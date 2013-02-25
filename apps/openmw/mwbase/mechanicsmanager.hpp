@@ -37,24 +37,24 @@ namespace MWBase
 
             virtual ~MechanicsManager() {}
 
-            virtual void addActor (const MWWorld::Ptr& ptr) = 0;
-            ///< Register an actor for stats management
-            ///
-            /// \note Dead actors are ignored.
+            virtual void add (const MWWorld::Ptr& ptr) = 0;
+            ///< Register an object for management
 
-            virtual void removeActor (const MWWorld::Ptr& ptr) = 0;
-            ///< Deregister an actor for stats management
+            virtual void remove (const MWWorld::Ptr& ptr) = 0;
+            ///< Deregister an object for management
 
-            virtual void dropActors (const MWWorld::CellStore *cellStore) = 0;
-            ///< Deregister all actors in the given cell.
+            virtual void updateCell(const MWWorld::Ptr &ptr) = 0;
+            ///< Moves an object to a new cell
+
+            virtual void drop (const MWWorld::CellStore *cellStore) = 0;
+            ///< Deregister all objects in the given cell.
 
             virtual void watchActor (const MWWorld::Ptr& ptr) = 0;
             ///< On each update look for changes in a previously registered actor and update the
             /// GUI accordingly.
 
-            virtual void update (std::vector<std::pair<std::string, Ogre::Vector3> >& movement,
-                float duration, bool paused) = 0;
-            ///< Update actor stats and store desired velocity vectors in \a movement
+            virtual void update (float duration, bool paused) = 0;
+            ///< Update objects
             ///
             /// \param paused In game type does not currently advance (this usually means some GUI
             /// component is up).
@@ -98,6 +98,17 @@ namespace MWBase
             virtual void getPersuasionDispositionChange (const MWWorld::Ptr& npc, PersuasionType type,
                 float currentTemporaryDispositionDelta, bool& success, float& tempChange, float& permChange) = 0;
             ///< Perform a persuasion action on NPC
+
+        virtual void playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number=1) = 0;
+        ///< Run animation for a MW-reference. Calls to this function for references that are currently not
+        /// in the scene should be ignored.
+        ///
+        /// \param mode 0 normal, 1 immediate start, 2 immediate loop
+        /// \param count How many times the animation should be run
+
+        virtual void skipAnimation(const MWWorld::Ptr& ptr) = 0;
+        ///< Skip the animation for the given MW-reference for one frame. Calls to this function for
+        /// references that are currently not in the scene should be ignored.
     };
 }
 

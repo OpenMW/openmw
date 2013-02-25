@@ -14,8 +14,8 @@ set(GAME_HEADER
 source_group(game FILES ${GAME} ${GAME_HEADER})
 
 add_openmw_dir (mwrender
-    renderingmanager debugging sky player animation npcanimation creatureanimation actors objects
-    renderinginterface localmap occlusionquery terrain terrainmaterial water shadows
+    renderingmanager debugging sky player animation npcanimation creatureanimation activatoranimation
+    actors objects renderinginterface localmap occlusionquery terrain terrainmaterial water shadows
     compositors characterpreview externalrendering globalmap videoplayer
     )
 
@@ -62,8 +62,9 @@ add_openmw_dir (mwclass
     )
 
 add_openmw_dir (mwmechanics
-    mechanicsmanagerimp stat creaturestats magiceffects movement actors drawstate spells
-    activespells npcstats aipackage aisequence alchemy aiwander aitravel aifollow aiescort aiactivate
+    mechanicsmanagerimp stat character creaturestats magiceffects movement actors activators
+    drawstate spells activespells npcstats aipackage aisequence alchemy aiwander aitravel aifollow
+    aiescort aiactivate
     )
 
 add_openmw_dir (mwbase

@@ -129,14 +129,8 @@ namespace MWRender
         MWBase::Environment::get().getWindowManager ()->showCrosshair
                 (!MWBase::Environment::get().getWindowManager ()->isGuiMode () && (mFirstPersonView && !mVanity.enabled && !mPreviewMode));
 
-        if (mAnimation) {
-            mAnimation->runAnimation(duration);
-        }
-        mPlayerNode->setVisible(
-            mVanity.enabled || mPreviewMode || !mFirstPersonView,
-            false
-        );
-
+        /// \fixme We shouldn't hide the whole model, just certain components of the character (head, chest, feet, etc)
+        mPlayerNode->setVisible(mVanity.enabled || mPreviewMode || !mFirstPersonView);
         if (mFirstPersonView && !mVanity.enabled) {
             return;
         }
@@ -313,10 +307,7 @@ namespace MWRender
         delete mAnimation;
         mAnimation = anim;
 
-        mPlayerNode->setVisible(
-            mVanity.enabled || mPreviewMode || !mFirstPersonView,
-            false
-        );
+        mPlayerNode->setVisible(mVanity.enabled || mPreviewMode || !mFirstPersonView);
     }
 
     void Player::setHeight(float height)

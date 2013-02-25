@@ -71,6 +71,12 @@ namespace MWWorld
         MWWorld::Class::get (ptr).getMovementSettings (ptr).mUpDown = value;
     }
 
+    void Player::setRunState(bool run)
+    {
+        MWWorld::Ptr ptr = getPlayer();
+        MWWorld::Class::get(ptr).setStance(ptr, MWWorld::Class::Run, run);
+    }
+
     void Player::toggleRunning()
     {
         MWWorld::Ptr ptr = getPlayer();

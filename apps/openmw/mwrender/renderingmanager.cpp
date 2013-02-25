@@ -18,9 +18,12 @@
 #include <extern/shiny/Main/Factory.hpp>
 #include <extern/shiny/Platforms/Ogre/OgrePlatform.hpp>
 
+#include <openengine/bullet/physic.hpp>
+
 #include <components/esm/loadstat.hpp>
-#include "../mwworld/esmstore.hpp"
 #include <components/settings/settings.hpp>
+#include "../mwworld/esmstore.hpp"
+#include "../mwworld/class.hpp"
 
 #include "../mwbase/world.hpp" // these includes can be removed once the static-hack is gone
 #include "../mwbase/environment.hpp"
@@ -252,8 +255,7 @@ void RenderingManager::removeObject (const MWWorld::Ptr& ptr)
 void RenderingManager::moveObject (const MWWorld::Ptr& ptr, const Ogre::Vector3& position)
 {
     /// \todo move this to the rendering-subsystems
-    mRendering.getScene()->getSceneNode (ptr.getRefData().getHandle())->
-            setPosition (position);
+    ptr.getRefData().getBaseNode()->setPosition(position);
 }
 
 void RenderingManager::scaleObject (const MWWorld::Ptr& ptr, const Ogre::Vector3& scale)
@@ -300,23 +302,19 @@ bool RenderingManager::rotateObject( const MWWorld::Ptr &ptr, Ogre::Vector3 &rot
 }
 
 void
-RenderingManager::moveObjectToCell(
-    const MWWorld::Ptr& ptr,
-    const Ogre::Vector3& pos,
-    MWWorld::CellStore *store)
+RenderingManager::updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
 {
     Ogre::SceneNode *child =
-        mRendering.getScene()->getSceneNode(ptr.getRefData().getHandle());
+        mRendering.getScene()->getSceneNode(old.getRefData().getHandle());
 
     Ogre::SceneNode *parent = child->getParentSceneNode();
     parent->removeChild(child);
 
-    if (MWWorld::Class::get(ptr).isActor()) {
-        mActors.updateObjectCell(ptr);
+    if (MWWorld::Class::get(old).isActor()) {
+        mActors.updateObjectCell(old, cur);
     } else {
-        mObjects.updateObjectCell(ptr);
+        mObjects.updateObjectCell(old, cur);
     }
-    child->setPosition(pos);
 }
 
 void RenderingManager::update (float duration, bool paused)
@@ -578,17 +576,6 @@ void RenderingManager::toggleLight()
     }
 
     setAmbientMode();
-}
-
-void RenderingManager::playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName,
-     int mode, int number)
-{
-    mActors.playAnimationGroup(ptr, groupName, mode, number);
-}
-
-void RenderingManager::skipAnimation (const MWWorld::Ptr& ptr)
-{
-    mActors.skipAnimation(ptr);
 }
 
 void RenderingManager::setSunColour(const Ogre::ColourValue& colour)
@@ -928,6 +915,15 @@ void RenderingManager::setupExternalRendering (MWRender::ExternalRendering& rend
 {
     rendering.setup (mRendering.getScene());
 }
+
+Animation* RenderingManager::getAnimation(const MWWorld::Ptr &ptr)
+{
+    Animation *anim = mActors.getAnimation(ptr);
+    if(!anim && ptr.getRefData().getHandle() == "player")
+        anim = mPlayer->getAnimation();
+    return anim;
+}
+
 
 void RenderingManager::playVideo(const std::string& name, bool allowSkipping)
 {

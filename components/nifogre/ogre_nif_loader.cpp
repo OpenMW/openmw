@@ -21,8 +21,6 @@
 
  */
 
-//loadResource->handleNode->handleNiTriShape->createSubMesh
-
 #include "ogre_nif_loader.hpp"
 
 #include <algorithm>
@@ -35,6 +33,7 @@
 #include <OgreSubMesh.h>
 #include <OgreRoot.h>
 #include <OgreEntity.h>
+#include <OgreSubEntity.h>
 #include <OgreTagPoint.h>
 
 #include <boost/lexical_cast.hpp>
@@ -52,9 +51,6 @@ typedef unsigned char ubyte;
 
 namespace std
 {
-
-// These operators allow extra data types to be stored in an Ogre::Any
-// object, which can then be stored in user object bindings on the nodes
 
 // TODO: Do something useful
 ostream& operator<<(ostream &o, const NifOgre::TextKeyMap&)
@@ -149,8 +145,12 @@ public:
 };
 
 
-class NIFSkeletonLoader : public Ogre::ManualResourceLoader {
-
+/** Manual resource loader for NIF skeletons. This is the main class
+    responsible for translating the internal NIF skeleton structure into
+    something Ogre can use (includes animations and node TextKeyData).
+ */
+class NIFSkeletonLoader : public Ogre::ManualResourceLoader
+{
 static void warn(const std::string &msg)
 {
     std::cerr << "NIFSkeletonLoader: Warn: " << msg << std::endl;
@@ -163,168 +163,49 @@ static void fail(const std::string &msg)
 }
 
 
-static TextKeyMap extractTextKeys(const Nif::NiTextKeyExtraData *tk)
+static void buildAnimation(Ogre::Skeleton *skel, const std::string &name, const std::vector<const Nif::NiKeyframeController*> &ctrls, const std::vector<std::string> &targets, float startTime, float stopTime)
 {
-    TextKeyMap textkeys;
-    for(size_t i = 0;i < tk->list.size();i++)
-    {
-        const std::string &str = tk->list[i].text;
-        std::string::size_type pos = 0;
-        while(pos < str.length())
-        {
-            while(pos < str.length() && ::isspace(str[pos]))
-                pos++;
-            if(pos >= str.length())
-                break;
-
-            std::string::size_type nextpos = std::min(str.find('\r', pos), str.find('\n', pos));
-            textkeys.insert(std::make_pair(tk->list[i].time, str.substr(pos, nextpos-pos)));
-
-            pos = nextpos;
-        }
-    }
-    return textkeys;
-}
-
-
-void buildBones(Ogre::Skeleton *skel, const Nif::Node *node, std::vector<Nif::NiKeyframeController const*> &ctrls, Ogre::Bone *parent=NULL)
-{
-    Ogre::Bone *bone;
-    if(!skel->hasBone(node->name))
-        bone = skel->createBone(node->name);
-    else
-        bone = skel->createBone();
-    if(parent) parent->addChild(bone);
-
-    bone->setOrientation(node->trafo.rotation);
-    bone->setPosition(node->trafo.pos);
-    bone->setScale(Ogre::Vector3(node->trafo.scale));
-    bone->setBindingPose();
-    bone->setInitialState();
-
-    Nif::ControllerPtr ctrl = node->controller;
-    while(!ctrl.empty())
-    {
-        if(ctrl->recType == Nif::RC_NiKeyframeController)
-            ctrls.push_back(static_cast<Nif::NiKeyframeController*>(ctrl.getPtr()));
-        ctrl = ctrl->next;
-    }
-
-    Nif::ExtraPtr e = node->extra;
-    while(!e.empty())
-    {
-        if(e->recType == Nif::RC_NiTextKeyExtraData)
-        {
-            const Nif::NiTextKeyExtraData *tk = static_cast<const Nif::NiTextKeyExtraData*>(e.getPtr());
-            bone->getUserObjectBindings().setUserAny("TextKeyExtraData", Ogre::Any(extractTextKeys(tk)));
-        }
-        e = e->extra;
-    }
-
-    const Nif::NiNode *ninode = dynamic_cast<const Nif::NiNode*>(node);
-    if(ninode)
-    {
-        const Nif::NodeList &children = ninode->children;
-        for(size_t i = 0;i < children.length();i++)
-        {
-            if(!children[i].empty())
-                buildBones(skel, children[i].getPtr(), ctrls, bone);
-        }
-    }
-}
-
-
-/* Comparitor to help sort Key<> vectors */
-template<class T>
-struct KeyTimeSort
-{
-    bool operator()(const Nif::KeyT<T> &lhs, const Nif::KeyT<T> &rhs) const
-    { return lhs.mTime < rhs.mTime; }
-};
-
-
-typedef std::map<std::string,NIFSkeletonLoader> LoaderMap;
-static LoaderMap sLoaders;
-
-public:
-void loadResource(Ogre::Resource *resource)
-{
-    Ogre::Skeleton *skel = dynamic_cast<Ogre::Skeleton*>(resource);
-    OgreAssert(skel, "Attempting to load a skeleton into a non-skeleton resource!");
-
-    Nif::NIFFile::ptr pnif(Nif::NIFFile::create (skel->getName()));
-    Nif::NIFFile & nif = *pnif.get ();
-    const Nif::Node *node = dynamic_cast<const Nif::Node*>(nif.getRecord(0));
-
-    std::vector<Nif::NiKeyframeController const*> ctrls;
-    buildBones(skel, node, ctrls);
-
-    std::vector<std::string> targets;
-    // TODO: If ctrls.size() == 0, check for a .kf file sharing the name of the .nif file
-    if(ctrls.size() == 0) // No animations? Then we're done.
-        return;
-
-    float maxtime = 0.0f;
-    for(size_t i = 0;i < ctrls.size();i++)
-    {
-        Nif::NiKeyframeController const *ctrl = ctrls[i];
-        maxtime = std::max(maxtime, ctrl->timeStop);
-        Nif::Named *target = dynamic_cast<Nif::Named*>(ctrl->target.getPtr());
-        if(target != NULL)
-            targets.push_back(target->name);
-    }
-
-    if(targets.size() != ctrls.size())
-    {
-        warn("Target size mismatch ("+Ogre::StringConverter::toString(targets.size())+" targets, "+
-             Ogre::StringConverter::toString(ctrls.size())+" controllers)");
-        return;
-    }
-
-    Ogre::Animation *anim = skel->createAnimation(skel->getName(), maxtime);
-    /* HACK: Pre-create the node tracks by matching the track IDs with the
-     * bone IDs. Otherwise, Ogre animates the wrong bones. */
-    size_t bonecount = skel->getNumBones();
-    for(size_t i = 0;i < bonecount;i++)
-        anim->createNodeTrack(i, skel->getBone(i));
+    Ogre::Animation *anim = skel->createAnimation(name, stopTime-startTime);
 
     for(size_t i = 0;i < ctrls.size();i++)
     {
-        Nif::NiKeyframeController const *kfc = ctrls[i];
-        Nif::NiKeyframeData const *kf = kfc->data.getPtr();
+        const Nif::NiKeyframeController *kfc = ctrls[i];
+        if(kfc->data.empty())
+            continue;
+        const Nif::NiKeyframeData *kf = kfc->data.getPtr();
 
         /* Get the keyframes and make sure they're sorted first to last */
-        Nif::QuaternionKeyList quatkeys = kf->mRotations;
-        Nif::Vector3KeyList trankeys = kf->mTranslations;
-        Nif::FloatKeyList scalekeys = kf->mScales;
-        std::sort(quatkeys.mKeys.begin(), quatkeys.mKeys.end(), KeyTimeSort<Ogre::Quaternion>());
-        std::sort(trankeys.mKeys.begin(), trankeys.mKeys.end(), KeyTimeSort<Ogre::Vector3>());
-        std::sort(scalekeys.mKeys.begin(), scalekeys.mKeys.end(), KeyTimeSort<float>());
+        const Nif::QuaternionKeyList &quatkeys = kf->mRotations;
+        const Nif::Vector3KeyList &trankeys = kf->mTranslations;
+        const Nif::FloatKeyList &scalekeys = kf->mScales;
 
         Nif::QuaternionKeyList::VecType::const_iterator quatiter = quatkeys.mKeys.begin();
         Nif::Vector3KeyList::VecType::const_iterator traniter = trankeys.mKeys.begin();
         Nif::FloatKeyList::VecType::const_iterator scaleiter = scalekeys.mKeys.begin();
 
         Ogre::Bone *bone = skel->getBone(targets[i]);
-        const Ogre::Quaternion startquat = bone->getInitialOrientation();
-        const Ogre::Vector3 starttrans = bone->getInitialPosition();
-        const Ogre::Vector3 startscale = bone->getInitialScale();
-        Ogre::NodeAnimationTrack *nodetrack = anim->getNodeTrack(bone->getHandle());
+        // NOTE: For some reason, Ogre doesn't like the node track ID being different from
+        // the bone ID
+        Ogre::NodeAnimationTrack *nodetrack = anim->hasNodeTrack(bone->getHandle()) ?
+                                              anim->getNodeTrack(bone->getHandle()) :
+                                              anim->createNodeTrack(bone->getHandle(), bone);
 
         Ogre::Quaternion lastquat, curquat;
         Ogre::Vector3 lasttrans(0.0f), curtrans(0.0f);
         Ogre::Vector3 lastscale(1.0f), curscale(1.0f);
         if(quatiter != quatkeys.mKeys.end())
-            lastquat = curquat = startquat.Inverse() * quatiter->mValue;
+            lastquat = curquat = quatiter->mValue;
         if(traniter != trankeys.mKeys.end())
-            lasttrans = curtrans = traniter->mValue - starttrans;
+            lasttrans = curtrans = traniter->mValue;
         if(scaleiter != scalekeys.mKeys.end())
-            lastscale = curscale = Ogre::Vector3(scaleiter->mValue) / startscale;
+            lastscale = curscale = Ogre::Vector3(scaleiter->mValue);
+        float begTime = std::max(kfc->timeStart, startTime);
+        float endTime = std::min(kfc->timeStop, stopTime);
         bool didlast = false;
 
         while(!didlast)
         {
-            float curtime = kfc->timeStop;
+            float curtime = std::numeric_limits<float>::max();
 
             //Get latest time
             if(quatiter != quatkeys.mKeys.end())
@@ -334,11 +215,11 @@ void loadResource(Ogre::Resource *resource)
             if(scaleiter != scalekeys.mKeys.end())
                 curtime = std::min(curtime, scaleiter->mTime);
 
-            curtime = std::max(curtime, kfc->timeStart);
-            if(curtime >= kfc->timeStop)
+            curtime = std::max(curtime, begTime);
+            if(curtime >= endTime)
             {
                 didlast = true;
-                curtime = kfc->timeStop;
+                curtime = endTime;
             }
 
             // Get the latest quaternions, translations, and scales for the
@@ -346,27 +227,24 @@ void loadResource(Ogre::Resource *resource)
             while(quatiter != quatkeys.mKeys.end() && curtime >= quatiter->mTime)
             {
                 lastquat = curquat;
-                quatiter++;
-                if(quatiter != quatkeys.mKeys.end())
-                    curquat = startquat.Inverse() * quatiter->mValue ;
+                if(++quatiter != quatkeys.mKeys.end())
+                    curquat = quatiter->mValue;
             }
             while(traniter != trankeys.mKeys.end() && curtime >= traniter->mTime)
             {
                 lasttrans = curtrans;
-                traniter++;
-                if(traniter != trankeys.mKeys.end())
-                    curtrans = traniter->mValue - starttrans;
+                if(++traniter != trankeys.mKeys.end())
+                    curtrans = traniter->mValue;
             }
             while(scaleiter != scalekeys.mKeys.end() && curtime >= scaleiter->mTime)
             {
                 lastscale = curscale;
-                scaleiter++;
-                if(scaleiter != scalekeys.mKeys.end())
-                    curscale = Ogre::Vector3(scaleiter->mValue) / startscale;
+                if(++scaleiter != scalekeys.mKeys.end())
+                    curscale = Ogre::Vector3(scaleiter->mValue);
             }
 
             Ogre::TransformKeyFrame *kframe;
-            kframe = nodetrack->createNodeKeyFrame(curtime);
+            kframe = nodetrack->createNodeKeyFrame(curtime-startTime);
             if(quatiter == quatkeys.mKeys.end() || quatiter == quatkeys.mKeys.begin())
                 kframe->setRotation(curquat);
             else
@@ -396,18 +274,73 @@ void loadResource(Ogre::Resource *resource)
     anim->optimise();
 }
 
-bool createSkeleton(const std::string &name, const std::string &group, const Nif::Node *node)
+
+static TextKeyMap extractTextKeys(const Nif::NiTextKeyExtraData *tk)
 {
-    if(node->boneTrafo != NULL)
+    TextKeyMap textkeys;
+    for(size_t i = 0;i < tk->list.size();i++)
     {
-        Ogre::SkeletonManager &skelMgr = Ogre::SkeletonManager::getSingleton();
-        Ogre::SkeletonPtr skel = skelMgr.getByName(name);
-        if(skel.isNull())
+        const std::string &str = tk->list[i].text;
+        std::string::size_type pos = 0;
+        while(pos < str.length())
         {
-            NIFSkeletonLoader *loader = &sLoaders[name];
-            skel = skelMgr.create(name, group, true, loader);
+            if(::isspace(str[pos]))
+            {
+                pos++;
+                continue;
+            }
+
+            std::string::size_type nextpos = std::min(str.find('\r', pos), str.find('\n', pos));
+            std::string result = str.substr(pos, nextpos-pos);
+            textkeys.insert(std::make_pair(tk->list[i].time, Misc::StringUtils::toLower(result)));
+
+            pos = nextpos;
         }
-        return true;
+    }
+    return textkeys;
+}
+
+
+void buildBones(Ogre::Skeleton *skel, const Nif::Node *node, Ogre::Bone *&animroot, TextKeyMap &textkeys, std::vector<Nif::NiKeyframeController const*> &ctrls, Ogre::Bone *parent=NULL)
+{
+    Ogre::Bone *bone;
+    if(!skel->hasBone(node->name))
+        bone = skel->createBone(node->name);
+    else
+        bone = skel->createBone();
+    if(parent) parent->addChild(bone);
+
+    bone->setOrientation(node->trafo.rotation);
+    bone->setPosition(node->trafo.pos);
+    bone->setScale(Ogre::Vector3(node->trafo.scale));
+    bone->setBindingPose();
+
+    if(!(node->recType == Nif::RC_NiNode || /* Nothing special; children traversed below */
+         node->recType == Nif::RC_RootCollisionNode || /* handled in nifbullet (hopefully) */
+         node->recType == Nif::RC_NiTriShape /* Handled in the mesh loader */
+         ))
+        warn("Unhandled "+node->recName+" "+node->name+" in "+skel->getName());
+
+    Nif::ControllerPtr ctrl = node->controller;
+    while(!ctrl.empty())
+    {
+        if(ctrl->recType == Nif::RC_NiKeyframeController)
+            ctrls.push_back(static_cast<const Nif::NiKeyframeController*>(ctrl.getPtr()));
+        else
+            warn("Unhandled "+ctrl->recName+" from node "+node->name+" in "+skel->getName());
+        ctrl = ctrl->next;
+    }
+
+    Nif::ExtraPtr e = node->extra;
+    while(!e.empty())
+    {
+        if(e->recType == Nif::RC_NiTextKeyExtraData && !animroot)
+        {
+            const Nif::NiTextKeyExtraData *tk = static_cast<const Nif::NiTextKeyExtraData*>(e.getPtr());
+            textkeys = extractTextKeys(tk);
+            animroot = bone;
+        }
+        e = e->extra;
     }
 
     const Nif::NiNode *ninode = dynamic_cast<const Nif::NiNode*>(node);
@@ -417,13 +350,142 @@ bool createSkeleton(const std::string &name, const std::string &group, const Nif
         for(size_t i = 0;i < children.length();i++)
         {
             if(!children[i].empty())
+                buildBones(skel, children[i].getPtr(), animroot, textkeys, ctrls, bone);
+        }
+    }
+}
+
+
+typedef std::map<std::string,NIFSkeletonLoader> LoaderMap;
+static LoaderMap sLoaders;
+
+public:
+void loadResource(Ogre::Resource *resource)
+{
+    Ogre::Skeleton *skel = dynamic_cast<Ogre::Skeleton*>(resource);
+    OgreAssert(skel, "Attempting to load a skeleton into a non-skeleton resource!");
+
+    Nif::NIFFile::ptr nif(Nif::NIFFile::create(skel->getName()));
+    const Nif::Node *node = static_cast<const Nif::Node*>(nif->getRecord(0));
+
+    std::vector<const Nif::NiKeyframeController*> ctrls;
+    Ogre::Bone *animroot = NULL;
+    TextKeyMap textkeys;
+    try {
+        buildBones(skel, node, animroot, textkeys, ctrls);
+    }
+    catch(std::exception &e) {
+        std::cerr<< "Exception while loading "<<skel->getName() <<std::endl;
+        std::cerr<< e.what() <<std::endl;
+        return;
+    }
+
+    std::vector<std::string> targets;
+    // TODO: If ctrls.size() == 0, check for a .kf file sharing the name of the .nif file
+    if(ctrls.size() == 0) // No animations? Then we're done.
+        return;
+
+    float maxtime = 0.0f;
+    for(size_t i = 0;i < ctrls.size();i++)
+    {
+        const Nif::NiKeyframeController *ctrl = ctrls[i];
+        maxtime = std::max(maxtime, ctrl->timeStop);
+        Nif::Named *target = dynamic_cast<Nif::Named*>(ctrl->target.getPtr());
+        if(target != NULL)
+            targets.push_back(target->name);
+    }
+
+    if(targets.size() != ctrls.size())
+    {
+        warn("Target size mismatch ("+Ogre::StringConverter::toString(targets.size())+" targets, "+
+             Ogre::StringConverter::toString(ctrls.size())+" controllers)");
+        return;
+    }
+
+    if(!animroot)
+    {
+        warn(Ogre::StringConverter::toString(ctrls.size())+" animated node(s) in "+
+             skel->getName()+", but no text keys.");
+        return;
+    }
+
+    Ogre::UserObjectBindings &bindings = animroot->getUserObjectBindings();
+    bindings.setUserAny(sTextKeyExtraDataID, Ogre::Any(true));
+
+    std::string currentgroup;
+    TextKeyMap::const_iterator keyiter = textkeys.begin();
+    for(keyiter = textkeys.begin();keyiter != textkeys.end();keyiter++)
+    {
+        std::string::size_type sep = keyiter->second.find(':');
+        if((sep == currentgroup.length() && keyiter->second.compare(0, sep, currentgroup) == 0) ||
+           (sep == sizeof("soundgen")-1 && keyiter->second.compare(0, sep, "soundgen") == 0) ||
+           (sep == sizeof("sound")-1 && keyiter->second.compare(0, sep, "sound") == 0))
+            continue;
+        currentgroup = keyiter->second.substr(0, sep);
+
+        if(skel->hasAnimation(currentgroup))
+            continue;
+
+        TextKeyMap::const_iterator lastkeyiter = textkeys.end();
+        while((--lastkeyiter)->first > keyiter->first)
+        {
+            if(lastkeyiter->second.find(':') == currentgroup.length() &&
+               lastkeyiter->second.compare(0, currentgroup.length(), currentgroup) == 0)
+                break;
+        }
+
+        buildAnimation(skel, currentgroup, ctrls, targets, keyiter->first, lastkeyiter->first);
+
+        TextKeyMap::const_iterator insiter = keyiter;
+        TextKeyMap groupkeys;
+        do {
+            sep = insiter->second.find(':');
+            if(sep == currentgroup.length() && insiter->second.compare(0, sep, currentgroup) == 0)
+                groupkeys.insert(std::make_pair(insiter->first - keyiter->first,
+                                                insiter->second.substr(sep+2)));
+            else if((sep == sizeof("soundgen")-1 && insiter->second.compare(0, sep, "soundgen") == 0) ||
+                    (sep == sizeof("sound")-1 && insiter->second.compare(0, sep, "sound") == 0))
+                groupkeys.insert(std::make_pair(insiter->first - keyiter->first, insiter->second));
+        } while(insiter++ != lastkeyiter);
+
+        bindings.setUserAny(std::string(sTextKeyExtraDataID)+"@"+currentgroup, Ogre::Any(groupkeys));
+    }
+}
+
+bool createSkeleton(const std::string &name, const std::string &group, const Nif::Node *node)
+{
+    /* We need to be a little aggressive here, since some NIFs have a crap-ton
+     * of nodes and Ogre only supports 256 bones. We will skip a skeleton if:
+     * There are no bones used for skinning, there are no controllers on non-
+     * NiTriShape nodes, there are no nodes named "AttachLight", and the tree
+     * consists of NiNode, NiTriShape, and RootCollisionNode types only.
+     */
+    if(!node->boneTrafo)
+    {
+        if(node->recType == Nif::RC_NiTriShape)
+            return false;
+        if(node->controller.empty() && node->name != "AttachLight")
+        {
+            if(node->recType == Nif::RC_NiNode || node->recType == Nif::RC_RootCollisionNode)
             {
-                if(createSkeleton(name, group, children[i].getPtr()))
-                    return true;
+                const Nif::NiNode *ninode = static_cast<const Nif::NiNode*>(node);
+                const Nif::NodeList &children = ninode->children;
+                for(size_t i = 0;i < children.length();i++)
+                {
+                    if(!children[i].empty())
+                    {
+                        if(createSkeleton(name, group, children[i].getPtr()))
+                            return true;
+                    }
+                }
+                return false;
             }
         }
     }
-    return false;
+
+    Ogre::SkeletonManager &skelMgr = Ogre::SkeletonManager::getSingleton();
+    skelMgr.create(name, group, true, &sLoaders[name]);
+    return true;
 }
 
 };
@@ -691,12 +753,15 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
 std::map<size_t,std::string> NIFMaterialLoader::MaterialMap;
 
 
+/** Manual resource loader for NIF meshes. This is the main class
+    responsible for translating the internal NIF mesh structure into
+    something Ogre can use.
+ */
 class NIFMeshLoader : Ogre::ManualResourceLoader
 {
     std::string mName;
     std::string mGroup;
     size_t mShapeIndex;
-    std::string mSkelName;
     std::string mMaterialName;
     std::string mShapeName;
 
@@ -724,12 +789,11 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
         {
             // Only set a skeleton when skinning. Unskinned meshes with a skeleton will be
             // explicitly attached later.
-            mesh->setSkeletonName(mSkelName);
+            mesh->setSkeletonName(mName);
 
             // Get the skeleton resource, so vertices can be transformed into the bones' initial state.
             Ogre::SkeletonManager *skelMgr = Ogre::SkeletonManager::getSingletonPtr();
-            skel = skelMgr->getByName(mSkelName);
-            skel->touch();
+            skel = skelMgr->getByName(mName);
 
             // Convert vertices and normals to bone space from bind position. It would be
             // better to transform the bones into bind position, but there doesn't seem to
@@ -742,12 +806,10 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
             for(size_t b = 0;b < bones.length();b++)
             {
                 Ogre::Bone *bone = skel->getBone(bones[b]->name);
-                Ogre::Matrix4 mat, mat2;
+                Ogre::Matrix4 mat;
                 mat.makeTransform(data->bones[b].trafo.trans, Ogre::Vector3(data->bones[b].trafo.scale),
                                   Ogre::Quaternion(data->bones[b].trafo.rotation));
-                mat2.makeTransform(bone->_getDerivedPosition(), bone->_getDerivedScale(),
-                                   bone->_getDerivedOrientation());
-                mat = mat2 * mat;
+                mat = bone->_getFullTransform() * mat;
 
                 const std::vector<Nif::NiSkinData::VertWeight> &weights = data->bones[b].weights;
                 for(size_t i = 0;i < weights.size();i++)
@@ -768,22 +830,26 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
             srcVerts = newVerts;
             srcNorms = newNorms;
         }
-        else if(mSkelName.length() == 0)
+        else
         {
-            // No skinning and no skeleton, so just transform the vertices and
-            // normals into position.
-            Ogre::Matrix4 mat4 = shape->getWorldTransform();
-            for(size_t i = 0;i < srcVerts.size();i++)
+            Ogre::SkeletonManager *skelMgr = Ogre::SkeletonManager::getSingletonPtr();
+            if(skelMgr->getByName(mName).isNull())
             {
-                Ogre::Vector4 vec4(srcVerts[i].x, srcVerts[i].y, srcVerts[i].z, 1.0f);
-                vec4 = mat4*vec4;
-                srcVerts[i] = Ogre::Vector3(&vec4[0]);
-            }
-            for(size_t i = 0;i < srcNorms.size();i++)
-            {
-                Ogre::Vector4 vec4(srcNorms[i].x, srcNorms[i].y, srcNorms[i].z, 0.0f);
-                vec4 = mat4*vec4;
-                srcNorms[i] = Ogre::Vector3(&vec4[0]);
+                // No skinning and no skeleton, so just transform the vertices and
+                // normals into position.
+                Ogre::Matrix4 mat4 = shape->getWorldTransform();
+                for(size_t i = 0;i < srcVerts.size();i++)
+                {
+                    Ogre::Vector4 vec4(srcVerts[i].x, srcVerts[i].y, srcVerts[i].z, 1.0f);
+                    vec4 = mat4*vec4;
+                    srcVerts[i] = Ogre::Vector3(&vec4[0]);
+                }
+                for(size_t i = 0;i < srcNorms.size();i++)
+                {
+                    Ogre::Vector4 vec4(srcNorms[i].x, srcNorms[i].y, srcNorms[i].z, 0.0f);
+                    vec4 = mat4*vec4;
+                    srcNorms[i] = Ogre::Vector3(&vec4[0]);
+                }
             }
         }
 
@@ -943,19 +1009,21 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
 public:
     NIFMeshLoader()
     { }
-    NIFMeshLoader(const std::string &name, const std::string &group, const std::string skelName)
-      : mName(name), mGroup(group), mShapeIndex(~(size_t)0), mSkelName(skelName)
+    NIFMeshLoader(const std::string &name, const std::string &group)
+      : mName(name), mGroup(group), mShapeIndex(~(size_t)0)
     { }
 
     virtual void loadResource(Ogre::Resource *resource)
     {
         Ogre::Mesh *mesh = dynamic_cast<Ogre::Mesh*>(resource);
-        assert(mesh && "Attempting to load a mesh into a non-mesh resource!");
+        OgreAssert(mesh, "Attempting to load a mesh into a non-mesh resource!");
 
         Nif::NIFFile::ptr nif = Nif::NIFFile::create(mName);
         if(mShapeIndex >= nif->numRecords())
         {
-            mesh->setSkeletonName(mSkelName);
+            Ogre::SkeletonManager *skelMgr = Ogre::SkeletonManager::getSingletonPtr();
+            if(!skelMgr->getByName(mName).isNull())
+                mesh->setSkeletonName(mName);
             return;
         }
 
@@ -963,7 +1031,7 @@ public:
         findTriShape(mesh, node);
     }
 
-    void createMeshes(const Nif::Node *node, MeshPairList &meshes, int flags=0)
+    void createMeshes(const Nif::Node *node, MeshInfoList &meshes, int flags=0)
     {
         flags |= node->flags;
 
@@ -976,7 +1044,6 @@ public:
         while(!e.empty())
         {
             Nif::NiStringExtraData *sd;
-            Nif::NiTextKeyExtraData *td;
             if((sd=dynamic_cast<Nif::NiStringExtraData*>(e.getPtr())) != NULL)
             {
                 // String markers may contain important information
@@ -988,16 +1055,10 @@ public:
                     flags |= 0x01;
                 }
             }
-            else if((td=dynamic_cast<Nif::NiTextKeyExtraData*>(e.getPtr())) != NULL)
-            {
-                // TODO: Read and store text keys somewhere
-            }
-            else
-                warn("Unhandled extra data type "+e->recName);
             e = e->extra;
         }
 
-        if(node->recType == Nif::RC_NiTriShape)
+        if(node->recType == Nif::RC_NiTriShape && !(flags&0x01)) // Not hidden
         {
             const Nif::NiTriShape *shape = dynamic_cast<const Nif::NiTriShape*>(node);
             mShapeName = shape->name;
@@ -1006,8 +1067,6 @@ public:
             std::string fullname = mName+"@index="+Ogre::StringConverter::toString(shape->recIndex);
             if(mShapeName.length() > 0)
                 fullname += "@shape="+mShapeName;
-            if(mSkelName.length() > 0 && mName != mSkelName)
-                fullname += "@skel="+mSkelName;
 
             Misc::StringUtils::toLower(fullname);
             Ogre::MeshPtr mesh = meshMgr.getByName(fullname);
@@ -1015,21 +1074,15 @@ public:
             {
                 NIFMeshLoader *loader = &sLoaders[fullname];
                 *loader = *this;
-                if(!(flags&0x01)) // Not hidden
-                {
-                    loader->mShapeIndex = shape->recIndex;
-                    loader->mMaterialName = NIFMaterialLoader::getMaterial(shape, fullname, mGroup);
-                }
+                loader->mShapeIndex = shape->recIndex;
+                loader->mMaterialName = NIFMaterialLoader::getMaterial(shape, fullname, mGroup);
 
                 mesh = meshMgr.createManual(fullname, mGroup, loader);
                 mesh->setAutoBuildEdgeLists(false);
             }
 
-            meshes.push_back(std::make_pair(mesh->getName(), shape->name));
+            meshes.push_back(MeshInfo(mesh->getName(), shape->name));
         }
-        else if(node->recType != Nif::RC_NiNode && node->recType != Nif::RC_RootCollisionNode &&
-                node->recType != Nif::RC_NiRotatingParticles)
-            warn("Unhandled mesh node type: "+node->recName);
 
         const Nif::NiNode *ninode = dynamic_cast<const Nif::NiNode*>(node);
         if(ninode)
@@ -1042,28 +1095,47 @@ public:
             }
         }
     }
+
+    void createEmptyMesh(const Nif::Node *node, MeshInfoList &meshes)
+    {
+        /* This creates an empty mesh to which a skeleton gets attached. This
+         * is to ensure we have an entity with a skeleton instance, even if all
+         * other meshes are hidden or entities attached to a specific node
+         * instead of skinned. */
+        std::string fullname = mName;
+        Misc::StringUtils::toLower(fullname);
+
+        Ogre::MeshManager &meshMgr = Ogre::MeshManager::getSingleton();
+        Ogre::MeshPtr mesh = meshMgr.getByName(fullname);
+        if(mesh.isNull())
+        {
+            NIFMeshLoader *loader = &sLoaders[fullname];
+            *loader = *this;
+
+            mesh = meshMgr.createManual(fullname, mGroup, loader);
+            mesh->setAutoBuildEdgeLists(false);
+        }
+        meshes.push_back(MeshInfo(mesh->getName(), node->name));
+    }
 };
 NIFMeshLoader::LoaderMap NIFMeshLoader::sLoaders;
 
 
-typedef std::map<std::string,MeshPairList> MeshPairMap;
-static MeshPairMap sMeshPairMap;
+typedef std::map<std::string,MeshInfoList> MeshInfoMap;
+static MeshInfoMap sMeshInfoMap;
 
-MeshPairList NIFLoader::load(std::string name, std::string skelName, const std::string &group)
+MeshInfoList Loader::load(const std::string &name, const std::string &group)
 {
-    Misc::StringUtils::toLower(name);
-     Misc::StringUtils::toLower(skelName);
-
-    MeshPairMap::const_iterator meshiter = sMeshPairMap.find(name+"@skel="+skelName);
-    if(meshiter != sMeshPairMap.end())
+    MeshInfoMap::const_iterator meshiter = sMeshInfoMap.find(name);
+    if(meshiter != sMeshInfoMap.end())
         return meshiter->second;
 
-    MeshPairList &meshes = sMeshPairMap[name+"@skel="+skelName];
-    Nif::NIFFile::ptr pnif = Nif::NIFFile::create (name);
-    Nif::NIFFile &nif = *pnif.get ();
-    if (nif.numRecords() < 1)
+    MeshInfoList &meshes = sMeshInfoMap[name];
+    Nif::NIFFile::ptr pnif = Nif::NIFFile::create(name);
+    Nif::NIFFile &nif = *pnif.get();
+    if(nif.numRecords() < 1)
     {
-        nif.warn("Found no records in NIF.");
+        nif.warn("Found no NIF records in "+name+".");
         return meshes;
     }
 
@@ -1074,109 +1146,87 @@ MeshPairList NIFLoader::load(std::string name, std::string skelName, const std::
     Nif::Node const *node = dynamic_cast<Nif::Node const *>(r);
     if(node == NULL)
     {
-        nif.warn("First record in file was not a node, but a "+
-                 r->recName+". Skipping file.");
+        nif.warn("First record in "+name+" was not a node, but a "+
+                 r->recName+".");
         return meshes;
     }
 
-    NIFSkeletonLoader skelldr;
-    bool hasSkel = skelldr.createSkeleton(name, group, node);
+    bool hasSkel = Ogre::SkeletonManager::getSingleton().resourceExists(name);
+    if(!hasSkel)
+    {
+        NIFSkeletonLoader skelldr;
+        hasSkel = skelldr.createSkeleton(name, group, node);
+    }
 
-    NIFMeshLoader meshldr(name, group, (hasSkel ? skelName : std::string()));
-    meshldr.createMeshes(node, meshes);
+    NIFMeshLoader meshldr(name, group);
+    if(hasSkel)
+        meshldr.createEmptyMesh(node, meshes);
+    meshldr.createMeshes(node, meshes, 0);
 
     return meshes;
 }
 
-EntityList NIFLoader::createEntities(Ogre::SceneNode *parent, TextKeyMap *textkeys, const std::string &name, const std::string &group)
+EntityList Loader::createEntities(Ogre::SceneNode *parentNode, std::string name, const std::string &group)
 {
     EntityList entitylist;
 
-    MeshPairList meshes = load(name, name, group);
+    Misc::StringUtils::toLower(name);
+    MeshInfoList meshes = load(name, group);
     if(meshes.size() == 0)
         return entitylist;
 
-    Ogre::SceneManager *sceneMgr = parent->getCreator();
+    Ogre::SceneManager *sceneMgr = parentNode->getCreator();
     for(size_t i = 0;i < meshes.size();i++)
     {
-        entitylist.mEntities.push_back(sceneMgr->createEntity(meshes[i].first));
+        entitylist.mEntities.push_back(sceneMgr->createEntity(meshes[i].mMeshName));
         Ogre::Entity *entity = entitylist.mEntities.back();
         if(!entitylist.mSkelBase && entity->hasSkeleton())
             entitylist.mSkelBase = entity;
     }
 
-    if(entitylist.mSkelBase && textkeys)
-    {
-        // Would be nice if Ogre::SkeletonInstance allowed access to the 'master' Ogre::SkeletonPtr.
-        Ogre::SkeletonManager &skelMgr = Ogre::SkeletonManager::getSingleton();
-        Ogre::SkeletonPtr skel = skelMgr.getByName(entitylist.mSkelBase->getSkeleton()->getName());
-        Ogre::Skeleton::BoneIterator iter = skel->getBoneIterator();
-        while(iter.hasMoreElements())
-        {
-            Ogre::Bone *bone = iter.getNext();
-            const Ogre::Any &data = bone->getUserObjectBindings().getUserAny("TextKeyExtraData");
-            if(!data.isEmpty())
-            {
-                *textkeys = Ogre::any_cast<TextKeyMap>(data);
-                break;
-            }
-        }
-    }
-
     if(entitylist.mSkelBase)
     {
-        parent->attachObject(entitylist.mSkelBase);
+        parentNode->attachObject(entitylist.mSkelBase);
         for(size_t i = 0;i < entitylist.mEntities.size();i++)
         {
             Ogre::Entity *entity = entitylist.mEntities[i];
             if(entity != entitylist.mSkelBase && entity->hasSkeleton())
             {
                 entity->shareSkeletonInstanceWith(entitylist.mSkelBase);
-                parent->attachObject(entity);
+                parentNode->attachObject(entity);
             }
             else if(entity != entitylist.mSkelBase)
-                entitylist.mSkelBase->attachObjectToBone(meshes[i].second, entity);
+                entitylist.mSkelBase->attachObjectToBone(meshes[i].mTargetNode, entity);
         }
     }
     else
     {
         for(size_t i = 0;i < entitylist.mEntities.size();i++)
-            parent->attachObject(entitylist.mEntities[i]);
+            parentNode->attachObject(entitylist.mEntities[i]);
     }
 
     return entitylist;
 }
 
-EntityList NIFLoader::createEntities(Ogre::Entity *parent, const std::string &bonename,
-                                     Ogre::SceneNode *parentNode,
-                                     const std::string &name,
-                                     const std::string &group)
+EntityList Loader::createEntities(Ogre::Entity *parent, const std::string &bonename,
+                                  Ogre::SceneNode *parentNode,
+                                  std::string name, const std::string &group)
 {
     EntityList entitylist;
 
-    MeshPairList meshes = load(name, parent->getMesh()->getSkeletonName(), group);
+    Misc::StringUtils::toLower(name);
+    MeshInfoList meshes = load(name, group);
     if(meshes.size() == 0)
         return entitylist;
 
     Ogre::SceneManager *sceneMgr = parentNode->getCreator();
-    std::string filter = "tri "+bonename;
-    std::transform(filter.begin()+4, filter.end(), filter.begin()+4, ::tolower);
+    std::string filter = "@shape=tri "+bonename;
+    Misc::StringUtils::toLower(filter);
     for(size_t i = 0;i < meshes.size();i++)
     {
-        Ogre::Entity *ent = sceneMgr->createEntity(meshes[i].first);
-        if(ent->hasSkeleton())
-        {
-             Misc::StringUtils::toLower(meshes[i].second);
-
-            if(meshes[i].second.length() < filter.length() ||
-               meshes[i].second.compare(0, filter.length(), filter) != 0)
-            {
-                sceneMgr->destroyEntity(ent);
-                continue;
-            }
-            if(!entitylist.mSkelBase)
-                entitylist.mSkelBase = ent;
-        }
+        Ogre::Entity *ent = sceneMgr->createEntity(meshes[i].mMeshName);
+        if(!entitylist.mSkelBase && ent->hasSkeleton())
+            entitylist.mSkelBase = ent;
         entitylist.mEntities.push_back(ent);
     }
 
@@ -1186,20 +1236,20 @@ EntityList NIFLoader::createEntities(Ogre::Entity *parent, const std::string &bo
 
     if(entitylist.mSkelBase)
     {
-        entitylist.mSkelBase->shareSkeletonInstanceWith(parent);
-        parentNode->attachObject(entitylist.mSkelBase);
         for(size_t i = 0;i < entitylist.mEntities.size();i++)
         {
             Ogre::Entity *entity = entitylist.mEntities[i];
-            if(entity != entitylist.mSkelBase && entity->hasSkeleton())
+            if(entity->hasSkeleton())
             {
-                entity->shareSkeletonInstanceWith(parent);
-                parentNode->attachObject(entity);
+                if(entity != entitylist.mSkelBase)
+                    entity->shareSkeletonInstanceWith(entitylist.mSkelBase);
+                if(entity->getMesh()->getName().find(filter) != std::string::npos)
+                    parentNode->attachObject(entity);
             }
-            else if(entity != entitylist.mSkelBase)
+            else
             {
-                Ogre::TagPoint *tag = parent->attachObjectToBone(bonename, entity);
-                tag->setScale(scale);
+                if(entity->getMesh()->getName().find(filter) != std::string::npos)
+                    entitylist.mSkelBase->attachObjectToBone(meshes[i].mTargetNode, entity);
             }
         }
     }
@@ -1213,6 +1263,33 @@ EntityList NIFLoader::createEntities(Ogre::Entity *parent, const std::string &bo
     }
 
     return entitylist;
+}
+
+
+bool Loader::createSkeleton(const std::string &name, const std::string &group)
+{
+    Nif::NIFFile::ptr pnif = Nif::NIFFile::create(name);
+    Nif::NIFFile &nif = *pnif.get();
+    if(nif.numRecords() < 1)
+    {
+        nif.warn("Found no NIF records in "+name+".");
+        return false;
+    }
+
+    // The first record is assumed to be the root node
+    Nif::Record const *r = nif.getRecord(0);
+    assert(r != NULL);
+
+    Nif::Node const *node = dynamic_cast<Nif::Node const *>(r);
+    if(node == NULL)
+    {
+        nif.warn("First record in "+name+" was not a node, but a "+
+                 r->recName+".");
+        return false;
+    }
+
+    NIFSkeletonLoader skelldr;
+    return skelldr.createSkeleton(name, group, node);
 }
 
 

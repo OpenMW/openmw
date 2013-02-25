@@ -140,6 +140,9 @@ namespace MWWorld
             virtual float getSpeed (const Ptr& ptr) const;
             ///< Return movement speed.
 
+            virtual float getJump(const MWWorld::Ptr &ptr) const;
+            ///< Return jump velocity (not accounting for movement)
+
             virtual MWMechanics::Movement& getMovementSettings (const Ptr& ptr) const;
             ///< Return desired movement.
 

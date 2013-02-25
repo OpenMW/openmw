@@ -207,7 +207,7 @@ namespace MWInput
             A_Journal,    //Journal
             A_Weapon,     //Draw/Sheath weapon
             A_Spell,      //Ready/Unready Casting
-            A_AlwaysRun,  //Toggle Always Run
+            A_Run,        //Run when held
             A_CycleSpellLeft, //cycling through spells
             A_CycleSpellRight,
             A_CycleWeaponLeft,//Cycling through weapons

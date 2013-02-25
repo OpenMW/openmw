@@ -2,7 +2,6 @@
 #include <btBulletDynamicsCommon.h>
 #include <btBulletCollisionCommon.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
-#include "pmove.h"
 #include <components/nifbullet/bullet_nif_loader.hpp>
 #include "CMotionState.h"
 #include "OgreRoot.h"
@@ -27,90 +26,47 @@ namespace Physic
         COL_RAYCASTING = BIT(3)
     };
 
-    PhysicActor::PhysicActor(std::string name, std::string mesh, PhysicEngine* engine, Ogre::Vector3 position, Ogre::Quaternion rotation, float scale): 
-        mName(name), mEngine(engine), mMesh(mesh), mBoxScaledTranslation(0,0,0), mBoxRotationInverse(0,0,0,0), mBody(0), collisionMode(false), mBoxRotation(0,0,0,0)
+    PhysicActor::PhysicActor(const std::string &name, const std::string &mesh, PhysicEngine *engine, const Ogre::Vector3 &position, const Ogre::Quaternion &rotation, float scale)
+      : mName(name), mEngine(engine), mMesh(mesh), mBoxScaledTranslation(0,0,0), mBoxRotationInverse(0,0,0,0)
+      , mBody(0), onGround(false), collisionMode(true), mBoxRotation(0,0,0,0), verticalForce(0.0f)
     {
+        // FIXME: Force player to start in no-collision mode for now, until he spawns at a proper door marker.
+        if(name == "player")
+            collisionMode = false;
         mBody = mEngine->createAndAdjustRigidBody(mMesh, mName, scale, position, rotation, &mBoxScaledTranslation, &mBoxRotation);
         Ogre::Quaternion inverse = mBoxRotation.Inverse();
         mBoxRotationInverse = btQuaternion(inverse.x, inverse.y, inverse.z,inverse.w);
         mEngine->addRigidBody(mBody, false);  //Add rigid body to dynamics world, but do not add to object map
-        pmove = new playerMove;
-        pmove->mEngine = mEngine;
-        btBoxShape* box = static_cast<btBoxShape*> (mBody->getCollisionShape());
-        if(box != NULL){
-            btVector3 size = box->getHalfExtentsWithMargin();
-            Ogre::Vector3 halfExtents = Ogre::Vector3(size.getX(), size.getY(), size.getZ());
-            pmove->ps.halfExtents = halfExtents;
-        }
     }
 
     PhysicActor::~PhysicActor()
     {
-        if(mBody){
+        if(mBody)
+        {
             mEngine->dynamicsWorld->removeRigidBody(mBody);
             delete mBody;
         }
-        delete pmove;
-    }
-
-    void PhysicActor::setCurrentWater(bool hasWater, int waterHeight){
-        pmove->hasWater = hasWater;
-        if(hasWater){
-            pmove->waterHeight = waterHeight;
-        }
-    }
-
-    void PhysicActor::setGravity(float gravity)
-    {
-        pmove->ps.gravity = gravity;
-    }
-    
-    void PhysicActor::setSpeed(float speed)
-    {
-        pmove->ps.speed = speed;
     }
 
     void PhysicActor::enableCollisions(bool collision)
     {
         collisionMode = collision;
-        if(collisionMode)
-            pmove->ps.move_type=PM_NORMAL;
-        else
-            pmove->ps.move_type=PM_NOCLIP;
     }
 
-    void PhysicActor::setJumpVelocity(float velocity)
+
+    void PhysicActor::setPosition(const Ogre::Vector3 &pos)
     {
-        pmove->ps.jump_velocity = velocity;
+        if(pos != getPosition())
+            mEngine->adjustRigidBody(mBody, pos, getRotation(), mBoxScaledTranslation, mBoxRotation);
     }
 
-    bool PhysicActor::getCollisionMode()
-    {
-        return collisionMode;
-    }
-
-    void PhysicActor::setMovement(signed char rightmove, signed char forwardmove, signed char upmove)
-    {
-        playerMove::playercmd& pm_ref = pmove->cmd;
-        pm_ref.rightmove = rightmove;
-        pm_ref.forwardmove = forwardmove;
-        pm_ref.upmove = upmove;
-    }
-
-    void PhysicActor::setPmoveViewAngles(float pitch, float yaw, float roll){
-        pmove->ps.viewangles.x = pitch;
-        pmove->ps.viewangles.y = yaw;
-        pmove->ps.viewangles.z = roll;
-    }
-
-    
-
-    void PhysicActor::setRotation(const Ogre::Quaternion quat)
+    void PhysicActor::setRotation(const Ogre::Quaternion &quat)
     {
         if(!quat.equals(getRotation(), Ogre::Radian(0))){
             mEngine->adjustRigidBody(mBody, getPosition(), quat, mBoxScaledTranslation, mBoxRotation);
         }
     }
+
 
     Ogre::Vector3 PhysicActor::getPosition()
     {
@@ -128,13 +84,6 @@ namespace Physic
         return Ogre::Quaternion(quat.getW(), quat.getX(), quat.getY(), quat.getZ());
     }
 
-    void PhysicActor::setPosition(const Ogre::Vector3 pos)
-    {
-        mEngine->adjustRigidBody(mBody, pos, getRotation(), mBoxScaledTranslation, mBoxRotation);
-        btVector3 vec = mBody->getWorldTransform().getOrigin();
-        pmove->ps.origin = Ogre::Vector3(vec.getX(), vec.getY(), vec.getZ());
-    }
-
     void PhysicActor::setScale(float scale){
         Ogre::Vector3 position = getPosition();
         Ogre::Quaternion rotation = getRotation();
@@ -148,18 +97,40 @@ namespace Physic
         //Create the newly scaled rigid body
         mBody = mEngine->createAndAdjustRigidBody(mMesh, mName, scale, position, rotation);
         mEngine->addRigidBody(mBody, false);  //Add rigid body to dynamics world, but do not add to object map
-        btBoxShape* box = static_cast<btBoxShape*> (mBody->getCollisionShape());
-        if(box != NULL){
-            btVector3 size = box->getHalfExtentsWithMargin();
-            Ogre::Vector3 halfExtents = Ogre::Vector3(size.getX(), size.getY(), size.getZ());
-            pmove->ps.halfExtents = halfExtents;
-        }
     }
 
-    void PhysicActor::runPmove(){
-        Pmove(pmove);
-        Ogre::Vector3 newpos = pmove->ps.origin;
-        mBody->getWorldTransform().setOrigin(btVector3(newpos.x, newpos.y, newpos.z));
+    Ogre::Vector3 PhysicActor::getHalfExtents() const
+    {
+        if(mBody)
+        {
+            btBoxShape *box = static_cast<btBoxShape*>(mBody->getCollisionShape());
+            if(box != NULL)
+            {
+                btVector3 size = box->getHalfExtentsWithMargin();
+                return Ogre::Vector3(size.getX(), size.getY(), size.getZ());
+            }
+        }
+        return Ogre::Vector3(0.0f);
+    }
+
+    void PhysicActor::setVerticalForce(float force)
+    {
+        verticalForce = force;
+    }
+
+    float PhysicActor::getVerticalForce() const
+    {
+        return verticalForce;
+    }
+
+    void PhysicActor::setOnGround(bool grounded)
+    {
+        onGround = grounded;
+    }
+
+    bool PhysicActor::getOnGround() const
+    {
+        return collisionMode && onGround;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -221,10 +192,7 @@ namespace Physic
     {
         if(!isDebugCreated)
         {
-            Ogre::SceneManagerEnumerator::SceneManagerIterator iter = Ogre::Root::getSingleton().getSceneManagerIterator();
-            iter.begin();
-            Ogre::SceneManager* scn = iter.getNext();
-            Ogre::SceneNode* node = scn->getRootSceneNode()->createChildSceneNode();
+            Ogre::SceneNode* node = mSceneMgr->getRootSceneNode()->createChildSceneNode();
             node->pitch(Ogre::Degree(-90));
             mDebugDrawer = new BtOgre::DebugDrawer(node, dynamicsWorld);
             dynamicsWorld->setDebugDrawer(mDebugDrawer);
@@ -247,6 +215,11 @@ namespace Physic
     {
         setDebugRenderingMode(!mDebugActive);
         return mDebugActive;
+    }
+
+    void PhysicEngine::setSceneManager(Ogre::SceneManager* sceneMgr)
+    {
+        mSceneMgr = sceneMgr;
     }
 
     PhysicEngine::~PhysicEngine()
@@ -356,18 +329,21 @@ namespace Physic
         mHeightFieldMap.erase(name);
     }
 
-    void PhysicEngine::adjustRigidBody(RigidBody* body, Ogre::Vector3 position, Ogre::Quaternion rotation, 
-        Ogre::Vector3 scaledBoxTranslation, Ogre::Quaternion boxRotation){
+    void PhysicEngine::adjustRigidBody(RigidBody* body, const Ogre::Vector3 &position, const Ogre::Quaternion &rotation,
+        const Ogre::Vector3 &scaledBoxTranslation, const Ogre::Quaternion &boxRotation)
+    {
         btTransform tr;
-        rotation = rotation * boxRotation;
-        Ogre::Vector3 transrot = rotation * scaledBoxTranslation;
+        Ogre::Quaternion boxrot = rotation * boxRotation;
+        Ogre::Vector3 transrot = boxrot * scaledBoxTranslation;
         Ogre::Vector3 newPosition = transrot + position;
-        
+
         tr.setOrigin(btVector3(newPosition.x, newPosition.y, newPosition.z));
-        tr.setRotation(btQuaternion(rotation.x,rotation.y,rotation.z,rotation.w));
+        tr.setRotation(btQuaternion(boxrot.x,boxrot.y,boxrot.z,boxrot.w));
         body->setWorldTransform(tr);
     }
-    void PhysicEngine::boxAdjustExternal(std::string mesh, RigidBody* body, float scale, Ogre::Vector3 position, Ogre::Quaternion rotation){
+    void PhysicEngine::boxAdjustExternal(const std::string &mesh, RigidBody* body,
+        float scale, const Ogre::Vector3 &position, const Ogre::Quaternion &rotation)
+    {
         std::string sid = (boost::format("%07.3f") % scale).str();
         std::string outputstring = mesh + sid;
         //std::cout << "The string" << outputstring << "\n";
@@ -380,7 +356,8 @@ namespace Physic
         adjustRigidBody(body, position, rotation, shape->boxTranslation * scale, shape->boxRotation);
     }
 
-    RigidBody* PhysicEngine::createAndAdjustRigidBody(std::string mesh,std::string name,float scale, Ogre::Vector3 position, Ogre::Quaternion rotation,
+    RigidBody* PhysicEngine::createAndAdjustRigidBody(const std::string &mesh, const std::string &name,
+        float scale, const Ogre::Vector3 &position, const Ogre::Quaternion &rotation,
         Ogre::Vector3* scaledBoxTranslation, Ogre::Quaternion* boxRotation)
     {
         std::string sid = (boost::format("%07.3f") % scale).str();
@@ -441,7 +418,7 @@ namespace Physic
         }
     }
 
-    void PhysicEngine::removeRigidBody(std::string name)
+    void PhysicEngine::removeRigidBody(const std::string &name)
     {
         RigidBodyContainer::iterator it = ObjectMap.find(name);
         if (it != ObjectMap.end() )
@@ -461,7 +438,7 @@ namespace Physic
         }
     }
 
-    void PhysicEngine::deleteRigidBody(std::string name)
+    void PhysicEngine::deleteRigidBody(const std::string &name)
     {
         RigidBodyContainer::iterator it = ObjectMap.find(name);
         if (it != ObjectMap.end() )
@@ -481,7 +458,7 @@ namespace Physic
         }
     }
 
-    RigidBody* PhysicEngine::getRigidBody(std::string name)
+    RigidBody* PhysicEngine::getRigidBody(const std::string &name)
     {
         RigidBodyContainer::iterator it = ObjectMap.find(name);
         if (it != ObjectMap.end() )
@@ -497,15 +474,16 @@ namespace Physic
 
     void PhysicEngine::stepSimulation(double deltaT)
     {
-        dynamicsWorld->stepSimulation(deltaT,10, 1/60.0);
+        // This isn't needed as there are no dynamic objects at this point
+        //dynamicsWorld->stepSimulation(deltaT,10, 1/60.0);
         if(isDebugCreated)
         {
             mDebugDrawer->step();
         }
     }
 
-    void PhysicEngine::addCharacter(std::string name, std::string mesh,
-        Ogre::Vector3 position, float scale, Ogre::Quaternion rotation)
+    void PhysicEngine::addCharacter(const std::string &name, const std::string &mesh,
+        const Ogre::Vector3 &position, float scale, const Ogre::Quaternion &rotation)
     {
         // Remove character with given name, so we don't make memory
         // leak when character would be added twice
@@ -518,9 +496,8 @@ namespace Physic
         PhysicActorMap[name] = newActor;
     }
 
-    void PhysicEngine::removeCharacter(std::string name)
+    void PhysicEngine::removeCharacter(const std::string &name)
     {
-        //std::cout << "remove";
         PhysicActorContainer::iterator it = PhysicActorMap.find(name);
         if (it != PhysicActorMap.end() )
         {
@@ -534,7 +511,7 @@ namespace Physic
         }
     }
 
-    PhysicActor* PhysicEngine::getCharacter(std::string name)
+    PhysicActor* PhysicEngine::getCharacter(const std::string &name)
     {
         PhysicActorContainer::iterator it = PhysicActorMap.find(name);
         if (it != PhysicActorMap.end() )
