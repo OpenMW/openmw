@@ -21,7 +21,7 @@ using namespace MWGui;
 /* GenerateClassResultDialog */
 
 GenerateClassResultDialog::GenerateClassResultDialog(MWBase::WindowManager& parWindowManager)
-  : WindowBase("openmw_chargen_generate_class_result.layout", parWindowManager)
+  : WindowModal("openmw_chargen_generate_class_result.layout", parWindowManager)
 {
     // Centre dialog
     center();
@@ -68,7 +68,7 @@ void GenerateClassResultDialog::onBackClicked(MyGUI::Widget* _sender)
 /* PickClassDialog */
 
 PickClassDialog::PickClassDialog(MWBase::WindowManager& parWindowManager)
-  : WindowBase("openmw_chargen_class.layout", parWindowManager)
+  : WindowModal("openmw_chargen_class.layout", parWindowManager)
 {
     // Centre dialog
     center();
@@ -122,6 +122,7 @@ void PickClassDialog::setNextButtonShow(bool shown)
 
 void PickClassDialog::open()
 {
+    WindowModal::open ();
     updateClasses();
     updateStats();
 }
@@ -276,7 +277,7 @@ void InfoBoxDialog::layoutVertically(MyGUI::WidgetPtr widget, int margin)
 }
 
 InfoBoxDialog::InfoBoxDialog(MWBase::WindowManager& parWindowManager)
-    : WindowBase("openmw_infobox.layout", parWindowManager)
+    : WindowModal("openmw_infobox.layout", parWindowManager)
     , mCurrentButton(-1)
 {
     getWidget(mTextBox, "TextBox");
@@ -327,6 +328,7 @@ void InfoBoxDialog::setButtons(ButtonList &buttons)
 
 void InfoBoxDialog::open()
 {
+    WindowModal::open();
     // Fix layout
     layoutVertically(mTextBox, 4);
     layoutVertically(mButtonBar, 6);
@@ -373,7 +375,7 @@ ClassChoiceDialog::ClassChoiceDialog(MWBase::WindowManager& parWindowManager)
 /* CreateClassDialog */
 
 CreateClassDialog::CreateClassDialog(MWBase::WindowManager& parWindowManager)
-  : WindowBase("openmw_chargen_create_class.layout", parWindowManager)
+  : WindowModal("openmw_chargen_create_class.layout", parWindowManager)
   , mSpecDialog(nullptr)
   , mAttribDialog(nullptr)
   , mSkillDialog(nullptr)

@@ -521,6 +521,9 @@ namespace MWInput
 
     void InputManager::toggleMainMenu()
     {
+        if (MyGUI::InputManager::getInstance ().isModalAny())
+            return;
+
         if (mWindows.isGuiMode () && (mWindows.getMode () == MWGui::GM_MainMenu || mWindows.getMode () == MWGui::GM_Settings))
             mWindows.popGuiMode();
         else if (mWindows.isGuiMode () && mWindows.getMode () == MWGui::GM_Video)
@@ -599,6 +602,9 @@ namespace MWInput
 
     void InputManager::toggleConsole()
     {
+        if (MyGUI::InputManager::getInstance ().isModalAny())
+            return;
+
         bool gameMode = !mWindows.isGuiMode();
 
         // Switch to console mode no matter what mode we are currently
