@@ -1,3 +1,5 @@
+#include "datafilespage.hpp"
+
 #include <QtGui>
 
 #include <components/esm/esmreader.hpp>
@@ -16,8 +18,6 @@
 
 #include "utils/profilescombobox.hpp"
 #include "utils/textinputdialog.hpp"
-
-#include "datafilespage.hpp"
 
 using namespace ESM;
 using namespace std;
@@ -216,9 +216,8 @@ void DataFilesPage::setupDataFiles()
     }
 
     QString dataLocal = mGameSettings.getDataLocal();
-    if (!dataLocal.isEmpty()) {
+    if (!dataLocal.isEmpty())
         mDataFilesModel->addFiles(dataLocal);
-    }
 
     // Sort by date accessed for now
     mDataFilesModel->sort(3);
@@ -235,7 +234,6 @@ void DataFilesPage::setupDataFiles()
 
     if (mProfilesComboBox->findText(QString("Default")) == -1)
         mProfilesComboBox->addItem(QString("Default"));
-
 
     if (profile.isEmpty() || profile == QLatin1String("Default")) {
         mProfilesComboBox->setCurrentIndex(mProfilesComboBox->findText(QString("Default")));

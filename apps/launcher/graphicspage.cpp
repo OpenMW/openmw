@@ -1,3 +1,5 @@
+#include "graphicspage.hpp"
+
 #include <QtGui>
 
 #include <cstdlib>
@@ -10,7 +12,6 @@
 #include <components/fileorderlist/utils/naturalsort.hpp>
 
 #include "settings/graphicssettings.hpp"
-#include "graphicspage.hpp"
 
 QString getAspect(int x, int y)
 {
@@ -183,22 +184,22 @@ bool GraphicsPage::setupOgre()
 void GraphicsPage::loadSettings()
 {
     if (mGraphicsSettings.value(QString("Video/vsync")) == QLatin1String("true"))
-         mVSyncCheckBox->setCheckState(Qt::Checked);
+        mVSyncCheckBox->setCheckState(Qt::Checked);
 
-     if (mGraphicsSettings.value(QString("Video/fullscreen")) == QLatin1String("true"))
-         mFullScreenCheckBox->setCheckState(Qt::Checked);
+    if (mGraphicsSettings.value(QString("Video/fullscreen")) == QLatin1String("true"))
+        mFullScreenCheckBox->setCheckState(Qt::Checked);
 
-     int aaIndex = mAntiAliasingComboBox->findText(mGraphicsSettings.value(QString("Video/antialiasing")));
-     if (aaIndex != -1)
-             mAntiAliasingComboBox->setCurrentIndex(aaIndex);
+    int aaIndex = mAntiAliasingComboBox->findText(mGraphicsSettings.value(QString("Video/antialiasing")));
+    if (aaIndex != -1)
+        mAntiAliasingComboBox->setCurrentIndex(aaIndex);
 
-     QString resolution = mGraphicsSettings.value(QString("Video/resolution x"));
-     resolution.append(QString(" x ") + mGraphicsSettings.value(QString("Video/resolution y")));
+    QString resolution = mGraphicsSettings.value(QString("Video/resolution x"));
+    resolution.append(QString(" x ") + mGraphicsSettings.value(QString("Video/resolution y")));
 
-     int resIndex = mResolutionComboBox->findText(resolution, Qt::MatchStartsWith);
+    int resIndex = mResolutionComboBox->findText(resolution, Qt::MatchStartsWith);
 
-     if (resIndex != -1)
-             mResolutionComboBox->setCurrentIndex(resIndex);
+    if (resIndex != -1)
+        mResolutionComboBox->setCurrentIndex(resIndex);
 }
 
 void GraphicsPage::saveSettings()
@@ -215,8 +216,8 @@ void GraphicsPage::saveSettings()
     QRegExp resolutionRe(QString("(\\d+) x (\\d+).*"));
 
     if (resolutionRe.exactMatch(mResolutionComboBox->currentText().simplified())) {
-         mGraphicsSettings.setValue(QString("Video/resolution x"), resolutionRe.cap(1));
-         mGraphicsSettings.setValue(QString("Video/resolution y"), resolutionRe.cap(2));
+        mGraphicsSettings.setValue(QString("Video/resolution x"), resolutionRe.cap(1));
+        mGraphicsSettings.setValue(QString("Video/resolution y"), resolutionRe.cap(2));
     }
 }
 

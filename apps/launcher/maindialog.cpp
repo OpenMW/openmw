@@ -1,9 +1,10 @@
+#include "maindialog.hpp"
+
 #include <QtGui>
 
 #include "utils/checkablemessagebox.hpp"
 #include "utils/profilescombobox.hpp"
 
-#include "maindialog.hpp"
 #include "playpage.hpp"
 #include "graphicspage.hpp"
 #include "datafilespage.hpp"
@@ -74,9 +75,8 @@ MainDialog::MainDialog()
     QString config = QString::fromStdString(mCfgMgr.getGlobalDataPath().string()) + QString("resources/launcher.qss");
     file.setFileName(config);
 
-    if (!file.exists()) {
+    if (!file.exists())
         file.setFileName(QString::fromStdString(mCfgMgr.getLocalPath().string()) + QString("launcher.qss"));
-    }
 
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QMessageBox msgBox;
@@ -101,9 +101,8 @@ MainDialog::MainDialog()
 
 void MainDialog::createIcons()
 {
-    if (!QIcon::hasThemeIcon("document-new")) {
+    if (!QIcon::hasThemeIcon("document-new"))
         QIcon::setThemeName("tango");
-    }
 
     // We create a fallback icon because the default fallback doesn't work
     QIcon graphicsIcon = QIcon(":/icons/tango/video-display.png");
@@ -733,4 +732,3 @@ bool MainDialog::startProgram(const QString &name, const QStringList &arguments,
     return true;
 
 }
-

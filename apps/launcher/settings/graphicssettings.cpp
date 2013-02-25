@@ -1,9 +1,9 @@
+#include "graphicssettings.hpp"
+
 #include <QTextStream>
 #include <QString>
 #include <QRegExp>
 #include <QMap>
-
-#include "graphicssettings.hpp"
 
 GraphicsSettings::GraphicsSettings()
 {

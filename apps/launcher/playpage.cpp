@@ -1,6 +1,6 @@
-#include <QtGui>
-
 #include "playpage.hpp"
+
+#include <QtGui>
 
 PlayPage::PlayPage(QWidget *parent) : QWidget(parent)
 {

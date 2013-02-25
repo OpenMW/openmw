@@ -1,3 +1,5 @@
+#include "gamesettings.hpp"
+
 #include <QTextStream>
 #include <QDir>
 #include <QString>
@@ -25,7 +27,6 @@ namespace boost
 } /* namespace boost */
 #endif /* (BOOST_VERSION <= 104600) */
 
-#include "gamesettings.hpp"
 
 GameSettings::GameSettings(Files::ConfigurationManager &cfg)
     : mCfgMgr(cfg)

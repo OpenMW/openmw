@@ -1,9 +1,9 @@
+#include "launchersettings.hpp"
+
 #include <QTextStream>
 #include <QString>
 #include <QRegExp>
 #include <QMap>
-
-#include "launchersettings.hpp"
 
 LauncherSettings::LauncherSettings()
 {
