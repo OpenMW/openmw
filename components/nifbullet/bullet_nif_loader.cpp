@@ -155,6 +155,8 @@ void ManualBulletShapeLoader::handleNode(const Nif::Node *node, int flags,
     // the flags we currently use, at least.
     flags |= node->flags;
 
+    isCollisionNode = isCollisionNode || (node->recType == Nif::RC_RootCollisionNode);
+
     // Marker objects: no collision
     /// \todo don't do this in the editor
     if (node->name.find("marker") != std::string::npos)
@@ -191,25 +193,26 @@ void ManualBulletShapeLoader::handleNode(const Nif::Node *node, int flags,
         }
     }
 
-    if(node->hasBounds)
+    if(!hasCollisionNode || isCollisionNode)
     {
-        cShape->boxTranslation = node->boundPos;
-        cShape->boxRotation = node->boundRot;
-        mBoundingBox = new btBoxShape(getbtVector(node->boundXYZ));
-    }
+        if(node->hasBounds)
+        {
+            cShape->boxTranslation = node->boundPos;
+            cShape->boxRotation = node->boundRot;
+            mBoundingBox = new btBoxShape(getbtVector(node->boundXYZ));
+        }
 
-    if(node->recType == Nif::RC_NiTriShape && (isCollisionNode || !hasCollisionNode))
-    {
-        cShape->mCollide = !(flags&0x800);
-        handleNiTriShape(static_cast<const Nif::NiTriShape*>(node), flags, node->getWorldTransform(), raycastingOnly);
+        if(node->recType == Nif::RC_NiTriShape)
+        {
+            cShape->mCollide = !(flags&0x800);
+            handleNiTriShape(static_cast<const Nif::NiTriShape*>(node), flags, node->getWorldTransform(), raycastingOnly);
+        }
     }
 
     // For NiNodes, loop through children
     const Nif::NiNode *ninode = dynamic_cast<const Nif::NiNode*>(node);
     if(ninode)
     {
-        isCollisionNode = isCollisionNode || (node->recType == Nif::RC_RootCollisionNode);
-
         const Nif::NodeList &list = ninode->children;
         for(size_t i = 0;i < list.length();i++)
         {

@@ -31,18 +31,14 @@
 #include <vector>
 #include <string>
 
-namespace Nif
-{
-    class Node;
-    class Transformation;
-    class NiTriShape;
-}
 
+// FIXME: This namespace really doesn't do anything Nif-specific. Any supportable
+// model format should go through this.
 namespace NifOgre
 {
 
-// FIXME: These should not be in NifOgre, it works agnostic of what model format is used
 typedef std::multimap<float,std::string> TextKeyMap;
+static const char sTextKeyExtraDataID[] = "TextKeyExtraData";
 struct EntityList {
     std::vector<Ogre::Entity*> mEntities;
     Ogre::Entity *mSkelBase;
@@ -52,39 +48,45 @@ struct EntityList {
 };
 
 
-/** This holds a list of mesh names along with the names of their parent nodes */
-typedef std::vector< std::pair<std::string,std::string> > MeshPairList;
+/* This holds a list of mesh names, the names of their parent nodes, and the offset
+ * from their parent nodes. */
+struct MeshInfo {
+    std::string mMeshName;
+    std::string mTargetNode;
 
-/** Manual resource loader for NIF meshes. This is the main class
-    responsible for translating the internal NIF mesh structure into
-    something Ogre can use.
+    MeshInfo(const std::string &name, const std::string &target)
+      : mMeshName(name), mTargetNode(target)
+    { }
+};
+typedef std::vector<MeshInfo> MeshInfoList;
 
-    You have to insert meshes manually into Ogre like this:
-
-    NIFLoader::load("somemesh.nif");
-
-    This returns a list of meshes used by the model, as well as the names of
-    their parent nodes (as they pertain to the skeleton, which is optionally
-    returned in the second argument if it exists).
- */
-class NIFLoader
+class Loader
 {
-    static MeshPairList load(std::string name, std::string skelName, const std::string &group);
+    static MeshInfoList load(const std::string &name, const std::string &group);
 
 public:
     static EntityList createEntities(Ogre::Entity *parent, const std::string &bonename,
                                      Ogre::SceneNode *parentNode,
-                                     const std::string &name,
+                                     std::string name,
                                      const std::string &group="General");
 
-    static EntityList createEntities(Ogre::SceneNode *parent,
-                                     TextKeyMap *textkeys,
-                                     const std::string &name,
+    static EntityList createEntities(Ogre::SceneNode *parentNode,
+                                     std::string name,
                                      const std::string &group="General");
+
+    static bool createSkeleton(const std::string &name, const std::string &group="General");
 };
 
 }
 
+namespace std
+{
+
+// These operators allow extra data types to be stored in an Ogre::Any
+// object, which can then be stored in user object bindings on the nodes
+
+ostream& operator<<(ostream &o, const NifOgre::TextKeyMap&);
+
+}
+
 #endif
-
-

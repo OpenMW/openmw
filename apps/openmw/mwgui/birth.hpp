@@ -10,7 +10,7 @@
 
 namespace MWGui
 {
-    class BirthDialog : public WindowBase
+    class BirthDialog : public WindowModal
     {
     public:
         BirthDialog(MWBase::WindowManager& parWindowManager);
