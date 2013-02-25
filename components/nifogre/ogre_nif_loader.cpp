@@ -763,7 +763,6 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
     std::string mGroup;
     size_t mShapeIndex;
     std::string mMaterialName;
-    std::string mShapeName;
 
     void warn(const std::string &msg)
     {
@@ -872,8 +871,7 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
         Ogre::VertexDeclaration *decl;
         int nextBuf = 0;
 
-        Ogre::SubMesh *sub = ((mShapeName.length() > 0) ? mesh->createSubMesh(mShapeName) :
-                                                          mesh->createSubMesh());
+        Ogre::SubMesh *sub = mesh->createSubMesh();
 
         // Add vertices
         sub->useSharedVertices = false;
@@ -1061,12 +1059,11 @@ public:
         if(node->recType == Nif::RC_NiTriShape && !(flags&0x01)) // Not hidden
         {
             const Nif::NiTriShape *shape = dynamic_cast<const Nif::NiTriShape*>(node);
-            mShapeName = shape->name;
 
             Ogre::MeshManager &meshMgr = Ogre::MeshManager::getSingleton();
             std::string fullname = mName+"@index="+Ogre::StringConverter::toString(shape->recIndex);
-            if(mShapeName.length() > 0)
-                fullname += "@shape="+mShapeName;
+            if(shape->name.length() > 0)
+                fullname += "@shape="+shape->name;
 
             Misc::StringUtils::toLower(fullname);
             Ogre::MeshPtr mesh = meshMgr.getByName(fullname);

@@ -79,6 +79,8 @@ public:
     CharacterController(const CharacterController &rhs);
     virtual ~CharacterController();
 
+    void updatePtr(const MWWorld::Ptr &ptr);
+
     Ogre::Vector3 update(float duration);
 
     void playGroup(const std::string &groupname, int mode, int count);
