@@ -1,13 +1,12 @@
 #ifndef GAMESETTINGS_HPP
 #define GAMESETTINGS_HPP
 
+#include <QTextStream>
+#include <QStringList>
+#include <QString>
 #include <QMap>
 
 #include <boost/filesystem/path.hpp>
-
-class QTextStream;
-class QStringList;
-class QString;
 
 namespace Files { typedef std::vector<boost::filesystem::path> PathContainer;
                   struct ConfigurationManager;}
