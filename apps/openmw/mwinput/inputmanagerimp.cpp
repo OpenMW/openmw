@@ -21,6 +21,7 @@
 #include "../engine.hpp"
 
 #include "../mwworld/player.hpp"
+#include "../mwworld/class.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -51,6 +52,7 @@ namespace MWInput
         , mUIYMultiplier (Settings::Manager::getFloat("ui y multiplier", "Input"))
         , mPreviewPOVDelay(0.f)
         , mTimeIdle(0.f)
+        , mOverencumberedMessageDelay(0.f)
     {
         Ogre::RenderWindow* window = ogre.getWindow ();
         size_t windowHnd;
@@ -268,13 +270,16 @@ namespace MWInput
         // be done in the physics system.
         if (mControlSwitch["playercontrols"])
         {
+            bool triedToMove = false;
             if (actionIsActive(A_MoveLeft))
             {
+                triedToMove = true;
                 mPlayer.setAutoMove (false);
                 mPlayer.setLeftRight (-1);
             }
             else if (actionIsActive(A_MoveRight))
             {
+                triedToMove = true;
                 mPlayer.setAutoMove (false);
                 mPlayer.setLeftRight (1);
             }
@@ -283,11 +288,13 @@ namespace MWInput
 
             if (actionIsActive(A_MoveForward))
             {
+                triedToMove = true;
                 mPlayer.setAutoMove (false);
                 mPlayer.setForwardBackward (1);
             }
             else if (actionIsActive(A_MoveBackward))
             {
+                triedToMove = true;
                 mPlayer.setAutoMove (false);
                 mPlayer.setForwardBackward (-1);
             }
@@ -295,7 +302,10 @@ namespace MWInput
                 mPlayer.setForwardBackward (0);
 
             if (actionIsActive(A_Jump) && mControlSwitch["playerjumping"])
+            {
                 mPlayer.setUpDown (1);
+                triedToMove = true;
+            }
             else if (actionIsActive(A_Crouch))
                 mPlayer.setUpDown (-1);
             else
@@ -305,6 +315,21 @@ namespace MWInput
                 mPlayer.setRunState(true);
             else
                 mPlayer.setRunState(false);
+
+            // if player tried to start moving, but can't (due to being overencumbered), display a notification.
+            if (triedToMove)
+            {
+                MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer ();
+                mOverencumberedMessageDelay -= dt;
+                if (MWWorld::Class::get(player).getEncumbrance(player) >= MWWorld::Class::get(player).getCapacity(player))
+                {
+                    if (mOverencumberedMessageDelay <= 0)
+                    {
+                        MWBase::Environment::get().getWindowManager ()->messageBox("#{sNotifyMessage59}");
+                        mOverencumberedMessageDelay = 1.0;
+                    }
+                }
+            }
 
             if (mControlSwitch["playerviewswitch"]) {
 
