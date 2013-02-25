@@ -60,22 +60,22 @@ MainDialog::MainDialog()
     // Check if the font is installed
     if (!fonts.contains("EB Garamond")) {
 
-      QString font = QString::fromStdString((mCfgMgr.getGlobalDataPath() / "resources/mygui/EBGaramond-Regular.ttf").string());
-      file.setFileName(font);
+        QString font = QString::fromStdString(mCfgMgr.getGlobalDataPath().string()) + QString("resources/mygui/EBGaramond-Regular.ttf");
+        file.setFileName(font);
 
-      if (!file.exists()) {
-      font = QString::fromStdString((mCfgMgr.getLocalPath() / "resources/mygui/EBGaramond-Regular.ttf").string());
-      }
+        if (!file.exists()) {
+            font = QString::fromStdString(mCfgMgr.getLocalPath().string()) + QString("resources/mygui/EBGaramond-Regular.ttf");
+        }
 
-      fontDatabase.addApplicationFont(font);
+        fontDatabase.addApplicationFont(font);
     }
 
     // Load the stylesheet
-    QString config = QString::fromStdString((mCfgMgr.getGlobalDataPath() / "resources/launcher.qss").string());
+    QString config = QString::fromStdString(mCfgMgr.getGlobalDataPath().string()) + QString("resources/launcher.qss");
     file.setFileName(config);
 
     if (!file.exists()) {
-        file.setFileName(QString::fromStdString((mCfgMgr.getLocalPath() / "launcher.qss").string()));
+        file.setFileName(QString::fromStdString(mCfgMgr.getLocalPath().string()) + QString("launcher.qss"));
     }
 
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
