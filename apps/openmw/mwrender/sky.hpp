@@ -211,6 +211,7 @@ namespace MWRender
         float mStarsOpacity;
         Ogre::ColourValue mCloudColour;
         Ogre::ColourValue mSkyColour;
+        Ogre::ColourValue mFogColour;
 
         Ogre::Light* mLightning;
 

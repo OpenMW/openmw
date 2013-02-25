@@ -18,10 +18,11 @@
     SH_BEGIN_PROGRAM
                 shInput(float, alphaFade)
         shUniform(float4, atmosphereColour)                   @shSharedParameter(atmosphereColour)
+        shUniform(float4, horizonColour)                   @shSharedParameter(horizonColour, horizonColour)
 
     SH_START_PROGRAM
     {
-        shOutputColour(0) = atmosphereColour * float4(1,1,1,alphaFade);
+        shOutputColour(0) = alphaFade * atmosphereColour + (1.f - alphaFade) * horizonColour;
     }
 
 #endif
