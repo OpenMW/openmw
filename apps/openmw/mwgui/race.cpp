@@ -20,7 +20,7 @@ using namespace MWGui;
 using namespace Widgets;
 
 RaceDialog::RaceDialog(MWBase::WindowManager& parWindowManager)
-  : WindowBase("openmw_chargen_race.layout", parWindowManager)
+  : WindowModal("openmw_chargen_race.layout", parWindowManager)
   , mGenderIndex(0)
   , mFaceIndex(0)
   , mHairIndex(0)
@@ -100,6 +100,8 @@ void RaceDialog::setNextButtonShow(bool shown)
 
 void RaceDialog::open()
 {
+    WindowModal::open();
+
     updateRaces();
     updateSkills();
     updateSpellPowers();

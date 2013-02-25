@@ -8,6 +8,8 @@
 #include <OgreMaterialManager.h>
 #include <OgreManualObject.h>
 
+#include <openengine/bullet/physic.hpp>
+
 #include <components/esm/loadstat.hpp>
 #include <components/esm/loadpgrd.hpp>
 

@@ -1,5 +1,7 @@
 #include "worldimp.hpp"
 
+#include <libs/openengine/bullet/physic.hpp>
+
 #include <components/bsa/bsa_archive.hpp>
 #include <components/files/collections.hpp>
 #include <components/compiler/locals.hpp>
@@ -10,6 +12,8 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/scriptmanager.hpp"
 
+#include "../mwmechanics/creaturestats.hpp"
+
 #include "../mwrender/sky.hpp"
 #include "../mwrender/player.hpp"
 
@@ -18,6 +22,7 @@
 #include "player.hpp"
 #include "manualref.hpp"
 #include "cellfunctors.hpp"
+#include "containerstore.hpp"
 
 using namespace Ogre;
 
@@ -182,6 +187,8 @@ namespace MWWorld
         mPhysEngine = mPhysics->getEngine();
 
         mRendering = new MWRender::RenderingManager(renderer, resDir, cacheDir, mPhysEngine);
+
+        mPhysEngine->setSceneManager(renderer.getScene());
 
         mWeatherManager = new MWWorld::WeatherManager(mRendering);
 
@@ -732,6 +739,7 @@ namespace MWWorld
         removeContainerScripts(ptr);
 
             if (isPlayer)
+            {
                 if (!newCell.isExterior())
                     changeToInteriorCell(Misc::StringUtils::lowerCase(newCell.mCell->mName), pos);
                 else
@@ -740,6 +748,7 @@ namespace MWWorld
                     int cellY = newCell.mCell->getGridY();
                     mWorldScene->changeCell(cellX, cellY, pos, false);
                 }
+            }
             else
             {
                 if (!mWorldScene->isCellActive(*currCell))
@@ -761,7 +770,10 @@ namespace MWWorld
                     MWWorld::Ptr copy =
                         MWWorld::Class::get(ptr).copyToCell(ptr, newCell);
 
-                    mRendering->moveObjectToCell(copy, vec, currCell);
+                    mRendering->updateObjectCell(ptr, copy);
+
+                    MWBase::MechanicsManager *mechMgr = MWBase::Environment::get().getMechanicsManager();
+                    mechMgr->updateCell(copy);
 
                     std::string script =
                         MWWorld::Class::get(ptr).getScript(ptr);
@@ -771,15 +783,6 @@ namespace MWWorld
                         removeContainerScripts (ptr);
                         mLocalScripts.add(script, copy);
                         addContainerScripts (copy, &newCell);
-                    }
-
-                    if (MWWorld::Class::get(ptr).isActor())
-                    {
-                        MWBase::MechanicsManager *mechMgr =
-                            MWBase::Environment::get().getMechanicsManager();
-
-                        mechMgr->removeActor(ptr);
-                        mechMgr->addActor(copy);
                     }
                 }
                 ptr.getRefData().setCount(0);
@@ -875,53 +878,33 @@ namespace MWWorld
             --cellY;
     }
 
-    void World::doPhysics (const std::vector<std::pair<std::string, Ogre::Vector3> >& actors,
-        float duration)
+    void World::doPhysics(const PtrMovementList &actors, float duration)
     {
-        mPhysics->doPhysics(duration, actors);
+        /* No duration? Shouldn't be any movement, then. */
+        if(duration <= 0.0f)
+            return;
 
-        const int tick = 16; // 16 ms ^= 60 Hz
-
-        // Game clock part of the loop, contains everything that has to be executed in a fixed timestep
-        long long dt = mTimer.getMilliseconds() - lastTick;
-        if (dt >= 100)
+        PtrMovementList::const_iterator player(actors.end());
+        for(PtrMovementList::const_iterator iter(actors.begin());iter != actors.end();iter++)
         {
-            //  throw away wall clock time if necessary to keep the framerate above the minimum of 10 fps
-            lastTick += (dt - 100);
-            dt = 100;
+            if(iter->first.getRefData().getHandle() == "player")
+            {
+                /* Handle player last, in case a cell transition occurs */
+                player = iter;
+                continue;
+            }
+            Ogre::Vector3 vec = mPhysics->move(iter->first, iter->second, duration,
+                                               !isSwimming(iter->first) && !isFlying(iter->first));
+            moveObjectImp(iter->first, vec.x, vec.y, vec.z);
         }
-        while (dt >= tick)
+        if(player != actors.end())
         {
-            dt -= tick;
-            lastTick += tick;
-
-            std::vector< std::pair<std::string, Ogre::Vector3> > vectors = mPhysics->doPhysicsFixed (actors);
-
-            std::vector< std::pair<std::string, Ogre::Vector3> >::iterator player = vectors.end();
-
-            for (std::vector< std::pair<std::string, Ogre::Vector3> >::iterator it = vectors.begin();
-                it!= vectors.end(); ++it)
-            {
-                if (it->first=="player")
-                {
-                    player = it;
-                }
-                else
-                {
-                    MWWorld::Ptr ptr = getPtrViaHandle (it->first);
-                    moveObjectImp (ptr, it->second.x, it->second.y, it->second.z);
-                }
-            }
-
-            // Make sure player is moved last (otherwise the cell might change in the middle of an update
-            // loop)
-            if (player!=vectors.end())
-            {
-                if (moveObjectImp (getPtrViaHandle (player->first),
-                    player->second.x, player->second.y, player->second.z) == true)
-                    return; // abort the current loop if the cell has changed
-            }
+            Ogre::Vector3 vec = mPhysics->move(player->first, player->second, duration,
+                                               !isSwimming(player->first) && !isFlying(player->first));
+            moveObjectImp(player->first, vec.x, vec.y, vec.z);
         }
+        // the only purpose this has currently is to update the debug drawer
+        mPhysEngine->stepSimulation (duration);
     }
 
     bool World::toggleCollisionMode()
@@ -987,17 +970,6 @@ namespace MWWorld
             mRendering->renderPlayer(mPlayer->getPlayer());
         }
         return ret;
-    }
-
-    void World::playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName, int mode,
-        int number)
-    {
-        mRendering->playAnimationGroup (ptr, groupName, mode, number);
-    }
-
-    void World::skipAnimation (const MWWorld::Ptr& ptr)
-    {
-        mRendering->skipAnimation (ptr);
     }
 
     void World::update (float duration, bool paused)
@@ -1420,25 +1392,42 @@ namespace MWWorld
     }
 
     bool
-    World::isSwimming(const MWWorld::Ptr &object)
+    World::isFlying(const MWWorld::Ptr &ptr) const
+    {
+        const MWWorld::Class &cls = MWWorld::Class::get(ptr);
+        if(cls.isActor() && cls.getCreatureStats(ptr).getMagicEffects().get(MWMechanics::EffectKey(10/*levitate*/)).mMagnitude > 0)
+            return true;
+        return false;
+    }
+
+    bool
+    World::isSwimming(const MWWorld::Ptr &object) const
     {
         /// \todo add check ifActor() - only actors can swim
         float *fpos = object.getRefData().getPosition().pos;
         Ogre::Vector3 pos(fpos[0], fpos[1], fpos[2]);
 
-        /// \fixme should rely on object height
-        pos.z += 30;
+        /// \fixme 3/4ths submerged?
+        const OEngine::Physic::PhysicActor *actor = mPhysEngine->getCharacter(object.getRefData().getHandle());
+        if(actor) pos.z += actor->getHalfExtents().z * 1.5;
 
         return isUnderwater(*object.getCell()->mCell, pos);
     }
 
     bool
-    World::isUnderwater(const ESM::Cell &cell, const Ogre::Vector3 &pos)
+    World::isUnderwater(const ESM::Cell &cell, const Ogre::Vector3 &pos) const
     {
         if (!(cell.mData.mFlags & ESM::Cell::HasWater)) {
             return false;
         }
         return pos.z < cell.mWater;
+    }
+
+    bool World::isOnGround(const MWWorld::Ptr &ptr) const
+    {
+        RefData &refdata = ptr.getRefData();
+        const OEngine::Physic::PhysicActor *physactor = mPhysEngine->getCharacter(refdata.getHandle());
+        return physactor && physactor->getOnGround();
     }
 
     void World::renderPlayer()
@@ -1455,24 +1444,21 @@ namespace MWWorld
     {
         Ptr::CellStore *currentCell = mWorldScene->getCurrentCell();
 
-        Ogre::Vector3 playerPos;
-        float* pos = mPlayer->getPlayer ().getRefData ().getPosition ().pos;
-        playerPos.x = pos[0];
-        playerPos.y = pos[1];
-        playerPos.z = pos[2];
+        RefData &refdata = mPlayer->getPlayer().getRefData();
+        Ogre::Vector3 playerPos(refdata.getPosition().pos);
 
-        std::pair<bool, Ogre::Vector3> hit =
-                mPhysics->castRay(playerPos, Ogre::Vector3(0,0,-1), 50);
-        bool isOnGround = (hit.first ? (hit.second.distance (playerPos) < 25) : false);
-
-        if (!isOnGround || isUnderwater (*currentCell->mCell, playerPos))
+        const OEngine::Physic::PhysicActor *physactor = mPhysEngine->getCharacter(refdata.getHandle());
+        if(!physactor->getOnGround() || isUnderwater(*currentCell->mCell, playerPos))
             return 2;
-
-        if (currentCell->mCell->mData.mFlags & ESM::Cell::NoSleep)
+        if((currentCell->mCell->mData.mFlags&ESM::Cell::NoSleep))
             return 1;
 
         return 0;
+    }
 
+    MWRender::Animation* World::getAnimation(const MWWorld::Ptr &ptr)
+    {
+        return mRendering->getAnimation(ptr);
     }
 
     void World::playVideo (const std::string &name, bool allowSkipping)

@@ -12,7 +12,7 @@
 
 namespace MWGui
 {
-    class InfoBoxDialog : public WindowBase
+    class InfoBoxDialog : public WindowModal
     {
     public:
         InfoBoxDialog(MWBase::WindowManager& parWindowManager);
@@ -63,7 +63,7 @@ namespace MWGui
         ClassChoiceDialog(MWBase::WindowManager& parWindowManager);
     };
 
-    class GenerateClassResultDialog : public WindowBase
+    class GenerateClassResultDialog : public WindowModal
     {
     public:
         GenerateClassResultDialog(MWBase::WindowManager& parWindowManager);
@@ -90,7 +90,7 @@ namespace MWGui
         std::string mCurrentClassId;
     };
 
-    class PickClassDialog : public WindowBase
+    class PickClassDialog : public WindowModal
     {
     public:
         PickClassDialog(MWBase::WindowManager& parWindowManager);
@@ -238,7 +238,7 @@ namespace MWGui
         MyGUI::EditPtr mTextEdit;
     };
 
-    class CreateClassDialog : public WindowBase
+    class CreateClassDialog : public WindowModal
     {
     public:
         CreateClassDialog(MWBase::WindowManager& parWindowManager);

@@ -25,7 +25,7 @@ bool sortBirthSigns(const std::pair<std::string, const ESM::BirthSign*>& left, c
 }
 
 BirthDialog::BirthDialog(MWBase::WindowManager& parWindowManager)
-  : WindowBase("openmw_chargen_birth.layout", parWindowManager)
+  : WindowModal("openmw_chargen_birth.layout", parWindowManager)
 {
     // Centre dialog
     center();
@@ -66,7 +66,7 @@ void BirthDialog::setNextButtonShow(bool shown)
 
 void BirthDialog::open()
 {
-    WindowBase::open();
+    WindowModal::open();
     updateBirths();
     updateSpells();
 }

@@ -13,7 +13,7 @@ namespace MWGui
 
 namespace MWGui
 {
-    class TextInputDialog : public WindowBase
+    class TextInputDialog : public WindowModal
     {
     public:
         TextInputDialog(MWBase::WindowManager& parWindowManager);

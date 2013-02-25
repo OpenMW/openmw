@@ -1,4 +1,4 @@
-#include "creatureanimation.hpp"
+#include "activatoranimation.hpp"
 
 #include <OgreEntity.h>
 #include <OgreSceneManager.h>
@@ -11,25 +11,24 @@
 namespace MWRender
 {
 
-CreatureAnimation::~CreatureAnimation()
+ActivatorAnimation::~ActivatorAnimation()
 {
 }
 
-CreatureAnimation::CreatureAnimation(const MWWorld::Ptr &ptr)
+ActivatorAnimation::ActivatorAnimation(const MWWorld::Ptr &ptr)
   : Animation(ptr)
 {
-    MWWorld::LiveCellRef<ESM::Creature> *ref = mPtr.get<ESM::Creature>();
+    MWWorld::LiveCellRef<ESM::Activator> *ref = mPtr.get<ESM::Activator>();
 
     assert (ref->mBase != NULL);
     if(!ref->mBase->mModel.empty())
     {
-        std::string model = "meshes\\"+ref->mBase->mModel;
+        std::string mesh = "meshes\\" + ref->mBase->mModel;
 
-        createEntityList(mPtr.getRefData().getBaseNode(), model);
+        createEntityList(mPtr.getRefData().getBaseNode(), mesh);
         for(size_t i = 0;i < mEntityList.mEntities.size();i++)
         {
             Ogre::Entity *ent = mEntityList.mEntities[i];
-            ent->setVisibilityFlags(RV_Actors);
 
             bool transparent = false;
             for (unsigned int j=0;j < ent->getNumSubEntities() && !transparent; ++j)
@@ -49,14 +48,10 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr &ptr)
                     }
                 }
             }
+            ent->setVisibilityFlags(RV_Misc);
             ent->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
         }
-
-        std::vector<std::string> names;
-        if((ref->mBase->mFlags&ESM::Creature::Biped))
-            names.push_back("meshes\\base_anim.nif");
-        names.push_back(model);
-        setAnimationSources(names);
+        setAnimationSource(mesh);
     }
 }
 

@@ -122,6 +122,11 @@ namespace MWWorld
         return 0;
     }
 
+    float Class::getJump (const Ptr& ptr) const
+    {
+        return 0;
+    }
+
     MWMechanics::Movement& Class::getMovementSettings (const Ptr& ptr) const
     {
         throw std::runtime_error ("movement settings not supported by class");

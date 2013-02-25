@@ -165,35 +165,44 @@ namespace MWMechanics
 
     void Actors::addActor (const MWWorld::Ptr& ptr)
     {
-        if (!MWWorld::Class::get (ptr).getCreatureStats (ptr).isDead())
-            mActors.insert (ptr);
+        MWRender::Animation *anim = MWBase::Environment::get().getWorld()->getAnimation(ptr);
+        if(!MWWorld::Class::get(ptr).getCreatureStats(ptr).isDead())
+            mActors.insert(std::make_pair(ptr, CharacterController(ptr, anim, CharState_Idle, true)));
         else
-            MWBase::Environment::get().getWorld()->playAnimationGroup (ptr, "death1", 2);
+            mActors.insert(std::make_pair(ptr, CharacterController(ptr, anim, CharState_Death1, false)));
     }
 
     void Actors::removeActor (const MWWorld::Ptr& ptr)
     {
-        std::set<MWWorld::Ptr>::iterator iter = mActors.find (ptr);
+        PtrControllerMap::iterator iter = mActors.find(ptr);
+        if(iter != mActors.end())
+            mActors.erase(iter);
+    }
 
-        if (iter!=mActors.end())
-            mActors.erase (iter);
+    void Actors::updateActorCell(const MWWorld::Ptr &ptr)
+    {
+        PtrControllerMap::iterator iter = mActors.find(ptr);
+        if(iter != mActors.end())
+        {
+            CharacterController ctrl = iter->second;
+            mActors.erase(iter);
+            mActors.insert(std::make_pair(ptr, ctrl));
+        }
     }
 
     void Actors::dropActors (const MWWorld::Ptr::CellStore *cellStore)
     {
-        std::set<MWWorld::Ptr>::iterator iter = mActors.begin();
-
-        while (iter!=mActors.end())
-            if (iter->getCell()==cellStore)
-            {
-                mActors.erase (iter++);
-            }
+        PtrControllerMap::iterator iter = mActors.begin();
+        while(iter != mActors.end())
+        {
+            if(iter->first.getCell()==cellStore)
+                mActors.erase(iter++);
             else
                 ++iter;
+        }
     }
 
-    void Actors::update (std::vector<std::pair<std::string, Ogre::Vector3> >& movement, float duration,
-        bool paused)
+    void Actors::update (float duration, bool paused)
     {
         mDuration += duration;
 
@@ -201,79 +210,91 @@ namespace MWMechanics
         {
             float totalDuration = mDuration;
             mDuration = 0;
-            
-            std::set<MWWorld::Ptr>::iterator iter (mActors.begin());
 
-            while (iter!=mActors.end())
+            for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();iter++)
             {
-                if (!MWWorld::Class::get (*iter).getCreatureStats (*iter).isDead())
+                if(!MWWorld::Class::get(iter->first).getCreatureStats(iter->first).isDead())
                 {
-                    updateActor (*iter, totalDuration);
+                    if(iter->second.getState() >= CharState_Death1)
+                        iter->second.setState(CharState_Idle, true);
 
-                    if (iter->getTypeName()==typeid (ESM::NPC).name())
-                        updateNpc (*iter, totalDuration, paused);
+                    updateActor(iter->first, totalDuration);
+                    if(iter->first.getTypeName() == typeid(ESM::NPC).name())
+                        updateNpc(iter->first, totalDuration, paused);
+
+                    if(!MWWorld::Class::get(iter->first).getCreatureStats(iter->first).isDead())
+                        continue;
                 }
 
-                if (MWWorld::Class::get (*iter).getCreatureStats (*iter).isDead())
+                // workaround: always keep player alive for now
+                // \todo remove workaround, once player death can be handled
+                if(iter->first.getRefData().getHandle()=="player")
                 {
-                    // workaround: always keep player alive for now
-                    // \todo remove workaround, once player death can be handled
-                    if (iter->getRefData().getHandle()=="player")
-                    {
-                        MWMechanics::DynamicStat<float> stat (
-                            MWWorld::Class::get (*iter).getCreatureStats (*iter).getHealth());
-                            
-                        if (stat.getModified()<1)
-                        {
-                            stat.setModified (1, 0);
-                            MWWorld::Class::get (*iter).getCreatureStats (*iter).setHealth (stat);
-                        }
+                    MWMechanics::DynamicStat<float> stat (
+                        MWWorld::Class::get(iter->first).getCreatureStats(iter->first).getHealth());
 
-                        MWWorld::Class::get (*iter).getCreatureStats (*iter).resurrect();
-                        ++iter;
-                        continue;
+                    if (stat.getModified()<1)
+                    {
+                        stat.setModified (1, 0);
+                        MWWorld::Class::get(iter->first).getCreatureStats(iter->first).setHealth(stat);
                     }
 
-                    ++mDeathCount[MWWorld::Class::get (*iter).getId (*iter)];
-
-                    MWBase::Environment::get().getWorld()->playAnimationGroup (*iter, "death1", 0);
-
-                    if (MWWorld::Class::get (*iter).isEssential (*iter))
-                        MWBase::Environment::get().getWindowManager()->messageBox (
-                            "#{sKilledEssential}", std::vector<std::string>());
-
-                    mActors.erase (iter++);
+                    MWWorld::Class::get(iter->first).getCreatureStats(iter->first).resurrect();
+                    continue;
                 }
-                else
-                    ++iter;
+
+                if(iter->second.getState() >= CharState_Death1)
+                    continue;
+
+                iter->second.setState(CharState_Death1, false);
+
+                ++mDeathCount[MWWorld::Class::get(iter->first).getId(iter->first)];
+
+                if(MWWorld::Class::get(iter->first).isEssential(iter->first))
+                    MWBase::Environment::get().getWindowManager()->messageBox(
+                        "#{sKilledEssential}", std::vector<std::string>());
             }
         }
 
-        for (std::set<MWWorld::Ptr>::iterator iter (mActors.begin()); iter!=mActors.end();
-            ++iter)
+        if(!paused)
         {
-            Ogre::Vector3 vector = MWWorld::Class::get (*iter).getMovementVector (*iter);
+            mMovement.reserve(mActors.size());
 
-            if (vector!=Ogre::Vector3::ZERO)
-                movement.push_back (std::make_pair (iter->getRefData().getHandle(), vector));
+            for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
+            {
+                Ogre::Vector3 movement = iter->second.update(duration);
+                mMovement.push_back(std::make_pair(iter->first, movement));
+            }
+            MWBase::Environment::get().getWorld()->doPhysics(mMovement, duration);
+
+            mMovement.clear();
         }
     }
 
     void Actors::restoreDynamicStats()
     {
-        for (std::set<MWWorld::Ptr>::iterator iter (mActors.begin()); iter!=mActors.end(); ++iter)
-        {
-            calculateRestoration (*iter, 3600);
-        }
+        for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
+            calculateRestoration(iter->first, 3600);
     }
     
     int Actors::countDeaths (const std::string& id) const
     {
-        std::map<std::string, int>::const_iterator iter = mDeathCount.find (id);
-
-        if (iter!=mDeathCount.end())
+        std::map<std::string, int>::const_iterator iter = mDeathCount.find(id);
+        if(iter != mDeathCount.end())
             return iter->second;
-
         return 0;
+    }
+
+    void Actors::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number)
+    {
+        PtrControllerMap::iterator iter = mActors.find(ptr);
+        if(iter != mActors.end())
+            iter->second.playGroup(groupName, mode, number);
+    }
+    void Actors::skipAnimation(const MWWorld::Ptr& ptr)
+    {
+        PtrControllerMap::iterator iter = mActors.find(ptr);
+        if(iter != mActors.end())
+            iter->second.skipAnim();
     }
 }

@@ -6,6 +6,9 @@
 #include <string>
 #include <map>
 
+#include "character.hpp"
+#include "../mwbase/world.hpp"
+
 namespace Ogre
 {
     class Vector3;
@@ -21,9 +24,14 @@ namespace MWMechanics
 {
     class Actors
     {
-            std::set<MWWorld::Ptr> mActors;
-            float mDuration;
-            std::map<std::string, int> mDeathCount;
+        typedef std::map<MWWorld::Ptr,CharacterController> PtrControllerMap;
+        PtrControllerMap mActors;
+
+        MWWorld::PtrMovementList mMovement;
+
+        std::map<std::string, int> mDeathCount;
+
+        float mDuration;
 
             void updateNpc (const MWWorld::Ptr& ptr, float duration, bool paused);
 
@@ -50,11 +58,13 @@ namespace MWMechanics
             ///
             /// \note Ignored, if \a ptr is not a registered actor.
 
+            void updateActorCell(const MWWorld::Ptr& ptr);
+            ///< Updates an actor with a new cell store
+
             void dropActors (const MWWorld::CellStore *cellStore);
             ///< Deregister all actors in the given cell.
 
-            void update (std::vector<std::pair<std::string, Ogre::Vector3> >& movement,
-                float duration, bool paused);
+            void update (float duration, bool paused);
             ///< Update actor stats and store desired velocity vectors in \a movement
 
             void updateActor (const MWWorld::Ptr& ptr, float duration);
@@ -66,6 +76,9 @@ namespace MWMechanics
             
             int countDeaths (const std::string& id) const;
             ///< Return the number of deaths for actors with the given ID.
+
+        void playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number);
+        void skipAnimation(const MWWorld::Ptr& ptr);
     };
 }
 

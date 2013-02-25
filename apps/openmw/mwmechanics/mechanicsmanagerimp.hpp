@@ -7,6 +7,7 @@
 
 #include "creaturestats.hpp"
 #include "npcstats.hpp"
+#include "activators.hpp"
 #include "actors.hpp"
 
 namespace Ogre
@@ -29,6 +30,8 @@ namespace MWMechanics
             bool mUpdatePlayer;
             bool mClassSelected;
             bool mRaceSelected;
+
+            Activators mActivators;
             Actors mActors;
 
             void buildPlayer();
@@ -39,24 +42,24 @@ namespace MWMechanics
 
             MechanicsManager();
 
-            virtual void addActor (const MWWorld::Ptr& ptr);
-            ///< Register an actor for stats management
-            ///
-            /// \note Dead actors are ignored.
+            virtual void add (const MWWorld::Ptr& ptr);
+            ///< Register an object for management
 
-            virtual void removeActor (const MWWorld::Ptr& ptr);
-            ///< Deregister an actor for stats management
+            virtual void remove (const MWWorld::Ptr& ptr);
+            ///< Deregister an object for management
 
-            virtual void dropActors (const MWWorld::CellStore *cellStore);
-            ///< Deregister all actors in the given cell.
+            virtual void updateCell(const MWWorld::Ptr &ptr);
+            ///< Moves an object to a new cell
 
-            virtual void watchActor (const MWWorld::Ptr& ptr);
+            virtual void drop(const MWWorld::CellStore *cellStore);
+            ///< Deregister all objects in the given cell.
+
+            virtual void watchActor(const MWWorld::Ptr& ptr);
             ///< On each update look for changes in a previously registered actor and update the
             /// GUI accordingly.
 
-            virtual void update (std::vector<std::pair<std::string, Ogre::Vector3> >& movement,
-                float duration, bool paused);
-            ///< Update actor stats and store desired velocity vectors in \a movement
+            virtual void update (float duration, bool paused);
+            ///< Update objects
             ///
             /// \param paused In game type does not currently advance (this usually means some GUI
             /// component is up).
@@ -92,6 +95,9 @@ namespace MWMechanics
                 float currentTemporaryDispositionDelta, bool& success, float& tempChange, float& permChange);
             void toLower(std::string npcFaction);
             ///< Perform a persuasion action on NPC
+
+        virtual void playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number);
+        virtual void skipAnimation(const MWWorld::Ptr& ptr);
     };
 }
 

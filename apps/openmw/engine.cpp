@@ -9,6 +9,7 @@
 #include <components/bsa/bsa_archive.hpp>
 #include <components/files/configurationmanager.hpp>
 #include <components/translation/translation.hpp>
+#include <components/nif/nif_file.hpp>
 #include <components/nifoverrides/nifoverrides.hpp>
 
 #include <components/nifbullet/bullet_nif_loader.hpp>
@@ -66,14 +67,15 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 {
     try
     {
-        mEnvironment.setFrameDuration (evt.timeSinceLastFrame);
+        float frametime = std::min(evt.timeSinceLastFrame, 0.2f);
+        mEnvironment.setFrameDuration(frametime);
 
         // update input
-        MWBase::Environment::get().getInputManager()->update(evt.timeSinceLastFrame, false);
+        MWBase::Environment::get().getInputManager()->update(frametime, false);
 
         // sound
         if (mUseSound)
-            MWBase::Environment::get().getSoundManager()->update (evt.timeSinceLastFrame);
+            MWBase::Environment::get().getSoundManager()->update(frametime);
 
         // global scripts
         MWBase::Environment::get().getScriptManager()->getGlobalScripts().run();
@@ -87,23 +89,19 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 
         // passing of time
         if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
-            MWBase::Environment::get().getWorld()->advanceTime (
-                mEnvironment.getFrameDuration()*MWBase::Environment::get().getWorld()->getTimeScaleFactor()/3600);
+            MWBase::Environment::get().getWorld()->advanceTime(
+                frametime*MWBase::Environment::get().getWorld()->getTimeScaleFactor()/3600);
 
 
         if (changed) // keep change flag for another frame, if cell changed happend in local script
             MWBase::Environment::get().getWorld()->markCellAsUnchanged();
 
         // update actors
-        std::vector<std::pair<std::string, Ogre::Vector3> > movement;
-        MWBase::Environment::get().getMechanicsManager()->update (movement, mEnvironment.getFrameDuration(),
+        MWBase::Environment::get().getMechanicsManager()->update(frametime,
             MWBase::Environment::get().getWindowManager()->isGuiMode());
 
-        if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
-            MWBase::Environment::get().getWorld()->doPhysics (movement, mEnvironment.getFrameDuration());
-
         // update world
-        MWBase::Environment::get().getWorld()->update (evt.timeSinceLastFrame, MWBase::Environment::get().getWindowManager()->isGuiMode());
+        MWBase::Environment::get().getWorld()->update(frametime, MWBase::Environment::get().getWindowManager()->isGuiMode());
 
         // update GUI
         Ogre::RenderWindow* window = mOgre->getWindow();
@@ -111,7 +109,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         MWBase::Environment::get().getWorld()->getTriangleBatchCount(tri, batch);
         MWBase::Environment::get().getWindowManager()->wmUpdateFps(window->getLastFPS(), tri, batch);
 
-        MWBase::Environment::get().getWindowManager()->onFrame(evt.timeSinceLastFrame);
+        MWBase::Environment::get().getWindowManager()->onFrame(frametime);
     }
     catch (const std::exception& e)
     {

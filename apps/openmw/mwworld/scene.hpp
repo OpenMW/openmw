@@ -3,7 +3,7 @@
 
 #include "../mwrender/renderingmanager.hpp"
 
-#include "physicssystem.hpp"
+#include "ptr.hpp"
 #include "globals.hpp"
 
 namespace Ogre
@@ -34,9 +34,9 @@ namespace MWRender
 
 namespace MWWorld
 {
+    class PhysicsSystem;
     class Player;
     class CellStore;
-    class Ptr;
 
     class Scene
     {

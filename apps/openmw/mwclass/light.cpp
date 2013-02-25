@@ -36,14 +36,9 @@ namespace MWClass
         objects.insertBegin(ptr, ptr.getRefData().isEnabled(), false);
 
         if (!model.empty())
-            objects.insertMesh(ptr, "meshes\\" + model);
-
-        const int color = ref->mBase->mData.mColor;
-        const float r = ((color >> 0) & 0xFF) / 255.0f;
-        const float g = ((color >> 8) & 0xFF) / 255.0f;
-        const float b = ((color >> 16) & 0xFF) / 255.0f;
-        const float radius = float (ref->mBase->mData.mRadius);
-        objects.insertLight (ptr, r, g, b, radius);
+            objects.insertMesh(ptr, "meshes\\" + model, true);
+        else
+            objects.insertLight(ptr);
     }
 
     void Light::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const

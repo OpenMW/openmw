@@ -6,6 +6,7 @@
 #include <components/settings/settings.hpp>
 
 #include "../mwworld/globals.hpp"
+#include "../mwworld/ptr.hpp"
 
 namespace Ogre
 {
@@ -18,6 +19,11 @@ namespace OEngine
     namespace Render
     {
         class Fader;
+    }
+
+    namespace Physic
+    {
+        class PhysicEngine;
     }
 }
 
@@ -35,6 +41,7 @@ namespace ESM
 namespace MWRender
 {
     class ExternalRendering;
+    class Animation;
 }
 
 namespace MWWorld
@@ -42,10 +49,11 @@ namespace MWWorld
     class CellStore;
     class Player;
     class LocalScripts;
-    class Ptr;
     class TimeStamp;
     class ESMStore;
     class RefData;
+
+    typedef std::vector<std::pair<MWWorld::Ptr,Ogre::Vector3> > PtrMovementList;
 }
 
 namespace MWBase
@@ -227,8 +235,7 @@ namespace MWBase
             virtual void positionToIndex (float x, float y, int &cellX, int &cellY) const = 0;
             ///< Convert position to cell numbers
 
-            virtual void doPhysics (const std::vector<std::pair<std::string, Ogre::Vector3> >& actors,
-                float duration) = 0;
+            virtual void doPhysics (const MWWorld::PtrMovementList &actors, float duration) = 0;
             ///< Run physics simulation and modify \a world accordingly.
 
             virtual bool toggleCollisionMode() = 0;
@@ -263,18 +270,6 @@ namespace MWBase
             ///< Create a new recrod (of type npc) in the ESM store.
             /// \return pointer to created record
 
-            virtual void playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName,
-                int mode, int number = 1) = 0;
-            ///< Run animation for a MW-reference. Calls to this function for references that are
-            /// currently not in the rendered scene should be ignored.
-            ///
-            /// \param mode: 0 normal, 1 immediate start, 2 immediate loop
-            /// \param number How offen the animation should be run
-
-            virtual void skipAnimation (const MWWorld::Ptr& ptr) = 0;
-            ///< Skip the animation for the given MW-reference for one frame. Calls to this function for
-            /// references that are currently not in the rendered scene should be ignored.
-
             virtual void update (float duration, bool paused) = 0;
 
             virtual bool placeObject(const MWWorld::Ptr& object, float cursorX, float cursorY) = 0;
@@ -291,8 +286,10 @@ namespace MWBase
 
             virtual void processChangedSettings (const Settings::CategorySettingVector& settings) = 0;
 
-            virtual bool isSwimming(const MWWorld::Ptr &object) = 0;
-            virtual bool isUnderwater(const ESM::Cell &cell, const Ogre::Vector3 &pos) = 0;
+            virtual bool isFlying(const MWWorld::Ptr &ptr) const = 0;
+            virtual bool isSwimming(const MWWorld::Ptr &object) const = 0;
+            virtual bool isUnderwater(const ESM::Cell &cell, const Ogre::Vector3 &pos) const = 0;
+            virtual bool isOnGround(const MWWorld::Ptr &ptr) const = 0;
 
             virtual void togglePOV() = 0;
             virtual void togglePreviewMode(bool enable) = 0;
@@ -311,6 +308,8 @@ namespace MWBase
             /// 2 - player is underwater \n
             /// 3 - enemies are nearby (not implemented)
 
+            /// \todo Probably shouldn't be here
+            virtual MWRender::Animation* getAnimation(const MWWorld::Ptr &ptr) = 0;
 
             /// \todo this does not belong here
             virtual void playVideo(const std::string& name, bool allowSkipping) = 0;
