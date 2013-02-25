@@ -683,7 +683,7 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
         new sh::Vector4(diffuse.x, diffuse.y, diffuse.z, alpha)));
 
     instance->setProperty ("specular", sh::makeProperty<sh::Vector4> (
-        new sh::Vector4(specular.x, specular.y, specular.z, glossiness)));
+        new sh::Vector4(specular.x, specular.y, specular.z, glossiness*255.0f)));
 
     instance->setProperty ("emissive", sh::makeProperty<sh::Vector3> (
         new sh::Vector3(emissive.x, emissive.y, emissive.z)));
