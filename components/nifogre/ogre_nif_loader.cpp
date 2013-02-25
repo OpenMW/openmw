@@ -454,23 +454,33 @@ void loadResource(Ogre::Resource *resource)
 
 bool createSkeleton(const std::string &name, const std::string &group, const Nif::Node *node)
 {
-    /* If the root node is a NiTriShape, or is a parent to only NiTriShapes, do
-     * not create a skeleton. */
-    if(node->recType == Nif::RC_NiTriShape)
-        return false;
-
-    if(node->recType == Nif::RC_NiNode)
+    /* We need to be a little aggressive here, since some NIFs have a crap-ton
+     * of nodes and Ogre only supports 256 bones. We will skip a skeleton if:
+     * There are no bones used for skinning, there are no controllers on non-
+     * NiTriShape nodes, there are no nodes named "AttachLight", and the tree
+     * consists of NiNode, NiTriShape, and RootCollisionNode types only.
+     */
+    if(!node->boneTrafo)
     {
-        bool alltrishapes = true;
-        const Nif::NiNode *ninode = static_cast<const Nif::NiNode*>(node);
-        const Nif::NodeList &children = ninode->children;
-        for(size_t i = 0;i < children.length() && alltrishapes;i++)
-        {
-            if(!children[i].empty() && children[i]->recType != Nif::RC_NiTriShape)
-                alltrishapes = false;
-        }
-        if(alltrishapes)
+        if(node->recType == Nif::RC_NiTriShape)
             return false;
+        if(node->controller.empty() && node->name != "AttachLight")
+        {
+            if(node->recType == Nif::RC_NiNode || node->recType == Nif::RC_RootCollisionNode)
+            {
+                const Nif::NiNode *ninode = static_cast<const Nif::NiNode*>(node);
+                const Nif::NodeList &children = ninode->children;
+                for(size_t i = 0;i < children.length();i++)
+                {
+                    if(!children[i].empty())
+                    {
+                        if(createSkeleton(name, group, children[i].getPtr()))
+                            return true;
+                    }
+                }
+                return false;
+            }
+        }
     }
 
     Ogre::SkeletonManager &skelMgr = Ogre::SkeletonManager::getSingleton();
