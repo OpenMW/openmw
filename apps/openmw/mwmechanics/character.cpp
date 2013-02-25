@@ -131,6 +131,12 @@ CharacterController::~CharacterController()
 }
 
 
+void CharacterController::updatePtr(const MWWorld::Ptr &ptr)
+{
+    mPtr = ptr;
+}
+
+
 void CharacterController::markerEvent(float time, const std::string &evt)
 {
     if(evt == "stop")

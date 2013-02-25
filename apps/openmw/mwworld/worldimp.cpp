@@ -773,7 +773,7 @@ namespace MWWorld
                     mRendering->updateObjectCell(ptr, copy);
 
                     MWBase::MechanicsManager *mechMgr = MWBase::Environment::get().getMechanicsManager();
-                    mechMgr->updateCell(copy);
+                    mechMgr->updateCell(ptr, copy);
 
                     std::string script =
                         MWWorld::Class::get(ptr).getScript(ptr);

@@ -191,12 +191,12 @@ namespace MWMechanics
         mActivators.removeActivator(ptr);
     }
 
-    void MechanicsManager::updateCell(const MWWorld::Ptr &ptr)
+    void MechanicsManager::updateCell(const MWWorld::Ptr &old, const MWWorld::Ptr &ptr)
     {
         if(ptr.getTypeName() == typeid(ESM::Activator).name())
-            mActivators.updateActivatorCell(ptr);
+            mActivators.updateActivator(old, ptr);
         else
-            mActors.updateActorCell(ptr);
+            mActors.updateActor(old, ptr);
     }
 
 
