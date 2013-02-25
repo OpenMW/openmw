@@ -226,8 +226,8 @@ void DataFilesPage::setupDataFiles()
     QStringList profiles = mLauncherSettings.subKeys(QString("Profiles/"));
     QString profile = mLauncherSettings.value(QString("Profiles/currentprofile"));
 
-    mProfilesComboBox->setCurrentIndex(-1);
-    mProfilesComboBox->addItems(profiles);
+    if (!profiles.isEmpty())
+        mProfilesComboBox->addItems(profiles);
 
     // Add the current profile if empty
     if (mProfilesComboBox->findText(profile) == -1)

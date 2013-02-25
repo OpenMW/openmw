@@ -29,7 +29,6 @@
 
 #include "checkablemessagebox.hpp"
 
-#include <QDebug>
 #include <QVariant>
 
 #include <QPushButton>

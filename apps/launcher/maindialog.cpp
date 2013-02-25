@@ -78,10 +78,20 @@ MainDialog::MainDialog()
         file.setFileName(QString::fromStdString((mCfgMgr.getLocalPath() / "launcher.qss").string()));
     }
 
-    file.open(QFile::ReadOnly);
-    QString styleSheet = QLatin1String(file.readAll());
-    qApp->setStyleSheet(styleSheet);
-    file.close();
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle(tr("Error opening Launcher stylesheet"));
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setText(QObject::tr("<br><b>Could not open %0 for reading</b><br><br> \
+                          Please make sure you have the right permissions \
+                          and try again.<br>").arg(file.fileName()));
+        msgBox.exec();
+    } else {
+        QString styleSheet = QLatin1String(file.readAll());
+        qApp->setStyleSheet(styleSheet);
+        file.close();
+    }
 
     connect(buttonBox, SIGNAL(rejected()), this, SLOT(close()));
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(play()));
@@ -261,7 +271,6 @@ bool MainDialog::showFirstRunDialog()
 
         // Add a new profile
         if (msgBox.isChecked()) {
-            qDebug() << "add a new profile";
             mLauncherSettings.setValue(QString("Profiles/CurrentProfile"), QString("Imported"));
 
             mLauncherSettings.remove(QString("Profiles/Imported/master"));
@@ -330,7 +339,7 @@ bool MainDialog::setupLauncherSettings()
     paths.append(userPath + QString("launcher.cfg"));
 
     foreach (const QString &path, paths) {
-        qDebug() << "Loading: " << path;
+        qDebug() << "Loading config file:" << qPrintable(path);
         QFile file(path);
         if (file.exists()) {
             if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -366,7 +375,8 @@ bool MainDialog::setupGameSettings()
     paths.append(globalPath + QString("openmw.cfg"));
 
     foreach (const QString &path, paths) {
-        qDebug() << "Loading: " << path;
+        qDebug() << "Loading config file:" << qPrintable(path);
+
         QFile file(path);
         if (file.exists()) {
             if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -388,7 +398,19 @@ bool MainDialog::setupGameSettings()
         file.close();
     }
 
-    if (mGameSettings.getDataDirs().isEmpty())
+    QStringList dataDirs;
+
+    // Check if the paths actually contain data files
+    foreach (const QString path, mGameSettings.getDataDirs()) {
+        QDir dir(path);
+        QStringList filters;
+        filters << "*.esp" << "*.esm";
+
+        if (!dir.entryList(filters).isEmpty())
+            dataDirs.append(path);
+    }
+
+    if (dataDirs.isEmpty())
     {
         QMessageBox msgBox;
         msgBox.setWindowTitle(tr("Error detecting Morrowind installation"));
@@ -415,13 +437,11 @@ bool MainDialog::setupGameSettings()
         if (selectedFile.isEmpty())
             return false; // Cancel was clicked;
 
-        qDebug() << selectedFile;
         QFileInfo info(selectedFile);
 
         // Add the new dir to the settings file and to the data dir container
         mGameSettings.setValue(QString("data"), info.absolutePath());
         mGameSettings.addDataDir(info.absolutePath());
-
     }
 
     return true;
@@ -454,7 +474,7 @@ bool MainDialog::setupGraphicsSettings()
     paths.append(userPath + QString("settings.cfg"));
 
     foreach (const QString &path, paths) {
-        qDebug() << "Loading: " << path;
+        qDebug() << "Loading config file:" << qPrintable(path);
         QFile file(path);
         if (file.exists()) {
             if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {

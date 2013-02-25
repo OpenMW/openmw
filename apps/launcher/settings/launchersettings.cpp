@@ -66,7 +66,6 @@ bool LauncherSettings::writeFile(QTextStream &stream)
     QString sectionPrefix;
     QRegExp sectionRe("([^/]+)/(.+)$");
     QMap<QString, QString> settings = SettingsBase::getSettings();
-    qDebug() << "writing " << settings;
 
     QMapIterator<QString, QString> i(settings);
     i.toBack();

@@ -3,8 +3,6 @@
 #include <QRegExp>
 #include <QMap>
 
-#include <QDebug>
-
 #include "graphicssettings.hpp"
 
 GraphicsSettings::GraphicsSettings()

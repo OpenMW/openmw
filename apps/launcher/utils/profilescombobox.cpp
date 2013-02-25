@@ -1,7 +1,6 @@
 #include <QRegExpValidator>
 #include <QLineEdit>
 #include <QString>
-#include <QDebug>
 #include <QApplication>
 #include <QKeyEvent>
 
@@ -66,8 +65,6 @@ void ProfilesComboBox::slotEditingFinished()
 {
     QString current = currentText();
     QString previous = itemText(currentIndex());
-
-    qDebug() << current << previous;
 
     if (currentIndex() == -1)
         return;

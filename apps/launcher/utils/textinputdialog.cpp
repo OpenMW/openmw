@@ -1,7 +1,6 @@
 #include <QDialogButtonBox>
 #include <QApplication>
 #include <QPushButton>
-#include <QDebug>
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QValidator>
