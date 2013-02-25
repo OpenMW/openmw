@@ -557,7 +557,8 @@ namespace MWMechanics
         float fPerDieRollMult = gmst.find("fPerDieRollMult")->getFloat();
         float fPerTempMult = gmst.find("fPerTempMult")->getFloat();
 
-        float x,y = 0;
+        float x = 0;
+        float y = 0;
 
         float roll = static_cast<float> (std::rand()) / RAND_MAX * 100;
 
