@@ -288,7 +288,7 @@ namespace MWBase
 
             virtual bool isFlying(const MWWorld::Ptr &ptr) const = 0;
             virtual bool isSwimming(const MWWorld::Ptr &object) const = 0;
-            virtual bool isUnderwater(const ESM::Cell &cell, const Ogre::Vector3 &pos) const = 0;
+            virtual bool isUnderwater(const MWWorld::Ptr::CellStore* cell, const Ogre::Vector3 &pos) const = 0;
             virtual bool isOnGround(const MWWorld::Ptr &ptr) const = 0;
 
             virtual void togglePOV() = 0;

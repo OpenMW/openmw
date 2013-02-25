@@ -491,8 +491,10 @@ namespace MWMechanics
         if(buying) x = buyTerm;
         else x = std::min(buyTerm, sellTerm);
         int offerPrice;
-        if (x < 1) offerPrice = int(x * basePrice);
-        if (x >= 1) offerPrice = basePrice + int((x - 1) * basePrice);
+        if (x < 1)
+            offerPrice = int(x * basePrice);
+        else
+            offerPrice = basePrice + int((x - 1) * basePrice);
         offerPrice = std::max(1, offerPrice);
         return offerPrice;
     }
@@ -555,7 +557,7 @@ namespace MWMechanics
         float fPerDieRollMult = gmst.find("fPerDieRollMult")->getFloat();
         float fPerTempMult = gmst.find("fPerTempMult")->getFloat();
 
-        float x,y;
+        float x,y = 0;
 
         float roll = static_cast<float> (std::rand()) / RAND_MAX * 100;
 
