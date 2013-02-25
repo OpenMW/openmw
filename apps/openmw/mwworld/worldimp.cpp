@@ -832,16 +832,16 @@ namespace MWWorld
         rot.y = Ogre::Degree(y).valueRadians();
         rot.z = Ogre::Degree(z).valueRadians();
 
-        float *objRot = ptr.getRefData().getPosition().rot;
-        if(ptr.getRefData().getBaseNode() == 0 || !mRendering->rotateObject(ptr, rot, adjust))
+        if (mRendering->rotateObject(ptr, rot, adjust))
         {
-            objRot[0] = (adjust ? objRot[0] + rot.x : rot.x), objRot[1] = (adjust ? objRot[1] + rot.y : rot.y), objRot[2] = (adjust ? objRot[2] + rot.z : rot.z);
-            return;
-         }
+            // rotate physically iff renderer confirm so
+            float *objRot = ptr.getRefData().getPosition().rot;
+            objRot[0] = rot.x, objRot[1] = rot.y, objRot[2] = rot.z;
 
-        // do this after rendering rotated the object so it gets changed by Class->adjustRotation
-        objRot[0] = rot.x, objRot[1] = rot.y, objRot[2] = rot.z;
-        mPhysics->rotateObject(ptr);
+            if (ptr.getRefData().getBaseNode() != 0) {
+                mPhysics->rotateObject(ptr);
+            }
+        }
     }
 
     void World::safePlaceObject(const MWWorld::Ptr& ptr,MWWorld::CellStore &Cell,ESM::Position pos)
