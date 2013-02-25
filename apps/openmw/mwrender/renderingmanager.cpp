@@ -381,7 +381,7 @@ void RenderingManager::update (float duration, bool paused)
 
         mWater->updateUnderwater(
             world->isUnderwater(
-                *world->getPlayer().getPlayer().getCell()->mCell,
+                world->getPlayer().getPlayer().getCell(),
                 Ogre::Vector3(cam.x, -cam.z, cam.y))
         );
         mWater->update(duration);

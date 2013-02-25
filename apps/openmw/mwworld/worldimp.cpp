@@ -1411,16 +1411,16 @@ namespace MWWorld
         const OEngine::Physic::PhysicActor *actor = mPhysEngine->getCharacter(object.getRefData().getHandle());
         if(actor) pos.z += actor->getHalfExtents().z * 1.5;
 
-        return isUnderwater(*object.getCell()->mCell, pos);
+        return isUnderwater(object.getCell(), pos);
     }
 
     bool
-    World::isUnderwater(const ESM::Cell &cell, const Ogre::Vector3 &pos) const
+    World::isUnderwater(const MWWorld::Ptr::CellStore* cell, const Ogre::Vector3 &pos) const
     {
-        if (!(cell.mData.mFlags & ESM::Cell::HasWater)) {
+        if (!(cell->mCell->mData.mFlags & ESM::Cell::HasWater)) {
             return false;
         }
-        return pos.z < cell.mWater;
+        return pos.z < cell->mWaterLevel;
     }
 
     bool World::isOnGround(const MWWorld::Ptr &ptr) const
@@ -1448,7 +1448,7 @@ namespace MWWorld
         Ogre::Vector3 playerPos(refdata.getPosition().pos);
 
         const OEngine::Physic::PhysicActor *physactor = mPhysEngine->getCharacter(refdata.getHandle());
-        if(!physactor->getOnGround() || isUnderwater(*currentCell->mCell, playerPos))
+        if(!physactor->getOnGround() || isUnderwater(currentCell, playerPos))
             return 2;
         if((currentCell->mCell->mData.mFlags&ESM::Cell::NoSleep))
             return 1;
