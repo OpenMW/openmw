@@ -69,8 +69,9 @@ Sandy Carter (bwrsandman) - Arch Linux
 
 
 Public Relations and Translations:
-Julien Voisin (jvoisin/ap0) - French News Writer
 Artem Kotsynyak (greye) - Russian News Writer
+Julien Voisin (jvoisin/ap0) - French News Writer
+Mickey Lyle (raevol) - Release Manager
 Pithorn - Chinese News Writer
 sir_herrbatka - English/Polish News Writer
 WeirdSexy - Podcaster
@@ -138,7 +139,7 @@ Thanks to Kevin Ryan,
 for creating the icon used for the Data Files tab of the OpenMW Launcher.
 
 Thanks to Georg Duffner,
-for the open-source EB Garamond fontface.
+for his EB Garamond fontface, see OFL.txt for his license terms.
 
 Thanks to Dongle,
 for his Daedric fontface, see Daedric Font License.txt for his license terms.
