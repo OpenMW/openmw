@@ -203,7 +203,7 @@ unsigned int Moon::getPhaseInt() const
     return 0;
 }
 
-SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera)
+SkyManager::SkyManager (SceneNode* root, Camera* pCamera)
     : mHour(0.0f)
     , mDay(0)
     , mMonth(0)
@@ -234,7 +234,7 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera)
     , mCloudAnimationTimer(0.f)
     , mMoonRed(false)
 {
-    mSceneMgr = pMwRoot->getCreator();
+    mSceneMgr = root->getCreator();
     mRootNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
     mRootNode->setInheritOrientation(false);
 }

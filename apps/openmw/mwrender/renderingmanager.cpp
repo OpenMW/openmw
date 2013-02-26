@@ -141,25 +141,20 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
 
     applyCompositors();
 
-    // Turn the entire scene (represented by the 'root' node) -90
-    // degrees around the x axis. This makes Z go upwards, and Y go into
-    // the screen (when x is to the right.) This is the orientation that
-    // Morrowind uses, and it automagically makes everything work as it
-    // should.
     SceneNode *rt = mRendering.getScene()->getRootSceneNode();
-    mMwRoot = rt;
+    mRootNode = rt;
 
-    mObjects.setMwRoot(mMwRoot);
-    mActors.setMwRoot(mMwRoot);
+    mObjects.setRootNode(mRootNode);
+    mActors.setRootNode(mRootNode);
 
-    Ogre::SceneNode *playerNode = mMwRoot->createChildSceneNode ("player");
+    Ogre::SceneNode *playerNode = mRootNode->createChildSceneNode ("player");
     mPlayer = new MWRender::Player (mRendering.getCamera(), playerNode);
 
     mShadows = new Shadows(&mRendering);
 
     mTerrainManager = new TerrainManager(mRendering.getScene(), this);
 
-    mSkyManager = new SkyManager(mMwRoot, mRendering.getCamera());
+    mSkyManager = new SkyManager(mRootNode, mRendering.getCamera());
 
     mOcclusionQuery = new OcclusionQuery(&mRendering, mSkyManager->getSunNode());
 
@@ -168,7 +163,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
 
     mSun = 0;
 
-    mDebugging = new Debugging(mMwRoot, engine);
+    mDebugging = new Debugging(mRootNode, engine);
     mLocalMap = new MWRender::LocalMap(&mRendering, this);
 
     setMenuTransparency(Settings::Manager::getFloat("menu transparency", "GUI"));
@@ -321,7 +316,7 @@ void RenderingManager::update (float duration, bool paused)
     Ogre::Vector3 orig, dest;
     mPlayer->setCameraDistance();
     if (!mPlayer->getPosition(orig, dest)) {
-        orig.z += mPlayer->getHeight() * mMwRoot->getScale().z;
+        orig.z += mPlayer->getHeight() * mRootNode->getScale().z;
 
         btVector3 btOrig(orig.x, orig.y, orig.z);
         btVector3 btDest(dest.x, dest.y, dest.z);

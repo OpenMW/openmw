@@ -54,7 +54,7 @@ namespace MWRender
         typedef std::vector<MWWorld::CellStore *> CellList;
         CellList mActiveCells;
 
-        Ogre::SceneNode *mMwRoot;
+        Ogre::SceneNode *mRootNode;
 
         Ogre::SceneNode *mPathGridRoot;
 
@@ -78,7 +78,7 @@ namespace MWRender
         Ogre::ManualObject *createPathgridLines(const ESM::Pathgrid *pathgrid);
         Ogre::ManualObject *createPathgridPoints(const ESM::Pathgrid *pathgrid);
     public:
-        Debugging(Ogre::SceneNode* mwRoot, OEngine::Physic::PhysicEngine *engine);
+        Debugging(Ogre::SceneNode* root, OEngine::Physic::PhysicEngine *engine);
         ~Debugging();
         bool toggleRenderMode (int mode);
 
