@@ -369,7 +369,7 @@
     
     
         float darkness = VISIBILITY*2.0;
-        darkness = clamp((waterEyePos.y - waterLevel + darkness)/darkness,0.2,1.0);
+        darkness = clamp((waterEyePos.z - waterLevel + darkness)/darkness,0.2,1.0);
         watercolour *= darkness;
 
         float isUnderwater = (worldPos.z < waterLevel) ? 1.0 : 0.0;

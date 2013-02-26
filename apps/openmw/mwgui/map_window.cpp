@@ -397,7 +397,7 @@ void MapWindow::globalMapUpdatePlayer ()
     Ogre::Vector2 dir (orient.yAxis ().x, -orient.yAxis().z);
 
     float worldX, worldY;
-    mGlobalMapRender->worldPosToImageSpace (pos.x, pos.z, worldX, worldY);
+    mGlobalMapRender->worldPosToImageSpace (pos.x, pos.y, worldX, worldY);
     worldX *= mGlobalMapRender->getWidth();
     worldY *= mGlobalMapRender->getHeight();
 
