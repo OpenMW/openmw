@@ -224,6 +224,8 @@ void FFmpeg_Decoder::getInfo(int *samplerate, ChannelConfig *chans, SampleType *
         *type = SampleType_UInt8;
     else if((*mStream)->codec->sample_fmt == AV_SAMPLE_FMT_S16)
         *type = SampleType_Int16;
+    else if((*mStream)->codec->sample_fmt == AV_SAMPLE_FMT_FLT)
+        *type = SampleType_Float32;
     else
         fail(std::string("Unsupported sample format: ")+
              av_get_sample_fmt_name((*mStream)->codec->sample_fmt));

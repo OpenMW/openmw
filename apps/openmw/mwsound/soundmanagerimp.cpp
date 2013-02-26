@@ -607,6 +607,7 @@ namespace MWSound
         {
             case SampleType_UInt8: return "U8";
             case SampleType_Int16: return "S16";
+            case SampleType_Float32: return "Float32";
         }
         return "(unknown sample type)";
     }
@@ -638,6 +639,7 @@ namespace MWSound
         {
             case SampleType_UInt8: frames *= 1; break;
             case SampleType_Int16: frames *= 2; break;
+            case SampleType_Float32: frames *= 4; break;
         }
         return frames;
     }
