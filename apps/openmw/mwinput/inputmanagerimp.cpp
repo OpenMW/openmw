@@ -179,6 +179,11 @@ namespace MWInput
             case A_Activate:
                 resetIdleTime();
                 activate();
+                if( MWBase::Environment::get().getWindowManager()->isGuiMode()
+                    && MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_InterMessageBox ) {
+                        // Pressing the activation key when a messagebox is prompting for "ok" will activate the ok button
+                        MWBase::Environment::get().getWindowManager()->enterPressed();
+                    }
                 break;
             case A_Journal:
                 toggleJournal ();
