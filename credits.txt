@@ -34,6 +34,7 @@ lazydev
 Leon Saunders (emoose)
 Lukasz Gromanowski (lgro)
 Marcin Hulist (Gohan)
+Manuel Edelmann (vorenon)
 Michael Mc Donnell
 Michael Papageorgiou (werdanith)
 Nathan Jeffords (blunted2night)
