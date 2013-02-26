@@ -110,7 +110,7 @@ void BillboardObject::setPosition(const Vector3& pPosition)
 Vector3 BillboardObject::getPosition() const
 {
     Vector3 p = mNode->_getDerivedPosition() - mNode->getParentSceneNode()->_getDerivedPosition();
-    return Vector3(p.x, -p.z, p.y);
+    return p;
 }
 
 void BillboardObject::setVisibilityFlags(int flags)
@@ -390,7 +390,6 @@ void SkyManager::update(float duration)
         // increase the strength of the sun glare effect depending
         // on how directly the player is looking at the sun
         Vector3 sun = mSunGlare->getPosition();
-        sun = Vector3(sun.x, sun.z, -sun.y);
         Vector3 cam = mCamera->getRealDirection();
         const Degree angle = sun.angleBetween( cam );
         float val = 1- (angle.valueDegrees() / 180.f);

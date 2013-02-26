@@ -88,7 +88,7 @@ void LocalMapBase::applyFogOfWar()
                     + boost::lexical_cast<std::string>(my);
 
             std::string image = mPrefix+"_"+ boost::lexical_cast<std::string>(mCurX + (mx-1)) + "_"
-                    + boost::lexical_cast<std::string>(mCurY + (mInterior ? (my-1) : -1*(my-1)));
+                    + boost::lexical_cast<std::string>(mCurY + (-1*(my-1)));
             MyGUI::ImageBox* fog = mFogWidgets[my + 3*mx];
             fog->setImageTexture(mFogOfWar ?
                 ((MyGUI::RenderManager::getInstance().getTexture(image+"_fog") != 0) ? image+"_fog"
@@ -127,7 +127,7 @@ void LocalMapBase::setActiveCell(const int x, const int y, bool interior)
         {
             // map
             std::string image = mPrefix+"_"+ boost::lexical_cast<std::string>(x + (mx-1)) + "_"
-                    + boost::lexical_cast<std::string>(y + (interior ? (my-1) : -1*(my-1)));
+                    + boost::lexical_cast<std::string>(y + (-1*(my-1)));
 
             std::string name = "Map_" + boost::lexical_cast<std::string>(mx) + "_"
                     + boost::lexical_cast<std::string>(my);
@@ -173,7 +173,7 @@ void LocalMapBase::setActiveCell(const int x, const int y, bool interior)
                 }
                 else
                 {
-                    Ogre::Vector2 position (marker.x, -marker.y);
+                    Ogre::Vector2 position (marker.x, marker.y);
                     MWBase::Environment::get().getWorld ()->getInteriorMapPosition (position, nX, nY, cellDx, cellDy);
 
                     widgetCoord = MyGUI::IntCoord(nX * 512 - 4 + (1+cellDx-x) * 512, nY * 512 - 4 + (1+cellDy-y) * 512, 8, 8);

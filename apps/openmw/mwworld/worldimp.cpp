@@ -1228,8 +1228,8 @@ namespace MWWorld
         if (!ref)
             return Vector2(0, 1);
         Ogre::SceneNode* node = ref->mData.getBaseNode();
-        Vector3 dir = node->_getDerivedOrientation().yAxis();
-        Vector2 d = Vector2(dir.x, dir.z);
+        Vector3 dir = node->_getDerivedOrientation() * Ogre::Vector3(0,1,0);
+        Vector2 d = Vector2(dir.x, dir.y);
         return d;
     }
 

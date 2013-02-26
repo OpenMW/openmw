@@ -122,7 +122,7 @@
         #define REFL_BUMP 0.08                      // reflection distortion amount
         #define REFR_BUMP 0.06                      // refraction distortion amount
 
-        #define SCATTER_AMOUNT 1.0                  // amount of sunlight scattering
+        #define SCATTER_AMOUNT 0.3                  // amount of sunlight scattering
         #define SCATTER_COLOUR gammaCorrectRead(float3(0.0,1.0,0.95)) // colour of sunlight scattering
         
         #define SUN_EXT gammaCorrectRead(float3(0.45, 0.55, 0.68))    //sunlight extinction
@@ -223,7 +223,7 @@
         
         normal = normalize(float3(normal.x * BUMP, normal.y * BUMP, normal.z));
         normal = float3(normal.x, normal.y, -normal.z);
-	    
+
 	    // normal for sunlight scattering			        
 		float3 lNormal = (normal0 * BIG_WAVES_X*0.5 + normal1 * BIG_WAVES_Y*0.5 +
                             normal2 * MID_WAVES_X*0.2 + normal3 * MID_WAVES_Y*0.2 +

@@ -368,8 +368,10 @@ void RenderingManager::update (float duration, bool paused)
     Ogre::Vector3 pos(fpos[0], fpos[1], fpos[2]);
 
     Ogre::SceneNode *node = data.getBaseNode();
+    //Ogre::Quaternion orient =
+        //node->convertLocalToWorldOrientation(node->_getDerivedOrientation());
     Ogre::Quaternion orient =
-        node->convertLocalToWorldOrientation(node->_getDerivedOrientation());
+node->_getDerivedOrientation();
 
     mLocalMap->updatePlayer(pos, orient);
 
