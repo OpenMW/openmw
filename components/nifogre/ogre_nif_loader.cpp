@@ -602,7 +602,7 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
         Nif::NiSourceTexture *st = t->textures[0].texture.getPtr();
         if (st->external)
         {
-            /* Bethesda at some at some point converted all their BSA
+            /* Bethesda at some point converted all their BSA
              * textures from tga to dds for increased load speed, but all
              * texture file name references were kept as .tga.
              */
@@ -620,6 +620,17 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
                 // verify, and revert if false (this call succeeds quickly, but fails slowly)
                 if(!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(texName))
                     texName = path + st->filename;
+            }
+            else if (!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(texName))
+            {
+                // workaround for Better Heads addon
+                size_t lastSlash = st->filename.rfind('\\');
+                if (lastSlash != std::string::npos && lastSlash + 1 != st->filename.size()) {
+                    texName = path + st->filename.substr(lastSlash + 1);
+                    // workaround for Better Bodies addon
+                    if (!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(texName))
+                        texName = st->filename;
+                }
             }
         }
         else warn("Found internal texture, ignoring.");
