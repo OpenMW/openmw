@@ -76,8 +76,8 @@ namespace MWRender
 
     void Refraction::setHeight(float height)
     {
-        mNearClipPlane = Ogre::Plane( -Ogre::Vector3(0,1,0), -(height + 5));
-        mNearClipPlaneUnderwater = Ogre::Plane( Ogre::Vector3(0,1,0), height - 5);
+        mNearClipPlane = Ogre::Plane( -Ogre::Vector3(0,0,1), -(height + 5));
+        mNearClipPlaneUnderwater = Ogre::Plane( Ogre::Vector3(0,0,1), height - 5);
     }
 
     void Refraction::renderQueueStarted (Ogre::uint8 queueGroupId, const Ogre::String &invocation, bool &skipThisInvocation)

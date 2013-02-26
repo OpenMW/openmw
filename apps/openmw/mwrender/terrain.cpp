@@ -26,7 +26,7 @@ namespace MWRender
     //----------------------------------------------------------------------------------------------
 
     TerrainManager::TerrainManager(Ogre::SceneManager* mgr, RenderingManager* rend) :
-         mTerrainGroup(TerrainGroup(mgr, Terrain::ALIGN_X_Z, mLandSize, mWorldSize)), mRendering(rend)
+         mTerrainGroup(TerrainGroup(mgr, Terrain::ALIGN_X_Y, mLandSize, mWorldSize)), mRendering(rend)
     {
         mTerrainGlobals = OGRE_NEW TerrainGlobalOptions();
 
@@ -54,8 +54,8 @@ namespace MWRender
         mTerrainGlobals->setCompositeMapDistance(mWorldSize*2);
 
         mTerrainGroup.setOrigin(Vector3(mWorldSize/2,
-                                         0,
-                                         -mWorldSize/2));
+                                         mWorldSize/2,
+                                         0));
 
         Terrain::ImportData& importSettings = mTerrainGroup.getDefaultImportSettings();
 

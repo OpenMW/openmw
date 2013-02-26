@@ -164,9 +164,9 @@ void PlaneReflection::postRenderTargetUpdate(const Ogre::RenderTargetEvent& evt)
 
 void PlaneReflection::setHeight (float height)
 {
-    mWaterPlane = Plane(Ogre::Vector3(0,1,0), height);
-    mErrorPlane = Plane(Ogre::Vector3(0,1,0), height - 5);
-    mErrorPlaneUnderwater = Plane(Ogre::Vector3(0,-1,0), -height - 5);
+    mWaterPlane = Plane(Ogre::Vector3(0,0,1), height);
+    mErrorPlane = Plane(Ogre::Vector3(0,0,1), height - 5);
+    mErrorPlaneUnderwater = Plane(Ogre::Vector3(0,0,-1), -height - 5);
 }
 
 void PlaneReflection::setActive (bool active)
@@ -206,9 +206,9 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend, const ESM::Cell* cel
 
     mIsUnderwater = false;
 
-    mWaterPlane = Plane(Vector3::UNIT_Y, 0);
+    mWaterPlane = Plane(Vector3::UNIT_Z, 0);
 
-    MeshManager::getSingleton().createPlane("water", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,  mWaterPlane, CELL_SIZE*5, CELL_SIZE * 5, 10, 10, true, 1, 3,3, Vector3::UNIT_Z);
+    MeshManager::getSingleton().createPlane("water", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,  mWaterPlane, CELL_SIZE*5, CELL_SIZE * 5, 10, 10, true, 1, 3,3, Vector3::UNIT_Y);
 
     mWater = mSceneMgr->createEntity("water");
     mWater->setVisibilityFlags(RV_Water);
@@ -324,14 +324,14 @@ void Water::setHeight(const float height)
 {
     mTop = height;
 
-    mWaterPlane = Plane(Vector3::UNIT_Y, -height);
+    mWaterPlane = Plane(Vector3::UNIT_Z, -height);
 
     if (mReflection)
         mReflection->setHeight(height);
     if (mRefraction)
         mRefraction->setHeight(height);
 
-    mWaterNode->setPosition(0, height, 0);
+    mWaterNode->setPosition(0, 0, height);
     sh::Factory::getInstance ().setSharedParameter ("waterLevel", sh::makeProperty<sh::FloatValue>(new sh::FloatValue(height)));
 }
 
@@ -362,7 +362,7 @@ Water::updateUnderwater(bool underwater)
 
 Vector3 Water::getSceneNodeCoordinates(int gridX, int gridY)
 {
-    return Vector3(gridX * CELL_SIZE + (CELL_SIZE / 2), mTop, -gridY * CELL_SIZE - (CELL_SIZE / 2));
+    return Vector3(gridX * CELL_SIZE + (CELL_SIZE / 2), gridY * CELL_SIZE + (CELL_SIZE / 2), mTop);
 }
 
 void Water::setViewportBackground(const ColourValue& bg)

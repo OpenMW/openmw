@@ -112,7 +112,7 @@ namespace MWRender
     class SkyManager
     {
     public:
-        SkyManager(Ogre::SceneNode* pMwRoot, Ogre::Camera* pCamera);
+        SkyManager(Ogre::SceneNode* root, Ogre::Camera* pCamera);
         ~SkyManager();
 
         void update(float duration);
