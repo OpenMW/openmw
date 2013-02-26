@@ -12,66 +12,74 @@ Marc Zinnschlag (Zini) - Lead Programmer/Project Manager
 
 Adam Hogan (aurix)
 Aleksandar Jovanov
+Alexander Nadeau (wareya)
 Alexander Olofsson (Ace)
 Artem Kotsynyak (greye)
 athile
 BrotherBrick
-Chris Robinson
+Chris Robinson (KittyCat)
 Cory F. Cohen (cfcohen)
 Cris Mihalache (Mirceam)
 Douglas Diniz (Dgdiniz)
+Douglas Mencken (dougmencken)
+Edmondo Tommasina (edmondo)
 Eduard Cot (trombonecot)
 Eli2
-Emanuel "potatoesmaster" Guével
-gugus / gus
+Emanuel Guével (potatoesmaster)
+gugus/gus
 Jacob Essex (Yacoby)
 Jannik Heller (scrawl)
 Jason Hooks (jhooks)
 Joel Graff (graffy)
+Jordan Milne
+Julien Voisin (jvoisin/ap0)
 Karl-Felix Glatzer (k1ll)
 Lars Söderberg (Lazaroth)
 lazydev
 Leon Saunders (emoose)
 Lukasz Gromanowski (lgro)
 Marcin Hulist (Gohan)
+Mark Siewert (mark76)
 Manuel Edelmann (vorenon)
 Michael Mc Donnell
 Michael Papageorgiou (werdanith)
 Nathan Jeffords (blunted2night)
 Nikolay Kasyanov (corristo)
+Nolan Poe (nopoe)
+Paul McElroy (Greendogo)
 Pieter van der Kloet (pvdk)
+Radu-Marius Popovici (rpopovici)
 Roman Melnik (Kromgart)
+Sandy Carter (bwrsandman)
 Sebastian Wick (swick)
 Sergey Shambir
-Sylvain T. (Garvek)
+Sylvain Thesnieres (Garvek)
 Tom Mason (wheybags)
+
 
 Packagers:
 Alexander Olofsson (Ace) - Windows
 BrotherBrick - Ubuntu Linux
-Edmondo Tommasina - Gentoo Linux
+Edmondo Tommasina (edmondo) - Gentoo Linux
+Julian Ospald (hasufell) - Gentoo Linux
+Karl-Felix Glatzer (k1ll) - Linux Binaries
 Kenny Armstrong (artorius) - Fedora Linux
 Nikolay Kasyanov (corristo) - Mac OS X
 Sandy Carter (bwrsandman) - Arch Linux
 
 
-Public Relations:
-ElderTroll - Release Manager
-sir_herrbatka - News Writer
+Public Relations and Translations:
+Julien Voisin (jvoisin/ap0) - French News Writer
+Artem Kotsynyak (greye) - Russian News Writer
+Pithorn - Chinese News Writer
+sir_herrbatka - English/Polish News Writer
 WeirdSexy - Podcaster
 
 
 Website:
-juanmnzsk8 - Spanish News Writer
-Julien Voisin (jvoisin/ap0) - French News Writer
-Kingpix - Italian News Writer
 Lukasz Gromanowski (lgro) - Website Administrator
-Nikolay Kasyanov (corristo) - Russian News Writer
-Okulo - Dutch News Writer
-penguinroad - Indonesian News Writer
 Ryan Sardonic (Wry) - Wiki Editor
-sir_herrbatka - Forum Admin/Polish News Writer
-spyboot - German News Writer
+sir_herrbatka - Forum Administrator
 
 
 Formula Research:
@@ -87,20 +95,32 @@ Sadler
 
 Artwork:
 Necrod - OpenMW Logo
-raevol - Wordpress Theme
-
+Mickey Lyle (raevol) - Wordpress Theme
+Okulo - OpenMW Editor Icons
 
 Inactive Contributors:
 Ardekantur
 Armin Preiml
+Carl Maxwell
 Diggory Hardy
-Jan Borsodi
+Dmitry Marakasov (AMDmi3)
+ElderTroll
+guidoj
 Jan-Peter Nilsson (peppe)
+Jan Borsodi
 Josua Grawitter
+juanmnzsk8
+Kingpix
 Lordrea
+Michal Sciubidlo
 Nicolay Korslund
+pchan3
+penguinroad
+psi29a
 sergoz
+spyboot
 Star-Demon
+Thoronador
 Yuri Krupenin
 
 
