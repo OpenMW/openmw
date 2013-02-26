@@ -147,8 +147,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     // Morrowind uses, and it automagically makes everything work as it
     // should.
     SceneNode *rt = mRendering.getScene()->getRootSceneNode();
-    mMwRoot = rt->createChildSceneNode("mwRoot");
-    mMwRoot->pitch(Degree(-90));
+    mMwRoot = rt;
 
     mObjects.setMwRoot(mMwRoot);
     mActors.setMwRoot(mMwRoot);
