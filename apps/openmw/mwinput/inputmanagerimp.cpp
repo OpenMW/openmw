@@ -87,10 +87,12 @@ namespace MWInput
                 std::string("false")));
             pl.insert(std::make_pair(std::string("x11_keyboard_grab"),
                 std::string("false")));
-            pl.insert(std::make_pair(std::string("XAutoRepeatOn"),
-                std::string("true")));
             #endif
         }
+#if defined OIS_LINUX_PLATFORM
+        pl.insert(std::make_pair(std::string("XAutoRepeatOn"),
+            std::string("true")));
+#endif
 
 #if defined(__APPLE__) && !defined(__LP64__)
         // Give the application window focus to receive input events
@@ -177,6 +179,11 @@ namespace MWInput
             case A_Activate:
                 resetIdleTime();
                 activate();
+                if( MWBase::Environment::get().getWindowManager()->isGuiMode()
+                    && MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_InterMessageBox ) {
+                        // Pressing the activation key when a messagebox is prompting for "ok" will activate the ok button
+                        MWBase::Environment::get().getWindowManager()->enterPressed();
+                    }
                 break;
             case A_Journal:
                 toggleJournal ();

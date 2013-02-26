@@ -113,11 +113,6 @@ namespace MWRender
         Ogre::Vector3 dir = mCamera->getRealDirection();
         Ogre::Vector3 up  = mCamera->getRealUp();
 
-        Ogre::Real xch;
-        xch = pos.y, pos.y = -pos.z, pos.z = xch;
-        xch = dir.y, dir.y = -dir.z, dir.z = xch;
-        xch = up.y,  up.y  = -up.z,  up.z = xch;
-
         MWBase::Environment::get().getSoundManager()->setListenerPosDir(pos, dir, up);
     }
 
@@ -323,10 +318,8 @@ namespace MWRender
 
     bool Player::getPosition(Ogre::Vector3 &player, Ogre::Vector3 &camera)
     {
-        float xch;
         mCamera->getParentSceneNode ()->needUpdate(true);
         camera = mCamera->getRealPosition();
-        xch = camera.z, camera.z = camera.y, camera.y = -xch;
         player = mPlayerNode->getPosition();
 
         return mFirstPersonView && !mVanity.enabled && !mPreviewMode;

@@ -122,7 +122,7 @@
         #define REFL_BUMP 0.08                      // reflection distortion amount
         #define REFR_BUMP 0.06                      // refraction distortion amount
 
-        #define SCATTER_AMOUNT 3.0                  // amount of sunlight scattering
+        #define SCATTER_AMOUNT 0.3                  // amount of sunlight scattering
         #define SCATTER_COLOUR gammaCorrectRead(float3(0.0,1.0,0.95)) // colour of sunlight scattering
         
         #define SUN_EXT gammaCorrectRead(float3(0.45, 0.55, 0.68))    //sunlight extinction
@@ -219,25 +219,27 @@
 	
 	    float3 normal = (normal0 * BIG_WAVES_X + normal1 * BIG_WAVES_Y +
                                 normal2 * MID_WAVES_X + normal3 * MID_WAVES_Y +
-						        normal4 * SMALL_WAVES_X + normal5 * SMALL_WAVES_Y).xzy;
+                                normal4 * SMALL_WAVES_X + normal5 * SMALL_WAVES_Y).xyz;
         
-        normal = normalize(float3(normal.x * BUMP, normal.y, normal.z * BUMP));
-	    
+        normal = normalize(float3(normal.x * BUMP, normal.y * BUMP, normal.z));
+        normal = float3(normal.x, normal.y, -normal.z);
+
 	    // normal for sunlight scattering			        
 		float3 lNormal = (normal0 * BIG_WAVES_X*0.5 + normal1 * BIG_WAVES_Y*0.5 +
                             normal2 * MID_WAVES_X*0.2 + normal3 * MID_WAVES_Y*0.2 +
-						    normal4 * SMALL_WAVES_X*0.1 + normal5 * SMALL_WAVES_Y*0.1).xzy;
-        lNormal = normalize(float3(lNormal.x * BUMP, lNormal.y, lNormal.z * BUMP));
-        
+                            normal4 * SMALL_WAVES_X*0.1 + normal5 * SMALL_WAVES_Y*0.1).xyz;
+        lNormal = normalize(float3(lNormal.x * BUMP, lNormal.y * BUMP, lNormal.z));
+        lNormal = float3(lNormal.x, lNormal.y, -lNormal.z);
+
         
         float3 lVec = normalize(sunPosition.xyz);
         float3 vVec = normalize(position.xyz - cameraPos.xyz);
         
         
-        float isUnderwater = (cameraPos.y > 0) ? 0.0 : 1.0;
+        float isUnderwater = (cameraPos.z > 0) ? 0.0 : 1.0;
         
         // sunlight scattering
-        float3 pNormal = float3(0,1,0);
+        float3 pNormal = float3(0,0,1);
     	float3 lR = reflect(lVec, lNormal);
         float3 llR = reflect(lVec, pNormal);
         
@@ -246,13 +248,13 @@
         float3 scatterColour = shLerp(float3(SCATTER_COLOUR)*gammaCorrectRead(float3(1.0,0.4,0.0)), SCATTER_COLOUR, shSaturate(1.0-exp(-waterSunFade_sunHeight.y*SUN_EXT)));
 
         // fresnel
-        float ior = (cameraPos.y>0)?(1.333/1.0):(1.0/1.333); //air to water; water to air
+        float ior = (cameraPos.z>0)?(1.333/1.0):(1.0/1.333); //air to water; water to air
         float fresnel = fresnel_dielectric(-vVec, normal, ior);
         
         fresnel = shSaturate(fresnel);
     
         // reflection
-        float3 reflection = gammaCorrectRead(shSample(reflectionMap, screenCoords+(normal.xz*REFL_BUMP)).rgb);
+        float3 reflection = gammaCorrectRead(shSample(reflectionMap, screenCoords+(normal.xy*REFL_BUMP)).rgb);
 		
 		// refraction
         float3 R = reflect(vVec, normal);
@@ -260,13 +262,13 @@
         // check the depth at the refracted coords, and don't do any normal distortion for the refraction if the object to refract
         // is actually above the water (objectDepth < waterDepth)
         // this solves silhouettes around objects above the water
-        float refractDepth = shSample(depthMap, screenCoords-(shoreFade * normal.xz*REFR_BUMP)).x * far - depthPassthrough;
+        float refractDepth = shSample(depthMap, screenCoords-(shoreFade * normal.xy*REFR_BUMP)).x * far - depthPassthrough;
         float doRefraction = (refractDepth < 0) ? 0.f : 1.f;
 		
-        float3 refraction = gammaCorrectRead(shSample(refractionMap, (screenCoords-(shoreFade * normal.xz*REFR_BUMP * doRefraction))*1.0).rgb);
+        float3 refraction = gammaCorrectRead(shSample(refractionMap, (screenCoords-(shoreFade * normal.xy*REFR_BUMP * doRefraction))*1.0).rgb);
         
          // brighten up the refraction underwater
-        refraction = (cameraPos.y < 0) ? shSaturate(refraction * 1.5) : refraction;
+        refraction = (cameraPos.z < 0) ? shSaturate(refraction * 1.5) : refraction;
     
 		// specular
         float specular = pow(max(dot(R, lVec), 0.0),SPEC_HARDNESS);
@@ -290,7 +292,7 @@
             watercolour = shLerp(watercolour*0.3*waterSunFade_sunHeight.x, watercolour, shSaturate(1.0-exp(-waterSunFade_sunHeight.y*SUN_EXT)));
         
             float darkness = VISIBILITY*2.0;
-            darkness = clamp((cameraPos.y+darkness)/darkness,0.2,1.0);
+            darkness = clamp((cameraPos.z+darkness)/darkness,0.2,1.0);
     
         
             float fog = shSaturate(length(cameraPos.xyz-position.xyz) / VISIBILITY);

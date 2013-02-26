@@ -193,7 +193,6 @@ namespace Physic
         if(!isDebugCreated)
         {
             Ogre::SceneNode* node = mSceneMgr->getRootSceneNode()->createChildSceneNode();
-            node->pitch(Ogre::Degree(-90));
             mDebugDrawer = new BtOgre::DebugDrawer(node, dynamicsWorld);
             dynamicsWorld->setDebugDrawer(mDebugDrawer);
             isDebugCreated = true;

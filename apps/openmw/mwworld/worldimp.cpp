@@ -1024,7 +1024,6 @@ namespace MWWorld
             // currently its here because we need to access the physics system
             float* p = mPlayer->getPlayer().getRefData().getPosition().pos;
             Vector3 sun = mRendering->getSkyManager()->getRealSunPos();
-            sun = Vector3(sun.x, -sun.z, sun.y);
             mRendering->getSkyManager()->setGlare(!mPhysics->castRay(Ogre::Vector3(p[0], p[1], p[2]), sun));
         }
 
@@ -1122,7 +1121,7 @@ namespace MWWorld
         }
         else
             p = mPhysics->getRayPoint(results.front().first);
-        Ogre::Vector3 pos(p.x(), p.z(), -p.y());
+        Ogre::Vector3 pos(p.x(), p.y(), p.z());
         Ogre::SceneNode* node = mFaced1.getRefData().getBaseNode();
 
         //std::cout << "Num facing 1 : " << mFaced1Name <<  std::endl;
@@ -1150,7 +1149,7 @@ namespace MWWorld
         }
         else
             p = mPhysics->getRayPoint(results.at (1).first);
-        Ogre::Vector3 pos(p.x(), p.z(), -p.y());
+        Ogre::Vector3 pos(p.x(), p.y(), p.z());
         Ogre::SceneNode* node1 = mFaced1.getRefData().getBaseNode();
         Ogre::SceneNode* node2 = mFaced2.getRefData().getBaseNode();
 
@@ -1228,8 +1227,8 @@ namespace MWWorld
         if (!ref)
             return Vector2(0, 1);
         Ogre::SceneNode* node = ref->mData.getBaseNode();
-        Vector3 dir = node->_getDerivedOrientation().yAxis();
-        Vector2 d = Vector2(dir.x, dir.z);
+        Vector3 dir = node->_getDerivedOrientation() * Ogre::Vector3(0,1,0);
+        Vector2 d = Vector2(dir.x, dir.y);
         return d;
     }
 
@@ -1299,7 +1298,7 @@ namespace MWWorld
         if (isCellExterior())
         {
             int cellX, cellY;
-            positionToIndex(result.second[0], -result.second[2], cellX, cellY);
+            positionToIndex(result.second[0], result.second[1], cellX, cellY);
             cell = mCells.getExterior(cellX, cellY);
         }
         else
@@ -1307,8 +1306,8 @@ namespace MWWorld
 
         ESM::Position pos = getPlayer().getPlayer().getRefData().getPosition();
         pos.pos[0] = result.second[0];
-        pos.pos[1] = -result.second[2];
-        pos.pos[2] = result.second[1];
+        pos.pos[1] = result.second[1];
+        pos.pos[2] = result.second[2];
 
         Ptr dropped = copyObjectToCell(object, *cell, pos);
         PCDropped(dropped);

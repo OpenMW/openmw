@@ -1,6 +1,8 @@
 #include <components/misc/stringops.hpp>
 
 #include "messagebox.hpp"
+#include "../mwbase/environment.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 using namespace MWGui;
 
@@ -375,6 +377,7 @@ void InteractiveMessageBox::enterPressed()
         if(Misc::StringUtils::lowerCase((*button)->getCaption()) == ok)
         {
             buttonActivated(*button);
+            MWBase::Environment::get().getSoundManager()->playSound("Menu Click", 1.f, 1.f);
             break;
         }
     }

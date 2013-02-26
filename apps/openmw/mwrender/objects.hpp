@@ -53,7 +53,7 @@ class Objects{
     std::map<MWWorld::CellStore *, Ogre::StaticGeometry*> mStaticGeometrySmall;
     std::map<MWWorld::CellStore *, Ogre::AxisAlignedBox> mBounds;
     std::vector<LightInfo> mLights;
-    Ogre::SceneNode* mMwRoot;
+    Ogre::SceneNode* mRootNode;
     bool mIsStatic;
     static int uniqueID;
 
@@ -90,7 +90,7 @@ public:
 
     void removeCell(MWWorld::CellStore* store);
     void buildStaticGeometry(MWWorld::CellStore &cell);
-    void setMwRoot(Ogre::SceneNode* root);
+    void setRootNode(Ogre::SceneNode* root);
 
     void rebuildStaticGeometry();
 
