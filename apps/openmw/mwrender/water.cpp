@@ -42,9 +42,9 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend, const ESM::Cell* cel
 
     mIsUnderwater = false;
 
-    mWaterPlane = Plane(Vector3::UNIT_Y, 0);
+    mWaterPlane = Plane(Vector3::UNIT_Z, 0);
 
-    MeshManager::getSingleton().createPlane("water", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,  mWaterPlane, CELL_SIZE*5, CELL_SIZE * 5, 10, 10, true, 1, 3,3, Vector3::UNIT_Z);
+    MeshManager::getSingleton().createPlane("water", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,  mWaterPlane, CELL_SIZE*5, CELL_SIZE * 5, 10, 10, true, 1, 3,3, Vector3::UNIT_Y);
 
     mWater = mSceneManager->createEntity("water");
     mWater->setVisibilityFlags(RV_Water);
@@ -168,12 +168,12 @@ void Water::setHeight(const float height)
 {
     mTop = height;
 
-    mWaterPlane = Plane(Vector3::UNIT_Y, height);
+    mWaterPlane = Plane(Vector3::UNIT_Z, height);
 
     // small error due to reflection texture size & reflection distortion
-    mErrorPlane = Plane(Vector3::UNIT_Y, height - 5);
+    mErrorPlane = Plane(Vector3::UNIT_Z, height - 5);
 
-    mWaterNode->setPosition(0, height, 0);
+    mWaterNode->setPosition(0, 0, height);
     sh::Factory::getInstance ().setSharedParameter ("waterLevel", sh::makeProperty<sh::FloatValue>(new sh::FloatValue(height)));
 }
 
@@ -199,7 +199,7 @@ Water::updateUnderwater(bool underwater)
 
 Vector3 Water::getSceneNodeCoordinates(int gridX, int gridY)
 {
-    return Vector3(gridX * CELL_SIZE + (CELL_SIZE / 2), mTop, -gridY * CELL_SIZE - (CELL_SIZE / 2));
+    return Vector3(gridX * CELL_SIZE + (CELL_SIZE / 2), gridY * CELL_SIZE + (CELL_SIZE / 2), mTop);
 }
 
 void Water::preRenderTargetUpdate(const RenderTargetEvent& evt)
@@ -216,7 +216,7 @@ void Water::preRenderTargetUpdate(const RenderTargetEvent& evt)
         mReflectionRenderActive = true;
 
         Vector3 pos = mCamera->getRealPosition();
-        pos.y = mTop*2 - pos.y;
+        pos.z = mTop*2 - pos.z;
         mSky->setSkyPosition(pos);
         mReflectionCamera->enableReflection(mWaterPlane);
     }

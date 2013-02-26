@@ -57,14 +57,14 @@ void Objects::clearSceneNode (Ogre::SceneNode *node)
     }
 }
 
-void Objects::setMwRoot(Ogre::SceneNode* root)
+void Objects::setRootNode(Ogre::SceneNode* root)
 {
-    mMwRoot = root;
+    mRootNode = root;
 }
 
 void Objects::insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_)
 {
-    Ogre::SceneNode* root = mMwRoot;
+    Ogre::SceneNode* root = mRootNode;
     Ogre::SceneNode* cellnode;
     if(mCellSceneNodes.find(ptr.getCell()) == mCellSceneNodes.end())
     {
@@ -390,9 +390,9 @@ void Objects::enableLights()
     std::vector<LightInfo>::iterator it = mLights.begin();
     while (it != mLights.end())
     {
-        if (mMwRoot->getCreator()->hasLight(it->name))
+        if (mRootNode->getCreator()->hasLight(it->name))
         {
-            mMwRoot->getCreator()->getLight(it->name)->setVisible(true);
+            mRootNode->getCreator()->getLight(it->name)->setVisible(true);
             ++it;
         }
         else
@@ -405,9 +405,9 @@ void Objects::disableLights()
     std::vector<LightInfo>::iterator it = mLights.begin();
     while (it != mLights.end())
     {
-        if (mMwRoot->getCreator()->hasLight(it->name))
+        if (mRootNode->getCreator()->hasLight(it->name))
         {
-            mMwRoot->getCreator()->getLight(it->name)->setVisible(false);
+            mRootNode->getCreator()->getLight(it->name)->setVisible(false);
             ++it;
         }
         else
@@ -460,9 +460,9 @@ void Objects::update(const float dt)
     std::vector<LightInfo>::iterator it = mLights.begin();
     while (it != mLights.end())
     {
-        if (mMwRoot->getCreator()->hasLight(it->name))
+        if (mRootNode->getCreator()->hasLight(it->name))
         {
-            Ogre::Light* light = mMwRoot->getCreator()->getLight(it->name);
+            Ogre::Light* light = mRootNode->getCreator()->getLight(it->name);
 
             float brightness;
             float cycle_time;
@@ -550,7 +550,7 @@ void Objects::updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
     MWWorld::CellStore *newCell = cur.getCell();
 
     if(mCellSceneNodes.find(newCell) == mCellSceneNodes.end()) {
-        node = mMwRoot->createChildSceneNode();
+        node = mRootNode->createChildSceneNode();
         mCellSceneNodes[newCell] = node;
     } else {
         node = mCellSceneNodes[newCell];

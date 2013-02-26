@@ -141,26 +141,20 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
 
     applyCompositors();
 
-    // Turn the entire scene (represented by the 'root' node) -90
-    // degrees around the x axis. This makes Z go upwards, and Y go into
-    // the screen (when x is to the right.) This is the orientation that
-    // Morrowind uses, and it automagically makes everything work as it
-    // should.
     SceneNode *rt = mRendering.getScene()->getRootSceneNode();
-    mMwRoot = rt->createChildSceneNode("mwRoot");
-    mMwRoot->pitch(Degree(-90));
+    mRootNode = rt;
 
-    mObjects.setMwRoot(mMwRoot);
-    mActors.setMwRoot(mMwRoot);
+    mObjects.setRootNode(mRootNode);
+    mActors.setRootNode(mRootNode);
 
-    Ogre::SceneNode *playerNode = mMwRoot->createChildSceneNode ("player");
+    Ogre::SceneNode *playerNode = mRootNode->createChildSceneNode ("player");
     mPlayer = new MWRender::Player (mRendering.getCamera(), playerNode);
 
     mShadows = new Shadows(&mRendering);
 
     mTerrainManager = new TerrainManager(mRendering.getScene(), this);
 
-    mSkyManager = new SkyManager(mMwRoot, mRendering.getCamera());
+    mSkyManager = new SkyManager(mRootNode, mRendering.getCamera());
 
     mOcclusionQuery = new OcclusionQuery(&mRendering, mSkyManager->getSunNode());
 
@@ -169,7 +163,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
 
     mSun = 0;
 
-    mDebugging = new Debugging(mMwRoot, engine);
+    mDebugging = new Debugging(mRootNode, engine);
     mLocalMap = new MWRender::LocalMap(&mRendering, this);
 
     setMenuTransparency(Settings::Manager::getFloat("menu transparency", "GUI"));
@@ -322,7 +316,7 @@ void RenderingManager::update (float duration, bool paused)
     Ogre::Vector3 orig, dest;
     mPlayer->setCameraDistance();
     if (!mPlayer->getPosition(orig, dest)) {
-        orig.z += mPlayer->getHeight() * mMwRoot->getScale().z;
+        orig.z += mPlayer->getHeight() * mRootNode->getScale().z;
 
         btVector3 btOrig(orig.x, orig.y, orig.z);
         btVector3 btDest(dest.x, dest.y, dest.z);
@@ -366,11 +360,13 @@ void RenderingManager::update (float duration, bool paused)
     float *fpos = data.getPosition().pos;
 
     // only for LocalMap::updatePlayer()
-    Ogre::Vector3 pos(fpos[0], -fpos[2], -fpos[1]);
+    Ogre::Vector3 pos(fpos[0], fpos[1], fpos[2]);
 
     Ogre::SceneNode *node = data.getBaseNode();
+    //Ogre::Quaternion orient =
+        //node->convertLocalToWorldOrientation(node->_getDerivedOrientation());
     Ogre::Quaternion orient =
-        node->convertLocalToWorldOrientation(node->_getDerivedOrientation());
+node->_getDerivedOrientation();
 
     mLocalMap->updatePlayer(pos, orient);
 
@@ -382,7 +378,7 @@ void RenderingManager::update (float duration, bool paused)
         mWater->updateUnderwater(
             world->isUnderwater(
                 world->getPlayer().getPlayer().getCell(),
-                Ogre::Vector3(cam.x, -cam.z, cam.y))
+                cam)
         );
         mWater->update(duration);
     }
@@ -614,8 +610,7 @@ void RenderingManager::sunDisable()
 void RenderingManager::setSunDirection(const Ogre::Vector3& direction)
 {
     // direction * -1 (because 'direction' is camera to sun vector and not sun to camera),
-    // then convert from MW to ogre coordinates (swap y,z and make y negative)
-    if (mSun) mSun->setDirection(Vector3(-direction.x, -direction.z, direction.y));
+    if (mSun) mSun->setDirection(Vector3(-direction.x, -direction.y, -direction.z));
 
     mSkyManager->setSunDirection(direction);
 }

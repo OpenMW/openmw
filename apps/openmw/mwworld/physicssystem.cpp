@@ -264,9 +264,8 @@ namespace MWWorld
         Ogre::Vector3 to = ray.getPoint(queryDistance);
 
         btVector3 _from, _to;
-        // OGRE to MW coordinates
-        _from = btVector3(from.x, -from.z, from.y);
-        _to = btVector3(to.x, -to.z, to.y);
+        _from = btVector3(from.x, from.y, from.z);
+        _to = btVector3(to.x, to.y, to.z);
 
         std::vector < std::pair <float, std::string> > results;
         /* auto */ results = mEngine->rayTest2(_from,_to);
@@ -287,7 +286,7 @@ namespace MWWorld
         Ray centerRay = mRender.getCamera()->getCameraToViewportRay(
         mRender.getViewport()->getWidth()/2,
         mRender.getViewport()->getHeight()/2);
-        btVector3 result(centerRay.getPoint(extent).x,-centerRay.getPoint(extent).z,centerRay.getPoint(extent).y);
+        btVector3 result(centerRay.getPoint(extent).x,centerRay.getPoint(extent).y,centerRay.getPoint(extent).z);
         return result;
     }
 
@@ -295,7 +294,7 @@ namespace MWWorld
     {
         //get a ray pointing to the center of the viewport
         Ray centerRay = mRender.getCamera()->getCameraToViewportRay(mouseX, mouseY);
-        btVector3 result(centerRay.getPoint(extent).x,-centerRay.getPoint(extent).z,centerRay.getPoint(extent).y);
+        btVector3 result(centerRay.getPoint(extent).x,centerRay.getPoint(extent).y,centerRay.getPoint(extent).z);
         return result;
     }
 
@@ -335,9 +334,8 @@ namespace MWWorld
         Ogre::Vector3 to = ray.getPoint(200); /// \todo make this distance (ray length) configurable
 
         btVector3 _from, _to;
-        // OGRE to MW coordinates
-        _from = btVector3(from.x, -from.z, from.y);
-        _to = btVector3(to.x, -to.z, to.y);
+        _from = btVector3(from.x, from.y, from.z);
+        _to = btVector3(to.x, to.y, to.z);
 
         std::pair<std::string, float> result = mEngine->rayTest(_from, _to);
 

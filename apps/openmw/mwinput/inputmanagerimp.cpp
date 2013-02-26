@@ -87,10 +87,12 @@ namespace MWInput
                 std::string("false")));
             pl.insert(std::make_pair(std::string("x11_keyboard_grab"),
                 std::string("false")));
-            pl.insert(std::make_pair(std::string("XAutoRepeatOn"),
-                std::string("true")));
             #endif
         }
+#if defined OIS_LINUX_PLATFORM
+        pl.insert(std::make_pair(std::string("XAutoRepeatOn"),
+            std::string("true")));
+#endif
 
 #if defined(__APPLE__) && !defined(__LP64__)
         // Give the application window focus to receive input events

@@ -228,10 +228,7 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     Ogre::ColourValue mAmbientColor;
     Ogre::Light* mSun;
 
-    /// Root node for all objects added to the scene. This is rotated so
-    /// that the OGRE coordinate system matches that used internally in
-    /// Morrowind.
-    Ogre::SceneNode *mMwRoot;
+    Ogre::SceneNode *mRootNode;
 
     OEngine::Physic::PhysicEngine* mPhysicsEngine;
 
