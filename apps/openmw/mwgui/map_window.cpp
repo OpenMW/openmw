@@ -394,7 +394,7 @@ void MapWindow::globalMapUpdatePlayer ()
 {
     Ogre::Vector3 pos = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer().getRefData ().getBaseNode ()->_getDerivedPosition ();
     Ogre::Quaternion orient = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer().getRefData ().getBaseNode ()->_getDerivedOrientation ();
-    Ogre::Vector2 dir (orient.yAxis ().x, -orient.yAxis().z);
+    Ogre::Vector2 dir (orient.yAxis ().x, orient.yAxis().y);
 
     float worldX, worldY;
     mGlobalMapRender->worldPosToImageSpace (pos.x, pos.y, worldX, worldY);
