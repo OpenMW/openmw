@@ -195,7 +195,7 @@ void LocalMap::render(const float x, const float y,
     mRendering->getScene()->setAmbientLight(ColourValue(1,1,1));
     mRenderingManager->disableLights();
 
-    mCameraNode->setPosition(Vector3(x, y, 100000));
+    mCameraNode->setPosition(Vector3(x, y, zhigh+100000));
     //mCellCamera->setFarClipDistance( (zhigh-zlow) * 1.1 );
     mCellCamera->setFarClipDistance(0); // infinite
 
