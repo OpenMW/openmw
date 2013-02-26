@@ -365,7 +365,7 @@ void RenderingManager::update (float duration, bool paused)
     float *fpos = data.getPosition().pos;
 
     // only for LocalMap::updatePlayer()
-    Ogre::Vector3 pos(fpos[0], -fpos[2], -fpos[1]);
+    Ogre::Vector3 pos(fpos[0], fpos[1], fpos[2]);
 
     Ogre::SceneNode *node = data.getBaseNode();
     Ogre::Quaternion orient =
@@ -381,7 +381,7 @@ void RenderingManager::update (float duration, bool paused)
         mWater->updateUnderwater(
             world->isUnderwater(
                 world->getPlayer().getPlayer().getCell(),
-                Ogre::Vector3(cam.x, -cam.z, cam.y))
+                cam)
         );
         mWater->update(duration);
     }
@@ -613,8 +613,7 @@ void RenderingManager::sunDisable()
 void RenderingManager::setSunDirection(const Ogre::Vector3& direction)
 {
     // direction * -1 (because 'direction' is camera to sun vector and not sun to camera),
-    // then convert from MW to ogre coordinates (swap y,z and make y negative)
-    if (mSun) mSun->setDirection(Vector3(-direction.x, -direction.z, direction.y));
+    if (mSun) mSun->setDirection(Vector3(-direction.x, -direction.y, -direction.z));
 
     mSkyManager->setSunDirection(direction);
 }

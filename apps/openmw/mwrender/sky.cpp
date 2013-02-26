@@ -236,7 +236,6 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera)
 {
     mSceneMgr = pMwRoot->getCreator();
     mRootNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
-    mRootNode->pitch(Degree(-90)); // convert MW to ogre coordinates
     mRootNode->setInheritOrientation(false);
 }
 

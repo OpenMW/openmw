@@ -79,9 +79,9 @@ float3 perturb(shTexture2D tex, float2 coords, float bend, float2 windDir, float
 
 float3 getCaustics (shTexture2D causticMap, float3 worldPos, float3 waterEyePos, float3 worldNormal, float3 lightDirectionWS0, float waterLevel, float waterTimer, float3 windDir_windSpeed)
 {
-    float waterDepth = shSaturate((waterEyePos.y - worldPos.y) / 50.0);
+    float waterDepth = shSaturate((waterEyePos.y - worldPos.z) / 50.0);
 
-    float3 causticPos = intercept(worldPos.xyz, lightDirectionWS0.xyz, float3(0,1,0), waterLevel);
+    float3 causticPos = intercept(worldPos.xyz, lightDirectionWS0.xyz, float3(0,0,1), waterLevel);
     
     ///\ todo clean this up 
     float causticdepth = length(causticPos-worldPos.xyz);
@@ -91,7 +91,7 @@ float3 getCaustics (shTexture2D causticMap, float3 worldPos, float3 waterEyePos,
     // NOTE: the original shader calculated a tangent space basis here, 
     // but using only the world normal is cheaper and i couldn't see a visual difference
     // also, if this effect gets moved to screen-space some day, it's unlikely to have tangent information
-    float3 causticNorm = worldNormal.xyz * perturb(causticMap, causticPos.xz, causticdepth, windDir_windSpeed.xy, windDir_windSpeed.z, waterTimer).xzy * 2 - 1;
+    float3 causticNorm = worldNormal.xyz * perturb(causticMap, causticPos.xz, causticdepth, windDir_windSpeed.xy, windDir_windSpeed.z, waterTimer).xyz * 2 - 1;
 
     //float fresnel = pow(clamp(dot(LV,causticnorm),0.0,1.0),2.0); 
     
