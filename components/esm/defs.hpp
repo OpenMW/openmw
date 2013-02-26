@@ -13,9 +13,9 @@ enum VarType
 {
     VT_Unknown,
     VT_None,
-    VT_Short,
+    VT_Short, // stored as a float, kinda
     VT_Int,
-    VT_Long,
+    VT_Long, // stored as a float
     VT_Float,
     VT_String,
     VT_Ignored

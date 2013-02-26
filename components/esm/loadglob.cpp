@@ -12,7 +12,7 @@ void Global::load(ESMReader &esm)
     if (tmp == "s")
         mType = VT_Short;
     else if (tmp == "l")
-        mType = VT_Int;
+        mType = VT_Long;
     else if (tmp == "f")
         mType = VT_Float;
     else
@@ -30,7 +30,7 @@ void Global::save(ESMWriter &esm)
         esm.writeHNString("FNAM", "s");
         break;
 
-    case VT_Int:
+    case VT_Long:
         esm.writeHNString("FNAM", "l");
         break;
 
