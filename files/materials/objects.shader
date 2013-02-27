@@ -32,8 +32,11 @@
     SH_BEGIN_PROGRAM
         shUniform(float4x4, wvp) @shAutoConstant(wvp, worldviewproj_matrix)
 
+#if (VIEWPROJ_FIX) || (SHADOWS)
+    shUniform(float4x4, worldMatrix) @shAutoConstant(worldMatrix, world_matrix)
+#endif
+
 #if VIEWPROJ_FIX
-        shUniform(float4x4, worldMatrix) @shAutoConstant(worldMatrix, world_matrix)
         shUniform(float4, vpRow2Fix) @shSharedParameter(vpRow2Fix, vpRow2Fix)
         shUniform(float4x4, vpMatrix) @shAutoConstant(vpMatrix, viewproj_matrix)
 #endif
