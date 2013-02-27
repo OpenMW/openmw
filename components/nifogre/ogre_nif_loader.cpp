@@ -586,6 +586,8 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
             m = static_cast<const Nif::NiMaterialProperty*>(pr);
         else if (pr->recType == Nif::RC_NiAlphaProperty)
             a = static_cast<const Nif::NiAlphaProperty*>(pr);
+        else if (pr->recType == Nif::RC_NiStencilProperty)
+            /* unused */;
         else
             warn("Skipped property type: "+pr->recName);
     }
