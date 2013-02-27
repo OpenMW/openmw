@@ -452,7 +452,8 @@ void loadResource(Ogre::Resource *resource)
     }
 }
 
-bool createSkeleton(const std::string &name, const std::string &group, const Nif::Node *node)
+
+static Ogre::SkeletonPtr createSkeleton(const std::string &name, const std::string &group, const Nif::Node *node)
 {
     /* We need to be a little aggressive here, since some NIFs have a crap-ton
      * of nodes and Ogre only supports 256 bones. We will skip a skeleton if:
@@ -463,7 +464,7 @@ bool createSkeleton(const std::string &name, const std::string &group, const Nif
     if(!node->boneTrafo)
     {
         if(node->recType == Nif::RC_NiTriShape)
-            return false;
+            return Ogre::SkeletonPtr();
         if(node->controller.empty() && node->name != "AttachLight")
         {
             if(node->recType == Nif::RC_NiNode || node->recType == Nif::RC_RootCollisionNode)
@@ -474,18 +475,18 @@ bool createSkeleton(const std::string &name, const std::string &group, const Nif
                 {
                     if(!children[i].empty())
                     {
-                        if(createSkeleton(name, group, children[i].getPtr()))
-                            return true;
+                        Ogre::SkeletonPtr skel = createSkeleton(name, group, children[i].getPtr());
+                        if(!skel.isNull())
+                            return skel;
                     }
                 }
-                return false;
+                return Ogre::SkeletonPtr();
             }
         }
     }
 
     Ogre::SkeletonManager &skelMgr = Ogre::SkeletonManager::getSingleton();
-    skelMgr.create(name, group, true, &sLoaders[name]);
-    return true;
+    return skelMgr.create(name, group, true, &sLoaders[name]);
 }
 
 };
@@ -1140,10 +1141,7 @@ MeshInfoList Loader::load(const std::string &name, const std::string &group)
 
     bool hasSkel = Ogre::SkeletonManager::getSingleton().resourceExists(name);
     if(!hasSkel)
-    {
-        NIFSkeletonLoader skelldr;
-        hasSkel = skelldr.createSkeleton(name, group, node);
-    }
+        hasSkel = !NIFSkeletonLoader::createSkeleton(name, group, node).isNull();
 
     NIFMeshLoader meshldr(name, group);
     if(hasSkel)
@@ -1253,30 +1251,35 @@ EntityList Loader::createEntities(Ogre::Entity *parent, const std::string &bonen
 }
 
 
-bool Loader::createSkeleton(const std::string &name, const std::string &group)
+Ogre::SkeletonPtr Loader::getSkeleton(std::string name, const std::string &group)
 {
-    Nif::NIFFile::ptr pnif = Nif::NIFFile::create(name);
-    Nif::NIFFile &nif = *pnif.get();
-    if(nif.numRecords() < 1)
+    Ogre::SkeletonPtr skel;
+
+    Misc::StringUtils::toLower(name);
+    skel = Ogre::SkeletonManager::getSingleton().getByName(name);
+    if(!skel.isNull())
+        return skel;
+
+    Nif::NIFFile::ptr nif = Nif::NIFFile::create(name);
+    if(nif->numRecords() < 1)
     {
-        nif.warn("Found no NIF records in "+name+".");
-        return false;
+        nif->warn("Found no NIF records in "+name+".");
+        return skel;
     }
 
     // The first record is assumed to be the root node
-    Nif::Record const *r = nif.getRecord(0);
+    const Nif::Record *r = nif->getRecord(0);
     assert(r != NULL);
 
-    Nif::Node const *node = dynamic_cast<Nif::Node const *>(r);
+    const Nif::Node *node = dynamic_cast<const Nif::Node*>(r);
     if(node == NULL)
     {
-        nif.warn("First record in "+name+" was not a node, but a "+
-                 r->recName+".");
-        return false;
+        nif->warn("First record in "+name+" was not a node, but a "+
+                  r->recName+".");
+        return skel;
     }
 
-    NIFSkeletonLoader skelldr;
-    return skelldr.createSkeleton(name, group, node);
+    return NIFSkeletonLoader::createSkeleton(name, group, node);
 }
 
 
