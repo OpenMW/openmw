@@ -85,6 +85,8 @@ namespace MWRender
     public:
         RaceSelectionPreview();
 
+        virtual void onSetup();
+
         void update(float angle);
 
         const ESM::NPC &getPrototype() const {

@@ -191,12 +191,12 @@ namespace MWMechanics
         mActivators.removeActivator(ptr);
     }
 
-    void MechanicsManager::updateCell(const MWWorld::Ptr &ptr)
+    void MechanicsManager::updateCell(const MWWorld::Ptr &old, const MWWorld::Ptr &ptr)
     {
         if(ptr.getTypeName() == typeid(ESM::Activator).name())
-            mActivators.updateActivatorCell(ptr);
+            mActivators.updateActivator(old, ptr);
         else
-            mActors.updateActorCell(ptr);
+            mActors.updateActor(old, ptr);
     }
 
 
@@ -557,7 +557,8 @@ namespace MWMechanics
         float fPerDieRollMult = gmst.find("fPerDieRollMult")->getFloat();
         float fPerTempMult = gmst.find("fPerTempMult")->getFloat();
 
-        float x,y = 0;
+        float x = 0;
+        float y = 0;
 
         float roll = static_cast<float> (std::rand()) / RAND_MAX * 100;
 

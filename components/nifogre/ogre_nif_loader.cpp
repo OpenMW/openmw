@@ -602,7 +602,7 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
         Nif::NiSourceTexture *st = t->textures[0].texture.getPtr();
         if (st->external)
         {
-            /* Bethesda at some at some point converted all their BSA
+            /* Bethesda at some point converted all their BSA
              * textures from tga to dds for increased load speed, but all
              * texture file name references were kept as .tga.
              */
@@ -620,6 +620,17 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
                 // verify, and revert if false (this call succeeds quickly, but fails slowly)
                 if(!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(texName))
                     texName = path + st->filename;
+            }
+            else if (!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(texName))
+            {
+                // workaround for Better Heads addon
+                size_t lastSlash = st->filename.rfind('\\');
+                if (lastSlash != std::string::npos && lastSlash + 1 != st->filename.size()) {
+                    texName = path + st->filename.substr(lastSlash + 1);
+                    // workaround for Better Bodies addon
+                    if (!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(texName))
+                        texName = st->filename;
+                }
             }
         }
         else warn("Found internal texture, ignoring.");
@@ -691,7 +702,7 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
         new sh::Vector4(diffuse.x, diffuse.y, diffuse.z, alpha)));
 
     instance->setProperty ("specular", sh::makeProperty<sh::Vector4> (
-        new sh::Vector4(specular.x, specular.y, specular.z, glossiness)));
+        new sh::Vector4(specular.x, specular.y, specular.z, glossiness*255.0f)));
 
     instance->setProperty ("emissive", sh::makeProperty<sh::Vector3> (
         new sh::Vector3(emissive.x, emissive.y, emissive.z)));
@@ -773,7 +784,6 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
     std::string mGroup;
     size_t mShapeIndex;
     std::string mMaterialName;
-    std::string mShapeName;
 
     void warn(const std::string &msg)
     {
@@ -882,8 +892,7 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
         Ogre::VertexDeclaration *decl;
         int nextBuf = 0;
 
-        Ogre::SubMesh *sub = ((mShapeName.length() > 0) ? mesh->createSubMesh(mShapeName) :
-                                                          mesh->createSubMesh());
+        Ogre::SubMesh *sub = mesh->createSubMesh();
 
         // Add vertices
         sub->useSharedVertices = false;
@@ -1043,6 +1052,10 @@ public:
 
     void createMeshes(const Nif::Node *node, MeshInfoList &meshes, int flags=0)
     {
+        // Do not create meshes for the collision shape (includes all children)
+        if(node->recType == Nif::RC_RootCollisionNode)
+            return;
+
         flags |= node->flags;
 
         // Marker objects: just skip the entire node
@@ -1071,12 +1084,11 @@ public:
         if(node->recType == Nif::RC_NiTriShape && !(flags&0x01)) // Not hidden
         {
             const Nif::NiTriShape *shape = dynamic_cast<const Nif::NiTriShape*>(node);
-            mShapeName = shape->name;
 
             Ogre::MeshManager &meshMgr = Ogre::MeshManager::getSingleton();
             std::string fullname = mName+"@index="+Ogre::StringConverter::toString(shape->recIndex);
-            if(mShapeName.length() > 0)
-                fullname += "@shape="+mShapeName;
+            if(shape->name.length() > 0)
+                fullname += "@shape="+shape->name;
 
             Misc::StringUtils::toLower(fullname);
             Ogre::MeshPtr mesh = meshMgr.getByName(fullname);
