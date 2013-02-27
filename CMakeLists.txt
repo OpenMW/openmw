@@ -378,7 +378,7 @@ if(WIN32)
         "${OpenMW_SOURCE_DIR}/readme.txt"
         "${OpenMW_SOURCE_DIR}/GPL3.txt"
         "${OpenMW_SOURCE_DIR}/OFL.txt"
-        "${OpenMW_SOURCE_DIR}/Bitstream Vera License.txt"
+        "${OpenMW_SOURCE_DIR}/DejaVu Font License.txt"
         "${OpenMW_SOURCE_DIR}/Daedric Font License.txt"
         "${OpenMW_BINARY_DIR}/launcher.qss"
         "${OpenMW_BINARY_DIR}/settings-default.cfg"
@@ -389,7 +389,7 @@ if(WIN32)
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION ".")
 
     SET(CPACK_GENERATOR "NSIS")
-    SET(CPACK_PACKAGE_NAME "OpenMW ${OPENMW_VERSION}")
+    SET(CPACK_PACKAGE_NAME "OpenMW")
     SET(CPACK_PACKAGE_VENDOR "OpenMW.org")
     SET(CPACK_PACKAGE_VERSION ${OPENMW_VERSION})
     SET(CPACK_PACKAGE_VERSION_MAJOR ${OPENMW_VERSION_MAJOR})
@@ -404,7 +404,7 @@ if(WIN32)
     SET(CPACK_RESOURCE_FILE_README "${OpenMW_SOURCE_DIR}/readme.txt")
     SET(CPACK_PACKAGE_DESCRIPTION_FILE "${OpenMW_SOURCE_DIR}/readme.txt")
     SET(CPACK_NSIS_EXECUTABLES_DIRECTORY ".")
-    SET(CPACK_NSIS_DISPLAY_NAME "OpenMW")
+    SET(CPACK_NSIS_DISPLAY_NAME "OpenMW ${OPENMW_VERSION}")
     SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.openmw.org")
     SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\www.openmw.org")
     SET(CPACK_NSIS_INSTALLED_ICON_NAME "omwlauncher.exe")
