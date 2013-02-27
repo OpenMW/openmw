@@ -11,9 +11,12 @@
 #include <components/esm/loadcell.hpp>
 #include <components/settings/settings.hpp>
 
+#include <extern/shiny/Main/MaterialInstance.hpp>
+
+
 #include "renderconst.hpp"
 
-#include <extern/shiny/Main/MaterialInstance.hpp>
+#include "../mwworld/ptr.hpp"
 
 namespace Ogre
 {
@@ -138,7 +141,7 @@ namespace MWRender {
         RippleSimulation* mSimulation;
 
     public:
-        Water (Ogre::Camera *camera, RenderingManager* rend, const ESM::Cell* cell);
+        Water (Ogre::Camera *camera, RenderingManager* rend);
         ~Water();
 
         void setActive(bool active);
@@ -146,7 +149,10 @@ namespace MWRender {
         void toggle();
         void update(float dt, Ogre::Vector3 player);
 
-        void addImpulse (Ogre::Vector2 position, float scale = 1.f, float force = 1.f);
+        /// adds an emitter, position will be tracked automatically using its scene node
+        void addEmitter (const MWWorld::Ptr& ptr, float scale = 1.f, float force = 1.f);
+        void removeEmitter (const MWWorld::Ptr& ptr);
+        void updateEmitterPtr (const MWWorld::Ptr& old, const MWWorld::Ptr& ptr);
 
         void setViewportBackground(const Ogre::ColourValue& bg);
 

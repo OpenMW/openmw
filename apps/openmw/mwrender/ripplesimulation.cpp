@@ -7,6 +7,11 @@
 
 #include <extern/shiny/Main/Factory.hpp>
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+
+#include "../mwworld/player.hpp"
+
 namespace MWRender
 {
 
@@ -21,8 +26,7 @@ RippleSimulation::RippleSimulation(Ogre::SceneManager* mainSceneManager)
       mRippleAreaLength(1000),
       mImpulseSize(20),
       mTexelOffset(0,0),
-      mFirstUpdate(true),
-      mLastPos(0,0)
+      mFirstUpdate(true)
 {
     Ogre::AxisAlignedBox aabInf;
     aabInf.setInfinite();
@@ -142,34 +146,39 @@ void RippleSimulation::update(float dt, Ogre::Vector2 position)
          new sh::Vector3(mRippleCenter.x + mTexelOffset.x, mRippleCenter.y + mTexelOffset.y, 0)));
 }
 
-void RippleSimulation::addImpulse(Ogre::Vector2 position, float scale, float force)
-{
-    // don't emit if there wasn't enough movement
-    /// \todo this should be done somewhere else, otherwise multiple emitters cannot be supported
-    if ((position - mLastPos).length () <= 2)
-        return;
-
-    mLastPos = position;
-
-    /// \todo scale, force
-    mImpulses.push(position);
-}
-
 void RippleSimulation::addImpulses()
 {
     mRectangle->setVisible(false);
     mImpulse->setVisible(true);
 
-    while (mImpulses.size())
+    /// \todo it should be more efficient to render all emitters at once
+    for (std::vector<Emitter>::iterator it=mEmitters.begin(); it !=mEmitters.end(); ++it)
     {
-        Ogre::Vector2 pos = mImpulses.front();
-        pos -= mRippleCenter;
-        pos /= mRippleAreaLength;
-        float size = mImpulseSize / mRippleAreaLength;
-        mImpulse->setCorners(pos.x-size, pos.y+size, pos.x+size, pos.y-size, false);
-        mImpulses.pop();
+        if (it->mPtr == MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer ())
+        {
+            // fetch a new ptr (to handle cell change etc)
+            // for non-player actors this is done in updateObjectCell
+            it->mPtr = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer ();
+        }
+        float* _currentPos = it->mPtr.getRefData().getPosition().pos;
+        Ogre::Vector3 currentPos (_currentPos[0], _currentPos[1], _currentPos[2]);
 
-        mRenderTargets[1]->update();
+        if ( (currentPos - it->mLastEmitPosition).length() > 2
+            && MWBase::Environment::get().getWorld ()->isUnderwater (it->mPtr.getCell(), currentPos))
+        {
+            it->mLastEmitPosition = currentPos;
+
+            Ogre::Vector2 pos (currentPos.x, currentPos.y);
+            pos -= mRippleCenter;
+            pos /= mRippleAreaLength;
+            float size = mImpulseSize / mRippleAreaLength;
+            mImpulse->setCorners(pos.x-size, pos.y+size, pos.x+size, pos.y-size, false);
+
+            // don't render if we are offscreen
+            if (pos.x - size >= 1.0 || pos.y+size <= -1.0 || pos.x+size <= -1.0 || pos.y-size >= 1.0)
+                continue;
+            mRenderTargets[1]->update();
+        }
     }
 
     mImpulse->setVisible(false);
@@ -214,6 +223,40 @@ void RippleSimulation::swapHeightMaps()
 
     mRenderTargets[2] = tmp;
     mTextures[2] = tmp2;
+}
+
+void RippleSimulation::addEmitter(const MWWorld::Ptr& ptr, float scale, float force)
+{
+    Emitter newEmitter;
+    newEmitter.mPtr = ptr;
+    newEmitter.mScale = scale;
+    newEmitter.mForce = force;
+    newEmitter.mLastEmitPosition = Ogre::Vector3(0,0,0);
+    mEmitters.push_back (newEmitter);
+}
+
+void RippleSimulation::removeEmitter (const MWWorld::Ptr& ptr)
+{
+    for (std::vector<Emitter>::iterator it = mEmitters.begin(); it != mEmitters.end(); ++it)
+    {
+        if (it->mPtr == ptr)
+        {
+            mEmitters.erase(it);
+            return;
+        }
+    }
+}
+
+void RippleSimulation::updateEmitterPtr (const MWWorld::Ptr& old, const MWWorld::Ptr& ptr)
+{
+    for (std::vector<Emitter>::iterator it = mEmitters.begin(); it != mEmitters.end(); ++it)
+    {
+        if (it->mPtr == old)
+        {
+            it->mPtr = ptr;
+            return;
+        }
+    }
 }
 
 

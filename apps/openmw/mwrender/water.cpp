@@ -81,6 +81,7 @@ void CubeReflection::update ()
 PlaneReflection::PlaneReflection(Ogre::SceneManager* sceneManager, SkyManager* sky)
     : Reflection(sceneManager)
     , mSky(sky)
+    , mRenderActive(false)
 {
     mCamera = mSceneMgr->createCamera ("PlaneReflectionCamera");
     mSceneMgr->addRenderQueueListener(this);
@@ -186,7 +187,7 @@ void PlaneReflection::setVisibilityMask (int flags)
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-Water::Water (Ogre::Camera *camera, RenderingManager* rend, const ESM::Cell* cell) :
+Water::Water (Ogre::Camera *camera, RenderingManager* rend) :
     mCamera (camera), mSceneMgr (camera->getSceneManager()),
     mIsUnderwater(false), mVisibilityFlags(0),
     mActive(1), mToggled(1),
@@ -202,7 +203,7 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend, const ESM::Cell* cel
 
     mMaterial = MaterialManager::getSingleton().getByName("Water");
 
-    mTop = cell->mWater;
+    mTop = 0;
 
     mIsUnderwater = false;
 
@@ -216,10 +217,6 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend, const ESM::Cell* cel
 
     mWaterNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
 
-    if(!(cell->mData.mFlags & cell->Interior))
-    {
-        mWaterNode->setPosition(getSceneNodeCoordinates(cell->mData.mX, cell->mData.mY));
-    }
     mWaterNode->attachObject(mWater);
 
     applyRTT();
@@ -397,7 +394,7 @@ void Water::update(float dt, Ogre::Vector3 player)
     {
         //mSimulation->addImpulse(Ogre::Vector2(player.x, player.z));
     }
-    mSimulation->update(dt, Ogre::Vector2(player.x, player.z));
+    mSimulation->update(dt, Ogre::Vector2(player.x, player.y));
 
     if (mReflection)
         mReflection->update();
@@ -499,10 +496,19 @@ void Water::createdConfiguration (sh::MaterialInstance* m, const std::string& co
     }
 }
 
-void Water::addImpulse (Vector2 position, float scale, float force)
+void Water::addEmitter (const MWWorld::Ptr& ptr, float scale, float force)
 {
-    if (mSimulation)
-        mSimulation->addImpulse (position, scale, force);
+    mSimulation->addEmitter (ptr, scale, force);
+}
+
+void Water::removeEmitter (const MWWorld::Ptr& ptr)
+{
+    mSimulation->removeEmitter (ptr);
+}
+
+void Water::updateEmitterPtr (const MWWorld::Ptr& old, const MWWorld::Ptr& ptr)
+{
+    mSimulation->updateEmitterPtr(old, ptr);
 }
 
 } // namespace

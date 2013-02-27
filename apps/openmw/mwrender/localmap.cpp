@@ -32,7 +32,7 @@ LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend, MWRender::RenderingManag
 
     mLight = mRendering->getScene()->createLight();
     mLight->setType (Ogre::Light::LT_DIRECTIONAL);
-    mLight->setDirection (Ogre::Vector3(0.3, -0.7, 0.3));
+    mLight->setDirection (Ogre::Vector3(0.3, 0.3, -0.7));
     mLight->setVisible (false);
     mLight->setDiffuseColour (ColourValue(0.7,0.7,0.7));
 }

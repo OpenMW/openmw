@@ -163,6 +163,10 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     void skySetMoonColour (bool red);
     void configureAmbient(MWWorld::CellStore &mCell);
 
+    void addWaterRippleEmitter (const MWWorld::Ptr& ptr, float scale = 1.f, float force = 1.f);
+    void removeWaterRippleEmitter (const MWWorld::Ptr& ptr);
+    void updateWaterRippleEmitterPtr (const MWWorld::Ptr& old, const MWWorld::Ptr& ptr);
+
     void requestMap (MWWorld::CellStore* cell);
     ///< request the local map for a cell
 
@@ -204,6 +208,7 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     sh::Factory* mFactory;
 
     void setAmbientMode();
+    void applyFog();
 
     void setMenuTransparency(float val);
 
@@ -233,6 +238,10 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     Ogre::Light* mSun;
 
     Ogre::SceneNode *mRootNode;
+
+    Ogre::ColourValue mFogColour;
+    float mFogStart;
+    float mFogEnd;
 
     OEngine::Physic::PhysicEngine* mPhysicsEngine;
 

@@ -4,6 +4,9 @@
 #include <OgreTexture.h>
 #include <OgreMaterial.h>
 #include <OgreVector2.h>
+#include <OgreVector3.h>
+
+#include "../mwworld/ptr.hpp"
 
 namespace Ogre
 {
@@ -16,6 +19,14 @@ namespace Ogre
 namespace MWRender
 {
 
+struct Emitter
+{
+    MWWorld::Ptr mPtr;
+    Ogre::Vector3 mLastEmitPosition;
+    float mScale;
+    float mForce;
+};
+
 class RippleSimulation
 {
 public:
@@ -24,17 +35,20 @@ public:
 
     void update(float dt, Ogre::Vector2 position);
 
-    void addImpulse (Ogre::Vector2 position, float scale = 1.f, float force = 1.f);
+    /// adds an emitter, position will be tracked automatically
+    void addEmitter (const MWWorld::Ptr& ptr, float scale = 1.f, float force = 1.f);
+    void removeEmitter (const MWWorld::Ptr& ptr);
+    void updateEmitterPtr (const MWWorld::Ptr& old, const MWWorld::Ptr& ptr);
 
 private:
+    std::vector<Emitter> mEmitters;
+
     Ogre::RenderTexture* mRenderTargets[4];
     Ogre::TexturePtr mTextures[4];
 
     int mTextureSize;
     float mRippleAreaLength;
     float mImpulseSize;
-
-    Ogre::Vector2 mLastPos;
 
     bool mFirstUpdate;
 
@@ -50,8 +64,6 @@ private:
     static const int TEX_NORMAL = 3;
 
     Ogre::Rectangle2D* mImpulse;
-
-    std::queue <Ogre::Vector2> mImpulses;
 
     void addImpulses();
     void heightMapToNormalMap();
