@@ -37,14 +37,14 @@ public:
    *************************************************************************/
 
   int getVer() const { return mCtx.header.version; }
-  float getFVer() { if(mCtx.header.version == VER_12) return 1.2; else return 1.3; }
-  int getSpecial() { return mSpf; }
-  int getType() { return mCtx.header.type; }
-  const std::string getAuthor() { return mCtx.header.author.toString(); }
-  const std::string getDesc() { return mCtx.header.desc.toString(); }
+  float getFVer() const { if(mCtx.header.version == VER_12) return 1.2; else return 1.3; }
+  int getSpecial() const { return mSpf; }
+  int getType() const { return mCtx.header.type; }
+  const std::string getAuthor() const { return mCtx.header.author.toString(); }
+  const std::string getDesc() const { return mCtx.header.desc.toString(); }
   const SaveData &getSaveData() const { return mSaveData; }
-  const MasterList &getMasters() { return mMasters; }
-  const NAME &retSubName() { return mCtx.subName; }
+  const MasterList &getMasters() const { return mMasters; }
+  const NAME &retSubName() const { return mCtx.subName; }
   uint32_t getSubSize() const { return mCtx.leftSub; }
 
   /*************************************************************************
@@ -85,7 +85,7 @@ public:
   int mIdx;
   void setIndex(const int index) {mIdx = index; mCtx.index = index;}
   const int getIndex() {return mIdx;}
-  
+
   void setGlobalReaderList(std::vector<ESMReader> *list) {mGlobalReaderList = list;}
   std::vector<ESMReader> *getGlobalReaderList() {return mGlobalReaderList;}
 
