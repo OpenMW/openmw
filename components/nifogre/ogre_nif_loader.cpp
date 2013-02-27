@@ -1204,14 +1204,20 @@ EntityList Loader::createEntities(Ogre::Entity *parent, const std::string &bonen
     if(meshes.size() == 0)
         return entitylist;
 
+    bool isskinned = false;
     Ogre::SceneManager *sceneMgr = parentNode->getCreator();
     std::string filter = "@shape=tri "+bonename;
     Misc::StringUtils::toLower(filter);
     for(size_t i = 0;i < meshes.size();i++)
     {
         Ogre::Entity *ent = sceneMgr->createEntity(meshes[i].mMeshName);
-        if(!entitylist.mSkelBase && ent->hasSkeleton())
-            entitylist.mSkelBase = ent;
+        if(!entitylist.mSkelBase)
+        {
+            if(ent->hasSkeleton())
+                entitylist.mSkelBase = ent;
+        }
+        else if(!isskinned && ent->hasSkeleton())
+            isskinned = true;
         entitylist.mEntities.push_back(ent);
     }
 
@@ -1219,7 +1225,7 @@ EntityList Loader::createEntities(Ogre::Entity *parent, const std::string &bonen
     if(bonename.find("Left") != std::string::npos)
         scale.x *= -1.0f;
 
-    if(entitylist.mSkelBase)
+    if(isskinned)
     {
         for(size_t i = 0;i < entitylist.mEntities.size();i++)
         {
