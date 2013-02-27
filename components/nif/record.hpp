@@ -48,6 +48,7 @@ enum RecordType
   RC_NiDitherProperty,
   RC_NiWireframeProperty,
   RC_NiSpecularProperty,
+  RC_NiStencilProperty,
   RC_NiVisController,
   RC_NiGeomMorpherController,
   RC_NiKeyframeController,

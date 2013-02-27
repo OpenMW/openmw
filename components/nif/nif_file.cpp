@@ -256,6 +256,7 @@ void NIFFile::parse()
       else if(rec == "NiDitherProperty") { r = new NiDitherProperty; r->recType = RC_NiDitherProperty; }
       else if(rec == "NiWireframeProperty") { r = new NiWireframeProperty; r->recType = RC_NiWireframeProperty; }
       else if(rec == "NiSpecularProperty") { r = new NiSpecularProperty; r->recType = RC_NiSpecularProperty; }
+      else if(rec == "NiStencilProperty") { r = new NiStencilProperty; r->recType = RC_NiStencilProperty; }
 
       // Controllers
       else if(rec == "NiVisController") { r = new NiVisController; r->recType = RC_NiVisController; }

@@ -158,6 +158,7 @@ public:
     short getShort() { return read_le16(); }
     unsigned short getUShort() { return read_le16(); }
     int getInt() { return read_le32(); }
+    unsigned int getUInt() { return read_le32(); }
     float getFloat() { return read_le32f(); }
     Ogre::Vector2 getVector2()
     {
