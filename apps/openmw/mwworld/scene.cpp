@@ -27,13 +27,10 @@ namespace
         {
             const MWWorld::Class& class_ =
                 MWWorld::Class::get (MWWorld::Ptr (&*cellRefList.mList.begin(), &cell));
-
-            size_t numRefs = cellRefList.mList.size();
             int current = 0;
             for (typename T::List::iterator it = cellRefList.mList.begin();
                 it != cellRefList.mList.end(); it++)
             {
-                MWBase::Environment::get().getWindowManager ()->setLoadingProgress ("Loading cells", 1, current, numRefs);
                 ++current;
 
                 if (it->mData.getCount() || it->mData.isEnabled())
@@ -54,10 +51,6 @@ namespace
                     }
                 }
             }
-        }
-        else
-        {
-            MWBase::Environment::get().getWindowManager ()->setLoadingProgress ("Loading cells", 1, 0, 1);
         }
     }
 
@@ -216,7 +209,6 @@ namespace MWWorld
                     continue;
                 }
             }
-
             unloadCell (active++);
             ++current;
         }
@@ -265,7 +257,9 @@ namespace MWWorld
                 {
                     CellStore *cell = MWBase::Environment::get().getWorld()->getExterior(x, y);
 
-                    MWBase::Environment::get().getWindowManager ()->setLoadingProgress ("Loading cells", 0, current, numLoad);
+                    //Loading Exterior loading text
+                    MWBase::Environment::get().getWindowManager ()->setLoadingProgress ("Loading Exterior", 0, current, numLoad);
+
                     loadCell (cell);
                     ++current;
                 }
@@ -359,7 +353,6 @@ namespace MWWorld
         active = mActiveCells.begin();
         while (active!=mActiveCells.end())
         {
-
             unloadCell (active++);
             ++current;
         }
@@ -367,7 +360,9 @@ namespace MWWorld
         // Load cell.
         std::cout << "cellName: " << cell->mCell->mName << std::endl;
 
-        MWBase::Environment::get().getWindowManager ()->setLoadingProgress ("Loading cells", 0, 0, 1);
+        //Loading Interior loading text
+        MWBase::Environment::get().getWindowManager ()->setLoadingProgress ("Loading Interior", 0, 0, 1);
+
         loadCell (cell);
 
         mCurrentCell = cell;
