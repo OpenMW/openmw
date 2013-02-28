@@ -844,9 +844,12 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
         // Set the bounding box first
         BoundsFinder bounds;
         bounds.add(&srcVerts[0][0], srcVerts.size());
-        // No idea why this offset is needed. It works fine without it if the
-        // vertices weren't transformed first, but otherwise it fails later on
-        // when the object is being inserted into the scene.
+        if(!bounds.isValid())
+        {
+            float v[3] = { 0.0f, 0.0f, 0.0f };
+            bounds.add(&v[0], 1);
+        }
+
         mesh->_setBounds(Ogre::AxisAlignedBox(bounds.minX()-0.5f, bounds.minY()-0.5f, bounds.minZ()-0.5f,
                                               bounds.maxX()+0.5f, bounds.maxY()+0.5f, bounds.maxZ()+0.5f));
         mesh->_setBoundingSphereRadius(bounds.getRadius());

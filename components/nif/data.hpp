@@ -142,20 +142,18 @@ public:
     {
         ShapeData::read(nif);
 
-        int tris = nif->getUShort();
-        if(tris)
-        {
-            // We have three times as many vertices as triangles, so this
-            // is always equal to tris*3.
-            int cnt = nif->getInt();
-            nif->getShorts(triangles, cnt);
-        }
+        /*int tris =*/ nif->getUShort();
+
+        // We have three times as many vertices as triangles, so this
+        // is always equal to tris*3.
+        int cnt = nif->getInt();
+        nif->getShorts(triangles, cnt);
 
         // Read the match list, which lists the vertices that are equal to
         // vertices. We don't actually need need this for anything, so
         // just skip it.
         int verts = nif->getUShort();
-        for(int i=0;i<verts;i++)
+        for(int i=0;i < verts;i++)
         {
             // Number of vertices matching vertex 'i'
             int num = nif->getUShort();
