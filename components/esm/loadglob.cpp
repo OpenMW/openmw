@@ -20,6 +20,14 @@ void Global::load(ESMReader &esm)
 
     // Note: Both floats and longs are represented as floats.
     esm.getHNT(mValue, "FLTV");
+
+    if (mType==VT_Short)
+    {
+        if (mValue!=mValue)
+            mValue = 0; // nan
+        else
+            mValue = static_cast<short> (mValue);
+    }
 }
 
 void Global::save(ESMWriter &esm)
