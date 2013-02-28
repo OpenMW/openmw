@@ -118,7 +118,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
                 while (passIt.hasMoreElements())
                 {
                     Ogre::Pass* pass = passIt.getNext();
-                    if (pass->getDepthWriteEnabled() == false)
+                    if(pass->getSourceBlendFactor() != Ogre::SBF_ONE || pass->getDestBlendFactor() != Ogre::SBF_ZERO)
                         transparent = true;
                 }
             }

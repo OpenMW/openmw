@@ -43,8 +43,7 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr &ptr)
                     while (passIt.hasMoreElements() && !transparent)
                     {
                         Ogre::Pass* pass = passIt.getNext();
-
-                        if (pass->getDepthWriteEnabled() == false)
+                        if(pass->getSourceBlendFactor() != Ogre::SBF_ONE || pass->getDestBlendFactor() != Ogre::SBF_ZERO)
                             transparent = true;
                     }
                 }

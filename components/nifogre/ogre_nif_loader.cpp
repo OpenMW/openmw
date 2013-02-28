@@ -716,8 +716,6 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
         blend_mode += getBlendFactor((alphaFlags>>1)&0xf);
         blend_mode += " ";
         blend_mode += getBlendFactor((alphaFlags>>5)&0xf);
-
-        instance->setProperty("depth_write", sh::makeProperty(new sh::StringValue("off")));
         instance->setProperty("scene_blend", sh::makeProperty(new sh::StringValue(blend_mode)));
     }
     else
