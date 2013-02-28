@@ -1,228 +1,107 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Skin">
-    <!-- scroll tracker -->
-    <Skin name = "MW_ScrollTrack" size = "16 20" texture="mwgui.png">
-        <BasisSkin type="SubSkin" offset = "0 0 16 2" align = "ALIGN_TOP ALIGN_HSTRETCH">
-            <State name="normal" offset = "38 24 16 2"/>
-        </BasisSkin>
-        <BasisSkin type="TileRect" offset="0 2 16 16" align="ALIGN_STRETCH">
-            <State name="normal" offset="38 26 16 16">
+
+    <!-- Horizontal Scrollbar -->
+
+    <Skin name="MW_HScroll" size="90 14">
+        <Property key="TrackRangeMargins" value="14 14" />
+        <Property key="MinTrackSize" value="14" />
+        <Property key="VerticalAlignment" value="false"/>
+        <Property key="MoveToClick" value="true"/>
+
+        <!-- Tracker must be last to be on top and receive mouse events -->
+
+        <Child type="Button" skin="MW_Box" offset="18 0 54 14" align="ALIGN_STRETCH" name="Background"/>
+
+        <!-- Arrows -->
+
+        <Child type="Widget" skin="MW_Box" offset="0 0 15 14" align="ALIGN_LEFT ALIGN_VSTRETCH"/>
+        <Child type="Button" skin="MW_ArrowLeft" offset="3 2 10 10" align="ALIGN_LEFT ALIGN_VSTRETCH" name="Start"/>
+
+        <Child type="Widget" skin="MW_Box" offset="75 0 15 14" align="ALIGN_RIGHT ALIGN_VSTRETCH"/>
+        <Child type="Button" skin="MW_ArrowRight" offset="76 2 10 10" align="ALIGN_RIGHT ALIGN_VSTRETCH" name="End"/>
+
+        <!-- These are only provided to get mouse input, they should have no skin and be transparent -->
+
+        <Child type="Button" skin="MW_ScrollEmptyPart" offset="14 0 24 14" align="ALIGN_TOP ALIGN_HSTRETCH" name="FirstPart"/>
+        <Child type="Button" skin="MW_ScrollEmptyPart" offset="52 0 24 14" align="ALIGN_TOP ALIGN_HSTRETCH" name="SecondPart"/>
+
+        <Child type="Button" skin="MW_ScrollTrackH" offset="38 2 30 9" align="ALIGN_LEFT ALIGN_VSTRETCH" name="Track"/>
+    </Skin>
+
+    <Skin name="MW_ScrollTrackH" size="16 16" texture="textures\tx_menubook_bookmark.dds">
+        <BasisSkin type="TileRect" offset="6 0 3 16" align="Stretch">
+            <State name="normal" offset="70 22 16 16">
                 <Property key="TileSize" value="16 16"/>
                 <Property key="TileH" value="true"/>
                 <Property key="TileV" value="true"/>
             </State>
         </BasisSkin>
-        <BasisSkin type="SubSkin" offset = "0 18 16 2" align = "ALIGN_BOTTOM ALIGN_HSTRETCH">
-            <State name="normal" offset = "38 42 16 2"/>
-        </BasisSkin>
     </Skin>
-    <Skin name = "MW_ScrollTrackH" size = "12 20" texture="mwgui.png">
-        <BasisSkin type="SubSkin" offset = "0 0 12 2" align = "ALIGN_TOP ALIGN_HSTRETCH">
-            <State name="normal" offset = "38 24 12 2"/>
-        </BasisSkin>
-        <BasisSkin type="TileRect" offset="0 2 12 16" align="ALIGN_STRETCH">
-            <State name="normal" offset="40 26 12 16">
-                <Property key="TileSize" value="12 16"/>
+
+    <!-- Vertical Scrollbar -->
+
+    <Skin name="MW_VScroll" size="14 90">
+        <Property key="TrackRangeMargins" value="14 14" />
+        <Property key="MinTrackSize" value="14" />
+        <Property key="MoveToClick" value="true"/>
+
+        <!-- Background widget trick that must go first to be placed behind Track and FirstPart/SecondPart widgets, provides the bar texture -->
+
+        <Child type="Button" skin="MW_Box" offset="0 18 14 55" align="ALIGN_STRETCH" name="Background"/>
+
+        <!-- Arrows -->
+
+        <Child type="Widget" skin="MW_Box" offset="0 0 14 15" align="ALIGN_TOP ALIGN_HSTRETCH"/>
+        <Child type="Button" skin="MW_ArrowUp" offset="2 3 10 10" align="ALIGN_TOP ALIGN_HSTRETCH" name="Start"/>
+
+        <Child type="Widget" skin="MW_Box" offset="0 76 14 15" align="ALIGN_BOTTOM ALIGN_HSTRETCH"/>
+        <Child type="Button" skin="MW_ArrowDown" offset="2 77 10 10" align="ALIGN_BOTTOM ALIGN_HSTRETCH" name="End"/>
+
+        <!-- These are only provided to get mouse input, they should have no skin and be transparent -->
+
+        <Child type="Button" skin="MW_ScrollEmptyPart" offset="0 14 24 14" align="ALIGN_LEFT ALIGN_VSTRETCH" name="FirstPart"/>
+        <Child type="Button" skin="MW_ScrollEmptyPart" offset="0 52 24 14" align="ALIGN_LEFT ALIGN_VSTRETCH" name="SecondPart"/>
+
+        <!-- Tracker must be last to be on top and receive mouse events -->
+
+        <Child type="Button" skin="MW_ScrollTrackV" offset="2 40 9 30" align="ALIGN_TOP ALIGN_HSTRETCH" name="Track"/>
+
+    </Skin>
+
+    <Skin name="MW_ScrollTrackV" size="16 16" texture="textures\tx_menubook_bookmark.dds">
+        <BasisSkin type="TileRect" offset="0 7 16 3" align="Stretch">
+            <State name="normal" offset="68 19 16 16">
+                <Property key="TileSize" value="16 16"/>
                 <Property key="TileH" value="true"/>
                 <Property key="TileV" value="true"/>
             </State>
         </BasisSkin>
-        <BasisSkin type="SubSkin" offset = "0 18 12 2" align = "ALIGN_BOTTOM ALIGN_HSTRETCH">
-            <State name="normal" offset = "38 42 12 2"/>
-        </BasisSkin>
     </Skin>
 
-    <Skin name = "MW_ScrollUp" size = "16 20" texture="mwgui.png">
-        <!-- border -->
-        <BasisSkin type="SubSkin" offset = "0 0 16 2" align = "ALIGN_TOP ALIGN_HSTRETCH">
-            <State name="normal" offset = "20 24 16 2"/>
-        </BasisSkin>
-        <BasisSkin type="SubSkin" offset = "0 2 2 16" align = "ALIGN_LEFT ALIGN_VSTRETCH">
-            <State name="normal" offset = "20 26 2 16"/>
-        </BasisSkin>
-        <BasisSkin type="SubSkin" offset = "14 2 2 16" align = "ALIGN_RIGHT ALIGN_VSTRETCH">
-            <State name="normal" offset = "34 26 2 16"/>
-        </BasisSkin>
-        <BasisSkin type="SubSkin" offset = "0 18 16 2" align = "ALIGN_BOTTOM ALIGN_HSTRETCH">
-            <State name="normal" offset = "20 42 16 2"/>
-        </BasisSkin>
-        <!-- arrow -->
-        <BasisSkin type="SubSkin" offset = "2 2 12 16" align = "ALIGN_STRETCH">
-            <State name="normal" offset = "56 24 8 8"/>
-        </BasisSkin>
+    <!-- Empty space in scrollbar -->
+
+    <Skin name="MW_ScrollEmptyPart" size="16 16" >
     </Skin>
 
-    <Skin name = "MW_ScrollDown" size = "16 20"  texture="mwgui.png">
-        <!-- border -->
-        <BasisSkin type="SubSkin" offset = "0 0 16 2" align = "ALIGN_TOP ALIGN_HSTRETCH">
-            <State name="normal" offset = "20 24 16 2"/>
-        </BasisSkin>
-        <BasisSkin type="SubSkin" offset = "0 2 2 16" align = "ALIGN_LEFT ALIGN_VSTRETCH">
-            <State name="normal" offset = "20 26 2 16"/>
-        </BasisSkin>
-        <BasisSkin type="SubSkin" offset = "14 2 2 16" align = "ALIGN_RIGHT ALIGN_VSTRETCH">
-            <State name="normal" offset = "34 26 2 16"/>
-        </BasisSkin>
-        <BasisSkin type="SubSkin" offset = "0 18 16 2" align = "ALIGN_BOTTOM ALIGN_HSTRETCH">
-            <State name="normal" offset = "20 42 16 2"/>
-        </BasisSkin>
-        <!-- arrow -->
-        <BasisSkin type="SubSkin" offset = "2 2 12 16" align = "ALIGN_STRETCH">
-            <State name="normal" offset = "56 44 8 8"/>
-        </BasisSkin>
-    </Skin>
+    <!-- Header text -->
 
-    <Skin name = "MW_ScrollLeft" size = "16 20" texture="mwgui.png">
-        <!-- border -->
-        <BasisSkin type="SubSkin" offset = "0 0 16 2" align = "ALIGN_TOP ALIGN_HSTRETCH">
-            <State name="normal" offset = "20 24 16 2"/>
-        </BasisSkin>
-        <BasisSkin type="SubSkin" offset = "0 2 2 16" align = "ALIGN_LEFT ALIGN_VSTRETCH">
-            <State name="normal" offset = "20 26 2 16"/>
-        </BasisSkin>
-        <BasisSkin type="SubSkin" offset = "14 2 2 16" align = "ALIGN_RIGHT ALIGN_VSTRETCH">
-            <State name="normal" offset = "34 26 2 16"/>
-        </BasisSkin>
-        <BasisSkin type="SubSkin" offset = "0 18 16 2" align = "ALIGN_BOTTOM ALIGN_HSTRETCH">
-            <State name="normal" offset = "20 42 16 2"/>
-        </BasisSkin>
-        <!-- arrow -->
-        <BasisSkin type="SubSkin" offset = "2 2 12 16" align = "ALIGN_STRETCH">
-            <State name="normal" offset = "56 54 8 8"/>
-        </BasisSkin>
-    </Skin>
+    <Skin name="HeaderText" size="16 16">
+        <Property key="FontName" value="Default"/>
+        <Property key="TextAlign" value="ALIGN_CENTER" />
+        <Property key="TextColour" value="0.82 0.74 0.58" />
 
-    <Skin name = "MW_ScrollRight" size = "16 20"  texture="mwgui.png">
-        <!-- border -->
-        <BasisSkin type="SubSkin" offset = "0 0 16 2" align = "ALIGN_TOP ALIGN_HSTRETCH">
-            <State name="normal" offset = "20 24 16 2"/>
-        </BasisSkin>
-        <BasisSkin type="SubSkin" offset = "0 2 2 16" align = "ALIGN_LEFT ALIGN_VSTRETCH">
-            <State name="normal" offset = "20 26 2 16"/>
-        </BasisSkin>
-        <BasisSkin type="SubSkin" offset = "14 2 2 16" align = "ALIGN_RIGHT ALIGN_VSTRETCH">
-            <State name="normal" offset = "34 26 2 16"/>
-        </BasisSkin>
-        <BasisSkin type="SubSkin" offset = "0 18 16 2" align = "ALIGN_BOTTOM ALIGN_HSTRETCH">
-            <State name="normal" offset = "20 42 16 2"/>
-        </BasisSkin>
-        <!-- arrow -->
-        <BasisSkin type="SubSkin" offset = "2 2 12 16" align = "ALIGN_STRETCH">
-            <State name="normal" offset = "56 34 8 8"/>
-        </BasisSkin>
-    </Skin>
-
-    <Skin name = "MW_HScrollBackground" size = "512 20"  texture="mwgui.png">
-        <BasisSkin type="SubSkin" offset = "0 0 512 2" align = "ALIGN_TOP ALIGN_HSTRETCH">
-            <State name="normal" offset = "2 2 512 2"/>
-        </BasisSkin>
-        <BasisSkin type="SubSkin" offset = "0 2 2 16" align = "ALIGN_LEFT ALIGN_VSTRETCH">
-            <State name="normal" offset = "2 4 2 16"/>
-        </BasisSkin>
-        <BasisSkin type="SubSkin" offset = "510 2 2 16" align = "ALIGN_RIGHT ALIGN_VSTRETCH">
-            <State name="normal" offset = "512 4 2 16"/>
-        </BasisSkin>
-        <BasisSkin type="SubSkin" offset = "0 18 512 2" align = "ALIGN_BOTTOM ALIGN_HSTRETCH">
-            <State name="normal" offset = "2 20 512 2"/>
-        </BasisSkin>
-    </Skin>
-
-    <Skin name = "MW_VScrollBackground" size = "16 512"  texture="mwgui.png">
-        <BasisSkin type="SubSkin" offset = "0 0 16 2" align = "ALIGN_TOP ALIGN_HSTRETCH">
-            <State name="normal" offset = "2 24 16 2"/>
-        </BasisSkin>
-        <BasisSkin type="SubSkin" offset = "0 2 2 512" align = "ALIGN_LEFT ALIGN_VSTRETCH">
-            <State name="normal" offset = "2 26 2 512"/>
-        </BasisSkin>
-        <BasisSkin type="SubSkin" offset = "14 2 2 512" align = "ALIGN_RIGHT ALIGN_VSTRETCH">
-            <State name="normal" offset = "16 26 2 512"/>
-        </BasisSkin>
-        <BasisSkin type="SubSkin" offset = "0 512 16 2" align = "ALIGN_BOTTOM ALIGN_HSTRETCH">
-            <State name="normal" offset = "2 538 16 2"/>
-        </BasisSkin>
-    </Skin>
-
-    <Skin name = "MW_ScrollEmptyPart" size = "16 16" >
-    </Skin>
-
-    <!-- Morrowind has a 1 pixel gap between the left arrow and the inner bar, this skin does not replicate that -->
-    <Skin name = "MW_HScroll" size = "90 14">
-        <Property key="TrackRangeMargins" value = "14 14" />
-        <Property key="MinTrackSize" value = "14" />
-        <Property key="VerticalAlignment" value="false"/>
-        <Property key="MoveToClick" value="true"/>
-
-        <!-- Background widget trick that must go first to be placed behind Track and FirstPart/SecondPart widgets, provides the bar texture -->
-        <Child type="Button" skin="MW_HScrollBackground" offset = "14 0 62 14" align = "ALIGN_STRETCH" name = "Background"/>
-
-        <Child type="Button" skin="MW_ScrollLeft" offset = "0 0 14 14" align = "ALIGN_LEFT ALIGN_VSTRETCH" name = "Start"/>
-        <Child type="Button" skin="MW_ScrollRight" offset = "76 0 14 14" align = "ALIGN_RIGHT ALIGN_VSTRETCH" name = "End"/>
-
-        <!-- These are only provided to get mouse input, they should have no skin and be transparent -->
-        <Child type="Button" skin="MW_ScrollEmptyPart" offset = "14 0 24 14" align = "ALIGN_TOP ALIGN_HSTRETCH" name = "FirstPart"/>
-        <Child type="Button" skin="MW_ScrollEmptyPart" offset = "52 0 24 14" align = "ALIGN_TOP ALIGN_HSTRETCH" name = "SecondPart"/>
-
-        <!-- Tracker must be last to be on top and receive mouse events -->
-        <Child type="Button" skin="MW_ScrollTrackH" offset = "38 0 14 14" align = "ALIGN_LEFT ALIGN_VSTRETCH" name = "Track"/>
-    </Skin>
-
-    <!-- Morrowind has a 1 pixel gap between the left arrow and the inner bar, this skin does not replicate that -->
-    <Skin name = "MW_HSlider" size = "90 14">
-        <Property key="TrackRangeMargins" value = "14 14" />
-        <Property key="MinTrackSize" value = "14" />
-        <Property key="VerticalAlignment" value="false"/>
-        <Property key="MoveToClick" value="true"/>
-
-        <!-- Background widget trick that must go first to be placed behind Track and FirstPart/SecondPart widgets, provides the bar texture -->
-        <Child type="Button" skin="MW_HScrollBackground" offset = "14 0 62 14" align = "ALIGN_STRETCH" name = "Background"/>
-
-        <Child type="Button" skin="MW_ScrollLeft" offset = "0 0 14 14" align = "ALIGN_LEFT ALIGN_VSTRETCH" name = "Start"/>
-        <Child type="Button" skin="MW_ScrollRight" offset = "76 0 14 14" align = "ALIGN_RIGHT ALIGN_VSTRETCH" name = "End"/>
-
-        <!-- These are only provided to get mouse input, they should have no skin and be transparent -->
-        <Child type="Button" skin="MW_ScrollEmptyPart" offset = "14 0 24 14" align = "ALIGN_TOP ALIGN_HSTRETCH" name = "FirstPart"/>
-        <Child type="Button" skin="MW_ScrollEmptyPart" offset = "52 0 24 14" align = "ALIGN_TOP ALIGN_HSTRETCH" name = "SecondPart"/>
-
-        <!-- Tracker must be last to be on top and receive mouse events -->
-        <Child type="Button" skin="MW_ScrollTrackH" offset = "38 0 14 14" align = "ALIGN_LEFT ALIGN_VSTRETCH" name = "Track"/>
-    </Skin>
-
-    <!-- Morrowind has a 1 pixel gap between the top arrow and the inner bar, this skin does not replicate that -->
-    <Skin name = "MW_VScroll" size = "14 90">
-        <Property key="TrackRangeMargins" value = "14 14" />
-        <Property key="MinTrackSize" value = "14" />
-        <Property key="MoveToClick" value="true"/>
-
-        <!-- Background widget trick that must go first to be placed behind Track and FirstPart/SecondPart widgets, provides the bar texture -->
-        <Child type="Button" skin="MW_VScrollBackground" offset = "0 14 14 62" align = "ALIGN_STRETCH" name = "Background"/>
-
-        <Child type="Button" skin="MW_ScrollUp" offset = "0 0 14 14" align = "ALIGN_TOP ALIGN_HSTRETCH" name = "Start"/>
-        <Child type="Button" skin="MW_ScrollDown" offset = "0 76 14 14" align = "ALIGN_BOTTOM ALIGN_HSTRETCH" name = "End"/>
-
-        <!-- These are only provided to get mouse input, they should have no skin and be transparent -->
-        <Child type="Button" skin="MW_ScrollEmptyPart" offset = "0 14 24 14" align = "ALIGN_LEFT ALIGN_VSTRETCH" name = "FirstPart"/>
-        <Child type="Button" skin="MW_ScrollEmptyPart" offset = "0 52 24 14" align = "ALIGN_LEFT ALIGN_VSTRETCH" name = "SecondPart"/>
-
-        <!-- Tracker must be last to be on top and receive mouse events -->
-        <Child type="Button" skin="MW_ScrollTrack" offset = "0 38 14 14" align = "ALIGN_TOP ALIGN_HSTRETCH" name = "Track"/>
-
-    </Skin>
-
-    <Skin name = "HeaderText" size = "16 16">
-        <Property key="FontName" value = "Default"/>
-        <Property key="TextAlign" value = "ALIGN_CENTER" />
-        <Property key="TextColour" value = "0.82 0.74 0.58" />
-
-        <BasisSkin type="SimpleText" offset = "0 0 16 16"  align = "ALIGN_STRETCH"/>
+        <BasisSkin type="SimpleText" offset="0 0 16 16"  align="ALIGN_STRETCH"/>
     </Skin>
 
     <!-- list and multilist skins -->
-    <Skin name = "MW_ListLine" size = "5 5" texture="mwgui.png">
-        <Property key="FontName" value = "Default" />
-        <Property key="TextAlign" value = "ALIGN_LEFT ALIGN_VCENTER" />
 
-        <BasisSkin type="SimpleText" offset = "2 0 1 5" align = "ALIGN_STRETCH">
+    <Skin name="MW_ListLine" size="5 5">
+        <Property key="FontName" value="Default" />
+        <Property key="TextAlign" value="ALIGN_LEFT ALIGN_VCENTER" />
+
+        <BasisSkin type="SimpleText" offset="2 0 1 5" align="ALIGN_STRETCH">
             <State name="disabled" colour="0.70 0.57 0.33" shift="0"/>
             <State name="normal" colour="0.70 0.57 0.33" shift="0"/>
             <State name="highlighted" colour="0.85 0.76 0.60" shift="0"/>
@@ -234,81 +113,85 @@
         </BasisSkin>
     </Skin>
 
-    <Skin name = "MW_List" size = "516 516" align = "ALIGN_LEFT ALIGN_TOP" texture="mwgui.png">
-        <Property key="NeedKey" value = "true" />
-        <Property key="SkinLine" value = "MW_ListLine" />
-        <Property key="HeightLine" value = "20" />
+    <Skin name="MW_List" size="516 516" align="ALIGN_LEFT ALIGN_TOP">
+        <Property key="NeedKey" value="true" />
+        <Property key="SkinLine" value="MW_ListLine" />
+        <Property key="HeightLine" value="20" />
 
-        <Child type="ScrollBar" skin="MW_VScroll" offset = "498 3 14 509" align = "ALIGN_RIGHT ALIGN_VSTRETCH" name = "VScroll">
-        </Child>
+        <Child type="Widget" skin="MW_Box" offset="0 0 516 516" align="ALIGN_STRETCH"/>
 
-        <Child type="Widget" skin="" offset = "3 3 493 509" align = "ALIGN_STRETCH" name = "Client">
-        </Child>
+        <Child type="ScrollBar" skin="MW_VScroll" offset="498 3 14 509" align="ALIGN_RIGHT ALIGN_VSTRETCH" name="VScroll"/>
 
-        <Child type="Widget" skin="IB_T" offset="2 0 512 2" align="ALIGN_TOP ALIGN_HSTRETCH"/>
-        <Child type="Widget" skin="IB_B" offset="2 514 512 2" align="ALIGN_BOTTOM ALIGN_HSTRETCH"/>
-        <Child type="Widget" skin="IB_L" offset="0 2 2 512" align="ALIGN_LEFT ALIGN_VSTRETCH"/>
-        <Child type="Widget" skin="IB_R" offset="514 2 2 512" align="ALIGN_RIGHT ALIGN_VSTRETCH"/>
-        <Child type="Widget" skin="IB_TL" offset="0 0 2 2" align="ALIGN_TOP ALIGN_LEFT"/>
-        <Child type="Widget" skin="IB_TR" offset="514 0 2 2" align="ALIGN_TOP ALIGN_RIGHT"/>
-        <Child type="Widget" skin="IB_BL" offset="0 514 2 2" align="ALIGN_BOTTOM ALIGN_LEFT"/>
-        <Child type="Widget" skin="IB_BR" offset="514 514 2 2" align="ALIGN_BOTTOM ALIGN_RIGHT"/>
-    </Skin>
-
-    <Skin name = "MW_SimpleList" size = "516 516" align = "ALIGN_LEFT ALIGN_TOP" texture="mwgui.png">
-        <Child type="Widget" skin="" offset = "3 3 510 510" align = "ALIGN_STRETCH" name = "Client">
-        </Child>
-
-        <Child type="Widget" skin="IB_T" offset="2 0 512 2" align="ALIGN_TOP ALIGN_HSTRETCH"/>
-        <Child type="Widget" skin="IB_B" offset="2 514 512 2" align="ALIGN_BOTTOM ALIGN_HSTRETCH"/>
-        <Child type="Widget" skin="IB_L" offset="0 2 2 512" align="ALIGN_LEFT ALIGN_VSTRETCH"/>
-        <Child type="Widget" skin="IB_R" offset="514 2 2 512" align="ALIGN_RIGHT ALIGN_VSTRETCH"/>
-        <Child type="Widget" skin="IB_TL" offset="0 0 2 2" align="ALIGN_TOP ALIGN_LEFT"/>
-        <Child type="Widget" skin="IB_TR" offset="514 0 2 2" align="ALIGN_TOP ALIGN_RIGHT"/>
-        <Child type="Widget" skin="IB_BL" offset="0 514 2 2" align="ALIGN_BOTTOM ALIGN_LEFT"/>
-        <Child type="Widget" skin="IB_BR" offset="514 514 2 2" align="ALIGN_BOTTOM ALIGN_RIGHT"/>
-    </Skin>
-
-    <Skin name = "MW_MultiSubList" size = "516 516" align = "ALIGN_LEFT ALIGN_TOP">
-        <Property key="NeedKey" value = "true" />
-        <Property key="SkinLine" value = "MW_ListLine" />
-        <Property key="HeightLine" value = "20" />
-
-        <Child type="ScrollBar" skin="VScroll" offset = "498 3 14 509" align = "ALIGN_RIGHT ALIGN_VSTRETCH" name = "VScroll">
-        </Child>
-
-        <Child type="Widget" skin="Default" offset = "3 3 493 509" align = "ALIGN_STRETCH" name = "Client">
-        </Child>
-
-        <BasisSkin type="MainSkin" offset = "0 0 0 0" align = "ALIGN_LEFT ALIGN_TOP"/>
+        <Child type="Widget" skin="" offset="3 3 493 509" align="ALIGN_STRETCH" name="Client"/>
 
     </Skin>
 
-    <Skin name = "MW_MultiList" size = "516 516" align = "ALIGN_LEFT ALIGN_TOP">
-        <Property key="NeedKey" value = "true" />
-        <Property key="SkinButton" value = "ButtonSmall" />
-        <Property key="_SkinButtonEmpty" value = "EditBox" />
-        <Property key="HeightButton" value = "20" />
+    <Skin name="MW_SimpleList" size="516 516" align="ALIGN_LEFT ALIGN_TOP">
 
-        <Property key="SkinList" value = "MW_MultiSubList" />
+        <Child type="Widget" skin="MW_Box" offset="0 0 516 516" align="ALIGN_STRETCH"/>
 
-        <Child type="Widget" skin="" offset = "3 3 516 516" align = "ALIGN_STRETCH" name = "Client">
-        </Child>
+        <Child type="Widget" skin="" offset="3 3 510 510" align="Top Left ALIGN_STRETCH" name="Client"/>
 
-        <Child type="Widget" skin="IB_T" offset="2 0 512 2" align="ALIGN_TOP ALIGN_HSTRETCH"/>
-        <Child type="Widget" skin="IB_B" offset="2 514 512 2" align="ALIGN_BOTTOM ALIGN_HSTRETCH"/>
-        <Child type="Widget" skin="IB_L" offset="0 2 2 512" align="ALIGN_LEFT ALIGN_VSTRETCH"/>
-        <Child type="Widget" skin="IB_R" offset="514 2 2 512" align="ALIGN_RIGHT ALIGN_VSTRETCH"/>
-        <Child type="Widget" skin="IB_TL" offset="0 0 2 2" align="ALIGN_TOP ALIGN_LEFT"/>
-        <Child type="Widget" skin="IB_TR" offset="514 0 2 2" align="ALIGN_TOP ALIGN_RIGHT"/>
-        <Child type="Widget" skin="IB_BL" offset="0 514 2 2" align="ALIGN_BOTTOM ALIGN_LEFT"/>
-        <Child type="Widget" skin="IB_BR" offset="514 514 2 2" align="ALIGN_BOTTOM ALIGN_RIGHT"/>
     </Skin>
 
-    <!-- textures/menu_thin_border_top.dds -->
-    <Skin name = "MW_HLine" size = "512 18"  texture="mwgui.png">
-        <BasisSkin type="SubSkin" offset = "0 8 512 2" align = "ALIGN_TOP ALIGN_HSTRETCH">
-            <State name="normal" offset = "20 106 512 2"/>
+    <Skin name="MW_MultiSubList" size="516 516" align="ALIGN_LEFT ALIGN_TOP">
+        <Property key="NeedKey" value="true" />
+        <Property key="SkinLine" value="MW_ListLine" />
+        <Property key="HeightLine" value="20" />
+
+        <Child type="Widget" skin="MW_Box" offset="0 0 516 516" align="ALIGN_STRETCH"/>
+
+        <Child type="ScrollBar" skin="MW_VScroll" offset="498 3 14 509" align="ALIGN_RIGHT ALIGN_VSTRETCH" name="VScroll"/>
+
+        <Child type="Widget" skin="Default" offset="3 3 493 509" align="ALIGN_STRETCH" name="Client"/>
+
+    </Skin>
+
+    <Skin name="MW_MultiList" size="516 516" align="ALIGN_LEFT ALIGN_TOP">
+        <Property key="NeedKey" value="true" />
+        <Property key="SkinButton" value="ButtonSmall" />
+        <Property key="_SkinButtonEmpty" value="EditBox" />
+        <Property key="HeightButton" value="20" />
+
+        <Property key="SkinList" value="MW_MultiSubList" />
+
+        <Child type="Widget" skin="MW_Box" offset="0 0 516 516" align="ALIGN_STRETCH"/>
+
+        <Child type="Widget" skin="" offset="3 3 516 516" align="ALIGN_STRETCH" name="Client"/>
+    </Skin>
+
+    <!-- Horizontal line -->
+
+    <Skin name="MW_HLine" size="512 10"  texture="textures\menu_thin_border_top.dds">
+        <BasisSkin type="SubSkin" offset="0 0 512 2" align="ALIGN_BOTTOM ALIGN_HSTRETCH">
+            <State name="normal" offset="0 0 512 2"/>
         </BasisSkin>
     </Skin>
+
+    <!-- Arrows -->
+
+    <Skin name="MW_ArrowLeft" size="20 20" texture="textures\menu_scroll_left.dds">
+        <BasisSkin type="SubSkin" offset="0 0 19 20" align="Stretch">
+            <State name="normal" offset="0 0 19 20"/>
+        </BasisSkin>
+    </Skin>
+
+    <Skin name="MW_ArrowRight" size="20 20" texture="textures\menu_scroll_right.dds">
+        <BasisSkin type="SubSkin" offset="1 0 19 20" align="Stretch">
+            <State name="normal" offset="1 0 19 20"/>
+        </BasisSkin>
+    </Skin>
+
+    <Skin name="MW_ArrowUp" size="20 20" texture="textures\menu_scroll_up.dds">
+        <BasisSkin type="SubSkin" offset="0 0 20 19" align="Stretch">
+            <State name="normal" offset="0 0 20 19"/>
+        </BasisSkin>
+    </Skin>
+
+    <Skin name="MW_ArrowDown" size="20 20" texture="textures\menu_scroll_down.dds">
+        <BasisSkin type="SubSkin" offset="0 1 20 20" align="Stretch">
+            <State name="normal" offset="0 1 20 20"/>
+        </BasisSkin>
+    </Skin>
+
 </MyGUI>
