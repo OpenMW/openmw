@@ -217,7 +217,6 @@ namespace MWWorld
                 }
             }
 
-            MWBase::Environment::get().getWindowManager ()->setLoadingProgress ("Unloading cells", 0, current, numUnload);
             unloadCell (active++);
             ++current;
         }
@@ -360,7 +359,6 @@ namespace MWWorld
         active = mActiveCells.begin();
         while (active!=mActiveCells.end())
         {
-            MWBase::Environment::get().getWindowManager ()->setLoadingProgress ("Unloading cells", 0, current, numUnload);
 
             unloadCell (active++);
             ++current;
