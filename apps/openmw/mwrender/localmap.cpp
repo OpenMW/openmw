@@ -134,7 +134,7 @@ void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell,
     mAngle = angle.valueRadians();
 
     mCellCamera->setOrientation(Quaternion::IDENTITY);
-    mCameraRotNode->setOrientation(Quaternion(Math::Cos(angle/2.f), 0, 0, -Math::Sin(angle/2.f)));
+    mCameraRotNode->setOrientation(Quaternion(Math::Cos(mAngle/2.f), 0, 0, -Math::Sin(mAngle/2.f)));
 
     // rotate the cell and merge the rotated corners to the bounding box
     Vector2 _center(bounds.getCenter().x, bounds.getCenter().y);
@@ -155,6 +155,9 @@ void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell,
     mBounds.merge(Vector3(c2.x, c2.y, 0));
     mBounds.merge(Vector3(c3.x, c3.y, 0));
     mBounds.merge(Vector3(c4.x, c4.y, 0));
+
+    // apply a little padding
+    mBounds.scale ((mBounds.getSize ()+Ogre::Vector3(1000,1000,0)) / mBounds.getSize ());
 
     Vector2 center(mBounds.getCenter().x, mBounds.getCenter().y);
 
