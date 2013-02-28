@@ -169,11 +169,17 @@ namespace MWWorld
     void Scene::changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos)
     {
         Nif::NIFFile::CacheLock cachelock;
+        const MWWorld::Store<ESM::GameSetting> &gmst =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
         mRendering.preCellChange(mCurrentCell);
 
         // remove active
         MWBase::Environment::get().getMechanicsManager()->remove(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+
+        std::string loadingExteriorText;
+
+        loadingExteriorText = gmst.find ("sLoadingMessage3")->getString();
 
         CellStoreCollection::iterator active = mActiveCells.begin();
 
@@ -258,7 +264,7 @@ namespace MWWorld
                     CellStore *cell = MWBase::Environment::get().getWorld()->getExterior(x, y);
 
                     //Loading Exterior loading text
-                    MWBase::Environment::get().getWindowManager ()->setLoadingProgress ("Loading Exterior", 0, current, numLoad);
+                    MWBase::Environment::get().getWindowManager ()->setLoadingProgress (loadingExteriorText, 0, current, numLoad);
 
                     loadCell (cell);
                     ++current;
@@ -318,6 +324,13 @@ namespace MWWorld
 
     void Scene::changeToInteriorCell (const std::string& cellName, const ESM::Position& position)
     {
+
+        const MWWorld::Store<ESM::GameSetting> &gmst =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+        std::string loadingInteriorText;
+        loadingInteriorText = gmst.find ("sLoadingMessage2")->getString();
+
         CellStore *cell = MWBase::Environment::get().getWorld()->getInterior(cellName);
         bool loadcell = (mCurrentCell == NULL);
         if(!loadcell)
@@ -361,7 +374,7 @@ namespace MWWorld
         std::cout << "cellName: " << cell->mCell->mName << std::endl;
 
         //Loading Interior loading text
-        MWBase::Environment::get().getWindowManager ()->setLoadingProgress ("Loading Interior", 0, 0, 1);
+        MWBase::Environment::get().getWindowManager ()->setLoadingProgress (loadingInteriorText, 0, 0, 1);
 
         loadCell (cell);
 
