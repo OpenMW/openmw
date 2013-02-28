@@ -27,13 +27,10 @@ namespace
         {
             const MWWorld::Class& class_ =
                 MWWorld::Class::get (MWWorld::Ptr (&*cellRefList.mList.begin(), &cell));
-
-            size_t numRefs = cellRefList.mList.size();
             int current = 0;
             for (typename T::List::iterator it = cellRefList.mList.begin();
                 it != cellRefList.mList.end(); it++)
             {
-                MWBase::Environment::get().getWindowManager ()->setLoadingProgress ("Loading cells", 1, current, numRefs);
                 ++current;
 
                 if (it->mData.getCount() || it->mData.isEnabled())
@@ -54,10 +51,6 @@ namespace
                     }
                 }
             }
-        }
-        else
-        {
-            MWBase::Environment::get().getWindowManager ()->setLoadingProgress ("Loading cells", 1, 0, 1);
         }
     }
 
@@ -176,11 +169,17 @@ namespace MWWorld
     void Scene::changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos)
     {
         Nif::NIFFile::CacheLock cachelock;
+        const MWWorld::Store<ESM::GameSetting> &gmst =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
         mRendering.preCellChange(mCurrentCell);
 
         // remove active
         MWBase::Environment::get().getMechanicsManager()->remove(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+
+        std::string loadingExteriorText;
+
+        loadingExteriorText = gmst.find ("sLoadingMessage3")->getString();
 
         CellStoreCollection::iterator active = mActiveCells.begin();
 
@@ -216,7 +215,6 @@ namespace MWWorld
                     continue;
                 }
             }
-
             unloadCell (active++);
             ++current;
         }
@@ -265,7 +263,9 @@ namespace MWWorld
                 {
                     CellStore *cell = MWBase::Environment::get().getWorld()->getExterior(x, y);
 
-                    MWBase::Environment::get().getWindowManager ()->setLoadingProgress ("Loading cells", 0, current, numLoad);
+                    //Loading Exterior loading text
+                    MWBase::Environment::get().getWindowManager ()->setLoadingProgress (loadingExteriorText, 0, current, numLoad);
+
                     loadCell (cell);
                     ++current;
                 }
@@ -324,6 +324,13 @@ namespace MWWorld
 
     void Scene::changeToInteriorCell (const std::string& cellName, const ESM::Position& position)
     {
+
+        const MWWorld::Store<ESM::GameSetting> &gmst =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+        std::string loadingInteriorText;
+        loadingInteriorText = gmst.find ("sLoadingMessage2")->getString();
+
         CellStore *cell = MWBase::Environment::get().getWorld()->getInterior(cellName);
         bool loadcell = (mCurrentCell == NULL);
         if(!loadcell)
@@ -359,7 +366,6 @@ namespace MWWorld
         active = mActiveCells.begin();
         while (active!=mActiveCells.end())
         {
-
             unloadCell (active++);
             ++current;
         }
@@ -367,7 +373,9 @@ namespace MWWorld
         // Load cell.
         std::cout << "cellName: " << cell->mCell->mName << std::endl;
 
-        MWBase::Environment::get().getWindowManager ()->setLoadingProgress ("Loading cells", 0, 0, 1);
+        //Loading Interior loading text
+        MWBase::Environment::get().getWindowManager ()->setLoadingProgress (loadingInteriorText, 0, 0, 1);
+
         loadCell (cell);
 
         mCurrentCell = cell;
