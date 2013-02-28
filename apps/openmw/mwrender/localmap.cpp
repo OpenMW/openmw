@@ -119,6 +119,10 @@ void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell)
 void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell,
                             AxisAlignedBox bounds)
 {
+    // if we're in an empty cell, don't bother rendering anything
+    if (bounds.isNull ())
+        return;
+
     mInterior = true;
     mBounds = bounds;
 
