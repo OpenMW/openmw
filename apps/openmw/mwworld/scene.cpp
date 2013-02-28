@@ -75,7 +75,7 @@ namespace MWWorld
     {
         std::cout << "Unloading cell\n";
         ListHandles functor;
-	
+    
         (*iter)->forEach<ListHandles>(functor);
         {
             // silence annoying g++ warning
@@ -217,7 +217,7 @@ namespace MWWorld
                 }
             }
 
-            MWBase::Environment::get().getWindowManager ()->setLoadingProgress ("Unloading cells", 0, current, numUnload);
+            //MWBase::Environment::get().getWindowManager ()->setLoadingProgress ("Unloading cells", 0, current, numUnload);
             unloadCell (active++);
             ++current;
         }
@@ -360,7 +360,7 @@ namespace MWWorld
         active = mActiveCells.begin();
         while (active!=mActiveCells.end())
         {
-            MWBase::Environment::get().getWindowManager ()->setLoadingProgress ("Unloading cells", 0, current, numUnload);
+            //MWBase::Environment::get().getWindowManager ()->setLoadingProgress ("Unloading cells", 0, current, numUnload);
 
             unloadCell (active++);
             ++current;
