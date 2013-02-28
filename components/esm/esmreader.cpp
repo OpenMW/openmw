@@ -77,8 +77,9 @@ void ESMReader::open(Ogre::DataStreamPtr _esm, const std::string &name)
     // Get the header
     getHNT(mCtx.header, "HEDR", 300);
 
-    if (mCtx.header.version != VER_12 && mCtx.header.version != VER_13)
-        fail("Unsupported file format version");
+    // Some mods abuse the header.version field for the version of the mod instead of the version of the file format, so we can only ignore it.
+    //if (mCtx.header.version != VER_12 && mCtx.header.version != VER_13)
+        //fail("Unsupported file format version");
 
     while (isNextSub("MAST"))
     {
