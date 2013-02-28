@@ -1,7 +1,6 @@
 #ifndef OPENMW_ESM_APPA_H
 #define OPENMW_ESM_APPA_H
 
-#include "esmcommon.hpp"
 #include <string>
 
 namespace ESM
@@ -14,7 +13,7 @@ class ESMWriter;
  * Alchemist apparatus
  */
 
-class Apparatus
+struct Apparatus
 {
 public:
     enum AppaType
@@ -37,7 +36,7 @@ public:
     std::string mId, mModel, mIcon, mScript, mName;
 
     void load(ESMReader &esm);
-    void save(ESMWriter &esm) const;
+    void save(ESMWriter &esm);
 };
 }
 #endif
