@@ -424,6 +424,12 @@ void WindowManager::updateVisible()
             MyGUI::PointerManager::getInstance().setVisible(false);
             break;
         case GM_Loading:
+            // Show the pinned windows
+            mMap->setVisible(mMap->pinned());
+            mStatsWindow->setVisible(mStatsWindow->pinned());
+            mInventoryWindow->setVisible(mInventoryWindow->pinned());
+            mSpellWindow->setVisible(mSpellWindow->pinned());
+
             MyGUI::PointerManager::getInstance().setVisible(false);
             break;
         case GM_Video:

@@ -289,7 +289,7 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
 
         case SelectWrapper::Function_PcGender:
 
-            return player.get<ESM::NPC>()->mBase->mFlags & ESM::NPC::Female ? 0 : 1;
+            return player.get<ESM::NPC>()->mBase->isMale() ? 0 : 1;
 
         case SelectWrapper::Function_PcClothingModifier:
         {
