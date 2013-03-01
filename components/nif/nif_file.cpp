@@ -220,10 +220,9 @@ void NIFFile::parse()
 
   for(size_t i = 0;i < recNum;i++)
     {
-      std::string rec = getString();
-      //cout << i << ": " << rec.toString() << endl;
-
       Record *r = NULL;
+
+      std::string rec = getString();
 
       /* These are all the record types we know how to read.
 

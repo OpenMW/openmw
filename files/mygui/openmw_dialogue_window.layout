@@ -3,13 +3,15 @@
 <MyGUI type="Layout">
     <Widget type="Window" skin="MW_Window" layer="Windows" position="0 0 588 433" name="_Main">
 
+        <Widget type="Widget" skin="MW_Box" position="8 8 415 381" align="Stretch" name = "Client"/>
+
         <!-- The Dialogue history -->
-        <Widget type="DialogueHistory" skin="MW_TextBoxEdit" position="8 8 415 381" name="History"  align="ALIGN_LEFT ALIGN_TOP ALIGN_STRETCH">
+        <Widget type="DialogueHistory" skin="MW_TextBoxEdit" position="13 13 405 371" name="History"  align="ALIGN_LEFT ALIGN_TOP ALIGN_STRETCH">
             <Property key="Static" value="true"/>
             <Property key="WordWrap" value="true"/>
             <Property key="MultiLine" value="1" />
             <Property key="VisibleVScroll" value="1" />
-            <!-- invisible box for receiving mouse events -->
+            <!-- box for receiving mouse events -->
             <Widget type="Widget" skin="" position="0 0 400 375" name="EventBox" align="ALIGN_LEFT ALIGN_TOP ALIGN_STRETCH"/>
         </Widget>
 

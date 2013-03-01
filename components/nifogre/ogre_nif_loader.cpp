@@ -605,7 +605,12 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
              */
             static const char path[] = "textures\\";
 
-            texName = path + st->filename;
+            texName = st->filename;
+            Misc::StringUtils::toLower(texName);
+
+            if(texName.compare(0, sizeof(path)-1, path) != 0)
+                texName = path + texName;
+
             Ogre::String::size_type pos = texName.rfind('.');
             if(pos != Ogre::String::npos && texName.compare(pos, texName.length() - pos, ".dds") != 0)
             {
@@ -616,18 +621,7 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
                 // if it turns out that the above wasn't true in all cases (not for vanilla, but maybe mods)
                 // verify, and revert if false (this call succeeds quickly, but fails slowly)
                 if(!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(texName))
-                    texName = path + st->filename;
-            }
-            else if (!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(texName))
-            {
-                // workaround for Better Heads addon
-                size_t lastSlash = st->filename.rfind('\\');
-                if (lastSlash != std::string::npos && lastSlash + 1 != st->filename.size()) {
-                    texName = path + st->filename.substr(lastSlash + 1);
-                    // workaround for Better Bodies addon
-                    if (!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(texName))
-                        texName = st->filename;
-                }
+                    texName = path + Misc::StringUtils::lowerCase(texName);
             }
         }
         else warn("Found internal texture, ignoring.");
@@ -843,9 +837,12 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
         // Set the bounding box first
         BoundsFinder bounds;
         bounds.add(&srcVerts[0][0], srcVerts.size());
-        // No idea why this offset is needed. It works fine without it if the
-        // vertices weren't transformed first, but otherwise it fails later on
-        // when the object is being inserted into the scene.
+        if(!bounds.isValid())
+        {
+            float v[3] = { 0.0f, 0.0f, 0.0f };
+            bounds.add(&v[0], 1);
+        }
+
         mesh->_setBounds(Ogre::AxisAlignedBox(bounds.minX()-0.5f, bounds.minY()-0.5f, bounds.minZ()-0.5f,
                                               bounds.maxX()+0.5f, bounds.maxY()+0.5f, bounds.maxZ()+0.5f));
         mesh->_setBoundingSphereRadius(bounds.getRadius());

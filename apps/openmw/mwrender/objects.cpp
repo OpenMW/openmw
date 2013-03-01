@@ -113,12 +113,8 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh, bool
     Ogre::AxisAlignedBox bounds = Ogre::AxisAlignedBox::BOX_NULL;
     NifOgre::EntityList entities = NifOgre::Loader::createEntities(insert, mesh);
     for(size_t i = 0;i < entities.mEntities.size();i++)
-    {
-        const Ogre::AxisAlignedBox &tmp = entities.mEntities[i]->getBoundingBox();
-        bounds.merge(Ogre::AxisAlignedBox(insert->_getDerivedPosition() + tmp.getMinimum(),
-                                          insert->_getDerivedPosition() + tmp.getMaximum())
-        );
-    }
+        bounds.merge(entities.mEntities[i]->getWorldBoundingBox(true));
+
     Ogre::Vector3 extents = bounds.getSize();
     extents *= insert->getScale();
     float size = std::max(std::max(extents.x, extents.y), extents.z);
