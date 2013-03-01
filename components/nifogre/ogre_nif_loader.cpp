@@ -605,7 +605,12 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
              */
             static const char path[] = "textures\\";
 
-            texName = path + st->filename;
+            texName = st->filename;
+            Misc::StringUtils::toLower(texName);
+
+            if(texName.compare(0, sizeof(path)-1, path) != 0)
+                texName = path + texName;
+
             Ogre::String::size_type pos = texName.rfind('.');
             if(pos != Ogre::String::npos && texName.compare(pos, texName.length() - pos, ".dds") != 0)
             {
@@ -616,18 +621,7 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
                 // if it turns out that the above wasn't true in all cases (not for vanilla, but maybe mods)
                 // verify, and revert if false (this call succeeds quickly, but fails slowly)
                 if(!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(texName))
-                    texName = path + st->filename;
-            }
-            else if (!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(texName))
-            {
-                // workaround for Better Heads addon
-                size_t lastSlash = st->filename.rfind('\\');
-                if (lastSlash != std::string::npos && lastSlash + 1 != st->filename.size()) {
-                    texName = path + st->filename.substr(lastSlash + 1);
-                    // workaround for Better Bodies addon
-                    if (!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(texName))
-                        texName = st->filename;
-                }
+                    texName = path + Misc::StringUtils::lowerCase(texName);
             }
         }
         else warn("Found internal texture, ignoring.");
