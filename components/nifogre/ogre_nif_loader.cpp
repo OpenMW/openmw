@@ -710,8 +710,6 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
         blend_mode += getBlendFactor((alphaFlags>>1)&0xf);
         blend_mode += " ";
         blend_mode += getBlendFactor((alphaFlags>>5)&0xf);
-
-        instance->setProperty("depth_write", sh::makeProperty(new sh::StringValue("off")));
         instance->setProperty("scene_blend", sh::makeProperty(new sh::StringValue(blend_mode)));
     }
     else
@@ -729,6 +727,7 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
     instance->setProperty("transparent_sorting", sh::makeProperty(new sh::StringValue(((alphaFlags>>13)&1) ?
                                                                                       "off" : "on")));
 
+    sh::Factory::getInstance()._ensureMaterial(matname, "Default");
     return matname;
 }
 

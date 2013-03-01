@@ -130,23 +130,21 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh, bool
     mBounds[ptr.getCell()].merge(bounds);
 
     bool transparent = false;
-    for(size_t i = 0;i < entities.mEntities.size();i++)
+    for(size_t i = 0;!transparent && i < entities.mEntities.size();i++)
     {
         Ogre::Entity *ent = entities.mEntities[i];
-        for (unsigned int i=0; i<ent->getNumSubEntities(); ++i)
+        for(unsigned int i=0;!transparent && i < ent->getNumSubEntities(); ++i)
         {
             Ogre::MaterialPtr mat = ent->getSubEntity(i)->getMaterial();
             Ogre::Material::TechniqueIterator techIt = mat->getTechniqueIterator();
-            while (techIt.hasMoreElements())
+            while(!transparent && techIt.hasMoreElements())
             {
                 Ogre::Technique* tech = techIt.getNext();
                 Ogre::Technique::PassIterator passIt = tech->getPassIterator();
-                while (passIt.hasMoreElements())
+                while(!transparent && passIt.hasMoreElements())
                 {
                     Ogre::Pass* pass = passIt.getNext();
-
-                    if (pass->getDepthWriteEnabled() == false)
-                        transparent = true;
+                    transparent = pass->isTransparent();
                 }
             }
         }

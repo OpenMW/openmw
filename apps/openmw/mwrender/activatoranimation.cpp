@@ -31,20 +31,18 @@ ActivatorAnimation::ActivatorAnimation(const MWWorld::Ptr &ptr)
             Ogre::Entity *ent = mEntityList.mEntities[i];
 
             bool transparent = false;
-            for (unsigned int j=0;j < ent->getNumSubEntities() && !transparent; ++j)
+            for(unsigned int j=0;!transparent && j < ent->getNumSubEntities(); ++j)
             {
                 Ogre::MaterialPtr mat = ent->getSubEntity(j)->getMaterial();
                 Ogre::Material::TechniqueIterator techIt = mat->getTechniqueIterator();
-                while (techIt.hasMoreElements() && !transparent)
+                while(!transparent && techIt.hasMoreElements())
                 {
                     Ogre::Technique* tech = techIt.getNext();
                     Ogre::Technique::PassIterator passIt = tech->getPassIterator();
-                    while (passIt.hasMoreElements() && !transparent)
+                    while(!transparent && passIt.hasMoreElements())
                     {
                         Ogre::Pass* pass = passIt.getNext();
-
-                        if (pass->getDepthWriteEnabled() == false)
-                            transparent = true;
+                        transparent = pass->isTransparent();
                     }
                 }
             }

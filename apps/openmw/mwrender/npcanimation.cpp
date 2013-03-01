@@ -107,19 +107,18 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
         base->setVisibilityFlags(mVisibilityFlags);
 
         bool transparent = false;
-        for(unsigned int j=0;j < base->getNumSubEntities();++j)
+        for(unsigned int j=0;!transparent && j < base->getNumSubEntities();++j)
         {
             Ogre::MaterialPtr mat = base->getSubEntity(j)->getMaterial();
             Ogre::Material::TechniqueIterator techIt = mat->getTechniqueIterator();
-            while (techIt.hasMoreElements())
+            while(!transparent && techIt.hasMoreElements())
             {
                 Ogre::Technique* tech = techIt.getNext();
                 Ogre::Technique::PassIterator passIt = tech->getPassIterator();
-                while (passIt.hasMoreElements())
+                while(!transparent && passIt.hasMoreElements())
                 {
                     Ogre::Pass* pass = passIt.getNext();
-                    if (pass->getDepthWriteEnabled() == false)
-                        transparent = true;
+                    transparent = pass->isTransparent();
                 }
             }
         }
@@ -322,8 +321,26 @@ NifOgre::EntityList NpcAnimation::insertBoundedPart(const std::string &mesh, int
     std::vector<Ogre::Entity*> &parts = entities.mEntities;
     for(size_t i = 0;i < parts.size();i++)
     {
-        parts[i]->setVisibilityFlags(mVisibilityFlags);
         parts[i]->getUserObjectBindings().setUserAny(Ogre::Any(group));
+        parts[i]->setVisibilityFlags(mVisibilityFlags);
+
+        bool transparent = false;
+        for(unsigned int j=0;!transparent && j < parts[i]->getNumSubEntities();++j)
+        {
+            Ogre::MaterialPtr mat = parts[i]->getSubEntity(j)->getMaterial();
+            Ogre::Material::TechniqueIterator techIt = mat->getTechniqueIterator();
+            while(!transparent && techIt.hasMoreElements())
+            {
+                Ogre::Technique* tech = techIt.getNext();
+                Ogre::Technique::PassIterator passIt = tech->getPassIterator();
+                while(!transparent && passIt.hasMoreElements())
+                {
+                    Ogre::Pass* pass = passIt.getNext();
+                    transparent = pass->isTransparent();
+                }
+            }
+        }
+        parts[i]->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
     }
     if(entities.mSkelBase)
     {
