@@ -110,7 +110,7 @@ namespace MWGui
         mWidget->setImageTexture(texture);
         MyGUI::ISubWidget* main = mWidget->getSubWidgetMain();
         MyGUI::RotatingSkin* rotatingSubskin = main->castType<MyGUI::RotatingSkin>();
-        rotatingSubskin->setCenter(MyGUI::IntPoint(16,16));
+        rotatingSubskin->setCenter(MyGUI::IntPoint(mSize.width/2,mSize.height/2));
         rotatingSubskin->setAngle(Ogre::Degree(rotation).valueRadians());
     }
 
