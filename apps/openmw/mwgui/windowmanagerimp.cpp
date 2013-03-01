@@ -53,6 +53,7 @@
 #include "trainingwindow.hpp"
 #include "imagebutton.hpp"
 #include "exposedwindow.hpp"
+#include "cursor.hpp"
 
 using namespace MWGui;
 
@@ -130,6 +131,9 @@ WindowManager::WindowManager(
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::ImageButton>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::ExposedWindow>("Widget");
 
+    MyGUI::FactoryManager::getInstance().registerFactory<ResourceImageSetPointerFix>("Resource", "ResourceImageSetPointer");
+    MyGUI::ResourceManager::getInstance().load("core.xml");
+
     MyGUI::LanguageManager::getInstance().eventRequestTag = MyGUI::newDelegate(this, &WindowManager::onRetrieveTag);
 
     // Get size info from the Gui object
@@ -177,6 +181,8 @@ WindowManager::WindowManager(
     mLoadingScreen->onResChange (w,h);
 
     mInputBlocker = mGui->createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Default,"Windows","");
+
+    mCursor = new Cursor();
 
     // The HUD is always on
     mHud->setVisible(true);
@@ -236,6 +242,7 @@ WindowManager::~WindowManager()
     delete mTrainingWindow;
     delete mCountDialog;
     delete mQuickKeysMenu;
+    delete mCursor;
 
     cleanupGarbage();
 
@@ -262,6 +269,8 @@ void WindowManager::update()
     mHud->setFPS(mFPS);
     mHud->setTriangleCount(mTriangleCount);
     mHud->setBatchCount(mBatchCount);
+
+    mCursor->update();
 }
 
 void WindowManager::updateVisible()
@@ -293,7 +302,7 @@ void WindowManager::updateVisible()
     mHud->setVisible(true);
 
     // Mouse is visible whenever we're not in game mode
-    MyGUI::PointerManager::getInstance().setVisible(isGuiMode());
+    mCursor->setVisible(isGuiMode());
 
     bool gameMode = !isGuiMode();
 
@@ -421,7 +430,7 @@ void WindowManager::updateVisible()
             break;
         case GM_LoadingWallpaper:
             mHud->setVisible(false);
-            MyGUI::PointerManager::getInstance().setVisible(false);
+            mCursor->setVisible(false);
             break;
         case GM_Loading:
             // Show the pinned windows
@@ -430,10 +439,10 @@ void WindowManager::updateVisible()
             mInventoryWindow->setVisible(mInventoryWindow->pinned());
             mSpellWindow->setVisible(mSpellWindow->pinned());
 
-            MyGUI::PointerManager::getInstance().setVisible(false);
+            mCursor->setVisible(false);
             break;
         case GM_Video:
-            MyGUI::PointerManager::getInstance().setVisible(false);
+            mCursor->setVisible(false);
             mHud->setVisible(false);
             break;
         default:
@@ -755,7 +764,7 @@ void WindowManager::setSpellVisibility(bool visible)
 
 void WindowManager::setMouseVisible(bool visible)
 {
-    MyGUI::PointerManager::getInstance().setVisible(visible);
+    mCursor->setVisible(visible);
 }
 
 void WindowManager::setDragDrop(bool dragDrop)
