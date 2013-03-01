@@ -559,8 +559,22 @@ MWDialogue::Filter::Filter (const MWWorld::Ptr& actor, int choice, bool talkedTo
 : mActor (actor), mChoice (choice), mTalkedToPlayer (talkedToPlayer)
 {}
 
-const ESM::DialInfo *MWDialogue::Filter::search (const ESM::Dialogue& dialogue, const bool fallbackToInfoRefusal) const
+const ESM::DialInfo* MWDialogue::Filter::search (const ESM::Dialogue& dialogue, const bool fallbackToInfoRefusal) const
 {
+    std::vector<const ESM::DialInfo*> suitableInfos;
+    search(suitableInfos, dialogue, fallbackToInfoRefusal, false);
+
+    if (suitableInfos.empty())
+        return NULL;
+    else
+        return suitableInfos[0];
+}
+
+void MWDialogue::Filter::search (std::vector<const ESM::DialInfo*>& suitableInfos, const ESM::Dialogue& dialogue,
+                                 const bool fallbackToInfoRefusal, bool searchAll) const
+{
+    suitableInfos.clear();
+
     bool infoRefusal = false;
 
     // Iterate over topic responses to find a matching one
@@ -569,14 +583,17 @@ const ESM::DialInfo *MWDialogue::Filter::search (const ESM::Dialogue& dialogue, 
     {
         if (testActor (*iter) && testPlayer (*iter) && testSelectStructs (*iter))
         {
-            if (testDisposition (*iter))
-                return &*iter;
+            if (testDisposition (*iter)) {
+                suitableInfos.push_back(&*iter);
+                if (!searchAll)
+                    return;
+            }
             else
                 infoRefusal = true;
         }
     }
 
-    if (infoRefusal && fallbackToInfoRefusal)
+    if (suitableInfos.empty() && infoRefusal && fallbackToInfoRefusal)
     {
         // No response is valid because of low NPC disposition,
         // search a response in the topic "Info Refusal"
@@ -588,11 +605,12 @@ const ESM::DialInfo *MWDialogue::Filter::search (const ESM::Dialogue& dialogue, 
 
         for (std::vector<ESM::DialInfo>::const_iterator iter = infoRefusalDialogue.mInfo.begin();
             iter!=infoRefusalDialogue.mInfo.end(); ++iter)
-            if (testActor (*iter) && testPlayer (*iter) && testSelectStructs (*iter) && testDisposition(*iter))
-                return &*iter;
+            if (testActor (*iter) && testPlayer (*iter) && testSelectStructs (*iter) && testDisposition(*iter)) {
+                suitableInfos.push_back(&*iter);
+                if (!searchAll)
+                    return;
+            }
     }
-
-    return 0;
 }
 
 bool MWDialogue::Filter::responseAvailable (const ESM::Dialogue& dialogue) const

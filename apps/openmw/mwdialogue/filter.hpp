@@ -51,7 +51,8 @@ namespace MWDialogue
 
             Filter (const MWWorld::Ptr& actor, int choice, bool talkedToPlayer);
 
-            const ESM::DialInfo *search (const ESM::Dialogue& dialogue, const bool fallbackToInfoRefusal) const;
+            void search (std::vector<const ESM::DialInfo*>& suitableInfos, const ESM::Dialogue& dialogue, const bool fallbackToInfoRefusal, bool searchAll) const;
+            const ESM::DialInfo* search (const ESM::Dialogue& dialogue, const bool fallbackToInfoRefusal) const;
             ///< Get a matching response for the requested dialogue.
             ///  Redirect to "Info Refusal" topic if a response fulfills all conditions but disposition.
 
