@@ -733,6 +733,7 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
     instance->setProperty("transparent_sorting", sh::makeProperty(new sh::StringValue(((alphaFlags>>13)&1) ?
                                                                                       "off" : "on")));
 
+    sh::Factory::getInstance()._ensureMaterial(matname, "Default");
     return matname;
 }
 
