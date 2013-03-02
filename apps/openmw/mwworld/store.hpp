@@ -187,11 +187,11 @@ namespace MWWorld
             T item;
             item.mId = Misc::StringUtils::lowerCase(id);
 
-            // delete from static part of shared
-            typename std::vector<T *>::iterator sharedit = mShared.begin();
-            for (; sharedit != (mShared.begin()+mStatic.size()); ++sharedit) {
-                if((*sharedit)->mId == item.mId) {
-                    mShared.erase(sharedit);
+            // delete from the static part of mShared
+            typename std::vector<T *>::iterator sharedIter = mShared.begin();
+            for (; sharedIter != (mShared.begin()+mStatic.size()); ++sharedIter) {
+                if((*sharedIter)->mId == item.mId) {
+                    mShared.erase(sharedIter);
                     break;
                 }
             }
