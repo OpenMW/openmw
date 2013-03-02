@@ -2,6 +2,7 @@
 #include "dialoguemanagerimp.hpp"
 
 #include <cctype>
+#include <cstdlib>
 #include <algorithm>
 #include <iterator>
 
@@ -251,11 +252,11 @@ namespace MWDialogue
 
         MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
 
-        std::vector<const ESM::DialInfo*> infos;
-        filter.search (infos, dialogue, true, true);
+        std::vector<const ESM::DialInfo *> infos = filter.list (dialogue, true, true);
+
         if (!infos.empty())
         {
-            const ESM::DialInfo* info = infos[rand() % infos.size()];
+            const ESM::DialInfo* info = infos[std::rand() % infos.size()];
 
             parseText (info->mResponse);
 
