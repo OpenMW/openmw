@@ -171,22 +171,22 @@ bool CSVDoc::ViewManager::showSaveInProgressMessageBox (View* view)
     messageBox.setInformativeText("Do you want to abort the save?");
     messageBox.setStandardButtons (QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
 
-    bool retVal = false;
+    bool retVal = true;
 
     switch (messageBox.exec())
     {
-        case QMessageBox::Yes:
+        case QMessageBox::Yes:    //immediate shutdown
+            mCloseMeOnSaveStateChange = 0;
             view->abortOperation(CSMDoc::State_Saving);
-           // mCloseMeOnSaveStateChange = view;
+        break;
+
+        case QMessageBox::No:    //shutdown after save completes
+            mCloseMeOnSaveStateChange = view;
             retVal = false;
         break;
 
-        case QMessageBox::No:
-            //mCloseMeOnSaveStateChange = view;
-            retVal = false;
-        break;
-
-        case QMessageBox::Cancel:
+        case QMessageBox::Cancel:  //abort shutdown, allow save to complete
+            mCloseMeOnSaveStateChange = 0;
             retVal = false;
         break;
 
@@ -207,13 +207,14 @@ void CSVDoc::ViewManager::documentStateChanged (int state, CSMDoc::Document *doc
         qDebug() << "Last state was saving";
     else
         qDebug() << "Last state was something else";
-/*
+
+    //mechanism to shutdown main window after saving operation completes
     if (mCloseMeOnSaveStateChange && (mPreviousDocumentState & CSMDoc::State_Saving))
     {
         mCloseMeOnSaveStateChange->close();
         mCloseMeOnSaveStateChange = 0;
     }
-*/
+
     mPreviousDocumentState = state;
 }
 

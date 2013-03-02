@@ -121,9 +121,9 @@ void CSVDoc::View::updateActions()
     mVerify->setEnabled (!(mDocument->getState() & CSMDoc::State_Verifying));
 }
 
-CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews) //, QMainWindow *viewParent)
+CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews)
     : mViewManager (viewManager), mDocument (document), mViewIndex (totalViews-1),
-      mViewTotal (totalViews) //, QMainWindow (viewParent)
+      mViewTotal (totalViews)
 {
     setAttribute (Qt::WA_DeleteOnClose, true);
     setDockOptions (QMainWindow::AllowNestedDocks);

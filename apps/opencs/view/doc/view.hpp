@@ -67,7 +67,7 @@ namespace CSVDoc
 
         public:
 
-            View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews); //, QMainWindow *viewParent);
+            View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews);
             ///< The ownership of \a document is not transferred to *this.
 
             virtual ~View();
