@@ -251,8 +251,12 @@ namespace MWDialogue
 
         MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
 
-        if (const ESM::DialInfo *info = filter.search (dialogue, true))
+        std::vector<const ESM::DialInfo*> infos;
+        filter.search (infos, dialogue, true, true);
+        if (!infos.empty())
         {
+            const ESM::DialInfo* info = infos[rand() % infos.size()];
+
             parseText (info->mResponse);
 
             if (dialogue.mType==ESM::Dialogue::Persuasion)
