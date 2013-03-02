@@ -9,6 +9,8 @@
 #include "settings/graphicssettings.hpp"
 #include "settings/launchersettings.hpp"
 
+#include "ui_mainwindow.h"
+
 class QListWidget;
 class QListWidgetItem;
 class QStackedWidget;
@@ -20,7 +22,7 @@ class PlayPage;
 class GraphicsPage;
 class DataFilesPage;
 
-class MainDialog : public QMainWindow
+class MainDialog : public QMainWindow, private Ui::MainWindow
 {
     Q_OBJECT
 
@@ -56,8 +58,8 @@ private:
 
     void closeEvent(QCloseEvent *event);
 
-    QListWidget *mIconWidget;
-    QStackedWidget *mPagesWidget;
+//    QListWidget *mIconWidget;
+//    QStackedWidget *mPagesWidget;
 
     PlayPage *mPlayPage;
     GraphicsPage *mGraphicsPage;

@@ -36,6 +36,7 @@ set(LAUNCHER_HEADER
     utils/comboboxlineedit.hpp
     utils/profilescombobox.hpp
     utils/textinputdialog.hpp
+
 )
 
 # Headers that must be pre-processed
@@ -54,9 +55,9 @@ set(LAUNCHER_HEADER_MOC
 )
 
 set(LAUNCHER_UI
-    ui/graphicspage.ui
-    ui/mainwindow.ui
-    ui/playpage.ui
+    ./ui/graphicspage.ui
+    ./ui/mainwindow.ui
+    ./ui/playpage.ui
 )
 
 source_group(launcher FILES ${LAUNCHER} ${LAUNCHER_HEADER})
@@ -72,9 +73,10 @@ endif(WIN32)
 
 QT4_ADD_RESOURCES(RCC_SRCS resources.qrc)
 QT4_WRAP_CPP(MOC_SRCS ${LAUNCHER_HEADER_MOC})
-QT4_WRAP_UI(UI_HDRS ${LAUCHER_UI})
+QT4_WRAP_UI(UI_HDRS ${LAUNCHER_UI})
 
 include(${QT_USE_FILE})
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 # Main executable
 IF(OGRE_STATIC)
@@ -105,18 +107,6 @@ target_link_libraries(omwlauncher
 
 if(DPKG_PROGRAM)
     INSTALL(TARGETS omwlauncher RUNTIME DESTINATION games COMPONENT omwlauncher)
-endif()
-
-if (APPLE)
-    configure_file(${CMAKE_SOURCE_DIR}/files/launcher.qss
-        "${APP_BUNDLE_DIR}/../launcher.qss")
-else()
-    configure_file(${CMAKE_SOURCE_DIR}/files/launcher.qss
-        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources/launcher.qss")
-
-    # Fallback in case getGlobalDataPath does not point to resources
-    configure_file(${CMAKE_SOURCE_DIR}/files/launcher.qss
-        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launcher.qss")
 endif()
 
 if (BUILD_WITH_CODE_COVERAGE)

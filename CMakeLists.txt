@@ -379,7 +379,6 @@ if(WIN32)
         "${OpenMW_SOURCE_DIR}/OFL.txt"
         "${OpenMW_SOURCE_DIR}/DejaVu Font License.txt"
         "${OpenMW_SOURCE_DIR}/Daedric Font License.txt"
-        "${OpenMW_BINARY_DIR}/launcher.qss"
         "${OpenMW_BINARY_DIR}/settings-default.cfg"
         "${OpenMW_BINARY_DIR}/transparency-overrides.cfg"
         "${OpenMW_BINARY_DIR}/Release/omwlauncher.exe"
@@ -566,8 +565,6 @@ if (APPLE)
     install(DIRECTORY "${APP_BUNDLE_DIR}" USE_SOURCE_PERMISSIONS DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
     install(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
     install(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" RENAME "openmw.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
-    install(FILES "${OpenMW_BINARY_DIR}/launcher.qss" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
-
     install(FILES "${OpenMW_BINARY_DIR}/settings-default.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
     install(FILES "${OpenMW_BINARY_DIR}/transparency-overrides.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
 
@@ -681,7 +678,4 @@ if (NOT WIN32 AND NOT DPKG_PROGRAM AND NOT APPLE)
 
     # Install resources
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION "${DATADIR}" )
-    IF(BUILD_LAUNCHER)
-        INSTALL(FILES "${OpenMW_BINARY_DIR}/launcher.qss" DESTINATION "${DATADIR}/resources" )
-    ENDIF(BUILD_LAUNCHER)
 endif(NOT WIN32 AND NOT DPKG_PROGRAM AND NOT APPLE)

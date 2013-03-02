@@ -12,46 +12,6 @@
 MainDialog::MainDialog()
     : mGameSettings(mCfgMgr)
 {
-    QWidget *centralWidget = new QWidget(this);
-    setCentralWidget(centralWidget);
-
-    mIconWidget = new QListWidget(centralWidget);
-    mIconWidget->setObjectName("IconWidget");
-    mIconWidget->setViewMode(QListView::IconMode);
-    mIconWidget->setWrapping(false);
-    mIconWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff); // Just to be sure
-    mIconWidget->setIconSize(QSize(48, 48));
-    mIconWidget->setMovement(QListView::Static);
-
-    mIconWidget->setMinimumWidth(400);
-    mIconWidget->setFixedHeight(80);
-    mIconWidget->setSpacing(4);
-    mIconWidget->setCurrentRow(0);
-    mIconWidget->setFlow(QListView::LeftToRight);
-
-    QGroupBox *groupBox = new QGroupBox(centralWidget);
-    QVBoxLayout *groupLayout = new QVBoxLayout(groupBox);
-
-    mPagesWidget = new QStackedWidget(groupBox);
-    groupLayout->addWidget(mPagesWidget);
-
-    QPushButton *playButton = new QPushButton(tr("Play"));
-
-    QDialogButtonBox *buttonBox = new QDialogButtonBox(centralWidget);
-    buttonBox->setStandardButtons(QDialogButtonBox::Close);
-    buttonBox->addButton(playButton, QDialogButtonBox::AcceptRole);
-
-    QVBoxLayout *dialogLayout = new QVBoxLayout(centralWidget);
-    dialogLayout->addWidget(mIconWidget);
-    dialogLayout->addWidget(groupBox);
-    dialogLayout->addWidget(buttonBox);
-
-    setWindowTitle(tr("OpenMW Launcher"));
-    setWindowIcon(QIcon(":/images/openmw.png"));
-    // Remove what's this? button
-    setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
-    setMinimumSize(QSize(575, 575));
-
     // Install the stylesheet font
     QFile file;
     QFontDatabase fontDatabase;
@@ -71,30 +31,26 @@ MainDialog::MainDialog()
         fontDatabase.addApplicationFont(font);
     }
 
-    // Load the stylesheet
-    QString config = QString::fromStdString(mCfgMgr.getGlobalDataPath().string()) + QString("resources/launcher.qss");
-    file.setFileName(config);
+    setupUi(this);
 
-    if (!file.exists())
-        file.setFileName(QString::fromStdString(mCfgMgr.getLocalPath().string()) + QString("launcher.qss"));
+    iconWidget->setViewMode(QListView::IconMode);
+    iconWidget->setWrapping(false);
+    iconWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff); // Just to be sure
+    iconWidget->setIconSize(QSize(48, 48));
+    iconWidget->setMovement(QListView::Static);
 
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QMessageBox msgBox;
-        msgBox.setWindowTitle(tr("Error opening Launcher stylesheet"));
-        msgBox.setIcon(QMessageBox::Warning);
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(QObject::tr("<br><b>Could not open %0 for reading</b><br><br> \
-                          Please make sure you have the right permissions \
-                          and try again.<br>").arg(file.fileName()));
-        msgBox.exec();
-    } else {
-        QString styleSheet = QLatin1String(file.readAll());
-        qApp->setStyleSheet(styleSheet);
-        file.close();
-    }
+    iconWidget->setSpacing(4);
+    iconWidget->setCurrentRow(0);
+    iconWidget->setFlow(QListView::LeftToRight);
+
+    QPushButton *playButton = new QPushButton(tr("Play"));
+    buttonBox->addButton(playButton, QDialogButtonBox::AcceptRole);
 
     connect(buttonBox, SIGNAL(rejected()), this, SLOT(close()));
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(play()));
+
+    // Remove what's this? button
+    setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
     createIcons();
 }
@@ -107,25 +63,25 @@ void MainDialog::createIcons()
     // We create a fallback icon because the default fallback doesn't work
     QIcon graphicsIcon = QIcon(":/icons/tango/video-display.png");
 
-    QListWidgetItem *playButton = new QListWidgetItem(mIconWidget);
+    QListWidgetItem *playButton = new QListWidgetItem(iconWidget);
     playButton->setIcon(QIcon(":/images/openmw.png"));
     playButton->setText(tr("Play"));
     playButton->setTextAlignment(Qt::AlignCenter);
     playButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
-    QListWidgetItem *graphicsButton = new QListWidgetItem(mIconWidget);
+    QListWidgetItem *graphicsButton = new QListWidgetItem(iconWidget);
     graphicsButton->setIcon(QIcon::fromTheme("video-display", graphicsIcon));
     graphicsButton->setText(tr("Graphics"));
     graphicsButton->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom | Qt::AlignAbsolute);
     graphicsButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
-    QListWidgetItem *dataFilesButton = new QListWidgetItem(mIconWidget);
+    QListWidgetItem *dataFilesButton = new QListWidgetItem(iconWidget);
     dataFilesButton->setIcon(QIcon(":/images/openmw-plugin.png"));
     dataFilesButton->setText(tr("Data Files"));
     dataFilesButton->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom);
     dataFilesButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
-    connect(mIconWidget,
+    connect(iconWidget,
             SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),
             this, SLOT(changePage(QListWidgetItem*,QListWidgetItem*)));
 
@@ -142,12 +98,12 @@ void MainDialog::createPages()
     mPlayPage->mProfilesComboBox->setCurrentIndex(mDataFilesPage->mProfilesComboBox->currentIndex());
 
     // Add the pages to the stacked widget
-    mPagesWidget->addWidget(mPlayPage);
-    mPagesWidget->addWidget(mGraphicsPage);
-    mPagesWidget->addWidget(mDataFilesPage);
+    pagesWidget->addWidget(mPlayPage);
+    pagesWidget->addWidget(mGraphicsPage);
+    pagesWidget->addWidget(mDataFilesPage);
 
     // Select the first page
-    mIconWidget->setCurrentItem(mIconWidget->item(0), QItemSelectionModel::Select);
+    iconWidget->setCurrentItem(iconWidget->item(0), QItemSelectionModel::Select);
 
     connect(mPlayPage->mPlayButton, SIGNAL(clicked()), this, SLOT(play()));
 
@@ -326,7 +282,7 @@ void MainDialog::changePage(QListWidgetItem *current, QListWidgetItem *previous)
     if (!current)
         current = previous;
 
-    mPagesWidget->setCurrentIndex(mIconWidget->row(current));
+    pagesWidget->setCurrentIndex(iconWidget->row(current));
 }
 
 bool MainDialog::setupLauncherSettings()
