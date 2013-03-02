@@ -18,10 +18,14 @@
 #include "operations.hpp"
 #include "subview.hpp"
 
+#include <QDebug>
 void CSVDoc::View::closeEvent (QCloseEvent *event)
 {
     if (!mViewManager.closeRequest (this))
+    {
+        qDebug() << "ignoring event";
         event->ignore();
+    }
 }
 
 void CSVDoc::View::setupFileMenu()
@@ -117,9 +121,11 @@ void CSVDoc::View::updateActions()
     mVerify->setEnabled (!(mDocument->getState() & CSMDoc::State_Verifying));
 }
 
-CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews, QMainWindow *viewParent)
-    : mViewManager (viewManager), mDocument (document), mViewIndex (totalViews-1), mViewTotal (totalViews), QMainWindow (viewParent)
+CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews) //, QMainWindow *viewParent)
+    : mViewManager (viewManager), mDocument (document), mViewIndex (totalViews-1),
+      mViewTotal (totalViews) //, QMainWindow (viewParent)
 {
+    setAttribute (Qt::WA_DeleteOnClose, true);
     setDockOptions (QMainWindow::AllowNestedDocks);
 
     resize (300, 300); /// \todo get default size from settings and set reasonable minimal size

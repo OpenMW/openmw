@@ -67,7 +67,7 @@ namespace CSVDoc
 
         public:
 
-            View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews, QMainWindow *viewParent);
+            View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews); //, QMainWindow *viewParent);
             ///< The ownership of \a document is not transferred to *this.
 
             virtual ~View();
@@ -94,6 +94,8 @@ namespace CSVDoc
 
             void addSubView (const CSMWorld::UniversalId& id);
 
+            void abortOperation (int type);
+
         private slots:
 
             void newView();
@@ -106,7 +108,6 @@ namespace CSVDoc
 
             void addGmstsSubView();
 
-            void abortOperation (int type);
     };
 }
 
