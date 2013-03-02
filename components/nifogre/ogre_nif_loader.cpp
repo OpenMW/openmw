@@ -621,7 +621,12 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
                 // if it turns out that the above wasn't true in all cases (not for vanilla, but maybe mods)
                 // verify, and revert if false (this call succeeds quickly, but fails slowly)
                 if(!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(texName))
-                    texName = path + Misc::StringUtils::lowerCase(texName);
+                {
+                    texName = st->filename;
+                    Misc::StringUtils::toLower(texName);
+                    if(texName.compare(0, sizeof(path)-1, path) != 0)
+                        texName = path + texName;
+                }
             }
         }
         else warn("Found internal texture, ignoring.");
