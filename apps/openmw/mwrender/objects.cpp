@@ -57,14 +57,14 @@ void Objects::clearSceneNode (Ogre::SceneNode *node)
     }
 }
 
-void Objects::setMwRoot(Ogre::SceneNode* root)
+void Objects::setRootNode(Ogre::SceneNode* root)
 {
-    mMwRoot = root;
+    mRootNode = root;
 }
 
 void Objects::insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_)
 {
-    Ogre::SceneNode* root = mMwRoot;
+    Ogre::SceneNode* root = mRootNode;
     Ogre::SceneNode* cellnode;
     if(mCellSceneNodes.find(ptr.getCell()) == mCellSceneNodes.end())
     {
@@ -113,12 +113,8 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh, bool
     Ogre::AxisAlignedBox bounds = Ogre::AxisAlignedBox::BOX_NULL;
     NifOgre::EntityList entities = NifOgre::Loader::createEntities(insert, mesh);
     for(size_t i = 0;i < entities.mEntities.size();i++)
-    {
-        const Ogre::AxisAlignedBox &tmp = entities.mEntities[i]->getBoundingBox();
-        bounds.merge(Ogre::AxisAlignedBox(insert->_getDerivedPosition() + tmp.getMinimum(),
-                                          insert->_getDerivedPosition() + tmp.getMaximum())
-        );
-    }
+        bounds.merge(entities.mEntities[i]->getWorldBoundingBox(true));
+
     Ogre::Vector3 extents = bounds.getSize();
     extents *= insert->getScale();
     float size = std::max(std::max(extents.x, extents.y), extents.z);
@@ -134,23 +130,21 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh, bool
     mBounds[ptr.getCell()].merge(bounds);
 
     bool transparent = false;
-    for(size_t i = 0;i < entities.mEntities.size();i++)
+    for(size_t i = 0;!transparent && i < entities.mEntities.size();i++)
     {
         Ogre::Entity *ent = entities.mEntities[i];
-        for (unsigned int i=0; i<ent->getNumSubEntities(); ++i)
+        for(unsigned int i=0;!transparent && i < ent->getNumSubEntities(); ++i)
         {
             Ogre::MaterialPtr mat = ent->getSubEntity(i)->getMaterial();
             Ogre::Material::TechniqueIterator techIt = mat->getTechniqueIterator();
-            while (techIt.hasMoreElements())
+            while(!transparent && techIt.hasMoreElements())
             {
                 Ogre::Technique* tech = techIt.getNext();
                 Ogre::Technique::PassIterator passIt = tech->getPassIterator();
-                while (passIt.hasMoreElements())
+                while(!transparent && passIt.hasMoreElements())
                 {
                     Ogre::Pass* pass = passIt.getNext();
-
-                    if (pass->getDepthWriteEnabled() == false)
-                        transparent = true;
+                    transparent = pass->isTransparent();
                 }
             }
         }
@@ -390,9 +384,9 @@ void Objects::enableLights()
     std::vector<LightInfo>::iterator it = mLights.begin();
     while (it != mLights.end())
     {
-        if (mMwRoot->getCreator()->hasLight(it->name))
+        if (mRootNode->getCreator()->hasLight(it->name))
         {
-            mMwRoot->getCreator()->getLight(it->name)->setVisible(true);
+            mRootNode->getCreator()->getLight(it->name)->setVisible(true);
             ++it;
         }
         else
@@ -405,9 +399,9 @@ void Objects::disableLights()
     std::vector<LightInfo>::iterator it = mLights.begin();
     while (it != mLights.end())
     {
-        if (mMwRoot->getCreator()->hasLight(it->name))
+        if (mRootNode->getCreator()->hasLight(it->name))
         {
-            mMwRoot->getCreator()->getLight(it->name)->setVisible(false);
+            mRootNode->getCreator()->getLight(it->name)->setVisible(false);
             ++it;
         }
         else
@@ -460,9 +454,9 @@ void Objects::update(const float dt)
     std::vector<LightInfo>::iterator it = mLights.begin();
     while (it != mLights.end())
     {
-        if (mMwRoot->getCreator()->hasLight(it->name))
+        if (mRootNode->getCreator()->hasLight(it->name))
         {
-            Ogre::Light* light = mMwRoot->getCreator()->getLight(it->name);
+            Ogre::Light* light = mRootNode->getCreator()->getLight(it->name);
 
             float brightness;
             float cycle_time;
@@ -550,7 +544,7 @@ void Objects::updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
     MWWorld::CellStore *newCell = cur.getCell();
 
     if(mCellSceneNodes.find(newCell) == mCellSceneNodes.end()) {
-        node = mMwRoot->createChildSceneNode();
+        node = mRootNode->createChildSceneNode();
         mCellSceneNodes[newCell] = node;
     } else {
         node = mCellSceneNodes[newCell];

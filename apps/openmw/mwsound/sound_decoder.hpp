@@ -9,7 +9,8 @@ namespace MWSound
 {
     enum SampleType {
         SampleType_UInt8,
-        SampleType_Int16
+        SampleType_Int16,
+        SampleType_Float32
     };
     const char *getSampleTypeName(SampleType type);
 

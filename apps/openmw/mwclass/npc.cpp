@@ -382,7 +382,7 @@ namespace MWClass
         const MWMechanics::MagicEffects &mageffects = npcdata->mCreatureStats.getMagicEffects();
         const float encumbranceTerm = fJumpEncumbranceBase->getFloat() +
                                           fJumpEncumbranceMultiplier->getFloat() *
-                                          (Npc::getEncumbrance(ptr)/Npc::getCapacity(ptr));
+                                          (1.0f - Npc::getEncumbrance(ptr)/Npc::getCapacity(ptr));
 
         float a = npcdata->mNpcStats.getSkill(ESM::Skill::Acrobatics).getModified();
         float b = 0.0f;

@@ -110,7 +110,7 @@ void BillboardObject::setPosition(const Vector3& pPosition)
 Vector3 BillboardObject::getPosition() const
 {
     Vector3 p = mNode->_getDerivedPosition() - mNode->getParentSceneNode()->_getDerivedPosition();
-    return Vector3(p.x, -p.z, p.y);
+    return p;
 }
 
 void BillboardObject::setVisibilityFlags(int flags)
@@ -203,7 +203,7 @@ unsigned int Moon::getPhaseInt() const
     return 0;
 }
 
-SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera)
+SkyManager::SkyManager (SceneNode* root, Camera* pCamera)
     : mHour(0.0f)
     , mDay(0)
     , mMonth(0)
@@ -234,9 +234,8 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera)
     , mCloudAnimationTimer(0.f)
     , mMoonRed(false)
 {
-    mSceneMgr = pMwRoot->getCreator();
+    mSceneMgr = root->getCreator();
     mRootNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
-    mRootNode->pitch(Degree(-90)); // convert MW to ogre coordinates
     mRootNode->setInheritOrientation(false);
 }
 
@@ -391,7 +390,6 @@ void SkyManager::update(float duration)
         // increase the strength of the sun glare effect depending
         // on how directly the player is looking at the sun
         Vector3 sun = mSunGlare->getPosition();
-        sun = Vector3(sun.x, sun.z, -sun.y);
         Vector3 cam = mCamera->getRealDirection();
         const Degree angle = sun.angleBetween( cam );
         float val = 1- (angle.valueDegrees() / 180.f);

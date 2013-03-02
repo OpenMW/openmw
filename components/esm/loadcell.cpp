@@ -112,8 +112,8 @@ void Cell::load(ESMReader &esm, MWWorld::ESMStore &store)
         // instead.
         if (mData.mFlags & QuasiEx)
             mRegion = esm.getHNOString("RGNN");
-        else
-            esm.getHNT(mAmbi, "AMBI", 16);
+        else if (esm.isNextSub("AMBI"))
+            esm.getHT(mAmbi);
     }
     else
     {
@@ -126,7 +126,7 @@ void Cell::load(ESMReader &esm, MWWorld::ESMStore &store)
     if (esm.isNextSub("NAM0")) {
         esm.getHT(mNAM0);
     }
-    
+
     // preload moved references
     while (esm.isNextSub("MVRF")) {
         CellRef ref;
@@ -135,7 +135,7 @@ void Cell::load(ESMReader &esm, MWWorld::ESMStore &store)
 
         MWWorld::Store<ESM::Cell> &cStore = const_cast<MWWorld::Store<ESM::Cell>&>(store.get<ESM::Cell>());
         ESM::Cell *cellAlt = const_cast<ESM::Cell*>(cStore.searchOrCreate(cMRef.mTarget[0], cMRef.mTarget[1]));
-        
+
         // Get regular moved reference data. Adapted from CellStore::loadRefs. Maybe we can optimize the following
         //  implementation when the oher implementation works as well.
         getNextRef(esm, ref);
@@ -143,7 +143,7 @@ void Cell::load(ESMReader &esm, MWWorld::ESMStore &store)
 
         std::transform (ref.mRefID.begin(), ref.mRefID.end(), std::back_inserter (lowerCase),
             (int(*)(int)) std::tolower);
-                
+
         // Add data required to make reference appear in the correct cell.
         // We should not need to test for duplicates, as this part of the code is pre-cell merge.
         mMovedRefs.push_back(cMRef);
@@ -186,7 +186,7 @@ void Cell::save(ESMWriter &esm)
         if (mMapColor != 0)
             esm.writeHNT("NAM5", mMapColor);
     }
-    
+
     if (mNAM0 != 0)
         esm.writeHNT("NAM0", mNAM0);
 }
@@ -226,7 +226,7 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
 
     esm.getHNT(ref.mRefnum, "FRMR");
     ref.mRefID = esm.getHNString("NAME");
-    
+
     // Identify references belonging to a parent file and adapt the ID accordingly.
     int local = (ref.mRefnum & 0xff000000) >> 24;
     size_t global = esm.getIndex() + 1;
@@ -249,7 +249,7 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
     // missing
     ref.mScale = 1.0;
     esm.getHNOT(ref.mScale, "XSCL");
-    
+
     // TODO: support loading references from saves, there are tons of keys not recognized yet.
     // The following is just an incomplete list.
     if (esm.isNextSub("ACTN"))
@@ -266,7 +266,7 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
         esm.skipHSub();
     else if (esm.isNextSub("CRED")) // ???
         esm.skipHSub();
-    
+
     ref.mOwner = esm.getHNOString("ANAM");
     ref.mGlob = esm.getHNOString("BNAM");
     ref.mSoul = esm.getHNOString("XSOL");
@@ -305,7 +305,7 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
     esm.getHNOT(ref.mFltv, "FLTV");
 
     esm.getHNOT(ref.mPos, "DATA", 24);
-    
+
     // Number of references in the cell? Maximum once in each cell,
     // but not always at the beginning, and not always right. In other
     // words, completely useless.
@@ -318,7 +318,7 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
         esm.getHT(ref.mNam0);
         //esm.getHNOT(NAM0, "NAM0");
     }
-    
+
     if (esm.isNextSub("DELE")) {
         esm.skipHSub();
         ref.mDeleted = 2; // Deleted, will not respawn.
@@ -333,7 +333,7 @@ bool Cell::getNextMVRF(ESMReader &esm, MovedCellRef &mref)
 {
     esm.getHT(mref.mRefnum);
     esm.getHNOT(mref.mTarget, "CNDT");
-    
+
     // Identify references belonging to a parent file and adapt the ID accordingly.
     int local = (mref.mRefnum & 0xff000000) >> 24;
     size_t global = esm.getIndex() + 1;

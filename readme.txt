@@ -9,7 +9,7 @@ Website: http://www.openmw.org
 
 Font Licenses:
 EBGaramond-Regular.ttf: OFL (see OFL.txt for more information)
-VeraMono.ttf: custom (see Bitstream Vera License.txt for more information)
+DejaVuLGCSansMono.ttf: custom (see DejaVu Font License.txt for more information)
 
 
 

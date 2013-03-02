@@ -20,7 +20,7 @@ namespace MWRender
         typedef std::map<MWWorld::Ptr,Animation*> PtrAnimationMap;
 
         OEngine::Render::OgreRenderer &mRend;
-        Ogre::SceneNode* mMwRoot;
+        Ogre::SceneNode* mRootNode;
 
         CellSceneNodeMap mCellSceneNodes;
         PtrAnimationMap mAllActors;
@@ -29,7 +29,7 @@ namespace MWRender
         Actors(OEngine::Render::OgreRenderer& _rend): mRend(_rend) {}
         ~Actors();
 
-        void setMwRoot(Ogre::SceneNode* root);
+        void setRootNode(Ogre::SceneNode* root);
         void insertBegin (const MWWorld::Ptr& ptr);
         void insertNPC(const MWWorld::Ptr& ptr, MWWorld::InventoryStore& inv);
         void insertCreature (const MWWorld::Ptr& ptr);

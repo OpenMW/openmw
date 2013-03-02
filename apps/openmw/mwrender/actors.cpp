@@ -28,8 +28,8 @@ Actors::~Actors()
     }
 }
 
-void Actors::setMwRoot(Ogre::SceneNode* root)
-{ mMwRoot = root; }
+void Actors::setRootNode(Ogre::SceneNode* root)
+{ mRootNode = root; }
 
 void Actors::insertBegin(const MWWorld::Ptr &ptr)
 {
@@ -40,7 +40,7 @@ void Actors::insertBegin(const MWWorld::Ptr &ptr)
     else
     {
         //Create the scenenode and put it in the map
-        cellnode = mMwRoot->createChildSceneNode();
+        cellnode = mRootNode->createChildSceneNode();
         mCellSceneNodes[ptr.getCell()] = cellnode;
     }
 
@@ -159,7 +159,7 @@ void Actors::updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
         node = celliter->second;
     else
     {
-        node = mMwRoot->createChildSceneNode();
+        node = mRootNode->createChildSceneNode();
         mCellSceneNodes[newCell] = node;
     }
     node->addChild(cur.getRefData().getBaseNode());

@@ -404,6 +404,8 @@ public:
             *type = MWSound::SampleType_UInt8;
         else if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_S16)
             *type = MWSound::SampleType_Int16;
+        else if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_FLT)
+            *type = MWSound::SampleType_Float32;
         else
             fail(std::string("Unsupported sample format: ")+
                  av_get_sample_fmt_name(mAVStream->codec->sample_fmt));

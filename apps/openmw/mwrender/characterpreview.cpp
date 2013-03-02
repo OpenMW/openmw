@@ -161,6 +161,7 @@ namespace MWRender
 
     void RaceSelectionPreview::update(float angle)
     {
+        mAnimation->runAnimation(0.0f);
         mNode->roll(Ogre::Radian(angle), Ogre::SceneNode::TS_LOCAL);
 
         mNode->setVisible (true);
@@ -174,5 +175,10 @@ namespace MWRender
         mBase.mId = "player";
         rebuild();
         update(0);
+    }
+
+    void RaceSelectionPreview::onSetup ()
+    {
+        mAnimation->play("idle", "start", "stop", false);
     }
 }

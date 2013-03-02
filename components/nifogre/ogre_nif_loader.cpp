@@ -452,7 +452,8 @@ void loadResource(Ogre::Resource *resource)
     }
 }
 
-bool createSkeleton(const std::string &name, const std::string &group, const Nif::Node *node)
+
+static Ogre::SkeletonPtr createSkeleton(const std::string &name, const std::string &group, const Nif::Node *node)
 {
     /* We need to be a little aggressive here, since some NIFs have a crap-ton
      * of nodes and Ogre only supports 256 bones. We will skip a skeleton if:
@@ -463,7 +464,7 @@ bool createSkeleton(const std::string &name, const std::string &group, const Nif
     if(!node->boneTrafo)
     {
         if(node->recType == Nif::RC_NiTriShape)
-            return false;
+            return Ogre::SkeletonPtr();
         if(node->controller.empty() && node->name != "AttachLight")
         {
             if(node->recType == Nif::RC_NiNode || node->recType == Nif::RC_RootCollisionNode)
@@ -474,67 +475,61 @@ bool createSkeleton(const std::string &name, const std::string &group, const Nif
                 {
                     if(!children[i].empty())
                     {
-                        if(createSkeleton(name, group, children[i].getPtr()))
-                            return true;
+                        Ogre::SkeletonPtr skel = createSkeleton(name, group, children[i].getPtr());
+                        if(!skel.isNull())
+                            return skel;
                     }
                 }
-                return false;
+                return Ogre::SkeletonPtr();
             }
         }
     }
 
     Ogre::SkeletonManager &skelMgr = Ogre::SkeletonManager::getSingleton();
-    skelMgr.create(name, group, true, &sLoaders[name]);
-    return true;
+    return skelMgr.create(name, group, true, &sLoaders[name]);
 }
 
 };
 NIFSkeletonLoader::LoaderMap NIFSkeletonLoader::sLoaders;
 
 
-// Conversion of blend / test mode from NIF -> OGRE.
-// Not in use yet, so let's comment it out.
-/*
-static SceneBlendFactor getBlendFactor(int mode)
+// Conversion of blend / test mode from NIF
+static const char *getBlendFactor(int mode)
 {
-  switch(mode)
+    switch(mode)
     {
-    case 0: return SBF_ONE;
-    case 1: return SBF_ZERO;
-    case 2: return SBF_SOURCE_COLOUR;
-    case 3: return SBF_ONE_MINUS_SOURCE_COLOUR;
-    case 4: return SBF_DEST_COLOUR;
-    case 5: return SBF_ONE_MINUS_DEST_COLOUR;
-    case 6: return SBF_SOURCE_ALPHA;
-    case 7: return SBF_ONE_MINUS_SOURCE_ALPHA;
-    case 8: return SBF_DEST_ALPHA;
-    case 9: return SBF_ONE_MINUS_DEST_ALPHA;
-      // [Comment from Chris Robinson:] Can't handle this mode? :/
-      // case 10: return SBF_SOURCE_ALPHA_SATURATE;
-    default:
-      return SBF_SOURCE_ALPHA;
+    case 0: return "one";
+    case 1: return "zero";
+    case 2: return "src_colour";
+    case 3: return "one_minus_src_colour";
+    case 4: return "dest_colour";
+    case 5: return "one_minus_dest_colour";
+    case 6: return "src_alpha";
+    case 7: return "one_minus_src_alpha";
+    case 8: return "dest_alpha";
+    case 9: return "one_minus_dest_alpha";
+    case 10: return "src_alpha_saturate";
     }
+    std::cerr<< "Unexpected blend mode: "<<mode <<std::endl;
+    return "src_alpha";
 }
 
-
-// This is also unused
-static CompareFunction getTestMode(int mode)
+static const char *getTestMode(int mode)
 {
-  switch(mode)
+    switch(mode)
     {
-    case 0: return CMPF_ALWAYS_PASS;
-    case 1: return CMPF_LESS;
-    case 2: return CMPF_EQUAL;
-    case 3: return CMPF_LESS_EQUAL;
-    case 4: return CMPF_GREATER;
-    case 5: return CMPF_NOT_EQUAL;
-    case 6: return CMPF_GREATER_EQUAL;
-    case 7: return CMPF_ALWAYS_FAIL;
-    default:
-      return CMPF_ALWAYS_PASS;
+    case 0: return "always_pass";
+    case 1: return "less";
+    case 2: return "equal";
+    case 3: return "less_equal";
+    case 4: return "greater";
+    case 5: return "not_equal";
+    case 6: return "greater_equal";
+    case 7: return "always_fail";
     }
+    std::cerr<< "Unexpected test mode: "<<mode <<std::endl;
+    return "less_equal";
 }
-*/
 
 
 class NIFMaterialLoader {
@@ -567,8 +562,8 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
     Ogre::Vector3 emissive(0.0f);
     float glossiness = 0.0f;
     float alpha = 1.0f;
-    int alphaFlags = -1;
-//    ubyte alphaTest = 0;
+    int alphaFlags = 0;
+    int alphaTest = 0;
     Ogre::String texName;
 
     bool vertexColour = (shape->data->colors.size() != 0);
@@ -592,6 +587,8 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
             m = static_cast<const Nif::NiMaterialProperty*>(pr);
         else if (pr->recType == Nif::RC_NiAlphaProperty)
             a = static_cast<const Nif::NiAlphaProperty*>(pr);
+        else if (pr->recType == Nif::RC_NiStencilProperty)
+            /* unused */;
         else
             warn("Skipped property type: "+pr->recName);
     }
@@ -602,13 +599,18 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
         Nif::NiSourceTexture *st = t->textures[0].texture.getPtr();
         if (st->external)
         {
-            /* Bethesda at some at some point converted all their BSA
+            /* Bethesda at some point converted all their BSA
              * textures from tga to dds for increased load speed, but all
              * texture file name references were kept as .tga.
              */
             static const char path[] = "textures\\";
 
-            texName = path + st->filename;
+            texName = st->filename;
+            Misc::StringUtils::toLower(texName);
+
+            if(texName.compare(0, sizeof(path)-1, path) != 0)
+                texName = path + texName;
+
             Ogre::String::size_type pos = texName.rfind('.');
             if(pos != Ogre::String::npos && texName.compare(pos, texName.length() - pos, ".dds") != 0)
             {
@@ -619,7 +621,12 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
                 // if it turns out that the above wasn't true in all cases (not for vanilla, but maybe mods)
                 // verify, and revert if false (this call succeeds quickly, but fails slowly)
                 if(!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(texName))
-                    texName = path + st->filename;
+                {
+                    texName = st->filename;
+                    Misc::StringUtils::toLower(texName);
+                    if(texName.compare(0, sizeof(path)-1, path) != 0)
+                        texName = path + texName;
+                }
             }
         }
         else warn("Found internal texture, ignoring.");
@@ -629,7 +636,7 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
     if (a)
     {
         alphaFlags = a->flags;
-//        alphaTest = a->data.threshold;
+        alphaTest = a->data.threshold;
     }
 
     // Material
@@ -663,6 +670,7 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
         boost::hash_combine(h, texName);
         boost::hash_combine(h, vertexColour);
         boost::hash_combine(h, alphaFlags);
+        boost::hash_combine(h, alphaTest);
 
         std::map<size_t,std::string>::iterator itr = MaterialMap.find(h);
         if (itr != MaterialMap.end())
@@ -683,7 +691,7 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
         new sh::Vector4(diffuse.x, diffuse.y, diffuse.z, alpha)));
 
     instance->setProperty ("specular", sh::makeProperty<sh::Vector4> (
-        new sh::Vector4(specular.x, specular.y, specular.z, glossiness)));
+        new sh::Vector4(specular.x, specular.y, specular.z, glossiness*255.0f)));
 
     instance->setProperty ("emissive", sh::makeProperty<sh::Vector3> (
         new sh::Vector3(emissive.x, emissive.y, emissive.z)));
@@ -694,58 +702,37 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
         instance->setProperty ("has_vertex_colour", sh::makeProperty<sh::BooleanValue>(new sh::BooleanValue(true)));
 
     // Add transparency if NiAlphaProperty was present
-    if (alphaFlags != -1)
+    NifOverrides::TransparencyResult result = NifOverrides::Overrides::getTransparencyOverride(texName);
+    if (result.first)
     {
-        // The 237 alpha flags are by far the most common. Check
-        // NiAlphaProperty in nif/property.h if you need to decode
-        // other values. 237 basically means normal transparencly.
-        if (alphaFlags == 237)
-        {
-            NifOverrides::TransparencyResult result = NifOverrides::Overrides::getTransparencyOverride(texName);
-            if (result.first)
-            {
-                instance->setProperty("alpha_rejection",
-                    sh::makeProperty<sh::StringValue>(new sh::StringValue("greater_equal " + boost::lexical_cast<std::string>(result.second))));
-            }
-            else
-            {
-                // Enable transparency
-                instance->setProperty("scene_blend", sh::makeProperty<sh::StringValue>(new sh::StringValue("alpha_blend")));
-                instance->setProperty("depth_write", sh::makeProperty<sh::StringValue>(new sh::StringValue("off")));
-            }
-        }
-        else
-            warn("Unhandled alpha setting for texture " + texName);
+        alphaFlags = (1<<9) | (6<<10); /* alpha_rejection enabled, greater_equal */
+        alphaTest = result.second;
+    }
+
+    if((alphaFlags&1))
+    {
+        std::string blend_mode;
+        blend_mode += getBlendFactor((alphaFlags>>1)&0xf);
+        blend_mode += " ";
+        blend_mode += getBlendFactor((alphaFlags>>5)&0xf);
+        instance->setProperty("scene_blend", sh::makeProperty(new sh::StringValue(blend_mode)));
     }
     else
-        instance->getMaterial ()->setShadowCasterMaterial ("openmw_shadowcaster_noalpha");
+        instance->getMaterial()->setShadowCasterMaterial("openmw_shadowcaster_noalpha");
 
-    // As of yet UNTESTED code from Chris:
-    /*pass->setTextureFiltering(Ogre::TFO_ANISOTROPIC);
-    pass->setDepthFunction(Ogre::CMPF_LESS_EQUAL);
-    pass->setDepthCheckEnabled(true);
-
-    // Add transparency if NiAlphaProperty was present
-    if (alphaFlags != -1)
+    if((alphaFlags>>9)&1)
     {
-        std::cout << "Alpha flags set!" << endl;
-        if ((alphaFlags&1))
-        {
-            pass->setDepthWriteEnabled(false);
-            pass->setSceneBlending(getBlendFactor((alphaFlags>>1)&0xf),
-                                   getBlendFactor((alphaFlags>>5)&0xf));
-        }
-        else
-            pass->setDepthWriteEnabled(true);
-
-        if ((alphaFlags>>9)&1)
-            pass->setAlphaRejectSettings(getTestMode((alphaFlags>>10)&0x7),
-                                         alphaTest);
-
-        pass->setTransparentSortingEnabled(!((alphaFlags>>13)&1));
+        std::string reject;
+        reject += getTestMode((alphaFlags>>10)&0x7);
+        reject += " ";
+        reject += Ogre::StringConverter::toString(alphaTest);
+        instance->setProperty("alpha_rejection", sh::makeProperty(new sh::StringValue(reject)));
     }
-*/
 
+    instance->setProperty("transparent_sorting", sh::makeProperty(new sh::StringValue(((alphaFlags>>13)&1) ?
+                                                                                      "off" : "on")));
+
+    sh::Factory::getInstance()._ensureMaterial(matname, "Default");
     return matname;
 }
 
@@ -855,9 +842,12 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
         // Set the bounding box first
         BoundsFinder bounds;
         bounds.add(&srcVerts[0][0], srcVerts.size());
-        // No idea why this offset is needed. It works fine without it if the
-        // vertices weren't transformed first, but otherwise it fails later on
-        // when the object is being inserted into the scene.
+        if(!bounds.isValid())
+        {
+            float v[3] = { 0.0f, 0.0f, 0.0f };
+            bounds.add(&v[0], 1);
+        }
+
         mesh->_setBounds(Ogre::AxisAlignedBox(bounds.minX()-0.5f, bounds.minY()-0.5f, bounds.minZ()-0.5f,
                                               bounds.maxX()+0.5f, bounds.maxY()+0.5f, bounds.maxZ()+0.5f));
         mesh->_setBoundingSphereRadius(bounds.getRadius());
@@ -1031,6 +1021,10 @@ public:
 
     void createMeshes(const Nif::Node *node, MeshInfoList &meshes, int flags=0)
     {
+        // Do not create meshes for the collision shape (includes all children)
+        if(node->recType == Nif::RC_RootCollisionNode)
+            return;
+
         flags |= node->flags;
 
         // Marker objects: just skip the entire node
@@ -1150,10 +1144,7 @@ MeshInfoList Loader::load(const std::string &name, const std::string &group)
 
     bool hasSkel = Ogre::SkeletonManager::getSingleton().resourceExists(name);
     if(!hasSkel)
-    {
-        NIFSkeletonLoader skelldr;
-        hasSkel = skelldr.createSkeleton(name, group, node);
-    }
+        hasSkel = !NIFSkeletonLoader::createSkeleton(name, group, node).isNull();
 
     NIFMeshLoader meshldr(name, group);
     if(hasSkel)
@@ -1216,14 +1207,20 @@ EntityList Loader::createEntities(Ogre::Entity *parent, const std::string &bonen
     if(meshes.size() == 0)
         return entitylist;
 
+    bool isskinned = false;
     Ogre::SceneManager *sceneMgr = parentNode->getCreator();
     std::string filter = "@shape=tri "+bonename;
     Misc::StringUtils::toLower(filter);
     for(size_t i = 0;i < meshes.size();i++)
     {
         Ogre::Entity *ent = sceneMgr->createEntity(meshes[i].mMeshName);
-        if(!entitylist.mSkelBase && ent->hasSkeleton())
-            entitylist.mSkelBase = ent;
+        if(!entitylist.mSkelBase)
+        {
+            if(ent->hasSkeleton())
+                entitylist.mSkelBase = ent;
+        }
+        else if(!isskinned && ent->hasSkeleton())
+            isskinned = true;
         entitylist.mEntities.push_back(ent);
     }
 
@@ -1231,7 +1228,7 @@ EntityList Loader::createEntities(Ogre::Entity *parent, const std::string &bonen
     if(bonename.find("Left") != std::string::npos)
         scale.x *= -1.0f;
 
-    if(entitylist.mSkelBase)
+    if(isskinned)
     {
         for(size_t i = 0;i < entitylist.mEntities.size();i++)
         {
@@ -1263,30 +1260,35 @@ EntityList Loader::createEntities(Ogre::Entity *parent, const std::string &bonen
 }
 
 
-bool Loader::createSkeleton(const std::string &name, const std::string &group)
+Ogre::SkeletonPtr Loader::getSkeleton(std::string name, const std::string &group)
 {
-    Nif::NIFFile::ptr pnif = Nif::NIFFile::create(name);
-    Nif::NIFFile &nif = *pnif.get();
-    if(nif.numRecords() < 1)
+    Ogre::SkeletonPtr skel;
+
+    Misc::StringUtils::toLower(name);
+    skel = Ogre::SkeletonManager::getSingleton().getByName(name);
+    if(!skel.isNull())
+        return skel;
+
+    Nif::NIFFile::ptr nif = Nif::NIFFile::create(name);
+    if(nif->numRecords() < 1)
     {
-        nif.warn("Found no NIF records in "+name+".");
-        return false;
+        nif->warn("Found no NIF records in "+name+".");
+        return skel;
     }
 
     // The first record is assumed to be the root node
-    Nif::Record const *r = nif.getRecord(0);
+    const Nif::Record *r = nif->getRecord(0);
     assert(r != NULL);
 
-    Nif::Node const *node = dynamic_cast<Nif::Node const *>(r);
+    const Nif::Node *node = dynamic_cast<const Nif::Node*>(r);
     if(node == NULL)
     {
-        nif.warn("First record in "+name+" was not a node, but a "+
-                 r->recName+".");
-        return false;
+        nif->warn("First record in "+name+" was not a node, but a "+
+                  r->recName+".");
+        return skel;
     }
 
-    NIFSkeletonLoader skelldr;
-    return skelldr.createSkeleton(name, group, node);
+    return NIFSkeletonLoader::createSkeleton(name, group, node);
 }
 
 

@@ -61,7 +61,7 @@ RaceDialog::RaceDialog(MWBase::WindowManager& parWindowManager)
     prevButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onSelectPreviousHair);
     nextButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onSelectNextHair);
 
-    setText("RaceT", mWindowManager.getGameSettingString("sRaceMenu4", "Race"));
+    setText("RaceT", mWindowManager.getGameSettingString("sRaceMenu5", "Race"));
     getWidget(mRaceList, "RaceList");
     mRaceList->setScrollVisible(true);
     mRaceList->eventListSelectAccept += MyGUI::newDelegate(this, &RaceDialog::onSelectRace);
