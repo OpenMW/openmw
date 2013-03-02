@@ -53,7 +53,13 @@ set(LAUNCHER_HEADER_MOC
     utils/textinputdialog.hpp
 )
 
-source_group(launcher FILES ${LAUNCHER} ${LAUNCHER_HEADER} ${LAUNCHER_HEADER_MOC})
+set(LAUNCHER_UI
+    ui/graphicspage.ui
+    ui/mainwindow.ui
+    ui/playpage.ui
+)
+
+source_group(launcher FILES ${LAUNCHER} ${LAUNCHER_HEADER})
 
 find_package(Qt4 REQUIRED)
 set(QT_USE_QTGUI 1)
@@ -66,6 +72,7 @@ endif(WIN32)
 
 QT4_ADD_RESOURCES(RCC_SRCS resources.qrc)
 QT4_WRAP_CPP(MOC_SRCS ${LAUNCHER_HEADER_MOC})
+QT4_WRAP_UI(UI_HDRS ${LAUCHER_UI})
 
 include(${QT_USE_FILE})
 
@@ -85,6 +92,7 @@ add_executable(omwlauncher
     ${LAUNCHER_HEADER}
     ${RCC_SRCS}
     ${MOC_SRCS}
+    ${UI_HDRS}
 )
 
 target_link_libraries(omwlauncher
