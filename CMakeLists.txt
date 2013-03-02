@@ -74,7 +74,6 @@ set(LIBDIR ${CMAKE_SOURCE_DIR}/libs)
 set(OENGINE_OGRE
   ${LIBDIR}/openengine/ogre/renderer.cpp
   ${LIBDIR}/openengine/ogre/fader.cpp
-  ${LIBDIR}/openengine/ogre/imagerotate.cpp
   ${LIBDIR}/openengine/ogre/selectionbuffer.cpp
 )
 set(OENGINE_GUI
@@ -94,8 +93,6 @@ set(OENGINE_BULLET
     ${LIBDIR}/openengine/bullet/physic.hpp
     ${LIBDIR}/openengine/bullet/BulletShapeLoader.cpp
     ${LIBDIR}/openengine/bullet/BulletShapeLoader.h
-    ${LIBDIR}/openengine/bullet/pmove.cpp
-    ${LIBDIR}/openengine/bullet/pmove.h
     ${LIBDIR}/openengine/bullet/trace.cpp
     ${LIBDIR}/openengine/bullet/trace.h
 
@@ -299,7 +296,7 @@ configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
     "${OpenMW_BINARY_DIR}/openmw.cfg.install")
 
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+if (NOT WIN32 AND NOT APPLE)
     configure_file(${OpenMW_SOURCE_DIR}/files/openmw.desktop
         "${OpenMW_BINARY_DIR}/openmw.desktop")
 endif()
@@ -380,7 +377,7 @@ if(WIN32)
         "${OpenMW_SOURCE_DIR}/readme.txt"
         "${OpenMW_SOURCE_DIR}/GPL3.txt"
         "${OpenMW_SOURCE_DIR}/OFL.txt"
-        "${OpenMW_SOURCE_DIR}/Bitstream Vera License.txt"
+        "${OpenMW_SOURCE_DIR}/DejaVu Font License.txt"
         "${OpenMW_SOURCE_DIR}/Daedric Font License.txt"
         "${OpenMW_BINARY_DIR}/launcher.qss"
         "${OpenMW_BINARY_DIR}/settings-default.cfg"
@@ -391,7 +388,7 @@ if(WIN32)
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION ".")
 
     SET(CPACK_GENERATOR "NSIS")
-    SET(CPACK_PACKAGE_NAME "OpenMW ${OPENMW_VERSION}")
+    SET(CPACK_PACKAGE_NAME "OpenMW")
     SET(CPACK_PACKAGE_VENDOR "OpenMW.org")
     SET(CPACK_PACKAGE_VERSION ${OPENMW_VERSION})
     SET(CPACK_PACKAGE_VERSION_MAJOR ${OPENMW_VERSION_MAJOR})
@@ -406,7 +403,7 @@ if(WIN32)
     SET(CPACK_RESOURCE_FILE_README "${OpenMW_SOURCE_DIR}/readme.txt")
     SET(CPACK_PACKAGE_DESCRIPTION_FILE "${OpenMW_SOURCE_DIR}/readme.txt")
     SET(CPACK_NSIS_EXECUTABLES_DIRECTORY ".")
-    SET(CPACK_NSIS_DISPLAY_NAME "OpenMW")
+    SET(CPACK_NSIS_DISPLAY_NAME "OpenMW ${OPENMW_VERSION}")
     SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.openmw.org")
     SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\www.openmw.org")
     SET(CPACK_NSIS_INSTALLED_ICON_NAME "omwlauncher.exe")
@@ -529,6 +526,8 @@ if (WIN32)
         set(WARNINGS "${WARNINGS} /wd${d}")
     endforeach(d)
 
+    set_target_properties(shiny PROPERTIES COMPILE_FLAGS ${WARNINGS})
+    set_target_properties(shiny.OgrePlatform PROPERTIES COMPILE_FLAGS ${WARNINGS})
     set_target_properties(components PROPERTIES COMPILE_FLAGS ${WARNINGS})
     if (BUILD_LAUNCHER)
 		set_target_properties(omwlauncher PROPERTIES COMPILE_FLAGS ${WARNINGS})
@@ -657,10 +656,18 @@ if (NOT WIN32 AND NOT DPKG_PROGRAM AND NOT APPLE)
 
     # Install binaries
     INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/openmw" DESTINATION "${BINDIR}" )
-    INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/omwlauncher" DESTINATION "${BINDIR}" )
-    INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/esmtool" DESTINATION "${BINDIR}" )
-    INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/mwiniimport" DESTINATION "${BINDIR}" )
-    INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/opencs" DESTINATION "${BINDIR}" )
+    IF(BUILD_LAUNCHER)
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/omwlauncher" DESTINATION "${BINDIR}" )
+    ENDIF(BUILD_LAUNCHER)
+    IF(BUILD_ESMTOOL)
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/esmtool" DESTINATION "${BINDIR}" )
+    ENDIF(BUILD_ESMTOOL)
+    IF(BUILD_MWINIIMPORTER)
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/mwiniimport" DESTINATION "${BINDIR}" )
+    ENDIF(BUILD_MWINIIMPORTER)
+    IF(BUILD_OPENCS)
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/opencs" DESTINATION "${BINDIR}" )
+    ENDIF(BUILD_OPENCS)
 
     # Install icon and .desktop
     INSTALL(FILES "${OpenMW_SOURCE_DIR}/apps/launcher/resources/images/openmw.png" DESTINATION "${ICONDIR}")
@@ -674,5 +681,7 @@ if (NOT WIN32 AND NOT DPKG_PROGRAM AND NOT APPLE)
 
     # Install resources
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION "${DATADIR}" )
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/launcher.qss" DESTINATION "${DATADIR}/resources" )
+    IF(BUILD_LAUNCHER)
+        INSTALL(FILES "${OpenMW_BINARY_DIR}/launcher.qss" DESTINATION "${DATADIR}/resources" )
+    ENDIF(BUILD_LAUNCHER)
 endif(NOT WIN32 AND NOT DPKG_PROGRAM AND NOT APPLE)

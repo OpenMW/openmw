@@ -2,41 +2,45 @@
 
 <MyGUI type="Layout">
 
-<Widget type="Window" skin="" layer="Windows" align="Left|Top" position="0 0 512 256" name="_Main">
+<Widget type="Window" skin="" layer="Windows" align="Left|Top" position="0 0 565 390" name="_Main">
 
-    <Widget type="ImageBox" skin="ImageBox" position_real="0 0 1 1" align="Top|Right" name="BookImage">     
+    <Widget type="ImageBox" skin="ImageBox" position="0 0 565 390" align="Top|Right" name="JImage">     
         <Property key="ImageTexture" value="textures\tx_menubook.dds"/>
+        <Property key="ImageCoord" value="50 0 412 256"/>
 
-        <Widget type="ImageButton" skin="ImageBox" position="251 220 128 32" name="NextPageBTN">
+        <Widget type="ImageButton" skin="ImageBox" position="300 350 48 32" name="NextPageBTN">
+            <Property key="ImageCoord" value="0 0 48 32"/>
             <Property key="ImageHighlighted" value="textures\tx_menubook_next_over.dds"/>
-	    <Property key="ImageNormal" value="textures\tx_menubook_next_idle.dds"/>
+            <Property key="ImageNormal" value="textures\tx_menubook_next_idle.dds"/>
             <Property key="ImagePushed" value="textures\tx_menubook_next_pressed.dds"/>
         </Widget>
-        <Widget type="ImageButton" skin="ImageBox" position="165 220 128 32" name="PrevPageBTN">
+        <Widget type="ImageButton" skin="ImageBox" position="220 350 48 32" name="PrevPageBTN">
+            <Property key="ImageCoord" value="0 0 48 32"/>
             <Property key="ImageHighlighted" value="textures\tx_menubook_prev_over.dds"/>
             <Property key="ImageNormal" value="textures\tx_menubook_prev_idle.dds"/>
             <Property key="ImagePushed" value="textures\tx_menubook_prev_pressed.dds"/>
         </Widget>
-        <Widget type="ImageButton" skin="ImageBox" position="75 220 128 32" name="TakeButton">
+        <Widget type="ImageButton" skin="ImageBox" position="40 350 64 32" name="TakeButton">
             <Property key="ImageHighlighted" value="textures\tx_menubook_take_over.dds"/>
             <Property key="ImageNormal" value="textures\tx_menubook_take_idle.dds"/>
             <Property key="ImagePushed" value="textures\tx_menubook_take_pressed.dds"/>
         </Widget>
-        <Widget type="ImageButton" skin="ImageBox" position="360 220 128 32" name="CloseButton">
+        <Widget type="ImageButton" skin="ImageBox" position="475 350 48 32" name="CloseButton">
+            <Property key="ImageCoord" value="0 0 48 32"/>
             <Property key="ImageHighlighted" value="textures\tx_menubook_close_over.dds"/>
             <Property key="ImageNormal" value="textures\tx_menubook_close_idle.dds"/>
             <Property key="ImagePushed" value="textures\tx_menubook_close_pressed.dds"/>
         </Widget>
 
-        <Widget type="TextBox" skin="NormalText" position="155 215 24 24" name="LeftPageNumber">
+        <Widget type="TextBox" skin="NormalText" position="150 350 32 16" name="LeftPageNumber">
             <Property key="TextColour" value="0 0 0"/>
         </Widget>
-        <Widget type="TextBox" skin="NormalText" position="325 215 24 24" name="RightPageNumber">
+        <Widget type="TextBox" skin="NormalText" position="410 350 32 16" name="RightPageNumber">
             <Property key="TextColour" value="0 0 0"/>
         </Widget>
 
-        <Widget type="Widget" skin="" position_real="0.15 0.1 0.3 0.75" name = "LeftPage"/>
-        <Widget type="Widget" skin="" position_real="0.55 0.1 0.3 0.75" name = "RightPage"/>
+        <Widget type="Widget" skin="" position="30 22 240 300" name = "LeftPage"/>
+        <Widget type="Widget" skin="" position="300 22 240 300" name = "RightPage"/>
     </Widget>
 </Widget>
 

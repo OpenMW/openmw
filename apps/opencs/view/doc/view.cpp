@@ -242,7 +242,6 @@ void CSVDoc::View::addGmstsSubView()
 void CSVDoc::View::abortOperation (int type)
 {
     mDocument->abortOperation (type);
-    mOperations->quitOperation (type);
     updateActions();
 }
 

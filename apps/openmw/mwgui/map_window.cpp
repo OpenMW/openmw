@@ -6,12 +6,16 @@
 #include <OgreTextureManager.h>
 #include <OgreSceneNode.h>
 
+#include <MyGUI_Gui.h>
+
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwworld/player.hpp"
 
 #include "../mwrender/globalmap.hpp"
+
+#include "widgets.hpp"
 
 using namespace MWGui;
 
@@ -88,7 +92,7 @@ void LocalMapBase::applyFogOfWar()
                     + boost::lexical_cast<std::string>(my);
 
             std::string image = mPrefix+"_"+ boost::lexical_cast<std::string>(mCurX + (mx-1)) + "_"
-                    + boost::lexical_cast<std::string>(mCurY + (mInterior ? (my-1) : -1*(my-1)));
+                    + boost::lexical_cast<std::string>(mCurY + (-1*(my-1)));
             MyGUI::ImageBox* fog = mFogWidgets[my + 3*mx];
             fog->setImageTexture(mFogOfWar ?
                 ((MyGUI::RenderManager::getInstance().getTexture(image+"_fog") != 0) ? image+"_fog"
@@ -96,6 +100,7 @@ void LocalMapBase::applyFogOfWar()
                : "");
         }
     }
+    notifyMapChanged ();
 }
 
 void LocalMapBase::onMarkerFocused (MyGUI::Widget* w1, MyGUI::Widget* w2)
@@ -127,7 +132,7 @@ void LocalMapBase::setActiveCell(const int x, const int y, bool interior)
         {
             // map
             std::string image = mPrefix+"_"+ boost::lexical_cast<std::string>(x + (mx-1)) + "_"
-                    + boost::lexical_cast<std::string>(y + (interior ? (my-1) : -1*(my-1)));
+                    + boost::lexical_cast<std::string>(y + (-1*(my-1)));
 
             std::string name = "Map_" + boost::lexical_cast<std::string>(mx) + "_"
                     + boost::lexical_cast<std::string>(my);
@@ -173,7 +178,7 @@ void LocalMapBase::setActiveCell(const int x, const int y, bool interior)
                 }
                 else
                 {
-                    Ogre::Vector2 position (marker.x, -marker.y);
+                    Ogre::Vector2 position (marker.x, marker.y);
                     MWBase::Environment::get().getWorld ()->getInteriorMapPosition (position, nX, nY, cellDx, cellDy);
 
                     widgetCoord = MyGUI::IntCoord(nX * 512 - 4 + (1+cellDx-x) * 512, nY * 512 - 4 + (1+cellDy-y) * 512, 8, 8);
@@ -394,10 +399,10 @@ void MapWindow::globalMapUpdatePlayer ()
 {
     Ogre::Vector3 pos = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer().getRefData ().getBaseNode ()->_getDerivedPosition ();
     Ogre::Quaternion orient = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer().getRefData ().getBaseNode ()->_getDerivedOrientation ();
-    Ogre::Vector2 dir (orient.yAxis ().x, -orient.yAxis().z);
+    Ogre::Vector2 dir (orient.yAxis ().x, orient.yAxis().y);
 
     float worldX, worldY;
-    mGlobalMapRender->worldPosToImageSpace (pos.x, pos.z, worldX, worldY);
+    mGlobalMapRender->worldPosToImageSpace (pos.x, pos.y, worldX, worldY);
     worldX *= mGlobalMapRender->getWidth();
     worldY *= mGlobalMapRender->getHeight();
 
@@ -424,4 +429,18 @@ void MapWindow::globalMapUpdatePlayer ()
 void MapWindow::notifyPlayerUpdate ()
 {
     globalMapUpdatePlayer ();
+}
+
+void MapWindow::notifyMapChanged ()
+{
+    // workaround to prevent the map from drawing on top of the button
+    MyGUI::IntCoord oldCoord = mButton->getCoord ();
+    MyGUI::Gui::getInstance().destroyWidget (mButton);
+    mButton = mMainWidget->createWidget<MWGui::Widgets::AutoSizedButton>("MW_Button",
+         oldCoord, MyGUI::Align::Bottom | MyGUI::Align::Right);
+    mButton->setProperty ("ExpandDirection", "Left");
+
+    mButton->eventMouseButtonClick += MyGUI::newDelegate(this, &MapWindow::onWorldButtonClicked);
+    mButton->setCaptionWithReplacing( mGlobal ? "#{sLocal}" :
+            "#{sWorld}");
 }

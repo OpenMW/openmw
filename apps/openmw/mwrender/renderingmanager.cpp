@@ -18,9 +18,12 @@
 #include <extern/shiny/Main/Factory.hpp>
 #include <extern/shiny/Platforms/Ogre/OgrePlatform.hpp>
 
+#include <openengine/bullet/physic.hpp>
+
 #include <components/esm/loadstat.hpp>
-#include "../mwworld/esmstore.hpp"
 #include <components/settings/settings.hpp>
+#include "../mwworld/esmstore.hpp"
+#include "../mwworld/class.hpp"
 
 #include "../mwbase/world.hpp" // these includes can be removed once the static-hack is gone
 #include "../mwbase/environment.hpp"
@@ -138,26 +141,20 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
 
     applyCompositors();
 
-    // Turn the entire scene (represented by the 'root' node) -90
-    // degrees around the x axis. This makes Z go upwards, and Y go into
-    // the screen (when x is to the right.) This is the orientation that
-    // Morrowind uses, and it automagically makes everything work as it
-    // should.
     SceneNode *rt = mRendering.getScene()->getRootSceneNode();
-    mMwRoot = rt->createChildSceneNode("mwRoot");
-    mMwRoot->pitch(Degree(-90));
+    mRootNode = rt;
 
-    mObjects.setMwRoot(mMwRoot);
-    mActors.setMwRoot(mMwRoot);
+    mObjects.setRootNode(mRootNode);
+    mActors.setRootNode(mRootNode);
 
-    Ogre::SceneNode *playerNode = mMwRoot->createChildSceneNode ("player");
+    Ogre::SceneNode *playerNode = mRootNode->createChildSceneNode ("player");
     mPlayer = new MWRender::Player (mRendering.getCamera(), playerNode);
 
     mShadows = new Shadows(&mRendering);
 
     mTerrainManager = new TerrainManager(mRendering.getScene(), this);
 
-    mSkyManager = new SkyManager(mMwRoot, mRendering.getCamera());
+    mSkyManager = new SkyManager(mRootNode, mRendering.getCamera());
 
     mOcclusionQuery = new OcclusionQuery(&mRendering, mSkyManager->getSunNode());
 
@@ -166,7 +163,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
 
     mSun = 0;
 
-    mDebugging = new Debugging(mMwRoot, engine);
+    mDebugging = new Debugging(mRootNode, engine);
     mLocalMap = new MWRender::LocalMap(&mRendering, this);
 
     setMenuTransparency(Settings::Manager::getFloat("menu transparency", "GUI"));
@@ -252,8 +249,7 @@ void RenderingManager::removeObject (const MWWorld::Ptr& ptr)
 void RenderingManager::moveObject (const MWWorld::Ptr& ptr, const Ogre::Vector3& position)
 {
     /// \todo move this to the rendering-subsystems
-    mRendering.getScene()->getSceneNode (ptr.getRefData().getHandle())->
-            setPosition (position);
+    ptr.getRefData().getBaseNode()->setPosition(position);
 }
 
 void RenderingManager::scaleObject (const MWWorld::Ptr& ptr, const Ogre::Vector3& scale)
@@ -300,23 +296,19 @@ bool RenderingManager::rotateObject( const MWWorld::Ptr &ptr, Ogre::Vector3 &rot
 }
 
 void
-RenderingManager::moveObjectToCell(
-    const MWWorld::Ptr& ptr,
-    const Ogre::Vector3& pos,
-    MWWorld::CellStore *store)
+RenderingManager::updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
 {
     Ogre::SceneNode *child =
-        mRendering.getScene()->getSceneNode(ptr.getRefData().getHandle());
+        mRendering.getScene()->getSceneNode(old.getRefData().getHandle());
 
     Ogre::SceneNode *parent = child->getParentSceneNode();
     parent->removeChild(child);
 
-    if (MWWorld::Class::get(ptr).isActor()) {
-        mActors.updateObjectCell(ptr);
+    if (MWWorld::Class::get(old).isActor()) {
+        mActors.updateObjectCell(old, cur);
     } else {
-        mObjects.updateObjectCell(ptr);
+        mObjects.updateObjectCell(old, cur);
     }
-    child->setPosition(pos);
 }
 
 void RenderingManager::update (float duration, bool paused)
@@ -324,7 +316,7 @@ void RenderingManager::update (float duration, bool paused)
     Ogre::Vector3 orig, dest;
     mPlayer->setCameraDistance();
     if (!mPlayer->getPosition(orig, dest)) {
-        orig.z += mPlayer->getHeight() * mMwRoot->getScale().z;
+        orig.z += mPlayer->getHeight() * mRootNode->getScale().z;
 
         btVector3 btOrig(orig.x, orig.y, orig.z);
         btVector3 btDest(dest.x, dest.y, dest.z);
@@ -368,11 +360,13 @@ void RenderingManager::update (float duration, bool paused)
     float *fpos = data.getPosition().pos;
 
     // only for LocalMap::updatePlayer()
-    Ogre::Vector3 pos(fpos[0], -fpos[2], -fpos[1]);
+    Ogre::Vector3 pos(fpos[0], fpos[1], fpos[2]);
 
     Ogre::SceneNode *node = data.getBaseNode();
+    //Ogre::Quaternion orient =
+        //node->convertLocalToWorldOrientation(node->_getDerivedOrientation());
     Ogre::Quaternion orient =
-        node->convertLocalToWorldOrientation(node->_getDerivedOrientation());
+node->_getDerivedOrientation();
 
     mLocalMap->updatePlayer(pos, orient);
 
@@ -383,8 +377,8 @@ void RenderingManager::update (float duration, bool paused)
 
         mWater->updateUnderwater(
             world->isUnderwater(
-                *world->getPlayer().getPlayer().getCell()->mCell,
-                Ogre::Vector3(cam.x, -cam.z, cam.y))
+                world->getPlayer().getPlayer().getCell(),
+                cam)
         );
         mWater->update(duration);
     }
@@ -580,17 +574,6 @@ void RenderingManager::toggleLight()
     setAmbientMode();
 }
 
-void RenderingManager::playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName,
-     int mode, int number)
-{
-    mActors.playAnimationGroup(ptr, groupName, mode, number);
-}
-
-void RenderingManager::skipAnimation (const MWWorld::Ptr& ptr)
-{
-    mActors.skipAnimation(ptr);
-}
-
 void RenderingManager::setSunColour(const Ogre::ColourValue& colour)
 {
     if (!mSunEnabled) return;
@@ -627,8 +610,7 @@ void RenderingManager::sunDisable()
 void RenderingManager::setSunDirection(const Ogre::Vector3& direction)
 {
     // direction * -1 (because 'direction' is camera to sun vector and not sun to camera),
-    // then convert from MW to ogre coordinates (swap y,z and make y negative)
-    if (mSun) mSun->setDirection(Vector3(-direction.x, -direction.z, direction.y));
+    if (mSun) mSun->setDirection(Vector3(-direction.x, -direction.y, -direction.z));
 
     mSkyManager->setSunDirection(direction);
 }
@@ -928,6 +910,15 @@ void RenderingManager::setupExternalRendering (MWRender::ExternalRendering& rend
 {
     rendering.setup (mRendering.getScene());
 }
+
+Animation* RenderingManager::getAnimation(const MWWorld::Ptr &ptr)
+{
+    Animation *anim = mActors.getAnimation(ptr);
+    if(!anim && ptr.getRefData().getHandle() == "player")
+        anim = mPlayer->getAnimation();
+    return anim;
+}
+
 
 void RenderingManager::playVideo(const std::string& name, bool allowSkipping)
 {

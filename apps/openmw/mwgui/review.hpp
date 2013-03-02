@@ -17,7 +17,7 @@ Layout is defined by resources/mygui/openmw_chargen_review.layout.
 
 namespace MWGui
 {
-    class ReviewDialog : public WindowBase
+    class ReviewDialog : public WindowModal
     {
     public:
         enum Dialogs {

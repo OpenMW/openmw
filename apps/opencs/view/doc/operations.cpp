@@ -16,7 +16,7 @@ CSVDoc::Operations::Operations()
 
     widgetContainer->setLayout (mLayout);
     setWidget (widgetContainer);
-
+    setVisible (false);
     setFixedHeight (widgetContainer->height());
     setTitleBarWidget (new QWidget (this));
 }
@@ -42,6 +42,8 @@ void CSVDoc::Operations::setProgress (int current, int max, int type, int thread
 
     if ( oldCount > 0)
         setFixedHeight (height()/oldCount * newCount);
+
+    setVisible (true);
 }
 
 void CSVDoc::Operations::quitOperation (int type)
@@ -59,6 +61,8 @@ void CSVDoc::Operations::quitOperation (int type)
 
             if (oldCount > 1)
                 setFixedHeight (height() / oldCount * newCount);
+            else
+                setVisible (false);
 
             break;
         }

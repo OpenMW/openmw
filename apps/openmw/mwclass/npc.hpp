@@ -3,6 +3,11 @@
 
 #include "../mwworld/class.hpp"
 
+namespace ESM
+{
+    class GameSetting;
+}
+
 namespace MWClass
 {
     class Npc : public MWWorld::Class
@@ -11,6 +16,23 @@ namespace MWClass
 
             virtual MWWorld::Ptr
             copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const;
+
+            static const ESM::GameSetting *fMinWalkSpeed;
+            static const ESM::GameSetting *fMaxWalkSpeed;
+            static const ESM::GameSetting *fEncumberedMoveEffect;
+            static const ESM::GameSetting *fSneakSpeedMultiplier;
+            static const ESM::GameSetting *fAthleticsRunBonus;
+            static const ESM::GameSetting *fBaseRunMultiplier;
+            static const ESM::GameSetting *fMinFlySpeed;
+            static const ESM::GameSetting *fMaxFlySpeed;
+            static const ESM::GameSetting *fSwimRunBase;
+            static const ESM::GameSetting *fSwimRunAthleticsMult;
+            static const ESM::GameSetting *fJumpEncumbranceBase;
+            static const ESM::GameSetting *fJumpEncumbranceMultiplier;
+            static const ESM::GameSetting *fJumpAcrobaticsBase;
+            static const ESM::GameSetting *fJumpAcroMultiplier;
+            static const ESM::GameSetting *fJumpRunMultiplier;
+            static const ESM::GameSetting *fWereWolfRunMult;
 
         public:
 
@@ -63,6 +85,9 @@ namespace MWClass
 
             virtual float getSpeed (const MWWorld::Ptr& ptr) const;
             ///< Return movement speed.
+
+            virtual float getJump(const MWWorld::Ptr &ptr) const;
+            ///< Return jump velocity (not accounting for movement)
 
             virtual MWMechanics::Movement& getMovementSettings (const MWWorld::Ptr& ptr) const;
             ///< Return desired movement.

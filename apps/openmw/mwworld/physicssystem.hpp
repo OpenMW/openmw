@@ -1,24 +1,33 @@
 #ifndef GAME_MWWORLD_PHYSICSSYSTEM_H
 #define GAME_MWWORLD_PHYSICSSYSTEM_H
 
-#include <openengine/ogre/renderer.hpp>
-#include "ptr.hpp"
-#include <openengine/bullet/pmove.h>
+#include <OgreVector3.h>
+
+#include <btBulletCollisionCommon.h>
+
+
+namespace OEngine
+{
+    namespace Render
+    {
+        class OgreRenderer;
+    }
+    namespace Physic
+    {
+        class PhysicEngine;
+    }
+}
 
 namespace MWWorld
 {
+    class World;
+    class Ptr;
 
     class PhysicsSystem
     {
         public:
             PhysicsSystem (OEngine::Render::OgreRenderer &_rend);
             ~PhysicsSystem ();
-
-            void doPhysics(float duration, const std::vector<std::pair<std::string, Ogre::Vector3> >& actors);
-            ///< do physics with dt - Usage: first call doPhysics with frame dt, then call doPhysicsFixed as often as time steps have passed
-
-            std::vector< std::pair<std::string, Ogre::Vector3> > doPhysicsFixed (const std::vector<std::pair<std::string, Ogre::Vector3> >& actors);
-            ///< do physics with fixed timestep - Usage: first call doPhysics with frame dt, then call doPhysicsFixed as often as time steps have passed
 
             void addObject (const MWWorld::Ptr& ptr);
 
@@ -41,6 +50,8 @@ namespace MWWorld
 
             bool toggleCollisionMode();
             
+            Ogre::Vector3 move(const MWWorld::Ptr &ptr, const Ogre::Vector3 &movement, float time, bool gravity);
+
             std::pair<float, std::string> getFacedHandle (MWWorld::World& world, float queryDistance);
             std::vector < std::pair <float, std::string> > getFacedHandles (float queryDistance);
             std::vector < std::pair <float, std::string> > getFacedHandles (float mouseX, float mouseY, float queryDistance);
@@ -74,8 +85,6 @@ namespace MWWorld
 
             OEngine::Render::OgreRenderer &mRender;
             OEngine::Physic::PhysicEngine* mEngine;
-            bool mFreeFly;
-            playerMove* playerphysics;
             std::map<std::string, std::string> handleToMesh;
 
             PhysicsSystem (const PhysicsSystem&);

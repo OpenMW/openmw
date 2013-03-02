@@ -53,7 +53,7 @@ void MyGUIManager::setup(Ogre::RenderWindow *wnd, Ogre::SceneManager *mgr, bool 
 
     // Create GUI
     mGui = new Gui();
-    mGui->initialise("core.xml");
+    mGui->initialise("");
 }
 
 void MyGUIManager::shutdown()

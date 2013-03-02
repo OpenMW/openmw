@@ -134,6 +134,18 @@ size_t FFmpeg_Decoder::readAVAudioData(void *data, size_t length)
     return dec;
 }
 
+static AVSampleFormat ffmpegNonPlanarSampleFormat (AVSampleFormat format)
+{
+    switch (format)
+    {
+    case AV_SAMPLE_FMT_U8P:  return AV_SAMPLE_FMT_U8;
+    case AV_SAMPLE_FMT_S16P: return AV_SAMPLE_FMT_S16;
+    case AV_SAMPLE_FMT_S32P: return AV_SAMPLE_FMT_S32;
+    case AV_SAMPLE_FMT_FLTP: return AV_SAMPLE_FMT_FLT;
+    case AV_SAMPLE_FMT_DBLP: return AV_SAMPLE_FMT_DBL;
+    default:return format;
+    }
+}
 
 void FFmpeg_Decoder::open(const std::string &fname)
 {
@@ -160,13 +172,14 @@ void FFmpeg_Decoder::open(const std::string &fname)
         {
             if(mFormatCtx->streams[j]->codec->codec_type == AVMEDIA_TYPE_AUDIO)
             {
-                mFormatCtx->streams[j]->codec->request_sample_fmt = AV_SAMPLE_FMT_S16;
                 mStream = &mFormatCtx->streams[j];
                 break;
             }
         }
         if(!mStream)
             fail("No audio streams in "+fname);
+
+        (*mStream)->codec->request_sample_fmt = ffmpegNonPlanarSampleFormat ((*mStream)->codec->sample_fmt);
 
         AVCodec *codec = avcodec_find_decoder((*mStream)->codec->codec_id);
         if(!codec)
@@ -220,6 +233,8 @@ void FFmpeg_Decoder::getInfo(int *samplerate, ChannelConfig *chans, SampleType *
         *type = SampleType_UInt8;
     else if((*mStream)->codec->sample_fmt == AV_SAMPLE_FMT_S16)
         *type = SampleType_Int16;
+    else if((*mStream)->codec->sample_fmt == AV_SAMPLE_FMT_FLT)
+        *type = SampleType_Float32;
     else
         fail(std::string("Unsupported sample format: ")+
              av_get_sample_fmt_name((*mStream)->codec->sample_fmt));

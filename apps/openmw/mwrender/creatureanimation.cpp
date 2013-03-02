@@ -8,70 +8,54 @@
 
 #include "../mwbase/world.hpp"
 
-using namespace Ogre;
-using namespace NifOgre;
-namespace MWRender{
+namespace MWRender
+{
 
 CreatureAnimation::~CreatureAnimation()
 {
 }
 
-CreatureAnimation::CreatureAnimation(const MWWorld::Ptr& ptr): Animation()
+CreatureAnimation::CreatureAnimation(const MWWorld::Ptr &ptr)
+  : Animation(ptr)
 {
-    mInsert = ptr.getRefData().getBaseNode();
-    MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
+    MWWorld::LiveCellRef<ESM::Creature> *ref = mPtr.get<ESM::Creature>();
 
     assert (ref->mBase != NULL);
     if(!ref->mBase->mModel.empty())
     {
-        std::string mesh = "meshes\\" + ref->mBase->mModel;
+        std::string model = "meshes\\"+ref->mBase->mModel;
 
-        mEntityList = NifOgre::NIFLoader::createEntities(mInsert, &mTextKeys, mesh);
+        createEntityList(mPtr.getRefData().getBaseNode(), model);
         for(size_t i = 0;i < mEntityList.mEntities.size();i++)
         {
             Ogre::Entity *ent = mEntityList.mEntities[i];
             ent->setVisibilityFlags(RV_Actors);
 
             bool transparent = false;
-            for (unsigned int j=0;j < ent->getNumSubEntities() && !transparent; ++j)
+            for(unsigned int j=0;!transparent && j < ent->getNumSubEntities(); ++j)
             {
                 Ogre::MaterialPtr mat = ent->getSubEntity(j)->getMaterial();
                 Ogre::Material::TechniqueIterator techIt = mat->getTechniqueIterator();
-                while (techIt.hasMoreElements() && !transparent)
+                while(!transparent && techIt.hasMoreElements())
                 {
                     Ogre::Technique* tech = techIt.getNext();
                     Ogre::Technique::PassIterator passIt = tech->getPassIterator();
-                    while (passIt.hasMoreElements() && !transparent)
+                    while(!transparent && passIt.hasMoreElements())
                     {
                         Ogre::Pass* pass = passIt.getNext();
-
-                        if (pass->getDepthWriteEnabled() == false)
-                            transparent = true;
+                        transparent = pass->isTransparent();
                     }
                 }
             }
             ent->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
         }
 
-        if(mEntityList.mSkelBase)
-        {
-            Ogre::AnimationStateSet *aset = mEntityList.mSkelBase->getAllAnimationStates();
-            Ogre::AnimationStateIterator as = aset->getAnimationStateIterator();
-            while(as.hasMoreElements())
-            {
-                Ogre::AnimationState *state = as.getNext();
-                state->setEnabled(true);
-                state->setLoop(false);
-            }
-        }
+        std::vector<std::string> names;
+        if((ref->mBase->mFlags&ESM::Creature::Biped))
+            names.push_back("meshes\\base_anim.nif");
+        names.push_back(model);
+        setAnimationSources(names);
     }
-}
-
-void CreatureAnimation::runAnimation(float timepassed)
-{
-    // Placeholder
-
-    Animation::runAnimation(timepassed);
 }
 
 }

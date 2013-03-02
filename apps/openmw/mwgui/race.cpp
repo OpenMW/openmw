@@ -20,7 +20,7 @@ using namespace MWGui;
 using namespace Widgets;
 
 RaceDialog::RaceDialog(MWBase::WindowManager& parWindowManager)
-  : WindowBase("openmw_chargen_race.layout", parWindowManager)
+  : WindowModal("openmw_chargen_race.layout", parWindowManager)
   , mGenderIndex(0)
   , mFaceIndex(0)
   , mHairIndex(0)
@@ -61,7 +61,7 @@ RaceDialog::RaceDialog(MWBase::WindowManager& parWindowManager)
     prevButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onSelectPreviousHair);
     nextButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onSelectNextHair);
 
-    setText("RaceT", mWindowManager.getGameSettingString("sRaceMenu4", "Race"));
+    setText("RaceT", mWindowManager.getGameSettingString("sRaceMenu5", "Race"));
     getWidget(mRaceList, "RaceList");
     mRaceList->setScrollVisible(true);
     mRaceList->eventListSelectAccept += MyGUI::newDelegate(this, &RaceDialog::onSelectRace);
@@ -100,6 +100,8 @@ void RaceDialog::setNextButtonShow(bool shown)
 
 void RaceDialog::open()
 {
+    WindowModal::open();
+
     updateRaces();
     updateSkills();
     updateSpellPowers();

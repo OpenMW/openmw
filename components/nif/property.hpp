@@ -257,9 +257,66 @@ struct S_AlphaProperty
     }
 };
 
+/*
+    Docs taken from:
+    http://niftools.sourceforge.net/doc/nif/NiStencilProperty.html
+ */
+struct S_StencilProperty
+{
+    // Is stencil test enabled?
+    unsigned char enabled;
+
+    /*
+        0   TEST_NEVER
+        1   TEST_LESS
+        2   TEST_EQUAL
+        3   TEST_LESS_EQUAL
+        4   TEST_GREATER
+        5   TEST_NOT_EQUAL
+        6   TEST_GREATER_EQUAL
+        7   TEST_ALWAYS
+     */
+    int compareFunc;
+    unsigned stencilRef;
+    unsigned stencilMask;
+    /*
+        Stencil test fail action, depth test fail action and depth test pass action:
+        0   ACTION_KEEP
+        1   ACTION_ZERO
+        2   ACTION_REPLACE
+        3   ACTION_INCREMENT
+        4   ACTION_DECREMENT
+        5   ACTION_INVERT
+     */
+    int failAction;
+    int zFailAction;
+    int zPassAction;
+    /*
+        Face draw mode:
+        0   DRAW_CCW_OR_BOTH
+        1   DRAW_CCW        [default]
+        2   DRAW_CW
+        3   DRAW_BOTH
+     */
+    int drawMode;
+
+    void read(NIFFile *nif)
+    {
+        enabled = nif->getChar();
+        compareFunc = nif->getInt();
+        stencilRef = nif->getUInt();
+        stencilMask = nif->getUInt();
+        failAction = nif->getInt();
+        zFailAction = nif->getInt();
+        zPassAction = nif->getInt();
+        drawMode = nif->getInt();
+    }
+};
+
 typedef StructPropT<S_AlphaProperty> NiAlphaProperty;
 typedef StructPropT<S_MaterialProperty> NiMaterialProperty;
 typedef StructPropT<S_VertexColorProperty> NiVertexColorProperty;
+typedef StructPropT<S_StencilProperty> NiStencilProperty;
 
 } // Namespace
 #endif

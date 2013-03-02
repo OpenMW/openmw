@@ -20,6 +20,7 @@ void CSMDoc::Document::load (const std::vector<boost::filesystem::path>::const_i
         getData().loadFile (*end2, false);
 
     addOptionalGmsts();
+    addOptionalGlobals();
 }
 
 void CSMDoc::Document::addOptionalGmsts()
@@ -139,6 +140,26 @@ void CSMDoc::Document::addOptionalGmsts()
     }
 }
 
+void CSMDoc::Document::addOptionalGlobals()
+{
+    static const char *sGlobals[] =
+    {
+        "dayspassed",
+        "pcwerewolf",
+        "pcyear",
+        0
+    };
+
+    for (int i=0; sGlobals[i]; ++i)
+    {
+        ESM::Global global;
+        global.mId = sGlobals[i];
+        global.mType = ESM::VT_Int;
+        global.mValue = 0;
+        addOptionalGlobal (global);
+    }
+}
+
 void CSMDoc::Document::addOptionalGmst (const ESM::GameSetting& gmst)
 {
     if (getData().getGmsts().searchId (gmst.mId)==-1)
@@ -147,6 +168,17 @@ void CSMDoc::Document::addOptionalGmst (const ESM::GameSetting& gmst)
         record.mBase = gmst;
         record.mState = CSMWorld::RecordBase::State_BaseOnly;
         getData().getGmsts().appendRecord (record);
+    }
+}
+
+void CSMDoc::Document::addOptionalGlobal (const ESM::Global& global)
+{
+    if (getData().getGlobals().searchId (global.mId)==-1)
+    {
+        CSMWorld::Record<ESM::Global> record;
+        record.mBase = global;
+        record.mState = CSMWorld::RecordBase::State_BaseOnly;
+        getData().getGlobals().appendRecord (record);
     }
 }
 

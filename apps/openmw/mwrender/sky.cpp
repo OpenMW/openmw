@@ -110,7 +110,7 @@ void BillboardObject::setPosition(const Vector3& pPosition)
 Vector3 BillboardObject::getPosition() const
 {
     Vector3 p = mNode->_getDerivedPosition() - mNode->getParentSceneNode()->_getDerivedPosition();
-    return Vector3(p.x, -p.z, p.y);
+    return p;
 }
 
 void BillboardObject::setVisibilityFlags(int flags)
@@ -203,7 +203,7 @@ unsigned int Moon::getPhaseInt() const
     return 0;
 }
 
-SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera)
+SkyManager::SkyManager (SceneNode* root, Camera* pCamera)
     : mHour(0.0f)
     , mDay(0)
     , mMonth(0)
@@ -234,9 +234,8 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera)
     , mCloudAnimationTimer(0.f)
     , mMoonRed(false)
 {
-    mSceneMgr = pMwRoot->getCreator();
+    mSceneMgr = root->getCreator();
     mRootNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
-    mRootNode->pitch(Degree(-90)); // convert MW to ogre coordinates
     mRootNode->setInheritOrientation(false);
 }
 
@@ -282,7 +281,7 @@ void SkyManager::create()
 
     // Stars
     mAtmosphereNight = mRootNode->createChildSceneNode();
-    NifOgre::EntityList entities = NifOgre::NIFLoader::createEntities(mAtmosphereNight, NULL, "meshes\\sky_night_01.nif");
+    NifOgre::EntityList entities = NifOgre::Loader::createEntities(mAtmosphereNight, "meshes\\sky_night_01.nif");
     for(size_t i = 0, matidx = 0;i < entities.mEntities.size();i++)
     {
         Entity* night1_ent = entities.mEntities[i];
@@ -307,26 +306,28 @@ void SkyManager::create()
 
     // Atmosphere (day)
     mAtmosphereDay = mRootNode->createChildSceneNode();
-    entities = NifOgre::NIFLoader::createEntities(mAtmosphereDay, NULL, "meshes\\sky_atmosphere.nif");
+    entities = NifOgre::Loader::createEntities(mAtmosphereDay, "meshes\\sky_atmosphere.nif");
     for(size_t i = 0;i < entities.mEntities.size();i++)
     {
         Entity* atmosphere_ent = entities.mEntities[i];
         atmosphere_ent->setCastShadows(false);
         atmosphere_ent->setRenderQueueGroup(RQG_SkiesEarly);
         atmosphere_ent->setVisibilityFlags(RV_Sky);
-        atmosphere_ent->getSubEntity (0)->setMaterialName ("openmw_atmosphere");
+        for(unsigned int j = 0;j < atmosphere_ent->getNumSubEntities();j++)
+            atmosphere_ent->getSubEntity (j)->setMaterialName("openmw_atmosphere");
     }
 
 
     // Clouds
     SceneNode* clouds_node = mRootNode->createChildSceneNode();
-    entities = NifOgre::NIFLoader::createEntities(clouds_node, NULL, "meshes\\sky_clouds_01.nif");
+    entities = NifOgre::Loader::createEntities(clouds_node, "meshes\\sky_clouds_01.nif");
     for(size_t i = 0;i < entities.mEntities.size();i++)
     {
         Entity* clouds_ent = entities.mEntities[i];
         clouds_ent->setVisibilityFlags(RV_Sky);
         clouds_ent->setRenderQueueGroup(RQG_SkiesEarly+5);
-        clouds_ent->getSubEntity(0)->setMaterialName ("openmw_clouds");
+        for(unsigned int j = 0;j < clouds_ent->getNumSubEntities();j++)
+            clouds_ent->getSubEntity(j)->setMaterialName("openmw_clouds");
         clouds_ent->setCastShadows(false);
     }
 
@@ -389,7 +390,6 @@ void SkyManager::update(float duration)
         // increase the strength of the sun glare effect depending
         // on how directly the player is looking at the sun
         Vector3 sun = mSunGlare->getPosition();
-        sun = Vector3(sun.x, sun.z, -sun.y);
         Vector3 cam = mCamera->getRealDirection();
         const Degree angle = sun.angleBetween( cam );
         float val = 1- (angle.valueDegrees() / 180.f);

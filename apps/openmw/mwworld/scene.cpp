@@ -1,5 +1,6 @@
 #include "scene.hpp"
 
+#include <components/nif/nif_file.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp" /// FIXME
@@ -7,9 +8,11 @@
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
+#include "physicssystem.hpp"
 #include "player.hpp"
 #include "localscripts.hpp"
 #include "esmstore.hpp"
+#include "class.hpp"
 
 #include "cellfunctors.hpp"
 
@@ -24,13 +27,10 @@ namespace
         {
             const MWWorld::Class& class_ =
                 MWWorld::Class::get (MWWorld::Ptr (&*cellRefList.mList.begin(), &cell));
-
-            int numRefs = cellRefList.mList.size();
             int current = 0;
             for (typename T::List::iterator it = cellRefList.mList.begin();
                 it != cellRefList.mList.end(); it++)
             {
-                MWBase::Environment::get().getWindowManager ()->setLoadingProgress ("Loading cells", 1, current, numRefs);
                 ++current;
 
                 if (it->mData.getCount() || it->mData.isEnabled())
@@ -51,10 +51,6 @@ namespace
                     }
                 }
             }
-        }
-        else
-        {
-            MWBase::Environment::get().getWindowManager ()->setLoadingProgress ("Loading cells", 1, 0, 1);
         }
     }
 
@@ -98,7 +94,7 @@ namespace MWWorld
        //mPhysics->removeObject("Unnamed_43");
 
         MWBase::Environment::get().getWorld()->getLocalScripts().clearCell (*iter);
-        MWBase::Environment::get().getMechanicsManager()->dropActors (*iter);
+        MWBase::Environment::get().getMechanicsManager()->drop (*iter);
         MWBase::Environment::get().getSoundManager()->stopSound (*iter);
         mActiveCells.erase(*iter);
     }
@@ -164,7 +160,7 @@ namespace MWWorld
         MWBase::MechanicsManager *mechMgr =
             MWBase::Environment::get().getMechanicsManager();
 
-        mechMgr->addActor(player);
+        mechMgr->add(player);
         mechMgr->watchActor(player);
 
         MWBase::Environment::get().getWindowManager()->changeCell(mCurrentCell);
@@ -173,11 +169,17 @@ namespace MWWorld
     void Scene::changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos)
     {
         Nif::NIFFile::CacheLock cachelock;
+        const MWWorld::Store<ESM::GameSetting> &gmst =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
         mRendering.preCellChange(mCurrentCell);
 
         // remove active
-        MWBase::Environment::get().getMechanicsManager()->removeActor (MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+        MWBase::Environment::get().getMechanicsManager()->remove(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+
+        std::string loadingExteriorText;
+
+        loadingExteriorText = gmst.find ("sLoadingMessage3")->getString();
 
         CellStoreCollection::iterator active = mActiveCells.begin();
 
@@ -213,8 +215,6 @@ namespace MWWorld
                     continue;
                 }
             }
-
-            MWBase::Environment::get().getWindowManager ()->setLoadingProgress ("Unloading cells", 0, current, numUnload);
             unloadCell (active++);
             ++current;
         }
@@ -263,7 +263,9 @@ namespace MWWorld
                 {
                     CellStore *cell = MWBase::Environment::get().getWorld()->getExterior(x, y);
 
-                    MWBase::Environment::get().getWindowManager ()->setLoadingProgress ("Loading cells", 0, current, numLoad);
+                    //Loading Exterior loading text
+                    MWBase::Environment::get().getWindowManager ()->setLoadingProgress (loadingExteriorText, 0, current, numLoad);
+
                     loadCell (cell);
                     ++current;
                 }
@@ -322,6 +324,13 @@ namespace MWWorld
 
     void Scene::changeToInteriorCell (const std::string& cellName, const ESM::Position& position)
     {
+
+        const MWWorld::Store<ESM::GameSetting> &gmst =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+        std::string loadingInteriorText;
+        loadingInteriorText = gmst.find ("sLoadingMessage2")->getString();
+
         CellStore *cell = MWBase::Environment::get().getWorld()->getInterior(cellName);
         bool loadcell = (mCurrentCell == NULL);
         if(!loadcell)
@@ -357,8 +366,6 @@ namespace MWWorld
         active = mActiveCells.begin();
         while (active!=mActiveCells.end())
         {
-            MWBase::Environment::get().getWindowManager ()->setLoadingProgress ("Unloading cells", 0, current, numUnload);
-
             unloadCell (active++);
             ++current;
         }
@@ -366,7 +373,9 @@ namespace MWWorld
         // Load cell.
         std::cout << "cellName: " << cell->mCell->mName << std::endl;
 
-        MWBase::Environment::get().getWindowManager ()->setLoadingProgress ("Loading cells", 0, 0, 1);
+        //Loading Interior loading text
+        MWBase::Environment::get().getWindowManager ()->setLoadingProgress (loadingInteriorText, 0, 0, 1);
+
         loadCell (cell);
 
         mCurrentCell = cell;
@@ -441,7 +450,7 @@ namespace MWWorld
 
     void Scene::removeObjectFromScene (const Ptr& ptr)
     {
-        MWBase::Environment::get().getMechanicsManager()->removeActor (ptr);
+        MWBase::Environment::get().getMechanicsManager()->remove (ptr);
         MWBase::Environment::get().getSoundManager()->stopSound3D (ptr);
         mPhysics->removeObject (ptr.getRefData().getHandle());
         mRendering.removeObject (ptr);

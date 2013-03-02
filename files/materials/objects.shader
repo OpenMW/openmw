@@ -225,9 +225,9 @@
     float3 waterEyePos = float3(1,1,1);
     // NOTE: this calculation would be wrong for non-uniform scaling
     float4 worldNormal = shMatrixMult(worldMatrix, float4(normal.xyz, 0));
-    waterEyePos = intercept(worldPos, cameraPos.xyz - worldPos, float3(0,1,0), waterLevel);
+    waterEyePos = intercept(worldPos, cameraPos.xyz - worldPos, float3(0,0,1), waterLevel);
     caustics = getCaustics(causticMap, worldPos, waterEyePos.xyz, worldNormal.xyz, lightDirectionWS0.xyz, waterLevel, waterTimer, windDir_windSpeed);
-    if (worldPos.y >= waterLevel || waterEnabled != 1.f)
+    if (worldPos.z >= waterLevel || waterEnabled != 1.f)
         caustics = float3(1,1,1);
 #endif
 
@@ -269,7 +269,7 @@
         
         #if UNDERWATER
         // regular fog only if fragment is above water
-        if (worldPos.y > waterLevel || waterEnabled != 1.f)
+        if (worldPos.z > waterLevel || waterEnabled != 1.f)
         #endif
         shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, gammaCorrectRead(fogColour), fogValue);
 #endif
@@ -278,7 +278,7 @@
         shOutputColour(0).xyz = max(shOutputColour(0).xyz, float3(0,0,0));
         
 #if UNDERWATER
-        float fogAmount = (cameraPos.y > waterLevel)
+        float fogAmount = (cameraPos.z > waterLevel)
              ? shSaturate(length(waterEyePos-worldPos) / VISIBILITY) 
              : shSaturate(length(cameraPos.xyz-worldPos)/ VISIBILITY);
              
@@ -292,14 +292,14 @@
         waterGradient = clamp((waterGradient*0.5+0.5),0.2,1.0);
         float3 watercolour = ( gammaCorrectRead(float3(0.0078, 0.5176, 0.700))+waterSunColour)*waterGradient*2.0;
         watercolour = shLerp(watercolour*0.3*waterSunFade_sunHeight.x, watercolour, shSaturate(1.0-exp(-waterSunFade_sunHeight.y*SUN_EXT)));
-        watercolour = (cameraPos.y <= waterLevel) ? watercolour : watercolour*0.3;
+        watercolour = (cameraPos.z <= waterLevel) ? watercolour : watercolour*0.3;
     
     
         float darkness = VISIBILITY*2.0;
-        darkness = clamp((waterEyePos.y - waterLevel + darkness)/darkness,0.2,1.0);
+        darkness = clamp((waterEyePos.z - waterLevel + darkness)/darkness,0.2,1.0);
         watercolour *= darkness;
 
-        float isUnderwater = (worldPos.y < waterLevel) ? 1.0 : 0.0;
+        float isUnderwater = (worldPos.z < waterLevel) ? 1.0 : 0.0;
         shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, watercolour, fogAmount * isUnderwater * waterEnabled);
 #endif
 

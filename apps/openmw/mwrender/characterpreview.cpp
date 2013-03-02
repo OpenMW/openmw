@@ -11,6 +11,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwworld/player.hpp"
+#include "../mwworld/class.hpp"
 
 #include "renderconst.hpp"
 #include "npcanimation.hpp"
@@ -120,7 +121,8 @@ namespace MWRender
 
     void InventoryPreview::update(int sizeX, int sizeY)
     {
-        mAnimation->forceUpdate ();
+        mAnimation->forceUpdate();
+        mAnimation->runAnimation(0.0f);
 
         mViewport->setDimensions (0, 0, std::min(1.f, float(sizeX) / float(512)), std::min(1.f, float(sizeY) / float(1024)));
 
@@ -143,8 +145,7 @@ namespace MWRender
     {
         mSelectionBuffer = new OEngine::Render::SelectionBuffer(mCamera, 512, 1024, RV_PlayerPreview);
 
-        mAnimation->playGroup ("inventoryhandtohand", 0, 1);
-        mAnimation->runAnimation (0);
+        mAnimation->play("inventoryhandtohand", "start", "stop", false);
     }
 
     // --------------------------------------------------------------------------------------------------
@@ -160,6 +161,7 @@ namespace MWRender
 
     void RaceSelectionPreview::update(float angle)
     {
+        mAnimation->runAnimation(0.0f);
         mNode->roll(Ogre::Radian(angle), Ogre::SceneNode::TS_LOCAL);
 
         mNode->setVisible (true);
@@ -173,5 +175,10 @@ namespace MWRender
         mBase.mId = "player";
         rebuild();
         update(0);
+    }
+
+    void RaceSelectionPreview::onSetup ()
+    {
+        mAnimation->play("idle", "start", "stop", false);
     }
 }

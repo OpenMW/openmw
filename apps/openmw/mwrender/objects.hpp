@@ -2,6 +2,7 @@
 #define _GAME_RENDER_OBJECTS_H
 
 #include <OgreColourValue.h>
+#include <OgreAxisAlignedBox.h>
 
 #include <openengine/ogre/renderer.hpp>
 
@@ -52,7 +53,7 @@ class Objects{
     std::map<MWWorld::CellStore *, Ogre::StaticGeometry*> mStaticGeometrySmall;
     std::map<MWWorld::CellStore *, Ogre::AxisAlignedBox> mBounds;
     std::vector<LightInfo> mLights;
-    Ogre::SceneNode* mMwRoot;
+    Ogre::SceneNode* mRootNode;
     bool mIsStatic;
     static int uniqueID;
 
@@ -72,8 +73,8 @@ public:
     Objects(OEngine::Render::OgreRenderer& renderer): mRenderer (renderer), mIsStatic(false) {}
     ~Objects(){}
     void insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_);
-    void insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh);
-    void insertLight (const MWWorld::Ptr& ptr, float r, float g, float b, float radius);
+    void insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh, bool light=false);
+    void insertLight (const MWWorld::Ptr& ptr, Ogre::Entity *skelBase=0, Ogre::Vector3 fallbackCenter=Ogre::Vector3(0.0f));
 
     void enableLights();
     void disableLights();
@@ -89,12 +90,12 @@ public:
 
     void removeCell(MWWorld::CellStore* store);
     void buildStaticGeometry(MWWorld::CellStore &cell);
-    void setMwRoot(Ogre::SceneNode* root);
+    void setRootNode(Ogre::SceneNode* root);
 
     void rebuildStaticGeometry();
 
     /// Updates containing cell for object rendering data
-    void updateObjectCell(const MWWorld::Ptr &ptr);
+    void updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur);
 };
 }
 #endif

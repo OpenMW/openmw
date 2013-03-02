@@ -72,6 +72,7 @@ namespace MWGui
   class SpellCreationDialog;
   class EnchantingDialog;
   class TrainingWindow;
+  class Cursor;
 
   class WindowManager : public MWBase::WindowManager
   {
@@ -188,7 +189,7 @@ namespace MWGui
 
     virtual void removeDialog(OEngine::GUI::Layout* dialog); ///< Hides dialog and schedules dialog to be deleted.
 
-    virtual void messageBox (const std::string& message, const std::vector<std::string>& buttons);
+    virtual void messageBox (const std::string& message, const std::vector<std::string>& buttons = std::vector<std::string>());
     virtual void enterPressed ();
     virtual int readPressedButton (); ///< returns the index of the pressed button or -1 if no button was pressed (->MessageBoxmanager->InteractiveMessageBox)
 
@@ -260,6 +261,7 @@ namespace MWGui
     EnchantingDialog* mEnchantingDialog;
     TrainingWindow* mTrainingWindow;
     Translation::Storage& mTranslationDataStorage;
+    Cursor* mCursor;
 
     CharacterCreation* mCharGen;
 

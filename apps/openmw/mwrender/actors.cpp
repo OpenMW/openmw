@@ -3,14 +3,23 @@
 #include <OgreSceneNode.h>
 #include <OgreSceneManager.h>
 
+#include "../mwworld/ptr.hpp"
+#include "../mwworld/class.hpp"
+
+#include "animation.hpp"
+#include "activatoranimation.hpp"
+#include "creatureanimation.hpp"
+#include "npcanimation.hpp"
+
 #include "renderconst.hpp"
 
 
 namespace MWRender
 {
+using namespace Ogre;
 
-Actors::~Actors(){
-
+Actors::~Actors()
+{
     PtrAnimationMap::iterator it = mAllActors.begin();
     for(;it != mAllActors.end();++it)
     {
@@ -19,18 +28,10 @@ Actors::~Actors(){
     }
 }
 
-void Actors::setMwRoot(Ogre::SceneNode* root)
-{ mMwRoot = root; }
+void Actors::setRootNode(Ogre::SceneNode* root)
+{ mRootNode = root; }
 
-void Actors::insertNPC(const MWWorld::Ptr &ptr, MWWorld::InventoryStore &inv)
-{
-    insertBegin(ptr, true, true);
-    NpcAnimation* anim = new MWRender::NpcAnimation(ptr, ptr.getRefData ().getBaseNode (), inv, RV_Actors);
-
-    mAllActors[ptr] = anim;
-}
-
-void Actors::insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_)
+void Actors::insertBegin(const MWWorld::Ptr &ptr)
 {
     Ogre::SceneNode* cellnode;
     CellSceneNodeMap::const_iterator celliter = mCellSceneNodes.find(ptr.getCell());
@@ -39,7 +40,7 @@ void Actors::insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_)
     else
     {
         //Create the scenenode and put it in the map
-        cellnode = mMwRoot->createChildSceneNode();
+        cellnode = mRootNode->createChildSceneNode();
         mCellSceneNodes[ptr.getCell()] = cellnode;
     }
 
@@ -62,17 +63,27 @@ void Actors::insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_)
 
    // Rotates first around z, then y, then x
     insert->setOrientation(xr*yr*zr);
-    if (!enabled)
-         insert->setVisible (false);
     ptr.getRefData().setBaseNode(insert);
-
-
 }
-void Actors::insertCreature (const MWWorld::Ptr& ptr){
 
-    insertBegin(ptr, true, true);
-    CreatureAnimation* anim = new MWRender::CreatureAnimation(ptr);
-
+void Actors::insertNPC(const MWWorld::Ptr& ptr, MWWorld::InventoryStore& inv)
+{
+    insertBegin(ptr);
+    NpcAnimation* anim = new NpcAnimation(ptr, ptr.getRefData().getBaseNode(), inv, RV_Actors);
+    delete mAllActors[ptr];
+    mAllActors[ptr] = anim;
+}
+void Actors::insertCreature (const MWWorld::Ptr& ptr)
+{
+    insertBegin(ptr);
+    CreatureAnimation* anim = new CreatureAnimation(ptr);
+    delete mAllActors[ptr];
+    mAllActors[ptr] = anim;
+}
+void Actors::insertActivator (const MWWorld::Ptr& ptr)
+{
+    insertBegin(ptr);
+    ActivatorAnimation* anim = new ActivatorAnimation(ptr);
     delete mAllActors[ptr];
     mAllActors[ptr] = anim;
 }
@@ -125,47 +136,41 @@ void Actors::removeCell(MWWorld::Ptr::CellStore* store)
     }
 }
 
-void Actors::playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number)
-{
-    PtrAnimationMap::const_iterator iter = mAllActors.find(ptr);
-    if(iter != mAllActors.end())
-        iter->second->playGroup(groupName, mode, number);
-}
-void Actors::skipAnimation (const MWWorld::Ptr& ptr)
-{
-    PtrAnimationMap::const_iterator iter = mAllActors.find(ptr);
-    if(iter != mAllActors.end())
-        iter->second->skipAnim();
-}
 void Actors::update (float duration)
 {
-    for(PtrAnimationMap::const_iterator iter = mAllActors.begin();iter != mAllActors.end();iter++)
-        iter->second->runAnimation(duration);
+    // Nothing to do
 }
 
-void Actors::updateObjectCell(const MWWorld::Ptr &ptr)
+Animation* Actors::getAnimation(const MWWorld::Ptr &ptr)
+{
+    PtrAnimationMap::const_iterator iter = mAllActors.find(ptr);
+    if(iter != mAllActors.end())
+        return iter->second;
+    return NULL;
+}
+
+void Actors::updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
 {
     Ogre::SceneNode *node;
-    MWWorld::CellStore *newCell = ptr.getCell();
+    MWWorld::CellStore *newCell = cur.getCell();
 
     CellSceneNodeMap::const_iterator celliter = mCellSceneNodes.find(newCell);
     if(celliter != mCellSceneNodes.end())
         node = celliter->second;
     else
     {
-        node = mMwRoot->createChildSceneNode();
+        node = mRootNode->createChildSceneNode();
         mCellSceneNodes[newCell] = node;
     }
-    node->addChild(ptr.getRefData().getBaseNode());
+    node->addChild(cur.getRefData().getBaseNode());
 
-    PtrAnimationMap::iterator iter = mAllActors.find(ptr);
+    PtrAnimationMap::iterator iter = mAllActors.find(old);
     if(iter != mAllActors.end())
     {
-        /// \note Update key (Ptr's are compared only with refdata so mCell
-        /// on key is outdated), maybe redundant
         Animation *anim = iter->second;
         mAllActors.erase(iter);
-        mAllActors[ptr] = anim;
+        anim->updatePtr(cur);
+        mAllActors[cur] = anim;
     }
 }
 
