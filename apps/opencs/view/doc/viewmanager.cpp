@@ -12,7 +12,6 @@
 
 #include "view.hpp"
 
-#include <QDebug>
 #include <QMessageBox>
 
 
@@ -105,15 +104,13 @@ bool CSVDoc::ViewManager::closeRequest (View *view)
 
         CSMDoc::Document *document = view->getDocument();
 
-        //notify user of unsaved changes and process response
-        if ( document->getState() & CSMDoc::State_Modified)
-            continueWithClose = showModifiedDocumentMessageBox (view);
-
         //notify user of saving in progress
         if ( document->getState() & CSMDoc::State_Saving )
             continueWithClose = showSaveInProgressMessageBox (view);
-
-        qDebug() << "Continue with close? " << continueWithClose;
+        else
+            //notify user of unsaved changes and process response
+            if ( document->getState() & CSMDoc::State_Modified)
+                continueWithClose = showModifiedDocumentMessageBox (view);
 
         if (continueWithClose)
         {
@@ -144,8 +141,13 @@ bool CSVDoc::ViewManager::showModifiedDocumentMessageBox (View* view)
     {
         case QMessageBox::Save:
             view->getDocument()->save();
-            mCloseMeOnSaveStateChange = view;
-            retVal = false;
+
+            retVal = !(view->getDocument()->getState() & CSMDoc::State_Saving);
+
+            if (!retVal)
+                mCloseMeOnSaveStateChange = view;
+            else
+                mCloseMeOnSaveStateChange = 0;
         break;
 
         case QMessageBox::Discard:
@@ -181,8 +183,16 @@ bool CSVDoc::ViewManager::showSaveInProgressMessageBox (View* view)
         break;
 
         case QMessageBox::No:    //shutdown after save completes
+
+        //return true (continue with close) if the save operation ended before the
+        //user clicked "No"
+        retVal = !(view->getDocument()->getState() & CSMDoc::State_Saving);
+
+        if (!retVal)
             mCloseMeOnSaveStateChange = view;
-            retVal = false;
+        else
+            mCloseMeOnSaveStateChange = 0;
+
         break;
 
         case QMessageBox::Cancel:  //abort shutdown, allow save to complete
@@ -203,17 +213,10 @@ void CSVDoc::ViewManager::documentStateChanged (int state, CSMDoc::Document *doc
             if ((*iter)->getDocument()==document)
                 (*iter)->updateDocumentState();
 
-    if (mPreviousDocumentState & CSMDoc::State_Saving)
-        qDebug() << "Last state was saving";
-    else
-        qDebug() << "Last state was something else";
-
     //mechanism to shutdown main window after saving operation completes
     if (mCloseMeOnSaveStateChange && (mPreviousDocumentState & CSMDoc::State_Saving))
-    {
-        mCloseMeOnSaveStateChange->close();
-        mCloseMeOnSaveStateChange = 0;
-    }
+        if (mCloseMeOnSaveStateChange->close())
+            mCloseMeOnSaveStateChange = 0;
 
     mPreviousDocumentState = state;
 }

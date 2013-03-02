@@ -18,14 +18,10 @@
 #include "operations.hpp"
 #include "subview.hpp"
 
-#include <QDebug>
 void CSVDoc::View::closeEvent (QCloseEvent *event)
 {
     if (!mViewManager.closeRequest (this))
-    {
-        qDebug() << "ignoring event";
         event->ignore();
-    }
 }
 
 void CSVDoc::View::setupFileMenu()
@@ -43,6 +39,11 @@ void CSVDoc::View::setupFileMenu()
     mSave = new QAction (tr ("&Save"), this);
     connect (mSave, SIGNAL (triggered()), this, SLOT (save()));
     file->addAction (mSave);
+
+    QAction *exit = new QAction (tr ("&Exit"), this);
+    connect (exit, SIGNAL (triggered()), this, SLOT (close()));
+    file->addAction(exit);
+
 }
 
 void CSVDoc::View::setupEditMenu()
