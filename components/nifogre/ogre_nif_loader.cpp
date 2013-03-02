@@ -549,7 +549,10 @@ static void fail(const std::string &msg)
 
 
 public:
-static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String &name, const Ogre::String &group)
+static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String &name, const Ogre::String &group,
+                                const Nif::NiTexturingProperty *texprop,
+                                const Nif::NiMaterialProperty *matprop,
+                                const Nif::NiAlphaProperty *alphaprop)
 {
     Ogre::MaterialManager &matMgr = Ogre::MaterialManager::getSingleton();
     Ogre::MaterialPtr material = matMgr.getByName(name);
@@ -568,36 +571,11 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
 
     bool vertexColour = (shape->data->colors.size() != 0);
 
-    // These are set below if present
-    const Nif::NiTexturingProperty *t = NULL;
-    const Nif::NiMaterialProperty *m = NULL;
-    const Nif::NiAlphaProperty *a = NULL;
-
-    // Scan the property list for material information
-    const Nif::PropertyList &list = shape->props;
-    for (size_t i = 0;i < list.length();i++)
-    {
-        // Entries may be empty
-        if (list[i].empty()) continue;
-
-        const Nif::Property *pr = list[i].getPtr();
-        if (pr->recType == Nif::RC_NiTexturingProperty)
-            t = static_cast<const Nif::NiTexturingProperty*>(pr);
-        else if (pr->recType == Nif::RC_NiMaterialProperty)
-            m = static_cast<const Nif::NiMaterialProperty*>(pr);
-        else if (pr->recType == Nif::RC_NiAlphaProperty)
-            a = static_cast<const Nif::NiAlphaProperty*>(pr);
-        else if (pr->recType == Nif::RC_NiStencilProperty)
-            /* unused */;
-        else
-            warn("Skipped property type: "+pr->recName);
-    }
-
     // Texture
-    if (t && t->textures[0].inUse)
+    if(texprop && texprop->textures[0].inUse)
     {
-        Nif::NiSourceTexture *st = t->textures[0].texture.getPtr();
-        if (st->external)
+        const Nif::NiSourceTexture *st = texprop->textures[0].texture.getPtr();
+        if(st->external)
         {
             /* Bethesda at some point converted all their BSA
              * textures from tga to dds for increased load speed, but all
@@ -633,25 +611,25 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
     }
 
     // Alpha modifiers
-    if (a)
+    if(alphaprop)
     {
-        alphaFlags = a->flags;
-        alphaTest = a->data.threshold;
+        alphaFlags = alphaprop->flags;
+        alphaTest = alphaprop->data.threshold;
     }
 
     // Material
-    if(m)
+    if(matprop)
     {
-        ambient = m->data.ambient;
-        diffuse = m->data.diffuse;
-        specular = m->data.specular;
-        emissive = m->data.emissive;
-        glossiness = m->data.glossiness;
-        alpha = m->data.alpha;
+        ambient = matprop->data.ambient;
+        diffuse = matprop->data.diffuse;
+        specular = matprop->data.specular;
+        emissive = matprop->data.emissive;
+        glossiness = matprop->data.glossiness;
+        alpha = matprop->data.alpha;
     }
 
     Ogre::String matname = name;
-    if (m || !texName.empty())
+    if(matprop || !texName.empty())
     {
         // Generate a hash out of all properties that can affect the material.
         size_t h = 0;
@@ -749,7 +727,6 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
     std::string mName;
     std::string mGroup;
     size_t mShapeIndex;
-    std::string mMaterialName;
 
     void warn(const std::string &msg)
     {
@@ -764,7 +741,10 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
 
 
     // Convert NiTriShape to Ogre::SubMesh
-    void handleNiTriShape(Ogre::Mesh *mesh, Nif::NiTriShape const *shape)
+    void handleNiTriShape(Ogre::Mesh *mesh, Nif::NiTriShape const *shape,
+                          const Nif::NiTexturingProperty *texprop,
+                          const Nif::NiMaterialProperty *matprop,
+                          const Nif::NiAlphaProperty *alphaprop)
     {
         Ogre::SkeletonPtr skel;
         const Nif::NiTriShapeData *data = shape->data.getPtr();
@@ -962,15 +942,39 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
             }
         }
 
-        if(mMaterialName.length() > 0)
-            sub->setMaterialName(mMaterialName);
+        std::string matname = NIFMaterialLoader::getMaterial(shape, mName, mGroup,
+                                                             texprop, matprop, alphaprop);
+        if(matname.length() > 0)
+            sub->setMaterialName(matname);
     }
 
-    bool findTriShape(Ogre::Mesh *mesh, Nif::Node const *node)
+    bool findTriShape(Ogre::Mesh *mesh, const Nif::Node *node,
+                      const Nif::NiTexturingProperty *texprop=NULL,
+                      const Nif::NiMaterialProperty *matprop=NULL,
+                      const Nif::NiAlphaProperty *alphaprop=NULL)
     {
+        // Scan the property list for material information
+        const Nif::PropertyList &proplist = node->props;
+        for(size_t i = 0;i < proplist.length();i++)
+        {
+            // Entries may be empty
+            if(proplist[i].empty())
+                continue;
+
+            const Nif::Property *pr = proplist[i].getPtr();
+            if(pr->recType == Nif::RC_NiTexturingProperty)
+                texprop = static_cast<const Nif::NiTexturingProperty*>(pr);
+            else if(pr->recType == Nif::RC_NiMaterialProperty)
+                matprop = static_cast<const Nif::NiMaterialProperty*>(pr);
+            else if(pr->recType == Nif::RC_NiAlphaProperty)
+                alphaprop = static_cast<const Nif::NiAlphaProperty*>(pr);
+            else
+                warn("Unhandled property type: "+pr->recName);
+        }
+
         if(node->recType == Nif::RC_NiTriShape && mShapeIndex == node->recIndex)
         {
-            handleNiTriShape(mesh, dynamic_cast<const Nif::NiTriShape*>(node));
+            handleNiTriShape(mesh, dynamic_cast<const Nif::NiTriShape*>(node), texprop, matprop, alphaprop);
             return true;
         }
 
@@ -982,7 +986,7 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
             {
                 if(!children[i].empty())
                 {
-                    if(findTriShape(mesh, children[i].getPtr()))
+                    if(findTriShape(mesh, children[i].getPtr(), texprop, matprop, alphaprop))
                         return true;
                 }
             }
@@ -1015,7 +1019,7 @@ public:
             return;
         }
 
-        Nif::Node const *node = dynamic_cast<const Nif::Node*>(nif->getRecord(mShapeIndex));
+        const Nif::Node *node = dynamic_cast<const Nif::Node*>(nif->getRecord(0));
         findTriShape(mesh, node);
     }
 
@@ -1066,7 +1070,6 @@ public:
                 NIFMeshLoader *loader = &sLoaders[fullname];
                 *loader = *this;
                 loader->mShapeIndex = shape->recIndex;
-                loader->mMaterialName = NIFMaterialLoader::getMaterial(shape, fullname, mGroup);
 
                 mesh = meshMgr.createManual(fullname, mGroup, loader);
                 mesh->setAutoBuildEdgeLists(false);
