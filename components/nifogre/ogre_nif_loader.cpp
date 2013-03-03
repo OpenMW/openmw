@@ -573,7 +573,8 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
     int vertMode = 2;
     //int lightMode = 1;
     int depthFlags = 3;
-    int specFlags = 1;
+    // Default should be 1, but Bloodmoon's models are broken
+    int specFlags = 0;
     Ogre::String texName;
 
     bool vertexColour = (shape->data->colors.size() != 0);
@@ -715,7 +716,7 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
     if(specFlags)
     {
         instance->setProperty("specular", sh::makeProperty(
-            new sh::Vector4(specular.x, specular.y, specular.z, glossiness*255.0f)));
+            new sh::Vector4(specular.x, specular.y, specular.z, glossiness)));
     }
 
     instance->setProperty("diffuseMap", sh::makeProperty(texName));
