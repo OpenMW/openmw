@@ -7,6 +7,7 @@
 #include <QMenuBar>
 #include <QMdiArea>
 #include <QDockWidget>
+#include <QtGui/QApplication>
 
 #include "../../model/doc/document.hpp"
 
@@ -40,9 +41,14 @@ void CSVDoc::View::setupFileMenu()
     connect (mSave, SIGNAL (triggered()), this, SLOT (save()));
     file->addAction (mSave);
 
+    QAction *close = new QAction (tr ("&Close"), this);
+    connect (close, SIGNAL (triggered()), this, SLOT (close()));
+    file->addAction(close);
+
     QAction *exit = new QAction (tr ("&Exit"), this);
-    connect (exit, SIGNAL (triggered()), this, SLOT (close()));
+    connect (exit, SIGNAL (triggered()), QApplication::instance(), SLOT (closeAllWindows()));
     file->addAction(exit);
+
 
 }
 
