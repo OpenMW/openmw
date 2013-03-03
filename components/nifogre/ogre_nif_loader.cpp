@@ -552,7 +552,8 @@ public:
 static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String &name, const Ogre::String &group,
                                 const Nif::NiTexturingProperty *texprop,
                                 const Nif::NiMaterialProperty *matprop,
-                                const Nif::NiAlphaProperty *alphaprop)
+                                const Nif::NiAlphaProperty *alphaprop,
+                                const Nif::NiVertexColorProperty *vertprop)
 {
     Ogre::MaterialManager &matMgr = Ogre::MaterialManager::getSingleton();
     Ogre::MaterialPtr material = matMgr.getByName(name);
@@ -567,6 +568,8 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
     float alpha = 1.0f;
     int alphaFlags = 0;
     int alphaTest = 0;
+    int vertMode = 2;
+    //int lightMode = 1;
     Ogre::String texName;
 
     bool vertexColour = (shape->data->colors.size() != 0);
@@ -617,6 +620,14 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
         alphaTest = alphaprop->data.threshold;
     }
 
+    // Vertex color handling
+    if(vertprop)
+    {
+        vertMode = vertprop->data.vertmode;
+        // FIXME: Handle lightmode?
+        //lightMode = vertprop->data.lightmode;
+    }
+
     // Material
     if(matprop)
     {
@@ -649,6 +660,7 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
         boost::hash_combine(h, vertexColour);
         boost::hash_combine(h, alphaFlags);
         boost::hash_combine(h, alphaTest);
+        boost::hash_combine(h, vertMode);
 
         std::map<size_t,std::string>::iterator itr = MaterialMap.find(h);
         if (itr != MaterialMap.end())
@@ -662,19 +674,31 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
 
     // No existing material like this. Create a new one.
     sh::MaterialInstance* instance = sh::Factory::getInstance ().createMaterialInstance (matname, "openmw_objects_base");
-    instance->setProperty ("ambient", sh::makeProperty<sh::Vector3> (
-        new sh::Vector3(ambient.x, ambient.y, ambient.z)));
+    if(vertMode == 0 || !vertexColour)
+    {
+        instance->setProperty("ambient", sh::makeProperty(new sh::Vector4(ambient.x, ambient.y, ambient.z, alpha)));
+        instance->setProperty("diffuse", sh::makeProperty(new sh::Vector4(diffuse.x, diffuse.y, diffuse.z, alpha)));
+        instance->setProperty("emissive", sh::makeProperty(new sh::Vector4(emissive.x, emissive.y, emissive.z, alpha)));
+    }
+    else if(vertMode == 1)
+    {
+        instance->setProperty("ambient", sh::makeProperty(new sh::Vector4(ambient.x, ambient.y, ambient.z, alpha)));
+        instance->setProperty("diffuse", sh::makeProperty(new sh::Vector4(diffuse.x, diffuse.y, diffuse.z, alpha)));
+        instance->setProperty("emissive", sh::makeProperty(new sh::StringValue("vertexcolour")));
+    }
+    else if(vertMode == 2)
+    {
+        instance->setProperty("ambient", sh::makeProperty(new sh::StringValue("vertexcolour")));
+        instance->setProperty("diffuse", sh::makeProperty(new sh::StringValue("vertexcolour")));
+        instance->setProperty("emissive", sh::makeProperty(new sh::Vector4(emissive.x, emissive.y, emissive.z, alpha)));
+    }
+    else
+        std::cerr<< "Unhandled vertex mode: "<<vertMode <<std::endl;
 
-    instance->setProperty ("diffuse", sh::makeProperty<sh::Vector4> (
-        new sh::Vector4(diffuse.x, diffuse.y, diffuse.z, alpha)));
-
-    instance->setProperty ("specular", sh::makeProperty<sh::Vector4> (
+    instance->setProperty("specular", sh::makeProperty(
         new sh::Vector4(specular.x, specular.y, specular.z, glossiness*255.0f)));
 
-    instance->setProperty ("emissive", sh::makeProperty<sh::Vector3> (
-        new sh::Vector3(emissive.x, emissive.y, emissive.z)));
-
-    instance->setProperty ("diffuseMap", sh::makeProperty(texName));
+    instance->setProperty("diffuseMap", sh::makeProperty(texName));
 
     if (vertexColour)
         instance->setProperty ("has_vertex_colour", sh::makeProperty<sh::BooleanValue>(new sh::BooleanValue(true)));
@@ -744,7 +768,8 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
     void handleNiTriShape(Ogre::Mesh *mesh, Nif::NiTriShape const *shape,
                           const Nif::NiTexturingProperty *texprop,
                           const Nif::NiMaterialProperty *matprop,
-                          const Nif::NiAlphaProperty *alphaprop)
+                          const Nif::NiAlphaProperty *alphaprop,
+                          const Nif::NiVertexColorProperty *vertprop)
     {
         Ogre::SkeletonPtr skel;
         const Nif::NiTriShapeData *data = shape->data.getPtr();
@@ -943,7 +968,8 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
         }
 
         std::string matname = NIFMaterialLoader::getMaterial(shape, mName, mGroup,
-                                                             texprop, matprop, alphaprop);
+                                                             texprop, matprop, alphaprop,
+                                                             vertprop);
         if(matname.length() > 0)
             sub->setMaterialName(matname);
     }
@@ -951,7 +977,8 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
     bool findTriShape(Ogre::Mesh *mesh, const Nif::Node *node,
                       const Nif::NiTexturingProperty *texprop=NULL,
                       const Nif::NiMaterialProperty *matprop=NULL,
-                      const Nif::NiAlphaProperty *alphaprop=NULL)
+                      const Nif::NiAlphaProperty *alphaprop=NULL,
+                      const Nif::NiVertexColorProperty *vertprop=NULL)
     {
         // Scan the property list for material information
         const Nif::PropertyList &proplist = node->props;
@@ -968,13 +995,15 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
                 matprop = static_cast<const Nif::NiMaterialProperty*>(pr);
             else if(pr->recType == Nif::RC_NiAlphaProperty)
                 alphaprop = static_cast<const Nif::NiAlphaProperty*>(pr);
+            else if(pr->recType == Nif::RC_NiVertexColorProperty)
+                vertprop = static_cast<const Nif::NiVertexColorProperty*>(pr);
             else
                 warn("Unhandled property type: "+pr->recName);
         }
 
         if(node->recType == Nif::RC_NiTriShape && mShapeIndex == node->recIndex)
         {
-            handleNiTriShape(mesh, dynamic_cast<const Nif::NiTriShape*>(node), texprop, matprop, alphaprop);
+            handleNiTriShape(mesh, dynamic_cast<const Nif::NiTriShape*>(node), texprop, matprop, alphaprop, vertprop);
             return true;
         }
 
@@ -986,7 +1015,7 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
             {
                 if(!children[i].empty())
                 {
-                    if(findTriShape(mesh, children[i].getPtr(), texprop, matprop, alphaprop))
+                    if(findTriShape(mesh, children[i].getPtr(), texprop, matprop, alphaprop, vertprop))
                         return true;
                 }
             }
