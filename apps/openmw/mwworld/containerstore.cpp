@@ -548,7 +548,8 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStoreIterator::operator++ (int
 
 bool MWWorld::ContainerStoreIterator::isEqual (const ContainerStoreIterator& iter) const
 {
-    assert (mContainer==iter.mContainer);
+    if (mContainer!=iter.mContainer)
+        return false;
 
     if (mType!=iter.mType)
         return false;
