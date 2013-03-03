@@ -42,7 +42,8 @@ namespace MWRender
 
         // We don't want any pixel error at all. Really, LOD makes no sense here - morrowind uses 65x65 verts in one cell,
         // so applying LOD is most certainly slower than doing no LOD at all.
-        mTerrainGlobals->setMaxPixelError(0);
+        // Setting this to 0 seems to cause glitches though. :/
+        mTerrainGlobals->setMaxPixelError(1);
 
         mTerrainGlobals->setLayerBlendMapSize(32);
 
