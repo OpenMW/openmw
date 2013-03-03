@@ -91,7 +91,7 @@ namespace MWGui
         std::map<int, MyGUI::TextBox*> mSkillWidgetMap;
         std::string mName, mRaceId, mBirthSignId;
         ESM::Class mKlass;
-        std::vector<MyGUI::WidgetPtr> mSkillWidgets; //< Skills and other information
+        std::vector<MyGUI::Widget*> mSkillWidgets; //< Skills and other information
     };
 }
 #endif

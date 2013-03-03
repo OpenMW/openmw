@@ -60,7 +60,7 @@ namespace MWGui
 
         MyGUI::Widget* mDummy;
 
-        MyGUI::WidgetPtr mFpsBox;
+        MyGUI::Widget* mFpsBox;
         MyGUI::TextBox* mFpsCounter;
         MyGUI::TextBox* mTriangleCounter;
         MyGUI::TextBox* mBatchCounter;

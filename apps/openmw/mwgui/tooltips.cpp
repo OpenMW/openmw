@@ -439,7 +439,7 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
         effectsWidget->setWindowManager(mWindowManager);
         effectsWidget->setEffectList(info.effects);
 
-        std::vector<MyGUI::WidgetPtr> effectItems;
+        std::vector<MyGUI::Widget*> effectItems;
         effectsWidget->createEffectWidgets(effectItems, effectArea, coord, true, info.isPotion ? Widgets::MWEffectList::EF_NoTarget : 0);
         totalSize.height += coord.top-6;
         totalSize.width = std::max(totalSize.width, coord.width);
@@ -459,7 +459,7 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
         enchantWidget->setWindowManager(mWindowManager);
         enchantWidget->setEffectList(Widgets::MWEffectList::effectListFromESM(&enchant->mEffects));
 
-        std::vector<MyGUI::WidgetPtr> enchantEffectItems;
+        std::vector<MyGUI::Widget*> enchantEffectItems;
         int flag = (enchant->mData.mType == ESM::Enchantment::ConstantEffect) ? Widgets::MWEffectList::EF_Constant : 0;
         enchantWidget->createEffectWidgets(enchantEffectItems, enchantArea, coord, true, flag);
         totalSize.height += coord.top-6;

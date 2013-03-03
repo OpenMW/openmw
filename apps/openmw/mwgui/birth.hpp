@@ -46,9 +46,9 @@ namespace MWGui
         void updateSpells();
 
         MyGUI::ListBox* mBirthList;
-        MyGUI::WidgetPtr  mSpellArea;
+        MyGUI::Widget*  mSpellArea;
         MyGUI::ImageBox* mBirthImage;
-        std::vector<MyGUI::WidgetPtr> mSpellItems;
+        std::vector<MyGUI::Widget*> mSpellItems;
 
         std::string mCurrentBirthId;
     };
