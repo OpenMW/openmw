@@ -289,7 +289,7 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
 
         case SelectWrapper::Function_PcGender:
 
-            return player.get<ESM::NPC>()->mBase->mFlags & ESM::NPC::Female ? 0 : 1;
+            return player.get<ESM::NPC>()->mBase->isMale() ? 0 : 1;
 
         case SelectWrapper::Function_PcClothingModifier:
         {
@@ -559,8 +559,21 @@ MWDialogue::Filter::Filter (const MWWorld::Ptr& actor, int choice, bool talkedTo
 : mActor (actor), mChoice (choice), mTalkedToPlayer (talkedToPlayer)
 {}
 
-const ESM::DialInfo *MWDialogue::Filter::search (const ESM::Dialogue& dialogue, const bool fallbackToInfoRefusal) const
+const ESM::DialInfo* MWDialogue::Filter::search (const ESM::Dialogue& dialogue, const bool fallbackToInfoRefusal) const
 {
+    std::vector<const ESM::DialInfo *> suitableInfos = list (dialogue, fallbackToInfoRefusal, false);
+
+    if (suitableInfos.empty())
+        return NULL;
+    else
+        return suitableInfos[0];
+}
+
+std::vector<const ESM::DialInfo *> MWDialogue::Filter::list (const ESM::Dialogue& dialogue,
+    bool fallbackToInfoRefusal, bool searchAll) const
+{
+    std::vector<const ESM::DialInfo *> infos;
+
     bool infoRefusal = false;
 
     // Iterate over topic responses to find a matching one
@@ -569,14 +582,17 @@ const ESM::DialInfo *MWDialogue::Filter::search (const ESM::Dialogue& dialogue, 
     {
         if (testActor (*iter) && testPlayer (*iter) && testSelectStructs (*iter))
         {
-            if (testDisposition (*iter))
-                return &*iter;
+            if (testDisposition (*iter)) {
+                infos.push_back(&*iter);
+                if (!searchAll)
+                    break;
+            }
             else
                 infoRefusal = true;
         }
     }
 
-    if (infoRefusal && fallbackToInfoRefusal)
+    if (infos.empty() && infoRefusal && fallbackToInfoRefusal)
     {
         // No response is valid because of low NPC disposition,
         // search a response in the topic "Info Refusal"
@@ -588,11 +604,14 @@ const ESM::DialInfo *MWDialogue::Filter::search (const ESM::Dialogue& dialogue, 
 
         for (std::vector<ESM::DialInfo>::const_iterator iter = infoRefusalDialogue.mInfo.begin();
             iter!=infoRefusalDialogue.mInfo.end(); ++iter)
-            if (testActor (*iter) && testPlayer (*iter) && testSelectStructs (*iter) && testDisposition(*iter))
-                return &*iter;
+            if (testActor (*iter) && testPlayer (*iter) && testSelectStructs (*iter) && testDisposition(*iter)) {
+                infos.push_back(&*iter);
+                if (!searchAll)
+                    break;
+            }
     }
 
-    return 0;
+    return infos;
 }
 
 bool MWDialogue::Filter::responseAvailable (const ESM::Dialogue& dialogue) const

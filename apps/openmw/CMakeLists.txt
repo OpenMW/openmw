@@ -26,11 +26,11 @@ add_openmw_dir (mwinput
 add_openmw_dir (mwgui
     text_input widgets race class birth review windowmanagerimp console dialogue
     dialogue_history window_base stats_window messagebox journalwindow charactercreation
-    map_window window_pinnable_base cursorreplace tooltips scrollwindow bookwindow list
+    map_window window_pinnable_base tooltips scrollwindow bookwindow list
     formatting inventorywindow container hud countdialog tradewindow settingswindow
     confirmationdialog alchemywindow referenceinterface spellwindow mainmenu quickkeysmenu
     itemselection spellbuyingwindow loadingscreen levelupdialog waitdialog spellcreationdialog
-    enchantingdialog trainingwindow travelwindow imagebutton exposedwindow
+    enchantingdialog trainingwindow travelwindow imagebutton exposedwindow cursor
     )
 
 add_openmw_dir (mwdialogue

@@ -113,12 +113,8 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh, bool
     Ogre::AxisAlignedBox bounds = Ogre::AxisAlignedBox::BOX_NULL;
     NifOgre::EntityList entities = NifOgre::Loader::createEntities(insert, mesh);
     for(size_t i = 0;i < entities.mEntities.size();i++)
-    {
-        const Ogre::AxisAlignedBox &tmp = entities.mEntities[i]->getBoundingBox();
-        bounds.merge(Ogre::AxisAlignedBox(insert->_getDerivedPosition() + tmp.getMinimum(),
-                                          insert->_getDerivedPosition() + tmp.getMaximum())
-        );
-    }
+        bounds.merge(entities.mEntities[i]->getWorldBoundingBox(true));
+
     Ogre::Vector3 extents = bounds.getSize();
     extents *= insert->getScale();
     float size = std::max(std::max(extents.x, extents.y), extents.z);
@@ -134,23 +130,21 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh, bool
     mBounds[ptr.getCell()].merge(bounds);
 
     bool transparent = false;
-    for(size_t i = 0;i < entities.mEntities.size();i++)
+    for(size_t i = 0;!transparent && i < entities.mEntities.size();i++)
     {
         Ogre::Entity *ent = entities.mEntities[i];
-        for (unsigned int i=0; i<ent->getNumSubEntities(); ++i)
+        for(unsigned int i=0;!transparent && i < ent->getNumSubEntities(); ++i)
         {
             Ogre::MaterialPtr mat = ent->getSubEntity(i)->getMaterial();
             Ogre::Material::TechniqueIterator techIt = mat->getTechniqueIterator();
-            while (techIt.hasMoreElements())
+            while(!transparent && techIt.hasMoreElements())
             {
                 Ogre::Technique* tech = techIt.getNext();
                 Ogre::Technique::PassIterator passIt = tech->getPassIterator();
-                while (passIt.hasMoreElements())
+                while(!transparent && passIt.hasMoreElements())
                 {
                     Ogre::Pass* pass = passIt.getNext();
-
-                    if (pass->getDepthWriteEnabled() == false)
-                        transparent = true;
+                    transparent = pass->isTransparent();
                 }
             }
         }

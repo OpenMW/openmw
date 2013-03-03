@@ -95,31 +95,46 @@ namespace MWGui
         // http://www.uesp.net/wiki/Lore:Calendar
         std::string month;
         int m = MWBase::Environment::get().getWorld ()->getMonth ();
-        if (m == 0)
-            month = "#{sMonthMorningstar}";
-        else if (m == 1)
-            month = "#{sMonthSunsdawn}";
-        else if (m == 2)
-            month = "#{sMonthFirstseed}";
-        else if (m == 3)
-            month = "#{sMonthRainshand}";
-        else if (m == 4)
-            month = "#{sMonthSecondseed}";
-        else if (m == 5)
-            month = "#{sMonthMidyear}";
-        else if (m == 6)
-            month = "#{sMonthSunsheight}";
-        else if (m == 7)
-            month = "#{sMonthLastseed}";
-        else if (m == 8)
-            month = "#{sMonthHeartfire}";
-        else if (m == 9)
-            month = "#{sMonthFrostfall}";
-        else if (m == 10)
-            month = "#{sMonthSunsdusk}";
-        else if (m == 11)
-            month = "#{sMonthEveningstar}";
-
+        switch (m) {
+            case 0:
+                month = "#{sMonthMorningstar}";
+                break;
+            case 1:
+                month = "#{sMonthSunsdawn}";
+                break;
+            case 2:
+                month = "#{sMonthFirstseed}";
+                break;
+            case 3:
+                month = "#{sMonthRainshand}";
+                break;
+            case 4:
+                month = "#{sMonthSecondseed}";
+                break;
+            case 5:
+                month = "#{sMonthMidyear}";
+                break;
+            case 6:
+                month = "#{sMonthSunsheight}";
+                break;
+            case 7:
+                month = "#{sMonthLastseed}";
+                break;
+            case 8:
+                month = "#{sMonthHeartfire}";
+                break;
+            case 9:
+                month = "#{sMonthFrostfall}";
+                break;
+            case 10:
+                month = "#{sMonthSunsdusk}";
+                break;
+            case 11:
+                month = "#{sMonthEveningstar}";
+                break;
+            default:   
+                break;
+        }
         int hour = MWBase::Environment::get().getWorld ()->getTimeStamp ().getHour ();
         bool pm = hour >= 12;
         if (hour >= 13) hour -= 12;

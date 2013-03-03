@@ -6,12 +6,16 @@
 #include <OgreTextureManager.h>
 #include <OgreSceneNode.h>
 
+#include <MyGUI_Gui.h>
+
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwworld/player.hpp"
 
 #include "../mwrender/globalmap.hpp"
+
+#include "widgets.hpp"
 
 using namespace MWGui;
 
@@ -96,6 +100,7 @@ void LocalMapBase::applyFogOfWar()
                : "");
         }
     }
+    notifyMapChanged ();
 }
 
 void LocalMapBase::onMarkerFocused (MyGUI::Widget* w1, MyGUI::Widget* w2)
@@ -424,4 +429,18 @@ void MapWindow::globalMapUpdatePlayer ()
 void MapWindow::notifyPlayerUpdate ()
 {
     globalMapUpdatePlayer ();
+}
+
+void MapWindow::notifyMapChanged ()
+{
+    // workaround to prevent the map from drawing on top of the button
+    MyGUI::IntCoord oldCoord = mButton->getCoord ();
+    MyGUI::Gui::getInstance().destroyWidget (mButton);
+    mButton = mMainWidget->createWidget<MWGui::Widgets::AutoSizedButton>("MW_Button",
+         oldCoord, MyGUI::Align::Bottom | MyGUI::Align::Right);
+    mButton->setProperty ("ExpandDirection", "Left");
+
+    mButton->eventMouseButtonClick += MyGUI::newDelegate(this, &MapWindow::onWorldButtonClicked);
+    mButton->setCaptionWithReplacing( mGlobal ? "#{sLocal}" :
+            "#{sWorld}");
 }

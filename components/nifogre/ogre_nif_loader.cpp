@@ -452,7 +452,8 @@ void loadResource(Ogre::Resource *resource)
     }
 }
 
-bool createSkeleton(const std::string &name, const std::string &group, const Nif::Node *node)
+
+static Ogre::SkeletonPtr createSkeleton(const std::string &name, const std::string &group, const Nif::Node *node)
 {
     /* We need to be a little aggressive here, since some NIFs have a crap-ton
      * of nodes and Ogre only supports 256 bones. We will skip a skeleton if:
@@ -463,7 +464,7 @@ bool createSkeleton(const std::string &name, const std::string &group, const Nif
     if(!node->boneTrafo)
     {
         if(node->recType == Nif::RC_NiTriShape)
-            return false;
+            return Ogre::SkeletonPtr();
         if(node->controller.empty() && node->name != "AttachLight")
         {
             if(node->recType == Nif::RC_NiNode || node->recType == Nif::RC_RootCollisionNode)
@@ -474,18 +475,18 @@ bool createSkeleton(const std::string &name, const std::string &group, const Nif
                 {
                     if(!children[i].empty())
                     {
-                        if(createSkeleton(name, group, children[i].getPtr()))
-                            return true;
+                        Ogre::SkeletonPtr skel = createSkeleton(name, group, children[i].getPtr());
+                        if(!skel.isNull())
+                            return skel;
                     }
                 }
-                return false;
+                return Ogre::SkeletonPtr();
             }
         }
     }
 
     Ogre::SkeletonManager &skelMgr = Ogre::SkeletonManager::getSingleton();
-    skelMgr.create(name, group, true, &sLoaders[name]);
-    return true;
+    return skelMgr.create(name, group, true, &sLoaders[name]);
 }
 
 };
@@ -586,6 +587,8 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
             m = static_cast<const Nif::NiMaterialProperty*>(pr);
         else if (pr->recType == Nif::RC_NiAlphaProperty)
             a = static_cast<const Nif::NiAlphaProperty*>(pr);
+        else if (pr->recType == Nif::RC_NiStencilProperty)
+            /* unused */;
         else
             warn("Skipped property type: "+pr->recName);
     }
@@ -602,7 +605,12 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
              */
             static const char path[] = "textures\\";
 
-            texName = path + st->filename;
+            texName = st->filename;
+            Misc::StringUtils::toLower(texName);
+
+            if(texName.compare(0, sizeof(path)-1, path) != 0)
+                texName = path + texName;
+
             Ogre::String::size_type pos = texName.rfind('.');
             if(pos != Ogre::String::npos && texName.compare(pos, texName.length() - pos, ".dds") != 0)
             {
@@ -613,17 +621,11 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
                 // if it turns out that the above wasn't true in all cases (not for vanilla, but maybe mods)
                 // verify, and revert if false (this call succeeds quickly, but fails slowly)
                 if(!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(texName))
-                    texName = path + st->filename;
-            }
-            else if (!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(texName))
-            {
-                // workaround for Better Heads addon
-                size_t lastSlash = st->filename.rfind('\\');
-                if (lastSlash != std::string::npos && lastSlash + 1 != st->filename.size()) {
-                    texName = path + st->filename.substr(lastSlash + 1);
-                    // workaround for Better Bodies addon
-                    if (!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(texName))
-                        texName = st->filename;
+                {
+                    texName = st->filename;
+                    Misc::StringUtils::toLower(texName);
+                    if(texName.compare(0, sizeof(path)-1, path) != 0)
+                        texName = path + texName;
                 }
             }
         }
@@ -721,8 +723,6 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
         blend_mode += getBlendFactor((alphaFlags>>1)&0xf);
         blend_mode += " ";
         blend_mode += getBlendFactor((alphaFlags>>5)&0xf);
-
-        instance->setProperty("depth_write", sh::makeProperty(new sh::StringValue("off")));
         instance->setProperty("scene_blend", sh::makeProperty(new sh::StringValue(blend_mode)));
     }
     else
@@ -740,6 +740,7 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
     instance->setProperty("transparent_sorting", sh::makeProperty(new sh::StringValue(((alphaFlags>>13)&1) ?
                                                                                       "off" : "on")));
 
+    sh::Factory::getInstance()._ensureMaterial(matname, "Default");
     return matname;
 }
 
@@ -849,9 +850,12 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
         // Set the bounding box first
         BoundsFinder bounds;
         bounds.add(&srcVerts[0][0], srcVerts.size());
-        // No idea why this offset is needed. It works fine without it if the
-        // vertices weren't transformed first, but otherwise it fails later on
-        // when the object is being inserted into the scene.
+        if(!bounds.isValid())
+        {
+            float v[3] = { 0.0f, 0.0f, 0.0f };
+            bounds.add(&v[0], 1);
+        }
+
         mesh->_setBounds(Ogre::AxisAlignedBox(bounds.minX()-0.5f, bounds.minY()-0.5f, bounds.minZ()-0.5f,
                                               bounds.maxX()+0.5f, bounds.maxY()+0.5f, bounds.maxZ()+0.5f));
         mesh->_setBoundingSphereRadius(bounds.getRadius());
@@ -1148,10 +1152,7 @@ MeshInfoList Loader::load(const std::string &name, const std::string &group)
 
     bool hasSkel = Ogre::SkeletonManager::getSingleton().resourceExists(name);
     if(!hasSkel)
-    {
-        NIFSkeletonLoader skelldr;
-        hasSkel = skelldr.createSkeleton(name, group, node);
-    }
+        hasSkel = !NIFSkeletonLoader::createSkeleton(name, group, node).isNull();
 
     NIFMeshLoader meshldr(name, group);
     if(hasSkel)
@@ -1214,14 +1215,20 @@ EntityList Loader::createEntities(Ogre::Entity *parent, const std::string &bonen
     if(meshes.size() == 0)
         return entitylist;
 
+    bool isskinned = false;
     Ogre::SceneManager *sceneMgr = parentNode->getCreator();
     std::string filter = "@shape=tri "+bonename;
     Misc::StringUtils::toLower(filter);
     for(size_t i = 0;i < meshes.size();i++)
     {
         Ogre::Entity *ent = sceneMgr->createEntity(meshes[i].mMeshName);
-        if(!entitylist.mSkelBase && ent->hasSkeleton())
-            entitylist.mSkelBase = ent;
+        if(!entitylist.mSkelBase)
+        {
+            if(ent->hasSkeleton())
+                entitylist.mSkelBase = ent;
+        }
+        else if(!isskinned && ent->hasSkeleton())
+            isskinned = true;
         entitylist.mEntities.push_back(ent);
     }
 
@@ -1229,7 +1236,7 @@ EntityList Loader::createEntities(Ogre::Entity *parent, const std::string &bonen
     if(bonename.find("Left") != std::string::npos)
         scale.x *= -1.0f;
 
-    if(entitylist.mSkelBase)
+    if(isskinned)
     {
         for(size_t i = 0;i < entitylist.mEntities.size();i++)
         {
@@ -1261,30 +1268,35 @@ EntityList Loader::createEntities(Ogre::Entity *parent, const std::string &bonen
 }
 
 
-bool Loader::createSkeleton(const std::string &name, const std::string &group)
+Ogre::SkeletonPtr Loader::getSkeleton(std::string name, const std::string &group)
 {
-    Nif::NIFFile::ptr pnif = Nif::NIFFile::create(name);
-    Nif::NIFFile &nif = *pnif.get();
-    if(nif.numRecords() < 1)
+    Ogre::SkeletonPtr skel;
+
+    Misc::StringUtils::toLower(name);
+    skel = Ogre::SkeletonManager::getSingleton().getByName(name);
+    if(!skel.isNull())
+        return skel;
+
+    Nif::NIFFile::ptr nif = Nif::NIFFile::create(name);
+    if(nif->numRecords() < 1)
     {
-        nif.warn("Found no NIF records in "+name+".");
-        return false;
+        nif->warn("Found no NIF records in "+name+".");
+        return skel;
     }
 
     // The first record is assumed to be the root node
-    Nif::Record const *r = nif.getRecord(0);
+    const Nif::Record *r = nif->getRecord(0);
     assert(r != NULL);
 
-    Nif::Node const *node = dynamic_cast<Nif::Node const *>(r);
+    const Nif::Node *node = dynamic_cast<const Nif::Node*>(r);
     if(node == NULL)
     {
-        nif.warn("First record in "+name+" was not a node, but a "+
-                 r->recName+".");
-        return false;
+        nif->warn("First record in "+name+" was not a node, but a "+
+                  r->recName+".");
+        return skel;
     }
 
-    NIFSkeletonLoader skelldr;
-    return skelldr.createSkeleton(name, group, node);
+    return NIFSkeletonLoader::createSkeleton(name, group, node);
 }
 
 

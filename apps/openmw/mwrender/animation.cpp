@@ -53,8 +53,6 @@ void Animation::setAnimationSources(const std::vector<std::string> &names)
     if(!mEntityList.mSkelBase)
         return;
 
-    Ogre::SkeletonManager &skelMgr = Ogre::SkeletonManager::getSingleton();
-
     mCurrentAnim = NULL;
     mCurrentKeys = NULL;
     mAnimVelocity = 0.0f;
@@ -62,19 +60,14 @@ void Animation::setAnimationSources(const std::vector<std::string> &names)
     mNonAccumRoot = NULL;
     mSkeletonSources.clear();
 
-    std::vector<std::string>::const_iterator nameiter = names.begin();
+    std::vector<std::string>::const_iterator nameiter;
     for(nameiter = names.begin();nameiter != names.end();nameiter++)
     {
-        Ogre::SkeletonPtr skel = skelMgr.getByName(*nameiter);
+        Ogre::SkeletonPtr skel = NifOgre::Loader::getSkeleton(*nameiter);
         if(skel.isNull())
         {
-            NifOgre::Loader::createSkeleton(*nameiter);
-            skel = skelMgr.getByName(*nameiter);
-            if(skel.isNull())
-            {
-                std::cerr<< "Failed to get skeleton source "<<*nameiter <<std::endl;
-                continue;
-            }
+            std::cerr<< "Failed to get skeleton source "<<*nameiter <<std::endl;
+            continue;
         }
         skel->touch();
 

@@ -72,6 +72,7 @@ namespace MWGui
   class SpellCreationDialog;
   class EnchantingDialog;
   class TrainingWindow;
+  class Cursor;
 
   class WindowManager : public MWBase::WindowManager
   {
@@ -261,6 +262,7 @@ namespace MWGui
     EnchantingDialog* mEnchantingDialog;
     TrainingWindow* mTrainingWindow;
     Translation::Storage& mTranslationDataStorage;
+    Cursor* mCursor;
 
     CharacterCreation* mCharGen;
 
