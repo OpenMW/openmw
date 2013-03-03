@@ -676,6 +676,7 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
         boost::hash_combine(h, alphaFlags);
         boost::hash_combine(h, alphaTest);
         boost::hash_combine(h, vertMode);
+        boost::hash_combine(h, depthFlags);
         boost::hash_combine(h, specFlags);
 
         std::map<size_t,std::string>::iterator itr = MaterialMap.find(h);
