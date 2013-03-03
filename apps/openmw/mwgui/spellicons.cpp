@@ -12,6 +12,7 @@
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/inventorystore.hpp"
 
 #include "../mwmechanics/activespells.hpp"
 #include "../mwmechanics/creaturestats.hpp"
@@ -29,6 +30,41 @@ namespace MWGui
 
         std::map <int, std::vector<MagicEffectInfo> > effects;
 
+        // add permanent item enchantments
+        MWWorld::InventoryStore& store = MWWorld::Class::get(player).getInventoryStore(player);
+        for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
+        {
+            MWWorld::ContainerStoreIterator it = store.getSlot(slot);
+            if (it == store.end())
+                continue;
+            std::string enchantment = MWWorld::Class::get(*it).getEnchantment(*it);
+            if (enchantment.empty())
+                continue;
+            const ESM::Enchantment* enchant = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(enchantment);
+            if (enchant->mData.mType != ESM::Enchantment::ConstantEffect)
+                continue;
+
+            const ESM::EffectList& list = enchant->mEffects;
+            for (std::vector<ESM::ENAMstruct>::const_iterator effectIt = list.mList.begin();
+                 effectIt != list.mList.end(); ++effectIt)
+            {
+                const ESM::MagicEffect* magicEffect =
+                    MWBase::Environment::get().getWorld ()->getStore ().get<ESM::MagicEffect>().find(effectIt->mEffectID);
+
+                MagicEffectInfo effectInfo;
+                effectInfo.mSource = MWWorld::Class::get(*it).getName(*it);
+                effectInfo.mKey = MWMechanics::EffectKey (effectIt->mEffectID);
+                if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetSkill)
+                    effectInfo.mKey.mArg = effectIt->mSkill;
+                else if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetAttribute)
+                    effectInfo.mKey.mArg = effectIt->mAttribute;
+                // just using the min magnitude here, permanent enchantments with a random magnitude just wouldn't make any sense
+                effectInfo.mMagnitude = effectIt->mMagnMin;
+                effectInfo.mPermanent = true;
+                effects[effectIt->mEffectID].push_back (effectInfo);
+            }
+        }
+
         // add permanent spells
         const MWMechanics::Spells& spells = stats.getSpells();
         for (MWMechanics::Spells::TIterator it = spells.begin(); it != spells.end(); ++it)
@@ -41,7 +77,7 @@ namespace MWGui
                     && !(spell->mData.mType == ESM::Spell::ST_Curse)
                     && !(spell->mData.mType == ESM::Spell::ST_Blight))
                 continue;
-            ESM::EffectList list = spell->mEffects;
+            const ESM::EffectList& list = spell->mEffects;
             for (std::vector<ESM::ENAMstruct>::const_iterator effectIt = list.mList.begin();
                  effectIt != list.mList.end(); ++effectIt)
             {
@@ -67,7 +103,7 @@ namespace MWGui
         for (MWMechanics::ActiveSpells::TContainer::const_iterator it = activeSpells.begin();
              it != activeSpells.end(); ++it)
         {
-            ESM::EffectList list = getSpellEffectList(it->first);
+            const ESM::EffectList& list = getSpellEffectList(it->first);
 
             float timeScale = MWBase::Environment::get().getWorld()->getTimeScaleFactor();
 
