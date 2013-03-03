@@ -553,7 +553,8 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
                                 const Nif::NiTexturingProperty *texprop,
                                 const Nif::NiMaterialProperty *matprop,
                                 const Nif::NiAlphaProperty *alphaprop,
-                                const Nif::NiVertexColorProperty *vertprop)
+                                const Nif::NiVertexColorProperty *vertprop,
+                                const Nif::NiZBufferProperty *zprop)
 {
     Ogre::MaterialManager &matMgr = Ogre::MaterialManager::getSingleton();
     Ogre::MaterialPtr material = matMgr.getByName(name);
@@ -570,6 +571,7 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
     int alphaTest = 0;
     int vertMode = 2;
     //int lightMode = 1;
+    int depthFlags = 3;
     Ogre::String texName;
 
     bool vertexColour = (shape->data->colors.size() != 0);
@@ -626,6 +628,12 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
         vertMode = vertprop->data.vertmode;
         // FIXME: Handle lightmode?
         //lightMode = vertprop->data.lightmode;
+    }
+
+    if(zprop)
+    {
+        depthFlags = zprop->flags;
+        // Depth function???
     }
 
     // Material
@@ -731,8 +739,11 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
         instance->setProperty("alpha_rejection", sh::makeProperty(new sh::StringValue(reject)));
     }
 
-    instance->setProperty("transparent_sorting", sh::makeProperty(new sh::StringValue(((alphaFlags>>13)&1) ?
-                                                                                      "off" : "on")));
+    instance->setProperty("transparent_sorting", sh::makeProperty(new sh::BooleanValue(!((alphaFlags>>13)&1))));
+
+    instance->setProperty("depth_check", sh::makeProperty(new sh::BooleanValue(depthFlags&1)));
+    instance->setProperty("depth_write", sh::makeProperty(new sh::BooleanValue((depthFlags>>1)&1)));
+    // depth_func???
 
     sh::Factory::getInstance()._ensureMaterial(matname, "Default");
     return matname;
@@ -769,7 +780,8 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
                           const Nif::NiTexturingProperty *texprop,
                           const Nif::NiMaterialProperty *matprop,
                           const Nif::NiAlphaProperty *alphaprop,
-                          const Nif::NiVertexColorProperty *vertprop)
+                          const Nif::NiVertexColorProperty *vertprop,
+                          const Nif::NiZBufferProperty *zprop)
     {
         Ogre::SkeletonPtr skel;
         const Nif::NiTriShapeData *data = shape->data.getPtr();
@@ -969,7 +981,7 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
 
         std::string matname = NIFMaterialLoader::getMaterial(shape, mName, mGroup,
                                                              texprop, matprop, alphaprop,
-                                                             vertprop);
+                                                             vertprop, zprop);
         if(matname.length() > 0)
             sub->setMaterialName(matname);
     }
@@ -978,7 +990,8 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
                       const Nif::NiTexturingProperty *texprop=NULL,
                       const Nif::NiMaterialProperty *matprop=NULL,
                       const Nif::NiAlphaProperty *alphaprop=NULL,
-                      const Nif::NiVertexColorProperty *vertprop=NULL)
+                      const Nif::NiVertexColorProperty *vertprop=NULL,
+                      const Nif::NiZBufferProperty *zprop=NULL)
     {
         // Scan the property list for material information
         const Nif::PropertyList &proplist = node->props;
@@ -997,25 +1010,27 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
                 alphaprop = static_cast<const Nif::NiAlphaProperty*>(pr);
             else if(pr->recType == Nif::RC_NiVertexColorProperty)
                 vertprop = static_cast<const Nif::NiVertexColorProperty*>(pr);
+            else if(pr->recType == Nif::RC_NiZBufferProperty)
+                zprop = static_cast<const Nif::NiZBufferProperty*>(pr);
             else
                 warn("Unhandled property type: "+pr->recName);
         }
 
         if(node->recType == Nif::RC_NiTriShape && mShapeIndex == node->recIndex)
         {
-            handleNiTriShape(mesh, dynamic_cast<const Nif::NiTriShape*>(node), texprop, matprop, alphaprop, vertprop);
+            handleNiTriShape(mesh, dynamic_cast<const Nif::NiTriShape*>(node), texprop, matprop, alphaprop, vertprop, zprop);
             return true;
         }
 
         const Nif::NiNode *ninode = dynamic_cast<const Nif::NiNode*>(node);
         if(ninode)
         {
-            Nif::NodeList const &children = ninode->children;
+            const Nif::NodeList &children = ninode->children;
             for(size_t i = 0;i < children.length();i++)
             {
                 if(!children[i].empty())
                 {
-                    if(findTriShape(mesh, children[i].getPtr(), texprop, matprop, alphaprop, vertprop))
+                    if(findTriShape(mesh, children[i].getPtr(), texprop, matprop, alphaprop, vertprop, zprop))
                         return true;
                 }
             }
