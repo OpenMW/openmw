@@ -21,7 +21,7 @@
 
  */
 
-#include "ogre_nif_loader.hpp"
+#include "ogrenifloader.hpp"
 
 #include <algorithm>
 

@@ -21,10 +21,10 @@
 
  */
 
-#ifndef _NIF_RECORD_PTR_H_
-#define _NIF_RECORD_PTR_H_
+#ifndef OPENMW_COMPONENTS_NIF_RECORDPTR_HPP
+#define OPENMW_COMPONENTS_NIF_RECORDPTR_HPP
 
-#include "nif_file.hpp"
+#include "niffile.hpp"
 #include <vector>
 
 namespace Nif
@@ -46,7 +46,7 @@ public:
     RecordPtrT() : index(-2) {}
 
     /// Read the index from the nif
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         // Can only read the index once
         assert(index == -2);
@@ -99,7 +99,7 @@ class RecordListT
     std::vector<Ptr> list;
 
 public:
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         int len = nif->getInt();
         list.resize(len);

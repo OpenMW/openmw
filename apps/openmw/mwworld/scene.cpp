@@ -1,6 +1,6 @@
 #include "scene.hpp"
 
-#include <components/nif/nif_file.hpp>
+#include <components/nif/niffile.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp" /// FIXME

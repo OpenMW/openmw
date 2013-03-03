@@ -21,8 +21,8 @@
 
  */
 
-#ifndef _NIF_CONTROLLED_H_
-#define _NIF_CONTROLLED_H_
+#ifndef OPENMW_COMPONENTS_NIF_CONTROLLED_HPP
+#define OPENMW_COMPONENTS_NIF_CONTROLLED_HPP
 
 #include "extra.hpp"
 #include "controller.hpp"
@@ -36,7 +36,7 @@ class Controlled : public Extra
 public:
     ControllerPtr controller;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         Extra::read(nif);
         controller.read(nif);
@@ -55,7 +55,7 @@ class Named : public Controlled
 public:
     std::string name;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         name = nif->getString();
         Controlled::read(nif);
@@ -66,7 +66,7 @@ typedef Named NiSequenceStreamHelper;
 class NiParticleGrowFade : public Controlled
 {
 public:
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         Controlled::read(nif);
 
@@ -80,7 +80,7 @@ class NiParticleColorModifier : public Controlled
 public:
     NiColorDataPtr data;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         Controlled::read(nif);
         data.read(nif);
@@ -96,7 +96,7 @@ public:
 class NiGravity : public Controlled
 {
 public:
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         Controlled::read(nif);
 
@@ -109,7 +109,7 @@ public:
 class NiPlanarCollider : public Controlled
 {
 public:
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         Controlled::read(nif);
 
@@ -121,7 +121,7 @@ public:
 class NiParticleRotation : public Controlled
 {
 public:
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         Controlled::read(nif);
 

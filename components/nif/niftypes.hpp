@@ -21,8 +21,8 @@
 
  */
 
-#ifndef _NIF_TYPES_H_
-#define _NIF_TYPES_H_
+#ifndef OPENMW_COMPONENTS_NIF_NIFTYPES_HPP
+#define OPENMW_COMPONENTS_NIF_NIFTYPES_HPP
 
 #include <OgreVector3.h>
 #include <OgreMatrix3.h>

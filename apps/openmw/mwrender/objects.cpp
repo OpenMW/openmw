@@ -7,7 +7,7 @@
 #include <OgreSubEntity.h>
 #include <OgreStaticGeometry.h>
 
-#include <components/nifogre/ogre_nif_loader.hpp>
+#include <components/nifogre/ogrenifloader.hpp>
 #include <components/settings/settings.hpp>
 
 #include "../mwworld/ptr.hpp"

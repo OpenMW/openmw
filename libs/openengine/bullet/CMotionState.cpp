@@ -3,7 +3,7 @@
 
 #include <btBulletDynamicsCommon.h>
 #include <btBulletCollisionCommon.h>
-#include <components/nifbullet/bullet_nif_loader.hpp>
+#include <components/nifbullet/bulletnifloader.hpp>
 
 namespace OEngine {
 namespace Physic

@@ -14,7 +14,7 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include <components/nifogre/ogre_nif_loader.hpp>
+#include <components/nifogre/ogrenifloader.hpp>
 
 #include <extern/shiny/Platforms/Ogre/OgreMaterial.hpp>
 

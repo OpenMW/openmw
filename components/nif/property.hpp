@@ -21,8 +21,8 @@
 
  */
 
-#ifndef _NIF_PROPERTY_H_
-#define _NIF_PROPERTY_H_
+#ifndef OPENMW_COMPONENTS_NIF_PROPERTY_HPP
+#define OPENMW_COMPONENTS_NIF_PROPERTY_HPP
 
 #include "controlled.hpp"
 
@@ -35,7 +35,7 @@ public:
     // The meaning of these depends on the actual property type.
     int flags;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         Named::read(nif);
         flags = nif->getUShort();
@@ -67,7 +67,7 @@ public:
         int clamp, set, filter;
         short unknown2;
 
-        void read(NIFFile *nif)
+        void read(NIFStream *nif)
         {
             inUse = !!nif->getInt();
             if(!inUse) return;
@@ -111,7 +111,7 @@ public:
      */
     Texture textures[7];
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         Property::read(nif);
         apply = nif->getInt();
@@ -157,7 +157,7 @@ struct StructPropT : Property
 {
     T data;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         Property::read(nif);
         data.read(nif);
@@ -170,7 +170,7 @@ struct S_MaterialProperty
     Ogre::Vector3 ambient, diffuse, specular, emissive;
     float glossiness, alpha;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         ambient = nif->getVector3();
         diffuse = nif->getVector3();
@@ -194,7 +194,7 @@ struct S_VertexColorProperty
     */
     int vertmode, lightmode;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         vertmode = nif->getInt();
         lightmode = nif->getInt();
@@ -251,7 +251,7 @@ struct S_AlphaProperty
     // Tested against when certain flags are set (see above.)
     unsigned char threshold;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         threshold = nif->getChar();
     }
@@ -300,7 +300,7 @@ struct S_StencilProperty
      */
     int drawMode;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         enabled = nif->getChar();
         compareFunc = nif->getInt();
