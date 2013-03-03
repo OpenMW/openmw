@@ -63,6 +63,8 @@ namespace MWMechanics
 
             const MagicEffects& getMagicEffects() const;
 
+            const TContainer& getActiveSpells() const;
+
             TIterator begin() const;
 
             TIterator end() const;

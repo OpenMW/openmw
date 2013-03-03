@@ -274,4 +274,9 @@ namespace MWMechanics
         }
         return false;
     }
+
+    const ActiveSpells::TContainer& ActiveSpells::getActiveSpells() const
+    {
+        return mSpells;
+    }
 }

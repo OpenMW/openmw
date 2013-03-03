@@ -19,6 +19,7 @@
 #include "inventorywindow.hpp"
 #include "container.hpp"
 #include "console.hpp"
+#include "spellicons.hpp"
 
 using namespace MWGui;
 
@@ -32,7 +33,6 @@ HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
     , mWeapStatus(NULL)
     , mSpellStatus(NULL)
     , mEffectBox(NULL)
-    , mEffect1(NULL)
     , mMinimap(NULL)
     , mCompass(NULL)
     , mCrosshair(NULL)
@@ -86,9 +86,7 @@ HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
     mSpellBox->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onMagicClicked);
 
     getWidget(mEffectBox, "EffectBox");
-    getWidget(mEffect1, "Effect1");
     mEffectBoxBaseRight = viewSize.width - mEffectBox->getRight();
-    mEffectBox->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onMagicClicked);
 
     getWidget(mMinimapBox, "MiniMapBox");
     mMinimapBoxBaseRight = viewSize.width - mMinimapBox->getRight();
@@ -107,13 +105,18 @@ HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
     getWidget(mTriangleCounter, "TriangleCounter");
     getWidget(mBatchCounter, "BatchCounter");
 
-    setEffect("icons\\s\\tx_s_chameleon.dds");
-
     LocalMapBase::init(mMinimap, mCompass, this);
 
     mMainWidget->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onWorldClicked);
     mMainWidget->eventMouseMove += MyGUI::newDelegate(this, &HUD::onWorldMouseOver);
     mMainWidget->eventMouseLostFocus += MyGUI::newDelegate(this, &HUD::onWorldMouseLostFocus);
+
+    mSpellIcons = new SpellIcons();
+}
+
+HUD::~HUD()
+{
+    delete mSpellIcons;
 }
 
 void HUD::setFpsLevel(int level)
@@ -154,11 +157,6 @@ void HUD::setTriangleCount(unsigned int count)
 void HUD::setBatchCount(unsigned int count)
 {
     mBatchCounter->setCaption(boost::lexical_cast<std::string>(count));
-}
-
-void HUD::setEffect(const char *img)
-{
-    mEffect1->setImageTexture(img);
 }
 
 void HUD::setValue(const std::string& id, const MWMechanics::DynamicStat<float>& value)
@@ -541,4 +539,9 @@ void HUD::updatePositions()
 
     mMapVisible = mMinimapBox->getVisible ();
     mEffectBox->setPosition((viewSize.width - mEffectBoxBaseRight) - mEffectBox->getWidth() + effectsDx, mEffectBox->getTop());
+}
+
+void HUD::update()
+{
+    mSpellIcons->updateWidgets(mEffectBox, true);
 }

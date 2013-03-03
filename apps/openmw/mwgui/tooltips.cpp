@@ -127,9 +127,7 @@ void ToolTips::onFrame(float frameDuration)
 
             Widget* focus = InputManager::getInstance().getMouseFocusWidget();
             if (focus == 0)
-            {
                 return;
-            }
 
             IntSize tooltipSize;
 
@@ -167,6 +165,10 @@ void ToolTips::onFrame(float frameDuration)
             {
                 mFocusObject = *focus->getUserData<MWWorld::Ptr>();
                 tooltipSize = getToolTipViaPtr(false);
+            }
+            else if (type == "ToolTipInfo")
+            {
+                tooltipSize = createToolTip(*focus->getUserData<MWGui::ToolTipInfo>());
             }
             else if (type == "AvatarItemSelection")
             {
@@ -363,7 +365,7 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
 
     std::string caption = info.caption;
     std::string image = info.icon;
-    int imageSize = (image != "") ? 32 : 0;
+    int imageSize = (image != "") ? info.imageSize : 0;
     std::string text = info.text;
 
     // remove the first newline (easier this way)
@@ -403,7 +405,7 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
 
     EditBox* captionWidget = mDynamicToolTipBox->createWidget<EditBox>("NormalText", IntCoord(0, 0, 300, 300), Align::Left | Align::Top, "ToolTipCaption");
     captionWidget->setProperty("Static", "true");
-    captionWidget->setCaption(caption);
+    captionWidget->setCaptionWithReplacing(caption);
     IntSize captionSize = captionWidget->getTextSize();
 
     int captionHeight = std::max(caption != "" ? captionSize.height : 0, imageSize);
@@ -411,7 +413,7 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
     EditBox* textWidget = mDynamicToolTipBox->createWidget<EditBox>("SandText", IntCoord(0, captionHeight+imageCaptionVPadding, 300, 300-captionHeight-imageCaptionVPadding), Align::Stretch, "ToolTipText");
     textWidget->setProperty("Static", "true");
     textWidget->setProperty("MultiLine", "true");
-    textWidget->setProperty("WordWrap", "true");
+    textWidget->setProperty("WordWrap", info.wordWrap ? "true" : "false");
     textWidget->setCaptionWithReplacing(text);
     textWidget->setTextAlign(Align::HCenter | Align::Top);
     IntSize textSize = textWidget->getTextSize();

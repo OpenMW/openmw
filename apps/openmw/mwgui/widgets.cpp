@@ -421,17 +421,7 @@ void MWSpellEffect::updateWidgets()
     }
     if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetAttribute)
     {
-        static const char *attributes[8] = {
-            "sAttributeStrength",
-            "sAttributeIntelligence",
-            "sAttributeWillpower",
-            "sAttributeAgility",
-            "sAttributeSpeed",
-            "sAttributeEndurance",
-            "sAttributePersonality",
-            "sAttributeLuck"
-        };
-        spellLine += " " + mWindowManager->getGameSettingString(attributes[mEffectParams.mAttribute], "");
+        spellLine += " " + mWindowManager->getGameSettingString(ESM::Attribute::sGmstAttributeIds[mEffectParams.mAttribute], "");
     }
 
     if ((mEffectParams.mMagnMin >= 0 || mEffectParams.mMagnMax >= 0) && !(magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude))
