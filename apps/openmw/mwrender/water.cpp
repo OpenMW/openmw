@@ -372,9 +372,9 @@ void Water::updateVisible()
 {
     mWater->setVisible(mToggled && mActive);
     if (mReflection)
-    {
         mReflection->setActive(mToggled && mActive);
-    }
+    if (mRefraction)
+        mRefraction->setActive(mToggled && mActive);
 }
 
 void Water::update(float dt, Ogre::Vector3 player)
@@ -424,6 +424,8 @@ void Water::applyRTT()
         mRefraction = new Refraction(mCamera);
         mRefraction->setHeight(mTop);
     }
+
+    updateVisible();
 }
 
 void Water::applyVisibilityMask()

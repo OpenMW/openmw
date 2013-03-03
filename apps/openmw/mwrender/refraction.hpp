@@ -25,6 +25,7 @@ namespace MWRender
         void preRenderTargetUpdate(const Ogre::RenderTargetEvent& evt);
         void postRenderTargetUpdate(const Ogre::RenderTargetEvent& evt);
         void setUnderwater(bool underwater) {mIsUnderwater = underwater;}
+        void setActive (bool active);
 
         void renderQueueStarted (Ogre::uint8 queueGroupId, const Ogre::String &invocation, bool &skipThisInvocation);
         void renderQueueEnded (Ogre::uint8 queueGroupId, const Ogre::String &invocation, bool &repeatThisInvocation);

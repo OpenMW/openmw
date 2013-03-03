@@ -99,4 +99,9 @@ namespace MWRender
         }
     }
 
+    void Refraction::setActive(bool active)
+    {
+        mRenderTarget->setActive(active);
+    }
+
 }
