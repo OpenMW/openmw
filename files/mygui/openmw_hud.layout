@@ -61,10 +61,7 @@
         </Widget>
 
         <!-- Spell effects box -->
-        <Widget type="Button" skin="HUD_Box" position="199 168 20 20"
-            align="Right Bottom" name="EffectBox">
-            <Widget type="ImageBox" skin="ImageBox" position="2 2 16 16" align="Left Bottom"
-                name="Effect1"/>
+        <Widget type="Widget" skin="HUD_Box_Transparent" position="199 168 20 20" align="Right Bottom" name="EffectBox">
         </Widget>
 
         <!-- Cell name display when cell changes -->
