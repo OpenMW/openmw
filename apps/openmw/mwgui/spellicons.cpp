@@ -124,6 +124,17 @@ namespace MWGui
                 effectInfo.mRemainingTime = effectIt->mDuration +
                         (it->second.first - MWBase::Environment::get().getWorld()->getTimeStamp())*3600/timeScale;
 
+                // ingredients need special casing for their magnitude / duration
+                /// \todo duplicated from ActiveSpells, helper function?
+                if (MWBase::Environment::get().getWorld()->getStore().get<ESM::Ingredient>().search (it->first))
+                {
+                    effectInfo.mRemainingTime = effectIt->mDuration * it->second.second +
+                            (it->second.first - MWBase::Environment::get().getWorld()->getTimeStamp())*3600/timeScale;
+
+                    effectInfo.mMagnitude = static_cast<int> (0.05*it->second.second / (0.1 * magicEffect->mData.mBaseCost));
+                }
+
+
                 effects[effectIt->mEffectID].push_back (effectInfo);
             }
         }
