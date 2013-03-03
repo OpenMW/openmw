@@ -41,7 +41,7 @@ RaceDialog::RaceDialog(MWBase::WindowManager& parWindowManager)
     mHeadRotate->eventScrollChangePosition += MyGUI::newDelegate(this, &RaceDialog::onHeadRotate);
 
     // Set up next/previous buttons
-    MyGUI::ButtonPtr prevButton, nextButton;
+    MyGUI::Button *prevButton, *nextButton;
 
     setText("GenderChoiceT", mWindowManager.getGameSettingString("sRaceMenu2", "Change Sex"));
     getWidget(prevButton, "PrevGenderButton");
@@ -73,11 +73,11 @@ RaceDialog::RaceDialog(MWBase::WindowManager& parWindowManager)
     setText("SpellPowerT", mWindowManager.getGameSettingString("sRaceMenu7", "Specials"));
     getWidget(mSpellPowerList, "SpellPowerList");
 
-    MyGUI::ButtonPtr backButton;
+    MyGUI::Button* backButton;
     getWidget(backButton, "BackButton");
     backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onBackClicked);
 
-    MyGUI::ButtonPtr okButton;
+    MyGUI::Button* okButton;
     getWidget(okButton, "OKButton");
     okButton->setCaption(mWindowManager.getGameSettingString("sOK", ""));
     okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onOkClicked);
@@ -89,7 +89,7 @@ RaceDialog::RaceDialog(MWBase::WindowManager& parWindowManager)
 
 void RaceDialog::setNextButtonShow(bool shown)
 {
-    MyGUI::ButtonPtr okButton;
+    MyGUI::Button* okButton;
     getWidget(okButton, "OKButton");
 
     if (shown)
@@ -134,7 +134,7 @@ void RaceDialog::setRaceId(const std::string &raceId)
         if (boost::iequals(*mRaceList->getItemDataAt<std::string>(i), raceId))
         {
             mRaceList->setIndexSelected(i);
-            MyGUI::ButtonPtr okButton;
+            MyGUI::Button* okButton;
             getWidget(okButton, "OKButton");
             break;
         }
@@ -256,7 +256,7 @@ void RaceDialog::onSelectRace(MyGUI::ListBox* _sender, size_t _index)
     if (_index == MyGUI::ITEM_NONE)
         return;
 
-    MyGUI::ButtonPtr okButton;
+    MyGUI::Button* okButton;
     getWidget(okButton, "OKButton");
     const std::string *raceId = mRaceList->getItemDataAt<std::string>(_index);
     if (boost::iequals(mCurrentRaceId, *raceId))
@@ -331,7 +331,7 @@ void RaceDialog::updateRaces()
 
 void RaceDialog::updateSkills()
 {
-    for (std::vector<MyGUI::WidgetPtr>::iterator it = mSkillItems.begin(); it != mSkillItems.end(); ++it)
+    for (std::vector<MyGUI::Widget*>::iterator it = mSkillItems.begin(); it != mSkillItems.end(); ++it)
     {
         MyGUI::Gui::getInstance().destroyWidget(*it);
     }
@@ -369,7 +369,7 @@ void RaceDialog::updateSkills()
 
 void RaceDialog::updateSpellPowers()
 {
-    for (std::vector<MyGUI::WidgetPtr>::iterator it = mSpellPowerItems.begin(); it != mSpellPowerItems.end(); ++it)
+    for (std::vector<MyGUI::Widget*>::iterator it = mSpellPowerItems.begin(); it != mSpellPowerItems.end(); ++it)
     {
         MyGUI::Gui::getInstance().destroyWidget(*it);
     }

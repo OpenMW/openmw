@@ -1,8 +1,9 @@
-#include <MyGUI.h>
-#include <MyGUI_OgrePlatform.h>
-#include <cassert>
-
 #include "manager.hpp"
+
+#include <MyGUI_Gui.h>
+#include <MyGUI_OgrePlatform.h>
+
+#include <cassert>
 
 using namespace OEngine::GUI;
 

@@ -151,7 +151,7 @@ DialogueWindow::DialogueWindow(MWBase::WindowManager& parWindowManager)
     getWidget(mTopicsList, "TopicsList");
     mTopicsList->eventItemSelected += MyGUI::newDelegate(this, &DialogueWindow::onSelectTopic);
 
-    MyGUI::ButtonPtr byeButton;
+    MyGUI::Button* byeButton;
     getWidget(byeButton, "ByeButton");
     byeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &DialogueWindow::onByeClicked);
 
@@ -164,7 +164,7 @@ DialogueWindow::DialogueWindow(MWBase::WindowManager& parWindowManager)
 void DialogueWindow::onHistoryClicked(MyGUI::Widget* _sender)
 {
     MyGUI::ISubWidgetText* t = mHistory->getClient()->getSubWidgetText();
-    if(t == nullptr)
+    if(t == NULL)
         return;
 
     const MyGUI::IntPoint& lastPressed = MyGUI::InputManager::getInstance().getLastPressedPosition(MyGUI::MouseButton::Left);
@@ -381,7 +381,7 @@ std::string DialogueWindow::parseText(const std::string& text)
     std::vector<MWDialogue::HyperTextToken> hypertext = MWDialogue::ParseHyperText(text);
 
     size_t historySize = 0;
-    if(mHistory->getClient()->getSubWidgetText() != nullptr)
+    if(mHistory->getClient()->getSubWidgetText() != NULL)
     {
         historySize = mHistory->getOnlyText().size();
     }

@@ -30,7 +30,7 @@ namespace MWGui
         void onTextAccepted(MyGUI::Edit* _sender);
 
     private:
-        MyGUI::EditPtr mTextEdit;
+        MyGUI::EditBox* mTextEdit;
     };
 }
 #endif

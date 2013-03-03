@@ -19,6 +19,7 @@
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/spellsuccess.hpp"
 
+#include "spellicons.hpp"
 #include "inventorywindow.hpp"
 #include "confirmationdialog.hpp"
 
@@ -51,6 +52,8 @@ namespace MWGui
         , mHeight(0)
         , mWidth(0)
     {
+        mSpellIcons = new SpellIcons();
+
         getWidget(mSpellView, "SpellView");
         getWidget(mEffectBox, "EffectsBox");
 
@@ -59,6 +62,11 @@ namespace MWGui
         updateSpells();
 
         mMainWidget->castType<MyGUI::Window>()->eventWindowChangeCoord += MyGUI::newDelegate(this, &SpellWindow::onWindowResize);
+    }
+
+    SpellWindow::~SpellWindow()
+    {
+        delete mSpellIcons;
     }
 
     void SpellWindow::onPinToggled()
@@ -73,6 +81,8 @@ namespace MWGui
 
     void SpellWindow::updateSpells()
     {
+        mSpellIcons->updateWidgets(mEffectBox, false);
+
         const int spellHeight = 18;
 
         mHeight = 0;

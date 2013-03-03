@@ -1,6 +1,8 @@
 #ifndef OENGINE_MYGUI_MANAGER_H
 #define OENGINE_MYGUI_MANAGER_H
 
+#include <string>
+
 namespace MyGUI
 {
   class Gui;

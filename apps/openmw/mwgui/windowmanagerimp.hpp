@@ -73,6 +73,7 @@ namespace MWGui
   class EnchantingDialog;
   class TrainingWindow;
   class Cursor;
+  class SpellIcons;
 
   class WindowManager : public MWBase::WindowManager
   {

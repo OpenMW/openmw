@@ -3,7 +3,7 @@
 #include <cassert>
 #include <iterator>
 
-#include "MyGUI_UString.h"
+#include <MyGUI_UString.h>
 
 #include <openengine/ogre/renderer.hpp>
 #include <openengine/gui/manager.hpp>
@@ -54,6 +54,7 @@
 #include "imagebutton.hpp"
 #include "exposedwindow.hpp"
 #include "cursor.hpp"
+#include "spellicons.hpp"
 
 using namespace MWGui;
 
@@ -269,6 +270,8 @@ void WindowManager::update()
     mHud->setFPS(mFPS);
     mHud->setTriangleCount(mTriangleCount);
     mHud->setBatchCount(mBatchCount);
+
+    mHud->update();
 
     mCursor->update();
 }

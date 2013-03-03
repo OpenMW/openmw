@@ -67,11 +67,11 @@ namespace MWGui
             SkillList mMajorSkills, mMinorSkills, mMiscSkills;
             std::map<int, MWMechanics::Stat<float> > mSkillValues;
             std::map<int, MyGUI::TextBox*> mSkillWidgetMap;
-            std::map<std::string, MyGUI::WidgetPtr> mFactionWidgetMap;
+            std::map<std::string, MyGUI::Widget*> mFactionWidgetMap;
             FactionList mFactions; ///< Stores a list of factions and the current rank
             std::string mBirthSignId;
             int mReputation, mBounty;
-            std::vector<MyGUI::WidgetPtr> mSkillWidgets; //< Skills and other information
+            std::vector<MyGUI::Widget*> mSkillWidgets; //< Skills and other information
             std::set<std::string> mExpelled;
 
             bool mChanged;

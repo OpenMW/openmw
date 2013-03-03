@@ -5,10 +5,13 @@
 
 namespace MWGui
 {
+    class SpellIcons;
+
     class SpellWindow : public WindowPinnableBase
     {
     public:
         SpellWindow(MWBase::WindowManager& parWindowManager);
+        virtual ~SpellWindow();
 
         void updateSpells();
 
@@ -33,6 +36,8 @@ namespace MWGui
 
         virtual void onPinToggled();
         virtual void open();
+
+        SpellIcons* mSpellIcons;
     };
 }
 
