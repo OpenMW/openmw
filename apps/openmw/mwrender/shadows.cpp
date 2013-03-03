@@ -9,9 +9,6 @@
 #include <OgreShadowCameraSetupPSSM.h>
 #include <OgreHardwarePixelBuffer.h>
 
-#include <OgreOverlayContainer.h>
-#include <OgreOverlayManager.h>
-
 #include <extern/shiny/Main/Factory.hpp>
 
 #include "renderconst.hpp"
@@ -33,8 +30,8 @@ void Shadows::recreate()
 
     // Split shadow maps are currently disabled because the terrain cannot cope with them
     // (Too many texture units) Solution would be a multi-pass terrain material
-    bool split = Settings::Manager::getBool("split", "Shadows");
-    //const bool split = false;
+    //bool split = Settings::Manager::getBool("split", "Shadows");
+    const bool split = false;
 
     sh::Factory::getInstance ().setGlobalSetting ("shadows", enabled && !split ? "true" : "false");
     sh::Factory::getInstance ().setGlobalSetting ("shadows_pssm", enabled && split ? "true" : "false");
@@ -125,6 +122,7 @@ void Shadows::recreate()
     // --------------------------------------------------------------------------------------------------------------------
     // --------------------------- Debug overlays to display the content of shadow maps -----------------------------------
     // --------------------------------------------------------------------------------------------------------------------
+    /*
     if (Settings::Manager::getBool("debug", "Shadows"))
     {
         OverlayManager& mgr = OverlayManager::getSingleton();
@@ -181,6 +179,7 @@ void Shadows::recreate()
         if ((overlay = mgr.getByName("DebugOverlay")))
             mgr.destroy(overlay);
     }
+    */
 }
 
 PSSMShadowCameraSetup* Shadows::getPSSMSetup()

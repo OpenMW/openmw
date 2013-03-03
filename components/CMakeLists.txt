@@ -15,15 +15,15 @@ add_component_dir (bsa
     )
 
 add_component_dir (nif
-    controlled effect nif_types record controller extra node record_ptr data nif_file property
+    controlled effect niftypes record controller extra node record_ptr data niffile property
     )
 
 add_component_dir (nifogre
-    ogre_nif_loader
+    ogrenifloader
     )
 
 add_component_dir (nifbullet
-    bullet_nif_loader
+    bulletnifloader
     )
 
 add_component_dir (to_utf8

@@ -1,0 +1,59 @@
+material HeightmapSimulation
+{
+	allow_fixed_function false
+	pass
+	{
+		depth_check off
+		depth_write off
+		vertex_program transform_vertex
+		fragment_program watersim_fragment
+
+                texture_unit heightPrevSampler
+		{
+			tex_address_mode border
+			tex_border_colour 0 0 0
+			texture_alias Heightmap0
+		}
+                texture_unit heightCurrentSampler
+		{
+			tex_address_mode border
+			tex_border_colour 0 0 0
+			texture_alias Heightmap1
+		}
+	}
+}
+
+material HeightToNormalMap
+{
+        allow_fixed_function false
+	pass
+	{
+		depth_check off
+		depth_write off
+		vertex_program transform_vertex
+		fragment_program height_to_normal_fragment
+		
+                texture_unit heightCurrentSampler
+		{
+			texture_alias Heightmap2
+		}
+	}
+}
+
+material AddImpulse
+{
+        allow_fixed_function false
+        pass
+        {
+                depth_check off
+                depth_write off
+                scene_blend alpha_blend
+                vertex_program transform_vertex
+                fragment_program add_impulse_fragment
+
+                texture_unit alphaMap
+                {
+                        texture circle.png
+                }
+        }
+}

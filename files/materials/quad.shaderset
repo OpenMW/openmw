@@ -1,4 +1,4 @@
-shader_set quad_vertex
+shader_set transform_vertex
 {
     source quad.shader
     type vertex
@@ -9,22 +9,6 @@ shader_set quad_vertex
 shader_set quad_fragment
 {
     source quad.shader
-    type fragment
-    profiles_cg ps_2_x ps_2_0 ps fp40 arbfp1
-    profiles_hlsl ps_2_0
-}
-
-shader_set viewport_init_vertex
-{
-    source quad2.shader
-    type vertex
-    profiles_cg vs_2_0 vp40 arbvp1
-    profiles_hlsl vs_2_0
-}
-
-shader_set viewport_init_fragment
-{
-    source quad2.shader
     type fragment
     profiles_cg ps_2_x ps_2_0 ps fp40 arbfp1
     profiles_hlsl ps_2_0

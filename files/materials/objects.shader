@@ -2,7 +2,6 @@
 
 
 #define FOG @shGlobalSettingBool(fog)
-#define MRT @shPropertyNotBool(is_transparent) && @shGlobalSettingBool(mrt_output)
 #define LIGHTING @shGlobalSettingBool(lighting)
 
 #define SHADOWS_PSSM LIGHTING && @shGlobalSettingBool(shadows_pssm)
@@ -12,15 +11,19 @@
     #include "shadows.h"
 #endif
 
-#if FOG || MRT || SHADOWS_PSSM
+#if FOG || SHADOWS_PSSM
 #define NEED_DEPTH
 #endif
 
 
-#define UNDERWATER @shGlobalSettingBool(underwater_effects) && LIGHTING
+#define UNDERWATER @shGlobalSettingBool(render_refraction)
 
 
 #define HAS_VERTEXCOLOR @shPropertyBool(has_vertex_colour)
+
+#define VERTEX_LIGHTING 1
+
+#define VIEWPROJ_FIX @shGlobalSettingBool(viewproj_fix)
 
 #ifdef SH_VERTEX_SHADER
 
@@ -28,6 +31,16 @@
 
     SH_BEGIN_PROGRAM
         shUniform(float4x4, wvp) @shAutoConstant(wvp, worldviewproj_matrix)
+
+#if (VIEWPROJ_FIX) || (SHADOWS)
+    shUniform(float4x4, worldMatrix) @shAutoConstant(worldMatrix, world_matrix)
+#endif
+
+#if VIEWPROJ_FIX
+        shUniform(float4, vpRow2Fix) @shSharedParameter(vpRow2Fix, vpRow2Fix)
+        shUniform(float4x4, vpMatrix) @shAutoConstant(vpMatrix, viewproj_matrix)
+#endif
+
         shVertexInput(float2, uv0)
         shOutput(float2, UV)
         shNormalInput(float4)
@@ -42,13 +55,28 @@
 
 #if HAS_VERTEXCOLOR
         shColourInput(float4)
+#if !VERTEX_LIGHTING
         shOutput(float4, colourPassthrough)
+#endif
+#endif
+
+#if VERTEX_LIGHTING
+    shUniform(float, lightCount) @shAutoConstant(lightCount, light_count)
+    shUniform(float4, lightPosition[@shGlobalSettingString(num_lights)]) @shAutoConstant(lightPosition, light_position_object_space_array, @shGlobalSettingString(num_lights))
+    shUniform(float4, lightDiffuse[@shGlobalSettingString(num_lights)]) @shAutoConstant(lightDiffuse, light_diffuse_colour_array, @shGlobalSettingString(num_lights))
+    shUniform(float4, lightAttenuation[@shGlobalSettingString(num_lights)]) @shAutoConstant(lightAttenuation, light_attenuation_array, @shGlobalSettingString(num_lights))
+    shUniform(float4, lightAmbient)                    @shAutoConstant(lightAmbient, ambient_light_colour)
+#if !HAS_VERTEXCOLOUR
+    shUniform(float4, materialAmbient)                    @shAutoConstant(materialAmbient, surface_ambient_colour)
+#endif
+    shUniform(float4, materialDiffuse)                    @shAutoConstant(materialDiffuse, surface_diffuse_colour)
+    shUniform(float4, materialEmissive)                   @shAutoConstant(materialEmissive, surface_emissive_colour)
+
 #endif
 
 #if SHADOWS
         shOutput(float4, lightSpacePos0)
         shUniform(float4x4, texViewProjMatrix0) @shAutoConstant(texViewProjMatrix0, texture_viewproj_matrix)
-        shUniform(float4x4, worldMatrix) @shAutoConstant(worldMatrix, world_matrix)
 #endif
 
 #if SHADOWS_PSSM
@@ -56,7 +84,14 @@
         shOutput(float4, lightSpacePos@shIterator)
         shUniform(float4x4, texViewProjMatrix@shIterator) @shAutoConstant(texViewProjMatrix@shIterator, texture_viewproj_matrix, @shIterator)
     @shEndForeach
-        shUniform(float4x4, worldMatrix) @shAutoConstant(worldMatrix, world_matrix)
+#if !VIEWPROJ_FIX
+    shUniform(float4x4, worldMatrix) @shAutoConstant(worldMatrix, world_matrix)
+#endif
+#endif
+
+#if VERTEX_LIGHTING
+    shOutput(float3, lightResult)
+    shOutput(float3, directionalResult)
 #endif
     SH_START_PROGRAM
     {
@@ -67,14 +102,33 @@
 #endif
 
 #ifdef NEED_DEPTH
+
+
+#if VIEWPROJ_FIX
+        float4x4 vpFixed = vpMatrix;
+#if !SH_GLSL
+        vpFixed[2] = vpRow2Fix;
+#else
+        vpFixed[0][2] = vpRow2Fix.x;
+        vpFixed[1][2] = vpRow2Fix.y;
+        vpFixed[2][2] = vpRow2Fix.z;
+        vpFixed[3][2] = vpRow2Fix.w;
+#endif
+
+        float4x4 fixedWVP = shMatrixMult(vpFixed, worldMatrix);
+
+        depthPassthrough = shMatrixMult(fixedWVP, shInputPosition).z;
+#else
         depthPassthrough = shOutputPosition.z;
+#endif
+
 #endif
 
 #if LIGHTING
         objSpacePositionPassthrough = shInputPosition.xyz;
 #endif
 
-#if HAS_VERTEXCOLOR
+#if HAS_VERTEXCOLOR && !VERTEX_LIGHTING
         colourPassthrough = colour;
 #endif
 
@@ -86,6 +140,36 @@
     @shForeach(3)
         lightSpacePos@shIterator = shMatrixMult(texViewProjMatrix@shIterator, wPos);
     @shEndForeach
+#endif
+
+
+#if VERTEX_LIGHTING
+        float3 lightDir;
+        float d;
+        lightResult = float3(0,0,0);
+        @shForeach(@shGlobalSettingString(num_lights))
+            lightDir = lightPosition[@shIterator].xyz - (shInputPosition.xyz * lightPosition[@shIterator].w);
+            d = length(lightDir);
+            lightDir = normalize(lightDir);
+
+            lightResult += materialDiffuse.xyz * lightDiffuse[@shIterator].xyz
+                    * (1.0 / ((lightAttenuation[@shIterator].y) + (lightAttenuation[@shIterator].z * d) + (lightAttenuation[@shIterator].w * d * d)))
+                    * max(dot(normalize(normal.xyz), normalize(lightDir)), 0);
+
+#if @shIterator == 0
+            directionalResult = lightResult;
+#endif
+
+        @shEndForeach
+
+#if HAS_VERTEXCOLOR
+        // ambient vertex colour tracking, FFP behaviour
+        lightResult += lightAmbient.xyz * colour.xyz + materialEmissive.xyz;
+
+#else
+        lightResult += lightAmbient.xyz * materialAmbient.xyz + materialEmissive.xyz;
+#endif
+
 #endif
     }
 
@@ -100,34 +184,29 @@
     SH_BEGIN_PROGRAM
 		shSampler2D(diffuseMap)
 		shInput(float2, UV)
-#if MRT
-        shDeclareMrtOutput(1)
-#endif
 
 #ifdef NEED_DEPTH
         shInput(float, depthPassthrough)
 #endif
 
-#if MRT
-        shUniform(float, far) @shAutoConstant(far, far_clip_distance)
-#endif
-
-        shUniform(float, gammaCorrection) @shSharedParameter(gammaCorrection, gammaCorrection)
-
 #if LIGHTING
         shInput(float3, normalPassthrough)
         shInput(float3, objSpacePositionPassthrough)
-        shUniform(float4, lightAmbient)                       @shAutoConstant(lightAmbient, ambient_light_colour)
         #if !HAS_VERTEXCOLOR
         shUniform(float4, materialAmbient)                    @shAutoConstant(materialAmbient, surface_ambient_colour)
         #endif
         shUniform(float4, materialDiffuse)                    @shAutoConstant(materialDiffuse, surface_diffuse_colour)
         shUniform(float4, materialEmissive)                   @shAutoConstant(materialEmissive, surface_emissive_colour)
+        shUniform(float4, lightAmbient)                       @shAutoConstant(lightAmbient, ambient_light_colour)
+#if !VERTEX_LIGHTING
+
     @shForeach(@shGlobalSettingString(num_lights))
         shUniform(float4, lightPosObjSpace@shIterator)        @shAutoConstant(lightPosObjSpace@shIterator, light_position_object_space, @shIterator)
         shUniform(float4, lightAttenuation@shIterator)        @shAutoConstant(lightAttenuation@shIterator, light_attenuation, @shIterator)
         shUniform(float4, lightDiffuse@shIterator)            @shAutoConstant(lightDiffuse@shIterator, light_diffuse_colour, @shIterator)
     @shEndForeach
+#endif
+
 #endif
         
 #if FOG
@@ -135,7 +214,7 @@
         shUniform(float4, fogParams) @shAutoConstant(fogParams, fog_params)
 #endif
 
-#if HAS_VERTEXCOLOR
+#if HAS_VERTEXCOLOR && !VERTEX_LIGHTING
         shInput(float4, colourPassthrough)
 #endif
 
@@ -163,37 +242,24 @@
 #endif
 
 #if UNDERWATER
-
-        shUniform(float, waterLevel) @shSharedParameter(waterLevel)
-
-        shUniform(float4, lightDirectionWS0) @shAutoConstant(lightDirectionWS0, light_position, 0)
-        
-        shSampler2D(causticMap)
-        
-		shUniform(float, waterTimer) @shSharedParameter(waterTimer)
-        shUniform(float2, waterSunFade_sunHeight) @shSharedParameter(waterSunFade_sunHeight)
+        shUniform(float, waterLevel) @shSharedParameter(waterLevel) 
         shUniform(float, waterEnabled) @shSharedParameter(waterEnabled)
-        		
-		shUniform(float3, windDir_windSpeed) @shSharedParameter(windDir_windSpeed)
+#endif
+
+#if VERTEX_LIGHTING
+    shInput(float3, lightResult)
+    shInput(float3, directionalResult)
 #endif
 
     SH_START_PROGRAM
     {
         shOutputColour(0) = shSample(diffuseMap, UV);
-        shOutputColour(0).xyz = gammaCorrectRead(shOutputColour(0).xyz);
         
 #if LIGHTING
         float3 normal = normalize(normalPassthrough);
         float3 lightDir;
         float3 diffuse = float3(0,0,0);
         float d;
-
-#if HAS_VERTEXCOLOR
-        // ambient vertex colour tracking, FFP behaviour
-        float3 ambient = colourPassthrough.xyz * lightAmbient.xyz;
-#else
-        float3 ambient = materialAmbient.xyz * lightAmbient.xyz;
-#endif
     
             // shadows only for the first (directional) light
 #if SHADOWS
@@ -215,22 +281,15 @@
 
 
 
-        float3 caustics = float3(1,1,1);
-
 #if (UNDERWATER) || (FOG)
     float3 worldPos = shMatrixMult(worldMatrix, float4(objSpacePositionPassthrough,1)).xyz;
 #endif
 
 #if UNDERWATER
-    float3 waterEyePos = float3(1,1,1);
-    // NOTE: this calculation would be wrong for non-uniform scaling
-    float4 worldNormal = shMatrixMult(worldMatrix, float4(normal.xyz, 0));
-    waterEyePos = intercept(worldPos, cameraPos.xyz - worldPos, float3(0,0,1), waterLevel);
-    caustics = getCaustics(causticMap, worldPos, waterEyePos.xyz, worldNormal.xyz, lightDirectionWS0.xyz, waterLevel, waterTimer, windDir_windSpeed);
-    if (worldPos.z >= waterLevel || waterEnabled != 1.f)
-        caustics = float3(1,1,1);
+    float3 waterEyePos = intercept(worldPos, cameraPos.xyz - worldPos, float3(0,0,1), waterLevel);
 #endif
 
+#if !VERTEX_LIGHTING
     
     @shForeach(@shGlobalSettingString(num_lights))
     
@@ -243,10 +302,10 @@
 #if @shIterator == 0
 
     #if (SHADOWS || SHADOWS_PSSM)
-        diffuse += materialDiffuse.xyz * lightDiffuse@shIterator.xyz * (1.0 / ((lightAttenuation@shIterator.y) + (lightAttenuation@shIterator.z * d) + (lightAttenuation@shIterator.w * d * d))) * max(dot(normal, lightDir), 0) * shadow * caustics;
+        diffuse += materialDiffuse.xyz * lightDiffuse@shIterator.xyz * (1.0 / ((lightAttenuation@shIterator.y) + (lightAttenuation@shIterator.z * d) + (lightAttenuation@shIterator.w * d * d))) * max(dot(normal, lightDir), 0) * shadow;
         
     #else
-        diffuse += materialDiffuse.xyz * lightDiffuse@shIterator.xyz * (1.0 / ((lightAttenuation@shIterator.y) + (lightAttenuation@shIterator.z * d) + (lightAttenuation@shIterator.w * d * d))) * max(dot(normal, lightDir), 0) * caustics;
+        diffuse += materialDiffuse.xyz * lightDiffuse@shIterator.xyz * (1.0 / ((lightAttenuation@shIterator.y) + (lightAttenuation@shIterator.z * d) + (lightAttenuation@shIterator.w * d * d))) * max(dot(normal, lightDir), 0);
         
     #endif
     
@@ -256,59 +315,35 @@
 
     @shEndForeach
 
-        shOutputColour(0).xyz *= (ambient + diffuse + materialEmissive.xyz);
+        lightResult = (ambient + diffuse + materialEmissive.xyz);
 #endif
 
+#if SHADOWS
+        shOutputColour(0).xyz *= (lightResult - directionalResult * (1.0-shadow));
+#else
+        shOutputColour(0).xyz *= (lightResult);
+#endif
+
+#endif // IF LIGHTING
 
 #if HAS_VERTEXCOLOR && !LIGHTING
         shOutputColour(0).xyz *= colourPassthrough.xyz;
 #endif
 
 #if FOG
-        float fogValue = shSaturate((length(cameraPos.xyz-worldPos) - fogParams.y) * fogParams.w);
+        float fogValue = shSaturate((depthPassthrough - fogParams.y) * fogParams.w);
         
-        #if UNDERWATER
-        // regular fog only if fragment is above water
-        if (worldPos.z > waterLevel || waterEnabled != 1.f)
-        #endif
-        shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, gammaCorrectRead(fogColour), fogValue);
+
+#if UNDERWATER
+        shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, UNDERWATER_COLOUR, shSaturate(length(waterEyePos-worldPos) / VISIBILITY));
+#else
+        shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, fogColour, fogValue);
+#endif
+
 #endif
 
         // prevent negative colour output (for example with negative lights)
         shOutputColour(0).xyz = max(shOutputColour(0).xyz, float3(0,0,0));
-        
-#if UNDERWATER
-        float fogAmount = (cameraPos.z > waterLevel)
-             ? shSaturate(length(waterEyePos-worldPos) / VISIBILITY) 
-             : shSaturate(length(cameraPos.xyz-worldPos)/ VISIBILITY);
-             
-        float3 eyeVec = normalize(cameraPos.xyz-worldPos);
-        
-        float waterSunGradient = dot(eyeVec, -normalize(lightDirectionWS0.xyz));
-        waterSunGradient = shSaturate(pow(waterSunGradient*0.7+0.3,2.0));  
-        float3 waterSunColour = gammaCorrectRead(float3(0.0,1.0,0.85)) *waterSunGradient * 0.5;
-        
-        float waterGradient = dot(eyeVec, float3(0.0,-1.0,0.0));
-        waterGradient = clamp((waterGradient*0.5+0.5),0.2,1.0);
-        float3 watercolour = ( gammaCorrectRead(float3(0.0078, 0.5176, 0.700))+waterSunColour)*waterGradient*2.0;
-        watercolour = shLerp(watercolour*0.3*waterSunFade_sunHeight.x, watercolour, shSaturate(1.0-exp(-waterSunFade_sunHeight.y*SUN_EXT)));
-        watercolour = (cameraPos.z <= waterLevel) ? watercolour : watercolour*0.3;
-    
-    
-        float darkness = VISIBILITY*2.0;
-        darkness = clamp((waterEyePos.z - waterLevel + darkness)/darkness,0.2,1.0);
-        watercolour *= darkness;
-
-        float isUnderwater = (worldPos.z < waterLevel) ? 1.0 : 0.0;
-        shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, watercolour, fogAmount * isUnderwater * waterEnabled);
-#endif
-
-        shOutputColour(0).xyz = gammaCorrectOutput(shOutputColour(0).xyz);
-
-#if MRT
-        shOutputColour(1) = float4(depthPassthrough / far,1,1,1);
-#endif
-
     }
 
 #endif

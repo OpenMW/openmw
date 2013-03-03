@@ -121,6 +121,7 @@ bool GraphicsPage::setupOgre()
     pluginDir = absPluginPath.string();
 
     Files::loadOgrePlugin(pluginDir, "RenderSystem_GL", *mOgre);
+    Files::loadOgrePlugin(pluginDir, "RenderSystem_GL3Plus", *mOgre);
     Files::loadOgrePlugin(pluginDir, "RenderSystem_Direct3D9", *mOgre);
 
 #ifdef ENABLE_PLUGIN_GL

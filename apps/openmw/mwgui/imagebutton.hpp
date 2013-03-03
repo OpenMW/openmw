@@ -1,7 +1,7 @@
 #ifndef MWGUI_IMAGEBUTTON_H
 #define MWGUI_IMAGEBUTTON_H
 
-#include "MyGUI_ImageBox.h"
+#include <MyGUI_ImageBox.h>
 
 namespace MWGui
 {

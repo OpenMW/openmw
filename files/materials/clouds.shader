@@ -1,7 +1,5 @@
 #include "core.h"
 
-#define MRT @shGlobalSettingBool(mrt_output)
-
 #ifdef SH_VERTEX_SHADER
 
     SH_BEGIN_PROGRAM
@@ -22,9 +20,6 @@
     SH_BEGIN_PROGRAM
 		shInput(float2, UV)
                 shInput(float, alphaFade)
-#if MRT
-        shDeclareMrtOutput(1)
-#endif
         
         shSampler2D(diffuseMap1)
         shSampler2D(diffuseMap2)
@@ -42,10 +37,6 @@
         float4 albedo = shSample(diffuseMap1, scrolledUV) * (1-cloudBlendFactor) + shSample(diffuseMap2, scrolledUV) * cloudBlendFactor;
         
         shOutputColour(0) = float4(cloudColour, 1) * albedo * float4(1,1,1, cloudOpacity * alphaFade);
-
-#if MRT
-        shOutputColour(1) = float4(1,1,1,1);
-#endif
     }
 
 #endif

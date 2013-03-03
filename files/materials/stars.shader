@@ -1,7 +1,5 @@
 #include "core.h"
 
-#define MRT @shGlobalSettingBool(mrt_output)
-
 #ifdef SH_VERTEX_SHADER
 
     SH_BEGIN_PROGRAM
@@ -22,9 +20,6 @@
 #else
 
     SH_BEGIN_PROGRAM
-#if MRT
-        shDeclareMrtOutput(1)
-#endif
 
         shInput(float2, UV)
         shInput(float, fade)
@@ -36,11 +31,6 @@
     SH_START_PROGRAM
     {
         shOutputColour(0) = shSample(diffuseMap, UV) * float4(1,1,1, nightFade * fade);
-
-
-#if MRT
-        shOutputColour(1) = float4(1,1,1,1);
-#endif
     }
 
 #endif

@@ -19,6 +19,8 @@ namespace MWGui
 
         void onResChange(int w, int h);
 
+        void updateWindow(Ogre::RenderWindow* rw) { mWindow = rw; }
+
     private:
         bool mFirstLoad;
 

@@ -974,14 +974,14 @@ namespace MWWorld
 
     void World::update (float duration, bool paused)
     {
+        mWeatherManager->update (duration);
+
         mWorldScene->update (duration, paused);
 
         float pitch, yaw;
         Ogre::Vector3 eyepos;
         mRendering->getPlayerData(eyepos, pitch, yaw);
         mPhysics->updatePlayerData(eyepos, pitch, yaw);
-
-        mWeatherManager->update (duration);
 
         performUpdateSceneQueries ();
 

@@ -21,8 +21,8 @@
 
  */
 
-#ifndef _NIF_NODE_H_
-#define _NIF_NODE_H_
+#ifndef OPENMW_COMPONENTS_NIF_NODE_HPP
+#define OPENMW_COMPONENTS_NIF_NODE_HPP
 
 #include <OgreMatrix4.h>
 
@@ -54,7 +54,7 @@ public:
     Ogre::Matrix3 boundRot;
     Ogre::Vector3 boundXYZ; // Box size
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         Named::read(nif);
 
@@ -128,7 +128,7 @@ struct NiNode : Node
         0x20, 0x40, 0x80 unknown
     */
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         Node::read(nif);
         children.read(nif);
@@ -162,7 +162,7 @@ struct NiTriShape : Node
     NiTriShapeDataPtr data;
     NiSkinInstancePtr skin;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         Node::read(nif);
         data.read(nif);
@@ -190,7 +190,7 @@ struct NiCamera : Node
         // Level of detail modifier
         float LOD;
 
-        void read(NIFFile *nif)
+        void read(NIFStream *nif)
         {
             left = nif->getFloat();
             right = nif->getFloat();
@@ -209,7 +209,7 @@ struct NiCamera : Node
     };
     Camera cam;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         Node::read(nif);
 
@@ -224,7 +224,7 @@ struct NiAutoNormalParticles : Node
 {
     NiAutoNormalParticlesDataPtr data;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         Node::read(nif);
         data.read(nif);
@@ -242,7 +242,7 @@ struct NiRotatingParticles : Node
 {
     NiRotatingParticlesDataPtr data;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         Node::read(nif);
         data.read(nif);

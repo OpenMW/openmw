@@ -113,7 +113,7 @@ namespace MWGui
         DialogueHistory*   mHistory;
         Widgets::MWList*   mTopicsList;
         MyGUI::ProgressPtr mDispositionBar;
-        MyGUI::EditPtr     mDispositionText;
+        MyGUI::EditBox*     mDispositionText;
 
         PersuasionDialog mPersuasionDialog;
 

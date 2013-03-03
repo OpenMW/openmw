@@ -59,7 +59,6 @@ material openmw_atmosphere
         
         polygon_mode_overrideable off
         
-        scene_blend alpha_blend
         depth_write off
     }
 }
