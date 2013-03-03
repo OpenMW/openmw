@@ -121,9 +121,6 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     //mRendering.getScene()->setCameraRelativeRendering(true);
 
     // disable unsupported effects
-    //const RenderSystemCapabilities* caps = Root::getSingleton().getRenderSystem()->getCapabilities();
-    if (!waterShaderSupported())
-        Settings::Manager::setBool("shader", "Water", false);
     if (!Settings::Manager::getBool("shaders", "Objects"))
         Settings::Manager::setBool("enabled", "Shadows", false);
 
@@ -504,9 +501,6 @@ void RenderingManager::configureFog(MWWorld::Ptr::CellStore &mCell)
     color.setAsABGR (mCell.mCell->mAmbi.mFog);
 
     configureFog(mCell.mCell->mAmbi.mFogDensity, color);
-
-    //if (mWater)
-    //    mWater->setViewportBackground (Ogre::ColourValue(0.8f, 0.9f, 1.0f));
 }
 
 void RenderingManager::configureFog(const float density, const Ogre::ColourValue& colour)
@@ -852,14 +846,6 @@ void RenderingManager::windowResized(Ogre::RenderWindow* rw)
 void RenderingManager::windowClosed(Ogre::RenderWindow* rw)
 {
     Ogre::Root::getSingleton ().queueEndRendering ();
-}
-
-bool RenderingManager::waterShaderSupported()
-{
-    //const RenderSystemCapabilities* caps = Root::getSingleton().getRenderSystem()->getCapabilities();
-    //if (caps->getNumMultiRenderTargets() < 2 || !Settings::Manager::getBool("shaders", "Objects"))
-        //return false;
-    return true;
 }
 
 void RenderingManager::applyCompositors()

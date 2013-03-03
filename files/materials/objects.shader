@@ -260,13 +260,6 @@
         float3 lightDir;
         float3 diffuse = float3(0,0,0);
         float d;
-
-#if HAS_VERTEXCOLOR
-        // ambient vertex colour tracking, FFP behaviour
-        //float3 ambient = colourPassthrough.xyz * lightAmbient.xyz;
-#else
-        //float3 ambient = materialAmbient.xyz * lightAmbient.xyz;
-#endif
     
             // shadows only for the first (directional) light
 #if SHADOWS
@@ -287,8 +280,6 @@
 #endif
 
 
-
-        float3 caustics = float3(1,1,1);
 
 #if (UNDERWATER) || (FOG)
     float3 worldPos = shMatrixMult(worldMatrix, float4(objSpacePositionPassthrough,1)).xyz;
@@ -311,10 +302,10 @@
 #if @shIterator == 0
 
     #if (SHADOWS || SHADOWS_PSSM)
-        diffuse += materialDiffuse.xyz * lightDiffuse@shIterator.xyz * (1.0 / ((lightAttenuation@shIterator.y) + (lightAttenuation@shIterator.z * d) + (lightAttenuation@shIterator.w * d * d))) * max(dot(normal, lightDir), 0) * shadow * caustics;
+        diffuse += materialDiffuse.xyz * lightDiffuse@shIterator.xyz * (1.0 / ((lightAttenuation@shIterator.y) + (lightAttenuation@shIterator.z * d) + (lightAttenuation@shIterator.w * d * d))) * max(dot(normal, lightDir), 0) * shadow;
         
     #else
-        diffuse += materialDiffuse.xyz * lightDiffuse@shIterator.xyz * (1.0 / ((lightAttenuation@shIterator.y) + (lightAttenuation@shIterator.z * d) + (lightAttenuation@shIterator.w * d * d))) * max(dot(normal, lightDir), 0) * caustics;
+        diffuse += materialDiffuse.xyz * lightDiffuse@shIterator.xyz * (1.0 / ((lightAttenuation@shIterator.y) + (lightAttenuation@shIterator.z * d) + (lightAttenuation@shIterator.w * d * d))) * max(dot(normal, lightDir), 0);
         
     #endif
     

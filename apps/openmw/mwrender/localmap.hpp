@@ -117,9 +117,6 @@ namespace MWRender
         int mCellX, mCellY;
         Ogre::AxisAlignedBox mBounds;
         std::string mInteriorName;
-
-        // maps texture name to according camera settings
-        std::map<Ogre::RenderTarget*, Ogre::Vector3> mCameraSettings;
     };
 
 }

@@ -184,8 +184,6 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
 
     Ogre::Viewport* getViewport() { return mRendering.getViewport(); }
 
-    static bool waterShaderSupported();
-
     void getInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y);
     ///< see MWRender::LocalMap::getInteriorMapPosition
 

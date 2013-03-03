@@ -210,6 +210,7 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend) :
     mWater = mSceneMgr->createEntity("water");
     mWater->setVisibilityFlags(RV_Water);
     mWater->setCastShadows(false);
+    mWater->setRenderQueueGroup(RQG_Alpha);
 
     mWaterNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
 
@@ -380,6 +381,8 @@ void Water::applyRTT()
 {
     delete mReflection;
     mReflection = NULL;
+    delete mRefraction;
+    mRefraction = NULL;
 
     // Create rendertarget for reflection
     //int rttsize = Settings::Manager::getInt("rtt size", "Water");
@@ -389,16 +392,12 @@ void Water::applyRTT()
         mReflection = new PlaneReflection(mSceneMgr, mSky);
         mReflection->setParentCamera (mCamera);
         mReflection->setHeight(mTop);
-    }
-    mWater->setRenderQueueGroup(RQG_Alpha);
 
-    delete mRefraction;
-    mRefraction = NULL;
-
-    if (Settings::Manager::getBool("refraction", "Water"))
-    {
-        mRefraction = new Refraction(mCamera);
-        mRefraction->setHeight(mTop);
+        if (Settings::Manager::getBool("refraction", "Water"))
+        {
+            mRefraction = new Refraction(mCamera);
+            mRefraction->setHeight(mTop);
+        }
     }
 
     updateVisible();
