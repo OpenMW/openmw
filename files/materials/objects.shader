@@ -146,7 +146,7 @@
 #if VERTEX_LIGHTING
         float3 lightDir;
         float d;
-
+        lightResult = float3(0,0,0);
         @shForeach(@shGlobalSettingString(num_lights))
             lightDir = lightPosition[@shIterator].xyz - (shInputPosition.xyz * lightPosition[@shIterator].w);
             d = length(lightDir);
