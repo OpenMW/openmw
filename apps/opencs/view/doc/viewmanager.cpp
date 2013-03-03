@@ -62,9 +62,7 @@ CSVDoc::View *CSVDoc::ViewManager::addView (CSMDoc::Document *document)
             this, SLOT (progress (int, int, int, int, CSMDoc::Document *)));
     }
 
-   // QMainWindow *mainWindow = new QMainWindow;
-
-    View *view = new View (*this, document, countViews (document)+1); //, mainWindow);
+    View *view = new View (*this, document, countViews (document)+1);
 
     mViews.push_back (view);
 
@@ -104,18 +102,21 @@ bool CSVDoc::ViewManager::closeRequest (View *view)
 
         CSMDoc::Document *document = view->getDocument();
 
-        //notify user of saving in progress
-        if ( document->getState() & CSMDoc::State_Saving )
-            continueWithClose = showSaveInProgressMessageBox (view);
-        else
-            //notify user of unsaved changes and process response
-            if ( document->getState() & CSMDoc::State_Modified)
-                continueWithClose = showModifiedDocumentMessageBox (view);
+        if (last)
+        {
+            //notify user of saving in progress
+            if ( (document->getState() & CSMDoc::State_Saving) )
+                continueWithClose = showSaveInProgressMessageBox (view);
+            else
+                //notify user of unsaved changes and process response
+                if ( document->getState() & CSMDoc::State_Modified)
+                    continueWithClose = showModifiedDocumentMessageBox (view);
+        }
+
+        mViews.erase (iter);
 
         if (continueWithClose)
         {
-            mViews.erase (iter);
-
             if (last)
                 mDocumentManager.removeDocument (document);
             else
