@@ -99,7 +99,7 @@ namespace MWWorld
             if(!physicActor || !physicActor->getCollisionMode())
             {
                 // FIXME: This works, but it's inconcsistent with how the rotations are applied elsewhere. Why?
-                return position + (Ogre::Quaternion(Ogre::Radian(-refpos.rot[2]), Ogre::Vector3::UNIT_Z)*
+                return position + (Ogre::Quaternion(Ogre::Radian( refpos.rot[2]), Ogre::Vector3::UNIT_Z)*
                                    Ogre::Quaternion(Ogre::Radian( refpos.rot[1]), Ogre::Vector3::UNIT_Y)*
                                    Ogre::Quaternion(Ogre::Radian( refpos.rot[0]), Ogre::Vector3::UNIT_X)) *
                                   movement;
@@ -109,12 +109,13 @@ namespace MWWorld
             bool onground = false;
             float remainingTime = time;
             bool isInterior = !ptr.getCell()->isExterior();
-            Ogre::Vector3 halfExtents = physicActor->getHalfExtents();
+            Ogre::Vector3 halfExtents = physicActor->getHalfExtents();// + Vector3(1,1,1);
+            physicActor->mBody->translate(btVector3(0,0,1000));
 
             Ogre::Vector3 velocity;
             if(!gravity)
             {
-                velocity = (Ogre::Quaternion(Ogre::Radian(-refpos.rot[2]), Ogre::Vector3::UNIT_Z)*
+                velocity = (Ogre::Quaternion(Ogre::Radian( refpos.rot[2]), Ogre::Vector3::UNIT_Z)*
                             Ogre::Quaternion(Ogre::Radian( refpos.rot[1]), Ogre::Vector3::UNIT_Y)*
                             Ogre::Quaternion(Ogre::Radian( refpos.rot[0]), Ogre::Vector3::UNIT_X)) *
                            movement / time;
@@ -127,9 +128,7 @@ namespace MWWorld
                     if(trace.fraction < 1.0f && getSlope(trace.planenormal) <= sMaxSlope)
                         onground = true;
                 }
-
-                velocity = Ogre::Quaternion(Ogre::Radian(-refpos.rot[2]), Ogre::Vector3::UNIT_Z) *
-                           movement / time;
+                velocity = Ogre::Quaternion(Ogre::Radian(refpos.rot[2]), Ogre::Vector3::UNIT_Z)*movement / time;
                 velocity.z += physicActor->getVerticalForce();
             }
 
@@ -148,6 +147,7 @@ namespace MWWorld
                 // trace to where character would go if there were no obstructions
                 newtrace(&trace, newPosition, newPosition+clippedVelocity*remainingTime, halfExtents, isInterior, engine);
                 newPosition = trace.endpos;
+                //std::cout << newPosition.x << " ";
                 remainingTime = remainingTime * (1.0f-trace.fraction);
 
                 // check for obstructions
@@ -191,7 +191,8 @@ namespace MWWorld
             }
             physicActor->setOnGround(onground);
             physicActor->setVerticalForce(!onground ? clippedVelocity.z - time*627.2f : 0.0f);
-
+            physicActor->mBody->translate(btVector3(0,0,-1000));
+            //std::cout << position.x << " " << newPosition.x << " " << position.y << " " << newPosition.y << std::endl;
             return newPosition;
         }
     };

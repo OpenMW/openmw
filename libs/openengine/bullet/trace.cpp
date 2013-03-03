@@ -8,6 +8,7 @@
 
 #include "physic.hpp"
 
+#define BIT(x) (1<<(x))
 
 enum traceWorldType
 {
@@ -24,6 +25,14 @@ enum collaborativePhysicsType
     Both_Physics = 3    // This object has both kinds of physics (example: activators)
 };
 
+enum collisiontypes {
+    COL_NOTHING = 0, //<Collide with nothing
+    COL_WORLD = BIT(0), //<Collide with world objects
+    COL_ACTOR_INTERNAL = BIT(1), //<Collide internal capsule
+    COL_ACTOR_EXTERNAL = BIT(2), //<collide with external capsule
+    COL_RAYCASTING = BIT(3)
+};
+
 void newtrace(traceResults *results, const Ogre::Vector3& start, const Ogre::Vector3& end, const Ogre::Vector3& BBHalfExtents, bool isInterior, OEngine::Physic::PhysicEngine *enginePass)  //Traceobj was a Aedra Object
 {
     const btVector3 btstart(start.x, start.y, start.z + BBHalfExtents.z);
@@ -36,7 +45,7 @@ void newtrace(traceResults *results, const Ogre::Vector3& start, const Ogre::Vec
     const btTransform to(btrot, btend);
 
     btCollisionWorld::ClosestConvexResultCallback newTraceCallback(btstart, btend);
-    newTraceCallback.m_collisionFilterMask = Only_Collision;
+    newTraceCallback.m_collisionFilterMask = COL_WORLD|COL_RAYCASTING;
 
     enginePass->dynamicsWorld->convexSweepTest(&newshape, from, to, newTraceCallback);
 
