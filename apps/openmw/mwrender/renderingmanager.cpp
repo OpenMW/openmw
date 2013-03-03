@@ -133,8 +133,8 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     sh::Factory::getInstance ().setGlobalSetting ("lighting", "true");
     sh::Factory::getInstance ().setGlobalSetting ("num_lights", Settings::Manager::getString ("num lights", "Objects"));
     sh::Factory::getInstance ().setGlobalSetting ("terrain_num_lights", Settings::Manager::getString ("num lights", "Terrain"));
-    sh::Factory::getInstance ().setGlobalSetting ("underwater_effects", Settings::Manager::getString("underwater effect", "Water"));
     sh::Factory::getInstance ().setGlobalSetting ("simple_water", Settings::Manager::getBool("shader", "Water") ? "false" : "true");
+    sh::Factory::getInstance ().setGlobalSetting ("render_refraction", "false");
 
     sh::Factory::getInstance ().setSharedParameter ("waterEnabled", sh::makeProperty<sh::FloatValue> (new sh::FloatValue(0.0)));
     sh::Factory::getInstance ().setSharedParameter ("waterLevel", sh::makeProperty<sh::FloatValue>(new sh::FloatValue(0)));
@@ -355,16 +355,7 @@ void RenderingManager::update (float duration, bool paused)
 
     Ogre::ControllerManager::getSingleton().setTimeFactor(paused ? 0.f : 1.f);
 
-    /*
-    if (world->isUnderwater (world->getPlayer().getPlayer().getCell(), cam))
-    {
-        mFogColour = Ogre::ColourValue(0.18039, 0.23137, 0.25490);
-        mFogStart = 0;
-        mFogEnd = 1500;
-    }
-    */
-
-    applyFog();
+    applyFog(world->isUnderwater (world->getPlayer().getPlayer().getCell(), cam));
 
     if(paused)
     {
@@ -529,16 +520,20 @@ void RenderingManager::configureFog(const float density, const Ogre::ColourValue
     mRendering.getCamera()->setFarClipDistance ( Settings::Manager::getFloat("max viewing distance", "Viewing distance") / density );
 }
 
-void RenderingManager::applyFog ()
+void RenderingManager::applyFog (bool underwater)
 {
-    mRendering.getScene()->setFog (FOG_LINEAR, mFogColour, 0, mFogStart, mFogEnd);
-
-    mRendering.getViewport()->setBackgroundColour (mFogColour);
-
-    mWater->setViewportBackground (mFogColour);
-
-    sh::Factory::getInstance ().setSharedParameter ("viewportBackground",
-        sh::makeProperty<sh::Vector3> (new sh::Vector3(mFogColour.r, mFogColour.g, mFogColour.b)));
+    if (!underwater)
+    {
+        mRendering.getScene()->setFog (FOG_LINEAR, mFogColour, 0, mFogStart, mFogEnd);
+        mRendering.getViewport()->setBackgroundColour (mFogColour);
+        mWater->setViewportBackground (mFogColour);
+    }
+    else
+    {
+        mRendering.getScene()->setFog (FOG_LINEAR, Ogre::ColourValue(0.18039, 0.23137, 0.25490), 0, 0, 1000);
+        mRendering.getViewport()->setBackgroundColour (Ogre::ColourValue(0.18039, 0.23137, 0.25490));
+        mWater->setViewportBackground (Ogre::ColourValue(0.18039, 0.23137, 0.25490));
+    }
 }
 
 void RenderingManager::setAmbientMode()
@@ -782,11 +777,6 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
         else if (it->second == "refraction" && it->first == "Water")
         {
             sh::Factory::getInstance ().setGlobalSetting ("refraction", Settings::Manager::getBool("refraction", "Water") ? "true" : "false");
-            rebuild = true;
-        }
-        else if (it->second == "underwater effect" && it->first == "Water")
-        {
-            sh::Factory::getInstance ().setGlobalSetting ("underwater_effects", Settings::Manager::getString("underwater effect", "Water"));
             rebuild = true;
         }
         else if (it->second == "shaders" && it->first == "Objects")

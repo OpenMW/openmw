@@ -56,6 +56,9 @@ enum VisibilityFlags
 
     RV_Debug = 512,
 
+    // overlays, we only want these on the main render target
+    RV_Overlay = 1024,
+
     RV_Map = RV_Terrain + RV_Statics + RV_StaticsSmall + RV_Misc + RV_Water
 };
 

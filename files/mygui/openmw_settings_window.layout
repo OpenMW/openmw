@@ -280,13 +280,6 @@
                         </Widget>
 
                         <Widget type="HBox" position="4 135 350 24">
-                            <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="UnderwaterButton"/>
-                            <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
-                                <Property key="Caption" value="Underwater effects (caustics, fog)"/>
-                            </Widget>
-                        </Widget>
-
-                        <Widget type="HBox" position="4 182 350 24">
                             <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="RefractionButton"/>
                             <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
                                 <Property key="Caption" value="Refraction"/>

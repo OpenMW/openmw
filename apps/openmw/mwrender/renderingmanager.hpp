@@ -208,7 +208,7 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     sh::Factory* mFactory;
 
     void setAmbientMode();
-    void applyFog();
+    void applyFog(bool underwater);
 
     void setMenuTransparency(float val);
 

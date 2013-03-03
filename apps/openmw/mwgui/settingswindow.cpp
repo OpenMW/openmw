@@ -129,7 +129,6 @@ namespace MWGui
         getWidget(mStaticsShadows, "StaticsShadows");
         getWidget(mMiscShadows, "MiscShadows");
         getWidget(mShadowsDebug, "ShadowsDebug");
-        getWidget(mUnderwaterButton, "UnderwaterButton");
         getWidget(mControlsBox, "ControlsBox");
         getWidget(mResetControlsButton, "ResetControlsButton");
         getWidget(mInvertYButton, "InvertYButton");
@@ -141,7 +140,6 @@ namespace MWGui
         mCrosshairButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mInvertYButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onOkButtonClicked);
-        mUnderwaterButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mShadersButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onShadersToggled);
         mShaderModeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onShaderModeToggled);
         mFullscreenButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
@@ -236,7 +234,6 @@ namespace MWGui
         mReflectObjectsButton->setCaptionWithReplacing(Settings::Manager::getBool("reflect statics", "Water") ? "#{sOn}" : "#{sOff}");
         mReflectActorsButton->setCaptionWithReplacing(Settings::Manager::getBool("reflect actors", "Water") ? "#{sOn}" : "#{sOff}");
         mReflectTerrainButton->setCaptionWithReplacing(Settings::Manager::getBool("reflect terrain", "Water") ? "#{sOn}" : "#{sOff}");
-        mUnderwaterButton->setCaptionWithReplacing(Settings::Manager::getBool("underwater effect", "Water") ? "#{sOn}" : "#{sOff}");
 
         mShadowsTextureSize->setCaption (Settings::Manager::getString ("texture size", "Shadows"));
         //mShadowsLargeDistance->setCaptionWithReplacing(Settings::Manager::getBool("split", "Shadows") ? "#{sOn}" : "#{sOff}");
@@ -267,7 +264,6 @@ namespace MWGui
         if (!Settings::Manager::getBool("shaders", "Objects"))
         {
             mRefractionButton->setEnabled(false);
-            mUnderwaterButton->setEnabled (false);
             mShadowsEnabledButton->setEnabled(false);
         }
 
@@ -389,10 +385,6 @@ namespace MWGui
                 Settings::Manager::setBool("shader", "Water", newState);
             else if (_sender == mRefractionButton)
                 Settings::Manager::setBool("refraction", "Water", newState);
-            else if (_sender == mUnderwaterButton)
-            {
-                Settings::Manager::setBool("underwater effect", "Water", newState);
-            }
             else if (_sender == mReflectObjectsButton)
             {
                 Settings::Manager::setBool("reflect misc", "Water", newState);
@@ -459,10 +451,6 @@ namespace MWGui
         {
             Settings::Manager::setBool("shaders", "Objects", false);
 
-            mUnderwaterButton->setCaptionWithReplacing("#{sOff}");
-
-            mUnderwaterButton->setEnabled(false);
-
             // refraction needs shaders to display underwater fog
             mRefractionButton->setCaptionWithReplacing("#{sOff}");
             mRefractionButton->setEnabled(false);
@@ -485,7 +473,6 @@ namespace MWGui
             mReflectTerrainButton->setEnabled(true);
             mRefractionButton->setEnabled(true);
 
-            mUnderwaterButton->setEnabled(true);
             mShadowsEnabledButton->setEnabled(true);
         }
 

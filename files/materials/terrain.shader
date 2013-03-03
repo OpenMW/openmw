@@ -21,7 +21,7 @@
 #define NEED_DEPTH 1
 #endif
 
-#define UNDERWATER @shGlobalSettingBool(underwater_effects) && LIGHTING
+#define UNDERWATER @shGlobalSettingBool(render_refraction)
 
 #define VIEWPROJ_FIX @shGlobalSettingBool(viewproj_fix)
 
@@ -210,14 +210,6 @@
 
 #if UNDERWATER
         shUniform(float, waterLevel) @shSharedParameter(waterLevel)
-        shUniform(float4, lightDirectionWS0) @shAutoConstant(lightDirectionWS0, light_position, 0)
-        
-        shSampler2D(causticMap)
-        
-		shUniform(float, waterTimer) @shSharedParameter(waterTimer)
-        shUniform(float2, waterSunFade_sunHeight) @shSharedParameter(waterSunFade_sunHeight)
-        		
-		shUniform(float3, windDir_windSpeed) @shSharedParameter(windDir_windSpeed)
 #endif
 
 
@@ -242,17 +234,7 @@
         float3 caustics = float3(1,1,1);
 
 #if UNDERWATER
-
-        float3 waterEyePos = float3(1,1,1);
-        // NOTE: this calculation would be wrong for non-uniform scaling
-        float4 worldNormal = shMatrixMult(worldMatrix, float4(normal.xyz, 0));
-        waterEyePos = intercept(worldPos, cameraPos.xyz - worldPos, float3(0,0,1), waterLevel);
-        caustics = getCaustics(causticMap, worldPos, waterEyePos.xyz, worldNormal.xyz, lightDirectionWS0.xyz, waterLevel, waterTimer, windDir_windSpeed);
-        if (worldPos.z >= waterLevel)
-            caustics = float3(1,1,1);
-        
-
-
+        float3 waterEyePos = intercept(worldPos, cameraPos.xyz - worldPos, float3(0,0,1), waterLevel);
 #endif
         
         
@@ -353,41 +335,14 @@
         float fogValue = shSaturate((depth - fogParams.y) * fogParams.w);
         
         #if UNDERWATER
-        // regular fog only if fragment is above water
-        if (worldPos.z > waterLevel)
-        #endif
+        shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, UNDERWATER_COLOUR, shSaturate(length(waterEyePos-worldPos) / VISIBILITY));
+        #else
         shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, fogColour, fogValue);
+        #endif
 #endif
 
         // prevent negative colour output (for example with negative lights)
         shOutputColour(0).xyz = max(shOutputColour(0).xyz, float3(0,0,0));
-        
-#if UNDERWATER
-        float fogAmount = (cameraPos.z > waterLevel)
-             ? shSaturate(length(waterEyePos-worldPos) / VISIBILITY) 
-             : shSaturate(length(cameraPos.xyz-worldPos)/ VISIBILITY);
-             
-        float3 eyeVec = normalize(cameraPos.xyz-worldPos);
-        
-        float waterSunGradient = dot(eyeVec, -normalize(lightDirectionWS0.xyz));
-        waterSunGradient = shSaturate(pow(waterSunGradient*0.7+0.3,2.0));  
-        float3 waterSunColour = float3(0.0,1.0,0.85)*waterSunGradient * 0.5;
-        
-        float waterGradient = dot(eyeVec, float3(0.0,-1.0,0.0));
-        waterGradient = clamp((waterGradient*0.5+0.5),0.2,1.0);
-        float3 watercolour = (float3(0.0078, 0.5176, 0.700)+waterSunColour)*waterGradient*2.0;
-        float3 waterext = float3(0.6, 0.9, 1.0);//water extinction
-        watercolour = shLerp(watercolour*0.3*waterSunFade_sunHeight.x, watercolour, shSaturate(1.0-exp(-waterSunFade_sunHeight.y*SUN_EXT)));
-        watercolour = (cameraPos.z <= waterLevel) ? watercolour : watercolour*0.3;
-    
-    
-        float darkness = VISIBILITY*2.0;
-        darkness = clamp((waterEyePos.z - waterLevel + darkness)/darkness,0.2,1.0);
-        watercolour *= darkness;
-
-        float isUnderwater = (worldPos.z < waterLevel) ? 1.0 : 0.0;
-        shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, watercolour, fogAmount * isUnderwater);
-#endif
     }
 
 #endif

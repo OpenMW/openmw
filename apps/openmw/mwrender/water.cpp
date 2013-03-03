@@ -4,14 +4,10 @@
 #include <OgreEntity.h>
 #include <OgreMeshManager.h>
 #include <OgreHardwarePixelBuffer.h>
-#include <OgreCompositorManager.h>
-#include <OgreCompositorInstance.h>
-#include <OgreCompositorChain.h>
 #include <OgreRoot.h>
 
 #include "sky.hpp"
 #include "renderingmanager.hpp"
-#include "compositors.hpp"
 #include "ripplesimulation.hpp"
 #include "refraction.hpp"
 
@@ -224,16 +220,6 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend) :
 
     mWater->setMaterial(mMaterial);
 
-    /*
-    Ogre::Entity* underwaterDome = mSceneManager->createEntity ("underwater_dome.mesh");
-    underwaterDome->setRenderQueueGroup (RQG_UnderWater);
-    mUnderwaterDome = mSceneManager->getRootSceneNode ()->createChildSceneNode ();
-    mUnderwaterDome->attachObject (underwaterDome);
-    mUnderwaterDome->setScale(10000,10000,10000);
-    mUnderwaterDome->setVisible(false);
-    underwaterDome->setMaterialName("Underwater_Dome");
-    */
-
     setHeight(mTop);
 
     sh::MaterialInstance* m = sh::Factory::getInstance ().getMaterialInstance ("Water");
@@ -379,21 +365,11 @@ void Water::updateVisible()
 
 void Water::update(float dt, Ogre::Vector3 player)
 {
-    /*
-    Ogre::Vector3 pos = mCamera->getDerivedPosition ();
-    pos.y = -mWaterPlane.d;
-    mUnderwaterDome->setPosition (pos);
-    */
-
     mWaterTimer += dt;
     sh::Factory::getInstance ().setSharedParameter ("waterTimer", sh::makeProperty<sh::FloatValue>(new sh::FloatValue(mWaterTimer)));
 
     mRendering->getSkyManager ()->setGlareEnabled (!mIsUnderwater);
 
-    //if (player.y <= mTop)
-    {
-        //mSimulation->addImpulse(Ogre::Vector2(player.x, player.z));
-    }
     mSimulation->update(dt, Ogre::Vector2(player.x, player.y));
 
     if (mReflection)

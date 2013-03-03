@@ -8,6 +8,7 @@ configuration water_reflection
 configuration water_refraction
 {
     viewproj_fix true
+    render_refraction true
 }
 
 configuration local_map

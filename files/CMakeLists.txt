@@ -1,7 +1,6 @@
 project(resources)
 
 set(WATER_FILES
-    underwater_dome.mesh
     water_nm.png
     circle.png
 )

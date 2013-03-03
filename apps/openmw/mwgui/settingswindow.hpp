@@ -50,7 +50,6 @@ namespace MWGui
             MyGUI::Button* mReflectTerrainButton;
             MyGUI::Button* mShadersButton;
             MyGUI::Button* mShaderModeButton;
-            MyGUI::Button* mUnderwaterButton;
             MyGUI::Button* mRefractionButton;
 
             MyGUI::Button* mShadowsEnabledButton;

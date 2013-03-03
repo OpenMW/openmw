@@ -25,6 +25,7 @@ namespace Ogre
     class SceneNode;
     class Entity;
     class Vector3;
+    class Rectangle2D;
     struct RenderTargetEvent;
 }
 
@@ -107,8 +108,6 @@ namespace MWRender {
 
         Ogre::SceneNode *mWaterNode;
         Ogre::Entity *mWater;
-
-        //Ogre::SceneNode* mUnderwaterDome;
 
         bool mIsUnderwater;
         bool mActive;

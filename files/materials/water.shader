@@ -272,38 +272,16 @@
 #if REFRACTION
         shOutputColour(0).xyz = shLerp(  shLerp(refraction, scatterColour, lightScatter), reflection, fresnel) + specular * sunSpecular.xyz;
 #else
-        shOutputColour(0).xyz = reflection + specular * sunSpecular.xyz;
+        shOutputColour(0).xyz = shLerp(reflection, float3(0.18039, 0.23137, 0.25490), (1.0-fresnel)*0.5) + specular * sunSpecular.xyz;
 #endif
         // fog
-        if (isUnderwater == 1)
-        {
-            float waterSunGradient = dot(-vVec, -lVec);
-            waterSunGradient = shSaturate(pow(waterSunGradient*0.7+0.3,2.0));  
-            float3 waterSunColour = float3(0.0,1.0,0.85)*waterSunGradient * 0.5;
-           
-            float waterGradient = dot(-vVec, float3(0.0,-1.0,0.0));
-            waterGradient = clamp((waterGradient*0.5+0.5),0.2,1.0);
-            float3 watercolour = (float3(0.0078, 0.5176, 0.700)+waterSunColour)*waterGradient*2.0;
-            float3 waterext = float3(0.6, 0.9, 1.0);//water extinction
-            watercolour = shLerp(watercolour*0.3*waterSunFade_sunHeight.x, watercolour, shSaturate(1.0-exp(-waterSunFade_sunHeight.y*SUN_EXT)));
-        
-            float darkness = VISIBILITY*2.0;
-            darkness = clamp((cameraPos.z+darkness)/darkness,0.2,1.0);
-    
-        
-            float fog = shSaturate(length(cameraPos.xyz-position.xyz) / VISIBILITY);
-            shOutputColour(0).xyz = shLerp(shOutputColour(0).xyz, watercolour * darkness, shSaturate(fog / waterext));
-        }
-        else
-        {
-            float fogValue = shSaturate((depthPassthrough - fogParams.y) * fogParams.w);
-            shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, fogColor, fogValue);
-        }
+        float fogValue = shSaturate((depthPassthrough - fogParams.y) * fogParams.w);
+        shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, fogColor, fogValue);
 
 #if REFRACTION
                 shOutputColour(0).w = 1;
 #else
-        shOutputColour(0).w = shSaturate(fresnel + specular);
+        shOutputColour(0).w = shSaturate(fresnel*2 + specular);
 #endif
     }
 
