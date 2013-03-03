@@ -29,8 +29,8 @@ namespace MWGui
             void notifyNextPage(MyGUI::Widget* _sender);
             void notifyPrevPage(MyGUI::Widget* _sender);
 
-            MyGUI::EditPtr mLeftTextWidget;
-            MyGUI::EditPtr mRightTextWidget;
+            MyGUI::EditBox* mLeftTextWidget;
+            MyGUI::EditBox* mRightTextWidget;
             MWGui::ImageButton* mPrevBtn;
             MWGui::ImageButton* mNextBtn;
             std::vector<std::string> mLeftPages;

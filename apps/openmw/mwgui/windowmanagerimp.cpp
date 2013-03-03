@@ -3,7 +3,7 @@
 #include <cassert>
 #include <iterator>
 
-#include "MyGUI_UString.h"
+#include <MyGUI_UString.h>
 
 #include <openengine/ogre/renderer.hpp>
 #include <openengine/gui/manager.hpp>

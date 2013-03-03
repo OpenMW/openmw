@@ -237,7 +237,7 @@ namespace MWGui
         Widgets::SpellEffectList _list = Widgets::MWEffectList::effectListFromESM(&list);
         effectsWidget->setEffectList(_list);
 
-        std::vector<MyGUI::WidgetPtr> effectItems;
+        std::vector<MyGUI::Widget*> effectItems;
         effectsWidget->createEffectWidgets(effectItems, mEffectsBox, coord, false, 0);
         effectsWidget->setCoord(coord);
     }

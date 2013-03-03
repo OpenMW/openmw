@@ -2,7 +2,9 @@
 
 #include <cmath>
 
-#include <MyGUI.h>
+#include <MyGUI_Widget.h>
+#include <MyGUI_RenderManager.h>
+#include <MyGUI_PointerManager.h>
 
 #include <boost/lexical_cast.hpp>
 

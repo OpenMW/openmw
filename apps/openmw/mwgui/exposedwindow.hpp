@@ -1,7 +1,7 @@
 #ifndef MWGUI_EXPOSEDWINDOW_H
 #define MWGUI_EXPOSEDWINDOW_H
 
-#include "MyGUI_Window.h"
+#include <MyGUI_Window.h>
 
 namespace MWGui
 {

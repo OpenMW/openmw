@@ -1,7 +1,5 @@
 #include "exposedwindow.hpp"
 
-#include "MyGUI_Window.h"
-
 namespace MWGui
 {
     MyGUI::VectorWidgetPtr ExposedWindow::getSkinWidgetsByName (const std::string &name)
@@ -16,7 +14,7 @@ namespace MWGui
         if (widgets.empty())
         {
             MYGUI_ASSERT( ! _throw, "widget name '" << _name << "' not found in skin of layout '" << getName() << "'");
-            return nullptr;
+            return NULL;
         }
         else
         {

@@ -55,8 +55,8 @@ namespace MWGui
 
 
     public:
-    MyGUI::EditPtr command;
-    MyGUI::EditPtr history;
+    MyGUI::EditBox* command;
+    MyGUI::EditBox* history;
 
     typedef std::list<std::string> StringList;
 
@@ -95,11 +95,11 @@ namespace MWGui
 
   private:
 
-    void keyPress(MyGUI::WidgetPtr _sender,
+    void keyPress(MyGUI::Widget* _sender,
                   MyGUI::KeyCode key,
                   MyGUI::Char _char);
 
-    void acceptCommand(MyGUI::EditPtr _sender);
+    void acceptCommand(MyGUI::EditBox* _sender);
 
     std::string complete( std::string input, std::vector<std::string> &matches );
   };
