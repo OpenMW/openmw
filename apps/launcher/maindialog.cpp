@@ -94,8 +94,8 @@ void MainDialog::createPages()
     mDataFilesPage = new DataFilesPage(mCfgMgr, mGameSettings, mLauncherSettings, this);
 
     // Set the combobox of the play page to imitate the combobox on the datafilespage
-    mPlayPage->mProfilesComboBox->setModel(mDataFilesPage->mProfilesComboBox->model());
-    mPlayPage->mProfilesComboBox->setCurrentIndex(mDataFilesPage->mProfilesComboBox->currentIndex());
+    mPlayPage->setProfilesComboBoxModel(mDataFilesPage->mProfilesComboBox->model());
+    mPlayPage->setProfilesComboBoxIndex(mDataFilesPage->mProfilesComboBox->currentIndex());
 
     // Add the pages to the stacked widget
     pagesWidget->addWidget(mPlayPage);
@@ -105,15 +105,10 @@ void MainDialog::createPages()
     // Select the first page
     iconWidget->setCurrentItem(iconWidget->item(0), QItemSelectionModel::Select);
 
-    connect(mPlayPage->mPlayButton, SIGNAL(clicked()), this, SLOT(play()));
+    connect(mPlayPage, SIGNAL(playButtonClicked()), this, SLOT(play()));
 
-    connect(mPlayPage->mProfilesComboBox,
-            SIGNAL(currentIndexChanged(int)),
-            mDataFilesPage->mProfilesComboBox, SLOT(setCurrentIndex(int)));
-
-    connect(mDataFilesPage->mProfilesComboBox,
-            SIGNAL(currentIndexChanged(int)),
-            mPlayPage->mProfilesComboBox, SLOT(setCurrentIndex(int)));
+    connect(mPlayPage, SIGNAL(profileChanged(int)), mDataFilesPage->mProfilesComboBox, SLOT(setCurrentIndex(int)));
+    connect(mDataFilesPage->mProfilesComboBox, SIGNAL(currentIndexChanged(int)), mPlayPage, SLOT(setProfilesComboBoxIndex(int)));
 
 }
 

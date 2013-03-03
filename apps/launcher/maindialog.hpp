@@ -28,12 +28,6 @@ class MainDialog : public QMainWindow, private Ui::MainWindow
 
 public:
     MainDialog();
-
-
-//    GameSettings &gameSettings,
-//               GraphicsSettings &GraphicsSettings,
-//               LauncherSettings &launcherSettings);
-
     bool setup();
     bool showFirstRunDialog();
 
@@ -57,9 +51,6 @@ private:
     bool startProgram(const QString &name, const QStringList &arguments, bool detached = false);
 
     void closeEvent(QCloseEvent *event);
-
-//    QListWidget *mIconWidget;
-//    QStackedWidget *mPagesWidget;
 
     PlayPage *mPlayPage;
     GraphicsPage *mGraphicsPage;
