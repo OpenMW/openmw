@@ -752,10 +752,10 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
         instance->setProperty("alpha_rejection", sh::makeProperty(new sh::StringValue(reject)));
     }
 
-    instance->setProperty("transparent_sorting", sh::makeProperty(new sh::BooleanValue(!((alphaFlags>>13)&1))));
+    instance->setProperty("transparent_sorting", sh::makeProperty(new sh::StringValue(!((alphaFlags>>13)&1) ? "on" : "off")));
 
-    instance->setProperty("depth_check", sh::makeProperty(new sh::BooleanValue(depthFlags&1)));
-    instance->setProperty("depth_write", sh::makeProperty(new sh::BooleanValue((depthFlags>>1)&1)));
+    instance->setProperty("depth_check", sh::makeProperty(new sh::StringValue((depthFlags&1) ? "on" : "off")));
+    instance->setProperty("depth_write", sh::makeProperty(new sh::StringValue(((depthFlags>>1)&1) ? "on" : "off")));
     // depth_func???
 
     sh::Factory::getInstance()._ensureMaterial(matname, "Default");
