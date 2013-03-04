@@ -993,7 +993,7 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
             }
         }
 
-        std::string matname = NIFMaterialLoader::getMaterial(shape, mName, mGroup,
+        std::string matname = NIFMaterialLoader::getMaterial(shape, mesh->getName(), mGroup,
                                                              texprop, matprop, alphaprop,
                                                              vertprop, zprop, specprop);
         if(matname.length() > 0)
@@ -1001,12 +1001,12 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
     }
 
     bool findTriShape(Ogre::Mesh *mesh, const Nif::Node *node,
-                      const Nif::NiTexturingProperty *texprop=NULL,
-                      const Nif::NiMaterialProperty *matprop=NULL,
-                      const Nif::NiAlphaProperty *alphaprop=NULL,
-                      const Nif::NiVertexColorProperty *vertprop=NULL,
-                      const Nif::NiZBufferProperty *zprop=NULL,
-                      const Nif::NiSpecularProperty *specprop=NULL)
+                      const Nif::NiTexturingProperty *texprop,
+                      const Nif::NiMaterialProperty *matprop,
+                      const Nif::NiAlphaProperty *alphaprop,
+                      const Nif::NiVertexColorProperty *vertprop,
+                      const Nif::NiZBufferProperty *zprop,
+                      const Nif::NiSpecularProperty *specprop)
     {
         // Scan the property list for material information
         const Nif::PropertyList &proplist = node->props;
@@ -1081,7 +1081,7 @@ public:
         }
 
         const Nif::Node *node = dynamic_cast<const Nif::Node*>(nif->getRecord(0));
-        findTriShape(mesh, node);
+        findTriShape(mesh, node, NULL, NULL, NULL, NULL, NULL, NULL);
     }
 
     void createMeshes(const Nif::Node *node, MeshInfoList &meshes, int flags=0)
