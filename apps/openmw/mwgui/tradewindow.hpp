@@ -74,6 +74,7 @@ namespace MWGui
             void onFilterChanged(MyGUI::Widget* _sender);
             void onOfferButtonClicked(MyGUI::Widget* _sender);
             void onCancelButtonClicked(MyGUI::Widget* _sender);
+            void onMaxSaleButtonClicked(MyGUI::Widget* _sender);
             void onIncreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
             void onDecreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
             void onBalanceButtonReleased(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
@@ -93,6 +94,9 @@ namespace MWGui
             void updateLabels();
 
             virtual void onReferenceUnavailable();
+
+        private:
+            int getMerchantGold();
     };
 }
 
