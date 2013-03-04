@@ -31,23 +31,11 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr &ptr)
             Ogre::Entity *ent = mEntityList.mEntities[i];
             ent->setVisibilityFlags(RV_Actors);
 
-            bool transparent = false;
-            for(unsigned int j=0;!transparent && j < ent->getNumSubEntities(); ++j)
+            for(unsigned int j=0; j < ent->getNumSubEntities(); ++j)
             {
-                Ogre::MaterialPtr mat = ent->getSubEntity(j)->getMaterial();
-                Ogre::Material::TechniqueIterator techIt = mat->getTechniqueIterator();
-                while(!transparent && techIt.hasMoreElements())
-                {
-                    Ogre::Technique* tech = techIt.getNext();
-                    Ogre::Technique::PassIterator passIt = tech->getPassIterator();
-                    while(!transparent && passIt.hasMoreElements())
-                    {
-                        Ogre::Pass* pass = passIt.getNext();
-                        transparent = pass->isTransparent();
-                    }
-                }
+                Ogre::SubEntity* subEnt = ent->getSubEntity(j);
+                subEnt->setRenderQueueGroup(subEnt->getMaterial()->isTransparent() ? RQG_Alpha : RQG_Main);
             }
-            ent->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
         }
 
         std::vector<std::string> names;
