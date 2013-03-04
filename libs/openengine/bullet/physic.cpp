@@ -37,6 +37,8 @@ namespace Physic
         Ogre::Quaternion inverse = mBoxRotation.Inverse();
         mBoxRotationInverse = btQuaternion(inverse.x, inverse.y, inverse.z,inverse.w);
         mEngine->addRigidBody(mBody, false);  //Add rigid body to dynamics world, but do not add to object map
+        //mBody->setCollisionFlags(COL_NOTHING);
+        //mBody->setMas
     }
 
     PhysicActor::~PhysicActor()
@@ -50,6 +52,8 @@ namespace Physic
 
     void PhysicActor::enableCollisions(bool collision)
     {
+        if(collision && !collisionMode) mBody->translate(btVector3(0,0,-1000));
+        if(!collision && collisionMode) mBody->translate(btVector3(0,0,1000));
         collisionMode = collision;
     }
 

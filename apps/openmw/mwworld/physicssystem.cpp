@@ -110,7 +110,7 @@ namespace MWWorld
             float remainingTime = time;
             bool isInterior = !ptr.getCell()->isExterior();
             Ogre::Vector3 halfExtents = physicActor->getHalfExtents();// + Vector3(1,1,1);
-            physicActor->mBody->translate(btVector3(0,0,1000));
+            physicActor->enableCollisions(false);
 
             Ogre::Vector3 velocity;
             if(!gravity)
@@ -147,7 +147,6 @@ namespace MWWorld
                 // trace to where character would go if there were no obstructions
                 newtrace(&trace, newPosition, newPosition+clippedVelocity*remainingTime, halfExtents, isInterior, engine);
                 newPosition = trace.endpos;
-                //std::cout << newPosition.x << " ";
                 remainingTime = remainingTime * (1.0f-trace.fraction);
 
                 // check for obstructions
@@ -191,8 +190,7 @@ namespace MWWorld
             }
             physicActor->setOnGround(onground);
             physicActor->setVerticalForce(!onground ? clippedVelocity.z - time*627.2f : 0.0f);
-            physicActor->mBody->translate(btVector3(0,0,-1000));
-            //std::cout << position.x << " " << newPosition.x << " " << position.y << " " << newPosition.y << std::endl;
+            physicActor->enableCollisions(true);
             return newPosition;
         }
     };
