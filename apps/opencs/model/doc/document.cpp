@@ -154,8 +154,7 @@ void CSMDoc::Document::addOptionalGlobals()
     {
         ESM::Global global;
         global.mId = sGlobals[i];
-        global.mType = ESM::VT_Int;
-        global.mValue = 0;
+        global.mValue.setType (ESM::VT_Int);
         addOptionalGlobal (global);
     }
 }
@@ -192,9 +191,14 @@ void CSMDoc::Document::createBase()
     for (int i=0; sGlobals[i]; ++i)
     {
         ESM::Global record;
+
         record.mId = sGlobals[i];
-        record.mValue = i==0 ? 1 : 0;
-        record.mType = ESM::VT_Float;
+
+        record.mValue.setType (i==2 ? ESM::VT_Float : ESM::VT_Int);
+
+        if (i==0)
+            record.mValue.setInteger (1);
+
         getData().getGlobals().add (record);
     }
 }

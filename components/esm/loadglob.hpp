@@ -3,7 +3,6 @@
 
 #include <string>
 
-#include "defs.hpp"
 #include "variant.hpp"
 
 namespace ESM
@@ -19,8 +18,7 @@ class ESMWriter;
 struct Global
 {
     std::string mId;
-    float mValue;
-    VarType mType;
+    Variant mValue;
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);

@@ -47,27 +47,24 @@ namespace MWWorld
             char type = ' ';
             Data value;
 
-            switch (iter->mType)
+            switch (iter->mValue.getType())
             {
                 case ESM::VT_Short:
 
                     type = 's';
-                    value.mShort = *reinterpret_cast<const Interpreter::Type_Float *> (
-                        &iter->mValue);
+                    value.mShort = iter->mValue.getInteger();
                     break;
 
                 case ESM::VT_Long:
 
                     type = 'l';
-                    value.mLong = *reinterpret_cast<const Interpreter::Type_Float *> (
-                        &iter->mValue);
+                    value.mLong = iter->mValue.getInteger();
                     break;
 
                 case ESM::VT_Float:
 
                     type = 'f';
-                    value.mFloat = *reinterpret_cast<const Interpreter::Type_Float *> (
-                        &iter->mValue);
+                    value.mFloat = iter->mValue.getFloat();
                     break;
 
                 default:

@@ -713,9 +713,7 @@ void Record<ESM::Faction>::print()
 template<>
 void Record<ESM::Global>::print()
 {
-    // nothing to print (well, nothing that's correct anyway)
-    std::cout << "  Type: " << mData.mType << std::endl;
-    std::cout << "  Value: " << mData.mValue << std::endl;
+    std::cout << "  " << mData.mValue << std::endl;
 }
 
 template<>

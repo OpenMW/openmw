@@ -12,13 +12,13 @@ namespace CSMWorld
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
-            return record.get().mValue;
+            return record.get().mValue.getFloat();
         }
 
         virtual void set (Record<ESXRecordT>& record, const QVariant& data)
         {
             ESXRecordT record2 = record.get();
-            record2.mValue = data.toFloat();
+            record2.mValue.setFloat (data.toFloat());
             record.setModified (record2);
         }
 
