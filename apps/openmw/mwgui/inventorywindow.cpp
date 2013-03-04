@@ -160,11 +160,8 @@ namespace MWGui
             // the "Take" button should not be visible.
             // NOTE: the take button is "reset" when the window opens, so we can safely do the following
             // without screwing up future book windows
-            if (mDragAndDrop->mDraggedFrom == this)
-            {
-                mWindowManager.getBookWindow()->setTakeButtonShow(false);
-                mWindowManager.getScrollWindow()->setTakeButtonShow(false);
-            }
+            mWindowManager.getBookWindow()->setTakeButtonShow(false);
+            mWindowManager.getScrollWindow()->setTakeButtonShow(false);
 
             mDragAndDrop->mIsOnDragAndDrop = false;
             MyGUI::Gui::getInstance().destroyWidget(mDragAndDrop->mDraggedWidget);
