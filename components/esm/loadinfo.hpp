@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "defs.hpp"
+#include "variant.hpp"
 
 namespace ESM
 {
