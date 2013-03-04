@@ -13,7 +13,7 @@
 #include "config.h"
 #endif
 
-#include <cstdio> /* for FILE */
+#include <stdio.h> /* for FILE */
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,7 +43,7 @@ struct gengetopt_args_info
   char * extract_orig;  /**< @brief Extract file from archive original value given at command line.  */
   const char *extract_help; /**< @brief Extract file from archive help description.  */
   const char *long_help; /**< @brief Include extra information in archive listing help description.  */
-  
+
   unsigned int help_given ; /**< @brief Whether help was given.  */
   unsigned int version_given ;  /**< @brief Whether version was given.  */
   unsigned int extract_given ;  /**< @brief Whether extract was given.  */
@@ -136,7 +136,7 @@ void cmdline_parser_print_help(void);
 void cmdline_parser_print_version(void);
 
 /**
- * Initializes all the fields a cmdline_parser_params structure 
+ * Initializes all the fields a cmdline_parser_params structure
  * to their default values
  * @param params the structure to initialize
  */

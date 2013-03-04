@@ -13,8 +13,8 @@
 #include "config.h"
 #endif
 
-#include <cstdio>
-#include <cstdlib>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #ifndef FIX_UNUSED
@@ -71,7 +71,7 @@ void clear_args (struct gengetopt_args_info *args_info)
   FIX_UNUSED (args_info);
   args_info->extract_arg = NULL;
   args_info->extract_orig = NULL;
-  
+
 }
 
 static
@@ -83,7 +83,7 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->version_help = gengetopt_args_info_help[1] ;
   args_info->extract_help = gengetopt_args_info_help[2] ;
   args_info->long_help = gengetopt_args_info_help[3] ;
-  
+
 }
 
 void
@@ -133,7 +133,7 @@ void
 cmdline_parser_params_init(struct cmdline_parser_params *params)
 {
   if (params)
-    { 
+    {
       params->override = 0;
       params->initialize = 1;
       params->check_required = 1;
@@ -145,9 +145,9 @@ cmdline_parser_params_init(struct cmdline_parser_params *params)
 struct cmdline_parser_params *
 cmdline_parser_params_create(void)
 {
-  struct cmdline_parser_params *params = 
+  struct cmdline_parser_params *params =
     (struct cmdline_parser_params *)malloc(sizeof(struct cmdline_parser_params));
-  cmdline_parser_params_init(params);  
+  cmdline_parser_params_init(params);
   return params;
 }
 
@@ -168,8 +168,8 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
   unsigned int i;
   free_string_field (&(args_info->extract_arg));
   free_string_field (&(args_info->extract_orig));
-  
-  
+
+
   for (i = 0; i < args_info->inputs_num; ++i)
     free (args_info->inputs [i]);
 
@@ -211,7 +211,7 @@ cmdline_parser_dump(FILE *outfile, struct gengetopt_args_info *args_info)
     write_into_file(outfile, "extract", args_info->extract_orig, 0);
   if (args_info->long_given)
     write_into_file(outfile, "long", 0, 0 );
-  
+
 
   i = EXIT_SUCCESS;
   return i;
@@ -276,7 +276,7 @@ cmdline_parser_ext (int argc, char * const *argv, struct gengetopt_args_info *ar
       cmdline_parser_free (args_info);
       exit (EXIT_FAILURE);
     }
-  
+
   return result;
 }
 
@@ -285,7 +285,7 @@ cmdline_parser2 (int argc, char * const *argv, struct gengetopt_args_info *args_
 {
   int result;
   struct cmdline_parser_params params;
-  
+
   params.override = override;
   params.initialize = initialize;
   params.check_required = check_required;
@@ -299,7 +299,7 @@ cmdline_parser2 (int argc, char * const *argv, struct gengetopt_args_info *args_
       cmdline_parser_free (args_info);
       exit (EXIT_FAILURE);
     }
-  
+
   return result;
 }
 
@@ -324,7 +324,7 @@ cmdline_parser_required (struct gengetopt_args_info *args_info, const char *prog
  *
  */
 
-/* 
+/*
  * we must include anything we need since this file is not thought to be
  * inserted in a file already using getopt.h
  *
@@ -859,7 +859,7 @@ static int getopt_internal_r(int argc, char *const *argv, const char *optstring,
         return -1;
     d->custom_optarg = NULL;
 
-    /* 
+    /*
      * This is a big difference with GNU getopt, since optind == 0
      * means initialization while here 1 means first call.
      */
@@ -926,7 +926,7 @@ static char *package_name = 0;
  */
 static
 int update_arg(void *field, char **orig_field,
-               unsigned int *field_given, unsigned int *prev_given, 
+               unsigned int *field_given, unsigned int *prev_given,
                char *value, const char *possible_values[],
                const char *default_value,
                cmdline_parser_arg_type arg_type,
@@ -947,18 +947,18 @@ int update_arg(void *field, char **orig_field,
   if (!multiple_option && prev_given && (*prev_given || (check_ambiguity && *field_given)))
     {
       if (short_opt != '-')
-        fprintf (stderr, "%s: `--%s' (`-%c') option given more than once%s\n", 
+        fprintf (stderr, "%s: `--%s' (`-%c') option given more than once%s\n",
                package_name, long_opt, short_opt,
                (additional_error ? additional_error : ""));
       else
-        fprintf (stderr, "%s: `--%s' option given more than once%s\n", 
+        fprintf (stderr, "%s: `--%s' option given more than once%s\n",
                package_name, long_opt,
                (additional_error ? additional_error : ""));
       return 1; /* failure */
     }
 
   FIX_UNUSED (default_value);
-    
+
   if (field_given && *field_given && ! override)
     return 0;
   if (prev_given)
@@ -1011,7 +1011,7 @@ cmdline_parser_internal (
 
   int error = 0;
   struct gengetopt_args_info local_args_info;
-  
+
   int override;
   int initialize;
   int check_required;
@@ -1021,9 +1021,9 @@ cmdline_parser_internal (
   int optind;
   int opterr;
   int optopt;
-  
+
   package_name = argv[0];
-  
+
   override = params->override;
   initialize = params->initialize;
   check_required = params->check_required;
@@ -1078,28 +1078,28 @@ cmdline_parser_internal (
           exit (EXIT_SUCCESS);
 
         case 'x':   /* Extract file from archive.  */
-        
-        
-          if (update_arg( (void *)&(args_info->extract_arg), 
+
+
+          if (update_arg( (void *)&(args_info->extract_arg),
                &(args_info->extract_orig), &(args_info->extract_given),
               &(local_args_info.extract_given), optarg, 0, 0, ARG_STRING,
               check_ambiguity, override, 0, 0,
               "extract", 'x',
               additional_error))
             goto failure;
-        
+
           break;
         case 'l':   /* Include extra information in archive listing.  */
-        
-        
-          if (update_arg( 0 , 
+
+
+          if (update_arg( 0 ,
                0 , &(args_info->long_given),
               &(local_args_info.long_given), optarg, 0, 0, ARG_NO,
               check_ambiguity, override, 0, 0,
               "long", 'l',
               additional_error))
             goto failure;
-        
+
           break;
 
         case 0: /* Long option with no short option */
@@ -1140,7 +1140,7 @@ cmdline_parser_internal (
   return 0;
 
 failure:
-  
+
   cmdline_parser_release (&local_args_info);
   return (EXIT_FAILURE);
 }
