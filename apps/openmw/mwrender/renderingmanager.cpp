@@ -100,7 +100,8 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     mFactory->loadAllFiles();
 
     // Set default mipmap level (NB some APIs ignore this)
-    TextureManager::getSingleton().setDefaultNumMipmaps(Settings::Manager::getInt("num mipmaps", "General"));
+    // Mipmap generation is currently disabled because it causes issues on Intel/AMD
+    //TextureManager::getSingleton().setDefaultNumMipmaps(Settings::Manager::getInt("num mipmaps", "General"));
 
     // Set default texture filtering options
     TextureFilterOptions tfo;
