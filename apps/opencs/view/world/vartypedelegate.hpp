@@ -1,6 +1,8 @@
 #ifndef CSV_WORLD_VARTYPEDELEGATE_H
 #define CSV_WORLD_VARTYPEDELEGATE_H
 
+#include <components/esm/variant.hpp>
+
 #include "enumdelegate.hpp"
 
 namespace CSVWorld

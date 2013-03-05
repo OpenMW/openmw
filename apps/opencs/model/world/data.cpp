@@ -6,6 +6,7 @@
 #include <QAbstractTableModel>
 
 #include <components/esm/esmreader.hpp>
+#include <components/esm/defs.hpp>
 #include <components/esm/loadglob.hpp>
 
 #include "idtable.hpp"
