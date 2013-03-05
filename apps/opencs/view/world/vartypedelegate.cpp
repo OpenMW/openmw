@@ -85,7 +85,7 @@ void CSVWorld::VarTypeDelegateFactory::add (ESM::VarType type)
     {
         { ESM::VT_None, "empty" },
         { ESM::VT_Short, "short" },
-        { ESM::VT_Int, "long" },
+        { ESM::VT_Int, "integer" },
         { ESM::VT_Long, "long" },
         { ESM::VT_Float, "float" },
         { ESM::VT_String, "string" },

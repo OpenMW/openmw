@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "defs.hpp"
+#include "variant.hpp"
 
 namespace ESM
 {
@@ -19,13 +19,12 @@ class ESMWriter;
 struct GameSetting
 {
     std::string mId;
-    // One of these is used depending on the variable type
-    std::string mStr;
-    int mI;
-    float mF;
-    VarType mType;
+
+    Variant mValue;
 
     void load(ESMReader &esm);
+
+    /// \todo remove the get* functions (redundant, since mValue as equivalent functions now).
 
     int getInt() const;
     ///< Throws an exception if GMST is not of type int or float.

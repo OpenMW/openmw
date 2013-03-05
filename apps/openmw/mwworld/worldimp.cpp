@@ -198,7 +198,7 @@ namespace MWWorld
         for (std::vector<std::string>::size_type i = 0; i < master.size(); i++, idx++)
         {
             boost::filesystem::path masterPath (fileCollections.getCollection (".esm").getPath (master[i]));
-            
+
             std::cout << "Loading ESM " << masterPath.string() << "\n";
 
             // This parses the ESM file
@@ -210,11 +210,11 @@ namespace MWWorld
             mEsm[idx] = lEsm;
             mStore.load (mEsm[idx]);
         }
- 
+
         for (std::vector<std::string>::size_type i = 0; i < plugins.size(); i++, idx++)
         {
             boost::filesystem::path pluginPath (fileCollections.getCollection (".esp").getPath (plugins[i]));
-            
+
             std::cout << "Loading ESP " << pluginPath.string() << "\n";
 
             // This parses the ESP file
@@ -226,7 +226,7 @@ namespace MWWorld
             mEsm[idx] = lEsm;
             mStore.load (mEsm[idx]);
         }
-        
+
         mStore.setUp();
 
         mPlayer = new MWWorld::Player (mStore.get<ESM::NPC>().find ("player"), *this);
@@ -363,10 +363,8 @@ namespace MWWorld
                     const ESM::GameSetting *setting =
                         MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().search("sDefaultCellname");
 
-                    if (setting && setting->mType == ESM::VT_String)
-                        name = setting->getString();
-                    else
-                        name = "Wilderness";
+                    if (setting && setting->mValue.getType()==ESM::VT_String)
+                        name = setting->mValue.getString();
                 }
 
             }

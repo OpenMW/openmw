@@ -116,8 +116,7 @@ void CSMDoc::Document::addOptionalGmsts()
     {
         ESM::GameSetting gmst;
         gmst.mId = sFloats[i];
-        gmst.mF = 0;
-        gmst.mType = ESM::VT_Float;
+        gmst.mValue.setType (ESM::VT_Float);
         addOptionalGmst (gmst);
     }
 
@@ -125,8 +124,7 @@ void CSMDoc::Document::addOptionalGmsts()
     {
         ESM::GameSetting gmst;
         gmst.mId = sIntegers[i];
-        gmst.mI = 0;
-        gmst.mType = ESM::VT_Long;
+        gmst.mValue.setType (ESM::VT_Int);
         addOptionalGmst (gmst);
     }
 
@@ -134,8 +132,8 @@ void CSMDoc::Document::addOptionalGmsts()
     {
         ESM::GameSetting gmst;
         gmst.mId = sStrings[i];
-        gmst.mStr = "<no text>";
-        gmst.mType = ESM::VT_String;
+        gmst.mValue.setType (ESM::VT_String);
+        gmst.mValue.setString ("<no text>");
         addOptionalGmst (gmst);
     }
 }
@@ -154,8 +152,7 @@ void CSMDoc::Document::addOptionalGlobals()
     {
         ESM::Global global;
         global.mId = sGlobals[i];
-        global.mType = ESM::VT_Int;
-        global.mValue = 0;
+        global.mValue.setType (ESM::VT_Long);
         addOptionalGlobal (global);
     }
 }
@@ -192,9 +189,14 @@ void CSMDoc::Document::createBase()
     for (int i=0; sGlobals[i]; ++i)
     {
         ESM::Global record;
+
         record.mId = sGlobals[i];
-        record.mValue = i==0 ? 1 : 0;
-        record.mType = ESM::VT_Float;
+
+        record.mValue.setType (i==2 ? ESM::VT_Float : ESM::VT_Int);
+
+        if (i==0)
+            record.mValue.setInteger (1);
+
         getData().getGlobals().add (record);
     }
 }
