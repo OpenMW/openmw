@@ -99,9 +99,9 @@ namespace MWWorld
             if(!physicActor || !physicActor->getCollisionMode())
             {
                 // FIXME: This works, but it's inconcsistent with how the rotations are applied elsewhere. Why?
-                return position + (Ogre::Quaternion(Ogre::Radian( refpos.rot[2]), Ogre::Vector3::UNIT_Z)*
-                                   Ogre::Quaternion(Ogre::Radian( refpos.rot[1]), Ogre::Vector3::UNIT_Y)*
-                                   Ogre::Quaternion(Ogre::Radian( refpos.rot[0]), Ogre::Vector3::UNIT_X)) *
+                return position + (Ogre::Quaternion(Ogre::Radian( -refpos.rot[2]), Ogre::Vector3::UNIT_Z)*
+                                   Ogre::Quaternion(Ogre::Radian( -refpos.rot[1]), Ogre::Vector3::UNIT_Y)*
+                                   Ogre::Quaternion(Ogre::Radian( -refpos.rot[0]), Ogre::Vector3::UNIT_X)) *
                                   movement;
             }
 
@@ -115,9 +115,9 @@ namespace MWWorld
             Ogre::Vector3 velocity;
             if(!gravity)
             {
-                velocity = (Ogre::Quaternion(Ogre::Radian( refpos.rot[2]), Ogre::Vector3::UNIT_Z)*
-                            Ogre::Quaternion(Ogre::Radian( refpos.rot[1]), Ogre::Vector3::UNIT_Y)*
-                            Ogre::Quaternion(Ogre::Radian( refpos.rot[0]), Ogre::Vector3::UNIT_X)) *
+                velocity = (Ogre::Quaternion(Ogre::Radian( -refpos.rot[2]), Ogre::Vector3::UNIT_Z)*
+                            Ogre::Quaternion(Ogre::Radian( -refpos.rot[1]), Ogre::Vector3::UNIT_Y)*
+                            Ogre::Quaternion(Ogre::Radian( -refpos.rot[0]), Ogre::Vector3::UNIT_X)) *
                            movement / time;
             }
             else
@@ -128,7 +128,7 @@ namespace MWWorld
                     if(trace.fraction < 1.0f && getSlope(trace.planenormal) <= sMaxSlope)
                         onground = true;
                 }
-                velocity = Ogre::Quaternion(Ogre::Radian(refpos.rot[2]), Ogre::Vector3::UNIT_Z)*movement / time;
+                velocity = Ogre::Quaternion(Ogre::Radian(-refpos.rot[2]), Ogre::Vector3::UNIT_Z)*movement / time;
                 velocity.z += physicActor->getVerticalForce();
             }
 
