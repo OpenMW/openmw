@@ -1,104 +1,39 @@
 #include "loadgmst.hpp"
 
-#include <stdexcept>
-
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
-
 namespace ESM
 {
-
-void GameSetting::load(ESMReader &esm)
-{
-    assert(mId != "");
-
-    // We are apparently allowed to be empty
-    if (!esm.hasMoreSubs())
+    void GameSetting::load (ESMReader &esm)
     {
-        mType = VT_None;
-        return;
+        mValue.read (esm, ESM::Variant::Format_Gmst);
     }
 
-    // Load some data
-    esm.getSubName();
-    NAME n = esm.retSubName();
-    if (n == "STRV")
+    void GameSetting::save (ESMWriter &esm)
     {
-        mStr = esm.getHString();
-        mType = VT_String;
+        mValue.write (esm, ESM::Variant::Format_Gmst);
     }
-    else if (n == "INTV")
-    {
-        esm.getHT(mI);
-        mType = VT_Int;
-    }
-    else if (n == "FLTV")
-    {
-        esm.getHT(mF);
-        mType = VT_Float;
-    }
-    else
-        esm.fail("Unwanted subrecord type");
-}
 
-void GameSetting::save(ESMWriter &esm)
-{
-    switch(mType)
+    int GameSetting::getInt() const
     {
-    case VT_String: esm.writeHNString("STRV", mStr); break;
-    case VT_Int: esm.writeHNT("INTV", mI); break;
-    case VT_Float: esm.writeHNT("FLTV", mF); break;
-    default: break;
+        return mValue.getInteger();
     }
-}
 
-int GameSetting::getInt() const
-{
-    switch (mType)
+    float GameSetting::getFloat() const
     {
-        case VT_Float: return static_cast<int> (mF);
-        case VT_Int: return mI;
-        default: throw std::runtime_error ("GMST " + mId + " is not of a numeric type");
+        return mValue.getFloat();
     }
-}
 
-float GameSetting::getFloat() const
-{
-    switch (mType)
+    std::string GameSetting::getString() const
     {
-        case VT_Float: return mF;
-        case VT_Int: return mI;
-        default: throw std::runtime_error ("GMST " + mId + " is not of a numeric type");
+        return mValue.getString();
     }
-}
-
-std::string GameSetting::getString() const
-{
-    if (mType==VT_String)
-        return mStr;
-
-    throw std::runtime_error ("GMST " + mId + " is not a string");
-}
 
     void GameSetting::blank()
     {
-        mStr.clear();
-        mI = 0;
-        mF = 0;
-        mType = VT_Float;
+        mValue.setType (ESM::VT_None);
     }
 
     bool operator== (const GameSetting& left, const GameSetting& right)
     {
-        if (left.mType!=right.mType)
-            return false;
-
-        switch (left.mType)
-        {
-            case VT_Float: return left.mF==right.mF;
-            case VT_Int: return left.mI==right.mI;
-            case VT_String: return left.mStr==right.mStr;
-            default: return false;
-        }
+        return left.mValue==right.mValue;
     }
 }

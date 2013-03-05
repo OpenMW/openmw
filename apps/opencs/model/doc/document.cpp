@@ -116,8 +116,7 @@ void CSMDoc::Document::addOptionalGmsts()
     {
         ESM::GameSetting gmst;
         gmst.mId = sFloats[i];
-        gmst.mF = 0;
-        gmst.mType = ESM::VT_Float;
+        gmst.mValue.setType (ESM::VT_Float);
         addOptionalGmst (gmst);
     }
 
@@ -125,8 +124,7 @@ void CSMDoc::Document::addOptionalGmsts()
     {
         ESM::GameSetting gmst;
         gmst.mId = sIntegers[i];
-        gmst.mI = 0;
-        gmst.mType = ESM::VT_Long;
+        gmst.mValue.setType (ESM::VT_Int);
         addOptionalGmst (gmst);
     }
 
@@ -134,8 +132,8 @@ void CSMDoc::Document::addOptionalGmsts()
     {
         ESM::GameSetting gmst;
         gmst.mId = sStrings[i];
-        gmst.mStr = "<no text>";
-        gmst.mType = ESM::VT_String;
+        gmst.mValue.setType (ESM::VT_String);
+        gmst.mValue.setString ("<no text>");
         addOptionalGmst (gmst);
     }
 }

@@ -719,23 +719,7 @@ void Record<ESM::Global>::print()
 template<>
 void Record<ESM::GameSetting>::print()
 {
-    std::cout << "  Value: ";
-    switch (mData.mType) {
-    case ESM::VT_String:
-        std::cout << "'" << mData.mStr << "' (std::string)";
-        break;
-
-    case ESM::VT_Float:
-        std::cout << mData.mF << " (float)";
-        break;
-
-    case ESM::VT_Int:
-        std::cout << mData.mI << " (int)";
-        break;
-
-    default:
-        std::cout << "unknown type";
-    }
+    std::cout << "  " << mData.mValue << std::endl;
 }
 
 template<>

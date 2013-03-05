@@ -569,7 +569,7 @@ void WindowManager::messageBox (const std::string& message, const std::vector<st
         else
             mMessageBoxManager->createMessageBox(message);
     }
-    
+
     else
     {
         mMessageBoxManager->createInteractiveMessageBox(message, buttons);
@@ -592,8 +592,9 @@ std::string WindowManager::getGameSettingString(const std::string &id, const std
     const ESM::GameSetting *setting =
         MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().search(id);
 
-    if (setting && setting->mType == ESM::VT_String)
-        return setting->getString();
+    if (setting && setting->mValue.getType()==ESM::VT_String)
+        return setting->mValue.getString();
+
     return default_;
 }
 
@@ -774,8 +775,8 @@ void WindowManager::onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _r
         const ESM::GameSetting *setting =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(tag);
 
-        if (setting && setting->mType == ESM::VT_String)
-            _result = setting->getString();
+        if (setting && setting->mValue.getType()==ESM::VT_String)
+            _result = setting->mValue.getString();
         else
             _result = tag;
     }
