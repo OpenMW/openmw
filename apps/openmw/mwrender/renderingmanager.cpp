@@ -278,7 +278,7 @@ bool RenderingManager::rotateObject( const MWWorld::Ptr &ptr, Ogre::Vector3 &rot
         Ogre::Quaternion yref(Ogre::Radian(-ptr.getRefData().getPosition().rot[1]), Ogre::Vector3::UNIT_Y);
         Ogre::Quaternion zref(Ogre::Radian(-ptr.getRefData().getPosition().rot[2]), Ogre::Vector3::UNIT_Z);
 
-        Ogre::Quaternion newo = adjust ? (zr * yr * xr) * (zref*yref*xref) : zr * yr * xr;
+        Ogre::Quaternion newo = adjust ? (xr * yr * zr) * (xref*yref*zref) : xr * yr * zr;
         Ogre::Radian ax,ay,az;
         Ogre::Matrix3 mat;
         newo.ToRotationMatrix(mat);
