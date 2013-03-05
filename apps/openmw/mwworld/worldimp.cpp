@@ -1467,4 +1467,9 @@ namespace MWWorld
     {
         mRendering->stopVideo();
     }
+
+    void World::frameStarted (float dt)
+    {
+        mRendering->frameStarted(dt);
+    }
 }

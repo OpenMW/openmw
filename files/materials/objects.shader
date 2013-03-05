@@ -2,10 +2,9 @@
 
 
 #define FOG @shGlobalSettingBool(fog)
-#define LIGHTING @shGlobalSettingBool(lighting)
 
-#define SHADOWS_PSSM LIGHTING && @shGlobalSettingBool(shadows_pssm)
-#define SHADOWS LIGHTING && @shGlobalSettingBool(shadows)
+#define SHADOWS_PSSM @shGlobalSettingBool(shadows_pssm)
+#define SHADOWS @shGlobalSettingBool(shadows)
 
 #if SHADOWS || SHADOWS_PSSM
     #include "shadows.h"
@@ -18,8 +17,7 @@
 
 #define UNDERWATER @shGlobalSettingBool(render_refraction)
 
-
-#define HAS_VERTEXCOLOR @shPropertyBool(has_vertex_colour)
+#define VERTEXCOLOR_MODE @shPropertyString(vertexcolor_mode)
 
 #define VERTEX_LIGHTING 1
 
@@ -48,16 +46,10 @@
         shOutput(float, depthPassthrough)
 #endif
 
-#if LIGHTING
-        shOutput(float3, normalPassthrough)
         shOutput(float3, objSpacePositionPassthrough)
-#endif
 
-#if HAS_VERTEXCOLOR
+#if VERTEXCOLOR_MODE != 0
         shColourInput(float4)
-#if !VERTEX_LIGHTING
-        shOutput(float4, colourPassthrough)
-#endif
 #endif
 
 #if VERTEX_LIGHTING
@@ -66,11 +58,15 @@
     shUniform(float4, lightDiffuse[@shGlobalSettingString(num_lights)]) @shAutoConstant(lightDiffuse, light_diffuse_colour_array, @shGlobalSettingString(num_lights))
     shUniform(float4, lightAttenuation[@shGlobalSettingString(num_lights)]) @shAutoConstant(lightAttenuation, light_attenuation_array, @shGlobalSettingString(num_lights))
     shUniform(float4, lightAmbient)                    @shAutoConstant(lightAmbient, ambient_light_colour)
-#if !HAS_VERTEXCOLOUR
+#if VERTEXCOLOR_MODE != 2
     shUniform(float4, materialAmbient)                    @shAutoConstant(materialAmbient, surface_ambient_colour)
 #endif
+#if VERTEXCOLOR_MODE != 2
     shUniform(float4, materialDiffuse)                    @shAutoConstant(materialDiffuse, surface_diffuse_colour)
+#endif
+#if VERTEXCOLOR_MODE != 1
     shUniform(float4, materialEmissive)                   @shAutoConstant(materialEmissive, surface_emissive_colour)
+#endif
 
 #endif
 
@@ -90,16 +86,13 @@
 #endif
 
 #if VERTEX_LIGHTING
-    shOutput(float3, lightResult)
+    shOutput(float4, lightResult)
     shOutput(float3, directionalResult)
 #endif
     SH_START_PROGRAM
     {
 	    shOutputPosition = shMatrixMult(wvp, shInputPosition);
 	    UV = uv0;
-#if LIGHTING
-        normalPassthrough = normal.xyz;
-#endif
 
 #ifdef NEED_DEPTH
 
@@ -124,13 +117,7 @@
 
 #endif
 
-#if LIGHTING
         objSpacePositionPassthrough = shInputPosition.xyz;
-#endif
-
-#if HAS_VERTEXCOLOR && !VERTEX_LIGHTING
-        colourPassthrough = colour;
-#endif
 
 #if SHADOWS
         lightSpacePos0 = shMatrixMult(texViewProjMatrix0, shMatrixMult(worldMatrix, shInputPosition));
@@ -146,28 +133,43 @@
 #if VERTEX_LIGHTING
         float3 lightDir;
         float d;
-        lightResult = float3(0,0,0);
+        lightResult = float4(0,0,0,1);
         @shForeach(@shGlobalSettingString(num_lights))
             lightDir = lightPosition[@shIterator].xyz - (shInputPosition.xyz * lightPosition[@shIterator].w);
             d = length(lightDir);
             lightDir = normalize(lightDir);
 
-            lightResult += materialDiffuse.xyz * lightDiffuse[@shIterator].xyz
+
+#if VERTEXCOLOR_MODE == 2
+            lightResult.xyz += colour.xyz * lightDiffuse[@shIterator].xyz
                     * (1.0 / ((lightAttenuation[@shIterator].y) + (lightAttenuation[@shIterator].z * d) + (lightAttenuation[@shIterator].w * d * d)))
                     * max(dot(normalize(normal.xyz), normalize(lightDir)), 0);
+#else
+            lightResult.xyz += materialDiffuse.xyz * lightDiffuse[@shIterator].xyz
+                    * (1.0 / ((lightAttenuation[@shIterator].y) + (lightAttenuation[@shIterator].z * d) + (lightAttenuation[@shIterator].w * d * d)))
+                    * max(dot(normalize(normal.xyz), normalize(lightDir)), 0);
+#endif
 
 #if @shIterator == 0
-            directionalResult = lightResult;
+            directionalResult = lightResult.xyz;
 #endif
 
         @shEndForeach
 
-#if HAS_VERTEXCOLOR
-        // ambient vertex colour tracking, FFP behaviour
-        lightResult += lightAmbient.xyz * colour.xyz + materialEmissive.xyz;
 
-#else
-        lightResult += lightAmbient.xyz * materialAmbient.xyz + materialEmissive.xyz;
+#if VERTEXCOLOR_MODE == 2
+        lightResult.xyz += lightAmbient.xyz * colour.xyz + materialEmissive.xyz;
+        lightResult.a *= colour.a;
+#endif
+#if VERTEXCOLOR_MODE == 1
+        lightResult.xyz += lightAmbient.xyz * materialAmbient.xyz + colour.xyz;
+#endif
+#if VERTEXCOLOR_MODE == 0
+        lightResult.xyz += lightAmbient.xyz * materialAmbient.xyz + materialEmissive.xyz;
+#endif
+
+#if VERTEXCOLOR_MODE != 2
+        lightResult.a *= materialDiffuse.a;
 #endif
 
 #endif
@@ -189,33 +191,11 @@
         shInput(float, depthPassthrough)
 #endif
 
-#if LIGHTING
-        shInput(float3, normalPassthrough)
         shInput(float3, objSpacePositionPassthrough)
-        #if !HAS_VERTEXCOLOR
-        shUniform(float4, materialAmbient)                    @shAutoConstant(materialAmbient, surface_ambient_colour)
-        #endif
-        shUniform(float4, materialDiffuse)                    @shAutoConstant(materialDiffuse, surface_diffuse_colour)
-        shUniform(float4, materialEmissive)                   @shAutoConstant(materialEmissive, surface_emissive_colour)
-        shUniform(float4, lightAmbient)                       @shAutoConstant(lightAmbient, ambient_light_colour)
-#if !VERTEX_LIGHTING
-
-    @shForeach(@shGlobalSettingString(num_lights))
-        shUniform(float4, lightPosObjSpace@shIterator)        @shAutoConstant(lightPosObjSpace@shIterator, light_position_object_space, @shIterator)
-        shUniform(float4, lightAttenuation@shIterator)        @shAutoConstant(lightAttenuation@shIterator, light_attenuation, @shIterator)
-        shUniform(float4, lightDiffuse@shIterator)            @shAutoConstant(lightDiffuse@shIterator, light_diffuse_colour, @shIterator)
-    @shEndForeach
-#endif
-
-#endif
         
 #if FOG
         shUniform(float3, fogColour) @shAutoConstant(fogColour, fog_colour)
         shUniform(float4, fogParams) @shAutoConstant(fogParams, fog_params)
-#endif
-
-#if HAS_VERTEXCOLOR && !VERTEX_LIGHTING
-        shInput(float4, colourPassthrough)
 #endif
 
 #if SHADOWS
@@ -247,20 +227,14 @@
 #endif
 
 #if VERTEX_LIGHTING
-    shInput(float3, lightResult)
+    shInput(float4, lightResult)
     shInput(float3, directionalResult)
 #endif
 
     SH_START_PROGRAM
     {
         shOutputColour(0) = shSample(diffuseMap, UV);
-        
-#if LIGHTING
-        float3 normal = normalize(normalPassthrough);
-        float3 lightDir;
-        float3 diffuse = float3(0,0,0);
-        float d;
-    
+            
             // shadows only for the first (directional) light
 #if SHADOWS
             float shadow = depthShadowPCF (shadowMap0, lightSpacePos0, invShadowmapSize0);
@@ -289,45 +263,10 @@
     float3 waterEyePos = intercept(worldPos, cameraPos.xyz - worldPos, float3(0,0,1), waterLevel);
 #endif
 
-#if !VERTEX_LIGHTING
-    
-    @shForeach(@shGlobalSettingString(num_lights))
-    
-        /// \todo use the array auto params for lights, and use a real for-loop with auto param "light_count" iterations 
-        lightDir = lightPosObjSpace@shIterator.xyz - (objSpacePositionPassthrough.xyz * lightPosObjSpace@shIterator.w);
-        d = length(lightDir);
-        
-        lightDir = normalize(lightDir);
-
-#if @shIterator == 0
-
-    #if (SHADOWS || SHADOWS_PSSM)
-        diffuse += materialDiffuse.xyz * lightDiffuse@shIterator.xyz * (1.0 / ((lightAttenuation@shIterator.y) + (lightAttenuation@shIterator.z * d) + (lightAttenuation@shIterator.w * d * d))) * max(dot(normal, lightDir), 0) * shadow;
-        
-    #else
-        diffuse += materialDiffuse.xyz * lightDiffuse@shIterator.xyz * (1.0 / ((lightAttenuation@shIterator.y) + (lightAttenuation@shIterator.z * d) + (lightAttenuation@shIterator.w * d * d))) * max(dot(normal, lightDir), 0);
-        
-    #endif
-    
-#else
-        diffuse += materialDiffuse.xyz * lightDiffuse@shIterator.xyz * (1.0 / ((lightAttenuation@shIterator.y) + (lightAttenuation@shIterator.z * d) + (lightAttenuation@shIterator.w * d * d))) * max(dot(normal, lightDir), 0);
-#endif
-
-    @shEndForeach
-
-        lightResult = (ambient + diffuse + materialEmissive.xyz);
-#endif
-
 #if SHADOWS
-        shOutputColour(0).xyz *= (lightResult - directionalResult * (1.0-shadow));
+        shOutputColour(0) *= (lightResult - float4(directionalResult * (1.0-shadow),0));
 #else
-        shOutputColour(0).xyz *= (lightResult);
-#endif
-
-#endif // IF LIGHTING
-
-#if HAS_VERTEXCOLOR && !LIGHTING
-        shOutputColour(0).xyz *= colourPassthrough.xyz;
+        shOutputColour(0) *= lightResult;
 #endif
 
 #if FOG

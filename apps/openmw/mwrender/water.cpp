@@ -191,7 +191,8 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend) :
     mWaterTimer(0.f),
     mReflection(NULL),
     mRefraction(NULL),
-    mSimulation(NULL)
+    mSimulation(NULL),
+    mPlayer(0,0)
 {
     mSimulation = new RippleSimulation(mSceneMgr);
 
@@ -371,7 +372,12 @@ void Water::update(float dt, Ogre::Vector3 player)
 
     mRendering->getSkyManager ()->setGlareEnabled (!mIsUnderwater);
 
-    mSimulation->update(dt, Ogre::Vector2(player.x, player.y));
+    mPlayer = Ogre::Vector2(player.x, player.y);
+}
+
+void Water::frameStarted(float dt)
+{
+    mSimulation->update(dt, mPlayer);
 
     if (mReflection)
         mReflection->update();

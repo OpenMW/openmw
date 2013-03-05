@@ -102,6 +102,7 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     // Set default mipmap level (NB some APIs ignore this)
     // Mipmap generation is currently disabled because it causes issues on Intel/AMD
     //TextureManager::getSingleton().setDefaultNumMipmaps(Settings::Manager::getInt("num mipmaps", "General"));
+    TextureManager::getSingleton().setDefaultNumMipmaps(0);
 
     // Set default texture filtering options
     TextureFilterOptions tfo;
@@ -128,7 +129,6 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
     sh::Factory::getInstance ().setShadersEnabled (Settings::Manager::getBool("shaders", "Objects"));
 
     sh::Factory::getInstance ().setGlobalSetting ("fog", "true");
-    sh::Factory::getInstance ().setGlobalSetting ("lighting", "true");
     sh::Factory::getInstance ().setGlobalSetting ("num_lights", Settings::Manager::getString ("num lights", "Objects"));
     sh::Factory::getInstance ().setGlobalSetting ("terrain_num_lights", Settings::Manager::getString ("num lights", "Terrain"));
     sh::Factory::getInstance ().setGlobalSetting ("simple_water", Settings::Manager::getBool("shader", "Water") ? "false" : "true");
@@ -329,8 +329,6 @@ void RenderingManager::update (float duration, bool paused)
     float *_playerPos = data.getPosition().pos;
     Ogre::Vector3 playerPos(_playerPos[0], _playerPos[1], _playerPos[2]);
 
-    Ogre::Vector3 cam = mRendering.getCamera()->getRealPosition();
-
     Ogre::Vector3 orig, dest;
     mPlayer->setCameraDistance();
     if (!mPlayer->getPosition(orig, dest)) {
@@ -352,6 +350,8 @@ void RenderingManager::update (float duration, bool paused)
     mRendering.update(duration);
 
     Ogre::ControllerManager::getSingleton().setTimeFactor(paused ? 0.f : 1.f);
+
+    Ogre::Vector3 cam = mRendering.getCamera()->getRealPosition();
 
     applyFog(world->isUnderwater (world->getPlayer().getPlayer().getCell(), cam));
 
@@ -937,6 +937,11 @@ void RenderingManager::removeWaterRippleEmitter (const MWWorld::Ptr& ptr)
 void RenderingManager::updateWaterRippleEmitterPtr (const MWWorld::Ptr& old, const MWWorld::Ptr& ptr)
 {
     mWater->updateEmitterPtr(old, ptr);
+}
+
+void RenderingManager::frameStarted(float dt)
+{
+    mWater->frameStarted(dt);
 }
 
 } // namespace
