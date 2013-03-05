@@ -4,10 +4,8 @@
 
 #define FOG @shGlobalSettingBool(fog)
 
-#define LIGHTING @shGlobalSettingBool(lighting)
-
-#define SHADOWS_PSSM LIGHTING && @shGlobalSettingBool(shadows_pssm)
-#define SHADOWS LIGHTING && @shGlobalSettingBool(shadows)
+#define SHADOWS_PSSM @shGlobalSettingBool(shadows_pssm)
+#define SHADOWS @shGlobalSettingBool(shadows)
 
 #if SHADOWS || SHADOWS_PSSM
 #include "shadows.h"
@@ -32,9 +30,7 @@
 
 @shAllocatePassthrough(2, UV)
 
-#if LIGHTING
 @shAllocatePassthrough(3, worldPos)
-#endif
 
 #if SHADOWS
 @shAllocatePassthrough(4, lightSpacePos0)
@@ -123,9 +119,7 @@
 
         @shPassthroughAssign(UV, uv0);
         
-#if LIGHTING
         @shPassthroughAssign(worldPos, worldPos.xyz);
-#endif
 
 #if SHADOWS
         float4 lightSpacePos = shMatrixMult(texViewProjMatrix0, shMatrixMult(worldMatrix, shInputPosition));
@@ -176,16 +170,12 @@
     
         @shPassthroughFragmentInputs
 
-
-#if LIGHTING
         shUniform(float4, lightAmbient)                       @shAutoConstant(lightAmbient, ambient_light_colour)
     @shForeach(@shGlobalSettingString(terrain_num_lights))
         shUniform(float4, lightPosObjSpace@shIterator)        @shAutoConstant(lightPosObjSpace@shIterator, light_position, @shIterator)
         shUniform(float4, lightAttenuation@shIterator)        @shAutoConstant(lightAttenuation@shIterator, light_attenuation, @shIterator)
         shUniform(float4, lightDiffuse@shIterator)            @shAutoConstant(lightDiffuse@shIterator, light_diffuse_colour, @shIterator)
     @shEndForeach
-#endif
-
 
 #if SHADOWS
         shSampler2D(shadowMap0)
@@ -222,12 +212,10 @@
 
         float2 UV = @shPassthroughReceive(UV);
         
-#if LIGHTING
         float3 worldPos = @shPassthroughReceive(worldPos);
 
         float3 normal = shSample(normalMap, UV).rgb * 2 - 1;
         normal = normalize(normal);
-#endif
         
         
 #if UNDERWATER
@@ -268,7 +256,6 @@
         
         // Lighting 
         
-#if LIGHTING
         // shadows only for the first (directional) light
 #if SHADOWS
             float4 lightSpacePos0 = @shPassthroughReceive(lightSpacePos0);
@@ -322,9 +309,7 @@
 
     @shEndForeach
     
-        shOutputColour(0).xyz *= (lightAmbient.xyz + diffuse);
-#endif
-    
+        shOutputColour(0).xyz *= (lightAmbient.xyz + diffuse);    
     
     
         

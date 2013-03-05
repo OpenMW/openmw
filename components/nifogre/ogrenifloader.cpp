@@ -694,21 +694,24 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
     sh::MaterialInstance* instance = sh::Factory::getInstance ().createMaterialInstance (matname, "openmw_objects_base");
     if(vertMode == 0 || !vertexColour)
     {
-        instance->setProperty("ambient", sh::makeProperty(new sh::Vector4(ambient.x, ambient.y, ambient.z, alpha)));
+        instance->setProperty("ambient", sh::makeProperty(new sh::Vector4(ambient.x, ambient.y, ambient.z, 1)));
         instance->setProperty("diffuse", sh::makeProperty(new sh::Vector4(diffuse.x, diffuse.y, diffuse.z, alpha)));
-        instance->setProperty("emissive", sh::makeProperty(new sh::Vector4(emissive.x, emissive.y, emissive.z, alpha)));
+        instance->setProperty("emissive", sh::makeProperty(new sh::Vector4(emissive.x, emissive.y, emissive.z, 1)));
+        instance->setProperty("vertmode", sh::makeProperty(new sh::StringValue("0")));
     }
     else if(vertMode == 1)
     {
-        instance->setProperty("ambient", sh::makeProperty(new sh::Vector4(ambient.x, ambient.y, ambient.z, alpha)));
+        instance->setProperty("ambient", sh::makeProperty(new sh::Vector4(ambient.x, ambient.y, ambient.z, 1)));
         instance->setProperty("diffuse", sh::makeProperty(new sh::Vector4(diffuse.x, diffuse.y, diffuse.z, alpha)));
         instance->setProperty("emissive", sh::makeProperty(new sh::StringValue("vertexcolour")));
+        instance->setProperty("vertmode", sh::makeProperty(new sh::StringValue("1")));
     }
     else if(vertMode == 2)
     {
         instance->setProperty("ambient", sh::makeProperty(new sh::StringValue("vertexcolour")));
         instance->setProperty("diffuse", sh::makeProperty(new sh::StringValue("vertexcolour")));
-        instance->setProperty("emissive", sh::makeProperty(new sh::Vector4(emissive.x, emissive.y, emissive.z, alpha)));
+        instance->setProperty("emissive", sh::makeProperty(new sh::Vector4(emissive.x, emissive.y, emissive.z, 1)));
+        instance->setProperty("vertmode", sh::makeProperty(new sh::StringValue("2")));
     }
     else
         std::cerr<< "Unhandled vertex mode: "<<vertMode <<std::endl;
