@@ -939,4 +939,9 @@ void RenderingManager::updateWaterRippleEmitterPtr (const MWWorld::Ptr& old, con
     mWater->updateEmitterPtr(old, ptr);
 }
 
+void RenderingManager::frameStarted(float dt)
+{
+    mWater->frameStarted(dt);
+}
+
 } // namespace

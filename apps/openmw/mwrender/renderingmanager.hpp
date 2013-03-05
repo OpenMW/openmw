@@ -196,6 +196,7 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
 
     void playVideo(const std::string& name, bool allowSkipping);
     void stopVideo();
+    void frameStarted(float dt);
 
   protected:
 	virtual void windowResized(Ogre::RenderWindow* rw);

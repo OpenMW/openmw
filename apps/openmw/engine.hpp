@@ -105,6 +105,7 @@ namespace OMW
             void executeLocalScripts();
 
             virtual bool frameRenderingQueued (const Ogre::FrameEvent& evt);
+            virtual bool frameStarted (const Ogre::FrameEvent& evt);
 
             /// Load settings from various files, returns the path to the user settings file
             std::string loadSettings (Settings::Manager & settings);

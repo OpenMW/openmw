@@ -7,6 +7,7 @@
 #include <OgreRenderTargetListener.h>
 #include <OgreMaterial.h>
 #include <OgreTexture.h>
+#include <OgreVector2.h>
 
 #include <components/esm/loadcell.hpp>
 #include <components/settings/settings.hpp>
@@ -98,7 +99,7 @@ namespace MWRender {
     };
 
     /// Water rendering
-    class Water : public Ogre::RenderTargetListener, public Ogre::RenderQueueListener, public sh::MaterialInstanceListener
+    class Water : public sh::MaterialInstanceListener
     {
         static const int CELL_SIZE = 8192;
         Ogre::Camera *mCamera;
@@ -139,6 +140,8 @@ namespace MWRender {
         Refraction* mRefraction;
         RippleSimulation* mSimulation;
 
+        Ogre::Vector2 mPlayer;
+
     public:
         Water (Ogre::Camera *camera, RenderingManager* rend);
         ~Water();
@@ -147,6 +150,7 @@ namespace MWRender {
 
         void toggle();
         void update(float dt, Ogre::Vector3 player);
+        void frameStarted(float dt);
 
         /// adds an emitter, position will be tracked automatically using its scene node
         void addEmitter (const MWWorld::Ptr& ptr, float scale = 1.f, float force = 1.f);
