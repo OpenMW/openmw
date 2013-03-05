@@ -10,13 +10,13 @@
 
 #include <components/fileorderlist/utils/lineedit.hpp>
 #include <components/fileorderlist/utils/naturalsort.hpp>
+#include <components/fileorderlist/utils/profilescombobox.hpp>
 
 #include "model/pluginsproxymodel.hpp"
 
 #include "settings/gamesettings.hpp"
 #include "settings/launchersettings.hpp"
 
-#include "utils/profilescombobox.hpp"
 #include "utils/textinputdialog.hpp"
 
 using namespace ESM;
@@ -40,6 +40,8 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
     , mLauncherSettings(launcherSettings)
     , QWidget(parent)
 {
+    setupUi(this);
+
     // Models
     mDataFilesModel = new DataFilesModel(this);
 
@@ -57,113 +59,117 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
     mFilterProxyModel->setDynamicSortFilter(true);
     mFilterProxyModel->setSourceModel(mPluginsProxyModel);
 
-    // Filter toolbar
-    QLabel *filterLabel = new QLabel(tr("&Filter:"), this);
-    LineEdit *filterLineEdit = new LineEdit(this);
-    filterLabel->setBuddy(filterLineEdit);
-
-    QToolBar *filterToolBar = new QToolBar(this);
-    filterToolBar->setMovable(false);
-
-    // Create a container widget and a layout to get the spacer to work
-    QWidget *filterWidget = new QWidget(this);
-    QHBoxLayout *filterLayout = new QHBoxLayout(filterWidget);
-    QSpacerItem *hSpacer1 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-
-    filterLayout->addItem(hSpacer1);
-    filterLayout->addWidget(filterLabel);
-    filterLayout->addWidget(filterLineEdit);
-
-    filterToolBar->addWidget(filterWidget);
-
     QCheckBox checkBox;
     unsigned int height = checkBox.sizeHint().height() + 4;
 
-    mMastersTable = new QTableView(this);
-    mMastersTable->setModel(mMastersProxyModel);
-    mMastersTable->setObjectName("MastersTable");
-    mMastersTable->setContextMenuPolicy(Qt::CustomContextMenu);
-    mMastersTable->setSortingEnabled(false);
-    mMastersTable->setSelectionBehavior(QAbstractItemView::SelectRows);
-    mMastersTable->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    mMastersTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    mMastersTable->setAlternatingRowColors(true);
-    mMastersTable->horizontalHeader()->setStretchLastSection(true);
-    mMastersTable->horizontalHeader()->hide();
+    mastersTable->setModel(mMastersProxyModel);
+    mastersTable->setObjectName("MastersTable");
+    mastersTable->setContextMenuPolicy(Qt::CustomContextMenu);
+    mastersTable->setSortingEnabled(false);
+    mastersTable->setSelectionBehavior(QAbstractItemView::SelectRows);
+    mastersTable->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    mastersTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    mastersTable->setAlternatingRowColors(true);
+    mastersTable->horizontalHeader()->setStretchLastSection(true);
+    mastersTable->horizontalHeader()->hide();
 
     // Set the row height to the size of the checkboxes
-    mMastersTable->verticalHeader()->setDefaultSectionSize(height);
-    mMastersTable->verticalHeader()->setResizeMode(QHeaderView::Fixed);
-    mMastersTable->verticalHeader()->hide();
+    mastersTable->verticalHeader()->setDefaultSectionSize(height);
+    mastersTable->verticalHeader()->setResizeMode(QHeaderView::Fixed);
+    mastersTable->verticalHeader()->hide();
 
-    mPluginsTable = new QTableView(this);
-    mPluginsTable->setModel(mFilterProxyModel);
-    mPluginsTable->setObjectName("PluginsTable");
-    mPluginsTable->setContextMenuPolicy(Qt::CustomContextMenu);
-    mPluginsTable->setSortingEnabled(false);
-    mPluginsTable->setSelectionBehavior(QAbstractItemView::SelectRows);
-    mPluginsTable->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    mPluginsTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    mPluginsTable->setAlternatingRowColors(true);
-    mPluginsTable->setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
-    mPluginsTable->horizontalHeader()->setStretchLastSection(true);
-    mPluginsTable->horizontalHeader()->hide();
+    pluginsTable->setModel(mFilterProxyModel);
+    pluginsTable->setObjectName("PluginsTable");
+    pluginsTable->setContextMenuPolicy(Qt::CustomContextMenu);
+    pluginsTable->setSortingEnabled(false);
+    pluginsTable->setSelectionBehavior(QAbstractItemView::SelectRows);
+    pluginsTable->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    pluginsTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    pluginsTable->setAlternatingRowColors(true);
+    pluginsTable->setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
+    pluginsTable->horizontalHeader()->setStretchLastSection(true);
+    pluginsTable->horizontalHeader()->hide();
 
-    mPluginsTable->verticalHeader()->setDefaultSectionSize(height);
-    mPluginsTable->verticalHeader()->setResizeMode(QHeaderView::Fixed);
+    pluginsTable->verticalHeader()->setDefaultSectionSize(height);
+    pluginsTable->verticalHeader()->setResizeMode(QHeaderView::Fixed);
 
-    // Add both tables to a splitter
-    mSplitter = new QSplitter(this);
-    mSplitter->setOrientation(Qt::Horizontal);
-    mSplitter->setChildrenCollapsible(false); // Don't allow the widgets to be hidden
-    mSplitter->addWidget(mMastersTable);
-    mSplitter->addWidget(mPluginsTable);
-
-    // Adjust the default widget widths inside the splitter
+    // Adjust the tableview widths inside the splitter
     QList<int> sizeList;
     sizeList << mLauncherSettings.value(QString("General/MastersTable/width"), QString("200")).toInt();
     sizeList << mLauncherSettings.value(QString("General/PluginTable/width"), QString("340")).toInt();
 
-    mSplitter->setSizes(sizeList);
+    splitter->setSizes(sizeList);
 
-    // Bottom part with profile options
-    QLabel *profileLabel = new QLabel(tr("Current Profile: "), this);
+//    // Filter toolbar
+//    QLabel *filterLabel = new QLabel(tr("&Filter:"), this);
+//    LineEdit *filterLineEdit = new LineEdit(this);
+//    filterLabel->setBuddy(filterLineEdit);
 
-    mProfilesComboBox = new ProfilesComboBox(this);
-    mProfilesComboBox->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum));
-    mProfilesComboBox->setInsertPolicy(QComboBox::NoInsert);
-    mProfilesComboBox->setDuplicatesEnabled(false);
-    mProfilesComboBox->setEditEnabled(false);
+//    QToolBar *filterToolBar = new QToolBar(this);
+//    filterToolBar->setMovable(false);
 
-    mProfileToolBar = new QToolBar(this);
-    mProfileToolBar->setMovable(false);
-    mProfileToolBar->setIconSize(QSize(16, 16));
+//    // Create a container widget and a layout to get the spacer to work
+//    QWidget *filterWidget = new QWidget(this);
+//    QHBoxLayout *filterLayout = new QHBoxLayout(filterWidget);
+//    QSpacerItem *hSpacer1 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
-    mProfileToolBar->addWidget(profileLabel);
-    mProfileToolBar->addWidget(mProfilesComboBox);
+//    filterLayout->addItem(hSpacer1);
+//    filterLayout->addWidget(filterLabel);
+//    filterLayout->addWidget(filterLineEdit);
 
-    QVBoxLayout *pageLayout = new QVBoxLayout(this);
+//    filterToolBar->addWidget(filterWidget);
 
-    pageLayout->addWidget(filterToolBar);
-    pageLayout->addWidget(mSplitter);
-    pageLayout->addWidget(mProfileToolBar);
+
+
+//    // Add both tables to a splitter
+//    mSplitter = new QSplitter(this);
+//    mSplitter->setOrientation(Qt::Horizontal);
+//    mSplitter->setChildrenCollapsible(false); // Don't allow the widgets to be hidden
+//    mSplitter->addWidget(mastersTable);
+//    mSplitter->addWidget(pluginsTable);
+
+
+
+//
+
+//    // Bottom part with profile options
+//    QLabel *profileLabel = new QLabel(tr("Current Profile: "), this);
+
+//    profilesComboBox = new ProfilesComboBox(this);
+//    profilesComboBox->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum));
+//    profilesComboBox->setInsertPolicy(QComboBox::NoInsert);
+//    profilesComboBox->setDuplicatesEnabled(false);
+//    profilesComboBox->setEditEnabled(false);
+
+//    mProfileToolBar = new QToolBar(this);
+//    mProfileToolBar->setMovable(false);
+//    mProfileToolBar->setIconSize(QSize(16, 16));
+
+//    mProfileToolBar->addWidget(profileLabel);
+//    mProfileToolBar->addWidget(profilesComboBox);
+
+//    QVBoxLayout *pageLayout = new QVBoxLayout(this);
+
+//    pageLayout->addWidget(filterToolBar);
+//    pageLayout->addWidget(mSplitter);
+//    pageLayout->addWidget(mProfileToolBar);
 
     // Create a dialog for the new profile name input
     mNewProfileDialog = new TextInputDialog(tr("New Profile"), tr("Profile name:"), this);
 
     connect(mNewProfileDialog->lineEdit(), SIGNAL(textChanged(QString)), this, SLOT(updateOkButton(QString)));
 
-    connect(mPluginsTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckState(QModelIndex)));
-    connect(mMastersTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckState(QModelIndex)));
+    connect(pluginsTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckState(QModelIndex)));
+    connect(mastersTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckState(QModelIndex)));
 
-    connect(mPluginsTable, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
-    connect(mMastersTable, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
+    connect(pluginsTable, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
+    connect(mastersTable, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
 
     connect(mDataFilesModel, SIGNAL(layoutChanged()), this, SLOT(updateViews()));
     
     connect(filterLineEdit, SIGNAL(textChanged(QString)), this, SLOT(filterChanged(QString)));
 
-    connect(mSplitter, SIGNAL(splitterMoved(int,int)), this, SLOT(updateSplitter()));
+    connect(splitter, SIGNAL(splitterMoved(int,int)), this, SLOT(updateSplitter()));
 
     createActions();
     setupDataFiles();
@@ -188,9 +194,9 @@ void DataFilesPage::createActions()
     connect(mDeleteProfileAction, SIGNAL(triggered()), this, SLOT(deleteProfile()));
 
     // Add the newly created actions to the toolbar
-    mProfileToolBar->addSeparator();
-    mProfileToolBar->addAction(mNewProfileAction);
-    mProfileToolBar->addAction(mDeleteProfileAction);
+//    mProfileToolBar->addSeparator();
+//    mProfileToolBar->addAction(mNewProfileAction);
+//    mProfileToolBar->addAction(mDeleteProfileAction);
 
     // Context menu actions
     mCheckAction = new QAction(tr("Check Selection"), this);
@@ -226,25 +232,25 @@ void DataFilesPage::setupDataFiles()
     QString profile = mLauncherSettings.value(QString("Profiles/currentprofile"));
 
     if (!profiles.isEmpty())
-        mProfilesComboBox->addItems(profiles);
+        profilesComboBox->addItems(profiles);
 
     // Add the current profile if empty
-    if (mProfilesComboBox->findText(profile) == -1)
-        mProfilesComboBox->addItem(profile);
+    if (profilesComboBox->findText(profile) == -1)
+        profilesComboBox->addItem(profile);
 
-    if (mProfilesComboBox->findText(QString("Default")) == -1)
-        mProfilesComboBox->addItem(QString("Default"));
+    if (profilesComboBox->findText(QString("Default")) == -1)
+        profilesComboBox->addItem(QString("Default"));
 
     if (profile.isEmpty() || profile == QLatin1String("Default")) {
-        mProfilesComboBox->setCurrentIndex(mProfilesComboBox->findText(QString("Default")));
+        profilesComboBox->setCurrentIndex(profilesComboBox->findText(QString("Default")));
     } else {
-        mProfilesComboBox->setEditEnabled(true);
-        mProfilesComboBox->setCurrentIndex(mProfilesComboBox->findText(profile));
+        profilesComboBox->setEditEnabled(true);
+        profilesComboBox->setCurrentIndex(profilesComboBox->findText(profile));
     }
 
     // We do this here to prevent deletion of profiles when initializing the combobox
-    connect(mProfilesComboBox, SIGNAL(profileRenamed(QString,QString)), this, SLOT(profileRenamed(QString,QString)));
-    connect(mProfilesComboBox, SIGNAL(profileChanged(QString,QString)), this, SLOT(profileChanged(QString,QString)));
+    connect(profilesComboBox, SIGNAL(profileRenamed(QString,QString)), this, SLOT(profileRenamed(QString,QString)));
+    connect(profilesComboBox, SIGNAL(profileChanged(QString,QString)), this, SLOT(profileChanged(QString,QString)));
 
     loadSettings();
 
@@ -283,7 +289,7 @@ void DataFilesPage::saveSettings()
     QString profile = mLauncherSettings.value(QString("Profiles/currentprofile"));
 
     if (profile.isEmpty()) {
-        profile = mProfilesComboBox->currentText();
+        profile = profilesComboBox->currentText();
         mLauncherSettings.setValue(QString("Profiles/currentprofile"), profile);
     }
 
@@ -313,8 +319,8 @@ void DataFilesPage::newProfile()
 {
     if (mNewProfileDialog->exec() == QDialog::Accepted) {
         QString profile = mNewProfileDialog->lineEdit()->text();
-        mProfilesComboBox->addItem(profile);
-        mProfilesComboBox->setCurrentIndex(mProfilesComboBox->findText(profile));
+        profilesComboBox->addItem(profile);
+        profilesComboBox->setCurrentIndex(profilesComboBox->findText(profile));
     }
 }
 
@@ -326,7 +332,7 @@ void DataFilesPage::updateOkButton(const QString &text)
          return;
     }
 
-    (mProfilesComboBox->findText(text) == -1)
+    (profilesComboBox->findText(text) == -1)
             ? mNewProfileDialog->setOkButtonEnabled(true)
             : mNewProfileDialog->setOkButtonEnabled(false);
 }
@@ -335,7 +341,7 @@ void DataFilesPage::updateSplitter()
 {
     // Sigh, update the saved splitter size in settings only when moved
     // Since getting mSplitter->sizes() if page is hidden returns invalid values
-    QList<int> sizes = mSplitter->sizes();
+    QList<int> sizes = splitter->sizes();
 
     mLauncherSettings.setValue(QString("General/MastersTable/width"), QString::number(sizes.at(0)));
     mLauncherSettings.setValue(QString("General/PluginsTable/width"), QString::number(sizes.at(1)));
@@ -344,28 +350,28 @@ void DataFilesPage::updateSplitter()
 void DataFilesPage::updateViews()
 {
     // Ensure the columns are hidden because sort() re-enables them
-    mMastersTable->setColumnHidden(1, true);
-    mMastersTable->setColumnHidden(2, true);
-    mMastersTable->setColumnHidden(3, true);
-    mMastersTable->setColumnHidden(4, true);
-    mMastersTable->setColumnHidden(5, true);
-    mMastersTable->setColumnHidden(6, true);
-    mMastersTable->setColumnHidden(7, true);
-    mMastersTable->setColumnHidden(8, true);
+    mastersTable->setColumnHidden(1, true);
+    mastersTable->setColumnHidden(2, true);
+    mastersTable->setColumnHidden(3, true);
+    mastersTable->setColumnHidden(4, true);
+    mastersTable->setColumnHidden(5, true);
+    mastersTable->setColumnHidden(6, true);
+    mastersTable->setColumnHidden(7, true);
+    mastersTable->setColumnHidden(8, true);
 
-    mPluginsTable->setColumnHidden(1, true);
-    mPluginsTable->setColumnHidden(2, true);
-    mPluginsTable->setColumnHidden(3, true);
-    mPluginsTable->setColumnHidden(4, true);
-    mPluginsTable->setColumnHidden(5, true);
-    mPluginsTable->setColumnHidden(6, true);
-    mPluginsTable->setColumnHidden(7, true);
-    mPluginsTable->setColumnHidden(8, true);
+    pluginsTable->setColumnHidden(1, true);
+    pluginsTable->setColumnHidden(2, true);
+    pluginsTable->setColumnHidden(3, true);
+    pluginsTable->setColumnHidden(4, true);
+    pluginsTable->setColumnHidden(5, true);
+    pluginsTable->setColumnHidden(6, true);
+    pluginsTable->setColumnHidden(7, true);
+    pluginsTable->setColumnHidden(8, true);
 }
 
 void DataFilesPage::deleteProfile()
 {
-    QString profile = mProfilesComboBox->currentText();
+    QString profile = profilesComboBox->currentText();
 
     if (profile.isEmpty())
         return;
@@ -386,26 +392,26 @@ void DataFilesPage::deleteProfile()
         mLauncherSettings.remove(QString("Profiles/") + profile + QString("/plugin"));
 
         // Remove the profile from the combobox
-        mProfilesComboBox->removeItem(mProfilesComboBox->findText(profile));
+        profilesComboBox->removeItem(profilesComboBox->findText(profile));
     }
 }
 
 void DataFilesPage::check()
 {
-    if (mPluginsTable->hasFocus())
+    if (pluginsTable->hasFocus())
         setPluginsCheckstates(Qt::Checked);
 
-    if (mMastersTable->hasFocus())
+    if (mastersTable->hasFocus())
         setMastersCheckstates(Qt::Checked);
 
 }
 
 void DataFilesPage::uncheck()
 {
-    if (mPluginsTable->hasFocus())
+    if (pluginsTable->hasFocus())
         setPluginsCheckstates(Qt::Unchecked);
 
-    if (mMastersTable->hasFocus())
+    if (mastersTable->hasFocus())
         setMastersCheckstates(Qt::Unchecked);
 }
 
@@ -414,16 +420,16 @@ void DataFilesPage::refresh()
 //    mDataFilesModel->sort(0);
 
     // Refresh the plugins table
-    mPluginsTable->scrollToTop();
+    pluginsTable->scrollToTop();
 }
 
 void DataFilesPage::setMastersCheckstates(Qt::CheckState state)
 {
-    if (!mMastersTable->selectionModel()->hasSelection()) {
+    if (!mastersTable->selectionModel()->hasSelection()) {
         return;
     }
 
-    QModelIndexList indexes = mMastersTable->selectionModel()->selectedIndexes();
+    QModelIndexList indexes = mastersTable->selectionModel()->selectedIndexes();
 
     foreach (const QModelIndex &index, indexes)
     {
@@ -441,11 +447,11 @@ void DataFilesPage::setMastersCheckstates(Qt::CheckState state)
 
 void DataFilesPage::setPluginsCheckstates(Qt::CheckState state)
 {
-    if (!mPluginsTable->selectionModel()->hasSelection()) {
+    if (!pluginsTable->selectionModel()->hasSelection()) {
         return;
     }
 
-    QModelIndexList indexes = mPluginsTable->selectionModel()->selectedIndexes();
+    QModelIndexList indexes = pluginsTable->selectionModel()->selectedIndexes();
 
     foreach (const QModelIndex &index, indexes)
     {
@@ -509,16 +515,16 @@ void DataFilesPage::profileChanged(const QString &previous, const QString &curre
     // Prevent the deletion of the default profile
     if (current == QLatin1String("Default")) {
         mDeleteProfileAction->setEnabled(false);
-        mProfilesComboBox->setEditEnabled(false);
+        profilesComboBox->setEditEnabled(false);
     } else {
         mDeleteProfileAction->setEnabled(true);
-        mProfilesComboBox->setEditEnabled(true);
+        profilesComboBox->setEditEnabled(true);
     }
 
     if (previous.isEmpty())
         return;
 
-    if (mProfilesComboBox->findText(previous) == -1)
+    if (profilesComboBox->findText(previous) == -1)
         return; // Profile was deleted
 
     // Store the previous profile
@@ -543,7 +549,7 @@ void DataFilesPage::profileRenamed(const QString &previous, const QString &curre
     mLauncherSettings.remove(QString("Profiles/") + previous + QString("/plugin"));
 
     // Remove the profile from the combobox
-    mProfilesComboBox->removeItem(mProfilesComboBox->findText(previous));
+    profilesComboBox->removeItem(profilesComboBox->findText(previous));
 
     loadSettings();
 
@@ -558,11 +564,11 @@ void DataFilesPage::showContextMenu(const QPoint &point)
         return;
 
     if (object->objectName() == QLatin1String("PluginsTable")) {
-        if (!mPluginsTable->selectionModel()->hasSelection())
+        if (!pluginsTable->selectionModel()->hasSelection())
             return;
 
-        QPoint globalPos = mPluginsTable->mapToGlobal(point);
-        QModelIndexList indexes = mPluginsTable->selectionModel()->selectedIndexes();
+        QPoint globalPos = pluginsTable->mapToGlobal(point);
+        QModelIndexList indexes = pluginsTable->selectionModel()->selectedIndexes();
 
         // Show the check/uncheck actions depending on the state of the selected items
         mUncheckAction->setEnabled(false);
@@ -589,11 +595,11 @@ void DataFilesPage::showContextMenu(const QPoint &point)
     }
 
     if (object->objectName() == QLatin1String("MastersTable")) {
-        if (!mMastersTable->selectionModel()->hasSelection())
+        if (!mastersTable->selectionModel()->hasSelection())
             return;
 
-        QPoint globalPos = mMastersTable->mapToGlobal(point);
-        QModelIndexList indexes = mMastersTable->selectionModel()->selectedIndexes();
+        QPoint globalPos = mastersTable->mapToGlobal(point);
+        QModelIndexList indexes = mastersTable->selectionModel()->selectedIndexes();
 
         // Show the check/uncheck actions depending on the state of the selected items
         mUncheckAction->setEnabled(false);

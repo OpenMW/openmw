@@ -4,32 +4,27 @@
 #include <QWidget>
 #include <QModelIndex>
 
-class QTableView;
+#include "ui_datafilespage.h"
+
 class QSortFilterProxyModel;
 class QAction;
-class QToolBar;
-class QSplitter;
 class QMenu;
 
-class ProfilesComboBox;
 class DataFilesModel;
 
 class TextInputDialog;
-class ProfilesComboBox;
 class GameSettings;
 class LauncherSettings;
 class PluginsProxyModel;
 
 namespace Files { struct ConfigurationManager; }
 
-class DataFilesPage : public QWidget
+class DataFilesPage : public QWidget, private Ui::DataFilesPage
 {
     Q_OBJECT
 
 public:
     DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gameSettings, LauncherSettings &launcherSettings, QWidget *parent = 0);
-
-    ProfilesComboBox *mProfilesComboBox;
 
     void writeConfig(QString profile = QString());
     void saveSettings();
@@ -60,13 +55,13 @@ private:
 
     QSortFilterProxyModel *mFilterProxyModel;
 
-    QTableView *mMastersTable;
-    QTableView *mPluginsTable;
+//    QTableView *mMastersTable;
+//    QTableView *mPluginsTable;
 
 
-    QToolBar *mProfileToolBar;
+//    QToolBar *mProfileToolBar;
     QMenu *mContextMenu;
-    QSplitter *mSplitter;
+//    QSplitter *mSplitter;
 
     QAction *mNewProfileAction;
     QAction *mDeleteProfileAction;

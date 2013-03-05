@@ -3,7 +3,6 @@
 #include <QtGui>
 
 #include "utils/checkablemessagebox.hpp"
-#include "utils/profilescombobox.hpp"
 
 #include "playpage.hpp"
 #include "graphicspage.hpp"
@@ -94,8 +93,8 @@ void MainDialog::createPages()
     mDataFilesPage = new DataFilesPage(mCfgMgr, mGameSettings, mLauncherSettings, this);
 
     // Set the combobox of the play page to imitate the combobox on the datafilespage
-    mPlayPage->setProfilesComboBoxModel(mDataFilesPage->mProfilesComboBox->model());
-    mPlayPage->setProfilesComboBoxIndex(mDataFilesPage->mProfilesComboBox->currentIndex());
+//    mPlayPage->setProfilesComboBoxModel(mDataFilesPage->mProfilesComboBox->model());
+//    mPlayPage->setProfilesComboBoxIndex(mDataFilesPage->mProfilesComboBox->currentIndex());
 
     // Add the pages to the stacked widget
     pagesWidget->addWidget(mPlayPage);
@@ -107,8 +106,8 @@ void MainDialog::createPages()
 
     connect(mPlayPage, SIGNAL(playButtonClicked()), this, SLOT(play()));
 
-    connect(mPlayPage, SIGNAL(profileChanged(int)), mDataFilesPage->mProfilesComboBox, SLOT(setCurrentIndex(int)));
-    connect(mDataFilesPage->mProfilesComboBox, SIGNAL(currentIndexChanged(int)), mPlayPage, SLOT(setProfilesComboBoxIndex(int)));
+//    connect(mPlayPage, SIGNAL(profileChanged(int)), mDataFilesPage->mProfilesComboBox, SLOT(setCurrentIndex(int)));
+//    connect(mDataFilesPage->mProfilesComboBox, SIGNAL(currentIndexChanged(int)), mPlayPage, SLOT(setProfilesComboBoxIndex(int)));
 
 }
 

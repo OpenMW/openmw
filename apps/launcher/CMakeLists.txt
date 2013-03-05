@@ -12,8 +12,6 @@ set(LAUNCHER
     settings/launchersettings.cpp
 
     utils/checkablemessagebox.cpp
-    utils/comboboxlineedit.cpp
-    utils/profilescombobox.cpp
     utils/textinputdialog.cpp
 
     launcher.rc
@@ -33,8 +31,6 @@ set(LAUNCHER_HEADER
     settings/settingsbase.hpp
 
     utils/checkablemessagebox.hpp
-    utils/comboboxlineedit.hpp
-    utils/profilescombobox.hpp
     utils/textinputdialog.hpp
 
 )
@@ -49,15 +45,14 @@ set(LAUNCHER_HEADER_MOC
     model/pluginsproxymodel.hpp
 
     utils/checkablemessagebox.hpp
-    utils/comboboxlineedit.hpp
-    utils/profilescombobox.hpp
     utils/textinputdialog.hpp
 )
 
 set(LAUNCHER_UI
-    ./ui/graphicspage.ui
-    ./ui/mainwindow.ui
-    ./ui/playpage.ui
+    ui/datafilespage.ui
+    ui/graphicspage.ui
+    ui/mainwindow.ui
+    ui/playpage.ui
 )
 
 source_group(launcher FILES ${LAUNCHER} ${LAUNCHER_HEADER})
