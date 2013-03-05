@@ -79,7 +79,7 @@ void ESM::Variant::read (ESMReader& esm, Format format)
         else
             esm.fail ("illegal global variable type " + typeId);
     }
-    else // GMST
+    else if (format==Format_Gmst)
     {
         if (!esm.hasMoreSubs())
         {
@@ -106,6 +106,22 @@ void ESM::Variant::read (ESMReader& esm, Format format)
                 esm.fail ("invalid subrecord: " + name.toString());
         }
     }
+    else // info
+    {
+        esm.getSubName();
+        NAME name = esm.retSubName();
+
+        if (name=="INTV")
+        {
+            type = VT_Int;
+        }
+        else if (name=="FLTV")
+        {
+            type = VT_Float;
+        }
+        else
+            esm.fail ("invalid subrecord: " + name.toString());
+    }
 
     setType (type);
 
@@ -124,6 +140,9 @@ void ESM::Variant::write (ESMWriter& esm, Format format) const
     {
         if (format==Format_Global)
             throw std::runtime_error ("can not serialise variant of type none to global format");
+
+        if (format==Format_Info)
+            throw std::runtime_error ("can not serialise variant of type none to info format");
 
         // nothing to do here for GMST format
     }

@@ -78,6 +78,9 @@ void ESM::VariantStringData::read (ESMReader& esm, Variant::Format format, VarTy
     if (format==Variant::Format_Global)
         esm.fail ("global variables of type string not supported");
 
+    if (format==Variant::Format_Info)
+        esm.fail ("info variables of type string not supported");
+
     // GMST
     mValue = esm.getHString();
 }
@@ -89,6 +92,9 @@ void ESM::VariantStringData::write (ESMWriter& esm, Variant::Format format, VarT
 
     if (format==Variant::Format_Global)
         throw std::runtime_error ("global variables of type string not supported");
+
+    if (format==Variant::Format_Info)
+        throw std::runtime_error ("info variables of type string not supported");
 
     // GMST
     esm.writeHNString ("STRV", mValue);
@@ -154,10 +160,16 @@ void ESM::VariantIntegerData::read (ESMReader& esm, Variant::Format format, VarT
         else
             esm.fail ("unsupported global variable integer type");
     }
-    else // GMST
+    else if (format==Variant::Format_Gmst || format==Variant::Format_Info)
     {
         if (type!=VT_Int)
-            esm.fail ("unsupported gmst variable integer type");
+        {
+            std::ostringstream stream;
+            stream
+                << "unsupported " <<(format==Variant::Format_Gmst ? "gmst" : "info")
+                << " variable integer type";
+            esm.fail (stream.str());
+        }
 
         esm.getHT (mValue);
     }
@@ -179,10 +191,16 @@ void ESM::VariantIntegerData::write (ESMWriter& esm, Variant::Format format, Var
         else
             throw std::runtime_error ("unsupported global variable integer type");
     }
-    else // GMST
+    else if (format==Variant::Format_Gmst || format==Variant::Format_Info)
     {
         if (type==VT_Int)
-            throw std::runtime_error ("unsupported global variable integer type");
+        {
+            std::ostringstream stream;
+            stream
+                << "unsupported " <<(format==Variant::Format_Gmst ? "gmst" : "info")
+                << " variable integer type";
+            throw std::runtime_error (stream.str());
+        }
 
         esm.writeHNT ("INTV", mValue);
     }
@@ -234,7 +252,7 @@ void ESM::VariantFloatData::read (ESMReader& esm, Variant::Format format, VarTyp
     {
         esm.getHNT (mValue, "FLTV");
     }
-    else // GMST
+    else if (format==Variant::Format_Gmst || format==Variant::Format_Info)
     {
         esm.getHT (mValue);
     }
@@ -250,9 +268,9 @@ void ESM::VariantFloatData::write (ESMWriter& esm, Variant::Format format, VarTy
         esm.writeHNString ("FNAM", "f");
         esm.writeHNT ("FLTV", mValue);
     }
-    else // GMST
+    else if (format==Variant::Format_Gmst || format==Variant::Format_Info)
     {
-        esm.writeHNT ("INTV", mValue);
+        esm.writeHNT ("FLTV", mValue);
     }
 }
 

@@ -32,7 +32,8 @@ namespace ESM
             enum Format
             {
                 Format_Global,
-                Format_Gmst
+                Format_Gmst,
+                Format_Info
             };
 
             Variant();
