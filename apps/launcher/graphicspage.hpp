@@ -16,16 +16,13 @@
 # include "OgreD3D9Plugin.h"
 #endif
 
-class QComboBox;
-class QCheckBox;
-class QStackedWidget;
-class QSettings;
+#include "ui_graphicspage.h"
 
 class GraphicsSettings;
 
 namespace Files { struct ConfigurationManager; }
 
-class GraphicsPage : public QWidget
+class GraphicsPage : public QWidget, private Ui::GraphicsPage
 {
     Q_OBJECT
 
@@ -37,6 +34,10 @@ public:
 
 public slots:
     void rendererChanged(const QString &renderer);
+
+private slots:
+    void slotFullScreenChanged(int state);
+    void slotStandardToggled(bool checked);
 
 private:
     Ogre::Root *mOgre;
@@ -50,22 +51,12 @@ private:
  	Ogre::D3D9Plugin* mD3D9Plugin;
  	#endif
 
-    QComboBox *mRendererComboBox;
-
-    QStackedWidget *mDisplayStackedWidget;
-
-    QComboBox *mAntiAliasingComboBox;
-    QComboBox *mResolutionComboBox;
-    QCheckBox *mVSyncCheckBox;
-    QCheckBox *mFullScreenCheckBox;
-
     Files::ConfigurationManager &mCfgMgr;
     GraphicsSettings &mGraphicsSettings;
 
     QStringList getAvailableOptions(const QString &key, Ogre::RenderSystem *renderer);
     QStringList getAvailableResolutions(Ogre::RenderSystem *renderer);
 
-    void createPages();
     void loadSettings();
 
 };

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>332</width>
+    <height>297</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -33,7 +33,7 @@
    <item>
     <widget class="QGroupBox" name="displayGroup">
      <property name="title">
-      <string>GroupBox</string>
+      <string>Display</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_4" columnstretch="1,1">
       <item row="0" column="0">
@@ -73,9 +73,13 @@
       <item row="3" column="1">
        <layout class="QGridLayout" name="resolutionLayout">
         <item row="1" column="2">
-         <layout class="QHBoxLayout" name="customResolutionLayout">
+         <layout class="QHBoxLayout" name="customResolutionLayout" stretch="1,0,1">
           <item>
-           <widget class="QLineEdit" name="customWidthLineEdit"/>
+           <widget class="QSpinBox" name="customWidthSpinBox">
+            <property name="minimum">
+             <number>800</number>
+            </property>
+           </widget>
           </item>
           <item>
            <widget class="QLabel" name="multiplyLabel">
@@ -85,7 +89,11 @@
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="customHeightLineEdit"/>
+           <widget class="QSpinBox" name="customHeightSpinBox">
+            <property name="minimum">
+             <number>600</number>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
@@ -101,7 +109,7 @@
           <property name="text">
            <string>Standard:</string>
           </property>
-          <property name="checked">
+          <property name="checkable">
            <bool>true</bool>
           </property>
          </widget>
