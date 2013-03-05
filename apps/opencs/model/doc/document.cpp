@@ -152,7 +152,7 @@ void CSMDoc::Document::addOptionalGlobals()
     {
         ESM::Global global;
         global.mId = sGlobals[i];
-        global.mValue.setType (ESM::VT_Int);
+        global.mValue.setType (ESM::VT_Long);
         addOptionalGlobal (global);
     }
 }

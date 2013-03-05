@@ -35,8 +35,12 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
 {
     mDelegateFactories = new CSVWorld::CommandDelegateFactoryCollection;
 
-    mDelegateFactories->add (CSMWorld::ColumnBase::Display_VarType,
+    mDelegateFactories->add (CSMWorld::ColumnBase::Display_GmstVarType,
         new CSVWorld::VarTypeDelegateFactory (ESM::VT_None, ESM::VT_String, ESM::VT_Int, ESM::VT_Float));
+
+    mDelegateFactories->add (CSMWorld::ColumnBase::Display_GlobalVarType,
+        new CSVWorld::VarTypeDelegateFactory (ESM::VT_Short, ESM::VT_Long, ESM::VT_Float));
+
 }
 
 CSVDoc::ViewManager::~ViewManager()

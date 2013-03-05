@@ -96,7 +96,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct VarTypeColumn : public Column<ESXRecordT>
     {
-        VarTypeColumn() : Column<ESXRecordT> ("Type", ColumnBase::Display_VarType) {}
+        VarTypeColumn (ColumnBase::Display display) : Column<ESXRecordT> ("Type", display) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -125,9 +125,19 @@ namespace CSMWorld
         {
             switch (record.get().mValue.getType())
             {
-                case ESM::VT_String: return record.get().mValue.getString().c_str(); break;
-                case ESM::VT_Int: return record.get().mValue.getInteger(); break;
-                case ESM::VT_Float: return record.get().mValue.getFloat(); break;
+                case ESM::VT_String:
+
+                    return record.get().mValue.getString().c_str(); break;
+
+                case ESM::VT_Int:
+                case ESM::VT_Short:
+                case ESM::VT_Long:
+
+                    return record.get().mValue.getInteger(); break;
+
+                case ESM::VT_Float:
+
+                    return record.get().mValue.getFloat(); break;
 
                 default: return QVariant();
             }
@@ -145,6 +155,8 @@ namespace CSMWorld
                     break;
 
                 case ESM::VT_Int:
+                case ESM::VT_Short:
+                case ESM::VT_Long:
 
                     record2.mValue.setInteger (data.toInt());
                     break;
