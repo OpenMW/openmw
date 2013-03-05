@@ -157,6 +157,8 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
     // Create a dialog for the new profile name input
     mNewProfileDialog = new TextInputDialog(tr("New Profile"), tr("Profile name:"), this);
 
+    connect(profilesComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(slotCurrentIndexChanged(int)));
+
     connect(mNewProfileDialog->lineEdit(), SIGNAL(textChanged(QString)), this, SLOT(updateOkButton(QString)));
 
     connect(pluginsTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckState(QModelIndex)));
@@ -182,7 +184,7 @@ void DataFilesPage::createActions()
     refreshAction->setShortcut(QKeySequence(tr("F5")));
     connect(refreshAction, SIGNAL(triggered()), this, SLOT(refresh()));
 
-    // Profile actions
+    // We can't create actions inside the .ui file
     mNewProfileAction = new QAction(QIcon::fromTheme("document-new"), tr("&New Profile"), this);
     mNewProfileAction->setToolTip(tr("New Profile"));
     mNewProfileAction->setShortcut(QKeySequence(tr("Ctrl+N")));
@@ -190,13 +192,11 @@ void DataFilesPage::createActions()
 
     mDeleteProfileAction = new QAction(QIcon::fromTheme("edit-delete"), tr("Delete Profile"), this);
     mDeleteProfileAction->setToolTip(tr("Delete Profile"));
-    mDeleteProfileAction->setShortcut(QKeySequence(tr("Delete")));
     connect(mDeleteProfileAction, SIGNAL(triggered()), this, SLOT(deleteProfile()));
 
-    // Add the newly created actions to the toolbar
-//    mProfileToolBar->addSeparator();
-//    mProfileToolBar->addAction(mNewProfileAction);
-//    mProfileToolBar->addAction(mDeleteProfileAction);
+    // Add the newly created actions to the toolbuttons
+    newProfileButton->setDefaultAction(mNewProfileAction);
+    deleteProfileButton->setDefaultAction(mDeleteProfileAction);
 
     // Context menu actions
     mCheckAction = new QAction(tr("Check Selection"), this);
@@ -367,6 +367,26 @@ void DataFilesPage::updateViews()
     pluginsTable->setColumnHidden(6, true);
     pluginsTable->setColumnHidden(7, true);
     pluginsTable->setColumnHidden(8, true);
+}
+
+void DataFilesPage::setProfilesComboBoxIndex(int index)
+{
+    profilesComboBox->setCurrentIndex(index);
+}
+
+void DataFilesPage::slotCurrentIndexChanged(int index)
+{
+    emit profileChanged(index);
+}
+
+QAbstractItemModel* DataFilesPage::profilesComboBoxModel()
+{
+    return profilesComboBox->model();
+}
+
+int DataFilesPage::profilesComboBoxIndex()
+{
+    return profilesComboBox->currentIndex();
 }
 
 void DataFilesPage::deleteProfile()

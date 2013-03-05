@@ -7,11 +7,11 @@
 #include "ui_datafilespage.h"
 
 class QSortFilterProxyModel;
+class QAbstractItemModel;
 class QAction;
 class QMenu;
 
 class DataFilesModel;
-
 class TextInputDialog;
 class GameSettings;
 class LauncherSettings;
@@ -26,12 +26,19 @@ class DataFilesPage : public QWidget, private Ui::DataFilesPage
 public:
     DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gameSettings, LauncherSettings &launcherSettings, QWidget *parent = 0);
 
+    QAbstractItemModel* profilesComboBoxModel();
+    int profilesComboBoxIndex();
+
     void writeConfig(QString profile = QString());
     void saveSettings();
 
+signals:
+    void profileChanged(int index);
 
 public slots:
     void setCheckState(QModelIndex index);
+    void setProfilesComboBoxIndex(int index);
+
     void filterChanged(const QString filter);
     void showContextMenu(const QPoint &point);
     void profileChanged(const QString &previous, const QString &current);
@@ -46,6 +53,9 @@ public slots:
     void check();
     void uncheck();
     void refresh();
+
+private slots:
+    void slotCurrentIndexChanged(int index);
 
 private:
     DataFilesModel *mDataFilesModel;
