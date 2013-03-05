@@ -37,7 +37,7 @@ ESM::VarType ESM::Variant::getType() const
     return mType;
 }
 
-std::string ESM::Variant::toString() const
+std::string ESM::Variant::getString() const
 {
     if (!mData)
         throw std::runtime_error ("can not convert empty variant to string");
@@ -81,23 +81,30 @@ void ESM::Variant::read (ESMReader& esm, Format format)
     }
     else // GMST
     {
-        esm.getSubName();
-        NAME name = esm.retSubName();
-
-        if (name=="STRV")
+        if (!esm.hasMoreSubs())
         {
-            type = VT_String;
-        }
-        else if (name=="INTV")
-        {
-            type = VT_Int;
-        }
-        else if (name=="FLTV")
-        {
-            type = VT_Float;
+            type = VT_None;
         }
         else
-            esm.fail ("invalid subrecord: " + name.toString());
+        {
+            esm.getSubName();
+            NAME name = esm.retSubName();
+
+            if (name=="STRV")
+            {
+                type = VT_String;
+            }
+            else if (name=="INTV")
+            {
+                type = VT_Int;
+            }
+            else if (name=="FLTV")
+            {
+                type = VT_Float;
+            }
+            else
+                esm.fail ("invalid subrecord: " + name.toString());
+        }
     }
 
     setType (type);

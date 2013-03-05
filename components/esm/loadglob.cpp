@@ -1,17 +1,13 @@
 #include "loadglob.hpp"
 
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
-
 namespace ESM
 {
-
-    void Global::load(ESMReader &esm)
+    void Global::load (ESMReader &esm)
     {
         mValue.read (esm, ESM::Variant::Format_Global);
     }
 
-    void Global::save(ESMWriter &esm)
+    void Global::save (ESMWriter &esm)
     {
         mValue.write (esm, ESM::Variant::Format_Global);
     }
