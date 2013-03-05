@@ -11,6 +11,7 @@ material openmw_objects_base
     scene_blend default
     depth_write default
     alpha_rejection default
+    transparent_sorting default
 
     pass
     {
@@ -30,6 +31,7 @@ material openmw_objects_base
         scene_blend $scene_blend
         alpha_rejection $alpha_rejection
         depth_write $depth_write
+        transparent_sorting $transparent_sorting
 
         texture_unit diffuseMap
         {

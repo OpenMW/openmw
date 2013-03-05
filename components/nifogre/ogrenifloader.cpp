@@ -755,7 +755,8 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
         instance->setProperty("alpha_rejection", sh::makeProperty(new sh::StringValue(reject)));
     }
 
-    instance->setProperty("transparent_sorting", sh::makeProperty(new sh::StringValue(!((alphaFlags>>13)&1) ? "on" : "off")));
+    // Ogre usually only sorts if depth write is disabled, so we want "force" instead of "on"
+    instance->setProperty("transparent_sorting", sh::makeProperty(new sh::StringValue(!((alphaFlags>>13)&1) ? "force" : "off")));
 
     instance->setProperty("depth_check", sh::makeProperty(new sh::StringValue((depthFlags&1) ? "on" : "off")));
     instance->setProperty("depth_write", sh::makeProperty(new sh::StringValue(((depthFlags>>1)&1) ? "on" : "off")));
