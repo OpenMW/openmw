@@ -156,8 +156,8 @@ void ESM::VariantIntegerData::read (ESMReader& esm, Variant::Format format, VarT
     }
     else // GMST
     {
-        if (type==VT_Int)
-            esm.fail ("unsupported global variable integer type");
+        if (type!=VT_Int)
+            esm.fail ("unsupported gmst variable integer type");
 
         esm.getHT (mValue);
     }
