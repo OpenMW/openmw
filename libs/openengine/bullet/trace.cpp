@@ -8,29 +8,11 @@
 
 #include "physic.hpp"
 
-#define BIT(x) (1<<(x))
-
 enum traceWorldType
 {
     collisionWorldTrace = 1,
     pickWorldTrace = 2,
     bothWorldTrace = collisionWorldTrace | pickWorldTrace
-};
-
-enum collaborativePhysicsType
-{
-    No_Physics = 0,     // Both are empty (example: statics you can walk through, like tall grass)
-    Only_Collision = 1, // This object only has collision physics but no pickup physics (example: statics)
-    Only_Pickup = 2,    // This object only has pickup physics but no collision physics (example: items dropped on the ground)
-    Both_Physics = 3    // This object has both kinds of physics (example: activators)
-};
-
-enum collisiontypes {
-    COL_NOTHING = 0, //<Collide with nothing
-    COL_WORLD = BIT(0), //<Collide with world objects
-    COL_ACTOR_INTERNAL = BIT(1), //<Collide internal capsule
-    COL_ACTOR_EXTERNAL = BIT(2), //<collide with external capsule
-    COL_RAYCASTING = BIT(3)
 };
 
 void newtrace(traceResults *results, const Ogre::Vector3& start, const Ogre::Vector3& end, const Ogre::Vector3& BBHalfExtents, bool isInterior, OEngine::Physic::PhysicEngine *enginePass)  //Traceobj was a Aedra Object
@@ -45,7 +27,7 @@ void newtrace(traceResults *results, const Ogre::Vector3& start, const Ogre::Vec
     const btTransform to(btrot, btend);
 
     btCollisionWorld::ClosestConvexResultCallback newTraceCallback(btstart, btend);
-    newTraceCallback.m_collisionFilterMask = COL_WORLD|COL_RAYCASTING;
+    newTraceCallback.m_collisionFilterMask = OEngine::Physic::CollisionType_World|OEngine::Physic::CollisionType_Raycasting;
 
     enginePass->dynamicsWorld->convexSweepTest(&newshape, from, to, newTraceCallback);
 

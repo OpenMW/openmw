@@ -279,13 +279,15 @@ bool RenderingManager::rotateObject( const MWWorld::Ptr &ptr, Ogre::Vector3 &rot
         Ogre::Quaternion zref(Ogre::Radian(-ptr.getRefData().getPosition().rot[2]), Ogre::Vector3::UNIT_Z);
 
         Ogre::Quaternion newo = adjust ? (xr * yr * zr) * (xref*yref*zref) : xr * yr * zr;
-        Ogre::Radian ax,ay,az;
+
         Ogre::Matrix3 mat;
         newo.ToRotationMatrix(mat);
+        Ogre::Radian ax,ay,az;
         mat.ToEulerAnglesXYZ(ax,ay,az);
         rot.x = -ax.valueRadians();
         rot.y = -ay.valueRadians();
         rot.z = -az.valueRadians();
+
         ptr.getRefData().getBaseNode()->setOrientation(newo);
     }
     else if(isPlayer)
