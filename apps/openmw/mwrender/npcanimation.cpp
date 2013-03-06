@@ -54,7 +54,7 @@ NpcAnimation::~NpcAnimation()
 }
 
 
-NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWorld::InventoryStore& inv, int visibilityFlags)
+NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWorld::InventoryStore& inv, int visibilityFlags, bool headOnly)
   : Animation(ptr),
     mStateID(-1),
     mTimeToChange(0),
@@ -70,7 +70,8 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
     mPants(inv.end()),
     mGloveL(inv.end()),
     mGloveR(inv.end()),
-    mSkirtIter(inv.end())
+    mSkirtIter(inv.end()),
+    mHeadOnly(headOnly)
 {
     mNpc = mPtr.get<ESM::NPC>()->mBase;
 
@@ -215,7 +216,7 @@ void NpcAnimation::updateParts(bool forceupdate)
     if(!forceupdate)
         return;
 
-    for(size_t i = 0;i < slotlistsize;i++)
+    for(size_t i = 0;i < slotlistsize && !mHeadOnly;i++)
     {
         MWWorld::ContainerStoreIterator iter = inv.getSlot(slotlist[i].slot);
 
@@ -251,6 +252,9 @@ void NpcAnimation::updateParts(bool forceupdate)
         addOrReplaceIndividualPart(ESM::PRT_Head, -1,1, mHeadModel);
     if(mPartPriorities[ESM::PRT_Hair] < 1 && mPartPriorities[ESM::PRT_Head] <= 1)
         addOrReplaceIndividualPart(ESM::PRT_Hair, -1,1, mHairModel);
+
+    if (mHeadOnly)
+        return;
 
     static const struct {
         ESM::PartReferenceType type;
@@ -447,6 +451,11 @@ void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::
         else
             reserveIndividualPart(part.mPart, group, priority);
     }
+}
+
+Ogre::Node* NpcAnimation::getHeadNode()
+{
+    return mEntityList.mSkelBase->getSkeleton()->getBone("Bip01 Head");
 }
 
 }

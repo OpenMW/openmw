@@ -39,6 +39,7 @@ private:
     std::string     mHeadModel;
     std::string     mHairModel;
     std::string     mBodyPrefix;
+    bool            mHeadOnly;
 
     float mTimeToChange;
     MWWorld::ContainerStoreIterator mRobe;
@@ -73,10 +74,12 @@ private:
 
 public:
     NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node,
-                 MWWorld::InventoryStore& inv, int visibilityFlags);
+                 MWWorld::InventoryStore& inv, int visibilityFlags, bool headOnly=false);
     virtual ~NpcAnimation();
 
     virtual Ogre::Vector3 runAnimation(float timepassed);
+
+    Ogre::Node* getHeadNode();
 
     void forceUpdate()
     { updateParts(true); }

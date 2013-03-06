@@ -60,7 +60,7 @@ namespace MWRender
         mNode = renderRoot->createChildSceneNode();
 
         mAnimation = new NpcAnimation(mCharacter, mNode,
-            MWWorld::Class::get(mCharacter).getInventoryStore (mCharacter), 0);
+            MWWorld::Class::get(mCharacter).getInventoryStore (mCharacter), 0, renderHeadOnly());
 
         mNode->setVisible (false);
 
@@ -102,7 +102,7 @@ namespace MWRender
         delete mAnimation;
 
         mAnimation = new NpcAnimation(mCharacter, mNode,
-            MWWorld::Class::get(mCharacter).getInventoryStore (mCharacter), 0);
+            MWWorld::Class::get(mCharacter).getInventoryStore (mCharacter), 0, renderHeadOnly());
 
         mNode->setVisible (false);
 
@@ -161,7 +161,7 @@ namespace MWRender
 
     RaceSelectionPreview::RaceSelectionPreview()
         : CharacterPreview(MWBase::Environment::get().getWorld()->getPlayer().getPlayer(),
-            512, 512, "CharacterHeadPreview", Ogre::Vector3(0, 120, -35), Ogre::Vector3(0,125,0))
+            512, 512, "CharacterHeadPreview", Ogre::Vector3(0, 6, -35), Ogre::Vector3(0,125,0))
         , mRef(&mBase)
     {
         mBase = *mCharacter.get<ESM::NPC>()->mBase;
@@ -172,6 +172,8 @@ namespace MWRender
     {
         mAnimation->runAnimation(0.0f);
         mNode->roll(Ogre::Radian(angle), Ogre::SceneNode::TS_LOCAL);
+
+        updateCamera();
 
         mNode->setVisible (true);
         mRenderTarget->update();
@@ -189,5 +191,17 @@ namespace MWRender
     void RaceSelectionPreview::onSetup ()
     {
         mAnimation->play("idle", "start", "stop", false);
+
+        updateCamera();
+    }
+
+    void RaceSelectionPreview::updateCamera()
+    {
+        Ogre::Vector3 scale = mNode->getScale();
+        Ogre::Vector3 headOffset = mAnimation->getHeadNode()->_getDerivedPosition();
+        headOffset = mNode->convertLocalToWorldPosition(headOffset);
+
+        mCamera->setPosition(headOffset + mPosition * scale);
+        mCamera->lookAt(headOffset + mPosition*Ogre::Vector3(0,1,0) * scale);
     }
 }
