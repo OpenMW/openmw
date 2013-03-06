@@ -26,7 +26,7 @@ namespace MWMechanics
                 return mBase;
             }
 
-            const T& getModified() const
+            T getModified() const
             {
                 return std::max(static_cast<T>(0), mModified);
             }
@@ -108,7 +108,7 @@ namespace MWMechanics
                 return mStatic.getBase();
             }
 
-            const T& getModified() const
+            T getModified() const
             {
                 return mStatic.getModified();
             }
