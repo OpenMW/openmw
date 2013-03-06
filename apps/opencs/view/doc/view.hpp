@@ -41,7 +41,8 @@ namespace CSVDoc
             std::vector<QAction *> mEditingActions;
             Operations *mOperations;
             SubViewFactoryManager mSubViewFactory;
-            QMainWindow* mSubViewWindow;
+            QMainWindow mSubViewWindow;
+
 
             // not implemented
             View (const View&);
@@ -68,6 +69,7 @@ namespace CSVDoc
         public:
 
             View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews);
+
             ///< The ownership of \a document is not transferred to *this.
 
             virtual ~View();
@@ -82,13 +84,15 @@ namespace CSVDoc
 
             void updateProgress (int current, int max, int type, int threads);
 
-            QDockWidget *getOperations() const;
+            Operations *getOperations() const;
 
         signals:
 
             void newDocumentRequest();
 
             void loadDocumentRequest();
+
+            void closeAllViews (View *);
 
         public slots:
 
@@ -107,6 +111,8 @@ namespace CSVDoc
             void addGlobalsSubView();
 
             void addGmstsSubView();
+
+            void exitApplication();
 
     };
 }

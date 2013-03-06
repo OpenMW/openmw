@@ -1,4 +1,3 @@
-
 set (OPENCS_SRC main.cpp)
 
 opencs_units (. editor)

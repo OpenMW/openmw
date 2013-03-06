@@ -13,7 +13,7 @@
 #include "view.hpp"
 
 #include <QMessageBox>
-
+#include <QPushButton>
 
 void CSVDoc::ViewManager::updateIndices()
 {
@@ -34,7 +34,7 @@ void CSVDoc::ViewManager::updateIndices()
 }
 
 CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
-    : mDocumentManager (documentManager), mCloseMeOnSaveStateChange(0)
+    : mDocumentManager (documentManager), mCloseMeOnSaveStateChange(0), mUserWarned(false)
 {
     mDelegateFactories = new CSVWorld::CommandDelegateFactoryCollection;
 
@@ -46,6 +46,7 @@ CSVDoc::ViewManager::~ViewManager()
 {
     delete mDelegateFactories;
 
+    //not needed due to deletion in ViewManager::closeRequest?
     for (std::vector<View *>::iterator iter (mViews.begin()); iter!=mViews.end(); ++iter)
         delete *iter;
 }
@@ -63,6 +64,7 @@ CSVDoc::View *CSVDoc::ViewManager::addView (CSMDoc::Document *document)
     }
 
     View *view = new View (*this, document, countViews (document)+1);
+
 
     mViews.push_back (view);
 
@@ -106,17 +108,18 @@ bool CSVDoc::ViewManager::closeRequest (View *view)
         {
             //notify user of saving in progress
             if ( (document->getState() & CSMDoc::State_Saving) )
-                continueWithClose = showSaveInProgressMessageBox (view);
-            else
-                //notify user of unsaved changes and process response
-                if ( document->getState() & CSMDoc::State_Modified)
-                    continueWithClose = showModifiedDocumentMessageBox (view);
-        }
+                continueWithClose = showSaveInProgressMessageBox (iter);
 
-        mViews.erase (iter);
+            //notify user of unsaved changes and process response
+            else if ( document->getState() & CSMDoc::State_Modified)
+                continueWithClose = showModifiedDocumentMessageBox (iter);
+        }
 
         if (continueWithClose)
         {
+            (*iter)->deleteLater();
+            mViews.erase (iter);
+
             if (last)
                 mDocumentManager.removeDocument (document);
             else
@@ -127,7 +130,7 @@ bool CSVDoc::ViewManager::closeRequest (View *view)
     return continueWithClose;
 }
 
-bool CSVDoc::ViewManager::showModifiedDocumentMessageBox (View* view)
+bool CSVDoc::ViewManager::showModifiedDocumentMessageBox (std::vector<View *>::iterator viewIter)
 {
     QMessageBox messageBox;
 
@@ -138,23 +141,32 @@ bool CSVDoc::ViewManager::showModifiedDocumentMessageBox (View* view)
 
     bool retVal = true;
 
-    switch (messageBox.exec())
+    connect (this, SIGNAL (closeMessageBox()), &messageBox, SLOT (close()));
+    connect ((*viewIter)->getDocument(), SIGNAL (stateChanged (int, CSMDoc::Document *)), this, SLOT (onCloseWarningHandler(int, CSMDoc::Document *)));
+    mUserWarned = true;
+
+    int response = messageBox.exec();
+
+    mUserWarned = false;
+
+    switch (response)
     {
         case QMessageBox::Save:
-            view->getDocument()->save();
 
-            retVal = !(view->getDocument()->getState() & CSMDoc::State_Saving);
-
-            if (!retVal)
-                mCloseMeOnSaveStateChange = view;
-            else
-                mCloseMeOnSaveStateChange = 0;
+            (*viewIter)->getDocument()->save();
+            mCloseMeOnSaveStateChange = viewIter;
+            retVal = false;
         break;
 
         case QMessageBox::Discard:
+
+            disconnect ((*viewIter)->getDocument(), SIGNAL (stateChanged (int, CSMDoc::Document *)), this, SLOT (onCloseWarningHandler(int, CSMDoc::Document *)));
         break;
 
         case QMessageBox::Cancel:
+
+            //disconnect to prevent unintended view closures
+            disconnect ((*viewIter)->getDocument(), SIGNAL (stateChanged (int, CSMDoc::Document *)), this, SLOT (onCloseWarningHandler(int, CSMDoc::Document *)));
             retVal = false;
         break;
 
@@ -166,43 +178,55 @@ bool CSVDoc::ViewManager::showModifiedDocumentMessageBox (View* view)
     return retVal;
 }
 
-bool CSVDoc::ViewManager::showSaveInProgressMessageBox (View* view)
+bool CSVDoc::ViewManager::showSaveInProgressMessageBox (std::vector<View *>::iterator viewIter)
 {
     QMessageBox messageBox;
 
     messageBox.setText ("The document is currently being saved.");
-    messageBox.setInformativeText("Do you want to abort the save?");
-    messageBox.setStandardButtons (QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+    messageBox.setInformativeText("Do you want to close now and abort saving, or wait until saving has completed?");
+
+    QPushButton* waitButton = messageBox.addButton (tr("Wait"), QMessageBox::YesRole);
+    QPushButton* closeButton = messageBox.addButton (tr("Close Now"), QMessageBox::RejectRole);
+    QPushButton* cancelButton = messageBox.addButton (tr("Cancel"), QMessageBox::NoRole);
+
+    messageBox.setDefaultButton (waitButton);
 
     bool retVal = true;
 
-    switch (messageBox.exec())
+    //Connections shut down message box if operation ends before user makes a decision.
+    connect ((*viewIter)->getDocument(), SIGNAL (stateChanged (int, CSMDoc::Document *)), this, SLOT (onCloseWarningHandler(int, CSMDoc::Document *)));
+    connect (this, SIGNAL (closeMessageBox()), &messageBox, SLOT (close()));
+
+    //set / clear the user warned flag to indicate whether or not the message box is currently active.
+    mUserWarned = true;
+
+    messageBox.exec();
+
+    mUserWarned = false;
+
+    //if closed by the warning handler, defaults to the RejectRole button (closeButton)
+    if (messageBox.clickedButton() == waitButton)
     {
-        case QMessageBox::Yes:    //immediate shutdown
-            mCloseMeOnSaveStateChange = 0;
-            view->abortOperation(CSMDoc::State_Saving);
-        break;
+        //save the View iterator for shutdown after the save operation ends
+        mCloseMeOnSaveStateChange = viewIter;
+        retVal = false;
+    }
 
-        case QMessageBox::No:    //shutdown after save completes
+    else if (messageBox.clickedButton() == closeButton)
+    {
+        //disconnect to avoid segmentation fault
+        disconnect ((*viewIter)->getDocument(), SIGNAL (stateChanged (int, CSMDoc::Document *)), this, SLOT (onCloseWarningHandler(int, CSMDoc::Document *)));
+        (*viewIter)->abortOperation(CSMDoc::State_Saving);
+        mCloseMeOnSaveStateChange = mViews.end();
+    }
 
-        //return true (continue with close) if the save operation ended before the
-        //user clicked "No"
-        retVal = !(view->getDocument()->getState() & CSMDoc::State_Saving);
-
-        if (!retVal)
-            mCloseMeOnSaveStateChange = view;
-        else
-            mCloseMeOnSaveStateChange = 0;
-
-        break;
-
-        case QMessageBox::Cancel:  //abort shutdown, allow save to complete
-            mCloseMeOnSaveStateChange = 0;
-            retVal = false;
-        break;
-
-        default:
-        break;
+    else if (messageBox.clickedButton() == cancelButton)
+    {
+        //abort shutdown, allow save to complete
+        //disconnection to prevent unintended view closures
+        mCloseMeOnSaveStateChange = mViews.end();
+        disconnect ((*viewIter)->getDocument(), SIGNAL (stateChanged (int, CSMDoc::Document *)), this, SLOT (onCloseWarningHandler(int, CSMDoc::Document *)));
+        retVal = false;
     }
 
     return retVal;
@@ -213,13 +237,6 @@ void CSVDoc::ViewManager::documentStateChanged (int state, CSMDoc::Document *doc
     for (std::vector<View *>::const_iterator iter (mViews.begin()); iter!=mViews.end(); ++iter)
             if ((*iter)->getDocument()==document)
                 (*iter)->updateDocumentState();
-
-    //mechanism to shutdown main window after saving operation completes
-    if (mCloseMeOnSaveStateChange && (mPreviousDocumentState & CSMDoc::State_Saving))
-        if (mCloseMeOnSaveStateChange->close())
-            mCloseMeOnSaveStateChange = 0;
-
-    mPreviousDocumentState = state;
 }
 
 void CSVDoc::ViewManager::progress (int current, int max, int type, int threads, CSMDoc::Document *document)
@@ -227,4 +244,39 @@ void CSVDoc::ViewManager::progress (int current, int max, int type, int threads,
     for (std::vector<View *>::const_iterator iter (mViews.begin()); iter!=mViews.end(); ++iter)
             if ((*iter)->getDocument()==document)
                 (*iter)->updateProgress (current, max, type, threads);
+}
+
+void CSVDoc::ViewManager::onCloseWarningHandler (int state, CSMDoc::Document *document)
+{
+    if ( !(state & CSMDoc::State_Saving) )
+    {
+        //if the user is being warned (message box is active), shut down the message box,
+        //as there is no save operation currently running
+        if ( mUserWarned )
+            emit closeMessageBox();
+
+        //otherwise, the user has closed the message box before the save operation ended.
+        //close the view
+        else if (mCloseMeOnSaveStateChange!=mViews.end())
+        {
+           (*mCloseMeOnSaveStateChange)->close();
+            mCloseMeOnSaveStateChange = mViews.end();
+        }
+    }
+}
+
+void CSVDoc::ViewManager::closeAllViews (View *lastView)
+{
+    //forces document views to close in an orderly manner
+    // the last view closed is the view from which the "Exit" action was triggered
+    while (mViews.size() > 1)
+    {
+        std::vector<View *>::iterator iter = mViews.begin();
+
+        if ((*iter) != lastView)
+            (*iter)->close();
+        else (*(++iter))->close();
+    }
+
+    lastView->close();
 }

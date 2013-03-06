@@ -46,10 +46,10 @@ void CSVDoc::View::setupFileMenu()
     file->addAction(close);
 
     QAction *exit = new QAction (tr ("&Exit"), this);
-    connect (exit, SIGNAL (triggered()), QApplication::instance(), SLOT (closeAllWindows()));
+    connect (exit, SIGNAL (triggered()), this, SLOT (exitApplication()));
+    connect (this, SIGNAL (closeAllViews(View *)), &mViewManager, SLOT (closeAllViews(View *)));
+
     file->addAction(exit);
-
-
 }
 
 void CSVDoc::View::setupEditMenu()
@@ -132,13 +132,11 @@ CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int to
     : mViewManager (viewManager), mDocument (document), mViewIndex (totalViews-1),
       mViewTotal (totalViews)
 {
-    setAttribute (Qt::WA_DeleteOnClose, true);
     setDockOptions (QMainWindow::AllowNestedDocks);
 
     resize (300, 300); /// \todo get default size from settings and set reasonable minimal size
 
-    mSubViewWindow = new QMainWindow();
-    setCentralWidget (mSubViewWindow);
+    setCentralWidget (&mSubViewWindow);
 
     mOperations = new Operations;
     addDockWidget (Qt::BottomDockWidgetArea, mOperations);
@@ -213,7 +211,7 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id)
     /// \todo add an user setting to reuse sub views (on a per document basis or on a per top level view basis)
 
     SubView *view = mSubViewFactory.makeSubView (id, *mDocument);
-    mSubViewWindow->addDockWidget (Qt::TopDockWidgetArea, view);
+    mSubViewWindow.addDockWidget (Qt::TopDockWidgetArea, view);
 
     connect (view, SIGNAL (focusId (const CSMWorld::UniversalId&)), this,
         SLOT (addSubView (const CSMWorld::UniversalId&)));
@@ -252,7 +250,12 @@ void CSVDoc::View::abortOperation (int type)
     updateActions();
 }
 
-QDockWidget *CSVDoc::View::getOperations() const
+CSVDoc::Operations *CSVDoc::View::getOperations() const
 {
     return mOperations;
+}
+
+void CSVDoc::View::exitApplication()
+{
+    emit closeAllViews (this);
 }
