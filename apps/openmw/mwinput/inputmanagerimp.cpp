@@ -193,9 +193,6 @@ namespace MWInput
             case A_AutoMove:
                 toggleAutoMove ();
                 break;
-            case A_ToggleSneak:
-                /// \todo implement
-                break;
             case A_ToggleWalk:
                 toggleWalking ();
                 break;
@@ -308,13 +305,13 @@ namespace MWInput
             else
                 mPlayer.setForwardBackward (0);
 
+            mPlayer.setSneak(actionIsActive(A_Sneak));
+
             if (actionIsActive(A_Jump) && mControlSwitch["playerjumping"])
             {
                 mPlayer.setUpDown (1);
                 triedToMove = true;
             }
-            else if (actionIsActive(A_Crouch))
-                mPlayer.setUpDown (-1);
             else
                 mPlayer.setUpDown (0);
 
@@ -364,7 +361,7 @@ namespace MWInput
             actionIsActive(A_MoveLeft) ||
             actionIsActive(A_MoveRight) ||
             actionIsActive(A_Jump) ||
-            actionIsActive(A_Crouch) ||
+            actionIsActive(A_Sneak) ||
             actionIsActive(A_TogglePOV))
         {
             resetIdleTime();
@@ -749,7 +746,7 @@ namespace MWInput
         defaultKeyBindings[A_QuickKeysMenu] = OIS::KC_F1;
         defaultKeyBindings[A_Console] = OIS::KC_F2;
         defaultKeyBindings[A_Run] = OIS::KC_LSHIFT;
-        defaultKeyBindings[A_Crouch] = OIS::KC_LCONTROL;
+        defaultKeyBindings[A_Sneak] = OIS::KC_LCONTROL;
         defaultKeyBindings[A_AutoMove] = OIS::KC_Q;
         defaultKeyBindings[A_Jump] = OIS::KC_E;
         defaultKeyBindings[A_Journal] = OIS::KC_J;
@@ -816,7 +813,7 @@ namespace MWInput
         descriptions[A_ToggleSpell] = "sReady_Magic";
         descriptions[A_Console] = "sConsoleTitle";
         descriptions[A_Run] = "sRun";
-        descriptions[A_Crouch] = "sCrouch_Sneak";
+        descriptions[A_Sneak] = "sCrouch_Sneak";
         descriptions[A_AutoMove] = "sAuto_Run";
         descriptions[A_Jump] = "sJump";
         descriptions[A_Journal] = "sJournal";
@@ -865,7 +862,7 @@ namespace MWInput
         ret.push_back(A_MoveRight);
         ret.push_back(A_TogglePOV);
         ret.push_back(A_Run);
-        ret.push_back(A_Crouch);
+        ret.push_back(A_Sneak);
         ret.push_back(A_Activate);
         ret.push_back(A_ToggleWeapon);
         ret.push_back(A_ToggleSpell);

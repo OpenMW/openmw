@@ -365,11 +365,10 @@ namespace MWClass
                                                     fSwimRunAthleticsMult->getFloat();
             moveSpeed = swimSpeed;
         }
-        else if(Npc::getStance(ptr, Run, false))
+        else if(Npc::getStance(ptr, Run, false) && !Npc::getStance(ptr, Sneak, false))
             moveSpeed = runSpeed;
         else
             moveSpeed = walkSpeed;
-
         if(getMovementSettings(ptr).mLeftRight != 0 && getMovementSettings(ptr).mForwardBackward == 0)
             moveSpeed *= 0.75f;
 
