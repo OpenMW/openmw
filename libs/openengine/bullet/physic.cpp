@@ -13,18 +13,9 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
 
-#define BIT(x) (1<<(x))
-
 namespace OEngine {
 namespace Physic
 {
-    enum collisiontypes {
-        COL_NOTHING = 0, //<Collide with nothing
-        COL_WORLD = BIT(0), //<Collide with world objects
-        COL_ACTOR_INTERNAL = BIT(1), //<Collide internal capsule
-        COL_ACTOR_EXTERNAL = BIT(2), //<collide with external capsule
-        COL_RAYCASTING = BIT(3)
-    };
 
     PhysicActor::PhysicActor(const std::string &name, const std::string &mesh, PhysicEngine *engine, const Ogre::Vector3 &position, const Ogre::Quaternion &rotation, float scale)
       : mName(name), mEngine(engine), mMesh(mesh), mBoxScaledTranslation(0,0,0), mBoxRotationInverse(0,0,0,0)
@@ -37,6 +28,8 @@ namespace Physic
         Ogre::Quaternion inverse = mBoxRotation.Inverse();
         mBoxRotationInverse = btQuaternion(inverse.x, inverse.y, inverse.z,inverse.w);
         mEngine->addRigidBody(mBody, false);  //Add rigid body to dynamics world, but do not add to object map
+        //mBody->setCollisionFlags(COL_NOTHING);
+        //mBody->setMas
     }
 
     PhysicActor::~PhysicActor()
@@ -50,6 +43,8 @@ namespace Physic
 
     void PhysicActor::enableCollisions(bool collision)
     {
+        if(collision && !collisionMode) mBody->translate(btVector3(0,0,-1000));
+        if(!collision && collisionMode) mBody->translate(btVector3(0,0,1000));
         collisionMode = collision;
     }
 
@@ -310,7 +305,7 @@ namespace Physic
 
         mHeightFieldMap [name] = hf;
 
-        dynamicsWorld->addRigidBody(body,COL_WORLD,COL_WORLD|COL_ACTOR_INTERNAL|COL_ACTOR_EXTERNAL);
+        dynamicsWorld->addRigidBody(body,CollisionType_World,CollisionType_World|CollisionType_ActorInternal|CollisionType_ActorExternal);
     }
 
     void PhysicEngine::removeHeightField(int x, int y)
@@ -397,11 +392,11 @@ namespace Physic
                 return;
             if(body->mCollide)
             {
-                dynamicsWorld->addRigidBody(body,COL_WORLD,COL_WORLD|COL_ACTOR_INTERNAL|COL_ACTOR_EXTERNAL);
+                dynamicsWorld->addRigidBody(body,CollisionType_World,CollisionType_World|CollisionType_ActorInternal|CollisionType_ActorExternal);
             }
             else
             {
-                dynamicsWorld->addRigidBody(body,COL_RAYCASTING,COL_RAYCASTING|COL_WORLD);
+                dynamicsWorld->addRigidBody(body,CollisionType_Raycasting,CollisionType_Raycasting|CollisionType_World);
             }
             body->setActivationState(DISABLE_DEACTIVATION);
             if(addToMap){
@@ -535,7 +530,7 @@ namespace Physic
 
         float d1 = 10000.;
         btCollisionWorld::ClosestRayResultCallback resultCallback1(from, to);
-        resultCallback1.m_collisionFilterMask = COL_WORLD|COL_RAYCASTING;
+        resultCallback1.m_collisionFilterMask = CollisionType_World|CollisionType_Raycasting;
         dynamicsWorld->rayTest(from, to, resultCallback1);
         if (resultCallback1.hasHit())
         {
@@ -545,7 +540,7 @@ namespace Physic
         }
 
         btCollisionWorld::ClosestRayResultCallback resultCallback2(from, to);
-        resultCallback2.m_collisionFilterMask = COL_ACTOR_INTERNAL|COL_ACTOR_EXTERNAL;
+        resultCallback2.m_collisionFilterMask = CollisionType_ActorInternal|CollisionType_ActorExternal;
         dynamicsWorld->rayTest(from, to, resultCallback2);
         float d2 = 10000.;
         if (resultCallback2.hasHit())
@@ -564,12 +559,12 @@ namespace Physic
     std::vector< std::pair<float, std::string> > PhysicEngine::rayTest2(btVector3& from, btVector3& to)
     {
         MyRayResultCallback resultCallback1;
-        resultCallback1.m_collisionFilterMask = COL_WORLD|COL_RAYCASTING;
+        resultCallback1.m_collisionFilterMask = CollisionType_World|CollisionType_Raycasting;
         dynamicsWorld->rayTest(from, to, resultCallback1);
         std::vector< std::pair<float, const btCollisionObject*> > results = resultCallback1.results;
 
         MyRayResultCallback resultCallback2;
-        resultCallback2.m_collisionFilterMask = COL_ACTOR_INTERNAL|COL_ACTOR_EXTERNAL;
+        resultCallback2.m_collisionFilterMask = CollisionType_ActorInternal|CollisionType_ActorExternal;
         dynamicsWorld->rayTest(from, to, resultCallback2);
         std::vector< std::pair<float, const btCollisionObject*> > actorResults = resultCallback2.results;
 

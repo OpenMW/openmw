@@ -274,27 +274,30 @@ bool RenderingManager::rotateObject( const MWWorld::Ptr &ptr, Ogre::Vector3 &rot
 
     if (!isPlayer && isActive)
     {
-        Ogre::Quaternion xr(Ogre::Radian(rot.x), Ogre::Vector3::UNIT_X);
-        Ogre::Quaternion yr(Ogre::Radian(rot.y), Ogre::Vector3::UNIT_Y);
-        Ogre::Quaternion zr(Ogre::Radian(rot.z), Ogre::Vector3::UNIT_Z);
-        Ogre::Quaternion newo = adjust ? (xr * yr * zr) * ptr.getRefData().getBaseNode()->getOrientation() : xr * yr * zr;
-        rot.x = newo.x;
-        rot.y = newo.y;
-        rot.z = newo.z;
+        Ogre::Quaternion xr(Ogre::Radian(-rot.x), Ogre::Vector3::UNIT_X);
+        Ogre::Quaternion yr(Ogre::Radian(-rot.y), Ogre::Vector3::UNIT_Y);
+        Ogre::Quaternion zr(Ogre::Radian(-rot.z), Ogre::Vector3::UNIT_Z);
+
+        Ogre::Quaternion xref(Ogre::Radian(-ptr.getRefData().getPosition().rot[0]), Ogre::Vector3::UNIT_X);
+        Ogre::Quaternion yref(Ogre::Radian(-ptr.getRefData().getPosition().rot[1]), Ogre::Vector3::UNIT_Y);
+        Ogre::Quaternion zref(Ogre::Radian(-ptr.getRefData().getPosition().rot[2]), Ogre::Vector3::UNIT_Z);
+
+        Ogre::Quaternion newo = adjust ? (xr * yr * zr) * (xref*yref*zref) : xr * yr * zr;
+
+        Ogre::Matrix3 mat;
+        newo.ToRotationMatrix(mat);
+        Ogre::Radian ax,ay,az;
+        mat.ToEulerAnglesXYZ(ax,ay,az);
+        rot.x = -ax.valueRadians();
+        rot.y = -ay.valueRadians();
+        rot.z = -az.valueRadians();
+
         ptr.getRefData().getBaseNode()->setOrientation(newo);
     }
     else if(isPlayer)
     {
-        rot.x = mPlayer->getPitch();
+        rot.x = -mPlayer->getPitch();
         rot.z = mPlayer->getYaw();
-    }
-    else if (adjust)
-    {
-        // Stored and passed in radians
-        float *f = ptr.getRefData().getPosition().rot;
-        rot.x += f[0];
-        rot.y += f[1];
-        rot.z += f[2];
     }
     return force;
 }

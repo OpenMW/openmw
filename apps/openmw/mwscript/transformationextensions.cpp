@@ -119,15 +119,15 @@ namespace MWScript
 
                     if (axis == "x")
                     {
-                        runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees());
+                        runtime.push(Ogre::Radian(ptr.getCellRef().mPos.rot[0]).valueDegrees());
                     }
                     else if (axis == "y")
                     {
-                        runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees());
+                        runtime.push(Ogre::Radian(ptr.getCellRef().mPos.rot[1]).valueDegrees());
                     }
                     else if (axis == "z")
                     {
-                        runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[2]).valueDegrees());
+                        runtime.push(Ogre::Radian(ptr.getCellRef().mPos.rot[2]).valueDegrees());
                     }
                     else
                         throw std::runtime_error ("invalid ration axis: " + axis);
@@ -148,15 +148,15 @@ namespace MWScript
 
                     if (axis=="x")
                     {
-                        runtime.push(Ogre::Radian(ptr.getCellRef().mPos.rot[0]).valueDegrees());
+                        runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees());
                     }
                     else if (axis=="y")
                     {
-                        runtime.push(Ogre::Radian(ptr.getCellRef().mPos.rot[1]).valueDegrees());
+                        runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees());
                     }
                     else if (axis=="z")
                     {
-                        runtime.push(Ogre::Radian(ptr.getCellRef().mPos.rot[2]).valueDegrees());
+                        runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[2]).valueDegrees());
                     }
                     else
                         throw std::runtime_error ("invalid ration axis: " + axis);
@@ -241,15 +241,15 @@ namespace MWScript
 
                     if(axis == "x")
                     {
-                        runtime.push(ptr.getCellRef().mPos.pos[0]);
+                        runtime.push(ptr.getRefData().getPosition().pos[0]);
                     }
                     else if(axis == "y")
                     {
-                        runtime.push(ptr.getCellRef().mPos.pos[1]);
+                        runtime.push(ptr.getRefData().getPosition().pos[1]);
                     }
                     else if(axis == "z")
                     {
-                        runtime.push(ptr.getCellRef().mPos.pos[2]);
+                        runtime.push(ptr.getRefData().getPosition().pos[2]);
                     }
                     else
                         throw std::runtime_error ("invalid axis: " + axis);
