@@ -43,6 +43,14 @@ namespace Physic
     class PhysicEngine;
     class RigidBody;
 
+    enum CollisionType {
+        CollisionType_Nothing = 0, //<Collide with nothing
+        CollisionType_World = 1<<0, //<Collide with world objects
+        CollisionType_ActorInternal = 1<<1, //<Collide internal capsule Still Used?
+        CollisionType_ActorExternal = 1<<2, //<collide with external capsule Still used?
+        CollisionType_Raycasting = 1<<3 //Still used?
+    };
+
     /**
     *This is just used to be able to name objects.
     */
@@ -129,8 +137,9 @@ namespace Physic
 		void operator delete (void * Data) { _aligned_free (Data); }
 #endif
 
+
     private:
-        
+
         OEngine::Physic::RigidBody* mBody;
         Ogre::Vector3 mBoxScaledTranslation;
         btQuaternion mBoxRotationInverse;
