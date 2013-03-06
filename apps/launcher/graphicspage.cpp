@@ -190,11 +190,17 @@ void GraphicsPage::saveSettings()
     mGraphicsSettings.setValue(QString("Video/antialiasing"), antiAliasingComboBox->currentText());
     mGraphicsSettings.setValue(QString("Video/render system"), rendererComboBox->currentText());
 
-    QRegExp resolutionRe(QString("(\\d+) x (\\d+).*"));
 
-    if (resolutionRe.exactMatch(resolutionComboBox->currentText().simplified())) {
-        mGraphicsSettings.setValue(QString("Video/resolution x"), resolutionRe.cap(1));
-        mGraphicsSettings.setValue(QString("Video/resolution y"), resolutionRe.cap(2));
+    if (standardRadioButton->isChecked()) {
+        QRegExp resolutionRe(QString("(\\d+) x (\\d+).*"));
+
+        if (resolutionRe.exactMatch(resolutionComboBox->currentText().simplified())) {
+            mGraphicsSettings.setValue(QString("Video/resolution x"), resolutionRe.cap(1));
+            mGraphicsSettings.setValue(QString("Video/resolution y"), resolutionRe.cap(2));
+        }
+    } else {
+        mGraphicsSettings.setValue(QString("Video/resolution x"), QString::number(customWidthSpinBox->value()));
+        mGraphicsSettings.setValue(QString("Video/resolution y"), QString::number(customHeightSpinBox->value()));
     }
 }
 
@@ -250,25 +256,26 @@ QStringList GraphicsPage::getAvailableResolutions(Ogre::RenderSystem *renderer)
         for (opt_it = i->second.possibleValues.begin ();
              opt_it != i->second.possibleValues.end (); opt_it++, idx++)
         {
-            QString qval = QString::fromStdString(*opt_it).simplified();
-            // remove extra tokens after the resolution (for example bpp, can be there or not depending on rendersystem)
-            QStringList tokens = qval.split(" ", QString::SkipEmptyParts);
-            assert (tokens.size() >= 3);
+            QRegExp resolutionRe(QString("(\\d+) x (\\d+)"));
+            QString resolution = QString::fromStdString(*opt_it).simplified();
 
-            QString resolutionStr = tokens.at(0) + QString(" x ") + tokens.at(2);
+            if (resolutionRe.exactMatch(resolution)) {
 
-            QString aspect = getAspect(tokens.at(0).toInt(),tokens.at(2).toInt());
+                int width = resolutionRe.cap(1).toInt();
+                int height = resolutionRe.cap(2).toInt();
 
-            if (aspect == QLatin1String("16:9") || aspect == QLatin1String("16:10")) {
-                resolutionStr.append(tr("\t(Widescreen ") + aspect + ")");
+                QString aspect = getAspect(width, height);
 
-            } else if (aspect == QLatin1String("4:3")) {
-                resolutionStr.append(tr("\t(Standard 4:3)"));
+                if (aspect == QLatin1String("16:9") || aspect == QLatin1String("16:10")) {
+                    resolution.append(tr("\t(Wide ") + aspect + ")");
+
+                } else if (aspect == QLatin1String("4:3")) {
+                    resolution.append(tr("\t(Standard 4:3)"));
+                }
+                // do not add duplicate resolutions
+                if (!result.contains(resolution))
+                    result.append(resolution);
             }
-
-            // do not add duplicate resolutions
-            if (!result.contains(resolutionStr))
-                result << resolutionStr;
         }
     }
 
