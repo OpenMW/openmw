@@ -2,6 +2,8 @@
 #define GAME_MWMECHANICS_AITRAVEL_H
 
 #include "aipackage.hpp"
+#include "components\esm\loadpgrd.hpp"
+#include <list>
 
 namespace MWMechanics
 {
@@ -20,6 +22,9 @@ namespace MWMechanics
             float mX;
             float mY;
             float mZ;
+
+            bool isPathConstructed;
+            std::list<ESM::Pathgrid::Point> mPath;
 
     };
 }
