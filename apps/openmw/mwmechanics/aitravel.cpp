@@ -22,6 +22,11 @@ MWMechanics::AiTravel * MWMechanics::AiTravel::clone() const
     return new AiTravel(*this);
 }
 
+float distanceZCorrected(ESM::Pathgrid::Point point,float x,float y,float z)
+{
+    return sqrt((point.mX - x)*(point.mX - x)+(point.mY - y)*(point.mY - y)+0.1*(point.mZ - z)*(point.mZ - z));
+}
+
 float distance(ESM::Pathgrid::Point point,float x,float y,float z)
 {
     return sqrt((point.mX - x)*(point.mX - x)+(point.mY - y)*(point.mY - y)+(point.mZ - z)*(point.mZ - z));
@@ -63,11 +68,6 @@ float getZAngle(float dX,float dY)
     float h = sqrt(dX*dX+dY*dY);
     return Ogre::Radian(acos(dY/h)*sgn(asin(dX/h))).valueDegrees();
 }
-
-struct Edge
-{
-    float distance;
-};
 
 typedef boost::adjacency_list<boost::vecS,boost::vecS,boost::undirectedS,
     boost::property<boost::vertex_index_t,int,ESM::Pathgrid::Point>,boost::property<boost::edge_weight_t,float> > PathGridGraph;
@@ -176,6 +176,11 @@ bool MWMechanics::AiTravel::execute (const MWWorld::Ptr& actor)
         PathGridGraph graph = buildGraph(pathgrid);
 
         mPath = getPath(start,end,graph);
+        ESM::Pathgrid::Point dest;
+        dest.mX = mX;
+        dest.mY = mY;
+        dest.mZ = mZ;
+        mPath.push_back(dest);
         isPathConstructed = true;
     }
     if(mPath.empty())
@@ -184,7 +189,7 @@ bool MWMechanics::AiTravel::execute (const MWWorld::Ptr& actor)
         return true;
     }
     ESM::Pathgrid::Point nextPoint = *mPath.begin();
-    if(distance(nextPoint,pos.pos[0],pos.pos[1],pos.pos[2]) < 20)
+    if(distanceZCorrected(nextPoint,pos.pos[0],pos.pos[1],pos.pos[2]) < 20)
     {
         mPath.pop_front();
         if(mPath.empty())
