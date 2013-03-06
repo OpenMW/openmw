@@ -92,7 +92,7 @@ namespace MWWorld
             bool moveObjectImp (const Ptr& ptr, float x, float y, float z);
             ///< @return true if the active cell (cell player is in) changed
 
-            
+
             Ptr copyObjectToCell(const Ptr &ptr, CellStore &cell, const ESM::Position &pos);
 
             void updateWindowManager ();
@@ -116,7 +116,7 @@ namespace MWWorld
                 const Files::Collections& fileCollections,
                 const std::vector<std::string>& master, const std::vector<std::string>& plugins,
         	const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir, bool newGame,
-                ToUTF8::Utf8Encoder* encoder, std::map<std::string,std::string> fallbackMap, int mActivationDistanceOverride);
+                ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap, int mActivationDistanceOverride);
 
             virtual ~World();
 
@@ -174,11 +174,11 @@ namespace MWWorld
 
             virtual char getGlobalVariableType (const std::string& name) const;
             ///< Return ' ', if there is no global variable with this name.
-            
+
             virtual std::vector<std::string> getGlobals () const;
-            
+
             virtual std::string getCurrentCellName () const;
-            
+
             virtual void removeRefScript (MWWorld::RefData *ref);
             //< Remove the script attached to ref from mLocalScripts
 

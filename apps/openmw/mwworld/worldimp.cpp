@@ -178,10 +178,11 @@ namespace MWWorld
         const Files::Collections& fileCollections,
         const std::vector<std::string>& master, const std::vector<std::string>& plugins,
 	const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir, bool newGame,
-        ToUTF8::Utf8Encoder* encoder, std::map<std::string,std::string> fallbackMap, int mActivationDistanceOverride)
+        ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap, int mActivationDistanceOverride)
     : mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
       mSky (true), mCells (mStore, mEsm),
-      mNumFacing(0), mActivationDistanceOverride (mActivationDistanceOverride)
+      mNumFacing(0), mActivationDistanceOverride (mActivationDistanceOverride),
+      mFallback (fallbackMap)
     {
         mPhysics = new PhysicsSystem(renderer);
         mPhysEngine = mPhysics->getEngine();
@@ -246,8 +247,6 @@ namespace MWWorld
         mGlobalVariables->setInt ("pcrace", 3);
 
         mWorldScene = new Scene(*mRendering, mPhysics);
-
-        setFallbackValues(fallbackMap);
 
         lastTick = mTimer.getMilliseconds();
     }
