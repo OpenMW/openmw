@@ -47,7 +47,7 @@ namespace
     static char const LeftTopicIndex [] = "LeftTopicIndex";
     static char const RightTopicIndex [] = "RightTopicIndex";
 
-    struct JournalWindow : WindowBase, JournalBooks, IJournalWindow
+    struct JournalWindowImpl : WindowBase, JournalBooks, JournalWindow
     {
         struct DisplayState
         {
@@ -83,40 +83,40 @@ namespace
                 setVisible (visible);
         }
 
-        void adviseButtonClick (char const * name, void (JournalWindow::*Handler) (Widget* _sender))
+        void adviseButtonClick (char const * name, void (JournalWindowImpl::*Handler) (Widget* _sender))
         {
             getWidget <MWGui::ImageButton> (name) ->
                 eventMouseButtonClick += newDelegate(this, Handler);
         }
 
-        MWGui::IBookPage* getPage (char const * name)
+        MWGui::BookPage* getPage (char const * name)
         {
-            return getWidget <MWGui::IBookPage> (name);
+            return getWidget <MWGui::BookPage> (name);
         }
 
-        JournalWindow (IJournalViewModel::ptr Model)
+        JournalWindowImpl (IJournalViewModel::ptr Model)
             : WindowBase("openmw_journal.layout"), JournalBooks (Model)
         {
             mMainWidget->setVisible(false);
             center();
 
-            adviseButtonClick (OptionsBTN,    &JournalWindow::notifyOptions   );
-            adviseButtonClick (PrevPageBTN,   &JournalWindow::notifyPrevPage  );
-            adviseButtonClick (NextPageBTN,   &JournalWindow::notifyNextPage  );
-            adviseButtonClick (CloseBTN,      &JournalWindow::notifyClose     );
-            adviseButtonClick (JournalBTN,    &JournalWindow::notifyJournal   );
+            adviseButtonClick (OptionsBTN,    &JournalWindowImpl::notifyOptions   );
+            adviseButtonClick (PrevPageBTN,   &JournalWindowImpl::notifyPrevPage  );
+            adviseButtonClick (NextPageBTN,   &JournalWindowImpl::notifyNextPage  );
+            adviseButtonClick (CloseBTN,      &JournalWindowImpl::notifyClose     );
+            adviseButtonClick (JournalBTN,    &JournalWindowImpl::notifyJournal   );
 
-            adviseButtonClick (TopicsBTN,     &JournalWindow::notifyTopics    );
-            adviseButtonClick (QuestsBTN,     &JournalWindow::notifyQuests    );
-            adviseButtonClick (CancelBTN,     &JournalWindow::notifyCancel    );
+            adviseButtonClick (TopicsBTN,     &JournalWindowImpl::notifyTopics    );
+            adviseButtonClick (QuestsBTN,     &JournalWindowImpl::notifyQuests    );
+            adviseButtonClick (CancelBTN,     &JournalWindowImpl::notifyCancel    );
 
-            adviseButtonClick (ShowAllBTN,    &JournalWindow::notifyShowAll   );
-            adviseButtonClick (ShowActiveBTN, &JournalWindow::notifyShowActive);
+            adviseButtonClick (ShowAllBTN,    &JournalWindowImpl::notifyShowAll   );
+            adviseButtonClick (ShowActiveBTN, &JournalWindowImpl::notifyShowActive);
 
             {
-                IBookPage::click_callback callback;
+                BookPage::click_callback callback;
                 
-                callback = boost::bind (&JournalWindow::notifyTopicClicked, this, _1);
+                callback = boost::bind (&JournalWindowImpl::notifyTopicClicked, this, _1);
 
                 getPage (TopicsPage)->adviseLinkClicked (callback);
                 getPage (LeftBookPage)->adviseLinkClicked (callback);
@@ -124,18 +124,18 @@ namespace
             }
 
             {
-                IBookPage::click_callback callback;
+                BookPage::click_callback callback;
                 
-                callback = boost::bind (&JournalWindow::notifyIndexLinkClicked, this, _1);
+                callback = boost::bind (&JournalWindowImpl::notifyIndexLinkClicked, this, _1);
 
                 getPage (LeftTopicIndex)->adviseLinkClicked (callback);
                 getPage (RightTopicIndex)->adviseLinkClicked (callback);
             }
 
             {
-                IBookPage::click_callback callback;
+                BookPage::click_callback callback;
                 
-                callback = boost::bind (&JournalWindow::notifyQuestClicked, this, _1);
+                callback = boost::bind (&JournalWindowImpl::notifyQuestClicked, this, _1);
 
                 getPage (QuestsPage)->adviseLinkClicked (callback);
             }
@@ -328,7 +328,7 @@ namespace
             getWidget <ScrollView> (ListId)->setCanvasSize (size.first, size.second);
         }
 
-        void notifyIndexLinkClicked (ITypesetBook::interactive_id character)
+        void notifyIndexLinkClicked (TypesetBook::interactive_id character)
         {
             setVisible (LeftTopicIndex, false);
             setVisible (RightTopicIndex, false);
@@ -420,7 +420,7 @@ namespace
 }
 
 // glue the implementation to the interface
-IJournalWindow * MWGui::IJournalWindow::create (IJournalViewModel::ptr Model)
+IJournalWindow * MWGui::JournalWindow::create (IJournalViewModel::ptr Model)
 {
-    return new JournalWindow (Model);
+    return new JournalWindowImpl (Model);
 }

@@ -10,13 +10,13 @@ namespace MWGui
 {
     struct IJournalViewModel;
 
-    struct IJournalWindow
+    struct JournalWindow
     {
         /// construct a new instance of the one JournalWindow implementation
-        static IJournalWindow * create (boost::shared_ptr <IJournalViewModel> Model);
+        static JournalWindow * create (boost::shared_ptr <IJournalViewModel> Model);
 
         /// destroy this instance of the JournalWindow implementation
-        virtual ~IJournalWindow () {};
+        virtual ~JournalWindow () {};
 
         /// show/hide the journal window
         virtual void setVisible (bool newValue) = 0;

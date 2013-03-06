@@ -4,13 +4,13 @@ using namespace MWGui;
 
 namespace
 {
-    IBookTypesetter::utf8_span to_utf8_span (char const * Text)
+    BookTypesetter::utf8_span to_utf8_span (char const * Text)
     {
-        typedef IBookTypesetter::utf8_point point;
+        typedef BookTypesetter::utf8_point point;
 
         point begin = reinterpret_cast <point> (Text);
 
-        return IBookTypesetter::utf8_span (begin, begin + strlen (Text));
+        return BookTypesetter::utf8_span (begin, begin + strlen (Text));
     }
 
     const MyGUI::Colour linkHot    (0.40f, 0.40f, 0.80f);
@@ -19,10 +19,10 @@ namespace
 
     struct addContent
     {
-        IBookTypesetter::ptr typesetter;
-        IBookTypesetter::IStyle* body_style;
+        BookTypesetter::ptr typesetter;
+        BookTypesetter::Style* body_style;
 
-        addContent (IBookTypesetter::ptr typesetter, IBookTypesetter::IStyle* body_style) :
+        addContent (BookTypesetter::ptr typesetter, BookTypesetter::Style* body_style) :
             typesetter (typesetter), body_style (body_style)
         {
         }
@@ -30,14 +30,14 @@ namespace
 
     struct addSpan : addContent
     {
-        addSpan (IBookTypesetter::ptr typesetter, IBookTypesetter::IStyle* body_style) :
+        addSpan (BookTypesetter::ptr typesetter, BookTypesetter::Style* body_style) :
             addContent (typesetter, body_style)
         {
         }
 
         void operator () (intptr_t topicId, size_t begin, size_t end)
         {
-            IBookTypesetter::IStyle* style = body_style;
+            BookTypesetter::Style* style = body_style;
 
             if (topicId)
                 style = typesetter->createHotStyle (body_style, linkNormal, linkHot, linkActive, topicId);
@@ -48,10 +48,10 @@ namespace
 
     struct addEntry
     {
-        IBookTypesetter::ptr typesetter;
-        IBookTypesetter::IStyle* body_style;
+        BookTypesetter::ptr typesetter;
+        BookTypesetter::Style* body_style;
 
-        addEntry (IBookTypesetter::ptr typesetter, IBookTypesetter::IStyle* body_style) :
+        addEntry (BookTypesetter::ptr typesetter, BookTypesetter::Style* body_style) :
             typesetter (typesetter), body_style (body_style)
         {
         }
@@ -67,10 +67,10 @@ namespace
     struct addJournalEntry : addEntry
     {
         bool add_header;
-        IBookTypesetter::IStyle* header_style;
+        BookTypesetter::Style* header_style;
 
-        addJournalEntry (IBookTypesetter::ptr typesetter, IBookTypesetter::IStyle* body_style,
-                            IBookTypesetter::IStyle* header_style, bool add_header) :
+        addJournalEntry (BookTypesetter::ptr typesetter, BookTypesetter::Style* body_style,
+                            BookTypesetter::Style* header_style, bool add_header) :
             addEntry (typesetter, body_style),
             header_style (header_style),
             add_header (add_header)
@@ -94,10 +94,10 @@ namespace
     struct addTopicEntry : addEntry
     {
         intptr_t contentId;
-        IBookTypesetter::IStyle* header_style;
+        BookTypesetter::Style* header_style;
 
-        addTopicEntry (IBookTypesetter::ptr typesetter, IBookTypesetter::IStyle* body_style,
-                        IBookTypesetter::IStyle* header_style, intptr_t contentId) :
+        addTopicEntry (BookTypesetter::ptr typesetter, BookTypesetter::Style* body_style,
+                        BookTypesetter::Style* header_style, intptr_t contentId) :
             addEntry (typesetter, body_style), header_style (header_style), contentId (contentId)
         {
         }
@@ -118,7 +118,7 @@ namespace
 
     struct addTopicName : addContent
     {
-        addTopicName (IBookTypesetter::ptr typesetter, IBookTypesetter::IStyle* style) :
+        addTopicName (BookTypesetter::ptr typesetter, BookTypesetter::Style* style) :
             addContent (typesetter, style)
         {
         }
@@ -132,7 +132,7 @@ namespace
 
     struct addQuestName : addContent
     {
-        addQuestName (IBookTypesetter::ptr typesetter, IBookTypesetter::IStyle* style) :
+        addQuestName (BookTypesetter::ptr typesetter, BookTypesetter::Style* style) :
             addContent (typesetter, style)
         {
         }
@@ -146,14 +146,14 @@ namespace
 
     struct addTopicLink : addContent
     {
-        addTopicLink (IBookTypesetter::ptr typesetter, IBookTypesetter::IStyle* style) :
+        addTopicLink (BookTypesetter::ptr typesetter, BookTypesetter::Style* style) :
             addContent (typesetter, style)
         {
         }
 
         void operator () (IJournalViewModel::topic_id topicId, IJournalViewModel::utf8_span name)
         {
-            IBookTypesetter::IStyle* link = typesetter->createHotStyle (body_style, MyGUI::Colour::Black, linkHot, linkActive, topicId);
+            BookTypesetter::Style* link = typesetter->createHotStyle (body_style, MyGUI::Colour::Black, linkHot, linkActive, topicId);
 
             typesetter->write (link, name);
             typesetter->lineBreak ();
@@ -162,14 +162,14 @@ namespace
 
     struct addQuestLink : addContent
     {
-        addQuestLink (IBookTypesetter::ptr typesetter, IBookTypesetter::IStyle* style) :
+        addQuestLink (BookTypesetter::ptr typesetter, BookTypesetter::Style* style) :
             addContent (typesetter, style)
         {
         }
 
         void operator () (IJournalViewModel::quest_id id, IJournalViewModel::utf8_span name)
         {
-            IBookTypesetter::IStyle* style = typesetter->createHotStyle (body_style, MyGUI::Colour::Black, linkHot, linkActive, id);
+            BookTypesetter::Style* style = typesetter->createHotStyle (body_style, MyGUI::Colour::Black, linkHot, linkActive, id);
 
             typesetter->write (style, name);
             typesetter->lineBreak ();
@@ -177,7 +177,7 @@ namespace
     };
 }
 
-typedef ITypesetBook::ptr book;
+typedef TypesetBook::ptr book;
 
 JournalBooks::JournalBooks (IJournalViewModel::ptr Model) :
     Model (Model)
@@ -186,17 +186,17 @@ JournalBooks::JournalBooks (IJournalViewModel::ptr Model) :
 
 book JournalBooks::createEmptyJournalBook ()
 {
-    IBookTypesetter::ptr typesetter = createTypesetter ();
+    BookTypesetter::ptr typesetter = createTypesetter ();
 
-    IBookTypesetter::IStyle* header = typesetter->createStyle ("EB Garamond", MyGUI::Colour (0.60f, 0.00f, 0.00f));
-    IBookTypesetter::IStyle* body   = typesetter->createStyle ("EB Garamond", MyGUI::Colour::Black);
+    BookTypesetter::Style* header = typesetter->createStyle ("EB Garamond", MyGUI::Colour (0.60f, 0.00f, 0.00f));
+    BookTypesetter::Style* body   = typesetter->createStyle ("EB Garamond", MyGUI::Colour::Black);
 
     typesetter->write (header, to_utf8_span ("You have no journal entries!"));
     typesetter->lineBreak ();
     typesetter->write (body, to_utf8_span ("You should have gone though the starting quest and got an initial quest."));
 
-    IBookTypesetter::IStyle* big    = typesetter->createStyle ("EB Garamond 24", MyGUI::Colour::Black);
-    IBookTypesetter::IStyle* test   = typesetter->createStyle ("MonoFont", MyGUI::Colour::Blue);
+    BookTypesetter::Style* big    = typesetter->createStyle ("EB Garamond 24", MyGUI::Colour::Black);
+    BookTypesetter::Style* test   = typesetter->createStyle ("MonoFont", MyGUI::Colour::Blue);
 
     typesetter->sectionBreak (20);
     typesetter->write (body, to_utf8_span (
@@ -228,10 +228,10 @@ book JournalBooks::createEmptyJournalBook ()
 
 book JournalBooks::createJournalBook ()
 {
-    IBookTypesetter::ptr typesetter = createTypesetter ();
+    BookTypesetter::ptr typesetter = createTypesetter ();
 
-    IBookTypesetter::IStyle* header = typesetter->createStyle ("EB Garamond", MyGUI::Colour (0.60f, 0.00f, 0.00f));
-    IBookTypesetter::IStyle* body   = typesetter->createStyle ("EB Garamond", MyGUI::Colour::Black);
+    BookTypesetter::Style* header = typesetter->createStyle ("EB Garamond", MyGUI::Colour (0.60f, 0.00f, 0.00f));
+    BookTypesetter::Style* body   = typesetter->createStyle ("EB Garamond", MyGUI::Colour::Black);
 
     Model->visitJournalEntries (0, addJournalEntry (typesetter, body, header, true));
 
@@ -240,10 +240,10 @@ book JournalBooks::createJournalBook ()
 
 book JournalBooks::createTopicBook (uintptr_t topicId)
 {
-    IBookTypesetter::ptr typesetter = createTypesetter ();
+    BookTypesetter::ptr typesetter = createTypesetter ();
 
-    IBookTypesetter::IStyle* header = typesetter->createStyle ("EB Garamond", MyGUI::Colour (0.60f, 0.00f, 0.00f));
-    IBookTypesetter::IStyle* body   = typesetter->createStyle ("EB Garamond", MyGUI::Colour::Black);
+    BookTypesetter::Style* header = typesetter->createStyle ("EB Garamond", MyGUI::Colour (0.60f, 0.00f, 0.00f));
+    BookTypesetter::Style* body   = typesetter->createStyle ("EB Garamond", MyGUI::Colour::Black);
 
     Model->visitTopicName (topicId, addTopicName (typesetter, header));
 
@@ -256,10 +256,10 @@ book JournalBooks::createTopicBook (uintptr_t topicId)
 
 book JournalBooks::createQuestBook (uintptr_t questId)
 {
-    IBookTypesetter::ptr typesetter = createTypesetter ();
+    BookTypesetter::ptr typesetter = createTypesetter ();
 
-    IBookTypesetter::IStyle* header = typesetter->createStyle ("EB Garamond", MyGUI::Colour (0.60f, 0.00f, 0.00f));
-    IBookTypesetter::IStyle* body   = typesetter->createStyle ("EB Garamond", MyGUI::Colour::Black);
+    BookTypesetter::Style* header = typesetter->createStyle ("EB Garamond", MyGUI::Colour (0.60f, 0.00f, 0.00f));
+    BookTypesetter::Style* body   = typesetter->createStyle ("EB Garamond", MyGUI::Colour::Black);
 
     Model->visitQuestName (questId, addQuestName (typesetter, header));
 
@@ -270,11 +270,11 @@ book JournalBooks::createQuestBook (uintptr_t questId)
 
 book JournalBooks::createTopicIndexBook ()
 {
-    IBookTypesetter::ptr typesetter = IBookTypesetter::create (92, 250);
+    BookTypesetter::ptr typesetter = BookTypesetter::create (92, 250);
 
-    typesetter->setSectionAlignment (IBookTypesetter::alignCenter);
+    typesetter->setSectionAlignment (BookTypesetter::alignCenter);
 
-    IBookTypesetter::IStyle* body   = typesetter->createStyle ("EB Garamond", MyGUI::Colour::Black);
+    BookTypesetter::Style* body   = typesetter->createStyle ("EB Garamond", MyGUI::Colour::Black);
 
     for (int i = 0; i < 26; ++i)
     {
@@ -284,7 +284,7 @@ book JournalBooks::createTopicIndexBook ()
 
         sprintf (buffer, "( %c )", ch);
 
-        IBookTypesetter::IStyle* style = typesetter->createHotStyle (body, MyGUI::Colour::Black, linkHot, linkActive, ch);
+        BookTypesetter::Style* style = typesetter->createHotStyle (body, MyGUI::Colour::Black, linkHot, linkActive, ch);
 
         if (i == 13)
             typesetter->sectionBreak ();
@@ -298,8 +298,8 @@ book JournalBooks::createTopicIndexBook ()
 
 book JournalBooks::createTopicIndexBook (char character)
 {
-    IBookTypesetter::ptr typesetter = IBookTypesetter::create (0x7FFFFFFF, 0x7FFFFFFF);
-    IBookTypesetter::IStyle* style = typesetter->createStyle ("EB Garamond", MyGUI::Colour::Black);
+    BookTypesetter::ptr typesetter = BookTypesetter::create (0x7FFFFFFF, 0x7FFFFFFF);
+    BookTypesetter::Style* style = typesetter->createStyle ("EB Garamond", MyGUI::Colour::Black);
 
     Model->visitTopicNamesStartingWith (character, addTopicLink (typesetter, style));
 
@@ -308,16 +308,16 @@ book JournalBooks::createTopicIndexBook (char character)
 
 book JournalBooks::createQuestIndexBook (bool activeOnly)
 {
-    IBookTypesetter::ptr typesetter = IBookTypesetter::create (0x7FFFFFFF, 0x7FFFFFFF);
-    IBookTypesetter::IStyle* base = typesetter->createStyle ("EB Garamond", MyGUI::Colour::Black);
+    BookTypesetter::ptr typesetter = BookTypesetter::create (0x7FFFFFFF, 0x7FFFFFFF);
+    BookTypesetter::Style* base = typesetter->createStyle ("EB Garamond", MyGUI::Colour::Black);
 
     Model->visitQuestNames (activeOnly, addQuestLink (typesetter, base));
 
     return typesetter->complete ();
 }
 
-IBookTypesetter::ptr JournalBooks::createTypesetter ()
+BookTypesetter::ptr JournalBooks::createTypesetter ()
 {
     //TODO: determine page size from layout...
-    return IBookTypesetter::create (240, 300);
+    return BookTypesetter::create (240, 300);
 }

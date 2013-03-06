@@ -15,9 +15,9 @@
 
 namespace MWGui
 {
-    struct TypesetBook;
+    struct TypesetBookImpl;
     struct PageDisplay;
-    struct BookPage;
+    struct BookPageImpl;
 }
 
 using namespace MyGUI;
@@ -27,16 +27,16 @@ static bool ucs_space (int code_point);
 static bool ucs_line_break (int code_point);
 static bool ucs_breaking_space (int code_point);
 
-struct IBookTypesetter::IStyle { virtual ~IStyle () {} };
+struct BookTypesetter::Style { virtual ~Style () {} };
 
-struct MWGui::TypesetBook : ITypesetBook
+struct MWGui::TypesetBookImpl : TypesetBook
 {
     typedef std::vector <uint8_t> content;
     typedef std::list <content> contents;
     typedef utf8_stream::point utf8_point;
     typedef std::pair <utf8_point, utf8_point> range;
 
-    struct Style : IBookTypesetter::IStyle
+    struct StyleImpl : BookTypesetter::Style
     {
         IFont*         mFont;
         Colour         mHotColour;
@@ -66,11 +66,11 @@ struct MWGui::TypesetBook : ITypesetBook
         }
     };
 
-    typedef std::list <Style> styles;
+    typedef std::list <StyleImpl> styles;
 
     struct Run
     {
-        Style*      mStyle;
+        StyleImpl*  mStyle;
         range       mRange;
         int         mLeft, mRight;
         int         mPrintableChars;
@@ -103,9 +103,9 @@ struct MWGui::TypesetBook : ITypesetBook
     styles mStyles;
     IntRect mRect;
 
-    virtual ~TypesetBook () {}
+    virtual ~TypesetBookImpl () {}
 
-    range addContent (IBookTypesetter::utf8_span Text)
+    range addContent (BookTypesetter::utf8_span Text)
     {
         contents::iterator i = mContents.insert (mContents.end (), content (Text.first, Text.second));
 
@@ -151,7 +151,7 @@ struct MWGui::TypesetBook : ITypesetBook
         visitRuns (top, bottom, NULL, Visitor);
     }
 
-    Style * hitTest (int left, int top) const
+    StyleImpl * hitTest (int left, int top) const
     {
         for (sections::const_iterator i = mSections.begin (); i != mSections.end (); ++i)
         {
@@ -180,7 +180,7 @@ struct MWGui::TypesetBook : ITypesetBook
         return nullptr;
     }
 
-    IFont* affectedFont (Style* Style)
+    IFont* affectedFont (StyleImpl* Style)
     {
         for (styles::iterator i = mStyles.begin (); i != mStyles.end (); ++i)
             if (&*i == Style)
@@ -191,9 +191,9 @@ struct MWGui::TypesetBook : ITypesetBook
     struct Typesetter;
 };
 
-struct TypesetBook::Typesetter : IBookTypesetter
+struct TypesetBookImpl::Typesetter : BookTypesetter
 {
-    typedef TypesetBook book;
+    typedef TypesetBookImpl book;
     typedef boost::shared_ptr <book> book_ptr;
 
     int mPageWidth;
@@ -222,13 +222,13 @@ struct TypesetBook::Typesetter : IBookTypesetter
     {
     }
 
-    IStyle * createStyle (char const * FontName, Colour FontColour)
+    Style * createStyle (char const * FontName, Colour FontColour)
     {
         for (styles::iterator i = mBook->mStyles.begin (); i != mBook->mStyles.end (); ++i)
             if (i->match (FontName, FontColour, FontColour, FontColour, 0))
                 return &*i;
 
-        Style & style = *mBook->mStyles.insert (mBook->mStyles.end (), Style ());
+        StyleImpl & style = *mBook->mStyles.insert (mBook->mStyles.end (), StyleImpl ());
 
         style.mFont = FontManager::getInstance().getByName(FontName);
         style.mHotColour = FontColour;
@@ -239,16 +239,16 @@ struct TypesetBook::Typesetter : IBookTypesetter
         return &style;
     }
 
-    IStyle* createHotStyle (IStyle * _BaseStyle, coulour NormalColour, coulour HoverColour, coulour ActiveColour, interactive_id Id, bool Unique)
+    Style* createHotStyle (Style* _BaseStyle, coulour NormalColour, coulour HoverColour, coulour ActiveColour, interactive_id Id, bool Unique)
     {
-        Style* BaseStyle = dynamic_cast <Style*> (_BaseStyle);
+        StyleImpl* BaseStyle = dynamic_cast <StyleImpl*> (_BaseStyle);
 
         if (!Unique)
             for (styles::iterator i = mBook->mStyles.begin (); i != mBook->mStyles.end (); ++i)
                 if (i->match (BaseStyle->mFont, HoverColour, ActiveColour, NormalColour, Id))
                     return &*i;
 
-        Style & style = *mBook->mStyles.insert (mBook->mStyles.end (), Style ());
+        StyleImpl & style = *mBook->mStyles.insert (mBook->mStyles.end (), StyleImpl ());
 
         style.mFont = BaseStyle->mFont;
         style.mHotColour = HoverColour;
@@ -259,11 +259,11 @@ struct TypesetBook::Typesetter : IBookTypesetter
         return &style;
     }
 
-    void write (IStyle * _Style, utf8_span Text)
+    void write (Style * _Style, utf8_span Text)
     {
         range text = mBook->addContent (Text);
 
-        write_impl (dynamic_cast <Style*> (_Style), text.first, text.second);
+        write_impl (dynamic_cast <StyleImpl*> (_Style), text.first, text.second);
     }
 
     intptr_t add_content (utf8_span Text, bool Select)
@@ -281,7 +281,7 @@ struct TypesetBook::Typesetter : IBookTypesetter
         mCurrentContent = reinterpret_cast <content const *> (contentHandle);
     }
 
-    void write (IStyle * style, size_t begin, size_t end)
+    void write (Style * style, size_t begin, size_t end)
     {
         assert (mCurrentContent != NULL);
         assert (end <= mCurrentContent->size ());
@@ -290,7 +290,7 @@ struct TypesetBook::Typesetter : IBookTypesetter
         utf8_point begin_ = &mCurrentContent->front () + begin;
         utf8_point end_   = &mCurrentContent->front () + end  ;
 
-        write_impl (dynamic_cast <Style*> (style), begin_, end_);
+        write_impl (dynamic_cast <StyleImpl*> (style), begin_, end_);
     }
     
     void lineBreak (float margin)
@@ -321,7 +321,7 @@ struct TypesetBook::Typesetter : IBookTypesetter
         mCurrentAlignment = sectionAlignment;
     }
 
-    ITypesetBook::ptr complete ()
+    TypesetBook::ptr complete ()
     {
         int curPageStart = 0;
         int curPageStop  = 0;
@@ -381,7 +381,7 @@ struct TypesetBook::Typesetter : IBookTypesetter
         return mBook;
     }
 
-    void write_impl (Style * Style, utf8_stream::point _begin, utf8_stream::point _end)
+    void write_impl (StyleImpl * Style, utf8_stream::point _begin, utf8_stream::point _end)
     {
         int line_height = Style->mFont->getDefaultHeight ();
 
@@ -443,7 +443,7 @@ struct TypesetBook::Typesetter : IBookTypesetter
         }
     }
 
-    void append_run (Style * style, utf8_stream::point begin, utf8_stream::point end, int pc, int right, int bottom)
+    void append_run (StyleImpl * style, utf8_stream::point begin, utf8_stream::point end, int pc, int right, int bottom)
     {
         if (mSection == NULL)
         {
@@ -501,9 +501,9 @@ struct TypesetBook::Typesetter : IBookTypesetter
     }
 };
 
-IBookTypesetter::ptr IBookTypesetter::create (int pageWidth, int pageHeight)
+BookTypesetter::ptr BookTypesetter::create (int pageWidth, int pageHeight)
 {
-    return boost::make_shared <TypesetBook::Typesetter> (pageWidth, pageHeight);
+    return boost::make_shared <TypesetBookImpl::Typesetter> (pageWidth, pageHeight);
 }
 
 namespace
@@ -684,9 +684,9 @@ class MWGui::PageDisplay : public ISubWidgetText
     MYGUI_RTTI_DERIVED(PageDisplay)
 protected:
 
-    typedef TypesetBook::Section Section;
-    typedef TypesetBook::Line    Line;
-    typedef TypesetBook::Run     Run;
+    typedef TypesetBookImpl::Section Section;
+    typedef TypesetBookImpl::Line    Line;
+    typedef TypesetBookImpl::Run     Run;
 
     struct TextFormat : ISubWidget
     {
@@ -739,7 +739,7 @@ protected:
 
 public:
 
-    typedef TypesetBook::Style style;
+    typedef TypesetBookImpl::StyleImpl style;
     typedef std::map <TextFormat::id, TextFormat*> active_text_formats;
 
     int mViewTop;
@@ -751,7 +751,7 @@ public:
     boost::function <void (intptr_t)> mLinkClicked;
 
 
-    boost::shared_ptr <TypesetBook> mBook;
+    boost::shared_ptr <TypesetBookImpl> mBook;
     size_t mPage;
 
     ILayerNode* mNode;
@@ -865,9 +865,9 @@ public:
         }
     }
 
-    void showPage (ITypesetBook::ptr _Book, size_t newPage)
+    void showPage (TypesetBook::ptr _Book, size_t newPage)
     {
-        boost::shared_ptr <TypesetBook> newBook = boost::dynamic_pointer_cast <TypesetBook> (_Book);
+        boost::shared_ptr <TypesetBookImpl> newBook = boost::dynamic_pointer_cast <TypesetBookImpl> (_Book);
 
         if (mBook != newBook)
         {
@@ -956,7 +956,7 @@ public:
         }
     };
 
-    void createActiveFormats (boost::shared_ptr <TypesetBook> newBook)
+    void createActiveFormats (boost::shared_ptr <TypesetBookImpl> newBook)
     {
         newBook->visitRuns (0, 0x7FFFFFFF, createActiveFormat (this));
 
@@ -1080,13 +1080,13 @@ public:
 };
 
 
-class MWGui::BookPage : public IBookPage
+class MWGui::BookPageImpl : public BookPage
 {
 MYGUI_RTTI_DERIVED(BookPage)
 public:
 
 
-    void showPage (ITypesetBook::ptr Book, size_t Page)
+    void showPage (TypesetBook::ptr Book, size_t Page)
     {
         if (PageDisplay* pd = dynamic_cast <PageDisplay*> (getSubWidgetText ()))
             pd->showPage (Book, Page);
@@ -1152,11 +1152,11 @@ protected:
     }
 };
 
-void IBookPage::registerMyGUIComponents ()
+void BookPage::registerMyGUIComponents ()
 {
     FactoryManager & factory = FactoryManager::getInstance();
 
-    factory.registerFactory<BookPage>("Widget");
+    factory.registerFactory<BookPageImpl>("Widget");
     factory.registerFactory<PageDisplay>("BasisSkin");
 }
 
