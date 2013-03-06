@@ -28,7 +28,7 @@ namespace MWMechanics
 
             const T& getModified() const
             {
-                return mModified;
+                return std::max(static_cast<T>(0), mModified);
             }
 
             T getModifier() const
