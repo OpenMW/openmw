@@ -129,13 +129,14 @@ MWWorld::Ptr::CellStore *MWWorld::Cells::getExterior (int x, int y)
 
 MWWorld::Ptr::CellStore *MWWorld::Cells::getInterior (const std::string& name)
 {
-    std::map<std::string, Ptr::CellStore>::iterator result = mInteriors.find (name);
+    std::string lowerName = Misc::StringUtils::lowerCase(name);
+    std::map<std::string, Ptr::CellStore>::iterator result = mInteriors.find (lowerName);
 
     if (result==mInteriors.end())
     {
-        const ESM::Cell *cell = mStore.get<ESM::Cell>().find(name);
+        const ESM::Cell *cell = mStore.get<ESM::Cell>().find(lowerName);
 
-        result = mInteriors.insert (std::make_pair (name, Ptr::CellStore (cell))).first;
+        result = mInteriors.insert (std::make_pair (lowerName, Ptr::CellStore (cell))).first;
     }
 
     if (result->second.mState!=Ptr::CellStore::State_Loaded)
