@@ -1,8 +1,9 @@
-#include <MyGUI.h>
-#include <MyGUI_OgrePlatform.h>
-#include <cassert>
-
 #include "manager.hpp"
+
+#include <MyGUI_Gui.h>
+#include <MyGUI_OgrePlatform.h>
+
+#include <cassert>
 
 using namespace OEngine::GUI;
 
@@ -54,6 +55,12 @@ void MyGUIManager::setup(Ogre::RenderWindow *wnd, Ogre::SceneManager *mgr, bool 
     // Create GUI
     mGui = new Gui();
     mGui->initialise("");
+}
+
+void MyGUIManager::updateWindow (Ogre::RenderWindow *wnd)
+{
+    mRenderManager->setRenderWindow (wnd);
+    mRenderManager->setActiveViewport(0);
 }
 
 void MyGUIManager::shutdown()

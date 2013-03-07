@@ -21,8 +21,8 @@
 
  */
 
-#ifndef _NIF_FILE_H_
-#define _NIF_FILE_H_
+#ifndef OPENMW_COMPONENTS_NIF_NIFFILE_HPP
+#define OPENMW_COMPONENTS_NIF_NIFFILE_HPP
 
 #include <OgreResourceGroupManager.h>
 #include <OgreDataStream.h>
@@ -45,7 +45,8 @@
 #include <libs/platform/stdint.h>
 
 #include "record.hpp"
-#include "nif_types.hpp"
+#include "niftypes.hpp"
+#include "nifstream.hpp"
 
 namespace Nif
 {
@@ -59,9 +60,6 @@ class NIFFile
     /// Nif file version
     int ver;
 
-    /// Input stream
-    Ogre::DataStreamPtr inp;
-
     /// File name, used for error messages
     std::string filename;
 
@@ -70,33 +68,6 @@ class NIFFile
 
     /// Parse the file
     void parse();
-
-    uint8_t read_byte()
-    {
-        uint8_t byte;
-        if(inp->read(&byte, 1) != 1) return 0;
-        return byte;
-    }
-    uint16_t read_le16()
-    {
-        uint8_t buffer[2];
-        if(inp->read(buffer, 2) != 2) return 0;
-        return buffer[0] | (buffer[1]<<8);
-    }
-    uint32_t read_le32()
-    {
-        uint8_t buffer[4];
-        if(inp->read(buffer, 4) != 4) return 0;
-        return buffer[0] | (buffer[1]<<8) | (buffer[2]<<16) | (buffer[3]<<24);
-    }
-    float read_le32f()
-    {
-        union {
-            uint32_t i;
-            float f;
-        } u = { read_le32() };
-        return u.f;
-    }
 
     class LoadedCache;
     friend class LoadedCache;
@@ -117,8 +88,8 @@ public:
 
     void warn(const std::string &msg)
     {
-        std::cerr<< "NIFFile Warning: "<<msg <<std::endl
-                 << "File: "<<filename <<std::endl;
+        std::cerr << "NIFFile Warning: " << msg <<std::endl
+                  << "File: " << filename <<std::endl;
     }
 
     typedef boost::shared_ptr <NIFFile> ptr;
@@ -147,111 +118,6 @@ public:
 
     /// Number of records
     size_t numRecords() { return records.size(); }
-
-    /*************************************************
-               Parser functions
-    ****************************************************/
-
-    void skip(size_t size) { inp->skip(size); }
-
-    char getChar() { return read_byte(); }
-    short getShort() { return read_le16(); }
-    unsigned short getUShort() { return read_le16(); }
-    int getInt() { return read_le32(); }
-    unsigned int getUInt() { return read_le32(); }
-    float getFloat() { return read_le32f(); }
-    Ogre::Vector2 getVector2()
-    {
-        float a[2];
-        for(size_t i = 0;i < 2;i++)
-            a[i] = getFloat();
-        return Ogre::Vector2(a);
-    }
-    Ogre::Vector3 getVector3()
-    {
-        float a[3];
-        for(size_t i = 0;i < 3;i++)
-            a[i] = getFloat();
-        return Ogre::Vector3(a);
-    }
-    Ogre::Vector4 getVector4()
-    {
-        float a[4];
-        for(size_t i = 0;i < 4;i++)
-            a[i] = getFloat();
-        return Ogre::Vector4(a);
-    }
-    Ogre::Matrix3 getMatrix3()
-    {
-        Ogre::Real a[3][3];
-        for(size_t i = 0;i < 3;i++)
-        {
-            for(size_t j = 0;j < 3;j++)
-                a[i][j] = Ogre::Real(getFloat());
-        }
-        return Ogre::Matrix3(a);
-    }
-    Ogre::Quaternion getQuaternion()
-    {
-        float a[4];
-        for(size_t i = 0;i < 4;i++)
-            a[i] = getFloat();
-        return Ogre::Quaternion(a);
-    }
-    Transformation getTrafo()
-    {
-        Transformation t;
-        t.pos = getVector3();
-        t.rotation = getMatrix3();
-        t.scale = getFloat();
-        return t;
-    }
-
-    std::string getString(size_t length)
-    {
-        std::vector<char> str (length+1, 0);
-
-        if(inp->read(&str[0], length) != length)
-            throw std::runtime_error ("string length in NIF file does not match");
-
-        return &str[0];
-    }
-    std::string getString()
-    {
-        size_t size = read_le32();
-        return getString(size);
-    }
-
-    void getShorts(std::vector<short> &vec, size_t size)
-    {
-        vec.resize(size);
-        for(size_t i = 0;i < vec.size();i++)
-            vec[i] = getShort();
-    }
-    void getFloats(std::vector<float> &vec, size_t size)
-    {
-        vec.resize(size);
-        for(size_t i = 0;i < vec.size();i++)
-            vec[i] = getFloat();
-    }
-    void getVector2s(std::vector<Ogre::Vector2> &vec, size_t size)
-    {
-        vec.resize(size);
-        for(size_t i = 0;i < vec.size();i++)
-            vec[i] = getVector2();
-    }
-    void getVector3s(std::vector<Ogre::Vector3> &vec, size_t size)
-    {
-        vec.resize(size);
-        for(size_t i = 0;i < vec.size();i++)
-            vec[i] = getVector3();
-    }
-    void getVector4s(std::vector<Ogre::Vector4> &vec, size_t size)
-    {
-        vec.resize(size);
-        for(size_t i = 0;i < vec.size();i++)
-            vec[i] = getVector4();
-    }
 };
 
 
@@ -270,7 +136,7 @@ typedef KeyT<Ogre::Vector3> Vector3Key;
 typedef KeyT<Ogre::Vector4> Vector4Key;
 typedef KeyT<Ogre::Quaternion> QuaternionKey;
 
-template<typename T, T (NIFFile::*getValue)()>
+template<typename T, T (NIFStream::*getValue)()>
 struct KeyListT {
     typedef std::vector< KeyT<T> > VecType;
 
@@ -281,7 +147,7 @@ struct KeyListT {
     int mInterpolationType;
     VecType mKeys;
 
-    void read(NIFFile *nif, bool force=false)
+    void read(NIFStream *nif, bool force=false)
     {
         size_t count = nif->getInt();
         if(count == 0 && !force)
@@ -322,13 +188,13 @@ struct KeyListT {
             }
         }
         else
-            nif->warn("Unhandled interpolation type: "+Ogre::StringConverter::toString(mInterpolationType));
+            nif->file->warn("Unhandled interpolation type: "+Ogre::StringConverter::toString(mInterpolationType));
     }
 };
-typedef KeyListT<float,&NIFFile::getFloat> FloatKeyList;
-typedef KeyListT<Ogre::Vector3,&NIFFile::getVector3> Vector3KeyList;
-typedef KeyListT<Ogre::Vector4,&NIFFile::getVector4> Vector4KeyList;
-typedef KeyListT<Ogre::Quaternion,&NIFFile::getQuaternion> QuaternionKeyList;
+typedef KeyListT<float,&NIFStream::getFloat> FloatKeyList;
+typedef KeyListT<Ogre::Vector3,&NIFStream::getVector3> Vector3KeyList;
+typedef KeyListT<Ogre::Vector4,&NIFStream::getVector4> Vector4KeyList;
+typedef KeyListT<Ogre::Quaternion,&NIFStream::getQuaternion> QuaternionKeyList;
 
 } // Namespace
 #endif

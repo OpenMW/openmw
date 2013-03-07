@@ -3,12 +3,9 @@
 #define IS_FIRST_PASS 1
 
 #define FOG @shGlobalSettingBool(fog)
-#define MRT @shGlobalSettingBool(mrt_output)
 
-#define LIGHTING @shGlobalSettingBool(lighting)
-
-#define SHADOWS_PSSM LIGHTING && @shGlobalSettingBool(shadows_pssm)
-#define SHADOWS LIGHTING && @shGlobalSettingBool(shadows)
+#define SHADOWS_PSSM @shGlobalSettingBool(shadows_pssm)
+#define SHADOWS @shGlobalSettingBool(shadows)
 
 #if SHADOWS || SHADOWS_PSSM
 #include "shadows.h"
@@ -18,11 +15,13 @@
 
 #define NUM_LAYERS @shPropertyString(num_layers)
 
-#if MRT || FOG || SHADOWS_PSSM
+#if FOG || SHADOWS_PSSM
 #define NEED_DEPTH 1
 #endif
 
-#define UNDERWATER @shGlobalSettingBool(underwater_effects) && LIGHTING
+#define UNDERWATER @shGlobalSettingBool(render_refraction)
+
+#define VIEWPROJ_FIX @shGlobalSettingBool(viewproj_fix)
 
 
 #if NEED_DEPTH
@@ -31,9 +30,7 @@
 
 @shAllocatePassthrough(2, UV)
 
-#if LIGHTING
-@shAllocatePassthrough(3, objSpacePosition)
-#endif
+@shAllocatePassthrough(3, worldPos)
 
 #if SHADOWS
 @shAllocatePassthrough(4, lightSpacePos0)
@@ -52,6 +49,10 @@
         shUniform(float4x4, worldMatrix) @shAutoConstant(worldMatrix, world_matrix)
         shUniform(float4x4, viewProjMatrix) @shAutoConstant(viewProjMatrix, viewproj_matrix)
         
+#if VIEWPROJ_FIX
+        shUniform(float4, vpRow2Fix) @shSharedParameter(vpRow2Fix, vpRow2Fix)
+#endif
+
         shUniform(float2, lodMorph) @shAutoConstant(lodMorph, custom, 1001)
         
         shVertexInput(float2, uv0)
@@ -95,14 +96,30 @@
         shOutputPosition = shMatrixMult(viewProjMatrix, worldPos);
         
 #if NEED_DEPTH
+#if VIEWPROJ_FIX
+        float4x4 vpFixed = viewProjMatrix;
+#if !SH_GLSL
+        vpFixed[2] = vpRow2Fix;
+#else
+        vpFixed[0][2] = vpRow2Fix.x;
+        vpFixed[1][2] = vpRow2Fix.y;
+        vpFixed[2][2] = vpRow2Fix.z;
+        vpFixed[3][2] = vpRow2Fix.w;
+#endif
+
+        float4x4 fixedWVP = shMatrixMult(vpFixed, worldMatrix);
+
+        float depth = shMatrixMult(fixedWVP, shInputPosition).z;
+        @shPassthroughAssign(depth, depth);
+#else
         @shPassthroughAssign(depth, shOutputPosition.z);
+#endif
+
 #endif
 
         @shPassthroughAssign(UV, uv0);
         
-#if LIGHTING
-        @shPassthroughAssign(objSpacePosition, shInputPosition.xyz);
-#endif
+        @shPassthroughAssign(worldPos, worldPos.xyz);
 
 #if SHADOWS
         float4 lightSpacePos = shMatrixMult(texViewProjMatrix0, shMatrixMult(worldMatrix, shInputPosition));
@@ -137,8 +154,6 @@
 
         shSampler2D(normalMap) // global normal map
         
-        shUniform(float, gammaCorrection) @shSharedParameter(gammaCorrection, gammaCorrection)
-
 
 @shForeach(@shPropertyString(num_blendmaps))
         shSampler2D(blendMap@shIterator)
@@ -154,22 +169,13 @@
 #endif
     
         @shPassthroughFragmentInputs
-    
-#if MRT
-        shDeclareMrtOutput(1)
-        shUniform(float, far) @shAutoConstant(far, far_clip_distance)
-#endif
 
-
-#if LIGHTING
         shUniform(float4, lightAmbient)                       @shAutoConstant(lightAmbient, ambient_light_colour)
     @shForeach(@shGlobalSettingString(terrain_num_lights))
-        shUniform(float4, lightPosObjSpace@shIterator)        @shAutoConstant(lightPosObjSpace@shIterator, light_position_object_space, @shIterator)
+        shUniform(float4, lightPosObjSpace@shIterator)        @shAutoConstant(lightPosObjSpace@shIterator, light_position, @shIterator)
         shUniform(float4, lightAttenuation@shIterator)        @shAutoConstant(lightAttenuation@shIterator, light_attenuation, @shIterator)
         shUniform(float4, lightDiffuse@shIterator)            @shAutoConstant(lightDiffuse@shIterator, light_diffuse_colour, @shIterator)
     @shEndForeach
-#endif
-
 
 #if SHADOWS
         shSampler2D(shadowMap0)
@@ -194,14 +200,6 @@
 
 #if UNDERWATER
         shUniform(float, waterLevel) @shSharedParameter(waterLevel)
-        shUniform(float4, lightDirectionWS0) @shAutoConstant(lightDirectionWS0, light_position, 0)
-        
-        shSampler2D(causticMap)
-        
-		shUniform(float, waterTimer) @shSharedParameter(waterTimer)
-        shUniform(float2, waterSunFade_sunHeight) @shSharedParameter(waterSunFade_sunHeight)
-        		
-		shUniform(float3, windDir_windSpeed) @shSharedParameter(windDir_windSpeed)
 #endif
 
 
@@ -214,32 +212,14 @@
 
         float2 UV = @shPassthroughReceive(UV);
         
-#if LIGHTING
-        float3 objSpacePosition = @shPassthroughReceive(objSpacePosition);
+        float3 worldPos = @shPassthroughReceive(worldPos);
 
         float3 normal = shSample(normalMap, UV).rgb * 2 - 1;
         normal = normalize(normal);
-#endif
         
         
-        
-        float3 caustics = float3(1,1,1);
-#if (UNDERWATER) || (FOG)
-        float3 worldPos = shMatrixMult(worldMatrix, float4(objSpacePosition,1)).xyz;
-#endif
-
 #if UNDERWATER
-
-        float3 waterEyePos = float3(1,1,1);
-        // NOTE: this calculation would be wrong for non-uniform scaling
-        float4 worldNormal = shMatrixMult(worldMatrix, float4(normal.xyz, 0));
-        waterEyePos = intercept(worldPos, cameraPos.xyz - worldPos, float3(0,0,1), waterLevel);
-        caustics = getCaustics(causticMap, worldPos, waterEyePos.xyz, worldNormal.xyz, lightDirectionWS0.xyz, waterLevel, waterTimer, windDir_windSpeed);
-        if (worldPos.z >= waterLevel)
-            caustics = float3(1,1,1);
-        
-
-
+        float3 waterEyePos = intercept(worldPos, cameraPos.xyz - worldPos, float3(0,0,1), waterLevel);
 #endif
         
         
@@ -254,9 +234,9 @@
 
 #if IS_FIRST_PASS == 1 && @shIterator == 0
         // first layer of first pass doesn't need a blend map
-        albedo = gammaCorrectRead(shSample(diffuseMap0, UV * 10).rgb);
+        albedo = shSample(diffuseMap0, UV * 10).rgb;
 #else
-        albedo = shLerp(albedo, gammaCorrectRead(shSample(diffuseMap@shIterator, UV * 10).rgb), blendValues@shPropertyString(blendmap_component_@shIterator));
+        albedo = shLerp(albedo, shSample(diffuseMap@shIterator, UV * 10).rgb, blendValues@shPropertyString(blendmap_component_@shIterator));
 
 #endif
 @shEndForeach
@@ -276,7 +256,6 @@
         
         // Lighting 
         
-#if LIGHTING
         // shadows only for the first (directional) light
 #if SHADOWS
             float4 lightSpacePos0 = @shPassthroughReceive(lightSpacePos0);
@@ -308,7 +287,7 @@
         
     @shForeach(@shGlobalSettingString(terrain_num_lights))
     
-        lightDir = lightPosObjSpace@shIterator.xyz - (objSpacePosition.xyz * lightPosObjSpace@shIterator.w);
+        lightDir = lightPosObjSpace@shIterator.xyz - (worldPos.xyz * lightPosObjSpace@shIterator.w);
         d = length(lightDir);
        
         
@@ -317,10 +296,10 @@
 #if @shIterator == 0
 
     #if (SHADOWS || SHADOWS_PSSM)
-        diffuse += lightDiffuse@shIterator.xyz * (1.0 / ((lightAttenuation@shIterator.y) + (lightAttenuation@shIterator.z * d) + (lightAttenuation@shIterator.w * d * d))) * max(dot(normal, lightDir), 0) * shadow * caustics;
+        diffuse += lightDiffuse@shIterator.xyz * (1.0 / ((lightAttenuation@shIterator.y) + (lightAttenuation@shIterator.z * d) + (lightAttenuation@shIterator.w * d * d))) * max(dot(normal, lightDir), 0) * shadow;
         
     #else
-        diffuse += lightDiffuse@shIterator.xyz * (1.0 / ((lightAttenuation@shIterator.y) + (lightAttenuation@shIterator.z * d) + (lightAttenuation@shIterator.w * d * d))) * max(dot(normal, lightDir), 0) * caustics;
+        diffuse += lightDiffuse@shIterator.xyz * (1.0 / ((lightAttenuation@shIterator.y) + (lightAttenuation@shIterator.z * d) + (lightAttenuation@shIterator.w * d * d))) * max(dot(normal, lightDir), 0);
         
     #endif
     
@@ -330,57 +309,22 @@
 
     @shEndForeach
     
-        shOutputColour(0).xyz *= (lightAmbient.xyz + diffuse);
-#endif
-    
+        shOutputColour(0).xyz *= (lightAmbient.xyz + diffuse);    
     
     
         
 #if FOG
-        float fogValue = shSaturate((length(cameraPos.xyz-worldPos) - fogParams.y) * fogParams.w);
+        float fogValue = shSaturate((depth - fogParams.y) * fogParams.w);
         
         #if UNDERWATER
-        // regular fog only if fragment is above water
-        if (worldPos.z > waterLevel)
+        shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, UNDERWATER_COLOUR, shSaturate(length(waterEyePos-worldPos) / VISIBILITY));
+        #else
+        shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, fogColour, fogValue);
         #endif
-        shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, gammaCorrectRead(fogColour), fogValue);
 #endif
 
         // prevent negative colour output (for example with negative lights)
         shOutputColour(0).xyz = max(shOutputColour(0).xyz, float3(0,0,0));
-        
-#if UNDERWATER
-        float fogAmount = (cameraPos.z > waterLevel)
-             ? shSaturate(length(waterEyePos-worldPos) / VISIBILITY) 
-             : shSaturate(length(cameraPos.xyz-worldPos)/ VISIBILITY);
-             
-        float3 eyeVec = normalize(cameraPos.xyz-worldPos);
-        
-        float waterSunGradient = dot(eyeVec, -normalize(lightDirectionWS0.xyz));
-        waterSunGradient = shSaturate(pow(waterSunGradient*0.7+0.3,2.0));  
-        float3 waterSunColour = gammaCorrectRead(float3(0.0,1.0,0.85))*waterSunGradient * 0.5;
-        
-        float waterGradient = dot(eyeVec, float3(0.0,-1.0,0.0));
-        waterGradient = clamp((waterGradient*0.5+0.5),0.2,1.0);
-        float3 watercolour = (gammaCorrectRead(float3(0.0078, 0.5176, 0.700))+waterSunColour)*waterGradient*2.0;
-        float3 waterext = gammaCorrectRead(float3(0.6, 0.9, 1.0));//water extinction
-        watercolour = shLerp(watercolour*0.3*waterSunFade_sunHeight.x, watercolour, shSaturate(1.0-exp(-waterSunFade_sunHeight.y*SUN_EXT)));
-        watercolour = (cameraPos.z <= waterLevel) ? watercolour : watercolour*0.3;
-    
-    
-        float darkness = VISIBILITY*2.0;
-        darkness = clamp((waterEyePos.z - waterLevel + darkness)/darkness,0.2,1.0);
-        watercolour *= darkness;
-
-        float isUnderwater = (worldPos.z < waterLevel) ? 1.0 : 0.0;
-        shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, watercolour, fogAmount * isUnderwater);
-#endif
-
-        shOutputColour(0).xyz = gammaCorrectOutput(shOutputColour(0).xyz);
-
-#if MRT
-        shOutputColour(1) = float4(depth / far,1,1,1);
-#endif
     }
 
 #endif

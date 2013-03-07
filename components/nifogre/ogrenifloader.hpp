@@ -21,8 +21,8 @@
 
  */
 
-#ifndef _OGRE_NIF_LOADER_H_
-#define _OGRE_NIF_LOADER_H_
+#ifndef OPENMW_COMPONENTS_NIFOGRE_OGRENIFLOADER_HPP
+#define OPENMW_COMPONENTS_NIFOGRE_OGRENIFLOADER_HPP
 
 #include <OgreResource.h>
 #include <OgreMesh.h>

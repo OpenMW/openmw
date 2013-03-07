@@ -79,7 +79,7 @@ void CellRef::save(ESMWriter &esm)
     }
 }
 
-void Cell::load(ESMReader &esm, MWWorld::ESMStore &store)
+void Cell::load(ESMReader &esm, bool saveContext)
 {
     // Ignore this for now, it might mean we should delete the entire
     // cell?
@@ -126,6 +126,16 @@ void Cell::load(ESMReader &esm, MWWorld::ESMStore &store)
     if (esm.isNextSub("NAM0")) {
         esm.getHT(mNAM0);
     }
+
+    if (saveContext) {
+        mContextList.push_back(esm.getContext());
+        esm.skipRecord();
+    }
+}
+
+void Cell::load(ESMReader &esm, MWWorld::ESMStore &store)
+{
+    this->load(esm, false);
 
     // preload moved references
     while (esm.isNextSub("MVRF")) {

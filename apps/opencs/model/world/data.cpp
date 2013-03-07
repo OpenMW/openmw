@@ -6,6 +6,7 @@
 #include <QAbstractTableModel>
 
 #include <components/esm/esmreader.hpp>
+#include <components/esm/defs.hpp>
 #include <components/esm/loadglob.hpp>
 
 #include "idtable.hpp"
@@ -26,12 +27,13 @@ CSMWorld::Data::Data()
     mGlobals.addColumn (new StringIdColumn<ESM::Global>);
     mGlobals.addColumn (new RecordStateColumn<ESM::Global>);
     mGlobals.addColumn (new FixedRecordTypeColumn<ESM::Global> (UniversalId::Type_Global));
-    mGlobals.addColumn (new FloatValueColumn<ESM::Global>);
+    mGlobals.addColumn (new VarTypeColumn<ESM::Global> (ColumnBase::Display_GlobalVarType));
+    mGlobals.addColumn (new VarValueColumn<ESM::Global>);
 
     mGmsts.addColumn (new StringIdColumn<ESM::GameSetting>);
     mGmsts.addColumn (new RecordStateColumn<ESM::GameSetting>);
     mGmsts.addColumn (new FixedRecordTypeColumn<ESM::GameSetting> (UniversalId::Type_Gmst));
-    mGmsts.addColumn (new VarTypeColumn<ESM::GameSetting>);
+    mGmsts.addColumn (new VarTypeColumn<ESM::GameSetting> (ColumnBase::Display_GmstVarType));
     mGmsts.addColumn (new VarValueColumn<ESM::GameSetting>);
 
     addModel (new IdTable (&mGlobals), UniversalId::Type_Globals, UniversalId::Type_Global);

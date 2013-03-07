@@ -6,6 +6,8 @@
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/class.hpp"
 
+#include "../mwrender/renderingmanager.hpp"
+
 #include "animation.hpp"
 #include "activatoranimation.hpp"
 #include "creatureanimation.hpp"
@@ -72,6 +74,7 @@ void Actors::insertNPC(const MWWorld::Ptr& ptr, MWWorld::InventoryStore& inv)
     NpcAnimation* anim = new NpcAnimation(ptr, ptr.getRefData().getBaseNode(), inv, RV_Actors);
     delete mAllActors[ptr];
     mAllActors[ptr] = anim;
+    mRendering->addWaterRippleEmitter (ptr);
 }
 void Actors::insertCreature (const MWWorld::Ptr& ptr)
 {
@@ -79,6 +82,7 @@ void Actors::insertCreature (const MWWorld::Ptr& ptr)
     CreatureAnimation* anim = new CreatureAnimation(ptr);
     delete mAllActors[ptr];
     mAllActors[ptr] = anim;
+    mRendering->addWaterRippleEmitter (ptr);
 }
 void Actors::insertActivator (const MWWorld::Ptr& ptr)
 {
@@ -90,6 +94,8 @@ void Actors::insertActivator (const MWWorld::Ptr& ptr)
 
 bool Actors::deleteObject (const MWWorld::Ptr& ptr)
 {
+    mRendering->removeWaterRippleEmitter (ptr);
+
     delete mAllActors[ptr];
     mAllActors.erase(ptr);
 
@@ -120,6 +126,7 @@ void Actors::removeCell(MWWorld::Ptr::CellStore* store)
     {
         if(iter->first.getCell() == store)
         {
+            mRendering->removeWaterRippleEmitter (iter->first);
             delete iter->second;
             mAllActors.erase(iter++);
         }
@@ -172,6 +179,8 @@ void Actors::updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
         anim->updatePtr(cur);
         mAllActors[cur] = anim;
     }
+
+    mRendering->updateWaterRippleEmitterPtr (old, cur);
 }
 
 }

@@ -64,6 +64,7 @@ namespace MWGui
 
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &TradeWindow::onCancelButtonClicked);
         mOfferButton->eventMouseButtonClick += MyGUI::newDelegate(this, &TradeWindow::onOfferButtonClicked);
+        mMaxSaleButton->eventMouseButtonClick += MyGUI::newDelegate(this, &TradeWindow::onMaxSaleButtonClicked);
         mIncreaseButton->eventMouseButtonPressed += MyGUI::newDelegate(this, &TradeWindow::onIncreaseButtonPressed);
         mIncreaseButton->eventMouseButtonReleased += MyGUI::newDelegate(this, &TradeWindow::onBalanceButtonReleased);
         mDecreaseButton->eventMouseButtonPressed += MyGUI::newDelegate(this, &TradeWindow::onDecreaseButtonPressed);
@@ -191,21 +192,7 @@ namespace MWGui
         }
 
         // check if the merchant can afford this
-        int merchantgold;
-        if (mPtr.getTypeName() == typeid(ESM::NPC).name())
-        {
-            MWWorld::LiveCellRef<ESM::NPC>* ref = mPtr.get<ESM::NPC>();
-            if (ref->mBase->mNpdt52.mGold == -10)
-                merchantgold = ref->mBase->mNpdt12.mGold;
-            else
-                merchantgold = ref->mBase->mNpdt52.mGold;
-        }
-        else // ESM::Creature
-        {
-            MWWorld::LiveCellRef<ESM::Creature>* ref = mPtr.get<ESM::Creature>();
-            merchantgold = ref->mBase->mData.mGold;
-        }
-        if (mCurrentBalance > 0 && merchantgold < mCurrentBalance)
+        if (mCurrentBalance > 0 && getMerchantGold() < mCurrentBalance)
         {
             // user notification
             MWBase::Environment::get().getWindowManager()->
@@ -293,6 +280,12 @@ namespace MWGui
         mWindowManager.removeGuiMode(GM_Barter);
     }
 
+    void TradeWindow::onMaxSaleButtonClicked(MyGUI::Widget* _sender)
+    {
+        mCurrentBalance = getMerchantGold();
+        updateLabels();
+    }
+
     void TradeWindow::onIncreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
     {
         mBalanceButtonsState = BBS_Increase;
@@ -341,22 +334,7 @@ namespace MWGui
             mTotalBalance->setCaption(boost::lexical_cast<std::string>(-mCurrentBalance));
         }
 
-        int merchantgold;
-        if (mPtr.getTypeName() == typeid(ESM::NPC).name())
-        {
-            MWWorld::LiveCellRef<ESM::NPC>* ref = mPtr.get<ESM::NPC>();
-            if (ref->mBase->mNpdt52.mGold == -10)
-                merchantgold = ref->mBase->mNpdt12.mGold;
-            else
-                merchantgold = ref->mBase->mNpdt52.mGold;
-        }
-        else // ESM::Creature
-        {
-            MWWorld::LiveCellRef<ESM::Creature>* ref = mPtr.get<ESM::Creature>();
-            merchantgold = ref->mBase->mData.mGold;
-        }
-
-        mMerchantGold->setCaptionWithReplacing("#{sSellerGold} " + boost::lexical_cast<std::string>(merchantgold));
+        mMerchantGold->setCaptionWithReplacing("#{sSellerGold} " + boost::lexical_cast<std::string>(getMerchantGold()));
     }
 
     std::vector<MWWorld::Ptr> TradeWindow::getEquippedItems()
@@ -467,5 +445,26 @@ namespace MWGui
         // remove both Trade and Dialogue (since you always trade with the NPC/creature that you have previously talked to)
         mWindowManager.removeGuiMode(GM_Barter);
         mWindowManager.removeGuiMode(GM_Dialogue);
+    }
+
+    int TradeWindow::getMerchantGold()
+    {
+        int merchantGold;
+
+        if (mPtr.getTypeName() == typeid(ESM::NPC).name())
+        {
+            MWWorld::LiveCellRef<ESM::NPC>* ref = mPtr.get<ESM::NPC>();
+            if (ref->mBase->mNpdt52.mGold == -10)
+                merchantGold = ref->mBase->mNpdt12.mGold;
+            else
+                merchantGold = ref->mBase->mNpdt52.mGold;
+        }
+        else // ESM::Creature
+        {
+            MWWorld::LiveCellRef<ESM::Creature>* ref = mPtr.get<ESM::Creature>();
+            merchantGold = ref->mBase->mData.mGold;
+        }
+
+        return merchantGold;
     }
 }

@@ -8,20 +8,11 @@
 
 #include "physic.hpp"
 
-
 enum traceWorldType
 {
     collisionWorldTrace = 1,
     pickWorldTrace = 2,
     bothWorldTrace = collisionWorldTrace | pickWorldTrace
-};
-
-enum collaborativePhysicsType
-{
-    No_Physics = 0,     // Both are empty (example: statics you can walk through, like tall grass)
-    Only_Collision = 1, // This object only has collision physics but no pickup physics (example: statics)
-    Only_Pickup = 2,    // This object only has pickup physics but no collision physics (example: items dropped on the ground)
-    Both_Physics = 3    // This object has both kinds of physics (example: activators)
 };
 
 void newtrace(traceResults *results, const Ogre::Vector3& start, const Ogre::Vector3& end, const Ogre::Vector3& BBHalfExtents, bool isInterior, OEngine::Physic::PhysicEngine *enginePass)  //Traceobj was a Aedra Object
@@ -36,7 +27,7 @@ void newtrace(traceResults *results, const Ogre::Vector3& start, const Ogre::Vec
     const btTransform to(btrot, btend);
 
     btCollisionWorld::ClosestConvexResultCallback newTraceCallback(btstart, btend);
-    newTraceCallback.m_collisionFilterMask = Only_Collision;
+    newTraceCallback.m_collisionFilterMask = OEngine::Physic::CollisionType_World|OEngine::Physic::CollisionType_Raycasting;
 
     enginePass->dynamicsWorld->convexSweepTest(&newshape, from, to, newTraceCallback);
 

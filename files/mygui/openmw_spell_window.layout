@@ -4,8 +4,8 @@
     <Widget type="ExposedWindow" skin="MW_Window_Pinnable" layer="Windows" position="0 0 300 600" name="_Main">
 
         <!-- Effect box-->
-        <Widget type="Widget" skin="MW_Box" position="8 8 268 24" align="Left Top HStretch">
-            <Widget type="Widget" skin="" position="4 4 260 16" align="Left Top Stretch" name="EffectsBox">
+        <Widget type="Widget" skin="MW_Box" position="8 8 268 23" align="Left Top HStretch">
+            <Widget type="Widget" skin="" position="2 1 264 20" align="Left Top Stretch" name="EffectsBox">
             </Widget>
         </Widget>
 

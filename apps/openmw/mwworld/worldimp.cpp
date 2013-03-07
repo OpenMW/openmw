@@ -178,10 +178,11 @@ namespace MWWorld
         const Files::Collections& fileCollections,
         const std::vector<std::string>& master, const std::vector<std::string>& plugins,
 	const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir, bool newGame,
-        ToUTF8::Utf8Encoder* encoder, std::map<std::string,std::string> fallbackMap, int mActivationDistanceOverride)
+        ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap, int mActivationDistanceOverride)
     : mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
       mSky (true), mCells (mStore, mEsm),
-      mNumFacing(0), mActivationDistanceOverride (mActivationDistanceOverride)
+      mNumFacing(0), mActivationDistanceOverride (mActivationDistanceOverride),
+      mFallback (fallbackMap)
     {
         mPhysics = new PhysicsSystem(renderer);
         mPhysEngine = mPhysics->getEngine();
@@ -198,7 +199,7 @@ namespace MWWorld
         for (std::vector<std::string>::size_type i = 0; i < master.size(); i++, idx++)
         {
             boost::filesystem::path masterPath (fileCollections.getCollection (".esm").getPath (master[i]));
-            
+
             std::cout << "Loading ESM " << masterPath.string() << "\n";
 
             // This parses the ESM file
@@ -210,11 +211,11 @@ namespace MWWorld
             mEsm[idx] = lEsm;
             mStore.load (mEsm[idx]);
         }
- 
+
         for (std::vector<std::string>::size_type i = 0; i < plugins.size(); i++, idx++)
         {
             boost::filesystem::path pluginPath (fileCollections.getCollection (".esp").getPath (plugins[i]));
-            
+
             std::cout << "Loading ESP " << pluginPath.string() << "\n";
 
             // This parses the ESP file
@@ -226,7 +227,7 @@ namespace MWWorld
             mEsm[idx] = lEsm;
             mStore.load (mEsm[idx]);
         }
-        
+
         mStore.setUp();
 
         mPlayer = new MWWorld::Player (mStore.get<ESM::NPC>().find ("player"), *this);
@@ -246,8 +247,6 @@ namespace MWWorld
         mGlobalVariables->setInt ("pcrace", 3);
 
         mWorldScene = new Scene(*mRendering, mPhysics);
-
-        setFallbackValues(fallbackMap);
 
         lastTick = mTimer.getMilliseconds();
     }
@@ -363,10 +362,8 @@ namespace MWWorld
                     const ESM::GameSetting *setting =
                         MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().search("sDefaultCellname");
 
-                    if (setting && setting->mType == ESM::VT_String)
-                        name = setting->getString();
-                    else
-                        name = "Wilderness";
+                    if (setting && setting->mValue.getType()==ESM::VT_String)
+                        name = setting->mValue.getString();
                 }
 
             }
@@ -974,14 +971,14 @@ namespace MWWorld
 
     void World::update (float duration, bool paused)
     {
+        mWeatherManager->update (duration);
+
         mWorldScene->update (duration, paused);
 
         float pitch, yaw;
         Ogre::Vector3 eyepos;
         mRendering->getPlayerData(eyepos, pitch, yaw);
         mPhysics->updatePlayerData(eyepos, pitch, yaw);
-
-        mWeatherManager->update (duration);
 
         performUpdateSceneQueries ();
 
@@ -1468,5 +1465,10 @@ namespace MWWorld
     void World::stopVideo ()
     {
         mRendering->stopVideo();
+    }
+
+    void World::frameStarted (float dt)
+    {
+        mRendering->frameStarted(dt);
     }
 }

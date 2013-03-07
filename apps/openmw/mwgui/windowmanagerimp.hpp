@@ -73,6 +73,7 @@ namespace MWGui
   class EnchantingDialog;
   class TrainingWindow;
   class Cursor;
+  class SpellIcons;
 
   class WindowManager : public MWBase::WindowManager
   {
@@ -231,6 +232,7 @@ namespace MWGui
 
   private:
     OEngine::GUI::MyGUIManager *mGuiManager;
+    OEngine::Render::OgreRenderer *mRendering;
     HUD *mHud;
     MapWindow *mMap;
     MainMenu *mMenu;

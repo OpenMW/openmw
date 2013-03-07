@@ -13,7 +13,7 @@ TextInputDialog::TextInputDialog(MWBase::WindowManager& parWindowManager)
     getWidget(mTextEdit, "TextEdit");
     mTextEdit->eventEditSelectAccept += newDelegate(this, &TextInputDialog::onTextAccepted);
 
-    MyGUI::ButtonPtr okButton;
+    MyGUI::Button* okButton;
     getWidget(okButton, "OKButton");
     okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &TextInputDialog::onOkClicked);
 
@@ -23,7 +23,7 @@ TextInputDialog::TextInputDialog(MWBase::WindowManager& parWindowManager)
 
 void TextInputDialog::setNextButtonShow(bool shown)
 {
-    MyGUI::ButtonPtr okButton;
+    MyGUI::Button* okButton;
     getWidget(okButton, "OKButton");
 
     if (shown)

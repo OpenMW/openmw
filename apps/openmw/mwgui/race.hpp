@@ -85,11 +85,11 @@ namespace MWGui
         MyGUI::ListBox*   mRaceList;
         MyGUI::ScrollBar* mHeadRotate;
 
-        MyGUI::WidgetPtr mSkillList;
-        std::vector<MyGUI::WidgetPtr> mSkillItems;
+        MyGUI::Widget* mSkillList;
+        std::vector<MyGUI::Widget*> mSkillItems;
 
-        MyGUI::WidgetPtr mSpellPowerList;
-        std::vector<MyGUI::WidgetPtr> mSpellPowerItems;
+        MyGUI::Widget* mSpellPowerList;
+        std::vector<MyGUI::Widget*> mSpellPowerItems;
 
         int mGenderIndex, mFaceIndex, mHairIndex;
         int mFaceCount, mHairCount;
