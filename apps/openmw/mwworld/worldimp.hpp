@@ -339,6 +339,10 @@ namespace MWWorld
                 mRendering->togglePlayerLooking(enable);
             }
 
+            virtual void changeVanityModeScale(float factor) {
+                mRendering->changeVanityModeScale(factor);
+            }
+
             virtual void renderPlayer();
 
             virtual void setupExternalRendering (MWRender::ExternalRendering& rendering);
