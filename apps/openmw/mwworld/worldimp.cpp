@@ -996,13 +996,7 @@ namespace MWWorld
         if (!object.isEmpty ())
         {
             Ogre::SceneNode* node = object.getRefData().getBaseNode();
-            Ogre::AxisAlignedBox bounds;
-            int i;
-            for (i=0; i<node->numAttachedObjects(); ++i)
-            {
-                Ogre::MovableObject* ob = node->getAttachedObject(i);
-                bounds.merge(ob->getWorldBoundingBox());
-            }
+            Ogre::AxisAlignedBox bounds = node->_getWorldAABB();
             if (bounds.isFinite())
             {
                 Vector4 screenCoords = mRendering->boundingBoxToScreen(bounds);

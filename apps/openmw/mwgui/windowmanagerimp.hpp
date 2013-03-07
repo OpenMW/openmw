@@ -228,6 +228,8 @@ namespace MWGui
     virtual void startEnchanting(MWWorld::Ptr actor);
     virtual void startTraining(MWWorld::Ptr actor);
 
+    virtual void changePointer (const std::string& name);
+
     virtual const Translation::Storage& getTranslationDataStorage() const;
 
   private:

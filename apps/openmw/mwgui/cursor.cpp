@@ -13,8 +13,9 @@ namespace MWGui
 {
 
 
-    ResourceImageSetPointerFix::ResourceImageSetPointerFix() :
-        mImageSet(NULL)
+    ResourceImageSetPointerFix::ResourceImageSetPointerFix()
+        : mImageSet(NULL)
+        , mRotation(0)
     {
     }
 
