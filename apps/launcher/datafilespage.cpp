@@ -2,25 +2,21 @@
 
 #include <QtGui>
 
-#include <components/esm/esmreader.hpp>
 #include <components/files/configurationmanager.hpp>
 
 #include <components/fileorderlist/model/datafilesmodel.hpp>
+#include <components/fileorderlist/model/pluginsproxymodel.hpp>
 #include <components/fileorderlist/model/esm/esmfile.hpp>
 
 #include <components/fileorderlist/utils/lineedit.hpp>
 #include <components/fileorderlist/utils/naturalsort.hpp>
 #include <components/fileorderlist/utils/profilescombobox.hpp>
 
-#include "model/pluginsproxymodel.hpp"
-
 #include "settings/gamesettings.hpp"
 #include "settings/launchersettings.hpp"
 
 #include "utils/textinputdialog.hpp"
 
-using namespace ESM;
-using namespace std;
 
 //sort QModelIndexList ascending
 bool rowGreaterThan(const QModelIndex &index1, const QModelIndex &index2)
@@ -99,60 +95,6 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
     sizeList << mLauncherSettings.value(QString("General/PluginTable/width"), QString("340")).toInt();
 
     splitter->setSizes(sizeList);
-
-//    // Filter toolbar
-//    QLabel *filterLabel = new QLabel(tr("&Filter:"), this);
-//    LineEdit *filterLineEdit = new LineEdit(this);
-//    filterLabel->setBuddy(filterLineEdit);
-
-//    QToolBar *filterToolBar = new QToolBar(this);
-//    filterToolBar->setMovable(false);
-
-//    // Create a container widget and a layout to get the spacer to work
-//    QWidget *filterWidget = new QWidget(this);
-//    QHBoxLayout *filterLayout = new QHBoxLayout(filterWidget);
-//    QSpacerItem *hSpacer1 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-
-//    filterLayout->addItem(hSpacer1);
-//    filterLayout->addWidget(filterLabel);
-//    filterLayout->addWidget(filterLineEdit);
-
-//    filterToolBar->addWidget(filterWidget);
-
-
-
-//    // Add both tables to a splitter
-//    mSplitter = new QSplitter(this);
-//    mSplitter->setOrientation(Qt::Horizontal);
-//    mSplitter->setChildrenCollapsible(false); // Don't allow the widgets to be hidden
-//    mSplitter->addWidget(mastersTable);
-//    mSplitter->addWidget(pluginsTable);
-
-
-
-//
-
-//    // Bottom part with profile options
-//    QLabel *profileLabel = new QLabel(tr("Current Profile: "), this);
-
-//    profilesComboBox = new ProfilesComboBox(this);
-//    profilesComboBox->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum));
-//    profilesComboBox->setInsertPolicy(QComboBox::NoInsert);
-//    profilesComboBox->setDuplicatesEnabled(false);
-//    profilesComboBox->setEditEnabled(false);
-
-//    mProfileToolBar = new QToolBar(this);
-//    mProfileToolBar->setMovable(false);
-//    mProfileToolBar->setIconSize(QSize(16, 16));
-
-//    mProfileToolBar->addWidget(profileLabel);
-//    mProfileToolBar->addWidget(profilesComboBox);
-
-//    QVBoxLayout *pageLayout = new QVBoxLayout(this);
-
-//    pageLayout->addWidget(filterToolBar);
-//    pageLayout->addWidget(mSplitter);
-//    pageLayout->addWidget(mProfileToolBar);
 
     // Create a dialog for the new profile name input
     mNewProfileDialog = new TextInputDialog(tr("New Profile"), tr("Profile name:"), this);

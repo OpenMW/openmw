@@ -212,6 +212,7 @@ bool DataFilesModel::setData(const QModelIndex &index, const QVariant &value, in
         QModelIndex lastIndex = indexFromItem(mFiles.last());
 
         emit dataChanged(firstIndex, lastIndex);
+        emit checkedItemsChanged(checkedItems());
         return true;
     }
 

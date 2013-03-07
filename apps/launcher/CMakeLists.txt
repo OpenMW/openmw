@@ -5,8 +5,6 @@ set(LAUNCHER
     maindialog.cpp
     playpage.cpp
 
-    model/pluginsproxymodel.cpp
-
     settings/gamesettings.cpp
     settings/graphicssettings.cpp
     settings/launchersettings.cpp
@@ -22,8 +20,6 @@ set(LAUNCHER_HEADER
     graphicspage.hpp
     maindialog.hpp
     playpage.hpp
-
-    model/pluginsproxymodel.hpp
 
     settings/gamesettings.hpp
     settings/graphicssettings.hpp
@@ -42,17 +38,15 @@ set(LAUNCHER_HEADER_MOC
     maindialog.hpp
     playpage.hpp
 
-    model/pluginsproxymodel.hpp
-
     utils/checkablemessagebox.hpp
     utils/textinputdialog.hpp
 )
 
 set(LAUNCHER_UI
-    ui/datafilespage.ui
-    ui/graphicspage.ui
-    ui/mainwindow.ui
-    ui/playpage.ui
+    ../../files/ui/datafilespage.ui
+    ../../files/ui/graphicspage.ui
+    ../../files/ui/mainwindow.ui
+    ../../files/ui/playpage.ui
 )
 
 source_group(launcher FILES ${LAUNCHER} ${LAUNCHER_HEADER})
@@ -66,7 +60,7 @@ if(WIN32)
     set(QT_USE_QTMAIN TRUE)
 endif(WIN32)
 
-QT4_ADD_RESOURCES(RCC_SRCS resources.qrc)
+QT4_ADD_RESOURCES(RCC_SRCS ${CMAKE_SOURCE_DIR}/files/launcher/launcher.qrc)
 QT4_WRAP_CPP(MOC_SRCS ${LAUNCHER_HEADER_MOC})
 QT4_WRAP_UI(UI_HDRS ${LAUNCHER_UI})
 

@@ -48,6 +48,9 @@ public:
     QModelIndex indexFromItem(EsmFile *item) const;
     EsmFile* findItem(const QString &name);
     EsmFile* item(int row) const;
+
+signals:
+    void checkedItemsChanged(const QStringList &items);
     
 private:
     bool canBeChecked(EsmFile *file) const;

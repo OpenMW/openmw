@@ -41,7 +41,7 @@ opencs_units_noqt (model/tools
 
 
 opencs_units (view/doc
-    viewmanager view operations operation subview startup opendialog
+    viewmanager view operations operation subview startup filedialog
     )
 
 
@@ -76,6 +76,10 @@ set (OPENCS_US
     )
 
 set (OPENCS_RES ../../files/opencs/resources.qrc
+                ../../files/launcher/launcher.qrc
+    )
+
+set (OPENCS_UI ../../files/ui/datafilespage.ui
     )
 
 source_group (opencs FILES ${OPENCS_SRC} ${OPENCS_HDR})
