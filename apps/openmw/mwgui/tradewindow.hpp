@@ -82,10 +82,6 @@ namespace MWGui
             void onIncreaseButtonTriggered();
             void onDecreaseButtonTriggered();
 
-            // don't show items that the NPC has equipped in his trade-window.
-            virtual bool ignoreEquippedItems() { return true; }
-            virtual std::vector<MWWorld::Ptr> getEquippedItems();
-
             virtual bool isTrading() { return true; }
             virtual bool isTradeWindow() { return true; }
 

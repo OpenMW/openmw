@@ -31,6 +31,9 @@ namespace MWGui
         , mBalanceButtonsState(BBS_None)
         , mBalanceChangePause(0.0)
     {
+        // items the NPC is wearing should not be for trade
+        mDisplayEquippedItems = true;
+
         MyGUI::ScrollView* itemView;
         MyGUI::Widget* containerWidget;
         getWidget(containerWidget, "Items");
@@ -335,30 +338,6 @@ namespace MWGui
         }
 
         mMerchantGold->setCaptionWithReplacing("#{sSellerGold} " + boost::lexical_cast<std::string>(getMerchantGold()));
-    }
-
-    std::vector<MWWorld::Ptr> TradeWindow::getEquippedItems()
-    {
-        std::vector<MWWorld::Ptr> items;
-
-        if (mPtr.getTypeName() == typeid(ESM::Creature).name())
-        {
-            // creatures don't have equipment slots.
-            return items;
-        }
-
-        MWWorld::InventoryStore& invStore = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
-
-        for (int slot=0; slot < MWWorld::InventoryStore::Slots; ++slot)
-        {
-            MWWorld::ContainerStoreIterator it = invStore.getSlot(slot);
-            if (it != invStore.end())
-            {
-                items.push_back(*it);
-            }
-        }
-
-        return items;
     }
 
     bool TradeWindow::npcAcceptsItem(MWWorld::Ptr item)
