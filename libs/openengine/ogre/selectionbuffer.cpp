@@ -24,7 +24,8 @@ namespace Render
         vp->setBackgroundColour(Ogre::ColourValue(0, 0, 0, 0));
         vp->setShadowsEnabled(false);
         vp->setMaterialScheme("selectionbuffer");
-        vp->setVisibilityMask (visibilityFlags);
+        if (visibilityFlags != 0)
+            vp->setVisibilityMask (visibilityFlags);
         mRenderTarget->setActive(true);
         mRenderTarget->setAutoUpdated (false);
 
