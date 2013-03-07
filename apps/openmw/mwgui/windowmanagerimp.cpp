@@ -1127,3 +1127,8 @@ const Translation::Storage& WindowManager::getTranslationDataStorage() const
 {
     return mTranslationDataStorage;
 }
+
+void WindowManager::changePointer(const std::string &name)
+{
+    mCursor->onCursorChange(name);
+}

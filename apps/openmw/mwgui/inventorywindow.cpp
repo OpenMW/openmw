@@ -211,24 +211,6 @@ namespace MWGui
             return MWWorld::Ptr();
     }
 
-    std::vector<MWWorld::Ptr> InventoryWindow::getEquippedItems()
-    {
-        MWWorld::InventoryStore& invStore = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
-
-        std::vector<MWWorld::Ptr> items;
-
-        for (int slot=0; slot < MWWorld::InventoryStore::Slots; ++slot)
-        {
-            MWWorld::ContainerStoreIterator it = invStore.getSlot(slot);
-            if (it != invStore.end())
-            {
-                items.push_back(*it);
-            }
-        }
-
-        return items;
-    }
-
     void InventoryWindow::_unequipItem(MWWorld::Ptr item)
     {
         MWWorld::InventoryStore& invStore = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);

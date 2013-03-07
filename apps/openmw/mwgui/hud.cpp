@@ -4,7 +4,6 @@
 
 #include <MyGUI_Widget.h>
 #include <MyGUI_RenderManager.h>
-#include <MyGUI_PointerManager.h>
 
 #include <boost/lexical_cast.hpp>
 
@@ -222,7 +221,7 @@ void HUD::onWorldClicked(MyGUI::Widget* _sender)
         else
             world->dropObjectOnGround(world->getPlayer().getPlayer(), object);
 
-        MyGUI::PointerManager::getInstance().setPointer("arrow");
+        MWBase::Environment::get().getWindowManager()->changePointer("arrow");
 
         std::string sound = MWWorld::Class::get(object).getDownSoundId(object);
         MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
@@ -273,21 +272,21 @@ void HUD::onWorldMouseOver(MyGUI::Widget* _sender, int x, int y)
         bool canDrop = world->canPlaceObject(mouseX, mouseY);
 
         if (!canDrop)
-            MyGUI::PointerManager::getInstance().setPointer("drop_ground");
+            MWBase::Environment::get().getWindowManager()->changePointer("drop_ground");
         else
-            MyGUI::PointerManager::getInstance().setPointer("arrow");
+            MWBase::Environment::get().getWindowManager()->changePointer("arrow");
 
     }
     else
     {
-        MyGUI::PointerManager::getInstance().setPointer("arrow");
+        MWBase::Environment::get().getWindowManager()->changePointer("arrow");
         mWorldMouseOver = true;
     }
 }
 
 void HUD::onWorldMouseLostFocus(MyGUI::Widget* _sender, MyGUI::Widget* _new)
 {
-    MyGUI::PointerManager::getInstance().setPointer("arrow");
+    MWBase::Environment::get().getWindowManager()->changePointer("arrow");
     mWorldMouseOver = false;
 }
 
