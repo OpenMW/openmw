@@ -4,7 +4,6 @@
 #include <QComboBox>
 
 class QString;
-
 class QRegExpValidator;
 
 class ProfilesComboBox : public QComboBox
@@ -19,8 +18,9 @@ signals:
     void profileRenamed(const QString &oldName, const QString &newName);
     
 private slots:
-    void slotReturnPressed();
+    void slotEditingFinished();
     void slotIndexChanged(int index);
+    void slotTextChanged(const QString &text);
 
 private:
     QString mOldProfile;

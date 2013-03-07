@@ -1,6 +1,6 @@
 #include <QApplication>
+#include <QTextCodec>
 #include <QDir>
-#include <QFile>
 
 #include "maindialog.hpp"
 
@@ -30,14 +30,17 @@ int main(int argc, char *argv[])
 
     QDir::setCurrent(dir.absolutePath());
 
+    // Support non-latin characters
+    QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
+
     MainDialog mainWin;
 
     if (mainWin.setup()) {
-
         mainWin.show();
-        return app.exec();
+    } else {
+        return 0;
     }
 
-    return 0;
+    return app.exec();
 }
 

@@ -14,12 +14,12 @@
 
 class QToolButton;
 
-class LineEdit : public QLineEdit
+class ComboBoxLineEdit : public QLineEdit
 {
     Q_OBJECT
 
 public:
-    LineEdit(QWidget *parent = 0);
+    ComboBoxLineEdit(QWidget *parent = 0);
 
 protected:
     void resizeEvent(QResizeEvent *);
