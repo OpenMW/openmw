@@ -18,9 +18,6 @@ void CSMDoc::Document::load (const std::vector<boost::filesystem::path>::const_i
 
     if (lastAsModified)
         getData().loadFile (*end2, false);
-
-    addOptionalGmsts();
-    addOptionalGlobals();
 }
 
 void CSMDoc::Document::addOptionalGmsts()
@@ -199,6 +196,8 @@ void CSMDoc::Document::createBase()
 
         getData().getGlobals().add (record);
     }
+
+    /// \todo add GMSTs
 }
 
 CSMDoc::Document::Document (const std::vector<boost::filesystem::path>& files, bool new_)
@@ -213,7 +212,9 @@ CSMDoc::Document::Document (const std::vector<boost::filesystem::path>& files, b
 
     mName = files.back().filename().string();
 
-    if (files.size()>1 || !new_)
+    if (new_ && files.size()==1)
+        createBase();
+    else if (files.size()>1)
     {
         std::vector<boost::filesystem::path>::const_iterator end = files.end();
 
@@ -223,8 +224,8 @@ CSMDoc::Document::Document (const std::vector<boost::filesystem::path>& files, b
         load (files.begin(), end, !new_);
     }
 
-    if (new_ && files.size()==1)
-        createBase();
+    addOptionalGmsts();
+    addOptionalGlobals();
 
     connect (&mUndoStack, SIGNAL (cleanChanged (bool)), this, SLOT (modificationStateChanged (bool)));
 
