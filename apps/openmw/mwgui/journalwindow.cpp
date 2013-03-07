@@ -94,7 +94,7 @@ namespace
             return getWidget <MWGui::BookPage> (name);
         }
 
-        JournalWindowImpl (IJournalViewModel::ptr Model)
+        JournalWindowImpl (JournalViewModel::ptr Model)
             : WindowBase("openmw_journal.layout"), JournalBooks (Model)
         {
             mMainWidget->setVisible(false);
@@ -420,7 +420,7 @@ namespace
 }
 
 // glue the implementation to the interface
-IJournalWindow * MWGui::JournalWindow::create (IJournalViewModel::ptr Model)
+JournalWindow * MWGui::JournalWindow::create (JournalViewModel::ptr Model)
 {
     return new JournalWindowImpl (Model);
 }

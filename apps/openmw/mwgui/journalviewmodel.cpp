@@ -15,7 +15,7 @@
 
 using namespace MWGui;
 
-namespace MWGui { struct JournalViewModel; }
+namespace MWGui { struct JournalViewModelImpl; }
 
 static void injectMonthName (std::ostream & os, int month);
 
@@ -148,7 +148,7 @@ private:
     std::locale mLocale;
 };
 
-struct MWGui::JournalViewModel : IJournalViewModel
+struct MWGui::JournalViewModelImpl : JournalViewModel
 {
     typedef KeywordSearch <std::string, intptr_t> keyword_search_t;
 
@@ -157,12 +157,12 @@ struct MWGui::JournalViewModel : IJournalViewModel
 
     std::locale mLocale;
 
-    JournalViewModel ()
+    JournalViewModelImpl ()
     {
         mKeywordSearchLoaded = false;
     }
 
-    virtual ~JournalViewModel ()
+    virtual ~JournalViewModelImpl ()
     {
     }
 
@@ -214,10 +214,10 @@ struct MWGui::JournalViewModel : IJournalViewModel
     {
         typedef t_iterator iterator_t;
 
-        iterator_t                  itr;
-        JournalViewModel const *    Model;
+        iterator_t                      itr;
+        JournalViewModelImpl const *    Model;
 
-        BaseEntry (JournalViewModel const * Model, iterator_t itr) :
+        BaseEntry (JournalViewModelImpl const * Model, iterator_t itr) :
             Model (Model), itr (itr), loaded (false)
         {}
 
@@ -292,14 +292,14 @@ struct MWGui::JournalViewModel : IJournalViewModel
     }
 
     template <typename iterator_t>
-    struct JournalEntry : BaseEntry <iterator_t, IJournalEntry>
+    struct JournalEntryImpl : BaseEntry <iterator_t, JournalEntry>
     {
-        using BaseEntry <iterator_t, IJournalEntry>::itr;
+        using BaseEntry <iterator_t, JournalEntry>::itr;
 
         mutable std::string timestamp_buffer;
 
-        JournalEntry (JournalViewModel const * Model, iterator_t itr) :
-            BaseEntry <iterator_t, IJournalEntry> (Model, itr)
+        JournalEntryImpl (JournalViewModelImpl const * Model, iterator_t itr) :
+            BaseEntry <iterator_t, JournalEntry> (Model, itr)
         {}
 
         std::string getText () const
@@ -326,7 +326,7 @@ struct MWGui::JournalViewModel : IJournalViewModel
         }
     };
 
-    void visitJournalEntries (quest_id questId, boost::function <void (IJournalEntry const &)> visitor) const
+    void visitJournalEntries (quest_id questId, boost::function <void (JournalEntry const &)> visitor) const
     {
         MWBase::Journal * journal = MWBase::Environment::get().getJournal();
 
@@ -339,14 +339,14 @@ struct MWGui::JournalViewModel : IJournalViewModel
                 for (MWDialogue::Topic::TEntryIter j = quest->begin (); j != quest->end (); ++j)
                 {
                     if (i->mInfoId == *j)
-                        visitor (JournalEntry <MWBase::Journal::TEntryIter> (this, i));
+                        visitor (JournalEntryImpl <MWBase::Journal::TEntryIter> (this, i));
                 }
             }
         }
         else
         {
             for(MWBase::Journal::TEntryIter i = journal->begin(); i != journal->end (); ++i)
-                visitor (JournalEntry <MWBase::Journal::TEntryIter> (this, i));
+                visitor (JournalEntryImpl <MWBase::Journal::TEntryIter> (this, i));
         }
     }
 
@@ -376,13 +376,13 @@ struct MWGui::JournalViewModel : IJournalViewModel
 
     }
 
-    struct topicEntry : BaseEntry <MWDialogue::Topic::TEntryIter, ITopicEntry>
+    struct TopicEntryImpl : BaseEntry <MWDialogue::Topic::TEntryIter, TopicEntry>
     {
         MWDialogue::Topic const & Topic;
 
         mutable std::string source_buffer;
 
-        topicEntry (JournalViewModel const * Model, MWDialogue::Topic const & Topic, iterator_t itr) :
+        TopicEntryImpl (JournalViewModelImpl const * Model, MWDialogue::Topic const & Topic, iterator_t itr) :
             BaseEntry (Model, itr), Topic (Topic)
         {}
 
@@ -401,14 +401,14 @@ struct MWGui::JournalViewModel : IJournalViewModel
 
     };
 
-    void visitTopicEntries (topic_id topicId, boost::function <void (ITopicEntry const &)> visitor) const
+    void visitTopicEntries (topic_id topicId, boost::function <void (TopicEntry const &)> visitor) const
     {
         typedef MWDialogue::Topic::TEntryIter iterator_t;
 
         MWDialogue::Topic const & Topic = * reinterpret_cast <MWDialogue::Topic const *> (topicId);
 
         for (iterator_t i = Topic.begin (); i != Topic.end (); ++i)
-            visitor (topicEntry (this, Topic, i));
+            visitor (TopicEntryImpl (this, Topic, i));
     }
 };
 
@@ -466,7 +466,7 @@ static void injectMonthName (std::ostream & os, int month)
 #endif
 }
 
-IJournalViewModel::ptr IJournalViewModel::create ()
+JournalViewModel::ptr JournalViewModel::create ()
 {
-    return boost::make_shared <JournalViewModel> ();
+    return boost::make_shared <JournalViewModelImpl> ();
 }

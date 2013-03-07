@@ -9,9 +9,9 @@ namespace MWGui
     struct JournalBooks
     {
         typedef TypesetBook::ptr book;
-        IJournalViewModel::ptr Model;
+        JournalViewModel::ptr Model;
 
-        JournalBooks (IJournalViewModel::ptr Model);
+        JournalBooks (JournalViewModel::ptr Model);
 
         book createEmptyJournalBook ();
         book createJournalBook ();

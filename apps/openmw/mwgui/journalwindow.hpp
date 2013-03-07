@@ -8,12 +8,12 @@ namespace MWBase { class WindowManager; }
 
 namespace MWGui
 {
-    struct IJournalViewModel;
+    struct JournalViewModel;
 
     struct JournalWindow
     {
         /// construct a new instance of the one JournalWindow implementation
-        static JournalWindow * create (boost::shared_ptr <IJournalViewModel> Model);
+        static JournalWindow * create (boost::shared_ptr <JournalViewModel> Model);
 
         /// destroy this instance of the JournalWindow implementation
         virtual ~JournalWindow () {};

@@ -56,7 +56,7 @@ namespace
         {
         }
 
-        void operator () (IJournalViewModel::IEntry const & Entry)
+        void operator () (JournalViewModel::Entry const & Entry)
         {
             typesetter->add_content (Entry.body ());
 
@@ -77,7 +77,7 @@ namespace
         {
         }
 
-        void operator () (IJournalViewModel::IJournalEntry const & Entry)
+        void operator () (JournalViewModel::JournalEntry const & Entry)
         {
             if (add_header)
             {
@@ -102,7 +102,7 @@ namespace
         {
         }
 
-        void operator () (IJournalViewModel::ITopicEntry const & Entry)
+        void operator () (JournalViewModel::TopicEntry const & Entry)
         {
             typesetter->write (body_style, Entry.source ());
             typesetter->write (body_style, 0, 3);// begin
@@ -123,7 +123,7 @@ namespace
         {
         }
 
-        void operator () (IJournalViewModel::utf8_span topicName)
+        void operator () (JournalViewModel::utf8_span topicName)
         {
             typesetter->write (body_style, topicName);
             typesetter->sectionBreak (10);
@@ -137,7 +137,7 @@ namespace
         {
         }
 
-        void operator () (IJournalViewModel::utf8_span topicName)
+        void operator () (JournalViewModel::utf8_span topicName)
         {
             typesetter->write (body_style, topicName);
             typesetter->sectionBreak (10);
@@ -151,7 +151,7 @@ namespace
         {
         }
 
-        void operator () (IJournalViewModel::topic_id topicId, IJournalViewModel::utf8_span name)
+        void operator () (JournalViewModel::topic_id topicId, JournalViewModel::utf8_span name)
         {
             BookTypesetter::Style* link = typesetter->createHotStyle (body_style, MyGUI::Colour::Black, linkHot, linkActive, topicId);
 
@@ -167,7 +167,7 @@ namespace
         {
         }
 
-        void operator () (IJournalViewModel::quest_id id, IJournalViewModel::utf8_span name)
+        void operator () (JournalViewModel::quest_id id, JournalViewModel::utf8_span name)
         {
             BookTypesetter::Style* style = typesetter->createHotStyle (body_style, MyGUI::Colour::Black, linkHot, linkActive, id);
 
@@ -179,7 +179,7 @@ namespace
 
 typedef TypesetBook::ptr book;
 
-JournalBooks::JournalBooks (IJournalViewModel::ptr Model) :
+JournalBooks::JournalBooks (JournalViewModel::ptr Model) :
     Model (Model)
 {
 }
