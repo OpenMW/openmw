@@ -24,13 +24,12 @@
 #ifndef OPENMW_COMPONENTS_NIFBULLET_BULLETNIFLOADER_HPP
 #define OPENMW_COMPONENTS_NIFBULLET_BULLETNIFLOADER_HPP
 
-#include <OgreMesh.h>
 #include <cassert>
 #include <string>
 #include <BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h>
 #include <BulletCollision/CollisionShapes/btConvexTriangleMeshShape.h>
 #include <btBulletDynamicsCommon.h>
-#include "openengine/bullet/BulletShapeLoader.h"
+#include <openengine/bullet/BulletShapeLoader.h>
 
 // For warning messages
 #include <iostream>
@@ -83,7 +82,7 @@ private:
     /**
     *Parse a node.
     */
-    void handleNode(Nif::Node const *node, int flags, bool hasCollisionNode, bool isCollisionNode, bool raycastingOnly);
+    void handleNode(btTriangleMesh* mesh, Nif::Node const *node, int flags, bool hasCollisionNode, bool isCollisionNode, bool raycasting);
 
     /**
     *Helper function
@@ -93,15 +92,15 @@ private:
     /**
     *convert a NiTriShape to a bullet trishape.
     */
-    void handleNiTriShape(const Nif::NiTriShape *shape, int flags, const Ogre::Matrix4 &transform, bool raycastingOnly);
+    void handleNiTriShape(btTriangleMesh* mesh, const Nif::NiTriShape *shape, int flags, const Ogre::Matrix4 &transform, bool raycasting);
 
     std::string resourceName;
     std::string resourceGroup;
 
     OEngine::Physic::BulletShape* cShape;//current shape
-    btTriangleMesh *mTriMesh;
     btBoxShape *mBoundingBox;
-    btBvhTriangleMeshShape* currentShape;//the shape curently under construction
+
+    bool mHasShape;
 };
 
 }

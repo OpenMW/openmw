@@ -97,10 +97,7 @@ namespace MWWorld
 
             void updateWindowManager ();
             void performUpdateSceneQueries ();
-            void processFacedQueryResults (MWRender::OcclusionQuery* query);
-            void beginFacedQueryProcess (MWRender::OcclusionQuery* query);
-            void beginSingleFacedQueryProcess (MWRender::OcclusionQuery* query, std::vector < std::pair < float, std::string > > const & results);
-            void beginDoubleFacedQueryProcess (MWRender::OcclusionQuery* query, std::vector < std::pair < float, std::string > > const & results);
+            void updateFacedHandle ();
 
             float getMaxActivationDistance ();
             float getNpcActivationDistance ();
