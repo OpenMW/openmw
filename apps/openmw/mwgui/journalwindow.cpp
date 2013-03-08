@@ -83,10 +83,9 @@ book formatText(std::string text,book mBook,int maxLine, int lineSize)
 
 MWGui::JournalWindow::JournalWindow (MWBase::WindowManager& parWindowManager)
     : WindowBase("openmw_journal.layout", parWindowManager)
-    , mLastPos(0)
-    , mVisible(false)
     , mPageNumber(0)
 {
+    mMainWidget->setVisible(false);
     //setCoord(0,0,498, 342);
     center();
 
@@ -115,20 +114,15 @@ MWGui::JournalWindow::JournalWindow (MWBase::WindowManager& parWindowManager)
     //displayLeftText(list.front());
 }
 
-void MWGui::JournalWindow::setVisible(bool visible)
+void MWGui::JournalWindow::close()
 {
-    if (mVisible && !visible)
-        MWBase::Environment::get().getSoundManager()->playSound ("book close", 1.0, 1.0);
-    mVisible = visible;
-
-    mMainWidget->setVisible(visible);
+    MWBase::Environment::get().getSoundManager()->playSound ("book close", 1.0, 1.0);
 }
 
 void MWGui::JournalWindow::open()
 {
     mPageNumber = 0;
-    std::string journalOpenSound = "book open";
-    MWBase::Environment::get().getSoundManager()->playSound (journalOpenSound, 1.0, 1.0);
+    MWBase::Environment::get().getSoundManager()->playSound ("book open", 1.0, 1.0);
     if(MWBase::Environment::get().getJournal()->begin()!=MWBase::Environment::get().getJournal()->end())
     {
         book journal;
@@ -182,7 +176,7 @@ void MWGui::JournalWindow::displayRightText(std::string text)
 }
 
 
-void MWGui::JournalWindow::notifyNextPage(MyGUI::WidgetPtr _sender)
+void MWGui::JournalWindow::notifyNextPage(MyGUI::Widget* _sender)
 {
     if(mPageNumber < int(mLeftPages.size())-1)
     {
@@ -194,7 +188,7 @@ void MWGui::JournalWindow::notifyNextPage(MyGUI::WidgetPtr _sender)
     }
 }
 
-void MWGui::JournalWindow::notifyPrevPage(MyGUI::WidgetPtr _sender)
+void MWGui::JournalWindow::notifyPrevPage(MyGUI::Widget* _sender)
 {
     if(mPageNumber > 0)
     {

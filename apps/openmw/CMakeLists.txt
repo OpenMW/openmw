@@ -14,9 +14,9 @@ set(GAME_HEADER
 source_group(game FILES ${GAME} ${GAME_HEADER})
 
 add_openmw_dir (mwrender
-    renderingmanager debugging sky player animation npcanimation creatureanimation actors objects
-    renderinginterface localmap occlusionquery terrain terrainmaterial water shadows
-    compositors characterpreview externalrendering globalmap
+    renderingmanager debugging sky player animation npcanimation creatureanimation activatoranimation
+    actors objects renderinginterface localmap occlusionquery terrain terrainmaterial water shadows
+    compositors characterpreview externalrendering globalmap videoplayer ripplesimulation refraction
     )
 
 add_openmw_dir (mwinput
@@ -26,11 +26,11 @@ add_openmw_dir (mwinput
 add_openmw_dir (mwgui
     text_input widgets race class birth review windowmanagerimp console dialogue
     dialogue_history window_base stats_window messagebox journalwindow charactercreation
-    map_window window_pinnable_base cursorreplace tooltips scrollwindow bookwindow list
+    map_window window_pinnable_base tooltips scrollwindow bookwindow list
     formatting inventorywindow container hud countdialog tradewindow settingswindow
     confirmationdialog alchemywindow referenceinterface spellwindow mainmenu quickkeysmenu
     itemselection spellbuyingwindow loadingscreen levelupdialog waitdialog spellcreationdialog
-    enchantingdialog trainingwindow travelwindow
+    enchantingdialog trainingwindow travelwindow imagebutton exposedwindow cursor spellicons
     )
 
 add_openmw_dir (mwdialogue
@@ -41,7 +41,7 @@ add_openmw_dir (mwscript
     locals scriptmanagerimp compilercontext interpretercontext cellextensions miscextensions
     guiextensions soundextensions skyextensions statsextensions containerextensions
     aiextensions controlextensions extensions globalscripts ref dialogueextensions
-    animationextensions transformationextensions consoleextensions userextensions
+    animationextensions transformationextensions consoleextensions userextensions locals
     )
 
 add_openmw_dir (mwsound
@@ -62,8 +62,9 @@ add_openmw_dir (mwclass
     )
 
 add_openmw_dir (mwmechanics
-    mechanicsmanagerimp stat creaturestats magiceffects movement actors drawstate spells
-    activespells npcstats aipackage aisequence alchemy aiwander aitravel aifollow aiescort aiactivate
+    mechanicsmanagerimp stat character creaturestats magiceffects movement actors activators
+    drawstate spells activespells npcstats aipackage aisequence alchemy aiwander aitravel aifollow
+    aiescort aiactivate
     )
 
 add_openmw_dir (mwbase
@@ -72,15 +73,20 @@ add_openmw_dir (mwbase
     )
 
 # Main executable
+
 IF(OGRE_STATIC)
+ADD_DEFINITIONS(-DENABLE_PLUGIN_OctreeSceneManager -DENABLE_PLUGIN_ParticleFX -DENABLE_PLUGIN_GL)
+set(OGRE_STATIC_PLUGINS ${OGRE_Plugin_OctreeSceneManager_LIBRARIES} ${OGRE_Plugin_ParticleFX_LIBRARIES} ${OGRE_RenderSystem_GL_LIBRARIES})
 IF(WIN32)
-ADD_DEFINITIONS(-DENABLE_PLUGIN_CgProgramManager -DENABLE_PLUGIN_OctreeSceneManager -DENABLE_PLUGIN_ParticleFX -DENABLE_PLUGIN_-DENABLE_PLUGIN_Direct3D9 -DENABLE_PLUGIN_GL)
-set(OGRE_STATIC_PLUGINS ${OGRE_Plugin_CgProgramManager_LIBRARIES} ${OGRE_Plugin_OctreeSceneManager_LIBRARIES} ${OGRE_Plugin_ParticleFX_LIBRARIES} ${OGRE_RenderSystem_Direct3D9_LIBRARIES} ${OGRE_RenderSystem_GL_LIBRARIES})
-ELSE(WIN32)
-ADD_DEFINITIONS(-DENABLE_PLUGIN_CgProgramManager -DENABLE_PLUGIN_OctreeSceneManager -DENABLE_PLUGIN_ParticleFX -DENABLE_PLUGIN_GL)
-set(OGRE_STATIC_PLUGINS ${OGRE_Plugin_CgProgramManager_LIBRARIES} ${Cg_LIBRARIES} ${OGRE_Plugin_OctreeSceneManager_LIBRARIES} ${OGRE_Plugin_ParticleFX_LIBRARIES} ${OGRE_RenderSystem_GL_LIBRARIES})
+ADD_DEFINITIONS(-DENABLE_PLUGIN_Direct3D9)
+list (APPEND OGRE_STATIC_PLUGINS ${OGRE_RenderSystem_Direct3D9_LIBRARIES})
 ENDIF(WIN32)
+IF (Cg_FOUND)
+ADD_DEFINITIONS(-DENABLE_PLUGIN_CgProgramManager)
+list (APPEND OGRE_STATIC_PLUGINS ${OGRE_Plugin_CgProgramManager_LIBRARIES} ${Cg_LIBRARIES})
+ENDIF (Cg_FOUND)
 ENDIF(OGRE_STATIC)
+
 add_executable(openmw
     ${OPENMW_LIBS} ${OPENMW_LIBS_HEADER}
     ${OPENMW_FILES}
@@ -120,6 +126,12 @@ if(APPLE)
     find_library(COCOA_FRAMEWORK Cocoa)
     find_library(IOKIT_FRAMEWORK IOKit)
     target_link_libraries(openmw ${CARBON_FRAMEWORK} ${COCOA_FRAMEWORK} ${IOKIT_FRAMEWORK})
+
+    if (FFMPEG_FOUND)
+        find_library(COREVIDEO_FRAMEWORK CoreVideo)
+        find_library(VDA_FRAMEWORK VideoDecodeAcceleration)
+        target_link_libraries(openmw ${COREVIDEO_FRAMEWORK} ${VDA_FRAMEWORK})
+    endif()
 endif(APPLE)
 
 if(DPKG_PROGRAM)

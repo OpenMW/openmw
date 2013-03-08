@@ -22,6 +22,8 @@ namespace MWWorld
 namespace MWSound
 {
     class Sound;
+    class Sound_Decoder;
+    typedef boost::shared_ptr<Sound_Decoder> DecoderPtr;
 }
 
 namespace MWBase
@@ -32,7 +34,7 @@ namespace MWBase
     class SoundManager
     {
         public:
-
+            /* These must all fit together */
             enum PlayMode {
                 Play_Normal  = 0, /* tracked, non-looping, multi-instance, environment */
                 Play_Loop    = 1<<0, /* Sound will continually loop until explicitly stopped */
@@ -40,6 +42,13 @@ namespace MWBase
                 Play_NoTrack = 1<<2  /* (3D only) Play the sound at the given object's position
                                       * but do not keep it updated (the sound will not move with
                                       * the object and will not stop when the object is deleted. */
+            };
+            enum PlayType {
+                Play_TypeSfx   = 1<<3, /* Normal SFX sound */
+                Play_TypeVoice = 1<<4, /* Voice sound */
+                Play_TypeMusic = 1<<5, /* Music track */
+                Play_TypeMovie = 1<<6, /* Movie audio track */
+                Play_TypeMask  = Play_TypeSfx|Play_TypeVoice|Play_TypeMusic|Play_TypeMovie
             };
 
         private:
@@ -75,7 +84,7 @@ namespace MWBase
             ///< Start playing music from the selected folder
             /// \param name of the folder that contains the playlist
 
-            virtual void say(MWWorld::Ptr reference, const std::string& filename) = 0;
+            virtual void say(const MWWorld::Ptr &reference, const std::string& filename) = 0;
             ///< Make an actor say some text.
             /// \param filename name of a sound file in "Sound/" in the data directory.
 
@@ -83,24 +92,27 @@ namespace MWBase
             ///< Say some text, without an actor ref
             /// \param filename name of a sound file in "Sound/" in the data directory.
 
-            virtual bool sayDone(MWWorld::Ptr reference=MWWorld::Ptr()) const = 0;
+            virtual bool sayDone(const MWWorld::Ptr &reference=MWWorld::Ptr()) const = 0;
             ///< Is actor not speaking?
 
-            virtual void stopSay(MWWorld::Ptr reference=MWWorld::Ptr()) = 0;
+            virtual void stopSay(const MWWorld::Ptr &reference=MWWorld::Ptr()) = 0;
             ///< Stop an actor speaking
 
+            virtual SoundPtr playTrack(const MWSound::DecoderPtr& decoder, PlayType type) = 0;
+            ///< Play a 2D audio track, using a custom decoder
+
             virtual SoundPtr playSound(const std::string& soundId, float volume, float pitch,
-                int mode=Play_Normal) = 0;
+                                       PlayMode mode=Play_Normal) = 0;
             ///< Play a sound, independently of 3D-position
 
-            virtual SoundPtr playSound3D(MWWorld::Ptr reference, const std::string& soundId,
-                                 float volume, float pitch, int mode=Play_Normal) = 0;
+            virtual SoundPtr playSound3D(const MWWorld::Ptr &reference, const std::string& soundId,
+                                         float volume, float pitch, PlayMode mode=Play_Normal) = 0;
             ///< Play a sound from an object
 
-            virtual void stopSound3D(MWWorld::Ptr reference, const std::string& soundId) = 0;
+            virtual void stopSound3D(const MWWorld::Ptr &reference, const std::string& soundId) = 0;
             ///< Stop the given object from playing the given sound,
 
-            virtual void stopSound3D(MWWorld::Ptr reference) = 0;
+            virtual void stopSound3D(const MWWorld::Ptr &reference) = 0;
             ///< Stop the given object from playing all sounds.
 
             virtual void stopSound(const MWWorld::CellStore *cell) = 0;
@@ -109,18 +121,19 @@ namespace MWBase
             virtual void stopSound(const std::string& soundId) = 0;
             ///< Stop a non-3d looping sound
 
-            virtual bool getSoundPlaying(MWWorld::Ptr reference, const std::string& soundId) const = 0;
+            virtual bool getSoundPlaying(const MWWorld::Ptr &reference, const std::string& soundId) const = 0;
             ///< Is the given sound currently playing on the given object?
+
+            virtual void pauseSounds(int types=Play_TypeMask) = 0;
+            ///< Pauses all currently playing sounds, including music.
+
+            virtual void resumeSounds(int types=Play_TypeMask) = 0;
+            ///< Resumes all previously paused sounds.
 
             virtual void update(float duration) = 0;
 
             virtual void setListenerPosDir(const Ogre::Vector3 &pos, const Ogre::Vector3 &dir, const Ogre::Vector3 &up) = 0;
     };
-
-    inline int operator|(SoundManager::PlayMode a, SoundManager::PlayMode b)
-    { return static_cast<int> (a) | static_cast<int> (b); }
-    inline int operator&(SoundManager::PlayMode a, SoundManager::PlayMode b)
-    { return static_cast<int> (a) & static_cast<int> (b); }
 }
 
 #endif

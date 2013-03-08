@@ -7,6 +7,8 @@
 
 #include <components/settings/settings.hpp>
 
+#include <components/translation/translation.hpp>
+
 #include "../mwmechanics/stat.hpp"
 
 #include "../mwgui/mode.hpp"
@@ -196,7 +198,8 @@ namespace MWBase
             virtual void removeDialog(OEngine::GUI::Layout* dialog) = 0;
             ///< Hides dialog and schedules dialog to be deleted.
 
-            virtual void messageBox (const std::string& message, const std::vector<std::string>& buttons) = 0;
+            virtual void messageBox (const std::string& message, const std::vector<std::string>& buttons = std::vector<std::string>()) = 0;
+            virtual void enterPressed () = 0;
             virtual int readPressedButton() = 0;
             ///< returns the index of the pressed button or -1 if no button was pressed (->MessageBoxmanager->InteractiveMessageBox)
 
@@ -233,6 +236,10 @@ namespace MWBase
             virtual void startSpellMaking(MWWorld::Ptr actor) = 0;
             virtual void startEnchanting(MWWorld::Ptr actor) = 0;
             virtual void startTraining(MWWorld::Ptr actor) = 0;
+
+            virtual void changePointer (const std::string& name) = 0;
+
+            virtual const Translation::Storage& getTranslationDataStorage() const = 0;
     };
 }
 

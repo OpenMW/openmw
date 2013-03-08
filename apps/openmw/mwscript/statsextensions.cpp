@@ -392,6 +392,46 @@ namespace MWScript
                 }
         };
 
+        class OpGetPCCrimeLevel : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWBase::World *world = MWBase::Environment::get().getWorld();
+                    MWWorld::Ptr player = world->getPlayer().getPlayer();
+                    runtime.push (static_cast <Interpreter::Type_Float> (MWWorld::Class::get (player).getNpcStats (player).getBounty()));
+                }
+        };
+
+        class OpSetPCCrimeLevel : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWBase::World *world = MWBase::Environment::get().getWorld();
+                    MWWorld::Ptr player = world->getPlayer().getPlayer();
+
+                    MWWorld::Class::get (player).getNpcStats (player).setBounty(runtime[0].mFloat);
+                    runtime.pop();
+                }
+        };
+
+        class OpModPCCrimeLevel : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWBase::World *world = MWBase::Environment::get().getWorld();
+                    MWWorld::Ptr player = world->getPlayer().getPlayer();
+
+                    MWWorld::Class::get (player).getNpcStats (player).setBounty(runtime[0].mFloat + MWWorld::Class::get (player).getNpcStats (player).getBounty());
+                    runtime.pop();
+                }
+        };
+
         template<class R>
         class OpAddSpell : public Interpreter::Opcode0
         {
@@ -445,7 +485,7 @@ namespace MWScript
                     for (MWMechanics::Spells::TIterator iter (
                         MWWorld::Class::get (ptr).getCreatureStats (ptr).getSpells().begin());
                         iter!=MWWorld::Class::get (ptr).getCreatureStats (ptr).getSpells().end(); ++iter)
-                        if (*iter==id)
+                        if (iter->first==id)
                         {
                             value = 1;
                             break;
@@ -472,7 +512,7 @@ namespace MWScript
                         factionID = runtime.getStringLiteral (runtime[0].mInteger);
                         runtime.pop();
                     }
-                    boost::algorithm::to_lower(factionID);
+                    Misc::StringUtils::toLower(factionID);
                     if(factionID != "")
                     {
                         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
@@ -501,7 +541,7 @@ namespace MWScript
                         factionID = runtime.getStringLiteral (runtime[0].mInteger);
                         runtime.pop();
                     }
-                    boost::algorithm::to_lower(factionID);
+                    Misc::StringUtils::toLower(factionID);
                     if(factionID != "")
                     {
                         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
@@ -534,7 +574,7 @@ namespace MWScript
                         factionID = runtime.getStringLiteral (runtime[0].mInteger);
                         runtime.pop();
                     }
-                    boost::algorithm::to_lower(factionID);
+                    Misc::StringUtils::toLower(factionID);
                     if(factionID != "")
                     {
                         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
@@ -572,7 +612,7 @@ namespace MWScript
                             factionID = MWWorld::Class::get(ptr).getNpcStats(ptr).getFactionRanks().begin()->first;
                         }
                     }
-                    boost::algorithm::to_lower(factionID);
+                    Misc::StringUtils::toLower(factionID);
                     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
                     if(factionID!="")
                     {
@@ -634,7 +674,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    runtime.push (MWWorld::Class::get (ptr).getNpcStats (ptr).getBaseDisposition());
+                    runtime.push (MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(ptr));
                 }
         };
 
@@ -674,7 +714,7 @@ namespace MWScript
                     if (factionId.empty())
                         throw std::runtime_error ("failed to determine faction");
 
-                    boost::algorithm::to_lower (factionId);
+                    Misc::StringUtils::toLower (factionId);
 
                     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
                     runtime.push (
@@ -710,7 +750,7 @@ namespace MWScript
                     if (factionId.empty())
                         throw std::runtime_error ("failed to determine faction");
 
-                    boost::algorithm::to_lower (factionId);
+                    Misc::StringUtils::toLower (factionId);
 
                     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
                     MWWorld::Class::get (player).getNpcStats (player).setFactionReputation (factionId, value);
@@ -745,7 +785,7 @@ namespace MWScript
                     if (factionId.empty())
                         throw std::runtime_error ("failed to determine faction");
 
-                    boost::algorithm::to_lower (factionId);
+                    Misc::StringUtils::toLower (factionId);
 
                     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
                     MWWorld::Class::get (player).getNpcStats (player).setFactionReputation (factionId,
@@ -790,11 +830,11 @@ namespace MWScript
                     MWWorld::Ptr ptr = R()(runtime);
 
                     std::string race = runtime.getStringLiteral(runtime[0].mInteger);
-                    boost::algorithm::to_lower(race);
+                    Misc::StringUtils::toLower(race);
                     runtime.pop();
 
                     std::string npcRace = ptr.get<ESM::NPC>()->mBase->mRace;
-                    boost::algorithm::to_lower(npcRace);
+                    Misc::StringUtils::toLower(npcRace);
 
                     runtime.push (npcRace == race);
             }
@@ -838,7 +878,7 @@ namespace MWScript
                             factionID = MWWorld::Class::get(ptr).getNpcStats(ptr).getFactionRanks().begin()->first;
                         }
                     }
-                    boost::algorithm::to_lower(factionID);
+                    Misc::StringUtils::toLower(factionID);
                     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
                     if(factionID!="")
                     {
@@ -889,7 +929,7 @@ namespace MWScript
                     if(factionID!="")
                     {
                         std::set<std::string>& expelled = MWWorld::Class::get(player).getNpcStats(player).getExpelled ();
-                        boost::algorithm::to_lower(factionID);
+                        Misc::StringUtils::toLower(factionID);
                         expelled.insert(factionID);
                     }
                 }
@@ -925,7 +965,7 @@ namespace MWScript
                     if(factionID!="")
                     {
                         std::set<std::string>& expelled = MWWorld::Class::get(player).getNpcStats(player).getExpelled ();
-                        boost::algorithm::to_lower(factionID);
+                        Misc::StringUtils::toLower(factionID);
                         expelled.erase (factionID);
                     }
                 }
@@ -1015,6 +1055,10 @@ namespace MWScript
         const int opcodeSetSkillExplicit = 0x20000df;
         const int opcodeModSkill = 0x20000fa;
         const int opcodeModSkillExplicit = 0x2000115;
+
+        const int opcodeGetPCCrimeLevel = 0x20001ec;
+        const int opcodeSetPCCrimeLevel = 0x20001ed;
+        const int opcodeModPCCrimeLevel = 0x20001ee;
 
         const int opcodeAddSpell = 0x2000147;
         const int opcodeAddSpellExplicit = 0x2000148;
@@ -1141,6 +1185,10 @@ namespace MWScript
                     opcodeModSkill+i, opcodeModSkillExplicit+i);
             }
 
+            extensions.registerFunction ("getpccrimelevel", 'f', "", opcodeGetPCCrimeLevel);
+            extensions.registerInstruction ("setpccrimelevel", "f", opcodeSetPCCrimeLevel);
+            extensions.registerInstruction ("modpccrimelevel", "f", opcodeModPCCrimeLevel);
+
             extensions.registerInstruction ("addspell", "c", opcodeAddSpell, opcodeAddSpellExplicit);
             extensions.registerInstruction ("removespell", "c", opcodeRemoveSpell,
                 opcodeRemoveSpellExplicit);
@@ -1234,6 +1282,10 @@ namespace MWScript
                 interpreter.installSegment5 (opcodeModSkill+i, new OpModSkill<ImplicitRef> (i));
                 interpreter.installSegment5 (opcodeModSkillExplicit+i, new OpModSkill<ExplicitRef> (i));
             }
+
+            interpreter.installSegment5 (opcodeGetPCCrimeLevel, new OpGetPCCrimeLevel);
+            interpreter.installSegment5 (opcodeSetPCCrimeLevel, new OpSetPCCrimeLevel);
+            interpreter.installSegment5 (opcodeModPCCrimeLevel, new OpModPCCrimeLevel);
 
             interpreter.installSegment5 (opcodeAddSpell, new OpAddSpell<ImplicitRef>);
             interpreter.installSegment5 (opcodeAddSpellExplicit, new OpAddSpell<ExplicitRef>);

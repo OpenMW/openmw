@@ -18,6 +18,7 @@
 #include "../mwworld/physicssystem.hpp"
 
 #include "../mwrender/renderinginterface.hpp"
+#include "../mwrender/actors.hpp"
 
 #include "../mwgui/tooltips.hpp"
 
@@ -96,7 +97,7 @@ namespace MWClass
         const std::string model = getModel(ptr);
         if(!model.empty())
             physics.addActor(ptr);
-        MWBase::Environment::get().getMechanicsManager()->addActor (ptr);
+        MWBase::Environment::get().getMechanicsManager()->add(ptr);
     }
 
     std::string Creature::getModel(const MWWorld::Ptr &ptr) const
@@ -131,7 +132,7 @@ namespace MWClass
         const MWWorld::Ptr& actor) const
     {
         if (MWWorld::Class::get (ptr).getCreatureStats (ptr).isDead())
-            return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionOpen(ptr));
+            return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionOpen(ptr, true));
         else
             return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionTalk (ptr));
     }

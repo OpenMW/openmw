@@ -20,7 +20,7 @@ using namespace MWGui;
 using namespace Widgets;
 
 RaceDialog::RaceDialog(MWBase::WindowManager& parWindowManager)
-  : WindowBase("openmw_chargen_race.layout", parWindowManager)
+  : WindowModal("openmw_chargen_race.layout", parWindowManager)
   , mGenderIndex(0)
   , mFaceIndex(0)
   , mHairIndex(0)
@@ -41,7 +41,7 @@ RaceDialog::RaceDialog(MWBase::WindowManager& parWindowManager)
     mHeadRotate->eventScrollChangePosition += MyGUI::newDelegate(this, &RaceDialog::onHeadRotate);
 
     // Set up next/previous buttons
-    MyGUI::ButtonPtr prevButton, nextButton;
+    MyGUI::Button *prevButton, *nextButton;
 
     setText("GenderChoiceT", mWindowManager.getGameSettingString("sRaceMenu2", "Change Sex"));
     getWidget(prevButton, "PrevGenderButton");
@@ -61,7 +61,7 @@ RaceDialog::RaceDialog(MWBase::WindowManager& parWindowManager)
     prevButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onSelectPreviousHair);
     nextButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onSelectNextHair);
 
-    setText("RaceT", mWindowManager.getGameSettingString("sRaceMenu4", "Race"));
+    setText("RaceT", mWindowManager.getGameSettingString("sRaceMenu5", "Race"));
     getWidget(mRaceList, "RaceList");
     mRaceList->setScrollVisible(true);
     mRaceList->eventListSelectAccept += MyGUI::newDelegate(this, &RaceDialog::onSelectRace);
@@ -73,15 +73,14 @@ RaceDialog::RaceDialog(MWBase::WindowManager& parWindowManager)
     setText("SpellPowerT", mWindowManager.getGameSettingString("sRaceMenu7", "Specials"));
     getWidget(mSpellPowerList, "SpellPowerList");
 
-    MyGUI::ButtonPtr backButton;
+    MyGUI::Button* backButton;
     getWidget(backButton, "BackButton");
     backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onBackClicked);
 
-    MyGUI::ButtonPtr okButton;
+    MyGUI::Button* okButton;
     getWidget(okButton, "OKButton");
     okButton->setCaption(mWindowManager.getGameSettingString("sOK", ""));
     okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onOkClicked);
-    okButton->setEnabled(false);
 
     updateRaces();
     updateSkills();
@@ -90,7 +89,7 @@ RaceDialog::RaceDialog(MWBase::WindowManager& parWindowManager)
 
 void RaceDialog::setNextButtonShow(bool shown)
 {
-    MyGUI::ButtonPtr okButton;
+    MyGUI::Button* okButton;
     getWidget(okButton, "OKButton");
 
     if (shown)
@@ -101,12 +100,14 @@ void RaceDialog::setNextButtonShow(bool shown)
 
 void RaceDialog::open()
 {
+    WindowModal::open();
+
     updateRaces();
     updateSkills();
     updateSpellPowers();
 
     mPreview = new MWRender::RaceSelectionPreview();
-    MWBase::Environment::get().getWorld ()->setupExternalRendering (*mPreview);
+    mPreview->setup();
     mPreview->update (0);
 
     const ESM::NPC proto = mPreview->getPrototype();
@@ -133,9 +134,8 @@ void RaceDialog::setRaceId(const std::string &raceId)
         if (boost::iequals(*mRaceList->getItemDataAt<std::string>(i), raceId))
         {
             mRaceList->setIndexSelected(i);
-            MyGUI::ButtonPtr okButton;
+            MyGUI::Button* okButton;
             getWidget(okButton, "OKButton");
-            okButton->setEnabled(true);
             break;
         }
     }
@@ -256,9 +256,8 @@ void RaceDialog::onSelectRace(MyGUI::ListBox* _sender, size_t _index)
     if (_index == MyGUI::ITEM_NONE)
         return;
 
-    MyGUI::ButtonPtr okButton;
+    MyGUI::Button* okButton;
     getWidget(okButton, "OKButton");
-    okButton->setEnabled(true);
     const std::string *raceId = mRaceList->getItemDataAt<std::string>(_index);
     if (boost::iequals(mCurrentRaceId, *raceId))
         return;
@@ -332,7 +331,7 @@ void RaceDialog::updateRaces()
 
 void RaceDialog::updateSkills()
 {
-    for (std::vector<MyGUI::WidgetPtr>::iterator it = mSkillItems.begin(); it != mSkillItems.end(); ++it)
+    for (std::vector<MyGUI::Widget*>::iterator it = mSkillItems.begin(); it != mSkillItems.end(); ++it)
     {
         MyGUI::Gui::getInstance().destroyWidget(*it);
     }
@@ -370,7 +369,7 @@ void RaceDialog::updateSkills()
 
 void RaceDialog::updateSpellPowers()
 {
-    for (std::vector<MyGUI::WidgetPtr>::iterator it = mSpellPowerItems.begin(); it != mSpellPowerItems.end(); ++it)
+    for (std::vector<MyGUI::Widget*>::iterator it = mSpellPowerItems.begin(); it != mSpellPowerItems.end(); ++it)
     {
         MyGUI::Gui::getInstance().destroyWidget(*it);
     }

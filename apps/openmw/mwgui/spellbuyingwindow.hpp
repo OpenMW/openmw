@@ -47,6 +47,8 @@ namespace MWGui
             void updateLabels();
 
             virtual void onReferenceUnavailable();
+
+            bool playerHasSpell (const std::string& id);
     };
 }
 

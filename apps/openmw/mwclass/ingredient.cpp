@@ -12,6 +12,10 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/physicssystem.hpp"
 #include "../mwworld/actioneat.hpp"
+#include "../mwworld/player.hpp"
+#include "../mwworld/nullaction.hpp"
+
+#include "../mwmechanics/npcstats.hpp"
 
 #include "../mwgui/tooltips.hpp"
 
@@ -69,6 +73,9 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Ingredient::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
+        if (!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
+            return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction ());
+
         boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTake (ptr));
 
         action->setSound(getUpSoundId(ptr));
@@ -154,6 +161,10 @@ namespace MWClass
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
         }
 
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer();
+        MWMechanics::NpcStats& npcStats = MWWorld::Class::get(player).getNpcStats (player);
+        int alchemySkill = npcStats.getSkill (ESM::Skill::Alchemy).getBase();
+
         MWGui::Widgets::SpellEffectList list;
         for (int i=0; i<4; ++i)
         {
@@ -163,6 +174,12 @@ namespace MWClass
             params.mEffectID = ref->mBase->mData.mEffectID[i];
             params.mAttribute = ref->mBase->mData.mAttributes[i];
             params.mSkill = ref->mBase->mData.mSkills[i];
+
+            params.mKnown = ( (i == 0 && alchemySkill >= 15)
+                 || (i == 1 && alchemySkill >= 30)
+                 || (i == 2 && alchemySkill >= 45)
+                 || (i == 3 && alchemySkill >= 60));
+
             list.push_back(params);
         }
         info.effects = list;

@@ -6,6 +6,7 @@
 #include <components/settings/settings.hpp>
 
 #include "../mwworld/globals.hpp"
+#include "../mwworld/ptr.hpp"
 
 namespace Ogre
 {
@@ -18,6 +19,11 @@ namespace OEngine
     namespace Render
     {
         class Fader;
+    }
+
+    namespace Physic
+    {
+        class PhysicEngine;
     }
 }
 
@@ -35,6 +41,7 @@ namespace ESM
 namespace MWRender
 {
     class ExternalRendering;
+    class Animation;
 }
 
 namespace MWWorld
@@ -42,9 +49,11 @@ namespace MWWorld
     class CellStore;
     class Player;
     class LocalScripts;
-    class Ptr;
     class TimeStamp;
     class ESMStore;
+    class RefData;
+
+    typedef std::vector<std::pair<MWWorld::Ptr,Ogre::Vector3> > PtrMovementList;
 }
 
 namespace MWBase
@@ -104,7 +113,7 @@ namespace MWBase
 
             virtual const MWWorld::ESMStore& getStore() const = 0;
 
-            virtual ESM::ESMReader& getEsmReader() = 0;
+            virtual std::vector<ESM::ESMReader>& getEsmReader() = 0;
 
             virtual MWWorld::LocalScripts& getLocalScripts() = 0;
 
@@ -133,6 +142,13 @@ namespace MWBase
 
             virtual char getGlobalVariableType (const std::string& name) const = 0;
             ///< Return ' ', if there is no global variable with this name.
+            
+            virtual std::vector<std::string> getGlobals () const = 0;
+
+            virtual std::string getCurrentCellName() const = 0;
+
+            virtual void removeRefScript (MWWorld::RefData *ref) = 0;
+            //< Remove the script attached to ref from mLocalScripts
 
             virtual MWWorld::Ptr getPtr (const std::string& name, bool activeOnly) = 0;
             ///< Return a pointer to a liveCellRef with the given name.
@@ -195,8 +211,8 @@ namespace MWBase
 
             virtual void markCellAsUnchanged() = 0;
 
-            virtual std::string getFacedHandle() = 0;
-            ///< Return handle of the object the player is looking at
+            virtual MWWorld::Ptr  getFacedObject() = 0;
+            ///< Return pointer to the object the player is looking at, if it is within activation range
 
             virtual void deleteObject (const MWWorld::Ptr& ptr) = 0;
 
@@ -219,8 +235,7 @@ namespace MWBase
             virtual void positionToIndex (float x, float y, int &cellX, int &cellY) const = 0;
             ///< Convert position to cell numbers
 
-            virtual void doPhysics (const std::vector<std::pair<std::string, Ogre::Vector3> >& actors,
-                float duration) = 0;
+            virtual void doPhysics (const MWWorld::PtrMovementList &actors, float duration) = 0;
             ///< Run physics simulation and modify \a world accordingly.
 
             virtual bool toggleCollisionMode() = 0;
@@ -255,18 +270,6 @@ namespace MWBase
             ///< Create a new recrod (of type npc) in the ESM store.
             /// \return pointer to created record
 
-            virtual void playAnimationGroup (const MWWorld::Ptr& ptr, const std::string& groupName,
-                int mode, int number = 1) = 0;
-            ///< Run animation for a MW-reference. Calls to this function for references that are
-            /// currently not in the rendered scene should be ignored.
-            ///
-            /// \param mode: 0 normal, 1 immediate start, 2 immediate loop
-            /// \param number How offen the animation should be run
-
-            virtual void skipAnimation (const MWWorld::Ptr& ptr) = 0;
-            ///< Skip the animation for the given MW-reference for one frame. Calls to this function for
-            /// references that are currently not in the rendered scene should be ignored.
-
             virtual void update (float duration, bool paused) = 0;
 
             virtual bool placeObject(const MWWorld::Ptr& object, float cursorX, float cursorY) = 0;
@@ -276,21 +279,24 @@ namespace MWBase
             /// @param cursor Y (relative 0-1)
             /// @return true if the object was placed, or false if it was rejected because the position is too far away
 
-            virtual void dropObjectOnGround (const MWWorld::Ptr& object) = 0;
+            virtual void dropObjectOnGround (const MWWorld::Ptr& actor, const MWWorld::Ptr& object) = 0;
 
             virtual bool canPlaceObject (float cursorX, float cursorY) = 0;
             ///< @return true if it is possible to place on object at specified cursor location
 
             virtual void processChangedSettings (const Settings::CategorySettingVector& settings) = 0;
 
-            virtual bool isSwimming(const MWWorld::Ptr &object) = 0;
-            virtual bool isUnderwater(const ESM::Cell &cell, const Ogre::Vector3 &pos) = 0;
+            virtual bool isFlying(const MWWorld::Ptr &ptr) const = 0;
+            virtual bool isSwimming(const MWWorld::Ptr &object) const = 0;
+            virtual bool isUnderwater(const MWWorld::Ptr::CellStore* cell, const Ogre::Vector3 &pos) const = 0;
+            virtual bool isOnGround(const MWWorld::Ptr &ptr) const = 0;
 
             virtual void togglePOV() = 0;
             virtual void togglePreviewMode(bool enable) = 0;
             virtual bool toggleVanityMode(bool enable, bool force) = 0;
             virtual void allowVanityMode(bool allow) = 0;
             virtual void togglePlayerLooking(bool enable) = 0;
+            virtual void changeVanityModeScale(float factor) = 0;
 
             virtual void renderPlayer() = 0;
             
@@ -302,6 +308,14 @@ namespace MWBase
             /// 1 - only waiting \n
             /// 2 - player is underwater \n
             /// 3 - enemies are nearby (not implemented)
+
+            /// \todo Probably shouldn't be here
+            virtual MWRender::Animation* getAnimation(const MWWorld::Ptr &ptr) = 0;
+
+            /// \todo this does not belong here
+            virtual void playVideo(const std::string& name, bool allowSkipping) = 0;
+            virtual void stopVideo() = 0;
+            virtual void frameStarted (float dt) = 0;
     };
 }
 

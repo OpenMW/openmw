@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>opencs.png</file>
+    </qresource>
+</RCC>

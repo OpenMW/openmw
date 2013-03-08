@@ -2,6 +2,7 @@
 #include "dialoguemanagerimp.hpp"
 
 #include <cctype>
+#include <cstdlib>
 #include <algorithm>
 #include <iterator>
 
@@ -16,9 +17,11 @@
 #include <components/compiler/scriptparser.hpp>
 
 #include <components/interpreter/interpreter.hpp>
+#include <components/interpreter/defines.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/journal.hpp"
 #include "../mwbase/scriptmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -39,47 +42,14 @@
 
 #include "filter.hpp"
 
-namespace
-{
-    std::string toLower (const std::string& name)
-    {
-        std::string lowerCase;
-
-        std::transform (name.begin(), name.end(), std::back_inserter (lowerCase),
-            (int(*)(int)) std::tolower);
-
-        return lowerCase;
-    }
-
-    bool stringCompareNoCase (std::string first, std::string second)
-    {
-        unsigned int i=0;
-        while ( (i<first.length()) && (i<second.length()) )
-        {
-            if (tolower(first[i])<tolower(second[i])) return true;
-            else if (tolower(first[i])>tolower(second[i])) return false;
-            ++i;
-        }
-        if (first.length()<second.length())
-            return true;
-        else
-            return false;
-    }
-
-    //helper function
-    std::string::size_type find_str_ci(const std::string& str, const std::string& substr,size_t pos)
-    {
-        return toLower(str).find(toLower(substr),pos);
-    }
-}
-
 namespace MWDialogue
 {
-    DialogueManager::DialogueManager (const Compiler::Extensions& extensions, bool scriptVerbose) :
+    DialogueManager::DialogueManager (const Compiler::Extensions& extensions, bool scriptVerbose, Translation::Storage& translationDataStorage) :
       mCompilerContext (MWScript::CompilerContext::Type_Dialgoue),
         mErrorStream(std::cout.rdbuf()),mErrorHandler(mErrorStream)
       , mTemporaryDispositionChange(0.f)
       , mPermanentDispositionChange(0.f), mScriptVerbose (scriptVerbose)
+      , mTranslationDataStorage(translationDataStorage)
     {
         mChoice = -1;
         mIsInChoice = false;
@@ -93,26 +63,55 @@ namespace MWDialogue
         MWWorld::Store<ESM::Dialogue>::iterator it = dialogs.begin();
         for (; it != dialogs.end(); ++it)
         {
-            mDialogueMap[toLower(it->mId)] = *it;
+            mDialogueMap[Misc::StringUtils::lowerCase(it->mId)] = *it;
         }
     }
 
     void DialogueManager::addTopic (const std::string& topic)
     {
-        mKnownTopics[toLower(topic)] = true;
+        mKnownTopics[Misc::StringUtils::lowerCase(topic)] = true;
     }
 
     void DialogueManager::parseText (const std::string& text)
     {
-        std::list<std::string>::iterator it;
-        for(it = mActorKnownTopics.begin();it != mActorKnownTopics.end();++it)
+        std::vector<HyperTextToken> hypertext = ParseHyperText(text);
+
+        //calculation of standard form fir all hyperlinks
+        for (size_t i = 0; i < hypertext.size(); ++i)
         {
-            size_t pos = find_str_ci(text,*it,0);
-            if(pos !=std::string::npos)
+            if (hypertext[i].mLink)
             {
-                mKnownTopics[*it] = true;
+                size_t asterisk_count = MWDialogue::RemovePseudoAsterisks(hypertext[i].mText);
+                for(; asterisk_count > 0; --asterisk_count)
+                    hypertext[i].mText.append("*");
+
+                hypertext[i].mText = mTranslationDataStorage.topicStandardForm(hypertext[i].mText);
             }
         }
+
+        for (size_t i = 0; i < hypertext.size(); ++i)
+        {
+            std::list<std::string>::iterator it;
+            for(it = mActorKnownTopics.begin(); it != mActorKnownTopics.end(); ++it)
+            {
+                if (hypertext[i].mLink)
+                {
+                    if( hypertext[i].mText == *it )
+                    {
+                        mKnownTopics[hypertext[i].mText] = true;
+                    }
+                }
+                else if( !mTranslationDataStorage.hasTranslation() )
+                {
+                    size_t pos = Misc::StringUtils::lowerCase(hypertext[i].mText).find(*it, 0);
+                    if(pos !=std::string::npos)
+                    {
+                        mKnownTopics[*it] = true;
+                    }
+                }
+            }
+        }
+
         updateTopics();
     }
 
@@ -125,14 +124,8 @@ namespace MWDialogue
 
         MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get (actor).getCreatureStats (actor);
         mTalkedTo = creatureStats.hasTalkedToPlayer();
-        creatureStats.talkedToPlayer();
 
         mActorKnownTopics.clear();
-
-        //initialise the GUI
-        MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Dialogue);
-        MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
-        win->startDialogue(actor, MWWorld::Class::get (actor).getName (actor));
 
         //setup the list of topics known by the actor. Topics who are also on the knownTopics list will be added to the GUI
         updateTopics();
@@ -147,15 +140,25 @@ namespace MWDialogue
         {
             if(it->mType == ESM::Dialogue::Greeting)
             {
-                if (const ESM::DialInfo *info = filter.search (*it))
+                // Search a response (we do not accept a fallback to "Info refusal" here)
+                if (const ESM::DialInfo *info = filter.search (*it, false))
                 {
+                    //initialise the GUI
+                    MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Dialogue);
+                    MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
+                    win->startDialogue(actor, MWWorld::Class::get (actor).getName (actor));
+
+                    creatureStats.talkedToPlayer();
+
                     if (!info->mSound.empty())
                     {
                         // TODO play sound
                     }
 
                     parseText (info->mResponse);
-                    win->addText (info->mResponse);
+
+                    MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
+                    win->addText (Interpreter::fixDefinesDialog(info->mResponse, interpreterContext));
                     executeScript (info->mResultScript);
                     mLastTopic = it->mId;
                     mLastDialogue = *info;
@@ -247,11 +250,15 @@ namespace MWDialogue
 
         const ESM::Dialogue& dialogue = *dialogues.find (topic);
 
-        if (const ESM::DialInfo *info = filter.search (dialogue))
-        {
-            parseText (info->mResponse);
+        MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
 
-            MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
+        std::vector<const ESM::DialInfo *> infos = filter.list (dialogue, true, true);
+
+        if (!infos.empty())
+        {
+            const ESM::DialInfo* info = infos[std::rand() % infos.size()];
+
+            parseText (info->mResponse);
 
             if (dialogue.mType==ESM::Dialogue::Persuasion)
             {
@@ -267,12 +274,21 @@ namespace MWDialogue
             else
                 win->addTitle (topic);
 
-            win->addText (info->mResponse);
+            MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
+            win->addText (Interpreter::fixDefinesDialog(info->mResponse, interpreterContext));
+            MWBase::Environment::get().getJournal()->addTopic (topic, info->mId);
 
             executeScript (info->mResultScript);
 
             mLastTopic = topic;
             mLastDialogue = *info;
+        }
+        else
+        {
+            // no response found, print a fallback text
+            win->addTitle (topic);
+            win->addText ("…");
+
         }
     }
 
@@ -292,12 +308,13 @@ namespace MWDialogue
         {
             if (iter->mType == ESM::Dialogue::Topic)
             {
-                if (filter.search (*iter))
+                if (filter.responseAvailable (*iter))
                 {
-                    mActorKnownTopics.push_back (toLower (iter->mId));
+                    std::string lower = Misc::StringUtils::lowerCase(iter->mId);
+                    mActorKnownTopics.push_back (lower);
 
                     //does the player know the topic?
-                    if (mKnownTopics.find (toLower (iter->mId)) != mKnownTopics.end())
+                    if (mKnownTopics.find (lower) != mKnownTopics.end())
                     {
                         keywordList.push_back (iter->mId);
                     }
@@ -355,7 +372,7 @@ namespace MWDialogue
         win->setServices (windowServices);
 
         // sort again, because the previous sort was case-sensitive
-        keywordList.sort(stringCompareNoCase);
+        keywordList.sort(Misc::StringUtils::ciEqual);
         win->setKeywords(keywordList);
 
         mChoice = choice;
@@ -380,6 +397,10 @@ namespace MWDialogue
 
     void DialogueManager::goodbyeSelected()
     {
+        // Do not close the dialogue window if the player has to answer a question
+        if (mIsInChoice)
+            return;
+
         MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Dialogue);
 
         // Apply disposition change to NPC's base disposition
@@ -404,14 +425,17 @@ namespace MWDialogue
                 {
                     Filter filter (mActor, mChoice, mTalkedTo);
 
-                    if (const ESM::DialInfo *info = filter.search (mDialogueMap[mLastTopic]))
+                    if (const ESM::DialInfo *info = filter.search (mDialogueMap[mLastTopic], true))
                     {
                         mChoiceMap.clear();
                         mChoice = -1;
                         mIsInChoice = false;
                         std::string text = info->mResponse;
                         parseText (text);
-                        MWBase::Environment::get().getWindowManager()->getDialogueWindow()->addText (text);
+
+                        MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
+                        MWBase::Environment::get().getWindowManager()->getDialogueWindow()->addText (Interpreter::fixDefinesDialog(text, interpreterContext));
+                        MWBase::Environment::get().getJournal()->addTopic (mLastTopic, info->mId);
                         executeScript (info->mResultScript);
                         mLastTopic = mLastTopic;
                         mLastDialogue = *info;
@@ -433,7 +457,7 @@ namespace MWDialogue
     {
         MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
         win->askQuestion(question);
-        mChoiceMap[toLower(question)] = choice;
+        mChoiceMap[Misc::StringUtils::lowerCase(question)] = choice;
         mIsInChoice = true;
     }
 
@@ -492,5 +516,58 @@ namespace MWDialogue
     void DialogueManager::applyTemporaryDispositionChange(int delta)
     {
         mTemporaryDispositionChange += delta;
+    }
+
+    std::vector<HyperTextToken> ParseHyperText(const std::string& text)
+    {
+        std::vector<HyperTextToken> result;
+
+        MyGUI::UString utext(text);
+
+        size_t pos_begin, pos_end, iteration_pos = 0;
+        for(;;)
+        {
+            pos_begin = utext.find('@', iteration_pos);
+            if (pos_begin != std::string::npos)
+                pos_end = utext.find('#', pos_begin);
+
+            if (pos_begin != std::string::npos && pos_end != std::string::npos)
+            {
+                result.push_back( HyperTextToken(utext.substr(iteration_pos, pos_begin - iteration_pos), false) );
+
+                std::string link = utext.substr(pos_begin + 1, pos_end - pos_begin - 1);
+                result.push_back( HyperTextToken(link, true) );
+
+                iteration_pos = pos_end + 1;
+            }
+            else
+            {
+                result.push_back( HyperTextToken(utext.substr(iteration_pos), false) );
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    size_t RemovePseudoAsterisks(std::string& phrase)
+    {
+        size_t pseudoAsterisksCount = 0;
+        const char specialPseudoAsteriskCharacter = 127;
+
+        if( !phrase.empty() )
+        {
+            std::string::reverse_iterator rit = phrase.rbegin();
+
+            while( rit != phrase.rend() && *rit == specialPseudoAsteriskCharacter )
+            {
+                pseudoAsterisksCount++;
+                ++rit;
+            }
+        }
+
+        phrase = phrase.substr(0, phrase.length() - pseudoAsterisksCount);
+
+        return pseudoAsterisksCount;
     }
 }

@@ -19,6 +19,8 @@ namespace MWGui
 
         void onResChange(int w, int h);
 
+        void updateWindow(Ogre::RenderWindow* rw) { mWindow = rw; }
+
     private:
         bool mFirstLoad;
 
@@ -42,6 +44,7 @@ namespace MWGui
         Ogre::Rectangle2D* mRectangle;
         Ogre::MaterialPtr mBackgroundMaterial;
 
+        Ogre::StringVectorPtr mResources;
 
         bool mLoadingOn;
 

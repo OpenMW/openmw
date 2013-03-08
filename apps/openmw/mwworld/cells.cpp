@@ -84,9 +84,9 @@ MWWorld::Ptr MWWorld::Cells::getPtrAndCache (const std::string& name, Ptr::CellS
     return ptr;
 }
 
-MWWorld::Cells::Cells (const MWWorld::ESMStore& store, ESM::ESMReader& reader)
+MWWorld::Cells::Cells (const MWWorld::ESMStore& store, std::vector<ESM::ESMReader>& reader)
 : mStore (store), mReader (reader),
-  mIdCache (20, std::pair<std::string, Ptr::CellStore *> ("", (Ptr::CellStore*)0)), /// \todo make cache size configurable
+  mIdCache (40, std::pair<std::string, Ptr::CellStore *> ("", (Ptr::CellStore*)0)), /// \todo make cache size configurable
   mIdCacheIndex (0)
 {}
 
@@ -119,6 +119,7 @@ MWWorld::Ptr::CellStore *MWWorld::Cells::getExterior (int x, int y)
 
     if (result->second.mState!=Ptr::CellStore::State_Loaded)
     {
+        // Multiple plugin support for landscape data is much easier than for references. The last plugin wins.
         result->second.load (mStore, mReader);
         fillContainers (result->second);
     }
@@ -128,13 +129,14 @@ MWWorld::Ptr::CellStore *MWWorld::Cells::getExterior (int x, int y)
 
 MWWorld::Ptr::CellStore *MWWorld::Cells::getInterior (const std::string& name)
 {
-    std::map<std::string, Ptr::CellStore>::iterator result = mInteriors.find (name);
+    std::string lowerName = Misc::StringUtils::lowerCase(name);
+    std::map<std::string, Ptr::CellStore>::iterator result = mInteriors.find (lowerName);
 
     if (result==mInteriors.end())
     {
-        const ESM::Cell *cell = mStore.get<ESM::Cell>().find(name);
+        const ESM::Cell *cell = mStore.get<ESM::Cell>().find(lowerName);
 
-        result = mInteriors.insert (std::make_pair (name, Ptr::CellStore (cell))).first;
+        result = mInteriors.insert (std::make_pair (lowerName, Ptr::CellStore (cell))).first;
     }
 
     if (result->second.mState!=Ptr::CellStore::State_Loaded)
@@ -153,10 +155,7 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name, Ptr::CellStore& ce
 
     if (cell.mState==Ptr::CellStore::State_Preloaded)
     {
-        std::string lowerCase;
-
-        std::transform (name.begin(), name.end(), std::back_inserter (lowerCase),
-            (int(*)(int)) std::tolower);
+        std::string lowerCase = Misc::StringUtils::lowerCase(name);
 
         if (std::binary_search (cell.mIds.begin(), cell.mIds.end(), lowerCase))
         {

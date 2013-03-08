@@ -145,8 +145,13 @@ namespace MWInput
         bool mMouseLookEnabled;
         bool mGuiCursorEnabled;
 
+        float mOverencumberedMessageDelay;
+
         float mMouseX;
         float mMouseY;
+        int mMouseWheel;
+        bool mDebug;
+        bool mUserFileExists;
 
         std::map<std::string, bool> mControlSwitch;
 
@@ -206,14 +211,14 @@ namespace MWInput
             A_Journal,    //Journal
             A_Weapon,     //Draw/Sheath weapon
             A_Spell,      //Ready/Unready Casting
-            A_AlwaysRun,  //Toggle Always Run
+            A_Run,        //Run when held
             A_CycleSpellLeft, //cycling through spells
             A_CycleSpellRight,
             A_CycleWeaponLeft,//Cycling through weapons
             A_CycleWeaponRight,
-            A_ToggleSneak,    //Toggles Sneak, add Push-Sneak later
+            A_ToggleSneak,    //Toggles Sneak
             A_ToggleWalk, //Toggle Walking/Running
-            A_Crouch,
+            A_Sneak,
 
             A_QuickSave,
             A_QuickLoad,

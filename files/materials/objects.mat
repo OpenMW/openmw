@@ -1,16 +1,17 @@
 material openmw_objects_base
 {
     diffuse 1.0 1.0 1.0 1.0
-    specular 0.4 0.4 0.4 32
+    specular 0 0 0 0
     ambient 1.0 1.0 1.0
     emissive 0.0 0.0 0.0
-    has_vertex_colour false
+    vertmode 0
     diffuseMap black.png
 
     is_transparent false // real transparency, alpha rejection doesn't count here
     scene_blend default
     depth_write default
     alpha_rejection default
+    transparent_sorting default
 
     pass
     {
@@ -19,7 +20,7 @@ material openmw_objects_base
 
         shader_properties
         {
-            has_vertex_colour $has_vertex_colour
+            vertexcolor_mode $vertmode
             is_transparent $is_transparent
         }
 
@@ -30,9 +31,7 @@ material openmw_objects_base
         scene_blend $scene_blend
         alpha_rejection $alpha_rejection
         depth_write $depth_write
-
-        ffp_vertex_colour_ambient $has_vertex_colour
-
+        transparent_sorting $transparent_sorting
 
         texture_unit diffuseMap
         {
@@ -57,11 +56,6 @@ material openmw_objects_base
             content_type shadow
             tex_address_mode clamp
             filtering none
-        }
-        
-        texture_unit causticMap
-        {
-            direct_texture water_nm.png
         }
     }
 }

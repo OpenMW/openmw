@@ -102,7 +102,7 @@ namespace MWScript
             virtual void execute (Interpreter::Runtime& runtime)
             {
                 std::string cell = (runtime.getStringLiteral (runtime[0].mInteger));
-                boost::algorithm::to_lower(cell);
+                Misc::StringUtils::toLower(cell);
                 runtime.pop();
 
                 // "Will match complete or partial cells, so ShowMap, "Vivec" will show cells Vivec and Vivec, Fred's House as well."
@@ -115,7 +115,7 @@ namespace MWScript
                 for (; it != cells.extEnd(); ++it)
                 {
                     std::string name = it->mName;
-                    boost::algorithm::to_lower(name);
+                    Misc::StringUtils::toLower(name);
                     if (name.find(cell) != std::string::npos)
                         MWBase::Environment::get().getWindowManager()->addVisitedLocation (
                             it->mName,
@@ -181,7 +181,7 @@ opcodeEnableStatsReviewMenu);
             extensions.registerInstruction ("enablemapmenu", "", opcodeEnableMapMenu);
             extensions.registerInstruction ("enablestatsmenu", "", opcodeEnableStatsMenu);
 
-            extensions.registerInstruction ("enablerestmenu", "", opcodeEnableRest);
+            extensions.registerInstruction ("enablerest", "", opcodeEnableRest);
             extensions.registerInstruction ("enablelevelupmenu", "", opcodeEnableRest);
 
             extensions.registerInstruction ("showrestmenu", "", opcodeShowRestMenu);

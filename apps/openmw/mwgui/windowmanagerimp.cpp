@@ -3,12 +3,13 @@
 #include <cassert>
 #include <iterator>
 
-#include "MyGUI_UString.h"
+#include <MyGUI_UString.h>
 
 #include <openengine/ogre/renderer.hpp>
 #include <openengine/gui/manager.hpp>
 
 #include <components/settings/settings.hpp>
+#include <components/translation/translation.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -50,13 +51,19 @@
 #include "spellcreationdialog.hpp"
 #include "enchantingdialog.hpp"
 #include "trainingwindow.hpp"
+#include "imagebutton.hpp"
+#include "exposedwindow.hpp"
+#include "cursor.hpp"
+#include "spellicons.hpp"
 
 using namespace MWGui;
 
 WindowManager::WindowManager(
-    const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *mOgre,
-        const std::string& logpath, const std::string& cacheDir, bool consoleOnlyScripts)
+    const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *ogre,
+        const std::string& logpath, const std::string& cacheDir, bool consoleOnlyScripts,
+        Translation::Storage& translationDataStorage)
   : mGuiManager(NULL)
+  , mRendering(ogre)
   , mHud(NULL)
   , mMap(NULL)
   , mMenu(NULL)
@@ -104,10 +111,10 @@ WindowManager::WindowManager(
   , mCrosshairEnabled(Settings::Manager::getBool ("crosshair", "HUD"))
   , mSubtitlesEnabled(Settings::Manager::getBool ("subtitles", "GUI"))
   , mHudEnabled(true)
+  , mTranslationDataStorage (translationDataStorage)
 {
-
     // Set up the GUI system
-    mGuiManager = new OEngine::GUI::MyGUIManager(mOgre->getWindow(), mOgre->getScene(), false, logpath);
+    mGuiManager = new OEngine::GUI::MyGUIManager(mRendering->getWindow(), mRendering->getScene(), false, logpath);
     mGui = mGuiManager->getGui();
 
     //Register own widgets with MyGUI
@@ -123,6 +130,11 @@ WindowManager::WindowManager(
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::VBox>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::AutoSizedTextBox>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::AutoSizedButton>("Widget");
+    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::ImageButton>("Widget");
+    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::ExposedWindow>("Widget");
+
+    MyGUI::FactoryManager::getInstance().registerFactory<ResourceImageSetPointerFix>("Resource", "ResourceImageSetPointer");
+    MyGUI::ResourceManager::getInstance().load("core.xml");
 
     MyGUI::LanguageManager::getInstance().eventRequestTag = MyGUI::newDelegate(this, &WindowManager::onRetrieveTag);
 
@@ -167,13 +179,14 @@ WindowManager::WindowManager(
     mEnchantingDialog = new EnchantingDialog(*this);
     mTrainingWindow = new TrainingWindow(*this);
 
-    mLoadingScreen = new LoadingScreen(mOgre->getScene (), mOgre->getWindow (), *this);
+    mLoadingScreen = new LoadingScreen(mRendering->getScene (), mRendering->getWindow (), *this);
     mLoadingScreen->onResChange (w,h);
 
     mInputBlocker = mGui->createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Default,"Windows","");
 
-    // The HUD is always on
-    mHud->setVisible(true);
+    mCursor = new Cursor();
+
+    mHud->setVisible(mHudEnabled);
 
     mCharGen = new CharacterCreation(this);
 
@@ -190,6 +203,9 @@ WindowManager::WindowManager(
 
     unsetSelectedSpell();
     unsetSelectedWeapon();
+
+    if (newGame)
+        disallowAll ();
 
     // Set up visibility
     updateVisible();
@@ -225,6 +241,9 @@ WindowManager::~WindowManager()
     delete mSpellCreationDialog;
     delete mEnchantingDialog;
     delete mTrainingWindow;
+    delete mCountDialog;
+    delete mQuickKeysMenu;
+    delete mCursor;
 
     cleanupGarbage();
 
@@ -251,6 +270,10 @@ void WindowManager::update()
     mHud->setFPS(mFPS);
     mHud->setTriangleCount(mTriangleCount);
     mHud->setBatchCount(mBatchCount);
+
+    mHud->update();
+
+    mCursor->update();
 }
 
 void WindowManager::updateVisible()
@@ -279,10 +302,10 @@ void WindowManager::updateVisible()
     mEnchantingDialog->setVisible(false);
     mTrainingWindow->setVisible(false);
 
-    mHud->setVisible(true);
+    mHud->setVisible(mHudEnabled);
 
     // Mouse is visible whenever we're not in game mode
-    MyGUI::PointerManager::getInstance().setVisible(isGuiMode());
+    mCursor->setVisible(isGuiMode());
 
     bool gameMode = !isGuiMode();
 
@@ -301,9 +324,16 @@ void WindowManager::updateVisible()
     setSpellVisibility((mAllowed & GW_Magic) && !mSpellWindow->pinned());
     setHMSVisibility((mAllowed & GW_Stats) && !mStatsWindow->pinned());
 
-    // If in game mode, don't show anything.
+    // If in game mode, show only the pinned windows
     if (gameMode)
+    {
+        mMap->setVisible(mMap->pinned());
+        mStatsWindow->setVisible(mStatsWindow->pinned());
+        mInventoryWindow->setVisible(mInventoryWindow->pinned());
+        mSpellWindow->setVisible(mSpellWindow->pinned());
+
         return;
+    }
 
     GuiMode mode = mGuiModes.back();
 
@@ -318,6 +348,12 @@ void WindowManager::updateVisible()
             mSettingsWindow->setVisible(true);
             break;
         case GM_Console:
+            // Show the pinned windows
+            mMap->setVisible(mMap->pinned());
+            mStatsWindow->setVisible(mStatsWindow->pinned());
+            mInventoryWindow->setVisible(mInventoryWindow->pinned());
+            mSpellWindow->setVisible(mSpellWindow->pinned());
+
             mConsole->enable();
             break;
         case GM_Scroll:
@@ -397,10 +433,20 @@ void WindowManager::updateVisible()
             break;
         case GM_LoadingWallpaper:
             mHud->setVisible(false);
-            MyGUI::PointerManager::getInstance().setVisible(false);
+            mCursor->setVisible(false);
             break;
         case GM_Loading:
-            MyGUI::PointerManager::getInstance().setVisible(false);
+            // Show the pinned windows
+            mMap->setVisible(mMap->pinned());
+            mStatsWindow->setVisible(mStatsWindow->pinned());
+            mInventoryWindow->setVisible(mInventoryWindow->pinned());
+            mSpellWindow->setVisible(mSpellWindow->pinned());
+
+            mCursor->setVisible(false);
+            break;
+        case GM_Video:
+            mCursor->setVisible(false);
+            mHud->setVisible(false);
             break;
         default:
             // Unsupported mode, switch back to game
@@ -534,15 +580,24 @@ void WindowManager::removeDialog(OEngine::GUI::Layout*dialog)
 
 void WindowManager::messageBox (const std::string& message, const std::vector<std::string>& buttons)
 {
-    if (buttons.empty())
-    {
-        mMessageBoxManager->createMessageBox(message);
+    if(buttons.empty()){
+        /* If there are no buttons, and there is a dialogue window open, messagebox goes to the dialogue window */
+        if(!mGuiModes.empty() && mGuiModes.back() == GM_Dialogue)
+            mDialogueWindow->addMessageBox(MyGUI::LanguageManager::getInstance().replaceTags(message));
+        else
+            mMessageBoxManager->createMessageBox(message);
     }
+
     else
     {
         mMessageBoxManager->createInteractiveMessageBox(message, buttons);
         pushGuiMode(GM_InterMessageBox);
     }
+}
+
+void WindowManager::enterPressed ()
+{
+    mMessageBoxManager->enterPressed();
 }
 
 int WindowManager::readPressedButton ()
@@ -555,8 +610,9 @@ std::string WindowManager::getGameSettingString(const std::string &id, const std
     const ESM::GameSetting *setting =
         MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().search(id);
 
-    if (setting && setting->mType == ESM::VT_String)
-        return setting->getString();
+    if (setting && setting->mValue.getType()==ESM::VT_String)
+        return setting->mValue.getString();
+
     return default_;
 }
 
@@ -593,6 +649,7 @@ void WindowManager::onFrame (float frameDuration)
     mHud->onFrame(frameDuration);
 
     mTrainingWindow->onFrame (frameDuration);
+    mTradeWindow->onFrame(frameDuration);
 
     mTrainingWindow->checkReferenceAvailable();
     mDialogueWindow->checkReferenceAvailable();
@@ -612,7 +669,7 @@ void WindowManager::changeCell(MWWorld::Ptr::CellStore* cell)
         if (cell->mCell->mName != "")
         {
             name = cell->mCell->mName;
-            mMap->addVisitedLocation (name, cell->mCell->getGridX (), cell->mCell->getGridY ());
+            mMap->addVisitedLocation ("#{sCell=" + name + "}", cell->mCell->getGridX (), cell->mCell->getGridY ());
         }
         else
         {
@@ -711,7 +768,7 @@ void WindowManager::setSpellVisibility(bool visible)
 
 void WindowManager::setMouseVisible(bool visible)
 {
-    MyGUI::PointerManager::getInstance().setVisible(visible);
+    mCursor->setVisible(visible);
 }
 
 void WindowManager::setDragDrop(bool dragDrop)
@@ -722,13 +779,25 @@ void WindowManager::setDragDrop(bool dragDrop)
 
 void WindowManager::onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result)
 {
-    const ESM::GameSetting *setting =
-        MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(_tag);
+    std::string tag(_tag);
 
-    if (setting && setting->mType == ESM::VT_String)
-        _result = setting->getString();
+    std::string tokenToFind = "sCell=";
+    size_t tokenLength = tokenToFind.length();
+
+    if (tag.substr(0, tokenLength) == tokenToFind)
+    {
+        _result = mTranslationDataStorage.translateCellName(tag.substr(tokenLength));
+    }
     else
-        _result = _tag;
+    {
+        const ESM::GameSetting *setting =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(tag);
+
+        if (setting && setting->mValue.getType()==ESM::VT_String)
+            _result = setting->mValue.getString();
+        else
+            _result = tag;
+    }
 }
 
 void WindowManager::processChangedSettings(const Settings::CategorySettingVector& changed)
@@ -737,6 +806,7 @@ void WindowManager::processChangedSettings(const Settings::CategorySettingVector
     mToolTips->setDelay(Settings::Manager::getFloat("tooltip delay", "GUI"));
 
     bool changeRes = false;
+    bool windowRecreated = false;
     for (Settings::CategorySettingVector::const_iterator it = changed.begin();
         it != changed.end(); ++it)
     {
@@ -746,6 +816,8 @@ void WindowManager::processChangedSettings(const Settings::CategorySettingVector
         {
             changeRes = true;
         }
+        else if (it->first == "Video" && it->second == "vsync")
+            windowRecreated = true;
         else if (it->first == "HUD" && it->second == "crosshair")
             mCrosshairEnabled = Settings::Manager::getBool ("crosshair", "HUD");
         else if (it->first == "GUI" && it->second == "subtitles")
@@ -768,6 +840,11 @@ void WindowManager::processChangedSettings(const Settings::CategorySettingVector
         mLoadingScreen->onResChange (x,y);
         mDragAndDrop->mDragAndDropWidget->setSize(MyGUI::IntSize(x, y));
         mInputBlocker->setSize(MyGUI::IntSize(x,y));
+    }
+    if (windowRecreated)
+    {
+        mGuiManager->updateWindow (mRendering->getWindow ());
+        mLoadingScreen->updateWindow (mRendering->getWindow ());
     }
 }
 
@@ -910,12 +987,23 @@ bool WindowManager::isAllowed (GuiWindow wnd) const
 void WindowManager::allow (GuiWindow wnd)
 {
     mAllowed = (GuiWindow)(mAllowed | wnd);
+
+    if (wnd & GW_Inventory)
+    {
+        mBookWindow->setInventoryAllowed (true);
+        mScrollWindow->setInventoryAllowed (true);
+    }
+
     updateVisible();
 }
 
 void WindowManager::disallowAll()
 {
     mAllowed = GW_None;
+
+    mBookWindow->setInventoryAllowed (false);
+    mScrollWindow->setInventoryAllowed (false);
+
     updateVisible();
 }
 
@@ -973,7 +1061,6 @@ void WindowManager::notifyInputActionBound ()
     mSettingsWindow->updateControlsBox ();
     allowMouse();
 }
-
 
 void WindowManager::showCrosshair (bool show)
 {
@@ -1034,4 +1121,14 @@ void WindowManager::startEnchanting (MWWorld::Ptr actor)
 void WindowManager::startTraining(MWWorld::Ptr actor)
 {
     mTrainingWindow->startTraining(actor);
+}
+
+const Translation::Storage& WindowManager::getTranslationDataStorage() const
+{
+    return mTranslationDataStorage;
+}
+
+void WindowManager::changePointer(const std::string &name)
+{
+    mCursor->onCursorChange(name);
 }

@@ -1,10 +1,14 @@
 #ifndef OENGINE_MYGUI_MANAGER_H
 #define OENGINE_MYGUI_MANAGER_H
 
+#include <string>
+
 namespace MyGUI
 {
-  class OgrePlatform;
   class Gui;
+  class LogManager;
+  class OgreDataManager;
+  class OgreRenderManager;
 }
 
 namespace Ogre
@@ -18,12 +22,15 @@ namespace GUI
 {
     class MyGUIManager
     {
-        MyGUI::OgrePlatform *mPlatform;
         MyGUI::Gui *mGui;
+        MyGUI::LogManager* mLogManager;
+        MyGUI::OgreDataManager* mDataManager;
+        MyGUI::OgreRenderManager* mRenderManager;
         Ogre::SceneManager* mSceneMgr;
 
+
     public:
-        MyGUIManager() : mPlatform(NULL), mGui(NULL) {}
+        MyGUIManager() : mLogManager(NULL), mDataManager(NULL), mRenderManager(NULL),  mGui(NULL) {}
         MyGUIManager(Ogre::RenderWindow *wnd, Ogre::SceneManager *mgr, bool logging=false, const std::string& logDir = std::string(""))
         {
             setup(wnd,mgr,logging, logDir);
@@ -32,6 +39,8 @@ namespace GUI
         {
             shutdown();
         }
+
+        void updateWindow (Ogre::RenderWindow* wnd);
 
         void setup(Ogre::RenderWindow *wnd, Ogre::SceneManager *mgr, bool logging=false, const std::string& logDir = std::string(""));
         void shutdown();

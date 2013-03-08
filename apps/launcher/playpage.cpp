@@ -1,43 +1,40 @@
-#include <QtGui>
-
 #include "playpage.hpp"
+
+#include <QtGui>
 
 PlayPage::PlayPage(QWidget *parent) : QWidget(parent)
 {
-    QWidget *playWidget = new QWidget(this);
-    playWidget->setObjectName("PlayGroup");
-    playWidget->setFixedSize(QSize(425, 375));
+    setupUi(this);
 
-    mPlayButton = new QPushButton(tr("Play"), playWidget);
-    mPlayButton->setObjectName("PlayButton");
-    mPlayButton->setMinimumSize(QSize(200, 50));
-
-    QLabel *profileLabel = new QLabel(tr("Current Profile:"), playWidget);
-    profileLabel->setObjectName("ProfileLabel");
-
+    // Hacks to get the stylesheet look properly on different platforms
     QPlastiqueStyle *style = new QPlastiqueStyle;
-    mProfilesComboBox = new QComboBox(playWidget);
-    mProfilesComboBox->setObjectName("ProfilesComboBox");
-    mProfilesComboBox->setStyle(style);
+    QFont font = QApplication::font();
+    font.setPointSize(12); // Fixes problem with overlapping items
 
-    QGridLayout *playLayout = new QGridLayout(playWidget);
+    profilesComboBox->setStyle(style);
+    profilesComboBox->setFont(font);
 
-    QSpacerItem *hSpacer1 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-    QSpacerItem *hSpacer2 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+    connect(profilesComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(slotCurrentIndexChanged(int)));
+    connect(playButton, SIGNAL(clicked()), this, SLOT(slotPlayClicked()));
 
-    QSpacerItem *vSpacer1 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
-    QSpacerItem *vSpacer2 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+}
 
-    playLayout->addWidget(mPlayButton, 1, 1, 1, 1);
-    playLayout->addWidget(profileLabel, 2, 1, 1, 1);
-    playLayout->addWidget(mProfilesComboBox, 3, 1, 1, 1);
-    playLayout->addItem(hSpacer1, 2, 0, 1, 1);
-    playLayout->addItem(hSpacer2, 2, 2, 1, 1);
-    playLayout->addItem(vSpacer1, 0, 1, 1, 1);
-    playLayout->addItem(vSpacer2, 4, 1, 1, 1);
+void PlayPage::setProfilesComboBoxModel(QAbstractItemModel *model)
+{
+    profilesComboBox->setModel(model);
+}
 
-    QHBoxLayout *pageLayout = new QHBoxLayout(this);
+void PlayPage::setProfilesComboBoxIndex(int index)
+{
+    profilesComboBox->setCurrentIndex(index);
+}
 
-    pageLayout->addWidget(playWidget);
+void PlayPage::slotCurrentIndexChanged(int index)
+{
+    emit profileChanged(index);
+}
 
+void PlayPage::slotPlayClicked()
+{
+    emit playButtonClicked();
 }

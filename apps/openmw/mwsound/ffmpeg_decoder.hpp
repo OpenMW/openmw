@@ -10,8 +10,8 @@
 #include <stdint.h>
 extern "C"
 {
-#include <avcodec.h>
-#include <avformat.h>
+#include <libavcodec/avcodec.h>
+#include <libavformat/avformat.h>
 }
 
 #include "sound_decoder.hpp"
@@ -22,25 +22,36 @@ namespace MWSound
     class FFmpeg_Decoder : public Sound_Decoder
     {
         AVFormatContext *mFormatCtx;
+        AVStream **mStream;
 
-        struct MyStream;
-        std::vector<MyStream*> mStreams;
+        AVPacket mPacket;
+        AVFrame *mFrame;
 
-        bool getNextPacket(int streamidx);
+        int mFrameSize;
+        int mFramePos;
+
+        double mNextPts;
+
+        bool getNextPacket();
 
         Ogre::DataStreamPtr mDataStream;
         static int readPacket(void *user_data, uint8_t *buf, int buf_size);
         static int writePacket(void *user_data, uint8_t *buf, int buf_size);
         static int64_t seek(void *user_data, int64_t offset, int whence);
 
+        bool getAVAudioData();
+        size_t readAVAudioData(void *data, size_t length);
+
         virtual void open(const std::string &fname);
         virtual void close();
 
+        virtual std::string getName();
         virtual void getInfo(int *samplerate, ChannelConfig *chans, SampleType *type);
 
         virtual size_t read(char *buffer, size_t bytes);
         virtual void readAll(std::vector<char> &output);
         virtual void rewind();
+        virtual size_t getSampleOffset();
 
         FFmpeg_Decoder& operator=(const FFmpeg_Decoder &rhs);
         FFmpeg_Decoder(const FFmpeg_Decoder &rhs);

@@ -2,14 +2,18 @@ configuration water_reflection
 {
     shadows false
     shadows_pssm false
-    mrt_output false
+    viewproj_fix true
+}
+
+configuration water_refraction
+{
+    viewproj_fix true
+    render_refraction true
 }
 
 configuration local_map
 {
     fog false
-    mrt_output false
-    lighting false
     shadows false
     shadows_pssm false
     simple_water true

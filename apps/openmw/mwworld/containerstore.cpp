@@ -8,13 +8,17 @@
 #include <boost/algorithm/string.hpp>
 
 #include <components/esm/loadcont.hpp>
+#include <components/compiler/locals.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/scriptmanager.hpp"
 
 #include "manualref.hpp"
 #include "refdata.hpp"
 #include "class.hpp"
+#include "localscripts.hpp"
+#include "player.hpp"
 
 namespace
 {
@@ -37,7 +41,7 @@ namespace
 
     bool compare_string_ci(std::string str1, std::string str2)
     {
-        boost::algorithm::to_lower(str1);
+        Misc::StringUtils::toLower(str1);
         return str1 == str2;
     }
 }
@@ -71,6 +75,36 @@ bool MWWorld::ContainerStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
 }
 
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& ptr)
+{
+    MWWorld::ContainerStoreIterator it = addImp(ptr);
+    MWWorld::Ptr item = *it;
+
+    std::string script = MWWorld::Class::get(item).getScript(item);
+    if(script != "")
+    {
+        CellStore *cell;
+
+        Ptr player = MWBase::Environment::get().getWorld ()->getPlayer().getPlayer();
+        
+        if(&(MWWorld::Class::get (player).getContainerStore (player)) == this)
+        {
+            cell = 0; // Items in player's inventory have cell set to 0, so their scripts will never be removed
+           
+            // Set OnPCAdd special variable, if it is declared 
+            item.mRefData->getLocals().setVarByInt(script, "onpcadd", 1);
+        }
+        else
+            cell = player.getCell();
+
+        item.mCell = cell;
+        item.mContainerStore = 0;
+        MWBase::Environment::get().getWorld()->getLocalScripts().add(script, item);
+    }
+
+    return it;
+}
+
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr)
 {
     int type = getType(ptr);
 
@@ -162,7 +196,7 @@ void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const MWWor
         }
 
         ref.getPtr().getRefData().setCount (std::abs(iter->mCount)); /// \todo implement item restocking (indicated by negative count)
-        add (ref.getPtr());
+        addImp (ref.getPtr());
     }
 
     flagAsModified();
@@ -514,7 +548,8 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStoreIterator::operator++ (int
 
 bool MWWorld::ContainerStoreIterator::isEqual (const ContainerStoreIterator& iter) const
 {
-    assert (mContainer==iter.mContainer);
+    if (mContainer!=iter.mContainer)
+        return false;
 
     if (mType!=iter.mType)
         return false;

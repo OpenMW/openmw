@@ -12,8 +12,10 @@
 
 using namespace MWGui;
 
-ScrollWindow::ScrollWindow (MWBase::WindowManager& parWindowManager) :
-    WindowBase("openmw_scroll.layout", parWindowManager)
+ScrollWindow::ScrollWindow (MWBase::WindowManager& parWindowManager)
+    : WindowBase("openmw_scroll.layout", parWindowManager)
+    , mTakeButtonShow(true)
+    , mTakeButtonAllowed(true)
 {
     getWidget(mTextView, "TextView");
 
@@ -50,7 +52,14 @@ void ScrollWindow::open (MWWorld::Ptr scroll)
 
 void ScrollWindow::setTakeButtonShow(bool show)
 {
-    mTakeButton->setVisible(show);
+    mTakeButtonShow = show;
+    mTakeButton->setVisible(mTakeButtonShow && mTakeButtonAllowed);
+}
+
+void ScrollWindow::setInventoryAllowed(bool allowed)
+{
+    mTakeButtonAllowed = allowed;
+    mTakeButton->setVisible(mTakeButtonShow && mTakeButtonAllowed);
 }
 
 void ScrollWindow::onCloseButtonClicked (MyGUI::Widget* _sender)

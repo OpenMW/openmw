@@ -21,8 +21,8 @@
 
  */
 
-#ifndef _NIF_RECORD_H_
-#define _NIF_RECORD_H_
+#ifndef OPENMW_COMPONENTS_NIF_RECORD_HPP
+#define OPENMW_COMPONENTS_NIF_RECORD_HPP
 
 #include <string>
 
@@ -30,6 +30,7 @@ namespace Nif
 {
 
 class NIFFile;
+class NIFStream;
 
 enum RecordType
 {
@@ -48,6 +49,7 @@ enum RecordType
   RC_NiDitherProperty,
   RC_NiWireframeProperty,
   RC_NiSpecularProperty,
+  RC_NiStencilProperty,
   RC_NiVisController,
   RC_NiGeomMorpherController,
   RC_NiKeyframeController,
@@ -91,11 +93,12 @@ struct Record
     // Record type and type name
     int recType;
     std::string recName;
+    size_t recIndex;
 
-    Record() : recType(RC_MISSING) {}
+    Record() : recType(RC_MISSING), recIndex(~(size_t)0) {}
 
     /// Parses the record from file
-    virtual void read(NIFFile *nif) = 0;
+    virtual void read(NIFStream *nif) = 0;
 
     /// Does post-processing, after the entire tree is loaded
     virtual void post(NIFFile *nif) {}

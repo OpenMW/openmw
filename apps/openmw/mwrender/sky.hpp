@@ -112,7 +112,7 @@ namespace MWRender
     class SkyManager
     {
     public:
-        SkyManager(Ogre::SceneNode* pMwRoot, Ogre::Camera* pCamera);
+        SkyManager(Ogre::SceneNode* root, Ogre::Camera* pCamera);
         ~SkyManager();
 
         void update(float duration);
@@ -167,6 +167,7 @@ namespace MWRender
 
         void setLightningStrength(const float factor);
         void setLightningDirection(const Ogre::Vector3& dir);
+        void setLightningEnabled(bool enabled); ///< disable prior to map render
 
         void setGlare(const float glare);
         void setGlareEnabled(bool enabled);
@@ -210,6 +211,7 @@ namespace MWRender
         float mStarsOpacity;
         Ogre::ColourValue mCloudColour;
         Ogre::ColourValue mSkyColour;
+        Ogre::ColourValue mFogColour;
 
         Ogre::Light* mLightning;
 
@@ -217,8 +219,6 @@ namespace MWRender
 
         float mGlare; // target
         float mGlareFade; // actual
-
-        void ModVertexAlpha(Ogre::Entity* ent, unsigned int meshType);
 
         bool mEnabled;
         bool mSunEnabled;

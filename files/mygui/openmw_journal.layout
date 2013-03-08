@@ -7,11 +7,15 @@
     <Widget type="ImageBox" skin="ImageBox" position_real="0 0 1 1" align="Top|Right" name="JImage">     
         <Property key="ImageTexture" value="textures\tx_menubook.dds"/>
 
-        <Widget type="Button" skin="ButtonImage" position="370 220 57 24" name="NextPageBTN">
-            <Property key="ImageResource" value="MenuBook_Next"/>
+        <Widget type="ImageButton" skin="ImageBox" position="370 220 128 32" name="NextPageBTN">
+            <Property key="ImageHighlighted" value="textures\tx_menubook_next_over.dds"/>
+            <Property key="ImageNormal" value="textures\tx_menubook_next_idle.dds"/>
+            <Property key="ImagePushed" value="textures\tx_menubook_next_pressed.dds"/>
         </Widget>
-        <Widget type="Button" skin="ButtonImage" position="80 220 96 24" name="PrevPageBTN">
-            <Property key="ImageResource" value="MenuBook_Prev"/>
+        <Widget type="ImageButton" skin="ImageBox" position="80 220 128 32" name="PrevPageBTN">
+            <Property key="ImageHighlighted" value="textures\tx_menubook_prev_over.dds"/>
+            <Property key="ImageNormal" value="textures\tx_menubook_prev_idle.dds"/>
+            <Property key="ImagePushed" value="textures\tx_menubook_prev_pressed.dds"/>
         </Widget>
         <Widget type="EditBox" skin="MW_BookPage" position_real="0.15 0.1 0.3 0.75" name = "LeftText"/>
         <Widget type="EditBox" skin="MW_BookPage" position_real="0.55 0.1 0.3 0.75" name = "RightText"/>

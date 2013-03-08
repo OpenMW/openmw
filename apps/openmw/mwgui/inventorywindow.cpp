@@ -7,6 +7,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <components/compiler/locals.hpp>
+
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -23,19 +25,6 @@
 #include "bookwindow.hpp"
 #include "scrollwindow.hpp"
 #include "spellwindow.hpp"
-
-namespace
-{
-    std::string toLower (const std::string& name)
-    {
-        std::string lowerCase;
-
-        std::transform (name.begin(), name.end(), std::back_inserter (lowerCase),
-            (int(*)(int)) std::tolower);
-
-        return lowerCase;
-    }
-}
 
 namespace MWGui
 {
@@ -80,7 +69,7 @@ namespace MWGui
 
         setCoord(0, 342, 498, 258);
 
-        MWBase::Environment::get().getWorld ()->setupExternalRendering (mPreview);
+        mPreview.setup();
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
         openContainer(player);
@@ -171,11 +160,8 @@ namespace MWGui
             // the "Take" button should not be visible.
             // NOTE: the take button is "reset" when the window opens, so we can safely do the following
             // without screwing up future book windows
-            if (mDragAndDrop->mDraggedFrom == this)
-            {
-                mWindowManager.getBookWindow()->setTakeButtonShow(false);
-                mWindowManager.getScrollWindow()->setTakeButtonShow(false);
-            }
+            mWindowManager.getBookWindow()->setTakeButtonShow(false);
+            mWindowManager.getScrollWindow()->setTakeButtonShow(false);
 
             mDragAndDrop->mIsOnDragAndDrop = false;
             MyGUI::Gui::getInstance().destroyWidget(mDragAndDrop->mDraggedWidget);
@@ -225,24 +211,6 @@ namespace MWGui
             return MWWorld::Ptr();
     }
 
-    std::vector<MWWorld::Ptr> InventoryWindow::getEquippedItems()
-    {
-        MWWorld::InventoryStore& invStore = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
-
-        std::vector<MWWorld::Ptr> items;
-
-        for (int slot=0; slot < MWWorld::InventoryStore::Slots; ++slot)
-        {
-            MWWorld::ContainerStoreIterator it = invStore.getSlot(slot);
-            if (it != invStore.end())
-            {
-                items.push_back(*it);
-            }
-        }
-
-        return items;
-    }
-
     void InventoryWindow::_unequipItem(MWWorld::Ptr item)
     {
         MWWorld::InventoryStore& invStore = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
@@ -253,6 +221,12 @@ namespace MWGui
             if (it != invStore.end() && *it == item)
             {
                 invStore.equip(slot, invStore.end());
+                std::string script = MWWorld::Class::get(*it).getScript(*it);
+                
+                // Unset OnPCEquip Variable on item's script, if it has a script with that variable declared
+                if(script != "")
+                    (*it).mRefData->getLocals().setVarByInt(script, "onpcequip", 0);
+                
                 return;
             }
         }
@@ -284,7 +258,7 @@ namespace MWGui
         for (MWWorld::ContainerStoreIterator it = invStore.begin();
                 it != invStore.end(); ++it)
         {
-            if (toLower(it->getCellRef().mRefID) == "gold_001")
+            if (Misc::StringUtils::ciEqual(it->getCellRef().mRefID, "gold_001"))
                 return it->getRefData().getCount();
         }
         return 0;

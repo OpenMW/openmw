@@ -9,6 +9,7 @@
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/failedaction.hpp"
+#include "../mwworld/nullaction.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/customdata.hpp"
 #include "../mwworld/cellstore.hpp"
@@ -85,6 +86,9 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Container::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
+        if (!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
+            return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction ());
+
         const std::string lockedSound = "LockedChest";
         const std::string trapActivationSound = "Disarm Trap Fail";
 
@@ -97,11 +101,11 @@ namespace MWClass
 
         // make key id lowercase
         std::string keyId = ptr.getCellRef().mKey;
-        std::transform(keyId.begin(), keyId.end(), keyId.begin(), ::tolower);
+        Misc::StringUtils::toLower(keyId);
         for (MWWorld::ContainerStoreIterator it = invStore.begin(); it != invStore.end(); ++it)
         {
             std::string refId = it->getCellRef().mRefID;
-            std::transform(refId.begin(), refId.end(), refId.begin(), ::tolower);
+            Misc::StringUtils::toLower(refId);
             if (refId == keyId)
             {
                 hasKey = true;

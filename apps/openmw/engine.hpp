@@ -5,6 +5,8 @@
 
 #include <components/compiler/extensions.hpp>
 #include <components/files/collections.hpp>
+#include <components/translation/translation.hpp>
+#include <components/settings/settings.hpp>
 
 #include "mwbase/environment.hpp"
 
@@ -59,12 +61,14 @@ namespace OMW
     class Engine : private Ogre::FrameListener
     {
             MWBase::Environment mEnvironment;
-            std::string mEncoding;
+            ToUTF8::FromType mEncoding;
+            ToUTF8::Utf8Encoder* mEncoder;
             Files::PathContainer mDataDirs;
             boost::filesystem::path mResDir;
             OEngine::Render::OgreRenderer *mOgre;
             std::string mCellName;
-            std::string mMaster;
+            std::vector<std::string> mMaster;
+            std::vector<std::string> mPlugins;
             int mFpsLevel;
             bool mDebug;
             bool mVerboseScripts;
@@ -75,13 +79,14 @@ namespace OMW
             std::map<std::string,std::string> mFallbackMap;
             bool mScriptConsoleMode;
             std::string mStartupScript;
+            int mActivationDistanceOverride;
 
             Compiler::Extensions mExtensions;
             Compiler::Context *mScriptContext;
 
-
             Files::Collections mFileCollections;
             bool mFSStrict;
+            Translation::Storage mTranslationDataStorage;
 
             // not implemented
             Engine (const Engine&);
@@ -100,6 +105,13 @@ namespace OMW
             void executeLocalScripts();
 
             virtual bool frameRenderingQueued (const Ogre::FrameEvent& evt);
+            virtual bool frameStarted (const Ogre::FrameEvent& evt);
+
+            /// Load settings from various files, returns the path to the user settings file
+            std::string loadSettings (Settings::Manager & settings);
+
+            /// Prepare engine for game play
+            void prepareEngine (Settings::Manager & settings);
 
         public:
             Engine(Files::ConfigurationManager& configurationManager);
@@ -122,8 +134,11 @@ namespace OMW
 
             /// Set master file (esm)
             /// - If the given name does not have an extension, ".esm" is added automatically
-            /// - Currently OpenMW only supports one master at the same time.
             void addMaster(const std::string& master);
+
+            /// Same as "addMaster", but for plugin files (esp)
+            /// - If the given name does not have an extension, ".esp" is added automatically
+            void addPlugin(const std::string& plugin);
 
             /// Enable fps counter
             void showFPS(int level);
@@ -154,7 +169,7 @@ namespace OMW
             void setCompileAll (bool all);
 
             /// Font encoding
-            void setEncoding(const std::string& encoding);
+            void setEncoding(const ToUTF8::FromType& encoding);
 
             void setAnimationVerbose(bool animverbose);
 
@@ -165,6 +180,9 @@ namespace OMW
 
             /// Set path for a script that is run on startup in the console.
             void setStartupScript (const std::string& path);
+
+            /// Override the game setting specified activation distance.
+            void setActivationDistanceOverride (int distance);
 
         private:
             Files::ConfigurationManager& mCfgMgr;

@@ -94,28 +94,37 @@ namespace MWGui
         mPtr = actor;
         clearSpells();
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-
-        MWMechanics::Spells& playerSpells = MWWorld::Class::get (player).getCreatureStats (player).getSpells();
         MWMechanics::Spells& merchantSpells = MWWorld::Class::get (actor).getCreatureStats (actor).getSpells();
-         
+
         for (MWMechanics::Spells::TIterator iter = merchantSpells.begin(); iter!=merchantSpells.end(); ++iter)
         {
             const ESM::Spell* spell =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (*iter);
-            
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (iter->first);
+
             if (spell->mData.mType!=ESM::Spell::ST_Spell)
                 continue; // don't try to sell diseases, curses or powers
-            
-            if (std::find (playerSpells.begin(), playerSpells.end(), *iter)!=playerSpells.end())
-                continue; // we have that spell already
-            
-            addSpell (*iter);
+
+            if (playerHasSpell(iter->first))
+                continue;
+
+            addSpell (iter->first);
         }
 
         updateLabels();
 
         mSpellsView->setCanvasSize (MyGUI::IntSize(mSpellsView->getWidth(), std::max(mSpellsView->getHeight(), mCurrentY)));
+    }
+
+    bool SpellBuyingWindow::playerHasSpell(const std::string &id)
+    {
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWMechanics::Spells& playerSpells = MWWorld::Class::get (player).getCreatureStats (player).getSpells();
+        for (MWMechanics::Spells::TIterator it = playerSpells.begin(); it != playerSpells.end(); ++it)
+        {
+            if (Misc::StringUtils::ciEqual(id, it->first))
+                return true;
+        }
+        return false;
     }
 
     void SpellBuyingWindow::onSpellButtonClick(MyGUI::Widget* _sender)

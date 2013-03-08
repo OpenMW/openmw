@@ -3,7 +3,7 @@
 #include <iostream>
 
 #include <boost/filesystem.hpp>
-#include <boost/algorithm/string.hpp>
+#include <../components/misc/stringops.hpp>
 
 namespace Files
 {
@@ -45,14 +45,14 @@ namespace Files
             if( !acceptableExtensions.empty() )
             {
                 fileExtension = boost::filesystem::path (listIter->extension()).string();
-                boost::algorithm::to_lower(fileExtension);
+                Misc::StringUtils::toLower(fileExtension);
                 if(!containsVectorString(acceptableExtensions, fileExtension))
                     continue;
             }
 
             type = boost::filesystem::path (listIter->parent_path().leaf()).string();
             if (!strict)
-                boost::algorithm::to_lower(type);
+                Misc::StringUtils::toLower(type);
 
             mMap[type].push_back(*listIter);
             // std::cout << "Added path: " << listIter->string() << " in section "<< type <<std::endl;
@@ -63,7 +63,7 @@ namespace Files
     bool FileLibrary::containsSection(std::string sectionName, bool strict)
     {
         if (!strict)
-            boost::algorithm::to_lower(sectionName);
+            Misc::StringUtils::toLower(sectionName);
         StringPathContMap::const_iterator mapIter = mMap.find(sectionName);
         if (mapIter == mMap.end())
             return false;
@@ -75,7 +75,7 @@ namespace Files
     const PathContainer* FileLibrary::section(std::string sectionName, bool strict)
     {
         if (!strict)
-            boost::algorithm::to_lower(sectionName);
+            Misc::StringUtils::toLower(sectionName);
         StringPathContMap::const_iterator mapIter = mMap.find(sectionName);
         if (mapIter == mMap.end())
         {

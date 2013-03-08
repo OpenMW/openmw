@@ -75,6 +75,36 @@ namespace MWScript
             virtual void setGlobalLong (const std::string& name, int value);
 
             virtual void setGlobalFloat (const std::string& name, float value);
+            
+            virtual std::vector<std::string> getGlobals () const;
+
+            virtual char getGlobalType (const std::string& name) const;
+            
+            virtual std::string getActionBinding(const std::string& action) const;
+            
+            virtual std::string getNPCName() const;
+            
+            virtual std::string getNPCRace() const;
+            
+            virtual std::string getNPCClass() const;
+            
+            virtual std::string getNPCFaction() const;
+            
+            virtual std::string getNPCRank() const;
+            
+            virtual std::string getPCName() const;
+            
+            virtual std::string getPCRace() const;
+            
+            virtual std::string getPCClass() const;
+            
+            virtual std::string getPCRank() const;
+            
+            virtual std::string getPCNextRank() const;
+            
+            virtual int getPCBounty() const;
+            
+            virtual std::string getCurrentCellName() const;
 
             virtual bool isScriptRunning (const std::string& name) const;
 

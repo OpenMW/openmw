@@ -175,34 +175,47 @@ namespace MWMechanics
         buildPlayer();
     }
 
-    void MechanicsManager::addActor (const MWWorld::Ptr& ptr)
+    void MechanicsManager::add(const MWWorld::Ptr& ptr)
     {
-        mActors.addActor (ptr);
+        if(ptr.getTypeName() == typeid(ESM::Activator).name())
+            mActivators.addActivator(ptr);
+        else
+            mActors.addActor(ptr);
     }
 
-    void MechanicsManager::removeActor (const MWWorld::Ptr& ptr)
+    void MechanicsManager::remove(const MWWorld::Ptr& ptr)
     {
-        if (ptr==mWatched)
+        if(ptr == mWatched)
+            mWatched = MWWorld::Ptr();
+        mActors.removeActor(ptr);
+        mActivators.removeActivator(ptr);
+    }
+
+    void MechanicsManager::updateCell(const MWWorld::Ptr &old, const MWWorld::Ptr &ptr)
+    {
+        if(ptr.getTypeName() == typeid(ESM::Activator).name())
+            mActivators.updateActivator(old, ptr);
+        else
+            mActors.updateActor(old, ptr);
+    }
+
+
+    void MechanicsManager::drop(const MWWorld::CellStore *cellStore)
+    {
+        if(!mWatched.isEmpty() && mWatched.getCell() == cellStore)
             mWatched = MWWorld::Ptr();
 
-        mActors.removeActor (ptr);
+        mActors.dropActors(cellStore);
+        mActivators.dropActivators(cellStore);
     }
 
-    void MechanicsManager::dropActors (const MWWorld::Ptr::CellStore *cellStore)
-    {
-        if (!mWatched.isEmpty() && mWatched.getCell()==cellStore)
-            mWatched = MWWorld::Ptr();
 
-        mActors.dropActors (cellStore);
-    }
-
-    void MechanicsManager::watchActor (const MWWorld::Ptr& ptr)
+    void MechanicsManager::watchActor(const MWWorld::Ptr& ptr)
     {
         mWatched = ptr;
     }
 
-    void MechanicsManager::update (std::vector<std::pair<std::string, Ogre::Vector3> >& movement,
-        float duration, bool paused)
+    void MechanicsManager::update(float duration, bool paused)
     {
         if (!mWatched.isEmpty())
         {
@@ -296,9 +309,16 @@ namespace MWMechanics
             }
 
             winMgr->configureSkills (majorSkills, minorSkills);
+
+            // HACK? The player has been changed, so a new Animation object may
+            // have been made for them. Make sure they're properly updated.
+            MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+            mActors.removeActor(ptr);
+            mActors.addActor(ptr);
         }
 
-        mActors.update (movement, duration, paused);
+        mActors.update(duration, paused);
+        mActivators.update(duration, paused);
     }
 
     void MechanicsManager::restoreDynamicStats()
@@ -377,16 +397,6 @@ namespace MWMechanics
         mUpdatePlayer = true;
     }
 
-    std::string toLower (const std::string& name)
-    {
-        std::string lowerCase;
-
-        std::transform (name.begin(), name.end(), std::back_inserter (lowerCase),
-            (int(*)(int)) std::tolower);
-
-        return lowerCase;
-    }
-
     int MechanicsManager::getDerivedDisposition(const MWWorld::Ptr& ptr)
     {
         MWMechanics::NpcStats npcSkill = MWWorld::Class::get(ptr).getNpcStats(ptr);
@@ -398,7 +408,7 @@ namespace MWMechanics
         MWMechanics::CreatureStats playerStats = MWWorld::Class::get(playerPtr).getCreatureStats(playerPtr);
         MWMechanics::NpcStats playerNpcStats = MWWorld::Class::get(playerPtr).getNpcStats(playerPtr);
 
-        if (toLower(npc->mBase->mRace) == toLower(player->mBase->mRace)) x += MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispRaceMod")->getFloat();
+        if (Misc::StringUtils::lowerCase(npc->mBase->mRace) == Misc::StringUtils::lowerCase(player->mBase->mRace)) x += MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispRaceMod")->getFloat();
 
         x += MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispPersonalityMult")->getFloat()
             * (playerStats.getAttribute(ESM::Attribute::Personality).getModified() - MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispPersonalityBase")->getFloat());
@@ -408,21 +418,21 @@ namespace MWMechanics
         std::string npcFaction = "";
         if(!npcSkill.getFactionRanks().empty()) npcFaction = npcSkill.getFactionRanks().begin()->first;
 
-        if (playerNpcStats.getFactionRanks().find(toLower(npcFaction)) != playerNpcStats.getFactionRanks().end())
+        if (playerNpcStats.getFactionRanks().find(Misc::StringUtils::lowerCase(npcFaction)) != playerNpcStats.getFactionRanks().end())
         {
-            for(std::vector<ESM::Faction::Reaction>::const_iterator it = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(toLower(npcFaction))->mReactions.begin();
-                it != MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(toLower(npcFaction))->mReactions.end(); it++)
+            for(std::vector<ESM::Faction::Reaction>::const_iterator it = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(Misc::StringUtils::lowerCase(npcFaction))->mReactions.begin();
+                it != MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(Misc::StringUtils::lowerCase(npcFaction))->mReactions.end(); it++)
             {
-                if(toLower(it->mFaction) == toLower(npcFaction)) reaction = it->mReaction;
+                if(Misc::StringUtils::lowerCase(it->mFaction) == Misc::StringUtils::lowerCase(npcFaction)) reaction = it->mReaction;
             }
-            rank = playerNpcStats.getFactionRanks().find(toLower(npcFaction))->second;
+            rank = playerNpcStats.getFactionRanks().find(Misc::StringUtils::lowerCase(npcFaction))->second;
         }
         else if (npcFaction != "")
         {
-            for(std::vector<ESM::Faction::Reaction>::const_iterator it = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(toLower(npcFaction))->mReactions.begin();
-                it != MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(toLower(npcFaction))->mReactions.end();it++)
+            for(std::vector<ESM::Faction::Reaction>::const_iterator it = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(Misc::StringUtils::lowerCase(npcFaction))->mReactions.begin();
+                it != MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(Misc::StringUtils::lowerCase(npcFaction))->mReactions.end();it++)
             {
-                if(playerNpcStats.getFactionRanks().find(toLower(it->mFaction)) != playerNpcStats.getFactionRanks().end() )
+                if(playerNpcStats.getFactionRanks().find(Misc::StringUtils::lowerCase(it->mFaction)) != playerNpcStats.getFactionRanks().end() )
                 {
                     if(it->mReaction<reaction) reaction = it->mReaction;
                 }
@@ -481,8 +491,10 @@ namespace MWMechanics
         if(buying) x = buyTerm;
         else x = std::min(buyTerm, sellTerm);
         int offerPrice;
-        if (x < 1) offerPrice = int(x * basePrice);
-        if (x >= 1) offerPrice = basePrice + int((x - 1) * basePrice);
+        if (x < 1)
+            offerPrice = int(x * basePrice);
+        else
+            offerPrice = basePrice + int((x - 1) * basePrice);
         offerPrice = std::max(1, offerPrice);
         return offerPrice;
     }
@@ -545,7 +557,8 @@ namespace MWMechanics
         float fPerDieRollMult = gmst.find("fPerDieRollMult")->getFloat();
         float fPerTempMult = gmst.find("fPerTempMult")->getFloat();
 
-        float x,y;
+        float x = 0;
+        float y = 0;
 
         float roll = static_cast<float> (std::rand()) / RAND_MAX * 100;
 
@@ -639,4 +652,20 @@ namespace MWMechanics
             permChange = success ? -int(cappedDispositionChange/ fPerTempMult) : y;
         }
     }
+
+    void MechanicsManager::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number)
+    {
+        if(ptr.getTypeName() == typeid(ESM::Activator).name())
+            mActivators.playAnimationGroup(ptr, groupName, mode, number);
+        else
+            mActors.playAnimationGroup(ptr, groupName, mode, number);
+    }
+    void MechanicsManager::skipAnimation(const MWWorld::Ptr& ptr)
+    {
+        if(ptr.getTypeName() == typeid(ESM::Activator).name())
+            mActivators.skipAnimation(ptr);
+        else
+            mActors.skipAnimation(ptr);
+    }
+
 }

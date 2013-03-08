@@ -23,19 +23,21 @@ namespace MWRender
 
     class NpcAnimation;
 
-    class CharacterPreview : public ExternalRendering
+    class CharacterPreview
     {
     public:
         CharacterPreview(MWWorld::Ptr character, int sizeX, int sizeY, const std::string& name,
                          Ogre::Vector3 position, Ogre::Vector3 lookAt);
         virtual ~CharacterPreview();
 
-        virtual void setup (Ogre::SceneManager *sceneManager);
+        virtual void setup ();
         virtual void onSetup();
 
         virtual void rebuild();
 
     protected:
+        virtual bool renderHeadOnly() { return false; }
+
         Ogre::TexturePtr mTexture;
         Ogre::RenderTarget* mRenderTarget;
         Ogre::Viewport* mViewport;
@@ -82,8 +84,16 @@ namespace MWRender
         ESM::NPC                        mBase;
         MWWorld::LiveCellRef<ESM::NPC>  mRef;
 
+    protected:
+
+        virtual bool renderHeadOnly() { return true; }
+
+        void updateCamera();
+
     public:
         RaceSelectionPreview();
+
+        virtual void onSetup();
 
         void update(float angle);
 

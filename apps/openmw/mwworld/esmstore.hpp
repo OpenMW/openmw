@@ -6,7 +6,7 @@
 #include <components/esm/records.hpp>
 #include "store.hpp"
 
-namespace MWWorld 
+namespace MWWorld
 {
     class ESMStore
     {
@@ -94,6 +94,9 @@ namespace MWWorld
         ESMStore()
           : mDynamicCount(0)
         {
+            // Cell store needs access to this for tracking moved references
+            mCells.mEsmStore = this;
+            
             mStores[ESM::REC_ACTI] = &mActivators;
             mStores[ESM::REC_ALCH] = &mPotions;
             mStores[ESM::REC_APPA] = &mAppas;
@@ -158,7 +161,7 @@ namespace MWWorld
             std::ostringstream id;
             id << "$dynamic" << mDynamicCount++;
             record.mId = id.str();
-            
+
             T *ptr = store.insert(record);
             for (iterator it = mStores.begin(); it != mStores.end(); ++it) {
                 if (it->second == &store) {
@@ -168,7 +171,8 @@ namespace MWWorld
             return ptr;
         }
 
-    private:
+        // This method must be called once, after loading all master/plugin files. This can only be done
+        //  from the outside, so it must be public.
         void setUp();
     };
 
@@ -179,7 +183,7 @@ namespace MWWorld
 
     template <>
     inline const ESM::NPC *ESMStore::insert<ESM::NPC>(const ESM::NPC &npc) {
-        if (StringUtils::ciEqual(npc.mId, "player")) {
+        if (Misc::StringUtils::ciEqual(npc.mId, "player")) {
             return mNpcs.insert(npc);
         } else if (mNpcs.search(npc.mId) != 0) {
             std::ostringstream msg;
@@ -191,7 +195,7 @@ namespace MWWorld
         std::ostringstream id;
         id << "$dynamic" << mDynamicCount++;
         record.mId = id.str();
-            
+
         ESM::NPC *ptr = mNpcs.insert(record);
         mIds[ptr->mId] = ESM::REC_NPC_;
         return ptr;

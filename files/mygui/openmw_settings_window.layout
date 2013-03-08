@@ -15,7 +15,7 @@
                 <Widget type="TextBox" skin="NormalText" position="4 4 352 18" align="Left Top">
                     <Property key="Caption" value="#{sTransparency_Menu}"/>
                 </Widget>
-                <Widget type="ScrollBar" skin="MW_HSlider" position="4 28 352 18" align="Left Top" name="MenuTransparencySlider">
+                <Widget type="ScrollBar" skin="MW_HScroll" position="4 28 352 18" align="Left Top" name="MenuTransparencySlider">
                     <Property key="Range" value="1000000"/>
                 </Widget>
                 <Widget type="TextBox" skin="SandText" position="4 52 352 18" align="Left Top">
@@ -30,7 +30,7 @@
                 <Widget type="TextBox" skin="NormalText" position="4 78 352 18" align="Left Top">
                     <Property key="Caption" value="#{sMenu_Help_Delay}"/>
                 </Widget>
-                <Widget type="ScrollBar" skin="MW_HSlider" position="4 102 352 18" align="Left Top" name="ToolTipDelaySlider">
+                <Widget type="ScrollBar" skin="MW_HScroll" position="4 102 352 18" align="Left Top" name="ToolTipDelaySlider">
                     <Property key="Range" value="1000000"/>
                 </Widget>
                 <Widget type="TextBox" skin="SandText" position="4 126 352 18" align="Left Top">
@@ -64,35 +64,35 @@
                 <Widget type="TextBox" skin="NormalText" position="4 4 352 18" align="Left Top">
                     <Property key="Caption" value="#{sMaster}"/>
                 </Widget>
-                <Widget type="ScrollBar" skin="MW_HSlider" position="4 28 352 18" align="Left Top" name="MasterVolume">
+                <Widget type="ScrollBar" skin="MW_HScroll" position="4 28 352 18" align="Left Top" name="MasterVolume">
                     <Property key="Range" value="1000000"/>
                 </Widget>
 
                 <Widget type="TextBox" skin="NormalText" position="4 54 352 18" align="Left Top">
                     <Property key="Caption" value="#{sVoice}"/>
                 </Widget>
-                <Widget type="ScrollBar" skin="MW_HSlider" position="4 78 352 18" align="Left Top" name="VoiceVolume">
+                <Widget type="ScrollBar" skin="MW_HScroll" position="4 78 352 18" align="Left Top" name="VoiceVolume">
                     <Property key="Range" value="1000000"/>
                 </Widget>
 
                 <Widget type="TextBox" skin="NormalText" position="4 104 352 18" align="Left Top">
                     <Property key="Caption" value="#{sEffects}"/>
                 </Widget>
-                <Widget type="ScrollBar" skin="MW_HSlider" position="4 128 352 18" align="Left Top" name="EffectsVolume">
+                <Widget type="ScrollBar" skin="MW_HScroll" position="4 128 352 18" align="Left Top" name="EffectsVolume">
                     <Property key="Range" value="1000000"/>
                 </Widget>
 
                 <Widget type="TextBox" skin="NormalText" position="4 154 352 18" align="Left Top">
                     <Property key="Caption" value="#{sFootsteps}"/>
                 </Widget>
-                <Widget type="ScrollBar" skin="MW_HSlider" position="4 178 352 18" align="Left Top" name="FootstepsVolume">
+                <Widget type="ScrollBar" skin="MW_HScroll" position="4 178 352 18" align="Left Top" name="FootstepsVolume">
                     <Property key="Range" value="1000000"/>
                 </Widget>
 
                 <Widget type="TextBox" skin="NormalText" position="4 204 352 18" align="Left Top">
                     <Property key="Caption" value="#{sMusic}"/>
                 </Widget>
-                <Widget type="ScrollBar" skin="MW_HSlider" position="4 228 352 18" align="Left Top" name="MusicVolume">
+                <Widget type="ScrollBar" skin="MW_HScroll" position="4 228 352 18" align="Left Top" name="MusicVolume">
                     <Property key="Range" value="1000000"/>
                 </Widget>
             </Widget>
@@ -117,7 +117,7 @@
                 <Widget type="TextBox" skin="NormalText" position="4 228 160 18" align="Left Top">
                     <Property key="Caption" value="UI cursor sensitivity"/>
                 </Widget>
-                <Widget type="ScrollBar" skin="MW_HSlider" position="4 252 160 18" align="Left Top" name="UISensitivitySlider">
+                <Widget type="ScrollBar" skin="MW_HScroll" position="4 252 160 18" align="Left Top" name="UISensitivitySlider">
                     <Property key="Range" value="1000000"/>
                 </Widget>
                 <Widget type="TextBox" skin="SandText" position="4 276 160 18" align="Left Top">
@@ -133,7 +133,7 @@
                 <Widget type="TextBox" skin="NormalText" position="180 228 160 18" align="Left Top">
                     <Property key="Caption" value="Camera sensitivity"/>
                 </Widget>
-                <Widget type="ScrollBar" skin="MW_HSlider" position="180 252 160 18" align="Left Top" name="CameraSensitivitySlider">
+                <Widget type="ScrollBar" skin="MW_HScroll" position="180 252 160 18" align="Left Top" name="CameraSensitivitySlider">
                     <Property key="Range" value="1000000"/>
                 </Widget>
                 <Widget type="TextBox" skin="SandText" position="180 276 160 18" align="Left Top">
@@ -157,58 +157,48 @@
                     <Widget type="TabItem" skin="" position="4 28 344 272">
                         <Property key="Caption" value="  Video  "/>
 
-                        <Widget type="ListBox" skin="MW_List" position="4 4 200 120" align="Left Top" name="ResolutionList"/>
+                        <Widget type="ListBox" skin="MW_List" position="4 4 170 170" align="Left Top" name="ResolutionList"/>
 
 
-                        <Widget type="HBox" position="212 4 300 24">
+                        <Widget type="HBox" position="182 4 300 24">
                             <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="FullscreenButton"/>
                             <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
                                 <Property key="Caption" value="Fullscreen"/>
                             </Widget>
                         </Widget>
 
-                        <Widget type="HBox" position="212 34 300 24">
+                        <Widget type="HBox" position="182 34 300 24">
                             <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="VSyncButton"/>
                             <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
                                 <Property key="Caption" value="VSync"/>
                             </Widget>
                         </Widget>
 
-                        <Widget type="HBox" position="212 64 300 24">
-                            <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="ShadersButton"/>
-                            <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
-                                <Property key="Caption" value="Shaders"/>
-                            </Widget>
-                        </Widget>
-
-                        <Widget type="HBox" position="212 94 300 24">
+                        <Widget type="HBox" position="182 64 300 24">
                             <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="FPSButton"/>
                             <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
                                 <Property key="Caption" value="FPS"/>
                             </Widget>
                         </Widget>
 
-
-                        <Widget type="TextBox" skin="NormalText" position="4 128 329 18" align="Left Top" name="GammaText">
-                            <Property key="Caption" value="Gamma"/>
-                        </Widget>
-                        <Widget type="ScrollBar" skin="MW_HSlider" position="4 152 329 18" align="Left Top" name="GammaSlider">
-                            <Property key="Range" value="1000000"/>
-                        </Widget>
-                        <Widget type="TextBox" skin="SandText" position="4 176 329 18" align="Left Top">
-                            <Property key="Caption" value="#{sDark_Gamma}"/>
-                            <Property key="TextAlign" value="Left"/>
-                        </Widget>
-                        <Widget type="TextBox" skin="SandText" position="4 176 329 18" align="Left Top">
-                            <Property key="Caption" value="#{sLight_Gamma}"/>
-                            <Property key="TextAlign" value="Right"/>
+                        <Widget type="HBox" position="182 94 300 24">
+                            <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="ShadersButton"/>
+                            <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
+                                <Property key="Caption" value="Object shaders"/>
+                            </Widget>
                         </Widget>
 
+                        <Widget type="HBox" position="182 124 300 24">
+                            <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="ShaderModeButton"/>
+                            <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
+                                <Property key="Caption" value="Shader mode"/>
+                            </Widget>
+                        </Widget>
 
                         <Widget type="TextBox" skin="NormalText" position="4 198 329 18" align="Left Top" name="FovText">
                             <Property key="Caption" value="Field of View"/>
                         </Widget>
-                        <Widget type="ScrollBar" skin="MW_HSlider" position="4 222 329 18" align="Left Top" name="FOVSlider">
+                        <Widget type="ScrollBar" skin="MW_HScroll" position="4 222 329 18" align="Left Top" name="FOVSlider">
                             <Property key="Range" value="1000000"/>
                         </Widget>
                         <Widget type="TextBox" skin="SandText" position="4 246 329 18" align="Left Top">
@@ -233,7 +223,7 @@
                             <Widget type="TextBox" skin="SandText" position="0 0 300 24" align="Left Top" name="AnisotropyLabel">
                                 <Property key="Caption" value="Anisotropy"/>
                             </Widget>
-                            <Widget type="ScrollBar" skin="MW_HSlider" position="0 28 150 18" align="Left Top" name="AnisotropySlider">
+                            <Widget type="ScrollBar" skin="MW_HScroll" position="0 28 150 18" align="Left Top" name="AnisotropySlider">
                                 <Property key="Range" value="1000000"/>
                             </Widget>
                         </Widget>
@@ -241,7 +231,7 @@
                         <Widget type="TextBox" skin="NormalText" position="4 130 322 18" align="Left Top">
                             <Property key="Caption" value="#{sRender_Distance}"/>
                         </Widget>
-                        <Widget type="ScrollBar" skin="MW_HSlider" position="4 154 322 18" align="Left Top" name="ViewDistanceSlider">
+                        <Widget type="ScrollBar" skin="MW_HScroll" position="4 154 322 18" align="Left Top" name="ViewDistanceSlider">
                             <Property key="Range" value="1000000"/>
                         </Widget>
                         <Widget type="TextBox" skin="SandText" position="4 178 332 18" align="Left Top">
@@ -290,9 +280,9 @@
                         </Widget>
 
                         <Widget type="HBox" position="4 135 350 24">
-                            <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="UnderwaterButton"/>
+                            <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="RefractionButton"/>
                             <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
-                                <Property key="Caption" value="Underwater effects (caustics, fog)"/>
+                                <Property key="Caption" value="Refraction"/>
                             </Widget>
                         </Widget>
                     </Widget>

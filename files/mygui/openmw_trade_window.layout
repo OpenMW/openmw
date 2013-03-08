@@ -51,10 +51,6 @@
                 <Property key="TextAlign" value="Center"/>
             </Widget>
 
-            <Widget type="AutoSizedButton" skin="MW_Button" position="0 60 60 24" name="MaxSaleButton" align="Left Top">
-                <Property key="Caption" value="Max. Sale"/> <!-- GMST sMaxSale doesn't work -->
-            </Widget>
-
             <Widget type="HBox" position="0 60 566 24" align="Right Bottom">
                 <Widget type="Widget">
                     <UserString key="HStretch" value="true"/>
@@ -65,6 +61,10 @@
                 <Widget type="AutoSizedButton" skin="MW_Button" name="CancelButton" align="Right Top">
                     <Property key="Caption" value="#{sCancel}"/>
                 </Widget>
+            </Widget>
+
+            <Widget type="AutoSizedButton" skin="MW_Button" position="0 60 60 24" name="MaxSaleButton" align="Left Top">
+                <Property key="Caption" value="Max. Sale"/> <!-- GMST sMaxSale doesn't work -->
             </Widget>
         </Widget>
 

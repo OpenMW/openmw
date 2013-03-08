@@ -14,8 +14,10 @@
 
 using namespace MWGui;
 
-BookWindow::BookWindow (MWBase::WindowManager& parWindowManager) :
-    WindowBase("openmw_book.layout", parWindowManager)
+BookWindow::BookWindow (MWBase::WindowManager& parWindowManager)
+    : WindowBase("openmw_book.layout", parWindowManager)
+    , mTakeButtonShow(true)
+    , mTakeButtonAllowed(true)
 {
     getWidget(mCloseButton, "CloseButton");
     mCloseButton->eventMouseButtonClick += MyGUI::newDelegate(this, &BookWindow::onCloseButtonClicked);
@@ -85,10 +87,17 @@ void BookWindow::open (MWWorld::Ptr book)
 
 void BookWindow::setTakeButtonShow(bool show)
 {
-    mTakeButton->setVisible(show);
+    mTakeButtonShow = show;
+    mTakeButton->setVisible(mTakeButtonShow && mTakeButtonAllowed);
 }
 
-void BookWindow::onCloseButtonClicked (MyGUI::Widget* _sender)
+void BookWindow::setInventoryAllowed(bool allowed)
+{
+    mTakeButtonAllowed = allowed;
+    mTakeButton->setVisible(mTakeButtonShow && mTakeButtonAllowed);
+}
+
+void BookWindow::onCloseButtonClicked (MyGUI::Widget* sender)
 {
     // no 3d sounds because the object could be in a container.
     MWBase::Environment::get().getSoundManager()->playSound ("book close", 1.0, 1.0);
@@ -96,7 +105,7 @@ void BookWindow::onCloseButtonClicked (MyGUI::Widget* _sender)
     mWindowManager.removeGuiMode(GM_Book);
 }
 
-void BookWindow::onTakeButtonClicked (MyGUI::Widget* _sender)
+void BookWindow::onTakeButtonClicked (MyGUI::Widget* sender)
 {
     MWBase::Environment::get().getSoundManager()->playSound ("Item Book Up", 1.0, 1.0, MWBase::SoundManager::Play_NoTrack);
 
@@ -106,7 +115,7 @@ void BookWindow::onTakeButtonClicked (MyGUI::Widget* _sender)
     mWindowManager.removeGuiMode(GM_Book);
 }
 
-void BookWindow::onNextPageButtonClicked (MyGUI::Widget* _sender)
+void BookWindow::onNextPageButtonClicked (MyGUI::Widget* sender)
 {
     if ((mCurrentPage+1)*2 < mPages.size())
     {
@@ -118,7 +127,7 @@ void BookWindow::onNextPageButtonClicked (MyGUI::Widget* _sender)
     }
 }
 
-void BookWindow::onPrevPageButtonClicked (MyGUI::Widget* _sender)
+void BookWindow::onPrevPageButtonClicked (MyGUI::Widget* sender)
 {
     if (mCurrentPage > 0)
     {

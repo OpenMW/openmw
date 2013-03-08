@@ -55,9 +55,35 @@ namespace MWClass
 {
     void Npc::ensureCustomData (const MWWorld::Ptr& ptr) const
     {
+        static bool inited = false;
+        if(!inited)
+        {
+            const MWBase::World *world = MWBase::Environment::get().getWorld();
+            const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
+
+            fMinWalkSpeed = gmst.find("fMinWalkSpeed");
+            fMaxWalkSpeed = gmst.find("fMaxWalkSpeed");
+            fEncumberedMoveEffect = gmst.find("fEncumberedMoveEffect");
+            fSneakSpeedMultiplier = gmst.find("fSneakSpeedMultiplier");
+            fAthleticsRunBonus = gmst.find("fAthleticsRunBonus");
+            fBaseRunMultiplier = gmst.find("fBaseRunMultiplier");
+            fMinFlySpeed = gmst.find("fMinFlySpeed");
+            fMaxFlySpeed = gmst.find("fMaxFlySpeed");
+            fSwimRunBase = gmst.find("fSwimRunBase");
+            fSwimRunAthleticsMult = gmst.find("fSwimRunAthleticsMult");
+            fJumpEncumbranceBase = gmst.find("fJumpEncumbranceBase");
+            fJumpEncumbranceMultiplier = gmst.find("fJumpEncumbranceMultiplier");
+            fJumpAcrobaticsBase = gmst.find("fJumpAcrobaticsBase");
+            fJumpAcroMultiplier = gmst.find("fJumpAcroMultiplier");
+            fJumpRunMultiplier = gmst.find("fJumpRunMultiplier");
+            // Added in Tribunal/Bloodmoon, may not exist
+            fWereWolfRunMult = gmst.search("fWereWolfRunMult");
+
+            inited = true;
+        }
         if (!ptr.getRefData().getCustomData())
         {
-            std::auto_ptr<CustomData> data (new CustomData);
+            std::auto_ptr<CustomData> data(new CustomData);
 
             MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
 
@@ -65,7 +91,7 @@ namespace MWClass
             if (!ref->mBase->mFaction.empty())
             {
                 std::string faction = ref->mBase->mFaction;
-                boost::algorithm::to_lower(faction);
+                Misc::StringUtils::toLower(faction);
                 if(ref->mBase->mNpdt52.mGold != -10)
                 {
                     data->mNpcStats.getFactionRanks()[faction] = (int)ref->mBase->mNpdt52.mRank;
@@ -100,14 +126,15 @@ namespace MWClass
             }
             else
             {
-                /// \todo do something with mNpdt12 maybe:p
                 for (int i=0; i<8; ++i)
                     data->mCreatureStats.getAttribute (i).set (10);
 
                 for (int i=0; i<3; ++i)
                     data->mCreatureStats.setDynamic (i, 10);
 
-                data->mCreatureStats.setLevel (1);
+                data->mCreatureStats.setLevel(ref->mBase->mNpdt12.mLevel);
+                data->mNpcStats.setBaseDisposition(ref->mBase->mNpdt12.mDisposition);
+                data->mNpcStats.setReputation(ref->mBase->mNpdt12.mReputation);
             }
 
             data->mCreatureStats.setAiSetting (0, ref->mBase->mAiData.mHello);
@@ -141,7 +168,7 @@ namespace MWClass
     void Npc::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
     {
         physics.addActor(ptr);
-        MWBase::Environment::get().getMechanicsManager()->addActor(ptr);
+        MWBase::Environment::get().getMechanicsManager()->add(ptr);
     }
 
     std::string Npc::getModel(const MWWorld::Ptr &ptr) const
@@ -193,7 +220,9 @@ namespace MWClass
         const MWWorld::Ptr& actor) const
     {
         if (MWWorld::Class::get (ptr).getCreatureStats (ptr).isDead())
-            return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionOpen(ptr));
+            return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionOpen(ptr, true));
+        else if (MWWorld::Class::get(actor).getStance(actor, MWWorld::Class::Sneak))
+            return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionOpen(ptr)); // stealing
         else
             return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionTalk (ptr));
     }
@@ -296,9 +325,87 @@ namespace MWClass
         return false;
     }
 
-    float Npc::getSpeed (const MWWorld::Ptr& ptr) const
+    float Npc::getSpeed(const MWWorld::Ptr& ptr) const
     {
-        return getStance (ptr, Run) ? 600 : 300; // TODO calculate these values from stats
+        const MWBase::World *world = MWBase::Environment::get().getWorld();
+        const CustomData *npcdata = static_cast<const CustomData*>(ptr.getRefData().getCustomData());
+        const MWMechanics::MagicEffects &mageffects = npcdata->mCreatureStats.getMagicEffects();
+
+        const float normalizedEncumbrance = Npc::getEncumbrance(ptr) / Npc::getCapacity(ptr);
+
+        float walkSpeed = fMinWalkSpeed->getFloat() + 0.01f*npcdata->mCreatureStats.getAttribute(ESM::Attribute::Speed).getModified()*
+                                                      (fMaxWalkSpeed->getFloat() - fMinWalkSpeed->getFloat());
+        walkSpeed *= 1.0f - fEncumberedMoveEffect->getFloat()*normalizedEncumbrance;
+        walkSpeed = std::max(0.0f, walkSpeed);
+        if(Npc::getStance(ptr, Sneak, false))
+            walkSpeed *= fSneakSpeedMultiplier->getFloat();
+
+        float runSpeed = walkSpeed*(0.01f * npcdata->mNpcStats.getSkill(ESM::Skill::Athletics).getModified() *
+                                    fAthleticsRunBonus->getFloat() + fBaseRunMultiplier->getFloat());
+        if(npcdata->mNpcStats.isWerewolf())
+            runSpeed *= fWereWolfRunMult->getFloat();
+
+        float moveSpeed;
+        if(normalizedEncumbrance >= 1.0f)
+            moveSpeed = 0.0f;
+        else if(mageffects.get(MWMechanics::EffectKey(10/*levitate*/)).mMagnitude > 0)
+        {
+            float flySpeed = 0.01f*(npcdata->mCreatureStats.getAttribute(ESM::Attribute::Speed).getModified() +
+                                    mageffects.get(MWMechanics::EffectKey(10/*levitate*/)).mMagnitude);
+            flySpeed = fMinFlySpeed->getFloat() + flySpeed*(fMaxFlySpeed->getFloat() - fMinFlySpeed->getFloat());
+            flySpeed *= 1.0f - fEncumberedMoveEffect->getFloat() * normalizedEncumbrance;
+            flySpeed = std::max(0.0f, flySpeed);
+            moveSpeed = flySpeed;
+        }
+        else if(world->isSwimming(ptr))
+        {
+            float swimSpeed = walkSpeed;
+            if(Npc::getStance(ptr, Run, false))
+                swimSpeed = runSpeed;
+            swimSpeed *= 1.0f + 0.01f * mageffects.get(MWMechanics::EffectKey(1/*swift swim*/)).mMagnitude;
+            swimSpeed *= fSwimRunBase->getFloat() + 0.01f*npcdata->mNpcStats.getSkill(ESM::Skill::Athletics).getModified()*
+                                                    fSwimRunAthleticsMult->getFloat();
+            moveSpeed = swimSpeed;
+        }
+        else if(Npc::getStance(ptr, Run, false) && !Npc::getStance(ptr, Sneak, false))
+            moveSpeed = runSpeed;
+        else
+            moveSpeed = walkSpeed;
+        if(getMovementSettings(ptr).mLeftRight != 0 && getMovementSettings(ptr).mForwardBackward == 0)
+            moveSpeed *= 0.75f;
+
+        return moveSpeed;
+    }
+
+    float Npc::getJump(const MWWorld::Ptr &ptr) const
+    {
+        const CustomData *npcdata = static_cast<const CustomData*>(ptr.getRefData().getCustomData());
+        const MWMechanics::MagicEffects &mageffects = npcdata->mCreatureStats.getMagicEffects();
+        const float encumbranceTerm = fJumpEncumbranceBase->getFloat() +
+                                          fJumpEncumbranceMultiplier->getFloat() *
+                                          (1.0f - Npc::getEncumbrance(ptr)/Npc::getCapacity(ptr));
+
+        float a = npcdata->mNpcStats.getSkill(ESM::Skill::Acrobatics).getModified();
+        float b = 0.0f;
+        if(a > 50.0f)
+        {
+            b = a - 50.0f;
+            a = 50.0f;
+        }
+
+        float x = fJumpAcrobaticsBase->getFloat() +
+                  std::pow(a / 15.0f, fJumpAcroMultiplier->getFloat());
+        x += 3 * b * fJumpAcroMultiplier->getFloat();
+        x += mageffects.get(MWMechanics::EffectKey(9/*jump*/)).mMagnitude * 64;
+        x *= encumbranceTerm;
+
+        if(Npc::getStance(ptr, Run, false))
+            x *= fJumpRunMultiplier->getFloat();
+        x *= 1.25f;//fatigueTerm;
+        x -= -627.2/*gravity constant*/;
+        x /= 3;
+
+        return x;
     }
 
     MWMechanics::Movement& Npc::getMovementSettings (const MWWorld::Ptr& ptr) const
@@ -310,14 +417,10 @@ namespace MWClass
 
     Ogre::Vector3 Npc::getMovementVector (const MWWorld::Ptr& ptr) const
     {
-        Ogre::Vector3 vector (0, 0, 0);
-
-        vector.x = getMovementSettings (ptr).mLeftRight * 127;
-        vector.y = getMovementSettings (ptr).mForwardBackward * 127;
-        vector.z = getMovementSettings(ptr).mUpDown * 127;
-
-        //if (getStance (ptr, Run, false))
-        //    vector *= 2;
+        Ogre::Vector3 vector;
+        vector.x = getMovementSettings(ptr).mLeftRight;
+        vector.y = getMovementSettings(ptr).mForwardBackward;
+        vector.z = getMovementSettings(ptr).mUpDown;
 
         return vector;
     }
@@ -419,4 +522,21 @@ namespace MWClass
 
         return MWWorld::Ptr(&cell.mNpcs.insert(*ref), &cell);
     }
+
+    const ESM::GameSetting *Npc::fMinWalkSpeed;
+    const ESM::GameSetting *Npc::fMaxWalkSpeed;
+    const ESM::GameSetting *Npc::fEncumberedMoveEffect;
+    const ESM::GameSetting *Npc::fSneakSpeedMultiplier;
+    const ESM::GameSetting *Npc::fAthleticsRunBonus;
+    const ESM::GameSetting *Npc::fBaseRunMultiplier;
+    const ESM::GameSetting *Npc::fMinFlySpeed;
+    const ESM::GameSetting *Npc::fMaxFlySpeed;
+    const ESM::GameSetting *Npc::fSwimRunBase;
+    const ESM::GameSetting *Npc::fSwimRunAthleticsMult;
+    const ESM::GameSetting *Npc::fJumpEncumbranceBase;
+    const ESM::GameSetting *Npc::fJumpEncumbranceMultiplier;
+    const ESM::GameSetting *Npc::fJumpAcrobaticsBase;
+    const ESM::GameSetting *Npc::fJumpAcroMultiplier;
+    const ESM::GameSetting *Npc::fJumpRunMultiplier;
+    const ESM::GameSetting *Npc::fWereWolfRunMult;
 }

@@ -84,22 +84,8 @@ void DialInfo::load(ESMReader &esm)
         SelectStruct ss;
 
         ss.mSelectRule = esm.getHString();
-        esm.isEmptyOrGetName();
 
-        if (subName.val == REC_INTV)
-        {
-            ss.mType = VT_Int;
-            esm.getHT(ss.mI);
-        }
-        else if (subName.val == REC_FLTV)
-        {
-            ss.mType = VT_Float;
-            esm.getHT(ss.mF);
-        }
-        else
-            esm.fail(
-                    "INFO.SCVR must precede INTV or FLTV, not "
-                            + subName.toString());
+        ss.mValue.read (esm, Variant::Format_Info);
 
         mSelects.push_back(ss);
 
@@ -152,16 +138,11 @@ void DialInfo::save(ESMWriter &esm)
     for (std::vector<SelectStruct>::iterator it = mSelects.begin(); it != mSelects.end(); ++it)
     {
         esm.writeHNString("SCVR", it->mSelectRule);
-        switch(it->mType)
-        {
-        case VT_Int: esm.writeHNT("INTV", it->mI); break;
-        case VT_Float: esm.writeHNT("FLTV", it->mF); break;
-        default: break;
-        }
+        it->mValue.write (esm, Variant::Format_Info);
     }
 
     esm.writeHNOString("BNAM", mResultScript);
-    
+
     switch(mQuestStatus)
     {
     case QS_Name: esm.writeHNT("QSTN",'\1'); break;

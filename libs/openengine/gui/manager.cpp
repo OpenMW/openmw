@@ -1,10 +1,24 @@
-#include <MyGUI.h>
-#include <MyGUI_OgrePlatform.h>
-#include <cassert>
-
 #include "manager.hpp"
 
+#include <MyGUI_Gui.h>
+#include <MyGUI_OgrePlatform.h>
+
+#include <cassert>
+
 using namespace OEngine::GUI;
+
+/*
+ *  As of MyGUI 3.2.0, MyGUI::OgreDataManager::isDataExist is unnecessarily complex
+ *  this override fixes the resulting performance issue.
+ */
+class FixedOgreDataManager : public MyGUI::OgreDataManager
+{
+public:
+    bool isDataExist(const std::string& _name)
+    {
+        return Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup (_name);
+    }
+};
 
 void MyGUIManager::setup(Ogre::RenderWindow *wnd, Ogre::SceneManager *mgr, bool logging, const std::string& logDir)
 {
@@ -25,26 +39,50 @@ void MyGUIManager::setup(Ogre::RenderWindow *wnd, Ogre::SceneManager *mgr, bool 
     if(!logDir.empty())
         theLogFile.insert(0, logDir);
 
-    // Set up OGRE platform. We might make this more generic later.
-    mPlatform = new OgrePlatform();
-    LogManager::getInstance().setSTDOutputEnabled(logging);
-    mPlatform->initialise(wnd, mgr, "General", theLogFile);
+    // Set up OGRE platform (bypassing OgrePlatform). We might make this more generic later.
+    mLogManager = new LogManager();
+    mRenderManager = new OgreRenderManager();
+    mDataManager = new FixedOgreDataManager();
 
+    LogManager::getInstance().setSTDOutputEnabled(logging);
+
+    if (!theLogFile.empty())
+        LogManager::getInstance().createDefaultSource(theLogFile);
+
+    mRenderManager->initialise(wnd, mgr);
+    mDataManager->initialise("General");
 
     // Create GUI
     mGui = new Gui();
-    mGui->initialise("core.xml");
+    mGui->initialise("");
+}
+
+void MyGUIManager::updateWindow (Ogre::RenderWindow *wnd)
+{
+    mRenderManager->setRenderWindow (wnd);
+    mRenderManager->setActiveViewport(0);
 }
 
 void MyGUIManager::shutdown()
 {
     mGui->shutdown ();
     delete mGui;
-    if(mPlatform)
+    if(mRenderManager)
     {
-        mPlatform->shutdown();
-        delete mPlatform;
+        mRenderManager->shutdown();
+        delete mRenderManager;
+        mRenderManager = NULL;
+    }
+    if(mDataManager)
+    {
+        mDataManager->shutdown();
+        delete mDataManager;
+        mDataManager = NULL;
+    }
+    if (mLogManager)
+    {
+        delete mLogManager;
+        mLogManager = NULL;
     }
     mGui = NULL;
-    mPlatform = NULL;
 }

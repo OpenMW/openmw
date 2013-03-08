@@ -5,7 +5,7 @@
 using namespace MWGui;
 
 TextInputDialog::TextInputDialog(MWBase::WindowManager& parWindowManager)
-  : WindowBase("openmw_text_input.layout", parWindowManager)
+  : WindowModal("openmw_text_input.layout", parWindowManager)
 {
     // Centre dialog
     center();
@@ -13,7 +13,7 @@ TextInputDialog::TextInputDialog(MWBase::WindowManager& parWindowManager)
     getWidget(mTextEdit, "TextEdit");
     mTextEdit->eventEditSelectAccept += newDelegate(this, &TextInputDialog::onTextAccepted);
 
-    MyGUI::ButtonPtr okButton;
+    MyGUI::Button* okButton;
     getWidget(okButton, "OKButton");
     okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &TextInputDialog::onOkClicked);
 
@@ -23,7 +23,7 @@ TextInputDialog::TextInputDialog(MWBase::WindowManager& parWindowManager)
 
 void TextInputDialog::setNextButtonShow(bool shown)
 {
-    MyGUI::ButtonPtr okButton;
+    MyGUI::Button* okButton;
     getWidget(okButton, "OKButton");
 
     if (shown)
@@ -39,6 +39,7 @@ void TextInputDialog::setTextLabel(const std::string &label)
 
 void TextInputDialog::open()
 {
+    WindowModal::open();
     // Make sure the edit box has focus
     MyGUI::InputManager::getInstance().setKeyFocusWidget(mTextEdit);
 }

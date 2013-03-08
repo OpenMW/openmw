@@ -25,7 +25,7 @@ bool sortBirthSigns(const std::pair<std::string, const ESM::BirthSign*>& left, c
 }
 
 BirthDialog::BirthDialog(MWBase::WindowManager& parWindowManager)
-  : WindowBase("openmw_chargen_birth.layout", parWindowManager)
+  : WindowModal("openmw_chargen_birth.layout", parWindowManager)
 {
     // Centre dialog
     center();
@@ -40,15 +40,14 @@ BirthDialog::BirthDialog(MWBase::WindowManager& parWindowManager)
     mBirthList->eventListMouseItemActivate += MyGUI::newDelegate(this, &BirthDialog::onSelectBirth);
     mBirthList->eventListChangePosition += MyGUI::newDelegate(this, &BirthDialog::onSelectBirth);
 
-    MyGUI::ButtonPtr backButton;
+    MyGUI::Button* backButton;
     getWidget(backButton, "BackButton");
     backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &BirthDialog::onBackClicked);
 
-    MyGUI::ButtonPtr okButton;
+    MyGUI::Button* okButton;
     getWidget(okButton, "OKButton");
     okButton->setCaption(mWindowManager.getGameSettingString("sOK", ""));
     okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &BirthDialog::onOkClicked);
-    okButton->setEnabled(false);
 
     updateBirths();
     updateSpells();
@@ -56,7 +55,7 @@ BirthDialog::BirthDialog(MWBase::WindowManager& parWindowManager)
 
 void BirthDialog::setNextButtonShow(bool shown)
 {
-    MyGUI::ButtonPtr okButton;
+    MyGUI::Button* okButton;
     getWidget(okButton, "OKButton");
 
     if (shown)
@@ -67,7 +66,7 @@ void BirthDialog::setNextButtonShow(bool shown)
 
 void BirthDialog::open()
 {
-    WindowBase::open();
+    WindowModal::open();
     updateBirths();
     updateSpells();
 }
@@ -83,9 +82,8 @@ void BirthDialog::setBirthId(const std::string &birthId)
         if (boost::iequals(*mBirthList->getItemDataAt<std::string>(i), birthId))
         {
             mBirthList->setIndexSelected(i);
-            MyGUI::ButtonPtr okButton;
+            MyGUI::Button* okButton;
             getWidget(okButton, "OKButton");
-            okButton->setEnabled(true);
             break;
         }
     }
@@ -112,9 +110,8 @@ void BirthDialog::onSelectBirth(MyGUI::ListBox* _sender, size_t _index)
     if (_index == MyGUI::ITEM_NONE)
         return;
 
-    MyGUI::ButtonPtr okButton;
+    MyGUI::Button* okButton;
     getWidget(okButton, "OKButton");
-    okButton->setEnabled(true);
 
     const std::string *birthId = mBirthList->getItemDataAt<std::string>(_index);
     if (boost::iequals(mCurrentBirthId, *birthId))
@@ -133,8 +130,6 @@ void BirthDialog::updateBirths()
     const MWWorld::Store<ESM::BirthSign> &signs =
         MWBase::Environment::get().getWorld()->getStore().get<ESM::BirthSign>();
 
-    int index = 0;
-
     // sort by name
     std::vector < std::pair<std::string, const ESM::BirthSign*> > birthSigns;
 
@@ -145,18 +140,26 @@ void BirthDialog::updateBirths()
     }
     std::sort(birthSigns.begin(), birthSigns.end(), sortBirthSigns);
 
-    for (std::vector < std::pair<std::string, const ESM::BirthSign*> >::const_iterator it2 = birthSigns.begin(); it2 != birthSigns.end(); ++it2)
+    int index = 0;
+    for (std::vector<std::pair<std::string, const ESM::BirthSign*> >::const_iterator it2 = birthSigns.begin();
+         it2 != birthSigns.end(); ++it2, ++index)
     {
         mBirthList->addItem(it2->second->mName, it2->first);
-        if (boost::iequals(it2->first, mCurrentBirthId))
+        if (mCurrentBirthId.empty())
+        {
             mBirthList->setIndexSelected(index);
-        ++index;
+            mCurrentBirthId = it2->first;
+        }
+        else if (boost::iequals(it2->first, mCurrentBirthId))
+        {
+            mBirthList->setIndexSelected(index);
+        }
     }
 }
 
 void BirthDialog::updateSpells()
 {
-    for (std::vector<MyGUI::WidgetPtr>::iterator it = mSpellItems.begin(); it != mSpellItems.end(); ++it)
+    for (std::vector<MyGUI::Widget*>::iterator it = mSpellItems.begin(); it != mSpellItems.end(); ++it)
     {
         MyGUI::Gui::getInstance().destroyWidget(*it);
     }

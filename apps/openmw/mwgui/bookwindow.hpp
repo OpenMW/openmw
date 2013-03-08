@@ -5,6 +5,8 @@
 
 #include "../mwworld/ptr.hpp"
 
+#include "imagebutton.hpp"
+
 namespace MWGui
 {
     class BookWindow : public WindowBase
@@ -15,20 +17,22 @@ namespace MWGui
             void open(MWWorld::Ptr book);
             void setTakeButtonShow(bool show);
 
+            void setInventoryAllowed(bool allowed);
+
         protected:
-            void onNextPageButtonClicked (MyGUI::Widget* _sender);
-            void onPrevPageButtonClicked (MyGUI::Widget* _sender);
-            void onCloseButtonClicked (MyGUI::Widget* _sender);
-            void onTakeButtonClicked (MyGUI::Widget* _sender);
+            void onNextPageButtonClicked (MyGUI::Widget* sender);
+            void onPrevPageButtonClicked (MyGUI::Widget* sender);
+            void onCloseButtonClicked (MyGUI::Widget* sender);
+            void onTakeButtonClicked (MyGUI::Widget* sender);
 
             void updatePages();
             void clearPages();
 
         private:
-            MyGUI::Button* mCloseButton;
-            MyGUI::Button* mTakeButton;
-            MyGUI::Button* mNextPageButton;
-            MyGUI::Button* mPrevPageButton;
+            MWGui::ImageButton* mCloseButton;
+            MWGui::ImageButton* mTakeButton;
+            MWGui::ImageButton* mNextPageButton;
+            MWGui::ImageButton* mPrevPageButton;
             MyGUI::TextBox* mLeftPageNumber;
             MyGUI::TextBox* mRightPageNumber;
             MyGUI::Widget* mLeftPage;
@@ -38,6 +42,9 @@ namespace MWGui
             std::vector<MyGUI::Widget*> mPages;
 
             MWWorld::Ptr mBook;
+
+            bool mTakeButtonShow;
+            bool mTakeButtonAllowed;
     };
 
 }

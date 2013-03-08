@@ -17,7 +17,7 @@ Layout is defined by resources/mygui/openmw_chargen_review.layout.
 
 namespace MWGui
 {
-    class ReviewDialog : public WindowBase
+    class ReviewDialog : public WindowModal
     {
     public:
         enum Dialogs {
@@ -91,7 +91,7 @@ namespace MWGui
         std::map<int, MyGUI::TextBox*> mSkillWidgetMap;
         std::string mName, mRaceId, mBirthSignId;
         ESM::Class mKlass;
-        std::vector<MyGUI::WidgetPtr> mSkillWidgets; //< Skills and other information
+        std::vector<MyGUI::Widget*> mSkillWidgets; //< Skills and other information
     };
 }
 #endif

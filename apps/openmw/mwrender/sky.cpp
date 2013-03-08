@@ -14,7 +14,7 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include <components/nifogre/ogre_nif_loader.hpp>
+#include <components/nifogre/ogrenifloader.hpp>
 
 #include <extern/shiny/Platforms/Ogre/OgreMaterial.hpp>
 
@@ -110,7 +110,7 @@ void BillboardObject::setPosition(const Vector3& pPosition)
 Vector3 BillboardObject::getPosition() const
 {
     Vector3 p = mNode->_getDerivedPosition() - mNode->getParentSceneNode()->_getDerivedPosition();
-    return Vector3(p.x, -p.z, p.y);
+    return p;
 }
 
 void BillboardObject::setVisibilityFlags(int flags)
@@ -203,49 +203,7 @@ unsigned int Moon::getPhaseInt() const
     return 0;
 }
 
-void SkyManager::ModVertexAlpha(Entity* ent, unsigned int meshType)
-{
-    // Get the vertex colour buffer of this mesh
-    const Ogre::VertexElement* ves_diffuse = ent->getMesh()->getSubMesh(0)->vertexData->vertexDeclaration->findElementBySemantic( Ogre::VES_DIFFUSE );
-    HardwareVertexBufferSharedPtr colourBuffer = ent->getMesh()->getSubMesh(0)->vertexData->vertexBufferBinding->getBuffer(ves_diffuse->getSource());
-
-    // Lock
-    void* pData = colourBuffer->lock(HardwareBuffer::HBL_NORMAL);
-
-    // Iterate over all vertices
-    int vertex_size = colourBuffer->getVertexSize();
-    float * currentVertex = NULL;
-    for (unsigned int i=0; i<colourBuffer->getNumVertices(); ++i)
-    {
-        // Get a pointer to the vertex colour
-        ves_diffuse->baseVertexPointerToElement( pData, &currentVertex );
-
-        unsigned char alpha=0;
-        if (meshType == 0) alpha = i%2 ? 0 : 255; // this is a cylinder, so every second vertex belongs to the bottom-most row
-        else if (meshType == 1)
-        {
-            if (i>= 49 && i <= 64) alpha = 0; // bottom-most row
-            else if (i>= 33 && i <= 48) alpha = 64; // second bottom-most row
-            else alpha = 255;
-        }
-        // NB we would have to swap R and B depending on rendersystem specific VertexElementType, but doesn't matter since they are both 1
-        uint8 tmpR = static_cast<uint8>(255);
-        uint8 tmpG = static_cast<uint8>(255);
-        uint8 tmpB = static_cast<uint8>(255);
-        uint8 tmpA = static_cast<uint8>(alpha);
-
-        // Modify
-        *((uint32*)currentVertex) = tmpR | (tmpG << 8) | (tmpB << 16) | (tmpA << 24);
-
-        // Move to the next vertex
-        pData = static_cast<unsigned char *> (pData) + vertex_size;
-    }
-
-    // Unlock
-    ent->getMesh()->getSubMesh(0)->vertexData->vertexBufferBinding->getBuffer(ves_diffuse->getSource())->unlock();
-}
-
-SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera)
+SkyManager::SkyManager (SceneNode* root, Camera* pCamera)
     : mHour(0.0f)
     , mDay(0)
     , mMonth(0)
@@ -276,9 +234,8 @@ SkyManager::SkyManager (SceneNode* pMwRoot, Camera* pCamera)
     , mCloudAnimationTimer(0.f)
     , mMoonRed(false)
 {
-    mSceneMgr = pMwRoot->getCreator();
+    mSceneMgr = root->getCreator();
     mRootNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
-    mRootNode->pitch(Degree(-90)); // convert MW to ogre coordinates
     mRootNode->setInheritOrientation(false);
 }
 
@@ -297,6 +254,7 @@ void SkyManager::create()
     sh::Factory::getInstance().setSharedParameter ("nightFade",
         sh::makeProperty<sh::FloatValue>(new sh::FloatValue(0)));
     sh::Factory::getInstance().setSharedParameter ("atmosphereColour", sh::makeProperty<sh::Vector4>(new sh::Vector4(0,0,0,1)));
+    sh::Factory::getInstance().setSharedParameter ("horizonColour", sh::makeProperty<sh::Vector4>(new sh::Vector4(0,0,0,1)));
 
     sh::Factory::getInstance().setTextureAlias ("cloud_texture_1", "");
     sh::Factory::getInstance().setTextureAlias ("cloud_texture_2", "");
@@ -322,15 +280,19 @@ void SkyManager::create()
     mSunGlare->setRenderQueue(RQG_SkiesLate);
     mSunGlare->setVisibilityFlags(RV_NoReflection);
 
+    Ogre::AxisAlignedBox aabInf;
+    aabInf.setInfinite ();
+
     // Stars
     mAtmosphereNight = mRootNode->createChildSceneNode();
-    NifOgre::EntityList entities = NifOgre::NIFLoader::createEntities(mAtmosphereNight, NULL, "meshes\\sky_night_01.nif");
+    NifOgre::EntityList entities = NifOgre::Loader::createEntities(mAtmosphereNight, "meshes\\sky_night_01.nif");
     for(size_t i = 0, matidx = 0;i < entities.mEntities.size();i++)
     {
         Entity* night1_ent = entities.mEntities[i];
         night1_ent->setRenderQueueGroup(RQG_SkiesEarly+1);
         night1_ent->setVisibilityFlags(RV_Sky);
         night1_ent->setCastShadows(false);
+        night1_ent->getMesh()->_setBounds (aabInf);
 
         for (unsigned int j=0; j<night1_ent->getNumSubEntities(); ++j)
         {
@@ -349,30 +311,35 @@ void SkyManager::create()
 
     // Atmosphere (day)
     mAtmosphereDay = mRootNode->createChildSceneNode();
-    entities = NifOgre::NIFLoader::createEntities(mAtmosphereDay, NULL, "meshes\\sky_atmosphere.nif");
+    entities = NifOgre::Loader::createEntities(mAtmosphereDay, "meshes\\sky_atmosphere.nif");
     for(size_t i = 0;i < entities.mEntities.size();i++)
     {
         Entity* atmosphere_ent = entities.mEntities[i];
         atmosphere_ent->setCastShadows(false);
         atmosphere_ent->setRenderQueueGroup(RQG_SkiesEarly);
         atmosphere_ent->setVisibilityFlags(RV_Sky);
-        atmosphere_ent->getSubEntity (0)->setMaterialName ("openmw_atmosphere");
-        ModVertexAlpha(atmosphere_ent, 0);
+
+        for(unsigned int j = 0;j < atmosphere_ent->getNumSubEntities();j++)
+            atmosphere_ent->getSubEntity (j)->setMaterialName("openmw_atmosphere");
+
+        // Using infinite AAB here to prevent being clipped by the custom near clip plane used for reflections/refractions
+        atmosphere_ent->getMesh()->_setBounds (aabInf);
     }
 
 
     // Clouds
     SceneNode* clouds_node = mRootNode->createChildSceneNode();
-    entities = NifOgre::NIFLoader::createEntities(clouds_node, NULL, "meshes\\sky_clouds_01.nif");
+    entities = NifOgre::Loader::createEntities(clouds_node, "meshes\\sky_clouds_01.nif");
     for(size_t i = 0;i < entities.mEntities.size();i++)
     {
         Entity* clouds_ent = entities.mEntities[i];
         clouds_ent->setVisibilityFlags(RV_Sky);
         clouds_ent->setRenderQueueGroup(RQG_SkiesEarly+5);
-        clouds_ent->getSubEntity(0)->setMaterialName ("openmw_clouds");
+        for(unsigned int j = 0;j < clouds_ent->getNumSubEntities();j++)
+            clouds_ent->getSubEntity(j)->setMaterialName("openmw_clouds");
         clouds_ent->setCastShadows(false);
-
-        ModVertexAlpha(clouds_ent, 1);
+        // Using infinite AAB here to prevent being clipped by the custom near clip plane used for reflections/refractions
+        clouds_ent->getMesh()->_setBounds (aabInf);
     }
 
     mCreated = true;
@@ -406,7 +373,7 @@ void SkyManager::update(float duration)
     mRootNode->setPosition(mCamera->getDerivedPosition());
 
     // UV Scroll the clouds
-    mCloudAnimationTimer += duration * mCloudSpeed * (MWBase::Environment::get().getWorld()->getTimeScaleFactor()/30.f);
+    mCloudAnimationTimer += duration * mCloudSpeed;
     sh::Factory::getInstance().setSharedParameter ("cloudAnimationTimer",
         sh::makeProperty<sh::FloatValue>(new sh::FloatValue(mCloudAnimationTimer)));
 
@@ -434,7 +401,6 @@ void SkyManager::update(float duration)
         // increase the strength of the sun glare effect depending
         // on how directly the player is looking at the sun
         Vector3 sun = mSunGlare->getPosition();
-        sun = Vector3(sun.x, sun.z, -sun.y);
         Vector3 cam = mCamera->getRealDirection();
         const Degree angle = sun.angleBetween( cam );
         float val = 1- (angle.valueDegrees() / 180.f);
@@ -519,6 +485,13 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
         mSkyColour = weather.mSkyColor;
         sh::Factory::getInstance().setSharedParameter ("atmosphereColour", sh::makeProperty<sh::Vector4>(new sh::Vector4(
             weather.mSkyColor.r, weather.mSkyColor.g, weather.mSkyColor.b, weather.mSkyColor.a)));
+    }
+
+    if (mFogColour != weather.mFogColor)
+    {
+        mFogColour = weather.mFogColor;
+        sh::Factory::getInstance().setSharedParameter ("horizonColour", sh::makeProperty<sh::Vector4>(new sh::Vector4(
+            weather.mFogColor.r, weather.mFogColor.g, weather.mFogColor.b, weather.mFogColor.a)));
     }
 
     mCloudSpeed = weather.mCloudSpeed;
@@ -627,6 +600,10 @@ void SkyManager::setLightningStrength(const float factor)
     }
     else
         mLightning->setVisible(false);
+}
+void SkyManager::setLightningEnabled(bool enabled)
+{
+    /// \todo
 }
 
 void SkyManager::setLightningDirection(const Ogre::Vector3& dir)

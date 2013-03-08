@@ -8,15 +8,16 @@
 
 #include <components/bsa/bsa_archive.hpp>
 #include <components/files/configurationmanager.hpp>
+#include <components/translation/translation.hpp>
+#include <components/nif/niffile.hpp>
 #include <components/nifoverrides/nifoverrides.hpp>
 
-#include <components/nifbullet/bullet_nif_loader.hpp>
-#include <components/nifogre/ogre_nif_loader.hpp>
+#include <components/nifbullet/bulletnifloader.hpp>
+#include <components/nifogre/ogrenifloader.hpp>
 
 #include "mwinput/inputmanagerimp.hpp"
 
 #include "mwgui/windowmanagerimp.hpp"
-#include "mwgui/cursorreplace.hpp"
 
 #include "mwscript/scriptmanagerimp.hpp"
 #include "mwscript/extensions.hpp"
@@ -61,18 +62,26 @@ void OMW::Engine::setAnimationVerbose(bool animverbose)
 {
 }
 
+bool OMW::Engine::frameStarted (const Ogre::FrameEvent& evt)
+{
+    if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
+        MWBase::Environment::get().getWorld()->frameStarted(evt.timeSinceLastFrame);
+    return true;
+}
+
 bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 {
     try
     {
-        mEnvironment.setFrameDuration (evt.timeSinceLastFrame);
+        float frametime = std::min(evt.timeSinceLastFrame, 0.2f);
+        mEnvironment.setFrameDuration(frametime);
 
         // update input
-        MWBase::Environment::get().getInputManager()->update(evt.timeSinceLastFrame, false);
+        MWBase::Environment::get().getInputManager()->update(frametime, false);
 
         // sound
         if (mUseSound)
-            MWBase::Environment::get().getSoundManager()->update (evt.timeSinceLastFrame);
+            MWBase::Environment::get().getSoundManager()->update(frametime);
 
         // global scripts
         MWBase::Environment::get().getScriptManager()->getGlobalScripts().run();
@@ -86,23 +95,19 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 
         // passing of time
         if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
-            MWBase::Environment::get().getWorld()->advanceTime (
-                mEnvironment.getFrameDuration()*MWBase::Environment::get().getWorld()->getTimeScaleFactor()/3600);
+            MWBase::Environment::get().getWorld()->advanceTime(
+                frametime*MWBase::Environment::get().getWorld()->getTimeScaleFactor()/3600);
 
 
         if (changed) // keep change flag for another frame, if cell changed happend in local script
             MWBase::Environment::get().getWorld()->markCellAsUnchanged();
 
         // update actors
-        std::vector<std::pair<std::string, Ogre::Vector3> > movement;
-        MWBase::Environment::get().getMechanicsManager()->update (movement, mEnvironment.getFrameDuration(),
+        MWBase::Environment::get().getMechanicsManager()->update(frametime,
             MWBase::Environment::get().getWindowManager()->isGuiMode());
 
-        if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
-            MWBase::Environment::get().getWorld()->doPhysics (movement, mEnvironment.getFrameDuration());
-
         // update world
-        MWBase::Environment::get().getWorld()->update (evt.timeSinceLastFrame, MWBase::Environment::get().getWindowManager()->isGuiMode());
+        MWBase::Environment::get().getWorld()->update(frametime, MWBase::Environment::get().getWindowManager()->isGuiMode());
 
         // update GUI
         Ogre::RenderWindow* window = mOgre->getWindow();
@@ -110,7 +115,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         MWBase::Environment::get().getWorld()->getTriangleBatchCount(tri, batch);
         MWBase::Environment::get().getWindowManager()->wmUpdateFps(window->getLastFPS(), tri, batch);
 
-        MWBase::Environment::get().getWindowManager()->onFrame(evt.timeSinceLastFrame);
+        MWBase::Environment::get().getWindowManager()->onFrame(frametime);
     }
     catch (const std::exception& e)
     {
@@ -163,9 +168,6 @@ void OMW::Engine::loadBSA()
         dataDirectory = iter->string();
         std::cout << "Data dir " << dataDirectory << std::endl;
         Bsa::addDir(dataDirectory, mFSStrict);
-
-        // Workaround until resource listing capabilities are added to DirArchive, we need those to list available splash screens
-        addResourcesDirectory (dataDirectory);
     }
 }
 
@@ -212,18 +214,31 @@ void OMW::Engine::setCell (const std::string& cellName)
 
 // Set master file (esm)
 // - If the given name does not have an extension, ".esm" is added automatically
-// - Currently OpenMW only supports one master at the same time.
 
 void OMW::Engine::addMaster (const std::string& master)
 {
-    assert (mMaster.empty());
-    mMaster = master;
+    mMaster.push_back(master);
+    std::string &str = mMaster.back();
 
     // Append .esm if not already there
-    std::string::size_type sep = mMaster.find_last_of (".");
+    std::string::size_type sep = str.find_last_of (".");
     if (sep == std::string::npos)
     {
-        mMaster += ".esm";
+        str += ".esm";
+    }
+}
+
+// Add plugin file (esp)
+void OMW::Engine::addPlugin (const std::string& plugin)
+{
+    mPlugins.push_back(plugin);
+    std::string &str = mPlugins.back();
+
+    // Append .esp if not already there
+    std::string::size_type sep = str.find_last_of (".");
+    if (sep == std::string::npos)
+    {
+        str += ".esp";
     }
 }
 
@@ -242,18 +257,9 @@ void OMW::Engine::setNewGame(bool newGame)
     mNewGame = newGame;
 }
 
-// Initialise and enter main loop.
-
-void OMW::Engine::go()
+std::string OMW::Engine::loadSettings (Settings::Manager & settings)
 {
-    assert (!mCellName.empty());
-    assert (!mMaster.empty());
-    assert (!mOgre);
-
-    mOgre = new OEngine::Render::OgreRenderer;
-
     // Create the settings manager and load default settings file
-    Settings::Manager settings;
     const std::string localdefault = mCfgMgr.getLocalPath().string() + "/settings-default.cfg";
     const std::string globaldefault = mCfgMgr.getGlobalPath().string() + "/settings-default.cfg";
 
@@ -274,10 +280,6 @@ void OMW::Engine::go()
     else if (boost::filesystem::exists(globaldefault))
         settings.loadUser(globaldefault);
 
-    // Get the path for the keybinder xml file
-    std::string keybinderUser = (mCfgMgr.getUserPath() / "input.xml").string();
-    bool keybinderUserExists = boost::filesystem::exists(keybinderUser);
-
     mFpsLevel = settings.getInt("fps", "HUD");
 
     // load nif overrides
@@ -286,6 +288,13 @@ void OMW::Engine::go()
         nifOverrides.loadTransparencyOverrides(mCfgMgr.getLocalPath().string() + "/transparency-overrides.cfg");
     else if (boost::filesystem::exists(mCfgMgr.getGlobalPath().string() + "/transparency-overrides.cfg"))
         nifOverrides.loadTransparencyOverrides(mCfgMgr.getGlobalPath().string() + "/transparency-overrides.cfg");
+
+    return settingspath;
+}
+
+void OMW::Engine::prepareEngine (Settings::Manager & settings)
+{
+    Nif::NIFFile::CacheLock cachelock;
 
     std::string renderSystem = settings.getString("render system", "Video");
     if (renderSystem == "")
@@ -296,6 +305,9 @@ void OMW::Engine::go()
         renderSystem = "OpenGL Rendering Subsystem";
 #endif
     }
+
+    mOgre = new OEngine::Render::OgreRenderer;
+
     mOgre->configure(
         mCfgMgr.getLogPath().string(),
         renderSystem,
@@ -311,7 +323,6 @@ void OMW::Engine::go()
 
     addResourcesDirectory(mResDir / "mygui");
     addResourcesDirectory(mResDir / "water");
-    addResourcesDirectory(mResDir / "gbuffer");
     addResourcesDirectory(mResDir / "shadows");
     addZipResource(mResDir / "mygui" / "Obliviontt.zip");
 
@@ -327,19 +338,22 @@ void OMW::Engine::go()
 
     loadBSA();
 
-    // cursor replacer (converts the cursor from the bsa so they can be used by mygui)
-    MWGui::CursorReplace replacer;
-
     // Create the world
-    mEnvironment.setWorld (new MWWorld::World (*mOgre, mFileCollections, mMaster,
-        mResDir, mCfgMgr.getCachePath(), mNewGame, mEncoding, mFallbackMap));
+    mEnvironment.setWorld( new MWWorld::World (*mOgre, mFileCollections, mMaster, mPlugins,
+        mResDir, mCfgMgr.getCachePath(), mNewGame, mEncoder, mFallbackMap,
+        mActivationDistanceOverride));
+
+    //Load translation data
+    mTranslationDataStorage.setEncoder(mEncoder);
+    for (size_t i = 0; i < mMaster.size(); i++)
+      mTranslationDataStorage.loadTranslationData(mFileCollections, mMaster[i]);
 
     // Create window manager - this manages all the MW-specific GUI windows
     MWScript::registerExtensions (mExtensions);
 
     mEnvironment.setWindowManager (new MWGui::WindowManager(
         mExtensions, mFpsLevel, mNewGame, mOgre, mCfgMgr.getLogPath().string() + std::string("/"),
-        mCfgMgr.getCachePath ().string(), mScriptConsoleMode));
+        mCfgMgr.getCachePath ().string(), mScriptConsoleMode, mTranslationDataStorage));
 
     // Create sound system
     mEnvironment.setSoundManager (new MWSound::SoundManager(mUseSound));
@@ -356,9 +370,14 @@ void OMW::Engine::go()
 
     // Create dialog system
     mEnvironment.setJournal (new MWDialogue::Journal);
-    mEnvironment.setDialogueManager (new MWDialogue::DialogueManager (mExtensions, mVerboseScripts));
+    mEnvironment.setDialogueManager (new MWDialogue::DialogueManager (mExtensions, mVerboseScripts, mTranslationDataStorage));
 
     // Sets up the input system
+
+    // Get the path for the keybinder xml file
+    std::string keybinderUser = (mCfgMgr.getUserPath() / "input.xml").string();
+    bool keybinderUserExists = boost::filesystem::exists(keybinderUser);
+
     mEnvironment.setInputManager (new MWInput::InputManager (*mOgre,
         MWBase::Environment::get().getWorld()->getPlayer(),
          *MWBase::Environment::get().getWindowManager(), mDebug, *this, keybinderUser, keybinderUserExists));
@@ -382,12 +401,7 @@ void OMW::Engine::go()
         MWBase::Environment::get().getWorld()->changeToInteriorCell (mCellName, pos);
     }
 
-    std::cout << "\nPress Q/ESC or close window to exit.\n";
-
     mOgre->getRoot()->addFrameListener (this);
-
-    // Play some good 'ol tunes
-    MWBase::Environment::get().getSoundManager()->playPlaylist(std::string("Explore"));
 
     // scripts
     if (mCompileAll)
@@ -401,9 +415,34 @@ void OMW::Engine::go()
                 << "%)"
                 << std::endl;
     }
+}
+
+// Initialise and enter main loop.
+
+void OMW::Engine::go()
+{
+    assert (!mCellName.empty());
+    assert (!mMaster.empty());
+    assert (!mOgre);
+
+    Settings::Manager settings;
+	std::string settingspath;
+
+    settingspath = loadSettings (settings);
+
+    // Create encoder
+    ToUTF8::Utf8Encoder encoder (mEncoding);
+    mEncoder = &encoder;
+
+    prepareEngine (settings);
+
+    // Play some good 'ol tunes
+    MWBase::Environment::get().getSoundManager()->playPlaylist(std::string("Explore"));
 
     if (!mStartupScript.empty())
         MWBase::Environment::get().getWindowManager()->executeInConsole (mStartupScript);
+
+    std::cout << "\nPress Q/ESC or close window to exit.\n";
 
     // Start the main rendering loop
     mOgre->start();
@@ -411,7 +450,7 @@ void OMW::Engine::go()
     // Save user settings
     settings.saveUser(settingspath);
 
-    std::cout << "Quitting peacefully.\n";
+    std::cout << "Quitting peacefully." << std::endl;
 }
 
 void OMW::Engine::activate()
@@ -419,12 +458,7 @@ void OMW::Engine::activate()
     if (MWBase::Environment::get().getWindowManager()->isGuiMode())
         return;
 
-    std::string handle = MWBase::Environment::get().getWorld()->getFacedHandle();
-
-    if (handle.empty())
-        return;
-
-    MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaHandle (handle);
+    MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getFacedObject();
 
     if (ptr.isEmpty())
         return;
@@ -487,7 +521,7 @@ void OMW::Engine::showFPS(int level)
     mFpsLevel = level;
 }
 
-void OMW::Engine::setEncoding(const std::string& encoding)
+void OMW::Engine::setEncoding(const ToUTF8::FromType& encoding)
 {
     mEncoding = encoding;
 }
@@ -505,4 +539,10 @@ void OMW::Engine::setScriptConsoleMode (bool enabled)
 void OMW::Engine::setStartupScript (const std::string& path)
 {
     mStartupScript = path;
+}
+
+
+void OMW::Engine::setActivationDistanceOverride (int distance)
+{
+    mActivationDistanceOverride = distance;
 }

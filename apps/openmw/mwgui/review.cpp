@@ -23,7 +23,7 @@ using namespace Widgets;
 const int ReviewDialog::sLineHeight = 18;
 
 ReviewDialog::ReviewDialog(MWBase::WindowManager& parWindowManager)
-    : WindowBase("openmw_chargen_review.layout", parWindowManager)
+    : WindowModal("openmw_chargen_review.layout", parWindowManager)
     , mLastPos(0)
 {
     // Centre dialog
@@ -86,17 +86,18 @@ ReviewDialog::ReviewDialog(MWBase::WindowManager& parWindowManager)
         mSkillWidgetMap.insert(std::make_pair(i, static_cast<MyGUI::TextBox*> (0)));
     }
 
-    MyGUI::ButtonPtr backButton;
+    MyGUI::Button* backButton;
     getWidget(backButton, "BackButton");
     backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onBackClicked);
 
-    MyGUI::ButtonPtr okButton;
+    MyGUI::Button* okButton;
     getWidget(okButton, "OKButton");
     okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ReviewDialog::onOkClicked);
 }
 
 void ReviewDialog::open()
 {
+    WindowModal::open();
     updateSkillArea();
 }
 
@@ -308,7 +309,7 @@ void ReviewDialog::addSkills(const SkillList &skills, const std::string &titleId
 
 void ReviewDialog::updateSkillArea()
 {
-    for (std::vector<MyGUI::WidgetPtr>::iterator it = mSkillWidgets.begin(); it != mSkillWidgets.end(); ++it)
+    for (std::vector<MyGUI::Widget*>::iterator it = mSkillWidgets.begin(); it != mSkillWidgets.end(); ++it)
     {
         MyGUI::Gui::getInstance().destroyWidget(*it);
     }

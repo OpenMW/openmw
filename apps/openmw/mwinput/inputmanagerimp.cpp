@@ -21,6 +21,7 @@
 #include "../engine.hpp"
 
 #include "../mwworld/player.hpp"
+#include "../mwworld/class.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -40,9 +41,12 @@ namespace MWInput
         , mMouseLookEnabled(true)
         , mMouseX(ogre.getWindow()->getWidth ()/2.f)
         , mMouseY(ogre.getWindow()->getHeight ()/2.f)
-        , mUserFile(userFile)
+        , mMouseWheel(0)
         , mDragDrop(false)
         , mGuiCursorEnabled(false)
+        , mDebug(debug)
+        , mUserFile(userFile)
+        , mUserFileExists(userFileExists)
         , mInvertY (Settings::Manager::getBool("invert y axis", "Input"))
         , mCameraSensitivity (Settings::Manager::getFloat("camera sensitivity", "Input"))
         , mUISensitivity (Settings::Manager::getFloat("ui sensitivity", "Input"))
@@ -50,8 +54,9 @@ namespace MWInput
         , mUIYMultiplier (Settings::Manager::getFloat("ui y multiplier", "Input"))
         , mPreviewPOVDelay(0.f)
         , mTimeIdle(0.f)
+        , mOverencumberedMessageDelay(0.f)
     {
-        Ogre::RenderWindow* window = ogre.getWindow ();
+        Ogre::RenderWindow* window = mOgre.getWindow ();
         size_t windowHnd;
 
         resetIdleTime();
@@ -66,7 +71,7 @@ namespace MWInput
 
         // Set non-exclusive mouse and keyboard input if the user requested
         // it.
-        if (debug)
+        if (mDebug)
         {
             #if defined OIS_WIN32_PLATFORM
             pl.insert(std::make_pair(std::string("w32_mouse"),
@@ -84,10 +89,12 @@ namespace MWInput
                 std::string("false")));
             pl.insert(std::make_pair(std::string("x11_keyboard_grab"),
                 std::string("false")));
-            pl.insert(std::make_pair(std::string("XAutoRepeatOn"),
-                std::string("true")));
             #endif
         }
+#if defined OIS_LINUX_PLATFORM
+        pl.insert(std::make_pair(std::string("XAutoRepeatOn"),
+            std::string("true")));
+#endif
 
 #if defined(__APPLE__) && !defined(__LP64__)
         // Give the application window focus to receive input events
@@ -111,7 +118,7 @@ namespace MWInput
 
         MyGUI::InputManager::getInstance().injectMouseMove(mMouseX, mMouseY, mMouse->getMouseState ().Z.abs);
 
-        std::string file = userFileExists ? userFile : "";
+        std::string file = mUserFileExists ? mUserFile : "";
         mInputCtrl = new ICS::InputControlSystem(file, true, this, NULL, A_Last);
 
         loadKeyDefaults();
@@ -174,15 +181,17 @@ namespace MWInput
             case A_Activate:
                 resetIdleTime();
                 activate();
+                if( MWBase::Environment::get().getWindowManager()->isGuiMode()
+                    && MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_InterMessageBox ) {
+                        // Pressing the activation key when a messagebox is prompting for "ok" will activate the ok button
+                        MWBase::Environment::get().getWindowManager()->enterPressed();
+                    }
                 break;
             case A_Journal:
                 toggleJournal ();
                 break;
             case A_AutoMove:
                 toggleAutoMove ();
-                break;
-            case A_ToggleSneak:
-                /// \todo implement
                 break;
             case A_ToggleWalk:
                 toggleWalking ();
@@ -232,7 +241,7 @@ namespace MWInput
             case A_ToggleHUD:
                 mWindows.toggleHud();
                 break;
-         }
+            }
         }
     }
 
@@ -242,10 +251,15 @@ namespace MWInput
         mKeyboard->capture();
         mMouse->capture();
 
+        // inject some fake mouse movement to force updating MyGUI's widget states
+        // this shouldn't do any harm since we're moving back to the original position afterwards
+        MyGUI::InputManager::getInstance().injectMouseMove( int(mMouseX+1), int(mMouseY+1), mMouseWheel);
+        MyGUI::InputManager::getInstance().injectMouseMove( int(mMouseX), int(mMouseY), mMouseWheel);
+
         // update values of channels (as a result of pressed keys)
         if (!loading)
             mInputCtrl->update(dt);
-
+        
         // Update windows/gui as a result of input events
         // For instance this could mean opening a new window/dialog,
         // by doing this after the input events are handled we
@@ -262,38 +276,64 @@ namespace MWInput
         // be done in the physics system.
         if (mControlSwitch["playercontrols"])
         {
+            bool triedToMove = false;
             if (actionIsActive(A_MoveLeft))
             {
-                mPlayer.setAutoMove (false);
-                mPlayer.setLeftRight (1);
+                triedToMove = true;
+                mPlayer.setLeftRight (-1);
             }
             else if (actionIsActive(A_MoveRight))
             {
-                mPlayer.setAutoMove (false);
-                mPlayer.setLeftRight (-1);
+                triedToMove = true;
+                mPlayer.setLeftRight (1);
             }
             else
                 mPlayer.setLeftRight (0);
 
             if (actionIsActive(A_MoveForward))
             {
+                triedToMove = true;
                 mPlayer.setAutoMove (false);
                 mPlayer.setForwardBackward (1);
             }
             else if (actionIsActive(A_MoveBackward))
             {
+                triedToMove = true;
                 mPlayer.setAutoMove (false);
                 mPlayer.setForwardBackward (-1);
             }
             else
                 mPlayer.setForwardBackward (0);
 
+            mPlayer.setSneak(actionIsActive(A_Sneak));
+
             if (actionIsActive(A_Jump) && mControlSwitch["playerjumping"])
+            {
                 mPlayer.setUpDown (1);
-            else if (actionIsActive(A_Crouch))
-                mPlayer.setUpDown (-1);
+                triedToMove = true;
+            }
             else
                 mPlayer.setUpDown (0);
+
+            if(actionIsActive(A_Run))
+                mPlayer.setRunState(true);
+            else
+                mPlayer.setRunState(false);
+
+            // if player tried to start moving, but can't (due to being overencumbered), display a notification.
+            if (triedToMove)
+            {
+                MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer ();
+                mOverencumberedMessageDelay -= dt;
+                if (MWWorld::Class::get(player).getEncumbrance(player) >= MWWorld::Class::get(player).getCapacity(player))
+                {
+                    if (mOverencumberedMessageDelay <= 0)
+                    {
+                        MWBase::Environment::get().getWindowManager ()->messageBox("#{sNotifyMessage59}");
+                        mOverencumberedMessageDelay = 1.0;
+                    }
+                }
+            }
 
             if (mControlSwitch["playerviewswitch"]) {
 
@@ -321,7 +361,7 @@ namespace MWInput
             actionIsActive(A_MoveLeft) ||
             actionIsActive(A_MoveRight) ||
             actionIsActive(A_Jump) ||
-            actionIsActive(A_Crouch) ||
+            actionIsActive(A_Sneak) ||
             actionIsActive(A_TogglePOV))
         {
             resetIdleTime();
@@ -420,6 +460,14 @@ namespace MWInput
 
     bool InputManager::keyPressed( const OIS::KeyEvent &arg )
     {
+        if(arg.key == OIS::KC_RETURN
+            && MWBase::Environment::get().getWindowManager()->isGuiMode()
+            && MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_InterMessageBox )
+        {
+            // Pressing enter when a messagebox is prompting for "ok" will activate the ok button
+            MWBase::Environment::get().getWindowManager()->enterPressed();
+        }
+
         mInputCtrl->keyPressed (arg);
         unsigned int text = arg.text;
 #ifdef __APPLE__ // filter \016 symbol for F-keys on OS X
@@ -486,8 +534,9 @@ namespace MWInput
             mMouseY += float(arg.state.Y.rel) * mUISensitivity * mUIYMultiplier;
             mMouseX = std::max(0.f, std::min(mMouseX, float(viewSize.width)));
             mMouseY = std::max(0.f, std::min(mMouseY, float(viewSize.height)));
+            mMouseWheel = arg.state.Z.abs;
 
-            MyGUI::InputManager::getInstance().injectMouseMove( int(mMouseX), int(mMouseY), arg.state.Z.abs);
+            MyGUI::InputManager::getInstance().injectMouseMove( int(mMouseX), int(mMouseY), mMouseWheel);
         }
 
         if (mMouseLookEnabled)
@@ -499,6 +548,9 @@ namespace MWInput
 
             MWBase::World *world = MWBase::Environment::get().getWorld();
             world->rotateObject(world->getPlayer().getPlayer(), -y, 0.f, x, true);
+
+            if (arg.state.Z.rel)
+                MWBase::Environment::get().getWorld()->changeVanityModeScale(arg.state.Z.rel);
         }
 
         return true;
@@ -506,8 +558,13 @@ namespace MWInput
 
     void InputManager::toggleMainMenu()
     {
+        if (MyGUI::InputManager::getInstance ().isModalAny())
+            return;
+
         if (mWindows.isGuiMode () && (mWindows.getMode () == MWGui::GM_MainMenu || mWindows.getMode () == MWGui::GM_Settings))
             mWindows.popGuiMode();
+        else if (mWindows.isGuiMode () && mWindows.getMode () == MWGui::GM_Video)
+            MWBase::Environment::get().getWorld ()->stopVideo ();
         else
             mWindows.pushGuiMode (MWGui::GM_MainMenu);
     }
@@ -570,14 +627,21 @@ namespace MWInput
         // Toggle between game mode and inventory mode
         if(gameMode)
             mWindows.pushGuiMode(MWGui::GM_Inventory);
-        else if(mWindows.getMode() == MWGui::GM_Inventory)
-            mWindows.popGuiMode();
+        else
+        {
+            MWGui::GuiMode mode = mWindows.getMode();
+            if(mode == MWGui::GM_Inventory || mode == MWGui::GM_Container)
+                mWindows.popGuiMode();
+        }
 
-        // .. but don't touch any other mode.
+        // .. but don't touch any other mode, except container.
     }
 
     void InputManager::toggleConsole()
     {
+        if (MyGUI::InputManager::getInstance ().isModalAny())
+            return;
+
         bool gameMode = !mWindows.isGuiMode();
 
         // Switch to console mode no matter what mode we are currently
@@ -614,11 +678,14 @@ namespace MWInput
     {
         if (!mWindows.isGuiMode ())
             mWindows.pushGuiMode (MWGui::GM_QuickKeysMenu);
+        else if (mWindows.getMode () == MWGui::GM_QuickKeysMenu)
+            mWindows.removeGuiMode (MWGui::GM_QuickKeysMenu);
     }
 
     void InputManager::activate()
     {
-        mEngine.activate();
+        if (mControlSwitch["playercontrols"])
+            mEngine.activate();
     }
 
     void InputManager::toggleAutoMove()
@@ -681,7 +748,8 @@ namespace MWInput
         defaultKeyBindings[A_ToggleSpell] = OIS::KC_R;
         defaultKeyBindings[A_QuickKeysMenu] = OIS::KC_F1;
         defaultKeyBindings[A_Console] = OIS::KC_F2;
-        defaultKeyBindings[A_Crouch] = OIS::KC_LCONTROL;
+        defaultKeyBindings[A_Run] = OIS::KC_LSHIFT;
+        defaultKeyBindings[A_Sneak] = OIS::KC_LCONTROL;
         defaultKeyBindings[A_AutoMove] = OIS::KC_Q;
         defaultKeyBindings[A_Jump] = OIS::KC_E;
         defaultKeyBindings[A_Journal] = OIS::KC_J;
@@ -747,7 +815,8 @@ namespace MWInput
         descriptions[A_ToggleWeapon] = "sReady_Weapon";
         descriptions[A_ToggleSpell] = "sReady_Magic";
         descriptions[A_Console] = "sConsoleTitle";
-        descriptions[A_Crouch] = "sCrouch_Sneak";
+        descriptions[A_Run] = "sRun";
+        descriptions[A_Sneak] = "sCrouch_Sneak";
         descriptions[A_AutoMove] = "sAuto_Run";
         descriptions[A_Jump] = "sJump";
         descriptions[A_Journal] = "sJournal";
@@ -795,7 +864,8 @@ namespace MWInput
         ret.push_back(A_MoveLeft);
         ret.push_back(A_MoveRight);
         ret.push_back(A_TogglePOV);
-        ret.push_back(A_Crouch);
+        ret.push_back(A_Run);
+        ret.push_back(A_Sneak);
         ret.push_back(A_Activate);
         ret.push_back(A_ToggleWeapon);
         ret.push_back(A_ToggleSpell);
