@@ -99,7 +99,7 @@ endmacro()
 # Check for cached results. If there are skip the costly part.
 if (NOT FFMPEG_LIBRARIES)
 
-  set (FFMPEGSDK ENV${FFMPEG_HOME})
+  set (FFMPEGSDK $ENV{FFMPEG_HOME})
   if (FFMPEGSDK)
     set (FFMPEGSDK_INC "${FFMPEGSDK}/include")
     set (FFMPEGSDK_LIB "${FFMPEGSDK}/lib")
