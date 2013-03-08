@@ -83,6 +83,11 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
         mPlayer->togglePlayerLooking(enable);
     }
 
+    void changeVanityModeScale(float factor) {
+        if (mPlayer->isVanityOrPreviewModeEnabled())
+        mPlayer->setCameraDistance(-factor/120.f*10, true, true);
+    }
+
     void getPlayerData(Ogre::Vector3 &eyepos, float &pitch, float &yaw);
 
     void attachCameraTo(const MWWorld::Ptr &ptr);

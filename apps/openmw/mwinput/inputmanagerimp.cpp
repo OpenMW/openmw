@@ -548,6 +548,9 @@ namespace MWInput
 
             MWBase::World *world = MWBase::Environment::get().getWorld();
             world->rotateObject(world->getPlayer().getPlayer(), -y, 0.f, x, true);
+
+            if (arg.state.Z.rel)
+                MWBase::Environment::get().getWorld()->changeVanityModeScale(arg.state.Z.rel);
         }
 
         return true;
