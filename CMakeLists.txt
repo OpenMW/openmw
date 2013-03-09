@@ -300,6 +300,8 @@ configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
 if (NOT WIN32 AND NOT APPLE)
     configure_file(${OpenMW_SOURCE_DIR}/files/openmw.desktop
         "${OpenMW_BINARY_DIR}/openmw.desktop")
+    configure_file(${OpenMW_SOURCE_DIR}/files/opencs.desktop
+        "${OpenMW_BINARY_DIR}/opencs.desktop")
 endif()
 
 # Compiler settings
