@@ -56,6 +56,7 @@ void MWList::redraw(bool scrollbarShown)
     }
 
     mItemHeight = 0;
+    int i=0;
     for (std::vector<std::string>::const_iterator it=mItems.begin();
         it!=mItems.end(); ++it)
     {
@@ -72,6 +73,7 @@ void MWList::redraw(bool scrollbarShown)
 
             int height = button->getTextSize().height;
             button->setSize(MyGUI::IntSize(button->getSize().width, height));
+            button->setUserData(i);
 
             mItemHeight += height + spacing;
         }
@@ -84,6 +86,7 @@ void MWList::redraw(bool scrollbarShown)
 
             mItemHeight += 18 + spacing;
         }
+        ++i;
     }
     mScrollView->setCanvasSize(mClient->getSize().width + (_scrollBarWidth-scrollBarWidth), std::max(mItemHeight, mClient->getSize().height));
 
@@ -135,8 +138,8 @@ void MWList::onMouseWheel(MyGUI::Widget* _sender, int _rel)
 void MWList::onItemSelected(MyGUI::Widget* _sender)
 {
     std::string name = static_cast<MyGUI::Button*>(_sender)->getCaption();
-
-    eventItemSelected(name);
+    int id = *_sender->getUserData<int>();
+    eventItemSelected(name, id);
     eventWidgetSelected(_sender);
 }
 
