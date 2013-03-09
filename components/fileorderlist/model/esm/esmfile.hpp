@@ -26,15 +26,15 @@ public:
     void setMasters(const QStringList &masters);
     void setDescription(const QString &description);
 
-    inline QString fileName() { return mFileName; }
-    inline QString author() { return mAuthor; }
-    inline int size() { return mSize; }
-    inline QDateTime modified() { return mModified; }
-    inline QDateTime accessed() { return mAccessed; }
-    inline float version() { return mVersion; }
-    inline QString path() { return mPath; }
-    inline QStringList masters() { return mMasters; }
-    inline QString description() { return mDescription; }
+    inline QString fileName() const { return mFileName; }
+    inline QString author() const { return mAuthor; }
+    inline int size() const { return mSize; }
+    inline QDateTime modified() const { return mModified; }
+    inline QDateTime accessed() const { return mAccessed; }
+    inline float version() const { return mVersion; }
+    inline QString path() const { return mPath; }
+    inline QStringList masters() const { return mMasters; }
+    inline QString description() const { return mDescription; }
 
 
 private:

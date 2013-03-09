@@ -1,5 +1,6 @@
 material SelectionColour
 {
+    allow_fixed_function false
     pass
     {
         vertex_program selection_vertex

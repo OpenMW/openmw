@@ -21,12 +21,12 @@
 
  */
 
-#ifndef _NIF_CONTROLLER_H_
-#define _NIF_CONTROLLER_H_
+#ifndef OPENMW_COMPONENTS_NIF_CONTROLLER_HPP
+#define OPENMW_COMPONENTS_NIF_CONTROLLER_HPP
 
 #include "record.hpp"
-#include "nif_file.hpp"
-#include "record_ptr.hpp"
+#include "niffile.hpp"
+#include "recordptr.hpp"
 
 namespace Nif
 {
@@ -40,7 +40,7 @@ public:
     float timeStart, timeStop;
     ControlledPtr target;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         next.read(nif);
 
@@ -65,7 +65,7 @@ public:
 class NiBSPArrayController : public Controller
 {
 public:
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         Controller::read(nif);
 
@@ -82,7 +82,7 @@ class NiMaterialColorController : public Controller
 public:
     NiPosDataPtr data;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         Controller::read(nif);
         data.read(nif);
@@ -101,7 +101,7 @@ public:
     NiPosDataPtr posData;
     NiFloatDataPtr floatData;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         Controller::read(nif);
 
@@ -129,7 +129,7 @@ class NiUVController : public Controller
 public:
     NiUVDataPtr data;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         Controller::read(nif);
 
@@ -149,7 +149,7 @@ class NiKeyframeController : public Controller
 public:
     NiKeyframeDataPtr data;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         Controller::read(nif);
         data.read(nif);
@@ -167,7 +167,7 @@ class NiAlphaController : public Controller
 public:
     NiFloatDataPtr data;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         Controller::read(nif);
         data.read(nif);
@@ -185,7 +185,7 @@ class NiGeomMorpherController : public Controller
 public:
     NiMorphDataPtr data;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         Controller::read(nif);
         data.read(nif);
@@ -204,7 +204,7 @@ class NiVisController : public Controller
 public:
     NiVisDataPtr data;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         Controller::read(nif);
         data.read(nif);

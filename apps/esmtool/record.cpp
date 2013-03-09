@@ -112,14 +112,11 @@ std::string ruleString(ESM::DialInfo::SelectStruct ss)
     case '5': oper_str = ">="; break;
     }
 
-    std::string value_str = "??";
-    if (ss.mType == ESM::VT_Int)
-        value_str = str(boost::format("%d") % ss.mI);
-    else if (ss.mType == ESM::VT_Float)
-        value_str = str(boost::format("%f") % ss.mF);
+    std::ostringstream stream;
+    stream << ss.mValue;
 
     std::string result = str(boost::format("%-12s %-32s %2s %s")
-                             % type_str % func_str % oper_str % value_str);
+                             % type_str % func_str % oper_str % stream.str());
     return result;
 }
 
@@ -713,31 +710,13 @@ void Record<ESM::Faction>::print()
 template<>
 void Record<ESM::Global>::print()
 {
-    // nothing to print (well, nothing that's correct anyway)
-    std::cout << "  Type: " << mData.mType << std::endl;
-    std::cout << "  Value: " << mData.mValue << std::endl;
+    std::cout << "  " << mData.mValue << std::endl;
 }
 
 template<>
 void Record<ESM::GameSetting>::print()
 {
-    std::cout << "  Value: ";
-    switch (mData.mType) {
-    case ESM::VT_String:
-        std::cout << "'" << mData.mStr << "' (std::string)";
-        break;
-
-    case ESM::VT_Float:
-        std::cout << mData.mF << " (float)";
-        break;
-
-    case ESM::VT_Int:
-        std::cout << mData.mI << " (int)";
-        break;
-
-    default:
-        std::cout << "unknown type";
-    }
+    std::cout << "  " << mData.mValue << std::endl;
 }
 
 template<>

@@ -13,8 +13,9 @@ namespace MWGui
 {
 
 
-    ResourceImageSetPointerFix::ResourceImageSetPointerFix() :
-        mImageSet(nullptr)
+    ResourceImageSetPointerFix::ResourceImageSetPointerFix()
+        : mImageSet(NULL)
+        , mRotation(0)
     {
     }
 
@@ -50,7 +51,7 @@ namespace MWGui
 
     void ResourceImageSetPointerFix::setImage(MyGUI::ImageBox* _image)
     {
-        if (mImageSet != nullptr)
+        if (mImageSet != NULL)
             _image->setItemResourceInfo(mImageSet->getIndexInfo(0, 0));
     }
 

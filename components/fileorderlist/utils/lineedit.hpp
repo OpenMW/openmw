@@ -25,7 +25,7 @@ protected:
     void resizeEvent(QResizeEvent *);
 
 private slots:
-    void updateCloseButton(const QString &text);
+    void updateClearButton(const QString &text);
 
 private:
     QToolButton *mClearButton;

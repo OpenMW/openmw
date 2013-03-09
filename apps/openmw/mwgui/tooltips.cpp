@@ -127,9 +127,7 @@ void ToolTips::onFrame(float frameDuration)
 
             Widget* focus = InputManager::getInstance().getMouseFocusWidget();
             if (focus == 0)
-            {
                 return;
-            }
 
             IntSize tooltipSize;
 
@@ -167,6 +165,10 @@ void ToolTips::onFrame(float frameDuration)
             {
                 mFocusObject = *focus->getUserData<MWWorld::Ptr>();
                 tooltipSize = getToolTipViaPtr(false);
+            }
+            else if (type == "ToolTipInfo")
+            {
+                tooltipSize = createToolTip(*focus->getUserData<MWGui::ToolTipInfo>());
             }
             else if (type == "AvatarItemSelection")
             {
@@ -363,7 +365,7 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
 
     std::string caption = info.caption;
     std::string image = info.icon;
-    int imageSize = (image != "") ? 32 : 0;
+    int imageSize = (image != "") ? info.imageSize : 0;
     std::string text = info.text;
 
     // remove the first newline (easier this way)
@@ -403,7 +405,7 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
 
     EditBox* captionWidget = mDynamicToolTipBox->createWidget<EditBox>("NormalText", IntCoord(0, 0, 300, 300), Align::Left | Align::Top, "ToolTipCaption");
     captionWidget->setProperty("Static", "true");
-    captionWidget->setCaption(caption);
+    captionWidget->setCaptionWithReplacing(caption);
     IntSize captionSize = captionWidget->getTextSize();
 
     int captionHeight = std::max(caption != "" ? captionSize.height : 0, imageSize);
@@ -411,7 +413,7 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
     EditBox* textWidget = mDynamicToolTipBox->createWidget<EditBox>("SandText", IntCoord(0, captionHeight+imageCaptionVPadding, 300, 300-captionHeight-imageCaptionVPadding), Align::Stretch, "ToolTipText");
     textWidget->setProperty("Static", "true");
     textWidget->setProperty("MultiLine", "true");
-    textWidget->setProperty("WordWrap", "true");
+    textWidget->setProperty("WordWrap", info.wordWrap ? "true" : "false");
     textWidget->setCaptionWithReplacing(text);
     textWidget->setTextAlign(Align::HCenter | Align::Top);
     IntSize textSize = textWidget->getTextSize();
@@ -439,7 +441,7 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
         effectsWidget->setWindowManager(mWindowManager);
         effectsWidget->setEffectList(info.effects);
 
-        std::vector<MyGUI::WidgetPtr> effectItems;
+        std::vector<MyGUI::Widget*> effectItems;
         effectsWidget->createEffectWidgets(effectItems, effectArea, coord, true, info.isPotion ? Widgets::MWEffectList::EF_NoTarget : 0);
         totalSize.height += coord.top-6;
         totalSize.width = std::max(totalSize.width, coord.width);
@@ -459,7 +461,7 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
         enchantWidget->setWindowManager(mWindowManager);
         enchantWidget->setEffectList(Widgets::MWEffectList::effectListFromESM(&enchant->mEffects));
 
-        std::vector<MyGUI::WidgetPtr> enchantEffectItems;
+        std::vector<MyGUI::Widget*> enchantEffectItems;
         int flag = (enchant->mData.mType == ESM::Enchantment::ConstantEffect) ? Widgets::MWEffectList::EF_Constant : 0;
         enchantWidget->createEffectWidgets(enchantEffectItems, enchantArea, coord, true, flag);
         totalSize.height += coord.top-6;

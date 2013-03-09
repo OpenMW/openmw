@@ -15,11 +15,14 @@ namespace MWGui
     public:
         ToolTipInfo()
             : isPotion(false)
+            , imageSize(32)
+            , wordWrap(true)
         {}
 
         std::string caption;
         std::string text;
         std::string icon;
+        int imageSize;
 
         // enchantment (for cloth, armor, weapons)
         std::string enchant;
@@ -28,6 +31,7 @@ namespace MWGui
         Widgets::SpellEffectList effects;
 
         bool isPotion; // potions do not show target in the tooltip
+        bool wordWrap;
     };
 
     class ToolTips : public OEngine::GUI::Layout

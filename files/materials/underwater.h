@@ -1,4 +1,6 @@
-#define VISIBILITY 1500.0      // how far you can look through water
+#define UNDERWATER_COLOUR float3(0.18039, 0.23137, 0.25490)
+
+#define VISIBILITY 1000.0      // how far you can look through water
 
 #define BIG_WAVES_X 0.3                     // strength of big waves
 #define BIG_WAVES_Y 0.3   

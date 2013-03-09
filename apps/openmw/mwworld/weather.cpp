@@ -718,14 +718,14 @@ void WeatherManager::update(float duration)
             mRendering->getSkyManager()->setLightningStrength(0.f);
 
         mRendering->setAmbientColour(result.mAmbientColor);
-        mRendering->sunEnable();
+        mRendering->sunEnable(false);
         mRendering->setSunColour(result.mSunColor);
 
         mRendering->getSkyManager()->setWeather(result);
     }
     else
     {
-        mRendering->sunDisable();
+        mRendering->sunDisable(false);
         mRendering->skyDisable();
         mRendering->getSkyManager()->setLightningStrength(0.f);
     }

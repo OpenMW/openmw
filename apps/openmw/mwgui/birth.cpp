@@ -40,11 +40,11 @@ BirthDialog::BirthDialog(MWBase::WindowManager& parWindowManager)
     mBirthList->eventListMouseItemActivate += MyGUI::newDelegate(this, &BirthDialog::onSelectBirth);
     mBirthList->eventListChangePosition += MyGUI::newDelegate(this, &BirthDialog::onSelectBirth);
 
-    MyGUI::ButtonPtr backButton;
+    MyGUI::Button* backButton;
     getWidget(backButton, "BackButton");
     backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &BirthDialog::onBackClicked);
 
-    MyGUI::ButtonPtr okButton;
+    MyGUI::Button* okButton;
     getWidget(okButton, "OKButton");
     okButton->setCaption(mWindowManager.getGameSettingString("sOK", ""));
     okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &BirthDialog::onOkClicked);
@@ -55,7 +55,7 @@ BirthDialog::BirthDialog(MWBase::WindowManager& parWindowManager)
 
 void BirthDialog::setNextButtonShow(bool shown)
 {
-    MyGUI::ButtonPtr okButton;
+    MyGUI::Button* okButton;
     getWidget(okButton, "OKButton");
 
     if (shown)
@@ -82,7 +82,7 @@ void BirthDialog::setBirthId(const std::string &birthId)
         if (boost::iequals(*mBirthList->getItemDataAt<std::string>(i), birthId))
         {
             mBirthList->setIndexSelected(i);
-            MyGUI::ButtonPtr okButton;
+            MyGUI::Button* okButton;
             getWidget(okButton, "OKButton");
             break;
         }
@@ -110,7 +110,7 @@ void BirthDialog::onSelectBirth(MyGUI::ListBox* _sender, size_t _index)
     if (_index == MyGUI::ITEM_NONE)
         return;
 
-    MyGUI::ButtonPtr okButton;
+    MyGUI::Button* okButton;
     getWidget(okButton, "OKButton");
 
     const std::string *birthId = mBirthList->getItemDataAt<std::string>(_index);
@@ -159,7 +159,7 @@ void BirthDialog::updateBirths()
 
 void BirthDialog::updateSpells()
 {
-    for (std::vector<MyGUI::WidgetPtr>::iterator it = mSpellItems.begin(); it != mSpellItems.end(); ++it)
+    for (std::vector<MyGUI::Widget*>::iterator it = mSpellItems.begin(); it != mSpellItems.end(); ++it)
     {
         MyGUI::Gui::getInstance().destroyWidget(*it);
     }

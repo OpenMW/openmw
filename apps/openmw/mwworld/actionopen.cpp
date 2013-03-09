@@ -10,7 +10,9 @@
 
 namespace MWWorld
 {
-    ActionOpen::ActionOpen (const MWWorld::Ptr& container) : Action (false, container)
+    ActionOpen::ActionOpen (const MWWorld::Ptr& container, bool loot)
+        : Action (false, container)
+        , mLoot(loot)
     {
     }
 
@@ -20,6 +22,6 @@ namespace MWWorld
             return;
 
         MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Container);
-        MWBase::Environment::get().getWindowManager()->getContainerWindow()->open(getTarget());
+        MWBase::Environment::get().getWindowManager()->getContainerWindow()->open(getTarget(), mLoot);
     }
 }

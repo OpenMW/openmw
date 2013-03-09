@@ -305,6 +305,11 @@ public:
     return new BSAArchive(name);
   }
 
+  virtual Archive* createInstance(const String& name, bool readOnly)
+  {
+    return new BSAArchive(name);
+  }
+
   void destroyInstance( Archive* arch) { delete arch; }
 };
 

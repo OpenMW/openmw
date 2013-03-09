@@ -30,7 +30,7 @@ namespace MWMechanics
     {
         public:
 
-            typedef std::map<std::string, std::pair<MWWorld::TimeStamp, float> > TContainer;
+            typedef std::multimap<std::string, std::pair<MWWorld::TimeStamp, float> > TContainer;
             typedef TContainer::const_iterator TIterator;
 
         private:
@@ -44,7 +44,8 @@ namespace MWMechanics
             
             void rebuildEffects() const;
 
-            std::pair<ESM::EffectList, bool> getEffectList (const std::string& id) const;
+            std::pair<ESM::EffectList, std::pair<bool, bool> > getEffectList (const std::string& id) const;
+            ///< @return (EffectList, (isIngredient, stacks))
 
         public:
 
@@ -62,6 +63,8 @@ namespace MWMechanics
             ///< case insensitive
 
             const MagicEffects& getMagicEffects() const;
+
+            const TContainer& getActiveSpells() const;
 
             TIterator begin() const;
 

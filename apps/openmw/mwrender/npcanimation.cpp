@@ -54,7 +54,7 @@ NpcAnimation::~NpcAnimation()
 }
 
 
-NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWorld::InventoryStore& inv, int visibilityFlags)
+NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWorld::InventoryStore& inv, int visibilityFlags, bool headOnly)
   : Animation(ptr),
     mStateID(-1),
     mTimeToChange(0),
@@ -70,7 +70,8 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
     mPants(inv.end()),
     mGloveL(inv.end()),
     mGloveR(inv.end()),
-    mSkirtIter(inv.end())
+    mSkirtIter(inv.end()),
+    mHeadOnly(headOnly)
 {
     mNpc = mPtr.get<ESM::NPC>()->mBase;
 
@@ -104,25 +105,14 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
         Ogre::Entity *base = mEntityList.mEntities[i];
 
         base->getUserObjectBindings().setUserAny(Ogre::Any(-1));
-        base->setVisibilityFlags(mVisibilityFlags);
+        if (mVisibilityFlags != 0)
+            base->setVisibilityFlags(mVisibilityFlags);
 
-        bool transparent = false;
-        for(unsigned int j=0;!transparent && j < base->getNumSubEntities();++j)
+        for(unsigned int j=0; j < base->getNumSubEntities(); ++j)
         {
-            Ogre::MaterialPtr mat = base->getSubEntity(j)->getMaterial();
-            Ogre::Material::TechniqueIterator techIt = mat->getTechniqueIterator();
-            while(!transparent && techIt.hasMoreElements())
-            {
-                Ogre::Technique* tech = techIt.getNext();
-                Ogre::Technique::PassIterator passIt = tech->getPassIterator();
-                while(!transparent && passIt.hasMoreElements())
-                {
-                    Ogre::Pass* pass = passIt.getNext();
-                    transparent = pass->isTransparent();
-                }
-            }
+            Ogre::SubEntity* subEnt = base->getSubEntity(j);
+            subEnt->setRenderQueueGroup(subEnt->getMaterial()->isTransparent() ? RQG_Alpha : RQG_Main);
         }
-        base->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
     }
 
     std::vector<std::string> skelnames(1, smodel);
@@ -226,7 +216,7 @@ void NpcAnimation::updateParts(bool forceupdate)
     if(!forceupdate)
         return;
 
-    for(size_t i = 0;i < slotlistsize;i++)
+    for(size_t i = 0;i < slotlistsize && !mHeadOnly;i++)
     {
         MWWorld::ContainerStoreIterator iter = inv.getSlot(slotlist[i].slot);
 
@@ -262,6 +252,9 @@ void NpcAnimation::updateParts(bool forceupdate)
         addOrReplaceIndividualPart(ESM::PRT_Head, -1,1, mHeadModel);
     if(mPartPriorities[ESM::PRT_Hair] < 1 && mPartPriorities[ESM::PRT_Head] <= 1)
         addOrReplaceIndividualPart(ESM::PRT_Hair, -1,1, mHairModel);
+
+    if (mHeadOnly)
+        return;
 
     static const struct {
         ESM::PartReferenceType type;
@@ -322,25 +315,14 @@ NifOgre::EntityList NpcAnimation::insertBoundedPart(const std::string &mesh, int
     for(size_t i = 0;i < parts.size();i++)
     {
         parts[i]->getUserObjectBindings().setUserAny(Ogre::Any(group));
-        parts[i]->setVisibilityFlags(mVisibilityFlags);
+        if (mVisibilityFlags != 0)
+            parts[i]->setVisibilityFlags(mVisibilityFlags);
 
-        bool transparent = false;
-        for(unsigned int j=0;!transparent && j < parts[i]->getNumSubEntities();++j)
+        for(unsigned int j=0; j < parts[i]->getNumSubEntities(); ++j)
         {
-            Ogre::MaterialPtr mat = parts[i]->getSubEntity(j)->getMaterial();
-            Ogre::Material::TechniqueIterator techIt = mat->getTechniqueIterator();
-            while(!transparent && techIt.hasMoreElements())
-            {
-                Ogre::Technique* tech = techIt.getNext();
-                Ogre::Technique::PassIterator passIt = tech->getPassIterator();
-                while(!transparent && passIt.hasMoreElements())
-                {
-                    Ogre::Pass* pass = passIt.getNext();
-                    transparent = pass->isTransparent();
-                }
-            }
+            Ogre::SubEntity* subEnt = parts[i]->getSubEntity(j);
+            subEnt->setRenderQueueGroup(subEnt->getMaterial()->isTransparent() ? RQG_Alpha : RQG_Main);
         }
-        parts[i]->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
     }
     if(entities.mSkelBase)
     {
@@ -469,6 +451,11 @@ void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::
         else
             reserveIndividualPart(part.mPart, group, priority);
     }
+}
+
+Ogre::Node* NpcAnimation::getHeadNode()
+{
+    return mEntityList.mSkelBase->getSkeleton()->getBone("Bip01 Head");
 }
 
 }

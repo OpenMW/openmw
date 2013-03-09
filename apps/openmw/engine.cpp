@@ -9,11 +9,11 @@
 #include <components/bsa/bsa_archive.hpp>
 #include <components/files/configurationmanager.hpp>
 #include <components/translation/translation.hpp>
-#include <components/nif/nif_file.hpp>
+#include <components/nif/niffile.hpp>
 #include <components/nifoverrides/nifoverrides.hpp>
 
-#include <components/nifbullet/bullet_nif_loader.hpp>
-#include <components/nifogre/ogre_nif_loader.hpp>
+#include <components/nifbullet/bulletnifloader.hpp>
+#include <components/nifogre/ogrenifloader.hpp>
 
 #include "mwinput/inputmanagerimp.hpp"
 
@@ -60,6 +60,13 @@ void OMW::Engine::executeLocalScripts()
 
 void OMW::Engine::setAnimationVerbose(bool animverbose)
 {
+}
+
+bool OMW::Engine::frameStarted (const Ogre::FrameEvent& evt)
+{
+    if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
+        MWBase::Environment::get().getWorld()->frameStarted(evt.timeSinceLastFrame);
+    return true;
 }
 
 bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
@@ -316,7 +323,6 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     addResourcesDirectory(mResDir / "mygui");
     addResourcesDirectory(mResDir / "water");
-    addResourcesDirectory(mResDir / "gbuffer");
     addResourcesDirectory(mResDir / "shadows");
     addZipResource(mResDir / "mygui" / "Obliviontt.zip");
 
@@ -444,7 +450,7 @@ void OMW::Engine::go()
     // Save user settings
     settings.saveUser(settingspath);
 
-    std::cout << "Quitting peacefully.\n";
+    std::cout << "Quitting peacefully." << std::endl;
 }
 
 void OMW::Engine::activate()

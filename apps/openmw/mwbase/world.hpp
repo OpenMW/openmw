@@ -296,6 +296,7 @@ namespace MWBase
             virtual bool toggleVanityMode(bool enable, bool force) = 0;
             virtual void allowVanityMode(bool allow) = 0;
             virtual void togglePlayerLooking(bool enable) = 0;
+            virtual void changeVanityModeScale(float factor) = 0;
 
             virtual void renderPlayer() = 0;
             
@@ -314,6 +315,7 @@ namespace MWBase
             /// \todo this does not belong here
             virtual void playVideo(const std::string& name, bool allowSkipping) = 0;
             virtual void stopVideo() = 0;
+            virtual void frameStarted (float dt) = 0;
     };
 }
 

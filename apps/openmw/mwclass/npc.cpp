@@ -220,7 +220,9 @@ namespace MWClass
         const MWWorld::Ptr& actor) const
     {
         if (MWWorld::Class::get (ptr).getCreatureStats (ptr).isDead())
-            return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionOpen(ptr));
+            return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionOpen(ptr, true));
+        else if (MWWorld::Class::get(actor).getStance(actor, MWWorld::Class::Sneak))
+            return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionOpen(ptr)); // stealing
         else
             return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionTalk (ptr));
     }
@@ -365,11 +367,10 @@ namespace MWClass
                                                     fSwimRunAthleticsMult->getFloat();
             moveSpeed = swimSpeed;
         }
-        else if(Npc::getStance(ptr, Run, false))
+        else if(Npc::getStance(ptr, Run, false) && !Npc::getStance(ptr, Sneak, false))
             moveSpeed = runSpeed;
         else
             moveSpeed = walkSpeed;
-
         if(getMovementSettings(ptr).mLeftRight != 0 && getMovementSettings(ptr).mForwardBackward == 0)
             moveSpeed *= 0.75f;
 

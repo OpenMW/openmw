@@ -1,6 +1,9 @@
 #include "list.hpp"
 
-#include <MyGUI.h>
+#include <MyGUI_ScrollView.h>
+#include <MyGUI_Gui.h>
+#include <MyGUI_Button.h>
+#include <MyGUI_ImageBox.h>
 
 using namespace MWGui;
 using namespace MWGui::Widgets;

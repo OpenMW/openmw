@@ -31,14 +31,13 @@ namespace
     template<typename T>
     bool selectCompareImp (const ESM::DialInfo::SelectStruct& select, T value1)
     {
-        if (select.mType==ESM::VT_Short || select.mType==ESM::VT_Int ||
-            select.mType==ESM::VT_Long)
+        if (select.mValue.getType()==ESM::VT_Int)
         {
-            return selectCompareImp (select.mSelectRule[4], value1, select.mI);
+            return selectCompareImp (select.mSelectRule[4], value1, select.mValue.getInteger());
         }
-        else if (select.mType==ESM::VT_Float)
+        else if (select.mValue.getType()==ESM::VT_Float)
         {
-            return selectCompareImp (select.mSelectRule[4], value1, select.mF);
+            return selectCompareImp (select.mSelectRule[4], value1, select.mValue.getFloat());
         }
         else
             throw std::runtime_error (

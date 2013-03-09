@@ -42,9 +42,11 @@ namespace MWInput
         , mMouseX(ogre.getWindow()->getWidth ()/2.f)
         , mMouseY(ogre.getWindow()->getHeight ()/2.f)
         , mMouseWheel(0)
-        , mUserFile(userFile)
         , mDragDrop(false)
         , mGuiCursorEnabled(false)
+        , mDebug(debug)
+        , mUserFile(userFile)
+        , mUserFileExists(userFileExists)
         , mInvertY (Settings::Manager::getBool("invert y axis", "Input"))
         , mCameraSensitivity (Settings::Manager::getFloat("camera sensitivity", "Input"))
         , mUISensitivity (Settings::Manager::getFloat("ui sensitivity", "Input"))
@@ -54,7 +56,7 @@ namespace MWInput
         , mTimeIdle(0.f)
         , mOverencumberedMessageDelay(0.f)
     {
-        Ogre::RenderWindow* window = ogre.getWindow ();
+        Ogre::RenderWindow* window = mOgre.getWindow ();
         size_t windowHnd;
 
         resetIdleTime();
@@ -69,7 +71,7 @@ namespace MWInput
 
         // Set non-exclusive mouse and keyboard input if the user requested
         // it.
-        if (debug)
+        if (mDebug)
         {
             #if defined OIS_WIN32_PLATFORM
             pl.insert(std::make_pair(std::string("w32_mouse"),
@@ -116,7 +118,7 @@ namespace MWInput
 
         MyGUI::InputManager::getInstance().injectMouseMove(mMouseX, mMouseY, mMouse->getMouseState ().Z.abs);
 
-        std::string file = userFileExists ? userFile : "";
+        std::string file = mUserFileExists ? mUserFile : "";
         mInputCtrl = new ICS::InputControlSystem(file, true, this, NULL, A_Last);
 
         loadKeyDefaults();
@@ -191,9 +193,6 @@ namespace MWInput
             case A_AutoMove:
                 toggleAutoMove ();
                 break;
-            case A_ToggleSneak:
-                /// \todo implement
-                break;
             case A_ToggleWalk:
                 toggleWalking ();
                 break;
@@ -242,7 +241,7 @@ namespace MWInput
             case A_ToggleHUD:
                 mWindows.toggleHud();
                 break;
-         }
+            }
         }
     }
 
@@ -306,13 +305,13 @@ namespace MWInput
             else
                 mPlayer.setForwardBackward (0);
 
+            mPlayer.setSneak(actionIsActive(A_Sneak));
+
             if (actionIsActive(A_Jump) && mControlSwitch["playerjumping"])
             {
                 mPlayer.setUpDown (1);
                 triedToMove = true;
             }
-            else if (actionIsActive(A_Crouch))
-                mPlayer.setUpDown (-1);
             else
                 mPlayer.setUpDown (0);
 
@@ -362,7 +361,7 @@ namespace MWInput
             actionIsActive(A_MoveLeft) ||
             actionIsActive(A_MoveRight) ||
             actionIsActive(A_Jump) ||
-            actionIsActive(A_Crouch) ||
+            actionIsActive(A_Sneak) ||
             actionIsActive(A_TogglePOV))
         {
             resetIdleTime();
@@ -549,6 +548,9 @@ namespace MWInput
 
             MWBase::World *world = MWBase::Environment::get().getWorld();
             world->rotateObject(world->getPlayer().getPlayer(), -y, 0.f, x, true);
+
+            if (arg.state.Z.rel)
+                MWBase::Environment::get().getWorld()->changeVanityModeScale(arg.state.Z.rel);
         }
 
         return true;
@@ -747,7 +749,7 @@ namespace MWInput
         defaultKeyBindings[A_QuickKeysMenu] = OIS::KC_F1;
         defaultKeyBindings[A_Console] = OIS::KC_F2;
         defaultKeyBindings[A_Run] = OIS::KC_LSHIFT;
-        defaultKeyBindings[A_Crouch] = OIS::KC_LCONTROL;
+        defaultKeyBindings[A_Sneak] = OIS::KC_LCONTROL;
         defaultKeyBindings[A_AutoMove] = OIS::KC_Q;
         defaultKeyBindings[A_Jump] = OIS::KC_E;
         defaultKeyBindings[A_Journal] = OIS::KC_J;
@@ -814,7 +816,7 @@ namespace MWInput
         descriptions[A_ToggleSpell] = "sReady_Magic";
         descriptions[A_Console] = "sConsoleTitle";
         descriptions[A_Run] = "sRun";
-        descriptions[A_Crouch] = "sCrouch_Sneak";
+        descriptions[A_Sneak] = "sCrouch_Sneak";
         descriptions[A_AutoMove] = "sAuto_Run";
         descriptions[A_Jump] = "sJump";
         descriptions[A_Journal] = "sJournal";
@@ -863,7 +865,7 @@ namespace MWInput
         ret.push_back(A_MoveRight);
         ret.push_back(A_TogglePOV);
         ret.push_back(A_Run);
-        ret.push_back(A_Crouch);
+        ret.push_back(A_Sneak);
         ret.push_back(A_Activate);
         ret.push_back(A_ToggleWeapon);
         ret.push_back(A_ToggleSpell);
