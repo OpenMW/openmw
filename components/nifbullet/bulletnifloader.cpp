@@ -22,8 +22,11 @@ http://www.gnu.org/licenses/ .
 */
 
 #include "bulletnifloader.hpp"
-#include <Ogre.h>
+
 #include <cstdio>
+
+
+#include <components/misc/stringops.hpp>
 
 #include "../nif/niffile.hpp"
 #include "../nif/node.hpp"
@@ -46,6 +49,20 @@ typedef unsigned char ubyte;
 namespace NifBullet
 {
 
+struct TriangleMeshShape : public btBvhTriangleMeshShape
+{
+    TriangleMeshShape(btStridingMeshInterface* meshInterface, bool useQuantizedAabbCompression)
+        : btBvhTriangleMeshShape(meshInterface, useQuantizedAabbCompression)
+    {
+    }
+
+    virtual ~TriangleMeshShape()
+    {
+        delete getTriangleInfoMap();
+        delete m_meshInterface;
+    }
+};
+
 ManualBulletShapeLoader::~ManualBulletShapeLoader()
 {
 }
@@ -62,10 +79,11 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
     resourceName = cShape->getName();
     cShape->mCollide = false;
     mBoundingBox = NULL;
-    cShape->boxTranslation = Ogre::Vector3(0,0,0);
-    cShape->boxRotation = Ogre::Quaternion::IDENTITY;
+    cShape->mBoxTranslation = Ogre::Vector3(0,0,0);
+    cShape->mBoxRotation = Ogre::Quaternion::IDENTITY;
+    mHasShape = false;
 
-    mTriMesh = new btTriangleMesh();
+    btTriangleMesh* mesh1 = new btTriangleMesh();
 
     // Load the NIF. TODO: Wrap this in a try-catch block once we're out
     // of the early stages of development. Right now we WANT to catch
@@ -94,35 +112,43 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
     bool hasCollisionNode = hasRootCollisionNode(node);
 
     //do a first pass
-    handleNode(node,0,hasCollisionNode,false,false);
-
-    //if collide = false, then it does a second pass which create a shape for raycasting.
-    if(cShape->mCollide == false)
-        handleNode(node,0,hasCollisionNode,false,true);
-
-    //cShape->collide = hasCollisionNode&&cShape->collide;
-
-    struct TriangleMeshShape : public btBvhTriangleMeshShape
-    {
-        TriangleMeshShape(btStridingMeshInterface* meshInterface, bool useQuantizedAabbCompression)
-            : btBvhTriangleMeshShape(meshInterface, useQuantizedAabbCompression)
-        {
-        }
-
-        virtual ~TriangleMeshShape()
-        {
-            delete getTriangleInfoMap();
-            delete m_meshInterface;
-        }
-    };
+    handleNode(mesh1, node,0,hasCollisionNode,false,false);
 
     if(mBoundingBox != NULL)
-       cShape->Shape = mBoundingBox;
-    else
     {
-        currentShape = new TriangleMeshShape(mTriMesh,true);
-        cShape->Shape = currentShape;
+       cShape->mCollisionShape = mBoundingBox;
+       delete mesh1;
     }
+    else if (mHasShape && !cShape->mIgnore && cShape->mCollide)
+    {
+        cShape->mCollisionShape = new TriangleMeshShape(mesh1,true);
+    }
+    else
+        delete mesh1;
+
+    //second pass which create a shape for raycasting.
+    resourceName = cShape->getName();
+    cShape->mCollide = false;
+    mBoundingBox = NULL;
+    cShape->mBoxTranslation = Ogre::Vector3(0,0,0);
+    cShape->mBoxRotation = Ogre::Quaternion::IDENTITY;
+    mHasShape = false;
+
+    btTriangleMesh* mesh2 = new btTriangleMesh();
+
+    handleNode(mesh2, node,0,hasCollisionNode,true,true);
+
+    if(mBoundingBox != NULL)
+    {
+       cShape->mRaycastingShape = mBoundingBox;
+       delete mesh2;
+    }
+    else if (mHasShape && !cShape->mIgnore)
+    {
+        cShape->mRaycastingShape = new TriangleMeshShape(mesh2,true);
+    }
+    else
+        delete mesh2;
 }
 
 bool ManualBulletShapeLoader::hasRootCollisionNode(Nif::Node const * node)
@@ -147,22 +173,26 @@ bool ManualBulletShapeLoader::hasRootCollisionNode(Nif::Node const * node)
     return false;
 }
 
-void ManualBulletShapeLoader::handleNode(const Nif::Node *node, int flags,
+void ManualBulletShapeLoader::handleNode(btTriangleMesh* mesh, const Nif::Node *node, int flags,
                                          bool hasCollisionNode, bool isCollisionNode,
-                                         bool raycastingOnly)
+                                         bool raycasting)
 {
     // Accumulate the flags from all the child nodes. This works for all
     // the flags we currently use, at least.
     flags |= node->flags;
 
-    isCollisionNode = isCollisionNode || (node->recType == Nif::RC_RootCollisionNode);
+    if (!raycasting)
+        isCollisionNode = isCollisionNode || (node->recType == Nif::RC_RootCollisionNode);
+    else
+        isCollisionNode = isCollisionNode && (node->recType != Nif::RC_RootCollisionNode);
 
     // Marker objects: no collision
     /// \todo don't do this in the editor
-    if (node->name.find("marker") != std::string::npos)
+    std::string nodename = node->name;
+    Misc::StringUtils::toLower(nodename);
+    if (nodename.find("marker") != std::string::npos)
     {
-        flags |= 0x800;
-        cShape->mIgnore = true;
+        return;
     }
 
     // Check for extra data
@@ -185,7 +215,7 @@ void ManualBulletShapeLoader::handleNode(const Nif::Node *node, int flags,
                 // No collision. Use an internal flag setting to mark this.
                 flags |= 0x800;
             }
-            else if (sd->string == "MRK" && !raycastingOnly)
+            else if (sd->string == "MRK")
                 // Marker objects. These are only visible in the
                 // editor. Until and unless we add an editor component to
                 // the engine, just skip this entire node.
@@ -193,19 +223,18 @@ void ManualBulletShapeLoader::handleNode(const Nif::Node *node, int flags,
         }
     }
 
-    if(!hasCollisionNode || isCollisionNode)
+    if (isCollisionNode || (!hasCollisionNode && !raycasting))
     {
         if(node->hasBounds)
         {
-            cShape->boxTranslation = node->boundPos;
-            cShape->boxRotation = node->boundRot;
+            cShape->mBoxTranslation = node->boundPos;
+            cShape->mBoxRotation = node->boundRot;
             mBoundingBox = new btBoxShape(getbtVector(node->boundXYZ));
         }
-
-        if(node->recType == Nif::RC_NiTriShape)
+        else if(node->recType == Nif::RC_NiTriShape)
         {
             cShape->mCollide = !(flags&0x800);
-            handleNiTriShape(static_cast<const Nif::NiTriShape*>(node), flags, node->getWorldTransform(), raycastingOnly);
+            handleNiTriShape(mesh, static_cast<const Nif::NiTriShape*>(node), flags, node->getWorldTransform(), raycasting);
         }
     }
 
@@ -217,13 +246,13 @@ void ManualBulletShapeLoader::handleNode(const Nif::Node *node, int flags,
         for(size_t i = 0;i < list.length();i++)
         {
             if(!list[i].empty())
-                handleNode(list[i].getPtr(), flags, hasCollisionNode, isCollisionNode, raycastingOnly);
+                handleNode(mesh, list[i].getPtr(), flags, hasCollisionNode, isCollisionNode, raycasting);
         }
     }
 }
 
-void ManualBulletShapeLoader::handleNiTriShape(const Nif::NiTriShape *shape, int flags, const Ogre::Matrix4 &transform,
-                                               bool raycastingOnly)
+void ManualBulletShapeLoader::handleNiTriShape(btTriangleMesh* mesh, const Nif::NiTriShape *shape, int flags, const Ogre::Matrix4 &transform,
+                                               bool raycasting)
 {
     assert(shape != NULL);
 
@@ -234,18 +263,19 @@ void ManualBulletShapeLoader::handleNiTriShape(const Nif::NiTriShape *shape, int
 
     // If the object was marked "NCO" earlier, it shouldn't collide with
     // anything. So don't do anything.
-    if (flags & 0x800 && !raycastingOnly)
+    if ((flags & 0x800) && !raycasting)
     {
         collide = false;
         bbcollide = false;
         return;
     }
 
-    if (!collide && !bbcollide && hidden && !raycastingOnly)
+    if (!collide && !bbcollide && hidden && !raycasting)
         // This mesh apparently isn't being used for anything, so don't
         // bother setting it up.
         return;
 
+    mHasShape = true;
 
     const Nif::NiTriShapeData *data = shape->data.getPtr();
     const std::vector<Ogre::Vector3> &vertices = data->vertices;
@@ -255,7 +285,7 @@ void ManualBulletShapeLoader::handleNiTriShape(const Nif::NiTriShape *shape, int
         Ogre::Vector3 b1 = transform*vertices[triangles[i+0]];
         Ogre::Vector3 b2 = transform*vertices[triangles[i+1]];
         Ogre::Vector3 b3 = transform*vertices[triangles[i+2]];
-        mTriMesh->addTriangle(btVector3(b1.x,b1.y,b1.z),btVector3(b2.x,b2.y,b2.z),btVector3(b3.x,b3.y,b3.z));
+        mesh->addTriangle(btVector3(b1.x,b1.y,b1.z),btVector3(b2.x,b2.y,b2.z),btVector3(b3.x,b3.y,b3.z));
     }
 }
 

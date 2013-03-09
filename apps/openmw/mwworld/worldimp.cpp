@@ -1018,42 +1018,10 @@ namespace MWWorld
             mRendering->getSkyManager()->setGlare(!mPhysics->castRay(Ogre::Vector3(p[0], p[1], p[2]), sun));
         }
 
-        // update faced handle (object the player is looking at)
-        // this uses a mixture of raycasts and occlusion queries.
-        else // if (mRendering->occlusionQuerySupported())
-        {
-            MWRender::OcclusionQuery* query = mRendering->getOcclusionQuery();
-            if (!query->occlusionTestPending())
-            {
-                processFacedQueryResults (query);
-                beginFacedQueryProcess (query);
-            }
-        }
+        updateFacedHandle ();
     }
 
-    void World::processFacedQueryResults (MWRender::OcclusionQuery* query)
-    {
-        // get result of last query
-        if (mNumFacing == 0)
-        {
-            mFacedHandle = "";
-            mFacedDistance = FLT_MAX;
-        }
-        else if (mNumFacing == 1)
-        {
-            bool result = query->getTestResult();
-            mFacedHandle = result ? mFaced1Name : "";
-            mFacedDistance = result ? mFaced1Distance : FLT_MAX;
-        }
-        else if (mNumFacing == 2)
-        {
-            bool result = query->getTestResult();
-            mFacedHandle = result ? mFaced2Name : mFaced1Name;
-            mFacedDistance = result ? mFaced1Distance : mFaced1Distance;
-        }
-    }
-
-    void World::beginFacedQueryProcess (MWRender::OcclusionQuery* query)
+    void World::updateFacedHandle ()
     {
         // send new query
         // figure out which object we want to test against
@@ -1084,93 +1052,14 @@ namespace MWWorld
 
         if (results.size() == 0)
         {
-            mNumFacing = 0;
-        }
-        else if (results.size() == 1)
-        {
-            beginSingleFacedQueryProcess (query, results);
+            mFacedHandle = "";
+            mFacedDistance = FLT_MAX;
         }
         else
         {
-            beginDoubleFacedQueryProcess (query, results);
+            mFacedHandle = results.front().second;
+            mFacedDistance = results.front().first;
         }
-    }
-
-    void World::beginSingleFacedQueryProcess (MWRender::OcclusionQuery* query, std::vector < std::pair < float, std::string > > const & results)
-    {
-        mFaced1 = getPtrViaHandle(results.front().second);
-        mFaced1Name = results.front().second;
-        mFaced1Distance = results.front().first;
-        mNumFacing = 1;
-
-        btVector3 p;
-        if (MWBase::Environment::get().getWindowManager()->isGuiMode())
-        {
-            float x, y;
-            MWBase::Environment::get().getWindowManager()->getMousePosition(x, y);
-            p = mPhysics->getRayPoint(results.front().first, x, y);
-        }
-        else
-            p = mPhysics->getRayPoint(results.front().first);
-        Ogre::Vector3 pos(p.x(), p.y(), p.z());
-        Ogre::SceneNode* node = mFaced1.getRefData().getBaseNode();
-
-        //std::cout << "Num facing 1 : " << mFaced1Name <<  std::endl;
-        //std::cout << "Type 1 " << mFaced1.getTypeName() <<  std::endl;
-
-        query->occlusionTest(pos, node);
-    }
-
-    void World::beginDoubleFacedQueryProcess (MWRender::OcclusionQuery* query, std::vector < std::pair < float, std::string > > const & results)
-    {
-        mFaced1Name = results.at (0).second;
-        mFaced2Name = results.at (1).second;
-        mFaced1Distance = results.at (0).first;
-        mFaced2Distance = results.at (1).first;
-        mFaced1 = getPtrViaHandle(results.at (0).second);
-        mFaced2 = getPtrViaHandle(results.at (1).second);
-        mNumFacing = 2;
-
-        btVector3 p;
-        if (MWBase::Environment::get().getWindowManager()->isGuiMode())
-        {
-            float x, y;
-            MWBase::Environment::get().getWindowManager()->getMousePosition(x, y);
-            p = mPhysics->getRayPoint(results.at (1).first, x, y);
-        }
-        else
-            p = mPhysics->getRayPoint(results.at (1).first);
-        Ogre::Vector3 pos(p.x(), p.y(), p.z());
-        Ogre::SceneNode* node1 = mFaced1.getRefData().getBaseNode();
-        Ogre::SceneNode* node2 = mFaced2.getRefData().getBaseNode();
-
-        // no need to test if the first node is not occluder
-        if (!query->isPotentialOccluder(node1) && (mFaced1.getTypeName().find("Static") == std::string::npos))
-        {
-            mFacedHandle = mFaced1Name;
-            mFacedDistance = mFaced1Distance;
-            //std::cout << "node1 Not an occluder" << std::endl;
-            return;
-        }
-
-        // no need to test if the second object is static (thus cannot be activated)
-        if (mFaced2.getTypeName().find("Static") != std::string::npos)
-        {
-            mFacedHandle = mFaced1Name;
-            mFacedDistance = mFaced1Distance;
-            return;
-        }
-
-        // work around door problems
-        if (mFaced1.getTypeName().find("Static") != std::string::npos
-            && mFaced2.getTypeName().find("Door") != std::string::npos)
-        {
-            mFacedHandle = mFaced2Name;
-            mFacedDistance = mFaced2Distance;
-            return;
-        }
-
-        query->occlusionTest(pos, node2);
     }
 
     bool World::isCellExterior() const
@@ -1299,6 +1188,9 @@ namespace MWWorld
         pos.pos[0] = result.second[0];
         pos.pos[1] = result.second[1];
         pos.pos[2] = result.second[2];
+        // We want only the Z part of the player's rotation
+        pos.rot[0] = 0;
+        pos.rot[1] = 0;
 
         Ptr dropped = copyObjectToCell(object, *cell, pos);
         PCDropped(dropped);
@@ -1353,6 +1245,9 @@ namespace MWWorld
 
         ESM::Position pos =
             actor.getRefData().getPosition();
+        // We want only the Z part of the actor's rotation
+        pos.rot[0] = 0;
+        pos.rot[1] = 0;
 
         Ogre::Vector3 orig =
             Ogre::Vector3(pos.pos[0], pos.pos[1], pos.pos[2]);
