@@ -370,7 +370,9 @@ namespace MWWorld
         Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
         handleToMesh[node->getName()] = mesh;
         OEngine::Physic::RigidBody* body = mEngine->createAndAdjustRigidBody(mesh, node->getName(), node->getScale().x, node->getPosition(), node->getOrientation());
-        mEngine->addRigidBody(body);
+        OEngine::Physic::RigidBody* raycastingBody = mEngine->createAndAdjustRigidBody
+                (mesh, node->getName(), node->getScale().x, node->getPosition(), node->getOrientation(), 0, 0, true);
+        mEngine->addRigidBody(body, true, raycastingBody);
     }
 
     void PhysicsSystem::addActor (const Ptr& ptr)
@@ -395,9 +397,14 @@ namespace MWWorld
         Ogre::SceneNode *node = ptr.getRefData().getBaseNode();
         const std::string &handle = node->getName();
         const Ogre::Vector3 &position = node->getPosition();
+
         if(OEngine::Physic::RigidBody *body = mEngine->getRigidBody(handle))
             body->getWorldTransform().setOrigin(btVector3(position.x,position.y,position.z));
-        else if(OEngine::Physic::PhysicActor *physact = mEngine->getCharacter(handle))
+
+        if(OEngine::Physic::RigidBody *body = mEngine->getRigidBody(handle, true))
+            body->getWorldTransform().setOrigin(btVector3(position.x,position.y,position.z));
+
+        if(OEngine::Physic::PhysicActor *physact = mEngine->getCharacter(handle))
             physact->setPosition(position);
     }
 
@@ -412,6 +419,13 @@ namespace MWWorld
             act->setRotation(rotation);
         }
         if (OEngine::Physic::RigidBody* body = mEngine->getRigidBody(handle))
+        {
+            if(dynamic_cast<btBoxShape*>(body->getCollisionShape()) == NULL)
+                body->getWorldTransform().setRotation(btQuaternion(rotation.x, rotation.y, rotation.z, rotation.w));
+            else
+                mEngine->boxAdjustExternal(handleToMesh[handle], body, node->getScale().x, node->getPosition(), rotation);
+        }
+        if (OEngine::Physic::RigidBody* body = mEngine->getRigidBody(handle, true))
         {
             if(dynamic_cast<btBoxShape*>(body->getCollisionShape()) == NULL)
                 body->getWorldTransform().setRotation(btQuaternion(rotation.x, rotation.y, rotation.z, rotation.w));

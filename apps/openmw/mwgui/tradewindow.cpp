@@ -32,7 +32,7 @@ namespace MWGui
         , mBalanceChangePause(0.0)
     {
         // items the NPC is wearing should not be for trade
-        mDisplayEquippedItems = true;
+        mDisplayEquippedItems = false;
 
         MyGUI::ScrollView* itemView;
         MyGUI::Widget* containerWidget;
