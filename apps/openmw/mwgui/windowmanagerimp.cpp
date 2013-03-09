@@ -132,6 +132,7 @@ WindowManager::WindowManager(
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::AutoSizedButton>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::ImageButton>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::ExposedWindow>("Widget");
+    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWScrollView>("Widget");
 
     MyGUI::FactoryManager::getInstance().registerFactory<ResourceImageSetPointerFix>("Resource", "ResourceImageSetPointer");
     MyGUI::ResourceManager::getInstance().load("core.xml");

@@ -1,9 +1,9 @@
 #include "list.hpp"
 
-#include <MyGUI_ScrollView.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_Button.h>
 #include <MyGUI_ImageBox.h>
+#include <MyGUI_ScrollBar.h>
 
 using namespace MWGui;
 using namespace MWGui::Widgets;
@@ -23,7 +23,7 @@ void MWList::initialiseOverride()
     if (mClient == 0)
         mClient = this;
 
-    mScrollView = mClient->createWidgetReal<MyGUI::ScrollView>(
+    mScrollView = mClient->createWidgetReal<MWGui::Widgets::MWScrollView>(
         "MW_ScrollView", MyGUI::FloatCoord(0.0, 0.0, 1.0, 1.0),
         MyGUI::Align::Top | MyGUI::Align::Left | MyGUI::Align::Stretch, getName() + "_ScrollView");
 }
@@ -48,6 +48,7 @@ void MWList::redraw(bool scrollbarShown)
     const int _scrollBarWidth = 24; // fetch this from skin?
     const int scrollBarWidth = scrollbarShown ? _scrollBarWidth : 0;
     const int spacing = 3;
+    size_t scrollbarPosition = mScrollView->getScrollPosition();
 
     while (mScrollView->getChildCount())
     {
@@ -88,6 +89,11 @@ void MWList::redraw(bool scrollbarShown)
 
     if (!scrollbarShown && mItemHeight > mClient->getSize().height)
         redraw(true);
+
+    size_t scrollbarRange = mScrollView->getScrollRange();
+    if(scrollbarPosition > scrollbarRange)
+        scrollbarPosition = scrollbarRange;
+    mScrollView->setScrollPosition(scrollbarPosition);
 }
 
 bool MWList::hasItem(const std::string& name)
@@ -137,4 +143,18 @@ void MWList::onItemSelected(MyGUI::Widget* _sender)
 MyGUI::Widget* MWList::getItemWidget(const std::string& name)
 {
     return mScrollView->findWidget (getName() + "_item_" + name);
+}
+
+size_t MWScrollView::getScrollPosition()
+{
+    return getVScroll()->getScrollPosition();
+}
+
+void MWScrollView::setScrollPosition(size_t position)
+{
+    getVScroll()->setScrollPosition(position);
+}
+size_t MWScrollView::getScrollRange()
+{
+    return getVScroll()->getScrollRange();
 }
