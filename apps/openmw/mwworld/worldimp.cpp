@@ -191,7 +191,7 @@ namespace MWWorld
 
         mPhysEngine->setSceneManager(renderer.getScene());
 
-        mWeatherManager = new MWWorld::WeatherManager(mRendering);
+        mWeatherManager = new MWWorld::WeatherManager(mRendering,fallbackMap);
 
         int idx = 0;
         // NOTE: We might need to reserve one more for the running game / save.
