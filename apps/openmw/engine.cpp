@@ -149,16 +149,22 @@ OMW::Engine::~Engine()
     delete mOgre;
 }
 
-// Load all BSA files in data directory.
+// Load BSA files
 
 void OMW::Engine::loadBSA()
 {
-    const Files::MultiDirCollection& bsa = mFileCollections.getCollection (".bsa");
-
-    for (Files::MultiDirCollection::TIter iter(bsa.begin()); iter!=bsa.end(); ++iter)
+    for (std::vector<std::string>::const_iterator archive = mArchives.begin(); archive != mArchives.end(); ++archive)
     {
-        std::cout << "Adding " << iter->second.string() << std::endl;
-        Bsa::addBSA(iter->second.string());
+        if (mFileCollections.doesExist(*archive))
+        {
+            const std::string archivePath = mFileCollections.getPath(*archive).string();
+            std::cout << "Adding BSA archive " << archivePath << std::endl;
+            Bsa::addBSA(archivePath);
+        }
+        else
+        {
+            std::cout << "Archive " << *archive << " not found" << std::endl;
+        }
     }
 
     const Files::PathContainer& dataDirs = mFileCollections.getPaths();
@@ -197,6 +203,11 @@ void OMW::Engine::setDataDirs (const Files::PathContainer& dataDirs)
 {
     mDataDirs = dataDirs;
     mFileCollections = Files::Collections (dataDirs, !mFSStrict);
+}
+
+// Add BSA archive
+void OMW::Engine::addArchive (const std::string& archive) {
+    mArchives.push_back(archive);
 }
 
 // Set resource dir
