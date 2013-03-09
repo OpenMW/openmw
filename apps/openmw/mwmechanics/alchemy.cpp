@@ -144,7 +144,11 @@ void MWMechanics::Alchemy::updateEffects()
             MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (iter->mId);         
         
         if (magicEffect->mData.mBaseCost<=0)
-            throw std::runtime_error ("invalid base cost for magic effect " + iter->mId);
+        {
+            std::ostringstream os;
+            os << "invalid base cost for magic effect " << iter->mId;
+            throw std::runtime_error (os.str());
+        }
         
         float fPotionT1MagMul =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("fPotionT1MagMult")->getFloat();
