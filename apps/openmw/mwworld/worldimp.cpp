@@ -1188,6 +1188,9 @@ namespace MWWorld
         pos.pos[0] = result.second[0];
         pos.pos[1] = result.second[1];
         pos.pos[2] = result.second[2];
+        // We want only the Z part of the player's rotation
+        pos.rot[0] = 0;
+        pos.rot[1] = 0;
 
         Ptr dropped = copyObjectToCell(object, *cell, pos);
         PCDropped(dropped);
@@ -1242,6 +1245,9 @@ namespace MWWorld
 
         ESM::Position pos =
             actor.getRefData().getPosition();
+        // We want only the Z part of the actor's rotation
+        pos.rot[0] = 0;
+        pos.rot[1] = 0;
 
         Ogre::Vector3 orig =
             Ogre::Vector3(pos.pos[0], pos.pos[1], pos.pos[2]);

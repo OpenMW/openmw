@@ -206,7 +206,9 @@ void CharacterCreation::spawnDialog(const char id)
             mRaceDialog->setRaceId(mPlayerRaceId);
             mRaceDialog->eventDone += MyGUI::newDelegate(this, &CharacterCreation::onRaceDialogDone);
             mRaceDialog->eventBack += MyGUI::newDelegate(this, &CharacterCreation::onRaceDialogBack);
-            mRaceDialog->setVisible(true);;
+            mRaceDialog->setVisible(true);
+            if (mCreationStage < CSE_NameChosen)
+                mCreationStage = CSE_NameChosen;
             break;
 
         case GM_Class:
@@ -215,6 +217,8 @@ void CharacterCreation::spawnDialog(const char id)
             mClassChoiceDialog = new ClassChoiceDialog(*mWM);
             mClassChoiceDialog->eventButtonSelected += MyGUI::newDelegate(this, &CharacterCreation::onClassChoice);
             mClassChoiceDialog->setVisible(true);
+            if (mCreationStage < CSE_RaceChosen)
+                mCreationStage = CSE_RaceChosen;
             break;
 
         case GM_ClassPick:
@@ -226,6 +230,8 @@ void CharacterCreation::spawnDialog(const char id)
             mPickClassDialog->eventDone += MyGUI::newDelegate(this, &CharacterCreation::onPickClassDialogDone);
             mPickClassDialog->eventBack += MyGUI::newDelegate(this, &CharacterCreation::onPickClassDialogBack);
             mPickClassDialog->setVisible(true);
+            if (mCreationStage < CSE_RaceChosen)
+                mCreationStage = CSE_RaceChosen;
             break;
 
         case GM_Birth:
@@ -237,6 +243,8 @@ void CharacterCreation::spawnDialog(const char id)
             mBirthSignDialog->eventDone += MyGUI::newDelegate(this, &CharacterCreation::onBirthSignDialogDone);
             mBirthSignDialog->eventBack += MyGUI::newDelegate(this, &CharacterCreation::onBirthSignDialogBack);
             mBirthSignDialog->setVisible(true);
+            if (mCreationStage < CSE_ClassChosen)
+                mCreationStage = CSE_ClassChosen;
             break;
 
         case GM_ClassCreate:
@@ -247,6 +255,8 @@ void CharacterCreation::spawnDialog(const char id)
             mCreateClassDialog->eventDone += MyGUI::newDelegate(this, &CharacterCreation::onCreateClassDialogDone);
             mCreateClassDialog->eventBack += MyGUI::newDelegate(this, &CharacterCreation::onCreateClassDialogBack);
             mCreateClassDialog->setVisible(true);
+            if (mCreationStage < CSE_RaceChosen)
+                mCreationStage = CSE_RaceChosen;
             break;
         case GM_ClassGenerate:
             mGenerateClassStep = 0;
@@ -255,6 +265,8 @@ void CharacterCreation::spawnDialog(const char id)
             mGenerateClassSpecializations[1] = 0;
             mGenerateClassSpecializations[2] = 0;
             showClassQuestionDialog();
+            if (mCreationStage < CSE_RaceChosen)
+                mCreationStage = CSE_RaceChosen;
             break;
         case GM_Review:
             mWM->removeDialog(mReviewDialog);
@@ -292,6 +304,8 @@ void CharacterCreation::spawnDialog(const char id)
             mReviewDialog->eventBack += MyGUI::newDelegate(this, &CharacterCreation::onReviewDialogBack);
             mReviewDialog->eventActivateDialog += MyGUI::newDelegate(this, &CharacterCreation::onReviewActivateDialog);
             mReviewDialog->setVisible(true);
+            if (mCreationStage < CSE_BirthSignChosen)
+                mCreationStage = CSE_BirthSignChosen;
             break;
     }
 }

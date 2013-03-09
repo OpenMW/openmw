@@ -25,7 +25,8 @@ http://www.gnu.org/licenses/ .
 
 #include <cstdio>
 
-#include <boost/algorithm/string.hpp>
+
+#include <components/misc/stringops.hpp>
 
 #include "../nif/niffile.hpp"
 #include "../nif/node.hpp"
@@ -188,7 +189,7 @@ void ManualBulletShapeLoader::handleNode(btTriangleMesh* mesh, const Nif::Node *
     // Marker objects: no collision
     /// \todo don't do this in the editor
     std::string nodename = node->name;
-    boost::algorithm::to_lower(nodename);
+    Misc::StringUtils::toLower(nodename);
     if (nodename.find("marker") != std::string::npos)
     {
         return;
@@ -222,16 +223,19 @@ void ManualBulletShapeLoader::handleNode(btTriangleMesh* mesh, const Nif::Node *
         }
     }
 
-    if(node->hasBounds)
+    if (isCollisionNode || (!hasCollisionNode && !raycasting))
     {
-        cShape->mBoxTranslation = node->boundPos;
-        cShape->mBoxRotation = node->boundRot;
-        mBoundingBox = new btBoxShape(getbtVector(node->boundXYZ));
-    }
-    else if( (isCollisionNode || (!hasCollisionNode && !raycasting)) && node->recType == Nif::RC_NiTriShape)
-    {
-        cShape->mCollide = !(flags&0x800);
-        handleNiTriShape(mesh, static_cast<const Nif::NiTriShape*>(node), flags, node->getWorldTransform(), raycasting);
+        if(node->hasBounds)
+        {
+            cShape->mBoxTranslation = node->boundPos;
+            cShape->mBoxRotation = node->boundRot;
+            mBoundingBox = new btBoxShape(getbtVector(node->boundXYZ));
+        }
+        else if(node->recType == Nif::RC_NiTriShape)
+        {
+            cShape->mCollide = !(flags&0x800);
+            handleNiTriShape(mesh, static_cast<const Nif::NiTriShape*>(node), flags, node->getWorldTransform(), raycasting);
+        }
     }
 
     // For NiNodes, loop through children

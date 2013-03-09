@@ -442,8 +442,6 @@ void OMW::Engine::go()
     if (!mStartupScript.empty())
         MWBase::Environment::get().getWindowManager()->executeInConsole (mStartupScript);
 
-    std::cout << "\nPress Q/ESC or close window to exit.\n";
-
     // Start the main rendering loop
     mOgre->start();
 
