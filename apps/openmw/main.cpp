@@ -100,6 +100,9 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("data-local", bpo::value<std::string>()->default_value(""),
             "set local data directory (highest priority)")
 
+        ("fallback-archive", bpo::value<StringsVector>()->default_value(StringsVector(), "fallback-archive")
+            ->multitoken(), "set fallback BSA archives (later archives have higher priority)")
+
         ("resources", bpo::value<std::string>()->default_value("resources"),
             "set resources directory")
 
@@ -200,6 +203,13 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     cfgMgr.processPaths(dataDirs);
 
     engine.setDataDirs(dataDirs);
+
+    // fallback archives
+    StringsVector archives = variables["fallback-archive"].as<StringsVector>();
+    for (StringsVector::const_iterator it = archives.begin(); it != archives.end(); it++)
+    {
+        engine.addArchive(*it);
+    }
 
     engine.setResourceDir(variables["resources"].as<std::string>());
 
