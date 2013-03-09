@@ -85,7 +85,7 @@ namespace MWGui
         };
 
     protected:
-        void onSelectTopic(std::string topic);
+        void onSelectTopic(const std::string& topic, int id);
         void onByeClicked(MyGUI::Widget* _sender);
         void onHistoryClicked(MyGUI::Widget* _sender);
         void onMouseWheel(MyGUI::Widget* _sender, int _rel);
