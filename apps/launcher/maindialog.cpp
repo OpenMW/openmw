@@ -213,8 +213,6 @@ bool MainDialog::showFirstRunDialog()
             return false;
 
         // Re-read the game settings
-        mGameSettings.clear();
-
         if (!setupGameSettings())
             return false;
 
@@ -389,7 +387,7 @@ bool MainDialog::setupGameSettings()
         QFileInfo info(selectedFile);
 
         // Add the new dir to the settings file and to the data dir container
-        mGameSettings.setValue(QString("data"), info.absolutePath());
+        mGameSettings.setMultiValue(QString("data"), info.absolutePath());
         mGameSettings.addDataDir(info.absolutePath());
     }
 
@@ -478,7 +476,7 @@ void MainDialog::saveSettings()
 
 }
 
-void MainDialog::writeSettings()
+bool MainDialog::writeSettings()
 {
     // Now write all config files
     saveSettings();
@@ -498,7 +496,7 @@ void MainDialog::writeSettings()
                               Please make sure you have the right permissions \
                               and try again.<br>").arg(userPath));
             msgBox.exec();
-            return;
+            return false;
         }
     }
 
@@ -515,7 +513,7 @@ void MainDialog::writeSettings()
                           Please make sure you have the right permissions \
                           and try again.<br>").arg(file.fileName()));
         msgBox.exec();
-        return;
+        return false;
     }
 
     QTextStream stream(&file);
@@ -537,7 +535,7 @@ void MainDialog::writeSettings()
                           Please make sure you have the right permissions \
                           and try again.<br>").arg(file.fileName()));
         msgBox.exec();
-        return;
+        return false;
     }
 
     stream.setDevice(&file);
@@ -559,7 +557,7 @@ void MainDialog::writeSettings()
                           Please make sure you have the right permissions \
                           and try again.<br>").arg(file.fileName()));
         msgBox.exec();
-        return;
+        return false;
     }
 
     stream.setDevice(&file);
@@ -567,19 +565,20 @@ void MainDialog::writeSettings()
 
     mLauncherSettings.writeFile(stream);
     file.close();
+
+    return true;
 }
 
 void MainDialog::closeEvent(QCloseEvent *event)
 {
-    saveSettings();
     writeSettings();
     event->accept();
 }
 
 void MainDialog::play()
 {
-    saveSettings();
-    writeSettings();
+    if (!writeSettings())
+        qApp->quit();
 
     // Launch the game detached
     startProgram(QString("openmw"), true);
