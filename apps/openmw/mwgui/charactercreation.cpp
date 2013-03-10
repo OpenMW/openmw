@@ -17,10 +17,10 @@ namespace
 {
     struct Step
     {
-        std::string mText;
-        std::string mButtons[3];
-        std::string mSound;
-        ESM::Class::Specialization mSpecializations[3]; // The specialization for each answer
+        const std::string mText;
+        const std::string mButtons[3];
+        const std::string mSound;
+        const ESM::Class::Specialization mSpecializations[3]; // The specialization for each answer
     };
 
     Step sGenerateClassSteps(int number) {
