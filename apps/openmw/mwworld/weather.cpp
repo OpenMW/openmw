@@ -4,7 +4,7 @@
 #include <cstdlib>
 
 #include <boost/algorithm/string.hpp>
-
+#include <boost/lexical_cast.hpp>
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -19,262 +19,125 @@ using namespace MWWorld;
 using namespace MWSound;
 
 #define lerp(x, y) (x * (1-factor) + y * factor)
+std::string WeatherManager::getFallback (const std::string& key)
+{
+    std::map<std::string,std::string>::const_iterator it;
+    if((it = mFallback.find(key)) == mFallback.end())
+    {
+        return "";
+    }
+    return it->second;
+}
+std::string WeatherManager::getFallbackString(const std::string& fall)
+{
+	return WeatherManager::getFallback(fall);
+}
 
-const std::string WeatherGlobals::mThunderSoundID0 = "Thunder0";
-const std::string WeatherGlobals::mThunderSoundID1 = "Thunder1";
-const std::string WeatherGlobals::mThunderSoundID2 = "Thunder2";
-const std::string WeatherGlobals::mThunderSoundID3 = "Thunder3";
-const float WeatherGlobals::mSunriseTime = 8;
-const float WeatherGlobals::mSunsetTime = 18;
-const float WeatherGlobals::mSunriseDuration = 2;
-const float WeatherGlobals::mSunsetDuration = 2;
-const float WeatherGlobals::mWeatherUpdateTime = 20.f;
+float WeatherManager::getFallbackFloat(const std::string& fall)
+{
+	std::string fallback=getFallbackString(fall);
+	return boost::lexical_cast<float>(fallback);
+}
 
+ColourValue WeatherManager::getFallbackColour(const std::string& fall)
+{
+	std::string sum;
+	std::string ret[3];
+	sum=getFallback(fall);
+	unsigned int j=0;
+	for(unsigned int i=0;i<sum.length();i++){
+		if(sum[i]==',') j++;
+		else ret[j]+=sum[i];
+	}
+	return ColourValue(boost::lexical_cast<int>(ret[0])/255.f,boost::lexical_cast<int>(ret[1])/255.f,boost::lexical_cast<int>(ret[2])/255.f);
+}
+void WeatherManager::setFallbackWeather(Weather& weather,const std::string& name)
+{
+	std::string upper=name;
+	upper[0]=toupper(name[0]);
+	weather.mCloudsMaximumPercent = getFallbackFloat("Weather_"+upper+"_Clouds_Maximum_Percent");
+    weather.mTransitionDelta = getFallbackFloat("Weather_"+upper+"_Transition_Delta");
+    weather.mSkySunriseColor=getFallbackColour("Weather_"+upper+"_Sky_Sunrise_Color");
+    weather.mSkyDayColor = getFallbackColour("Weather_"+upper+"_Sky_Day_Color");
+    weather.mSkySunsetColor = getFallbackColour("Weather_"+upper+"_Sky_Sunset_Color");
+    weather.mSkyNightColor = getFallbackColour("Weather_"+upper+"_Sky_Night_Color");
+    weather.mFogSunriseColor = getFallbackColour("Weather_"+upper+"_Fog_Sunrise_Color");
+    weather.mFogDayColor = getFallbackColour("Weather_"+upper+"_Fog_Day_Color");
+    weather.mFogSunsetColor = getFallbackColour("Weather_"+upper+"_Fog_Sunset_Color");
+    weather.mFogNightColor = getFallbackColour("Weather_"+upper+"_Fog_Night_Color");
+    weather.mAmbientSunriseColor = getFallbackColour("Weather_"+upper+"_Ambient_Sunrise_Color");
+    weather.mAmbientDayColor = getFallbackColour("Weather_"+upper+"_Ambient_Day_Color");
+    weather.mAmbientSunsetColor = getFallbackColour("Weather_"+upper+"_Ambient_Sunset_Color");
+    weather.mAmbientNightColor = getFallbackColour("Weather_"+upper+"_Ambient_Night_Color");
+    weather.mSunSunriseColor = getFallbackColour("Weather_"+upper+"_Sun_Sunrise_Color");
+    weather.mSunDayColor = getFallbackColour("Weather_"+upper+"_Sun_Day_Color");
+    weather.mSunSunsetColor = getFallbackColour("Weather_"+upper+"_Sun_Sunset_Color");
+    weather.mSunNightColor = getFallbackColour("Weather_"+upper+"_Sun_Night_Color");
+    weather.mSunDiscSunsetColor = getFallbackColour("Weather_"+upper+"_Sun_Disc_Sunset_Color");
+    weather.mLandFogDayDepth = getFallbackFloat("Weather_"+upper+"_Land_Fog_Day_Depth");
+    weather.mLandFogNightDepth = getFallbackFloat("Weather_"+upper+"_Land_Fog_Night_Depth");
+    weather.mWindSpeed = getFallbackFloat("Weather_"+upper+"_Wind_Speed");
+    weather.mCloudSpeed = getFallbackFloat("Weather_"+upper+"_Cloud_Speed");
+    weather.mGlareView = getFallbackFloat("Weather_"+upper+"_Glare_View");
+    mWeatherSettings[name] = weather;
+}
 
-// morrowind sets these per-weather, but since they are only used by 'thunderstorm'
-// weather setting anyway, we can just as well set them globally
-const float WeatherGlobals::mThunderFrequency = .4;
-const float WeatherGlobals::mThunderThreshold = 0.6;
-const float WeatherGlobals::mThunderSoundDelay = 0.25;
-
-WeatherManager::WeatherManager(MWRender::RenderingManager* rendering) :
+WeatherManager::WeatherManager(MWRender::RenderingManager* rendering,const std::map<std::string,std::string>& fallbackMap) :
      mHour(14), mCurrentWeather("clear"), mFirstUpdate(true), mWeatherUpdateTime(0),
      mThunderFlash(0), mThunderChance(0), mThunderChanceNeeded(50), mThunderSoundDelay(0),
      mRemainingTransitionTime(0), mMonth(0), mDay(0),
-     mTimePassed(0)
+     mTimePassed(0), mFallback(fallbackMap)
 {
     mRendering = rendering;
-
-    #define clr(r,g,b) ColourValue(r/255.f, g/255.f, b/255.f)
-
-    /// \todo read these from Morrowind.ini
-    Weather clear;
-    clear.mCloudTexture = "tx_sky_clear.dds";
-    clear.mCloudsMaximumPercent = 1.0;
-    clear.mTransitionDelta = 0.015;
-    clear.mSkySunriseColor = clr(118, 141, 164);
-    clear.mSkyDayColor = clr(95, 135, 203);
-    clear.mSkySunsetColor = clr(56, 89, 129);
-    clear.mSkyNightColor = clr(9, 10, 11);
-    clear.mFogSunriseColor = clr(255, 189, 157);
-    clear.mFogDayColor = clr(206, 227, 255);
-    clear.mFogSunsetColor = clr(255, 189, 157);
-    clear.mFogNightColor = clr(9, 10, 11);
-    clear.mAmbientSunriseColor = clr(47, 66, 96);
-    clear.mAmbientDayColor = clr(137, 140, 160);
-    clear.mAmbientSunsetColor = clr(68, 75, 96);
-    clear.mAmbientNightColor = clr(32, 35, 42);
-    clear.mSunSunriseColor = clr(242, 159, 99);
-    clear.mSunDayColor = clr(255, 252, 238);
-    clear.mSunSunsetColor = clr(255, 115, 79);
-    clear.mSunNightColor = clr(59, 97, 176);
-    clear.mSunDiscSunsetColor = clr(255, 189, 157);
-    clear.mLandFogDayDepth = 0.69;
-    clear.mLandFogNightDepth = 0.69;
-    clear.mWindSpeed = 0.1;
-    clear.mCloudSpeed = 1.25;
-    clear.mGlareView = 1.0;
-    mWeatherSettings["clear"] = clear;
+	//Globals
+	mThunderSoundID0 = getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_0");
+	mThunderSoundID1 = getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_1");
+	mThunderSoundID2 = getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_2");
+	mThunderSoundID3 = getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_3");
+	mSunriseTime = getFallbackFloat("Weather_Sunrise_Time");
+	mSunsetTime = getFallbackFloat("Weather_Sunset_Time");
+	mSunriseDuration = getFallbackFloat("Weather_Sunrise_Duration");
+	mSunsetDuration = getFallbackFloat("Weather_Sunset_Duration");
+	mWeatherUpdateTime = getFallbackFloat("Weather_Hours_Between_Weather_Changes");
+	mThunderFrequency = getFallbackFloat("Weather_Thunderstorm_Thunder_Frequency");
+	mThunderThreshold = getFallbackFloat("Weather_Thunderstorm_Thunder_Threshold");
+	mThunderSoundDelay = 0.25;
+	//Weather
+	Weather clear;
+	clear.mCloudTexture = "tx_sky_clear.dds";
+	setFallbackWeather(clear,"clear");
 
     Weather cloudy;
-    cloudy.mCloudTexture = "tx_sky_cloudy.dds";
-    cloudy.mCloudsMaximumPercent = 1.0;
-    cloudy.mTransitionDelta = 0.015;
-    cloudy.mSkySunriseColor = clr(126, 158, 173);
-    cloudy.mSkyDayColor = clr(117, 160, 215);
-    cloudy.mSkySunsetColor = clr(111, 114, 159);
-    cloudy.mSkyNightColor = clr(9, 10, 11);
-    cloudy.mFogSunriseColor = clr(255, 207, 149);
-    cloudy.mFogDayColor = clr(245, 235, 224);
-    cloudy.mFogSunsetColor = clr(255, 155, 106);
-    cloudy.mFogNightColor = clr(9, 10, 11);
-    cloudy.mAmbientSunriseColor = clr(66, 74, 87);
-    cloudy.mAmbientDayColor = clr(137, 145, 160);
-    cloudy.mAmbientSunsetColor = clr(71, 80, 92);
-    cloudy.mAmbientNightColor = clr(32, 39, 54);
-    cloudy.mSunSunriseColor = clr(241, 177, 99);
-    cloudy.mSunDayColor = clr(255, 236, 221);
-    cloudy.mSunSunsetColor = clr(255, 89, 00);
-    cloudy.mSunNightColor = clr(77, 91, 124);
-    cloudy.mSunDiscSunsetColor = clr(255, 202, 179);
-    cloudy.mLandFogDayDepth = 0.72;
-    cloudy.mLandFogNightDepth = 0.72;
-    cloudy.mWindSpeed = 0.2;
-    cloudy.mCloudSpeed = 2;
-    cloudy.mGlareView = 1.0;
-    mWeatherSettings["cloudy"] = cloudy;
+	cloudy.mCloudTexture = "tx_sky_cloudy.dds";
+    setFallbackWeather(cloudy,"cloudy");
 
     Weather foggy;
-    foggy.mCloudTexture = "tx_sky_foggy.dds";
-    foggy.mCloudsMaximumPercent = 1.0;
-    foggy.mTransitionDelta = 0.015;
-    foggy.mSkySunriseColor = clr(197, 190, 180);
-    foggy.mSkyDayColor = clr(184, 211, 228);
-    foggy.mSkySunsetColor = clr(142, 159, 176);
-    foggy.mSkyNightColor = clr(18, 23, 28);
-    foggy.mFogSunriseColor = clr(173, 164, 148);
-    foggy.mFogDayColor = clr(150, 187, 209);
-    foggy.mFogSunsetColor = clr(113, 135, 157);
-    foggy.mFogNightColor = clr(19, 24, 29);
-    foggy.mAmbientSunriseColor = clr(48, 43, 37);
-    foggy.mAmbientDayColor = clr(92, 109, 120);
-    foggy.mAmbientSunsetColor = clr(28, 33, 39);
-    foggy.mAmbientNightColor = clr(28, 33, 39);
-    foggy.mSunSunriseColor = clr(177, 162, 137);
-    foggy.mSunDayColor = clr(111, 131, 151);
-    foggy.mSunSunsetColor = clr(125, 157, 189);
-    foggy.mSunNightColor = clr(81, 100, 119);
-    foggy.mSunDiscSunsetColor = clr(223, 223, 223);
-    foggy.mLandFogDayDepth = 1.0;
-    foggy.mLandFogNightDepth = 1.9;
-    foggy.mWindSpeed = 0;
-    foggy.mCloudSpeed = 1.25;
-    foggy.mGlareView = 0.25;
-    mWeatherSettings["foggy"] = foggy;
+	foggy.mCloudTexture = "tx_sky_foggy.dds";
+    setFallbackWeather(foggy,"foggy");
 
     Weather thunderstorm;
     thunderstorm.mCloudTexture = "tx_sky_thunder.dds";
-    thunderstorm.mCloudsMaximumPercent = 0.66;
-    thunderstorm.mTransitionDelta = 0.03;
-    thunderstorm.mSkySunriseColor = clr(35, 36, 39);
-    thunderstorm.mSkyDayColor = clr(97, 104, 115);
-    thunderstorm.mSkySunsetColor = clr(35, 36, 39);
-    thunderstorm.mSkyNightColor = clr(19, 20, 22);
-    thunderstorm.mFogSunriseColor = clr(70, 74, 85);
-    thunderstorm.mFogDayColor = clr(97, 104, 115);
-    thunderstorm.mFogSunsetColor = clr(70, 74, 85);
-    thunderstorm.mFogNightColor = clr(19, 20, 22);
-    thunderstorm.mAmbientSunriseColor = clr(54, 54, 54);
-    thunderstorm.mAmbientDayColor = clr(90, 90, 90);
-    thunderstorm.mAmbientSunsetColor = clr(54, 54, 54);
-    thunderstorm.mAmbientNightColor = clr(49, 51, 54);
-    thunderstorm.mSunSunriseColor = clr(91, 99, 122);
-    thunderstorm.mSunDayColor = clr(138, 144, 155);
-    thunderstorm.mSunSunsetColor = clr(96, 101, 117);
-    thunderstorm.mSunNightColor = clr(55, 76, 110);
-    thunderstorm.mSunDiscSunsetColor = clr(128, 128, 128);
-    thunderstorm.mLandFogDayDepth = 1;
-    thunderstorm.mLandFogNightDepth = 1.15;
-    thunderstorm.mWindSpeed = 0.5;
-    thunderstorm.mCloudSpeed = 3;
-    thunderstorm.mGlareView = 0;
     thunderstorm.mRainLoopSoundID = "rain heavy";
-    mWeatherSettings["thunderstorm"] = thunderstorm;
+    setFallbackWeather(thunderstorm,"thunderstorm");
 
     Weather rain;
     rain.mCloudTexture = "tx_sky_rainy.dds";
-    rain.mCloudsMaximumPercent = 0.66;
-    rain.mTransitionDelta = 0.015;
-    rain.mSkySunriseColor = clr(71, 74, 75);
-    rain.mSkyDayColor = clr(116, 120, 122);
-    rain.mSkySunsetColor = clr(73, 73, 73);
-    rain.mSkyNightColor = clr(24, 25, 26);
-    rain.mFogSunriseColor = clr(71, 74, 75);
-    rain.mFogDayColor = clr(116, 120, 122);
-    rain.mFogSunsetColor = clr(73, 73, 73);
-    rain.mFogNightColor = clr(24, 25, 26);
-    rain.mAmbientSunriseColor = clr(97, 90, 88);
-    rain.mAmbientDayColor = clr(105, 110, 113);
-    rain.mAmbientSunsetColor = clr(88, 97, 97);
-    rain.mAmbientNightColor = clr(50, 55, 67);
-    rain.mSunSunriseColor = clr(131, 122, 120);
-    rain.mSunDayColor = clr(149, 157, 170);
-    rain.mSunSunsetColor = clr(120, 126, 131);
-    rain.mSunNightColor = clr(50, 62, 101);
-    rain.mSunDiscSunsetColor = clr(128, 128, 128);
-    rain.mLandFogDayDepth = 0.8;
-    rain.mLandFogNightDepth = 0.8;
-    rain.mWindSpeed = 0.3;
-    rain.mCloudSpeed = 2;
-    rain.mGlareView = 0;
     rain.mRainLoopSoundID = "rain";
-    mWeatherSettings["rain"] = rain;
+    setFallbackWeather(rain,"rain");
 
     Weather overcast;
     overcast.mCloudTexture = "tx_sky_overcast.dds";
-    overcast.mCloudsMaximumPercent = 1.0;
-    overcast.mTransitionDelta = 0.015;
-    overcast.mSkySunriseColor = clr(91, 99, 106);
-    overcast.mSkyDayColor = clr(143, 146, 149);
-    overcast.mSkySunsetColor = clr(108, 115, 121);
-    overcast.mSkyNightColor = clr(19, 22, 25);
-    overcast.mFogSunriseColor = clr(91, 99, 106);
-    overcast.mFogDayColor = clr(143, 146, 149);
-    overcast.mFogSunsetColor = clr(108, 115, 121);
-    overcast.mFogNightColor = clr(19, 22, 25);
-    overcast.mAmbientSunriseColor = clr(84, 88, 92);
-    overcast.mAmbientDayColor = clr(93, 96, 105);
-    overcast.mAmbientSunsetColor = clr(83, 77, 75);
-    overcast.mAmbientNightColor = clr(57, 60, 66);
-    overcast.mSunSunriseColor = clr(87, 125, 163);
-    overcast.mSunDayColor = clr(163, 169, 183);
-    overcast.mSunSunsetColor = clr(85, 103, 157);
-    overcast.mSunNightColor = clr(32, 54, 100);
-    overcast.mSunDiscSunsetColor = clr(128, 128, 128);
-    overcast.mLandFogDayDepth = 0.7;
-    overcast.mLandFogNightDepth = 0.7;
-    overcast.mWindSpeed = 0.2;
-    overcast.mCloudSpeed = 1.5;
-    overcast.mGlareView = 0;
-    mWeatherSettings["overcast"] = overcast;
+    setFallbackWeather(overcast,"overcast");
 
     Weather ashstorm;
     ashstorm.mCloudTexture = "tx_sky_ashstorm.dds";
-    ashstorm.mCloudsMaximumPercent = 1.0;
-    ashstorm.mTransitionDelta = 0.035;
-    ashstorm.mSkySunriseColor = clr(91, 56, 51);
-    ashstorm.mSkyDayColor = clr(124, 73, 58);
-    ashstorm.mSkySunsetColor = clr(106, 55, 40);
-    ashstorm.mSkyNightColor = clr(20, 21, 22);
-    ashstorm.mFogSunriseColor = clr(91, 56, 51);
-    ashstorm.mFogDayColor = clr(124, 73, 58);
-    ashstorm.mFogSunsetColor = clr(106, 55, 40);
-    ashstorm.mFogNightColor = clr(20, 21, 22);
-    ashstorm.mAmbientSunriseColor = clr(52, 42, 37);
-    ashstorm.mAmbientDayColor = clr(75, 49, 41);
-    ashstorm.mAmbientSunsetColor = clr(48, 39, 35);
-    ashstorm.mAmbientNightColor = clr(36, 42, 49);
-    ashstorm.mSunSunriseColor = clr(184, 91, 71);
-    ashstorm.mSunDayColor = clr(228, 139, 114);
-    ashstorm.mSunSunsetColor = clr(185, 86, 57);
-    ashstorm.mSunNightColor = clr(54, 66, 74);
-    ashstorm.mSunDiscSunsetColor = clr(128, 128, 128);
-    ashstorm.mLandFogDayDepth = 1.1;
-    ashstorm.mLandFogNightDepth = 1.2;
-    ashstorm.mWindSpeed = 0.8;
-    ashstorm.mCloudSpeed = 7;
-    ashstorm.mGlareView = 0;
     ashstorm.mAmbientLoopSoundID = "ashstorm";
-    mWeatherSettings["ashstorm"] = ashstorm;
+    setFallbackWeather(ashstorm,"ashstorm");
 
     Weather blight;
     blight.mCloudTexture = "tx_sky_blight.dds";
-    blight.mCloudsMaximumPercent = 1.0;
-    blight.mTransitionDelta = 0.04;
-    blight.mSkySunriseColor = clr(90, 35, 35);
-    blight.mSkyDayColor = clr(90, 35, 35);
-    blight.mSkySunsetColor = clr(92, 33, 33);
-    blight.mSkyNightColor = clr(44, 14, 14);
-    blight.mFogSunriseColor = clr(90, 35, 35);
-    blight.mFogDayColor = clr(128, 19, 19);
-    blight.mFogSunsetColor = clr(92, 33, 33);
-    blight.mFogNightColor = clr(44, 14, 14);
-    blight.mAmbientSunriseColor = clr(61, 40, 40);
-    blight.mAmbientDayColor = clr(79, 54, 54);
-    blight.mAmbientSunsetColor = clr(61, 40, 40);
-    blight.mAmbientNightColor = clr(56, 58, 62);
-    blight.mSunSunriseColor = clr(180, 78, 78);
-    blight.mSunDayColor = clr(224, 84, 84);
-    blight.mSunSunsetColor = clr(180, 78, 78);
-    blight.mSunNightColor = clr(61, 91, 143);
-    blight.mSunDiscSunsetColor = clr(128, 128, 128);
-    blight.mLandFogDayDepth = 1.1;
-    blight.mLandFogNightDepth = 1.2;
-    blight.mWindSpeed = 0.9;
-    blight.mCloudSpeed = 9;
-    blight.mGlareView = 0;
     blight.mAmbientLoopSoundID = "blight";
-    mWeatherSettings["blight"] = blight;
+    setFallbackWeather(blight,"blight");
 
     /*
     Weather snow;
@@ -502,7 +365,7 @@ void WeatherManager::update(float duration)
         if (mWeatherUpdateTime <= 0 || regionstr != mCurrentRegion)
         {
             mCurrentRegion = regionstr;
-            mWeatherUpdateTime = WeatherGlobals::mWeatherUpdateTime*3600;
+            mWeatherUpdateTime = mWeatherUpdateTime*3600;
 
             std::string weather = "clear";
 
@@ -681,17 +544,17 @@ void WeatherManager::update(float duration)
                     // pick a random sound
                     int sound = rand() % 4;
                     std::string soundname;
-                    if (sound == 0) soundname = WeatherGlobals::mThunderSoundID0;
-                    else if (sound == 1) soundname = WeatherGlobals::mThunderSoundID1;
-                    else if (sound == 2) soundname = WeatherGlobals::mThunderSoundID2;
-                    else if (sound == 3) soundname = WeatherGlobals::mThunderSoundID3;
+                    if (sound == 0) soundname = mThunderSoundID0;
+                    else if (sound == 1) soundname = mThunderSoundID1;
+                    else if (sound == 2) soundname = mThunderSoundID2;
+                    else if (sound == 3) soundname = mThunderSoundID3;
                     MWBase::Environment::get().getSoundManager()->playSound(soundname, 1.0, 1.0);
                     mThunderSoundDelay = 1000;
                 }
 
                 mThunderFlash -= duration;
                 if (mThunderFlash > 0)
-                    mRendering->getSkyManager()->setLightningStrength( mThunderFlash / WeatherGlobals::mThunderThreshold );
+                    mRendering->getSkyManager()->setLightningStrength( mThunderFlash / mThunderThreshold );
                 else
                 {
                     srand(time(NULL));
@@ -706,11 +569,11 @@ void WeatherManager::update(float duration)
                 mThunderChance += duration*4; // chance increases by 4 percent every second
                 if (mThunderChance >= mThunderChanceNeeded)
                 {
-                    mThunderFlash = WeatherGlobals::mThunderThreshold;
+                    mThunderFlash = mThunderThreshold;
 
-                    mRendering->getSkyManager()->setLightningStrength( mThunderFlash / WeatherGlobals::mThunderThreshold );
+                    mRendering->getSkyManager()->setLightningStrength( mThunderFlash / mThunderThreshold );
 
-                    mThunderSoundDelay = WeatherGlobals::mThunderSoundDelay;
+                    mThunderSoundDelay = 0.25;
                 }
             }
         }
