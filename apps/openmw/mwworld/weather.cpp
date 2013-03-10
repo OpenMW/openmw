@@ -4,7 +4,7 @@
 #include <cstdlib>
 
 #include <boost/algorithm/string.hpp>
-
+#include <boost/lexical_cast.hpp>
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -19,7 +19,7 @@ using namespace MWWorld;
 using namespace MWSound;
 
 #define lerp(x, y) (x * (1-factor) + y * factor)
-std::string WeatherManager::getFallback (const std::string& key)
+const std::string WeatherManager::getFallback (const std::string& key)
 {
     std::map<std::string,std::string>::const_iterator it;
     if((it = mFallback.find(key)) == mFallback.end())
@@ -28,56 +28,57 @@ std::string WeatherManager::getFallback (const std::string& key)
     }
     return it->second;
 }
-std::string WeatherManager::getFallbackS(std::string fall)
+const std::string WeatherManager::getFallbackString(const std::string fall)
 {
 	return WeatherManager::getFallback(fall);
 }
 
-float WeatherManager::getFallbackF(std::string fall)
+const float WeatherManager::getFallbackFloat(const std::string fall)
 {
-	return atof(getFallbackS(fall).c_str());
+	std::string fallback=getFallbackString(fall);
+	return boost::lexical_cast<float>(fallback);
 }
 
-ColourValue WeatherManager::getFallbackClr(std::string fall)
+const ColourValue WeatherManager::getFallbackColour(const std::string fall)
 {
 	std::string sum;
 	std::string ret[3];
 	sum=getFallback(fall);
-	int j=0;
-	for(int i=0;i<sum.length();i++){
-		if(sum[i]==',') j+=1;
+	unsigned int j=0;
+	for(unsigned int i=0;i<sum.length();i++){
+		if(sum[i]==',') j++;
 		else ret[j]+=sum[i];
 	}
-	return ColourValue(atoi(ret[0].c_str())/255.f,atoi(ret[1].c_str())/255.f,atoi(ret[2].c_str())/255.f);
+	return ColourValue(boost::lexical_cast<int>(ret[0])/255.f,boost::lexical_cast<int>(ret[1])/255.f,boost::lexical_cast<int>(ret[2])/255.f);
 }
-void WeatherManager::setFallbackWeather(Weather weather,const std::string name)
+const void WeatherManager::setFallbackWeather(Weather weather,const std::string name)
 {
 	std::string upper=name;
 	upper[0]=toupper(name[0]);
-	weather.mCloudsMaximumPercent = getFallbackF("Weather_"+upper+"_Clouds_Maximum_Percent");
-    weather.mTransitionDelta = getFallbackF("Weather_"+upper+"_Transition_Delta");
-    weather.mSkySunriseColor=getFallbackClr("Weather_"+upper+"_Sky_Sunrise_Color");
-    weather.mSkyDayColor = getFallbackClr("Weather_"+upper+"_Sky_Day_Color");
-    weather.mSkySunsetColor = getFallbackClr("Weather_"+upper+"_Sky_Sunset_Color");
-    weather.mSkyNightColor = getFallbackClr("Weather_"+upper+"_Sky_Night_Color");
-    weather.mFogSunriseColor = getFallbackClr("Weather_"+upper+"_Fog_Sunrise_Color");
-    weather.mFogDayColor = getFallbackClr("Weather_"+upper+"_Fog_Day_Color");
-    weather.mFogSunsetColor = getFallbackClr("Weather_"+upper+"_Fog_Sunset_Color");
-    weather.mFogNightColor = getFallbackClr("Weather_"+upper+"_Fog_Night_Color");
-    weather.mAmbientSunriseColor = getFallbackClr("Weather_"+upper+"_Ambient_Sunrise_Color");
-    weather.mAmbientDayColor = getFallbackClr("Weather_"+upper+"_Ambient_Day_Color");
-    weather.mAmbientSunsetColor = getFallbackClr("Weather_"+upper+"_Ambient_Sunset_Color");
-    weather.mAmbientNightColor = getFallbackClr("Weather_"+upper+"_Ambient_Night_Color");
-    weather.mSunSunriseColor = getFallbackClr("Weather_"+upper+"_Sun_Sunrise_Color");
-    weather.mSunDayColor = getFallbackClr("Weather_"+upper+"_Sun_Day_Color");
-    weather.mSunSunsetColor = getFallbackClr("Weather_"+upper+"_Sun_Sunset_Color");
-    weather.mSunNightColor = getFallbackClr("Weather_"+upper+"_Sun_Night_Color");
-    weather.mSunDiscSunsetColor = getFallbackClr("Weather_"+upper+"_Sun_Disc_Sunset_Color");
-    weather.mLandFogDayDepth = getFallbackF("Weather_"+upper+"_Land_Fog_Day_Depth");
-    weather.mLandFogNightDepth = getFallbackF("Weather_"+upper+"_Land_Fog_Night_Depth");
-    weather.mWindSpeed = getFallbackF("Weather_"+upper+"_Wind_Speed");
-    weather.mCloudSpeed = getFallbackF("Weather_"+upper+"_Cloud_Speed");
-    weather.mGlareView = getFallbackF("Weather_"+upper+"_Glare_View");
+	weather.mCloudsMaximumPercent = getFallbackFloat("Weather_"+upper+"_Clouds_Maximum_Percent");
+    weather.mTransitionDelta = getFallbackFloat("Weather_"+upper+"_Transition_Delta");
+    weather.mSkySunriseColor=getFallbackColour("Weather_"+upper+"_Sky_Sunrise_Color");
+    weather.mSkyDayColor = getFallbackColour("Weather_"+upper+"_Sky_Day_Color");
+    weather.mSkySunsetColor = getFallbackColour("Weather_"+upper+"_Sky_Sunset_Color");
+    weather.mSkyNightColor = getFallbackColour("Weather_"+upper+"_Sky_Night_Color");
+    weather.mFogSunriseColor = getFallbackColour("Weather_"+upper+"_Fog_Sunrise_Color");
+    weather.mFogDayColor = getFallbackColour("Weather_"+upper+"_Fog_Day_Color");
+    weather.mFogSunsetColor = getFallbackColour("Weather_"+upper+"_Fog_Sunset_Color");
+    weather.mFogNightColor = getFallbackColour("Weather_"+upper+"_Fog_Night_Color");
+    weather.mAmbientSunriseColor = getFallbackColour("Weather_"+upper+"_Ambient_Sunrise_Color");
+    weather.mAmbientDayColor = getFallbackColour("Weather_"+upper+"_Ambient_Day_Color");
+    weather.mAmbientSunsetColor = getFallbackColour("Weather_"+upper+"_Ambient_Sunset_Color");
+    weather.mAmbientNightColor = getFallbackColour("Weather_"+upper+"_Ambient_Night_Color");
+    weather.mSunSunriseColor = getFallbackColour("Weather_"+upper+"_Sun_Sunrise_Color");
+    weather.mSunDayColor = getFallbackColour("Weather_"+upper+"_Sun_Day_Color");
+    weather.mSunSunsetColor = getFallbackColour("Weather_"+upper+"_Sun_Sunset_Color");
+    weather.mSunNightColor = getFallbackColour("Weather_"+upper+"_Sun_Night_Color");
+    weather.mSunDiscSunsetColor = getFallbackColour("Weather_"+upper+"_Sun_Disc_Sunset_Color");
+    weather.mLandFogDayDepth = getFallbackFloat("Weather_"+upper+"_Land_Fog_Day_Depth");
+    weather.mLandFogNightDepth = getFallbackFloat("Weather_"+upper+"_Land_Fog_Night_Depth");
+    weather.mWindSpeed = getFallbackFloat("Weather_"+upper+"_Wind_Speed");
+    weather.mCloudSpeed = getFallbackFloat("Weather_"+upper+"_Cloud_Speed");
+    weather.mGlareView = getFallbackFloat("Weather_"+upper+"_Glare_View");
     mWeatherSettings[name] = weather;
 }
 
@@ -89,17 +90,17 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering,const std::
 {
     mRendering = rendering;
 	//Globals
-	mThunderSoundID0 = getFallbackS("Weather_Thunderstorm_Thunder_Sound_ID_0");
-	mThunderSoundID1 = getFallbackS("Weather_Thunderstorm_Thunder_Sound_ID_1");
-	mThunderSoundID2 = getFallbackS("Weather_Thunderstorm_Thunder_Sound_ID_2");
-	mThunderSoundID3 = getFallbackS("Weather_Thunderstorm_Thunder_Sound_ID_3");
-	mSunriseTime = getFallbackF("Weather_Sunrise_Time");
-	mSunsetTime = getFallbackF("Weather_Sunset_Time");
-	mSunriseDuration = getFallbackF("Weather_Sunrise_Duration");
-	mSunsetDuration = getFallbackF("Weather_Sunset_Duration");
-	mWeatherUpdateTime = getFallbackF("Weather_Hours_Between_Weather_Changes");
-	mThunderFrequency = getFallbackF("Weather_Thunderstorm_Thunder_Frequency");
-	mThunderThreshold = getFallbackF("Weather_Thunderstorm_Thunder_Threshold");
+	mThunderSoundID0 = getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_0");
+	mThunderSoundID1 = getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_1");
+	mThunderSoundID2 = getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_2");
+	mThunderSoundID3 = getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_3");
+	mSunriseTime = getFallbackFloat("Weather_Sunrise_Time");
+	mSunsetTime = getFallbackFloat("Weather_Sunset_Time");
+	mSunriseDuration = getFallbackFloat("Weather_Sunrise_Duration");
+	mSunsetDuration = getFallbackFloat("Weather_Sunset_Duration");
+	mWeatherUpdateTime = getFallbackFloat("Weather_Hours_Between_Weather_Changes");
+	mThunderFrequency = getFallbackFloat("Weather_Thunderstorm_Thunder_Frequency");
+	mThunderThreshold = getFallbackFloat("Weather_Thunderstorm_Thunder_Threshold");
 	mThunderSoundDelay = 0.25;
 	//Weather
 	Weather clear;
