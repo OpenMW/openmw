@@ -20,8 +20,9 @@ namespace
         const std::string mText;
         const std::string mButtons[3];
         const std::string mSound;
-        const ESM::Class::Specialization mSpecializations[3]; // The specialization for each answer
     };
+
+    const ESM::Class::Specialization mSpecializations[3]={ESM::Class::Combat, ESM::Class::Magic, ESM::Class::Stealth}; // The specialization for each answer
 
     Step sGenerateClassSteps(int number) {
         MWBase::World *world = MWBase::Environment::get().getWorld();
@@ -30,8 +31,7 @@ namespace
         {world->getFallback("Question_"+boost::lexical_cast<std::string>(number)+"_AnswerOne"),
         world->getFallback("Question_"+boost::lexical_cast<std::string>(number)+"_AnswerTwo"),
         world->getFallback("Question_"+boost::lexical_cast<std::string>(number)+"_AnswerThree")},
-        "vo\\misc\\chargen qa"+boost::lexical_cast<std::string>(number)+".wav",
-        {ESM::Class::Combat, ESM::Class::Magic, ESM::Class::Stealth}
+        "vo\\misc\\chargen qa"+boost::lexical_cast<std::string>(number)+".wav"
         };
         return step;
     }
@@ -568,7 +568,7 @@ void CharacterCreation::onClassQuestionChosen(int _index)
         return;
     }
 
-    ESM::Class::Specialization specialization = sGenerateClassSteps(mGenerateClassStep).mSpecializations[_index];
+    ESM::Class::Specialization specialization = mSpecializations[_index];
     if (specialization == ESM::Class::Stealth)
         ++mGenerateClassSpecializations[0];
     else if (specialization == ESM::Class::Combat)
