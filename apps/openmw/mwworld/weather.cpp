@@ -19,7 +19,7 @@ using namespace MWWorld;
 using namespace MWSound;
 
 #define lerp(x, y) (x * (1-factor) + y * factor)
-std::string WeatherManager::getFallback (const std::string& key)
+std::string WeatherManager::getFallback (const std::string& key) const
 {
     std::map<std::string,std::string>::const_iterator it;
     if((it = mFallback.find(key)) == mFallback.end())
@@ -28,34 +28,34 @@ std::string WeatherManager::getFallback (const std::string& key)
     }
     return it->second;
 }
-std::string WeatherManager::getFallbackString(const std::string& fall)
+std::string WeatherManager::getFallbackString(const std::string& fall) const
 {
-	return WeatherManager::getFallback(fall);
+    return getFallback(fall);
 }
 
-float WeatherManager::getFallbackFloat(const std::string& fall)
+float WeatherManager::getFallbackFloat(const std::string& fall) const
 {
-	std::string fallback=getFallbackString(fall);
-	return boost::lexical_cast<float>(fallback);
+    std::string fallback=getFallbackString(fall);
+    return boost::lexical_cast<float>(fallback);
 }
 
-ColourValue WeatherManager::getFallbackColour(const std::string& fall)
+ColourValue WeatherManager::getFallbackColour(const std::string& fall) const
 {
-	std::string sum;
-	std::string ret[3];
-	sum=getFallback(fall);
-	unsigned int j=0;
-	for(unsigned int i=0;i<sum.length();i++){
-		if(sum[i]==',') j++;
-		else ret[j]+=sum[i];
-	}
-	return ColourValue(boost::lexical_cast<int>(ret[0])/255.f,boost::lexical_cast<int>(ret[1])/255.f,boost::lexical_cast<int>(ret[2])/255.f);
+    std::string sum;
+    std::string ret[3];
+    sum=getFallback(fall);
+    unsigned int j=0;
+    for(unsigned int i=0;i<sum.length();i++){
+            if(sum[i]==',') j++;
+            else ret[j]+=sum[i];
+    }
+    return ColourValue(boost::lexical_cast<int>(ret[0])/255.f,boost::lexical_cast<int>(ret[1])/255.f,boost::lexical_cast<int>(ret[2])/255.f);
 }
 void WeatherManager::setFallbackWeather(Weather& weather,const std::string& name)
 {
-	std::string upper=name;
-	upper[0]=toupper(name[0]);
-	weather.mCloudsMaximumPercent = getFallbackFloat("Weather_"+upper+"_Clouds_Maximum_Percent");
+    std::string upper=name;
+    upper[0]=toupper(name[0]);
+    weather.mCloudsMaximumPercent = getFallbackFloat("Weather_"+upper+"_Clouds_Maximum_Percent");
     weather.mTransitionDelta = getFallbackFloat("Weather_"+upper+"_Transition_Delta");
     weather.mSkySunriseColor=getFallbackColour("Weather_"+upper+"_Sky_Sunrise_Color");
     weather.mSkyDayColor = getFallbackColour("Weather_"+upper+"_Sky_Day_Color");
@@ -89,30 +89,30 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering,const std::
      mTimePassed(0), mFallback(fallbackMap)
 {
     mRendering = rendering;
-	//Globals
-	mThunderSoundID0 = getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_0");
-	mThunderSoundID1 = getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_1");
-	mThunderSoundID2 = getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_2");
-	mThunderSoundID3 = getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_3");
-	mSunriseTime = getFallbackFloat("Weather_Sunrise_Time");
-	mSunsetTime = getFallbackFloat("Weather_Sunset_Time");
-	mSunriseDuration = getFallbackFloat("Weather_Sunrise_Duration");
-	mSunsetDuration = getFallbackFloat("Weather_Sunset_Duration");
-	mWeatherUpdateTime = getFallbackFloat("Weather_Hours_Between_Weather_Changes");
-	mThunderFrequency = getFallbackFloat("Weather_Thunderstorm_Thunder_Frequency");
-	mThunderThreshold = getFallbackFloat("Weather_Thunderstorm_Thunder_Threshold");
-	mThunderSoundDelay = 0.25;
-	//Weather
-	Weather clear;
-	clear.mCloudTexture = "tx_sky_clear.dds";
-	setFallbackWeather(clear,"clear");
+    //Globals
+    mThunderSoundID0 = getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_0");
+    mThunderSoundID1 = getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_1");
+    mThunderSoundID2 = getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_2");
+    mThunderSoundID3 = getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_3");
+    mSunriseTime = getFallbackFloat("Weather_Sunrise_Time");
+    mSunsetTime = getFallbackFloat("Weather_Sunset_Time");
+    mSunriseDuration = getFallbackFloat("Weather_Sunrise_Duration");
+    mSunsetDuration = getFallbackFloat("Weather_Sunset_Duration");
+    mWeatherUpdateTime = getFallbackFloat("Weather_Hours_Between_Weather_Changes");
+    mThunderFrequency = getFallbackFloat("Weather_Thunderstorm_Thunder_Frequency");
+    mThunderThreshold = getFallbackFloat("Weather_Thunderstorm_Thunder_Threshold");
+    mThunderSoundDelay = 0.25;
+    //Weather
+    Weather clear;
+    clear.mCloudTexture = "tx_sky_clear.dds";
+    setFallbackWeather(clear,"clear");
 
     Weather cloudy;
-	cloudy.mCloudTexture = "tx_sky_cloudy.dds";
+    cloudy.mCloudTexture = "tx_sky_cloudy.dds";
     setFallbackWeather(cloudy,"cloudy");
 
     Weather foggy;
-	foggy.mCloudTexture = "tx_sky_foggy.dds";
+    foggy.mCloudTexture = "tx_sky_foggy.dds";
     setFallbackWeather(foggy,"foggy");
 
     Weather thunderstorm;
