@@ -19,7 +19,7 @@ using namespace MWWorld;
 using namespace MWSound;
 
 #define lerp(x, y) (x * (1-factor) + y * factor)
-const std::string WeatherManager::getFallback (const std::string& key)
+std::string WeatherManager::getFallback (const std::string& key)
 {
     std::map<std::string,std::string>::const_iterator it;
     if((it = mFallback.find(key)) == mFallback.end())
@@ -28,18 +28,18 @@ const std::string WeatherManager::getFallback (const std::string& key)
     }
     return it->second;
 }
-const std::string WeatherManager::getFallbackString(const std::string fall)
+std::string WeatherManager::getFallbackString(const std::string& fall)
 {
 	return WeatherManager::getFallback(fall);
 }
 
-const float WeatherManager::getFallbackFloat(const std::string fall)
+float WeatherManager::getFallbackFloat(const std::string& fall)
 {
 	std::string fallback=getFallbackString(fall);
 	return boost::lexical_cast<float>(fallback);
 }
 
-const ColourValue WeatherManager::getFallbackColour(const std::string fall)
+ColourValue WeatherManager::getFallbackColour(const std::string& fall)
 {
 	std::string sum;
 	std::string ret[3];
@@ -51,7 +51,7 @@ const ColourValue WeatherManager::getFallbackColour(const std::string fall)
 	}
 	return ColourValue(boost::lexical_cast<int>(ret[0])/255.f,boost::lexical_cast<int>(ret[1])/255.f,boost::lexical_cast<int>(ret[2])/255.f);
 }
-const void WeatherManager::setFallbackWeather(Weather weather,const std::string name)
+void WeatherManager::setFallbackWeather(Weather& weather,const std::string& name)
 {
 	std::string upper=name;
 	upper[0]=toupper(name[0]);

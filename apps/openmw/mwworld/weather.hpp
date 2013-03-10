@@ -142,11 +142,11 @@ namespace MWWorld
         float mHour;
         int mDay, mMonth;
         std::map<std::string,std::string> mFallback;
-        const std::string getFallback (const std::string& key);
-        const std::string getFallbackString(const std::string fall);
-        const float getFallbackFloat(const std::string fall);
-        const Ogre::ColourValue getFallbackColour(const std::string fall);
-        const void setFallbackWeather(Weather weather,const std::string name);
+        std::string getFallback (const std::string& key);
+        std::string getFallbackString(const std::string& fall);
+        float getFallbackFloat(const std::string& fall);
+        Ogre::ColourValue getFallbackColour(const std::string& fall);
+        void setFallbackWeather(Weather& weather,const std::string& name);
         MWRender::RenderingManager* mRendering;
 
         std::map<Ogre::String, Weather> mWeatherSettings;
