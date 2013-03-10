@@ -112,8 +112,6 @@ namespace CSVDoc
 
             void addGmstsSubView();
 
-            void exitApplication();
-
     };
 }
 

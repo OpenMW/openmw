@@ -46,8 +46,7 @@ void CSVDoc::View::setupFileMenu()
     file->addAction(close);
 
     QAction *exit = new QAction (tr ("&Exit"), this);
-    connect (exit, SIGNAL (triggered()), this, SLOT (exitApplication()));
-    connect (this, SIGNAL (closeAllViews(View *)), &mViewManager, SLOT (closeAllViews(View *)));
+    connect (exit, SIGNAL (triggered()), QApplication::instance(), SLOT (closeAllWindows()));
 
     file->addAction(exit);
 }
@@ -253,9 +252,4 @@ void CSVDoc::View::abortOperation (int type)
 CSVDoc::Operations *CSVDoc::View::getOperations() const
 {
     return mOperations;
-}
-
-void CSVDoc::View::exitApplication()
-{
-    emit closeAllViews (this);
 }

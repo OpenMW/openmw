@@ -108,16 +108,13 @@ bool CSVDoc::ViewManager::closeRequest (View *view)
 
         CSMDoc::Document *document = view->getDocument();
 
-        if (last)
-        {
-            //notify user of saving in progress
-            if ( (document->getState() & CSMDoc::State_Saving) )
-                continueWithClose = showSaveInProgressMessageBox (iter);
+        //notify user of saving in progress
+        if ( (document->getState() & CSMDoc::State_Saving) )
+            continueWithClose = showSaveInProgressMessageBox (iter);
 
-            //notify user of unsaved changes and process response
-            else if ( document->getState() & CSMDoc::State_Modified)
-                continueWithClose = showModifiedDocumentMessageBox (iter);
-        }
+        //notify user of unsaved changes and process response
+        else if ( document->getState() & CSMDoc::State_Modified)
+            continueWithClose = showModifiedDocumentMessageBox (iter);
 
         if (continueWithClose)
         {
@@ -267,20 +264,4 @@ void CSVDoc::ViewManager::onCloseWarningHandler (int state, CSMDoc::Document *do
             mCloseMeOnSaveStateChange = mViews.end();
         }
     }
-}
-
-void CSVDoc::ViewManager::closeAllViews (View *lastView)
-{
-    //forces document views to close in an orderly manner
-    // the last view closed is the view from which the "Exit" action was triggered
-    while (mViews.size() > 1)
-    {
-        std::vector<View *>::iterator iter = mViews.begin();
-
-        if ((*iter) != lastView)
-            (*iter)->close();
-        else (*(++iter))->close();
-    }
-
-    lastView->close();
 }

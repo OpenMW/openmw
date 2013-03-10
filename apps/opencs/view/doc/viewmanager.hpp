@@ -60,10 +60,6 @@ namespace CSVDoc
 
             void closeMessageBox();
 
-        public slots:
-
-            void closeAllViews (View *lastView);
-
         private slots:
 
             void documentStateChanged (int state, CSMDoc::Document *document);
