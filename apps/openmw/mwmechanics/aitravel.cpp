@@ -53,7 +53,7 @@ int getClosestPoint(const ESM::Pathgrid* grid,float x,float y,float z)
             i0 = i;
         }
     }
-
+    std::cout << "distance:: " << m << "\n";
     return i0;
 }
 
@@ -135,14 +135,16 @@ std::list<ESM::Pathgrid::Point> getPath(PointID start,PointID end,PathGridGraph 
     return shortest_path;
 }
 
-PathGridGraph buildGraph(const ESM::Pathgrid* pathgrid)
+PathGridGraph buildGraph(const ESM::Pathgrid* pathgrid,float xCell = 0,float yCell = 0)
 {
     PathGridGraph graph;
 
     for(int i = 0;i<pathgrid->mPoints.size();i++)
     {
         PointID pID = boost::add_vertex(graph);
-        graph[pID] = pathgrid->mPoints[i];
+        graph[pID].mX = pathgrid->mPoints[i].mX + xCell;
+        graph[pID].mY = pathgrid->mPoints[i].mY + yCell;
+        graph[pID].mZ = pathgrid->mPoints[i].mZ;
     }
 
     for(int i = 0;i<pathgrid->mEdges.size();i++)
@@ -165,17 +167,26 @@ bool MWMechanics::AiTravel::execute (const MWWorld::Ptr& actor)
 {
     const ESM::Pathgrid *pathgrid =
         MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*actor.getCell()->mCell);
-    
-    ESM::Position pos = actor.getRefData().getPosition();
 
+    ESM::Position pos = actor.getRefData().getPosition();
+    //std::cout << "npcpos" << pos.pos[0] << pos.pos[1] <<pos.pos[2] <<"\n";
     if(!isPathConstructed)
     {
-        int start = getClosestPoint(pathgrid,pos.pos[0],pos.pos[1],pos.pos[2]);
-        int end = getClosestPoint(pathgrid,mX,mY,mZ);
+        float xCell = 0;
+        float yCell = 0;
+        if (actor.getCell()->mCell->isExterior())
+        {
+            xCell = actor.getCell()->mCell->mData.mX * ESM::Land::REAL_SIZE;
+            yCell = actor.getCell()->mCell->mData.mY * ESM::Land::REAL_SIZE;
+        }
 
-        PathGridGraph graph = buildGraph(pathgrid);
+        int start = getClosestPoint(pathgrid,pos.pos[0] - xCell,pos.pos[1] - yCell,pos.pos[2]);
+        int end = getClosestPoint(pathgrid,mX - xCell,mY - yCell,mZ);
+
+        PathGridGraph graph = buildGraph(pathgrid,xCell,yCell);
 
         mPath = getPath(start,end,graph);
+        if(mPath.empty()) std::cout << "graph doesn't find any way...";
         ESM::Pathgrid::Point dest;
         dest.mX = mX;
         dest.mY = mY;
@@ -185,6 +196,7 @@ bool MWMechanics::AiTravel::execute (const MWWorld::Ptr& actor)
     }
     if(mPath.empty())
     {
+        std::cout << "pathc empty";
         MWWorld::Class::get(actor).getMovementSettings(actor).mForwardBackward = 0;
         return true;
     }
@@ -195,6 +207,7 @@ bool MWMechanics::AiTravel::execute (const MWWorld::Ptr& actor)
         if(mPath.empty())
         {
             MWWorld::Class::get(actor).getMovementSettings(actor).mForwardBackward = 0;
+            std::cout << "emptypath!";
             return true;
         }
         nextPoint = *mPath.begin();
@@ -205,8 +218,8 @@ bool MWMechanics::AiTravel::execute (const MWWorld::Ptr& actor)
 
     MWBase::Environment::get().getWorld()->rotateObject(actor,0,0,getZAngle(dX,dY),false);
     MWWorld::Class::get(actor).getMovementSettings(actor).mForwardBackward = 1;
+
     return false;
-    //return true;
 }
 
 int MWMechanics::AiTravel::getTypeId() const
