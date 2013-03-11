@@ -288,8 +288,7 @@ int load(Arguments& info)
         {
             std::cout << "Author: " << esm.getAuthor() << std::endl
                  << "Description: " << esm.getDesc() << std::endl
-                 << "File format version: " << esm.getFVer() << std::endl
-                 << "Special flag: " << esm.getSpecial() << std::endl;
+                 << "File format version: " << esm.getFVer() << std::endl;
             ESM::ESMReader::MasterList m = esm.getMasters();
             if (!m.empty())
             {

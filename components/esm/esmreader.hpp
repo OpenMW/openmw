@@ -38,7 +38,6 @@ public:
 
   int getVer() const { return mCtx.header.version; }
   float getFVer() const { if(mCtx.header.version == VER_12) return 1.2; else return 1.3; }
-  int getSpecial() const { return mSpf; }
   const std::string getAuthor() const { return mCtx.header.author.toString(); }
   const std::string getDesc() const { return mCtx.header.desc.toString(); }
   const MasterList &getMasters() const { return mMasters; }
@@ -261,7 +260,6 @@ private:
   ESM_Context mCtx;
 
   // Special file signifier (see SpecialFile enum above)
-  int mSpf;
 
   // Buffer for ESM strings
   std::vector<char> mBuffer;

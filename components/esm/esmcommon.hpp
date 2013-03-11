@@ -21,17 +21,6 @@ enum FileType
     FT_ESS = 32       // Savegame
   };
 
-// Used to mark special files. The original ESM files are given
-// special treatment in a few places, most noticably in loading and
-// filtering out "dirtly" GMST entries correctly.
-enum SpecialFile
-  {
-    SF_Other,
-    SF_Morrowind,
-    SF_Tribunal,
-    SF_Bloodmoon
-  };
-
 /* A structure used for holding fixed-length strings. In the case of
    LEN=4, it can be more efficient to match the string as a 32 bit
    number, therefore the struct is implemented as a union with an int.

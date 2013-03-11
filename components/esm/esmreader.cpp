@@ -51,18 +51,6 @@ void ESMReader::openRaw(Ogre::DataStreamPtr _esm, const std::string &name)
     mEsm = _esm;
     mCtx.filename = name;
     mCtx.leftFile = mEsm->size();
-
-    // Flag certain files for special treatment, based on the file
-    // name.
-    const char *cstr = mCtx.filename.c_str();
-    if (iends(cstr, "Morrowind.esm"))
-        mSpf = SF_Morrowind;
-    else if (iends(cstr, "Tribunal.esm"))
-        mSpf = SF_Tribunal;
-    else if (iends(cstr, "Bloodmoon.esm"))
-        mSpf = SF_Bloodmoon;
-    else
-        mSpf = SF_Other;
 }
 
 void ESMReader::open(Ogre::DataStreamPtr _esm, const std::string &name)
