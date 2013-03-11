@@ -67,6 +67,9 @@
      </item>
      <item>
       <widget class="ProfilesComboBox" name="profilesComboBox">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -107,6 +110,41 @@
     </layout>
    </item>
   </layout>
+  <action name="newProfileAction">
+   <property name="icon">
+    <iconset theme="document-new"/>
+   </property>
+   <property name="text">
+    <string>New Profile</string>
+   </property>
+   <property name="toolTip">
+    <string>New Profile</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="deleteProfileAction">
+   <property name="icon">
+    <iconset theme="edit-delete"/>
+   </property>
+   <property name="text">
+    <string>Delete Profile</string>
+   </property>
+   <property name="toolTip">
+    <string>Delete Profile</string>
+   </property>
+  </action>
+  <action name="checkAction">
+   <property name="text">
+    <string>Check Selection</string>
+   </property>
+  </action>
+  <action name="uncheckAction">
+   <property name="text">
+    <string>Uncheck Selection</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>

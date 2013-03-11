@@ -17,19 +17,6 @@
 
 #include "utils/textinputdialog.hpp"
 
-
-//sort QModelIndexList ascending
-bool rowGreaterThan(const QModelIndex &index1, const QModelIndex &index2)
-{
-    return index1.row() >= index2.row();
-}
-
-//sort QModelIndexList descending
-bool rowSmallerThan(const QModelIndex &index1, const QModelIndex &index2)
-{
-    return index1.row() <= index2.row();
-}
-
 DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gameSettings, LauncherSettings &launcherSettings, QWidget *parent)
     : mCfgMgr(cfg)
     , mGameSettings(gameSettings)
@@ -121,35 +108,15 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
 
 void DataFilesPage::createActions()
 {
-    // Refresh the plugins
-    QAction *refreshAction = new QAction(tr("Refresh"), this);
-    refreshAction->setShortcut(QKeySequence(tr("F5")));
-    connect(refreshAction, SIGNAL(triggered()), this, SLOT(refresh()));
 
-    // We can't create actions inside the .ui file
-    mNewProfileAction = new QAction(QIcon::fromTheme("document-new"), tr("&New Profile"), this);
-    mNewProfileAction->setToolTip(tr("New Profile"));
-    mNewProfileAction->setShortcut(QKeySequence(tr("Ctrl+N")));
-    connect(mNewProfileAction, SIGNAL(triggered()), this, SLOT(newProfile()));
-
-    mDeleteProfileAction = new QAction(QIcon::fromTheme("edit-delete"), tr("Delete Profile"), this);
-    mDeleteProfileAction->setToolTip(tr("Delete Profile"));
-    connect(mDeleteProfileAction, SIGNAL(triggered()), this, SLOT(deleteProfile()));
-
-    // Add the newly created actions to the toolbuttons
-    newProfileButton->setDefaultAction(mNewProfileAction);
-    deleteProfileButton->setDefaultAction(mDeleteProfileAction);
+    // Add the actions to the toolbuttons
+    newProfileButton->setDefaultAction(newProfileAction);
+    deleteProfileButton->setDefaultAction(deleteProfileAction);
 
     // Context menu actions
-    mCheckAction = new QAction(tr("Check Selection"), this);
-    connect(mCheckAction, SIGNAL(triggered()), this, SLOT(check()));
-
-    mUncheckAction = new QAction(tr("Uncheck Selection"), this);
-    connect(mUncheckAction, SIGNAL(triggered()), this, SLOT(uncheck()));
-
     mContextMenu = new QMenu(this);
-    mContextMenu->addAction(mCheckAction);
-    mContextMenu->addAction(mUncheckAction);
+    mContextMenu->addAction(checkAction);
+    mContextMenu->addAction(uncheckAction);
 }
 
 void DataFilesPage::setupDataFiles()
@@ -184,6 +151,8 @@ void DataFilesPage::setupDataFiles()
         profilesComboBox->addItem(QString("Default"));
 
     if (profile.isEmpty() || profile == QLatin1String("Default")) {
+        deleteProfileAction->setEnabled(false);
+        profilesComboBox->setEditEnabled(false);
         profilesComboBox->setCurrentIndex(profilesComboBox->findText(QString("Default")));
     } else {
         profilesComboBox->setEditEnabled(true);
@@ -257,15 +226,6 @@ void DataFilesPage::saveSettings()
 
 }
 
-void DataFilesPage::newProfile()
-{
-    if (mNewProfileDialog->exec() == QDialog::Accepted) {
-        QString profile = mNewProfileDialog->lineEdit()->text();
-        profilesComboBox->addItem(profile);
-        profilesComboBox->setCurrentIndex(profilesComboBox->findText(profile));
-    }
-}
-
 void DataFilesPage::updateOkButton(const QString &text)
 {
     // We do this here because we need the profiles combobox text
@@ -331,7 +291,16 @@ int DataFilesPage::profilesComboBoxIndex()
     return profilesComboBox->currentIndex();
 }
 
-void DataFilesPage::deleteProfile()
+void DataFilesPage::on_newProfileAction_triggered()
+{
+    if (mNewProfileDialog->exec() == QDialog::Accepted) {
+        QString profile = mNewProfileDialog->lineEdit()->text();
+        profilesComboBox->addItem(profile);
+        profilesComboBox->setCurrentIndex(profilesComboBox->findText(profile));
+    }
+}
+
+void DataFilesPage::on_deleteProfileAction_triggered()
 {
     QString profile = profilesComboBox->currentText();
 
@@ -358,7 +327,7 @@ void DataFilesPage::deleteProfile()
     }
 }
 
-void DataFilesPage::check()
+void DataFilesPage::on_checkAction_triggered()
 {
     if (pluginsTable->hasFocus())
         setPluginsCheckstates(Qt::Checked);
@@ -368,21 +337,13 @@ void DataFilesPage::check()
 
 }
 
-void DataFilesPage::uncheck()
+void DataFilesPage::on_uncheckAction_triggered()
 {
     if (pluginsTable->hasFocus())
         setPluginsCheckstates(Qt::Unchecked);
 
     if (mastersTable->hasFocus())
         setMastersCheckstates(Qt::Unchecked);
-}
-
-void DataFilesPage::refresh()
-{
-//    mDataFilesModel->sort(0);
-
-    // Refresh the plugins table
-    pluginsTable->scrollToTop();
 }
 
 void DataFilesPage::setMastersCheckstates(Qt::CheckState state)
@@ -476,10 +437,10 @@ void DataFilesPage::profileChanged(const QString &previous, const QString &curre
 {
     // Prevent the deletion of the default profile
     if (current == QLatin1String("Default")) {
-        mDeleteProfileAction->setEnabled(false);
+        deleteProfileAction->setEnabled(false);
         profilesComboBox->setEditEnabled(false);
     } else {
-        mDeleteProfileAction->setEnabled(true);
+        deleteProfileAction->setEnabled(true);
         profilesComboBox->setEditEnabled(true);
     }
 
@@ -533,8 +494,8 @@ void DataFilesPage::showContextMenu(const QPoint &point)
         QModelIndexList indexes = pluginsTable->selectionModel()->selectedIndexes();
 
         // Show the check/uncheck actions depending on the state of the selected items
-        mUncheckAction->setEnabled(false);
-        mCheckAction->setEnabled(false);
+        uncheckAction->setEnabled(false);
+        checkAction->setEnabled(false);
 
         foreach (const QModelIndex &index, indexes)
         {
@@ -548,8 +509,8 @@ void DataFilesPage::showContextMenu(const QPoint &point)
                 return;
 
             (mDataFilesModel->checkState(sourceIndex) == Qt::Checked)
-                    ? mUncheckAction->setEnabled(true)
-                    : mCheckAction->setEnabled(true);
+                    ? uncheckAction->setEnabled(true)
+                    : checkAction->setEnabled(true);
         }
 
         // Show menu
@@ -564,8 +525,8 @@ void DataFilesPage::showContextMenu(const QPoint &point)
         QModelIndexList indexes = mastersTable->selectionModel()->selectedIndexes();
 
         // Show the check/uncheck actions depending on the state of the selected items
-        mUncheckAction->setEnabled(false);
-        mCheckAction->setEnabled(false);
+        uncheckAction->setEnabled(false);
+        checkAction->setEnabled(false);
 
         foreach (const QModelIndex &index, indexes)
         {
@@ -578,8 +539,8 @@ void DataFilesPage::showContextMenu(const QPoint &point)
                 return;
 
             (mDataFilesModel->checkState(sourceIndex) == Qt::Checked)
-                    ? mUncheckAction->setEnabled(true)
-                    : mCheckAction->setEnabled(true);
+                    ? uncheckAction->setEnabled(true)
+                    : checkAction->setEnabled(true);
         }
 
         mContextMenu->exec(globalPos);

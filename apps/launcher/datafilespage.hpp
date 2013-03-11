@@ -48,11 +48,10 @@ public slots:
     void updateViews();
 
     // Action slots
-    void newProfile();
-    void deleteProfile();
-    void check();
-    void uncheck();
-    void refresh();
+    void on_newProfileAction_triggered();
+    void on_deleteProfileAction_triggered();
+    void on_checkAction_triggered();
+    void on_uncheckAction_triggered();
 
 private slots:
     void slotCurrentIndexChanged(int index);
@@ -65,23 +64,7 @@ private:
 
     QSortFilterProxyModel *mFilterProxyModel;
 
-//    QTableView *mMastersTable;
-//    QTableView *mPluginsTable;
-
-
-//    QToolBar *mProfileToolBar;
     QMenu *mContextMenu;
-//    QSplitter *mSplitter;
-
-    QAction *mNewProfileAction;
-    QAction *mDeleteProfileAction;
-    QAction *mCheckAction;
-    QAction *mUncheckAction;
-
-//    QAction *mMoveUpAction;
-//    QAction *mMoveDownAction;
-//    QAction *mMoveTopAction;
-//    QAction *mMoveBottomAction;
 
     Files::ConfigurationManager &mCfgMgr;
 
