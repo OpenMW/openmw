@@ -162,7 +162,8 @@ void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell,
     mBounds.merge(Vector3(c4.x, c4.y, 0));
 
     // apply a little padding
-    mBounds.scale ((mBounds.getSize ()+Ogre::Vector3(1000,1000,0)) / mBounds.getSize ());
+    mBounds.setMinimum (mBounds.getMinimum() - Vector3(500,500,0));
+    mBounds.setMaximum (mBounds.getMaximum() + Vector3(500,500,0));
 
     Vector2 center(mBounds.getCenter().x, mBounds.getCenter().y);
 
