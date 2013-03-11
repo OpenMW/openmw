@@ -22,8 +22,6 @@ class ESMWriter
 public:
     int getVersion();
     void setVersion(int ver);
-    int getType();
-    void setType(int type);
     void setEncoder(ToUTF8::Utf8Encoder *encoding); // Write strings as UTF-8?
     void setAuthor(const std::string& author);
     void setDescription(const std::string& desc);
@@ -80,7 +78,7 @@ public:
     {
         write((char*)&data, size);
     }
-    
+
     void startRecord(const std::string& name, uint32_t flags);
     void startSubRecord(const std::string& name);
     void endRecord(const std::string& name);

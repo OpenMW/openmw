@@ -41,7 +41,7 @@ union NAME_T
 {
     char name[LEN];
     int32_t val;
-    
+
   bool operator==(const char *str) const
   {
     for(int i=0; i<LEN; i++)
@@ -78,7 +78,7 @@ struct HEDRstruct
      1.2 = 0x3f99999a and 1.3 = 0x3fa66666
   */
   int version;
-  int type;           // 0=esp, 1=esm, 32=ess
+  int type;           // 0=esp, 1=esm, 32=ess (unused)
   NAME32 author;      // Author's name
   NAME256 desc;       // File description
   int records;        // Number of records? Not used.

@@ -23,7 +23,6 @@ struct ESMData
     std::string author;
     std::string description;
     int version;
-    int type;
     ESM::ESMReader::MasterList masters;
 
     std::deque<EsmTool::RecordBase *> mRecords;
@@ -284,8 +283,6 @@ int load(Arguments& info)
         info.data.author = esm.getAuthor();
         info.data.description = esm.getDesc();
         info.data.masters = esm.getMasters();
-        info.data.version = esm.getVer();
-        info.data.type = esm.getType();
 
         if (!quiet)
         {
@@ -430,7 +427,6 @@ int clone(Arguments& info)
     esm.setAuthor(info.data.author);
     esm.setDescription(info.data.description);
     esm.setVersion(info.data.version);
-    esm.setType(info.data.type);
 
     for (ESM::ESMReader::MasterList::iterator it = info.data.masters.begin(); it != info.data.masters.end(); ++it)
         esm.addMaster(it->name, it->size);

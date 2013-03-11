@@ -86,30 +86,6 @@ void ESMReader::open(Ogre::DataStreamPtr _esm, const std::string &name)
         m.size = getHNLong("DATA");
         mMasters.push_back(m);
     }
-
-    if (mCtx.header.type == FT_ESS)
-    {
-        // Savegame-related data
-
-        // Player position etc
-        getHNT(mSaveData, "GMDT", 124);
-
-        /* Image properties, five ints. Is always:
-         Red-mask:   0xff0000
-         Blue-mask:  0x00ff00
-         Green-mask: 0x0000ff
-         Alpha-mask: 0x000000
-         Bpp:        32
-         */
-        getSubNameIs("SCRD");
-        skipHSubSize(20);
-
-        /* Savegame screenshot:
-         128x128 pixels * 4 bytes per pixel
-         */
-        getSubNameIs("SCRS");
-        skipHSubSize(65536);
-    }
 }
 
 void ESMReader::open(const std::string &file)

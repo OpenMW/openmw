@@ -17,16 +17,6 @@ void ESMWriter::setVersion(int ver)
     m_header.version = ver;
 }
 
-int ESMWriter::getType()
-{
-    return m_header.type;
-}
-
-void ESMWriter::setType(int type)
-{
-    m_header.type = type;
-}
-
 void ESMWriter::setAuthor(const std::string& auth)
 {
     strncpy((char*)&m_header.author, auth.c_str(), 32);
@@ -86,7 +76,7 @@ void ESMWriter::close()
 void ESMWriter::startRecord(const std::string& name, uint32_t flags)
 {
     m_recordCount++;
-    
+
     writeName(name);
     RecordData rec;
     rec.name = name;
@@ -109,7 +99,7 @@ void ESMWriter::startSubRecord(const std::string& name)
     rec.size = 0;
     writeT<int>(0); // Size goes here
     m_records.push_back(rec);
-    
+
     assert(m_records.back().size == 0);
 }
 
@@ -118,7 +108,7 @@ void ESMWriter::endRecord(const std::string& name)
     RecordData rec = m_records.back();
     assert(rec.name == name);
     m_records.pop_back();
-    
+
     m_stream->seekp(rec.position);
 
     count = false;

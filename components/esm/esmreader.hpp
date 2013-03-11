@@ -39,10 +39,8 @@ public:
   int getVer() const { return mCtx.header.version; }
   float getFVer() const { if(mCtx.header.version == VER_12) return 1.2; else return 1.3; }
   int getSpecial() const { return mSpf; }
-  int getType() const { return mCtx.header.type; }
   const std::string getAuthor() const { return mCtx.header.author.toString(); }
   const std::string getDesc() const { return mCtx.header.desc.toString(); }
-  const SaveData &getSaveData() const { return mSaveData; }
   const MasterList &getMasters() const { return mMasters; }
   const NAME &retSubName() const { return mCtx.subName; }
   uint32_t getSubSize() const { return mCtx.leftSub; }
@@ -268,7 +266,6 @@ private:
   // Buffer for ESM strings
   std::vector<char> mBuffer;
 
-  SaveData mSaveData;
   MasterList mMasters;
   std::vector<ESMReader> *mGlobalReaderList;
   ToUTF8::Utf8Encoder* mEncoder;
