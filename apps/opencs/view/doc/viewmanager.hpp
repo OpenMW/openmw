@@ -60,13 +60,15 @@ namespace CSVDoc
 
             void closeMessageBox();
 
+            void exitApplication();
+
         private slots:
 
             void documentStateChanged (int state, CSMDoc::Document *document);
 
             void progress (int current, int max, int type, int threads, CSMDoc::Document *document);
 
-            void onCloseWarningHandler(int state, CSMDoc::Document* document);
+            void onExitWarningHandler(int state, CSMDoc::Document* document);
     };
 
 }

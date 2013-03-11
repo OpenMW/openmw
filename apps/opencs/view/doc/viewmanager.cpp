@@ -14,6 +14,8 @@
 
 #include <QMessageBox>
 #include <QPushButton>
+#include <QtGui/QApplication>
+#include <QDebug>
 
 void CSVDoc::ViewManager::updateIndices()
 {
@@ -43,6 +45,8 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
 
     mDelegateFactories->add (CSMWorld::ColumnBase::Display_GlobalVarType,
         new CSVWorld::VarTypeDelegateFactory (ESM::VT_Short, ESM::VT_Long, ESM::VT_Float));
+
+    connect (this, SIGNAL (exitApplication()), QApplication::instance(), SLOT (closeAllWindows()));
 
 }
 
@@ -143,7 +147,7 @@ bool CSVDoc::ViewManager::showModifiedDocumentMessageBox (std::vector<View *>::i
     bool retVal = true;
 
     connect (this, SIGNAL (closeMessageBox()), &messageBox, SLOT (close()));
-    connect ((*viewIter)->getDocument(), SIGNAL (stateChanged (int, CSMDoc::Document *)), this, SLOT (onCloseWarningHandler(int, CSMDoc::Document *)));
+    connect ((*viewIter)->getDocument(), SIGNAL (stateChanged (int, CSMDoc::Document *)), this, SLOT (onExitWarningHandler(int, CSMDoc::Document *)));
     mUserWarned = true;
 
     int response = messageBox.exec();
@@ -161,13 +165,13 @@ bool CSVDoc::ViewManager::showModifiedDocumentMessageBox (std::vector<View *>::i
 
         case QMessageBox::Discard:
 
-            disconnect ((*viewIter)->getDocument(), SIGNAL (stateChanged (int, CSMDoc::Document *)), this, SLOT (onCloseWarningHandler(int, CSMDoc::Document *)));
+            disconnect ((*viewIter)->getDocument(), SIGNAL (stateChanged (int, CSMDoc::Document *)), this, SLOT (onExitWarningHandler(int, CSMDoc::Document *)));
         break;
 
         case QMessageBox::Cancel:
 
             //disconnect to prevent unintended view closures
-            disconnect ((*viewIter)->getDocument(), SIGNAL (stateChanged (int, CSMDoc::Document *)), this, SLOT (onCloseWarningHandler(int, CSMDoc::Document *)));
+            disconnect ((*viewIter)->getDocument(), SIGNAL (stateChanged (int, CSMDoc::Document *)), this, SLOT (onExitWarningHandler(int, CSMDoc::Document *)));
             retVal = false;
         break;
 
@@ -195,7 +199,7 @@ bool CSVDoc::ViewManager::showSaveInProgressMessageBox (std::vector<View *>::ite
     bool retVal = true;
 
     //Connections shut down message box if operation ends before user makes a decision.
-    connect ((*viewIter)->getDocument(), SIGNAL (stateChanged (int, CSMDoc::Document *)), this, SLOT (onCloseWarningHandler(int, CSMDoc::Document *)));
+    connect ((*viewIter)->getDocument(), SIGNAL (stateChanged (int, CSMDoc::Document *)), this, SLOT (onExitWarningHandler(int, CSMDoc::Document *)));
     connect (this, SIGNAL (closeMessageBox()), &messageBox, SLOT (close()));
 
     //set / clear the user warned flag to indicate whether or not the message box is currently active.
@@ -216,7 +220,7 @@ bool CSVDoc::ViewManager::showSaveInProgressMessageBox (std::vector<View *>::ite
     else if (messageBox.clickedButton() == closeButton)
     {
         //disconnect to avoid segmentation fault
-        disconnect ((*viewIter)->getDocument(), SIGNAL (stateChanged (int, CSMDoc::Document *)), this, SLOT (onCloseWarningHandler(int, CSMDoc::Document *)));
+        disconnect ((*viewIter)->getDocument(), SIGNAL (stateChanged (int, CSMDoc::Document *)), this, SLOT (onExitWarningHandler(int, CSMDoc::Document *)));
         (*viewIter)->abortOperation(CSMDoc::State_Saving);
         mCloseMeOnSaveStateChange = mViews.end();
     }
@@ -226,7 +230,7 @@ bool CSVDoc::ViewManager::showSaveInProgressMessageBox (std::vector<View *>::ite
         //abort shutdown, allow save to complete
         //disconnection to prevent unintended view closures
         mCloseMeOnSaveStateChange = mViews.end();
-        disconnect ((*viewIter)->getDocument(), SIGNAL (stateChanged (int, CSMDoc::Document *)), this, SLOT (onCloseWarningHandler(int, CSMDoc::Document *)));
+        disconnect ((*viewIter)->getDocument(), SIGNAL (stateChanged (int, CSMDoc::Document *)), this, SLOT (onExitWarningHandler(int, CSMDoc::Document *)));
         retVal = false;
     }
 
@@ -247,7 +251,7 @@ void CSVDoc::ViewManager::progress (int current, int max, int type, int threads,
                 (*iter)->updateProgress (current, max, type, threads);
 }
 
-void CSVDoc::ViewManager::onCloseWarningHandler (int state, CSMDoc::Document *document)
+void CSVDoc::ViewManager::onExitWarningHandler (int state, CSMDoc::Document *document)
 {
     if ( !(state & CSMDoc::State_Saving) )
     {
@@ -257,10 +261,10 @@ void CSVDoc::ViewManager::onCloseWarningHandler (int state, CSMDoc::Document *do
             emit closeMessageBox();
 
         //otherwise, the user has closed the message box before the save operation ended.
-        //close the view
+        //exit the application
         else if (mCloseMeOnSaveStateChange!=mViews.end())
         {
-           (*mCloseMeOnSaveStateChange)->close();
+            emit exitApplication();
             mCloseMeOnSaveStateChange = mViews.end();
         }
     }

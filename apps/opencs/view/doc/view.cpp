@@ -131,9 +131,11 @@ CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int to
     : mViewManager (viewManager), mDocument (document), mViewIndex (totalViews-1),
       mViewTotal (totalViews)
 {
-    setDockOptions (QMainWindow::AllowNestedDocks);
+   // setDockOptions (QMainWindow::AllowNestedDocks);
 
     resize (300, 300); /// \todo get default size from settings and set reasonable minimal size
+
+    mSubViewWindow.setDockOptions (QMainWindow::AllowNestedDocks);
 
     setCentralWidget (&mSubViewWindow);
 
