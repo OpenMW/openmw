@@ -58,6 +58,7 @@
 
     font-size: 12pt;
     font-family: &quot;EB Garamond&quot;, &quot;EB Garamond 08&quot;;
+	color: black;
 }
 
 #profilesComboBox::drop-down {
@@ -81,11 +82,10 @@
     left: 1px;
 }
 
+
 #profilesComboBox QAbstractItemView {
-    border: 2px solid lightgray;
-    border-radius: 5px;
-}
-</string>
+    border: 0px;
+}</string>
         </property>
        </widget>
       </item>
@@ -95,6 +95,7 @@
          <string notr="true">#profileLabel {
     font-size: 18pt;
     font-family: &quot;EB Garamond&quot;, &quot;EB Garamond 08&quot;;
+	color: black;
 }
 </string>
         </property>
@@ -185,8 +186,6 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../resources.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>
