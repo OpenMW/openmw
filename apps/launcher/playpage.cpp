@@ -6,13 +6,12 @@ PlayPage::PlayPage(QWidget *parent) : QWidget(parent)
 {
     setupUi(this);
 
-    // Hacks to get the stylesheet look properly on different platforms
+    // Hacks to get the stylesheet look properly
+#ifdef Q_OS_MAC
     QPlastiqueStyle *style = new QPlastiqueStyle;
-    QFont font = QApplication::font();
-    font.setPointSize(12); // Fixes problem with overlapping items
-
     profilesComboBox->setStyle(style);
-    profilesComboBox->setFont(font);
+#endif
+    profilesComboBox->setView(new QListView());
 
     connect(profilesComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(slotCurrentIndexChanged(int)));
     connect(playButton, SIGNAL(clicked()), this, SLOT(slotPlayClicked()));
