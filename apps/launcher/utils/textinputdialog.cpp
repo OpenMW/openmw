@@ -1,13 +1,13 @@
+#include "textinputdialog.hpp"
+
 #include <QDialogButtonBox>
 #include <QApplication>
 #include <QPushButton>
-#include <QLabel>
 #include <QVBoxLayout>
 #include <QValidator>
+#include <QLabel>
 
 #include <components/fileorderlist/utils/lineedit.hpp>
-
-#include "textinputdialog.hpp"
 
 TextInputDialog::TextInputDialog(const QString& title, const QString &text, QWidget *parent) :
     QDialog(parent)
@@ -38,7 +38,6 @@ TextInputDialog::TextInputDialog(const QString& title, const QString &text, QWid
     Q_UNUSED(title);
 #endif
 
-    setMaximumHeight(height());
     setOkButtonEnabled(false);
     setModal(true);
 

@@ -56,6 +56,7 @@ namespace MWWorld
             void playerCellChange (CellStore *cell, const ESM::Position& position,
                 bool adjustPlayerPos = true);
 
+            void insertCell (Ptr::CellStore &cell, bool rescale);
 
         public:
 
@@ -85,8 +86,6 @@ namespace MWWorld
             ///< Move to exterior cell.
 
             void markCellAsUnchanged();
-
-            void insertCell (Ptr::CellStore &cell);
 
             void update (float duration, bool paused);
 

@@ -45,7 +45,7 @@ private:
 
     void loadSettings();
     void saveSettings();
-    void writeSettings();
+    bool writeSettings();
 
     inline bool startProgram(const QString &name, bool detached = false) { return startProgram(name, QStringList(), detached); }
     bool startProgram(const QString &name, const QStringList &arguments, bool detached = false);

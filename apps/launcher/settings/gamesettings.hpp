@@ -40,11 +40,6 @@ public:
         mSettings.remove(key);
     }
 
-    inline void clear()
-    {
-        mSettings.clear();
-    }
-
     inline QStringList getDataDirs() { return mDataDirs; }
     inline void addDataDir(const QString &dir) { if(!dir.isEmpty()) mDataDirs.append(dir); }
     inline QString getDataLocal() {return mDataLocal; }
