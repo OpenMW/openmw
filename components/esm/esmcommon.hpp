@@ -14,13 +14,6 @@ enum Version
     VER_13 = 0x3fa66666
   };
 
-enum FileType
-  {
-    FT_ESP = 0,       // Plugin
-    FT_ESM = 1,       // Master
-    FT_ESS = 32       // Savegame
-  };
-
 /* A structure used for holding fixed-length strings. In the case of
    LEN=4, it can be more efficient to match the string as a 32 bit
    number, therefore the struct is implemented as a union with an int.
