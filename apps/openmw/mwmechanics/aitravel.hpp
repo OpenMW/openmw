@@ -23,6 +23,9 @@ namespace MWMechanics
             float mY;
             float mZ;
 
+            int cellX;
+            int cellY;
+
             bool isPathConstructed;
             std::list<ESM::Pathgrid::Point> mPath;
 

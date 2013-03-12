@@ -169,9 +169,13 @@ bool MWMechanics::AiTravel::execute (const MWWorld::Ptr& actor)
         MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*actor.getCell()->mCell);
 
     ESM::Position pos = actor.getRefData().getPosition();
+    bool cellChange = actor.getCell()->mCell->mData.mX != cellX || actor.getCell()->mCell->mData.mY != cellY;
+    if(cellChange) std::cout << "cellChanged! \n";
     //std::cout << "npcpos" << pos.pos[0] << pos.pos[1] <<pos.pos[2] <<"\n";
-    if(!isPathConstructed)
+    if(!isPathConstructed ||cellChange)
     {
+        cellX = actor.getCell()->mCell->mData.mX;
+        cellY = actor.getCell()->mCell->mData.mY;
         float xCell = 0;
         float yCell = 0;
         if (actor.getCell()->mCell->isExterior())
