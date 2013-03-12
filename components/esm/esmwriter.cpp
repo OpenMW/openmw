@@ -1,5 +1,8 @@
 #include "esmwriter.hpp"
+
+#include <cassert>
 #include <fstream>
+#include <iostream>
 
 bool count = true;
 
@@ -47,26 +50,13 @@ void ESMWriter::save(std::ostream& file)
 
     startRecord("TES3", 0);
 
-    mHeader.mData.records = 0;
-    writeHNT("HEDR", mHeader.mData, 300);
-    m_headerPos = m_stream->tellp() - (std::streampos)4;
-
-    for (std::vector<Header::MasterData>::iterator it = mHeader.mMaster.begin();
-         it != mHeader.mMaster.end(); ++it)
-    {
-        writeHNCString("MAST", it->name);
-        writeHNT("DATA", it->size);
-    }
+    mHeader.save (*this);
 
     endRecord("TES3");
 }
 
 void ESMWriter::close()
 {
-    std::cout << "Writing amount of saved records (" << m_recordCount - 1 << ")" << std::endl;
-    m_stream->seekp(m_headerPos);
-    writeT<int>(m_recordCount-1);
-    m_stream->seekp(0, std::ios::end);
     m_stream->flush();
 
     if (!m_records.empty())

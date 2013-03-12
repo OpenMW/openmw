@@ -2,7 +2,6 @@
 #define OPENMW_ESM_COMMON_H
 
 #include <string>
-#include <vector>
 #include <cstring>
 
 #include <libs/platform/stdint.h>
@@ -53,38 +52,6 @@ typedef NAME_T<4> NAME;
 typedef NAME_T<32> NAME32;
 typedef NAME_T<64> NAME64;
 typedef NAME_T<256> NAME256;
-
-#pragma pack(push)
-#pragma pack(1)
-/// File header data for all ES files
-struct Header
-{
-    struct Data
-    {
-        /* File format version. This is actually a float, the supported
-            versions are 1.2 and 1.3. These correspond to:
-            1.2 = 0x3f99999a and 1.3 = 0x3fa66666
-        */
-        int version;
-        int type;           // 0=esp, 1=esm, 32=ess (unused)
-        NAME32 author;      // Author's name
-        NAME256 desc;       // File description
-        int records;        // Number of records? Not used.
-    };
-
-    // Defines another files (esm or esp) that this file depends upon.
-    struct MasterData
-    {
-        std::string name;
-        uint64_t size;
-        int index; // Position of the parent file in the global list of loaded files
-    };
-
-    Data mData;
-    std::vector<MasterData> mMaster;
-};
-#pragma pack(pop)
-
 
 #pragma pack(push)
 #pragma pack(1)

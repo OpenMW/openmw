@@ -1,12 +1,13 @@
 #ifndef OPENMW_ESM_WRITER_H
 #define OPENMW_ESM_WRITER_H
 
-#include <iostream>
+#include <iosfwd>
 #include <list>
-#include <assert.h>
+
+#include <components/to_utf8/to_utf8.hpp>
 
 #include "esmcommon.hpp"
-#include <components/to_utf8/to_utf8.hpp>
+#include "loadtes3.hpp"
 
 namespace ESM {
 

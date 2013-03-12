@@ -62,18 +62,7 @@ void ESMReader::open(Ogre::DataStreamPtr _esm, const std::string &name)
 
     getRecHeader();
 
-    // Get the header
-    getHNT (mHeader.mData, "HEDR", 300);
-
-    // Some mods abuse the header.version field for the version of the mod instead of the version of the file format, so we can only ignore it.
-
-    while (isNextSub("MAST"))
-    {
-        Header::MasterData m;
-        m.name = getHString();
-        m.size = getHNLong("DATA");
-        mHeader.mMaster.push_back(m);
-    }
+    mHeader.load (*this);
 }
 
 void ESMReader::open(const std::string &file)

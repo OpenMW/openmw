@@ -12,7 +12,9 @@
 #include <components/misc/stringops.hpp>
 
 #include <components/to_utf8/to_utf8.hpp>
+
 #include "esmcommon.hpp"
+#include "loadtes3.hpp"
 
 namespace ESM {
 
@@ -20,7 +22,7 @@ class ESMReader
 {
 public:
 
-  ESMReader(void);
+  ESMReader();
 
   /*************************************************************************
    *
