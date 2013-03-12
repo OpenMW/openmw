@@ -12,7 +12,7 @@ set(LAUNCHER
     utils/checkablemessagebox.cpp
     utils/textinputdialog.cpp
 
-    launcher.rc
+    ${CMAKE_SOURCE_DIR}/files/launcher/launcher.rc
 )
 
 set(LAUNCHER_HEADER
@@ -43,10 +43,10 @@ set(LAUNCHER_HEADER_MOC
 )
 
 set(LAUNCHER_UI
-    ../../files/ui/datafilespage.ui
-    ../../files/ui/graphicspage.ui
-    ../../files/ui/mainwindow.ui
-    ../../files/ui/playpage.ui
+    ${CMAKE_SOURCE_DIR}/files/ui/datafilespage.ui
+    ${CMAKE_SOURCE_DIR}/files/ui/graphicspage.ui
+    ${CMAKE_SOURCE_DIR}/files/ui/mainwindow.ui
+    ${CMAKE_SOURCE_DIR}/files/ui/playpage.ui
 )
 
 source_group(launcher FILES ${LAUNCHER} ${LAUNCHER_HEADER})
