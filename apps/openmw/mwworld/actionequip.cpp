@@ -45,11 +45,12 @@ namespace MWWorld
         {
 
             // Beast races cannot equip shoes / boots, or full helms (head part vs hair part)
-            if(npcRace == "argonian" || npcRace == "khajiit")
+            const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npcRace);
+            if(race->mData.mFlags & ESM::Race::Beast)
             {
-                if(*slot == MWWorld::InventoryStore::Slot_Helmet){
+                if(*slot == MWWorld::InventoryStore::Slot_Helmet)
+                {
                     std::vector<ESM::PartReference> parts;
-
                     if(it.getType() == MWWorld::ContainerStore::Type_Clothing)
                         parts = it->get<ESM::Clothing>()->mBase->mParts.mParts;
                     else
@@ -74,19 +75,35 @@ namespace MWWorld
 
                 if (*slot == MWWorld::InventoryStore::Slot_Boots)
                 {
-                    // Only notify the player, not npcs
-                    if(actor == MWBase::Environment::get().getWorld()->getPlayer().getPlayer() )
+                    bool allow = true;
+                    std::vector<ESM::PartReference> parts;
+                    if(it.getType() == MWWorld::ContainerStore::Type_Clothing)
+                        parts = it->get<ESM::Clothing>()->mBase->mParts.mParts;
+                    else
+                        parts = it->get<ESM::Armor>()->mBase->mParts.mParts;
+                    for(std::vector<ESM::PartReference>::iterator itr = parts.begin(); itr != parts.end(); ++itr)
                     {
-                        if(it.getType() == MWWorld::ContainerStore::Type_Clothing){ // It's shoes
-                            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage15}", std::vector<std::string>());
-                        }
-
-                        else // It's boots
+                        if((*itr).mPart == ESM::PRT_LFoot || (*itr).mPart == ESM::PRT_RFoot)
                         {
-                            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage14}", std::vector<std::string>());
+                            allow = false;
+                            // Only notify the player, not npcs
+                            if(actor == MWBase::Environment::get().getWorld()->getPlayer().getPlayer() )
+                            {
+                                if(it.getType() == MWWorld::ContainerStore::Type_Clothing){ // It's shoes
+                                    MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage15}", std::vector<std::string>());
+                                }
+
+                                else // It's boots
+                                {
+                                    MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage14}", std::vector<std::string>());
+                                }
+                            }
+                            break;
                         }
                     }
-                    break;
+
+                    if(!allow)
+                        break;
                 }
 
             }
