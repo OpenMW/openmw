@@ -1,6 +1,10 @@
 #include "playpage.hpp"
 
-#include <QtGui>
+#include <QListView>
+
+#ifdef Q_OS_MAC
+#include <QPlastiqueStyle>
+#endif
 
 PlayPage::PlayPage(QWidget *parent) : QWidget(parent)
 {
