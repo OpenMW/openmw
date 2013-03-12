@@ -103,11 +103,6 @@ bool CSVDoc::ViewManager::closeRequest (View *view)
     {
         bool last = countViews (view->getDocument())<=1;
 
-        /// \todo check if save is in progress  -> warn user about possible data loss
-        /// \todo check if document has not been saved -> return false and start close dialogue
-
-        CSMDoc::Document *document = view->getDocument();
-
         if (last)
             continueWithClose = notifySaveOnClose (view);
         else

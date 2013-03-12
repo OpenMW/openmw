@@ -238,9 +238,7 @@ CSMDoc::Document::Document (const std::vector<boost::filesystem::path>& files, b
 }
 
 CSMDoc::Document::~Document()
-{
-    qDebug() << "document destroyed";
-}
+{}
 
 QUndoStack& CSMDoc::Document::getUndoStack()
 {
