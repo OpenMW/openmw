@@ -66,6 +66,8 @@ namespace CSVDoc
 
             void updateActions();
 
+            void exitApplication();
+
         public:
 
             View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews);
@@ -92,7 +94,7 @@ namespace CSVDoc
 
             void loadDocumentRequest();
 
-            void closeAllViews (View *);
+            void exitApplicationRequest (CSVDoc::View *view);
 
         public slots:
 
@@ -105,6 +107,8 @@ namespace CSVDoc
             void newView();
 
             void save();
+
+            void exit();
 
             void verify();
 

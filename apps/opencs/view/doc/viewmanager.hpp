@@ -27,7 +27,7 @@ namespace CSVDoc
             CSMDoc::DocumentManager& mDocumentManager;
             std::vector<View *> mViews;
             CSVWorld::CommandDelegateFactoryCollection *mDelegateFactories;
-            std::vector<View *>::iterator mCloseMeOnSaveStateChange;
+            bool mExitOnSaveStateChange;
             bool mUserWarned;
 
             // not implemented
@@ -35,8 +35,9 @@ namespace CSVDoc
             ViewManager& operator= (const ViewManager&);
 
             void updateIndices();
-            bool showModifiedDocumentMessageBox (std::vector<View*>::iterator view);
-            bool showSaveInProgressMessageBox (std::vector<View*>::iterator view);
+            bool notifySaveOnClose (View *view = 0);
+            bool showModifiedDocumentMessageBox (View *view);
+            bool showSaveInProgressMessageBox (View *view);
 
         public:
 
@@ -60,7 +61,9 @@ namespace CSVDoc
 
             void closeMessageBox();
 
-            void exitApplication();
+        public slots:
+
+            void exitApplication (CSVDoc::View *view);
 
         private slots:
 

@@ -46,7 +46,8 @@ void CSVDoc::View::setupFileMenu()
     file->addAction(close);
 
     QAction *exit = new QAction (tr ("&Exit"), this);
-    connect (exit, SIGNAL (triggered()), QApplication::instance(), SLOT (closeAllWindows()));
+    connect (exit, SIGNAL (triggered()), this, SLOT (exit()));
+    connect (this, SIGNAL(exitApplicationRequest(CSVDoc::View *)), &mViewManager, SLOT(exitApplication(CSVDoc::View *)));
 
     file->addAction(exit);
 }
@@ -131,8 +132,6 @@ CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int to
     : mViewManager (viewManager), mDocument (document), mViewIndex (totalViews-1),
       mViewTotal (totalViews)
 {
-   // setDockOptions (QMainWindow::AllowNestedDocks);
-
     resize (300, 300); /// \todo get default size from settings and set reasonable minimal size
 
     mSubViewWindow.setDockOptions (QMainWindow::AllowNestedDocks);
@@ -254,4 +253,9 @@ void CSVDoc::View::abortOperation (int type)
 CSVDoc::Operations *CSVDoc::View::getOperations() const
 {
     return mOperations;
+}
+
+void CSVDoc::View::exit()
+{
+    emit exitApplicationRequest (this);
 }

@@ -1,6 +1,6 @@
-#include <QDebug>
 #include <QFileInfo>
 #include <QDir>
+#include <QDebug>
 
 #include <stdexcept>
 
