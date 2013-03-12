@@ -1,6 +1,9 @@
 #include "datafilespage.hpp"
 
-#include <QtGui>
+#include <QPushButton>
+#include <QMessageBox>
+#include <QCheckBox>
+#include <QMenu>
 
 #include <components/files/configurationmanager.hpp>
 
@@ -97,7 +100,7 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
     connect(mastersTable, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
 
     connect(mDataFilesModel, SIGNAL(layoutChanged()), this, SLOT(updateViews()));
-    
+
     connect(filterLineEdit, SIGNAL(textChanged(QString)), this, SLOT(filterChanged(QString)));
 
     connect(splitter, SIGNAL(splitterMoved(int,int)), this, SLOT(updateSplitter()));

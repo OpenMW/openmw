@@ -233,8 +233,6 @@ namespace MWWorld
         mPlayer = new MWWorld::Player (mStore.get<ESM::NPC>().find ("player"), *this);
         mRendering->attachCameraTo(mPlayer->getPlayer());
 
-        mPhysics->addActor(mPlayer->getPlayer());
-
         // global variables
         mGlobalVariables = new Globals (mStore);
 
@@ -940,19 +938,16 @@ namespace MWWorld
 
         if (Misc::StringUtils::ciEqual(record.mId, "player"))
         {
-            static const char *sRaces[] =
-            {
-                "Argonian", "Breton", "Dark Elf", "High Elf", "Imperial", "Khajiit", "Nord", "Orc", "Redguard",
-                "Woodelf",  0
-            };
+            std::vector<std::string> ids;
+            getStore().get<ESM::Race>().listIdentifier(ids);
 
-            int i=0;
+            unsigned int i=0;
 
-            for (; sRaces[i]; ++i)
-                if (Misc::StringUtils::ciEqual (sRaces[i], record.mRace))
+            for (; i<ids.size(); ++i)
+                if (Misc::StringUtils::ciEqual (ids[i], record.mRace))
                     break;
 
-            mGlobalVariables->setInt ("pcrace", sRaces[i] ? i+1 : 0);
+            mGlobalVariables->setInt ("pcrace", (i == ids.size()) ? 0 : i+1);
 
             const ESM::NPC *player =
                 mPlayer->getPlayer().get<ESM::NPC>()->mBase;
@@ -1318,6 +1313,7 @@ namespace MWWorld
     void World::renderPlayer()
     {
         mRendering->renderPlayer(mPlayer->getPlayer());
+        mPhysics->addActor(mPlayer->getPlayer());
     }
 
     void World::setupExternalRendering (MWRender::ExternalRendering& rendering)

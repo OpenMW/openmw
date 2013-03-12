@@ -1,6 +1,8 @@
 #include "graphicspage.hpp"
 
-#include <QtGui>
+#include <QDesktopWidget>
+#include <QMessageBox>
+#include <QDir>
 
 #include <cstdlib>
 

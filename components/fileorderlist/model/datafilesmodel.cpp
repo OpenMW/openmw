@@ -1,4 +1,6 @@
 #include <QDebug>
+#include <QTextDecoder>
+#include <QTextCodec>
 #include <QFileInfo>
 #include <QDir>
 
@@ -157,7 +159,7 @@ Qt::ItemFlags DataFilesModel::flags(const QModelIndex &index) const
     if (!file)
         return Qt::NoItemFlags;
 
-    if (canBeChecked(file)) {    
+    if (canBeChecked(file)) {
         if (index.column() == 0) {
             return Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
         } else {
@@ -226,7 +228,7 @@ bool lessThanEsmFile(const EsmFile *e1, const EsmFile *e2)
         return true;
     if (!e1->fileName().endsWith(".esm") && e2->fileName().endsWith(".esm"))
         return false;
-    
+
     return e1->fileName().toLower() < e2->fileName().toLower();
 }
 
@@ -237,10 +239,6 @@ bool lessThanDate(const EsmFile *e1, const EsmFile *e2)
     } else {
         return false;
     }
-//    if (!e1->fileName().endsWith(".esm") && e2->fileName().endsWith(".esm"))
-//        return false;
-
-//    return e1->fileName().toLower() < e2->fileName().toLower();
 }
 
 void DataFilesModel::sort(int column, Qt::SortOrder order)
@@ -270,16 +268,31 @@ void DataFilesModel::addFiles(const QString &path)
     filters << "*.esp" << "*.esm";
     dir.setNameFilters(filters);
 
+    // Create a decoder for non-latin characters in esx metadata
+    QTextCodec *codec;
+
+    if (mEncoding == QLatin1String("win1252")) {
+        codec = QTextCodec::codecForName("windows-1252");
+    } else if (mEncoding == QLatin1String("win1251")) {
+        codec = QTextCodec::codecForName("windows-1251");
+    } else if (mEncoding == QLatin1String("win1250")) {
+        codec = QTextCodec::codecForName("windows-1250");
+    } else {
+        return; // This should never happen;
+    }
+
+    QTextDecoder *decoder = codec->makeDecoder();
+
     foreach (const QString &path, dir.entryList()) {
         QFileInfo info(dir.absoluteFilePath(path));
         EsmFile *file = new EsmFile(path);
 
-
         try {
             ESM::ESMReader fileReader;
-            ToUTF8::Utf8Encoder encoder (ToUTF8::calculateEncoding(mEncoding.toStdString()));
+            ToUTF8::Utf8Encoder encoder(ToUTF8::calculateEncoding(mEncoding.toStdString()));
             fileReader.setEncoder(&encoder);
             fileReader.open(dir.absoluteFilePath(path).toStdString());
+
 
             ESM::ESMReader::MasterList mlist = fileReader.getMasters();
             QStringList masters;
@@ -289,13 +302,13 @@ void DataFilesModel::addFiles(const QString &path)
                 masters.append(master);
             }
 
-            file->setAuthor(QString::fromStdString(fileReader.getAuthor()));
+            file->setAuthor(decoder->toUnicode(fileReader.getAuthor().c_str()));
             file->setSize(info.size());
             file->setDates(info.lastModified(), info.lastRead());
             file->setVersion(fileReader.getFVer());
             file->setPath(info.absoluteFilePath());
             file->setMasters(masters);
-            file->setDescription(QString::fromStdString(fileReader.getDesc()));
+            file->setDescription(decoder->toUnicode(fileReader.getDesc().c_str()));
 
 
             // Put the file in the table
@@ -308,6 +321,8 @@ void DataFilesModel::addFiles(const QString &path)
         }
 
     }
+
+    delete decoder;
 }
 
 QModelIndex DataFilesModel::indexFromItem(EsmFile *item) const
@@ -369,10 +384,10 @@ QStringList DataFilesModel::checkedItems()
 QStringList DataFilesModel::checkedItemsPaths()
 {
     QStringList list;
-    
+
     QList<EsmFile *>::ConstIterator it;
     QList<EsmFile *>::ConstIterator itEnd = mFiles.constEnd();
-    
+
     int i = 0;
     for (it = mFiles.constBegin(); it != itEnd; ++it) {
         EsmFile *file = item(i);
@@ -381,7 +396,7 @@ QStringList DataFilesModel::checkedItemsPaths()
         if (mCheckStates[file->fileName()] == Qt::Checked && canBeChecked(file))
             list << file->path();
     }
-    
+
     return list;
 }
 
