@@ -16,6 +16,8 @@ namespace ESM
     /// \brief File header record
     struct Header
     {
+        static const int CurrentFormat = 0; // most recent known format
+
         struct Data
         {
             /* File format version. This is actually a float, the supported
@@ -38,6 +40,7 @@ namespace ESM
         };
 
         Data mData;
+        int mFormat;
         std::vector<MasterData> mMaster;
 
         void blank();

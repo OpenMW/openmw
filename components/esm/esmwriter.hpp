@@ -26,6 +26,8 @@ public:
     void setEncoder(ToUTF8::Utf8Encoder *encoding); // Write strings as UTF-8?
     void setAuthor(const std::string& author);
     void setDescription(const std::string& desc);
+    void setRecordCount (int count);
+    void setFormat (int format);
 
     void addMaster(const std::string& name, uint64_t size);
 

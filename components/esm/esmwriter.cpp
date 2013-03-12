@@ -29,6 +29,16 @@ void ESMWriter::setDescription(const std::string& desc)
     mHeader.mData.desc.assign (desc);
 }
 
+void ESMWriter::setRecordCount (int count)
+{
+    mHeader.mData.records = count;
+}
+
+void ESMWriter::setFormat (int format)
+{
+    mHeader.mFormat = format;
+}
+
 void ESMWriter::addMaster(const std::string& name, uint64_t size)
 {
     Header::MasterData d;

@@ -15,9 +15,14 @@ ESM_Context ESMReader::getContext()
     return mCtx;
 }
 
-ESMReader::ESMReader(void):
+ESMReader::ESMReader():
     mBuffer(50*1024)
 {
+}
+
+int ESMReader::getFormat() const
+{
+    return mHeader.mFormat;
 }
 
 void ESMReader::restoreContext(const ESM_Context &rc)

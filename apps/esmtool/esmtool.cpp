@@ -426,6 +426,7 @@ int clone(Arguments& info)
     esm.setAuthor(info.data.author);
     esm.setDescription(info.data.description);
     esm.setVersion(info.data.version);
+    esm.setRecordCount (recordCount);
 
     for (std::vector<ESM::Header::MasterData>::iterator it = info.data.masters.begin(); it != info.data.masters.end(); ++it)
         esm.addMaster(it->name, it->size);
