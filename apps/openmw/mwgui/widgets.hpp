@@ -7,6 +7,7 @@
 #include <MyGUI_Widget.h>
 #include <MyGUI_TextBox.h>
 #include <MyGUI_Button.h>
+#include <MyGUI_EditBox.h>
 
 namespace MyGUI
 {
@@ -331,6 +332,18 @@ namespace MWGui
         class AutoSizedTextBox : public AutoSizedWidget, public MyGUI::TextBox
         {
             MYGUI_RTTI_DERIVED( AutoSizedTextBox )
+
+        public:
+            virtual MyGUI::IntSize getRequestedSize();
+            virtual void setCaption(const MyGUI::UString& _value);
+
+        protected:
+            virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
+        };
+
+        class AutoSizedEditBox : public AutoSizedWidget, public MyGUI::EditBox
+        {
+            MYGUI_RTTI_DERIVED( AutoSizedEditBox )
 
         public:
             virtual MyGUI::IntSize getRequestedSize();

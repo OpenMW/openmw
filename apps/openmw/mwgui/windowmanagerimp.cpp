@@ -129,6 +129,7 @@ WindowManager::WindowManager(
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::HBox>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::VBox>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::AutoSizedTextBox>("Widget");
+    MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::AutoSizedEditBox>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::AutoSizedButton>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::ImageButton>("Widget");
     MyGUI::FactoryManager::getInstance().registerFactory<MWGui::ExposedWindow>("Widget");

@@ -586,6 +586,30 @@ void AutoSizedTextBox::setPropertyOverride(const std::string& _key, const std::s
     }
 }
 
+MyGUI::IntSize AutoSizedEditBox::getRequestedSize()
+{
+    return MyGUI::IntSize(getSize().width, getTextSize().height);
+}
+
+void AutoSizedEditBox::setCaption(const MyGUI::UString& _value)
+{
+    EditBox::setCaption(_value);
+
+    notifySizeChange (this);
+}
+
+void AutoSizedEditBox::setPropertyOverride(const std::string& _key, const std::string& _value)
+{
+    if (_key == "ExpandDirection")
+    {
+        mExpandDirection = MyGUI::Align::parse (_value);
+    }
+    else
+    {
+        EditBox::setPropertyOverride (_key, _value);
+    }
+}
+
 
 MyGUI::IntSize AutoSizedButton::getRequestedSize()
 {
@@ -660,6 +684,8 @@ void HBox::align ()
         {
             sizes.push_back (std::make_pair(w->getSize(), hstretch));
             total_width += w->getSize().width;
+            if (!(w->getUserString("VStretch") == "true"))
+                total_height = std::max(total_height, w->getSize().height);
         }
 
         if (i != count-1)
@@ -783,6 +809,9 @@ void VBox::align ()
         {
             sizes.push_back (std::make_pair(w->getSize(), vstretch));
             total_height += w->getSize().height;
+
+            if (!(w->getUserString("HStretch") == "true"))
+                total_width = std::max(total_width, w->getSize().width);
         }
 
         if (i != count-1)
