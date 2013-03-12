@@ -64,7 +64,6 @@ void ESMReader::open(Ogre::DataStreamPtr _esm, const std::string &name)
 
     // Get the header
     getHNT (mHeader.mData, "HEDR", 300);
-    mCtx.header = mHeader.mData;
 
     // Some mods abuse the header.version field for the version of the mod instead of the version of the file format, so we can only ignore it.
 
