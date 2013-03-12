@@ -1,6 +1,13 @@
 #include "maindialog.hpp"
 
-#include <QtGui>
+#include <QFontDatabase>
+#include <QInputDialog>
+#include <QFileDialog>
+#include <QCloseEvent>
+#include <QTextCodec>
+#include <QProcess>
+#include <QFile>
+#include <QDir>
 
 #include "utils/checkablemessagebox.hpp"
 
