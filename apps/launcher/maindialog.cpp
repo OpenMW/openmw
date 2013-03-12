@@ -9,6 +9,8 @@
 #include <QFile>
 #include <QDir>
 
+#include <QDebug>
+
 #include "utils/checkablemessagebox.hpp"
 
 #include "playpage.hpp"
@@ -210,10 +212,15 @@ bool MainDialog::showFirstRunDialog()
         // Construct the arguments to run the importer
         QStringList arguments;
 
-        if (msgBox.isChecked())
-            arguments.append(QString("-g"));
 
+        if (msgBox.isChecked())
+            arguments.append(QString("--game-files"));
+
+        arguments.append(QString("--encoding"));
+        arguments.append(mGameSettings.value(QString("encoding"), QString("win1252")));
+        arguments.append(QString("--ini"));
         arguments.append(iniPaths.first());
+        arguments.append(QString("--cfg"));
         arguments.append(path);
 
         if (!startProgram(QString("mwiniimport"), arguments, false))
@@ -666,7 +673,7 @@ bool MainDialog::startProgram(const QString &name, const QStringList &arguments,
             return false;
         }
 
-        if (process.exitCode() != 0) {
+        if (process.exitCode() != 0 || process.exitStatus() == QProcess::CrashExit) {
             QString error(process.readAllStandardError());
             error.append(tr("\nArguments:\n"));
             error.append(arguments.join(" "));
