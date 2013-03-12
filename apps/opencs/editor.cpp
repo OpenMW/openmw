@@ -113,5 +113,7 @@ int CS::Editor::run()
 {
     mStartup.show();
 
+    QApplication::setQuitOnLastWindowClosed (true);
+
     return QApplication::exec();
 }

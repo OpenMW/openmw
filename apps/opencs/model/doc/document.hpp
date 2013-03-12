@@ -63,6 +63,7 @@ namespace CSMDoc
         public:
 
             Document (const std::vector<boost::filesystem::path>& files, bool new_);
+            ~Document();
 
             QUndoStack& getUndoStack();
 

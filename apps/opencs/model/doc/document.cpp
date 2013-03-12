@@ -2,7 +2,7 @@
 #include "document.hpp"
 
 #include <cassert>
-
+#include <QDebug>
 void CSMDoc::Document::load (const std::vector<boost::filesystem::path>::const_iterator& begin,
     const std::vector<boost::filesystem::path>::const_iterator& end, bool lastAsModified)
 {
@@ -237,6 +237,11 @@ CSMDoc::Document::Document (const std::vector<boost::filesystem::path>& files, b
     connect (&mSaveTimer, SIGNAL(timeout()), this, SLOT (saving()));
 }
 
+CSMDoc::Document::~Document()
+{
+    qDebug() << "document destroyed";
+}
+
 QUndoStack& CSMDoc::Document::getUndoStack()
 {
     return mUndoStack;
@@ -290,10 +295,12 @@ void CSMDoc::Document::abortOperation (int type)
     }
 }
 
+
 void CSMDoc::Document::modificationStateChanged (bool clean)
 {
     emit stateChanged (getState(), this);
 }
+
 
 void CSMDoc::Document::operationDone (int type)
 {
@@ -308,9 +315,12 @@ void CSMDoc::Document::saving()
 
     if (mSaveCount>15)
     {
+        //clear the stack before resetting the save state
+        //to avoid emitting incorrect states
+        mUndoStack.setClean();
+
         mSaveCount = 0;
         mSaveTimer.stop();
-        mUndoStack.setClean();
         emit stateChanged (getState(), this);
     }
 }
