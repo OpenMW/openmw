@@ -183,13 +183,10 @@ namespace MWClass
         std::string bodyRaceID = headID.substr(0, end);
 
         std::string model = "meshes\\base_anim.nif";
-        if (bodyRaceID == "b_n_khajiit_m_" ||
-            bodyRaceID == "b_n_khajiit_f_" ||
-            bodyRaceID == "b_n_argonian_m_" ||
-            bodyRaceID == "b_n_argonian_f_")
-        {
+        const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(ref->mBase->mRace);
+        if(race->mData.mFlags & ESM::Race::Beast)
             model = "meshes\\base_animkna.nif";
-        }
+
         return model;
 
     }

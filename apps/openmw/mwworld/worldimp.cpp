@@ -233,8 +233,6 @@ namespace MWWorld
         mPlayer = new MWWorld::Player (mStore.get<ESM::NPC>().find ("player"), *this);
         mRendering->attachCameraTo(mPlayer->getPlayer());
 
-        mPhysics->addActor(mPlayer->getPlayer());
-
         // global variables
         mGlobalVariables = new Globals (mStore);
 
@@ -1315,6 +1313,7 @@ namespace MWWorld
     void World::renderPlayer()
     {
         mRendering->renderPlayer(mPlayer->getPlayer());
+        mPhysics->addActor(mPlayer->getPlayer());
     }
 
     void World::setupExternalRendering (MWRender::ExternalRendering& rendering)
