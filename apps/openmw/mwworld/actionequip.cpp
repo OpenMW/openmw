@@ -45,7 +45,8 @@ namespace MWWorld
         {
 
             // Beast races cannot equip shoes / boots, or full helms (head part vs hair part)
-            if(npcRace == "argonian" || npcRace == "khajiit")
+            const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npcRace);
+            if(race->mData.mFlags & ESM::Race::Beast)
             {
                 if(*slot == MWWorld::InventoryStore::Slot_Helmet)
                 {
