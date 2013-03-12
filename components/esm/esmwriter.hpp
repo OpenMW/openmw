@@ -88,14 +88,13 @@ public:
     void write(const char* data, size_t size);
 
 private:
-    std::list<MasterData> m_masters;
     std::list<RecordData> m_records;
     std::ostream* m_stream;
     std::streampos m_headerPos;
     ToUTF8::Utf8Encoder* m_encoder;
     int m_recordCount;
 
-    HEDRstruct m_header;
+    Header mHeader;
 };
 
 }

@@ -1,6 +1,5 @@
 #include "esmwriter.hpp"
 #include <fstream>
-#include <cstring>
 
 bool count = true;
 
@@ -9,30 +8,30 @@ namespace ESM
 
 int ESMWriter::getVersion()
 {
-    return m_header.version;
+    return mHeader.mData.version;
 }
 
 void ESMWriter::setVersion(int ver)
 {
-    m_header.version = ver;
+    mHeader.mData.version = ver;
 }
 
 void ESMWriter::setAuthor(const std::string& auth)
 {
-    strncpy((char*)&m_header.author, auth.c_str(), 32);
+    mHeader.mData.author.assign (auth);
 }
 
 void ESMWriter::setDescription(const std::string& desc)
 {
-    strncpy((char*)&m_header.desc, desc.c_str(), 256);
+    mHeader.mData.desc.assign (desc);
 }
 
 void ESMWriter::addMaster(const std::string& name, uint64_t size)
 {
-    MasterData d;
+    Header::MasterData d;
     d.name = name;
     d.size = size;
-    m_masters.push_back(d);
+    mHeader.mMaster.push_back(d);
 }
 
 void ESMWriter::save(const std::string& file)
@@ -48,11 +47,12 @@ void ESMWriter::save(std::ostream& file)
 
     startRecord("TES3", 0);
 
-    m_header.records = 0;
-    writeHNT("HEDR", m_header, 300);
+    mHeader.mData.records = 0;
+    writeHNT("HEDR", mHeader.mData, 300);
     m_headerPos = m_stream->tellp() - (std::streampos)4;
 
-    for (std::list<MasterData>::iterator it = m_masters.begin(); it != m_masters.end(); ++it)
+    for (std::vector<Header::MasterData>::iterator it = mHeader.mMaster.begin();
+         it != mHeader.mMaster.end(); ++it)
     {
         writeHNCString("MAST", it->name);
         writeHNT("DATA", it->size);

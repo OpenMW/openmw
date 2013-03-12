@@ -24,23 +24,15 @@ public:
 
   /*************************************************************************
    *
-   *  Public type definitions
-   *
-   *************************************************************************/
-
-  typedef std::vector<MasterData> MasterList;
-
-  /*************************************************************************
-   *
    *  Information retrieval
    *
    *************************************************************************/
 
-  int getVer() const { return mCtx.header.version; }
-  float getFVer() const { if(mCtx.header.version == VER_12) return 1.2; else return 1.3; }
-  const std::string getAuthor() const { return mCtx.header.author.toString(); }
-  const std::string getDesc() const { return mCtx.header.desc.toString(); }
-  const MasterList &getMasters() const { return mMasters; }
+  int getVer() const { return mHeader.mData.version; }
+  float getFVer() const { if(mHeader.mData.version == VER_12) return 1.2; else return 1.3; }
+  const std::string getAuthor() const { return mHeader.mData.author.toString(); }
+  const std::string getDesc() const { return mHeader.mData.desc.toString(); }
+  const std::vector<Header::MasterData> &getMasters() const { return mHeader.mMaster; }
   const NAME &retSubName() const { return mCtx.subName; }
   uint32_t getSubSize() const { return mCtx.leftSub; }
 
@@ -264,7 +256,8 @@ private:
   // Buffer for ESM strings
   std::vector<char> mBuffer;
 
-  MasterList mMasters;
+  Header mHeader;
+
   std::vector<ESMReader> *mGlobalReaderList;
   ToUTF8::Utf8Encoder* mEncoder;
 };
