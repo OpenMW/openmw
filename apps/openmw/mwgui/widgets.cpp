@@ -588,6 +588,8 @@ void AutoSizedTextBox::setPropertyOverride(const std::string& _key, const std::s
 
 MyGUI::IntSize AutoSizedEditBox::getRequestedSize()
 {
+    if (getAlign().isHStretch())
+        throw std::runtime_error("AutoSizedEditBox can't have HStretch align (" + getName() + ")");
     return MyGUI::IntSize(getSize().width, getTextSize().height);
 }
 
