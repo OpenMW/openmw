@@ -403,7 +403,6 @@ namespace MWGui
             virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
 
             virtual void onWidgetCreated(MyGUI::Widget* _widget);
-            virtual void onWidgetDestroy(MyGUI::Widget* _widget);
         };
 
         class VBox : public Box, public MyGUI::Widget
@@ -421,7 +420,6 @@ namespace MWGui
             virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
 
             virtual void onWidgetCreated(MyGUI::Widget* _widget);
-            virtual void onWidgetDestroy(MyGUI::Widget* _widget);
         };
     }
 }

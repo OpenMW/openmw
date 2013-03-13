@@ -749,11 +749,6 @@ void HBox::onWidgetCreated(MyGUI::Widget* _widget)
     align();
 }
 
-void HBox::onWidgetDestroy(MyGUI::Widget* _widget)
-{
-    align();
-}
-
 MyGUI::IntSize HBox::getRequestedSize ()
 {
     MyGUI::IntSize size(0,0);
@@ -902,11 +897,6 @@ MyGUI::IntSize VBox::getRequestedSize ()
 }
 
 void VBox::onWidgetCreated(MyGUI::Widget* _widget)
-{
-    align();
-}
-
-void VBox::onWidgetDestroy(MyGUI::Widget* _widget)
 {
     align();
 }
