@@ -12,7 +12,9 @@
 #include <components/misc/stringops.hpp>
 
 #include <components/to_utf8/to_utf8.hpp>
+
 #include "esmcommon.hpp"
+#include "loadtes3.hpp"
 
 namespace ESM {
 
@@ -20,15 +22,7 @@ class ESMReader
 {
 public:
 
-  ESMReader(void);
-
-  /*************************************************************************
-   *
-   *  Public type definitions
-   *
-   *************************************************************************/
-
-  typedef std::vector<MasterData> MasterList;
+  ESMReader();
 
   /*************************************************************************
    *
@@ -36,14 +30,12 @@ public:
    *
    *************************************************************************/
 
-  int getVer() const { return mCtx.header.version; }
-  float getFVer() const { if(mCtx.header.version == VER_12) return 1.2; else return 1.3; }
-  int getSpecial() const { return mSpf; }
-  int getType() const { return mCtx.header.type; }
-  const std::string getAuthor() const { return mCtx.header.author.toString(); }
-  const std::string getDesc() const { return mCtx.header.desc.toString(); }
-  const SaveData &getSaveData() const { return mSaveData; }
-  const MasterList &getMasters() const { return mMasters; }
+  int getVer() const { return mHeader.mData.version; }
+  float getFVer() const { if(mHeader.mData.version == VER_12) return 1.2; else return 1.3; }
+  const std::string getAuthor() const { return mHeader.mData.author.toString(); }
+  const std::string getDesc() const { return mHeader.mData.desc.toString(); }
+  const std::vector<Header::MasterData> &getMasters() const { return mHeader.mMaster; }
+  int getFormat() const;
   const NAME &retSubName() const { return mCtx.subName; }
   uint32_t getSubSize() const { return mCtx.leftSub; }
 
@@ -263,13 +255,12 @@ private:
   ESM_Context mCtx;
 
   // Special file signifier (see SpecialFile enum above)
-  int mSpf;
 
   // Buffer for ESM strings
   std::vector<char> mBuffer;
 
-  SaveData mSaveData;
-  MasterList mMasters;
+  Header mHeader;
+
   std::vector<ESMReader> *mGlobalReaderList;
   ToUTF8::Utf8Encoder* mEncoder;
 };

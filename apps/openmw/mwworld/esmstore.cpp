@@ -27,14 +27,15 @@ void ESMStore::load(ESM::ESMReader &esm)
 
     ESM::Dialogue *dialogue = 0;
 
+    /// \todo Move this to somewhere else. ESMReader?
     // Cache parent esX files by tracking their indices in the global list of
     //  all files/readers used by the engine. This will greaty accelerate
     //  refnumber mangling, as required for handling moved references.
     int index = ~0;
-    const ESM::ESMReader::MasterList &masters = esm.getMasters();
+    const std::vector<ESM::Header::MasterData> &masters = esm.getMasters();
     std::vector<ESM::ESMReader> *allPlugins = esm.getGlobalReaderList();
     for (size_t j = 0; j < masters.size(); j++) {
-        ESM::MasterData &mast = const_cast<ESM::MasterData&>(masters[j]);
+        ESM::Header::MasterData &mast = const_cast<ESM::Header::MasterData&>(masters[j]);
         std::string fname = mast.name;
         for (int i = 0; i < esm.getIndex(); i++) {
             const std::string &candidate = allPlugins->at(i).getContext().filename;

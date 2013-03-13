@@ -1,6 +1,6 @@
-#include <QDebug>
 #include <QFileInfo>
 #include <QDir>
+#include <QDebug>
 
 #include <stdexcept>
 
@@ -157,7 +157,7 @@ Qt::ItemFlags DataFilesModel::flags(const QModelIndex &index) const
     if (!file)
         return Qt::NoItemFlags;
 
-    if (canBeChecked(file)) {    
+    if (canBeChecked(file)) {
         if (index.column() == 0) {
             return Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
         } else {
@@ -226,7 +226,7 @@ bool lessThanEsmFile(const EsmFile *e1, const EsmFile *e2)
         return true;
     if (!e1->fileName().endsWith(".esm") && e2->fileName().endsWith(".esm"))
         return false;
-    
+
     return e1->fileName().toLower() < e2->fileName().toLower();
 }
 
@@ -281,7 +281,7 @@ void DataFilesModel::addFiles(const QString &path)
             fileReader.setEncoder(&encoder);
             fileReader.open(dir.absoluteFilePath(path).toStdString());
 
-            ESM::ESMReader::MasterList mlist = fileReader.getMasters();
+            std::vector<ESM::Header::MasterData> mlist = fileReader.getMasters();
             QStringList masters;
 
             for (unsigned int i = 0; i < mlist.size(); ++i) {
@@ -369,10 +369,10 @@ QStringList DataFilesModel::checkedItems()
 QStringList DataFilesModel::checkedItemsPaths()
 {
     QStringList list;
-    
+
     QList<EsmFile *>::ConstIterator it;
     QList<EsmFile *>::ConstIterator itEnd = mFiles.constEnd();
-    
+
     int i = 0;
     for (it = mFiles.constBegin(); it != itEnd; ++it) {
         EsmFile *file = item(i);
@@ -381,7 +381,7 @@ QStringList DataFilesModel::checkedItemsPaths()
         if (mCheckStates[file->fileName()] == Qt::Checked && canBeChecked(file))
             list << file->path();
     }
-    
+
     return list;
 }
 
