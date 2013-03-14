@@ -109,17 +109,17 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
         return;
     }
 
-    bool hasCollisionNode = hasRootCollisionNode(node);
+    cShape->mHasCollisionNode = hasRootCollisionNode(node);
 
     //do a first pass
-    handleNode(mesh1, node,0,hasCollisionNode,false,false);
+    handleNode(mesh1, node,0,false,false);
 
     if(mBoundingBox != NULL)
     {
        cShape->mCollisionShape = mBoundingBox;
        delete mesh1;
     }
-    else if (mHasShape && !cShape->mIgnore && cShape->mCollide)
+    else if (mHasShape && cShape->mCollide)
     {
         cShape->mCollisionShape = new TriangleMeshShape(mesh1,true);
     }
@@ -136,14 +136,14 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
 
     btTriangleMesh* mesh2 = new btTriangleMesh();
 
-    handleNode(mesh2, node,0,hasCollisionNode,true,true);
+    handleNode(mesh2, node,0,true,true);
 
     if(mBoundingBox != NULL)
     {
        cShape->mRaycastingShape = mBoundingBox;
        delete mesh2;
     }
-    else if (mHasShape && !cShape->mIgnore)
+    else if (mHasShape)
     {
         cShape->mRaycastingShape = new TriangleMeshShape(mesh2,true);
     }
@@ -174,7 +174,7 @@ bool ManualBulletShapeLoader::hasRootCollisionNode(Nif::Node const * node)
 }
 
 void ManualBulletShapeLoader::handleNode(btTriangleMesh* mesh, const Nif::Node *node, int flags,
-                                         bool hasCollisionNode, bool isCollisionNode,
+                                         bool isCollisionNode,
                                          bool raycasting)
 {
     // Accumulate the flags from all the child nodes. This works for all
@@ -223,7 +223,7 @@ void ManualBulletShapeLoader::handleNode(btTriangleMesh* mesh, const Nif::Node *
         }
     }
 
-    if (isCollisionNode || (!hasCollisionNode && !raycasting))
+    if (isCollisionNode || (!cShape->mHasCollisionNode && !raycasting))
     {
         if(node->hasBounds)
         {
@@ -246,7 +246,7 @@ void ManualBulletShapeLoader::handleNode(btTriangleMesh* mesh, const Nif::Node *
         for(size_t i = 0;i < list.length();i++)
         {
             if(!list[i].empty())
-                handleNode(mesh, list[i].getPtr(), flags, hasCollisionNode, isCollisionNode, raycasting);
+                handleNode(mesh, list[i].getPtr(), flags, isCollisionNode, raycasting);
         }
     }
 }
