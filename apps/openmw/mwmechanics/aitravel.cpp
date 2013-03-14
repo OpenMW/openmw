@@ -7,6 +7,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "movement.hpp"
+#include "../mwworld/player.hpp"
 
 #include <boost/graph/astar_search.hpp>
 #include <boost/graph/adjacency_list.hpp>
@@ -167,13 +168,35 @@ bool MWMechanics::AiTravel::execute (const MWWorld::Ptr& actor)
 {
     const ESM::Pathgrid *pathgrid =
         MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*actor.getCell()->mCell);
-
+    
     ESM::Position pos = actor.getRefData().getPosition();
     bool cellChange = actor.getCell()->mCell->mData.mX != cellX || actor.getCell()->mCell->mData.mY != cellY;
-    if(cellChange) std::cout << "cellChanged! \n";
+
+    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+    if(actor.getCell()->mCell->mData.mX != player.getCell()->mCell->mData.mX)
+    {
+        int sideX = sgn(actor.getCell()->mCell->mData.mX != player.getCell()->mCell->mData.mX);
+        //check if actor is near the border of an inactive cell. If so, disable aitravel.
+        if(sideX*(pos.pos[0] - actor.getCell()->mCell->mData.mX * ESM::Land::REAL_SIZE) > sideX*(ESM::Land::REAL_SIZE/2. - 2000)) 
+        {
+            MWWorld::Class::get(actor).getMovementSettings(actor).mForwardBackward = 0;
+            return true;
+        }
+    }
+    if(actor.getCell()->mCell->mData.mY != player.getCell()->mCell->mData.mY)
+    {
+        int sideY = sgn(actor.getCell()->mCell->mData.mY != player.getCell()->mCell->mData.mY);
+        //check if actor is near the border of an inactive cell. If so, disable aitravel.
+        if(sideY*(pos.pos[1] - actor.getCell()->mCell->mData.mY * ESM::Land::REAL_SIZE) > sideY*(ESM::Land::REAL_SIZE/2. - 2000)) 
+        {
+            MWWorld::Class::get(actor).getMovementSettings(actor).mForwardBackward = 0;
+            return true;
+        }
+    }
     //std::cout << "npcpos" << pos.pos[0] << pos.pos[1] <<pos.pos[2] <<"\n";
     if(!isPathConstructed ||cellChange)
     {
+        std::cout << "constructing path.... \n";
         cellX = actor.getCell()->mCell->mData.mX;
         cellY = actor.getCell()->mCell->mData.mY;
         float xCell = 0;
@@ -190,7 +213,7 @@ bool MWMechanics::AiTravel::execute (const MWWorld::Ptr& actor)
         PathGridGraph graph = buildGraph(pathgrid,xCell,yCell);
 
         mPath = getPath(start,end,graph);
-        if(mPath.empty()) std::cout << "graph doesn't find any way...";
+
         ESM::Pathgrid::Point dest;
         dest.mX = mX;
         dest.mY = mY;
@@ -200,7 +223,6 @@ bool MWMechanics::AiTravel::execute (const MWWorld::Ptr& actor)
     }
     if(mPath.empty())
     {
-        std::cout << "pathc empty";
         MWWorld::Class::get(actor).getMovementSettings(actor).mForwardBackward = 0;
         return true;
     }
@@ -211,7 +233,6 @@ bool MWMechanics::AiTravel::execute (const MWWorld::Ptr& actor)
         if(mPath.empty())
         {
             MWWorld::Class::get(actor).getMovementSettings(actor).mForwardBackward = 0;
-            std::cout << "emptypath!";
             return true;
         }
         nextPoint = *mPath.begin();
