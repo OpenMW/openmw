@@ -364,14 +364,15 @@ namespace MWWorld
         mEngine->removeHeightField(x, y);
     }
 
-    void PhysicsSystem::addObject (const Ptr& ptr)
+    void PhysicsSystem::addObject (const Ptr& ptr, bool placeable)
     {
         std::string mesh = MWWorld::Class::get(ptr).getModel(ptr);
         Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
         handleToMesh[node->getName()] = mesh;
-        OEngine::Physic::RigidBody* body = mEngine->createAndAdjustRigidBody(mesh, node->getName(), node->getScale().x, node->getPosition(), node->getOrientation());
-        OEngine::Physic::RigidBody* raycastingBody = mEngine->createAndAdjustRigidBody
-                (mesh, node->getName(), node->getScale().x, node->getPosition(), node->getOrientation(), 0, 0, true);
+        OEngine::Physic::RigidBody* body = mEngine->createAndAdjustRigidBody(
+            mesh, node->getName(), node->getScale().x, node->getPosition(), node->getOrientation(), 0, 0, false, placeable);
+        OEngine::Physic::RigidBody* raycastingBody = mEngine->createAndAdjustRigidBody(
+            mesh, node->getName(), node->getScale().x, node->getPosition(), node->getOrientation(), 0, 0, true, placeable);
         mEngine->addRigidBody(body, true, raycastingBody);
     }
 
@@ -440,8 +441,13 @@ namespace MWWorld
         const std::string &handle = node->getName();
         if(handleToMesh.find(handle) != handleToMesh.end())
         {
+            bool placeable = false;
+            if (OEngine::Physic::RigidBody* body = mEngine->getRigidBody(handle,true))
+                placeable = body->mPlaceable;
+            else if (OEngine::Physic::RigidBody* body = mEngine->getRigidBody(handle,false))
+                placeable = body->mPlaceable;
             removeObject(handle);
-            addObject(ptr);
+            addObject(ptr, placeable);
         }
 
         if (OEngine::Physic::PhysicActor* act = mEngine->getCharacter(handle))

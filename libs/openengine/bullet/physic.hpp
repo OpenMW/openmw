@@ -164,6 +164,7 @@ namespace Physic
         RigidBody(btRigidBody::btRigidBodyConstructionInfo& CI,std::string name);
         virtual ~RigidBody();
         std::string mName;
+        bool mPlaceable;
     };
 
     struct HeightField
@@ -197,7 +198,7 @@ namespace Physic
          */
         RigidBody* createAndAdjustRigidBody(const std::string &mesh, const std::string &name,
             float scale, const Ogre::Vector3 &position, const Ogre::Quaternion &rotation,
-            Ogre::Vector3* scaledBoxTranslation = 0, Ogre::Quaternion* boxRotation = 0, bool raycasting=false);
+            Ogre::Vector3* scaledBoxTranslation = 0, Ogre::Quaternion* boxRotation = 0, bool raycasting=false, bool placeable=false);
 
         /**
          * Adjusts a rigid body to the right position and rotation

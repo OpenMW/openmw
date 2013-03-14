@@ -29,7 +29,7 @@ namespace MWWorld
             PhysicsSystem (OEngine::Render::OgreRenderer &_rend);
             ~PhysicsSystem ();
 
-            void addObject (const MWWorld::Ptr& ptr);
+            void addObject (const MWWorld::Ptr& ptr, bool placeable=false);
 
             void addActor (const MWWorld::Ptr& ptr);
 

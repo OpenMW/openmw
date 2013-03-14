@@ -144,6 +144,7 @@ namespace Physic
     RigidBody::RigidBody(btRigidBody::btRigidBodyConstructionInfo& CI,std::string name)
         : btRigidBody(CI)
         , mName(name)
+        , mPlaceable(false)
     {
     }
 
@@ -368,7 +369,7 @@ namespace Physic
 
     RigidBody* PhysicEngine::createAndAdjustRigidBody(const std::string &mesh, const std::string &name,
         float scale, const Ogre::Vector3 &position, const Ogre::Quaternion &rotation,
-        Ogre::Vector3* scaledBoxTranslation, Ogre::Quaternion* boxRotation, bool raycasting)
+        Ogre::Vector3* scaledBoxTranslation, Ogre::Quaternion* boxRotation, bool raycasting, bool placeable)
     {
         std::string sid = (boost::format("%07.3f") % scale).str();
         std::string outputstring = mesh + sid;
@@ -377,6 +378,9 @@ namespace Physic
         mShapeLoader->load(outputstring,"General");
         BulletShapeManager::getSingletonPtr()->load(outputstring,"General");
         BulletShapePtr shape = BulletShapeManager::getSingleton().getByName(outputstring,"General");
+
+        if (placeable && !raycasting && shape->mCollisionShape && !shape->mHasCollisionNode)
+            return NULL;
 
         if (!shape->mCollisionShape && !raycasting)
             return NULL;
@@ -395,6 +399,7 @@ namespace Physic
         btRigidBody::btRigidBodyConstructionInfo CI = btRigidBody::btRigidBodyConstructionInfo
                 (0,newMotionState, raycasting ? shape->mRaycastingShape : shape->mCollisionShape);
         RigidBody* body = new RigidBody(CI,name);
+        body->mPlaceable = placeable;
 
         if(scaledBoxTranslation != 0)
             *scaledBoxTranslation = shape->mBoxTranslation * scale;
