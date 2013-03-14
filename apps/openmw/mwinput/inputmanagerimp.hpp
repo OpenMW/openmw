@@ -217,7 +217,7 @@ namespace MWInput
             A_CycleWeaponLeft,//Cycling through weapons
             A_CycleWeaponRight,
             A_ToggleSneak,    //Toggles Sneak
-            A_ToggleWalk, //Toggle Walking/Running
+            A_AlwaysRun, //Toggle Walking/Running
             A_Sneak,
 
             A_QuickSave,

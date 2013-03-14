@@ -322,6 +322,24 @@ namespace MWClass
         return false;
     }
 
+    bool Npc::getForceStance(const MWWorld::Ptr& ptr, Stance stance) const
+    {
+        MWMechanics::NpcStats& stats = getNpcStats (ptr);
+
+        switch (stance)
+        {
+            case Run:
+                return stats.getMovementFlag (MWMechanics::NpcStats::Flag_ForceRun);
+            case Sneak:
+                return stats.getMovementFlag (MWMechanics::NpcStats::Flag_ForceSneak);
+
+            case Combat:
+                return false;
+        }
+
+        return false;
+    }
+
     float Npc::getSpeed(const MWWorld::Ptr& ptr) const
     {
         const MWBase::World *world = MWBase::Environment::get().getWorld();

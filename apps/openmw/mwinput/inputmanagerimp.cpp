@@ -193,7 +193,7 @@ namespace MWInput
             case A_AutoMove:
                 toggleAutoMove ();
                 break;
-            case A_ToggleWalk:
+            case A_AlwaysRun:
                 toggleWalking ();
                 break;
             case A_ToggleWeapon:
@@ -768,6 +768,7 @@ namespace MWInput
         defaultKeyBindings[A_QuickKey10] = OIS::KC_0;
         defaultKeyBindings[A_Screenshot] = OIS::KC_SYSRQ;
         defaultKeyBindings[A_ToggleHUD] = OIS::KC_F12;
+        defaultKeyBindings[A_AlwaysRun] = OIS::KC_Y;
 
         std::map<int, int> defaultMouseButtonBindings;
         defaultMouseButtonBindings[A_Inventory] = OIS::MB_Right;
@@ -834,6 +835,7 @@ namespace MWInput
         descriptions[A_QuickKey8] = "sQuick8Cmd";
         descriptions[A_QuickKey9] = "sQuick9Cmd";
         descriptions[A_QuickKey10] = "sQuick10Cmd";
+        descriptions[A_AlwaysRun] = "sAlways_Run";
 
         if (descriptions[action] == "")
             return ""; // not configurable
@@ -865,6 +867,7 @@ namespace MWInput
         ret.push_back(A_MoveRight);
         ret.push_back(A_TogglePOV);
         ret.push_back(A_Run);
+        ret.push_back(A_AlwaysRun);
         ret.push_back(A_Sneak);
         ret.push_back(A_Activate);
         ret.push_back(A_ToggleWeapon);
