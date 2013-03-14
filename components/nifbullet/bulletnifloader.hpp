@@ -82,7 +82,7 @@ private:
     /**
     *Parse a node.
     */
-    void handleNode(btTriangleMesh* mesh, Nif::Node const *node, int flags, bool isCollisionNode, bool raycasting);
+    void handleNode(btTriangleMesh* mesh, Nif::Node const *node, int flags, bool isCollisionNode, bool raycasting, bool isMarker);
 
     /**
     *Helper function

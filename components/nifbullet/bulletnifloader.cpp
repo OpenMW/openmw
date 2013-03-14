@@ -112,7 +112,7 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
     cShape->mHasCollisionNode = hasRootCollisionNode(node);
 
     //do a first pass
-    handleNode(mesh1, node,0,false,false);
+    handleNode(mesh1, node,0,false,false,false);
 
     if(mBoundingBox != NULL)
     {
@@ -136,7 +136,7 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
 
     btTriangleMesh* mesh2 = new btTriangleMesh();
 
-    handleNode(mesh2, node,0,true,true);
+    handleNode(mesh2, node,0,true,true,false);
 
     if(mBoundingBox != NULL)
     {
@@ -175,7 +175,7 @@ bool ManualBulletShapeLoader::hasRootCollisionNode(Nif::Node const * node)
 
 void ManualBulletShapeLoader::handleNode(btTriangleMesh* mesh, const Nif::Node *node, int flags,
                                          bool isCollisionNode,
-                                         bool raycasting)
+                                         bool raycasting, bool isMarker)
 {
     // Accumulate the flags from all the child nodes. This works for all
     // the flags we currently use, at least.
@@ -186,14 +186,12 @@ void ManualBulletShapeLoader::handleNode(btTriangleMesh* mesh, const Nif::Node *
     else
         isCollisionNode = isCollisionNode && (node->recType != Nif::RC_RootCollisionNode);
 
-    // Marker objects: no collision
+    // Marker objects
     /// \todo don't do this in the editor
     std::string nodename = node->name;
     Misc::StringUtils::toLower(nodename);
     if (nodename.find("marker") != std::string::npos)
-    {
-        return;
-    }
+        isMarker = true;
 
     // Check for extra data
     Nif::Extra const *e = node;
@@ -219,11 +217,12 @@ void ManualBulletShapeLoader::handleNode(btTriangleMesh* mesh, const Nif::Node *
                 // Marker objects. These are only visible in the
                 // editor. Until and unless we add an editor component to
                 // the engine, just skip this entire node.
-                return;
+                isMarker = true;
         }
     }
 
-    if (isCollisionNode || (!cShape->mHasCollisionNode && !raycasting))
+    if ( (isCollisionNode || (!cShape->mHasCollisionNode && !raycasting))
+            && (!isMarker || (cShape->mHasCollisionNode && !raycasting)))
     {
         if(node->hasBounds)
         {
@@ -246,7 +245,7 @@ void ManualBulletShapeLoader::handleNode(btTriangleMesh* mesh, const Nif::Node *
         for(size_t i = 0;i < list.length();i++)
         {
             if(!list[i].empty())
-                handleNode(mesh, list[i].getPtr(), flags, isCollisionNode, raycasting);
+                handleNode(mesh, list[i].getPtr(), flags, isCollisionNode, raycasting, isMarker);
         }
     }
 }

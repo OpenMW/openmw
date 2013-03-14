@@ -1113,7 +1113,7 @@ public:
                 {
                     // Marker objects. These are only visible in the
                     // editor.
-                    flags |= 0x01;
+                    return;
                 }
             }
             e = e->extra;
