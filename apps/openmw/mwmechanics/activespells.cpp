@@ -62,7 +62,7 @@ namespace MWMechanics
 
         for (TIterator iter (begin()); iter!=end(); ++iter)
         {
-            std::pair<ESM::EffectList, bool> effects = getEffectList (iter->first);
+            std::pair<ESM::EffectList, std::pair<bool, bool> > effects = getEffectList (iter->first);
 
             const MWWorld::TimeStamp& start = iter->second.first;
             float magnitude = iter->second.second;
@@ -74,7 +74,7 @@ namespace MWMechanics
                 {
                     int duration = iter->mDuration;
                     
-                    if (effects.second)
+                    if (effects.second.first)
                         duration *= magnitude;
                     
                     MWWorld::TimeStamp end = start;
@@ -85,7 +85,7 @@ namespace MWMechanics
                     {
                         EffectParam param;
                         
-                        if (effects.second)
+                        if (effects.second.first)
                         {
                             const ESM::MagicEffect *magicEffect =
                                 MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
@@ -113,15 +113,15 @@ namespace MWMechanics
         }    
     }
 
-    std::pair<ESM::EffectList, bool> ActiveSpells::getEffectList (const std::string& id) const
+    std::pair<ESM::EffectList, std::pair<bool, bool> > ActiveSpells::getEffectList (const std::string& id) const
     {
         if (const ESM::Spell *spell =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search (id))
-            return std::make_pair (spell->mEffects, false);
+            return std::make_pair (spell->mEffects, std::make_pair(false, false));
 
         if (const ESM::Potion *potion =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Potion>().search (id))
-            return std::make_pair (potion->mEffects, false);
+            return std::make_pair (potion->mEffects, std::make_pair(false, true));
 
         if (const ESM::Ingredient *ingredient =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Ingredient>().search (id))
@@ -140,11 +140,12 @@ namespace MWMechanics
             effect.mMagnMin = 1;
             effect.mMagnMax = 1;
             
-            std::pair<ESM::EffectList, bool> result;
-            
+            std::pair<ESM::EffectList, std::pair<bool, bool> > result;
+            result.second.second = true;
+            result.second.first = true;
+
             result.first.mList.push_back (effect);
-            result.second = true;
-            
+
             return result;
         }
 
@@ -157,7 +158,8 @@ namespace MWMechanics
 
     bool ActiveSpells::addSpell (const std::string& id, const MWWorld::Ptr& actor)
     {
-        std::pair<ESM::EffectList, bool> effects = getEffectList (id);
+        std::pair<ESM::EffectList, std::pair<bool, bool> > effects = getEffectList (id);
+        bool stacks = effects.second.second;
 
         bool found = false;
 
@@ -178,7 +180,7 @@ namespace MWMechanics
 
         float random = static_cast<float> (std::rand()) / RAND_MAX;
 
-        if (effects.second)
+        if (effects.second.first)
         {
             // ingredient -> special treatment required.
             const CreatureStats& creatureStats = MWWorld::Class::get (actor).getCreatureStats (actor);
@@ -194,7 +196,7 @@ namespace MWMechanics
             random *= 0.25 * x;
         }
 
-        if (iter==mSpells.end())
+        if (iter==mSpells.end() || stacks)
             mSpells.insert (std::make_pair (id,
                 std::make_pair (MWBase::Environment::get().getWorld()->getTimeStamp(), random)));
         else
@@ -236,7 +238,7 @@ namespace MWMechanics
 
     double ActiveSpells::timeToExpire (const TIterator& iterator) const
     {
-        std::pair<ESM::EffectList, bool> effects = getEffectList (iterator->first);
+        std::pair<ESM::EffectList, std::pair<bool, bool> > effects = getEffectList (iterator->first);
 
         int duration = 0;
 
@@ -247,7 +249,7 @@ namespace MWMechanics
                 duration = iter->mDuration;
         }
 
-        if (effects.second)
+        if (effects.second.first)
             duration *= iterator->second.second;
 
         double scaledDuration = duration *
@@ -273,5 +275,10 @@ namespace MWMechanics
                 return true;
         }
         return false;
+    }
+
+    const ActiveSpells::TContainer& ActiveSpells::getActiveSpells() const
+    {
+        return mSpells;
     }
 }

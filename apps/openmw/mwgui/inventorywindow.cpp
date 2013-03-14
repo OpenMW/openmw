@@ -160,11 +160,8 @@ namespace MWGui
             // the "Take" button should not be visible.
             // NOTE: the take button is "reset" when the window opens, so we can safely do the following
             // without screwing up future book windows
-            if (mDragAndDrop->mDraggedFrom == this)
-            {
-                mWindowManager.getBookWindow()->setTakeButtonShow(false);
-                mWindowManager.getScrollWindow()->setTakeButtonShow(false);
-            }
+            mWindowManager.getBookWindow()->setTakeButtonShow(false);
+            mWindowManager.getScrollWindow()->setTakeButtonShow(false);
 
             mDragAndDrop->mIsOnDragAndDrop = false;
             MyGUI::Gui::getInstance().destroyWidget(mDragAndDrop->mDraggedWidget);
@@ -212,24 +209,6 @@ namespace MWGui
             return *invStore.getSlot (slot);
         else
             return MWWorld::Ptr();
-    }
-
-    std::vector<MWWorld::Ptr> InventoryWindow::getEquippedItems()
-    {
-        MWWorld::InventoryStore& invStore = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
-
-        std::vector<MWWorld::Ptr> items;
-
-        for (int slot=0; slot < MWWorld::InventoryStore::Slots; ++slot)
-        {
-            MWWorld::ContainerStoreIterator it = invStore.getSlot(slot);
-            if (it != invStore.end())
-            {
-                items.push_back(*it);
-            }
-        }
-
-        return items;
     }
 
     void InventoryWindow::_unequipItem(MWWorld::Ptr item)

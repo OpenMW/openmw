@@ -17,6 +17,8 @@
 #include "../mwsound/sound_decoder.hpp"
 #include "../mwsound/sound.hpp"
 
+#include "renderconst.hpp"
+
 #ifdef _WIN32
 #include <BaseTsd.h>
 
@@ -1067,9 +1069,9 @@ VideoPlayer::VideoPlayer(Ogre::SceneManager* sceneMgr)
     mBackgroundNode->attachObject(mBackgroundRectangle);
 
     mRectangle->setVisible(false);
-    mRectangle->setVisibilityFlags(0x1);
+    mRectangle->setVisibilityFlags(RV_Overlay);
     mBackgroundRectangle->setVisible(false);
-    mBackgroundRectangle->setVisibilityFlags(0x1);
+    mBackgroundRectangle->setVisibilityFlags(RV_Overlay);
 }
 
 VideoPlayer::~VideoPlayer()

@@ -1,5 +1,7 @@
 #include "OgreMaterialSerializer.hpp"
 
+#include <OgrePass.h>
+
 namespace sh
 {
 	void OgreMaterialSerializer::reset()
@@ -19,6 +21,13 @@ namespace sh
 
 	bool OgreMaterialSerializer::setPassProperty (const std::string& param, std::string value, Ogre::Pass* pass)
 	{
+		// workaround https://ogre3d.atlassian.net/browse/OGRE-158
+		if (param == "transparent_sorting" && value == "force")
+		{
+			pass->setTransparentSortingForced(true);
+			return true;
+		}
+
 		reset();
 
 		mScriptContext.section = Ogre::MSS_PASS;

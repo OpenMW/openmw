@@ -7,12 +7,27 @@ namespace ESM
 {
 void Apparatus::load(ESMReader &esm)
 {
-    mModel = esm.getHNString("MODL");
-    mName = esm.getHNString("FNAM");
-    esm.getHNT(mData, "AADT", 16);
-    mScript = esm.getHNOString("SCRI");
-    mIcon = esm.getHNString("ITEX");
+    // we will not treat duplicated subrecords as errors here
+    while (esm.hasMoreSubs())
+    {
+        esm.getSubName();
+        NAME subName = esm.retSubName();
+
+        if (subName == "MODL")
+            mModel = esm.getHString();
+        else if (subName == "FNAM")
+            mName = esm.getHString();
+        else if (subName == "AADT")
+            esm.getHT(mData);
+        else if (subName == "SCRI")
+            mScript = esm.getHString();
+        else if (subName == "ITEX")
+            mIcon = esm.getHString();
+        else
+            esm.fail("wrong subrecord type " + subName.toString() + " for APPA record");
+    }
 }
+
 void Apparatus::save(ESMWriter &esm)
 {
     esm.writeHNCString("MODL", mModel);

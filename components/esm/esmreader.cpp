@@ -15,9 +15,14 @@ ESM_Context ESMReader::getContext()
     return mCtx;
 }
 
-ESMReader::ESMReader(void):
+ESMReader::ESMReader():
     mBuffer(50*1024)
 {
+}
+
+int ESMReader::getFormat() const
+{
+    return mHeader.mFormat;
 }
 
 void ESMReader::restoreContext(const ESM_Context &rc)
@@ -51,18 +56,6 @@ void ESMReader::openRaw(Ogre::DataStreamPtr _esm, const std::string &name)
     mEsm = _esm;
     mCtx.filename = name;
     mCtx.leftFile = mEsm->size();
-
-    // Flag certain files for special treatment, based on the file
-    // name.
-    const char *cstr = mCtx.filename.c_str();
-    if (iends(cstr, "Morrowind.esm"))
-        mSpf = SF_Morrowind;
-    else if (iends(cstr, "Tribunal.esm"))
-        mSpf = SF_Tribunal;
-    else if (iends(cstr, "Bloodmoon.esm"))
-        mSpf = SF_Bloodmoon;
-    else
-        mSpf = SF_Other;
 }
 
 void ESMReader::open(Ogre::DataStreamPtr _esm, const std::string &name)
@@ -74,43 +67,7 @@ void ESMReader::open(Ogre::DataStreamPtr _esm, const std::string &name)
 
     getRecHeader();
 
-    // Get the header
-    getHNT(mCtx.header, "HEDR", 300);
-
-    if (mCtx.header.version != VER_12 && mCtx.header.version != VER_13)
-        fail("Unsupported file format version");
-
-    while (isNextSub("MAST"))
-    {
-        MasterData m;
-        m.name = getHString();
-        m.size = getHNLong("DATA");
-        mMasters.push_back(m);
-    }
-
-    if (mCtx.header.type == FT_ESS)
-    {
-        // Savegame-related data
-
-        // Player position etc
-        getHNT(mSaveData, "GMDT", 124);
-
-        /* Image properties, five ints. Is always:
-         Red-mask:   0xff0000
-         Blue-mask:  0x00ff00
-         Green-mask: 0x0000ff
-         Alpha-mask: 0x000000
-         Bpp:        32
-         */
-        getSubNameIs("SCRD");
-        skipHSubSize(20);
-
-        /* Savegame screenshot:
-         128x128 pixels * 4 bytes per pixel
-         */
-        getSubNameIs("SCRS");
-        skipHSubSize(65536);
-    }
+    mHeader.load (*this);
 }
 
 void ESMReader::open(const std::string &file)

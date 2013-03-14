@@ -151,7 +151,7 @@ DialogueWindow::DialogueWindow(MWBase::WindowManager& parWindowManager)
     getWidget(mTopicsList, "TopicsList");
     mTopicsList->eventItemSelected += MyGUI::newDelegate(this, &DialogueWindow::onSelectTopic);
 
-    MyGUI::ButtonPtr byeButton;
+    MyGUI::Button* byeButton;
     getWidget(byeButton, "ByeButton");
     byeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &DialogueWindow::onByeClicked);
 
@@ -164,7 +164,7 @@ DialogueWindow::DialogueWindow(MWBase::WindowManager& parWindowManager)
 void DialogueWindow::onHistoryClicked(MyGUI::Widget* _sender)
 {
     MyGUI::ISubWidgetText* t = mHistory->getClient()->getSubWidgetText();
-    if(t == nullptr)
+    if(t == NULL)
         return;
 
     const MyGUI::IntPoint& lastPressed = MyGUI::InputManager::getInstance().getLastPressedPosition(MyGUI::MouseButton::Left);
@@ -223,50 +223,60 @@ void DialogueWindow::onByeClicked(MyGUI::Widget* _sender)
     MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
 }
 
-void DialogueWindow::onSelectTopic(std::string topic)
+void DialogueWindow::onSelectTopic(const std::string& topic, int id)
 {
     if (!mEnabled) return;
 
-    const MWWorld::Store<ESM::GameSetting> &gmst =
-        MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+    int separatorPos = mTopicsList->getItemCount();
+    for (unsigned int i=0; i<mTopicsList->getItemCount(); ++i)
+    {
+        if (mTopicsList->getItemNameAt(i) == "")
+            separatorPos = i;
+    }
 
-    if (topic == gmst.find("sBarter")->getString())
-    {
-        /// \todo check if the player is allowed to trade with this actor (e.g. faction rank high enough)?
-        mWindowManager.pushGuiMode(GM_Barter);
-        mWindowManager.getTradeWindow()->startTrade(mPtr);
-    }
-    if (topic == gmst.find("sPersuasion")->getString())
-    {
-        mPersuasionDialog.setVisible(true);
-    }
-    else if (topic == gmst.find("sSpells")->getString())
-    {
-        mWindowManager.pushGuiMode(GM_SpellBuying);
-        mWindowManager.getSpellBuyingWindow()->startSpellBuying(mPtr);
-    }
-    else if (topic == gmst.find("sTravel")->getString())
-    {
-        mWindowManager.pushGuiMode(GM_Travel);
-        mWindowManager.getTravelWindow()->startTravel(mPtr);
-    }
-    else if (topic == gmst.find("sSpellMakingMenuTitle")->getString())
-    {
-        mWindowManager.pushGuiMode(GM_SpellCreation);
-        mWindowManager.startSpellMaking (mPtr);
-    }
-    else if (topic == gmst.find("sEnchanting")->getString())
-    {
-        mWindowManager.pushGuiMode(GM_Enchanting);
-        mWindowManager.startEnchanting (mPtr);
-    }
-    else if (topic == gmst.find("sServiceTrainingTitle")->getString())
-    {
-        mWindowManager.pushGuiMode(GM_Training);
-        mWindowManager.startTraining (mPtr);
-    }
-    else
+    if (id > separatorPos)
         MWBase::Environment::get().getDialogueManager()->keywordSelected(lower_string(topic));
+    else
+    {
+        const MWWorld::Store<ESM::GameSetting> &gmst =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+        if (topic == gmst.find("sBarter")->getString())
+        {
+            /// \todo check if the player is allowed to trade with this actor (e.g. faction rank high enough)?
+            mWindowManager.pushGuiMode(GM_Barter);
+            mWindowManager.getTradeWindow()->startTrade(mPtr);
+        }
+        if (topic == gmst.find("sPersuasion")->getString())
+        {
+            mPersuasionDialog.setVisible(true);
+        }
+        else if (topic == gmst.find("sSpells")->getString())
+        {
+            mWindowManager.pushGuiMode(GM_SpellBuying);
+            mWindowManager.getSpellBuyingWindow()->startSpellBuying(mPtr);
+        }
+        else if (topic == gmst.find("sTravel")->getString())
+        {
+            mWindowManager.pushGuiMode(GM_Travel);
+            mWindowManager.getTravelWindow()->startTravel(mPtr);
+        }
+        else if (topic == gmst.find("sSpellMakingMenuTitle")->getString())
+        {
+            mWindowManager.pushGuiMode(GM_SpellCreation);
+            mWindowManager.startSpellMaking (mPtr);
+        }
+        else if (topic == gmst.find("sEnchanting")->getString())
+        {
+            mWindowManager.pushGuiMode(GM_Enchanting);
+            mWindowManager.startEnchanting (mPtr);
+        }
+        else if (topic == gmst.find("sServiceTrainingTitle")->getString())
+        {
+            mWindowManager.pushGuiMode(GM_Training);
+            mWindowManager.startTraining (mPtr);
+        }
+    }
 }
 
 void DialogueWindow::startDialogue(MWWorld::Ptr actor, std::string npcName)
@@ -381,7 +391,7 @@ std::string DialogueWindow::parseText(const std::string& text)
     std::vector<MWDialogue::HyperTextToken> hypertext = MWDialogue::ParseHyperText(text);
 
     size_t historySize = 0;
-    if(mHistory->getClient()->getSubWidgetText() != nullptr)
+    if(mHistory->getClient()->getSubWidgetText() != NULL)
     {
         historySize = mHistory->getOnlyText().size();
     }

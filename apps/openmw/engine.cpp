@@ -9,16 +9,15 @@
 #include <components/bsa/bsa_archive.hpp>
 #include <components/files/configurationmanager.hpp>
 #include <components/translation/translation.hpp>
-#include <components/nif/nif_file.hpp>
+#include <components/nif/niffile.hpp>
 #include <components/nifoverrides/nifoverrides.hpp>
 
-#include <components/nifbullet/bullet_nif_loader.hpp>
-#include <components/nifogre/ogre_nif_loader.hpp>
+#include <components/nifbullet/bulletnifloader.hpp>
+#include <components/nifogre/ogrenifloader.hpp>
 
 #include "mwinput/inputmanagerimp.hpp"
 
 #include "mwgui/windowmanagerimp.hpp"
-#include "mwgui/cursorreplace.hpp"
 
 #include "mwscript/scriptmanagerimp.hpp"
 #include "mwscript/extensions.hpp"
@@ -61,6 +60,13 @@ void OMW::Engine::executeLocalScripts()
 
 void OMW::Engine::setAnimationVerbose(bool animverbose)
 {
+}
+
+bool OMW::Engine::frameStarted (const Ogre::FrameEvent& evt)
+{
+    if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
+        MWBase::Environment::get().getWorld()->frameStarted(evt.timeSinceLastFrame);
+    return true;
 }
 
 bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
@@ -143,16 +149,22 @@ OMW::Engine::~Engine()
     delete mOgre;
 }
 
-// Load all BSA files in data directory.
+// Load BSA files
 
 void OMW::Engine::loadBSA()
 {
-    const Files::MultiDirCollection& bsa = mFileCollections.getCollection (".bsa");
-
-    for (Files::MultiDirCollection::TIter iter(bsa.begin()); iter!=bsa.end(); ++iter)
+    for (std::vector<std::string>::const_iterator archive = mArchives.begin(); archive != mArchives.end(); ++archive)
     {
-        std::cout << "Adding " << iter->second.string() << std::endl;
-        Bsa::addBSA(iter->second.string());
+        if (mFileCollections.doesExist(*archive))
+        {
+            const std::string archivePath = mFileCollections.getPath(*archive).string();
+            std::cout << "Adding BSA archive " << archivePath << std::endl;
+            Bsa::addBSA(archivePath);
+        }
+        else
+        {
+            std::cout << "Archive " << *archive << " not found" << std::endl;
+        }
     }
 
     const Files::PathContainer& dataDirs = mFileCollections.getPaths();
@@ -191,6 +203,11 @@ void OMW::Engine::setDataDirs (const Files::PathContainer& dataDirs)
 {
     mDataDirs = dataDirs;
     mFileCollections = Files::Collections (dataDirs, !mFSStrict);
+}
+
+// Add BSA archive
+void OMW::Engine::addArchive (const std::string& archive) {
+    mArchives.push_back(archive);
 }
 
 // Set resource dir
@@ -317,7 +334,6 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     addResourcesDirectory(mResDir / "mygui");
     addResourcesDirectory(mResDir / "water");
-    addResourcesDirectory(mResDir / "gbuffer");
     addResourcesDirectory(mResDir / "shadows");
     addZipResource(mResDir / "mygui" / "Obliviontt.zip");
 
@@ -332,9 +348,6 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     mOgre->createWindow("OpenMW", windowSettings);
 
     loadBSA();
-
-    // cursor replacer (converts the cursor from the bsa so they can be used by mygui)
-    MWGui::CursorReplace replacer;
 
     // Create the world
     mEnvironment.setWorld( new MWWorld::World (*mOgre, mFileCollections, mMaster, mPlugins,
@@ -440,15 +453,13 @@ void OMW::Engine::go()
     if (!mStartupScript.empty())
         MWBase::Environment::get().getWindowManager()->executeInConsole (mStartupScript);
 
-    std::cout << "\nPress Q/ESC or close window to exit.\n";
-
     // Start the main rendering loop
     mOgre->start();
 
     // Save user settings
     settings.saveUser(settingspath);
 
-    std::cout << "Quitting peacefully.\n";
+    std::cout << "Quitting peacefully." << std::endl;
 }
 
 void OMW::Engine::activate()

@@ -2,6 +2,7 @@
 #define OPENMW_ESM_COMMON_H
 
 #include <string>
+#include <cstring>
 
 #include <libs/platform/stdint.h>
 #include <libs/platform/string.h>
@@ -14,24 +15,6 @@ enum Version
     VER_13 = 0x3fa66666
   };
 
-enum FileType
-  {
-    FT_ESP = 0,       // Plugin
-    FT_ESM = 1,       // Master
-    FT_ESS = 32       // Savegame
-  };
-
-// Used to mark special files. The original ESM files are given
-// special treatment in a few places, most noticably in loading and
-// filtering out "dirtly" GMST entries correctly.
-enum SpecialFile
-  {
-    SF_Other,
-    SF_Morrowind,
-    SF_Tribunal,
-    SF_Bloodmoon
-  };
-
 /* A structure used for holding fixed-length strings. In the case of
    LEN=4, it can be more efficient to match the string as a 32 bit
    number, therefore the struct is implemented as a union with an int.
@@ -41,7 +24,7 @@ union NAME_T
 {
     char name[LEN];
     int32_t val;
-    
+
   bool operator==(const char *str) const
   {
     for(int i=0; i<LEN; i++)
@@ -61,6 +44,8 @@ union NAME_T
   bool operator!=(int v) const { return v != val; }
 
   std::string toString() const { return std::string(name, strnlen(name, LEN)); }
+
+  void assign (const std::string& value) { std::strncpy (name, value.c_str(), LEN); }
 };
 
 typedef NAME_T<4> NAME;
@@ -70,28 +55,6 @@ typedef NAME_T<256> NAME256;
 
 #pragma pack(push)
 #pragma pack(1)
-/// File header data for all ES files
-struct HEDRstruct
-{
-  /* File format version. This is actually a float, the supported
-     versions are 1.2 and 1.3. These correspond to:
-     1.2 = 0x3f99999a and 1.3 = 0x3fa66666
-  */
-  int version;
-  int type;           // 0=esp, 1=esm, 32=ess
-  NAME32 author;      // Author's name
-  NAME256 desc;       // File description
-  int records;        // Number of records? Not used.
-};
-
-// Defines another files (esm or esp) that this file depends upon.
-struct MasterData
-{
-  std::string name;
-  uint64_t size;
-  int index; // Position of the parent file in the global list of loaded files
-};
-
 // Data that is only present in save game files
 struct SaveData
 {
@@ -113,7 +76,6 @@ struct ESM_Context
   uint32_t leftRec, leftSub;
   size_t leftFile;
   NAME recName, subName;
-  HEDRstruct header;
   // When working with multiple esX files, we will generate lists of all files that
   //  actually contribute to a specific cell. Therefore, we need to store the index
   //  of the file belonging to this contest. See CellStore::(list/load)refs for details.

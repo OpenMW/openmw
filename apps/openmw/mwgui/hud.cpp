@@ -2,7 +2,8 @@
 
 #include <cmath>
 
-#include <MyGUI.h>
+#include <MyGUI_Widget.h>
+#include <MyGUI_RenderManager.h>
 
 #include <boost/lexical_cast.hpp>
 
@@ -19,6 +20,7 @@
 #include "inventorywindow.hpp"
 #include "container.hpp"
 #include "console.hpp"
+#include "spellicons.hpp"
 
 using namespace MWGui;
 
@@ -32,7 +34,6 @@ HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
     , mWeapStatus(NULL)
     , mSpellStatus(NULL)
     , mEffectBox(NULL)
-    , mEffect1(NULL)
     , mMinimap(NULL)
     , mCompass(NULL)
     , mCrosshair(NULL)
@@ -86,9 +87,7 @@ HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
     mSpellBox->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onMagicClicked);
 
     getWidget(mEffectBox, "EffectBox");
-    getWidget(mEffect1, "Effect1");
     mEffectBoxBaseRight = viewSize.width - mEffectBox->getRight();
-    mEffectBox->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onMagicClicked);
 
     getWidget(mMinimapBox, "MiniMapBox");
     mMinimapBoxBaseRight = viewSize.width - mMinimapBox->getRight();
@@ -107,13 +106,18 @@ HUD::HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop)
     getWidget(mTriangleCounter, "TriangleCounter");
     getWidget(mBatchCounter, "BatchCounter");
 
-    setEffect("icons\\s\\tx_s_chameleon.dds");
-
     LocalMapBase::init(mMinimap, mCompass, this);
 
     mMainWidget->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onWorldClicked);
     mMainWidget->eventMouseMove += MyGUI::newDelegate(this, &HUD::onWorldMouseOver);
     mMainWidget->eventMouseLostFocus += MyGUI::newDelegate(this, &HUD::onWorldMouseLostFocus);
+
+    mSpellIcons = new SpellIcons();
+}
+
+HUD::~HUD()
+{
+    delete mSpellIcons;
 }
 
 void HUD::setFpsLevel(int level)
@@ -154,11 +158,6 @@ void HUD::setTriangleCount(unsigned int count)
 void HUD::setBatchCount(unsigned int count)
 {
     mBatchCounter->setCaption(boost::lexical_cast<std::string>(count));
-}
-
-void HUD::setEffect(const char *img)
-{
-    mEffect1->setImageTexture(img);
 }
 
 void HUD::setValue(const std::string& id, const MWMechanics::DynamicStat<float>& value)
@@ -222,7 +221,7 @@ void HUD::onWorldClicked(MyGUI::Widget* _sender)
         else
             world->dropObjectOnGround(world->getPlayer().getPlayer(), object);
 
-        MyGUI::PointerManager::getInstance().setPointer("arrow");
+        MWBase::Environment::get().getWindowManager()->changePointer("arrow");
 
         std::string sound = MWWorld::Class::get(object).getDownSoundId(object);
         MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
@@ -273,21 +272,21 @@ void HUD::onWorldMouseOver(MyGUI::Widget* _sender, int x, int y)
         bool canDrop = world->canPlaceObject(mouseX, mouseY);
 
         if (!canDrop)
-            MyGUI::PointerManager::getInstance().setPointer("drop_ground");
+            MWBase::Environment::get().getWindowManager()->changePointer("drop_ground");
         else
-            MyGUI::PointerManager::getInstance().setPointer("arrow");
+            MWBase::Environment::get().getWindowManager()->changePointer("arrow");
 
     }
     else
     {
-        MyGUI::PointerManager::getInstance().setPointer("arrow");
+        MWBase::Environment::get().getWindowManager()->changePointer("arrow");
         mWorldMouseOver = true;
     }
 }
 
 void HUD::onWorldMouseLostFocus(MyGUI::Widget* _sender, MyGUI::Widget* _new)
 {
-    MyGUI::PointerManager::getInstance().setPointer("arrow");
+    MWBase::Environment::get().getWindowManager()->changePointer("arrow");
     mWorldMouseOver = false;
 }
 
@@ -541,4 +540,9 @@ void HUD::updatePositions()
 
     mMapVisible = mMinimapBox->getVisible ();
     mEffectBox->setPosition((viewSize.width - mEffectBoxBaseRight) - mEffectBox->getWidth() + effectsDx, mEffectBox->getTop());
+}
+
+void HUD::update()
+{
+    mSpellIcons->updateWidgets(mEffectBox, true);
 }

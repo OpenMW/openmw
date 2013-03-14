@@ -2,7 +2,7 @@
 #include "document.hpp"
 
 #include <cassert>
-
+#include <QDebug>
 void CSMDoc::Document::load (const std::vector<boost::filesystem::path>::const_iterator& begin,
     const std::vector<boost::filesystem::path>::const_iterator& end, bool lastAsModified)
 {
@@ -18,9 +18,6 @@ void CSMDoc::Document::load (const std::vector<boost::filesystem::path>::const_i
 
     if (lastAsModified)
         getData().loadFile (*end2, false);
-
-    addOptionalGmsts();
-    addOptionalGlobals();
 }
 
 void CSMDoc::Document::addOptionalGmsts()
@@ -116,8 +113,7 @@ void CSMDoc::Document::addOptionalGmsts()
     {
         ESM::GameSetting gmst;
         gmst.mId = sFloats[i];
-        gmst.mF = 0;
-        gmst.mType = ESM::VT_Float;
+        gmst.mValue.setType (ESM::VT_Float);
         addOptionalGmst (gmst);
     }
 
@@ -125,8 +121,7 @@ void CSMDoc::Document::addOptionalGmsts()
     {
         ESM::GameSetting gmst;
         gmst.mId = sIntegers[i];
-        gmst.mI = 0;
-        gmst.mType = ESM::VT_Long;
+        gmst.mValue.setType (ESM::VT_Int);
         addOptionalGmst (gmst);
     }
 
@@ -134,8 +129,8 @@ void CSMDoc::Document::addOptionalGmsts()
     {
         ESM::GameSetting gmst;
         gmst.mId = sStrings[i];
-        gmst.mStr = "<no text>";
-        gmst.mType = ESM::VT_String;
+        gmst.mValue.setType (ESM::VT_String);
+        gmst.mValue.setString ("<no text>");
         addOptionalGmst (gmst);
     }
 }
@@ -154,8 +149,7 @@ void CSMDoc::Document::addOptionalGlobals()
     {
         ESM::Global global;
         global.mId = sGlobals[i];
-        global.mType = ESM::VT_Int;
-        global.mValue = 0;
+        global.mValue.setType (ESM::VT_Long);
         addOptionalGlobal (global);
     }
 }
@@ -192,11 +186,18 @@ void CSMDoc::Document::createBase()
     for (int i=0; sGlobals[i]; ++i)
     {
         ESM::Global record;
+
         record.mId = sGlobals[i];
-        record.mValue = i==0 ? 1 : 0;
-        record.mType = ESM::VT_Float;
+
+        record.mValue.setType (i==2 ? ESM::VT_Float : ESM::VT_Int);
+
+        if (i==0)
+            record.mValue.setInteger (1);
+
         getData().getGlobals().add (record);
     }
+
+    /// \todo add GMSTs
 }
 
 CSMDoc::Document::Document (const std::vector<boost::filesystem::path>& files, bool new_)
@@ -211,7 +212,9 @@ CSMDoc::Document::Document (const std::vector<boost::filesystem::path>& files, b
 
     mName = files.back().filename().string();
 
-    if (files.size()>1 || !new_)
+    if (new_ && files.size()==1)
+        createBase();
+    else if (files.size()>1)
     {
         std::vector<boost::filesystem::path>::const_iterator end = files.end();
 
@@ -221,8 +224,8 @@ CSMDoc::Document::Document (const std::vector<boost::filesystem::path>& files, b
         load (files.begin(), end, !new_);
     }
 
-    if (new_ && files.size()==1)
-        createBase();
+    addOptionalGmsts();
+    addOptionalGlobals();
 
     connect (&mUndoStack, SIGNAL (cleanChanged (bool)), this, SLOT (modificationStateChanged (bool)));
 
@@ -233,6 +236,9 @@ CSMDoc::Document::Document (const std::vector<boost::filesystem::path>& files, b
     mSaveCount = 0;
     connect (&mSaveTimer, SIGNAL(timeout()), this, SLOT (saving()));
 }
+
+CSMDoc::Document::~Document()
+{}
 
 QUndoStack& CSMDoc::Document::getUndoStack()
 {
@@ -287,10 +293,12 @@ void CSMDoc::Document::abortOperation (int type)
     }
 }
 
+
 void CSMDoc::Document::modificationStateChanged (bool clean)
 {
     emit stateChanged (getState(), this);
 }
+
 
 void CSMDoc::Document::operationDone (int type)
 {
@@ -305,9 +313,12 @@ void CSMDoc::Document::saving()
 
     if (mSaveCount>15)
     {
+        //clear the stack before resetting the save state
+        //to avoid emitting incorrect states
+        mUndoStack.setClean();
+
         mSaveCount = 0;
         mSaveTimer.stop();
-        mUndoStack.setClean();
         emit stateChanged (getState(), this);
     }
 }

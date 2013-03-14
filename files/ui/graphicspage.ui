@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>GraphicsPage</class>
+ <widget class="QWidget" name="GraphicsPage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>332</width>
+    <height>297</height>
+   </rect>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QGroupBox" name="rendererGroup">
+     <property name="title">
+      <string>Render System</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_3">
+      <item row="0" column="0">
+       <widget class="QLabel" name="rendererLabel">
+        <property name="text">
+         <string>Rendering Subsystem:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="rendererComboBox"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="displayGroup">
+     <property name="title">
+      <string>Display</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_4" columnstretch="1,1">
+      <item row="0" column="0">
+       <widget class="QCheckBox" name="vSyncCheckBox">
+        <property name="text">
+         <string>Vertical Sync</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QCheckBox" name="fullScreenCheckBox">
+        <property name="text">
+         <string>Full Screen</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="antiAliasingLabel">
+        <property name="text">
+         <string>Anti-aliasing:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="resolutionLabel">
+        <property name="text">
+         <string>Resolution:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QComboBox" name="antiAliasingComboBox"/>
+      </item>
+      <item row="3" column="1">
+       <layout class="QGridLayout" name="resolutionLayout">
+        <item row="1" column="2">
+         <layout class="QHBoxLayout" name="customResolutionLayout" stretch="1,0,1">
+          <item>
+           <widget class="QSpinBox" name="customWidthSpinBox">
+            <property name="minimum">
+             <number>800</number>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="multiplyLabel">
+            <property name="text">
+             <string> x </string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="customHeightSpinBox">
+            <property name="minimum">
+             <number>600</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="1" column="1">
+         <widget class="QRadioButton" name="customRadioButton">
+          <property name="text">
+           <string>Custom:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QRadioButton" name="standardRadioButton">
+          <property name="text">
+           <string>Standard:</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QComboBox" name="resolutionComboBox"/>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>61</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

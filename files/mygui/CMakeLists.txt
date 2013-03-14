@@ -9,7 +9,6 @@ set(MYGUI_FILES
     core.skin
     core.xml
     EBGaramond-Regular.ttf
-    mwgui.png
     Obliviontt.zip
     openmw_alchemy_window.layout
     openmw_book.layout

@@ -36,7 +36,7 @@ namespace MWClass
     {
         const std::string model = getModel(ptr);
         if(!model.empty())
-            physics.addObject(ptr);
+            physics.addObject(ptr,true);
     }
 
     std::string Clothing::getModel(const MWWorld::Ptr &ptr) const

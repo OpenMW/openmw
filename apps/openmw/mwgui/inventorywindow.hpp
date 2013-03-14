@@ -64,7 +64,6 @@ namespace MWGui
 
             virtual bool isTrading() { return mTrading; }
             virtual bool isInventory() { return true; }
-            virtual std::vector<MWWorld::Ptr> getEquippedItems();
             virtual void _unequipItem(MWWorld::Ptr item);
 
             virtual void onReferenceUnavailable() { ; }

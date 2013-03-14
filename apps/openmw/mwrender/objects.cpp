@@ -7,7 +7,7 @@
 #include <OgreSubEntity.h>
 #include <OgreStaticGeometry.h>
 
-#include <components/nifogre/ogre_nif_loader.hpp>
+#include <components/nifogre/ogrenifloader.hpp>
 #include <components/settings/settings.hpp>
 
 #include "../mwworld/ptr.hpp"
@@ -113,12 +113,8 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh, bool
     Ogre::AxisAlignedBox bounds = Ogre::AxisAlignedBox::BOX_NULL;
     NifOgre::EntityList entities = NifOgre::Loader::createEntities(insert, mesh);
     for(size_t i = 0;i < entities.mEntities.size();i++)
-    {
-        const Ogre::AxisAlignedBox &tmp = entities.mEntities[i]->getBoundingBox();
-        bounds.merge(Ogre::AxisAlignedBox(insert->_getDerivedPosition() + tmp.getMinimum(),
-                                          insert->_getDerivedPosition() + tmp.getMaximum())
-        );
-    }
+        bounds.merge(entities.mEntities[i]->getWorldBoundingBox(true));
+
     Ogre::Vector3 extents = bounds.getSize();
     extents *= insert->getScale();
     float size = std::max(std::max(extents.x, extents.y), extents.z);
@@ -133,38 +129,28 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh, bool
         mBounds[ptr.getCell()] = Ogre::AxisAlignedBox::BOX_NULL;
     mBounds[ptr.getCell()].merge(bounds);
 
-    bool transparent = false;
-    for(size_t i = 0;i < entities.mEntities.size();i++)
+    bool anyTransparency = false;
+    for(size_t i = 0;!anyTransparency && i < entities.mEntities.size();i++)
     {
         Ogre::Entity *ent = entities.mEntities[i];
-        for (unsigned int i=0; i<ent->getNumSubEntities(); ++i)
+        for(unsigned int i=0;!anyTransparency && i < ent->getNumSubEntities(); ++i)
         {
-            Ogre::MaterialPtr mat = ent->getSubEntity(i)->getMaterial();
-            Ogre::Material::TechniqueIterator techIt = mat->getTechniqueIterator();
-            while (techIt.hasMoreElements())
-            {
-                Ogre::Technique* tech = techIt.getNext();
-                Ogre::Technique::PassIterator passIt = tech->getPassIterator();
-                while (passIt.hasMoreElements())
-                {
-                    Ogre::Pass* pass = passIt.getNext();
-
-                    if (pass->getDepthWriteEnabled() == false)
-                        transparent = true;
-                }
-            }
+            anyTransparency = ent->getSubEntity(i)->getMaterial()->isTransparent();
         }
     }
 
-    if(!mIsStatic || !Settings::Manager::getBool("use static geometry", "Objects") || transparent)
+    if(!mIsStatic || !Settings::Manager::getBool("use static geometry", "Objects") || anyTransparency)
     {
         for(size_t i = 0;i < entities.mEntities.size();i++)
         {
             Ogre::Entity *ent = entities.mEntities[i];
-
+            for(unsigned int i=0; i < ent->getNumSubEntities(); ++i)
+            {
+                Ogre::SubEntity* subEnt = ent->getSubEntity(i);
+                subEnt->setRenderQueueGroup(subEnt->getMaterial()->isTransparent() ? RQG_Alpha : RQG_Main);
+            }
             ent->setRenderingDistance(small ? Settings::Manager::getInt("small object distance", "Viewing distance") : 0);
             ent->setVisibilityFlags(mIsStatic ? (small ? RV_StaticsSmall : RV_Statics) : RV_Misc);
-            ent->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
         }
     }
     else
@@ -209,7 +195,7 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh, bool
 
         sg->setCastShadows(true);
 
-        sg->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
+        sg->setRenderQueueGroup(RQG_Main);
 
         std::vector<Ogre::Entity*>::reverse_iterator iter = entities.mEntities.rbegin();
         while(iter != entities.mEntities.rend())
@@ -270,17 +256,16 @@ void Objects::insertLight (const MWWorld::Ptr& ptr, Ogre::Entity* skelBase, Ogre
     info.time = Ogre::Math::RangeRandom(-500, +500);
     info.phase = Ogre::Math::RangeRandom(-500, +500);
 
-    // adjust the lights depending if we're in an interior or exterior cell
-    // quadratic means the light intensity falls off quite fast, resulting in a
-    // dark, atmospheric environment (perfect for exteriors)
-    // for interiors, we want more "warm" lights, so use linear attenuation.
+    // changed to linear to look like morrowind
     bool quadratic = false;
+    /*
     if (!lightOutQuadInLin)
         quadratic = lightQuadratic;
     else
     {
         quadratic = !info.interior;
     }
+    */
 
     if (!quadratic)
     {

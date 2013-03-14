@@ -86,6 +86,13 @@ namespace MWWorld
         MWWorld::Class::get (ptr).setStance (ptr, MWWorld::Class::Run, !running);
     }
 
+    void Player::setSneak(bool sneak)
+    {
+        MWWorld::Ptr ptr = getPlayer();
+
+        MWWorld::Class::get (ptr).setStance (ptr, MWWorld::Class::Sneak, sneak);
+    }
+
     MWMechanics::DrawState_ Player::getDrawState()
     {
          MWWorld::Ptr ptr = getPlayer();

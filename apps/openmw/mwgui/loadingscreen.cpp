@@ -106,7 +106,7 @@ namespace MWGui
         float progress = (float(mCurrentCellLoading)+refProgress) / float(mTotalCellsLoading);
         assert(progress <= 1 && progress >= 0);
 
-        mLoadingText->setCaption(stage + "... ");
+        mLoadingText->setCaption(stage);
         mProgressBar->setProgressPosition (static_cast<size_t>(progress * 1000));
 
         static float loadingScreenFps = 30.f;

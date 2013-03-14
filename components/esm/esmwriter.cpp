@@ -1,6 +1,8 @@
 #include "esmwriter.hpp"
+
+#include <cassert>
 #include <fstream>
-#include <cstring>
+#include <iostream>
 
 bool count = true;
 
@@ -9,40 +11,40 @@ namespace ESM
 
 int ESMWriter::getVersion()
 {
-    return m_header.version;
+    return mHeader.mData.version;
 }
 
 void ESMWriter::setVersion(int ver)
 {
-    m_header.version = ver;
-}
-
-int ESMWriter::getType()
-{
-    return m_header.type;
-}
-
-void ESMWriter::setType(int type)
-{
-    m_header.type = type;
+    mHeader.mData.version = ver;
 }
 
 void ESMWriter::setAuthor(const std::string& auth)
 {
-    strncpy((char*)&m_header.author, auth.c_str(), 32);
+    mHeader.mData.author.assign (auth);
 }
 
 void ESMWriter::setDescription(const std::string& desc)
 {
-    strncpy((char*)&m_header.desc, desc.c_str(), 256);
+    mHeader.mData.desc.assign (desc);
+}
+
+void ESMWriter::setRecordCount (int count)
+{
+    mHeader.mData.records = count;
+}
+
+void ESMWriter::setFormat (int format)
+{
+    mHeader.mFormat = format;
 }
 
 void ESMWriter::addMaster(const std::string& name, uint64_t size)
 {
-    MasterData d;
+    Header::MasterData d;
     d.name = name;
     d.size = size;
-    m_masters.push_back(d);
+    mHeader.mMaster.push_back(d);
 }
 
 void ESMWriter::save(const std::string& file)
@@ -58,25 +60,13 @@ void ESMWriter::save(std::ostream& file)
 
     startRecord("TES3", 0);
 
-    m_header.records = 0;
-    writeHNT("HEDR", m_header, 300);
-    m_headerPos = m_stream->tellp() - (std::streampos)4;
-
-    for (std::list<MasterData>::iterator it = m_masters.begin(); it != m_masters.end(); ++it)
-    {
-        writeHNCString("MAST", it->name);
-        writeHNT("DATA", it->size);
-    }
+    mHeader.save (*this);
 
     endRecord("TES3");
 }
 
 void ESMWriter::close()
 {
-    std::cout << "Writing amount of saved records (" << m_recordCount - 1 << ")" << std::endl;
-    m_stream->seekp(m_headerPos);
-    writeT<int>(m_recordCount-1);
-    m_stream->seekp(0, std::ios::end);
     m_stream->flush();
 
     if (!m_records.empty())
@@ -86,7 +76,7 @@ void ESMWriter::close()
 void ESMWriter::startRecord(const std::string& name, uint32_t flags)
 {
     m_recordCount++;
-    
+
     writeName(name);
     RecordData rec;
     rec.name = name;
@@ -109,7 +99,7 @@ void ESMWriter::startSubRecord(const std::string& name)
     rec.size = 0;
     writeT<int>(0); // Size goes here
     m_records.push_back(rec);
-    
+
     assert(m_records.back().size == 0);
 }
 
@@ -118,7 +108,7 @@ void ESMWriter::endRecord(const std::string& name)
     RecordData rec = m_records.back();
     assert(rec.name == name);
     m_records.pop_back();
-    
+
     m_stream->seekp(rec.position);
 
     count = false;

@@ -1,8 +1,5 @@
 #include "core.h"
 
-#define MRT @shGlobalSettingBool(mrt_output)
-
-
 #ifdef SH_VERTEX_SHADER
 
     SH_BEGIN_PROGRAM
@@ -21,19 +18,12 @@
     SH_BEGIN_PROGRAM
 		shSampler2D(diffuseMap)
 		shInput(float2, UV)
-#if MRT
-        shDeclareMrtOutput(1)
-#endif
         shUniform(float4, materialDiffuse)                    @shAutoConstant(materialDiffuse, surface_diffuse_colour)
         //shUniform(float4, materialEmissive)                   @shAutoConstant(materialEmissive, surface_emissive_colour)
 
     SH_START_PROGRAM
     {
         shOutputColour(0) = float4(1,1,1,materialDiffuse.a) * shSample(diffuseMap, UV);
-
-#if MRT
-        shOutputColour(1) = float4(1,1,1,1);
-#endif
     }
 
 #endif

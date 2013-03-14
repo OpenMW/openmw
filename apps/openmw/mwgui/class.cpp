@@ -31,11 +31,11 @@ GenerateClassResultDialog::GenerateClassResultDialog(MWBase::WindowManager& parW
     getWidget(mClassImage, "ClassImage");
     getWidget(mClassName, "ClassName");
 
-    MyGUI::ButtonPtr backButton;
+    MyGUI::Button* backButton;
     getWidget(backButton, "BackButton");
     backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &GenerateClassResultDialog::onBackClicked);
 
-    MyGUI::ButtonPtr okButton;
+    MyGUI::Button* okButton;
     getWidget(okButton, "OKButton");
     okButton->setCaption(mWindowManager.getGameSettingString("sOK", ""));
     okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &GenerateClassResultDialog::onOkClicked);
@@ -97,11 +97,11 @@ PickClassDialog::PickClassDialog(MWBase::WindowManager& parWindowManager)
 
     getWidget(mClassImage, "ClassImage");
 
-    MyGUI::ButtonPtr backButton;
+    MyGUI::Button* backButton;
     getWidget(backButton, "BackButton");
     backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &PickClassDialog::onBackClicked);
 
-    MyGUI::ButtonPtr okButton;
+    MyGUI::Button* okButton;
     getWidget(okButton, "OKButton");
     okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &PickClassDialog::onOkClicked);
 
@@ -111,7 +111,7 @@ PickClassDialog::PickClassDialog(MWBase::WindowManager& parWindowManager)
 
 void PickClassDialog::setNextButtonShow(bool shown)
 {
-    MyGUI::ButtonPtr okButton;
+    MyGUI::Button* okButton;
     getWidget(okButton, "OKButton");
 
     if (shown)
@@ -138,7 +138,7 @@ void PickClassDialog::setClassId(const std::string &classId)
         if (boost::iequals(*mClassList->getItemDataAt<std::string>(i), classId))
         {
             mClassList->setIndexSelected(i);
-            MyGUI::ButtonPtr okButton;
+            MyGUI::Button* okButton;
             getWidget(okButton, "OKButton");
             break;
         }
@@ -166,7 +166,7 @@ void PickClassDialog::onSelectClass(MyGUI::ListBox* _sender, size_t _index)
     if (_index == MyGUI::ITEM_NONE)
         return;
 
-    MyGUI::ButtonPtr okButton;
+    MyGUI::Button* okButton;
     getWidget(okButton, "OKButton");
 
     const std::string *classId = mClassList->getItemDataAt<std::string>(_index);
@@ -256,7 +256,7 @@ void InfoBoxDialog::fitToText(MyGUI::TextBox* widget)
     widget->setSize(size);
 }
 
-void InfoBoxDialog::layoutVertically(MyGUI::WidgetPtr widget, int margin)
+void InfoBoxDialog::layoutVertically(MyGUI::Widget* widget, int margin)
 {
     size_t count = widget->getChildCount();
     int pos = 0;
@@ -264,7 +264,7 @@ void InfoBoxDialog::layoutVertically(MyGUI::WidgetPtr widget, int margin)
     int width = 0;
     for (unsigned i = 0; i < count; ++i)
     {
-        MyGUI::WidgetPtr child = widget->getChildAt(i);
+        MyGUI::Widget* child = widget->getChildAt(i);
         if (!child->getVisible())
             continue;
 
@@ -302,7 +302,7 @@ std::string InfoBoxDialog::getText() const
 
 void InfoBoxDialog::setButtons(ButtonList &buttons)
 {
-    for (std::vector<MyGUI::ButtonPtr>::iterator it = this->mButtons.begin(); it != this->mButtons.end(); ++it)
+    for (std::vector<MyGUI::Button*>::iterator it = this->mButtons.begin(); it != this->mButtons.end(); ++it)
     {
         MyGUI::Gui::getInstance().destroyWidget(*it);
     }
@@ -310,7 +310,7 @@ void InfoBoxDialog::setButtons(ButtonList &buttons)
     mCurrentButton = -1;
 
     // TODO: The buttons should be generated from a template in the layout file, ie. cloning an existing widget
-    MyGUI::ButtonPtr button;
+    MyGUI::Button* button;
     MyGUI::IntCoord coord = MyGUI::IntCoord(0, 0, mButtonBar->getWidth(), 10);
     ButtonList::const_iterator end = buttons.end();
     for (ButtonList::const_iterator it = buttons.begin(); it != end; ++it)
@@ -342,11 +342,11 @@ int InfoBoxDialog::getChosenButton() const
     return mCurrentButton;
 }
 
-void InfoBoxDialog::onButtonClicked(MyGUI::WidgetPtr _sender)
+void InfoBoxDialog::onButtonClicked(MyGUI::Widget* _sender)
 {
-    std::vector<MyGUI::ButtonPtr>::const_iterator end = mButtons.end();
+    std::vector<MyGUI::Button*>::const_iterator end = mButtons.end();
     int i = 0;
-    for (std::vector<MyGUI::ButtonPtr>::const_iterator it = mButtons.begin(); it != end; ++it)
+    for (std::vector<MyGUI::Button*>::const_iterator it = mButtons.begin(); it != end; ++it)
     {
         if (*it == _sender)
         {
@@ -376,10 +376,10 @@ ClassChoiceDialog::ClassChoiceDialog(MWBase::WindowManager& parWindowManager)
 
 CreateClassDialog::CreateClassDialog(MWBase::WindowManager& parWindowManager)
   : WindowModal("openmw_chargen_create_class.layout", parWindowManager)
-  , mSpecDialog(nullptr)
-  , mAttribDialog(nullptr)
-  , mSkillDialog(nullptr)
-  , mDescDialog(nullptr)
+  , mSpecDialog(NULL)
+  , mAttribDialog(NULL)
+  , mSkillDialog(NULL)
+  , mDescDialog(NULL)
 {
     // Centre dialog
     center();
@@ -420,15 +420,15 @@ CreateClassDialog::CreateClassDialog(MWBase::WindowManager& parWindowManager)
     // Make sure the edit box has focus
     MyGUI::InputManager::getInstance().setKeyFocusWidget(mEditName);
 
-    MyGUI::ButtonPtr descriptionButton;
+    MyGUI::Button* descriptionButton;
     getWidget(descriptionButton, "DescriptionButton");
     descriptionButton->eventMouseButtonClick += MyGUI::newDelegate(this, &CreateClassDialog::onDescriptionClicked);
 
-    MyGUI::ButtonPtr backButton;
+    MyGUI::Button* backButton;
     getWidget(backButton, "BackButton");
     backButton->eventMouseButtonClick += MyGUI::newDelegate(this, &CreateClassDialog::onBackClicked);
 
-    MyGUI::ButtonPtr okButton;
+    MyGUI::Button* okButton;
     getWidget(okButton, "OKButton");
     okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &CreateClassDialog::onOkClicked);
 
@@ -518,7 +518,7 @@ std::vector<ESM::Skill::SkillEnum> CreateClassDialog::getMinorSkills() const
 
 void CreateClassDialog::setNextButtonShow(bool shown)
 {
-    MyGUI::ButtonPtr okButton;
+    MyGUI::Button* okButton;
     getWidget(okButton, "OKButton");
 
     if (shown)
@@ -544,7 +544,7 @@ void CreateClassDialog::onDialogCancel()
     mDescDialog = 0;
 }
 
-void CreateClassDialog::onSpecializationClicked(MyGUI::WidgetPtr _sender)
+void CreateClassDialog::onSpecializationClicked(MyGUI::Widget* _sender)
 {
     delete mSpecDialog;
     mSpecDialog = new SelectSpecializationDialog(mWindowManager);
@@ -694,7 +694,7 @@ SelectSpecializationDialog::SelectSpecializationDialog(MWBase::WindowManager& pa
     ToolTips::createSpecializationToolTip(mSpecialization1, magic, ESM::Class::Magic);
     ToolTips::createSpecializationToolTip(mSpecialization2, stealth, ESM::Class::Stealth);
 
-    MyGUI::ButtonPtr cancelButton;
+    MyGUI::Button* cancelButton;
     getWidget(cancelButton, "CancelButton");
     cancelButton->setCaption(mWindowManager.getGameSettingString("sCancel", ""));
     cancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectSpecializationDialog::onCancelClicked);
@@ -706,7 +706,7 @@ SelectSpecializationDialog::~SelectSpecializationDialog()
 
 // widget controls
 
-void SelectSpecializationDialog::onSpecializationClicked(MyGUI::WidgetPtr _sender)
+void SelectSpecializationDialog::onSpecializationClicked(MyGUI::Widget* _sender)
 {
     if (_sender == mSpecialization0)
         mSpecializationId = ESM::Class::Combat;
@@ -747,7 +747,7 @@ SelectAttributeDialog::SelectAttributeDialog(MWBase::WindowManager& parWindowMan
         ToolTips::createAttributeToolTip(attribute, attribute->getAttributeId());
     }
 
-    MyGUI::ButtonPtr cancelButton;
+    MyGUI::Button* cancelButton;
     getWidget(cancelButton, "CancelButton");
     cancelButton->setCaption(mWindowManager.getGameSettingString("sCancel", ""));
     cancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectAttributeDialog::onCancelClicked);
@@ -840,7 +840,7 @@ SelectSkillDialog::SelectSkillDialog(MWBase::WindowManager& parWindowManager)
         }
     }
 
-    MyGUI::ButtonPtr cancelButton;
+    MyGUI::Button* cancelButton;
     getWidget(cancelButton, "CancelButton");
     cancelButton->setCaption(mWindowManager.getGameSettingString("sCancel", ""));
     cancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectSkillDialog::onCancelClicked);
@@ -873,7 +873,7 @@ DescriptionDialog::DescriptionDialog(MWBase::WindowManager& parWindowManager)
 
     getWidget(mTextEdit, "TextEdit");
 
-    MyGUI::ButtonPtr okButton;
+    MyGUI::Button* okButton;
     getWidget(okButton, "OKButton");
     okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &DescriptionDialog::onOkClicked);
     okButton->setCaption(mWindowManager.getGameSettingString("sInputMenu1", ""));

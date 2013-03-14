@@ -3,11 +3,13 @@
 
 #include <QObject>
 
+#include <components/files/configurationmanager.hpp>
+
 #include "model/doc/documentmanager.hpp"
 
 #include "view/doc/viewmanager.hpp"
 #include "view/doc/startup.hpp"
-#include "view/doc/opendialog.hpp"
+#include "view/doc/filedialog.hpp"
 
 namespace CS
 {
@@ -15,12 +17,14 @@ namespace CS
     {
             Q_OBJECT
 
-            int mNewDocumentIndex; ///< \todo remove when the proper new document dialogue is implemented.
-
             CSMDoc::DocumentManager mDocumentManager;
             CSVDoc::ViewManager mViewManager;
             CSVDoc::StartupDialogue mStartup;
-            OpenDialog mOpenDialog;
+            FileDialog mFileDialog;
+
+            Files::ConfigurationManager mCfgMgr;
+
+            void setupDataFiles();
 
             // not implemented
             Editor (const Editor&);
@@ -39,6 +43,7 @@ namespace CS
 
             void loadDocument();
             void openFiles();
+            void createNewFile();
     };
 }
 

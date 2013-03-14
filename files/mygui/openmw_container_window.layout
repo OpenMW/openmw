@@ -15,6 +15,10 @@
             <Widget type="Widget">
                 <UserString key="HStretch" value="true"/>
             </Widget>
+            <Widget type="AutoSizedButton" skin="MW_Button" name="DisposeCorpseButton" align="Right Bottom">
+                <Property key="Caption" value="#{sDisposeofCorpse}"/>
+                <Property key="Visible" value="false"/>
+            </Widget>
             <Widget type="AutoSizedButton" skin="MW_Button" name="TakeButton" align="Right Bottom">
                 <Property key="Caption" value="#{sTakeAll}"/>
             </Widget>

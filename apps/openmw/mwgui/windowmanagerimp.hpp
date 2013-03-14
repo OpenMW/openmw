@@ -72,6 +72,8 @@ namespace MWGui
   class SpellCreationDialog;
   class EnchantingDialog;
   class TrainingWindow;
+  class Cursor;
+  class SpellIcons;
 
   class WindowManager : public MWBase::WindowManager
   {
@@ -226,10 +228,13 @@ namespace MWGui
     virtual void startEnchanting(MWWorld::Ptr actor);
     virtual void startTraining(MWWorld::Ptr actor);
 
+    virtual void changePointer (const std::string& name);
+
     virtual const Translation::Storage& getTranslationDataStorage() const;
 
   private:
     OEngine::GUI::MyGUIManager *mGuiManager;
+    OEngine::Render::OgreRenderer *mRendering;
     HUD *mHud;
     MapWindow *mMap;
     MainMenu *mMenu;
@@ -260,6 +265,7 @@ namespace MWGui
     EnchantingDialog* mEnchantingDialog;
     TrainingWindow* mTrainingWindow;
     Translation::Storage& mTranslationDataStorage;
+    Cursor* mCursor;
 
     CharacterCreation* mCharGen;
 

@@ -150,6 +150,8 @@ namespace MWInput
         float mMouseX;
         float mMouseY;
         int mMouseWheel;
+        bool mDebug;
+        bool mUserFileExists;
 
         std::map<std::string, bool> mControlSwitch;
 
@@ -214,9 +216,9 @@ namespace MWInput
             A_CycleSpellRight,
             A_CycleWeaponLeft,//Cycling through weapons
             A_CycleWeaponRight,
-            A_ToggleSneak,    //Toggles Sneak, add Push-Sneak later
+            A_ToggleSneak,    //Toggles Sneak
             A_ToggleWalk, //Toggle Walking/Running
-            A_Crouch,
+            A_Sneak,
 
             A_QuickSave,
             A_QuickLoad,
