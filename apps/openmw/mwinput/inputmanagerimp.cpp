@@ -55,6 +55,7 @@ namespace MWInput
         , mPreviewPOVDelay(0.f)
         , mTimeIdle(0.f)
         , mOverencumberedMessageDelay(0.f)
+        , mAlwaysRunActive(false)
     {
         Ogre::RenderWindow* window = mOgre.getWindow ();
         size_t windowHnd;
@@ -193,7 +194,7 @@ namespace MWInput
             case A_AutoMove:
                 toggleAutoMove ();
                 break;
-            case A_ToggleWalk:
+            case A_AlwaysRun:
                 toggleWalking ();
                 break;
             case A_ToggleWeapon:
@@ -315,10 +316,10 @@ namespace MWInput
             else
                 mPlayer.setUpDown (0);
 
-            if(actionIsActive(A_Run))
-                mPlayer.setRunState(true);
+            if (mAlwaysRunActive)
+                mPlayer.setRunState(!actionIsActive(A_Run));
             else
-                mPlayer.setRunState(false);
+                mPlayer.setRunState(actionIsActive(A_Run));
 
             // if player tried to start moving, but can't (due to being overencumbered), display a notification.
             if (triedToMove)
@@ -699,7 +700,7 @@ namespace MWInput
     void InputManager::toggleWalking()
     {
         if (mWindows.isGuiMode()) return;
-        mPlayer.toggleRunning();
+        mAlwaysRunActive = !mAlwaysRunActive;
     }
 
     // Exit program now button (which is disabled in GUI mode)
@@ -768,6 +769,7 @@ namespace MWInput
         defaultKeyBindings[A_QuickKey10] = OIS::KC_0;
         defaultKeyBindings[A_Screenshot] = OIS::KC_SYSRQ;
         defaultKeyBindings[A_ToggleHUD] = OIS::KC_F12;
+        defaultKeyBindings[A_AlwaysRun] = OIS::KC_Y;
 
         std::map<int, int> defaultMouseButtonBindings;
         defaultMouseButtonBindings[A_Inventory] = OIS::MB_Right;
@@ -834,6 +836,7 @@ namespace MWInput
         descriptions[A_QuickKey8] = "sQuick8Cmd";
         descriptions[A_QuickKey9] = "sQuick9Cmd";
         descriptions[A_QuickKey10] = "sQuick10Cmd";
+        descriptions[A_AlwaysRun] = "sAlways_Run";
 
         if (descriptions[action] == "")
             return ""; // not configurable
@@ -865,6 +868,7 @@ namespace MWInput
         ret.push_back(A_MoveRight);
         ret.push_back(A_TogglePOV);
         ret.push_back(A_Run);
+        ret.push_back(A_AlwaysRun);
         ret.push_back(A_Sneak);
         ret.push_back(A_Activate);
         ret.push_back(A_ToggleWeapon);

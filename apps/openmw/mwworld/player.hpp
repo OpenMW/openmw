@@ -66,7 +66,6 @@ namespace MWWorld
         void setUpDown(int value);
 
         void setRunState(bool run);
-        void toggleRunning();
         void setSneak(bool sneak);
     };
 }
