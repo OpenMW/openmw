@@ -241,7 +241,7 @@ namespace MWDialogue
         }
     }
 
-    void DialogueManager::executeTopic (const std::string& topic)
+    void DialogueManager::executeTopic (const std::string& topic, bool randomResponse)
     {
         Filter filter (mActor, mChoice, mTalkedTo);
 
@@ -256,7 +256,7 @@ namespace MWDialogue
 
         if (!infos.empty())
         {
-            const ESM::DialInfo* info = infos[std::rand() % infos.size()];
+            const ESM::DialInfo* info = infos[randomResponse ? std::rand() % infos.size() : 0];
 
             parseText (info->mResponse);
 
@@ -505,7 +505,7 @@ namespace MWDialogue
             text = "Bribe";
         }
 
-        executeTopic (text + (success ? " Success" : " Fail"));
+        executeTopic (text + (success ? " Success" : " Fail"), true);
     }
 
     int DialogueManager::getTemporaryDispositionChange() const
