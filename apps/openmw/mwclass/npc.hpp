@@ -76,9 +76,6 @@ namespace MWClass
             virtual void setForceStance (const MWWorld::Ptr& ptr, Stance stance, bool force) const;
             ///< Force or unforce a stance.
 
-            virtual bool getForceStance (const MWWorld::Ptr& ptr, Stance stance) const;
-            ///< Check if a stance forced.
-
             virtual void setStance (const MWWorld::Ptr& ptr, Stance stance, bool set) const;
             ///< Set or unset a stance.
 
