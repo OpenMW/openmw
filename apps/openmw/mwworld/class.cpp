@@ -117,11 +117,6 @@ namespace MWWorld
         return false;
     }
 
-    bool Class::getForceStance (const Ptr& ptr, Stance stance) const
-    {
-        return false;
-    }
-
     float Class::getSpeed (const Ptr& ptr) const
     {
         return 0;

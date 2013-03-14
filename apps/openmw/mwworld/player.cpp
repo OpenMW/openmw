@@ -77,15 +77,6 @@ namespace MWWorld
         MWWorld::Class::get(ptr).setStance(ptr, MWWorld::Class::Run, run);
     }
 
-    void Player::toggleRunning()
-    {
-        MWWorld::Ptr ptr = getPlayer();
-
-        bool running = MWWorld::Class::get (ptr).getForceStance(ptr, MWWorld::Class::Run);
-
-        MWWorld::Class::get (ptr).setForceStance(ptr, MWWorld::Class::Run, !running);
-    }
-
     void Player::setSneak(bool sneak)
     {
         MWWorld::Ptr ptr = getPlayer();

@@ -152,6 +152,7 @@ namespace MWInput
         int mMouseWheel;
         bool mDebug;
         bool mUserFileExists;
+        bool mAlwaysRunActive;
 
         std::map<std::string, bool> mControlSwitch;
 

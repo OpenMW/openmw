@@ -55,6 +55,7 @@ namespace MWInput
         , mPreviewPOVDelay(0.f)
         , mTimeIdle(0.f)
         , mOverencumberedMessageDelay(0.f)
+        , mAlwaysRunActive(false)
     {
         Ogre::RenderWindow* window = mOgre.getWindow ();
         size_t windowHnd;
@@ -315,10 +316,10 @@ namespace MWInput
             else
                 mPlayer.setUpDown (0);
 
-            if(actionIsActive(A_Run))
-                mPlayer.setRunState(true);
+            if (mAlwaysRunActive)
+                mPlayer.setRunState(!actionIsActive(A_Run));
             else
-                mPlayer.setRunState(false);
+                mPlayer.setRunState(actionIsActive(A_Run));
 
             // if player tried to start moving, but can't (due to being overencumbered), display a notification.
             if (triedToMove)
@@ -699,7 +700,7 @@ namespace MWInput
     void InputManager::toggleWalking()
     {
         if (mWindows.isGuiMode()) return;
-        mPlayer.toggleRunning();
+        mAlwaysRunActive = !mAlwaysRunActive;
     }
 
     // Exit program now button (which is disabled in GUI mode)
