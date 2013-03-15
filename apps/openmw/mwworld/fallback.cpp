@@ -2,6 +2,9 @@
 #include "boost/lexical_cast.hpp"
 namespace MWWorld
 {
+    Fallback::Fallback(const std::map<std::string,std::string>& fallback):mFallbackMap(fallback)
+    {}
+
     std::string Fallback::getFallbackString(const std::string& fall) const
     {
         std::map<std::string,std::string>::const_iterator it;
@@ -14,7 +17,7 @@ namespace MWWorld
     float Fallback::getFallbackFloat(const std::string& fall) const
     {
         std::string fallback=getFallbackString(fall);
-        if(fallback=="")
+        if(fallback.empty())
             return 0;
         else
             return boost::lexical_cast<float>(fallback);
@@ -22,7 +25,7 @@ namespace MWWorld
     bool Fallback::getFallbackBool(const std::string& fall) const
     {
         std::string fallback=getFallbackString(fall);
-        if(fallback=="")
+        if(fallback.empty())
             return false;
         else
             return boost::lexical_cast<bool>(fallback);
@@ -30,13 +33,13 @@ namespace MWWorld
     Ogre::ColourValue Fallback::getFallbackColour(const std::string& fall) const
     {
         std::string sum=getFallbackString(fall);
-        if(sum=="")
+        if(sum.empty())
             return Ogre::ColourValue(0,0,0);
         else
         {
             std::string ret[3];
             unsigned int j=0;
-            for(unsigned int i=0;i<sum.length();i++){
+            for(unsigned int i=0;i<sum.length();++i){
                 if(sum[i]==',') j++;
                 else ret[j]+=sum[i];
             }

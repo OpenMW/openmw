@@ -3,7 +3,7 @@
 
 #include <OgreString.h>
 #include <OgreColourValue.h>
-#include "fallback.hpp"
+
 namespace MWRender
 {
     class RenderingManager;
@@ -11,6 +11,8 @@ namespace MWRender
 
 namespace MWWorld
 {
+    class Fallback;
+
     /// Defines the actual weather that results from weather setting (see below), time of day and weather transition
     struct WeatherResult
     {
