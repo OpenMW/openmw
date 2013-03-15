@@ -153,6 +153,7 @@ Bug #621: Batching bloodmoon's trees
 Bug #623: NiMaterialProperty alpha unhandled
 Bug #628: Launcher in latest master crashes the game
 Bug #633: Crash on startup: Better Heads
+Bug #636: Incorrect Char Gen Menu Behavior
 Feature #29: Allow ESPs and multiple ESMs
 Feature #94: Finish class selection-dialogue
 Feature #149: Texture Alphas
