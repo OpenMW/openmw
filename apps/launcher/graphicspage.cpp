@@ -259,7 +259,7 @@ QStringList GraphicsPage::getAvailableResolutions(Ogre::RenderSystem *renderer)
         for (opt_it = i->second.possibleValues.begin ();
              opt_it != i->second.possibleValues.end (); opt_it++, idx++)
         {
-            QRegExp resolutionRe(QString("(\\d+) x (\\d+)"));
+            QRegExp resolutionRe(QString("(\\d+) x (\\d+).*"));
             QString resolution = QString::fromStdString(*opt_it).simplified();
 
             if (resolutionRe.exactMatch(resolution)) {
