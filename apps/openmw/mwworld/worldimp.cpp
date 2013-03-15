@@ -154,24 +154,9 @@ namespace MWWorld
             mRendering->skyDisable();
     }
 
-    void World::setFallbackValues (const std::map<std::string,std::string>& fallbackMap)
-    {
-        mFallback = fallbackMap;
-    }
-
     std::string World::getFallback (const std::string& key) const
     {
-        return getFallback(key, "");
-    }
-
-    std::string World::getFallback (const std::string& key, const std::string& def) const
-    {
-        std::map<std::string,std::string>::const_iterator it;
-        if((it = mFallback.find(key)) == mFallback.end())
-        {
-            return def;
-        }
-        return it->second;
+        return mFallback.getFallbackString(key);
     }
 
     World::World (OEngine::Render::OgreRenderer& renderer,
@@ -181,17 +166,16 @@ namespace MWWorld
         ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap, int mActivationDistanceOverride)
     : mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
       mSky (true), mCells (mStore, mEsm),
-      mNumFacing(0), mActivationDistanceOverride (mActivationDistanceOverride),
-      mFallback (fallbackMap)
+      mNumFacing(0), mActivationDistanceOverride (mActivationDistanceOverride),mFallback(fallbackMap)
     {
         mPhysics = new PhysicsSystem(renderer);
         mPhysEngine = mPhysics->getEngine();
 
-        mRendering = new MWRender::RenderingManager(renderer, resDir, cacheDir, mPhysEngine);
+        mRendering = new MWRender::RenderingManager(renderer, resDir, cacheDir, mPhysEngine,&mFallback);
 
         mPhysEngine->setSceneManager(renderer.getScene());
 
-        mWeatherManager = new MWWorld::WeatherManager(mRendering,fallbackMap);
+        mWeatherManager = new MWWorld::WeatherManager(mRendering,&mFallback);
 
         int idx = 0;
         // NOTE: We might need to reserve one more for the running game / save.

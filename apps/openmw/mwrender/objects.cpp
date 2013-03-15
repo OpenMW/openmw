@@ -16,16 +16,31 @@
 #include "renderconst.hpp"
 
 using namespace MWRender;
+float Objects::lightLinearValue()
+{
+    return mFallback->getFallbackFloat("LightAttenuation_LinearValue");
+}
+float Objects::lightLinearRadiusMult()
+{
+    return mFallback->getFallbackFloat("LightAttenuation_LinearRadiusMult");
+}
+float Objects::lightQuadraticValue()
+{
+    return mFallback->getFallbackFloat("LightAttenuation_QuadraticValue");
+}
+float Objects::lightQuadraticRadiusMult()
+{
+    return mFallback->getFallbackFloat("LightAttenuation_QuadraticRadiusMult");
+}
 
-/// \todo Replace these, once fallback values from the ini file are available.
-float Objects::lightLinearValue = 3;
-float Objects::lightLinearRadiusMult = 1;
-
-float Objects::lightQuadraticValue = 16;
-float Objects::lightQuadraticRadiusMult = 1;
-
-bool Objects::lightOutQuadInLin = true;
-bool Objects::lightQuadratic = false;
+bool Objects::lightOutQuadInLin()
+{
+    return mFallback->getFallbackBool("LightAttenuation_OutQuadInLin");
+}
+bool Objects::lightQuadratic()
+{
+    return mFallback->getFallbackBool("LightAttenuation_UseQuadratic");
+}
 
 int Objects::uniqueID = 0;
 
@@ -269,14 +284,14 @@ void Objects::insertLight (const MWWorld::Ptr& ptr, Ogre::Entity* skelBase, Ogre
 
     if (!quadratic)
     {
-        float r = radius * lightLinearRadiusMult;
-        float attenuation = lightLinearValue / r;
+        float r = radius * lightLinearRadiusMult();
+        float attenuation = lightLinearValue() / r;
         light->setAttenuation(r*10, 0, attenuation, 0);
     }
     else
     {
-        float r = radius * lightQuadraticRadiusMult;
-        float attenuation = lightQuadraticValue / pow(r, 2);
+        float r = radius * lightQuadraticRadiusMult();
+        float attenuation = lightQuadraticValue() / pow(r, 2);
         light->setAttenuation(r*10, 0, 0, attenuation);
     }
 

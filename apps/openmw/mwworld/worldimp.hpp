@@ -10,6 +10,7 @@
 #include "cells.hpp"
 #include "localscripts.hpp"
 #include "timestamp.hpp"
+#include "fallback.hpp"
 
 #include "../mwbase/world.hpp"
 
@@ -49,6 +50,7 @@ namespace MWWorld
 
     class World : public MWBase::World
     {
+            MWWorld::Fallback mFallback;
             MWRender::RenderingManager* mRendering;
 
             MWWorld::WeatherManager* mWeatherManager;
@@ -82,7 +84,6 @@ namespace MWWorld
             float mFaced1Distance;
             float mFaced2Distance;
             int mNumFacing;
-            std::map<std::string,std::string> mFallback;
 
             unsigned long lastTick;
             Ogre::Timer mTimer;
@@ -132,11 +133,7 @@ namespace MWWorld
 
             virtual void getTriangleBatchCount(unsigned int &triangles, unsigned int &batches);
 
-            virtual void setFallbackValues (const std::map<std::string,std::string>& fallbackMap);
-
             virtual std::string getFallback (const std::string& key) const;
-
-            virtual std::string getFallback (const std::string& key, const std::string& def) const;
 
             virtual Player& getPlayer();
 

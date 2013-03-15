@@ -3,7 +3,7 @@
 
 #include <OgreString.h>
 #include <OgreColourValue.h>
-
+#include "fallback.hpp"
 namespace MWRender
 {
     class RenderingManager;
@@ -112,7 +112,7 @@ namespace MWWorld
     class WeatherManager
     {
     public:
-        WeatherManager(MWRender::RenderingManager*,const std::map<std::string,std::string>& fallbackMap);
+        WeatherManager(MWRender::RenderingManager*,MWWorld::Fallback* fallback);
 
         /**
          * Change the weather in the specified region
@@ -141,11 +141,7 @@ namespace MWWorld
     private:
         float mHour;
         int mDay, mMonth;
-        std::map<std::string,std::string> mFallback;
-        std::string getFallback (const std::string& key) const;
-        std::string getFallbackString(const std::string& fall) const;
-        float getFallbackFloat(const std::string& fall) const;
-        Ogre::ColourValue getFallbackColour(const std::string& fall) const;
+        MWWorld::Fallback* mFallback;
         void setFallbackWeather(Weather& weather,const std::string& name);
         MWRender::RenderingManager* mRendering;
 

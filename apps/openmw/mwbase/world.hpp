@@ -103,11 +103,7 @@ namespace MWBase
 
             virtual void getTriangleBatchCount(unsigned int &triangles, unsigned int &batches) = 0;
 
-            virtual void setFallbackValues (const std::map<std::string, std::string>& fallbackMap) = 0;
-
             virtual std::string getFallback (const std::string& key) const = 0;
-
-            virtual std::string getFallback (const std::string& key, const std::string& def) const = 0;
 
             virtual MWWorld::Player& getPlayer() = 0;
 

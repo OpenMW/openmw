@@ -48,9 +48,10 @@ using namespace Ogre;
 namespace MWRender {
 
 RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir,
-                                    const boost::filesystem::path& cacheDir, OEngine::Physic::PhysicEngine* engine)
+                                    const boost::filesystem::path& cacheDir, OEngine::Physic::PhysicEngine* engine,MWWorld::Fallback* fallback)
     : mRendering(_rend)
-    , mObjects(mRendering)
+    , mFallback(fallback)
+    , mObjects(mRendering,mFallback)
     , mActors(mRendering, this)
     , mAmbientMode(0)
     , mSunEnabled(0)
