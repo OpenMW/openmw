@@ -70,16 +70,16 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering,MWWorld::Fa
 	mThunderThreshold = mFallback->getFallbackFloat("Weather_Thunderstorm_Thunder_Threshold");
 	mThunderSoundDelay = 0.25;
 	//Weather
-	Weather clear;
-	clear.mCloudTexture = "tx_sky_clear.dds";
-	setFallbackWeather(clear,"clear");
+    Weather clear;
+    clear.mCloudTexture = "tx_sky_clear.dds";
+    setFallbackWeather(clear,"clear");
 
     Weather cloudy;
-	cloudy.mCloudTexture = "tx_sky_cloudy.dds";
+    cloudy.mCloudTexture = "tx_sky_cloudy.dds";
     setFallbackWeather(cloudy,"cloudy");
 
     Weather foggy;
-	foggy.mCloudTexture = "tx_sky_foggy.dds";
+    foggy.mCloudTexture = "tx_sky_foggy.dds";
     setFallbackWeather(foggy,"foggy");
 
     Weather thunderstorm;
