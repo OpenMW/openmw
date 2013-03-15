@@ -20,9 +20,9 @@ using namespace MWSound;
 #define lerp(x, y) (x * (1-factor) + y * factor)
 void WeatherManager::setFallbackWeather(Weather& weather,const std::string& name)
 {
-	std::string upper=name;
-	upper[0]=toupper(name[0]);
-	weather.mCloudsMaximumPercent = mFallback->getFallbackFloat("Weather_"+upper+"_Clouds_Maximum_Percent");
+    std::string upper=name;
+    upper[0]=toupper(name[0]);
+    weather.mCloudsMaximumPercent = mFallback->getFallbackFloat("Weather_"+upper+"_Clouds_Maximum_Percent");
     weather.mTransitionDelta = mFallback->getFallbackFloat("Weather_"+upper+"_Transition_Delta");
     weather.mSkySunriseColor=mFallback->getFallbackColour("Weather_"+upper+"_Sky_Sunrise_Color");
     weather.mSkyDayColor = mFallback->getFallbackColour("Weather_"+upper+"_Sky_Day_Color");
@@ -57,19 +57,19 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering,MWWorld::Fa
 {
     mRendering = rendering;
 	//Globals
-	mThunderSoundID0 = mFallback->getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_0");
-	mThunderSoundID1 = mFallback->getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_1");
-	mThunderSoundID2 = mFallback->getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_2");
-	mThunderSoundID3 = mFallback->getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_3");
-	mSunriseTime = mFallback->getFallbackFloat("Weather_Sunrise_Time");
-	mSunsetTime = mFallback->getFallbackFloat("Weather_Sunset_Time");
-	mSunriseDuration = mFallback->getFallbackFloat("Weather_Sunrise_Duration");
-	mSunsetDuration = mFallback->getFallbackFloat("Weather_Sunset_Duration");
-	mWeatherUpdateTime = mFallback->getFallbackFloat("Weather_Hours_Between_Weather_Changes");
-	mThunderFrequency = mFallback->getFallbackFloat("Weather_Thunderstorm_Thunder_Frequency");
-	mThunderThreshold = mFallback->getFallbackFloat("Weather_Thunderstorm_Thunder_Threshold");
-	mThunderSoundDelay = 0.25;
-	//Weather
+    mThunderSoundID0 = mFallback->getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_0");
+    mThunderSoundID1 = mFallback->getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_1");
+    mThunderSoundID2 = mFallback->getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_2");
+    mThunderSoundID3 = mFallback->getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_3");
+    mSunriseTime = mFallback->getFallbackFloat("Weather_Sunrise_Time");
+    mSunsetTime = mFallback->getFallbackFloat("Weather_Sunset_Time");
+    mSunriseDuration = mFallback->getFallbackFloat("Weather_Sunrise_Duration");
+    mSunsetDuration = mFallback->getFallbackFloat("Weather_Sunset_Duration");
+    mWeatherUpdateTime = mFallback->getFallbackFloat("Weather_Hours_Between_Weather_Changes");
+    mThunderFrequency = mFallback->getFallbackFloat("Weather_Thunderstorm_Thunder_Frequency");
+    mThunderThreshold = mFallback->getFallbackFloat("Weather_Thunderstorm_Thunder_Threshold");
+    mThunderSoundDelay = 0.25;
+    //Weather
     Weather clear;
     clear.mCloudTexture = "tx_sky_clear.dds";
     setFallbackWeather(clear,"clear");
