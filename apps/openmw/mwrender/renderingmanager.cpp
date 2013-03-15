@@ -885,6 +885,8 @@ void RenderingManager::renderPlayer(const MWWorld::Ptr &ptr)
     mPlayer->setAnimation(anim);
     mWater->removeEmitter (ptr);
     mWater->addEmitter (ptr);
+    // apply race height
+    MWBase::Environment::get().getWorld()->scaleObject(ptr, 1.f);
 }
 
 void RenderingManager::getPlayerData(Ogre::Vector3 &eyepos, float &pitch, float &yaw)

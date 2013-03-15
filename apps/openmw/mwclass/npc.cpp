@@ -511,6 +511,20 @@ namespace MWClass
         x = 0;
     }
 
+    void Npc::adjustScale(const MWWorld::Ptr &ptr, float &scale) const
+    {
+        MWWorld::LiveCellRef<ESM::NPC> *ref =
+            ptr.get<ESM::NPC>();
+
+        const ESM::Race* race =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(ref->mBase->mRace);
+
+        if (ref->mBase->isMale())
+            scale *= race->mData.mHeight.mMale;
+        else
+            scale *= race->mData.mHeight.mFemale;
+    }
+
     MWWorld::Ptr
     Npc::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
     {

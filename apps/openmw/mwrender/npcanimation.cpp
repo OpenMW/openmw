@@ -85,11 +85,6 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
         MWBase::Environment::get().getWorld()->getStore();
     const ESM::Race *race = store.get<ESM::Race>().find(mNpc->mRace);
 
-    float scale = race->mData.mHeight.mMale;
-    if(!mNpc->isMale())
-        scale = race->mData.mHeight.mFemale;
-    node->scale(Ogre::Vector3(scale));
-
     mHeadModel = "meshes\\" + store.get<ESM::BodyPart>().find(mNpc->mHead)->mModel;
     mHairModel = "meshes\\" + store.get<ESM::BodyPart>().find(mNpc->mHair)->mModel;
 
