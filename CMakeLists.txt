@@ -384,6 +384,7 @@ if(WIN32)
         "${OpenMW_SOURCE_DIR}/Daedric Font License.txt"
         "${OpenMW_BINARY_DIR}/settings-default.cfg"
         "${OpenMW_BINARY_DIR}/transparency-overrides.cfg"
+        "${OpenMW_BINARY_DIR}/Release/mwiniimport.exe"
         "${OpenMW_BINARY_DIR}/Release/omwlauncher.exe"
         "${OpenMW_BINARY_DIR}/Release/openmw.exe"
         DESTINATION ".")
