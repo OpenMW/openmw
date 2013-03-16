@@ -268,16 +268,17 @@ QStringList GraphicsPage::getAvailableResolutions(Ogre::RenderSystem *renderer)
                 int height = resolutionRe.cap(2).toInt();
 
                 QString aspect = getAspect(width, height);
+                QString cleanRes = QString::number(width) + QString(" x ") + QString::number(height);
 
                 if (aspect == QLatin1String("16:9") || aspect == QLatin1String("16:10")) {
-                    resolution.append(tr("\t(Wide ") + aspect + ")");
+                    cleanRes.append(tr("\t(Wide ") + aspect + ")");
 
                 } else if (aspect == QLatin1String("4:3")) {
-                    resolution.append(tr("\t(Standard 4:3)"));
+                    cleanRes.append(tr("\t(Standard 4:3)"));
                 }
                 // do not add duplicate resolutions
-                if (!result.contains(resolution))
-                    result.append(resolution);
+                if (!result.contains(cleanRes))
+                    result.append(cleanRes);
             }
         }
     }
