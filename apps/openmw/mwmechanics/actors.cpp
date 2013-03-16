@@ -71,7 +71,7 @@ namespace MWMechanics
         int endurance       = creatureStats.getAttribute(5).getBase();
 
         double magickaFactor =
-            creatureStats.getMagicEffects().get (EffectKey (84)).mMagnitude * 0.1 + 0.5;
+            creatureStats.getMagicEffects().get (EffectKey (ESM::MagicEffect::FortifyMaximumMagicka)).mMagnitude * 0.1 + 0.5;
 
         DynamicStat<float> health = creatureStats.getHealth();
         health.setBase (static_cast<int> (0.5 * (strength + endurance)) + creatureStats.getLevelHealthBonus ());
@@ -92,8 +92,7 @@ namespace MWMechanics
 
         if (duration == 3600)
         {
-            // stunted magicka
-            bool stunted = stats.getMagicEffects ().get(MWMechanics::EffectKey(136)).mMagnitude > 0;
+            bool stunted = stats.getMagicEffects ().get(MWMechanics::EffectKey(ESM::MagicEffect::StuntedMagicka)).mMagnitude > 0;
 
             int endurance = stats.getAttribute (ESM::Attribute::Endurance).getModified ();
             
@@ -140,9 +139,9 @@ namespace MWMechanics
         for (int i=0; i<8; ++i)
         {
             int modifier =
-                creatureStats.getMagicEffects().get (EffectKey (79, i)).mMagnitude;
+                creatureStats.getMagicEffects().get (EffectKey (ESM::MagicEffect::FortifyAttribute, i)).mMagnitude;
 
-            modifier -= creatureStats.getMagicEffects().get (EffectKey (17, i)).mMagnitude;
+            modifier -= creatureStats.getMagicEffects().get (EffectKey (ESM::MagicEffect::DrainAttribute, i)).mMagnitude;
 
             creatureStats.getAttribute(i).setModifier (modifier);
         }

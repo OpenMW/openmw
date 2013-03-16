@@ -1259,7 +1259,7 @@ namespace MWWorld
     World::isFlying(const MWWorld::Ptr &ptr) const
     {
         const MWWorld::Class &cls = MWWorld::Class::get(ptr);
-        if(cls.isActor() && cls.getCreatureStats(ptr).getMagicEffects().get(MWMechanics::EffectKey(10/*levitate*/)).mMagnitude > 0)
+        if(cls.isActor() && cls.getCreatureStats(ptr).getMagicEffects().get(MWMechanics::EffectKey(ESM::MagicEffect::Levitate)).mMagnitude > 0)
             return true;
         return false;
     }

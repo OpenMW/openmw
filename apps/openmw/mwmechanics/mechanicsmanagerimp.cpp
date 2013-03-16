@@ -705,7 +705,7 @@ namespace MWMechanics
             }
         }
 
-        float shield = MWWorld::Class::get(ptr).getCreatureStats(ptr).getMagicEffects().get(3).mMagnitude;
+        float shield = MWWorld::Class::get(ptr).getCreatureStats(ptr).getMagicEffects().get(ESM::MagicEffect::Shield).mMagnitude;
 
         return ratings[MWWorld::InventoryStore::Slot_Cuirass] * 0.3
                 + (ratings[MWWorld::InventoryStore::Slot_CarriedLeft] + ratings[MWWorld::InventoryStore::Slot_Helmet]
