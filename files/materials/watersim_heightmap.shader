@@ -14,12 +14,21 @@
 
     SH_START_PROGRAM
     {
+#if !SH_HLSL
 		const float3 offset[4] = float3[4](
 			float3(-1.0, 0.0, 0.25),
 			float3( 1.0, 0.0, 0.25),
 			float3( 0.0,-1.0, 0.25),
 			float3( 0.0, 1.0, 0.25)
 		);	
+#else
+                const float3 offset[4] = {
+                    float3(-1.0, 0.0, 0.25),
+                    float3( 1.0, 0.0, 0.25),
+                    float3( 0.0,-1.0, 0.25),
+                    float3( 0.0, 1.0, 0.25)
+                    };
+#endif
 
                 float fHeightPrev = DecodeHeightmap(heightPrevSampler, UV.xy + previousFrameOffset.xy + currentFrameOffset.xy);
 		
