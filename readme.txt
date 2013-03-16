@@ -103,7 +103,6 @@ Bug #387: Always use detailed shape for physics raycasts
 Bug #420: Potion/ingredient effects do not stack
 Bug #429: Parts of dwemer door not picked up correctly for activation/tooltips
 Bug #434/Bug #605: Object movement between cells not properly implemented
-Bug #455: Animation doesn't move creature's bounding box
 Bug #502: Duplicate player collision model at origin
 Bug #509: Dialogue topic list shifts inappropriately
 Bug #513: Sliding stairs
