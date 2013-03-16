@@ -268,7 +268,7 @@ QStringList GraphicsPage::getAvailableResolutions(Ogre::RenderSystem *renderer)
                 int height = resolutionRe.cap(2).toInt();
 
                 QString aspect = getAspect(width, height);
-                QString cleanRes = QString::number(width) + QString(" x ") + QString::number(height);
+                QString cleanRes = resolutionRe.cap(1) + QString(" x ") + resolutionRe.cap(2);
 
                 if (aspect == QLatin1String("16:9") || aspect == QLatin1String("16:10")) {
                     cleanRes.append(tr("\t(Wide ") + aspect + ")");
