@@ -147,7 +147,7 @@ void DataFilesPage::setupDataFiles()
         profilesComboBox->addItems(profiles);
 
     // Add the current profile if empty
-    if (profilesComboBox->findText(profile) == -1)
+    if (profilesComboBox->findText(profile) == -1 && !profile.isEmpty())
         profilesComboBox->addItem(profile);
 
     if (profilesComboBox->findText(QString("Default")) == -1)
