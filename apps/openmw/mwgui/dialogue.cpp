@@ -316,8 +316,8 @@ void DialogueWindow::setKeywords(std::list<std::string> keyWords)
     if (mServices & Service_CreateSpells)
         mTopicsList->addItem(gmst.find("sSpellmakingMenuTitle")->getString());
 
-//    if (mServices & Service_Enchant)
-//        mTopicsList->addItem(gmst.find("sEnchanting")->getString());
+    if (mServices & Service_Enchant)
+        mTopicsList->addItem(gmst.find("sEnchanting")->getString());
 
     if (mServices & Service_Training)
         mTopicsList->addItem(gmst.find("sServiceTrainingTitle")->getString());

@@ -127,6 +127,11 @@ namespace MWWorld
         return 0;
     }
 
+    short Class::getEnchantmentPoints (const MWWorld::Ptr& ptr) const
+    {
+        throw std::runtime_error ("class does not support enchanting");
+    }
+
     MWMechanics::Movement& Class::getMovementSettings (const Ptr& ptr) const
     {
         throw std::runtime_error ("movement settings not supported by class");
