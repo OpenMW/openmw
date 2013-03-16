@@ -518,6 +518,37 @@ namespace MWDialogue
         mTemporaryDispositionChange += delta;
     }
 
+    bool DialogueManager::checkServiceRefused()
+    {
+        Filter filter (mActor, mChoice, mTalkedTo);
+
+        const MWWorld::Store<ESM::Dialogue> &dialogues =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
+
+        const ESM::Dialogue& dialogue = *dialogues.find ("Service Refusal");
+        MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
+
+        std::vector<const ESM::DialInfo *> infos = filter.list (dialogue, false, false, true);
+        if (!infos.empty())
+        {
+            const ESM::DialInfo* info = infos[0];
+
+            parseText (info->mResponse);
+
+            const MWWorld::Store<ESM::GameSetting>& gmsts =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+            win->addTitle (gmsts.find ("sServiceRefusal")->getString());
+
+            MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
+            win->addText (Interpreter::fixDefinesDialog(info->mResponse, interpreterContext));
+
+            executeScript (info->mResultScript);
+            return true;
+        }
+        return false;
+    }
+
     std::vector<HyperTextToken> ParseHyperText(const std::string& text)
     {
         std::vector<HyperTextToken> result;

@@ -121,7 +121,7 @@ bool MWDialogue::Filter::testSelectStructs (const ESM::DialInfo& info) const
     return true;
 }
 
-bool MWDialogue::Filter::testDisposition (const ESM::DialInfo& info) const
+bool MWDialogue::Filter::testDisposition (const ESM::DialInfo& info, bool invert) const
 {
     bool isCreature = (mActor.getTypeName() != typeid (ESM::NPC).name());
 
@@ -129,8 +129,9 @@ bool MWDialogue::Filter::testDisposition (const ESM::DialInfo& info) const
         return true;
 
     int actorDisposition = MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mActor);
-
-    return actorDisposition >= info.mData.mDisposition;
+    // For service refusal, the disposition check is inverted. However, a value of 0 still means "always succeed".
+    return invert ? (info.mData.mDisposition == 0 || actorDisposition < info.mData.mDisposition)
+                  : (actorDisposition >= info.mData.mDisposition);
 }
 
 bool MWDialogue::Filter::testSelectStruct (const SelectWrapper& select) const
@@ -570,7 +571,7 @@ const ESM::DialInfo* MWDialogue::Filter::search (const ESM::Dialogue& dialogue, 
 }
 
 std::vector<const ESM::DialInfo *> MWDialogue::Filter::list (const ESM::Dialogue& dialogue,
-    bool fallbackToInfoRefusal, bool searchAll) const
+    bool fallbackToInfoRefusal, bool searchAll, bool invertDisposition) const
 {
     std::vector<const ESM::DialInfo *> infos;
 
@@ -582,7 +583,7 @@ std::vector<const ESM::DialInfo *> MWDialogue::Filter::list (const ESM::Dialogue
     {
         if (testActor (*iter) && testPlayer (*iter) && testSelectStructs (*iter))
         {
-            if (testDisposition (*iter)) {
+            if (testDisposition (*iter, invertDisposition)) {
                 infos.push_back(&*iter);
                 if (!searchAll)
                     break;
@@ -604,7 +605,7 @@ std::vector<const ESM::DialInfo *> MWDialogue::Filter::list (const ESM::Dialogue
 
         for (std::vector<ESM::DialInfo>::const_iterator iter = infoRefusalDialogue.mInfo.begin();
             iter!=infoRefusalDialogue.mInfo.end(); ++iter)
-            if (testActor (*iter) && testPlayer (*iter) && testSelectStructs (*iter) && testDisposition(*iter)) {
+            if (testActor (*iter) && testPlayer (*iter) && testSelectStructs (*iter) && testDisposition(*iter, invertDisposition)) {
                 infos.push_back(&*iter);
                 if (!searchAll)
                     break;

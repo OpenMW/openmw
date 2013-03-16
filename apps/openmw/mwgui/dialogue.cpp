@@ -241,40 +241,42 @@ void DialogueWindow::onSelectTopic(const std::string& topic, int id)
         const MWWorld::Store<ESM::GameSetting> &gmst =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-        if (topic == gmst.find("sBarter")->getString())
-        {
-            /// \todo check if the player is allowed to trade with this actor (e.g. faction rank high enough)?
-            mWindowManager.pushGuiMode(GM_Barter);
-            mWindowManager.getTradeWindow()->startTrade(mPtr);
-        }
         if (topic == gmst.find("sPersuasion")->getString())
         {
             mPersuasionDialog.setVisible(true);
         }
-        else if (topic == gmst.find("sSpells")->getString())
+        else if (!MWBase::Environment::get().getDialogueManager()->checkServiceRefused())
         {
-            mWindowManager.pushGuiMode(GM_SpellBuying);
-            mWindowManager.getSpellBuyingWindow()->startSpellBuying(mPtr);
-        }
-        else if (topic == gmst.find("sTravel")->getString())
-        {
-            mWindowManager.pushGuiMode(GM_Travel);
-            mWindowManager.getTravelWindow()->startTravel(mPtr);
-        }
-        else if (topic == gmst.find("sSpellMakingMenuTitle")->getString())
-        {
-            mWindowManager.pushGuiMode(GM_SpellCreation);
-            mWindowManager.startSpellMaking (mPtr);
-        }
-        else if (topic == gmst.find("sEnchanting")->getString())
-        {
-            mWindowManager.pushGuiMode(GM_Enchanting);
-            mWindowManager.startEnchanting (mPtr);
-        }
-        else if (topic == gmst.find("sServiceTrainingTitle")->getString())
-        {
-            mWindowManager.pushGuiMode(GM_Training);
-            mWindowManager.startTraining (mPtr);
+            if (topic == gmst.find("sBarter")->getString())
+            {
+                mWindowManager.pushGuiMode(GM_Barter);
+                mWindowManager.getTradeWindow()->startTrade(mPtr);
+            }
+            else if (topic == gmst.find("sSpells")->getString())
+            {
+                mWindowManager.pushGuiMode(GM_SpellBuying);
+                mWindowManager.getSpellBuyingWindow()->startSpellBuying(mPtr);
+            }
+            else if (topic == gmst.find("sTravel")->getString())
+            {
+                mWindowManager.pushGuiMode(GM_Travel);
+                mWindowManager.getTravelWindow()->startTravel(mPtr);
+            }
+            else if (topic == gmst.find("sSpellMakingMenuTitle")->getString())
+            {
+                mWindowManager.pushGuiMode(GM_SpellCreation);
+                mWindowManager.startSpellMaking (mPtr);
+            }
+            else if (topic == gmst.find("sEnchanting")->getString())
+            {
+                mWindowManager.pushGuiMode(GM_Enchanting);
+                mWindowManager.startEnchanting (mPtr);
+            }
+            else if (topic == gmst.find("sServiceTrainingTitle")->getString())
+            {
+                mWindowManager.pushGuiMode(GM_Training);
+                mWindowManager.startTraining (mPtr);
+            }
         }
     }
 }
