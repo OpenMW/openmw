@@ -112,11 +112,11 @@ MWDialogue::SelectWrapper::Function MWDialogue::SelectWrapper::getFunction() con
         case '4': return Function_Journal;
         case '5': return Function_Item;
         case '6': return Function_Dead;
-        case '7': return Function_Id;
-        case '8': return Function_Faction;
-        case '9': return Function_Class;
-        case 'A': return Function_Race;
-        case 'B': return Function_Cell;
+        case '7': return Function_NotId;
+        case '8': return Function_NotFaction;
+        case '9': return Function_NotClass;
+        case 'A': return Function_NotRace;
+        case 'B': return Function_NotCell;
         case 'C': return Function_Local;
     }
 
@@ -219,7 +219,7 @@ MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
     static const Function booleanFunctions[] =
     {
         Function_False,
-        Function_Id, Function_Faction, Function_Class, Function_Race, Function_Cell,
+        Function_NotId, Function_NotFaction, Function_NotClass, Function_NotRace, Function_NotCell,
         Function_SameGender, Function_SameRace, Function_SameFaction,
         Function_PcCommonDisease, Function_PcBlightDisease, Function_PcCorprus,
         Function_PcExpelled,
@@ -259,7 +259,7 @@ bool MWDialogue::SelectWrapper::isNpcOnly() const
 {
     static const Function functions[] =
     {
-        Function_Faction, SelectWrapper::Function_Class, SelectWrapper::Function_Race,
+        Function_NotFaction, SelectWrapper::Function_NotClass, SelectWrapper::Function_NotRace,
         Function_SameGender, Function_SameRace, Function_SameFaction,
         Function_PcSkill,
         Function_PcExpelled,

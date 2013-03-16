@@ -413,25 +413,25 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
 
             return false;
 
-        case SelectWrapper::Function_Id:
+        case SelectWrapper::Function_NotId:
 
-            return select.getName()==Misc::StringUtils::lowerCase (MWWorld::Class::get (mActor).getId (mActor));
+            return select.getName()!=Misc::StringUtils::lowerCase (MWWorld::Class::get (mActor).getId (mActor));
 
-        case SelectWrapper::Function_Faction:
+        case SelectWrapper::Function_NotFaction:
 
-            return Misc::StringUtils::lowerCase (mActor.get<ESM::NPC>()->mBase->mFaction)==select.getName();
+            return Misc::StringUtils::lowerCase (mActor.get<ESM::NPC>()->mBase->mFaction)!=select.getName();
 
-        case SelectWrapper::Function_Class:
+        case SelectWrapper::Function_NotClass:
 
-            return Misc::StringUtils::lowerCase (mActor.get<ESM::NPC>()->mBase->mClass)==select.getName();
+            return Misc::StringUtils::lowerCase (mActor.get<ESM::NPC>()->mBase->mClass)!=select.getName();
 
-        case SelectWrapper::Function_Race:
+        case SelectWrapper::Function_NotRace:
 
-            return Misc::StringUtils::lowerCase (mActor.get<ESM::NPC>()->mBase->mRace)==select.getName();
+            return Misc::StringUtils::lowerCase (mActor.get<ESM::NPC>()->mBase->mRace)!=select.getName();
 
-        case SelectWrapper::Function_Cell:
+        case SelectWrapper::Function_NotCell:
 
-            return Misc::StringUtils::lowerCase (mActor.getCell()->mCell->mName)==select.getName();
+            return Misc::StringUtils::lowerCase (mActor.getCell()->mCell->mName)!=select.getName();
 
         case SelectWrapper::Function_SameGender:
 
