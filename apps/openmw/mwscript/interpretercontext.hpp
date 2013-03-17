@@ -89,7 +89,7 @@ namespace MWScript
             virtual std::string getNPCClass() const;
             
             virtual std::string getNPCFaction() const;
-            
+
             virtual std::string getNPCRank() const;
             
             virtual std::string getPCName() const;
