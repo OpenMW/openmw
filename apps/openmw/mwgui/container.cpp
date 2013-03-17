@@ -683,12 +683,18 @@ void ContainerWindow::onTakeAllButtonClicked(MyGUI::Widget* _sender)
         // transfer everything into the player's inventory
         MWWorld::ContainerStore& containerStore = MWWorld::Class::get(mPtr).getContainerStore(mPtr);
 
+        std::vector<MWWorld::Ptr> equippedItems = getEquippedItems();
+
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
         MWWorld::ContainerStore& playerStore = MWWorld::Class::get(player).getContainerStore(player);
 
         int i=0;
         for (MWWorld::ContainerStoreIterator iter (containerStore.begin()); iter!=containerStore.end(); ++iter)
         {
+            if (std::find(equippedItems.begin(), equippedItems.end(), *iter) != equippedItems.end()
+                    && !mDisplayEquippedItems)
+                continue;
+
             playerStore.add(*iter);
 
             if (i==0)
@@ -698,10 +704,10 @@ void ContainerWindow::onTakeAllButtonClicked(MyGUI::Widget* _sender)
                 MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
             }
 
+            iter->getRefData().setCount(0);
+
             ++i;
         }
-
-        containerStore.clear();
 
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Container);
     }
