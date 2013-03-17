@@ -107,16 +107,14 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering,MWWorld::Fa
     blight.mAmbientLoopSoundID = "blight";
     setFallbackWeather(blight,"blight");
 
-    /*
     Weather snow;
     snow.mCloudTexture = "tx_bm_sky_snow.dds";
-    setFallbackWeather(snow, "snow")
+    setFallbackWeather(snow, "snow");
 
     Weather blizzard;
     blizzard.mCloudTexture = "tx_bm_sky_blizzard.dds";
     blizzard.mAmbientLoopSoundID = "BM Blizzard";
-    setFallbackWeather(blizzard,"blizzard")
-    */
+    setFallbackWeather(blizzard,"blizzard");
 }
 
 void WeatherManager::setWeather(const String& weather, bool instant)
