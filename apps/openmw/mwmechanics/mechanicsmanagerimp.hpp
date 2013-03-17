@@ -88,9 +88,6 @@ namespace MWMechanics
             virtual int getDerivedDisposition(const MWWorld::Ptr& ptr);
             ///< Calculate the diposition of an NPC toward the player.
 
-            virtual float getArmorRating (const MWWorld::Ptr& ptr);
-            ///< Calculate the combined armor rating of an NPC.
-
             virtual int countDeaths (const std::string& id) const;
             ///< Return the number of deaths for actors with the given ID.
             

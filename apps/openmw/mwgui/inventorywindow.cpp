@@ -292,7 +292,7 @@ namespace MWGui
         mAvatarImage->setImageTexture("CharacterPreview");
 
         mArmorRating->setCaptionWithReplacing ("#{sArmor}: "
-            + boost::lexical_cast<std::string>(static_cast<int>(MWBase::Environment::get().getMechanicsManager()->getArmorRating(mPtr))));
+            + boost::lexical_cast<std::string>(static_cast<int>(MWWorld::Class::get(mPtr).getArmorRating(mPtr))));
     }
 
     void InventoryWindow::pickUpObject (MWWorld::Ptr object)
