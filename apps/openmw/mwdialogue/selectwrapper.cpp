@@ -117,7 +117,7 @@ MWDialogue::SelectWrapper::Function MWDialogue::SelectWrapper::getFunction() con
         case '9': return Function_NotClass;
         case 'A': return Function_NotRace;
         case 'B': return Function_NotCell;
-        case 'C': return Function_Local;
+        case 'C': return Function_NotLocal;
     }
 
     return Function_None;
@@ -233,7 +233,7 @@ MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
     static const Function invertedBooleanFunctions[] =
     {
         Function_NotId, Function_NotFaction, Function_NotClass,
-        Function_NotRace, Function_NotCell,
+        Function_NotRace, Function_NotCell, Function_NotLocal,
         Function_None // end marker
     };
 

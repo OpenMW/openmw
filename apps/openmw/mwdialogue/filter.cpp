@@ -440,6 +440,30 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
 
             return Misc::StringUtils::lowerCase (mActor.getCell()->mCell->mName)!=select.getName();
 
+        case SelectWrapper::Function_NotLocal:
+        {
+            std::string scriptName = MWWorld::Class::get (mActor).getScript (mActor);
+
+            if (scriptName.empty())
+                // This actor has no attached script, so there is no local variable
+                return true;
+
+            const ESM::Script *script =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find (scriptName);
+
+            std::string name = select.getName();
+
+            int i = 0;
+            for (; i < script->mVarNames.size(); ++i)
+                if (Misc::StringUtils::lowerCase(script->mVarNames[i]) == name)
+                    break;
+
+            if (i >= script->mVarNames.size())
+                return true; // script does not have a variable of this name
+
+            return false;
+        }
+
         case SelectWrapper::Function_SameGender:
 
             return (player.get<ESM::NPC>()->mBase->mFlags & ESM::NPC::Female)==

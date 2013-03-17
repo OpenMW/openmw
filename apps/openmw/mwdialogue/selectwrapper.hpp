@@ -22,6 +22,7 @@ namespace MWDialogue
                 Function_NotClass,
                 Function_NotRace,
                 Function_NotCell,
+                Function_NotLocal,
                 Function_Local,
                 Function_Global,
                 Function_SameGender, Function_SameRace, Function_SameFaction,
