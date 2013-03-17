@@ -50,7 +50,8 @@ namespace MWDialogue
                 Type_None,
                 Type_Integer,
                 Type_Numeric,
-                Type_Boolean
+                Type_Boolean,
+                Type_Inverted
             };
 
         private:
@@ -66,8 +67,6 @@ namespace MWDialogue
             int getArgument() const;
 
             Type getType() const;
-
-            bool isInverted() const;
 
             bool isNpcOnly() const;
             ///< \attention Do not call any of the select functions for this select struct!
