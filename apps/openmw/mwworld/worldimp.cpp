@@ -154,11 +154,6 @@ namespace MWWorld
             mRendering->skyDisable();
     }
 
-    std::string World::getFallback (const std::string& key) const
-    {
-        return mFallback.getFallbackString(key);
-    }
-
     World::World (OEngine::Render::OgreRenderer& renderer,
         const Files::Collections& fileCollections,
         const std::vector<std::string>& master, const std::vector<std::string>& plugins,
@@ -265,6 +260,11 @@ namespace MWWorld
         }
 
         return 0;
+    }
+
+    MWWorld::Fallback *World::getFallback ()
+    {
+        return &mFallback;
     }
 
     Ptr::CellStore *World::getExterior (int x, int y)

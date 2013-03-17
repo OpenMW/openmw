@@ -9,6 +9,7 @@
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/fallback.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
@@ -138,9 +139,9 @@ namespace MWGui
 
         std::string levelupdescription;
         if(level>20)
-            levelupdescription=world->getFallback("Level_Up_Default");
+            levelupdescription=world->getFallback()->getFallbackString("Level_Up_Default");
         else
-            levelupdescription=world->getFallback("Level_Up_Level"+boost::lexical_cast<std::string>(level));
+            levelupdescription=world->getFallback()->getFallbackString("Level_Up_Level"+boost::lexical_cast<std::string>(level));
 
         mLevelDescription->setCaption (levelupdescription);
 

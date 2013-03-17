@@ -12,6 +12,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwworld/fallback.hpp"
 
 namespace
 {
@@ -23,14 +24,13 @@ namespace
     };
 
     const ESM::Class::Specialization mSpecializations[3]={ESM::Class::Combat, ESM::Class::Magic, ESM::Class::Stealth}; // The specialization for each answer
-
     Step sGenerateClassSteps(int number) {
-        MWBase::World *world = MWBase::Environment::get().getWorld();
         number++;
-        Step step = {world->getFallback("Question_"+boost::lexical_cast<std::string>(number)+"_Question"),
-        {world->getFallback("Question_"+boost::lexical_cast<std::string>(number)+"_AnswerOne"),
-        world->getFallback("Question_"+boost::lexical_cast<std::string>(number)+"_AnswerTwo"),
-        world->getFallback("Question_"+boost::lexical_cast<std::string>(number)+"_AnswerThree")},
+        MWWorld::Fallback* fallback=MWBase::Environment::get().getWorld()->getFallback();
+        Step step = {fallback->getFallbackString("Question_"+boost::lexical_cast<std::string>(number)+"_Question"),
+        {fallback->getFallbackString("Question_"+boost::lexical_cast<std::string>(number)+"_AnswerOne"),
+        fallback->getFallbackString("Question_"+boost::lexical_cast<std::string>(number)+"_AnswerTwo"),
+        fallback->getFallbackString("Question_"+boost::lexical_cast<std::string>(number)+"_AnswerThree")},
         "vo\\misc\\chargen qa"+boost::lexical_cast<std::string>(number)+".wav"
         };
         return step;
