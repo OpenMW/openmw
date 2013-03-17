@@ -262,7 +262,7 @@ bool MWDialogue::SelectWrapper::isNpcOnly() const
 {
     static const Function functions[] =
     {
-        Function_NotFaction, SelectWrapper::Function_NotClass, SelectWrapper::Function_NotRace,
+        Function_NotFaction, Function_NotClass, Function_NotRace,
         Function_SameGender, Function_SameRace, Function_SameFaction,
         Function_PcSkill,
         Function_PcExpelled,
