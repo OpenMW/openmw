@@ -415,13 +415,28 @@ void WeatherManager::update(float duration)
             mRendering->getSkyManager()->masserEnable();
             mRendering->getSkyManager()->secundaEnable();
 
-            float hour_fade;
-            if (mHour >= 7.f && mHour <= 14.f)
-                hour_fade = 1-(mHour-7)/3.f;
-            else if (mHour >= 14 && mHour <= 15.f)
-                hour_fade = mHour-14;
+            float secunda_hour_fade;
+            float secunda_fadeout_start=mFallback->getFallbackFloat("Moons_Secunda_Fade_Out_Start");
+            float secunda_fadein_start=mFallback->getFallbackFloat("Moons_Secunda_Fade_In_Start");
+            float secunda_fadein_finish=mFallback->getFallbackFloat("Moons_Secunda_Fade_In_Finish");
+
+            if (mHour >= secunda_fadeout_start && mHour <= secunda_fadein_start)
+                secunda_hour_fade = 1-(mHour-secunda_fadeout_start)/3.f;
+            else if (mHour >= secunda_fadein_start && mHour <= secunda_fadein_finish)
+                secunda_hour_fade = mHour-secunda_fadein_start;
             else
-                hour_fade = 1;
+                secunda_hour_fade = 1;
+
+            float masser_hour_fade;
+            float masser_fadeout_start=mFallback->getFallbackFloat("Moons_Masser_Fade_Out_Start");
+            float masser_fadein_start=mFallback->getFallbackFloat("Moons_Masser_Fade_In_Start");
+            float masser_fadein_finish=mFallback->getFallbackFloat("Moons_Masser_Fade_In_Finish");
+            if (mHour >= masser_fadeout_start && mHour <= masser_fadein_start)
+                masser_hour_fade = 1-(mHour-masser_fadeout_start)/3.f;
+            else if (mHour >= masser_fadein_start && mHour <= masser_fadein_finish)
+                masser_hour_fade = mHour-masser_fadein_start;
+            else
+                masser_hour_fade = 1;
 
             float angle = moonHeight*90.f;
 
@@ -445,8 +460,8 @@ void WeatherManager::update(float duration)
             else
                 masser_angle_fade = 1.f;
 
-            masser_angle_fade *= hour_fade;
-            secunda_angle_fade *= hour_fade;
+            masser_angle_fade *= masser_hour_fade;
+            secunda_angle_fade *= secunda_hour_fade;
 
             mRendering->getSkyManager()->setMasserFade(masser_angle_fade);
             mRendering->getSkyManager()->setSecundaFade(secunda_angle_fade);
