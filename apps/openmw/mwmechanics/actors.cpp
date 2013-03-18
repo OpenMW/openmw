@@ -80,7 +80,7 @@ namespace MWMechanics
         DynamicStat<float> magicka = creatureStats.getMagicka();
         magicka.setBase (static_cast<int> (intelligence + magickaFactor * intelligence));
         creatureStats.setMagicka (magicka);
-       
+
         DynamicStat<float> fatigue = creatureStats.getFatigue();
         fatigue.setBase (strength+willpower+agility+endurance);
         creatureStats.setFatigue (fatigue);
@@ -95,7 +95,7 @@ namespace MWMechanics
             bool stunted = stats.getMagicEffects ().get(MWMechanics::EffectKey(ESM::MagicEffect::StuntedMagicka)).mMagnitude > 0;
 
             int endurance = stats.getAttribute (ESM::Attribute::Endurance).getModified ();
-            
+
             DynamicStat<float> health = stats.getHealth();
             health.setCurrent (health.getCurrent() + 0.1 * endurance);
             stats.setHealth (health);
@@ -114,15 +114,15 @@ namespace MWMechanics
 
             float x = fFatigueReturnBase + fFatigueReturnMult * (1 - normalizedEncumbrance);
             x *= fEndFatigueMult * endurance;
-            
+
             DynamicStat<float> fatigue = stats.getFatigue();
             fatigue.setCurrent (fatigue.getCurrent() + 3600 * x);
             stats.setFatigue (fatigue);
-            
+
             if (!stunted)
             {
                 float fRestMagicMult = store.get<ESM::GameSetting>().find("fRestMagicMult")->getFloat ();
-                
+
                 DynamicStat<float> magicka = stats.getMagicka();
                 magicka.setCurrent (magicka.getCurrent()
                     + fRestMagicMult * stats.getAttribute(ESM::Attribute::Intelligence).getModified());
@@ -148,22 +148,25 @@ namespace MWMechanics
 
         // dynamic stats
         MagicEffects effects = creatureStats.getMagicEffects();
-        
+
         for (int i=0; i<3; ++i)
         {
             DynamicStat<float> stat = creatureStats.getDynamic (i);
-            
+
             stat.setModifier (
                 effects.get (EffectKey(80+i)).mMagnitude - effects.get (EffectKey(18+i)).mMagnitude);
-        
+
             creatureStats.setDynamic (i, stat);
-        }        
+        }
     }
 
     Actors::Actors() : mDuration (0) {}
 
     void Actors::addActor (const MWWorld::Ptr& ptr)
     {
+        // erase previous death events since we are currently only tracking them while in an active cell
+        MWWorld::Class::get (ptr).getCreatureStats (ptr).clearHasDied();
+
         MWRender::Animation *anim = MWBase::Environment::get().getWorld()->getAnimation(ptr);
         if(!MWWorld::Class::get(ptr).getCreatureStats(ptr).isDead())
             mActors.insert(std::make_pair(ptr, CharacterController(ptr, anim, CharState_Idle, true)));
@@ -277,7 +280,7 @@ namespace MWMechanics
         for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
             calculateRestoration(iter->first, 3600);
     }
-    
+
     int Actors::countDeaths (const std::string& id) const
     {
         std::map<std::string, int>::const_iterator iter = mDeathCount.find(id);
