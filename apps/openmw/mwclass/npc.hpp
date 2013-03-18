@@ -104,6 +104,9 @@ namespace MWClass
             ///< Returns total weight of objects inside this object (including modifications from magic
             /// effects). Throws an exception, if the object can't hold other objects.
 
+            virtual float getArmorRating (const MWWorld::Ptr& ptr) const;
+            ///< @return combined armor rating of this actor
+
             virtual bool apply (const MWWorld::Ptr& ptr, const std::string& id,
                 const MWWorld::Ptr& actor) const;
             ///< Apply \a id on \a ptr.

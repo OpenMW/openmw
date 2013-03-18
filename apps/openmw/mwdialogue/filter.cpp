@@ -459,7 +459,7 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
         case SelectWrapper::Function_PcCorprus:
 
             return MWWorld::Class::get (player).getCreatureStats (player).
-                getMagicEffects().get (132).mMagnitude!=0;
+                getMagicEffects().get (ESM::MagicEffect::Corprus).mMagnitude!=0;
 
         case SelectWrapper::Function_PcExpelled:
         {

@@ -13,6 +13,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
@@ -50,6 +51,7 @@ namespace MWGui
         getWidget(mFilterMisc, "MiscButton");
         getWidget(mLeftPane, "LeftPane");
         getWidget(mRightPane, "RightPane");
+        getWidget(mArmorRating, "ArmorRating");
 
         mAvatar->eventMouseButtonClick += MyGUI::newDelegate(this, &InventoryWindow::onAvatarClicked);
 
@@ -288,6 +290,9 @@ namespace MWGui
         mPreview.update (size.width, size.height);
         mAvatarImage->setSize(MyGUI::IntSize(std::max(mAvatar->getSize().width, 512), std::max(mAvatar->getSize().height, 1024)));
         mAvatarImage->setImageTexture("CharacterPreview");
+
+        mArmorRating->setCaptionWithReplacing ("#{sArmor}: "
+            + boost::lexical_cast<std::string>(static_cast<int>(MWWorld::Class::get(mPtr).getArmorRating(mPtr))));
     }
 
     void InventoryWindow::pickUpObject (MWWorld::Ptr object)

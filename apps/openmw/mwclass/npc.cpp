@@ -471,9 +471,9 @@ namespace MWClass
 
         const MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
 
-        weight -= stats.getMagicEffects().get (MWMechanics::EffectKey (8)).mMagnitude; // feather
+        weight -= stats.getMagicEffects().get (MWMechanics::EffectKey (ESM::MagicEffect::Feather)).mMagnitude;
 
-        weight += stats.getMagicEffects().get (MWMechanics::EffectKey (7)).mMagnitude; // burden
+        weight += stats.getMagicEffects().get (MWMechanics::EffectKey (ESM::MagicEffect::Burden)).mMagnitude;
 
         if (weight<0)
             weight = 0;
@@ -504,6 +504,55 @@ namespace MWClass
 
         stats.useSkill (skill, *class_, usageType);
     }
+
+    float Npc::getArmorRating (const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::InventoryStore& invStore = MWWorld::Class::get(ptr).getInventoryStore(ptr);
+        const MWWorld::Store<ESM::GameSetting> &gmst =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+        int ratings[MWWorld::InventoryStore::Slots];
+
+        int iBaseArmorSkill = gmst.find("iBaseArmorSkill")->getInt();
+        float fUnarmoredBase1 = gmst.find("fUnarmoredBase1")->getFloat();
+        float fUnarmoredBase2 = gmst.find("fUnarmoredBase2")->getFloat();
+        int unarmoredSkill = MWWorld::Class::get(ptr).getNpcStats(ptr).getSkill(ESM::Skill::Unarmored).getModified();
+
+        for (int i = 0; i < MWWorld::InventoryStore::Slots; ++i)
+        {
+            MWWorld::ContainerStoreIterator it = invStore.getSlot(i);
+            if (it == invStore.end() || it->getTypeName() != typeid(ESM::Armor).name())
+            {
+                // unarmored
+                ratings[i] = (fUnarmoredBase1 * unarmoredSkill) * (fUnarmoredBase2 * unarmoredSkill);
+            }
+            else
+            {
+                MWWorld::LiveCellRef<ESM::Armor> *ref =
+                    it->get<ESM::Armor>();
+
+                int armorSkillType = MWWorld::Class::get(*it).getEquipmentSkill(*it);
+                int armorSkill = MWWorld::Class::get(ptr).getNpcStats(ptr).getSkill(armorSkillType).getModified();
+
+                if (ref->mBase->mData.mWeight == 0)
+                    ratings[i] = ref->mBase->mData.mArmor;
+                else
+                    ratings[i] = ref->mBase->mData.mArmor * armorSkill / iBaseArmorSkill;
+            }
+        }
+
+        float shield = MWWorld::Class::get(ptr).getCreatureStats(ptr).getMagicEffects().get(ESM::MagicEffect::Shield).mMagnitude;
+
+        return ratings[MWWorld::InventoryStore::Slot_Cuirass] * 0.3
+                + (ratings[MWWorld::InventoryStore::Slot_CarriedLeft] + ratings[MWWorld::InventoryStore::Slot_Helmet]
+                    + ratings[MWWorld::InventoryStore::Slot_Greaves] + ratings[MWWorld::InventoryStore::Slot_Boots]
+                    + ratings[MWWorld::InventoryStore::Slot_LeftPauldron] + ratings[MWWorld::InventoryStore::Slot_RightPauldron]
+                    ) * 0.1
+                + (ratings[MWWorld::InventoryStore::Slot_LeftGauntlet] + MWWorld::InventoryStore::Slot_RightGauntlet)
+                    * 0.05
+                + shield;
+    }
+
 
     void Npc::adjustRotation(const MWWorld::Ptr& ptr,float& x,float& y,float& z) const
     {

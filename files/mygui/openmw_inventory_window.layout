@@ -17,7 +17,6 @@
                     <Property key="NeedMouse" value="false"/>
                 </Widget>
                 <Widget type="TextBox" skin="ProgressText" position="0 150 212 24" align="HCenter Bottom" name="ArmorRating">
-                    <Property key="Caption" value="Armor Rating"/>
                     <Property key="NeedMouse" value="false"/>
                 </Widget>
             </Widget>
