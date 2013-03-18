@@ -671,11 +671,12 @@ namespace MWWorld
             return MWWorld::Ptr ();
 
         MWWorld::Ptr object = searchPtrViaHandle (result.second);
-
         float ActivationDistance;
 
         if (object.getTypeName ().find("NPC") != std::string::npos)
             ActivationDistance = getNpcActivationDistance ();
+        else if (MWBase::Environment::get().getWindowManager()->isConsoleMode())
+            ActivationDistance = getObjectActivationDistance ()*50;
         else
             ActivationDistance = getObjectActivationDistance ();
 
@@ -1010,6 +1011,8 @@ namespace MWWorld
             float x, y;
             MWBase::Environment::get().getWindowManager()->getMousePosition(x, y);
             results = mPhysics->getFacedHandles(x, y, getMaxActivationDistance ());
+            if (MWBase::Environment::get().getWindowManager()->isConsoleMode())
+                results = mPhysics->getFacedHandles(x, y, getMaxActivationDistance ()*50);
         }
         else
         {

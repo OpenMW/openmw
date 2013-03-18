@@ -1020,6 +1020,13 @@ bool WindowManager::isGuiMode() const
     return !mGuiModes.empty();
 }
 
+bool WindowManager::isConsoleMode() const
+{
+    if (mGuiModes.back()==GM_Console)
+        return true;
+    return false;
+}
+
 MWGui::GuiMode WindowManager::getMode() const
 {
     if (mGuiModes.empty())

@@ -102,6 +102,8 @@ namespace MWGui
 
     virtual bool isGuiMode() const;
 
+    virtual bool isConsoleMode() const;
+
     virtual void toggleVisible(GuiWindow wnd);
 
     // Disallow all inventory mode windows

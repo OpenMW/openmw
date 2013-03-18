@@ -81,8 +81,33 @@ void ToolTips::onFrame(float frameDuration)
     {
         const MyGUI::IntPoint& mousePos = InputManager::getInstance().getMousePosition();
 
-        if (mWindowManager->getWorldMouseOver() && ((mWindowManager->getMode() == GM_Console)
-            || (mWindowManager->getMode() == GM_Container)
+        if (mWindowManager->getWorldMouseOver() && (mWindowManager->getMode() == GM_Console))
+        {
+            MWWorld::Ptr object = MWBase::Environment::get().getWorld()->getFacedObject();
+            if (!object.isEmpty())
+            {
+                setCoord(0, 0, 300, 300);
+                mDynamicToolTipBox->setVisible(true);
+                ToolTipInfo info;
+                info.caption=object.getCellRef().mRefID;
+                info.icon="";
+                IntSize tooltipSize = createToolTip(info);
+                IntPoint tooltipPosition = InputManager::getInstance().getMousePosition() + IntPoint(0, 24);
+
+                if ((tooltipPosition.left + tooltipSize.width) > viewSize.width)
+                {
+                    tooltipPosition.left = viewSize.width - tooltipSize.width;
+                }
+                if ((tooltipPosition.top + tooltipSize.height) > viewSize.height)
+                {
+                    tooltipPosition.top = viewSize.height - tooltipSize.height;
+                }
+
+                setCoord(tooltipPosition.left, tooltipPosition.top, tooltipSize.width, tooltipSize.height);
+            }
+        }
+
+        if (mWindowManager->getWorldMouseOver() && ((mWindowManager->getMode() == GM_Container)
             || (mWindowManager->getMode() == GM_Inventory)))
         {
             mFocusObject = MWBase::Environment::get().getWorld()->getFacedObject();
@@ -90,7 +115,7 @@ void ToolTips::onFrame(float frameDuration)
             if (mFocusObject.isEmpty ())
                 return;
 
-            MyGUI::IntSize tooltipSize = getToolTipViaPtr(true);
+            IntSize tooltipSize = getToolTipViaPtr(true);
 
             IntPoint tooltipPosition = InputManager::getInstance().getMousePosition() + IntPoint(0, 24);
 
