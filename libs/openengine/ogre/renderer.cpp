@@ -229,15 +229,6 @@ void OgreRenderer::createWindow(const std::string &title, const WindowSettings& 
     assert(mRoot);
     mRoot->initialise(false);
 
-    // create a hidden 1x1 background window to keep resources when recreating the secondary (real) window
-    NameValuePairList params_;
-    params_.insert(std::make_pair("title", title));
-    params_.insert(std::make_pair("FSAA", "0"));
-    params_.insert(std::make_pair("vsync", "false"));
-    params_.insert(std::make_pair("hidden", "true"));
-    Ogre::RenderWindow* hiddenWindow = mRoot->createRenderWindow("InactiveHidden", 1, 1, false, &params_);
-    hiddenWindow->setActive(false);
-
     NameValuePairList params;
     params.insert(std::make_pair("title", title));
     params.insert(std::make_pair("FSAA", settings.fsaa));
