@@ -259,7 +259,7 @@ QStringList GraphicsPage::getAvailableResolutions(Ogre::RenderSystem *renderer)
         for (opt_it = i->second.possibleValues.begin ();
              opt_it != i->second.possibleValues.end (); opt_it++, idx++)
         {
-            QRegExp resolutionRe(QString("(\\d+) x (\\d+)"));
+            QRegExp resolutionRe(QString("(\\d+) x (\\d+).*"));
             QString resolution = QString::fromStdString(*opt_it).simplified();
 
             if (resolutionRe.exactMatch(resolution)) {
@@ -268,16 +268,17 @@ QStringList GraphicsPage::getAvailableResolutions(Ogre::RenderSystem *renderer)
                 int height = resolutionRe.cap(2).toInt();
 
                 QString aspect = getAspect(width, height);
+                QString cleanRes = resolutionRe.cap(1) + QString(" x ") + resolutionRe.cap(2);
 
                 if (aspect == QLatin1String("16:9") || aspect == QLatin1String("16:10")) {
-                    resolution.append(tr("\t(Wide ") + aspect + ")");
+                    cleanRes.append(tr("\t(Wide ") + aspect + ")");
 
                 } else if (aspect == QLatin1String("4:3")) {
-                    resolution.append(tr("\t(Standard 4:3)"));
+                    cleanRes.append(tr("\t(Standard 4:3)"));
                 }
                 // do not add duplicate resolutions
-                if (!result.contains(resolution))
-                    result.append(resolution);
+                if (!result.contains(cleanRes))
+                    result.append(cleanRes);
             }
         }
     }
