@@ -262,7 +262,7 @@ namespace MWWorld
         return 0;
     }
 
-    MWWorld::Fallback *World::getFallback ()
+    const MWWorld::Fallback *World::getFallback() const
     {
         return &mFallback;
     }

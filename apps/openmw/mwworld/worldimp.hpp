@@ -133,7 +133,7 @@ namespace MWWorld
 
             virtual void getTriangleBatchCount(unsigned int &triangles, unsigned int &batches);
 
-            virtual Fallback *getFallback ();
+            virtual const Fallback *getFallback() const;
 
             virtual Player& getPlayer();
 

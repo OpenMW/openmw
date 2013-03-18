@@ -268,7 +268,7 @@ void SkyManager::create()
     mLightning->setVisible (false);
     mLightning->setDiffuseColour (ColourValue(3,3,3));
 
-    MWWorld::Fallback* fallback=MWBase::Environment::get().getWorld()->getFallback();
+    const MWWorld::Fallback* fallback=MWBase::Environment::get().getWorld()->getFallback();
     mSecunda = new Moon("secunda_texture", /*0.5*/fallback->getFallbackFloat("Moons_Secunda_Size")/100, Vector3(-0.4, 0.4, 0.5), mRootNode, "openmw_moon");
     mSecunda->setType(Moon::Type_Secunda);
     mSecunda->setRenderQueue(RQG_SkiesEarly+4);
@@ -371,7 +371,7 @@ int SkyManager::getSecundaPhase() const
 void SkyManager::update(float duration)
 {
     if (!mEnabled) return;
-    MWWorld::Fallback* fallback=MWBase::Environment::get().getWorld()->getFallback();
+    const MWWorld::Fallback* fallback=MWBase::Environment::get().getWorld()->getFallback();
     mCamera->getParentSceneNode ()->needUpdate ();
     mRootNode->setPosition(mCamera->getDerivedPosition());
 

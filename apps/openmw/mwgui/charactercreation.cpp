@@ -26,7 +26,7 @@ namespace
     const ESM::Class::Specialization mSpecializations[3]={ESM::Class::Combat, ESM::Class::Magic, ESM::Class::Stealth}; // The specialization for each answer
     Step sGenerateClassSteps(int number) {
         number++;
-        MWWorld::Fallback* fallback=MWBase::Environment::get().getWorld()->getFallback();
+        const MWWorld::Fallback* fallback=MWBase::Environment::get().getWorld()->getFallback();
         Step step = {fallback->getFallbackString("Question_"+boost::lexical_cast<std::string>(number)+"_Question"),
         {fallback->getFallbackString("Question_"+boost::lexical_cast<std::string>(number)+"_AnswerOne"),
         fallback->getFallbackString("Question_"+boost::lexical_cast<std::string>(number)+"_AnswerTwo"),

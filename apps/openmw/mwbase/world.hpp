@@ -104,7 +104,7 @@ namespace MWBase
 
             virtual void getTriangleBatchCount(unsigned int &triangles, unsigned int &batches) = 0;
 
-            virtual MWWorld::Fallback *getFallback () = 0;
+            virtual const MWWorld::Fallback *getFallback () const = 0;
 
             virtual MWWorld::Player& getPlayer() = 0;
 
@@ -139,7 +139,7 @@ namespace MWBase
 
             virtual char getGlobalVariableType (const std::string& name) const = 0;
             ///< Return ' ', if there is no global variable with this name.
-            
+
             virtual std::vector<std::string> getGlobals () const = 0;
 
             virtual std::string getCurrentCellName() const = 0;
@@ -296,7 +296,7 @@ namespace MWBase
             virtual void changeVanityModeScale(float factor) = 0;
 
             virtual void renderPlayer() = 0;
-            
+
             virtual void setupExternalRendering (MWRender::ExternalRendering& rendering) = 0;
 
             virtual int canRest() = 0;
