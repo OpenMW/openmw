@@ -673,10 +673,10 @@ namespace MWWorld
         MWWorld::Ptr object = searchPtrViaHandle (result.second);
         float ActivationDistance;
 
-        if (object.getTypeName ().find("NPC") != std::string::npos)
-            ActivationDistance = getNpcActivationDistance ();
-        else if (MWBase::Environment::get().getWindowManager()->isConsoleMode())
+        if (MWBase::Environment::get().getWindowManager()->isConsoleMode())
             ActivationDistance = getObjectActivationDistance ()*50;
+        else if (object.getTypeName ().find("NPC") != std::string::npos)
+            ActivationDistance = getNpcActivationDistance ();
         else
             ActivationDistance = getObjectActivationDistance ();
 
