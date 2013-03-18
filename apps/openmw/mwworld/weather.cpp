@@ -107,64 +107,14 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering,MWWorld::Fa
     blight.mAmbientLoopSoundID = "blight";
     setFallbackWeather(blight,"blight");
 
-    /*
     Weather snow;
     snow.mCloudTexture = "tx_bm_sky_snow.dds";
-    snow.mCloudsMaximumPercent = 1.0;
-    snow.mTransitionDelta = 0.014;
-    snow.mSkySunriseColor = clr(196, 91, 91);
-    snow.mSkyDayColor = clr(153, 158, 166);
-    snow.mSkySunsetColor = clr(96, 115, 134);
-    snow.mSkyNightColor = clr(31, 35, 39);
-    snow.mFogSunriseColor = clr(106, 91, 91);
-    snow.mFogDayColor = clr(153, 158, 166);
-    snow.mFogSunsetColor = clr(96, 115, 134);
-    snow.mFogNightColor = clr(31, 35, 39);
-    snow.mAmbientSunriseColor = clr(92, 84, 84);
-    snow.mAmbientDayColor = clr(93, 96, 105);
-    snow.mAmbientSunsetColor = clr(70, 79, 87);
-    snow.mAmbientNightColor = clr(49, 58, 68);
-    snow.mSunSunriseColor = clr(141, 109, 109);
-    snow.mSunDayColor = clr(163, 169, 183);
-    snow.mSunSunsetColor = clr(101, 121, 141);
-    snow.mSunNightColor = clr(55, 66, 77);
-    snow.mSunDiscSunsetColor = clr(128, 128, 128);
-    snow.mLandFogDayDepth = 1.0;
-    snow.mLandFogNightDepth = 1.2;
-    snow.mWindSpeed = 0;
-    snow.mCloudSpeed = 1.5;
-    snow.mGlareView = 0;
-    mWeatherSettings["snow"] = snow;
+    setFallbackWeather(snow, "snow");
 
     Weather blizzard;
     blizzard.mCloudTexture = "tx_bm_sky_blizzard.dds";
-    blizzard.mCloudsMaximumPercent = 1.0;
-    blizzard.mTransitionDelta = 0.030;
-    blizzard.mSkySunriseColor = clr(91, 99, 106);
-    blizzard.mSkyDayColor = clr(121, 133, 145);
-    blizzard.mSkySunsetColor = clr(108, 115, 121);
-    blizzard.mSkyNightColor = clr(27, 29, 31);
-    blizzard.mFogSunriseColor = clr(91, 99, 106);
-    blizzard.mFogDayColor = clr(121, 133, 145);
-    blizzard.mFogSunsetColor = clr(108, 115, 121);
-    blizzard.mFogNightColor = clr(21, 24, 28);
-    blizzard.mAmbientSunriseColor = clr(84, 88, 92);
-    blizzard.mAmbientDayColor = clr(93, 96, 105);
-    blizzard.mAmbientSunsetColor = clr(83, 77, 75);
-    blizzard.mAmbientNightColor = clr(53, 62, 70);
-    blizzard.mSunSunriseColor = clr(114, 128, 146);
-    blizzard.mSunDayColor = clr(163, 169, 183);
-    blizzard.mSunSunsetColor = clr(106, 114, 136);
-    blizzard.mSunNightColor = clr(57, 66, 74);
-    blizzard.mSunDiscSunsetColor = clr(128, 128, 128);
-    blizzard.mLandFogDayDepth = 2.8;
-    blizzard.mLandFogNightDepth = 3.0;
-    blizzard.mWindSpeed = 0.9;
-    blizzard.mCloudSpeed = 7.5;
-    blizzard.mGlareView = 0;
     blizzard.mAmbientLoopSoundID = "BM Blizzard";
-    mWeatherSettings["blizzard"] = blizzard;
-    */
+    setFallbackWeather(blizzard,"blizzard");
 }
 
 void WeatherManager::setWeather(const String& weather, bool instant)
@@ -463,34 +413,53 @@ void WeatherManager::update(float duration)
             mRendering->getSkyManager()->masserEnable();
             mRendering->getSkyManager()->secundaEnable();
 
-            float hour_fade;
-            if (mHour >= 7.f && mHour <= 14.f)
-                hour_fade = 1-(mHour-7)/3.f;
-            else if (mHour >= 14 && mHour <= 15.f)
-                hour_fade = mHour-14;
-            else
-                hour_fade = 1;
+            float secunda_hour_fade;
+            float secunda_fadeout_start=mFallback->getFallbackFloat("Moons_Secunda_Fade_Out_Start");
+            float secunda_fadein_start=mFallback->getFallbackFloat("Moons_Secunda_Fade_In_Start");
+            float secunda_fadein_finish=mFallback->getFallbackFloat("Moons_Secunda_Fade_In_Finish");
 
-            float secunda_angle_fade;
-            float masser_angle_fade;
+            if (mHour >= secunda_fadeout_start && mHour <= secunda_fadein_start)
+                secunda_hour_fade = 1-(mHour-secunda_fadeout_start)/3.f;
+            else if (mHour >= secunda_fadein_start && mHour <= secunda_fadein_finish)
+                secunda_hour_fade = mHour-secunda_fadein_start;
+            else
+                secunda_hour_fade = 1;
+
+            float masser_hour_fade;
+            float masser_fadeout_start=mFallback->getFallbackFloat("Moons_Masser_Fade_Out_Start");
+            float masser_fadein_start=mFallback->getFallbackFloat("Moons_Masser_Fade_In_Start");
+            float masser_fadein_finish=mFallback->getFallbackFloat("Moons_Masser_Fade_In_Finish");
+            if (mHour >= masser_fadeout_start && mHour <= masser_fadein_start)
+                masser_hour_fade = 1-(mHour-masser_fadeout_start)/3.f;
+            else if (mHour >= masser_fadein_start && mHour <= masser_fadein_finish)
+                masser_hour_fade = mHour-masser_fadein_start;
+            else
+                masser_hour_fade = 1;
+
             float angle = moonHeight*90.f;
 
-            if (angle >= 30 && angle <= 50)
-                secunda_angle_fade = (angle-30)/20.f;
-            else if (angle <30)
+            float secunda_angle_fade;
+            float secunda_end_angle=mFallback->getFallbackFloat("Moons_Secunda_Fade_End_Angle");
+            float secunda_start_angle=mFallback->getFallbackFloat("Moons_Secunda_Fade_Start_Angle");
+            if (angle >= secunda_end_angle && angle <= secunda_start_angle)
+                secunda_angle_fade = (angle-secunda_end_angle)/20.f;
+            else if (angle < secunda_end_angle)
                 secunda_angle_fade = 0.f;
             else
                 secunda_angle_fade = 1.f;
 
-            if (angle >= 40 && angle <= 50)
-                masser_angle_fade = (angle-40)/10.f;
-            else if (angle <40)
+            float masser_angle_fade;
+            float masser_end_angle=mFallback->getFallbackFloat("Moons_Masser_Fade_End_Angle");
+            float masser_start_angle=mFallback->getFallbackFloat("Moons_Masser_Fade_Start_Angle");
+            if (angle >= masser_end_angle && angle <= masser_start_angle)
+                masser_angle_fade = (angle-masser_end_angle)/10.f;
+            else if (angle < masser_end_angle)
                 masser_angle_fade = 0.f;
             else
                 masser_angle_fade = 1.f;
 
-            masser_angle_fade *= hour_fade;
-            secunda_angle_fade *= hour_fade;
+            masser_angle_fade *= masser_hour_fade;
+            secunda_angle_fade *= secunda_hour_fade;
 
             mRendering->getSkyManager()->setMasserFade(masser_angle_fade);
             mRendering->getSkyManager()->setSecundaFade(secunda_angle_fade);

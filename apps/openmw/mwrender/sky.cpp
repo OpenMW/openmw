@@ -21,6 +21,8 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwworld/fallback.hpp"
+
 #include "renderconst.hpp"
 #include "renderingmanager.hpp"
 
@@ -266,11 +268,12 @@ void SkyManager::create()
     mLightning->setVisible (false);
     mLightning->setDiffuseColour (ColourValue(3,3,3));
 
-    mSecunda = new Moon("secunda_texture", 0.5, Vector3(-0.4, 0.4, 0.5), mRootNode, "openmw_moon");
+    MWWorld::Fallback* fallback=MWBase::Environment::get().getWorld()->getFallback();
+    mSecunda = new Moon("secunda_texture", /*0.5*/fallback->getFallbackFloat("Moons_Secunda_Size")/100, Vector3(-0.4, 0.4, 0.5), mRootNode, "openmw_moon");
     mSecunda->setType(Moon::Type_Secunda);
     mSecunda->setRenderQueue(RQG_SkiesEarly+4);
 
-    mMasser = new Moon("masser_texture", 0.75, Vector3(-0.4, 0.4, 0.5), mRootNode, "openmw_moon");
+    mMasser = new Moon("masser_texture", /*0.75*/fallback->getFallbackFloat("Moons_Masser_Size")/100, Vector3(-0.4, 0.4, 0.5), mRootNode, "openmw_moon");
     mMasser->setRenderQueue(RQG_SkiesEarly+3);
     mMasser->setType(Moon::Type_Masser);
 
@@ -368,7 +371,7 @@ int SkyManager::getSecundaPhase() const
 void SkyManager::update(float duration)
 {
     if (!mEnabled) return;
-
+    MWWorld::Fallback* fallback=MWBase::Environment::get().getWorld()->getFallback();
     mCamera->getParentSceneNode ()->needUpdate ();
     mRootNode->setPosition(mCamera->getDerivedPosition());
 
@@ -381,7 +384,7 @@ void SkyManager::update(float duration)
     mMasser->setPhase( static_cast<Moon::Phase>( (int) ((mDay % 32)/4.f)) );
     mSecunda->setPhase ( static_cast<Moon::Phase>( (int) ((mDay % 32)/4.f)) );
 
-    mSecunda->setColour ( mMoonRed ? ColourValue(1.0, 0.0784, 0.0784) : ColourValue(1,1,1,1));
+    mSecunda->setColour ( mMoonRed ? fallback->getFallbackColour("Moons_Script_Color") : ColourValue(1,1,1,1));
     mMasser->setColour (ColourValue(1,1,1,1));
 
     if (mSunEnabled)

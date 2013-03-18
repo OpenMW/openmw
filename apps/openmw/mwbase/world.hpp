@@ -46,6 +46,7 @@ namespace MWRender
 
 namespace MWWorld
 {
+    class Fallback;
     class CellStore;
     class Player;
     class LocalScripts;
@@ -103,7 +104,7 @@ namespace MWBase
 
             virtual void getTriangleBatchCount(unsigned int &triangles, unsigned int &batches) = 0;
 
-            virtual std::string getFallback (const std::string& key) const = 0;
+            virtual MWWorld::Fallback *getFallback () = 0;
 
             virtual MWWorld::Player& getPlayer() = 0;
 
