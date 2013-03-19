@@ -81,48 +81,28 @@ void ToolTips::onFrame(float frameDuration)
     {
         const MyGUI::IntPoint& mousePos = InputManager::getInstance().getMousePosition();
 
-        if (mWindowManager->getWorldMouseOver() && (mWindowManager->getMode() == GM_Console))
-        {
-            MWWorld::Ptr objectptr = MWBase::Environment::get().getWorld()->getFacedObject();
-            if (!objectptr.isEmpty())
-            {
-                const MWWorld::Class& objectclass = MWWorld::Class::get (mFocusObject);
-                IntSize tooltipSize;
-                if (!objectclass.hasToolTip(mFocusObject))
-                {
-                    setCoord(0, 0, 300, 300);
-                    mDynamicToolTipBox->setVisible(true);
-                    ToolTipInfo info;
-                    info.caption=objectptr.getCellRef().mRefID;
-                    info.icon="";
-                    tooltipSize = createToolTip(info);
-                }
-                else
-                    tooltipSize = getToolTipViaPtr(true);
-                IntPoint tooltipPosition = InputManager::getInstance().getMousePosition() + IntPoint(0, 24);
-
-                if ((tooltipPosition.left + tooltipSize.width) > viewSize.width)
-                {
-                    tooltipPosition.left = viewSize.width - tooltipSize.width;
-                }
-                if ((tooltipPosition.top + tooltipSize.height) > viewSize.height)
-                {
-                    tooltipPosition.top = viewSize.height - tooltipSize.height;
-                }
-
-                setCoord(tooltipPosition.left, tooltipPosition.top, tooltipSize.width, tooltipSize.height);
-            }
-        }
-
-        if (mWindowManager->getWorldMouseOver() && ((mWindowManager->getMode() == GM_Container)
+        if (mWindowManager->getWorldMouseOver() && ((mWindowManager->getMode() == GM_Console)
+            || (mWindowManager->getMode() == GM_Container)
             || (mWindowManager->getMode() == GM_Inventory)))
         {
             mFocusObject = MWBase::Environment::get().getWorld()->getFacedObject();
+            const MWWorld::Class& objectclass = MWWorld::Class::get (mFocusObject);
 
             if (mFocusObject.isEmpty ())
                 return;
 
-            IntSize tooltipSize = getToolTipViaPtr(true);
+            IntSize tooltipSize;
+            if ((!objectclass.hasToolTip(mFocusObject))&&(mWindowManager->getMode() == GM_Console))
+            {
+                setCoord(0, 0, 300, 300);
+                mDynamicToolTipBox->setVisible(true);
+                ToolTipInfo info;
+                info.caption=mFocusObject.getCellRef().mRefID;
+                info.icon="";
+                tooltipSize = createToolTip(info);
+            }
+            else
+                tooltipSize = getToolTipViaPtr(true);
 
             IntPoint tooltipPosition = InputManager::getInstance().getMousePosition() + IntPoint(0, 24);
 
