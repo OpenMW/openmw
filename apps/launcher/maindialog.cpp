@@ -182,8 +182,9 @@ bool MainDialog::showFirstRunDialog()
     Q_UNUSED(skipButton); // Surpress compiler unused warning
 
     msgBox.setStandardButtons(QDialogButtonBox::NoButton);
-    msgBox.setText(tr("<br><b>An existing Morrowind configuration was detected</b><br><br> \
-                      Would you like to import settings from Morrowind.ini?<br>"));
+    msgBox.setText(tr("<br><b>An existing Morrowind configuration was detected</b><br> \
+                      <br>Would you like to import settings from Morrowind.ini?<br> \
+                      <br><b>Warning: In most cases OpenMW needs these settings to run properly</b><br>"));
     msgBox.setCheckBoxText(tr("Include selected masters and plugins (creates a new profile)"));
     msgBox.exec();
 
