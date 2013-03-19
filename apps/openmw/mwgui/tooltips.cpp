@@ -86,10 +86,11 @@ void ToolTips::onFrame(float frameDuration)
             || (mWindowManager->getMode() == GM_Inventory)))
         {
             mFocusObject = MWBase::Environment::get().getWorld()->getFacedObject();
-            const MWWorld::Class& objectclass = MWWorld::Class::get (mFocusObject);
 
             if (mFocusObject.isEmpty ())
                 return;
+
+            const MWWorld::Class& objectclass = MWWorld::Class::get (mFocusObject);
 
             IntSize tooltipSize;
             if ((!objectclass.hasToolTip(mFocusObject))&&(mWindowManager->getMode() == GM_Console))
