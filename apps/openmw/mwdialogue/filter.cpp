@@ -136,8 +136,12 @@ bool MWDialogue::Filter::testDisposition (const ESM::DialInfo& info, bool invert
 
 bool MWDialogue::Filter::testSelectStruct (const SelectWrapper& select) const
 {
-    if (select.isNpcOnly() && mActor.getTypeName()!=typeid (ESM::NPC).name())
-        return select.isInverted();
+    if (select.isNpcOnly() && (mActor.getTypeName() != typeid (ESM::NPC).name()))
+        // If the actor is a creature, we do not test the conditions applicable
+        // only to NPCs. Such conditions can never be satisfied, apart
+        // inverted ones (NotClass, NotRace, NotFaction return true
+        // because creatures are not of any race, class or faction).
+        return select.getType() == SelectWrapper::Type_Inverted;
 
     switch (select.getType())
     {
@@ -145,6 +149,9 @@ bool MWDialogue::Filter::testSelectStruct (const SelectWrapper& select) const
         case SelectWrapper::Type_Integer: return select.selectCompare (getSelectStructInteger (select));
         case SelectWrapper::Type_Numeric: return testSelectStructNumeric (select);
         case SelectWrapper::Type_Boolean: return select.selectCompare (getSelectStructBoolean (select));
+
+        // We must not do the comparison for inverted functions (eg. Function_NotClass)
+        case SelectWrapper::Type_Inverted: return getSelectStructBoolean (select);
     }
 
     return true;
@@ -432,6 +439,30 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
         case SelectWrapper::Function_NotCell:
 
             return Misc::StringUtils::lowerCase (mActor.getCell()->mCell->mName)!=select.getName();
+
+        case SelectWrapper::Function_NotLocal:
+        {
+            std::string scriptName = MWWorld::Class::get (mActor).getScript (mActor);
+
+            if (scriptName.empty())
+                // This actor has no attached script, so there is no local variable
+                return true;
+
+            const ESM::Script *script =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find (scriptName);
+
+            std::string name = select.getName();
+
+            int i = 0;
+            for (; i < script->mVarNames.size(); ++i)
+                if (Misc::StringUtils::lowerCase(script->mVarNames[i]) == name)
+                    break;
+
+            if (i >= script->mVarNames.size())
+                return true; // script does not have a variable of this name
+
+            return false;
+        }
 
         case SelectWrapper::Function_SameGender:
 

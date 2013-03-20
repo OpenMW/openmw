@@ -169,7 +169,7 @@ namespace MWWorld
 
     bool Class::hasDetected (const MWWorld::Ptr& ptr, const MWWorld::Ptr& ptr2) const
     {
-        return false;
+        return true;
     }
 
     float Class::getArmorRating (const MWWorld::Ptr& ptr) const
