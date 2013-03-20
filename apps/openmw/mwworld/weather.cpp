@@ -317,19 +317,19 @@ void WeatherManager::update(float duration)
                     float thunder = region->mData.mThunder/255.f;
                     float ash = region->mData.mAsh/255.f;
                     float blight = region->mData.mBlight/255.f;
-                    //float snow = region->mData.a/255.f;
-                    //float blizzard = region->mData.b/255.f;
+                    float snow = region->mData.mA/255.f;
+                    float blizzard = region->mData.mB/255.f;
 
                     // re-scale to 100 percent
-                    const float total = clear+cloudy+foggy+overcast+rain+thunder+ash+blight;//+snow+blizzard;
+                    const float total = clear+cloudy+foggy+overcast+rain+thunder+ash+blight+snow+blizzard;
 
                     float random = ((rand()%100)/100.f) * total;
 
-                    //if (random >= snow+blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
-                    //    weather = "blizzard";
-                    //else if (random >= blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
-                    //    weather = "snow";
-                    /*else*/ if (random >= ash+thunder+rain+overcast+foggy+cloudy+clear)
+                    if (random >= snow+blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
+                        weather = "blizzard";
+                    else if (random >= blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
+                        weather = "snow";
+                    else if (random >= ash+thunder+rain+overcast+foggy+cloudy+clear)
                         weather = "blight";
                     else if (random >= thunder+rain+overcast+foggy+cloudy+clear)
                         weather = "ashstorm";
