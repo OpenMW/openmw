@@ -1,6 +1,15 @@
 #include "maindialog.hpp"
 
-#include <QtGui>
+#include <QFontDatabase>
+#include <QInputDialog>
+#include <QFileDialog>
+#include <QCloseEvent>
+#include <QTextCodec>
+#include <QProcess>
+#include <QFile>
+#include <QDir>
+
+#include <QDebug>
 
 #include "utils/checkablemessagebox.hpp"
 
@@ -113,13 +122,57 @@ void MainDialog::createPages()
 
 bool MainDialog::showFirstRunDialog()
 {
+    QStringList iniPaths;
+
+    foreach (const QString &path, mGameSettings.getDataDirs()) {
+        QDir dir(path);
+        dir.setPath(dir.canonicalPath()); // Resolve symlinks
+
+        if (!dir.cdUp())
+            continue; // Cannot move from Data Files
+
+        if (dir.exists(QString("Morrowind.ini")))
+            iniPaths.append(dir.absoluteFilePath(QString("Morrowind.ini")));
+    }
+
+    // Ask the user where the Morrowind.ini is
+    if (iniPaths.empty()) {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle(tr("Error detecting Morrowind configuration"));
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setStandardButtons(QMessageBox::Cancel);
+        msgBox.setText(QObject::tr("<br><b>Could not find Morrowind.ini</b><br><br> \
+                                   OpenMW needs to import settings from this file.<br><br> \
+                                   Press \"Browse...\" to specify the location manually.<br>"));
+
+        QAbstractButton *dirSelectButton =
+                msgBox.addButton(QObject::tr("B&rowse..."), QMessageBox::ActionRole);
+
+        msgBox.exec();
+
+        QString iniFile;
+        if (msgBox.clickedButton() == dirSelectButton) {
+            iniFile = QFileDialog::getOpenFileName(
+                        NULL,
+                        QObject::tr("Select configuration file"),
+                        QDir::currentPath(),
+                        QString(tr("Morrowind configuration file (*.ini)")));
+        }
+
+        if (iniFile.isEmpty())
+            return false; // Cancel was clicked;
+
+        QFileInfo info(iniFile);
+        iniPaths.clear();
+        iniPaths.append(info.absoluteFilePath());
+    }
+
     CheckableMessageBox msgBox(this);
     msgBox.setWindowTitle(tr("Morrowind installation detected"));
 
     QIcon icon = QApplication::style()->standardIcon(QStyle::SP_MessageBoxQuestion);
     int size = QApplication::style()->pixelMetric(QStyle::PM_MessageBoxIconSize);
     msgBox.setIconPixmap(icon.pixmap(size, size));
-
 
     QAbstractButton *importerButton =
             msgBox.addButton(tr("Import"), QDialogButtonBox::AcceptRole); // ActionRole doesn't work?!
@@ -129,54 +182,28 @@ bool MainDialog::showFirstRunDialog()
     Q_UNUSED(skipButton); // Surpress compiler unused warning
 
     msgBox.setStandardButtons(QDialogButtonBox::NoButton);
-
-    msgBox.setText(tr("<br><b>An existing Morrowind installation was detected</b><br><br> \
-                      Would you like to import settings from Morrowind.ini?<br>"));
-
+    msgBox.setText(tr("<br><b>An existing Morrowind configuration was detected</b><br> \
+                      <br>Would you like to import settings from Morrowind.ini?<br> \
+                      <br><b>Warning: In most cases OpenMW needs these settings to run properly</b><br>"));
     msgBox.setCheckBoxText(tr("Include selected masters and plugins (creates a new profile)"));
     msgBox.exec();
 
 
     if (msgBox.clickedButton() == importerButton) {
 
-        QStringList iniPaths;
-
-        foreach (const QString &path, mGameSettings.getDataDirs()) {
-            QDir dir(path);
-            dir.setPath(dir.canonicalPath()); // Resolve symlinks
-
-            if (!dir.cdUp())
-                continue; // Cannot move from Data Files
-
-            if (dir.exists(QString("Morrowind.ini")))
-                iniPaths.append(dir.absoluteFilePath(QString("Morrowind.ini")));
-        }
-
-        if (iniPaths.isEmpty()) {
-            QMessageBox msgBox;
-            msgBox.setWindowTitle(tr("Error reading Morrowind configuration file"));
-            msgBox.setIcon(QMessageBox::Warning);
-            msgBox.setStandardButtons(QMessageBox::Ok);
-            msgBox.setText(QObject::tr("<br><b>Could not find Morrowind.ini</b><br><br> \
-                              The problem may be due to an incomplete installation of Morrowind.<br> \
-                              Reinstalling Morrowind may resolve the problem."));
-            msgBox.exec();
-            return false;
-        }
-
         if (iniPaths.count() > 1) {
             // Multiple Morrowind.ini files found
             bool ok;
-                QString path = QInputDialog::getItem(this, tr("Multiple configurations found"),
+            QString path = QInputDialog::getItem(this, tr("Multiple configurations found"),
                                                      tr("<br><b>There are multiple Morrowind.ini files found.</b><br><br> \
                                                         Please select the one you wish to import from:"), iniPaths, 0, false, &ok);
-                if (ok && !path.isEmpty()) {
-                    iniPaths.clear();
-                    iniPaths.append(path);
-                } else {
-                    // Cancel was clicked TODO: should we abort here?
-                    return false;
-                }
+            if (ok && !path.isEmpty()) {
+                iniPaths.clear();
+                iniPaths.append(path);
+            } else {
+                // Cancel was clicked
+                return false;
+            }
         }
 
         // Create the file if it doesn't already exist, else the importer will fail
@@ -204,9 +231,13 @@ bool MainDialog::showFirstRunDialog()
         QStringList arguments;
 
         if (msgBox.isChecked())
-            arguments.append(QString("-g"));
+            arguments.append(QString("--game-files"));
 
+        arguments.append(QString("--encoding"));
+        arguments.append(mGameSettings.value(QString("encoding"), QString("win1252")));
+        arguments.append(QString("--ini"));
         arguments.append(iniPaths.first());
+        arguments.append(QString("--cfg"));
         arguments.append(path);
 
         if (!startProgram(QString("mwiniimport"), arguments, false))
@@ -218,7 +249,7 @@ bool MainDialog::showFirstRunDialog()
 
         // Add a new profile
         if (msgBox.isChecked()) {
-            mLauncherSettings.setValue(QString("Profiles/CurrentProfile"), QString("Imported"));
+            mLauncherSettings.setValue(QString("Profiles/currentprofile"), QString("Imported"));
 
             mLauncherSettings.remove(QString("Profiles/Imported/master"));
             mLauncherSettings.remove(QString("Profiles/Imported/plugin"));
@@ -659,7 +690,7 @@ bool MainDialog::startProgram(const QString &name, const QStringList &arguments,
             return false;
         }
 
-        if (process.exitCode() != 0) {
+        if (process.exitCode() != 0 || process.exitStatus() == QProcess::CrashExit) {
             QString error(process.readAllStandardError());
             error.append(tr("\nArguments:\n"));
             error.append(arguments.join(" "));

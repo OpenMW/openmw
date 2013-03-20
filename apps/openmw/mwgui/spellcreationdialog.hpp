@@ -88,6 +88,8 @@ namespace MWGui
 
 
     protected:
+        std::map<int, short> mButtonMapping; // maps button ID to effect ID
+
         Widgets::MWList* mAvailableEffectsList;
         MyGUI::ScrollView* mUsedEffectsView;
 

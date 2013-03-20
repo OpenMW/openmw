@@ -3,7 +3,7 @@ OpenMW: A reimplementation of The Elder Scrolls III: Morrowind
 OpenMW is an attempt at recreating the engine for the popular role-playing game
 Morrowind by Bethesda Softworks. You need to own and install the original game for OpenMW to work.
 
-Version: 0.21.0
+Version: 0.22.0
 License: GPL (see GPL3.txt for more information)
 Website: http://www.openmw.org
 
@@ -93,6 +93,82 @@ Allowed options:
 
 
 CHANGELOG
+
+0.22.0
+
+Bug #311: Potential infinite recursion in script compiler
+Bug #355: Keyboard repeat rate (in Xorg) are left disabled after game exit.
+Bug #382: Weird effect in 3rd person on water
+Bug #387: Always use detailed shape for physics raycasts
+Bug #420: Potion/ingredient effects do not stack
+Bug #429: Parts of dwemer door not picked up correctly for activation/tooltips
+Bug #434/Bug #605: Object movement between cells not properly implemented
+Bug #502: Duplicate player collision model at origin
+Bug #509: Dialogue topic list shifts inappropriately
+Bug #513: Sliding stairs
+Bug #515: Launcher does not support non-latin strings
+Bug #525: Race selection preview camera wrong position
+Bug #526: Attributes / skills should not go below zero
+Bug #529: Class and Birthsign menus options should be preselected
+Bug #530: Lock window button graphic missing
+Bug #532: Missing map menu graphics
+Bug #545: ESX selector does not list ESM files properly
+Bug #547: Global variables of type short are read incorrectly
+Bug #550: Invisible meshes collision and tooltip
+Bug #551: Performance drop when loading multiple ESM files
+Bug #552: Don't list CG in options if it is not available
+Bug #555: Character creation windows "OK" button broken
+Bug #558: Segmentation fault when Alt-tabbing with console opened
+Bug #559: Dialog window should not be available before character creation is finished
+Bug #560: Tooltip borders should be stretched
+Bug #562: Sound should not be played when an object cannot be picked up
+Bug #565: Water animation speed + timescale
+Bug #572: Better Bodies' textures don't work
+Bug #573: OpenMW doesn't load if TR_Mainland.esm is enabled (Tamriel Rebuilt mod)
+Bug #574: Moving left/right should not cancel auto-run
+Bug #575: Crash entering the Chamber of Song
+Bug #576: Missing includes
+Bug #577: Left Gloves Addon causes ESMReader exception
+Bug #579: Unable to open container "Kvama Egg Sack"
+Bug #581: Mimicking vanilla Morrowind water
+Bug #583: Gender not recognized
+Bug #586: Wrong char gen behaviour
+Bug #587: "End" script statements with spaces don't work
+Bug #589: Closing message boxes by pressing the activation key
+Bug #590: Ugly Dagoth Ur rendering
+Bug #591: Race selection issues
+Bug #593: Persuasion response should be random
+Bug #595: Footless guard
+Bug #599: Waterfalls are invisible from a certain distance
+Bug #600: Waterfalls rendered incorrectly, cut off by water
+Bug #607: New beast bodies mod crashes
+Bug #608: Crash in cell "Mournhold, Royal Palace"
+Bug #611: OpenMW doesn't find some of textures used in Tamriel Rebuilt
+Bug #613: Messagebox causing assert to fail
+Bug #615: Meshes invisible from above water
+Bug #617: Potion effects should be hidden until discovered
+Bug #619: certain moss hanging from tree has rendering bug
+Bug #621: Batching bloodmoon's trees
+Bug #623: NiMaterialProperty alpha unhandled
+Bug #628: Launcher in latest master crashes the game
+Bug #633: Crash on startup: Better Heads
+Bug #636: Incorrect Char Gen Menu Behavior
+Feature #29: Allow ESPs and multiple ESMs
+Feature #94: Finish class selection-dialogue
+Feature #149: Texture Alphas
+Feature #237: Run Morrowind-ini importer from launcher
+Feature #286: Update Active Spell Icons
+Feature #334: Swimming animation
+Feature #335: Walking animation
+Feature #360: Proper collision shapes for NPCs and creatures
+Feature #367: Lights that behave more like original morrowind implementation
+Feature #477: Special local scripting variables
+Feature #528: Message boxes should close when enter is pressed under certain conditions.
+Feature #543: Add bsa files to the settings imported by the ini importer
+Feature #594: coordinate space and utility functions
+Feature #625: Zoom in vanity mode
+Task #464: Refactor launcher ESX selector into a re-usable component
+Task #624: Unified implementation of type-variable sub-records
 
 0.21.0
 

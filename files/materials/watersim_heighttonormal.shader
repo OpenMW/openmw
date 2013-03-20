@@ -8,12 +8,21 @@
 
     SH_START_PROGRAM
     {
-		float2 offset[4] = float2[4] (
-			vec2(-1.0, 0.0),
-			vec2( 1.0, 0.0),
-			vec2( 0.0,-1.0),
-			vec2( 0.0, 1.0)
-		);
+#if !SH_HLSL
+                float2 offset[4] = float2[4] (
+                    float2(-1.0, 0.0),
+                    float2( 1.0, 0.0),
+                    float2( 0.0,-1.0),
+                    float2( 0.0, 1.0)
+                );
+#else
+                float2 offset[4] = {
+                    float2(-1.0, 0.0),
+                    float2( 1.0, 0.0),
+                    float2( 0.0,-1.0),
+                    float2( 0.0, 1.0)
+                    };
+#endif
 
 		float fHeightL = DecodeHeightmap(heightCurrentSampler, UV.xy + offset[0]*rippleTextureSize.xy);
 		float fHeightR = DecodeHeightmap(heightCurrentSampler, UV.xy + offset[1]*rippleTextureSize.xy);

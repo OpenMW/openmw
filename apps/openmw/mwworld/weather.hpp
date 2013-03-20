@@ -177,6 +177,7 @@ namespace MWWorld
         float mSunriseDuration;
         float mSunsetDuration;
         float mWeatherUpdateTime;
+        float mHoursBetweenWeatherChanges;
         float mThunderFrequency;
         float mThunderThreshold;
         float mThunderSoundDelay;

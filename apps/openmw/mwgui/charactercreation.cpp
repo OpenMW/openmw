@@ -674,9 +674,6 @@ void CharacterCreation::showClassQuestionDialog()
 
 void CharacterCreation::onGenerateClassBack()
 {
-    if(mCreationStage < CSE_ClassChosen)
-        mCreationStage = CSE_ClassChosen;
-
     mWM->removeDialog(mGenerateClassResultDialog);
     mGenerateClassResultDialog = 0;
 

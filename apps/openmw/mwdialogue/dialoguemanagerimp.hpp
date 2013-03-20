@@ -48,7 +48,7 @@ namespace MWDialogue
 
             void printError (const std::string& error);
 
-            void executeTopic (const std::string& topic);
+            void executeTopic (const std::string& topic, bool randomResponse=false);
 
         public:
 
