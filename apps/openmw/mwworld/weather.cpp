@@ -18,7 +18,18 @@ using namespace Ogre;
 using namespace MWWorld;
 using namespace MWSound;
 
-#define lerp(x, y) (x * (1-factor) + y * factor)
+namespace
+{
+    float lerp (float x, float y, float factor)
+    {
+        return x * (1-factor) + y * factor;
+    }
+    Ogre::ColourValue lerp (const Ogre::ColourValue& x, const Ogre::ColourValue& y, float factor)
+    {
+        return x * (1-factor) + y * factor;
+    }
+}
+
 std::string WeatherManager::getFallback (const std::string& key) const
 {
     std::map<std::string,std::string>::const_iterator it;
@@ -51,6 +62,7 @@ ColourValue WeatherManager::getFallbackColour(const std::string& fall) const
     }
     return ColourValue(boost::lexical_cast<int>(ret[0])/255.f,boost::lexical_cast<int>(ret[1])/255.f,boost::lexical_cast<int>(ret[2])/255.f);
 }
+
 void WeatherManager::setFallbackWeather(Weather& weather,const std::string& name)
 {
     std::string upper=name;
@@ -98,7 +110,8 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering,const std::
     mSunsetTime = getFallbackFloat("Weather_Sunset_Time");
     mSunriseDuration = getFallbackFloat("Weather_Sunrise_Duration");
     mSunsetDuration = getFallbackFloat("Weather_Sunset_Duration");
-    mWeatherUpdateTime = getFallbackFloat("Weather_Hours_Between_Weather_Changes");
+    mHoursBetweenWeatherChanges = getFallbackFloat("Weather_Hours_Between_Weather_Changes");
+    mWeatherUpdateTime = mHoursBetweenWeatherChanges*3600;
     mThunderFrequency = getFallbackFloat("Weather_Thunderstorm_Thunder_Frequency");
     mThunderThreshold = getFallbackFloat("Weather_Thunderstorm_Thunder_Threshold");
     mThunderSoundDelay = 0.25;
@@ -263,10 +276,10 @@ WeatherResult WeatherManager::getResult(const String& weather)
             // fade in
             float advance = 6-mHour;
             float factor = advance / 0.5f;
-            result.mFogColor = lerp(current.mFogSunriseColor, current.mFogNightColor);
-            result.mAmbientColor = lerp(current.mAmbientSunriseColor, current.mAmbientNightColor);
-            result.mSunColor = lerp(current.mSunSunriseColor, current.mSunNightColor);
-            result.mSkyColor = lerp(current.mSkySunriseColor, current.mSkyNightColor);
+            result.mFogColor = lerp(current.mFogSunriseColor, current.mFogNightColor, factor);
+            result.mAmbientColor = lerp(current.mAmbientSunriseColor, current.mAmbientNightColor, factor);
+            result.mSunColor = lerp(current.mSunSunriseColor, current.mSunNightColor, factor);
+            result.mSkyColor = lerp(current.mSkySunriseColor, current.mSkyNightColor, factor);
             result.mNightFade = factor;
         }
         else //if (mHour >= 6)
@@ -274,10 +287,10 @@ WeatherResult WeatherManager::getResult(const String& weather)
             // fade out
             float advance = mHour-6;
             float factor = advance / 3.f;
-            result.mFogColor = lerp(current.mFogSunriseColor, current.mFogDayColor);
-            result.mAmbientColor = lerp(current.mAmbientSunriseColor, current.mAmbientDayColor);
-            result.mSunColor = lerp(current.mSunSunriseColor, current.mSunDayColor);
-            result.mSkyColor = lerp(current.mSkySunriseColor, current.mSkyDayColor);
+            result.mFogColor = lerp(current.mFogSunriseColor, current.mFogDayColor, factor);
+            result.mAmbientColor = lerp(current.mAmbientSunriseColor, current.mAmbientDayColor, factor);
+            result.mSunColor = lerp(current.mSunSunriseColor, current.mSunDayColor, factor);
+            result.mSkyColor = lerp(current.mSkySunriseColor, current.mSkyDayColor, factor);
         }
     }
 
@@ -298,20 +311,20 @@ WeatherResult WeatherManager::getResult(const String& weather)
             // fade in
             float advance = 19-mHour;
             float factor = (advance / 2);
-            result.mFogColor = lerp(current.mFogSunsetColor, current.mFogDayColor);
-            result.mAmbientColor = lerp(current.mAmbientSunsetColor, current.mAmbientDayColor);
-            result.mSunColor = lerp(current.mSunSunsetColor, current.mSunDayColor);
-            result.mSkyColor = lerp(current.mSkySunsetColor, current.mSkyDayColor);
+            result.mFogColor = lerp(current.mFogSunsetColor, current.mFogDayColor, factor);
+            result.mAmbientColor = lerp(current.mAmbientSunsetColor, current.mAmbientDayColor, factor);
+            result.mSunColor = lerp(current.mSunSunsetColor, current.mSunDayColor, factor);
+            result.mSkyColor = lerp(current.mSkySunsetColor, current.mSkyDayColor, factor);
         }
         else //if (mHour >= 19)
         {
             // fade out
             float advance = mHour-19;
             float factor = advance / 2.f;
-            result.mFogColor = lerp(current.mFogSunsetColor, current.mFogNightColor);
-            result.mAmbientColor = lerp(current.mAmbientSunsetColor, current.mAmbientNightColor);
-            result.mSunColor = lerp(current.mSunSunsetColor, current.mSunNightColor);
-            result.mSkyColor = lerp(current.mSkySunsetColor, current.mSkyNightColor);
+            result.mFogColor = lerp(current.mFogSunsetColor, current.mFogNightColor, factor);
+            result.mAmbientColor = lerp(current.mAmbientSunsetColor, current.mAmbientNightColor, factor);
+            result.mSunColor = lerp(current.mSunSunsetColor, current.mSunNightColor, factor);
+            result.mSkyColor = lerp(current.mSkySunsetColor, current.mSkyNightColor, factor);
             result.mNightFade = factor;
         }
     }
@@ -329,19 +342,19 @@ WeatherResult WeatherManager::transition(float factor)
     result.mNextCloudTexture = other.mCloudTexture;
     result.mCloudBlendFactor = factor;
 
-    result.mCloudOpacity = lerp(current.mCloudOpacity, other.mCloudOpacity);
-    result.mFogColor = lerp(current.mFogColor, other.mFogColor);
-    result.mSunColor = lerp(current.mSunColor, other.mSunColor);
-    result.mSkyColor = lerp(current.mSkyColor, other.mSkyColor);
+    result.mCloudOpacity = lerp(current.mCloudOpacity, other.mCloudOpacity, factor);
+    result.mFogColor = lerp(current.mFogColor, other.mFogColor, factor);
+    result.mSunColor = lerp(current.mSunColor, other.mSunColor, factor);
+    result.mSkyColor = lerp(current.mSkyColor, other.mSkyColor, factor);
 
-    result.mAmbientColor = lerp(current.mAmbientColor, other.mAmbientColor);
-    result.mSunDiscColor = lerp(current.mSunDiscColor, other.mSunDiscColor);
-    result.mFogDepth = lerp(current.mFogDepth, other.mFogDepth);
-    result.mWindSpeed = lerp(current.mWindSpeed, other.mWindSpeed);
-    result.mCloudSpeed = lerp(current.mCloudSpeed, other.mCloudSpeed);
-    result.mCloudOpacity = lerp(current.mCloudOpacity, other.mCloudOpacity);
-    result.mGlareView = lerp(current.mGlareView, other.mGlareView);
-    result.mNightFade = lerp(current.mNightFade, other.mNightFade);
+    result.mAmbientColor = lerp(current.mAmbientColor, other.mAmbientColor, factor);
+    result.mSunDiscColor = lerp(current.mSunDiscColor, other.mSunDiscColor, factor);
+    result.mFogDepth = lerp(current.mFogDepth, other.mFogDepth, factor);
+    result.mWindSpeed = lerp(current.mWindSpeed, other.mWindSpeed, factor);
+    result.mCloudSpeed = lerp(current.mCloudSpeed, other.mCloudSpeed, factor);
+    result.mCloudOpacity = lerp(current.mCloudOpacity, other.mCloudOpacity, factor);
+    result.mGlareView = lerp(current.mGlareView, other.mGlareView, factor);
+    result.mNightFade = lerp(current.mNightFade, other.mNightFade, factor);
 
     result.mNight = current.mNight;
 
@@ -365,7 +378,7 @@ void WeatherManager::update(float duration)
         if (mWeatherUpdateTime <= 0 || regionstr != mCurrentRegion)
         {
             mCurrentRegion = regionstr;
-            mWeatherUpdateTime = mWeatherUpdateTime*3600;
+            mWeatherUpdateTime = mHoursBetweenWeatherChanges*3600;
 
             std::string weather = "clear";
 
