@@ -454,11 +454,11 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
             std::string name = select.getName();
 
             int i = 0;
-            for (; i < script->mVarNames.size(); ++i)
+            for (; i < static_cast<int> (script->mVarNames.size()); ++i)
                 if (Misc::StringUtils::lowerCase(script->mVarNames[i]) == name)
                     break;
 
-            if (i >= script->mVarNames.size())
+            if (i >= static_cast<int> (script->mVarNames.size()))
                 return true; // script does not have a variable of this name
 
             return false;
