@@ -175,6 +175,9 @@ void DialogueWindow::onHistoryClicked(MyGUI::Widget* _sender)
     if (!mEnabled && color == "#572D21")
         MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
 
+    if (!mEnabled)
+        return;
+
     if(color != "#B29154")
     {
         MyGUI::UString key = mHistory->getColorTextAt(cursorPosition);
