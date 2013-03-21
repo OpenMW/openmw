@@ -214,7 +214,7 @@ CSMDoc::Document::Document (const std::vector<boost::filesystem::path>& files, b
 
     if (new_ && files.size()==1)
         createBase();
-    else if (files.size()>1)
+    else
     {
         std::vector<boost::filesystem::path>::const_iterator end = files.end();
 
