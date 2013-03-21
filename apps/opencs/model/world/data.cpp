@@ -39,6 +39,8 @@ CSMWorld::Data::Data()
     mSkills.addColumn (new StringIdColumn<ESM::Skill>);
     mSkills.addColumn (new RecordStateColumn<ESM::Skill>);
 
+    mSkills.addColumn (new DescriptionColumn<ESM::Skill>);
+
     addModel (new IdTable (&mGlobals), UniversalId::Type_Globals, UniversalId::Type_Global);
     addModel (new IdTable (&mGmsts), UniversalId::Type_Gmsts, UniversalId::Type_Gmst);
     addModel (new IdTable (&mSkills), UniversalId::Type_Skills, UniversalId::Type_Skill);
