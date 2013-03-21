@@ -1,5 +1,7 @@
 #include "loadskil.hpp"
 
+#include <sstream>
+
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
@@ -98,6 +100,22 @@ void Skill::load(ESMReader &esm)
     esm.getHNT(mIndex, "INDX");
     esm.getHNT(mData, "SKDT", 24);
     mDescription = esm.getHNOString("DESC");
+
+    // create an ID from the index and the name (only used in the editor and likely to change in the
+    // future)
+    std::ostringstream stream;
+
+    stream << "#";
+
+    if (mIndex<10)
+        stream << "0";
+
+    stream << mIndex;
+
+    if (mIndex>=0 && mIndex<Length)
+        stream << sSkillNameIds[mIndex].substr (6);
+
+    mId = stream.str();
 }
 void Skill::save(ESMWriter &esm)
 {
@@ -105,4 +123,11 @@ void Skill::save(ESMWriter &esm)
     esm.writeHNT("SKDT", mData, 24);
     esm.writeHNOString("DESC", mDescription);
 }
+
+    void Skill::blank()
+    {
+        mData.mAttribute = 0;
+        mData.mSpecialization = 0;
+        mData.mUseValue[0] = mData.mUseValue[1] = mData.mUseValue[2] = mData.mUseValue[3] = 1.0;
+    }
 }
