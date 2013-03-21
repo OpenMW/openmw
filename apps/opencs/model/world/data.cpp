@@ -3,7 +3,7 @@
 
 #include <stdexcept>
 
-#include <QAbstractTableModel>
+#include <QAbstractItemModel>
 
 #include <components/esm/esmreader.hpp>
 #include <components/esm/defs.hpp>
@@ -12,7 +12,7 @@
 #include "idtable.hpp"
 #include "columns.hpp"
 
-void CSMWorld::Data::addModel (QAbstractTableModel *model, UniversalId::Type type1,
+void CSMWorld::Data::addModel (QAbstractItemModel *model, UniversalId::Type type1,
     UniversalId::Type type2)
 {
     mModels.push_back (model);
@@ -42,7 +42,7 @@ CSMWorld::Data::Data()
 
 CSMWorld::Data::~Data()
 {
-    for (std::vector<QAbstractTableModel *>::iterator iter (mModels.begin()); iter!=mModels.end(); ++iter)
+    for (std::vector<QAbstractItemModel *>::iterator iter (mModels.begin()); iter!=mModels.end(); ++iter)
         delete *iter;
 }
 
@@ -66,9 +66,9 @@ CSMWorld::IdCollection<ESM::GameSetting>& CSMWorld::Data::getGmsts()
     return mGmsts;
 }
 
-QAbstractTableModel *CSMWorld::Data::getTableModel (const UniversalId& id)
+QAbstractItemModel *CSMWorld::Data::getTableModel (const UniversalId& id)
 {
-    std::map<UniversalId::Type, QAbstractTableModel *>::iterator iter = mModelIndex.find (id.getType());
+    std::map<UniversalId::Type, QAbstractItemModel *>::iterator iter = mModelIndex.find (id.getType());
 
     if (iter==mModelIndex.end())
         throw std::logic_error ("No table model available for " + id.toString());
