@@ -35,7 +35,7 @@ namespace CSMWorld
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
-            return record.get().mId.c_str();
+            return QString::fromUtf8 (record.get().mId.c_str());
         }
 
         virtual bool isEditable() const
@@ -127,17 +127,17 @@ namespace CSMWorld
             {
                 case ESM::VT_String:
 
-                    return record.get().mValue.getString().c_str(); break;
+                    return QString::fromUtf8 (record.get().mValue.getString().c_str());
 
                 case ESM::VT_Int:
                 case ESM::VT_Short:
                 case ESM::VT_Long:
 
-                    return record.get().mValue.getInteger(); break;
+                    return record.get().mValue.getInteger();
 
                 case ESM::VT_Float:
 
-                    return record.get().mValue.getFloat(); break;
+                    return record.get().mValue.getFloat();
 
                 default: return QVariant();
             }
