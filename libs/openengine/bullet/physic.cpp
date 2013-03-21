@@ -603,6 +603,14 @@ namespace Physic
         btTransform trans;
         trans.setIdentity();
 
-        shape->mCollisionShape->getAabb(trans, min, max);
+        if (shape->mRaycastingShape)
+            shape->mRaycastingShape->getAabb(trans, min, max);
+        else if (shape->mCollisionShape)
+            shape->mCollisionShape->getAabb(trans, min, max);
+        else
+        {
+            min = btVector3(0,0,0);
+            max = btVector3(0,0,0);
+        }
     }
 }}
