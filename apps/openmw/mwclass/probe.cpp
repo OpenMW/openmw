@@ -1,7 +1,7 @@
 
 #include "probe.hpp"
 
-#include <components/esm/loadlocks.hpp>
+#include <components/esm/loadprob.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

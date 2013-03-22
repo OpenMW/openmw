@@ -308,7 +308,7 @@ namespace MWGui
             && (type != typeid(ESM::Ingredient).name())
             && (type != typeid(ESM::Light).name())
             && (type != typeid(ESM::Miscellaneous).name())
-            && (type != typeid(ESM::Tool).name())
+            && (type != typeid(ESM::Lockpick).name())
             && (type != typeid(ESM::Probe).name())
             && (type != typeid(ESM::Repair).name())
             && (type != typeid(ESM::Weapon).name())

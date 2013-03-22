@@ -53,7 +53,7 @@ namespace MWWorld
                     !create (store.get<ESM::CreatureLevList>(), name) &&
                     !create (store.get<ESM::ItemLevList>(), name) &&
                     !create (store.get<ESM::Light>(), name) &&
-                    !create (store.get<ESM::Tool>(), name) &&
+                    !create (store.get<ESM::Lockpick>(), name) &&
                     !create (store.get<ESM::Miscellaneous>(), name) &&
                     !create (store.get<ESM::NPC>(), name) &&
                     !create (store.get<ESM::Probe>(), name) &&

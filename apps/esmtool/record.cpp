@@ -275,7 +275,7 @@ RecordBase::create(ESM::NAME type)
     }
     case ESM::REC_LOCK:
     {
-        record = new EsmTool::Record<ESM::Tool>;
+        record = new EsmTool::Record<ESM::Lockpick>;
         break;
     }
     case ESM::REC_LTEX:
@@ -864,14 +864,13 @@ void Record<ESM::Light>::print()
 }
 
 template<>
-void Record<ESM::Tool>::print()
+void Record<ESM::Lockpick>::print()
 {
     std::cout << "  Name: " << mData.mName << std::endl;
     std::cout << "  Model: " << mData.mModel << std::endl;
     std::cout << "  Icon: " << mData.mIcon << std::endl;
     if (mData.mScript != "")
         std::cout << "  Script: " << mData.mScript << std::endl;
-    std::cout << "  Type: " << mData.mType << std::endl;
     std::cout << "  Weight: " << mData.mData.mWeight << std::endl;
     std::cout << "  Value: " << mData.mData.mValue << std::endl;
     std::cout << "  Quality: " << mData.mData.mQuality << std::endl;
@@ -886,8 +885,6 @@ void Record<ESM::Probe>::print()
     std::cout << "  Icon: " << mData.mIcon << std::endl;
     if (mData.mScript != "")
         std::cout << "  Script: " << mData.mScript << std::endl;
-    // BUG? No Type Label?
-    std::cout << "  Type: " << mData.mType << std::endl;
     std::cout << "  Weight: " << mData.mData.mWeight << std::endl;
     std::cout << "  Value: " << mData.mData.mValue << std::endl;
     std::cout << "  Quality: " << mData.mData.mQuality << std::endl;
@@ -902,7 +899,6 @@ void Record<ESM::Repair>::print()
     std::cout << "  Icon: " << mData.mIcon << std::endl;
     if (mData.mScript != "")
         std::cout << "  Script: " << mData.mScript << std::endl;
-    std::cout << "  Type: " << mData.mType << std::endl;
     std::cout << "  Weight: " << mData.mData.mWeight << std::endl;
     std::cout << "  Value: " << mData.mData.mValue << std::endl;
     std::cout << "  Quality: " << mData.mData.mQuality << std::endl;

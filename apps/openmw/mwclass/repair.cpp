@@ -1,7 +1,7 @@
 
 #include "repair.hpp"
 
-#include <components/esm/loadlocks.hpp>
+#include <components/esm/loadrepa.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

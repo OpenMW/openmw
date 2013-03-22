@@ -45,7 +45,7 @@ namespace
         mapping.push_back( typeid(ESM::Book).name() );
         mapping.push_back( typeid(ESM::Light).name() );
         mapping.push_back( typeid(ESM::Miscellaneous).name() );
-        mapping.push_back( typeid(ESM::Tool).name() );
+        mapping.push_back( typeid(ESM::Lockpick).name() );
         mapping.push_back( typeid(ESM::Repair).name() );
         mapping.push_back( typeid(ESM::Probe).name() );
 
