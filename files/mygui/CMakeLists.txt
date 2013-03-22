@@ -78,6 +78,7 @@ set(MYGUI_FILES
     openmw_trainingwindow.layout
     openmw_travel_window.layout
     openmw_persuasion_dialog.layout
+    openmw_merchantrepair.layout
     smallbars.png
     DejaVuLGCSansMono.ttf
     markers.png

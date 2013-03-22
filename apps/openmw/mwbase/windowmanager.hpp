@@ -238,6 +238,7 @@ namespace MWBase
             virtual void startSpellMaking(MWWorld::Ptr actor) = 0;
             virtual void startEnchanting(MWWorld::Ptr actor) = 0;
             virtual void startTraining(MWWorld::Ptr actor) = 0;
+            virtual void startRepair(MWWorld::Ptr actor) = 0;
 
             virtual void changePointer (const std::string& name) = 0;
 

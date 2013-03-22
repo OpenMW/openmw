@@ -280,6 +280,11 @@ void DialogueWindow::onSelectTopic(const std::string& topic, int id)
                 mWindowManager.pushGuiMode(GM_Training);
                 mWindowManager.startTraining (mPtr);
             }
+            else if (topic == gmst.find("sRepair")->getString())
+            {
+                mWindowManager.pushGuiMode(GM_MerchantRepair);
+                mWindowManager.startRepair (mPtr);
+            }
         }
     }
 }
@@ -326,6 +331,9 @@ void DialogueWindow::setKeywords(std::list<std::string> keyWords)
 
     if (mServices & Service_Training)
         mTopicsList->addItem(gmst.find("sServiceTrainingTitle")->getString());
+
+    if (mServices & Service_Repair)
+        mTopicsList->addItem(gmst.find("sRepair")->getString());
 
     if (anyService || mPtr.getTypeName() == typeid(ESM::NPC).name())
         mTopicsList->addSeparator();

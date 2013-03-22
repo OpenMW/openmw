@@ -55,6 +55,7 @@
 #include "exposedwindow.hpp"
 #include "cursor.hpp"
 #include "spellicons.hpp"
+#include "merchantrepair.hpp"
 
 using namespace MWGui;
 
@@ -90,6 +91,7 @@ WindowManager::WindowManager(
   , mSpellCreationDialog(NULL)
   , mEnchantingDialog(NULL)
   , mTrainingWindow(NULL)
+  , mMerchantRepair(NULL)
   , mPlayerName()
   , mPlayerRaceId()
   , mPlayerAttributes()
@@ -180,6 +182,7 @@ WindowManager::WindowManager(
     mSpellCreationDialog = new SpellCreationDialog(*this);
     mEnchantingDialog = new EnchantingDialog(*this);
     mTrainingWindow = new TrainingWindow(*this);
+    mMerchantRepair = new MerchantRepair(*this);
 
     mLoadingScreen = new LoadingScreen(mRendering->getScene (), mRendering->getWindow (), *this);
     mLoadingScreen->onResChange (w,h);
@@ -245,6 +248,7 @@ WindowManager::~WindowManager()
     delete mTrainingWindow;
     delete mCountDialog;
     delete mQuickKeysMenu;
+    delete mMerchantRepair;
     delete mCursor;
 
     cleanupGarbage();
@@ -303,6 +307,7 @@ void WindowManager::updateVisible()
     mSpellCreationDialog->setVisible(false);
     mEnchantingDialog->setVisible(false);
     mTrainingWindow->setVisible(false);
+    mMerchantRepair->setVisible(false);
 
     mHud->setVisible(mHudEnabled);
 
@@ -427,6 +432,9 @@ void WindowManager::updateVisible()
             break;
         case GM_Training:
             mTrainingWindow->setVisible(true);
+            break;
+        case GM_MerchantRepair:
+            mMerchantRepair->setVisible(true);
             break;
         case GM_InterMessageBox:
             break;
@@ -1130,6 +1138,11 @@ void WindowManager::startEnchanting (MWWorld::Ptr actor)
 void WindowManager::startTraining(MWWorld::Ptr actor)
 {
     mTrainingWindow->startTraining(actor);
+}
+
+void WindowManager::startRepair(MWWorld::Ptr actor)
+{
+    mMerchantRepair->startRepair(actor);
 }
 
 const Translation::Storage& WindowManager::getTranslationDataStorage() const

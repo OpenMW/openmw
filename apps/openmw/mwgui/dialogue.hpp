@@ -81,7 +81,8 @@ namespace MWGui
             Service_CreateSpells = 0x04,
             Service_Enchant = 0x08,
             Service_Training = 0x10,
-            Service_Travel = 0x20
+            Service_Travel = 0x20,
+            Service_Repair = 0x40
         };
 
     protected:

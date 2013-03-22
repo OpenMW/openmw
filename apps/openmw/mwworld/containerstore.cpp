@@ -62,13 +62,13 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::end()
 
 bool MWWorld::ContainerStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
 {
-    /// \todo add current weapon/armor health, remaining lockpick/repair uses, current enchantment charge here as soon as they are implemented
+    /// \todo add current enchantment charge here when it is implemented
     if (  ptr1.mCellRef->mRefID == ptr2.mCellRef->mRefID
         && MWWorld::Class::get(ptr1).getScript(ptr1) == "" // item with a script never stacks
         && MWWorld::Class::get(ptr1).getEnchantment(ptr1) == "" // item with enchantment never stacks (we could revisit this later, but for now it makes selecting items in the spell window much easier)
         && ptr1.mCellRef->mOwner == ptr2.mCellRef->mOwner
         && ptr1.mCellRef->mSoul == ptr2.mCellRef->mSoul
-        && ptr1.mCellRef->mCharge == ptr2.mCellRef->mCharge)
+        && ptr1.mCellRef->mCharge == -1) // item that is already partly used up never stacks
         return true;
 
     return false;
