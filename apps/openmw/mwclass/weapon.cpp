@@ -75,7 +75,10 @@ namespace MWClass
 
     bool Weapon::hasItemHealth (const MWWorld::Ptr& ptr) const
     {
-        return true;
+        MWWorld::LiveCellRef<ESM::Weapon> *ref =
+            ptr.get<ESM::Weapon>();
+
+        return (ref->mBase->mData.mType < 11); // thrown weapons and arrows/bolts don't have health, only quantity
     }
 
     int Weapon::getItemMaxHealth (const MWWorld::Ptr& ptr) const
