@@ -334,9 +334,12 @@ namespace MWClass
             }
         }
 
-        /// \todo store the current weapon health somewhere
         if (ref->mBase->mData.mType < 11) // thrown weapons and arrows/bolts don't have health, only quantity
-            text += "\n#{sCondition}: " + MWGui::ToolTips::toString(ref->mBase->mData.mHealth);
+        {
+            int remainingHealth = (ptr.getCellRef().mCharge != -1) ? ptr.getCellRef().mCharge : ref->mBase->mData.mHealth;
+            text += "\n#{sCondition}: " + MWGui::ToolTips::toString(remainingHealth) + "/"
+                    + MWGui::ToolTips::toString(ref->mBase->mData.mHealth);
+        }
 
         text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight);
         text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");

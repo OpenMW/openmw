@@ -68,8 +68,7 @@ namespace MWWorld
                 cellRef.mRefnum = -1;
                 cellRef.mScale = 1;
                 cellRef.mFactIndex = 0;
-                cellRef.mCharge = 0;
-                cellRef.mIntv = 0;
+                cellRef.mCharge = -1;
                 cellRef.mNam9 = 0;
                 cellRef.mTeleport = false;
                 cellRef.mLockLevel = 0;
