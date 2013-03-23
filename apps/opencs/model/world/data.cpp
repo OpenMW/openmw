@@ -38,6 +38,7 @@ CSMWorld::Data::Data()
 
     mSkills.addColumn (new StringIdColumn<ESM::Skill>);
     mSkills.addColumn (new RecordStateColumn<ESM::Skill>);
+    mSkills.addColumn (new SpecialisationColumn<ESM::Skill>);
 
     mSkills.addColumn (new DescriptionColumn<ESM::Skill>);
 

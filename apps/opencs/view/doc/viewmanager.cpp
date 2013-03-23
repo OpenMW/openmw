@@ -38,6 +38,11 @@ void CSVDoc::ViewManager::updateIndices()
 CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
     : mDocumentManager (documentManager), mExitOnSaveStateChange(false), mUserWarned(false)
 {
+    static const char *sSpecialisations[] =
+    {
+        "Combat", "Magic", "Stealth", 0
+    };
+
     mDelegateFactories = new CSVWorld::CommandDelegateFactoryCollection;
 
     mDelegateFactories->add (CSMWorld::ColumnBase::Display_GmstVarType,
@@ -45,6 +50,9 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
 
     mDelegateFactories->add (CSMWorld::ColumnBase::Display_GlobalVarType,
         new CSVWorld::VarTypeDelegateFactory (ESM::VT_Short, ESM::VT_Long, ESM::VT_Float));
+
+    mDelegateFactories->add (CSMWorld::ColumnBase::Display_Specialisation,
+        new CSVWorld::EnumDelegateFactory (sSpecialisations));
 }
 
 CSVDoc::ViewManager::~ViewManager()
