@@ -38,12 +38,6 @@ namespace
 
         return sum;
     }
-
-    bool compare_string_ci(std::string str1, std::string str2)
-    {
-        Misc::StringUtils::toLower(str1);
-        return str1 == str2;
-    }
 }
 
 MWWorld::ContainerStore::ContainerStore() : mStateId (0), mCachedWeight (0), mWeightUpToDate (false) {}
@@ -68,7 +62,11 @@ bool MWWorld::ContainerStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
         && MWWorld::Class::get(ptr1).getEnchantment(ptr1) == "" // item with enchantment never stacks (we could revisit this later, but for now it makes selecting items in the spell window much easier)
         && ptr1.mCellRef->mOwner == ptr2.mCellRef->mOwner
         && ptr1.mCellRef->mSoul == ptr2.mCellRef->mSoul
-        && ptr1.mCellRef->mCharge == -1) // item that is already partly used up never stacks
+          // item that is already partly used up never stacks
+          && (!MWWorld::Class::get(ptr1).hasItemHealth(ptr1) || ptr1.mCellRef->mCharge == -1
+              || MWWorld::Class::get(ptr1).getItemMaxHealth(ptr1) == ptr1.mCellRef->mCharge)
+        && (!MWWorld::Class::get(ptr2).hasItemHealth(ptr2) || ptr2.mCellRef->mCharge == -1
+            || MWWorld::Class::get(ptr2).getItemMaxHealth(ptr2) == ptr2.mCellRef->mCharge))
         return true;
 
     return false;
@@ -118,11 +116,11 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr)
         MWWorld::LiveCellRef<ESM::Miscellaneous> *gold =
             ptr.get<ESM::Miscellaneous>();
 
-        if (compare_string_ci(gold->mRef.mRefID, "gold_001")
-            || compare_string_ci(gold->mRef.mRefID, "gold_005")
-            || compare_string_ci(gold->mRef.mRefID, "gold_010")
-            || compare_string_ci(gold->mRef.mRefID, "gold_025")
-            || compare_string_ci(gold->mRef.mRefID, "gold_100"))
+        if (Misc::StringUtils::ciEqual(gold->mRef.mRefID, "gold_001")
+            || Misc::StringUtils::ciEqual(gold->mRef.mRefID, "gold_005")
+            || Misc::StringUtils::ciEqual(gold->mRef.mRefID, "gold_010")
+            || Misc::StringUtils::ciEqual(gold->mRef.mRefID, "gold_025")
+            || Misc::StringUtils::ciEqual(gold->mRef.mRefID, "gold_100"))
         {
             MWWorld::ManualRef ref(esmStore, "Gold_001");
 
@@ -130,7 +128,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr)
             ref.getPtr().getRefData().setCount(count);
             for (MWWorld::ContainerStoreIterator iter (begin(type)); iter!=end(); ++iter)
             {
-                if (compare_string_ci((*iter).get<ESM::Miscellaneous>()->mRef.mRefID, "gold_001"))
+                if (Misc::StringUtils::ciEqual((*iter).get<ESM::Miscellaneous>()->mRef.mRefID, "gold_001"))
                 {
                     (*iter).getRefData().setCount( (*iter).getRefData().getCount() + count);
                     flagAsModified();

@@ -12,6 +12,7 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/physicssystem.hpp"
 #include "../mwworld/nullaction.hpp"
+#include "../mwworld/actionrepair.hpp"
 
 #include "../mwgui/tooltips.hpp"
 
@@ -120,6 +121,19 @@ namespace MWClass
         return (ref->mBase->mName != "");
     }
 
+    bool Repair::hasItemHealth (const MWWorld::Ptr& ptr) const
+    {
+        return true;
+    }
+
+    int Repair::getItemMaxHealth (const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Repair> *ref =
+            ptr.get<ESM::Repair>();
+
+        return ref->mBase->mData.mUses;
+    }
+
     MWGui::ToolTipInfo Repair::getToolTipInfo (const MWWorld::Ptr& ptr) const
     {
         MWWorld::LiveCellRef<ESM::Repair> *ref =
@@ -155,5 +169,10 @@ namespace MWClass
             ptr.get<ESM::Repair>();
 
         return MWWorld::Ptr(&cell.mRepairs.insert(*ref), &cell);
+    }
+
+    boost::shared_ptr<MWWorld::Action> Repair::use (const MWWorld::Ptr& ptr) const
+    {
+        return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionRepair(ptr));
     }
 }
