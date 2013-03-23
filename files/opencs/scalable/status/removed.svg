@@ -24,7 +24,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="5.1200001"
-     inkscape:cx="-7.8107089"
+     inkscape:cx="36.725183"
      inkscape:cy="2.9588236"
      inkscape:document-units="px"
      inkscape:current-layer="g5597"
@@ -946,58 +946,6 @@
        x2="-152.88422"
        y2="-41.022785"
        gradientUnits="userSpaceOnUse" />
-    <radialGradient
-       inkscape:collect="always"
-       xlink:href="#linearGradient3944"
-       id="radialGradient3942"
-       gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(0.92976036,0,0,2.6869958,-56.971163,888.30913)"
-       cx="-15.5"
-       cy="30.53125"
-       fx="-15.5"
-       fy="30.53125"
-       r="15.34375" />
-    <radialGradient
-       inkscape:collect="always"
-       xlink:href="#linearGradient3944"
-       id="radialGradient3952"
-       cx="-152.88422"
-       cy="-22.158251"
-       fx="-152.88422"
-       fy="-22.158251"
-       r="20.249271"
-       gradientTransform="matrix(1,0,0,0.24294293,0,-16.77506)"
-       gradientUnits="userSpaceOnUse" />
-    <linearGradient
-       inkscape:collect="always"
-       xlink:href="#linearGradient3954"
-       id="linearGradient3960"
-       x1="-126.17325"
-       y1="953.44806"
-       x2="-137.5746"
-       y2="991.67816"
-       gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(0.98345881,0,0,1.0246049,42.42393,-31.855387)" />
-    <radialGradient
-       inkscape:collect="always"
-       xlink:href="#linearGradient3845"
-       id="radialGradient3962"
-       gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(0.99999984,-2.6136065e-7,1.3555931e-7,0.44755236,-2.2357346,-2.665094)"
-       cx="-150.6485"
-       cy="-33.680485"
-       fx="-150.6485"
-       fy="-33.680485"
-       r="19.749271" />
-    <linearGradient
-       inkscape:collect="always"
-       xlink:href="#linearGradient3985"
-       id="linearGradient3991"
-       x1="-102.68832"
-       y1="973.31067"
-       x2="-78.542328"
-       y2="980.34857"
-       gradientUnits="userSpaceOnUse" />
     <filter
        inkscape:collect="always"
        id="filter5724"
@@ -1009,18 +957,6 @@
          inkscape:collect="always"
          stdDeviation="0.71198312"
          id="feGaussianBlur5726" />
-    </filter>
-    <filter
-       inkscape:collect="always"
-       id="filter5732"
-       x="-0.042608355"
-       width="1.0852167"
-       y="-0.11631166"
-       height="1.2326233">
-      <feGaussianBlur
-         inkscape:collect="always"
-         stdDeviation="0.71198312"
-         id="feGaussianBlur5734" />
     </filter>
     <filter
        inkscape:collect="always"
@@ -1059,29 +995,29 @@
          id="g5597"
          transform="matrix(0.85483505,0,0,1,-20.035433,-2.2155805e-6)">
         <rect
-           style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:4.57319449999999961;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;filter:url(#filter5724)"
+           style="fill:none;stroke:#000000;stroke-width:4.5731945;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;filter:url(#filter5724)"
            id="rect4647"
            width="12.558564"
            height="46.91415"
            x="966.46228"
            y="45.056572"
-           transform="matrix(0,1,-1,0,0,0)" />
+           transform="matrix(0,1,-1,0,0.20564565,0.22375836)" />
         <rect
            transform="matrix(0,1,-1,0,0,0)"
-           y="45.056572"
-           x="966.46228"
+           y="44.850925"
+           x="966.68604"
            height="46.91415"
            width="12.558564"
            id="rect5728"
-           style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:4.57319449999999961;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;" />
+           style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:4.5731945;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
         <rect
-           style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:4.57319449999999961;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;filter:url(#filter5751)"
+           style="fill:#ffffff;fill-opacity:1;stroke:none;filter:url(#filter5751)"
            id="rect5749"
            width="12.558564"
            height="46.91415"
            x="966.46228"
            y="45.056572"
-           transform="matrix(0,1,-1,0,0,0)" />
+           transform="matrix(0,1,-1,0,0.20564565,0.22375836)" />
       </g>
     </g>
   </g>
