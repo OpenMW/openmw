@@ -74,6 +74,16 @@ CSMWorld::IdCollection<ESM::GameSetting>& CSMWorld::Data::getGmsts()
     return mGmsts;
 }
 
+const CSMWorld::IdCollection<ESM::Skill>& CSMWorld::Data::getSkills() const
+{
+    return mSkills;
+}
+
+CSMWorld::IdCollection<ESM::Skill>& CSMWorld::Data::getSkills()
+{
+    return mSkills;
+}
+
 QAbstractItemModel *CSMWorld::Data::getTableModel (const UniversalId& id)
 {
     std::map<UniversalId::Type, QAbstractItemModel *>::iterator iter = mModelIndex.find (id.getType());

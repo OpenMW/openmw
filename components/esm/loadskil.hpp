@@ -78,6 +78,8 @@ struct Skill
 
     void blank();
      ///< Set record to default state (does not touch the ID/index).
+
+    static std::string getIndexToId (int index);
 };
 }
 #endif
