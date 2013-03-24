@@ -43,6 +43,12 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
         "Combat", "Magic", "Stealth", 0
     };
 
+    static const char *sAttributes[] =
+    {
+        "Strength", "Intelligence", "Willpower", "Agility", "Speed", "Endurance", "Personality",
+        "Luck", 0
+    };
+
     mDelegateFactories = new CSVWorld::CommandDelegateFactoryCollection;
 
     mDelegateFactories->add (CSMWorld::ColumnBase::Display_GmstVarType,
@@ -53,6 +59,9 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
 
     mDelegateFactories->add (CSMWorld::ColumnBase::Display_Specialisation,
         new CSVWorld::EnumDelegateFactory (sSpecialisations));
+
+    mDelegateFactories->add (CSMWorld::ColumnBase::Display_Attribute,
+        new CSVWorld::EnumDelegateFactory (sAttributes));
 }
 
 CSVDoc::ViewManager::~ViewManager()

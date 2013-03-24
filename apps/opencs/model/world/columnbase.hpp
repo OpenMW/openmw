@@ -32,7 +32,8 @@ namespace CSMWorld
             Display_Var,
             Display_GmstVarType,
             Display_GlobalVarType,
-            Display_Specialisation
+            Display_Specialisation,
+            Display_Attribute
         };
 
         std::string mTitle;
