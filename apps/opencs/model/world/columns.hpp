@@ -1,6 +1,8 @@
 #ifndef CSM_WOLRD_COLUMNS_H
 #define CSM_WOLRD_COLUMNS_H
 
+#include <boost/lexical_cast.hpp>
+
 #include "columnbase.hpp"
 
 namespace CSMWorld
@@ -218,6 +220,36 @@ namespace CSMWorld
             ESXRecordT record2 = record.get();
 
             record2.mData.mSpecialization = data.toInt();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct UseValueColumn : public Column<ESXRecordT>
+    {
+        int mIndex;
+
+        UseValueColumn (int index)
+        : Column<ESXRecordT> ("Use value #" + boost::lexical_cast<std::string> (index),
+            ColumnBase::Display_Float), mIndex (index)
+        {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return record.get().mData.mUseValue[mIndex];
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            record2.mData.mUseValue[mIndex] = data.toInt();
 
             record.setModified (record2);
         }

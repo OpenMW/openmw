@@ -39,7 +39,8 @@ CSMWorld::Data::Data()
     mSkills.addColumn (new StringIdColumn<ESM::Skill>);
     mSkills.addColumn (new RecordStateColumn<ESM::Skill>);
     mSkills.addColumn (new SpecialisationColumn<ESM::Skill>);
-
+    for (int i=0; i<4; ++i)
+        mSkills.addColumn (new UseValueColumn<ESM::Skill> (i));
     mSkills.addColumn (new DescriptionColumn<ESM::Skill>);
 
     addModel (new IdTable (&mGlobals), UniversalId::Type_Globals, UniversalId::Type_Global);
