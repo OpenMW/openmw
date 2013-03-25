@@ -389,10 +389,17 @@ std::string DialogueWindow::parseText(const std::string& text)
 
     std::vector<std::string> topics;
 
+    bool hasSeparator = false;
+    for (unsigned int i=0; i<mTopicsList->getItemCount(); ++i)
+    {
+        if (mTopicsList->getItemNameAt(i) == "")
+            hasSeparator = true;
+    }
+
     for(unsigned int i = 0;i<mTopicsList->getItemCount();i++)
     {
         std::string keyWord = mTopicsList->getItemNameAt(i);
-        if (separatorReached)
+        if (separatorReached || !hasSeparator)
             topics.push_back(keyWord);
         else if (keyWord == "")
             separatorReached = true;
