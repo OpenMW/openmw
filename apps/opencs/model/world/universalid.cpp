@@ -45,7 +45,7 @@ CSMWorld::UniversalId::UniversalId (const std::string& universalId)
 {
     std::string::size_type index = universalId.find (':');
 
-    if (index==std::string::npos)
+    if (index!=std::string::npos)
     {
         std::string type = universalId.substr (0, index);
 
