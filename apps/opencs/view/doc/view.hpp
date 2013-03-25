@@ -117,6 +117,8 @@ namespace CSVDoc
             void addGmstsSubView();
 
             void addSkillsSubView();
+
+            void addClassesSubView();
     };
 }
 

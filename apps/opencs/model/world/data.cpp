@@ -44,9 +44,15 @@ CSMWorld::Data::Data()
         mSkills.addColumn (new UseValueColumn<ESM::Skill> (i));
     mSkills.addColumn (new DescriptionColumn<ESM::Skill>);
 
+    mClasses.addColumn (new StringIdColumn<ESM::Class>);
+    mClasses.addColumn (new RecordStateColumn<ESM::Class>);
+    mClasses.addColumn (new SpecialisationColumn<ESM::Class>);
+    mClasses.addColumn (new DescriptionColumn<ESM::Class>);
+
     addModel (new IdTable (&mGlobals), UniversalId::Type_Globals, UniversalId::Type_Global);
     addModel (new IdTable (&mGmsts), UniversalId::Type_Gmsts, UniversalId::Type_Gmst);
     addModel (new IdTable (&mSkills), UniversalId::Type_Skills, UniversalId::Type_Skill);
+    addModel (new IdTable (&mClasses), UniversalId::Type_Classes, UniversalId::Type_Class);
 }
 
 CSMWorld::Data::~Data()
@@ -122,6 +128,7 @@ void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base)
             case ESM::REC_GLOB: mGlobals.load (reader, base); break;
             case ESM::REC_GMST: mGmsts.load (reader, base); break;
             case ESM::REC_SKIL: mSkills.load (reader, base); break;
+            case ESM::REC_CLAS: mClasses.load (reader, base); break;
 
             default:
 
