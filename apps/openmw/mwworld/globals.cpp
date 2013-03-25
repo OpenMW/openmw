@@ -79,7 +79,7 @@ namespace MWWorld
         {
             // vanilla Morrowind does not define dayspassed.
             Data value;
-            value.mLong = 0;
+            value.mLong = 1; // but the addons start counting at 1 :(
 
             mVariables.insert (std::make_pair ("dayspassed", std::make_pair ('l', value)));
         }
