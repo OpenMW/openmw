@@ -150,6 +150,10 @@ void CSMDoc::Document::addOptionalGlobals()
         ESM::Global global;
         global.mId = sGlobals[i];
         global.mValue.setType (ESM::VT_Long);
+
+        if (i==0)
+            global.mValue.setInteger (1); // dayspassed starts counting at 1
+
         addOptionalGlobal (global);
     }
 }
@@ -189,9 +193,9 @@ void CSMDoc::Document::createBase()
 
         record.mId = sGlobals[i];
 
-        record.mValue.setType (i==2 ? ESM::VT_Float : ESM::VT_Int);
+        record.mValue.setType (i==2 ? ESM::VT_Float : ESM::VT_Long);
 
-        if (i==0)
+        if (i==0 || i==1)
             record.mValue.setInteger (1);
 
         getData().getGlobals().add (record);
