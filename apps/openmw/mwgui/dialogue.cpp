@@ -230,14 +230,14 @@ void DialogueWindow::onSelectTopic(const std::string& topic, int id)
 {
     if (!mEnabled) return;
 
-    int separatorPos = mTopicsList->getItemCount();
+    int separatorPos = 0;
     for (unsigned int i=0; i<mTopicsList->getItemCount(); ++i)
     {
         if (mTopicsList->getItemNameAt(i) == "")
             separatorPos = i;
     }
 
-    if (id > separatorPos)
+    if (id >= separatorPos)
         MWBase::Environment::get().getDialogueManager()->keywordSelected(lower_string(topic));
     else
     {
