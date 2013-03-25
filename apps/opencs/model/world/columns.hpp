@@ -285,6 +285,59 @@ namespace CSMWorld
         }
     };
 
+    template<typename ESXRecordT>
+    struct NameColumn : public Column<ESXRecordT>
+    {
+        NameColumn() : Column<ESXRecordT> ("Name", ColumnBase::Display_String) {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return QString::fromUtf8 (record.get().mName.c_str());
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            record2.mName = data.toString().toUtf8().constData();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct AttributesColumn : public Column<ESXRecordT>
+    {
+        int mIndex;
+
+        AttributesColumn (int index)
+        : Column<ESXRecordT> ("Attribute #" + boost::lexical_cast<std::string> (index),
+            ColumnBase::Display_Attribute), mIndex (index) {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return record.get().mData.mAttribute[mIndex];
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            record2.mData.mAttribute[mIndex] = data.toInt();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
 }
 
 #endif

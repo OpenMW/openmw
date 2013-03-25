@@ -46,6 +46,9 @@ CSMWorld::Data::Data()
 
     mClasses.addColumn (new StringIdColumn<ESM::Class>);
     mClasses.addColumn (new RecordStateColumn<ESM::Class>);
+    mClasses.addColumn (new NameColumn<ESM::Class>);
+    mClasses.addColumn (new AttributesColumn<ESM::Class> (0));
+    mClasses.addColumn (new AttributesColumn<ESM::Class> (1));
     mClasses.addColumn (new SpecialisationColumn<ESM::Class>);
     mClasses.addColumn (new DescriptionColumn<ESM::Class>);
 
