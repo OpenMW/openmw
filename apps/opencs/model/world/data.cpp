@@ -36,8 +36,17 @@ CSMWorld::Data::Data()
     mGmsts.addColumn (new VarTypeColumn<ESM::GameSetting> (ColumnBase::Display_GmstVarType));
     mGmsts.addColumn (new VarValueColumn<ESM::GameSetting>);
 
+    mSkills.addColumn (new StringIdColumn<ESM::Skill>);
+    mSkills.addColumn (new RecordStateColumn<ESM::Skill>);
+    mSkills.addColumn (new AttributeColumn<ESM::Skill>);
+    mSkills.addColumn (new SpecialisationColumn<ESM::Skill>);
+    for (int i=0; i<4; ++i)
+        mSkills.addColumn (new UseValueColumn<ESM::Skill> (i));
+    mSkills.addColumn (new DescriptionColumn<ESM::Skill>);
+
     addModel (new IdTable (&mGlobals), UniversalId::Type_Globals, UniversalId::Type_Global);
     addModel (new IdTable (&mGmsts), UniversalId::Type_Gmsts, UniversalId::Type_Gmst);
+    addModel (new IdTable (&mSkills), UniversalId::Type_Skills, UniversalId::Type_Skill);
 }
 
 CSMWorld::Data::~Data()
@@ -64,6 +73,16 @@ const CSMWorld::IdCollection<ESM::GameSetting>& CSMWorld::Data::getGmsts() const
 CSMWorld::IdCollection<ESM::GameSetting>& CSMWorld::Data::getGmsts()
 {
     return mGmsts;
+}
+
+const CSMWorld::IdCollection<ESM::Skill>& CSMWorld::Data::getSkills() const
+{
+    return mSkills;
+}
+
+CSMWorld::IdCollection<ESM::Skill>& CSMWorld::Data::getSkills()
+{
+    return mSkills;
 }
 
 QAbstractItemModel *CSMWorld::Data::getTableModel (const UniversalId& id)
@@ -102,7 +121,7 @@ void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base)
         {
             case ESM::REC_GLOB: mGlobals.load (reader, base); break;
             case ESM::REC_GMST: mGmsts.load (reader, base); break;
-
+            case ESM::REC_SKIL: mSkills.load (reader, base); break;
 
             default:
 

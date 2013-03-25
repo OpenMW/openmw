@@ -86,6 +86,10 @@ void CSVDoc::View::setupWorldMenu()
     connect (gmsts, SIGNAL (triggered()), this, SLOT (addGmstsSubView()));
     world->addAction (gmsts);
 
+    QAction *skills = new QAction (tr ("Skills"), this);
+    connect (skills, SIGNAL (triggered()), this, SLOT (addSkillsSubView()));
+    world->addAction (skills);
+
     mVerify = new QAction (tr ("&Verify"), this);
     connect (mVerify, SIGNAL (triggered()), this, SLOT (verify()));
     world->addAction (mVerify);
@@ -242,6 +246,11 @@ void CSVDoc::View::addGlobalsSubView()
 void CSVDoc::View::addGmstsSubView()
 {
     addSubView (CSMWorld::UniversalId::Type_Gmsts);
+}
+
+void CSVDoc::View::addSkillsSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Skills);
 }
 
 void CSVDoc::View::abortOperation (int type)

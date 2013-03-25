@@ -198,6 +198,16 @@ void CSMDoc::Document::createBase()
     }
 
     /// \todo add GMSTs
+
+    for (int i=0; i<27; ++i)
+    {
+        ESM::Skill record;
+        record.mIndex = i;
+        record.mId = ESM::Skill::getIndexToId (record.mIndex);
+        record.blank();
+
+        getData().getSkills().add (record);
+    }
 }
 
 CSMDoc::Document::Document (const std::vector<boost::filesystem::path>& files, bool new_)

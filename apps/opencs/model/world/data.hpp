@@ -8,6 +8,7 @@
 
 #include <components/esm/loadglob.hpp>
 #include <components/esm/loadgmst.hpp>
+#include <components/esm/loadskil.hpp>
 
 #include "idcollection.hpp"
 #include "universalid.hpp"
@@ -20,6 +21,7 @@ namespace CSMWorld
     {
             IdCollection<ESM::Global> mGlobals;
             IdCollection<ESM::GameSetting> mGmsts;
+            IdCollection<ESM::Skill> mSkills;
             std::vector<QAbstractItemModel *> mModels;
             std::map<UniversalId::Type, QAbstractItemModel *> mModelIndex;
 
@@ -43,6 +45,10 @@ namespace CSMWorld
             const IdCollection<ESM::GameSetting>& getGmsts() const;
 
             IdCollection<ESM::GameSetting>& getGmsts();
+
+            const IdCollection<ESM::Skill>& getSkills() const;
+
+            IdCollection<ESM::Skill>& getSkills();
 
             QAbstractItemModel *getTableModel (const UniversalId& id);
             ///< If no table model is available for \a id, an exception is thrown.
