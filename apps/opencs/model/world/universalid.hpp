@@ -37,8 +37,9 @@ namespace CSMWorld
                 Type_Global,
                 Type_VerificationResults,
                 Type_Gmsts,
-                Type_Gmst
-
+                Type_Gmst,
+                Type_Skills,
+                Type_Skill
             };
 
         private:

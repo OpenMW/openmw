@@ -7,6 +7,7 @@
 #include <QMenuBar>
 #include <QMdiArea>
 #include <QDockWidget>
+#include <QtGui/QApplication>
 
 #include "../../model/doc/document.hpp"
 
@@ -39,6 +40,16 @@ void CSVDoc::View::setupFileMenu()
     mSave = new QAction (tr ("&Save"), this);
     connect (mSave, SIGNAL (triggered()), this, SLOT (save()));
     file->addAction (mSave);
+
+    QAction *close = new QAction (tr ("&Close"), this);
+    connect (close, SIGNAL (triggered()), this, SLOT (close()));
+    file->addAction(close);
+
+    QAction *exit = new QAction (tr ("&Exit"), this);
+    connect (exit, SIGNAL (triggered()), this, SLOT (exit()));
+    connect (this, SIGNAL(exitApplicationRequest(CSVDoc::View *)), &mViewManager, SLOT(exitApplication(CSVDoc::View *)));
+
+    file->addAction(exit);
 }
 
 void CSVDoc::View::setupEditMenu()
@@ -74,6 +85,10 @@ void CSVDoc::View::setupWorldMenu()
     QAction *gmsts = new QAction (tr ("Game settings"), this);
     connect (gmsts, SIGNAL (triggered()), this, SLOT (addGmstsSubView()));
     world->addAction (gmsts);
+
+    QAction *skills = new QAction (tr ("Skills"), this);
+    connect (skills, SIGNAL (triggered()), this, SLOT (addSkillsSubView()));
+    world->addAction (skills);
 
     mVerify = new QAction (tr ("&Verify"), this);
     connect (mVerify, SIGNAL (triggered()), this, SLOT (verify()));
@@ -117,15 +132,15 @@ void CSVDoc::View::updateActions()
     mVerify->setEnabled (!(mDocument->getState() & CSMDoc::State_Verifying));
 }
 
-CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews, QMainWindow *viewParent)
-    : mViewManager (viewManager), mDocument (document), mViewIndex (totalViews-1), mViewTotal (totalViews), QMainWindow (viewParent)
+CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews)
+    : mViewManager (viewManager), mDocument (document), mViewIndex (totalViews-1),
+      mViewTotal (totalViews)
 {
-    setDockOptions (QMainWindow::AllowNestedDocks);
-
     resize (300, 300); /// \todo get default size from settings and set reasonable minimal size
 
-    mSubViewWindow = new QMainWindow();
-    setCentralWidget (mSubViewWindow);
+    mSubViewWindow.setDockOptions (QMainWindow::AllowNestedDocks);
+
+    setCentralWidget (&mSubViewWindow);
 
     mOperations = new Operations;
     addDockWidget (Qt::BottomDockWidgetArea, mOperations);
@@ -200,7 +215,7 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id)
     /// \todo add an user setting to reuse sub views (on a per document basis or on a per top level view basis)
 
     SubView *view = mSubViewFactory.makeSubView (id, *mDocument);
-    mSubViewWindow->addDockWidget (Qt::TopDockWidgetArea, view);
+    mSubViewWindow.addDockWidget (Qt::TopDockWidgetArea, view);
 
     connect (view, SIGNAL (focusId (const CSMWorld::UniversalId&)), this,
         SLOT (addSubView (const CSMWorld::UniversalId&)));
@@ -233,13 +248,23 @@ void CSVDoc::View::addGmstsSubView()
     addSubView (CSMWorld::UniversalId::Type_Gmsts);
 }
 
+void CSVDoc::View::addSkillsSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Skills);
+}
+
 void CSVDoc::View::abortOperation (int type)
 {
     mDocument->abortOperation (type);
     updateActions();
 }
 
-QDockWidget *CSVDoc::View::getOperations() const
+CSVDoc::Operations *CSVDoc::View::getOperations() const
 {
     return mOperations;
+}
+
+void CSVDoc::View::exit()
+{
+    emit exitApplicationRequest (this);
 }

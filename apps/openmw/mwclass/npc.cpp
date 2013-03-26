@@ -183,13 +183,10 @@ namespace MWClass
         std::string bodyRaceID = headID.substr(0, end);
 
         std::string model = "meshes\\base_anim.nif";
-        if (bodyRaceID == "b_n_khajiit_m_" ||
-            bodyRaceID == "b_n_khajiit_f_" ||
-            bodyRaceID == "b_n_argonian_m_" ||
-            bodyRaceID == "b_n_argonian_f_")
-        {
+        const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(ref->mBase->mRace);
+        if(race->mData.mFlags & ESM::Race::Beast)
             model = "meshes\\base_animkna.nif";
-        }
+
         return model;
 
     }
@@ -220,7 +217,9 @@ namespace MWClass
         const MWWorld::Ptr& actor) const
     {
         if (MWWorld::Class::get (ptr).getCreatureStats (ptr).isDead())
-            return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionOpen(ptr));
+            return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionOpen(ptr, true));
+        else if (MWWorld::Class::get(actor).getStance(actor, MWWorld::Class::Sneak))
+            return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionOpen(ptr)); // stealing
         else
             return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionTalk (ptr));
     }
@@ -365,11 +364,10 @@ namespace MWClass
                                                     fSwimRunAthleticsMult->getFloat();
             moveSpeed = swimSpeed;
         }
-        else if(Npc::getStance(ptr, Run, false))
+        else if(Npc::getStance(ptr, Run, false) && !Npc::getStance(ptr, Sneak, false))
             moveSpeed = runSpeed;
         else
             moveSpeed = walkSpeed;
-
         if(getMovementSettings(ptr).mLeftRight != 0 && getMovementSettings(ptr).mForwardBackward == 0)
             moveSpeed *= 0.75f;
 
@@ -473,9 +471,9 @@ namespace MWClass
 
         const MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
 
-        weight -= stats.getMagicEffects().get (MWMechanics::EffectKey (8)).mMagnitude; // feather
+        weight -= stats.getMagicEffects().get (MWMechanics::EffectKey (ESM::MagicEffect::Feather)).mMagnitude;
 
-        weight += stats.getMagicEffects().get (MWMechanics::EffectKey (7)).mMagnitude; // burden
+        weight += stats.getMagicEffects().get (MWMechanics::EffectKey (ESM::MagicEffect::Burden)).mMagnitude;
 
         if (weight<0)
             weight = 0;
@@ -507,10 +505,73 @@ namespace MWClass
         stats.useSkill (skill, *class_, usageType);
     }
 
+    float Npc::getArmorRating (const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::InventoryStore& invStore = MWWorld::Class::get(ptr).getInventoryStore(ptr);
+        const MWWorld::Store<ESM::GameSetting> &gmst =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+        int ratings[MWWorld::InventoryStore::Slots];
+
+        int iBaseArmorSkill = gmst.find("iBaseArmorSkill")->getInt();
+        float fUnarmoredBase1 = gmst.find("fUnarmoredBase1")->getFloat();
+        float fUnarmoredBase2 = gmst.find("fUnarmoredBase2")->getFloat();
+        int unarmoredSkill = MWWorld::Class::get(ptr).getNpcStats(ptr).getSkill(ESM::Skill::Unarmored).getModified();
+
+        for (int i = 0; i < MWWorld::InventoryStore::Slots; ++i)
+        {
+            MWWorld::ContainerStoreIterator it = invStore.getSlot(i);
+            if (it == invStore.end() || it->getTypeName() != typeid(ESM::Armor).name())
+            {
+                // unarmored
+                ratings[i] = (fUnarmoredBase1 * unarmoredSkill) * (fUnarmoredBase2 * unarmoredSkill);
+            }
+            else
+            {
+                MWWorld::LiveCellRef<ESM::Armor> *ref =
+                    it->get<ESM::Armor>();
+
+                int armorSkillType = MWWorld::Class::get(*it).getEquipmentSkill(*it);
+                int armorSkill = MWWorld::Class::get(ptr).getNpcStats(ptr).getSkill(armorSkillType).getModified();
+
+                if (ref->mBase->mData.mWeight == 0)
+                    ratings[i] = ref->mBase->mData.mArmor;
+                else
+                    ratings[i] = ref->mBase->mData.mArmor * armorSkill / iBaseArmorSkill;
+            }
+        }
+
+        float shield = MWWorld::Class::get(ptr).getCreatureStats(ptr).getMagicEffects().get(ESM::MagicEffect::Shield).mMagnitude;
+
+        return ratings[MWWorld::InventoryStore::Slot_Cuirass] * 0.3
+                + (ratings[MWWorld::InventoryStore::Slot_CarriedLeft] + ratings[MWWorld::InventoryStore::Slot_Helmet]
+                    + ratings[MWWorld::InventoryStore::Slot_Greaves] + ratings[MWWorld::InventoryStore::Slot_Boots]
+                    + ratings[MWWorld::InventoryStore::Slot_LeftPauldron] + ratings[MWWorld::InventoryStore::Slot_RightPauldron]
+                    ) * 0.1
+                + (ratings[MWWorld::InventoryStore::Slot_LeftGauntlet] + MWWorld::InventoryStore::Slot_RightGauntlet)
+                    * 0.05
+                + shield;
+    }
+
+
     void Npc::adjustRotation(const MWWorld::Ptr& ptr,float& x,float& y,float& z) const
     {
         y = 0;
         x = 0;
+    }
+
+    void Npc::adjustScale(const MWWorld::Ptr &ptr, float &scale) const
+    {
+        MWWorld::LiveCellRef<ESM::NPC> *ref =
+            ptr.get<ESM::NPC>();
+
+        const ESM::Race* race =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(ref->mBase->mRace);
+
+        if (ref->mBase->isMale())
+            scale *= race->mData.mHeight.mMale;
+        else
+            scale *= race->mData.mHeight.mFemale;
     }
 
     MWWorld::Ptr

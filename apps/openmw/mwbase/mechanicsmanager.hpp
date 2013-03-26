@@ -82,7 +82,7 @@ namespace MWBase
 
             virtual int getDerivedDisposition(const MWWorld::Ptr& ptr) = 0;
             ///< Calculate the diposition of an NPC toward the player.
-            
+
             virtual int countDeaths (const std::string& id) const = 0;
             ///< Return the number of deaths for actors with the given ID.
 

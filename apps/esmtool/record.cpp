@@ -112,14 +112,11 @@ std::string ruleString(ESM::DialInfo::SelectStruct ss)
     case '5': oper_str = ">="; break;
     }
 
-    std::string value_str = "??";
-    if (ss.mType == ESM::VT_Int)
-        value_str = str(boost::format("%d") % ss.mI);
-    else if (ss.mType == ESM::VT_Float)
-        value_str = str(boost::format("%f") % ss.mF);
+    std::ostringstream stream;
+    stream << ss.mValue;
 
     std::string result = str(boost::format("%-12s %-32s %2s %s")
-                             % type_str % func_str % oper_str % value_str);
+                             % type_str % func_str % oper_str % stream.str());
     return result;
 }
 
@@ -278,7 +275,7 @@ RecordBase::create(ESM::NAME type)
     }
     case ESM::REC_LOCK:
     {
-        record = new EsmTool::Record<ESM::Tool>;
+        record = new EsmTool::Record<ESM::Lockpick>;
         break;
     }
     case ESM::REC_LTEX:
@@ -713,31 +710,13 @@ void Record<ESM::Faction>::print()
 template<>
 void Record<ESM::Global>::print()
 {
-    // nothing to print (well, nothing that's correct anyway)
-    std::cout << "  Type: " << mData.mType << std::endl;
-    std::cout << "  Value: " << mData.mValue << std::endl;
+    std::cout << "  " << mData.mValue << std::endl;
 }
 
 template<>
 void Record<ESM::GameSetting>::print()
 {
-    std::cout << "  Value: ";
-    switch (mData.mType) {
-    case ESM::VT_String:
-        std::cout << "'" << mData.mStr << "' (std::string)";
-        break;
-
-    case ESM::VT_Float:
-        std::cout << mData.mF << " (float)";
-        break;
-
-    case ESM::VT_Int:
-        std::cout << mData.mI << " (int)";
-        break;
-
-    default:
-        std::cout << "unknown type";
-    }
+    std::cout << "  " << mData.mValue << std::endl;
 }
 
 template<>
@@ -885,14 +864,13 @@ void Record<ESM::Light>::print()
 }
 
 template<>
-void Record<ESM::Tool>::print()
+void Record<ESM::Lockpick>::print()
 {
     std::cout << "  Name: " << mData.mName << std::endl;
     std::cout << "  Model: " << mData.mModel << std::endl;
     std::cout << "  Icon: " << mData.mIcon << std::endl;
     if (mData.mScript != "")
         std::cout << "  Script: " << mData.mScript << std::endl;
-    std::cout << "  Type: " << mData.mType << std::endl;
     std::cout << "  Weight: " << mData.mData.mWeight << std::endl;
     std::cout << "  Value: " << mData.mData.mValue << std::endl;
     std::cout << "  Quality: " << mData.mData.mQuality << std::endl;
@@ -907,8 +885,6 @@ void Record<ESM::Probe>::print()
     std::cout << "  Icon: " << mData.mIcon << std::endl;
     if (mData.mScript != "")
         std::cout << "  Script: " << mData.mScript << std::endl;
-    // BUG? No Type Label?
-    std::cout << "  Type: " << mData.mType << std::endl;
     std::cout << "  Weight: " << mData.mData.mWeight << std::endl;
     std::cout << "  Value: " << mData.mData.mValue << std::endl;
     std::cout << "  Quality: " << mData.mData.mQuality << std::endl;
@@ -923,7 +899,6 @@ void Record<ESM::Repair>::print()
     std::cout << "  Icon: " << mData.mIcon << std::endl;
     if (mData.mScript != "")
         std::cout << "  Script: " << mData.mScript << std::endl;
-    std::cout << "  Type: " << mData.mType << std::endl;
     std::cout << "  Weight: " << mData.mData.mWeight << std::endl;
     std::cout << "  Value: " << mData.mData.mValue << std::endl;
     std::cout << "  Quality: " << mData.mData.mQuality << std::endl;

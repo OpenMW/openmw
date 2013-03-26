@@ -192,6 +192,7 @@ void OgreRenderer::configure(const std::string &logPath,
     pluginDir = absPluginPath.string();
 
     Files::loadOgrePlugin(pluginDir, "RenderSystem_GL", *mRoot);
+    Files::loadOgrePlugin(pluginDir, "RenderSystem_GL3Plus", *mRoot);
     Files::loadOgrePlugin(pluginDir, "RenderSystem_Direct3D9", *mRoot);
     Files::loadOgrePlugin(pluginDir, "Plugin_CgProgramManager", *mRoot);
 
@@ -204,6 +205,25 @@ void OgreRenderer::configure(const std::string &logPath,
         rs->setConfigOption ("RTT Preferred Mode", rttMode);
 }
 
+void OgreRenderer::recreateWindow(const std::string &title, const WindowSettings &settings)
+{
+    Ogre::ColourValue viewportBG = mView->getBackgroundColour();
+
+    mRoot->destroyRenderTarget(mWindow);
+    NameValuePairList params;
+    params.insert(std::make_pair("title", title));
+    params.insert(std::make_pair("FSAA", settings.fsaa));
+    params.insert(std::make_pair("vsync", settings.vsync ? "true" : "false"));
+
+    mWindow = mRoot->createRenderWindow(title, settings.window_x, settings.window_y, settings.fullscreen, &params);
+
+    // Create one viewport, entire window
+    mView = mWindow->addViewport(mCamera);
+    mView->setBackgroundColour(viewportBG);
+
+    adjustViewport();
+}
+
 void OgreRenderer::createWindow(const std::string &title, const WindowSettings& settings)
 {
     assert(mRoot);
@@ -213,6 +233,7 @@ void OgreRenderer::createWindow(const std::string &title, const WindowSettings& 
     params.insert(std::make_pair("title", title));
     params.insert(std::make_pair("FSAA", settings.fsaa));
     params.insert(std::make_pair("vsync", settings.vsync ? "true" : "false"));
+
 
     mWindow = mRoot->createRenderWindow(title, settings.window_x, settings.window_y, settings.fullscreen, &params);
 
@@ -258,12 +279,12 @@ void OgreRenderer::adjustViewport()
 
 void OgreRenderer::setWindowEventListener(Ogre::WindowEventListener* listener)
 {
-	Ogre::WindowEventUtilities::addWindowEventListener(mWindow, listener);
+    Ogre::WindowEventUtilities::addWindowEventListener(mWindow, listener);
 }
 
 void OgreRenderer::removeWindowEventListener(Ogre::WindowEventListener* listener)
 {
-	Ogre::WindowEventUtilities::removeWindowEventListener(mWindow, listener);
+    Ogre::WindowEventUtilities::removeWindowEventListener(mWindow, listener);
 }
 
 void OgreRenderer::setFov(float fov)

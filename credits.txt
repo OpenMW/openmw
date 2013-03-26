@@ -43,6 +43,7 @@ Mark Siewert (mark76)
 Manuel Edelmann (vorenon)
 Michael Mc Donnell
 Michael Papageorgiou (werdanith)
+Michał Bień (Glorf)
 Nathan Jeffords (blunted2night)
 Nikolay Kasyanov (corristo)
 Nolan Poe (nopoe)

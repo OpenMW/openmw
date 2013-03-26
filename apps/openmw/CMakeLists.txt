@@ -16,7 +16,7 @@ source_group(game FILES ${GAME} ${GAME_HEADER})
 add_openmw_dir (mwrender
     renderingmanager debugging sky player animation npcanimation creatureanimation activatoranimation
     actors objects renderinginterface localmap occlusionquery terrain terrainmaterial water shadows
-    compositors characterpreview externalrendering globalmap videoplayer
+    compositors characterpreview externalrendering globalmap videoplayer ripplesimulation refraction
     )
 
 add_openmw_dir (mwinput
@@ -26,11 +26,12 @@ add_openmw_dir (mwinput
 add_openmw_dir (mwgui
     text_input widgets race class birth review windowmanagerimp console dialogue
     dialogue_history window_base stats_window messagebox journalwindow charactercreation
-    map_window window_pinnable_base cursorreplace tooltips scrollwindow bookwindow list
+    map_window window_pinnable_base tooltips scrollwindow bookwindow list
     formatting inventorywindow container hud countdialog tradewindow settingswindow
     confirmationdialog alchemywindow referenceinterface spellwindow mainmenu quickkeysmenu
     itemselection spellbuyingwindow loadingscreen levelupdialog waitdialog spellcreationdialog
-    enchantingdialog trainingwindow travelwindow imagebutton exposedwindow
+    enchantingdialog trainingwindow travelwindow imagebutton exposedwindow cursor spellicons
+    merchantrepair repair
     )
 
 add_openmw_dir (mwdialogue
@@ -53,7 +54,7 @@ add_openmw_dir (mwworld
     containerstore actiontalk actiontake manualref player cellfunctors failedaction
     cells localscripts customdata weather inventorystore ptr actionopen actionread
     actionequip timestamp actionalchemy cellstore actionapply actioneat
-    esmstore store recordcmp
+    esmstore store recordcmp fallback actionrepair
     )
 
 add_openmw_dir (mwclass
@@ -64,7 +65,7 @@ add_openmw_dir (mwclass
 add_openmw_dir (mwmechanics
     mechanicsmanagerimp stat character creaturestats magiceffects movement actors activators
     drawstate spells activespells npcstats aipackage aisequence alchemy aiwander aitravel aifollow
-    aiescort aiactivate
+    aiescort aiactivate repair
     )
 
 add_openmw_dir (mwbase

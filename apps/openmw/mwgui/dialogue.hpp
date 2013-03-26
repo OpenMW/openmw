@@ -81,11 +81,12 @@ namespace MWGui
             Service_CreateSpells = 0x04,
             Service_Enchant = 0x08,
             Service_Training = 0x10,
-            Service_Travel = 0x20
+            Service_Travel = 0x20,
+            Service_Repair = 0x40
         };
 
     protected:
-        void onSelectTopic(std::string topic);
+        void onSelectTopic(const std::string& topic, int id);
         void onByeClicked(MyGUI::Widget* _sender);
         void onHistoryClicked(MyGUI::Widget* _sender);
         void onMouseWheel(MyGUI::Widget* _sender, int _rel);
@@ -113,7 +114,7 @@ namespace MWGui
         DialogueHistory*   mHistory;
         Widgets::MWList*   mTopicsList;
         MyGUI::ProgressPtr mDispositionBar;
-        MyGUI::EditPtr     mDispositionText;
+        MyGUI::EditBox*     mDispositionText;
 
         PersuasionDialog mPersuasionDialog;
 

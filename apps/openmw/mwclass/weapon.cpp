@@ -36,7 +36,7 @@ namespace MWClass
     {
         const std::string model = getModel(ptr);
         if(!model.empty())
-            physics.addObject(ptr);
+            physics.addObject(ptr,true);
     }
 
     std::string Weapon::getModel(const MWWorld::Ptr &ptr) const
@@ -75,7 +75,10 @@ namespace MWClass
 
     bool Weapon::hasItemHealth (const MWWorld::Ptr& ptr) const
     {
-        return true;
+        MWWorld::LiveCellRef<ESM::Weapon> *ref =
+            ptr.get<ESM::Weapon>();
+
+        return (ref->mBase->mData.mType < 11); // thrown weapons and arrows/bolts don't have health, only quantity
     }
 
     int Weapon::getItemMaxHealth (const MWWorld::Ptr& ptr) const
@@ -334,9 +337,12 @@ namespace MWClass
             }
         }
 
-        /// \todo store the current weapon health somewhere
         if (ref->mBase->mData.mType < 11) // thrown weapons and arrows/bolts don't have health, only quantity
-            text += "\n#{sCondition}: " + MWGui::ToolTips::toString(ref->mBase->mData.mHealth);
+        {
+            int remainingHealth = (ptr.getCellRef().mCharge != -1) ? ptr.getCellRef().mCharge : ref->mBase->mData.mHealth;
+            text += "\n#{sCondition}: " + MWGui::ToolTips::toString(remainingHealth) + "/"
+                    + MWGui::ToolTips::toString(ref->mBase->mData.mHealth);
+        }
 
         text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight);
         text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");

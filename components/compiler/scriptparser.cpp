@@ -2,6 +2,8 @@
 #include "scriptparser.hpp"
 
 #include "scanner.hpp"
+#include "skipparser.hpp"
+#include "errorhandler.hpp"
 
 namespace Compiler
 {
@@ -38,6 +40,17 @@ namespace Compiler
 
             mControlParser.appendCode (mOutput.getCode());
 
+            return true;
+        }
+
+        /// \todo add an option to disable this nonsense
+        if (keyword==Scanner::K_endif)
+        {
+            // surplus endif
+            getErrorHandler().warning ("endif without matching if/elseif", loc);
+
+            SkipParser skip (getErrorHandler(), getContext());
+            scanner.scan (skip);
             return true;
         }
 

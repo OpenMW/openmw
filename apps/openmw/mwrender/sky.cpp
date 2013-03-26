@@ -14,12 +14,14 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include <components/nifogre/ogre_nif_loader.hpp>
+#include <components/nifogre/ogrenifloader.hpp>
 
 #include <extern/shiny/Platforms/Ogre/OgreMaterial.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+
+#include "../mwworld/fallback.hpp"
 
 #include "renderconst.hpp"
 #include "renderingmanager.hpp"
@@ -254,6 +256,7 @@ void SkyManager::create()
     sh::Factory::getInstance().setSharedParameter ("nightFade",
         sh::makeProperty<sh::FloatValue>(new sh::FloatValue(0)));
     sh::Factory::getInstance().setSharedParameter ("atmosphereColour", sh::makeProperty<sh::Vector4>(new sh::Vector4(0,0,0,1)));
+    sh::Factory::getInstance().setSharedParameter ("horizonColour", sh::makeProperty<sh::Vector4>(new sh::Vector4(0,0,0,1)));
 
     sh::Factory::getInstance().setTextureAlias ("cloud_texture_1", "");
     sh::Factory::getInstance().setTextureAlias ("cloud_texture_2", "");
@@ -265,11 +268,12 @@ void SkyManager::create()
     mLightning->setVisible (false);
     mLightning->setDiffuseColour (ColourValue(3,3,3));
 
-    mSecunda = new Moon("secunda_texture", 0.5, Vector3(-0.4, 0.4, 0.5), mRootNode, "openmw_moon");
+    const MWWorld::Fallback* fallback=MWBase::Environment::get().getWorld()->getFallback();
+    mSecunda = new Moon("secunda_texture", /*0.5*/fallback->getFallbackFloat("Moons_Secunda_Size")/100, Vector3(-0.4, 0.4, 0.5), mRootNode, "openmw_moon");
     mSecunda->setType(Moon::Type_Secunda);
     mSecunda->setRenderQueue(RQG_SkiesEarly+4);
 
-    mMasser = new Moon("masser_texture", 0.75, Vector3(-0.4, 0.4, 0.5), mRootNode, "openmw_moon");
+    mMasser = new Moon("masser_texture", /*0.75*/fallback->getFallbackFloat("Moons_Masser_Size")/100, Vector3(-0.4, 0.4, 0.5), mRootNode, "openmw_moon");
     mMasser->setRenderQueue(RQG_SkiesEarly+3);
     mMasser->setType(Moon::Type_Masser);
 
@@ -278,6 +282,9 @@ void SkyManager::create()
     mSunGlare = new BillboardObject("textures\\tx_sun_flash_grey_05.dds", 3, Vector3(0.4, 0.4, 0.4), mRootNode, "openmw_sun");
     mSunGlare->setRenderQueue(RQG_SkiesLate);
     mSunGlare->setVisibilityFlags(RV_NoReflection);
+
+    Ogre::AxisAlignedBox aabInf;
+    aabInf.setInfinite ();
 
     // Stars
     mAtmosphereNight = mRootNode->createChildSceneNode();
@@ -288,6 +295,7 @@ void SkyManager::create()
         night1_ent->setRenderQueueGroup(RQG_SkiesEarly+1);
         night1_ent->setVisibilityFlags(RV_Sky);
         night1_ent->setCastShadows(false);
+        night1_ent->getMesh()->_setBounds (aabInf);
 
         for (unsigned int j=0; j<night1_ent->getNumSubEntities(); ++j)
         {
@@ -313,8 +321,12 @@ void SkyManager::create()
         atmosphere_ent->setCastShadows(false);
         atmosphere_ent->setRenderQueueGroup(RQG_SkiesEarly);
         atmosphere_ent->setVisibilityFlags(RV_Sky);
+
         for(unsigned int j = 0;j < atmosphere_ent->getNumSubEntities();j++)
             atmosphere_ent->getSubEntity (j)->setMaterialName("openmw_atmosphere");
+
+        // Using infinite AAB here to prevent being clipped by the custom near clip plane used for reflections/refractions
+        atmosphere_ent->getMesh()->_setBounds (aabInf);
     }
 
 
@@ -329,6 +341,8 @@ void SkyManager::create()
         for(unsigned int j = 0;j < clouds_ent->getNumSubEntities();j++)
             clouds_ent->getSubEntity(j)->setMaterialName("openmw_clouds");
         clouds_ent->setCastShadows(false);
+        // Using infinite AAB here to prevent being clipped by the custom near clip plane used for reflections/refractions
+        clouds_ent->getMesh()->_setBounds (aabInf);
     }
 
     mCreated = true;
@@ -357,12 +371,12 @@ int SkyManager::getSecundaPhase() const
 void SkyManager::update(float duration)
 {
     if (!mEnabled) return;
-
+    const MWWorld::Fallback* fallback=MWBase::Environment::get().getWorld()->getFallback();
     mCamera->getParentSceneNode ()->needUpdate ();
     mRootNode->setPosition(mCamera->getDerivedPosition());
 
     // UV Scroll the clouds
-    mCloudAnimationTimer += duration * mCloudSpeed * (MWBase::Environment::get().getWorld()->getTimeScaleFactor()/30.f);
+    mCloudAnimationTimer += duration * mCloudSpeed;
     sh::Factory::getInstance().setSharedParameter ("cloudAnimationTimer",
         sh::makeProperty<sh::FloatValue>(new sh::FloatValue(mCloudAnimationTimer)));
 
@@ -370,7 +384,7 @@ void SkyManager::update(float duration)
     mMasser->setPhase( static_cast<Moon::Phase>( (int) ((mDay % 32)/4.f)) );
     mSecunda->setPhase ( static_cast<Moon::Phase>( (int) ((mDay % 32)/4.f)) );
 
-    mSecunda->setColour ( mMoonRed ? ColourValue(1.0, 0.0784, 0.0784) : ColourValue(1,1,1,1));
+    mSecunda->setColour ( mMoonRed ? fallback->getFallbackColour("Moons_Script_Color") : ColourValue(1,1,1,1));
     mMasser->setColour (ColourValue(1,1,1,1));
 
     if (mSunEnabled)
@@ -474,6 +488,13 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
         mSkyColour = weather.mSkyColor;
         sh::Factory::getInstance().setSharedParameter ("atmosphereColour", sh::makeProperty<sh::Vector4>(new sh::Vector4(
             weather.mSkyColor.r, weather.mSkyColor.g, weather.mSkyColor.b, weather.mSkyColor.a)));
+    }
+
+    if (mFogColour != weather.mFogColor)
+    {
+        mFogColour = weather.mFogColor;
+        sh::Factory::getInstance().setSharedParameter ("horizonColour", sh::makeProperty<sh::Vector4>(new sh::Vector4(
+            weather.mFogColor.r, weather.mFogColor.g, weather.mFogColor.b, weather.mFogColor.a)));
     }
 
     mCloudSpeed = weather.mCloudSpeed;
@@ -582,6 +603,10 @@ void SkyManager::setLightningStrength(const float factor)
     }
     else
         mLightning->setVisible(false);
+}
+void SkyManager::setLightningEnabled(bool enabled)
+{
+    /// \todo
 }
 
 void SkyManager::setLightningDirection(const Ogre::Vector3& dir)

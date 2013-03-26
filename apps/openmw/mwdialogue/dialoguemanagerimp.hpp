@@ -48,7 +48,7 @@ namespace MWDialogue
 
             void printError (const std::string& error);
 
-            void executeTopic (const std::string& topic);
+            void executeTopic (const std::string& topic, bool randomResponse=false);
 
         public:
 
@@ -64,6 +64,8 @@ namespace MWDialogue
 
             virtual MWWorld::Ptr getActor() const;
             ///< Return the actor the player is currently talking to.
+
+            virtual bool checkServiceRefused ();
 
             //calbacks for the GUI
             virtual void keywordSelected (const std::string& keyword);

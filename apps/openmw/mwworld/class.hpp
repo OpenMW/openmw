@@ -215,6 +215,9 @@ namespace MWWorld
             ///< Return the down sound ID of \a ptr or throw an exception, if class does not support ID retrieval
             /// (default implementation: throw an exception)
 
+            virtual float getArmorRating (const MWWorld::Ptr& ptr) const;
+            ///< @return combined armor rating of this actor
+
             virtual std::string getInventoryIcon (const MWWorld::Ptr& ptr) const;
             ///< Return name of inventory icon.
 

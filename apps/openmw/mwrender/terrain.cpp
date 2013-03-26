@@ -40,9 +40,10 @@ namespace MWRender
                            ->getActiveProfile();
         mActiveProfile = static_cast<TerrainMaterial::Profile*>(activeProfile);
 
-        //The pixel error should be as high as possible without it being noticed
-        //as it governs how fast mesh quality decreases.
-        mTerrainGlobals->setMaxPixelError(8);
+        // We don't want any pixel error at all. Really, LOD makes no sense here - morrowind uses 65x65 verts in one cell,
+        // so applying LOD is most certainly slower than doing no LOD at all.
+        // Setting this to 0 seems to cause glitches though. :/
+        mTerrainGlobals->setMaxPixelError(1);
 
         mTerrainGlobals->setLayerBlendMapSize(32);
 

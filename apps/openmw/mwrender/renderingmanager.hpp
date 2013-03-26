@@ -11,6 +11,8 @@
 
 #include <boost/filesystem.hpp>
 
+#include <OgreRenderTargetListener.h>
+
 #include "renderinginterface.hpp"
 
 #include "objects.hpp"
@@ -48,7 +50,7 @@ namespace MWRender
     class VideoPlayer;
     class Animation;
 
-class RenderingManager: private RenderingInterface, public Ogre::WindowEventListener {
+class RenderingManager: private RenderingInterface, public Ogre::WindowEventListener, public Ogre::RenderTargetListener {
 
   private:
 
@@ -58,7 +60,7 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
 
   public:
     RenderingManager(OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir,
-                     const boost::filesystem::path& cacheDir, OEngine::Physic::PhysicEngine* engine);
+                     const boost::filesystem::path& cacheDir, OEngine::Physic::PhysicEngine* engine,MWWorld::Fallback* fallback);
     virtual ~RenderingManager();
 
     void togglePOV() {
@@ -79,6 +81,11 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
 
     void togglePlayerLooking(bool enable) {
         mPlayer->togglePlayerLooking(enable);
+    }
+
+    void changeVanityModeScale(float factor) {
+        if (mPlayer->isVanityOrPreviewModeEnabled())
+        mPlayer->setCameraDistance(-factor/120.f*10, true, true);
     }
 
     void getPlayerData(Ogre::Vector3 &eyepos, float &pitch, float &yaw);
@@ -102,8 +109,6 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     void waterAdded(MWWorld::CellStore *store);
 
     void removeWater();
-
-    static const bool useMRT();
 
     void preCellChange (MWWorld::CellStore* store);
     ///< this event is fired immediately before changing cell
@@ -133,11 +138,15 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     void setAmbientColour(const Ogre::ColourValue& colour);
     void setSunColour(const Ogre::ColourValue& colour);
     void setSunDirection(const Ogre::Vector3& direction);
-    void sunEnable();
-    void sunDisable();
+    void sunEnable(bool real); ///< @param real whether or not to really disable the sunlight (otherwise just set diffuse to 0)
+    void sunDisable(bool real);
 
-    void disableLights();
-    void enableLights();
+    void disableLights(bool sun); ///< @param sun whether or not to really disable the sunlight (otherwise just set diffuse to 0)
+    void enableLights(bool sun);
+
+
+    void preRenderTargetUpdate(const Ogre::RenderTargetEvent& evt);
+    void postRenderTargetUpdate(const Ogre::RenderTargetEvent& evt);
 
     bool occlusionQuerySupported() { return mOcclusionQuery->supported(); }
     OcclusionQuery* getOcclusionQuery() { return mOcclusionQuery; }
@@ -159,6 +168,10 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     void skySetMoonColour (bool red);
     void configureAmbient(MWWorld::CellStore &mCell);
 
+    void addWaterRippleEmitter (const MWWorld::Ptr& ptr, float scale = 1.f, float force = 1.f);
+    void removeWaterRippleEmitter (const MWWorld::Ptr& ptr);
+    void updateWaterRippleEmitterPtr (const MWWorld::Ptr& old, const MWWorld::Ptr& ptr);
+
     void requestMap (MWWorld::CellStore* cell);
     ///< request the local map for a cell
 
@@ -176,8 +189,6 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
 
     Ogre::Viewport* getViewport() { return mRendering.getViewport(); }
 
-    static bool waterShaderSupported();
-
     void getInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y);
     ///< see MWRender::LocalMap::getInteriorMapPosition
 
@@ -190,6 +201,7 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
 
     void playVideo(const std::string& name, bool allowSkipping);
     void stopVideo();
+    void frameStarted(float dt);
 
   protected:
 	virtual void windowResized(Ogre::RenderWindow* rw);
@@ -200,12 +212,15 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     sh::Factory* mFactory;
 
     void setAmbientMode();
+    void applyFog(bool underwater);
 
     void setMenuTransparency(float val);
 
     void applyCompositors();
 
     bool mSunEnabled;
+
+    MWWorld::Fallback* mFallback;
 
     SkyManager* mSkyManager;
 
@@ -229,6 +244,10 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     Ogre::Light* mSun;
 
     Ogre::SceneNode *mRootNode;
+
+    Ogre::ColourValue mFogColour;
+    float mFogStart;
+    float mFogEnd;
 
     OEngine::Physic::PhysicEngine* mPhysicsEngine;
 

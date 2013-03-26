@@ -25,6 +25,7 @@ enum CharacterState {
     CharState_Idle8,
     CharState_Idle9,
     CharState_IdleSwim,
+    CharState_IdleSneak,
 
     CharState_WalkForward,
     CharState_WalkBack,
@@ -45,6 +46,11 @@ enum CharacterState {
     CharState_SwimRunBack,
     CharState_SwimRunLeft,
     CharState_SwimRunRight,
+
+    CharState_SneakForward,
+    CharState_SneakBack,
+    CharState_SneakLeft,
+    CharState_SneakRight,
 
     CharState_Jump,
 

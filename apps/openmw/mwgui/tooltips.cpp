@@ -44,6 +44,11 @@ ToolTips::ToolTips(MWBase::WindowManager* windowManager) :
 
     mDelay = Settings::Manager::getFloat("tooltip delay", "GUI");
     mRemainingDelay = mDelay;
+
+    for (unsigned int i=0; i < mMainWidget->getChildCount(); ++i)
+    {
+        mMainWidget->getChildAt(i)->setVisible(false);
+    }
 }
 
 void ToolTips::setEnabled(bool enabled)
@@ -85,7 +90,20 @@ void ToolTips::onFrame(float frameDuration)
             if (mFocusObject.isEmpty ())
                 return;
 
-            MyGUI::IntSize tooltipSize = getToolTipViaPtr(true);
+            const MWWorld::Class& objectclass = MWWorld::Class::get (mFocusObject);
+
+            IntSize tooltipSize;
+            if ((!objectclass.hasToolTip(mFocusObject))&&(mWindowManager->getMode() == GM_Console))
+            {
+                setCoord(0, 0, 300, 300);
+                mDynamicToolTipBox->setVisible(true);
+                ToolTipInfo info;
+                info.caption=mFocusObject.getCellRef().mRefID;
+                info.icon="";
+                tooltipSize = createToolTip(info);
+            }
+            else
+                tooltipSize = getToolTipViaPtr(true);
 
             IntPoint tooltipPosition = InputManager::getInstance().getMousePosition() + IntPoint(0, 24);
 
@@ -115,7 +133,7 @@ void ToolTips::onFrame(float frameDuration)
             }
             else
             {
-		mHorizontalScrollIndex = 0;
+                mHorizontalScrollIndex = 0;
                 mRemainingDelay = mDelay;
             }
             mLastMouseX = mousePos.left;
@@ -127,9 +145,7 @@ void ToolTips::onFrame(float frameDuration)
 
             Widget* focus = InputManager::getInstance().getMouseFocusWidget();
             if (focus == 0)
-            {
                 return;
-            }
 
             IntSize tooltipSize;
 
@@ -167,6 +183,10 @@ void ToolTips::onFrame(float frameDuration)
             {
                 mFocusObject = *focus->getUserData<MWWorld::Ptr>();
                 tooltipSize = getToolTipViaPtr(false);
+            }
+            else if (type == "ToolTipInfo")
+            {
+                tooltipSize = createToolTip(*focus->getUserData<MWGui::ToolTipInfo>());
             }
             else if (type == "AvatarItemSelection")
             {
@@ -213,14 +233,6 @@ void ToolTips::onFrame(float frameDuration)
                 getWidget(tooltip, focus->getUserString("ToolTipLayout"));
 
                 tooltip->setVisible(true);
-                if (!tooltip->isUserString("DontResize"))
-                {
-                    tooltip->setCoord(0, 0, 450, 300); // this is the maximum width of the tooltip before it starts word-wrapping
-
-                    tooltipSize = MyGUI::IntSize(0, tooltip->getSize().height);
-                }
-                else
-                    tooltipSize = tooltip->getSize();
 
                 std::map<std::string, std::string> userStrings = focus->getUserStrings();
                 for (std::map<std::string, std::string>::iterator it = userStrings.begin();
@@ -241,32 +253,8 @@ void ToolTips::onFrame(float frameDuration)
                     w->setProperty(propertyKey, it->second);
                 }
 
-                for (unsigned int i=0; i<tooltip->getChildCount(); ++i)
-                {
-                    MyGUI::Widget* w = tooltip->getChildAt(i);
+                tooltipSize = tooltip->getSize();
 
-                    if (w->isUserString("AutoResizeHorizontal"))
-                    {
-                        MyGUI::TextBox* text = w->castType<MyGUI::TextBox>();
-                        tooltipSize.width = std::max(tooltipSize.width, w->getLeft() + text->getTextSize().width + 8);
-                    }
-                    else if (!tooltip->isUserString("DontResize"))
-                        tooltipSize.width = std::max(tooltipSize.width, w->getLeft() + w->getWidth() + 8);
-
-                    if (w->isUserString("AutoResizeVertical"))
-                    {
-                        MyGUI::TextBox* text = w->castType<MyGUI::TextBox>();
-                        int height = text->getTextSize().height;
-                        if (height > w->getHeight())
-                        {
-                            tooltipSize += MyGUI::IntSize(0, height - w->getHeight());
-                        }
-                        if (height < w->getHeight())
-                        {
-                            tooltipSize -= MyGUI::IntSize(0, w->getHeight() - height);
-                        }
-                    }
-                }
                 tooltip->setCoord(0, 0, tooltipSize.width, tooltipSize.height);
             }
             else
@@ -363,7 +351,7 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
 
     std::string caption = info.caption;
     std::string image = info.icon;
-    int imageSize = (image != "") ? 32 : 0;
+    int imageSize = (image != "") ? info.imageSize : 0;
     std::string text = info.text;
 
     // remove the first newline (easier this way)
@@ -403,7 +391,7 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
 
     EditBox* captionWidget = mDynamicToolTipBox->createWidget<EditBox>("NormalText", IntCoord(0, 0, 300, 300), Align::Left | Align::Top, "ToolTipCaption");
     captionWidget->setProperty("Static", "true");
-    captionWidget->setCaption(caption);
+    captionWidget->setCaptionWithReplacing(caption);
     IntSize captionSize = captionWidget->getTextSize();
 
     int captionHeight = std::max(caption != "" ? captionSize.height : 0, imageSize);
@@ -411,7 +399,7 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
     EditBox* textWidget = mDynamicToolTipBox->createWidget<EditBox>("SandText", IntCoord(0, captionHeight+imageCaptionVPadding, 300, 300-captionHeight-imageCaptionVPadding), Align::Stretch, "ToolTipText");
     textWidget->setProperty("Static", "true");
     textWidget->setProperty("MultiLine", "true");
-    textWidget->setProperty("WordWrap", "true");
+    textWidget->setProperty("WordWrap", info.wordWrap ? "true" : "false");
     textWidget->setCaptionWithReplacing(text);
     textWidget->setTextAlign(Align::HCenter | Align::Top);
     IntSize textSize = textWidget->getTextSize();
@@ -439,7 +427,7 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
         effectsWidget->setWindowManager(mWindowManager);
         effectsWidget->setEffectList(info.effects);
 
-        std::vector<MyGUI::WidgetPtr> effectItems;
+        std::vector<MyGUI::Widget*> effectItems;
         effectsWidget->createEffectWidgets(effectItems, effectArea, coord, true, info.isPotion ? Widgets::MWEffectList::EF_NoTarget : 0);
         totalSize.height += coord.top-6;
         totalSize.width = std::max(totalSize.width, coord.width);
@@ -459,7 +447,7 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
         enchantWidget->setWindowManager(mWindowManager);
         enchantWidget->setEffectList(Widgets::MWEffectList::effectListFromESM(&enchant->mEffects));
 
-        std::vector<MyGUI::WidgetPtr> enchantEffectItems;
+        std::vector<MyGUI::Widget*> enchantEffectItems;
         int flag = (enchant->mData.mType == ESM::Enchantment::ConstantEffect) ? Widgets::MWEffectList::EF_Constant : 0;
         enchantWidget->createEffectWidgets(enchantEffectItems, enchantArea, coord, true, flag);
         totalSize.height += coord.top-6;
@@ -507,20 +495,21 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
         captionSize.height);
     
      //if its too long we do hscroll with the caption
-    if (captionSize.width > maximumWidth){
-      mHorizontalScrollIndex = mHorizontalScrollIndex + 2;
-      if (mHorizontalScrollIndex > captionSize.width){
-        mHorizontalScrollIndex = -totalSize.width;
-      }      
-      int horizontal_scroll = mHorizontalScrollIndex;
-      if (horizontal_scroll < 40){
-       horizontal_scroll = 40;	
-      }else{
-        horizontal_scroll = 80 - mHorizontalScrollIndex;
-      }
-      captionWidget->setPosition (IntPoint(horizontal_scroll, captionWidget->getPosition().top + padding.top));
+    if (captionSize.width > maximumWidth)
+    {
+        mHorizontalScrollIndex = mHorizontalScrollIndex + 2;
+        if (mHorizontalScrollIndex > captionSize.width){
+            mHorizontalScrollIndex = -totalSize.width;
+        }
+        int horizontal_scroll = mHorizontalScrollIndex;
+        if (horizontal_scroll < 40){
+            horizontal_scroll = 40;
+        }else{
+            horizontal_scroll = 80 - mHorizontalScrollIndex;
+        }
+        captionWidget->setPosition (IntPoint(horizontal_scroll, captionWidget->getPosition().top + padding.top));
     } else {
-      captionWidget->setPosition (captionWidget->getPosition() + padding);
+        captionWidget->setPosition (captionWidget->getPosition() + padding);
     }
 
     textWidget->setPosition (textWidget->getPosition() + IntPoint(0, padding.top)); // only apply vertical padding, the horizontal works automatically due to Align::HCenter

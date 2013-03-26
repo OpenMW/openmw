@@ -30,34 +30,15 @@ namespace MWRender
         bool supported();
 
         /**
+         * make sure to disable occlusion queries before updating unrelated render targets
+         * @param active
+         */
+        void setActive (bool active) { mActive = active; }
+
+        /**
          * per-frame update
          */
         void update(float duration);
-
-        /**
-         * request occlusion test for a billboard at the given position, omitting an entity
-         * @param position of the billboard in ogre coordinates
-         * @param object to exclude from the occluders
-         */
-        void occlusionTest(const Ogre::Vector3& position, Ogre::SceneNode* object);
-
-        /**
-         * @return true if a request is still outstanding
-         */
-        bool occlusionTestPending();
-
-        /**
-         * Checks if the objects held by this scenenode
-         * can be considered as potential occluders
-         * (which might not be the case when transparency is involved)
-         * @param Scene node
-         */
-        bool isPotentialOccluder(Ogre::SceneNode* node);
-
-        /**
-         * @return true if the object tested in the last request was occluded
-         */
-        bool getTestResult();
 
         float getSunVisibility() const {return mSunVisibility;};
 
@@ -66,31 +47,22 @@ namespace MWRender
     private:
         Ogre::HardwareOcclusionQuery* mSunTotalAreaQuery;
         Ogre::HardwareOcclusionQuery* mSunVisibleAreaQuery;
-        Ogre::HardwareOcclusionQuery* mSingleObjectQuery;
         Ogre::HardwareOcclusionQuery* mActiveQuery;
 
         Ogre::BillboardSet* mBBQueryVisible;
         Ogre::BillboardSet* mBBQueryTotal;
-        Ogre::BillboardSet* mBBQuerySingleObject;
 
         Ogre::SceneNode* mSunNode;
         Ogre::SceneNode* mBBNode;
         Ogre::SceneNode* mBBNodeReal;
         float mSunVisibility;
 
-        Ogre::SceneNode* mObjectNode;
-
         bool mWasVisible;
-        bool mObjectWasVisible;
 
-        bool mTestResult;
+        bool mActive;
 
         bool mSupported;
         bool mDoQuery;
-        bool mDoQuery2;
-
-        bool mQuerySingleObjectRequested;
-        bool mQuerySingleObjectStarted;
 
         OEngine::Render::OgreRenderer* mRendering;
 

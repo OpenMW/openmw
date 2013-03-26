@@ -1,80 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Skin">
+
     <!-- The 'box' frame that surrounds various HUD items and other elements -->
-    <Skin name="HUD_Box" size="40 40" texture="mwgui.png">
 
-        <BasisSkin type="TileRect" offset="0 0 39 2" align="ALIGN_TOP ALIGN_HSTRETCH">
-            <State name="normal" offset="4 2 38 2">
-                <Property key="TileSize" value="40 2"/>
-                <Property key="TileH" value="true"/>
-                <Property key="TileV" value="true"/>
-            </State>
-        </BasisSkin>
+    <Skin name="HUD_Box" size="40 40">
 
-        <BasisSkin type="TileRect" offset="0 1 2 37" align="ALIGN_LEFT ALIGN_VSTRETCH">
-            <State name="normal" offset="2 26 2 36">
-                <Property key="TileSize" value="2 40"/>
-                <Property key="TileH" value="true"/>
-                <Property key="TileV" value="true"/>
-            </State>
-        </BasisSkin>
+        <!-- Borders -->
 
-        <BasisSkin type="TileRect" offset="38 0 2 40" align="ALIGN_RIGHT ALIGN_VSTRETCH">
-            <State name="normal" offset="16 26 2 38">
-                <Property key="TileSize" value="2 40"/>
-                <Property key="TileH" value="true"/>
-                <Property key="TileV" value="true"/>
-            </State>
-        </BasisSkin>
-        
-        <BasisSkin type="TileRect" offset="0 38 39 2" align="ALIGN_BOTTOM ALIGN_HSTRETCH">
-            <State name="normal" offset="4 20 40 2">
-                <Property key="TileSize" value="40 2"/>
-                <Property key="TileH" value="true"/>
-                <Property key="TileV" value="true"/>
-            </State>
-        </BasisSkin>
-        
+        <Child type="Widget" skin="MW_Box" offset="0 0 40 40" align="ALIGN_LEFT Stretch" name="Client"/>
+
         <!-- The interior of the box -->
+
         <Child type="Widget" skin="BlackBG" offset="2 2 36 36" align="ALIGN_STRETCH" name="Client"/>
+
     </Skin>
 
-    <Skin name="HUD_Box_NoTransp" size="40 40" texture="mwgui.png">
-    
-        <BasisSkin type="TileRect" offset="0 0 39 2" align="ALIGN_TOP ALIGN_HSTRETCH">
-            <State name="normal" offset="4 2 38 2">
-                <Property key="TileSize" value="40 2"/>
-                <Property key="TileH" value="true"/>
-                <Property key="TileV" value="true"/>
-            </State>
-        </BasisSkin>
+    <Skin name="HUD_Box_Transparent" size="40 40">
+        <Child type="Widget" skin="MW_Box" offset="0 0 40 40" align="ALIGN_LEFT Stretch" name="Client"/>
+    </Skin>
 
-        <BasisSkin type="TileRect" offset="0 1 2 37" align="ALIGN_LEFT ALIGN_VSTRETCH">
-            <State name="normal" offset="2 26 2 36">
-                <Property key="TileSize" value="2 40"/>
-                <Property key="TileH" value="true"/>
-                <Property key="TileV" value="true"/>
-            </State>
-        </BasisSkin>
+    <Skin name="HUD_Box_NoTransp" size="40 40">
 
-        <BasisSkin type="TileRect" offset="38 0 2 40" align="ALIGN_RIGHT ALIGN_VSTRETCH">
-            <State name="normal" offset="16 26 2 38">
-                <Property key="TileSize" value="2 40"/>
-                <Property key="TileH" value="true"/>
-                <Property key="TileV" value="true"/>
-            </State>
-        </BasisSkin>
-        
-        <BasisSkin type="TileRect" offset="0 38 39 2" align="ALIGN_BOTTOM ALIGN_HSTRETCH">
-            <State name="normal" offset="4 20 40 2">
-                <Property key="TileSize" value="40 2"/>
-                <Property key="TileH" value="true"/>
-                <Property key="TileV" value="true"/>
-            </State>
-        </BasisSkin>
+        <!-- Borders -->
+
+        <Child type="Widget" skin="MW_Box" offset="0 0 40 40" align="ALIGN_LEFT Stretch" name="Client"/>
 
         <!-- The interior of the box -->
+
         <Child type="Widget" skin="DialogBG" offset="2 2 36 36" align="ALIGN_STRETCH" name="Client"/>
+
     </Skin>
+
 </MyGUI>

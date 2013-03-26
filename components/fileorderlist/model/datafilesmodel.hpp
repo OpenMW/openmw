@@ -34,10 +34,7 @@ public:
 
     void setEncoding(const QString &encoding);
 
-    void addFile(EsmFile *file);
-
-    void addMasters(const QString &path);
-    void addPlugins(const QString &path);
+    void addFiles(const QString &path);
 
     void uncheckAll();
 
@@ -53,16 +50,13 @@ public:
     EsmFile* item(int row) const;
 
 signals:
-    void checkedItemsChanged(const QStringList checkedItems, const QStringList unCheckedItems);
-    
-public slots:
-    void slotcheckedItemsChanged(const QStringList &checkedItems, const QStringList &unCheckedItems);
+    void checkedItemsChanged(const QStringList &items);
     
 private:
+    bool canBeChecked(EsmFile *file) const;
+    void addFile(EsmFile *file);
+    
     QList<EsmFile *> mFiles;
-    QStringList mAvailableFiles;
-
-    QHash<QString, QStringList> mDependencies;
     QHash<QString, Qt::CheckState> mCheckStates;
 
     QString mEncoding;

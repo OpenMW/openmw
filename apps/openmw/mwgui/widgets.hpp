@@ -2,10 +2,17 @@
 #define MWGUI_WIDGETS_H
 
 #include "../mwworld/esmstore.hpp"
-
-#include <MyGUI.h>
-
 #include "../mwmechanics/stat.hpp"
+
+#include <MyGUI_Widget.h>
+#include <MyGUI_TextBox.h>
+#include <MyGUI_Button.h>
+#include <MyGUI_EditBox.h>
+
+namespace MyGUI
+{
+    class ImageBox;
+}
 
 namespace MWBase
 {
@@ -118,7 +125,8 @@ namespace MWGui
             MWBase::WindowManager *mManager;
             ESM::Skill::SkillEnum mSkillId;
             SkillValue mValue;
-            MyGUI::WidgetPtr mSkillNameWidget, mSkillValueWidget;
+            MyGUI::Widget* mSkillNameWidget;
+            MyGUI::Widget* mSkillValueWidget;
         };
         typedef MWSkill* MWSkillPtr;
 
@@ -160,7 +168,8 @@ namespace MWGui
             MWBase::WindowManager *mManager;
             int mId;
             AttributeValue mValue;
-            MyGUI::WidgetPtr mAttributeNameWidget, mAttributeValueWidget;
+            MyGUI::Widget* mAttributeNameWidget;
+            MyGUI::Widget* mAttributeValueWidget;
         };
         typedef MWAttribute* MWAttributePtr;
 
@@ -186,7 +195,7 @@ namespace MWGui
              * @param spell category, if this is 0, this means the spell effects are permanent and won't display e.g. duration
              * @param various flags, see MWEffectList::EffectFlags
              */
-            void createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI::WidgetPtr creator, MyGUI::IntCoord &coord, int flags);
+            void createEffectWidgets(std::vector<MyGUI::Widget*> &effects, MyGUI::Widget* creator, MyGUI::IntCoord &coord, int flags);
 
             const std::string &getSpellId() const { return mId; }
 
@@ -230,7 +239,7 @@ namespace MWGui
              * @param center the effect widgets horizontally
              * @param various flags, see MWEffectList::EffectFlags
              */
-            void createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI::WidgetPtr creator, MyGUI::IntCoord &coord, bool center, int flags);
+            void createEffectWidgets(std::vector<MyGUI::Widget*> &effects, MyGUI::Widget* creator, MyGUI::IntCoord &coord, bool center, int flags);
 
         protected:
             virtual ~MWEffectList();
@@ -332,6 +341,18 @@ namespace MWGui
             virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
         };
 
+        class AutoSizedEditBox : public AutoSizedWidget, public MyGUI::EditBox
+        {
+            MYGUI_RTTI_DERIVED( AutoSizedEditBox )
+
+        public:
+            virtual MyGUI::IntSize getRequestedSize();
+            virtual void setCaption(const MyGUI::UString& _value);
+
+        protected:
+            virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
+        };
+
         class AutoSizedButton : public AutoSizedWidget, public MyGUI::Button
         {
             MYGUI_RTTI_DERIVED( AutoSizedButton )
@@ -382,7 +403,6 @@ namespace MWGui
             virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
 
             virtual void onWidgetCreated(MyGUI::Widget* _widget);
-            virtual void onWidgetDestroy(MyGUI::Widget* _widget);
         };
 
         class VBox : public Box, public MyGUI::Widget
@@ -400,7 +420,6 @@ namespace MWGui
             virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
 
             virtual void onWidgetCreated(MyGUI::Widget* _widget);
-            virtual void onWidgetDestroy(MyGUI::Widget* _widget);
         };
     }
 }

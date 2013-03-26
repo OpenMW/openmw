@@ -50,6 +50,7 @@ namespace MWGui
         void onMarkerUnfocused(MyGUI::Widget* w1, MyGUI::Widget* w2);
 
         virtual void notifyPlayerUpdate() {}
+        virtual void notifyMapChanged() {}
 
         OEngine::GUI::Layout* mLayout;
 
@@ -99,6 +100,8 @@ namespace MWGui
         virtual void onPinToggled();
 
         virtual void notifyPlayerUpdate();
+        virtual void notifyMapChanged();
+
     };
 }
 #endif

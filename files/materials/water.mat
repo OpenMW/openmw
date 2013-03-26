@@ -1,8 +1,10 @@
 material Water
 {
+    allow_fixed_function false
+
     pass
     {
-        emissive 0.6 0.7 1.0
+        emissive 1.0 1.0 1.0
         ambient 0 0 0
         diffuse 0 0 0 1
         specular 0 0 0 32
@@ -11,6 +13,9 @@ material Water
         fragment_program water_fragment
         
         cull_hardware none
+
+        scene_blend alpha_blend
+        depth_write off
         
         texture_unit reflectionMap
         {
@@ -20,7 +25,7 @@ material Water
         
         texture_unit refractionMap
         {
-            texture_alias WaterRefraction
+            direct_texture WaterRefraction
             tex_address_mode clamp
         }
         
@@ -32,10 +37,16 @@ material Water
         
         texture_unit normalMap
         {
-            direct_texture water_nm.png
+            texture water_nm.png 5
         }
-        
-        
+
+        texture_unit rippleNormalMap
+        {
+            direct_texture RippleNormal
+            tex_address_mode border
+            tex_border_colour 0.5 0.5 1.0
+        }
+
         // for simple_water
         texture_unit animatedTexture
         {
@@ -44,12 +55,4 @@ material Water
             alpha_op_ex source1 src_manual src_current 0.7
         }
     }
-}
-
-
-material Underwater_Dome
-{
-    parent openmw_objects_base
-    
-    depth_write off
 }

@@ -2,6 +2,7 @@
 #include "mechanicsmanagerimp.hpp"
 
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/inventorystore.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

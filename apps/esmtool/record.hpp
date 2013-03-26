@@ -104,7 +104,7 @@ namespace EsmTool
     template<> void Record<ESM::CreatureLevList>::print();
     template<> void Record<ESM::ItemLevList>::print();
     template<> void Record<ESM::Light>::print();
-    template<> void Record<ESM::Tool>::print();
+    template<> void Record<ESM::Lockpick>::print();
     template<> void Record<ESM::Probe>::print();
     template<> void Record<ESM::Repair>::print();
     template<> void Record<ESM::LandTexture>::print();

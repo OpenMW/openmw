@@ -40,6 +40,15 @@ namespace MWRender
     void CharacterPreview::setup ()
     {
         mSceneMgr = Ogre::Root::getSingleton().createSceneManager(Ogre::ST_GENERIC);
+
+        /// \todo Read the fallback values from INIImporter (Inventory:Directional*)
+        Ogre::Light* l = mSceneMgr->createLight();
+        l->setType (Ogre::Light::LT_DIRECTIONAL);
+        l->setDirection (Ogre::Vector3(0.3, -0.7, 0.3));
+        l->setDiffuseColour (Ogre::ColourValue(1,1,1));
+
+        mSceneMgr->setAmbientLight (Ogre::ColourValue(0.5, 0.5, 0.5));
+
         mCamera = mSceneMgr->createCamera (mName);
         mCamera->setAspectRatio (float(mSizeX) / float(mSizeY));
 
@@ -51,7 +60,7 @@ namespace MWRender
         mNode = renderRoot->createChildSceneNode();
 
         mAnimation = new NpcAnimation(mCharacter, mNode,
-            MWWorld::Class::get(mCharacter).getInventoryStore (mCharacter), RV_PlayerPreview);
+            MWWorld::Class::get(mCharacter).getInventoryStore (mCharacter), 0, renderHeadOnly());
 
         mNode->setVisible (false);
 
@@ -73,8 +82,6 @@ namespace MWRender
         mViewport->setOverlaysEnabled(false);
         mViewport->setBackgroundColour(Ogre::ColourValue(0, 0, 0, 0));
         mViewport->setShadowsEnabled(false);
-        mViewport->setMaterialScheme("local_map");
-        mViewport->setVisibilityMask (RV_PlayerPreview);
         mRenderTarget->setActive(true);
         mRenderTarget->setAutoUpdated (false);
 
@@ -95,13 +102,16 @@ namespace MWRender
         delete mAnimation;
 
         mAnimation = new NpcAnimation(mCharacter, mNode,
-            MWWorld::Class::get(mCharacter).getInventoryStore (mCharacter), RV_PlayerPreview);
+            MWWorld::Class::get(mCharacter).getInventoryStore (mCharacter), 0, renderHeadOnly());
+
+        float scale=1.f;
+        MWWorld::Class::get(mCharacter).adjustScale(mCharacter, scale);
+        mNode->setScale(Ogre::Vector3(scale));
 
         mNode->setVisible (false);
 
-        Ogre::Vector3 scale = mNode->getScale();
-        mCamera->setPosition(mPosition * scale);
-        mCamera->lookAt(mLookAt * scale);
+        mCamera->setPosition(mPosition * mNode->getScale());
+        mCamera->lookAt(mLookAt * mNode->getScale());
 
         onSetup();
     }
@@ -111,6 +121,7 @@ namespace MWRender
 
     InventoryPreview::InventoryPreview(MWWorld::Ptr character)
         : CharacterPreview(character, 512, 1024, "CharacterPreview", Ogre::Vector3(0, 65, -180), Ogre::Vector3(0,65,0))
+        , mSelectionBuffer(NULL)
     {
     }
 
@@ -143,7 +154,8 @@ namespace MWRender
 
     void InventoryPreview::onSetup ()
     {
-        mSelectionBuffer = new OEngine::Render::SelectionBuffer(mCamera, 512, 1024, RV_PlayerPreview);
+        if (!mSelectionBuffer)
+            mSelectionBuffer = new OEngine::Render::SelectionBuffer(mCamera, 512, 1024, 0);
 
         mAnimation->play("inventoryhandtohand", "start", "stop", false);
     }
@@ -152,7 +164,7 @@ namespace MWRender
 
     RaceSelectionPreview::RaceSelectionPreview()
         : CharacterPreview(MWBase::Environment::get().getWorld()->getPlayer().getPlayer(),
-            512, 512, "CharacterHeadPreview", Ogre::Vector3(0, 120, -35), Ogre::Vector3(0,125,0))
+            512, 512, "CharacterHeadPreview", Ogre::Vector3(0, 6, -35), Ogre::Vector3(0,125,0))
         , mRef(&mBase)
     {
         mBase = *mCharacter.get<ESM::NPC>()->mBase;
@@ -163,6 +175,8 @@ namespace MWRender
     {
         mAnimation->runAnimation(0.0f);
         mNode->roll(Ogre::Radian(angle), Ogre::SceneNode::TS_LOCAL);
+
+        updateCamera();
 
         mNode->setVisible (true);
         mRenderTarget->update();
@@ -180,5 +194,17 @@ namespace MWRender
     void RaceSelectionPreview::onSetup ()
     {
         mAnimation->play("idle", "start", "stop", false);
+
+        updateCamera();
+    }
+
+    void RaceSelectionPreview::updateCamera()
+    {
+        Ogre::Vector3 scale = mNode->getScale();
+        Ogre::Vector3 headOffset = mAnimation->getHeadNode()->_getDerivedPosition();
+        headOffset = mNode->convertLocalToWorldPosition(headOffset);
+
+        mCamera->setPosition(headOffset + mPosition * scale);
+        mCamera->lookAt(headOffset + mPosition*Ogre::Vector3(0,1,0) * scale);
     }
 }

@@ -1,16 +1,19 @@
-#include <QtGui>
+#include "graphicspage.hpp"
+
+#include <QDesktopWidget>
+#include <QMessageBox>
+#include <QDir>
 
 #include <cstdlib>
 
 #include <boost/math/common_factor.hpp>
-#include <boost/filesystem.hpp>
 
 #include <components/files/configurationmanager.hpp>
 #include <components/files/ogreplugin.hpp>
-#include <components/settings/settings.hpp>
+
 #include <components/fileorderlist/utils/naturalsort.hpp>
 
-#include "graphicspage.hpp"
+#include "settings/graphicssettings.hpp"
 
 QString getAspect(int x, int y)
 {
@@ -24,52 +27,22 @@ QString getAspect(int x, int y)
     return QString(QString::number(xaspect) + ":" + QString::number(yaspect));
 }
 
-GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, QWidget *parent)
-    : QWidget(parent)
-    , mCfgMgr(cfg)
+GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, GraphicsSettings &graphicsSetting, QWidget *parent)
+    : mCfgMgr(cfg)
+    , mGraphicsSettings(graphicsSetting)
+    , QWidget(parent)
 {
-    QGroupBox *rendererGroup = new QGroupBox(tr("Renderer"), this);
+    setupUi(this);
 
-    QLabel *rendererLabel = new QLabel(tr("Rendering Subsystem:"), rendererGroup);
-    mRendererComboBox = new QComboBox(rendererGroup);
+    // Set the maximum res we can set in windowed mode
+    QRect res = QApplication::desktop()->screenGeometry();
+    customWidthSpinBox->setMaximum(res.width());
+    customHeightSpinBox->setMaximum(res.height());
 
-    // Layout for the combobox and label
-    QGridLayout *renderSystemLayout = new QGridLayout();
-    renderSystemLayout->addWidget(rendererLabel, 0, 0, 1, 1);
-    renderSystemLayout->addWidget(mRendererComboBox, 0, 1, 1, 1);
+    connect(rendererComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(rendererChanged(const QString&)));
+    connect(fullScreenCheckBox, SIGNAL(stateChanged(int)), this, SLOT(slotFullScreenChanged(int)));
+    connect(standardRadioButton, SIGNAL(toggled(bool)), this, SLOT(slotStandardToggled(bool)));
 
-    // Display
-    QGroupBox *displayGroup = new QGroupBox(tr("Display"), this);
-
-    mVSyncCheckBox = new QCheckBox(tr("Vertical Sync"), displayGroup);
-    mFullScreenCheckBox = new QCheckBox(tr("Full Screen"), displayGroup);
-
-    QLabel *antiAliasingLabel = new QLabel(tr("Antialiasing:"), displayGroup);
-    QLabel *resolutionLabel = new QLabel(tr("Resolution:"), displayGroup);
-
-    mResolutionComboBox = new QComboBox(displayGroup);
-    mAntiAliasingComboBox = new QComboBox(displayGroup);
-
-    QVBoxLayout *rendererGroupLayout = new QVBoxLayout(rendererGroup);
-    rendererGroupLayout->addLayout(renderSystemLayout);
-
-    QGridLayout *displayGroupLayout = new QGridLayout(displayGroup);
-    displayGroupLayout->addWidget(mVSyncCheckBox, 0, 0, 1, 1);
-    displayGroupLayout->addWidget(mFullScreenCheckBox, 1, 0, 1, 1);
-    displayGroupLayout->addWidget(antiAliasingLabel, 2, 0, 1, 1);
-    displayGroupLayout->addWidget(mAntiAliasingComboBox, 2, 1, 1, 1);
-    displayGroupLayout->addWidget(resolutionLabel, 3, 0, 1, 1);
-    displayGroupLayout->addWidget(mResolutionComboBox, 3, 1, 1, 1);
-
-    // Layout for the whole page
-    QVBoxLayout *pageLayout = new QVBoxLayout(this);
-    QSpacerItem *vSpacer1 = new QSpacerItem(20, 10, QSizePolicy::Minimum, QSizePolicy::Expanding);
-
-    pageLayout->addWidget(rendererGroup);
-    pageLayout->addWidget(displayGroup);
-    pageLayout->addItem(vSpacer1);
-
-    connect(mRendererComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(rendererChanged(const QString&)));
 }
 
 bool GraphicsPage::setupOgre()
@@ -116,11 +89,11 @@ bool GraphicsPage::setupOgre()
 #endif
     }
 
-    boost::filesystem::path absPluginPath = boost::filesystem::absolute(boost::filesystem::path(pluginDir));
-
-    pluginDir = absPluginPath.string();
+    QDir dir(QString::fromStdString(pluginDir));
+    pluginDir = dir.absolutePath().toStdString();
 
     Files::loadOgrePlugin(pluginDir, "RenderSystem_GL", *mOgre);
+    Files::loadOgrePlugin(pluginDir, "RenderSystem_GL3Plus", *mOgre);
     Files::loadOgrePlugin(pluginDir, "RenderSystem_Direct3D9", *mOgre);
 
 #ifdef ENABLE_PLUGIN_GL
@@ -137,7 +110,7 @@ bool GraphicsPage::setupOgre()
 
     for (Ogre::RenderSystemList::const_iterator r = renderers.begin(); r != renderers.end(); ++r) {
         mSelectedRenderSystem = *r;
-        mRendererComboBox->addItem((*r)->getName().c_str());
+        rendererComboBox->addItem((*r)->getName().c_str());
     }
 
     QString openGLName = QString("OpenGL Rendering Subsystem");
@@ -153,71 +126,85 @@ bool GraphicsPage::setupOgre()
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(tr("<br><b>Could not select a valid render system</b><br><br> \
-        Please make sure the plugins.cfg file exists and contains a valid rendering plugin.<br>"));
+                          Please make sure the plugins.cfg file exists and contains a valid rendering plugin.<br>"));
         msgBox.exec();
-
         return false;
     }
 
     // Now fill the GUI elements
-    int index = mRendererComboBox->findText(QString::fromStdString(Settings::Manager::getString("render system", "Video")));
-
+    int index = rendererComboBox->findText(mGraphicsSettings.value(QString("Video/render system")));
     if ( index != -1) {
-        mRendererComboBox->setCurrentIndex(index);
-    }
-    else
-    {
+        rendererComboBox->setCurrentIndex(index);
+    } else {
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
-        mRendererComboBox->setCurrentIndex(mRendererComboBox->findText(direct3DName));
+        rendererComboBox->setCurrentIndex(rendererComboBox->findText(direct3DName));
 #else
-        mRendererComboBox->setCurrentIndex(mRendererComboBox->findText(openGLName));
+        rendererComboBox->setCurrentIndex(rendererComboBox->findText(openGLName));
 #endif
     }
 
-    mAntiAliasingComboBox->clear();
-    mResolutionComboBox->clear();
-    mAntiAliasingComboBox->addItems(getAvailableOptions(QString("FSAA"), mSelectedRenderSystem));
-    mResolutionComboBox->addItems(getAvailableResolutions(mSelectedRenderSystem));
+    antiAliasingComboBox->clear();
+    resolutionComboBox->clear();
+    antiAliasingComboBox->addItems(getAvailableOptions(QString("FSAA"), mSelectedRenderSystem));
+    resolutionComboBox->addItems(getAvailableResolutions(mSelectedRenderSystem));
 
-    readConfig();
+    // Load the rest of the values
+    loadSettings();
     return true;
 }
 
-void GraphicsPage::readConfig()
+void GraphicsPage::loadSettings()
 {
-    if (Settings::Manager::getBool("vsync", "Video"))
-        mVSyncCheckBox->setCheckState(Qt::Checked);
+    if (mGraphicsSettings.value(QString("Video/vsync")) == QLatin1String("true"))
+        vSyncCheckBox->setCheckState(Qt::Checked);
 
-    if (Settings::Manager::getBool("fullscreen", "Video"))
-        mFullScreenCheckBox->setCheckState(Qt::Checked);
+    if (mGraphicsSettings.value(QString("Video/fullscreen")) == QLatin1String("true"))
+        fullScreenCheckBox->setCheckState(Qt::Checked);
 
-    int aaIndex = mAntiAliasingComboBox->findText(QString::fromStdString(Settings::Manager::getString("antialiasing", "Video")));
+    int aaIndex = antiAliasingComboBox->findText(mGraphicsSettings.value(QString("Video/antialiasing")));
     if (aaIndex != -1)
-        mAntiAliasingComboBox->setCurrentIndex(aaIndex);
+        antiAliasingComboBox->setCurrentIndex(aaIndex);
 
-    QString resolution = QString::number(Settings::Manager::getInt("resolution x", "Video"));
-    resolution.append(" x " + QString::number(Settings::Manager::getInt("resolution y", "Video")));
+    QString width = mGraphicsSettings.value(QString("Video/resolution x"));
+    QString height = mGraphicsSettings.value(QString("Video/resolution y"));
+    QString resolution = width + QString(" x ") + height;
 
-    int resIndex = mResolutionComboBox->findText(resolution, Qt::MatchStartsWith);
-    if (resIndex != -1)
-        mResolutionComboBox->setCurrentIndex(resIndex);
+    int resIndex = resolutionComboBox->findText(resolution, Qt::MatchStartsWith);
+
+    if (resIndex != -1) {
+        standardRadioButton->toggle();
+        resolutionComboBox->setCurrentIndex(resIndex);
+    } else {
+        customRadioButton->toggle();
+        customWidthSpinBox->setValue(width.toInt());
+        customHeightSpinBox->setValue(height.toInt());
+
+    }
 }
 
-void GraphicsPage::writeConfig()
+void GraphicsPage::saveSettings()
 {
-    Settings::Manager::setBool("vsync", "Video", mVSyncCheckBox->checkState());
-    Settings::Manager::setBool("fullscreen", "Video", mFullScreenCheckBox->checkState());
-    Settings::Manager::setString("antialiasing", "Video", mAntiAliasingComboBox->currentText().toStdString());
-    Settings::Manager::setString("render system", "Video", mRendererComboBox->currentText().toStdString());
+    vSyncCheckBox->checkState() ? mGraphicsSettings.setValue(QString("Video/vsync"), QString("true"))
+                                 : mGraphicsSettings.setValue(QString("Video/vsync"), QString("false"));
 
-    // Get the current resolution, but with the tabs replaced with a single space
-    QString resolution = mResolutionComboBox->currentText().simplified();
-    QStringList tokens = resolution.split(" ", QString::SkipEmptyParts);
+    fullScreenCheckBox->checkState() ? mGraphicsSettings.setValue(QString("Video/fullscreen"), QString("true"))
+                                      : mGraphicsSettings.setValue(QString("Video/fullscreen"), QString("false"));
 
-    int resX = tokens.at(0).toInt();
-    int resY = tokens.at(2).toInt();
-    Settings::Manager::setInt("resolution x", "Video", resX);
-    Settings::Manager::setInt("resolution y", "Video", resY);
+    mGraphicsSettings.setValue(QString("Video/antialiasing"), antiAliasingComboBox->currentText());
+    mGraphicsSettings.setValue(QString("Video/render system"), rendererComboBox->currentText());
+
+
+    if (standardRadioButton->isChecked()) {
+        QRegExp resolutionRe(QString("(\\d+) x (\\d+).*"));
+
+        if (resolutionRe.exactMatch(resolutionComboBox->currentText().simplified())) {
+            mGraphicsSettings.setValue(QString("Video/resolution x"), resolutionRe.cap(1));
+            mGraphicsSettings.setValue(QString("Video/resolution y"), resolutionRe.cap(2));
+        }
+    } else {
+        mGraphicsSettings.setValue(QString("Video/resolution x"), QString::number(customWidthSpinBox->value()));
+        mGraphicsSettings.setValue(QString("Video/resolution y"), QString::number(customHeightSpinBox->value()));
+    }
 }
 
 QStringList GraphicsPage::getAvailableOptions(const QString &key, Ogre::RenderSystem *renderer)
@@ -231,16 +218,14 @@ QStringList GraphicsPage::getAvailableOptions(const QString &key, Ogre::RenderSy
     {
         Ogre::StringVector::iterator opt_it;
         uint idx = 0;
-        for (opt_it = i->second.possibleValues.begin ();
-        opt_it != i->second.possibleValues.end (); opt_it++, idx++)
-        {
 
-            if (strcmp (key.toStdString().c_str(), i->first.c_str()) == 0)
-            {
+        for (opt_it = i->second.possibleValues.begin();
+             opt_it != i->second.possibleValues.end(); opt_it++, idx++)
+        {
+            if (strcmp (key.toStdString().c_str(), i->first.c_str()) == 0) {
                 result << ((key == "FSAA") ? QString("MSAA ") : QString("")) + QString::fromStdString((*opt_it).c_str()).simplified();
             }
         }
-
     }
 
     // Sort ascending
@@ -257,7 +242,7 @@ QStringList GraphicsPage::getAvailableOptions(const QString &key, Ogre::RenderSy
 
 QStringList GraphicsPage::getAvailableResolutions(Ogre::RenderSystem *renderer)
 {
-    QString key ("Video Mode");
+    QString key("Video Mode");
     QStringList result;
 
     uint row = 0;
@@ -274,24 +259,27 @@ QStringList GraphicsPage::getAvailableResolutions(Ogre::RenderSystem *renderer)
         for (opt_it = i->second.possibleValues.begin ();
              opt_it != i->second.possibleValues.end (); opt_it++, idx++)
         {
-            QString qval = QString::fromStdString(*opt_it).simplified();
-            // remove extra tokens after the resolution (for example bpp, can be there or not depending on rendersystem)
-            QStringList tokens = qval.split(" ", QString::SkipEmptyParts);
-            assert (tokens.size() >= 3);
-            QString resolutionStr = tokens.at(0) + QString(" x ") + tokens.at(2);
+            QRegExp resolutionRe(QString("(\\d+) x (\\d+).*"));
+            QString resolution = QString::fromStdString(*opt_it).simplified();
 
-            QString aspect = getAspect(tokens.at(0).toInt(),tokens.at(2).toInt());
+            if (resolutionRe.exactMatch(resolution)) {
 
-            if (aspect == QLatin1String("16:9") || aspect == QLatin1String("16:10")) {
-                resolutionStr.append(tr("\t(Widescreen ") + aspect + ")");
+                int width = resolutionRe.cap(1).toInt();
+                int height = resolutionRe.cap(2).toInt();
 
-            } else if (aspect == QLatin1String("4:3")) {
-                resolutionStr.append(tr("\t(Standard 4:3)"));
+                QString aspect = getAspect(width, height);
+                QString cleanRes = resolutionRe.cap(1) + QString(" x ") + resolutionRe.cap(2);
+
+                if (aspect == QLatin1String("16:9") || aspect == QLatin1String("16:10")) {
+                    cleanRes.append(tr("\t(Wide ") + aspect + ")");
+
+                } else if (aspect == QLatin1String("4:3")) {
+                    cleanRes.append(tr("\t(Standard 4:3)"));
+                }
+                // do not add duplicate resolutions
+                if (!result.contains(cleanRes))
+                    result.append(cleanRes);
             }
-
-            // do not add duplicate resolutions
-            if (!result.contains(resolutionStr))
-                result << resolutionStr;
         }
     }
 
@@ -305,9 +293,36 @@ void GraphicsPage::rendererChanged(const QString &renderer)
 {
     mSelectedRenderSystem = mOgre->getRenderSystemByName(renderer.toStdString());
 
-    mAntiAliasingComboBox->clear();
-    mResolutionComboBox->clear();
+    antiAliasingComboBox->clear();
+    resolutionComboBox->clear();
 
-    mAntiAliasingComboBox->addItems(getAvailableOptions(QString("FSAA"), mSelectedRenderSystem));
-    mResolutionComboBox->addItems(getAvailableResolutions(mSelectedRenderSystem));
+    antiAliasingComboBox->addItems(getAvailableOptions(QString("FSAA"), mSelectedRenderSystem));
+    resolutionComboBox->addItems(getAvailableResolutions(mSelectedRenderSystem));
+}
+
+void GraphicsPage::slotFullScreenChanged(int state)
+{
+    if (state == Qt::Checked) {
+        standardRadioButton->toggle();
+        customRadioButton->setEnabled(false);
+        customWidthSpinBox->setEnabled(false);
+        customHeightSpinBox->setEnabled(false);
+    } else {
+        customRadioButton->setEnabled(true);
+        customWidthSpinBox->setEnabled(true);
+        customHeightSpinBox->setEnabled(true);
+    }
+}
+
+void GraphicsPage::slotStandardToggled(bool checked)
+{
+    if (checked) {
+        resolutionComboBox->setEnabled(true);
+        customWidthSpinBox->setEnabled(false);
+        customHeightSpinBox->setEnabled(false);
+    } else {
+        resolutionComboBox->setEnabled(false);
+        customWidthSpinBox->setEnabled(true);
+        customHeightSpinBox->setEnabled(true);
+    }
 }

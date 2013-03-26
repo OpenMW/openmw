@@ -8,7 +8,8 @@
 
             <Widget type="Widget" skin="HUD_Box" position="0 200 300 60" align="Bottom HCenter">
 
-                <Widget type="AutoSizedTextBox" skin="SandText" position="20 12 260 24" name="LoadingText">
+                <Widget type="TextBox" skin="SandText" position="20 12 260 20" name="LoadingText">
+                    <Property key="TextAlign" value="Center"/>
                 </Widget>
 
                 <Widget type="ProgressBar" skin="MW_Progress_Loading" position="20 36 260 8" name="ProgressBar">

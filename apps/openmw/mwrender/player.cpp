@@ -271,6 +271,8 @@ namespace MWRender
             v.z = 800.f;
         } else if (v.z < 10.f) {
             v.z = 10.f;
+        } else if (override && v.z < 50.f) {
+            v.z = 50.f;
         }
         mCamera->setPosition(v);
 
@@ -361,5 +363,10 @@ namespace MWRender
         } else {
             mCameraNode->setPosition(0.f, 0.f, mHeight);
         }
+    }
+
+    bool Player::isVanityOrPreviewModeEnabled()
+    {
+        return mPreviewMode || mVanity.enabled;
     }
 }

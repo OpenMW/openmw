@@ -49,6 +49,18 @@ namespace MWClass
             ///< Return name of inventory icon.
 
             virtual std::string getModel(const MWWorld::Ptr &ptr) const;
+
+            virtual boost::shared_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr)
+                const;
+            ///< Generate action for using via inventory menu (default implementation: return a
+            /// null action).
+
+            virtual bool hasItemHealth (const MWWorld::Ptr& ptr) const;
+            ///< \return Item health data available? (default implementation: false)
+
+            virtual int getItemMaxHealth (const MWWorld::Ptr& ptr) const;
+            ///< Return item max health or throw an exception, if class does not have item health
+            /// (default implementation: throw an exceoption)
     };
 }
 

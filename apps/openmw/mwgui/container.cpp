@@ -15,6 +15,7 @@
 
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/containerstore.hpp"
+#include "../mwworld/inventorystore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
 
@@ -44,7 +45,7 @@ namespace
         mapping.push_back( typeid(ESM::Book).name() );
         mapping.push_back( typeid(ESM::Light).name() );
         mapping.push_back( typeid(ESM::Miscellaneous).name() );
-        mapping.push_back( typeid(ESM::Tool).name() );
+        mapping.push_back( typeid(ESM::Lockpick).name() );
         mapping.push_back( typeid(ESM::Repair).name() );
         mapping.push_back( typeid(ESM::Probe).name() );
 
@@ -70,9 +71,11 @@ namespace
 }
 
 
-ContainerBase::ContainerBase(DragAndDrop* dragAndDrop) :
-    mDragAndDrop(dragAndDrop),
-    mFilter(ContainerBase::Filter_All)
+ContainerBase::ContainerBase(DragAndDrop* dragAndDrop)
+    : mDragAndDrop(dragAndDrop)
+    , mFilter(ContainerBase::Filter_All)
+    , mDisplayEquippedItems(true)
+    , mHighlightEquippedItems(true)
 {
 }
 
@@ -313,7 +316,6 @@ void ContainerBase::onContainerClicked(MyGUI::Widget* _sender)
                 {
                     object.getRefData().setCount(origCount - mDragAndDrop->mDraggedCount);
                 }
-                std::cout << "container weight " << curWeight << "/" << capacity << std::endl;
             }
             else
             {
@@ -430,7 +432,7 @@ void ContainerBase::drawItems()
         equippedItems.erase(found);
     }
     // and add the items that are left (= have the correct category)
-    if (!ignoreEquippedItems())
+    if (mDisplayEquippedItems && mHighlightEquippedItems)
     {
         for (std::vector<MWWorld::Ptr>::const_iterator it=equippedItems.begin();
             it != equippedItems.end(); ++it)
@@ -445,7 +447,8 @@ void ContainerBase::drawItems()
     std::vector<MWWorld::Ptr> regularItems;
     for (MWWorld::ContainerStoreIterator iter (containerStore.begin(categories)); iter!=containerStore.end(); ++iter)
     {
-        if (std::find(equippedItems.begin(), equippedItems.end(), *iter) == equippedItems.end()
+        if ( (std::find(equippedItems.begin(), equippedItems.end(), *iter) == equippedItems.end()
+              || (!mHighlightEquippedItems && mDisplayEquippedItems))
             && std::find(ignoreItems.begin(), ignoreItems.end(), *iter) == ignoreItems.end()
             && std::find(mBoughtItems.begin(), mBoughtItems.end(), *iter) == mBoughtItems.end())
             regularItems.push_back(*iter);
@@ -587,6 +590,27 @@ void ContainerBase::returnBoughtItems(MWWorld::ContainerStore& store)
     }
 }
 
+std::vector<MWWorld::Ptr> ContainerBase::getEquippedItems()
+{
+    if (mPtr.getTypeName() != typeid(ESM::NPC).name())
+        return std::vector<MWWorld::Ptr>();
+
+    MWWorld::InventoryStore& invStore = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
+
+    std::vector<MWWorld::Ptr> items;
+
+    for (int slot=0; slot < MWWorld::InventoryStore::Slots; ++slot)
+    {
+        MWWorld::ContainerStoreIterator it = invStore.getSlot(slot);
+        if (it != invStore.end())
+        {
+            items.push_back(*it);
+        }
+    }
+
+    return items;
+}
+
 MWWorld::ContainerStore& ContainerBase::getContainerStore()
 {
     MWWorld::ContainerStore& store = MWWorld::Class::get(mPtr).getContainerStore(mPtr);
@@ -599,6 +623,7 @@ ContainerWindow::ContainerWindow(MWBase::WindowManager& parWindowManager,DragAnd
     : ContainerBase(dragAndDrop)
     , WindowBase("openmw_container_window.layout", parWindowManager)
 {
+    getWidget(mDisposeCorpseButton, "DisposeCorpseButton");
     getWidget(mTakeButton, "TakeButton");
     getWidget(mCloseButton, "CloseButton");
 
@@ -608,6 +633,7 @@ ContainerWindow::ContainerWindow(MWBase::WindowManager& parWindowManager,DragAnd
     getWidget(itemView, "ItemView");
     setWidgets(containerWidget, itemView);
 
+    mDisposeCorpseButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ContainerWindow::onDisposeCorpseButtonClicked);
     mCloseButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ContainerWindow::onCloseButtonClicked);
     mTakeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ContainerWindow::onTakeAllButtonClicked);
 
@@ -625,8 +651,18 @@ void ContainerWindow::onWindowResize(MyGUI::Window* window)
     drawItems();
 }
 
-void ContainerWindow::open(MWWorld::Ptr container)
+void ContainerWindow::open(MWWorld::Ptr container, bool loot)
 {
+    mDisplayEquippedItems = true;
+    mHighlightEquippedItems = false;
+    if (container.getTypeName() == typeid(ESM::NPC).name() && !loot)
+    {
+        // we are stealing stuff
+        mDisplayEquippedItems = false;
+    }
+
+    mDisposeCorpseButton->setVisible(loot);
+
     openContainer(container);
     setTitle(MWWorld::Class::get(container).getName(container));
     drawItems();
@@ -647,12 +683,18 @@ void ContainerWindow::onTakeAllButtonClicked(MyGUI::Widget* _sender)
         // transfer everything into the player's inventory
         MWWorld::ContainerStore& containerStore = MWWorld::Class::get(mPtr).getContainerStore(mPtr);
 
+        std::vector<MWWorld::Ptr> equippedItems = getEquippedItems();
+
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
         MWWorld::ContainerStore& playerStore = MWWorld::Class::get(player).getContainerStore(player);
 
         int i=0;
         for (MWWorld::ContainerStoreIterator iter (containerStore.begin()); iter!=containerStore.end(); ++iter)
         {
+            if (std::find(equippedItems.begin(), equippedItems.end(), *iter) != equippedItems.end()
+                    && !mDisplayEquippedItems)
+                continue;
+
             playerStore.add(*iter);
 
             if (i==0)
@@ -662,12 +704,28 @@ void ContainerWindow::onTakeAllButtonClicked(MyGUI::Widget* _sender)
                 MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
             }
 
+            iter->getRefData().setCount(0);
+
             ++i;
         }
 
-        containerStore.clear();
-
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Container);
+    }
+}
+
+void ContainerWindow::onDisposeCorpseButtonClicked(MyGUI::Widget *sender)
+{
+    if(mDragAndDrop == NULL || !mDragAndDrop->mIsOnDragAndDrop)
+    {
+        onTakeAllButtonClicked(mTakeButton);
+
+        /// \todo I don't think this is the correct flag to check
+        if (MWWorld::Class::get(mPtr).isEssential(mPtr))
+            mWindowManager.messageBox("#{sDisposeCorpseFail}");
+        else
+            MWBase::Environment::get().getWorld()->deleteObject(mPtr);
+
+        mPtr = MWWorld::Ptr();
     }
 }
 

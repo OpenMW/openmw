@@ -74,6 +74,8 @@ namespace CSMWorld
 
             virtual const RecordBase& getRecord (const std::string& id) const = 0;
 
+            virtual const RecordBase& getRecord (int index) const = 0;
+
             virtual void load (ESM::ESMReader& reader, bool base) = 0;
     };
 
@@ -139,7 +141,9 @@ namespace CSMWorld
             ///
             /// \attention Throw san exception, if the type of \a record does not match.
 
-            virtual const RecordBase& getRecord (const std::string& id) const;
+            virtual const Record<ESXRecordT>& getRecord (const std::string& id) const;
+
+            virtual const Record<ESXRecordT>& getRecord (int index) const;
 
             virtual void load (ESM::ESMReader& reader, bool base);
 
@@ -373,11 +377,18 @@ namespace CSMWorld
     }
 
     template<typename ESXRecordT>
-    const RecordBase& IdCollection<ESXRecordT>::getRecord (const std::string& id) const
+    const Record<ESXRecordT>& IdCollection<ESXRecordT>::getRecord (const std::string& id) const
     {
         int index = getIndex (id);
         return mRecords.at (index);
     }
+
+    template<typename ESXRecordT>
+    const Record<ESXRecordT>& IdCollection<ESXRecordT>::getRecord (int index) const
+    {
+        return mRecords.at (index);
+    }
+
 }
 
 #endif

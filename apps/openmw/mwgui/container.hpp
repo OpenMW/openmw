@@ -82,6 +82,9 @@ namespace MWGui
         void drawItems();
 
     protected:
+        bool mDisplayEquippedItems;
+        bool mHighlightEquippedItems;
+
         MyGUI::ScrollView* mItemView;
         MyGUI::Widget* mContainerWidget;
 
@@ -111,14 +114,13 @@ namespace MWGui
 
         virtual bool isTradeWindow() { return false; }
         virtual bool isInventory() { return false; }
-        virtual std::vector<MWWorld::Ptr> getEquippedItems() { return std::vector<MWWorld::Ptr>(); }
+        virtual std::vector<MWWorld::Ptr> getEquippedItems();
         virtual void _unequipItem(MWWorld::Ptr item) { ; }
 
         virtual bool isTrading() { return false; }
 
         virtual void onSelectedItemImpl(MWWorld::Ptr item) { ; }
 
-        virtual bool ignoreEquippedItems() { return false; }
         virtual std::vector<MWWorld::Ptr> itemsToIgnore() { return std::vector<MWWorld::Ptr>(); }
 
         virtual void notifyContentChanged() { ; }
@@ -131,15 +133,17 @@ namespace MWGui
 
         virtual ~ContainerWindow();
 
-        void open(MWWorld::Ptr container);
+        void open(MWWorld::Ptr container, bool loot=false);
 
     protected:
+        MyGUI::Button* mDisposeCorpseButton;
         MyGUI::Button* mTakeButton;
         MyGUI::Button* mCloseButton;
 
         void onWindowResize(MyGUI::Window* window);
         void onCloseButtonClicked(MyGUI::Widget* _sender);
         void onTakeAllButtonClicked(MyGUI::Widget* _sender);
+        void onDisposeCorpseButtonClicked(MyGUI::Widget* sender);
 
         virtual void onReferenceUnavailable();
     };

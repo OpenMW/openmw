@@ -62,7 +62,7 @@ namespace CSMWorld
         if (mState==State_Erased)
             throw std::logic_error ("attempt to access a deleted record");
 
-        return mState==State_BaseOnly ? mBase : mModified;
+        return mState==State_BaseOnly || mState==State_Deleted ? mBase : mModified;
     }
 
     template <typename ESXRecordT>
@@ -81,9 +81,7 @@ namespace CSMWorld
             throw std::logic_error ("attempt to modify a deleted record");
 
         mModified = modified;
-
-        if (mState!=State_ModifiedOnly)
-            mState = mBase==mModified ? State_BaseOnly : State_Modified;
+        mState = State_Modified;
     }
 
     template <typename ESXRecordT>

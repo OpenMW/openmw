@@ -21,12 +21,12 @@
 
  */
 
-#ifndef _NIF_EXTRA_H_
-#define _NIF_EXTRA_H_
+#ifndef OPENMW_COMPONENTS_NIF_EXTRA_HPP
+#define OPENMW_COMPONENTS_NIF_EXTRA_HPP
 
 #include "record.hpp"
-#include "nif_file.hpp"
-#include "record_ptr.hpp"
+#include "niffile.hpp"
+#include "recordptr.hpp"
 
 namespace Nif
 {
@@ -40,14 +40,14 @@ class Extra : public Record
 public:
     ExtraPtr extra;
 
-    void read(NIFFile *nif) { extra.read(nif); }
+    void read(NIFStream *nif) { extra.read(nif); }
     void post(NIFFile *nif) { extra.post(nif); }
 };
 
 class NiVertWeightsExtraData : public Extra
 {
 public:
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         Extra::read(nif);
 
@@ -70,7 +70,7 @@ public:
     };
     std::vector<TextKey> list;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         Extra::read(nif);
 
@@ -95,7 +95,7 @@ public:
     */
     std::string string;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         Extra::read(nif);
 

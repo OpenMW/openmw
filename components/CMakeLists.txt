@@ -15,15 +15,15 @@ add_component_dir (bsa
     )
 
 add_component_dir (nif
-    controlled effect nif_types record controller extra node record_ptr data nif_file property
+    controlled effect niftypes record controller extra node record_ptr data niffile property
     )
 
 add_component_dir (nifogre
-    ogre_nif_loader
+    ogrenifloader
     )
 
 add_component_dir (nifbullet
-    bullet_nif_loader
+    bulletnifloader
     )
 
 add_component_dir (to_utf8
@@ -37,9 +37,9 @@ add_component_dir (file_finder
 add_component_dir (esm
     attr defs esmcommon esmreader esmwriter loadacti loadalch loadappa loadarmo loadbody loadbook loadbsgn loadcell
     loadclas loadclot loadcont loadcrea loadcrec loaddial loaddoor loadench loadfact loadglob loadgmst
-    loadinfo loadingr loadland loadlevlist loadligh loadlocks loadltex loadmgef loadmisc loadnpcc
+    loadinfo loadingr loadland loadlevlist loadligh loadlock loadprob loadrepa loadltex loadmgef loadmisc loadnpcc
     loadnpc loadpgrd loadrace loadregn loadscpt loadskil loadsndg loadsoun loadspel loadsscr loadstat
-    loadweap records aipackage effectlist spelllist
+    loadweap records aipackage effectlist spelllist variant variantimp loadtes3
     )
 
 add_component_dir (misc
@@ -70,8 +70,8 @@ find_package(Qt4 COMPONENTS QtCore QtGui)
 
 if(QT_QTGUI_LIBRARY AND QT_QTCORE_LIBRARY)
    add_component_qt_dir (fileorderlist
-       datafileslist model/modelitem model/datafilesmodel model/esm/esmfile
-       utils/filedialog utils/lineedit utils/naturalsort
+       model/modelitem model/datafilesmodel model/pluginsproxymodel model/esm/esmfile
+       utils/profilescombobox utils/comboboxlineedit utils/lineedit utils/naturalsort
        )
 
    include(${QT_USE_FILE})

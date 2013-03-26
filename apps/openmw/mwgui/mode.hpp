@@ -16,6 +16,7 @@ namespace MWGui
       GM_Scroll,        // Read scroll
       GM_Book,          // Read book
       GM_Alchemy,       // Make potions
+      GM_Repair,
 
       GM_Dialogue,      // NPC interaction
       GM_Barter,
@@ -26,6 +27,7 @@ namespace MWGui
       GM_SpellCreation,
       GM_Enchanting,
       GM_Training,
+      GM_MerchantRepair,
 
       GM_Levelup,
 

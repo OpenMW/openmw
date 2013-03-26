@@ -132,7 +132,7 @@ namespace MWGui
             case 11:
                 month = "#{sMonthEveningstar}";
                 break;
-            default:   
+            default:
                 break;
         }
         int hour = MWBase::Environment::get().getWorld ()->getTimeStamp ().getHour ();
@@ -142,7 +142,7 @@ namespace MWGui
 
         std::string dateTimeText =
                 boost::lexical_cast<std::string>(MWBase::Environment::get().getWorld ()->getDay ()) + " "
-                + month + " (#{sDay} " + boost::lexical_cast<std::string>(MWBase::Environment::get().getWorld ()->getTimeStamp ().getDay ()+1)
+                + month + " (#{sDay} " + boost::lexical_cast<std::string>(MWBase::Environment::get().getWorld ()->getTimeStamp ().getDay())
                 + ") " + boost::lexical_cast<std::string>(hour) + " " + (pm ? "#{sSaveMenuHelp05}" : "#{sSaveMenuHelp04}");
 
         mDateTimeText->setCaptionWithReplacing (dateTimeText);
@@ -156,13 +156,13 @@ namespace MWGui
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
         MWMechanics::CreatureStats stats = MWWorld::Class::get(player).getCreatureStats(player);
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-        
+
         float hourlyHealthDelta  = stats.getAttribute(ESM::Attribute::Endurance).getModified() * 0.1;
-        
-        bool stunted = (stats.getMagicEffects().get(MWMechanics::EffectKey(136)).mMagnitude > 0);
+
+        bool stunted = (stats.getMagicEffects().get(MWMechanics::EffectKey(ESM::MagicEffect::StuntedMagicka)).mMagnitude > 0);
         float fRestMagicMult = store.get<ESM::GameSetting>().find("fRestMagicMult")->getFloat();
         float hourlyMagickaDelta = fRestMagicMult * stats.getAttribute(ESM::Attribute::Intelligence).getModified();
-        
+
         // this massive duplication is why it has to be put into helper functions instead
         float fFatigueReturnBase = store.get<ESM::GameSetting>().find("fFatigueReturnBase")->getFloat();
         float fFatigueReturnMult = store.get<ESM::GameSetting>().find("fFatigueReturnMult")->getFloat();
@@ -174,7 +174,7 @@ namespace MWGui
             normalizedEncumbrance = 1;
         float hourlyFatigueDelta = fFatigueReturnBase + fFatigueReturnMult * (1 - normalizedEncumbrance);
         hourlyFatigueDelta *= 3600 * fEndFatigueMult * stats.getAttribute(ESM::Attribute::Endurance).getModified();
-        
+
         float healthHours  = hourlyHealthDelta  >= 0.0
                              ? (stats.getHealth().getBase() - stats.getHealth().getCurrent()) / hourlyHealthDelta
                              : 1.0f;
@@ -185,9 +185,9 @@ namespace MWGui
         float fatigueHours = hourlyFatigueDelta >= 0.0
                              ? (stats.getFatigue().getBase() - stats.getFatigue().getCurrent()) / hourlyFatigueDelta
                              : 1.0f;
-        
+
         int autoHours = int(std::ceil( std::max(std::max(healthHours, magickaHours), std::max(fatigueHours, 1.0f)) )); // this should use a variadic max if possible
-        
+
         startWaiting(autoHours);
     }
 
@@ -201,11 +201,11 @@ namespace MWGui
         MWBase::Environment::get().getWorld ()->getFader ()->fadeOut(0.2);
         setVisible(false);
         mProgressBar.setVisible (true);
-        
+
         mWaiting = true;
         mCurHour = 0;
         mHours = hoursToWait;
-        
+
         mRemainingTime = 0.05;
         mProgressBar.setProgress (0, mHours);
     }

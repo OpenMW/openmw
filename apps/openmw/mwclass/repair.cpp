@@ -1,7 +1,7 @@
 
 #include "repair.hpp"
 
-#include <components/esm/loadlocks.hpp>
+#include <components/esm/loadrepa.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -12,6 +12,7 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/physicssystem.hpp"
 #include "../mwworld/nullaction.hpp"
+#include "../mwworld/actionrepair.hpp"
 
 #include "../mwgui/tooltips.hpp"
 
@@ -34,7 +35,7 @@ namespace MWClass
     {
         const std::string model = getModel(ptr);
         if(!model.empty())
-            physics.addObject(ptr);
+            physics.addObject(ptr,true);
     }
 
     std::string Repair::getModel(const MWWorld::Ptr &ptr) const
@@ -120,6 +121,19 @@ namespace MWClass
         return (ref->mBase->mName != "");
     }
 
+    bool Repair::hasItemHealth (const MWWorld::Ptr& ptr) const
+    {
+        return true;
+    }
+
+    int Repair::getItemMaxHealth (const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Repair> *ref =
+            ptr.get<ESM::Repair>();
+
+        return ref->mBase->mData.mUses;
+    }
+
     MWGui::ToolTipInfo Repair::getToolTipInfo (const MWWorld::Ptr& ptr) const
     {
         MWWorld::LiveCellRef<ESM::Repair> *ref =
@@ -131,9 +145,9 @@ namespace MWClass
 
         std::string text;
 
-        /// \todo store remaining uses somewhere
+        int remainingUses = (ptr.getCellRef().mCharge != -1) ? ptr.getCellRef().mCharge : ref->mBase->mData.mUses;
 
-        text += "\n#{sUses}: " + MWGui::ToolTips::toString(ref->mBase->mData.mUses);
+        text += "\n#{sUses}: " + MWGui::ToolTips::toString(remainingUses);
         text += "\n#{sQuality}: " + MWGui::ToolTips::toString(ref->mBase->mData.mQuality);
         text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight);
         text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
@@ -155,5 +169,10 @@ namespace MWClass
             ptr.get<ESM::Repair>();
 
         return MWWorld::Ptr(&cell.mRepairs.insert(*ref), &cell);
+    }
+
+    boost::shared_ptr<MWWorld::Action> Repair::use (const MWWorld::Ptr& ptr) const
+    {
+        return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionRepair(ptr));
     }
 }

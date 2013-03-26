@@ -1,55 +1,52 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Skin">
+
     <!-- Text edit widget -->
+
     <Skin name = "MW_TextEditClient" size = "10 10">
+
         <BasisSkin type="EditText" offset = "0 0 10 10" align = "Stretch"/>
+
     </Skin>
 
     <Skin name = "MW_TextBoxEditClient" size = "10 10">
+
         <BasisSkin type="EditText" offset = "0 0 10 10" align = "Stretch"/>
+
     </Skin>
 
-    <Skin name="MW_TextEdit" size="512 20" texture="mwgui.png">
-        <Property key="FontName" value = "Default"/>
-        <Property key="TextAlign" value = "ALIGN_LEFT ALIGN_VCENTER" />
-        <Property key="TextColour" value = "0.75 0.6 0.35" />
+    <Skin name="MW_TextEdit" size="512 20">
 
-        <BasisSkin type="SubSkin" offset = "0 0 512 2" align = "ALIGN_TOP ALIGN_HSTRETCH">
-            <State name="normal" offset = "2 2 512 2"/>
-        </BasisSkin>
-        <BasisSkin type="SubSkin" offset = "0 2 2 16" align = "ALIGN_LEFT ALIGN_VSTRETCH">
-            <State name="normal" offset = "2 4 2 16"/>
-        </BasisSkin>
-        <BasisSkin type="SubSkin" offset = "510 2 2 16" align = "ALIGN_RIGHT ALIGN_VSTRETCH">
-            <State name="normal" offset = "512 4 2 16"/>
-        </BasisSkin>
-        <BasisSkin type="SubSkin" offset = "0 18 512 2" align = "ALIGN_BOTTOM ALIGN_HSTRETCH">
-            <State name="normal" offset = "2 20 512 2"/>
-        </BasisSkin>
+        <!-- Input -->
+
+        <Property key="FontName" value = "Default"/>
+
+        <Property key="TextAlign" value = "ALIGN_LEFT ALIGN_VCENTER" />
+
+        <Property key="TextColour" value = "0.75 0.6 0.35" />
 
         <Child type="TextBox" skin="MW_TextEditClient" offset = "2 2 508 18" align = "Stretch" name = "Client"/>
+
+
+        <!-- Borders -->
+
+        <Child type="Widget" skin="MW_Box" offset="0 0 512 20" align="ALIGN_STRETCH" name="Client"/>
+
     </Skin>
 
-    <Skin name="MW_TextBoxEdit" size="512 20" texture="mwgui.png">
+    <Skin name="MW_TextBoxEdit" size="512 20">
+
         <Property key="FontName" value = "Default"/>
+
         <Property key="TextAlign" value = "ALIGN_LEFT ALIGN_TOP" />
+
         <Property key="TextColour" value = "0.75 0.6 0.35" />
 
-        <BasisSkin type="SubSkin" offset = "0 0 512 2" align = "ALIGN_TOP ALIGN_HSTRETCH">
-            <State name="normal" offset = "2 2 512 2"/>
-        </BasisSkin>
-        <BasisSkin type="SubSkin" offset = "0 2 2 16" align = "ALIGN_LEFT ALIGN_VSTRETCH">
-            <State name="normal" offset = "2 4 2 16"/>
-        </BasisSkin>
-        <BasisSkin type="SubSkin" offset = "510 2 2 16" align = "ALIGN_RIGHT ALIGN_VSTRETCH">
-            <State name="normal" offset = "512 4 2 16"/>
-        </BasisSkin>
-        <BasisSkin type="SubSkin" offset = "0 18 512 2" align = "ALIGN_BOTTOM ALIGN_HSTRETCH">
-            <State name="normal" offset = "2 20 512 2"/>
-        </BasisSkin>
-
         <Child type="TextBox" skin="MW_TextBoxEditClient" offset = "2 2 490 18" align = "Stretch" name = "Client"/>
+
         <Child type="ScrollBar" skin="MW_VScroll" offset = "494 3 14 14" align = "Right VStretch" name = "VScroll"/>
+
     </Skin>
+
 </MyGUI>

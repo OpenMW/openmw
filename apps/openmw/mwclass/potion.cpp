@@ -20,6 +20,8 @@
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
 
+#include "../mwmechanics/npcstats.hpp"
+
 namespace MWClass
 {
     void Potion::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
@@ -36,7 +38,7 @@ namespace MWClass
     {
         const std::string model = getModel(ptr);
         if(!model.empty())
-            physics.addObject(ptr);
+            physics.addObject(ptr,true);
     }
 
     std::string Potion::getModel(const MWWorld::Ptr &ptr) const
@@ -138,6 +140,23 @@ namespace MWClass
         text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
 
         info.effects = MWGui::Widgets::MWEffectList::effectListFromESM(&ref->mBase->mEffects);
+
+        // hide effects the player doesnt know about
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer();
+        MWMechanics::NpcStats& npcStats = MWWorld::Class::get(player).getNpcStats (player);
+        int alchemySkill = npcStats.getSkill (ESM::Skill::Alchemy).getBase();
+        int i=0;
+        for (MWGui::Widgets::SpellEffectList::iterator it = info.effects.begin(); it != info.effects.end(); ++it)
+        {
+            /// \todo this code is duplicated from mwclass/ingredient, put it in a helper function
+            it->mKnown = ( (i == 0 && alchemySkill >= 15)
+                 || (i == 1 && alchemySkill >= 30)
+                 || (i == 2 && alchemySkill >= 45)
+                 || (i == 3 && alchemySkill >= 60));
+
+            ++i;
+        }
+
         info.isPotion = true;
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {

@@ -6,12 +6,16 @@
 #include <OgreTextureManager.h>
 #include <OgreSceneNode.h>
 
+#include <MyGUI_Gui.h>
+
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwworld/player.hpp"
 
 #include "../mwrender/globalmap.hpp"
+
+#include "widgets.hpp"
 
 using namespace MWGui;
 
@@ -96,6 +100,7 @@ void LocalMapBase::applyFogOfWar()
                : "");
         }
     }
+    notifyMapChanged ();
 }
 
 void LocalMapBase::onMarkerFocused (MyGUI::Widget* w1, MyGUI::Widget* w2)
@@ -185,8 +190,8 @@ void LocalMapBase::setActiveCell(const int x, const int y, bool interior)
                     widgetCoord, MyGUI::Align::Default, "Marker" + boost::lexical_cast<std::string>(counter));
                 markerWidget->setImageResource("DoorMarker");
                 markerWidget->setUserString("ToolTipType", "Layout");
-                markerWidget->setUserString("ToolTipLayout", "TextToolTip");
-                markerWidget->setUserString("Caption_Text", marker.name);
+                markerWidget->setUserString("ToolTipLayout", "TextToolTipOneLine");
+                markerWidget->setUserString("Caption_TextOneLine", marker.name);
                 markerWidget->setUserString("IsMarker", "true");
                 markerWidget->eventMouseSetFocus += MyGUI::newDelegate(this, &LocalMapBase::onMarkerFocused);
                 markerWidget->eventMouseLostFocus += MyGUI::newDelegate(this, &LocalMapBase::onMarkerUnfocused);
@@ -318,16 +323,16 @@ void MapWindow::addVisitedLocation(const std::string& name, int x, int y)
         widgetCoord, MyGUI::Align::Default, "Marker" + boost::lexical_cast<std::string>(_counter));
     markerWidget->setImageResource("DoorMarker");
     markerWidget->setUserString("ToolTipType", "Layout");
-    markerWidget->setUserString("ToolTipLayout", "TextToolTip");
-    markerWidget->setUserString("Caption_Text", name);
+    markerWidget->setUserString("ToolTipLayout", "TextToolTipOneLine");
+    markerWidget->setUserString("Caption_TextOneLine", name);
     ++_counter;
 
     markerWidget = mEventBoxGlobal->createWidget<MyGUI::Button>("",
         widgetCoord, MyGUI::Align::Default);
     markerWidget->setNeedMouseFocus (true);
     markerWidget->setUserString("ToolTipType", "Layout");
-    markerWidget->setUserString("ToolTipLayout", "TextToolTip");
-    markerWidget->setUserString("Caption_Text", name);
+    markerWidget->setUserString("ToolTipLayout", "TextToolTipOneLine");
+    markerWidget->setUserString("Caption_TextOneLine", name);
 }
 
 void MapWindow::cellExplored(int x, int y)
@@ -424,4 +429,18 @@ void MapWindow::globalMapUpdatePlayer ()
 void MapWindow::notifyPlayerUpdate ()
 {
     globalMapUpdatePlayer ();
+}
+
+void MapWindow::notifyMapChanged ()
+{
+    // workaround to prevent the map from drawing on top of the button
+    MyGUI::IntCoord oldCoord = mButton->getCoord ();
+    MyGUI::Gui::getInstance().destroyWidget (mButton);
+    mButton = mMainWidget->createWidget<MWGui::Widgets::AutoSizedButton>("MW_Button",
+         oldCoord, MyGUI::Align::Bottom | MyGUI::Align::Right);
+    mButton->setProperty ("ExpandDirection", "Left");
+
+    mButton->eventMouseButtonClick += MyGUI::newDelegate(this, &MapWindow::onWorldButtonClicked);
+    mButton->setCaptionWithReplacing( mGlobal ? "#{sLocal}" :
+            "#{sWorld}");
 }

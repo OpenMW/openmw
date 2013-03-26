@@ -91,6 +91,8 @@ namespace MWBase
 
             virtual bool isGuiMode() const = 0;
 
+            virtual bool isConsoleMode() const = 0;
+
             virtual void toggleVisible (MWGui::GuiWindow wnd) = 0;
 
             /// Disallow all inventory mode windows
@@ -236,6 +238,10 @@ namespace MWBase
             virtual void startSpellMaking(MWWorld::Ptr actor) = 0;
             virtual void startEnchanting(MWWorld::Ptr actor) = 0;
             virtual void startTraining(MWWorld::Ptr actor) = 0;
+            virtual void startRepair(MWWorld::Ptr actor) = 0;
+            virtual void startRepairItem(MWWorld::Ptr item) = 0;
+
+            virtual void changePointer (const std::string& name) = 0;
 
             virtual const Translation::Storage& getTranslationDataStorage() const = 0;
     };

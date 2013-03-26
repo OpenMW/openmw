@@ -17,3 +17,4 @@ data
 CMakeLists.txt.user
 *.swp
 *.swo
+*.kate-swp

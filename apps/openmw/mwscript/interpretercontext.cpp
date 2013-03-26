@@ -215,19 +215,22 @@ namespace MWScript
     std::string InterpreterContext::getNPCRace() const
     {
         ESM::NPC npc = *mReference.get<ESM::NPC>()->mBase;
-        return npc.mRace;
+        const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npc.mRace);
+        return race->mName;
     }
 
     std::string InterpreterContext::getNPCClass() const
     {
         ESM::NPC npc = *mReference.get<ESM::NPC>()->mBase;
-        return npc.mClass;
+        const ESM::Class* class_ = MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(npc.mClass);
+        return class_->mName;
     }
 
     std::string InterpreterContext::getNPCFaction() const
     {
         ESM::NPC npc = *mReference.get<ESM::NPC>()->mBase;
-        return npc.mFaction;
+        const ESM::Faction* faction = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(npc.mFaction);
+        return faction->mName;
     }
 
     std::string InterpreterContext::getNPCRank() const

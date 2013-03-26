@@ -1,6 +1,8 @@
 #ifndef GAME_MWDIALOGUE_FILTER_H
 #define GAME_MWDIALOGUE_FILTER_H
 
+#include <vector>
+
 #include "../mwworld/ptr.hpp"
 
 namespace ESM
@@ -28,8 +30,8 @@ namespace MWDialogue
             bool testSelectStructs (const ESM::DialInfo& info) const;
             ///< Are all select structs matching?
 
-            bool testDisposition (const ESM::DialInfo& info) const;
-            ///< Is the actor disposition toward the player high enough?
+            bool testDisposition (const ESM::DialInfo& info, bool invert=false) const;
+            ///< Is the actor disposition toward the player high enough (or low enough, if \a invert is true)?
 
             bool testSelectStruct (const SelectWrapper& select) const;
 
@@ -51,7 +53,10 @@ namespace MWDialogue
 
             Filter (const MWWorld::Ptr& actor, int choice, bool talkedToPlayer);
 
-            const ESM::DialInfo *search (const ESM::Dialogue& dialogue, const bool fallbackToInfoRefusal) const;
+            std::vector<const ESM::DialInfo *> list (const ESM::Dialogue& dialogue,
+                bool fallbackToInfoRefusal, bool searchAll, bool invertDisposition=false) const;
+
+            const ESM::DialInfo* search (const ESM::Dialogue& dialogue, const bool fallbackToInfoRefusal) const;
             ///< Get a matching response for the requested dialogue.
             ///  Redirect to "Info Refusal" topic if a response fulfills all conditions but disposition.
 

@@ -4,7 +4,6 @@
 #include <cstdlib>
 
 #include <boost/algorithm/string.hpp>
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -13,327 +12,121 @@
 
 #include "player.hpp"
 #include "esmstore.hpp"
+#include "fallback.hpp"
 
 using namespace Ogre;
 using namespace MWWorld;
 using namespace MWSound;
 
-#define lerp(x, y) (x * (1-factor) + y * factor)
+namespace
+{
+    float lerp (float x, float y, float factor)
+    {
+        return x * (1-factor) + y * factor;
+    }
+    Ogre::ColourValue lerp (const Ogre::ColourValue& x, const Ogre::ColourValue& y, float factor)
+    {
+        return x * (1-factor) + y * factor;
+    }
+}
 
-const std::string WeatherGlobals::mThunderSoundID0 = "Thunder0";
-const std::string WeatherGlobals::mThunderSoundID1 = "Thunder1";
-const std::string WeatherGlobals::mThunderSoundID2 = "Thunder2";
-const std::string WeatherGlobals::mThunderSoundID3 = "Thunder3";
-const float WeatherGlobals::mSunriseTime = 8;
-const float WeatherGlobals::mSunsetTime = 18;
-const float WeatherGlobals::mSunriseDuration = 2;
-const float WeatherGlobals::mSunsetDuration = 2;
-const float WeatherGlobals::mWeatherUpdateTime = 20.f;
+void WeatherManager::setFallbackWeather(Weather& weather,const std::string& name)
+{
+    std::string upper=name;
+    upper[0]=toupper(name[0]);
+    weather.mCloudsMaximumPercent = mFallback->getFallbackFloat("Weather_"+upper+"_Clouds_Maximum_Percent");
+    weather.mTransitionDelta = mFallback->getFallbackFloat("Weather_"+upper+"_Transition_Delta");
+    weather.mSkySunriseColor=mFallback->getFallbackColour("Weather_"+upper+"_Sky_Sunrise_Color");
+    weather.mSkyDayColor = mFallback->getFallbackColour("Weather_"+upper+"_Sky_Day_Color");
+    weather.mSkySunsetColor = mFallback->getFallbackColour("Weather_"+upper+"_Sky_Sunset_Color");
+    weather.mSkyNightColor = mFallback->getFallbackColour("Weather_"+upper+"_Sky_Night_Color");
+    weather.mFogSunriseColor = mFallback->getFallbackColour("Weather_"+upper+"_Fog_Sunrise_Color");
+    weather.mFogDayColor = mFallback->getFallbackColour("Weather_"+upper+"_Fog_Day_Color");
+    weather.mFogSunsetColor = mFallback->getFallbackColour("Weather_"+upper+"_Fog_Sunset_Color");
+    weather.mFogNightColor = mFallback->getFallbackColour("Weather_"+upper+"_Fog_Night_Color");
+    weather.mAmbientSunriseColor = mFallback->getFallbackColour("Weather_"+upper+"_Ambient_Sunrise_Color");
+    weather.mAmbientDayColor = mFallback->getFallbackColour("Weather_"+upper+"_Ambient_Day_Color");
+    weather.mAmbientSunsetColor = mFallback->getFallbackColour("Weather_"+upper+"_Ambient_Sunset_Color");
+    weather.mAmbientNightColor = mFallback->getFallbackColour("Weather_"+upper+"_Ambient_Night_Color");
+    weather.mSunSunriseColor = mFallback->getFallbackColour("Weather_"+upper+"_Sun_Sunrise_Color");
+    weather.mSunDayColor = mFallback->getFallbackColour("Weather_"+upper+"_Sun_Day_Color");
+    weather.mSunSunsetColor = mFallback->getFallbackColour("Weather_"+upper+"_Sun_Sunset_Color");
+    weather.mSunNightColor = mFallback->getFallbackColour("Weather_"+upper+"_Sun_Night_Color");
+    weather.mSunDiscSunsetColor = mFallback->getFallbackColour("Weather_"+upper+"_Sun_Disc_Sunset_Color");
+    weather.mLandFogDayDepth = mFallback->getFallbackFloat("Weather_"+upper+"_Land_Fog_Day_Depth");
+    weather.mLandFogNightDepth = mFallback->getFallbackFloat("Weather_"+upper+"_Land_Fog_Night_Depth");
+    weather.mWindSpeed = mFallback->getFallbackFloat("Weather_"+upper+"_Wind_Speed");
+    weather.mCloudSpeed = mFallback->getFallbackFloat("Weather_"+upper+"_Cloud_Speed");
+    weather.mGlareView = mFallback->getFallbackFloat("Weather_"+upper+"_Glare_View");
+    mWeatherSettings[name] = weather;
+}
 
-
-// morrowind sets these per-weather, but since they are only used by 'thunderstorm'
-// weather setting anyway, we can just as well set them globally
-const float WeatherGlobals::mThunderFrequency = .4;
-const float WeatherGlobals::mThunderThreshold = 0.6;
-const float WeatherGlobals::mThunderSoundDelay = 0.25;
-
-WeatherManager::WeatherManager(MWRender::RenderingManager* rendering) :
+WeatherManager::WeatherManager(MWRender::RenderingManager* rendering,MWWorld::Fallback* fallback) :
      mHour(14), mCurrentWeather("clear"), mFirstUpdate(true), mWeatherUpdateTime(0),
      mThunderFlash(0), mThunderChance(0), mThunderChanceNeeded(50), mThunderSoundDelay(0),
      mRemainingTransitionTime(0), mMonth(0), mDay(0),
-     mTimePassed(0)
+     mTimePassed(0), mFallback(fallback)
 {
     mRendering = rendering;
-
-    #define clr(r,g,b) ColourValue(r/255.f, g/255.f, b/255.f)
-
-    /// \todo read these from Morrowind.ini
+    //Globals
+    mThunderSoundID0 = mFallback->getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_0");
+    mThunderSoundID1 = mFallback->getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_1");
+    mThunderSoundID2 = mFallback->getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_2");
+    mThunderSoundID3 = mFallback->getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_3");
+    mSunriseTime = mFallback->getFallbackFloat("Weather_Sunrise_Time");
+    mSunsetTime = mFallback->getFallbackFloat("Weather_Sunset_Time");
+    mSunriseDuration = mFallback->getFallbackFloat("Weather_Sunrise_Duration");
+    mSunsetDuration = mFallback->getFallbackFloat("Weather_Sunset_Duration");
+    mHoursBetweenWeatherChanges = mFallback->getFallbackFloat("Weather_Hours_Between_Weather_Changes");
+    mWeatherUpdateTime = mHoursBetweenWeatherChanges*3600;
+    mThunderFrequency = mFallback->getFallbackFloat("Weather_Thunderstorm_Thunder_Frequency");
+    mThunderThreshold = mFallback->getFallbackFloat("Weather_Thunderstorm_Thunder_Threshold");
+    mThunderSoundDelay = 0.25;
+    //Weather
     Weather clear;
     clear.mCloudTexture = "tx_sky_clear.dds";
-    clear.mCloudsMaximumPercent = 1.0;
-    clear.mTransitionDelta = 0.015;
-    clear.mSkySunriseColor = clr(118, 141, 164);
-    clear.mSkyDayColor = clr(95, 135, 203);
-    clear.mSkySunsetColor = clr(56, 89, 129);
-    clear.mSkyNightColor = clr(9, 10, 11);
-    clear.mFogSunriseColor = clr(255, 189, 157);
-    clear.mFogDayColor = clr(206, 227, 255);
-    clear.mFogSunsetColor = clr(255, 189, 157);
-    clear.mFogNightColor = clr(9, 10, 11);
-    clear.mAmbientSunriseColor = clr(47, 66, 96);
-    clear.mAmbientDayColor = clr(137, 140, 160);
-    clear.mAmbientSunsetColor = clr(68, 75, 96);
-    clear.mAmbientNightColor = clr(32, 35, 42);
-    clear.mSunSunriseColor = clr(242, 159, 99);
-    clear.mSunDayColor = clr(255, 252, 238);
-    clear.mSunSunsetColor = clr(255, 115, 79);
-    clear.mSunNightColor = clr(59, 97, 176);
-    clear.mSunDiscSunsetColor = clr(255, 189, 157);
-    clear.mLandFogDayDepth = 0.69;
-    clear.mLandFogNightDepth = 0.69;
-    clear.mWindSpeed = 0.1;
-    clear.mCloudSpeed = 1.25;
-    clear.mGlareView = 1.0;
-    mWeatherSettings["clear"] = clear;
+    setFallbackWeather(clear,"clear");
 
     Weather cloudy;
     cloudy.mCloudTexture = "tx_sky_cloudy.dds";
-    cloudy.mCloudsMaximumPercent = 1.0;
-    cloudy.mTransitionDelta = 0.015;
-    cloudy.mSkySunriseColor = clr(126, 158, 173);
-    cloudy.mSkyDayColor = clr(117, 160, 215);
-    cloudy.mSkySunsetColor = clr(111, 114, 159);
-    cloudy.mSkyNightColor = clr(9, 10, 11);
-    cloudy.mFogSunriseColor = clr(255, 207, 149);
-    cloudy.mFogDayColor = clr(245, 235, 224);
-    cloudy.mFogSunsetColor = clr(255, 155, 106);
-    cloudy.mFogNightColor = clr(9, 10, 11);
-    cloudy.mAmbientSunriseColor = clr(66, 74, 87);
-    cloudy.mAmbientDayColor = clr(137, 145, 160);
-    cloudy.mAmbientSunsetColor = clr(71, 80, 92);
-    cloudy.mAmbientNightColor = clr(32, 39, 54);
-    cloudy.mSunSunriseColor = clr(241, 177, 99);
-    cloudy.mSunDayColor = clr(255, 236, 221);
-    cloudy.mSunSunsetColor = clr(255, 89, 00);
-    cloudy.mSunNightColor = clr(77, 91, 124);
-    cloudy.mSunDiscSunsetColor = clr(255, 202, 179);
-    cloudy.mLandFogDayDepth = 0.72;
-    cloudy.mLandFogNightDepth = 0.72;
-    cloudy.mWindSpeed = 0.2;
-    cloudy.mCloudSpeed = 2;
-    cloudy.mGlareView = 1.0;
-    mWeatherSettings["cloudy"] = cloudy;
+    setFallbackWeather(cloudy,"cloudy");
 
     Weather foggy;
     foggy.mCloudTexture = "tx_sky_foggy.dds";
-    foggy.mCloudsMaximumPercent = 1.0;
-    foggy.mTransitionDelta = 0.015;
-    foggy.mSkySunriseColor = clr(197, 190, 180);
-    foggy.mSkyDayColor = clr(184, 211, 228);
-    foggy.mSkySunsetColor = clr(142, 159, 176);
-    foggy.mSkyNightColor = clr(18, 23, 28);
-    foggy.mFogSunriseColor = clr(173, 164, 148);
-    foggy.mFogDayColor = clr(150, 187, 209);
-    foggy.mFogSunsetColor = clr(113, 135, 157);
-    foggy.mFogNightColor = clr(19, 24, 29);
-    foggy.mAmbientSunriseColor = clr(48, 43, 37);
-    foggy.mAmbientDayColor = clr(92, 109, 120);
-    foggy.mAmbientSunsetColor = clr(28, 33, 39);
-    foggy.mAmbientNightColor = clr(28, 33, 39);
-    foggy.mSunSunriseColor = clr(177, 162, 137);
-    foggy.mSunDayColor = clr(111, 131, 151);
-    foggy.mSunSunsetColor = clr(125, 157, 189);
-    foggy.mSunNightColor = clr(81, 100, 119);
-    foggy.mSunDiscSunsetColor = clr(223, 223, 223);
-    foggy.mLandFogDayDepth = 1.0;
-    foggy.mLandFogNightDepth = 1.9;
-    foggy.mWindSpeed = 0;
-    foggy.mCloudSpeed = 1.25;
-    foggy.mGlareView = 0.25;
-    mWeatherSettings["foggy"] = foggy;
+    setFallbackWeather(foggy,"foggy");
 
     Weather thunderstorm;
     thunderstorm.mCloudTexture = "tx_sky_thunder.dds";
-    thunderstorm.mCloudsMaximumPercent = 0.66;
-    thunderstorm.mTransitionDelta = 0.03;
-    thunderstorm.mSkySunriseColor = clr(35, 36, 39);
-    thunderstorm.mSkyDayColor = clr(97, 104, 115);
-    thunderstorm.mSkySunsetColor = clr(35, 36, 39);
-    thunderstorm.mSkyNightColor = clr(19, 20, 22);
-    thunderstorm.mFogSunriseColor = clr(70, 74, 85);
-    thunderstorm.mFogDayColor = clr(97, 104, 115);
-    thunderstorm.mFogSunsetColor = clr(70, 74, 85);
-    thunderstorm.mFogNightColor = clr(19, 20, 22);
-    thunderstorm.mAmbientSunriseColor = clr(54, 54, 54);
-    thunderstorm.mAmbientDayColor = clr(90, 90, 90);
-    thunderstorm.mAmbientSunsetColor = clr(54, 54, 54);
-    thunderstorm.mAmbientNightColor = clr(49, 51, 54);
-    thunderstorm.mSunSunriseColor = clr(91, 99, 122);
-    thunderstorm.mSunDayColor = clr(138, 144, 155);
-    thunderstorm.mSunSunsetColor = clr(96, 101, 117);
-    thunderstorm.mSunNightColor = clr(55, 76, 110);
-    thunderstorm.mSunDiscSunsetColor = clr(128, 128, 128);
-    thunderstorm.mLandFogDayDepth = 1;
-    thunderstorm.mLandFogNightDepth = 1.15;
-    thunderstorm.mWindSpeed = 0.5;
-    thunderstorm.mCloudSpeed = 3;
-    thunderstorm.mGlareView = 0;
     thunderstorm.mRainLoopSoundID = "rain heavy";
-    mWeatherSettings["thunderstorm"] = thunderstorm;
+    setFallbackWeather(thunderstorm,"thunderstorm");
 
     Weather rain;
     rain.mCloudTexture = "tx_sky_rainy.dds";
-    rain.mCloudsMaximumPercent = 0.66;
-    rain.mTransitionDelta = 0.015;
-    rain.mSkySunriseColor = clr(71, 74, 75);
-    rain.mSkyDayColor = clr(116, 120, 122);
-    rain.mSkySunsetColor = clr(73, 73, 73);
-    rain.mSkyNightColor = clr(24, 25, 26);
-    rain.mFogSunriseColor = clr(71, 74, 75);
-    rain.mFogDayColor = clr(116, 120, 122);
-    rain.mFogSunsetColor = clr(73, 73, 73);
-    rain.mFogNightColor = clr(24, 25, 26);
-    rain.mAmbientSunriseColor = clr(97, 90, 88);
-    rain.mAmbientDayColor = clr(105, 110, 113);
-    rain.mAmbientSunsetColor = clr(88, 97, 97);
-    rain.mAmbientNightColor = clr(50, 55, 67);
-    rain.mSunSunriseColor = clr(131, 122, 120);
-    rain.mSunDayColor = clr(149, 157, 170);
-    rain.mSunSunsetColor = clr(120, 126, 131);
-    rain.mSunNightColor = clr(50, 62, 101);
-    rain.mSunDiscSunsetColor = clr(128, 128, 128);
-    rain.mLandFogDayDepth = 0.8;
-    rain.mLandFogNightDepth = 0.8;
-    rain.mWindSpeed = 0.3;
-    rain.mCloudSpeed = 2;
-    rain.mGlareView = 0;
     rain.mRainLoopSoundID = "rain";
-    mWeatherSettings["rain"] = rain;
+    setFallbackWeather(rain,"rain");
 
     Weather overcast;
     overcast.mCloudTexture = "tx_sky_overcast.dds";
-    overcast.mCloudsMaximumPercent = 1.0;
-    overcast.mTransitionDelta = 0.015;
-    overcast.mSkySunriseColor = clr(91, 99, 106);
-    overcast.mSkyDayColor = clr(143, 146, 149);
-    overcast.mSkySunsetColor = clr(108, 115, 121);
-    overcast.mSkyNightColor = clr(19, 22, 25);
-    overcast.mFogSunriseColor = clr(91, 99, 106);
-    overcast.mFogDayColor = clr(143, 146, 149);
-    overcast.mFogSunsetColor = clr(108, 115, 121);
-    overcast.mFogNightColor = clr(19, 22, 25);
-    overcast.mAmbientSunriseColor = clr(84, 88, 92);
-    overcast.mAmbientDayColor = clr(93, 96, 105);
-    overcast.mAmbientSunsetColor = clr(83, 77, 75);
-    overcast.mAmbientNightColor = clr(57, 60, 66);
-    overcast.mSunSunriseColor = clr(87, 125, 163);
-    overcast.mSunDayColor = clr(163, 169, 183);
-    overcast.mSunSunsetColor = clr(85, 103, 157);
-    overcast.mSunNightColor = clr(32, 54, 100);
-    overcast.mSunDiscSunsetColor = clr(128, 128, 128);
-    overcast.mLandFogDayDepth = 0.7;
-    overcast.mLandFogNightDepth = 0.7;
-    overcast.mWindSpeed = 0.2;
-    overcast.mCloudSpeed = 1.5;
-    overcast.mGlareView = 0;
-    mWeatherSettings["overcast"] = overcast;
+    setFallbackWeather(overcast,"overcast");
 
     Weather ashstorm;
     ashstorm.mCloudTexture = "tx_sky_ashstorm.dds";
-    ashstorm.mCloudsMaximumPercent = 1.0;
-    ashstorm.mTransitionDelta = 0.035;
-    ashstorm.mSkySunriseColor = clr(91, 56, 51);
-    ashstorm.mSkyDayColor = clr(124, 73, 58);
-    ashstorm.mSkySunsetColor = clr(106, 55, 40);
-    ashstorm.mSkyNightColor = clr(20, 21, 22);
-    ashstorm.mFogSunriseColor = clr(91, 56, 51);
-    ashstorm.mFogDayColor = clr(124, 73, 58);
-    ashstorm.mFogSunsetColor = clr(106, 55, 40);
-    ashstorm.mFogNightColor = clr(20, 21, 22);
-    ashstorm.mAmbientSunriseColor = clr(52, 42, 37);
-    ashstorm.mAmbientDayColor = clr(75, 49, 41);
-    ashstorm.mAmbientSunsetColor = clr(48, 39, 35);
-    ashstorm.mAmbientNightColor = clr(36, 42, 49);
-    ashstorm.mSunSunriseColor = clr(184, 91, 71);
-    ashstorm.mSunDayColor = clr(228, 139, 114);
-    ashstorm.mSunSunsetColor = clr(185, 86, 57);
-    ashstorm.mSunNightColor = clr(54, 66, 74);
-    ashstorm.mSunDiscSunsetColor = clr(128, 128, 128);
-    ashstorm.mLandFogDayDepth = 1.1;
-    ashstorm.mLandFogNightDepth = 1.2;
-    ashstorm.mWindSpeed = 0.8;
-    ashstorm.mCloudSpeed = 7;
-    ashstorm.mGlareView = 0;
     ashstorm.mAmbientLoopSoundID = "ashstorm";
-    mWeatherSettings["ashstorm"] = ashstorm;
+    setFallbackWeather(ashstorm,"ashstorm");
 
     Weather blight;
     blight.mCloudTexture = "tx_sky_blight.dds";
-    blight.mCloudsMaximumPercent = 1.0;
-    blight.mTransitionDelta = 0.04;
-    blight.mSkySunriseColor = clr(90, 35, 35);
-    blight.mSkyDayColor = clr(90, 35, 35);
-    blight.mSkySunsetColor = clr(92, 33, 33);
-    blight.mSkyNightColor = clr(44, 14, 14);
-    blight.mFogSunriseColor = clr(90, 35, 35);
-    blight.mFogDayColor = clr(128, 19, 19);
-    blight.mFogSunsetColor = clr(92, 33, 33);
-    blight.mFogNightColor = clr(44, 14, 14);
-    blight.mAmbientSunriseColor = clr(61, 40, 40);
-    blight.mAmbientDayColor = clr(79, 54, 54);
-    blight.mAmbientSunsetColor = clr(61, 40, 40);
-    blight.mAmbientNightColor = clr(56, 58, 62);
-    blight.mSunSunriseColor = clr(180, 78, 78);
-    blight.mSunDayColor = clr(224, 84, 84);
-    blight.mSunSunsetColor = clr(180, 78, 78);
-    blight.mSunNightColor = clr(61, 91, 143);
-    blight.mSunDiscSunsetColor = clr(128, 128, 128);
-    blight.mLandFogDayDepth = 1.1;
-    blight.mLandFogNightDepth = 1.2;
-    blight.mWindSpeed = 0.9;
-    blight.mCloudSpeed = 9;
-    blight.mGlareView = 0;
     blight.mAmbientLoopSoundID = "blight";
-    mWeatherSettings["blight"] = blight;
+    setFallbackWeather(blight,"blight");
 
-    /*
     Weather snow;
     snow.mCloudTexture = "tx_bm_sky_snow.dds";
-    snow.mCloudsMaximumPercent = 1.0;
-    snow.mTransitionDelta = 0.014;
-    snow.mSkySunriseColor = clr(196, 91, 91);
-    snow.mSkyDayColor = clr(153, 158, 166);
-    snow.mSkySunsetColor = clr(96, 115, 134);
-    snow.mSkyNightColor = clr(31, 35, 39);
-    snow.mFogSunriseColor = clr(106, 91, 91);
-    snow.mFogDayColor = clr(153, 158, 166);
-    snow.mFogSunsetColor = clr(96, 115, 134);
-    snow.mFogNightColor = clr(31, 35, 39);
-    snow.mAmbientSunriseColor = clr(92, 84, 84);
-    snow.mAmbientDayColor = clr(93, 96, 105);
-    snow.mAmbientSunsetColor = clr(70, 79, 87);
-    snow.mAmbientNightColor = clr(49, 58, 68);
-    snow.mSunSunriseColor = clr(141, 109, 109);
-    snow.mSunDayColor = clr(163, 169, 183);
-    snow.mSunSunsetColor = clr(101, 121, 141);
-    snow.mSunNightColor = clr(55, 66, 77);
-    snow.mSunDiscSunsetColor = clr(128, 128, 128);
-    snow.mLandFogDayDepth = 1.0;
-    snow.mLandFogNightDepth = 1.2;
-    snow.mWindSpeed = 0;
-    snow.mCloudSpeed = 1.5;
-    snow.mGlareView = 0;
-    mWeatherSettings["snow"] = snow;
+    setFallbackWeather(snow, "snow");
 
     Weather blizzard;
     blizzard.mCloudTexture = "tx_bm_sky_blizzard.dds";
-    blizzard.mCloudsMaximumPercent = 1.0;
-    blizzard.mTransitionDelta = 0.030;
-    blizzard.mSkySunriseColor = clr(91, 99, 106);
-    blizzard.mSkyDayColor = clr(121, 133, 145);
-    blizzard.mSkySunsetColor = clr(108, 115, 121);
-    blizzard.mSkyNightColor = clr(27, 29, 31);
-    blizzard.mFogSunriseColor = clr(91, 99, 106);
-    blizzard.mFogDayColor = clr(121, 133, 145);
-    blizzard.mFogSunsetColor = clr(108, 115, 121);
-    blizzard.mFogNightColor = clr(21, 24, 28);
-    blizzard.mAmbientSunriseColor = clr(84, 88, 92);
-    blizzard.mAmbientDayColor = clr(93, 96, 105);
-    blizzard.mAmbientSunsetColor = clr(83, 77, 75);
-    blizzard.mAmbientNightColor = clr(53, 62, 70);
-    blizzard.mSunSunriseColor = clr(114, 128, 146);
-    blizzard.mSunDayColor = clr(163, 169, 183);
-    blizzard.mSunSunsetColor = clr(106, 114, 136);
-    blizzard.mSunNightColor = clr(57, 66, 74);
-    blizzard.mSunDiscSunsetColor = clr(128, 128, 128);
-    blizzard.mLandFogDayDepth = 2.8;
-    blizzard.mLandFogNightDepth = 3.0;
-    blizzard.mWindSpeed = 0.9;
-    blizzard.mCloudSpeed = 7.5;
-    blizzard.mGlareView = 0;
     blizzard.mAmbientLoopSoundID = "BM Blizzard";
-    mWeatherSettings["blizzard"] = blizzard;
-    */
+    setFallbackWeather(blizzard,"blizzard");
 }
 
 void WeatherManager::setWeather(const String& weather, bool instant)
@@ -400,10 +193,10 @@ WeatherResult WeatherManager::getResult(const String& weather)
             // fade in
             float advance = 6-mHour;
             float factor = advance / 0.5f;
-            result.mFogColor = lerp(current.mFogSunriseColor, current.mFogNightColor);
-            result.mAmbientColor = lerp(current.mAmbientSunriseColor, current.mAmbientNightColor);
-            result.mSunColor = lerp(current.mSunSunriseColor, current.mSunNightColor);
-            result.mSkyColor = lerp(current.mSkySunriseColor, current.mSkyNightColor);
+            result.mFogColor = lerp(current.mFogSunriseColor, current.mFogNightColor, factor);
+            result.mAmbientColor = lerp(current.mAmbientSunriseColor, current.mAmbientNightColor, factor);
+            result.mSunColor = lerp(current.mSunSunriseColor, current.mSunNightColor, factor);
+            result.mSkyColor = lerp(current.mSkySunriseColor, current.mSkyNightColor, factor);
             result.mNightFade = factor;
         }
         else //if (mHour >= 6)
@@ -411,10 +204,10 @@ WeatherResult WeatherManager::getResult(const String& weather)
             // fade out
             float advance = mHour-6;
             float factor = advance / 3.f;
-            result.mFogColor = lerp(current.mFogSunriseColor, current.mFogDayColor);
-            result.mAmbientColor = lerp(current.mAmbientSunriseColor, current.mAmbientDayColor);
-            result.mSunColor = lerp(current.mSunSunriseColor, current.mSunDayColor);
-            result.mSkyColor = lerp(current.mSkySunriseColor, current.mSkyDayColor);
+            result.mFogColor = lerp(current.mFogSunriseColor, current.mFogDayColor, factor);
+            result.mAmbientColor = lerp(current.mAmbientSunriseColor, current.mAmbientDayColor, factor);
+            result.mSunColor = lerp(current.mSunSunriseColor, current.mSunDayColor, factor);
+            result.mSkyColor = lerp(current.mSkySunriseColor, current.mSkyDayColor, factor);
         }
     }
 
@@ -435,20 +228,20 @@ WeatherResult WeatherManager::getResult(const String& weather)
             // fade in
             float advance = 19-mHour;
             float factor = (advance / 2);
-            result.mFogColor = lerp(current.mFogSunsetColor, current.mFogDayColor);
-            result.mAmbientColor = lerp(current.mAmbientSunsetColor, current.mAmbientDayColor);
-            result.mSunColor = lerp(current.mSunSunsetColor, current.mSunDayColor);
-            result.mSkyColor = lerp(current.mSkySunsetColor, current.mSkyDayColor);
+            result.mFogColor = lerp(current.mFogSunsetColor, current.mFogDayColor, factor);
+            result.mAmbientColor = lerp(current.mAmbientSunsetColor, current.mAmbientDayColor, factor);
+            result.mSunColor = lerp(current.mSunSunsetColor, current.mSunDayColor, factor);
+            result.mSkyColor = lerp(current.mSkySunsetColor, current.mSkyDayColor, factor);
         }
         else //if (mHour >= 19)
         {
             // fade out
             float advance = mHour-19;
             float factor = advance / 2.f;
-            result.mFogColor = lerp(current.mFogSunsetColor, current.mFogNightColor);
-            result.mAmbientColor = lerp(current.mAmbientSunsetColor, current.mAmbientNightColor);
-            result.mSunColor = lerp(current.mSunSunsetColor, current.mSunNightColor);
-            result.mSkyColor = lerp(current.mSkySunsetColor, current.mSkyNightColor);
+            result.mFogColor = lerp(current.mFogSunsetColor, current.mFogNightColor, factor);
+            result.mAmbientColor = lerp(current.mAmbientSunsetColor, current.mAmbientNightColor, factor);
+            result.mSunColor = lerp(current.mSunSunsetColor, current.mSunNightColor, factor);
+            result.mSkyColor = lerp(current.mSkySunsetColor, current.mSkyNightColor, factor);
             result.mNightFade = factor;
         }
     }
@@ -466,19 +259,19 @@ WeatherResult WeatherManager::transition(float factor)
     result.mNextCloudTexture = other.mCloudTexture;
     result.mCloudBlendFactor = factor;
 
-    result.mCloudOpacity = lerp(current.mCloudOpacity, other.mCloudOpacity);
-    result.mFogColor = lerp(current.mFogColor, other.mFogColor);
-    result.mSunColor = lerp(current.mSunColor, other.mSunColor);
-    result.mSkyColor = lerp(current.mSkyColor, other.mSkyColor);
+    result.mCloudOpacity = lerp(current.mCloudOpacity, other.mCloudOpacity, factor);
+    result.mFogColor = lerp(current.mFogColor, other.mFogColor, factor);
+    result.mSunColor = lerp(current.mSunColor, other.mSunColor, factor);
+    result.mSkyColor = lerp(current.mSkyColor, other.mSkyColor, factor);
 
-    result.mAmbientColor = lerp(current.mAmbientColor, other.mAmbientColor);
-    result.mSunDiscColor = lerp(current.mSunDiscColor, other.mSunDiscColor);
-    result.mFogDepth = lerp(current.mFogDepth, other.mFogDepth);
-    result.mWindSpeed = lerp(current.mWindSpeed, other.mWindSpeed);
-    result.mCloudSpeed = lerp(current.mCloudSpeed, other.mCloudSpeed);
-    result.mCloudOpacity = lerp(current.mCloudOpacity, other.mCloudOpacity);
-    result.mGlareView = lerp(current.mGlareView, other.mGlareView);
-    result.mNightFade = lerp(current.mNightFade, other.mNightFade);
+    result.mAmbientColor = lerp(current.mAmbientColor, other.mAmbientColor, factor);
+    result.mSunDiscColor = lerp(current.mSunDiscColor, other.mSunDiscColor, factor);
+    result.mFogDepth = lerp(current.mFogDepth, other.mFogDepth, factor);
+    result.mWindSpeed = lerp(current.mWindSpeed, other.mWindSpeed, factor);
+    result.mCloudSpeed = lerp(current.mCloudSpeed, other.mCloudSpeed, factor);
+    result.mCloudOpacity = lerp(current.mCloudOpacity, other.mCloudOpacity, factor);
+    result.mGlareView = lerp(current.mGlareView, other.mGlareView, factor);
+    result.mNightFade = lerp(current.mNightFade, other.mNightFade, factor);
 
     result.mNight = current.mNight;
 
@@ -502,7 +295,7 @@ void WeatherManager::update(float duration)
         if (mWeatherUpdateTime <= 0 || regionstr != mCurrentRegion)
         {
             mCurrentRegion = regionstr;
-            mWeatherUpdateTime = WeatherGlobals::mWeatherUpdateTime*3600;
+            mWeatherUpdateTime = mHoursBetweenWeatherChanges*3600;
 
             std::string weather = "clear";
 
@@ -524,19 +317,19 @@ void WeatherManager::update(float duration)
                     float thunder = region->mData.mThunder/255.f;
                     float ash = region->mData.mAsh/255.f;
                     float blight = region->mData.mBlight/255.f;
-                    //float snow = region->mData.a/255.f;
-                    //float blizzard = region->mData.b/255.f;
+                    float snow = region->mData.mA/255.f;
+                    float blizzard = region->mData.mB/255.f;
 
                     // re-scale to 100 percent
-                    const float total = clear+cloudy+foggy+overcast+rain+thunder+ash+blight;//+snow+blizzard;
+                    const float total = clear+cloudy+foggy+overcast+rain+thunder+ash+blight+snow+blizzard;
 
                     float random = ((rand()%100)/100.f) * total;
 
-                    //if (random >= snow+blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
-                    //    weather = "blizzard";
-                    //else if (random >= blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
-                    //    weather = "snow";
-                    /*else*/ if (random >= ash+thunder+rain+overcast+foggy+cloudy+clear)
+                    if (random >= snow+blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
+                        weather = "blizzard";
+                    else if (random >= blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
+                        weather = "snow";
+                    else if (random >= ash+thunder+rain+overcast+foggy+cloudy+clear)
                         weather = "blight";
                     else if (random >= thunder+rain+overcast+foggy+cloudy+clear)
                         weather = "ashstorm";
@@ -632,34 +425,53 @@ void WeatherManager::update(float duration)
             mRendering->getSkyManager()->masserEnable();
             mRendering->getSkyManager()->secundaEnable();
 
-            float hour_fade;
-            if (mHour >= 7.f && mHour <= 14.f)
-                hour_fade = 1-(mHour-7)/3.f;
-            else if (mHour >= 14 && mHour <= 15.f)
-                hour_fade = mHour-14;
-            else
-                hour_fade = 1;
+            float secunda_hour_fade;
+            float secunda_fadeout_start=mFallback->getFallbackFloat("Moons_Secunda_Fade_Out_Start");
+            float secunda_fadein_start=mFallback->getFallbackFloat("Moons_Secunda_Fade_In_Start");
+            float secunda_fadein_finish=mFallback->getFallbackFloat("Moons_Secunda_Fade_In_Finish");
 
-            float secunda_angle_fade;
-            float masser_angle_fade;
+            if (mHour >= secunda_fadeout_start && mHour <= secunda_fadein_start)
+                secunda_hour_fade = 1-(mHour-secunda_fadeout_start)/3.f;
+            else if (mHour >= secunda_fadein_start && mHour <= secunda_fadein_finish)
+                secunda_hour_fade = mHour-secunda_fadein_start;
+            else
+                secunda_hour_fade = 1;
+
+            float masser_hour_fade;
+            float masser_fadeout_start=mFallback->getFallbackFloat("Moons_Masser_Fade_Out_Start");
+            float masser_fadein_start=mFallback->getFallbackFloat("Moons_Masser_Fade_In_Start");
+            float masser_fadein_finish=mFallback->getFallbackFloat("Moons_Masser_Fade_In_Finish");
+            if (mHour >= masser_fadeout_start && mHour <= masser_fadein_start)
+                masser_hour_fade = 1-(mHour-masser_fadeout_start)/3.f;
+            else if (mHour >= masser_fadein_start && mHour <= masser_fadein_finish)
+                masser_hour_fade = mHour-masser_fadein_start;
+            else
+                masser_hour_fade = 1;
+
             float angle = moonHeight*90.f;
 
-            if (angle >= 30 && angle <= 50)
-                secunda_angle_fade = (angle-30)/20.f;
-            else if (angle <30)
+            float secunda_angle_fade;
+            float secunda_end_angle=mFallback->getFallbackFloat("Moons_Secunda_Fade_End_Angle");
+            float secunda_start_angle=mFallback->getFallbackFloat("Moons_Secunda_Fade_Start_Angle");
+            if (angle >= secunda_end_angle && angle <= secunda_start_angle)
+                secunda_angle_fade = (angle-secunda_end_angle)/20.f;
+            else if (angle < secunda_end_angle)
                 secunda_angle_fade = 0.f;
             else
                 secunda_angle_fade = 1.f;
 
-            if (angle >= 40 && angle <= 50)
-                masser_angle_fade = (angle-40)/10.f;
-            else if (angle <40)
+            float masser_angle_fade;
+            float masser_end_angle=mFallback->getFallbackFloat("Moons_Masser_Fade_End_Angle");
+            float masser_start_angle=mFallback->getFallbackFloat("Moons_Masser_Fade_Start_Angle");
+            if (angle >= masser_end_angle && angle <= masser_start_angle)
+                masser_angle_fade = (angle-masser_end_angle)/10.f;
+            else if (angle < masser_end_angle)
                 masser_angle_fade = 0.f;
             else
                 masser_angle_fade = 1.f;
 
-            masser_angle_fade *= hour_fade;
-            secunda_angle_fade *= hour_fade;
+            masser_angle_fade *= masser_hour_fade;
+            secunda_angle_fade *= secunda_hour_fade;
 
             mRendering->getSkyManager()->setMasserFade(masser_angle_fade);
             mRendering->getSkyManager()->setSecundaFade(secunda_angle_fade);
@@ -681,17 +493,17 @@ void WeatherManager::update(float duration)
                     // pick a random sound
                     int sound = rand() % 4;
                     std::string soundname;
-                    if (sound == 0) soundname = WeatherGlobals::mThunderSoundID0;
-                    else if (sound == 1) soundname = WeatherGlobals::mThunderSoundID1;
-                    else if (sound == 2) soundname = WeatherGlobals::mThunderSoundID2;
-                    else if (sound == 3) soundname = WeatherGlobals::mThunderSoundID3;
+                    if (sound == 0) soundname = mThunderSoundID0;
+                    else if (sound == 1) soundname = mThunderSoundID1;
+                    else if (sound == 2) soundname = mThunderSoundID2;
+                    else if (sound == 3) soundname = mThunderSoundID3;
                     MWBase::Environment::get().getSoundManager()->playSound(soundname, 1.0, 1.0);
                     mThunderSoundDelay = 1000;
                 }
 
                 mThunderFlash -= duration;
                 if (mThunderFlash > 0)
-                    mRendering->getSkyManager()->setLightningStrength( mThunderFlash / WeatherGlobals::mThunderThreshold );
+                    mRendering->getSkyManager()->setLightningStrength( mThunderFlash / mThunderThreshold );
                 else
                 {
                     srand(time(NULL));
@@ -706,11 +518,11 @@ void WeatherManager::update(float duration)
                 mThunderChance += duration*4; // chance increases by 4 percent every second
                 if (mThunderChance >= mThunderChanceNeeded)
                 {
-                    mThunderFlash = WeatherGlobals::mThunderThreshold;
+                    mThunderFlash = mThunderThreshold;
 
-                    mRendering->getSkyManager()->setLightningStrength( mThunderFlash / WeatherGlobals::mThunderThreshold );
+                    mRendering->getSkyManager()->setLightningStrength( mThunderFlash / mThunderThreshold );
 
-                    mThunderSoundDelay = WeatherGlobals::mThunderSoundDelay;
+                    mThunderSoundDelay = 0.25;
                 }
             }
         }
@@ -718,14 +530,14 @@ void WeatherManager::update(float duration)
             mRendering->getSkyManager()->setLightningStrength(0.f);
 
         mRendering->setAmbientColour(result.mAmbientColor);
-        mRendering->sunEnable();
+        mRendering->sunEnable(false);
         mRendering->setSunColour(result.mSunColor);
 
         mRendering->getSkyManager()->setWeather(result);
     }
     else
     {
-        mRendering->sunDisable();
+        mRendering->sunDisable(false);
         mRendering->skyDisable();
         mRendering->getSkyManager()->setLightningStrength(0.f);
     }

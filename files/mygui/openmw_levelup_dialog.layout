@@ -1,17 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 440 438" name="_Main">
+    <Widget type="VBox" skin="MW_Dialog" layer="Windows" position="0 0 0 0" name="_Main">
+        <Property key="Padding" value="12"/>
+        <Property key="Spacing" value="8"/>
+        <Property key="AutoResize" value="true"/>
 
         <Widget type="Widget" skin="MW_Box" position="28 14 391 198">
+            <UserString key="HStretch" value="false"/>
+            <UserString key="VStretch" value="false"/>
             <Widget type="ImageBox" skin="ImageBox" name="ClassImage" position="4 4 383 190">
             </Widget>
         </Widget>
 
-        <Widget type="TextBox" skin="SandText" position="28 218 391 24" name="LevelText">
+        <Widget type="AutoSizedTextBox" skin="SandText" position="28 218 391 24" name="LevelText">
         </Widget>
 
-        <Widget type="Widget" skin="" position="36 280 400 400">
+        <Widget type="AutoSizedEditBox" skin="SandText" position="36 280 330 24" name="LevelDescription">
+            <Property key="MultiLine" value="true"/>
+            <Property key="WordWrap" value="true"/>
+            <Property key="Static" value="true"/>
+        </Widget>
+
+        <Widget type="Widget" skin="" position="0 0 100 16" name="Coins">
+            <UserString key="HStretch" value="false"/>
+            <UserString key="VStretch" value="false"/>
+        </Widget>
+
+        <Widget type="Widget" skin="" position="0 280 350 100">
+            <UserString key="HStretch" value="false"/>
+            <UserString key="VStretch" value="false"/>
+
             <Widget type="TextBox" skin="SandText" position="0 0 100 24" name="AttribMultiplier1"/>
             <Widget type="TextBox" skin="SandText" position="0 24 100 24" name="AttribMultiplier2"/>
             <Widget type="TextBox" skin="SandText" position="0 48 100 24" name="AttribMultiplier3"/>
@@ -127,12 +146,17 @@
             </Widget>
         </Widget>
 
-
-        <Widget type="AutoSizedButton" skin="MW_Button" position="422 398 0 24" name="OkButton">
-            <Property key="ExpandDirection" value="Left"/>
-            <Property key="Caption" value="#{sOk}"/>
+        <Widget type="HBox" skin="" position="0 0 330 24">
+            <UserString key="HStretch" value="true"/>
+            <Widget type="Widget">
+                <UserString key="HStretch" value="true"/>
+            </Widget>
+            <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 0 24" name="OkButton">
+                <Property key="Caption" value="#{sOk}"/>
+            </Widget>
         </Widget>
 
     </Widget>
+
 
 </MyGUI>

@@ -44,7 +44,7 @@ namespace MWWorld
             MWWorld::CellRefList<ESM::Clothing>          clothes;
             MWWorld::CellRefList<ESM::Ingredient>        ingreds;
             MWWorld::CellRefList<ESM::Light>             lights;
-            MWWorld::CellRefList<ESM::Tool>              lockpicks;
+            MWWorld::CellRefList<ESM::Lockpick>              lockpicks;
             MWWorld::CellRefList<ESM::Miscellaneous>     miscItems;
             MWWorld::CellRefList<ESM::Probe>             probes;
             MWWorld::CellRefList<ESM::Repair>            repairs;
@@ -127,7 +127,7 @@ namespace MWWorld
             MWWorld::CellRefList<ESM::Clothing>::List::iterator mClothing;
             MWWorld::CellRefList<ESM::Ingredient>::List::iterator mIngredient;
             MWWorld::CellRefList<ESM::Light>::List::iterator mLight;
-            MWWorld::CellRefList<ESM::Tool>::List::iterator mLockpick;
+            MWWorld::CellRefList<ESM::Lockpick>::List::iterator mLockpick;
             MWWorld::CellRefList<ESM::Miscellaneous>::List::iterator mMiscellaneous;
             MWWorld::CellRefList<ESM::Probe>::List::iterator mProbe;
             MWWorld::CellRefList<ESM::Repair>::List::iterator mRepair;
@@ -149,7 +149,7 @@ namespace MWWorld
             ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Clothing>::List::iterator);
             ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Ingredient>::List::iterator);
             ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Light>::List::iterator);
-            ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Tool>::List::iterator);
+            ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Lockpick>::List::iterator);
             ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Miscellaneous>::List::iterator);
             ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Probe>::List::iterator);
             ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Repair>::List::iterator);

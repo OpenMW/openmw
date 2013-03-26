@@ -27,12 +27,17 @@ namespace CSVDoc
             CSMDoc::DocumentManager& mDocumentManager;
             std::vector<View *> mViews;
             CSVWorld::CommandDelegateFactoryCollection *mDelegateFactories;
+            bool mExitOnSaveStateChange;
+            bool mUserWarned;
 
             // not implemented
             ViewManager (const ViewManager&);
             ViewManager& operator= (const ViewManager&);
 
             void updateIndices();
+            bool notifySaveOnClose (View *view = 0);
+            bool showModifiedDocumentMessageBox (View *view);
+            bool showSaveInProgressMessageBox (View *view);
 
         public:
 
@@ -54,11 +59,19 @@ namespace CSVDoc
 
             void loadDocumentRequest();
 
+            void closeMessageBox();
+
+        public slots:
+
+            void exitApplication (CSVDoc::View *view);
+
         private slots:
 
             void documentStateChanged (int state, CSMDoc::Document *document);
 
             void progress (int current, int max, int type, int threads, CSMDoc::Document *document);
+
+            void onExitWarningHandler(int state, CSMDoc::Document* document);
     };
 
 }

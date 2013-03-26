@@ -315,5 +315,6 @@ op 0x20001f8: Drop
 op 0x20001f9: Drop, explicit reference
 op 0x20001fa: DropSoulGem
 op 0x20001fb: DropSoulGem, explicit reference
+op 0x20001fc: OnDeath
 
-opcodes 0x20001fa-0x3ffffff unused
+opcodes 0x20001fd-0x3ffffff unused

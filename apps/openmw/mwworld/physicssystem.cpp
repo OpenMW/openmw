@@ -13,7 +13,7 @@
 #include <openengine/bullet/physic.hpp>
 #include <openengine/ogre/renderer.hpp>
 
-#include <components/nifbullet/bullet_nif_loader.hpp>
+#include <components/nifbullet/bulletnifloader.hpp>
 
 //#include "../mwbase/world.hpp" // FIXME
 #include "../mwbase/environment.hpp"
@@ -364,13 +364,16 @@ namespace MWWorld
         mEngine->removeHeightField(x, y);
     }
 
-    void PhysicsSystem::addObject (const Ptr& ptr)
+    void PhysicsSystem::addObject (const Ptr& ptr, bool placeable)
     {
         std::string mesh = MWWorld::Class::get(ptr).getModel(ptr);
         Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
         handleToMesh[node->getName()] = mesh;
-        OEngine::Physic::RigidBody* body = mEngine->createAndAdjustRigidBody(mesh, node->getName(), node->getScale().x, node->getPosition(), node->getOrientation());
-        mEngine->addRigidBody(body);
+        OEngine::Physic::RigidBody* body = mEngine->createAndAdjustRigidBody(
+            mesh, node->getName(), node->getScale().x, node->getPosition(), node->getOrientation(), 0, 0, false, placeable);
+        OEngine::Physic::RigidBody* raycastingBody = mEngine->createAndAdjustRigidBody(
+            mesh, node->getName(), node->getScale().x, node->getPosition(), node->getOrientation(), 0, 0, true, placeable);
+        mEngine->addRigidBody(body, true, raycastingBody);
     }
 
     void PhysicsSystem::addActor (const Ptr& ptr)
@@ -395,9 +398,14 @@ namespace MWWorld
         Ogre::SceneNode *node = ptr.getRefData().getBaseNode();
         const std::string &handle = node->getName();
         const Ogre::Vector3 &position = node->getPosition();
+
         if(OEngine::Physic::RigidBody *body = mEngine->getRigidBody(handle))
             body->getWorldTransform().setOrigin(btVector3(position.x,position.y,position.z));
-        else if(OEngine::Physic::PhysicActor *physact = mEngine->getCharacter(handle))
+
+        if(OEngine::Physic::RigidBody *body = mEngine->getRigidBody(handle, true))
+            body->getWorldTransform().setOrigin(btVector3(position.x,position.y,position.z));
+
+        if(OEngine::Physic::PhysicActor *physact = mEngine->getCharacter(handle))
             physact->setPosition(position);
     }
 
@@ -418,6 +426,13 @@ namespace MWWorld
             else
                 mEngine->boxAdjustExternal(handleToMesh[handle], body, node->getScale().x, node->getPosition(), rotation);
         }
+        if (OEngine::Physic::RigidBody* body = mEngine->getRigidBody(handle, true))
+        {
+            if(dynamic_cast<btBoxShape*>(body->getCollisionShape()) == NULL)
+                body->getWorldTransform().setRotation(btQuaternion(rotation.x, rotation.y, rotation.z, rotation.w));
+            else
+                mEngine->boxAdjustExternal(handleToMesh[handle], body, node->getScale().x, node->getPosition(), rotation);
+        }
     }
 
     void PhysicsSystem::scaleObject (const Ptr& ptr)
@@ -426,8 +441,13 @@ namespace MWWorld
         const std::string &handle = node->getName();
         if(handleToMesh.find(handle) != handleToMesh.end())
         {
+            bool placeable = false;
+            if (OEngine::Physic::RigidBody* body = mEngine->getRigidBody(handle,true))
+                placeable = body->mPlaceable;
+            else if (OEngine::Physic::RigidBody* body = mEngine->getRigidBody(handle,false))
+                placeable = body->mPlaceable;
             removeObject(handle);
-            addObject(ptr);
+            addObject(ptr, placeable);
         }
 
         if (OEngine::Physic::PhysicActor* act = mEngine->getCharacter(handle))

@@ -190,6 +190,17 @@ namespace MWWorld
             typename std::map<std::string, T>::iterator it = mStatic.find(item.mId);
 
             if (it != mStatic.end() && Misc::StringUtils::ciEqual(it->second.mId, id)) {
+                // delete from the static part of mShared
+                typename std::vector<T *>::iterator sharedIter = mShared.begin();
+                typename std::vector<T *>::iterator end = sharedIter + mStatic.size();
+
+                while (sharedIter != mShared.end() && sharedIter != end) { 
+                    if((*sharedIter)->mId == item.mId) {
+                        mShared.erase(sharedIter);
+                        break;
+                    }
+                    ++sharedIter;
+                }
                 mStatic.erase(it);
             }
 
