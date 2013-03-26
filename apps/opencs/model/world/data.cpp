@@ -54,6 +54,7 @@ CSMWorld::Data::Data()
         mClasses.addColumn (new SkillsColumn<ESM::Class> (i, true));
     for (int i=0; i<5; ++i)
         mClasses.addColumn (new SkillsColumn<ESM::Class> (i, false));
+    mClasses.addColumn (new PlayableColumn<ESM::Class>);
     mClasses.addColumn (new DescriptionColumn<ESM::Class>);
 
     addModel (new IdTable (&mGlobals), UniversalId::Type_Globals, UniversalId::Type_Global);
