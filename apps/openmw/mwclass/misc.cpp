@@ -91,6 +91,12 @@ namespace MWClass
 
         int value = (ptr.getCellRef().mGoldValue == 1) ? ref->mBase->mData.mValue : ptr.getCellRef().mGoldValue;
 
+        if (ptr.getCellRef().mSoul != "")
+        {
+            const ESM::Creature *creature = MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().find(ref->mRef.mSoul);
+            value *= creature->mData.mSoul;
+        }
+
         return value;
     }
 
@@ -178,7 +184,7 @@ namespace MWClass
         if (!isGold)
         {
             text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight);
-            text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
+            text += MWGui::ToolTips::getValueString(getValue(ptr), "#{sValue}");
         }
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
