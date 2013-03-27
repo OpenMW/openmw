@@ -69,10 +69,11 @@ namespace MWWorld
                 cellRef.mScale = 1;
                 cellRef.mFactIndex = 0;
                 cellRef.mCharge = -1;
-                cellRef.mNam9 = 0;
+                cellRef.mGoldValue = 1;
+                cellRef.mEnchantmentCharge = -1;
                 cellRef.mTeleport = false;
                 cellRef.mLockLevel = 0;
-                cellRef.mUnam = 0;
+                cellRef.mReferenceBlocked = 0;
             }
 
             const Ptr& getPtr() const

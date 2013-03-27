@@ -124,7 +124,8 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr)
         {
             MWWorld::ManualRef ref(esmStore, "Gold_001");
 
-            int count = (ptr.getRefData().getCount() == 1) ? gold->mBase->mData.mValue : ptr.getRefData().getCount();
+            int count = MWWorld::Class::get(ptr).getValue(ptr) * ptr.getRefData().getCount();
+
             ref.getPtr().getRefData().setCount(count);
             for (MWWorld::ContainerStoreIterator iter (begin(type)); iter!=end(); ++iter)
             {

@@ -43,11 +43,14 @@ void CellRef::save(ESMWriter &esm)
         esm.writeHNT("INDX", mFactIndex);
     }
 
+    if (mEnchantmentCharge != -1)
+        esm.writeHNT("XCHG", mEnchantmentCharge);
+
     if (mCharge != -1)
         esm.writeHNT("INTV", mCharge);
 
-    if (mNam9 != 0) {
-        esm.writeHNT("NAM9", mNam9);
+    if (mGoldValue != 1) {
+        esm.writeHNT("NAM9", mGoldValue);
     }
 
     if (mTeleport)
@@ -62,8 +65,8 @@ void CellRef::save(ESMWriter &esm)
     esm.writeHNOCString("KNAM", mKey);
     esm.writeHNOCString("TNAM", mTrap);
 
-    if (mUnam != -1) {
-        esm.writeHNT("UNAM", mUnam);
+    if (mReferenceBlocked != -1) {
+        esm.writeHNT("UNAM", mReferenceBlocked);
     }
     if (mFltv != 0) {
         esm.writeHNT("FLTV", mFltv);
@@ -281,10 +284,15 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
     ref.mFactIndex = -2;
     esm.getHNOT(ref.mFactIndex, "INDX");
 
-    ref.mNam9 = 0;
+    ref.mGoldValue = 1;
     ref.mCharge = -1;
+    ref.mEnchantmentCharge = -1;
+
+    esm.getHNOT(ref.mEnchantmentCharge, "XCHG");
+
     esm.getHNOT(ref.mCharge, "INTV");
-    esm.getHNOT(ref.mNam9, "NAM9");
+
+    esm.getHNOT(ref.mGoldValue, "NAM9");
 
     // Present for doors that teleport you to another cell.
     if (esm.isNextSub("DODT"))
@@ -302,9 +310,9 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
     ref.mKey = esm.getHNOString("KNAM");
     ref.mTrap = esm.getHNOString("TNAM");
 
-    ref.mUnam = -1;
+    ref.mReferenceBlocked = -1;
     ref.mFltv = 0;
-    esm.getHNOT(ref.mUnam, "UNAM");
+    esm.getHNOT(ref.mReferenceBlocked, "UNAM");
     esm.getHNOT(ref.mFltv, "FLTV");
 
     esm.getHNOT(ref.mPos, "DATA", 24);

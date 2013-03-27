@@ -227,7 +227,10 @@ void loadCell(ESM::Cell &cell, ESM::ESMReader &esm, Arguments& info)
         std::cout << "    Refnum: " << ref.mRefnum << std::endl;
         std::cout << "    ID: '" << ref.mRefID << "'\n";
         std::cout << "    Owner: '" << ref.mOwner << "'\n";
-        std::cout << "    Uses/health: " << ref.mCharge << "   NAM9: " << ref.mNam9 << std::endl;
+        std::cout << "    Enchantment charge: '" << ref.mEnchantmentCharge << "'\n";
+        std::cout << "    Uses/health: '" << ref.mCharge << "'\n";
+        std::cout << "    Gold value: '" << ref.mGoldValue << "'\n";
+        std::cout << "    Blocked: '" << static_cast<int>(ref.mReferenceBlocked) << "'" << std::endl;
     }
 }
 
