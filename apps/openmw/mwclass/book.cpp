@@ -148,19 +148,20 @@ namespace MWClass
         return ref->mBase->mEnchant;
     }
 
-    MWWorld::Ptr Book::applyEnchantment(const MWWorld::Ptr &ptr, std::string enchId, int enchCharge, std::string newName) const
+    MWWorld::Ptr Book::applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
     {
-        const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-        ESM::Book oldItem = *store.get<ESM::Book>().find(ptr.getCellRef().mRefID);
-        ESM::Book newItem = oldItem;
+        MWWorld::LiveCellRef<ESM::Book> *ref =
+            ptr.get<ESM::Book>();
+
+        ESM::Book newItem = *ref->mBase;
         newItem.mId="";
         newItem.mName=newName;
         newItem.mData.mIsScroll = 1;
         newItem.mData.mEnchant=enchCharge;
         newItem.mEnchant=enchId;
         const ESM::Book *record = MWBase::Environment::get().getWorld()->createRecord (newItem);
-        MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), record->mId);
-        return ref.getPtr();
+        MWWorld::ManualRef mref (MWBase::Environment::get().getWorld()->getStore(), record->mId);
+        return mref.getPtr();
     }
 
     boost::shared_ptr<MWWorld::Action> Book::use (const MWWorld::Ptr& ptr) const

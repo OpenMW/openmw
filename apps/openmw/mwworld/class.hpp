@@ -231,7 +231,7 @@ namespace MWWorld
 
             virtual std::string getModel(const MWWorld::Ptr &ptr) const;
 
-            virtual MWWorld::Ptr applyEnchantment(const MWWorld::Ptr &ptr, std::string enchId, int enchCharge, std::string newName) const;
+            virtual MWWorld::Ptr applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const;
 
             virtual Ptr
             copyToCell(const Ptr &ptr, CellStore &cell) const;

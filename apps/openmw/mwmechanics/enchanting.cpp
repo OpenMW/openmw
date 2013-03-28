@@ -62,8 +62,8 @@ namespace MWMechanics
         MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), newobj.getCellRef().mRefID);
         MWWorld::Class::get (mEnchanter).getContainerStore (mEnchanter).add (ref.getPtr());
 
-        mOldItemPtr.getRefData().setCount(0);
-        mSoulGemPtr.getRefData().setCount(0);
+        mOldItemPtr.getRefData().setCount(mOldItemPtr.getRefData().getCount()-1);
+        mSoulGemPtr.getRefData().setCount(mSoulGemPtr.getRefData().getCount()-1);
     }
     
     void Enchanting::nextEnchantType()

@@ -362,18 +362,19 @@ namespace MWClass
         return ref->mBase->mEnchant;
     }
 
-    MWWorld::Ptr Weapon::applyEnchantment(const MWWorld::Ptr &ptr, std::string enchId, int enchCharge, std::string newName) const
+    MWWorld::Ptr Weapon::applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
     {
-            const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-            ESM::Weapon oldItem = *store.get<ESM::Weapon>().find(ptr.getCellRef().mRefID);
-            ESM::Weapon newItem = oldItem;
+            MWWorld::LiveCellRef<ESM::Weapon> *ref =
+            ptr.get<ESM::Weapon>();
+
+            ESM::Weapon newItem = *ref->mBase;
             newItem.mId="";
             newItem.mName=newName;
             newItem.mData.mEnchant=enchCharge;
             newItem.mEnchant=enchId;
             const ESM::Weapon *record = MWBase::Environment::get().getWorld()->createRecord (newItem);
-            MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), record->mId);
-            return ref.getPtr();
+            MWWorld::ManualRef mref (MWBase::Environment::get().getWorld()->getStore(), record->mId);
+            return mref.getPtr();
     }
 
     boost::shared_ptr<MWWorld::Action> Weapon::use (const MWWorld::Ptr& ptr) const
