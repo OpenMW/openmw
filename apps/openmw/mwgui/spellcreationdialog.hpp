@@ -24,7 +24,7 @@ namespace MWGui
 
         void newEffect (const ESM::MagicEffect* effect);
         void editEffect (ESM::ENAMstruct effect);
-
+        bool constantEffect;
         typedef MyGUI::delegates::CMultiDelegate1<ESM::ENAMstruct> EventHandle_Effect;
 
         EventHandle_Effect eventEffectAdded;
@@ -69,7 +69,6 @@ namespace MWGui
         void onMagnitudeMaxChanged (MyGUI::ScrollBar* sender, size_t pos);
         void onDurationChanged (MyGUI::ScrollBar* sender, size_t pos);
         void onAreaChanged (MyGUI::ScrollBar* sender, size_t pos);
-
         void setMagicEffect(const ESM::MagicEffect* effect);
 
         void updateBoxes();
@@ -88,6 +87,8 @@ namespace MWGui
 
 
     protected:
+        std::map<int, short> mButtonMapping; // maps button ID to effect ID
+
         Widgets::MWList* mAvailableEffectsList;
         MyGUI::ScrollView* mUsedEffectsView;
 

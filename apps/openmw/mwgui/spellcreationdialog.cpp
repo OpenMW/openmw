@@ -72,6 +72,7 @@ namespace MWGui
         mMagnitudeMaxSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &EditEffectDialog::onMagnitudeMaxChanged);
         mDurationSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &EditEffectDialog::onDurationChanged);
         mAreaSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &EditEffectDialog::onAreaChanged);
+        constantEffect=false;
     }
 
     void EditEffectDialog::open()
@@ -164,7 +165,7 @@ namespace MWGui
             mMagnitudeBox->setVisible (true);
             curY += mMagnitudeBox->getSize().height;
         }
-        if (!(mMagicEffect->mData.mFlags & ESM::MagicEffect::NoDuration))
+        if (!(mMagicEffect->mData.mFlags & ESM::MagicEffect::NoDuration)&&constantEffect==false)
         {
             mDurationBox->setPosition(mDurationBox->getPosition().left, curY);
             mDurationBox->setVisible (true);
@@ -454,10 +455,13 @@ namespace MWGui
 
         mAvailableEffectsList->clear ();
 
+        int i=0;
         for (std::vector<short>::const_iterator it = knownEffects.begin(); it != knownEffects.end(); ++it)
         {
             mAvailableEffectsList->addItem(MWBase::Environment::get().getWorld ()->getStore ().get<ESM::GameSetting>().find(
                                                ESM::MagicEffect::effectIdToString  (*it))->getString());
+            mButtonMapping[i] = *it;
+            ++i;
         }
         mAvailableEffectsList->adjustSize ();
 
@@ -466,7 +470,6 @@ namespace MWGui
             std::string name = MWBase::Environment::get().getWorld ()->getStore ().get<ESM::GameSetting>().find(
                                                ESM::MagicEffect::effectIdToString  (*it))->getString();
             MyGUI::Widget* w = mAvailableEffectsList->getItemWidget(name);
-            w->setUserData(*it);
 
             ToolTips::createMagicEffectToolTip (w, *it);
         }
@@ -518,7 +521,8 @@ namespace MWGui
             return;
         }
 
-        short effectId = *sender->getUserData<short>();
+        int buttonId = *sender->getUserData<int>();
+        short effectId = mButtonMapping[buttonId];
 
         for (std::vector<ESM::ENAMstruct>::const_iterator it = mEffects.begin(); it != mEffects.end(); ++it)
         {

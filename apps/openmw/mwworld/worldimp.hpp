@@ -272,25 +272,44 @@ namespace MWWorld
             ///< \return Resulting mode
 
             virtual const ESM::Potion *createRecord (const ESM::Potion& record);
-            ///< Create a new recrod (of type potion) in the ESM store.
+            ///< Create a new record (of type potion) in the ESM store.
             /// \return pointer to created record
 
             virtual const ESM::Spell *createRecord (const ESM::Spell& record);
-            ///< Create a new recrod (of type spell) in the ESM store.
+            ///< Create a new record (of type spell) in the ESM store.
             /// \return pointer to created record
 
             virtual const ESM::Class *createRecord (const ESM::Class& record);
-            ///< Create a new recrod (of type class) in the ESM store.
+            ///< Create a new record (of type class) in the ESM store.
             /// \return pointer to created record
 
             virtual const ESM::Cell *createRecord (const ESM::Cell& record);
-            ///< Create a new recrod (of type cell) in the ESM store.
+            ///< Create a new record (of type cell) in the ESM store.
             /// \return pointer to created record
 
             virtual const ESM::NPC *createRecord(const ESM::NPC &record);
-            ///< Create a new recrod (of type npc) in the ESM store.
+            ///< Create a new record (of type npc) in the ESM store.
             /// \return pointer to created record
 
+            virtual const ESM::Armor *createRecord (const ESM::Armor& record);
+            ///< Create a new record (of type armor) in the ESM store.
+            /// \return pointer to created record
+
+            virtual const ESM::Weapon *createRecord (const ESM::Weapon& record);
+            ///< Create a new record (of type weapon) in the ESM store.
+            /// \return pointer to created record
+
+            virtual const ESM::Clothing *createRecord (const ESM::Clothing& record);
+            ///< Create a new record (of type clothing) in the ESM store.
+            /// \return pointer to created record
+
+            virtual const ESM::Enchantment *createRecord (const ESM::Enchantment& record);
+            ///< Create a new record (of type enchantment) in the ESM store.
+            /// \return pointer to created record
+
+            virtual const ESM::Book *createRecord (const ESM::Book& record);
+            ///< Create a new record (of type book) in the ESM store.
+            /// \return pointer to created record
 
             virtual void update (float duration, bool paused);
 

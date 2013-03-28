@@ -14,6 +14,7 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/physicssystem.hpp"
 #include "../mwworld/nullaction.hpp"
+#include "../mwworld/manualref.hpp"
 
 #include "../mwgui/tooltips.hpp"
 
@@ -219,6 +220,20 @@ namespace MWClass
             ptr.get<ESM::Clothing>();
 
         return ref->mBase->mEnchant;
+    }
+
+    MWWorld::Ptr Clothing::applyEnchantment(const MWWorld::Ptr &ptr, std::string enchId, int enchCharge, std::string newName) const
+    {
+        const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+        ESM::Clothing oldItem = *store.get<ESM::Clothing>().find(ptr.getCellRef().mRefID);
+        ESM::Clothing newItem = oldItem;
+        newItem.mId="";
+        newItem.mName=newName;
+        newItem.mData.mEnchant=enchCharge;
+        newItem.mEnchant=enchId;
+        const ESM::Clothing *record = MWBase::Environment::get().getWorld()->createRecord (newItem);
+        MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), record->mId);
+        return ref.getPtr();
     }
 
     boost::shared_ptr<MWWorld::Action> Clothing::use (const MWWorld::Ptr& ptr) const

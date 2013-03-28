@@ -7,6 +7,8 @@
 
 #include "../mwbase/windowmanager.hpp"
 
+#include "../mwmechanics/enchanting.hpp"
+
 namespace MWGui
 {
 
@@ -23,6 +25,7 @@ namespace MWGui
 
     protected:
         virtual void onReferenceUnavailable();
+        virtual void notifyEffectsChanged ();
 
         void onCancelButtonClicked(MyGUI::Widget* sender);
         void onSelectItem (MyGUI::Widget* sender);
@@ -34,8 +37,9 @@ namespace MWGui
         void onItemCancel();
         void onSoulSelected(MWWorld::Ptr item);
         void onSoulCancel();
-
+        void onBuyButtonClicked(MyGUI::Widget* sender);
         void updateLabels();
+        void onTypeButtonClicked(MyGUI::Widget* sender);
 
         ItemSelectionDialog* mItemSelectionDialog;
 
@@ -46,15 +50,14 @@ namespace MWGui
         MyGUI::Button* mTypeButton;
         MyGUI::Button* mBuyButton;
 
+        MyGUI::TextBox* mName;
         MyGUI::TextBox* mEnchantmentPoints;
         MyGUI::TextBox* mCastCost;
         MyGUI::TextBox* mCharge;
         MyGUI::TextBox* mPrice;
 
-        MWWorld::Ptr mItem;
-        MWWorld::Ptr mSoul;
-
-        float mCurrentEnchantmentPoints;
+        MWMechanics::Enchanting mEnchanting;
+        ESM::EffectList mEffectList;
     };
 
 }
