@@ -60,6 +60,7 @@ namespace MWMechanics
         MWWorld::Ptr newobj = MWWorld::Class::get(mOldItemPtr).applyEnchantment(mOldItemPtr, enchantment->mId, getGemCharge(), mNewItemName);
 
         MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), newobj.getCellRef().mRefID);
+        newobj.mPtr = mOldItemPtr.mPtr;
         MWWorld::Class::get (mEnchanter).getContainerStore (mEnchanter).add (ref.getPtr());
 
         mOldItemPtr.getRefData().setCount(mOldItemPtr.getRefData().getCount()-1);
