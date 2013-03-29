@@ -72,6 +72,7 @@ namespace MWGui
         mMagnitudeMaxSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &EditEffectDialog::onMagnitudeMaxChanged);
         mDurationSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &EditEffectDialog::onDurationChanged);
         mAreaSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &EditEffectDialog::onAreaChanged);
+        constantEffect=false;
     }
 
     void EditEffectDialog::open()
@@ -164,7 +165,7 @@ namespace MWGui
             mMagnitudeBox->setVisible (true);
             curY += mMagnitudeBox->getSize().height;
         }
-        if (!(mMagicEffect->mData.mFlags & ESM::MagicEffect::NoDuration))
+        if (!(mMagicEffect->mData.mFlags & ESM::MagicEffect::NoDuration)&&constantEffect==false)
         {
             mDurationBox->setPosition(mDurationBox->getPosition().left, curY);
             mDurationBox->setVisible (true);

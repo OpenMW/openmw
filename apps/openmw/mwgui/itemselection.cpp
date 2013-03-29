@@ -3,7 +3,7 @@
 namespace MWGui
 {
 
-    ItemSelectionDialog::ItemSelectionDialog(const std::string &label, ContainerBase::Filter filter, MWBase::WindowManager& parWindowManager)
+    ItemSelectionDialog::ItemSelectionDialog(const std::string &label, int filter, MWBase::WindowManager& parWindowManager)
         : ContainerBase(NULL)
         , WindowModal("openmw_itemselection_dialog.layout", parWindowManager)
     {

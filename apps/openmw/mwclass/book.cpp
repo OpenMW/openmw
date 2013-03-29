@@ -147,6 +147,21 @@ namespace MWClass
         return ref->mBase->mEnchant;
     }
 
+    std::string Book::applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
+    {
+        MWWorld::LiveCellRef<ESM::Book> *ref =
+            ptr.get<ESM::Book>();
+
+        ESM::Book newItem = *ref->mBase;
+        newItem.mId="";
+        newItem.mName=newName;
+        newItem.mData.mIsScroll = 1;
+        newItem.mData.mEnchant=enchCharge;
+        newItem.mEnchant=enchId;
+        const ESM::Book *record = MWBase::Environment::get().getWorld()->createRecord (newItem);
+        return record->mId;
+    }
+
     boost::shared_ptr<MWWorld::Action> Book::use (const MWWorld::Ptr& ptr) const
     {
         return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionRead(ptr));
@@ -159,5 +174,13 @@ namespace MWClass
             ptr.get<ESM::Book>();
 
         return MWWorld::Ptr(&cell.mBooks.insert(*ref), &cell);
+    }
+
+    short Book::getEnchantmentPoints (const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Book> *ref =
+                ptr.get<ESM::Book>();
+
+        return ref->mBase->mData.mEnchant;
     }
 }

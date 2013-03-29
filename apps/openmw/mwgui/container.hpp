@@ -48,16 +48,17 @@ namespace MWGui
         ContainerBase(DragAndDrop* dragAndDrop);
         virtual ~ContainerBase();
 
-        enum Filter
-        {
-            Filter_All = 0x01,
-            Filter_Weapon = 0x02,
-            Filter_Apparel = 0x03,
-            Filter_Magic = 0x04,
-            Filter_Misc = 0x05,
+        // basic types (inclusive)
+        static const int Filter_All = (1<<0);
+        static const int Filter_Weapon = (1<<1);
+        static const int Filter_Apparel = (1<<2);
+        static const int Filter_Ingredients = (1<<3);
+        static const int Filter_Misc = (1<<4);
 
-            Filter_Ingredients = 0x06
-        };
+        // special filtering (exclusive)
+        static const int Filter_Magic = (1<<5);
+        static const int Filter_NoMagic = (1<<6);
+        static const int Filter_ChargedSoulstones = (1<<7);
 
         enum ItemState
         {
@@ -78,7 +79,7 @@ namespace MWGui
         MWWorld::ContainerStore& getBoughtItems() { return mBoughtItems; }
 
         void openContainer(MWWorld::Ptr container);
-        void setFilter(Filter filter); ///< set category filter
+        void setFilter(int filter); ///< set category filter
         void drawItems();
 
     protected:
@@ -92,7 +93,7 @@ namespace MWGui
 
         DragAndDrop* mDragAndDrop;
 
-        Filter mFilter;
+        int mFilter;
 
         // bought items are put in a separate ContainerStore so that they don't stack with other (not bought) items.
         MWWorld::ContainerStore mBoughtItems;
