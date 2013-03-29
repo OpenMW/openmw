@@ -271,16 +271,11 @@ void Objects::insertLight (const MWWorld::Ptr& ptr, Ogre::Entity* skelBase, Ogre
     info.time = Ogre::Math::RangeRandom(-500, +500);
     info.phase = Ogre::Math::RangeRandom(-500, +500);
 
-    // changed to linear to look like morrowind
-    bool quadratic = false;
-    /*
-    if (!lightOutQuadInLin)
-        quadratic = lightQuadratic;
+    bool quadratic;
+    if (!lightOutQuadInLin())
+        quadratic = lightQuadratic();
     else
-    {
         quadratic = !info.interior;
-    }
-    */
 
     if (!quadratic)
     {
