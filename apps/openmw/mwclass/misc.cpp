@@ -89,7 +89,15 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
             ptr.get<ESM::Miscellaneous>();
 
-        return ref->mBase->mData.mValue;
+        int value = (ptr.getCellRef().mGoldValue == 1) ? ref->mBase->mData.mValue : ptr.getCellRef().mGoldValue;
+
+        if (ptr.getCellRef().mSoul != "")
+        {
+            const ESM::Creature *creature = MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().find(ref->mRef.mSoul);
+            value *= creature->mData.mSoul;
+        }
+
+        return value;
     }
 
     void Miscellaneous::registerSelf()
@@ -151,8 +159,10 @@ namespace MWClass
         int count = ptr.getRefData().getCount();
 
         bool isGold = (ref->mBase->mName == store.get<ESM::GameSetting>().find("sGold")->getString());
-        if (isGold && count == 1)
-            count = ref->mBase->mData.mValue;
+        if (isGold && ptr.getCellRef().mGoldValue != 1)
+            count = ptr.getCellRef().mGoldValue;
+        else if (isGold)
+            count *= ref->mBase->mData.mValue;
 
         std::string countString;
         if (!isGold)
@@ -174,7 +184,7 @@ namespace MWClass
         if (!isGold)
         {
             text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight);
-            text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
+            text += MWGui::ToolTips::getValueString(getValue(ptr), "#{sValue}");
         }
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
@@ -214,7 +224,8 @@ namespace MWClass
             MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
                 newRef.getPtr().get<ESM::Miscellaneous>();
             newPtr = MWWorld::Ptr(&cell.mMiscItems.insert(*ref), &cell);
-            newPtr.getRefData ().setCount(goldAmount);
+            newPtr.getRefData ().setCount(1);
+            newPtr.getCellRef().mGoldValue = goldAmount;
         } else {
             MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
                 ptr.get<ESM::Miscellaneous>();

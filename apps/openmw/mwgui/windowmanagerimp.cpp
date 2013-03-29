@@ -55,6 +55,8 @@
 #include "exposedwindow.hpp"
 #include "cursor.hpp"
 #include "spellicons.hpp"
+#include "merchantrepair.hpp"
+#include "repair.hpp"
 
 using namespace MWGui;
 
@@ -90,6 +92,8 @@ WindowManager::WindowManager(
   , mSpellCreationDialog(NULL)
   , mEnchantingDialog(NULL)
   , mTrainingWindow(NULL)
+  , mMerchantRepair(NULL)
+  , mRepair(NULL)
   , mPlayerName()
   , mPlayerRaceId()
   , mPlayerAttributes()
@@ -180,6 +184,8 @@ WindowManager::WindowManager(
     mSpellCreationDialog = new SpellCreationDialog(*this);
     mEnchantingDialog = new EnchantingDialog(*this);
     mTrainingWindow = new TrainingWindow(*this);
+    mMerchantRepair = new MerchantRepair(*this);
+    mRepair = new Repair(*this);
 
     mLoadingScreen = new LoadingScreen(mRendering->getScene (), mRendering->getWindow (), *this);
     mLoadingScreen->onResChange (w,h);
@@ -245,6 +251,8 @@ WindowManager::~WindowManager()
     delete mTrainingWindow;
     delete mCountDialog;
     delete mQuickKeysMenu;
+    delete mMerchantRepair;
+    delete mRepair;
     delete mCursor;
 
     cleanupGarbage();
@@ -303,6 +311,8 @@ void WindowManager::updateVisible()
     mSpellCreationDialog->setVisible(false);
     mEnchantingDialog->setVisible(false);
     mTrainingWindow->setVisible(false);
+    mMerchantRepair->setVisible(false);
+    mRepair->setVisible(false);
 
     mHud->setVisible(mHudEnabled);
 
@@ -427,6 +437,12 @@ void WindowManager::updateVisible()
             break;
         case GM_Training:
             mTrainingWindow->setVisible(true);
+            break;
+        case GM_MerchantRepair:
+            mMerchantRepair->setVisible(true);
+            break;
+        case GM_Repair:
+            mRepair->setVisible(true);
             break;
         case GM_InterMessageBox:
             break;
@@ -1130,6 +1146,16 @@ void WindowManager::startEnchanting (MWWorld::Ptr actor)
 void WindowManager::startTraining(MWWorld::Ptr actor)
 {
     mTrainingWindow->startTraining(actor);
+}
+
+void WindowManager::startRepair(MWWorld::Ptr actor)
+{
+    mMerchantRepair->startRepair(actor);
+}
+
+void WindowManager::startRepairItem(MWWorld::Ptr item)
+{
+    mRepair->startRepairItem(item);
 }
 
 const Translation::Storage& WindowManager::getTranslationDataStorage() const

@@ -368,7 +368,7 @@ namespace MWGui
             return services & ESM::NPC::Books;
         else if (item.getTypeName() == typeid(ESM::Ingredient).name())
             return services & ESM::NPC::Ingredients;
-        else if (item.getTypeName() == typeid(ESM::Tool).name())
+        else if (item.getTypeName() == typeid(ESM::Lockpick).name())
             return services & ESM::NPC::Picks;
         else if (item.getTypeName() == typeid(ESM::Probe).name())
             return services & ESM::NPC::Probes;

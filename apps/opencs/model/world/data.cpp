@@ -3,7 +3,7 @@
 
 #include <stdexcept>
 
-#include <QAbstractTableModel>
+#include <QAbstractItemModel>
 
 #include <components/esm/esmreader.hpp>
 #include <components/esm/defs.hpp>
@@ -12,7 +12,7 @@
 #include "idtable.hpp"
 #include "columns.hpp"
 
-void CSMWorld::Data::addModel (QAbstractTableModel *model, UniversalId::Type type1,
+void CSMWorld::Data::addModel (QAbstractItemModel *model, UniversalId::Type type1,
     UniversalId::Type type2)
 {
     mModels.push_back (model);
@@ -36,13 +36,22 @@ CSMWorld::Data::Data()
     mGmsts.addColumn (new VarTypeColumn<ESM::GameSetting> (ColumnBase::Display_GmstVarType));
     mGmsts.addColumn (new VarValueColumn<ESM::GameSetting>);
 
+    mSkills.addColumn (new StringIdColumn<ESM::Skill>);
+    mSkills.addColumn (new RecordStateColumn<ESM::Skill>);
+    mSkills.addColumn (new AttributeColumn<ESM::Skill>);
+    mSkills.addColumn (new SpecialisationColumn<ESM::Skill>);
+    for (int i=0; i<4; ++i)
+        mSkills.addColumn (new UseValueColumn<ESM::Skill> (i));
+    mSkills.addColumn (new DescriptionColumn<ESM::Skill>);
+
     addModel (new IdTable (&mGlobals), UniversalId::Type_Globals, UniversalId::Type_Global);
     addModel (new IdTable (&mGmsts), UniversalId::Type_Gmsts, UniversalId::Type_Gmst);
+    addModel (new IdTable (&mSkills), UniversalId::Type_Skills, UniversalId::Type_Skill);
 }
 
 CSMWorld::Data::~Data()
 {
-    for (std::vector<QAbstractTableModel *>::iterator iter (mModels.begin()); iter!=mModels.end(); ++iter)
+    for (std::vector<QAbstractItemModel *>::iterator iter (mModels.begin()); iter!=mModels.end(); ++iter)
         delete *iter;
 }
 
@@ -66,9 +75,19 @@ CSMWorld::IdCollection<ESM::GameSetting>& CSMWorld::Data::getGmsts()
     return mGmsts;
 }
 
-QAbstractTableModel *CSMWorld::Data::getTableModel (const UniversalId& id)
+const CSMWorld::IdCollection<ESM::Skill>& CSMWorld::Data::getSkills() const
 {
-    std::map<UniversalId::Type, QAbstractTableModel *>::iterator iter = mModelIndex.find (id.getType());
+    return mSkills;
+}
+
+CSMWorld::IdCollection<ESM::Skill>& CSMWorld::Data::getSkills()
+{
+    return mSkills;
+}
+
+QAbstractItemModel *CSMWorld::Data::getTableModel (const UniversalId& id)
+{
+    std::map<UniversalId::Type, QAbstractItemModel *>::iterator iter = mModelIndex.find (id.getType());
 
     if (iter==mModelIndex.end())
         throw std::logic_error ("No table model available for " + id.toString());
@@ -102,7 +121,7 @@ void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base)
         {
             case ESM::REC_GLOB: mGlobals.load (reader, base); break;
             case ESM::REC_GMST: mGmsts.load (reader, base); break;
-
+            case ESM::REC_SKIL: mSkills.load (reader, base); break;
 
             default:
 

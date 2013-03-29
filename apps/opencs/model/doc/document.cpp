@@ -2,7 +2,7 @@
 #include "document.hpp"
 
 #include <cassert>
-#include <QDebug>
+
 void CSMDoc::Document::load (const std::vector<boost::filesystem::path>::const_iterator& begin,
     const std::vector<boost::filesystem::path>::const_iterator& end, bool lastAsModified)
 {
@@ -150,6 +150,10 @@ void CSMDoc::Document::addOptionalGlobals()
         ESM::Global global;
         global.mId = sGlobals[i];
         global.mValue.setType (ESM::VT_Long);
+
+        if (i==0)
+            global.mValue.setInteger (1); // dayspassed starts counting at 1
+
         addOptionalGlobal (global);
     }
 }
@@ -189,15 +193,25 @@ void CSMDoc::Document::createBase()
 
         record.mId = sGlobals[i];
 
-        record.mValue.setType (i==2 ? ESM::VT_Float : ESM::VT_Int);
+        record.mValue.setType (i==2 ? ESM::VT_Float : ESM::VT_Long);
 
-        if (i==0)
+        if (i==0 || i==1)
             record.mValue.setInteger (1);
 
         getData().getGlobals().add (record);
     }
 
     /// \todo add GMSTs
+
+    for (int i=0; i<27; ++i)
+    {
+        ESM::Skill record;
+        record.mIndex = i;
+        record.mId = ESM::Skill::getIndexToId (record.mIndex);
+        record.blank();
+
+        getData().getSkills().add (record);
+    }
 }
 
 CSMDoc::Document::Document (const std::vector<boost::filesystem::path>& files, bool new_)
@@ -214,7 +228,7 @@ CSMDoc::Document::Document (const std::vector<boost::filesystem::path>& files, b
 
     if (new_ && files.size()==1)
         createBase();
-    else if (files.size()>1)
+    else
     {
         std::vector<boost::filesystem::path>::const_iterator end = files.end();
 

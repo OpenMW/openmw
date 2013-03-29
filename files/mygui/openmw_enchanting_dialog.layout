@@ -26,14 +26,18 @@
             <Widget type="AutoSizedTextBox" skin="NormalText">
                 <Property key="Caption" value="#{sItem}"/>
             </Widget>
-            <Widget type="Button" skin="MW_Box" position="0 0 60 59" name="ItemBox"/>
+            <Widget type="Widget" skin="MW_Box" position="0 0 50 50">
+                <Widget type="ImageBox" skin="ImageBox" position="9 9 32 32" name="ItemBox"/>
+            </Widget>
 
             <Widget type="Widget" position="0 0 8 0"/>
 
             <Widget type="AutoSizedTextBox" skin="NormalText">
                 <Property key="Caption" value="#{sSoulGem}"/>
             </Widget>
-            <Widget type="Button" skin="MW_Box" position="0 0 60 59" name="SoulBox"/>
+            <Widget type="Button" skin="MW_Box" position="0 0 50 50">
+                <Widget type="ImageBox" skin="ImageBox" position="9 9 32 32" name="SoulBox"/>
+            </Widget>
 
         </Widget>
 
@@ -85,7 +89,11 @@
         <Widget type="HBox" position="0 340 560 60">
             <Property key="Padding" value="16"/>
 
-            <Widget type="Widget" position="0 0 0 0">
+            <Widget type="AutoSizedButton" skin="MW_Button" name="TypeButton">
+                <Property key="Caption" value="Constant effect"/>
+            </Widget>
+
+            <Widget type="Widget">
                 <UserString key="HStretch" value="true"/>
             </Widget>
 
@@ -95,6 +103,7 @@
             <Widget type="AutoSizedTextBox" skin="SandText" name="PriceLabel">
                 <Property key="Caption" value="30"/>
             </Widget>
+
 
 
             <Widget type="AutoSizedButton" skin="MW_Button" name="BuyButton">

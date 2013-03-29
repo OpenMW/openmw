@@ -31,6 +31,7 @@ add_openmw_dir (mwgui
     confirmationdialog alchemywindow referenceinterface spellwindow mainmenu quickkeysmenu
     itemselection spellbuyingwindow loadingscreen levelupdialog waitdialog spellcreationdialog
     enchantingdialog trainingwindow travelwindow imagebutton exposedwindow cursor spellicons
+    merchantrepair repair
     )
 
 add_openmw_dir (mwdialogue
@@ -53,7 +54,7 @@ add_openmw_dir (mwworld
     containerstore actiontalk actiontake manualref player cellfunctors failedaction
     cells localscripts customdata weather inventorystore ptr actionopen actionread
     actionequip timestamp actionalchemy cellstore actionapply actioneat
-    esmstore store recordcmp fallback
+    esmstore store recordcmp fallback actionrepair
     )
 
 add_openmw_dir (mwclass
@@ -64,7 +65,7 @@ add_openmw_dir (mwclass
 add_openmw_dir (mwmechanics
     mechanicsmanagerimp stat character creaturestats magiceffects movement actors activators
     drawstate spells activespells npcstats aipackage aisequence alchemy aiwander aitravel aifollow
-    aiescort aiactivate
+    aiescort aiactivate repair enchanting
     )
 
 add_openmw_dir (mwbase

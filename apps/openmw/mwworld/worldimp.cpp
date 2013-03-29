@@ -101,7 +101,7 @@ namespace MWWorld
             return Ptr (ref, &cell);
         if (MWWorld::LiveCellRef<ESM::Light> *ref = searchViaHandle (handle, cell.mLights))
             return Ptr (ref, &cell);
-        if (MWWorld::LiveCellRef<ESM::Tool> *ref = searchViaHandle (handle, cell.mLockpicks))
+        if (MWWorld::LiveCellRef<ESM::Lockpick> *ref = searchViaHandle (handle, cell.mLockpicks))
             return Ptr (ref, &cell);
         if (MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = searchViaHandle (handle, cell.mMiscItems))
             return Ptr (ref, &cell);
@@ -947,6 +947,31 @@ namespace MWWorld
             mRendering->renderPlayer(mPlayer->getPlayer());
         }
         return ret;
+    }
+
+    const ESM::Armor *World::createRecord (const ESM::Armor& record)
+    {
+        return mStore.insert(record);
+    }
+
+    const ESM::Weapon *World::createRecord (const ESM::Weapon& record)
+    {
+        return mStore.insert(record);
+    }
+
+    const ESM::Clothing *World::createRecord (const ESM::Clothing& record)
+    {
+        return mStore.insert(record);
+    }
+
+    const ESM::Enchantment *World::createRecord (const ESM::Enchantment& record)
+    {
+        return mStore.insert(record);
+    }
+
+    const ESM::Book *World::createRecord (const ESM::Book& record)
+    {
+        return mStore.insert(record);
     }
 
     void World::update (float duration, bool paused)

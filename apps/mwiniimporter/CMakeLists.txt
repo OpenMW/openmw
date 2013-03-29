@@ -22,3 +22,8 @@ if (BUILD_WITH_CODE_COVERAGE)
   add_definitions (--coverage)
   target_link_libraries(mwiniimport gcov)
 endif()
+
+if(DPKG_PROGRAM)
+    INSTALL(TARGETS mwiniimport RUNTIME DESTINATION games COMPONENT mwiniimport)
+endif()
+

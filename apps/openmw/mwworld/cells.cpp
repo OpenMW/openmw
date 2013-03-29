@@ -206,7 +206,7 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name, Ptr::CellStore& ce
     if (MWWorld::LiveCellRef<ESM::Light> *ref = cell.mLights.find (name))
         ptr = Ptr (ref, &cell);
 
-    if (MWWorld::LiveCellRef<ESM::Tool> *ref = cell.mLockpicks.find (name))
+    if (MWWorld::LiveCellRef<ESM::Lockpick> *ref = cell.mLockpicks.find (name))
         ptr = Ptr (ref, &cell);
 
     if (MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = cell.mMiscItems.find (name))

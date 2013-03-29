@@ -127,6 +127,11 @@ namespace MWWorld
         return 0;
     }
 
+    short Class::getEnchantmentPoints (const MWWorld::Ptr& ptr) const
+    {
+        throw std::runtime_error ("class does not support enchanting");
+    }
+
     MWMechanics::Movement& Class::getMovementSettings (const Ptr& ptr) const
     {
         throw std::runtime_error ("movement settings not supported by class");
@@ -169,7 +174,7 @@ namespace MWWorld
 
     bool Class::hasDetected (const MWWorld::Ptr& ptr, const MWWorld::Ptr& ptr2) const
     {
-        return false;
+        return true;
     }
 
     float Class::getArmorRating (const MWWorld::Ptr& ptr) const
@@ -239,6 +244,11 @@ namespace MWWorld
     std::string Class::getModel(const MWWorld::Ptr &ptr) const
     {
         return "";
+    }
+
+    std::string Class::applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
+    {
+        throw std::runtime_error ("class can't be enchanted");
     }
 
     MWWorld::Ptr

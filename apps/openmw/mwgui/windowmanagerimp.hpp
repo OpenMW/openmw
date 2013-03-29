@@ -74,6 +74,8 @@ namespace MWGui
   class TrainingWindow;
   class Cursor;
   class SpellIcons;
+  class MerchantRepair;
+  class Repair;
 
   class WindowManager : public MWBase::WindowManager
   {
@@ -229,6 +231,8 @@ namespace MWGui
     virtual void startSpellMaking(MWWorld::Ptr actor);
     virtual void startEnchanting(MWWorld::Ptr actor);
     virtual void startTraining(MWWorld::Ptr actor);
+    virtual void startRepair(MWWorld::Ptr actor);
+    virtual void startRepairItem(MWWorld::Ptr item);
 
     virtual void changePointer (const std::string& name);
 
@@ -266,6 +270,9 @@ namespace MWGui
     SpellCreationDialog* mSpellCreationDialog;
     EnchantingDialog* mEnchantingDialog;
     TrainingWindow* mTrainingWindow;
+    MerchantRepair* mMerchantRepair;
+    Repair* mRepair;
+
     Translation::Storage& mTranslationDataStorage;
     Cursor* mCursor;
 

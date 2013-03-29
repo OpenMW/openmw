@@ -367,6 +367,9 @@ namespace MWDialogue
         if (services & ESM::NPC::Enchanting)
             windowServices |= MWGui::DialogueWindow::Service_Enchant;
 
+        if (services & ESM::NPC::Repair)
+            windowServices |= MWGui::DialogueWindow::Service_Repair;
+
         MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
 
         win->setServices (windowServices);

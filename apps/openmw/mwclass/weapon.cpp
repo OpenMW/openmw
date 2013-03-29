@@ -75,7 +75,10 @@ namespace MWClass
 
     bool Weapon::hasItemHealth (const MWWorld::Ptr& ptr) const
     {
-        return true;
+        MWWorld::LiveCellRef<ESM::Weapon> *ref =
+            ptr.get<ESM::Weapon>();
+
+        return (ref->mBase->mData.mType < 11); // thrown weapons and arrows/bolts don't have health, only quantity
     }
 
     int Weapon::getItemMaxHealth (const MWWorld::Ptr& ptr) const
@@ -334,9 +337,12 @@ namespace MWClass
             }
         }
 
-        /// \todo store the current weapon health somewhere
         if (ref->mBase->mData.mType < 11) // thrown weapons and arrows/bolts don't have health, only quantity
-            text += "\n#{sCondition}: " + MWGui::ToolTips::toString(ref->mBase->mData.mHealth);
+        {
+            int remainingHealth = (ptr.getCellRef().mCharge != -1) ? ptr.getCellRef().mCharge : ref->mBase->mData.mHealth;
+            text += "\n#{sCondition}: " + MWGui::ToolTips::toString(remainingHealth) + "/"
+                    + MWGui::ToolTips::toString(ref->mBase->mData.mHealth);
+        }
 
         text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight);
         text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
@@ -361,6 +367,20 @@ namespace MWClass
         return ref->mBase->mEnchant;
     }
 
+    std::string Weapon::applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
+    {
+            MWWorld::LiveCellRef<ESM::Weapon> *ref =
+            ptr.get<ESM::Weapon>();
+
+            ESM::Weapon newItem = *ref->mBase;
+            newItem.mId="";
+            newItem.mName=newName;
+            newItem.mData.mEnchant=enchCharge;
+            newItem.mEnchant=enchId;
+            const ESM::Weapon *record = MWBase::Environment::get().getWorld()->createRecord (newItem);
+            return record->mId;
+    }
+
     boost::shared_ptr<MWWorld::Action> Weapon::use (const MWWorld::Ptr& ptr) const
     {
         boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionEquip(ptr));
@@ -377,5 +397,13 @@ namespace MWClass
             ptr.get<ESM::Weapon>();
 
         return MWWorld::Ptr(&cell.mWeapons.insert(*ref), &cell);
+    }
+
+    short Weapon::getEnchantmentPoints (const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Weapon> *ref =
+                ptr.get<ESM::Weapon>();
+
+        return ref->mBase->mData.mEnchant;
     }
 }

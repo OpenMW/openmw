@@ -32,20 +32,9 @@ namespace MWGui
 
         getWidget(mCancelButton, "CancelButton");
         getWidget(mPlayerGold, "PlayerGold");
-        getWidget(mSelect, "Select");
-        getWidget(mSpells, "Spells");
         getWidget(mSpellsView, "SpellsView");
 
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellBuyingWindow::onCancelButtonClicked);
-
-        mSpells->setCoord(450/2-mSpells->getTextSize().width/2,
-                          mSpells->getTop(),
-                          mSpells->getTextSize().width,
-                          mSpells->getHeight());
-        mSelect->setCoord(8,
-                          mSelect->getTop(),
-                          mSelect->getTextSize().width,
-                          mSelect->getHeight());
     }
 
     void SpellBuyingWindow::addSpell(const std::string& spellId)

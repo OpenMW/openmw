@@ -52,15 +52,15 @@ public:
   // is -1, which I assume means "any rank".
   int mFactIndex;
 
-  // Depends on context - possibly weapon health, number of uses left
-  // or weapon magic charge?
-  float mCharge;
+  // For weapon or armor, this is the remaining item health.
+  // For tools (lockpicks, probes, repair hammer) it is the remaining uses.
+  int mCharge;
 
-  // I have no idea, these are present some times, often along with
-  // owner (ANAM) and sometimes otherwise. They are often (but not
-  // always) 1. INTV is big for lights (possibly a float?), might have
-  // something to do with remaining light "charge".
-  int mIntv, mNam9;
+  // Remaining enchantment charge
+  float mEnchantmentCharge;
+
+  // This is 5 for Gold_005 references, 100 for Gold_100 and so on.
+  int mGoldValue;
 
   // For doors - true if this door teleports to somewhere else, false
   // if it should open through animation.
@@ -76,8 +76,10 @@ public:
   int mLockLevel;
   std::string mKey, mTrap; // Key and trap ID names, if any
 
-  // No idea - occurs ONCE in Morrowind.esm, for an activator
-  signed char mUnam;
+  // This corresponds to the "Reference Blocked" checkbox in the construction set,
+  // which prevents editing that reference.
+  // -1 is not blocked, otherwise it is blocked.
+  signed char mReferenceBlocked;
 
   // Track deleted references. 0 - not deleted, 1 - deleted, but respawns, 2 - deleted and does not respawn.
   int mDeleted;

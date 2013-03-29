@@ -28,8 +28,6 @@ namespace MWGui
         protected:
             MyGUI::Button* mCancelButton;
             MyGUI::TextBox* mPlayerGold;
-            MyGUI::TextBox* mSpells;
-            MyGUI::TextBox* mSelect;
 
             MyGUI::ScrollView* mSpellsView;
 

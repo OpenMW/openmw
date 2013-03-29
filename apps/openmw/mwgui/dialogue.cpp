@@ -230,14 +230,14 @@ void DialogueWindow::onSelectTopic(const std::string& topic, int id)
 {
     if (!mEnabled) return;
 
-    int separatorPos = mTopicsList->getItemCount();
+    int separatorPos = 0;
     for (unsigned int i=0; i<mTopicsList->getItemCount(); ++i)
     {
         if (mTopicsList->getItemNameAt(i) == "")
             separatorPos = i;
     }
 
-    if (id > separatorPos)
+    if (id >= separatorPos)
         MWBase::Environment::get().getDialogueManager()->keywordSelected(lower_string(topic));
     else
     {
@@ -280,6 +280,11 @@ void DialogueWindow::onSelectTopic(const std::string& topic, int id)
                 mWindowManager.pushGuiMode(GM_Training);
                 mWindowManager.startTraining (mPtr);
             }
+            else if (topic == gmst.find("sRepair")->getString())
+            {
+                mWindowManager.pushGuiMode(GM_MerchantRepair);
+                mWindowManager.startRepair (mPtr);
+            }
         }
     }
 }
@@ -321,11 +326,14 @@ void DialogueWindow::setKeywords(std::list<std::string> keyWords)
     if (mServices & Service_CreateSpells)
         mTopicsList->addItem(gmst.find("sSpellmakingMenuTitle")->getString());
 
-//    if (mServices & Service_Enchant)
-//        mTopicsList->addItem(gmst.find("sEnchanting")->getString());
+    if (mServices & Service_Enchant)
+        mTopicsList->addItem(gmst.find("sEnchanting")->getString());
 
     if (mServices & Service_Training)
         mTopicsList->addItem(gmst.find("sServiceTrainingTitle")->getString());
+
+    if (mServices & Service_Repair)
+        mTopicsList->addItem(gmst.find("sRepair")->getString());
 
     if (anyService || mPtr.getTypeName() == typeid(ESM::NPC).name())
         mTopicsList->addSeparator();
@@ -381,10 +389,17 @@ std::string DialogueWindow::parseText(const std::string& text)
 
     std::vector<std::string> topics;
 
+    bool hasSeparator = false;
+    for (unsigned int i=0; i<mTopicsList->getItemCount(); ++i)
+    {
+        if (mTopicsList->getItemNameAt(i) == "")
+            hasSeparator = true;
+    }
+
     for(unsigned int i = 0;i<mTopicsList->getItemCount();i++)
     {
         std::string keyWord = mTopicsList->getItemNameAt(i);
-        if (separatorReached)
+        if (separatorReached || !hasSeparator)
             topics.push_back(keyWord);
         else if (keyWord == "")
             separatorReached = true;
