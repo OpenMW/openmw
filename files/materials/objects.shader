@@ -146,11 +146,11 @@
 
 #if VERTEXCOLOR_MODE == 2
             lightResult.xyz += colour.xyz * lightDiffuse[@shIterator].xyz
-                    * (1.0 / ((lightAttenuation[@shIterator].y) + (lightAttenuation[@shIterator].z * d) + (lightAttenuation[@shIterator].w * d * d)))
+                    * shSaturate(1.0 / ((lightAttenuation[@shIterator].y) + (lightAttenuation[@shIterator].z * d) + (lightAttenuation[@shIterator].w * d * d)))
                     * max(dot(viewNormal.xyz, lightDir), 0);
 #else
             lightResult.xyz += materialDiffuse.xyz * lightDiffuse[@shIterator].xyz
-                    * (1.0 / ((lightAttenuation[@shIterator].y) + (lightAttenuation[@shIterator].z * d) + (lightAttenuation[@shIterator].w * d * d)))
+                    * shSaturate(1.0 / ((lightAttenuation[@shIterator].y) + (lightAttenuation[@shIterator].z * d) + (lightAttenuation[@shIterator].w * d * d)))
                     * max(dot(viewNormal.xyz, lightDir), 0);
 #endif
 
