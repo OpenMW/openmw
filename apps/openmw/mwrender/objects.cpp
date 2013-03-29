@@ -1,5 +1,7 @@
 #include "objects.hpp"
 
+#include <cmath>
+
 #include <OgreSceneNode.h>
 #include <OgreSceneManager.h>
 #include <OgreEntity.h>
@@ -271,11 +273,7 @@ void Objects::insertLight (const MWWorld::Ptr& ptr, Ogre::Entity* skelBase, Ogre
     info.time = Ogre::Math::RangeRandom(-500, +500);
     info.phase = Ogre::Math::RangeRandom(-500, +500);
 
-    bool quadratic;
-    if (!lightOutQuadInLin())
-        quadratic = lightQuadratic();
-    else
-        quadratic = !info.interior;
+    bool quadratic = lightOutQuadInLin() ? !info.interior : lightQuadratic();
 
     if (!quadratic)
     {
@@ -286,7 +284,7 @@ void Objects::insertLight (const MWWorld::Ptr& ptr, Ogre::Entity* skelBase, Ogre
     else
     {
         float r = radius * lightQuadraticRadiusMult();
-        float attenuation = lightQuadraticValue() / pow(r, 2);
+        float attenuation = lightQuadraticValue() / std::pow(r, 2);
         light->setAttenuation(r*10, 0, 0, attenuation);
     }
 
