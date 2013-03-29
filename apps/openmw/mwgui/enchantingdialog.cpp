@@ -254,6 +254,7 @@ namespace MWGui
         mEnchanting.setEffect(mEffectList);
 
         mEnchanting.create();
+        mWindowManager.messageBox ("#{sEnchantmentMenu12}", std::vector<std::string>());
         mWindowManager.removeGuiMode (GM_Enchanting);
     }
 }

@@ -11,7 +11,6 @@
 #include "../mwworld/actionread.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/physicssystem.hpp"
-#include "../mwworld/manualref.hpp"
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
@@ -148,7 +147,7 @@ namespace MWClass
         return ref->mBase->mEnchant;
     }
 
-    MWWorld::Ptr Book::applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
+    std::string Book::applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
     {
         MWWorld::LiveCellRef<ESM::Book> *ref =
             ptr.get<ESM::Book>();
@@ -160,8 +159,7 @@ namespace MWClass
         newItem.mData.mEnchant=enchCharge;
         newItem.mEnchant=enchId;
         const ESM::Book *record = MWBase::Environment::get().getWorld()->createRecord (newItem);
-        MWWorld::ManualRef mref (MWBase::Environment::get().getWorld()->getStore(), record->mId);
-        return mref.getPtr();
+        return record->mId;
     }
 
     boost::shared_ptr<MWWorld::Action> Book::use (const MWWorld::Ptr& ptr) const

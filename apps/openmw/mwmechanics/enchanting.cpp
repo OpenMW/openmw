@@ -47,6 +47,9 @@ namespace MWMechanics
 
     void Enchanting::create()
     {
+        mOldItemPtr.getRefData().setCount(mOldItemPtr.getRefData().getCount()-1);
+        mSoulGemPtr.getRefData().setCount(mSoulGemPtr.getRefData().getCount()-1);
+
         mEnchantment.mData.mCharge = getGemCharge();
         if(mEnchantType==3)
         {
@@ -57,14 +60,13 @@ namespace MWMechanics
         mEnchantment.mEffects = mEffectList;
         const ESM::Enchantment *enchantment = MWBase::Environment::get().getWorld()->createRecord (mEnchantment);
 
-        MWWorld::Ptr newobj = MWWorld::Class::get(mOldItemPtr).applyEnchantment(mOldItemPtr, enchantment->mId, getGemCharge(), mNewItemName);
+        std::string newobjId = MWWorld::Class::get(mOldItemPtr).applyEnchantment(mOldItemPtr, enchantment->mId, getGemCharge(), mNewItemName);
 
-        MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), newobj.getCellRef().mRefID);
-        newobj.mPtr = mOldItemPtr.mPtr;
-        MWWorld::Class::get (mEnchanter).getContainerStore (mEnchanter).add (ref.getPtr());
-
-        mOldItemPtr.getRefData().setCount(mOldItemPtr.getRefData().getCount()-1);
-        mSoulGemPtr.getRefData().setCount(mSoulGemPtr.getRefData().getCount()-1);
+        MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), newobjId);
+        MWWorld::Ptr newobjPtr = ref.getPtr();
+        MWWorld::Ptr result = mOldItemPtr;
+        result.mPtr = newobjPtr.mPtr;
+        MWWorld::Class::get (mEnchanter).getContainerStore (mEnchanter).add (result);
     }
     
     void Enchanting::nextEnchantType()
