@@ -129,7 +129,7 @@ namespace MWGui
         MWMechanics::NpcStats& npcStats = MWWorld::Class::get(mPtr).getNpcStats (mPtr);
         if (npcStats.getSkill (skillId).getBase () <= pcStats.getSkill (skillId).getBase ())
         {
-            mWindowManager.messageBox ("#{sServiceTrainingWords}", std::vector<std::string>());
+            mWindowManager.messageBox ("#{sServiceTrainingWords}");
             return;
         }
 

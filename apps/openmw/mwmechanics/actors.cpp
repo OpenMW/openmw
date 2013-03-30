@@ -256,7 +256,7 @@ namespace MWMechanics
 
                 if(MWWorld::Class::get(iter->first).isEssential(iter->first))
                     MWBase::Environment::get().getWindowManager()->messageBox(
-                        "#{sKilledEssential}", std::vector<std::string>());
+                        "#{sKilledEssential}");
             }
         }
 

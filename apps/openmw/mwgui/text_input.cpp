@@ -50,7 +50,7 @@ void TextInputDialog::onOkClicked(MyGUI::Widget* _sender)
 {
     if (mTextEdit->getCaption() == "")
     {
-        mWindowManager.messageBox ("#{sNotifyMessage37}", std::vector<std::string>());
+        mWindowManager.messageBox ("#{sNotifyMessage37}");
         MyGUI::InputManager::getInstance ().setKeyFocusWidget (mTextEdit);
     }
     else
@@ -61,7 +61,7 @@ void TextInputDialog::onTextAccepted(MyGUI::Edit* _sender)
 {
     if (mTextEdit->getCaption() == "")
     {
-        mWindowManager.messageBox ("#{sNotifyMessage37}", std::vector<std::string>());
+        mWindowManager.messageBox ("#{sNotifyMessage37}");
         MyGUI::InputManager::getInstance ().setKeyFocusWidget (mTextEdit);
     }
     else

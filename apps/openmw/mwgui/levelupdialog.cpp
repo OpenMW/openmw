@@ -162,7 +162,7 @@ namespace MWGui
         MWMechanics::NpcStats& pcStats = MWWorld::Class::get(player).getNpcStats (player);
 
         if (mSpentAttributes.size() < 3)
-            MWBase::Environment::get().getWindowManager ()->messageBox("#{sNotifyMessage36}", std::vector<std::string>());
+            MWBase::Environment::get().getWindowManager ()->messageBox("#{sNotifyMessage36}");
         else
         {
             // increase attributes
