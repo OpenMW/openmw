@@ -92,6 +92,11 @@ namespace MWGui
         startEditing ();
     }
 
+    void EnchantingDialog::startSelfEnchanting(MWWorld::Ptr soulgem)
+    {
+        /// \todo
+    }
+
     void EnchantingDialog::onReferenceUnavailable ()
     {
         mWindowManager.removeGuiMode (GM_Dialogue);
