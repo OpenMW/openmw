@@ -23,6 +23,18 @@
 
 #include <boost/lexical_cast.hpp>
 
+namespace
+{
+bool isGold (const MWWorld::Ptr& ptr)
+{
+    return Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_001")
+                    || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_005")
+                    || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_010")
+                    || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_025")
+                    || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_100");
+}
+}
+
 namespace MWClass
 {
     void Miscellaneous::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
@@ -109,25 +121,15 @@ namespace MWClass
 
     std::string Miscellaneous::getUpSoundId (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
-            ptr.get<ESM::Miscellaneous>();
-
-        if (ref->mBase->mName == MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sGold")->getString())
-        {
+        if (isGold(ptr))
             return std::string("Item Gold Up");
-        }
         return std::string("Item Misc Up");
     }
 
     std::string Miscellaneous::getDownSoundId (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
-            ptr.get<ESM::Miscellaneous>();
-
-        if (ref->mBase->mName == MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sGold")->getString())
-        {
+        if (isGold(ptr))
             return std::string("Item Gold Down");
-        }
         return std::string("Item Misc Down");
     }
 
@@ -158,19 +160,15 @@ namespace MWClass
 
         int count = ptr.getRefData().getCount();
 
-        bool isGold = Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_001")
-                || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_005")
-                || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_010")
-                || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_025")
-                || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_100");
+        bool gold = isGold(ptr);
 
-        if (isGold && ptr.getCellRef().mGoldValue != 1)
+        if (gold && ptr.getCellRef().mGoldValue != 1)
             count = ptr.getCellRef().mGoldValue;
-        else if (isGold)
+        else if (gold)
             count *= ref->mBase->mData.mValue;
 
         std::string countString;
-        if (!isGold)
+        if (!gold)
             countString = MWGui::ToolTips::getCountString(count);
         else // gold displays its count also if it's 1.
             countString = " (" + boost::lexical_cast<std::string>(count) + ")";
@@ -186,7 +184,7 @@ namespace MWClass
 
         std::string text;
 
-        if (!isGold)
+        if (!gold)
         {
             text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight);
             text += MWGui::ToolTips::getValueString(getValue(ptr), "#{sValue}");
@@ -210,7 +208,7 @@ namespace MWClass
         const MWWorld::ESMStore &store =
             MWBase::Environment::get().getWorld()->getStore();
 
-        if (MWWorld::Class::get(ptr).getName(ptr) == store.get<ESM::GameSetting>().find("sGold")->getString()) {
+        if (isGold(ptr)) {
             int goldAmount = ptr.getRefData().getCount();
 
             std::string base = "Gold_001";
