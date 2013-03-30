@@ -54,10 +54,11 @@
 
 #if VERTEX_LIGHTING
     shUniform(float, lightCount) @shAutoConstant(lightCount, light_count)
-    shUniform(float4, lightPosition[@shGlobalSettingString(num_lights)]) @shAutoConstant(lightPosition, light_position_object_space_array, @shGlobalSettingString(num_lights))
+    shUniform(float4, lightPosition[@shGlobalSettingString(num_lights)]) @shAutoConstant(lightPosition, light_position_view_space_array, @shGlobalSettingString(num_lights))
     shUniform(float4, lightDiffuse[@shGlobalSettingString(num_lights)]) @shAutoConstant(lightDiffuse, light_diffuse_colour_array, @shGlobalSettingString(num_lights))
     shUniform(float4, lightAttenuation[@shGlobalSettingString(num_lights)]) @shAutoConstant(lightAttenuation, light_attenuation_array, @shGlobalSettingString(num_lights))
     shUniform(float4, lightAmbient)                    @shAutoConstant(lightAmbient, ambient_light_colour)
+    shUniform(float4x4, worldView) @shAutoConstant(worldView, worldview_matrix)
 #if VERTEXCOLOR_MODE != 2
     shUniform(float4, materialAmbient)                    @shAutoConstant(materialAmbient, surface_ambient_colour)
 #endif
@@ -131,23 +132,26 @@
 
 
 #if VERTEX_LIGHTING
+        float3 viewPos = shMatrixMult(worldView, shInputPosition).xyz;
+        float3 viewNormal = normalize(shMatrixMult(worldView, float4(normal.xyz, 0)).xyz);
+
         float3 lightDir;
         float d;
         lightResult = float4(0,0,0,1);
         @shForeach(@shGlobalSettingString(num_lights))
-            lightDir = lightPosition[@shIterator].xyz - (shInputPosition.xyz * lightPosition[@shIterator].w);
+            lightDir = lightPosition[@shIterator].xyz - (viewPos * lightPosition[@shIterator].w);
             d = length(lightDir);
             lightDir = normalize(lightDir);
 
 
 #if VERTEXCOLOR_MODE == 2
             lightResult.xyz += colour.xyz * lightDiffuse[@shIterator].xyz
-                    * (1.0 / ((lightAttenuation[@shIterator].y) + (lightAttenuation[@shIterator].z * d) + (lightAttenuation[@shIterator].w * d * d)))
-                    * max(dot(normalize(normal.xyz), normalize(lightDir)), 0);
+                    * shSaturate(1.0 / ((lightAttenuation[@shIterator].y) + (lightAttenuation[@shIterator].z * d) + (lightAttenuation[@shIterator].w * d * d)))
+                    * max(dot(viewNormal.xyz, lightDir), 0);
 #else
             lightResult.xyz += materialDiffuse.xyz * lightDiffuse[@shIterator].xyz
-                    * (1.0 / ((lightAttenuation[@shIterator].y) + (lightAttenuation[@shIterator].z * d) + (lightAttenuation[@shIterator].w * d * d)))
-                    * max(dot(normalize(normal.xyz), normalize(lightDir)), 0);
+                    * shSaturate(1.0 / ((lightAttenuation[@shIterator].y) + (lightAttenuation[@shIterator].z * d) + (lightAttenuation[@shIterator].w * d * d)))
+                    * max(dot(viewNormal.xyz, lightDir), 0);
 #endif
 
 #if @shIterator == 0
