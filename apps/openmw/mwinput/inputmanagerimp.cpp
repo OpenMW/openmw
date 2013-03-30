@@ -623,6 +623,9 @@ namespace MWInput
 
     void InputManager::toggleInventory()
     {
+        if (MyGUI::InputManager::getInstance ().isModalAny())
+            return;
+
         bool gameMode = !mWindows.isGuiMode();
 
         // Toggle between game mode and inventory mode
@@ -660,6 +663,9 @@ namespace MWInput
 
     void InputManager::toggleJournal()
     {
+        if (MyGUI::InputManager::getInstance ().isModalAny())
+            return;
+
         // Toggle between game mode and journal mode
         bool gameMode = !mWindows.isGuiMode();
 
