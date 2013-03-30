@@ -198,7 +198,7 @@ bool MWDialogue::Filter::testSelectStructNumeric (const SelectWrapper& select) c
             if (i<script->mData.mNumLongs)
                 return select.selectCompare (locals.mLongs[i]);
 
-            i -= script->mData.mNumShorts;
+            i -= script->mData.mNumLongs;
 
             return select.selectCompare (locals.mFloats.at (i));
         }
