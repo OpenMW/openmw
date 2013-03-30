@@ -111,34 +111,28 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr)
 
     // gold needs special handling: when it is inserted into a container, the base object automatically becomes Gold_001
     // this ensures that gold piles of different sizes stack with each other (also, several scripts rely on Gold_001 for detecting player gold)
-    if (MWWorld::Class::get(ptr).getName(ptr) == esmStore.get<ESM::GameSetting>().find("sGold")->getString())
+    if (Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_001")
+        || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_005")
+        || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_010")
+        || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_025")
+        || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_100"))
     {
-        MWWorld::LiveCellRef<ESM::Miscellaneous> *gold =
-            ptr.get<ESM::Miscellaneous>();
+        MWWorld::ManualRef ref(esmStore, "Gold_001");
 
-        if (Misc::StringUtils::ciEqual(gold->mRef.mRefID, "gold_001")
-            || Misc::StringUtils::ciEqual(gold->mRef.mRefID, "gold_005")
-            || Misc::StringUtils::ciEqual(gold->mRef.mRefID, "gold_010")
-            || Misc::StringUtils::ciEqual(gold->mRef.mRefID, "gold_025")
-            || Misc::StringUtils::ciEqual(gold->mRef.mRefID, "gold_100"))
+        int count = MWWorld::Class::get(ptr).getValue(ptr) * ptr.getRefData().getCount();
+
+        ref.getPtr().getRefData().setCount(count);
+        for (MWWorld::ContainerStoreIterator iter (begin(type)); iter!=end(); ++iter)
         {
-            MWWorld::ManualRef ref(esmStore, "Gold_001");
-
-            int count = MWWorld::Class::get(ptr).getValue(ptr) * ptr.getRefData().getCount();
-
-            ref.getPtr().getRefData().setCount(count);
-            for (MWWorld::ContainerStoreIterator iter (begin(type)); iter!=end(); ++iter)
+            if (Misc::StringUtils::ciEqual((*iter).get<ESM::Miscellaneous>()->mRef.mRefID, "gold_001"))
             {
-                if (Misc::StringUtils::ciEqual((*iter).get<ESM::Miscellaneous>()->mRef.mRefID, "gold_001"))
-                {
-                    (*iter).getRefData().setCount( (*iter).getRefData().getCount() + count);
-                    flagAsModified();
-                    return iter;
-                }
+                (*iter).getRefData().setCount( (*iter).getRefData().getCount() + count);
+                flagAsModified();
+                return iter;
             }
-
-            return addImpl(ref.getPtr());
         }
+
+        return addImpl(ref.getPtr());
     }
 
     // determine whether to stack or not

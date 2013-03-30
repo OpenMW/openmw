@@ -158,7 +158,12 @@ namespace MWClass
 
         int count = ptr.getRefData().getCount();
 
-        bool isGold = (ref->mBase->mName == store.get<ESM::GameSetting>().find("sGold")->getString());
+        bool isGold = Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_001")
+                || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_005")
+                || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_010")
+                || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_025")
+                || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_100");
+
         if (isGold && ptr.getCellRef().mGoldValue != 1)
             count = ptr.getCellRef().mGoldValue;
         else if (isGold)
