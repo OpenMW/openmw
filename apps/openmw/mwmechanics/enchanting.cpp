@@ -3,10 +3,13 @@
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
+
+#include "creaturestats.hpp"
+#include "npcstats.hpp"
+
 namespace MWMechanics
 {
-    Enchanting::Enchanting(MWWorld::Ptr enchanter):
-    mEnchanter(enchanter),
+    Enchanting::Enchanting():
     mEnchantType(0)
     {}
 
@@ -45,10 +48,19 @@ namespace MWMechanics
         mSoulGemPtr=soulGem;
     }
 
-    void Enchanting::create()
+    int Enchanting::create()
     {
-        mOldItemPtr.getRefData().setCount(mOldItemPtr.getRefData().getCount()-1);
         mSoulGemPtr.getRefData().setCount(mSoulGemPtr.getRefData().getCount()-1);
+
+        if(mSelfEnchanting)
+        {
+            if(getEnchantChance()<std::rand()/static_cast<double> (RAND_MAX)*100)
+                return 0;
+
+            MWWorld::Class::get (mEnchanter).skillUsageSucceeded (mEnchanter, ESM::Skill::Enchant, 1);
+        }
+
+        mOldItemPtr.getRefData().setCount(mOldItemPtr.getRefData().getCount()-1);
 
         mEnchantment.mData.mCharge = getGemCharge();
         if(mEnchantType==3)
@@ -67,6 +79,7 @@ namespace MWMechanics
         MWWorld::Ptr result = mOldItemPtr;
         result.mPtr = newobjPtr.mPtr;
         MWWorld::Class::get (mEnchanter).getContainerStore (mEnchanter).add (result);
+        return 1;
     }
     
     void Enchanting::nextEnchantType()
@@ -110,6 +123,10 @@ namespace MWMechanics
         float cost = 0;
         std::vector<ESM::ENAMstruct> mEffects = mEffectList.mList;
         int i=mEffects.size();
+
+        /*
+        Formula from http://www.uesp.net/wiki/Morrowind:Enchant
+        */
         for (std::vector<ESM::ENAMstruct>::const_iterator it = mEffects.begin(); it != mEffects.end(); ++it)
         {
             const ESM::MagicEffect* effect = store.get<ESM::MagicEffect>().find(it->mEffectID);
@@ -163,5 +180,35 @@ namespace MWMechanics
         if(mOldItemPtr.isEmpty())
             return true;
         return false;
+    }
+
+    void Enchanting::setSelfEnchanting(bool selfEnchanting)
+    {
+        mSelfEnchanting = selfEnchanting;
+    }
+
+    void Enchanting::setEnchanter(MWWorld::Ptr enchanter)
+    {
+        mEnchanter = enchanter;
+    }
+
+    float Enchanting::getEnchantChance()
+    {
+        /*
+        Formula from http://www.uesp.net/wiki/Morrowind:Enchant
+        */
+        const CreatureStats& creatureStats = MWWorld::Class::get (mEnchanter).getCreatureStats (mEnchanter);
+        const NpcStats& npcStats = MWWorld::Class::get (mEnchanter).getNpcStats (mEnchanter);
+
+        float chance1 = (npcStats.getSkill (ESM::Skill::Enchant).getModified() + 
+        (0.25 * creatureStats.getAttribute (ESM::Attribute::Intelligence).getModified())
+        + (0.125 * creatureStats.getAttribute (ESM::Attribute::Luck).getModified()));
+
+        float chance2 = 2.5 * getEnchantCost();
+        if(mEnchantType==3)
+        {
+            chance2 *= 2;
+        }
+        return (chance1-chance2);
     }
 }

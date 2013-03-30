@@ -16,6 +16,8 @@ namespace MWMechanics
             const MWWorld::Ptr *mNewItemPtr;
             int mEnchantType;
 
+            bool mSelfEnchanting;
+
             ESM::EffectList mEffectList;
             ESM::Enchantment mEnchantment;
 
@@ -23,17 +25,20 @@ namespace MWMechanics
             std::string mObjectType;
             std::string mOldItemId;
         public:
-            Enchanting(MWWorld::Ptr enchanter);
+            Enchanting();
+            void setEnchanter(MWWorld::Ptr enchanter);
+            void setSelfEnchanting(bool selfEnchanting);
             void setOldItem(MWWorld::Ptr oldItem);
             void setNewItemName(std::string s);
             void setEffect(ESM::EffectList effectList);
             void setSoulGem(MWWorld::Ptr soulGem);
-            void create();
+            int create();
             void nextEnchantType();
             int getEnchantType();
             int getEnchantCost();
             int getMaxEnchantValue();
             int getGemCharge();
+            float getEnchantChance();
             bool soulEmpty();
             bool itemEmpty();
     };
