@@ -81,6 +81,9 @@ namespace MWGui
         void updatePreview();
         void recountParts();
 
+        bool isHairPlayable();
+        bool isFacePlayable();
+
         MyGUI::ImageBox*  mPreviewImage;
         MyGUI::ListBox*   mRaceList;
         MyGUI::ScrollBar* mHeadRotate;

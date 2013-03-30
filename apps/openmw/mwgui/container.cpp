@@ -140,9 +140,6 @@ void ContainerBase::onSelectedItem(MyGUI::Widget* _sender)
 
         if (isInventory())
         {
-            const MWWorld::Store<ESM::GameSetting> &gmst =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
-
             // the player is trying to sell an item, check if the merchant accepts it
             if (!MWBase::Environment::get().getWindowManager()->getTradeWindow()->npcAcceptsItem(object))
             {

@@ -129,9 +129,6 @@ namespace MWGui
         MWWorld::Ptr gold;
         MWWorld::ContainerStore& playerStore = mWindowManager.getInventoryWindow()->getContainerStore();
 
-        const MWWorld::Store<ESM::GameSetting> &gmst =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
-
         for (MWWorld::ContainerStoreIterator it = playerStore.begin();
                 it != playerStore.end(); ++it)
         {
