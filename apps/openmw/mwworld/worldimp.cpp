@@ -806,13 +806,8 @@ namespace MWWorld
         mPhysics->scaleObject(ptr);
     }
 
-    void World::rotateObject (const Ptr& ptr,float x,float y,float z, bool adjust)
+    void World::rotateObjectImp (const Ptr& ptr, Ogre::Vector3 rot, bool adjust)
     {
-        Ogre::Vector3 rot;
-        rot.x = Ogre::Degree(x).valueRadians();
-        rot.y = Ogre::Degree(y).valueRadians();
-        rot.z = Ogre::Degree(z).valueRadians();
-
         if (mRendering->rotateObject(ptr, rot, adjust))
         {
             // rotate physically iff renderer confirm so
@@ -825,6 +820,14 @@ namespace MWWorld
                 mPhysics->rotateObject(ptr);
             }
         }
+    }
+
+    void World::rotateObject (const Ptr& ptr,float x,float y,float z, bool adjust)
+    {
+        rotateObjectImp(ptr, Ogre::Vector3(Ogre::Degree(x).valueRadians(),
+                                           Ogre::Degree(y).valueRadians(),
+                                           Ogre::Degree(z).valueRadians()),
+                        adjust);
     }
 
     void World::safePlaceObject(const MWWorld::Ptr& ptr,MWWorld::CellStore &Cell,ESM::Position pos)
@@ -876,12 +879,17 @@ namespace MWWorld
                 player = iter;
                 continue;
             }
+
+            rotateObjectImp(iter->first, Ogre::Vector3(iter->second.mRotation), true);
+
             Ogre::Vector3 vec = mPhysics->move(iter->first, Ogre::Vector3(iter->second.mPosition), duration,
                                                !isSwimming(iter->first) && !isFlying(iter->first));
             moveObjectImp(iter->first, vec.x, vec.y, vec.z);
         }
         if(player != actors.end())
         {
+            rotateObjectImp(player->first, Ogre::Vector3(player->second.mRotation), true);
+
             Ogre::Vector3 vec = mPhysics->move(player->first, Ogre::Vector3(player->second.mPosition), duration,
                                                !isSwimming(player->first) && !isFlying(player->first));
             moveObjectImp(player->first, vec.x, vec.y, vec.z);

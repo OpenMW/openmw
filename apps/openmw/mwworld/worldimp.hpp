@@ -90,6 +90,8 @@ namespace MWWorld
 
             int getDaysPerMonth (int month) const;
 
+            void rotateObjectImp (const Ptr& ptr, Ogre::Vector3 rot, bool adjust);
+
             bool moveObjectImp (const Ptr& ptr, float x, float y, float z);
             ///< @return true if the active cell (cell player is in) changed
 
