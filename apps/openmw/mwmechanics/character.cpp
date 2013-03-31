@@ -183,6 +183,7 @@ void CharacterController::update(float duration, Movement &movement)
         bool isrunning = cls.getStance(mPtr, MWWorld::Class::Run);
         bool sneak = cls.getStance(mPtr, MWWorld::Class::Sneak);
         const Ogre::Vector3 &vec = cls.getMovementVector(mPtr);
+        const Ogre::Vector3 &rot = cls.getRotationVector(mPtr);
         speed = cls.getSpeed(mPtr);
 
         /* FIXME: The state should be set to Jump, and X/Y movement should be disallowed except
@@ -232,6 +233,10 @@ void CharacterController::update(float duration, Movement &movement)
         }
         else if(mAnimQueue.size() == 0)
             setState((inwater ? CharState_IdleSwim : (sneak ? CharState_IdleSneak : CharState_Idle)), true);
+
+        movement.mRotation[0] += rot.x * duration;
+        movement.mRotation[1] += rot.y * duration;
+        movement.mRotation[2] += rot.z * duration;
     }
 
     if(mAnimation && !mSkipAnim)

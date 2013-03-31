@@ -416,7 +416,12 @@ namespace MWClass
     {
         return Ogre::Vector3(getMovementSettings(ptr).mPosition);
     }
-    
+
+    Ogre::Vector3 Npc::getRotationVector (const MWWorld::Ptr& ptr) const
+    {
+        return Ogre::Vector3(getMovementSettings(ptr).mRotation);
+    }
+
     bool Npc::isEssential (const MWWorld::Ptr& ptr) const
     {
         MWWorld::LiveCellRef<ESM::NPC> *ref =
