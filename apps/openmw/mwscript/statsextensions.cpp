@@ -1046,6 +1046,18 @@ namespace MWScript
                 }
         };
 
+        template <class R>
+        class OpIsWerewolf : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+                    runtime.push(MWWorld::Class::get(ptr).getNpcStats(ptr).isWerewolf());
+                }
+        };
+
         const int numberOfAttributes = 8;
 
         const int opcodeGetAttribute = 0x2000027;
@@ -1136,6 +1148,9 @@ namespace MWScript
         const int opcodeLowerRankExplicit = 0x20001eb;
 
         const int opcodeOnDeath = 0x20001fc;
+
+        const int opcodeIsWerewolf = 0x20001fd;
+        const int opcodeIsWerewolfExplicit = 0x20001fe;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -1252,6 +1267,8 @@ namespace MWScript
             extensions.registerInstruction ("lowerrank", "", opcodeLowerRank, opcodeLowerRankExplicit);
 
             extensions.registerFunction ("ondeath", 'l', "", opcodeOnDeath);
+
+            extensions.registerFunction ("iswerewolf", 'l', "", opcodeIsWerewolf, opcodeIsWerewolfExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -1368,6 +1385,9 @@ namespace MWScript
             interpreter.installSegment5 (opcodeLowerRankExplicit, new OpLowerRank<ExplicitRef>);
 
             interpreter.installSegment5 (opcodeOnDeath, new OpOnDeath);
+
+            interpreter.installSegment5 (opcodeIsWerewolf, new OpIsWerewolf<ImplicitRef>);
+            interpreter.installSegment5 (opcodeIsWerewolfExplicit, new OpIsWerewolf<ExplicitRef>);
         }
     }
 }

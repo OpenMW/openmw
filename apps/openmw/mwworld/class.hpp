@@ -150,6 +150,9 @@ namespace MWWorld
             ///< Return desired movement vector (determined based on movement settings,
             /// stance and stats).
 
+            virtual Ogre::Vector3 getRotationVector (const Ptr& ptr) const;
+            ///< Return desired rotations, as euler angles.
+
             virtual std::pair<std::vector<int>, bool> getEquipmentSlots (const Ptr& ptr) const;
             ///< \return first: Return IDs of the slot this object can be equipped in; second: can object
             /// stay stacked when equipped?

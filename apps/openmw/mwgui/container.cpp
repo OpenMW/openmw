@@ -140,13 +140,8 @@ void ContainerBase::onSelectedItem(MyGUI::Widget* _sender)
 
         if (isInventory())
         {
-            const MWWorld::Store<ESM::GameSetting> &gmst =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
-
             // the player is trying to sell an item, check if the merchant accepts it
-            // also, don't allow selling gold (let's be better than Morrowind at this, can we?)
-            if (!MWBase::Environment::get().getWindowManager()->getTradeWindow()->npcAcceptsItem(object) ||
-                MWWorld::Class::get(object).getName(object) == gmst.find("sGold")->getString())
+            if (!MWBase::Environment::get().getWindowManager()->getTradeWindow()->npcAcceptsItem(object))
             {
                 // user notification "i don't buy this item"
                 MWBase::Environment::get().getWindowManager()->

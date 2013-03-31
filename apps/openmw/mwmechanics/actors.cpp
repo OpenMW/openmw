@@ -17,6 +17,7 @@
 #include "../mwbase/windowmanager.hpp"
 
 #include "creaturestats.hpp"
+#include "movement.hpp"
 
 namespace MWMechanics
 {
@@ -266,7 +267,8 @@ namespace MWMechanics
 
             for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
             {
-                Ogre::Vector3 movement = iter->second.update(duration);
+                Movement movement;
+                iter->second.update(duration, movement);
                 mMovement.push_back(std::make_pair(iter->first, movement));
             }
             MWBase::Environment::get().getWorld()->doPhysics(mMovement, duration);

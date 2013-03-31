@@ -67,6 +67,10 @@ namespace MWWorld
 
         void setRunState(bool run);
         void setSneak(bool sneak);
+
+        void setYaw(float yaw);
+        void setPitch(float pitch);
+        void setRoll(float roll);
     };
 }
 #endif

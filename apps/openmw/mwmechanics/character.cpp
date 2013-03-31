@@ -21,6 +21,8 @@
 
 #include <OgreStringConverter.h>
 
+#include "movement.hpp"
+
 #include "../mwrender/animation.hpp"
 
 #include "../mwbase/environment.hpp"
@@ -72,6 +74,9 @@ static const struct {
     { CharState_SneakBack, "sneakback" },
     { CharState_SneakLeft, "sneakleft" },
     { CharState_SneakRight, "sneakright" },
+
+    { CharState_TurnLeft, "turnleft" },
+    { CharState_TurnRight, "turnright" },
 
     { CharState_Jump, "jump" },
 
@@ -168,21 +173,20 @@ void CharacterController::markerEvent(float time, const std::string &evt)
 }
 
 
-Ogre::Vector3 CharacterController::update(float duration)
+void CharacterController::update(float duration, Movement &movement)
 {
-    Ogre::Vector3 movement(0.0f);
-
     float speed = 0.0f;
     if(!(getState() >= CharState_Death1))
     {
         const MWBase::World *world = MWBase::Environment::get().getWorld();
         const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
-        const Ogre::Vector3 &vec = cls.getMovementVector(mPtr);
 
         bool onground = world->isOnGround(mPtr);
         bool inwater = world->isSwimming(mPtr);
         bool isrunning = cls.getStance(mPtr, MWWorld::Class::Run);
         bool sneak = cls.getStance(mPtr, MWWorld::Class::Sneak);
+        const Ogre::Vector3 &vec = cls.getMovementVector(mPtr);
+        const Ogre::Vector3 &rot = cls.getRotationVector(mPtr);
         speed = cls.getSpeed(mPtr);
 
         /* FIXME: The state should be set to Jump, and X/Y movement should be disallowed except
@@ -192,14 +196,14 @@ Ogre::Vector3 CharacterController::update(float duration)
             float x = cls.getJump(mPtr);
 
             if(vec.x == 0 && vec.y == 0)
-                movement.z += x*duration;
+                movement.mPosition[2] += x*duration;
             else
             {
                 /* FIXME: this would be more correct if we were going into a jumping state,
                  * rather than normal walking/idle states. */
                 //Ogre::Vector3 lat = Ogre::Vector3(vec.x, vec.y, 0.0f).normalisedCopy();
                 //movement += Ogre::Vector3(lat.x, lat.y, 1.0f) * x * 0.707f * duration;
-                movement.z += x * 0.707f * duration;
+                movement.mPosition[2] += x * 0.707f * duration;
             }
 
             //decrease fatigue by fFatigueJumpBase + (1 - normalizedEncumbrance) * fFatigueJumpMult;
@@ -216,7 +220,7 @@ Ogre::Vector3 CharacterController::update(float duration)
                                  : (sneak ? CharState_SneakLeft : (isrunning ? CharState_RunLeft : CharState_WalkLeft)), true);
 
             // Apply any forward/backward movement manually
-            movement.y += vec.y * (speed*duration);
+            movement.mPosition[1] += vec.y * (speed*duration);
         }
         else if(vec.y != 0.0f && speed > 0.0f)
         {
@@ -228,20 +232,32 @@ Ogre::Vector3 CharacterController::update(float duration)
                 setState(inwater ? (isrunning ? CharState_SwimRunBack : CharState_SwimWalkBack)
                                  : (sneak ? CharState_SneakBack : (isrunning ? CharState_RunBack : CharState_WalkBack)), true);
             // Apply any sideways movement manually
-            movement.x += vec.x * (speed*duration);
+            movement.mPosition[0] += vec.x * (speed*duration);
+        }
+        else if(rot.z != 0.0f && !inwater && !sneak)
+        {
+            if(rot.z > 0.0f)
+                setState(CharState_TurnRight, true);
+            else if(rot.z < 0.0f)
+                setState(CharState_TurnLeft, true);
         }
         else if(mAnimQueue.size() == 0)
             setState((inwater ? CharState_IdleSwim : (sneak ? CharState_IdleSneak : CharState_Idle)), true);
+
+        movement.mRotation[0] += rot.x * duration;
+        movement.mRotation[1] += rot.y * duration;
+        movement.mRotation[2] += rot.z * duration;
     }
 
     if(mAnimation && !mSkipAnim)
     {
         mAnimation->setSpeed(speed);
-        movement += mAnimation->runAnimation(duration);
+        Ogre::Vector3 moved = mAnimation->runAnimation(duration);
+        movement.mPosition[0] += moved.x;
+        movement.mPosition[1] += moved.y;
+        movement.mPosition[2] += moved.z;
     }
     mSkipAnim = false;
-
-    return movement;
 }
 
 
