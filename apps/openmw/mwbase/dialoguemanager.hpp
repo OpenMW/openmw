@@ -25,6 +25,8 @@ namespace MWBase
 
             virtual ~DialogueManager() {}
 
+            virtual bool isInChoice() const = 0;
+
             virtual void startDialogue (const MWWorld::Ptr& actor) = 0;
 
             virtual void addTopic (const std::string& topic) = 0;

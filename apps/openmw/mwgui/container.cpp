@@ -340,6 +340,9 @@ void ContainerBase::onContainerClicked(MyGUI::Widget* _sender)
         drawItems();
         mDragAndDrop->mDraggedFrom->drawItems();
 
+        mDragAndDrop->mDraggedFrom->notifyItemDragged(object, -mDragAndDrop->mDraggedCount);
+        notifyItemDragged(object, mDragAndDrop->mDraggedCount);
+
         MWBase::Environment::get().getWindowManager()->setDragDrop(false);
 
         std::string sound = MWWorld::Class::get(object).getDownSoundId(object);

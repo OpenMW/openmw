@@ -58,6 +58,7 @@
 #include "merchantrepair.hpp"
 #include "repair.hpp"
 #include "soulgemdialog.hpp"
+#include "companionwindow.hpp"
 
 using namespace MWGui;
 
@@ -96,6 +97,7 @@ WindowManager::WindowManager(
   , mMerchantRepair(NULL)
   , mRepair(NULL)
   , mSoulgemDialog(NULL)
+  , mCompanionWindow(NULL)
   , mPlayerName()
   , mPlayerRaceId()
   , mPlayerAttributes()
@@ -189,6 +191,7 @@ WindowManager::WindowManager(
     mMerchantRepair = new MerchantRepair(*this);
     mRepair = new Repair(*this);
     mSoulgemDialog = new SoulgemDialog(mMessageBoxManager);
+    mCompanionWindow = new CompanionWindow(*this, mDragAndDrop, mMessageBoxManager);
 
     mLoadingScreen = new LoadingScreen(mRendering->getScene (), mRendering->getWindow (), *this);
     mLoadingScreen->onResChange (w,h);
@@ -317,6 +320,7 @@ void WindowManager::updateVisible()
     mTrainingWindow->setVisible(false);
     mMerchantRepair->setVisible(false);
     mRepair->setVisible(false);
+    mCompanionWindow->setVisible(false);
 
     mHud->setVisible(mHudEnabled);
 
@@ -415,6 +419,10 @@ void WindowManager::updateVisible()
         }
         case GM_Container:
             mContainerWindow->setVisible(true);
+            mInventoryWindow->setVisible(true);
+            break;
+        case GM_Companion:
+            mCompanionWindow->setVisible(true);
             mInventoryWindow->setVisible(true);
             break;
         case GM_Dialogue:
@@ -676,6 +684,7 @@ void WindowManager::onFrame (float frameDuration)
     mSpellCreationDialog->checkReferenceAvailable();
     mEnchantingDialog->checkReferenceAvailable();
     mContainerWindow->checkReferenceAvailable();
+    mCompanionWindow->checkReferenceAvailable();
     mConsole->checkReferenceAvailable();
 }
 
@@ -1165,6 +1174,11 @@ void WindowManager::startRepairItem(MWWorld::Ptr item)
 const Translation::Storage& WindowManager::getTranslationDataStorage() const
 {
     return mTranslationDataStorage;
+}
+
+void WindowManager::showCompanionWindow(MWWorld::Ptr actor)
+{
+    mCompanionWindow->open(actor);
 }
 
 void WindowManager::changePointer(const std::string &name)

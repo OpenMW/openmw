@@ -77,6 +77,7 @@ namespace MWGui
   class MerchantRepair;
   class Repair;
   class SoulgemDialog;
+  class CompanionWindow;
 
   class WindowManager : public MWBase::WindowManager
   {
@@ -229,6 +230,7 @@ namespace MWGui
     virtual bool getPlayerSleeping();
     virtual void wakeUpPlayer();
 
+    virtual void showCompanionWindow(MWWorld::Ptr actor);
     virtual void startSpellMaking(MWWorld::Ptr actor);
     virtual void startEnchanting(MWWorld::Ptr actor);
     virtual void startSelfEnchanting(MWWorld::Ptr soulgem);
@@ -279,6 +281,7 @@ namespace MWGui
     MerchantRepair* mMerchantRepair;
     SoulgemDialog* mSoulgemDialog;
     Repair* mRepair;
+    CompanionWindow* mCompanionWindow;
 
     Translation::Storage& mTranslationDataStorage;
     Cursor* mCursor;

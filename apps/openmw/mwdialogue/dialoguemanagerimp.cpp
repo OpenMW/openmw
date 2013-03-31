@@ -117,6 +117,8 @@ namespace MWDialogue
 
     void DialogueManager::startDialogue (const MWWorld::Ptr& actor)
     {
+        mLastTopic = "";
+
         mChoice = -1;
         mIsInChoice = false;
 
@@ -126,6 +128,9 @@ namespace MWDialogue
         mTalkedTo = creatureStats.hasTalkedToPlayer();
 
         mActorKnownTopics.clear();
+
+        MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
+        win->startDialogue(actor, MWWorld::Class::get (actor).getName (actor));
 
         //setup the list of topics known by the actor. Topics who are also on the knownTopics list will be added to the GUI
         updateTopics();
@@ -145,8 +150,6 @@ namespace MWDialogue
                 {
                     //initialise the GUI
                     MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Dialogue);
-                    MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
-                    win->startDialogue(actor, MWWorld::Class::get (actor).getName (actor));
 
                     creatureStats.talkedToPlayer();
 
@@ -160,7 +163,7 @@ namespace MWDialogue
                     MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
                     win->addText (Interpreter::fixDefinesDialog(info->mResponse, interpreterContext));
                     executeScript (info->mResultScript);
-                    mLastTopic = it->mId;
+                    mLastTopic = Misc::StringUtils::lowerCase(it->mId);
                     mLastDialogue = *info;
                     break;
                 }
@@ -398,6 +401,11 @@ namespace MWDialogue
         updateTopics();
     }
 
+    bool DialogueManager::isInChoice() const
+    {
+        return mIsInChoice;
+    }
+
     void DialogueManager::goodbyeSelected()
     {
         // Do not close the dialogue window if the player has to answer a question
@@ -424,15 +432,13 @@ namespace MWDialogue
 
             if (mDialogueMap.find(mLastTopic) != mDialogueMap.end())
             {
-                if (mDialogueMap[mLastTopic].mType == ESM::Dialogue::Topic)
-                {
-                    Filter filter (mActor, mChoice, mTalkedTo);
+                Filter filter (mActor, mChoice, mTalkedTo);
 
+                if (mDialogueMap[mLastTopic].mType == ESM::Dialogue::Topic
+                        || mDialogueMap[mLastTopic].mType == ESM::Dialogue::Greeting)
+                {
                     if (const ESM::DialInfo *info = filter.search (mDialogueMap[mLastTopic], true))
                     {
-                        mChoiceMap.clear();
-                        mChoice = -1;
-                        mIsInChoice = false;
                         std::string text = info->mResponse;
                         parseText (text);
 
@@ -440,10 +446,12 @@ namespace MWDialogue
                         MWBase::Environment::get().getWindowManager()->getDialogueWindow()->addText (Interpreter::fixDefinesDialog(text, interpreterContext));
                         MWBase::Environment::get().getJournal()->addTopic (mLastTopic, info->mId);
                         executeScript (info->mResultScript);
-                        mLastTopic = mLastTopic;
                         mLastDialogue = *info;
                     }
                 }
+                mChoiceMap.clear();
+                mChoice = -1;
+                mIsInChoice = false;
             }
 
             updateTopics();

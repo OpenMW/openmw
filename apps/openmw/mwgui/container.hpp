@@ -82,6 +82,10 @@ namespace MWGui
         void setFilter(int filter); ///< set category filter
         void drawItems();
 
+        /// fired when an item was moved by drag&drop. \n
+        /// if it was removed from this container, count will be negative.
+        virtual void notifyItemDragged(MWWorld::Ptr item, int count) {}
+
     protected:
         bool mDisplayEquippedItems;
         bool mHighlightEquippedItems;
