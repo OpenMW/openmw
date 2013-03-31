@@ -89,18 +89,19 @@ namespace Physic
     }
 
     void PhysicActor::setScale(float scale){
-        Ogre::Vector3 position = getPosition();
-        Ogre::Quaternion rotation = getRotation();
         //We only need to change the scaled box translation, box rotations remain the same.
         mBoxScaledTranslation = mBoxScaledTranslation / mBody->getCollisionShape()->getLocalScaling().getX();
         mBoxScaledTranslation *= scale;
         if(mBody){
             mEngine->dynamicsWorld->removeRigidBody(mBody);
+            mEngine->dynamicsWorld->removeRigidBody(mRaycastingBody);
             delete mBody;
+            delete mRaycastingBody;
         }
         //Create the newly scaled rigid body
-        mBody = mEngine->createAndAdjustRigidBody(mMesh, mName, scale, position, rotation);
-        mEngine->addRigidBody(mBody, false);  //Add rigid body to dynamics world, but do not add to object map
+        mBody = mEngine->createAndAdjustRigidBody(mMesh, mName, scale, getPosition(), getRotation());
+        mRaycastingBody = mEngine->createAndAdjustRigidBody(mMesh, mName, scale, getPosition(), getRotation(), 0, 0, true);
+        mEngine->addRigidBody(mBody, false, mRaycastingBody);  //Add rigid body to dynamics world, but do not add to object map
     }
 
     Ogre::Vector3 PhysicActor::getHalfExtents() const
