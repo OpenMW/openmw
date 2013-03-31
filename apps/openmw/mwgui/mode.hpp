@@ -5,6 +5,7 @@ namespace MWGui
 {
   enum GuiMode
     {
+      GM_None,
       GM_Settings,      // Settings window
       GM_Inventory,     // Inventory mode
       GM_Container,
@@ -41,9 +42,6 @@ namespace MWGui
       GM_ClassCreate,
       GM_Review,
       
-      // interactive MessageBox
-      GM_InterMessageBox,
-
       GM_Loading,
       GM_LoadingWallpaper,
 

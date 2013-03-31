@@ -22,6 +22,7 @@ namespace MWGui
 
         virtual void open();
         void startEnchanting(MWWorld::Ptr actor);
+        void startSelfEnchanting(MWWorld::Ptr soulgem);
 
     protected:
         virtual void onReferenceUnavailable();

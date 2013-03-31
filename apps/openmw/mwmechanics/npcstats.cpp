@@ -221,12 +221,12 @@ void MWMechanics::NpcStats::increaseSkill(int skillIndex, const ESM::Class &clas
     message << boost::format(MWBase::Environment::get().getWindowManager ()->getGameSettingString ("sNotifyMessage39", ""))
                % std::string("#{" + ESM::Skill::sSkillNameIds[skillIndex] + "}")
                % static_cast<int> (base);
-    MWBase::Environment::get().getWindowManager ()->messageBox(message.str(), std::vector<std::string>());
+    MWBase::Environment::get().getWindowManager ()->messageBox(message.str());
 
     if (mLevelProgress >= 10)
     {
         // levelup is possible now
-        MWBase::Environment::get().getWindowManager ()->messageBox ("#{sLevelUpMsg}", std::vector<std::string>());
+        MWBase::Environment::get().getWindowManager ()->messageBox ("#{sLevelUpMsg}");
     }
 
     getSkill (skillIndex).setBase (base);

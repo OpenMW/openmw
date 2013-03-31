@@ -150,7 +150,7 @@ void ContainerBase::onSelectedItem(MyGUI::Widget* _sender)
             {
                 // user notification "i don't buy this item"
                 MWBase::Environment::get().getWindowManager()->
-                        messageBox("#{sBarterDialog4}", std::vector<std::string>());
+                        messageBox("#{sBarterDialog4}");
                 return;
             }
         }
@@ -294,7 +294,7 @@ void ContainerBase::onContainerClicked(MyGUI::Widget* _sender)
                 {
                     // user notification
                     MWBase::Environment::get().getWindowManager()->
-                        messageBox("#{sContentsMessage2}", std::vector<std::string>());
+                        messageBox("#{sContentsMessage2}");
 
                     return;
                 }
@@ -318,7 +318,7 @@ void ContainerBase::onContainerClicked(MyGUI::Widget* _sender)
                     object.getRefData().setCount(origCount);
                     // user notification
                     MWBase::Environment::get().getWindowManager()->
-                        messageBox("#{sContentsMessage3}", std::vector<std::string>());
+                        messageBox("#{sContentsMessage3}");
 
                     return;
                 }

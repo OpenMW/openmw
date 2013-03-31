@@ -98,7 +98,7 @@ namespace MWClass
 
         if (needKey && hasKey)
         {
-            MWBase::Environment::get().getWindowManager ()->messageBox (keyName + " #{sKeyUsed}", std::vector<std::string>());
+            MWBase::Environment::get().getWindowManager ()->messageBox (keyName + " #{sKeyUsed}");
             ptr.getCellRef().mLockLevel = 0;
             // using a key disarms the trap
             ptr.getCellRef().mTrap = "";
