@@ -13,6 +13,7 @@
 #include "../mwbase/scriptmanager.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/movement.hpp"
 
 #include "../mwrender/sky.hpp"
 #include "../mwrender/player.hpp"
@@ -875,13 +876,13 @@ namespace MWWorld
                 player = iter;
                 continue;
             }
-            Ogre::Vector3 vec = mPhysics->move(iter->first, iter->second, duration,
+            Ogre::Vector3 vec = mPhysics->move(iter->first, Ogre::Vector3(iter->second.mPosition), duration,
                                                !isSwimming(iter->first) && !isFlying(iter->first));
             moveObjectImp(iter->first, vec.x, vec.y, vec.z);
         }
         if(player != actors.end())
         {
-            Ogre::Vector3 vec = mPhysics->move(player->first, player->second, duration,
+            Ogre::Vector3 vec = mPhysics->move(player->first, Ogre::Vector3(player->second.mPosition), duration,
                                                !isSwimming(player->first) && !isFlying(player->first));
             moveObjectImp(player->first, vec.x, vec.y, vec.z);
         }

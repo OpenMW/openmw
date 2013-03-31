@@ -21,6 +21,8 @@
 
 #include <OgreStringConverter.h>
 
+#include "movement.hpp"
+
 #include "../mwrender/animation.hpp"
 
 #include "../mwbase/environment.hpp"
@@ -168,7 +170,7 @@ void CharacterController::markerEvent(float time, const std::string &evt)
 }
 
 
-void CharacterController::update(float duration, Ogre::Vector3 &movement)
+void CharacterController::update(float duration, Movement &movement)
 {
     float speed = 0.0f;
     if(!(getState() >= CharState_Death1))
@@ -190,14 +192,14 @@ void CharacterController::update(float duration, Ogre::Vector3 &movement)
             float x = cls.getJump(mPtr);
 
             if(vec.x == 0 && vec.y == 0)
-                movement.z += x*duration;
+                movement.mPosition[2] += x*duration;
             else
             {
                 /* FIXME: this would be more correct if we were going into a jumping state,
                  * rather than normal walking/idle states. */
                 //Ogre::Vector3 lat = Ogre::Vector3(vec.x, vec.y, 0.0f).normalisedCopy();
                 //movement += Ogre::Vector3(lat.x, lat.y, 1.0f) * x * 0.707f * duration;
-                movement.z += x * 0.707f * duration;
+                movement.mPosition[2] += x * 0.707f * duration;
             }
 
             //decrease fatigue by fFatigueJumpBase + (1 - normalizedEncumbrance) * fFatigueJumpMult;
@@ -214,7 +216,7 @@ void CharacterController::update(float duration, Ogre::Vector3 &movement)
                                  : (sneak ? CharState_SneakLeft : (isrunning ? CharState_RunLeft : CharState_WalkLeft)), true);
 
             // Apply any forward/backward movement manually
-            movement.y += vec.y * (speed*duration);
+            movement.mPosition[1] += vec.y * (speed*duration);
         }
         else if(vec.y != 0.0f && speed > 0.0f)
         {
@@ -226,7 +228,7 @@ void CharacterController::update(float duration, Ogre::Vector3 &movement)
                 setState(inwater ? (isrunning ? CharState_SwimRunBack : CharState_SwimWalkBack)
                                  : (sneak ? CharState_SneakBack : (isrunning ? CharState_RunBack : CharState_WalkBack)), true);
             // Apply any sideways movement manually
-            movement.x += vec.x * (speed*duration);
+            movement.mPosition[0] += vec.x * (speed*duration);
         }
         else if(mAnimQueue.size() == 0)
             setState((inwater ? CharState_IdleSwim : (sneak ? CharState_IdleSneak : CharState_Idle)), true);
@@ -235,7 +237,10 @@ void CharacterController::update(float duration, Ogre::Vector3 &movement)
     if(mAnimation && !mSkipAnim)
     {
         mAnimation->setSpeed(speed);
-        movement += mAnimation->runAnimation(duration);
+        Ogre::Vector3 moved = mAnimation->runAnimation(duration);
+        movement.mPosition[0] += moved.x;
+        movement.mPosition[1] += moved.y;
+        movement.mPosition[2] += moved.z;
     }
     mSkipAnim = false;
 }

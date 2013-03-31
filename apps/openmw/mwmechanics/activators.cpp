@@ -2,6 +2,8 @@
 
 #include <OgreVector3.h>
 
+#include "movement.hpp"
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
@@ -57,7 +59,7 @@ void Activators::update(float duration, bool paused)
     {
         for(PtrControllerMap::iterator iter(mActivators.begin());iter != mActivators.end();++iter)
         {
-            Ogre::Vector3 movement(0.0f);
+            Movement movement;
             iter->second.update(duration, movement);
         }
     }
