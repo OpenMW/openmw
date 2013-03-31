@@ -2,8 +2,7 @@
 #define GAME_MWMECHANICS_AITRAVEL_H
 
 #include "aipackage.hpp"
-#include <components/esm/loadpgrd.hpp>
-#include <list>
+#include "pathfinding.hpp"
 
 namespace MWMechanics
 {
@@ -26,8 +25,9 @@ namespace MWMechanics
             int cellX;
             int cellY;
 
-            bool isPathConstructed;
-            std::list<ESM::Pathgrid::Point> mPath;
+            //bool isPathConstructed;
+            //std::list<ESM::Pathgrid::Point> mPath;
+            PathFinder mPathFinder;
 
     };
 }
