@@ -288,8 +288,6 @@ namespace MWInput
                 triedToMove = true;
                 mPlayer.setLeftRight (1);
             }
-            else
-                mPlayer.setLeftRight (0);
 
             if (actionIsActive(A_MoveForward))
             {
@@ -303,8 +301,6 @@ namespace MWInput
                 mPlayer.setAutoMove (false);
                 mPlayer.setForwardBackward (-1);
             }
-            else
-                mPlayer.setForwardBackward (0);
 
             mPlayer.setSneak(actionIsActive(A_Sneak));
 
@@ -313,8 +309,6 @@ namespace MWInput
                 mPlayer.setUpDown (1);
                 triedToMove = true;
             }
-            else
-                mPlayer.setUpDown (0);
 
             if (mAlwaysRunActive)
                 mPlayer.setRunState(!actionIsActive(A_Run));

@@ -414,12 +414,22 @@ namespace MWClass
 
     Ogre::Vector3 Npc::getMovementVector (const MWWorld::Ptr& ptr) const
     {
-        return Ogre::Vector3(getMovementSettings(ptr).mPosition);
+        MWMechanics::Movement &movement = getMovementSettings(ptr);
+        Ogre::Vector3 vec(movement.mPosition);
+        movement.mPosition[0] = 0.0f;
+        movement.mPosition[1] = 0.0f;
+        movement.mPosition[2] = 0.0f;
+        return vec;
     }
 
     Ogre::Vector3 Npc::getRotationVector (const MWWorld::Ptr& ptr) const
     {
-        return Ogre::Vector3(getMovementSettings(ptr).mRotation);
+        MWMechanics::Movement &movement = getMovementSettings(ptr);
+        Ogre::Vector3 vec(movement.mRotation);
+        movement.mRotation[0] = 0.0f;
+        movement.mRotation[1] = 0.0f;
+        movement.mRotation[2] = 0.0f;
+        return vec;
     }
 
     bool Npc::isEssential (const MWWorld::Ptr& ptr) const
