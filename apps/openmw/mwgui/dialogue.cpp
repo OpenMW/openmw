@@ -228,7 +228,8 @@ void DialogueWindow::onByeClicked(MyGUI::Widget* _sender)
 
 void DialogueWindow::onSelectTopic(const std::string& topic, int id)
 {
-    if (!mEnabled) return;
+    if (!mEnabled || MWBase::Environment::get().getDialogueManager()->isInChoice())
+        return;
 
     int separatorPos = 0;
     for (unsigned int i=0; i<mTopicsList->getItemCount(); ++i)
@@ -247,6 +248,11 @@ void DialogueWindow::onSelectTopic(const std::string& topic, int id)
         if (topic == gmst.find("sPersuasion")->getString())
         {
             mPersuasionDialog.setVisible(true);
+        }
+        else if (topic == gmst.find("sCompanionShare")->getString())
+        {
+            mWindowManager.pushGuiMode(GM_Companion);
+            mWindowManager.showCompanionWindow(mPtr);
         }
         else if (!MWBase::Environment::get().getDialogueManager()->checkServiceRefused())
         {
@@ -306,7 +312,10 @@ void DialogueWindow::setKeywords(std::list<std::string> keyWords)
 {
     mTopicsList->clear();
 
-    bool anyService = mServices > 0;
+    bool isCompanion = !MWWorld::Class::get(mPtr).getScript(mPtr).empty()
+            && mPtr.getRefData().getLocals().getIntVar(MWWorld::Class::get(mPtr).getScript(mPtr), "companion");
+
+    bool anyService = mServices > 0 || isCompanion || mPtr.getTypeName() == typeid(ESM::NPC).name();
 
     const MWWorld::Store<ESM::GameSetting> &gmst =
         MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
@@ -335,8 +344,12 @@ void DialogueWindow::setKeywords(std::list<std::string> keyWords)
     if (mServices & Service_Repair)
         mTopicsList->addItem(gmst.find("sRepair")->getString());
 
-    if (anyService || mPtr.getTypeName() == typeid(ESM::NPC).name())
+    if (isCompanion)
+        mTopicsList->addItem(gmst.find("sCompanionShare")->getString());
+
+    if (anyService)
         mTopicsList->addSeparator();
+
 
     for(std::list<std::string>::iterator it = keyWords.begin(); it != keyWords.end(); ++it)
     {

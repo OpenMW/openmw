@@ -77,40 +77,40 @@ namespace MWGui
 
         if (result == MWMechanics::Alchemy::Result_NoName)
         {
-            mWindowManager.messageBox("#{sNotifyMessage37}", std::vector<std::string>());
+            mWindowManager.messageBox("#{sNotifyMessage37}");
             return;
         }
 
         // check if mortar & pestle is available (always needed)
         if (result == MWMechanics::Alchemy::Result_NoMortarAndPestle)
         {
-            mWindowManager.messageBox("#{sNotifyMessage45}", std::vector<std::string>());
+            mWindowManager.messageBox("#{sNotifyMessage45}");
             return;
         }
 
         // make sure 2 or more ingredients were selected
         if (result == MWMechanics::Alchemy::Result_LessThanTwoIngredients)
         {
-            mWindowManager.messageBox("#{sNotifyMessage6a}", std::vector<std::string>());
+            mWindowManager.messageBox("#{sNotifyMessage6a}");
             return;
         }
 
         if (result == MWMechanics::Alchemy::Result_NoEffects)
         {
-            mWindowManager.messageBox("#{sNotifyMessage8}", std::vector<std::string>());
+            mWindowManager.messageBox("#{sNotifyMessage8}");
             MWBase::Environment::get().getSoundManager()->playSound("potion fail", 1.f, 1.f);
             return;
         }
 
         if (result == MWMechanics::Alchemy::Result_Success)
         {
-            mWindowManager.messageBox("#{sPotionSuccess}", std::vector<std::string>());
+            mWindowManager.messageBox("#{sPotionSuccess}");
             MWBase::Environment::get().getSoundManager()->playSound("potion success", 1.f, 1.f);
         }
         else if (result == MWMechanics::Alchemy::Result_RandomFailure)
         {
             // potion failed
-            mWindowManager.messageBox("#{sNotifyMessage8}", std::vector<std::string>());
+            mWindowManager.messageBox("#{sNotifyMessage8}");
             MWBase::Environment::get().getSoundManager()->playSound("potion fail", 1.f, 1.f);
         }
 

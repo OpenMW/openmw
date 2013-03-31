@@ -181,8 +181,7 @@ namespace MWInput
                 break;
             case A_Activate:
                 resetIdleTime();
-                if( MWBase::Environment::get().getWindowManager()->isGuiMode()
-                    && MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_InterMessageBox ) {
+                if( MWBase::Environment::get().getWindowManager()->isGuiMode()) {
                         // Pressing the activation key when a messagebox is prompting for "ok" will activate the ok button
                         MWBase::Environment::get().getWindowManager()->enterPressed();
                     }
@@ -372,7 +371,7 @@ namespace MWInput
 
     void InputManager::changeInputMode(bool guiMode)
     {
-        // Are we in GUI mode now?
+        MWBase::Environment::get().getWindowManager()->setMouseVisible(guiMode);
         if(guiMode)
         {
             // Disable mouse look
@@ -456,8 +455,7 @@ namespace MWInput
     bool InputManager::keyPressed( const OIS::KeyEvent &arg )
     {
         if(arg.key == OIS::KC_RETURN
-            && MWBase::Environment::get().getWindowManager()->isGuiMode()
-            && MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_InterMessageBox )
+            && MWBase::Environment::get().getWindowManager()->isGuiMode())
         {
             // Pressing enter when a messagebox is prompting for "ok" will activate the ok button
             MWBase::Environment::get().getWindowManager()->enterPressed();

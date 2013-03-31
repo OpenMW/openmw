@@ -114,7 +114,7 @@ namespace MWScript
             }
             catch (const std::exception& e)
             {
-                std::cerr << "exeution of script " << name << " failed." << std::endl;
+                std::cerr << "execution of script " << name << " failed." << std::endl;
 
                 if (mVerbose)
                     std::cerr << "(" << e.what() << ")" << std::endl;

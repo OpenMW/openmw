@@ -80,6 +80,7 @@ set(MYGUI_FILES
     openmw_persuasion_dialog.layout
     openmw_merchantrepair.layout
     openmw_repair.layout
+    openmw_companion_window.layout
     smallbars.png
     DejaVuLGCSansMono.ttf
     markers.png

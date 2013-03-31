@@ -234,7 +234,8 @@ void HUD::onWorldClicked(MyGUI::Widget* _sender)
         mDragAndDrop->mDraggedWidget = 0;
 
         MWBase::Environment::get().getWindowManager()->setDragDrop(false);
-        MWBase::Environment::get().getWindowManager()->getInventoryWindow()->drawItems();
+        mDragAndDrop->mDraggedFrom->drawItems();
+        mDragAndDrop->mDraggedFrom->notifyItemDragged(object, -mDragAndDrop->mDraggedCount);
     }
     else
     {

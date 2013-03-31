@@ -83,7 +83,7 @@ namespace MWScript
                             msgBox = boost::str(boost::format(msgBox) % count % itemName);
                         }
 
-                        MWBase::Environment::get().getWindowManager()->messageBox(msgBox, std::vector<std::string>());
+                        MWBase::Environment::get().getWindowManager()->messageBox(msgBox);
                     }
                 }
         };
@@ -179,7 +179,7 @@ namespace MWScript
                         }
 
                         if (numRemoved > 0)
-                            MWBase::Environment::get().getWindowManager()->messageBox(msgBox, std::vector<std::string>());
+                            MWBase::Environment::get().getWindowManager()->messageBox(msgBox);
                     }
                 }
         };

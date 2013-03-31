@@ -178,7 +178,7 @@ namespace MWGui
         {
             // user notification
             MWBase::Environment::get().getWindowManager()->
-                messageBox("#{sBarterDialog11}", std::vector<std::string>());
+                messageBox("#{sBarterDialog11}");
             return;
         }
 
@@ -187,7 +187,7 @@ namespace MWGui
         {
             // user notification
             MWBase::Environment::get().getWindowManager()->
-                messageBox("#{sBarterDialog1}", std::vector<std::string>());
+                messageBox("#{sBarterDialog1}");
             return;
         }
 
@@ -196,7 +196,7 @@ namespace MWGui
         {
             // user notification
             MWBase::Environment::get().getWindowManager()->
-                messageBox("#{sBarterDialog2}", std::vector<std::string>());
+                messageBox("#{sBarterDialog2}");
             return;
         }
 
@@ -206,7 +206,7 @@ namespace MWGui
             if (mPtr.getTypeName() != typeid(ESM::NPC).name())
             {
                 MWBase::Environment::get().getWindowManager()->
-                    messageBox("#{sNotifyMessage9}", std::vector<std::string>());
+                    messageBox("#{sNotifyMessage9}");
                 return;
             }
 
@@ -242,7 +242,7 @@ namespace MWGui
             if(roll > x) //trade refused
             {
                 MWBase::Environment::get().getWindowManager()->
-                    messageBox("#{sNotifyMessage9}", std::vector<std::string>());
+                    messageBox("#{sNotifyMessage9}");
 
                 int iBarterFailDisposition = gmst.find("iBarterFailDisposition")->getInt();
                 MWBase::Environment::get().getDialogueManager()->applyTemporaryDispositionChange(iBarterFailDisposition);

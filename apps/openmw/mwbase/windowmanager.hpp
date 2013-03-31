@@ -201,6 +201,7 @@ namespace MWBase
             ///< Hides dialog and schedules dialog to be deleted.
 
             virtual void messageBox (const std::string& message, const std::vector<std::string>& buttons = std::vector<std::string>()) = 0;
+
             virtual void enterPressed () = 0;
             virtual int readPressedButton() = 0;
             ///< returns the index of the pressed button or -1 if no button was pressed (->MessageBoxmanager->InteractiveMessageBox)
@@ -235,11 +236,15 @@ namespace MWBase
             virtual bool getPlayerSleeping() = 0;
             virtual void wakeUpPlayer() = 0;
 
+            virtual void showCompanionWindow(MWWorld::Ptr actor) = 0;
             virtual void startSpellMaking(MWWorld::Ptr actor) = 0;
             virtual void startEnchanting(MWWorld::Ptr actor) = 0;
+            virtual void startSelfEnchanting(MWWorld::Ptr soulgem) = 0;
             virtual void startTraining(MWWorld::Ptr actor) = 0;
             virtual void startRepair(MWWorld::Ptr actor) = 0;
             virtual void startRepairItem(MWWorld::Ptr item) = 0;
+
+            virtual void showSoulgemDialog (MWWorld::Ptr item) = 0;
 
             virtual void changePointer (const std::string& name) = 0;
 
