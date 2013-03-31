@@ -86,10 +86,16 @@ namespace MWGui
 
     void EnchantingDialog::startEnchanting (MWWorld::Ptr actor)
     {
-        mEnchanting.setSelfEnchanting(false);
-        mEnchanting.setEnchanter(actor);
 
-        mPtr = actor;
+        /*Now there's no need to use other enchanters, player is the enchanter here,
+          even if the enchanted object is created by NPC. Could be changed later, probably
+          with some price formulas                                                       */
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+
+        mEnchanting.setSelfEnchanting(false);
+        mEnchanting.setEnchanter(player);
+
+        mPtr = player;
 
         startEditing ();
     }

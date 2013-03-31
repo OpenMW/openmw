@@ -13,7 +13,7 @@ namespace MWMechanics
             MWWorld::Ptr mOldItemPtr;
             MWWorld::Ptr mSoulGemPtr;
             MWWorld::Ptr mEnchanter;
-            const MWWorld::Ptr *mNewItemPtr;
+
             int mEnchantType;
 
             bool mSelfEnchanting;
@@ -24,6 +24,8 @@ namespace MWMechanics
             std::string mNewItemName;
             std::string mObjectType;
             std::string mOldItemId;
+            int mOldItemCount;
+
         public:
             Enchanting();
             void setEnchanter(MWWorld::Ptr enchanter);

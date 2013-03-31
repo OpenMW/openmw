@@ -20,6 +20,7 @@ namespace MWMechanics
         {
             mObjectType = mOldItemPtr.getTypeName();
             mOldItemId = mOldItemPtr.getCellRef().mRefID;
+            mOldItemCount = mOldItemPtr.getRefData().getCount();
         }
         else
         {
@@ -50,7 +51,8 @@ namespace MWMechanics
 
     int Enchanting::create()
     {
-        mSoulGemPtr.getRefData().setCount(mSoulGemPtr.getRefData().getCount()-1);
+        mEnchantment.mData.mCharge = getGemCharge();
+        mSoulGemPtr.getRefData().setCount (mSoulGemPtr.getRefData().getCount()-1);
 
         if(mSelfEnchanting)
         {
@@ -60,9 +62,6 @@ namespace MWMechanics
             MWWorld::Class::get (mEnchanter).skillUsageSucceeded (mEnchanter, ESM::Skill::Enchant, 1);
         }
 
-        mOldItemPtr.getRefData().setCount(mOldItemPtr.getRefData().getCount()-1);
-
-        mEnchantment.mData.mCharge = getGemCharge();
         if(mEnchantType==3)
         {
             mEnchantment.mData.mCharge=0;
@@ -70,15 +69,17 @@ namespace MWMechanics
         mEnchantment.mData.mType = mEnchantType;
         mEnchantment.mData.mCost = getEnchantCost();
         mEnchantment.mEffects = mEffectList;
+
         const ESM::Enchantment *enchantment = MWBase::Environment::get().getWorld()->createRecord (mEnchantment);
 
-        std::string newobjId = MWWorld::Class::get(mOldItemPtr).applyEnchantment(mOldItemPtr, enchantment->mId, getGemCharge(), mNewItemName);
+        MWWorld::Class::get(mOldItemPtr).applyEnchantment(mOldItemPtr, enchantment->mId, getGemCharge(), mNewItemName);
 
-        MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), newobjId);
-        MWWorld::Ptr newobjPtr = ref.getPtr();
-        MWWorld::Ptr result = mOldItemPtr;
-        result.mPtr = newobjPtr.mPtr;
-        MWWorld::Class::get (mEnchanter).getContainerStore (mEnchanter).add (result);
+        mOldItemPtr.getRefData().setCount(1);
+
+        MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), mOldItemId);
+        ref.getPtr().getRefData().setCount (mOldItemCount-1);
+        MWWorld::Class::get (mEnchanter).getContainerStore (mEnchanter).add (ref.getPtr());
+
         return 1;
     }
     
