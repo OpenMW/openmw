@@ -11,7 +11,7 @@
             </Widget>
         </Widget>
 
-        <Widget type="HBox" position="5 235 575 24" align="Right Bottom">
+        <Widget type="HBox" position="5 235 575 24" align="Bottom HStretch">
             <Widget type="MWDynamicStat" skin="MW_ChargeBar_Blue" position="8 8 212 24" name="EncumbranceBar" align="Left Top HStretch">
                 <UserString key="HStretch" value="true"/>
             </Widget>
