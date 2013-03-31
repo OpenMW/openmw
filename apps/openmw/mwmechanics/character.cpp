@@ -175,12 +175,12 @@ void CharacterController::update(float duration, Ogre::Vector3 &movement)
     {
         const MWBase::World *world = MWBase::Environment::get().getWorld();
         const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
-        const Ogre::Vector3 &vec = cls.getMovementVector(mPtr);
 
         bool onground = world->isOnGround(mPtr);
         bool inwater = world->isSwimming(mPtr);
         bool isrunning = cls.getStance(mPtr, MWWorld::Class::Run);
         bool sneak = cls.getStance(mPtr, MWWorld::Class::Sneak);
+        const Ogre::Vector3 &vec = cls.getMovementVector(mPtr);
         speed = cls.getSpeed(mPtr);
 
         /* FIXME: The state should be set to Jump, and X/Y movement should be disallowed except

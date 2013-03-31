@@ -42,14 +42,14 @@ namespace MWWorld
         if (mAutoMove)
             value = 1;
 
-        MWWorld::Class::get (ptr).getMovementSettings (ptr).mForwardBackward = value;
+        MWWorld::Class::get (ptr).getMovementSettings (ptr).mPosition[1] = value;
     }
 
     void Player::setLeftRight (int value)
     {
         MWWorld::Ptr ptr = getPlayer();
 
-        MWWorld::Class::get (ptr).getMovementSettings (ptr).mLeftRight = value;
+        MWWorld::Class::get (ptr).getMovementSettings (ptr).mPosition[0] = value;
     }
 
     void Player::setForwardBackward (int value)
@@ -61,14 +61,14 @@ namespace MWWorld
         if (mAutoMove)
             value = 1;
 
-        MWWorld::Class::get (ptr).getMovementSettings (ptr).mForwardBackward = value;
+        MWWorld::Class::get (ptr).getMovementSettings (ptr).mPosition[1] = value;
     }
 
     void Player::setUpDown(int value)
     {
         MWWorld::Ptr ptr = getPlayer();
 
-        MWWorld::Class::get (ptr).getMovementSettings (ptr).mUpDown = value;
+        MWWorld::Class::get (ptr).getMovementSettings (ptr).mPosition[2] = value;
     }
 
     void Player::setRunState(bool run)

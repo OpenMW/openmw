@@ -368,7 +368,7 @@ namespace MWClass
             moveSpeed = runSpeed;
         else
             moveSpeed = walkSpeed;
-        if(getMovementSettings(ptr).mLeftRight != 0 && getMovementSettings(ptr).mForwardBackward == 0)
+        if(getMovementSettings(ptr).mPosition[0] != 0 && getMovementSettings(ptr).mPosition[1] == 0)
             moveSpeed *= 0.75f;
 
         return moveSpeed;
@@ -414,12 +414,7 @@ namespace MWClass
 
     Ogre::Vector3 Npc::getMovementVector (const MWWorld::Ptr& ptr) const
     {
-        Ogre::Vector3 vector;
-        vector.x = getMovementSettings(ptr).mLeftRight;
-        vector.y = getMovementSettings(ptr).mForwardBackward;
-        vector.z = getMovementSettings(ptr).mUpDown;
-
-        return vector;
+        return Ogre::Vector3(getMovementSettings(ptr).mPosition);
     }
     
     bool Npc::isEssential (const MWWorld::Ptr& ptr) const
