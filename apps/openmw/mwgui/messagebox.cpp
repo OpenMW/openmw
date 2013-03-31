@@ -247,7 +247,7 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
     std::vector<std::string>::const_iterator it;
     for(it = buttons.begin(); it != buttons.end(); ++it)
     {
-        MyGUI::ButtonPtr button = mButtonsWidget->createWidget<MyGUI::Button>(
+        MyGUI::Button* button = mButtonsWidget->createWidget<MyGUI::Button>(
             MyGUI::WidgetStyle::Child,
             std::string("MW_Button"),
             dummyCoord,
@@ -301,7 +301,7 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
         MyGUI::IntSize buttonSize(0, buttonHeight);
         int left = (mainWidgetSize.width - buttonsWidth)/2 + buttonPadding;
 
-        std::vector<MyGUI::ButtonPtr>::const_iterator button;
+        std::vector<MyGUI::Button*>::const_iterator button;
         for(button = mButtons.begin(); button != mButtons.end(); ++button)
         {
             buttonCord.left = left;
@@ -349,7 +349,7 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
 
         int top = textButtonPadding + buttonTopPadding + textSize.height;
 
-        std::vector<MyGUI::ButtonPtr>::const_iterator button;
+        std::vector<MyGUI::Button*>::const_iterator button;
         for(button = mButtons.begin(); button != mButtons.end(); ++button)
         {
             buttonSize.width = (*button)->getTextSize().width + buttonPadding*2;
@@ -371,7 +371,7 @@ void InteractiveMessageBox::enterPressed()
 {
     
     std::string ok = Misc::StringUtils::lowerCase(MyGUI::LanguageManager::getInstance().replaceTags("#{sOK}"));
-    std::vector<MyGUI::ButtonPtr>::const_iterator button;
+    std::vector<MyGUI::Button*>::const_iterator button;
     for(button = mButtons.begin(); button != mButtons.end(); ++button)
     {
         if(Misc::StringUtils::lowerCase((*button)->getCaption()) == ok)
@@ -393,7 +393,7 @@ void InteractiveMessageBox::buttonActivated (MyGUI::Widget* pressed)
 {
     mMarkedToDelete = true;
     int index = 0;
-    std::vector<MyGUI::ButtonPtr>::const_iterator button;
+    std::vector<MyGUI::Button*>::const_iterator button;
     for(button = mButtons.begin(); button != mButtons.end(); ++button)
     {
         if(*button == pressed)

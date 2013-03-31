@@ -42,9 +42,11 @@ namespace MWInput
         , mMouseX(ogre.getWindow()->getWidth ()/2.f)
         , mMouseY(ogre.getWindow()->getHeight ()/2.f)
         , mMouseWheel(0)
-        , mUserFile(userFile)
         , mDragDrop(false)
         , mGuiCursorEnabled(false)
+        , mDebug(debug)
+        , mUserFile(userFile)
+        , mUserFileExists(userFileExists)
         , mInvertY (Settings::Manager::getBool("invert y axis", "Input"))
         , mCameraSensitivity (Settings::Manager::getFloat("camera sensitivity", "Input"))
         , mUISensitivity (Settings::Manager::getFloat("ui sensitivity", "Input"))
@@ -53,8 +55,9 @@ namespace MWInput
         , mPreviewPOVDelay(0.f)
         , mTimeIdle(0.f)
         , mOverencumberedMessageDelay(0.f)
+        , mAlwaysRunActive(false)
     {
-        Ogre::RenderWindow* window = ogre.getWindow ();
+        Ogre::RenderWindow* window = mOgre.getWindow ();
         size_t windowHnd;
 
         resetIdleTime();
@@ -69,7 +72,7 @@ namespace MWInput
 
         // Set non-exclusive mouse and keyboard input if the user requested
         // it.
-        if (debug)
+        if (mDebug)
         {
             #if defined OIS_WIN32_PLATFORM
             pl.insert(std::make_pair(std::string("w32_mouse"),
@@ -116,7 +119,7 @@ namespace MWInput
 
         MyGUI::InputManager::getInstance().injectMouseMove(mMouseX, mMouseY, mMouse->getMouseState ().Z.abs);
 
-        std::string file = userFileExists ? userFile : "";
+        std::string file = mUserFileExists ? mUserFile : "";
         mInputCtrl = new ICS::InputControlSystem(file, true, this, NULL, A_Last);
 
         loadKeyDefaults();
@@ -178,12 +181,12 @@ namespace MWInput
                 break;
             case A_Activate:
                 resetIdleTime();
-                activate();
                 if( MWBase::Environment::get().getWindowManager()->isGuiMode()
                     && MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_InterMessageBox ) {
                         // Pressing the activation key when a messagebox is prompting for "ok" will activate the ok button
                         MWBase::Environment::get().getWindowManager()->enterPressed();
                     }
+                activate();
                 break;
             case A_Journal:
                 toggleJournal ();
@@ -191,10 +194,7 @@ namespace MWInput
             case A_AutoMove:
                 toggleAutoMove ();
                 break;
-            case A_ToggleSneak:
-                /// \todo implement
-                break;
-            case A_ToggleWalk:
+            case A_AlwaysRun:
                 toggleWalking ();
                 break;
             case A_ToggleWeapon:
@@ -242,7 +242,7 @@ namespace MWInput
             case A_ToggleHUD:
                 mWindows.toggleHud();
                 break;
-         }
+            }
         }
     }
 
@@ -281,13 +281,11 @@ namespace MWInput
             if (actionIsActive(A_MoveLeft))
             {
                 triedToMove = true;
-                mPlayer.setAutoMove (false);
                 mPlayer.setLeftRight (-1);
             }
             else if (actionIsActive(A_MoveRight))
             {
                 triedToMove = true;
-                mPlayer.setAutoMove (false);
                 mPlayer.setLeftRight (1);
             }
             else
@@ -308,20 +306,20 @@ namespace MWInput
             else
                 mPlayer.setForwardBackward (0);
 
+            mPlayer.setSneak(actionIsActive(A_Sneak));
+
             if (actionIsActive(A_Jump) && mControlSwitch["playerjumping"])
             {
                 mPlayer.setUpDown (1);
                 triedToMove = true;
             }
-            else if (actionIsActive(A_Crouch))
-                mPlayer.setUpDown (-1);
             else
                 mPlayer.setUpDown (0);
 
-            if(actionIsActive(A_Run))
-                mPlayer.setRunState(true);
+            if (mAlwaysRunActive)
+                mPlayer.setRunState(!actionIsActive(A_Run));
             else
-                mPlayer.setRunState(false);
+                mPlayer.setRunState(actionIsActive(A_Run));
 
             // if player tried to start moving, but can't (due to being overencumbered), display a notification.
             if (triedToMove)
@@ -364,7 +362,7 @@ namespace MWInput
             actionIsActive(A_MoveLeft) ||
             actionIsActive(A_MoveRight) ||
             actionIsActive(A_Jump) ||
-            actionIsActive(A_Crouch) ||
+            actionIsActive(A_Sneak) ||
             actionIsActive(A_TogglePOV))
         {
             resetIdleTime();
@@ -551,6 +549,9 @@ namespace MWInput
 
             MWBase::World *world = MWBase::Environment::get().getWorld();
             world->rotateObject(world->getPlayer().getPlayer(), -y, 0.f, x, true);
+
+            if (arg.state.Z.rel)
+                MWBase::Environment::get().getWorld()->changeVanityModeScale(arg.state.Z.rel);
         }
 
         return true;
@@ -699,7 +700,7 @@ namespace MWInput
     void InputManager::toggleWalking()
     {
         if (mWindows.isGuiMode()) return;
-        mPlayer.toggleRunning();
+        mAlwaysRunActive = !mAlwaysRunActive;
     }
 
     // Exit program now button (which is disabled in GUI mode)
@@ -749,7 +750,7 @@ namespace MWInput
         defaultKeyBindings[A_QuickKeysMenu] = OIS::KC_F1;
         defaultKeyBindings[A_Console] = OIS::KC_F2;
         defaultKeyBindings[A_Run] = OIS::KC_LSHIFT;
-        defaultKeyBindings[A_Crouch] = OIS::KC_LCONTROL;
+        defaultKeyBindings[A_Sneak] = OIS::KC_LCONTROL;
         defaultKeyBindings[A_AutoMove] = OIS::KC_Q;
         defaultKeyBindings[A_Jump] = OIS::KC_E;
         defaultKeyBindings[A_Journal] = OIS::KC_J;
@@ -768,6 +769,7 @@ namespace MWInput
         defaultKeyBindings[A_QuickKey10] = OIS::KC_0;
         defaultKeyBindings[A_Screenshot] = OIS::KC_SYSRQ;
         defaultKeyBindings[A_ToggleHUD] = OIS::KC_F12;
+        defaultKeyBindings[A_AlwaysRun] = OIS::KC_Y;
 
         std::map<int, int> defaultMouseButtonBindings;
         defaultMouseButtonBindings[A_Inventory] = OIS::MB_Right;
@@ -816,7 +818,7 @@ namespace MWInput
         descriptions[A_ToggleSpell] = "sReady_Magic";
         descriptions[A_Console] = "sConsoleTitle";
         descriptions[A_Run] = "sRun";
-        descriptions[A_Crouch] = "sCrouch_Sneak";
+        descriptions[A_Sneak] = "sCrouch_Sneak";
         descriptions[A_AutoMove] = "sAuto_Run";
         descriptions[A_Jump] = "sJump";
         descriptions[A_Journal] = "sJournal";
@@ -834,6 +836,7 @@ namespace MWInput
         descriptions[A_QuickKey8] = "sQuick8Cmd";
         descriptions[A_QuickKey9] = "sQuick9Cmd";
         descriptions[A_QuickKey10] = "sQuick10Cmd";
+        descriptions[A_AlwaysRun] = "sAlways_Run";
 
         if (descriptions[action] == "")
             return ""; // not configurable
@@ -865,7 +868,8 @@ namespace MWInput
         ret.push_back(A_MoveRight);
         ret.push_back(A_TogglePOV);
         ret.push_back(A_Run);
-        ret.push_back(A_Crouch);
+        ret.push_back(A_AlwaysRun);
+        ret.push_back(A_Sneak);
         ret.push_back(A_Activate);
         ret.push_back(A_ToggleWeapon);
         ret.push_back(A_ToggleSpell);

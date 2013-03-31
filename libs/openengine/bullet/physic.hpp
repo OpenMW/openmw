@@ -141,6 +141,7 @@ namespace Physic
     private:
 
         OEngine::Physic::RigidBody* mBody;
+        OEngine::Physic::RigidBody* mRaycastingBody;
         Ogre::Vector3 mBoxScaledTranslation;
         btQuaternion mBoxRotationInverse;
         Ogre::Quaternion mBoxRotation;
@@ -163,10 +164,7 @@ namespace Physic
         RigidBody(btRigidBody::btRigidBodyConstructionInfo& CI,std::string name);
         virtual ~RigidBody();
         std::string mName;
-
-        //is this body used for raycasting only?
-        bool mCollide;
-        bool mIgnore;
+        bool mPlaceable;
     };
 
     struct HeightField
@@ -200,7 +198,7 @@ namespace Physic
          */
         RigidBody* createAndAdjustRigidBody(const std::string &mesh, const std::string &name,
             float scale, const Ogre::Vector3 &position, const Ogre::Quaternion &rotation,
-            Ogre::Vector3* scaledBoxTranslation = 0, Ogre::Quaternion* boxRotation = 0);
+            Ogre::Vector3* scaledBoxTranslation = 0, Ogre::Quaternion* boxRotation = 0, bool raycasting=false, bool placeable=false);
 
         /**
          * Adjusts a rigid body to the right position and rotation
@@ -228,7 +226,7 @@ namespace Physic
         /**
          * Add a RigidBody to the simulation
          */
-        void addRigidBody(RigidBody* body, bool addToMap = true);
+        void addRigidBody(RigidBody* body, bool addToMap = true, RigidBody* raycastingBody = NULL);
 
         /**
          * Remove a RigidBody from the simulation. It does not delete it, and does not remove it from the RigidBodyMap.
@@ -242,9 +240,8 @@ namespace Physic
 
         /**
          * Return a pointer to a given rigid body.
-         * TODO:check if exist
          */
-        RigidBody* getRigidBody(const std::string &name);
+        RigidBody* getRigidBody(const std::string &name, bool raycasting=false);
 
         /**
          * Create and add a character to the scene, and add it to the ActorMap.
@@ -322,7 +319,9 @@ namespace Physic
         HeightFieldContainer mHeightFieldMap;
 
         typedef std::map<std::string,RigidBody*> RigidBodyContainer;
-        RigidBodyContainer ObjectMap;
+        RigidBodyContainer mCollisionObjectMap;
+
+        RigidBodyContainer mRaycastingObjectMap;
 
         typedef std::map<std::string, PhysicActor*>  PhysicActorContainer;
         PhysicActorContainer PhysicActorMap;

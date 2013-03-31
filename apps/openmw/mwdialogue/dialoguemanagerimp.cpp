@@ -2,6 +2,7 @@
 #include "dialoguemanagerimp.hpp"
 
 #include <cctype>
+#include <cstdlib>
 #include <algorithm>
 #include <iterator>
 
@@ -240,7 +241,7 @@ namespace MWDialogue
         }
     }
 
-    void DialogueManager::executeTopic (const std::string& topic)
+    void DialogueManager::executeTopic (const std::string& topic, bool randomResponse)
     {
         Filter filter (mActor, mChoice, mTalkedTo);
 
@@ -251,8 +252,12 @@ namespace MWDialogue
 
         MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
 
-        if (const ESM::DialInfo *info = filter.search (dialogue, true))
+        std::vector<const ESM::DialInfo *> infos = filter.list (dialogue, true, true);
+
+        if (!infos.empty())
         {
+            const ESM::DialInfo* info = infos[randomResponse ? std::rand() % infos.size() : 0];
+
             parseText (info->mResponse);
 
             if (dialogue.mType==ESM::Dialogue::Persuasion)
@@ -361,6 +366,9 @@ namespace MWDialogue
 
         if (services & ESM::NPC::Enchanting)
             windowServices |= MWGui::DialogueWindow::Service_Enchant;
+
+        if (services & ESM::NPC::Repair)
+            windowServices |= MWGui::DialogueWindow::Service_Repair;
 
         MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
 
@@ -500,7 +508,7 @@ namespace MWDialogue
             text = "Bribe";
         }
 
-        executeTopic (text + (success ? " Success" : " Fail"));
+        executeTopic (text + (success ? " Success" : " Fail"), true);
     }
 
     int DialogueManager::getTemporaryDispositionChange() const
@@ -511,6 +519,37 @@ namespace MWDialogue
     void DialogueManager::applyTemporaryDispositionChange(int delta)
     {
         mTemporaryDispositionChange += delta;
+    }
+
+    bool DialogueManager::checkServiceRefused()
+    {
+        Filter filter (mActor, mChoice, mTalkedTo);
+
+        const MWWorld::Store<ESM::Dialogue> &dialogues =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
+
+        const ESM::Dialogue& dialogue = *dialogues.find ("Service Refusal");
+        MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
+
+        std::vector<const ESM::DialInfo *> infos = filter.list (dialogue, false, false, true);
+        if (!infos.empty())
+        {
+            const ESM::DialInfo* info = infos[0];
+
+            parseText (info->mResponse);
+
+            const MWWorld::Store<ESM::GameSetting>& gmsts =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+            win->addTitle (gmsts.find ("sServiceRefusal")->getString());
+
+            MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
+            win->addText (Interpreter::fixDefinesDialog(info->mResponse, interpreterContext));
+
+            executeScript (info->mResultScript);
+            return true;
+        }
+        return false;
     }
 
     std::vector<HyperTextToken> ParseHyperText(const std::string& text)

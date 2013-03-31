@@ -2,6 +2,9 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <MyGUI_ProgressBar.h>
+#include <MyGUI_ImageBox.h>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -31,10 +34,10 @@ void MWGui::Widgets::fixTexturePath(std::string &path)
 /* MWSkill */
 
 MWSkill::MWSkill()
-    : mManager(nullptr)
+    : mManager(NULL)
     , mSkillId(ESM::Skill::Length)
-    , mSkillNameWidget(nullptr)
-    , mSkillValueWidget(nullptr)
+    , mSkillNameWidget(NULL)
+    , mSkillValueWidget(NULL)
 {
 }
 
@@ -103,7 +106,7 @@ void MWSkill::initialiseOverride()
     assignWidget(mSkillNameWidget, "StatName");
     assignWidget(mSkillValueWidget, "StatValue");
 
-    MyGUI::ButtonPtr button;
+    MyGUI::Button* button;
     assignWidget(button, "StatNameButton");
     if (button)
     {
@@ -123,10 +126,10 @@ void MWSkill::initialiseOverride()
 /* MWAttribute */
 
 MWAttribute::MWAttribute()
-    : mManager(nullptr)
+    : mManager(NULL)
     , mId(-1)
-    , mAttributeNameWidget(nullptr)
-    , mAttributeValueWidget(nullptr)
+    , mAttributeNameWidget(NULL)
+    , mAttributeValueWidget(NULL)
 {
 }
 
@@ -195,7 +198,7 @@ void MWAttribute::initialiseOverride()
     assignWidget(mAttributeNameWidget, "StatName");
     assignWidget(mAttributeValueWidget, "StatValue");
 
-    MyGUI::ButtonPtr button;
+    MyGUI::Button* button;
     assignWidget(button, "StatNameButton");
     if (button)
     {
@@ -215,8 +218,8 @@ void MWAttribute::initialiseOverride()
 /* MWSpell */
 
 MWSpell::MWSpell()
-    : mWindowManager(nullptr)
-    , mSpellNameWidget(nullptr)
+    : mWindowManager(NULL)
+    , mSpellNameWidget(NULL)
 {
 }
 
@@ -226,7 +229,7 @@ void MWSpell::setSpellId(const std::string &spellId)
     updateWidgets();
 }
 
-void MWSpell::createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI::WidgetPtr creator, MyGUI::IntCoord &coord, int flags)
+void MWSpell::createEffectWidgets(std::vector<MyGUI::Widget*> &effects, MyGUI::Widget* creator, MyGUI::IntCoord &coord, int flags)
 {
     const MWWorld::ESMStore &store =
         MWBase::Environment::get().getWorld()->getStore();
@@ -234,7 +237,7 @@ void MWSpell::createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI:
     const ESM::Spell *spell = store.get<ESM::Spell>().search(mId);
     MYGUI_ASSERT(spell, "spell with id '" << mId << "' not found");
 
-    MWSpellEffectPtr effect = nullptr;
+    MWSpellEffectPtr effect = NULL;
     std::vector<ESM::ENAMstruct>::const_iterator end = spell->mEffects.mList.end();
     for (std::vector<ESM::ENAMstruct>::const_iterator it = spell->mEffects.mList.begin(); it != end; ++it)
     {
@@ -286,7 +289,7 @@ MWSpell::~MWSpell()
 /* MWEffectList */
 
 MWEffectList::MWEffectList()
-    : mWindowManager(nullptr)
+    : mWindowManager(NULL)
     , mEffectList(0)
 {
 }
@@ -297,11 +300,11 @@ void MWEffectList::setEffectList(const SpellEffectList& list)
     updateWidgets();
 }
 
-void MWEffectList::createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, MyGUI::WidgetPtr creator, MyGUI::IntCoord &coord, bool center, int flags)
+void MWEffectList::createEffectWidgets(std::vector<MyGUI::Widget*> &effects, MyGUI::Widget* creator, MyGUI::IntCoord &coord, bool center, int flags)
 {
     // We don't know the width of all the elements beforehand, so we do it in
     // 2 steps: first, create all widgets and check their width....
-    MWSpellEffectPtr effect = nullptr;
+    MWSpellEffectPtr effect = NULL;
     int maxwidth = coord.width;
 
     for (SpellEffectList::iterator it=mEffectList.begin();
@@ -320,7 +323,7 @@ void MWEffectList::createEffectWidgets(std::vector<MyGUI::WidgetPtr> &effects, M
     }
 
     // ... then adjust the size for all widgets
-    for (std::vector<MyGUI::WidgetPtr>::iterator it = effects.begin(); it != effects.end(); ++it)
+    for (std::vector<MyGUI::Widget*>::iterator it = effects.begin(); it != effects.end(); ++it)
     {
         effect = static_cast<MWSpellEffectPtr>(*it);
         bool needcenter = center && (maxwidth > effect->getRequestedWidth());
@@ -375,9 +378,9 @@ SpellEffectList MWEffectList::effectListFromESM(const ESM::EffectList* effects)
 /* MWSpellEffect */
 
 MWSpellEffect::MWSpellEffect()
-    : mWindowManager(nullptr)
-    , mImageWidget(nullptr)
-    , mTextWidget(nullptr)
+    : mWindowManager(NULL)
+    , mImageWidget(NULL)
+    , mTextWidget(NULL)
     , mRequestedWidth(0)
 {
 }
@@ -421,17 +424,7 @@ void MWSpellEffect::updateWidgets()
     }
     if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetAttribute)
     {
-        static const char *attributes[8] = {
-            "sAttributeStrength",
-            "sAttributeIntelligence",
-            "sAttributeWillpower",
-            "sAttributeAgility",
-            "sAttributeSpeed",
-            "sAttributeEndurance",
-            "sAttributePersonality",
-            "sAttributeLuck"
-        };
-        spellLine += " " + mWindowManager->getGameSettingString(attributes[mEffectParams.mAttribute], "");
+        spellLine += " " + mWindowManager->getGameSettingString(ESM::Attribute::sGmstAttributeIds[mEffectParams.mAttribute], "");
     }
 
     if ((mEffectParams.mMagnMin >= 0 || mEffectParams.mMagnMax >= 0) && !(magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude))
@@ -495,9 +488,9 @@ void MWSpellEffect::initialiseOverride()
 MWDynamicStat::MWDynamicStat()
 : mValue(0)
 , mMax(1)
-, mTextWidget(nullptr)
-, mBarWidget(nullptr)
-, mBarTextWidget(nullptr)
+, mTextWidget(NULL)
+, mBarWidget(NULL)
+, mBarTextWidget(NULL)
 {
 }
 
@@ -593,6 +586,32 @@ void AutoSizedTextBox::setPropertyOverride(const std::string& _key, const std::s
     }
 }
 
+MyGUI::IntSize AutoSizedEditBox::getRequestedSize()
+{
+    if (getAlign().isHStretch())
+        throw std::runtime_error("AutoSizedEditBox can't have HStretch align (" + getName() + ")");
+    return MyGUI::IntSize(getSize().width, getTextSize().height);
+}
+
+void AutoSizedEditBox::setCaption(const MyGUI::UString& _value)
+{
+    EditBox::setCaption(_value);
+
+    notifySizeChange (this);
+}
+
+void AutoSizedEditBox::setPropertyOverride(const std::string& _key, const std::string& _value)
+{
+    if (_key == "ExpandDirection")
+    {
+        mExpandDirection = MyGUI::Align::parse (_value);
+    }
+    else
+    {
+        EditBox::setPropertyOverride (_key, _value);
+    }
+}
+
 
 MyGUI::IntSize AutoSizedButton::getRequestedSize()
 {
@@ -667,6 +686,8 @@ void HBox::align ()
         {
             sizes.push_back (std::make_pair(w->getSize(), hstretch));
             total_width += w->getSize().width;
+            if (!(w->getUserString("VStretch") == "true"))
+                total_height = std::max(total_height, w->getSize().height);
         }
 
         if (i != count-1)
@@ -728,11 +749,6 @@ void HBox::onWidgetCreated(MyGUI::Widget* _widget)
     align();
 }
 
-void HBox::onWidgetDestroy(MyGUI::Widget* _widget)
-{
-    align();
-}
-
 MyGUI::IntSize HBox::getRequestedSize ()
 {
     MyGUI::IntSize size(0,0);
@@ -790,6 +806,9 @@ void VBox::align ()
         {
             sizes.push_back (std::make_pair(w->getSize(), vstretch));
             total_height += w->getSize().height;
+
+            if (!(w->getUserString("HStretch") == "true"))
+                total_width = std::max(total_width, w->getSize().width);
         }
 
         if (i != count-1)
@@ -878,11 +897,6 @@ MyGUI::IntSize VBox::getRequestedSize ()
 }
 
 void VBox::onWidgetCreated(MyGUI::Widget* _widget)
-{
-    align();
-}
-
-void VBox::onWidgetDestroy(MyGUI::Widget* _widget)
 {
     align();
 }

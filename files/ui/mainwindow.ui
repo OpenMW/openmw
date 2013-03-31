@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="minimumSize">
+   <size>
+    <width>575</width>
+    <height>535</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>OpenMW Launcher</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../launcher/launcher.qrc">
+    <normaloff>:/images/openmw.png</normaloff>:/images/openmw.png</iconset>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <item>
+     <widget class="QListWidget" name="iconWidget">
+      <property name="minimumSize">
+       <size>
+        <width>400</width>
+        <height>80</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>80</height>
+       </size>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">#iconWidget {
+    background-image: url(&quot;:/images/openmw-header.png&quot;);
+    background-color: palette(base);
+    background-repeat: no-repeat;
+    background-attachment: scroll;
+    background-position: right;
+}
+</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="groupBox">
+      <property name="title">
+       <string/>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QStackedWidget" name="pagesWidget"/>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QDialogButtonBox" name="buttonBox">
+      <property name="standardButtons">
+       <set>QDialogButtonBox::Close</set>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources>
+  <include location="../launcher/launcher.qrc"/>
+ </resources>
+ <connections/>
+</ui>

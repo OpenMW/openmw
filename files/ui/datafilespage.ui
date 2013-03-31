@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DataFilesPage</class>
+ <widget class="QWidget" name="DataFilesPage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>520</width>
+    <height>256</height>
+   </rect>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QHBoxLayout" name="filterLayout">
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="filterLabel">
+       <property name="text">
+        <string>Filter:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="LineEdit" name="filterLineEdit"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QSplitter" name="splitter">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="childrenCollapsible">
+      <bool>false</bool>
+     </property>
+     <widget class="QTableView" name="mastersTable"/>
+     <widget class="QTableView" name="pluginsTable"/>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QLabel" name="profileLabel">
+       <property name="text">
+        <string>Current Profile:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="ProfilesComboBox" name="profilesComboBox">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="newProfileButton">
+       <property name="toolTip">
+        <string>New Profile</string>
+       </property>
+       <property name="text">
+        <string>&amp;New Profile</string>
+       </property>
+       <property name="autoRaise">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="deleteProfileButton">
+       <property name="toolTip">
+        <string>Delete Profile</string>
+       </property>
+       <property name="text">
+        <string>Delete Profile</string>
+       </property>
+       <property name="shortcut">
+        <string>Ctrl+D</string>
+       </property>
+       <property name="autoRaise">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+  <action name="newProfileAction">
+   <property name="icon">
+    <iconset theme="document-new"/>
+   </property>
+   <property name="text">
+    <string>New Profile</string>
+   </property>
+   <property name="toolTip">
+    <string>New Profile</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="deleteProfileAction">
+   <property name="icon">
+    <iconset theme="edit-delete"/>
+   </property>
+   <property name="text">
+    <string>Delete Profile</string>
+   </property>
+   <property name="toolTip">
+    <string>Delete Profile</string>
+   </property>
+  </action>
+  <action name="checkAction">
+   <property name="text">
+    <string>Check Selection</string>
+   </property>
+  </action>
+  <action name="uncheckAction">
+   <property name="text">
+    <string>Uncheck Selection</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>LineEdit</class>
+   <extends>QLineEdit</extends>
+   <header location="global">components/fileorderlist/utils/lineedit.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>ProfilesComboBox</class>
+   <extends>QComboBox</extends>
+   <header location="global">components/fileorderlist/utils/profilescombobox.hpp</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

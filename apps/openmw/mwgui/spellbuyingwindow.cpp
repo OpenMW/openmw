@@ -32,20 +32,9 @@ namespace MWGui
 
         getWidget(mCancelButton, "CancelButton");
         getWidget(mPlayerGold, "PlayerGold");
-        getWidget(mSelect, "Select");
-        getWidget(mSpells, "Spells");
         getWidget(mSpellsView, "SpellsView");
 
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellBuyingWindow::onCancelButtonClicked);
-
-        mSpells->setCoord(450/2-mSpells->getTextSize().width/2,
-                          mSpells->getTop(),
-                          mSpells->getTextSize().width,
-                          mSpells->getHeight());
-        mSelect->setCoord(8,
-                          mSelect->getTop(),
-                          mSelect->getTextSize().width,
-                          mSelect->getHeight());
     }
 
     void SpellBuyingWindow::addSpell(const std::string& spellId)
@@ -94,9 +83,6 @@ namespace MWGui
         mPtr = actor;
         clearSpells();
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-
-        MWMechanics::Spells& playerSpells = MWWorld::Class::get (player).getCreatureStats (player).getSpells();
         MWMechanics::Spells& merchantSpells = MWWorld::Class::get (actor).getCreatureStats (actor).getSpells();
 
         for (MWMechanics::Spells::TIterator iter = merchantSpells.begin(); iter!=merchantSpells.end(); ++iter)
@@ -107,8 +93,8 @@ namespace MWGui
             if (spell->mData.mType!=ESM::Spell::ST_Spell)
                 continue; // don't try to sell diseases, curses or powers
 
-            if (std::find (playerSpells.begin(), playerSpells.end(), *iter)!=playerSpells.end())
-                continue; // we have that spell already
+            if (playerHasSpell(iter->first))
+                continue;
 
             addSpell (iter->first);
         }
@@ -116,6 +102,18 @@ namespace MWGui
         updateLabels();
 
         mSpellsView->setCanvasSize (MyGUI::IntSize(mSpellsView->getWidth(), std::max(mSpellsView->getHeight(), mCurrentY)));
+    }
+
+    bool SpellBuyingWindow::playerHasSpell(const std::string &id)
+    {
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWMechanics::Spells& playerSpells = MWWorld::Class::get (player).getCreatureStats (player).getSpells();
+        for (MWMechanics::Spells::TIterator it = playerSpells.begin(); it != playerSpells.end(); ++it)
+        {
+            if (Misc::StringUtils::ciEqual(id, it->first))
+                return true;
+        }
+        return false;
     }
 
     void SpellBuyingWindow::onSpellButtonClick(MyGUI::Widget* _sender)

@@ -17,6 +17,9 @@ namespace MWGui
         MyGUI::Button* mOkButton;
         MyGUI::ImageBox* mClassImage;
         MyGUI::TextBox* mLevelText;
+        MyGUI::EditBox* mLevelDescription;
+
+        MyGUI::Widget* mCoinBox;
 
         std::vector<MyGUI::Button*> mAttributes;
         std::vector<MyGUI::TextBox*> mAttributeValues;

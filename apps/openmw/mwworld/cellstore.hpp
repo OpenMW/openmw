@@ -112,7 +112,7 @@ namespace MWWorld
     CellRefList<ESM::CreatureLevList>   mCreatureLists;
     CellRefList<ESM::ItemLevList>       mItemLists;
     CellRefList<ESM::Light>             mLights;
-    CellRefList<ESM::Tool>              mLockpicks;
+    CellRefList<ESM::Lockpick>          mLockpicks;
     CellRefList<ESM::Miscellaneous>     mMiscItems;
     CellRefList<ESM::NPC>               mNpcs;
     CellRefList<ESM::Probe>             mProbes;

@@ -2,7 +2,7 @@
 #define GAME_MWMECHANICS_AITRAVEL_H
 
 #include "aipackage.hpp"
-#include "components\esm\loadpgrd.hpp"
+#include <components/esm/loadpgrd.hpp>
 #include <list>
 
 namespace MWMechanics

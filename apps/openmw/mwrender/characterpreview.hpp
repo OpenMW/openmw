@@ -36,6 +36,8 @@ namespace MWRender
         virtual void rebuild();
 
     protected:
+        virtual bool renderHeadOnly() { return false; }
+
         Ogre::TexturePtr mTexture;
         Ogre::RenderTarget* mRenderTarget;
         Ogre::Viewport* mViewport;
@@ -81,6 +83,12 @@ namespace MWRender
     {
         ESM::NPC                        mBase;
         MWWorld::LiveCellRef<ESM::NPC>  mRef;
+
+    protected:
+
+        virtual bool renderHeadOnly() { return true; }
+
+        void updateCamera();
 
     public:
         RaceSelectionPreview();

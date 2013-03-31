@@ -14,7 +14,7 @@
 namespace ESM
 {
 
-/// Some overloaded copare operators.
+/// Some overloaded compare operators.
 bool operator==(const MovedCellRef& ref, int pRefnum)
 {
   return (ref.mRefnum == pRefnum);
@@ -43,13 +43,9 @@ void CellRef::save(ESMWriter &esm)
         esm.writeHNT("INDX", mFactIndex);
     }
 
-    if (mCharge != -1.0) {
-        esm.writeHNT("XCHG", mCharge);
-    }
+    if (mCharge != -1)
+        esm.writeHNT("INTV", mCharge);
 
-    if (mIntv != -1) {
-        esm.writeHNT("INTV", mIntv);
-    }
     if (mNam9 != 0) {
         esm.writeHNT("NAM9", mNam9);
     }
@@ -79,7 +75,7 @@ void CellRef::save(ESMWriter &esm)
     }
 }
 
-void Cell::load(ESMReader &esm, MWWorld::ESMStore &store)
+void Cell::load(ESMReader &esm, bool saveContext)
 {
     // Ignore this for now, it might mean we should delete the entire
     // cell?
@@ -126,6 +122,16 @@ void Cell::load(ESMReader &esm, MWWorld::ESMStore &store)
     if (esm.isNextSub("NAM0")) {
         esm.getHT(mNAM0);
     }
+
+    if (saveContext) {
+        mContextList.push_back(esm.getContext());
+        esm.skipRecord();
+    }
+}
+
+void Cell::load(ESMReader &esm, MWWorld::ESMStore &store)
+{
+    this->load(esm, false);
 
     // preload moved references
     while (esm.isNextSub("MVRF")) {
@@ -235,7 +241,7 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
         // If the most significant 8 bits are used, then this reference already exists.
         // In this case, do not spawn a new reference, but overwrite the old one.
         ref.mRefnum &= 0x00ffffff; // delete old plugin ID
-        const ESM::ESMReader::MasterList &masters = esm.getMasters();
+        const std::vector<Header::MasterData> &masters = esm.getMasters();
         global = masters[local-1].index + 1;
         ref.mRefnum |= global << 24; // insert global plugin ID
     }
@@ -275,12 +281,9 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
     ref.mFactIndex = -2;
     esm.getHNOT(ref.mFactIndex, "INDX");
 
-    ref.mCharge = -1.0;
-    esm.getHNOT(ref.mCharge, "XCHG");
-
-    ref.mIntv = -1;
     ref.mNam9 = 0;
-    esm.getHNOT(ref.mIntv, "INTV");
+    ref.mCharge = -1;
+    esm.getHNOT(ref.mCharge, "INTV");
     esm.getHNOT(ref.mNam9, "NAM9");
 
     // Present for doors that teleport you to another cell.
@@ -338,7 +341,7 @@ bool Cell::getNextMVRF(ESMReader &esm, MovedCellRef &mref)
     int local = (mref.mRefnum & 0xff000000) >> 24;
     size_t global = esm.getIndex() + 1;
     mref.mRefnum &= 0x00ffffff; // delete old plugin ID
-    const ESM::ESMReader::MasterList &masters = esm.getMasters();
+    const std::vector<Header::MasterData> &masters = esm.getMasters();
     global = masters[local-1].index + 1;
     mref.mRefnum |= global << 24; // insert global plugin ID
 

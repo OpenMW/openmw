@@ -21,8 +21,8 @@
 
  */
 
-#ifndef _NIF_DATA_H_
-#define _NIF_DATA_H_
+#ifndef OPENMW_COMPONENTS_NIF_DATA_HPP
+#define OPENMW_COMPONENTS_NIF_DATA_HPP
 
 #include "controlled.hpp"
 
@@ -65,7 +65,7 @@ public:
     */
     int alpha;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         Named::read(nif);
 
@@ -102,7 +102,7 @@ public:
     Ogre::Vector3 center;
     float radius;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         int verts = nif->getUShort();
 
@@ -138,24 +138,22 @@ public:
     // Triangles, three vertex indices per triangle
     std::vector<short> triangles;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         ShapeData::read(nif);
 
-        int tris = nif->getUShort();
-        if(tris)
-        {
-            // We have three times as many vertices as triangles, so this
-            // is always equal to tris*3.
-            int cnt = nif->getInt();
-            nif->getShorts(triangles, cnt);
-        }
+        /*int tris =*/ nif->getUShort();
+
+        // We have three times as many vertices as triangles, so this
+        // is always equal to tris*3.
+        int cnt = nif->getInt();
+        nif->getShorts(triangles, cnt);
 
         // Read the match list, which lists the vertices that are equal to
         // vertices. We don't actually need need this for anything, so
         // just skip it.
         int verts = nif->getUShort();
-        for(int i=0;i<verts;i++)
+        for(int i=0;i < verts;i++)
         {
             // Number of vertices matching vertex 'i'
             int num = nif->getUShort();
@@ -169,7 +167,7 @@ class NiAutoNormalParticlesData : public ShapeData
 public:
     int activeCount;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         ShapeData::read(nif);
 
@@ -191,7 +189,7 @@ public:
 class NiRotatingParticlesData : public NiAutoNormalParticlesData
 {
 public:
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         NiAutoNormalParticlesData::read(nif);
 
@@ -210,7 +208,7 @@ class NiPosData : public Record
 public:
     Vector3KeyList mKeyList;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         mKeyList.read(nif);
     }
@@ -221,7 +219,7 @@ class NiUVData : public Record
 public:
     FloatKeyList mKeyList[4];
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         for(int i = 0;i < 4;i++)
             mKeyList[i].read(nif);
@@ -233,7 +231,7 @@ class NiFloatData : public Record
 public:
     FloatKeyList mKeyList;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         mKeyList.read(nif);
     }
@@ -245,7 +243,7 @@ public:
     unsigned int rmask, gmask, bmask, amask;
     int bpp, mips;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         nif->getInt(); // always 0 or 1
 
@@ -283,7 +281,7 @@ class NiColorData : public Record
 public:
     Vector4KeyList mKeyList;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         mKeyList.read(nif);
     }
@@ -297,7 +295,7 @@ public:
         char isSet;
     };
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         int count = nif->getInt();
 
@@ -313,7 +311,7 @@ public:
     NodePtr root;
     NodeList bones;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         data.read(nif);
         root.read(nif);
@@ -349,7 +347,7 @@ public:
     BoneTrafo trafo;
     std::vector<BoneInfo> bones;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         trafo.rotation = nif->getMatrix3();
         trafo.trans = nif->getVector3();
@@ -387,7 +385,7 @@ struct NiMorphData : public Record
     };
     std::vector<MorphData> mMorphs;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         int morphCount = nif->getInt();
         int vertCount  = nif->getInt();
@@ -412,7 +410,7 @@ struct NiKeyframeData : public Record
     Vector3KeyList mTranslations;
     FloatKeyList mScales;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         mRotations.read(nif);
         mTranslations.read(nif);

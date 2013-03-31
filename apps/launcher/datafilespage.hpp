@@ -3,77 +3,85 @@
 
 #include <QWidget>
 #include <QModelIndex>
-#include "utils/profilescombobox.hpp"
-#include <components/files/collections.hpp>
 
+#include "ui_datafilespage.h"
 
-class QTableView;
 class QSortFilterProxyModel;
-class QSettings;
+class QAbstractItemModel;
 class QAction;
-class QToolBar;
 class QMenu;
-class ProfilesComboBox;
-class DataFilesModel;
 
+class DataFilesModel;
 class TextInputDialog;
-class DataFilesList;
+class GameSettings;
+class LauncherSettings;
+class PluginsProxyModel;
 
 namespace Files { struct ConfigurationManager; }
 
-class DataFilesPage : public QWidget
+class DataFilesPage : public QWidget, private Ui::DataFilesPage
 {
     Q_OBJECT
 
 public:
-    DataFilesPage(Files::ConfigurationManager& cfg, QWidget *parent = 0);
+    DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gameSettings, LauncherSettings &launcherSettings, QWidget *parent = 0);
 
-    ProfilesComboBox *mProfilesComboBox;
+    QAbstractItemModel* profilesComboBoxModel();
+    int profilesComboBoxIndex();
 
     void writeConfig(QString profile = QString());
-    bool showDataFilesWarning();
-    bool setupDataFiles();
+    void saveSettings();
+
+signals:
+    void profileChanged(int index);
 
 public slots:
+    void setCheckState(QModelIndex index);
+    void setProfilesComboBoxIndex(int index);
+
+    void filterChanged(const QString filter);
+    void showContextMenu(const QPoint &point);
     void profileChanged(const QString &previous, const QString &current);
     void profileRenamed(const QString &previous, const QString &current);
     void updateOkButton(const QString &text);
+    void updateSplitter();
+    void updateViews();
 
     // Action slots
-    void newProfile();
-    void deleteProfile();
-//    void moveUp();
-//    void moveDown();
-//    void moveTop();
-//    void moveBottom();
+    void on_newProfileAction_triggered();
+    void on_deleteProfileAction_triggered();
+    void on_checkAction_triggered();
+    void on_uncheckAction_triggered();
+
+private slots:
+    void slotCurrentIndexChanged(int index);
 
 private:
-    DataFilesList *mDataFilesList;
+    DataFilesModel *mDataFilesModel;
 
-    QToolBar *mProfileToolBar;
+    PluginsProxyModel *mPluginsProxyModel;
+    QSortFilterProxyModel *mMastersProxyModel;
 
-    QAction *mNewProfileAction;
-    QAction *mDeleteProfileAction;
+    QSortFilterProxyModel *mFilterProxyModel;
 
-//    QAction *mMoveUpAction;
-//    QAction *mMoveDownAction;
-//    QAction *mMoveTopAction;
-//    QAction *mMoveBottomAction;
+    QMenu *mContextMenu;
 
     Files::ConfigurationManager &mCfgMgr;
-    Files::PathContainer mDataDirs;
-    Files::PathContainer mDataLocal;
 
-    QSettings *mLauncherConfig;
+    GameSettings &mGameSettings;
+    LauncherSettings &mLauncherSettings;
 
     TextInputDialog *mNewProfileDialog;
 
-//    const QStringList checkedPlugins();
-//    const QStringList selectedMasters();
+    void setMastersCheckstates(Qt::CheckState state);
+    void setPluginsCheckstates(Qt::CheckState state);
 
     void createActions();
+    void setupDataFiles();
     void setupConfig();
     void readConfig();
+
+    void loadSettings();
 
 };
 

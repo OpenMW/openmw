@@ -13,6 +13,7 @@ namespace MWWorld
 namespace MWRender
 {
     class Animation;
+    class RenderingManager;
 
     class Actors
     {
@@ -20,13 +21,17 @@ namespace MWRender
         typedef std::map<MWWorld::Ptr,Animation*> PtrAnimationMap;
 
         OEngine::Render::OgreRenderer &mRend;
+        MWRender::RenderingManager* mRendering;
         Ogre::SceneNode* mRootNode;
 
         CellSceneNodeMap mCellSceneNodes;
         PtrAnimationMap mAllActors;
 
     public:
-        Actors(OEngine::Render::OgreRenderer& _rend): mRend(_rend) {}
+        Actors(OEngine::Render::OgreRenderer& _rend, MWRender::RenderingManager* rendering)
+            : mRend(_rend)
+            , mRendering(rendering)
+        {}
         ~Actors();
 
         void setRootNode(Ogre::SceneNode* root);

@@ -1,14 +1,14 @@
-#include <QDebug>
+#include <QTextDecoder>
+#include <QTextCodec>
 #include <QFileInfo>
 #include <QDir>
+#include <QDebug>
 
 #include <stdexcept>
 
 #include <components/esm/esmreader.hpp>
 
 #include "esm/esmfile.hpp"
-
-#include "../utils/naturalsort.hpp"
 
 #include "datafilesmodel.hpp"
 
@@ -159,7 +159,7 @@ Qt::ItemFlags DataFilesModel::flags(const QModelIndex &index) const
     if (!file)
         return Qt::NoItemFlags;
 
-    if (mAvailableFiles.contains(file->fileName())) {
+    if (canBeChecked(file)) {
         if (index.column() == 0) {
             return Qt::ItemIsUserCheckable | Qt::ItemIsEnabled | Qt::ItemIsSelectable;
         } else {
@@ -206,52 +206,50 @@ bool DataFilesModel::setData(const QModelIndex &index, const QVariant &value, in
             return false;
 
     if (role == Qt::CheckStateRole) {
-
-        emit layoutAboutToBeChanged();
-
         QString name = item(index.row())->fileName();
         mCheckStates[name] = static_cast<Qt::CheckState>(value.toInt());
 
-        emit checkedItemsChanged(checkedItems(), uncheckedItems());
-        emit layoutChanged();
+        // Force a redraw of the view since unchecking one item can affect another
+        QModelIndex firstIndex = indexFromItem(mFiles.first());
+        QModelIndex lastIndex = indexFromItem(mFiles.last());
+
+        emit dataChanged(firstIndex, lastIndex);
+        emit checkedItemsChanged(checkedItems());
         return true;
     }
 
     return false;
 }
 
+bool lessThanEsmFile(const EsmFile *e1, const EsmFile *e2)
+{
+    //Masters first then alphabetically
+    if (e1->fileName().endsWith(".esm") && !e2->fileName().endsWith(".esm"))
+        return true;
+    if (!e1->fileName().endsWith(".esm") && e2->fileName().endsWith(".esm"))
+        return false;
+
+    return e1->fileName().toLower() < e2->fileName().toLower();
+}
+
+bool lessThanDate(const EsmFile *e1, const EsmFile *e2)
+{
+    if (e1->modified().toString(Qt::ISODate) < e2->modified().toString(Qt::ISODate)) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 void DataFilesModel::sort(int column, Qt::SortOrder order)
 {
-    // TODO: Make this more efficient
     emit layoutAboutToBeChanged();
 
-    QList<EsmFile *> sortedFiles;
-
-    QMultiMap<QString, QString> timestamps;
-
-    foreach (EsmFile *file, mFiles)
-        timestamps.insert(file->modified().toString(Qt::ISODate), file->fileName());
-
-    QMapIterator<QString, QString> ti(timestamps);
-
-    while (ti.hasNext()) {
-        ti.next();
-
-        QModelIndex index = indexFromItem(findItem(ti.value()));
-
-        if (!index.isValid())
-            continue;
-
-        EsmFile *file = item(index.row());
-
-        if (!file)
-            continue;
-
-        sortedFiles.append(file);
+    if (column == 3) {
+        qSort(mFiles.begin(), mFiles.end(), lessThanDate);
+    } else {
+        qSort(mFiles.begin(), mFiles.end(), lessThanEsmFile);
     }
-
-    mFiles.clear();
-    mFiles = sortedFiles;
 
     emit layoutChanged();
 }
@@ -263,73 +261,27 @@ void DataFilesModel::addFile(EsmFile *file)
     emit endInsertRows();
 }
 
-void DataFilesModel::addMasters(const QString &path)
+void DataFilesModel::addFiles(const QString &path)
 {
     QDir dir(path);
-    dir.setNameFilters(QStringList(QLatin1String("*.esp")));
+    QStringList filters;
+    filters << "*.esp" << "*.esm";
+    dir.setNameFilters(filters);
 
-    // Read the dependencies from the plugins
-    foreach (const QString &path, dir.entryList()) {
-        try {
-            ESM::ESMReader fileReader;
-            ToUTF8::Utf8Encoder encoder (ToUTF8::calculateEncoding(mEncoding.toStdString()));
-            fileReader.setEncoder(&encoder);
-            fileReader.open(dir.absoluteFilePath(path).toStdString());
+    // Create a decoder for non-latin characters in esx metadata
+    QTextCodec *codec;
 
-            ESM::ESMReader::MasterList mlist = fileReader.getMasters();
-
-            for (unsigned int i = 0; i < mlist.size(); ++i) {
-                QString master = QString::fromStdString(mlist[i].name);
-
-                // Add the plugin to the internal dependency map
-                mDependencies[master].append(path);
-
-                // Don't add esps
-                if (master.endsWith(".esp", Qt::CaseInsensitive))
-                    continue;
-
-                QFileInfo info(dir.absoluteFilePath(master));
-
-                EsmFile *file = new EsmFile(master);
-                file->setDates(info.lastModified(), info.lastRead());
-                file->setPath(info.absoluteFilePath());
-
-                // Add the master to the table
-                if (findItem(master) == 0)
-                    addFile(file);
-
-
-            }
-
-        } catch(std::runtime_error &e) {
-            // An error occurred while reading the .esp
-            qWarning() << "Error reading esp: " << e.what();
-            continue;
-        }
+    if (mEncoding == QLatin1String("win1252")) {
+        codec = QTextCodec::codecForName("windows-1252");
+    } else if (mEncoding == QLatin1String("win1251")) {
+        codec = QTextCodec::codecForName("windows-1251");
+    } else if (mEncoding == QLatin1String("win1250")) {
+        codec = QTextCodec::codecForName("windows-1250");
+    } else {
+        return; // This should never happen;
     }
 
-    // See if the masters actually exist in the filesystem
-    dir.setNameFilters(QStringList(QLatin1String("*.esm")));
-
-    foreach (const QString &path, dir.entryList()) {
-        QFileInfo info(dir.absoluteFilePath(path));
-
-        if (findItem(path) == 0) {
-            EsmFile *file = new EsmFile(path);
-            file->setDates(info.lastModified(), info.lastRead());
-
-            addFile(file);
-        }
-
-        // Make the master selectable
-        mAvailableFiles.append(path);
-    }
-}
-
-void DataFilesModel::addPlugins(const QString &path)
-{
-    QDir dir(path);
-    dir.setNameFilters(QStringList(QLatin1String("*.esp")));
+    QTextDecoder *decoder = codec->makeDecoder();
 
     foreach (const QString &path, dir.entryList()) {
         QFileInfo info(dir.absoluteFilePath(path));
@@ -337,32 +289,31 @@ void DataFilesModel::addPlugins(const QString &path)
 
         try {
             ESM::ESMReader fileReader;
-            ToUTF8::Utf8Encoder encoder (ToUTF8::calculateEncoding(mEncoding.toStdString()));
+            ToUTF8::Utf8Encoder encoder(ToUTF8::calculateEncoding(mEncoding.toStdString()));
             fileReader.setEncoder(&encoder);
             fileReader.open(dir.absoluteFilePath(path).toStdString());
 
-            ESM::ESMReader::MasterList mlist = fileReader.getMasters();
+            std::vector<ESM::Header::MasterData> mlist = fileReader.getMasters();
+
             QStringList masters;
 
             for (unsigned int i = 0; i < mlist.size(); ++i) {
                 QString master = QString::fromStdString(mlist[i].name);
                 masters.append(master);
-
-                // Add the plugin to the internal dependency map
-                mDependencies[master].append(path);
             }
 
-            file->setAuthor(QString::fromStdString(fileReader.getAuthor()));
+            file->setAuthor(decoder->toUnicode(fileReader.getAuthor().c_str()));
             file->setSize(info.size());
             file->setDates(info.lastModified(), info.lastRead());
             file->setVersion(fileReader.getFVer());
             file->setPath(info.absoluteFilePath());
             file->setMasters(masters);
-            file->setDescription(QString::fromStdString(fileReader.getDesc()));
+            file->setDescription(decoder->toUnicode(fileReader.getDesc().c_str()));
 
 
             // Put the file in the table
-            addFile(file);
+            if (findItem(path) == 0)
+                addFile(file);
         } catch(std::runtime_error &e) {
             // An error occurred while reading the .esp
             qWarning() << "Error reading esp: " << e.what();
@@ -370,6 +321,8 @@ void DataFilesModel::addPlugins(const QString &path)
         }
 
     }
+
+    delete decoder;
 }
 
 QModelIndex DataFilesModel::indexFromItem(EsmFile *item) const
@@ -421,7 +374,7 @@ QStringList DataFilesModel::checkedItems()
         QString name = file->fileName();
 
         // Only add the items that are in the checked list and available
-        if (mCheckStates[name] == Qt::Checked && mAvailableFiles.contains(name))
+        if (mCheckStates[name] == Qt::Checked && canBeChecked(file))
             list << name;
     }
 
@@ -431,19 +384,19 @@ QStringList DataFilesModel::checkedItems()
 QStringList DataFilesModel::checkedItemsPaths()
 {
     QStringList list;
-    
+
     QList<EsmFile *>::ConstIterator it;
     QList<EsmFile *>::ConstIterator itEnd = mFiles.constEnd();
-    
+
     int i = 0;
     for (it = mFiles.constBegin(); it != itEnd; ++it) {
         EsmFile *file = item(i);
         ++i;
-        
-        if (mCheckStates[file->fileName()] == Qt::Checked && mAvailableFiles.contains(file->fileName()))
+
+        if (mCheckStates[file->fileName()] == Qt::Checked && canBeChecked(file))
             list << file->path();
     }
-    
+
     return list;
 }
 
@@ -475,24 +428,17 @@ QStringList DataFilesModel::uncheckedItems()
     return list;
 }
 
-void DataFilesModel::slotcheckedItemsChanged(const QStringList &checkedItems, const QStringList &unCheckedItems)
+bool DataFilesModel::canBeChecked(EsmFile *file) const
 {
-    emit layoutAboutToBeChanged();
-
-    QStringList list;
-
-    foreach (const QString &file, checkedItems) {
-        list << mDependencies[file];
-    }
-
-    foreach (const QString &file, unCheckedItems) {
-        foreach (const QString &remove, mDependencies[file]) {
-            list.removeAll(remove);
+    //element can be checked if all its dependencies are
+    bool canBeChecked = true;
+    foreach (const QString &master, file->masters())
+    {
+        if (!mCheckStates.contains(master) || mCheckStates[master] != Qt::Checked)
+        {
+            canBeChecked = false;
+            break;
         }
     }
-
-    mAvailableFiles.clear();
-    mAvailableFiles.append(list);
-
-    emit layoutChanged();
+    return canBeChecked;
 }

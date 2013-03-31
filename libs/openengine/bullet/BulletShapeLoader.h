@@ -22,7 +22,7 @@ protected:
     void unloadImpl();
     size_t calculateSize() const;
 
-    void deleteShape(btCollisionShape* mShape);
+    void deleteShape(btCollisionShape* shape);
 
 public:
 
@@ -32,13 +32,17 @@ public:
 
     virtual ~BulletShape();
 
-    btCollisionShape* Shape;
-    Ogre::Vector3 boxTranslation;
-    Ogre::Quaternion boxRotation;
+    btCollisionShape* mCollisionShape;
+    btCollisionShape* mRaycastingShape;
+
+    // Whether or not a NiRootCollisionNode was present in the .nif. If there is none, the collision behaviour
+    // depends on object type, so we need to expose this variable.
+    bool mHasCollisionNode;
+
+    Ogre::Vector3 mBoxTranslation;
+    Ogre::Quaternion mBoxRotation;
     //this flag indicate if the shape is used for collision or if it's for raycasting only.
     bool mCollide;
-
-    bool mIgnore;
 };
 
 /**

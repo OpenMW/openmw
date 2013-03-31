@@ -1,445 +1,311 @@
-#include <QtGui>
-
-#include <components/esm/esmreader.hpp>
-#include <components/files/configurationmanager.hpp>
-#include <components/fileorderlist/datafileslist.hpp>
-#include <components/fileorderlist/utils/lineedit.hpp>
-#include <components/fileorderlist/utils/naturalsort.hpp>
-#include <components/fileorderlist/utils/filedialog.hpp>
-
-////#include "model/datafilesmodel.hpp"
-////#include "model/esm/esmfile.hpp"
-
-#include "utils/profilescombobox.hpp"
-////#include "utils/filedialog.hpp"
-////#include "utils/naturalsort.hpp"
-#include "utils/textinputdialog.hpp"
-
 #include "datafilespage.hpp"
 
-#include <boost/version.hpp>
-/**
- * Workaround for problems with whitespaces in paths in older versions of Boost library
- */
-#if (BOOST_VERSION <= 104600)
-namespace boost
+#include <QPushButton>
+#include <QMessageBox>
+#include <QCheckBox>
+#include <QMenu>
+
+#include <components/files/configurationmanager.hpp>
+
+#include <components/fileorderlist/model/datafilesmodel.hpp>
+#include <components/fileorderlist/model/pluginsproxymodel.hpp>
+#include <components/fileorderlist/model/esm/esmfile.hpp>
+
+#include <components/fileorderlist/utils/lineedit.hpp>
+#include <components/fileorderlist/utils/naturalsort.hpp>
+#include <components/fileorderlist/utils/profilescombobox.hpp>
+
+#include "settings/gamesettings.hpp"
+#include "settings/launchersettings.hpp"
+
+#include "utils/textinputdialog.hpp"
+
+DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gameSettings, LauncherSettings &launcherSettings, QWidget *parent)
+    : mCfgMgr(cfg)
+    , mGameSettings(gameSettings)
+    , mLauncherSettings(launcherSettings)
+    , QWidget(parent)
 {
+    setupUi(this);
 
-    template<>
-    inline boost::filesystem::path lexical_cast<boost::filesystem::path, std::string>(const std::string& arg)
-    {
-        return boost::filesystem::path(arg);
-    }
+    // Models
+    mDataFilesModel = new DataFilesModel(this);
 
-} /* namespace boost */
-#endif /* (BOOST_VERSION <= 104600) */
+    mMastersProxyModel = new QSortFilterProxyModel();
+    mMastersProxyModel->setFilterRegExp(QString("^.*\\.esm"));
+    mMastersProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    mMastersProxyModel->setSourceModel(mDataFilesModel);
 
-using namespace ESM;
-using namespace std;
+    mPluginsProxyModel = new PluginsProxyModel();
+    mPluginsProxyModel->setFilterRegExp(QString("^.*\\.esp"));
+    mPluginsProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    mPluginsProxyModel->setSourceModel(mDataFilesModel);
 
-DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, QWidget *parent)
-    : QWidget(parent)
-    , mCfgMgr(cfg)
-{
-    mDataFilesList = new DataFilesList(mCfgMgr, this);
+    mFilterProxyModel = new QSortFilterProxyModel();
+    mFilterProxyModel->setDynamicSortFilter(true);
+    mFilterProxyModel->setSourceModel(mPluginsProxyModel);
 
-    // Bottom part with profile options
-    QLabel *profileLabel = new QLabel(tr("Current Profile: "), this);
+    QCheckBox checkBox;
+    unsigned int height = checkBox.sizeHint().height() + 4;
 
-    mProfilesComboBox = new ProfilesComboBox(this);
-    mProfilesComboBox->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum));
-    mProfilesComboBox->setInsertPolicy(QComboBox::NoInsert);
-    mProfilesComboBox->setDuplicatesEnabled(false);
-    mProfilesComboBox->setEditEnabled(false);
+    mastersTable->setModel(mMastersProxyModel);
+    mastersTable->setObjectName("MastersTable");
+    mastersTable->setContextMenuPolicy(Qt::CustomContextMenu);
+    mastersTable->setSortingEnabled(false);
+    mastersTable->setSelectionBehavior(QAbstractItemView::SelectRows);
+    mastersTable->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    mastersTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    mastersTable->setAlternatingRowColors(true);
+    mastersTable->horizontalHeader()->setStretchLastSection(true);
+    mastersTable->horizontalHeader()->hide();
 
-    mProfileToolBar = new QToolBar(this);
-    mProfileToolBar->setMovable(false);
-    mProfileToolBar->setIconSize(QSize(16, 16));
+    // Set the row height to the size of the checkboxes
+    mastersTable->verticalHeader()->setDefaultSectionSize(height);
+    mastersTable->verticalHeader()->setResizeMode(QHeaderView::Fixed);
+    mastersTable->verticalHeader()->hide();
 
-    mProfileToolBar->addWidget(profileLabel);
-    mProfileToolBar->addWidget(mProfilesComboBox);
+    pluginsTable->setModel(mFilterProxyModel);
+    pluginsTable->setObjectName("PluginsTable");
+    pluginsTable->setContextMenuPolicy(Qt::CustomContextMenu);
+    pluginsTable->setSortingEnabled(false);
+    pluginsTable->setSelectionBehavior(QAbstractItemView::SelectRows);
+    pluginsTable->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    pluginsTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    pluginsTable->setAlternatingRowColors(true);
+    pluginsTable->setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
+    pluginsTable->horizontalHeader()->setStretchLastSection(true);
+    pluginsTable->horizontalHeader()->hide();
 
-    QVBoxLayout *pageLayout = new QVBoxLayout(this);
+    pluginsTable->verticalHeader()->setDefaultSectionSize(height);
+    pluginsTable->verticalHeader()->setResizeMode(QHeaderView::Fixed);
 
-    pageLayout->addWidget(mDataFilesList);
-    pageLayout->addWidget(mProfileToolBar);
+    // Adjust the tableview widths inside the splitter
+    QList<int> sizeList;
+    sizeList << mLauncherSettings.value(QString("General/MastersTable/width"), QString("200")).toInt();
+    sizeList << mLauncherSettings.value(QString("General/PluginTable/width"), QString("340")).toInt();
+
+    splitter->setSizes(sizeList);
 
     // Create a dialog for the new profile name input
     mNewProfileDialog = new TextInputDialog(tr("New Profile"), tr("Profile name:"), this);
 
+    connect(profilesComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(slotCurrentIndexChanged(int)));
+
     connect(mNewProfileDialog->lineEdit(), SIGNAL(textChanged(QString)), this, SLOT(updateOkButton(QString)));
-    
-    connect(mProfilesComboBox, SIGNAL(profileRenamed(QString,QString)), this, SLOT(profileRenamed(QString,QString)));
-    connect(mProfilesComboBox, SIGNAL(profileChanged(QString,QString)), this, SLOT(profileChanged(QString,QString)));
+
+    connect(pluginsTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckState(QModelIndex)));
+    connect(mastersTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckState(QModelIndex)));
+
+    connect(pluginsTable, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
+    connect(mastersTable, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
+
+    connect(mDataFilesModel, SIGNAL(layoutChanged()), this, SLOT(updateViews()));
+
+    connect(filterLineEdit, SIGNAL(textChanged(QString)), this, SLOT(filterChanged(QString)));
+
+    connect(splitter, SIGNAL(splitterMoved(int,int)), this, SLOT(updateSplitter()));
 
     createActions();
-    setupConfig();
+    setupDataFiles();
 }
 
 void DataFilesPage::createActions()
 {
-    // Refresh the plugins
-    QAction *refreshAction = new QAction(tr("Refresh"), this);
-    refreshAction->setShortcut(QKeySequence(tr("F5")));
-    connect(refreshAction, SIGNAL(triggered()), this, SLOT(refresh()));
 
-    // Profile actions
-    mNewProfileAction = new QAction(QIcon::fromTheme("document-new"), tr("&New Profile"), this);
-    mNewProfileAction->setToolTip(tr("New Profile"));
-    mNewProfileAction->setShortcut(QKeySequence(tr("Ctrl+N")));
-    connect(mNewProfileAction, SIGNAL(triggered()), this, SLOT(newProfile()));
+    // Add the actions to the toolbuttons
+    newProfileButton->setDefaultAction(newProfileAction);
+    deleteProfileButton->setDefaultAction(deleteProfileAction);
 
-    mDeleteProfileAction = new QAction(QIcon::fromTheme("edit-delete"), tr("Delete Profile"), this);
-    mDeleteProfileAction->setToolTip(tr("Delete Profile"));
-    mDeleteProfileAction->setShortcut(QKeySequence(tr("Delete")));
-    connect(mDeleteProfileAction, SIGNAL(triggered()), this, SLOT(deleteProfile()));
-
-    // Add the newly created actions to the toolbar
-    mProfileToolBar->addSeparator();
-    mProfileToolBar->addAction(mNewProfileAction);
-    mProfileToolBar->addAction(mDeleteProfileAction);
+    // Context menu actions
+    mContextMenu = new QMenu(this);
+    mContextMenu->addAction(checkAction);
+    mContextMenu->addAction(uncheckAction);
 }
 
-void DataFilesPage::setupConfig()
+void DataFilesPage::setupDataFiles()
 {
-    // Open our config file
-    QString config = QString::fromStdString((mCfgMgr.getUserPath() / "launcher.cfg").string());
-    mLauncherConfig = new QSettings(config, QSettings::IniFormat);
+    // Set the encoding to the one found in openmw.cfg or the default
+    mDataFilesModel->setEncoding(mGameSettings.value(QString("encoding"), QString("win1252")));
 
-    // Make sure we have no groups open
-    while (!mLauncherConfig->group().isEmpty()) {
-        mLauncherConfig->endGroup();
+    QStringList paths = mGameSettings.getDataDirs();
+
+    foreach (const QString &path, paths) {
+        mDataFilesModel->addFiles(path);
     }
 
-    mLauncherConfig->beginGroup("Profiles");
-    QStringList profiles = mLauncherConfig->childGroups();
+    QString dataLocal = mGameSettings.getDataLocal();
+    if (!dataLocal.isEmpty())
+        mDataFilesModel->addFiles(dataLocal);
 
-    // Add the profiles to the combobox
-    foreach (const QString &profile, profiles) {
+    // Sort by date accessed for now
+    mDataFilesModel->sort(3);
 
-        if (profile.contains(QRegExp("[^a-zA-Z0-9_]")))
-            continue; // Profile name contains garbage
+    QStringList profiles = mLauncherSettings.subKeys(QString("Profiles/"));
+    QString profile = mLauncherSettings.value(QString("Profiles/currentprofile"));
 
+    if (!profiles.isEmpty())
+        profilesComboBox->addItems(profiles);
 
-         qDebug() << "adding " << profile;
-         mProfilesComboBox->addItem(profile);
-    }
+    // Add the current profile if empty
+    if (profilesComboBox->findText(profile) == -1 && !profile.isEmpty())
+        profilesComboBox->addItem(profile);
 
-    // Add a default profile
-    if (mProfilesComboBox->findText(QString("Default")) == -1) {
-         mProfilesComboBox->addItem(QString("Default"));
-    }
+    if (profilesComboBox->findText(QString("Default")) == -1)
+        profilesComboBox->addItem(QString("Default"));
 
-    QString currentProfile = mLauncherConfig->value("CurrentProfile").toString();
-
-    if (currentProfile.isEmpty()) {
-        // No current profile selected
-        currentProfile = "Default";
-    }
-
-    const int currentIndex = mProfilesComboBox->findText(currentProfile);
-    if (currentIndex != -1) {
-        // Profile is found
-        mProfilesComboBox->setCurrentIndex(currentIndex);
-    }
-
-    mLauncherConfig->endGroup();
-}
-
-
-void DataFilesPage::readConfig()
-{
-    QString profile = mProfilesComboBox->currentText();
-    
-    // Make sure we have no groups open
-    while (!mLauncherConfig->group().isEmpty()) {
-        mLauncherConfig->endGroup();
-    }
-
-    mLauncherConfig->beginGroup("Profiles");
-    mLauncherConfig->beginGroup(profile);
-
-    QStringList childKeys = mLauncherConfig->childKeys();
-    QStringList plugins;
-
-    // Sort the child keys numerical instead of alphabetically
-    // i.e. Plugin1, Plugin2 instead of Plugin1, Plugin10
-    qSort(childKeys.begin(), childKeys.end(), naturalSortLessThanCI);
-
-    foreach (const QString &key, childKeys) {
-        const QString keyValue = mLauncherConfig->value(key).toString();
-        
-        mDataFilesList->setCheckState(keyValue, Qt::Checked);
-    }
-
-    qDebug() << plugins;
-}
-
-bool DataFilesPage::showDataFilesWarning()
-{
-
-    QMessageBox msgBox;
-    msgBox.setWindowTitle("Error detecting Morrowind installation");
-    msgBox.setIcon(QMessageBox::Warning);
-    msgBox.setStandardButtons(QMessageBox::Cancel);
-    msgBox.setText(tr("<br><b>Could not find the Data Files location</b><br><br> \
-                      The directory containing the data files was not found.<br><br> \
-                      Press \"Browse...\" to specify the location manually.<br>"));
-
-    QAbstractButton *dirSelectButton =
-            msgBox.addButton(tr("B&rowse..."), QMessageBox::ActionRole);
-
-    msgBox.exec();
-
-    if (msgBox.clickedButton() == dirSelectButton) {
-
-        // Show a custom dir selection dialog which only accepts valid dirs
-        QString selectedDir = FileDialog::getExistingDirectory(
-                    this, tr("Select Data Files Directory"),
-                    QDir::currentPath(),
-                    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-
-        // Add the user selected data directory
-        if (!selectedDir.isEmpty()) {
-            mDataDirs.push_back(Files::PathContainer::value_type(selectedDir.toStdString()));
-            mCfgMgr.processPaths(mDataDirs);
-        } else {
-            // Cancel from within the dir selection dialog
-            return false;
-        }
-
+    if (profile.isEmpty() || profile == QLatin1String("Default")) {
+        deleteProfileAction->setEnabled(false);
+        profilesComboBox->setEditEnabled(false);
+        profilesComboBox->setCurrentIndex(profilesComboBox->findText(QString("Default")));
     } else {
-        // Cancel
-        return false;
+        profilesComboBox->setEditEnabled(true);
+        profilesComboBox->setCurrentIndex(profilesComboBox->findText(profile));
     }
 
-    return true;
+    // We do this here to prevent deletion of profiles when initializing the combobox
+    connect(profilesComboBox, SIGNAL(profileRenamed(QString,QString)), this, SLOT(profileRenamed(QString,QString)));
+    connect(profilesComboBox, SIGNAL(profileChanged(QString,QString)), this, SLOT(profileChanged(QString,QString)));
+
+    loadSettings();
+
 }
 
-bool DataFilesPage::setupDataFiles()
+void DataFilesPage::loadSettings()
 {
-    // We use the Configuration Manager to retrieve the configuration values
-    boost::program_options::variables_map variables;
-    boost::program_options::options_description desc;
-    
-    desc.add_options()
-    ("data", boost::program_options::value<Files::PathContainer>()->default_value(Files::PathContainer(), "data")->multitoken())
-    ("data-local", boost::program_options::value<std::string>()->default_value(""))
-    ("fs-strict", boost::program_options::value<bool>()->implicit_value(true)->default_value(false))
-    ("encoding", boost::program_options::value<std::string>()->default_value("win1252"));
-    
-    boost::program_options::notify(variables);
-    
-    mCfgMgr.readConfiguration(variables, desc);
-    
-    if (variables["data"].empty()) {
-        if (!showDataFilesWarning())
-            return false;
-    } else {
-        mDataDirs = Files::PathContainer(variables["data"].as<Files::PathContainer>());
-    }
-    
-    std::string local = variables["data-local"].as<std::string>();
-    if (!local.empty()) {
-        mDataLocal.push_back(Files::PathContainer::value_type(local));
-    }
-    
-    mCfgMgr.processPaths(mDataDirs);
-    mCfgMgr.processPaths(mDataLocal);
-    
-    // Second chance to display the warning, the data= entries are invalid
-    while (mDataDirs.empty()) {
-        if (!showDataFilesWarning())
-            return false;
-    }
-    
-    // Set the charset for reading the esm/esp files
-    QString encoding = QString::fromStdString(variables["encoding"].as<std::string>());
-    
-    Files::PathContainer paths;
-    paths.insert(paths.end(), mDataDirs.begin(), mDataDirs.end());
-    paths.insert(paths.end(), mDataLocal.begin(), mDataLocal.end());
-    mDataFilesList->setupDataFiles(paths, encoding);
-    readConfig();
-    return true;
-}
-
-void DataFilesPage::writeConfig(QString profile)
-{
-    QString pathStr = QString::fromStdString(mCfgMgr.getUserPath().string());
-    QDir userPath(pathStr);
-
-    if (!userPath.exists()) {
-        if (!userPath.mkpath(pathStr)) {
-            QMessageBox msgBox;
-            msgBox.setWindowTitle("Error creating OpenMW configuration directory");
-            msgBox.setIcon(QMessageBox::Critical);
-            msgBox.setStandardButtons(QMessageBox::Ok);
-            msgBox.setText(tr("<br><b>Could not create %0</b><br><br> \
-                              Please make sure you have the right permissions and try again.<br>").arg(pathStr));
-            msgBox.exec();
-
-            qApp->quit();
-            return;
-        }
-    }
-    // Open the OpenMW config as a QFile
-    QFile file(pathStr.append("openmw.cfg"));
-
-    if (!file.open(QIODevice::ReadWrite | QIODevice::Text)) {
-        // File cannot be opened or created
-        QMessageBox msgBox;
-        msgBox.setWindowTitle("Error writing OpenMW configuration file");
-        msgBox.setIcon(QMessageBox::Critical);
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(tr("<br><b>Could not open or create %0</b><br><br> \
-                          Please make sure you have the right permissions and try again.<br>").arg(file.fileName()));
-        msgBox.exec();
-
-        qApp->quit();
-        return;
-    }
-
-    QTextStream in(&file);
-    QByteArray buffer;
-
-    // Remove all previous entries from config
-    while (!in.atEnd()) {
-        QString line = in.readLine();
-        if (!line.startsWith("master") &&
-            !line.startsWith("plugin") &&
-            !line.startsWith("data") &&
-            !line.startsWith("data-local"))
-        {
-            buffer += line += "\n";
-        }
-    }
-
-    file.close();
-
-    // Now we write back the other config entries
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
-        QMessageBox msgBox;
-        msgBox.setWindowTitle("Error writing OpenMW configuration file");
-        msgBox.setIcon(QMessageBox::Critical);
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(tr("<br><b>Could not write to %0</b><br><br> \
-                          Please make sure you have the right permissions and try again.<br>").arg(file.fileName()));
-        msgBox.exec();
-
-        qApp->quit();
-        return;
-    }
-
-    if (!buffer.isEmpty()) {
-        file.write(buffer);
-    }
-
-    QTextStream gameConfig(&file);
-
-    // First write the list of data dirs
-    mCfgMgr.processPaths(mDataDirs);
-    mCfgMgr.processPaths(mDataLocal);
-
-    QString path;
-
-    // data= directories
-    for (Files::PathContainer::iterator it = mDataDirs.begin(); it != mDataDirs.end(); ++it) {
-        path = QString::fromStdString(it->string());
-        path.remove(QChar('\"'));
-
-        // Make sure the string is quoted when it contains spaces
-        if (path.contains(" ")) {
-            gameConfig << "data=\"" << path << "\"" << endl;
-        } else {
-            gameConfig << "data=" << path << endl;
-        }
-    }
-
-    // data-local directory
-    if (!mDataLocal.empty()) {
-        path = QString::fromStdString(mDataLocal.front().string());
-        path.remove(QChar('\"'));
-
-        if (path.contains(" ")) {
-            gameConfig << "data-local=\"" << path << "\"" << endl;
-        } else {
-            gameConfig << "data-local=" << path << endl;
-        }
-    }
-
-
-    if (profile.isEmpty())
-        profile = mProfilesComboBox->currentText();
+    QString profile = mLauncherSettings.value(QString("Profiles/currentprofile"));
 
     if (profile.isEmpty())
         return;
 
-    // Make sure we have no groups open
-    while (!mLauncherConfig->group().isEmpty()) {
-        mLauncherConfig->endGroup();
+    mDataFilesModel->uncheckAll();
+
+    QStringList masters = mLauncherSettings.values(QString("Profiles/") + profile + QString("/master"), Qt::MatchExactly);
+    QStringList plugins = mLauncherSettings.values(QString("Profiles/") + profile + QString("/plugin"), Qt::MatchExactly);
+
+    foreach (const QString &master, masters) {
+        QModelIndex index = mDataFilesModel->indexFromItem(mDataFilesModel->findItem(master));
+        if (index.isValid())
+            mDataFilesModel->setCheckState(index, Qt::Checked);
     }
 
-    mLauncherConfig->beginGroup("Profiles");
-    mLauncherConfig->setValue("CurrentProfile", profile);
-
-    // Open the profile-name subgroup
-    mLauncherConfig->beginGroup(profile);
-    mLauncherConfig->remove(""); // Clear the subgroup
-
-    // Now write the masters to the configs
-    const QStringList checkedFiles = mDataFilesList->checkedFiles();
-    for(int i=0; i < checkedFiles.size(); i++)
-    {
-        if (checkedFiles.at(i).lastIndexOf("esm") != -1)
-        {
-            mLauncherConfig->setValue(QString("Master%0").arg(i), checkedFiles.at(i));
-            gameConfig << "master=" << checkedFiles.at(i) << endl;
-        }
-        else
-        {
-            mLauncherConfig->setValue(QString("Plugin%1").arg(i), checkedFiles.at(i));
-            gameConfig << "plugin=" << checkedFiles.at(i) << endl;
-        }
+    foreach (const QString &plugin, plugins) {
+        QModelIndex index = mDataFilesModel->indexFromItem(mDataFilesModel->findItem(plugin));
+        if (index.isValid())
+            mDataFilesModel->setCheckState(index, Qt::Checked);
     }
-
-    file.close();
-    mLauncherConfig->endGroup();
-    mLauncherConfig->endGroup();
-    mLauncherConfig->sync();
 }
 
-
-void DataFilesPage::newProfile()
+void DataFilesPage::saveSettings()
 {
-    if (mNewProfileDialog->exec() == QDialog::Accepted) {
+    if (mDataFilesModel->rowCount() < 1)
+        return;
 
-        const QString text = mNewProfileDialog->lineEdit()->text();
-        mProfilesComboBox->addItem(text);
+    QString profile = mLauncherSettings.value(QString("Profiles/currentprofile"));
 
-        // Copy the currently checked items to cfg
-        writeConfig(text);
-        mLauncherConfig->sync();
-
-        mProfilesComboBox->setCurrentIndex(mProfilesComboBox->findText(text));
+    if (profile.isEmpty()) {
+        profile = profilesComboBox->currentText();
+        mLauncherSettings.setValue(QString("Profiles/currentprofile"), profile);
     }
+
+    mLauncherSettings.remove(QString("Profiles/") + profile + QString("/master"));
+    mLauncherSettings.remove(QString("Profiles/") + profile + QString("/plugin"));
+
+    mGameSettings.remove(QString("master"));
+    mGameSettings.remove(QString("plugin"));
+
+    QStringList items = mDataFilesModel->checkedItems();
+
+    foreach(const QString &item, items) {
+
+        if (item.endsWith(QString(".esm"), Qt::CaseInsensitive)) {
+            mLauncherSettings.setMultiValue(QString("Profiles/") + profile + QString("/master"), item);
+            mGameSettings.setMultiValue(QString("master"), item);
+
+        } else if (item.endsWith(QString(".esp"), Qt::CaseInsensitive)) {
+            mLauncherSettings.setMultiValue(QString("Profiles/") + profile + QString("/plugin"), item);
+            mGameSettings.setMultiValue(QString("plugin"), item);
+        }
+    }
+
 }
 
 void DataFilesPage::updateOkButton(const QString &text)
 {
+    // We do this here because we need the profiles combobox text
     if (text.isEmpty()) {
          mNewProfileDialog->setOkButtonEnabled(false);
          return;
     }
 
-    (mProfilesComboBox->findText(text) == -1)
+    (profilesComboBox->findText(text) == -1)
             ? mNewProfileDialog->setOkButtonEnabled(true)
             : mNewProfileDialog->setOkButtonEnabled(false);
 }
 
-void DataFilesPage::deleteProfile()
+void DataFilesPage::updateSplitter()
 {
-    QString profile = mProfilesComboBox->currentText();
+    // Sigh, update the saved splitter size in settings only when moved
+    // Since getting mSplitter->sizes() if page is hidden returns invalid values
+    QList<int> sizes = splitter->sizes();
+
+    mLauncherSettings.setValue(QString("General/MastersTable/width"), QString::number(sizes.at(0)));
+    mLauncherSettings.setValue(QString("General/PluginsTable/width"), QString::number(sizes.at(1)));
+}
+
+void DataFilesPage::updateViews()
+{
+    // Ensure the columns are hidden because sort() re-enables them
+    mastersTable->setColumnHidden(1, true);
+    mastersTable->setColumnHidden(2, true);
+    mastersTable->setColumnHidden(3, true);
+    mastersTable->setColumnHidden(4, true);
+    mastersTable->setColumnHidden(5, true);
+    mastersTable->setColumnHidden(6, true);
+    mastersTable->setColumnHidden(7, true);
+    mastersTable->setColumnHidden(8, true);
+
+    pluginsTable->setColumnHidden(1, true);
+    pluginsTable->setColumnHidden(2, true);
+    pluginsTable->setColumnHidden(3, true);
+    pluginsTable->setColumnHidden(4, true);
+    pluginsTable->setColumnHidden(5, true);
+    pluginsTable->setColumnHidden(6, true);
+    pluginsTable->setColumnHidden(7, true);
+    pluginsTable->setColumnHidden(8, true);
+}
+
+void DataFilesPage::setProfilesComboBoxIndex(int index)
+{
+    profilesComboBox->setCurrentIndex(index);
+}
+
+void DataFilesPage::slotCurrentIndexChanged(int index)
+{
+    emit profileChanged(index);
+}
+
+QAbstractItemModel* DataFilesPage::profilesComboBoxModel()
+{
+    return profilesComboBox->model();
+}
+
+int DataFilesPage::profilesComboBoxIndex()
+{
+    return profilesComboBox->currentIndex();
+}
+
+void DataFilesPage::on_newProfileAction_triggered()
+{
+    if (mNewProfileDialog->exec() == QDialog::Accepted) {
+        QString profile = mNewProfileDialog->lineEdit()->text();
+        profilesComboBox->addItem(profile);
+        profilesComboBox->setCurrentIndex(profilesComboBox->findText(profile));
+    }
+}
+
+void DataFilesPage::on_deleteProfileAction_triggered()
+{
+    QString profile = profilesComboBox->currentText();
 
     if (profile.isEmpty())
         return;
@@ -456,49 +322,143 @@ void DataFilesPage::deleteProfile()
     msgBox.exec();
 
     if (msgBox.clickedButton() == deleteButton) {
-       // Make sure we have no groups open
-        while (!mLauncherConfig->group().isEmpty()) {
-            mLauncherConfig->endGroup();
-        }
-
-        mLauncherConfig->beginGroup("Profiles");
-
-        // Open the profile-name subgroup
-        mLauncherConfig->beginGroup(profile);
-        mLauncherConfig->remove(""); // Clear the subgroup
-        mLauncherConfig->endGroup();
-        mLauncherConfig->endGroup();
+        mLauncherSettings.remove(QString("Profiles/") + profile + QString("/master"));
+        mLauncherSettings.remove(QString("Profiles/") + profile + QString("/plugin"));
 
         // Remove the profile from the combobox
-        mProfilesComboBox->removeItem(mProfilesComboBox->findText(profile));
+        profilesComboBox->removeItem(profilesComboBox->findText(profile));
     }
+}
+
+void DataFilesPage::on_checkAction_triggered()
+{
+    if (pluginsTable->hasFocus())
+        setPluginsCheckstates(Qt::Checked);
+
+    if (mastersTable->hasFocus())
+        setMastersCheckstates(Qt::Checked);
+
+}
+
+void DataFilesPage::on_uncheckAction_triggered()
+{
+    if (pluginsTable->hasFocus())
+        setPluginsCheckstates(Qt::Unchecked);
+
+    if (mastersTable->hasFocus())
+        setMastersCheckstates(Qt::Unchecked);
+}
+
+void DataFilesPage::setMastersCheckstates(Qt::CheckState state)
+{
+    if (!mastersTable->selectionModel()->hasSelection()) {
+        return;
+    }
+
+    QModelIndexList indexes = mastersTable->selectionModel()->selectedIndexes();
+
+    foreach (const QModelIndex &index, indexes)
+    {
+        if (!index.isValid())
+            return;
+
+        QModelIndex sourceIndex = mMastersProxyModel->mapToSource(index);
+
+        if (!sourceIndex.isValid())
+            return;
+
+        mDataFilesModel->setCheckState(sourceIndex, state);
+    }
+}
+
+void DataFilesPage::setPluginsCheckstates(Qt::CheckState state)
+{
+    if (!pluginsTable->selectionModel()->hasSelection()) {
+        return;
+    }
+
+    QModelIndexList indexes = pluginsTable->selectionModel()->selectedIndexes();
+
+    foreach (const QModelIndex &index, indexes)
+    {
+        if (!index.isValid())
+            return;
+
+        QModelIndex sourceIndex = mPluginsProxyModel->mapToSource(
+                    mFilterProxyModel->mapToSource(index));
+
+        if (!sourceIndex.isValid())
+            return;
+
+        mDataFilesModel->setCheckState(sourceIndex, state);
+    }
+}
+
+void DataFilesPage::setCheckState(QModelIndex index)
+{
+    if (!index.isValid())
+        return;
+
+    QObject *object = QObject::sender();
+
+    // Not a signal-slot call
+    if (!object)
+        return;
+
+
+    if (object->objectName() == QLatin1String("PluginsTable")) {
+        QModelIndex sourceIndex = mPluginsProxyModel->mapToSource(
+                    mFilterProxyModel->mapToSource(index));
+
+        if (sourceIndex.isValid()) {
+            (mDataFilesModel->checkState(sourceIndex) == Qt::Checked)
+                    ? mDataFilesModel->setCheckState(sourceIndex, Qt::Unchecked)
+                    : mDataFilesModel->setCheckState(sourceIndex, Qt::Checked);
+        }
+    }
+
+    if (object->objectName() == QLatin1String("MastersTable")) {
+        QModelIndex sourceIndex = mMastersProxyModel->mapToSource(index);
+
+        if (sourceIndex.isValid()) {
+            (mDataFilesModel->checkState(sourceIndex) == Qt::Checked)
+                    ? mDataFilesModel->setCheckState(sourceIndex, Qt::Unchecked)
+                    : mDataFilesModel->setCheckState(sourceIndex, Qt::Checked);
+        }
+    }
+
+    return;
+}
+
+void DataFilesPage::filterChanged(const QString filter)
+{
+    QRegExp regExp(filter, Qt::CaseInsensitive, QRegExp::FixedString);
+    mFilterProxyModel->setFilterRegExp(regExp);
 }
 
 void DataFilesPage::profileChanged(const QString &previous, const QString &current)
 {
-    qDebug() << "Profile is changed from: " << previous << " to " << current;
     // Prevent the deletion of the default profile
     if (current == QLatin1String("Default")) {
-        mDeleteProfileAction->setEnabled(false);
-        mProfilesComboBox->setEditEnabled(false);
+        deleteProfileAction->setEnabled(false);
+        profilesComboBox->setEditEnabled(false);
     } else {
-        mDeleteProfileAction->setEnabled(true);
-        mProfilesComboBox->setEditEnabled(true);
+        deleteProfileAction->setEnabled(true);
+        profilesComboBox->setEditEnabled(true);
     }
 
-    if (!previous.isEmpty()) {
-        writeConfig(previous);
-        mLauncherConfig->sync();
-
-        if (mProfilesComboBox->currentIndex() == -1)
-            return;
-
-    } else {
+    if (previous.isEmpty())
         return;
-    }
 
-    mDataFilesList->uncheckAll();
-    readConfig();
+    if (profilesComboBox->findText(previous) == -1)
+        return; // Profile was deleted
+
+    // Store the previous profile
+    mLauncherSettings.setValue(QString("Profiles/currentprofile"), previous);
+    saveSettings();
+    mLauncherSettings.setValue(QString("Profiles/currentprofile"), current);
+
+    loadSettings();
 }
 
 void DataFilesPage::profileRenamed(const QString &previous, const QString &current)
@@ -507,27 +467,85 @@ void DataFilesPage::profileRenamed(const QString &previous, const QString &curre
         return;
 
     // Save the new profile name
-    writeConfig(current);
+    mLauncherSettings.setValue(QString("Profiles/currentprofile"), current);
+    saveSettings();
 
-    // Make sure we have no groups open
-     while (!mLauncherConfig->group().isEmpty()) {
-         mLauncherConfig->endGroup();
-     }
+    // Remove the old one
+    mLauncherSettings.remove(QString("Profiles/") + previous + QString("/master"));
+    mLauncherSettings.remove(QString("Profiles/") + previous + QString("/plugin"));
 
-     mLauncherConfig->beginGroup("Profiles");
+    // Remove the profile from the combobox
+    profilesComboBox->removeItem(profilesComboBox->findText(previous));
 
-     // Open the profile-name subgroup
-     mLauncherConfig->beginGroup(previous);
-     mLauncherConfig->remove(""); // Clear the subgroup
-     mLauncherConfig->endGroup();
-     mLauncherConfig->endGroup();
-     mLauncherConfig->sync();
+    loadSettings();
 
-     // Remove the profile from the combobox
-     mProfilesComboBox->removeItem(mProfilesComboBox->findText(previous));
+}
 
-     mDataFilesList->uncheckAll();
-     ////mMastersModel->uncheckAll();
-     ////mPluginsModel->uncheckAll();
-     readConfig();
+void DataFilesPage::showContextMenu(const QPoint &point)
+{
+    QObject *object = QObject::sender();
+
+    // Not a signal-slot call
+    if (!object)
+        return;
+
+    if (object->objectName() == QLatin1String("PluginsTable")) {
+        if (!pluginsTable->selectionModel()->hasSelection())
+            return;
+
+        QPoint globalPos = pluginsTable->mapToGlobal(point);
+        QModelIndexList indexes = pluginsTable->selectionModel()->selectedIndexes();
+
+        // Show the check/uncheck actions depending on the state of the selected items
+        uncheckAction->setEnabled(false);
+        checkAction->setEnabled(false);
+
+        foreach (const QModelIndex &index, indexes)
+        {
+            if (!index.isValid())
+                return;
+
+            QModelIndex sourceIndex = mPluginsProxyModel->mapToSource(
+                        mFilterProxyModel->mapToSource(index));
+
+            if (!sourceIndex.isValid())
+                return;
+
+            (mDataFilesModel->checkState(sourceIndex) == Qt::Checked)
+                    ? uncheckAction->setEnabled(true)
+                    : checkAction->setEnabled(true);
+        }
+
+        // Show menu
+        mContextMenu->exec(globalPos);
+    }
+
+    if (object->objectName() == QLatin1String("MastersTable")) {
+        if (!mastersTable->selectionModel()->hasSelection())
+            return;
+
+        QPoint globalPos = mastersTable->mapToGlobal(point);
+        QModelIndexList indexes = mastersTable->selectionModel()->selectedIndexes();
+
+        // Show the check/uncheck actions depending on the state of the selected items
+        uncheckAction->setEnabled(false);
+        checkAction->setEnabled(false);
+
+        foreach (const QModelIndex &index, indexes)
+        {
+            if (!index.isValid())
+                return;
+
+            QModelIndex sourceIndex = mMastersProxyModel->mapToSource(index);
+
+            if (!sourceIndex.isValid())
+                return;
+
+            (mDataFilesModel->checkState(sourceIndex) == Qt::Checked)
+                    ? uncheckAction->setEnabled(true)
+                    : checkAction->setEnabled(true);
+        }
+
+        mContextMenu->exec(globalPos);
+    }
 }

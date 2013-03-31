@@ -38,12 +38,6 @@ namespace
 
         return sum;
     }
-
-    bool compare_string_ci(std::string str1, std::string str2)
-    {
-        Misc::StringUtils::toLower(str1);
-        return str1 == str2;
-    }
 }
 
 MWWorld::ContainerStore::ContainerStore() : mStateId (0), mCachedWeight (0), mWeightUpToDate (false) {}
@@ -62,13 +56,17 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::end()
 
 bool MWWorld::ContainerStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
 {
-    /// \todo add current weapon/armor health, remaining lockpick/repair uses, current enchantment charge here as soon as they are implemented
+    /// \todo add current enchantment charge here when it is implemented
     if (  ptr1.mCellRef->mRefID == ptr2.mCellRef->mRefID
         && MWWorld::Class::get(ptr1).getScript(ptr1) == "" // item with a script never stacks
         && MWWorld::Class::get(ptr1).getEnchantment(ptr1) == "" // item with enchantment never stacks (we could revisit this later, but for now it makes selecting items in the spell window much easier)
         && ptr1.mCellRef->mOwner == ptr2.mCellRef->mOwner
         && ptr1.mCellRef->mSoul == ptr2.mCellRef->mSoul
-        && ptr1.mCellRef->mCharge == ptr2.mCellRef->mCharge)
+          // item that is already partly used up never stacks
+          && (!MWWorld::Class::get(ptr1).hasItemHealth(ptr1) || ptr1.mCellRef->mCharge == -1
+              || MWWorld::Class::get(ptr1).getItemMaxHealth(ptr1) == ptr1.mCellRef->mCharge)
+        && (!MWWorld::Class::get(ptr2).hasItemHealth(ptr2) || ptr2.mCellRef->mCharge == -1
+            || MWWorld::Class::get(ptr2).getItemMaxHealth(ptr2) == ptr2.mCellRef->mCharge))
         return true;
 
     return false;
@@ -118,11 +116,11 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr)
         MWWorld::LiveCellRef<ESM::Miscellaneous> *gold =
             ptr.get<ESM::Miscellaneous>();
 
-        if (compare_string_ci(gold->mRef.mRefID, "gold_001")
-            || compare_string_ci(gold->mRef.mRefID, "gold_005")
-            || compare_string_ci(gold->mRef.mRefID, "gold_010")
-            || compare_string_ci(gold->mRef.mRefID, "gold_025")
-            || compare_string_ci(gold->mRef.mRefID, "gold_100"))
+        if (Misc::StringUtils::ciEqual(gold->mRef.mRefID, "gold_001")
+            || Misc::StringUtils::ciEqual(gold->mRef.mRefID, "gold_005")
+            || Misc::StringUtils::ciEqual(gold->mRef.mRefID, "gold_010")
+            || Misc::StringUtils::ciEqual(gold->mRef.mRefID, "gold_025")
+            || Misc::StringUtils::ciEqual(gold->mRef.mRefID, "gold_100"))
         {
             MWWorld::ManualRef ref(esmStore, "Gold_001");
 
@@ -130,7 +128,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr)
             ref.getPtr().getRefData().setCount(count);
             for (MWWorld::ContainerStoreIterator iter (begin(type)); iter!=end(); ++iter)
             {
-                if (compare_string_ci((*iter).get<ESM::Miscellaneous>()->mRef.mRefID, "gold_001"))
+                if (Misc::StringUtils::ciEqual((*iter).get<ESM::Miscellaneous>()->mRef.mRefID, "gold_001"))
                 {
                     (*iter).getRefData().setCount( (*iter).getRefData().getCount() + count);
                     flagAsModified();
@@ -171,7 +169,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImpl (const Ptr& ptr
         case Type_Clothing: clothes.mList.push_back (*ptr.get<ESM::Clothing>()); it = ContainerStoreIterator(this, --clothes.mList.end()); break;
         case Type_Ingredient: ingreds.mList.push_back (*ptr.get<ESM::Ingredient>()); it = ContainerStoreIterator(this, --ingreds.mList.end()); break;
         case Type_Light: lights.mList.push_back (*ptr.get<ESM::Light>()); it = ContainerStoreIterator(this, --lights.mList.end()); break;
-        case Type_Lockpick: lockpicks.mList.push_back (*ptr.get<ESM::Tool>()); it = ContainerStoreIterator(this, --lockpicks.mList.end()); break;
+        case Type_Lockpick: lockpicks.mList.push_back (*ptr.get<ESM::Lockpick>()); it = ContainerStoreIterator(this, --lockpicks.mList.end()); break;
         case Type_Miscellaneous: miscItems.mList.push_back (*ptr.get<ESM::Miscellaneous>()); it = ContainerStoreIterator(this, --miscItems.mList.end()); break;
         case Type_Probe: probes.mList.push_back (*ptr.get<ESM::Probe>()); it = ContainerStoreIterator(this, --probes.mList.end()); break;
         case Type_Repair: repairs.mList.push_back (*ptr.get<ESM::Repair>()); it = ContainerStoreIterator(this, --repairs.mList.end()); break;
@@ -272,7 +270,7 @@ int MWWorld::ContainerStore::getType (const Ptr& ptr)
     if (ptr.getTypeName()==typeid (ESM::Light).name())
         return Type_Light;
 
-    if (ptr.getTypeName()==typeid (ESM::Tool).name())
+    if (ptr.getTypeName()==typeid (ESM::Lockpick).name())
         return Type_Lockpick;
 
     if (ptr.getTypeName()==typeid (ESM::Miscellaneous).name())
@@ -321,7 +319,7 @@ MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *contain
     : mType(MWWorld::ContainerStore::Type_Ingredient), mMask(MWWorld::ContainerStore::Type_All), mContainer(container), mIngredient(iterator){}
 MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Light>::List::iterator iterator)
     : mType(MWWorld::ContainerStore::Type_Light), mMask(MWWorld::ContainerStore::Type_All), mContainer(container), mLight(iterator){}
-MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Tool>::List::iterator iterator)
+MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Lockpick>::List::iterator iterator)
     : mType(MWWorld::ContainerStore::Type_Lockpick), mMask(MWWorld::ContainerStore::Type_All), mContainer(container), mLockpick(iterator){}
 MWWorld::ContainerStoreIterator::ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Miscellaneous>::List::iterator iterator)
     : mType(MWWorld::ContainerStore::Type_Miscellaneous), mMask(MWWorld::ContainerStore::Type_All), mContainer(container), mMiscellaneous(iterator){}
@@ -548,7 +546,8 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStoreIterator::operator++ (int
 
 bool MWWorld::ContainerStoreIterator::isEqual (const ContainerStoreIterator& iter) const
 {
-    assert (mContainer==iter.mContainer);
+    if (mContainer!=iter.mContainer)
+        return false;
 
     if (mType!=iter.mType)
         return false;

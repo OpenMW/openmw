@@ -10,6 +10,7 @@
 #include "cells.hpp"
 #include "localscripts.hpp"
 #include "timestamp.hpp"
+#include "fallback.hpp"
 
 #include "../mwbase/world.hpp"
 
@@ -49,6 +50,7 @@ namespace MWWorld
 
     class World : public MWBase::World
     {
+            MWWorld::Fallback mFallback;
             MWRender::RenderingManager* mRendering;
 
             MWWorld::WeatherManager* mWeatherManager;
@@ -82,7 +84,6 @@ namespace MWWorld
             float mFaced1Distance;
             float mFaced2Distance;
             int mNumFacing;
-            std::map<std::string,std::string> mFallback;
 
             unsigned long lastTick;
             Ogre::Timer mTimer;
@@ -92,15 +93,12 @@ namespace MWWorld
             bool moveObjectImp (const Ptr& ptr, float x, float y, float z);
             ///< @return true if the active cell (cell player is in) changed
 
-            
+
             Ptr copyObjectToCell(const Ptr &ptr, CellStore &cell, const ESM::Position &pos);
 
             void updateWindowManager ();
             void performUpdateSceneQueries ();
-            void processFacedQueryResults (MWRender::OcclusionQuery* query);
-            void beginFacedQueryProcess (MWRender::OcclusionQuery* query);
-            void beginSingleFacedQueryProcess (MWRender::OcclusionQuery* query, std::vector < std::pair < float, std::string > > const & results);
-            void beginDoubleFacedQueryProcess (MWRender::OcclusionQuery* query, std::vector < std::pair < float, std::string > > const & results);
+            void updateFacedHandle ();
 
             float getMaxActivationDistance ();
             float getNpcActivationDistance ();
@@ -116,7 +114,7 @@ namespace MWWorld
                 const Files::Collections& fileCollections,
                 const std::vector<std::string>& master, const std::vector<std::string>& plugins,
         	const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir, bool newGame,
-                ToUTF8::Utf8Encoder* encoder, std::map<std::string,std::string> fallbackMap, int mActivationDistanceOverride);
+                ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap, int mActivationDistanceOverride);
 
             virtual ~World();
 
@@ -135,11 +133,7 @@ namespace MWWorld
 
             virtual void getTriangleBatchCount(unsigned int &triangles, unsigned int &batches);
 
-            virtual void setFallbackValues (const std::map<std::string,std::string>& fallbackMap);
-
-            virtual std::string getFallback (const std::string& key) const;
-
-            virtual std::string getFallback (const std::string& key, const std::string& def) const;
+            virtual const Fallback *getFallback() const;
 
             virtual Player& getPlayer();
 
@@ -174,11 +168,11 @@ namespace MWWorld
 
             virtual char getGlobalVariableType (const std::string& name) const;
             ///< Return ' ', if there is no global variable with this name.
-            
+
             virtual std::vector<std::string> getGlobals () const;
-            
+
             virtual std::string getCurrentCellName () const;
-            
+
             virtual void removeRefScript (MWWorld::RefData *ref);
             //< Remove the script attached to ref from mLocalScripts
 
@@ -339,6 +333,10 @@ namespace MWWorld
                 mRendering->togglePlayerLooking(enable);
             }
 
+            virtual void changeVanityModeScale(float factor) {
+                mRendering->changeVanityModeScale(factor);
+            }
+
             virtual void renderPlayer();
 
             virtual void setupExternalRendering (MWRender::ExternalRendering& rendering);
@@ -356,6 +354,7 @@ namespace MWWorld
             /// \todo this does not belong here
             virtual void playVideo(const std::string& name, bool allowSkipping);
             virtual void stopVideo();
+            virtual void frameStarted (float dt);
     };
 }
 

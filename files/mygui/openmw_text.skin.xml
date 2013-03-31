@@ -154,8 +154,8 @@
     </Skin>
 
     <Skin name = "MW_ChargeBar" size = "204 18">
-        <Child type="ProgressBar" skin="MW_Progress_Red" offset = "0 0 204 18" align = "ALIGN_RIGHT ALIGN_TOP" name = "Bar" />
-        <Child type="TextBox" skin="SandTextC" offset = "0 0 204 18" align = "ALIGN_RIGHT ALIGN_TOP" name = "BarText" />
+        <Child type="ProgressBar" skin="MW_Progress_Red" offset = "0 0 204 18" align = "ALIGN_RIGHT ALIGN_TOP ALIGN_STRETCH" name = "Bar" />
+        <Child type="TextBox" skin="SandTextC" offset = "0 0 204 18" align = "ALIGN_RIGHT ALIGN_TOP ALIGN_STRETCH" name = "BarText" />
     </Skin>
 
     <Skin name = "MW_DynamicStat_Red" size = "204 18">

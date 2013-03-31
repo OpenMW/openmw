@@ -4,6 +4,9 @@
     <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 249 249" name="_Main">
 
         <!-- Edit box -->
+
+        <Widget type="Widget" skin="MW_Box" position="14 14 220 192" align="Stretch" name = "Client"/>
+
         <Widget type="EditBox" skin="MW_TextBoxEdit" position="14 14 220 192" name="TextEdit" align="ALIGN_LEFT ALIGN_TOP STRETCH">
             <Property key="MultiLine" value="1" />
             <Property key="VisibleVScroll" value="1" />

@@ -1,6 +1,5 @@
 #include "localmap.hpp"
 
-#include <OgreOverlayManager.h>
 #include <OgreMaterialManager.h>
 #include <OgreHardwarePixelBuffer.h>
 
@@ -30,6 +29,12 @@ LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend, MWRender::RenderingManag
     mCellCamera->setProjectionType(PT_ORTHOGRAPHIC);
 
     mCameraNode->attachObject(mCellCamera);
+
+    mLight = mRendering->getScene()->createLight();
+    mLight->setType (Ogre::Light::LT_DIRECTIONAL);
+    mLight->setDirection (Ogre::Vector3(0.3, 0.3, -0.7));
+    mLight->setVisible (false);
+    mLight->setDiffuseColour (ColourValue(0.7,0.7,0.7));
 }
 
 LocalMap::~LocalMap()
@@ -119,6 +124,10 @@ void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell)
 void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell,
                             AxisAlignedBox bounds)
 {
+    // if we're in an empty cell, don't bother rendering anything
+    if (bounds.isNull ())
+        return;
+
     mInterior = true;
     mBounds = bounds;
 
@@ -130,7 +139,7 @@ void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell,
     mAngle = angle.valueRadians();
 
     mCellCamera->setOrientation(Quaternion::IDENTITY);
-    mCameraRotNode->setOrientation(Quaternion(Math::Cos(angle/2.f), 0, 0, -Math::Sin(angle/2.f)));
+    mCameraRotNode->setOrientation(Quaternion(Math::Cos(mAngle/2.f), 0, 0, -Math::Sin(mAngle/2.f)));
 
     // rotate the cell and merge the rotated corners to the bounding box
     Vector2 _center(bounds.getCenter().x, bounds.getCenter().y);
@@ -151,6 +160,10 @@ void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell,
     mBounds.merge(Vector3(c2.x, c2.y, 0));
     mBounds.merge(Vector3(c3.x, c3.y, 0));
     mBounds.merge(Vector3(c4.x, c4.y, 0));
+
+    // apply a little padding
+    mBounds.setMinimum (mBounds.getMinimum() - Vector3(500,500,0));
+    mBounds.setMaximum (mBounds.getMaximum() + Vector3(500,500,0));
 
     Vector2 center(mBounds.getCenter().x, mBounds.getCenter().y);
 
@@ -184,22 +197,24 @@ void LocalMap::render(const float x, const float y,
                     const float zlow, const float zhigh,
                     const float xw, const float yw, const std::string& texture)
 {
-    // disable fog
-    // changing FOG_MODE is not a solution when using shaders, thus we have to push linear start/end
-    const float fStart = mRendering->getScene()->getFogStart();
-    const float fEnd = mRendering->getScene()->getFogEnd();
-    const ColourValue& clr = mRendering->getScene()->getFogColour();
-    mRendering->getScene()->setFog(FOG_LINEAR, clr, 0, 1000000, 10000000);
-
-    // make everything visible
-    mRendering->getScene()->setAmbientLight(ColourValue(1,1,1));
-    mRenderingManager->disableLights();
-
-    mCameraNode->setPosition(Vector3(x, y, zhigh+100000));
     //mCellCamera->setFarClipDistance( (zhigh-zlow) * 1.1 );
     mCellCamera->setFarClipDistance(0); // infinite
 
     mCellCamera->setOrthoWindow(xw, yw);
+    mCameraNode->setPosition(Vector3(x, y, zhigh+100000));
+
+    // disable fog (only necessary for fixed function, the shader based
+    // materials already do this through local_map material configuration)
+    float oldFogStart = mRendering->getScene()->getFogStart();
+    float oldFogEnd = mRendering->getScene()->getFogEnd();
+    Ogre::ColourValue oldFogColour = mRendering->getScene()->getFogColour();
+    mRendering->getScene()->setFog(FOG_NONE);
+
+    // set up lighting
+    Ogre::ColourValue oldAmbient = mRendering->getScene()->getAmbientLight();
+    mRendering->getScene()->setAmbientLight(Ogre::ColourValue(0.3, 0.3, 0.3));
+    mRenderingManager->disableLights(true);
+    mLight->setVisible(true);
 
     TexturePtr tex;
     // try loading from memory
@@ -224,14 +239,13 @@ void LocalMap::render(const float x, const float y,
                             TU_RENDERTARGET);
 
             RenderTarget* rtt = tex->getBuffer()->getRenderTarget();
+
             rtt->setAutoUpdated(false);
             Viewport* vp = rtt->addViewport(mCellCamera);
             vp->setOverlaysEnabled(false);
             vp->setShadowsEnabled(false);
             vp->setBackgroundColour(ColourValue(0, 0, 0));
             vp->setVisibilityMask(RV_Map);
-
-            // use fallback techniques without shadows and without mrt
             vp->setMaterialScheme("local_map");
 
             rtt->update();
@@ -265,11 +279,12 @@ void LocalMap::render(const float x, const float y,
             //rtt->writeContentsToFile("./" + texture + ".jpg");
         }
     }
-
-    mRenderingManager->enableLights();
+    mRenderingManager->enableLights(true);
+    mLight->setVisible(false);
 
     // re-enable fog
-    mRendering->getScene()->setFog(FOG_LINEAR, clr, 0, fStart, fEnd);
+    mRendering->getScene()->setFog(FOG_LINEAR, oldFogColour, 0, oldFogStart, oldFogEnd);
+    mRendering->getScene()->setAmbientLight(oldAmbient);
 }
 
 void LocalMap::getInteriorMapPosition (Ogre::Vector2 pos, float& nX, float& nY, int& x, int& y)

@@ -30,7 +30,10 @@ namespace CSMWorld
             Display_Integer,
             Display_Float,
             Display_Var,
-            Display_VarType
+            Display_GmstVarType,
+            Display_GlobalVarType,
+            Display_Specialisation,
+            Display_Attribute
         };
 
         std::string mTitle;

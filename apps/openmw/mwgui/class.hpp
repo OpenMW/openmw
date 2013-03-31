@@ -1,7 +1,7 @@
 #ifndef MWGUI_CLASS_H
 #define MWGUI_CLASS_H
 
-#include <MyGUI.h>
+
 #include "widgets.hpp"
 #include "window_base.hpp"
 
@@ -35,17 +35,17 @@ namespace MWGui
         EventHandle_Int eventButtonSelected;
 
     protected:
-        void onButtonClicked(MyGUI::WidgetPtr _sender);
+        void onButtonClicked(MyGUI::Widget* _sender);
 
     private:
 
         void fitToText(MyGUI::TextBox* widget);
-        void layoutVertically(MyGUI::WidgetPtr widget, int margin);
+        void layoutVertically(MyGUI::Widget* widget, int margin);
         int mCurrentButton;
-        MyGUI::WidgetPtr mTextBox;
+        MyGUI::Widget* mTextBox;
         MyGUI::TextBox* mText;
-        MyGUI::WidgetPtr mButtonBar;
-        std::vector<MyGUI::ButtonPtr> mButtons;
+        MyGUI::Widget* mButtonBar;
+        std::vector<MyGUI::Button*> mButtons;
     };
 
     // Lets the player choose between 3 ways of creating a class
@@ -235,7 +235,7 @@ namespace MWGui
         void onOkClicked(MyGUI::Widget* _sender);
 
     private:
-        MyGUI::EditPtr mTextEdit;
+        MyGUI::EditBox* mTextEdit;
     };
 
     class CreateClassDialog : public WindowModal
@@ -265,7 +265,7 @@ namespace MWGui
         void onOkClicked(MyGUI::Widget* _sender);
         void onBackClicked(MyGUI::Widget* _sender);
 
-        void onSpecializationClicked(MyGUI::WidgetPtr _sender);
+        void onSpecializationClicked(MyGUI::Widget* _sender);
         void onSpecializationSelected();
         void onAttributeClicked(Widgets::MWAttributePtr _sender);
         void onAttributeSelected();
@@ -280,7 +280,7 @@ namespace MWGui
         void update();
 
     private:
-        MyGUI::EditPtr                   mEditName;
+        MyGUI::EditBox*                   mEditName;
         MyGUI::TextBox*                  mSpecializationName;
         Widgets::MWAttributePtr          mFavoriteAttribute0, mFavoriteAttribute1;
         Widgets::MWSkillPtr              mMajorSkill[5];

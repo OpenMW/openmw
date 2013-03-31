@@ -13,6 +13,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
@@ -50,6 +51,7 @@ namespace MWGui
         getWidget(mFilterMisc, "MiscButton");
         getWidget(mLeftPane, "LeftPane");
         getWidget(mRightPane, "RightPane");
+        getWidget(mArmorRating, "ArmorRating");
 
         mAvatar->eventMouseButtonClick += MyGUI::newDelegate(this, &InventoryWindow::onAvatarClicked);
 
@@ -160,11 +162,8 @@ namespace MWGui
             // the "Take" button should not be visible.
             // NOTE: the take button is "reset" when the window opens, so we can safely do the following
             // without screwing up future book windows
-            if (mDragAndDrop->mDraggedFrom == this)
-            {
-                mWindowManager.getBookWindow()->setTakeButtonShow(false);
-                mWindowManager.getScrollWindow()->setTakeButtonShow(false);
-            }
+            mWindowManager.getBookWindow()->setTakeButtonShow(false);
+            mWindowManager.getScrollWindow()->setTakeButtonShow(false);
 
             mDragAndDrop->mIsOnDragAndDrop = false;
             MyGUI::Gui::getInstance().destroyWidget(mDragAndDrop->mDraggedWidget);
@@ -212,24 +211,6 @@ namespace MWGui
             return *invStore.getSlot (slot);
         else
             return MWWorld::Ptr();
-    }
-
-    std::vector<MWWorld::Ptr> InventoryWindow::getEquippedItems()
-    {
-        MWWorld::InventoryStore& invStore = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
-
-        std::vector<MWWorld::Ptr> items;
-
-        for (int slot=0; slot < MWWorld::InventoryStore::Slots; ++slot)
-        {
-            MWWorld::ContainerStoreIterator it = invStore.getSlot(slot);
-            if (it != invStore.end())
-            {
-                items.push_back(*it);
-            }
-        }
-
-        return items;
     }
 
     void InventoryWindow::_unequipItem(MWWorld::Ptr item)
@@ -309,6 +290,9 @@ namespace MWGui
         mPreview.update (size.width, size.height);
         mAvatarImage->setSize(MyGUI::IntSize(std::max(mAvatar->getSize().width, 512), std::max(mAvatar->getSize().height, 1024)));
         mAvatarImage->setImageTexture("CharacterPreview");
+
+        mArmorRating->setCaptionWithReplacing ("#{sArmor}: "
+            + boost::lexical_cast<std::string>(static_cast<int>(MWWorld::Class::get(mPtr).getArmorRating(mPtr))));
     }
 
     void InventoryWindow::pickUpObject (MWWorld::Ptr object)
@@ -324,7 +308,7 @@ namespace MWGui
             && (type != typeid(ESM::Ingredient).name())
             && (type != typeid(ESM::Light).name())
             && (type != typeid(ESM::Miscellaneous).name())
-            && (type != typeid(ESM::Tool).name())
+            && (type != typeid(ESM::Lockpick).name())
             && (type != typeid(ESM::Probe).name())
             && (type != typeid(ESM::Repair).name())
             && (type != typeid(ESM::Weapon).name())

@@ -28,8 +28,6 @@ namespace MWGui
         protected:
             MyGUI::Button* mCancelButton;
             MyGUI::TextBox* mPlayerGold;
-            MyGUI::TextBox* mSpells;
-            MyGUI::TextBox* mSelect;
 
             MyGUI::ScrollView* mSpellsView;
 
@@ -47,6 +45,8 @@ namespace MWGui
             void updateLabels();
 
             virtual void onReferenceUnavailable();
+
+            bool playerHasSpell (const std::string& id);
     };
 }
 

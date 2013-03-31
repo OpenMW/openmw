@@ -46,6 +46,7 @@ static const struct {
     { CharState_Idle8, "idle8" },
     { CharState_Idle9, "idle9" },
     { CharState_IdleSwim, "idleswim" },
+    { CharState_IdleSneak, "idlesneak" },
 
     { CharState_WalkForward, "walkforward" },
     { CharState_WalkBack, "walkback" },
@@ -66,6 +67,11 @@ static const struct {
     { CharState_SwimRunBack, "swimrunback" },
     { CharState_SwimRunLeft, "swimrunleft" },
     { CharState_SwimRunRight, "swimrunright" },
+
+    { CharState_SneakForward, "sneakforward" },
+    { CharState_SneakBack, "sneakback" },
+    { CharState_SneakLeft, "sneakleft" },
+    { CharState_SneakRight, "sneakright" },
 
     { CharState_Jump, "jump" },
 
@@ -176,6 +182,7 @@ Ogre::Vector3 CharacterController::update(float duration)
         bool onground = world->isOnGround(mPtr);
         bool inwater = world->isSwimming(mPtr);
         bool isrunning = cls.getStance(mPtr, MWWorld::Class::Run);
+        bool sneak = cls.getStance(mPtr, MWWorld::Class::Sneak);
         speed = cls.getSpeed(mPtr);
 
         /* FIXME: The state should be set to Jump, and X/Y movement should be disallowed except
@@ -201,31 +208,30 @@ Ogre::Vector3 CharacterController::update(float duration)
         if(std::abs(vec.x/2.0f) > std::abs(vec.y) && speed > 0.0f)
         {
             if(vec.x > 0.0f)
-                setState(isrunning ?
-                         (inwater ? CharState_SwimRunRight : CharState_RunRight) :
-                         (inwater ? CharState_SwimWalkRight : CharState_WalkRight), true);
+                setState(inwater ? (isrunning ? CharState_SwimRunRight : CharState_SwimWalkRight)
+                                 : (sneak ? CharState_SneakRight : (isrunning ? CharState_RunRight : CharState_WalkRight)), true);
+
             else if(vec.x < 0.0f)
-                setState(isrunning ?
-                         (inwater ? CharState_SwimRunLeft: CharState_RunLeft) :
-                         (inwater ? CharState_SwimWalkLeft : CharState_WalkLeft), true);
+                setState(inwater ? (isrunning ? CharState_SwimRunLeft : CharState_SwimWalkLeft)
+                                 : (sneak ? CharState_SneakLeft : (isrunning ? CharState_RunLeft : CharState_WalkLeft)), true);
+
             // Apply any forward/backward movement manually
             movement.y += vec.y * (speed*duration);
         }
         else if(vec.y != 0.0f && speed > 0.0f)
         {
             if(vec.y > 0.0f)
-                setState(isrunning ?
-                         (inwater ? CharState_SwimRunForward : CharState_RunForward) :
-                         (inwater ? CharState_SwimWalkForward : CharState_WalkForward), true);
+                setState(inwater ? (isrunning ? CharState_SwimRunForward : CharState_SwimWalkForward)
+                                 : (sneak ? CharState_SneakForward : (isrunning ? CharState_RunForward : CharState_WalkForward)), true);
+
             else if(vec.y < 0.0f)
-                setState(isrunning ?
-                         (inwater ? CharState_SwimRunBack : CharState_RunBack) :
-                         (inwater ? CharState_SwimWalkBack : CharState_WalkBack), true);
+                setState(inwater ? (isrunning ? CharState_SwimRunBack : CharState_SwimWalkBack)
+                                 : (sneak ? CharState_SneakBack : (isrunning ? CharState_RunBack : CharState_WalkBack)), true);
             // Apply any sideways movement manually
             movement.x += vec.x * (speed*duration);
         }
         else if(mAnimQueue.size() == 0)
-            setState((inwater ? CharState_IdleSwim : CharState_Idle), true);
+            setState((inwater ? CharState_IdleSwim : (sneak ? CharState_IdleSneak : CharState_Idle)), true);
     }
 
     if(mAnimation && !mSkipAnim)

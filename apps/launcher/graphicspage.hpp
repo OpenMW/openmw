@@ -5,8 +5,8 @@
 
 #include <OgreRoot.h>
 #include <OgreRenderSystem.h>
-#include <OgreConfigFile.h>
-#include <OgreConfigDialog.h>
+//#include <OgreConfigFile.h>
+//#include <OgreConfigDialog.h>
 
 // Static plugin headers
 #ifdef ENABLE_PLUGIN_GL
@@ -16,25 +16,28 @@
 # include "OgreD3D9Plugin.h"
 #endif
 
-class QComboBox;
-class QCheckBox;
-class QStackedWidget;
-class QSettings;
+#include "ui_graphicspage.h"
+
+class GraphicsSettings;
 
 namespace Files { struct ConfigurationManager; }
 
-class GraphicsPage : public QWidget
+class GraphicsPage : public QWidget, private Ui::GraphicsPage
 {
     Q_OBJECT
 
 public:
-    GraphicsPage(Files::ConfigurationManager &cfg, QWidget *parent = 0);
+    GraphicsPage(Files::ConfigurationManager &cfg, GraphicsSettings &graphicsSettings, QWidget *parent = 0);
 
+    void saveSettings();
     bool setupOgre();
-    void writeConfig();
 
 public slots:
     void rendererChanged(const QString &renderer);
+
+private slots:
+    void slotFullScreenChanged(int state);
+    void slotStandardToggled(bool checked);
 
 private:
     Ogre::Root *mOgre;
@@ -48,22 +51,14 @@ private:
  	Ogre::D3D9Plugin* mD3D9Plugin;
  	#endif
 
-    QComboBox *mRendererComboBox;
-
-    QStackedWidget *mDisplayStackedWidget;
-
-    QComboBox *mAntiAliasingComboBox;
-    QComboBox *mResolutionComboBox;
-    QCheckBox *mVSyncCheckBox;
-    QCheckBox *mFullScreenCheckBox;
-
     Files::ConfigurationManager &mCfgMgr;
+    GraphicsSettings &mGraphicsSettings;
 
     QStringList getAvailableOptions(const QString &key, Ogre::RenderSystem *renderer);
     QStringList getAvailableResolutions(Ogre::RenderSystem *renderer);
 
-    void createPages();
-    void readConfig();
+    void loadSettings();
+
 };
 
 #endif

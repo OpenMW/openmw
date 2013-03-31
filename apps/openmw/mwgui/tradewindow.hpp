@@ -74,16 +74,13 @@ namespace MWGui
             void onFilterChanged(MyGUI::Widget* _sender);
             void onOfferButtonClicked(MyGUI::Widget* _sender);
             void onCancelButtonClicked(MyGUI::Widget* _sender);
+            void onMaxSaleButtonClicked(MyGUI::Widget* _sender);
             void onIncreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
             void onDecreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
             void onBalanceButtonReleased(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
 
             void onIncreaseButtonTriggered();
             void onDecreaseButtonTriggered();
-
-            // don't show items that the NPC has equipped in his trade-window.
-            virtual bool ignoreEquippedItems() { return true; }
-            virtual std::vector<MWWorld::Ptr> getEquippedItems();
 
             virtual bool isTrading() { return true; }
             virtual bool isTradeWindow() { return true; }
@@ -93,6 +90,9 @@ namespace MWGui
             void updateLabels();
 
             virtual void onReferenceUnavailable();
+
+        private:
+            int getMerchantGold();
     };
 }
 

@@ -46,7 +46,7 @@ int getClosestPoint(const ESM::Pathgrid* grid,float x,float y,float z)
     float m = distance(grid->mPoints[0],x,y,z);
     int i0 = 0;
 
-    for(int i=1; i<grid->mPoints.size();i++)
+    for(unsigned int i=1; i<grid->mPoints.size();++i)
     {
         if(distance(grid->mPoints[i],x,y,z)<m)
         {
@@ -139,7 +139,7 @@ PathGridGraph buildGraph(const ESM::Pathgrid* pathgrid,float xCell = 0,float yCe
 {
     PathGridGraph graph;
 
-    for(int i = 0;i<pathgrid->mPoints.size();i++)
+    for(unsigned int i = 0;i<pathgrid->mPoints.size();++i)
     {
         PointID pID = boost::add_vertex(graph);
         graph[pID].mX = pathgrid->mPoints[i].mX + xCell;
@@ -147,7 +147,7 @@ PathGridGraph buildGraph(const ESM::Pathgrid* pathgrid,float xCell = 0,float yCe
         graph[pID].mZ = pathgrid->mPoints[i].mZ;
     }
 
-    for(int i = 0;i<pathgrid->mEdges.size();i++)
+    for(unsigned int i = 0;i<pathgrid->mEdges.size();++i)
     {
         PointID u = pathgrid->mEdges[i].mV0;
         PointID v = pathgrid->mEdges[i].mV1;

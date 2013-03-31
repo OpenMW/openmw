@@ -1,0 +1,21 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource prefix="images">
+    <file alias="clear.png">images/clear.png</file>
+    <file alias="down.png">images/down.png</file>
+    <file alias="openmw.png">images/openmw.png</file>
+    <file alias="openmw-plugin.png">images/openmw-plugin.png</file>
+    <file alias="openmw-header.png">images/openmw-header.png</file>
+    <file alias="playpage-background.png">images/playpage-background.png</file>
+</qresource>
+<qresource prefix="icons/tango">
+    <file alias="index.theme">icons/tango/index.theme</file>
+    <file alias="video-display.png">icons/tango/video-display.png</file>
+    <file alias="16x16/document-new.png">icons/tango/document-new.png</file>
+    <file alias="16x16/edit-copy.png">icons/tango/edit-copy.png</file>
+    <file alias="16x16/edit-delete.png">icons/tango/edit-delete.png</file>
+    <file alias="16x16/go-bottom.png">icons/tango/go-bottom.png</file>
+    <file alias="16x16/go-down.png">icons/tango/go-down.png</file>
+    <file alias="16x16/go-top.png">icons/tango/go-top.png</file>
+    <file alias="16x16/go-up.png">icons/tango/go-up.png</file>
+</qresource>
+</RCC>
