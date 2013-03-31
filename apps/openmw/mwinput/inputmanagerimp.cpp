@@ -372,26 +372,11 @@ namespace MWInput
     void InputManager::changeInputMode(bool guiMode)
     {
         MWBase::Environment::get().getWindowManager()->setMouseVisible(guiMode);
-        if(guiMode)
-        {
-            // Disable mouse look
-            mMouseLookEnabled = false;
-
-            mWindows.showCrosshair (false);
-
-            // Enable GUI events
-            mGuiCursorEnabled = true;
-        }
-        else
-        {
-            // Enable mouse look
-            mMouseLookEnabled = true;
-
-            mWindows.showCrosshair (false);
-
-            // Disable GUI events
-            mGuiCursorEnabled = false;
-        }
+        mGuiCursorEnabled = guiMode;
+        mMouseLookEnabled = !guiMode;
+        if (guiMode)
+            mWindows.showCrosshair(false);
+        // if not in gui mode, the camera decides whether to show crosshair or not.
     }
 
     void InputManager::processChangedSettings(const Settings::CategorySettingVector& changed)
