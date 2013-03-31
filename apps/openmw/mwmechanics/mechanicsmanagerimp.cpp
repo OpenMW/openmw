@@ -181,7 +181,7 @@ namespace MWMechanics
         if(MWWorld::Class::get(ptr).isActor())
             mActors.addActor(ptr);
         else
-            mActivators.addActivator(ptr);
+            mObjects.addObject(ptr);
     }
 
     void MechanicsManager::remove(const MWWorld::Ptr& ptr)
@@ -189,7 +189,7 @@ namespace MWMechanics
         if(ptr == mWatched)
             mWatched = MWWorld::Ptr();
         mActors.removeActor(ptr);
-        mActivators.removeActivator(ptr);
+        mObjects.removeObject(ptr);
     }
 
     void MechanicsManager::updateCell(const MWWorld::Ptr &old, const MWWorld::Ptr &ptr)
@@ -197,7 +197,7 @@ namespace MWMechanics
         if(MWWorld::Class::get(ptr).isActor())
             mActors.updateActor(old, ptr);
         else
-            mActivators.updateActivator(old, ptr);
+            mObjects.updateObject(old, ptr);
     }
 
 
@@ -207,7 +207,7 @@ namespace MWMechanics
             mWatched = MWWorld::Ptr();
 
         mActors.dropActors(cellStore);
-        mActivators.dropActivators(cellStore);
+        mObjects.dropObjects(cellStore);
     }
 
 
@@ -319,7 +319,7 @@ namespace MWMechanics
         }
 
         mActors.update(duration, paused);
-        mActivators.update(duration, paused);
+        mObjects.update(duration, paused);
     }
 
     void MechanicsManager::restoreDynamicStats()
@@ -659,14 +659,14 @@ namespace MWMechanics
         if(MWWorld::Class::get(ptr).isActor())
             mActors.playAnimationGroup(ptr, groupName, mode, number);
         else
-            mActivators.playAnimationGroup(ptr, groupName, mode, number);
+            mObjects.playAnimationGroup(ptr, groupName, mode, number);
     }
     void MechanicsManager::skipAnimation(const MWWorld::Ptr& ptr)
     {
         if(MWWorld::Class::get(ptr).isActor())
             mActors.skipAnimation(ptr);
         else
-            mActivators.skipAnimation(ptr);
+            mObjects.skipAnimation(ptr);
     }
 
 }
