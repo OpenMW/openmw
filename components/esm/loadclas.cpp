@@ -35,4 +35,18 @@ void Class::save(ESMWriter &esm)
     esm.writeHNOString("DESC", mDescription);
 }
 
+    void Class::blank()
+    {
+        mName.clear();
+        mDescription.clear();
+
+        mData.mAttribute[0] = mData.mAttribute[1] = 0;
+        mData.mSpecialization = 0;
+        mData.mIsPlayable = 0;
+        mData.mCalc = 0;
+
+        for (int i=0; i<5; ++i)
+            for (int i2=0; i2<2; ++i2)
+                mData.mSkills[i][i2] = 0;
+    }
 }

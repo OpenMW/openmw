@@ -129,13 +129,10 @@ namespace MWGui
         MWWorld::Ptr gold;
         MWWorld::ContainerStore& playerStore = mWindowManager.getInventoryWindow()->getContainerStore();
 
-        const MWWorld::Store<ESM::GameSetting> &gmst =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
-
         for (MWWorld::ContainerStoreIterator it = playerStore.begin();
                 it != playerStore.end(); ++it)
         {
-            if (MWWorld::Class::get(*it).getName(*it) == gmst.find("sGold")->getString())
+            if (Misc::StringUtils::ciEqual(it->getCellRef().mRefID, "gold_001"))
             {
                 goldFound = true;
                 gold = *it;
@@ -342,6 +339,9 @@ namespace MWGui
 
     bool TradeWindow::npcAcceptsItem(MWWorld::Ptr item)
     {
+        if (Misc::StringUtils::ciEqual(item.getCellRef().mRefID, "gold_001"))
+            return false;
+
         int services = 0;
         if (mPtr.getTypeName() == typeid(ESM::NPC).name())
         {

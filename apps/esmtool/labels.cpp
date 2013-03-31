@@ -627,10 +627,10 @@ std::string bodyPartFlags(int flags)
     std::string properties = "";
     if (flags == 0) properties += "[None] ";    
     if (flags & ESM::BodyPart::BPF_Female) properties += "Female ";
-    if (flags & ESM::BodyPart::BPF_Playable) properties += "Playable ";
+    if (flags & ESM::BodyPart::BPF_NotPlayable) properties += "NotPlayable ";
     int unused = (0xFFFFFFFF ^
                   (ESM::BodyPart::BPF_Female|
-                   ESM::BodyPart::BPF_Playable));
+                   ESM::BodyPart::BPF_NotPlayable));
     if (flags & unused) properties += "Invalid ";
     properties += str(boost::format("(0x%08X)") % flags);
     return properties;
