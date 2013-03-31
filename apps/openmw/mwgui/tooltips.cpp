@@ -90,7 +90,20 @@ void ToolTips::onFrame(float frameDuration)
             if (mFocusObject.isEmpty ())
                 return;
 
-            MyGUI::IntSize tooltipSize = getToolTipViaPtr(true);
+            const MWWorld::Class& objectclass = MWWorld::Class::get (mFocusObject);
+
+            IntSize tooltipSize;
+            if ((!objectclass.hasToolTip(mFocusObject))&&(mWindowManager->getMode() == GM_Console))
+            {
+                setCoord(0, 0, 300, 300);
+                mDynamicToolTipBox->setVisible(true);
+                ToolTipInfo info;
+                info.caption=mFocusObject.getCellRef().mRefID;
+                info.icon="";
+                tooltipSize = createToolTip(info);
+            }
+            else
+                tooltipSize = getToolTipViaPtr(true);
 
             IntPoint tooltipPosition = InputManager::getInstance().getMousePosition() + IntPoint(0, 24);
 

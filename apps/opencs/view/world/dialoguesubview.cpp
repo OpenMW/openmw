@@ -3,7 +3,7 @@
 
 #include <QGridLayout>
 #include <QLabel>
-#include <QAbstractTableModel>
+#include <QAbstractItemModel>
 #include <QDoubleSpinBox>
 #include <QSpinBox>
 #include <QLineEdit>
@@ -24,7 +24,7 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
 
     widget->setLayout (layout);
 
-    QAbstractTableModel *model = document.getData().getTableModel (id);
+    QAbstractItemModel *model = document.getData().getTableModel (id);
 
     int columns = model->columnCount();
 

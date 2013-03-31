@@ -14,7 +14,7 @@
 namespace ESM
 {
 
-/// Some overloaded copare operators.
+/// Some overloaded compare operators.
 bool operator==(const MovedCellRef& ref, int pRefnum)
 {
   return (ref.mRefnum == pRefnum);
@@ -43,13 +43,9 @@ void CellRef::save(ESMWriter &esm)
         esm.writeHNT("INDX", mFactIndex);
     }
 
-    if (mCharge != -1.0) {
-        esm.writeHNT("XCHG", mCharge);
-    }
+    if (mCharge != -1)
+        esm.writeHNT("INTV", mCharge);
 
-    if (mIntv != -1) {
-        esm.writeHNT("INTV", mIntv);
-    }
     if (mNam9 != 0) {
         esm.writeHNT("NAM9", mNam9);
     }
@@ -285,12 +281,9 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
     ref.mFactIndex = -2;
     esm.getHNOT(ref.mFactIndex, "INDX");
 
-    ref.mCharge = -1.0;
-    esm.getHNOT(ref.mCharge, "XCHG");
-
-    ref.mIntv = -1;
     ref.mNam9 = 0;
-    esm.getHNOT(ref.mIntv, "INTV");
+    ref.mCharge = -1;
+    esm.getHNOT(ref.mCharge, "INTV");
     esm.getHNOT(ref.mNam9, "NAM9");
 
     // Present for doors that teleport you to another cell.

@@ -10,7 +10,8 @@
 namespace MWMechanics
 {
     CreatureStats::CreatureStats()
-        : mLevel (0), mLevelHealthBonus(0.f), mDead (false), mFriendlyHits (0), mTalkedTo (false), mAlarmed (false),
+        : mLevel (0), mLevelHealthBonus(0.f), mDead (false), mDied (false), mFriendlyHits (0),
+          mTalkedTo (false), mAlarmed (false),
           mAttacked (false), mHostile (false)
     {
         for (int i=0; i<4; ++i)
@@ -167,7 +168,12 @@ namespace MWMechanics
         mDynamic[index] = value;
 
         if (index==0 && mDynamic[index].getCurrent()<1)
+        {
+            if (!mDead)
+                mDied = true;
+
             mDead = true;
+        }
     }
 
     void CreatureStats::setLevel(int level)
@@ -194,6 +200,16 @@ namespace MWMechanics
     bool CreatureStats::isDead() const
     {
         return mDead;
+    }
+
+    bool CreatureStats::hasDied() const
+    {
+        return mDied;
+    }
+
+    void CreatureStats::clearHasDied()
+    {
+        mDied = false;
     }
 
     void CreatureStats::resurrect()

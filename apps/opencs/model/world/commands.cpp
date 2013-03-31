@@ -1,7 +1,7 @@
 
 #include "commands.hpp"
 
-#include <QAbstractTableModel>
+#include <QAbstractItemModel>
 
 #include "idtableproxymodel.hpp"
 #include "idtable.hpp"

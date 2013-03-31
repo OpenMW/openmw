@@ -8,11 +8,12 @@
 
 #include <components/esm/loadglob.hpp>
 #include <components/esm/loadgmst.hpp>
+#include <components/esm/loadskil.hpp>
 
 #include "idcollection.hpp"
 #include "universalid.hpp"
 
-class QAbstractTableModel;
+class QAbstractItemModel;
 
 namespace CSMWorld
 {
@@ -20,14 +21,15 @@ namespace CSMWorld
     {
             IdCollection<ESM::Global> mGlobals;
             IdCollection<ESM::GameSetting> mGmsts;
-            std::vector<QAbstractTableModel *> mModels;
-            std::map<UniversalId::Type, QAbstractTableModel *> mModelIndex;
+            IdCollection<ESM::Skill> mSkills;
+            std::vector<QAbstractItemModel *> mModels;
+            std::map<UniversalId::Type, QAbstractItemModel *> mModelIndex;
 
             // not implemented
             Data (const Data&);
             Data& operator= (const Data&);
 
-            void addModel (QAbstractTableModel *model, UniversalId::Type type1,
+            void addModel (QAbstractItemModel *model, UniversalId::Type type1,
                 UniversalId::Type type2 = UniversalId::Type_None);
 
         public:
@@ -44,7 +46,11 @@ namespace CSMWorld
 
             IdCollection<ESM::GameSetting>& getGmsts();
 
-            QAbstractTableModel *getTableModel (const UniversalId& id);
+            const IdCollection<ESM::Skill>& getSkills() const;
+
+            IdCollection<ESM::Skill>& getSkills();
+
+            QAbstractItemModel *getTableModel (const UniversalId& id);
             ///< If no table model is available for \a id, an exception is thrown.
             ///
             /// \note The returned table may either be the model for the ID itself or the model that

@@ -1,6 +1,7 @@
 
 #include "enumdelegate.hpp"
 
+#include <cassert>
 #include <stdexcept>
 
 #include <QComboBox>
@@ -88,6 +89,16 @@ void CSVWorld::EnumDelegate::paint (QPainter *painter, const QStyleOptionViewIte
         }
 }
 
+
+CSVWorld::EnumDelegateFactory::EnumDelegateFactory() {}
+
+CSVWorld::EnumDelegateFactory::EnumDelegateFactory (const char **names)
+{
+    assert (names);
+
+    for (int i=0; names[i]; ++i)
+        add (i, names[i]);
+}
 
 CSVWorld::CommandDelegate *CSVWorld::EnumDelegateFactory::makeDelegate (QUndoStack& undoStack,
     QObject *parent) const

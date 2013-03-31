@@ -41,7 +41,7 @@ namespace
 
                 ++current;
 
-                if (it->mData.getCount() || it->mData.isEnabled())
+                if (it->mData.getCount() && it->mData.isEnabled())
                 {
                     MWWorld::Ptr ptr (&*it, &cell);
 

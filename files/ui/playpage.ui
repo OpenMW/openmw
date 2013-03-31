@@ -19,6 +19,9 @@
      <property name="frameShadow">
       <enum>QFrame::Plain</enum>
      </property>
+     <property name="lineWidth">
+      <number>0</number>
+     </property>
      <layout class="QGridLayout" name="gridLayout">
       <property name="leftMargin">
        <number>30</number>
@@ -40,10 +43,14 @@
     border-color: rgba(0, 0, 0, 125);
     border-style: solid;
     border-radius: 2px;
+
+    font-size: 12pt;
+    font-family: &quot;EB Garamond&quot;, &quot;EB Garamond 08&quot;;
+	color: black;
 }
 
 /*QComboBox gets the &quot;on&quot; state when the popup is open */
-#profilesComboBox:!editable:on, #ProfilesComboBox::drop-down:editable:on {
+#profilesComboBox:!editable:on {
     background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
         stop:0 rgba(0, 0, 0, 75),
         stop:0.1 rgba(0, 0, 0, 15),
@@ -52,13 +59,9 @@
     border: 1px solid rgba(0, 0, 0, 55);
 }
 
-#profilesComboBox { /* shift the text when the popup opens */
+#profilesComboBox:on { /* shift the text when the popup opens */
     padding-top: 3px;
     padding-left: 4px;
-
-    font-size: 12pt;
-    font-family: &quot;EB Garamond&quot;, &quot;EB Garamond 08&quot;;
-	color: black;
 }
 
 #profilesComboBox::drop-down {
@@ -81,7 +84,6 @@
     top: 1px;
     left: 1px;
 }
-
 
 #profilesComboBox QAbstractItemView {
     border: 0px;

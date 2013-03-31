@@ -190,8 +190,8 @@ void LocalMapBase::setActiveCell(const int x, const int y, bool interior)
                     widgetCoord, MyGUI::Align::Default, "Marker" + boost::lexical_cast<std::string>(counter));
                 markerWidget->setImageResource("DoorMarker");
                 markerWidget->setUserString("ToolTipType", "Layout");
-                markerWidget->setUserString("ToolTipLayout", "TextToolTip");
-                markerWidget->setUserString("Caption_Text", marker.name);
+                markerWidget->setUserString("ToolTipLayout", "TextToolTipOneLine");
+                markerWidget->setUserString("Caption_TextOneLine", marker.name);
                 markerWidget->setUserString("IsMarker", "true");
                 markerWidget->eventMouseSetFocus += MyGUI::newDelegate(this, &LocalMapBase::onMarkerFocused);
                 markerWidget->eventMouseLostFocus += MyGUI::newDelegate(this, &LocalMapBase::onMarkerUnfocused);
@@ -323,16 +323,16 @@ void MapWindow::addVisitedLocation(const std::string& name, int x, int y)
         widgetCoord, MyGUI::Align::Default, "Marker" + boost::lexical_cast<std::string>(_counter));
     markerWidget->setImageResource("DoorMarker");
     markerWidget->setUserString("ToolTipType", "Layout");
-    markerWidget->setUserString("ToolTipLayout", "TextToolTip");
-    markerWidget->setUserString("Caption_Text", name);
+    markerWidget->setUserString("ToolTipLayout", "TextToolTipOneLine");
+    markerWidget->setUserString("Caption_TextOneLine", name);
     ++_counter;
 
     markerWidget = mEventBoxGlobal->createWidget<MyGUI::Button>("",
         widgetCoord, MyGUI::Align::Default);
     markerWidget->setNeedMouseFocus (true);
     markerWidget->setUserString("ToolTipType", "Layout");
-    markerWidget->setUserString("ToolTipLayout", "TextToolTip");
-    markerWidget->setUserString("Caption_Text", name);
+    markerWidget->setUserString("ToolTipLayout", "TextToolTipOneLine");
+    markerWidget->setUserString("Caption_TextOneLine", name);
 }
 
 void MapWindow::cellExplored(int x, int y)

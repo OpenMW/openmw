@@ -19,6 +19,8 @@ class ESMWriter;
 
 struct Skill
 {
+    std::string mId;
+
   struct SKDTstruct
   {
     int mAttribute;     // see defs.hpp
@@ -73,6 +75,11 @@ struct Skill
 
   void load(ESMReader &esm);
   void save(ESMWriter &esm);
+
+    void blank();
+     ///< Set record to default state (does not touch the ID/index).
+
+    static std::string getIndexToId (int index);
 };
 }
 #endif

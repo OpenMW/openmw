@@ -96,6 +96,25 @@ bool CSMWorld::IdTable::removeRows (int row, int count, const QModelIndex& paren
     return true;
 }
 
+QModelIndex CSMWorld::IdTable::index (int row, int column, const QModelIndex& parent) const
+{
+    if (parent.isValid())
+        return QModelIndex();
+
+    if (row<0 || row>=mIdCollection->getSize())
+        return QModelIndex();
+
+    if (column<0 || column>=mIdCollection->getColumns())
+        return QModelIndex();
+
+    return createIndex (row, column);
+}
+
+QModelIndex CSMWorld::IdTable::parent (const QModelIndex& index) const
+{
+    return QModelIndex();
+}
+
 void CSMWorld::IdTable::addRecord (const std::string& id)
 {
     int index = mIdCollection->getSize();

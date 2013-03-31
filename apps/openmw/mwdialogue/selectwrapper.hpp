@@ -17,11 +17,12 @@ namespace MWDialogue
                 Function_Journal,
                 Function_Item,
                 Function_Dead,
-                Function_Id,
-                Function_Faction,
-                Function_Class,
-                Function_Race,
-                Function_Cell,
+                Function_NotId,
+                Function_NotFaction,
+                Function_NotClass,
+                Function_NotRace,
+                Function_NotCell,
+                Function_NotLocal,
                 Function_Local,
                 Function_Global,
                 Function_SameGender, Function_SameRace, Function_SameFaction,
@@ -50,7 +51,8 @@ namespace MWDialogue
                 Type_None,
                 Type_Integer,
                 Type_Numeric,
-                Type_Boolean
+                Type_Boolean,
+                Type_Inverted
             };
 
         private:
@@ -66,8 +68,6 @@ namespace MWDialogue
             int getArgument() const;
 
             Type getType() const;
-
-            bool isInverted() const;
 
             bool isNpcOnly() const;
             ///< \attention Do not call any of the select functions for this select struct!

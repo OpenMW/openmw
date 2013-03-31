@@ -101,7 +101,7 @@ namespace MWWorld
             return Ptr (ref, &cell);
         if (MWWorld::LiveCellRef<ESM::Light> *ref = searchViaHandle (handle, cell.mLights))
             return Ptr (ref, &cell);
-        if (MWWorld::LiveCellRef<ESM::Tool> *ref = searchViaHandle (handle, cell.mLockpicks))
+        if (MWWorld::LiveCellRef<ESM::Lockpick> *ref = searchViaHandle (handle, cell.mLockpicks))
             return Ptr (ref, &cell);
         if (MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = searchViaHandle (handle, cell.mMiscItems))
             return Ptr (ref, &cell);
@@ -154,26 +154,6 @@ namespace MWWorld
             mRendering->skyDisable();
     }
 
-    void World::setFallbackValues (const std::map<std::string,std::string>& fallbackMap)
-    {
-        mFallback = fallbackMap;
-    }
-
-    std::string World::getFallback (const std::string& key) const
-    {
-        return getFallback(key, "");
-    }
-
-    std::string World::getFallback (const std::string& key, const std::string& def) const
-    {
-        std::map<std::string,std::string>::const_iterator it;
-        if((it = mFallback.find(key)) == mFallback.end())
-        {
-            return def;
-        }
-        return it->second;
-    }
-
     World::World (OEngine::Render::OgreRenderer& renderer,
         const Files::Collections& fileCollections,
         const std::vector<std::string>& master, const std::vector<std::string>& plugins,
@@ -181,17 +161,16 @@ namespace MWWorld
         ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap, int mActivationDistanceOverride)
     : mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
       mSky (true), mCells (mStore, mEsm),
-      mNumFacing(0), mActivationDistanceOverride (mActivationDistanceOverride),
-      mFallback (fallbackMap)
+      mNumFacing(0), mActivationDistanceOverride (mActivationDistanceOverride),mFallback(fallbackMap)
     {
         mPhysics = new PhysicsSystem(renderer);
         mPhysEngine = mPhysics->getEngine();
 
-        mRendering = new MWRender::RenderingManager(renderer, resDir, cacheDir, mPhysEngine);
+        mRendering = new MWRender::RenderingManager(renderer, resDir, cacheDir, mPhysEngine,&mFallback);
 
         mPhysEngine->setSceneManager(renderer.getScene());
 
-        mWeatherManager = new MWWorld::WeatherManager(mRendering,fallbackMap);
+        mWeatherManager = new MWWorld::WeatherManager(mRendering,&mFallback);
 
         int idx = 0;
         // NOTE: We might need to reserve one more for the running game / save.
@@ -281,6 +260,11 @@ namespace MWWorld
         }
 
         return 0;
+    }
+
+    const MWWorld::Fallback *World::getFallback() const
+    {
+        return &mFallback;
     }
 
     Ptr::CellStore *World::getExterior (int x, int y)
@@ -687,10 +671,11 @@ namespace MWWorld
             return MWWorld::Ptr ();
 
         MWWorld::Ptr object = searchPtrViaHandle (result.second);
-
         float ActivationDistance;
 
-        if (object.getTypeName ().find("NPC") != std::string::npos)
+        if (MWBase::Environment::get().getWindowManager()->isConsoleMode())
+            ActivationDistance = getObjectActivationDistance ()*50;
+        else if (object.getTypeName ().find("NPC") != std::string::npos)
             ActivationDistance = getNpcActivationDistance ();
         else
             ActivationDistance = getObjectActivationDistance ();
@@ -1026,6 +1011,8 @@ namespace MWWorld
             float x, y;
             MWBase::Environment::get().getWindowManager()->getMousePosition(x, y);
             results = mPhysics->getFacedHandles(x, y, getMaxActivationDistance ());
+            if (MWBase::Environment::get().getWindowManager()->isConsoleMode())
+                results = mPhysics->getFacedHandles(x, y, getMaxActivationDistance ()*50);
         }
         else
         {
@@ -1275,7 +1262,7 @@ namespace MWWorld
     World::isFlying(const MWWorld::Ptr &ptr) const
     {
         const MWWorld::Class &cls = MWWorld::Class::get(ptr);
-        if(cls.isActor() && cls.getCreatureStats(ptr).getMagicEffects().get(MWMechanics::EffectKey(10/*levitate*/)).mMagnitude > 0)
+        if(cls.isActor() && cls.getCreatureStats(ptr).getMagicEffects().get(MWMechanics::EffectKey(ESM::MagicEffect::Levitate)).mMagnitude > 0)
             return true;
         return false;
     }

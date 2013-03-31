@@ -227,7 +227,7 @@ void loadCell(ESM::Cell &cell, ESM::ESMReader &esm, Arguments& info)
         std::cout << "    Refnum: " << ref.mRefnum << std::endl;
         std::cout << "    ID: '" << ref.mRefID << "'\n";
         std::cout << "    Owner: '" << ref.mOwner << "'\n";
-        std::cout << "    INTV: " << ref.mIntv << "   NAM9: " << ref.mIntv << std::endl;
+        std::cout << "    Uses/health: " << ref.mCharge << "   NAM9: " << ref.mNam9 << std::endl;
     }
 }
 

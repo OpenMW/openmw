@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 329 253" name="_Main">
+
+        <Widget type="Widget" skin="" position="4 4 321 42" name="ToolBox">
+            <Widget type="ImageBox" skin="ImageBox" position="5 6 32 32" name="ToolIcon"/>
+
+            <Widget type="AutoSizedTextBox" skin="SandText" position="55 13 300 18" name="UsesLabel">
+                <Property key="Caption" value="#{sUses}"/>
+            </Widget>
+
+            <Widget type="TextBox" skin="SandText" position="55 13 250 18" name="QualityLabel">
+                <Property key="Caption" value="#{sQuality}"/>
+                <Property key="TextAlign" value="Right"/>
+            </Widget>
+
+        </Widget>
+
+        <Widget type="Widget" skin="MW_Box" position="6 46 309 160" align="Left Stretch" name="RepairBox">
+            <Widget type="ScrollView" skin="MW_ScrollView" position="4 4 301 152" align="Left Top Stretch" name="RepairView">
+                <Property key="CanvasAlign" value="Left"/>
+            </Widget>
+        </Widget>
+
+        <Widget type="AutoSizedButton" skin="MW_Button" position="239 214 75 24" name="CancelButton">
+            <Property key="ExpandDirection" value="Left"/>
+            <Property key="Caption" value="#{sCancel}"/>
+        </Widget>
+
+    </Widget>
+
+</MyGUI>

@@ -28,6 +28,7 @@ namespace MWMechanics
         AiSequence mAiSequence;
         float mLevelHealthBonus;
         bool mDead;
+        bool mDied;
         int mFriendlyHits;
         bool mTalkedTo;
         bool mAlarmed;
@@ -99,6 +100,10 @@ namespace MWMechanics
         float getLevelHealthBonus() const;
 
         bool isDead() const;
+
+        bool hasDied() const;
+
+        void clearHasDied();
 
         void resurrect();
 

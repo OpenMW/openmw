@@ -104,11 +104,14 @@ namespace MWRender
         mAnimation = new NpcAnimation(mCharacter, mNode,
             MWWorld::Class::get(mCharacter).getInventoryStore (mCharacter), 0, renderHeadOnly());
 
+        float scale=1.f;
+        MWWorld::Class::get(mCharacter).adjustScale(mCharacter, scale);
+        mNode->setScale(Ogre::Vector3(scale));
+
         mNode->setVisible (false);
 
-        Ogre::Vector3 scale = mNode->getScale();
-        mCamera->setPosition(mPosition * scale);
-        mCamera->lookAt(mLookAt * scale);
+        mCamera->setPosition(mPosition * mNode->getScale());
+        mCamera->lookAt(mLookAt * mNode->getScale());
 
         onSetup();
     }

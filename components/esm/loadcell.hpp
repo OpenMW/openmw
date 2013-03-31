@@ -52,15 +52,11 @@ public:
   // is -1, which I assume means "any rank".
   int mFactIndex;
 
-  // Depends on context - possibly weapon health, number of uses left
-  // or weapon magic charge?
-  float mCharge;
+  // For weapon or armor, this is the remaining item health.
+  // For tools (lockpicks, probes, repair hammer) it is the remaining uses.
+  int mCharge;
 
-  // I have no idea, these are present some times, often along with
-  // owner (ANAM) and sometimes otherwise. They are often (but not
-  // always) 1. INTV is big for lights (possibly a float?), might have
-  // something to do with remaining light "charge".
-  int mIntv, mNam9;
+  int mNam9;
 
   // For doors - true if this door teleports to somewhere else, false
   // if it should open through animation.
