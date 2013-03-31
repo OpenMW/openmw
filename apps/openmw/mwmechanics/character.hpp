@@ -54,6 +54,9 @@ enum CharacterState {
     CharState_SneakLeft,
     CharState_SneakRight,
 
+    CharState_TurnLeft,
+    CharState_TurnRight,
+
     CharState_Jump,
 
     /* Death states must be last! */

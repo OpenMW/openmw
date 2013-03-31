@@ -75,6 +75,9 @@ static const struct {
     { CharState_SneakLeft, "sneakleft" },
     { CharState_SneakRight, "sneakright" },
 
+    { CharState_TurnLeft, "turnleft" },
+    { CharState_TurnRight, "turnright" },
+
     { CharState_Jump, "jump" },
 
     { CharState_Death1, "death1" },
@@ -230,6 +233,13 @@ void CharacterController::update(float duration, Movement &movement)
                                  : (sneak ? CharState_SneakBack : (isrunning ? CharState_RunBack : CharState_WalkBack)), true);
             // Apply any sideways movement manually
             movement.mPosition[0] += vec.x * (speed*duration);
+        }
+        else if(rot.z != 0.0f && !inwater && !sneak)
+        {
+            if(rot.z > 0.0f)
+                setState(CharState_TurnRight, true);
+            else if(rot.z < 0.0f)
+                setState(CharState_TurnLeft, true);
         }
         else if(mAnimQueue.size() == 0)
             setState((inwater ? CharState_IdleSwim : (sneak ? CharState_IdleSneak : CharState_Idle)), true);
