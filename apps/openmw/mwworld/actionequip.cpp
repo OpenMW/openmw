@@ -62,7 +62,7 @@ namespace MWWorld
                         if((*itr).mPart == ESM::PRT_Head)
                         {
                             if(actor == MWBase::Environment::get().getWorld()->getPlayer().getPlayer() )
-                                MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage13}", std::vector<std::string>());
+                                MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage13}");
 
                             allow = false;
                             break;
@@ -90,12 +90,12 @@ namespace MWWorld
                             if(actor == MWBase::Environment::get().getWorld()->getPlayer().getPlayer() )
                             {
                                 if(it.getType() == MWWorld::ContainerStore::Type_Clothing){ // It's shoes
-                                    MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage15}", std::vector<std::string>());
+                                    MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage15}");
                                 }
 
                                 else // It's boots
                                 {
-                                    MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage14}", std::vector<std::string>());
+                                    MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage14}");
                                 }
                             }
                             break;

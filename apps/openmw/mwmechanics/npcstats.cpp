@@ -21,8 +21,16 @@
 #include "../mwbase/soundmanager.hpp"
 
 MWMechanics::NpcStats::NpcStats()
-: mMovementFlags (0), mDrawState (DrawState_Nothing), mBounty (0)
-, mLevelProgress(0), mDisposition(0), mVampire (0), mReputation(0), mWerewolf (false), mWerewolfKills (0)
+: mMovementFlags (0)
+, mDrawState (DrawState_Nothing)
+, mBounty (0)
+, mLevelProgress(0)
+, mDisposition(0)
+, mVampire (0)
+, mReputation(0)
+, mWerewolf (false)
+, mWerewolfKills (0)
+, mProfit(0)
 {
     mSkillIncreases.resize (ESM::Attribute::Length);
     for (int i=0; i<ESM::Attribute::Length; ++i)
@@ -221,12 +229,12 @@ void MWMechanics::NpcStats::increaseSkill(int skillIndex, const ESM::Class &clas
     message << boost::format(MWBase::Environment::get().getWindowManager ()->getGameSettingString ("sNotifyMessage39", ""))
                % std::string("#{" + ESM::Skill::sSkillNameIds[skillIndex] + "}")
                % static_cast<int> (base);
-    MWBase::Environment::get().getWindowManager ()->messageBox(message.str(), std::vector<std::string>());
+    MWBase::Environment::get().getWindowManager ()->messageBox(message.str());
 
     if (mLevelProgress >= 10)
     {
         // levelup is possible now
-        MWBase::Environment::get().getWindowManager ()->messageBox ("#{sLevelUpMsg}", std::vector<std::string>());
+        MWBase::Environment::get().getWindowManager ()->messageBox ("#{sLevelUpMsg}");
     }
 
     getSkill (skillIndex).setBase (base);
@@ -353,4 +361,14 @@ void MWMechanics::NpcStats::setWerewolf (bool set)
 int MWMechanics::NpcStats::getWerewolfKills() const
 {
     return mWerewolfKills;
+}
+
+int MWMechanics::NpcStats::getProfit() const
+{
+    return mProfit;
+}
+
+void MWMechanics::NpcStats::modifyProfit(int diff)
+{
+    mProfit += diff;
 }

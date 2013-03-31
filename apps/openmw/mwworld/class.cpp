@@ -142,6 +142,11 @@ namespace MWWorld
         return Ogre::Vector3 (0, 0, 0);
     }
 
+    Ogre::Vector3 Class::getRotationVector (const Ptr& ptr) const
+    {
+        return Ogre::Vector3 (0, 0, 0);
+    }
+
     std::pair<std::vector<int>, bool> Class::getEquipmentSlots (const Ptr& ptr) const
     {
         return std::make_pair (std::vector<int>(), false);
@@ -184,10 +189,13 @@ namespace MWWorld
 
     const Class& Class::get (const std::string& key)
     {
+        if (key.empty())
+            throw std::logic_error ("Class::get(): attempting to get an empty key");
+
         std::map<std::string, boost::shared_ptr<Class> >::const_iterator iter = sClasses.find (key);
 
         if (iter==sClasses.end())
-            throw std::logic_error ("unknown class key: " + key);
+            throw std::logic_error ("Class::get(): unknown class key: " + key);
 
         return *iter->second;
     }

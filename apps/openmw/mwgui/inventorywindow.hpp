@@ -5,6 +5,7 @@
 
 #include "container.hpp"
 #include "window_pinnable_base.hpp"
+#include "widgets.hpp"
 
 namespace MWGui
 {
@@ -36,8 +37,7 @@ namespace MWGui
             MyGUI::Widget* mAvatar;
             MyGUI::ImageBox* mAvatarImage;
             MyGUI::TextBox* mArmorRating;
-            MyGUI::ProgressBar* mEncumbranceBar;
-            MyGUI::TextBox* mEncumbranceText;
+            Widgets::MWDynamicStat* mEncumbranceBar;
 
             MyGUI::Widget* mLeftPane;
             MyGUI::Widget* mRightPane;

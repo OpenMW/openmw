@@ -310,25 +310,25 @@ namespace MWGui
     {
         if (mEffects.size() <= 0)
         {
-            mWindowManager.messageBox ("#{sNotifyMessage30}", std::vector<std::string>());
+            mWindowManager.messageBox ("#{sNotifyMessage30}");
             return;
         }
 
         if (mNameEdit->getCaption () == "")
         {
-            mWindowManager.messageBox ("#{sNotifyMessage10}", std::vector<std::string>());
+            mWindowManager.messageBox ("#{sNotifyMessage10}");
             return;
         }
 
         if (mMagickaCost->getCaption() == "0")
         {
-            mWindowManager.messageBox ("#{sEnchantmentMenu8}", std::vector<std::string>());
+            mWindowManager.messageBox ("#{sEnchantmentMenu8}");
             return;
         }
 
         if (boost::lexical_cast<int>(mPriceLabel->getCaption()) > mWindowManager.getInventoryWindow()->getPlayerGold())
         {
-            mWindowManager.messageBox ("#{sNotifyMessage18}", std::vector<std::string>());
+            mWindowManager.messageBox ("#{sNotifyMessage18}");
             return;
         }
 
@@ -517,7 +517,7 @@ namespace MWGui
     {
         if (mEffects.size() >= 8)
         {
-            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage28}", std::vector<std::string>());
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage28}");
             return;
         }
 
@@ -528,7 +528,7 @@ namespace MWGui
         {
             if (it->mEffectID == effectId)
             {
-                MWBase::Environment::get().getWindowManager()->messageBox ("#{sOnetypeEffectMessage}", std::vector<std::string>());
+                MWBase::Environment::get().getWindowManager()->messageBox ("#{sOnetypeEffectMessage}");
                 return;
             }
         }

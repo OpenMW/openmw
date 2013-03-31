@@ -368,7 +368,7 @@ namespace MWClass
             moveSpeed = runSpeed;
         else
             moveSpeed = walkSpeed;
-        if(getMovementSettings(ptr).mLeftRight != 0 && getMovementSettings(ptr).mForwardBackward == 0)
+        if(getMovementSettings(ptr).mPosition[0] != 0 && getMovementSettings(ptr).mPosition[1] == 0)
             moveSpeed *= 0.75f;
 
         return moveSpeed;
@@ -414,14 +414,24 @@ namespace MWClass
 
     Ogre::Vector3 Npc::getMovementVector (const MWWorld::Ptr& ptr) const
     {
-        Ogre::Vector3 vector;
-        vector.x = getMovementSettings(ptr).mLeftRight;
-        vector.y = getMovementSettings(ptr).mForwardBackward;
-        vector.z = getMovementSettings(ptr).mUpDown;
-
-        return vector;
+        MWMechanics::Movement &movement = getMovementSettings(ptr);
+        Ogre::Vector3 vec(movement.mPosition);
+        movement.mPosition[0] = 0.0f;
+        movement.mPosition[1] = 0.0f;
+        movement.mPosition[2] = 0.0f;
+        return vec;
     }
-    
+
+    Ogre::Vector3 Npc::getRotationVector (const MWWorld::Ptr& ptr) const
+    {
+        MWMechanics::Movement &movement = getMovementSettings(ptr);
+        Ogre::Vector3 vec(movement.mRotation);
+        movement.mRotation[0] = 0.0f;
+        movement.mRotation[1] = 0.0f;
+        movement.mRotation[2] = 0.0f;
+        return vec;
+    }
+
     bool Npc::isEssential (const MWWorld::Ptr& ptr) const
     {
         MWWorld::LiveCellRef<ESM::NPC> *ref =

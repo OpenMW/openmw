@@ -44,6 +44,11 @@ namespace MWRender
     class Animation;
 }
 
+namespace MWMechanics
+{
+    class Movement;
+}
+
 namespace MWWorld
 {
     class Fallback;
@@ -54,7 +59,7 @@ namespace MWWorld
     class ESMStore;
     class RefData;
 
-    typedef std::vector<std::pair<MWWorld::Ptr,Ogre::Vector3> > PtrMovementList;
+    typedef std::vector<std::pair<MWWorld::Ptr,MWMechanics::Movement> > PtrMovementList;
 }
 
 namespace MWBase

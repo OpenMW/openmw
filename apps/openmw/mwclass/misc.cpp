@@ -15,6 +15,7 @@
 #include "../mwworld/physicssystem.hpp"
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/nullaction.hpp"
+#include "../mwworld/actionsoulgem.hpp"
 
 #include "../mwgui/tooltips.hpp"
 
@@ -236,4 +237,13 @@ namespace MWClass
         }
         return newPtr;
     }
+
+    boost::shared_ptr<MWWorld::Action> Miscellaneous::use (const MWWorld::Ptr& ptr) const
+    {
+        if (ptr.getCellRef().mSoul == "")
+            return boost::shared_ptr<MWWorld::Action>(new MWWorld::NullAction());
+        else
+            return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionSoulgem(ptr));
+    }
+
 }

@@ -2,6 +2,8 @@
 
 #include <sstream>
 
+#include <components/misc/stringops.hpp>
+
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
@@ -103,8 +105,9 @@ void Skill::load(ESMReader &esm)
 
     // create an ID from the index and the name (only used in the editor and likely to change in the
     // future)
-    mId = getIndexToId (mIndex);
+    mId = indexToId (mIndex);
 }
+
 void Skill::save(ESMWriter &esm)
 {
     esm.writeHNT("INDX", mIndex);
@@ -120,7 +123,7 @@ void Skill::save(ESMWriter &esm)
         mDescription.clear();
     }
 
-    std::string Skill::getIndexToId (int index)
+    std::string Skill::indexToId (int index)
     {
         std::ostringstream stream;
 

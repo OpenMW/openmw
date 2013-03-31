@@ -83,7 +83,7 @@ namespace MWGui
         if (canRest == 2)
         {
             // resting underwater or mid-air not allowed
-            mWindowManager.messageBox ("#{sNotifyMessage1}", std::vector<std::string>());
+            mWindowManager.messageBox ("#{sNotifyMessage1}");
             mWindowManager.popGuiMode ();
         }
 

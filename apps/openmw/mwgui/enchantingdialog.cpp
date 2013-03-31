@@ -92,6 +92,11 @@ namespace MWGui
         startEditing ();
     }
 
+    void EnchantingDialog::startSelfEnchanting(MWWorld::Ptr soulgem)
+    {
+        /// \todo
+    }
+
     void EnchantingDialog::onReferenceUnavailable ()
     {
         mWindowManager.removeGuiMode (GM_Dialogue);
@@ -158,7 +163,7 @@ namespace MWGui
 
         if(mEnchanting.getGemCharge()==0)
         {
-            mWindowManager.messageBox ("#{sNotifyMessage32}", std::vector<std::string>());
+            mWindowManager.messageBox ("#{sNotifyMessage32}");
             return;
         }
 
@@ -222,31 +227,37 @@ namespace MWGui
     {
         if (mEffects.size() <= 0)
         {
-            mWindowManager.messageBox ("#{sNotifyMessage30}", std::vector<std::string>());
+            mWindowManager.messageBox ("#{sNotifyMessage30}");
             return;
         }
 
         if (mName->getCaption ().empty())
         {
-            mWindowManager.messageBox ("#{sNotifyMessage10}", std::vector<std::string>());
+            mWindowManager.messageBox ("#{sNotifyMessage10}");
             return;
         }
 
         if (boost::lexical_cast<int>(mPrice->getCaption()) > mWindowManager.getInventoryWindow()->getPlayerGold())
         {
-            mWindowManager.messageBox ("#{sNotifyMessage18}", std::vector<std::string>());
+            mWindowManager.messageBox ("#{sNotifyMessage18}");
             return;
         }
 
         if (mEnchanting.soulEmpty())
         {
-            mWindowManager.messageBox ("#{sNotifyMessage52}", std::vector<std::string>());
+            mWindowManager.messageBox ("#{sNotifyMessage52}");
             return;
         }
 
         if (mEnchanting.itemEmpty())
         {
-            mWindowManager.messageBox ("#{sNotifyMessage11}", std::vector<std::string>());
+            mWindowManager.messageBox ("#{sNotifyMessage11}");
+            return;
+        }
+
+        if (mEnchanting.getEnchantCost() > mEnchanting.getMaxEnchantValue())
+        {
+            mWindowManager.messageBox ("#{sNotifyMessage29}");
             return;
         }
 
@@ -254,7 +265,7 @@ namespace MWGui
         mEnchanting.setEffect(mEffectList);
 
         mEnchanting.create();
-        mWindowManager.messageBox ("#{sEnchantmentMenu12}", std::vector<std::string>());
+        mWindowManager.messageBox ("#{sEnchantmentMenu12}");
         mWindowManager.removeGuiMode (GM_Enchanting);
     }
 }

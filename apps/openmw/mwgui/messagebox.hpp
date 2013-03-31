@@ -44,6 +44,13 @@ namespace MWGui
             void enterPressed();
             int readPressedButton ();
 
+            typedef MyGUI::delegates::CMultiDelegate1<int> EventHandle_Int;
+
+            // Note: this delegate unassigns itself after it was fired, i.e. works once.
+            EventHandle_Int eventButtonPressed;
+
+            void onButtonPressed(int button) { eventButtonPressed(button); eventButtonPressed.clear(); }
+
             MWBase::WindowManager *mWindowManager;
 
         private:
@@ -73,7 +80,7 @@ namespace MWGui
             int mNextBoxPadding;
     };
 
-    class InteractiveMessageBox : public OEngine::GUI::Layout
+    class InteractiveMessageBox : public WindowModal
     {
         public:
             InteractiveMessageBox (MessageBoxManager& parMessageBoxManager, const std::string& message, const std::vector<std::string>& buttons);
