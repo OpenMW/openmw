@@ -168,10 +168,8 @@ void CharacterController::markerEvent(float time, const std::string &evt)
 }
 
 
-Ogre::Vector3 CharacterController::update(float duration)
+void CharacterController::update(float duration, Ogre::Vector3 &movement)
 {
-    Ogre::Vector3 movement(0.0f);
-
     float speed = 0.0f;
     if(!(getState() >= CharState_Death1))
     {
@@ -240,8 +238,6 @@ Ogre::Vector3 CharacterController::update(float duration)
         movement += mAnimation->runAnimation(duration);
     }
     mSkipAnim = false;
-
-    return movement;
 }
 
 

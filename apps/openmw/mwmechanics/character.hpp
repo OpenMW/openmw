@@ -87,7 +87,7 @@ public:
 
     void updatePtr(const MWWorld::Ptr &ptr);
 
-    Ogre::Vector3 update(float duration);
+    void update(float duration, Ogre::Vector3 &movement);
 
     void playGroup(const std::string &groupname, int mode, int count);
     void skipAnim();

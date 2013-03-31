@@ -266,7 +266,8 @@ namespace MWMechanics
 
             for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
             {
-                Ogre::Vector3 movement = iter->second.update(duration);
+                Ogre::Vector3 movement(0.0f);
+                iter->second.update(duration, movement);
                 mMovement.push_back(std::make_pair(iter->first, movement));
             }
             MWBase::Environment::get().getWorld()->doPhysics(mMovement, duration);

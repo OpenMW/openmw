@@ -56,7 +56,10 @@ void Activators::update(float duration, bool paused)
     if(!paused)
     {
         for(PtrControllerMap::iterator iter(mActivators.begin());iter != mActivators.end();++iter)
-            iter->second.update(duration);
+        {
+            Ogre::Vector3 movement(0.0f);
+            iter->second.update(duration, movement);
+        }
     }
 }
 
