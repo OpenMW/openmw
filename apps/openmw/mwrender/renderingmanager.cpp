@@ -262,37 +262,29 @@ void RenderingManager::scaleObject (const MWWorld::Ptr& ptr, const Ogre::Vector3
     ptr.getRefData().getBaseNode()->setScale(scale);
 }
 
-bool RenderingManager::rotateObject( const MWWorld::Ptr &ptr, Ogre::Vector3 &rot, bool adjust)
+bool RenderingManager::rotateObject(const MWWorld::Ptr &ptr, Ogre::Vector3 &rot, bool adjust)
 {
     bool isActive = ptr.getRefData().getBaseNode() != 0;
     bool isPlayer = isActive && ptr.getRefData().getHandle() == "player";
     bool force = true;
-    
+
     if (isPlayer)
         force = mPlayer->rotate(rot, adjust);
-    
-    MWWorld::Class::get(ptr).adjustRotation(ptr, rot.x, rot.y, rot.z);
 
+    MWWorld::Class::get(ptr).adjustRotation(ptr, rot.x, rot.y, rot.z);
     if (!isPlayer && isActive)
     {
-        Ogre::Quaternion xr(Ogre::Radian(-rot.x), Ogre::Vector3::UNIT_X);
-        Ogre::Quaternion yr(Ogre::Radian(-rot.y), Ogre::Vector3::UNIT_Y);
-        Ogre::Quaternion zr(Ogre::Radian(-rot.z), Ogre::Vector3::UNIT_Z);
+        if(adjust)
+        {
+            const float *objRot = ptr.getRefData().getPosition().rot;
+            rot.x += objRot[0];
+            rot.y += objRot[1];
+            rot.z += objRot[2];
+        }
 
-        Ogre::Quaternion xref(Ogre::Radian(-ptr.getRefData().getPosition().rot[0]), Ogre::Vector3::UNIT_X);
-        Ogre::Quaternion yref(Ogre::Radian(-ptr.getRefData().getPosition().rot[1]), Ogre::Vector3::UNIT_Y);
-        Ogre::Quaternion zref(Ogre::Radian(-ptr.getRefData().getPosition().rot[2]), Ogre::Vector3::UNIT_Z);
-
-        Ogre::Quaternion newo = adjust ? (xr * yr * zr) * (xref*yref*zref) : xr * yr * zr;
-
-        Ogre::Matrix3 mat;
-        newo.ToRotationMatrix(mat);
-        Ogre::Radian ax,ay,az;
-        mat.ToEulerAnglesXYZ(ax,ay,az);
-        rot.x = -ax.valueRadians();
-        rot.y = -ay.valueRadians();
-        rot.z = -az.valueRadians();
-
+        Ogre::Quaternion newo = Ogre::Quaternion(Ogre::Radian(-rot.x), Ogre::Vector3::UNIT_X) *
+                                Ogre::Quaternion(Ogre::Radian(-rot.y), Ogre::Vector3::UNIT_Y) *
+                                Ogre::Quaternion(Ogre::Radian(-rot.z), Ogre::Vector3::UNIT_Z);
         ptr.getRefData().getBaseNode()->setOrientation(newo);
     }
     else if(isPlayer)
