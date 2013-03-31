@@ -816,7 +816,9 @@ namespace MWWorld
         {
             // rotate physically iff renderer confirm so
             float *objRot = ptr.getRefData().getPosition().rot;
-            objRot[0] = rot.x, objRot[1] = rot.y, objRot[2] = rot.z;
+            objRot[0] = rot.x;
+            objRot[1] = rot.y;
+            objRot[2] = rot.z;
 
             if (ptr.getRefData().getBaseNode() != 0) {
                 mPhysics->rotateObject(ptr);
