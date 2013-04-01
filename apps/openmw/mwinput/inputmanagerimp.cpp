@@ -521,11 +521,13 @@ namespace MWInput
         {
             resetIdleTime();
 
-            float x = arg.state.X.rel * mCameraSensitivity * 0.2f;
-            float y = arg.state.Y.rel * mCameraSensitivity * 0.2f * (mInvertY ? -1 : 1) * mUIYMultiplier;
+            float x = arg.state.X.rel * (1.0f/256.0f) * mCameraSensitivity;
+            float y = arg.state.Y.rel * (1.0f/256.0f) * mCameraSensitivity * mCameraYMultiplier * (mInvertY ? -1 : 1);
+            float scale = MWBase::Environment::get().getFrameDuration();
+            if(scale <= 0.0f) scale = 1.0f;
 
-            mPlayer.setYaw(x);
-            mPlayer.setPitch(-y);
+            mPlayer.setYaw(x/scale);
+            mPlayer.setPitch(-y/scale);
 
             if (arg.state.Z.rel)
                 MWBase::Environment::get().getWorld()->changeVanityModeScale(arg.state.Z.rel);
