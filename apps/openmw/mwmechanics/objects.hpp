@@ -1,5 +1,5 @@
 #ifndef GAME_MWMECHANICS_ACTIVATORS_H
-#define GAME_MWMECHANICS_ACTOVATRS_H
+#define GAME_MWMECHANICS_ACTOVATORS_H
 
 #include <string>
 #include <map>
