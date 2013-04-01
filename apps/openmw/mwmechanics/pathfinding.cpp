@@ -118,7 +118,7 @@ namespace MWMechanics
         return graph;
     }
 
-    std::list<ESM::Pathgrid::Point> getPath(PointID start,PointID end,PathGridGraph graph){
+    std::list<ESM::Pathgrid::Point> findPath(PointID start,PointID end,PathGridGraph graph){
         std::vector<PointID> p(boost::num_vertices(graph));
         std::vector<float> d(boost::num_vertices(graph));
         std::list<ESM::Pathgrid::Point> shortest_path;
@@ -149,7 +149,7 @@ namespace MWMechanics
         mIsPathConstructed = false;
     }
 
-    std::list<ESM::Pathgrid::Point> PathFinder::findPath(ESM::Pathgrid::Point startPoint,ESM::Pathgrid::Point endPoint,
+    void PathFinder::buildPath(ESM::Pathgrid::Point startPoint,ESM::Pathgrid::Point endPoint,
         const ESM::Pathgrid* pathGrid,float xCell,float yCell)
     {
         int start = getClosestPoint(pathGrid,startPoint.mX - xCell,startPoint.mY - yCell,startPoint.mZ);
@@ -158,13 +158,11 @@ namespace MWMechanics
         if(start != -1 && end != -1)
         {
             PathGridGraph graph = buildGraph(pathGrid,xCell,yCell);
-            mPath = getPath(start,end,graph);
+            mPath = findPath(start,end,graph);
         }
 
         mPath.push_back(endPoint);
         mIsPathConstructed = true;
-
-        return mPath;
     }
 
     float PathFinder::getZAngleToNext(float x,float y,float z)
@@ -197,5 +195,14 @@ namespace MWMechanics
             nextPoint = *mPath.begin();
         }
         return false;
+    }
+
+    std::list<ESM::Pathgrid::Point> PathFinder::getPath()
+    {
+        return mPath;
+    }
+    bool PathFinder::isPathConstructed()
+    {
+        return mIsPathConstructed;
     }
 }

@@ -59,7 +59,7 @@ bool MWMechanics::AiTravel::execute (const MWWorld::Ptr& actor)
         }
     }
 
-    if(!mPathFinder.mIsPathConstructed ||cellChange)
+    if(!mPathFinder.isPathConstructed() ||cellChange)
     {
         cellX = actor.getCell()->mCell->mData.mX;
         cellY = actor.getCell()->mCell->mData.mY;
@@ -81,7 +81,7 @@ bool MWMechanics::AiTravel::execute (const MWWorld::Ptr& actor)
         dest.mY = pos.pos[1];
         dest.mZ = pos.pos[2];
 
-        mPathFinder.findPath(start,dest,pathgrid,xCell,yCell);
+        mPathFinder.buildPath(start,dest,pathgrid,xCell,yCell);
     }
     if(mPathFinder.checkIfNextPointReached(pos.pos[0],pos.pos[1],pos.pos[2]))
     {
