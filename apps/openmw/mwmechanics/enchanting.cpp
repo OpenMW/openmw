@@ -3,10 +3,13 @@
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
+
+#include "creaturestats.hpp"
+#include "npcstats.hpp"
+
 namespace MWMechanics
 {
-    Enchanting::Enchanting(MWWorld::Ptr enchanter):
-    mEnchanter(enchanter),
+    Enchanting::Enchanting():
     mEnchantType(0)
     {}
 
@@ -17,6 +20,7 @@ namespace MWMechanics
         {
             mObjectType = mOldItemPtr.getTypeName();
             mOldItemId = mOldItemPtr.getCellRef().mRefID;
+            mOldItemCount = mOldItemPtr.getRefData().getCount();
         }
         else
         {
@@ -25,7 +29,7 @@ namespace MWMechanics
         }
     }
 
-    void Enchanting::setNewItemName(std::string s)
+    void Enchanting::setNewItemName(const std::string& s)
     {
         mNewItemName=s;
     }
@@ -35,7 +39,7 @@ namespace MWMechanics
         mEffectList=effectList;
     }
 
-    int Enchanting::getEnchantType()
+    int Enchanting::getEnchantType() const
     {
         return mEnchantType;
     }
@@ -45,28 +49,39 @@ namespace MWMechanics
         mSoulGemPtr=soulGem;
     }
 
-    void Enchanting::create()
+    bool Enchanting::create()
     {
-        mOldItemPtr.getRefData().setCount(mOldItemPtr.getRefData().getCount()-1);
-        mSoulGemPtr.getRefData().setCount(mSoulGemPtr.getRefData().getCount()-1);
+        ESM::Enchantment enchantment;
+        enchantment.mData.mCharge = getGemCharge();
+        mSoulGemPtr.getRefData().setCount (mSoulGemPtr.getRefData().getCount()-1);
 
-        mEnchantment.mData.mCharge = getGemCharge();
+        if(mSelfEnchanting)
+        {
+            if(getEnchantChance()<std::rand()/static_cast<double> (RAND_MAX)*100)
+                return false;
+
+            MWWorld::Class::get (mEnchanter).skillUsageSucceeded (mEnchanter, ESM::Skill::Enchant, 1);
+        }
+
         if(mEnchantType==3)
         {
-            mEnchantment.mData.mCharge=0;
+            enchantment.mData.mCharge=0;
         }
-        mEnchantment.mData.mType = mEnchantType;
-        mEnchantment.mData.mCost = getEnchantCost();
-        mEnchantment.mEffects = mEffectList;
-        const ESM::Enchantment *enchantment = MWBase::Environment::get().getWorld()->createRecord (mEnchantment);
+        enchantment.mData.mType = mEnchantType;
+        enchantment.mData.mCost = getEnchantCost();
+        enchantment.mEffects = mEffectList;
 
-        std::string newobjId = MWWorld::Class::get(mOldItemPtr).applyEnchantment(mOldItemPtr, enchantment->mId, getGemCharge(), mNewItemName);
+        const ESM::Enchantment *enchantmentPtr = MWBase::Environment::get().getWorld()->createRecord (enchantment);
 
-        MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), newobjId);
-        MWWorld::Ptr newobjPtr = ref.getPtr();
-        MWWorld::Ptr result = mOldItemPtr;
-        result.mPtr = newobjPtr.mPtr;
-        MWWorld::Class::get (mEnchanter).getContainerStore (mEnchanter).add (result);
+        MWWorld::Class::get(mOldItemPtr).applyEnchantment(mOldItemPtr, enchantmentPtr->mId, getGemCharge(), mNewItemName);
+
+        mOldItemPtr.getRefData().setCount(1);
+
+        MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), mOldItemId);
+        ref.getPtr().getRefData().setCount (mOldItemCount-1);
+        MWWorld::Class::get (mEnchanter).getContainerStore (mEnchanter).add (ref.getPtr());
+
+        return true;
     }
     
     void Enchanting::nextEnchantType()
@@ -79,12 +94,13 @@ namespace MWMechanics
         }
         if ((mObjectType == typeid(ESM::Armor).name())||(mObjectType == typeid(ESM::Clothing).name()))
         {
+            int soulConstAmount = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("iSoulAmountForConstantEffect")->getInt();
             switch(mEnchantType)
             {
                 case 1:
                     mEnchantType = 2;
                 case 3:
-                    if(getGemCharge()<400)
+                    if(getGemCharge()<soulConstAmount)
                         mEnchantType=2;
                 case 4:
                     mEnchantType = 2;
@@ -104,12 +120,16 @@ namespace MWMechanics
         }
     }
 
-    int Enchanting::getEnchantCost()
+    int Enchanting::getEnchantCost() const
     {
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
         float cost = 0;
         std::vector<ESM::ENAMstruct> mEffects = mEffectList.mList;
         int i=mEffects.size();
+
+        /*
+        Formula from http://www.uesp.net/wiki/Morrowind:Enchant
+        */
         for (std::vector<ESM::ENAMstruct>::const_iterator it = mEffects.begin(); it != mEffects.end(); ++it)
         {
             const ESM::MagicEffect* effect = store.get<ESM::MagicEffect>().find(it->mEffectID);
@@ -120,7 +140,8 @@ namespace MWMechanics
 
             if(mEnchantType==3)
             {
-                cost1 *= 100;
+                int constDurationMultipler = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("fEnchantmentConstantDurationMult")->getFloat();
+                cost1 *= constDurationMultipler;
                 cost2 *= 2;
             }
             if(effect->mData.mFlags & ESM::MagicEffect::CastTarget)
@@ -134,7 +155,7 @@ namespace MWMechanics
         }
         return cost;
     }
-    int Enchanting::getGemCharge()
+    int Enchanting::getGemCharge() const
     {
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
         if(soulEmpty())
@@ -145,23 +166,54 @@ namespace MWMechanics
         return soul->mData.mSoul;
     }
 
-    int Enchanting::getMaxEnchantValue()
+    int Enchanting::getMaxEnchantValue() const
     {
         if (itemEmpty())
             return 0;
         return MWWorld::Class::get(mOldItemPtr).getEnchantmentPoints(mOldItemPtr);
     }
-    bool Enchanting::soulEmpty()
+    bool Enchanting::soulEmpty() const
     {
         if (mSoulGemPtr.isEmpty())
             return true;
         return false;
     }
 
-    bool Enchanting::itemEmpty()
+    bool Enchanting::itemEmpty() const
     {
         if(mOldItemPtr.isEmpty())
             return true;
         return false;
+    }
+
+    void Enchanting::setSelfEnchanting(bool selfEnchanting)
+    {
+        mSelfEnchanting = selfEnchanting;
+    }
+
+    void Enchanting::setEnchanter(MWWorld::Ptr enchanter)
+    {
+        mEnchanter = enchanter;
+    }
+
+    float Enchanting::getEnchantChance() const
+    {
+        /*
+        Formula from http://www.uesp.net/wiki/Morrowind:Enchant
+        */
+        const CreatureStats& creatureStats = MWWorld::Class::get (mEnchanter).getCreatureStats (mEnchanter);
+        const NpcStats& npcStats = MWWorld::Class::get (mEnchanter).getNpcStats (mEnchanter);
+
+        float chance1 = (npcStats.getSkill (ESM::Skill::Enchant).getModified() + 
+        (0.25 * creatureStats.getAttribute (ESM::Attribute::Intelligence).getModified())
+        + (0.125 * creatureStats.getAttribute (ESM::Attribute::Luck).getModified()));
+
+        float chance2 = 2.5 * getEnchantCost();
+        if(mEnchantType==3)
+        {
+            float constantChance = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("fEnchantmentConstantChanceMult")->getFloat();
+            chance2 /= constantChance;
+        }
+        return (chance1-chance2);
     }
 }

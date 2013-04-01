@@ -19,7 +19,6 @@ namespace MWGui
         : WindowBase("openmw_enchanting_dialog.layout", parWindowManager)
         , EffectEditorBase(parWindowManager)
         , mItemSelectionDialog(NULL)
-        , mEnchanting(MWBase::Environment::get().getWorld()->getPlayer().getPlayer())
     {
         getWidget(mName, "NameEdit");
         getWidget(mCancelButton, "CancelButton");
@@ -87,14 +86,30 @@ namespace MWGui
 
     void EnchantingDialog::startEnchanting (MWWorld::Ptr actor)
     {
-        mPtr = actor;
+
+        /*Now there's no need to use other enchanters, player is the enchanter here,
+          even if the enchanted object is created by NPC. Could be changed later, probably
+          with some price formulas                                                       */
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+
+        mEnchanting.setSelfEnchanting(false);
+        mEnchanting.setEnchanter(player);
+
+        mPtr = player;
 
         startEditing ();
     }
 
     void EnchantingDialog::startSelfEnchanting(MWWorld::Ptr soulgem)
     {
-        /// \todo
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+
+        mEnchanting.setSelfEnchanting(true);
+        mEnchanting.setEnchanter(player);
+
+        mPtr = player;
+
+        startEditing();
     }
 
     void EnchantingDialog::onReferenceUnavailable ()
@@ -264,8 +279,13 @@ namespace MWGui
         mEnchanting.setNewItemName(mName->getCaption());
         mEnchanting.setEffect(mEffectList);
 
-        mEnchanting.create();
-        mWindowManager.messageBox ("#{sEnchantmentMenu12}");
+        int result = mEnchanting.create();
+
+        if(result==1)
+            mWindowManager.messageBox ("#{sEnchantmentMenu12}");
+        else
+            mWindowManager.messageBox ("#{sNotifyMessage34}");
+
         mWindowManager.removeGuiMode (GM_Enchanting);
     }
 }
