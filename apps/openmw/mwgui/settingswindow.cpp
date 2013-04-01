@@ -362,7 +362,7 @@ namespace MWGui
             {
                 std::string msg = "This resolution is not supported in Fullscreen mode. Please select a resolution from the list.";
                 MWBase::Environment::get().getWindowManager()->
-                    messageBox(msg, std::vector<std::string>());
+                    messageBox(msg);
                 _sender->castType<MyGUI::Button>()->setCaption(off);
             }
             else
@@ -593,7 +593,7 @@ namespace MWGui
 
         static_cast<MyGUI::Button*>(_sender)->setCaptionWithReplacing("#{sNone}");
 
-        MWBase::Environment::get().getWindowManager ()->messageBox ("#{sControlsMenu3}", std::vector<std::string>());
+        MWBase::Environment::get().getWindowManager ()->messageBox ("#{sControlsMenu3}");
         MWBase::Environment::get().getWindowManager ()->disallowMouse();
 
         MWBase::Environment::get().getInputManager ()->enableDetectingBindingMode (actionId);

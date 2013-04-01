@@ -42,14 +42,14 @@ namespace MWWorld
         if (mAutoMove)
             value = 1;
 
-        MWWorld::Class::get (ptr).getMovementSettings (ptr).mForwardBackward = value;
+        MWWorld::Class::get (ptr).getMovementSettings (ptr).mPosition[1] = value;
     }
 
     void Player::setLeftRight (int value)
     {
         MWWorld::Ptr ptr = getPlayer();
 
-        MWWorld::Class::get (ptr).getMovementSettings (ptr).mLeftRight = value;
+        MWWorld::Class::get (ptr).getMovementSettings (ptr).mPosition[0] = value;
     }
 
     void Player::setForwardBackward (int value)
@@ -61,14 +61,14 @@ namespace MWWorld
         if (mAutoMove)
             value = 1;
 
-        MWWorld::Class::get (ptr).getMovementSettings (ptr).mForwardBackward = value;
+        MWWorld::Class::get (ptr).getMovementSettings (ptr).mPosition[1] = value;
     }
 
     void Player::setUpDown(int value)
     {
         MWWorld::Ptr ptr = getPlayer();
 
-        MWWorld::Class::get (ptr).getMovementSettings (ptr).mUpDown = value;
+        MWWorld::Class::get (ptr).getMovementSettings (ptr).mPosition[2] = value;
     }
 
     void Player::setRunState(bool run)
@@ -82,6 +82,22 @@ namespace MWWorld
         MWWorld::Ptr ptr = getPlayer();
 
         MWWorld::Class::get (ptr).setStance (ptr, MWWorld::Class::Sneak, sneak);
+    }
+
+    void Player::setYaw(float yaw)
+    {
+        MWWorld::Ptr ptr = getPlayer();
+        MWWorld::Class::get(ptr).getMovementSettings(ptr).mRotation[2] = yaw;
+    }
+    void Player::setPitch(float pitch)
+    {
+        MWWorld::Ptr ptr = getPlayer();
+        MWWorld::Class::get(ptr).getMovementSettings(ptr).mRotation[0] = pitch;
+    }
+    void Player::setRoll(float roll)
+    {
+        MWWorld::Ptr ptr = getPlayer();
+        MWWorld::Class::get(ptr).getMovementSettings(ptr).mRotation[1] = roll;
     }
 
     MWMechanics::DrawState_ Player::getDrawState()

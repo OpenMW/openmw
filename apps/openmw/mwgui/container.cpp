@@ -68,6 +68,16 @@ namespace
             return compareType(left.getTypeName(), right.getTypeName());
         }
     }
+
+    bool isChargedSoulstone (MWWorld::Ptr ptr)
+    {
+        if (ptr.getTypeName() != typeid(ESM::Miscellaneous).name())
+            return false;
+        MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
+            ptr.get<ESM::Miscellaneous>();
+
+        return (ref->mRef.mSoul != "");
+    }
 }
 
 
@@ -130,17 +140,12 @@ void ContainerBase::onSelectedItem(MyGUI::Widget* _sender)
 
         if (isInventory())
         {
-            const MWWorld::Store<ESM::GameSetting> &gmst =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
-
             // the player is trying to sell an item, check if the merchant accepts it
-            // also, don't allow selling gold (let's be better than Morrowind at this, can we?)
-            if (!MWBase::Environment::get().getWindowManager()->getTradeWindow()->npcAcceptsItem(object) ||
-                MWWorld::Class::get(object).getName(object) == gmst.find("sGold")->getString())
+            if (!MWBase::Environment::get().getWindowManager()->getTradeWindow()->npcAcceptsItem(object))
             {
                 // user notification "i don't buy this item"
                 MWBase::Environment::get().getWindowManager()->
-                        messageBox("#{sBarterDialog4}", std::vector<std::string>());
+                        messageBox("#{sBarterDialog4}");
                 return;
             }
         }
@@ -284,7 +289,7 @@ void ContainerBase::onContainerClicked(MyGUI::Widget* _sender)
                 {
                     // user notification
                     MWBase::Environment::get().getWindowManager()->
-                        messageBox("#{sContentsMessage2}", std::vector<std::string>());
+                        messageBox("#{sContentsMessage2}");
 
                     return;
                 }
@@ -308,7 +313,7 @@ void ContainerBase::onContainerClicked(MyGUI::Widget* _sender)
                     object.getRefData().setCount(origCount);
                     // user notification
                     MWBase::Environment::get().getWindowManager()->
-                        messageBox("#{sContentsMessage3}", std::vector<std::string>());
+                        messageBox("#{sContentsMessage3}");
 
                     return;
                 }
@@ -330,6 +335,9 @@ void ContainerBase::onContainerClicked(MyGUI::Widget* _sender)
         drawItems();
         mDragAndDrop->mDraggedFrom->drawItems();
 
+        mDragAndDrop->mDraggedFrom->notifyItemDragged(object, -mDragAndDrop->mDraggedCount);
+        notifyItemDragged(object, mDragAndDrop->mDraggedCount);
+
         MWBase::Environment::get().getWindowManager()->setDragDrop(false);
 
         std::string sound = MWWorld::Class::get(object).getDownSoundId(object);
@@ -345,7 +353,7 @@ void ContainerBase::onMouseWheel(MyGUI::Widget* _sender, int _rel)
         mItemView->setViewOffset(MyGUI::IntPoint(mItemView->getViewOffset().left + _rel*0.3, 0));
 }
 
-void ContainerBase::setFilter(ContainerBase::Filter filter)
+void ContainerBase::setFilter(int filter)
 {
     mFilter = filter;
     drawItems();
@@ -369,29 +377,34 @@ void ContainerBase::drawItems()
     int maxHeight = mItemView->getSize().height - 58;
 
     bool onlyMagic = false;
+    bool noMagic = false;
     int categories = 0;
-    if (mFilter == Filter_All)
-        categories = MWWorld::ContainerStore::Type_All;
-    else if (mFilter == Filter_Weapon)
-        categories = MWWorld::ContainerStore::Type_Weapon;
-    else if (mFilter == Filter_Apparel)
-        categories = MWWorld::ContainerStore::Type_Clothing + MWWorld::ContainerStore::Type_Armor;
-    else if (mFilter == Filter_Magic)
+    if (mFilter & Filter_All)
+        categories |= MWWorld::ContainerStore::Type_All;
+    if (mFilter & Filter_Weapon)
+        categories |= MWWorld::ContainerStore::Type_Weapon;
+    if (mFilter & Filter_Apparel)
+        categories |= MWWorld::ContainerStore::Type_Clothing | MWWorld::ContainerStore::Type_Armor;
+    if (mFilter & Filter_Magic)
     {
-        categories = MWWorld::ContainerStore::Type_Clothing + MWWorld::ContainerStore::Type_Armor
-                    + MWWorld::ContainerStore::Type_Weapon + MWWorld::ContainerStore::Type_Book
-                    + MWWorld::ContainerStore::Type_Potion;
+        categories |= MWWorld::ContainerStore::Type_Clothing | MWWorld::ContainerStore::Type_Armor
+                    | MWWorld::ContainerStore::Type_Weapon | MWWorld::ContainerStore::Type_Book
+                    | MWWorld::ContainerStore::Type_Potion;
         onlyMagic = true;
     }
-    else if (mFilter == Filter_Misc)
+    if (mFilter & Filter_Misc)
     {
-        categories = MWWorld::ContainerStore::Type_Miscellaneous + MWWorld::ContainerStore::Type_Book
-                    + MWWorld::ContainerStore::Type_Ingredient + MWWorld::ContainerStore::Type_Repair
-                    + MWWorld::ContainerStore::Type_Lockpick + MWWorld::ContainerStore::Type_Light
-                    + MWWorld::ContainerStore::Type_Apparatus + MWWorld::ContainerStore::Type_Probe;
+        categories |= MWWorld::ContainerStore::Type_Miscellaneous | MWWorld::ContainerStore::Type_Book
+                    | MWWorld::ContainerStore::Type_Ingredient | MWWorld::ContainerStore::Type_Repair
+                    | MWWorld::ContainerStore::Type_Lockpick | MWWorld::ContainerStore::Type_Light
+                    | MWWorld::ContainerStore::Type_Apparatus | MWWorld::ContainerStore::Type_Probe;
     }
-    else if (mFilter == Filter_Ingredients)
-        categories = MWWorld::ContainerStore::Type_Ingredient;
+    if (mFilter & Filter_Ingredients)
+        categories |= MWWorld::ContainerStore::Type_Ingredient;
+    if (mFilter & Filter_ChargedSoulstones)
+        categories |= MWWorld::ContainerStore::Type_Miscellaneous;
+    if (mFilter & Filter_NoMagic)
+        noMagic = true;
 
     /// \todo performance improvement: don't create/destroy all the widgets everytime the container window changes size, only reposition them
 
@@ -466,12 +479,29 @@ void ContainerBase::drawItems()
     {
         const MWWorld::Ptr* iter = &((*it).first);
 
+
+        if (onlyMagic
+                && it->second != ItemState_Barter
+                && MWWorld::Class::get(*iter).getEnchantment(*iter) == ""
+                && iter->getTypeName() != typeid(ESM::Potion).name())
+            continue;
+
+        if (noMagic
+                && it->second != ItemState_Barter
+                && (MWWorld::Class::get(*iter).getEnchantment(*iter) != ""
+                || iter->getTypeName() == typeid(ESM::Potion).name()))
+            continue;
+
+        if ( (mFilter & Filter_ChargedSoulstones)
+                && !isChargedSoulstone(*iter))
+            continue;
+
         int displayCount = iter->getRefData().getCount();
         if (mDragAndDrop != NULL && mDragAndDrop->mIsOnDragAndDrop && *iter == *mDragAndDrop->mDraggedWidget->getUserData<MWWorld::Ptr>())
         {
             displayCount -= mDragAndDrop->mDraggedCount;
         }
-        if(displayCount > 0 && !(onlyMagic && it->second != ItemState_Barter && MWWorld::Class::get(*iter).getEnchantment(*iter) == "" && iter->getTypeName() != typeid(ESM::Potion).name()))
+        if(displayCount > 0)
         {
             std::string path = std::string("icons\\");
             path += MWWorld::Class::get(*iter).getInventoryIcon(*iter);

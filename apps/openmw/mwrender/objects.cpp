@@ -1,5 +1,7 @@
 #include "objects.hpp"
 
+#include <cmath>
+
 #include <OgreSceneNode.h>
 #include <OgreSceneManager.h>
 #include <OgreEntity.h>
@@ -271,28 +273,25 @@ void Objects::insertLight (const MWWorld::Ptr& ptr, Ogre::Entity* skelBase, Ogre
     info.time = Ogre::Math::RangeRandom(-500, +500);
     info.phase = Ogre::Math::RangeRandom(-500, +500);
 
-    // changed to linear to look like morrowind
-    bool quadratic = false;
-    /*
-    if (!lightOutQuadInLin)
-        quadratic = lightQuadratic;
-    else
-    {
-        quadratic = !info.interior;
-    }
-    */
+    bool quadratic = lightOutQuadInLin() ? !info.interior : lightQuadratic();
+
+    // with the standard 1 / (c + d*l + d*d*q) equation the attenuation factor never becomes zero,
+    // so we ignore lights if their attenuation falls below this factor.
+    const float threshold = 0.03;
 
     if (!quadratic)
     {
         float r = radius * lightLinearRadiusMult();
         float attenuation = lightLinearValue() / r;
-        light->setAttenuation(r*10, 0, attenuation, 0);
+        float activationRange = 1 / (threshold * attenuation);
+        light->setAttenuation(activationRange, 0, attenuation, 0);
     }
     else
     {
         float r = radius * lightQuadraticRadiusMult();
-        float attenuation = lightQuadraticValue() / pow(r, 2);
-        light->setAttenuation(r*10, 0, 0, attenuation);
+        float attenuation = lightQuadraticValue() / std::pow(r, 2);
+        float activationRange = std::sqrt(1 / (threshold * attenuation));
+        light->setAttenuation(activationRange, 0, 0, attenuation);
     }
 
     // If there's an AttachLight bone, attach the light to that, otherwise attach it to the base scene node

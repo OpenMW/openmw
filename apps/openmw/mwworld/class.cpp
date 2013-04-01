@@ -127,12 +127,22 @@ namespace MWWorld
         return 0;
     }
 
+    short Class::getEnchantmentPoints (const MWWorld::Ptr& ptr) const
+    {
+        throw std::runtime_error ("class does not support enchanting");
+    }
+
     MWMechanics::Movement& Class::getMovementSettings (const Ptr& ptr) const
     {
         throw std::runtime_error ("movement settings not supported by class");
     }
 
     Ogre::Vector3 Class::getMovementVector (const Ptr& ptr) const
+    {
+        return Ogre::Vector3 (0, 0, 0);
+    }
+
+    Ogre::Vector3 Class::getRotationVector (const Ptr& ptr) const
     {
         return Ogre::Vector3 (0, 0, 0);
     }
@@ -179,10 +189,13 @@ namespace MWWorld
 
     const Class& Class::get (const std::string& key)
     {
+        if (key.empty())
+            throw std::logic_error ("Class::get(): attempting to get an empty key");
+
         std::map<std::string, boost::shared_ptr<Class> >::const_iterator iter = sClasses.find (key);
 
         if (iter==sClasses.end())
-            throw std::logic_error ("unknown class key: " + key);
+            throw std::logic_error ("Class::get(): unknown class key: " + key);
 
         return *iter->second;
     }
@@ -239,6 +252,11 @@ namespace MWWorld
     std::string Class::getModel(const MWWorld::Ptr &ptr) const
     {
         return "";
+    }
+
+    std::string Class::applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
+    {
+        throw std::runtime_error ("class can't be enchanted");
     }
 
     MWWorld::Ptr

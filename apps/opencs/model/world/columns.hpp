@@ -1,6 +1,8 @@
 #ifndef CSM_WOLRD_COLUMNS_H
 #define CSM_WOLRD_COLUMNS_H
 
+#include <sstream>
+
 #include <boost/lexical_cast.hpp>
 
 #include "columnbase.hpp"
@@ -285,6 +287,128 @@ namespace CSMWorld
         }
     };
 
+    template<typename ESXRecordT>
+    struct NameColumn : public Column<ESXRecordT>
+    {
+        NameColumn() : Column<ESXRecordT> ("Name", ColumnBase::Display_String) {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return QString::fromUtf8 (record.get().mName.c_str());
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            record2.mName = data.toString().toUtf8().constData();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct AttributesColumn : public Column<ESXRecordT>
+    {
+        int mIndex;
+
+        AttributesColumn (int index)
+        : Column<ESXRecordT> ("Attribute #" + boost::lexical_cast<std::string> (index),
+            ColumnBase::Display_Attribute), mIndex (index) {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return record.get().mData.mAttribute[mIndex];
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            record2.mData.mAttribute[mIndex] = data.toInt();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct SkillsColumn : public Column<ESXRecordT>
+    {
+        int mIndex;
+        bool mMajor;
+
+        SkillsColumn (int index, bool major)
+        : Column<ESXRecordT> ((major ? "Major Skill #" : "Minor Skill #")+
+            boost::lexical_cast<std::string> (index), ColumnBase::Display_String),
+            mIndex (index), mMajor (major)
+        {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            int skill = record.get().mData.mSkills[mIndex][mMajor ? 1 : 0];
+
+            return QString::fromUtf8 (ESM::Skill::indexToId (skill).c_str());
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            std::istringstream stream (data.toString().toUtf8().constData());
+
+            int index = -1;
+            char c;
+
+            stream >> c >> index;
+
+            if (index!=-1)
+            {
+                ESXRecordT record2 = record.get();
+
+                record2.mData.mSkills[mIndex][mMajor ? 1 : 0] = index;
+
+                record.setModified (record2);
+            }
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct PlayableColumn : public Column<ESXRecordT>
+    {
+        PlayableColumn() : Column<ESXRecordT> ("Playable", ColumnBase::Display_Boolean) {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return record.get().mData.mIsPlayable!=0;
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            record2.mData.mIsPlayable = data.toInt();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
 }
 
 #endif

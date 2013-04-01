@@ -106,6 +106,12 @@ namespace Compiler
             mLoc.mLiteral.clear();
             return true;
         }
+        else if (c==':')
+        {
+            // treat : as a whitespace :(
+            mLoc.mLiteral.clear();
+            return true;
+        }
         else if (std::isdigit (c))
         {
             bool cont = false;

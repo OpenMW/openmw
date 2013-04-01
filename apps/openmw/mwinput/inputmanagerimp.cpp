@@ -181,8 +181,7 @@ namespace MWInput
                 break;
             case A_Activate:
                 resetIdleTime();
-                if( MWBase::Environment::get().getWindowManager()->isGuiMode()
-                    && MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_InterMessageBox ) {
+                if( MWBase::Environment::get().getWindowManager()->isGuiMode()) {
                         // Pressing the activation key when a messagebox is prompting for "ok" will activate the ok button
                         MWBase::Environment::get().getWindowManager()->enterPressed();
                     }
@@ -288,8 +287,6 @@ namespace MWInput
                 triedToMove = true;
                 mPlayer.setLeftRight (1);
             }
-            else
-                mPlayer.setLeftRight (0);
 
             if (actionIsActive(A_MoveForward))
             {
@@ -303,8 +300,6 @@ namespace MWInput
                 mPlayer.setAutoMove (false);
                 mPlayer.setForwardBackward (-1);
             }
-            else
-                mPlayer.setForwardBackward (0);
 
             mPlayer.setSneak(actionIsActive(A_Sneak));
 
@@ -313,8 +308,6 @@ namespace MWInput
                 mPlayer.setUpDown (1);
                 triedToMove = true;
             }
-            else
-                mPlayer.setUpDown (0);
 
             if (mAlwaysRunActive)
                 mPlayer.setRunState(!actionIsActive(A_Run));
@@ -378,27 +371,12 @@ namespace MWInput
 
     void InputManager::changeInputMode(bool guiMode)
     {
-        // Are we in GUI mode now?
-        if(guiMode)
-        {
-            // Disable mouse look
-            mMouseLookEnabled = false;
-
-            mWindows.showCrosshair (false);
-
-            // Enable GUI events
-            mGuiCursorEnabled = true;
-        }
-        else
-        {
-            // Enable mouse look
-            mMouseLookEnabled = true;
-
-            mWindows.showCrosshair (false);
-
-            // Disable GUI events
-            mGuiCursorEnabled = false;
-        }
+        MWBase::Environment::get().getWindowManager()->setMouseVisible(guiMode);
+        mGuiCursorEnabled = guiMode;
+        mMouseLookEnabled = !guiMode;
+        if (guiMode)
+            mWindows.showCrosshair(false);
+        // if not in gui mode, the camera decides whether to show crosshair or not.
     }
 
     void InputManager::processChangedSettings(const Settings::CategorySettingVector& changed)
@@ -462,8 +440,7 @@ namespace MWInput
     bool InputManager::keyPressed( const OIS::KeyEvent &arg )
     {
         if(arg.key == OIS::KC_RETURN
-            && MWBase::Environment::get().getWindowManager()->isGuiMode()
-            && MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_InterMessageBox )
+            && MWBase::Environment::get().getWindowManager()->isGuiMode())
         {
             // Pressing enter when a messagebox is prompting for "ok" will activate the ok button
             MWBase::Environment::get().getWindowManager()->enterPressed();
@@ -544,11 +521,13 @@ namespace MWInput
         {
             resetIdleTime();
 
-            float x = arg.state.X.rel * mCameraSensitivity * 0.2;
-            float y = arg.state.Y.rel * mCameraSensitivity * 0.2 * (mInvertY ? -1 : 1) * mUIYMultiplier;
+            float x = arg.state.X.rel * (1.0f/256.0f) * mCameraSensitivity;
+            float y = arg.state.Y.rel * (1.0f/256.0f) * mCameraSensitivity * mCameraYMultiplier * (mInvertY ? -1 : 1);
+            float scale = MWBase::Environment::get().getFrameDuration();
+            if(scale <= 0.0f) scale = 1.0f;
 
-            MWBase::World *world = MWBase::Environment::get().getWorld();
-            world->rotateObject(world->getPlayer().getPlayer(), -y, 0.f, x, true);
+            mPlayer.setYaw(x/scale);
+            mPlayer.setPitch(-y/scale);
 
             if (arg.state.Z.rel)
                 MWBase::Environment::get().getWorld()->changeVanityModeScale(arg.state.Z.rel);
@@ -623,6 +602,9 @@ namespace MWInput
 
     void InputManager::toggleInventory()
     {
+        if (MyGUI::InputManager::getInstance ().isModalAny())
+            return;
+
         bool gameMode = !mWindows.isGuiMode();
 
         // Toggle between game mode and inventory mode
@@ -660,6 +642,9 @@ namespace MWInput
 
     void InputManager::toggleJournal()
     {
+        if (MyGUI::InputManager::getInstance ().isModalAny())
+            return;
+
         // Toggle between game mode and journal mode
         bool gameMode = !mWindows.isGuiMode();
 

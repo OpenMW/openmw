@@ -76,6 +76,8 @@ namespace MWGui
   class SpellIcons;
   class MerchantRepair;
   class Repair;
+  class SoulgemDialog;
+  class CompanionWindow;
 
   class WindowManager : public MWBase::WindowManager
   {
@@ -228,15 +230,21 @@ namespace MWGui
     virtual bool getPlayerSleeping();
     virtual void wakeUpPlayer();
 
+    virtual void showCompanionWindow(MWWorld::Ptr actor);
     virtual void startSpellMaking(MWWorld::Ptr actor);
     virtual void startEnchanting(MWWorld::Ptr actor);
+    virtual void startSelfEnchanting(MWWorld::Ptr soulgem);
     virtual void startTraining(MWWorld::Ptr actor);
     virtual void startRepair(MWWorld::Ptr actor);
     virtual void startRepairItem(MWWorld::Ptr item);
 
+    virtual void showSoulgemDialog (MWWorld::Ptr item);
+
     virtual void changePointer (const std::string& name);
 
     virtual const Translation::Storage& getTranslationDataStorage() const;
+
+    void onSoulgemDialogButtonPressed (int button);
 
   private:
     OEngine::GUI::MyGUIManager *mGuiManager;
@@ -271,7 +279,9 @@ namespace MWGui
     EnchantingDialog* mEnchantingDialog;
     TrainingWindow* mTrainingWindow;
     MerchantRepair* mMerchantRepair;
+    SoulgemDialog* mSoulgemDialog;
     Repair* mRepair;
+    CompanionWindow* mCompanionWindow;
 
     Translation::Storage& mTranslationDataStorage;
     Cursor* mCursor;

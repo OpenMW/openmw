@@ -7,6 +7,7 @@
 #include <map>
 
 #include "character.hpp"
+#include "movement.hpp"
 #include "../mwbase/world.hpp"
 
 namespace Ogre

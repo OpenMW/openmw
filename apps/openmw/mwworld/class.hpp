@@ -150,6 +150,9 @@ namespace MWWorld
             ///< Return desired movement vector (determined based on movement settings,
             /// stance and stats).
 
+            virtual Ogre::Vector3 getRotationVector (const Ptr& ptr) const;
+            ///< Return desired rotations, as euler angles.
+
             virtual std::pair<std::vector<int>, bool> getEquipmentSlots (const Ptr& ptr) const;
             ///< \return first: Return IDs of the slot this object can be equipped in; second: can object
             /// stay stacked when equipped?
@@ -225,11 +228,16 @@ namespace MWWorld
             ///< @return the enchantment ID if the object is enchanted, otherwise an empty string
             /// (default implementation: return empty string)
 
+            virtual short getEnchantmentPoints (const MWWorld::Ptr& ptr) const;
+            ///< @return the number of enchantment points available for possible enchanting
+
             virtual void adjustScale(const MWWorld::Ptr& ptr,float& scale) const;
 
             virtual void adjustRotation(const MWWorld::Ptr& ptr,float& x,float& y,float& z) const;
 
             virtual std::string getModel(const MWWorld::Ptr &ptr) const;
+
+            virtual std::string applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const;
 
             virtual Ptr
             copyToCell(const Ptr &ptr, CellStore &cell) const;

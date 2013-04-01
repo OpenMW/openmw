@@ -26,7 +26,10 @@ namespace MWGui
         // check if player has changed cell, or count of the reference has become 0
         if ((playerCell != mCurrentPlayerCell && mCurrentPlayerCell != NULL)
             || mPtr.getRefData().getCount() == 0)
+        {
+            mPtr = MWWorld::Ptr();
             onReferenceUnavailable();
+        }
 
         mCurrentPlayerCell = playerCell;
     }

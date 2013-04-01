@@ -178,10 +178,10 @@ namespace MWMechanics
 
     void MechanicsManager::add(const MWWorld::Ptr& ptr)
     {
-        if(ptr.getTypeName() == typeid(ESM::Activator).name())
-            mActivators.addActivator(ptr);
-        else
+        if(MWWorld::Class::get(ptr).isActor())
             mActors.addActor(ptr);
+        else
+            mObjects.addObject(ptr);
     }
 
     void MechanicsManager::remove(const MWWorld::Ptr& ptr)
@@ -189,15 +189,15 @@ namespace MWMechanics
         if(ptr == mWatched)
             mWatched = MWWorld::Ptr();
         mActors.removeActor(ptr);
-        mActivators.removeActivator(ptr);
+        mObjects.removeObject(ptr);
     }
 
     void MechanicsManager::updateCell(const MWWorld::Ptr &old, const MWWorld::Ptr &ptr)
     {
-        if(ptr.getTypeName() == typeid(ESM::Activator).name())
-            mActivators.updateActivator(old, ptr);
-        else
+        if(MWWorld::Class::get(ptr).isActor())
             mActors.updateActor(old, ptr);
+        else
+            mObjects.updateObject(old, ptr);
     }
 
 
@@ -207,7 +207,7 @@ namespace MWMechanics
             mWatched = MWWorld::Ptr();
 
         mActors.dropActors(cellStore);
-        mActivators.dropActivators(cellStore);
+        mObjects.dropObjects(cellStore);
     }
 
 
@@ -319,7 +319,7 @@ namespace MWMechanics
         }
 
         mActors.update(duration, paused);
-        mActivators.update(duration, paused);
+        mObjects.update(duration, paused);
     }
 
     void MechanicsManager::restoreDynamicStats()
@@ -656,17 +656,17 @@ namespace MWMechanics
 
     void MechanicsManager::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number)
     {
-        if(ptr.getTypeName() == typeid(ESM::Activator).name())
-            mActivators.playAnimationGroup(ptr, groupName, mode, number);
-        else
+        if(MWWorld::Class::get(ptr).isActor())
             mActors.playAnimationGroup(ptr, groupName, mode, number);
+        else
+            mObjects.playAnimationGroup(ptr, groupName, mode, number);
     }
     void MechanicsManager::skipAnimation(const MWWorld::Ptr& ptr)
     {
-        if(ptr.getTypeName() == typeid(ESM::Activator).name())
-            mActivators.skipAnimation(ptr);
-        else
+        if(MWWorld::Class::get(ptr).isActor())
             mActors.skipAnimation(ptr);
+        else
+            mObjects.skipAnimation(ptr);
     }
 
 }

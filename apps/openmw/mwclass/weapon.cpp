@@ -367,6 +367,20 @@ namespace MWClass
         return ref->mBase->mEnchant;
     }
 
+    std::string Weapon::applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
+    {
+            MWWorld::LiveCellRef<ESM::Weapon> *ref =
+            ptr.get<ESM::Weapon>();
+
+            ESM::Weapon newItem = *ref->mBase;
+            newItem.mId="";
+            newItem.mName=newName;
+            newItem.mData.mEnchant=enchCharge;
+            newItem.mEnchant=enchId;
+            const ESM::Weapon *record = MWBase::Environment::get().getWorld()->createRecord (newItem);
+            return record->mId;
+    }
+
     boost::shared_ptr<MWWorld::Action> Weapon::use (const MWWorld::Ptr& ptr) const
     {
         boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionEquip(ptr));
@@ -383,5 +397,13 @@ namespace MWClass
             ptr.get<ESM::Weapon>();
 
         return MWWorld::Ptr(&cell.mWeapons.insert(*ref), &cell);
+    }
+
+    short Weapon::getEnchantmentPoints (const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Weapon> *ref =
+                ptr.get<ESM::Weapon>();
+
+        return ref->mBase->mData.mEnchant;
     }
 }

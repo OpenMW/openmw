@@ -129,13 +129,10 @@ namespace MWGui
         MWWorld::Ptr gold;
         MWWorld::ContainerStore& playerStore = mWindowManager.getInventoryWindow()->getContainerStore();
 
-        const MWWorld::Store<ESM::GameSetting> &gmst =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
-
         for (MWWorld::ContainerStoreIterator it = playerStore.begin();
                 it != playerStore.end(); ++it)
         {
-            if (MWWorld::Class::get(*it).getName(*it) == gmst.find("sGold")->getString())
+            if (Misc::StringUtils::ciEqual(it->getCellRef().mRefID, "gold_001"))
             {
                 goldFound = true;
                 gold = *it;
@@ -181,7 +178,7 @@ namespace MWGui
         {
             // user notification
             MWBase::Environment::get().getWindowManager()->
-                messageBox("#{sBarterDialog11}", std::vector<std::string>());
+                messageBox("#{sBarterDialog11}");
             return;
         }
 
@@ -190,7 +187,7 @@ namespace MWGui
         {
             // user notification
             MWBase::Environment::get().getWindowManager()->
-                messageBox("#{sBarterDialog1}", std::vector<std::string>());
+                messageBox("#{sBarterDialog1}");
             return;
         }
 
@@ -199,7 +196,7 @@ namespace MWGui
         {
             // user notification
             MWBase::Environment::get().getWindowManager()->
-                messageBox("#{sBarterDialog2}", std::vector<std::string>());
+                messageBox("#{sBarterDialog2}");
             return;
         }
 
@@ -209,7 +206,7 @@ namespace MWGui
             if (mPtr.getTypeName() != typeid(ESM::NPC).name())
             {
                 MWBase::Environment::get().getWindowManager()->
-                    messageBox("#{sNotifyMessage9}", std::vector<std::string>());
+                    messageBox("#{sNotifyMessage9}");
                 return;
             }
 
@@ -245,7 +242,7 @@ namespace MWGui
             if(roll > x) //trade refused
             {
                 MWBase::Environment::get().getWindowManager()->
-                    messageBox("#{sNotifyMessage9}", std::vector<std::string>());
+                    messageBox("#{sNotifyMessage9}");
 
                 int iBarterFailDisposition = gmst.find("iBarterFailDisposition")->getInt();
                 MWBase::Environment::get().getDialogueManager()->applyTemporaryDispositionChange(iBarterFailDisposition);
@@ -342,6 +339,9 @@ namespace MWGui
 
     bool TradeWindow::npcAcceptsItem(MWWorld::Ptr item)
     {
+        if (Misc::StringUtils::ciEqual(item.getCellRef().mRefID, "gold_001"))
+            return false;
+
         int services = 0;
         if (mPtr.getTypeName() == typeid(ESM::NPC).name())
         {

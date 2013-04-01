@@ -33,7 +33,7 @@ struct BodyPart
     enum Flags
     {
         BPF_Female = 1,
-        BPF_Playable = 2
+        BPF_NotPlayable = 2
     };
 
     enum MeshType

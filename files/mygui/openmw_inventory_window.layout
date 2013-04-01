@@ -6,8 +6,7 @@
         <Widget type="Widget" skin="" position="0 0 224 223" align="Left Top" name="LeftPane">
 
             <!-- Player encumbrance -->
-            <Widget type="ProgressBar" skin="MW_Progress_Blue" position="8 8 212 24" name="EncumbranceBar" align="Left Top HStretch">
-                <Widget type="TextBox" skin="ProgressText" position="0 0 212 24" align="Center Stretch" name="EncumbranceBarT"/>
+            <Widget type="MWDynamicStat" skin="MW_ChargeBar_Blue" position="8 8 212 24" name="EncumbranceBar" align="Left Top HStretch">
             </Widget>
 
             <!-- Avatar -->

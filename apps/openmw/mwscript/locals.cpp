@@ -15,6 +15,30 @@ namespace MWScript
         mFloats.clear();
         mFloats.resize (script.mData.mNumFloats, 0);
     }
+
+    int Locals::getIntVar(const std::string &script, const std::string &var)
+    {
+        Compiler::Locals locals = MWBase::Environment::get().getScriptManager()->getLocals(script);
+        int index = locals.getIndex(var);
+        char type = locals.getType(var);
+        if(index != -1)
+        {
+            switch(type)
+            {
+                case 's':
+                    return mShorts.at (index);
+
+                case 'l':
+                    return mLongs.at (index);
+
+                case 'f':
+                    return mFloats.at (index);
+                default:
+                    return 0;
+            }
+        }
+        return 0;
+    }
         
     bool Locals::setVarByInt(const std::string& script, const std::string& var, int val)
     {    

@@ -7,7 +7,7 @@
 
 #include "creaturestats.hpp"
 #include "npcstats.hpp"
-#include "activators.hpp"
+#include "objects.hpp"
 #include "actors.hpp"
 
 namespace Ogre
@@ -31,7 +31,7 @@ namespace MWMechanics
             bool mClassSelected;
             bool mRaceSelected;
 
-            Activators mActivators;
+            Objects mObjects;
             Actors mActors;
 
             void buildPlayer();

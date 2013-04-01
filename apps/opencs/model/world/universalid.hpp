@@ -39,7 +39,9 @@ namespace CSMWorld
                 Type_Gmsts,
                 Type_Gmst,
                 Type_Skills,
-                Type_Skill
+                Type_Skill,
+                Type_Classes,
+                Type_Class
             };
 
         private:

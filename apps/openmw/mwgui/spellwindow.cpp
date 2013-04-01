@@ -404,7 +404,7 @@ namespace MWGui
             if (spell->mData.mFlags & ESM::Spell::F_Always
                 || spell->mData.mType == ESM::Spell::ST_Power)
             {
-                mWindowManager.messageBox("#{sDeleteSpellError}", std::vector<std::string>());
+                mWindowManager.messageBox("#{sDeleteSpellError}");
             }
             else
             {

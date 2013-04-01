@@ -3,6 +3,7 @@
 #include "messagebox.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/inputmanager.hpp"
 
 using namespace MWGui;
 
@@ -62,7 +63,8 @@ void MessageBoxManager::onFrame (float frameDuration)
     if(mInterMessageBoxe != NULL && mInterMessageBoxe->mMarkedToDelete) {
         delete mInterMessageBoxe;
         mInterMessageBoxe = NULL;
-        mWindowManager->removeGuiMode(GM_InterMessageBox);
+        MWBase::Environment::get().getInputManager()->changeInputMode(
+                    MWBase::Environment::get().getWindowManager()->isGuiMode());
     }
 }
 
@@ -90,11 +92,8 @@ void MessageBoxManager::createMessageBox (const std::string& message)
 
 bool MessageBoxManager::createInteractiveMessageBox (const std::string& message, const std::vector<std::string>& buttons)
 {
-    /// \todo Don't write this kind of error message to cout. Either discard the old message box
-    /// silently or throw an exception.
     if(mInterMessageBoxe != NULL) {
-        std::cout << "there is a MessageBox already" << std::endl;
-        return false;
+        throw std::runtime_error("There is a message box already");
     }
 
     mInterMessageBoxe = new InteractiveMessageBox(*this, message, buttons);
@@ -139,7 +138,8 @@ void MessageBoxManager::setMessageBoxSpeed (int speed)
 
 void MessageBoxManager::enterPressed ()
 {
-    mInterMessageBoxe->enterPressed();
+    if(mInterMessageBoxe != NULL)
+        mInterMessageBoxe->enterPressed();
 }
 
 int MessageBoxManager::readPressedButton ()
@@ -213,10 +213,12 @@ int MessageBox::getHeight ()
 
 
 InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxManager, const std::string& message, const std::vector<std::string>& buttons)
-  : Layout("openmw_interactive_messagebox.layout")
+    : WindowModal("openmw_interactive_messagebox.layout", *MWBase::Environment::get().getWindowManager())
   , mMessageBoxManager(parMessageBoxManager)
   , mButtonPressed(-1)
 {
+    WindowModal::open();
+
     int fixedWidth = 500;
     int textPadding = 10; // padding between text-widget and main-widget
     int textButtonPadding = 20; // padding between the text-widget und the button-widget
@@ -232,7 +234,7 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
     getWidget(mButtonsWidget, "buttons");
 
     mMessageWidget->setOverflowToTheLeft(true);
-    mMessageWidget->addText(message);
+    mMessageWidget->setCaptionWithReplacing(message);
 
     MyGUI::IntSize textSize = mMessageWidget->getTextSize();
 
@@ -252,7 +254,7 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
             std::string("MW_Button"),
             dummyCoord,
             MyGUI::Align::Default);
-        button->setCaption(*it);
+        button->setCaptionWithReplacing(*it);
 
         button->eventMouseButtonClick += MyGUI::newDelegate(this, &InteractiveMessageBox::mousePressed);
 
@@ -399,6 +401,7 @@ void InteractiveMessageBox::buttonActivated (MyGUI::Widget* pressed)
         if(*button == pressed)
         {
             mButtonPressed = index;
+            mMessageBoxManager.onButtonPressed(mButtonPressed);
             return;
         }
         index++;

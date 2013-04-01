@@ -13,6 +13,8 @@ namespace MWRender
 namespace MWMechanics
 {
 
+class Movement;
+
 enum CharacterState {
     CharState_SpecialIdle,
     CharState_Idle,
@@ -52,6 +54,9 @@ enum CharacterState {
     CharState_SneakLeft,
     CharState_SneakRight,
 
+    CharState_TurnLeft,
+    CharState_TurnRight,
+
     CharState_Jump,
 
     /* Death states must be last! */
@@ -87,7 +92,7 @@ public:
 
     void updatePtr(const MWWorld::Ptr &ptr);
 
-    Ogre::Vector3 update(float duration);
+    void update(float duration, Movement &movement);
 
     void playGroup(const std::string &groupname, int mode, int count);
     void skipAnim();

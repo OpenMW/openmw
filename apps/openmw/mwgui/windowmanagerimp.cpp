@@ -57,6 +57,8 @@
 #include "spellicons.hpp"
 #include "merchantrepair.hpp"
 #include "repair.hpp"
+#include "soulgemdialog.hpp"
+#include "companionwindow.hpp"
 
 using namespace MWGui;
 
@@ -94,6 +96,8 @@ WindowManager::WindowManager(
   , mTrainingWindow(NULL)
   , mMerchantRepair(NULL)
   , mRepair(NULL)
+  , mSoulgemDialog(NULL)
+  , mCompanionWindow(NULL)
   , mPlayerName()
   , mPlayerRaceId()
   , mPlayerAttributes()
@@ -186,6 +190,8 @@ WindowManager::WindowManager(
     mTrainingWindow = new TrainingWindow(*this);
     mMerchantRepair = new MerchantRepair(*this);
     mRepair = new Repair(*this);
+    mSoulgemDialog = new SoulgemDialog(mMessageBoxManager);
+    mCompanionWindow = new CompanionWindow(*this, mDragAndDrop, mMessageBoxManager);
 
     mLoadingScreen = new LoadingScreen(mRendering->getScene (), mRendering->getWindow (), *this);
     mLoadingScreen->onResChange (w,h);
@@ -253,6 +259,7 @@ WindowManager::~WindowManager()
     delete mQuickKeysMenu;
     delete mMerchantRepair;
     delete mRepair;
+    delete mSoulgemDialog;
     delete mCursor;
 
     cleanupGarbage();
@@ -313,11 +320,9 @@ void WindowManager::updateVisible()
     mTrainingWindow->setVisible(false);
     mMerchantRepair->setVisible(false);
     mRepair->setVisible(false);
+    mCompanionWindow->setVisible(false);
 
     mHud->setVisible(mHudEnabled);
-
-    // Mouse is visible whenever we're not in game mode
-    mCursor->setVisible(isGuiMode());
 
     bool gameMode = !isGuiMode();
 
@@ -416,6 +421,10 @@ void WindowManager::updateVisible()
             mContainerWindow->setVisible(true);
             mInventoryWindow->setVisible(true);
             break;
+        case GM_Companion:
+            mCompanionWindow->setVisible(true);
+            mInventoryWindow->setVisible(true);
+            break;
         case GM_Dialogue:
             mDialogueWindow->setVisible(true);
             break;
@@ -443,8 +452,6 @@ void WindowManager::updateVisible()
             break;
         case GM_Repair:
             mRepair->setVisible(true);
-            break;
-        case GM_InterMessageBox:
             break;
         case GM_Journal:
             mJournal->setVisible(true);
@@ -609,7 +616,7 @@ void WindowManager::messageBox (const std::string& message, const std::vector<st
     else
     {
         mMessageBoxManager->createInteractiveMessageBox(message, buttons);
-        pushGuiMode(GM_InterMessageBox);
+        MWBase::Environment::get().getInputManager()->changeInputMode(isGuiMode());
     }
 }
 
@@ -648,6 +655,7 @@ void WindowManager::onDialogueWindowBye()
 void WindowManager::onFrame (float frameDuration)
 {
     mMessageBoxManager->onFrame(frameDuration);
+
     mToolTips->onFrame(frameDuration);
 
     if (mDragAndDrop->mIsOnDragAndDrop)
@@ -676,6 +684,7 @@ void WindowManager::onFrame (float frameDuration)
     mSpellCreationDialog->checkReferenceAvailable();
     mEnchantingDialog->checkReferenceAvailable();
     mContainerWindow->checkReferenceAvailable();
+    mCompanionWindow->checkReferenceAvailable();
     mConsole->checkReferenceAvailable();
 }
 
@@ -1033,12 +1042,12 @@ void WindowManager::toggleVisible (GuiWindow wnd)
 
 bool WindowManager::isGuiMode() const
 {
-    return !mGuiModes.empty();
+    return !mGuiModes.empty() || mMessageBoxManager->isInteractiveMessageBox();
 }
 
 bool WindowManager::isConsoleMode() const
 {
-    if (mGuiModes.back()==GM_Console)
+    if (!mGuiModes.empty() && mGuiModes.back()==GM_Console)
         return true;
     return false;
 }
@@ -1046,8 +1055,7 @@ bool WindowManager::isConsoleMode() const
 MWGui::GuiMode WindowManager::getMode() const
 {
     if (mGuiModes.empty())
-        throw std::runtime_error ("getMode() called, but there is no active mode");
-
+        return GM_None;
     return mGuiModes.back();
 }
 
@@ -1143,6 +1151,11 @@ void WindowManager::startEnchanting (MWWorld::Ptr actor)
     mEnchantingDialog->startEnchanting (actor);
 }
 
+void WindowManager::startSelfEnchanting(MWWorld::Ptr soulgem)
+{
+    mEnchantingDialog->startSelfEnchanting(soulgem);
+}
+
 void WindowManager::startTraining(MWWorld::Ptr actor)
 {
     mTrainingWindow->startTraining(actor);
@@ -1163,7 +1176,17 @@ const Translation::Storage& WindowManager::getTranslationDataStorage() const
     return mTranslationDataStorage;
 }
 
+void WindowManager::showCompanionWindow(MWWorld::Ptr actor)
+{
+    mCompanionWindow->open(actor);
+}
+
 void WindowManager::changePointer(const std::string &name)
 {
     mCursor->onCursorChange(name);
+}
+
+void WindowManager::showSoulgemDialog(MWWorld::Ptr item)
+{
+    mSoulgemDialog->show(item);
 }

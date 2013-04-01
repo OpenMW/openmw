@@ -291,7 +291,7 @@ namespace MWGui
             if (item.getRefData ().getCount() == 0)
             {
                 MWBase::Environment::get().getWindowManager ()->messageBox (
-                            "#{sQuickMenu5} " + MWWorld::Class::get(item).getName(item), std::vector<std::string>());
+                            "#{sQuickMenu5} " + MWWorld::Class::get(item).getName(item));
                 return;
             }
 
@@ -317,7 +317,7 @@ namespace MWGui
             if (item.getRefData ().getCount() == 0)
             {
                 MWBase::Environment::get().getWindowManager ()->messageBox (
-                            "#{sQuickMenu5} " + MWWorld::Class::get(item).getName(item), std::vector<std::string>());
+                            "#{sQuickMenu5} " + MWWorld::Class::get(item).getName(item));
                 return;
             }
 

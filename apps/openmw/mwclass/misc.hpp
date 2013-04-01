@@ -49,6 +49,10 @@ namespace MWClass
             ///< Return name of inventory icon.
 
             virtual std::string getModel(const MWWorld::Ptr &ptr) const;
+
+            virtual boost::shared_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr)
+                const;
+            ///< Generate action for using via inventory menu
     };
 }
 
