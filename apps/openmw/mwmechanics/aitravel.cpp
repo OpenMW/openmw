@@ -47,7 +47,7 @@ namespace MWMechanics
             //check if actor is near the border of an inactive cell. If so, disable aitravel.
             if(sideX*(pos.pos[0] - actor.getCell()->mCell->mData.mX * ESM::Land::REAL_SIZE) > sideX*(ESM::Land::REAL_SIZE/2. - 2000)) 
             {
-                MWWorld::Class::get(actor).getMovementSettings(actor).mForwardBackward = 0;
+                MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 0;
                 return true;
             }
         }
@@ -57,7 +57,7 @@ namespace MWMechanics
             //check if actor is near the border of an inactive cell. If so, disable aitravel.
             if(sideY*(pos.pos[1] - actor.getCell()->mCell->mData.mY * ESM::Land::REAL_SIZE) > sideY*(ESM::Land::REAL_SIZE/2. - 2000)) 
             {
-                MWWorld::Class::get(actor).getMovementSettings(actor).mForwardBackward = 0;
+                MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 0;
                 return true;
             }
         }
@@ -88,13 +88,13 @@ namespace MWMechanics
         }
         if(mPathFinder.checkIfNextPointReached(pos.pos[0],pos.pos[1],pos.pos[2]))
         {
-            MWWorld::Class::get(actor).getMovementSettings(actor).mForwardBackward = 0;
+            MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 0;
             return true;
         }
 
         float zAngle = mPathFinder.getZAngleToNext(pos.pos[0],pos.pos[1],pos.pos[2]);
         MWBase::Environment::get().getWorld()->rotateObject(actor,0,0,zAngle,false);
-        MWWorld::Class::get(actor).getMovementSettings(actor).mForwardBackward = 1;
+        MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 1;
 
         return false;
     }
