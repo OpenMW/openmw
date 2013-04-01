@@ -26,7 +26,7 @@ namespace MWMechanics
         return new AiTravel(*this);
     }
 
-    float sgn(float a)
+    static float sgn(float a)
     {
         if(a>0) return 1.;
         else return -1.;

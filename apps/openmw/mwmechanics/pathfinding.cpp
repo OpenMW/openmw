@@ -23,7 +23,7 @@ namespace MWMechanics
         return sqrt(float(a.mX - b.mX)*(a.mX - b.mX)+(a.mY - b.mY)*(a.mY - b.mY)+(a.mZ - b.mZ)*(a.mZ - b.mZ));
     }
 
-    float sgn(float a)
+    static float sgn(float a)
     {
         if(a>0) return 1.;
         else return -1.;
