@@ -54,7 +54,12 @@ namespace MWMechanics
     {
         ESM::Enchantment enchantment;
         enchantment.mData.mCharge = getGemCharge();
-        mSoulGemPtr.getRefData().setCount (mSoulGemPtr.getRefData().getCount()-1);
+
+        //Exception for Azura Star, it's not destroyed after enchanting
+        if(mSoulGemPtr.get<ESM::Miscellaneous>()->mBase->mId=="Misc_SoulGem_Azura")
+            mSoulGemPtr.getCellRef().mSoul="";
+        else
+            mSoulGemPtr.getRefData().setCount (mSoulGemPtr.getRefData().getCount()-1);
 
         if(mSelfEnchanting)
         {
