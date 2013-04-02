@@ -1,10 +1,27 @@
 #include "loadfact.hpp"
 
+#include <stdexcept>
+
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
 namespace ESM
 {
+    int& Faction::FADTstruct::getSkill (int index, bool ignored)
+    {
+        if (index<0 || index>=6)
+            throw std::logic_error ("skill index out of range");
+
+        return mSkills[index];
+    }
+
+    int Faction::FADTstruct::getSkill (int index, bool ignored) const
+    {
+        if (index<0 || index>=6)
+            throw std::logic_error ("skill index out of range");
+
+        return mSkills[index];
+    }
 
 void Faction::load(ESMReader &esm)
 {
@@ -54,7 +71,7 @@ void Faction::save(ESMWriter &esm)
     void Faction::blank()
     {
         mName.clear();
-        mData.mAttribute1 = mData.mAttribute2 = 0;
+        mData.mAttributes[0] = mData.mAttributes[1] = 0;
         mData.mUnknown = -1;
         mData.mIsHidden = 0;
 
@@ -68,7 +85,7 @@ void Faction::save(ESMWriter &esm)
         }
 
         for (int i=0; i<6; ++i)
-            mData.mSkillID[i] = 0;
+            mData.mSkills[i] = 0;
 
         mReactions.clear();
     }

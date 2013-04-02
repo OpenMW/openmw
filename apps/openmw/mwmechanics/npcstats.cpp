@@ -334,7 +334,7 @@ bool MWMechanics::NpcStats::hasSkillsForRank (const std::string& factionId, int 
     std::vector<int> skills;
 
     for (int i=0; i<6; ++i)
-        skills.push_back (static_cast<int> (getSkill (faction.mData.mSkillID[i]).getModified()));
+        skills.push_back (static_cast<int> (getSkill (faction.mData.mSkills[i]).getModified()));
 
     std::sort (skills.begin(), skills.end());
 
