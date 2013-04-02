@@ -6,6 +6,9 @@ before_script:
  - mkdir build
  - cd build
  - cmake ..
+before_install:
+  - git submodule update --init --recursive
+script: make
 branches:
   only:
     - master
