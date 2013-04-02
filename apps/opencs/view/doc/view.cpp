@@ -41,6 +41,10 @@ void CSVDoc::View::setupFileMenu()
     connect (mSave, SIGNAL (triggered()), this, SLOT (save()));
     file->addAction (mSave);
 
+    mVerify = new QAction (tr ("&Verify"), this);
+    connect (mVerify, SIGNAL (triggered()), this, SLOT (verify()));
+    file->addAction (mVerify);
+
     QAction *close = new QAction (tr ("&Close"), this);
     connect (close, SIGNAL (triggered()), this, SLOT (close()));
     file->addAction(close);
@@ -97,10 +101,6 @@ void CSVDoc::View::setupWorldMenu()
     QAction *factions = new QAction (tr ("Factions"), this);
     connect (factions, SIGNAL (triggered()), this, SLOT (addFactionsSubView()));
     world->addAction (factions);
-
-    mVerify = new QAction (tr ("&Verify"), this);
-    connect (mVerify, SIGNAL (triggered()), this, SLOT (verify()));
-    world->addAction (mVerify);
 }
 
 void CSVDoc::View::setupUi()
