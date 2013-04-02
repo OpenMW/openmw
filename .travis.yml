@@ -1,0 +1,18 @@
+language: cpp
+compiler:
+  - clang
+  - gcc
+before_script:
+ - mkdir build
+ - cd build
+ - cmake ..
+branches:
+  only:
+    - master
+    - travis_ci_test
+notifications:
+  recipients:
+    - lgromanowski+travis.ci@gmail.com
+  email:
+    on_success: change
+    on_failure: always
