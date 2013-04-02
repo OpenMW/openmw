@@ -2,9 +2,9 @@
 #define MAINDIALOG_H
 
 #include <QMainWindow>
-
+#ifndef Q_MOC_RUN
 #include <components/files/configurationmanager.hpp>
-
+#endif
 #include "settings/gamesettings.hpp"
 #include "settings/graphicssettings.hpp"
 #include "settings/launchersettings.hpp"
