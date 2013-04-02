@@ -60,6 +60,7 @@ CSMWorld::Data::Data()
     mFactions.addColumn (new StringIdColumn<ESM::Faction>);
     mFactions.addColumn (new RecordStateColumn<ESM::Faction>);
     mFactions.addColumn (new NameColumn<ESM::Faction>);
+    mFactions.addColumn (new HiddenColumn<ESM::Faction>);
     for (int i=0; i<6; ++i)
         mFactions.addColumn (new SkillsColumn<ESM::Faction> (i));
 
