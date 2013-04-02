@@ -20,6 +20,9 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
     manager.add (CSMWorld::UniversalId::Type_Classes,
         new CSVDoc::SubViewFactoryWithCreateFlag<TableSubView> (true));
 
+    manager.add (CSMWorld::UniversalId::Type_Factions,
+        new CSVDoc::SubViewFactoryWithCreateFlag<TableSubView> (true));
+
 //    manager.add (CSMWorld::UniversalId::Type_Global,
 //        new CSVDoc::SubViewFactoryWithCreateFlag<DialogueSubView> (true));
 }

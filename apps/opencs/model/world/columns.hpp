@@ -347,15 +347,15 @@ namespace CSMWorld
         int mIndex;
         bool mMajor;
 
-        SkillsColumn (int index, bool major)
-        : Column<ESXRecordT> ((major ? "Major Skill #" : "Minor Skill #")+
+        SkillsColumn (int index, bool typePrefix = false, bool major = false)
+        : Column<ESXRecordT> ((typePrefix ? (major ? "Major Skill #" : "Minor Skill #") : "Skill #")+
             boost::lexical_cast<std::string> (index), ColumnBase::Display_String),
             mIndex (index), mMajor (major)
         {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
-            int skill = record.get().mData.mSkills[mIndex][mMajor ? 1 : 0];
+            int skill = record.get().mData.getSkill (mIndex, mMajor);
 
             return QString::fromUtf8 (ESM::Skill::indexToId (skill).c_str());
         }
@@ -373,7 +373,7 @@ namespace CSMWorld
             {
                 ESXRecordT record2 = record.get();
 
-                record2.mData.mSkills[mIndex][mMajor ? 1 : 0] = index;
+                record2.mData.getSkill (mIndex, mMajor) = index;
 
                 record.setModified (record2);
             }
@@ -400,6 +400,31 @@ namespace CSMWorld
             ESXRecordT record2 = record.get();
 
             record2.mData.mIsPlayable = data.toInt();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct HiddenColumn : public Column<ESXRecordT>
+    {
+        HiddenColumn() : Column<ESXRecordT> ("Hidden", ColumnBase::Display_Boolean) {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return record.get().mData.mIsHidden!=0;
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            record2.mData.mIsHidden = data.toInt();
 
             record.setModified (record2);
         }

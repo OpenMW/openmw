@@ -500,8 +500,8 @@ void StatsWindow::updateSkillArea()
                     text += std::string("\n\n#DDC79E#{sNextRank} ") + faction->mRanks[it->second+1];
 
                     ESM::RankData rankData = faction->mData.mRankData[it->second+1];
-                    const ESM::Attribute* attr1 = store.get<ESM::Attribute>().find(faction->mData.mAttribute1);
-                    const ESM::Attribute* attr2 = store.get<ESM::Attribute>().find(faction->mData.mAttribute2);
+                    const ESM::Attribute* attr1 = store.get<ESM::Attribute>().find(faction->mData.mAttributes[0]);
+                    const ESM::Attribute* attr2 = store.get<ESM::Attribute>().find(faction->mData.mAttributes[1]);
                     assert(attr1 && attr2);
 
                     text += "\n#BF9959#{" + attr1->mName + "}: " + boost::lexical_cast<std::string>(rankData.mAttribute1)
@@ -511,7 +511,7 @@ void StatsWindow::updateSkillArea()
                     text += "\n#BF9959";
                     for (int i=0; i<6; ++i)
                     {
-                        text += "#{"+ESM::Skill::sSkillNameIds[faction->mData.mSkillID[i]]+"}";
+                        text += "#{"+ESM::Skill::sSkillNameIds[faction->mData.mSkills[i]]+"}";
                         if (i<5)
                             text += ", ";
                     }

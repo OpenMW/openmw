@@ -1,5 +1,7 @@
 #include "loadclas.hpp"
 
+#include <stdexcept>
+
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
@@ -17,6 +19,23 @@ const char *Class::sGmstSpecializationIds[3] = {
   "sSpecializationMagic",
   "sSpecializationStealth"
 };
+
+
+    int& Class::CLDTstruct::getSkill (int index, bool major)
+    {
+        if (index<0 || index>=5)
+            throw std::logic_error ("skill index out of range");
+
+        return mSkills[index][major ? 1 : 0];
+    }
+
+    int Class::CLDTstruct::getSkill (int index, bool major) const
+    {
+        if (index<0 || index>=5)
+            throw std::logic_error ("skill index out of range");
+
+        return mSkills[index][major ? 1 : 0];
+    }
 
 void Class::load(ESMReader &esm)
 {

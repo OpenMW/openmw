@@ -127,15 +127,18 @@ void Skill::save(ESMWriter &esm)
     {
         std::ostringstream stream;
 
-        stream << "#";
+        if (index!=-1)
+        {
+            stream << "#";
 
-        if (index<10)
-            stream << "0";
+            if (index<10)
+                stream << "0";
 
-        stream << index;
+            stream << index;
 
-        if (index>=0 && index<Length)
-            stream << sSkillNameIds[index].substr (6);
+            if (index>=0 && index<Length)
+                stream << sSkillNameIds[index].substr (6);
+        }
 
         return stream.str();
     }

@@ -92,9 +92,12 @@ void CSVWorld::EnumDelegate::paint (QPainter *painter, const QStyleOptionViewIte
 
 CSVWorld::EnumDelegateFactory::EnumDelegateFactory() {}
 
-CSVWorld::EnumDelegateFactory::EnumDelegateFactory (const char **names)
+CSVWorld::EnumDelegateFactory::EnumDelegateFactory (const char **names, bool allowNone)
 {
     assert (names);
+
+    if (allowNone)
+        add (-1, "");
 
     for (int i=0; names[i]; ++i)
         add (i, names[i]);

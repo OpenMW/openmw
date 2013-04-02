@@ -1,10 +1,27 @@
 #include "loadfact.hpp"
 
+#include <stdexcept>
+
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
 namespace ESM
 {
+    int& Faction::FADTstruct::getSkill (int index, bool ignored)
+    {
+        if (index<0 || index>=6)
+            throw std::logic_error ("skill index out of range");
+
+        return mSkills[index];
+    }
+
+    int Faction::FADTstruct::getSkill (int index, bool ignored) const
+    {
+        if (index<0 || index>=6)
+            throw std::logic_error ("skill index out of range");
+
+        return mSkills[index];
+    }
 
 void Faction::load(ESMReader &esm)
 {
@@ -33,7 +50,7 @@ void Faction::load(ESMReader &esm)
 void Faction::save(ESMWriter &esm)
 {
     esm.writeHNCString("FNAM", mName);
-    
+
     for (int i = 0; i < 10; i++)
     {
         if (mRanks[i].empty())
@@ -43,7 +60,7 @@ void Faction::save(ESMWriter &esm)
     }
 
     esm.writeHNT("FADT", mData, 240);
-    
+
     for (std::vector<Reaction>::iterator it = mReactions.begin(); it != mReactions.end(); ++it)
     {
         esm.writeHNString("ANAM", it->mFaction);
@@ -51,4 +68,25 @@ void Faction::save(ESMWriter &esm)
     }
 }
 
+    void Faction::blank()
+    {
+        mName.clear();
+        mData.mAttributes[0] = mData.mAttributes[1] = 0;
+        mData.mUnknown = -1;
+        mData.mIsHidden = 0;
+
+        for (int i=0; i<10; ++i)
+        {
+            mData.mRankData[i].mAttribute1 = mData.mRankData[i].mAttribute2 = 0;
+            mData.mRankData[i].mSkill1 = mData.mRankData[i].mSkill2 = 0;
+            mData.mRankData[i].mFactReaction = 0;
+
+            mRanks[i].clear();
+        }
+
+        for (int i=0; i<6; ++i)
+            mData.mSkills[i] = 0;
+
+        mReactions.clear();
+    }
 }

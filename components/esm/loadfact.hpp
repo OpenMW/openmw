@@ -34,13 +34,19 @@ struct Faction
     struct FADTstruct
     {
         // Which attributes we like
-        int mAttribute1, mAttribute2;
+        int mAttributes[2];
 
         RankData mRankData[10];
 
-        int mSkillID[6]; // IDs of skills this faction require
+        int mSkills[6]; // IDs of skills this faction require
         int mUnknown; // Always -1?
         int mIsHidden; // 1 - hidden from player
+
+        int& getSkill (int index, bool ignored = false);
+        ///< Throws an exception for invalid values of \a index.
+
+        int getSkill (int index, bool ignored = false) const;
+        ///< Throws an exception for invalid values of \a index.
     }; // 240 bytes
 
     FADTstruct mData;
@@ -58,6 +64,9 @@ struct Faction
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
+
+    void blank();
+     ///< Set record to default state (does not touch the ID/index).
 };
 }
 #endif

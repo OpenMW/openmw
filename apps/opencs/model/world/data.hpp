@@ -10,6 +10,7 @@
 #include <components/esm/loadgmst.hpp>
 #include <components/esm/loadskil.hpp>
 #include <components/esm/loadclas.hpp>
+#include <components/esm/loadfact.hpp>
 
 #include "idcollection.hpp"
 #include "universalid.hpp"
@@ -24,6 +25,7 @@ namespace CSMWorld
             IdCollection<ESM::GameSetting> mGmsts;
             IdCollection<ESM::Skill> mSkills;
             IdCollection<ESM::Class> mClasses;
+            IdCollection<ESM::Faction> mFactions;
             std::vector<QAbstractItemModel *> mModels;
             std::map<UniversalId::Type, QAbstractItemModel *> mModelIndex;
 
@@ -51,6 +53,10 @@ namespace CSMWorld
             const IdCollection<ESM::Skill>& getSkills() const;
 
             IdCollection<ESM::Skill>& getSkills();
+
+            const IdCollection<ESM::Faction>& getFactions() const;
+
+            IdCollection<ESM::Faction>& getFactions();
 
             QAbstractItemModel *getTableModel (const UniversalId& id);
             ///< If no table model is available for \a id, an exception is thrown.
