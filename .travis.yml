@@ -10,7 +10,7 @@ before_install:
  - git submodule update --init --recursive
  - echo "yes" | sudo apt-add-repository ppa:openmw/deps
  - sudo apt-get update -qq
- - sudo apt-get install -qq ffmpeg libboost-all-dev libbullet-dev libogre-static-dev libmygui-static-dev libqt4-dev libgtest-dev google-mock zziplib-bin libmpg123-dev libcg libav-tools libois-dev libopenal-dev
+ - sudo apt-get install -qq ffmpeg libboost-all-dev libbullet-dev libogre-static-dev libmygui-static-dev libqt4-dev libgtest-dev google-mock zziplib-bin libmpg123-dev libcg libav-tools libois-dev libopenal-dev libxaw7-dev 
 script: make
 branches:
   only:
