@@ -61,7 +61,7 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
         new CSVWorld::EnumDelegateFactory (sSpecialisations));
 
     mDelegateFactories->add (CSMWorld::ColumnBase::Display_Attribute,
-        new CSVWorld::EnumDelegateFactory (sAttributes));
+        new CSVWorld::EnumDelegateFactory (sAttributes, true));
 }
 
 CSVDoc::ViewManager::~ViewManager()
