@@ -51,15 +51,17 @@ CSMWorld::Data::Data()
     mClasses.addColumn (new AttributesColumn<ESM::Class> (1));
     mClasses.addColumn (new SpecialisationColumn<ESM::Class>);
     for (int i=0; i<5; ++i)
-        mClasses.addColumn (new SkillsColumn<ESM::Class> (i, true));
+        mClasses.addColumn (new SkillsColumn<ESM::Class> (i, true, true));
     for (int i=0; i<5; ++i)
-        mClasses.addColumn (new SkillsColumn<ESM::Class> (i, false));
+        mClasses.addColumn (new SkillsColumn<ESM::Class> (i, true, false));
     mClasses.addColumn (new PlayableColumn<ESM::Class>);
     mClasses.addColumn (new DescriptionColumn<ESM::Class>);
 
     mFactions.addColumn (new StringIdColumn<ESM::Faction>);
     mFactions.addColumn (new RecordStateColumn<ESM::Faction>);
     mFactions.addColumn (new NameColumn<ESM::Faction>);
+    for (int i=0; i<6; ++i)
+        mFactions.addColumn (new SkillsColumn<ESM::Faction> (i));
 
     addModel (new IdTable (&mGlobals), UniversalId::Type_Globals, UniversalId::Type_Global);
     addModel (new IdTable (&mGmsts), UniversalId::Type_Gmsts, UniversalId::Type_Gmst);
