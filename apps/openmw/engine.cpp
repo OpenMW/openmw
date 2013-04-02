@@ -66,6 +66,7 @@ bool OMW::Engine::frameStarted (const Ogre::FrameEvent& evt)
 {
     if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
         MWBase::Environment::get().getWorld()->frameStarted(evt.timeSinceLastFrame);
+    MWBase::Environment::get().getWindowManager ()->frameStarted(evt.timeSinceLastFrame);
     return true;
 }
 

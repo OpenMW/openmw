@@ -238,6 +238,8 @@ namespace MWGui
     virtual void startRepair(MWWorld::Ptr actor);
     virtual void startRepairItem(MWWorld::Ptr item);
 
+    virtual void frameStarted(float dt);
+
     virtual void showSoulgemDialog (MWWorld::Ptr item);
 
     virtual void changePointer (const std::string& name);
