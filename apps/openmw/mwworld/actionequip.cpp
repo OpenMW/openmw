@@ -111,8 +111,6 @@ namespace MWWorld
             //Disable twohanded when shield equipped, shield when twohanded equipped
             if(*slot == MWWorld::InventoryStore::Slot_CarriedRight)
             {
-                invStore.equip(*slot, it);
-
                 if (it.getType() == MWWorld::ContainerStore::Type_Weapon)
                 {
                     if(it->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::LongBladeTwoHand ||
