@@ -41,7 +41,9 @@ namespace CSMWorld
                 Type_Skills,
                 Type_Skill,
                 Type_Classes,
-                Type_Class
+                Type_Class,
+                Type_Factions,
+                Type_Faction
             };
 
         private:

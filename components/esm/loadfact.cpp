@@ -33,7 +33,7 @@ void Faction::load(ESMReader &esm)
 void Faction::save(ESMWriter &esm)
 {
     esm.writeHNCString("FNAM", mName);
-    
+
     for (int i = 0; i < 10; i++)
     {
         if (mRanks[i].empty())
@@ -43,7 +43,7 @@ void Faction::save(ESMWriter &esm)
     }
 
     esm.writeHNT("FADT", mData, 240);
-    
+
     for (std::vector<Reaction>::iterator it = mReactions.begin(); it != mReactions.end(); ++it)
     {
         esm.writeHNString("ANAM", it->mFaction);
@@ -51,4 +51,25 @@ void Faction::save(ESMWriter &esm)
     }
 }
 
+    void Faction::blank()
+    {
+        mName.clear();
+        mData.mAttribute1 = mData.mAttribute2 = 0;
+        mData.mUnknown = -1;
+        mData.mIsHidden = 0;
+
+        for (int i=0; i<10; ++i)
+        {
+            mData.mRankData[i].mAttribute1 = mData.mRankData[i].mAttribute2 = 0;
+            mData.mRankData[i].mSkill1 = mData.mRankData[i].mSkill2 = 0;
+            mData.mRankData[i].mFactReaction = 0;
+
+            mRanks[i].clear();
+        }
+
+        for (int i=0; i<6; ++i)
+            mData.mSkillID[i] = 0;
+
+        mReactions.clear();
+    }
 }
