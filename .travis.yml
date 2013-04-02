@@ -7,7 +7,10 @@ before_script:
  - cd build
  - cmake ..
 before_install:
-  - git submodule update --init --recursive
+ - git submodule update --init --recursive
+ - sudo apt-add-repository ppa:openmw/deps
+ - sudo apt-get update -qq
+ - sudo apt-get install -qq ffmpeg-dev boost-dev libbullet libogre-static mygui-static
 script: make
 branches:
   only:
