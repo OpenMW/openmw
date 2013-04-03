@@ -709,6 +709,7 @@ namespace MWWorld
         pos.pos[0] = x;
         pos.pos[1] = y;
         pos.pos[2] = z;
+
         Ogre::Vector3 vec(x, y, z);
 
         CellStore *currCell = ptr.getCell();
@@ -820,6 +821,24 @@ namespace MWWorld
                 mPhysics->rotateObject(ptr);
             }
         }
+    }
+
+    void World::adjustPosition(const Ptr &ptr)
+    {
+        Ogre::Vector3 pos (ptr.getRefData().getPosition().pos[0], ptr.getRefData().getPosition().pos[1], ptr.getRefData().getPosition().pos[2]);
+
+        if (!isFlying(ptr))
+        {
+            Ogre::Vector3 traced = mPhysics->traceDown(ptr);
+            if (traced.z < pos.z)
+                pos.z = traced.z;
+        }
+
+        float terrainHeight = mRendering->getTerrainHeightAt(pos);
+        if (pos.z < terrainHeight)
+            pos.z = terrainHeight;
+
+        moveObject(ptr, pos.x, pos.y, pos.z);
     }
 
     void World::rotateObject (const Ptr& ptr,float x,float y,float z, bool adjust)

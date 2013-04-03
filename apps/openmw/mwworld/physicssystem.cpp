@@ -88,6 +88,50 @@ namespace MWWorld
         }
 
     public:
+        static Ogre::Vector3 traceDown(const MWWorld::Ptr &ptr, OEngine::Physic::PhysicEngine *engine)
+        {
+            const ESM::Position &refpos = ptr.getRefData().getPosition();
+            Ogre::Vector3 position(refpos.pos);
+
+            bool hit=false;
+            bool isInterior = !ptr.getCell()->isExterior();
+
+            OEngine::Physic::PhysicActor *physicActor = engine->getCharacter(ptr.getRefData().getHandle());
+            if (!physicActor)
+                return position;
+
+            bool wasCollisionMode = physicActor->getCollisionMode();
+
+            physicActor->enableCollisions(false);
+
+            Ogre::Vector3 halfExtents = physicActor->getHalfExtents();// + Vector3(1,1,1);
+
+            Ogre::Vector3 newPosition = position;
+
+            traceResults trace; //no initialization needed
+
+            int maxHeight = 400.f;
+            int steps = 100;
+            for (int i=0; i<steps; ++i)
+            {
+                newtrace(&trace, newPosition, newPosition-Ogre::Vector3(0,0,maxHeight / steps), halfExtents, isInterior, engine);
+                if(trace.fraction < 1.0f)
+                    hit = true;
+                newPosition = trace.endpos;
+            }
+
+            newPosition = trace.endpos;
+
+            physicActor->setOnGround(hit);
+            physicActor->enableCollisions(wasCollisionMode);
+
+            if (hit)
+                return newPosition;
+            else
+                return position;
+        }
+
+
         static Ogre::Vector3 move(const MWWorld::Ptr &ptr, const Ogre::Vector3 &movement, float time,
                                   bool gravity, OEngine::Physic::PhysicEngine *engine)
         {
@@ -318,7 +362,7 @@ namespace MWWorld
         btVector3 btTo = btVector3(to.x, to.y, to.z);
 
         std::pair<std::string, float> test = mEngine->rayTest(btFrom, btTo);
-        if (test.first == "") {
+        if (test.second == -1) {
             return std::make_pair(false, Ogre::Vector3());
         }
         return std::make_pair(true, ray.getPoint(len * test.second));
@@ -351,6 +395,10 @@ namespace MWWorld
         return MovementSolver::move(ptr, movement, time, gravity, mEngine);
     }
 
+    Ogre::Vector3 PhysicsSystem::traceDown(const MWWorld::Ptr &ptr)
+    {
+        return MovementSolver::traceDown(ptr, mEngine);
+    }
 
     void PhysicsSystem::addHeightField (float* heights,
                 int x, int y, float yoffset,

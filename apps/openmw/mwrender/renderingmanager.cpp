@@ -529,24 +529,27 @@ void RenderingManager::applyFog (bool underwater)
 
 void RenderingManager::setAmbientMode()
 {
-  switch (mAmbientMode)
-  {
+    switch (mAmbientMode)
+    {
     case 0:
-
-      setAmbientColour(mAmbientColor);
-      break;
+        setAmbientColour(mAmbientColor);
+        break;
 
     case 1:
-
-      setAmbientColour(0.7f*mAmbientColor + 0.3f*ColourValue(1,1,1));
-      break;
+        setAmbientColour(0.7f*mAmbientColor + 0.3f*ColourValue(1,1,1));
+        break;
 
     case 2:
-
-      setAmbientColour(ColourValue(1,1,1));
-      break;
-  }
+        setAmbientColour(ColourValue(1,1,1));
+        break;
+    }
 }
+
+float RenderingManager::getTerrainHeightAt(Ogre::Vector3 worldPos)
+{
+    return mTerrainManager->getTerrainHeightAt(worldPos);
+}
+
 
 void RenderingManager::configureAmbient(MWWorld::Ptr::CellStore &mCell)
 {

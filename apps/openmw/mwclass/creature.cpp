@@ -9,6 +9,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
@@ -84,6 +85,11 @@ namespace MWClass
             ptr.get<ESM::Creature>();
 
         return ref->mBase->mId;
+    }
+
+    void Creature::adjustPosition(const MWWorld::Ptr& ptr) const
+    {
+        MWBase::Environment::get().getWorld()->adjustPosition(ptr);
     }
 
     void Creature::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
