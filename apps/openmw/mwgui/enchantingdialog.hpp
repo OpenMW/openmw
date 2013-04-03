@@ -56,6 +56,7 @@ namespace MWGui
         MyGUI::TextBox* mCastCost;
         MyGUI::TextBox* mCharge;
         MyGUI::TextBox* mPrice;
+        MyGUI::TextBox* mPriceText;
 
         MWMechanics::Enchanting mEnchanting;
         ESM::EffectList mEffectList;

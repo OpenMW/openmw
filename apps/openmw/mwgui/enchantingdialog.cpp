@@ -32,6 +32,7 @@ namespace MWGui
         getWidget(mTypeButton, "TypeButton");
         getWidget(mBuyButton, "BuyButton");
         getWidget(mPrice, "PriceLabel");
+        getWidget(mPriceText, "PriceTextLabel");
 
         setWidgets(mAvailableEffectsList, mUsedEffectsView);
 
@@ -94,19 +95,34 @@ namespace MWGui
         mPtr = actor;
 
         startEditing ();
+
+        mPrice->setVisible(true);
     }
 
     void EnchantingDialog::startSelfEnchanting(MWWorld::Ptr soulgem)
     {
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-        MWWorld::Ptr gem = soulgem;
 
         mEnchanting.setSelfEnchanting(true);
         mEnchanting.setEnchanter(player);
 
         mPtr = player;
         startEditing();
-        mEnchanting.setSoulGem(gem);
+        mEnchanting.setSoulGem(soulgem);
+
+        MyGUI::ImageBox* image = mSoulBox->createWidget<MyGUI::ImageBox>("ImageBox", MyGUI::IntCoord(0, 0, 32, 32), MyGUI::Align::Default);
+        std::string path = std::string("icons\\");
+        path += MWWorld::Class::get(soulgem).getInventoryIcon(soulgem);
+        int pos = path.rfind(".");
+        path.erase(pos);
+        path.append(".dds");
+        image->setImageTexture (path);
+        image->setUserString ("ToolTipType", "ItemPtr");
+        image->setUserData(soulgem);
+        image->eventMouseButtonClick += MyGUI::newDelegate(this, &EnchantingDialog::onRemoveSoul);
+
+        mPrice->setVisible(false);
+        mPriceText->setVisible(false);
     }
 
     void EnchantingDialog::onReferenceUnavailable ()

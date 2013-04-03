@@ -88,7 +88,8 @@ namespace MWMechanics
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
         MWWorld::Class::get (player).getContainerStore (player).add (ref.getPtr());
-        payForEnchantment();
+        if(!mSelfEnchanting)
+            payForEnchantment();
 
         return true;
     }
