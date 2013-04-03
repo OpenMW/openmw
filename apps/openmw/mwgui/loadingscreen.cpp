@@ -217,15 +217,21 @@ namespace MWGui
 
     void LoadingScreen::changeWallpaper ()
     {
-        if (mResources.isNull ())
-            mResources = Ogre::ResourceGroupManager::getSingleton ().findResourceNames ("General", "Splash_*.tga");
-
-
-        if (mResources->size())
+        if (mResources.empty())
         {
-            std::string const & randomSplash = mResources->at (rand() % mResources->size());
+            Ogre::StringVector groups = Ogre::ResourceGroupManager::getSingleton().getResourceGroups ();
+            for (Ogre::StringVector::iterator it = groups.begin(); it != groups.end(); ++it)
+            {
+                Ogre::StringVectorPtr resourcesInThisGroup = Ogre::ResourceGroupManager::getSingleton ().findResourceNames (*it, "Splash_*.tga");
+                mResources.insert(mResources.end(), resourcesInThisGroup->begin(), resourcesInThisGroup->end());
+            }
+        }
 
-            Ogre::TexturePtr tex = Ogre::TextureManager::getSingleton ().load (randomSplash, "General");
+        if (!mResources.empty())
+        {
+            std::string const & randomSplash = mResources.at (rand() % mResources.size());
+
+            Ogre::TexturePtr tex = Ogre::TextureManager::getSingleton ().load (randomSplash, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME);
 
             mBackgroundImage->setImageTexture (randomSplash);
         }

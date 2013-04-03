@@ -37,6 +37,7 @@ namespace MWGui
         , mLastXSize(0)
         , mLastYSize(0)
         , mPreview(MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer ())
+        , mPreviewDirty(true)
     {
         static_cast<MyGUI::Window*>(mMainWidget)->eventWindowChangeCoord += MyGUI::newDelegate(this, &InventoryWindow::onWindowResize);
 
@@ -268,6 +269,19 @@ namespace MWGui
         mTrading = true;
     }
 
+    void InventoryWindow::doRenderUpdate ()
+    {
+        if (mPreviewDirty)
+        {
+            mPreviewDirty = false;
+            MyGUI::IntSize size = mAvatar->getSize();
+
+            mPreview.update (size.width, size.height);
+            mAvatarImage->setSize(MyGUI::IntSize(std::max(mAvatar->getSize().width, 512), std::max(mAvatar->getSize().height, 1024)));
+            mAvatarImage->setImageTexture("CharacterPreview");
+        }
+    }
+
     void InventoryWindow::notifyContentChanged()
     {
         // update the spell window just in case new enchanted items were added to inventory
@@ -282,11 +296,7 @@ namespace MWGui
         else
             mWindowManager.setSelectedWeapon(*weaponSlot, 100); /// \todo track weapon durability
 
-        MyGUI::IntSize size = mAvatar->getSize();
-
-        mPreview.update (size.width, size.height);
-        mAvatarImage->setSize(MyGUI::IntSize(std::max(mAvatar->getSize().width, 512), std::max(mAvatar->getSize().height, 1024)));
-        mAvatarImage->setImageTexture("CharacterPreview");
+        mPreviewDirty = true;
 
         mArmorRating->setCaptionWithReplacing ("#{sArmor}: "
             + boost::lexical_cast<std::string>(static_cast<int>(MWWorld::Class::get(mPtr).getArmorRating(mPtr))));

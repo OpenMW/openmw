@@ -1190,3 +1190,8 @@ void WindowManager::showSoulgemDialog(MWWorld::Ptr item)
 {
     mSoulgemDialog->show(item);
 }
+
+void WindowManager::frameStarted (float dt)
+{
+    mInventoryWindow->doRenderUpdate ();
+}

@@ -16,6 +16,8 @@ namespace MWGui
 
             virtual void open();
 
+            void doRenderUpdate();
+
             /// start trading, disables item drag&drop
             void startTrade();
 
@@ -34,6 +36,8 @@ namespace MWGui
             }
 
         protected:
+            bool mPreviewDirty;
+
             MyGUI::Widget* mAvatar;
             MyGUI::ImageBox* mAvatarImage;
             MyGUI::TextBox* mArmorRating;
