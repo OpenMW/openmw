@@ -167,6 +167,10 @@ class NiAutoNormalParticlesData : public ShapeData
 public:
     int activeCount;
 
+    float activeRadius;
+
+    std::vector<float> sizes;
+
     void read(NIFStream *nif)
     {
         ShapeData::read(nif);
@@ -174,14 +178,13 @@ public:
         // Should always match the number of vertices
         activeCount = nif->getUShort();
 
-        // Skip all the info, we don't support particles yet
-        nif->getFloat();  // Active radius ?
+        activeRadius = nif->getFloat();
         nif->getUShort(); // Number of valid entries in the following arrays ?
 
         if(nif->getInt())
         {
             // Particle sizes
-            nif->skip(activeCount * sizeof(float));
+            nif->getFloats(sizes, activeCount);
         }
     }
 };
@@ -189,6 +192,8 @@ public:
 class NiRotatingParticlesData : public NiAutoNormalParticlesData
 {
 public:
+    std::vector<Ogre::Quaternion> rotations;
+
     void read(NIFStream *nif)
     {
         NiAutoNormalParticlesData::read(nif);
@@ -198,7 +203,7 @@ public:
             // Rotation quaternions. I THINK activeCount is correct here,
             // but verts (vertex number) might also be correct, if there is
             // any case where the two don't match.
-            nif->skip(activeCount * 4*sizeof(float));
+            nif->getQuaternions(rotations, activeCount);
         }
     }
 };
