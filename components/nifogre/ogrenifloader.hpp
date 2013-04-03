@@ -48,22 +48,8 @@ struct EntityList {
 };
 
 
-/* This holds a list of mesh names, the names of their parent nodes, and the offset
- * from their parent nodes. */
-struct MeshInfo {
-    std::string mMeshName;
-    std::string mTargetNode;
-
-    MeshInfo(const std::string &name, const std::string &target)
-      : mMeshName(name), mTargetNode(target)
-    { }
-};
-typedef std::vector<MeshInfo> MeshInfoList;
-
 class Loader
 {
-    static MeshInfoList load(const std::string &name, const std::string &group);
-
 public:
     static EntityList createEntities(Ogre::Entity *parent, const std::string &bonename,
                                      Ogre::SceneNode *parentNode,
