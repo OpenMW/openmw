@@ -36,11 +36,13 @@ namespace MWMechanics
             void nextEnchantType(); //Set enchant type to next possible type (for mOldItemPtr object)
             int getEnchantType() const;
             int getEnchantCost() const;
+            int getEnchantPrice() const;
             int getMaxEnchantValue() const;
             int getGemCharge() const;
             float getEnchantChance() const;
             bool soulEmpty() const; //Return true if empty
             bool itemEmpty() const; //Return true if empty
+            void payForEnchantment() const;
     };
 }
 #endif

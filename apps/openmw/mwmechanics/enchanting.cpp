@@ -3,9 +3,11 @@
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "creaturestats.hpp"
 #include "npcstats.hpp"
+#include <boost/algorithm/string.hpp>
 
 namespace MWMechanics
 {
@@ -53,7 +55,12 @@ namespace MWMechanics
     {
         ESM::Enchantment enchantment;
         enchantment.mData.mCharge = getGemCharge();
-        mSoulGemPtr.getRefData().setCount (mSoulGemPtr.getRefData().getCount()-1);
+
+        //Exception for Azura Star, it's not destroyed after enchanting
+        if(boost::iequals(mSoulGemPtr.get<ESM::Miscellaneous>()->mBase->mId, "Misc_SoulGem_Azura"))
+            mSoulGemPtr.getCellRef().mSoul="";
+        else
+            mSoulGemPtr.getRefData().setCount (mSoulGemPtr.getRefData().getCount()-1);
 
         if(mSelfEnchanting)
         {
@@ -79,7 +86,11 @@ namespace MWMechanics
 
         MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), mOldItemId);
         ref.getPtr().getRefData().setCount (mOldItemCount-1);
-        MWWorld::Class::get (mEnchanter).getContainerStore (mEnchanter).add (ref.getPtr());
+
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::Class::get (player).getContainerStore (player).add (ref.getPtr());
+        if(!mSelfEnchanting)
+            payForEnchantment();
 
         return true;
     }
@@ -126,6 +137,8 @@ namespace MWMechanics
         float cost = 0;
         std::vector<ESM::ENAMstruct> mEffects = mEffectList.mList;
         int i=mEffects.size();
+        if(i<=0)
+            return 0;
 
         /*
         Formula from http://www.uesp.net/wiki/Morrowind:Enchant
@@ -155,6 +168,17 @@ namespace MWMechanics
         }
         return cost;
     }
+
+    int Enchanting::getEnchantPrice() const
+    {
+        if(mEnchanter.isEmpty())
+            return 0;
+
+        float priceMultipler = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("fEnchantmentValueMult")->getFloat();
+        int price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mEnchanter, (getEnchantCost() * priceMultipler), true);
+        return price;
+    }
+
     int Enchanting::getGemCharge() const
     {
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
@@ -215,5 +239,24 @@ namespace MWMechanics
             chance2 /= constantChance;
         }
         return (chance1-chance2);
+    }
+
+    void Enchanting::payForEnchantment() const
+    {
+        MWWorld::Ptr gold;
+
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::ContainerStore& store = MWWorld::Class::get(player).getContainerStore(player);
+
+        for (MWWorld::ContainerStoreIterator it = store.begin();
+                it != store.end(); ++it)
+        {
+            if (Misc::StringUtils::ciEqual(it->getCellRef().mRefID, "gold_001"))
+            {
+                gold = *it;
+            }
+        }
+
+        gold.getRefData().setCount(gold.getRefData().getCount() - getEnchantPrice());
     }
 }

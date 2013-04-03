@@ -32,6 +32,7 @@ namespace MWGui
         getWidget(mTypeButton, "TypeButton");
         getWidget(mBuyButton, "BuyButton");
         getWidget(mPrice, "PriceLabel");
+        getWidget(mPriceText, "PriceTextLabel");
 
         setWidgets(mAvailableEffectsList, mUsedEffectsView);
 
@@ -63,6 +64,8 @@ namespace MWGui
 
         mCastCost->setCaption(boost::lexical_cast<std::string>(mEnchanting.getEnchantCost()));
 
+        mPrice->setCaption(boost::lexical_cast<std::string>(mEnchanting.getEnchantPrice()));
+
         switch(mEnchanting.getEnchantType())
         {
             case 0:
@@ -86,16 +89,10 @@ namespace MWGui
 
     void EnchantingDialog::startEnchanting (MWWorld::Ptr actor)
     {
-
-        /*Now there's no need to use other enchanters, player is the enchanter here,
-          even if the enchanted object is created by NPC. Could be changed later, probably
-          with some price formulas                                                       */
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-
         mEnchanting.setSelfEnchanting(false);
-        mEnchanting.setEnchanter(player);
+        mEnchanting.setEnchanter(actor);
 
-        mPtr = player;
+        mPtr = actor;
 
         startEditing ();
     }
@@ -108,8 +105,23 @@ namespace MWGui
         mEnchanting.setEnchanter(player);
 
         mPtr = player;
-
         startEditing();
+        mEnchanting.setSoulGem(soulgem);
+
+        MyGUI::ImageBox* image = mSoulBox->createWidget<MyGUI::ImageBox>("ImageBox", MyGUI::IntCoord(0, 0, 32, 32), MyGUI::Align::Default);
+        std::string path = std::string("icons\\");
+        path += MWWorld::Class::get(soulgem).getInventoryIcon(soulgem);
+        int pos = path.rfind(".");
+        path.erase(pos);
+        path.append(".dds");
+        image->setImageTexture (path);
+        image->setUserString ("ToolTipType", "ItemPtr");
+        image->setUserData(soulgem);
+        image->eventMouseButtonClick += MyGUI::newDelegate(this, &EnchantingDialog::onRemoveSoul);
+
+        mPrice->setVisible(false);
+        mPriceText->setVisible(false);
+        updateLabels();
     }
 
     void EnchantingDialog::onReferenceUnavailable ()
@@ -252,12 +264,6 @@ namespace MWGui
             return;
         }
 
-        if (boost::lexical_cast<int>(mPrice->getCaption()) > mWindowManager.getInventoryWindow()->getPlayerGold())
-        {
-            mWindowManager.messageBox ("#{sNotifyMessage18}");
-            return;
-        }
-
         if (mEnchanting.soulEmpty())
         {
             mWindowManager.messageBox ("#{sNotifyMessage52}");
@@ -278,6 +284,12 @@ namespace MWGui
 
         mEnchanting.setNewItemName(mName->getCaption());
         mEnchanting.setEffect(mEffectList);
+
+        if (mEnchanting.getEnchantPrice() > mWindowManager.getInventoryWindow()->getPlayerGold())
+        {
+            mWindowManager.messageBox ("#{sNotifyMessage18}");
+            return;
+        }
 
         int result = mEnchanting.create();
 
