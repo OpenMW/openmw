@@ -5,6 +5,7 @@ before_script:
  - mkdir build
  - cd build
  - cmake .. -DMYGUI_STATIC=1
+ - cat CMakeCache.txt
 before_install:
  - git submodule update --init --recursive
  - echo "yes" | sudo apt-add-repository ppa:openmw/deps
