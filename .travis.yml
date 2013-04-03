@@ -10,7 +10,7 @@ before_install:
  - echo "yes" | sudo apt-add-repository ppa:openmw/deps
  - sudo apt-get update -qq
  - sudo apt-get remove -qq libogre-static-dev
- - sudo apt-get install -qq ffmpeg libboost-all-dev libbullet-dev libogre-dev libmygui-static-dev libqt4-dev libgtest-dev google-mock zziplib-bin libmpg123-dev libcg libav-tools libois-dev libopenal-dev libxaw7-dev 
+ - sudo apt-get install -qq libois-dev libopenal-dev libpng-dev libogre-dev libmpg123-dev libsndfile1-dev libblkid-dev libfreeimage-dev libboost-filesystem-dev libboost-thread-dev libboost-chrono-dev libboost-program-options-dev libboost-system-dev libboost-wave-dev uuid-dev libqt4-opengl libqt4-dev libavcodec-dev libavformat-dev libavdevice-dev libavutil-dev libswscale-dev libpostproc-dev ffmpeg libbullet-dev libmygui-dev libqt4-dev libgtest-dev google-mock zziplib-bin libcg libav-tools libois-dev libopenal-dev libxaw7-dev 
 script: make
 branches:
   only:
