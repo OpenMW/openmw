@@ -11,7 +11,7 @@ before_install:
  - echo "yes" | sudo apt-add-repository ppa:openmw/deps
  - sudo apt-get update -qq
  - sudo apt-get remove -qq libogre-static-dev
- - sudo apt-get install -qq libois-dev libopenal-dev libpng-dev libogre-static-dev libmpg123-dev libsndfile1-dev libblkid-dev libfreeimage-dev libboost-all-dev uuid-dev libqt4-opengl libqt4-dev libavcodec-dev libavformat-dev libavdevice-dev libavutil-dev libswscale-dev 0ibpostproc-dev ffmpeg libbullet-dev libmygui-static-dev libgtest-dev google-mock zziplib-bin libcg libav-tools libois-dev libopenal-dev libxaw7-dev 
+ - sudo apt-get install -qq libois-dev libopenal-dev libpng-dev libogre-static-dev libmpg123-dev libsndfile1-dev libblkid-dev libfreeimage-dev libboost-all-dev uuid-dev libqt4-opengl libqt4-dev libavcodec-dev libavformat-dev libavdevice-dev libavutil-dev libswscale-dev libpostproc-dev ffmpeg libbullet-dev libmygui-static-dev libgtest-dev google-mock zziplib-bin libcg libav-tools libois-dev libopenal-dev libxaw7-dev 
 script: "make -j`grep -c processor /proc/cpuinfo`"
 branches:
   only:
