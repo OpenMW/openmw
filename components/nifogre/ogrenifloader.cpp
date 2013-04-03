@@ -555,11 +555,14 @@ static std::string findTextureName(const std::string &filename)
      * texture file name references were kept as .tga.
      */
     static const char path[] = "textures\\";
+    static const char path2[] = "textures/";
+
 
     std::string texname = filename;
     Misc::StringUtils::toLower(texname);
 
-    if(texname.compare(0, sizeof(path)-1, path) != 0)
+    if(texname.compare(0, sizeof(path)-1, path) != 0
+            && texname.compare(0, sizeof(path2)-1, path2) != 0)
         texname = path + texname;
 
     Ogre::String::size_type pos = texname.rfind('.');
@@ -575,7 +578,8 @@ static std::string findTextureName(const std::string &filename)
         {
             texname = filename;
             Misc::StringUtils::toLower(texname);
-            if(texname.compare(0, sizeof(path)-1, path) != 0)
+            if(texname.compare(0, sizeof(path)-1, path) != 0
+                    && texname.compare(0, sizeof(path2)-1, path2) != 0)
                 texname = path + texname;
         }
     }
@@ -590,7 +594,8 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
                                 const Nif::NiAlphaProperty *alphaprop,
                                 const Nif::NiVertexColorProperty *vertprop,
                                 const Nif::NiZBufferProperty *zprop,
-                                const Nif::NiSpecularProperty *specprop)
+                                const Nif::NiSpecularProperty *specprop,
+                                bool &needTangents)
 {
     Ogre::MaterialManager &matMgr = Ogre::MaterialManager::getSingleton();
     Ogre::MaterialPtr material = matMgr.getByName(name);
@@ -634,6 +639,7 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
                 warn("Found internal texture, ignoring.");
         }
     }
+    needTangents = !texName[Nif::NiTexturingProperty::BumpTexture].empty();
 
     // Alpha modifiers
     if(alphaprop)
@@ -741,7 +747,15 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
             new sh::Vector4(specular.x, specular.y, specular.z, glossiness)));
     }
 
-    instance->setProperty("diffuseMap", sh::makeProperty(texName[0]));
+    instance->setProperty("diffuseMap", sh::makeProperty(texName[Nif::NiTexturingProperty::BaseTexture]));
+    instance->setProperty("normalMap", sh::makeProperty(texName[Nif::NiTexturingProperty::BumpTexture]));
+    instance->setProperty("emissiveMap", sh::makeProperty(texName[Nif::NiTexturingProperty::GlowTexture]));
+    if (!texName[Nif::NiTexturingProperty::GlowTexture].empty())
+    {
+        instance->setProperty("use_emissive_map", sh::makeProperty(new sh::BooleanValue(true)));
+        instance->setProperty("emissiveMapUVSet", sh::makeProperty(new sh::IntValue(texprop->textures[Nif::NiTexturingProperty::GlowTexture].uvSet)));
+    }
+
     for(int i = 1;i < 7;i++)
     {
         if(!texName[i].empty())
@@ -1022,11 +1036,20 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
             }
         }
 
+        bool needTangents=false;
         std::string matname = NIFMaterialLoader::getMaterial(shape, mesh->getName(), mGroup,
                                                              texprop, matprop, alphaprop,
-                                                             vertprop, zprop, specprop);
+                                                             vertprop, zprop, specprop, needTangents);
         if(matname.length() > 0)
             sub->setMaterialName(matname);
+
+        // build tangents if the material needs them
+        if (needTangents)
+        {
+            unsigned short src,dest;
+            if (!mesh->suggestTangentVectorBuildParams(Ogre::VES_TANGENT, src,dest))
+                mesh->buildTangentVectors(Ogre::VES_TANGENT, src,dest);
+        }
     }
 
     bool findTriShape(Ogre::Mesh *mesh, const Nif::Node *node,

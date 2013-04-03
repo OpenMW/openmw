@@ -14,12 +14,18 @@
 #define NEED_DEPTH
 #endif
 
+#define NORMAL_MAP @shPropertyHasValue(normalMap)
+#define EMISSIVE_MAP @shPropertyHasValue(emissiveMap)
+
+// right now we support 2 UV sets max. implementing them is tedious, and we're probably not going to need more
+#define SECOND_UV_SET @shPropertyString(emissiveMapUVSet)
+
+// if normal mapping is enabled, we force pixel lighting
+#define VERTEX_LIGHTING (!@shPropertyHasValue(normalMap))
 
 #define UNDERWATER @shGlobalSettingBool(render_refraction)
 
 #define VERTEXCOLOR_MODE @shPropertyString(vertexcolor_mode)
-
-#define VERTEX_LIGHTING 1
 
 #define VIEWPROJ_FIX @shGlobalSettingBool(viewproj_fix)
 
@@ -40,8 +46,22 @@
 #endif
 
         shVertexInput(float2, uv0)
-        shOutput(float2, UV)
+#if SECOND_UV_SET
+        shVertexInput(float2, uv1)
+#endif
+        shOutput(float4, UV)
+
         shNormalInput(float4)
+
+#if NORMAL_MAP
+        shTangentInput(float4)
+        shOutput(float3, tangentPassthrough)
+#endif
+
+#if !VERTEX_LIGHTING
+        shOutput(float3, normalPassthrough)
+#endif
+
 #ifdef NEED_DEPTH
         shOutput(float, depthPassthrough)
 #endif
@@ -50,6 +70,10 @@
 
 #if VERTEXCOLOR_MODE != 0
         shColourInput(float4)
+#endif
+
+#if VERTEXCOLOR_MODE != 0 && !VERTEX_LIGHTING
+        shOutput(float4, colourPassthrough)
 #endif
 
 #if VERTEX_LIGHTING
@@ -93,7 +117,21 @@
     SH_START_PROGRAM
     {
 	    shOutputPosition = shMatrixMult(wvp, shInputPosition);
-	    UV = uv0;
+
+        UV.xy = uv0;
+#if SECOND_UV_SET
+        UV.zw = uv1;
+#endif
+
+#if NORMAL_MAP
+        tangentPassthrough = tangent.xyz;
+#endif
+#if !VERTEX_LIGHTING
+        normalPassthrough = normal.xyz;
+#endif
+#if VERTEXCOLOR_MODE != 0 && !VERTEX_LIGHTING
+        colourPassthrough = colour;
+#endif
 
 #ifdef NEED_DEPTH
 
@@ -188,15 +226,35 @@
 #endif
 
     SH_BEGIN_PROGRAM
-		shSampler2D(diffuseMap)
-		shInput(float2, UV)
+        shSampler2D(diffuseMap)
+
+#if NORMAL_MAP
+        shSampler2D(normalMap)
+#endif
+
+#if EMISSIVE_MAP
+        shSampler2D(emissiveMap)
+#endif
+
+        shInput(float4, UV)
+
+#if NORMAL_MAP
+        shInput(float3, tangentPassthrough)
+#endif
+#if !VERTEX_LIGHTING
+        shInput(float3, normalPassthrough)
+#endif
 
 #ifdef NEED_DEPTH
         shInput(float, depthPassthrough)
 #endif
 
         shInput(float3, objSpacePositionPassthrough)
-        
+
+#if VERTEXCOLOR_MODE != 0 && !VERTEX_LIGHTING
+        shInput(float4, colourPassthrough)
+#endif
+
 #if FOG
         shUniform(float3, fogColour) @shAutoConstant(fogColour, fog_colour)
         shUniform(float4, fogParams) @shAutoConstant(fogParams, fog_params)
@@ -222,23 +280,98 @@
 
 #if (UNDERWATER) || (FOG)
         shUniform(float4x4, worldMatrix) @shAutoConstant(worldMatrix, world_matrix)
-        shUniform(float4, cameraPos) @shAutoConstant(cameraPos, camera_position) 
+        shUniform(float4, cameraPos) @shAutoConstant(cameraPos, camera_position)
 #endif
 
 #if UNDERWATER
-        shUniform(float, waterLevel) @shSharedParameter(waterLevel) 
+        shUniform(float, waterLevel) @shSharedParameter(waterLevel)
         shUniform(float, waterEnabled) @shSharedParameter(waterEnabled)
 #endif
 
 #if VERTEX_LIGHTING
     shInput(float4, lightResult)
     shInput(float3, directionalResult)
+#else
+    shUniform(float, lightCount) @shAutoConstant(lightCount, light_count)
+    shUniform(float4, lightPosition[@shGlobalSettingString(num_lights)]) @shAutoConstant(lightPosition, light_position_view_space_array, @shGlobalSettingString(num_lights))
+    shUniform(float4, lightDiffuse[@shGlobalSettingString(num_lights)]) @shAutoConstant(lightDiffuse, light_diffuse_colour_array, @shGlobalSettingString(num_lights))
+    shUniform(float4, lightAttenuation[@shGlobalSettingString(num_lights)]) @shAutoConstant(lightAttenuation, light_attenuation_array, @shGlobalSettingString(num_lights))
+    shUniform(float4, lightAmbient)                    @shAutoConstant(lightAmbient, ambient_light_colour)
+    shUniform(float4x4, worldView) @shAutoConstant(worldView, worldview_matrix)
+    #if VERTEXCOLOR_MODE != 2
+    shUniform(float4, materialAmbient)                    @shAutoConstant(materialAmbient, surface_ambient_colour)
+    #endif
+    #if VERTEXCOLOR_MODE != 2
+    shUniform(float4, materialDiffuse)                    @shAutoConstant(materialDiffuse, surface_diffuse_colour)
+    #endif
+    #if VERTEXCOLOR_MODE != 1
+    shUniform(float4, materialEmissive)                   @shAutoConstant(materialEmissive, surface_emissive_colour)
+    #endif
 #endif
 
     SH_START_PROGRAM
     {
-        shOutputColour(0) = shSample(diffuseMap, UV);
-            
+        shOutputColour(0) = shSample(diffuseMap, UV.xy);
+
+#if NORMAL_MAP
+        float3 normal = normalPassthrough;
+        float3 binormal = cross(tangentPassthrough.xyz, normal.xyz);
+        float3x3 tbn = float3x3(tangentPassthrough.xyz, binormal, normal.xyz);
+
+        #if SH_GLSL
+            tbn = transpose(tbn);
+        #endif
+
+        float3 TSnormal = shSample(normalMap, UV.xy).xyz * 2 - 1;
+
+        normal = normalize (shMatrixMult( transpose(tbn), TSnormal ));
+#endif
+
+#if !VERTEX_LIGHTING
+        float3 viewPos = shMatrixMult(worldView, float4(objSpacePositionPassthrough,1)).xyz;
+        float3 viewNormal = normalize(shMatrixMult(worldView, float4(normal.xyz, 0)).xyz);
+
+        float3 lightDir;
+        float d;
+        float4 lightResult = float4(0,0,0,1);
+        @shForeach(@shGlobalSettingString(num_lights))
+            lightDir = lightPosition[@shIterator].xyz - (viewPos * lightPosition[@shIterator].w);
+            d = length(lightDir);
+            lightDir = normalize(lightDir);
+
+#if VERTEXCOLOR_MODE == 2
+            lightResult.xyz += colourPassthrough.xyz * lightDiffuse[@shIterator].xyz
+                    * shSaturate(1.0 / ((lightAttenuation[@shIterator].y) + (lightAttenuation[@shIterator].z * d) + (lightAttenuation[@shIterator].w * d * d)))
+                    * max(dot(viewNormal.xyz, lightDir), 0);
+#else
+            lightResult.xyz += materialDiffuse.xyz * lightDiffuse[@shIterator].xyz
+                    * shSaturate(1.0 / ((lightAttenuation[@shIterator].y) + (lightAttenuation[@shIterator].z * d) + (lightAttenuation[@shIterator].w * d * d)))
+                    * max(dot(viewNormal.xyz, lightDir), 0);
+#endif
+
+#if @shIterator == 0
+            float3 directionalResult = lightResult.xyz;
+#endif
+
+        @shEndForeach
+
+
+#if VERTEXCOLOR_MODE == 2
+        lightResult.xyz += lightAmbient.xyz * colourPassthrough.xyz + materialEmissive.xyz;
+        lightResult.a *= colourPassthrough.a;
+#endif
+#if VERTEXCOLOR_MODE == 1
+        lightResult.xyz += lightAmbient.xyz * materialAmbient.xyz + colourPassthrough.xyz;
+#endif
+#if VERTEXCOLOR_MODE == 0
+        lightResult.xyz += lightAmbient.xyz * materialAmbient.xyz + materialEmissive.xyz;
+#endif
+
+#if VERTEXCOLOR_MODE != 2
+        lightResult.a *= materialDiffuse.a;
+#endif
+#endif
+
             // shadows only for the first (directional) light
 #if SHADOWS
             float shadow = depthShadowPCF (shadowMap0, lightSpacePos0, invShadowmapSize0);
@@ -275,7 +408,7 @@
 
 #if FOG
         float fogValue = shSaturate((depthPassthrough - fogParams.y) * fogParams.w);
-        
+
 
 #if UNDERWATER
         shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, UNDERWATER_COLOUR, shSaturate(length(waterEyePos-worldPos) / VISIBILITY));
@@ -283,6 +416,14 @@
         shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, fogColour, fogValue);
 #endif
 
+#endif
+
+#if EMISSIVE_MAP
+        #if SECOND_UV_SET
+        shOutputColour(0).xyz += shSample(emissiveMap, UV.zw).xyz;
+        #else
+        shOutputColour(0).xyz += shSample(emissiveMap, UV.xy).xyz;
+        #endif
 #endif
 
         // prevent negative colour output (for example with negative lights)
