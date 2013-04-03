@@ -179,8 +179,8 @@ namespace MWGui
     virtual void activateQuickKey  (int index);
 
     virtual void setSelectedSpell(const std::string& spellId, int successChancePercent);
-    virtual void setSelectedEnchantItem(const MWWorld::Ptr& item, int chargePercent);
-    virtual void setSelectedWeapon(const MWWorld::Ptr& item, int durabilityPercent);
+    virtual void setSelectedEnchantItem(const MWWorld::Ptr& item);
+    virtual void setSelectedWeapon(const MWWorld::Ptr& item);
     virtual void unsetSelectedSpell();
     virtual void unsetSelectedWeapon();
 
