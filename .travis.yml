@@ -4,7 +4,7 @@ compiler:
 before_script:
  - mkdir build
  - cd build
- - cmake .. -DMYGUI_STATIC=1
+ - cmake .. -DOGRE_STATIC=1 -DMYGUI_STATIC=1
  - cat CMakeCache.txt
 before_install:
  - git submodule update --init --recursive
