@@ -7,6 +7,7 @@
 
 #include "creaturestats.hpp"
 #include "npcstats.hpp"
+#include <boost/algorithm/string.hpp>
 
 namespace MWMechanics
 {
@@ -56,7 +57,7 @@ namespace MWMechanics
         enchantment.mData.mCharge = getGemCharge();
 
         //Exception for Azura Star, it's not destroyed after enchanting
-        if(mSoulGemPtr.get<ESM::Miscellaneous>()->mBase->mId=="Misc_SoulGem_Azura")
+        if(boost::iequals(mSoulGemPtr.get<ESM::Miscellaneous>()->mBase->mId, "Misc_SoulGem_Azura"))
             mSoulGemPtr.getCellRef().mSoul="";
         else
             mSoulGemPtr.getRefData().setCount (mSoulGemPtr.getRefData().getCount()-1);
