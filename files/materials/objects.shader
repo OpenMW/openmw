@@ -15,6 +15,10 @@
 #endif
 
 #define NORMAL_MAP @shPropertyHasValue(normalMap)
+#define EMISSIVE_MAP @shPropertyHasValue(emissiveMap)
+
+// right now we support 2 UV sets max. implementing them is tedious, and we're probably not going to need more
+#define SECOND_UV_SET @shPropertyString(emissiveMapUVSet)
 
 // if normal mapping is enabled, we force pixel lighting
 #define VERTEX_LIGHTING (!@shPropertyHasValue(normalMap))
@@ -42,7 +46,11 @@
 #endif
 
         shVertexInput(float2, uv0)
-        shOutput(float2, UV)
+#if SECOND_UV_SET
+        shVertexInput(float2, uv1)
+#endif
+        shOutput(float4, UV)
+
         shNormalInput(float4)
 
 #if NORMAL_MAP
@@ -109,7 +117,12 @@
     SH_START_PROGRAM
     {
 	    shOutputPosition = shMatrixMult(wvp, shInputPosition);
-	    UV = uv0;
+
+        UV.xy = uv0;
+#if SECOND_UV_SET
+        UV.zw = uv1;
+#endif
+
 #if NORMAL_MAP
         tangentPassthrough = tangent.xyz;
 #endif
@@ -219,7 +232,11 @@
         shSampler2D(normalMap)
 #endif
 
-        shInput(float2, UV)
+#if EMISSIVE_MAP
+        shSampler2D(emissiveMap)
+#endif
+
+        shInput(float4, UV)
 
 #if NORMAL_MAP
         shInput(float3, tangentPassthrough)
@@ -294,7 +311,7 @@
 
     SH_START_PROGRAM
     {
-        shOutputColour(0) = shSample(diffuseMap, UV);
+        shOutputColour(0) = shSample(diffuseMap, UV.xy);
 
 #if NORMAL_MAP
         float3 normal = normalPassthrough;
@@ -399,6 +416,14 @@
         shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, fogColour, fogValue);
 #endif
 
+#endif
+
+#if EMISSIVE_MAP
+        #if SECOND_UV_SET
+        shOutputColour(0).xyz += shSample(emissiveMap, UV.zw).xyz;
+        #else
+        shOutputColour(0).xyz += shSample(emissiveMap, UV.xy).xyz;
+        #endif
 #endif
 
         // prevent negative colour output (for example with negative lights)

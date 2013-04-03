@@ -64,7 +64,7 @@ public:
         bool inUse;
         NiSourceTexturePtr texture;
 
-        int clamp, set, filter;
+        int clamp, uvSet, filter;
         short unknown2;
 
         void read(NIFStream *nif)
@@ -75,7 +75,7 @@ public:
             texture.read(nif);
             clamp = nif->getInt();
             filter = nif->getInt();
-            set = nif->getInt();
+            uvSet = nif->getInt();
 
             // I have no idea, but I think these are actually two
             // PS2-specific shorts (ps2L and ps2K), followed by an unknown

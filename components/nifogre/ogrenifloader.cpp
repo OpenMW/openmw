@@ -749,6 +749,13 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
 
     instance->setProperty("diffuseMap", sh::makeProperty(texName[Nif::NiTexturingProperty::BaseTexture]));
     instance->setProperty("normalMap", sh::makeProperty(texName[Nif::NiTexturingProperty::BumpTexture]));
+    instance->setProperty("emissiveMap", sh::makeProperty(texName[Nif::NiTexturingProperty::GlowTexture]));
+    if (!texName[Nif::NiTexturingProperty::GlowTexture].empty())
+    {
+        instance->setProperty("use_emissive_map", sh::makeProperty(new sh::BooleanValue(true)));
+        instance->setProperty("emissiveMapUVSet", sh::makeProperty(new sh::IntValue(texprop->textures[Nif::NiTexturingProperty::GlowTexture].uvSet)));
+    }
+
     for(int i = 1;i < 7;i++)
     {
         if(!texName[i].empty())
