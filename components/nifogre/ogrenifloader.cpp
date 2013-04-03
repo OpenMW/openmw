@@ -538,15 +538,50 @@ static std::map<size_t,std::string> MaterialMap;
 
 static void warn(const std::string &msg)
 {
-    std::cerr << "NIFMeshLoader: Warn: " << msg << std::endl;
+    std::cerr << "NIFMaterialLoader: Warn: " << msg << std::endl;
 }
 
 static void fail(const std::string &msg)
 {
-    std::cerr << "NIFMeshLoader: Fail: "<< msg << std::endl;
+    std::cerr << "NIFMaterialLoader: Fail: "<< msg << std::endl;
     abort();
 }
 
+
+static std::string findTextureName(const std::string &filename)
+{
+    /* Bethesda at some point converted all their BSA
+     * textures from tga to dds for increased load speed, but all
+     * texture file name references were kept as .tga.
+     */
+    static const char path[] = "textures\\";
+
+    std::string texname = filename;
+    Misc::StringUtils::toLower(texname);
+
+    if(texname.compare(0, sizeof(path)-1, path) != 0)
+        texname = path + texname;
+
+    Ogre::String::size_type pos = texname.rfind('.');
+    if(pos != Ogre::String::npos && texname.compare(pos, texname.length() - pos, ".dds") != 0)
+    {
+        // since we know all (GOTY edition or less) textures end
+        // in .dds, we change the extension
+        texname.replace(pos, texname.length(), ".dds");
+
+        // if it turns out that the above wasn't true in all cases (not for vanilla, but maybe mods)
+        // verify, and revert if false (this call succeeds quickly, but fails slowly)
+        if(!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(texname))
+        {
+            texname = filename;
+            Misc::StringUtils::toLower(texname);
+            if(texname.compare(0, sizeof(path)-1, path) != 0)
+                texname = path + texname;
+        }
+    }
+
+    return texname;
+}
 
 public:
 static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String &name, const Ogre::String &group,
@@ -575,47 +610,29 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
     int depthFlags = 3;
     // Default should be 1, but Bloodmoon's models are broken
     int specFlags = 0;
-    Ogre::String texName;
+    Ogre::String texName[7];
 
     bool vertexColour = (shape->data->colors.size() != 0);
 
     // Texture
-    if(texprop && texprop->textures[0].inUse)
+    if(texprop)
     {
-        const Nif::NiSourceTexture *st = texprop->textures[0].texture.getPtr();
-        if(st->external)
+        for(int i = 0;i < 7;i++)
         {
-            /* Bethesda at some point converted all their BSA
-             * textures from tga to dds for increased load speed, but all
-             * texture file name references were kept as .tga.
-             */
-            static const char path[] = "textures\\";
-
-            texName = st->filename;
-            Misc::StringUtils::toLower(texName);
-
-            if(texName.compare(0, sizeof(path)-1, path) != 0)
-                texName = path + texName;
-
-            Ogre::String::size_type pos = texName.rfind('.');
-            if(pos != Ogre::String::npos && texName.compare(pos, texName.length() - pos, ".dds") != 0)
+            if(!texprop->textures[i].inUse)
+                continue;
+            if(texprop->textures[i].texture.empty())
             {
-                // since we know all (GOTY edition or less) textures end
-                // in .dds, we change the extension
-                texName.replace(pos, texName.length(), ".dds");
-
-                // if it turns out that the above wasn't true in all cases (not for vanilla, but maybe mods)
-                // verify, and revert if false (this call succeeds quickly, but fails slowly)
-                if(!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(texName))
-                {
-                    texName = st->filename;
-                    Misc::StringUtils::toLower(texName);
-                    if(texName.compare(0, sizeof(path)-1, path) != 0)
-                        texName = path + texName;
-                }
+                warn("Texture layer "+Ogre::StringConverter::toString(i)+" is in use but empty in "+name+"\n");
+                continue;
             }
+
+            const Nif::NiSourceTexture *st = texprop->textures[0].texture.getPtr();
+            if(st->external)
+                texName[i] = findTextureName(st->filename);
+            else
+                warn("Found internal texture, ignoring.");
         }
-        else warn("Found internal texture, ignoring.");
     }
 
     // Alpha modifiers
@@ -655,8 +672,6 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
         alpha = matprop->data.alpha;
     }
 
-    Ogre::String matname = name;
-    if(matprop || !texName.empty())
     {
         // Generate a hash out of all properties that can affect the material.
         size_t h = 0;
@@ -672,7 +687,11 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
         boost::hash_combine(h, emissive.x);
         boost::hash_combine(h, emissive.y);
         boost::hash_combine(h, emissive.z);
-        boost::hash_combine(h, texName);
+        for(int i = 0;i < 7;i++)
+        {
+            if(!texName[i].empty())
+                boost::hash_combine(h, texName[i]);
+        }
         boost::hash_combine(h, vertexColour);
         boost::hash_combine(h, alphaFlags);
         boost::hash_combine(h, alphaTest);
@@ -687,11 +706,11 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
             return itr->second;
         }
         // not found, create a new one
-        MaterialMap.insert(std::make_pair(h, matname));
+        MaterialMap.insert(std::make_pair(h, name));
     }
 
     // No existing material like this. Create a new one.
-    sh::MaterialInstance* instance = sh::Factory::getInstance ().createMaterialInstance (matname, "openmw_objects_base");
+    sh::MaterialInstance *instance = sh::Factory::getInstance().createMaterialInstance(name, "openmw_objects_base");
     if(vertMode == 0 || !vertexColour)
     {
         instance->setProperty("ambient", sh::makeProperty(new sh::Vector4(ambient.x, ambient.y, ambient.z, 1)));
@@ -722,13 +741,18 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
             new sh::Vector4(specular.x, specular.y, specular.z, glossiness)));
     }
 
-    instance->setProperty("diffuseMap", sh::makeProperty(texName));
+    instance->setProperty("diffuseMap", sh::makeProperty(texName[0]));
+    for(int i = 1;i < 7;i++)
+    {
+        if(!texName[i].empty())
+            warn("Ignored texture "+texName[i]+" on layer "+Ogre::StringConverter::toString(i)+"\n");
+    }
 
     if (vertexColour)
         instance->setProperty("has_vertex_colour", sh::makeProperty(new sh::BooleanValue(true)));
 
     // Add transparency if NiAlphaProperty was present
-    NifOverrides::TransparencyResult result = NifOverrides::Overrides::getTransparencyOverride(texName);
+    NifOverrides::TransparencyResult result = NifOverrides::Overrides::getTransparencyOverride(texName[0]);
     if (result.first)
     {
         alphaFlags = (1<<9) | (6<<10); /* alpha_rejection enabled, greater_equal */
@@ -763,8 +787,8 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
     instance->setProperty("depth_write", sh::makeProperty(new sh::StringValue(((depthFlags>>1)&1) ? "on" : "off")));
     // depth_func???
 
-    sh::Factory::getInstance()._ensureMaterial(matname, "Default");
-    return matname;
+    sh::Factory::getInstance()._ensureMaterial(name, "Default");
+    return name;
 }
 
 };
