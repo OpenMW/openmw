@@ -154,26 +154,36 @@ OMW::Engine::~Engine()
 
 void OMW::Engine::loadBSA()
 {
+    // We use separate resource groups to handle location priority.
     const Files::PathContainer& dataDirs = mFileCollections.getPaths();
-    std::string dataDirectory;
+
+    int i=0;
     for (Files::PathContainer::const_iterator iter = dataDirs.begin(); iter != dataDirs.end(); ++iter)
     {
-        dataDirectory = iter->string();
+        // Last data dir has the highest priority
+        std::string groupName = "Data" + Ogre::StringConverter::toString(dataDirs.size()-i);
+        Ogre::ResourceGroupManager::getSingleton ().createResourceGroup (groupName);
+
+        std::string dataDirectory = iter->string();
         std::cout << "Data dir " << dataDirectory << std::endl;
-        Bsa::addDir(dataDirectory, mFSStrict);
+        Bsa::addDir(dataDirectory, mFSStrict, groupName);
+        ++i;
     }
 
-    // BSA resources are put into a separate group. We want loose files to have priority over BSA resources, and this seems
-    // to be the only way to get Ogre to do just that.
-    Ogre::ResourceGroupManager::getSingleton ().createResourceGroup ("GroupBSA");
-
+    i=0;
     for (std::vector<std::string>::const_iterator archive = mArchives.begin(); archive != mArchives.end(); ++archive)
     {
         if (mFileCollections.doesExist(*archive))
         {
+            // Last BSA has the highest priority
+            std::string groupName = "DataBSA" + Ogre::StringConverter::toString(dataDirs.size()-i);
+
+            Ogre::ResourceGroupManager::getSingleton ().createResourceGroup (groupName);
+
             const std::string archivePath = mFileCollections.getPath(*archive).string();
             std::cout << "Adding BSA archive " << archivePath << std::endl;
-            Bsa::addBSA(archivePath, "GroupBSA");
+            Bsa::addBSA(archivePath, groupName);
+            ++i;
         }
         else
         {
