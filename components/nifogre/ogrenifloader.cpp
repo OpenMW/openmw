@@ -845,8 +845,13 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
         const Nif::NiSkinInstance *skin = (shape->skin.empty() ? NULL : shape->skin.getPtr());
         std::vector<Ogre::Vector3> srcVerts = data->vertices;
         std::vector<Ogre::Vector3> srcNorms = data->normals;
+        Ogre::HardwareBuffer::Usage vertUsage = Ogre::HardwareBuffer::HBU_STATIC;
+        bool vertShadowBuffer = false;
         if(skin != NULL)
         {
+            vertUsage = Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY;
+            vertShadowBuffer = true;
+
             // Only set a skeleton when skinning. Unskinned meshes with a skeleton will be
             // explicitly attached later.
             mesh->setSkeletonName(mName);
@@ -948,8 +953,7 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
         if(srcVerts.size())
         {
             vbuf = hwBufMgr->createVertexBuffer(Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3),
-                                                srcVerts.size(), Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY,
-                                                true);
+                                                srcVerts.size(), vertUsage, vertShadowBuffer);
             vbuf->writeData(0, vbuf->getSizeInBytes(), &srcVerts[0][0], true);
 
             decl->addElement(nextBuf, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
@@ -960,8 +964,7 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
         if(srcNorms.size())
         {
             vbuf = hwBufMgr->createVertexBuffer(Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3),
-                                                srcNorms.size(), Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY,
-                                                true);
+                                                srcNorms.size(), vertUsage, vertShadowBuffer);
             vbuf->writeData(0, vbuf->getSizeInBytes(), &srcNorms[0][0], true);
 
             decl->addElement(nextBuf, 0, Ogre::VET_FLOAT3, Ogre::VES_NORMAL);
@@ -980,8 +983,7 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
                 rs->convertColourValue(clr, &colorsRGB[i]);
             }
             vbuf = hwBufMgr->createVertexBuffer(Ogre::VertexElement::getTypeSize(Ogre::VET_COLOUR),
-                                                colorsRGB.size(), Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY,
-                                                true);
+                                                colorsRGB.size(), Ogre::HardwareBuffer::HBU_STATIC);
             vbuf->writeData(0, vbuf->getSizeInBytes(), &colorsRGB[0], true);
             decl->addElement(nextBuf, 0, Ogre::VET_COLOUR, Ogre::VES_DIFFUSE);
             bind->setBinding(nextBuf++, vbuf);
@@ -993,7 +995,7 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
         {
             size_t elemSize = Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT2);
             vbuf = hwBufMgr->createVertexBuffer(elemSize, srcVerts.size()*numUVs,
-                                                Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY, true);
+                                                Ogre::HardwareBuffer::HBU_STATIC);
             for(size_t i = 0;i < numUVs;i++)
             {
                 const std::vector<Ogre::Vector2> &uvlist = data->uvlist[i];
@@ -1009,7 +1011,7 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
         if(srcIdx.size())
         {
             ibuf = hwBufMgr->createIndexBuffer(Ogre::HardwareIndexBuffer::IT_16BIT, srcIdx.size(),
-                                               Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+                                               Ogre::HardwareBuffer::HBU_STATIC);
             ibuf->writeData(0, ibuf->getSizeInBytes(), &srcIdx[0], true);
             sub->indexData->indexBuffer = ibuf;
             sub->indexData->indexCount = srcIdx.size();
