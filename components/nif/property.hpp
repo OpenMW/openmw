@@ -109,6 +109,17 @@ public:
      * 5 - Bump map texture
      * 6 - Decal texture
      */
+    enum TextureType
+    {
+        BaseTexture = 0,
+        DarkTexture = 1,
+        DetailTexture = 2,
+        GlossTexture = 3,
+        GlowTexture = 4,
+        BumpTexture = 5,
+        DecalTexture = 6
+    };
+
     Texture textures[7];
 
     void read(NIFStream *nif)
