@@ -627,7 +627,7 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
                 continue;
             }
 
-            const Nif::NiSourceTexture *st = texprop->textures[0].texture.getPtr();
+            const Nif::NiSourceTexture *st = texprop->textures[i].texture.getPtr();
             if(st->external)
                 texName[i] = findTextureName(st->filename);
             else
