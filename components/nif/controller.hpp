@@ -62,20 +62,87 @@ public:
     }
 };
 
-class NiBSPArrayController : public Controller
+class NiParticleSystemController : public Controller
 {
 public:
+    float velocity;
+    float velocityRandom;
+
+    float verticalDir; // 0=up, pi/2=horizontal, pi=down
+    float verticalAngle;
+    float horizontalDir;
+    float horizontalAngle;
+
+    float size;
+    float startTime;
+    float stopTime;
+
+    float emitRate;
+    float lifetime;
+    float lifetimeRandom;
+
+    int emitFlags; // Bit 0: Emit Rate toggle bit (0 = auto adjust, 1 = use Emit Rate value)
+    Ogre::Vector3 offsetRandom;
+
+    NodePtr emitter;
+
+    int numParticles;
+    int activeCount;
+    //std::vector<Particle> particles; /*numParticles*/
+
+    RecordPtr modifier;
+
     void read(NIFStream *nif)
     {
         Controller::read(nif);
 
-        // At the moment, just skip it all
-        nif->skip(111);
-        int s = nif->getUShort();
-        nif->skip(15 + s*40);
+        velocity = nif->getFloat();
+        velocityRandom = nif->getFloat();
+        verticalDir = nif->getFloat();
+        verticalAngle = nif->getFloat();
+        horizontalDir = nif->getFloat();
+        horizontalAngle = nif->getFloat();
+        /*normal?*/ nif->getVector3();
+        /*color?*/ nif->getVector4();
+        size = nif->getFloat();
+        startTime = nif->getFloat();
+        stopTime = nif->getFloat();
+        nif->getChar();
+        emitRate = nif->getFloat();
+        lifetime = nif->getFloat();
+        lifetimeRandom = nif->getFloat();
+
+        emitFlags = nif->getUShort();
+        offsetRandom = nif->getVector3();
+
+        emitter.read(nif);
+
+        /* Unknown Short, 0?
+         * Unknown Float, 1.0?
+         * Unknown Int, 1?
+         * Unknown Int, 0?
+         * Unknown Short, 0?
+         */
+        nif->skip(16);
+
+        numParticles = nif->getUShort();
+        activeCount = nif->getUShort();
+        nif->skip(numParticles*40);
+
+        nif->getUInt(); /* -1? */
+        modifier.read(nif);
+        nif->getUInt(); /* -1? */
+        nif->getChar();
+    }
+
+    void post(NIFFile *nif)
+    {
+        Controller::post(nif);
+        emitter.post(nif);
+        modifier.post(nif);
     }
 };
-typedef NiBSPArrayController NiParticleSystemController;
+typedef NiParticleSystemController NiBSPArrayController;
 
 class NiMaterialColorController : public Controller
 {
