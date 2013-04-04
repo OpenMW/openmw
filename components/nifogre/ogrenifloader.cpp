@@ -35,6 +35,8 @@
 #include <OgreEntity.h>
 #include <OgreSubEntity.h>
 #include <OgreTagPoint.h>
+#include <OgreParticleSystem.h>
+#include <OgreParticleEmitter.h>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
@@ -317,7 +319,9 @@ void buildBones(Ogre::Skeleton *skel, const Nif::Node *node, Ogre::Bone *&animro
 
     if(!(node->recType == Nif::RC_NiNode || /* Nothing special; children traversed below */
          node->recType == Nif::RC_RootCollisionNode || /* handled in nifbullet (hopefully) */
-         node->recType == Nif::RC_NiTriShape /* Handled in the mesh loader */
+         node->recType == Nif::RC_NiTriShape || /* Handled in the mesh loader */
+         node->recType == Nif::RC_NiAutoNormalParticles ||
+         node->recType == Nif::RC_NiRotatingParticles
          ))
         warn("Unhandled "+node->recName+" "+node->name+" in "+skel->getName());
 
@@ -326,7 +330,8 @@ void buildBones(Ogre::Skeleton *skel, const Nif::Node *node, Ogre::Bone *&animro
     {
         if(ctrl->recType == Nif::RC_NiKeyframeController)
             ctrls.push_back(static_cast<const Nif::NiKeyframeController*>(ctrl.getPtr()));
-        else
+        else if(!(ctrl->recType == Nif::RC_NiParticleSystemController
+                  ))
             warn("Unhandled "+ctrl->recName+" from node "+node->name+" in "+skel->getName());
         ctrl = ctrl->next;
     }
@@ -588,7 +593,8 @@ static std::string findTextureName(const std::string &filename)
 }
 
 public:
-static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String &name, const Ogre::String &group,
+static Ogre::String getMaterial(const Nif::ShapeData *shapedata,
+                                const Ogre::String &name, const Ogre::String &group,
                                 const Nif::NiTexturingProperty *texprop,
                                 const Nif::NiMaterialProperty *matprop,
                                 const Nif::NiAlphaProperty *alphaprop,
@@ -617,7 +623,7 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
     int specFlags = 0;
     Ogre::String texName[7];
 
-    bool vertexColour = (shape->data->colors.size() != 0);
+    bool vertexColour = (shapedata->colors.size() != 0);
 
     // Texture
     if(texprop)
@@ -819,12 +825,12 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
     std::string mGroup;
     size_t mShapeIndex;
 
-    void warn(const std::string &msg)
+    static void warn(const std::string &msg)
     {
         std::cerr << "NIFMeshLoader: Warn: " << msg << std::endl;
     }
 
-    void fail(const std::string &msg)
+    static void fail(const std::string &msg)
     {
         std::cerr << "NIFMeshLoader: Fail: "<< msg << std::endl;
         abort();
@@ -1039,9 +1045,10 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
         }
 
         bool needTangents=false;
-        std::string matname = NIFMaterialLoader::getMaterial(shape, mesh->getName(), mGroup,
+        std::string matname = NIFMaterialLoader::getMaterial(data, mesh->getName(), mGroup,
                                                              texprop, matprop, alphaprop,
-                                                             vertprop, zprop, specprop, needTangents);
+                                                             vertprop, zprop, specprop,
+                                                             needTangents);
         if(matname.length() > 0)
             sub->setMaterialName(matname);
 
@@ -1112,6 +1119,146 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
 
     typedef std::map<std::string,NIFMeshLoader> LoaderMap;
     static LoaderMap sLoaders;
+
+
+    static void createParticleEmitterAffectors(Ogre::ParticleSystem *partsys, const Nif::NiParticleSystemController *partctrl)
+    {
+        Ogre::ParticleEmitter *emitter = partsys->addEmitter("Point");
+        emitter->setDirection(Ogre::Vector3::UNIT_Z);
+        emitter->setParticleVelocity(partctrl->velocity-partctrl->velocityRandom,
+                                     partctrl->velocity+partctrl->velocityRandom);
+        emitter->setEmissionRate(partctrl->emitRate);
+        emitter->setTimeToLive(partctrl->lifetime-partctrl->lifetimeRandom,
+                               partctrl->lifetime+partctrl->lifetimeRandom);
+
+        Nif::ExtraPtr e = partctrl->extra;
+        while(!e.empty())
+        {
+            if(e->recType == Nif::RC_NiParticleGrowFade)
+            {
+                // TODO: Implement
+            }
+            else if(e->recType == Nif::RC_NiParticleColorModifier)
+            {
+                // TODO: Implement (Ogre::ColourInterpolatorAffector?)
+            }
+            else if(e->recType == Nif::RC_NiGravity)
+            {
+                // TODO: Implement (Ogre::LinearForceAffector?)
+            }
+            else
+                warn("Unhandled particle modifier "+e->recName);
+            e = e->extra;
+        }
+    }
+
+    Ogre::ParticleSystem *createParticleSystem(Ogre::SceneManager *sceneMgr, Ogre::Entity *entitybase,
+                                               const Nif::Node *partnode)
+    {
+        const Nif::NiAutoNormalParticlesData *particledata = NULL;
+        if(partnode->recType == Nif::RC_NiAutoNormalParticles)
+            particledata = static_cast<const Nif::NiAutoNormalParticles*>(partnode)->data.getPtr();
+        else if(partnode->recType == Nif::RC_NiRotatingParticles)
+            particledata = static_cast<const Nif::NiRotatingParticles*>(partnode)->data.getPtr();
+
+        Ogre::ParticleSystem *partsys = sceneMgr->createParticleSystem();
+        try {
+            const Nif::NiTexturingProperty *texprop = NULL;
+            const Nif::NiMaterialProperty *matprop = NULL;
+            const Nif::NiAlphaProperty *alphaprop = NULL;
+            const Nif::NiVertexColorProperty *vertprop = NULL;
+            const Nif::NiZBufferProperty *zprop = NULL;
+            const Nif::NiSpecularProperty *specprop = NULL;
+            if(partnode->parent)
+            {
+                // FIXME: We should probably search down the whole tree instead of just the parent
+                const Nif::PropertyList &proplist = partnode->parent->props;
+                for(size_t i = 0;i < proplist.length();i++)
+                {
+                    // Entries may be empty
+                    if(proplist[i].empty())
+                        continue;
+
+                    const Nif::Property *pr = proplist[i].getPtr();
+                    if(pr->recType == Nif::RC_NiTexturingProperty)
+                        texprop = static_cast<const Nif::NiTexturingProperty*>(pr);
+                    else if(pr->recType == Nif::RC_NiMaterialProperty)
+                        matprop = static_cast<const Nif::NiMaterialProperty*>(pr);
+                    else if(pr->recType == Nif::RC_NiAlphaProperty)
+                        alphaprop = static_cast<const Nif::NiAlphaProperty*>(pr);
+                    else if(pr->recType == Nif::RC_NiVertexColorProperty)
+                        vertprop = static_cast<const Nif::NiVertexColorProperty*>(pr);
+                    else if(pr->recType == Nif::RC_NiZBufferProperty)
+                        zprop = static_cast<const Nif::NiZBufferProperty*>(pr);
+                    else if(pr->recType == Nif::RC_NiSpecularProperty)
+                        specprop = static_cast<const Nif::NiSpecularProperty*>(pr);
+                    else
+                        warn("Unhandled property type: "+pr->recName);
+                }
+            }
+            const Nif::PropertyList &proplist = partnode->props;
+            for(size_t i = 0;i < proplist.length();i++)
+            {
+                // Entries may be empty
+                if(proplist[i].empty())
+                    continue;
+
+                const Nif::Property *pr = proplist[i].getPtr();
+                if(pr->recType == Nif::RC_NiTexturingProperty)
+                    texprop = static_cast<const Nif::NiTexturingProperty*>(pr);
+                else if(pr->recType == Nif::RC_NiMaterialProperty)
+                    matprop = static_cast<const Nif::NiMaterialProperty*>(pr);
+                else if(pr->recType == Nif::RC_NiAlphaProperty)
+                    alphaprop = static_cast<const Nif::NiAlphaProperty*>(pr);
+                else if(pr->recType == Nif::RC_NiVertexColorProperty)
+                    vertprop = static_cast<const Nif::NiVertexColorProperty*>(pr);
+                else if(pr->recType == Nif::RC_NiZBufferProperty)
+                    zprop = static_cast<const Nif::NiZBufferProperty*>(pr);
+                else if(pr->recType == Nif::RC_NiSpecularProperty)
+                    specprop = static_cast<const Nif::NiSpecularProperty*>(pr);
+                else
+                    warn("Unhandled property type: "+pr->recName);
+            }
+
+            std::string fullname = mName+"@index="+Ogre::StringConverter::toString(partnode->recIndex);
+            if(partnode->name.length() > 0)
+                fullname += "@type="+partnode->name;
+            Misc::StringUtils::toLower(fullname);
+
+            bool needTangents;
+            partsys->setMaterialName(NIFMaterialLoader::getMaterial(particledata, fullname, mGroup,
+                                                                    texprop, matprop, alphaprop,
+                                                                    vertprop, zprop, specprop,
+                                                                    needTangents));
+
+            partsys->setDefaultDimensions(particledata->particleSize, particledata->particleSize);
+            partsys->setCullIndividually(false);
+            partsys->setParticleQuota(particledata->activeCount);
+
+            Nif::ControllerPtr ctrl = partnode->controller;
+            while(!ctrl.empty())
+            {
+                if(ctrl->recType == Nif::RC_NiParticleSystemController)
+                {
+                    const Nif::NiParticleSystemController *partctrl = static_cast<const Nif::NiParticleSystemController*>(ctrl.getPtr());
+
+                    createParticleEmitterAffectors(partsys, partctrl);
+                    if(!partctrl->emitter.empty() && !partsys->isAttached())
+                        entitybase->attachObjectToBone(partctrl->emitter->name, partsys);
+                }
+                ctrl = ctrl->next;
+            }
+
+            if(!partsys->isAttached())
+                entitybase->attachObjectToBone(partnode->name, partsys);
+        }
+        catch(std::exception &e) {
+            std::cerr<< "Particles exception: "<<e.what() <<std::endl;
+            sceneMgr->destroyParticleSystem(partsys);
+            partsys = NULL;
+        };
+        return partsys;
+    }
 
 
     NIFMeshLoader(const std::string &name, const std::string &group)
@@ -1197,6 +1344,14 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
                 else
                     entities.mSkelBase->attachObjectToBone(shape->name, entity);
             }
+        }
+
+        if((node->recType == Nif::RC_NiAutoNormalParticles ||
+            node->recType == Nif::RC_NiRotatingParticles) && !(flags&0x01))
+        {
+            Ogre::ParticleSystem *partsys = createParticleSystem(sceneMgr, entities.mSkelBase, node);
+            if(partsys != NULL)
+                entities.mParticles.push_back(partsys);
         }
 
         const Nif::NiNode *ninode = dynamic_cast<const Nif::NiNode*>(node);
