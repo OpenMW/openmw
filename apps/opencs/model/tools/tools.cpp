@@ -14,6 +14,7 @@
 #include "mandatoryid.hpp"
 #include "skillcheck.hpp"
 #include "classcheck.hpp"
+#include "factioncheck.hpp"
 
 CSMTools::Operation *CSMTools::Tools::get (int type)
 {
@@ -57,6 +58,8 @@ CSMTools::Verifier *CSMTools::Tools::getVerifier()
         mVerifier->appendStage (new SkillCheckStage (mData.getSkills()));
 
         mVerifier->appendStage (new ClassCheckStage (mData.getClasses()));
+
+        mVerifier->appendStage (new FactionCheckStage (mData.getFactions()));
     }
 
     return mVerifier;
