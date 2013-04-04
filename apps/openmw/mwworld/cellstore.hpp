@@ -9,7 +9,6 @@
 #include "livecellref.hpp"
 #include "esmstore.hpp"
 
-struct C;
 namespace MWWorld
 {
 

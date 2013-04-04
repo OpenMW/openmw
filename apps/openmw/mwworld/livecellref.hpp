@@ -39,7 +39,7 @@ namespace MWWorld
         RefData mData;
     };
 
-    template<typename X> bool operator==(const LiveCellRef<X>& ref, int pRefnum);
+//    template<typename X> bool operator==(const LiveCellRef<X>& ref, int pRefnum);
 }
 
 #endif
