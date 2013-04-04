@@ -66,12 +66,14 @@ typedef Named NiSequenceStreamHelper;
 class NiParticleGrowFade : public Controlled
 {
 public:
+    float growTime;
+    float fadeTime;
+
     void read(NIFStream *nif)
     {
         Controlled::read(nif);
-
-        // Two floats.
-        nif->skip(8);
+        growTime = nif->getFloat();
+        fadeTime = nif->getFloat();
     }
 };
 

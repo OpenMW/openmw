@@ -65,6 +65,14 @@ public:
 class NiParticleSystemController : public Controller
 {
 public:
+    struct Particle {
+        Ogre::Vector3 velocity;
+        float lifetime;
+        float lifespan;
+        float timestamp;
+        int vertex;
+    };
+
     float velocity;
     float velocityRandom;
 
@@ -88,9 +96,9 @@ public:
 
     int numParticles;
     int activeCount;
-    //std::vector<Particle> particles; /*numParticles*/
+    std::vector<Particle> particles;
 
-    RecordPtr modifier;
+    ExtraPtr extra;
 
     void read(NIFStream *nif)
     {
@@ -127,10 +135,21 @@ public:
 
         numParticles = nif->getUShort();
         activeCount = nif->getUShort();
-        nif->skip(numParticles*40);
+
+        particles.resize(numParticles);
+        for(size_t i = 0;i < particles.size();i++)
+        {
+            particles[i].velocity = nif->getVector3();
+            nif->getVector3(); /* unknown */
+            particles[i].lifetime = nif->getFloat();
+            particles[i].lifespan = nif->getFloat();
+            particles[i].timestamp = nif->getFloat();
+            nif->getUShort(); /* unknown */
+            particles[i].vertex = nif->getUShort();
+        }
 
         nif->getUInt(); /* -1? */
-        modifier.read(nif);
+        extra.read(nif);
         nif->getUInt(); /* -1? */
         nif->getChar();
     }
@@ -139,7 +158,7 @@ public:
     {
         Controller::post(nif);
         emitter.post(nif);
-        modifier.post(nif);
+        extra.post(nif);
     }
 };
 typedef NiParticleSystemController NiBSPArrayController;

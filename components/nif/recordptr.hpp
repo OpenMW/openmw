@@ -142,7 +142,6 @@ class NiSourceTexture;
 class NiRotatingParticlesData;
 class NiAutoNormalParticlesData;
 
-typedef RecordPtrT<Record> RecordPtr;
 typedef RecordPtrT<Node> NodePtr;
 typedef RecordPtrT<Extra> ExtraPtr;
 typedef RecordPtrT<NiUVData> NiUVDataPtr;
