@@ -54,6 +54,10 @@ namespace CSMWorld
 
             IdCollection<ESM::Skill>& getSkills();
 
+            const IdCollection<ESM::Class>& getClasses() const;
+
+            IdCollection<ESM::Class>& getClasses();
+
             const IdCollection<ESM::Faction>& getFactions() const;
 
             IdCollection<ESM::Faction>& getFactions();

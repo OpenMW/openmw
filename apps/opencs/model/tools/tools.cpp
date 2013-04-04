@@ -13,6 +13,7 @@
 #include "reportmodel.hpp"
 #include "mandatoryid.hpp"
 #include "skillcheck.hpp"
+#include "classcheck.hpp"
 
 CSMTools::Operation *CSMTools::Tools::get (int type)
 {
@@ -54,6 +55,8 @@ CSMTools::Verifier *CSMTools::Tools::getVerifier()
             CSMWorld::UniversalId (CSMWorld::UniversalId::Type_Globals), mandatoryIds));
 
         mVerifier->appendStage (new SkillCheckStage (mData.getSkills()));
+
+        mVerifier->appendStage (new ClassCheckStage (mData.getClasses()));
     }
 
     return mVerifier;

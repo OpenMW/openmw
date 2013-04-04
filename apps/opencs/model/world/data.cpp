@@ -107,6 +107,16 @@ CSMWorld::IdCollection<ESM::Skill>& CSMWorld::Data::getSkills()
     return mSkills;
 }
 
+const CSMWorld::IdCollection<ESM::Class>& CSMWorld::Data::getClasses() const
+{
+    return mClasses;
+}
+
+CSMWorld::IdCollection<ESM::Class>& CSMWorld::Data::getClasses()
+{
+    return mClasses;
+}
+
 const CSMWorld::IdCollection<ESM::Faction>& CSMWorld::Data::getFactions() const
 {
     return mFactions;
