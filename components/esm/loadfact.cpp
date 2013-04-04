@@ -71,7 +71,7 @@ void Faction::save(ESMWriter &esm)
     void Faction::blank()
     {
         mName.clear();
-        mData.mAttributes[0] = mData.mAttributes[1] = 0;
+        mData.mAttribute[0] = mData.mAttribute[1] = 0;
         mData.mUnknown = -1;
         mData.mIsHidden = 0;
 

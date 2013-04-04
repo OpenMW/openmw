@@ -34,7 +34,7 @@ struct Faction
     struct FADTstruct
     {
         // Which attributes we like
-        int mAttributes[2];
+        int mAttribute[2];
 
         RankData mRankData[10];
 

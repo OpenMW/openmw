@@ -679,10 +679,10 @@ void Record<ESM::Faction>::print()
     std::cout << "  Hidden: " << mData.mData.mIsHidden << std::endl;
     if (mData.mData.mUnknown != -1)
         std::cout << "  Unknown: " << mData.mData.mUnknown << std::endl;
-    std::cout << "  Attribute1: " << attributeLabel(mData.mData.mAttributes[0])
-              << " (" << mData.mData.mAttributes[0] << ")" << std::endl;
-    std::cout << "  Attribute2: " << attributeLabel(mData.mData.mAttributes[1])
-              << " (" << mData.mData.mAttributes[1] << ")" << std::endl;
+    std::cout << "  Attribute1: " << attributeLabel(mData.mData.mAttribute[0])
+              << " (" << mData.mData.mAttribute[0] << ")" << std::endl;
+    std::cout << "  Attribute2: " << attributeLabel(mData.mData.mAttribute[1])
+              << " (" << mData.mData.mAttribute[1] << ")" << std::endl;
     for (int i = 0; i != 6; i++)
         if (mData.mData.mSkills[i] != -1)
             std::cout << "  Skill: " << skillLabel(mData.mData.mSkills[i])

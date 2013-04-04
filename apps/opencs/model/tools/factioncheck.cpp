@@ -29,7 +29,7 @@ void CSMTools::FactionCheckStage::perform (int stage, std::vector<std::string>& 
         messages.push_back (id.toString() + "|" + faction.mId + " has an empty name");
 
     // test for invalid attributes
-    if (faction.mData.mAttributes[0]==faction.mData.mAttributes[1] && faction.mData.mAttributes[0]!=-1)
+    if (faction.mData.mAttribute[0]==faction.mData.mAttribute[1] && faction.mData.mAttribute[0]!=-1)
     {
         std::ostringstream stream;
 
