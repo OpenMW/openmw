@@ -207,6 +207,8 @@ namespace MWClass
         }
 
         info.enchant = ref->mBase->mEnchant;
+        if (!info.enchant.empty())
+            info.remainingEnchantCharge = ptr.getCellRef().mEnchantmentCharge;
 
         info.text = text;
 

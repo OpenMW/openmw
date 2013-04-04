@@ -40,7 +40,8 @@ void MerchantRepair::startRepair(const MWWorld::Ptr &actor)
 
     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
     MWWorld::ContainerStore& store = MWWorld::Class::get(player).getContainerStore(player);
-    for (MWWorld::ContainerStoreIterator iter (store.begin());
+    int categories = MWWorld::ContainerStore::Type_Weapon | MWWorld::ContainerStore::Type_Armor;
+    for (MWWorld::ContainerStoreIterator iter (store.begin(categories));
          iter!=store.end(); ++iter)
     {
         if (MWWorld::Class::get(*iter).hasItemHealth(*iter))

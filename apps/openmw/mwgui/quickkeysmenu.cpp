@@ -346,7 +346,7 @@ namespace MWGui
 
             store.setSelectedEnchantItem(it);
             spells.setSelectedSpell("");
-            mWindowManager.setSelectedEnchantItem(item, 100); /// \todo track charge %
+            mWindowManager.setSelectedEnchantItem(item);
         }
     }
 

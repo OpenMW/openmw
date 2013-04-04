@@ -706,9 +706,11 @@ namespace MWWorld
     void World::moveObject(const Ptr &ptr, CellStore &newCell, float x, float y, float z)
     {
         ESM::Position &pos = ptr.getRefData().getPosition();
+
         pos.pos[0] = x;
         pos.pos[1] = y;
         pos.pos[2] = z;
+
         Ogre::Vector3 vec(x, y, z);
 
         CellStore *currCell = ptr.getCell();
@@ -717,7 +719,7 @@ namespace MWWorld
 
         if (*currCell != newCell)
         {
-        removeContainerScripts(ptr);
+            removeContainerScripts(ptr);
 
             if (isPlayer)
             {
@@ -749,7 +751,7 @@ namespace MWWorld
                 else
                 {
                     MWWorld::Ptr copy =
-                        MWWorld::Class::get(ptr).copyToCell(ptr, newCell);
+                        MWWorld::Class::get(ptr).copyToCell(ptr, newCell, pos);
 
                     mRendering->updateObjectCell(ptr, copy);
 
@@ -779,12 +781,14 @@ namespace MWWorld
     bool World::moveObjectImp(const Ptr& ptr, float x, float y, float z)
     {
         CellStore *cell = ptr.getCell();
+
         if (cell->isExterior()) {
             int cellX, cellY;
             positionToIndex(x, y, cellX, cellY);
 
             cell = getExterior(cellX, cellY);
         }
+
         moveObject(ptr, *cell, x, y, z);
 
         return cell != ptr.getCell();
@@ -820,6 +824,33 @@ namespace MWWorld
                 mPhysics->rotateObject(ptr);
             }
         }
+    }
+
+    void World::adjustPosition(const Ptr &ptr)
+    {
+        Ogre::Vector3 pos (ptr.getRefData().getPosition().pos[0], ptr.getRefData().getPosition().pos[1], ptr.getRefData().getPosition().pos[2]);
+
+        if(!ptr.getRefData().getBaseNode())
+        {
+            // will be adjusted when Ptr's cell becomes active
+            return;
+        }
+
+        float terrainHeight = mRendering->getTerrainHeightAt(pos);
+
+        if (pos.z < terrainHeight)
+            pos.z = terrainHeight+400; // place slightly above. will snap down to ground with code below
+
+        ptr.getRefData().getPosition().pos[2] = pos.z;
+
+        if (!isFlying(ptr))
+        {
+            Ogre::Vector3 traced = mPhysics->traceDown(ptr);
+            if (traced.z < pos.z)
+                pos.z = traced.z;
+        }
+
+        moveObject(ptr, pos.x, pos.y, pos.z);
     }
 
     void World::rotateObject (const Ptr& ptr,float x,float y,float z, bool adjust)

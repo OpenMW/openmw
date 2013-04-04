@@ -456,8 +456,8 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
         if (enchant->mData.mType == ESM::Enchantment::WhenStrikes
             || enchant->mData.mType == ESM::Enchantment::WhenUsed)
         {
-            /// \todo store the current enchantment charge somewhere
-            int charge = enchant->mData.mCharge;
+            int maxCharge = enchant->mData.mCharge;
+            int charge = (info.remainingEnchantCharge == -1) ? maxCharge : info.remainingEnchantCharge;
 
             const int chargeWidth = 204;
 

@@ -158,6 +158,8 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
 
     void getTriangleBatchCount(unsigned int &triangles, unsigned int &batches);
 
+    float getTerrainHeightAt (Ogre::Vector3 worldPos);
+
     void setGlare(bool glare);
     void skyEnable ();
     void skyDisable ();
