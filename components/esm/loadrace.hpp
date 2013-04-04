@@ -26,11 +26,15 @@ struct Race
     struct MaleFemale
     {
         int mMale, mFemale;
+
+        int getValue (bool male) const;
     };
 
     struct MaleFemaleF
     {
         float mMale, mFemale;
+
+        int getValue (bool male) const;
     };
 
     enum Flags
@@ -45,14 +49,7 @@ struct Race
         SkillBonus mBonus[7];
 
         // Attribute values for male/female
-        MaleFemale mStrength,
-                   mIntelligence,
-                   mWillpower,
-                   mAgility,
-                   mSpeed,
-                   mEndurance,
-                   mPersonality,
-                   mLuck;
+        MaleFemale mAttributeValues[8];
 
         // The actual eye level height (in game units) is (probably) given
         // as 'height' times 128. This has not been tested yet.

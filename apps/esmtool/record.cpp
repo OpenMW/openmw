@@ -1099,53 +1099,29 @@ void Record<ESM::Pathgrid>::print()
 template<>
 void Record<ESM::Race>::print()
 {
+    static const char *sAttributeNames[8] =
+    {
+        "Strength", "Intelligence", "Willpower", "Agility",
+        "Speed", "Endurance", "Personality", "Luck"
+    };
+
     std::cout << "  Name: " << mData.mName << std::endl;
     std::cout << "  Description: " << mData.mDescription << std::endl;
     std::cout << "  Flags: " << raceFlags(mData.mData.mFlags) << std::endl;
 
-    std::cout << "  Male:" << std::endl;
-    std::cout << "    Strength: "
-              << mData.mData.mStrength.mMale << std::endl;
-    std::cout << "    Intelligence: "
-              << mData.mData.mIntelligence.mMale << std::endl;
-    std::cout << "    Willpower: "
-              << mData.mData.mWillpower.mMale << std::endl;
-    std::cout << "    Agility: "
-              << mData.mData.mAgility.mMale << std::endl;
-    std::cout << "    Speed: "
-              << mData.mData.mSpeed.mMale << std::endl;
-    std::cout << "    Endurance: "
-              << mData.mData.mEndurance.mMale << std::endl;
-    std::cout << "    Personality: "
-              << mData.mData.mPersonality.mMale << std::endl;
-    std::cout << "    Luck: "
-              << mData.mData.mLuck.mMale << std::endl;
-    std::cout << "    Height: "
-              << mData.mData.mHeight.mMale << std::endl;
-    std::cout << "    Weight: "
-              << mData.mData.mWeight.mMale << std::endl;
+    for (int i=0; i<2; ++i)
+    {
+        bool male = i==0;
 
-    std::cout << "  Female:" << std::endl;
-    std::cout << "    Strength: "
-              << mData.mData.mStrength.mFemale << std::endl;
-    std::cout << "    Intelligence: "
-              << mData.mData.mIntelligence.mFemale << std::endl;
-    std::cout << "    Willpower: "
-              << mData.mData.mWillpower.mFemale << std::endl;
-    std::cout << "    Agility: "
-              << mData.mData.mAgility.mFemale << std::endl;
-    std::cout << "    Speed: "
-              << mData.mData.mSpeed.mFemale << std::endl;
-    std::cout << "    Endurance: "
-              << mData.mData.mEndurance.mFemale << std::endl;
-    std::cout << "    Personality: "
-              << mData.mData.mPersonality.mFemale << std::endl;
-    std::cout << "    Luck: "
-              << mData.mData.mLuck.mFemale << std::endl;
-    std::cout << "    Height: "
-              << mData.mData.mHeight.mFemale << std::endl;
-    std::cout << "    Weight: "
-              << mData.mData.mWeight.mFemale << std::endl;
+        std::cout << (male ? "  Male:" : "  Female:") << std::endl;
+
+        for (int i=0; i<8; ++i)
+            std::cout << "    " << sAttributeNames[i] << ": "
+                << mData.mData.mAttributeValues[i].getValue (male) << std::endl;
+
+        std::cout << "    Height: " << mData.mData.mHeight.getValue (male) << std::endl;
+        std::cout << "    Weight: " << mData.mData.mWeight.getValue (male) << std::endl;
+    }
 
     for (int i = 0; i != 7; i++)
         // Not all races have 7 skills.
