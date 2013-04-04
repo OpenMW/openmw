@@ -115,11 +115,6 @@ namespace MWWorld
 
         if(result.second)
         {
-            /// \todo rescale depending on the state of a new GMST
-            insertCell (*cell, true);
-
-            mRendering.cellAdded (cell);
-
             float verts = ESM::Land::LAND_SIZE;
             float worldsize = ESM::Land::REAL_SIZE;
 
@@ -141,6 +136,11 @@ namespace MWWorld
                     ;
                 }
             }
+
+            /// \todo rescale depending on the state of a new GMST
+            insertCell (*cell, true);
+
+            mRendering.cellAdded (cell);
 
             mRendering.configureAmbient(*cell);
             mRendering.requestMap(cell);
@@ -166,7 +166,7 @@ namespace MWWorld
             float z = Ogre::Radian(pos.rot[2]).valueDegrees();
             world->rotateObject(player, x, y, z);
 
-            world->adjustPosition(player);
+            MWWorld::Class::get(player).adjustPosition(player);
         }
 
         MWBase::MechanicsManager *mechMgr =
@@ -358,7 +358,7 @@ namespace MWWorld
             float z = Ogre::Radian(position.rot[2]).valueDegrees();
             world->rotateObject(world->getPlayer().getPlayer(), x, y, z);
 
-            world->adjustPosition(world->getPlayer().getPlayer());
+            MWWorld::Class::get(world->getPlayer().getPlayer()).adjustPosition(world->getPlayer().getPlayer());
             return;
         }
 

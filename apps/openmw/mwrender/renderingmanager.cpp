@@ -235,7 +235,7 @@ void RenderingManager::cellAdded (MWWorld::Ptr::CellStore *store)
     mObjects.buildStaticGeometry (*store);
     mDebugging->cellAdded(store);
     if (store->mCell->isExterior())
-      mTerrainManager->cellAdded(store);
+        mTerrainManager->cellAdded(store);
     waterAdded(store);
 }
 
