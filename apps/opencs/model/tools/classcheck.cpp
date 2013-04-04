@@ -42,6 +42,15 @@ void CSMTools::ClassCheckStage::perform (int stage, std::vector<std::string>& me
             messages.push_back (stream.str());
         }
 
+    if (class_.mData.mAttribute[0]==class_.mData.mAttribute[1] && class_.mData.mAttribute[0]!=-1)
+    {
+        std::ostringstream stream;
+
+        stream << id.toString() << "|Class lists same attribute twice";
+
+        messages.push_back (stream.str());
+    }
+
     // test for non-unique skill
     std::map<int, int> skills; // ID, number of occurrences
 
