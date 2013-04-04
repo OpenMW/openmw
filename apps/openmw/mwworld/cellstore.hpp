@@ -1,8 +1,6 @@
 #ifndef GAME_MWWORLD_CELLSTORE_H
 #define GAME_MWWORLD_CELLSTORE_H
 
-#include <components/esm/records.hpp>
-
 #include <deque>
 #include <algorithm>
 
