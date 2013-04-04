@@ -66,11 +66,17 @@ CSMWorld::Data::Data()
     for (int i=0; i<6; ++i)
         mFactions.addColumn (new SkillsColumn<ESM::Faction> (i));
 
+    mRaces.addColumn (new StringIdColumn<ESM::Race>);
+    mRaces.addColumn (new RecordStateColumn<ESM::Race>);
+    mRaces.addColumn (new NameColumn<ESM::Race>);
+    mRaces.addColumn (new DescriptionColumn<ESM::Race>);
+
     addModel (new IdTable (&mGlobals), UniversalId::Type_Globals, UniversalId::Type_Global);
     addModel (new IdTable (&mGmsts), UniversalId::Type_Gmsts, UniversalId::Type_Gmst);
     addModel (new IdTable (&mSkills), UniversalId::Type_Skills, UniversalId::Type_Skill);
     addModel (new IdTable (&mClasses), UniversalId::Type_Classes, UniversalId::Type_Class);
     addModel (new IdTable (&mFactions), UniversalId::Type_Factions, UniversalId::Type_Faction);
+    addModel (new IdTable (&mRaces), UniversalId::Type_Races, UniversalId::Type_Race);
 }
 
 CSMWorld::Data::~Data()
@@ -129,6 +135,16 @@ CSMWorld::IdCollection<ESM::Faction>& CSMWorld::Data::getFactions()
     return mFactions;
 }
 
+const CSMWorld::IdCollection<ESM::Race>& CSMWorld::Data::getRaces() const
+{
+    return mRaces;
+}
+
+CSMWorld::IdCollection<ESM::Race>& CSMWorld::Data::getRaces()
+{
+    return mRaces;
+}
+
 QAbstractItemModel *CSMWorld::Data::getTableModel (const UniversalId& id)
 {
     std::map<UniversalId::Type, QAbstractItemModel *>::iterator iter = mModelIndex.find (id.getType());
@@ -168,6 +184,7 @@ void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base)
             case ESM::REC_SKIL: mSkills.load (reader, base); break;
             case ESM::REC_CLAS: mClasses.load (reader, base); break;
             case ESM::REC_FACT: mFactions.load (reader, base); break;
+            case ESM::REC_RACE: mRaces.load (reader, base); break;
 
             default:
 

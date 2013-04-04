@@ -121,6 +121,8 @@ namespace CSVDoc
             void addClassesSubView();
 
             void addFactionsSubView();
+
+            void addRacesSubView();
     };
 }
 
