@@ -363,11 +363,11 @@ void NpcAnimation::removeEntities(NifOgre::EntityList &entities)
     assert(&entities != &mEntityList);
 
     Ogre::SceneManager *sceneMgr = mInsert->getCreator();
+    for(size_t i = 0;i < entities.mParticles.size();i++)
+        sceneMgr->destroyParticleSystem(entities.mParticles[i]);
     for(size_t i = 0;i < entities.mEntities.size();i++)
-    {
-        entities.mEntities[i]->detachFromParent();
         sceneMgr->destroyEntity(entities.mEntities[i]);
-    }
+    entities.mParticles.clear();
     entities.mEntities.clear();
     entities.mSkelBase = NULL;
 }

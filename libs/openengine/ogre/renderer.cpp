@@ -195,6 +195,7 @@ void OgreRenderer::configure(const std::string &logPath,
     Files::loadOgrePlugin(pluginDir, "RenderSystem_GL3Plus", *mRoot);
     Files::loadOgrePlugin(pluginDir, "RenderSystem_Direct3D9", *mRoot);
     Files::loadOgrePlugin(pluginDir, "Plugin_CgProgramManager", *mRoot);
+    Files::loadOgrePlugin(pluginDir, "Plugin_ParticleFX", *mRoot);
 
     RenderSystem* rs = mRoot->getRenderSystemByName(renderSystem);
     if (rs == 0)

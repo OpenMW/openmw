@@ -40,9 +40,12 @@ Animation::~Animation()
     if(mInsert)
     {
         Ogre::SceneManager *sceneMgr = mInsert->getCreator();
+        for(size_t i = 0;i < mEntityList.mParticles.size();i++)
+            sceneMgr->destroyParticleSystem(mEntityList.mParticles[i]);
         for(size_t i = 0;i < mEntityList.mEntities.size();i++)
             sceneMgr->destroyEntity(mEntityList.mEntities[i]);
     }
+    mEntityList.mParticles.clear();
     mEntityList.mEntities.clear();
     mEntityList.mSkelBase = NULL;
 }

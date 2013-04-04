@@ -40,8 +40,10 @@ namespace NifOgre
 typedef std::multimap<float,std::string> TextKeyMap;
 static const char sTextKeyExtraDataID[] = "TextKeyExtraData";
 struct EntityList {
-    std::vector<Ogre::Entity*> mEntities;
     Ogre::Entity *mSkelBase;
+    std::vector<Ogre::Entity*> mEntities;
+
+    std::vector<Ogre::ParticleSystem*> mParticles;
 
     EntityList() : mSkelBase(0)
     { }

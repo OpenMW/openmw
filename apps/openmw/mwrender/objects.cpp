@@ -7,6 +7,8 @@
 #include <OgreEntity.h>
 #include <OgreLight.h>
 #include <OgreSubEntity.h>
+#include <OgreParticleSystem.h>
+#include <OgreParticleEmitter.h>
 #include <OgreStaticGeometry.h>
 
 #include <components/nifogre/ogrenifloader.hpp>
@@ -156,7 +158,8 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh, bool
         }
     }
 
-    if(!mIsStatic || !Settings::Manager::getBool("use static geometry", "Objects") || anyTransparency)
+    if(!mIsStatic || !Settings::Manager::getBool("use static geometry", "Objects") ||
+       anyTransparency || entities.mParticles.size() > 0)
     {
         for(size_t i = 0;i < entities.mEntities.size();i++)
         {
@@ -168,6 +171,14 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh, bool
             }
             ent->setRenderingDistance(small ? Settings::Manager::getInt("small object distance", "Viewing distance") : 0);
             ent->setVisibilityFlags(mIsStatic ? (small ? RV_StaticsSmall : RV_Statics) : RV_Misc);
+        }
+        for(size_t i = 0;i < entities.mParticles.size();i++)
+        {
+            Ogre::ParticleSystem *part = entities.mParticles[i];
+            // TODO: Check the particle system's material for actual transparency
+            part->setRenderQueueGroup(RQG_Alpha);
+            part->setRenderingDistance(small ? Settings::Manager::getInt("small object distance", "Viewing distance") : 0);
+            part->setVisibilityFlags(mIsStatic ? (small ? RV_StaticsSmall : RV_Statics) : RV_Misc);
         }
     }
     else
