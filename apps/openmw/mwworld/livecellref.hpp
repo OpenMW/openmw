@@ -1,7 +1,7 @@
 #ifndef GAME_MWWORLD_LIVECELLREF_H
 #define GAME_MWWORLD_LIVECELLREF_H
 
-#include <components/esm/loadcell.hpp>
+#include <components/esm/cellref.hpp>
 
 #include "refdata.hpp"
 
