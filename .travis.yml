@@ -4,6 +4,7 @@ compiler:
 branches:
   only:
     - master
+    - next
     - travis_ci_test
 before_install:
  - pwd
@@ -31,7 +32,7 @@ before_script:
 script:
  - make -j4
 after_script:
- - openmw_test_suite
+ - ./openmw_test_suite
 notifications:
   recipients:
     - lgromanowski+travis.ci@gmail.com
