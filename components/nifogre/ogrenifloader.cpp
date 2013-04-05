@@ -167,7 +167,7 @@ static void fail(const std::string &msg)
 
 static void buildAnimation(Ogre::Skeleton *skel, const std::string &name, const std::vector<const Nif::NiKeyframeController*> &ctrls, const std::vector<std::string> &targets, float startTime, float stopTime)
 {
-    Ogre::Animation *anim = skel->createAnimation(name, stopTime-startTime);
+    Ogre::Animation *anim = skel->createAnimation(name, stopTime);
 
     for(size_t i = 0;i < ctrls.size();i++)
     {
@@ -246,7 +246,7 @@ static void buildAnimation(Ogre::Skeleton *skel, const std::string &name, const 
             }
 
             Ogre::TransformKeyFrame *kframe;
-            kframe = nodetrack->createNodeKeyFrame(curtime-startTime);
+            kframe = nodetrack->createNodeKeyFrame(curtime);
             if(quatiter == quatkeys.mKeys.end() || quatiter == quatkeys.mKeys.begin())
                 kframe->setRotation(curquat);
             else
@@ -441,16 +441,15 @@ void loadResource(Ogre::Resource *resource)
 
         buildAnimation(skel, currentgroup, ctrls, targets, keyiter->first, lastkeyiter->first);
 
-        TextKeyMap::const_iterator insiter = keyiter;
+        TextKeyMap::const_iterator insiter(keyiter);
         TextKeyMap groupkeys;
         do {
             sep = insiter->second.find(':');
             if(sep == currentgroup.length() && insiter->second.compare(0, sep, currentgroup) == 0)
-                groupkeys.insert(std::make_pair(insiter->first - keyiter->first,
-                                                insiter->second.substr(sep+2)));
+                groupkeys.insert(std::make_pair(insiter->first, insiter->second.substr(sep+2)));
             else if((sep == sizeof("soundgen")-1 && insiter->second.compare(0, sep, "soundgen") == 0) ||
                     (sep == sizeof("sound")-1 && insiter->second.compare(0, sep, "sound") == 0))
-                groupkeys.insert(std::make_pair(insiter->first - keyiter->first, insiter->second));
+                groupkeys.insert(std::make_pair(insiter->first, insiter->second));
         } while(insiter++ != lastkeyiter);
 
         bindings.setUserAny(std::string(sTextKeyExtraDataID)+"@"+currentgroup, Ogre::Any(groupkeys));
