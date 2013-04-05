@@ -67,6 +67,8 @@ namespace MWClass
 
             virtual void applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const;
 
+            virtual bool canEquip(const MWWorld::Ptr &npc, const MWWorld::Ptr &item) const;
+
             virtual boost::shared_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr)
                 const;
             ///< Generate action for using via inventory menu

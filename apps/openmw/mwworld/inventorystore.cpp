@@ -128,8 +128,9 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::getSlot (int slot)
     return mSlots[slot];
 }
 
-void MWWorld::InventoryStore::autoEquip (const MWMechanics::NpcStats& stats)
+void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& npc)
 {
+    const MWMechanics::NpcStats& stats = MWWorld::Class::get(npc).getNpcStats(npc);
     TSlots slots;
     initSlots (slots);
 
@@ -182,6 +183,9 @@ void MWWorld::InventoryStore::autoEquip (const MWMechanics::NpcStats& stats)
                     use = true;
                 }
             }
+
+            if(!MWWorld::Class::get (test).canEquip (npc, test))
+                continue;
 
             if (!itemsSlots.second) // if itemsSlots.second is true, item can stay stacked when equipped
             {

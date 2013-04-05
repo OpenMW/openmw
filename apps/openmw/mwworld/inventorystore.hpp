@@ -78,7 +78,7 @@ namespace MWWorld
 
             ContainerStoreIterator getSlot (int slot);
 
-            void autoEquip (const MWMechanics::NpcStats& stats);
+            void autoEquip (const MWWorld::Ptr& npc);
             ///< Auto equip items according to stats and item value.
 
             const MWMechanics::MagicEffects& getMagicEffects();

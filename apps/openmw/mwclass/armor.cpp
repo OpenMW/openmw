@@ -16,6 +16,8 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/physicssystem.hpp"
 #include "../mwworld/nullaction.hpp"
+#include "../mwworld/containerstore.hpp"
+#include "../mwworld/player.hpp"
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
@@ -288,6 +290,91 @@ namespace MWClass
         newItem.mEnchant=enchId;
         const ESM::Armor *record = MWBase::Environment::get().getWorld()->createRecord (newItem);
         ref->mBase = record;
+    }
+
+    bool Armor::canEquip(const MWWorld::Ptr &npc, const MWWorld::Ptr &item) const
+    {
+        MWWorld::InventoryStore& invStore = MWWorld::Class::get(npc).getInventoryStore(npc);
+
+        // slots that this item can be equipped in
+        std::pair<std::vector<int>, bool> slots = MWWorld::Class::get(item).getEquipmentSlots(item);
+
+        // retrieve ContainerStoreIterator to the item
+        MWWorld::ContainerStoreIterator it = invStore.begin();
+        for (; it != invStore.end(); ++it)
+        {
+            if (*it == item)
+            {
+                break;
+            }
+        }
+
+        assert(it != invStore.end());
+
+        std::string npcRace = npc.get<ESM::NPC>()->mBase->mRace;
+
+        for (std::vector<int>::const_iterator slot=slots.first.begin();
+            slot!=slots.first.end(); ++slot)
+        {
+
+            // Beast races cannot equip shoes / boots, or full helms (head part vs hair part)
+            const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npcRace);
+            if(race->mData.mFlags & ESM::Race::Beast)
+            {
+                if(*slot == MWWorld::InventoryStore::Slot_Helmet)
+                {
+                    std::vector<ESM::PartReference> parts;
+                    if(it.getType() == MWWorld::ContainerStore::Type_Clothing)
+                        parts = it->get<ESM::Clothing>()->mBase->mParts.mParts;
+                    else
+                        parts = it->get<ESM::Armor>()->mBase->mParts.mParts;
+
+                    bool allow = true;
+                    for(std::vector<ESM::PartReference>::iterator itr = parts.begin(); itr != parts.end(); ++itr)
+                    {
+                        if((*itr).mPart == ESM::PRT_Head)
+                        {
+                            if(npc == MWBase::Environment::get().getWorld()->getPlayer().getPlayer() )
+                                MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage13}");
+
+                            allow = false;
+                            break;
+                        }
+                    }
+
+                    if(!allow)
+                        break;
+                }
+
+                if (*slot == MWWorld::InventoryStore::Slot_Boots)
+                {
+                    bool allow = true;
+                    std::vector<ESM::PartReference> parts;
+                    if(it.getType() == MWWorld::ContainerStore::Type_Clothing)
+                        parts = it->get<ESM::Clothing>()->mBase->mParts.mParts;
+                    else
+                        parts = it->get<ESM::Armor>()->mBase->mParts.mParts;
+                    for(std::vector<ESM::PartReference>::iterator itr = parts.begin(); itr != parts.end(); ++itr)
+                    {
+                        if((*itr).mPart == ESM::PRT_LFoot || (*itr).mPart == ESM::PRT_RFoot)
+                        {
+                            allow = false;
+                            // Only notify the player, not npcs
+                            if(npc == MWBase::Environment::get().getWorld()->getPlayer().getPlayer() )
+                            {
+                                MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage14}");
+                            }
+                            break;
+                        }
+                    }
+
+                    if(!allow)
+                        return false;
+                }
+
+            }
+        }
+        return true;
     }
 
     boost::shared_ptr<MWWorld::Action> Armor::use (const MWWorld::Ptr& ptr) const
