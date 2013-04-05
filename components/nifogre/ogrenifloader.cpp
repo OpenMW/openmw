@@ -62,6 +62,83 @@ ostream& operator<<(ostream &o, const NifOgre::TextKeyMap&)
 
 namespace NifOgre
 {
+
+// FIXME: Should not be here.
+class VisController
+{
+public:
+    class Value : public Ogre::ControllerValue<Ogre::Real>
+    {
+    private:
+        Ogre::Bone *mTarget;
+
+        // FIXME: We are not getting all objects here. Skinned meshes get
+        // attached to the object's root node, and won't be connected via a
+        // TagPoint.
+        static void setVisible(Ogre::Node *node, int vis)
+        {
+            Ogre::Node::ChildNodeIterator iter = node->getChildIterator();
+            while(iter.hasMoreElements())
+            {
+                node = iter.getNext();
+                setVisible(node, vis);
+
+                Ogre::TagPoint *tag = dynamic_cast<Ogre::TagPoint*>(node);
+                if(tag != NULL)
+                {
+                    Ogre::MovableObject *obj = tag->getChildObject();
+                    if(obj != NULL)
+                        obj->setVisible(vis);
+                }
+            }
+        }
+
+    public:
+        Value(Ogre::Bone *target) : mTarget(target)
+        { }
+
+        virtual Ogre::Real getValue() const
+        {
+            // Should not be called
+            return 1.0f;
+        }
+
+        virtual void setValue(Ogre::Real value)
+        {
+            int vis = static_cast<int>(value);
+            setVisible(mTarget, vis);
+        }
+    };
+
+    class Function : public Ogre::ControllerFunction<Ogre::Real>
+    {
+    private:
+        std::vector<Nif::NiVisData::VisData> mData;
+
+    public:
+        Function(const Nif::NiVisData *data)
+          : Ogre::ControllerFunction<Ogre::Real>(false),
+            mData(data->mVis)
+        { }
+
+        virtual Ogre::Real calculate(Ogre::Real value)
+        {
+            if(mData.size() == 0)
+                return 1.0f;
+
+            if(mData[0].time >= value)
+                return mData[0].isSet;
+            for(size_t i = 1;i < mData.size();i++)
+            {
+                if(mData[i].time > value)
+                    return mData[i-1].isSet;
+            }
+            return mData.back().isSet;
+        }
+    };
+};
+
+
 // Helper class that computes the bounding box and of a mesh
 class BoundsFinder
 {
@@ -330,7 +407,8 @@ void buildBones(Ogre::Skeleton *skel, const Nif::Node *node, Ogre::Bone *&animro
     {
         if(ctrl->recType == Nif::RC_NiKeyframeController)
             ctrls.push_back(static_cast<const Nif::NiKeyframeController*>(ctrl.getPtr()));
-        else if(!(ctrl->recType == Nif::RC_NiParticleSystemController
+        else if(!(ctrl->recType == Nif::RC_NiParticleSystemController ||
+                  ctrl->recType == Nif::RC_NiVisController
                   ))
             warn("Unhandled "+ctrl->recName+" from node "+node->name+" in "+skel->getName());
         ctrl = ctrl->next;
@@ -1129,7 +1207,8 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
     static void createParticleEmitterAffectors(Ogre::ParticleSystem *partsys, const Nif::NiParticleSystemController *partctrl)
     {
         Ogre::ParticleEmitter *emitter = partsys->addEmitter("Point");
-        emitter->setDirection(Ogre::Vector3::UNIT_Z);
+        emitter->setDirection(Ogre::Vector3(0.0f, 0.0f, std::cos(partctrl->verticalDir)));
+        emitter->setAngle(Ogre::Radian(partctrl->verticalAngle));
         emitter->setParticleVelocity(partctrl->velocity-partctrl->velocityRandom,
                                      partctrl->velocity+partctrl->velocityRandom);
         emitter->setEmissionRate(partctrl->emitRate);
@@ -1268,6 +1347,26 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
                 }
             }
             e = e->extra;
+        }
+
+        Nif::ControllerPtr ctrl = node->controller;
+        while(!ctrl.empty())
+        {
+            if(ctrl->recType == Nif::RC_NiVisController)
+            {
+                const Nif::NiVisController *vis = static_cast<const Nif::NiVisController*>(ctrl.getPtr());
+
+                const Nif::Named *target = dynamic_cast<const Nif::Named*>(ctrl->target.getPtr());
+                if(!target) target = node;
+
+                Ogre::Bone *trgtbone = entities.mSkelBase->getSkeleton()->getBone(target->name);
+                Ogre::SharedPtr<Ogre::ControllerValue<Ogre::Real> > srcval; /* Filled in later */
+                Ogre::SharedPtr<Ogre::ControllerValue<Ogre::Real> > dstval(OGRE_NEW VisController::Value(trgtbone));
+                Ogre::SharedPtr<Ogre::ControllerFunction<Ogre::Real> > func(OGRE_NEW VisController::Function(vis->data.getPtr()));
+
+                entities.mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
+            }
+            ctrl = ctrl->next;
         }
 
         if(node->recType == Nif::RC_NiTriShape && !(flags&0x01)) // Not hidden
