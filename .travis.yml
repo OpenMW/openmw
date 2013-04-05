@@ -2,6 +2,7 @@ language: cpp
 compiler:
  - gcc
 before_install:
+ - pwd
  - git submodule update --init --recursive
  - echo "yes" | sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu `lsb_release -sc` main universe restricted multiverse"
  - echo "yes" | sudo apt-add-repository ppa:openmw/deps
@@ -19,6 +20,7 @@ before_install:
  - sudo ln -s /usr/src/gtest/build/libgtest.so /usr/lib/libgtest.so
  - sudo ln -s /usr/src/gtest/build/libgtest_main.so /usr/lib/libgtest_main.so
 before_script:
+ - cd -
  - mkdir build
  - cd build
  - cmake .. -DOGRE_STATIC=1 -DMYGUI_STATIC=1 -DBUILD_WITH_CODE_COVERAGE=1 -DBUILD_UNITTESTS=1
