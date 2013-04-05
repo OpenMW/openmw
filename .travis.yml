@@ -1,10 +1,6 @@
 language: cpp
 compiler:
-  - gcc
-before_script:
- - mkdir build
- - cd build
- - cmake .. -DOGRE_STATIC=1 -DMYGUI_STATIC=1 -DBUILD_WITH_CODE_COVERAGE=1 -DBUILD_UNITTESTS=1
+ - gcc
 before_install:
  - git submodule update --init --recursive
  - echo "yes" | sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu `lsb_release -sc` main universe restricted multiverse"
@@ -15,7 +11,17 @@ before_install:
  - sudo apt-get install -qq libopenal-dev libmpg123-dev libsndfile1-dev
  - sudo apt-get install -qq libcg nvidia-cg-toolkit
  - sudo apt-get install -qq libavcodec-dev libavformat-dev libavdevice-dev libavutil-dev libswscale-dev libpostproc-dev
- - sudo apt-get install -qq libois-dev libbullet-dev libogre-static-dev libmygui-static-dev 
+ - sudo apt-get install -qq libois-dev libbullet-dev libogre-static-dev libmygui-static-dev
+ - sudo mkdir /usr/src/gtest/build
+ - cd /usr/src/gtest/build
+ - sudo cmake .. -DBUILD_SHARED_LIBS=1
+ - sudo make -j4
+ - sudo ln -s /usr/src/gtest/build/libgtest.so /usr/lib/libgtest.so
+ - sudo ln -s /usr/src/gtest/build/libgtest_main.so /usr/lib/libgtest_main.so
+before_script:
+ - mkdir build
+ - cd build
+ - cmake .. -DOGRE_STATIC=1 -DMYGUI_STATIC=1 -DBUILD_WITH_CODE_COVERAGE=1 -DBUILD_UNITTESTS=1
 script: "make -j4"
 branches:
   only:
