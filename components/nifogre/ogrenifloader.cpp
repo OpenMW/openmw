@@ -771,6 +771,7 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
     {
         alphaFlags = (1<<9) | (6<<10); /* alpha_rejection enabled, greater_equal */
         alphaTest = result.second;
+        depthFlags = (1<<0) | (1<<1); // depth_write on, depth_check on
     }
 
     if((alphaFlags&1))

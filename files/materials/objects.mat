@@ -14,6 +14,7 @@ material openmw_objects_base
     is_transparent false // real transparency, alpha rejection doesn't count here
     scene_blend default
     depth_write default
+    depth_check default
     alpha_rejection default
     transparent_sorting default
 
@@ -38,6 +39,7 @@ material openmw_objects_base
         scene_blend $scene_blend
         alpha_rejection $alpha_rejection
         depth_write $depth_write
+        depth_check $depth_check
         transparent_sorting $transparent_sorting
 
         texture_unit diffuseMap
