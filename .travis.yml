@@ -1,6 +1,10 @@
 language: cpp
 compiler:
  - gcc
+branches:
+  only:
+    - master
+    - travis_ci_test
 before_install:
  - pwd
  - git submodule update --init --recursive
@@ -24,11 +28,10 @@ before_script:
  - mkdir build
  - cd build
  - cmake .. -DOGRE_STATIC=1 -DMYGUI_STATIC=1 -DBUILD_WITH_CODE_COVERAGE=1 -DBUILD_UNITTESTS=1
-script: "make -j4"
-branches:
-  only:
-    - master
-    - travis_ci_test
+script:
+ - make -j4
+after_script:
+ - openmw_test_suite
 notifications:
   recipients:
     - lgromanowski+travis.ci@gmail.com
