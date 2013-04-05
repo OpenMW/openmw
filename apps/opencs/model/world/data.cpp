@@ -70,6 +70,8 @@ CSMWorld::Data::Data()
     mRaces.addColumn (new RecordStateColumn<ESM::Race>);
     mRaces.addColumn (new NameColumn<ESM::Race>);
     mRaces.addColumn (new DescriptionColumn<ESM::Race>);
+    mRaces.addColumn (new FlagColumn<ESM::Race> ("Playable", 0x1));
+    mRaces.addColumn (new FlagColumn<ESM::Race> ("Beast Race", 0x2));
 
     addModel (new IdTable (&mGlobals), UniversalId::Type_Globals, UniversalId::Type_Global);
     addModel (new IdTable (&mGmsts), UniversalId::Type_Gmsts, UniversalId::Type_Gmst);

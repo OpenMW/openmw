@@ -434,6 +434,40 @@ namespace CSMWorld
             return true;
         }
     };
+
+    template<typename ESXRecordT>
+    struct FlagColumn : public Column<ESXRecordT>
+    {
+        int mMask;
+
+        FlagColumn (const std::string& name, int mask)
+        : Column<ESXRecordT> (name, ColumnBase::Display_Boolean), mMask (mask)
+        {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return (record.get().mData.mFlags & mMask)!=0;
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            int flags = record.get().mData.mFlags & ~mMask;
+
+            if (data.toInt())
+                flags |= mMask;
+
+            record2.mData.mFlags = flags;
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
 }
 
 #endif
