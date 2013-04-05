@@ -836,15 +836,44 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
         abort();
     }
 
+    static void getNodeProperties(const Nif::Node *node,
+                                  const Nif::NiTexturingProperty *&texprop,
+                                  const Nif::NiMaterialProperty *&matprop,
+                                  const Nif::NiAlphaProperty *&alphaprop,
+                                  const Nif::NiVertexColorProperty *&vertprop,
+                                  const Nif::NiZBufferProperty *&zprop,
+                                  const Nif::NiSpecularProperty *&specprop)
+    {
+        if(node->parent)
+            getNodeProperties(node->parent, texprop, matprop, alphaprop, vertprop, zprop, specprop);
+
+        const Nif::PropertyList &proplist = node->props;
+        for(size_t i = 0;i < proplist.length();i++)
+        {
+            // Entries may be empty
+            if(proplist[i].empty())
+                continue;
+
+            const Nif::Property *pr = proplist[i].getPtr();
+            if(pr->recType == Nif::RC_NiTexturingProperty)
+                texprop = static_cast<const Nif::NiTexturingProperty*>(pr);
+            else if(pr->recType == Nif::RC_NiMaterialProperty)
+                matprop = static_cast<const Nif::NiMaterialProperty*>(pr);
+            else if(pr->recType == Nif::RC_NiAlphaProperty)
+                alphaprop = static_cast<const Nif::NiAlphaProperty*>(pr);
+            else if(pr->recType == Nif::RC_NiVertexColorProperty)
+                vertprop = static_cast<const Nif::NiVertexColorProperty*>(pr);
+            else if(pr->recType == Nif::RC_NiZBufferProperty)
+                zprop = static_cast<const Nif::NiZBufferProperty*>(pr);
+            else if(pr->recType == Nif::RC_NiSpecularProperty)
+                specprop = static_cast<const Nif::NiSpecularProperty*>(pr);
+            else
+                warn("Unhandled property type: "+pr->recName);
+        }
+    }
 
     // Convert NiTriShape to Ogre::SubMesh
-    void handleNiTriShape(Ogre::Mesh *mesh, Nif::NiTriShape const *shape,
-                          const Nif::NiTexturingProperty *texprop,
-                          const Nif::NiMaterialProperty *matprop,
-                          const Nif::NiAlphaProperty *alphaprop,
-                          const Nif::NiVertexColorProperty *vertprop,
-                          const Nif::NiZBufferProperty *zprop,
-                          const Nif::NiSpecularProperty *specprop)
+    void handleNiTriShape(Ogre::Mesh *mesh, Nif::NiTriShape const *shape)
     {
         Ogre::SkeletonPtr skel;
         const Nif::NiTriShapeData *data = shape->data.getPtr();
@@ -1044,7 +1073,15 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
             }
         }
 
-        bool needTangents=false;
+        const Nif::NiTexturingProperty *texprop = NULL;
+        const Nif::NiMaterialProperty *matprop = NULL;
+        const Nif::NiAlphaProperty *alphaprop = NULL;
+        const Nif::NiVertexColorProperty *vertprop = NULL;
+        const Nif::NiZBufferProperty *zprop = NULL;
+        const Nif::NiSpecularProperty *specprop = NULL;
+        bool needTangents = false;
+
+        getNodeProperties(shape, texprop, matprop, alphaprop, vertprop, zprop, specprop);
         std::string matname = NIFMaterialLoader::getMaterial(data, mesh->getName(), mGroup,
                                                              texprop, matprop, alphaprop,
                                                              vertprop, zprop, specprop,
@@ -1061,42 +1098,11 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
         }
     }
 
-    bool findTriShape(Ogre::Mesh *mesh, const Nif::Node *node,
-                      const Nif::NiTexturingProperty *texprop,
-                      const Nif::NiMaterialProperty *matprop,
-                      const Nif::NiAlphaProperty *alphaprop,
-                      const Nif::NiVertexColorProperty *vertprop,
-                      const Nif::NiZBufferProperty *zprop,
-                      const Nif::NiSpecularProperty *specprop)
+    bool findTriShape(Ogre::Mesh *mesh, const Nif::Node *node)
     {
-        // Scan the property list for material information
-        const Nif::PropertyList &proplist = node->props;
-        for(size_t i = 0;i < proplist.length();i++)
-        {
-            // Entries may be empty
-            if(proplist[i].empty())
-                continue;
-
-            const Nif::Property *pr = proplist[i].getPtr();
-            if(pr->recType == Nif::RC_NiTexturingProperty)
-                texprop = static_cast<const Nif::NiTexturingProperty*>(pr);
-            else if(pr->recType == Nif::RC_NiMaterialProperty)
-                matprop = static_cast<const Nif::NiMaterialProperty*>(pr);
-            else if(pr->recType == Nif::RC_NiAlphaProperty)
-                alphaprop = static_cast<const Nif::NiAlphaProperty*>(pr);
-            else if(pr->recType == Nif::RC_NiVertexColorProperty)
-                vertprop = static_cast<const Nif::NiVertexColorProperty*>(pr);
-            else if(pr->recType == Nif::RC_NiZBufferProperty)
-                zprop = static_cast<const Nif::NiZBufferProperty*>(pr);
-            else if(pr->recType == Nif::RC_NiSpecularProperty)
-                specprop = static_cast<const Nif::NiSpecularProperty*>(pr);
-            else
-                warn("Unhandled property type: "+pr->recName);
-        }
-
         if(node->recType == Nif::RC_NiTriShape && mShapeIndex == node->recIndex)
         {
-            handleNiTriShape(mesh, dynamic_cast<const Nif::NiTriShape*>(node), texprop, matprop, alphaprop, vertprop, zprop, specprop);
+            handleNiTriShape(mesh, dynamic_cast<const Nif::NiTriShape*>(node));
             return true;
         }
 
@@ -1108,7 +1114,7 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
             {
                 if(!children[i].empty())
                 {
-                    if(findTriShape(mesh, children[i].getPtr(), texprop, matprop, alphaprop, vertprop, zprop, specprop))
+                    if(findTriShape(mesh, children[i].getPtr()))
                         return true;
                 }
             }
@@ -1163,69 +1169,20 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
 
         Ogre::ParticleSystem *partsys = sceneMgr->createParticleSystem();
         try {
+            std::string fullname = mName+"@index="+Ogre::StringConverter::toString(partnode->recIndex);
+            if(partnode->name.length() > 0)
+                fullname += "@type="+partnode->name;
+            Misc::StringUtils::toLower(fullname);
+
             const Nif::NiTexturingProperty *texprop = NULL;
             const Nif::NiMaterialProperty *matprop = NULL;
             const Nif::NiAlphaProperty *alphaprop = NULL;
             const Nif::NiVertexColorProperty *vertprop = NULL;
             const Nif::NiZBufferProperty *zprop = NULL;
             const Nif::NiSpecularProperty *specprop = NULL;
-            if(partnode->parent)
-            {
-                // FIXME: We should probably search down the whole tree instead of just the parent
-                const Nif::PropertyList &proplist = partnode->parent->props;
-                for(size_t i = 0;i < proplist.length();i++)
-                {
-                    // Entries may be empty
-                    if(proplist[i].empty())
-                        continue;
+            bool needTangents = false;
 
-                    const Nif::Property *pr = proplist[i].getPtr();
-                    if(pr->recType == Nif::RC_NiTexturingProperty)
-                        texprop = static_cast<const Nif::NiTexturingProperty*>(pr);
-                    else if(pr->recType == Nif::RC_NiMaterialProperty)
-                        matprop = static_cast<const Nif::NiMaterialProperty*>(pr);
-                    else if(pr->recType == Nif::RC_NiAlphaProperty)
-                        alphaprop = static_cast<const Nif::NiAlphaProperty*>(pr);
-                    else if(pr->recType == Nif::RC_NiVertexColorProperty)
-                        vertprop = static_cast<const Nif::NiVertexColorProperty*>(pr);
-                    else if(pr->recType == Nif::RC_NiZBufferProperty)
-                        zprop = static_cast<const Nif::NiZBufferProperty*>(pr);
-                    else if(pr->recType == Nif::RC_NiSpecularProperty)
-                        specprop = static_cast<const Nif::NiSpecularProperty*>(pr);
-                    else
-                        warn("Unhandled property type: "+pr->recName);
-                }
-            }
-            const Nif::PropertyList &proplist = partnode->props;
-            for(size_t i = 0;i < proplist.length();i++)
-            {
-                // Entries may be empty
-                if(proplist[i].empty())
-                    continue;
-
-                const Nif::Property *pr = proplist[i].getPtr();
-                if(pr->recType == Nif::RC_NiTexturingProperty)
-                    texprop = static_cast<const Nif::NiTexturingProperty*>(pr);
-                else if(pr->recType == Nif::RC_NiMaterialProperty)
-                    matprop = static_cast<const Nif::NiMaterialProperty*>(pr);
-                else if(pr->recType == Nif::RC_NiAlphaProperty)
-                    alphaprop = static_cast<const Nif::NiAlphaProperty*>(pr);
-                else if(pr->recType == Nif::RC_NiVertexColorProperty)
-                    vertprop = static_cast<const Nif::NiVertexColorProperty*>(pr);
-                else if(pr->recType == Nif::RC_NiZBufferProperty)
-                    zprop = static_cast<const Nif::NiZBufferProperty*>(pr);
-                else if(pr->recType == Nif::RC_NiSpecularProperty)
-                    specprop = static_cast<const Nif::NiSpecularProperty*>(pr);
-                else
-                    warn("Unhandled property type: "+pr->recName);
-            }
-
-            std::string fullname = mName+"@index="+Ogre::StringConverter::toString(partnode->recIndex);
-            if(partnode->name.length() > 0)
-                fullname += "@type="+partnode->name;
-            Misc::StringUtils::toLower(fullname);
-
-            bool needTangents;
+            getNodeProperties(partnode, texprop, matprop, alphaprop, vertprop, zprop, specprop);
             partsys->setMaterialName(NIFMaterialLoader::getMaterial(particledata, fullname, mGroup,
                                                                     texprop, matprop, alphaprop,
                                                                     vertprop, zprop, specprop,
@@ -1280,7 +1237,7 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
         }
 
         const Nif::Node *node = dynamic_cast<const Nif::Node*>(nif->getRecord(0));
-        findTriShape(mesh, node, NULL, NULL, NULL, NULL, NULL, NULL);
+        findTriShape(mesh, node);
     }
 
     void createEntities(Ogre::SceneManager *sceneMgr, const Nif::Node *node, EntityList &entities, int flags=0)
