@@ -294,7 +294,7 @@ namespace MWGui
         if (weaponSlot == invStore.end())
             mWindowManager.unsetSelectedWeapon();
         else
-            mWindowManager.setSelectedWeapon(*weaponSlot, 100); /// \todo track weapon durability
+            mWindowManager.setSelectedWeapon(*weaponSlot); /// \todo track weapon durability
 
         mPreviewDirty = true;
 

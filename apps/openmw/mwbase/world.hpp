@@ -216,6 +216,9 @@ namespace MWBase
             virtual MWWorld::Ptr  getFacedObject() = 0;
             ///< Return pointer to the object the player is looking at, if it is within activation range
 
+            virtual void adjustPosition (const MWWorld::Ptr& ptr) = 0;
+            ///< Adjust position after load to be on ground. Must be called after model load.
+
             virtual void deleteObject (const MWWorld::Ptr& ptr) = 0;
 
             virtual void moveObject (const MWWorld::Ptr& ptr, float x, float y, float z) = 0;

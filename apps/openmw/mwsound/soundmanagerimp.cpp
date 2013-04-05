@@ -208,14 +208,21 @@ namespace MWSound
 
     void SoundManager::startRandomTitle()
     {
-        Ogre::StringVectorPtr filelist;
-        filelist = mResourceMgr.findResourceNames(Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                                                  "Music/"+mCurrentPlaylist+"/*");
-        if(!filelist->size())
+        Ogre::StringVector filelist;
+
+        Ogre::StringVector groups = Ogre::ResourceGroupManager::getSingleton().getResourceGroups ();
+        for (Ogre::StringVector::iterator it = groups.begin(); it != groups.end(); ++it)
+        {
+            Ogre::StringVectorPtr resourcesInThisGroup = mResourceMgr.findResourceNames(*it,
+                                                                                        "Music/"+mCurrentPlaylist+"/*");
+            filelist.insert(filelist.end(), resourcesInThisGroup->begin(), resourcesInThisGroup->end());
+        }
+
+        if(!filelist.size())
             return;
 
-        int i = rand()%filelist->size();
-        streamMusicFull((*filelist)[i]);
+        int i = rand()%filelist.size();
+        streamMusicFull(filelist[i]);
     }
 
     bool SoundManager::isMusicPlaying()

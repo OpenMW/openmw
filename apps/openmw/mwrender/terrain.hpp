@@ -40,6 +40,9 @@ namespace MWRender{
 
         void cellAdded(MWWorld::CellStore* store);
         void cellRemoved(MWWorld::CellStore* store);
+
+        float getTerrainHeightAt (Ogre::Vector3 worldPos);
+
     private:
         Ogre::TerrainGlobalOptions* mTerrainGlobals;
         Ogre::TerrainGroup mTerrainGroup;

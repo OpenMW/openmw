@@ -71,6 +71,17 @@ namespace MWRender
 
     //----------------------------------------------------------------------------------------------
 
+    float TerrainManager::getTerrainHeightAt(Vector3 worldPos)
+    {
+        Ogre::Terrain* terrain = NULL;
+        float height = mTerrainGroup.getHeightAtWorldPosition(worldPos, &terrain);
+        if (terrain == NULL)
+            return std::numeric_limits<int>().min();
+        return height;
+    }
+
+    //----------------------------------------------------------------------------------------------
+
     TerrainManager::~TerrainManager()
     {
         OGRE_DELETE mTerrainGlobals;

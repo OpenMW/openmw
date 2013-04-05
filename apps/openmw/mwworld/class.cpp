@@ -259,6 +259,10 @@ namespace MWWorld
         throw std::runtime_error ("class can't be enchanted");
     }
 
+    void Class::adjustPosition(const MWWorld::Ptr& ptr) const
+    {
+    }
+
     MWWorld::Ptr
     Class::copyToCellImpl(const Ptr &ptr, CellStore &cell) const
     {

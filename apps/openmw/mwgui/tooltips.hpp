@@ -17,6 +17,7 @@ namespace MWGui
             : isPotion(false)
             , imageSize(32)
             , wordWrap(true)
+            , remainingEnchantCharge(-1)
         {}
 
         std::string caption;
@@ -26,6 +27,7 @@ namespace MWGui
 
         // enchantment (for cloth, armor, weapons)
         std::string enchant;
+        int remainingEnchantCharge;
 
         // effects (for potions, ingredients)
         Widgets::SpellEffectList effects;

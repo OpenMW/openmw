@@ -303,6 +303,8 @@ namespace MWScript
                             zRot = zRot/60.;
                         }
                         MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,zRot);
+
+                        MWWorld::Class::get(ptr).adjustPosition(ptr);
                     }
                     else
                     {
@@ -341,6 +343,7 @@ namespace MWScript
                         zRot = zRot/60.;
                     }
                     MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,zRot);
+                    MWWorld::Class::get(ptr).adjustPosition(ptr);
                 }
         };
 
