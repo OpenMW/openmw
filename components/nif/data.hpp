@@ -297,13 +297,17 @@ public:
         float time;
         char isSet;
     };
+    std::vector<VisData> mVis;
 
     void read(NIFStream *nif)
     {
         int count = nif->getInt();
-
-        /* Skip VisData */
-        nif->skip(count*5);
+        mVis.resize(count);
+        for(size_t i = 0;i < mVis.size();i++)
+        {
+            mVis[i].time = nif->getFloat();
+            mVis[i].isSet = nif->getChar();
+        }
     }
 };
 
