@@ -4,7 +4,7 @@ compiler:
 before_script:
  - mkdir build
  - cd build
- - cmake .. -DOGRE_STATIC=1 -DMYGUI_STATIC=1
+ - cmake .. -DOGRE_STATIC=1 -DMYGUI_STATIC=1 -DBUILD_WITH_CODE_COVERAGE=1 -DBUILD_UNITTESTS=1
 before_install:
  - git submodule update --init --recursive
  - echo "yes" | sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu `lsb_release -sc` main universe restricted multiverse"
@@ -16,7 +16,7 @@ before_install:
  - sudo apt-get install -qq libcg nvidia-cg-toolkit
  - sudo apt-get install -qq libavcodec-dev libavformat-dev libavdevice-dev libavutil-dev libswscale-dev libpostproc-dev
  - sudo apt-get install -qq libois-dev libbullet-dev libogre-static-dev libmygui-static-dev 
-script: "make -j`grep -c processor /proc/cpuinfo`"
+script: "make -j4"
 branches:
   only:
     - master
