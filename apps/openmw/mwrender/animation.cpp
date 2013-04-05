@@ -307,7 +307,15 @@ void Animation::reset(const std::string &start, const std::string &stop)
     else
     {
         mNextKey = mCurrentKeys->begin();
-        mCurrentTime = 0.0f;
+        while(mNextKey != mCurrentKeys->end() && mNextKey->second != "start")
+            mNextKey++;
+        if(mNextKey != mCurrentKeys->end())
+            mCurrentTime = mNextKey->first;
+        else
+        {
+            mNextKey = mCurrentKeys->begin();
+            mCurrentTime = 0.0f;
+        }
     }
 
     if(stop.length() > 0)
