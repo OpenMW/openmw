@@ -453,12 +453,50 @@ namespace CSMWorld
         {
             ESXRecordT record2 = record.get();
 
-            int flags = record.get().mData.mFlags & ~mMask;
+            int flags = record2.mData.mFlags & ~mMask;
 
             if (data.toInt())
                 flags |= mMask;
 
             record2.mData.mFlags = flags;
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct WeightHeightColumn : public Column<ESXRecordT>
+    {
+        bool mMale;
+        bool mWeight;
+
+        WeightHeightColumn (bool male, bool weight)
+        : Column<ESXRecordT> (male ? (weight ? "Male Weight" : "Male Height") :
+          (weight ? "Female Weight" : "Female Height"), ColumnBase::Display_Float),
+          mMale (male), mWeight (weight)
+        {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            const ESM::Race::MaleFemaleF& value =
+                mWeight ? record.get().mData.mWeight : record.get().mData.mHeight;
+
+            return mMale ? value.mMale : value.mFemale;
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            ESM::Race::MaleFemaleF& value =
+                mWeight ? record2.mData.mWeight : record2.mData.mHeight;
+
+            (mMale ? value.mMale : value.mFemale) = data.toFloat();
 
             record.setModified (record2);
         }
