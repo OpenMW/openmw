@@ -5,13 +5,16 @@ before_script:
  - mkdir build
  - cd build
  - cmake .. -DOGRE_STATIC=1 -DMYGUI_STATIC=1
- - cat CMakeCache.txt
 before_install:
  - git submodule update --init --recursive
  - echo "yes" | sudo apt-add-repository ppa:openmw/deps
  - sudo apt-get update -qq
- - sudo apt-get remove -qq libogre-static-dev
- - sudo apt-get install -qq libois-dev libopenal-dev libpng-dev libogre-static-dev libmpg123-dev libsndfile1-dev libblkid-dev libfreeimage-dev libboost-all-dev uuid-dev libqt4-opengl libqt4-dev libavcodec-dev libavformat-dev libavdevice-dev libavutil-dev libswscale-dev libpostproc-dev ffmpeg libbullet-dev libmygui-static-dev libgtest-dev google-mock zziplib-bin libcg libav-tools libois-dev libopenal-dev libxaw7-dev 
+ - sudo apt-get install -qq libboost-all-dev libgtest-dev google-mock libzzip-dev
+ - sudo apt-get install -qq libqt4-dev libxaw7-dev libxrand-dev libfreeimage-dev libpng-dev
+ - sudo apt-get install -qq libopenal-dev libmpg123-dev libsndfile1-dev
+ - sudo apt-get install -qq libcg nvidia-cg-dev
+ - sudo apt-get install -qq libavcodec-dev libavformat-dev libavdevice-dev libavutil-dev libswscale-dev libpostproc-dev
+ - sudo apt-get install -qq libois-dev libbullet-dev libogre-static-dev libmygui-static-dev 
 script: "make -j`grep -c processor /proc/cpuinfo`"
 branches:
   only:
