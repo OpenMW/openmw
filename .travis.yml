@@ -5,7 +5,6 @@ branches:
   only:
     - master
     - next
-    - travis_ci_test
 before_install:
  - pwd
  - git submodule update --init --recursive
