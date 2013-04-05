@@ -16,6 +16,26 @@ namespace MWRender
 class Animation
 {
 protected:
+    class AnimationValue : public Ogre::ControllerValue<Ogre::Real>
+    {
+    private:
+        Animation *mAnimation;
+
+    public:
+        AnimationValue(Animation *anim) : mAnimation(anim)
+        { }
+
+        virtual Ogre::Real getValue() const
+        {
+            return mAnimation->mCurrentTime;
+        }
+
+        virtual void setValue(Ogre::Real value)
+        {
+            mAnimation->mCurrentTime = value;
+        }
+    };
+
     MWWorld::Ptr mPtr;
     MWMechanics::CharacterController *mController;
 

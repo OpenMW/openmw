@@ -45,6 +45,8 @@ struct EntityList {
 
     std::vector<Ogre::ParticleSystem*> mParticles;
 
+    std::vector<Ogre::Controller<Ogre::Real> > mControllers;
+
     EntityList() : mSkelBase(0)
     { }
 };

@@ -367,6 +367,7 @@ void NpcAnimation::removeEntities(NifOgre::EntityList &entities)
         sceneMgr->destroyParticleSystem(entities.mParticles[i]);
     for(size_t i = 0;i < entities.mEntities.size();i++)
         sceneMgr->destroyEntity(entities.mEntities[i]);
+    entities.mControllers.clear();
     entities.mParticles.clear();
     entities.mEntities.clear();
     entities.mSkelBase = NULL;

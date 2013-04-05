@@ -45,6 +45,7 @@ Animation::~Animation()
         for(size_t i = 0;i < mEntityList.mEntities.size();i++)
             sceneMgr->destroyEntity(mEntityList.mEntities[i]);
     }
+    mEntityList.mControllers.clear();
     mEntityList.mParticles.clear();
     mEntityList.mEntities.clear();
     mEntityList.mSkelBase = NULL;
@@ -129,6 +130,10 @@ void Animation::createEntityList(Ogre::SceneNode *node, const std::string &model
         while(boneiter.hasMoreElements())
             boneiter.getNext()->setManuallyControlled(true);
     }
+
+    Ogre::SharedPtr<Ogre::ControllerValue<Ogre::Real> > ctrlval(OGRE_NEW AnimationValue(this));
+    for(size_t i = 0;i < mEntityList.mControllers.size();i++)
+        mEntityList.mControllers[i].setSource(ctrlval);
 }
 
 
@@ -457,6 +462,8 @@ Ogre::Vector3 Animation::runAnimation(float timepassed)
         if(!handleEvent(time, evt))
             break;
     }
+    for(size_t i = 0;i < mEntityList.mControllers.size();i++)
+        mEntityList.mControllers[i].update();
 
     return movement;
 }
