@@ -29,6 +29,6 @@ void Sound::save(ESMWriter &esm)
 
         mData.mVolume = 128;
         mData.mMinRange = 0;
-        mData.mMaxRange = 256;
+        mData.mMaxRange = 255;
     }
 }
