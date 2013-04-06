@@ -13,6 +13,11 @@ namespace CSMTools
     class RaceCheckStage : public Stage
     {
             const CSMWorld::IdCollection<ESM::Race>& mRaces;
+            bool mPlayable;
+
+            void performPerRecord (int stage, std::vector<std::string>& messages);
+
+            void performFinal (std::vector<std::string>& messages);
 
         public:
 
