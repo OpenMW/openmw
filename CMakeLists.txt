@@ -75,6 +75,7 @@ set(LIBDIR ${CMAKE_SOURCE_DIR}/libs)
 set(OENGINE_OGRE
   ${LIBDIR}/openengine/ogre/renderer.cpp
   ${LIBDIR}/openengine/ogre/fader.cpp
+  ${LIBDIR}/openengine/ogre/particles.cpp
   ${LIBDIR}/openengine/ogre/selectionbuffer.cpp
 )
 set(OENGINE_GUI
