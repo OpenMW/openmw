@@ -399,6 +399,13 @@ namespace MWScript
                     Interpreter::Type_Integer amount = runtime[0].mInteger;
                     runtime.pop();
 
+                    if (amount<0)
+                        throw std::runtime_error ("amount must be non-negative");
+
+                    // no-op
+                    if (amount == 0)
+                        return;
+
                     MWWorld::ContainerStore& store = MWWorld::Class::get (ptr).getContainerStore (ptr);
 
 
