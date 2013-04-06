@@ -53,21 +53,9 @@ namespace MWMechanics
 
             for (int i=0; i<8; ++i)
             {
-                const ESM::Race::MaleFemale *attribute = 0;
-                switch (i)
-                {
-                    case 0: attribute = &race->mData.mStrength; break;
-                    case 1: attribute = &race->mData.mIntelligence; break;
-                    case 2: attribute = &race->mData.mWillpower; break;
-                    case 3: attribute = &race->mData.mAgility; break;
-                    case 4: attribute = &race->mData.mSpeed; break;
-                    case 5: attribute = &race->mData.mEndurance; break;
-                    case 6: attribute = &race->mData.mPersonality; break;
-                    case 7: attribute = &race->mData.mLuck; break;
-                }
+                const ESM::Race::MaleFemale& attribute = race->mData.mAttributeValues[i];
 
-                creatureStats.getAttribute(i).setBase (
-                    static_cast<int> (male ? attribute->mMale : attribute->mFemale));
+                creatureStats.getAttribute(i).setBase (male ? attribute.mMale : attribute.mFemale);
             }
 
             for (int i=0; i<27; ++i)

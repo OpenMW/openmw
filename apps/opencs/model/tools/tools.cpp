@@ -15,6 +15,7 @@
 #include "skillcheck.hpp"
 #include "classcheck.hpp"
 #include "factioncheck.hpp"
+#include "racecheck.hpp"
 
 CSMTools::Operation *CSMTools::Tools::get (int type)
 {
@@ -60,6 +61,8 @@ CSMTools::Verifier *CSMTools::Tools::getVerifier()
         mVerifier->appendStage (new ClassCheckStage (mData.getClasses()));
 
         mVerifier->appendStage (new FactionCheckStage (mData.getFactions()));
+
+        mVerifier->appendStage (new RaceCheckStage (mData.getRaces()));
     }
 
     return mVerifier;

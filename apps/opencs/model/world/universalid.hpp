@@ -43,7 +43,9 @@ namespace CSMWorld
                 Type_Classes,
                 Type_Class,
                 Type_Factions,
-                Type_Faction
+                Type_Faction,
+                Type_Races,
+                Type_Race
             };
 
         private:

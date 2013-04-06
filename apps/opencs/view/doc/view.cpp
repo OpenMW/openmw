@@ -101,6 +101,10 @@ void CSVDoc::View::setupWorldMenu()
     QAction *factions = new QAction (tr ("Factions"), this);
     connect (factions, SIGNAL (triggered()), this, SLOT (addFactionsSubView()));
     world->addAction (factions);
+
+    QAction *races = new QAction (tr ("Races"), this);
+    connect (races, SIGNAL (triggered()), this, SLOT (addRacesSubView()));
+    world->addAction (races);
 }
 
 void CSVDoc::View::setupUi()
@@ -269,6 +273,11 @@ void CSVDoc::View::addClassesSubView()
 void CSVDoc::View::addFactionsSubView()
 {
     addSubView (CSMWorld::UniversalId::Type_Factions);
+}
+
+void CSVDoc::View::addRacesSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Races);
 }
 
 void CSVDoc::View::abortOperation (int type)
