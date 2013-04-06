@@ -59,6 +59,7 @@ enum RecordType
   RC_NiMaterialColorController,
   RC_NiBSPArrayController,
   RC_NiParticleSystemController,
+  RC_NiBSAnimationNode,
   RC_NiLight,
   RC_NiTextureEffect,
   RC_NiVertWeightsExtraData,

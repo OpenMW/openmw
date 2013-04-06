@@ -464,6 +464,10 @@ void loadResource(Ogre::Resource *resource)
         return;
     }
 
+    /* Animations without textkeys don't get Ogre::Animation objects. */
+    if(!animroot)
+        return;
+
     std::vector<std::string> targets;
     // TODO: If ctrls.size() == 0, check for a .kf file sharing the name of the .nif file
     if(ctrls.size() == 0) // No animations? Then we're done.
@@ -483,13 +487,6 @@ void loadResource(Ogre::Resource *resource)
     {
         warn("Target size mismatch ("+Ogre::StringConverter::toString(targets.size())+" targets, "+
              Ogre::StringConverter::toString(ctrls.size())+" controllers)");
-        return;
-    }
-
-    if(!animroot)
-    {
-        warn(Ogre::StringConverter::toString(ctrls.size())+" animated node(s) in "+
-             skel->getName()+", but no text keys.");
         return;
     }
 
