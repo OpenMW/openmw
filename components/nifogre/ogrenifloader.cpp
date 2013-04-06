@@ -1375,7 +1375,7 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
             ctrl = ctrl->next;
         }
 
-        if(node->recType == Nif::RC_NiTriShape && !(flags&0x01)) // Not hidden
+        if(node->recType == Nif::RC_NiTriShape)
         {
             const Nif::NiTriShape *shape = static_cast<const Nif::NiTriShape*>(node);
 
@@ -1396,10 +1396,12 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
                 mesh->setAutoBuildEdgeLists(false);
             }
 
-            entities.mEntities.push_back(sceneMgr->createEntity(mesh));
+            Ogre::Entity *entity = sceneMgr->createEntity(mesh);
+            entity->setVisible(!(flags&0x01));
+
+            entities.mEntities.push_back(entity);
             if(entities.mSkelBase)
             {
-                Ogre::Entity *entity = entities.mEntities.back();
                 if(entity->hasSkeleton())
                     entity->shareSkeletonInstanceWith(entities.mSkelBase);
                 else
@@ -1407,12 +1409,15 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
             }
         }
 
-        if((node->recType == Nif::RC_NiAutoNormalParticles ||
-            node->recType == Nif::RC_NiRotatingParticles) && !(flags&0x01))
+        if(node->recType == Nif::RC_NiAutoNormalParticles ||
+           node->recType == Nif::RC_NiRotatingParticles)
         {
             Ogre::ParticleSystem *partsys = createParticleSystem(sceneMgr, entities.mSkelBase, node);
             if(partsys != NULL)
+            {
+                partsys->setVisible(!(flags&0x01));
                 entities.mParticles.push_back(partsys);
+            }
         }
 
         const Nif::NiNode *ninode = dynamic_cast<const Nif::NiNode*>(node);
