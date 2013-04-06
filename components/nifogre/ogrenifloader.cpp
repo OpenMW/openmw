@@ -380,7 +380,6 @@ static TextKeyMap extractTextKeys(const Nif::NiTextKeyExtraData *tk)
     return textkeys;
 }
 
-
 void buildBones(Ogre::Skeleton *skel, const Nif::Node *node, Ogre::Bone *&animroot, TextKeyMap &textkeys, std::vector<Nif::NiKeyframeController const*> &ctrls, Ogre::Bone *parent=NULL)
 {
     Ogre::Bone *bone;
@@ -389,6 +388,7 @@ void buildBones(Ogre::Skeleton *skel, const Nif::Node *node, Ogre::Bone *&animro
     else
         bone = skel->createBone();
     if(parent) parent->addChild(bone);
+    mNifToOgreHandleMap[node->recIndex] = bone->getHandle();
 
     bone->setOrientation(node->trafo.rotation);
     bone->setPosition(node->trafo.pos);
@@ -439,6 +439,8 @@ void buildBones(Ogre::Skeleton *skel, const Nif::Node *node, Ogre::Bone *&animro
     }
 }
 
+// Lookup to retrieve an Ogre bone handle for a given Nif record index
+std::map<int,int> mNifToOgreHandleMap;
 
 typedef std::map<std::string,NIFSkeletonLoader> LoaderMap;
 static LoaderMap sLoaders;
@@ -567,6 +569,20 @@ static Ogre::SkeletonPtr createSkeleton(const std::string &name, const std::stri
 
     Ogre::SkeletonManager &skelMgr = Ogre::SkeletonManager::getSingleton();
     return skelMgr.create(name, group, true, &sLoaders[name]);
+}
+
+// Looks up an Ogre Bone handle ID from a NIF's record index. Should only be
+// used when the bone name is insufficient as this is a relatively slow lookup
+static int lookupOgreBoneHandle(const std::string &nifname, int idx)
+{
+    LoaderMap::const_iterator loader = sLoaders.find(nifname);
+    if(loader != sLoaders.end())
+    {
+        std::map<int,int>::const_iterator entry = loader->second.mNifToOgreHandleMap.find(idx);
+        if(entry != loader->second.mNifToOgreHandleMap.end())
+            return entry->second;
+    }
+    throw std::runtime_error("Invalid NIF record lookup ("+nifname+", index "+Ogre::StringConverter::toString(idx)+")");
 }
 
 };
@@ -1285,7 +1301,11 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
 
                     createParticleEmitterAffectors(partsys, partctrl);
                     if(!partctrl->emitter.empty() && !partsys->isAttached())
-                        entitybase->attachObjectToBone(partctrl->emitter->name, partsys);
+                    {
+                        int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(mName, partctrl->emitter->recIndex);
+                        Ogre::Bone *trgtbone = entitybase->getSkeleton()->getBone(trgtid);
+                        entitybase->attachObjectToBone(trgtbone->getName(), partsys);
+                    }
                 }
                 ctrl = ctrl->next;
             }
@@ -1362,10 +1382,8 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
             {
                 const Nif::NiVisController *vis = static_cast<const Nif::NiVisController*>(ctrl.getPtr());
 
-                const Nif::Named *target = dynamic_cast<const Nif::Named*>(ctrl->target.getPtr());
-                if(!target) target = node;
-
-                Ogre::Bone *trgtbone = entities.mSkelBase->getSkeleton()->getBone(target->name);
+                int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(mName, ctrl->target->recIndex);
+                Ogre::Bone *trgtbone = entities.mSkelBase->getSkeleton()->getBone(trgtid);
                 Ogre::SharedPtr<Ogre::ControllerValue<Ogre::Real> > srcval; /* Filled in later */
                 Ogre::SharedPtr<Ogre::ControllerValue<Ogre::Real> > dstval(OGRE_NEW VisController::Value(trgtbone));
                 Ogre::SharedPtr<Ogre::ControllerFunction<Ogre::Real> > func(OGRE_NEW VisController::Function(vis->data.getPtr()));
@@ -1405,7 +1423,11 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
                 if(entity->hasSkeleton())
                     entity->shareSkeletonInstanceWith(entities.mSkelBase);
                 else
-                    entities.mSkelBase->attachObjectToBone(shape->name, entity);
+                {
+                    int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(mName, shape->recIndex);
+                    Ogre::Bone *trgtbone = entities.mSkelBase->getSkeleton()->getBone(trgtid);
+                    entities.mSkelBase->attachObjectToBone(trgtbone->getName(), entity);
+                }
             }
         }
 
