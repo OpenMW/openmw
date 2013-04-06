@@ -1070,7 +1070,7 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
     }
 
     // Convert NiTriShape to Ogre::SubMesh
-    void handleNiTriShape(Ogre::Mesh *mesh, Nif::NiTriShape const *shape)
+    void createSubMesh(Ogre::Mesh *mesh, const Nif::NiTriShape *shape)
     {
         Ogre::SkeletonPtr skel;
         const Nif::NiTriShapeData *data = shape->data.getPtr();
@@ -1295,30 +1295,6 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
         }
     }
 
-    bool findTriShape(Ogre::Mesh *mesh, const Nif::Node *node)
-    {
-        if(node->recType == Nif::RC_NiTriShape && mShapeIndex == node->recIndex)
-        {
-            handleNiTriShape(mesh, dynamic_cast<const Nif::NiTriShape*>(node));
-            return true;
-        }
-
-        const Nif::NiNode *ninode = dynamic_cast<const Nif::NiNode*>(node);
-        if(ninode)
-        {
-            const Nif::NodeList &children = ninode->children;
-            for(size_t i = 0;i < children.length();i++)
-            {
-                if(!children[i].empty())
-                {
-                    if(findTriShape(mesh, children[i].getPtr()))
-                        return true;
-                }
-            }
-        }
-        return false;
-    }
-
 
     typedef std::map<std::string,NIFMeshLoader> LoaderMap;
     static LoaderMap sLoaders;
@@ -1441,8 +1417,8 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
             return;
         }
 
-        const Nif::Node *node = dynamic_cast<const Nif::Node*>(nif->getRecord(mShapeIndex));
-        findTriShape(mesh, node);
+        const Nif::Record *record = nif->getRecord(mShapeIndex);
+        createSubMesh(mesh, dynamic_cast<const Nif::NiTriShape*>(record));
     }
 
     void createEntities(Ogre::SceneManager *sceneMgr, const Nif::Node *node, EntityList &entities, int flags=0)
