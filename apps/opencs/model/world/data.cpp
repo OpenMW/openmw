@@ -77,12 +77,16 @@ CSMWorld::Data::Data()
     mRaces.addColumn (new WeightHeightColumn<ESM::Race> (false, true));
     mRaces.addColumn (new WeightHeightColumn<ESM::Race> (false, false));
 
+    mSounds.addColumn (new StringIdColumn<ESM::Sound>);
+    mSounds.addColumn (new RecordStateColumn<ESM::Sound>);
+
     addModel (new IdTable (&mGlobals), UniversalId::Type_Globals, UniversalId::Type_Global);
     addModel (new IdTable (&mGmsts), UniversalId::Type_Gmsts, UniversalId::Type_Gmst);
     addModel (new IdTable (&mSkills), UniversalId::Type_Skills, UniversalId::Type_Skill);
     addModel (new IdTable (&mClasses), UniversalId::Type_Classes, UniversalId::Type_Class);
     addModel (new IdTable (&mFactions), UniversalId::Type_Factions, UniversalId::Type_Faction);
     addModel (new IdTable (&mRaces), UniversalId::Type_Races, UniversalId::Type_Race);
+    addModel (new IdTable (&mSounds), UniversalId::Type_Sounds, UniversalId::Type_Sound);
 }
 
 CSMWorld::Data::~Data()
@@ -151,6 +155,16 @@ CSMWorld::IdCollection<ESM::Race>& CSMWorld::Data::getRaces()
     return mRaces;
 }
 
+const CSMWorld::IdCollection<ESM::Sound>& CSMWorld::Data::getSounds() const
+{
+    return mSounds;
+}
+
+CSMWorld::IdCollection<ESM::Sound>& CSMWorld::Data::getSounds()
+{
+    return mSounds;
+}
+
 QAbstractItemModel *CSMWorld::Data::getTableModel (const UniversalId& id)
 {
     std::map<UniversalId::Type, QAbstractItemModel *>::iterator iter = mModelIndex.find (id.getType());
@@ -191,6 +205,7 @@ void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base)
             case ESM::REC_CLAS: mClasses.load (reader, base); break;
             case ESM::REC_FACT: mFactions.load (reader, base); break;
             case ESM::REC_RACE: mRaces.load (reader, base); break;
+            case ESM::REC_SOUN: mSounds.load (reader, base); break;
 
             default:
 

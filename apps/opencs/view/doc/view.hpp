@@ -123,6 +123,8 @@ namespace CSVDoc
             void addFactionsSubView();
 
             void addRacesSubView();
+
+            void addSoundsSubView();
     };
 }
 
