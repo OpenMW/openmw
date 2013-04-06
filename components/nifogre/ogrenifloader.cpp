@@ -182,7 +182,7 @@ public:
         Nif::FloatKeyList mUScale;
         Nif::FloatKeyList mVScale;
 
-        static float lookupValue(float time, const Nif::FloatKeyList &keys)
+        static float lookupValue(const Nif::FloatKeyList &keys, float time, float def)
         {
             Nif::FloatKeyList::VecType::const_iterator iter(keys.mKeys.begin());
             for(;iter != keys.mKeys.end();iter++)
@@ -195,7 +195,7 @@ public:
                 float a = (time-iter->mTime) / (next->mTime-iter->mTime);
                 return iter->mValue + ((next->mValue - iter->mValue)*a);
             }
-            return 0.0f;
+            return def;
         }
 
     public:
@@ -215,12 +215,10 @@ public:
 
         virtual void setValue(Ogre::Real value)
         {
-            float uTrans = lookupValue(value, mUTrans);
-            float vTrans = lookupValue(value, mVTrans);
-            float uScale = lookupValue(value, mUScale);
-            float vScale = lookupValue(value, mVScale);
-            if(uScale == 0.0f) uScale = 1.0f;
-            if(vScale == 0.0f) vScale = 1.0f;
+            float uTrans = lookupValue(mUTrans, value, 0.0f);
+            float vTrans = lookupValue(mVTrans, value, 0.0f);
+            float uScale = lookupValue(mUScale, value, 1.0f);
+            float vScale = lookupValue(mVScale, value, 1.0f);
 
             Ogre::Material::TechniqueIterator techs = mMaterial->getTechniqueIterator();
             while(techs.hasMoreElements())
