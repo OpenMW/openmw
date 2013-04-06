@@ -1,0 +1,40 @@
+language: cpp
+compiler:
+ - gcc
+branches:
+  only:
+    - master
+    - next
+before_install:
+ - pwd
+ - git submodule update --init --recursive
+ - echo "yes" | sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu `lsb_release -sc` main universe restricted multiverse"
+ - echo "yes" | sudo apt-add-repository ppa:openmw/deps
+ - sudo apt-get update -qq
+ - sudo apt-get install -qq libboost-all-dev libgtest-dev google-mock libzzip-dev
+ - sudo apt-get install -qq libqt4-dev libxaw7-dev libxrandr-dev libfreeimage-dev libpng-dev
+ - sudo apt-get install -qq libopenal-dev libmpg123-dev libsndfile1-dev
+ - sudo apt-get install -qq libcg nvidia-cg-toolkit
+ - sudo apt-get install -qq libavcodec-dev libavformat-dev libavdevice-dev libavutil-dev libswscale-dev libpostproc-dev
+ - sudo apt-get install -qq libois-dev libbullet-dev libogre-static-dev libmygui-static-dev
+ - sudo mkdir /usr/src/gtest/build
+ - cd /usr/src/gtest/build
+ - sudo cmake .. -DBUILD_SHARED_LIBS=1
+ - sudo make -j4
+ - sudo ln -s /usr/src/gtest/build/libgtest.so /usr/lib/libgtest.so
+ - sudo ln -s /usr/src/gtest/build/libgtest_main.so /usr/lib/libgtest_main.so
+before_script:
+ - cd -
+ - mkdir build
+ - cd build
+ - cmake .. -DOGRE_STATIC=1 -DMYGUI_STATIC=1 -DBUILD_WITH_CODE_COVERAGE=1 -DBUILD_UNITTESTS=1
+script:
+ - make -j4
+after_script:
+ - ./openmw_test_suite
+notifications:
+  recipients:
+    - lgromanowski+travis.ci@gmail.com
+  email:
+    on_success: change
+    on_failure: always
