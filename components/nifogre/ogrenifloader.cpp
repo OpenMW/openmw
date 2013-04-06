@@ -712,7 +712,7 @@ static Ogre::String getMaterial(const Nif::ShapeData *shapedata,
                 continue;
             if(texprop->textures[i].texture.empty())
             {
-                warn("Texture layer "+Ogre::StringConverter::toString(i)+" is in use but empty in "+name+"\n");
+                warn("Texture layer "+Ogre::StringConverter::toString(i)+" is in use but empty in "+name);
                 continue;
             }
 
@@ -840,10 +840,14 @@ static Ogre::String getMaterial(const Nif::ShapeData *shapedata,
         instance->setProperty("emissiveMapUVSet", sh::makeProperty(new sh::IntValue(texprop->textures[Nif::NiTexturingProperty::GlowTexture].uvSet)));
     }
 
-    for(int i = 1;i < 7;i++)
+    for(int i = 0;i < 7;i++)
     {
+        if(i == Nif::NiTexturingProperty::BaseTexture ||
+           i == Nif::NiTexturingProperty::BumpTexture ||
+           i == Nif::NiTexturingProperty::GlowTexture)
+            continue;
         if(!texName[i].empty())
-            warn("Ignored texture "+texName[i]+" on layer "+Ogre::StringConverter::toString(i)+"\n");
+            warn("Ignored texture "+texName[i]+" on layer "+Ogre::StringConverter::toString(i));
     }
 
     if (vertexColour)
