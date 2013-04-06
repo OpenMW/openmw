@@ -1274,7 +1274,7 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
 
             partsys->setDefaultDimensions(particledata->particleSize, particledata->particleSize);
             partsys->setCullIndividually(false);
-            partsys->setParticleQuota(particledata->activeCount);
+            partsys->setParticleQuota(particledata->numParticles);
 
             Nif::ControllerPtr ctrl = partnode->controller;
             while(!ctrl.empty())

@@ -165,6 +165,8 @@ public:
 class NiAutoNormalParticlesData : public ShapeData
 {
 public:
+    int numParticles;
+
     float particleSize;
 
     int activeCount;
@@ -176,7 +178,7 @@ public:
         ShapeData::read(nif);
 
         // Should always match the number of vertices
-        nif->getUShort();
+        numParticles = nif->getUShort();
 
         particleSize = nif->getFloat();
         activeCount = nif->getUShort();
