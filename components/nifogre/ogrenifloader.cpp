@@ -1444,9 +1444,9 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
                 // affecting the entire subtree of this obj
                 if(sd->string == "MRK")
                 {
-                    // Marker objects. These are only visible in the
+                    // Marker objects. These meshes are only visible in the
                     // editor.
-                    return;
+                    flags |= 0x80000000;
                 }
             }
             e = e->extra;
@@ -1470,7 +1470,7 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
             ctrl = ctrl->next;
         }
 
-        if(node->recType == Nif::RC_NiTriShape)
+        if(node->recType == Nif::RC_NiTriShape && !(flags&0x80000000))
         {
             const Nif::NiTriShape *shape = static_cast<const Nif::NiTriShape*>(node);
 
