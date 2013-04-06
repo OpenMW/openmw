@@ -66,6 +66,36 @@ namespace NifOgre
 {
 
 // FIXME: Should not be here.
+class DefaultFunction : public Ogre::ControllerFunction<Ogre::Real>
+{
+private:
+    float mFrequency;
+    float mPhase;
+    float mStartTime;
+    float mStopTime;
+
+public:
+    DefaultFunction(const Nif::Controller *ctrl)
+        : Ogre::ControllerFunction<Ogre::Real>(false)
+        , mFrequency(ctrl->frequency)
+        , mPhase(ctrl->phase)
+        , mStartTime(ctrl->timeStart)
+        , mStopTime(ctrl->timeStop)
+    {
+        mDeltaCount = mPhase;
+        while(mDeltaCount < mStartTime)
+            mDeltaCount += (mStopTime-mStartTime);
+    }
+
+    virtual Ogre::Real calculate(Ogre::Real value)
+    {
+        mDeltaCount += value*mFrequency;
+        mDeltaCount = std::fmod(mDeltaCount - mStartTime,
+                                mStopTime - mStartTime) + mStartTime;
+        return mDeltaCount;
+    }
+};
+
 class VisController
 {
 public:
@@ -208,35 +238,7 @@ public:
         }
     };
 
-    class Function : public Ogre::ControllerFunction<Ogre::Real>
-    {
-    private:
-        float mFrequency;
-        float mPhase;
-        float mStartTime;
-        float mStopTime;
-
-    public:
-        Function(const Nif::NiUVController *ctrl)
-          : Ogre::ControllerFunction<Ogre::Real>(false)
-          , mFrequency(ctrl->frequency)
-          , mPhase(ctrl->phase)
-          , mStartTime(ctrl->timeStart)
-          , mStopTime(ctrl->timeStop)
-        {
-            mDeltaCount = mPhase;
-            while(mDeltaCount < mStartTime)
-                mDeltaCount += (mStopTime-mStartTime);
-        }
-
-        virtual Ogre::Real calculate(Ogre::Real value)
-        {
-            mDeltaCount += value;
-            mDeltaCount = std::fmod(mDeltaCount+(value*mFrequency) - mStartTime,
-                                    mStopTime - mStartTime) + mStartTime;
-            return mDeltaCount;
-        }
-    };
+    typedef DefaultFunction Function;
 };
 
 
