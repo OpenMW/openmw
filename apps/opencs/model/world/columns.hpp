@@ -506,6 +506,66 @@ namespace CSMWorld
             return true;
         }
     };
+
+    template<typename ESXRecordT>
+    struct SoundParamColumn : public Column<ESXRecordT>
+    {
+        enum Type
+        {
+            Type_Volume,
+            Type_MinRange,
+            Type_MaxRange
+        };
+
+        Type mType;
+
+        SoundParamColumn (Type type)
+        : Column<ESXRecordT> (
+            type==Type_Volume ? "Volume" : (type==Type_MinRange ? "Min Range" : "Max Range"),
+            ColumnBase::Display_Integer),
+          mType (type)
+        {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            int value = 0;
+
+            switch (mType)
+            {
+                case Type_Volume: value = record.get().mData.mVolume; break;
+                case Type_MinRange: value = record.get().mData.mMinRange; break;
+                case Type_MaxRange: value = record.get().mData.mMaxRange; break;
+            }
+
+            return value;
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            int value = data.toInt();
+
+            if (value<0)
+                value = 0;
+            else if (value>255)
+                value = 255;
+
+            ESXRecordT record2 = record.get();
+
+            switch (mType)
+            {
+                case Type_Volume: record2.mData.mVolume = static_cast<unsigned char> (value); break;
+                case Type_MinRange: record2.mData.mMinRange = static_cast<unsigned char> (value); break;
+                case Type_MaxRange: record2.mData.mMaxRange = static_cast<unsigned char> (value); break;
+            }
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
 }
 
 #endif
