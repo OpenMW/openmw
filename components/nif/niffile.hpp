@@ -66,6 +66,9 @@ class NIFFile
     /// Record list
     std::vector<Record*> records;
 
+    /// Root list
+    std::vector<Record*> roots;
+
     /// Parse the file
     void parse();
 
@@ -115,9 +118,18 @@ public:
         assert(res != NULL);
         return res;
     }
-
     /// Number of records
     size_t numRecords() { return records.size(); }
+
+    /// Get a given root
+    Record *getRoot(size_t index=0)
+    {
+        Record *res = roots.at(index);
+        assert(res != NULL);
+        return res;
+    }
+    /// Number of roots
+    size_t numRoots() { return roots.size(); }
 };
 
 

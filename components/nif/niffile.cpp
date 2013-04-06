@@ -345,14 +345,18 @@ void NIFFile::parse()
       }
     }
 
-  /* After the data, the nif contains an int N and then a list of N
-     ints following it. This might be a list of the root nodes in the
-     tree, but for the moment we ignore it.
-   */
+    size_t rootNum = nif.getUInt();
+    roots.resize(rootNum);
 
-  // Once parsing is done, do post-processing.
-  for(size_t i=0; i<recNum; i++)
-    records[i]->post(this);
+    for(size_t i = 0;i < rootNum;i++)
+    {
+        intptr_t idx = nif.getInt();
+        roots[i] = ((idx >= 0) ? records.at(idx) : NULL);
+    }
+
+    // Once parsing is done, do post-processing.
+    for(size_t i=0; i<recNum; i++)
+        records[i]->post(this);
 }
 
 /// \todo move to the write cpp file

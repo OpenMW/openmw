@@ -91,21 +91,20 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
     // likely a sign of incomplete code rather than faulty input.
     Nif::NIFFile::ptr pnif (Nif::NIFFile::create (resourceName.substr(0, resourceName.length()-7)));
     Nif::NIFFile & nif = *pnif.get ();
-    if (nif.numRecords() < 1)
+    if (nif.numRoots() < 1)
     {
-        warn("Found no records in NIF.");
+        warn("Found no root nodes in NIF.");
         return;
     }
 
-    // The first record is assumed to be the root node
-    Nif::Record *r = nif.getRecord(0);
+    Nif::Record *r = nif.getRoot(0);
     assert(r != NULL);
 
     Nif::Node *node = dynamic_cast<Nif::Node*>(r);
     if (node == NULL)
     {
-        warn("First record in file was not a node, but a " +
-                r->recName + ". Skipping file.");
+        warn("First root in file was not a node, but a " +
+             r->recName + ". Skipping file.");
         return;
     }
 

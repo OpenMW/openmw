@@ -553,7 +553,7 @@ void loadResource(Ogre::Resource *resource)
     OgreAssert(skel, "Attempting to load a skeleton into a non-skeleton resource!");
 
     Nif::NIFFile::ptr nif(Nif::NIFFile::create(skel->getName()));
-    const Nif::Node *node = static_cast<const Nif::Node*>(nif->getRecord(0));
+    const Nif::Node *node = static_cast<const Nif::Node*>(nif->getRoot(0));
 
     std::vector<const Nif::NiKeyframeController*> ctrls;
     Ogre::Bone *animroot = NULL;
@@ -1441,7 +1441,7 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
             return;
         }
 
-        const Nif::Node *node = dynamic_cast<const Nif::Node*>(nif->getRecord(0));
+        const Nif::Node *node = dynamic_cast<const Nif::Node*>(nif->getRecord(mShapeIndex));
         findTriShape(mesh, node);
     }
 
@@ -1603,21 +1603,21 @@ public:
     {
         Nif::NIFFile::ptr pnif = Nif::NIFFile::create(name);
         Nif::NIFFile &nif = *pnif.get();
-        if(nif.numRecords() < 1)
+        if(nif.numRoots() < 1)
         {
-            nif.warn("Found no NIF records in "+name+".");
+            nif.warn("Found no root nodes in "+name+".");
             return;
         }
 
         // The first record is assumed to be the root node
-        const Nif::Record *r = nif.getRecord(0);
+        const Nif::Record *r = nif.getRoot(0);
         assert(r != NULL);
 
         const Nif::Node *node = dynamic_cast<Nif::Node const *>(r);
         if(node == NULL)
         {
-            nif.warn("First record in "+name+" was not a node, but a "+
-                    r->recName+".");
+            nif.warn("First root in "+name+" was not a node, but a "+
+                     r->recName+".");
             return;
         }
 
@@ -1722,14 +1722,14 @@ Ogre::SkeletonPtr Loader::getSkeleton(std::string name, const std::string &group
         return skel;
 
     Nif::NIFFile::ptr nif = Nif::NIFFile::create(name);
-    if(nif->numRecords() < 1)
+    if(nif->numRoots() < 1)
     {
-        nif->warn("Found no NIF records in "+name+".");
+        nif->warn("Found no root nodes in "+name+".");
         return skel;
     }
 
     // The first record is assumed to be the root node
-    const Nif::Record *r = nif->getRecord(0);
+    const Nif::Record *r = nif->getRoot(0);
     assert(r != NULL);
 
     const Nif::Node *node = dynamic_cast<const Nif::Node*>(r);
