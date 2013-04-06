@@ -13,7 +13,7 @@ MWMechanics::AiPackage * MWMechanics::AiWander::clone() const
 
 bool MWMechanics::AiWander::execute (const MWWorld::Ptr& actor)
 {
-    std::cout << "AiWadner completed.\n";
+    // Return completed
     return true;
 }
 
