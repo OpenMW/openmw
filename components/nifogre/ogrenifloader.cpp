@@ -38,6 +38,7 @@
 #include <OgreParticleSystem.h>
 #include <OgreParticleEmitter.h>
 #include <OgreParticleAffector.h>
+#include <OgreControllerManager.h>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
@@ -135,6 +136,105 @@ public:
                     return mData[i-1].isSet;
             }
             return mData.back().isSet;
+        }
+    };
+};
+
+class UVController
+{
+public:
+    class Value : public Ogre::ControllerValue<Ogre::Real>
+    {
+    private:
+        Ogre::MaterialPtr mMaterial;
+        Nif::FloatKeyList mUTrans;
+        Nif::FloatKeyList mVTrans;
+        Nif::FloatKeyList mUScale;
+        Nif::FloatKeyList mVScale;
+
+        static float lookupValue(float time, const Nif::FloatKeyList &keys)
+        {
+            Nif::FloatKeyList::VecType::const_iterator iter(keys.mKeys.begin());
+            for(;iter != keys.mKeys.end();iter++)
+            {
+                if(iter->mTime > time)
+                    continue;
+                Nif::FloatKeyList::VecType::const_iterator next(iter+1);
+                if(next == keys.mKeys.end())
+                    return iter->mValue;
+                float a = (time-iter->mTime) / (next->mTime-iter->mTime);
+                return iter->mValue + ((next->mValue - iter->mValue)*a);
+            }
+            return 0.0f;
+        }
+
+    public:
+        Value(const Ogre::MaterialPtr &material, Nif::NiUVData *data)
+          : mMaterial(material)
+          , mUTrans(data->mKeyList[0])
+          , mVTrans(data->mKeyList[1])
+          , mUScale(data->mKeyList[2])
+          , mVScale(data->mKeyList[3])
+        { }
+
+        virtual Ogre::Real getValue() const
+        {
+            // Should not be called
+            return 1.0f;
+        }
+
+        virtual void setValue(Ogre::Real value)
+        {
+            float uTrans = lookupValue(value, mUTrans);
+            float vTrans = lookupValue(value, mVTrans);
+            float uScale = lookupValue(value, mUScale);
+            float vScale = lookupValue(value, mVScale);
+            if(uScale == 0.0f) uScale = 1.0f;
+            if(vScale == 0.0f) vScale = 1.0f;
+
+            Ogre::Material::TechniqueIterator techs = mMaterial->getTechniqueIterator();
+            while(techs.hasMoreElements())
+            {
+                Ogre::Technique *tech = techs.getNext();
+                Ogre::Technique::PassIterator passes = tech->getPassIterator();
+                while(passes.hasMoreElements())
+                {
+                    Ogre::Pass *pass = passes.getNext();
+                    Ogre::TextureUnitState *tex = pass->getTextureUnitState(0);
+                    tex->setTextureScroll(uTrans, vTrans);
+                    tex->setTextureScale(uScale, vScale);
+                }
+            }
+        }
+    };
+
+    class Function : public Ogre::ControllerFunction<Ogre::Real>
+    {
+    private:
+        float mFrequency;
+        float mPhase;
+        float mStartTime;
+        float mStopTime;
+
+    public:
+        Function(const Nif::NiUVController *ctrl)
+          : Ogre::ControllerFunction<Ogre::Real>(false)
+          , mFrequency(ctrl->frequency)
+          , mPhase(ctrl->phase)
+          , mStartTime(ctrl->timeStart)
+          , mStopTime(ctrl->timeStop)
+        {
+            mDeltaCount = mPhase;
+            while(mDeltaCount < mStartTime)
+                mDeltaCount += (mStopTime-mStartTime);
+        }
+
+        virtual Ogre::Real calculate(Ogre::Real value)
+        {
+            mDeltaCount += value;
+            mDeltaCount = std::fmod(mDeltaCount+(value*mFrequency) - mStartTime,
+                                    mStopTime - mStartTime) + mStartTime;
+            return mDeltaCount;
         }
     };
 };
@@ -409,7 +509,8 @@ void buildBones(Ogre::Skeleton *skel, const Nif::Node *node, Ogre::Bone *&animro
         if(ctrl->recType == Nif::RC_NiKeyframeController)
             ctrls.push_back(static_cast<const Nif::NiKeyframeController*>(ctrl.getPtr()));
         else if(!(ctrl->recType == Nif::RC_NiParticleSystemController ||
-                  ctrl->recType == Nif::RC_NiVisController
+                  ctrl->recType == Nif::RC_NiVisController ||
+                  ctrl->recType == Nif::RC_NiUVController
                   ))
             warn("Unhandled "+ctrl->recName+" from node "+node->name+" in "+skel->getName());
         ctrl = ctrl->next;
@@ -1428,6 +1529,23 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
                     Ogre::Bone *trgtbone = entities.mSkelBase->getSkeleton()->getBone(trgtid);
                     entities.mSkelBase->attachObjectToBone(trgtbone->getName(), entity);
                 }
+            }
+
+            Nif::ControllerPtr ctrl = node->controller;
+            while(!ctrl.empty())
+            {
+                if(ctrl->recType == Nif::RC_NiUVController)
+                {
+                    const Nif::NiUVController *uv = static_cast<const Nif::NiUVController*>(ctrl.getPtr());
+
+                    const Ogre::MaterialPtr &material = entity->getSubEntity(0)->getMaterial();
+                    Ogre::ControllerValueRealPtr srcval(Ogre::ControllerManager::getSingleton().getFrameTimeSource());
+                    Ogre::ControllerValueRealPtr dstval(OGRE_NEW UVController::Value(material, uv->data.getPtr()));
+                    Ogre::ControllerFunctionRealPtr func(OGRE_NEW UVController::Function(uv));
+
+                    entities.mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
+                }
+                ctrl = ctrl->next;
             }
         }
 

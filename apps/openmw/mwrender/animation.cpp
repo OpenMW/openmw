@@ -133,7 +133,10 @@ void Animation::createEntityList(Ogre::SceneNode *node, const std::string &model
 
     Ogre::SharedPtr<Ogre::ControllerValue<Ogre::Real> > ctrlval(OGRE_NEW AnimationValue(this));
     for(size_t i = 0;i < mEntityList.mControllers.size();i++)
-        mEntityList.mControllers[i].setSource(ctrlval);
+    {
+        if(mEntityList.mControllers[i].getSource().isNull())
+            mEntityList.mControllers[i].setSource(ctrlval);
+    }
 }
 
 
