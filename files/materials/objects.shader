@@ -36,6 +36,8 @@
     SH_BEGIN_PROGRAM
         shUniform(float4x4, wvp) @shAutoConstant(wvp, worldviewproj_matrix)
 
+        shUniform(float4x4, textureMatrix0) @shAutoConstant(textureMatrix0, texture_matrix, 0)
+
 #if (VIEWPROJ_FIX) || (SHADOWS)
     shUniform(float4x4, worldMatrix) @shAutoConstant(worldMatrix, world_matrix)
 #endif
@@ -118,7 +120,7 @@
     {
 	    shOutputPosition = shMatrixMult(wvp, shInputPosition);
 
-        UV.xy = uv0;
+        UV.xy = shMatrixMult (textureMatrix0, float4(uv0,0,1)).xy;
 #if SECOND_UV_SET
         UV.zw = uv1;
 #endif
