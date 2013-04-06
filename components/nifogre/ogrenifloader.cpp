@@ -37,6 +37,7 @@
 #include <OgreTagPoint.h>
 #include <OgreParticleSystem.h>
 #include <OgreParticleEmitter.h>
+#include <OgreParticleAffector.h>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
@@ -1220,7 +1221,10 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
         {
             if(e->recType == Nif::RC_NiParticleGrowFade)
             {
-                // TODO: Implement
+                const Nif::NiParticleGrowFade *gf = static_cast<const Nif::NiParticleGrowFade*>(e.getPtr());
+                Ogre::ParticleAffector *affector = partsys->addAffector("GrowFade");
+                affector->setParameter("grow_time", Ogre::StringConverter::toString(gf->growTime));
+                affector->setParameter("fade_time", Ogre::StringConverter::toString(gf->fadeTime));
             }
             else if(e->recType == Nif::RC_NiParticleColorModifier)
             {
