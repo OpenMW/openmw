@@ -91,6 +91,7 @@ CSMWorld::Data::Data()
     mRegions.addColumn (new RecordStateColumn<ESM::Region>);
     mRegions.addColumn (new NameColumn<ESM::Region>);
     mRegions.addColumn (new MapColourColumn<ESM::Region>);
+    mRegions.addColumn (new SleepListColumn<ESM::Region>);
 
     addModel (new IdTable (&mGlobals), UniversalId::Type_Globals, UniversalId::Type_Global);
     addModel (new IdTable (&mGmsts), UniversalId::Type_Gmsts, UniversalId::Type_Gmst);
