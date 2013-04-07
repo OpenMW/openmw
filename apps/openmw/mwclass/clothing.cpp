@@ -262,4 +262,9 @@ namespace MWClass
 
         return ref->mBase->mData.mEnchant;
     }
+
+    bool Clothing::canSell (const MWWorld::Ptr& item, int npcServices) const
+    {
+        return npcServices & ESM::NPC::Clothing;
+    }
 }

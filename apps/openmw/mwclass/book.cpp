@@ -183,4 +183,9 @@ namespace MWClass
 
         return ref->mBase->mData.mEnchant;
     }
+
+    bool Book::canSell (const MWWorld::Ptr& item, int npcServices) const
+    {
+        return npcServices & ESM::NPC::Books;
+    }
 }
