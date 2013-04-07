@@ -169,6 +169,101 @@ public:
     typedef DefaultFunction Function;
 };
 
+class KeyframeController
+{
+public:
+    class Value : public NodeTargetValue<Ogre::Real>
+    {
+    private:
+        Nif::QuaternionKeyList mRotations;
+        Nif::Vector3KeyList mTranslations;
+        Nif::FloatKeyList mScales;
+
+    public:
+        Value(Ogre::Node *target, const Nif::NiKeyframeData *data)
+          : NodeTargetValue<Ogre::Real>(target)
+          , mRotations(data->mRotations)
+          , mTranslations(data->mTranslations)
+          , mScales(data->mScales)
+        { }
+
+        virtual Ogre::Real getValue() const
+        {
+            // Should not be called
+            return 0.0f;
+        }
+
+        virtual void setValue(Ogre::Real time)
+        {
+            if(mRotations.mKeys.size() > 0)
+            {
+                if(time <= mRotations.mKeys.front().mTime)
+                    mNode->setOrientation(mRotations.mKeys.front().mValue);
+                else if(time >= mRotations.mKeys.back().mTime)
+                    mNode->setOrientation(mRotations.mKeys.back().mValue);
+                else
+                {
+                    Nif::QuaternionKeyList::VecType::const_iterator iter(mRotations.mKeys.begin()+1);
+                    for(;iter != mRotations.mKeys.end();iter++)
+                    {
+                        if(iter->mTime < time)
+                            continue;
+
+                        Nif::QuaternionKeyList::VecType::const_iterator last(iter-1);
+                        float a = (time-last->mTime) / (iter->mTime-last->mTime);
+                        mNode->setOrientation(Ogre::Quaternion::nlerp(a, last->mValue, iter->mValue));
+                        break;
+                    }
+                }
+            }
+            if(mTranslations.mKeys.size() > 0)
+            {
+                if(time <= mTranslations.mKeys.front().mTime)
+                    mNode->setPosition(mTranslations.mKeys.front().mValue);
+                else if(time >= mTranslations.mKeys.back().mTime)
+                    mNode->setPosition(mTranslations.mKeys.back().mValue);
+                else
+                {
+                    Nif::Vector3KeyList::VecType::const_iterator iter(mTranslations.mKeys.begin()+1);
+                    for(;iter != mTranslations.mKeys.end();iter++)
+                    {
+                        if(iter->mTime < time)
+                            continue;
+
+                        Nif::Vector3KeyList::VecType::const_iterator last(iter-1);
+                        float a = (time-last->mTime) / (iter->mTime-last->mTime);
+                        mNode->setPosition(last->mValue + ((iter->mValue - last->mValue)*a));
+                        break;
+                    }
+                }
+            }
+            if(mScales.mKeys.size() > 0)
+            {
+                if(time <= mScales.mKeys.front().mTime)
+                    mNode->setScale(Ogre::Vector3(mScales.mKeys.front().mValue));
+                else if(time >= mScales.mKeys.back().mTime)
+                    mNode->setScale(Ogre::Vector3(mScales.mKeys.back().mValue));
+                else
+                {
+                    Nif::FloatKeyList::VecType::const_iterator iter(mScales.mKeys.begin()+1);
+                    for(;iter != mScales.mKeys.end();iter++)
+                    {
+                        if(iter->mTime < time)
+                            continue;
+
+                        Nif::FloatKeyList::VecType::const_iterator last(iter-1);
+                        float a = (time-last->mTime) / (iter->mTime-last->mTime);
+                        mNode->setScale(Ogre::Vector3(last->mValue + ((iter->mValue - last->mValue)*a)));
+                        break;
+                    }
+                }
+            }
+        }
+    };
+
+    typedef DefaultFunction Function;
+};
+
 class UVController
 {
 public:
@@ -1543,6 +1638,18 @@ class NIFObjectLoader : Ogre::ManualResourceLoader
                 Ogre::ControllerValueRealPtr srcval; /* Filled in later */
                 Ogre::ControllerValueRealPtr dstval(OGRE_NEW VisController::Value(trgtbone, vis->data.getPtr()));
                 Ogre::ControllerFunctionRealPtr func(OGRE_NEW VisController::Function(vis, false));
+
+                objectlist.mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
+            }
+            else if(ctrl->recType == Nif::RC_NiKeyframeController)
+            {
+                const Nif::NiKeyframeController *key = static_cast<const Nif::NiKeyframeController*>(ctrl.getPtr());
+
+                int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(mName, ctrl->target->recIndex);
+                Ogre::Bone *trgtbone = objectlist.mSkelBase->getSkeleton()->getBone(trgtid);
+                Ogre::ControllerValueRealPtr srcval; /* Filled in later */
+                Ogre::ControllerValueRealPtr dstval(OGRE_NEW KeyframeController::Value(trgtbone, key->data.getPtr()));
+                Ogre::ControllerFunctionRealPtr func(OGRE_NEW KeyframeController::Function(key, false));
 
                 objectlist.mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
             }

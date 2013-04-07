@@ -49,6 +49,7 @@ protected:
 
     std::vector<NifOgre::ObjectList> mAnimationSources;
 
+    std::vector<Ogre::Controller<Ogre::Real> > *mCurrentControllers;
     NifOgre::TextKeyMap *mCurrentKeys;
     NifOgre::TextKeyMap::const_iterator mNextKey;
     Ogre::Animation *mCurrentAnim;
