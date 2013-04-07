@@ -78,6 +78,7 @@ void Animation::setAnimationSources(const std::vector<std::string> &names)
         destroyObjectList(sceneMgr, mAnimationSources[i]);
     mAnimationSources.clear();
 
+    Ogre::SkeletonInstance *skelinst = mObjectList.mSkelBase->getSkeleton();
     std::vector<std::string>::const_iterator nameiter;
     for(nameiter = names.begin();nameiter != names.end();nameiter++)
     {
@@ -88,6 +89,19 @@ void Animation::setAnimationSources(const std::vector<std::string> &names)
             destroyObjectList(sceneMgr, mAnimationSources.back());
             mAnimationSources.pop_back();
             continue;
+        }
+        const NifOgre::ObjectList &objects = mAnimationSources.back();
+
+        for(size_t i = 0;i < objects.mControllers.size();i++)
+        {
+            NifOgre::NodeTargetValue<Ogre::Real> *dstval = dynamic_cast<NifOgre::NodeTargetValue<Ogre::Real>*>(objects.mControllers[i].getDestination().getPointer());
+            if(!dstval) continue;
+
+            const Ogre::String &trgtname = dstval->getNode()->getName();
+            if(!skelinst->hasBone(trgtname)) continue;
+
+            Ogre::Bone *bone = skelinst->getBone(trgtname);
+            dstval->setNode(bone);
         }
 
         Ogre::Entity *ent = mAnimationSources.back().mSkelBase;

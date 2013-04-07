@@ -108,10 +108,9 @@ public:
 class VisController
 {
 public:
-    class Value : public Ogre::ControllerValue<Ogre::Real>
+    class Value : public NodeTargetValue<Ogre::Real>
     {
     private:
-        Ogre::Bone *mTarget;
         std::vector<Nif::NiVisData::VisData> mData;
 
         virtual bool calculate(Ogre::Real time)
@@ -149,8 +148,8 @@ public:
         }
 
     public:
-        Value(Ogre::Bone *target, const Nif::NiVisData *data)
-          : mTarget(target)
+        Value(Ogre::Node *target, const Nif::NiVisData *data)
+          : NodeTargetValue<Ogre::Real>(target)
           , mData(data->mVis)
         { }
 
@@ -163,7 +162,7 @@ public:
         virtual void setValue(Ogre::Real time)
         {
             bool vis = calculate(time);
-            setVisible(mTarget, vis);
+            setVisible(mNode, vis);
         }
     };
 

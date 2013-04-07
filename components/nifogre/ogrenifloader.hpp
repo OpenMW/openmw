@@ -74,6 +74,24 @@ public:
                                        const std::string &group="General");
 };
 
+// FIXME: Should be with other general Ogre extensions.
+template<typename T>
+class NodeTargetValue : public Ogre::ControllerValue<T>
+{
+protected:
+    Ogre::Node *mNode;
+
+public:
+    NodeTargetValue(Ogre::Node *target) : mNode(target)
+    { }
+
+    void setNode(Ogre::Node *target)
+    { mNode = target; }
+    Ogre::Node *getNode() const
+    { return mNode; }
+};
+typedef Ogre::SharedPtr<NodeTargetValue<Ogre::Real> > NodeTargetValueRealPtr;
+
 }
 
 namespace std
