@@ -263,28 +263,6 @@ void Animation::calcAnimVelocity()
     }
 }
 
-void Animation::applyAnimation(const Ogre::Animation *anim, float time, Ogre::SkeletonInstance *skel)
-{
-    Ogre::TimeIndex timeindex = anim->_getTimeIndex(time);
-    Ogre::Animation::NodeTrackIterator tracks = anim->getNodeTrackIterator();
-    while(tracks.hasMoreElements())
-    {
-        Ogre::NodeAnimationTrack *track = tracks.getNext();
-        const Ogre::String &targetname = track->getAssociatedNode()->getName();
-        if(!skel->hasBone(targetname))
-            continue;
-        Ogre::Bone *bone = skel->getBone(targetname);
-        bone->setOrientation(Ogre::Quaternion::IDENTITY);
-        bone->setPosition(Ogre::Vector3::ZERO);
-        bone->setScale(Ogre::Vector3::UNIT_SCALE);
-        track->applyToNode(bone, timeindex);
-    }
-
-    // HACK: Dirty the animation state set so that Ogre will apply the
-    // transformations to entities this skeleton instance is shared with.
-    mObjectList.mSkelBase->getAllAnimationStates()->_notifyDirty();
-}
-
 static void updateBoneTree(const Ogre::SkeletonInstance *skelsrc, Ogre::Bone *bone)
 {
     if(skelsrc->hasBone(bone->getName()))
@@ -323,24 +301,29 @@ void Animation::updateSkeletonInstance(const Ogre::SkeletonInstance *skelsrc, Og
 }
 
 
-Ogre::Vector3 Animation::updatePosition(float time)
+Ogre::Vector3 Animation::updatePosition()
 {
-    if(mLooping)
-        mCurrentTime = std::fmod(std::max(time, 0.0f), mCurrentAnim->getLength());
-    else
-        mCurrentTime = std::min(mCurrentAnim->getLength(), std::max(time, 0.0f));
-    applyAnimation(mCurrentAnim, mCurrentTime, mObjectList.mSkelBase->getSkeleton());
+    Ogre::Vector3 posdiff;
 
-    Ogre::Vector3 posdiff = Ogre::Vector3::ZERO;
-    if(mNonAccumRoot)
+    Ogre::TransformKeyFrame kf(0, mCurrentTime);
+    Ogre::Animation::NodeTrackIterator trackiter = mCurrentAnim->getNodeTrackIterator();
+    while(trackiter.hasMoreElements())
     {
-        /* Get the non-accumulation root's difference from the last update. */
-        posdiff = (mNonAccumRoot->getPosition() - mLastPosition) * mAccumulate;
-
-        /* Translate the accumulation root back to compensate for the move. */
-        mLastPosition += posdiff;
-        mAccumRoot->setPosition(-mLastPosition);
+        const Ogre::NodeAnimationTrack *track = trackiter.getNext();
+        if(track->getAssociatedNode()->getName() == mNonAccumRoot->getName())
+        {
+            track->getInterpolatedKeyFrame(mCurrentAnim->_getTimeIndex(mCurrentTime), &kf);
+            break;
+        }
     }
+
+    /* Get the non-accumulation root's difference from the last update. */
+    posdiff = (kf.getTranslate() - mLastPosition) * mAccumulate;
+
+    /* Translate the accumulation root back to compensate for the move. */
+    mLastPosition += posdiff;
+    mAccumRoot->setPosition(-mLastPosition);
+
     return posdiff;
 }
 
@@ -486,11 +469,14 @@ Ogre::Vector3 Animation::runAnimation(float timepassed)
     timepassed *= mAnimSpeedMult;
     while(mCurrentAnim && mPlaying)
     {
-        float targetTime = std::min(mStopTime, mCurrentTime+timepassed);
+        float targetTime = mCurrentTime + timepassed;
         if(mNextKey == mCurrentKeys->end() || mNextKey->first > targetTime)
         {
-            movement += updatePosition(targetTime);
-            mPlaying = (mLooping || mStopTime > targetTime);
+            mCurrentTime = std::min(mStopTime, targetTime);
+            if(mNonAccumRoot)
+                movement += updatePosition();
+            mPlaying = (mLooping || mStopTime > mCurrentTime);
+            timepassed = targetTime - mCurrentTime;
             break;
         }
 
@@ -498,16 +484,24 @@ Ogre::Vector3 Animation::runAnimation(float timepassed)
         const std::string &evt = mNextKey->second;
         mNextKey++;
 
-        movement += updatePosition(time);
-        mPlaying = (mLooping || mStopTime > time);
-
-        timepassed = targetTime - time;
+        mCurrentTime = time;
+        if(mNonAccumRoot)
+            movement += updatePosition();
+        mPlaying = (mLooping || mStopTime > mCurrentTime);
+        timepassed = targetTime - mCurrentTime;
 
         if(!handleEvent(time, evt))
             break;
     }
     for(size_t i = 0;i < mCurrentControllers->size();i++)
         (*mCurrentControllers)[i].update();
+
+    if(mObjectList.mSkelBase)
+    {
+        // HACK: Dirty the animation state set so that Ogre will apply the
+        // transformations to entities this skeleton instance is shared with.
+        mObjectList.mSkelBase->getAllAnimationStates()->_notifyDirty();
+    }
 
     return movement;
 }
