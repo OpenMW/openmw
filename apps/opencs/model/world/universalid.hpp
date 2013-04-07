@@ -49,7 +49,9 @@ namespace CSMWorld
                 Type_Sounds,
                 Type_Sound,
                 Type_Scripts,
-                Type_Script
+                Type_Script,
+                Type_Regions,
+                Type_Region
             };
 
         private:

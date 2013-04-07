@@ -113,6 +113,10 @@ void CSVDoc::View::setupWorldMenu()
     QAction *scripts = new QAction (tr ("Scripts"), this);
     connect (scripts, SIGNAL (triggered()), this, SLOT (addScriptsSubView()));
     world->addAction (scripts);
+
+    QAction *regions = new QAction (tr ("Regions"), this);
+    connect (regions, SIGNAL (triggered()), this, SLOT (addRegionsSubView()));
+    world->addAction (regions);
 }
 
 void CSVDoc::View::setupUi()
@@ -296,6 +300,11 @@ void CSVDoc::View::addSoundsSubView()
 void CSVDoc::View::addScriptsSubView()
 {
     addSubView (CSMWorld::UniversalId::Type_Scripts);
+}
+
+void CSVDoc::View::addRegionsSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Regions);
 }
 
 void CSVDoc::View::abortOperation (int type)

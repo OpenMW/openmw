@@ -127,6 +127,8 @@ namespace CSVDoc
             void addSoundsSubView();
 
             void addScriptsSubView();
+
+            void addRegionsSubView();
     };
 }
 
