@@ -384,10 +384,8 @@ static void buildAnimation(Ogre::Skeleton *skel, const std::string &name, const 
             lasttrans = curtrans = traniter->mValue;
         if(scaleiter != scalekeys.mKeys.end())
             lastscale = curscale = Ogre::Vector3(scaleiter->mValue);
-        float begTime = std::max(kfc->timeStart, startTime);
-        float endTime = std::min(kfc->timeStop, stopTime);
-        bool didlast = false;
 
+        bool didlast = false;
         while(!didlast)
         {
             float curtime = std::numeric_limits<float>::max();
@@ -400,11 +398,11 @@ static void buildAnimation(Ogre::Skeleton *skel, const std::string &name, const 
             if(scaleiter != scalekeys.mKeys.end())
                 curtime = std::min(curtime, scaleiter->mTime);
 
-            curtime = std::max(curtime, begTime);
-            if(curtime >= endTime)
+            curtime = std::max(curtime, startTime);
+            if(curtime >= stopTime)
             {
                 didlast = true;
-                curtime = endTime;
+                curtime = stopTime;
             }
 
             // Get the latest quaternions, translations, and scales for the
