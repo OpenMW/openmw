@@ -17,6 +17,7 @@ material openmw_objects_base
     depth_check default
     alpha_rejection default
     transparent_sorting default
+    polygon_mode default
 
     pass
     {
@@ -41,6 +42,7 @@ material openmw_objects_base
         depth_write $depth_write
         depth_check $depth_check
         transparent_sorting $transparent_sorting
+        polygon_mode $polygon_mode
 
         texture_unit diffuseMap
         {
