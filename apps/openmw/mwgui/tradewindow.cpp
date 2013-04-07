@@ -257,6 +257,12 @@ namespace MWGui
         MWBase::Environment::get().getDialogueManager()->applyTemporaryDispositionChange(iBarterSuccessDisposition);
 
         // success! make the item transfer.
+        MWWorld::ContainerStore& playerBoughtItems = mWindowManager.getInventoryWindow()->getBoughtItems();
+        for (MWWorld::ContainerStoreIterator it = playerBoughtItems.begin(); it != playerBoughtItems.end(); ++it)
+        {
+            if (Misc::StringUtils::ciEqual(it->getCellRef().mOwner, MWWorld::Class::get(mPtr).getId(mPtr)))
+                it->getCellRef().mOwner = "";
+        }
         transferBoughtItems();
         mWindowManager.getInventoryWindow()->transferBoughtItems();
 
