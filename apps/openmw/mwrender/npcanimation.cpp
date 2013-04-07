@@ -50,7 +50,7 @@ const NpcAnimation::PartInfo NpcAnimation::sPartList[NpcAnimation::sPartListSize
 NpcAnimation::~NpcAnimation()
 {
     for(size_t i = 0;i < sPartListSize;i++)
-        removeEntities(mEntityParts[i]);
+        removeObjects(mObjectParts[i]);
 }
 
 
@@ -94,10 +94,10 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
     bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
     std::string smodel = (!isBeast ? "meshes\\base_anim.nif" : "meshes\\base_animkna.nif");
 
-    createEntityList(node, smodel);
-    for(size_t i = 0;i < mEntityList.mEntities.size();i++)
+    createObjectList(node, smodel);
+    for(size_t i = 0;i < mObjectList.mEntities.size();i++)
     {
-        Ogre::Entity *base = mEntityList.mEntities[i];
+        Ogre::Entity *base = mObjectList.mEntities[i];
 
         base->getUserObjectBindings().setUserAny(Ogre::Any(-1));
         if (mVisibilityFlags != 0)
@@ -302,11 +302,11 @@ void NpcAnimation::updateParts(bool forceupdate)
     }
 }
 
-NifOgre::EntityList NpcAnimation::insertBoundedPart(const std::string &mesh, int group, const std::string &bonename)
+NifOgre::ObjectList NpcAnimation::insertBoundedPart(const std::string &model, int group, const std::string &bonename)
 {
-    NifOgre::EntityList entities = NifOgre::Loader::createEntities(mEntityList.mSkelBase, bonename,
-                                                                   mInsert, mesh);
-    std::vector<Ogre::Entity*> &parts = entities.mEntities;
+    NifOgre::ObjectList objects = NifOgre::Loader::createObjects(mObjectList.mSkelBase, bonename,
+                                                                 mInsert, model);
+    const std::vector<Ogre::Entity*> &parts = objects.mEntities;
     for(size_t i = 0;i < parts.size();i++)
     {
         parts[i]->getUserObjectBindings().setUserAny(Ogre::Any(group));
@@ -319,9 +319,9 @@ NifOgre::EntityList NpcAnimation::insertBoundedPart(const std::string &mesh, int
             subEnt->setRenderQueueGroup(subEnt->getMaterial()->isTransparent() ? RQG_Alpha : RQG_Main);
         }
     }
-    if(entities.mSkelBase)
+    if(objects.mSkelBase)
     {
-        Ogre::AnimationStateSet *aset = entities.mSkelBase->getAllAnimationStates();
+        Ogre::AnimationStateSet *aset = objects.mSkelBase->getAllAnimationStates();
         Ogre::AnimationStateIterator asiter = aset->getAnimationStateIterator();
         while(asiter.hasMoreElements())
         {
@@ -329,12 +329,12 @@ NifOgre::EntityList NpcAnimation::insertBoundedPart(const std::string &mesh, int
             state->setEnabled(false);
             state->setLoop(false);
         }
-        Ogre::SkeletonInstance *skelinst = entities.mSkelBase->getSkeleton();
+        Ogre::SkeletonInstance *skelinst = objects.mSkelBase->getSkeleton();
         Ogre::Skeleton::BoneIterator boneiter = skelinst->getBoneIterator();
         while(boneiter.hasMoreElements())
             boneiter.getNext()->setManuallyControlled(true);
     }
-    return entities;
+    return objects;
 }
 
 Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
@@ -347,10 +347,10 @@ Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
     mTimeToChange -= timepassed;
 
     Ogre::Vector3 ret = Animation::runAnimation(timepassed);
-    const Ogre::SkeletonInstance *skelsrc = mEntityList.mSkelBase->getSkeleton();
+    const Ogre::SkeletonInstance *skelsrc = mObjectList.mSkelBase->getSkeleton();
     for(size_t i = 0;i < sPartListSize;i++)
     {
-        Ogre::Entity *ent = mEntityParts[i].mSkelBase;
+        Ogre::Entity *ent = mObjectParts[i].mSkelBase;
         if(!ent) continue;
         updateSkeletonInstance(skelsrc, ent->getSkeleton());
         ent->getAllAnimationStates()->_notifyDirty();
@@ -358,19 +358,19 @@ Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
     return ret;
 }
 
-void NpcAnimation::removeEntities(NifOgre::EntityList &entities)
+void NpcAnimation::removeObjects(NifOgre::ObjectList &objects)
 {
-    assert(&entities != &mEntityList);
+    assert(&objects != &mObjectList);
 
     Ogre::SceneManager *sceneMgr = mInsert->getCreator();
-    for(size_t i = 0;i < entities.mParticles.size();i++)
-        sceneMgr->destroyParticleSystem(entities.mParticles[i]);
-    for(size_t i = 0;i < entities.mEntities.size();i++)
-        sceneMgr->destroyEntity(entities.mEntities[i]);
-    entities.mControllers.clear();
-    entities.mParticles.clear();
-    entities.mEntities.clear();
-    entities.mSkelBase = NULL;
+    for(size_t i = 0;i < objects.mParticles.size();i++)
+        sceneMgr->destroyParticleSystem(objects.mParticles[i]);
+    for(size_t i = 0;i < objects.mEntities.size();i++)
+        sceneMgr->destroyEntity(objects.mEntities[i]);
+    objects.mControllers.clear();
+    objects.mParticles.clear();
+    objects.mEntities.clear();
+    objects.mSkelBase = NULL;
 }
 
 void NpcAnimation::removeIndividualPart(int type)
@@ -382,7 +382,7 @@ void NpcAnimation::removeIndividualPart(int type)
     {
         if(type == sPartList[i].type)
         {
-            removeEntities(mEntityParts[i]);
+            removeObjects(mObjectParts[i]);
             break;
         }
     }
@@ -420,7 +420,7 @@ bool NpcAnimation::addOrReplaceIndividualPart(int type, int group, int priority,
     {
         if(type == sPartList[i].type)
         {
-            mEntityParts[i] = insertBoundedPart(mesh, group, sPartList[i].name);
+            mObjectParts[i] = insertBoundedPart(mesh, group, sPartList[i].name);
             break;
         }
     }
@@ -451,7 +451,7 @@ void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::
 
 Ogre::Node* NpcAnimation::getHeadNode()
 {
-    return mEntityList.mSkelBase->getSkeleton()->getBone("Bip01 Head");
+    return mObjectList.mSkelBase->getSkeleton()->getBone("Bip01 Head");
 }
 
 }

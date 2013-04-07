@@ -288,10 +288,10 @@ void SkyManager::create()
 
     // Stars
     mAtmosphereNight = mRootNode->createChildSceneNode();
-    NifOgre::EntityList entities = NifOgre::Loader::createEntities(mAtmosphereNight, "meshes\\sky_night_01.nif");
-    for(size_t i = 0, matidx = 0;i < entities.mEntities.size();i++)
+    NifOgre::ObjectList objects = NifOgre::Loader::createObjects(mAtmosphereNight, "meshes\\sky_night_01.nif");
+    for(size_t i = 0, matidx = 0;i < objects.mEntities.size();i++)
     {
-        Entity* night1_ent = entities.mEntities[i];
+        Entity* night1_ent = objects.mEntities[i];
         night1_ent->setRenderQueueGroup(RQG_SkiesEarly+1);
         night1_ent->setVisibilityFlags(RV_Sky);
         night1_ent->setCastShadows(false);
@@ -314,10 +314,10 @@ void SkyManager::create()
 
     // Atmosphere (day)
     mAtmosphereDay = mRootNode->createChildSceneNode();
-    entities = NifOgre::Loader::createEntities(mAtmosphereDay, "meshes\\sky_atmosphere.nif");
-    for(size_t i = 0;i < entities.mEntities.size();i++)
+    objects = NifOgre::Loader::createObjects(mAtmosphereDay, "meshes\\sky_atmosphere.nif");
+    for(size_t i = 0;i < objects.mEntities.size();i++)
     {
-        Entity* atmosphere_ent = entities.mEntities[i];
+        Entity* atmosphere_ent = objects.mEntities[i];
         atmosphere_ent->setCastShadows(false);
         atmosphere_ent->setRenderQueueGroup(RQG_SkiesEarly);
         atmosphere_ent->setVisibilityFlags(RV_Sky);
@@ -332,10 +332,10 @@ void SkyManager::create()
 
     // Clouds
     SceneNode* clouds_node = mRootNode->createChildSceneNode();
-    entities = NifOgre::Loader::createEntities(clouds_node, "meshes\\sky_clouds_01.nif");
-    for(size_t i = 0;i < entities.mEntities.size();i++)
+    objects = NifOgre::Loader::createObjects(clouds_node, "meshes\\sky_clouds_01.nif");
+    for(size_t i = 0;i < objects.mEntities.size();i++)
     {
-        Entity* clouds_ent = entities.mEntities[i];
+        Entity* clouds_ent = objects.mEntities[i];
         clouds_ent->setVisibilityFlags(RV_Sky);
         clouds_ent->setRenderQueueGroup(RQG_SkiesEarly+5);
         for(unsigned int j = 0;j < clouds_ent->getNumSubEntities();j++)

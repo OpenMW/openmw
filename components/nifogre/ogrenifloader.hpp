@@ -39,7 +39,7 @@ namespace NifOgre
 
 typedef std::multimap<float,std::string> TextKeyMap;
 static const char sTextKeyExtraDataID[] = "TextKeyExtraData";
-struct EntityList {
+struct ObjectList {
     Ogre::Entity *mSkelBase;
     std::vector<Ogre::Entity*> mEntities;
 
@@ -47,7 +47,7 @@ struct EntityList {
 
     std::vector<Ogre::Controller<Ogre::Real> > mControllers;
 
-    EntityList() : mSkelBase(0)
+    ObjectList() : mSkelBase(0)
     { }
 };
 
@@ -55,14 +55,14 @@ struct EntityList {
 class Loader
 {
 public:
-    static EntityList createEntities(Ogre::Entity *parent, const std::string &bonename,
-                                     Ogre::SceneNode *parentNode,
-                                     std::string name,
-                                     const std::string &group="General");
+    static ObjectList createObjects(Ogre::Entity *parent, const std::string &bonename,
+                                    Ogre::SceneNode *parentNode,
+                                    std::string name,
+                                    const std::string &group="General");
 
-    static EntityList createEntities(Ogre::SceneNode *parentNode,
-                                     std::string name,
-                                     const std::string &group="General");
+    static ObjectList createObjects(Ogre::SceneNode *parentNode,
+                                    std::string name,
+                                    const std::string &group="General");
 
     static Ogre::SkeletonPtr getSkeleton(std::string name, const std::string &group="General");
 };

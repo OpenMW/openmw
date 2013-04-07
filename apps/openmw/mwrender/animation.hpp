@@ -40,7 +40,7 @@ protected:
     MWMechanics::CharacterController *mController;
 
     Ogre::SceneNode* mInsert;
-    NifOgre::EntityList mEntityList;
+    NifOgre::ObjectList mObjectList;
     std::map<std::string,NifOgre::TextKeyMap> mTextKeys;
     Ogre::Node *mAccumRoot;
     Ogre::Bone *mNonAccumRoot;
@@ -91,7 +91,7 @@ protected:
         setAnimationSources(names);
     }
 
-    void createEntityList(Ogre::SceneNode *node, const std::string &model);
+    void createObjectList(Ogre::SceneNode *node, const std::string &model);
 
 public:
     Animation(const MWWorld::Ptr &ptr);

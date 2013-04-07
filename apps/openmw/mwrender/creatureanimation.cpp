@@ -25,10 +25,10 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr &ptr)
     {
         std::string model = "meshes\\"+ref->mBase->mModel;
 
-        createEntityList(mPtr.getRefData().getBaseNode(), model);
-        for(size_t i = 0;i < mEntityList.mEntities.size();i++)
+        createObjectList(mPtr.getRefData().getBaseNode(), model);
+        for(size_t i = 0;i < mObjectList.mEntities.size();i++)
         {
-            Ogre::Entity *ent = mEntityList.mEntities[i];
+            Ogre::Entity *ent = mObjectList.mEntities[i];
             ent->setVisibilityFlags(RV_Actors);
 
             for(unsigned int j=0; j < ent->getNumSubEntities(); ++j)

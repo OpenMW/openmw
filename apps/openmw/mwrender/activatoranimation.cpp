@@ -25,10 +25,10 @@ ActivatorAnimation::ActivatorAnimation(const MWWorld::Ptr &ptr)
     {
         std::string mesh = "meshes\\" + ref->mBase->mModel;
 
-        createEntityList(mPtr.getRefData().getBaseNode(), mesh);
-        for(size_t i = 0;i < mEntityList.mEntities.size();i++)
+        createObjectList(mPtr.getRefData().getBaseNode(), mesh);
+        for(size_t i = 0;i < mObjectList.mEntities.size();i++)
         {
-            Ogre::Entity *ent = mEntityList.mEntities[i];
+            Ogre::Entity *ent = mObjectList.mEntities[i];
 
             for(unsigned int j=0; j < ent->getNumSubEntities(); ++j)
             {

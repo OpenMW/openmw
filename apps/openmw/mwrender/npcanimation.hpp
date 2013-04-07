@@ -33,7 +33,7 @@ private:
     int mStateID;
 
     // Bounded Parts
-    NifOgre::EntityList mEntityParts[sPartListSize];
+    NifOgre::ObjectList mObjectParts[sPartListSize];
 
     const ESM::NPC  *mNpc;
     std::string     mHeadModel;
@@ -60,11 +60,11 @@ private:
     int mPartslots[sPartListSize];  //Each part slot is taken by clothing, armor, or is empty
     int mPartPriorities[sPartListSize];
 
-    NifOgre::EntityList insertBoundedPart(const std::string &mesh, int group, const std::string &bonename);
+    NifOgre::ObjectList insertBoundedPart(const std::string &model, int group, const std::string &bonename);
 
     void updateParts(bool forceupdate = false);
 
-    void removeEntities(NifOgre::EntityList &entities);
+    void removeObjects(NifOgre::ObjectList &objects);
     void removeIndividualPart(int type);
     void reserveIndividualPart(int type, int group, int priority);
 
