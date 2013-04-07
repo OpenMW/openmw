@@ -2,6 +2,7 @@
 
 #include <OgreSceneManager.h>
 #include <OgreEntity.h>
+#include <OgreParticleSystem.h>
 #include <OgreSubEntity.h>
 
 #include "../mwworld/esmstore.hpp"
@@ -108,6 +109,15 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
             Ogre::SubEntity* subEnt = base->getSubEntity(j);
             subEnt->setRenderQueueGroup(subEnt->getMaterial()->isTransparent() ? RQG_Alpha : RQG_Main);
         }
+    }
+    for(size_t i = 0;i < mObjectList.mParticles.size();i++)
+    {
+        Ogre::ParticleSystem *part = mObjectList.mParticles[i];
+
+        part->getUserObjectBindings().setUserAny(Ogre::Any(-1));
+        if(mVisibilityFlags != 0)
+            part->setVisibilityFlags(mVisibilityFlags);
+        part->setRenderQueueGroup(RQG_Alpha);
     }
 
     std::vector<std::string> skelnames(1, smodel);
@@ -306,18 +316,24 @@ NifOgre::ObjectList NpcAnimation::insertBoundedPart(const std::string &model, in
 {
     NifOgre::ObjectList objects = NifOgre::Loader::createObjects(mObjectList.mSkelBase, bonename,
                                                                  mInsert, model);
-    const std::vector<Ogre::Entity*> &parts = objects.mEntities;
-    for(size_t i = 0;i < parts.size();i++)
+    for(size_t i = 0;i < objects.mEntities.size();i++)
     {
-        parts[i]->getUserObjectBindings().setUserAny(Ogre::Any(group));
-        if (mVisibilityFlags != 0)
-            parts[i]->setVisibilityFlags(mVisibilityFlags);
+        objects.mEntities[i]->getUserObjectBindings().setUserAny(Ogre::Any(group));
+        if(mVisibilityFlags != 0)
+            objects.mEntities[i]->setVisibilityFlags(mVisibilityFlags);
 
-        for(unsigned int j=0; j < parts[i]->getNumSubEntities(); ++j)
+        for(unsigned int j=0; j < objects.mEntities[i]->getNumSubEntities(); ++j)
         {
-            Ogre::SubEntity* subEnt = parts[i]->getSubEntity(j);
+            Ogre::SubEntity* subEnt = objects.mEntities[i]->getSubEntity(j);
             subEnt->setRenderQueueGroup(subEnt->getMaterial()->isTransparent() ? RQG_Alpha : RQG_Main);
         }
+    }
+    for(size_t i = 0;i < objects.mParticles.size();i++)
+    {
+        objects.mParticles[i]->getUserObjectBindings().setUserAny(Ogre::Any(group));
+        if(mVisibilityFlags != 0)
+            objects.mParticles[i]->setVisibilityFlags(mVisibilityFlags);
+        objects.mParticles[i]->setRenderQueueGroup(RQG_Alpha);
     }
     if(objects.mSkelBase)
     {

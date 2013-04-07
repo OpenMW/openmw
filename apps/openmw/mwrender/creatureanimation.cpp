@@ -1,6 +1,7 @@
 #include "creatureanimation.hpp"
 
 #include <OgreEntity.h>
+#include <OgreParticleSystem.h>
 #include <OgreSceneManager.h>
 #include <OgreSubEntity.h>
 
@@ -36,6 +37,13 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr &ptr)
                 Ogre::SubEntity* subEnt = ent->getSubEntity(j);
                 subEnt->setRenderQueueGroup(subEnt->getMaterial()->isTransparent() ? RQG_Alpha : RQG_Main);
             }
+        }
+        for(size_t i = 0;i < mObjectList.mParticles.size();i++)
+        {
+            Ogre::ParticleSystem *part = mObjectList.mParticles[i];
+            part->setVisibilityFlags(RV_Actors);
+
+            part->setRenderQueueGroup(RQG_Alpha);
         }
 
         std::vector<std::string> names;
