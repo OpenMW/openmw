@@ -42,8 +42,13 @@ static const char sTextKeyExtraDataID[] = "TextKeyExtraData";
 struct ObjectList {
     Ogre::Entity *mSkelBase;
     std::vector<Ogre::Entity*> mEntities;
-
     std::vector<Ogre::ParticleSystem*> mParticles;
+
+    // We could actually have Ogre::Camera objects, but that means more
+    // maintenance when switching cameras. The information in the NiCamera node
+    // is pretty much useless too anyway. So instead, this is just a list of
+    // bones in the mSkelBase which are NiCamera nodes.
+    std::vector<Ogre::Bone*> mCameras;
 
     std::vector<Ogre::Controller<Ogre::Real> > mControllers;
 

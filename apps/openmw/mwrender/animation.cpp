@@ -46,6 +46,7 @@ Animation::~Animation()
             sceneMgr->destroyEntity(mObjectList.mEntities[i]);
     }
     mObjectList.mControllers.clear();
+    mObjectList.mCameras.clear();
     mObjectList.mParticles.clear();
     mObjectList.mEntities.clear();
     mObjectList.mSkelBase = NULL;

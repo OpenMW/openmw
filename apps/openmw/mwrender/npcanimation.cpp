@@ -384,6 +384,7 @@ void NpcAnimation::removeObjects(NifOgre::ObjectList &objects)
     for(size_t i = 0;i < objects.mEntities.size();i++)
         sceneMgr->destroyEntity(objects.mEntities[i]);
     objects.mControllers.clear();
+    objects.mCameras.clear();
     objects.mParticles.clear();
     objects.mEntities.clear();
     objects.mSkelBase = NULL;

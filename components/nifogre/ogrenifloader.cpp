@@ -498,6 +498,7 @@ void buildBones(Ogre::Skeleton *skel, const Nif::Node *node, Ogre::Bone *&animro
     if(!(node->recType == Nif::RC_NiNode || /* Nothing special; children traversed below */
          node->recType == Nif::RC_RootCollisionNode || /* handled in nifbullet (hopefully) */
          node->recType == Nif::RC_NiTriShape || /* Handled in the mesh loader */
+         node->recType == Nif::RC_NiCamera ||
          node->recType == Nif::RC_NiAutoNormalParticles ||
          node->recType == Nif::RC_NiRotatingParticles
          ))
@@ -1450,6 +1451,13 @@ class NIFObjectLoader : Ogre::ManualResourceLoader
                 }
             }
             e = e->extra;
+        }
+
+        if(node->recType == Nif::RC_NiCamera)
+        {
+            int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(mName, node->recIndex);
+            Ogre::Bone *trgtbone = objectlist.mSkelBase->getSkeleton()->getBone(trgtid);
+            objectlist.mCameras.push_back(trgtbone);
         }
 
         Nif::ControllerPtr ctrl = node->controller;
