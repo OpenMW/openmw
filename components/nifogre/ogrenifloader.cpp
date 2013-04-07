@@ -799,6 +799,7 @@ static Ogre::String getMaterial(const Nif::ShapeData *shapedata,
                                 const Nif::NiVertexColorProperty *vertprop,
                                 const Nif::NiZBufferProperty *zprop,
                                 const Nif::NiSpecularProperty *specprop,
+                                const Nif::NiWireframeProperty *wireprop,
                                 bool &needTangents)
 {
     Ogre::MaterialManager &matMgr = Ogre::MaterialManager::getSingleton();
@@ -819,6 +820,7 @@ static Ogre::String getMaterial(const Nif::ShapeData *shapedata,
     int depthFlags = 3;
     // Default should be 1, but Bloodmoon's models are broken
     int specFlags = 0;
+    int wireFlags = 0;
     Ogre::String texName[7];
 
     bool vertexColour = (shapedata->colors.size() != 0);
@@ -906,6 +908,18 @@ static Ogre::String getMaterial(const Nif::ShapeData *shapedata,
         }
     }
 
+    if(wireprop)
+    {
+        wireFlags = wireprop->flags;
+
+        Nif::ControllerPtr ctrls = wireprop->controller;
+        while(!ctrls.empty())
+        {
+            warn("Unhandled wireframe controller "+ctrls->recName+" in "+name);
+            ctrls = ctrls->next;
+        }
+    }
+
     // Material
     if(matprop)
     {
@@ -950,6 +964,7 @@ static Ogre::String getMaterial(const Nif::ShapeData *shapedata,
         boost::hash_combine(h, vertMode);
         boost::hash_combine(h, depthFlags);
         boost::hash_combine(h, specFlags);
+        boost::hash_combine(h, wireFlags);
 
         std::map<size_t,std::string>::iterator itr = MaterialMap.find(h);
         if (itr != MaterialMap.end())
@@ -991,6 +1006,11 @@ static Ogre::String getMaterial(const Nif::ShapeData *shapedata,
     {
         instance->setProperty("specular", sh::makeProperty(
             new sh::Vector4(specular.x, specular.y, specular.z, glossiness)));
+    }
+
+    if(wireFlags)
+    {
+        instance->setProperty("polygon_mode", sh::makeProperty(new sh::StringValue("wireframe")));
     }
 
     instance->setProperty("diffuseMap", sh::makeProperty(texName[Nif::NiTexturingProperty::BaseTexture]));
@@ -1087,10 +1107,11 @@ class NIFObjectLoader : Ogre::ManualResourceLoader
                                   const Nif::NiAlphaProperty *&alphaprop,
                                   const Nif::NiVertexColorProperty *&vertprop,
                                   const Nif::NiZBufferProperty *&zprop,
-                                  const Nif::NiSpecularProperty *&specprop)
+                                  const Nif::NiSpecularProperty *&specprop,
+                                  const Nif::NiWireframeProperty *wireprop)
     {
         if(node->parent)
-            getNodeProperties(node->parent, texprop, matprop, alphaprop, vertprop, zprop, specprop);
+            getNodeProperties(node->parent, texprop, matprop, alphaprop, vertprop, zprop, specprop, wireprop);
 
         const Nif::PropertyList &proplist = node->props;
         for(size_t i = 0;i < proplist.length();i++)
@@ -1112,6 +1133,8 @@ class NIFObjectLoader : Ogre::ManualResourceLoader
                 zprop = static_cast<const Nif::NiZBufferProperty*>(pr);
             else if(pr->recType == Nif::RC_NiSpecularProperty)
                 specprop = static_cast<const Nif::NiSpecularProperty*>(pr);
+            else if(pr->recType == Nif::RC_NiWireframeProperty)
+                wireprop = static_cast<const Nif::NiWireframeProperty*>(pr);
             else
                 warn("Unhandled property type: "+pr->recName);
         }
@@ -1324,13 +1347,14 @@ class NIFObjectLoader : Ogre::ManualResourceLoader
         const Nif::NiVertexColorProperty *vertprop = NULL;
         const Nif::NiZBufferProperty *zprop = NULL;
         const Nif::NiSpecularProperty *specprop = NULL;
+        const Nif::NiWireframeProperty *wireprop = NULL;
         bool needTangents = false;
 
-        getNodeProperties(shape, texprop, matprop, alphaprop, vertprop, zprop, specprop);
+        getNodeProperties(shape, texprop, matprop, alphaprop, vertprop, zprop, specprop, wireprop);
         std::string matname = NIFMaterialLoader::getMaterial(data, mesh->getName(), mGroup,
                                                              texprop, matprop, alphaprop,
                                                              vertprop, zprop, specprop,
-                                                             needTangents);
+                                                             wireprop, needTangents);
         if(matname.length() > 0)
             sub->setMaterialName(matname);
 
@@ -1405,13 +1429,14 @@ class NIFObjectLoader : Ogre::ManualResourceLoader
             const Nif::NiVertexColorProperty *vertprop = NULL;
             const Nif::NiZBufferProperty *zprop = NULL;
             const Nif::NiSpecularProperty *specprop = NULL;
+            const Nif::NiWireframeProperty *wireprop = NULL;
             bool needTangents = false;
 
-            getNodeProperties(partnode, texprop, matprop, alphaprop, vertprop, zprop, specprop);
+            getNodeProperties(partnode, texprop, matprop, alphaprop, vertprop, zprop, specprop, wireprop);
             partsys->setMaterialName(NIFMaterialLoader::getMaterial(particledata, fullname, mGroup,
                                                                     texprop, matprop, alphaprop,
                                                                     vertprop, zprop, specprop,
-                                                                    needTangents));
+                                                                    wireprop, needTangents));
 
             partsys->setDefaultDimensions(particledata->particleSize, particledata->particleSize);
             partsys->setCullIndividually(false);
