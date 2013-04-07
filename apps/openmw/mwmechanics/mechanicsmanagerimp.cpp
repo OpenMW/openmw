@@ -149,7 +149,7 @@ namespace MWMechanics
         // forced update and current value adjustments
         mActors.updateActor (ptr, 0);
 
-        for (int i=0; i<2; ++i)
+        for (int i=0; i<3; ++i)
         {
             DynamicStat<float> stat = creatureStats.getDynamic (i);
             stat.setCurrent (stat.getModified());
