@@ -1092,12 +1092,12 @@ class NIFObjectLoader : Ogre::ManualResourceLoader
 
     static void warn(const std::string &msg)
     {
-        std::cerr << "NIFMeshLoader: Warn: " << msg << std::endl;
+        std::cerr << "NIFObjectLoader: Warn: " << msg << std::endl;
     }
 
     static void fail(const std::string &msg)
     {
-        std::cerr << "NIFMeshLoader: Fail: "<< msg << std::endl;
+        std::cerr << "NIFObjectLoader: Fail: "<< msg << std::endl;
         abort();
     }
 
