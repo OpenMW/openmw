@@ -1768,35 +1768,14 @@ ObjectList Loader::createObjects(Ogre::Entity *parent, const std::string &bonena
 }
 
 
-Ogre::SkeletonPtr Loader::getSkeleton(std::string name, const std::string &group)
+ObjectList Loader::createObjectBase(Ogre::SceneManager *sceneMgr, std::string name, const std::string &group)
 {
-    Ogre::SkeletonPtr skel;
+    ObjectList objectlist;
 
     Misc::StringUtils::toLower(name);
-    skel = Ogre::SkeletonManager::getSingleton().getByName(name);
-    if(!skel.isNull())
-        return skel;
+    NIFObjectLoader::load(sceneMgr, objectlist, name, group);
 
-    Nif::NIFFile::ptr nif = Nif::NIFFile::create(name);
-    if(nif->numRoots() < 1)
-    {
-        nif->warn("Found no root nodes in "+name+".");
-        return skel;
-    }
-
-    // The first record is assumed to be the root node
-    const Nif::Record *r = nif->getRoot(0);
-    assert(r != NULL);
-
-    const Nif::Node *node = dynamic_cast<const Nif::Node*>(r);
-    if(node == NULL)
-    {
-        nif->warn("First record in "+name+" was not a node, but a "+
-                  r->recName+".");
-        return skel;
-    }
-
-    return NIFSkeletonLoader::createSkeleton(name, group, node);
+    return objectlist;
 }
 
 } // namespace NifOgre

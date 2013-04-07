@@ -47,7 +47,7 @@ protected:
     Ogre::Vector3 mAccumulate;
     Ogre::Vector3 mLastPosition;
 
-    std::vector<Ogre::SkeletonPtr> mSkeletonSources;
+    std::vector<NifOgre::ObjectList> mAnimationSources;
 
     NifOgre::TextKeyMap *mCurrentKeys;
     NifOgre::TextKeyMap::const_iterator mNextKey;
@@ -92,6 +92,7 @@ protected:
     }
 
     void createObjectList(Ogre::SceneNode *node, const std::string &model);
+    static void destroyObjectList(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList &objects);
 
 public:
     Animation(const MWWorld::Ptr &ptr);

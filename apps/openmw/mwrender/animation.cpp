@@ -16,6 +16,19 @@
 namespace MWRender
 {
 
+void Animation::destroyObjectList(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList &objects)
+{
+    for(size_t i = 0;i < objects.mParticles.size();i++)
+        sceneMgr->destroyParticleSystem(objects.mParticles[i]);
+    for(size_t i = 0;i < objects.mEntities.size();i++)
+        sceneMgr->destroyEntity(objects.mEntities[i]);
+    objects.mControllers.clear();
+    objects.mCameras.clear();
+    objects.mParticles.clear();
+    objects.mEntities.clear();
+    objects.mSkelBase = NULL;
+}
+
 Animation::Animation(const MWWorld::Ptr &ptr)
     : mPtr(ptr)
     , mController(NULL)
@@ -40,16 +53,12 @@ Animation::~Animation()
     if(mInsert)
     {
         Ogre::SceneManager *sceneMgr = mInsert->getCreator();
-        for(size_t i = 0;i < mObjectList.mParticles.size();i++)
-            sceneMgr->destroyParticleSystem(mObjectList.mParticles[i]);
-        for(size_t i = 0;i < mObjectList.mEntities.size();i++)
-            sceneMgr->destroyEntity(mObjectList.mEntities[i]);
+        destroyObjectList(sceneMgr, mObjectList);
+
+        for(size_t i = 0;i < mAnimationSources.size();i++)
+            destroyObjectList(sceneMgr, mAnimationSources[i]);
+        mAnimationSources.clear();
     }
-    mObjectList.mControllers.clear();
-    mObjectList.mCameras.clear();
-    mObjectList.mParticles.clear();
-    mObjectList.mEntities.clear();
-    mObjectList.mSkelBase = NULL;
 }
 
 
@@ -57,6 +66,7 @@ void Animation::setAnimationSources(const std::vector<std::string> &names)
 {
     if(!mObjectList.mSkelBase)
         return;
+    Ogre::SceneManager *sceneMgr = mInsert->getCreator();
 
     mCurrentAnim = NULL;
     mCurrentKeys = NULL;
@@ -64,19 +74,24 @@ void Animation::setAnimationSources(const std::vector<std::string> &names)
     mAccumRoot = NULL;
     mNonAccumRoot = NULL;
     mTextKeys.clear();
-    mSkeletonSources.clear();
+    for(size_t i = 0;i < mAnimationSources.size();i++)
+        destroyObjectList(sceneMgr, mAnimationSources[i]);
+    mAnimationSources.clear();
 
     std::vector<std::string>::const_iterator nameiter;
     for(nameiter = names.begin();nameiter != names.end();nameiter++)
     {
-        Ogre::SkeletonPtr skel = NifOgre::Loader::getSkeleton(*nameiter);
-        if(skel.isNull())
+        mAnimationSources.push_back(NifOgre::Loader::createObjectBase(sceneMgr, *nameiter));
+        if(!mAnimationSources.back().mSkelBase)
         {
             std::cerr<< "Failed to get skeleton source "<<*nameiter <<std::endl;
+            destroyObjectList(sceneMgr, mAnimationSources.back());
+            mAnimationSources.pop_back();
             continue;
         }
-        skel->touch();
 
+        Ogre::Entity *ent = mAnimationSources.back().mSkelBase;
+        Ogre::SkeletonPtr skel = Ogre::SkeletonManager::getSingleton().getByName(ent->getSkeleton()->getName());
         Ogre::Skeleton::BoneIterator boneiter = skel->getBoneIterator();
         while(boneiter.hasMoreElements())
         {
@@ -92,7 +107,6 @@ void Animation::setAnimationSources(const std::vector<std::string> &names)
                 mNonAccumRoot = mObjectList.mSkelBase->getSkeleton()->getBone(bone->getName());
             }
 
-            mSkeletonSources.push_back(skel);
             for(int i = 0;i < skel->getNumAnimations();i++)
             {
                 Ogre::Animation *anim = skel->getAnimation(i);
@@ -144,9 +158,9 @@ void Animation::createObjectList(Ogre::SceneNode *node, const std::string &model
 
 bool Animation::hasAnimation(const std::string &anim)
 {
-    for(std::vector<Ogre::SkeletonPtr>::const_iterator iter(mSkeletonSources.begin());iter != mSkeletonSources.end();iter++)
+    for(std::vector<NifOgre::ObjectList>::const_iterator iter(mAnimationSources.begin());iter != mAnimationSources.end();iter++)
     {
-        if((*iter)->hasAnimation(anim))
+        if(iter->mSkelBase->hasAnimationState(anim))
             return true;
     }
     return false;
@@ -413,11 +427,11 @@ void Animation::play(const std::string &groupname, const std::string &start, con
     try {
         bool found = false;
         /* Look in reverse; last-inserted source has priority. */
-        for(std::vector<Ogre::SkeletonPtr>::const_reverse_iterator iter(mSkeletonSources.rbegin());iter != mSkeletonSources.rend();iter++)
+        for(std::vector<NifOgre::ObjectList>::const_reverse_iterator iter(mAnimationSources.rbegin());iter != mAnimationSources.rend();iter++)
         {
-            if((*iter)->hasAnimation(groupname))
+            if(iter->mSkelBase->hasAnimationState(groupname))
             {
-                mCurrentAnim = (*iter)->getAnimation(groupname);
+                mCurrentAnim = iter->mSkelBase->getSkeleton()->getAnimation(groupname);
                 mCurrentKeys = &mTextKeys[groupname];
                 mAnimVelocity = 0.0f;
 

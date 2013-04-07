@@ -69,7 +69,9 @@ public:
                                     std::string name,
                                     const std::string &group="General");
 
-    static Ogre::SkeletonPtr getSkeleton(std::string name, const std::string &group="General");
+    static ObjectList createObjectBase(Ogre::SceneManager *sceneMgr,
+                                       std::string name,
+                                       const std::string &group="General");
 };
 
 }
