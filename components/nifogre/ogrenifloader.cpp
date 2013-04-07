@@ -75,24 +75,33 @@ private:
     float mStopTime;
 
 public:
-    DefaultFunction(const Nif::Controller *ctrl)
-        : Ogre::ControllerFunction<Ogre::Real>(false)
+    DefaultFunction(const Nif::Controller *ctrl, bool deltaInput)
+        : Ogre::ControllerFunction<Ogre::Real>(deltaInput)
         , mFrequency(ctrl->frequency)
         , mPhase(ctrl->phase)
         , mStartTime(ctrl->timeStart)
         , mStopTime(ctrl->timeStop)
     {
-        mDeltaCount = mPhase;
-        while(mDeltaCount < mStartTime)
-            mDeltaCount += (mStopTime-mStartTime);
+        if(mDeltaInput)
+        {
+            mDeltaCount = mPhase;
+            while(mDeltaCount < mStartTime)
+                mDeltaCount += (mStopTime-mStartTime);
+        }
     }
 
     virtual Ogre::Real calculate(Ogre::Real value)
     {
-        mDeltaCount += value*mFrequency;
-        mDeltaCount = std::fmod(mDeltaCount - mStartTime,
-                                mStopTime - mStartTime) + mStartTime;
-        return mDeltaCount;
+        if(mDeltaInput)
+        {
+            mDeltaCount += value*mFrequency;
+            mDeltaCount = std::fmod(mDeltaCount - mStartTime,
+                                    mStopTime - mStartTime) + mStartTime;
+            return mDeltaCount;
+        }
+
+        value = std::min(mStopTime, std::max(mStartTime, value+mPhase));
+        return value;
     }
 };
 
@@ -103,6 +112,20 @@ public:
     {
     private:
         Ogre::Bone *mTarget;
+        std::vector<Nif::NiVisData::VisData> mData;
+
+        virtual bool calculate(Ogre::Real time)
+        {
+            if(mData.size() == 0)
+                return true;
+
+            for(size_t i = 1;i < mData.size();i++)
+            {
+                if(mData[i].time > time)
+                    return mData[i-1].isSet;
+            }
+            return mData.back().isSet;
+        }
 
         // FIXME: We are not getting all objects here. Skinned meshes get
         // attached to the object's root node, and won't be connected via a
@@ -126,7 +149,9 @@ public:
         }
 
     public:
-        Value(Ogre::Bone *target) : mTarget(target)
+        Value(Ogre::Bone *target, const Nif::NiVisData *data)
+          : mTarget(target)
+          , mData(data->mVis)
         { }
 
         virtual Ogre::Real getValue() const
@@ -135,39 +160,14 @@ public:
             return 1.0f;
         }
 
-        virtual void setValue(Ogre::Real value)
+        virtual void setValue(Ogre::Real time)
         {
-            int vis = static_cast<int>(value);
+            bool vis = calculate(time);
             setVisible(mTarget, vis);
         }
     };
 
-    class Function : public Ogre::ControllerFunction<Ogre::Real>
-    {
-    private:
-        std::vector<Nif::NiVisData::VisData> mData;
-
-    public:
-        Function(const Nif::NiVisData *data)
-          : Ogre::ControllerFunction<Ogre::Real>(false),
-            mData(data->mVis)
-        { }
-
-        virtual Ogre::Real calculate(Ogre::Real value)
-        {
-            if(mData.size() == 0)
-                return 1.0f;
-
-            if(mData[0].time >= value)
-                return mData[0].isSet;
-            for(size_t i = 1;i < mData.size();i++)
-            {
-                if(mData[i].time > value)
-                    return mData[i-1].isSet;
-            }
-            return mData.back().isSet;
-        }
-    };
+    typedef DefaultFunction Function;
 };
 
 class UVController
@@ -1543,9 +1543,9 @@ class NIFObjectLoader : Ogre::ManualResourceLoader
 
                 int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(mName, ctrl->target->recIndex);
                 Ogre::Bone *trgtbone = objectlist.mSkelBase->getSkeleton()->getBone(trgtid);
-                Ogre::SharedPtr<Ogre::ControllerValue<Ogre::Real> > srcval; /* Filled in later */
-                Ogre::SharedPtr<Ogre::ControllerValue<Ogre::Real> > dstval(OGRE_NEW VisController::Value(trgtbone));
-                Ogre::SharedPtr<Ogre::ControllerFunction<Ogre::Real> > func(OGRE_NEW VisController::Function(vis->data.getPtr()));
+                Ogre::ControllerValueRealPtr srcval; /* Filled in later */
+                Ogre::ControllerValueRealPtr dstval(OGRE_NEW VisController::Value(trgtbone, vis->data.getPtr()));
+                Ogre::ControllerFunctionRealPtr func(OGRE_NEW VisController::Function(vis, false));
 
                 objectlist.mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
             }
@@ -1599,7 +1599,7 @@ class NIFObjectLoader : Ogre::ManualResourceLoader
                     const Ogre::MaterialPtr &material = entity->getSubEntity(0)->getMaterial();
                     Ogre::ControllerValueRealPtr srcval(Ogre::ControllerManager::getSingleton().getFrameTimeSource());
                     Ogre::ControllerValueRealPtr dstval(OGRE_NEW UVController::Value(material, uv->data.getPtr()));
-                    Ogre::ControllerFunctionRealPtr func(OGRE_NEW UVController::Function(uv));
+                    Ogre::ControllerFunctionRealPtr func(OGRE_NEW UVController::Function(uv, true));
 
                     objectlist.mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
                 }
