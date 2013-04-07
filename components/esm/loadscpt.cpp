@@ -64,7 +64,7 @@ void Script::save(ESMWriter &esm)
     memcpy(data.mName.name, mId.c_str(), mId.size());
 
     esm.writeHNT("SCHD", data, 52);
-    
+
     if (!mVarNames.empty())
     {
         esm.startSubRecord("SCVR");
@@ -76,10 +76,21 @@ void Script::save(ESMWriter &esm)
     }
 
     esm.startSubRecord("SCDT");
-    esm.write(&mScriptData[0], mData.mScriptDataSize);
+    esm.write(reinterpret_cast<const char * >(&mScriptData[0]), mData.mScriptDataSize);
     esm.endRecord("SCDT");
 
     esm.writeHNOString("SCTX", mScriptText);
 }
+
+    void Script::blank()
+    {
+        mData.mNumShorts = mData.mNumLongs = mData.mNumFloats = 0;
+        mData.mScriptDataSize = 0;
+        mData.mStringTableSize = 0;
+
+        mVarNames.clear();
+        mScriptData.clear();
+        mScriptText = "Begin " + mId + "\n\nEnd " + mId + "\n";
+    }
 
 }

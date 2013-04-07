@@ -21,6 +21,7 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         CSMWorld::UniversalId::Type_Factions,
         CSMWorld::UniversalId::Type_Races,
         CSMWorld::UniversalId::Type_Sounds,
+        CSMWorld::UniversalId::Type_Scripts,
 
         CSMWorld::UniversalId::Type_None // end marker
     };

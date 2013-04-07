@@ -47,7 +47,9 @@ namespace CSMWorld
                 Type_Races,
                 Type_Race,
                 Type_Sounds,
-                Type_Sound
+                Type_Sound,
+                Type_Scripts,
+                Type_Script
             };
 
         private:

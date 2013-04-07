@@ -84,6 +84,9 @@ CSMWorld::Data::Data()
     mSounds.addColumn (new SoundParamColumn<ESM::Sound> (SoundParamColumn<ESM::Sound>::Type_MaxRange));
     mSounds.addColumn (new SoundFileColumn<ESM::Sound>);
 
+    mScripts.addColumn (new StringIdColumn<ESM::Script>);
+    mScripts.addColumn (new RecordStateColumn<ESM::Script>);
+
     addModel (new IdTable (&mGlobals), UniversalId::Type_Globals, UniversalId::Type_Global);
     addModel (new IdTable (&mGmsts), UniversalId::Type_Gmsts, UniversalId::Type_Gmst);
     addModel (new IdTable (&mSkills), UniversalId::Type_Skills, UniversalId::Type_Skill);
@@ -91,6 +94,7 @@ CSMWorld::Data::Data()
     addModel (new IdTable (&mFactions), UniversalId::Type_Factions, UniversalId::Type_Faction);
     addModel (new IdTable (&mRaces), UniversalId::Type_Races, UniversalId::Type_Race);
     addModel (new IdTable (&mSounds), UniversalId::Type_Sounds, UniversalId::Type_Sound);
+    addModel (new IdTable (&mScripts), UniversalId::Type_Scripts, UniversalId::Type_Script);
 }
 
 CSMWorld::Data::~Data()
@@ -169,6 +173,16 @@ CSMWorld::IdCollection<ESM::Sound>& CSMWorld::Data::getSounds()
     return mSounds;
 }
 
+const CSMWorld::IdCollection<ESM::Script>& CSMWorld::Data::getScripts() const
+{
+    return mScripts;
+}
+
+CSMWorld::IdCollection<ESM::Script>& CSMWorld::Data::getScripts()
+{
+    return mScripts;
+}
+
 QAbstractItemModel *CSMWorld::Data::getTableModel (const UniversalId& id)
 {
     std::map<UniversalId::Type, QAbstractItemModel *>::iterator iter = mModelIndex.find (id.getType());
@@ -210,6 +224,7 @@ void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base)
             case ESM::REC_FACT: mFactions.load (reader, base); break;
             case ESM::REC_RACE: mRaces.load (reader, base); break;
             case ESM::REC_SOUN: mSounds.load (reader, base); break;
+            case ESM::REC_SCPT: mScripts.load (reader, base); break;
 
             default:
 
