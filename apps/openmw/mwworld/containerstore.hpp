@@ -53,7 +53,7 @@ namespace MWWorld
             mutable float mCachedWeight;
             mutable bool mWeightUpToDate;
             ContainerStoreIterator addImp (const Ptr& ptr);
-            void addInitialItem (const std::string& id, int count, unsigned char failChance=0, bool topLevel=true);
+            void addInitialItem (const std::string& id, const std::string& owner, int count, unsigned char failChance=0, bool topLevel=true);
 
         public:
 
@@ -85,7 +85,7 @@ namespace MWWorld
 
         public:
 
-            void fill (const ESM::InventoryList& items, const MWWorld::ESMStore& store);
+            void fill (const ESM::InventoryList& items, const std::string& owner, const MWWorld::ESMStore& store);
             ///< Insert items into *this.
 
             void clear();

@@ -177,19 +177,19 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImpl (const Ptr& ptr
     return it;
 }
 
-void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const MWWorld::ESMStore& store)
+void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const std::string& owner, const MWWorld::ESMStore& store)
 {
     for (std::vector<ESM::ContItem>::const_iterator iter (items.mList.begin()); iter!=items.mList.end();
         ++iter)
     {
         std::string id = iter->mItem.toString();
-        addInitialItem(id, iter->mCount);
+        addInitialItem(id, owner, iter->mCount);
     }
 
     flagAsModified();
 }
 
-void MWWorld::ContainerStore::addInitialItem (const std::string& id, int count, unsigned char failChance, bool topLevel)
+void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::string& owner, int count, unsigned char failChance, bool topLevel)
 {
     count = std::abs(count); /// \todo implement item restocking (indicated by negative count)
 
@@ -208,7 +208,7 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, int count, 
         if (topLevel && count > 1 && levItem->mFlags & ESM::ItemLevList::Each)
         {
             for (int i=0; i<count; ++i)
-                addInitialItem(id, 1, failChance, false);
+                addInitialItem(id, owner, 1, failChance, false);
             return;
         }
 
@@ -238,12 +238,13 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, int count, 
             if (!candidates.size())
                 return;
             std::string item = candidates[std::rand()%candidates.size()];
-            addInitialItem(item, count, failChance, false);
+            addInitialItem(item, owner, count, failChance, false);
         }
     }
     else
     {
         ref.getPtr().getRefData().setCount (count);
+        ref.getPtr().getCellRef().mOwner = owner;
         addImp (ref.getPtr());
     }
 }
