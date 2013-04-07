@@ -18,6 +18,7 @@
 #include "racecheck.hpp"
 #include "soundcheck.hpp"
 #include "regioncheck.hpp"
+#include "birthsigncheck.hpp"
 
 CSMTools::Operation *CSMTools::Tools::get (int type)
 {
@@ -69,6 +70,8 @@ CSMTools::Verifier *CSMTools::Tools::getVerifier()
         mVerifier->appendStage (new SoundCheckStage (mData.getSounds()));
 
         mVerifier->appendStage (new RegionCheckStage (mData.getRegions()));
+
+        mVerifier->appendStage (new BirthsignCheckStage (mData.getBirthsigns()));
     }
 
     return mVerifier;
