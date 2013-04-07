@@ -301,6 +301,12 @@ namespace MWInput
                 mPlayer.setForwardBackward (-1);
             }
 
+            else if(mPlayer.getAutoMove())
+            {
+                triedToMove = true;
+                mPlayer.setForwardBackward (1);
+            }
+
             mPlayer.setSneak(actionIsActive(A_Sneak));
 
             if (actionIsActive(A_Jump) && mControlSwitch["playerjumping"])
@@ -321,6 +327,7 @@ namespace MWInput
                 mOverencumberedMessageDelay -= dt;
                 if (MWWorld::Class::get(player).getEncumbrance(player) >= MWWorld::Class::get(player).getCapacity(player))
                 {
+                    mPlayer.setAutoMove (false);
                     if (mOverencumberedMessageDelay <= 0)
                     {
                         MWBase::Environment::get().getWindowManager ()->messageBox("#{sNotifyMessage59}");
