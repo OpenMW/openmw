@@ -1644,14 +1644,16 @@ class NIFObjectLoader : Ogre::ManualResourceLoader
             else if(ctrl->recType == Nif::RC_NiKeyframeController)
             {
                 const Nif::NiKeyframeController *key = static_cast<const Nif::NiKeyframeController*>(ctrl.getPtr());
+                if(!key->data.empty())
+                {
+                    int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(mName, ctrl->target->recIndex);
+                    Ogre::Bone *trgtbone = objectlist.mSkelBase->getSkeleton()->getBone(trgtid);
+                    Ogre::ControllerValueRealPtr srcval; /* Filled in later */
+                    Ogre::ControllerValueRealPtr dstval(OGRE_NEW KeyframeController::Value(trgtbone, key->data.getPtr()));
+                    Ogre::ControllerFunctionRealPtr func(OGRE_NEW KeyframeController::Function(key, false));
 
-                int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(mName, ctrl->target->recIndex);
-                Ogre::Bone *trgtbone = objectlist.mSkelBase->getSkeleton()->getBone(trgtid);
-                Ogre::ControllerValueRealPtr srcval; /* Filled in later */
-                Ogre::ControllerValueRealPtr dstval(OGRE_NEW KeyframeController::Value(trgtbone, key->data.getPtr()));
-                Ogre::ControllerFunctionRealPtr func(OGRE_NEW KeyframeController::Function(key, false));
-
-                objectlist.mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
+                    objectlist.mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
+                }
             }
             ctrl = ctrl->next;
         }
