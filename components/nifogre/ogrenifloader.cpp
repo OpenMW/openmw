@@ -1719,46 +1719,4 @@ Ogre::SkeletonPtr Loader::getSkeleton(std::string name, const std::string &group
     return NIFSkeletonLoader::createSkeleton(name, group, node);
 }
 
-
-/* More code currently not in use, from the old D source. This was
-   used in the first attempt at loading NIF meshes, where each submesh
-   in the file was given a separate bone in a skeleton. Unfortunately
-   the OGRE skeletons can't hold more than 256 bones, and some NIFs go
-   way beyond that. The code might be of use if we implement animated
-   submeshes like this (the part of the NIF that is animated is
-   usually much less than the entire file, but the method might still
-   not be water tight.)
-
-// Insert a raw RGBA image into the texture system.
-extern "C" void ogre_insertTexture(char* name, uint32_t width, uint32_t height, void *data)
-{
-  TexturePtr texture = TextureManager::getSingleton().createManual(
-      name,         // name
-      "General",    // group
-      TEX_TYPE_2D,      // type
-      width, height,    // width & height
-      0,                // number of mipmaps
-      PF_BYTE_RGBA,     // pixel format
-      TU_DEFAULT);      // usage; should be TU_DYNAMIC_WRITE_ONLY_DISCARDABLE for
-                        // textures updated very often (e.g. each frame)
-
-  // Get the pixel buffer
-  HardwarePixelBufferSharedPtr pixelBuffer = texture->getBuffer();
-
-  // Lock the pixel buffer and get a pixel box
-  pixelBuffer->lock(HardwareBuffer::HBL_NORMAL); // for best performance use HBL_DISCARD!
-  const PixelBox& pixelBox = pixelBuffer->getCurrentLock();
-
-  void *dest = pixelBox.data;
-
-  // Copy the data
-  memcpy(dest, data, width*height*4);
-
-  // Unlock the pixel buffer
-  pixelBuffer->unlock();
-}
-
-
-*/
-
-} // nsmaepace NifOgre
+} // namespace NifOgre
