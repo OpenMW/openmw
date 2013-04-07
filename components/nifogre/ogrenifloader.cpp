@@ -1012,11 +1012,11 @@ static Ogre::String getMaterial(const Nif::ShapeData *shapedata,
 std::map<size_t,std::string> NIFMaterialLoader::MaterialMap;
 
 
-/** Manual resource loader for NIF meshes. This is the main class
-    responsible for translating the internal NIF mesh structure into
-    something Ogre can use.
+/** Manual resource loader for NIF objects (meshes, particle systems, etc).
+ * This is the main class responsible for translating the internal NIF
+ * structures into something Ogre can use.
  */
-class NIFMeshLoader : Ogre::ManualResourceLoader
+class NIFObjectLoader : Ogre::ManualResourceLoader
 {
     std::string mName;
     std::string mGroup;
@@ -1296,7 +1296,7 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
     }
 
 
-    typedef std::map<std::string,NIFMeshLoader> LoaderMap;
+    typedef std::map<std::string,NIFObjectLoader> LoaderMap;
     static LoaderMap sLoaders;
 
 
@@ -1399,7 +1399,7 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
     }
 
 
-    NIFMeshLoader(const std::string &name, const std::string &group)
+    NIFObjectLoader(const std::string &name, const std::string &group)
       : mName(name), mGroup(group), mShapeIndex(~(size_t)0)
     { }
 
@@ -1421,13 +1421,13 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
         createSubMesh(mesh, dynamic_cast<const Nif::NiTriShape*>(record));
     }
 
-    void createEntities(Ogre::SceneManager *sceneMgr, const Nif::Node *node, EntityList &entities, int flags=0)
+    void createObjects(Ogre::SceneManager *sceneMgr, const Nif::Node *node, EntityList &entities, int flags=0)
     {
-        // Do not create meshes for the collision shape (includes all children)
+        // Do not create objects for the collision shape (includes all children)
         if(node->recType == Nif::RC_RootCollisionNode)
             return;
 
-        // Marker objects: just skip the entire node
+        // Marker objects: just skip the entire node branch
         /// \todo don't do this in the editor
         if (node->name.find("marker") != std::string::npos)
             return;
@@ -1483,7 +1483,7 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
             Ogre::MeshPtr mesh = meshMgr.getByName(fullname);
             if(mesh.isNull())
             {
-                NIFMeshLoader *loader = &sLoaders[fullname];
+                NIFObjectLoader *loader = &sLoaders[fullname];
                 *loader = *this;
                 loader->mShapeIndex = shape->recIndex;
 
@@ -1543,7 +1543,7 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
             for(size_t i = 0;i < children.length();i++)
             {
                 if(!children[i].empty())
-                    createEntities(sceneMgr, children[i].getPtr(), entities, flags);
+                    createObjects(sceneMgr, children[i].getPtr(), entities, flags);
             }
         }
     }
@@ -1561,7 +1561,7 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
         Ogre::MeshPtr mesh = meshMgr.getByName(fullname);
         if(mesh.isNull())
         {
-            NIFMeshLoader *loader = &sLoaders[fullname];
+            NIFObjectLoader *loader = &sLoaders[fullname];
             *loader = *this;
 
             mesh = meshMgr.createManual(fullname, mGroup, loader);
@@ -1572,7 +1572,7 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
     }
 
 public:
-    NIFMeshLoader() : mShapeIndex(~(size_t)0)
+    NIFObjectLoader() : mShapeIndex(~(size_t)0)
     { }
 
     static void load(Ogre::SceneManager *sceneMgr, EntityList &entities, const std::string &name, const std::string &group)
@@ -1601,13 +1601,13 @@ public:
         if(!hasSkel)
             hasSkel = !NIFSkeletonLoader::createSkeleton(name, group, node).isNull();
 
-        NIFMeshLoader meshldr(name, group);
+        NIFObjectLoader meshldr(name, group);
         if(hasSkel)
             meshldr.createSkelBase(sceneMgr, node, entities);
-        meshldr.createEntities(sceneMgr, node, entities);
+        meshldr.createObjects(sceneMgr, node, entities);
     }
 };
-NIFMeshLoader::LoaderMap NIFMeshLoader::sLoaders;
+NIFObjectLoader::LoaderMap NIFObjectLoader::sLoaders;
 
 
 EntityList Loader::createEntities(Ogre::SceneNode *parentNode, std::string name, const std::string &group)
@@ -1615,7 +1615,7 @@ EntityList Loader::createEntities(Ogre::SceneNode *parentNode, std::string name,
     EntityList entitylist;
 
     Misc::StringUtils::toLower(name);
-    NIFMeshLoader::load(parentNode->getCreator(), entitylist, name, group);
+    NIFObjectLoader::load(parentNode->getCreator(), entitylist, name, group);
 
     for(size_t i = 0;i < entitylist.mEntities.size();i++)
     {
@@ -1634,7 +1634,7 @@ EntityList Loader::createEntities(Ogre::Entity *parent, const std::string &bonen
     EntityList entitylist;
 
     Misc::StringUtils::toLower(name);
-    NIFMeshLoader::load(parentNode->getCreator(), entitylist, name, group);
+    NIFObjectLoader::load(parentNode->getCreator(), entitylist, name, group);
 
     bool isskinned = false;
     for(size_t i = 0;i < entitylist.mEntities.size();i++)
