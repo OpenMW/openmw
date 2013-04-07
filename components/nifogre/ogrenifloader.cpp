@@ -947,9 +947,11 @@ static Ogre::String getMaterial(const Nif::ShapeData *shapedata,
         boost::hash_combine(h, diffuse.x);
         boost::hash_combine(h, diffuse.y);
         boost::hash_combine(h, diffuse.z);
+        boost::hash_combine(h, alpha);
         boost::hash_combine(h, specular.x);
         boost::hash_combine(h, specular.y);
         boost::hash_combine(h, specular.z);
+        boost::hash_combine(h, glossiness);
         boost::hash_combine(h, emissive.x);
         boost::hash_combine(h, emissive.y);
         boost::hash_combine(h, emissive.z);
@@ -1108,7 +1110,7 @@ class NIFObjectLoader : Ogre::ManualResourceLoader
                                   const Nif::NiVertexColorProperty *&vertprop,
                                   const Nif::NiZBufferProperty *&zprop,
                                   const Nif::NiSpecularProperty *&specprop,
-                                  const Nif::NiWireframeProperty *wireprop)
+                                  const Nif::NiWireframeProperty *&wireprop)
     {
         if(node->parent)
             getNodeProperties(node->parent, texprop, matprop, alphaprop, vertprop, zprop, specprop, wireprop);
