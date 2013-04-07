@@ -63,6 +63,7 @@ void Animation::setAnimationSources(const std::vector<std::string> &names)
     mAnimVelocity = 0.0f;
     mAccumRoot = NULL;
     mNonAccumRoot = NULL;
+    mTextKeys.clear();
     mSkeletonSources.clear();
 
     std::vector<std::string>::const_iterator nameiter;
@@ -96,7 +97,7 @@ void Animation::setAnimationSources(const std::vector<std::string> &names)
             {
                 Ogre::Animation *anim = skel->getAnimation(i);
                 const Ogre::Any &groupdata = bindings.getUserAny(std::string(NifOgre::sTextKeyExtraDataID)+
-                                                                "@"+anim->getName());
+                                                                 "@"+anim->getName());
                 if(!groupdata.isEmpty())
                     mTextKeys[anim->getName()] = Ogre::any_cast<NifOgre::TextKeyMap>(groupdata);
             }
