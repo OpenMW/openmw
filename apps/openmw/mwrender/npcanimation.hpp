@@ -64,7 +64,6 @@ private:
 
     void updateParts(bool forceupdate = false);
 
-    void removeObjects(NifOgre::ObjectList &objects);
     void removeIndividualPart(int type);
     void reserveIndividualPart(int type, int group, int priority);
 

@@ -50,8 +50,9 @@ const NpcAnimation::PartInfo NpcAnimation::sPartList[NpcAnimation::sPartListSize
 
 NpcAnimation::~NpcAnimation()
 {
+    Ogre::SceneManager *sceneMgr = mInsert->getCreator();
     for(size_t i = 0;i < sPartListSize;i++)
-        removeObjects(mObjectParts[i]);
+        destroyObjectList(sceneMgr, mObjectParts[i]);
 }
 
 
@@ -374,22 +375,6 @@ Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
     return ret;
 }
 
-void NpcAnimation::removeObjects(NifOgre::ObjectList &objects)
-{
-    assert(&objects != &mObjectList);
-
-    Ogre::SceneManager *sceneMgr = mInsert->getCreator();
-    for(size_t i = 0;i < objects.mParticles.size();i++)
-        sceneMgr->destroyParticleSystem(objects.mParticles[i]);
-    for(size_t i = 0;i < objects.mEntities.size();i++)
-        sceneMgr->destroyEntity(objects.mEntities[i]);
-    objects.mControllers.clear();
-    objects.mCameras.clear();
-    objects.mParticles.clear();
-    objects.mEntities.clear();
-    objects.mSkelBase = NULL;
-}
-
 void NpcAnimation::removeIndividualPart(int type)
 {
     mPartPriorities[type] = 0;
@@ -399,7 +384,7 @@ void NpcAnimation::removeIndividualPart(int type)
     {
         if(type == sPartList[i].type)
         {
-            removeObjects(mObjectParts[i]);
+            destroyObjectList(mInsert->getCreator(), mObjectParts[i]);
             break;
         }
     }
