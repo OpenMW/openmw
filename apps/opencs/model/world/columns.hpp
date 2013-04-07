@@ -5,6 +5,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <QColor>
+
 #include "columnbase.hpp"
 
 namespace CSMWorld
@@ -582,6 +584,38 @@ namespace CSMWorld
             ESXRecordT record2 = record.get();
 
             record2.mSound = data.toString().toUtf8().constData();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
+    /// \todo QColor is a GUI class and should not be in model. Need to think of an alternative
+    /// solution.
+    template<typename ESXRecordT>
+    struct MapColourColumn : public Column<ESXRecordT>
+    {
+        /// \todo Replace Display_Integer with something that displays the colour value more directly.
+        MapColourColumn() : Column<ESXRecordT> ("Map Colour", ColumnBase::Display_Integer) {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            int colour = record.get().mMapColor;
+
+            return QColor (colour & 0xff, (colour>>8) & 0xff, (colour>>16) & 0xff);
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            QColor colour = data.value<QColor>();
+
+            record2.mMapColor = colour.rgb() & 0xffffff;
 
             record.setModified (record2);
         }
