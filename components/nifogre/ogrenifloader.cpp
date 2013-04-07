@@ -184,18 +184,23 @@ public:
 
         static float lookupValue(const Nif::FloatKeyList &keys, float time, float def)
         {
-            Nif::FloatKeyList::VecType::const_iterator iter(keys.mKeys.begin());
+            if(keys.mKeys.size() == 0)
+                return def;
+
+            if(time <= keys.mKeys.front().mTime)
+                return keys.mKeys.front().mValue;
+
+            Nif::FloatKeyList::VecType::const_iterator iter(keys.mKeys.begin()+1);
             for(;iter != keys.mKeys.end();iter++)
             {
-                if(iter->mTime > time)
+                if(iter->mTime < time)
                     continue;
-                Nif::FloatKeyList::VecType::const_iterator next(iter+1);
-                if(next == keys.mKeys.end())
-                    return iter->mValue;
-                float a = (time-iter->mTime) / (next->mTime-iter->mTime);
-                return iter->mValue + ((next->mValue - iter->mValue)*a);
+
+                Nif::FloatKeyList::VecType::const_iterator last(iter-1);
+                float a = (time-last->mTime) / (iter->mTime-last->mTime);
+                return last->mValue + ((iter->mValue - last->mValue)*a);
             }
-            return def;
+            return keys.mKeys.back().mValue;
         }
 
     public:
@@ -837,6 +842,13 @@ static Ogre::String getMaterial(const Nif::ShapeData *shapedata,
             else
                 warn("Found internal texture, ignoring.");
         }
+
+        Nif::ControllerPtr ctrls = texprop->controller;
+        while(!ctrls.empty())
+        {
+            warn("Unhandled texture controller "+ctrls->recName+" in "+name);
+            ctrls = ctrls->next;
+        }
     }
     needTangents = !texName[Nif::NiTexturingProperty::BumpTexture].empty();
 
@@ -845,6 +857,13 @@ static Ogre::String getMaterial(const Nif::ShapeData *shapedata,
     {
         alphaFlags = alphaprop->flags;
         alphaTest = alphaprop->data.threshold;
+
+        Nif::ControllerPtr ctrls = alphaprop->controller;
+        while(!ctrls.empty())
+        {
+            warn("Unhandled alpha controller "+ctrls->recName+" in "+name);
+            ctrls = ctrls->next;
+        }
     }
 
     // Vertex color handling
@@ -853,17 +872,38 @@ static Ogre::String getMaterial(const Nif::ShapeData *shapedata,
         vertMode = vertprop->data.vertmode;
         // FIXME: Handle lightmode?
         //lightMode = vertprop->data.lightmode;
+
+        Nif::ControllerPtr ctrls = vertprop->controller;
+        while(!ctrls.empty())
+        {
+            warn("Unhandled vertex color controller "+ctrls->recName+" in "+name);
+            ctrls = ctrls->next;
+        }
     }
 
     if(zprop)
     {
         depthFlags = zprop->flags;
         // Depth function???
+
+        Nif::ControllerPtr ctrls = zprop->controller;
+        while(!ctrls.empty())
+        {
+            warn("Unhandled depth controller "+ctrls->recName+" in "+name);
+            ctrls = ctrls->next;
+        }
     }
 
     if(specprop)
     {
         specFlags = specprop->flags;
+
+        Nif::ControllerPtr ctrls = specprop->controller;
+        while(!ctrls.empty())
+        {
+            warn("Unhandled specular controller "+ctrls->recName+" in "+name);
+            ctrls = ctrls->next;
+        }
     }
 
     // Material
@@ -875,6 +915,13 @@ static Ogre::String getMaterial(const Nif::ShapeData *shapedata,
         emissive = matprop->data.emissive;
         glossiness = matprop->data.glossiness;
         alpha = matprop->data.alpha;
+
+        Nif::ControllerPtr ctrls = matprop->controller;
+        while(!ctrls.empty())
+        {
+            warn("Unhandled material controller "+ctrls->recName+" in "+name);
+            ctrls = ctrls->next;
+        }
     }
 
     {
