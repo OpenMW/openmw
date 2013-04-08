@@ -1566,7 +1566,11 @@ class NIFObjectLoader : Ogre::ManualResourceLoader
             }
 
             if(!partsys->isAttached())
-                entitybase->attachObjectToBone(partnode->name, partsys);
+            {
+                int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(mName, partnode->recIndex);
+                Ogre::Bone *trgtbone = entitybase->getSkeleton()->getBone(trgtid);
+                entitybase->attachObjectToBone(trgtbone->getName(), partsys);
+            }
         }
         catch(std::exception &e) {
             std::cerr<< "Particles exception: "<<e.what() <<std::endl;
