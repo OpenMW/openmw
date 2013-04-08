@@ -238,24 +238,10 @@ namespace MWClass
         ref->mBase = record;
     }
 
-    bool Clothing::canEquip(const MWWorld::Ptr &npc, const MWWorld::Ptr &item) const
+    int Clothing::canBeEquipped(const MWWorld::Ptr &npc, const MWWorld::Ptr &item) const
     {
-        MWWorld::InventoryStore& invStore = MWWorld::Class::get(npc).getInventoryStore(npc);
-
         // slots that this item can be equipped in
         std::pair<std::vector<int>, bool> slots = MWWorld::Class::get(item).getEquipmentSlots(item);
-
-        // retrieve ContainerStoreIterator to the item
-        MWWorld::ContainerStoreIterator it = invStore.begin();
-        for (; it != invStore.end(); ++it)
-        {
-            if (*it == item)
-            {
-                break;
-            }
-        }
-
-        assert(it != invStore.end());
 
         std::string npcRace = npc.get<ESM::NPC>()->mBase->mRace;
 
@@ -267,7 +253,7 @@ namespace MWClass
             const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npcRace);
             if(race->mData.mFlags & ESM::Race::Beast)
             {
-                std::vector<ESM::PartReference> parts = it->get<ESM::Clothing>()->mBase->mParts.mParts;
+                std::vector<ESM::PartReference> parts = item.get<ESM::Clothing>()->mBase->mParts.mParts;
 
                 if(*slot == MWWorld::InventoryStore::Slot_Helmet)
                 {
@@ -278,7 +264,7 @@ namespace MWClass
                             if(npc == MWBase::Environment::get().getWorld()->getPlayer().getPlayer() )
                                 MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage13}");
 
-                            return false;
+                            return 0;
                         }
                     }
                 }
@@ -294,13 +280,13 @@ namespace MWClass
                                 MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage15}");
                             }
 
-                            return false;
+                            return 0;
                         }
                     }
                 }
             }
         }
-        return true;
+        return 1;
     }
 
     boost::shared_ptr<MWWorld::Action> Clothing::use (const MWWorld::Ptr& ptr) const

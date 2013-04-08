@@ -61,7 +61,8 @@ namespace MWClass
 
             virtual void applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const;
 
-            virtual bool canEquip(const MWWorld::Ptr &npc, const MWWorld::Ptr &item) const;
+            virtual int canBeEquipped(const MWWorld::Ptr &npc, const MWWorld::Ptr &item) const;
+            ///< Return 0 if player cannot equip item. 1 if can equip. 2 if it's twohanded weapon. 3 if twohanded weapon conflicts with that.
 
             virtual boost::shared_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr)
                 const;

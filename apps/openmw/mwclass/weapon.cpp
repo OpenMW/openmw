@@ -384,26 +384,9 @@ namespace MWClass
             ref->mBase = record;
     }
 
-    bool Weapon::canEquip(const MWWorld::Ptr &npc, const MWWorld::Ptr &item) const
+    int Weapon::canBeEquipped(const MWWorld::Ptr &npc, const MWWorld::Ptr &item) const
     {
-        MWWorld::InventoryStore& invStore = MWWorld::Class::get(npc).getInventoryStore(npc);
-
-        // slots that this item can be equipped in
         std::pair<std::vector<int>, bool> slots = MWWorld::Class::get(item).getEquipmentSlots(item);
-
-        // retrieve ContainerStoreIterator to the item
-        MWWorld::ContainerStoreIterator it = invStore.begin();
-        for (; it != invStore.end(); ++it)
-        {
-            if (*it == item)
-            {
-                break;
-            }
-        }
-
-        assert(it != invStore.end());
-
-        std::string npcRace = npc.get<ESM::NPC>()->mBase->mRace;
 
         // equip the item in the first free slot
         for (std::vector<int>::const_iterator slot=slots.first.begin();
@@ -411,21 +394,20 @@ namespace MWClass
         {
             if(*slot == MWWorld::InventoryStore::Slot_CarriedRight)
             {
-                if(it->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::LongBladeTwoHand ||
-                it->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::BluntTwoClose || 
-                it->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::BluntTwoWide || 
-                it->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::SpearTwoWide ||
-                it->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::AxeTwoHand || 
-                it->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanBow || 
-                it->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanCrossbow)
+                if(item.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::LongBladeTwoHand ||
+                item.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::BluntTwoClose || 
+                item.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::BluntTwoWide || 
+                item.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::SpearTwoWide ||
+                item.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::AxeTwoHand || 
+                item.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanBow || 
+                item.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanCrossbow)
                 {
-                    //unequip lefthand item
-                    invStore.equip(MWWorld::InventoryStore::Slot_CarriedLeft, invStore.end());
+                    return 2;
                 }
-                return true;
+                return 1;
             }
         }
-        return false;
+        return 0;
     }
 
     boost::shared_ptr<MWWorld::Action> Weapon::use (const MWWorld::Ptr& ptr) const

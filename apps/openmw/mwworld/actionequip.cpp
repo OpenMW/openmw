@@ -43,8 +43,15 @@ namespace MWWorld
         for (std::vector<int>::const_iterator slot=slots.first.begin();
             slot!=slots.first.end(); ++slot)
         {
-            if(!MWWorld::Class::get(getTarget()).canEquip(actor,getTarget()))
-                break;
+            switch(MWWorld::Class::get (*it).canBeEquipped (actor, *it))
+            {
+                case 0:
+                    return;
+                case 2:
+                    invStore.equip(MWWorld::InventoryStore::Slot_CarriedLeft, invStore.end());
+                case 3:
+                    invStore.equip(MWWorld::InventoryStore::Slot_CarriedRight, invStore.end());
+            }
 
             // if all slots are occupied, replace the last slot
             if (slot == --slots.first.end())
