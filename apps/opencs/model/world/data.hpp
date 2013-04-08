@@ -12,6 +12,9 @@
 #include <components/esm/loadclas.hpp>
 #include <components/esm/loadfact.hpp>
 #include <components/esm/loadrace.hpp>
+#include <components/esm/loadsoun.hpp>
+#include <components/esm/loadscpt.hpp>
+#include <components/esm/loadregn.hpp>
 
 #include "idcollection.hpp"
 #include "universalid.hpp"
@@ -28,6 +31,9 @@ namespace CSMWorld
             IdCollection<ESM::Class> mClasses;
             IdCollection<ESM::Faction> mFactions;
             IdCollection<ESM::Race> mRaces;
+            IdCollection<ESM::Sound> mSounds;
+            IdCollection<ESM::Script> mScripts;
+            IdCollection<ESM::Region> mRegions;
             std::vector<QAbstractItemModel *> mModels;
             std::map<UniversalId::Type, QAbstractItemModel *> mModelIndex;
 
@@ -67,6 +73,18 @@ namespace CSMWorld
             const IdCollection<ESM::Race>& getRaces() const;
 
             IdCollection<ESM::Race>& getRaces();
+
+            const IdCollection<ESM::Sound>& getSounds() const;
+
+            IdCollection<ESM::Sound>& getSounds();
+
+            const IdCollection<ESM::Script>& getScripts() const;
+
+            IdCollection<ESM::Script>& getScripts();
+
+            const IdCollection<ESM::Region>& getRegions() const;
+
+            IdCollection<ESM::Region>& getRegions();
 
             QAbstractItemModel *getTableModel (const UniversalId& id);
             ///< If no table model is available for \a id, an exception is thrown.

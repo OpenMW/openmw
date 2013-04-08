@@ -44,6 +44,9 @@ set(MATERIAL_FILES
     watersim_common.h
     watersim.mat
     watersim.shaderset
+    mygui.mat
+    mygui.shader
+    mygui.shaderset
 )
 
 copy_all_files(${CMAKE_CURRENT_SOURCE_DIR}/water "${OpenMW_BINARY_DIR}/resources/water/" "${WATER_FILES}")

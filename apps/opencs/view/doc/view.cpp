@@ -105,6 +105,18 @@ void CSVDoc::View::setupWorldMenu()
     QAction *races = new QAction (tr ("Races"), this);
     connect (races, SIGNAL (triggered()), this, SLOT (addRacesSubView()));
     world->addAction (races);
+
+    QAction *sounds = new QAction (tr ("Sounds"), this);
+    connect (sounds, SIGNAL (triggered()), this, SLOT (addSoundsSubView()));
+    world->addAction (sounds);
+
+    QAction *scripts = new QAction (tr ("Scripts"), this);
+    connect (scripts, SIGNAL (triggered()), this, SLOT (addScriptsSubView()));
+    world->addAction (scripts);
+
+    QAction *regions = new QAction (tr ("Regions"), this);
+    connect (regions, SIGNAL (triggered()), this, SLOT (addRegionsSubView()));
+    world->addAction (regions);
 }
 
 void CSVDoc::View::setupUi()
@@ -278,6 +290,21 @@ void CSVDoc::View::addFactionsSubView()
 void CSVDoc::View::addRacesSubView()
 {
     addSubView (CSMWorld::UniversalId::Type_Races);
+}
+
+void CSVDoc::View::addSoundsSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Sounds);
+}
+
+void CSVDoc::View::addScriptsSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Scripts);
+}
+
+void CSVDoc::View::addRegionsSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Regions);
 }
 
 void CSVDoc::View::abortOperation (int type)

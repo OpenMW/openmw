@@ -1,0 +1,25 @@
+material MyGUI/NoTexture
+{
+	pass
+	{
+        vertex_program mygui_vertex
+        fragment_program mygui_fragment
+		shader_properties
+		{
+			has_texture false
+		}
+	}
+}
+
+material MyGUI/OneTexture
+{
+	pass
+	{
+        vertex_program mygui_vertex
+        fragment_program mygui_fragment
+		shader_properties
+		{
+			has_texture true
+		}
+	}
+}

@@ -77,12 +77,31 @@ CSMWorld::Data::Data()
     mRaces.addColumn (new WeightHeightColumn<ESM::Race> (false, true));
     mRaces.addColumn (new WeightHeightColumn<ESM::Race> (false, false));
 
+    mSounds.addColumn (new StringIdColumn<ESM::Sound>);
+    mSounds.addColumn (new RecordStateColumn<ESM::Sound>);
+    mSounds.addColumn (new SoundParamColumn<ESM::Sound> (SoundParamColumn<ESM::Sound>::Type_Volume));
+    mSounds.addColumn (new SoundParamColumn<ESM::Sound> (SoundParamColumn<ESM::Sound>::Type_MinRange));
+    mSounds.addColumn (new SoundParamColumn<ESM::Sound> (SoundParamColumn<ESM::Sound>::Type_MaxRange));
+    mSounds.addColumn (new SoundFileColumn<ESM::Sound>);
+
+    mScripts.addColumn (new StringIdColumn<ESM::Script>);
+    mScripts.addColumn (new RecordStateColumn<ESM::Script>);
+
+    mRegions.addColumn (new StringIdColumn<ESM::Region>);
+    mRegions.addColumn (new RecordStateColumn<ESM::Region>);
+    mRegions.addColumn (new NameColumn<ESM::Region>);
+    mRegions.addColumn (new MapColourColumn<ESM::Region>);
+    mRegions.addColumn (new SleepListColumn<ESM::Region>);
+
     addModel (new IdTable (&mGlobals), UniversalId::Type_Globals, UniversalId::Type_Global);
     addModel (new IdTable (&mGmsts), UniversalId::Type_Gmsts, UniversalId::Type_Gmst);
     addModel (new IdTable (&mSkills), UniversalId::Type_Skills, UniversalId::Type_Skill);
     addModel (new IdTable (&mClasses), UniversalId::Type_Classes, UniversalId::Type_Class);
     addModel (new IdTable (&mFactions), UniversalId::Type_Factions, UniversalId::Type_Faction);
     addModel (new IdTable (&mRaces), UniversalId::Type_Races, UniversalId::Type_Race);
+    addModel (new IdTable (&mSounds), UniversalId::Type_Sounds, UniversalId::Type_Sound);
+    addModel (new IdTable (&mScripts), UniversalId::Type_Scripts, UniversalId::Type_Script);
+    addModel (new IdTable (&mRegions), UniversalId::Type_Regions, UniversalId::Type_Region);
 }
 
 CSMWorld::Data::~Data()
@@ -151,6 +170,36 @@ CSMWorld::IdCollection<ESM::Race>& CSMWorld::Data::getRaces()
     return mRaces;
 }
 
+const CSMWorld::IdCollection<ESM::Sound>& CSMWorld::Data::getSounds() const
+{
+    return mSounds;
+}
+
+CSMWorld::IdCollection<ESM::Sound>& CSMWorld::Data::getSounds()
+{
+    return mSounds;
+}
+
+const CSMWorld::IdCollection<ESM::Script>& CSMWorld::Data::getScripts() const
+{
+    return mScripts;
+}
+
+CSMWorld::IdCollection<ESM::Script>& CSMWorld::Data::getScripts()
+{
+    return mScripts;
+}
+
+const CSMWorld::IdCollection<ESM::Region>& CSMWorld::Data::getRegions() const
+{
+    return mRegions;
+}
+
+CSMWorld::IdCollection<ESM::Region>& CSMWorld::Data::getRegions()
+{
+    return mRegions;
+}
+
 QAbstractItemModel *CSMWorld::Data::getTableModel (const UniversalId& id)
 {
     std::map<UniversalId::Type, QAbstractItemModel *>::iterator iter = mModelIndex.find (id.getType());
@@ -191,6 +240,9 @@ void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base)
             case ESM::REC_CLAS: mClasses.load (reader, base); break;
             case ESM::REC_FACT: mFactions.load (reader, base); break;
             case ESM::REC_RACE: mRaces.load (reader, base); break;
+            case ESM::REC_SOUN: mSounds.load (reader, base); break;
+            case ESM::REC_SCPT: mScripts.load (reader, base); break;
+            case ESM::REC_REGN: mRegions.load (reader, base); break;
 
             default:
 

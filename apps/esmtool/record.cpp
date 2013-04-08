@@ -1182,7 +1182,7 @@ void Record<ESM::Script>::print()
         std::cout << "  Variable: " << *vit << std::endl;
 
     std::cout << "  ByteCode: ";
-    std::vector<char>::iterator cit;
+    std::vector<unsigned char>::iterator cit;
     for (cit = mData.mScriptData.begin(); cit != mData.mScriptData.end(); cit++)
         std::cout << boost::format("%02X") % (int)(*cit);
     std::cout << std::endl;

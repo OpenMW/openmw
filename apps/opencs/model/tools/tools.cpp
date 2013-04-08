@@ -16,6 +16,8 @@
 #include "classcheck.hpp"
 #include "factioncheck.hpp"
 #include "racecheck.hpp"
+#include "soundcheck.hpp"
+#include "regioncheck.hpp"
 
 CSMTools::Operation *CSMTools::Tools::get (int type)
 {
@@ -63,6 +65,10 @@ CSMTools::Verifier *CSMTools::Tools::getVerifier()
         mVerifier->appendStage (new FactionCheckStage (mData.getFactions()));
 
         mVerifier->appendStage (new RaceCheckStage (mData.getRaces()));
+
+        mVerifier->appendStage (new SoundCheckStage (mData.getSounds()));
+
+        mVerifier->appendStage (new RegionCheckStage (mData.getRegions()));
     }
 
     return mVerifier;

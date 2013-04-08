@@ -45,7 +45,13 @@ namespace CSMWorld
                 Type_Factions,
                 Type_Faction,
                 Type_Races,
-                Type_Race
+                Type_Race,
+                Type_Sounds,
+                Type_Sound,
+                Type_Scripts,
+                Type_Script,
+                Type_Regions,
+                Type_Region
             };
 
         private:

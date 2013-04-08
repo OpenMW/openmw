@@ -242,14 +242,15 @@ namespace MWRender
 
     void Player::setPitch(float angle)
     {
-        float limit = Ogre::Math::HALF_PI;
+        const float epsilon = 0.000001;
+        float limit = Ogre::Math::HALF_PI - epsilon;
         if (mVanity.forced || mPreviewMode) {
              limit /= 2;
         }
         if (angle > limit) {
-            angle = limit - 0.01;
+            angle = limit;
         } else if (angle < -limit) {
-            angle = -limit + 0.01;
+            angle = -limit;
         }
         if (mVanity.enabled || mPreviewMode) {
             mPreviewCam.pitch = angle;

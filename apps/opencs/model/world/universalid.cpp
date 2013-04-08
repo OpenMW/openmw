@@ -23,6 +23,9 @@ namespace
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Classes, "Classes" },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Factions, "Factions" },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Races, "Races" },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Sounds, "Sounds" },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Scripts, "Scripts" },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Regions, "Regions" },
 
         { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0 } // end marker
     };
@@ -35,6 +38,9 @@ namespace
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Class, "Class" },
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Faction, "Faction" },
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Race, "Race" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Sound, "Sound" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Script, "Script" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Region, "Region" },
 
         { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0 } // end marker
     };
