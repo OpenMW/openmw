@@ -16,7 +16,6 @@ namespace MWGui
         public:
             JournalWindow(MWBase::WindowManager& parWindowManager);
             virtual void open();
-            virtual void close();
 
         private:
             void displayLeftText(std::string text);
