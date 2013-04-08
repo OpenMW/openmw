@@ -150,6 +150,7 @@ namespace MWGui
                 it = invStore.add(ptr);
                 (*it).getRefData().setCount(mDragAndDrop->mDraggedCount);
                 ptr = *it;
+                mDragAndDrop->mDraggedFrom->notifyItemDragged(ptr, -mDragAndDrop->mDraggedCount);
             }
 
             /// \todo scripts

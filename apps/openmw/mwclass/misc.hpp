@@ -53,6 +53,8 @@ namespace MWClass
             virtual boost::shared_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr)
                 const;
             ///< Generate action for using via inventory menu
+
+            virtual bool canSell (const MWWorld::Ptr& item, int npcServices) const;
     };
 }
 

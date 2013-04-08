@@ -749,16 +749,29 @@ static Ogre::String getMaterial(const Nif::NiTriShape *shape, const Ogre::String
 
     instance->setProperty("diffuseMap", sh::makeProperty(texName[Nif::NiTexturingProperty::BaseTexture]));
     instance->setProperty("normalMap", sh::makeProperty(texName[Nif::NiTexturingProperty::BumpTexture]));
+    instance->setProperty("detailMap", sh::makeProperty(texName[Nif::NiTexturingProperty::DetailTexture]));
     instance->setProperty("emissiveMap", sh::makeProperty(texName[Nif::NiTexturingProperty::GlowTexture]));
     if (!texName[Nif::NiTexturingProperty::GlowTexture].empty())
     {
         instance->setProperty("use_emissive_map", sh::makeProperty(new sh::BooleanValue(true)));
         instance->setProperty("emissiveMapUVSet", sh::makeProperty(new sh::IntValue(texprop->textures[Nif::NiTexturingProperty::GlowTexture].uvSet)));
     }
+    if (!texName[Nif::NiTexturingProperty::DetailTexture].empty())
+    {
+        instance->setProperty("use_detail_map", sh::makeProperty(new sh::BooleanValue(true)));
+        instance->setProperty("detailMapUVSet", sh::makeProperty(new sh::IntValue(texprop->textures[Nif::NiTexturingProperty::DetailTexture].uvSet)));
+    }
+    if (!texName[Nif::NiTexturingProperty::BumpTexture].empty())
+    {
+        // force automips on normal maps for now
+        instance->setProperty("normalMap", sh::makeProperty(texName[Nif::NiTexturingProperty::BumpTexture] + " 4"));
+    }
+
 
     for(int i = 1;i < 7;i++)
     {
-        if(!texName[i].empty())
+        if(!texName[i].empty() && (i == Nif::NiTexturingProperty::DarkTexture || i == Nif::NiTexturingProperty::DecalTexture
+                                   || i == Nif::NiTexturingProperty::GlossTexture))
             warn("Ignored texture "+texName[i]+" on layer "+Ogre::StringConverter::toString(i)+"\n");
     }
 
@@ -992,17 +1005,19 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
         size_t numUVs = data->uvlist.size();
         if(numUVs)
         {
-            size_t elemSize = Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT2);
-            vbuf = hwBufMgr->createVertexBuffer(elemSize, srcVerts.size()*numUVs,
-                                                Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY, true);
             for(size_t i = 0;i < numUVs;i++)
             {
+                size_t elemSize = Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT2);
+                vbuf = hwBufMgr->createVertexBuffer(elemSize, srcVerts.size(),
+                                                    Ogre::HardwareBuffer::HBU_STATIC);
+
                 const std::vector<Ogre::Vector2> &uvlist = data->uvlist[i];
-                vbuf->writeData(i*srcVerts.size()*elemSize, elemSize*srcVerts.size(), &uvlist[0], true);
-                decl->addElement(nextBuf, i*srcVerts.size()*elemSize, Ogre::VET_FLOAT2,
+
+                vbuf->writeData(0, elemSize*srcVerts.size(), &uvlist[0], true);
+                decl->addElement(nextBuf, 0, Ogre::VET_FLOAT2,
                                  Ogre::VES_TEXTURE_COORDINATES, i);
+                bind->setBinding(nextBuf++, vbuf);
             }
-            bind->setBinding(nextBuf++, vbuf);
         }
 
         // Triangle faces

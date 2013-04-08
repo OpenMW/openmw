@@ -197,4 +197,9 @@ namespace MWClass
 
         return MWWorld::Ptr(&cell.mIngreds.insert(*ref), &cell);
     }
+
+    bool Ingredient::canSell (const MWWorld::Ptr& item, int npcServices) const
+    {
+        return npcServices & ESM::NPC::Ingredients;
+    }
 }

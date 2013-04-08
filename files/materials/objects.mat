@@ -9,9 +9,10 @@ material openmw_objects_base
     normalMap
     emissiveMap
     use_emissive_map false
+    use_detail_map false
     emissiveMapUVSet 0
+    detailMapUVSet 0
 
-    is_transparent false // real transparency, alpha rejection doesn't count here
     scene_blend default
     depth_write default
     depth_check default
@@ -26,10 +27,11 @@ material openmw_objects_base
         shader_properties
         {
             vertexcolor_mode $vertmode
-            is_transparent $is_transparent
             normalMap $normalMap
             emissiveMapUVSet $emissiveMapUVSet
+            detailMapUVSet $detailMapUVSet
             emissiveMap $emissiveMap
+            detailMap $detailMap
         }
 
         diffuse $diffuse
@@ -51,7 +53,7 @@ material openmw_objects_base
 
         texture_unit normalMap
         {
-            direct_texture $normalMap
+            texture $normalMap
         }
 
         texture_unit emissiveMap
@@ -60,6 +62,14 @@ material openmw_objects_base
             colour_op add
             direct_texture $emissiveMap
             tex_coord_set $emissiveMapUVSet
+        }
+
+        texture_unit detailMap
+        {
+            create_in_ffp $use_detail_map
+            colour_op_ex modulate_x2 src_current src_texture
+            direct_texture $detailMap
+            tex_coord_set $detailMapUVSet
         }
       
         texture_unit shadowMap0

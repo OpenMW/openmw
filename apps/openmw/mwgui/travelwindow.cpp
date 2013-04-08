@@ -156,6 +156,7 @@ namespace MWGui
             MWBase::Environment::get().getWorld()->advanceTime(time);
         }
         MWBase::Environment::get().getWorld()->moveObject(player,*cell,pos.pos[0],pos.pos[1],pos.pos[2]);
+        MWWorld::Class::get(player).adjustPosition(player);
         mWindowManager.removeGuiMode(GM_Travel);
         mWindowManager.removeGuiMode(GM_Dialogue);
         MWBase::Environment::get().getWorld ()->getFader ()->fadeOut(0);
