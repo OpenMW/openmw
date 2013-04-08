@@ -118,6 +118,7 @@ namespace MWWorld
             float verts = ESM::Land::LAND_SIZE;
             float worldsize = ESM::Land::REAL_SIZE;
 
+            // Load terrain physics first...
             if (cell->mCell->isExterior())
             {
                 ESM::Land* land =
@@ -137,6 +138,7 @@ namespace MWWorld
                 }
             }
 
+            // ... then references. This is important for adjustPosition to work correctly.
             /// \todo rescale depending on the state of a new GMST
             insertCell (*cell, true);
 
@@ -439,7 +441,6 @@ namespace MWWorld
         insertCellRefList(mRendering, cell.mBooks, cell, *mPhysics, rescale);
         insertCellRefList(mRendering, cell.mClothes, cell, *mPhysics, rescale);
         insertCellRefList(mRendering, cell.mContainers, cell, *mPhysics, rescale);
-        insertCellRefList(mRendering, cell.mCreatures, cell, *mPhysics, rescale);
         insertCellRefList(mRendering, cell.mDoors, cell, *mPhysics, rescale);
         insertCellRefList(mRendering, cell.mIngreds, cell, *mPhysics, rescale);
         insertCellRefList(mRendering, cell.mCreatureLists, cell, *mPhysics, rescale);
@@ -447,11 +448,13 @@ namespace MWWorld
         insertCellRefList(mRendering, cell.mLights, cell, *mPhysics, rescale);
         insertCellRefList(mRendering, cell.mLockpicks, cell, *mPhysics, rescale);
         insertCellRefList(mRendering, cell.mMiscItems, cell, *mPhysics, rescale);
-        insertCellRefList(mRendering, cell.mNpcs, cell, *mPhysics, rescale);
         insertCellRefList(mRendering, cell.mProbes, cell, *mPhysics, rescale);
         insertCellRefList(mRendering, cell.mRepairs, cell, *mPhysics, rescale);
         insertCellRefList(mRendering, cell.mStatics, cell, *mPhysics, rescale);
         insertCellRefList(mRendering, cell.mWeapons, cell, *mPhysics, rescale);
+        // Load NPCs and creatures _after_ everything else (important for adjustPosition to work correctly)
+        insertCellRefList(mRendering, cell.mCreatures, cell, *mPhysics, rescale);
+        insertCellRefList(mRendering, cell.mNpcs, cell, *mPhysics, rescale);
     }
 
     void Scene::addObjectToScene (const Ptr& ptr)
