@@ -1487,13 +1487,17 @@ class NIFObjectLoader : Ogre::ManualResourceLoader
                 affector->setParameter("grow_time", Ogre::StringConverter::toString(gf->growTime));
                 affector->setParameter("fade_time", Ogre::StringConverter::toString(gf->fadeTime));
             }
+            else if(e->recType == Nif::RC_NiParticleRotation)
+            {
+                // TODO: Implement (Ogre::RotationAffector?)
+            }
             else if(e->recType == Nif::RC_NiParticleColorModifier)
             {
                 // TODO: Implement (Ogre::ColourInterpolatorAffector?)
             }
             else if(e->recType == Nif::RC_NiGravity)
             {
-                // TODO: Implement (Ogre::LinearForceAffector?)
+                // TODO: Implement
             }
             else
                 warn("Unhandled particle modifier "+e->recName);
