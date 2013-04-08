@@ -114,15 +114,9 @@ MWGui::JournalWindow::JournalWindow (MWBase::WindowManager& parWindowManager)
     //displayLeftText(list.front());
 }
 
-void MWGui::JournalWindow::close()
-{
-    MWBase::Environment::get().getSoundManager()->playSound ("book close", 1.0, 1.0);
-}
-
 void MWGui::JournalWindow::open()
 {
     mPageNumber = 0;
-    MWBase::Environment::get().getSoundManager()->playSound ("book open", 1.0, 1.0);
     if(MWBase::Environment::get().getJournal()->begin()!=MWBase::Environment::get().getJournal()->end())
     {
         book journal;
