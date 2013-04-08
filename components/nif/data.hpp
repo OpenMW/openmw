@@ -398,16 +398,13 @@ struct NiMorphData : public Record
     {
         int morphCount = nif->getInt();
         int vertCount  = nif->getInt();
-        nif->getChar();
+        /*relative targets?*/nif->getChar();
 
         mMorphs.resize(morphCount);
         for(int i = 0;i < morphCount;i++)
         {
             mMorphs[i].mData.read(nif, true);
-
-            mMorphs[i].mVertices.resize(vertCount);
-            for(int j = 0;j < vertCount;j++)
-                mMorphs[i].mVertices[j] = nif->getVector3();
+            nif->getVector3s(mMorphs[i].mVertices, vertCount);
         }
     }
 };
