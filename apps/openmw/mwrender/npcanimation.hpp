@@ -78,8 +78,6 @@ public:
 
     virtual Ogre::Vector3 runAnimation(float timepassed);
 
-    Ogre::Node* getHeadNode();
-
     void forceUpdate()
     { updateParts(true); }
 };

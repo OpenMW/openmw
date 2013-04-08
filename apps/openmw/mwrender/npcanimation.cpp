@@ -451,9 +451,4 @@ void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::
     }
 }
 
-Ogre::Node* NpcAnimation::getHeadNode()
-{
-    return mObjectList.mSkelBase->getSkeleton()->getBone("Bip01 Head");
-}
-
 }

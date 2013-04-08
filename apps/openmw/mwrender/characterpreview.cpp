@@ -201,7 +201,7 @@ namespace MWRender
     void RaceSelectionPreview::updateCamera()
     {
         Ogre::Vector3 scale = mNode->getScale();
-        Ogre::Vector3 headOffset = mAnimation->getHeadNode()->_getDerivedPosition();
+        Ogre::Vector3 headOffset = mAnimation->getNode("Bip01 Head")->_getDerivedPosition();
         headOffset = mNode->convertLocalToWorldPosition(headOffset);
 
         mCamera->setPosition(headOffset + mPosition * scale);

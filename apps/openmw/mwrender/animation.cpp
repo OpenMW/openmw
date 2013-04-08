@@ -180,6 +180,18 @@ void Animation::createObjectList(Ogre::SceneNode *node, const std::string &model
 }
 
 
+Ogre::Node *Animation::getNode(const std::string &name)
+{
+    if(mObjectList.mSkelBase)
+    {
+        Ogre::SkeletonInstance *skel = mObjectList.mSkelBase->getSkeleton();
+        if(skel->hasBone(name))
+            return skel->getBone(name);
+    }
+    return NULL;
+}
+
+
 bool Animation::hasAnimation(const std::string &anim)
 {
     for(std::vector<NifOgre::ObjectList>::const_iterator iter(mAnimationSources.begin());iter != mAnimationSources.end();iter++)

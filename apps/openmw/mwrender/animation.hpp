@@ -113,6 +113,8 @@ public:
 
     void play(const std::string &groupname, const std::string &start, const std::string &stop, bool loop);
     virtual Ogre::Vector3 runAnimation(float timepassed);
+
+    Ogre::Node *getNode(const std::string &name);
 };
 
 }
