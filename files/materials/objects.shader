@@ -16,9 +16,10 @@
 
 #define NORMAL_MAP @shPropertyHasValue(normalMap)
 #define EMISSIVE_MAP @shPropertyHasValue(emissiveMap)
+#define DETAIL_MAP @shPropertyHasValue(detailMap)
 
 // right now we support 2 UV sets max. implementing them is tedious, and we're probably not going to need more
-#define SECOND_UV_SET @shPropertyString(emissiveMapUVSet)
+#define SECOND_UV_SET (@shPropertyString(emissiveMapUVSet) || @shPropertyString(detailMapUVSet))
 
 // if normal mapping is enabled, we force pixel lighting
 #define VERTEX_LIGHTING (!@shPropertyHasValue(normalMap))
@@ -236,6 +237,10 @@
         shSampler2D(emissiveMap)
 #endif
 
+#if DETAIL_MAP
+        shSampler2D(detailMap)
+#endif
+
         shInput(float4, UV)
 
 #if NORMAL_MAP
@@ -312,6 +317,14 @@
     SH_START_PROGRAM
     {
         shOutputColour(0) = shSample(diffuseMap, UV.xy);
+
+#if DETAIL_MAP
+#if @shPropertyString(detailMapUVSet)
+        shOutputColour(0) *= shSample(detailMap, UV.zw)*2;
+#else
+        shOutputColour(0) *= shSample(detailMap, UV.xy)*2;
+#endif
+#endif
 
 #if NORMAL_MAP
         float3 normal = normalPassthrough;
@@ -419,7 +432,7 @@
 #endif
 
 #if EMISSIVE_MAP
-        #if SECOND_UV_SET
+        #if @shPropertyString(emissiveMapUVSet)
         shOutputColour(0).xyz += shSample(emissiveMap, UV.zw).xyz;
         #else
         shOutputColour(0).xyz += shSample(emissiveMap, UV.xy).xyz;
