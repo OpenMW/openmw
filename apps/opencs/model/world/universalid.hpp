@@ -51,7 +51,9 @@ namespace CSMWorld
                 Type_Scripts,
                 Type_Script,
                 Type_Regions,
-                Type_Region
+                Type_Region,
+                Type_Birthsigns,
+                Type_Birthsign
             };
 
         private:

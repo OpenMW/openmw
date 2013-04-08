@@ -24,4 +24,12 @@ void BirthSign::save(ESMWriter &esm)
     mPowers.save(esm);
 }
 
+    void BirthSign::blank()
+    {
+        mName.clear();
+        mDescription.clear();
+        mTexture.clear();
+        mPowers.mList.clear();
+    }
+
 }

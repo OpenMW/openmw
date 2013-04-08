@@ -203,4 +203,9 @@ namespace MWClass
 
         return MWWorld::Ptr(&cell.mLights.insert(*ref), &cell);
     }
+
+    bool Light::canSell (const MWWorld::Ptr& item, int npcServices) const
+    {
+        return npcServices & ESM::NPC::Lights;
+    }
 }

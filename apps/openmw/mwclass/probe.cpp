@@ -175,4 +175,9 @@ namespace MWClass
 
         return MWWorld::Ptr(&cell.mProbes.insert(*ref), &cell);
     }
+
+    bool Probe::canSell (const MWWorld::Ptr& item, int npcServices) const
+    {
+        return npcServices & ESM::NPC::Probes;
+    }
 }

@@ -93,6 +93,12 @@ CSMWorld::Data::Data()
     mRegions.addColumn (new MapColourColumn<ESM::Region>);
     mRegions.addColumn (new SleepListColumn<ESM::Region>);
 
+    mBirthsigns.addColumn (new StringIdColumn<ESM::BirthSign>);
+    mBirthsigns.addColumn (new RecordStateColumn<ESM::BirthSign>);
+    mBirthsigns.addColumn (new NameColumn<ESM::BirthSign>);
+    mBirthsigns.addColumn (new TextureColumn<ESM::BirthSign>);
+    mBirthsigns.addColumn (new DescriptionColumn<ESM::BirthSign>);
+
     addModel (new IdTable (&mGlobals), UniversalId::Type_Globals, UniversalId::Type_Global);
     addModel (new IdTable (&mGmsts), UniversalId::Type_Gmsts, UniversalId::Type_Gmst);
     addModel (new IdTable (&mSkills), UniversalId::Type_Skills, UniversalId::Type_Skill);
@@ -102,6 +108,7 @@ CSMWorld::Data::Data()
     addModel (new IdTable (&mSounds), UniversalId::Type_Sounds, UniversalId::Type_Sound);
     addModel (new IdTable (&mScripts), UniversalId::Type_Scripts, UniversalId::Type_Script);
     addModel (new IdTable (&mRegions), UniversalId::Type_Regions, UniversalId::Type_Region);
+    addModel (new IdTable (&mBirthsigns), UniversalId::Type_Birthsigns, UniversalId::Type_Birthsign);
 }
 
 CSMWorld::Data::~Data()
@@ -200,6 +207,16 @@ CSMWorld::IdCollection<ESM::Region>& CSMWorld::Data::getRegions()
     return mRegions;
 }
 
+const CSMWorld::IdCollection<ESM::BirthSign>& CSMWorld::Data::getBirthsigns() const
+{
+    return mBirthsigns;
+}
+
+CSMWorld::IdCollection<ESM::BirthSign>& CSMWorld::Data::getBirthsigns()
+{
+    return mBirthsigns;
+}
+
 QAbstractItemModel *CSMWorld::Data::getTableModel (const UniversalId& id)
 {
     std::map<UniversalId::Type, QAbstractItemModel *>::iterator iter = mModelIndex.find (id.getType());
@@ -243,6 +260,7 @@ void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base)
             case ESM::REC_SOUN: mSounds.load (reader, base); break;
             case ESM::REC_SCPT: mScripts.load (reader, base); break;
             case ESM::REC_REGN: mRegions.load (reader, base); break;
+            case ESM::REC_BSGN: mBirthsigns.load (reader, base); break;
 
             default:
 

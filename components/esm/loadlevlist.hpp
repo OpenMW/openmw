@@ -22,17 +22,20 @@ struct LeveledListBase
 {
     enum Flags
     {
-        AllLevels = 0x01, // Calculate from all levels <= player
-                          // level, not just the closest below
-                          // player.
-        Each = 0x02       // Select a new item each time this
+
+        Each = 0x01,      // Select a new item each time this
                           // list is instantiated, instead of
                           // giving several identical items
-    };                    // (used when a container has more
+                          // (used when a container has more
                           // than one instance of one leveled
                           // list.)
+        AllLevels = 0x02  // Calculate from all levels <= player
+                          // level, not just the closest below
+                          // player.
+    };
+
     int mFlags;
-    unsigned char mChanceNone; // Chance that none are selected (0-255?)
+    unsigned char mChanceNone; // Chance that none are selected (0-100)
     std::string mId;
 
     // Record name used to read references. Must be set before load() is

@@ -238,6 +238,9 @@ namespace MWWorld
 
             virtual void adjustRotation(const MWWorld::Ptr& ptr,float& x,float& y,float& z) const;
 
+            virtual bool canSell (const MWWorld::Ptr& item, int npcServices) const;
+            ///< Determine whether or not \a item can be sold to an npc with the given \a npcServices
+
             virtual std::string getModel(const MWWorld::Ptr &ptr) const;
 
             virtual void applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const;

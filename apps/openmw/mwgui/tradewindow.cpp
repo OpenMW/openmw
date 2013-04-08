@@ -257,6 +257,12 @@ namespace MWGui
         MWBase::Environment::get().getDialogueManager()->applyTemporaryDispositionChange(iBarterSuccessDisposition);
 
         // success! make the item transfer.
+        MWWorld::ContainerStore& playerBoughtItems = mWindowManager.getInventoryWindow()->getBoughtItems();
+        for (MWWorld::ContainerStoreIterator it = playerBoughtItems.begin(); it != playerBoughtItems.end(); ++it)
+        {
+            if (Misc::StringUtils::ciEqual(it->getCellRef().mOwner, MWWorld::Class::get(mPtr).getId(mPtr)))
+                it->getCellRef().mOwner = "";
+        }
         transferBoughtItems();
         mWindowManager.getInventoryWindow()->transferBoughtItems();
 
@@ -356,32 +362,7 @@ namespace MWGui
                 services = ref->mBase->mAiData.mServices;
         }
 
-        /// \todo what about potions, there doesn't seem to be a flag for them??
-
-        if      (item.getTypeName() == typeid(ESM::Weapon).name())
-            return services & ESM::NPC::Weapon;
-        else if (item.getTypeName() == typeid(ESM::Armor).name())
-            return services & ESM::NPC::Armor;
-        else if (item.getTypeName() == typeid(ESM::Clothing).name())
-            return services & ESM::NPC::Clothing;
-        else if (item.getTypeName() == typeid(ESM::Book).name())
-            return services & ESM::NPC::Books;
-        else if (item.getTypeName() == typeid(ESM::Ingredient).name())
-            return services & ESM::NPC::Ingredients;
-        else if (item.getTypeName() == typeid(ESM::Lockpick).name())
-            return services & ESM::NPC::Picks;
-        else if (item.getTypeName() == typeid(ESM::Probe).name())
-            return services & ESM::NPC::Probes;
-        else if (item.getTypeName() == typeid(ESM::Light).name())
-            return services & ESM::NPC::Lights;
-        else if (item.getTypeName() == typeid(ESM::Apparatus).name())
-            return services & ESM::NPC::Apparatus;
-        else if (item.getTypeName() == typeid(ESM::Repair).name())
-            return services & ESM::NPC::RepairItem;
-        else if (item.getTypeName() == typeid(ESM::Miscellaneous).name())
-            return services & ESM::NPC::Misc;
-
-        return false;
+        return MWWorld::Class::get(item).canSell(item, services);
     }
 
     std::vector<MWWorld::Ptr> TradeWindow::itemsToIgnore()
