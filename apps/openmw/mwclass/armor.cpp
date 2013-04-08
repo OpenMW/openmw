@@ -321,15 +321,10 @@ namespace MWClass
             const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npcRace);
             if(race->mData.mFlags & ESM::Race::Beast)
             {
+                std::vector<ESM::PartReference> parts = it->get<ESM::Armor>()->mBase->mParts.mParts;
+
                 if(*slot == MWWorld::InventoryStore::Slot_Helmet)
                 {
-                    std::vector<ESM::PartReference> parts;
-                    if(it.getType() == MWWorld::ContainerStore::Type_Clothing)
-                        parts = it->get<ESM::Clothing>()->mBase->mParts.mParts;
-                    else
-                        parts = it->get<ESM::Armor>()->mBase->mParts.mParts;
-
-                    bool allow = true;
                     for(std::vector<ESM::PartReference>::iterator itr = parts.begin(); itr != parts.end(); ++itr)
                     {
                         if((*itr).mPart == ESM::PRT_Head)
@@ -337,41 +332,41 @@ namespace MWClass
                             if(npc == MWBase::Environment::get().getWorld()->getPlayer().getPlayer() )
                                 MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage13}");
 
-                            allow = false;
-                            break;
+                            return false;
                         }
                     }
-
-                    if(!allow)
-                        break;
                 }
 
                 if (*slot == MWWorld::InventoryStore::Slot_Boots)
                 {
-                    bool allow = true;
-                    std::vector<ESM::PartReference> parts;
-                    if(it.getType() == MWWorld::ContainerStore::Type_Clothing)
-                        parts = it->get<ESM::Clothing>()->mBase->mParts.mParts;
-                    else
-                        parts = it->get<ESM::Armor>()->mBase->mParts.mParts;
                     for(std::vector<ESM::PartReference>::iterator itr = parts.begin(); itr != parts.end(); ++itr)
                     {
                         if((*itr).mPart == ESM::PRT_LFoot || (*itr).mPart == ESM::PRT_RFoot)
                         {
-                            allow = false;
-                            // Only notify the player, not npcs
                             if(npc == MWBase::Environment::get().getWorld()->getPlayer().getPlayer() )
-                            {
                                 MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage14}");
-                            }
-                            break;
+                            return false;
                         }
                     }
-
-                    if(!allow)
-                        return false;
                 }
+            }
 
+            if(*slot == MWWorld::InventoryStore::Slot_CarriedLeft)
+            {
+                MWWorld::ContainerStoreIterator weapon = invStore.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+
+                if(weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::LongBladeTwoHand ||
+                weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::BluntTwoClose || 
+                weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::BluntTwoWide || 
+                weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::SpearTwoWide ||
+                weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::AxeTwoHand || 
+                weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanBow || 
+                weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanCrossbow)
+                {
+                    //unequip twohanded item
+                    invStore.equip(MWWorld::InventoryStore::Slot_CarriedRight, invStore.end());
+                }
+                return true;
             }
         }
         return true;

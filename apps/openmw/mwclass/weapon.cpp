@@ -411,41 +411,19 @@ namespace MWClass
         {
             if(*slot == MWWorld::InventoryStore::Slot_CarriedRight)
             {
-               if (it.getType() == MWWorld::ContainerStore::Type_Weapon)
+                if(it->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::LongBladeTwoHand ||
+                it->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::BluntTwoClose || 
+                it->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::BluntTwoWide || 
+                it->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::SpearTwoWide ||
+                it->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::AxeTwoHand || 
+                it->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanBow || 
+                it->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanCrossbow)
                 {
-                   if(it->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::LongBladeTwoHand ||
-                   it->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::BluntTwoClose || 
-                   it->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::BluntTwoWide || 
-                   it->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::SpearTwoWide ||
-                   it->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::AxeTwoHand || 
-                   it->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanBow || 
-                   it->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanCrossbow)
-                 {
-                      //unequip lefthand item
-                     invStore.equip(MWWorld::InventoryStore::Slot_CarriedLeft, invStore.end());
-                 }
-              }
-          }
-          if(*slot == MWWorld::InventoryStore::Slot_CarriedLeft)
-          {
-            MWWorld::ContainerStoreIterator weapon = invStore.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-
-                if (weapon.getType() == MWWorld::ContainerStore::Type_Weapon)
-                {
-                    if(weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::LongBladeTwoHand ||
-                    weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::BluntTwoClose || 
-                    weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::BluntTwoWide || 
-                    weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::SpearTwoWide ||
-                    weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::AxeTwoHand || 
-                    weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanBow || 
-                    weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanCrossbow)
-                    {
-                        //unequip twohanded item
-                        invStore.equip(MWWorld::InventoryStore::Slot_CarriedRight, invStore.end());
-                    }
+                    //unequip lefthand item
+                    invStore.equip(MWWorld::InventoryStore::Slot_CarriedLeft, invStore.end());
                 }
+                return true;
             }
-            return true;
         }
         return false;
     }

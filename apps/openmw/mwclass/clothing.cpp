@@ -267,32 +267,37 @@ namespace MWClass
             const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npcRace);
             if(race->mData.mFlags & ESM::Race::Beast)
             {
+                std::vector<ESM::PartReference> parts = it->get<ESM::Clothing>()->mBase->mParts.mParts;
+
+                if(*slot == MWWorld::InventoryStore::Slot_Helmet)
+                {
+                    for(std::vector<ESM::PartReference>::iterator itr = parts.begin(); itr != parts.end(); ++itr)
+                    {
+                        if((*itr).mPart == ESM::PRT_Head)
+                        {
+                            if(npc == MWBase::Environment::get().getWorld()->getPlayer().getPlayer() )
+                                MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage13}");
+
+                            return false;
+                        }
+                    }
+                }
+
                 if (*slot == MWWorld::InventoryStore::Slot_Boots)
                 {
-                    bool allow = true;
-                    std::vector<ESM::PartReference> parts;
-                    if(it.getType() == MWWorld::ContainerStore::Type_Clothing)
-                        parts = it->get<ESM::Clothing>()->mBase->mParts.mParts;
-                    else
-                        parts = it->get<ESM::Armor>()->mBase->mParts.mParts;
                     for(std::vector<ESM::PartReference>::iterator itr = parts.begin(); itr != parts.end(); ++itr)
                     {
                         if((*itr).mPart == ESM::PRT_LFoot || (*itr).mPart == ESM::PRT_RFoot)
                         {
-                            allow = false;
-                            // Only notify the player, not npcs
                             if(npc == MWBase::Environment::get().getWorld()->getPlayer().getPlayer() )
                             {
                                 MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage15}");
                             }
-                            break;
+
+                            return false;
                         }
                     }
-
-                    if(!allow)
-                        return false;
                 }
-
             }
         }
         return true;
