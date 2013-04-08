@@ -1400,21 +1400,14 @@ class NIFObjectLoader : Ogre::ManualResourceLoader
 
         // Texture UV coordinates
         size_t numUVs = data->uvlist.size();
-        if(numUVs)
+        for(size_t i = 0;i < numUVs;i++)
         {
-            for(size_t i = 0;i < numUVs;i++)
-            {
-                size_t elemSize = Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT2);
-                vbuf = hwBufMgr->createVertexBuffer(elemSize, srcVerts.size(),
-                                                    Ogre::HardwareBuffer::HBU_STATIC);
+            vbuf = hwBufMgr->createVertexBuffer(Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT2),
+                                                srcVerts.size(), Ogre::HardwareBuffer::HBU_STATIC);
+            vbuf->writeData(0, vbuf->getSizeInBytes(), &data->uvlist[i][0], true);
 
-                const std::vector<Ogre::Vector2> &uvlist = data->uvlist[i];
-
-                vbuf->writeData(0, elemSize*srcVerts.size(), &uvlist[0], true);
-                decl->addElement(nextBuf, 0, Ogre::VET_FLOAT2,
-                                 Ogre::VES_TEXTURE_COORDINATES, i);
-                bind->setBinding(nextBuf++, vbuf);
-            }
+            decl->addElement(nextBuf, 0, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES, i);
+            bind->setBinding(nextBuf++, vbuf);
         }
 
         // Triangle faces
