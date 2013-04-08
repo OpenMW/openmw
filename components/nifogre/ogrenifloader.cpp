@@ -992,17 +992,19 @@ class NIFMeshLoader : Ogre::ManualResourceLoader
         size_t numUVs = data->uvlist.size();
         if(numUVs)
         {
-            size_t elemSize = Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT2);
-            vbuf = hwBufMgr->createVertexBuffer(elemSize, srcVerts.size()*numUVs,
-                                                Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY, true);
             for(size_t i = 0;i < numUVs;i++)
             {
+                size_t elemSize = Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT2);
+                vbuf = hwBufMgr->createVertexBuffer(elemSize, srcVerts.size(),
+                                                    Ogre::HardwareBuffer::HBU_STATIC);
+
                 const std::vector<Ogre::Vector2> &uvlist = data->uvlist[i];
-                vbuf->writeData(i*srcVerts.size()*elemSize, elemSize*srcVerts.size(), &uvlist[0], true);
-                decl->addElement(nextBuf, i*srcVerts.size()*elemSize, Ogre::VET_FLOAT2,
+
+                vbuf->writeData(0, elemSize*srcVerts.size(), &uvlist[0], true);
+                decl->addElement(nextBuf, 0, Ogre::VET_FLOAT2,
                                  Ogre::VES_TEXTURE_COORDINATES, i);
+                bind->setBinding(nextBuf++, vbuf);
             }
-            bind->setBinding(nextBuf++, vbuf);
         }
 
         // Triangle faces
