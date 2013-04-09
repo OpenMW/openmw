@@ -56,7 +56,7 @@ NpcAnimation::~NpcAnimation()
 }
 
 
-NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWorld::InventoryStore& inv, int visibilityFlags, bool headOnly)
+NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWorld::InventoryStore& inv, int visibilityFlags, ViewMode viewMode)
   : Animation(ptr),
     mStateID(-1),
     mTimeToChange(0),
@@ -73,7 +73,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
     mGloveL(inv.end()),
     mGloveR(inv.end()),
     mSkirtIter(inv.end()),
-    mHeadOnly(headOnly)
+    mViewMode(viewMode)
 {
     mNpc = mPtr.get<ESM::NPC>()->mBase;
 
@@ -222,7 +222,7 @@ void NpcAnimation::updateParts(bool forceupdate)
     if(!forceupdate)
         return;
 
-    for(size_t i = 0;i < slotlistsize && !mHeadOnly;i++)
+    for(size_t i = 0;i < slotlistsize && mViewMode != VM_HeadOnly;i++)
     {
         MWWorld::ContainerStoreIterator iter = inv.getSlot(slotlist[i].slot);
 
@@ -259,7 +259,7 @@ void NpcAnimation::updateParts(bool forceupdate)
     if(mPartPriorities[ESM::PRT_Hair] < 1 && mPartPriorities[ESM::PRT_Head] <= 1)
         addOrReplaceIndividualPart(ESM::PRT_Hair, -1,1, mHairModel);
 
-    if (mHeadOnly)
+    if(mViewMode == VM_HeadOnly)
         return;
 
     static const struct {

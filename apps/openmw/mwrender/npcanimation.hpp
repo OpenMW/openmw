@@ -26,6 +26,11 @@ struct PartInfo {
     const char name[32];
 };
 
+enum ViewMode {
+    VM_Normal,
+    VM_HeadOnly
+};
+
 private:
     static const size_t sPartListSize = 27;
     static const PartInfo sPartList[sPartListSize];
@@ -39,7 +44,7 @@ private:
     std::string     mHeadModel;
     std::string     mHairModel;
     std::string     mBodyPrefix;
-    bool            mHeadOnly;
+    ViewMode        mViewMode;
 
     float mTimeToChange;
     MWWorld::ContainerStoreIterator mRobe;
@@ -73,7 +78,8 @@ private:
 
 public:
     NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node,
-                 MWWorld::InventoryStore& inv, int visibilityFlags, bool headOnly=false);
+                 MWWorld::InventoryStore& inv, int visibilityFlags,
+                 ViewMode viewMode=VM_Normal);
     virtual ~NpcAnimation();
 
     virtual Ogre::Vector3 runAnimation(float timepassed);

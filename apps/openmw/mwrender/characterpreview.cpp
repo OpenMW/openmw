@@ -59,8 +59,8 @@ namespace MWRender
 
         mNode = renderRoot->createChildSceneNode();
 
-        mAnimation = new NpcAnimation(mCharacter, mNode,
-            MWWorld::Class::get(mCharacter).getInventoryStore (mCharacter), 0, renderHeadOnly());
+        mAnimation = new NpcAnimation(mCharacter, mNode, MWWorld::Class::get(mCharacter).getInventoryStore(mCharacter),
+                                      0, (renderHeadOnly() ? NpcAnimation::VM_HeadOnly : NpcAnimation::VM_Normal));
 
         mNode->setVisible (false);
 
@@ -101,8 +101,8 @@ namespace MWRender
         assert(mAnimation);
         delete mAnimation;
 
-        mAnimation = new NpcAnimation(mCharacter, mNode,
-            MWWorld::Class::get(mCharacter).getInventoryStore (mCharacter), 0, renderHeadOnly());
+        mAnimation = new NpcAnimation(mCharacter, mNode, MWWorld::Class::get(mCharacter).getInventoryStore(mCharacter),
+                                      0, (renderHeadOnly() ? NpcAnimation::VM_HeadOnly : NpcAnimation::VM_Normal));
 
         float scale=1.f;
         MWWorld::Class::get(mCharacter).adjustScale(mCharacter, scale);
