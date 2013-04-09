@@ -361,6 +361,8 @@ namespace MWWorld
                 mRendering->changeVanityModeScale(factor);
             }
 
+            virtual bool vanityRotateCamera(float * rot);
+
             virtual void renderPlayer();
 
             virtual void setupExternalRendering (MWRender::ExternalRendering& rendering);

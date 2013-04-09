@@ -891,6 +891,16 @@ void RenderingManager::getPlayerData(Ogre::Vector3 &eyepos, float &pitch, float 
     mPlayer->getSightAngles(pitch, yaw);
 }
 
+bool RenderingManager::vanityRotateCamera(float* rot)
+{
+    if(!mPlayer->isVanityOrPreviewModeEnabled())
+        return false;
+
+    Ogre::Vector3 vRot(rot);
+    mPlayer->rotateCamera(vRot, true);
+    return true;
+}
+
 void RenderingManager::getInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y)
 {
     return mLocalMap->getInteriorMapPosition (position, nX, nY, x, y);

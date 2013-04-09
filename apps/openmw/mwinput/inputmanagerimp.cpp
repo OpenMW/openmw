@@ -533,8 +533,17 @@ namespace MWInput
             float scale = MWBase::Environment::get().getFrameDuration();
             if(scale <= 0.0f) scale = 1.0f;
 
-            mPlayer.setYaw(x/scale);
-            mPlayer.setPitch(-y/scale);
+            float rot[3];
+            rot[0] = -y;
+            rot[1] = 0.0f;
+            rot[2] = x;
+            
+            // Only actually turn player when we're not in vanity mode 
+            if(!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot))
+            {
+                mPlayer.setYaw(x/scale);
+                mPlayer.setPitch(-y/scale);
+            }
 
             if (arg.state.Z.rel)
                 MWBase::Environment::get().getWorld()->changeVanityModeScale(arg.state.Z.rel);

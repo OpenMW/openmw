@@ -88,6 +88,8 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
         mPlayer->setCameraDistance(-factor/120.f*10, true, true);
     }
 
+    bool vanityRotateCamera(float* rot);
+
     void getPlayerData(Ogre::Vector3 &eyepos, float &pitch, float &yaw);
 
     void attachCameraTo(const MWWorld::Ptr &ptr);
