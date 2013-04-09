@@ -1364,6 +1364,11 @@ namespace MWWorld
         return physactor && physactor->getOnGround();
     }
 
+    bool World::vanityRotateCamera(float * rot)
+    {
+        return mRendering->vanityRotateCamera(rot);
+    }
+
     void World::renderPlayer()
     {
         mRendering->renderPlayer(mPlayer->getPlayer());

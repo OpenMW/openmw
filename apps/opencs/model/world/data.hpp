@@ -16,6 +16,7 @@
 #include <components/esm/loadscpt.hpp>
 #include <components/esm/loadregn.hpp>
 #include <components/esm/loadbsgn.hpp>
+#include <components/esm/loadspel.hpp>
 
 #include "idcollection.hpp"
 #include "universalid.hpp"
@@ -36,6 +37,7 @@ namespace CSMWorld
             IdCollection<ESM::Script> mScripts;
             IdCollection<ESM::Region> mRegions;
             IdCollection<ESM::BirthSign> mBirthsigns;
+            IdCollection<ESM::Spell> mSpells;
             std::vector<QAbstractItemModel *> mModels;
             std::map<UniversalId::Type, QAbstractItemModel *> mModelIndex;
 
@@ -91,6 +93,10 @@ namespace CSMWorld
             const IdCollection<ESM::BirthSign>& getBirthsigns() const;
 
             IdCollection<ESM::BirthSign>& getBirthsigns();
+
+            const IdCollection<ESM::Spell>& getSpells() const;
+
+            IdCollection<ESM::Spell>& getSpells();
 
             QAbstractItemModel *getTableModel (const UniversalId& id);
             ///< If no table model is available for \a id, an exception is thrown.

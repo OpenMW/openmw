@@ -1,6 +1,6 @@
 #include "core.h"
 
-#define IS_FIRST_PASS 1
+#define IS_FIRST_PASS (@shPropertyString(pass_index) == 0)
 
 #define FOG @shGlobalSettingBool(fog)
 
@@ -23,6 +23,9 @@
 
 #define VIEWPROJ_FIX @shGlobalSettingBool(viewproj_fix)
 
+#if !IS_FIRST_PASS
+// This is not the first pass.
+#endif
 
 #if NEED_DEPTH
 @shAllocatePassthrough(1, depth)
@@ -222,7 +225,11 @@
         float3 waterEyePos = intercept(worldPos, cameraPos.xyz - worldPos, float3(0,0,1), waterLevel);
 #endif
         
-        
+
+#if !IS_FIRST_PASS
+float combinedAlpha = 0.f;
+#endif
+
         // Layer calculations 
 @shForeach(@shPropertyString(num_blendmaps))
         float4 blendValues@shIterator = shSample(blendMap@shIterator, UV);
@@ -232,12 +239,20 @@
 @shForeach(@shPropertyString(num_layers))
 
 
-#if IS_FIRST_PASS == 1 && @shIterator == 0
-        // first layer of first pass doesn't need a blend map
+#if IS_FIRST_PASS
+        #if @shIterator == 0
+        // first layer of first pass is the base layer and doesn't need a blend map
         albedo = shSample(diffuseMap0, UV * 10).rgb;
-#else
+        #else
         albedo = shLerp(albedo, shSample(diffuseMap@shIterator, UV * 10).rgb, blendValues@shPropertyString(blendmap_component_@shIterator));
-
+        #endif
+#else
+        #if @shIterator == 0
+        albedo = shSample(diffuseMap@shIterator, UV * 10).rgb, blendValues@shPropertyString(blendmap_component_@shIterator);
+        #else
+        albedo = shLerp(albedo, shSample(diffuseMap@shIterator, UV * 10).rgb, blendValues@shPropertyString(blendmap_component_@shIterator));
+        #endif
+        combinedAlpha += blendValues@shPropertyString(blendmap_component_@shIterator);
 #endif
 @shEndForeach
         
@@ -325,6 +340,12 @@
 
         // prevent negative colour output (for example with negative lights)
         shOutputColour(0).xyz = max(shOutputColour(0).xyz, float3(0,0,0));
+
+#if IS_FIRST_PASS
+        shOutputColour(0).a = 1;
+#else
+        shOutputColour(0).a = min(combinedAlpha, 1.f);
+#endif
     }
 
 #endif

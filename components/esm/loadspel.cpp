@@ -20,4 +20,14 @@ void Spell::save(ESMWriter &esm)
     mEffects.save(esm);
 }
 
+    void Spell::blank()
+    {
+        mData.mType = 0;
+        mData.mCost = 0;
+        mData.mFlags = 0;
+
+        mName.clear();
+
+        mEffects.mList.clear();
+    }
 }

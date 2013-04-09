@@ -319,6 +319,7 @@ namespace MWBase
             virtual void allowVanityMode(bool allow) = 0;
             virtual void togglePlayerLooking(bool enable) = 0;
             virtual void changeVanityModeScale(float factor) = 0;
+            virtual bool vanityRotateCamera(float * rot) = 0;
 
             virtual void renderPlayer() = 0;
 

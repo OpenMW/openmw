@@ -45,8 +45,7 @@
         // use alpha channel of the first texture
         float alpha = shSample(texture1, UV).a;
 
-        // discard if alpha is less than 0.5
-        if (alpha < 1.0)
+        if (alpha < 0.5)
             discard;
 #endif
 

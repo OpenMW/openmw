@@ -99,6 +99,15 @@ CSMWorld::Data::Data()
     mBirthsigns.addColumn (new TextureColumn<ESM::BirthSign>);
     mBirthsigns.addColumn (new DescriptionColumn<ESM::BirthSign>);
 
+    mSpells.addColumn (new StringIdColumn<ESM::Spell>);
+    mSpells.addColumn (new RecordStateColumn<ESM::Spell>);
+    mSpells.addColumn (new NameColumn<ESM::Spell>);
+    mSpells.addColumn (new SpellTypeColumn<ESM::Spell>);
+    mSpells.addColumn (new CostColumn<ESM::Spell>);
+    mSpells.addColumn (new FlagColumn<ESM::Spell> ("Autocalc", 0x1));
+    mSpells.addColumn (new FlagColumn<ESM::Spell> ("Starter Spell", 0x2));
+    mSpells.addColumn (new FlagColumn<ESM::Spell> ("Always Succeeds", 0x4));
+
     addModel (new IdTable (&mGlobals), UniversalId::Type_Globals, UniversalId::Type_Global);
     addModel (new IdTable (&mGmsts), UniversalId::Type_Gmsts, UniversalId::Type_Gmst);
     addModel (new IdTable (&mSkills), UniversalId::Type_Skills, UniversalId::Type_Skill);
@@ -109,6 +118,7 @@ CSMWorld::Data::Data()
     addModel (new IdTable (&mScripts), UniversalId::Type_Scripts, UniversalId::Type_Script);
     addModel (new IdTable (&mRegions), UniversalId::Type_Regions, UniversalId::Type_Region);
     addModel (new IdTable (&mBirthsigns), UniversalId::Type_Birthsigns, UniversalId::Type_Birthsign);
+    addModel (new IdTable (&mSpells), UniversalId::Type_Spells, UniversalId::Type_Spell);
 }
 
 CSMWorld::Data::~Data()
@@ -217,6 +227,16 @@ CSMWorld::IdCollection<ESM::BirthSign>& CSMWorld::Data::getBirthsigns()
     return mBirthsigns;
 }
 
+const CSMWorld::IdCollection<ESM::Spell>& CSMWorld::Data::getSpells() const
+{
+    return mSpells;
+}
+
+CSMWorld::IdCollection<ESM::Spell>& CSMWorld::Data::getSpells()
+{
+    return mSpells;
+}
+
 QAbstractItemModel *CSMWorld::Data::getTableModel (const UniversalId& id)
 {
     std::map<UniversalId::Type, QAbstractItemModel *>::iterator iter = mModelIndex.find (id.getType());
@@ -261,6 +281,7 @@ void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base)
             case ESM::REC_SCPT: mScripts.load (reader, base); break;
             case ESM::REC_REGN: mRegions.load (reader, base); break;
             case ESM::REC_BSGN: mBirthsigns.load (reader, base); break;
+            case ESM::REC_SPEL: mSpells.load (reader, base); break;
 
             default:
 

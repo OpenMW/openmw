@@ -131,6 +131,8 @@ namespace CSVDoc
             void addRegionsSubView();
 
             void addBirthsignsSubView();
+
+            void addSpellsSubView();
     };
 }
 

@@ -36,7 +36,7 @@ opencs_units (model/tools
 
 opencs_units_noqt (model/tools
     stage verifier mandatoryid skillcheck classcheck factioncheck racecheck soundcheck regioncheck
-    birthsigncheck
+    birthsigncheck spellcheck
     )
 
 
