@@ -68,59 +68,113 @@ namespace MWRender
             Ogre::MaterialManager::getSingleton().remove(matName);
 
         mMaterial = sh::Factory::getInstance().createMaterialInstance (matName);
-
         mMaterial->setProperty ("allow_fixed_function", sh::makeProperty<sh::BooleanValue>(new sh::BooleanValue(false)));
 
-        sh::MaterialInstancePass* p = mMaterial->createPass ();
+        int numPasses = getRequiredPasses(terrain);
+        int maxLayersInOnePass = getMaxLayersPerPass(terrain);
 
-        p->setProperty ("vertex_program", sh::makeProperty<sh::StringValue>(new sh::StringValue("terrain_vertex")));
-        p->setProperty ("fragment_program", sh::makeProperty<sh::StringValue>(new sh::StringValue("terrain_fragment")));
-
-        p->mShaderProperties.setProperty ("colour_map", sh::makeProperty<sh::BooleanValue>(new sh::BooleanValue(mGlobalColourMap)));
-
-        // global colour map
-        sh::MaterialInstanceTextureUnit* colourMap = p->createTextureUnit ("colourMap");
-        colourMap->setProperty ("texture_alias", sh::makeProperty<sh::StringValue> (new sh::StringValue(mMaterial->getName() + "_colourMap")));
-        colourMap->setProperty ("tex_address_mode", sh::makeProperty<sh::StringValue> (new sh::StringValue("clamp")));
-
-        // global normal map
-        sh::MaterialInstanceTextureUnit* normalMap = p->createTextureUnit ("normalMap");
-        normalMap->setProperty ("direct_texture", sh::makeProperty<sh::StringValue> (new sh::StringValue(terrain->getTerrainNormalMap ()->getName())));
-        normalMap->setProperty ("tex_address_mode", sh::makeProperty<sh::StringValue> (new sh::StringValue("clamp")));
-
-        Ogre::uint maxLayers = getMaxLayers(terrain);
-        Ogre::uint numBlendTextures = std::min(terrain->getBlendTextureCount(maxLayers), terrain->getBlendTextureCount());
-        Ogre::uint numLayers = std::min(maxLayers, static_cast<Ogre::uint>(terrain->getLayerCount()));
-
-        p->mShaderProperties.setProperty ("num_layers", sh::makeProperty<sh::StringValue>(new sh::StringValue(Ogre::StringConverter::toString(numLayers))));
-        p->mShaderProperties.setProperty ("num_blendmaps", sh::makeProperty<sh::StringValue>(new sh::StringValue(Ogre::StringConverter::toString(numBlendTextures))));
-
-        // blend maps
-        for (Ogre::uint i = 0; i < numBlendTextures; ++i)
+        for (int pass=0; pass<numPasses; ++pass)
         {
-            sh::MaterialInstanceTextureUnit* blendTex = p->createTextureUnit ("blendMap" + Ogre::StringConverter::toString(i));
-            blendTex->setProperty ("direct_texture", sh::makeProperty<sh::StringValue> (new sh::StringValue(terrain->getBlendTextureName(i))));
-            blendTex->setProperty ("tex_address_mode", sh::makeProperty<sh::StringValue> (new sh::StringValue("clamp")));
-        }
+            int layerOffset = maxLayersInOnePass * pass;
+            int blendmapOffset = (pass == 0) ? 1 : 0; // the first layer of the first pass is the base layer and does not need a blend map
 
-        // layer maps
-        for (Ogre::uint i = 0; i < numLayers; ++i)
-        {
-            sh::MaterialInstanceTextureUnit* diffuseTex = p->createTextureUnit ("diffuseMap" + Ogre::StringConverter::toString(i));
-            diffuseTex->setProperty ("direct_texture", sh::makeProperty<sh::StringValue> (new sh::StringValue(terrain->getLayerTextureName(i, 0))));
-            p->mShaderProperties.setProperty ("blendmap_component_" + Ogre::StringConverter::toString(i),
-                sh::makeProperty<sh::StringValue>(new sh::StringValue(Ogre::StringConverter::toString(int((i-1) / 4)) + "." + getComponent(int((i-1) % 4)))));
-        }
+            sh::MaterialInstancePass* p = mMaterial->createPass ();
 
-        // shadow
-        for (Ogre::uint i = 0; i < 3; ++i)
-        {
-            sh::MaterialInstanceTextureUnit* shadowTex = p->createTextureUnit ("shadowMap" + Ogre::StringConverter::toString(i));
-            shadowTex->setProperty ("content_type", sh::makeProperty<sh::StringValue> (new sh::StringValue("shadow")));
-        }
+            p->setProperty ("vertex_program", sh::makeProperty<sh::StringValue>(new sh::StringValue("terrain_vertex")));
+            p->setProperty ("fragment_program", sh::makeProperty<sh::StringValue>(new sh::StringValue("terrain_fragment")));
+            if (pass != 0)
+            {
+                p->setProperty ("scene_blend", sh::makeProperty(new sh::StringValue("alpha_blend")));
+                // Only write if depth is equal to the depth value written by the previous pass.
+                p->setProperty ("depth_func", sh::makeProperty(new sh::StringValue("equal")));
+            }
 
-        p->mShaderProperties.setProperty ("shadowtexture_offset", sh::makeProperty<sh::StringValue>(new sh::StringValue(
-            Ogre::StringConverter::toString(numBlendTextures + numLayers + 2))));
+            p->mShaderProperties.setProperty ("colour_map", sh::makeProperty(new sh::BooleanValue(mGlobalColourMap)));
+            p->mShaderProperties.setProperty ("is_first_pass", sh::makeProperty(new sh::BooleanValue(pass == 0)));
+
+            // global colour map
+            sh::MaterialInstanceTextureUnit* colourMap = p->createTextureUnit ("colourMap");
+            colourMap->setProperty ("texture_alias", sh::makeProperty<sh::StringValue> (new sh::StringValue(mMaterial->getName() + "_colourMap")));
+            colourMap->setProperty ("tex_address_mode", sh::makeProperty<sh::StringValue> (new sh::StringValue("clamp")));
+
+            // global normal map
+            sh::MaterialInstanceTextureUnit* normalMap = p->createTextureUnit ("normalMap");
+            normalMap->setProperty ("direct_texture", sh::makeProperty<sh::StringValue> (new sh::StringValue(terrain->getTerrainNormalMap ()->getName())));
+            normalMap->setProperty ("tex_address_mode", sh::makeProperty<sh::StringValue> (new sh::StringValue("clamp")));
+
+            Ogre::uint numLayersInThisPass = std::min(maxLayersInOnePass, terrain->getLayerCount()-layerOffset);
+
+            // HACK: Terrain::getLayerBlendTextureIndex should be const, but it is not.
+            // Remove this once ogre got fixed.
+            Ogre::Terrain* nonconstTerrain = const_cast<Ogre::Terrain*>(terrain);
+
+            // a blend map might be shared between two passes
+            // so we can't just use terrain->getBlendTextureCount()
+            Ogre::uint numBlendTextures=0;
+            std::vector<std::string> blendTextures;
+            for (unsigned int layer=blendmapOffset; layer<numLayersInThisPass; ++layer)
+            {
+                std::string blendTextureName = terrain->getBlendTextureName(nonconstTerrain->getLayerBlendTextureIndex(
+                                                                                static_cast<Ogre::uint8>(layerOffset+layer)).first);
+                if (std::find(blendTextures.begin(), blendTextures.end(), blendTextureName) == blendTextures.end())
+                {
+                    blendTextures.push_back(blendTextureName);
+                    ++numBlendTextures;
+                }
+            }
+
+            p->mShaderProperties.setProperty ("num_layers", sh::makeProperty (new sh::StringValue(Ogre::StringConverter::toString(numLayersInThisPass))));
+            p->mShaderProperties.setProperty ("num_blendmaps", sh::makeProperty (new sh::StringValue(Ogre::StringConverter::toString(numBlendTextures))));
+
+            // blend maps
+            // the index of the first blend map used in this pass
+            int blendmapStart;
+            if (terrain->getLayerCount() == 1) // special case. if there's only one layer, we don't need blend maps at all
+                blendmapStart = 0;
+            else
+                blendmapStart = nonconstTerrain->getLayerBlendTextureIndex(static_cast<Ogre::uint8>(layerOffset+blendmapOffset)).first;
+            for (Ogre::uint i = 0; i < numBlendTextures; ++i)
+            {
+                sh::MaterialInstanceTextureUnit* blendTex = p->createTextureUnit ("blendMap" + Ogre::StringConverter::toString(i));
+                blendTex->setProperty ("direct_texture", sh::makeProperty (new sh::StringValue(terrain->getBlendTextureName(blendmapStart+i))));
+                blendTex->setProperty ("tex_address_mode", sh::makeProperty (new sh::StringValue("clamp")));
+            }
+
+            // layer maps
+            for (Ogre::uint i = 0; i < numLayersInThisPass; ++i)
+            {
+                sh::MaterialInstanceTextureUnit* diffuseTex = p->createTextureUnit ("diffuseMap" + Ogre::StringConverter::toString(i));
+                diffuseTex->setProperty ("direct_texture", sh::makeProperty (new sh::StringValue(terrain->getLayerTextureName(layerOffset+i, 0))));
+
+                if (i+layerOffset > 0)
+                {
+                    int blendTextureIndex = nonconstTerrain->getLayerBlendTextureIndex(static_cast<Ogre::uint8>(layerOffset+i)).first;
+                    int blendTextureComponent = nonconstTerrain->getLayerBlendTextureIndex(static_cast<Ogre::uint8>(layerOffset+i)).second;
+                    p->mShaderProperties.setProperty ("blendmap_component_" + Ogre::StringConverter::toString(i),
+                        sh::makeProperty (new sh::StringValue(Ogre::StringConverter::toString(blendTextureIndex-blendmapStart) + "." + getComponent(blendTextureComponent))));
+                }
+                else
+                {
+                    // just to make it shut up about blendmap_component_0 not existing in the first pass.
+                    // it might be retrieved, but will never survive the preprocessing step.
+                    p->mShaderProperties.setProperty ("blendmap_component_" + Ogre::StringConverter::toString(i),
+                        sh::makeProperty (new sh::StringValue("")));
+                }
+            }
+
+            // shadow
+            for (Ogre::uint i = 0; i < 3; ++i)
+            {
+                sh::MaterialInstanceTextureUnit* shadowTex = p->createTextureUnit ("shadowMap" + Ogre::StringConverter::toString(i));
+                shadowTex->setProperty ("content_type", sh::makeProperty<sh::StringValue> (new sh::StringValue("shadow")));
+            }
+
+            p->mShaderProperties.setProperty ("shadowtexture_offset", sh::makeProperty (new sh::StringValue(
+                Ogre::StringConverter::toString(numBlendTextures + numLayersInThisPass + 2))));
+
+            // make sure the pass index is fed to the permutation handler, because blendmap components may be different
+            p->mShaderProperties.setProperty ("pass_index", sh::makeProperty(new sh::IntValue(pass)));
+        }
 
         return Ogre::MaterialManager::getSingleton().getByName(matName);
     }
@@ -143,6 +197,11 @@ namespace MWRender
 
     Ogre::uint8 TerrainMaterial::Profile::getMaxLayers(const Ogre::Terrain* terrain) const
     {
+        return 255;
+    }
+
+    int TerrainMaterial::Profile::getMaxLayersPerPass (const Ogre::Terrain* terrain)
+    {
         // count the texture units free
         Ogre::uint8 freeTextureUnits = 16;
         // normalmap
@@ -151,9 +210,19 @@ namespace MWRender
         --freeTextureUnits;
         // shadow
         --freeTextureUnits;
+        --freeTextureUnits;
+        --freeTextureUnits;
 
         // each layer needs 1.25 units (1xdiffusespec, 0.25xblend)
         return static_cast<Ogre::uint8>(freeTextureUnits / (1.25f));
+    }
+
+    int TerrainMaterial::Profile::getRequiredPasses (const Ogre::Terrain* terrain)
+    {
+        int maxLayersPerPass = getMaxLayersPerPass(terrain);
+        assert(terrain->getLayerCount());
+        assert(maxLayersPerPass);
+        return std::ceil(static_cast<float>(terrain->getLayerCount()) / maxLayersPerPass);
     }
 
     void TerrainMaterial::Profile::updateParams(const Ogre::MaterialPtr& mat, const Ogre::Terrain* terrain)

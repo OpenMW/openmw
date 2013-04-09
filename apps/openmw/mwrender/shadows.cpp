@@ -28,10 +28,7 @@ void Shadows::recreate()
 {
     bool enabled = Settings::Manager::getBool("enabled", "Shadows");
 
-    // Split shadow maps are currently disabled because the terrain cannot cope with them
-    // (Too many texture units) Solution would be a multi-pass terrain material
-    //bool split = Settings::Manager::getBool("split", "Shadows");
-    const bool split = false;
+    bool split = Settings::Manager::getBool("split", "Shadows");
 
     sh::Factory::getInstance ().setGlobalSetting ("shadows", enabled && !split ? "true" : "false");
     sh::Factory::getInstance ().setGlobalSetting ("shadows_pssm", enabled && split ? "true" : "false");
