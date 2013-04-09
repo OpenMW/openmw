@@ -49,6 +49,11 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
         "Luck", 0
     };
 
+    static const char *sSpellTypes[] =
+    {
+        "Spell", "Ability", "Blight", "Disease", "Curse", "Power", 0
+    };
+
     mDelegateFactories = new CSVWorld::CommandDelegateFactoryCollection;
 
     mDelegateFactories->add (CSMWorld::ColumnBase::Display_GmstVarType,
@@ -62,6 +67,9 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
 
     mDelegateFactories->add (CSMWorld::ColumnBase::Display_Attribute,
         new CSVWorld::EnumDelegateFactory (sAttributes, true));
+
+    mDelegateFactories->add (CSMWorld::ColumnBase::Display_SpellType,
+        new CSVWorld::EnumDelegateFactory (sSpellTypes));
 }
 
 CSVDoc::ViewManager::~ViewManager()

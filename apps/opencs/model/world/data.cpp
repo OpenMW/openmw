@@ -102,6 +102,8 @@ CSMWorld::Data::Data()
     mSpells.addColumn (new StringIdColumn<ESM::Spell>);
     mSpells.addColumn (new RecordStateColumn<ESM::Spell>);
     mSpells.addColumn (new NameColumn<ESM::Spell>);
+    mSpells.addColumn (new SpellTypeColumn<ESM::Spell>);
+    mSpells.addColumn (new CostColumn<ESM::Spell>);
     mSpells.addColumn (new FlagColumn<ESM::Spell> ("Autocalc", 0x1));
     mSpells.addColumn (new FlagColumn<ESM::Spell> ("Starter Spell", 0x2));
     mSpells.addColumn (new FlagColumn<ESM::Spell> ("Always Succeeds", 0x4));
