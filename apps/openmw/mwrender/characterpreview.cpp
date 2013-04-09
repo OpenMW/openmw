@@ -62,8 +62,6 @@ namespace MWRender
         mAnimation = new NpcAnimation(mCharacter, mNode, MWWorld::Class::get(mCharacter).getInventoryStore(mCharacter),
                                       0, (renderHeadOnly() ? NpcAnimation::VM_HeadOnly : NpcAnimation::VM_Normal));
 
-        mNode->setVisible (false);
-
         Ogre::Vector3 scale = mNode->getScale();
         mCamera->setPosition(mPosition * scale);
         mCamera->lookAt(mLookAt * scale);
@@ -108,8 +106,6 @@ namespace MWRender
         MWWorld::Class::get(mCharacter).adjustScale(mCharacter, scale);
         mNode->setScale(Ogre::Vector3(scale));
 
-        mNode->setVisible (false);
-
         mCamera->setPosition(mPosition * mNode->getScale());
         mCamera->lookAt(mLookAt * mNode->getScale());
 
@@ -139,12 +135,8 @@ namespace MWRender
 
         mNode->setOrientation (Ogre::Quaternion::IDENTITY);
 
-        mNode->setVisible (true);
-
         mRenderTarget->update();
         mSelectionBuffer->update();
-
-        mNode->setVisible (false);
     }
 
     int InventoryPreview::getSlotSelected (int posX, int posY)
@@ -178,9 +170,7 @@ namespace MWRender
 
         updateCamera();
 
-        mNode->setVisible (true);
         mRenderTarget->update();
-        mNode->setVisible (false);
     }
 
     void RaceSelectionPreview::setPrototype(const ESM::NPC &proto)
