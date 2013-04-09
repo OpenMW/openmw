@@ -43,11 +43,13 @@ namespace MWWorld
         switch(MWWorld::Class::get (object).canBeEquipped (actor, object))
         {
             case 0:
-                return; //Item cannot be equipped, so function breaks.
+                return;
             case 2:
                 invStore.equip(MWWorld::InventoryStore::Slot_CarriedLeft, invStore.end());
+                break;
             case 3:
                 invStore.equip(MWWorld::InventoryStore::Slot_CarriedRight, invStore.end());
+                break;
         }
 
         // equip the item in the first free slot

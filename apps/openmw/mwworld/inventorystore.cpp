@@ -192,8 +192,10 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& npc)
                     continue;
                 case 2:
                     invStore.equip(MWWorld::InventoryStore::Slot_CarriedLeft, invStore.end());
+                    break;
                 case 3:
                     invStore.equip(MWWorld::InventoryStore::Slot_CarriedRight, invStore.end());
+                    break;
             }
 
             if (!itemsSlots.second) // if itemsSlots.second is true, item can stay stacked when equipped
