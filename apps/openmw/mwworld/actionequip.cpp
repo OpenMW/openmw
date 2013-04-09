@@ -21,6 +21,18 @@ namespace MWWorld
         MWWorld::Ptr object = getTarget();
         MWWorld::InventoryStore& invStore = MWWorld::Class::get(actor).getInventoryStore(actor);
 
+        switch(MWWorld::Class::get (object).canBeEquipped (actor, object))
+        {
+            case 0:
+                return;
+            case 2:
+                invStore.equip(MWWorld::InventoryStore::Slot_CarriedLeft, invStore.end());
+                break;
+            case 3:
+                invStore.equip(MWWorld::InventoryStore::Slot_CarriedRight, invStore.end());
+                break;
+        }
+
         // slots that this item can be equipped in
         std::pair<std::vector<int>, bool> slots = MWWorld::Class::get(getTarget()).getEquipmentSlots(getTarget());
 
@@ -39,18 +51,6 @@ namespace MWWorld
         std::string npcRace = actor.get<ESM::NPC>()->mBase->mRace;
 
         bool equipped = false;
-
-        switch(MWWorld::Class::get (object).canBeEquipped (actor, object))
-        {
-            case 0:
-                return;
-            case 2:
-                invStore.equip(MWWorld::InventoryStore::Slot_CarriedLeft, invStore.end());
-                break;
-            case 3:
-                invStore.equip(MWWorld::InventoryStore::Slot_CarriedRight, invStore.end());
-                break;
-        }
 
         // equip the item in the first free slot
         for (std::vector<int>::const_iterator slot=slots.first.begin();
