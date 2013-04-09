@@ -40,19 +40,20 @@ namespace MWWorld
 
         bool equipped = false;
 
+        switch(MWWorld::Class::get (object).canBeEquipped (actor, object))
+        {
+            case 0:
+                return; //Item cannot be equipped, so function breaks.
+            case 2:
+                invStore.equip(MWWorld::InventoryStore::Slot_CarriedLeft, invStore.end());
+            case 3:
+                invStore.equip(MWWorld::InventoryStore::Slot_CarriedRight, invStore.end());
+        }
+
         // equip the item in the first free slot
         for (std::vector<int>::const_iterator slot=slots.first.begin();
             slot!=slots.first.end(); ++slot)
         {
-            switch(MWWorld::Class::get (object).canBeEquipped (actor, object))
-            {
-                case 0:
-                    return;
-                case 2:
-                    invStore.equip(MWWorld::InventoryStore::Slot_CarriedLeft, invStore.end());
-                case 3:
-                    invStore.equip(MWWorld::InventoryStore::Slot_CarriedRight, invStore.end());
-            }
 
             // if all slots are occupied, replace the last slot
             if (slot == --slots.first.end())
