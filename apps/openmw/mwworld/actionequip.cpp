@@ -43,7 +43,7 @@ namespace MWWorld
         for (std::vector<int>::const_iterator slot=slots.first.begin();
             slot!=slots.first.end(); ++slot)
         {
-            switch(MWWorld::Class::get (*it).canBeEquipped (actor, *it))
+            switch(MWWorld::Class::get (getTarget()).canBeEquipped (actor, getTarget()))
             {
                 case 0:
                     return;
