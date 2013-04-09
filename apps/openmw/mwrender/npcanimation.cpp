@@ -130,7 +130,40 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
         skelnames.push_back("meshes\\"+Misc::StringUtils::lowerCase(mNpc->mModel));
     setAnimationSources(skelnames);
 
-    updateParts(true);
+    forceUpdate();
+}
+
+void NpcAnimation::setViewMode(NpcAnimation::ViewMode viewMode)
+{
+    assert(viewMode != VM_HeadOnly);
+    mViewMode = viewMode;
+
+    /* FIXME: Enable this once first-person animations work. */
+#if 0
+    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+    const ESM::Race *race = store.get<ESM::Race>().find(mNpc->mRace);
+
+    bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
+    std::string smodel = (!isBeast ? "meshes\\base_anim.nif" : "meshes\\base_animkna.nif");
+
+    std::vector<std::string> skelnames(1, smodel);
+    if(!mNpc->isMale() && !isBeast)
+        skelnames.push_back("meshes\\base_anim_female.nif");
+    else if(mBodyPrefix.find("argonian") != std::string::npos)
+        skelnames.push_back("meshes\\argonian_swimkna.nif");
+    if(mNpc->mModel.length() > 0)
+        skelnames.push_back("meshes\\"+Misc::StringUtils::lowerCase(mNpc->mModel));
+    if(mViewMode == VM_FirstPerson)
+    {
+        smodel = (!isBeast ? "meshes\\base_anim.1st.nif" : "meshes\\base_animkna.1st.nif");
+        skelnames.push_back(smodel);
+    }
+    setAnimationSources(skelnames);
+#endif
+
+    for(size_t i = 0;i < sPartListSize;i++)
+        removeIndividualPart(i);
+    forceUpdate();
 }
 
 void NpcAnimation::updateParts(bool forceupdate)
@@ -254,12 +287,17 @@ void NpcAnimation::updateParts(bool forceupdate)
             reserveIndividualPart(slotlist[i].reserveParts[res], slotlist[i].slot, prio);
     }
 
-    if(mPartPriorities[ESM::PRT_Head] < 1)
-        addOrReplaceIndividualPart(ESM::PRT_Head, -1,1, mHeadModel);
-    if(mPartPriorities[ESM::PRT_Hair] < 1 && mPartPriorities[ESM::PRT_Head] <= 1)
-        addOrReplaceIndividualPart(ESM::PRT_Hair, -1,1, mHairModel);
-
+    if(mViewMode != VM_FirstPerson)
+    {
+        if(mPartPriorities[ESM::PRT_Head] < 1)
+            addOrReplaceIndividualPart(ESM::PRT_Head, -1,1, mHeadModel);
+        if(mPartPriorities[ESM::PRT_Hair] < 1 && mPartPriorities[ESM::PRT_Head] <= 1)
+            addOrReplaceIndividualPart(ESM::PRT_Hair, -1,1, mHairModel);
+    }
     if(mViewMode == VM_HeadOnly)
+        return;
+    /* FIXME: Remove this once we figure out how to show what in first-person */
+    if(mViewMode == VM_FirstPerson)
         return;
 
     static const struct {
@@ -288,6 +326,7 @@ void NpcAnimation::updateParts(bool forceupdate)
         { ESM::PRT_Tail,      { "tail", "" } }
     };
 
+    const char *ext = (mViewMode == VM_FirstPerson) ? ".1st" : "";
     const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
     for(size_t i = 0;i < sizeof(PartTypeList)/sizeof(PartTypeList[0]);i++)
     {
@@ -298,14 +337,14 @@ void NpcAnimation::updateParts(bool forceupdate)
 
             if(!mNpc->isMale())
             {
-                part = partStore.search(mBodyPrefix + "_f_" + PartTypeList[i].name[0]);
+                part = partStore.search(mBodyPrefix + "_f_" + PartTypeList[i].name[0]+ext);
                 if(part == 0)
-                    part = partStore.search(mBodyPrefix + "_f_" + PartTypeList[i].name[1]);
+                    part = partStore.search(mBodyPrefix + "_f_" + PartTypeList[i].name[1]+ext);
             }
             if(part == 0)
-                part = partStore.search(mBodyPrefix + "_m_" + PartTypeList[i].name[0]);
+                part = partStore.search(mBodyPrefix + "_m_" + PartTypeList[i].name[0]+ext);
             if(part == 0)
-                part = partStore.search(mBodyPrefix + "_m_" + PartTypeList[i].name[1]);
+                part = partStore.search(mBodyPrefix + "_m_" + PartTypeList[i].name[1]+ext);
 
             if(part)
                 addOrReplaceIndividualPart(PartTypeList[i].type, -1,1, "meshes\\"+part->mModel);
@@ -431,6 +470,7 @@ bool NpcAnimation::addOrReplaceIndividualPart(int type, int group, int priority,
 
 void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::PartReference> &parts)
 {
+    const char *ext = (mViewMode == VM_FirstPerson) ? ".1st" : "";
     for(std::size_t i = 0; i < parts.size(); i++)
     {
         const ESM::PartReference &part = parts[i];
@@ -440,9 +480,9 @@ void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::
 
         const ESM::BodyPart *bodypart = 0;
         if(!mNpc->isMale())
-            bodypart = partStore.search(part.mFemale);
+            bodypart = partStore.search(part.mFemale+ext);
         if(!bodypart)
-            bodypart = partStore.search(part.mMale);
+            bodypart = partStore.search(part.mMale+ext);
 
         if(bodypart)
             addOrReplaceIndividualPart(part.mPart, group, priority, "meshes\\"+bodypart->mModel);

@@ -28,6 +28,7 @@ struct PartInfo {
 
 enum ViewMode {
     VM_Normal,
+    VM_FirstPerson,
     VM_HeadOnly
 };
 
@@ -83,6 +84,8 @@ public:
     virtual ~NpcAnimation();
 
     virtual Ogre::Vector3 runAnimation(float timepassed);
+
+    void setViewMode(ViewMode viewMode);
 
     void forceUpdate()
     { updateParts(true); }

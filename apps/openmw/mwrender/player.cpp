@@ -124,8 +124,6 @@ namespace MWRender
         MWBase::Environment::get().getWindowManager ()->showCrosshair
                 (!MWBase::Environment::get().getWindowManager ()->isGuiMode () && (mFirstPersonView && !mVanity.enabled && !mPreviewMode));
 
-        /// \fixme We shouldn't hide the whole model, just certain components of the character (head, chest, feet, etc)
-        mPlayerNode->setVisible(mVanity.enabled || mPreviewMode || !mFirstPersonView);
         if (mFirstPersonView && !mVanity.enabled) {
             return;
         }
@@ -139,6 +137,8 @@ namespace MWRender
     void Player::toggleViewMode()
     {
         mFirstPersonView = !mFirstPersonView;
+        mAnimation->setViewMode((mVanity.enabled || mPreviewMode || !mFirstPersonView) ?
+                                NpcAnimation::VM_Normal : NpcAnimation::VM_FirstPerson);
         if (mFirstPersonView) {
             mCamera->setPosition(0.f, 0.f, 0.f);
             setLowHeight(false);
@@ -168,6 +168,9 @@ namespace MWRender
         mVanity.enabled = enable;
         mVanity.forced = force && enable;
 
+        mAnimation->setViewMode((mVanity.enabled || mPreviewMode || !mFirstPersonView) ?
+                                NpcAnimation::VM_Normal : NpcAnimation::VM_FirstPerson);
+
         float offset = mPreviewCam.offset;
         Ogre::Vector3 rot(0.f, 0.f, 0.f);
         if (mVanity.enabled) {
@@ -194,6 +197,8 @@ namespace MWRender
             return;
         }
         mPreviewMode = enable;
+        mAnimation->setViewMode((mVanity.enabled || mPreviewMode || !mFirstPersonView) ?
+                                NpcAnimation::VM_Normal : NpcAnimation::VM_FirstPerson);
         float offset = mCamera->getPosition().z;
         if (mPreviewMode) {
             mMainCam.offset = offset;
@@ -305,7 +310,8 @@ namespace MWRender
         delete mAnimation;
         mAnimation = anim;
 
-        mPlayerNode->setVisible(mVanity.enabled || mPreviewMode || !mFirstPersonView);
+        mAnimation->setViewMode((mVanity.enabled || mPreviewMode || !mFirstPersonView) ?
+                                NpcAnimation::VM_Normal : NpcAnimation::VM_FirstPerson);
     }
 
     void Player::setHeight(float height)

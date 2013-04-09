@@ -476,7 +476,7 @@ void Animation::play(const std::string &groupname, const std::string &start, con
 
 Ogre::Vector3 Animation::runAnimation(float timepassed)
 {
-    Ogre::Vector3 movement = Ogre::Vector3::ZERO;
+    Ogre::Vector3 movement(0.0f);
 
     timepassed *= mAnimSpeedMult;
     while(mCurrentAnim && mPlaying)
