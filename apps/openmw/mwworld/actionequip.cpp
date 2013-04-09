@@ -18,6 +18,7 @@ namespace MWWorld
 
     void ActionEquip::executeImp (const Ptr& actor)
     {
+        MWWorld::Ptr object = getTarget();
         MWWorld::InventoryStore& invStore = MWWorld::Class::get(actor).getInventoryStore(actor);
 
         // slots that this item can be equipped in
@@ -27,7 +28,7 @@ namespace MWWorld
         MWWorld::ContainerStoreIterator it = invStore.begin();
         for (; it != invStore.end(); ++it)
         {
-            if (*it == getTarget())
+            if (*it == object)
             {
                 break;
             }
@@ -43,7 +44,7 @@ namespace MWWorld
         for (std::vector<int>::const_iterator slot=slots.first.begin();
             slot!=slots.first.end(); ++slot)
         {
-            switch(MWWorld::Class::get (getTarget()).canBeEquipped (actor, getTarget()))
+            switch(MWWorld::Class::get (object).canBeEquipped (actor, object))
             {
                 case 0:
                     return;
@@ -70,10 +71,10 @@ namespace MWWorld
             }
         }
 
-        std::string script = MWWorld::Class::get(*it).getScript(*it);
+        std::string script = MWWorld::Class::get(object).getScript(object);
         
         /* Set OnPCEquip Variable on item's script, if the player is equipping it, and it has a script with that variable declared */
         if(equipped && actor == MWBase::Environment::get().getWorld()->getPlayer().getPlayer() && script != "")
-            (*it).mRefData->getLocals().setVarByInt(script, "onpcequip", 1);
+            (object).mRefData->getLocals().setVarByInt(script, "onpcequip", 1);
     }
 }
