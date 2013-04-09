@@ -255,6 +255,14 @@ void NpcAnimation::updateParts(bool forceupdate)
     if(!forceupdate)
         return;
 
+    /* FIXME: Remove this once we figure out how to show what in first-person */
+    if(mViewMode == VM_FirstPerson)
+    {
+        for(size_t i = 0;i < slotlistsize;i++)
+            this->*slotlist[i].part = inv.getSlot(slotlist[i].slot);
+        return;
+    }
+
     for(size_t i = 0;i < slotlistsize && mViewMode != VM_HeadOnly;i++)
     {
         MWWorld::ContainerStoreIterator iter = inv.getSlot(slotlist[i].slot);
@@ -295,9 +303,6 @@ void NpcAnimation::updateParts(bool forceupdate)
             addOrReplaceIndividualPart(ESM::PRT_Hair, -1,1, mHairModel);
     }
     if(mViewMode == VM_HeadOnly)
-        return;
-    /* FIXME: Remove this once we figure out how to show what in first-person */
-    if(mViewMode == VM_FirstPerson)
         return;
 
     static const struct {
