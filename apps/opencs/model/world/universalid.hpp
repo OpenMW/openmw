@@ -53,7 +53,9 @@ namespace CSMWorld
                 Type_Regions,
                 Type_Region,
                 Type_Birthsigns,
-                Type_Birthsign
+                Type_Birthsign,
+                Type_Spells,
+                Type_Spell
             };
 
         private:
