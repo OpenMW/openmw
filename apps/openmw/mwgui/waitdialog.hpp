@@ -9,7 +9,7 @@ namespace MWGui
     class WaitDialogProgressBar : public WindowBase
     {
     public:
-        WaitDialogProgressBar(MWBase::WindowManager& parWindowManager);
+        WaitDialogProgressBar();
 
         virtual void open();
 
@@ -23,7 +23,7 @@ namespace MWGui
     class WaitDialog : public WindowBase
     {
     public:
-        WaitDialog(MWBase::WindowManager& parWindowManager);
+        WaitDialog();
 
         virtual void open();
 

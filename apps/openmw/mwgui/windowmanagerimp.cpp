@@ -162,38 +162,38 @@ WindowManager::WindowManager(
     mDragAndDrop->mDragAndDropWidget = dragAndDropWidget;
 
     mMenu = new MainMenu(w,h);
-    mMap = new MapWindow(*this, cacheDir);
-    mStatsWindow = new StatsWindow(*this);
+    mMap = new MapWindow(cacheDir);
+    mStatsWindow = new StatsWindow();
     mConsole = new Console(w,h, consoleOnlyScripts);
-    mJournal = new JournalWindow(*this);
-    mMessageBoxManager = new MessageBoxManager(this);
-    mInventoryWindow = new InventoryWindow(*this,mDragAndDrop);
-    mTradeWindow = new TradeWindow(*this);
-    mSpellBuyingWindow = new SpellBuyingWindow(*this);
-    mTravelWindow = new TravelWindow(*this);
-    mDialogueWindow = new DialogueWindow(*this);
-    mContainerWindow = new ContainerWindow(*this,mDragAndDrop);
+    mJournal = new JournalWindow();
+    mMessageBoxManager = new MessageBoxManager();
+    mInventoryWindow = new InventoryWindow(mDragAndDrop);
+    mTradeWindow = new TradeWindow();
+    mSpellBuyingWindow = new SpellBuyingWindow();
+    mTravelWindow = new TravelWindow();
+    mDialogueWindow = new DialogueWindow();
+    mContainerWindow = new ContainerWindow(mDragAndDrop);
     mHud = new HUD(w,h, mShowFPSLevel, mDragAndDrop);
-    mToolTips = new ToolTips(this);
-    mScrollWindow = new ScrollWindow(*this);
-    mBookWindow = new BookWindow(*this);
-    mCountDialog = new CountDialog(*this);
-    mSettingsWindow = new SettingsWindow(*this);
-    mConfirmationDialog = new ConfirmationDialog(*this);
-    mAlchemyWindow = new AlchemyWindow(*this);
-    mSpellWindow = new SpellWindow(*this);
-    mQuickKeysMenu = new QuickKeysMenu(*this);
-    mLevelupDialog = new LevelupDialog(*this);
-    mWaitDialog = new WaitDialog(*this);
-    mSpellCreationDialog = new SpellCreationDialog(*this);
-    mEnchantingDialog = new EnchantingDialog(*this);
-    mTrainingWindow = new TrainingWindow(*this);
-    mMerchantRepair = new MerchantRepair(*this);
-    mRepair = new Repair(*this);
+    mToolTips = new ToolTips();
+    mScrollWindow = new ScrollWindow();
+    mBookWindow = new BookWindow();
+    mCountDialog = new CountDialog();
+    mSettingsWindow = new SettingsWindow();
+    mConfirmationDialog = new ConfirmationDialog();
+    mAlchemyWindow = new AlchemyWindow();
+    mSpellWindow = new SpellWindow();
+    mQuickKeysMenu = new QuickKeysMenu();
+    mLevelupDialog = new LevelupDialog();
+    mWaitDialog = new WaitDialog();
+    mSpellCreationDialog = new SpellCreationDialog();
+    mEnchantingDialog = new EnchantingDialog();
+    mTrainingWindow = new TrainingWindow();
+    mMerchantRepair = new MerchantRepair();
+    mRepair = new Repair();
     mSoulgemDialog = new SoulgemDialog(mMessageBoxManager);
-    mCompanionWindow = new CompanionWindow(*this, mDragAndDrop, mMessageBoxManager);
+    mCompanionWindow = new CompanionWindow(mDragAndDrop, mMessageBoxManager);
 
-    mLoadingScreen = new LoadingScreen(mRendering->getScene (), mRendering->getWindow (), *this);
+    mLoadingScreen = new LoadingScreen(mRendering->getScene (), mRendering->getWindow ());
     mLoadingScreen->onResChange (w,h);
 
     mInputBlocker = mGui->createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Default,"Windows","");
@@ -202,7 +202,7 @@ WindowManager::WindowManager(
 
     mHud->setVisible(mHudEnabled);
 
-    mCharGen = new CharacterCreation(this);
+    mCharGen = new CharacterCreation();
 
     // Setup player stats
     for (int i = 0; i < ESM::Attribute::Length; ++i)

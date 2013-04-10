@@ -15,8 +15,8 @@
 namespace MWGui
 {
 
-Repair::Repair(MWBase::WindowManager &parWindowManager)
-    : WindowBase("openmw_repair.layout", parWindowManager)
+Repair::Repair()
+    : WindowBase("openmw_repair.layout")
 {
     getWidget(mRepairBox, "RepairBox");
     getWidget(mRepairView, "RepairView");

@@ -10,7 +10,7 @@ namespace MWGui
     class TrainingWindow : public WindowBase, public ReferenceInterface
     {
     public:
-        TrainingWindow(MWBase::WindowManager& parWindowManager);
+        TrainingWindow();
 
         virtual void open();
 

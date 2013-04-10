@@ -19,8 +19,8 @@
 namespace MWGui
 {
 
-MerchantRepair::MerchantRepair(MWBase::WindowManager &parWindowManager)
-    : WindowBase("openmw_merchantrepair.layout", parWindowManager)
+MerchantRepair::MerchantRepair()
+    : WindowBase("openmw_merchantrepair.layout")
 {
     getWidget(mList, "RepairView");
     getWidget(mOkButton, "OkButton");

@@ -20,8 +20,8 @@ using namespace MWGui;
 
 /* GenerateClassResultDialog */
 
-GenerateClassResultDialog::GenerateClassResultDialog(MWBase::WindowManager& parWindowManager)
-  : WindowModal("openmw_chargen_generate_class_result.layout", parWindowManager)
+GenerateClassResultDialog::GenerateClassResultDialog()
+  : WindowModal("openmw_chargen_generate_class_result.layout")
 {
     // Centre dialog
     center();
@@ -67,8 +67,8 @@ void GenerateClassResultDialog::onBackClicked(MyGUI::Widget* _sender)
 
 /* PickClassDialog */
 
-PickClassDialog::PickClassDialog(MWBase::WindowManager& parWindowManager)
-  : WindowModal("openmw_chargen_class.layout", parWindowManager)
+PickClassDialog::PickClassDialog()
+  : WindowModal("openmw_chargen_class.layout")
 {
     // Centre dialog
     center();
@@ -272,8 +272,8 @@ void InfoBoxDialog::layoutVertically(MyGUI::Widget* widget, int margin)
     widget->setSize(width, pos);
 }
 
-InfoBoxDialog::InfoBoxDialog(MWBase::WindowManager& parWindowManager)
-    : WindowModal("openmw_infobox.layout", parWindowManager)
+InfoBoxDialog::InfoBoxDialog()
+    : WindowModal("openmw_infobox.layout")
     , mCurrentButton(-1)
 {
     getWidget(mTextBox, "TextBox");
@@ -356,8 +356,8 @@ void InfoBoxDialog::onButtonClicked(MyGUI::Widget* _sender)
 
 /* ClassChoiceDialog */
 
-ClassChoiceDialog::ClassChoiceDialog(MWBase::WindowManager& parWindowManager)
-    : InfoBoxDialog(parWindowManager)
+ClassChoiceDialog::ClassChoiceDialog()
+    : InfoBoxDialog()
 {
     setText("");
     ButtonList buttons;
@@ -370,8 +370,8 @@ ClassChoiceDialog::ClassChoiceDialog(MWBase::WindowManager& parWindowManager)
 
 /* CreateClassDialog */
 
-CreateClassDialog::CreateClassDialog(MWBase::WindowManager& parWindowManager)
-  : WindowModal("openmw_chargen_create_class.layout", parWindowManager)
+CreateClassDialog::CreateClassDialog()
+  : WindowModal("openmw_chargen_create_class.layout")
   , mSpecDialog(NULL)
   , mAttribDialog(NULL)
   , mSkillDialog(NULL)
@@ -540,7 +540,7 @@ void CreateClassDialog::onDialogCancel()
 void CreateClassDialog::onSpecializationClicked(MyGUI::Widget* _sender)
 {
     delete mSpecDialog;
-    mSpecDialog = new SelectSpecializationDialog(*MWBase::Environment::get().getWindowManager());
+    mSpecDialog = new SelectSpecializationDialog();
     mSpecDialog->eventCancel += MyGUI::newDelegate(this, &CreateClassDialog::onDialogCancel);
     mSpecDialog->eventItemSelected += MyGUI::newDelegate(this, &CreateClassDialog::onSpecializationSelected);
     mSpecDialog->setVisible(true);
@@ -571,7 +571,7 @@ void CreateClassDialog::setSpecialization(int id)
 void CreateClassDialog::onAttributeClicked(Widgets::MWAttributePtr _sender)
 {
     delete mAttribDialog;
-    mAttribDialog = new SelectAttributeDialog(*MWBase::Environment::get().getWindowManager());
+    mAttribDialog = new SelectAttributeDialog();
     mAffectedAttribute = _sender;
     mAttribDialog->eventCancel += MyGUI::newDelegate(this, &CreateClassDialog::onDialogCancel);
     mAttribDialog->eventItemSelected += MyGUI::newDelegate(this, &CreateClassDialog::onAttributeSelected);
@@ -601,7 +601,7 @@ void CreateClassDialog::onAttributeSelected()
 void CreateClassDialog::onSkillClicked(Widgets::MWSkillPtr _sender)
 {
     delete mSkillDialog;
-    mSkillDialog = new SelectSkillDialog(*MWBase::Environment::get().getWindowManager());
+    mSkillDialog = new SelectSkillDialog();
     mAffectedSkill = _sender;
     mSkillDialog->eventCancel += MyGUI::newDelegate(this, &CreateClassDialog::onDialogCancel);
     mSkillDialog->eventItemSelected += MyGUI::newDelegate(this, &CreateClassDialog::onSkillSelected);
@@ -633,7 +633,7 @@ void CreateClassDialog::onSkillSelected()
 
 void CreateClassDialog::onDescriptionClicked(MyGUI::Widget* _sender)
 {
-    mDescDialog = new DescriptionDialog(*MWBase::Environment::get().getWindowManager());
+    mDescDialog = new DescriptionDialog();
     mDescDialog->setTextInput(mDescription);
     mDescDialog->eventDone += MyGUI::newDelegate(this, &CreateClassDialog::onDescriptionEntered);
     mDescDialog->setVisible(true);
@@ -660,8 +660,8 @@ void CreateClassDialog::onBackClicked(MyGUI::Widget* _sender)
 
 /* SelectSpecializationDialog */
 
-SelectSpecializationDialog::SelectSpecializationDialog(MWBase::WindowManager& parWindowManager)
-  : WindowModal("openmw_chargen_select_specialization.layout", parWindowManager)
+SelectSpecializationDialog::SelectSpecializationDialog()
+  : WindowModal("openmw_chargen_select_specialization.layout")
 {
     // Centre dialog
     center();
@@ -720,8 +720,8 @@ void SelectSpecializationDialog::onCancelClicked(MyGUI::Widget* _sender)
 
 /* SelectAttributeDialog */
 
-SelectAttributeDialog::SelectAttributeDialog(MWBase::WindowManager& parWindowManager)
-  : WindowModal("openmw_chargen_select_attribute.layout", parWindowManager)
+SelectAttributeDialog::SelectAttributeDialog()
+  : WindowModal("openmw_chargen_select_attribute.layout")
 {
     // Centre dialog
     center();
@@ -766,8 +766,8 @@ void SelectAttributeDialog::onCancelClicked(MyGUI::Widget* _sender)
 
 /* SelectSkillDialog */
 
-SelectSkillDialog::SelectSkillDialog(MWBase::WindowManager& parWindowManager)
-  : WindowModal("openmw_chargen_select_skill.layout", parWindowManager)
+SelectSkillDialog::SelectSkillDialog()
+  : WindowModal("openmw_chargen_select_skill.layout")
 {
     // Centre dialog
     center();
@@ -856,8 +856,8 @@ void SelectSkillDialog::onCancelClicked(MyGUI::Widget* _sender)
 
 /* DescriptionDialog */
 
-DescriptionDialog::DescriptionDialog(MWBase::WindowManager& parWindowManager)
-  : WindowModal("openmw_chargen_class_description.layout", parWindowManager)
+DescriptionDialog::DescriptionDialog()
+  : WindowModal("openmw_chargen_class_description.layout")
 {
     // Centre dialog
     center();

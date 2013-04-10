@@ -10,7 +10,7 @@ namespace MWGui
     class SpellWindow : public WindowPinnableBase
     {
     public:
-        SpellWindow(MWBase::WindowManager& parWindowManager);
+        SpellWindow();
         virtual ~SpellWindow();
 
         void updateSpells();

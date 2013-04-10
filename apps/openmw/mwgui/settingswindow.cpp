@@ -93,8 +93,8 @@ namespace
 
 namespace MWGui
 {
-    SettingsWindow::SettingsWindow(MWBase::WindowManager& parWindowManager) :
-        WindowBase("openmw_settings_window.layout", parWindowManager)
+    SettingsWindow::SettingsWindow() :
+        WindowBase("openmw_settings_window.layout")
     {
         getWidget(mOkButton, "OkButton");
         getWidget(mSubtitlesButton, "SubtitlesButton");

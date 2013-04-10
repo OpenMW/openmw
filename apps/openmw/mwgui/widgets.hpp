@@ -98,7 +98,6 @@ namespace MWGui
             void setSkillNumber(int skillId);
             void setSkillValue(const SkillValue& value);
 
-            MWBase::WindowManager *getWindowManager() const { return mManager; }
             ESM::Skill::SkillEnum getSkillId() const { return mSkillId; }
             const SkillValue& getSkillValue() const { return mValue; }
 
@@ -121,7 +120,6 @@ namespace MWGui
 
             void updateWidgets();
 
-            MWBase::WindowManager *mManager;
             ESM::Skill::SkillEnum mSkillId;
             SkillValue mValue;
             MyGUI::Widget* mSkillNameWidget;
@@ -140,7 +138,6 @@ namespace MWGui
             void setAttributeId(int attributeId);
             void setAttributeValue(const AttributeValue& value);
 
-            MWBase::WindowManager *getWindowManager() const { return mManager; }
             int getAttributeId() const { return mId; }
             const AttributeValue& getAttributeValue() const { return mValue; }
 
@@ -163,7 +160,6 @@ namespace MWGui
 
             void updateWidgets();
 
-            MWBase::WindowManager *mManager;
             int mId;
             AttributeValue mValue;
             MyGUI::Widget* mAttributeNameWidget;

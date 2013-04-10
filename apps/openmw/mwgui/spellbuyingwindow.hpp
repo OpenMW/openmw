@@ -21,7 +21,7 @@ namespace MWGui
     class SpellBuyingWindow : public ReferenceInterface, public WindowBase
     {
         public:
-            SpellBuyingWindow(MWBase::WindowManager& parWindowManager);
+            SpellBuyingWindow();
 
             void startSpellBuying(const MWWorld::Ptr& actor);
 

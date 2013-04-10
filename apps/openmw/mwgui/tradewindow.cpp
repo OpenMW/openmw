@@ -24,8 +24,8 @@ namespace MWGui
     const float TradeWindow::sBalanceChangeInitialPause = 0.5;
     const float TradeWindow::sBalanceChangeInterval = 0.1;
 
-    TradeWindow::TradeWindow(MWBase::WindowManager& parWindowManager) :
-        WindowBase("openmw_trade_window.layout", parWindowManager)
+    TradeWindow::TradeWindow() :
+        WindowBase("openmw_trade_window.layout")
         , ContainerBase(NULL) // no drag&drop
         , mCurrentBalance(0)
         , mBalanceButtonsState(BBS_None)

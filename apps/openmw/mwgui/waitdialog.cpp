@@ -25,8 +25,8 @@
 namespace MWGui
 {
 
-    WaitDialogProgressBar::WaitDialogProgressBar(MWBase::WindowManager &parWindowManager)
-        : WindowBase("openmw_wait_dialog_progressbar.layout", parWindowManager)
+    WaitDialogProgressBar::WaitDialogProgressBar()
+        : WindowBase("openmw_wait_dialog_progressbar.layout")
     {
         getWidget(mProgressBar, "ProgressBar");
         getWidget(mProgressText, "ProgressText");
@@ -46,9 +46,9 @@ namespace MWGui
 
     // ---------------------------------------------------------------------------------------------------------
 
-    WaitDialog::WaitDialog(MWBase::WindowManager &parWindowManager)
-        : WindowBase("openmw_wait_dialog.layout", parWindowManager)
-        , mProgressBar(parWindowManager)
+    WaitDialog::WaitDialog()
+        : WindowBase("openmw_wait_dialog.layout")
+        , mProgressBar()
         , mWaiting(false)
         , mSleeping(false)
         , mHours(1)

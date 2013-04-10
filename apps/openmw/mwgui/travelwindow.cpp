@@ -25,8 +25,8 @@ namespace MWGui
 {
     const int TravelWindow::sLineHeight = 18;
 
-    TravelWindow::TravelWindow(MWBase::WindowManager& parWindowManager) :
-        WindowBase("openmw_travel_window.layout", parWindowManager)
+    TravelWindow::TravelWindow() :
+        WindowBase("openmw_travel_window.layout")
         , mCurrentY(0)
         , mLastPos(0)
     {

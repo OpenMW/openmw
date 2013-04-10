@@ -62,8 +62,8 @@ int countParts(const std::string &part, const std::string &race, bool male)
 }
 }
 
-RaceDialog::RaceDialog(MWBase::WindowManager& parWindowManager)
-  : WindowModal("openmw_chargen_race.layout", parWindowManager)
+RaceDialog::RaceDialog()
+  : WindowModal("openmw_chargen_race.layout")
   , mGenderIndex(0)
   , mFaceIndex(0)
   , mHairIndex(0)

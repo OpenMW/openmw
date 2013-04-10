@@ -23,8 +23,8 @@ namespace MWGui
 {
     const int SpellBuyingWindow::sLineHeight = 18;
 
-    SpellBuyingWindow::SpellBuyingWindow(MWBase::WindowManager& parWindowManager) :
-        WindowBase("openmw_spell_buying_window.layout", parWindowManager)
+    SpellBuyingWindow::SpellBuyingWindow() :
+        WindowBase("openmw_spell_buying_window.layout")
         , mCurrentY(0)
         , mLastPos(0)
     {

@@ -7,7 +7,7 @@
 
 using namespace MWGui;
 
-MessageBoxManager::MessageBoxManager (MWBase::WindowManager* windowManager)
+MessageBoxManager::MessageBoxManager ()
 {
     // defines
     mMessageBoxSpeed = 0.1;
@@ -212,7 +212,7 @@ int MessageBox::getHeight ()
 
 
 InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxManager, const std::string& message, const std::vector<std::string>& buttons)
-    : WindowModal("openmw_interactive_messagebox.layout", *MWBase::Environment::get().getWindowManager())
+    : WindowModal("openmw_interactive_messagebox.layout")
   , mMessageBoxManager(parMessageBoxManager)
   , mButtonPressed(-1)
 {

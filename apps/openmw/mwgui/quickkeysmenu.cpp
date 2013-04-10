@@ -43,8 +43,8 @@ namespace
 namespace MWGui
 {
 
-    QuickKeysMenu::QuickKeysMenu(MWBase::WindowManager& parWindowManager)
-        : WindowBase("openmw_quickkeys_menu.layout", parWindowManager)
+    QuickKeysMenu::QuickKeysMenu()
+        : WindowBase("openmw_quickkeys_menu.layout")
         , mAssignDialog(0)
         , mItemSelectionDialog(0)
         , mMagicSelectionDialog(0)
@@ -109,7 +109,7 @@ namespace MWGui
         {
             // open assign dialog
             if (!mAssignDialog)
-                mAssignDialog = new QuickKeysMenuAssign(*MWBase::Environment::get().getWindowManager(), this);
+                mAssignDialog = new QuickKeysMenuAssign(this);
             mAssignDialog->setVisible (true);
         }
     }
@@ -124,7 +124,7 @@ namespace MWGui
     {
         if (!mItemSelectionDialog )
         {
-            mItemSelectionDialog = new ItemSelectionDialog("#{sQuickMenu6}", ContainerBase::Filter_All, *MWBase::Environment::get().getWindowManager());
+            mItemSelectionDialog = new ItemSelectionDialog("#{sQuickMenu6}", ContainerBase::Filter_All);
             mItemSelectionDialog->eventItemSelected += MyGUI::newDelegate(this, &QuickKeysMenu::onAssignItem);
             mItemSelectionDialog->eventDialogCanceled += MyGUI::newDelegate(this, &QuickKeysMenu::onAssignItemCancel);
         }
@@ -139,7 +139,7 @@ namespace MWGui
     {
         if (!mMagicSelectionDialog )
         {
-            mMagicSelectionDialog = new MagicSelectionDialog(*MWBase::Environment::get().getWindowManager(), this);
+            mMagicSelectionDialog = new MagicSelectionDialog(this);
         }
         mMagicSelectionDialog->setVisible(true);
 
@@ -352,8 +352,8 @@ namespace MWGui
 
     // ---------------------------------------------------------------------------------------------------------
 
-    QuickKeysMenuAssign::QuickKeysMenuAssign (MWBase::WindowManager &parWindowManager, QuickKeysMenu* parent)
-        : WindowModal("openmw_quickkeys_menu_assign.layout", parWindowManager)
+    QuickKeysMenuAssign::QuickKeysMenuAssign (QuickKeysMenu* parent)
+        : WindowModal("openmw_quickkeys_menu_assign.layout")
         , mParent(parent)
     {
         getWidget(mLabel, "Label");
@@ -399,8 +399,8 @@ namespace MWGui
 
     // ---------------------------------------------------------------------------------------------------------
 
-    MagicSelectionDialog::MagicSelectionDialog(MWBase::WindowManager &parWindowManager, QuickKeysMenu* parent)
-        : WindowModal("openmw_magicselection_dialog.layout", parWindowManager)
+    MagicSelectionDialog::MagicSelectionDialog(QuickKeysMenu* parent)
+        : WindowModal("openmw_magicselection_dialog.layout")
         , mParent(parent)
         , mWidth(0)
         , mHeight(0)

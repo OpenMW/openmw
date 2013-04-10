@@ -14,7 +14,7 @@ namespace MWGui
     class JournalWindow : public WindowBase
     {
         public:
-            JournalWindow(MWBase::WindowManager& parWindowManager);
+            JournalWindow();
             virtual void open();
             virtual void close();
 

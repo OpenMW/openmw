@@ -6,8 +6,8 @@
 
 using namespace MWGui;
 
-WindowPinnableBase::WindowPinnableBase(const std::string& parLayout, MWBase::WindowManager& parWindowManager)
-  : WindowBase(parLayout, parWindowManager), mPinned(false), mVisible(false)
+WindowPinnableBase::WindowPinnableBase(const std::string& parLayout)
+  : WindowBase(parLayout), mPinned(false), mVisible(false)
 {
     ExposedWindow* window = static_cast<ExposedWindow*>(mMainWidget);
     mPinButton = window->getSkinWidget ("Button");

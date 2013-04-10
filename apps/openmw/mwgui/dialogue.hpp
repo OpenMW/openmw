@@ -29,7 +29,7 @@ namespace MWGui
     class PersuasionDialog : public WindowModal
     {
     public:
-        PersuasionDialog(MWBase::WindowManager& parWindowManager);
+        PersuasionDialog();
 
         virtual void open();
 
@@ -50,7 +50,7 @@ namespace MWGui
     class DialogueWindow: public WindowBase, public ReferenceInterface
     {
     public:
-        DialogueWindow(MWBase::WindowManager& parWindowManager);
+        DialogueWindow();
 
         // Events
         typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;

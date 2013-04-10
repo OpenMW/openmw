@@ -13,7 +13,7 @@ namespace MWGui
     class BirthDialog : public WindowModal
     {
     public:
-        BirthDialog(MWBase::WindowManager& parWindowManager);
+        BirthDialog();
 
         enum Gender
         {

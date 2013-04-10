@@ -14,8 +14,8 @@
 
 using namespace MWGui;
 
-BookWindow::BookWindow (MWBase::WindowManager& parWindowManager)
-    : WindowBase("openmw_book.layout", parWindowManager)
+BookWindow::BookWindow ()
+    : WindowBase("openmw_book.layout")
     , mTakeButtonShow(true)
     , mTakeButtonAllowed(true)
 {

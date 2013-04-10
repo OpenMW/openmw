@@ -24,8 +24,8 @@ bool sortBirthSigns(const std::pair<std::string, const ESM::BirthSign*>& left, c
 
 }
 
-BirthDialog::BirthDialog(MWBase::WindowManager& parWindowManager)
-  : WindowModal("openmw_chargen_birth.layout", parWindowManager)
+BirthDialog::BirthDialog()
+  : WindowModal("openmw_chargen_birth.layout")
 {
     // Centre dialog
     center();

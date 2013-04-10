@@ -31,7 +31,7 @@ namespace MWGui
     class MessageBoxManager
     {
         public:
-            MessageBoxManager (MWBase::WindowManager* windowManager);
+            MessageBoxManager ();
             void onFrame (float frameDuration);
             void createMessageBox (const std::string& message);
             bool createInteractiveMessageBox (const std::string& message, const std::vector<std::string>& buttons);

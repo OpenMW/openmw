@@ -12,8 +12,8 @@
 
 using namespace MWGui;
 
-ScrollWindow::ScrollWindow (MWBase::WindowManager& parWindowManager)
-    : WindowBase("openmw_scroll.layout", parWindowManager)
+ScrollWindow::ScrollWindow ()
+    : WindowBase("openmw_scroll.layout")
     , mTakeButtonShow(true)
     , mTakeButtonAllowed(true)
 {

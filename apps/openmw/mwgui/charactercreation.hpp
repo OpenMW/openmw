@@ -29,7 +29,7 @@ namespace MWGui
     public:
     typedef std::vector<int> SkillList;
 
-    CharacterCreation(MWBase::WindowManager* _wm);
+    CharacterCreation();
     ~CharacterCreation();
 
     //Show a dialog
@@ -57,8 +57,6 @@ namespace MWGui
     CreateClassDialog* mCreateClassDialog;
     BirthDialog* mBirthSignDialog;
     ReviewDialog* mReviewDialog;
-
-    MWBase::WindowManager* mWM;
 
     //Player data
     std::string mPlayerName;

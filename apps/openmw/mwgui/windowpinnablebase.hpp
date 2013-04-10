@@ -10,7 +10,7 @@ namespace MWGui
     class WindowPinnableBase: public WindowBase
     {
     public:
-        WindowPinnableBase(const std::string& parLayout, MWBase::WindowManager& parWindowManager);
+        WindowPinnableBase(const std::string& parLayout);
         bool pinned() { return mPinned; }
 
     private:

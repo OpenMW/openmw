@@ -20,8 +20,8 @@
 namespace MWGui
 {
 
-    TrainingWindow::TrainingWindow(MWBase::WindowManager &parWindowManager)
-        : WindowBase("openmw_trainingwindow.layout", parWindowManager)
+    TrainingWindow::TrainingWindow()
+        : WindowBase("openmw_trainingwindow.layout")
         , mFadeTimeRemaining(0)
     {
         getWidget(mTrainingOptions, "TrainingOptions");

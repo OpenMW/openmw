@@ -22,8 +22,8 @@ using namespace Widgets;
 
 const int ReviewDialog::sLineHeight = 18;
 
-ReviewDialog::ReviewDialog(MWBase::WindowManager& parWindowManager)
-    : WindowModal("openmw_chargen_review.layout", parWindowManager)
+ReviewDialog::ReviewDialog()
+    : WindowModal("openmw_chargen_review.layout")
     , mLastPos(0)
 {
     // Centre dialog

@@ -18,8 +18,8 @@
 namespace MWGui
 {
 
-    LevelupDialog::LevelupDialog(MWBase::WindowManager &parWindowManager)
-        : WindowBase("openmw_levelup_dialog.layout", parWindowManager)
+    LevelupDialog::LevelupDialog()
+        : WindowBase("openmw_levelup_dialog.layout")
     {
         getWidget(mOkButton, "OkButton");
         getWidget(mClassImage, "ClassImage");

@@ -14,7 +14,7 @@ namespace MWGui
     class AlchemyWindow : public WindowBase, public ContainerBase
     {
     public:
-        AlchemyWindow(MWBase::WindowManager& parWindowManager);
+        AlchemyWindow();
 
         virtual void open();
 

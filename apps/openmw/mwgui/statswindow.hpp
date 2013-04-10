@@ -22,7 +22,7 @@ namespace MWGui
 
             typedef std::vector<int> SkillList;
 
-            StatsWindow(MWBase::WindowManager& parWindowManager);
+            StatsWindow();
 
             /// automatically updates all the data in the stats window, but only if it has changed.
             void onFrame();

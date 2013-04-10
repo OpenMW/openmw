@@ -81,8 +81,8 @@ book formatText(std::string text,book mBook,int maxLine, int lineSize)
 }
 
 
-MWGui::JournalWindow::JournalWindow (MWBase::WindowManager& parWindowManager)
-    : WindowBase("openmw_journal.layout", parWindowManager)
+MWGui::JournalWindow::JournalWindow ()
+    : WindowBase("openmw_journal.layout")
     , mPageNumber(0)
 {
     mMainWidget->setVisible(false);

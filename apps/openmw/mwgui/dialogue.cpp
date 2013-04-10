@@ -55,8 +55,8 @@ bool sortByLength (const std::string& left, const std::string& right)
 
 
 
-PersuasionDialog::PersuasionDialog(MWBase::WindowManager &parWindowManager)
-    : WindowModal("openmw_persuasion_dialog.layout", parWindowManager)
+PersuasionDialog::PersuasionDialog()
+    : WindowModal("openmw_persuasion_dialog.layout")
 {
     getWidget(mCancelButton, "CancelButton");
     getWidget(mAdmireButton, "AdmireButton");
@@ -124,9 +124,9 @@ void PersuasionDialog::open()
 
 // --------------------------------------------------------------------------------------------------
 
-DialogueWindow::DialogueWindow(MWBase::WindowManager& parWindowManager)
-    : WindowBase("openmw_dialogue_window.layout", parWindowManager)
-    , mPersuasionDialog(parWindowManager)
+DialogueWindow::DialogueWindow()
+    : WindowBase("openmw_dialogue_window.layout")
+    , mPersuasionDialog()
     , mEnabled(false)
     , mServices(0)
 {

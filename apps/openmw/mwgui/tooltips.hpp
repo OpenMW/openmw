@@ -39,7 +39,7 @@ namespace MWGui
     class ToolTips : public OEngine::GUI::Layout
     {
     public:
-        ToolTips(MWBase::WindowManager* windowManager);
+        ToolTips();
 
         void onFrame(float frameDuration);
 

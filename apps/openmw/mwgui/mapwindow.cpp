@@ -262,8 +262,8 @@ void LocalMapBase::setPlayerDir(const float x, const float y)
 
 // ------------------------------------------------------------------------------------------
 
-MapWindow::MapWindow(MWBase::WindowManager& parWindowManager, const std::string& cacheDir)
-    : MWGui::WindowPinnableBase("openmw_map_window.layout", parWindowManager)
+MapWindow::MapWindow(const std::string& cacheDir)
+    : MWGui::WindowPinnableBase("openmw_map_window.layout")
     , mGlobal(false)
 {
     setCoord(500,0,320,300);

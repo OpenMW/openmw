@@ -17,7 +17,7 @@ namespace MWGui
     class EnchantingDialog : public WindowBase, public ReferenceInterface, public EffectEditorBase
     {
     public:
-        EnchantingDialog(MWBase::WindowManager& parWindowManager);
+        EnchantingDialog();
         virtual ~EnchantingDialog();
 
         virtual void open();

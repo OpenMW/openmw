@@ -12,7 +12,7 @@ namespace MWGui
 class MerchantRepair : public WindowBase
 {
 public:
-    MerchantRepair(MWBase::WindowManager &parWindowManager);
+    MerchantRepair();
 
     virtual void open();
 

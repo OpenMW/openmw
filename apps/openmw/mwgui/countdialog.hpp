@@ -8,7 +8,7 @@ namespace MWGui
     class CountDialog : public WindowModal
     {
         public:
-            CountDialog(MWBase::WindowManager& parWindowManager);
+            CountDialog();
             void open(const std::string& item, const std::string& message, const int maxCount);
 
             typedef MyGUI::delegates::CMultiDelegate2<MyGUI::Widget*, int> EventHandle_WidgetInt;

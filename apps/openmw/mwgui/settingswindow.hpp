@@ -13,7 +13,7 @@ namespace MWGui
     class SettingsWindow : public WindowBase
     {
         public:
-            SettingsWindow(MWBase::WindowManager& parWindowManager);
+            SettingsWindow();
 
             virtual void open();
 

@@ -9,7 +9,7 @@ namespace MWGui
     class LevelupDialog : public WindowBase
     {
     public:
-        LevelupDialog(MWBase::WindowManager& parWindowManager);
+        LevelupDialog();
 
         virtual void open();
 

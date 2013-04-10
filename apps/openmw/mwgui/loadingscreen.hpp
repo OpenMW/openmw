@@ -11,7 +11,7 @@ namespace MWGui
     class LoadingScreen : public WindowBase
     {
     public:
-        LoadingScreen(Ogre::SceneManager* sceneMgr, Ogre::RenderWindow* rw, MWBase::WindowManager& parWindowManager);
+        LoadingScreen(Ogre::SceneManager* sceneMgr, Ogre::RenderWindow* rw);
         virtual ~LoadingScreen();
 
         void setLoadingProgress (const std::string& stage, int depth, int current, int total);

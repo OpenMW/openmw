@@ -26,7 +26,7 @@ namespace MWGui
     class RaceDialog : public WindowModal
     {
     public:
-        RaceDialog(MWBase::WindowManager& parWindowManager);
+        RaceDialog();
 
         enum Gender
         {

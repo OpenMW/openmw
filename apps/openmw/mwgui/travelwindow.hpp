@@ -23,7 +23,7 @@ namespace MWGui
     class TravelWindow : public ReferenceInterface, public WindowBase
     {
         public:
-            TravelWindow(MWBase::WindowManager& parWindowManager);
+            TravelWindow();
 
             void startTravel(const MWWorld::Ptr& actor);
 

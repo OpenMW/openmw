@@ -40,8 +40,8 @@ namespace
 namespace MWGui
 {
 
-    EditEffectDialog::EditEffectDialog(MWBase::WindowManager &parWindowManager)
-        : WindowModal("openmw_edit_effect.layout", parWindowManager)
+    EditEffectDialog::EditEffectDialog()
+        : WindowModal("openmw_edit_effect.layout")
         , mEditing(false)
     {
         getWidget(mCancelButton, "CancelButton");
@@ -274,9 +274,9 @@ namespace MWGui
 
     // ------------------------------------------------------------------------------------------------
 
-    SpellCreationDialog::SpellCreationDialog(MWBase::WindowManager &parWindowManager)
-        : WindowBase("openmw_spellcreation_dialog.layout", parWindowManager)
-        , EffectEditorBase(parWindowManager)
+    SpellCreationDialog::SpellCreationDialog()
+        : WindowBase("openmw_spellcreation_dialog.layout")
+        , EffectEditorBase()
     {
         getWidget(mNameEdit, "NameEdit");
         getWidget(mMagickaCost, "MagickaCost");
@@ -412,8 +412,8 @@ namespace MWGui
     // ------------------------------------------------------------------------------------------------
 
 
-    EffectEditorBase::EffectEditorBase(MWBase::WindowManager& parWindowManager)
-        : mAddEffectDialog(parWindowManager)
+    EffectEditorBase::EffectEditorBase()
+        : mAddEffectDialog()
         , mSelectAttributeDialog(NULL)
         , mSelectSkillDialog(NULL)
     {
@@ -541,7 +541,7 @@ namespace MWGui
         if (effect->mData.mFlags & ESM::MagicEffect::TargetSkill)
         {
             delete mSelectSkillDialog;
-            mSelectSkillDialog = new SelectSkillDialog(*MWBase::Environment::get().getWindowManager ());
+            mSelectSkillDialog = new SelectSkillDialog();
             mSelectSkillDialog->eventCancel += MyGUI::newDelegate(this, &SpellCreationDialog::onAttributeOrSkillCancel);
             mSelectSkillDialog->eventItemSelected += MyGUI::newDelegate(this, &SpellCreationDialog::onSelectSkill);
             mSelectSkillDialog->setVisible (true);
@@ -549,7 +549,7 @@ namespace MWGui
         else if (effect->mData.mFlags & ESM::MagicEffect::TargetAttribute)
         {
             delete mSelectAttributeDialog;
-            mSelectAttributeDialog = new SelectAttributeDialog(*MWBase::Environment::get().getWindowManager ());
+            mSelectAttributeDialog = new SelectAttributeDialog();
             mSelectAttributeDialog->eventCancel += MyGUI::newDelegate(this, &SpellCreationDialog::onAttributeOrSkillCancel);
             mSelectAttributeDialog->eventItemSelected += MyGUI::newDelegate(this, &SpellCreationDialog::onSelectAttribute);
             mSelectAttributeDialog->setVisible (true);

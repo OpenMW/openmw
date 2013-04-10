@@ -15,9 +15,9 @@ namespace MWGui
 {
 
 
-    EnchantingDialog::EnchantingDialog(MWBase::WindowManager &parWindowManager)
-        : WindowBase("openmw_enchanting_dialog.layout", parWindowManager)
-        , EffectEditorBase(parWindowManager)
+    EnchantingDialog::EnchantingDialog()
+        : WindowBase("openmw_enchanting_dialog.layout")
+        , EffectEditorBase()
         , mItemSelectionDialog(NULL)
     {
         getWidget(mName, "NameEdit");
@@ -139,7 +139,7 @@ namespace MWGui
     {
         delete mItemSelectionDialog;
         mItemSelectionDialog = new ItemSelectionDialog("#{sEnchantItems}",
-            ContainerBase::Filter_Apparel|ContainerBase::Filter_Weapon|ContainerBase::Filter_NoMagic, *MWBase::Environment::get().getWindowManager());
+            ContainerBase::Filter_Apparel|ContainerBase::Filter_Weapon|ContainerBase::Filter_NoMagic);
         mItemSelectionDialog->eventItemSelected += MyGUI::newDelegate(this, &EnchantingDialog::onItemSelected);
         mItemSelectionDialog->eventDialogCanceled += MyGUI::newDelegate(this, &EnchantingDialog::onItemCancel);
         mItemSelectionDialog->setVisible(true);
@@ -227,7 +227,7 @@ namespace MWGui
     {
         delete mItemSelectionDialog;
         mItemSelectionDialog = new ItemSelectionDialog("#{sSoulGemsWithSouls}",
-            ContainerBase::Filter_Misc|ContainerBase::Filter_ChargedSoulstones, *MWBase::Environment::get().getWindowManager());
+            ContainerBase::Filter_Misc|ContainerBase::Filter_ChargedSoulstones);
         mItemSelectionDialog->eventItemSelected += MyGUI::newDelegate(this, &EnchantingDialog::onSoulSelected);
         mItemSelectionDialog->eventDialogCanceled += MyGUI::newDelegate(this, &EnchantingDialog::onSoulCancel);
         mItemSelectionDialog->setVisible(true);

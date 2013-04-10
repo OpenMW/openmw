@@ -19,7 +19,7 @@
 using namespace MWGui;
 using namespace MyGUI;
 
-ToolTips::ToolTips(MWBase::WindowManager* windowManager) :
+ToolTips::ToolTips() :
     Layout("openmw_tooltips.layout")
     , mGameMode(true)
     , mFullHelp(false)

@@ -12,7 +12,7 @@ namespace MWGui
 class Repair : public WindowBase
 {
 public:
-    Repair(MWBase::WindowManager &parWindowManager);
+    Repair();
 
     virtual void open();
 

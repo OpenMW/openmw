@@ -15,7 +15,7 @@ namespace MWGui
     class WindowBase: public OEngine::GUI::Layout
     {
         public:
-        WindowBase(const std::string& parLayout, MWBase::WindowManager& parWindowManager);
+        WindowBase(const std::string& parLayout);
 
         // Events
         typedef MyGUI::delegates::CMultiDelegate1<WindowBase*> EventHandle_WindowBase;
@@ -38,7 +38,7 @@ namespace MWGui
     class WindowModal : public WindowBase
     {
     public:
-        WindowModal(const std::string& parLayout, MWBase::WindowManager& parWindowManager);
+        WindowModal(const std::string& parLayout);
         virtual void open();
         virtual void close();
     };

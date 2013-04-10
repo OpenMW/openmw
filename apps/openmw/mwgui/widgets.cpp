@@ -34,8 +34,7 @@ void MWGui::Widgets::fixTexturePath(std::string &path)
 /* MWSkill */
 
 MWSkill::MWSkill()
-    : mManager(NULL)
-    , mSkillId(ESM::Skill::Length)
+    : mSkillId(ESM::Skill::Length)
     , mSkillNameWidget(NULL)
     , mSkillValueWidget(NULL)
 {
@@ -65,7 +64,7 @@ void MWSkill::setSkillValue(const SkillValue& value)
 
 void MWSkill::updateWidgets()
 {
-    if (mSkillNameWidget && mManager)
+    if (mSkillNameWidget)
     {
         if (mSkillId == ESM::Skill::Length)
         {
@@ -73,7 +72,7 @@ void MWSkill::updateWidgets()
         }
         else
         {
-            const std::string &name = mManager->getGameSettingString(ESM::Skill::sSkillNameIds[mSkillId], "");
+            const std::string &name = MWBase::Environment::get().getWindowManager()->getGameSettingString(ESM::Skill::sSkillNameIds[mSkillId], "");
             static_cast<MyGUI::TextBox*>(mSkillNameWidget)->setCaption(name);
         }
     }
@@ -126,8 +125,7 @@ void MWSkill::initialiseOverride()
 /* MWAttribute */
 
 MWAttribute::MWAttribute()
-    : mManager(NULL)
-    , mId(-1)
+    : mId(-1)
     , mAttributeNameWidget(NULL)
     , mAttributeValueWidget(NULL)
 {
@@ -152,7 +150,7 @@ void MWAttribute::onClicked(MyGUI::Widget* _sender)
 
 void MWAttribute::updateWidgets()
 {
-    if (mAttributeNameWidget && mManager)
+    if (mAttributeNameWidget)
     {
         if (mId < 0 || mId >= 8)
         {
@@ -170,7 +168,7 @@ void MWAttribute::updateWidgets()
                 "sAttributePersonality",
                 "sAttributeLuck"
             };
-            const std::string &name = mManager->getGameSettingString(attributes[mId], "");
+            const std::string &name = MWBase::Environment::get().getWindowManager()->getGameSettingString(attributes[mId], "");
             static_cast<MyGUI::TextBox*>(mAttributeNameWidget)->setCaption(name);
         }
     }

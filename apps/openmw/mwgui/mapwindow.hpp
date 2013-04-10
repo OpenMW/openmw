@@ -65,7 +65,7 @@ namespace MWGui
     class MapWindow : public MWGui::WindowPinnableBase, public LocalMapBase
     {
     public:
-        MapWindow(MWBase::WindowManager& parWindowManager, const std::string& cacheDir);
+        MapWindow(const std::string& cacheDir);
         virtual ~MapWindow();
 
         void setCellName(const std::string& cellName);

@@ -15,7 +15,7 @@ namespace MWGui
     class EditEffectDialog : public WindowModal
     {
     public:
-        EditEffectDialog(MWBase::WindowManager& parWindowManager);
+        EditEffectDialog();
 
         virtual void open();
 
@@ -83,7 +83,7 @@ namespace MWGui
     class EffectEditorBase
     {
     public:
-        EffectEditorBase(MWBase::WindowManager& parWindowManager);
+        EffectEditorBase();
 
 
     protected:
@@ -123,7 +123,7 @@ namespace MWGui
     class SpellCreationDialog : public WindowBase, public ReferenceInterface, public EffectEditorBase
     {
     public:
-        SpellCreationDialog(MWBase::WindowManager& parWindowManager);
+        SpellCreationDialog();
 
         virtual void open();
 

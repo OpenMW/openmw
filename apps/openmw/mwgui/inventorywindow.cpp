@@ -30,9 +30,9 @@
 namespace MWGui
 {
 
-    InventoryWindow::InventoryWindow(MWBase::WindowManager& parWindowManager,DragAndDrop* dragAndDrop)
+    InventoryWindow::InventoryWindow(DragAndDrop* dragAndDrop)
         : ContainerBase(dragAndDrop)
-        , WindowPinnableBase("openmw_inventory_window.layout", parWindowManager)
+        , WindowPinnableBase("openmw_inventory_window.layout")
         , mTrading(false)
         , mLastXSize(0)
         , mLastYSize(0)
