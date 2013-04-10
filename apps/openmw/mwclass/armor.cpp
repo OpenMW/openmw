@@ -292,12 +292,12 @@ namespace MWClass
         ref->mBase = record;
     }
 
-    int Armor::canBeEquipped(const MWWorld::Ptr &npc, const MWWorld::Ptr &item) const
+    int Armor::canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const
     {
         MWWorld::InventoryStore& invStore = MWWorld::Class::get(npc).getInventoryStore(npc);
 
         // slots that this item can be equipped in
-        std::pair<std::vector<int>, bool> slots = MWWorld::Class::get(item).getEquipmentSlots(item);
+        std::pair<std::vector<int>, bool> slots = MWWorld::Class::get(ptr).getEquipmentSlots(ptr);
 
         std::string npcRace = npc.get<ESM::NPC>()->mBase->mRace;
 
@@ -309,7 +309,7 @@ namespace MWClass
             const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npcRace);
             if(race->mData.mFlags & ESM::Race::Beast)
             {
-                std::vector<ESM::PartReference> parts = item.get<ESM::Armor>()->mBase->mParts.mParts;
+                std::vector<ESM::PartReference> parts = ptr.get<ESM::Armor>()->mBase->mParts.mParts;
 
                 if(*slot == MWWorld::InventoryStore::Slot_Helmet)
                 {

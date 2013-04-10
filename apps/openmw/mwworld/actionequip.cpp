@@ -21,7 +21,7 @@ namespace MWWorld
         MWWorld::Ptr object = getTarget();
         MWWorld::InventoryStore& invStore = MWWorld::Class::get(actor).getInventoryStore(actor);
 
-        switch(MWWorld::Class::get (object).canBeEquipped (actor, object))
+        switch(MWWorld::Class::get (object).canBeEquipped (object, actor))
         {
             case 0:
                 return;
