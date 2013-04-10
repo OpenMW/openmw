@@ -542,6 +542,42 @@ namespace MWScript
                 }
         };
 
+        template<class R>
+        class OpRotate : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+                    Interpreter::Type_Float rotation = (runtime[0].mFloat/80); //It works this way, don't ask me why
+                    runtime.pop();
+
+                    float ax = Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees();
+                    float ay = Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees();
+                    float az = Ogre::Radian(ptr.getRefData().getPosition().rot[2]).valueDegrees();
+
+                    //Axis in morrowind are inverted
+                    if (axis == "y")
+                    {
+                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax+rotation,ay,az);
+                    }
+                    else if (axis == "x")
+                    {
+                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay+rotation,az);
+                    }
+                    else if (axis == "z")
+                    {
+                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,az+rotation);
+                    }
+                    else
+                        throw std::runtime_error ("invalid rotation axis: " + axis);
+                }
+        };
+
         const int opcodeSetScale = 0x2000164;
         const int opcodeSetScaleExplicit = 0x2000165;
         const int opcodeSetAngle = 0x2000166;
@@ -568,6 +604,8 @@ namespace MWScript
         const int opcodePlaceAtMeExplicit = 0x200019e;
         const int opcodeModScale = 0x20001e3;
         const int opcodeModScaleExplicit = 0x20001e4;
+        const int opcodeRotate = 0x20001ff;
+        const int opcodeRotateExplicit = 0x2000200;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -585,6 +623,7 @@ namespace MWScript
             extensions.registerInstruction("placeatpc","clfl",opcodePlaceAtPc);
             extensions.registerInstruction("placeatme","clfl",opcodePlaceAtMe,opcodePlaceAtMeExplicit);
             extensions.registerInstruction("modscale","f",opcodeModScale,opcodeModScaleExplicit);
+            extensions.registerInstruction("rotate","cf",opcodeRotate,opcodeRotateExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -614,6 +653,8 @@ namespace MWScript
             interpreter.installSegment5(opcodePlaceAtMeExplicit,new OpPlaceAtMe<ExplicitRef>);
             interpreter.installSegment5(opcodeModScale,new OpModScale<ImplicitRef>);
             interpreter.installSegment5(opcodeModScaleExplicit,new OpModScale<ExplicitRef>);
+            interpreter.installSegment5(opcodeRotate,new OpRotate<ImplicitRef>);
+            interpreter.installSegment5(opcodeRotateExplicit,new OpRotate<ExplicitRef>);
         }
     }
 }
