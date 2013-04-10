@@ -12,6 +12,8 @@
 #include "../../model/world/commands.hpp"
 #include "../../model/world/idtable.hpp"
 
+#include "scripthighlighter.hpp"
+
 CSVWorld::ScriptSubView::ChangeLock::ChangeLock (ScriptSubView& view) : mView (view)
 {
     ++mView.mChangeLocked;
@@ -55,6 +57,8 @@ CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc:
 
     connect (mModel, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
         this, SLOT (rowsAboutToBeRemoved (const QModelIndex&, int, int)));
+
+    new ScriptHighlighter (mEditor->document());
 }
 
 void CSVWorld::ScriptSubView::setEditLock (bool locked)
