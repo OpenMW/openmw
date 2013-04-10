@@ -1543,7 +1543,8 @@ class NIFObjectLoader : Ogre::ManualResourceLoader
                                                                     vertprop, zprop, specprop,
                                                                     wireprop, needTangents));
 
-            partsys->setDefaultDimensions(particledata->particleSize, particledata->particleSize);
+            partsys->setDefaultDimensions(particledata->particleRadius*2.0f,
+                                          particledata->particleRadius*2.0f);
             partsys->setCullIndividually(false);
             partsys->setParticleQuota(particledata->numParticles);
 
