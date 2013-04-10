@@ -93,6 +93,7 @@ CSMWorld::Data::Data()
     mScripts.addColumn (new StringIdColumn<ESM::Script>);
     mScripts.addColumn (new RecordStateColumn<ESM::Script>);
     mScripts.addColumn (new FixedRecordTypeColumn<ESM::Script> (UniversalId::Type_Script));
+    mScripts.addColumn (new ScriptColumn<ESM::Script>);
 
     mRegions.addColumn (new StringIdColumn<ESM::Region>);
     mRegions.addColumn (new RecordStateColumn<ESM::Region>);
