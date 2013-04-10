@@ -53,8 +53,8 @@ CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc:
     connect (mModel, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
         this, SLOT (dataChanged (const QModelIndex&, const QModelIndex&)));
 
-//    connect (mModel, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int start, int end)),
-//        this, SLOT (rowsAboutToBeRemoved (const QModelIndex&, int start, int end)));
+    connect (mModel, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
+        this, SLOT (rowsAboutToBeRemoved (const QModelIndex&, int, int)));
 }
 
 void CSVWorld::ScriptSubView::setEditLock (bool locked)
@@ -88,5 +88,8 @@ void CSVWorld::ScriptSubView::dataChanged (const QModelIndex& topLeft, const QMo
 
 void CSVWorld::ScriptSubView::rowsAboutToBeRemoved (const QModelIndex& parent, int start, int end)
 {
+    QModelIndex index = mModel->getModelIndex (getUniversalId().getId(), mColumn);
 
+    if (!parent.isValid() && index.row()>=start && index.row()<=end)
+        deleteLater();
 }
