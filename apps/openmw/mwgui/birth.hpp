@@ -1,7 +1,7 @@
 #ifndef MWGUI_BIRTH_H
 #define MWGUI_BIRTH_H
 
-#include "window_base.hpp"
+#include "windowbase.hpp"
 
 /*
   This file contains the dialog for choosing a birth sign.

@@ -109,14 +109,14 @@ namespace MWGui
         {
             // open assign dialog
             if (!mAssignDialog)
-                mAssignDialog = new QuickKeysMenuAssign(mWindowManager, this);
+                mAssignDialog = new QuickKeysMenuAssign(*MWBase::Environment::get().getWindowManager(), this);
             mAssignDialog->setVisible (true);
         }
     }
 
     void QuickKeysMenu::onOkButtonClicked (MyGUI::Widget *sender)
     {
-        mWindowManager.removeGuiMode(GM_QuickKeysMenu);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_QuickKeysMenu);
     }
 
 
@@ -124,7 +124,7 @@ namespace MWGui
     {
         if (!mItemSelectionDialog )
         {
-            mItemSelectionDialog = new ItemSelectionDialog("#{sQuickMenu6}", ContainerBase::Filter_All, mWindowManager);
+            mItemSelectionDialog = new ItemSelectionDialog("#{sQuickMenu6}", ContainerBase::Filter_All, *MWBase::Environment::get().getWindowManager());
             mItemSelectionDialog->eventItemSelected += MyGUI::newDelegate(this, &QuickKeysMenu::onAssignItem);
             mItemSelectionDialog->eventDialogCanceled += MyGUI::newDelegate(this, &QuickKeysMenu::onAssignItemCancel);
         }
@@ -139,7 +139,7 @@ namespace MWGui
     {
         if (!mMagicSelectionDialog )
         {
-            mMagicSelectionDialog = new MagicSelectionDialog(mWindowManager, this);
+            mMagicSelectionDialog = new MagicSelectionDialog(*MWBase::Environment::get().getWindowManager(), this);
         }
         mMagicSelectionDialog->setVisible(true);
 
@@ -281,7 +281,7 @@ namespace MWGui
             std::string spellId = button->getChildAt(0)->getUserString("Spell");
             spells.setSelectedSpell(spellId);
             store.setSelectedEnchantItem(store.end());
-            mWindowManager.setSelectedSpell(spellId, int(MWMechanics::getSpellSuccessChance(spellId, player)));
+            MWBase::Environment::get().getWindowManager()->setSelectedSpell(spellId, int(MWMechanics::getSpellSuccessChance(spellId, player)));
         }
         else if (type == Type_Item)
         {
@@ -303,11 +303,11 @@ namespace MWGui
             // the "Take" button should not be visible.
             // NOTE: the take button is "reset" when the window opens, so we can safely do the following
             // without screwing up future book windows
-            mWindowManager.getBookWindow()->setTakeButtonShow(false);
-            mWindowManager.getScrollWindow()->setTakeButtonShow(false);
+            MWBase::Environment::get().getWindowManager()->getBookWindow()->setTakeButtonShow(false);
+            MWBase::Environment::get().getWindowManager()->getScrollWindow()->setTakeButtonShow(false);
 
             // since we changed equipping status, update the inventory window
-            mWindowManager.getInventoryWindow()->drawItems();
+            MWBase::Environment::get().getWindowManager()->getInventoryWindow()->drawItems();
         }
         else if (type == Type_MagicItem)
         {
@@ -341,12 +341,12 @@ namespace MWGui
                 action.execute (MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer ());
 
                 // since we changed equipping status, update the inventory window
-                mWindowManager.getInventoryWindow()->drawItems();
+                MWBase::Environment::get().getWindowManager()->getInventoryWindow()->drawItems();
             }
 
             store.setSelectedEnchantItem(it);
             spells.setSelectedSpell("");
-            mWindowManager.setSelectedEnchantItem(item);
+            MWBase::Environment::get().getWindowManager()->setSelectedEnchantItem(item);
         }
     }
 

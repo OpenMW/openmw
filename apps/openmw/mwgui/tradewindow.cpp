@@ -85,7 +85,7 @@ namespace MWGui
         mCurrentBalance = 0;
         mCurrentMerchantOffer = 0;
 
-        mWindowManager.getInventoryWindow()->startTrade();
+        MWBase::Environment::get().getWindowManager()->getInventoryWindow()->startTrade();
 
         mBoughtItems.clear();
 
@@ -127,7 +127,7 @@ namespace MWGui
     {
         bool goldFound = false;
         MWWorld::Ptr gold;
-        MWWorld::ContainerStore& playerStore = mWindowManager.getInventoryWindow()->getContainerStore();
+        MWWorld::ContainerStore& playerStore = MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getContainerStore();
 
         for (MWWorld::ContainerStoreIterator it = playerStore.begin();
                 it != playerStore.end(); ++it)
@@ -172,7 +172,7 @@ namespace MWGui
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
         // were there any items traded at all?
-        MWWorld::ContainerStore& playerBought = mWindowManager.getInventoryWindow()->getBoughtItems();
+        MWWorld::ContainerStore& playerBought = MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getBoughtItems();
         MWWorld::ContainerStore& merchantBought = getBoughtItems();
         if (playerBought.begin() == playerBought.end() && merchantBought.begin() == merchantBought.end())
         {
@@ -183,7 +183,7 @@ namespace MWGui
         }
 
         // check if the player can afford this
-        if (mCurrentBalance < 0 && mWindowManager.getInventoryWindow()->getPlayerGold() < std::abs(mCurrentBalance))
+        if (mCurrentBalance < 0 && MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getPlayerGold() < std::abs(mCurrentBalance))
         {
             // user notification
             MWBase::Environment::get().getWindowManager()->
@@ -258,7 +258,7 @@ namespace MWGui
 
         // success! make the item transfer.
         transferBoughtItems();
-        mWindowManager.getInventoryWindow()->transferBoughtItems();
+        MWBase::Environment::get().getWindowManager()->getInventoryWindow()->transferBoughtItems();
 
         // add or remove gold from the player.
         if (mCurrentBalance != 0)
@@ -267,17 +267,17 @@ namespace MWGui
         std::string sound = "Item Gold Up";
         MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
 
-        mWindowManager.removeGuiMode(GM_Barter);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Barter);
     }
 
     void TradeWindow::onCancelButtonClicked(MyGUI::Widget* _sender)
     {
         // i give you back your stuff!
-        returnBoughtItems(mWindowManager.getInventoryWindow()->getContainerStore());
+        returnBoughtItems(MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getContainerStore());
         // now gimme back my stuff!
-        mWindowManager.getInventoryWindow()->returnBoughtItems(MWWorld::Class::get(mPtr).getContainerStore(mPtr));
+        MWBase::Environment::get().getWindowManager()->getInventoryWindow()->returnBoughtItems(MWWorld::Class::get(mPtr).getContainerStore(mPtr));
 
-        mWindowManager.removeGuiMode(GM_Barter);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Barter);
     }
 
     void TradeWindow::onMaxSaleButtonClicked(MyGUI::Widget* _sender)
@@ -321,7 +321,7 @@ namespace MWGui
 
     void TradeWindow::updateLabels()
     {
-        mPlayerGold->setCaptionWithReplacing("#{sYourGold} " + boost::lexical_cast<std::string>(mWindowManager.getInventoryWindow()->getPlayerGold()));
+        mPlayerGold->setCaptionWithReplacing("#{sYourGold} " + boost::lexical_cast<std::string>(MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getPlayerGold()));
 
         if (mCurrentBalance > 0)
         {
@@ -422,8 +422,8 @@ namespace MWGui
     void TradeWindow::onReferenceUnavailable()
     {
         // remove both Trade and Dialogue (since you always trade with the NPC/creature that you have previously talked to)
-        mWindowManager.removeGuiMode(GM_Barter);
-        mWindowManager.removeGuiMode(GM_Dialogue);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Barter);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Dialogue);
     }
 
     int TradeWindow::getMerchantGold()

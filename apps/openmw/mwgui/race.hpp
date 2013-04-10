@@ -8,7 +8,7 @@
 
 #include "../mwrender/characterpreview.hpp"
 
-#include "window_base.hpp"
+#include "windowbase.hpp"
 
 
 namespace MWGui

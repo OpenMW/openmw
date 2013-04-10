@@ -48,7 +48,7 @@ namespace MWGui
 
         MyGUI::Button* toAdd =
             mSpellsView->createWidget<MyGUI::Button>(
-                (price>mWindowManager.getInventoryWindow()->getPlayerGold()) ? "SandTextGreyedOut" : "SandTextButton",
+                (price>MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getPlayerGold()) ? "SandTextGreyedOut" : "SandTextButton",
                 0,
                 mCurrentY,
                 200,
@@ -120,13 +120,13 @@ namespace MWGui
     {
         int price = *_sender->getUserData<int>();
 
-        if (mWindowManager.getInventoryWindow()->getPlayerGold()>=price)
+        if (MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getPlayerGold()>=price)
         {
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
             MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
             MWMechanics::Spells& spells = stats.getSpells();
             spells.add (mSpellsWidgetMap.find(_sender)->second);
-            mWindowManager.getTradeWindow()->addOrRemoveGold(-price);
+            MWBase::Environment::get().getWindowManager()->getTradeWindow()->addOrRemoveGold(-price);
             startSpellBuying(mPtr);
 
             MWBase::Environment::get().getSoundManager()->playSound ("Item Gold Up", 1.0, 1.0);
@@ -135,12 +135,12 @@ namespace MWGui
 
     void SpellBuyingWindow::onCancelButtonClicked(MyGUI::Widget* _sender)
     {
-        mWindowManager.removeGuiMode(GM_SpellBuying);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_SpellBuying);
     }
 
     void SpellBuyingWindow::updateLabels()
     {
-        mPlayerGold->setCaptionWithReplacing("#{sGold}: " + boost::lexical_cast<std::string>(mWindowManager.getInventoryWindow()->getPlayerGold()));
+        mPlayerGold->setCaptionWithReplacing("#{sGold}: " + boost::lexical_cast<std::string>(MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getPlayerGold()));
         mPlayerGold->setCoord(8,
                               mPlayerGold->getTop(),
                               mPlayerGold->getTextSize().width,
@@ -150,8 +150,8 @@ namespace MWGui
     void SpellBuyingWindow::onReferenceUnavailable()
     {
         // remove both Spells and Dialogue (since you always trade with the NPC/creature that you have previously talked to)
-        mWindowManager.removeGuiMode(GM_SpellBuying);
-        mWindowManager.removeGuiMode(GM_Dialogue);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_SpellBuying);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Dialogue);
     }
 
     void SpellBuyingWindow::onMouseWheel(MyGUI::Widget* _sender, int _rel)

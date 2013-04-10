@@ -1,7 +1,7 @@
 #ifndef MWGUI_TRAININGWINDOW_H
 #define MWGUI_TRAININGWINDOW_H
 
-#include "window_base.hpp"
+#include "windowbase.hpp"
 #include "referenceinterface.hpp"
 
 namespace MWGui

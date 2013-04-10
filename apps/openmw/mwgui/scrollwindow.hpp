@@ -1,7 +1,7 @@
 #ifndef MWGUI_SCROLLWINDOW_H
 #define MWGUI_SCROLLWINDOW_H
 
-#include "window_base.hpp"
+#include "windowbase.hpp"
 #include "imagebutton.hpp"
 
 #include "../mwworld/ptr.hpp"

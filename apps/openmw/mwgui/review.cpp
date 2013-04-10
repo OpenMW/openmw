@@ -53,15 +53,15 @@ ReviewDialog::ReviewDialog(MWBase::WindowManager& parWindowManager)
 
     // Setup dynamic stats
     getWidget(mHealth, "Health");
-    mHealth->setTitle(mWindowManager.getGameSettingString("sHealth", ""));
+    mHealth->setTitle(MWBase::Environment::get().getWindowManager()->getGameSettingString("sHealth", ""));
     mHealth->setValue(45, 45);
 
     getWidget(mMagicka, "Magicka");
-    mMagicka->setTitle(mWindowManager.getGameSettingString("sMagic", ""));
+    mMagicka->setTitle(MWBase::Environment::get().getWindowManager()->getGameSettingString("sMagic", ""));
     mMagicka->setValue(50, 50);
 
     getWidget(mFatigue, "Fatigue");
-    mFatigue->setTitle(mWindowManager.getGameSettingString("sFatigue", ""));
+    mFatigue->setTitle(MWBase::Environment::get().getWindowManager()->getGameSettingString("sFatigue", ""));
     mFatigue->setValue(160, 160);
 
     // Setup attributes
@@ -71,7 +71,6 @@ ReviewDialog::ReviewDialog(MWBase::WindowManager& parWindowManager)
     {
         getWidget(attribute, std::string("Attribute") + boost::lexical_cast<std::string>(idx));
         mAttributeWidgets.insert(std::make_pair(static_cast<int>(ESM::Attribute::sAttributeIds[idx]), attribute));
-        attribute->setWindowManager(&mWindowManager);
         attribute->setAttributeId(ESM::Attribute::sAttributeIds[idx]);
         attribute->setAttributeValue(MWAttribute::AttributeValue(0, 0));
     }
@@ -277,7 +276,7 @@ void ReviewDialog::addSkills(const SkillList &skills, const std::string &titleId
         addSeparator(coord1, coord2);
     }
 
-    addGroup(mWindowManager.getGameSettingString(titleId, titleDefault), coord1, coord2);
+    addGroup(MWBase::Environment::get().getWindowManager()->getGameSettingString(titleId, titleDefault), coord1, coord2);
 
     SkillList::const_iterator end = skills.end();
     for (SkillList::const_iterator it = skills.begin(); it != end; ++it)
@@ -296,7 +295,7 @@ void ReviewDialog::addSkills(const SkillList &skills, const std::string &titleId
             state = "increased";
         else if (modified < base)
             state = "decreased";
-        MyGUI::TextBox* widget = addValueItem(mWindowManager.getGameSettingString(skillNameId, skillNameId), boost::lexical_cast<std::string>(static_cast<int>(modified)), state, coord1, coord2);
+        MyGUI::TextBox* widget = addValueItem(MWBase::Environment::get().getWindowManager()->getGameSettingString(skillNameId, skillNameId), boost::lexical_cast<std::string>(static_cast<int>(modified)), state, coord1, coord2);
 
         for (int i=0; i<2; ++i)
         {

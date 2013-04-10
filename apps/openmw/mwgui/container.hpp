@@ -3,7 +3,7 @@
 
 #include "../mwworld/esmstore.hpp"
 
-#include "window_base.hpp"
+#include "windowbase.hpp"
 #include "referenceinterface.hpp"
 
 #include "../mwclass/container.hpp"

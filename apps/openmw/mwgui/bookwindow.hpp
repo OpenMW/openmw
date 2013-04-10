@@ -1,7 +1,7 @@
 #ifndef MWGUI_BOOKWINDOW_H
 #define MWGUI_BOOKWINDOW_H
 
-#include "window_base.hpp"
+#include "windowbase.hpp"
 
 #include "../mwworld/ptr.hpp"
 

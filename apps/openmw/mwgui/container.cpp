@@ -751,7 +751,7 @@ void ContainerWindow::onDisposeCorpseButtonClicked(MyGUI::Widget *sender)
 
         /// \todo I don't think this is the correct flag to check
         if (MWWorld::Class::get(mPtr).isEssential(mPtr))
-            mWindowManager.messageBox("#{sDisposeCorpseFail}");
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sDisposeCorpseFail}");
         else
             MWBase::Environment::get().getWorld()->deleteObject(mPtr);
 

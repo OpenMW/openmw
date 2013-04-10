@@ -218,8 +218,7 @@ void MWAttribute::initialiseOverride()
 /* MWSpell */
 
 MWSpell::MWSpell()
-    : mWindowManager(NULL)
-    , mSpellNameWidget(NULL)
+    : mSpellNameWidget(NULL)
 {
 }
 
@@ -242,7 +241,6 @@ void MWSpell::createEffectWidgets(std::vector<MyGUI::Widget*> &effects, MyGUI::W
     for (std::vector<ESM::ENAMstruct>::const_iterator it = spell->mEffects.mList.begin(); it != end; ++it)
     {
         effect = creator->createWidget<MWSpellEffect>("MW_EffectImage", coord, MyGUI::Align::Default);
-        effect->setWindowManager(mWindowManager);
         SpellEffectParams params;
         params.mEffectID = it->mEffectID;
         params.mSkill = it->mSkill;
@@ -262,7 +260,7 @@ void MWSpell::createEffectWidgets(std::vector<MyGUI::Widget*> &effects, MyGUI::W
 
 void MWSpell::updateWidgets()
 {
-    if (mSpellNameWidget && mWindowManager)
+    if (mSpellNameWidget && MWBase::Environment::get().getWindowManager())
     {
         const MWWorld::ESMStore &store =
             MWBase::Environment::get().getWorld()->getStore();
@@ -289,8 +287,7 @@ MWSpell::~MWSpell()
 /* MWEffectList */
 
 MWEffectList::MWEffectList()
-    : mWindowManager(NULL)
-    , mEffectList(0)
+    : mEffectList(0)
 {
 }
 
@@ -311,7 +308,6 @@ void MWEffectList::createEffectWidgets(std::vector<MyGUI::Widget*> &effects, MyG
         it != mEffectList.end(); ++it)
     {
         effect = creator->createWidget<MWSpellEffect>("MW_EffectImage", coord, MyGUI::Align::Default);
-        effect->setWindowManager(mWindowManager);
         it->mIsConstant = (flags & EF_Constant) || it->mIsConstant;
         it->mNoTarget = (flags & EF_NoTarget) || it->mNoTarget;
         effect->setSpellEffect(*it);
@@ -378,8 +374,7 @@ SpellEffectList MWEffectList::effectListFromESM(const ESM::EffectList* effects)
 /* MWSpellEffect */
 
 MWSpellEffect::MWSpellEffect()
-    : mWindowManager(NULL)
-    , mImageWidget(NULL)
+    : mImageWidget(NULL)
     , mTextWidget(NULL)
     , mRequestedWidth(0)
 {
@@ -409,22 +404,22 @@ void MWSpellEffect::updateWidgets()
 
     assert(magicEffect);
 
-    std::string pt =  mWindowManager->getGameSettingString("spoint", "");
-    std::string pts =  mWindowManager->getGameSettingString("spoints", "");
-    std::string to =  " " + mWindowManager->getGameSettingString("sTo", "") + " ";
-    std::string sec =  " " + mWindowManager->getGameSettingString("ssecond", "");
-    std::string secs =  " " + mWindowManager->getGameSettingString("sseconds", "");
+    std::string pt =  MWBase::Environment::get().getWindowManager()->getGameSettingString("spoint", "");
+    std::string pts =  MWBase::Environment::get().getWindowManager()->getGameSettingString("spoints", "");
+    std::string to =  " " + MWBase::Environment::get().getWindowManager()->getGameSettingString("sTo", "") + " ";
+    std::string sec =  " " + MWBase::Environment::get().getWindowManager()->getGameSettingString("ssecond", "");
+    std::string secs =  " " + MWBase::Environment::get().getWindowManager()->getGameSettingString("sseconds", "");
 
     std::string effectIDStr = ESM::MagicEffect::effectIdToString(mEffectParams.mEffectID);
-    std::string spellLine = mWindowManager->getGameSettingString(effectIDStr, "");
+    std::string spellLine = MWBase::Environment::get().getWindowManager()->getGameSettingString(effectIDStr, "");
 
     if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetSkill)
     {
-        spellLine += " " + mWindowManager->getGameSettingString(ESM::Skill::sSkillNameIds[mEffectParams.mSkill], "");
+        spellLine += " " + MWBase::Environment::get().getWindowManager()->getGameSettingString(ESM::Skill::sSkillNameIds[mEffectParams.mSkill], "");
     }
     if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetAttribute)
     {
-        spellLine += " " + mWindowManager->getGameSettingString(ESM::Attribute::sGmstAttributeIds[mEffectParams.mAttribute], "");
+        spellLine += " " + MWBase::Environment::get().getWindowManager()->getGameSettingString(ESM::Attribute::sGmstAttributeIds[mEffectParams.mAttribute], "");
     }
 
     if ((mEffectParams.mMagnMin >= 0 || mEffectParams.mMagnMax >= 0) && !(magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude))
@@ -442,7 +437,7 @@ void MWSpellEffect::updateWidgets()
     {
         if (mEffectParams.mDuration >= 0 && !(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration))
         {
-            spellLine += " " + mWindowManager->getGameSettingString("sfor", "") + " " + boost::lexical_cast<std::string>(mEffectParams.mDuration) + ((mEffectParams.mDuration == 1) ? sec : secs);
+            spellLine += " " + MWBase::Environment::get().getWindowManager()->getGameSettingString("sfor", "") + " " + boost::lexical_cast<std::string>(mEffectParams.mDuration) + ((mEffectParams.mDuration == 1) ? sec : secs);
         }
 
         if (mEffectParams.mArea > 0)
@@ -453,13 +448,13 @@ void MWSpellEffect::updateWidgets()
         // potions have no target
         if (!mEffectParams.mNoTarget)
         {
-            std::string on = mWindowManager->getGameSettingString("sonword", "");
+            std::string on = MWBase::Environment::get().getWindowManager()->getGameSettingString("sonword", "");
             if (mEffectParams.mRange == ESM::RT_Self)
-                spellLine += " " + on + " " + mWindowManager->getGameSettingString("sRangeSelf", "");
+                spellLine += " " + on + " " + MWBase::Environment::get().getWindowManager()->getGameSettingString("sRangeSelf", "");
             else if (mEffectParams.mRange == ESM::RT_Touch)
-                spellLine += " " + on + " " + mWindowManager->getGameSettingString("sRangeTouch", "");
+                spellLine += " " + on + " " + MWBase::Environment::get().getWindowManager()->getGameSettingString("sRangeTouch", "");
             else if (mEffectParams.mRange == ESM::RT_Target)
-                spellLine += " " + on + " " + mWindowManager->getGameSettingString("sRangeTarget", "");
+                spellLine += " " + on + " " + MWBase::Environment::get().getWindowManager()->getGameSettingString("sRangeTarget", "");
         }
     }
 

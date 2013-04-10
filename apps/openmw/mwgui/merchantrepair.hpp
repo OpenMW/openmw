@@ -1,7 +1,7 @@
 #ifndef OPENMW_MWGUI_MERCHANTREPAIR_H
 #define OPENMW_MWGUI_MERCHANTREPAIR_H
 
-#include "window_base.hpp"
+#include "windowbase.hpp"
 #include "../mwworld/ptr.hpp"
 
 

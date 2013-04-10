@@ -46,7 +46,7 @@ BirthDialog::BirthDialog(MWBase::WindowManager& parWindowManager)
 
     MyGUI::Button* okButton;
     getWidget(okButton, "OKButton");
-    okButton->setCaption(mWindowManager.getGameSettingString("sOK", ""));
+    okButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", ""));
     okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &BirthDialog::onOkClicked);
 
     updateBirths();
@@ -59,9 +59,9 @@ void BirthDialog::setNextButtonShow(bool shown)
     getWidget(okButton, "OKButton");
 
     if (shown)
-        okButton->setCaption(mWindowManager.getGameSettingString("sNext", ""));
+        okButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sNext", ""));
     else
-        okButton->setCaption(mWindowManager.getGameSettingString("sOK", ""));
+        okButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", ""));
 }
 
 void BirthDialog::open()
@@ -221,7 +221,7 @@ void BirthDialog::updateSpells()
         if (!categories[category].spells.empty())
         {
             MyGUI::TextBox* label = mSpellArea->createWidget<MyGUI::TextBox>("SandBrightText", coord, MyGUI::Align::Default, std::string("Label"));
-            label->setCaption(mWindowManager.getGameSettingString(categories[category].label, ""));
+            label->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString(categories[category].label, ""));
             mSpellItems.push_back(label);
             coord.top += lineHeight;
 
@@ -230,7 +230,6 @@ void BirthDialog::updateSpells()
             {
                 const std::string &spellId = *it;
                 spellWidget = mSpellArea->createWidget<MWSpell>("MW_StatName", coord, MyGUI::Align::Default, std::string("Spell") + boost::lexical_cast<std::string>(i));
-                spellWidget->setWindowManager(&mWindowManager);
                 spellWidget->setSpellId(spellId);
 
                 mSpellItems.push_back(spellWidget);

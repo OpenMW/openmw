@@ -1,4 +1,4 @@
-#include "map_window.hpp"
+#include "mapwindow.hpp"
 
 #include <openengine/gui/layout.hpp>
 

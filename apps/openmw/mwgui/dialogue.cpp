@@ -18,7 +18,7 @@
 
 #include "../mwdialogue/dialoguemanagerimp.hpp"
 
-#include "dialogue_history.hpp"
+#include "dialoguehistory.hpp"
 #include "widgets.hpp"
 #include "list.hpp"
 #include "tradewindow.hpp"
@@ -89,17 +89,17 @@ void PersuasionDialog::onPersuade(MyGUI::Widget *sender)
     else if (sender == mTauntButton) type = MWBase::MechanicsManager::PT_Taunt;
     else if (sender == mBribe10Button)
     {
-        mWindowManager.getTradeWindow()->addOrRemoveGold(-10);
+        MWBase::Environment::get().getWindowManager()->getTradeWindow()->addOrRemoveGold(-10);
         type = MWBase::MechanicsManager::PT_Bribe10;
     }
     else if (sender == mBribe100Button)
     {
-        mWindowManager.getTradeWindow()->addOrRemoveGold(-100);
+        MWBase::Environment::get().getWindowManager()->getTradeWindow()->addOrRemoveGold(-100);
         type = MWBase::MechanicsManager::PT_Bribe100;
     }
     else /*if (sender == mBribe1000Button)*/
     {
-        mWindowManager.getTradeWindow()->addOrRemoveGold(-1000);
+        MWBase::Environment::get().getWindowManager()->getTradeWindow()->addOrRemoveGold(-1000);
         type = MWBase::MechanicsManager::PT_Bribe1000;
     }
 
@@ -113,7 +113,7 @@ void PersuasionDialog::open()
     WindowModal::open();
     center();
 
-    int playerGold = mWindowManager.getInventoryWindow()->getPlayerGold();
+    int playerGold = MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getPlayerGold();
 
     mBribe10Button->setEnabled (playerGold >= 10);
     mBribe100Button->setEnabled (playerGold >= 100);
@@ -251,45 +251,45 @@ void DialogueWindow::onSelectTopic(const std::string& topic, int id)
         }
         else if (topic == gmst.find("sCompanionShare")->getString())
         {
-            mWindowManager.pushGuiMode(GM_Companion);
-            mWindowManager.showCompanionWindow(mPtr);
+            MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Companion);
+            MWBase::Environment::get().getWindowManager()->showCompanionWindow(mPtr);
         }
         else if (!MWBase::Environment::get().getDialogueManager()->checkServiceRefused())
         {
             if (topic == gmst.find("sBarter")->getString())
             {
-                mWindowManager.pushGuiMode(GM_Barter);
-                mWindowManager.getTradeWindow()->startTrade(mPtr);
+                MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Barter);
+                MWBase::Environment::get().getWindowManager()->getTradeWindow()->startTrade(mPtr);
             }
             else if (topic == gmst.find("sSpells")->getString())
             {
-                mWindowManager.pushGuiMode(GM_SpellBuying);
-                mWindowManager.getSpellBuyingWindow()->startSpellBuying(mPtr);
+                MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_SpellBuying);
+                MWBase::Environment::get().getWindowManager()->getSpellBuyingWindow()->startSpellBuying(mPtr);
             }
             else if (topic == gmst.find("sTravel")->getString())
             {
-                mWindowManager.pushGuiMode(GM_Travel);
-                mWindowManager.getTravelWindow()->startTravel(mPtr);
+                MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Travel);
+                MWBase::Environment::get().getWindowManager()->getTravelWindow()->startTravel(mPtr);
             }
             else if (topic == gmst.find("sSpellMakingMenuTitle")->getString())
             {
-                mWindowManager.pushGuiMode(GM_SpellCreation);
-                mWindowManager.startSpellMaking (mPtr);
+                MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_SpellCreation);
+                MWBase::Environment::get().getWindowManager()->startSpellMaking (mPtr);
             }
             else if (topic == gmst.find("sEnchanting")->getString())
             {
-                mWindowManager.pushGuiMode(GM_Enchanting);
-                mWindowManager.startEnchanting (mPtr);
+                MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Enchanting);
+                MWBase::Environment::get().getWindowManager()->startEnchanting (mPtr);
             }
             else if (topic == gmst.find("sServiceTrainingTitle")->getString())
             {
-                mWindowManager.pushGuiMode(GM_Training);
-                mWindowManager.startTraining (mPtr);
+                MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Training);
+                MWBase::Environment::get().getWindowManager()->startTraining (mPtr);
             }
             else if (topic == gmst.find("sRepair")->getString())
             {
-                mWindowManager.pushGuiMode(GM_MerchantRepair);
-                mWindowManager.startRepair (mPtr);
+                MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_MerchantRepair);
+                MWBase::Environment::get().getWindowManager()->startRepair (mPtr);
             }
         }
     }
@@ -456,7 +456,7 @@ std::string DialogueWindow::parseText(const std::string& text)
         }
         else
         {
-            if( !mWindowManager.getTranslationDataStorage().hasTranslation() )
+            if( !MWBase::Environment::get().getWindowManager()->getTranslationDataStorage().hasTranslation() )
             {
                 for(std::vector<std::string>::const_iterator it = topics.begin(); it != topics.end(); ++it)
                 {
@@ -528,7 +528,7 @@ void DialogueWindow::goodbye()
 
 void DialogueWindow::onReferenceUnavailable()
 {
-    mWindowManager.removeGuiMode(GM_Dialogue);
+    MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Dialogue);
 }
 
 void DialogueWindow::onFrame()

@@ -7,9 +7,8 @@
 
 using namespace MWGui;
 
-MessageBoxManager::MessageBoxManager (MWBase::WindowManager *windowManager)
+MessageBoxManager::MessageBoxManager (MWBase::WindowManager* windowManager)
 {
-    mWindowManager = windowManager;
     // defines
     mMessageBoxSpeed = 0.1;
     mInterMessageBoxe = NULL;
@@ -371,7 +370,7 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
 
 void InteractiveMessageBox::enterPressed()
 {
-    
+
     std::string ok = Misc::StringUtils::lowerCase(MyGUI::LanguageManager::getInstance().replaceTags("#{sOK}"));
     std::vector<MyGUI::Button*>::const_iterator button;
     for(button = mButtons.begin(); button != mButtons.end(); ++button)

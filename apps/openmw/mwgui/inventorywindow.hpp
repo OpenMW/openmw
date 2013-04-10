@@ -4,7 +4,7 @@
 #include "../mwrender/characterpreview.hpp"
 
 #include "container.hpp"
-#include "window_pinnable_base.hpp"
+#include "windowpinnablebase.hpp"
 #include "widgets.hpp"
 
 namespace MWGui

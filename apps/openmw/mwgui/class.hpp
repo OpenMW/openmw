@@ -3,7 +3,7 @@
 
 
 #include "widgets.hpp"
-#include "window_base.hpp"
+#include "windowbase.hpp"
 
 /*
   This file contains the dialogs for choosing a class.

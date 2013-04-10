@@ -75,7 +75,7 @@ namespace MWGui
     {
         if (!MWBase::Environment::get().getWindowManager ()->getRestEnabled ())
         {
-            mWindowManager.popGuiMode ();
+            MWBase::Environment::get().getWindowManager()->popGuiMode ();
         }
 
         int canRest = MWBase::Environment::get().getWorld ()->canRest ();
@@ -83,8 +83,8 @@ namespace MWGui
         if (canRest == 2)
         {
             // resting underwater or mid-air not allowed
-            mWindowManager.messageBox ("#{sNotifyMessage1}");
-            mWindowManager.popGuiMode ();
+            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage1}");
+            MWBase::Environment::get().getWindowManager()->popGuiMode ();
         }
 
         setCanRest(canRest == 0);
@@ -212,7 +212,7 @@ namespace MWGui
 
     void WaitDialog::onCancelButtonClicked(MyGUI::Widget* sender)
     {
-        mWindowManager.popGuiMode ();
+        MWBase::Environment::get().getWindowManager()->popGuiMode ();
     }
 
     void WaitDialog::onHourSliderChangedPosition(MyGUI::ScrollBar* sender, size_t position)
@@ -263,8 +263,8 @@ namespace MWGui
     {
         MWBase::Environment::get().getWorld ()->getFader ()->fadeIn(0.2);
         mProgressBar.setVisible (false);
-        mWindowManager.removeGuiMode (GM_Rest);
-        mWindowManager.removeGuiMode (GM_RestBed);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Rest);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_RestBed);
         mWaiting = false;
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
@@ -273,7 +273,7 @@ namespace MWGui
         // trigger levelup if possible
         if (mSleeping && pcstats.getLevelProgress () >= 10)
         {
-            mWindowManager.pushGuiMode (GM_Levelup);
+            MWBase::Environment::get().getWindowManager()->pushGuiMode (GM_Levelup);
         }
     }
 

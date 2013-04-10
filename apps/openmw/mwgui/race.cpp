@@ -74,7 +74,7 @@ RaceDialog::RaceDialog(MWBase::WindowManager& parWindowManager)
     // Centre dialog
     center();
 
-    setText("AppearanceT", mWindowManager.getGameSettingString("sRaceMenu1", "Appearance"));
+    setText("AppearanceT", MWBase::Environment::get().getWindowManager()->getGameSettingString("sRaceMenu1", "Appearance"));
     getWidget(mPreviewImage, "PreviewImage");
 
     getWidget(mHeadRotate, "HeadRotate");
@@ -86,34 +86,34 @@ RaceDialog::RaceDialog(MWBase::WindowManager& parWindowManager)
     // Set up next/previous buttons
     MyGUI::Button *prevButton, *nextButton;
 
-    setText("GenderChoiceT", mWindowManager.getGameSettingString("sRaceMenu2", "Change Sex"));
+    setText("GenderChoiceT", MWBase::Environment::get().getWindowManager()->getGameSettingString("sRaceMenu2", "Change Sex"));
     getWidget(prevButton, "PrevGenderButton");
     getWidget(nextButton, "NextGenderButton");
     prevButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onSelectPreviousGender);
     nextButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onSelectNextGender);
 
-    setText("FaceChoiceT", mWindowManager.getGameSettingString("sRaceMenu3", "Change Face"));
+    setText("FaceChoiceT", MWBase::Environment::get().getWindowManager()->getGameSettingString("sRaceMenu3", "Change Face"));
     getWidget(prevButton, "PrevFaceButton");
     getWidget(nextButton, "NextFaceButton");
     prevButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onSelectPreviousFace);
     nextButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onSelectNextFace);
 
-    setText("HairChoiceT", mWindowManager.getGameSettingString("sRaceMenu4", "Change Hair"));
+    setText("HairChoiceT", MWBase::Environment::get().getWindowManager()->getGameSettingString("sRaceMenu4", "Change Hair"));
     getWidget(prevButton, "PrevHairButton");
     getWidget(nextButton, "NextHairButton");
     prevButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onSelectPreviousHair);
     nextButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onSelectNextHair);
 
-    setText("RaceT", mWindowManager.getGameSettingString("sRaceMenu5", "Race"));
+    setText("RaceT", MWBase::Environment::get().getWindowManager()->getGameSettingString("sRaceMenu5", "Race"));
     getWidget(mRaceList, "RaceList");
     mRaceList->setScrollVisible(true);
     mRaceList->eventListSelectAccept += MyGUI::newDelegate(this, &RaceDialog::onSelectRace);
     mRaceList->eventListMouseItemActivate += MyGUI::newDelegate(this, &RaceDialog::onSelectRace);
     mRaceList->eventListChangePosition += MyGUI::newDelegate(this, &RaceDialog::onSelectRace);
 
-    setText("SkillsT", mWindowManager.getGameSettingString("sBonusSkillTitle", "Skill Bonus"));
+    setText("SkillsT", MWBase::Environment::get().getWindowManager()->getGameSettingString("sBonusSkillTitle", "Skill Bonus"));
     getWidget(mSkillList, "SkillList");
-    setText("SpellPowerT", mWindowManager.getGameSettingString("sRaceMenu7", "Specials"));
+    setText("SpellPowerT", MWBase::Environment::get().getWindowManager()->getGameSettingString("sRaceMenu7", "Specials"));
     getWidget(mSpellPowerList, "SpellPowerList");
 
     MyGUI::Button* backButton;
@@ -122,7 +122,7 @@ RaceDialog::RaceDialog(MWBase::WindowManager& parWindowManager)
 
     MyGUI::Button* okButton;
     getWidget(okButton, "OKButton");
-    okButton->setCaption(mWindowManager.getGameSettingString("sOK", ""));
+    okButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", ""));
     okButton->eventMouseButtonClick += MyGUI::newDelegate(this, &RaceDialog::onOkClicked);
 
     updateRaces();
@@ -136,9 +136,9 @@ void RaceDialog::setNextButtonShow(bool shown)
     getWidget(okButton, "OKButton");
 
     if (shown)
-        okButton->setCaption(mWindowManager.getGameSettingString("sNext", ""));
+        okButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sNext", ""));
     else
-        okButton->setCaption(mWindowManager.getGameSettingString("sOK", ""));
+        okButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", ""));
 }
 
 void RaceDialog::open()
@@ -156,7 +156,7 @@ void RaceDialog::open()
     const ESM::NPC proto = mPreview->getPrototype();
     setRaceId(proto.mRace);
     recountParts();
-    
+
     std::string index = proto.mHead.substr(proto.mHead.size() - 2, 2);
     mFaceIndex = boost::lexical_cast<int>(index) - 1;
 
@@ -361,7 +361,7 @@ void RaceDialog::updateRaces()
     const MWWorld::Store<ESM::Race> &races =
         MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>();
 
-    
+
     int index = 0;
     MWWorld::Store<ESM::Race>::iterator it = races.begin();
     for (; it != races.end(); ++it)
@@ -403,7 +403,6 @@ void RaceDialog::updateSkills()
 
         skillWidget = mSkillList->createWidget<MWSkill>("MW_StatNameValue", coord1, MyGUI::Align::Default,
                                                        std::string("Skill") + boost::lexical_cast<std::string>(i));
-        skillWidget->setWindowManager(&mWindowManager);
         skillWidget->setSkillNumber(skillId);
         skillWidget->setSkillValue(MWSkill::SkillValue(race->mData.mBonus[i].mBonus));
         ToolTips::createSkillToolTip(skillWidget, skillId);
@@ -439,7 +438,6 @@ void RaceDialog::updateSpellPowers()
     {
         const std::string &spellpower = *it;
         spellPowerWidget = mSpellPowerList->createWidget<MWSpell>("MW_StatName", coord, MyGUI::Align::Default, std::string("SpellPower") + boost::lexical_cast<std::string>(i));
-        spellPowerWidget->setWindowManager(&mWindowManager);
         spellPowerWidget->setSpellId(spellpower);
         spellPowerWidget->setUserString("ToolTipType", "Spell");
         spellPowerWidget->setUserString("Spell", spellpower);

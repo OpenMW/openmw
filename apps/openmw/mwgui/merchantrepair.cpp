@@ -72,7 +72,7 @@ void MerchantRepair::startRepair(const MWWorld::Ptr &actor)
 
             MyGUI::Button* button =
                 mList->createWidget<MyGUI::Button>(
-                    (price>mWindowManager.getInventoryWindow()->getPlayerGold()) ? "SandTextGreyedOut" : "SandTextButton",
+                    (price>MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getPlayerGold()) ? "SandTextGreyedOut" : "SandTextButton",
                     0,
                     currentY,
                     0,
@@ -82,7 +82,7 @@ void MerchantRepair::startRepair(const MWWorld::Ptr &actor)
 
             currentY += 18;
 
-            button->setEnabled(price<=mWindowManager.getInventoryWindow()->getPlayerGold());
+            button->setEnabled(price<=MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getPlayerGold());
             button->setUserString("Price", boost::lexical_cast<std::string>(price));
             button->setUserData(*iter);
             button->setCaptionWithReplacing(name);
@@ -95,7 +95,7 @@ void MerchantRepair::startRepair(const MWWorld::Ptr &actor)
     mList->setCanvasSize (MyGUI::IntSize(mList->getWidth(), std::max(mList->getHeight(), currentY)));
 
     mGoldLabel->setCaptionWithReplacing("#{sGold}: "
-        + boost::lexical_cast<std::string>(mWindowManager.getInventoryWindow()->getPlayerGold()));
+        + boost::lexical_cast<std::string>(MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getPlayerGold()));
 }
 
 void MerchantRepair::onMouseWheel(MyGUI::Widget* _sender, int _rel)
@@ -120,14 +120,14 @@ void MerchantRepair::onRepairButtonClick(MyGUI::Widget *sender)
     MWBase::Environment::get().getSoundManager()->playSound("Repair",1,1);
 
     int price = boost::lexical_cast<int>(sender->getUserString("Price"));
-    mWindowManager.getTradeWindow()->addOrRemoveGold(-price);
+    MWBase::Environment::get().getWindowManager()->getTradeWindow()->addOrRemoveGold(-price);
 
     startRepair(mActor);
 }
 
 void MerchantRepair::onOkButtonClick(MyGUI::Widget *sender)
 {
-    mWindowManager.removeGuiMode(GM_MerchantRepair);
+    MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_MerchantRepair);
 }
 
 }

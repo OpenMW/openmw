@@ -1,7 +1,7 @@
 #ifndef MWGUI_REVIEW_H
 #define MWGUI_REVIEW_H
 
-#include "window_base.hpp"
+#include "windowbase.hpp"
 #include "../mwmechanics/stat.hpp"
 #include "widgets.hpp"
 

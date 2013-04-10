@@ -4,7 +4,7 @@
 #include <OgreSceneManager.h>
 #include <OgreResourceGroupManager.h>
 
-#include "window_base.hpp"
+#include "windowbase.hpp"
 
 namespace MWGui
 {

@@ -1,7 +1,7 @@
 #ifndef MWGUI_CONFIRMATIONDIALOG_H
 #define MWGUI_CONFIRMATIONDIALOG_H
 
-#include "window_base.hpp"
+#include "windowbase.hpp"
 
 namespace MWGui
 {

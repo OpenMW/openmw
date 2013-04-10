@@ -6,7 +6,7 @@
 #include <string>
 #include <utility>
 
-#include "window_base.hpp"
+#include "windowbase.hpp"
 #include "imagebutton.hpp"
 
 namespace MWGui

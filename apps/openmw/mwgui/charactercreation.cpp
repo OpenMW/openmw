@@ -1,6 +1,6 @@
 #include "charactercreation.hpp"
 
-#include "text_input.hpp"
+#include "textinput.hpp"
 #include "race.hpp"
 #include "class.hpp"
 #include "birth.hpp"

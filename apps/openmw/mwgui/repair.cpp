@@ -133,7 +133,7 @@ void Repair::updateRepairView()
 
 void Repair::onCancel(MyGUI::Widget *sender)
 {
-    mWindowManager.removeGuiMode(GM_Repair);
+    MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Repair);
 }
 
 void Repair::onRepairItem(MyGUI::Widget *sender)

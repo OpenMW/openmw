@@ -12,7 +12,7 @@
 
 #include "../mwworld/class.hpp"
 
-#include "map_window.hpp"
+#include "mapwindow.hpp"
 #include "widgets.hpp"
 #include "inventorywindow.hpp"
 
@@ -22,7 +22,6 @@ using namespace MyGUI;
 ToolTips::ToolTips(MWBase::WindowManager* windowManager) :
     Layout("openmw_tooltips.layout")
     , mGameMode(true)
-    , mWindowManager(windowManager)
     , mFullHelp(false)
     , mEnabled(true)
     , mFocusToolTipX(0.0)
@@ -81,9 +80,9 @@ void ToolTips::onFrame(float frameDuration)
     {
         const MyGUI::IntPoint& mousePos = InputManager::getInstance().getMousePosition();
 
-        if (mWindowManager->getWorldMouseOver() && ((mWindowManager->getMode() == GM_Console)
-            || (mWindowManager->getMode() == GM_Container)
-            || (mWindowManager->getMode() == GM_Inventory)))
+        if (MWBase::Environment::get().getWindowManager()->getWorldMouseOver() && ((MWBase::Environment::get().getWindowManager()->getMode() == GM_Console)
+            || (MWBase::Environment::get().getWindowManager()->getMode() == GM_Container)
+            || (MWBase::Environment::get().getWindowManager()->getMode() == GM_Inventory)))
         {
             mFocusObject = MWBase::Environment::get().getWorld()->getFacedObject();
 
@@ -93,7 +92,7 @@ void ToolTips::onFrame(float frameDuration)
             const MWWorld::Class& objectclass = MWWorld::Class::get (mFocusObject);
 
             IntSize tooltipSize;
-            if ((!objectclass.hasToolTip(mFocusObject))&&(mWindowManager->getMode() == GM_Console))
+            if ((!objectclass.hasToolTip(mFocusObject))&&(MWBase::Environment::get().getWindowManager()->getMode() == GM_Console))
             {
                 setCoord(0, 0, 300, 300);
                 mDynamicToolTipBox->setVisible(true);
@@ -139,7 +138,7 @@ void ToolTips::onFrame(float frameDuration)
             mLastMouseX = mousePos.left;
             mLastMouseY = mousePos.top;
 
-	    
+
             if (mRemainingDelay > 0)
                 return;
 
@@ -167,8 +166,8 @@ void ToolTips::onFrame(float frameDuration)
             {
                 return;
             }
-	    
-	
+
+
             // special handling for markers on the local map: the tooltip should only be visible
             // if the marker is not hidden due to the fog of war.
             if (focus->getUserString ("IsMarker") == "true")
@@ -190,11 +189,11 @@ void ToolTips::onFrame(float frameDuration)
             }
             else if (type == "AvatarItemSelection")
             {
-                MyGUI::IntCoord avatarPos = mWindowManager->getInventoryWindow ()->getAvatarScreenCoord ();
+                MyGUI::IntCoord avatarPos = MWBase::Environment::get().getWindowManager()->getInventoryWindow ()->getAvatarScreenCoord ();
                 MyGUI::IntPoint relMousePos = MyGUI::InputManager::getInstance ().getMousePosition () - MyGUI::IntPoint(avatarPos.left, avatarPos.top);
                 int realX = int(float(relMousePos.left) / float(avatarPos.width) * 512.f );
                 int realY = int(float(relMousePos.top) / float(avatarPos.height) * 1024.f );
-                MWWorld::Ptr item = mWindowManager->getInventoryWindow ()->getAvatarSelectedItem (realX, realY);
+                MWWorld::Ptr item = MWBase::Environment::get().getWindowManager()->getInventoryWindow ()->getAvatarSelectedItem (realX, realY);
 
                 mFocusObject = item;
                 if (!mFocusObject.isEmpty ())
@@ -346,7 +345,7 @@ void ToolTips::findImageExtension(std::string& image)
 }
 
 IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
-{    
+{
     mDynamicToolTipBox->setVisible(true);
 
     std::string caption = info.caption;
@@ -380,7 +379,7 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
     setCoord(0, 0, 300, 300);
 
     const IntPoint padding(8, 8);
-    
+
     const int maximumWidth = 500;
 
     const int imageCaptionHPadding = (caption != "" ? 8 : 0);
@@ -424,7 +423,6 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
 
         Widgets::MWEffectListPtr effectsWidget = effectArea->createWidget<Widgets::MWEffectList>
             ("MW_StatName", coord, Align::Default, "ToolTipEffectsWidget");
-        effectsWidget->setWindowManager(mWindowManager);
         effectsWidget->setEffectList(info.effects);
 
         std::vector<MyGUI::Widget*> effectItems;
@@ -444,7 +442,6 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
 
         Widgets::MWEffectListPtr enchantWidget = enchantArea->createWidget<Widgets::MWEffectList>
             ("MW_StatName", coord, Align::Default, "ToolTipEnchantWidget");
-        enchantWidget->setWindowManager(mWindowManager);
         enchantWidget->setEffectList(Widgets::MWEffectList::effectListFromESM(&enchant->mEffects));
 
         std::vector<MyGUI::Widget*> enchantEffectItems;
@@ -493,7 +490,7 @@ IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
         (captionHeight-captionSize.height)/2,
         captionSize.width-imageSize,
         captionSize.height);
-    
+
      //if its too long we do hscroll with the caption
     if (captionSize.width > maximumWidth)
     {

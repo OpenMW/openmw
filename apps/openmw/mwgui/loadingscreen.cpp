@@ -195,12 +195,12 @@ namespace MWGui
         {
             changeWallpaper();
 
-            mWindowManager.pushGuiMode(GM_LoadingWallpaper);
+            MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_LoadingWallpaper);
         }
         else
         {
             mBackgroundImage->setImageTexture("");
-            mWindowManager.pushGuiMode(GM_Loading);
+            MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Loading);
         }
     }
 
@@ -211,8 +211,8 @@ namespace MWGui
         mLoadingOn = false;
         mFirstLoad = false;
 
-        mWindowManager.removeGuiMode(GM_Loading);
-        mWindowManager.removeGuiMode(GM_LoadingWallpaper);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Loading);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_LoadingWallpaper);
     }
 
     void LoadingScreen::changeWallpaper ()

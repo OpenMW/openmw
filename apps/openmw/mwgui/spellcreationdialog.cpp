@@ -303,38 +303,38 @@ namespace MWGui
 
     void SpellCreationDialog::onCancelButtonClicked (MyGUI::Widget* sender)
     {
-        mWindowManager.removeGuiMode (MWGui::GM_SpellCreation);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (MWGui::GM_SpellCreation);
     }
 
     void SpellCreationDialog::onBuyButtonClicked (MyGUI::Widget* sender)
     {
         if (mEffects.size() <= 0)
         {
-            mWindowManager.messageBox ("#{sNotifyMessage30}");
+            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage30}");
             return;
         }
 
         if (mNameEdit->getCaption () == "")
         {
-            mWindowManager.messageBox ("#{sNotifyMessage10}");
+            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage10}");
             return;
         }
 
         if (mMagickaCost->getCaption() == "0")
         {
-            mWindowManager.messageBox ("#{sEnchantmentMenu8}");
+            MWBase::Environment::get().getWindowManager()->messageBox ("#{sEnchantmentMenu8}");
             return;
         }
 
-        if (boost::lexical_cast<int>(mPriceLabel->getCaption()) > mWindowManager.getInventoryWindow()->getPlayerGold())
+        if (boost::lexical_cast<int>(mPriceLabel->getCaption()) > MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getPlayerGold())
         {
-            mWindowManager.messageBox ("#{sNotifyMessage18}");
+            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage18}");
             return;
         }
 
         mSpell.mName = mNameEdit->getCaption();
 
-        mWindowManager.getTradeWindow()->addOrRemoveGold(-boost::lexical_cast<int>(mPriceLabel->getCaption()));
+        MWBase::Environment::get().getWindowManager()->getTradeWindow()->addOrRemoveGold(-boost::lexical_cast<int>(mPriceLabel->getCaption()));
 
         MWBase::Environment::get().getSoundManager()->playSound ("Item Gold Up", 1.0, 1.0);
 
@@ -347,7 +347,7 @@ namespace MWGui
 
         MWBase::Environment::get().getSoundManager()->playSound ("Item Gold Up", 1.0, 1.0);
 
-        mWindowManager.removeGuiMode (GM_SpellCreation);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_SpellCreation);
     }
 
     void SpellCreationDialog::open()
@@ -357,8 +357,8 @@ namespace MWGui
 
     void SpellCreationDialog::onReferenceUnavailable ()
     {
-        mWindowManager.removeGuiMode (GM_Dialogue);
-        mWindowManager.removeGuiMode (GM_SpellCreation);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Dialogue);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_SpellCreation);
     }
 
     void SpellCreationDialog::notifyEffectsChanged ()
@@ -601,7 +601,6 @@ namespace MWGui
             Widgets::MWSpellEffectPtr effect = button->createWidget<Widgets::MWSpellEffect>("MW_EffectImage", MyGUI::IntCoord(0,0,0,24), MyGUI::Align::Default);
 
             effect->setNeedMouseFocus (false);
-            effect->setWindowManager (MWBase::Environment::get().getWindowManager ());
             effect->setSpellEffect (params);
 
             effect->setSize(effect->getRequestedWidth (), 24);

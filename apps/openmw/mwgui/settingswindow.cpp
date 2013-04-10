@@ -274,7 +274,7 @@ namespace MWGui
 
     void SettingsWindow::onOkButtonClicked(MyGUI::Widget* _sender)
     {
-        mWindowManager.removeGuiMode(GM_Settings);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Settings);
     }
 
     void SettingsWindow::onResolutionSelected(MyGUI::ListBox* _sender, size_t index)
@@ -282,7 +282,7 @@ namespace MWGui
         if (index == MyGUI::ITEM_NONE)
             return;
 
-        ConfirmationDialog* dialog = mWindowManager.getConfirmationDialog();
+        ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
         dialog->open("#{sNotifyMessage67}");
         dialog->eventOkClicked.clear();
         dialog->eventOkClicked += MyGUI::newDelegate(this, &SettingsWindow::onResolutionAccept);
@@ -329,8 +329,8 @@ namespace MWGui
 
     void SettingsWindow::onButtonToggled(MyGUI::Widget* _sender)
     {
-        std::string on = mWindowManager.getGameSettingString("sOn", "On");
-        std::string off = mWindowManager.getGameSettingString("sOff", "On");
+        std::string on = MWBase::Environment::get().getWindowManager()->getGameSettingString("sOn", "On");
+        std::string off = MWBase::Environment::get().getWindowManager()->getGameSettingString("sOff", "On");
         bool newState;
         if (_sender->castType<MyGUI::Button>()->getCaption() == on)
         {
@@ -437,8 +437,8 @@ namespace MWGui
 
     void SettingsWindow::onShadersToggled(MyGUI::Widget* _sender)
     {
-        std::string on = mWindowManager.getGameSettingString("sOn", "On");
-        std::string off = mWindowManager.getGameSettingString("sOff", "On");
+        std::string on = MWBase::Environment::get().getWindowManager()->getGameSettingString("sOn", "On");
+        std::string off = MWBase::Environment::get().getWindowManager()->getGameSettingString("sOff", "On");
 
         std::string val = static_cast<MyGUI::Button*>(_sender)->getCaption();
         if (val == off)
@@ -610,7 +610,7 @@ namespace MWGui
 
     void SettingsWindow::onResetDefaultBindings(MyGUI::Widget* _sender)
     {
-        ConfirmationDialog* dialog = mWindowManager.getConfirmationDialog();
+        ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
         dialog->open("#{sNotifyMessage66}");
         dialog->eventOkClicked.clear();
         dialog->eventOkClicked += MyGUI::newDelegate(this, &SettingsWindow::onResetDefaultBindingsAccept);

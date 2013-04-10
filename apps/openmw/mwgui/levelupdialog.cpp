@@ -183,7 +183,7 @@ namespace MWGui
             creatureStats.setLevel (creatureStats.getLevel()+1);
             pcStats.levelUp ();
 
-            mWindowManager.removeGuiMode (GM_Levelup);
+            MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Levelup);
         }
 
     }

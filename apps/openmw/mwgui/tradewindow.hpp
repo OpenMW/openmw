@@ -2,7 +2,7 @@
 #define MWGUI_TRADEWINDOW_H
 
 #include "container.hpp"
-#include "window_base.hpp"
+#include "windowbase.hpp"
 
 #include "../mwworld/ptr.hpp"
 
