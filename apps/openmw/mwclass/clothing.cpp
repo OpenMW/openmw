@@ -14,6 +14,7 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/physicssystem.hpp"
 #include "../mwworld/nullaction.hpp"
+#include "../mwworld/player.hpp"
 
 #include "../mwgui/tooltips.hpp"
 
@@ -235,6 +236,57 @@ namespace MWClass
         newItem.mEnchant=enchId;
         const ESM::Clothing *record = MWBase::Environment::get().getWorld()->createRecord (newItem);
         ref->mBase = record;
+    }
+
+    int Clothing::canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const
+    {
+        // slots that this item can be equipped in
+        std::pair<std::vector<int>, bool> slots = MWWorld::Class::get(ptr).getEquipmentSlots(ptr);
+
+        std::string npcRace = npc.get<ESM::NPC>()->mBase->mRace;
+
+        for (std::vector<int>::const_iterator slot=slots.first.begin();
+            slot!=slots.first.end(); ++slot)
+        {
+
+            // Beast races cannot equip shoes / boots, or full helms (head part vs hair part)
+            const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npcRace);
+            if(race->mData.mFlags & ESM::Race::Beast)
+            {
+                std::vector<ESM::PartReference> parts = ptr.get<ESM::Clothing>()->mBase->mParts.mParts;
+
+                if(*slot == MWWorld::InventoryStore::Slot_Helmet)
+                {
+                    for(std::vector<ESM::PartReference>::iterator itr = parts.begin(); itr != parts.end(); ++itr)
+                    {
+                        if((*itr).mPart == ESM::PRT_Head)
+                        {
+                            if(npc == MWBase::Environment::get().getWorld()->getPlayer().getPlayer() )
+                                MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage13}");
+
+                            return 0;
+                        }
+                    }
+                }
+
+                if (*slot == MWWorld::InventoryStore::Slot_Boots)
+                {
+                    for(std::vector<ESM::PartReference>::iterator itr = parts.begin(); itr != parts.end(); ++itr)
+                    {
+                        if((*itr).mPart == ESM::PRT_LFoot || (*itr).mPart == ESM::PRT_RFoot)
+                        {
+                            if(npc == MWBase::Environment::get().getWorld()->getPlayer().getPlayer() )
+                            {
+                                MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage15}");
+                            }
+
+                            return 0;
+                        }
+                    }
+                }
+            }
+        }
+        return 1;
     }
 
     boost::shared_ptr<MWWorld::Action> Clothing::use (const MWWorld::Ptr& ptr) const

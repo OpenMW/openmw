@@ -53,14 +53,18 @@ namespace MWMechanics
 
     bool Enchanting::create()
     {
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
         ESM::Enchantment enchantment;
         enchantment.mData.mCharge = getGemCharge();
 
-        //Exception for Azura Star, it's not destroyed after enchanting
+        mSoulGemPtr.getRefData().setCount (mSoulGemPtr.getRefData().getCount()-1);
+
+        //Exception for Azura Star, new one will be added after enchanting
         if(boost::iequals(mSoulGemPtr.get<ESM::Miscellaneous>()->mBase->mId, "Misc_SoulGem_Azura"))
-            mSoulGemPtr.getCellRef().mSoul="";
-        else
-            mSoulGemPtr.getRefData().setCount (mSoulGemPtr.getRefData().getCount()-1);
+        {
+            MWWorld::ManualRef azura (MWBase::Environment::get().getWorld()->getStore(), "Misc_SoulGem_Azura");
+            MWWorld::Class::get (player).getContainerStore (player).add (azura.getPtr());
+        }
 
         if(mSelfEnchanting)
         {
@@ -87,7 +91,6 @@ namespace MWMechanics
         MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), mOldItemId);
         ref.getPtr().getRefData().setCount (mOldItemCount-1);
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
         MWWorld::Class::get (player).getContainerStore (player).add (ref.getPtr());
         if(!mSelfEnchanting)
             payForEnchantment();
