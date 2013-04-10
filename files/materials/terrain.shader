@@ -227,7 +227,8 @@
         
 
 #if !IS_FIRST_PASS
-float combinedAlpha = 0.f;
+// Opacity the previous passes should have, i.e. 1 - (opacity of this pass)
+float previousAlpha = 1.f;
 #endif
 
         // Layer calculations 
@@ -252,7 +253,7 @@ float combinedAlpha = 0.f;
         #else
         albedo = shLerp(albedo, shSample(diffuseMap@shIterator, UV * 10).rgb, blendValues@shPropertyString(blendmap_component_@shIterator));
         #endif
-        combinedAlpha += blendValues@shPropertyString(blendmap_component_@shIterator);
+        previousAlpha *= 1.f-blendValues@shPropertyString(blendmap_component_@shIterator);
 #endif
 @shEndForeach
         
@@ -344,7 +345,7 @@ float combinedAlpha = 0.f;
 #if IS_FIRST_PASS
         shOutputColour(0).a = 1;
 #else
-        shOutputColour(0).a = min(combinedAlpha, 1.f);
+        shOutputColour(0).a = 1.f-previousAlpha;
 #endif
     }
 
