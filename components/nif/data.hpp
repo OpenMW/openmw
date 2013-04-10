@@ -167,7 +167,7 @@ class NiAutoNormalParticlesData : public ShapeData
 public:
     int numParticles;
 
-    float particleSize;
+    float particleRadius;
 
     int activeCount;
 
@@ -180,7 +180,7 @@ public:
         // Should always match the number of vertices
         numParticles = nif->getUShort();
 
-        particleSize = nif->getFloat();
+        particleRadius = nif->getFloat();
         activeCount = nif->getUShort();
 
         if(nif->getInt())
