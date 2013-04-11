@@ -156,11 +156,11 @@ public:
 };
 
 // These contain no other data than the 'flags' field in Property
-typedef Property NiShadeProperty;
-typedef Property NiDitherProperty;
-typedef Property NiZBufferProperty;
-typedef Property NiSpecularProperty;
-typedef Property NiWireframeProperty;
+class NiShadeProperty : public Property { };
+class NiDitherProperty : public Property { };
+class NiZBufferProperty : public Property { };
+class NiSpecularProperty : public Property { };
+class NiWireframeProperty : public Property { };
 
 // The rest are all struct-based
 template <typename T>
@@ -324,10 +324,10 @@ struct S_StencilProperty
     }
 };
 
-typedef StructPropT<S_AlphaProperty> NiAlphaProperty;
-typedef StructPropT<S_MaterialProperty> NiMaterialProperty;
-typedef StructPropT<S_VertexColorProperty> NiVertexColorProperty;
-typedef StructPropT<S_StencilProperty> NiStencilProperty;
+class NiAlphaProperty : public StructPropT<S_AlphaProperty> { };
+class NiMaterialProperty : public StructPropT<S_MaterialProperty> { };
+class NiVertexColorProperty : public StructPropT<S_VertexColorProperty> { };
+class NiStencilProperty : public StructPropT<S_StencilProperty> { };
 
 } // Namespace
 #endif

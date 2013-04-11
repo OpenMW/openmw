@@ -1,6 +1,9 @@
 #ifndef _GAME_RENDER_ANIMATION_H
 #define _GAME_RENDER_ANIMATION_H
 
+#include <OgreController.h>
+#include <OgreVector3.h>
+
 #include <components/nifogre/ogrenifloader.hpp>
 
 #include "../mwworld/ptr.hpp"
