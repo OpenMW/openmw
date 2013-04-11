@@ -25,11 +25,11 @@
 #define OPENMW_COMPONENTS_NIFOGRE_OGRENIFLOADER_HPP
 
 #include <OgreResource.h>
-#include <OgreMesh.h>
-#include <OgreSkeleton.h>
+#include <OgreController.h>
 
 #include <vector>
 #include <string>
+#include <map>
 
 
 // FIXME: This namespace really doesn't do anything Nif-specific. Any supportable
