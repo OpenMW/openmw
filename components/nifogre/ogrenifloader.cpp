@@ -56,46 +56,6 @@ ostream& operator<<(ostream &o, const NifOgre::TextKeyMap&)
 namespace NifOgre
 {
 
-void getNodeProperties(const Nif::Node *node,
-                       const Nif::NiTexturingProperty *&texprop,
-                       const Nif::NiMaterialProperty *&matprop,
-                       const Nif::NiAlphaProperty *&alphaprop,
-                       const Nif::NiVertexColorProperty *&vertprop,
-                       const Nif::NiZBufferProperty *&zprop,
-                       const Nif::NiSpecularProperty *&specprop,
-                       const Nif::NiWireframeProperty *&wireprop)
-{
-    if(node->parent)
-        getNodeProperties(node->parent, texprop, matprop, alphaprop, vertprop, zprop, specprop, wireprop);
-
-    const Nif::PropertyList &proplist = node->props;
-    for(size_t i = 0;i < proplist.length();i++)
-    {
-        // Entries may be empty
-        if(proplist[i].empty())
-            continue;
-
-        const Nif::Property *pr = proplist[i].getPtr();
-        if(pr->recType == Nif::RC_NiTexturingProperty)
-            texprop = static_cast<const Nif::NiTexturingProperty*>(pr);
-        else if(pr->recType == Nif::RC_NiMaterialProperty)
-            matprop = static_cast<const Nif::NiMaterialProperty*>(pr);
-        else if(pr->recType == Nif::RC_NiAlphaProperty)
-            alphaprop = static_cast<const Nif::NiAlphaProperty*>(pr);
-        else if(pr->recType == Nif::RC_NiVertexColorProperty)
-            vertprop = static_cast<const Nif::NiVertexColorProperty*>(pr);
-        else if(pr->recType == Nif::RC_NiZBufferProperty)
-            zprop = static_cast<const Nif::NiZBufferProperty*>(pr);
-        else if(pr->recType == Nif::RC_NiSpecularProperty)
-            specprop = static_cast<const Nif::NiSpecularProperty*>(pr);
-        else if(pr->recType == Nif::RC_NiWireframeProperty)
-            wireprop = static_cast<const Nif::NiWireframeProperty*>(pr);
-        else
-            std::cerr<< "Unhandled property type: "<<pr->recName <<std::endl;
-    }
-}
-
-
 // FIXME: Should not be here.
 class DefaultFunction : public Ogre::ControllerFunction<Ogre::Real>
 {
@@ -454,7 +414,7 @@ class NIFObjectLoader
             const Nif::NiWireframeProperty *wireprop = NULL;
             bool needTangents = false;
 
-            getNodeProperties(partnode, texprop, matprop, alphaprop, vertprop, zprop, specprop, wireprop);
+            partnode->getProperties(texprop, matprop, alphaprop, vertprop, zprop, specprop, wireprop);
             partsys->setMaterialName(NIFMaterialLoader::getMaterial(particledata, fullname, group,
                                                                     texprop, matprop, alphaprop,
                                                                     vertprop, zprop, specprop,

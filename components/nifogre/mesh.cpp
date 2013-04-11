@@ -20,15 +20,6 @@
 namespace NifOgre
 {
 
-void getNodeProperties(const Nif::Node *node,
-                       const Nif::NiTexturingProperty *&texprop,
-                       const Nif::NiMaterialProperty *&matprop,
-                       const Nif::NiAlphaProperty *&alphaprop,
-                       const Nif::NiVertexColorProperty *&vertprop,
-                       const Nif::NiZBufferProperty *&zprop,
-                       const Nif::NiSpecularProperty *&specprop,
-                       const Nif::NiWireframeProperty *&wireprop);
-
 // Helper class that computes the bounding box and of a mesh
 class BoundsFinder
 {
@@ -320,7 +311,7 @@ void NIFMeshLoader::createSubMesh(Ogre::Mesh *mesh, const Nif::NiTriShape *shape
     const Nif::NiWireframeProperty *wireprop = NULL;
     bool needTangents = false;
 
-    getNodeProperties(shape, texprop, matprop, alphaprop, vertprop, zprop, specprop, wireprop);
+    shape->getProperties(texprop, matprop, alphaprop, vertprop, zprop, specprop, wireprop);
     std::string matname = NIFMaterialLoader::getMaterial(data, mesh->getName(), mGroup,
                                                          texprop, matprop, alphaprop,
                                                          vertprop, zprop, specprop,
