@@ -13,6 +13,13 @@
 #include "reportmodel.hpp"
 #include "mandatoryid.hpp"
 #include "skillcheck.hpp"
+#include "classcheck.hpp"
+#include "factioncheck.hpp"
+#include "racecheck.hpp"
+#include "soundcheck.hpp"
+#include "regioncheck.hpp"
+#include "birthsigncheck.hpp"
+#include "spellcheck.hpp"
 
 CSMTools::Operation *CSMTools::Tools::get (int type)
 {
@@ -54,6 +61,20 @@ CSMTools::Verifier *CSMTools::Tools::getVerifier()
             CSMWorld::UniversalId (CSMWorld::UniversalId::Type_Globals), mandatoryIds));
 
         mVerifier->appendStage (new SkillCheckStage (mData.getSkills()));
+
+        mVerifier->appendStage (new ClassCheckStage (mData.getClasses()));
+
+        mVerifier->appendStage (new FactionCheckStage (mData.getFactions()));
+
+        mVerifier->appendStage (new RaceCheckStage (mData.getRaces()));
+
+        mVerifier->appendStage (new SoundCheckStage (mData.getSounds()));
+
+        mVerifier->appendStage (new RegionCheckStage (mData.getRegions()));
+
+        mVerifier->appendStage (new BirthsignCheckStage (mData.getBirthsigns()));
+
+        mVerifier->appendStage (new SpellCheckStage (mData.getSpells()));
     }
 
     return mVerifier;

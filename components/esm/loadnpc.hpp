@@ -35,11 +35,11 @@ struct NPC
       Apparatus     = 0x00100,
       RepairItem    = 0x00200,
       Misc          = 0x00400,
+      Potions       = 0x02000,
 
       // Other services
       Spells        = 0x00800,
       MagicItems    = 0x01000,
-      Potions       = 0x02000,
       Training      = 0x04000, // What skills?
       Spellmaking   = 0x08000,
       Enchanting    = 0x10000,

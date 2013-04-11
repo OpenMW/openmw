@@ -7,6 +7,8 @@
 #include <OgreEntity.h>
 #include <OgreLight.h>
 #include <OgreSubEntity.h>
+#include <OgreParticleSystem.h>
+#include <OgreParticleEmitter.h>
 #include <OgreStaticGeometry.h>
 
 #include <components/nifogre/ogrenifloader.hpp>
@@ -128,9 +130,9 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh, bool
     assert(insert);
 
     Ogre::AxisAlignedBox bounds = Ogre::AxisAlignedBox::BOX_NULL;
-    NifOgre::EntityList entities = NifOgre::Loader::createEntities(insert, mesh);
-    for(size_t i = 0;i < entities.mEntities.size();i++)
-        bounds.merge(entities.mEntities[i]->getWorldBoundingBox(true));
+    NifOgre::ObjectList objects = NifOgre::Loader::createObjects(insert, mesh);
+    for(size_t i = 0;i < objects.mEntities.size();i++)
+        bounds.merge(objects.mEntities[i]->getWorldBoundingBox(true));
 
     Ogre::Vector3 extents = bounds.getSize();
     extents *= insert->getScale();
@@ -147,20 +149,21 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh, bool
     mBounds[ptr.getCell()].merge(bounds);
 
     bool anyTransparency = false;
-    for(size_t i = 0;!anyTransparency && i < entities.mEntities.size();i++)
+    for(size_t i = 0;!anyTransparency && i < objects.mEntities.size();i++)
     {
-        Ogre::Entity *ent = entities.mEntities[i];
+        Ogre::Entity *ent = objects.mEntities[i];
         for(unsigned int i=0;!anyTransparency && i < ent->getNumSubEntities(); ++i)
         {
             anyTransparency = ent->getSubEntity(i)->getMaterial()->isTransparent();
         }
     }
 
-    if(!mIsStatic || !Settings::Manager::getBool("use static geometry", "Objects") || anyTransparency)
+    if(!mIsStatic || !Settings::Manager::getBool("use static geometry", "Objects") ||
+       anyTransparency || objects.mParticles.size() > 0)
     {
-        for(size_t i = 0;i < entities.mEntities.size();i++)
+        for(size_t i = 0;i < objects.mEntities.size();i++)
         {
-            Ogre::Entity *ent = entities.mEntities[i];
+            Ogre::Entity *ent = objects.mEntities[i];
             for(unsigned int i=0; i < ent->getNumSubEntities(); ++i)
             {
                 Ogre::SubEntity* subEnt = ent->getSubEntity(i);
@@ -168,6 +171,14 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh, bool
             }
             ent->setRenderingDistance(small ? Settings::Manager::getInt("small object distance", "Viewing distance") : 0);
             ent->setVisibilityFlags(mIsStatic ? (small ? RV_StaticsSmall : RV_Statics) : RV_Misc);
+        }
+        for(size_t i = 0;i < objects.mParticles.size();i++)
+        {
+            Ogre::ParticleSystem *part = objects.mParticles[i];
+            // TODO: Check the particle system's material for actual transparency
+            part->setRenderQueueGroup(RQG_Alpha);
+            part->setRenderingDistance(small ? Settings::Manager::getInt("small object distance", "Viewing distance") : 0);
+            part->setVisibilityFlags(mIsStatic ? (small ? RV_StaticsSmall : RV_Statics) : RV_Misc);
         }
     }
     else
@@ -214,8 +225,8 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh, bool
 
         sg->setRenderQueueGroup(RQG_Main);
 
-        std::vector<Ogre::Entity*>::reverse_iterator iter = entities.mEntities.rbegin();
-        while(iter != entities.mEntities.rend())
+        std::vector<Ogre::Entity*>::reverse_iterator iter = objects.mEntities.rbegin();
+        while(iter != objects.mEntities.rend())
         {
             Ogre::Node *node = (*iter)->getParentNode();
             sg->addEntity(*iter, node->_getDerivedPosition(), node->_getDerivedOrientation(), node->_getDerivedScale());
@@ -228,7 +239,7 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh, bool
 
     if (light)
     {
-        insertLight(ptr, entities.mSkelBase, bounds.getCenter() - insert->_getDerivedPosition());
+        insertLight(ptr, objects.mSkelBase, bounds.getCenter() - insert->_getDerivedPosition());
     }
 }
 

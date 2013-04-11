@@ -7,8 +7,8 @@
 
 namespace MWGui
 {
-    CountDialog::CountDialog(MWBase::WindowManager& parWindowManager) :
-        WindowModal("openmw_count_window.layout", parWindowManager)
+    CountDialog::CountDialog() :
+        WindowModal("openmw_count_window.layout")
     {
         getWidget(mSlider, "CountSlider");
         getWidget(mItemEdit, "ItemEdit");

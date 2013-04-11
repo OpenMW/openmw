@@ -66,6 +66,7 @@ bool OMW::Engine::frameStarted (const Ogre::FrameEvent& evt)
 {
     if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
         MWBase::Environment::get().getWorld()->frameStarted(evt.timeSinceLastFrame);
+    MWBase::Environment::get().getWindowManager ()->frameStarted(evt.timeSinceLastFrame);
     return true;
 }
 
@@ -153,27 +154,41 @@ OMW::Engine::~Engine()
 
 void OMW::Engine::loadBSA()
 {
+    // We use separate resource groups to handle location priority.
+    const Files::PathContainer& dataDirs = mFileCollections.getPaths();
+
+    int i=0;
+    for (Files::PathContainer::const_iterator iter = dataDirs.begin(); iter != dataDirs.end(); ++iter)
+    {
+        // Last data dir has the highest priority
+        std::string groupName = "Data" + Ogre::StringConverter::toString(dataDirs.size()-i);
+        Ogre::ResourceGroupManager::getSingleton ().createResourceGroup (groupName);
+
+        std::string dataDirectory = iter->string();
+        std::cout << "Data dir " << dataDirectory << std::endl;
+        Bsa::addDir(dataDirectory, mFSStrict, groupName);
+        ++i;
+    }
+
+    i=0;
     for (std::vector<std::string>::const_iterator archive = mArchives.begin(); archive != mArchives.end(); ++archive)
     {
         if (mFileCollections.doesExist(*archive))
         {
+            // Last BSA has the highest priority
+            std::string groupName = "DataBSA" + Ogre::StringConverter::toString(dataDirs.size()-i);
+
+            Ogre::ResourceGroupManager::getSingleton ().createResourceGroup (groupName);
+
             const std::string archivePath = mFileCollections.getPath(*archive).string();
             std::cout << "Adding BSA archive " << archivePath << std::endl;
-            Bsa::addBSA(archivePath);
+            Bsa::addBSA(archivePath, groupName);
+            ++i;
         }
         else
         {
             std::cout << "Archive " << *archive << " not found" << std::endl;
         }
-    }
-
-    const Files::PathContainer& dataDirs = mFileCollections.getPaths();
-    std::string dataDirectory;
-    for (Files::PathContainer::const_iterator iter = dataDirs.begin(); iter != dataDirs.end(); ++iter)
-    {
-        dataDirectory = iter->string();
-        std::cout << "Data dir " << dataDirectory << std::endl;
-        Bsa::addDir(dataDirectory, mFSStrict);
     }
 }
 

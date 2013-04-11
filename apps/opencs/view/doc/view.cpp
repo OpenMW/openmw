@@ -41,6 +41,10 @@ void CSVDoc::View::setupFileMenu()
     connect (mSave, SIGNAL (triggered()), this, SLOT (save()));
     file->addAction (mSave);
 
+    mVerify = new QAction (tr ("&Verify"), this);
+    connect (mVerify, SIGNAL (triggered()), this, SLOT (verify()));
+    file->addAction (mVerify);
+
     QAction *close = new QAction (tr ("&Close"), this);
     connect (close, SIGNAL (triggered()), this, SLOT (close()));
     file->addAction(close);
@@ -94,9 +98,33 @@ void CSVDoc::View::setupWorldMenu()
     connect (classes, SIGNAL (triggered()), this, SLOT (addClassesSubView()));
     world->addAction (classes);
 
-    mVerify = new QAction (tr ("&Verify"), this);
-    connect (mVerify, SIGNAL (triggered()), this, SLOT (verify()));
-    world->addAction (mVerify);
+    QAction *factions = new QAction (tr ("Factions"), this);
+    connect (factions, SIGNAL (triggered()), this, SLOT (addFactionsSubView()));
+    world->addAction (factions);
+
+    QAction *races = new QAction (tr ("Races"), this);
+    connect (races, SIGNAL (triggered()), this, SLOT (addRacesSubView()));
+    world->addAction (races);
+
+    QAction *sounds = new QAction (tr ("Sounds"), this);
+    connect (sounds, SIGNAL (triggered()), this, SLOT (addSoundsSubView()));
+    world->addAction (sounds);
+
+    QAction *scripts = new QAction (tr ("Scripts"), this);
+    connect (scripts, SIGNAL (triggered()), this, SLOT (addScriptsSubView()));
+    world->addAction (scripts);
+
+    QAction *regions = new QAction (tr ("Regions"), this);
+    connect (regions, SIGNAL (triggered()), this, SLOT (addRegionsSubView()));
+    world->addAction (regions);
+
+    QAction *birthsigns = new QAction (tr ("Birthsigns"), this);
+    connect (birthsigns, SIGNAL (triggered()), this, SLOT (addBirthsignsSubView()));
+    world->addAction (birthsigns);
+
+    QAction *spells = new QAction (tr ("Spells"), this);
+    connect (spells, SIGNAL (triggered()), this, SLOT (addSpellsSubView()));
+    world->addAction (spells);
 }
 
 void CSVDoc::View::setupUi()
@@ -260,6 +288,41 @@ void CSVDoc::View::addSkillsSubView()
 void CSVDoc::View::addClassesSubView()
 {
     addSubView (CSMWorld::UniversalId::Type_Classes);
+}
+
+void CSVDoc::View::addFactionsSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Factions);
+}
+
+void CSVDoc::View::addRacesSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Races);
+}
+
+void CSVDoc::View::addSoundsSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Sounds);
+}
+
+void CSVDoc::View::addScriptsSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Scripts);
+}
+
+void CSVDoc::View::addRegionsSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Regions);
+}
+
+void CSVDoc::View::addBirthsignsSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Birthsigns);
+}
+
+void CSVDoc::View::addSpellsSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Spells);
 }
 
 void CSVDoc::View::abortOperation (int type)

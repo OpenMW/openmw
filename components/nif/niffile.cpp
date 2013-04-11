@@ -209,7 +209,7 @@ static const RecordFactoryEntry recordFactories [] = {
     { "NiNode",                     &construct <NiNode                      >, RC_NiNode                        },
     { "AvoidNode",                  &construct <NiNode                      >, RC_NiNode                        },
     { "NiBSParticleNode",           &construct <NiNode                      >, RC_NiNode                        },
-    { "NiBSAnimationNode",          &construct <NiNode                      >, RC_NiNode                        },
+    { "NiBSAnimationNode",          &construct <NiNode                      >, RC_NiBSAnimationNode             },
     { "NiBillboardNode",            &construct <NiNode                      >, RC_NiNode                        },
     { "NiTriShape",                 &construct <NiTriShape                  >, RC_NiTriShape                    },
     { "NiRotatingParticles",        &construct <NiRotatingParticles         >, RC_NiRotatingParticles           },
@@ -345,14 +345,18 @@ void NIFFile::parse()
       }
     }
 
-  /* After the data, the nif contains an int N and then a list of N
-     ints following it. This might be a list of the root nodes in the
-     tree, but for the moment we ignore it.
-   */
+    size_t rootNum = nif.getUInt();
+    roots.resize(rootNum);
 
-  // Once parsing is done, do post-processing.
-  for(size_t i=0; i<recNum; i++)
-    records[i]->post(this);
+    for(size_t i = 0;i < rootNum;i++)
+    {
+        intptr_t idx = nif.getInt();
+        roots[i] = ((idx >= 0) ? records.at(idx) : NULL);
+    }
+
+    // Once parsing is done, do post-processing.
+    for(size_t i=0; i<recNum; i++)
+        records[i]->post(this);
 }
 
 /// \todo move to the write cpp file
@@ -377,6 +381,44 @@ void NiSkinInstance::post(NIFFile *nif)
         if(bones[i].empty())
             nif->fail("Oops: Missing bone! Don't know how to handle this.");
         bones[i]->makeBone(i, data->bones[i]);
+    }
+}
+
+
+void Node::getProperties(const Nif::NiTexturingProperty *&texprop,
+                         const Nif::NiMaterialProperty *&matprop,
+                         const Nif::NiAlphaProperty *&alphaprop,
+                         const Nif::NiVertexColorProperty *&vertprop,
+                         const Nif::NiZBufferProperty *&zprop,
+                         const Nif::NiSpecularProperty *&specprop,
+                         const Nif::NiWireframeProperty *&wireprop) const
+{
+    if(parent)
+        parent->getProperties(texprop, matprop, alphaprop, vertprop, zprop, specprop, wireprop);
+
+    for(size_t i = 0;i < props.length();i++)
+    {
+        // Entries may be empty
+        if(props[i].empty())
+            continue;
+
+        const Nif::Property *pr = props[i].getPtr();
+        if(pr->recType == Nif::RC_NiTexturingProperty)
+            texprop = static_cast<const Nif::NiTexturingProperty*>(pr);
+        else if(pr->recType == Nif::RC_NiMaterialProperty)
+            matprop = static_cast<const Nif::NiMaterialProperty*>(pr);
+        else if(pr->recType == Nif::RC_NiAlphaProperty)
+            alphaprop = static_cast<const Nif::NiAlphaProperty*>(pr);
+        else if(pr->recType == Nif::RC_NiVertexColorProperty)
+            vertprop = static_cast<const Nif::NiVertexColorProperty*>(pr);
+        else if(pr->recType == Nif::RC_NiZBufferProperty)
+            zprop = static_cast<const Nif::NiZBufferProperty*>(pr);
+        else if(pr->recType == Nif::RC_NiSpecularProperty)
+            specprop = static_cast<const Nif::NiSpecularProperty*>(pr);
+        else if(pr->recType == Nif::RC_NiWireframeProperty)
+            wireprop = static_cast<const Nif::NiWireframeProperty*>(pr);
+        else
+            std::cerr<< "Unhandled property type: "<<pr->recName <<std::endl;
     }
 }
 

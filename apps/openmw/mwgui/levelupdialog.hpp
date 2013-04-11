@@ -1,7 +1,7 @@
 #ifndef MWGUI_LEVELUPDIALOG_H
 #define MWGUI_LEVELUPDIALOG_H
 
-#include "window_base.hpp"
+#include "windowbase.hpp"
 
 namespace MWGui
 {
@@ -9,7 +9,7 @@ namespace MWGui
     class LevelupDialog : public WindowBase
     {
     public:
-        LevelupDialog(MWBase::WindowManager& parWindowManager);
+        LevelupDialog();
 
         virtual void open();
 

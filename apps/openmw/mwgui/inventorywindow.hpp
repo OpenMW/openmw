@@ -4,7 +4,7 @@
 #include "../mwrender/characterpreview.hpp"
 
 #include "container.hpp"
-#include "window_pinnable_base.hpp"
+#include "windowpinnablebase.hpp"
 #include "widgets.hpp"
 
 namespace MWGui
@@ -12,9 +12,11 @@ namespace MWGui
     class InventoryWindow : public ContainerBase, public WindowPinnableBase
     {
         public:
-            InventoryWindow(MWBase::WindowManager& parWindowManager,DragAndDrop* dragAndDrop);
+            InventoryWindow(DragAndDrop* dragAndDrop);
 
             virtual void open();
+
+            void doRenderUpdate();
 
             /// start trading, disables item drag&drop
             void startTrade();
@@ -34,6 +36,8 @@ namespace MWGui
             }
 
         protected:
+            bool mPreviewDirty;
+
             MyGUI::Widget* mAvatar;
             MyGUI::ImageBox* mAvatarImage;
             MyGUI::TextBox* mArmorRating;

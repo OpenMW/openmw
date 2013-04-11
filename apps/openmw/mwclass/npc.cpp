@@ -160,6 +160,11 @@ namespace MWClass
         return ref->mBase->mId;
     }
 
+    void Npc::adjustPosition(const MWWorld::Ptr& ptr) const
+    {
+        MWBase::Environment::get().getWorld()->adjustPosition(ptr);
+    }
+
     void Npc::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
         renderingInterface.getActors().insertNPC(ptr, getInventoryStore(ptr));

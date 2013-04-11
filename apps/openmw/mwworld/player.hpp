@@ -1,15 +1,20 @@
 #ifndef GAME_MWWORLD_PLAYER_H
 #define GAME_MWWORLD_PLAYER_H
 
-#include "../mwworld/cellstore.hpp"
 #include "../mwworld/refdata.hpp"
-#include "../mwworld/ptr.hpp"
+#include "../mwworld/livecellref.hpp"
 
 #include "../mwmechanics/drawstate.hpp"
+
+namespace ESM
+{
+    struct NPC;
+}
 
 namespace MWBase
 {
     class World;
+    class Ptr;
 }
 
 namespace MWWorld
@@ -30,31 +35,17 @@ namespace MWWorld
 
         Player(const ESM::NPC *player, const MWBase::World& world);
 
-        void setCell (MWWorld::CellStore *cellStore)
-        {
-            mCellStore = cellStore;
-        }
+        void setCell (MWWorld::CellStore *cellStore);
 
-        MWWorld::Ptr getPlayer()
-        {
-            MWWorld::Ptr ptr (&mPlayer, mCellStore);
-            return ptr;
-        }
+        MWWorld::Ptr getPlayer();
 
-        void setBirthSign(const std::string &sign) {
-            mSign = sign;
-        }
+        void setBirthSign(const std::string &sign);
 
-        const std::string &getBirthSign() const {
-            return mSign;
-        }
+        const std::string &getBirthSign() const;
 
         void setDrawState (MWMechanics::DrawState_ state);
 
-        bool getAutoMove() const
-        {
-            return mAutoMove;
-        }
+        bool getAutoMove() const;
 
         MWMechanics::DrawState_ getDrawState(); /// \todo constness
 

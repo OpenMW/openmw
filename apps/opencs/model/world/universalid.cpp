@@ -21,6 +21,13 @@ namespace
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Gmsts, "Game Settings" },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Skills, "Skills" },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Classes, "Classes" },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Factions, "Factions" },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Races, "Races" },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Sounds, "Sounds" },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Scripts, "Scripts" },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Regions, "Regions" },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Birthsigns, "Birthsigns" },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Spells, "Spells" },
 
         { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0 } // end marker
     };
@@ -31,6 +38,13 @@ namespace
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Gmst, "Game Setting" },
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Skill, "Skill" },
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Class, "Class" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Faction, "Faction" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Race, "Race" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Sound, "Sound" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Script, "Script" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Region, "Region" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Birthsign, "Birthsign" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Spell, "Spell" },
 
         { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0 } // end marker
     };
@@ -51,44 +65,41 @@ CSMWorld::UniversalId::UniversalId (const std::string& universalId)
     {
         std::string type = universalId.substr (0, index);
 
-        if (index==std::string::npos)
-        {
-            for (int i=0; sNoArg[i].mName; ++i)
-                if (type==sNoArg[i].mName)
-                {
-                    mArgumentType = ArgumentType_None;
-                    mType = sNoArg[i].mType;
-                    mClass = sNoArg[i].mClass;
+        for (int i=0; sIdArg[i].mName; ++i)
+            if (type==sIdArg[i].mName)
+            {
+                mArgumentType = ArgumentType_Id;
+                mType = sIdArg[i].mType;
+                mClass = sIdArg[i].mClass;
+                mId = universalId.substr (index+2);
+                return;
+            }
+
+        for (int i=0; sIndexArg[i].mName; ++i)
+            if (type==sIndexArg[i].mName)
+            {
+                mArgumentType = ArgumentType_Index;
+                mType = sIndexArg[i].mType;
+                mClass = sIndexArg[i].mClass;
+
+                std::istringstream stream (universalId.substr (index+2));
+
+                if (stream >> mIndex)
                     return;
-                }
-        }
-        else
-        {
-            for (int i=0; sIdArg[i].mName; ++i)
-                if (type==sIdArg[i].mName)
-                {
-                    mArgumentType = ArgumentType_Id;
-                    mType = sIdArg[i].mType;
-                    mClass = sIdArg[i].mClass;
-                    mId = universalId.substr (0, index);
-                    return;
-                }
 
-            for (int i=0; sIndexArg[i].mName; ++i)
-                if (type==sIndexArg[i].mName)
-                {
-                    mArgumentType = ArgumentType_Index;
-                    mType = sIndexArg[i].mType;
-                    mClass = sIndexArg[i].mClass;
-
-                    std::istringstream stream (universalId.substr (0, index));
-
-                    if (stream >> mIndex)
-                        return;
-
-                    break;
-                }
-        }
+                break;
+            }
+    }
+    else
+    {
+        for (int i=0; sNoArg[i].mName; ++i)
+            if (universalId==sNoArg[i].mName)
+            {
+                mArgumentType = ArgumentType_None;
+                mType = sNoArg[i].mType;
+                mClass = sNoArg[i].mClass;
+                return;
+            }
     }
 
     throw std::runtime_error ("invalid UniversalId: " + universalId);

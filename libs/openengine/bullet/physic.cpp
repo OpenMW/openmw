@@ -323,7 +323,8 @@ namespace Physic
 
         mHeightFieldMap [name] = hf;
 
-        dynamicsWorld->addRigidBody(body,CollisionType_World,CollisionType_World|CollisionType_ActorInternal|CollisionType_ActorExternal);
+        dynamicsWorld->addRigidBody(body,CollisionType_World|CollisionType_Raycasting,
+                                    CollisionType_World|CollisionType_ActorInternal|CollisionType_ActorExternal|CollisionType_Raycasting);
     }
 
     void PhysicEngine::removeHeightField(int x, int y)

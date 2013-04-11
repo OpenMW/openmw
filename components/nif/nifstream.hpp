@@ -168,6 +168,12 @@ public:
         for(size_t i = 0;i < vec.size();i++)
             vec[i] = getVector4();
     }
+    void getQuaternions(std::vector<Ogre::Quaternion> &quat, size_t size)
+    {
+        quat.resize(size);
+        for(size_t i = 0;i < quat.size();i++)
+            quat[i] = getQuaternion();
+    }
 };
 
 }

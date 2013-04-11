@@ -41,7 +41,21 @@ namespace CSMWorld
                 Type_Skills,
                 Type_Skill,
                 Type_Classes,
-                Type_Class
+                Type_Class,
+                Type_Factions,
+                Type_Faction,
+                Type_Races,
+                Type_Race,
+                Type_Sounds,
+                Type_Sound,
+                Type_Scripts,
+                Type_Script,
+                Type_Regions,
+                Type_Region,
+                Type_Birthsigns,
+                Type_Birthsign,
+                Type_Spells,
+                Type_Spell
             };
 
         private:

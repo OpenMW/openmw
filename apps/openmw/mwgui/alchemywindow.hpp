@@ -5,16 +5,16 @@
 
 #include "../mwmechanics/alchemy.hpp"
 
-#include "window_base.hpp"
 #include "container.hpp"
 #include "widgets.hpp"
 
 namespace MWGui
 {
+
     class AlchemyWindow : public WindowBase, public ContainerBase
     {
     public:
-        AlchemyWindow(MWBase::WindowManager& parWindowManager);
+        AlchemyWindow();
 
         virtual void open();
 
@@ -38,7 +38,7 @@ namespace MWGui
         virtual void onReferenceUnavailable() { ; }
 
         void update();
-        
+
     private:
 
         MWMechanics::Alchemy mAlchemy;

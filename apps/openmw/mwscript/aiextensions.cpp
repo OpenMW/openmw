@@ -196,8 +196,6 @@ namespace MWScript
 
                     MWMechanics::AiWander wanderPackage(range, duration, time, idleList);
                     MWWorld::Class::get (ptr).getCreatureStats (ptr).getAiSequence().stack(wanderPackage);
-
-                    std::cout << "AiWander" << std::endl;
                 }
         };
 

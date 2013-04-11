@@ -303,6 +303,8 @@ namespace MWScript
                             zRot = zRot/60.;
                         }
                         MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,zRot);
+
+                        MWWorld::Class::get(ptr).adjustPosition(ptr);
                     }
                     else
                     {
@@ -341,6 +343,7 @@ namespace MWScript
                         zRot = zRot/60.;
                     }
                     MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,zRot);
+                    MWWorld::Class::get(ptr).adjustPosition(ptr);
                 }
         };
 
@@ -457,6 +460,13 @@ namespace MWScript
                     Interpreter::Type_Integer direction = runtime[0].mInteger;
                     runtime.pop();
 
+                    if (count<0)
+                        throw std::runtime_error ("count must be non-negative");
+
+                    // no-op
+                    if (count == 0)
+                        return;
+
                     ESM::Position ipos = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getRefData().getPosition();
                     Ogre::Vector3 pos(ipos.pos[0],ipos.pos[1],ipos.pos[2]);
                     Ogre::Quaternion rot(Ogre::Radian(-ipos.rot[2]), Ogre::Vector3::UNIT_Z);
@@ -499,6 +509,13 @@ namespace MWScript
                     runtime.pop();
                     Interpreter::Type_Integer direction = runtime[0].mInteger;
                     runtime.pop();
+
+                    if (count<0)
+                        throw std::runtime_error ("count must be non-negative");
+
+                    // no-op
+                    if (count == 0)
+                        return;
 
                     ESM::Position ipos = me.getRefData().getPosition();
                     Ogre::Vector3 pos(ipos.pos[0],ipos.pos[1],ipos.pos[2]);

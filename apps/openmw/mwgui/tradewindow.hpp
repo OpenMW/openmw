@@ -2,9 +2,6 @@
 #define MWGUI_TRADEWINDOW_H
 
 #include "container.hpp"
-#include "window_base.hpp"
-
-#include "../mwworld/ptr.hpp"
 
 namespace MyGUI
 {
@@ -23,7 +20,7 @@ namespace MWGui
     class TradeWindow : public ContainerBase, public WindowBase
     {
         public:
-            TradeWindow(MWBase::WindowManager& parWindowManager);
+            TradeWindow();
 
             void startTrade(MWWorld::Ptr actor);
 

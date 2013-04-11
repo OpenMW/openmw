@@ -1,14 +1,13 @@
 
 #include "player.hpp"
 
-
 #include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
+
+#include "../mwworld/ptr.hpp"
 
 #include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/npcstats.hpp"
 
-#include "esmstore.hpp"
 #include "class.hpp"
 
 namespace MWWorld
@@ -25,10 +24,36 @@ namespace MWWorld
         playerPos[0] = playerPos[1] = playerPos[2] = 0;
     }
 
+    void Player::setCell (MWWorld::CellStore *cellStore)
+    {
+        mCellStore = cellStore;
+    }
+
+    MWWorld::Ptr Player::getPlayer()
+    {
+        MWWorld::Ptr ptr (&mPlayer, mCellStore);
+        return ptr;
+    }
+
+    void Player::setBirthSign (const std::string &sign)
+    {
+        mSign = sign;
+    }
+
+    const std::string& Player::getBirthSign() const
+    {
+        return mSign;
+    }
+
     void Player::setDrawState (MWMechanics::DrawState_ state)
     {
          MWWorld::Ptr ptr = getPlayer();
          MWWorld::Class::get(ptr).getNpcStats(ptr).setDrawState (state);
+    }
+
+    bool Player::getAutoMove() const
+    {
+        return mAutoMove;
     }
 
     void Player::setAutoMove (bool enable)

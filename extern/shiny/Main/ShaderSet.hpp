@@ -53,6 +53,10 @@ namespace sh
 		std::vector <std::string> mGlobalSettings; ///< names of the global settings that affect the shader source
 		std::vector <std::string> mProperties; ///< names of the per-material properties that affect the shader source
 
+		std::vector <std::string> mPropertiesToExist;
+		///< same as mProperties, however in this case, it is only relevant if the property is empty or not
+		/// (we don't care about the value)
+
 		ShaderInstanceMap mInstances; ///< maps permutation ID (generated from the properties) to \a ShaderInstance
 
 		void parse(); ///< find out which properties and global settings affect the shader source

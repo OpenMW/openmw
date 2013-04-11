@@ -1,7 +1,7 @@
 #ifndef MWGUI_WINDOW_PINNABLE_BASE_H
 #define MWGUI_WINDOW_PINNABLE_BASE_H
 
-#include "window_base.hpp"
+#include "windowbase.hpp"
 
 namespace MWGui
 {
@@ -10,7 +10,7 @@ namespace MWGui
     class WindowPinnableBase: public WindowBase
     {
     public:
-        WindowPinnableBase(const std::string& parLayout, MWBase::WindowManager& parWindowManager);
+        WindowPinnableBase(const std::string& parLayout);
         bool pinned() { return mPinned; }
 
     private:

@@ -47,6 +47,11 @@ namespace MWWorld
         throw std::runtime_error ("class does not represent an actor");
     }
 
+    bool Class::canSell (const MWWorld::Ptr& item, int npcServices) const
+    {
+        return false;
+    }
+
     MWMechanics::CreatureStats& Class::getCreatureStats (const Ptr& ptr) const
     {
         throw std::runtime_error ("class does not have creature stats");
@@ -254,9 +259,18 @@ namespace MWWorld
         return "";
     }
 
-    std::string Class::applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
+    void Class::applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
     {
         throw std::runtime_error ("class can't be enchanted");
+    }
+
+    int Class::canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const
+    {
+        return 1;
+    }
+
+    void Class::adjustPosition(const MWWorld::Ptr& ptr) const
+    {
     }
 
     MWWorld::Ptr

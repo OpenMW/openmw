@@ -1,6 +1,7 @@
 #include "activatoranimation.hpp"
 
 #include <OgreEntity.h>
+#include <OgreParticleSystem.h>
 #include <OgreSceneManager.h>
 #include <OgreSubEntity.h>
 
@@ -25,18 +26,24 @@ ActivatorAnimation::ActivatorAnimation(const MWWorld::Ptr &ptr)
     {
         std::string mesh = "meshes\\" + ref->mBase->mModel;
 
-        createEntityList(mPtr.getRefData().getBaseNode(), mesh);
-        for(size_t i = 0;i < mEntityList.mEntities.size();i++)
+        createObjectList(mPtr.getRefData().getBaseNode(), mesh);
+        for(size_t i = 0;i < mObjectList.mEntities.size();i++)
         {
-            Ogre::Entity *ent = mEntityList.mEntities[i];
+            Ogre::Entity *ent = mObjectList.mEntities[i];
+            ent->setVisibilityFlags(RV_Misc);
 
             for(unsigned int j=0; j < ent->getNumSubEntities(); ++j)
             {
                 Ogre::SubEntity* subEnt = ent->getSubEntity(j);
                 subEnt->setRenderQueueGroup(subEnt->getMaterial()->isTransparent() ? RQG_Alpha : RQG_Main);
             }
+        }
+        for(size_t i = 0;i < mObjectList.mParticles.size();i++)
+        {
+            Ogre::ParticleSystem *part = mObjectList.mParticles[i];
+            part->setVisibilityFlags(RV_Misc);
 
-            ent->setVisibilityFlags(RV_Misc);
+            part->setRenderQueueGroup(RQG_Alpha);
         }
         setAnimationSource(mesh);
     }

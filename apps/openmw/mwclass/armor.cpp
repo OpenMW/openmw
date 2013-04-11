@@ -16,6 +16,8 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/physicssystem.hpp"
 #include "../mwworld/nullaction.hpp"
+#include "../mwworld/containerstore.hpp"
+#include "../mwworld/player.hpp"
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
@@ -260,6 +262,8 @@ namespace MWClass
         }
 
         info.enchant = ref->mBase->mEnchant;
+        if (!info.enchant.empty())
+            info.remainingEnchantCharge = ptr.getCellRef().mEnchantmentCharge;
 
         info.text = text;
 
@@ -274,7 +278,7 @@ namespace MWClass
         return ref->mBase->mEnchant;
     }
 
-    std::string Armor::applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
+    void Armor::applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
     {
         MWWorld::LiveCellRef<ESM::Armor> *ref =
             ptr.get<ESM::Armor>();
@@ -285,7 +289,77 @@ namespace MWClass
         newItem.mData.mEnchant=enchCharge;
         newItem.mEnchant=enchId;
         const ESM::Armor *record = MWBase::Environment::get().getWorld()->createRecord (newItem);
-        return record->mId;
+        ref->mBase = record;
+    }
+
+    int Armor::canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const
+    {
+        MWWorld::InventoryStore& invStore = MWWorld::Class::get(npc).getInventoryStore(npc);
+
+        // slots that this item can be equipped in
+        std::pair<std::vector<int>, bool> slots = MWWorld::Class::get(ptr).getEquipmentSlots(ptr);
+
+        std::string npcRace = npc.get<ESM::NPC>()->mBase->mRace;
+
+        for (std::vector<int>::const_iterator slot=slots.first.begin();
+            slot!=slots.first.end(); ++slot)
+        {
+
+            // Beast races cannot equip shoes / boots, or full helms (head part vs hair part)
+            const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npcRace);
+            if(race->mData.mFlags & ESM::Race::Beast)
+            {
+                std::vector<ESM::PartReference> parts = ptr.get<ESM::Armor>()->mBase->mParts.mParts;
+
+                if(*slot == MWWorld::InventoryStore::Slot_Helmet)
+                {
+                    for(std::vector<ESM::PartReference>::iterator itr = parts.begin(); itr != parts.end(); ++itr)
+                    {
+                        if((*itr).mPart == ESM::PRT_Head)
+                        {
+                            if(npc == MWBase::Environment::get().getWorld()->getPlayer().getPlayer() )
+                                MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage13}");
+
+                            return 0;
+                        }
+                    }
+                }
+
+                if (*slot == MWWorld::InventoryStore::Slot_Boots)
+                {
+                    for(std::vector<ESM::PartReference>::iterator itr = parts.begin(); itr != parts.end(); ++itr)
+                    {
+                        if((*itr).mPart == ESM::PRT_LFoot || (*itr).mPart == ESM::PRT_RFoot)
+                        {
+                            if(npc == MWBase::Environment::get().getWorld()->getPlayer().getPlayer() )
+                                MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage14}");
+                            return 0;
+                        }
+                    }
+                }
+            }
+
+            if(*slot == MWWorld::InventoryStore::Slot_CarriedLeft)
+            {
+                MWWorld::ContainerStoreIterator weapon = invStore.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+
+                if(weapon == invStore.end())
+                    return 1;
+
+                if(weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::LongBladeTwoHand ||
+                weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::BluntTwoClose || 
+                weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::BluntTwoWide || 
+                weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::SpearTwoWide ||
+                weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::AxeTwoHand || 
+                weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanBow || 
+                weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanCrossbow)
+                {
+                    return 3;
+                }
+                return 1;
+            }
+        }
+        return 1;
     }
 
     boost::shared_ptr<MWWorld::Action> Armor::use (const MWWorld::Ptr& ptr) const
@@ -312,5 +386,10 @@ namespace MWClass
                 ptr.get<ESM::Armor>();
 
         return ref->mBase->mData.mEnchant;
+    }
+
+    bool Armor::canSell (const MWWorld::Ptr& item, int npcServices) const
+    {
+        return npcServices & ESM::NPC::Armor;
     }
 }

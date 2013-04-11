@@ -111,6 +111,14 @@ public:
         boneIndex = ind;
     }
 
+    void getProperties(const Nif::NiTexturingProperty *&texprop,
+                       const Nif::NiMaterialProperty *&matprop,
+                       const Nif::NiAlphaProperty *&alphaprop,
+                       const Nif::NiVertexColorProperty *&vertprop,
+                       const Nif::NiZBufferProperty *&zprop,
+                       const Nif::NiSpecularProperty *&specprop,
+                       const Nif::NiWireframeProperty *&wireprop) const;
+
     Ogre::Matrix4 getLocalTransform() const;
     Ogre::Matrix4 getWorldTransform() const;
 };

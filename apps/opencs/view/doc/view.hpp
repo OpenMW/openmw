@@ -119,6 +119,20 @@ namespace CSVDoc
             void addSkillsSubView();
 
             void addClassesSubView();
+
+            void addFactionsSubView();
+
+            void addRacesSubView();
+
+            void addSoundsSubView();
+
+            void addScriptsSubView();
+
+            void addRegionsSubView();
+
+            void addBirthsignsSubView();
+
+            void addSpellsSubView();
     };
 }
 

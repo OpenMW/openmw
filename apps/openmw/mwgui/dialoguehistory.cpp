@@ -1,4 +1,4 @@
-#include "dialogue_history.hpp"
+#include "dialoguehistory.hpp"
 
 #include "../mwbase/windowmanager.hpp"
 

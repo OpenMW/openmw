@@ -1,5 +1,6 @@
 #include "renderer.hpp"
 #include "fader.hpp"
+#include "particles.hpp"
 
 #include "OgreRoot.h"
 #include "OgreRenderWindow.h"
@@ -8,6 +9,8 @@
 #include "OgreTextureManager.h"
 #include "OgreTexture.h"
 #include "OgreHardwarePixelBuffer.h"
+#include <OgreParticleSystemManager.h>
+#include "OgreParticleAffectorFactory.h"
 
 #include <boost/filesystem.hpp>
 
@@ -23,6 +26,7 @@
 
 using namespace Ogre;
 using namespace OEngine::Render;
+
 
 #if defined(__APPLE__) && !defined(__LP64__)
 
@@ -106,6 +110,11 @@ void OgreRenderer::loadPlugins()
 
 void OgreRenderer::unloadPlugins()
 {
+    std::vector<Ogre::ParticleAffectorFactory*>::iterator ai;
+    for(ai = mAffectorFactories.begin();ai != mAffectorFactories.end();ai++)
+        OGRE_DELETE (*ai);
+    mAffectorFactories.clear();
+
     #ifdef ENABLE_PLUGIN_GL
     delete mGLPlugin;
     mGLPlugin = NULL;
@@ -195,6 +204,13 @@ void OgreRenderer::configure(const std::string &logPath,
     Files::loadOgrePlugin(pluginDir, "RenderSystem_GL3Plus", *mRoot);
     Files::loadOgrePlugin(pluginDir, "RenderSystem_Direct3D9", *mRoot);
     Files::loadOgrePlugin(pluginDir, "Plugin_CgProgramManager", *mRoot);
+    Files::loadOgrePlugin(pluginDir, "Plugin_ParticleFX", *mRoot);
+
+    Ogre::ParticleAffectorFactory *affector;
+    affector = OGRE_NEW GrowFadeAffectorFactory();
+    Ogre::ParticleSystemManager::getSingleton().addAffectorFactory(affector);
+    mAffectorFactories.push_back(affector);
+
 
     RenderSystem* rs = mRoot->getRenderSystemByName(renderSystem);
     if (rs == 0)

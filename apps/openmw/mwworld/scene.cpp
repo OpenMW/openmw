@@ -51,6 +51,7 @@ namespace
                         class_.insertObject(ptr, physics);
                         MWBase::Environment::get().getWorld()->rotateObject(ptr, 0, 0, 0, true);
                         MWBase::Environment::get().getWorld()->scaleObject(ptr, ptr.getCellRef().mScale);
+                        class_.adjustPosition(ptr);
                     }
                     catch (const std::exception& e)
                     {
@@ -99,7 +100,6 @@ namespace MWWorld
         }
 
         mRendering.removeCell(*iter);
-       //mPhysics->removeObject("Unnamed_43");
 
         MWBase::Environment::get().getWorld()->getLocalScripts().clearCell (*iter);
         MWBase::Environment::get().getMechanicsManager()->drop (*iter);
@@ -115,14 +115,10 @@ namespace MWWorld
 
         if(result.second)
         {
-            /// \todo rescale depending on the state of a new GMST
-            insertCell (*cell, true);
-
-            mRendering.cellAdded (cell);
-
             float verts = ESM::Land::LAND_SIZE;
             float worldsize = ESM::Land::REAL_SIZE;
 
+            // Load terrain physics first...
             if (cell->mCell->isExterior())
             {
                 ESM::Land* land =
@@ -141,6 +137,12 @@ namespace MWWorld
                     ;
                 }
             }
+
+            // ... then references. This is important for adjustPosition to work correctly.
+            /// \todo rescale depending on the state of a new GMST
+            insertCell (*cell, true);
+
+            mRendering.cellAdded (cell);
 
             mRendering.configureAmbient(*cell);
             mRendering.requestMap(cell);
@@ -165,6 +167,8 @@ namespace MWWorld
             float y = Ogre::Radian(pos.rot[1]).valueDegrees();
             float z = Ogre::Radian(pos.rot[2]).valueDegrees();
             world->rotateObject(player, x, y, z);
+
+            MWWorld::Class::get(player).adjustPosition(player);
         }
 
         MWBase::MechanicsManager *mechMgr =
@@ -355,6 +359,8 @@ namespace MWWorld
             float y = Ogre::Radian(position.rot[1]).valueDegrees();
             float z = Ogre::Radian(position.rot[2]).valueDegrees();
             world->rotateObject(world->getPlayer().getPlayer(), x, y, z);
+
+            MWWorld::Class::get(world->getPlayer().getPlayer()).adjustPosition(world->getPlayer().getPlayer());
             return;
         }
 
@@ -435,7 +441,6 @@ namespace MWWorld
         insertCellRefList(mRendering, cell.mBooks, cell, *mPhysics, rescale);
         insertCellRefList(mRendering, cell.mClothes, cell, *mPhysics, rescale);
         insertCellRefList(mRendering, cell.mContainers, cell, *mPhysics, rescale);
-        insertCellRefList(mRendering, cell.mCreatures, cell, *mPhysics, rescale);
         insertCellRefList(mRendering, cell.mDoors, cell, *mPhysics, rescale);
         insertCellRefList(mRendering, cell.mIngreds, cell, *mPhysics, rescale);
         insertCellRefList(mRendering, cell.mCreatureLists, cell, *mPhysics, rescale);
@@ -443,11 +448,13 @@ namespace MWWorld
         insertCellRefList(mRendering, cell.mLights, cell, *mPhysics, rescale);
         insertCellRefList(mRendering, cell.mLockpicks, cell, *mPhysics, rescale);
         insertCellRefList(mRendering, cell.mMiscItems, cell, *mPhysics, rescale);
-        insertCellRefList(mRendering, cell.mNpcs, cell, *mPhysics, rescale);
         insertCellRefList(mRendering, cell.mProbes, cell, *mPhysics, rescale);
         insertCellRefList(mRendering, cell.mRepairs, cell, *mPhysics, rescale);
         insertCellRefList(mRendering, cell.mStatics, cell, *mPhysics, rescale);
         insertCellRefList(mRendering, cell.mWeapons, cell, *mPhysics, rescale);
+        // Load NPCs and creatures _after_ everything else (important for adjustPosition to work correctly)
+        insertCellRefList(mRendering, cell.mCreatures, cell, *mPhysics, rescale);
+        insertCellRefList(mRendering, cell.mNpcs, cell, *mPhysics, rescale);
     }
 
     void Scene::addObjectToScene (const Ptr& ptr)

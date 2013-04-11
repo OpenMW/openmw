@@ -2,6 +2,7 @@
 
 #include <OgreSceneManager.h>
 #include <OgreEntity.h>
+#include <OgreParticleSystem.h>
 #include <OgreSubEntity.h>
 
 #include "../mwworld/esmstore.hpp"
@@ -49,12 +50,13 @@ const NpcAnimation::PartInfo NpcAnimation::sPartList[NpcAnimation::sPartListSize
 
 NpcAnimation::~NpcAnimation()
 {
+    Ogre::SceneManager *sceneMgr = mInsert->getCreator();
     for(size_t i = 0;i < sPartListSize;i++)
-        removeEntities(mEntityParts[i]);
+        destroyObjectList(sceneMgr, mObjectParts[i]);
 }
 
 
-NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWorld::InventoryStore& inv, int visibilityFlags, bool headOnly)
+NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWorld::InventoryStore& inv, int visibilityFlags, ViewMode viewMode)
   : Animation(ptr),
     mStateID(-1),
     mTimeToChange(0),
@@ -71,7 +73,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
     mGloveL(inv.end()),
     mGloveR(inv.end()),
     mSkirtIter(inv.end()),
-    mHeadOnly(headOnly)
+    mViewMode(viewMode)
 {
     mNpc = mPtr.get<ESM::NPC>()->mBase;
 
@@ -94,10 +96,10 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
     bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
     std::string smodel = (!isBeast ? "meshes\\base_anim.nif" : "meshes\\base_animkna.nif");
 
-    createEntityList(node, smodel);
-    for(size_t i = 0;i < mEntityList.mEntities.size();i++)
+    createObjectList(node, smodel);
+    for(size_t i = 0;i < mObjectList.mEntities.size();i++)
     {
-        Ogre::Entity *base = mEntityList.mEntities[i];
+        Ogre::Entity *base = mObjectList.mEntities[i];
 
         base->getUserObjectBindings().setUserAny(Ogre::Any(-1));
         if (mVisibilityFlags != 0)
@@ -109,6 +111,15 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
             subEnt->setRenderQueueGroup(subEnt->getMaterial()->isTransparent() ? RQG_Alpha : RQG_Main);
         }
     }
+    for(size_t i = 0;i < mObjectList.mParticles.size();i++)
+    {
+        Ogre::ParticleSystem *part = mObjectList.mParticles[i];
+
+        part->getUserObjectBindings().setUserAny(Ogre::Any(-1));
+        if(mVisibilityFlags != 0)
+            part->setVisibilityFlags(mVisibilityFlags);
+        part->setRenderQueueGroup(RQG_Alpha);
+    }
 
     std::vector<std::string> skelnames(1, smodel);
     if(!mNpc->isMale() && !isBeast)
@@ -119,7 +130,40 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
         skelnames.push_back("meshes\\"+Misc::StringUtils::lowerCase(mNpc->mModel));
     setAnimationSources(skelnames);
 
-    updateParts(true);
+    forceUpdate();
+}
+
+void NpcAnimation::setViewMode(NpcAnimation::ViewMode viewMode)
+{
+    assert(viewMode != VM_HeadOnly);
+    mViewMode = viewMode;
+
+    /* FIXME: Enable this once first-person animations work. */
+#if 0
+    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+    const ESM::Race *race = store.get<ESM::Race>().find(mNpc->mRace);
+
+    bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
+    std::string smodel = (!isBeast ? "meshes\\base_anim.nif" : "meshes\\base_animkna.nif");
+
+    std::vector<std::string> skelnames(1, smodel);
+    if(!mNpc->isMale() && !isBeast)
+        skelnames.push_back("meshes\\base_anim_female.nif");
+    else if(mBodyPrefix.find("argonian") != std::string::npos)
+        skelnames.push_back("meshes\\argonian_swimkna.nif");
+    if(mNpc->mModel.length() > 0)
+        skelnames.push_back("meshes\\"+Misc::StringUtils::lowerCase(mNpc->mModel));
+    if(mViewMode == VM_FirstPerson)
+    {
+        smodel = (!isBeast ? "meshes\\base_anim.1st.nif" : "meshes\\base_animkna.1st.nif");
+        skelnames.push_back(smodel);
+    }
+    setAnimationSources(skelnames);
+#endif
+
+    for(size_t i = 0;i < sPartListSize;i++)
+        removeIndividualPart(i);
+    forceUpdate();
 }
 
 void NpcAnimation::updateParts(bool forceupdate)
@@ -211,7 +255,15 @@ void NpcAnimation::updateParts(bool forceupdate)
     if(!forceupdate)
         return;
 
-    for(size_t i = 0;i < slotlistsize && !mHeadOnly;i++)
+    /* FIXME: Remove this once we figure out how to show what in first-person */
+    if(mViewMode == VM_FirstPerson)
+    {
+        for(size_t i = 0;i < slotlistsize;i++)
+            this->*slotlist[i].part = inv.getSlot(slotlist[i].slot);
+        return;
+    }
+
+    for(size_t i = 0;i < slotlistsize && mViewMode != VM_HeadOnly;i++)
     {
         MWWorld::ContainerStoreIterator iter = inv.getSlot(slotlist[i].slot);
 
@@ -243,12 +295,14 @@ void NpcAnimation::updateParts(bool forceupdate)
             reserveIndividualPart(slotlist[i].reserveParts[res], slotlist[i].slot, prio);
     }
 
-    if(mPartPriorities[ESM::PRT_Head] < 1)
-        addOrReplaceIndividualPart(ESM::PRT_Head, -1,1, mHeadModel);
-    if(mPartPriorities[ESM::PRT_Hair] < 1 && mPartPriorities[ESM::PRT_Head] <= 1)
-        addOrReplaceIndividualPart(ESM::PRT_Hair, -1,1, mHairModel);
-
-    if (mHeadOnly)
+    if(mViewMode != VM_FirstPerson)
+    {
+        if(mPartPriorities[ESM::PRT_Head] < 1)
+            addOrReplaceIndividualPart(ESM::PRT_Head, -1,1, mHeadModel);
+        if(mPartPriorities[ESM::PRT_Hair] < 1 && mPartPriorities[ESM::PRT_Head] <= 1)
+            addOrReplaceIndividualPart(ESM::PRT_Hair, -1,1, mHairModel);
+    }
+    if(mViewMode == VM_HeadOnly)
         return;
 
     static const struct {
@@ -277,6 +331,7 @@ void NpcAnimation::updateParts(bool forceupdate)
         { ESM::PRT_Tail,      { "tail", "" } }
     };
 
+    const char *ext = (mViewMode == VM_FirstPerson) ? ".1st" : "";
     const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
     for(size_t i = 0;i < sizeof(PartTypeList)/sizeof(PartTypeList[0]);i++)
     {
@@ -287,14 +342,14 @@ void NpcAnimation::updateParts(bool forceupdate)
 
             if(!mNpc->isMale())
             {
-                part = partStore.search(mBodyPrefix + "_f_" + PartTypeList[i].name[0]);
+                part = partStore.search(mBodyPrefix + "_f_" + PartTypeList[i].name[0]+ext);
                 if(part == 0)
-                    part = partStore.search(mBodyPrefix + "_f_" + PartTypeList[i].name[1]);
+                    part = partStore.search(mBodyPrefix + "_f_" + PartTypeList[i].name[1]+ext);
             }
             if(part == 0)
-                part = partStore.search(mBodyPrefix + "_m_" + PartTypeList[i].name[0]);
+                part = partStore.search(mBodyPrefix + "_m_" + PartTypeList[i].name[0]+ext);
             if(part == 0)
-                part = partStore.search(mBodyPrefix + "_m_" + PartTypeList[i].name[1]);
+                part = partStore.search(mBodyPrefix + "_m_" + PartTypeList[i].name[1]+ext);
 
             if(part)
                 addOrReplaceIndividualPart(PartTypeList[i].type, -1,1, "meshes\\"+part->mModel);
@@ -302,26 +357,32 @@ void NpcAnimation::updateParts(bool forceupdate)
     }
 }
 
-NifOgre::EntityList NpcAnimation::insertBoundedPart(const std::string &mesh, int group, const std::string &bonename)
+NifOgre::ObjectList NpcAnimation::insertBoundedPart(const std::string &model, int group, const std::string &bonename)
 {
-    NifOgre::EntityList entities = NifOgre::Loader::createEntities(mEntityList.mSkelBase, bonename,
-                                                                   mInsert, mesh);
-    std::vector<Ogre::Entity*> &parts = entities.mEntities;
-    for(size_t i = 0;i < parts.size();i++)
+    NifOgre::ObjectList objects = NifOgre::Loader::createObjects(mObjectList.mSkelBase, bonename,
+                                                                 mInsert, model);
+    for(size_t i = 0;i < objects.mEntities.size();i++)
     {
-        parts[i]->getUserObjectBindings().setUserAny(Ogre::Any(group));
-        if (mVisibilityFlags != 0)
-            parts[i]->setVisibilityFlags(mVisibilityFlags);
+        objects.mEntities[i]->getUserObjectBindings().setUserAny(Ogre::Any(group));
+        if(mVisibilityFlags != 0)
+            objects.mEntities[i]->setVisibilityFlags(mVisibilityFlags);
 
-        for(unsigned int j=0; j < parts[i]->getNumSubEntities(); ++j)
+        for(unsigned int j=0; j < objects.mEntities[i]->getNumSubEntities(); ++j)
         {
-            Ogre::SubEntity* subEnt = parts[i]->getSubEntity(j);
+            Ogre::SubEntity* subEnt = objects.mEntities[i]->getSubEntity(j);
             subEnt->setRenderQueueGroup(subEnt->getMaterial()->isTransparent() ? RQG_Alpha : RQG_Main);
         }
     }
-    if(entities.mSkelBase)
+    for(size_t i = 0;i < objects.mParticles.size();i++)
     {
-        Ogre::AnimationStateSet *aset = entities.mSkelBase->getAllAnimationStates();
+        objects.mParticles[i]->getUserObjectBindings().setUserAny(Ogre::Any(group));
+        if(mVisibilityFlags != 0)
+            objects.mParticles[i]->setVisibilityFlags(mVisibilityFlags);
+        objects.mParticles[i]->setRenderQueueGroup(RQG_Alpha);
+    }
+    if(objects.mSkelBase)
+    {
+        Ogre::AnimationStateSet *aset = objects.mSkelBase->getAllAnimationStates();
         Ogre::AnimationStateIterator asiter = aset->getAnimationStateIterator();
         while(asiter.hasMoreElements())
         {
@@ -329,12 +390,12 @@ NifOgre::EntityList NpcAnimation::insertBoundedPart(const std::string &mesh, int
             state->setEnabled(false);
             state->setLoop(false);
         }
-        Ogre::SkeletonInstance *skelinst = entities.mSkelBase->getSkeleton();
+        Ogre::SkeletonInstance *skelinst = objects.mSkelBase->getSkeleton();
         Ogre::Skeleton::BoneIterator boneiter = skelinst->getBoneIterator();
         while(boneiter.hasMoreElements())
             boneiter.getNext()->setManuallyControlled(true);
     }
-    return entities;
+    return objects;
 }
 
 Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
@@ -347,29 +408,15 @@ Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
     mTimeToChange -= timepassed;
 
     Ogre::Vector3 ret = Animation::runAnimation(timepassed);
-    const Ogre::SkeletonInstance *skelsrc = mEntityList.mSkelBase->getSkeleton();
+    const Ogre::SkeletonInstance *skelsrc = mObjectList.mSkelBase->getSkeleton();
     for(size_t i = 0;i < sPartListSize;i++)
     {
-        Ogre::Entity *ent = mEntityParts[i].mSkelBase;
+        Ogre::Entity *ent = mObjectParts[i].mSkelBase;
         if(!ent) continue;
         updateSkeletonInstance(skelsrc, ent->getSkeleton());
         ent->getAllAnimationStates()->_notifyDirty();
     }
     return ret;
-}
-
-void NpcAnimation::removeEntities(NifOgre::EntityList &entities)
-{
-    assert(&entities != &mEntityList);
-
-    Ogre::SceneManager *sceneMgr = mInsert->getCreator();
-    for(size_t i = 0;i < entities.mEntities.size();i++)
-    {
-        entities.mEntities[i]->detachFromParent();
-        sceneMgr->destroyEntity(entities.mEntities[i]);
-    }
-    entities.mEntities.clear();
-    entities.mSkelBase = NULL;
 }
 
 void NpcAnimation::removeIndividualPart(int type)
@@ -381,7 +428,7 @@ void NpcAnimation::removeIndividualPart(int type)
     {
         if(type == sPartList[i].type)
         {
-            removeEntities(mEntityParts[i]);
+            destroyObjectList(mInsert->getCreator(), mObjectParts[i]);
             break;
         }
     }
@@ -419,7 +466,7 @@ bool NpcAnimation::addOrReplaceIndividualPart(int type, int group, int priority,
     {
         if(type == sPartList[i].type)
         {
-            mEntityParts[i] = insertBoundedPart(mesh, group, sPartList[i].name);
+            mObjectParts[i] = insertBoundedPart(mesh, group, sPartList[i].name);
             break;
         }
     }
@@ -428,6 +475,7 @@ bool NpcAnimation::addOrReplaceIndividualPart(int type, int group, int priority,
 
 void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::PartReference> &parts)
 {
+    const char *ext = (mViewMode == VM_FirstPerson) ? ".1st" : "";
     for(std::size_t i = 0; i < parts.size(); i++)
     {
         const ESM::PartReference &part = parts[i];
@@ -437,20 +485,15 @@ void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::
 
         const ESM::BodyPart *bodypart = 0;
         if(!mNpc->isMale())
-            bodypart = partStore.search(part.mFemale);
+            bodypart = partStore.search(part.mFemale+ext);
         if(!bodypart)
-            bodypart = partStore.search(part.mMale);
+            bodypart = partStore.search(part.mMale+ext);
 
         if(bodypart)
             addOrReplaceIndividualPart(part.mPart, group, priority, "meshes\\"+bodypart->mModel);
         else
             reserveIndividualPart(part.mPart, group, priority);
     }
-}
-
-Ogre::Node* NpcAnimation::getHeadNode()
-{
-    return mEntityList.mSkelBase->getSkeleton()->getBone("Bip01 Head");
 }
 
 }

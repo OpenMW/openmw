@@ -12,8 +12,8 @@
 
 using namespace MWGui;
 
-ScrollWindow::ScrollWindow (MWBase::WindowManager& parWindowManager)
-    : WindowBase("openmw_scroll.layout", parWindowManager)
+ScrollWindow::ScrollWindow ()
+    : WindowBase("openmw_scroll.layout")
     , mTakeButtonShow(true)
     , mTakeButtonAllowed(true)
 {
@@ -66,7 +66,7 @@ void ScrollWindow::onCloseButtonClicked (MyGUI::Widget* _sender)
 {
     MWBase::Environment::get().getSoundManager()->playSound ("scroll", 1.0, 1.0);
 
-    mWindowManager.removeGuiMode(GM_Scroll);
+    MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Scroll);
 }
 
 void ScrollWindow::onTakeButtonClicked (MyGUI::Widget* _sender)
@@ -76,5 +76,5 @@ void ScrollWindow::onTakeButtonClicked (MyGUI::Widget* _sender)
     MWWorld::ActionTake take(mScroll);
     take.execute (MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
 
-    mWindowManager.removeGuiMode(GM_Scroll);
+    MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Scroll);
 }

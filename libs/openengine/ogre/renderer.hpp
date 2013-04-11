@@ -40,6 +40,7 @@ namespace Ogre
     class SceneManager;
     class Camera;
     class Viewport;
+    class ParticleAffectorFactory;
 }
 
 namespace OEngine
@@ -94,6 +95,7 @@ namespace OEngine
             Ogre::D3D9Plugin* mD3D9Plugin;
             #endif
             Fader* mFader;
+            std::vector<Ogre::ParticleAffectorFactory*> mAffectorFactories;
             bool logging;
 
         public:

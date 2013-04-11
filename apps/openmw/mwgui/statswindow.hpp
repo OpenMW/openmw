@@ -3,13 +3,8 @@
 
 #include "../mwworld/esmstore.hpp"
 
-#include <sstream>
-#include <set>
-#include <string>
-#include <utility>
-
 #include "../mwmechanics/stat.hpp"
-#include "window_pinnable_base.hpp"
+#include "windowpinnablebase.hpp"
 
 namespace MWGui
 {
@@ -22,7 +17,7 @@ namespace MWGui
 
             typedef std::vector<int> SkillList;
 
-            StatsWindow(MWBase::WindowManager& parWindowManager);
+            StatsWindow();
 
             /// automatically updates all the data in the stats window, but only if it has changed.
             void onFrame();

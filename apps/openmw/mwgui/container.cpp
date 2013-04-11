@@ -649,9 +649,9 @@ MWWorld::ContainerStore& ContainerBase::getContainerStore()
 
 // ------------------------------------------------------------------------------------------------
 
-ContainerWindow::ContainerWindow(MWBase::WindowManager& parWindowManager,DragAndDrop* dragAndDrop)
+ContainerWindow::ContainerWindow(DragAndDrop* dragAndDrop)
     : ContainerBase(dragAndDrop)
-    , WindowBase("openmw_container_window.layout", parWindowManager)
+    , WindowBase("openmw_container_window.layout")
 {
     getWidget(mDisposeCorpseButton, "DisposeCorpseButton");
     getWidget(mTakeButton, "TakeButton");
@@ -751,7 +751,7 @@ void ContainerWindow::onDisposeCorpseButtonClicked(MyGUI::Widget *sender)
 
         /// \todo I don't think this is the correct flag to check
         if (MWWorld::Class::get(mPtr).isEssential(mPtr))
-            mWindowManager.messageBox("#{sDisposeCorpseFail}");
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sDisposeCorpseFail}");
         else
             MWBase::Environment::get().getWorld()->deleteObject(mPtr);
 

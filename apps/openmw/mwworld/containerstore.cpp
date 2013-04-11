@@ -14,6 +14,8 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/scriptmanager.hpp"
 
+#include "../mwmechanics/creaturestats.hpp"
+
 #include "manualref.hpp"
 #include "refdata.hpp"
 #include "class.hpp"
@@ -175,24 +177,76 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImpl (const Ptr& ptr
     return it;
 }
 
-void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const MWWorld::ESMStore& store)
+void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const std::string& owner, const MWWorld::ESMStore& store)
 {
     for (std::vector<ESM::ContItem>::const_iterator iter (items.mList.begin()); iter!=items.mList.end();
         ++iter)
     {
-        ManualRef ref (store, iter->mItem.toString());
-
-        if (ref.getPtr().getTypeName()==typeid (ESM::ItemLevList).name())
-        {
-            /// \todo implement leveled item lists
-            continue;
-        }
-
-        ref.getPtr().getRefData().setCount (std::abs(iter->mCount)); /// \todo implement item restocking (indicated by negative count)
-        addImp (ref.getPtr());
+        std::string id = iter->mItem.toString();
+        addInitialItem(id, owner, iter->mCount);
     }
 
     flagAsModified();
+}
+
+void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::string& owner, int count, unsigned char failChance, bool topLevel)
+{
+    count = std::abs(count); /// \todo implement item restocking (indicated by negative count)
+
+    ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), id);
+
+    if (ref.getPtr().getTypeName()==typeid (ESM::ItemLevList).name())
+    {
+        const ESM::ItemLevList* levItem = ref.getPtr().get<ESM::ItemLevList>()->mBase;
+        const std::vector<ESM::LeveledListBase::LevelItem>& items = levItem->mList;
+
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        int playerLevel = MWWorld::Class::get(player).getCreatureStats(player).getLevel();
+
+        failChance += levItem->mChanceNone;
+
+        if (topLevel && count > 1 && levItem->mFlags & ESM::ItemLevList::Each)
+        {
+            for (int i=0; i<count; ++i)
+                addInitialItem(id, owner, 1, failChance, false);
+            return;
+        }
+
+        float random = static_cast<float> (std::rand()) / RAND_MAX;
+        if (random >= failChance/100.f)
+        {
+            std::vector<std::string> candidates;
+            int highestLevel = 0;
+            for (std::vector<ESM::LeveledListBase::LevelItem>::const_iterator it = items.begin(); it != items.end(); ++it)
+            {
+                if (it->mLevel > highestLevel)
+                    highestLevel = it->mLevel;
+            }
+
+            std::pair<int, std::string> highest = std::make_pair(-1, "");
+            for (std::vector<ESM::LeveledListBase::LevelItem>::const_iterator it = items.begin(); it != items.end(); ++it)
+            {
+                if (playerLevel >= it->mLevel
+                        && (levItem->mFlags & ESM::ItemLevList::AllLevels || it->mLevel == highestLevel))
+                {
+                    candidates.push_back(it->mId);
+                    if (it->mLevel >= highest.first)
+                        highest = std::make_pair(it->mLevel, it->mId);
+                }
+
+            }
+            if (!candidates.size())
+                return;
+            std::string item = candidates[std::rand()%candidates.size()];
+            addInitialItem(item, owner, count, failChance, false);
+        }
+    }
+    else
+    {
+        ref.getPtr().getRefData().setCount (count);
+        ref.getPtr().getCellRef().mOwner = owner;
+        addImp (ref.getPtr());
+    }
 }
 
 void MWWorld::ContainerStore::clear()

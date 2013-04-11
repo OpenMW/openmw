@@ -1,22 +1,19 @@
 #ifndef MWGUI_TEXT_INPUT_H
 #define MWGUI_TEXT_INPUT_H
 
-#include "window_base.hpp"
+#include "windowbase.hpp"
 
 namespace MWGui
 {
     class WindowManager;
 }
 
-/*
- */
-
 namespace MWGui
 {
     class TextInputDialog : public WindowModal
     {
     public:
-        TextInputDialog(MWBase::WindowManager& parWindowManager);
+        TextInputDialog();
 
         std::string getTextInput() const { return mTextEdit ? mTextEdit->getOnlyText() : ""; }
         void setTextInput(const std::string &text) { if (mTextEdit) mTextEdit->setOnlyText(text); }

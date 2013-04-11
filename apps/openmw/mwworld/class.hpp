@@ -81,6 +81,9 @@ namespace MWWorld
             ///< \return name (the one that is to be presented to the user; not the internal one);
             /// can return an empty string.
 
+            virtual void adjustPosition(const MWWorld::Ptr& ptr) const;
+            ///< Adjust position to stand on ground. Must be called post model load
+
             virtual MWMechanics::CreatureStats& getCreatureStats (const Ptr& ptr) const;
             ///< Return creature stats or throw an exception, if class does not have creature stats
             /// (default implementation: throw an exceoption)
@@ -235,9 +238,15 @@ namespace MWWorld
 
             virtual void adjustRotation(const MWWorld::Ptr& ptr,float& x,float& y,float& z) const;
 
+            virtual bool canSell (const MWWorld::Ptr& item, int npcServices) const;
+            ///< Determine whether or not \a item can be sold to an npc with the given \a npcServices
+
             virtual std::string getModel(const MWWorld::Ptr &ptr) const;
 
-            virtual std::string applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const;
+            virtual void applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const;
+
+            virtual int canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const;
+            ///< Return 0 if player cannot equip item. 1 if can equip. 2 if it's twohanded weapon. 3 if twohanded weapon conflicts with that.
 
             virtual Ptr
             copyToCell(const Ptr &ptr, CellStore &cell) const;

@@ -182,8 +182,8 @@ namespace MWBase
             virtual void activateQuickKey  (int index) = 0;
 
             virtual void setSelectedSpell(const std::string& spellId, int successChancePercent) = 0;
-            virtual void setSelectedEnchantItem(const MWWorld::Ptr& item, int chargePercent) = 0;
-            virtual void setSelectedWeapon(const MWWorld::Ptr& item, int durabilityPercent) = 0;
+            virtual void setSelectedEnchantItem(const MWWorld::Ptr& item) = 0;
+            virtual void setSelectedWeapon(const MWWorld::Ptr& item) = 0;
             virtual void unsetSelectedSpell() = 0;
             virtual void unsetSelectedWeapon() = 0;
 
@@ -245,6 +245,8 @@ namespace MWBase
             virtual void startRepairItem(MWWorld::Ptr item) = 0;
 
             virtual void showSoulgemDialog (MWWorld::Ptr item) = 0;
+
+            virtual void frameStarted(float dt) = 0;
 
             virtual void changePointer (const std::string& name) = 0;
 

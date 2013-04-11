@@ -175,4 +175,9 @@ namespace MWClass
     {
         return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionRepair(ptr));
     }
+
+    bool Repair::canSell (const MWWorld::Ptr& item, int npcServices) const
+    {
+        return npcServices & ESM::NPC::RepairItem;
+    }
 }

@@ -30,13 +30,14 @@
 namespace MWGui
 {
 
-    InventoryWindow::InventoryWindow(MWBase::WindowManager& parWindowManager,DragAndDrop* dragAndDrop)
+    InventoryWindow::InventoryWindow(DragAndDrop* dragAndDrop)
         : ContainerBase(dragAndDrop)
-        , WindowPinnableBase("openmw_inventory_window.layout", parWindowManager)
+        , WindowPinnableBase("openmw_inventory_window.layout")
         , mTrading(false)
         , mLastXSize(0)
         , mLastYSize(0)
         , mPreview(MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer ())
+        , mPreviewDirty(true)
     {
         static_cast<MyGUI::Window*>(mMainWidget)->eventWindowChangeCoord += MyGUI::newDelegate(this, &InventoryWindow::onWindowResize);
 
@@ -129,7 +130,7 @@ namespace MWGui
 
     void InventoryWindow::onPinToggled()
     {
-        mWindowManager.setWeaponVisibility(!mPinned);
+        MWBase::Environment::get().getWindowManager()->setWeaponVisibility(!mPinned);
     }
 
     void InventoryWindow::onAvatarClicked(MyGUI::Widget* _sender)
@@ -149,6 +150,7 @@ namespace MWGui
                 it = invStore.add(ptr);
                 (*it).getRefData().setCount(mDragAndDrop->mDraggedCount);
                 ptr = *it;
+                mDragAndDrop->mDraggedFrom->notifyItemDragged(ptr, -mDragAndDrop->mDraggedCount);
             }
 
             /// \todo scripts
@@ -161,13 +163,13 @@ namespace MWGui
             // the "Take" button should not be visible.
             // NOTE: the take button is "reset" when the window opens, so we can safely do the following
             // without screwing up future book windows
-            mWindowManager.getBookWindow()->setTakeButtonShow(false);
-            mWindowManager.getScrollWindow()->setTakeButtonShow(false);
+            MWBase::Environment::get().getWindowManager()->getBookWindow()->setTakeButtonShow(false);
+            MWBase::Environment::get().getWindowManager()->getScrollWindow()->setTakeButtonShow(false);
 
             mDragAndDrop->mIsOnDragAndDrop = false;
             MyGUI::Gui::getInstance().destroyWidget(mDragAndDrop->mDraggedWidget);
 
-            mWindowManager.setDragDrop(false);
+            MWBase::Environment::get().getWindowManager()->setDragDrop(false);
 
             drawItems();
 
@@ -223,11 +225,11 @@ namespace MWGui
             {
                 invStore.equip(slot, invStore.end());
                 std::string script = MWWorld::Class::get(*it).getScript(*it);
-                
+
                 // Unset OnPCEquip Variable on item's script, if it has a script with that variable declared
                 if(script != "")
                     (*it).mRefData->getLocals().setVarByInt(script, "onpcequip", 0);
-                
+
                 return;
             }
         }
@@ -268,25 +270,34 @@ namespace MWGui
         mTrading = true;
     }
 
+    void InventoryWindow::doRenderUpdate ()
+    {
+        if (mPreviewDirty)
+        {
+            mPreviewDirty = false;
+            MyGUI::IntSize size = mAvatar->getSize();
+
+            mPreview.update (size.width, size.height);
+            mAvatarImage->setSize(MyGUI::IntSize(std::max(mAvatar->getSize().width, 512), std::max(mAvatar->getSize().height, 1024)));
+            mAvatarImage->setImageTexture("CharacterPreview");
+        }
+    }
+
     void InventoryWindow::notifyContentChanged()
     {
         // update the spell window just in case new enchanted items were added to inventory
-        if (mWindowManager.getSpellWindow())
-            mWindowManager.getSpellWindow()->updateSpells();
+        if (MWBase::Environment::get().getWindowManager()->getSpellWindow())
+            MWBase::Environment::get().getWindowManager()->getSpellWindow()->updateSpells();
 
         // update selected weapon icon
         MWWorld::InventoryStore& invStore = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
         MWWorld::ContainerStoreIterator weaponSlot = invStore.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
         if (weaponSlot == invStore.end())
-            mWindowManager.unsetSelectedWeapon();
+            MWBase::Environment::get().getWindowManager()->unsetSelectedWeapon();
         else
-            mWindowManager.setSelectedWeapon(*weaponSlot, 100); /// \todo track weapon durability
+            MWBase::Environment::get().getWindowManager()->setSelectedWeapon(*weaponSlot); /// \todo track weapon durability
 
-        MyGUI::IntSize size = mAvatar->getSize();
-
-        mPreview.update (size.width, size.height);
-        mAvatarImage->setSize(MyGUI::IntSize(std::max(mAvatar->getSize().width, 512), std::max(mAvatar->getSize().height, 1024)));
-        mAvatarImage->setImageTexture("CharacterPreview");
+        mPreviewDirty = true;
 
         mArmorRating->setCaptionWithReplacing ("#{sArmor}: "
             + boost::lexical_cast<std::string>(static_cast<int>(MWWorld::Class::get(mPtr).getArmorRating(mPtr))));

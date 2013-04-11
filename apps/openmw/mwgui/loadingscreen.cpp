@@ -23,10 +23,10 @@
 namespace MWGui
 {
 
-    LoadingScreen::LoadingScreen(Ogre::SceneManager* sceneMgr, Ogre::RenderWindow* rw, MWBase::WindowManager& parWindowManager)
+    LoadingScreen::LoadingScreen(Ogre::SceneManager* sceneMgr, Ogre::RenderWindow* rw)
         : mSceneMgr(sceneMgr)
         , mWindow(rw)
-        , WindowBase("openmw_loading_screen.layout", parWindowManager)
+        , WindowBase("openmw_loading_screen.layout")
         , mLoadingOn(false)
         , mLastRenderTime(0.f)
         , mLastWallpaperChangeTime(0.f)
@@ -195,12 +195,12 @@ namespace MWGui
         {
             changeWallpaper();
 
-            mWindowManager.pushGuiMode(GM_LoadingWallpaper);
+            MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_LoadingWallpaper);
         }
         else
         {
             mBackgroundImage->setImageTexture("");
-            mWindowManager.pushGuiMode(GM_Loading);
+            MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Loading);
         }
     }
 
@@ -211,21 +211,27 @@ namespace MWGui
         mLoadingOn = false;
         mFirstLoad = false;
 
-        mWindowManager.removeGuiMode(GM_Loading);
-        mWindowManager.removeGuiMode(GM_LoadingWallpaper);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Loading);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_LoadingWallpaper);
     }
 
     void LoadingScreen::changeWallpaper ()
     {
-        if (mResources.isNull ())
-            mResources = Ogre::ResourceGroupManager::getSingleton ().findResourceNames ("General", "Splash_*.tga");
-
-
-        if (mResources->size())
+        if (mResources.empty())
         {
-            std::string const & randomSplash = mResources->at (rand() % mResources->size());
+            Ogre::StringVector groups = Ogre::ResourceGroupManager::getSingleton().getResourceGroups ();
+            for (Ogre::StringVector::iterator it = groups.begin(); it != groups.end(); ++it)
+            {
+                Ogre::StringVectorPtr resourcesInThisGroup = Ogre::ResourceGroupManager::getSingleton ().findResourceNames (*it, "Splash_*.tga");
+                mResources.insert(mResources.end(), resourcesInThisGroup->begin(), resourcesInThisGroup->end());
+            }
+        }
 
-            Ogre::TexturePtr tex = Ogre::TextureManager::getSingleton ().load (randomSplash, "General");
+        if (!mResources.empty())
+        {
+            std::string const & randomSplash = mResources.at (rand() % mResources.size());
+
+            Ogre::TexturePtr tex = Ogre::TextureManager::getSingleton ().load (randomSplash, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME);
 
             mBackgroundImage->setImageTexture (randomSplash);
         }

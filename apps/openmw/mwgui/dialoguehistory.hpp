@@ -1,5 +1,6 @@
 #ifndef MWGUI_DIALOGE_HISTORY_H
 #define MWGUI_DIALOGE_HISTORY_H
+
 #include <openengine/gui/layout.hpp>
 
 namespace MWGui

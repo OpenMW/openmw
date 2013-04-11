@@ -301,6 +301,12 @@ namespace MWInput
                 mPlayer.setForwardBackward (-1);
             }
 
+            else if(mPlayer.getAutoMove())
+            {
+                triedToMove = true;
+                mPlayer.setForwardBackward (1);
+            }
+
             mPlayer.setSneak(actionIsActive(A_Sneak));
 
             if (actionIsActive(A_Jump) && mControlSwitch["playerjumping"])
@@ -321,6 +327,7 @@ namespace MWInput
                 mOverencumberedMessageDelay -= dt;
                 if (MWWorld::Class::get(player).getEncumbrance(player) >= MWWorld::Class::get(player).getCapacity(player))
                 {
+                    mPlayer.setAutoMove (false);
                     if (mOverencumberedMessageDelay <= 0)
                     {
                         MWBase::Environment::get().getWindowManager ()->messageBox("#{sNotifyMessage59}");
@@ -526,8 +533,17 @@ namespace MWInput
             float scale = MWBase::Environment::get().getFrameDuration();
             if(scale <= 0.0f) scale = 1.0f;
 
-            mPlayer.setYaw(x/scale);
-            mPlayer.setPitch(-y/scale);
+            float rot[3];
+            rot[0] = -y;
+            rot[1] = 0.0f;
+            rot[2] = x;
+            
+            // Only actually turn player when we're not in vanity mode 
+            if(!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot))
+            {
+                mPlayer.setYaw(x/scale);
+                mPlayer.setPitch(-y/scale);
+            }
 
             if (arg.state.Z.rel)
                 MWBase::Environment::get().getWorld()->changeVanityModeScale(arg.state.Z.rel);
@@ -649,9 +665,15 @@ namespace MWInput
         bool gameMode = !mWindows.isGuiMode();
 
         if(gameMode)
+        {
+            MWBase::Environment::get().getSoundManager()->playSound ("book open", 1.0, 1.0);
             mWindows.pushGuiMode(MWGui::GM_Journal);
+        }
         else if(mWindows.getMode() == MWGui::GM_Journal)
+        {
+            MWBase::Environment::get().getSoundManager()->playSound ("book close", 1.0, 1.0);
             mWindows.popGuiMode();
+        }
         // .. but don't touch any other mode.
     }
 

@@ -24,9 +24,9 @@ add_openmw_dir (mwinput
     )
 
 add_openmw_dir (mwgui
-    text_input widgets race class birth review windowmanagerimp console dialogue
-    dialogue_history window_base stats_window messagebox journalwindow charactercreation
-    map_window window_pinnable_base tooltips scrollwindow bookwindow list
+    textinput widgets race class birth review windowmanagerimp console dialogue
+    dialoguehistory windowbase statswindow messagebox journalwindow charactercreation
+    mapwindow windowpinnablebase tooltips scrollwindow bookwindow list
     formatting inventorywindow container hud countdialog tradewindow settingswindow
     confirmationdialog alchemywindow referenceinterface spellwindow mainmenu quickkeysmenu
     itemselection spellbuyingwindow loadingscreen levelupdialog waitdialog spellcreationdialog
@@ -54,7 +54,7 @@ add_openmw_dir (mwworld
     containerstore actiontalk actiontake manualref player cellfunctors failedaction
     cells localscripts customdata weather inventorystore ptr actionopen actionread
     actionequip timestamp actionalchemy cellstore actionapply actioneat
-    esmstore store recordcmp fallback actionrepair actionsoulgem
+    esmstore store recordcmp fallback actionrepair actionsoulgem livecellref
     )
 
 add_openmw_dir (mwclass

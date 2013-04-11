@@ -10,11 +10,6 @@
    this class.
 **/
 
-#include <vector>
-#include <string>
-
-#include <components/esm/loadclas.hpp>
-
 #include "../mwbase/windowmanager.hpp"
 
 namespace MyGUI
@@ -179,8 +174,8 @@ namespace MWGui
     virtual void activateQuickKey  (int index);
 
     virtual void setSelectedSpell(const std::string& spellId, int successChancePercent);
-    virtual void setSelectedEnchantItem(const MWWorld::Ptr& item, int chargePercent);
-    virtual void setSelectedWeapon(const MWWorld::Ptr& item, int durabilityPercent);
+    virtual void setSelectedEnchantItem(const MWWorld::Ptr& item);
+    virtual void setSelectedWeapon(const MWWorld::Ptr& item);
     virtual void unsetSelectedSpell();
     virtual void unsetSelectedWeapon();
 
@@ -237,6 +232,8 @@ namespace MWGui
     virtual void startTraining(MWWorld::Ptr actor);
     virtual void startRepair(MWWorld::Ptr actor);
     virtual void startRepairItem(MWWorld::Ptr item);
+
+    virtual void frameStarted(float dt);
 
     virtual void showSoulgemDialog (MWWorld::Ptr item);
 

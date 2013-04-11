@@ -14,8 +14,8 @@
 
 using namespace MWGui;
 
-BookWindow::BookWindow (MWBase::WindowManager& parWindowManager)
-    : WindowBase("openmw_book.layout", parWindowManager)
+BookWindow::BookWindow ()
+    : WindowBase("openmw_book.layout")
     , mTakeButtonShow(true)
     , mTakeButtonAllowed(true)
 {
@@ -102,7 +102,7 @@ void BookWindow::onCloseButtonClicked (MyGUI::Widget* sender)
     // no 3d sounds because the object could be in a container.
     MWBase::Environment::get().getSoundManager()->playSound ("book close", 1.0, 1.0);
 
-    mWindowManager.removeGuiMode(GM_Book);
+    MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Book);
 }
 
 void BookWindow::onTakeButtonClicked (MyGUI::Widget* sender)
@@ -112,7 +112,7 @@ void BookWindow::onTakeButtonClicked (MyGUI::Widget* sender)
     MWWorld::ActionTake take(mBook);
     take.execute (MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
 
-    mWindowManager.removeGuiMode(GM_Book);
+    MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Book);
 }
 
 void BookWindow::onNextPageButtonClicked (MyGUI::Widget* sender)

@@ -1,6 +1,7 @@
 #include "creatureanimation.hpp"
 
 #include <OgreEntity.h>
+#include <OgreParticleSystem.h>
 #include <OgreSceneManager.h>
 #include <OgreSubEntity.h>
 
@@ -25,10 +26,10 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr &ptr)
     {
         std::string model = "meshes\\"+ref->mBase->mModel;
 
-        createEntityList(mPtr.getRefData().getBaseNode(), model);
-        for(size_t i = 0;i < mEntityList.mEntities.size();i++)
+        createObjectList(mPtr.getRefData().getBaseNode(), model);
+        for(size_t i = 0;i < mObjectList.mEntities.size();i++)
         {
-            Ogre::Entity *ent = mEntityList.mEntities[i];
+            Ogre::Entity *ent = mObjectList.mEntities[i];
             ent->setVisibilityFlags(RV_Actors);
 
             for(unsigned int j=0; j < ent->getNumSubEntities(); ++j)
@@ -36,6 +37,13 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr &ptr)
                 Ogre::SubEntity* subEnt = ent->getSubEntity(j);
                 subEnt->setRenderQueueGroup(subEnt->getMaterial()->isTransparent() ? RQG_Alpha : RQG_Main);
             }
+        }
+        for(size_t i = 0;i < mObjectList.mParticles.size();i++)
+        {
+            Ogre::ParticleSystem *part = mObjectList.mParticles[i];
+            part->setVisibilityFlags(RV_Actors);
+
+            part->setRenderQueueGroup(RQG_Alpha);
         }
 
         std::vector<std::string> names;
