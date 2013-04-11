@@ -1,8 +1,6 @@
 #ifndef MWGUI_ENCHANTINGDIALOG_H
 #define MWGUI_ENCHANTINGDIALOG_H
 
-#include "windowbase.hpp"
-#include "referenceinterface.hpp"
 #include "spellcreationdialog.hpp"
 
 #include "../mwbase/windowmanager.hpp"

@@ -5,12 +5,12 @@
 
 #include "../mwmechanics/alchemy.hpp"
 
-#include "windowbase.hpp"
 #include "container.hpp"
 #include "widgets.hpp"
 
 namespace MWGui
 {
+
     class AlchemyWindow : public WindowBase, public ContainerBase
     {
     public:

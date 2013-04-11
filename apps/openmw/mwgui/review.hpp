@@ -2,7 +2,6 @@
 #define MWGUI_REVIEW_H
 
 #include "windowbase.hpp"
-#include "../mwmechanics/stat.hpp"
 #include "widgets.hpp"
 
 namespace MWGui

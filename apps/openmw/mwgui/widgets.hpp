@@ -4,8 +4,6 @@
 #include "../mwworld/esmstore.hpp"
 #include "../mwmechanics/stat.hpp"
 
-#include <MyGUI_Widget.h>
-#include <MyGUI_TextBox.h>
 #include <MyGUI_Button.h>
 #include <MyGUI_EditBox.h>
 

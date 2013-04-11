@@ -10,11 +10,6 @@
    this class.
 **/
 
-#include <vector>
-#include <string>
-
-#include <components/esm/loadclas.hpp>
-
 #include "../mwbase/windowmanager.hpp"
 
 namespace MyGUI

@@ -3,7 +3,6 @@
 
 #include "windowbase.hpp"
 
-#include "../mwworld/ptr.hpp"
 #include "../mwmechanics/repair.hpp"
 
 namespace MWGui

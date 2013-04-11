@@ -1,13 +1,10 @@
 #ifndef MGUI_CONTAINER_H
 #define MGUI_CONTAINER_H
 
-#include "../mwworld/esmstore.hpp"
-
 #include "windowbase.hpp"
 #include "referenceinterface.hpp"
 
 #include "../mwclass/container.hpp"
-#include "../mwworld/ptr.hpp"
 #include "../mwworld/containerstore.hpp"
 
 

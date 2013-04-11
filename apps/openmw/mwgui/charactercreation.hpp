@@ -1,12 +1,8 @@
 #ifndef CHARACTER_CREATION_HPP
 #define CHARACTER_CREATION_HPP
 
-#include "../mwworld/esmstore.hpp"
-
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
-
-#include "../mwmechanics/stat.hpp"
 
 namespace MWGui
 {

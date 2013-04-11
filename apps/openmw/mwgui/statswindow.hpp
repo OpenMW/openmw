@@ -3,11 +3,6 @@
 
 #include "../mwworld/esmstore.hpp"
 
-#include <sstream>
-#include <set>
-#include <string>
-#include <utility>
-
 #include "../mwmechanics/stat.hpp"
 #include "windowpinnablebase.hpp"
 

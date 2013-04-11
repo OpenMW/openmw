@@ -1,10 +1,7 @@
 #ifndef MWGUI_JOURNAL_H
 #define MWGUI_JOURNAL_H
 
-#include <sstream>
-#include <set>
 #include <string>
-#include <utility>
 
 #include "windowbase.hpp"
 #include "imagebutton.hpp"

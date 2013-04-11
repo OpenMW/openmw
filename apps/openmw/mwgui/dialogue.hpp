@@ -3,9 +3,6 @@
 
 #include "windowbase.hpp"
 #include "referenceinterface.hpp"
-#include <boost/array.hpp>
-
-#include "../mwworld/ptr.hpp"
 
 namespace MWGui
 {

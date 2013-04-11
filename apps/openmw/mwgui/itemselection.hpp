@@ -1,7 +1,5 @@
 #include "container.hpp"
 
-#include "../mwworld/ptr.hpp"
-
 namespace MWGui
 {
 

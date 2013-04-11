@@ -2,9 +2,6 @@
 #define MWGUI_TRADEWINDOW_H
 
 #include "container.hpp"
-#include "windowbase.hpp"
-
-#include "../mwworld/ptr.hpp"
 
 namespace MyGUI
 {
