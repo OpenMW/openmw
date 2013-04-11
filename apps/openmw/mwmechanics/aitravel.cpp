@@ -80,9 +80,9 @@ namespace MWMechanics
             dest.mZ = mZ;
 
             ESM::Pathgrid::Point start;
-            dest.mX = pos.pos[0];
-            dest.mY = pos.pos[1];
-            dest.mZ = pos.pos[2];
+            start.mX = pos.pos[0];
+            start.mY = pos.pos[1];
+            start.mZ = pos.pos[2];
 
             mPathFinder.buildPath(start,dest,pathgrid,xCell,yCell);
         }
