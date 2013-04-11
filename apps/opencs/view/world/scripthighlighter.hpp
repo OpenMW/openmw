@@ -22,7 +22,8 @@ namespace CSVWorld
                 Type_Float,
                 Type_Name,
                 Type_Keyword,
-                Type_Special
+                Type_Special,
+                Type_Comment
             };
 
         private:
@@ -58,7 +59,9 @@ namespace CSVWorld
             ///< Handle a special character token.
             /// \return fetch another token?
 
-            ///< Handle a special character token.
+            virtual bool parseComment (const std::string& comment, const Compiler::TokenLoc& loc,
+                Compiler::Scanner& scanner);
+            ///< Handle comment token.
             /// \return fetch another token?
 
             virtual void parseEOF (Compiler::Scanner& scanner);

@@ -40,6 +40,13 @@ bool CSVWorld::ScriptHighlighter::parseSpecial (int code, const Compiler::TokenL
     return true;
 }
 
+bool CSVWorld::ScriptHighlighter::parseComment (const std::string& comment,
+    const Compiler::TokenLoc& loc, Compiler::Scanner& scanner)
+{
+    highlight (loc, Type_Comment);
+    return true;
+}
+
 void CSVWorld::ScriptHighlighter::parseEOF (Compiler::Scanner& scanner)
 {}
 
@@ -67,7 +74,7 @@ CSVWorld::ScriptHighlighter::ScriptHighlighter (QTextDocument *parent)
 
     {
         QTextCharFormat format;
-        format.setForeground (Qt::green);
+        format.setForeground (Qt::magenta);
         mScheme.insert (std::make_pair (Type_Float, format));
     }
 
@@ -87,6 +94,12 @@ CSVWorld::ScriptHighlighter::ScriptHighlighter (QTextDocument *parent)
         QTextCharFormat format;
         format.setForeground (Qt::darkYellow);
         mScheme.insert (std::make_pair (Type_Special, format));
+    }
+
+    {
+        QTextCharFormat format;
+        format.setForeground (Qt::green);
+        mScheme.insert (std::make_pair (Type_Comment, format));
     }
 }
 
