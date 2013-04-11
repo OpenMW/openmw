@@ -4,7 +4,7 @@
 #include "../mwrender/characterpreview.hpp"
 
 #include "container.hpp"
-#include "window_pinnable_base.hpp"
+#include "windowpinnablebase.hpp"
 #include "widgets.hpp"
 
 namespace MWGui
@@ -12,7 +12,7 @@ namespace MWGui
     class InventoryWindow : public ContainerBase, public WindowPinnableBase
     {
         public:
-            InventoryWindow(MWBase::WindowManager& parWindowManager,DragAndDrop* dragAndDrop);
+            InventoryWindow(DragAndDrop* dragAndDrop);
 
             virtual void open();
 

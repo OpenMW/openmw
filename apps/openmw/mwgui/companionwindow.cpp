@@ -13,9 +13,9 @@
 namespace MWGui
 {
 
-CompanionWindow::CompanionWindow(MWBase::WindowManager &parWindowManager, DragAndDrop *dragAndDrop, MessageBoxManager* manager)
+CompanionWindow::CompanionWindow(DragAndDrop *dragAndDrop, MessageBoxManager* manager)
     : ContainerBase(dragAndDrop)
-    , WindowBase("openmw_companion_window.layout", parWindowManager)
+    , WindowBase("openmw_companion_window.layout")
     , mMessageBoxManager(manager)
 {
     MyGUI::ScrollView* itemView;

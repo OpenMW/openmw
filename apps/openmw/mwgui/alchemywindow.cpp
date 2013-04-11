@@ -26,8 +26,8 @@ namespace
 
 namespace MWGui
 {
-    AlchemyWindow::AlchemyWindow(MWBase::WindowManager& parWindowManager)
-        : WindowBase("openmw_alchemy_window.layout", parWindowManager)
+    AlchemyWindow::AlchemyWindow()
+        : WindowBase("openmw_alchemy_window.layout")
         , ContainerBase(0), mApparatus (4), mIngredients (4)
     {
         getWidget(mCreateButton, "CreateButton");
@@ -64,8 +64,8 @@ namespace MWGui
     {
         mAlchemy.clear();
 
-        mWindowManager.removeGuiMode(GM_Alchemy);
-        mWindowManager.removeGuiMode(GM_Inventory);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Alchemy);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Inventory);
     }
 
     void AlchemyWindow::onCreateButtonClicked(MyGUI::Widget* _sender)
@@ -77,40 +77,40 @@ namespace MWGui
 
         if (result == MWMechanics::Alchemy::Result_NoName)
         {
-            mWindowManager.messageBox("#{sNotifyMessage37}");
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage37}");
             return;
         }
 
         // check if mortar & pestle is available (always needed)
         if (result == MWMechanics::Alchemy::Result_NoMortarAndPestle)
         {
-            mWindowManager.messageBox("#{sNotifyMessage45}");
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage45}");
             return;
         }
 
         // make sure 2 or more ingredients were selected
         if (result == MWMechanics::Alchemy::Result_LessThanTwoIngredients)
         {
-            mWindowManager.messageBox("#{sNotifyMessage6a}");
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage6a}");
             return;
         }
 
         if (result == MWMechanics::Alchemy::Result_NoEffects)
         {
-            mWindowManager.messageBox("#{sNotifyMessage8}");
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage8}");
             MWBase::Environment::get().getSoundManager()->playSound("potion fail", 1.f, 1.f);
             return;
         }
 
         if (result == MWMechanics::Alchemy::Result_Success)
         {
-            mWindowManager.messageBox("#{sPotionSuccess}");
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sPotionSuccess}");
             MWBase::Environment::get().getSoundManager()->playSound("potion success", 1.f, 1.f);
         }
         else if (result == MWMechanics::Alchemy::Result_RandomFailure)
         {
             // potion failed
-            mWindowManager.messageBox("#{sNotifyMessage8}");
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage8}");
             MWBase::Environment::get().getSoundManager()->playSound("potion fail", 1.f, 1.f);
         }
 
@@ -232,7 +232,6 @@ namespace MWGui
         MyGUI::IntCoord coord(0, 0, mEffectsBox->getWidth(), 24);
         Widgets::MWEffectListPtr effectsWidget = mEffectsBox->createWidget<Widgets::MWEffectList>
             ("MW_StatName", coord, MyGUI::Align::Left | MyGUI::Align::Top);
-        effectsWidget->setWindowManager(&mWindowManager);
 
         Widgets::SpellEffectList _list = Widgets::MWEffectList::effectListFromESM(&list);
         effectsWidget->setEffectList(_list);

@@ -1,6 +1,6 @@
 #include "charactercreation.hpp"
 
-#include "text_input.hpp"
+#include "textinput.hpp"
 #include "race.hpp"
 #include "class.hpp"
 #include "birth.hpp"
@@ -47,7 +47,7 @@ namespace
 
 using namespace MWGui;
 
-CharacterCreation::CharacterCreation(MWBase::WindowManager* _wm)
+CharacterCreation::CharacterCreation()
     : mNameDialog(0)
     , mRaceDialog(0)
     , mClassChoiceDialog(0)
@@ -58,7 +58,6 @@ CharacterCreation::CharacterCreation(MWBase::WindowManager* _wm)
     , mBirthSignDialog(0)
     , mReviewDialog(0)
     , mGenerateClassStep(0)
-    , mWM(_wm)
 {
     mCreationStage = CSE_NotStarted;
 }
@@ -118,10 +117,10 @@ void CharacterCreation::spawnDialog(const char id)
     switch (id)
     {
         case GM_Name:
-            mWM->removeDialog(mNameDialog);
+            MWBase::Environment::get().getWindowManager()->removeDialog(mNameDialog);
             mNameDialog = 0;
-            mNameDialog = new TextInputDialog(*mWM);
-            mNameDialog->setTextLabel(mWM->getGameSettingString("sName", "Name"));
+            mNameDialog = new TextInputDialog();
+            mNameDialog->setTextLabel(MWBase::Environment::get().getWindowManager()->getGameSettingString("sName", "Name"));
             mNameDialog->setTextInput(mPlayerName);
             mNameDialog->setNextButtonShow(mCreationStage >= CSE_NameChosen);
             mNameDialog->eventDone += MyGUI::newDelegate(this, &CharacterCreation::onNameDialogDone);
@@ -129,9 +128,9 @@ void CharacterCreation::spawnDialog(const char id)
             break;
 
         case GM_Race:
-            mWM->removeDialog(mRaceDialog);
+            MWBase::Environment::get().getWindowManager()->removeDialog(mRaceDialog);
             mRaceDialog = 0;
-            mRaceDialog = new RaceDialog(*mWM);
+            mRaceDialog = new RaceDialog();
             mRaceDialog->setNextButtonShow(mCreationStage >= CSE_RaceChosen);
             mRaceDialog->setRaceId(mPlayerRaceId);
             mRaceDialog->eventDone += MyGUI::newDelegate(this, &CharacterCreation::onRaceDialogDone);
@@ -142,9 +141,9 @@ void CharacterCreation::spawnDialog(const char id)
             break;
 
         case GM_Class:
-            mWM->removeDialog(mClassChoiceDialog);
+            MWBase::Environment::get().getWindowManager()->removeDialog(mClassChoiceDialog);
             mClassChoiceDialog = 0;
-            mClassChoiceDialog = new ClassChoiceDialog(*mWM);
+            mClassChoiceDialog = new ClassChoiceDialog();
             mClassChoiceDialog->eventButtonSelected += MyGUI::newDelegate(this, &CharacterCreation::onClassChoice);
             mClassChoiceDialog->setVisible(true);
             if (mCreationStage < CSE_RaceChosen)
@@ -152,9 +151,9 @@ void CharacterCreation::spawnDialog(const char id)
             break;
 
         case GM_ClassPick:
-            mWM->removeDialog(mPickClassDialog);
+            MWBase::Environment::get().getWindowManager()->removeDialog(mPickClassDialog);
             mPickClassDialog = 0;
-            mPickClassDialog = new PickClassDialog(*mWM);
+            mPickClassDialog = new PickClassDialog();
             mPickClassDialog->setNextButtonShow(mCreationStage >= CSE_ClassChosen);
             mPickClassDialog->setClassId(mPlayerClass.mName);
             mPickClassDialog->eventDone += MyGUI::newDelegate(this, &CharacterCreation::onPickClassDialogDone);
@@ -165,9 +164,9 @@ void CharacterCreation::spawnDialog(const char id)
             break;
 
         case GM_Birth:
-            mWM->removeDialog(mBirthSignDialog);
+            MWBase::Environment::get().getWindowManager()->removeDialog(mBirthSignDialog);
             mBirthSignDialog = 0;
-            mBirthSignDialog = new BirthDialog(*mWM);
+            mBirthSignDialog = new BirthDialog();
             mBirthSignDialog->setNextButtonShow(mCreationStage >= CSE_BirthSignChosen);
             mBirthSignDialog->setBirthId(mPlayerBirthSignId);
             mBirthSignDialog->eventDone += MyGUI::newDelegate(this, &CharacterCreation::onBirthSignDialogDone);
@@ -178,9 +177,9 @@ void CharacterCreation::spawnDialog(const char id)
             break;
 
         case GM_ClassCreate:
-            mWM->removeDialog(mCreateClassDialog);
+            MWBase::Environment::get().getWindowManager()->removeDialog(mCreateClassDialog);
             mCreateClassDialog = 0;
-            mCreateClassDialog = new CreateClassDialog(*mWM);
+            mCreateClassDialog = new CreateClassDialog();
             mCreateClassDialog->setNextButtonShow(mCreationStage >= CSE_ClassChosen);
             mCreateClassDialog->eventDone += MyGUI::newDelegate(this, &CharacterCreation::onCreateClassDialogDone);
             mCreateClassDialog->eventBack += MyGUI::newDelegate(this, &CharacterCreation::onCreateClassDialogBack);
@@ -199,9 +198,9 @@ void CharacterCreation::spawnDialog(const char id)
                 mCreationStage = CSE_RaceChosen;
             break;
         case GM_Review:
-            mWM->removeDialog(mReviewDialog);
+            MWBase::Environment::get().getWindowManager()->removeDialog(mReviewDialog);
             mReviewDialog = 0;
-            mReviewDialog = new ReviewDialog(*mWM);
+            mReviewDialog = new ReviewDialog();
             mReviewDialog->setPlayerName(mPlayerName);
             mReviewDialog->setRace(mPlayerRaceId);
             mReviewDialog->setClass(mPlayerClass);
@@ -212,7 +211,7 @@ void CharacterCreation::spawnDialog(const char id)
             mReviewDialog->setFatigue(mPlayerFatigue);
 
             {
-                std::map<int, MWMechanics::Stat<int> > attributes = mWM->getPlayerAttributeValues();
+                std::map<int, MWMechanics::Stat<int> > attributes = MWBase::Environment::get().getWindowManager()->getPlayerAttributeValues();
                 for (std::map<int, MWMechanics::Stat<int> >::iterator it = attributes.begin();
                     it != attributes.end(); ++it)
                 {
@@ -221,13 +220,13 @@ void CharacterCreation::spawnDialog(const char id)
             }
 
             {
-                std::map<int, MWMechanics::Stat<float> > skills = mWM->getPlayerSkillValues();
+                std::map<int, MWMechanics::Stat<float> > skills = MWBase::Environment::get().getWindowManager()->getPlayerSkillValues();
                 for (std::map<int, MWMechanics::Stat<float> >::iterator it = skills.begin();
                     it != skills.end(); ++it)
                 {
                     mReviewDialog->setSkillValue(static_cast<ESM::Skill::SkillEnum> (it->first), it->second);
                 }
-                mReviewDialog->configureSkills(mWM->getPlayerMajorSkills(), mWM->getPlayerMinorSkills());
+                mReviewDialog->configureSkills(MWBase::Environment::get().getWindowManager()->getPlayerMajorSkills(), MWBase::Environment::get().getWindowManager()->getPlayerMinorSkills());
             }
 
             mReviewDialog->eventDone += MyGUI::newDelegate(this, &CharacterCreation::onReviewDialogDone);
@@ -257,41 +256,41 @@ void CharacterCreation::setPlayerFatigue (const MWMechanics::DynamicStat<float>&
 
 void CharacterCreation::onReviewDialogDone(WindowBase* parWindow)
 {
-    mWM->removeDialog(mReviewDialog);
+    MWBase::Environment::get().getWindowManager()->removeDialog(mReviewDialog);
     mReviewDialog = 0;
 
-    mWM->popGuiMode();
+    MWBase::Environment::get().getWindowManager()->popGuiMode();
 }
 
 void CharacterCreation::onReviewDialogBack()
 {
-    mWM->removeDialog(mReviewDialog);
+    MWBase::Environment::get().getWindowManager()->removeDialog(mReviewDialog);
     mReviewDialog = 0;
 
-    mWM->pushGuiMode(GM_Birth);
+    MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Birth);
 }
 
 void CharacterCreation::onReviewActivateDialog(int parDialog)
 {
-    mWM->removeDialog(mReviewDialog);
+    MWBase::Environment::get().getWindowManager()->removeDialog(mReviewDialog);
     mReviewDialog = 0;
     mCreationStage = CSE_ReviewNext;
 
-    mWM->popGuiMode();
+    MWBase::Environment::get().getWindowManager()->popGuiMode();
 
     switch(parDialog)
     {
         case ReviewDialog::NAME_DIALOG:
-            mWM->pushGuiMode(GM_Name);
+            MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Name);
             break;
         case ReviewDialog::RACE_DIALOG:
-            mWM->pushGuiMode(GM_Race);
+            MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Race);
             break;
         case ReviewDialog::CLASS_DIALOG:
-            mWM->pushGuiMode(GM_Class);
+            MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Class);
             break;
         case ReviewDialog::BIRTHSIGN_DIALOG:
-            mWM->pushGuiMode(GM_Birth);
+            MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Birth);
     };
 }
 
@@ -308,27 +307,27 @@ void CharacterCreation::onPickClassDialogDone(WindowBase* parWindow)
         if (klass)
         {
             mPlayerClass = *klass;
-            mWM->setPlayerClass(mPlayerClass);
+            MWBase::Environment::get().getWindowManager()->setPlayerClass(mPlayerClass);
         }
-        mWM->removeDialog(mPickClassDialog);
+        MWBase::Environment::get().getWindowManager()->removeDialog(mPickClassDialog);
         mPickClassDialog = 0;
     }
 
     //TODO This bit gets repeated a few times; wrap it in a function
     if (mCreationStage == CSE_ReviewNext)
     {
-        mWM->popGuiMode();
-        mWM->pushGuiMode(GM_Review);
+        MWBase::Environment::get().getWindowManager()->popGuiMode();
+        MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Review);
     }
     else if (mCreationStage >= CSE_ClassChosen)
     {
-        mWM->popGuiMode();
-        mWM->pushGuiMode(GM_Birth);
+        MWBase::Environment::get().getWindowManager()->popGuiMode();
+        MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Birth);
     }
     else
     {
         mCreationStage = CSE_ClassChosen;
-        mWM->popGuiMode();
+        MWBase::Environment::get().getWindowManager()->popGuiMode();
     }
 }
 
@@ -339,34 +338,34 @@ void CharacterCreation::onPickClassDialogBack()
         const std::string classId = mPickClassDialog->getClassId();
         if (!classId.empty())
             MWBase::Environment::get().getMechanicsManager()->setPlayerClass(classId);
-        mWM->removeDialog(mPickClassDialog);
+        MWBase::Environment::get().getWindowManager()->removeDialog(mPickClassDialog);
         mPickClassDialog = 0;
     }
 
-    mWM->popGuiMode();
-    mWM->pushGuiMode(GM_Class);
+    MWBase::Environment::get().getWindowManager()->popGuiMode();
+    MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Class);
 }
 
 void CharacterCreation::onClassChoice(int _index)
 {
-    mWM->removeDialog(mClassChoiceDialog);
+    MWBase::Environment::get().getWindowManager()->removeDialog(mClassChoiceDialog);
     mClassChoiceDialog = 0;
 
-    mWM->popGuiMode();
+    MWBase::Environment::get().getWindowManager()->popGuiMode();
 
     switch(_index)
     {
         case ClassChoiceDialog::Class_Generate:
-            mWM->pushGuiMode(GM_ClassGenerate);
+            MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_ClassGenerate);
             break;
         case ClassChoiceDialog::Class_Pick:
-            mWM->pushGuiMode(GM_ClassPick);
+            MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_ClassPick);
             break;
         case ClassChoiceDialog::Class_Create:
-            mWM->pushGuiMode(GM_ClassCreate);
+            MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_ClassCreate);
             break;
         case ClassChoiceDialog::Class_Back:
-            mWM->pushGuiMode(GM_Race);
+            MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Race);
             break;
 
     };
@@ -377,26 +376,26 @@ void CharacterCreation::onNameDialogDone(WindowBase* parWindow)
     if (mNameDialog)
     {
         mPlayerName = mNameDialog->getTextInput();
-        mWM->setValue("name", mPlayerName);
+        MWBase::Environment::get().getWindowManager()->setValue("name", mPlayerName);
         MWBase::Environment::get().getMechanicsManager()->setPlayerName(mPlayerName);
-        mWM->removeDialog(mNameDialog);
+        MWBase::Environment::get().getWindowManager()->removeDialog(mNameDialog);
         mNameDialog = 0;
     }
 
     if (mCreationStage == CSE_ReviewNext)
     {
-        mWM->popGuiMode();
-        mWM->pushGuiMode(GM_Review);
+        MWBase::Environment::get().getWindowManager()->popGuiMode();
+        MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Review);
     }
     else if (mCreationStage >= CSE_NameChosen)
     {
-        mWM->popGuiMode();
-        mWM->pushGuiMode(GM_Race);
+        MWBase::Environment::get().getWindowManager()->popGuiMode();
+        MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Race);
     }
     else
     {
         mCreationStage = CSE_NameChosen;
-        mWM->popGuiMode();
+        MWBase::Environment::get().getWindowManager()->popGuiMode();
     }
 }
 
@@ -414,12 +413,12 @@ void CharacterCreation::onRaceDialogBack()
                 data.mHair
             );
         }
-        mWM->removeDialog(mRaceDialog);
+        MWBase::Environment::get().getWindowManager()->removeDialog(mRaceDialog);
         mRaceDialog = 0;
     }
 
-    mWM->popGuiMode();
-    mWM->pushGuiMode(GM_Name);
+    MWBase::Environment::get().getWindowManager()->popGuiMode();
+    MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Name);
 }
 
 void CharacterCreation::onRaceDialogDone(WindowBase* parWindow)
@@ -436,26 +435,26 @@ void CharacterCreation::onRaceDialogDone(WindowBase* parWindow)
                 data.mHair
             );
         }
-        mWM->getInventoryWindow()->rebuildAvatar();
+        MWBase::Environment::get().getWindowManager()->getInventoryWindow()->rebuildAvatar();
 
-        mWM->removeDialog(mRaceDialog);
+        MWBase::Environment::get().getWindowManager()->removeDialog(mRaceDialog);
         mRaceDialog = 0;
     }
 
     if (mCreationStage == CSE_ReviewNext)
     {
-        mWM->popGuiMode();
-        mWM->pushGuiMode(GM_Review);
+        MWBase::Environment::get().getWindowManager()->popGuiMode();
+        MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Review);
     }
     else if (mCreationStage >= CSE_RaceChosen)
     {
-        mWM->popGuiMode();
-        mWM->pushGuiMode(GM_Class);
+        MWBase::Environment::get().getWindowManager()->popGuiMode();
+        MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Class);
     }
     else
     {
         mCreationStage = CSE_RaceChosen;
-        mWM->popGuiMode();
+        MWBase::Environment::get().getWindowManager()->popGuiMode();
     }
 }
 
@@ -466,19 +465,19 @@ void CharacterCreation::onBirthSignDialogDone(WindowBase* parWindow)
         mPlayerBirthSignId = mBirthSignDialog->getBirthId();
         if (!mPlayerBirthSignId.empty())
             MWBase::Environment::get().getMechanicsManager()->setPlayerBirthsign(mPlayerBirthSignId);
-        mWM->removeDialog(mBirthSignDialog);
+        MWBase::Environment::get().getWindowManager()->removeDialog(mBirthSignDialog);
         mBirthSignDialog = 0;
     }
 
     if (mCreationStage >= CSE_BirthSignChosen)
     {
-        mWM->popGuiMode();
-        mWM->pushGuiMode(GM_Review);
+        MWBase::Environment::get().getWindowManager()->popGuiMode();
+        MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Review);
     }
     else
     {
         mCreationStage = CSE_BirthSignChosen;
-        mWM->popGuiMode();
+        MWBase::Environment::get().getWindowManager()->popGuiMode();
     }
 }
 
@@ -487,12 +486,12 @@ void CharacterCreation::onBirthSignDialogBack()
     if (mBirthSignDialog)
     {
         MWBase::Environment::get().getMechanicsManager()->setPlayerBirthsign(mBirthSignDialog->getBirthId());
-        mWM->removeDialog(mBirthSignDialog);
+        MWBase::Environment::get().getWindowManager()->removeDialog(mBirthSignDialog);
         mBirthSignDialog = 0;
     }
 
-    mWM->popGuiMode();
-    mWM->pushGuiMode(GM_Class);
+    MWBase::Environment::get().getWindowManager()->popGuiMode();
+    MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Class);
 }
 
 void CharacterCreation::onCreateClassDialogDone(WindowBase* parWindow)
@@ -522,49 +521,49 @@ void CharacterCreation::onCreateClassDialogDone(WindowBase* parWindow)
 
         MWBase::Environment::get().getMechanicsManager()->setPlayerClass(klass);
         mPlayerClass = klass;
-        mWM->setPlayerClass(klass);
+        MWBase::Environment::get().getWindowManager()->setPlayerClass(klass);
 
-        mWM->removeDialog(mCreateClassDialog);
+        MWBase::Environment::get().getWindowManager()->removeDialog(mCreateClassDialog);
         mCreateClassDialog = 0;
     }
 
     if (mCreationStage == CSE_ReviewNext)
     {
-        mWM->popGuiMode();
-        mWM->pushGuiMode(GM_Review);
+        MWBase::Environment::get().getWindowManager()->popGuiMode();
+        MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Review);
     }
     else if (mCreationStage >= CSE_ClassChosen)
     {
-        mWM->popGuiMode();
-        mWM->pushGuiMode(GM_Birth);
+        MWBase::Environment::get().getWindowManager()->popGuiMode();
+        MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Birth);
     }
     else
     {
         mCreationStage = CSE_ClassChosen;
-        mWM->popGuiMode();
+        MWBase::Environment::get().getWindowManager()->popGuiMode();
     }
 }
 
 void CharacterCreation::onCreateClassDialogBack()
 {
-    mWM->removeDialog(mCreateClassDialog);
+    MWBase::Environment::get().getWindowManager()->removeDialog(mCreateClassDialog);
     mCreateClassDialog = 0;
 
-    mWM->popGuiMode();
-    mWM->pushGuiMode(GM_Class);
+    MWBase::Environment::get().getWindowManager()->popGuiMode();
+    MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Class);
 }
 
 void CharacterCreation::onClassQuestionChosen(int _index)
 {
     MWBase::Environment::get().getSoundManager()->stopSay();
 
-    mWM->removeDialog(mGenerateClassQuestionDialog);
+    MWBase::Environment::get().getWindowManager()->removeDialog(mGenerateClassQuestionDialog);
     mGenerateClassQuestionDialog = 0;
 
     if (_index < 0 || _index >= 3)
     {
-        mWM->popGuiMode();
-        mWM->pushGuiMode(GM_Class);
+        MWBase::Environment::get().getWindowManager()->popGuiMode();
+        MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Class);
         return;
     }
 
@@ -637,10 +636,10 @@ void CharacterCreation::showClassQuestionDialog()
             }
         }
 
-        mWM->removeDialog(mGenerateClassResultDialog);
+        MWBase::Environment::get().getWindowManager()->removeDialog(mGenerateClassResultDialog);
         mGenerateClassResultDialog = 0;
 
-        mGenerateClassResultDialog = new GenerateClassResultDialog(*mWM);
+        mGenerateClassResultDialog = new GenerateClassResultDialog();
         mGenerateClassResultDialog->setClassId(mGenerateClass);
         mGenerateClassResultDialog->eventBack += MyGUI::newDelegate(this, &CharacterCreation::onGenerateClassBack);
         mGenerateClassResultDialog->eventDone += MyGUI::newDelegate(this, &CharacterCreation::onGenerateClassDone);
@@ -650,15 +649,15 @@ void CharacterCreation::showClassQuestionDialog()
 
     if (mGenerateClassStep > 10)
     {
-        mWM->popGuiMode();
-        mWM->pushGuiMode(GM_Class);
+        MWBase::Environment::get().getWindowManager()->popGuiMode();
+        MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Class);
         return;
     }
 
-    mWM->removeDialog(mGenerateClassQuestionDialog);
+    MWBase::Environment::get().getWindowManager()->removeDialog(mGenerateClassQuestionDialog);
     mGenerateClassQuestionDialog = 0;
 
-    mGenerateClassQuestionDialog = new InfoBoxDialog(*mWM);
+    mGenerateClassQuestionDialog = new InfoBoxDialog();
 
     InfoBoxDialog::ButtonList buttons;
     mGenerateClassQuestionDialog->setText(sGenerateClassSteps(mGenerateClassStep).mText);
@@ -674,18 +673,18 @@ void CharacterCreation::showClassQuestionDialog()
 
 void CharacterCreation::onGenerateClassBack()
 {
-    mWM->removeDialog(mGenerateClassResultDialog);
+    MWBase::Environment::get().getWindowManager()->removeDialog(mGenerateClassResultDialog);
     mGenerateClassResultDialog = 0;
 
     MWBase::Environment::get().getMechanicsManager()->setPlayerClass(mGenerateClass);
 
-    mWM->popGuiMode();
-    mWM->pushGuiMode(GM_Class);
+    MWBase::Environment::get().getWindowManager()->popGuiMode();
+    MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Class);
 }
 
 void CharacterCreation::onGenerateClassDone(WindowBase* parWindow)
 {
-    mWM->removeDialog(mGenerateClassResultDialog);
+    MWBase::Environment::get().getWindowManager()->removeDialog(mGenerateClassResultDialog);
     mGenerateClassResultDialog = 0;
 
     MWBase::Environment::get().getMechanicsManager()->setPlayerClass(mGenerateClass);
@@ -694,22 +693,22 @@ void CharacterCreation::onGenerateClassDone(WindowBase* parWindow)
         MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(mGenerateClass);
 
     mPlayerClass = *klass;
-    mWM->setPlayerClass(mPlayerClass);
+    MWBase::Environment::get().getWindowManager()->setPlayerClass(mPlayerClass);
 
     if (mCreationStage == CSE_ReviewNext)
     {
-        mWM->popGuiMode();
-        mWM->pushGuiMode(GM_Review);
+        MWBase::Environment::get().getWindowManager()->popGuiMode();
+        MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Review);
     }
     else if (mCreationStage >= CSE_ClassChosen)
     {
-        mWM->popGuiMode();
-        mWM->pushGuiMode(GM_Birth);
+        MWBase::Environment::get().getWindowManager()->popGuiMode();
+        MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Birth);
     }
     else
     {
         mCreationStage = CSE_ClassChosen;
-        mWM->popGuiMode();
+        MWBase::Environment::get().getWindowManager()->popGuiMode();
     }
 }
 

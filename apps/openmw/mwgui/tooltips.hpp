@@ -39,7 +39,7 @@ namespace MWGui
     class ToolTips : public OEngine::GUI::Layout
     {
     public:
-        ToolTips(MWBase::WindowManager* windowManager);
+        ToolTips();
 
         void onFrame(float frameDuration);
 
@@ -82,8 +82,6 @@ namespace MWGui
     private:
         MyGUI::Widget* mDynamicToolTipBox;
 
-        MWBase::WindowManager* mWindowManager;
-
         MWWorld::Ptr mFocusObject;
 
         void findImageExtension(std::string& image);
@@ -96,9 +94,9 @@ namespace MWGui
 
         float mFocusToolTipX;
         float mFocusToolTipY;
-	
+
 	int mHorizontalScrollIndex;
-	
+
 
         float mDelay;
         float mRemainingDelay; // remaining time until tooltip will show

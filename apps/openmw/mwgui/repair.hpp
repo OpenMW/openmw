@@ -1,9 +1,8 @@
 #ifndef OPENMW_MWGUI_REPAIR_H
 #define OPENMW_MWGUI_REPAIR_H
 
-#include "window_base.hpp"
+#include "windowbase.hpp"
 
-#include "../mwworld/ptr.hpp"
 #include "../mwmechanics/repair.hpp"
 
 namespace MWGui
@@ -12,7 +11,7 @@ namespace MWGui
 class Repair : public WindowBase
 {
 public:
-    Repair(MWBase::WindowManager &parWindowManager);
+    Repair();
 
     virtual void open();
 

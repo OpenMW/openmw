@@ -1,4 +1,4 @@
-#include "stats_window.hpp"
+#include "statswindow.hpp"
 
 #include <cmath>
 #include <algorithm>
@@ -22,8 +22,8 @@
 using namespace MWGui;
 const int StatsWindow::sLineHeight = 18;
 
-StatsWindow::StatsWindow (MWBase::WindowManager& parWindowManager)
-  : WindowPinnableBase("openmw_stats_window.layout", parWindowManager)
+StatsWindow::StatsWindow ()
+  : WindowPinnableBase("openmw_stats_window.layout")
   , mSkillView(NULL)
   , mClientHeight(0)
   , mMajorSkills()
@@ -363,7 +363,7 @@ void StatsWindow::addSkills(const SkillList &skills, const std::string &titleId,
         addSeparator(coord1, coord2);
     }
 
-    addGroup(mWindowManager.getGameSettingString(titleId, titleDefault), coord1, coord2);
+    addGroup(MWBase::Environment::get().getWindowManager()->getGameSettingString(titleId, titleDefault), coord1, coord2);
 
     SkillList::const_iterator end = skills.end();
     for (SkillList::const_iterator it = skills.begin(); it != end; ++it)
@@ -395,7 +395,7 @@ void StatsWindow::addSkills(const SkillList &skills, const std::string &titleId,
             state = "increased";
         else if (modified < base)
             state = "decreased";
-        MyGUI::TextBox* widget = addValueItem(mWindowManager.getGameSettingString(skillNameId, skillNameId),
+        MyGUI::TextBox* widget = addValueItem(MWBase::Environment::get().getWindowManager()->getGameSettingString(skillNameId, skillNameId),
             boost::lexical_cast<std::string>(static_cast<int>(modified)), state, coord1, coord2);
 
         for (int i=0; i<2; ++i)
@@ -476,7 +476,7 @@ void StatsWindow::updateSkillArea()
         MWMechanics::NpcStats PCstats = MWWorld::Class::get(player).getNpcStats(player);
         std::set<std::string>& expelled = PCstats.getExpelled ();
 
-        addGroup(mWindowManager.getGameSettingString("sFaction", "Faction"), coord1, coord2);
+        addGroup(MWBase::Environment::get().getWindowManager()->getGameSettingString("sFaction", "Faction"), coord1, coord2);
         FactionList::const_iterator end = mFactions.end();
         for (FactionList::const_iterator it = mFactions.begin(); it != end; ++it)
         {
@@ -537,7 +537,7 @@ void StatsWindow::updateSkillArea()
         if (!mSkillWidgets.empty())
             addSeparator(coord1, coord2);
 
-        addGroup(mWindowManager.getGameSettingString("sBirthSign", "Sign"), coord1, coord2);
+        addGroup(MWBase::Environment::get().getWindowManager()->getGameSettingString("sBirthSign", "Sign"), coord1, coord2);
         const ESM::BirthSign *sign =
             store.get<ESM::BirthSign>().find(mBirthSignId);
         MyGUI::Widget* w = addItem(sign->mName, coord1, coord2);
@@ -549,7 +549,7 @@ void StatsWindow::updateSkillArea()
     if (!mSkillWidgets.empty())
         addSeparator(coord1, coord2);
 
-    addValueItem(mWindowManager.getGameSettingString("sReputation", "Reputation"),
+    addValueItem(MWBase::Environment::get().getWindowManager()->getGameSettingString("sReputation", "Reputation"),
                 boost::lexical_cast<std::string>(static_cast<int>(mReputation)), "normal", coord1, coord2);
 
     for (int i=0; i<2; ++i)
@@ -559,7 +559,7 @@ void StatsWindow::updateSkillArea()
         mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("Caption_Text", "#{sSkillsMenuReputationHelp}");
     }
 
-    addValueItem(mWindowManager.getGameSettingString("sBounty", "Bounty"),
+    addValueItem(MWBase::Environment::get().getWindowManager()->getGameSettingString("sBounty", "Bounty"),
                 boost::lexical_cast<std::string>(static_cast<int>(mBounty)), "normal", coord1, coord2);
 
     for (int i=0; i<2; ++i)
@@ -576,5 +576,5 @@ void StatsWindow::updateSkillArea()
 
 void StatsWindow::onPinToggled()
 {
-    mWindowManager.setHMSVisibility(!mPinned);
+    MWBase::Environment::get().getWindowManager()->setHMSVisibility(!mPinned);
 }

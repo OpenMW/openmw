@@ -11,7 +11,7 @@ namespace MWGui
     class CompanionWindow : public ContainerBase, public WindowBase
     {
     public:
-        CompanionWindow(MWBase::WindowManager& parWindowManager,DragAndDrop* dragAndDrop, MessageBoxManager* manager);
+        CompanionWindow(DragAndDrop* dragAndDrop, MessageBoxManager* manager);
         virtual ~CompanionWindow() {}
 
         void open(MWWorld::Ptr npc);

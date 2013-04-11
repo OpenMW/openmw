@@ -15,9 +15,9 @@ namespace MWGui
 {
 
 
-    EnchantingDialog::EnchantingDialog(MWBase::WindowManager &parWindowManager)
-        : WindowBase("openmw_enchanting_dialog.layout", parWindowManager)
-        , EffectEditorBase(parWindowManager)
+    EnchantingDialog::EnchantingDialog()
+        : WindowBase("openmw_enchanting_dialog.layout")
+        , EffectEditorBase()
         , mItemSelectionDialog(NULL)
     {
         getWidget(mName, "NameEdit");
@@ -69,19 +69,19 @@ namespace MWGui
         switch(mEnchanting.getEnchantType())
         {
             case 0:
-                mTypeButton->setCaption(mWindowManager.getGameSettingString("sItemCastOnce","Cast Once"));
+                mTypeButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastOnce","Cast Once"));
                 mAddEffectDialog.constantEffect=false;
                 break;
             case 1:
-                mTypeButton->setCaption(mWindowManager.getGameSettingString("sItemCastWhenStrikes", "When Strikes"));
+                mTypeButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastWhenStrikes", "When Strikes"));
                 mAddEffectDialog.constantEffect=false;
                 break;
             case 2:
-                mTypeButton->setCaption(mWindowManager.getGameSettingString("sItemCastWhenUsed", "When Used"));
+                mTypeButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastWhenUsed", "When Used"));
                 mAddEffectDialog.constantEffect=false;
                 break;
             case 3:
-                mTypeButton->setCaption(mWindowManager.getGameSettingString("sItemCastConstant", "Cast Constant"));
+                mTypeButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastConstant", "Cast Constant"));
                 mAddEffectDialog.constantEffect=true;
                 break;
         }
@@ -126,20 +126,20 @@ namespace MWGui
 
     void EnchantingDialog::onReferenceUnavailable ()
     {
-        mWindowManager.removeGuiMode (GM_Dialogue);
-        mWindowManager.removeGuiMode (GM_Enchanting);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Dialogue);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Enchanting);
     }
 
     void EnchantingDialog::onCancelButtonClicked(MyGUI::Widget* sender)
     {
-        mWindowManager.removeGuiMode (GM_Enchanting);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Enchanting);
     }
 
     void EnchantingDialog::onSelectItem(MyGUI::Widget *sender)
     {
         delete mItemSelectionDialog;
         mItemSelectionDialog = new ItemSelectionDialog("#{sEnchantItems}",
-            ContainerBase::Filter_Apparel|ContainerBase::Filter_Weapon|ContainerBase::Filter_NoMagic, mWindowManager);
+            ContainerBase::Filter_Apparel|ContainerBase::Filter_Weapon|ContainerBase::Filter_NoMagic);
         mItemSelectionDialog->eventItemSelected += MyGUI::newDelegate(this, &EnchantingDialog::onItemSelected);
         mItemSelectionDialog->eventDialogCanceled += MyGUI::newDelegate(this, &EnchantingDialog::onItemCancel);
         mItemSelectionDialog->setVisible(true);
@@ -190,7 +190,7 @@ namespace MWGui
 
         if(mEnchanting.getGemCharge()==0)
         {
-            mWindowManager.messageBox ("#{sNotifyMessage32}");
+            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage32}");
             return;
         }
 
@@ -227,14 +227,14 @@ namespace MWGui
     {
         delete mItemSelectionDialog;
         mItemSelectionDialog = new ItemSelectionDialog("#{sSoulGemsWithSouls}",
-            ContainerBase::Filter_Misc|ContainerBase::Filter_ChargedSoulstones, mWindowManager);
+            ContainerBase::Filter_Misc|ContainerBase::Filter_ChargedSoulstones);
         mItemSelectionDialog->eventItemSelected += MyGUI::newDelegate(this, &EnchantingDialog::onSoulSelected);
         mItemSelectionDialog->eventDialogCanceled += MyGUI::newDelegate(this, &EnchantingDialog::onSoulCancel);
         mItemSelectionDialog->setVisible(true);
         mItemSelectionDialog->openContainer(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
         mItemSelectionDialog->drawItems ();
 
-        //mWindowManager.messageBox("#{sInventorySelectNoSoul}");
+        //MWBase::Environment::get().getWindowManager()->messageBox("#{sInventorySelectNoSoul}");
     }
 
     void EnchantingDialog::notifyEffectsChanged ()
@@ -254,50 +254,50 @@ namespace MWGui
     {
         if (mEffects.size() <= 0)
         {
-            mWindowManager.messageBox ("#{sNotifyMessage30}");
+            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage30}");
             return;
         }
 
         if (mName->getCaption ().empty())
         {
-            mWindowManager.messageBox ("#{sNotifyMessage10}");
+            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage10}");
             return;
         }
 
         if (mEnchanting.soulEmpty())
         {
-            mWindowManager.messageBox ("#{sNotifyMessage52}");
+            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage52}");
             return;
         }
 
         if (mEnchanting.itemEmpty())
         {
-            mWindowManager.messageBox ("#{sNotifyMessage11}");
+            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage11}");
             return;
         }
 
         if (mEnchanting.getEnchantCost() > mEnchanting.getMaxEnchantValue())
         {
-            mWindowManager.messageBox ("#{sNotifyMessage29}");
+            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage29}");
             return;
         }
 
         mEnchanting.setNewItemName(mName->getCaption());
         mEnchanting.setEffect(mEffectList);
 
-        if (mEnchanting.getEnchantPrice() > mWindowManager.getInventoryWindow()->getPlayerGold())
+        if (mEnchanting.getEnchantPrice() > MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getPlayerGold())
         {
-            mWindowManager.messageBox ("#{sNotifyMessage18}");
+            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage18}");
             return;
         }
 
         int result = mEnchanting.create();
 
         if(result==1)
-            mWindowManager.messageBox ("#{sEnchantmentMenu12}");
+            MWBase::Environment::get().getWindowManager()->messageBox ("#{sEnchantmentMenu12}");
         else
-            mWindowManager.messageBox ("#{sNotifyMessage34}");
+            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage34}");
 
-        mWindowManager.removeGuiMode (GM_Enchanting);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Enchanting);
     }
 }

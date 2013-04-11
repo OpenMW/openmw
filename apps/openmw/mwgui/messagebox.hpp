@@ -1,9 +1,7 @@
 #ifndef MWGUI_MESSAGE_BOX_H
 #define MWGUI_MESSAGE_BOX_H
 
-#include <openengine/gui/layout.hpp>
-
-#include "window_base.hpp"
+#include "windowbase.hpp"
 
 #include "../mwbase/windowmanager.hpp"
 
@@ -31,7 +29,7 @@ namespace MWGui
     class MessageBoxManager
     {
         public:
-            MessageBoxManager (MWBase::WindowManager* windowManager);
+            MessageBoxManager ();
             void onFrame (float frameDuration);
             void createMessageBox (const std::string& message);
             bool createInteractiveMessageBox (const std::string& message, const std::vector<std::string>& buttons);
@@ -40,7 +38,7 @@ namespace MWGui
             void removeMessageBox (float time, MessageBox *msgbox);
             bool removeMessageBox (MessageBox *msgbox);
             void setMessageBoxSpeed (int speed);
-            
+
             void enterPressed();
             int readPressedButton ();
 
@@ -50,8 +48,6 @@ namespace MWGui
             EventHandle_Int eventButtonPressed;
 
             void onButtonPressed(int button) { eventButtonPressed(button); eventButtonPressed.clear(); }
-
-            MWBase::WindowManager *mWindowManager;
 
         private:
             std::vector<MessageBox*> mMessageBoxes;
@@ -92,7 +88,7 @@ namespace MWGui
 
         private:
             void buttonActivated (MyGUI::Widget* _widget);
-            
+
             MessageBoxManager& mMessageBoxManager;
             MyGUI::EditBox* mMessageWidget;
             MyGUI::Widget* mButtonsWidget;

@@ -1,7 +1,7 @@
 #ifndef MWGUI_SPELLCREATION_H
 #define MWGUI_SPELLCREATION_H
 
-#include "window_base.hpp"
+#include "windowbase.hpp"
 #include "referenceinterface.hpp"
 #include "list.hpp"
 #include "widgets.hpp"
@@ -15,7 +15,7 @@ namespace MWGui
     class EditEffectDialog : public WindowModal
     {
     public:
-        EditEffectDialog(MWBase::WindowManager& parWindowManager);
+        EditEffectDialog();
 
         virtual void open();
 
@@ -83,7 +83,7 @@ namespace MWGui
     class EffectEditorBase
     {
     public:
-        EffectEditorBase(MWBase::WindowManager& parWindowManager);
+        EffectEditorBase();
 
 
     protected:
@@ -123,7 +123,7 @@ namespace MWGui
     class SpellCreationDialog : public WindowBase, public ReferenceInterface, public EffectEditorBase
     {
     public:
-        SpellCreationDialog(MWBase::WindowManager& parWindowManager);
+        SpellCreationDialog();
 
         virtual void open();
 

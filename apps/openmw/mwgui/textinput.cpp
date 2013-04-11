@@ -1,11 +1,12 @@
-#include "text_input.hpp"
+#include "textinput.hpp"
 
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/environment.hpp"
 
 using namespace MWGui;
 
-TextInputDialog::TextInputDialog(MWBase::WindowManager& parWindowManager)
-  : WindowModal("openmw_text_input.layout", parWindowManager)
+TextInputDialog::TextInputDialog()
+  : WindowModal("openmw_text_input.layout")
 {
     // Centre dialog
     center();
@@ -27,9 +28,9 @@ void TextInputDialog::setNextButtonShow(bool shown)
     getWidget(okButton, "OKButton");
 
     if (shown)
-        okButton->setCaption(mWindowManager.getGameSettingString("sNext", ""));
+        okButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sNext", ""));
     else
-        okButton->setCaption(mWindowManager.getGameSettingString("sOK", ""));
+        okButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sOK", ""));
 }
 
 void TextInputDialog::setTextLabel(const std::string &label)
@@ -50,7 +51,7 @@ void TextInputDialog::onOkClicked(MyGUI::Widget* _sender)
 {
     if (mTextEdit->getCaption() == "")
     {
-        mWindowManager.messageBox ("#{sNotifyMessage37}");
+        MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage37}");
         MyGUI::InputManager::getInstance ().setKeyFocusWidget (mTextEdit);
     }
     else
@@ -61,7 +62,7 @@ void TextInputDialog::onTextAccepted(MyGUI::Edit* _sender)
 {
     if (mTextEdit->getCaption() == "")
     {
-        mWindowManager.messageBox ("#{sNotifyMessage37}");
+        MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage37}");
         MyGUI::InputManager::getInstance ().setKeyFocusWidget (mTextEdit);
     }
     else

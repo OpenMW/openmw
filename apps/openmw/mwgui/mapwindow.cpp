@@ -1,4 +1,4 @@
-#include "map_window.hpp"
+#include "mapwindow.hpp"
 
 #include <boost/lexical_cast.hpp>
 
@@ -262,8 +262,8 @@ void LocalMapBase::setPlayerDir(const float x, const float y)
 
 // ------------------------------------------------------------------------------------------
 
-MapWindow::MapWindow(MWBase::WindowManager& parWindowManager, const std::string& cacheDir)
-    : MWGui::WindowPinnableBase("openmw_map_window.layout", parWindowManager)
+MapWindow::MapWindow(const std::string& cacheDir)
+    : MWGui::WindowPinnableBase("openmw_map_window.layout")
     , mGlobal(false)
 {
     setCoord(500,0,320,300);
@@ -376,7 +376,7 @@ void MapWindow::onWorldButtonClicked(MyGUI::Widget* _sender)
 
 void MapWindow::onPinToggled()
 {
-    mWindowManager.setMinimapVisibility(!mPinned);
+    MWBase::Environment::get().getWindowManager()->setMinimapVisibility(!mPinned);
 }
 
 void MapWindow::open()

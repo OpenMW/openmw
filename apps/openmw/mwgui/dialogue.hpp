@@ -1,11 +1,8 @@
 #ifndef MWGUI_DIALOGE_H
 #define MWGUI_DIALOGE_H
 
-#include "window_base.hpp"
+#include "windowbase.hpp"
 #include "referenceinterface.hpp"
-#include <boost/array.hpp>
-
-#include "../mwworld/ptr.hpp"
 
 namespace MWGui
 {
@@ -29,7 +26,7 @@ namespace MWGui
     class PersuasionDialog : public WindowModal
     {
     public:
-        PersuasionDialog(MWBase::WindowManager& parWindowManager);
+        PersuasionDialog();
 
         virtual void open();
 
@@ -50,7 +47,7 @@ namespace MWGui
     class DialogueWindow: public WindowBase, public ReferenceInterface
     {
     public:
-        DialogueWindow(MWBase::WindowManager& parWindowManager);
+        DialogueWindow();
 
         // Events
         typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;

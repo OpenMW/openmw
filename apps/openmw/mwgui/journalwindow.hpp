@@ -1,12 +1,9 @@
 #ifndef MWGUI_JOURNAL_H
 #define MWGUI_JOURNAL_H
 
-#include <sstream>
-#include <set>
 #include <string>
-#include <utility>
 
-#include "window_base.hpp"
+#include "windowbase.hpp"
 #include "imagebutton.hpp"
 
 namespace MWGui
@@ -14,7 +11,7 @@ namespace MWGui
     class JournalWindow : public WindowBase
     {
         public:
-            JournalWindow(MWBase::WindowManager& parWindowManager);
+            JournalWindow();
             virtual void open();
 
         private:

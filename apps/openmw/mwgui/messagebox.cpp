@@ -7,9 +7,8 @@
 
 using namespace MWGui;
 
-MessageBoxManager::MessageBoxManager (MWBase::WindowManager *windowManager)
+MessageBoxManager::MessageBoxManager ()
 {
-    mWindowManager = windowManager;
     // defines
     mMessageBoxSpeed = 0.1;
     mInterMessageBoxe = NULL;
@@ -213,7 +212,7 @@ int MessageBox::getHeight ()
 
 
 InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxManager, const std::string& message, const std::vector<std::string>& buttons)
-    : WindowModal("openmw_interactive_messagebox.layout", *MWBase::Environment::get().getWindowManager())
+    : WindowModal("openmw_interactive_messagebox.layout")
   , mMessageBoxManager(parMessageBoxManager)
   , mButtonPressed(-1)
 {
@@ -371,7 +370,7 @@ InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxMan
 
 void InteractiveMessageBox::enterPressed()
 {
-    
+
     std::string ok = Misc::StringUtils::lowerCase(MyGUI::LanguageManager::getInstance().replaceTags("#{sOK}"));
     std::vector<MyGUI::Button*>::const_iterator button;
     for(button = mButtons.begin(); button != mButtons.end(); ++button)

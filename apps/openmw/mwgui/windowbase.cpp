@@ -1,4 +1,4 @@
-#include "window_base.hpp"
+#include "windowbase.hpp"
 
 #include <components/settings/settings.hpp>
 
@@ -6,9 +6,8 @@
 
 using namespace MWGui;
 
-WindowBase::WindowBase(const std::string& parLayout, MWBase::WindowManager& parWindowManager)
+WindowBase::WindowBase(const std::string& parLayout)
   : Layout(parLayout)
-  , mWindowManager(parWindowManager)
 {
 }
 
@@ -39,8 +38,8 @@ void WindowBase::center()
     mMainWidget->setCoord(coord);
 }
 
-WindowModal::WindowModal(const std::string& parLayout, MWBase::WindowManager& parWindowManager)
-    : WindowBase(parLayout, parWindowManager)
+WindowModal::WindowModal(const std::string& parLayout)
+    : WindowBase(parLayout)
 {
 }
 

@@ -3,7 +3,6 @@
 
 #include <MyGUI_IPointer.h>
 #include <MyGUI_ResourceImageSet.h>
-#include <MyGUI_RTTI.h>
 
 namespace MWGui
 {

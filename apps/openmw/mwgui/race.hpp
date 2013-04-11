@@ -1,14 +1,9 @@
 #ifndef MWGUI_RACE_H
 #define MWGUI_RACE_H
 
-
-#include <boost/array.hpp>
-
-#include "../mwworld/esmstore.hpp"
-
 #include "../mwrender/characterpreview.hpp"
 
-#include "window_base.hpp"
+#include "windowbase.hpp"
 
 
 namespace MWGui
@@ -26,7 +21,7 @@ namespace MWGui
     class RaceDialog : public WindowModal
     {
     public:
-        RaceDialog(MWBase::WindowManager& parWindowManager);
+        RaceDialog();
 
         enum Gender
         {

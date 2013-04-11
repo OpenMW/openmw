@@ -23,10 +23,10 @@
 namespace MWGui
 {
 
-    LoadingScreen::LoadingScreen(Ogre::SceneManager* sceneMgr, Ogre::RenderWindow* rw, MWBase::WindowManager& parWindowManager)
+    LoadingScreen::LoadingScreen(Ogre::SceneManager* sceneMgr, Ogre::RenderWindow* rw)
         : mSceneMgr(sceneMgr)
         , mWindow(rw)
-        , WindowBase("openmw_loading_screen.layout", parWindowManager)
+        , WindowBase("openmw_loading_screen.layout")
         , mLoadingOn(false)
         , mLastRenderTime(0.f)
         , mLastWallpaperChangeTime(0.f)
@@ -195,12 +195,12 @@ namespace MWGui
         {
             changeWallpaper();
 
-            mWindowManager.pushGuiMode(GM_LoadingWallpaper);
+            MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_LoadingWallpaper);
         }
         else
         {
             mBackgroundImage->setImageTexture("");
-            mWindowManager.pushGuiMode(GM_Loading);
+            MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Loading);
         }
     }
 
@@ -211,8 +211,8 @@ namespace MWGui
         mLoadingOn = false;
         mFirstLoad = false;
 
-        mWindowManager.removeGuiMode(GM_Loading);
-        mWindowManager.removeGuiMode(GM_LoadingWallpaper);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Loading);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_LoadingWallpaper);
     }
 
     void LoadingScreen::changeWallpaper ()
