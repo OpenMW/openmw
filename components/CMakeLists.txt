@@ -19,7 +19,7 @@ add_component_dir (nif
     )
 
 add_component_dir (nifogre
-    ogrenifloader skeleton
+    ogrenifloader skeleton material
     )
 
 add_component_dir (nifbullet
