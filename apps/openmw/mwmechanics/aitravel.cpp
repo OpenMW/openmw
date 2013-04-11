@@ -13,6 +13,15 @@
 #include <boost/graph/adjacency_list.hpp>
 #include "boost/tuple/tuple.hpp"
 
+namespace
+{
+    float sgn(float a)
+    {
+        if(a>0) return 1.;
+        else return -1.;
+    }
+}
+
 namespace MWMechanics
 {
 
@@ -24,12 +33,6 @@ namespace MWMechanics
     AiTravel * AiTravel::clone() const
     {
         return new AiTravel(*this);
-    }
-
-    static float sgn(float a)
-    {
-        if(a>0) return 1.;
-        else return -1.;
     }
 
     bool AiTravel::execute (const MWWorld::Ptr& actor)

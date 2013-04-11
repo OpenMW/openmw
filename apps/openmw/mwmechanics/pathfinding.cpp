@@ -4,10 +4,9 @@
 #include "boost/tuple/tuple.hpp"
 #include "OgreMath.h"
 
-namespace MWMechanics
+namespace
 {
-
-    //helpers functions
+	//helpers functions
     float distanceZCorrected(ESM::Pathgrid::Point point,float x,float y,float z)
     {
         return sqrt((point.mX - x)*(point.mX - x)+(point.mY - y)*(point.mY - y)+0.1*(point.mZ - z)*(point.mZ - z));
@@ -89,7 +88,10 @@ namespace MWMechanics
         const PathGridGraph & mGraph;
         PointID mGoal;
     };
+}
 
+namespace MWMechanics
+{
     PathGridGraph buildGraph(const ESM::Pathgrid* pathgrid,float xCell = 0,float yCell = 0)
     {
         PathGridGraph graph;
