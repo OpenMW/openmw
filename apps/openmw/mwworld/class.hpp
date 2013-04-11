@@ -245,6 +245,9 @@ namespace MWWorld
 
             virtual void applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const;
 
+            virtual int canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const;
+            ///< Return 0 if player cannot equip item. 1 if can equip. 2 if it's twohanded weapon. 3 if twohanded weapon conflicts with that.
+
             virtual Ptr
             copyToCell(const Ptr &ptr, CellStore &cell) const;
 
