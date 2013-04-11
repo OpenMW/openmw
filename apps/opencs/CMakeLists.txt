@@ -22,7 +22,7 @@ opencs_units (model/world
 
 
 opencs_units_noqt (model/world
-    universalid data record idcollection commands columnbase
+    universalid data record idcollection commands columnbase scriptcontext
     )
 
 opencs_hdrs_noqt (model/world
@@ -55,11 +55,11 @@ opencs_hdrs_noqt (view/doc
 
 
 opencs_units (view/world
-    table tablesubview
+    table tablesubview scriptsubview
     )
 
 opencs_units_noqt (view/world
-    dialoguesubview util subviews enumdelegate vartypedelegate
+    dialoguesubview util subviews enumdelegate vartypedelegate scripthighlighter
     )
 
 

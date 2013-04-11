@@ -88,6 +88,10 @@ namespace Compiler
         }
         else if (c==';')
         {
+            std::string comment;
+
+            comment += c;
+
             while (get (c))
             {
                 if (c=='\n')
@@ -95,11 +99,14 @@ namespace Compiler
                     putback (c);
                     break;
                 }
+                else
+                    comment += c;
             }
 
+            TokenLoc loc (mLoc);
             mLoc.mLiteral.clear();
 
-            return true;
+            return parser.parseComment (comment, loc, *this);
         }
         else if (isWhitespace (c))
         {

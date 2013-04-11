@@ -33,11 +33,13 @@ CSMWorld::Data::Data()
     mGmsts.addColumn (new StringIdColumn<ESM::GameSetting>);
     mGmsts.addColumn (new RecordStateColumn<ESM::GameSetting>);
     mGmsts.addColumn (new FixedRecordTypeColumn<ESM::GameSetting> (UniversalId::Type_Gmst));
+    mGmsts.addColumn (new FixedRecordTypeColumn<ESM::GameSetting> (UniversalId::Type_Gmst));
     mGmsts.addColumn (new VarTypeColumn<ESM::GameSetting> (ColumnBase::Display_GmstVarType));
     mGmsts.addColumn (new VarValueColumn<ESM::GameSetting>);
 
     mSkills.addColumn (new StringIdColumn<ESM::Skill>);
     mSkills.addColumn (new RecordStateColumn<ESM::Skill>);
+    mSkills.addColumn (new FixedRecordTypeColumn<ESM::Skill> (UniversalId::Type_Skill));
     mSkills.addColumn (new AttributeColumn<ESM::Skill>);
     mSkills.addColumn (new SpecialisationColumn<ESM::Skill>);
     for (int i=0; i<4; ++i)
@@ -46,6 +48,7 @@ CSMWorld::Data::Data()
 
     mClasses.addColumn (new StringIdColumn<ESM::Class>);
     mClasses.addColumn (new RecordStateColumn<ESM::Class>);
+    mClasses.addColumn (new FixedRecordTypeColumn<ESM::Class> (UniversalId::Type_Class));
     mClasses.addColumn (new NameColumn<ESM::Class>);
     mClasses.addColumn (new AttributesColumn<ESM::Class> (0));
     mClasses.addColumn (new AttributesColumn<ESM::Class> (1));
@@ -59,6 +62,7 @@ CSMWorld::Data::Data()
 
     mFactions.addColumn (new StringIdColumn<ESM::Faction>);
     mFactions.addColumn (new RecordStateColumn<ESM::Faction>);
+    mFactions.addColumn (new FixedRecordTypeColumn<ESM::Faction> (UniversalId::Type_Faction));
     mFactions.addColumn (new NameColumn<ESM::Faction>);
     mFactions.addColumn (new AttributesColumn<ESM::Faction> (0));
     mFactions.addColumn (new AttributesColumn<ESM::Faction> (1));
@@ -68,6 +72,7 @@ CSMWorld::Data::Data()
 
     mRaces.addColumn (new StringIdColumn<ESM::Race>);
     mRaces.addColumn (new RecordStateColumn<ESM::Race>);
+    mRaces.addColumn (new FixedRecordTypeColumn<ESM::Race> (UniversalId::Type_Race));
     mRaces.addColumn (new NameColumn<ESM::Race>);
     mRaces.addColumn (new DescriptionColumn<ESM::Race>);
     mRaces.addColumn (new FlagColumn<ESM::Race> ("Playable", 0x1));
@@ -79,6 +84,7 @@ CSMWorld::Data::Data()
 
     mSounds.addColumn (new StringIdColumn<ESM::Sound>);
     mSounds.addColumn (new RecordStateColumn<ESM::Sound>);
+    mSounds.addColumn (new FixedRecordTypeColumn<ESM::Sound> (UniversalId::Type_Sound));
     mSounds.addColumn (new SoundParamColumn<ESM::Sound> (SoundParamColumn<ESM::Sound>::Type_Volume));
     mSounds.addColumn (new SoundParamColumn<ESM::Sound> (SoundParamColumn<ESM::Sound>::Type_MinRange));
     mSounds.addColumn (new SoundParamColumn<ESM::Sound> (SoundParamColumn<ESM::Sound>::Type_MaxRange));
@@ -86,21 +92,26 @@ CSMWorld::Data::Data()
 
     mScripts.addColumn (new StringIdColumn<ESM::Script>);
     mScripts.addColumn (new RecordStateColumn<ESM::Script>);
+    mScripts.addColumn (new FixedRecordTypeColumn<ESM::Script> (UniversalId::Type_Script));
+    mScripts.addColumn (new ScriptColumn<ESM::Script>);
 
     mRegions.addColumn (new StringIdColumn<ESM::Region>);
     mRegions.addColumn (new RecordStateColumn<ESM::Region>);
+    mRegions.addColumn (new FixedRecordTypeColumn<ESM::Region> (UniversalId::Type_Region));
     mRegions.addColumn (new NameColumn<ESM::Region>);
     mRegions.addColumn (new MapColourColumn<ESM::Region>);
     mRegions.addColumn (new SleepListColumn<ESM::Region>);
 
     mBirthsigns.addColumn (new StringIdColumn<ESM::BirthSign>);
     mBirthsigns.addColumn (new RecordStateColumn<ESM::BirthSign>);
+    mBirthsigns.addColumn (new FixedRecordTypeColumn<ESM::BirthSign> (UniversalId::Type_Birthsign));
     mBirthsigns.addColumn (new NameColumn<ESM::BirthSign>);
     mBirthsigns.addColumn (new TextureColumn<ESM::BirthSign>);
     mBirthsigns.addColumn (new DescriptionColumn<ESM::BirthSign>);
 
     mSpells.addColumn (new StringIdColumn<ESM::Spell>);
     mSpells.addColumn (new RecordStateColumn<ESM::Spell>);
+    mSpells.addColumn (new FixedRecordTypeColumn<ESM::Spell> (UniversalId::Type_Spell));
     mSpells.addColumn (new NameColumn<ESM::Spell>);
     mSpells.addColumn (new SpellTypeColumn<ESM::Spell>);
     mSpells.addColumn (new CostColumn<ESM::Spell>);

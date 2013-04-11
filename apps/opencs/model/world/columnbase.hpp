@@ -35,7 +35,8 @@ namespace CSMWorld
             Display_Specialisation,
             Display_Attribute,
             Display_Boolean,
-            Display_SpellType
+            Display_SpellType,
+            Display_Script
         };
 
         std::string mTitle;

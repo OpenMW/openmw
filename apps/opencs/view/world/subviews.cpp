@@ -5,6 +5,7 @@
 
 #include "tablesubview.hpp"
 #include "dialoguesubview.hpp"
+#include "scriptsubview.hpp"
 
 void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
 {
@@ -32,6 +33,7 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
     for (int i=0; sTableTypes[i]!=CSMWorld::UniversalId::Type_None; ++i)
         manager.add (sTableTypes[i], new CSVDoc::SubViewFactoryWithCreateFlag<TableSubView> (true));
 
+    manager.add (CSMWorld::UniversalId::Type_Script, new CSVDoc::SubViewFactory<ScriptSubView>);
 
 //    manager.add (CSMWorld::UniversalId::Type_Global,
 //        new CSVDoc::SubViewFactoryWithCreateFlag<DialogueSubView> (true));
