@@ -19,7 +19,7 @@ namespace Physic
 
     PhysicActor::PhysicActor(const std::string &name, const std::string &mesh, PhysicEngine *engine, const Ogre::Vector3 &position, const Ogre::Quaternion &rotation, float scale)
       : mName(name), mEngine(engine), mMesh(mesh), mBoxScaledTranslation(0,0,0), mBoxRotationInverse(0,0,0,0)
-      , mBody(0), onGround(false), collisionMode(true), mBoxRotation(0,0,0,0), verticalForce(0.0f)
+      , mBody(0), mRaycastingBody(0), onGround(false), collisionMode(true), mBoxRotation(0,0,0,0), verticalForce(0.0f)
     {
         // FIXME: Force player to start in no-collision mode for now, until he spawns at a proper door marker.
         if(name == "player")
@@ -47,6 +47,7 @@ namespace Physic
 
     void PhysicActor::enableCollisions(bool collision)
     {
+        assert(mBody);
         if(collision && !collisionMode) mBody->translate(btVector3(0,0,-1000));
         if(!collision && collisionMode) mBody->translate(btVector3(0,0,1000));
         collisionMode = collision;
@@ -55,6 +56,7 @@ namespace Physic
 
     void PhysicActor::setPosition(const Ogre::Vector3 &pos)
     {
+        assert(mBody);
         if(pos != getPosition())
         {
             mEngine->adjustRigidBody(mBody, pos, getRotation(), mBoxScaledTranslation, mBoxRotation);
@@ -64,6 +66,7 @@ namespace Physic
 
     void PhysicActor::setRotation(const Ogre::Quaternion &quat)
     {
+        assert(mBody);
         if(!quat.equals(getRotation(), Ogre::Radian(0))){
             mEngine->adjustRigidBody(mBody, getPosition(), quat, mBoxScaledTranslation, mBoxRotation);
             mEngine->adjustRigidBody(mRaycastingBody, getPosition(), quat, mBoxScaledTranslation, mBoxRotation);
@@ -74,6 +77,7 @@ namespace Physic
 
     Ogre::Vector3 PhysicActor::getPosition()
     {
+        assert(mBody);
         btVector3 vec = mBody->getWorldTransform().getOrigin();
         Ogre::Quaternion rotation = Ogre::Quaternion(mBody->getWorldTransform().getRotation().getW(), mBody->getWorldTransform().getRotation().getX(),
             mBody->getWorldTransform().getRotation().getY(), mBody->getWorldTransform().getRotation().getZ());
@@ -84,14 +88,18 @@ namespace Physic
 
     Ogre::Quaternion PhysicActor::getRotation()
     {
+        assert(mBody);
         btQuaternion quat = mBody->getWorldTransform().getRotation() * mBoxRotationInverse;
         return Ogre::Quaternion(quat.getW(), quat.getX(), quat.getY(), quat.getZ());
     }
 
     void PhysicActor::setScale(float scale){
         //We only need to change the scaled box translation, box rotations remain the same.
+        assert(mBody);
         mBoxScaledTranslation = mBoxScaledTranslation / mBody->getCollisionShape()->getLocalScaling().getX();
         mBoxScaledTranslation *= scale;
+        Ogre::Vector3 pos = getPosition();
+        Ogre::Quaternion rot = getRotation();
         if(mBody){
             mEngine->dynamicsWorld->removeRigidBody(mBody);
             mEngine->dynamicsWorld->removeRigidBody(mRaycastingBody);
@@ -99,8 +107,8 @@ namespace Physic
             delete mRaycastingBody;
         }
         //Create the newly scaled rigid body
-        mBody = mEngine->createAndAdjustRigidBody(mMesh, mName, scale, getPosition(), getRotation());
-        mRaycastingBody = mEngine->createAndAdjustRigidBody(mMesh, mName, scale, getPosition(), getRotation(), 0, 0, true);
+        mBody = mEngine->createAndAdjustRigidBody(mMesh, mName, scale, pos, rot);
+        mRaycastingBody = mEngine->createAndAdjustRigidBody(mMesh, mName, scale, pos, rot, 0, 0, true);
         mEngine->addRigidBody(mBody, false, mRaycastingBody);  //Add rigid body to dynamics world, but do not add to object map
     }
 
