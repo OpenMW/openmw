@@ -144,3 +144,184 @@ Ogre::ParticleAffector *GrowFadeAffectorFactory::createAffector(Ogre::ParticleSy
     mAffectors.push_back(p);
     return p;
 }
+
+
+class GravityAffector : public Ogre::ParticleAffector
+{
+    enum ForceType {
+        Type_Wind,
+        Type_Point
+    };
+
+public:
+    /** Command object for force (see Ogre::ParamCommand).*/
+    class CmdForce : public Ogre::ParamCommand
+    {
+    public:
+        Ogre::String doGet(const void *target) const
+        {
+            const GravityAffector *self = static_cast<const GravityAffector*>(target);
+            return Ogre::StringConverter::toString(self->getForce());
+        }
+        void doSet(void *target, const Ogre::String &val)
+        {
+            GravityAffector *self = static_cast<GravityAffector*>(target);
+            self->setForce(Ogre::StringConverter::parseReal(val));
+        }
+    };
+
+    /** Command object for force_type (see Ogre::ParamCommand).*/
+    class CmdForceType : public Ogre::ParamCommand
+    {
+        static ForceType getTypeFromString(const Ogre::String &type)
+        {
+            if(type == "wind")
+                return Type_Wind;
+            if(type == "point")
+                return Type_Point;
+            OGRE_EXCEPT(Ogre::Exception::ERR_INVALIDPARAMS, "Invalid force type string: "+type,
+                        "CmdForceType::getTypeFromString");
+        }
+
+        static Ogre::String getStringFromType(ForceType type)
+        {
+            switch(type)
+            {
+                case Type_Wind: return "wind";
+                case Type_Point: return "point";
+            }
+            OGRE_EXCEPT(Ogre::Exception::ERR_INVALIDPARAMS, "Invalid force type enum: "+Ogre::StringConverter::toString(type),
+                        "CmdForceType::getStringFromType");
+        }
+
+    public:
+        Ogre::String doGet(const void *target) const
+        {
+            const GravityAffector *self = static_cast<const GravityAffector*>(target);
+            return getStringFromType(self->getForceType());
+        }
+        void doSet(void *target, const Ogre::String &val)
+        {
+            GravityAffector *self = static_cast<GravityAffector*>(target);
+            self->setForceType(getTypeFromString(val));
+        }
+    };
+
+    /** Command object for direction (see Ogre::ParamCommand).*/
+    class CmdDirection : public Ogre::ParamCommand
+    {
+    public:
+        Ogre::String doGet(const void *target) const
+        {
+            const GravityAffector *self = static_cast<const GravityAffector*>(target);
+            return Ogre::StringConverter::toString(self->getDirection());
+        }
+        void doSet(void *target, const Ogre::String &val)
+        {
+            GravityAffector *self = static_cast<GravityAffector*>(target);
+            self->setDirection(Ogre::StringConverter::parseVector3(val));
+        }
+    };
+
+    /** Command object for position (see Ogre::ParamCommand).*/
+    class CmdPosition : public Ogre::ParamCommand
+    {
+    public:
+        Ogre::String doGet(const void *target) const
+        {
+            const GravityAffector *self = static_cast<const GravityAffector*>(target);
+            return Ogre::StringConverter::toString(self->getPosition());
+        }
+        void doSet(void *target, const Ogre::String &val)
+        {
+            GravityAffector *self = static_cast<GravityAffector*>(target);
+            self->setPosition(Ogre::StringConverter::parseVector3(val));
+        }
+    };
+
+
+    /** Default constructor. */
+    GravityAffector(Ogre::ParticleSystem *psys)
+      : ParticleAffector(psys)
+      , mForce(0.0f)
+      , mForceType(Type_Wind)
+      , mPosition(0.0f)
+      , mDirection(0.0f)
+    {
+        mType = "Gravity";
+
+        // Init parameters
+        if(createParamDictionary("GravityAffector"))
+        {
+            Ogre::ParamDictionary *dict = getParamDictionary();
+
+            Ogre::String force_title("force");
+            Ogre::String force_descr("Amount of force applied to particles.");
+            Ogre::String force_type_title("force_type");
+            Ogre::String force_type_descr("Type of force applied to particles (point or wind).");
+            Ogre::String direction_title("direction");
+            Ogre::String direction_descr("Direction of wind forces.");
+            Ogre::String position_title("position");
+            Ogre::String position_descr("Position of point forces.");
+
+            dict->addParameter(Ogre::ParameterDef(force_title, force_descr, Ogre::PT_REAL), &msForceCmd);
+            dict->addParameter(Ogre::ParameterDef(force_type_title, force_type_descr, Ogre::PT_STRING), &msForceTypeCmd);
+            dict->addParameter(Ogre::ParameterDef(direction_title, direction_descr, Ogre::PT_VECTOR3), &msDirectionCmd);
+            dict->addParameter(Ogre::ParameterDef(position_title, position_descr, Ogre::PT_VECTOR3), &msPositionCmd);
+        }
+    }
+
+    /** See Ogre::ParticleAffector. */
+    void _affectParticles(Ogre::ParticleSystem *psys, Ogre::Real timeElapsed)
+    {
+        Ogre::ParticleIterator pi = psys->_getIterator();
+        while (!pi.end())
+        {
+            Ogre::Particle *p = pi.getNext();
+        }
+    }
+
+    void setForce(Ogre::Real force)
+    { mForce = force; }
+    Ogre::Real getForce() const
+    { return mForce; }
+
+    void setForceType(ForceType type)
+    { mForceType = type; }
+    ForceType getForceType() const
+    { return mForceType; }
+
+    void setDirection(const Ogre::Vector3 &dir)
+    { mDirection = dir; }
+    const Ogre::Vector3 &getDirection() const
+    { return mDirection; }
+
+    void setPosition(const Ogre::Vector3 &pos)
+    { mPosition = pos; }
+    const Ogre::Vector3 &getPosition() const
+    { return mPosition; }
+
+    static CmdForce msForceCmd;
+    static CmdForceType msForceTypeCmd;
+    static CmdDirection msDirectionCmd;
+    static CmdPosition msPositionCmd;
+
+protected:
+    float mForce;
+
+    ForceType mForceType;
+
+    Ogre::Vector3 mPosition;
+    Ogre::Vector3 mDirection;
+};
+GravityAffector::CmdForce GravityAffector::msForceCmd;
+GravityAffector::CmdForceType GravityAffector::msForceTypeCmd;
+GravityAffector::CmdDirection GravityAffector::msDirectionCmd;
+GravityAffector::CmdPosition GravityAffector::msPositionCmd;
+
+Ogre::ParticleAffector *GravityAffectorFactory::createAffector(Ogre::ParticleSystem *psys)
+{
+    Ogre::ParticleAffector *p = new GravityAffector(psys);
+    mAffectors.push_back(p);
+    return p;
+}

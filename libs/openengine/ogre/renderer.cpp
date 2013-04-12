@@ -211,6 +211,10 @@ void OgreRenderer::configure(const std::string &logPath,
     Ogre::ParticleSystemManager::getSingleton().addAffectorFactory(affector);
     mAffectorFactories.push_back(affector);
 
+    affector = OGRE_NEW GravityAffectorFactory();
+    Ogre::ParticleSystemManager::getSingleton().addAffectorFactory(affector);
+    mAffectorFactories.push_back(affector);
+
 
     RenderSystem* rs = mRoot->getRenderSystemByName(renderSystem);
     if (rs == 0)

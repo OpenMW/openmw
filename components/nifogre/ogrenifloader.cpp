@@ -366,9 +366,20 @@ class NIFObjectLoader
             if(e->recType == Nif::RC_NiParticleGrowFade)
             {
                 const Nif::NiParticleGrowFade *gf = static_cast<const Nif::NiParticleGrowFade*>(e.getPtr());
+
                 Ogre::ParticleAffector *affector = partsys->addAffector("GrowFade");
                 affector->setParameter("grow_time", Ogre::StringConverter::toString(gf->growTime));
                 affector->setParameter("fade_time", Ogre::StringConverter::toString(gf->fadeTime));
+            }
+            else if(e->recType == Nif::RC_NiGravity)
+            {
+                const Nif::NiGravity *gr = static_cast<const Nif::NiGravity*>(e.getPtr());
+
+                Ogre::ParticleAffector *affector = partsys->addAffector("Gravity");
+                affector->setParameter("force", Ogre::StringConverter::toString(gr->mForce));
+                affector->setParameter("force_type", (gr->mType==0) ? "wind" : "point");
+                affector->setParameter("direction", Ogre::StringConverter::toString(gr->mDirection));
+                affector->setParameter("position", Ogre::StringConverter::toString(gr->mPosition));
             }
             else if(e->recType == Nif::RC_NiParticleRotation)
             {
@@ -377,10 +388,6 @@ class NIFObjectLoader
             else if(e->recType == Nif::RC_NiParticleColorModifier)
             {
                 // TODO: Implement (Ogre::ColourInterpolatorAffector?)
-            }
-            else if(e->recType == Nif::RC_NiGravity)
-            {
-                // TODO: Implement
             }
             else
                 warn("Unhandled particle modifier "+e->recName);
