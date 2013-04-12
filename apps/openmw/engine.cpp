@@ -176,7 +176,7 @@ void OMW::Engine::loadBSA()
         if (mFileCollections.doesExist(*archive))
         {
             // Last BSA has the highest priority
-            std::string groupName = "DataBSA" + Ogre::StringConverter::toString(dataDirs.size()-i);
+            std::string groupName = "DataBSA" + Ogre::StringConverter::toString(mArchives.size()-i);
 
             Ogre::ResourceGroupManager::getSingleton ().createResourceGroup (groupName);
 
