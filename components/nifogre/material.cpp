@@ -333,11 +333,6 @@ Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
         instance->setProperty("use_detail_map", sh::makeProperty(new sh::BooleanValue(true)));
         instance->setProperty("detailMapUVSet", sh::makeProperty(new sh::IntValue(texprop->textures[Nif::NiTexturingProperty::DetailTexture].uvSet)));
     }
-    if (!texName[Nif::NiTexturingProperty::BumpTexture].empty())
-    {
-        // force automips on normal maps for now
-        instance->setProperty("normalMap", sh::makeProperty(texName[Nif::NiTexturingProperty::BumpTexture] + " 4"));
-    }
 
     for(int i = 0;i < 7;i++)
     {

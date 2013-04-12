@@ -55,7 +55,9 @@ material openmw_objects_base
 
         texture_unit normalMap
         {
-            texture $normalMap
+            direct_texture $normalMap
+            // force automips here for now
+            num_mipmaps 4
         }
 
         texture_unit emissiveMap
