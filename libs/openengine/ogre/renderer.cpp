@@ -110,6 +110,11 @@ void OgreRenderer::loadPlugins()
 
 void OgreRenderer::unloadPlugins()
 {
+    std::vector<Ogre::ParticleEmitterFactory*>::iterator ei;
+    for(ei = mEmitterFactories.begin();ei != mEmitterFactories.end();ei++)
+        OGRE_DELETE (*ei);
+    mEmitterFactories.clear();
+
     std::vector<Ogre::ParticleAffectorFactory*>::iterator ai;
     for(ai = mAffectorFactories.begin();ai != mAffectorFactories.end();ai++)
         OGRE_DELETE (*ai);
@@ -205,6 +210,13 @@ void OgreRenderer::configure(const std::string &logPath,
     Files::loadOgrePlugin(pluginDir, "RenderSystem_Direct3D9", *mRoot);
     Files::loadOgrePlugin(pluginDir, "Plugin_CgProgramManager", *mRoot);
     Files::loadOgrePlugin(pluginDir, "Plugin_ParticleFX", *mRoot);
+
+
+    Ogre::ParticleEmitterFactory *emitter;
+    emitter = OGRE_NEW NifEmitterFactory();
+    Ogre::ParticleSystemManager::getSingleton().addEmitterFactory(emitter);
+    mEmitterFactories.push_back(emitter);
+
 
     Ogre::ParticleAffectorFactory *affector;
     affector = OGRE_NEW GrowFadeAffectorFactory();

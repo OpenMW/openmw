@@ -2,8 +2,225 @@
 
 #include <OgreStringConverter.h>
 #include <OgreParticleSystem.h>
+#include <OgreParticleEmitter.h>
 #include <OgreParticleAffector.h>
 #include <OgreParticle.h>
+
+/* FIXME: "Nif" isn't really an appropriate emitter name. */
+class NifEmitter : public Ogre::ParticleEmitter
+{
+public:
+    /** Command object for the emitter width (see Ogre::ParamCommand).*/
+    class CmdWidth : public Ogre::ParamCommand
+    {
+    public:
+        Ogre::String doGet(const void *target) const
+        {
+            return Ogre::StringConverter::toString(static_cast<const NifEmitter*>(target)->getWidth());
+        }
+        void doSet(void *target, const Ogre::String &val)
+        {
+            static_cast<NifEmitter*>(target)->setWidth(Ogre::StringConverter::parseReal(val));
+        }
+    };
+
+    /** Command object for the emitter height (see Ogre::ParamCommand).*/
+    class CmdHeight : public Ogre::ParamCommand
+    {
+    public:
+        Ogre::String doGet(const void *target) const
+        {
+            return Ogre::StringConverter::toString(static_cast<const NifEmitter*>(target)->getHeight());
+        }
+        void doSet(void *target, const Ogre::String &val)
+        {
+            static_cast<NifEmitter*>(target)->setHeight(Ogre::StringConverter::parseReal(val));
+        }
+    };
+
+    /** Command object for the emitter depth (see Ogre::ParamCommand).*/
+    class CmdDepth : public Ogre::ParamCommand
+    {
+    public:
+        Ogre::String doGet(const void *target) const
+        {
+            return Ogre::StringConverter::toString(static_cast<const NifEmitter*>(target)->getDepth());
+        }
+        void doSet(void *target, const Ogre::String &val)
+        {
+            static_cast<NifEmitter*>(target)->setDepth(Ogre::StringConverter::parseReal(val));
+        }
+    };
+
+
+    NifEmitter(Ogre::ParticleSystem *psys)
+      : Ogre::ParticleEmitter(psys)
+    {
+        initDefaults("Nif");
+    }
+
+    /** See Ogre::ParticleEmitter. */
+    unsigned short _getEmissionCount(Ogre::Real timeElapsed)
+    {
+        // Use basic constant emission
+        return genConstantEmissionCount(timeElapsed);
+    }
+
+    /** See Ogre::ParticleEmitter. */
+    void _initParticle(Ogre::Particle *particle)
+    {
+        Ogre::Vector3 xOff, yOff, zOff;
+
+        // Call superclass
+        ParticleEmitter::_initParticle(particle);
+
+        xOff = Ogre::Math::SymmetricRandom() * mXRange;
+        yOff = Ogre::Math::SymmetricRandom() * mYRange;
+        zOff = Ogre::Math::SymmetricRandom() * mZRange;
+
+        particle->position = mPosition + xOff + yOff + zOff;
+
+        // Generate complex data by reference
+        genEmissionColour(particle->colour);
+        genEmissionDirection(particle->direction);
+        genEmissionVelocity(particle->direction);
+
+        // Generate simpler data
+        particle->timeToLive = particle->totalTimeToLive = genEmissionTTL();
+    }
+
+    /** Overloaded to update the trans. matrix */
+    void setDirection(const Ogre::Vector3 &dir)
+    {
+        ParticleEmitter::setDirection(dir);
+        genAreaAxes();
+    }
+
+    /** Sets the size of the area from which particles are emitted.
+    @param
+        size Vector describing the size of the area. The area extends
+        around the center point by half the x, y and z components of
+        this vector. The box is aligned such that it's local Z axis points
+        along it's direction (see setDirection)
+    */
+    void setSize(const Ogre::Vector3 &size)
+    {
+        mSize = size;
+        genAreaAxes();
+    }
+
+    /** Sets the size of the area from which particles are emitted.
+    @param x,y,z
+        Individual axis lengths describing the size of the area. The area
+        extends around the center point by half the x, y and z components
+        of this vector. The box is aligned such that it's local Z axis
+        points along it's direction (see setDirection)
+    */
+    void setSize(Ogre::Real x, Ogre::Real y, Ogre::Real z)
+    {
+        mSize.x = x;
+        mSize.y = y;
+        mSize.z = z;
+        genAreaAxes();
+    }
+
+    /** Sets the width (local x size) of the emitter. */
+    void setWidth(Ogre::Real width)
+    {
+        mSize.x = width;
+        genAreaAxes();
+    }
+    /** Gets the width (local x size) of the emitter. */
+    Ogre::Real getWidth(void) const
+    { return mSize.x; }
+    /** Sets the height (local y size) of the emitter. */
+    void setHeight(Ogre::Real height)
+    {
+        mSize.y = height;
+        genAreaAxes();
+    }
+    /** Gets the height (local y size) of the emitter. */
+    Ogre::Real getHeight(void) const
+    { return mSize.y; }
+    /** Sets the depth (local y size) of the emitter. */
+    void setDepth(Ogre::Real depth)
+    {
+        mSize.z = depth;
+        genAreaAxes();
+    }
+    /** Gets the depth (local y size) of the emitter. */
+    Ogre::Real getDepth(void) const
+    { return mSize.z; }
+
+protected:
+    /// Size of the area
+    Ogre::Vector3 mSize;
+
+    /// Local axes, not normalised, their magnitude reflects area size
+    Ogre::Vector3 mXRange, mYRange, mZRange;
+
+    /// Internal method for generating the area axes
+    void genAreaAxes(void)
+    {
+        Ogre::Vector3 mLeft = mUp.crossProduct(mDirection);
+
+        mXRange = mLeft * (mSize.x * 0.5f);
+        mYRange = mUp * (mSize.y * 0.5f);
+        mZRange = mDirection * (mSize.z * 0.5f);
+    }
+
+    /** Internal for initializing some defaults and parameters
+    @return True if custom parameters need initialising
+    */
+    bool initDefaults(const Ogre::String &t)
+    {
+        // Defaults
+        mDirection = Ogre::Vector3::UNIT_Z;
+        mUp = Ogre::Vector3::UNIT_Y;
+        setSize(100.0f, 100.0f, 100.0f);
+        mType = t;
+
+        // Set up parameters
+        if(createParamDictionary(mType + "Emitter"))
+        {
+            addBaseParameters();
+            Ogre::ParamDictionary *dict = getParamDictionary();
+
+            // Custom params
+            dict->addParameter(Ogre::ParameterDef("width",
+                                                  "Width of the shape in world coordinates.",
+                                                  Ogre::PT_REAL),
+                               &msWidthCmd);
+            dict->addParameter(Ogre::ParameterDef("height",
+                                                  "Height of the shape in world coordinates.",
+                                                  Ogre::PT_REAL),
+                               &msHeightCmd);
+            dict->addParameter(Ogre::ParameterDef("depth",
+                                                  "Depth of the shape in world coordinates.",
+                                                  Ogre::PT_REAL),
+                               &msDepthCmd);
+
+            return true;
+        }
+        return false;
+    }
+
+    /// Command objects
+    static CmdWidth msWidthCmd;
+    static CmdHeight msHeightCmd;
+    static CmdDepth msDepthCmd;
+};
+NifEmitter::CmdWidth NifEmitter::msWidthCmd;
+NifEmitter::CmdHeight NifEmitter::msHeightCmd;
+NifEmitter::CmdDepth NifEmitter::msDepthCmd;
+
+Ogre::ParticleEmitter* NifEmitterFactory::createEmitter(Ogre::ParticleSystem *psys)
+{
+    Ogre::ParticleEmitter *emit = OGRE_NEW NifEmitter(psys);
+    mEmitters.push_back(emit);
+    return emit;
+}
+
 
 class GrowFadeAffector : public Ogre::ParticleAffector
 {

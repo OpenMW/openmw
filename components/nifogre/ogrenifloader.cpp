@@ -351,7 +351,7 @@ class NIFObjectLoader
 
     static void createParticleEmitterAffectors(Ogre::ParticleSystem *partsys, const Nif::NiParticleSystemController *partctrl)
     {
-        Ogre::ParticleEmitter *emitter = partsys->addEmitter("Point");
+        Ogre::ParticleEmitter *emitter = partsys->addEmitter("Nif");
         emitter->setDirection(Ogre::Vector3(0.0f, 0.0f, std::cos(partctrl->verticalDir)));
         emitter->setAngle(Ogre::Radian(partctrl->verticalAngle));
         emitter->setParticleVelocity(partctrl->velocity-partctrl->velocityRandom,
@@ -359,6 +359,9 @@ class NIFObjectLoader
         emitter->setEmissionRate(partctrl->emitRate);
         emitter->setTimeToLive(partctrl->lifetime-partctrl->lifetimeRandom,
                                partctrl->lifetime+partctrl->lifetimeRandom);
+        emitter->setParameter("width", Ogre::StringConverter::toString(partctrl->offsetRandom.x));
+        emitter->setParameter("height", Ogre::StringConverter::toString(partctrl->offsetRandom.z));
+        emitter->setParameter("depth", Ogre::StringConverter::toString(partctrl->offsetRandom.y));
 
         Nif::ExtraPtr e = partctrl->extra;
         while(!e.empty())
