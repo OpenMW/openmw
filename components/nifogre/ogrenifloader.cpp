@@ -436,6 +436,9 @@ class NIFObjectLoader
                                           particledata->particleRadius*2.0f);
             partsys->setCullIndividually(false);
             partsys->setParticleQuota(particledata->numParticles);
+            // TODO: There is probably a field or flag to specify this, as some
+            // particle effects have it and some don't.
+            partsys->setKeepParticlesInLocalSpace(true);
 
             Nif::ControllerPtr ctrl = partnode->controller;
             while(!ctrl.empty())
