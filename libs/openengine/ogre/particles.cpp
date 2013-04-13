@@ -52,6 +52,70 @@ public:
         }
     };
 
+    /** Command object for the emitter vertical_direction (see Ogre::ParamCommand).*/
+    class CmdVerticalDir : public Ogre::ParamCommand
+    {
+    public:
+        Ogre::String doGet(const void *target) const
+        {
+            const NifEmitter *self = static_cast<const NifEmitter*>(target);
+            return Ogre::StringConverter::toString(self->getVerticalDirection().valueDegrees());
+        }
+        void doSet(void *target, const Ogre::String &val)
+        {
+            NifEmitter *self = static_cast<NifEmitter*>(target);
+            self->setVerticalDirection(Ogre::Degree(Ogre::StringConverter::parseReal(val)));
+        }
+    };
+
+    /** Command object for the emitter vertical_angle (see Ogre::ParamCommand).*/
+    class CmdVerticalAngle : public Ogre::ParamCommand
+    {
+    public:
+        Ogre::String doGet(const void *target) const
+        {
+            const NifEmitter *self = static_cast<const NifEmitter*>(target);
+            return Ogre::StringConverter::toString(self->getVerticalAngle().valueDegrees());
+        }
+        void doSet(void *target, const Ogre::String &val)
+        {
+            NifEmitter *self = static_cast<NifEmitter*>(target);
+            self->setVerticalAngle(Ogre::Degree(Ogre::StringConverter::parseReal(val)));
+        }
+    };
+
+    /** Command object for the emitter horizontal_direction (see Ogre::ParamCommand).*/
+    class CmdHorizontalDir : public Ogre::ParamCommand
+    {
+    public:
+        Ogre::String doGet(const void *target) const
+        {
+            const NifEmitter *self = static_cast<const NifEmitter*>(target);
+            return Ogre::StringConverter::toString(self->getHorizontalDirection().valueDegrees());
+        }
+        void doSet(void *target, const Ogre::String &val)
+        {
+            NifEmitter *self = static_cast<NifEmitter*>(target);
+            self->setHorizontalDirection(Ogre::Degree(Ogre::StringConverter::parseReal(val)));
+        }
+    };
+
+    /** Command object for the emitter horizontal_angle (see Ogre::ParamCommand).*/
+    class CmdHorizontalAngle : public Ogre::ParamCommand
+    {
+    public:
+        Ogre::String doGet(const void *target) const
+        {
+            const NifEmitter *self = static_cast<const NifEmitter*>(target);
+            return Ogre::StringConverter::toString(self->getHorizontalAngle().valueDegrees());
+        }
+        void doSet(void *target, const Ogre::String &val)
+        {
+            NifEmitter *self = static_cast<NifEmitter*>(target);
+            self->setHorizontalAngle(Ogre::Degree(Ogre::StringConverter::parseReal(val)));
+        }
+    };
+
 
     NifEmitter(Ogre::ParticleSystem *psys)
       : Ogre::ParticleEmitter(psys)
@@ -82,7 +146,14 @@ public:
 
         // Generate complex data by reference
         genEmissionColour(particle->colour);
-        genEmissionDirection(particle->direction);
+
+        // NOTE: We do not use mDirection/mAngle for the initial direction.
+        Ogre::Radian vdir = mVerticalDir + mVerticalAngle*Ogre::Math::SymmetricRandom();
+        Ogre::Radian hdir = mHorizontalDir + mHorizontalAngle*Ogre::Math::SymmetricRandom();
+        particle->direction = (Ogre::Quaternion(vdir, Ogre::Vector3::UNIT_X) *
+                               Ogre::Quaternion(hdir, Ogre::Vector3::UNIT_Z)) *
+                              Ogre::Vector3::UNIT_Z;
+
         genEmissionVelocity(particle->direction);
 
         // Generate simpler data
@@ -152,9 +223,35 @@ public:
     Ogre::Real getDepth(void) const
     { return mSize.z; }
 
+    void setVerticalDirection(Ogre::Radian vdir)
+    { mVerticalDir = vdir; }
+    Ogre::Radian getVerticalDirection(void) const
+    { return mVerticalDir; }
+
+    void setVerticalAngle(Ogre::Radian vangle)
+    { mVerticalAngle = vangle; }
+    Ogre::Radian getVerticalAngle(void) const
+    { return mVerticalAngle; }
+
+    void setHorizontalDirection(Ogre::Radian hdir)
+    { mHorizontalDir = hdir; }
+    Ogre::Radian getHorizontalDirection(void) const
+    { return mHorizontalDir; }
+
+    void setHorizontalAngle(Ogre::Radian hangle)
+    { mHorizontalAngle = hangle; }
+    Ogre::Radian getHorizontalAngle(void) const
+    { return mHorizontalAngle; }
+
+
 protected:
     /// Size of the area
     Ogre::Vector3 mSize;
+
+    Ogre::Radian mVerticalDir;
+    Ogre::Radian mVerticalAngle;
+    Ogre::Radian mHorizontalDir;
+    Ogre::Radian mHorizontalAngle;
 
     /// Local axes, not normalised, their magnitude reflects area size
     Ogre::Vector3 mXRange, mYRange, mZRange;
@@ -163,7 +260,6 @@ protected:
     void genAreaAxes(void)
     {
         Ogre::Vector3 mLeft = mUp.crossProduct(mDirection);
-
         mXRange = mLeft * (mSize.x * 0.5f);
         mYRange = mUp * (mSize.y * 0.5f);
         mZRange = mDirection * (mSize.z * 0.5f);
@@ -200,6 +296,23 @@ protected:
                                                   Ogre::PT_REAL),
                                &msDepthCmd);
 
+            dict->addParameter(Ogre::ParameterDef("vertical_direction",
+                                                  "Vertical direction of emitted particles (in degrees).",
+                                                  Ogre::PT_REAL),
+                               &msVerticalDirCmd);
+            dict->addParameter(Ogre::ParameterDef("vertical_angle",
+                                                  "Vertical direction variance of emitted particles (in degrees).",
+                                                  Ogre::PT_REAL),
+                               &msVerticalAngleCmd);
+            dict->addParameter(Ogre::ParameterDef("horizontal_direction",
+                                                  "Horizontal direction of emitted particles (in degrees).",
+                                                  Ogre::PT_REAL),
+                               &msHorizontalDirCmd);
+            dict->addParameter(Ogre::ParameterDef("horizontal_angle",
+                                                  "Horizontal direction variance of emitted particles (in degrees).",
+                                                  Ogre::PT_REAL),
+                               &msHorizontalAngleCmd);
+
             return true;
         }
         return false;
@@ -209,10 +322,18 @@ protected:
     static CmdWidth msWidthCmd;
     static CmdHeight msHeightCmd;
     static CmdDepth msDepthCmd;
+    static CmdVerticalDir msVerticalDirCmd;
+    static CmdVerticalAngle msVerticalAngleCmd;
+    static CmdHorizontalDir msHorizontalDirCmd;
+    static CmdHorizontalAngle msHorizontalAngleCmd;
 };
 NifEmitter::CmdWidth NifEmitter::msWidthCmd;
 NifEmitter::CmdHeight NifEmitter::msHeightCmd;
 NifEmitter::CmdDepth NifEmitter::msDepthCmd;
+NifEmitter::CmdVerticalDir NifEmitter::msVerticalDirCmd;
+NifEmitter::CmdVerticalAngle NifEmitter::msVerticalAngleCmd;
+NifEmitter::CmdHorizontalDir NifEmitter::msHorizontalDirCmd;
+NifEmitter::CmdHorizontalAngle NifEmitter::msHorizontalAngleCmd;
 
 Ogre::ParticleEmitter* NifEmitterFactory::createEmitter(Ogre::ParticleSystem *psys)
 {

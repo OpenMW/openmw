@@ -352,16 +352,18 @@ class NIFObjectLoader
     static void createParticleEmitterAffectors(Ogre::ParticleSystem *partsys, const Nif::NiParticleSystemController *partctrl)
     {
         Ogre::ParticleEmitter *emitter = partsys->addEmitter("Nif");
-        emitter->setDirection(Ogre::Vector3(0.0f, 0.0f, std::cos(partctrl->verticalDir)));
-        emitter->setAngle(Ogre::Radian(partctrl->verticalAngle));
         emitter->setParticleVelocity(partctrl->velocity-partctrl->velocityRandom,
                                      partctrl->velocity+partctrl->velocityRandom);
         emitter->setEmissionRate(partctrl->emitRate);
         emitter->setTimeToLive(partctrl->lifetime-partctrl->lifetimeRandom,
                                partctrl->lifetime+partctrl->lifetimeRandom);
         emitter->setParameter("width", Ogre::StringConverter::toString(partctrl->offsetRandom.x));
-        emitter->setParameter("height", Ogre::StringConverter::toString(partctrl->offsetRandom.z));
-        emitter->setParameter("depth", Ogre::StringConverter::toString(partctrl->offsetRandom.y));
+        emitter->setParameter("height", Ogre::StringConverter::toString(partctrl->offsetRandom.y));
+        emitter->setParameter("depth", Ogre::StringConverter::toString(partctrl->offsetRandom.z));
+        emitter->setParameter("vertical_direction", Ogre::StringConverter::toString(Ogre::Radian(partctrl->verticalDir).valueDegrees()));
+        emitter->setParameter("vertical_angle", Ogre::StringConverter::toString(Ogre::Radian(partctrl->verticalAngle).valueDegrees()));
+        emitter->setParameter("horizontal_direction", Ogre::StringConverter::toString(Ogre::Radian(partctrl->horizontalDir).valueDegrees()));
+        emitter->setParameter("horizontal_angle", Ogre::StringConverter::toString(Ogre::Radian(partctrl->horizontalAngle).valueDegrees()));
 
         Nif::ExtraPtr e = partctrl->extra;
         while(!e.empty())
