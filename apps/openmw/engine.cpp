@@ -161,7 +161,7 @@ void OMW::Engine::loadBSA()
     for (Files::PathContainer::const_iterator iter = dataDirs.begin(); iter != dataDirs.end(); ++iter)
     {
         // Last data dir has the highest priority
-        std::string groupName = "Data" + Ogre::StringConverter::toString(dataDirs.size()-i);
+        std::string groupName = "Data" + Ogre::StringConverter::toString(dataDirs.size()-i, 8, '0');
         Ogre::ResourceGroupManager::getSingleton ().createResourceGroup (groupName);
 
         std::string dataDirectory = iter->string();
@@ -176,7 +176,7 @@ void OMW::Engine::loadBSA()
         if (mFileCollections.doesExist(*archive))
         {
             // Last BSA has the highest priority
-            std::string groupName = "DataBSA" + Ogre::StringConverter::toString(dataDirs.size()-i);
+            std::string groupName = "DataBSA" + Ogre::StringConverter::toString(mArchives.size()-i, 8, '0');
 
             Ogre::ResourceGroupManager::getSingleton ().createResourceGroup (groupName);
 
