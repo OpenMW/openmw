@@ -386,13 +386,29 @@ class NIFObjectLoader
                 affector->setParameter("direction", Ogre::StringConverter::toString(gr->mDirection));
                 affector->setParameter("position", Ogre::StringConverter::toString(gr->mPosition));
             }
+            else if(e->recType == Nif::RC_NiParticleColorModifier)
+            {
+                const Nif::NiParticleColorModifier *cl = static_cast<const Nif::NiParticleColorModifier*>(e.getPtr());
+                const Nif::NiColorData *clrdata = cl->data.getPtr();
+
+                Ogre::ParticleAffector *affector = partsys->addAffector("ColourInterpolator");
+                size_t num_colors = std::min<size_t>(6, clrdata->mKeyList.mKeys.size());
+                for(size_t i = 0;i < num_colors;i++)
+                {
+                    Ogre::ColourValue color;
+                    color.r = clrdata->mKeyList.mKeys[i].mValue[0];
+                    color.g = clrdata->mKeyList.mKeys[i].mValue[1];
+                    color.b = clrdata->mKeyList.mKeys[i].mValue[2];
+                    color.a = clrdata->mKeyList.mKeys[i].mValue[3];
+                    affector->setParameter("colour"+Ogre::StringConverter::toString(i),
+                                           Ogre::StringConverter::toString(color));
+                    affector->setParameter("time"+Ogre::StringConverter::toString(i),
+                                           Ogre::StringConverter::toString(clrdata->mKeyList.mKeys[i].mTime));
+                }
+            }
             else if(e->recType == Nif::RC_NiParticleRotation)
             {
                 // TODO: Implement (Ogre::RotationAffector?)
-            }
-            else if(e->recType == Nif::RC_NiParticleColorModifier)
-            {
-                // TODO: Implement (Ogre::ColourInterpolatorAffector?)
             }
             else
                 warn("Unhandled particle modifier "+e->recName);
