@@ -801,8 +801,8 @@ namespace MWWorld
 
     void World::scaleObject (const Ptr& ptr, float scale)
     {
-        MWWorld::Class::get(ptr).adjustScale(ptr,scale);
         ptr.getCellRef().mScale = scale;
+        MWWorld::Class::get(ptr).adjustScale(ptr,scale);
 
         if(ptr.getRefData().getBaseNode() == 0)
             return;
