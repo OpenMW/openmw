@@ -274,10 +274,14 @@ public:
     /** See Ogre::ParticleAffector. */
     void _affectParticles(Ogre::ParticleSystem *psys, Ogre::Real timeElapsed)
     {
-        Ogre::ParticleIterator pi = psys->_getIterator();
-        while (!pi.end())
+        switch(mForceType)
         {
-            Ogre::Particle *p = pi.getNext();
+            case Type_Wind:
+                applyWindForce(psys, timeElapsed);
+                break;
+            case Type_Point:
+                applyPointForce(psys, timeElapsed);
+                break;
         }
     }
 
@@ -307,6 +311,30 @@ public:
     static CmdPosition msPositionCmd;
 
 protected:
+    void applyWindForce(Ogre::ParticleSystem *psys, Ogre::Real timeElapsed)
+    {
+        const Ogre::Vector3 vec = mDirection * mForce * timeElapsed;
+        Ogre::ParticleIterator pi = psys->_getIterator();
+        while (!pi.end())
+        {
+            Ogre::Particle *p = pi.getNext();
+            p->direction += vec;
+        }
+    }
+
+    void applyPointForce(Ogre::ParticleSystem *psys, Ogre::Real timeElapsed)
+    {
+        const Ogre::Real force = mForce * timeElapsed;
+        Ogre::ParticleIterator pi = psys->_getIterator();
+        while (!pi.end())
+        {
+            Ogre::Particle *p = pi.getNext();
+            const Ogre::Vector3 vec = (p->position - mPosition).normalisedCopy() * force;
+            p->direction += vec;
+        }
+    }
+
+
     float mForce;
 
     ForceType mForceType;
