@@ -329,6 +329,35 @@ public:
     typedef DefaultFunction Function;
 };
 
+class ParticleSystemController
+{
+public:
+    class Value : public Ogre::ControllerValue<Ogre::Real>
+    {
+    private:
+        Ogre::ParticleSystem *mParticleSys;
+        float mEmitStart;
+        float mEmitStop;
+
+    public:
+        Value(Ogre::ParticleSystem *psys, const Nif::NiParticleSystemController *pctrl)
+          : mParticleSys(psys)
+          , mEmitStart(pctrl->startTime)
+          , mEmitStop(pctrl->stopTime)
+        {
+        }
+
+        Ogre::Real getValue() const
+        { return 0.0f; }
+
+        void setValue(Ogre::Real value)
+        {
+            mParticleSys->setEmitting(value >= mEmitStart && value < mEmitStop);
+        }
+    };
+
+    typedef DefaultFunction Function;
+};
 
 
 /** Object creator for NIFs. This is the main class responsible for creating
@@ -521,6 +550,13 @@ class NIFObjectLoader
                     Ogre::Bone *trgtbone = objectlist.mSkelBase->getSkeleton()->getBone(trgtid);
                     objectlist.mSkelBase->attachObjectToBone(trgtbone->getName(), partsys);
                 }
+
+                Ogre::ControllerValueRealPtr srcval((partflags&0x20) ? Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
+                                                                       Ogre::ControllerValueRealPtr());
+                Ogre::ControllerValueRealPtr dstval(OGRE_NEW ParticleSystemController::Value(partsys, partctrl));
+                Ogre::ControllerFunctionRealPtr func(OGRE_NEW ParticleSystemController::Function(partctrl, (partflags&0x20)));
+
+                objectlist.mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
             }
             ctrl = ctrl->next;
         }
