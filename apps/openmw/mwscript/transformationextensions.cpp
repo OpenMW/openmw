@@ -553,26 +553,30 @@ namespace MWScript
 
                     std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
-                    Interpreter::Type_Float rotation = (runtime[0].mFloat/80); //It works this way, don't ask me why
+                    Interpreter::Type_Float rotation = (runtime[0].mFloat/80); //It works this way, don't ask me why (probably framerate)
                     runtime.pop();
 
-                    float ax = Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees();
-                    float ay = Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees();
-                    float az = Ogre::Radian(ptr.getRefData().getPosition().rot[2]).valueDegrees();
+                    float *objRot = ptr.getRefData().getPosition().rot;
 
-                    //Axis in morrowind are inverted
-                    if (axis == "y")
+                    if (axis == "x")
                     {
-                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax+rotation,ay,az);
+                        objRot[0]+=Ogre::Degree(rotation).valueRadians();
+
+                        ptr.getRefData().getBaseNode()->rotate(Ogre::Quaternion(Ogre::Radian(Ogre::Degree(-rotation).valueRadians()), Ogre::Vector3::UNIT_X));;
                     }
-                    else if (axis == "x")
+                    else if (axis == "y")
                     {
-                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay+rotation,az);
+                        objRot[1]+=Ogre::Degree(rotation).valueRadians();
+
+                        ptr.getRefData().getBaseNode()->rotate(Ogre::Quaternion(Ogre::Radian(Ogre::Degree(-rotation).valueRadians()), Ogre::Vector3::UNIT_Y));
                     }
                     else if (axis == "z")
                     {
-                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,az+rotation);
+                        objRot[2]+=Ogre::Degree(rotation).valueRadians();
+
+                        ptr.getRefData().getBaseNode()->rotate(Ogre::Quaternion(Ogre::Radian(Ogre::Degree(-rotation).valueRadians()), Ogre::Vector3::UNIT_Z));
                     }
+
                     else
                         throw std::runtime_error ("invalid rotation axis: " + axis);
                 }
