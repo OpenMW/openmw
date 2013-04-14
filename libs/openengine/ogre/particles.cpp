@@ -148,10 +148,10 @@ public:
         genEmissionColour(particle->colour);
 
         // NOTE: We do not use mDirection/mAngle for the initial direction.
-        Ogre::Radian vdir = mVerticalDir + mVerticalAngle*Ogre::Math::SymmetricRandom();
         Ogre::Radian hdir = mHorizontalDir + mHorizontalAngle*Ogre::Math::SymmetricRandom();
-        particle->direction = (Ogre::Quaternion(vdir, Ogre::Vector3::UNIT_X) *
-                               Ogre::Quaternion(hdir, Ogre::Vector3::UNIT_Z)) *
+        Ogre::Radian vdir = mVerticalDir + mVerticalAngle*Ogre::Math::SymmetricRandom();
+        particle->direction = (Ogre::Quaternion(hdir, Ogre::Vector3::UNIT_Z) *
+                               Ogre::Quaternion(vdir, Ogre::Vector3::UNIT_X)) *
                               Ogre::Vector3::UNIT_Z;
 
         genEmissionVelocity(particle->direction);
