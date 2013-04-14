@@ -165,6 +165,7 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name, Ptr::CellStore& ce
         else
             return Ptr();
     }
+
     MWWorld::Ptr ptr;
 
     if (MWWorld::LiveCellRef<ESM::Activator> *ref = cell.mActivators.find (name))
@@ -246,16 +247,16 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name)
         }
 
     // Then check cells that are already listed
-    for (std::map<std::string, Ptr::CellStore>::iterator iter = mInteriors.begin();
-        iter!=mInteriors.end(); ++iter)
+    for (std::map<std::pair<int, int>, Ptr::CellStore>::iterator iter = mExteriors.begin();
+        iter!=mExteriors.end(); ++iter)
     {
         Ptr ptr = getPtrAndCache (name, iter->second);
         if (!ptr.isEmpty())
-             return ptr;
+            return ptr;
     }
 
-    for (std::map<std::pair<int, int>, Ptr::CellStore>::iterator iter = mExteriors.begin();
-        iter!=mExteriors.end(); ++iter)
+    for (std::map<std::string, Ptr::CellStore>::iterator iter = mInteriors.begin();
+        iter!=mInteriors.end(); ++iter)
     {
         Ptr ptr = getPtrAndCache (name, iter->second);
         if (!ptr.isEmpty())
@@ -266,7 +267,7 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name)
     const MWWorld::Store<ESM::Cell> &cells = mStore.get<ESM::Cell>();
     MWWorld::Store<ESM::Cell>::iterator iter;
 
-    for (iter = cells.intBegin(); iter != cells.intEnd(); ++iter)
+    for (iter = cells.extBegin(); iter != cells.extEnd(); ++iter)
     {
         Ptr::CellStore *cellStore = getCellStore (&(*iter));
 
@@ -276,7 +277,7 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name)
             return ptr;
     }
 
-    for (iter = cells.extBegin(); iter != cells.extEnd(); ++iter)
+    for (iter = cells.intBegin(); iter != cells.intEnd(); ++iter)
     {
         Ptr::CellStore *cellStore = getCellStore (&(*iter));
 
