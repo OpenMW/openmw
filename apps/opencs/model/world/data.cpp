@@ -123,6 +123,9 @@ CSMWorld::Data::Data()
     mCells.addColumn (new RecordStateColumn<Cell>);
     mCells.addColumn (new FixedRecordTypeColumn<Cell> (UniversalId::Type_Cell));
     mCells.addColumn (new NameColumn<Cell>);
+    mCells.addColumn (new FlagColumn<Cell> ("Sleep forbidden", ESM::Cell::NoSleep));
+    mCells.addColumn (new FlagColumn<Cell> ("Interior Water", ESM::Cell::HasWater));
+    mCells.addColumn (new FlagColumn<Cell> ("Interior Sky", ESM::Cell::QuasiEx));
 
     addModel (new IdTable (&mGlobals), UniversalId::Type_Globals, UniversalId::Type_Global);
     addModel (new IdTable (&mGmsts), UniversalId::Type_Gmsts, UniversalId::Type_Gmst);
