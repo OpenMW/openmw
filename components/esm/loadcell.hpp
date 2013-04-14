@@ -140,6 +140,9 @@ struct Cell
    * Since they are comparably rare, we use a separate method for this.
    */
   static bool getNextMVRF(ESMReader &esm, MovedCellRef &mref);
+
+    void blank();
+    ///< Set record to default state (does not touch the ID/index).
 };
 }
 #endif

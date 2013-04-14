@@ -356,4 +356,22 @@ bool Cell::getNextMVRF(ESMReader &esm, MovedCellRef &mref)
     return true;
 }
 
+    void Cell::blank()
+    {
+        mName.clear();
+        mRegion.clear();
+        mWater = 0;
+        mWaterInt = false;
+        mMapColor = 0;
+        mNAM0 = 0;
+
+        mData.mFlags = 0;
+        mData.mX = 0;
+        mData.mY = 0;
+
+        mAmbi.mAmbient = 0;
+        mAmbi.mSunlight = 0;
+        mAmbi.mFog = 0;
+        mAmbi.mFogDensity = 0;
+    }
 }

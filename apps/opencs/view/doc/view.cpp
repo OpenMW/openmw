@@ -125,6 +125,10 @@ void CSVDoc::View::setupWorldMenu()
     QAction *spells = new QAction (tr ("Spells"), this);
     connect (spells, SIGNAL (triggered()), this, SLOT (addSpellsSubView()));
     world->addAction (spells);
+
+    QAction *cells = new QAction (tr ("Cells"), this);
+    connect (cells, SIGNAL (triggered()), this, SLOT (addCellsSubView()));
+    world->addAction (cells);
 }
 
 void CSVDoc::View::setupUi()
@@ -323,6 +327,11 @@ void CSVDoc::View::addBirthsignsSubView()
 void CSVDoc::View::addSpellsSubView()
 {
     addSubView (CSMWorld::UniversalId::Type_Spells);
+}
+
+void CSVDoc::View::addCellsSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Cells);
 }
 
 void CSVDoc::View::abortOperation (int type)
