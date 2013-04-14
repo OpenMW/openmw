@@ -492,7 +492,7 @@ class NIFObjectLoader
 
     static void createObjects(const std::string &name, const std::string &group,
                               Ogre::SceneManager *sceneMgr, const Nif::Node *node,
-                              ObjectList &objectlist, int flags)
+                              ObjectList &objectlist, int flags, int animflags)
     {
         // Do not create objects for the collision shape (includes all children)
         if(node->recType == Nif::RC_RootCollisionNode)
@@ -503,7 +503,10 @@ class NIFObjectLoader
         if (node->name.find("marker") != std::string::npos)
             return;
 
-        flags |= node->flags;
+        if(node->recType == Nif::RC_NiBSAnimationNode)
+            animflags |= node->flags;
+        else
+            flags |= node->flags;
 
         Nif::ExtraPtr e = node->extra;
         while(!e.empty())
@@ -539,9 +542,10 @@ class NIFObjectLoader
 
                 int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, ctrl->target->recIndex);
                 Ogre::Bone *trgtbone = objectlist.mSkelBase->getSkeleton()->getBone(trgtid);
-                Ogre::ControllerValueRealPtr srcval; /* Filled in later */
+                Ogre::ControllerValueRealPtr srcval((animflags&0x20) ? Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
+                                                                       Ogre::ControllerValueRealPtr());
                 Ogre::ControllerValueRealPtr dstval(OGRE_NEW VisController::Value(trgtbone, vis->data.getPtr()));
-                Ogre::ControllerFunctionRealPtr func(OGRE_NEW VisController::Function(vis, false));
+                Ogre::ControllerFunctionRealPtr func(OGRE_NEW VisController::Function(vis, (animflags&0x20)));
 
                 objectlist.mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
             }
@@ -552,9 +556,10 @@ class NIFObjectLoader
                 {
                     int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, ctrl->target->recIndex);
                     Ogre::Bone *trgtbone = objectlist.mSkelBase->getSkeleton()->getBone(trgtid);
-                    Ogre::ControllerValueRealPtr srcval; /* Filled in later */
+                    Ogre::ControllerValueRealPtr srcval((animflags&0x20) ? Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
+                                                                           Ogre::ControllerValueRealPtr());
                     Ogre::ControllerValueRealPtr dstval(OGRE_NEW KeyframeController::Value(trgtbone, key->data.getPtr()));
-                    Ogre::ControllerFunctionRealPtr func(OGRE_NEW KeyframeController::Function(key, false));
+                    Ogre::ControllerFunctionRealPtr func(OGRE_NEW KeyframeController::Function(key, (animflags&0x20)));
 
                     objectlist.mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
                 }
@@ -599,9 +604,10 @@ class NIFObjectLoader
                     const Nif::NiUVController *uv = static_cast<const Nif::NiUVController*>(ctrl.getPtr());
 
                     const Ogre::MaterialPtr &material = entity->getSubEntity(0)->getMaterial();
-                    Ogre::ControllerValueRealPtr srcval(Ogre::ControllerManager::getSingleton().getFrameTimeSource());
+                    Ogre::ControllerValueRealPtr srcval((animflags&0x20) ? Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
+                                                                           Ogre::ControllerValueRealPtr());
                     Ogre::ControllerValueRealPtr dstval(OGRE_NEW UVController::Value(material, uv->data.getPtr()));
-                    Ogre::ControllerFunctionRealPtr func(OGRE_NEW UVController::Function(uv, true));
+                    Ogre::ControllerFunctionRealPtr func(OGRE_NEW UVController::Function(uv, (animflags&0x20)));
 
                     objectlist.mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
                 }
@@ -627,7 +633,7 @@ class NIFObjectLoader
             for(size_t i = 0;i < children.length();i++)
             {
                 if(!children[i].empty())
-                    createObjects(name, group, sceneMgr, children[i].getPtr(), objectlist, flags);
+                    createObjects(name, group, sceneMgr, children[i].getPtr(), objectlist, flags, animflags);
             }
         }
     }
@@ -674,7 +680,7 @@ public:
             // Create a base skeleton entity if this NIF needs one
             createSkelBase(name, group, sceneMgr, node, objectlist);
         }
-        createObjects(name, group, sceneMgr, node, objectlist, flags);
+        createObjects(name, group, sceneMgr, node, objectlist, flags, 0);
     }
 };
 
