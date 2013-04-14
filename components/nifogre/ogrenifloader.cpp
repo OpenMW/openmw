@@ -469,7 +469,7 @@ class NIFObjectLoader
 
     static void createParticleSystem(const std::string &name, const std::string &group,
                                      Ogre::SceneManager *sceneMgr, ObjectList &objectlist,
-                                     const Nif::Node *partnode, int flags, int animflags)
+                                     const Nif::Node *partnode, int flags, int partflags)
     {
         const Nif::NiAutoNormalParticlesData *particledata = NULL;
         if(partnode->recType == Nif::RC_NiAutoNormalParticles)
@@ -539,7 +539,7 @@ class NIFObjectLoader
 
     static void createObjects(const std::string &name, const std::string &group,
                               Ogre::SceneManager *sceneMgr, const Nif::Node *node,
-                              ObjectList &objectlist, int flags, int animflags)
+                              ObjectList &objectlist, int flags, int animflags, int partflags)
     {
         // Do not create objects for the collision shape (includes all children)
         if(node->recType == Nif::RC_RootCollisionNode)
@@ -552,6 +552,8 @@ class NIFObjectLoader
 
         if(node->recType == Nif::RC_NiBSAnimationNode)
             animflags |= node->flags;
+        else if(node->recType == Nif::RC_NiBSParticleNode)
+            partflags |= node->flags;
         else
             flags |= node->flags;
 
@@ -622,7 +624,7 @@ class NIFObjectLoader
         if((node->recType == Nif::RC_NiAutoNormalParticles ||
             node->recType == Nif::RC_NiRotatingParticles) && !(flags&0x40000000))
         {
-            createParticleSystem(name, group, sceneMgr, objectlist, node, flags, animflags);
+            createParticleSystem(name, group, sceneMgr, objectlist, node, flags, partflags);
         }
 
         const Nif::NiNode *ninode = dynamic_cast<const Nif::NiNode*>(node);
@@ -632,7 +634,7 @@ class NIFObjectLoader
             for(size_t i = 0;i < children.length();i++)
             {
                 if(!children[i].empty())
-                    createObjects(name, group, sceneMgr, children[i].getPtr(), objectlist, flags, animflags);
+                    createObjects(name, group, sceneMgr, children[i].getPtr(), objectlist, flags, animflags, partflags);
             }
         }
     }
@@ -679,7 +681,7 @@ public:
             // Create a base skeleton entity if this NIF needs one
             createSkelBase(name, group, sceneMgr, node, objectlist);
         }
-        createObjects(name, group, sceneMgr, node, objectlist, flags, 0);
+        createObjects(name, group, sceneMgr, node, objectlist, flags, 0, 0);
     }
 };
 
