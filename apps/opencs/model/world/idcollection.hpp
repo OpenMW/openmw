@@ -325,10 +325,10 @@ namespace CSMWorld
     {
         std::string id = reader.getHNOString ("NAME");
 
-        int index = searchId (id);
-
         if (reader.isNextSub ("DELE"))
         {
+            int index = searchId (id);
+
             reader.skipRecord();
 
             if (index==-1)
@@ -353,6 +353,8 @@ namespace CSMWorld
             ESXRecordT record;
             record.mId = id;
             record.load (reader);
+
+            int index = searchId (record.mId);
 
             if (index==-1)
             {
