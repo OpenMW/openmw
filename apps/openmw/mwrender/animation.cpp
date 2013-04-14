@@ -33,6 +33,7 @@ Animation::Animation(const MWWorld::Ptr &ptr)
     : mPtr(ptr)
     , mController(NULL)
     , mInsert(NULL)
+    , mSkelBase(NULL)
     , mAccumRoot(NULL)
     , mNonAccumRoot(NULL)
     , mAccumulate(Ogre::Vector3::ZERO)
@@ -65,7 +66,7 @@ Animation::~Animation()
 
 void Animation::setAnimationSources(const std::vector<std::string> &names)
 {
-    if(!mObjectList.mSkelBase)
+    if(!mSkelBase)
         return;
     Ogre::SceneManager *sceneMgr = mInsert->getCreator();
 
@@ -81,7 +82,7 @@ void Animation::setAnimationSources(const std::vector<std::string> &names)
     mAnimationSources.clear();
 
     Ogre::SharedPtr<Ogre::ControllerValue<Ogre::Real> > ctrlval(OGRE_NEW AnimationValue(this));
-    Ogre::SkeletonInstance *skelinst = mObjectList.mSkelBase->getSkeleton();
+    Ogre::SkeletonInstance *skelinst = mSkelBase->getSkeleton();
     std::vector<std::string>::const_iterator nameiter;
     for(nameiter = names.begin();nameiter != names.end();nameiter++)
     {
@@ -127,7 +128,7 @@ void Animation::setAnimationSources(const std::vector<std::string> &names)
             if(!mNonAccumRoot)
             {
                 mAccumRoot = mInsert;
-                mNonAccumRoot = mObjectList.mSkelBase->getSkeleton()->getBone(bone->getName());
+                mNonAccumRoot = mSkelBase->getSkeleton()->getBone(bone->getName());
             }
 
             for(int i = 0;i < skel->getNumAnimations();i++)
@@ -152,7 +153,9 @@ void Animation::createObjectList(Ogre::SceneNode *node, const std::string &model
     mObjectList = NifOgre::Loader::createObjects(mInsert, model);
     if(mObjectList.mSkelBase)
     {
-        Ogre::AnimationStateSet *aset = mObjectList.mSkelBase->getAllAnimationStates();
+        mSkelBase = mObjectList.mSkelBase;
+
+        Ogre::AnimationStateSet *aset = mSkelBase->getAllAnimationStates();
         Ogre::AnimationStateIterator asiter = aset->getAnimationStateIterator();
         while(asiter.hasMoreElements())
         {
@@ -164,7 +167,7 @@ void Animation::createObjectList(Ogre::SceneNode *node, const std::string &model
         // Set the bones as manually controlled since we're applying the
         // transformations manually (needed if we want to apply an animation
         // from one skeleton onto another).
-        Ogre::SkeletonInstance *skelinst = mObjectList.mSkelBase->getSkeleton();
+        Ogre::SkeletonInstance *skelinst = mSkelBase->getSkeleton();
         Ogre::Skeleton::BoneIterator boneiter = skelinst->getBoneIterator();
         while(boneiter.hasMoreElements())
             boneiter.getNext()->setManuallyControlled(true);
@@ -182,9 +185,9 @@ void Animation::createObjectList(Ogre::SceneNode *node, const std::string &model
 
 Ogre::Node *Animation::getNode(const std::string &name)
 {
-    if(mObjectList.mSkelBase)
+    if(mSkelBase)
     {
-        Ogre::SkeletonInstance *skel = mObjectList.mSkelBase->getSkeleton();
+        Ogre::SkeletonInstance *skel = mSkelBase->getSkeleton();
         if(skel->hasBone(name))
             return skel->getBone(name);
     }
@@ -508,11 +511,11 @@ Ogre::Vector3 Animation::runAnimation(float timepassed)
     for(size_t i = 0;i < mCurrentControllers->size();i++)
         (*mCurrentControllers)[i].update();
 
-    if(mObjectList.mSkelBase)
+    if(mSkelBase)
     {
         // HACK: Dirty the animation state set so that Ogre will apply the
         // transformations to entities this skeleton instance is shared with.
-        mObjectList.mSkelBase->getAllAnimationStates()->_notifyDirty();
+        mSkelBase->getAllAnimationStates()->_notifyDirty();
     }
 
     return movement;

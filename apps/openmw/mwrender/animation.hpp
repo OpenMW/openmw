@@ -42,7 +42,8 @@ protected:
     MWWorld::Ptr mPtr;
     MWMechanics::CharacterController *mController;
 
-    Ogre::SceneNode* mInsert;
+    Ogre::SceneNode *mInsert;
+    Ogre::Entity *mSkelBase;
     NifOgre::ObjectList mObjectList;
     std::map<std::string,NifOgre::TextKeyMap> mTextKeys;
     Ogre::Node *mAccumRoot;

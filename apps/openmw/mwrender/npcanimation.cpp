@@ -359,8 +359,7 @@ void NpcAnimation::updateParts(bool forceupdate)
 
 NifOgre::ObjectList NpcAnimation::insertBoundedPart(const std::string &model, int group, const std::string &bonename)
 {
-    NifOgre::ObjectList objects = NifOgre::Loader::createObjects(mObjectList.mSkelBase, bonename,
-                                                                 mInsert, model);
+    NifOgre::ObjectList objects = NifOgre::Loader::createObjects(mSkelBase, bonename, mInsert, model);
     for(size_t i = 0;i < objects.mEntities.size();i++)
     {
         objects.mEntities[i]->getUserObjectBindings().setUserAny(Ogre::Any(group));
@@ -408,7 +407,7 @@ Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
     mTimeToChange -= timepassed;
 
     Ogre::Vector3 ret = Animation::runAnimation(timepassed);
-    const Ogre::SkeletonInstance *skelsrc = mObjectList.mSkelBase->getSkeleton();
+    const Ogre::SkeletonInstance *skelsrc = mSkelBase->getSkeleton();
     for(size_t i = 0;i < sPartListSize;i++)
     {
         Ogre::Entity *ent = mObjectParts[i].mSkelBase;
