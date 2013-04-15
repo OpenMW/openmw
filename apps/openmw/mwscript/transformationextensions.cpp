@@ -13,7 +13,6 @@
 #include <components/interpreter/opcodes.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
@@ -554,7 +553,7 @@ namespace MWScript
 
                     std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
-                    Interpreter::Type_Float rotation = (runtime[0].mFloat/MWBase::Environment::get().getWindowManager()->getFPS());
+                    Interpreter::Type_Float rotation = (runtime[0].mFloat*MWBase::Environment::get().getFrameDuration());
                     runtime.pop();
 
                     float *objRot = ptr.getRefData().getPosition().rot;
@@ -597,7 +596,7 @@ namespace MWScript
 
                     std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
-                    Interpreter::Type_Float rotation = (runtime[0].mFloat/MWBase::Environment::get().getWindowManager()->getFPS());
+                    Interpreter::Type_Float rotation = (runtime[0].mFloat*MWBase::Environment::get().getFrameDuration());
                     runtime.pop();
 
                     float *objRot = ptr.getRefData().getPosition().rot;

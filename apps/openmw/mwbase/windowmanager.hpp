@@ -251,8 +251,6 @@ namespace MWBase
             virtual void changePointer (const std::string& name) = 0;
 
             virtual const Translation::Storage& getTranslationDataStorage() const = 0;
-
-            virtual int getFPS() const = 0;
     };
 }
 

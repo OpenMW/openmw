@@ -248,8 +248,6 @@ namespace MWGui
 
     void onSoulgemDialogButtonPressed (int button);
 
-    virtual int getFPS() const;
-
   private:
     OEngine::GUI::MyGUIManager *mGuiManager;
     OEngine::Render::OgreRenderer *mRendering;
