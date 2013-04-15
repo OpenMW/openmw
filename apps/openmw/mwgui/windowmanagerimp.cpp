@@ -1200,3 +1200,8 @@ void WindowManager::frameStarted (float dt)
 {
     mInventoryWindow->doRenderUpdate ();
 }
+
+int WindowManager::getFPS() const
+{
+    return mFPS;
+}
