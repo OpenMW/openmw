@@ -318,5 +318,9 @@ op 0x20001fb: DropSoulGem, explicit reference
 op 0x20001fc: OnDeath
 op 0x20001fd: IsWerewolf
 op 0x20001fe: IsWerewolf, explicit reference
+op 0x20001ff: Rotate
+op 0x2000200: Rotate, explicit reference
+op 0x2000201: RotateWorld
+op 0x2000202: RotateWorld, explicit reference
 
-opcodes 0x20001ff-0x3ffffff unused
+opcodes 0x2000203-0x3ffffff unused
