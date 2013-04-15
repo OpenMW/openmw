@@ -24,6 +24,7 @@
 #include "manualref.hpp"
 #include "cellfunctors.hpp"
 #include "containerstore.hpp"
+#include "inventorystore.hpp"
 
 using namespace Ogre;
 
@@ -209,9 +210,6 @@ namespace MWWorld
         }
 
         mStore.setUp();
-
-        mPlayer = new MWWorld::Player (mStore.get<ESM::NPC>().find ("player"), *this);
-        mRendering->attachCameraTo(mPlayer->getPlayer());
 
         // global variables
         mGlobalVariables = new Globals (mStore);
@@ -1367,6 +1365,18 @@ namespace MWWorld
     bool World::vanityRotateCamera(float * rot)
     {
         return mRendering->vanityRotateCamera(rot);
+    }
+
+    void World::setupPlayer(bool newGame)
+    {
+        const ESM::NPC* player = mStore.get<ESM::NPC>().find ("player");
+        mPlayer = new MWWorld::Player (player, *this);
+        mRendering->attachCameraTo(mPlayer->getPlayer());
+        if (newGame)
+        {
+            MWWorld::Class::get(mPlayer->getPlayer()).getContainerStore(mPlayer->getPlayer()).fill(player->mInventory, "", mStore);
+            MWWorld::Class::get(mPlayer->getPlayer()).getInventoryStore(mPlayer->getPlayer()).autoEquip (mPlayer->getPlayer());
+        }
     }
 
     void World::renderPlayer()

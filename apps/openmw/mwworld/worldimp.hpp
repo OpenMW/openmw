@@ -363,6 +363,7 @@ namespace MWWorld
 
             virtual bool vanityRotateCamera(float * rot);
 
+            virtual void setupPlayer(bool newGame);
             virtual void renderPlayer();
 
             virtual void setupExternalRendering (MWRender::ExternalRendering& rendering);
