@@ -44,14 +44,12 @@ protected:
 
     Ogre::SceneNode *mInsert;
     Ogre::Entity *mSkelBase;
-    NifOgre::ObjectList mObjectList;
+    std::vector<NifOgre::ObjectList> mObjectLists;
     std::map<std::string,NifOgre::TextKeyMap> mTextKeys;
     Ogre::Node *mAccumRoot;
     Ogre::Bone *mNonAccumRoot;
     Ogre::Vector3 mAccumulate;
     Ogre::Vector3 mLastPosition;
-
-    std::vector<NifOgre::ObjectList> mAnimationSources;
 
     std::vector<Ogre::Controller<Ogre::Real> > *mCurrentControllers;
     NifOgre::TextKeyMap *mCurrentKeys;
@@ -82,16 +80,6 @@ protected:
     void reset(const std::string &start, const std::string &stop);
 
     bool handleEvent(float time, const std::string &evt);
-
-    /* Specifies a list of skeleton names to use as animation sources. */
-    void setAnimationSources(const std::vector<std::string> &names);
-
-    /* Specifies a single skeleton name to use as an animation source. */
-    void setAnimationSource(const std::string &name)
-    {
-        std::vector<std::string> names(1, name);
-        setAnimationSources(names);
-    }
 
     void createObjectList(Ogre::SceneNode *node, const std::string &model);
     static void destroyObjectList(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList &objects);

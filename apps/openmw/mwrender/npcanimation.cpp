@@ -96,10 +96,18 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
     bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
     std::string smodel = (!isBeast ? "meshes\\base_anim.nif" : "meshes\\base_animkna.nif");
 
-    createObjectList(node, smodel);
-    for(size_t i = 0;i < mObjectList.mEntities.size();i++)
+    std::vector<std::string> skelnames(1, smodel);
+    if(!mNpc->isMale() && !isBeast)
+        skelnames.push_back("meshes\\base_anim_female.nif");
+    else if(mBodyPrefix.find("argonian") != std::string::npos)
+        skelnames.push_back("meshes\\argonian_swimkna.nif");
+    if(mNpc->mModel.length() > 0)
+        skelnames.push_back("meshes\\"+Misc::StringUtils::lowerCase(mNpc->mModel));
+
+    createObjectList(node, smodel/*skelnames*/);
+    for(size_t i = 0;i < mObjectLists[0].mEntities.size();i++)
     {
-        Ogre::Entity *base = mObjectList.mEntities[i];
+        Ogre::Entity *base = mObjectLists[0].mEntities[i];
 
         base->getUserObjectBindings().setUserAny(Ogre::Any(-1));
         if (mVisibilityFlags != 0)
@@ -111,24 +119,15 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
             subEnt->setRenderQueueGroup(subEnt->getMaterial()->isTransparent() ? RQG_Alpha : RQG_Main);
         }
     }
-    for(size_t i = 0;i < mObjectList.mParticles.size();i++)
+    for(size_t i = 0;i < mObjectLists[0].mParticles.size();i++)
     {
-        Ogre::ParticleSystem *part = mObjectList.mParticles[i];
+        Ogre::ParticleSystem *part = mObjectLists[0].mParticles[i];
 
         part->getUserObjectBindings().setUserAny(Ogre::Any(-1));
         if(mVisibilityFlags != 0)
             part->setVisibilityFlags(mVisibilityFlags);
         part->setRenderQueueGroup(RQG_Alpha);
     }
-
-    std::vector<std::string> skelnames(1, smodel);
-    if(!mNpc->isMale() && !isBeast)
-        skelnames.push_back("meshes\\base_anim_female.nif");
-    else if(mBodyPrefix.find("argonian") != std::string::npos)
-        skelnames.push_back("meshes\\argonian_swimkna.nif");
-    if(mNpc->mModel.length() > 0)
-        skelnames.push_back("meshes\\"+Misc::StringUtils::lowerCase(mNpc->mModel));
-    setAnimationSources(skelnames);
 
     forceUpdate();
 }
