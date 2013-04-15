@@ -141,21 +141,22 @@ namespace MWGui
         int x,y;
         bool interior = _sender->getUserString("interior") == "y";
         MWBase::Environment::get().getWorld()->positionToIndex(pos.pos[0],pos.pos[1],x,y);
-        MWWorld::CellStore* cell;
-        if(interior) cell = MWBase::Environment::get().getWorld()->getInterior(cellname);
+        if(interior)
+            MWBase::Environment::get().getWorld()->changeToInteriorCell(cellname, pos);
         else
         {
-            cell = MWBase::Environment::get().getWorld()->getExterior(x,y);
-            ESM::Position PlayerPos = player.getRefData().getPosition();
-            float d = sqrt( pow(pos.pos[0] - PlayerPos.pos[0],2) + pow(pos.pos[1] - PlayerPos.pos[1],2) + pow(pos.pos[2] - PlayerPos.pos[2],2)   );
-            int time = int(d /MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fTravelTimeMult")->getFloat());
-            for(int i = 0;i < time;i++)
+            ESM::Position playerPos = player.getRefData().getPosition();
+            float d = Ogre::Vector3(pos.pos[0], pos.pos[1], 0).distance(
+                        Ogre::Vector3(playerPos.pos[0], playerPos.pos[1], 0));
+            int hours = static_cast<int>(d /MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fTravelTimeMult")->getFloat());
+            for(int i = 0;i < hours;i++)
             {
                 MWBase::Environment::get().getMechanicsManager ()->restoreDynamicStats ();
             }
-            MWBase::Environment::get().getWorld()->advanceTime(time);
+            MWBase::Environment::get().getWorld()->advanceTime(hours);
+
+            MWBase::Environment::get().getWorld()->changeToExteriorCell(pos);
         }
-        MWBase::Environment::get().getWorld()->moveObject(player,*cell,pos.pos[0],pos.pos[1],pos.pos[2]);
 
         MWWorld::Class::get(player).adjustPosition(player);
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Travel);
