@@ -128,13 +128,17 @@ struct NiNode : Node
     NodeList children;
     NodeList effects;
 
-    /* Known NiNode flags:
-        0x01 hidden
-        0x02 use mesh for collision
-        0x04 use bounding box for collision (?)
-        0x08 unknown, but common
-        0x20, 0x40, 0x80 unknown
-    */
+    enum Flags {
+        Flag_Hidden = 0x0001,
+        Flag_MeshCollision = 0x0002,
+        Flag_BBoxCollision = 0x0004
+    };
+    enum BSAnimFlags {
+        AnimFlag_AutoPlay = 0x0020
+    };
+    enum BSParticleFlags {
+        ParticleFlag_AutoPlay = 0x0020
+    };
 
     void read(NIFStream *nif)
     {

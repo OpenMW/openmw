@@ -394,7 +394,7 @@ class NIFObjectLoader
             NIFMeshLoader::createMesh(name, fullname, group, shape->recIndex);
 
         Ogre::Entity *entity = sceneMgr->createEntity(fullname);
-        entity->setVisible(!(flags&0x01));
+        entity->setVisible(!(flags&Nif::NiNode::Flag_Hidden));
 
         objectlist.mEntities.push_back(entity);
         if(objectlist.mSkelBase)
@@ -417,10 +417,11 @@ class NIFObjectLoader
                 const Nif::NiUVController *uv = static_cast<const Nif::NiUVController*>(ctrl.getPtr());
 
                 const Ogre::MaterialPtr &material = entity->getSubEntity(0)->getMaterial();
-                Ogre::ControllerValueRealPtr srcval((animflags&0x20) ? Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
-                                                                       Ogre::ControllerValueRealPtr());
+                Ogre::ControllerValueRealPtr srcval((animflags&Nif::NiNode::AnimFlag_AutoPlay) ?
+                                                    Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
+                                                    Ogre::ControllerValueRealPtr());
                 Ogre::ControllerValueRealPtr dstval(OGRE_NEW UVController::Value(material, uv->data.getPtr()));
-                Ogre::ControllerFunctionRealPtr func(OGRE_NEW UVController::Function(uv, (animflags&0x20)));
+                Ogre::ControllerFunctionRealPtr func(OGRE_NEW UVController::Function(uv, (animflags&Nif::NiNode::AnimFlag_AutoPlay)));
 
                 objectlist.mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
             }
@@ -551,10 +552,11 @@ class NIFObjectLoader
                     objectlist.mSkelBase->attachObjectToBone(trgtbone->getName(), partsys);
                 }
 
-                Ogre::ControllerValueRealPtr srcval((partflags&0x20) ? Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
-                                                                       Ogre::ControllerValueRealPtr());
+                Ogre::ControllerValueRealPtr srcval((partflags&Nif::NiNode::ParticleFlag_AutoPlay) ?
+                                                    Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
+                                                    Ogre::ControllerValueRealPtr());
                 Ogre::ControllerValueRealPtr dstval(OGRE_NEW ParticleSystemController::Value(partsys, partctrl));
-                Ogre::ControllerFunctionRealPtr func(OGRE_NEW ParticleSystemController::Function(partctrl, (partflags&0x20)));
+                Ogre::ControllerFunctionRealPtr func(OGRE_NEW ParticleSystemController::Function(partctrl, (partflags&Nif::NiNode::ParticleFlag_AutoPlay)));
 
                 objectlist.mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
             }
@@ -568,7 +570,7 @@ class NIFObjectLoader
             objectlist.mSkelBase->attachObjectToBone(trgtbone->getName(), partsys);
         }
 
-        partsys->setVisible(!(flags&0x01));
+        partsys->setVisible(!(flags&Nif::NiNode::Flag_Hidden));
         objectlist.mParticles.push_back(partsys);
     }
 
@@ -627,10 +629,11 @@ class NIFObjectLoader
 
                 int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, ctrl->target->recIndex);
                 Ogre::Bone *trgtbone = objectlist.mSkelBase->getSkeleton()->getBone(trgtid);
-                Ogre::ControllerValueRealPtr srcval((animflags&0x20) ? Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
-                                                                       Ogre::ControllerValueRealPtr());
+                Ogre::ControllerValueRealPtr srcval((animflags&Nif::NiNode::AnimFlag_AutoPlay) ?
+                                                    Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
+                                                    Ogre::ControllerValueRealPtr());
                 Ogre::ControllerValueRealPtr dstval(OGRE_NEW VisController::Value(trgtbone, vis->data.getPtr()));
-                Ogre::ControllerFunctionRealPtr func(OGRE_NEW VisController::Function(vis, (animflags&0x20)));
+                Ogre::ControllerFunctionRealPtr func(OGRE_NEW VisController::Function(vis, (animflags&Nif::NiNode::AnimFlag_AutoPlay)));
 
                 objectlist.mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
             }
@@ -641,10 +644,11 @@ class NIFObjectLoader
                 {
                     int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, ctrl->target->recIndex);
                     Ogre::Bone *trgtbone = objectlist.mSkelBase->getSkeleton()->getBone(trgtid);
-                    Ogre::ControllerValueRealPtr srcval((animflags&0x20) ? Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
-                                                                           Ogre::ControllerValueRealPtr());
+                    Ogre::ControllerValueRealPtr srcval((animflags&Nif::NiNode::AnimFlag_AutoPlay) ?
+                                                        Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
+                                                        Ogre::ControllerValueRealPtr());
                     Ogre::ControllerValueRealPtr dstval(OGRE_NEW KeyframeController::Value(trgtbone, key->data.getPtr()));
-                    Ogre::ControllerFunctionRealPtr func(OGRE_NEW KeyframeController::Function(key, (animflags&0x20)));
+                    Ogre::ControllerFunctionRealPtr func(OGRE_NEW KeyframeController::Function(key, (animflags&Nif::NiNode::AnimFlag_AutoPlay)));
 
                     objectlist.mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
                 }
