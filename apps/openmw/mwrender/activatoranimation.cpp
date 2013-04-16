@@ -24,12 +24,13 @@ ActivatorAnimation::ActivatorAnimation(const MWWorld::Ptr &ptr)
     assert (ref->mBase != NULL);
     if(!ref->mBase->mModel.empty())
     {
-        std::string mesh = "meshes\\" + ref->mBase->mModel;
+        const std::string name = "meshes\\"+ref->mBase->mModel;
 
-        createObjectList(mPtr.getRefData().getBaseNode(), mesh);
-        for(size_t i = 0;i < mObjectLists[0].mEntities.size();i++)
+        addObjectList(mPtr.getRefData().getBaseNode(), name, false);
+        const NifOgre::ObjectList &objlist = mObjectLists.back();
+        for(size_t i = 0;i < objlist.mEntities.size();i++)
         {
-            Ogre::Entity *ent = mObjectLists[0].mEntities[i];
+            Ogre::Entity *ent = objlist.mEntities[i];
             ent->setVisibilityFlags(RV_Misc);
 
             for(unsigned int j=0; j < ent->getNumSubEntities(); ++j)
@@ -38,9 +39,9 @@ ActivatorAnimation::ActivatorAnimation(const MWWorld::Ptr &ptr)
                 subEnt->setRenderQueueGroup(subEnt->getMaterial()->isTransparent() ? RQG_Alpha : RQG_Main);
             }
         }
-        for(size_t i = 0;i < mObjectLists[0].mParticles.size();i++)
+        for(size_t i = 0;i < objlist.mParticles.size();i++)
         {
-            Ogre::ParticleSystem *part = mObjectLists[0].mParticles[i];
+            Ogre::ParticleSystem *part = objlist.mParticles[i];
             part->setVisibilityFlags(RV_Misc);
             part->setRenderQueueGroup(RQG_Alpha);
         }

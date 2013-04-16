@@ -96,38 +96,13 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
     bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
     std::string smodel = (!isBeast ? "meshes\\base_anim.nif" : "meshes\\base_animkna.nif");
 
-    std::vector<std::string> skelnames(1, smodel);
+    addObjectList(node, smodel, true);
     if(!mNpc->isMale() && !isBeast)
-        skelnames.push_back("meshes\\base_anim_female.nif");
+        addObjectList(node, "meshes\\base_anim_female.nif", true);
     else if(mBodyPrefix.find("argonian") != std::string::npos)
-        skelnames.push_back("meshes\\argonian_swimkna.nif");
+        addObjectList(node, "meshes\\argonian_swimkna.nif", true);
     if(mNpc->mModel.length() > 0)
-        skelnames.push_back("meshes\\"+Misc::StringUtils::lowerCase(mNpc->mModel));
-
-    createObjectList(node, smodel/*skelnames*/);
-    for(size_t i = 0;i < mObjectLists[0].mEntities.size();i++)
-    {
-        Ogre::Entity *base = mObjectLists[0].mEntities[i];
-
-        base->getUserObjectBindings().setUserAny(Ogre::Any(-1));
-        if (mVisibilityFlags != 0)
-            base->setVisibilityFlags(mVisibilityFlags);
-
-        for(unsigned int j=0; j < base->getNumSubEntities(); ++j)
-        {
-            Ogre::SubEntity* subEnt = base->getSubEntity(j);
-            subEnt->setRenderQueueGroup(subEnt->getMaterial()->isTransparent() ? RQG_Alpha : RQG_Main);
-        }
-    }
-    for(size_t i = 0;i < mObjectLists[0].mParticles.size();i++)
-    {
-        Ogre::ParticleSystem *part = mObjectLists[0].mParticles[i];
-
-        part->getUserObjectBindings().setUserAny(Ogre::Any(-1));
-        if(mVisibilityFlags != 0)
-            part->setVisibilityFlags(mVisibilityFlags);
-        part->setRenderQueueGroup(RQG_Alpha);
-    }
+        addObjectList(node, "meshes\\"+mNpc->mModel, true);
 
     forceUpdate();
 }
@@ -406,14 +381,16 @@ Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
     mTimeToChange -= timepassed;
 
     Ogre::Vector3 ret = Animation::runAnimation(timepassed);
-    const Ogre::SkeletonInstance *skelsrc = mSkelBase->getSkeleton();
+
+    Ogre::SkeletonInstance *baseinst = mSkelBase->getSkeleton();
     for(size_t i = 0;i < sPartListSize;i++)
     {
         Ogre::Entity *ent = mObjectParts[i].mSkelBase;
         if(!ent) continue;
-        updateSkeletonInstance(skelsrc, ent->getSkeleton());
+        updateSkeletonInstance(baseinst, ent->getSkeleton());
         ent->getAllAnimationStates()->_notifyDirty();
     }
+
     return ret;
 }
 

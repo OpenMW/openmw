@@ -81,7 +81,7 @@ protected:
 
     bool handleEvent(float time, const std::string &evt);
 
-    void createObjectList(Ogre::SceneNode *node, const std::string &model);
+    void addObjectList(Ogre::SceneNode *node, const std::string &model, bool baseonly);
     static void destroyObjectList(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList &objects);
 
 public:

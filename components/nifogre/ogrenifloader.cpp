@@ -800,12 +800,15 @@ ObjectList Loader::createObjects(Ogre::Entity *parent, const std::string &bonena
 }
 
 
-ObjectList Loader::createObjectBase(Ogre::SceneManager *sceneMgr, std::string name, const std::string &group)
+ObjectList Loader::createObjectBase(Ogre::SceneNode *parentNode, std::string name, const std::string &group)
 {
     ObjectList objectlist;
 
     Misc::StringUtils::toLower(name);
-    NIFObjectLoader::load(sceneMgr, objectlist, name, group, 0xC0000000);
+    NIFObjectLoader::load(parentNode->getCreator(), objectlist, name, group, 0xC0000000);
+
+    if(objectlist.mSkelBase)
+        parentNode->attachObject(objectlist.mSkelBase);
 
     return objectlist;
 }

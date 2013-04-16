@@ -69,7 +69,7 @@ public:
                                     std::string name,
                                     const std::string &group="General");
 
-    static ObjectList createObjectBase(Ogre::SceneManager *sceneMgr,
+    static ObjectList createObjectBase(Ogre::SceneNode *parentNode,
                                        std::string name,
                                        const std::string &group="General");
 };
