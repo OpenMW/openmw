@@ -38,11 +38,10 @@ Animation::Animation(const MWWorld::Ptr &ptr)
     , mNonAccumRoot(NULL)
     , mAccumulate(0.0f)
     , mLastPosition(0.0f)
+    , mCurrentAnim(NULL)
     , mCurrentControllers(NULL)
     , mCurrentKeys(NULL)
-    , mCurrentAnim(NULL)
     , mCurrentTime(0.0f)
-    , mStopTime(0.0f)
     , mPlaying(false)
     , mLooping(false)
     , mAnimVelocity(0.0f)
@@ -313,35 +312,26 @@ Ogre::Vector3 Animation::updatePosition()
 
 void Animation::reset(const std::string &start, const std::string &stop)
 {
-    mNextKey = mCurrentKeys->begin();
+    mStartKey = mCurrentKeys->begin();
 
-    while(mNextKey != mCurrentKeys->end() && mNextKey->second != start)
-        mNextKey++;
-    if(mNextKey != mCurrentKeys->end())
-        mCurrentTime = mNextKey->first;
+    while(mStartKey != mCurrentKeys->end() && mStartKey->second != start)
+        mStartKey++;
+    if(mStartKey != mCurrentKeys->end())
+        mCurrentTime = mStartKey->first;
     else
     {
-        mNextKey = mCurrentKeys->begin();
-        while(mNextKey != mCurrentKeys->end() && mNextKey->second != "start")
-            mNextKey++;
-        if(mNextKey != mCurrentKeys->end())
-            mCurrentTime = mNextKey->first;
-        else
-        {
-            mNextKey = mCurrentKeys->begin();
-            mCurrentTime = 0.0f;
-        }
+        mStartKey = mCurrentKeys->begin();
+        mCurrentTime = mStartKey->first;
     }
+    mNextKey = mStartKey;
 
     if(stop.length() > 0)
     {
-        NifOgre::TextKeyMap::const_iterator stopKey = mNextKey;
-        while(stopKey != mCurrentKeys->end() && stopKey->second != stop)
-            stopKey++;
-        if(stopKey != mCurrentKeys->end())
-            mStopTime = stopKey->first;
-        else
-            mStopTime = mCurrentAnim->getLength();
+        mStopKey = mStartKey;
+        while(mStopKey != mCurrentKeys->end() && mStopKey->second != stop)
+            mStopKey++;
+        if(mStopKey == mCurrentKeys->end())
+            mStopKey--;
     }
 
     if(mNonAccumRoot)
@@ -390,7 +380,7 @@ bool Animation::handleEvent(float time, const std::string &evt)
     {
         if(mLooping)
         {
-            reset("loop start", "");
+            reset("loop start");
             if(mCurrentTime >= time)
                 return false;
         }
@@ -400,7 +390,7 @@ bool Animation::handleEvent(float time, const std::string &evt)
     {
         if(mLooping)
         {
-            reset("loop start", "");
+            reset("loop start");
             if(mCurrentTime >= time)
                 return false;
             return true;
@@ -455,13 +445,11 @@ Ogre::Vector3 Animation::runAnimation(float timepassed)
     while(mCurrentAnim && mPlaying)
     {
         float targetTime = mCurrentTime + timepassed;
-        if(mNextKey == mCurrentKeys->end() || mNextKey->first > targetTime)
+        if(mNextKey->first > targetTime)
         {
-            mCurrentTime = std::min(mStopTime, targetTime);
+            mCurrentTime = targetTime;
             if(mNonAccumRoot)
                 movement += updatePosition();
-            mPlaying = (mLooping || mStopTime > mCurrentTime);
-            timepassed = targetTime - mCurrentTime;
             break;
         }
 
@@ -472,7 +460,8 @@ Ogre::Vector3 Animation::runAnimation(float timepassed)
         mCurrentTime = time;
         if(mNonAccumRoot)
             movement += updatePosition();
-        mPlaying = (mLooping || mStopTime > mCurrentTime);
+
+        mPlaying = (mLooping || mStopKey->first > mCurrentTime);
         timepassed = targetTime - mCurrentTime;
 
         if(!handleEvent(time, evt))

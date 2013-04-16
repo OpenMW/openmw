@@ -50,13 +50,14 @@ protected:
     Ogre::Bone *mNonAccumRoot;
     Ogre::Vector3 mAccumulate;
     Ogre::Vector3 mLastPosition;
+    Ogre::Animation *mCurrentAnim;
 
     std::vector<Ogre::Controller<Ogre::Real> > *mCurrentControllers;
     NifOgre::TextKeyMap *mCurrentKeys;
+    NifOgre::TextKeyMap::const_iterator mStartKey;
+    NifOgre::TextKeyMap::const_iterator mStopKey;
     NifOgre::TextKeyMap::const_iterator mNextKey;
-    Ogre::Animation *mCurrentAnim;
     float mCurrentTime;
-    float mStopTime;
     bool mPlaying;
     bool mLooping;
 
@@ -77,7 +78,7 @@ protected:
      * moving anything, and set the end time to the specified stop marker. If
      * the marker is not found, it resets to the beginning or end respectively.
      */
-    void reset(const std::string &start, const std::string &stop);
+    void reset(const std::string &start, const std::string &stop=std::string());
 
     bool handleEvent(float time, const std::string &evt);
 
