@@ -22,7 +22,7 @@ opencs_units (model/world
 
 
 opencs_units_noqt (model/world
-    universalid data record idcollection commands columnbase scriptcontext
+    universalid data record idcollection commands columnbase scriptcontext cell
     )
 
 opencs_hdrs_noqt (model/world

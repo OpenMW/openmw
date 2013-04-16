@@ -186,7 +186,7 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& npc)
                 }
             }
 
-            switch(MWWorld::Class::get (test).canBeEquipped (test, npc))
+            switch(MWWorld::Class::get (test).canBeEquipped (test, npc).first)
             {
                 case 0:
                     continue;

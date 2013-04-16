@@ -55,7 +55,9 @@ namespace CSMWorld
                 Type_Birthsigns,
                 Type_Birthsign,
                 Type_Spells,
-                Type_Spell
+                Type_Spell,
+                Type_Cells,
+                Type_Cell
             };
 
         private:

@@ -21,7 +21,13 @@ namespace MWWorld
         MWWorld::Ptr object = getTarget();
         MWWorld::InventoryStore& invStore = MWWorld::Class::get(actor).getInventoryStore(actor);
 
-        switch(MWWorld::Class::get (object).canBeEquipped (object, actor))
+        std::pair <int, std::string> result = MWWorld::Class::get (object).canBeEquipped (object, actor);
+
+        // display error message if the player tried to equip something
+        if (!result.second.empty() && actor == MWBase::Environment::get().getWorld()->getPlayer().getPlayer())
+            MWBase::Environment::get().getWindowManager()->messageBox(result.second);
+
+        switch(result.first)
         {
             case 0:
                 return;
@@ -47,8 +53,6 @@ namespace MWWorld
         }
 
         assert(it != invStore.end());
-
-        std::string npcRace = actor.get<ESM::NPC>()->mBase->mRace;
 
         bool equipped = false;
 
