@@ -826,8 +826,10 @@ namespace MWWorld
 
     void World::localRotateObject (const Ptr& ptr, float rotation, Ogre::Vector3 axis)
     {
-        ptr.getRefData().getBaseNode()->rotate(Ogre::Quaternion(Ogre::Radian(Ogre::Degree(-rotation).valueRadians()), axis));
-        mPhysics->rotateObject(ptr);
+        if (ptr.getRefData().getBaseNode() != 0) {
+            ptr.getRefData().getBaseNode()->rotate(Ogre::Quaternion(Ogre::Radian(Ogre::Degree(-rotation).valueRadians()), axis));
+            mPhysics->rotateObject(ptr);
+        }
     }
 
     void World::adjustPosition(const Ptr &ptr)

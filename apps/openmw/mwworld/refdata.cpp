@@ -19,6 +19,7 @@ namespace MWWorld
         mEnabled = refData.mEnabled;
         mCount = refData.mCount;
         mPosition = refData.mPosition;
+        mLocalRotation = refData.mLocalRotation;
 
         mCustomData = refData.mCustomData ? refData.mCustomData->clone() : 0;
     }
@@ -34,7 +35,11 @@ namespace MWWorld
     RefData::RefData (const ESM::CellRef& cellRef)
     : mBaseNode(0), mHasLocals (false), mEnabled (true), mCount (1), mPosition (cellRef.mPos),
       mCustomData (0)
-    {}
+    {
+        mLocalRotation.rot[0]=0;
+        mLocalRotation.rot[1]=0;
+        mLocalRotation.rot[2]=0;
+    }
 
     RefData::RefData (const RefData& refData)
     : mBaseNode(0), mCustomData (0)
@@ -139,6 +144,11 @@ namespace MWWorld
     ESM::Position& RefData::getPosition()
     {
         return mPosition;
+    }
+
+    LocalRotation& RefData::getLocalRotation()
+    {
+        return mLocalRotation;
     }
 
     void RefData::setCustomData (CustomData *data)

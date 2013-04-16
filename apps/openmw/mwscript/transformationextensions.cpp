@@ -102,6 +102,11 @@ namespace MWScript
                     }
                     else
                         throw std::runtime_error ("invalid ration axis: " + axis);
+
+                    //Local rotations clear
+                    ptr.getRefData().getLocalRotation().rot[0]=0;
+                    ptr.getRefData().getLocalRotation().rot[1]=0;
+                    ptr.getRefData().getLocalRotation().rot[2]=0;
                 }
         };
 
@@ -148,15 +153,15 @@ namespace MWScript
 
                     if (axis=="x")
                     {
-                        runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees());
+                        runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[0]+ptr.getRefData().getLocalRotation().rot[0]).valueDegrees());
                     }
                     else if (axis=="y")
                     {
-                        runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees());
+                        runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[1]+ptr.getRefData().getLocalRotation().rot[1]).valueDegrees());
                     }
                     else if (axis=="z")
                     {
-                        runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[2]).valueDegrees());
+                        runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[2]+ptr.getRefData().getLocalRotation().rot[2]).valueDegrees());
                     }
                     else
                         throw std::runtime_error ("invalid ration axis: " + axis);
@@ -556,27 +561,19 @@ namespace MWScript
                     Interpreter::Type_Float rotation = (runtime[0].mFloat*MWBase::Environment::get().getFrameDuration());
                     runtime.pop();
 
-                    float *objRot = ptr.getRefData().getPosition().rot;
-
                     if (axis == "x")
                     {
-                        objRot[0]+=Ogre::Degree(rotation).valueRadians();
-
-                        if (ptr.getRefData().getBaseNode() != 0)
-                            MWBase::Environment::get().getWorld()->localRotateObject(ptr, rotation, Ogre::Vector3::UNIT_X);
+                        ptr.getRefData().getLocalRotation().rot[0]+=rotation;
+                        MWBase::Environment::get().getWorld()->localRotateObject(ptr, rotation, Ogre::Vector3::UNIT_X);
                     }
                     else if (axis == "y")
                     {
-                        objRot[1]+=Ogre::Degree(rotation).valueRadians();
-
-                        if (ptr.getRefData().getBaseNode() != 0)
+                        ptr.getRefData().getLocalRotation().rot[1]+=rotation;
                         MWBase::Environment::get().getWorld()->localRotateObject(ptr, rotation, Ogre::Vector3::UNIT_Y);
                     }
                     else if (axis == "z")
                     {
-                        objRot[2]+=Ogre::Degree(rotation).valueRadians();
-
-                        if (ptr.getRefData().getBaseNode() != 0)
+                        ptr.getRefData().getLocalRotation().rot[2]+=rotation;
                         MWBase::Environment::get().getWorld()->localRotateObject(ptr, rotation, Ogre::Vector3::UNIT_Z);
                     }
 
