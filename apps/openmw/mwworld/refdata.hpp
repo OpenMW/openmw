@@ -5,8 +5,6 @@
 
 #include "../mwscript/locals.hpp"
 
-#include <OgreVector3.h>
-
 namespace Ogre
 {
     class SceneNode;
