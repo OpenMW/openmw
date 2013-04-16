@@ -79,8 +79,29 @@ namespace CSMWorld
             virtual void load (ESM::ESMReader& reader, bool base) = 0;
     };
 
-    ///< \brief Collection of ID-based records
+    ///< \brief Access to ID field in records
     template<typename ESXRecordT>
+    struct IdAccessor
+    {
+        std::string& getId (ESXRecordT& record);
+
+        const std::string getId (const ESXRecordT& record) const;
+    };
+
+    template<typename ESXRecordT>
+    std::string& IdAccessor<ESXRecordT>::getId (ESXRecordT& record)
+    {
+        return record.mId;
+    }
+
+    template<typename ESXRecordT>
+    const std::string IdAccessor<ESXRecordT>::getId (const ESXRecordT& record) const
+    {
+        return record.mId;
+    }
+
+    ///< \brief Collection of ID-based records
+    template<typename ESXRecordT, typename IdAccessorT = IdAccessor<ESXRecordT> >
     class IdCollection : public IdCollectionBase
     {
             std::vector<Record<ESXRecordT> > mRecords;
@@ -150,21 +171,21 @@ namespace CSMWorld
             void addColumn (Column<ESXRecordT> *column);
     };
 
-    template<typename ESXRecordT>
-    IdCollection<ESXRecordT>::IdCollection()
+    template<typename ESXRecordT, typename IdAccessorT>
+    IdCollection<ESXRecordT, IdAccessorT>::IdCollection()
     {}
 
-    template<typename ESXRecordT>
-    IdCollection<ESXRecordT>::~IdCollection()
+    template<typename ESXRecordT, typename IdAccessorT>
+    IdCollection<ESXRecordT, IdAccessorT>::~IdCollection()
     {
         for (typename std::vector<Column<ESXRecordT> *>::iterator iter (mColumns.begin()); iter!=mColumns.end(); ++iter)
             delete *iter;
     }
 
-    template<typename ESXRecordT>
-    void IdCollection<ESXRecordT>::add (const ESXRecordT& record)
+    template<typename ESXRecordT, typename IdAccessorT>
+    void IdCollection<ESXRecordT, IdAccessorT>::add (const ESXRecordT& record)
     {
-        std::string id = Misc::StringUtils::lowerCase(record.mId);
+        std::string id = Misc::StringUtils::lowerCase (IdAccessorT().getId (record));
 
         std::map<std::string, int>::iterator iter = mIndex.find (id);
 
@@ -183,20 +204,20 @@ namespace CSMWorld
         }
     }
 
-    template<typename ESXRecordT>
-    int IdCollection<ESXRecordT>::getSize() const
+    template<typename ESXRecordT, typename IdAccessorT>
+    int IdCollection<ESXRecordT, IdAccessorT>::getSize() const
     {
         return mRecords.size();
     }
 
-    template<typename ESXRecordT>
-    std::string IdCollection<ESXRecordT>::getId (int index) const
+    template<typename ESXRecordT, typename IdAccessorT>
+    std::string IdCollection<ESXRecordT, IdAccessorT>::getId (int index) const
     {
-        return mRecords.at (index).get().mId;
+        return IdAccessorT().getId (mRecords.at (index).get());
     }
 
-    template<typename ESXRecordT>
-    int  IdCollection<ESXRecordT>::getIndex (const std::string& id) const
+    template<typename ESXRecordT, typename IdAccessorT>
+    int  IdCollection<ESXRecordT, IdAccessorT>::getIndex (const std::string& id) const
     {
         int index = searchId (id);
 
@@ -206,38 +227,38 @@ namespace CSMWorld
         return index;
     }
 
-    template<typename ESXRecordT>
-    int IdCollection<ESXRecordT>::getColumns() const
+    template<typename ESXRecordT, typename IdAccessorT>
+    int IdCollection<ESXRecordT, IdAccessorT>::getColumns() const
     {
         return mColumns.size();
     }
 
-    template<typename ESXRecordT>
-    QVariant IdCollection<ESXRecordT>::getData (int index, int column) const
+    template<typename ESXRecordT, typename IdAccessorT>
+    QVariant IdCollection<ESXRecordT, IdAccessorT>::getData (int index, int column) const
     {
         return mColumns.at (column)->get (mRecords.at (index));
     }
 
-    template<typename ESXRecordT>
-    void IdCollection<ESXRecordT>::setData (int index, int column, const QVariant& data)
+    template<typename ESXRecordT, typename IdAccessorT>
+    void IdCollection<ESXRecordT, IdAccessorT>::setData (int index, int column, const QVariant& data)
     {
         return mColumns.at (column)->set (mRecords.at (index), data);
     }
 
-    template<typename ESXRecordT>
-    const ColumnBase& IdCollection<ESXRecordT>::getColumn (int column) const
+    template<typename ESXRecordT, typename IdAccessorT>
+    const ColumnBase& IdCollection<ESXRecordT, IdAccessorT>::getColumn (int column) const
     {
         return *mColumns.at (column);
     }
 
-    template<typename ESXRecordT>
-    void IdCollection<ESXRecordT>::addColumn (Column<ESXRecordT> *column)
+    template<typename ESXRecordT, typename IdAccessorT>
+    void IdCollection<ESXRecordT, IdAccessorT>::addColumn (Column<ESXRecordT> *column)
     {
         mColumns.push_back (column);
     }
 
-    template<typename ESXRecordT>
-    void IdCollection<ESXRecordT>::merge()
+    template<typename ESXRecordT, typename IdAccessorT>
+    void IdCollection<ESXRecordT, IdAccessorT>::merge()
     {
         for (typename std::vector<Record<ESXRecordT> >::iterator iter (mRecords.begin()); iter!=mRecords.end(); ++iter)
             iter->merge();
@@ -245,16 +266,16 @@ namespace CSMWorld
         purge();
     }
 
-    template<typename ESXRecordT>
-    void  IdCollection<ESXRecordT>::purge()
+    template<typename ESXRecordT, typename IdAccessorT>
+    void  IdCollection<ESXRecordT, IdAccessorT>::purge()
     {
         mRecords.erase (std::remove_if (mRecords.begin(), mRecords.end(),
             std::mem_fun_ref (&Record<ESXRecordT>::isErased) // I want lambda :(
             ), mRecords.end());
     }
 
-    template<typename ESXRecordT>
-    void IdCollection<ESXRecordT>::removeRows (int index, int count)
+    template<typename ESXRecordT, typename IdAccessorT>
+    void IdCollection<ESXRecordT, IdAccessorT>::removeRows (int index, int count)
     {
         mRecords.erase (mRecords.begin()+index, mRecords.begin()+index+count);
 
@@ -278,17 +299,17 @@ namespace CSMWorld
         }
     }
 
-    template<typename ESXRecordT>
-    void  IdCollection<ESXRecordT>::appendBlankRecord (const std::string& id)
+    template<typename ESXRecordT, typename IdAccessorT>
+    void  IdCollection<ESXRecordT, IdAccessorT>::appendBlankRecord (const std::string& id)
     {
         ESXRecordT record;
-        record.mId = id;
+        IdAccessorT().getId (record) = id;
         record.blank();
         add (record);
     }
 
-    template<typename ESXRecordT>
-    int IdCollection<ESXRecordT>::searchId (const std::string& id) const
+    template<typename ESXRecordT, typename IdAccessorT>
+    int IdCollection<ESXRecordT, IdAccessorT>::searchId (const std::string& id) const
     {
         std::string id2 = Misc::StringUtils::lowerCase(id);
 
@@ -300,28 +321,28 @@ namespace CSMWorld
         return iter->second;
     }
 
-    template<typename ESXRecordT>
-    void IdCollection<ESXRecordT>::replace (int index, const RecordBase& record)
+    template<typename ESXRecordT, typename IdAccessorT>
+    void IdCollection<ESXRecordT, IdAccessorT>::replace (int index, const RecordBase& record)
     {
         mRecords.at (index) = dynamic_cast<const Record<ESXRecordT>&> (record);
     }
 
-    template<typename ESXRecordT>
-    void IdCollection<ESXRecordT>::appendRecord (const RecordBase& record)
+    template<typename ESXRecordT, typename IdAccessorT>
+    void IdCollection<ESXRecordT, IdAccessorT>::appendRecord (const RecordBase& record)
     {
         mRecords.push_back (dynamic_cast<const Record<ESXRecordT>&> (record));
         mIndex.insert (std::make_pair (Misc::StringUtils::lowerCase (getId (record)), mRecords.size()-1));
     }
 
-    template<typename ESXRecordT>
-    std::string IdCollection<ESXRecordT>::getId (const RecordBase& record) const
+    template<typename ESXRecordT, typename IdAccessorT>
+    std::string IdCollection<ESXRecordT, IdAccessorT>::getId (const RecordBase& record) const
     {
         const Record<ESXRecordT>& record2 = dynamic_cast<const Record<ESXRecordT>&> (record);
-        return (record2.isModified() ? record2.mModified : record2.mBase).mId;
+        return IdAccessorT().getId (record2.isModified() ? record2.mModified : record2.mBase);
     }
 
-    template<typename ESXRecordT>
-    void IdCollection<ESXRecordT>::load (ESM::ESMReader& reader, bool base)
+    template<typename ESXRecordT, typename IdAccessorT>
+    void IdCollection<ESXRecordT, IdAccessorT>::load (ESM::ESMReader& reader, bool base)
     {
         std::string id = reader.getHNOString ("NAME");
 
@@ -351,10 +372,10 @@ namespace CSMWorld
         else
         {
             ESXRecordT record;
-            record.mId = id;
+            IdAccessorT().getId (record) = id;
             record.load (reader);
 
-            int index = searchId (record.mId);
+            int index = searchId (IdAccessorT().getId (record));
 
             if (index==-1)
             {
@@ -378,15 +399,15 @@ namespace CSMWorld
         }
     }
 
-    template<typename ESXRecordT>
-    const Record<ESXRecordT>& IdCollection<ESXRecordT>::getRecord (const std::string& id) const
+    template<typename ESXRecordT, typename IdAccessorT>
+    const Record<ESXRecordT>& IdCollection<ESXRecordT, IdAccessorT>::getRecord (const std::string& id) const
     {
         int index = getIndex (id);
         return mRecords.at (index);
     }
 
-    template<typename ESXRecordT>
-    const Record<ESXRecordT>& IdCollection<ESXRecordT>::getRecord (int index) const
+    template<typename ESXRecordT, typename IdAccessorT>
+    const Record<ESXRecordT>& IdCollection<ESXRecordT, IdAccessorT>::getRecord (int index) const
     {
         return mRecords.at (index);
     }
