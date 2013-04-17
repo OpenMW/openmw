@@ -1,6 +1,5 @@
 #include "soulgemdialog.hpp"
 
-#include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
 
 #include "messagebox.hpp"

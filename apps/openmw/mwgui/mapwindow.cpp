@@ -2,11 +2,7 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include <OgreVector2.h>
-#include <OgreTextureManager.h>
 #include <OgreSceneNode.h>
-
-#include <MyGUI_Gui.h>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"

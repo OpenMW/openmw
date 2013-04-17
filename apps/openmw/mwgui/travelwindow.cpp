@@ -1,22 +1,15 @@
 #include "travelwindow.hpp"
 
-#include <algorithm>
-
 #include <boost/lexical_cast.hpp>
 
 #include <libs/openengine/ogre/fader.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
-#include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/player.hpp"
-#include "../mwworld/manualref.hpp"
-
-#include "../mwmechanics/spells.hpp"
-#include "../mwmechanics/creaturestats.hpp"
 
 #include "inventorywindow.hpp"
 #include "tradewindow.hpp"

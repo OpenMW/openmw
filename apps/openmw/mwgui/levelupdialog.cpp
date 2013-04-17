@@ -8,12 +8,10 @@
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
-#include "../mwworld/esmstore.hpp"
 #include "../mwworld/fallback.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
-#include "../mwmechanics/stat.hpp"
 
 namespace MWGui
 {

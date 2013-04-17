@@ -4,9 +4,6 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/journal.hpp"
 #include "../mwbase/soundmanager.hpp"
-#include "../mwbase/windowmanager.hpp"
-
-#include "../mwdialogue/journalentry.hpp"
 
 namespace
 {

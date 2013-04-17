@@ -1,18 +1,11 @@
 #include "dialogue.hpp"
 
-#include <iostream>
-#include <iterator>
-
-#include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include "../mwworld/esmstore.hpp"
-
 #include "../mwbase/environment.hpp"
-#include "../mwbase/dialoguemanager.hpp"
-#include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 

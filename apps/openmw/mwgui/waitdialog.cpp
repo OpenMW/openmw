@@ -1,7 +1,5 @@
 #include "waitdialog.hpp"
 
-#include <cmath>
-
 #include <boost/lexical_cast.hpp>
 
 #include <libs/openengine/ogre/fader.hpp>
@@ -11,9 +9,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
-#include "../mwworld/timestamp.hpp"
 #include "../mwworld/player.hpp"
-#include "../mwworld/ptr.hpp"
 #include "../mwworld/class.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"

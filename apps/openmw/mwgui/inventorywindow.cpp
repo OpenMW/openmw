@@ -1,28 +1,15 @@
 #include "inventorywindow.hpp"
 
-#include <cmath>
-#include <algorithm>
-#include <iterator>
-#include <cassert>
-
 #include <boost/lexical_cast.hpp>
-
-#include <components/compiler/locals.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
-#include "../mwbase/mechanicsmanager.hpp"
 
-#include "../mwworld/containerstore.hpp"
-#include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
-#include "../mwworld/manualref.hpp"
-#include "../mwworld/actiontake.hpp"
 #include "../mwworld/inventorystore.hpp"
 
-#include "widgets.hpp"
 #include "bookwindow.hpp"
 #include "scrollwindow.hpp"
 #include "spellwindow.hpp"

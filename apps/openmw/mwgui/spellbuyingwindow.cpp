@@ -1,7 +1,5 @@
 #include "spellbuyingwindow.hpp"
 
-#include <algorithm>
-
 #include <boost/lexical_cast.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -11,9 +9,7 @@
 #include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/player.hpp"
-#include "../mwworld/manualref.hpp"
 
-#include "../mwmechanics/spells.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 
 #include "inventorywindow.hpp"
