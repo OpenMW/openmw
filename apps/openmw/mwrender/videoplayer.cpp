@@ -788,8 +788,8 @@ void VideoState::decode_thread_loop(VideoState *self)
         // main decode loop
         while(!self->quit)
         {
-            if((self->audio_st >= 0 && self->audioq.size > MAX_AUDIOQ_SIZE) ||
-               (self->video_st >= 0 && self->videoq.size > MAX_VIDEOQ_SIZE))
+            if((self->audio_st && self->audioq.size > MAX_AUDIOQ_SIZE) ||
+               (self->video_st && self->videoq.size > MAX_VIDEOQ_SIZE))
             {
                 boost::this_thread::sleep(boost::posix_time::milliseconds(10));
                 continue;
