@@ -351,14 +351,19 @@ class NIFObjectLoader
 
     static void createParticleEmitterAffectors(Ogre::ParticleSystem *partsys, const Nif::NiParticleSystemController *partctrl)
     {
-        Ogre::ParticleEmitter *emitter = partsys->addEmitter("Point");
-        emitter->setDirection(Ogre::Vector3(0.0f, 0.0f, std::cos(partctrl->verticalDir)));
-        emitter->setAngle(Ogre::Radian(partctrl->verticalAngle));
+        Ogre::ParticleEmitter *emitter = partsys->addEmitter("Nif");
         emitter->setParticleVelocity(partctrl->velocity-partctrl->velocityRandom,
                                      partctrl->velocity+partctrl->velocityRandom);
         emitter->setEmissionRate(partctrl->emitRate);
         emitter->setTimeToLive(partctrl->lifetime-partctrl->lifetimeRandom,
                                partctrl->lifetime+partctrl->lifetimeRandom);
+        emitter->setParameter("width", Ogre::StringConverter::toString(partctrl->offsetRandom.x));
+        emitter->setParameter("height", Ogre::StringConverter::toString(partctrl->offsetRandom.y));
+        emitter->setParameter("depth", Ogre::StringConverter::toString(partctrl->offsetRandom.z));
+        emitter->setParameter("vertical_direction", Ogre::StringConverter::toString(Ogre::Radian(partctrl->verticalDir).valueDegrees()));
+        emitter->setParameter("vertical_angle", Ogre::StringConverter::toString(Ogre::Radian(partctrl->verticalAngle).valueDegrees()));
+        emitter->setParameter("horizontal_direction", Ogre::StringConverter::toString(Ogre::Radian(partctrl->horizontalDir).valueDegrees()));
+        emitter->setParameter("horizontal_angle", Ogre::StringConverter::toString(Ogre::Radian(partctrl->horizontalAngle).valueDegrees()));
 
         Nif::ExtraPtr e = partctrl->extra;
         while(!e.empty())
@@ -366,21 +371,44 @@ class NIFObjectLoader
             if(e->recType == Nif::RC_NiParticleGrowFade)
             {
                 const Nif::NiParticleGrowFade *gf = static_cast<const Nif::NiParticleGrowFade*>(e.getPtr());
+
                 Ogre::ParticleAffector *affector = partsys->addAffector("GrowFade");
                 affector->setParameter("grow_time", Ogre::StringConverter::toString(gf->growTime));
                 affector->setParameter("fade_time", Ogre::StringConverter::toString(gf->fadeTime));
             }
-            else if(e->recType == Nif::RC_NiParticleRotation)
+            else if(e->recType == Nif::RC_NiGravity)
             {
-                // TODO: Implement (Ogre::RotationAffector?)
+                const Nif::NiGravity *gr = static_cast<const Nif::NiGravity*>(e.getPtr());
+
+                Ogre::ParticleAffector *affector = partsys->addAffector("Gravity");
+                affector->setParameter("force", Ogre::StringConverter::toString(gr->mForce));
+                affector->setParameter("force_type", (gr->mType==0) ? "wind" : "point");
+                affector->setParameter("direction", Ogre::StringConverter::toString(gr->mDirection));
+                affector->setParameter("position", Ogre::StringConverter::toString(gr->mPosition));
             }
             else if(e->recType == Nif::RC_NiParticleColorModifier)
             {
-                // TODO: Implement (Ogre::ColourInterpolatorAffector?)
+                const Nif::NiParticleColorModifier *cl = static_cast<const Nif::NiParticleColorModifier*>(e.getPtr());
+                const Nif::NiColorData *clrdata = cl->data.getPtr();
+
+                Ogre::ParticleAffector *affector = partsys->addAffector("ColourInterpolator");
+                size_t num_colors = std::min<size_t>(6, clrdata->mKeyList.mKeys.size());
+                for(size_t i = 0;i < num_colors;i++)
+                {
+                    Ogre::ColourValue color;
+                    color.r = clrdata->mKeyList.mKeys[i].mValue[0];
+                    color.g = clrdata->mKeyList.mKeys[i].mValue[1];
+                    color.b = clrdata->mKeyList.mKeys[i].mValue[2];
+                    color.a = clrdata->mKeyList.mKeys[i].mValue[3];
+                    affector->setParameter("colour"+Ogre::StringConverter::toString(i),
+                                           Ogre::StringConverter::toString(color));
+                    affector->setParameter("time"+Ogre::StringConverter::toString(i),
+                                           Ogre::StringConverter::toString(clrdata->mKeyList.mKeys[i].mTime));
+                }
             }
-            else if(e->recType == Nif::RC_NiGravity)
+            else if(e->recType == Nif::RC_NiParticleRotation)
             {
-                // TODO: Implement
+                // TODO: Implement (Ogre::RotationAffector?)
             }
             else
                 warn("Unhandled particle modifier "+e->recName);
@@ -424,6 +452,9 @@ class NIFObjectLoader
                                           particledata->particleRadius*2.0f);
             partsys->setCullIndividually(false);
             partsys->setParticleQuota(particledata->numParticles);
+            // TODO: There is probably a field or flag to specify this, as some
+            // particle effects have it and some don't.
+            partsys->setKeepParticlesInLocalSpace(true);
 
             Nif::ControllerPtr ctrl = partnode->controller;
             while(!ctrl.empty())
@@ -461,7 +492,7 @@ class NIFObjectLoader
 
     static void createObjects(const std::string &name, const std::string &group,
                               Ogre::SceneManager *sceneMgr, const Nif::Node *node,
-                              ObjectList &objectlist, int flags=0)
+                              ObjectList &objectlist, int flags)
     {
         // Do not create objects for the collision shape (includes all children)
         if(node->recType == Nif::RC_RootCollisionNode)
@@ -578,8 +609,8 @@ class NIFObjectLoader
             }
         }
 
-        if(node->recType == Nif::RC_NiAutoNormalParticles ||
-           node->recType == Nif::RC_NiRotatingParticles)
+        if((node->recType == Nif::RC_NiAutoNormalParticles ||
+            node->recType == Nif::RC_NiRotatingParticles) && !(flags&0x40000000))
         {
             Ogre::ParticleSystem *partsys = createParticleSystem(name, group, sceneMgr, objectlist.mSkelBase, node);
             if(partsys != NULL)
@@ -607,8 +638,7 @@ class NIFObjectLoader
     {
         /* This creates an empty mesh to which a skeleton gets attached. This
          * is to ensure we have an entity with a skeleton instance, even if all
-         * other meshes are hidden or entities attached to a specific node
-         * instead of skinned. */
+         * other entities are attached to bones and not skinned. */
         Ogre::MeshManager &meshMgr = Ogre::MeshManager::getSingleton();
         if(meshMgr.getByName(name).isNull())
             NIFMeshLoader::createMesh(name, name, group, ~(size_t)0);
@@ -618,7 +648,7 @@ class NIFObjectLoader
     }
 
 public:
-    static void load(Ogre::SceneManager *sceneMgr, ObjectList &objectlist, const std::string &name, const std::string &group)
+    static void load(Ogre::SceneManager *sceneMgr, ObjectList &objectlist, const std::string &name, const std::string &group, int flags=0)
     {
         Nif::NIFFile::ptr nif = Nif::NIFFile::create(name);
         if(nif->numRoots() < 1)
@@ -644,7 +674,7 @@ public:
             // Create a base skeleton entity if this NIF needs one
             createSkelBase(name, group, sceneMgr, node, objectlist);
         }
-        createObjects(name, group, sceneMgr, node, objectlist);
+        createObjects(name, group, sceneMgr, node, objectlist, flags);
     }
 };
 
@@ -732,7 +762,7 @@ ObjectList Loader::createObjectBase(Ogre::SceneManager *sceneMgr, std::string na
     ObjectList objectlist;
 
     Misc::StringUtils::toLower(name);
-    NIFObjectLoader::load(sceneMgr, objectlist, name, group);
+    NIFObjectLoader::load(sceneMgr, objectlist, name, group, 0xC0000000);
 
     return objectlist;
 }

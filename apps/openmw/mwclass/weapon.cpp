@@ -384,7 +384,7 @@ namespace MWClass
             ref->mBase = record;
     }
 
-    int Weapon::canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const
+    std::pair<int, std::string> Weapon::canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const
     {
         std::pair<std::vector<int>, bool> slots = MWWorld::Class::get(ptr).getEquipmentSlots(ptr);
 
@@ -402,12 +402,12 @@ namespace MWClass
                 ptr.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanBow || 
                 ptr.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanCrossbow)
                 {
-                    return 2;
+                    return std::make_pair (2, "");
                 }
-                return 1;
+                return std::make_pair (1, "");
             }
         }
-        return 0;
+        return std::make_pair (0, "");
     }
 
     boost::shared_ptr<MWWorld::Action> Weapon::use (const MWWorld::Ptr& ptr) const

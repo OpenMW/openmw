@@ -292,7 +292,7 @@ namespace MWClass
         ref->mBase = record;
     }
 
-    int Armor::canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const
+    std::pair<int, std::string> Armor::canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const
     {
         MWWorld::InventoryStore& invStore = MWWorld::Class::get(npc).getInventoryStore(npc);
 
@@ -317,10 +317,7 @@ namespace MWClass
                     {
                         if((*itr).mPart == ESM::PRT_Head)
                         {
-                            if(npc == MWBase::Environment::get().getWorld()->getPlayer().getPlayer() )
-                                MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage13}");
-
-                            return 0;
+                            return std::make_pair(0, "#{sNotifyMessage13}");
                         }
                     }
                 }
@@ -331,9 +328,7 @@ namespace MWClass
                     {
                         if((*itr).mPart == ESM::PRT_LFoot || (*itr).mPart == ESM::PRT_RFoot)
                         {
-                            if(npc == MWBase::Environment::get().getWorld()->getPlayer().getPlayer() )
-                                MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage14}");
-                            return 0;
+                            return std::make_pair(0, "#{sNotifyMessage14}");
                         }
                     }
                 }
@@ -344,7 +339,7 @@ namespace MWClass
                 MWWorld::ContainerStoreIterator weapon = invStore.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
 
                 if(weapon == invStore.end())
-                    return 1;
+                    return std::make_pair(1,"");
 
                 if(weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::LongBladeTwoHand ||
                 weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::BluntTwoClose || 
@@ -354,12 +349,12 @@ namespace MWClass
                 weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanBow || 
                 weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanCrossbow)
                 {
-                    return 3;
+                    return std::make_pair(3,"");
                 }
-                return 1;
+                return std::make_pair(1,"");
             }
         }
-        return 1;
+        return std::make_pair(1,"");
     }
 
     boost::shared_ptr<MWWorld::Action> Armor::use (const MWWorld::Ptr& ptr) const

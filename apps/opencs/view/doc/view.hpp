@@ -133,6 +133,8 @@ namespace CSVDoc
             void addBirthsignsSubView();
 
             void addSpellsSubView();
+
+            void addCellsSubView();
     };
 }
 

@@ -20,6 +20,7 @@
 
 #include "idcollection.hpp"
 #include "universalid.hpp"
+#include "cell.hpp"
 
 class QAbstractItemModel;
 
@@ -38,6 +39,7 @@ namespace CSMWorld
             IdCollection<ESM::Region> mRegions;
             IdCollection<ESM::BirthSign> mBirthsigns;
             IdCollection<ESM::Spell> mSpells;
+            IdCollection<Cell> mCells;
             std::vector<QAbstractItemModel *> mModels;
             std::map<UniversalId::Type, QAbstractItemModel *> mModelIndex;
 
@@ -97,6 +99,10 @@ namespace CSMWorld
             const IdCollection<ESM::Spell>& getSpells() const;
 
             IdCollection<ESM::Spell>& getSpells();
+
+            const IdCollection<Cell>& getCells() const;
+
+            IdCollection<Cell>& getCells();
 
             QAbstractItemModel *getTableModel (const UniversalId& id);
             ///< If no table model is available for \a id, an exception is thrown.

@@ -155,6 +155,18 @@ namespace MWMechanics
             stat.setCurrent (stat.getModified());
             creatureStats.setDynamic (i, stat);
         }
+
+        // unequip any items that may not be equipped. we need this for when the race is changed to a beast race
+        MWWorld::InventoryStore& invStore = MWWorld::Class::get(ptr).getInventoryStore(ptr);
+        for (int i=0; i<MWWorld::InventoryStore::Slots; ++i)
+        {
+            MWWorld::ContainerStoreIterator it = invStore.getSlot(i);
+            if (it != invStore.end())
+            {
+                if (!MWWorld::Class::get(*it).canBeEquipped(*it, ptr).first)
+                    invStore.equip(i, invStore.end());
+            }
+        }
     }
 
     MechanicsManager::MechanicsManager()
