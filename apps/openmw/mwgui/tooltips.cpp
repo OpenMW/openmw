@@ -2,18 +2,11 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include <OgreResourceGroupManager.h>
-
-#include <components/settings/settings.hpp>
-
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 
-#include "../mwworld/class.hpp"
-
 #include "mapwindow.hpp"
-#include "widgets.hpp"
 #include "inventorywindow.hpp"
 
 using namespace MWGui;

@@ -3,7 +3,6 @@
 #include <components/interpreter/defines.hpp>
 
 #include "../mwscript/interpretercontext.hpp"
-#include "../mwworld/ptr.hpp"
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/predicate.hpp>

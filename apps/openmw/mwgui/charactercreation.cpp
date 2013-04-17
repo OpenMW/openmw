@@ -5,8 +5,6 @@
 #include "class.hpp"
 #include "birth.hpp"
 #include "review.hpp"
-#include "dialogue.hpp"
-#include "mode.hpp"
 #include "inventorywindow.hpp"
 #include <boost/lexical_cast.hpp>
 #include "../mwbase/environment.hpp"

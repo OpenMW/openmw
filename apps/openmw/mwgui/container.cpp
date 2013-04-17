@@ -1,11 +1,5 @@
 #include "container.hpp"
 
-#include <cmath>
-#include <algorithm>
-#include <iterator>
-#include <cassert>
-#include <iostream>
-
 #include <boost/lexical_cast.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -13,15 +7,9 @@
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
-#include "../mwworld/manualref.hpp"
-#include "../mwworld/containerstore.hpp"
 #include "../mwworld/inventorystore.hpp"
-#include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
 
-#include "../mwclass/container.hpp"
-
-#include "widgets.hpp"
 #include "countdialog.hpp"
 #include "tradewindow.hpp"
 #include "inventorywindow.hpp"

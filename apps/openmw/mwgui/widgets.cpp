@@ -9,8 +9,6 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 
-#include "../mwworld/esmstore.hpp"
-
 #undef min
 #undef max
 

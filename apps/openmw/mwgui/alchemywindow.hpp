@@ -10,7 +10,6 @@
 
 namespace MWGui
 {
-
     class AlchemyWindow : public WindowBase, public ContainerBase
     {
     public:

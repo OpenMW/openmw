@@ -1,39 +1,20 @@
 #include "windowmanagerimp.hpp"
 
-#include <cassert>
-#include <iterator>
-
-#include <MyGUI_UString.h>
-
 #include <openengine/ogre/renderer.hpp>
 #include <openengine/gui/manager.hpp>
 
-#include <components/settings/settings.hpp>
-#include <components/translation/translation.hpp>
-
-#include "../mwbase/environment.hpp"
-#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/inputmanager.hpp"
-
-#include "../mwworld/ptr.hpp"
-#include "../mwworld/cellstore.hpp"
 
 #include "console.hpp"
 #include "journalwindow.hpp"
 #include "charactercreation.hpp"
-#include "textinput.hpp"
-#include "review.hpp"
 #include "dialogue.hpp"
 #include "dialoguehistory.hpp"
-#include "mapwindow.hpp"
 #include "statswindow.hpp"
 #include "messagebox.hpp"
-#include "container.hpp"
-#include "inventorywindow.hpp"
 #include "tooltips.hpp"
 #include "scrollwindow.hpp"
 #include "bookwindow.hpp"
-#include "list.hpp"
 #include "hud.hpp"
 #include "mainmenu.hpp"
 #include "countdialog.hpp"
@@ -48,17 +29,15 @@
 #include "loadingscreen.hpp"
 #include "levelupdialog.hpp"
 #include "waitdialog.hpp"
-#include "spellcreationdialog.hpp"
 #include "enchantingdialog.hpp"
 #include "trainingwindow.hpp"
-#include "imagebutton.hpp"
 #include "exposedwindow.hpp"
 #include "cursor.hpp"
-#include "spellicons.hpp"
 #include "merchantrepair.hpp"
 #include "repair.hpp"
 #include "soulgemdialog.hpp"
 #include "companionwindow.hpp"
+#include "inventorywindow.hpp"
 
 using namespace MWGui;
 

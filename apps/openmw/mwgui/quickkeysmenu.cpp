@@ -2,13 +2,9 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
 #include "../mwworld/player.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/actionequip.hpp"
-#include "../mwmechanics/spells.hpp"
-#include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/spellsuccess.hpp"
 #include "../mwgui/inventorywindow.hpp"
 #include "../mwgui/bookwindow.hpp"

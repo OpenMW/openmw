@@ -1,12 +1,6 @@
-
 #include "console.hpp"
 
-#include <algorithm>
-#include <fstream>
-
 #include <components/compiler/exception.hpp>
-
-#include "../mwworld/esmstore.hpp"
 
 #include "../mwscript/extensions.hpp"
 

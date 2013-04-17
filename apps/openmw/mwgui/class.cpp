@@ -1,11 +1,6 @@
 #include "class.hpp"
 
-#include <iterator>
-
 #include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
-
-#include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

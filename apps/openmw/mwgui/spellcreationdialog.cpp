@@ -4,22 +4,14 @@
 
 #include "../mwbase/windowmanager.hpp"
 
-#include "../mwbase/world.hpp"
-#include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
-#include "../mwworld/esmstore.hpp"
 #include "../mwworld/player.hpp"
-#include "../mwworld/class.hpp"
 
-#include "../mwmechanics/spells.hpp"
-#include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/spellsuccess.hpp"
 
-
 #include "tooltips.hpp"
-#include "widgets.hpp"
 #include "class.hpp"
 #include "inventorywindow.hpp"
 #include "tradewindow.hpp"
