@@ -94,6 +94,9 @@ void Actors::insertActivator (const MWWorld::Ptr& ptr)
 
 bool Actors::deleteObject (const MWWorld::Ptr& ptr)
 {
+    if (mAllActors.find(ptr) == mAllActors.end())
+        return false;
+
     mRendering->removeWaterRippleEmitter (ptr);
 
     delete mAllActors[ptr];
@@ -139,6 +142,7 @@ void Actors::removeCell(MWWorld::Ptr::CellStore* store)
         Ogre::SceneNode *base = celliter->second;
         base->removeAndDestroyAllChildren();
         mRend.getScene()->destroySceneNode(base);
+
         mCellSceneNodes.erase(celliter);
     }
 }
