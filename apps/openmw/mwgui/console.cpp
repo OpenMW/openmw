@@ -278,16 +278,15 @@ namespace MWGui
 
     std::string Console::complete( std::string input, std::vector<std::string> &matches )
     {
-        using namespace std;
-        string output=input;
-        string tmp=input;
+        std::string output = input;
+        std::string tmp = input;
         bool has_front_quote = false;
 
         /* Does the input string contain things that don't have to be completed? If yes erase them. */
         /* Are there quotation marks? */
-        if( tmp.find('"') != string::npos ) {
+        if( tmp.find('"') != std::string::npos ) {
             int numquotes=0;
-            for(string::iterator it=tmp.begin(); it < tmp.end(); ++it) {
+            for(std::string::iterator it=tmp.begin(); it < tmp.end(); ++it) {
                 if( *it == '"' )
                     numquotes++;
             }
@@ -299,7 +298,7 @@ namespace MWGui
             }
             else {
                 size_t pos;
-                if( ( ((pos = tmp.rfind(' ')) != string::npos ) ) && ( pos > tmp.rfind('"') ) ) {
+                if( ( ((pos = tmp.rfind(' ')) != std::string::npos ) ) && ( pos > tmp.rfind('"') ) ) {
                     tmp.erase( 0, tmp.rfind(' ')+1);
                 }
                 else {
@@ -311,7 +310,7 @@ namespace MWGui
         /* No quotation marks. Are there spaces?*/
         else {
             size_t rpos;
-            if( (rpos=tmp.rfind(' ')) != string::npos ) {
+            if( (rpos=tmp.rfind(' ')) != std::string::npos ) {
                 if( rpos == 0 ) {
                     tmp.clear();
                 }
@@ -330,7 +329,7 @@ namespace MWGui
         }
 
         /* Iterate through the vector. */
-        for(vector<string>::iterator it=mNames.begin(); it < mNames.end();++it) {
+        for(std::vector<std::string>::iterator it=mNames.begin(); it < mNames.end();++it) {
             bool string_different=false;
 
             /* Is the string shorter than the input string? If yes skip it. */
@@ -338,7 +337,7 @@ namespace MWGui
                 continue;
 
             /* Is the beginning of the string different from the input string? If yes skip it. */
-            for( string::iterator iter=tmp.begin(), iter2=(*it).begin(); iter < tmp.end();iter++, iter2++) {
+            for( std::string::iterator iter=tmp.begin(), iter2=(*it).begin(); iter < tmp.end();iter++, iter2++) {
                 if( tolower(*iter) != tolower(*iter2) ) {
                     string_different=true;
                     break;
@@ -361,24 +360,24 @@ namespace MWGui
         /* Only one match. We're done. */
         if( matches.size() == 1 ) {
             /* Adding quotation marks when the input string started with a quotation mark or has spaces in it*/
-            if( ( matches.front().find(' ') != string::npos )  ) {
+            if( ( matches.front().find(' ') != std::string::npos )  ) {
                 if( !has_front_quote )
-                    output.append(string("\""));
-                return output.append(matches.front() + string("\" "));
+                    output.append(std::string("\""));
+                return output.append(matches.front() + std::string("\" "));
             }
             else if( has_front_quote ) {
-                return  output.append(matches.front() + string("\" "));
+                return  output.append(matches.front() + std::string("\" "));
             }
             else {
-                return output.append(matches.front() + string(" "));
+                return output.append(matches.front() + std::string(" "));
             }
         }
 
         /* Check if all matching strings match further than input. If yes complete to this match. */
         int i = tmp.length();
 
-        for(string::iterator iter=matches.front().begin()+tmp.length(); iter < matches.front().end(); iter++, i++) {
-            for(vector<string>::iterator it=matches.begin(); it < matches.end();++it) {
+        for(std::string::iterator iter=matches.front().begin()+tmp.length(); iter < matches.front().end(); iter++, i++) {
+            for(std::vector<std::string>::iterator it=matches.begin(); it < matches.end();++it) {
                 if( tolower((*it)[i]) != tolower(*iter) ) {
                     /* Append the longest match to the end of the output string*/
                     output.append(matches.front().substr( 0, i));

@@ -10,71 +10,73 @@
 
 #include "formatting.hpp"
 
-using namespace MWGui;
-
-ScrollWindow::ScrollWindow ()
-    : WindowBase("openmw_scroll.layout")
-    , mTakeButtonShow(true)
-    , mTakeButtonAllowed(true)
+namespace MWGui
 {
-    getWidget(mTextView, "TextView");
 
-    getWidget(mCloseButton, "CloseButton");
-    mCloseButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ScrollWindow::onCloseButtonClicked);
+    ScrollWindow::ScrollWindow ()
+        : WindowBase("openmw_scroll.layout")
+        , mTakeButtonShow(true)
+        , mTakeButtonAllowed(true)
+    {
+        getWidget(mTextView, "TextView");
 
-    getWidget(mTakeButton, "TakeButton");
-    mTakeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ScrollWindow::onTakeButtonClicked);
+        getWidget(mCloseButton, "CloseButton");
+        mCloseButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ScrollWindow::onCloseButtonClicked);
 
-    center();
-}
+        getWidget(mTakeButton, "TakeButton");
+        mTakeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ScrollWindow::onTakeButtonClicked);
 
-void ScrollWindow::open (MWWorld::Ptr scroll)
-{
-    // no 3d sounds because the object could be in a container.
-    MWBase::Environment::get().getSoundManager()->playSound ("scroll", 1.0, 1.0);
+        center();
+    }
 
-    mScroll = scroll;
+    void ScrollWindow::open (MWWorld::Ptr scroll)
+    {
+        // no 3d sounds because the object could be in a container.
+        MWBase::Environment::get().getSoundManager()->playSound ("scroll", 1.0, 1.0);
 
-    MWWorld::LiveCellRef<ESM::Book> *ref = mScroll.get<ESM::Book>();
+        mScroll = scroll;
 
-    BookTextParser parser;
-    MyGUI::IntSize size = parser.parse(ref->mBase->mText, mTextView, 390);
+        MWWorld::LiveCellRef<ESM::Book> *ref = mScroll.get<ESM::Book>();
 
-    if (size.height > mTextView->getSize().height)
-        mTextView->setCanvasSize(MyGUI::IntSize(410, size.height));
-    else
-        mTextView->setCanvasSize(410, mTextView->getSize().height);
+        BookTextParser parser;
+        MyGUI::IntSize size = parser.parse(ref->mBase->mText, mTextView, 390);
 
-    mTextView->setViewOffset(MyGUI::IntPoint(0,0));
+        if (size.height > mTextView->getSize().height)
+            mTextView->setCanvasSize(MyGUI::IntSize(410, size.height));
+        else
+            mTextView->setCanvasSize(410, mTextView->getSize().height);
 
-    setTakeButtonShow(true);
-}
+        mTextView->setViewOffset(MyGUI::IntPoint(0,0));
 
-void ScrollWindow::setTakeButtonShow(bool show)
-{
-    mTakeButtonShow = show;
-    mTakeButton->setVisible(mTakeButtonShow && mTakeButtonAllowed);
-}
+        setTakeButtonShow(true);
+    }
 
-void ScrollWindow::setInventoryAllowed(bool allowed)
-{
-    mTakeButtonAllowed = allowed;
-    mTakeButton->setVisible(mTakeButtonShow && mTakeButtonAllowed);
-}
+    void ScrollWindow::setTakeButtonShow(bool show)
+    {
+        mTakeButtonShow = show;
+        mTakeButton->setVisible(mTakeButtonShow && mTakeButtonAllowed);
+    }
 
-void ScrollWindow::onCloseButtonClicked (MyGUI::Widget* _sender)
-{
-    MWBase::Environment::get().getSoundManager()->playSound ("scroll", 1.0, 1.0);
+    void ScrollWindow::setInventoryAllowed(bool allowed)
+    {
+        mTakeButtonAllowed = allowed;
+        mTakeButton->setVisible(mTakeButtonShow && mTakeButtonAllowed);
+    }
 
-    MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Scroll);
-}
+    void ScrollWindow::onCloseButtonClicked (MyGUI::Widget* _sender)
+    {
+        MWBase::Environment::get().getSoundManager()->playSound ("scroll", 1.0, 1.0);
 
-void ScrollWindow::onTakeButtonClicked (MyGUI::Widget* _sender)
-{
-    MWBase::Environment::get().getSoundManager()->playSound ("Item Book Up", 1.0, 1.0, MWBase::SoundManager::Play_NoTrack);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Scroll);
+    }
 
-    MWWorld::ActionTake take(mScroll);
-    take.execute (MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+    void ScrollWindow::onTakeButtonClicked (MyGUI::Widget* _sender)
+    {
+        MWBase::Environment::get().getSoundManager()->playSound ("Item Book Up", 1.0, 1.0, MWBase::SoundManager::Play_NoTrack);
 
-    MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Scroll);
+        MWWorld::ActionTake take(mScroll);
+        take.execute (MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Scroll);
+    }
 }
