@@ -24,36 +24,6 @@ int wrap(int index, int max)
     else
         return index;
 }
-
-int countParts(const std::string &part, const std::string &race, bool male)
-{
-    /// \todo loop through the whole store for appropriate bodyparts instead of looking for fixed IDs
-    const MWWorld::Store<ESM::BodyPart> &store =
-        MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>();
-
-    std::string prefix =
-        "b_n_" + race + ((male) ? "_m_" : "_f_") + part;
-
-    std::string suffix;
-    suffix.reserve(prefix.size() + 3);
-
-    int count = -1;
-    do {
-        ++count;
-        suffix = "_" + (boost::format("%02d") % (count + 1)).str();
-    }
-    while (store.search(prefix + suffix) != 0);
-
-    if (count == 0 && part == "hair") {
-        count = -1;
-        do {
-            ++count;
-            suffix = (boost::format("%02d") % (count + 1)).str();
-        }
-        while (store.search(prefix + suffix) != 0);
-    }
-    return count;
-}
 }
 
 RaceDialog::RaceDialog()
@@ -61,8 +31,6 @@ RaceDialog::RaceDialog()
   , mGenderIndex(0)
   , mFaceIndex(0)
   , mHairIndex(0)
-  , mFaceCount(10)
-  , mHairCount(14)
   , mCurrentAngle(0)
 {
     // Centre dialog
@@ -227,65 +195,26 @@ void RaceDialog::onSelectNextGender(MyGUI::Widget*)
 
 void RaceDialog::onSelectPreviousFace(MyGUI::Widget*)
 {
-    do
-        mFaceIndex = wrap(mFaceIndex - 1, mFaceCount);
-    while (!isFacePlayable());
+    mFaceIndex = wrap(mFaceIndex - 1, mAvailableHeads.size());
     updatePreview();
 }
 
 void RaceDialog::onSelectNextFace(MyGUI::Widget*)
 {
-    do
-        mFaceIndex = wrap(mFaceIndex + 1, mFaceCount);
-    while (!isFacePlayable());
+    mFaceIndex = wrap(mFaceIndex + 1, mAvailableHeads.size());
     updatePreview();
 }
 
 void RaceDialog::onSelectPreviousHair(MyGUI::Widget*)
 {
-    do
-        mHairIndex = wrap(mHairIndex - 1, mHairCount);
-    while (!isHairPlayable());
+    mHairIndex = wrap(mHairIndex - 1, mAvailableHairs.size());
     updatePreview();
 }
 
 void RaceDialog::onSelectNextHair(MyGUI::Widget*)
 {
-    do
-        mHairIndex = wrap(mHairIndex + 1, mHairCount);
-    while (!isHairPlayable());
+    mHairIndex = wrap(mHairIndex + 1, mAvailableHairs.size());
     updatePreview();
-}
-
-bool RaceDialog::isFacePlayable()
-{
-    std::string prefix =
-            "b_n_" + mCurrentRaceId + ((mGenderIndex == 0) ? "_m_" : "_f_");
-
-    std::string headIndex = (boost::format("%02d") % (mFaceIndex + 1)).str();
-
-    const MWWorld::Store<ESM::BodyPart> &parts =
-        MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>();
-
-    if (parts.search(prefix + "head_" + headIndex) == 0)
-        return !(parts.find(prefix + "head" + headIndex)->mData.mFlags & ESM::BodyPart::BPF_NotPlayable);
-    else
-        return !(parts.find(prefix + "head_" + headIndex)->mData.mFlags & ESM::BodyPart::BPF_NotPlayable);
-}
-
-bool RaceDialog::isHairPlayable()
-{
-    std::string prefix =
-        "b_n_" + mCurrentRaceId + ((mGenderIndex == 0) ? "_m_" : "_f_");
-
-    std::string hairIndex = (boost::format("%02d") % (mHairIndex + 1)).str();
-
-    const MWWorld::Store<ESM::BodyPart> &parts =
-        MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>();
-    if (parts.search(prefix + "hair_" + hairIndex) == 0)
-        return !(parts.find(prefix + "hair" + hairIndex)->mData.mFlags & ESM::BodyPart::BPF_NotPlayable);
-    else
-        return !(parts.find(prefix + "hair_" + hairIndex)->mData.mFlags & ESM::BodyPart::BPF_NotPlayable);
 }
 
 void RaceDialog::onSelectRace(MyGUI::ListBox* _sender, size_t _index)
@@ -308,18 +237,41 @@ void RaceDialog::onSelectRace(MyGUI::ListBox* _sender, size_t _index)
     updateSpellPowers();
 }
 
+void RaceDialog::getBodyParts (int part, std::vector<std::string>& out)
+{
+    out.clear();
+    const MWWorld::Store<ESM::BodyPart> &store =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>();
+
+    for (MWWorld::Store<ESM::BodyPart>::iterator it = store.begin(); it != store.end(); ++it)
+    {
+        const ESM::BodyPart& bodypart = *it;
+        if (bodypart.mData.mFlags & ESM::BodyPart::BPF_NotPlayable)
+            continue;
+        if (bodypart.mData.mType != ESM::BodyPart::MT_Skin)
+            continue;
+        if (bodypart.mData.mPart != static_cast<ESM::BodyPart::MeshPart>(part))
+            continue;
+        if (mGenderIndex != (bodypart.mData.mFlags & ESM::BodyPart::BPF_Female))
+            continue;
+        bool firstPerson = (bodypart.mId.size() >= 3)
+                && bodypart.mId[bodypart.mId.size()-3] == '1'
+                && bodypart.mId[bodypart.mId.size()-2] == 's'
+                && bodypart.mId[bodypart.mId.size()-1] == 't';
+        if (firstPerson)
+            continue;
+        if (Misc::StringUtils::ciEqual(bodypart.mRace, mCurrentRaceId))
+            out.push_back(bodypart.mId);
+    }
+}
+
 void RaceDialog::recountParts()
 {
-    mFaceCount = countParts("head", mCurrentRaceId, mGenderIndex == 0);
-    mHairCount = countParts("hair", mCurrentRaceId, mGenderIndex == 0);
+    getBodyParts(ESM::BodyPart::MP_Hair, mAvailableHairs);
+    getBodyParts(ESM::BodyPart::MP_Head, mAvailableHeads);
 
     mFaceIndex = 0;
     mHairIndex = 0;
-
-    while (!isHairPlayable())
-        mHairIndex = wrap(mHairIndex + 1, mHairCount);
-    while (!isFacePlayable())
-        mFaceIndex = wrap(mFaceIndex + 1, mFaceCount);
 }
 
 // update widget content
@@ -330,21 +282,9 @@ void RaceDialog::updatePreview()
     record.mRace = mCurrentRaceId;
     record.setIsMale(mGenderIndex == 0);
 
-    std::string prefix =
-        "b_n_" + mCurrentRaceId + ((record.isMale()) ? "_m_" : "_f_");
+    record.mHead = mAvailableHeads[mFaceIndex];
+    record.mHair = mAvailableHairs[mHairIndex];
 
-    std::string headIndex = (boost::format("%02d") % (mFaceIndex + 1)).str();
-    std::string hairIndex = (boost::format("%02d") % (mHairIndex + 1)).str();
-
-    record.mHead = prefix + "head_" + headIndex;
-    record.mHair = prefix + "hair_" + hairIndex;
-
-    const MWWorld::Store<ESM::BodyPart> &parts =
-        MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>();
-
-    if (parts.search(record.mHair) == 0) {
-        record.mHair = prefix + "hair" + hairIndex;
-    }
     mPreview->setPrototype(record);
 }
 

@@ -439,7 +439,7 @@ void Record<ESM::Apparatus>::print()
 template<>
 void Record<ESM::BodyPart>::print()
 {
-    std::cout << "  Name: " << mData.mName << std::endl;
+    std::cout << "  Race: " << mData.mRace << std::endl;
     std::cout << "  Model: " << mData.mModel << std::endl;
     std::cout << "  Type: " << meshTypeLabel(mData.mData.mType)
               << " (" << (int)mData.mData.mType << ")" << std::endl;
