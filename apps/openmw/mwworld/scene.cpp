@@ -76,27 +76,28 @@ namespace MWWorld
     void Scene::unloadCell (CellStoreCollection::iterator iter)
     {
         std::cout << "Unloading cell\n";
-        ListHandles functor;
+        ListAndResetHandles functor;
 
-        (*iter)->forEach<ListHandles>(functor);
+        (*iter)->forEach<ListAndResetHandles>(functor);
         {
             // silence annoying g++ warning
             for (std::vector<Ogre::SceneNode*>::const_iterator iter2 (functor.mHandles.begin());
-                iter2!=functor.mHandles.end(); ++iter2){
-                 Ogre::SceneNode* node = *iter2;
+                iter2!=functor.mHandles.end(); ++iter2)
+            {
+                Ogre::SceneNode* node = *iter2;
                 mPhysics->removeObject (node->getName());
             }
+        }
 
-            if ((*iter)->mCell->isExterior())
-            {
-                ESM::Land* land =
-                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Land>().search(
-                        (*iter)->mCell->getGridX(),
-                        (*iter)->mCell->getGridY()
-                    );
-                if (land)
-                    mPhysics->removeHeightField( (*iter)->mCell->getGridX(), (*iter)->mCell->getGridY() );
-            }
+        if ((*iter)->mCell->isExterior())
+        {
+            ESM::Land* land =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::Land>().search(
+                    (*iter)->mCell->getGridX(),
+                    (*iter)->mCell->getGridY()
+                );
+            if (land)
+                mPhysics->removeHeightField( (*iter)->mCell->getGridX(), (*iter)->mCell->getGridY() );
         }
 
         mRendering.removeCell(*iter);

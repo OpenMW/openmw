@@ -1,24 +1,14 @@
 #include "hud.hpp"
 
-#include <cmath>
-
-#include <MyGUI_Widget.h>
-#include <MyGUI_RenderManager.h>
-
 #include <boost/lexical_cast.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
-#include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
 
-#include "../mwgui/widgets.hpp"
-
 #include "inventorywindow.hpp"
-#include "container.hpp"
 #include "console.hpp"
 #include "spellicons.hpp"
 

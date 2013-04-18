@@ -1,14 +1,9 @@
 #include "statswindow.hpp"
 
-#include <cmath>
-#include <algorithm>
-#include <iterator>
-
 #include <boost/lexical_cast.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
-#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/player.hpp"
@@ -17,7 +12,6 @@
 #include "../mwmechanics/npcstats.hpp"
 
 #include "tooltips.hpp"
-
 
 using namespace MWGui;
 const int StatsWindow::sLineHeight = 18;

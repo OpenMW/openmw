@@ -1,10 +1,5 @@
 #include "confirmationdialog.hpp"
 
-#include <boost/lexical_cast.hpp>
-
-#include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
-
 namespace MWGui
 {
     ConfirmationDialog::ConfirmationDialog() :

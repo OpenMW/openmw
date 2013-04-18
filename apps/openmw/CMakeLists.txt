@@ -122,6 +122,12 @@ if (UNIX AND NOT APPLE)
 target_link_libraries(openmw ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
+# Workaround for binutil => 2.23 problem when linking, should be fixed eventually upstream
+if (UNIX AND NOT APPLE)
+target_link_libraries(openmw dl Xt)
+endif()
+
+
 if(APPLE)
     find_library(CARBON_FRAMEWORK Carbon)
     find_library(COCOA_FRAMEWORK Cocoa)

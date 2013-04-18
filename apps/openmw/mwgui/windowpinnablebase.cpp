@@ -1,7 +1,5 @@
 #include "windowpinnablebase.hpp"
 
-#include "../mwbase/windowmanager.hpp"
-
 #include "exposedwindow.hpp"
 
 using namespace MWGui;

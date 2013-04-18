@@ -2,7 +2,6 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/dialoguemanager.hpp"
 

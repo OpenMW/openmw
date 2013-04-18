@@ -27,7 +27,9 @@ struct BodyPart
         MP_Knee = 11,
         MP_Upperleg = 12,
         MP_Clavicle = 13,
-        MP_Tail = 14
+        MP_Tail = 14,
+
+        MP_Count = 15
     };
 
     enum Flags
@@ -52,7 +54,7 @@ struct BodyPart
     };
 
     BYDTstruct mData;
-    std::string mId, mModel, mName;
+    std::string mId, mModel, mRace;
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
