@@ -415,8 +415,18 @@ namespace MWWorld
             }
         };
 
-        typedef std::map<std::string, ESM::Cell>            DynamicInt;
-        typedef std::map<std::pair<int, int>, ESM::Cell>    DynamicExt;
+        struct DynamicExtCmp
+        {
+            bool operator()(const std::pair<int, int> &left, const std::pair<int, int> &right) const {
+                if (left.first == right.first) {
+                    return left.second < right.second;
+                }
+                return left.first < right.first;
+            }
+        };
+
+        typedef std::map<std::string, ESM::Cell>                           DynamicInt;
+        typedef std::map<std::pair<int, int>, ESM::Cell, DynamicExtCmp>    DynamicExt;
 
         DynamicInt      mInt;
         DynamicExt      mExt;
