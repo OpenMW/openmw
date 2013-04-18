@@ -548,7 +548,7 @@ namespace MWMechanics
 
         float bribeMod;
         if (type == PT_Bribe10) bribeMod = gmst.find("fBribe10Mod")->getFloat();
-        if (type == PT_Bribe100) bribeMod = gmst.find("fBribe100Mod")->getFloat();
+        else if (type == PT_Bribe100) bribeMod = gmst.find("fBribe100Mod")->getFloat();
         else bribeMod = gmst.find("fBribe1000Mod")->getFloat();
 
         float target3 = d * (playerRating3 - npcRating3 + 50) + bribeMod;
