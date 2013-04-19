@@ -426,6 +426,7 @@ namespace MWDialogue
 
     void DialogueManager::questionAnswered (const std::string& answer)
     {
+
         if (mChoiceMap.find(answer) != mChoiceMap.end())
         {
             mChoice = mChoiceMap[answer];
@@ -442,6 +443,10 @@ namespace MWDialogue
                         std::string text = info->mResponse;
                         parseText (text);
 
+                        mChoiceMap.clear();
+                        mChoice = -1;
+                        mIsInChoice = false;
+
                         MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
                         MWBase::Environment::get().getWindowManager()->getDialogueWindow()->addText (Interpreter::fixDefinesDialog(text, interpreterContext));
                         MWBase::Environment::get().getJournal()->addTopic (mLastTopic, info->mId);
@@ -449,9 +454,6 @@ namespace MWDialogue
                         mLastDialogue = *info;
                     }
                 }
-                mChoiceMap.clear();
-                mChoice = -1;
-                mIsInChoice = false;
             }
 
             updateTopics();
