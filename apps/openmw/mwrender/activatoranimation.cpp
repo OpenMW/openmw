@@ -1,10 +1,5 @@
 #include "activatoranimation.hpp"
 
-#include <OgreEntity.h>
-#include <OgreParticleSystem.h>
-#include <OgreSceneManager.h>
-#include <OgreSubEntity.h>
-
 #include "renderconst.hpp"
 
 #include "../mwbase/world.hpp"
@@ -27,24 +22,7 @@ ActivatorAnimation::ActivatorAnimation(const MWWorld::Ptr &ptr)
         const std::string name = "meshes\\"+ref->mBase->mModel;
 
         addObjectList(mPtr.getRefData().getBaseNode(), name, false);
-        const NifOgre::ObjectList &objlist = mObjectLists.back();
-        for(size_t i = 0;i < objlist.mEntities.size();i++)
-        {
-            Ogre::Entity *ent = objlist.mEntities[i];
-            ent->setVisibilityFlags(RV_Misc);
-
-            for(unsigned int j=0; j < ent->getNumSubEntities(); ++j)
-            {
-                Ogre::SubEntity* subEnt = ent->getSubEntity(j);
-                subEnt->setRenderQueueGroup(subEnt->getMaterial()->isTransparent() ? RQG_Alpha : RQG_Main);
-            }
-        }
-        for(size_t i = 0;i < objlist.mParticles.size();i++)
-        {
-            Ogre::ParticleSystem *part = objlist.mParticles[i];
-            part->setVisibilityFlags(RV_Misc);
-            part->setRenderQueueGroup(RQG_Alpha);
-        }
+        setRenderProperties(mObjectLists.back(), RV_Misc, RQG_Main, RQG_Alpha);
     }
 }
 

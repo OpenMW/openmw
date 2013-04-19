@@ -85,6 +85,8 @@ protected:
     void addObjectList(Ogre::SceneNode *node, const std::string &model, bool baseonly);
     static void destroyObjectList(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList &objects);
 
+    static void setRenderProperties(const NifOgre::ObjectList &objlist, Ogre::uint32 visflags, Ogre::uint8 solidqueue, Ogre::uint8 transqueue);
+
 public:
     Animation(const MWWorld::Ptr &ptr);
     virtual ~Animation();

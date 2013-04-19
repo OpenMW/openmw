@@ -3,6 +3,8 @@
 #include <OgreSkeletonManager.h>
 #include <OgreSkeletonInstance.h>
 #include <OgreEntity.h>
+#include <OgreSubEntity.h>
+#include <OgreParticleSystem.h>
 #include <OgreBone.h>
 #include <OgreSubMesh.h>
 #include <OgreSceneManager.h>
@@ -148,6 +150,30 @@ void Animation::addObjectList(Ogre::SceneNode *node, const std::string &model, b
 
     if(!mCurrentControllers || (*mCurrentControllers).size() == 0)
         mCurrentControllers = &objlist.mControllers;
+}
+
+void Animation::setRenderProperties(const NifOgre::ObjectList &objlist, Ogre::uint32 visflags, Ogre::uint8 solidqueue, Ogre::uint8 transqueue)
+{
+    for(size_t i = 0;i < objlist.mEntities.size();i++)
+    {
+        Ogre::Entity *ent = objlist.mEntities[i];
+        if(visflags != 0)
+            ent->setVisibilityFlags(visflags);
+
+        for(unsigned int j = 0;j < ent->getNumSubEntities();++j)
+        {
+            Ogre::SubEntity* subEnt = ent->getSubEntity(j);
+            subEnt->setRenderQueueGroup(subEnt->getMaterial()->isTransparent() ? transqueue : solidqueue);
+        }
+    }
+    for(size_t i = 0;i < objlist.mParticles.size();i++)
+    {
+        Ogre::ParticleSystem *part = objlist.mParticles[i];
+        if(visflags != 0)
+            part->setVisibilityFlags(visflags);
+        // TODO: Check particle material for actual transparency
+        part->setRenderQueueGroup(transqueue);
+    }
 }
 
 

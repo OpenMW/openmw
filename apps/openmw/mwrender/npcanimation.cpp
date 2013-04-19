@@ -361,25 +361,13 @@ void NpcAnimation::updateParts(bool forceupdate)
 NifOgre::ObjectList NpcAnimation::insertBoundedPart(const std::string &model, int group, const std::string &bonename)
 {
     NifOgre::ObjectList objects = NifOgre::Loader::createObjects(mSkelBase, bonename, mInsert, model);
-    for(size_t i = 0;i < objects.mEntities.size();i++)
-    {
-        objects.mEntities[i]->getUserObjectBindings().setUserAny(Ogre::Any(group));
-        if(mVisibilityFlags != 0)
-            objects.mEntities[i]->setVisibilityFlags(mVisibilityFlags);
+    setRenderProperties(objects, mVisibilityFlags, RQG_Main, RQG_Alpha);
 
-        for(unsigned int j=0; j < objects.mEntities[i]->getNumSubEntities(); ++j)
-        {
-            Ogre::SubEntity* subEnt = objects.mEntities[i]->getSubEntity(j);
-            subEnt->setRenderQueueGroup(subEnt->getMaterial()->isTransparent() ? RQG_Alpha : RQG_Main);
-        }
-    }
+    for(size_t i = 0;i < objects.mEntities.size();i++)
+        objects.mEntities[i]->getUserObjectBindings().setUserAny(Ogre::Any(group));
     for(size_t i = 0;i < objects.mParticles.size();i++)
-    {
         objects.mParticles[i]->getUserObjectBindings().setUserAny(Ogre::Any(group));
-        if(mVisibilityFlags != 0)
-            objects.mParticles[i]->setVisibilityFlags(mVisibilityFlags);
-        objects.mParticles[i]->setRenderQueueGroup(RQG_Alpha);
-    }
+
     if(objects.mSkelBase)
     {
         Ogre::AnimationStateSet *aset = objects.mSkelBase->getAllAnimationStates();
@@ -395,6 +383,7 @@ NifOgre::ObjectList NpcAnimation::insertBoundedPart(const std::string &model, in
         while(boneiter.hasMoreElements())
             boneiter.getNext()->setManuallyControlled(true);
     }
+
     return objects;
 }
 
