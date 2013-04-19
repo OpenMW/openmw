@@ -163,6 +163,7 @@ typedef RecordPtrT<NiAutoNormalParticlesData> NiAutoNormalParticlesDataPtr;
 
 typedef RecordListT<Node> NodeList;
 typedef RecordListT<Property> PropertyList;
+typedef RecordListT<NiSourceTexture> NiSourceTextureList;
 
 } // Namespace
 #endif

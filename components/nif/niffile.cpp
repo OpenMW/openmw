@@ -235,6 +235,7 @@ static const RecordFactoryEntry recordFactories [] = {
     { "NiMaterialColorController",  &construct <NiMaterialColorController   >, RC_NiMaterialColorController     },
     { "NiBSPArrayController",       &construct <NiBSPArrayController        >, RC_NiBSPArrayController          },
     { "NiParticleSystemController", &construct <NiParticleSystemController  >, RC_NiParticleSystemController    },
+    { "NiFlipController",           &construct <NiFlipController            >, RC_NiFlipController              },
     { "NiAmbientLight",             &construct <NiLight                     >, RC_NiLight                       },
     { "NiDirectionalLight",         &construct <NiLight                     >, RC_NiLight                       },
     { "NiTextureEffect",            &construct <NiTextureEffect             >, RC_NiTextureEffect               },
