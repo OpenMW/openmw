@@ -21,13 +21,15 @@ namespace MWRender
 
     CharacterPreview::CharacterPreview(MWWorld::Ptr character, int sizeX, int sizeY, const std::string& name,
                                        Ogre::Vector3 position, Ogre::Vector3 lookAt)
-        : mSizeX(sizeX)
-        , mSizeY(sizeY)
-        , mName(name)
+
+        : mSceneMgr (0)
         , mPosition(position)
         , mLookAt(lookAt)
         , mCharacter(character)
         , mAnimation(NULL)
+        , mName(name)
+        , mSizeX(sizeX)
+        , mSizeY(sizeY)
     {
 
     }
@@ -88,16 +90,20 @@ namespace MWRender
 
     CharacterPreview::~CharacterPreview ()
     {
-        //Ogre::TextureManager::getSingleton().remove(mName);
-        mSceneMgr->destroyCamera (mName);
-        delete mAnimation;
-        Ogre::Root::getSingleton().destroySceneManager(mSceneMgr);
+        if (mSceneMgr)
+        {
+            //Ogre::TextureManager::getSingleton().remove(mName);
+            mSceneMgr->destroyAllCameras();
+            delete mAnimation;
+            Ogre::Root::getSingleton().destroySceneManager(mSceneMgr);
+        }
     }
 
     void CharacterPreview::rebuild()
     {
         assert(mAnimation);
         delete mAnimation;
+        mAnimation = 0;
 
         mAnimation = new NpcAnimation(mCharacter, mNode, MWWorld::Class::get(mCharacter).getInventoryStore(mCharacter),
                                       0, (renderHeadOnly() ? NpcAnimation::VM_HeadOnly : NpcAnimation::VM_Normal));
