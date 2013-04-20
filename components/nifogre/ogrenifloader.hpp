@@ -85,6 +85,8 @@ public:
     NodeTargetValue(Ogre::Node *target) : mNode(target)
     { }
 
+    virtual void applyToNode(Ogre::Node *node, float time) const = 0;
+
     void setNode(Ogre::Node *target)
     { mNode = target; }
     Ogre::Node *getNode() const

@@ -104,7 +104,7 @@ public:
     private:
         std::vector<Nif::NiVisData::VisData> mData;
 
-        virtual bool calculate(Ogre::Real time)
+        bool calculate(Ogre::Real time) const
         {
             if(mData.size() == 0)
                 return true;
@@ -144,16 +144,21 @@ public:
           , mData(data->mVis)
         { }
 
+        virtual void applyToNode(Ogre::Node *node, float time) const
+        {
+            bool vis = calculate(time);
+            setVisible(node, vis);
+        }
+
         virtual Ogre::Real getValue() const
         {
             // Should not be called
-            return 1.0f;
+            return 0.0f;
         }
 
         virtual void setValue(Ogre::Real time)
         {
-            bool vis = calculate(time);
-            setVisible(mNode, vis);
+            Value::applyToNode(mNode, time);
         }
     };
 
@@ -170,6 +175,66 @@ public:
         Nif::Vector3KeyList mTranslations;
         Nif::FloatKeyList mScales;
 
+        static float interpKey(const Nif::FloatKeyList::VecType &keys, float time)
+        {
+            if(time <= keys.front().mTime)
+                return keys.front().mValue;
+            if(time >= keys.back().mTime)
+                return keys.back().mValue;
+
+            Nif::FloatKeyList::VecType::const_iterator iter(keys.begin()+1);
+            for(;iter != keys.end();iter++)
+            {
+                if(iter->mTime < time)
+                    continue;
+
+                Nif::FloatKeyList::VecType::const_iterator last(iter-1);
+                float a = (time-last->mTime) / (iter->mTime-last->mTime);
+                return last->mValue + ((iter->mValue - last->mValue)*a);
+            }
+            return keys.back().mValue;
+        }
+
+        static Ogre::Vector3 interpKey(const Nif::Vector3KeyList::VecType &keys, float time)
+        {
+            if(time <= keys.front().mTime)
+                return keys.front().mValue;
+            if(time >= keys.back().mTime)
+                return keys.back().mValue;
+
+            Nif::Vector3KeyList::VecType::const_iterator iter(keys.begin()+1);
+            for(;iter != keys.end();iter++)
+            {
+                if(iter->mTime < time)
+                    continue;
+
+                Nif::Vector3KeyList::VecType::const_iterator last(iter-1);
+                float a = (time-last->mTime) / (iter->mTime-last->mTime);
+                return last->mValue + ((iter->mValue - last->mValue)*a);
+            }
+            return keys.back().mValue;
+        }
+
+        static Ogre::Quaternion interpKey(const Nif::QuaternionKeyList::VecType &keys, float time)
+        {
+            if(time <= keys.front().mTime)
+                return keys.front().mValue;
+            if(time >= keys.back().mTime)
+                return keys.back().mValue;
+
+            Nif::QuaternionKeyList::VecType::const_iterator iter(keys.begin()+1);
+            for(;iter != keys.end();iter++)
+            {
+                if(iter->mTime < time)
+                    continue;
+
+                Nif::QuaternionKeyList::VecType::const_iterator last(iter-1);
+                float a = (time-last->mTime) / (iter->mTime-last->mTime);
+                return Ogre::Quaternion::nlerp(a, last->mValue, iter->mValue);
+            }
+            return Ogre::Quaternion();
+        }
+
     public:
         Value(Ogre::Node *target, const Nif::NiKeyframeData *data)
           : NodeTargetValue<Ogre::Real>(target)
@@ -177,6 +242,16 @@ public:
           , mTranslations(data->mTranslations)
           , mScales(data->mScales)
         { }
+
+        virtual void applyToNode(Ogre::Node *node, float time) const
+        {
+            if(mRotations.mKeys.size() > 0)
+                node->setOrientation(interpKey(mRotations.mKeys, time));
+            if(mTranslations.mKeys.size() > 0)
+                node->setPosition(interpKey(mTranslations.mKeys, time));
+            if(mScales.mKeys.size() > 0)
+                node->setScale(Ogre::Vector3(interpKey(mScales.mKeys, time)));
+        }
 
         virtual Ogre::Real getValue() const
         {
@@ -186,69 +261,7 @@ public:
 
         virtual void setValue(Ogre::Real time)
         {
-            if(mRotations.mKeys.size() > 0)
-            {
-                if(time <= mRotations.mKeys.front().mTime)
-                    mNode->setOrientation(mRotations.mKeys.front().mValue);
-                else if(time >= mRotations.mKeys.back().mTime)
-                    mNode->setOrientation(mRotations.mKeys.back().mValue);
-                else
-                {
-                    Nif::QuaternionKeyList::VecType::const_iterator iter(mRotations.mKeys.begin()+1);
-                    for(;iter != mRotations.mKeys.end();iter++)
-                    {
-                        if(iter->mTime < time)
-                            continue;
-
-                        Nif::QuaternionKeyList::VecType::const_iterator last(iter-1);
-                        float a = (time-last->mTime) / (iter->mTime-last->mTime);
-                        mNode->setOrientation(Ogre::Quaternion::nlerp(a, last->mValue, iter->mValue));
-                        break;
-                    }
-                }
-            }
-            if(mTranslations.mKeys.size() > 0)
-            {
-                if(time <= mTranslations.mKeys.front().mTime)
-                    mNode->setPosition(mTranslations.mKeys.front().mValue);
-                else if(time >= mTranslations.mKeys.back().mTime)
-                    mNode->setPosition(mTranslations.mKeys.back().mValue);
-                else
-                {
-                    Nif::Vector3KeyList::VecType::const_iterator iter(mTranslations.mKeys.begin()+1);
-                    for(;iter != mTranslations.mKeys.end();iter++)
-                    {
-                        if(iter->mTime < time)
-                            continue;
-
-                        Nif::Vector3KeyList::VecType::const_iterator last(iter-1);
-                        float a = (time-last->mTime) / (iter->mTime-last->mTime);
-                        mNode->setPosition(last->mValue + ((iter->mValue - last->mValue)*a));
-                        break;
-                    }
-                }
-            }
-            if(mScales.mKeys.size() > 0)
-            {
-                if(time <= mScales.mKeys.front().mTime)
-                    mNode->setScale(Ogre::Vector3(mScales.mKeys.front().mValue));
-                else if(time >= mScales.mKeys.back().mTime)
-                    mNode->setScale(Ogre::Vector3(mScales.mKeys.back().mValue));
-                else
-                {
-                    Nif::FloatKeyList::VecType::const_iterator iter(mScales.mKeys.begin()+1);
-                    for(;iter != mScales.mKeys.end();iter++)
-                    {
-                        if(iter->mTime < time)
-                            continue;
-
-                        Nif::FloatKeyList::VecType::const_iterator last(iter-1);
-                        float a = (time-last->mTime) / (iter->mTime-last->mTime);
-                        mNode->setScale(Ogre::Vector3(last->mValue + ((iter->mValue - last->mValue)*a)));
-                        break;
-                    }
-                }
-            }
+            Value::applyToNode(mNode, time);
         }
     };
 
