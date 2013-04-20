@@ -575,6 +575,44 @@ class NIFObjectLoader
     }
 
 
+    static void createNodeControllers(const std::string &name, Nif::ControllerPtr ctrl, ObjectList &objectlist, int animflags)
+    {
+        do {
+            if(ctrl->recType == Nif::RC_NiVisController)
+            {
+                const Nif::NiVisController *vis = static_cast<const Nif::NiVisController*>(ctrl.getPtr());
+
+                int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, ctrl->target->recIndex);
+                Ogre::Bone *trgtbone = objectlist.mSkelBase->getSkeleton()->getBone(trgtid);
+                Ogre::ControllerValueRealPtr srcval((animflags&Nif::NiNode::AnimFlag_AutoPlay) ?
+                                                    Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
+                                                    Ogre::ControllerValueRealPtr());
+                Ogre::ControllerValueRealPtr dstval(OGRE_NEW VisController::Value(trgtbone, vis->data.getPtr()));
+                Ogre::ControllerFunctionRealPtr func(OGRE_NEW VisController::Function(vis, (animflags&Nif::NiNode::AnimFlag_AutoPlay)));
+
+                objectlist.mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
+            }
+            else if(ctrl->recType == Nif::RC_NiKeyframeController)
+            {
+                const Nif::NiKeyframeController *key = static_cast<const Nif::NiKeyframeController*>(ctrl.getPtr());
+                if(!key->data.empty())
+                {
+                    int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, ctrl->target->recIndex);
+                    Ogre::Bone *trgtbone = objectlist.mSkelBase->getSkeleton()->getBone(trgtid);
+                    Ogre::ControllerValueRealPtr srcval((animflags&Nif::NiNode::AnimFlag_AutoPlay) ?
+                                                        Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
+                                                        Ogre::ControllerValueRealPtr());
+                    Ogre::ControllerValueRealPtr dstval(OGRE_NEW KeyframeController::Value(trgtbone, key->data.getPtr()));
+                    Ogre::ControllerFunctionRealPtr func(OGRE_NEW KeyframeController::Function(key, (animflags&Nif::NiNode::AnimFlag_AutoPlay)));
+
+                    objectlist.mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
+                }
+            }
+            ctrl = ctrl->next;
+        } while(!ctrl.empty());
+    }
+
+
     static void createObjects(const std::string &name, const std::string &group,
                               Ogre::SceneManager *sceneMgr, const Nif::Node *node,
                               ObjectList &objectlist, int flags, int animflags, int partflags)
@@ -613,47 +651,14 @@ class NIFObjectLoader
             e = e->extra;
         }
 
+        if(!node->controller.empty())
+            createNodeControllers(name, node->controller, objectlist, animflags);
+
         if(node->recType == Nif::RC_NiCamera)
         {
             int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, node->recIndex);
             Ogre::Bone *trgtbone = objectlist.mSkelBase->getSkeleton()->getBone(trgtid);
             objectlist.mCameras.push_back(trgtbone);
-        }
-
-        Nif::ControllerPtr ctrl = node->controller;
-        while(!ctrl.empty())
-        {
-            if(ctrl->recType == Nif::RC_NiVisController)
-            {
-                const Nif::NiVisController *vis = static_cast<const Nif::NiVisController*>(ctrl.getPtr());
-
-                int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, ctrl->target->recIndex);
-                Ogre::Bone *trgtbone = objectlist.mSkelBase->getSkeleton()->getBone(trgtid);
-                Ogre::ControllerValueRealPtr srcval((animflags&Nif::NiNode::AnimFlag_AutoPlay) ?
-                                                    Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
-                                                    Ogre::ControllerValueRealPtr());
-                Ogre::ControllerValueRealPtr dstval(OGRE_NEW VisController::Value(trgtbone, vis->data.getPtr()));
-                Ogre::ControllerFunctionRealPtr func(OGRE_NEW VisController::Function(vis, (animflags&Nif::NiNode::AnimFlag_AutoPlay)));
-
-                objectlist.mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
-            }
-            else if(ctrl->recType == Nif::RC_NiKeyframeController)
-            {
-                const Nif::NiKeyframeController *key = static_cast<const Nif::NiKeyframeController*>(ctrl.getPtr());
-                if(!key->data.empty())
-                {
-                    int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, ctrl->target->recIndex);
-                    Ogre::Bone *trgtbone = objectlist.mSkelBase->getSkeleton()->getBone(trgtid);
-                    Ogre::ControllerValueRealPtr srcval((animflags&Nif::NiNode::AnimFlag_AutoPlay) ?
-                                                        Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
-                                                        Ogre::ControllerValueRealPtr());
-                    Ogre::ControllerValueRealPtr dstval(OGRE_NEW KeyframeController::Value(trgtbone, key->data.getPtr()));
-                    Ogre::ControllerFunctionRealPtr func(OGRE_NEW KeyframeController::Function(key, (animflags&Nif::NiNode::AnimFlag_AutoPlay)));
-
-                    objectlist.mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
-                }
-            }
-            ctrl = ctrl->next;
         }
 
         if(node->recType == Nif::RC_NiTriShape && !(flags&0x80000000))
