@@ -475,7 +475,7 @@ namespace MWWorld
             cell.mData.mX = x, cell.mData.mY = y;
 
             std::pair<int, int> key(x, y);
-            std::map<std::pair<int, int>, ESM::Cell>::const_iterator it = mExt.find(key);
+            DynamicExt::const_iterator it = mExt.find(key);
             if (it != mExt.end()) {
                 return &(it->second);
             }
@@ -493,7 +493,7 @@ namespace MWWorld
             cell.mData.mX = x, cell.mData.mY = y;
 
             std::pair<int, int> key(x, y);
-            std::map<std::pair<int, int>, ESM::Cell>::const_iterator it = mExt.find(key);
+            DynamicExt::const_iterator it = mExt.find(key);
             if (it != mExt.end()) {
                 return &(it->second);
             }
@@ -534,7 +534,7 @@ namespace MWWorld
 
         void setUp() {
             //typedef std::vector<ESM::Cell>::iterator Iterator;
-            typedef std::map<std::pair<int, int>, ESM::Cell>::iterator ExtIterator;
+            typedef DynamicExt::iterator ExtIterator;
             typedef std::map<std::string, ESM::Cell>::iterator IntIterator;
 
             //std::sort(mInt.begin(), mInt.end(), RecordCmp());
