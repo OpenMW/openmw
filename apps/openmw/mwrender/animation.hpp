@@ -38,6 +38,7 @@ protected:
             mAnimation->mCurrentTime = value;
         }
     };
+    Ogre::SharedPtr<Ogre::ControllerValue<Ogre::Real> > mAnimationBaseValuePtr;
 
     MWWorld::Ptr mPtr;
     MWMechanics::CharacterController *mController;

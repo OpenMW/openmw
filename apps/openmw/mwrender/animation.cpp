@@ -32,7 +32,8 @@ void Animation::destroyObjectList(Ogre::SceneManager *sceneMgr, NifOgre::ObjectL
 }
 
 Animation::Animation(const MWWorld::Ptr &ptr)
-    : mPtr(ptr)
+    : mAnimationBaseValuePtr(OGRE_NEW AnimationValue(this))
+    , mPtr(ptr)
     , mController(NULL)
     , mInsert(NULL)
     , mSkelBase(NULL)
@@ -70,7 +71,6 @@ void Animation::addObjectList(Ogre::SceneNode *node, const std::string &model, b
         mInsert = node->createChildSceneNode();
         assert(mInsert);
     }
-    Ogre::SharedPtr<Ogre::ControllerValue<Ogre::Real> > ctrlval(OGRE_NEW AnimationValue(this));
 
     mObjectLists.push_back(!baseonly ? NifOgre::Loader::createObjects(mInsert, model) :
                                        NifOgre::Loader::createObjectBase(mInsert, model));
@@ -145,7 +145,7 @@ void Animation::addObjectList(Ogre::SceneNode *node, const std::string &model, b
     for(size_t i = 0;i < objlist.mControllers.size();i++)
     {
         if(objlist.mControllers[i].getSource().isNull())
-            objlist.mControllers[i].setSource(ctrlval);
+            objlist.mControllers[i].setSource(mAnimationBaseValuePtr);
     }
 
     if(!mCurrentControllers || (*mCurrentControllers).size() == 0)
