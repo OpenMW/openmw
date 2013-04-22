@@ -41,12 +41,12 @@ Animation::Animation(const MWWorld::Ptr &ptr)
     , mNonAccumRoot(NULL)
     , mAccumulate(0.0f)
     , mLastPosition(0.0f)
-    , mCurrentAnim(NULL)
     , mCurrentControllers(NULL)
     , mCurrentKeys(NULL)
     , mCurrentTime(0.0f)
     , mPlaying(false)
     , mLooping(false)
+    , mNonAccumCtrl(NULL)
     , mAnimVelocity(0.0f)
     , mAnimSpeedMult(1.0f)
 {
@@ -209,48 +209,31 @@ void Animation::updatePtr(const MWWorld::Ptr &ptr)
 }
 
 
-float Animation::calcAnimVelocity(Ogre::Animation *anim, const std::string &bonename, const std::string &groupname, const NifOgre::TextKeyMap *keys)
+float Animation::calcAnimVelocity(NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl, const std::string &groupname, const NifOgre::TextKeyMap *keys)
 {
-    const Ogre::NodeAnimationTrack *track = 0;
-
-    Ogre::Animation::NodeTrackIterator trackiter = anim->getNodeTrackIterator();
-    while(!track && trackiter.hasMoreElements())
+    const std::string loopstart = groupname+": loop start";
+    const std::string loopstop = groupname+": loop stop";
+    float loopstarttime = 0.0f;
+    float loopstoptime = std::numeric_limits<float>::max();
+    NifOgre::TextKeyMap::const_iterator keyiter = keys->begin();
+    while(keyiter != keys->end())
     {
-        const Ogre::NodeAnimationTrack *cur = trackiter.getNext();
-        if(cur->getAssociatedNode()->getName() == bonename)
-            track = cur;
+        if(keyiter->second == loopstart)
+            loopstarttime = keyiter->first;
+        else if(keyiter->second == loopstop)
+        {
+            loopstoptime = keyiter->first;
+            break;
+        }
+        keyiter++;
     }
 
-    if(track && track->getNumKeyFrames() > 1)
+    if(loopstoptime > loopstarttime)
     {
-        const std::string loopstart = groupname+": loop start";
-        const std::string loopstop = groupname+": loop stop";
-        float loopstarttime = 0.0f;
-        float loopstoptime = anim->getLength();
-        NifOgre::TextKeyMap::const_iterator keyiter = keys->begin();
-        while(keyiter != keys->end())
-        {
-            if(keyiter->second == loopstart)
-                loopstarttime = keyiter->first;
-            else if(keyiter->second == loopstop)
-            {
-                loopstoptime = keyiter->first;
-                break;
-            }
-            keyiter++;
-        }
+        Ogre::Vector3 startpos = nonaccumctrl->getTranslation(loopstarttime);
+        Ogre::Vector3 endpos = nonaccumctrl->getTranslation(loopstarttime);
 
-        if(loopstoptime > loopstarttime)
-        {
-            Ogre::TransformKeyFrame startkf(0, loopstarttime);
-            Ogre::TransformKeyFrame endkf(0, loopstoptime);
-
-            track->getInterpolatedKeyFrame(anim->_getTimeIndex(loopstarttime), &startkf);
-            track->getInterpolatedKeyFrame(anim->_getTimeIndex(loopstoptime), &endkf);
-
-            return startkf.getTranslate().distance(endkf.getTranslate()) /
-                   (loopstoptime-loopstarttime);
-        }
+        return startpos.distance(endpos) / (loopstoptime-loopstarttime);
     }
 
     return 0.0f;
@@ -298,20 +281,8 @@ Ogre::Vector3 Animation::updatePosition()
 {
     Ogre::Vector3 posdiff;
 
-    Ogre::TransformKeyFrame kf(0, mCurrentTime);
-    Ogre::Animation::NodeTrackIterator trackiter = mCurrentAnim->getNodeTrackIterator();
-    while(trackiter.hasMoreElements())
-    {
-        const Ogre::NodeAnimationTrack *track = trackiter.getNext();
-        if(track->getAssociatedNode()->getName() == mNonAccumRoot->getName())
-        {
-            track->getInterpolatedKeyFrame(mCurrentAnim->_getTimeIndex(mCurrentTime), &kf);
-            break;
-        }
-    }
-
     /* Get the non-accumulation root's difference from the last update. */
-    posdiff = (kf.getTranslate() - mLastPosition) * mAccumulate;
+    posdiff = (mNonAccumCtrl->getTranslation(mCurrentTime) - mLastPosition) * mAccumulate;
 
     /* Translate the accumulation root back to compensate for the move. */
     mLastPosition += posdiff;
@@ -344,24 +315,9 @@ void Animation::reset(const std::string &start, const std::string &stop)
             mStopKey--;
     }
 
-    if(mNonAccumRoot)
-    {
-        const Ogre::NodeAnimationTrack *track = 0;
-        Ogre::Animation::NodeTrackIterator trackiter = mCurrentAnim->getNodeTrackIterator();
-        while(!track && trackiter.hasMoreElements())
-        {
-            const Ogre::NodeAnimationTrack *cur = trackiter.getNext();
-            if(cur->getAssociatedNode()->getName() == mNonAccumRoot->getName())
-                track = cur;
-        }
-
-        if(track)
-        {
-            Ogre::TransformKeyFrame kf(0, mCurrentTime);
-            track->getInterpolatedKeyFrame(mCurrentAnim->_getTimeIndex(mCurrentTime), &kf);
-            mLastPosition = kf.getTranslate() * mAccumulate;
-        }
-    }
+    if(mNonAccumCtrl)
+        mLastPosition = mNonAccumCtrl->getTranslation(mCurrentTime) *
+                        mAccumulate;
 }
 
 
@@ -431,24 +387,34 @@ void Animation::play(const std::string &groupname, const std::string &start, con
         {
             if(iter->mSkelBase && iter->mSkelBase->hasAnimationState(groupname))
             {
-                Ogre::SkeletonInstance *skel = iter->mSkelBase->getSkeleton();
-                Ogre::Animation *anim = skel->getAnimation(groupname);
                 const NifOgre::TextKeyMap *keys = &iter->mTextKeys.begin()->second;
+                NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl = NULL;
+                for(size_t i = 0;i < iter->mControllers.size();i++)
+                {
+                    NifOgre::NodeTargetValue<Ogre::Real> *dstval;
+                    dstval = dynamic_cast<NifOgre::NodeTargetValue<Ogre::Real>*>(iter->mControllers[i].getDestination().getPointer());
+                    if(dstval && dstval->getNode() == mNonAccumRoot)
+                    {
+                        nonaccumctrl = dstval;
+                        break;
+                    }
+                }
+
                 if(!foundanim)
                 {
-                    mCurrentAnim = anim;
                     mCurrentKeys = keys;
                     mCurrentGroup = groupname;
                     mCurrentControllers = &iter->mControllers;
-
+                    mNonAccumCtrl = nonaccumctrl;
                     mAnimVelocity = 0.0f;
+
                     foundanim = true;
                 }
 
                 if(!mNonAccumRoot)
                     break;
 
-                mAnimVelocity = calcAnimVelocity(anim, mNonAccumRoot->getName(), groupname, keys);
+                mAnimVelocity = calcAnimVelocity(nonaccumctrl, groupname, keys);
                 if(mAnimVelocity > 0.0f) break;
             }
         }
@@ -469,7 +435,7 @@ Ogre::Vector3 Animation::runAnimation(float timepassed)
     Ogre::Vector3 movement(0.0f);
 
     timepassed *= mAnimSpeedMult;
-    while(mCurrentAnim && mPlaying)
+    while(!mCurrentGroup.empty() && mPlaying)
     {
         float targetTime = mCurrentTime + timepassed;
         if(mNextKey->first > targetTime)

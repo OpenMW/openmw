@@ -50,7 +50,6 @@ protected:
     Ogre::Bone *mNonAccumRoot;
     Ogre::Vector3 mAccumulate;
     Ogre::Vector3 mLastPosition;
-    Ogre::Animation *mCurrentAnim;
 
     std::string mCurrentGroup;
     std::vector<Ogre::Controller<Ogre::Real> > *mCurrentControllers;
@@ -62,10 +61,11 @@ protected:
     bool mPlaying;
     bool mLooping;
 
+    NifOgre::NodeTargetValue<Ogre::Real> *mNonAccumCtrl;
     float mAnimVelocity;
     float mAnimSpeedMult;
 
-    static float calcAnimVelocity(Ogre::Animation *anim, const std::string &bonename,
+    static float calcAnimVelocity(NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl,
                                   const std::string &groupname, const NifOgre::TextKeyMap *keys);
 
     /* Updates a skeleton instance so that all bones matching the source skeleton (based on
