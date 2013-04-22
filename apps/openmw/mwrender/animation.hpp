@@ -54,7 +54,7 @@ protected:
 
     std::string mCurrentGroup;
     std::vector<Ogre::Controller<Ogre::Real> > *mCurrentControllers;
-    NifOgre::TextKeyMap *mCurrentKeys;
+    const NifOgre::TextKeyMap *mCurrentKeys;
     NifOgre::TextKeyMap::const_iterator mStartKey;
     NifOgre::TextKeyMap::const_iterator mStopKey;
     NifOgre::TextKeyMap::const_iterator mNextKey;
@@ -65,7 +65,8 @@ protected:
     float mAnimVelocity;
     float mAnimSpeedMult;
 
-    void calcAnimVelocity();
+    static float calcAnimVelocity(Ogre::Animation *anim, const std::string &bonename,
+                                  const std::string &groupname, const NifOgre::TextKeyMap *keys);
 
     /* Updates a skeleton instance so that all bones matching the source skeleton (based on
      * bone names) are positioned identically. */

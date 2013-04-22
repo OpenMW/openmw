@@ -209,26 +209,26 @@ void Animation::updatePtr(const MWWorld::Ptr &ptr)
 }
 
 
-void Animation::calcAnimVelocity()
+float Animation::calcAnimVelocity(Ogre::Animation *anim, const std::string &bonename, const std::string &groupname, const NifOgre::TextKeyMap *keys)
 {
     const Ogre::NodeAnimationTrack *track = 0;
 
-    Ogre::Animation::NodeTrackIterator trackiter = mCurrentAnim->getNodeTrackIterator();
+    Ogre::Animation::NodeTrackIterator trackiter = anim->getNodeTrackIterator();
     while(!track && trackiter.hasMoreElements())
     {
         const Ogre::NodeAnimationTrack *cur = trackiter.getNext();
-        if(cur->getAssociatedNode()->getName() == mNonAccumRoot->getName())
+        if(cur->getAssociatedNode()->getName() == bonename)
             track = cur;
     }
 
     if(track && track->getNumKeyFrames() > 1)
     {
-        const std::string loopstart = mCurrentGroup+": loop start";
-        const std::string loopstop = mCurrentGroup+": loop stop";
+        const std::string loopstart = groupname+": loop start";
+        const std::string loopstop = groupname+": loop stop";
         float loopstarttime = 0.0f;
-        float loopstoptime = mCurrentAnim->getLength();
-        NifOgre::TextKeyMap::const_iterator keyiter = mCurrentKeys->begin();
-        while(keyiter != mCurrentKeys->end())
+        float loopstoptime = anim->getLength();
+        NifOgre::TextKeyMap::const_iterator keyiter = keys->begin();
+        while(keyiter != keys->end())
         {
             if(keyiter->second == loopstart)
                 loopstarttime = keyiter->first;
@@ -245,13 +245,15 @@ void Animation::calcAnimVelocity()
             Ogre::TransformKeyFrame startkf(0, loopstarttime);
             Ogre::TransformKeyFrame endkf(0, loopstoptime);
 
-            track->getInterpolatedKeyFrame(mCurrentAnim->_getTimeIndex(loopstarttime), &startkf);
-            track->getInterpolatedKeyFrame(mCurrentAnim->_getTimeIndex(loopstoptime), &endkf);
+            track->getInterpolatedKeyFrame(anim->_getTimeIndex(loopstarttime), &startkf);
+            track->getInterpolatedKeyFrame(anim->_getTimeIndex(loopstoptime), &endkf);
 
-            mAnimVelocity = startkf.getTranslate().distance(endkf.getTranslate()) /
-                            (loopstoptime-loopstarttime);
+            return startkf.getTranslate().distance(endkf.getTranslate()) /
+                   (loopstoptime-loopstarttime);
         }
     }
+
+    return 0.0f;
 }
 
 static void updateBoneTree(const Ogre::SkeletonInstance *skelsrc, Ogre::Bone *bone)
@@ -423,27 +425,34 @@ bool Animation::handleEvent(float time, const std::string &evt)
 void Animation::play(const std::string &groupname, const std::string &start, const std::string &stop, bool loop)
 {
     try {
-        bool found = false;
+        bool foundanim = false;
         /* Look in reverse; last-inserted source has priority. */
         for(std::vector<NifOgre::ObjectList>::reverse_iterator iter(mObjectLists.rbegin());iter != mObjectLists.rend();iter++)
         {
             if(iter->mSkelBase && iter->mSkelBase->hasAnimationState(groupname))
             {
                 Ogre::SkeletonInstance *skel = iter->mSkelBase->getSkeleton();
-                mCurrentAnim = skel->getAnimation(groupname);
-                mCurrentKeys = &iter->mTextKeys.begin()->second;
-                mCurrentGroup = groupname;
-                mCurrentControllers = &iter->mControllers;
+                Ogre::Animation *anim = skel->getAnimation(groupname);
+                const NifOgre::TextKeyMap *keys = &iter->mTextKeys.begin()->second;
+                if(!foundanim)
+                {
+                    mCurrentAnim = anim;
+                    mCurrentKeys = keys;
+                    mCurrentGroup = groupname;
+                    mCurrentControllers = &iter->mControllers;
 
-                mAnimVelocity = 0.0f;
-                if(mNonAccumRoot)
-                    calcAnimVelocity();
+                    mAnimVelocity = 0.0f;
+                    foundanim = true;
+                }
 
-                found = true;
-                break;
+                if(!mNonAccumRoot)
+                    break;
+
+                mAnimVelocity = calcAnimVelocity(anim, mNonAccumRoot->getName(), groupname, keys);
+                if(mAnimVelocity > 0.0f) break;
             }
         }
-        if(!found)
+        if(!foundanim)
             throw std::runtime_error("Failed to find animation "+groupname);
 
         reset(mCurrentGroup+": "+start, mCurrentGroup+": "+stop);
