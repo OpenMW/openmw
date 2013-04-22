@@ -179,7 +179,8 @@ void NIFSkeletonLoader::buildBones(Ogre::Skeleton *skel, const Nif::Node *node, 
             ctrls.push_back(static_cast<const Nif::NiKeyframeController*>(ctrl.getPtr()));
         else if(!(ctrl->recType == Nif::RC_NiParticleSystemController ||
                   ctrl->recType == Nif::RC_NiVisController ||
-                  ctrl->recType == Nif::RC_NiUVController
+                  ctrl->recType == Nif::RC_NiUVController ||
+                  ctrl->recType == Nif::RC_NiGeomMorpherController
                   ))
             warn("Unhandled "+ctrl->recName+" from node "+node->name+" in "+skel->getName());
         ctrl = ctrl->next;

@@ -293,7 +293,7 @@ public:
         }
 
     public:
-        Value(const Ogre::MaterialPtr &material, Nif::NiUVData *data)
+        Value(const Ogre::MaterialPtr &material, const Nif::NiUVData *data)
           : mMaterial(material)
           , mUTrans(data->mKeyList[0])
           , mVTrans(data->mKeyList[1])
@@ -363,6 +363,36 @@ public:
     typedef DefaultFunction Function;
 };
 
+class GeomMorpherController
+{
+public:
+    class Value : public Ogre::ControllerValue<Ogre::Real>
+    {
+    private:
+        Ogre::SubEntity *mSubEntity;
+        std::vector<Nif::NiMorphData::MorphData> mMorphs;
+
+    public:
+        Value(Ogre::SubEntity *subent, const Nif::NiMorphData *data)
+          : mSubEntity(subent)
+          , mMorphs(data->mMorphs)
+        { }
+
+        virtual Ogre::Real getValue() const
+        {
+            // Should not be called
+            return 0.0f;
+        }
+
+        virtual void setValue(Ogre::Real value)
+        {
+            // TODO: Implement
+        }
+    };
+
+    typedef DefaultFunction Function;
+};
+
 
 /** Object creator for NIFs. This is the main class responsible for creating
  * "live" Ogre objects (entities, particle systems, controllers, etc) from
@@ -426,6 +456,19 @@ class NIFObjectLoader
                                                     Ogre::ControllerValueRealPtr());
                 Ogre::ControllerValueRealPtr dstval(OGRE_NEW UVController::Value(material, uv->data.getPtr()));
                 Ogre::ControllerFunctionRealPtr func(OGRE_NEW UVController::Function(uv, (animflags&Nif::NiNode::AnimFlag_AutoPlay)));
+
+                objectlist.mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
+            }
+            else if(ctrl->recType == Nif::RC_NiGeomMorpherController)
+            {
+                const Nif::NiGeomMorpherController *geom = static_cast<const Nif::NiGeomMorpherController*>(ctrl.getPtr());
+
+                Ogre::SubEntity *subent = entity->getSubEntity(0);
+                Ogre::ControllerValueRealPtr srcval((animflags&Nif::NiNode::AnimFlag_AutoPlay) ?
+                                                    Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
+                                                    Ogre::ControllerValueRealPtr());
+                Ogre::ControllerValueRealPtr dstval(OGRE_NEW GeomMorpherController::Value(subent, geom->data.getPtr()));
+                Ogre::ControllerFunctionRealPtr func(OGRE_NEW GeomMorpherController::Function(geom, (animflags&Nif::NiNode::AnimFlag_AutoPlay)));
 
                 objectlist.mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
             }

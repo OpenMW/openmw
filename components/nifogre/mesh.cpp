@@ -116,6 +116,20 @@ void NIFMeshLoader::createSubMesh(Ogre::Mesh *mesh, const Nif::NiTriShape *shape
     std::vector<Ogre::Vector3> srcNorms = data->normals;
     Ogre::HardwareBuffer::Usage vertUsage = Ogre::HardwareBuffer::HBU_STATIC;
     bool vertShadowBuffer = false;
+
+    if(!shape->controller.empty())
+    {
+        Nif::ControllerPtr ctrl = shape->controller;
+        do {
+            if(ctrl->recType == Nif::RC_NiGeomMorpherController)
+            {
+                vertUsage = Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY;
+                vertShadowBuffer = true;
+                break;
+            }
+        } while(!(ctrl=ctrl->next).empty());
+    }
+
     if(skin != NULL)
     {
         vertUsage = Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY;
