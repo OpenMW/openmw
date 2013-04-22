@@ -55,6 +55,7 @@ protected:
     std::vector<Ogre::Controller<Ogre::Real> > *mCurrentControllers;
     const NifOgre::TextKeyMap *mCurrentKeys;
     NifOgre::TextKeyMap::const_iterator mStartKey;
+    NifOgre::TextKeyMap::const_iterator mLoopStartKey;
     NifOgre::TextKeyMap::const_iterator mStopKey;
     NifOgre::TextKeyMap::const_iterator mNextKey;
     float mCurrentTime;
@@ -82,7 +83,9 @@ protected:
      */
     void reset(const std::string &start, const std::string &stop=std::string());
 
-    bool handleEvent(float time, const std::string &evt);
+    void doLoop();
+
+    bool handleTextKey(const NifOgre::TextKeyMap::const_iterator &key);
 
     void addObjectList(Ogre::SceneNode *node, const std::string &model, bool baseonly);
     static void destroyObjectList(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList &objects);

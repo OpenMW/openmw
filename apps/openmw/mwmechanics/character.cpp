@@ -123,7 +123,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
         mAnimation->setAccumulation(Ogre::Vector3(0.0f));
     }
     if(mAnimation->hasAnimation(mCurrentGroup))
-        mAnimation->play(mCurrentGroup, "stop", "stop", loop);
+        mAnimation->play(mCurrentGroup, "start", "stop", loop);
 }
 
 CharacterController::CharacterController(const CharacterController &rhs)

@@ -293,36 +293,51 @@ Ogre::Vector3 Animation::updatePosition()
 
 void Animation::reset(const std::string &start, const std::string &stop)
 {
+    std::string tag = mCurrentGroup+": "+start;
     mStartKey = mCurrentKeys->begin();
-
-    while(mStartKey != mCurrentKeys->end() && mStartKey->second != start)
+    while(mStartKey != mCurrentKeys->end() && mStartKey->second != tag)
         mStartKey++;
-    if(mStartKey != mCurrentKeys->end())
-        mCurrentTime = mStartKey->first;
-    else
+    if(mStartKey == mCurrentKeys->end() && tag == "loop start")
     {
+        tag = mCurrentGroup+": start";
         mStartKey = mCurrentKeys->begin();
-        mCurrentTime = mStartKey->first;
+        while(mStartKey != mCurrentKeys->end() && mStartKey->second != tag)
+            mStartKey++;
     }
-    mNextKey = mStartKey;
+    if(mStartKey == mCurrentKeys->end())
+        mStartKey = mCurrentKeys->begin();
 
-    if(stop.length() > 0)
-    {
-        mStopKey = mStartKey;
-        while(mStopKey != mCurrentKeys->end() && mStopKey->second != stop)
-            mStopKey++;
-        if(mStopKey == mCurrentKeys->end())
-            mStopKey--;
-    }
+    tag = mCurrentGroup+": "+stop;
+    mStopKey = mStartKey;
+    while(mStopKey != mCurrentKeys->end() && mStopKey->second != tag)
+        mStopKey++;
+    if(mStopKey == mCurrentKeys->end())
+        mStopKey--;
+
+    mCurrentTime = mStartKey->first;
+    mLoopStartKey = mStartKey;
+    mNextKey = mStartKey;
+    ++mNextKey;
 
     if(mNonAccumCtrl)
-        mLastPosition = mNonAccumCtrl->getTranslation(mCurrentTime) *
-                        mAccumulate;
+        mLastPosition = mNonAccumCtrl->getTranslation(mCurrentTime) * mAccumulate;
+}
+
+void Animation::doLoop()
+{
+    mCurrentTime = mLoopStartKey->first;
+    mNextKey = mLoopStartKey;
+    ++mNextKey;
+    if(mNonAccumCtrl)
+        mLastPosition = mNonAccumCtrl->getTranslation(mCurrentTime) * mAccumulate;
 }
 
 
-bool Animation::handleEvent(float time, const std::string &evt)
+bool Animation::handleTextKey(const NifOgre::TextKeyMap::const_iterator &key)
 {
+    float time = key->first;
+    const std::string &evt = key->second;
+
     if(evt.compare(0, 7, "sound: ") == 0)
     {
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
@@ -347,25 +362,15 @@ bool Animation::handleEvent(float time, const std::string &evt)
 
     if(evt.compare(off, len, "start") == 0 || evt.compare(off, len, "loop start") == 0)
     {
-        /* Do nothing */
+        mLoopStartKey = key;
         return true;
     }
 
-    if(evt.compare(off, len, "loop stop") == 0)
+    if(evt.compare(off, len, "loop stop") == 0 || evt.compare(off, len, "stop") == 0)
     {
         if(mLooping)
         {
-            reset(mCurrentGroup+": loop start");
-            if(mCurrentTime >= time)
-                return false;
-            return true;
-        }
-    }
-    else if(evt.compare(off, len, "stop") == 0)
-    {
-        if(mLooping)
-        {
-            reset(mCurrentGroup+": loop start");
+            doLoop();
             if(mCurrentTime >= time)
                 return false;
             return true;
@@ -421,7 +426,7 @@ void Animation::play(const std::string &groupname, const std::string &start, con
         if(!foundanim)
             throw std::runtime_error("Failed to find animation "+groupname);
 
-        reset(mCurrentGroup+": "+start, mCurrentGroup+": "+stop);
+        reset(start, stop);
         setLooping(loop);
         mPlaying = true;
     }
@@ -446,18 +451,15 @@ Ogre::Vector3 Animation::runAnimation(float timepassed)
             break;
         }
 
-        float time = mNextKey->first;
-        const std::string &evt = mNextKey->second;
-        mNextKey++;
-
-        mCurrentTime = time;
+        NifOgre::TextKeyMap::const_iterator key(mNextKey++);
+        mCurrentTime = key->first;
         if(mNonAccumRoot)
             movement += updatePosition();
 
         mPlaying = (mLooping || mStopKey->first > mCurrentTime);
         timepassed = targetTime - mCurrentTime;
 
-        if(!handleEvent(time, evt))
+        if(!handleTextKey(key))
             break;
     }
 
