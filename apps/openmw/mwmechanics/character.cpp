@@ -150,6 +150,15 @@ void CharacterController::updatePtr(const MWWorld::Ptr &ptr)
 
 void CharacterController::markerEvent(float time, const std::string &evt)
 {
+    if(evt == "loop stop")
+    {
+        if(mAnimQueue.size() >= 2 && mAnimQueue[0] == mAnimQueue[1])
+        {
+            mAnimQueue.pop_front();
+            mAnimation->play(mCurrentGroup, "loop start", "stop", false);
+        }
+        return;
+    }
     if(evt == "stop")
     {
         if(mAnimQueue.size() >= 2 && mAnimQueue[0] == mAnimQueue[1])

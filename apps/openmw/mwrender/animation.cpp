@@ -409,10 +409,10 @@ bool Animation::handleEvent(float time, const std::string &evt)
             reset("loop start");
             if(mCurrentTime >= time)
                 return false;
+            return true;
         }
-        return true;
     }
-    if(evt == "stop")
+    else if(evt == "stop")
     {
         if(mLooping)
         {
