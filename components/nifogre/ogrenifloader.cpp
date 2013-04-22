@@ -135,11 +135,14 @@ public:
           , mData(data->mVis)
         { }
 
-        virtual void applyToNode(Ogre::Node *node, float time) const
-        {
-            bool vis = calculate(time);
-            setVisible(node, vis);
-        }
+        virtual Ogre::Quaternion getRotation(float time) const
+        { return Ogre::Quaternion(); }
+
+        virtual Ogre::Vector3 getTranslation(float time) const
+        { return Ogre::Vector3(0.0f); }
+
+        virtual Ogre::Vector3 getScale(float time) const
+        { return Ogre::Vector3(1.0f); }
 
         virtual Ogre::Real getValue() const
         {
@@ -149,7 +152,8 @@ public:
 
         virtual void setValue(Ogre::Real time)
         {
-            Value::applyToNode(mNode, time);
+            bool vis = calculate(time);
+            setVisible(mNode, vis);
         }
     };
 
@@ -223,7 +227,7 @@ public:
                 float a = (time-last->mTime) / (iter->mTime-last->mTime);
                 return Ogre::Quaternion::nlerp(a, last->mValue, iter->mValue);
             }
-            return Ogre::Quaternion();
+            return keys.back().mValue;
         }
 
     public:
@@ -234,14 +238,25 @@ public:
           , mScales(data->mScales)
         { }
 
-        virtual void applyToNode(Ogre::Node *node, float time) const
+        virtual Ogre::Quaternion getRotation(float time) const
         {
             if(mRotations.mKeys.size() > 0)
-                node->setOrientation(interpKey(mRotations.mKeys, time));
+                return interpKey(mRotations.mKeys, time);
+            return Ogre::Quaternion();
+        }
+
+        virtual Ogre::Vector3 getTranslation(float time) const
+        {
             if(mTranslations.mKeys.size() > 0)
-                node->setPosition(interpKey(mTranslations.mKeys, time));
+                return interpKey(mTranslations.mKeys, time);
+            return Ogre::Vector3(0.0f);
+        }
+
+        virtual Ogre::Vector3 getScale(float time) const
+        {
             if(mScales.mKeys.size() > 0)
-                node->setScale(Ogre::Vector3(interpKey(mScales.mKeys, time)));
+                return Ogre::Vector3(interpKey(mScales.mKeys, time));
+            return Ogre::Vector3(1.0f);
         }
 
         virtual Ogre::Real getValue() const
@@ -252,7 +267,9 @@ public:
 
         virtual void setValue(Ogre::Real time)
         {
-            Value::applyToNode(mNode, time);
+            mNode->setOrientation(Value::getRotation(time));
+            mNode->setPosition(Value::getTranslation(time));
+            mNode->setScale(Value::getScale(time));
         }
     };
 

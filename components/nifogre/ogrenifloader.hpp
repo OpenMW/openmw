@@ -87,7 +87,9 @@ public:
     NodeTargetValue(Ogre::Node *target) : mNode(target)
     { }
 
-    virtual void applyToNode(Ogre::Node *node, float time) const = 0;
+    virtual Ogre::Quaternion getRotation(T value) const = 0;
+    virtual Ogre::Vector3 getTranslation(T value) const = 0;
+    virtual Ogre::Vector3 getScale(T value) const = 0;
 
     void setNode(Ogre::Node *target)
     { mNode = target; }
