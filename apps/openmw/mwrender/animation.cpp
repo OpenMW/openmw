@@ -97,9 +97,9 @@ void Animation::addObjectList(Ogre::SceneNode *node, const std::string &model, b
         while(boneiter.hasMoreElements())
             boneiter.getNext()->setManuallyControlled(true);
 
+        Ogre::SkeletonInstance *baseinst = mSkelBase->getSkeleton();
         if(mSkelBase != objlist.mSkelBase)
         {
-            Ogre::SkeletonInstance *baseinst = mSkelBase->getSkeleton();
             for(size_t i = 0;i < objlist.mControllers.size();i++)
             {
                 NifOgre::NodeTargetValue<Ogre::Real> *dstval;
@@ -114,23 +114,13 @@ void Animation::addObjectList(Ogre::SceneNode *node, const std::string &model, b
             }
         }
 
-        Ogre::SkeletonPtr skel = Ogre::SkeletonManager::getSingleton().getByName(skelinst->getName());
-        boneiter = skel->getBoneIterator();
-        while(boneiter.hasMoreElements())
+        if(objlist.mTextKeys.size() > 0)
         {
-            Ogre::Bone *bone = boneiter.getNext();
-            Ogre::UserObjectBindings &bindings = bone->getUserObjectBindings();
-            const Ogre::Any &data = bindings.getUserAny(NifOgre::sTextKeyExtraDataID);
-            if(data.isEmpty()) continue;
-
-            objlist.mTextKeys[bone->getHandle()] = Ogre::any_cast<NifOgre::TextKeyMap>(data);
             if(!mNonAccumRoot)
             {
                 mAccumRoot = mInsert;
-                mNonAccumRoot = mSkelBase->getSkeleton()->getBone(bone->getName());
+                mNonAccumRoot = baseinst->getBone(objlist.mTextKeys.begin()->first);
             }
-
-            break;
         }
     }
     for(size_t i = 0;i < objlist.mControllers.size();i++)

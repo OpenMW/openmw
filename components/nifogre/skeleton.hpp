@@ -37,8 +37,6 @@ class NIFSkeletonLoader : public Ogre::ManualResourceLoader
     }
 
     static void buildAnimation(Ogre::Skeleton *skel, const std::string &name, const std::vector<const Nif::NiKeyframeController*> &ctrls, const std::vector<std::string> &targets, float startTime, float stopTime);
-
-    static TextKeyMap extractTextKeys(const Nif::NiTextKeyExtraData *tk);
     void buildBones(Ogre::Skeleton *skel, const Nif::Node *node, Ogre::Bone *&animroot, TextKeyMap &textkeys, std::vector<Nif::NiKeyframeController const*> &ctrls, Ogre::Bone *parent=NULL);
 
     // Lookup to retrieve an Ogre bone handle for a given Nif record index
@@ -48,6 +46,7 @@ class NIFSkeletonLoader : public Ogre::ManualResourceLoader
     static LoaderMap sLoaders;
 
 public:
+    static TextKeyMap extractTextKeys(const Nif::NiTextKeyExtraData *tk);
     void loadResource(Ogre::Resource *resource);
 
     static Ogre::SkeletonPtr createSkeleton(const std::string &name, const std::string &group, const Nif::Node *node);

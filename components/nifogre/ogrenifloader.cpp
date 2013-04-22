@@ -649,7 +649,14 @@ class NIFObjectLoader
         Nif::ExtraPtr e = node->extra;
         while(!e.empty())
         {
-            if(e->recType == Nif::RC_NiStringExtraData)
+            if(e->recType == Nif::RC_NiTextKeyExtraData)
+            {
+                const Nif::NiTextKeyExtraData *tk = static_cast<const Nif::NiTextKeyExtraData*>(e.getPtr());
+
+                int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, node->recIndex);
+                objectlist.mTextKeys[trgtid] = NIFSkeletonLoader::extractTextKeys(tk);
+            }
+            else if(e->recType == Nif::RC_NiStringExtraData)
             {
                 const Nif::NiStringExtraData *sd = static_cast<const Nif::NiStringExtraData*>(e.getPtr());
                 // String markers may contain important information
@@ -661,6 +668,7 @@ class NIFObjectLoader
                     flags |= 0x80000000;
                 }
             }
+
             e = e->extra;
         }
 

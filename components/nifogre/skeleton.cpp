@@ -193,7 +193,6 @@ void NIFSkeletonLoader::buildBones(Ogre::Skeleton *skel, const Nif::Node *node, 
             const Nif::NiTextKeyExtraData *tk = static_cast<const Nif::NiTextKeyExtraData*>(e.getPtr());
             textkeys = extractTextKeys(tk);
             animroot = bone;
-            bone->getUserObjectBindings().setUserAny(sTextKeyExtraDataID, Ogre::Any(textkeys));
         }
         e = e->extra;
     }
@@ -287,16 +286,16 @@ Ogre::SkeletonPtr NIFSkeletonLoader::createSkeleton(const std::string &name, con
 {
     /* We need to be a little aggressive here, since some NIFs have a crap-ton
      * of nodes and Ogre only supports 256 bones. We will skip a skeleton if:
-     * There are no bones used for skinning, there are no controllers on non-
-     * NiTriShape nodes, there are no nodes named "AttachLight", and the tree
-     * consists of NiNode, NiTriShape, and RootCollisionNode types only.
+     * There are no bones used for skinning, there are no controllers, there
+     * are no nodes named "AttachLight", and the tree consists of NiNode,
+     * NiTriShape, and RootCollisionNode types only.
      */
     if(!node->boneTrafo)
     {
-        if(node->recType == Nif::RC_NiTriShape)
-            return Ogre::SkeletonPtr();
         if(node->controller.empty() && node->name != "AttachLight")
         {
+            if(node->recType == Nif::RC_NiTriShape)
+                return Ogre::SkeletonPtr();
             if(node->recType == Nif::RC_NiNode || node->recType == Nif::RC_RootCollisionNode)
             {
                 const Nif::NiNode *ninode = static_cast<const Nif::NiNode*>(node);
