@@ -53,6 +53,7 @@ protected:
     Ogre::Vector3 mLastPosition;
     Ogre::Animation *mCurrentAnim;
 
+    std::string mCurrentGroup;
     std::vector<Ogre::Controller<Ogre::Real> > *mCurrentControllers;
     NifOgre::TextKeyMap *mCurrentKeys;
     NifOgre::TextKeyMap::const_iterator mStartKey;

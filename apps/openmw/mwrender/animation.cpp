@@ -441,9 +441,10 @@ void Animation::play(const std::string &groupname, const std::string &start, con
                 Ogre::SkeletonInstance *skel = iter->mSkelBase->getSkeleton();
                 mCurrentAnim = skel->getAnimation(groupname);
                 mCurrentKeys = &mTextKeys[groupname];
+                mCurrentGroup = groupname;
                 mCurrentControllers = &iter->mControllers;
-                mAnimVelocity = 0.0f;
 
+                mAnimVelocity = 0.0f;
                 if(mNonAccumRoot)
                     calcAnimVelocity();
 
