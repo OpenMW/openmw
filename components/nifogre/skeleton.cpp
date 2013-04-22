@@ -282,17 +282,7 @@ void NIFSkeletonLoader::loadResource(Ogre::Resource *resource)
 
         buildAnimation(skel, currentgroup, ctrls, targets, keyiter->first, lastkeyiter->first);
 
-        TextKeyMap::const_iterator insiter(keyiter);
-        TextKeyMap groupkeys;
-        do {
-            sep = insiter->second.find(':');
-            if(sep == currentgroup.length() && insiter->second.compare(0, sep, currentgroup) == 0)
-                groupkeys.insert(std::make_pair(insiter->first, insiter->second.substr(sep+2)));
-            else if((sep == sizeof("soundgen")-1 && insiter->second.compare(0, sep, "soundgen") == 0) ||
-                    (sep == sizeof("sound")-1 && insiter->second.compare(0, sep, "sound") == 0))
-                groupkeys.insert(std::make_pair(insiter->first, insiter->second));
-        } while(insiter++ != lastkeyiter);
-
+        TextKeyMap groupkeys(keyiter, ++lastkeyiter);
         bindings.setUserAny(std::string(sTextKeyExtraDataID)+"@"+currentgroup, Ogre::Any(groupkeys));
     }
 }

@@ -243,14 +243,16 @@ void Animation::calcAnimVelocity()
 
     if(track && track->getNumKeyFrames() > 1)
     {
+        const std::string loopstart = mCurrentGroup+": loop start";
+        const std::string loopstop = mCurrentGroup+": loop stop";
         float loopstarttime = 0.0f;
         float loopstoptime = mCurrentAnim->getLength();
         NifOgre::TextKeyMap::const_iterator keyiter = mCurrentKeys->begin();
         while(keyiter != mCurrentKeys->end())
         {
-            if(keyiter->second == "loop start")
+            if(keyiter->second == loopstart)
                 loopstarttime = keyiter->first;
-            else if(keyiter->second == "loop stop")
+            else if(keyiter->second == loopstop)
             {
                 loopstoptime = keyiter->first;
                 break;
@@ -383,12 +385,6 @@ void Animation::reset(const std::string &start, const std::string &stop)
 
 bool Animation::handleEvent(float time, const std::string &evt)
 {
-    if(evt == "start" || evt == "loop start")
-    {
-        /* Do nothing */
-        return true;
-    }
-
     if(evt.compare(0, 7, "sound: ") == 0)
     {
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
@@ -402,21 +398,36 @@ bool Animation::handleEvent(float time, const std::string &evt)
         return true;
     }
 
-    if(evt == "loop stop")
+    if(evt.compare(0, mCurrentGroup.size(), mCurrentGroup) != 0 ||
+       evt.compare(mCurrentGroup.size(), 2, ": ") != 0)
+    {
+        // Not ours
+        return true;
+    }
+    size_t off = mCurrentGroup.size()+2;
+    size_t len = evt.size() - off;
+
+    if(evt.compare(off, len, "start") == 0 || evt.compare(off, len, "loop start") == 0)
+    {
+        /* Do nothing */
+        return true;
+    }
+
+    if(evt.compare(off, len, "loop stop") == 0)
     {
         if(mLooping)
         {
-            reset("loop start");
+            reset(mCurrentGroup+": loop start");
             if(mCurrentTime >= time)
                 return false;
             return true;
         }
     }
-    else if(evt == "stop")
+    else if(evt.compare(off, len, "stop") == 0)
     {
         if(mLooping)
         {
-            reset("loop start");
+            reset(mCurrentGroup+": loop start");
             if(mCurrentTime >= time)
                 return false;
             return true;
@@ -424,7 +435,7 @@ bool Animation::handleEvent(float time, const std::string &evt)
         // fall-through
     }
     if(mController)
-        mController->markerEvent(time, evt);
+        mController->markerEvent(time, evt.substr(off));
     return true;
 }
 
@@ -455,7 +466,7 @@ void Animation::play(const std::string &groupname, const std::string &start, con
         if(!found)
             throw std::runtime_error("Failed to find animation "+groupname);
 
-        reset(start, stop);
+        reset(mCurrentGroup+": "+start, mCurrentGroup+": "+stop);
         setLooping(loop);
         mPlaying = true;
     }
