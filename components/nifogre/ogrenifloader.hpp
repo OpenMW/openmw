@@ -50,6 +50,8 @@ struct ObjectList {
     // bones in the mSkelBase which are NiCamera nodes.
     std::vector<Ogre::Bone*> mCameras;
 
+    std::map<int,TextKeyMap> mTextKeys;
+
     std::vector<Ogre::Controller<Ogre::Real> > mControllers;
 
     ObjectList() : mSkelBase(0)

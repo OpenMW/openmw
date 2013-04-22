@@ -121,22 +121,13 @@ void Animation::addObjectList(Ogre::SceneNode *node, const std::string &model, b
             Ogre::Bone *bone = boneiter.getNext();
             Ogre::UserObjectBindings &bindings = bone->getUserObjectBindings();
             const Ogre::Any &data = bindings.getUserAny(NifOgre::sTextKeyExtraDataID);
-            if(data.isEmpty() || !Ogre::any_cast<bool>(data))
-                continue;
+            if(data.isEmpty()) continue;
 
+            objlist.mTextKeys[bone->getHandle()] = Ogre::any_cast<NifOgre::TextKeyMap>(data);
             if(!mNonAccumRoot)
             {
                 mAccumRoot = mInsert;
                 mNonAccumRoot = mSkelBase->getSkeleton()->getBone(bone->getName());
-            }
-
-            for(int i = 0;i < skel->getNumAnimations();i++)
-            {
-                Ogre::Animation *anim = skel->getAnimation(i);
-                const Ogre::Any &groupdata = bindings.getUserAny(std::string(NifOgre::sTextKeyExtraDataID)+
-                                                                 "@"+anim->getName());
-                if(!groupdata.isEmpty())
-                    mTextKeys[anim->getName()] = Ogre::any_cast<NifOgre::TextKeyMap>(groupdata);
             }
 
             break;
@@ -451,7 +442,7 @@ void Animation::play(const std::string &groupname, const std::string &start, con
             {
                 Ogre::SkeletonInstance *skel = iter->mSkelBase->getSkeleton();
                 mCurrentAnim = skel->getAnimation(groupname);
-                mCurrentKeys = &mTextKeys[groupname];
+                mCurrentKeys = &iter->mTextKeys.begin()->second;
                 mCurrentGroup = groupname;
                 mCurrentControllers = &iter->mControllers;
 

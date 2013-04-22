@@ -46,7 +46,6 @@ protected:
     Ogre::SceneNode *mInsert;
     Ogre::Entity *mSkelBase;
     std::vector<NifOgre::ObjectList> mObjectLists;
-    std::map<std::string,NifOgre::TextKeyMap> mTextKeys;
     Ogre::Node *mAccumRoot;
     Ogre::Bone *mNonAccumRoot;
     Ogre::Vector3 mAccumulate;

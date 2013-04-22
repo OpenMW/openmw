@@ -193,6 +193,7 @@ void NIFSkeletonLoader::buildBones(Ogre::Skeleton *skel, const Nif::Node *node, 
             const Nif::NiTextKeyExtraData *tk = static_cast<const Nif::NiTextKeyExtraData*>(e.getPtr());
             textkeys = extractTextKeys(tk);
             animroot = bone;
+            bone->getUserObjectBindings().setUserAny(sTextKeyExtraDataID, Ogre::Any(textkeys));
         }
         e = e->extra;
     }
@@ -255,9 +256,6 @@ void NIFSkeletonLoader::loadResource(Ogre::Resource *resource)
         return;
     }
 
-    Ogre::UserObjectBindings &bindings = animroot->getUserObjectBindings();
-    bindings.setUserAny(sTextKeyExtraDataID, Ogre::Any(true));
-
     std::string currentgroup;
     TextKeyMap::const_iterator keyiter = textkeys.begin();
     for(keyiter = textkeys.begin();keyiter != textkeys.end();keyiter++)
@@ -281,9 +279,6 @@ void NIFSkeletonLoader::loadResource(Ogre::Resource *resource)
         }
 
         buildAnimation(skel, currentgroup, ctrls, targets, keyiter->first, lastkeyiter->first);
-
-        TextKeyMap groupkeys(keyiter, ++lastkeyiter);
-        bindings.setUserAny(std::string(sTextKeyExtraDataID)+"@"+currentgroup, Ogre::Any(groupkeys));
     }
 }
 
