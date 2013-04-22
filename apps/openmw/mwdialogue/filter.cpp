@@ -73,6 +73,11 @@ bool MWDialogue::Filter::testActor (const ESM::DialInfo& info) const
         if (iter->second < info.mData.mRank)
             return false;
     }
+    else if (info.mData.mRank != -1)
+    {
+        // if there is a rank condition, but the NPC is not in a faction, always fail
+        return false;
+    }
 
     // Gender
     if (!isCreature)
