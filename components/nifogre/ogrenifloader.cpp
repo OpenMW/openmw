@@ -44,15 +44,6 @@
 #include "material.hpp"
 #include "mesh.hpp"
 
-namespace std
-{
-
-// TODO: Do something useful
-ostream& operator<<(ostream &o, const NifOgre::TextKeyMap&)
-{ return o; }
-
-}
-
 namespace NifOgre
 {
 
