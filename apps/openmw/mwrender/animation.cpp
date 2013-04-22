@@ -98,7 +98,15 @@ void Animation::addObjectList(Ogre::SceneNode *node, const std::string &model, b
             boneiter.getNext()->setManuallyControlled(true);
 
         Ogre::SkeletonInstance *baseinst = mSkelBase->getSkeleton();
-        if(mSkelBase != objlist.mSkelBase)
+        if(mSkelBase == objlist.mSkelBase)
+        {
+            if(objlist.mTextKeys.size() > 0)
+            {
+                mAccumRoot = mInsert;
+                mNonAccumRoot = baseinst->getBone(objlist.mTextKeys.begin()->first);
+            }
+        }
+        else
         {
             for(size_t i = 0;i < objlist.mControllers.size();i++)
             {
@@ -111,15 +119,6 @@ void Animation::addObjectList(Ogre::SceneNode *node, const std::string &model, b
 
                 Ogre::Bone *bone = baseinst->getBone(trgtname);
                 dstval->setNode(bone);
-            }
-        }
-
-        if(objlist.mTextKeys.size() > 0)
-        {
-            if(!mNonAccumRoot)
-            {
-                mAccumRoot = mInsert;
-                mNonAccumRoot = baseinst->getBone(objlist.mTextKeys.begin()->first);
             }
         }
     }
