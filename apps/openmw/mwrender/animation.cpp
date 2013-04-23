@@ -519,8 +519,23 @@ Ogre::Vector3 Animation::runAnimation(float duration)
             if(!handleTextKey(layeridx, key))
                 break;
         }
-        for(size_t i = 0;i < (*(mLayer[layeridx].mControllers)).size();i++)
-            (*(mLayer[layeridx].mControllers))[i].update();
+
+        bool updatectrls = true;
+        for(size_t i = layeridx-1;i < layeridx;i--)
+        {
+            if(mLayer[i].mGroupName.empty())
+                continue;
+            if(mLayer[i].mControllers == mLayer[layeridx].mControllers)
+            {
+                updatectrls = false;
+                break;
+            }
+        }
+        if(updatectrls)
+        {
+            for(size_t i = 0;i < (*(mLayer[layeridx].mControllers)).size();i++)
+                (*(mLayer[layeridx].mControllers))[i].update();
+        }
     }
 
     if(mSkelBase)
