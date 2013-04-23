@@ -78,6 +78,8 @@ protected:
      * returns the wanted movement vector from the previous update. */
     Ogre::Vector3 updatePosition();
 
+    static NifOgre::TextKeyMap::const_iterator findGroupStart(const NifOgre::TextKeyMap &keys, const std::string &groupname);
+
     /* Resets the animation to the time of the specified start marker, without
      * moving anything, and set the end time to the specified stop marker. If
      * the marker is not found, or if the markers are the same, it returns

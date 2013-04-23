@@ -169,11 +169,28 @@ Ogre::Node *Animation::getNode(const std::string &name)
 }
 
 
+NifOgre::TextKeyMap::const_iterator Animation::findGroupStart(const NifOgre::TextKeyMap &keys, const std::string &groupname)
+{
+    NifOgre::TextKeyMap::const_iterator iter(keys.begin());
+    for(;iter != keys.end();iter++)
+    {
+        if(iter->second.compare(0, groupname.size(), groupname) == 0 &&
+           iter->second.compare(groupname.size(), 2, ": ") == 0)
+            break;
+    }
+    return iter;
+}
+
+
 bool Animation::hasAnimation(const std::string &anim)
 {
     for(std::vector<NifOgre::ObjectList>::const_iterator iter(mObjectLists.begin());iter != mObjectLists.end();iter++)
     {
-        if(iter->mSkelBase && iter->mSkelBase->hasAnimationState(anim))
+        if(iter->mTextKeys.size() == 0)
+            continue;
+
+        const NifOgre::TextKeyMap &keys = iter->mTextKeys.begin()->second;
+        if(findGroupStart(keys, anim) != keys.end())
             return true;
     }
     return false;
