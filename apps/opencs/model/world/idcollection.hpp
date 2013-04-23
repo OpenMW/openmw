@@ -79,7 +79,9 @@ namespace CSMWorld
 
             virtual const RecordBase& getRecord (int index) const = 0;
 
-            virtual void load (ESM::ESMReader& reader, bool base) = 0;
+            virtual void load (ESM::ESMReader& reader, bool base,
+                UniversalId::Type type = UniversalId::Type_None) = 0;
+            ///< \param type Will be ignored, unless the collection supports multiple record types
     };
 
     ///< \brief Access to ID field in records
@@ -171,7 +173,9 @@ namespace CSMWorld
 
             virtual const Record<ESXRecordT>& getRecord (int index) const;
 
-            virtual void load (ESM::ESMReader& reader, bool base);
+            virtual void load (ESM::ESMReader& reader, bool base,
+                UniversalId::Type type = UniversalId::Type_None);
+            ///< \param type Will be ignored, unless the collection supports multiple record types
 
             void addColumn (Column<ESXRecordT> *column);
     };
@@ -348,7 +352,8 @@ namespace CSMWorld
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
-    void IdCollection<ESXRecordT, IdAccessorT>::load (ESM::ESMReader& reader, bool base)
+    void IdCollection<ESXRecordT, IdAccessorT>::load (ESM::ESMReader& reader, bool base,
+        UniversalId::Type type)
     {
         std::string id = reader.getHNOString ("NAME");
 
