@@ -228,29 +228,31 @@ void Animation::updatePtr(const MWWorld::Ptr &ptr)
 
 float Animation::calcAnimVelocity(const NifOgre::TextKeyMap &keys, NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl, const std::string &groupname)
 {
+    const std::string start = groupname+": start";
     const std::string loopstart = groupname+": loop start";
     const std::string loopstop = groupname+": loop stop";
-    float loopstarttime = 0.0f;
-    float loopstoptime = 0.0f;
-    NifOgre::TextKeyMap::const_iterator keyiter = keys.begin();
+    const std::string stop = groupname+": stop";
+    float starttime = std::numeric_limits<float>::max();
+    float stoptime = 0.0f;
+    NifOgre::TextKeyMap::const_iterator keyiter(keys.begin());
     while(keyiter != keys.end())
     {
-        if(keyiter->second == loopstart)
-            loopstarttime = keyiter->first;
-        else if(keyiter->second == loopstop)
+        if(keyiter->second == start || keyiter->second == loopstart)
+            starttime = keyiter->first;
+        else if(keyiter->second == loopstop || keyiter->second == stop)
         {
-            loopstoptime = keyiter->first;
+            stoptime = keyiter->first;
             break;
         }
         keyiter++;
     }
 
-    if(loopstoptime > loopstarttime)
+    if(stoptime > starttime)
     {
-        Ogre::Vector3 startpos = nonaccumctrl->getTranslation(loopstarttime);
-        Ogre::Vector3 endpos = nonaccumctrl->getTranslation(loopstarttime);
+        Ogre::Vector3 startpos = nonaccumctrl->getTranslation(starttime);
+        Ogre::Vector3 endpos = nonaccumctrl->getTranslation(stoptime);
 
-        return startpos.distance(endpos) / (loopstoptime-loopstarttime);
+        return startpos.distance(endpos) / (stoptime-starttime);
     }
 
     return 0.0f;
