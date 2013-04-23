@@ -66,8 +66,9 @@ protected:
     float mAnimVelocity;
     float mAnimSpeedMult;
 
-    static float calcAnimVelocity(NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl,
-                                  const std::string &groupname, const NifOgre::TextKeyMap *keys);
+    static float calcAnimVelocity(const NifOgre::TextKeyMap &keys,
+                                  NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl,
+                                  const std::string &groupname);
 
     /* Updates a skeleton instance so that all bones matching the source skeleton (based on
      * bone names) are positioned identically. */
@@ -79,9 +80,10 @@ protected:
 
     /* Resets the animation to the time of the specified start marker, without
      * moving anything, and set the end time to the specified stop marker. If
-     * the marker is not found, it resets to the beginning or end respectively.
+     * the marker is not found, or if the markers are the same, it returns
+     * false.
      */
-    void reset(const std::string &start, const std::string &stop=std::string());
+    bool reset(const NifOgre::TextKeyMap &keys, NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl, const std::string &groupname, const std::string &start, const std::string &stop);
 
     void doLoop();
 

@@ -209,14 +209,14 @@ void Animation::updatePtr(const MWWorld::Ptr &ptr)
 }
 
 
-float Animation::calcAnimVelocity(NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl, const std::string &groupname, const NifOgre::TextKeyMap *keys)
+float Animation::calcAnimVelocity(const NifOgre::TextKeyMap &keys, NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl, const std::string &groupname)
 {
     const std::string loopstart = groupname+": loop start";
     const std::string loopstop = groupname+": loop stop";
     float loopstarttime = 0.0f;
-    float loopstoptime = std::numeric_limits<float>::max();
-    NifOgre::TextKeyMap::const_iterator keyiter = keys->begin();
-    while(keyiter != keys->end())
+    float loopstoptime = 0.0f;
+    NifOgre::TextKeyMap::const_iterator keyiter = keys.begin();
+    while(keyiter != keys.end())
     {
         if(keyiter->second == loopstart)
             loopstarttime = keyiter->first;
@@ -291,36 +291,44 @@ Ogre::Vector3 Animation::updatePosition()
     return posdiff;
 }
 
-void Animation::reset(const std::string &start, const std::string &stop)
+bool Animation::reset(const NifOgre::TextKeyMap &keys, NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl, const std::string &groupname, const std::string &start, const std::string &stop)
 {
-    std::string tag = mCurrentGroup+": "+start;
-    mStartKey = mCurrentKeys->begin();
-    while(mStartKey != mCurrentKeys->end() && mStartKey->second != tag)
-        mStartKey++;
-    if(mStartKey == mCurrentKeys->end() && tag == "loop start")
+    std::string tag = groupname+": "+start;
+    NifOgre::TextKeyMap::const_iterator startkey(keys.begin());
+    while(startkey != keys.end() && startkey->second != tag)
+        startkey++;
+    if(startkey == keys.end() && tag == "loop start")
     {
-        tag = mCurrentGroup+": start";
-        mStartKey = mCurrentKeys->begin();
-        while(mStartKey != mCurrentKeys->end() && mStartKey->second != tag)
-            mStartKey++;
+        tag = groupname+": start";
+        startkey = keys.begin();
+        while(startkey != keys.end() && startkey->second != tag)
+            startkey++;
     }
-    if(mStartKey == mCurrentKeys->end())
-        mStartKey = mCurrentKeys->begin();
+    if(startkey == keys.end())
+        return false;
 
-    tag = mCurrentGroup+": "+stop;
-    mStopKey = mStartKey;
-    while(mStopKey != mCurrentKeys->end() && mStopKey->second != tag)
-        mStopKey++;
-    if(mStopKey == mCurrentKeys->end())
-        mStopKey--;
+    tag = groupname+": "+stop;
+    NifOgre::TextKeyMap::const_iterator stopkey(startkey);
+    while(stopkey != keys.end() && stopkey->second != tag)
+        stopkey++;
+    if(stopkey == keys.end())
+        return false;
 
-    mCurrentTime = mStartKey->first;
+    if(startkey == stopkey)
+        return false;
+
+    mStartKey = startkey;
     mLoopStartKey = mStartKey;
+    mStopKey = stopkey;
     mNextKey = mStartKey;
     ++mNextKey;
 
-    if(mNonAccumCtrl)
-        mLastPosition = mNonAccumCtrl->getTranslation(mCurrentTime) * mAccumulate;
+    mCurrentTime = mStartKey->first;
+
+    if(nonaccumctrl)
+        mLastPosition = nonaccumctrl->getTranslation(mCurrentTime) * mAccumulate;
+
+    return true;
 }
 
 void Animation::doLoop()
@@ -390,45 +398,46 @@ void Animation::play(const std::string &groupname, const std::string &start, con
         /* Look in reverse; last-inserted source has priority. */
         for(std::vector<NifOgre::ObjectList>::reverse_iterator iter(mObjectLists.rbegin());iter != mObjectLists.rend();iter++)
         {
-            if(iter->mSkelBase && iter->mSkelBase->hasAnimationState(groupname))
+            if(iter->mTextKeys.size() == 0)
+                continue;
+
+            const NifOgre::TextKeyMap &keys = iter->mTextKeys.begin()->second;
+            NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl = NULL;
+            for(size_t i = 0;i < iter->mControllers.size();i++)
             {
-                const NifOgre::TextKeyMap *keys = &iter->mTextKeys.begin()->second;
-                NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl = NULL;
-                for(size_t i = 0;i < iter->mControllers.size();i++)
+                NifOgre::NodeTargetValue<Ogre::Real> *dstval;
+                dstval = dynamic_cast<NifOgre::NodeTargetValue<Ogre::Real>*>(iter->mControllers[i].getDestination().getPointer());
+                if(dstval && dstval->getNode() == mNonAccumRoot)
                 {
-                    NifOgre::NodeTargetValue<Ogre::Real> *dstval;
-                    dstval = dynamic_cast<NifOgre::NodeTargetValue<Ogre::Real>*>(iter->mControllers[i].getDestination().getPointer());
-                    if(dstval && dstval->getNode() == mNonAccumRoot)
-                    {
-                        nonaccumctrl = dstval;
-                        break;
-                    }
-                }
-
-                if(!foundanim)
-                {
-                    mCurrentKeys = keys;
-                    mCurrentGroup = groupname;
-                    mCurrentControllers = &iter->mControllers;
-                    mNonAccumCtrl = nonaccumctrl;
-                    mAnimVelocity = 0.0f;
-
-                    foundanim = true;
-                }
-
-                if(!mNonAccumRoot)
+                    nonaccumctrl = dstval;
                     break;
-
-                mAnimVelocity = calcAnimVelocity(nonaccumctrl, groupname, keys);
-                if(mAnimVelocity > 0.0f) break;
+                }
             }
+
+            if(!foundanim)
+            {
+                if(!reset(keys, nonaccumctrl, groupname, start, stop))
+                    continue;
+                mCurrentKeys = &keys;
+                mCurrentGroup = groupname;
+                mCurrentControllers = &iter->mControllers;
+                mNonAccumCtrl = nonaccumctrl;
+                mAnimVelocity = 0.0f;
+
+                setLooping(loop);
+                mPlaying = true;
+
+                foundanim = true;
+            }
+
+            if(!mNonAccumRoot)
+                break;
+
+            mAnimVelocity = calcAnimVelocity(keys, nonaccumctrl, groupname);
+            if(mAnimVelocity > 0.0f) break;
         }
         if(!foundanim)
             throw std::runtime_error("Failed to find animation "+groupname);
-
-        reset(start, stop);
-        setLooping(loop);
-        mPlaying = true;
     }
     catch(std::exception &e) {
         std::cerr<< e.what() <<std::endl;
