@@ -78,9 +78,9 @@ Animation::~Animation()
     if(mInsert)
     {
         Ogre::SceneManager *sceneMgr = mInsert->getCreator();
-        for(size_t i = 0;i < mObjectLists.size();i++)
-            destroyObjectList(sceneMgr, mObjectLists[i]);
-        mObjectLists.clear();
+        for(size_t i = 0;i < mObjects.size();i++)
+            destroyObjectList(sceneMgr, mObjects[i].mObjectList);
+        mObjects.clear();
     }
 }
 
@@ -93,9 +93,13 @@ void Animation::addObjectList(Ogre::SceneNode *node, const std::string &model, b
         assert(mInsert);
     }
 
-    mObjectLists.push_back(!baseonly ? NifOgre::Loader::createObjects(mInsert, model) :
-                                       NifOgre::Loader::createObjectBase(mInsert, model));
-    NifOgre::ObjectList &objlist = mObjectLists.back();
+    mObjects.push_back(ObjectInfo());
+    ObjectInfo &obj = mObjects.back();
+    obj.mActiveLayers = 0;
+    obj.mObjectList = (!baseonly ? NifOgre::Loader::createObjects(mInsert, model) :
+                                   NifOgre::Loader::createObjectBase(mInsert, model));
+
+    NifOgre::ObjectList &objlist = obj.mObjectList;
     if(objlist.mSkelBase)
     {
         if(!mSkelBase)
@@ -202,12 +206,12 @@ NifOgre::TextKeyMap::const_iterator Animation::findGroupStart(const NifOgre::Tex
 
 bool Animation::hasAnimation(const std::string &anim)
 {
-    for(std::vector<NifOgre::ObjectList>::const_iterator iter(mObjectLists.begin());iter != mObjectLists.end();iter++)
+    for(std::vector<ObjectInfo>::const_iterator iter(mObjects.begin());iter != mObjects.end();iter++)
     {
-        if(iter->mTextKeys.size() == 0)
+        if(iter->mObjectList.mTextKeys.size() == 0)
             continue;
 
-        const NifOgre::TextKeyMap &keys = iter->mTextKeys.begin()->second;
+        const NifOgre::TextKeyMap &keys = iter->mObjectList.mTextKeys.begin()->second;
         if(findGroupStart(keys, anim) != keys.end())
             return true;
     }
@@ -430,21 +434,45 @@ void Animation::play(const std::string &groupname, const std::string &start, con
     size_t layeridx = 0;
 
     try {
+        for(std::vector<ObjectInfo>::iterator iter(mObjects.begin());iter != mObjects.end();iter++)
+            iter->mActiveLayers &= ~(1<<layeridx);
+
+        if(groupname.empty())
+        {
+            // Do not allow layer 0 to be disabled
+            assert(layeridx != 0);
+
+            mLayer[layeridx].mGroupName.clear();
+            mLayer[layeridx].mTextKeys = NULL;
+            mLayer[layeridx].mControllers = NULL;
+            mLayer[layeridx].mLooping = false;
+            mLayer[layeridx].mPlaying = false;
+
+            if(layeridx == 0)
+            {
+                mNonAccumCtrl = NULL;
+                mAnimVelocity = 0.0f;
+            }
+
+            return;
+        }
+
         bool foundanim = false;
         /* Look in reverse; last-inserted source has priority. */
-        for(std::vector<NifOgre::ObjectList>::reverse_iterator iter(mObjectLists.rbegin());iter != mObjectLists.rend();iter++)
+        for(std::vector<ObjectInfo>::reverse_iterator iter(mObjects.rbegin());iter != mObjects.rend();iter++)
         {
-            if(iter->mTextKeys.size() == 0)
+            NifOgre::ObjectList &objlist = iter->mObjectList;
+            if(objlist.mTextKeys.size() == 0)
                 continue;
 
-            const NifOgre::TextKeyMap &keys = iter->mTextKeys.begin()->second;
+            const NifOgre::TextKeyMap &keys = objlist.mTextKeys.begin()->second;
             NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl = NULL;
             if(layeridx == 0)
             {
-                for(size_t i = 0;i < iter->mControllers.size();i++)
+                for(size_t i = 0;i < objlist.mControllers.size();i++)
                 {
                     NifOgre::NodeTargetValue<Ogre::Real> *dstval;
-                    dstval = dynamic_cast<NifOgre::NodeTargetValue<Ogre::Real>*>(iter->mControllers[i].getDestination().getPointer());
+                    dstval = dynamic_cast<NifOgre::NodeTargetValue<Ogre::Real>*>(objlist.mControllers[i].getDestination().getPointer());
                     if(dstval && dstval->getNode() == mNonAccumRoot)
                     {
                         nonaccumctrl = dstval;
@@ -459,7 +487,7 @@ void Animation::play(const std::string &groupname, const std::string &start, con
                     continue;
                 mLayer[layeridx].mGroupName = groupname;
                 mLayer[layeridx].mTextKeys = &keys;
-                mLayer[layeridx].mControllers = &iter->mControllers;
+                mLayer[layeridx].mControllers = &objlist.mControllers;
                 mLayer[layeridx].mLooping = loop;
                 mLayer[layeridx].mPlaying = true;
 
@@ -469,6 +497,7 @@ void Animation::play(const std::string &groupname, const std::string &start, con
                     mAnimVelocity = 0.0f;
                 }
 
+                iter->mActiveLayers |= (1<<layeridx);
                 foundanim = true;
             }
 
@@ -541,9 +570,9 @@ Ogre::Vector3 Animation::runAnimation(float duration)
     if(mSkelBase)
     {
         const Ogre::SkeletonInstance *baseinst = mSkelBase->getSkeleton();
-        for(std::vector<NifOgre::ObjectList>::iterator iter(mObjectLists.begin());iter != mObjectLists.end();iter++)
+        for(std::vector<ObjectInfo>::iterator iter(mObjects.begin());iter != mObjects.end();iter++)
         {
-            Ogre::Entity *ent = iter->mSkelBase;
+            Ogre::Entity *ent = iter->mObjectList.mSkelBase;
             if(!ent) continue;
 
             Ogre::SkeletonInstance *inst = ent->getSkeleton();

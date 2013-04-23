@@ -25,7 +25,7 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr &ptr)
             addObjectList(mPtr.getRefData().getBaseNode(), "meshes\\base_anim.nif", true);
 
         addObjectList(mPtr.getRefData().getBaseNode(), model, false);
-        setRenderProperties(mObjectLists.back(), RV_Actors, RQG_Main, RQG_Alpha);
+        setRenderProperties(mObjects.back().mObjectList, RV_Actors, RQG_Main, RQG_Alpha);
     }
 }
 

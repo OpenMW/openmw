@@ -38,9 +38,18 @@ protected:
     MWWorld::Ptr mPtr;
     MWMechanics::CharacterController *mController;
 
+    struct ObjectInfo {
+        NifOgre::ObjectList mObjectList;
+        /* Bit-field specifying which animation layers this object list is
+         * explicitly animating on (1 = layer 0, 2 = layer 1, 4 = layer 2.
+         * etc).
+         */
+        int mActiveLayers;
+    };
+
     Ogre::SceneNode *mInsert;
     Ogre::Entity *mSkelBase;
-    std::vector<NifOgre::ObjectList> mObjectLists;
+    std::vector<ObjectInfo> mObjects;
     Ogre::Node *mAccumRoot;
     Ogre::Bone *mNonAccumRoot;
     Ogre::Vector3 mAccumulate;
