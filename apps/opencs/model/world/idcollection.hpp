@@ -16,6 +16,7 @@
 #include <components/misc/stringops.hpp>
 
 #include "columnbase.hpp"
+#include "universalid.hpp"
 
 namespace CSMWorld
 {
@@ -53,7 +54,9 @@ namespace CSMWorld
 
             virtual void removeRows (int index, int count) = 0;
 
-            virtual void appendBlankRecord (const std::string& id) = 0;
+            virtual void appendBlankRecord (const std::string& id,
+                UniversalId::Type type = UniversalId::Type_None) = 0;
+            ///< \param type Will be ignored, unless the collection supports multiple record types
 
             virtual int searchId (const std::string& id) const = 0;
             ////< Search record with \a id.
@@ -143,7 +146,9 @@ namespace CSMWorld
 
             virtual void removeRows (int index, int count) ;
 
-            virtual void appendBlankRecord (const std::string& id);
+            virtual void appendBlankRecord (const std::string& id,
+                UniversalId::Type type = UniversalId::Type_None);
+            ///< \param type Will be ignored, unless the collection supports multiple record types
 
             virtual int searchId (const std::string& id) const;
             ////< Search record with \a id.
@@ -300,7 +305,8 @@ namespace CSMWorld
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
-    void  IdCollection<ESXRecordT, IdAccessorT>::appendBlankRecord (const std::string& id)
+    void  IdCollection<ESXRecordT, IdAccessorT>::appendBlankRecord (const std::string& id,
+        UniversalId::Type type)
     {
         ESXRecordT record;
         IdAccessorT().getId (record) = id;
