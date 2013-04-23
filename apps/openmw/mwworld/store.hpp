@@ -872,7 +872,28 @@ namespace MWWorld
         }
 
         void setUp() {
-            std::sort(mStatic.begin(), mStatic.end(), Compare());
+            /// \note This method sorts indexed values for further
+            /// searches. Every loaded item is present in storage, but
+            /// latest loaded shadows any previous while searching.
+            /// If memory cost will be too high, it is possible to remove
+            /// unused values.
+
+            Compare cmp;
+
+            std::stable_sort(mStatic.begin(), mStatic.end(), cmp);
+
+            typename std::vector<T>::iterator first, next;
+            next = first = mStatic.begin();
+
+            while (first != mStatic.end() && ++next != mStatic.end()) {
+                while (next != mStatic.end() && !cmp(*first, *next)) {
+                    ++next;
+                }
+                if (first != --next) {
+                    std::swap(*first, *next);
+                }
+                first = ++next;
+            }
         }
 
         const T *search(int index) const {
