@@ -260,13 +260,24 @@ void NIFMeshLoader::createSubMesh(Ogre::Mesh *mesh, const Nif::NiTriShape *shape
 
     // Texture UV coordinates
     size_t numUVs = data->uvlist.size();
-    for(size_t i = 0;i < numUVs;i++)
+    if (numUVs)
     {
-        vbuf = hwBufMgr->createVertexBuffer(Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT2),
-                                            srcVerts.size(), Ogre::HardwareBuffer::HBU_STATIC);
-        vbuf->writeData(0, vbuf->getSizeInBytes(), &data->uvlist[i][0], true);
+        size_t elemSize = Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT2);
 
-        decl->addElement(nextBuf, 0, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES, i);
+        for(size_t i = 0; i < numUVs; i++)
+            decl->addElement(nextBuf, elemSize*i, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES, i);
+
+        vbuf = hwBufMgr->createVertexBuffer(decl->getVertexSize(nextBuf), srcVerts.size(),
+                                            Ogre::HardwareBuffer::HBU_STATIC);
+
+        std::vector<Ogre::Vector2> allUVs;
+        allUVs.reserve(srcVerts.size()*numUVs);
+        for (size_t vert = 0; vert<srcVerts.size(); ++vert)
+            for(size_t i = 0; i < numUVs; i++)
+                allUVs.push_back(data->uvlist[i][vert]);
+
+        vbuf->writeData(0, elemSize*srcVerts.size()*numUVs, &allUVs[0], true);
+
         bind->setBinding(nextBuf++, vbuf);
     }
 
