@@ -304,11 +304,7 @@ void CharacterController::skipAnim()
 void CharacterController::setState(CharacterState state, bool loop)
 {
     if(mState == state)
-    {
-        if(mAnimation)
-            mAnimation->setLooping(loop);
         return;
-    }
     mState = state;
 
     if(!mAnimation)

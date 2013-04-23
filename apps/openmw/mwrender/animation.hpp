@@ -23,20 +23,15 @@ protected:
     {
     private:
         Animation *mAnimation;
+        size_t mIndex;
 
     public:
-        AnimationValue(Animation *anim) : mAnimation(anim)
+        AnimationValue(Animation *anim, size_t layeridx)
+          : mAnimation(anim), mIndex(layeridx)
         { }
 
-        virtual Ogre::Real getValue() const
-        {
-            return mAnimation->mCurrentTime;
-        }
-
-        virtual void setValue(Ogre::Real value)
-        {
-            mAnimation->mCurrentTime = value;
-        }
+        virtual Ogre::Real getValue() const;
+        virtual void setValue(Ogre::Real value);
     };
     Ogre::SharedPtr<Ogre::ControllerValue<Ogre::Real> > mAnimationBaseValuePtr;
 
@@ -51,20 +46,27 @@ protected:
     Ogre::Vector3 mAccumulate;
     Ogre::Vector3 mLastPosition;
 
-    std::string mCurrentGroup;
-    std::vector<Ogre::Controller<Ogre::Real> > *mCurrentControllers;
-    const NifOgre::TextKeyMap *mCurrentKeys;
-    NifOgre::TextKeyMap::const_iterator mStartKey;
-    NifOgre::TextKeyMap::const_iterator mLoopStartKey;
-    NifOgre::TextKeyMap::const_iterator mStopKey;
-    NifOgre::TextKeyMap::const_iterator mNextKey;
-    float mCurrentTime;
-    bool mPlaying;
-    bool mLooping;
-
     NifOgre::NodeTargetValue<Ogre::Real> *mNonAccumCtrl;
     float mAnimVelocity;
     float mAnimSpeedMult;
+
+    static const size_t sMaxLayers = 1;
+    struct AnimLayer {
+        std::string mGroupName;
+        std::vector<Ogre::Controller<Ogre::Real> > *mControllers;
+        const NifOgre::TextKeyMap *mTextKeys;
+        NifOgre::TextKeyMap::const_iterator mStartKey;
+        NifOgre::TextKeyMap::const_iterator mLoopStartKey;
+        NifOgre::TextKeyMap::const_iterator mStopKey;
+        NifOgre::TextKeyMap::const_iterator mNextKey;
+
+        float mTime;
+
+        bool mPlaying;
+        bool mLooping;
+
+        AnimLayer();
+    } mLayer[sMaxLayers];
 
     static float calcAnimVelocity(const NifOgre::TextKeyMap &keys,
                                   NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl,
@@ -85,11 +87,11 @@ protected:
      * the marker is not found, or if the markers are the same, it returns
      * false.
      */
-    bool reset(const NifOgre::TextKeyMap &keys, NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl, const std::string &groupname, const std::string &start, const std::string &stop);
+    bool reset(size_t layeridx, const NifOgre::TextKeyMap &keys, NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl, const std::string &groupname, const std::string &start, const std::string &stop);
 
-    void doLoop();
+    void doLoop(size_t layeridx);
 
-    bool handleTextKey(const NifOgre::TextKeyMap::const_iterator &key);
+    bool handleTextKey(size_t layeridx, const NifOgre::TextKeyMap::const_iterator &key);
 
     void addObjectList(Ogre::SceneNode *node, const std::string &model, bool baseonly);
     static void destroyObjectList(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList &objects);
@@ -112,8 +114,6 @@ public:
     void setAccumulation(const Ogre::Vector3 &accum);
 
     void setSpeed(float speed);
-
-    void setLooping(bool loop);
 
     void play(const std::string &groupname, const std::string &start, const std::string &stop, bool loop);
     virtual Ogre::Vector3 runAnimation(float timepassed);

@@ -18,6 +18,32 @@
 namespace MWRender
 {
 
+Animation::AnimLayer::AnimLayer()
+  : mControllers(NULL)
+  , mTextKeys(NULL)
+  , mTime(0.0f)
+  , mPlaying(false)
+  , mLooping(false)
+{
+}
+
+
+Ogre::Real Animation::AnimationValue::getValue() const
+{
+    size_t idx = mIndex;
+    while(idx > 0 && mAnimation->mLayer[idx].mGroupName.empty())
+        idx--;
+    if(!mAnimation->mLayer[idx].mGroupName.empty())
+        return mAnimation->mLayer[idx].mTime;
+    return 0.0f;
+}
+
+void Animation::AnimationValue::setValue(Ogre::Real value)
+{
+    mAnimation->mLayer[mIndex].mTime = value;
+}
+
+
 void Animation::destroyObjectList(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList &objects)
 {
     for(size_t i = 0;i < objects.mParticles.size();i++)
@@ -32,7 +58,7 @@ void Animation::destroyObjectList(Ogre::SceneManager *sceneMgr, NifOgre::ObjectL
 }
 
 Animation::Animation(const MWWorld::Ptr &ptr)
-    : mAnimationBaseValuePtr(OGRE_NEW AnimationValue(this))
+    : mAnimationBaseValuePtr(OGRE_NEW AnimationValue(this, 0))
     , mPtr(ptr)
     , mController(NULL)
     , mInsert(NULL)
@@ -41,11 +67,6 @@ Animation::Animation(const MWWorld::Ptr &ptr)
     , mNonAccumRoot(NULL)
     , mAccumulate(0.0f)
     , mLastPosition(0.0f)
-    , mCurrentControllers(NULL)
-    , mCurrentKeys(NULL)
-    , mCurrentTime(0.0f)
-    , mPlaying(false)
-    , mLooping(false)
     , mNonAccumCtrl(NULL)
     , mAnimVelocity(0.0f)
     , mAnimSpeedMult(1.0f)
@@ -127,9 +148,6 @@ void Animation::addObjectList(Ogre::SceneNode *node, const std::string &model, b
         if(objlist.mControllers[i].getSource().isNull())
             objlist.mControllers[i].setSource(mAnimationBaseValuePtr);
     }
-
-    if(!mCurrentControllers || (*mCurrentControllers).size() == 0)
-        mCurrentControllers = &objlist.mControllers;
 }
 
 void Animation::setRenderProperties(const NifOgre::ObjectList &objlist, Ogre::uint32 visflags, Ogre::uint8 solidqueue, Ogre::uint8 transqueue)
@@ -215,10 +233,6 @@ void Animation::setSpeed(float speed)
         mAnimSpeedMult = speed / mAnimVelocity;
 }
 
-void Animation::setLooping(bool loop)
-{
-    mLooping = loop;
-}
 
 void Animation::updatePtr(const MWWorld::Ptr &ptr)
 {
@@ -301,7 +315,7 @@ Ogre::Vector3 Animation::updatePosition()
     Ogre::Vector3 posdiff;
 
     /* Get the non-accumulation root's difference from the last update. */
-    posdiff = (mNonAccumCtrl->getTranslation(mCurrentTime) - mLastPosition) * mAccumulate;
+    posdiff = (mNonAccumCtrl->getTranslation(mLayer[0].mTime) - mLastPosition) * mAccumulate;
 
     /* Translate the accumulation root back to compensate for the move. */
     mLastPosition += posdiff;
@@ -310,7 +324,7 @@ Ogre::Vector3 Animation::updatePosition()
     return posdiff;
 }
 
-bool Animation::reset(const NifOgre::TextKeyMap &keys, NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl, const std::string &groupname, const std::string &start, const std::string &stop)
+bool Animation::reset(size_t layeridx, const NifOgre::TextKeyMap &keys, NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl, const std::string &groupname, const std::string &start, const std::string &stop)
 {
     std::string tag = groupname+": "+start;
     NifOgre::TextKeyMap::const_iterator startkey(keys.begin());
@@ -336,31 +350,31 @@ bool Animation::reset(const NifOgre::TextKeyMap &keys, NifOgre::NodeTargetValue<
     if(startkey == stopkey)
         return false;
 
-    mStartKey = startkey;
-    mLoopStartKey = mStartKey;
-    mStopKey = stopkey;
-    mNextKey = mStartKey;
-    ++mNextKey;
+    mLayer[layeridx].mStartKey = startkey;
+    mLayer[layeridx].mLoopStartKey = startkey;
+    mLayer[layeridx].mStopKey = stopkey;
+    mLayer[layeridx].mNextKey = startkey;
+    mLayer[layeridx].mNextKey++;
 
-    mCurrentTime = mStartKey->first;
+    mLayer[layeridx].mTime = mLayer[layeridx].mStartKey->first;
 
-    if(nonaccumctrl)
-        mLastPosition = nonaccumctrl->getTranslation(mCurrentTime) * mAccumulate;
+    if(layeridx == 0 && nonaccumctrl)
+        mLastPosition = nonaccumctrl->getTranslation(mLayer[layeridx].mTime) * mAccumulate;
 
     return true;
 }
 
-void Animation::doLoop()
+void Animation::doLoop(size_t layeridx)
 {
-    mCurrentTime = mLoopStartKey->first;
-    mNextKey = mLoopStartKey;
-    ++mNextKey;
-    if(mNonAccumCtrl)
-        mLastPosition = mNonAccumCtrl->getTranslation(mCurrentTime) * mAccumulate;
+    mLayer[layeridx].mTime = mLayer[layeridx].mLoopStartKey->first;
+    mLayer[layeridx].mNextKey = mLayer[layeridx].mLoopStartKey;
+    mLayer[layeridx].mNextKey++;
+    if(layeridx == 0 && mNonAccumCtrl)
+        mLastPosition = mNonAccumCtrl->getTranslation(mLayer[layeridx].mTime) * mAccumulate;
 }
 
 
-bool Animation::handleTextKey(const NifOgre::TextKeyMap::const_iterator &key)
+bool Animation::handleTextKey(size_t layeridx, const NifOgre::TextKeyMap::const_iterator &key)
 {
     float time = key->first;
     const std::string &evt = key->second;
@@ -378,27 +392,27 @@ bool Animation::handleTextKey(const NifOgre::TextKeyMap::const_iterator &key)
         return true;
     }
 
-    if(evt.compare(0, mCurrentGroup.size(), mCurrentGroup) != 0 ||
-       evt.compare(mCurrentGroup.size(), 2, ": ") != 0)
+    if(evt.compare(0, mLayer[layeridx].mGroupName.size(), mLayer[layeridx].mGroupName) != 0 ||
+       evt.compare(mLayer[layeridx].mGroupName.size(), 2, ": ") != 0)
     {
-        // Not ours
+        // Not ours, skip it
         return true;
     }
-    size_t off = mCurrentGroup.size()+2;
+    size_t off = mLayer[layeridx].mGroupName.size()+2;
     size_t len = evt.size() - off;
 
     if(evt.compare(off, len, "start") == 0 || evt.compare(off, len, "loop start") == 0)
     {
-        mLoopStartKey = key;
+        mLayer[layeridx].mLoopStartKey = key;
         return true;
     }
 
     if(evt.compare(off, len, "loop stop") == 0 || evt.compare(off, len, "stop") == 0)
     {
-        if(mLooping)
+        if(mLayer[layeridx].mLooping)
         {
-            doLoop();
-            if(mCurrentTime >= time)
+            doLoop(layeridx);
+            if(mLayer[layeridx].mTime >= time)
                 return false;
             return true;
         }
@@ -412,6 +426,9 @@ bool Animation::handleTextKey(const NifOgre::TextKeyMap::const_iterator &key)
 
 void Animation::play(const std::string &groupname, const std::string &start, const std::string &stop, bool loop)
 {
+    // TODO: parameterize this
+    size_t layeridx = 0;
+
     try {
         bool foundanim = false;
         /* Look in reverse; last-inserted source has priority. */
@@ -422,34 +439,40 @@ void Animation::play(const std::string &groupname, const std::string &start, con
 
             const NifOgre::TextKeyMap &keys = iter->mTextKeys.begin()->second;
             NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl = NULL;
-            for(size_t i = 0;i < iter->mControllers.size();i++)
+            if(layeridx == 0)
             {
-                NifOgre::NodeTargetValue<Ogre::Real> *dstval;
-                dstval = dynamic_cast<NifOgre::NodeTargetValue<Ogre::Real>*>(iter->mControllers[i].getDestination().getPointer());
-                if(dstval && dstval->getNode() == mNonAccumRoot)
+                for(size_t i = 0;i < iter->mControllers.size();i++)
                 {
-                    nonaccumctrl = dstval;
-                    break;
+                    NifOgre::NodeTargetValue<Ogre::Real> *dstval;
+                    dstval = dynamic_cast<NifOgre::NodeTargetValue<Ogre::Real>*>(iter->mControllers[i].getDestination().getPointer());
+                    if(dstval && dstval->getNode() == mNonAccumRoot)
+                    {
+                        nonaccumctrl = dstval;
+                        break;
+                    }
                 }
             }
 
             if(!foundanim)
             {
-                if(!reset(keys, nonaccumctrl, groupname, start, stop))
+                if(!reset(layeridx, keys, nonaccumctrl, groupname, start, stop))
                     continue;
-                mCurrentKeys = &keys;
-                mCurrentGroup = groupname;
-                mCurrentControllers = &iter->mControllers;
-                mNonAccumCtrl = nonaccumctrl;
-                mAnimVelocity = 0.0f;
+                mLayer[layeridx].mGroupName = groupname;
+                mLayer[layeridx].mTextKeys = &keys;
+                mLayer[layeridx].mControllers = &iter->mControllers;
+                mLayer[layeridx].mLooping = loop;
+                mLayer[layeridx].mPlaying = true;
 
-                setLooping(loop);
-                mPlaying = true;
+                if(layeridx == 0)
+                {
+                    mNonAccumCtrl = nonaccumctrl;
+                    mAnimVelocity = 0.0f;
+                }
 
                 foundanim = true;
             }
 
-            if(!mNonAccumRoot)
+            if(!nonaccumctrl)
                 break;
 
             mAnimVelocity = calcAnimVelocity(keys, nonaccumctrl, groupname);
@@ -463,36 +486,42 @@ void Animation::play(const std::string &groupname, const std::string &start, con
     }
 }
 
-Ogre::Vector3 Animation::runAnimation(float timepassed)
+Ogre::Vector3 Animation::runAnimation(float duration)
 {
     Ogre::Vector3 movement(0.0f);
 
-    timepassed *= mAnimSpeedMult;
-    while(!mCurrentGroup.empty() && mPlaying)
+    duration *= mAnimSpeedMult;
+    for(size_t layeridx = 0;layeridx < sMaxLayers;layeridx++)
     {
-        float targetTime = mCurrentTime + timepassed;
-        if(mNextKey->first > targetTime)
+        if(mLayer[layeridx].mGroupName.empty())
+            continue;
+
+        float timepassed = duration;
+        while(mLayer[layeridx].mPlaying)
         {
-            mCurrentTime = targetTime;
-            if(mNonAccumRoot)
+            float targetTime = mLayer[layeridx].mTime + timepassed;
+            if(mLayer[layeridx].mNextKey->first > targetTime)
+            {
+                mLayer[layeridx].mTime = targetTime;
+                if(layeridx == 0 && mNonAccumRoot)
+                    movement += updatePosition();
+                break;
+            }
+
+            NifOgre::TextKeyMap::const_iterator key(mLayer[layeridx].mNextKey++);
+            mLayer[layeridx].mTime = key->first;
+            if(layeridx == 0 && mNonAccumRoot)
                 movement += updatePosition();
-            break;
+
+            mLayer[layeridx].mPlaying = (mLayer[layeridx].mLooping || mLayer[layeridx].mStopKey->first > mLayer[layeridx].mTime);
+            timepassed = targetTime - mLayer[layeridx].mTime;
+
+            if(!handleTextKey(layeridx, key))
+                break;
         }
-
-        NifOgre::TextKeyMap::const_iterator key(mNextKey++);
-        mCurrentTime = key->first;
-        if(mNonAccumRoot)
-            movement += updatePosition();
-
-        mPlaying = (mLooping || mStopKey->first > mCurrentTime);
-        timepassed = targetTime - mCurrentTime;
-
-        if(!handleTextKey(key))
-            break;
+        for(size_t i = 0;i < (*(mLayer[layeridx].mControllers)).size();i++)
+            (*(mLayer[layeridx].mControllers))[i].update();
     }
-
-    for(size_t i = 0;i < (*mCurrentControllers).size();i++)
-        (*mCurrentControllers)[i].update();
 
     if(mSkelBase)
     {
