@@ -449,6 +449,7 @@ void Animation::doLoop(size_t layeridx)
     mLayer[layeridx].mTime = mLayer[layeridx].mLoopStartKey->first;
     mLayer[layeridx].mNextKey = mLayer[layeridx].mLoopStartKey;
     mLayer[layeridx].mNextKey++;
+    mLayer[layeridx].mPlaying = true;
     if(layeridx == 0 && mNonAccumCtrl)
         mLastPosition = mNonAccumCtrl->getTranslation(mLayer[layeridx].mTime) * mAccumulate;
 }
@@ -608,7 +609,7 @@ Ogre::Vector3 Animation::runAnimation(float duration)
             if(layeridx == 0 && mNonAccumRoot)
                 movement += updatePosition();
 
-            mLayer[layeridx].mPlaying = (mLayer[layeridx].mLooping || mLayer[layeridx].mStopKey->first > mLayer[layeridx].mTime);
+            mLayer[layeridx].mPlaying = (key != mLayer[layeridx].mStopKey);
             timepassed = targetTime - mLayer[layeridx].mTime;
 
             if(!handleTextKey(layeridx, key))
