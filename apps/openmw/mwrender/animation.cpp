@@ -392,18 +392,19 @@ void Animation::updateSkeletonInstance(const Ogre::SkeletonInstance *skelsrc, Og
 }
 
 
-Ogre::Vector3 Animation::updatePosition()
+void Animation::updatePosition(Ogre::Vector3 &position)
 {
     Ogre::Vector3 posdiff;
 
-    /* Get the non-accumulation root's difference from the last update. */
+    /* Get the non-accumulation root's difference from the last update, and move the position
+     * accordingly.
+     */
     posdiff = (mNonAccumCtrl->getTranslation(mLayer[0].mTime) - mLastPosition) * mAccumulate;
+    position += posdiff;
 
     /* Translate the accumulation root back to compensate for the move. */
     mLastPosition += posdiff;
     mAccumRoot->setPosition(-mLastPosition);
-
-    return posdiff;
 }
 
 bool Animation::reset(size_t layeridx, const NifOgre::TextKeyMap &keys, NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl, const std::string &groupname, const std::string &start, const std::string &stop)
@@ -602,14 +603,14 @@ Ogre::Vector3 Animation::runAnimation(float duration)
             {
                 mLayer[layeridx].mTime = targetTime;
                 if(layeridx == 0 && mNonAccumCtrl)
-                    movement += updatePosition();
+                    updatePosition(movement);
                 break;
             }
 
             NifOgre::TextKeyMap::const_iterator key(mLayer[layeridx].mNextKey++);
             mLayer[layeridx].mTime = key->first;
             if(layeridx == 0 && mNonAccumCtrl)
-                movement += updatePosition();
+                updatePosition(movement);
 
             mLayer[layeridx].mPlaying = (key != mLayer[layeridx].mStopKey);
             timepassed = targetTime - mLayer[layeridx].mTime;

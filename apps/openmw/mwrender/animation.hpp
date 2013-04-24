@@ -88,7 +88,7 @@ protected:
 
     /* Updates the position of the accum root node for the current time, and
      * returns the wanted movement vector from the previous update. */
-    Ogre::Vector3 updatePosition();
+    void updatePosition(Ogre::Vector3 &position);
 
     static NifOgre::TextKeyMap::const_iterator findGroupStart(const NifOgre::TextKeyMap &keys, const std::string &groupname);
 
