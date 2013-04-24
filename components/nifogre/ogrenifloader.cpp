@@ -65,11 +65,7 @@ public:
         , mStopTime(ctrl->timeStop)
     {
         if(mDeltaInput)
-        {
             mDeltaCount = mPhase;
-            while(mDeltaCount < mStartTime)
-                mDeltaCount += (mStopTime-mStartTime);
-        }
     }
 
     virtual Ogre::Real calculate(Ogre::Real value)
@@ -77,6 +73,9 @@ public:
         if(mDeltaInput)
         {
             mDeltaCount += value*mFrequency;
+            if(mDeltaCount < mStartTime)
+                mDeltaCount = mStopTime - std::fmod(mStartTime - mDeltaCount,
+                                                    mStopTime - mStartTime);
             mDeltaCount = std::fmod(mDeltaCount - mStartTime,
                                     mStopTime - mStartTime) + mStartTime;
             return mDeltaCount;
