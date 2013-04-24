@@ -173,8 +173,6 @@ public:
         {
             if(time <= keys.front().mTime)
                 return keys.front().mValue;
-            if(time >= keys.back().mTime)
-                return keys.back().mValue;
 
             Nif::FloatKeyList::VecType::const_iterator iter(keys.begin()+1);
             for(;iter != keys.end();iter++)
@@ -193,8 +191,6 @@ public:
         {
             if(time <= keys.front().mTime)
                 return keys.front().mValue;
-            if(time >= keys.back().mTime)
-                return keys.back().mValue;
 
             Nif::Vector3KeyList::VecType::const_iterator iter(keys.begin()+1);
             for(;iter != keys.end();iter++)
@@ -213,8 +209,6 @@ public:
         {
             if(time <= keys.front().mTime)
                 return keys.front().mValue;
-            if(time >= keys.back().mTime)
-                return keys.back().mValue;
 
             Nif::QuaternionKeyList::VecType::const_iterator iter(keys.begin()+1);
             for(;iter != keys.end();iter++)
@@ -241,21 +235,21 @@ public:
         {
             if(mRotations.mKeys.size() > 0)
                 return interpKey(mRotations.mKeys, time);
-            return Ogre::Quaternion();
+            return mNode->getOrientation();
         }
 
         virtual Ogre::Vector3 getTranslation(float time) const
         {
             if(mTranslations.mKeys.size() > 0)
                 return interpKey(mTranslations.mKeys, time);
-            return Ogre::Vector3(0.0f);
+            return mNode->getPosition();
         }
 
         virtual Ogre::Vector3 getScale(float time) const
         {
             if(mScales.mKeys.size() > 0)
                 return Ogre::Vector3(interpKey(mScales.mKeys, time));
-            return Ogre::Vector3(1.0f);
+            return mNode->getScale();
         }
 
         virtual Ogre::Real getValue() const
@@ -266,9 +260,12 @@ public:
 
         virtual void setValue(Ogre::Real time)
         {
-            mNode->setOrientation(Value::getRotation(time));
-            mNode->setPosition(Value::getTranslation(time));
-            mNode->setScale(Value::getScale(time));
+            if(mRotations.mKeys.size() > 0)
+                mNode->setOrientation(interpKey(mRotations.mKeys, time));
+            if(mTranslations.mKeys.size() > 0)
+                mNode->setPosition(interpKey(mTranslations.mKeys, time));
+            if(mScales.mKeys.size() > 0)
+                mNode->setScale(Ogre::Vector3(interpKey(mScales.mKeys, time)));
         }
     };
 
