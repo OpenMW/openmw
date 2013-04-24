@@ -23,7 +23,7 @@ Animation::AnimLayer::AnimLayer()
   , mTextKeys(NULL)
   , mTime(0.0f)
   , mPlaying(false)
-  , mLooping(false)
+  , mLoopCount(0)
 {
 }
 
@@ -449,14 +449,20 @@ bool Animation::reset(size_t layeridx, const NifOgre::TextKeyMap &keys, NifOgre:
     return true;
 }
 
-void Animation::doLoop(size_t layeridx)
+bool Animation::doLoop(size_t layeridx)
 {
+    if(mLayer[layeridx].mLoopCount == 0)
+        return false;
+    mLayer[layeridx].mLoopCount--;
+
     mLayer[layeridx].mTime = mLayer[layeridx].mLoopStartKey->first;
     mLayer[layeridx].mNextKey = mLayer[layeridx].mLoopStartKey;
     mLayer[layeridx].mNextKey++;
     mLayer[layeridx].mPlaying = true;
     if(layeridx == 0 && mNonAccumCtrl)
         mLastPosition = mNonAccumCtrl->getTranslation(mLayer[layeridx].mTime) * mAccumulate;
+
+    return true;
 }
 
 
@@ -495,9 +501,8 @@ bool Animation::handleTextKey(size_t layeridx, const NifOgre::TextKeyMap::const_
 
     if(evt.compare(off, len, "loop stop") == 0 || evt.compare(off, len, "stop") == 0)
     {
-        if(mLayer[layeridx].mLooping)
+        if(doLoop(layeridx))
         {
-            doLoop(layeridx);
             if(mLayer[layeridx].mTime >= time)
                 return false;
             return true;
@@ -510,7 +515,7 @@ bool Animation::handleTextKey(size_t layeridx, const NifOgre::TextKeyMap::const_
 }
 
 
-void Animation::play(const std::string &groupname, const std::string &start, const std::string &stop, bool loop)
+void Animation::play(const std::string &groupname, const std::string &start, const std::string &stop, size_t loops)
 {
     // TODO: parameterize this
     size_t layeridx = 0;
@@ -527,7 +532,7 @@ void Animation::play(const std::string &groupname, const std::string &start, con
         mLayer[layeridx].mGroupName.clear();
         mLayer[layeridx].mTextKeys = NULL;
         mLayer[layeridx].mControllers = NULL;
-        mLayer[layeridx].mLooping = false;
+        mLayer[layeridx].mLoopCount = 0;
         mLayer[layeridx].mPlaying = false;
 
         foundanim = true;
@@ -562,7 +567,7 @@ void Animation::play(const std::string &groupname, const std::string &start, con
             mLayer[layeridx].mGroupName = groupname;
             mLayer[layeridx].mTextKeys = &keys;
             mLayer[layeridx].mControllers = &objlist.mControllers;
-            mLayer[layeridx].mLooping = loop;
+            mLayer[layeridx].mLoopCount = loops;
             mLayer[layeridx].mPlaying = true;
 
             if(layeridx == 0)

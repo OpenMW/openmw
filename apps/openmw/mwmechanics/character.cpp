@@ -123,7 +123,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
         mAnimation->setAccumulation(Ogre::Vector3(0.0f));
     }
     if(mAnimation->hasAnimation(mCurrentGroup))
-        mAnimation->play(mCurrentGroup, "start", "stop", loop);
+        mAnimation->play(mCurrentGroup, "start", "stop", loop ? (~(size_t)0) : 0);
 }
 
 CharacterController::CharacterController(const CharacterController &rhs)
@@ -155,7 +155,7 @@ void CharacterController::markerEvent(float time, const std::string &evt)
         if(mAnimQueue.size() >= 2 && mAnimQueue[0] == mAnimQueue[1])
         {
             mAnimQueue.pop_front();
-            mAnimation->play(mCurrentGroup, "loop start", "stop", false);
+            mAnimation->play(mCurrentGroup, "loop start", "stop", 0);
         }
         return;
     }
@@ -164,7 +164,7 @@ void CharacterController::markerEvent(float time, const std::string &evt)
         if(mAnimQueue.size() >= 2 && mAnimQueue[0] == mAnimQueue[1])
         {
             mAnimQueue.pop_front();
-            mAnimation->play(mCurrentGroup, "loop start", "stop", false);
+            mAnimation->play(mCurrentGroup, "loop start", "stop", 0);
         }
         else if(mAnimQueue.size() > 0)
         {
@@ -172,7 +172,7 @@ void CharacterController::markerEvent(float time, const std::string &evt)
             if(mAnimQueue.size() > 0)
             {
                 mCurrentGroup = mAnimQueue.front();
-                mAnimation->play(mCurrentGroup, "start", "stop", false);
+                mAnimation->play(mCurrentGroup, "start", "stop", 0);
             }
         }
         return;
@@ -284,7 +284,7 @@ void CharacterController::playGroup(const std::string &groupname, int mode, int 
                 mAnimQueue.push_back(groupname);
             mCurrentGroup = groupname;
             mState = CharState_SpecialIdle;
-            mAnimation->play(mCurrentGroup, ((mode==2) ? "loop start" : "start"), "stop", false);
+            mAnimation->play(mCurrentGroup, ((mode==2) ? "loop start" : "start"), "stop", 0);
         }
         else if(mode == 0)
         {
@@ -316,7 +316,7 @@ void CharacterController::setState(CharacterState state, bool loop)
     if(mAnimation->hasAnimation(anim))
     {
         mCurrentGroup = anim;
-        mAnimation->play(mCurrentGroup, "start", "stop", loop);
+        mAnimation->play(mCurrentGroup, "start", "stop", loop ? (~(size_t)0) : 0);
     }
 }
 

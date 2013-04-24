@@ -55,7 +55,7 @@ protected:
         float mTime;
 
         bool mPlaying;
-        bool mLooping;
+        size_t mLoopCount;
 
         AnimLayer();
     };
@@ -101,7 +101,7 @@ protected:
      */
     bool reset(size_t layeridx, const NifOgre::TextKeyMap &keys, NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl, const std::string &groupname, const std::string &start, const std::string &stop);
 
-    void doLoop(size_t layeridx);
+    bool doLoop(size_t layeridx);
 
     bool handleTextKey(size_t layeridx, const NifOgre::TextKeyMap::const_iterator &key);
 
@@ -129,7 +129,7 @@ public:
 
     void setSpeed(float speed);
 
-    void play(const std::string &groupname, const std::string &start, const std::string &stop, bool loop);
+    void play(const std::string &groupname, const std::string &start, const std::string &stop, size_t loops);
     virtual Ogre::Vector3 runAnimation(float timepassed);
 
     Ogre::Node *getNode(const std::string &name);
