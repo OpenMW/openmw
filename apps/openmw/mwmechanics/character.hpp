@@ -72,7 +72,7 @@ class CharacterController
     MWWorld::Ptr mPtr;
     MWRender::Animation *mAnimation;
 
-    typedef std::deque<std::string> AnimationQueue;
+    typedef std::deque<std::pair<std::string,size_t> > AnimationQueue;
     AnimationQueue mAnimQueue;
 
     std::string mCurrentGroup;

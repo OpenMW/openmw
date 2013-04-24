@@ -150,29 +150,16 @@ void CharacterController::updatePtr(const MWWorld::Ptr &ptr)
 
 void CharacterController::markerEvent(float time, const std::string &evt)
 {
-    if(evt == "loop stop")
-    {
-        if(mAnimQueue.size() >= 2 && mAnimQueue[0] == mAnimQueue[1])
-        {
-            mAnimQueue.pop_front();
-            mAnimation->play(mCurrentGroup, "loop start", "stop", 0);
-        }
-        return;
-    }
     if(evt == "stop")
     {
-        if(mAnimQueue.size() >= 2 && mAnimQueue[0] == mAnimQueue[1])
-        {
-            mAnimQueue.pop_front();
-            mAnimation->play(mCurrentGroup, "loop start", "stop", 0);
-        }
-        else if(mAnimQueue.size() > 0)
+        if(mAnimQueue.size() > 0)
         {
             mAnimQueue.pop_front();
             if(mAnimQueue.size() > 0)
             {
-                mCurrentGroup = mAnimQueue.front();
-                mAnimation->play(mCurrentGroup, "start", "stop", 0);
+                mCurrentGroup = mAnimQueue.front().first;
+                size_t count = mAnimQueue.front().second;
+                mAnimation->play(mCurrentGroup, "start", "stop", count);
             }
         }
         return;
@@ -223,7 +210,6 @@ void CharacterController::update(float duration, Movement &movement)
             if(vec.x > 0.0f)
                 setState(inwater ? (isrunning ? CharState_SwimRunRight : CharState_SwimWalkRight)
                                  : (sneak ? CharState_SneakRight : (isrunning ? CharState_RunRight : CharState_WalkRight)), true);
-
             else if(vec.x < 0.0f)
                 setState(inwater ? (isrunning ? CharState_SwimRunLeft : CharState_SwimWalkLeft)
                                  : (sneak ? CharState_SneakLeft : (isrunning ? CharState_RunLeft : CharState_WalkLeft)), true);
@@ -236,10 +222,10 @@ void CharacterController::update(float duration, Movement &movement)
             if(vec.y > 0.0f)
                 setState(inwater ? (isrunning ? CharState_SwimRunForward : CharState_SwimWalkForward)
                                  : (sneak ? CharState_SneakForward : (isrunning ? CharState_RunForward : CharState_WalkForward)), true);
-
             else if(vec.y < 0.0f)
                 setState(inwater ? (isrunning ? CharState_SwimRunBack : CharState_SwimWalkBack)
                                  : (sneak ? CharState_SneakBack : (isrunning ? CharState_RunBack : CharState_WalkBack)), true);
+
             // Apply any sideways movement manually
             movement.mPosition[0] += vec.x * (speed*duration);
         }
@@ -250,7 +236,7 @@ void CharacterController::update(float duration, Movement &movement)
             else if(rot.z < 0.0f)
                 setState(CharState_TurnLeft, true);
         }
-        else if(mAnimQueue.size() == 0)
+        else if(getState() != CharState_SpecialIdle || !mAnimation->isPlaying(0))
             setState((inwater ? CharState_IdleSwim : (sneak ? CharState_IdleSneak : CharState_Idle)), true);
 
         movement.mRotation[0] += rot.x * duration;
@@ -280,17 +266,15 @@ void CharacterController::playGroup(const std::string &groupname, int mode, int 
         if(mode != 0 || mAnimQueue.size() == 0)
         {
             mAnimQueue.clear();
-            while(count-- > 0)
-                mAnimQueue.push_back(groupname);
+            mAnimQueue.push_back(std::make_pair(groupname, count-1));
             mCurrentGroup = groupname;
             mState = CharState_SpecialIdle;
-            mAnimation->play(mCurrentGroup, ((mode==2) ? "loop start" : "start"), "stop", 0);
+            mAnimation->play(mCurrentGroup, ((mode==2) ? "loop start" : "start"), "stop", count-1);
         }
         else if(mode == 0)
         {
             mAnimQueue.resize(1);
-            while(count-- > 0)
-                mAnimQueue.push_back(groupname);
+            mAnimQueue.push_back(std::make_pair(groupname, count-1));
         }
     }
 }
