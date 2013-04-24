@@ -412,7 +412,7 @@ bool Animation::reset(size_t layeridx, const NifOgre::TextKeyMap &keys, NifOgre:
     NifOgre::TextKeyMap::const_iterator startkey(keys.begin());
     while(startkey != keys.end() && startkey->second != tag)
         startkey++;
-    if(startkey == keys.end() && tag == "loop start")
+    if(startkey == keys.end() && start == "loop start")
     {
         tag = groupname+": start";
         startkey = keys.begin();
