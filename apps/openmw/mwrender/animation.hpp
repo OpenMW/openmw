@@ -33,10 +33,6 @@ protected:
         virtual Ogre::Real getValue() const;
         virtual void setValue(Ogre::Real value);
     };
-    Ogre::SharedPtr<Ogre::ControllerValue<Ogre::Real> > mAnimationBaseValuePtr;
-
-    MWWorld::Ptr mPtr;
-    MWMechanics::CharacterController *mController;
 
     struct ObjectInfo {
         NifOgre::ObjectList mObjectList;
@@ -47,20 +43,6 @@ protected:
         int mActiveLayers;
     };
 
-    Ogre::SceneNode *mInsert;
-    Ogre::Entity *mSkelBase;
-    std::vector<ObjectInfo> mObjects;
-    Ogre::Node *mAccumRoot;
-    Ogre::Bone *mNonAccumRoot;
-    Ogre::Vector3 mAccumulate;
-    Ogre::Vector3 mLastPosition;
-
-    NifOgre::NodeTargetValue<Ogre::Real> *mNonAccumCtrl;
-    float mAnimVelocity;
-    float mAnimSpeedMult;
-    std::vector<Ogre::Controller<Ogre::Real> > mActiveCtrls;
-
-    static const size_t sMaxLayers = 1;
     struct AnimLayer {
         std::string mGroupName;
         std::vector<Ogre::Controller<Ogre::Real> > *mControllers;
@@ -76,7 +58,27 @@ protected:
         bool mLooping;
 
         AnimLayer();
-    } mLayer[sMaxLayers];
+    };
+
+    MWWorld::Ptr mPtr;
+    MWMechanics::CharacterController *mController;
+
+    Ogre::SceneNode *mInsert;
+    Ogre::Entity *mSkelBase;
+    std::vector<ObjectInfo> mObjects;
+    Ogre::Node *mAccumRoot;
+    Ogre::Bone *mNonAccumRoot;
+    Ogre::Vector3 mAccumulate;
+    Ogre::Vector3 mLastPosition;
+
+    NifOgre::NodeTargetValue<Ogre::Real> *mNonAccumCtrl;
+    float mAnimVelocity;
+    float mAnimSpeedMult;
+    std::vector<Ogre::Controller<Ogre::Real> > mActiveCtrls;
+
+    static const size_t sMaxLayers = 1;
+    AnimLayer mLayer[sMaxLayers];
+    Ogre::SharedPtr<Ogre::ControllerValue<Ogre::Real> > mAnimationValuePtr[sMaxLayers];
 
     static float calcAnimVelocity(const NifOgre::TextKeyMap &keys,
                                   NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl,

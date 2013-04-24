@@ -58,8 +58,7 @@ void Animation::destroyObjectList(Ogre::SceneManager *sceneMgr, NifOgre::ObjectL
 }
 
 Animation::Animation(const MWWorld::Ptr &ptr)
-    : mAnimationBaseValuePtr(OGRE_NEW AnimationValue(this, 0))
-    , mPtr(ptr)
+    : mPtr(ptr)
     , mController(NULL)
     , mInsert(NULL)
     , mSkelBase(NULL)
@@ -71,6 +70,9 @@ Animation::Animation(const MWWorld::Ptr &ptr)
     , mAnimVelocity(0.0f)
     , mAnimSpeedMult(1.0f)
 {
+    for(size_t i = 0;i < sMaxLayers;i++)
+        mAnimationValuePtr[i].bind(OGRE_NEW AnimationValue(this, i));
+
     /* As long as we remain under 128 active controllers, we can avoid
      * reallocations. */
     mActiveCtrls.reserve(128);
@@ -153,7 +155,7 @@ void Animation::addObjectList(Ogre::SceneNode *node, const std::string &model, b
     for(size_t i = 0;i < objlist.mControllers.size();i++)
     {
         if(objlist.mControllers[i].getSource().isNull())
-            objlist.mControllers[i].setSource(mAnimationBaseValuePtr);
+            objlist.mControllers[i].setSource(mAnimationValuePtr[0]);
     }
 
     mActiveCtrls.insert(mActiveCtrls.end(), objlist.mControllers.begin(), objlist.mControllers.end());
