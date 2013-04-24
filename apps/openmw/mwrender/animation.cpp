@@ -155,6 +155,8 @@ void Animation::addObjectList(Ogre::SceneNode *node, const std::string &model, b
         if(objlist.mControllers[i].getSource().isNull())
             objlist.mControllers[i].setSource(mAnimationBaseValuePtr);
     }
+
+    mActiveCtrls.insert(mActiveCtrls.end(), objlist.mControllers.begin(), objlist.mControllers.end());
 }
 
 void Animation::setRenderProperties(const NifOgre::ObjectList &objlist, Ogre::uint32 visflags, Ogre::uint8 solidqueue, Ogre::uint8 transqueue)
@@ -231,7 +233,7 @@ void Animation::updateActiveControllers()
         {
             for(obj = mObjects.begin();obj != mObjects.end();obj++)
             {
-                if((obj->mActiveLayers&(1<<layer)))
+                if((obj->mActiveLayers&(1<<nextlayer)))
                     break;
             }
         }
