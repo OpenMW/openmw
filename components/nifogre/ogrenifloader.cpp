@@ -676,9 +676,8 @@ class NIFObjectLoader
     }
 
 
-    static TextKeyMap extractTextKeys(const Nif::NiTextKeyExtraData *tk)
+    static void extractTextKeys(const Nif::NiTextKeyExtraData *tk, TextKeyMap &textkeys)
     {
-        TextKeyMap textkeys;
         for(size_t i = 0;i < tk->list.size();i++)
         {
             const std::string &str = tk->list[i].text;
@@ -698,7 +697,6 @@ class NIFObjectLoader
                 pos = nextpos;
             }
         }
-        return textkeys;
     }
 
 
@@ -730,7 +728,7 @@ class NIFObjectLoader
                 const Nif::NiTextKeyExtraData *tk = static_cast<const Nif::NiTextKeyExtraData*>(e.getPtr());
 
                 int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, node->recIndex);
-                objectlist.mTextKeys[trgtid] = extractTextKeys(tk);
+                extractTextKeys(tk, objectlist.mTextKeys[trgtid]);
             }
             else if(e->recType == Nif::RC_NiStringExtraData)
             {
