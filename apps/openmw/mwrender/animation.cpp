@@ -538,7 +538,7 @@ void Animation::play(const std::string &groupname, const std::string &start, con
 
         const NifOgre::TextKeyMap &keys = objlist.mTextKeys.begin()->second;
         NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl = NULL;
-        if(layeridx == 0)
+        if(layeridx == 0 && mNonAccumRoot)
         {
             for(size_t i = 0;i < objlist.mControllers.size();i++)
             {
@@ -601,14 +601,14 @@ Ogre::Vector3 Animation::runAnimation(float duration)
             if(mLayer[layeridx].mNextKey->first > targetTime)
             {
                 mLayer[layeridx].mTime = targetTime;
-                if(layeridx == 0 && mNonAccumRoot)
+                if(layeridx == 0 && mNonAccumCtrl)
                     movement += updatePosition();
                 break;
             }
 
             NifOgre::TextKeyMap::const_iterator key(mLayer[layeridx].mNextKey++);
             mLayer[layeridx].mTime = key->first;
-            if(layeridx == 0 && mNonAccumRoot)
+            if(layeridx == 0 && mNonAccumCtrl)
                 movement += updatePosition();
 
             mLayer[layeridx].mPlaying = (key != mLayer[layeridx].mStopKey);
