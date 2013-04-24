@@ -132,6 +132,9 @@ public:
     void play(const std::string &groupname, const std::string &start, const std::string &stop, size_t loops);
     virtual Ogre::Vector3 runAnimation(float timepassed);
 
+    bool isPlaying(size_t layeridx) const
+    { return mLayer[layeridx].mPlaying; }
+
     Ogre::Node *getNode(const std::string &name);
 };
 
