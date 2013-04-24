@@ -148,27 +148,6 @@ void CharacterController::updatePtr(const MWWorld::Ptr &ptr)
 }
 
 
-void CharacterController::markerEvent(float time, const std::string &evt)
-{
-    if(evt == "stop")
-    {
-        if(mAnimQueue.size() > 0)
-        {
-            mAnimQueue.pop_front();
-            if(mAnimQueue.size() > 0)
-            {
-                mCurrentGroup = mAnimQueue.front().first;
-                size_t count = mAnimQueue.front().second;
-                mAnimation->play(mCurrentGroup, "start", "stop", count);
-            }
-        }
-        return;
-    }
-
-    std::cerr<< "Unhandled animation event: "<<evt <<std::endl;
-}
-
-
 void CharacterController::update(float duration, Movement &movement)
 {
     float speed = 0.0f;
@@ -237,7 +216,17 @@ void CharacterController::update(float duration, Movement &movement)
                 setState(CharState_TurnLeft, true);
         }
         else if(getState() != CharState_SpecialIdle || !mAnimation->isPlaying(0))
-            setState((inwater ? CharState_IdleSwim : (sneak ? CharState_IdleSneak : CharState_Idle)), true);
+        {
+            if(mAnimQueue.size() > 0)
+            {
+                mCurrentGroup = mAnimQueue.front().first;
+                size_t count = mAnimQueue.front().second;
+                mAnimQueue.pop_front();
+                mAnimation->play(mCurrentGroup, "start", "stop", count);
+            }
+            else
+                setState((inwater ? CharState_IdleSwim : (sneak ? CharState_IdleSneak : CharState_Idle)), true);
+        }
 
         movement.mRotation[0] += rot.x * duration;
         movement.mRotation[1] += rot.y * duration;
@@ -263,17 +252,16 @@ void CharacterController::playGroup(const std::string &groupname, int mode, int 
     else
     {
         count = std::max(count, 1);
-        if(mode != 0 || mAnimQueue.size() == 0)
+        if(mode != 0 || getState() != CharState_SpecialIdle)
         {
             mAnimQueue.clear();
-            mAnimQueue.push_back(std::make_pair(groupname, count-1));
             mCurrentGroup = groupname;
             mState = CharState_SpecialIdle;
             mAnimation->play(mCurrentGroup, ((mode==2) ? "loop start" : "start"), "stop", count-1);
         }
         else if(mode == 0)
         {
-            mAnimQueue.resize(1);
+            mAnimQueue.clear();
             mAnimQueue.push_back(std::make_pair(groupname, count-1));
         }
     }

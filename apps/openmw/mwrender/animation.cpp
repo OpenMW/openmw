@@ -499,7 +499,7 @@ bool Animation::handleTextKey(size_t layeridx, const NifOgre::TextKeyMap::const_
         return true;
     }
 
-    if(evt.compare(off, len, "loop stop") == 0)
+    if(evt.compare(off, len, "loop stop") == 0 || evt.compare(off, len, "stop") == 0)
     {
         if(doLoop(layeridx))
         {
@@ -508,18 +508,8 @@ bool Animation::handleTextKey(size_t layeridx, const NifOgre::TextKeyMap::const_
         }
         return true;
     }
-    if(evt.compare(off, len, "stop") == 0)
-    {
-        if(doLoop(layeridx))
-        {
-            if(mLayer[layeridx].mTime >= time)
-                return false;
-            return true;
-        }
-        // fall-through
-    }
-    if(mController)
-        mController->markerEvent(time, evt.substr(off));
+
+    std::cerr<< "Unhandled animation textkey: "<<evt <<std::endl;
     return true;
 }
 

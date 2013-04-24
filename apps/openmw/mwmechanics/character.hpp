@@ -79,12 +79,6 @@ class CharacterController
     CharacterState mState;
     bool mSkipAnim;
 
-protected:
-    /* Called by the animation whenever a new text key is reached. */
-    void markerEvent(float time, const std::string &evt);
-
-    friend class MWRender::Animation;
-
 public:
     CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state, bool loop);
     CharacterController(const CharacterController &rhs);
