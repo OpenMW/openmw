@@ -108,8 +108,6 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     if(!mAnimation)
         return;
 
-    mAnimation->setController(this);
-
     getStateInfo(mState, &mCurrentGroup);
     if(MWWorld::Class::get(mPtr).isActor())
     {
@@ -124,17 +122,6 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     }
     if(mAnimation->hasAnimation(mCurrentGroup))
         mAnimation->play(mCurrentGroup, "start", "stop", loop ? (~(size_t)0) : 0);
-}
-
-CharacterController::CharacterController(const CharacterController &rhs)
-  : mPtr(rhs.mPtr), mAnimation(rhs.mAnimation), mAnimQueue(rhs.mAnimQueue)
-  , mCurrentGroup(rhs.mCurrentGroup), mState(rhs.mState)
-  , mSkipAnim(rhs.mSkipAnim)
-{
-    if(!mAnimation)
-        return;
-    /* We've been copied. Update the animation with the new controller. */
-    mAnimation->setController(this);
 }
 
 CharacterController::~CharacterController()

@@ -59,14 +59,13 @@ void Animation::destroyObjectList(Ogre::SceneManager *sceneMgr, NifOgre::ObjectL
 
 Animation::Animation(const MWWorld::Ptr &ptr)
     : mPtr(ptr)
-    , mController(NULL)
     , mInsert(NULL)
     , mSkelBase(NULL)
     , mAccumRoot(NULL)
     , mNonAccumRoot(NULL)
+    , mNonAccumCtrl(NULL)
     , mAccumulate(0.0f)
     , mLastPosition(0.0f)
-    , mNonAccumCtrl(NULL)
     , mAnimVelocity(0.0f)
     , mAnimSpeedMult(1.0f)
 {
@@ -296,12 +295,6 @@ bool Animation::hasAnimation(const std::string &anim)
             return true;
     }
     return false;
-}
-
-
-void Animation::setController(MWMechanics::CharacterController *controller)
-{
-    mController = controller;
 }
 
 

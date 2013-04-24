@@ -8,10 +8,6 @@
 
 #include "../mwworld/ptr.hpp"
 
-namespace MWMechanics
-{
-    class CharacterController;
-}
 
 namespace MWRender
 {
@@ -61,20 +57,20 @@ protected:
     };
 
     MWWorld::Ptr mPtr;
-    MWMechanics::CharacterController *mController;
 
     Ogre::SceneNode *mInsert;
     Ogre::Entity *mSkelBase;
     std::vector<ObjectInfo> mObjects;
     Ogre::Node *mAccumRoot;
     Ogre::Bone *mNonAccumRoot;
+    NifOgre::NodeTargetValue<Ogre::Real> *mNonAccumCtrl;
     Ogre::Vector3 mAccumulate;
     Ogre::Vector3 mLastPosition;
 
-    NifOgre::NodeTargetValue<Ogre::Real> *mNonAccumCtrl;
+    std::vector<Ogre::Controller<Ogre::Real> > mActiveCtrls;
+
     float mAnimVelocity;
     float mAnimSpeedMult;
-    std::vector<Ogre::Controller<Ogre::Real> > mActiveCtrls;
 
     static const size_t sMaxLayers = 1;
     AnimLayer mLayer[sMaxLayers];
@@ -115,8 +111,6 @@ protected:
 public:
     Animation(const MWWorld::Ptr &ptr);
     virtual ~Animation();
-
-    void setController(MWMechanics::CharacterController *controller);
 
     void updatePtr(const MWWorld::Ptr &ptr);
 

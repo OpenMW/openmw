@@ -81,7 +81,6 @@ class CharacterController
 
 public:
     CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state, bool loop);
-    CharacterController(const CharacterController &rhs);
     virtual ~CharacterController();
 
     void updatePtr(const MWWorld::Ptr &ptr);
