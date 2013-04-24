@@ -827,6 +827,14 @@ namespace MWWorld
     void World::localRotateObject (const Ptr& ptr, float rotation, Ogre::Vector3 axis)
     {
         if (ptr.getRefData().getBaseNode() != 0) {
+
+            if(axis==Ogre::Vector3::UNIT_X)
+                ptr.getRefData().getLocalRotation().rot[0]+=rotation;
+            else if(axis==Ogre::Vector3::UNIT_Y)
+                ptr.getRefData().getLocalRotation().rot[1]+=rotation;
+            else if(axis==Ogre::Vector3::UNIT_Z)
+                ptr.getRefData().getLocalRotation().rot[2]+=rotation;
+
             ptr.getRefData().getBaseNode()->rotate(Ogre::Quaternion(Ogre::Radian(Ogre::Degree(-rotation).valueRadians()), axis));
             mPhysics->rotateObject(ptr);
         }

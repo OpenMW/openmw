@@ -153,15 +153,15 @@ namespace MWScript
 
                     if (axis=="x")
                     {
-                        runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees()+ptr.getRefData().getLocalRotation().rot[0]);
+                        runtime.push(Ogre::Radian(ptr.getCellRef().mPos.rot[0]).valueDegrees()+ptr.getRefData().getLocalRotation().rot[0]);
                     }
                     else if (axis=="y")
                     {
-                        runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees()+ptr.getRefData().getLocalRotation().rot[1]);
+                        runtime.push(Ogre::Radian(ptr.getCellRef().mPos.rot[1]).valueDegrees()+ptr.getRefData().getLocalRotation().rot[1]);
                     }
                     else if (axis=="z")
                     {
-                        runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[2]).valueDegrees()+ptr.getRefData().getLocalRotation().rot[2]);
+                        runtime.push(Ogre::Radian(ptr.getCellRef().mPos.rot[2]).valueDegrees()+ptr.getRefData().getLocalRotation().rot[2]);
                     }
                     else
                         throw std::runtime_error ("invalid ration axis: " + axis);
@@ -563,17 +563,14 @@ namespace MWScript
 
                     if (axis == "x")
                     {
-                        ptr.getRefData().getLocalRotation().rot[0]+=rotation;
                         MWBase::Environment::get().getWorld()->localRotateObject(ptr, rotation, Ogre::Vector3::UNIT_X);
                     }
                     else if (axis == "y")
                     {
-                        ptr.getRefData().getLocalRotation().rot[1]+=rotation;
                         MWBase::Environment::get().getWorld()->localRotateObject(ptr, rotation, Ogre::Vector3::UNIT_Y);
                     }
                     else if (axis == "z")
                     {
-                        ptr.getRefData().getLocalRotation().rot[2]+=rotation;
                         MWBase::Environment::get().getWorld()->localRotateObject(ptr, rotation, Ogre::Vector3::UNIT_Z);
                     }
 
