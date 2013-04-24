@@ -676,6 +676,32 @@ class NIFObjectLoader
     }
 
 
+    static TextKeyMap extractTextKeys(const Nif::NiTextKeyExtraData *tk)
+    {
+        TextKeyMap textkeys;
+        for(size_t i = 0;i < tk->list.size();i++)
+        {
+            const std::string &str = tk->list[i].text;
+            std::string::size_type pos = 0;
+            while(pos < str.length())
+            {
+                if(::isspace(str[pos]))
+                {
+                    pos++;
+                    continue;
+                }
+
+                std::string::size_type nextpos = std::min(str.find('\r', pos), str.find('\n', pos));
+                std::string result = str.substr(pos, nextpos-pos);
+                textkeys.insert(std::make_pair(tk->list[i].time, Misc::StringUtils::toLower(result)));
+
+                pos = nextpos;
+            }
+        }
+        return textkeys;
+    }
+
+
     static void createObjects(const std::string &name, const std::string &group,
                               Ogre::SceneManager *sceneMgr, const Nif::Node *node,
                               ObjectList &objectlist, int flags, int animflags, int partflags)
@@ -704,7 +730,7 @@ class NIFObjectLoader
                 const Nif::NiTextKeyExtraData *tk = static_cast<const Nif::NiTextKeyExtraData*>(e.getPtr());
 
                 int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, node->recIndex);
-                objectlist.mTextKeys[trgtid] = NIFSkeletonLoader::extractTextKeys(tk);
+                objectlist.mTextKeys[trgtid] = extractTextKeys(tk);
             }
             else if(e->recType == Nif::RC_NiStringExtraData)
             {
