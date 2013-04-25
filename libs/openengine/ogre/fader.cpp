@@ -19,6 +19,7 @@ Fader::Fader(Ogre::SceneManager* sceneMgr)
     , mTargetAlpha(0.f)
     , mCurrentAlpha(0.f)
     , mStartAlpha(0.f)
+    , mFactor(1.f)
 {
     // Create the fading material
     MaterialPtr material = MaterialManager::getSingleton().create("FadeInOutMaterial", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME );
@@ -62,19 +63,20 @@ void Fader::update(float dt)
             mCurrentAlpha += dt/mTargetTime * (mTargetAlpha-mStartAlpha);
             if (mCurrentAlpha > mTargetAlpha) mCurrentAlpha = mTargetAlpha;
         }
-        
-        applyAlpha();
-        
+                
         mRemainingTime -= dt;
     }
     
-   if (mCurrentAlpha == 0.f) mRectangle->setVisible(false);
+    if (1.f-((1.f-mCurrentAlpha) * mFactor) == 0.f)
+        mRectangle->setVisible(false);
+    else
+        applyAlpha();
 }
 
 void Fader::applyAlpha()
 {
     mRectangle->setVisible(true);
-    mFadeTextureUnit->setAlphaOperation(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, mCurrentAlpha);
+    mFadeTextureUnit->setAlphaOperation(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, 1.f-((1.f-mCurrentAlpha) * mFactor));
 }
 
 void Fader::fadeIn(float time)

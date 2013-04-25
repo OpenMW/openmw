@@ -208,7 +208,7 @@ static const RecordFactoryEntry recordFactories [] = {
 
     { "NiNode",                     &construct <NiNode                      >, RC_NiNode                        },
     { "AvoidNode",                  &construct <NiNode                      >, RC_NiNode                        },
-    { "NiBSParticleNode",           &construct <NiNode                      >, RC_NiNode                        },
+    { "NiBSParticleNode",           &construct <NiNode                      >, RC_NiBSParticleNode              },
     { "NiBSAnimationNode",          &construct <NiNode                      >, RC_NiBSAnimationNode             },
     { "NiBillboardNode",            &construct <NiNode                      >, RC_NiNode                        },
     { "NiTriShape",                 &construct <NiTriShape                  >, RC_NiTriShape                    },
@@ -235,6 +235,7 @@ static const RecordFactoryEntry recordFactories [] = {
     { "NiMaterialColorController",  &construct <NiMaterialColorController   >, RC_NiMaterialColorController     },
     { "NiBSPArrayController",       &construct <NiBSPArrayController        >, RC_NiBSPArrayController          },
     { "NiParticleSystemController", &construct <NiParticleSystemController  >, RC_NiParticleSystemController    },
+    { "NiFlipController",           &construct <NiFlipController            >, RC_NiFlipController              },
     { "NiAmbientLight",             &construct <NiLight                     >, RC_NiLight                       },
     { "NiDirectionalLight",         &construct <NiLight                     >, RC_NiLight                       },
     { "NiTextureEffect",            &construct <NiTextureEffect             >, RC_NiTextureEffect               },

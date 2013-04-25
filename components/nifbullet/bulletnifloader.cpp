@@ -255,9 +255,9 @@ void ManualBulletShapeLoader::handleNiTriShape(btTriangleMesh* mesh, const Nif::
     assert(shape != NULL);
 
     // Interpret flags
-    bool hidden    = (flags & 0x01) != 0; // Not displayed
-    bool collide   = (flags & 0x02) != 0; // Use mesh for collision
-    bool bbcollide = (flags & 0x04) != 0; // Use bounding box for collision
+    bool hidden    = (flags&Nif::NiNode::Flag_Hidden) != 0;
+    bool collide   = (flags&Nif::NiNode::Flag_MeshCollision) != 0;
+    bool bbcollide = (flags&Nif::NiNode::Flag_BBoxCollision) != 0;
 
     // If the object was marked "NCO" earlier, it shouldn't collide with
     // anything. So don't do anything.

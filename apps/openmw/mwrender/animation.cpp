@@ -3,6 +3,8 @@
 #include <OgreSkeletonManager.h>
 #include <OgreSkeletonInstance.h>
 #include <OgreEntity.h>
+#include <OgreSubEntity.h>
+#include <OgreParticleSystem.h>
 #include <OgreBone.h>
 #include <OgreSubMesh.h>
 #include <OgreSceneManager.h>
@@ -15,6 +17,32 @@
 
 namespace MWRender
 {
+
+Animation::AnimLayer::AnimLayer()
+  : mControllers(NULL)
+  , mTextKeys(NULL)
+  , mTime(0.0f)
+  , mPlaying(false)
+  , mLoopCount(0)
+{
+}
+
+
+Ogre::Real Animation::AnimationValue::getValue() const
+{
+    size_t idx = mIndex;
+    while(idx > 0 && mAnimation->mLayer[idx].mGroupName.empty())
+        idx--;
+    if(!mAnimation->mLayer[idx].mGroupName.empty())
+        return mAnimation->mLayer[idx].mTime;
+    return 0.0f;
+}
+
+void Animation::AnimationValue::setValue(Ogre::Real value)
+{
+    mAnimation->mLayer[mIndex].mTime = value;
+}
+
 
 void Animation::destroyObjectList(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList &objects)
 {
@@ -31,22 +59,22 @@ void Animation::destroyObjectList(Ogre::SceneManager *sceneMgr, NifOgre::ObjectL
 
 Animation::Animation(const MWWorld::Ptr &ptr)
     : mPtr(ptr)
-    , mController(NULL)
     , mInsert(NULL)
+    , mSkelBase(NULL)
     , mAccumRoot(NULL)
     , mNonAccumRoot(NULL)
-    , mAccumulate(Ogre::Vector3::ZERO)
+    , mNonAccumCtrl(NULL)
+    , mAccumulate(0.0f)
     , mLastPosition(0.0f)
-    , mCurrentControllers(NULL)
-    , mCurrentKeys(NULL)
-    , mCurrentAnim(NULL)
-    , mCurrentTime(0.0f)
-    , mStopTime(0.0f)
-    , mPlaying(false)
-    , mLooping(false)
     , mAnimVelocity(0.0f)
     , mAnimSpeedMult(1.0f)
 {
+    for(size_t i = 0;i < sMaxLayers;i++)
+        mAnimationValuePtr[i].bind(OGRE_NEW AnimationValue(this, i));
+
+    /* As long as we remain under 128 active controllers, we can avoid
+     * reallocations. */
+    mActiveCtrls.reserve(128);
 }
 
 Animation::~Animation()
@@ -54,105 +82,34 @@ Animation::~Animation()
     if(mInsert)
     {
         Ogre::SceneManager *sceneMgr = mInsert->getCreator();
-        destroyObjectList(sceneMgr, mObjectList);
-
-        for(size_t i = 0;i < mAnimationSources.size();i++)
-            destroyObjectList(sceneMgr, mAnimationSources[i]);
-        mAnimationSources.clear();
+        for(size_t i = 0;i < mObjects.size();i++)
+            destroyObjectList(sceneMgr, mObjects[i].mObjectList);
+        mObjects.clear();
     }
 }
 
 
-void Animation::setAnimationSources(const std::vector<std::string> &names)
+void Animation::addObjectList(Ogre::SceneNode *node, const std::string &model, bool baseonly)
 {
-    if(!mObjectList.mSkelBase)
-        return;
-    Ogre::SceneManager *sceneMgr = mInsert->getCreator();
-
-    mCurrentControllers = &mObjectList.mControllers;
-    mCurrentAnim = NULL;
-    mCurrentKeys = NULL;
-    mAnimVelocity = 0.0f;
-    mAccumRoot = NULL;
-    mNonAccumRoot = NULL;
-    mTextKeys.clear();
-    for(size_t i = 0;i < mAnimationSources.size();i++)
-        destroyObjectList(sceneMgr, mAnimationSources[i]);
-    mAnimationSources.clear();
-
-    Ogre::SharedPtr<Ogre::ControllerValue<Ogre::Real> > ctrlval(OGRE_NEW AnimationValue(this));
-    Ogre::SkeletonInstance *skelinst = mObjectList.mSkelBase->getSkeleton();
-    std::vector<std::string>::const_iterator nameiter;
-    for(nameiter = names.begin();nameiter != names.end();nameiter++)
+    if(!mInsert)
     {
-        mAnimationSources.push_back(NifOgre::Loader::createObjectBase(sceneMgr, *nameiter));
-        if(!mAnimationSources.back().mSkelBase)
-        {
-            std::cerr<< "Failed to get skeleton source "<<*nameiter <<std::endl;
-            destroyObjectList(sceneMgr, mAnimationSources.back());
-            mAnimationSources.pop_back();
-            continue;
-        }
-        NifOgre::ObjectList &objects = mAnimationSources.back();
-
-        for(size_t i = 0;i < objects.mControllers.size();i++)
-        {
-            NifOgre::NodeTargetValue<Ogre::Real> *dstval = dynamic_cast<NifOgre::NodeTargetValue<Ogre::Real>*>(objects.mControllers[i].getDestination().getPointer());
-            if(!dstval) continue;
-
-            const Ogre::String &trgtname = dstval->getNode()->getName();
-            if(!skelinst->hasBone(trgtname)) continue;
-
-            Ogre::Bone *bone = skelinst->getBone(trgtname);
-            dstval->setNode(bone);
-        }
-
-        for(size_t i = 0;i < objects.mControllers.size();i++)
-        {
-            if(objects.mControllers[i].getSource().isNull())
-                objects.mControllers[i].setSource(ctrlval);
-        }
-
-        Ogre::Entity *ent = objects.mSkelBase;
-        Ogre::SkeletonPtr skel = Ogre::SkeletonManager::getSingleton().getByName(ent->getSkeleton()->getName());
-        Ogre::Skeleton::BoneIterator boneiter = skel->getBoneIterator();
-        while(boneiter.hasMoreElements())
-        {
-            Ogre::Bone *bone = boneiter.getNext();
-            Ogre::UserObjectBindings &bindings = bone->getUserObjectBindings();
-            const Ogre::Any &data = bindings.getUserAny(NifOgre::sTextKeyExtraDataID);
-            if(data.isEmpty() || !Ogre::any_cast<bool>(data))
-                continue;
-
-            if(!mNonAccumRoot)
-            {
-                mAccumRoot = mInsert;
-                mNonAccumRoot = mObjectList.mSkelBase->getSkeleton()->getBone(bone->getName());
-            }
-
-            for(int i = 0;i < skel->getNumAnimations();i++)
-            {
-                Ogre::Animation *anim = skel->getAnimation(i);
-                const Ogre::Any &groupdata = bindings.getUserAny(std::string(NifOgre::sTextKeyExtraDataID)+
-                                                                 "@"+anim->getName());
-                if(!groupdata.isEmpty())
-                    mTextKeys[anim->getName()] = Ogre::any_cast<NifOgre::TextKeyMap>(groupdata);
-            }
-
-            break;
-        }
+        mInsert = node->createChildSceneNode();
+        assert(mInsert);
     }
-}
 
-void Animation::createObjectList(Ogre::SceneNode *node, const std::string &model)
-{
-    mInsert = node->createChildSceneNode();
-    assert(mInsert);
+    mObjects.push_back(ObjectInfo());
+    ObjectInfo &obj = mObjects.back();
+    obj.mActiveLayers = 0;
+    obj.mObjectList = (!baseonly ? NifOgre::Loader::createObjects(mInsert, model) :
+                                   NifOgre::Loader::createObjectBase(mInsert, model));
 
-    mObjectList = NifOgre::Loader::createObjects(mInsert, model);
-    if(mObjectList.mSkelBase)
+    NifOgre::ObjectList &objlist = obj.mObjectList;
+    if(objlist.mSkelBase)
     {
-        Ogre::AnimationStateSet *aset = mObjectList.mSkelBase->getAllAnimationStates();
+        if(mObjects.size() == 1)
+            mSkelBase = objlist.mSkelBase;
+
+        Ogre::AnimationStateSet *aset = objlist.mSkelBase->getAllAnimationStates();
         Ogre::AnimationStateIterator asiter = aset->getAnimationStateIterator();
         while(asiter.hasMoreElements())
         {
@@ -164,27 +121,184 @@ void Animation::createObjectList(Ogre::SceneNode *node, const std::string &model
         // Set the bones as manually controlled since we're applying the
         // transformations manually (needed if we want to apply an animation
         // from one skeleton onto another).
-        Ogre::SkeletonInstance *skelinst = mObjectList.mSkelBase->getSkeleton();
+        Ogre::SkeletonInstance *skelinst = objlist.mSkelBase->getSkeleton();
         Ogre::Skeleton::BoneIterator boneiter = skelinst->getBoneIterator();
         while(boneiter.hasMoreElements())
             boneiter.getNext()->setManuallyControlled(true);
     }
-
-    Ogre::SharedPtr<Ogre::ControllerValue<Ogre::Real> > ctrlval(OGRE_NEW AnimationValue(this));
-    for(size_t i = 0;i < mObjectList.mControllers.size();i++)
+    if(objlist.mSkelBase && mSkelBase)
     {
-        if(mObjectList.mControllers[i].getSource().isNull())
-            mObjectList.mControllers[i].setSource(ctrlval);
+        Ogre::SkeletonInstance *baseinst = mSkelBase->getSkeleton();
+        if(mSkelBase == objlist.mSkelBase)
+        {
+            if(objlist.mTextKeys.size() > 0)
+            {
+                mAccumRoot = mInsert;
+                mNonAccumRoot = baseinst->getBone(objlist.mTextKeys.begin()->first);
+            }
+        }
+        else
+        {
+            for(size_t i = 0;i < objlist.mControllers.size();i++)
+            {
+                NifOgre::NodeTargetValue<Ogre::Real> *dstval;
+                dstval = dynamic_cast<NifOgre::NodeTargetValue<Ogre::Real>*>(objlist.mControllers[i].getDestination().getPointer());
+                if(!dstval) continue;
+
+                const Ogre::String &trgtname = dstval->getNode()->getName();
+                if(!baseinst->hasBone(trgtname)) continue;
+
+                Ogre::Bone *bone = baseinst->getBone(trgtname);
+                dstval->setNode(bone);
+            }
+        }
     }
-    mCurrentControllers = &mObjectList.mControllers;
+    for(size_t i = 0;i < objlist.mControllers.size();i++)
+    {
+        if(objlist.mControllers[i].getSource().isNull())
+            objlist.mControllers[i].setSource(mAnimationValuePtr[0]);
+    }
+
+    mActiveCtrls.insert(mActiveCtrls.end(), objlist.mControllers.begin(), objlist.mControllers.end());
+}
+
+void Animation::setRenderProperties(const NifOgre::ObjectList &objlist, Ogre::uint32 visflags, Ogre::uint8 solidqueue, Ogre::uint8 transqueue)
+{
+    for(size_t i = 0;i < objlist.mEntities.size();i++)
+    {
+        Ogre::Entity *ent = objlist.mEntities[i];
+        if(visflags != 0)
+            ent->setVisibilityFlags(visflags);
+
+        for(unsigned int j = 0;j < ent->getNumSubEntities();++j)
+        {
+            Ogre::SubEntity* subEnt = ent->getSubEntity(j);
+            subEnt->setRenderQueueGroup(subEnt->getMaterial()->isTransparent() ? transqueue : solidqueue);
+        }
+    }
+    for(size_t i = 0;i < objlist.mParticles.size();i++)
+    {
+        Ogre::ParticleSystem *part = objlist.mParticles[i];
+        if(visflags != 0)
+            part->setVisibilityFlags(visflags);
+        // TODO: Check particle material for actual transparency
+        part->setRenderQueueGroup(transqueue);
+    }
+}
+
+
+void Animation::clearExtraSources()
+{
+    for(size_t layer = 0;layer < sMaxLayers;layer++)
+    {
+        mLayer[layer].mGroupName.clear();
+        mLayer[layer].mTextKeys = NULL;
+        mLayer[layer].mControllers = NULL;
+        mLayer[layer].mTime = 0.0f;
+        mLayer[layer].mLoopCount = 0;
+        mLayer[layer].mPlaying = false;
+    }
+    mNonAccumCtrl = NULL;
+    mAnimVelocity = 0.0f;
+
+    mLastPosition = Ogre::Vector3(0.0f);
+    if(mAccumRoot)
+        mAccumRoot->setPosition(mLastPosition);
+
+    if(mObjects.size() > 1)
+    {
+        mObjects.resize(1);
+        mObjects[0].mActiveLayers = 0;
+
+        NifOgre::ObjectList &objlist = mObjects[0].mObjectList;
+        mActiveCtrls.clear();
+        mActiveCtrls.insert(mActiveCtrls.end(), objlist.mControllers.begin(), objlist.mControllers.end());
+    }
+}
+
+
+void Animation::updateActiveControllers()
+{
+    mActiveCtrls.clear();
+
+    /* First, get all controllers that don't target a node, or that target
+     * nodes that don't belong to any particular layer.
+     */
+    std::vector<ObjectInfo>::iterator obj(mObjects.begin());
+    for(;obj != mObjects.end();obj++)
+    {
+        std::vector<Ogre::Controller<Ogre::Real> >::const_iterator ctrl(obj->mObjectList.mControllers.begin());
+        for(;ctrl != obj->mObjectList.mControllers.end();ctrl++)
+        {
+            NifOgre::NodeTargetValue<Ogre::Real> *dstval;
+            dstval = dynamic_cast<NifOgre::NodeTargetValue<Ogre::Real>*>(ctrl->getDestination().getPointer());
+            if(dstval)
+            {
+                /*if(getLayerByName(dstval->getNode()->getName()) >= 0)*/
+                    continue;
+            }
+            mActiveCtrls.insert(mActiveCtrls.end(), *ctrl);
+        }
+    }
+
+    std::vector<Ogre::Controller<Ogre::Real> > *ctrls = NULL;
+    size_t layer = 0;
+    while(layer < sMaxLayers)
+    {
+        /* Now get controllers that target nodes that belong to this layer from
+         * whatever objectlist is active on this layer.
+         */
+        std::vector<ObjectInfo>::iterator obj(mObjects.begin());
+        for(;obj != mObjects.end();obj++)
+        {
+            if((obj->mActiveLayers&(1<<layer)))
+            {
+                ctrls = &obj->mObjectList.mControllers;
+                break;
+            }
+        }
+        if(ctrls == NULL)
+        {
+            layer++;
+            continue;
+        }
+
+        /* Check if any objectlists are active on subsequent layers. Include
+         * those layers if not.
+         */
+        size_t nextlayer = layer+1;
+        for(;nextlayer < sMaxLayers;nextlayer++)
+        {
+            for(obj = mObjects.begin();obj != mObjects.end();obj++)
+            {
+                if((obj->mActiveLayers&(1<<nextlayer)))
+                    break;
+            }
+        }
+
+        std::vector<Ogre::Controller<Ogre::Real> >::const_iterator ctrl(ctrls->begin());
+        for(;ctrl != ctrls->end();ctrl++)
+        {
+            NifOgre::NodeTargetValue<Ogre::Real> *dstval;
+            dstval = dynamic_cast<NifOgre::NodeTargetValue<Ogre::Real>*>(ctrl->getDestination().getPointer());
+            if(dstval)
+            {
+                /*ssize_t idx = getLayerByName(dstval->getNode()->getName());
+                if(idx >= (ssize_t)layer && idx < (ssize_t)nextlayer)*/
+                    mActiveCtrls.insert(mActiveCtrls.end(), *ctrl);
+            }
+        }
+
+        layer = nextlayer;
+    }
 }
 
 
 Ogre::Node *Animation::getNode(const std::string &name)
 {
-    if(mObjectList.mSkelBase)
+    if(mSkelBase)
     {
-        Ogre::SkeletonInstance *skel = mObjectList.mSkelBase->getSkeleton();
+        Ogre::SkeletonInstance *skel = mSkelBase->getSkeleton();
         if(skel->hasBone(name))
             return skel->getBone(name);
     }
@@ -192,20 +306,34 @@ Ogre::Node *Animation::getNode(const std::string &name)
 }
 
 
-bool Animation::hasAnimation(const std::string &anim)
+NifOgre::TextKeyMap::const_iterator Animation::findGroupStart(const NifOgre::TextKeyMap &keys, const std::string &groupname)
 {
-    for(std::vector<NifOgre::ObjectList>::const_iterator iter(mAnimationSources.begin());iter != mAnimationSources.end();iter++)
+    NifOgre::TextKeyMap::const_iterator iter(keys.begin());
+    for(;iter != keys.end();iter++)
     {
-        if(iter->mSkelBase->hasAnimationState(anim))
-            return true;
+        if(iter->second.compare(0, groupname.size(), groupname) == 0 &&
+           iter->second.compare(groupname.size(), 2, ": ") == 0)
+            break;
     }
-    return false;
+    return iter;
 }
 
 
-void Animation::setController(MWMechanics::CharacterController *controller)
+bool Animation::hasAnimation(const std::string &anim)
 {
-    mController = controller;
+    if(!mSkelBase)
+        return false;
+
+    for(std::vector<ObjectInfo>::const_iterator iter(mObjects.begin());iter != mObjects.end();iter++)
+    {
+        if(iter->mObjectList.mTextKeys.size() == 0)
+            continue;
+
+        const NifOgre::TextKeyMap &keys = iter->mObjectList.mTextKeys.begin()->second;
+        if(findGroupStart(keys, anim) != keys.end())
+            return true;
+    }
+    return false;
 }
 
 
@@ -221,10 +349,6 @@ void Animation::setSpeed(float speed)
         mAnimSpeedMult = speed / mAnimVelocity;
 }
 
-void Animation::setLooping(bool loop)
-{
-    mLooping = loop;
-}
 
 void Animation::updatePtr(const MWWorld::Ptr &ptr)
 {
@@ -232,47 +356,36 @@ void Animation::updatePtr(const MWWorld::Ptr &ptr)
 }
 
 
-void Animation::calcAnimVelocity()
+float Animation::calcAnimVelocity(const NifOgre::TextKeyMap &keys, NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl, const Ogre::Vector3 &accum, const std::string &groupname)
 {
-    const Ogre::NodeAnimationTrack *track = 0;
-
-    Ogre::Animation::NodeTrackIterator trackiter = mCurrentAnim->getNodeTrackIterator();
-    while(!track && trackiter.hasMoreElements())
+    const std::string start = groupname+": start";
+    const std::string loopstart = groupname+": loop start";
+    const std::string loopstop = groupname+": loop stop";
+    const std::string stop = groupname+": stop";
+    float starttime = std::numeric_limits<float>::max();
+    float stoptime = 0.0f;
+    NifOgre::TextKeyMap::const_iterator keyiter(keys.begin());
+    while(keyiter != keys.end())
     {
-        const Ogre::NodeAnimationTrack *cur = trackiter.getNext();
-        if(cur->getAssociatedNode()->getName() == mNonAccumRoot->getName())
-            track = cur;
+        if(keyiter->second == start || keyiter->second == loopstart)
+            starttime = keyiter->first;
+        else if(keyiter->second == loopstop || keyiter->second == stop)
+        {
+            stoptime = keyiter->first;
+            break;
+        }
+        keyiter++;
     }
 
-    if(track && track->getNumKeyFrames() > 1)
+    if(stoptime > starttime)
     {
-        float loopstarttime = 0.0f;
-        float loopstoptime = mCurrentAnim->getLength();
-        NifOgre::TextKeyMap::const_iterator keyiter = mCurrentKeys->begin();
-        while(keyiter != mCurrentKeys->end())
-        {
-            if(keyiter->second == "loop start")
-                loopstarttime = keyiter->first;
-            else if(keyiter->second == "loop stop")
-            {
-                loopstoptime = keyiter->first;
-                break;
-            }
-            keyiter++;
-        }
+        Ogre::Vector3 startpos = nonaccumctrl->getTranslation(starttime) * accum;
+        Ogre::Vector3 endpos = nonaccumctrl->getTranslation(stoptime) * accum;
 
-        if(loopstoptime > loopstarttime)
-        {
-            Ogre::TransformKeyFrame startkf(0, loopstarttime);
-            Ogre::TransformKeyFrame endkf(0, loopstoptime);
-
-            track->getInterpolatedKeyFrame(mCurrentAnim->_getTimeIndex(loopstarttime), &startkf);
-            track->getInterpolatedKeyFrame(mCurrentAnim->_getTimeIndex(loopstoptime), &endkf);
-
-            mAnimVelocity = startkf.getTranslate().distance(endkf.getTranslate()) /
-                            (loopstoptime-loopstarttime);
-        }
+        return startpos.distance(endpos) / (stoptime-starttime);
     }
+
+    return 0.0f;
 }
 
 static void updateBoneTree(const Ogre::SkeletonInstance *skelsrc, Ogre::Bone *bone)
@@ -313,93 +426,90 @@ void Animation::updateSkeletonInstance(const Ogre::SkeletonInstance *skelsrc, Og
 }
 
 
-Ogre::Vector3 Animation::updatePosition()
+void Animation::updatePosition(Ogre::Vector3 &position)
 {
     Ogre::Vector3 posdiff;
 
-    Ogre::TransformKeyFrame kf(0, mCurrentTime);
-    Ogre::Animation::NodeTrackIterator trackiter = mCurrentAnim->getNodeTrackIterator();
-    while(trackiter.hasMoreElements())
-    {
-        const Ogre::NodeAnimationTrack *track = trackiter.getNext();
-        if(track->getAssociatedNode()->getName() == mNonAccumRoot->getName())
-        {
-            track->getInterpolatedKeyFrame(mCurrentAnim->_getTimeIndex(mCurrentTime), &kf);
-            break;
-        }
-    }
-
-    /* Get the non-accumulation root's difference from the last update. */
-    posdiff = (kf.getTranslate() - mLastPosition) * mAccumulate;
+    /* Get the non-accumulation root's difference from the last update, and move the position
+     * accordingly.
+     */
+    posdiff = (mNonAccumCtrl->getTranslation(mLayer[0].mTime) - mLastPosition) * mAccumulate;
+    position += posdiff;
 
     /* Translate the accumulation root back to compensate for the move. */
     mLastPosition += posdiff;
     mAccumRoot->setPosition(-mLastPosition);
-
-    return posdiff;
 }
 
-void Animation::reset(const std::string &start, const std::string &stop)
+bool Animation::reset(size_t layeridx, const NifOgre::TextKeyMap &keys, NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl, const std::string &groupname, const std::string &start, const std::string &stop, float startpoint)
 {
-    mNextKey = mCurrentKeys->begin();
-
-    while(mNextKey != mCurrentKeys->end() && mNextKey->second != start)
-        mNextKey++;
-    if(mNextKey != mCurrentKeys->end())
-        mCurrentTime = mNextKey->first;
-    else
+    std::string tag = groupname+": "+start;
+    NifOgre::TextKeyMap::const_iterator startkey(keys.begin());
+    while(startkey != keys.end() && startkey->second != tag)
+        startkey++;
+    if(startkey == keys.end() && start == "loop start")
     {
-        mNextKey = mCurrentKeys->begin();
-        while(mNextKey != mCurrentKeys->end() && mNextKey->second != "start")
-            mNextKey++;
-        if(mNextKey != mCurrentKeys->end())
-            mCurrentTime = mNextKey->first;
-        else
-        {
-            mNextKey = mCurrentKeys->begin();
-            mCurrentTime = 0.0f;
-        }
+        tag = groupname+": start";
+        startkey = keys.begin();
+        while(startkey != keys.end() && startkey->second != tag)
+            startkey++;
+    }
+    if(startkey == keys.end())
+        return false;
+
+    tag = groupname+": "+stop;
+    NifOgre::TextKeyMap::const_iterator stopkey(startkey);
+    while(stopkey != keys.end() && stopkey->second != tag)
+        stopkey++;
+    if(stopkey == keys.end())
+        return false;
+
+    if(startkey == stopkey)
+        return false;
+
+    mLayer[layeridx].mStartKey = startkey;
+    mLayer[layeridx].mLoopStartKey = startkey;
+    mLayer[layeridx].mStopKey = stopkey;
+    mLayer[layeridx].mNextKey = startkey;
+
+    mLayer[layeridx].mTime = mLayer[layeridx].mStartKey->first + ((mLayer[layeridx].mStopKey->first-
+                                                                   mLayer[layeridx].mStartKey->first) * startpoint);
+
+    tag = groupname+": loop start";
+    while(mLayer[layeridx].mNextKey->first <= mLayer[layeridx].mTime && mLayer[layeridx].mNextKey != mLayer[layeridx].mStopKey)
+    {
+        if(mLayer[layeridx].mNextKey->second == tag)
+            mLayer[layeridx].mLoopStartKey = mLayer[layeridx].mNextKey;
+        mLayer[layeridx].mNextKey++;
     }
 
-    if(stop.length() > 0)
-    {
-        NifOgre::TextKeyMap::const_iterator stopKey = mNextKey;
-        while(stopKey != mCurrentKeys->end() && stopKey->second != stop)
-            stopKey++;
-        if(stopKey != mCurrentKeys->end())
-            mStopTime = stopKey->first;
-        else
-            mStopTime = mCurrentAnim->getLength();
-    }
+    if(layeridx == 0 && nonaccumctrl)
+        mLastPosition = nonaccumctrl->getTranslation(mLayer[layeridx].mTime) * mAccumulate;
 
-    if(mNonAccumRoot)
-    {
-        const Ogre::NodeAnimationTrack *track = 0;
-        Ogre::Animation::NodeTrackIterator trackiter = mCurrentAnim->getNodeTrackIterator();
-        while(!track && trackiter.hasMoreElements())
-        {
-            const Ogre::NodeAnimationTrack *cur = trackiter.getNext();
-            if(cur->getAssociatedNode()->getName() == mNonAccumRoot->getName())
-                track = cur;
-        }
+    return true;
+}
 
-        if(track)
-        {
-            Ogre::TransformKeyFrame kf(0, mCurrentTime);
-            track->getInterpolatedKeyFrame(mCurrentAnim->_getTimeIndex(mCurrentTime), &kf);
-            mLastPosition = kf.getTranslate() * mAccumulate;
-        }
-    }
+bool Animation::doLoop(size_t layeridx)
+{
+    if(mLayer[layeridx].mLoopCount == 0)
+        return false;
+    mLayer[layeridx].mLoopCount--;
+
+    mLayer[layeridx].mTime = mLayer[layeridx].mLoopStartKey->first;
+    mLayer[layeridx].mNextKey = mLayer[layeridx].mLoopStartKey;
+    mLayer[layeridx].mNextKey++;
+    mLayer[layeridx].mPlaying = true;
+    if(layeridx == 0 && mNonAccumCtrl)
+        mLastPosition = mNonAccumCtrl->getTranslation(mLayer[layeridx].mTime) * mAccumulate;
+
+    return true;
 }
 
 
-bool Animation::handleEvent(float time, const std::string &evt)
+bool Animation::handleTextKey(size_t layeridx, const NifOgre::TextKeyMap::const_iterator &key)
 {
-    if(evt == "start" || evt == "loop start")
-    {
-        /* Do nothing */
-        return true;
-    }
+    float time = key->first;
+    const std::string &evt = key->second;
 
     if(evt.compare(0, 7, "sound: ") == 0)
     {
@@ -414,105 +524,214 @@ bool Animation::handleEvent(float time, const std::string &evt)
         return true;
     }
 
-    if(evt == "loop stop")
+    if(evt.compare(0, mLayer[layeridx].mGroupName.size(), mLayer[layeridx].mGroupName) != 0 ||
+       evt.compare(mLayer[layeridx].mGroupName.size(), 2, ": ") != 0)
     {
-        if(mLooping)
+        // Not ours, skip it
+        return true;
+    }
+    size_t off = mLayer[layeridx].mGroupName.size()+2;
+    size_t len = evt.size() - off;
+
+    if(evt.compare(off, len, "start") == 0 || evt.compare(off, len, "loop start") == 0)
+    {
+        mLayer[layeridx].mLoopStartKey = key;
+        return true;
+    }
+
+    if(evt.compare(off, len, "loop stop") == 0 || evt.compare(off, len, "stop") == 0)
+    {
+        if(doLoop(layeridx))
         {
-            reset("loop start", "");
-            if(mCurrentTime >= time)
+            if(mLayer[layeridx].mTime >= time)
                 return false;
         }
         return true;
     }
-    if(evt == "stop")
-    {
-        if(mLooping)
-        {
-            reset("loop start", "");
-            if(mCurrentTime >= time)
-                return false;
-            return true;
-        }
-        // fall-through
-    }
-    if(mController)
-        mController->markerEvent(time, evt);
+
+    std::cerr<< "Unhandled animation textkey: "<<evt <<std::endl;
     return true;
 }
 
 
-void Animation::play(const std::string &groupname, const std::string &start, const std::string &stop, bool loop)
+bool Animation::play(const std::string &groupname, const std::string &start, const std::string &stop, float startpoint, size_t loops)
 {
-    try {
-        bool found = false;
-        /* Look in reverse; last-inserted source has priority. */
-        for(std::vector<NifOgre::ObjectList>::reverse_iterator iter(mAnimationSources.rbegin());iter != mAnimationSources.rend();iter++)
+    // TODO: parameterize this
+    size_t layeridx = 0;
+
+    if(!mSkelBase)
+        return false;
+
+    for(std::vector<ObjectInfo>::iterator iter(mObjects.begin());iter != mObjects.end();iter++)
+        iter->mActiveLayers &= ~(1<<layeridx);
+
+    mLayer[layeridx].mGroupName.clear();
+    mLayer[layeridx].mTextKeys = NULL;
+    mLayer[layeridx].mControllers = NULL;
+    mLayer[layeridx].mTime = 0.0f;
+    mLayer[layeridx].mLoopCount = 0;
+    mLayer[layeridx].mPlaying = false;
+
+    bool movinganim = false;
+    bool foundanim = false;
+
+    /* Look in reverse; last-inserted source has priority. */
+    for(std::vector<ObjectInfo>::reverse_iterator iter(mObjects.rbegin());iter != mObjects.rend();iter++)
+    {
+        NifOgre::ObjectList &objlist = iter->mObjectList;
+        if(objlist.mTextKeys.size() == 0)
+            continue;
+
+        const NifOgre::TextKeyMap &keys = objlist.mTextKeys.begin()->second;
+        NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl = NULL;
+        if(layeridx == 0 && mNonAccumRoot)
         {
-            if(iter->mSkelBase->hasAnimationState(groupname))
+            for(size_t i = 0;i < objlist.mControllers.size();i++)
             {
-                mCurrentAnim = iter->mSkelBase->getSkeleton()->getAnimation(groupname);
-                mCurrentKeys = &mTextKeys[groupname];
-                mCurrentControllers = &iter->mControllers;
-                mAnimVelocity = 0.0f;
-
-                if(mNonAccumRoot)
-                    calcAnimVelocity();
-
-                found = true;
-                break;
+                NifOgre::NodeTargetValue<Ogre::Real> *dstval;
+                dstval = dynamic_cast<NifOgre::NodeTargetValue<Ogre::Real>*>(objlist.mControllers[i].getDestination().getPointer());
+                if(dstval && dstval->getNode() == mNonAccumRoot)
+                {
+                    nonaccumctrl = dstval;
+                    break;
+                }
             }
         }
-        if(!found)
-            throw std::runtime_error("Failed to find animation "+groupname);
 
-        reset(start, stop);
-        setLooping(loop);
-        mPlaying = true;
+        if(!foundanim)
+        {
+            if(!reset(layeridx, keys, nonaccumctrl, groupname, start, stop, startpoint))
+                continue;
+
+            mLayer[layeridx].mGroupName = groupname;
+            mLayer[layeridx].mTextKeys = &keys;
+            mLayer[layeridx].mControllers = &objlist.mControllers;
+            mLayer[layeridx].mLoopCount = loops;
+            mLayer[layeridx].mPlaying = true;
+
+            if(layeridx == 0)
+            {
+                mNonAccumCtrl = nonaccumctrl;
+                mAnimVelocity = 0.0f;
+            }
+
+            iter->mActiveLayers |= (1<<layeridx);
+            foundanim = true;
+
+            if(mAccumulate == Ogre::Vector3(0.0f))
+                break;
+        }
+
+        if(!nonaccumctrl)
+            break;
+
+        mAnimVelocity = calcAnimVelocity(keys, nonaccumctrl, mAccumulate, groupname);
+        if(mAnimVelocity > 1.0f)
+        {
+            movinganim = (nonaccumctrl==mNonAccumCtrl);
+            break;
+        }
     }
-    catch(std::exception &e) {
-        std::cerr<< e.what() <<std::endl;
-    }
+    if(!foundanim)
+        std::cerr<< "Failed to find animation "<<groupname <<std::endl;
+
+    updateActiveControllers();
+
+    return movinganim;
 }
 
-Ogre::Vector3 Animation::runAnimation(float timepassed)
+void Animation::disable(size_t layeridx)
+{
+    if(mLayer[layeridx].mGroupName.empty())
+        return;
+
+    for(std::vector<ObjectInfo>::iterator iter(mObjects.begin());iter != mObjects.end();iter++)
+        iter->mActiveLayers &= ~(1<<layeridx);
+
+    mLayer[layeridx].mGroupName.clear();
+    mLayer[layeridx].mTextKeys = NULL;
+    mLayer[layeridx].mControllers = NULL;
+    mLayer[layeridx].mTime = 0.0f;
+    mLayer[layeridx].mLoopCount = 0;
+    mLayer[layeridx].mPlaying = false;
+
+    updateActiveControllers();
+}
+
+bool Animation::getInfo(size_t layeridx, float *complete, std::string *groupname, std::string *start, std::string *stop) const
+{
+    if(mLayer[layeridx].mGroupName.empty())
+    {
+        if(complete) *complete = 0.0f;
+        if(groupname) *groupname = "";
+        if(start) *start = "";
+        if(stop) *stop = "";
+        return false;
+    }
+
+    if(complete) *complete = (mLayer[layeridx].mTime - mLayer[layeridx].mStartKey->first) /
+                             (mLayer[layeridx].mStopKey->first - mLayer[layeridx].mStartKey->first);
+    if(groupname) *groupname = mLayer[layeridx].mGroupName;
+    if(start) *start = mLayer[layeridx].mStartKey->second.substr(mLayer[layeridx].mGroupName.size()+2);
+    if(stop) *stop = mLayer[layeridx].mStopKey->second.substr(mLayer[layeridx].mGroupName.size()+2);
+    return true;
+}
+
+
+Ogre::Vector3 Animation::runAnimation(float duration)
 {
     Ogre::Vector3 movement(0.0f);
 
-    timepassed *= mAnimSpeedMult;
-    while(mCurrentAnim && mPlaying)
+    duration *= mAnimSpeedMult;
+    for(size_t layeridx = 0;layeridx < sMaxLayers;layeridx++)
     {
-        float targetTime = mCurrentTime + timepassed;
-        if(mNextKey == mCurrentKeys->end() || mNextKey->first > targetTime)
+        if(mLayer[layeridx].mGroupName.empty())
+            continue;
+
+        float timepassed = duration;
+        while(mLayer[layeridx].mPlaying)
         {
-            mCurrentTime = std::min(mStopTime, targetTime);
-            if(mNonAccumRoot)
-                movement += updatePosition();
-            mPlaying = (mLooping || mStopTime > mCurrentTime);
-            timepassed = targetTime - mCurrentTime;
-            break;
+            float targetTime = mLayer[layeridx].mTime + timepassed;
+            if(mLayer[layeridx].mNextKey->first > targetTime)
+            {
+                mLayer[layeridx].mTime = targetTime;
+                if(layeridx == 0 && mNonAccumCtrl)
+                    updatePosition(movement);
+                break;
+            }
+
+            NifOgre::TextKeyMap::const_iterator key(mLayer[layeridx].mNextKey++);
+            mLayer[layeridx].mTime = key->first;
+            if(layeridx == 0 && mNonAccumCtrl)
+                updatePosition(movement);
+
+            mLayer[layeridx].mPlaying = (key != mLayer[layeridx].mStopKey);
+            timepassed = targetTime - mLayer[layeridx].mTime;
+
+            if(!handleTextKey(layeridx, key))
+                break;
         }
-
-        float time = mNextKey->first;
-        const std::string &evt = mNextKey->second;
-        mNextKey++;
-
-        mCurrentTime = time;
-        if(mNonAccumRoot)
-            movement += updatePosition();
-        mPlaying = (mLooping || mStopTime > mCurrentTime);
-        timepassed = targetTime - mCurrentTime;
-
-        if(!handleEvent(time, evt))
-            break;
     }
-    for(size_t i = 0;i < mCurrentControllers->size();i++)
-        (*mCurrentControllers)[i].update();
 
-    if(mObjectList.mSkelBase)
+    for(size_t i = 0;i < mActiveCtrls.size();i++)
+        mActiveCtrls[i].update();
+
+    if(mSkelBase)
     {
-        // HACK: Dirty the animation state set so that Ogre will apply the
-        // transformations to entities this skeleton instance is shared with.
-        mObjectList.mSkelBase->getAllAnimationStates()->_notifyDirty();
+        const Ogre::SkeletonInstance *baseinst = mSkelBase->getSkeleton();
+        for(std::vector<ObjectInfo>::iterator iter(mObjects.begin());iter != mObjects.end();iter++)
+        {
+            Ogre::Entity *ent = iter->mObjectList.mSkelBase;
+            if(!ent) continue;
+
+            Ogre::SkeletonInstance *inst = ent->getSkeleton();
+            if(baseinst != inst)
+                updateSkeletonInstance(baseinst, inst);
+
+            // HACK: Dirty the animation state set so that Ogre will apply the
+            // transformations to entities this skeleton instance is shared with.
+            ent->getAllAnimationStates()->_notifyDirty();
+        }
     }
 
     return movement;

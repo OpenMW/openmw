@@ -44,15 +44,6 @@
 #include "material.hpp"
 #include "mesh.hpp"
 
-namespace std
-{
-
-// TODO: Do something useful
-ostream& operator<<(ostream &o, const NifOgre::TextKeyMap&)
-{ return o; }
-
-}
-
 namespace NifOgre
 {
 
@@ -74,11 +65,7 @@ public:
         , mStopTime(ctrl->timeStop)
     {
         if(mDeltaInput)
-        {
             mDeltaCount = mPhase;
-            while(mDeltaCount < mStartTime)
-                mDeltaCount += (mStopTime-mStartTime);
-        }
     }
 
     virtual Ogre::Real calculate(Ogre::Real value)
@@ -86,6 +73,9 @@ public:
         if(mDeltaInput)
         {
             mDeltaCount += value*mFrequency;
+            if(mDeltaCount < mStartTime)
+                mDeltaCount = mStopTime - std::fmod(mStartTime - mDeltaCount,
+                                                    mStopTime - mStartTime);
             mDeltaCount = std::fmod(mDeltaCount - mStartTime,
                                     mStopTime - mStartTime) + mStartTime;
             return mDeltaCount;
@@ -104,7 +94,7 @@ public:
     private:
         std::vector<Nif::NiVisData::VisData> mData;
 
-        virtual bool calculate(Ogre::Real time)
+        bool calculate(Ogre::Real time) const
         {
             if(mData.size() == 0)
                 return true;
@@ -144,10 +134,19 @@ public:
           , mData(data->mVis)
         { }
 
+        virtual Ogre::Quaternion getRotation(float time) const
+        { return Ogre::Quaternion(); }
+
+        virtual Ogre::Vector3 getTranslation(float time) const
+        { return Ogre::Vector3(0.0f); }
+
+        virtual Ogre::Vector3 getScale(float time) const
+        { return Ogre::Vector3(1.0f); }
+
         virtual Ogre::Real getValue() const
         {
             // Should not be called
-            return 1.0f;
+            return 0.0f;
         }
 
         virtual void setValue(Ogre::Real time)
@@ -170,6 +169,60 @@ public:
         Nif::Vector3KeyList mTranslations;
         Nif::FloatKeyList mScales;
 
+        static float interpKey(const Nif::FloatKeyList::VecType &keys, float time)
+        {
+            if(time <= keys.front().mTime)
+                return keys.front().mValue;
+
+            Nif::FloatKeyList::VecType::const_iterator iter(keys.begin()+1);
+            for(;iter != keys.end();iter++)
+            {
+                if(iter->mTime < time)
+                    continue;
+
+                Nif::FloatKeyList::VecType::const_iterator last(iter-1);
+                float a = (time-last->mTime) / (iter->mTime-last->mTime);
+                return last->mValue + ((iter->mValue - last->mValue)*a);
+            }
+            return keys.back().mValue;
+        }
+
+        static Ogre::Vector3 interpKey(const Nif::Vector3KeyList::VecType &keys, float time)
+        {
+            if(time <= keys.front().mTime)
+                return keys.front().mValue;
+
+            Nif::Vector3KeyList::VecType::const_iterator iter(keys.begin()+1);
+            for(;iter != keys.end();iter++)
+            {
+                if(iter->mTime < time)
+                    continue;
+
+                Nif::Vector3KeyList::VecType::const_iterator last(iter-1);
+                float a = (time-last->mTime) / (iter->mTime-last->mTime);
+                return last->mValue + ((iter->mValue - last->mValue)*a);
+            }
+            return keys.back().mValue;
+        }
+
+        static Ogre::Quaternion interpKey(const Nif::QuaternionKeyList::VecType &keys, float time)
+        {
+            if(time <= keys.front().mTime)
+                return keys.front().mValue;
+
+            Nif::QuaternionKeyList::VecType::const_iterator iter(keys.begin()+1);
+            for(;iter != keys.end();iter++)
+            {
+                if(iter->mTime < time)
+                    continue;
+
+                Nif::QuaternionKeyList::VecType::const_iterator last(iter-1);
+                float a = (time-last->mTime) / (iter->mTime-last->mTime);
+                return Ogre::Quaternion::nlerp(a, last->mValue, iter->mValue);
+            }
+            return keys.back().mValue;
+        }
+
     public:
         Value(Ogre::Node *target, const Nif::NiKeyframeData *data)
           : NodeTargetValue<Ogre::Real>(target)
@@ -177,6 +230,27 @@ public:
           , mTranslations(data->mTranslations)
           , mScales(data->mScales)
         { }
+
+        virtual Ogre::Quaternion getRotation(float time) const
+        {
+            if(mRotations.mKeys.size() > 0)
+                return interpKey(mRotations.mKeys, time);
+            return mNode->getOrientation();
+        }
+
+        virtual Ogre::Vector3 getTranslation(float time) const
+        {
+            if(mTranslations.mKeys.size() > 0)
+                return interpKey(mTranslations.mKeys, time);
+            return mNode->getPosition();
+        }
+
+        virtual Ogre::Vector3 getScale(float time) const
+        {
+            if(mScales.mKeys.size() > 0)
+                return Ogre::Vector3(interpKey(mScales.mKeys, time));
+            return mNode->getScale();
+        }
 
         virtual Ogre::Real getValue() const
         {
@@ -187,68 +261,11 @@ public:
         virtual void setValue(Ogre::Real time)
         {
             if(mRotations.mKeys.size() > 0)
-            {
-                if(time <= mRotations.mKeys.front().mTime)
-                    mNode->setOrientation(mRotations.mKeys.front().mValue);
-                else if(time >= mRotations.mKeys.back().mTime)
-                    mNode->setOrientation(mRotations.mKeys.back().mValue);
-                else
-                {
-                    Nif::QuaternionKeyList::VecType::const_iterator iter(mRotations.mKeys.begin()+1);
-                    for(;iter != mRotations.mKeys.end();iter++)
-                    {
-                        if(iter->mTime < time)
-                            continue;
-
-                        Nif::QuaternionKeyList::VecType::const_iterator last(iter-1);
-                        float a = (time-last->mTime) / (iter->mTime-last->mTime);
-                        mNode->setOrientation(Ogre::Quaternion::nlerp(a, last->mValue, iter->mValue));
-                        break;
-                    }
-                }
-            }
+                mNode->setOrientation(interpKey(mRotations.mKeys, time));
             if(mTranslations.mKeys.size() > 0)
-            {
-                if(time <= mTranslations.mKeys.front().mTime)
-                    mNode->setPosition(mTranslations.mKeys.front().mValue);
-                else if(time >= mTranslations.mKeys.back().mTime)
-                    mNode->setPosition(mTranslations.mKeys.back().mValue);
-                else
-                {
-                    Nif::Vector3KeyList::VecType::const_iterator iter(mTranslations.mKeys.begin()+1);
-                    for(;iter != mTranslations.mKeys.end();iter++)
-                    {
-                        if(iter->mTime < time)
-                            continue;
-
-                        Nif::Vector3KeyList::VecType::const_iterator last(iter-1);
-                        float a = (time-last->mTime) / (iter->mTime-last->mTime);
-                        mNode->setPosition(last->mValue + ((iter->mValue - last->mValue)*a));
-                        break;
-                    }
-                }
-            }
+                mNode->setPosition(interpKey(mTranslations.mKeys, time));
             if(mScales.mKeys.size() > 0)
-            {
-                if(time <= mScales.mKeys.front().mTime)
-                    mNode->setScale(Ogre::Vector3(mScales.mKeys.front().mValue));
-                else if(time >= mScales.mKeys.back().mTime)
-                    mNode->setScale(Ogre::Vector3(mScales.mKeys.back().mValue));
-                else
-                {
-                    Nif::FloatKeyList::VecType::const_iterator iter(mScales.mKeys.begin()+1);
-                    for(;iter != mScales.mKeys.end();iter++)
-                    {
-                        if(iter->mTime < time)
-                            continue;
-
-                        Nif::FloatKeyList::VecType::const_iterator last(iter-1);
-                        float a = (time-last->mTime) / (iter->mTime-last->mTime);
-                        mNode->setScale(Ogre::Vector3(last->mValue + ((iter->mValue - last->mValue)*a)));
-                        break;
-                    }
-                }
-            }
+                mNode->setScale(Ogre::Vector3(interpKey(mScales.mKeys, time)));
         }
     };
 
@@ -289,7 +306,7 @@ public:
         }
 
     public:
-        Value(const Ogre::MaterialPtr &material, Nif::NiUVData *data)
+        Value(const Ogre::MaterialPtr &material, const Nif::NiUVData *data)
           : mMaterial(material)
           , mUTrans(data->mKeyList[0])
           , mVTrans(data->mKeyList[1])
@@ -329,11 +346,70 @@ public:
     typedef DefaultFunction Function;
 };
 
+class ParticleSystemController
+{
+public:
+    class Value : public Ogre::ControllerValue<Ogre::Real>
+    {
+    private:
+        Ogre::ParticleSystem *mParticleSys;
+        float mEmitStart;
+        float mEmitStop;
+
+    public:
+        Value(Ogre::ParticleSystem *psys, const Nif::NiParticleSystemController *pctrl)
+          : mParticleSys(psys)
+          , mEmitStart(pctrl->startTime)
+          , mEmitStop(pctrl->stopTime)
+        {
+        }
+
+        Ogre::Real getValue() const
+        { return 0.0f; }
+
+        void setValue(Ogre::Real value)
+        {
+            mParticleSys->setEmitting(value >= mEmitStart && value < mEmitStop);
+        }
+    };
+
+    typedef DefaultFunction Function;
+};
+
+class GeomMorpherController
+{
+public:
+    class Value : public Ogre::ControllerValue<Ogre::Real>
+    {
+    private:
+        Ogre::SubEntity *mSubEntity;
+        std::vector<Nif::NiMorphData::MorphData> mMorphs;
+
+    public:
+        Value(Ogre::SubEntity *subent, const Nif::NiMorphData *data)
+          : mSubEntity(subent)
+          , mMorphs(data->mMorphs)
+        { }
+
+        virtual Ogre::Real getValue() const
+        {
+            // Should not be called
+            return 0.0f;
+        }
+
+        virtual void setValue(Ogre::Real value)
+        {
+            // TODO: Implement
+        }
+    };
+
+    typedef DefaultFunction Function;
+};
 
 
-/** Manual resource loader for NIF objects (meshes, particle systems, etc).
- * This is the main class responsible for translating the internal NIF
- * structures into something Ogre can use.
+/** Object creator for NIFs. This is the main class responsible for creating
+ * "live" Ogre objects (entities, particle systems, controllers, etc) from
+ * their NIF equivalents.
  */
 class NIFObjectLoader
 {
@@ -349,14 +425,79 @@ class NIFObjectLoader
     }
 
 
+    static void createEntity(const std::string &name, const std::string &group,
+                             Ogre::SceneManager *sceneMgr, ObjectList &objectlist,
+                             const Nif::Node *node, int flags, int animflags)
+    {
+        const Nif::NiTriShape *shape = static_cast<const Nif::NiTriShape*>(node);
+
+        std::string fullname = name+"@index="+Ogre::StringConverter::toString(shape->recIndex);
+        if(shape->name.length() > 0)
+            fullname += "@shape="+shape->name;
+        Misc::StringUtils::toLower(fullname);
+
+        Ogre::MeshManager &meshMgr = Ogre::MeshManager::getSingleton();
+        if(meshMgr.getByName(fullname).isNull())
+            NIFMeshLoader::createMesh(name, fullname, group, shape->recIndex);
+
+        Ogre::Entity *entity = sceneMgr->createEntity(fullname);
+        entity->setVisible(!(flags&Nif::NiNode::Flag_Hidden));
+
+        objectlist.mEntities.push_back(entity);
+        if(objectlist.mSkelBase)
+        {
+            if(entity->hasSkeleton())
+                entity->shareSkeletonInstanceWith(objectlist.mSkelBase);
+            else
+            {
+                int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, shape->recIndex);
+                Ogre::Bone *trgtbone = objectlist.mSkelBase->getSkeleton()->getBone(trgtid);
+                objectlist.mSkelBase->attachObjectToBone(trgtbone->getName(), entity);
+            }
+        }
+
+        Nif::ControllerPtr ctrl = node->controller;
+        while(!ctrl.empty())
+        {
+            if(ctrl->recType == Nif::RC_NiUVController)
+            {
+                const Nif::NiUVController *uv = static_cast<const Nif::NiUVController*>(ctrl.getPtr());
+
+                const Ogre::MaterialPtr &material = entity->getSubEntity(0)->getMaterial();
+                Ogre::ControllerValueRealPtr srcval((animflags&Nif::NiNode::AnimFlag_AutoPlay) ?
+                                                    Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
+                                                    Ogre::ControllerValueRealPtr());
+                Ogre::ControllerValueRealPtr dstval(OGRE_NEW UVController::Value(material, uv->data.getPtr()));
+                Ogre::ControllerFunctionRealPtr func(OGRE_NEW UVController::Function(uv, (animflags&Nif::NiNode::AnimFlag_AutoPlay)));
+
+                objectlist.mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
+            }
+            else if(ctrl->recType == Nif::RC_NiGeomMorpherController)
+            {
+                const Nif::NiGeomMorpherController *geom = static_cast<const Nif::NiGeomMorpherController*>(ctrl.getPtr());
+
+                Ogre::SubEntity *subent = entity->getSubEntity(0);
+                Ogre::ControllerValueRealPtr srcval((animflags&Nif::NiNode::AnimFlag_AutoPlay) ?
+                                                    Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
+                                                    Ogre::ControllerValueRealPtr());
+                Ogre::ControllerValueRealPtr dstval(OGRE_NEW GeomMorpherController::Value(subent, geom->data.getPtr()));
+                Ogre::ControllerFunctionRealPtr func(OGRE_NEW GeomMorpherController::Function(geom, (animflags&Nif::NiNode::AnimFlag_AutoPlay)));
+
+                objectlist.mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
+            }
+            ctrl = ctrl->next;
+        }
+    }
+
+
     static void createParticleEmitterAffectors(Ogre::ParticleSystem *partsys, const Nif::NiParticleSystemController *partctrl)
     {
         Ogre::ParticleEmitter *emitter = partsys->addEmitter("Nif");
-        emitter->setParticleVelocity(partctrl->velocity-partctrl->velocityRandom,
-                                     partctrl->velocity+partctrl->velocityRandom);
+        emitter->setParticleVelocity(partctrl->velocity - partctrl->velocityRandom*0.5f,
+                                     partctrl->velocity + partctrl->velocityRandom*0.5f);
         emitter->setEmissionRate(partctrl->emitRate);
-        emitter->setTimeToLive(partctrl->lifetime-partctrl->lifetimeRandom,
-                               partctrl->lifetime+partctrl->lifetimeRandom);
+        emitter->setTimeToLive(partctrl->lifetime - partctrl->lifetimeRandom*0.5f,
+                               partctrl->lifetime + partctrl->lifetimeRandom*0.5f);
         emitter->setParameter("width", Ogre::StringConverter::toString(partctrl->offsetRandom.x));
         emitter->setParameter("height", Ogre::StringConverter::toString(partctrl->offsetRandom.y));
         emitter->setParameter("depth", Ogre::StringConverter::toString(partctrl->offsetRandom.z));
@@ -416,9 +557,9 @@ class NIFObjectLoader
         }
     }
 
-    static Ogre::ParticleSystem *createParticleSystem(const std::string &name, const std::string &group,
-                                                      Ogre::SceneManager *sceneMgr, Ogre::Entity *entitybase,
-                                                      const Nif::Node *partnode)
+    static void createParticleSystem(const std::string &name, const std::string &group,
+                                     Ogre::SceneManager *sceneMgr, ObjectList &objectlist,
+                                     const Nif::Node *partnode, int flags, int partflags)
     {
         const Nif::NiAutoNormalParticlesData *particledata = NULL;
         if(partnode->recType == Nif::RC_NiAutoNormalParticles)
@@ -426,73 +567,139 @@ class NIFObjectLoader
         else if(partnode->recType == Nif::RC_NiRotatingParticles)
             particledata = static_cast<const Nif::NiRotatingParticles*>(partnode)->data.getPtr();
 
+        std::string fullname = name+"@index="+Ogre::StringConverter::toString(partnode->recIndex);
+        if(partnode->name.length() > 0)
+            fullname += "@type="+partnode->name;
+        Misc::StringUtils::toLower(fullname);
+
         Ogre::ParticleSystem *partsys = sceneMgr->createParticleSystem();
-        try {
-            std::string fullname = name+"@index="+Ogre::StringConverter::toString(partnode->recIndex);
-            if(partnode->name.length() > 0)
-                fullname += "@type="+partnode->name;
-            Misc::StringUtils::toLower(fullname);
 
-            const Nif::NiTexturingProperty *texprop = NULL;
-            const Nif::NiMaterialProperty *matprop = NULL;
-            const Nif::NiAlphaProperty *alphaprop = NULL;
-            const Nif::NiVertexColorProperty *vertprop = NULL;
-            const Nif::NiZBufferProperty *zprop = NULL;
-            const Nif::NiSpecularProperty *specprop = NULL;
-            const Nif::NiWireframeProperty *wireprop = NULL;
-            bool needTangents = false;
+        const Nif::NiTexturingProperty *texprop = NULL;
+        const Nif::NiMaterialProperty *matprop = NULL;
+        const Nif::NiAlphaProperty *alphaprop = NULL;
+        const Nif::NiVertexColorProperty *vertprop = NULL;
+        const Nif::NiZBufferProperty *zprop = NULL;
+        const Nif::NiSpecularProperty *specprop = NULL;
+        const Nif::NiWireframeProperty *wireprop = NULL;
+        bool needTangents = false;
 
-            partnode->getProperties(texprop, matprop, alphaprop, vertprop, zprop, specprop, wireprop);
-            partsys->setMaterialName(NIFMaterialLoader::getMaterial(particledata, fullname, group,
-                                                                    texprop, matprop, alphaprop,
-                                                                    vertprop, zprop, specprop,
-                                                                    wireprop, needTangents));
+        partnode->getProperties(texprop, matprop, alphaprop, vertprop, zprop, specprop, wireprop);
+        partsys->setMaterialName(NIFMaterialLoader::getMaterial(particledata, fullname, group,
+                                                                texprop, matprop, alphaprop,
+                                                                vertprop, zprop, specprop,
+                                                                wireprop, needTangents));
 
-            partsys->setDefaultDimensions(particledata->particleRadius*2.0f,
-                                          particledata->particleRadius*2.0f);
-            partsys->setCullIndividually(false);
-            partsys->setParticleQuota(particledata->numParticles);
-            // TODO: There is probably a field or flag to specify this, as some
-            // particle effects have it and some don't.
-            partsys->setKeepParticlesInLocalSpace(true);
+        partsys->setDefaultDimensions(particledata->particleRadius*2.0f,
+                                        particledata->particleRadius*2.0f);
+        partsys->setCullIndividually(false);
+        partsys->setParticleQuota(particledata->numParticles);
+        // TODO: There is probably a field or flag to specify this, as some
+        // particle effects have it and some don't.
+        partsys->setKeepParticlesInLocalSpace(true);
 
-            Nif::ControllerPtr ctrl = partnode->controller;
-            while(!ctrl.empty())
+        Nif::ControllerPtr ctrl = partnode->controller;
+        while(!ctrl.empty())
+        {
+            if(ctrl->recType == Nif::RC_NiParticleSystemController)
             {
-                if(ctrl->recType == Nif::RC_NiParticleSystemController)
+                const Nif::NiParticleSystemController *partctrl = static_cast<const Nif::NiParticleSystemController*>(ctrl.getPtr());
+
+                createParticleEmitterAffectors(partsys, partctrl);
+                if(!partctrl->emitter.empty() && !partsys->isAttached())
                 {
-                    const Nif::NiParticleSystemController *partctrl = static_cast<const Nif::NiParticleSystemController*>(ctrl.getPtr());
-
-                    createParticleEmitterAffectors(partsys, partctrl);
-                    if(!partctrl->emitter.empty() && !partsys->isAttached())
-                    {
-                        int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, partctrl->emitter->recIndex);
-                        Ogre::Bone *trgtbone = entitybase->getSkeleton()->getBone(trgtid);
-                        entitybase->attachObjectToBone(trgtbone->getName(), partsys);
-                    }
+                    int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, partctrl->emitter->recIndex);
+                    Ogre::Bone *trgtbone = objectlist.mSkelBase->getSkeleton()->getBone(trgtid);
+                    objectlist.mSkelBase->attachObjectToBone(trgtbone->getName(), partsys);
                 }
-                ctrl = ctrl->next;
-            }
 
-            if(!partsys->isAttached())
+                Ogre::ControllerValueRealPtr srcval((partflags&Nif::NiNode::ParticleFlag_AutoPlay) ?
+                                                    Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
+                                                    Ogre::ControllerValueRealPtr());
+                Ogre::ControllerValueRealPtr dstval(OGRE_NEW ParticleSystemController::Value(partsys, partctrl));
+                Ogre::ControllerFunctionRealPtr func(OGRE_NEW ParticleSystemController::Function(partctrl, (partflags&Nif::NiNode::ParticleFlag_AutoPlay)));
+
+                objectlist.mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
+            }
+            ctrl = ctrl->next;
+        }
+
+        if(!partsys->isAttached())
+        {
+            int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, partnode->recIndex);
+            Ogre::Bone *trgtbone = objectlist.mSkelBase->getSkeleton()->getBone(trgtid);
+            objectlist.mSkelBase->attachObjectToBone(trgtbone->getName(), partsys);
+        }
+
+        partsys->setVisible(!(flags&Nif::NiNode::Flag_Hidden));
+        objectlist.mParticles.push_back(partsys);
+    }
+
+
+    static void createNodeControllers(const std::string &name, Nif::ControllerPtr ctrl, ObjectList &objectlist, int animflags)
+    {
+        do {
+            if(ctrl->recType == Nif::RC_NiVisController)
             {
-                int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, partnode->recIndex);
-                Ogre::Bone *trgtbone = entitybase->getSkeleton()->getBone(trgtid);
-                entitybase->attachObjectToBone(trgtbone->getName(), partsys);
+                const Nif::NiVisController *vis = static_cast<const Nif::NiVisController*>(ctrl.getPtr());
+
+                int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, ctrl->target->recIndex);
+                Ogre::Bone *trgtbone = objectlist.mSkelBase->getSkeleton()->getBone(trgtid);
+                Ogre::ControllerValueRealPtr srcval((animflags&Nif::NiNode::AnimFlag_AutoPlay) ?
+                                                    Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
+                                                    Ogre::ControllerValueRealPtr());
+                Ogre::ControllerValueRealPtr dstval(OGRE_NEW VisController::Value(trgtbone, vis->data.getPtr()));
+                Ogre::ControllerFunctionRealPtr func(OGRE_NEW VisController::Function(vis, (animflags&Nif::NiNode::AnimFlag_AutoPlay)));
+
+                objectlist.mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
+            }
+            else if(ctrl->recType == Nif::RC_NiKeyframeController)
+            {
+                const Nif::NiKeyframeController *key = static_cast<const Nif::NiKeyframeController*>(ctrl.getPtr());
+                if(!key->data.empty())
+                {
+                    int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, ctrl->target->recIndex);
+                    Ogre::Bone *trgtbone = objectlist.mSkelBase->getSkeleton()->getBone(trgtid);
+                    Ogre::ControllerValueRealPtr srcval((animflags&Nif::NiNode::AnimFlag_AutoPlay) ?
+                                                        Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
+                                                        Ogre::ControllerValueRealPtr());
+                    Ogre::ControllerValueRealPtr dstval(OGRE_NEW KeyframeController::Value(trgtbone, key->data.getPtr()));
+                    Ogre::ControllerFunctionRealPtr func(OGRE_NEW KeyframeController::Function(key, (animflags&Nif::NiNode::AnimFlag_AutoPlay)));
+
+                    objectlist.mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
+                }
+            }
+            ctrl = ctrl->next;
+        } while(!ctrl.empty());
+    }
+
+
+    static void extractTextKeys(const Nif::NiTextKeyExtraData *tk, TextKeyMap &textkeys)
+    {
+        for(size_t i = 0;i < tk->list.size();i++)
+        {
+            const std::string &str = tk->list[i].text;
+            std::string::size_type pos = 0;
+            while(pos < str.length())
+            {
+                if(::isspace(str[pos]))
+                {
+                    pos++;
+                    continue;
+                }
+
+                std::string::size_type nextpos = std::min(str.find('\r', pos), str.find('\n', pos));
+                std::string result = str.substr(pos, nextpos-pos);
+                textkeys.insert(std::make_pair(tk->list[i].time, Misc::StringUtils::toLower(result)));
+
+                pos = nextpos;
             }
         }
-        catch(std::exception &e) {
-            std::cerr<< "Particles exception: "<<e.what() <<std::endl;
-            sceneMgr->destroyParticleSystem(partsys);
-            partsys = NULL;
-        };
-        return partsys;
     }
 
 
     static void createObjects(const std::string &name, const std::string &group,
                               Ogre::SceneManager *sceneMgr, const Nif::Node *node,
-                              ObjectList &objectlist, int flags)
+                              ObjectList &objectlist, int flags, int animflags, int partflags)
     {
         // Do not create objects for the collision shape (includes all children)
         if(node->recType == Nif::RC_RootCollisionNode)
@@ -503,12 +710,24 @@ class NIFObjectLoader
         if (node->name.find("marker") != std::string::npos)
             return;
 
-        flags |= node->flags;
+        if(node->recType == Nif::RC_NiBSAnimationNode)
+            animflags |= node->flags;
+        else if(node->recType == Nif::RC_NiBSParticleNode)
+            partflags |= node->flags;
+        else
+            flags |= node->flags;
 
         Nif::ExtraPtr e = node->extra;
         while(!e.empty())
         {
-            if(e->recType == Nif::RC_NiStringExtraData)
+            if(e->recType == Nif::RC_NiTextKeyExtraData)
+            {
+                const Nif::NiTextKeyExtraData *tk = static_cast<const Nif::NiTextKeyExtraData*>(e.getPtr());
+
+                int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, node->recIndex);
+                extractTextKeys(tk, objectlist.mTextKeys[trgtid]);
+            }
+            else if(e->recType == Nif::RC_NiStringExtraData)
             {
                 const Nif::NiStringExtraData *sd = static_cast<const Nif::NiStringExtraData*>(e.getPtr());
                 // String markers may contain important information
@@ -520,8 +739,12 @@ class NIFObjectLoader
                     flags |= 0x80000000;
                 }
             }
+
             e = e->extra;
         }
+
+        if(!node->controller.empty())
+            createNodeControllers(name, node->controller, objectlist, animflags);
 
         if(node->recType == Nif::RC_NiCamera)
         {
@@ -530,94 +753,15 @@ class NIFObjectLoader
             objectlist.mCameras.push_back(trgtbone);
         }
 
-        Nif::ControllerPtr ctrl = node->controller;
-        while(!ctrl.empty())
-        {
-            if(ctrl->recType == Nif::RC_NiVisController)
-            {
-                const Nif::NiVisController *vis = static_cast<const Nif::NiVisController*>(ctrl.getPtr());
-
-                int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, ctrl->target->recIndex);
-                Ogre::Bone *trgtbone = objectlist.mSkelBase->getSkeleton()->getBone(trgtid);
-                Ogre::ControllerValueRealPtr srcval; /* Filled in later */
-                Ogre::ControllerValueRealPtr dstval(OGRE_NEW VisController::Value(trgtbone, vis->data.getPtr()));
-                Ogre::ControllerFunctionRealPtr func(OGRE_NEW VisController::Function(vis, false));
-
-                objectlist.mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
-            }
-            else if(ctrl->recType == Nif::RC_NiKeyframeController)
-            {
-                const Nif::NiKeyframeController *key = static_cast<const Nif::NiKeyframeController*>(ctrl.getPtr());
-                if(!key->data.empty())
-                {
-                    int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, ctrl->target->recIndex);
-                    Ogre::Bone *trgtbone = objectlist.mSkelBase->getSkeleton()->getBone(trgtid);
-                    Ogre::ControllerValueRealPtr srcval; /* Filled in later */
-                    Ogre::ControllerValueRealPtr dstval(OGRE_NEW KeyframeController::Value(trgtbone, key->data.getPtr()));
-                    Ogre::ControllerFunctionRealPtr func(OGRE_NEW KeyframeController::Function(key, false));
-
-                    objectlist.mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
-                }
-            }
-            ctrl = ctrl->next;
-        }
-
         if(node->recType == Nif::RC_NiTriShape && !(flags&0x80000000))
         {
-            const Nif::NiTriShape *shape = static_cast<const Nif::NiTriShape*>(node);
-
-            std::string fullname = name+"@index="+Ogre::StringConverter::toString(shape->recIndex);
-            if(shape->name.length() > 0)
-                fullname += "@shape="+shape->name;
-            Misc::StringUtils::toLower(fullname);
-
-            Ogre::MeshManager &meshMgr = Ogre::MeshManager::getSingleton();
-            if(meshMgr.getByName(fullname).isNull())
-                NIFMeshLoader::createMesh(name, fullname, group, shape->recIndex);
-
-            Ogre::Entity *entity = sceneMgr->createEntity(fullname);
-            entity->setVisible(!(flags&0x01));
-
-            objectlist.mEntities.push_back(entity);
-            if(objectlist.mSkelBase)
-            {
-                if(entity->hasSkeleton())
-                    entity->shareSkeletonInstanceWith(objectlist.mSkelBase);
-                else
-                {
-                    int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, shape->recIndex);
-                    Ogre::Bone *trgtbone = objectlist.mSkelBase->getSkeleton()->getBone(trgtid);
-                    objectlist.mSkelBase->attachObjectToBone(trgtbone->getName(), entity);
-                }
-            }
-
-            Nif::ControllerPtr ctrl = node->controller;
-            while(!ctrl.empty())
-            {
-                if(ctrl->recType == Nif::RC_NiUVController)
-                {
-                    const Nif::NiUVController *uv = static_cast<const Nif::NiUVController*>(ctrl.getPtr());
-
-                    const Ogre::MaterialPtr &material = entity->getSubEntity(0)->getMaterial();
-                    Ogre::ControllerValueRealPtr srcval(Ogre::ControllerManager::getSingleton().getFrameTimeSource());
-                    Ogre::ControllerValueRealPtr dstval(OGRE_NEW UVController::Value(material, uv->data.getPtr()));
-                    Ogre::ControllerFunctionRealPtr func(OGRE_NEW UVController::Function(uv, true));
-
-                    objectlist.mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
-                }
-                ctrl = ctrl->next;
-            }
+            createEntity(name, group, sceneMgr, objectlist, node, flags, animflags);
         }
 
         if((node->recType == Nif::RC_NiAutoNormalParticles ||
             node->recType == Nif::RC_NiRotatingParticles) && !(flags&0x40000000))
         {
-            Ogre::ParticleSystem *partsys = createParticleSystem(name, group, sceneMgr, objectlist.mSkelBase, node);
-            if(partsys != NULL)
-            {
-                partsys->setVisible(!(flags&0x01));
-                objectlist.mParticles.push_back(partsys);
-            }
+            createParticleSystem(name, group, sceneMgr, objectlist, node, flags, partflags);
         }
 
         const Nif::NiNode *ninode = dynamic_cast<const Nif::NiNode*>(node);
@@ -627,7 +771,7 @@ class NIFObjectLoader
             for(size_t i = 0;i < children.length();i++)
             {
                 if(!children[i].empty())
-                    createObjects(name, group, sceneMgr, children[i].getPtr(), objectlist, flags);
+                    createObjects(name, group, sceneMgr, children[i].getPtr(), objectlist, flags, animflags, partflags);
             }
         }
     }
@@ -674,7 +818,7 @@ public:
             // Create a base skeleton entity if this NIF needs one
             createSkelBase(name, group, sceneMgr, node, objectlist);
         }
-        createObjects(name, group, sceneMgr, node, objectlist, flags);
+        createObjects(name, group, sceneMgr, node, objectlist, flags, 0, 0);
     }
 };
 
@@ -757,12 +901,15 @@ ObjectList Loader::createObjects(Ogre::Entity *parent, const std::string &bonena
 }
 
 
-ObjectList Loader::createObjectBase(Ogre::SceneManager *sceneMgr, std::string name, const std::string &group)
+ObjectList Loader::createObjectBase(Ogre::SceneNode *parentNode, std::string name, const std::string &group)
 {
     ObjectList objectlist;
 
     Misc::StringUtils::toLower(name);
-    NIFObjectLoader::load(sceneMgr, objectlist, name, group, 0xC0000000);
+    NIFObjectLoader::load(parentNode->getCreator(), objectlist, name, group, 0xC0000000);
+
+    if(objectlist.mSkelBase)
+        parentNode->attachObject(objectlist.mSkelBase);
 
     return objectlist;
 }

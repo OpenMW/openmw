@@ -511,8 +511,8 @@ namespace Physic
 
     void PhysicEngine::stepSimulation(double deltaT)
     {
-        // This isn't needed as there are no dynamic objects at this point
-        //dynamicsWorld->stepSimulation(deltaT,10, 1/60.0);
+        // This seems to be needed for character controller objects
+        dynamicsWorld->stepSimulation(deltaT,10, 1/60.0);
         if(isDebugCreated)
         {
             mDebugDrawer->step();

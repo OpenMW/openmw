@@ -303,5 +303,28 @@ public:
     }
 };
 
+class NiFlipController : public Controller
+{
+public:
+    int mTexSlot;
+    float mDelta; // Time between two flips. delta = (start_time - stop_time) / num_sources
+    NiSourceTextureList mSources;
+
+    void read(NIFStream *nif)
+    {
+        Controller::read(nif);
+        mTexSlot = nif->getUInt();
+        /*unknown=*/nif->getUInt();/*0?*/
+        mDelta = nif->getFloat();
+        mSources.read(nif);
+    }
+
+    void post(NIFFile *nif)
+    {
+        Controller::post(nif);
+        mSources.post(nif);
+    }
+};
+
 } // Namespace
 #endif

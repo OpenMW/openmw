@@ -1,7 +1,5 @@
 #include "windowbase.hpp"
 
-#include <components/settings/settings.hpp>
-
 #include "../mwbase/windowmanager.hpp"
 
 using namespace MWGui;

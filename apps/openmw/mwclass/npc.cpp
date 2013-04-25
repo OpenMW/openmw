@@ -49,6 +49,67 @@ namespace
     {
         return new CustomData (*this);
     }
+
+    void autoCalculateAttributes (const ESM::NPC* npc, MWMechanics::CreatureStats& creatureStats)
+    {
+        // race bonus
+        const ESM::Race *race =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npc->mRace);
+
+        bool male = (npc->mFlags & ESM::NPC::Female) == 0;
+
+        int level = creatureStats.getLevel();
+
+        for (int i=0; i<ESM::Attribute::Length; ++i)
+        {
+            const ESM::Race::MaleFemale& attribute = race->mData.mAttributeValues[i];
+            creatureStats.getAttribute(i).setBase (male ? attribute.mMale : attribute.mFemale);
+        }
+
+        // class bonus
+        const ESM::Class *class_ =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(npc->mClass);
+
+        for (int i=0; i<2; ++i)
+        {
+            int attribute = class_->mData.mAttribute[i];
+            if (attribute>=0 && attribute<8)
+            {
+                creatureStats.getAttribute(attribute).setBase (
+                    creatureStats.getAttribute(attribute).getBase() + 10);
+            }
+        }
+
+        // skill bonus
+        for (int attribute=0; attribute<ESM::Attribute::Length; ++attribute)
+        {
+            float modifierSum = 0;
+
+            for (int j=0; j<ESM::Skill::Length; ++j)
+            {
+                const ESM::Skill* skill = MWBase::Environment::get().getWorld()->getStore().get<ESM::Skill>().find(j);
+
+                if (skill->mData.mAttribute != attribute)
+                    continue;
+
+                // is this a minor or major skill?
+                float add=0.2;
+                for (int k=0; k<5; ++k)
+                {
+                    if (class_->mData.mSkills[k][0] == j)
+                        add=0.5;
+                }
+                for (int k=0; k<5; ++k)
+                {
+                    if (class_->mData.mSkills[k][1] == j)
+                        add=1.0;
+                }
+                modifierSum += add;
+            }
+            creatureStats.getAttribute(attribute).setBase ( std::min(creatureStats.getAttribute(attribute).getBase()
+                + static_cast<int>((level-1) * modifierSum+0.5), 100) );
+        }
+    }
 }
 
 namespace MWClass
@@ -126,15 +187,14 @@ namespace MWClass
             }
             else
             {
-                for (int i=0; i<8; ++i)
-                    data->mCreatureStats.getAttribute (i).set (10);
-
                 for (int i=0; i<3; ++i)
                     data->mCreatureStats.setDynamic (i, 10);
 
                 data->mCreatureStats.setLevel(ref->mBase->mNpdt12.mLevel);
                 data->mNpcStats.setBaseDisposition(ref->mBase->mNpdt12.mDisposition);
                 data->mNpcStats.setReputation(ref->mBase->mNpdt12.mReputation);
+
+                autoCalculateAttributes(ref->mBase, data->mCreatureStats);
             }
 
             data->mCreatureStats.setAiSetting (0, ref->mBase->mAiData.mHello);

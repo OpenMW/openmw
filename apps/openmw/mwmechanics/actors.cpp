@@ -290,6 +290,13 @@ namespace MWMechanics
         return 0;
     }
 
+    void Actors::forceStateUpdate(const MWWorld::Ptr & ptr)
+    {
+        PtrControllerMap::iterator iter = mActors.find(ptr);
+        if(iter != mActors.end())
+            iter->second.forceStateUpdate();
+    }
+
     void Actors::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number)
     {
         PtrControllerMap::iterator iter = mActors.find(ptr);

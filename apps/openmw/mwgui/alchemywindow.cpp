@@ -8,8 +8,6 @@
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/player.hpp"
-#include "../mwworld/manualref.hpp"
-#include "../mwworld/containerstore.hpp"
 
 namespace
 {

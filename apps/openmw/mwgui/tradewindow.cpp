@@ -9,7 +9,6 @@
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/dialoguemanager.hpp"
 
-#include "../mwworld/inventorystore.hpp"
 #include "../mwworld/manualref.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"

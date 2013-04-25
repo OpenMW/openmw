@@ -2,9 +2,6 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
-
 namespace MWGui
 {
     CountDialog::CountDialog() :

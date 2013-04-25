@@ -72,22 +72,17 @@ class CharacterController
     MWWorld::Ptr mPtr;
     MWRender::Animation *mAnimation;
 
-    typedef std::deque<std::string> AnimationQueue;
+    typedef std::deque<std::pair<std::string,size_t> > AnimationQueue;
     AnimationQueue mAnimQueue;
 
-    std::string mCurrentGroup;
-    CharacterState mState;
+    CharacterState mCharState;
+    bool mLooping;
     bool mSkipAnim;
 
-protected:
-    /* Called by the animation whenever a new text key is reached. */
-    void markerEvent(float time, const std::string &evt);
-
-    friend class MWRender::Animation;
+    bool mMovingAnim;
 
 public:
     CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state, bool loop);
-    CharacterController(const CharacterController &rhs);
     virtual ~CharacterController();
 
     void updatePtr(const MWWorld::Ptr &ptr);
@@ -99,7 +94,9 @@ public:
 
     void setState(CharacterState state, bool loop);
     CharacterState getState() const
-    { return mState; }
+    { return mCharState; }
+
+    void forceStateUpdate();
 };
 
 }

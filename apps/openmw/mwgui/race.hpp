@@ -76,8 +76,10 @@ namespace MWGui
         void updatePreview();
         void recountParts();
 
-        bool isHairPlayable();
-        bool isFacePlayable();
+        void getBodyParts (int part, std::vector<std::string>& out);
+
+        std::vector<std::string> mAvailableHeads;
+        std::vector<std::string> mAvailableHairs;
 
         MyGUI::ImageBox*  mPreviewImage;
         MyGUI::ListBox*   mRaceList;
@@ -90,7 +92,6 @@ namespace MWGui
         std::vector<MyGUI::Widget*> mSpellPowerItems;
 
         int mGenderIndex, mFaceIndex, mHairIndex;
-        int mFaceCount, mHairCount;
 
         std::string mCurrentRaceId;
 

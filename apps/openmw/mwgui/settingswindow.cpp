@@ -1,23 +1,17 @@
 #include "settingswindow.hpp"
 
 #include <OgreRoot.h>
-#include <OgreRenderSystem.h>
 #include <OgrePlugin.h>
-#include <OgreString.h>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/math/common_factor_rt.hpp>
-
-#include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/inputmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
-
-#include "../mwrender/renderingmanager.hpp"
 
 #include "confirmationdialog.hpp"
 
