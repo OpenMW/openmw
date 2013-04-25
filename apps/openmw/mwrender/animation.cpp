@@ -106,7 +106,7 @@ void Animation::addObjectList(Ogre::SceneNode *node, const std::string &model, b
     NifOgre::ObjectList &objlist = obj.mObjectList;
     if(objlist.mSkelBase)
     {
-        if(!mSkelBase)
+        if(mObjects.size() == 1)
             mSkelBase = objlist.mSkelBase;
 
         Ogre::AnimationStateSet *aset = objlist.mSkelBase->getAllAnimationStates();
@@ -125,7 +125,9 @@ void Animation::addObjectList(Ogre::SceneNode *node, const std::string &model, b
         Ogre::Skeleton::BoneIterator boneiter = skelinst->getBoneIterator();
         while(boneiter.hasMoreElements())
             boneiter.getNext()->setManuallyControlled(true);
-
+    }
+    if(objlist.mSkelBase && mSkelBase)
+    {
         Ogre::SkeletonInstance *baseinst = mSkelBase->getSkeleton();
         if(mSkelBase == objlist.mSkelBase)
         {
@@ -286,6 +288,9 @@ NifOgre::TextKeyMap::const_iterator Animation::findGroupStart(const NifOgre::Tex
 
 bool Animation::hasAnimation(const std::string &anim)
 {
+    if(!mSkelBase)
+        return false;
+
     for(std::vector<ObjectInfo>::const_iterator iter(mObjects.begin());iter != mObjects.end();iter++)
     {
         if(iter->mObjectList.mTextKeys.size() == 0)
@@ -520,6 +525,9 @@ bool Animation::play(const std::string &groupname, const std::string &start, con
 {
     // TODO: parameterize this
     size_t layeridx = 0;
+
+    if(!mSkelBase)
+        return false;
 
     for(std::vector<ObjectInfo>::iterator iter(mObjects.begin());iter != mObjects.end();iter++)
         iter->mActiveLayers &= ~(1<<layeridx);
