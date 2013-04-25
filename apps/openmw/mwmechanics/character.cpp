@@ -274,6 +274,11 @@ void CharacterController::setState(CharacterState state, bool loop)
     mCharState = state;
     mLooping = loop;
 
+    forceStateUpdate();
+}
+
+void CharacterController::forceStateUpdate()
+{
     if(!mAnimation)
         return;
     mAnimQueue.clear();

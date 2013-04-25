@@ -95,6 +95,8 @@ public:
     void setState(CharacterState state, bool loop);
     CharacterState getState() const
     { return mCharState; }
+
+    void forceStateUpdate();
 };
 
 }
