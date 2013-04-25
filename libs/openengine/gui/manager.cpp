@@ -559,6 +559,8 @@ void MyGUIManager::setup(Ogre::RenderWindow *wnd, Ogre::SceneManager *mgr, bool 
     assert(mgr);
 
     mSceneMgr = mgr;
+    mShaderRenderManager = NULL;
+    mRenderManager = NULL;
 
     using namespace MyGUI;
 
@@ -574,7 +576,10 @@ void MyGUIManager::setup(Ogre::RenderWindow *wnd, Ogre::SceneManager *mgr, bool 
 
     // Set up OGRE platform (bypassing OgrePlatform). We might make this more generic later.
     mLogManager = new LogManager();
-    mRenderManager = new MyGUI::ShaderBasedRenderManager();
+    if (!Ogre::Root::getSingleton().getRenderSystem()->getCapabilities()->hasCapability(Ogre::RSC_FIXED_FUNCTION))
+        mShaderRenderManager = new MyGUI::ShaderBasedRenderManager();
+    else
+        mRenderManager = new MyGUI::OgreRenderManager();
     mDataManager = new MyGUI::FixedOgreDataManager();
 
     LogManager::getInstance().setSTDOutputEnabled(logging);
@@ -582,7 +587,10 @@ void MyGUIManager::setup(Ogre::RenderWindow *wnd, Ogre::SceneManager *mgr, bool 
     if (!theLogFile.empty())
         LogManager::getInstance().createDefaultSource(theLogFile);
 
-    mRenderManager->initialise(wnd, mgr);
+    if (mShaderRenderManager)
+        mShaderRenderManager->initialise(wnd, mgr);
+    else
+        mRenderManager->initialise(wnd, mgr);
     mDataManager->initialise("General");
 
     // Create GUI
@@ -592,8 +600,16 @@ void MyGUIManager::setup(Ogre::RenderWindow *wnd, Ogre::SceneManager *mgr, bool 
 
 void MyGUIManager::updateWindow (Ogre::RenderWindow *wnd)
 {
-    mRenderManager->setRenderWindow (wnd);
-    mRenderManager->setActiveViewport(0);
+    if (mShaderRenderManager)
+    {
+        mShaderRenderManager->setRenderWindow (wnd);
+        mShaderRenderManager->setActiveViewport(0);
+    }
+    else
+    {
+        mRenderManager->setRenderWindow (wnd);
+        mRenderManager->setActiveViewport(0);
+    }
 }
 
 void MyGUIManager::shutdown()
@@ -605,6 +621,12 @@ void MyGUIManager::shutdown()
         mRenderManager->shutdown();
         delete mRenderManager;
         mRenderManager = NULL;
+    }
+    if(mShaderRenderManager)
+    {
+        mShaderRenderManager->shutdown();
+        delete mShaderRenderManager;
+        mShaderRenderManager = NULL;
     }
     if(mDataManager)
     {

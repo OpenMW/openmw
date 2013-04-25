@@ -136,6 +136,9 @@ Bug #700: "On the rocks" mod does not load its UV coordinates correctly.
 Bug #702: Some race mods don't work
 Bug #711: Crash during character creation
 Bug #715: Growing Tauryon
+Bug #725: Auto calculate stats
+Bug #728: Failure to open container and talk dialogue
+Bug #731: Crash with Mush-Mere's "background" topic
 Feature #55/657: Item Repairing
 Feature #62/87: Enchanting
 Feature #99: Pathfinding

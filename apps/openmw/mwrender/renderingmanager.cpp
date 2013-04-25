@@ -30,6 +30,8 @@
 #include "../mwbase/inputmanager.hpp" // FIXME
 #include "../mwbase/windowmanager.hpp" // FIXME
 
+#include "../mwmechanics/creaturestats.hpp"
+
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/player.hpp"
 
@@ -315,13 +317,15 @@ void RenderingManager::update (float duration, bool paused)
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
 
+    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+
+    int blind = MWWorld::Class::get(player).getCreatureStats(player).getMagicEffects().get(MWMechanics::EffectKey(ESM::MagicEffect::Blind)).mMagnitude;
+    mRendering.getFader()->setFactor(1.f-(blind / 100.f));
+
+    setAmbientMode();
+
     // player position
-    MWWorld::RefData &data =
-        MWBase::Environment::get()
-            .getWorld()
-            ->getPlayer()
-            .getPlayer()
-            .getRefData();
+    MWWorld::RefData &data = player.getRefData();
     float *_playerPos = data.getPosition().pos;
     Ogre::Vector3 playerPos(_playerPos[0], _playerPos[1], _playerPos[2]);
 
@@ -597,8 +601,15 @@ void RenderingManager::setSunColour(const Ogre::ColourValue& colour)
 
 void RenderingManager::setAmbientColour(const Ogre::ColourValue& colour)
 {
-    mRendering.getScene()->setAmbientLight(colour);
-    mTerrainManager->setAmbient(colour);
+    mAmbientColor = colour;
+
+    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+    int nightEye = MWWorld::Class::get(player).getCreatureStats(player).getMagicEffects().get(MWMechanics::EffectKey(ESM::MagicEffect::NightEye)).mMagnitude;
+    Ogre::ColourValue final = colour;
+    final += Ogre::ColourValue(0.7,0.7,0.7,0) * std::min(1.f, (nightEye/100.f));
+
+    mRendering.getScene()->setAmbientLight(final);
+    mTerrainManager->setAmbient(final);
 }
 
 void RenderingManager::sunEnable(bool real)
