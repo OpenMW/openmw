@@ -818,6 +818,22 @@ namespace MWWorld
             objRot[1] = rot.y;
             objRot[2] = rot.z;
 
+            float fullRotateRad=Ogre::Degree(360).valueRadians();
+
+            while(objRot[0]>=fullRotateRad)
+                objRot[0] -= fullRotateRad;
+            while(objRot[1]>=fullRotateRad)
+                objRot[1] -= fullRotateRad;
+            while(objRot[2]>=fullRotateRad)
+                objRot[2] -= fullRotateRad;
+
+            while(objRot[0]<=-fullRotateRad)
+                objRot[0] += fullRotateRad;
+            while(objRot[1]<=-fullRotateRad)
+                objRot[1] += fullRotateRad;
+            while(objRot[2]<=-fullRotateRad)
+                objRot[2] += fullRotateRad;
+
             if (ptr.getRefData().getBaseNode() != 0) {
                 mPhysics->rotateObject(ptr);
             }
@@ -831,6 +847,22 @@ namespace MWWorld
             ptr.getRefData().getLocalRotation().rot[0]=Ogre::Degree(x).valueRadians();
             ptr.getRefData().getLocalRotation().rot[1]=Ogre::Degree(y).valueRadians();
             ptr.getRefData().getLocalRotation().rot[2]=Ogre::Degree(z).valueRadians();
+
+            float fullRotateRad=Ogre::Degree(360).valueRadians();
+
+            while(ptr.getRefData().getLocalRotation().rot[0]>=fullRotateRad)
+                ptr.getRefData().getLocalRotation().rot[0]-=fullRotateRad;
+            while(ptr.getRefData().getLocalRotation().rot[1]>=fullRotateRad)
+                ptr.getRefData().getLocalRotation().rot[1]-=fullRotateRad;
+            while(ptr.getRefData().getLocalRotation().rot[2]>=fullRotateRad)
+                ptr.getRefData().getLocalRotation().rot[2]-=fullRotateRad;
+
+            while(ptr.getRefData().getLocalRotation().rot[0]<=-fullRotateRad)
+                ptr.getRefData().getLocalRotation().rot[0]+=fullRotateRad;
+            while(ptr.getRefData().getLocalRotation().rot[1]<=-fullRotateRad)
+                ptr.getRefData().getLocalRotation().rot[1]+=fullRotateRad;
+            while(ptr.getRefData().getLocalRotation().rot[2]<=-fullRotateRad)
+                ptr.getRefData().getLocalRotation().rot[2]+=fullRotateRad;
 
             float *worldRot = ptr.getRefData().getPosition().rot;
 
