@@ -524,6 +524,12 @@ bool Animation::play(const std::string &groupname, const std::string &start, con
     for(std::vector<ObjectInfo>::iterator iter(mObjects.begin());iter != mObjects.end();iter++)
         iter->mActiveLayers &= ~(1<<layeridx);
 
+    mLayer[layeridx].mGroupName.clear();
+    mLayer[layeridx].mTextKeys = NULL;
+    mLayer[layeridx].mControllers = NULL;
+    mLayer[layeridx].mLoopCount = 0;
+    mLayer[layeridx].mPlaying = false;
+
     bool movinganim = false;
     bool foundanim = false;
 
