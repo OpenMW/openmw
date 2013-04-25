@@ -141,8 +141,22 @@ public:
      */
     bool play(const std::string &groupname, const std::string &start, const std::string &stop, float startpoint, size_t loops);
 
-    virtual Ogre::Vector3 runAnimation(float timepassed);
+    /** Stops and removes the animation from the given layer. */
+    void disable(size_t layeridx);
 
+    /** Gets info about the given animation layer.
+     * \param layeridx Layer index to get info about.
+     * \param complete Stores completion amount (0 = at start key, 0.5 = half way between start and stop keys), etc.
+     * \param groupname Stores animation group being played.
+     * \param start Stores the start key
+     * \param stop Stores the stop key
+     * \return True if an animation is active on the layer, false otherwise.
+     */
+    bool getInfo(size_t layeridx, float *complete=NULL, std::string *groupname=NULL, std::string *start=NULL, std::string *stop=NULL) const;
+
+    virtual Ogre::Vector3 runAnimation(float duration);
+
+    /* Returns if there's an animation playing on the given layer. */
     bool isPlaying(size_t layeridx) const
     { return mLayer[layeridx].mPlaying; }
 

@@ -225,6 +225,8 @@ void Animation::updateActiveControllers()
                 break;
             }
         }
+        if(ctrls == NULL)
+            continue;
 
         /* Check if any objectlists are active on subsequent layers. Include
          * those layers if not.
@@ -239,7 +241,6 @@ void Animation::updateActiveControllers()
             }
         }
 
-        assert(ctrls != NULL);
         std::vector<Ogre::Controller<Ogre::Real> >::const_iterator ctrl(ctrls->begin());
         for(;ctrl != ctrls->end();ctrl++)
         {
@@ -525,21 +526,9 @@ bool Animation::play(const std::string &groupname, const std::string &start, con
 
     bool movinganim = false;
     bool foundanim = false;
-    if(groupname.empty())
-    {
-        // Do not allow layer 0 to be disabled
-        assert(layeridx != 0);
 
-        mLayer[layeridx].mGroupName.clear();
-        mLayer[layeridx].mTextKeys = NULL;
-        mLayer[layeridx].mControllers = NULL;
-        mLayer[layeridx].mLoopCount = 0;
-        mLayer[layeridx].mPlaying = false;
-
-        foundanim = true;
-    }
     /* Look in reverse; last-inserted source has priority. */
-    else for(std::vector<ObjectInfo>::reverse_iterator iter(mObjects.rbegin());iter != mObjects.rend();iter++)
+    for(std::vector<ObjectInfo>::reverse_iterator iter(mObjects.rbegin());iter != mObjects.rend();iter++)
     {
         NifOgre::ObjectList &objlist = iter->mObjectList;
         if(objlist.mTextKeys.size() == 0)
@@ -601,6 +590,43 @@ bool Animation::play(const std::string &groupname, const std::string &start, con
 
     return movinganim;
 }
+
+void Animation::disable(size_t layeridx)
+{
+    if(mLayer[layeridx].mGroupName.empty())
+        return;
+
+    for(std::vector<ObjectInfo>::iterator iter(mObjects.begin());iter != mObjects.end();iter++)
+        iter->mActiveLayers &= ~(1<<layeridx);
+
+    mLayer[layeridx].mGroupName.clear();
+    mLayer[layeridx].mTextKeys = NULL;
+    mLayer[layeridx].mControllers = NULL;
+    mLayer[layeridx].mLoopCount = 0;
+    mLayer[layeridx].mPlaying = false;
+
+    updateActiveControllers();
+}
+
+bool Animation::getInfo(size_t layeridx, float *complete, std::string *groupname, std::string *start, std::string *stop) const
+{
+    if(mLayer[layeridx].mGroupName.empty())
+    {
+        if(complete) *complete = 0.0f;
+        if(groupname) *groupname = "";
+        if(start) *start = "";
+        if(stop) *stop = "";
+        return false;
+    }
+
+    if(complete) *complete = (mLayer[layeridx].mTime - mLayer[layeridx].mStartKey->first) /
+                             (mLayer[layeridx].mStopKey->first - mLayer[layeridx].mStartKey->first);
+    if(groupname) *groupname = mLayer[layeridx].mGroupName;
+    if(start) *start = mLayer[layeridx].mStartKey->second.substr(mLayer[layeridx].mGroupName.size()+2);
+    if(stop) *stop = mLayer[layeridx].mStopKey->second.substr(mLayer[layeridx].mGroupName.size()+2);
+    return true;
+}
+
 
 Ogre::Vector3 Animation::runAnimation(float duration)
 {
