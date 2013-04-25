@@ -95,7 +95,10 @@ protected:
      * the marker is not found, or if the markers are the same, it returns
      * false.
      */
-    bool reset(size_t layeridx, const NifOgre::TextKeyMap &keys, NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl, const std::string &groupname, const std::string &start, const std::string &stop);
+    bool reset(size_t layeridx, const NifOgre::TextKeyMap &keys,
+               NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl,
+               const std::string &groupname, const std::string &start, const std::string &stop,
+               float startpoint);
 
     bool doLoop(size_t layeridx);
 
@@ -123,7 +126,18 @@ public:
 
     void setSpeed(float speed);
 
-    void play(const std::string &groupname, const std::string &start, const std::string &stop, size_t loops);
+    /** Plays an animation.
+     * \param groupname Name of the animation group to play.
+     * \param start Key marker from which to start.
+     * \param stop Key marker to stop at.
+     * \param startpoint How far in between the two markers to start. 0 starts
+     *                   at the start marker, 1 starts at the stop marker.
+     * \param loops How many times to loop the animation. This will use the
+     *              "loop start" and "loop stop" markers if they exist,
+     *              otherwise it will use "start" and "stop".
+     */
+    void play(const std::string &groupname, const std::string &start, const std::string &stop, float startpoint, size_t loops);
+
     virtual Ogre::Vector3 runAnimation(float timepassed);
 
     bool isPlaying(size_t layeridx) const

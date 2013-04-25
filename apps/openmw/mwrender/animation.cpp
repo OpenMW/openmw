@@ -402,7 +402,7 @@ void Animation::updatePosition(Ogre::Vector3 &position)
     mAccumRoot->setPosition(-mLastPosition);
 }
 
-bool Animation::reset(size_t layeridx, const NifOgre::TextKeyMap &keys, NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl, const std::string &groupname, const std::string &start, const std::string &stop)
+bool Animation::reset(size_t layeridx, const NifOgre::TextKeyMap &keys, NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl, const std::string &groupname, const std::string &start, const std::string &stop, float startpoint)
 {
     std::string tag = groupname+": "+start;
     NifOgre::TextKeyMap::const_iterator startkey(keys.begin());
@@ -432,9 +432,17 @@ bool Animation::reset(size_t layeridx, const NifOgre::TextKeyMap &keys, NifOgre:
     mLayer[layeridx].mLoopStartKey = startkey;
     mLayer[layeridx].mStopKey = stopkey;
     mLayer[layeridx].mNextKey = startkey;
-    mLayer[layeridx].mNextKey++;
 
-    mLayer[layeridx].mTime = mLayer[layeridx].mStartKey->first;
+    mLayer[layeridx].mTime = mLayer[layeridx].mStartKey->first + ((mLayer[layeridx].mStopKey->first-
+                                                                   mLayer[layeridx].mStartKey->first) * startpoint);
+
+    tag = groupname+": loop start";
+    while(mLayer[layeridx].mNextKey->first <= mLayer[layeridx].mTime && mLayer[layeridx].mNextKey != mLayer[layeridx].mStopKey)
+    {
+        if(mLayer[layeridx].mNextKey->second == tag)
+            mLayer[layeridx].mLoopStartKey = mLayer[layeridx].mNextKey;
+        mLayer[layeridx].mNextKey++;
+    }
 
     if(layeridx == 0 && nonaccumctrl)
         mLastPosition = nonaccumctrl->getTranslation(mLayer[layeridx].mTime) * mAccumulate;
@@ -507,7 +515,7 @@ bool Animation::handleTextKey(size_t layeridx, const NifOgre::TextKeyMap::const_
 }
 
 
-void Animation::play(const std::string &groupname, const std::string &start, const std::string &stop, size_t loops)
+void Animation::play(const std::string &groupname, const std::string &start, const std::string &stop, float startpoint, size_t loops)
 {
     // TODO: parameterize this
     size_t layeridx = 0;
@@ -554,7 +562,7 @@ void Animation::play(const std::string &groupname, const std::string &start, con
 
         if(!foundanim)
         {
-            if(!reset(layeridx, keys, nonaccumctrl, groupname, start, stop))
+            if(!reset(layeridx, keys, nonaccumctrl, groupname, start, stop, startpoint))
                 continue;
             mLayer[layeridx].mGroupName = groupname;
             mLayer[layeridx].mTextKeys = &keys;

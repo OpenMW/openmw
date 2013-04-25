@@ -121,7 +121,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
         mAnimation->setAccumulation(Ogre::Vector3(0.0f));
     }
     if(mAnimation->hasAnimation(mCurrentGroup))
-        mAnimation->play(mCurrentGroup, "start", "stop", loop ? (~(size_t)0) : 0);
+        mAnimation->play(mCurrentGroup, "start", "stop", 1.0f, loop ? (~(size_t)0) : 0);
 }
 
 CharacterController::~CharacterController()
@@ -204,15 +204,15 @@ void CharacterController::update(float duration, Movement &movement)
         }
         else if(getState() != CharState_SpecialIdle || !mAnimation->isPlaying(0))
         {
-            if(mAnimQueue.size() > 0)
+            if(mAnimQueue.size() == 0)
+                setState((inwater ? CharState_IdleSwim : (sneak ? CharState_IdleSneak : CharState_Idle)), true);
+            else
             {
                 mCurrentGroup = mAnimQueue.front().first;
                 size_t count = mAnimQueue.front().second;
                 mAnimQueue.pop_front();
-                mAnimation->play(mCurrentGroup, "start", "stop", count);
+                mAnimation->play(mCurrentGroup, "start", "stop", 0.0f, count);
             }
-            else
-                setState((inwater ? CharState_IdleSwim : (sneak ? CharState_IdleSneak : CharState_Idle)), true);
         }
 
         movement.mRotation[0] += rot.x * duration;
@@ -244,7 +244,7 @@ void CharacterController::playGroup(const std::string &groupname, int mode, int 
             mAnimQueue.clear();
             mCurrentGroup = groupname;
             mState = CharState_SpecialIdle;
-            mAnimation->play(mCurrentGroup, ((mode==2) ? "loop start" : "start"), "stop", count-1);
+            mAnimation->play(mCurrentGroup, ((mode==2) ? "loop start" : "start"), "stop", 0.0f, count-1);
         }
         else if(mode == 0)
         {
@@ -275,7 +275,7 @@ void CharacterController::setState(CharacterState state, bool loop)
     if(mAnimation->hasAnimation(anim))
     {
         mCurrentGroup = anim;
-        mAnimation->play(mCurrentGroup, "start", "stop", loop ? (~(size_t)0) : 0);
+        mAnimation->play(mCurrentGroup, "start", "stop", 0.0f, loop ? (~(size_t)0) : 0);
     }
 }
 
