@@ -187,6 +187,36 @@ void Animation::setRenderProperties(const NifOgre::ObjectList &objlist, Ogre::ui
 }
 
 
+void Animation::clearExtraSources()
+{
+    for(size_t layer = 0;layer < sMaxLayers;layer++)
+    {
+        mLayer[layer].mGroupName.clear();
+        mLayer[layer].mTextKeys = NULL;
+        mLayer[layer].mControllers = NULL;
+        mLayer[layer].mTime = 0.0f;
+        mLayer[layer].mLoopCount = 0;
+        mLayer[layer].mPlaying = false;
+    }
+    mNonAccumCtrl = NULL;
+    mAnimVelocity = 0.0f;
+
+    mLastPosition = Ogre::Vector3(0.0f);
+    if(mAccumRoot)
+        mAccumRoot->setPosition(mLastPosition);
+
+    if(mObjects.size() > 1)
+    {
+        mObjects.resize(1);
+        mObjects[0].mActiveLayers = 0;
+
+        NifOgre::ObjectList &objlist = mObjects[0].mObjectList;
+        mActiveCtrls.clear();
+        mActiveCtrls.insert(mActiveCtrls.end(), objlist.mControllers.begin(), objlist.mControllers.end());
+    }
+}
+
+
 void Animation::updateActiveControllers()
 {
     mActiveCtrls.clear();
@@ -538,6 +568,7 @@ bool Animation::play(const std::string &groupname, const std::string &start, con
     mLayer[layeridx].mGroupName.clear();
     mLayer[layeridx].mTextKeys = NULL;
     mLayer[layeridx].mControllers = NULL;
+    mLayer[layeridx].mTime = 0.0f;
     mLayer[layeridx].mLoopCount = 0;
     mLayer[layeridx].mPlaying = false;
 
@@ -571,6 +602,7 @@ bool Animation::play(const std::string &groupname, const std::string &start, con
         {
             if(!reset(layeridx, keys, nonaccumctrl, groupname, start, stop, startpoint))
                 continue;
+
             mLayer[layeridx].mGroupName = groupname;
             mLayer[layeridx].mTextKeys = &keys;
             mLayer[layeridx].mControllers = &objlist.mControllers;
@@ -619,6 +651,7 @@ void Animation::disable(size_t layeridx)
     mLayer[layeridx].mGroupName.clear();
     mLayer[layeridx].mTextKeys = NULL;
     mLayer[layeridx].mControllers = NULL;
+    mLayer[layeridx].mTime = 0.0f;
     mLayer[layeridx].mLoopCount = 0;
     mLayer[layeridx].mPlaying = false;
 

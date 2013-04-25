@@ -116,6 +116,11 @@ public:
     Animation(const MWWorld::Ptr &ptr);
     virtual ~Animation();
 
+    /** Clears all ObjectLists except the first one. As a consequence, any
+     * playing animations are stopped.
+     */
+    void clearExtraSources();
+
     void updatePtr(const MWWorld::Ptr &ptr);
 
     bool hasAnimation(const std::string &anim);
