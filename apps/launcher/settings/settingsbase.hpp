@@ -52,7 +52,7 @@ public:
         QRegExp keyRe("^([^=]+)\\s*=\\s*(.+)$");
 
         while (!stream.atEnd()) {
-            QString line = stream.readLine().simplified();
+            QString line = stream.readLine();
 
             if (line.isEmpty() || line.startsWith("#"))
                 continue;
@@ -65,8 +65,8 @@ public:
 
             if (keyRe.indexIn(line) != -1) {
 
-                QString key = keyRe.cap(1).simplified();
-                QString value = keyRe.cap(2).simplified();
+                QString key = keyRe.cap(1);
+                QString value = keyRe.cap(2);
 
                 if (!sectionPrefix.isEmpty())
                     key.prepend(sectionPrefix);
