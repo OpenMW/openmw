@@ -75,7 +75,8 @@ class CharacterController
     typedef std::deque<std::pair<std::string,size_t> > AnimationQueue;
     AnimationQueue mAnimQueue;
 
-    CharacterState mState;
+    CharacterState mCharState;
+    bool mLooping;
     bool mSkipAnim;
 
     bool mMovingAnim;
@@ -93,7 +94,7 @@ public:
 
     void setState(CharacterState state, bool loop);
     CharacterState getState() const
-    { return mState; }
+    { return mCharState; }
 };
 
 }

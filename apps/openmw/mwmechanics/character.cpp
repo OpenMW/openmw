@@ -103,13 +103,13 @@ static void getStateInfo(CharacterState state, std::string *group)
 
 
 CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state, bool loop)
-  : mPtr(ptr), mAnimation(anim), mState(state), mSkipAnim(false), mMovingAnim(false)
+  : mPtr(ptr), mAnimation(anim), mCharState(state), mSkipAnim(false), mMovingAnim(false)
 {
     if(!mAnimation)
         return;
 
     std::string group;
-    getStateInfo(mState, &group);
+    getStateInfo(mCharState, &group);
     if(MWWorld::Class::get(mPtr).isActor())
     {
         /* Accumulate along X/Y only for now, until we can figure out how we should
@@ -249,7 +249,8 @@ void CharacterController::playGroup(const std::string &groupname, int mode, int 
         if(mode != 0 || getState() != CharState_SpecialIdle)
         {
             mAnimQueue.clear();
-            mState = CharState_SpecialIdle;
+            mCharState = CharState_SpecialIdle;
+            mLooping = false;
             mMovingAnim = mAnimation->play(groupname, ((mode==2) ? "loop start" : "start"), "stop", 0.0f, count-1);
         }
         else if(mode == 0)
@@ -268,18 +269,19 @@ void CharacterController::skipAnim()
 
 void CharacterController::setState(CharacterState state, bool loop)
 {
-    if(mState == state)
+    if(mCharState == state)
         return;
-    mState = state;
+    mCharState = state;
+    mLooping = loop;
 
     if(!mAnimation)
         return;
     mAnimQueue.clear();
 
     std::string anim;
-    getStateInfo(mState, &anim);
+    getStateInfo(mCharState, &anim);
     if((mMovingAnim=mAnimation->hasAnimation(anim)) != false)
-        mMovingAnim = mAnimation->play(anim, "start", "stop", 0.0f, loop ? (~(size_t)0) : 0);
+        mMovingAnim = mAnimation->play(anim, "start", "stop", 0.0f, mLooping ? (~(size_t)0) : 0);
 }
 
 }
