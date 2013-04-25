@@ -78,6 +78,7 @@ protected:
 
     static float calcAnimVelocity(const NifOgre::TextKeyMap &keys,
                                   NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl,
+                                  const Ogre::Vector3 &accum,
                                   const std::string &groupname);
 
     /* Updates a skeleton instance so that all bones matching the source skeleton (based on
@@ -135,8 +136,10 @@ public:
      * \param loops How many times to loop the animation. This will use the
      *              "loop start" and "loop stop" markers if they exist,
      *              otherwise it will use "start" and "stop".
+     * \return Boolean specifying whether the animation will return movement
+     *         for the character at all.
      */
-    void play(const std::string &groupname, const std::string &start, const std::string &stop, float startpoint, size_t loops);
+    bool play(const std::string &groupname, const std::string &start, const std::string &stop, float startpoint, size_t loops);
 
     virtual Ogre::Vector3 runAnimation(float timepassed);
 

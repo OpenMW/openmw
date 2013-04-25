@@ -79,6 +79,8 @@ class CharacterController
     CharacterState mState;
     bool mSkipAnim;
 
+    bool mMovingAnim;
+
 public:
     CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state, bool loop);
     virtual ~CharacterController();

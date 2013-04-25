@@ -317,7 +317,7 @@ void Animation::updatePtr(const MWWorld::Ptr &ptr)
 }
 
 
-float Animation::calcAnimVelocity(const NifOgre::TextKeyMap &keys, NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl, const std::string &groupname)
+float Animation::calcAnimVelocity(const NifOgre::TextKeyMap &keys, NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl, const Ogre::Vector3 &accum, const std::string &groupname)
 {
     const std::string start = groupname+": start";
     const std::string loopstart = groupname+": loop start";
@@ -340,8 +340,8 @@ float Animation::calcAnimVelocity(const NifOgre::TextKeyMap &keys, NifOgre::Node
 
     if(stoptime > starttime)
     {
-        Ogre::Vector3 startpos = nonaccumctrl->getTranslation(starttime);
-        Ogre::Vector3 endpos = nonaccumctrl->getTranslation(stoptime);
+        Ogre::Vector3 startpos = nonaccumctrl->getTranslation(starttime) * accum;
+        Ogre::Vector3 endpos = nonaccumctrl->getTranslation(stoptime) * accum;
 
         return startpos.distance(endpos) / (stoptime-starttime);
     }
@@ -515,7 +515,7 @@ bool Animation::handleTextKey(size_t layeridx, const NifOgre::TextKeyMap::const_
 }
 
 
-void Animation::play(const std::string &groupname, const std::string &start, const std::string &stop, float startpoint, size_t loops)
+bool Animation::play(const std::string &groupname, const std::string &start, const std::string &stop, float startpoint, size_t loops)
 {
     // TODO: parameterize this
     size_t layeridx = 0;
@@ -523,6 +523,7 @@ void Animation::play(const std::string &groupname, const std::string &start, con
     for(std::vector<ObjectInfo>::iterator iter(mObjects.begin());iter != mObjects.end();iter++)
         iter->mActiveLayers &= ~(1<<layeridx);
 
+    bool movinganim = false;
     bool foundanim = false;
     if(groupname.empty())
     {
@@ -578,18 +579,27 @@ void Animation::play(const std::string &groupname, const std::string &start, con
 
             iter->mActiveLayers |= (1<<layeridx);
             foundanim = true;
+
+            if(mAccumulate == Ogre::Vector3(0.0f))
+                break;
         }
 
         if(!nonaccumctrl)
             break;
 
-        mAnimVelocity = calcAnimVelocity(keys, nonaccumctrl, groupname);
-        if(mAnimVelocity > 0.0f) break;
+        mAnimVelocity = calcAnimVelocity(keys, nonaccumctrl, mAccumulate, groupname);
+        if(mAnimVelocity > 1.0f)
+        {
+            movinganim = (nonaccumctrl==mNonAccumCtrl);
+            break;
+        }
     }
     if(!foundanim)
         std::cerr<< "Failed to find animation "<<groupname <<std::endl;
 
     updateActiveControllers();
+
+    return movinganim;
 }
 
 Ogre::Vector3 Animation::runAnimation(float duration)

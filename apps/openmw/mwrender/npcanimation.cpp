@@ -97,10 +97,10 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
     std::string smodel = (!isBeast ? "meshes\\base_anim.nif" : "meshes\\base_animkna.nif");
 
     addObjectList(node, smodel, true);
-    if(!mNpc->isMale() && !isBeast)
-        addObjectList(node, "meshes\\base_anim_female.nif", true);
-    else if(mBodyPrefix.find("argonian") != std::string::npos)
+    if(mBodyPrefix.find("argonian") != std::string::npos)
         addObjectList(node, "meshes\\argonian_swimkna.nif", true);
+    else if(!mNpc->isMale() && !isBeast)
+        addObjectList(node, "meshes\\base_anim_female.nif", true);
     if(mNpc->mModel.length() > 0)
         addObjectList(node, "meshes\\"+mNpc->mModel, true);
 
