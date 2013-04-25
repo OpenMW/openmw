@@ -97,14 +97,10 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
     std::string smodel = (!isBeast ? "meshes\\base_anim.nif" : "meshes\\base_animkna.nif");
 
     addObjectList(node, smodel, true);
-    if(mBodyPrefix.find("argonian") != std::string::npos)
-        addObjectList(node, "meshes\\argonian_swimkna.nif", true);
-    else if(!mNpc->isMale() && !isBeast)
-        addObjectList(node, "meshes\\base_anim_female.nif", true);
-    if(mNpc->mModel.length() > 0)
-        addObjectList(node, "meshes\\"+mNpc->mModel, true);
-
-    forceUpdate();
+    if(viewMode != VM_HeadOnly)
+        setViewMode(viewMode);
+    else
+        forceUpdate();
 }
 
 void NpcAnimation::setViewMode(NpcAnimation::ViewMode viewMode)
@@ -112,28 +108,30 @@ void NpcAnimation::setViewMode(NpcAnimation::ViewMode viewMode)
     assert(viewMode != VM_HeadOnly);
     mViewMode = viewMode;
 
-    /* FIXME: Enable this once first-person animations work. */
-#if 0
+    Ogre::SceneNode *node = mInsert->getParentSceneNode();
+
     const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
     const ESM::Race *race = store.get<ESM::Race>().find(mNpc->mRace);
-
     bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
-    std::string smodel = (!isBeast ? "meshes\\base_anim.nif" : "meshes\\base_animkna.nif");
 
-    std::vector<std::string> skelnames(1, smodel);
-    if(!mNpc->isMale() && !isBeast)
-        skelnames.push_back("meshes\\base_anim_female.nif");
-    else if(mBodyPrefix.find("argonian") != std::string::npos)
-        skelnames.push_back("meshes\\argonian_swimkna.nif");
+    clearExtraSources();
+    if(mBodyPrefix.find("argonian") != std::string::npos)
+        addObjectList(node, "meshes\\argonian_swimkna.nif", true);
+    else if(!mNpc->isMale() && !isBeast)
+        addObjectList(node, "meshes\\base_anim_female.nif", true);
     if(mNpc->mModel.length() > 0)
-        skelnames.push_back("meshes\\"+Misc::StringUtils::lowerCase(mNpc->mModel));
+        addObjectList(node, "meshes\\"+mNpc->mModel, true);
     if(mViewMode == VM_FirstPerson)
     {
-        smodel = (!isBeast ? "meshes\\base_anim.1st.nif" : "meshes\\base_animkna.1st.nif");
-        skelnames.push_back(smodel);
+        /* A bit counter-intuitive, but unlike third-person anims, it seems
+         * beast races get both base_anim.1st.nif and base_animkna.1st.nif.
+         */
+        addObjectList(node, "meshes\\base_anim.1st.nif", true);
+        if(isBeast)
+            addObjectList(node, "meshes\\base_animkna.1st.nif", true);
+        if(!mNpc->isMale() && !isBeast)
+            addObjectList(node, "meshes\\base_anim_female.1st.nif", true);
     }
-    setAnimationSources(skelnames);
-#endif
 
     for(size_t i = 0;i < sPartListSize;i++)
         removeIndividualPart(i);
