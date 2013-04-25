@@ -84,29 +84,30 @@ namespace MWScript
                     Interpreter::Type_Float angle = runtime[0].mFloat;
                     runtime.pop();
 
-                    float ax = Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees();
-                    float ay = Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees();
-                    float az = Ogre::Radian(ptr.getRefData().getPosition().rot[2]).valueDegrees();
+                    float ax = Ogre::Radian(ptr.getRefData().getLocalRotation().rot[0]).valueDegrees();
+                    float ay = Ogre::Radian(ptr.getRefData().getLocalRotation().rot[1]).valueDegrees();
+                    float az = Ogre::Radian(ptr.getRefData().getLocalRotation().rot[2]).valueDegrees();
+
+                    float *objRot = ptr.getRefData().getPosition().rot;
+
+                    float lx = Ogre::Radian(objRot[0]).valueDegrees();
+                    float ly = Ogre::Radian(objRot[1]).valueDegrees();
+                    float lz = Ogre::Radian(objRot[2]).valueDegrees();
 
                     if (axis == "x")
                     {
-                        MWBase::Environment::get().getWorld()->rotateObject(ptr,angle,ay,az);
+                        MWBase::Environment::get().getWorld()->localRotateObject(ptr,angle-lx,ay,az);
                     }
                     else if (axis == "y")
                     {
-                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,angle,az);
+                        MWBase::Environment::get().getWorld()->localRotateObject(ptr,ax,angle-ly,az);
                     }
                     else if (axis == "z")
                     {
-                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,angle);
+                        MWBase::Environment::get().getWorld()->localRotateObject(ptr,ax,ay,angle-lz);
                     }
                     else
                         throw std::runtime_error ("invalid ration axis: " + axis);
-
-                    //Local rotations clear
-                    ptr.getRefData().getLocalRotation().rot[0]=0;
-                    ptr.getRefData().getLocalRotation().rot[1]=0;
-                    ptr.getRefData().getLocalRotation().rot[2]=0;
                 }
         };
 
@@ -153,15 +154,15 @@ namespace MWScript
 
                     if (axis=="x")
                     {
-                        runtime.push(Ogre::Radian(ptr.getCellRef().mPos.rot[0]).valueDegrees()+ptr.getRefData().getLocalRotation().rot[0]);
+                        runtime.push(Ogre::Radian(ptr.getCellRef().mPos.rot[0]).valueDegrees()+Ogre::Radian(ptr.getRefData().getLocalRotation().rot[0]).valueDegrees());
                     }
                     else if (axis=="y")
                     {
-                        runtime.push(Ogre::Radian(ptr.getCellRef().mPos.rot[1]).valueDegrees()+ptr.getRefData().getLocalRotation().rot[1]);
+                        runtime.push(Ogre::Radian(ptr.getCellRef().mPos.rot[1]).valueDegrees()+Ogre::Radian(ptr.getRefData().getLocalRotation().rot[1]).valueDegrees());
                     }
                     else if (axis=="z")
                     {
-                        runtime.push(Ogre::Radian(ptr.getCellRef().mPos.rot[2]).valueDegrees()+ptr.getRefData().getLocalRotation().rot[2]);
+                        runtime.push(Ogre::Radian(ptr.getCellRef().mPos.rot[2]).valueDegrees()+Ogre::Radian(ptr.getRefData().getLocalRotation().rot[2]).valueDegrees());
                     }
                     else
                         throw std::runtime_error ("invalid ration axis: " + axis);
@@ -561,21 +562,24 @@ namespace MWScript
                     Interpreter::Type_Float rotation = (runtime[0].mFloat*MWBase::Environment::get().getFrameDuration());
                     runtime.pop();
 
+                    float ax = Ogre::Radian(ptr.getRefData().getLocalRotation().rot[0]).valueDegrees();
+                    float ay = Ogre::Radian(ptr.getRefData().getLocalRotation().rot[1]).valueDegrees();
+                    float az = Ogre::Radian(ptr.getRefData().getLocalRotation().rot[2]).valueDegrees();
+
                     if (axis == "x")
                     {
-                        MWBase::Environment::get().getWorld()->localRotateObject(ptr, rotation, Ogre::Vector3::UNIT_X);
+                        MWBase::Environment::get().getWorld()->localRotateObject(ptr,ax+rotation,ay,az);
                     }
                     else if (axis == "y")
                     {
-                        MWBase::Environment::get().getWorld()->localRotateObject(ptr, rotation, Ogre::Vector3::UNIT_Y);
+                        MWBase::Environment::get().getWorld()->localRotateObject(ptr,ax,ay+rotation,az);
                     }
                     else if (axis == "z")
                     {
-                        MWBase::Environment::get().getWorld()->localRotateObject(ptr, rotation, Ogre::Vector3::UNIT_Z);
+                        MWBase::Environment::get().getWorld()->localRotateObject(ptr,ax,ay,az+rotation);
                     }
-
                     else
-                        throw std::runtime_error ("invalid rotation axis: " + axis);
+                        throw std::runtime_error ("invalid ration axis: " + axis);
                 }
         };
 

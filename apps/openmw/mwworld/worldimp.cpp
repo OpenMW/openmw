@@ -824,18 +824,25 @@ namespace MWWorld
         }
     }
 
-    void World::localRotateObject (const Ptr& ptr, float rotation, Ogre::Vector3 axis)
+    void World::localRotateObject (const Ptr& ptr, float x, float y, float z)
     {
         if (ptr.getRefData().getBaseNode() != 0) {
 
-            if(axis==Ogre::Vector3::UNIT_X)
-                ptr.getRefData().getLocalRotation().rot[0]+=rotation;
-            else if(axis==Ogre::Vector3::UNIT_Y)
-                ptr.getRefData().getLocalRotation().rot[1]+=rotation;
-            else if(axis==Ogre::Vector3::UNIT_Z)
-                ptr.getRefData().getLocalRotation().rot[2]+=rotation;
+            ptr.getRefData().getLocalRotation().rot[0]=Ogre::Degree(x).valueRadians();
+            ptr.getRefData().getLocalRotation().rot[1]=Ogre::Degree(y).valueRadians();
+            ptr.getRefData().getLocalRotation().rot[2]=Ogre::Degree(z).valueRadians();
 
-            ptr.getRefData().getBaseNode()->rotate(Ogre::Quaternion(Ogre::Radian(Ogre::Degree(-rotation).valueRadians()), axis));
+            float *worldRot = ptr.getRefData().getPosition().rot;
+
+            Ogre::Quaternion worldRotQuat(Ogre::Quaternion(Ogre::Radian(-worldRot[0]), Ogre::Vector3::UNIT_X)*
+            Ogre::Quaternion(Ogre::Radian(-worldRot[1]), Ogre::Vector3::UNIT_Y)*
+            Ogre::Quaternion(Ogre::Radian(-worldRot[2]), Ogre::Vector3::UNIT_Z));
+
+            Ogre::Quaternion rot(Ogre::Quaternion(Ogre::Radian(Ogre::Degree(-x).valueRadians()), Ogre::Vector3::UNIT_X)*
+            Ogre::Quaternion(Ogre::Radian(Ogre::Degree(-y).valueRadians()), Ogre::Vector3::UNIT_Y)*
+            Ogre::Quaternion(Ogre::Radian(Ogre::Degree(-z).valueRadians()), Ogre::Vector3::UNIT_Z));
+
+            ptr.getRefData().getBaseNode()->setOrientation(worldRotQuat*rot);
             mPhysics->rotateObject(ptr);
         }
     }
