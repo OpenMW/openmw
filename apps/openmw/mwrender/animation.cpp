@@ -228,7 +228,10 @@ void Animation::updateActiveControllers()
             }
         }
         if(ctrls == NULL)
+        {
+            layer++;
             continue;
+        }
 
         /* Check if any objectlists are active on subsequent layers. Include
          * those layers if not.
