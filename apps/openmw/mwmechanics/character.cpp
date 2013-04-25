@@ -108,7 +108,8 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     if(!mAnimation)
         return;
 
-    getStateInfo(mState, &mCurrentGroup);
+    std::string group;
+    getStateInfo(mState, &group);
     if(MWWorld::Class::get(mPtr).isActor())
     {
         /* Accumulate along X/Y only for now, until we can figure out how we should
@@ -120,8 +121,8 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
         /* Don't accumulate with non-actors. */
         mAnimation->setAccumulation(Ogre::Vector3(0.0f));
     }
-    if(mAnimation->hasAnimation(mCurrentGroup))
-        mMovingAnim = mAnimation->play(mCurrentGroup, "start", "stop", 1.0f, loop ? (~(size_t)0) : 0);
+    if(mAnimation->hasAnimation(group))
+        mMovingAnim = mAnimation->play(group, "start", "stop", 1.0f, loop ? (~(size_t)0) : 0);
 }
 
 CharacterController::~CharacterController()
@@ -214,10 +215,10 @@ void CharacterController::update(float duration, Movement &movement)
                 setState((inwater ? CharState_IdleSwim : (sneak ? CharState_IdleSneak : CharState_Idle)), true);
             else
             {
-                mCurrentGroup = mAnimQueue.front().first;
-                size_t count = mAnimQueue.front().second;
+                mMovingAnim = mAnimation->play(mAnimQueue.front().first,
+                                               "start", "stop", 0.0f,
+                                               mAnimQueue.front().second);
                 mAnimQueue.pop_front();
-                mMovingAnim = mAnimation->play(mCurrentGroup, "start", "stop", 0.0f, count);
             }
         }
 
@@ -248,9 +249,8 @@ void CharacterController::playGroup(const std::string &groupname, int mode, int 
         if(mode != 0 || getState() != CharState_SpecialIdle)
         {
             mAnimQueue.clear();
-            mCurrentGroup = groupname;
             mState = CharState_SpecialIdle;
-            mMovingAnim = mAnimation->play(mCurrentGroup, ((mode==2) ? "loop start" : "start"), "stop", 0.0f, count-1);
+            mMovingAnim = mAnimation->play(groupname, ((mode==2) ? "loop start" : "start"), "stop", 0.0f, count-1);
         }
         else if(mode == 0)
         {
@@ -279,10 +279,7 @@ void CharacterController::setState(CharacterState state, bool loop)
     std::string anim;
     getStateInfo(mState, &anim);
     if((mMovingAnim=mAnimation->hasAnimation(anim)) != false)
-    {
-        mCurrentGroup = anim;
-        mMovingAnim = mAnimation->play(mCurrentGroup, "start", "stop", 0.0f, loop ? (~(size_t)0) : 0);
-    }
+        mMovingAnim = mAnimation->play(anim, "start", "stop", 0.0f, loop ? (~(size_t)0) : 0);
 }
 
 }

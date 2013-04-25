@@ -75,7 +75,6 @@ class CharacterController
     typedef std::deque<std::pair<std::string,size_t> > AnimationQueue;
     AnimationQueue mAnimQueue;
 
-    std::string mCurrentGroup;
     CharacterState mState;
     bool mSkipAnim;
 
