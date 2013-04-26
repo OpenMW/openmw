@@ -579,7 +579,7 @@ namespace MWScript
                         MWBase::Environment::get().getWorld()->localRotateObject(ptr,ax,ay,az+rotation);
                     }
                     else
-                        throw std::runtime_error ("invalid ration axis: " + axis);
+                        throw std::runtime_error ("invalid rotation axis: " + axis);
                 }
         };
 
@@ -638,6 +638,75 @@ namespace MWScript
                 }
         };
 
+        template<class R>
+        class OpMove : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    const MWWorld::Ptr& ptr = R()(runtime);
+
+                    std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+                    Interpreter::Type_Float movement = (runtime[0].mFloat*MWBase::Environment::get().getFrameDuration());
+                    runtime.pop();
+
+                    Ogre::Vector3 posChange;
+                    if (axis == "x")
+                    {
+                        posChange=Ogre::Vector3(movement, 0, 0);
+                    }
+                    else if (axis == "y")
+                    {
+                        posChange=Ogre::Vector3(0, movement, 0);
+                    }
+                    else if (axis == "z")
+                    {
+                        posChange=Ogre::Vector3(0, 0, movement);
+                    }
+                    else
+                        throw std::runtime_error ("invalid movement axis: " + axis);
+
+                    Ogre::Vector3 worldPos = ptr.getRefData().getBaseNode()->convertLocalToWorldPosition(posChange);
+                    MWBase::Environment::get().getWorld()->moveObject(ptr, worldPos.x, worldPos.y, worldPos.z);
+                }
+        };
+
+        template<class R>
+        class OpMoveWorld : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+                    Interpreter::Type_Float movement = (runtime[0].mFloat*MWBase::Environment::get().getFrameDuration());
+                    runtime.pop();
+
+                    float *objPos = ptr.getRefData().getPosition().pos;
+
+                    if (axis == "x")
+                    {
+                        MWBase::Environment::get().getWorld()->moveObject(ptr, objPos[0]+movement, objPos[1], objPos[2]);
+                    }
+                    else if (axis == "y")
+                    {
+                        MWBase::Environment::get().getWorld()->moveObject(ptr, objPos[0], objPos[1]+movement, objPos[2]);
+                    }
+                    else if (axis == "z")
+                    {
+                        MWBase::Environment::get().getWorld()->moveObject(ptr, objPos[0], objPos[1], objPos[2]+movement);
+                    }
+                    else
+                        throw std::runtime_error ("invalid movement axis: " + axis);
+                }
+        };
+
+
         const int opcodeSetScale = 0x2000164;
         const int opcodeSetScaleExplicit = 0x2000165;
         const int opcodeSetAngle = 0x2000166;
@@ -670,6 +739,10 @@ namespace MWScript
         const int opcodeRotateWorldExplicit = 0x2000202;
         const int opcodeSetAtStart = 0x2000203;
         const int opcodeSetAtStartExplicit = 0x2000204;
+        const int opcodeMove = 0x2000206;
+        const int opcodeMoveExplicit = 0x2000207;
+        const int opcodeMoveWorld = 0x2000208;
+        const int opcodeMoveWorldExplicit = 0x2000209;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -690,6 +763,8 @@ namespace MWScript
             extensions.registerInstruction("rotate","cf",opcodeRotate,opcodeRotateExplicit);
             extensions.registerInstruction("rotateworld","cf",opcodeRotateWorld,opcodeRotateWorldExplicit);
             extensions.registerInstruction("setatstart","",opcodeSetAtStart,opcodeSetAtStartExplicit);
+            extensions.registerInstruction("move","cf",opcodeMove,opcodeMoveExplicit);
+            extensions.registerInstruction("moveworld","cf",opcodeMoveWorld,opcodeMoveWorldExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -725,6 +800,10 @@ namespace MWScript
             interpreter.installSegment5(opcodeRotateWorldExplicit,new OpRotateWorld<ExplicitRef>);
             interpreter.installSegment5(opcodeSetAtStart,new OpSetAtStart<ImplicitRef>);
             interpreter.installSegment5(opcodeSetAtStartExplicit,new OpSetAtStart<ExplicitRef>);
+            interpreter.installSegment5(opcodeMove,new OpMove<ImplicitRef>);
+            interpreter.installSegment5(opcodeMoveExplicit,new OpMove<ExplicitRef>);
+            interpreter.installSegment5(opcodeMoveWorld,new OpMoveWorld<ImplicitRef>);
+            interpreter.installSegment5(opcodeMoveWorldExplicit,new OpMoveWorld<ExplicitRef>);
         }
     }
 }
