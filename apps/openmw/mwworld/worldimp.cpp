@@ -818,9 +818,64 @@ namespace MWWorld
             objRot[1] = rot.y;
             objRot[2] = rot.z;
 
+            float fullRotateRad=Ogre::Degree(360).valueRadians();
+
+            while(objRot[0]>=fullRotateRad)
+                objRot[0] -= fullRotateRad;
+            while(objRot[1]>=fullRotateRad)
+                objRot[1] -= fullRotateRad;
+            while(objRot[2]>=fullRotateRad)
+                objRot[2] -= fullRotateRad;
+
+            while(objRot[0]<=-fullRotateRad)
+                objRot[0] += fullRotateRad;
+            while(objRot[1]<=-fullRotateRad)
+                objRot[1] += fullRotateRad;
+            while(objRot[2]<=-fullRotateRad)
+                objRot[2] += fullRotateRad;
+
             if (ptr.getRefData().getBaseNode() != 0) {
                 mPhysics->rotateObject(ptr);
             }
+        }
+    }
+
+    void World::localRotateObject (const Ptr& ptr, float x, float y, float z)
+    {
+        if (ptr.getRefData().getBaseNode() != 0) {
+
+            ptr.getRefData().getLocalRotation().rot[0]=Ogre::Degree(x).valueRadians();
+            ptr.getRefData().getLocalRotation().rot[1]=Ogre::Degree(y).valueRadians();
+            ptr.getRefData().getLocalRotation().rot[2]=Ogre::Degree(z).valueRadians();
+
+            float fullRotateRad=Ogre::Degree(360).valueRadians();
+
+            while(ptr.getRefData().getLocalRotation().rot[0]>=fullRotateRad)
+                ptr.getRefData().getLocalRotation().rot[0]-=fullRotateRad;
+            while(ptr.getRefData().getLocalRotation().rot[1]>=fullRotateRad)
+                ptr.getRefData().getLocalRotation().rot[1]-=fullRotateRad;
+            while(ptr.getRefData().getLocalRotation().rot[2]>=fullRotateRad)
+                ptr.getRefData().getLocalRotation().rot[2]-=fullRotateRad;
+
+            while(ptr.getRefData().getLocalRotation().rot[0]<=-fullRotateRad)
+                ptr.getRefData().getLocalRotation().rot[0]+=fullRotateRad;
+            while(ptr.getRefData().getLocalRotation().rot[1]<=-fullRotateRad)
+                ptr.getRefData().getLocalRotation().rot[1]+=fullRotateRad;
+            while(ptr.getRefData().getLocalRotation().rot[2]<=-fullRotateRad)
+                ptr.getRefData().getLocalRotation().rot[2]+=fullRotateRad;
+
+            float *worldRot = ptr.getRefData().getPosition().rot;
+
+            Ogre::Quaternion worldRotQuat(Ogre::Quaternion(Ogre::Radian(-worldRot[0]), Ogre::Vector3::UNIT_X)*
+            Ogre::Quaternion(Ogre::Radian(-worldRot[1]), Ogre::Vector3::UNIT_Y)*
+            Ogre::Quaternion(Ogre::Radian(-worldRot[2]), Ogre::Vector3::UNIT_Z));
+
+            Ogre::Quaternion rot(Ogre::Quaternion(Ogre::Radian(Ogre::Degree(-x).valueRadians()), Ogre::Vector3::UNIT_X)*
+            Ogre::Quaternion(Ogre::Radian(Ogre::Degree(-y).valueRadians()), Ogre::Vector3::UNIT_Y)*
+            Ogre::Quaternion(Ogre::Radian(Ogre::Degree(-z).valueRadians()), Ogre::Vector3::UNIT_Z));
+
+            ptr.getRefData().getBaseNode()->setOrientation(worldRotQuat*rot);
+            mPhysics->rotateObject(ptr);
         }
     }
 
