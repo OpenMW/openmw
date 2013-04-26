@@ -307,11 +307,11 @@ namespace MWRender
 
     void Player::setAnimation(NpcAnimation *anim)
     {
+        anim->setViewMode((mVanity.enabled || mPreviewMode || !mFirstPersonView) ?
+                          NpcAnimation::VM_Normal : NpcAnimation::VM_FirstPerson);
+
         delete mAnimation;
         mAnimation = anim;
-
-        mAnimation->setViewMode((mVanity.enabled || mPreviewMode || !mFirstPersonView) ?
-                                NpcAnimation::VM_Normal : NpcAnimation::VM_FirstPerson);
     }
 
     void Player::setHeight(float height)
