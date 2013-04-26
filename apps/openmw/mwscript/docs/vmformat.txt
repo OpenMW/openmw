@@ -322,5 +322,7 @@ op 0x20001ff: Rotate
 op 0x2000200: Rotate, explicit reference
 op 0x2000201: RotateWorld
 op 0x2000202: RotateWorld, explicit reference
+op 0x2000203: SetAtStart
+op 0x2000204: SetAtStart, explicit
 
-opcodes 0x2000203-0x3ffffff unused
+opcodes 0x2000205-0x3ffffff unused

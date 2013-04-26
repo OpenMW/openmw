@@ -620,6 +620,24 @@ namespace MWScript
                 }
         };
 
+        template<class R>
+        class OpSetAtStart : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+                    ptr.getRefData().getLocalRotation().rot[0] = 0;
+                    ptr.getRefData().getLocalRotation().rot[1] = 0;
+                    ptr.getRefData().getLocalRotation().rot[2] = 0;
+                    MWBase::Environment::get().getWorld()->rotateObject(ptr, 0,0,0,true);
+                    MWBase::Environment::get().getWorld()->moveObject(ptr, ptr.getCellRef().mPos.pos[0],
+                            ptr.getCellRef().mPos.pos[1], ptr.getCellRef().mPos.pos[2]);
+
+                }
+        };
+
         const int opcodeSetScale = 0x2000164;
         const int opcodeSetScaleExplicit = 0x2000165;
         const int opcodeSetAngle = 0x2000166;
@@ -650,6 +668,8 @@ namespace MWScript
         const int opcodeRotateExplicit = 0x2000200;
         const int opcodeRotateWorld = 0x2000201;
         const int opcodeRotateWorldExplicit = 0x2000202;
+        const int opcodeSetAtStart = 0x2000203;
+        const int opcodeSetAtStartExplicit = 0x2000204;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -669,6 +689,7 @@ namespace MWScript
             extensions.registerInstruction("modscale","f",opcodeModScale,opcodeModScaleExplicit);
             extensions.registerInstruction("rotate","cf",opcodeRotate,opcodeRotateExplicit);
             extensions.registerInstruction("rotateworld","cf",opcodeRotateWorld,opcodeRotateWorldExplicit);
+            extensions.registerInstruction("setatstart","",opcodeSetAtStart,opcodeSetAtStartExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -702,6 +723,8 @@ namespace MWScript
             interpreter.installSegment5(opcodeRotateExplicit,new OpRotate<ExplicitRef>);
             interpreter.installSegment5(opcodeRotateWorld,new OpRotateWorld<ImplicitRef>);
             interpreter.installSegment5(opcodeRotateWorldExplicit,new OpRotateWorld<ExplicitRef>);
+            interpreter.installSegment5(opcodeSetAtStart,new OpSetAtStart<ImplicitRef>);
+            interpreter.installSegment5(opcodeSetAtStartExplicit,new OpSetAtStart<ExplicitRef>);
         }
     }
 }
