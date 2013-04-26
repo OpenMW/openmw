@@ -158,84 +158,31 @@ void NpcAnimation::setViewMode(NpcAnimation::ViewMode viewMode)
 void NpcAnimation::updateParts(bool forceupdate)
 {
     static const struct {
-        int numRemoveParts; // Max: 1
-        ESM::PartReferenceType removeParts[1];
-
-        MWWorld::ContainerStoreIterator NpcAnimation::*part;
-        int slot;
-
-        int numReserveParts; // Max: 12
-        ESM::PartReferenceType reserveParts[12];
+        MWWorld::ContainerStoreIterator NpcAnimation::*mPart;
+        int mSlot;
+        int mBasePriority;
     } slotlist[] = {
-        { 0, { },
-          &NpcAnimation::mRobe, MWWorld::InventoryStore::Slot_Robe,
-          12, { ESM::PRT_Groin, ESM::PRT_Skirt, ESM::PRT_RLeg, ESM::PRT_LLeg,
-                ESM::PRT_RUpperarm, ESM::PRT_LUpperarm, ESM::PRT_RKnee, ESM::PRT_LKnee,
-                ESM::PRT_RForearm, ESM::PRT_LForearm, ESM::PRT_RPauldron, ESM::PRT_LPauldron }
-        },
-
-        { 0, { },
-          &NpcAnimation::mSkirtIter, MWWorld::InventoryStore::Slot_Skirt,
-          3, { ESM::PRT_Groin, ESM::PRT_RLeg, ESM::PRT_LLeg }
-        },
-
-        { 1, { ESM::PRT_Hair },
-          &NpcAnimation::mHelmet, MWWorld::InventoryStore::Slot_Helmet,
-          0, { }
-        },
-
-        { 0, { },
-          &NpcAnimation::mCuirass, MWWorld::InventoryStore::Slot_Cuirass,
-          0, { }
-        },
-
-        { 0, { },
-          &NpcAnimation::mGreaves, MWWorld::InventoryStore::Slot_Greaves,
-          0, { }
-        },
-
-        { 0, { },
-          &NpcAnimation::mPauldronL, MWWorld::InventoryStore::Slot_LeftPauldron,
-          0, { }
-        },
-
-        { 0, { },
-          &NpcAnimation::mPauldronR, MWWorld::InventoryStore::Slot_RightPauldron,
-          0, { }
-        },
-
-        { 0, { },
-          &NpcAnimation::mBoots, MWWorld::InventoryStore::Slot_Boots,
-          0, { }
-        },
-
-        { 0, { },
-          &NpcAnimation::mGloveL, MWWorld::InventoryStore::Slot_LeftGauntlet,
-          0, { }
-        },
-
-        { 0, { },
-          &NpcAnimation::mGloveR, MWWorld::InventoryStore::Slot_RightGauntlet,
-          0, { }
-        },
-
-        { 0, { },
-          &NpcAnimation::mShirt, MWWorld::InventoryStore::Slot_Shirt,
-          0, { }
-        },
-
-        { 0, { },
-          &NpcAnimation::mPants, MWWorld::InventoryStore::Slot_Pants,
-          0, { }
-        },
+        // FIXME: Priority is based on the number of reserved slots. There should be a better way.
+        { &NpcAnimation::mRobe,      MWWorld::InventoryStore::Slot_Robe,         12 },
+        { &NpcAnimation::mSkirtIter, MWWorld::InventoryStore::Slot_Skirt,         3 },
+        { &NpcAnimation::mHelmet,    MWWorld::InventoryStore::Slot_Helmet,        0 },
+        { &NpcAnimation::mCuirass,   MWWorld::InventoryStore::Slot_Cuirass,       0 },
+        { &NpcAnimation::mGreaves,   MWWorld::InventoryStore::Slot_Greaves,       0 },
+        { &NpcAnimation::mPauldronL, MWWorld::InventoryStore::Slot_LeftPauldron,  0 },
+        { &NpcAnimation::mPauldronR, MWWorld::InventoryStore::Slot_RightPauldron, 0 },
+        { &NpcAnimation::mBoots,     MWWorld::InventoryStore::Slot_Boots,         0 },
+        { &NpcAnimation::mGloveL,    MWWorld::InventoryStore::Slot_LeftGauntlet,  0 },
+        { &NpcAnimation::mGloveR,    MWWorld::InventoryStore::Slot_RightGauntlet, 0 },
+        { &NpcAnimation::mShirt,     MWWorld::InventoryStore::Slot_Shirt,         0 },
+        { &NpcAnimation::mPants,     MWWorld::InventoryStore::Slot_Pants,         0 },
     };
     static const size_t slotlistsize = sizeof(slotlist)/sizeof(slotlist[0]);
 
     MWWorld::InventoryStore &inv = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
     for(size_t i = 0;!forceupdate && i < slotlistsize;i++)
     {
-        MWWorld::ContainerStoreIterator iter = inv.getSlot(slotlist[i].slot);
-        if(this->*slotlist[i].part != iter)
+        MWWorld::ContainerStoreIterator iter = inv.getSlot(slotlist[i].mSlot);
+        if(this->*slotlist[i].mPart != iter)
         {
             forceupdate = true;
             break;
@@ -248,40 +195,55 @@ void NpcAnimation::updateParts(bool forceupdate)
     if(mViewMode == VM_FirstPerson)
     {
         for(size_t i = 0;i < slotlistsize;i++)
-            this->*slotlist[i].part = inv.getSlot(slotlist[i].slot);
+            this->*slotlist[i].mPart = inv.getSlot(slotlist[i].mSlot);
         return;
     }
 
     for(size_t i = 0;i < slotlistsize && mViewMode != VM_HeadOnly;i++)
     {
-        MWWorld::ContainerStoreIterator iter = inv.getSlot(slotlist[i].slot);
+        MWWorld::ContainerStoreIterator iter = inv.getSlot(slotlist[i].mSlot);
 
-        this->*slotlist[i].part = iter;
-        removePartGroup(slotlist[i].slot);
+        this->*slotlist[i].mPart = iter;
+        removePartGroup(slotlist[i].mSlot);
 
-        if(this->*slotlist[i].part == inv.end())
+        if(this->*slotlist[i].mPart == inv.end())
             continue;
 
-        for(int rem = 0;rem < slotlist[i].numRemoveParts;rem++)
-            removeIndividualPart(slotlist[i].removeParts[rem]);
+        if(slotlist[i].mSlot == MWWorld::InventoryStore::Slot_Helmet)
+            removeIndividualPart(ESM::PRT_Hair);
 
         int prio = 1;
-        MWWorld::ContainerStoreIterator &store = this->*slotlist[i].part;
+        MWWorld::ContainerStoreIterator &store = this->*slotlist[i].mPart;
         if(store->getTypeName() == typeid(ESM::Clothing).name())
         {
-            prio = ((slotlist[i].numReserveParts+1)<<1) + 0;
+            prio = ((slotlist[i].mBasePriority+1)<<1) + 0;
             const ESM::Clothing *clothes = store->get<ESM::Clothing>()->mBase;
-            addPartGroup(slotlist[i].slot, prio, clothes->mParts.mParts);
+            addPartGroup(slotlist[i].mSlot, prio, clothes->mParts.mParts);
         }
         else if(store->getTypeName() == typeid(ESM::Armor).name())
         {
-            prio = ((slotlist[i].numReserveParts+1)<<1) + 1;
+            prio = ((slotlist[i].mBasePriority+1)<<1) + 1;
             const ESM::Armor *armor = store->get<ESM::Armor>()->mBase;
-            addPartGroup(slotlist[i].slot, prio, armor->mParts.mParts);
+            addPartGroup(slotlist[i].mSlot, prio, armor->mParts.mParts);
         }
 
-        for(int res = 0;res < slotlist[i].numReserveParts;res++)
-            reserveIndividualPart(slotlist[i].reserveParts[res], slotlist[i].slot, prio);
+        if(slotlist[i].mSlot == MWWorld::InventoryStore::Slot_Robe)
+        {
+            ESM::PartReferenceType parts[] = {
+                ESM::PRT_Groin, ESM::PRT_Skirt, ESM::PRT_RLeg, ESM::PRT_LLeg,
+                ESM::PRT_RUpperarm, ESM::PRT_LUpperarm, ESM::PRT_RKnee, ESM::PRT_LKnee,
+                ESM::PRT_RForearm, ESM::PRT_LForearm, ESM::PRT_RPauldron, ESM::PRT_LPauldron
+            };
+            size_t parts_size = sizeof(parts)/sizeof(parts[0]);
+            for(int p = 0;p < parts_size;p++)
+                reserveIndividualPart(parts[p], slotlist[i].mSlot, prio);
+        }
+        else if(slotlist[i].mSlot == MWWorld::InventoryStore::Slot_Skirt)
+        {
+            reserveIndividualPart(ESM::PRT_Groin, slotlist[i].mSlot, prio);
+            reserveIndividualPart(ESM::PRT_RLeg, slotlist[i].mSlot, prio);
+            reserveIndividualPart(ESM::PRT_LLeg, slotlist[i].mSlot, prio);
+        }
     }
 
     if(mViewMode != VM_FirstPerson)
