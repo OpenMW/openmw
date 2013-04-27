@@ -235,7 +235,7 @@ void NpcAnimation::updateParts(bool forceupdate)
                 ESM::PRT_RForearm, ESM::PRT_LForearm, ESM::PRT_RPauldron, ESM::PRT_LPauldron
             };
             size_t parts_size = sizeof(parts)/sizeof(parts[0]);
-            for(int p = 0;p < parts_size;p++)
+            for(int p = 0;p < static_cast<int> (parts_size);++p)
                 reserveIndividualPart(parts[p], slotlist[i].mSlot, prio);
         }
         else if(slotlist[i].mSlot == MWWorld::InventoryStore::Slot_Skirt)

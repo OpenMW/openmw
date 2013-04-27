@@ -325,5 +325,9 @@ op 0x2000202: RotateWorld, explicit reference
 op 0x2000203: SetAtStart
 op 0x2000204: SetAtStart, explicit
 op 0x2000205: OnDeath, explicit
+op 0x2000206: Move
+op 0x2000207: Move, explicit
+op 0x2000208: MoveWorld
+op 0x2000209: MoveWorld, explicit
 
-opcodes 0x2000206-0x3ffffff unused
+opcodes 0x200020a-0x3ffffff unused
