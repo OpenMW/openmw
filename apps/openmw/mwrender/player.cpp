@@ -28,7 +28,6 @@ namespace MWRender
     {
         mVanity.enabled = false;
         mVanity.allowed = true;
-        mVanity.forced = false;
 
         mCameraNode->attachObject(mCamera);
         mCameraNode->setPosition(0.f, 0.f, mHeight);
@@ -44,32 +43,13 @@ namespace MWRender
     
     bool Player::rotate(const Ogre::Vector3 &rot, bool adjust)
     {
-        if (mVanity.enabled) {
+        if (mVanity.enabled)
             toggleVanityMode(false);
-        }
 
-        Ogre::Vector3 trueRot = rot;
+        if (mFreeLook || mVanity.enabled || mPreviewMode)
+            rotateCamera(rot, adjust);
 
-        /// \note rotate player on forced vanity
-        if (mVanity.forced) {
-            if (mFreeLook) {
-                float diff = (adjust) ? rot.z : mMainCam.yaw - rot.z;
-
-                mVanity.enabled = false;
-                rotateCamera(rot, adjust);
-                mVanity.enabled = true;
-
-                compensateYaw(diff);
-            }
-            trueRot.z = 0.f;
-        }
-
-        if (mFreeLook || mVanity.enabled || mPreviewMode) {
-            rotateCamera(trueRot, adjust);
-        }
-
-        /// \note if vanity mode is forced by TVM then rotate player
-        return (!mVanity.enabled && !mPreviewMode) || mVanity.forced;
+        return (!mVanity.enabled && !mPreviewMode);
     }
 
     void Player::rotateCamera(const Ogre::Vector3 &rot, bool adjust)
@@ -81,14 +61,9 @@ namespace MWRender
             setYaw(rot.z);
             setPitch(rot.x);
         }
-        Ogre::Quaternion xr(
-            Ogre::Radian(getPitch() + Ogre::Math::HALF_PI),
-            Ogre::Vector3::UNIT_X
-        );
-        Ogre::Quaternion zr(
-            Ogre::Radian(getYaw()),
-            Ogre::Vector3::NEGATIVE_UNIT_Z
-        );
+
+        Ogre::Quaternion xr(Ogre::Radian(getPitch() + Ogre::Math::HALF_PI), Ogre::Vector3::UNIT_X);
+        Ogre::Quaternion zr(Ogre::Radian(getYaw()), Ogre::Vector3::NEGATIVE_UNIT_Z);
         if (!mVanity.enabled && !mPreviewMode) {
             mPlayerNode->setOrientation(zr);
             mCameraNode->setOrientation(xr);
@@ -150,23 +125,19 @@ namespace MWRender
     
     void Player::allowVanityMode(bool allow)
     {
-        if (!allow && mVanity.enabled && !mVanity.forced) {
+        if (!allow && mVanity.enabled)
             toggleVanityMode(false);
-        }
         mVanity.allowed = allow;
     }
 
-    bool Player::toggleVanityMode(bool enable, bool force)
+    bool Player::toggleVanityMode(bool enable)
     {
-        if ((mVanity.forced && !force) ||
-            (!mVanity.allowed && (force || enable)))
-        { 
+        if(!mVanity.allowed && enable)
             return false;
-        } else if (mVanity.enabled == enable) {
+
+        if(mVanity.enabled == enable)
             return true;
-        }
         mVanity.enabled = enable;
-        mVanity.forced = force && enable;
 
         mAnimation->setViewMode((mVanity.enabled || mPreviewMode || !mFirstPersonView) ?
                                 NpcAnimation::VM_Normal : NpcAnimation::VM_FirstPerson);
@@ -185,6 +156,7 @@ namespace MWRender
             setLowHeight(!mFirstPersonView);
         }
         rot.z = getYaw();
+
         mCamera->setPosition(0.f, 0.f, offset);
         rotateCamera(rot, false);
 
@@ -193,12 +165,13 @@ namespace MWRender
 
     void Player::togglePreviewMode(bool enable)
     {
-        if (mPreviewMode == enable) {
+        if(mPreviewMode == enable)
             return;
-        }
+
         mPreviewMode = enable;
         mAnimation->setViewMode((mVanity.enabled || mPreviewMode || !mFirstPersonView) ?
                                 NpcAnimation::VM_Normal : NpcAnimation::VM_FirstPerson);
+
         float offset = mCamera->getPosition().z;
         if (mPreviewMode) {
             mMainCam.offset = offset;
@@ -211,15 +184,15 @@ namespace MWRender
 
             setLowHeight(!mFirstPersonView);
         }
+
         mCamera->setPosition(0.f, 0.f, offset);
         rotateCamera(Ogre::Vector3(getPitch(), 0.f, getYaw()), false);
     }
 
     float Player::getYaw()
     {
-        if (mVanity.enabled || mPreviewMode) {
+        if(mVanity.enabled || mPreviewMode)
             return mPreviewCam.yaw;
-        }
         return mMainCam.yaw;
     }
 
@@ -247,16 +220,16 @@ namespace MWRender
 
     void Player::setPitch(float angle)
     {
-        const float epsilon = 0.000001;
+        const float epsilon = 0.000001f;
         float limit = Ogre::Math::HALF_PI - epsilon;
-        if (mVanity.forced || mPreviewMode) {
-             limit /= 2;
-        }
-        if (angle > limit) {
+        if(mPreviewMode)
+            limit /= 2;
+
+        if(angle > limit)
             angle = limit;
-        } else if (angle < -limit) {
+        else if(angle < -limit)
             angle = -limit;
-        }
+
         if (mVanity.enabled || mPreviewMode) {
             mPreviewCam.pitch = angle;
         } else {
@@ -266,9 +239,9 @@ namespace MWRender
 
     void Player::setCameraDistance(float dist, bool adjust, bool override)
     {
-        if (mFirstPersonView && !mPreviewMode && !mVanity.enabled) {
+        if(mFirstPersonView && !mPreviewMode && !mVanity.enabled)
             return;
-        }
+
         Ogre::Vector3 v(0.f, 0.f, dist);
         if (adjust) {
             v += mCamera->getPosition();

@@ -37,7 +37,7 @@ namespace MWRender
         bool mFreeLook;
 
         struct {
-            bool enabled, allowed, forced;
+            bool enabled, allowed;
         } mVanity;
 
         float mHeight, mCameraDistance;
@@ -79,7 +79,7 @@ namespace MWRender
 
         void toggleViewMode();
 
-        bool toggleVanityMode(bool enable, bool force = false);
+        bool toggleVanityMode(bool enable);
         void allowVanityMode(bool allow);
 
         void togglePreviewMode(bool enable);
