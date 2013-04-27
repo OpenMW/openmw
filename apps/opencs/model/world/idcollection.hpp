@@ -278,9 +278,15 @@ namespace CSMWorld
     template<typename ESXRecordT, typename IdAccessorT>
     void  IdCollection<ESXRecordT, IdAccessorT>::purge()
     {
-        mRecords.erase (std::remove_if (mRecords.begin(), mRecords.end(),
-            std::mem_fun_ref (&Record<ESXRecordT>::isErased) // I want lambda :(
-            ), mRecords.end());
+        int i = 0;
+
+        while (i<static_cast<int> (mRecords.size()))
+        {
+            if (mRecords[i].isErased())
+                removeRows (i, 1);
+            else
+                ++i;
+        }
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
