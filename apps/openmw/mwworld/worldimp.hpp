@@ -272,6 +272,9 @@ namespace MWWorld
             virtual void doPhysics(const PtrMovementList &actors, float duration);
             ///< Run physics simulation and modify \a world accordingly.
 
+            virtual void processDoors(float duration);
+            ///< Run physics simulation and modify \a world accordingly.
+
             virtual bool toggleCollisionMode();
             ///< Toggle collision mode for player. If disabled player object should ignore
             /// collisions and gravity.

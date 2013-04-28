@@ -979,15 +979,23 @@ namespace MWWorld
             moveObjectImp(player->first, vec.x, vec.y, vec.z);
         }
 
+        processDoors(duration);
+
+        mPhysEngine->stepSimulation (duration);
+    }
+
+    void World::processDoors(float duration)
+    {
         // doors
         for (std::map<MWWorld::Ptr, int>::iterator it = mDoorStates.begin(); it != mDoorStates.end(); ++it)
         {
-            if (!it->first.getRefData().getCount())
-                mDoorStates.erase(it);
+            if (it->first.isEmpty() || !it->first.getRefData().getCount())
+                mDoorStates.erase(it++);
             else
             {
-                if (mPlayer->getPlayer().getCell() != it->first.getCell())
+                if (!mWorldScene->isCellActive(*it->first.getCell()))
                     continue;
+
                 float oldRot = Ogre::Radian(it->first.getRefData().getLocalRotation().rot[2]).valueDegrees();
                 float diff = duration * 90 * (it->second ? 1 : -1);
                 float targetRot = std::min(std::max(0.f, oldRot + diff), 90.f);
@@ -1016,8 +1024,6 @@ namespace MWWorld
                     mDoorStates.erase(it);
             }
         }
-
-        mPhysEngine->stepSimulation (duration);
     }
 
     bool World::toggleCollisionMode()
