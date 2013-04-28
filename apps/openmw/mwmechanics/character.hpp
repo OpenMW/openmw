@@ -79,6 +79,10 @@ class CharacterController
     bool mLooping;
     bool mSkipAnim;
 
+    // counted for skill increase
+    float mSecondsOfSwimming;
+    float mSecondsOfRunning;
+
     bool mMovingAnim;
 
 public:

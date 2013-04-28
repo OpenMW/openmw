@@ -28,6 +28,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
 
 
@@ -103,7 +104,7 @@ static void getStateInfo(CharacterState state, std::string *group)
 
 
 CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state, bool loop)
-  : mPtr(ptr), mAnimation(anim), mCharState(state), mSkipAnim(false), mMovingAnim(false)
+    : mPtr(ptr), mAnimation(anim), mCharState(state), mSkipAnim(false), mMovingAnim(false), mSecondsOfRunning(0), mSecondsOfSwimming(0)
 {
     if(!mAnimation)
         return;
@@ -151,6 +152,29 @@ void CharacterController::update(float duration, Movement &movement)
         const Ogre::Vector3 &vec = cls.getMovementVector(mPtr);
         const Ogre::Vector3 &rot = cls.getRotationVector(mPtr);
         speed = cls.getSpeed(mPtr);
+
+        // advance athletics
+        if (vec.squaredLength() > 0 && mPtr == MWBase::Environment::get().getWorld()->getPlayer().getPlayer())
+        {
+            if (inwater)
+            {
+                mSecondsOfSwimming += duration;
+                while (mSecondsOfSwimming > 1)
+                {
+                    MWWorld::Class::get(mPtr).skillUsageSucceeded(mPtr, ESM::Skill::Athletics, 1);
+                    mSecondsOfSwimming -= 1;
+                }
+            }
+            else if (isrunning)
+            {
+                mSecondsOfRunning += duration;
+                while (mSecondsOfRunning > 1)
+                {
+                    MWWorld::Class::get(mPtr).skillUsageSucceeded(mPtr, ESM::Skill::Athletics, 0);
+                    mSecondsOfRunning -= 1;
+                }
+            }
+        }
 
         /* FIXME: The state should be set to Jump, and X/Y movement should be disallowed except
          * for the initial thrust (which would be carried by "physics" until landing). */
