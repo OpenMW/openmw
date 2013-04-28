@@ -986,19 +986,16 @@ namespace MWWorld
 
     void World::processDoors(float duration)
     {
-        // doors
-        for (std::map<MWWorld::Ptr, int>::iterator it = mDoorStates.begin(); it != mDoorStates.end(); ++it)
+        std::map<MWWorld::Ptr, int>::iterator it = mDoorStates.begin();
+        while (it != mDoorStates.end())
         {
-            if (it->first.isEmpty() || !it->first.getRefData().getCount())
+            if (!mWorldScene->isCellActive(*it->first.getCell()))
                 mDoorStates.erase(it++);
             else
             {
-                if (!mWorldScene->isCellActive(*it->first.getCell()))
-                    continue;
-
                 float oldRot = Ogre::Radian(it->first.getRefData().getLocalRotation().rot[2]).valueDegrees();
-                float diff = duration * 90 * (it->second ? 1 : -1);
-                float targetRot = std::min(std::max(0.f, oldRot + diff), 90.f);
+                float diff = duration * 90;
+                float targetRot = std::min(std::max(0.f, oldRot + diff * (it->second ? 1 : -1)), 90.f);
                 localRotateObject(it->first, 0, 0, targetRot);
 
                 std::vector<std::string> collisions = mPhysics->getCollisions(it->first);
@@ -1021,7 +1018,9 @@ namespace MWWorld
                 }
 
                 if ((targetRot == 90.f && it->second) || targetRot == 0.f)
-                    mDoorStates.erase(it);
+                    mDoorStates.erase(it++);
+                else
+                    ++it;
             }
         }
     }
