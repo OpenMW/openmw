@@ -478,8 +478,8 @@ void NpcAnimation::showWeapons(bool showWeapon)
         mWeapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
         if(mWeapon != inv.end()) // special case for weapons
         {
-            const ESM::Weapon* weapon = (mWeapon->get<ESM::Weapon>())->mBase;
-            addOrReplaceIndividualPart(ESM::PRT_Weapon,-1,1,"meshes\\"+weapon->mModel);
+            std::string mesh = MWWorld::Class::get(*mWeapon).getModel(*mWeapon);
+            addOrReplaceIndividualPart(ESM::PRT_Weapon,-1,1,mesh);
         }
     }
     else
