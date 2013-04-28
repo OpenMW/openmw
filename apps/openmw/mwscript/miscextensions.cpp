@@ -557,6 +557,16 @@ namespace MWScript
                 }
         };
 
+        template <class R>
+        class OpFall : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                }
+        };
+
         const int opcodeXBox = 0x200000c;
         const int opcodeOnActivate = 0x200000d;
         const int opcodeActivate = 0x2000075;
@@ -598,6 +608,8 @@ namespace MWScript
         const int opcodeSetDelete = 0x20001e5;
         const int opcodeSetDeleteExplicit = 0x20001e6;
         const int opcodeGetSquareRoot = 0x20001e7;
+        const int opcodeFall = 0x200020a;
+        const int opcodeFallExplicit = 0x200020b;
 
         const int opcodePlayBink = 0x20001f7;
 
@@ -639,6 +651,7 @@ namespace MWScript
             extensions.registerFunction ("getcurrenttime", 'f', "", opcodeGetCurrentTime);
             extensions.registerInstruction ("setdelete", "l", opcodeSetDelete, opcodeSetDeleteExplicit);
             extensions.registerFunction ("getsquareroot", 'f', "f", opcodeGetSquareRoot);
+            extensions.registerInstruction ("fall", "", opcodeFall, opcodeFallExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -685,6 +698,9 @@ namespace MWScript
             interpreter.installSegment5 (opcodeSetDelete, new OpSetDelete<ImplicitRef>);
             interpreter.installSegment5 (opcodeSetDeleteExplicit, new OpSetDelete<ExplicitRef>);
             interpreter.installSegment5 (opcodeGetSquareRoot, new OpGetSquareRoot);
+            interpreter.installSegment5 (opcodeFall, new OpFall<ImplicitRef>);
+            interpreter.installSegment5 (opcodeFallExplicit, new OpFall<ExplicitRef>);
+
         }
     }
 }

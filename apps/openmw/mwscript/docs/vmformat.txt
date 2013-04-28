@@ -329,5 +329,7 @@ op 0x2000206: Move
 op 0x2000207: Move, explicit
 op 0x2000208: MoveWorld
 op 0x2000209: MoveWorld, explicit
+op 0x200020a: Fall
+op 0x200020b: Fall, explicit
 
-opcodes 0x200020a-0x3ffffff unused
+opcodes 0x200020c-0x3ffffff unused
