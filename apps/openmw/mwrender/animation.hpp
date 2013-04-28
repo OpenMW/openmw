@@ -161,6 +161,8 @@ public:
 
     virtual Ogre::Vector3 runAnimation(float duration);
 
+    virtual void showWeapons(bool showWeapon);
+
     /* Returns if there's an animation playing on the given layer. */
     bool isPlaying(size_t layeridx) const
     { return mLayer[layeridx].mPlaying; }

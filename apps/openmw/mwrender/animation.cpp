@@ -737,4 +737,6 @@ Ogre::Vector3 Animation::runAnimation(float duration)
     return movement;
 }
 
+void Animation::showWeapons(bool showWeapon){}
+
 }
