@@ -169,8 +169,7 @@ float MWMechanics::NpcStats::getSkillGain (int skillIndex, const ESM::Class& cla
         if (specialisationFactor<=0)
             throw std::runtime_error ("invalid skill specialisation factor");
     }
-
-    return 1.0 / (level +1) * (1.0 / (skillFactor)) * typeFactor * specialisationFactor;
+    return 1.0 / ((level+1) * (1.0/skillFactor) * typeFactor * specialisationFactor);
 }
 
 void MWMechanics::NpcStats::useSkill (int skillIndex, const ESM::Class& class_, int usageType)
