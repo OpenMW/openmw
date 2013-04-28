@@ -522,6 +522,15 @@ namespace Physic
                 mResult.push_back(body->mName);
             return 0.f;
         }
+
+        virtual btScalar addSingleResult(btManifoldPoint&, const btCollisionObject* col0, int partId0, int index0,
+                                         const btCollisionObject* col1, int partId1, int index1)
+        {
+            const RigidBody* body = dynamic_cast<const RigidBody*>(col0);
+            if (body)
+                mResult.push_back(body->mName);
+            return 0.f;
+        }
     };
 
     std::vector<std::string> PhysicEngine::getCollisions(const std::string& name)
