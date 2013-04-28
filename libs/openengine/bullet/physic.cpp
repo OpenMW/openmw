@@ -513,7 +513,11 @@ namespace Physic
     {
     public:
         std::vector<std::string> mResult;
-        virtual	btScalar	addSingleResult(btManifoldPoint& cp,
+
+        // added in bullet 2.81
+        // this is just a quick hack, as there does not seem to be a BULLET_VERSION macro?
+#if defined(BT_COLLISION_OBJECT_WRAPPER_H)
+        virtual	btScalar addSingleResult(btManifoldPoint& cp,
                                             const btCollisionObjectWrapper* colObj0Wrap,int partId0,int index0,
                                             const btCollisionObjectWrapper* colObj1Wrap,int partId1,int index1)
         {
@@ -522,8 +526,8 @@ namespace Physic
                 mResult.push_back(body->mName);
             return 0.f;
         }
-
-        virtual btScalar addSingleResult(btManifoldPoint&, const btCollisionObject* col0, int partId0, int index0,
+#else
+        virtual btScalar addSingleResult(btManifoldPoint& cp, const btCollisionObject* col0, int partId0, int index0,
                                          const btCollisionObject* col1, int partId1, int index1)
         {
             const RigidBody* body = dynamic_cast<const RigidBody*>(col0);
@@ -531,6 +535,7 @@ namespace Physic
                 mResult.push_back(body->mName);
             return 0.f;
         }
+#endif
     };
 
     std::vector<std::string> PhysicEngine::getCollisions(const std::string& name)
