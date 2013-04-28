@@ -622,8 +622,7 @@ unsigned int WeatherManager::getWeatherID() const
 void WeatherManager::changeWeather(const std::string& region, const unsigned int id)
 {
     // make sure this region exists
-    const ESM::Region *reg =
-        MWBase::Environment::get().getWorld()->getStore().get<ESM::Region>().find(region);
+    MWBase::Environment::get().getWorld()->getStore().get<ESM::Region>().find(region);
 
     std::string weather;
     if (id==0)
