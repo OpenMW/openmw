@@ -85,6 +85,9 @@ namespace MWWorld
             float mFaced2Distance;
             int mNumFacing;
 
+            std::map<MWWorld::Ptr, int> mDoorStates;
+            ///< only holds doors that are currently moving. 0 means closing, 1 opening
+
             unsigned long lastTick;
             Ogre::Timer mTimer;
 
@@ -269,6 +272,9 @@ namespace MWWorld
             virtual void doPhysics(const PtrMovementList &actors, float duration);
             ///< Run physics simulation and modify \a world accordingly.
 
+            virtual void processDoors(float duration);
+            ///< Run physics simulation and modify \a world accordingly.
+
             virtual bool toggleCollisionMode();
             ///< Toggle collision mode for player. If disabled player object should ignore
             /// collisions and gravity.
@@ -367,6 +373,9 @@ namespace MWWorld
 
             virtual void setupPlayer(bool newGame);
             virtual void renderPlayer();
+
+            virtual void activateDoor(const MWWorld::Ptr& door);
+            ///< activate (open or close) an non-teleport door
 
             virtual void setupExternalRendering (MWRender::ExternalRendering& rendering);
 

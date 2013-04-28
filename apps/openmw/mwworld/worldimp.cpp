@@ -995,8 +995,60 @@ namespace MWWorld
                                                !isSwimming(player->first) && !isFlying(player->first));
             moveObjectImp(player->first, vec.x, vec.y, vec.z);
         }
-        // the only purpose this has currently is to update the debug drawer
+
+        processDoors(duration);
+
         mPhysEngine->stepSimulation (duration);
+    }
+
+    void World::processDoors(float duration)
+    {
+        std::map<MWWorld::Ptr, int>::iterator it = mDoorStates.begin();
+        while (it != mDoorStates.end())
+        {
+            if (!mWorldScene->isCellActive(*it->first.getCell()))
+                mDoorStates.erase(it++);
+            else
+            {
+                float oldRot = Ogre::Radian(it->first.getRefData().getLocalRotation().rot[2]).valueDegrees();
+                float diff = duration * 90;
+                float targetRot = std::min(std::max(0.f, oldRot + diff * (it->second ? 1 : -1)), 90.f);
+                localRotateObject(it->first, 0, 0, targetRot);
+
+                // AABB of the door
+                Ogre::Vector3 min,max;
+                mPhysics->getObjectAABB(it->first, min, max);
+                Ogre::Vector3 dimensions = max-min;
+
+                std::vector<std::string> collisions = mPhysics->getCollisions(it->first);
+                for (std::vector<std::string>::iterator cit = collisions.begin(); cit != collisions.end(); ++cit)
+                {
+                    MWWorld::Ptr ptr = getPtrViaHandle(*cit);
+                    if (MWWorld::Class::get(ptr).isActor())
+                    {
+                        // we collided with an actor, we need to undo the rotation and push the door away from the actor
+
+                        // figure out on which side of the door the actor we collided with is
+                        Ogre::Vector3 relativePos = it->first.getRefData().getBaseNode()->
+                                convertWorldToLocalPosition(ptr.getRefData().getBaseNode()->_getDerivedPosition());
+
+                        float axisToCheck = (dimensions.x > dimensions.y) ? relativePos.y : -relativePos.x;
+                        if (axisToCheck >= 0)
+                            targetRot = std::min(std::max(0.f, oldRot + diff*0.5f), 90.f);
+                        else
+                            targetRot = std::min(std::max(0.f, oldRot - diff*0.5f), 90.f);
+
+                        localRotateObject(it->first, 0, 0, targetRot);
+                        break;
+                    }
+                }
+
+                if ((targetRot == 90.f && it->second) || targetRot == 0.f)
+                    mDoorStates.erase(it++);
+                else
+                    ++it;
+            }
+        }
     }
 
     bool World::toggleCollisionMode()
@@ -1470,7 +1522,7 @@ namespace MWWorld
         Ogre::Vector3 playerPos(refdata.getPosition().pos);
 
         const OEngine::Physic::PhysicActor *physactor = mPhysEngine->getCharacter(refdata.getHandle());
-        if(!physactor->getOnGround() || isUnderwater(currentCell, playerPos))
+        if((!physactor->getOnGround()&&physactor->getCollisionMode()) || isUnderwater(currentCell, playerPos))
             return 2;
         if((currentCell->mCell->mData.mFlags&ESM::Cell::NoSleep))
             return 1;
@@ -1496,5 +1548,21 @@ namespace MWWorld
     void World::frameStarted (float dt)
     {
         mRendering->frameStarted(dt);
+    }
+
+    void World::activateDoor(const MWWorld::Ptr& door)
+    {
+        if (mDoorStates.find(door) != mDoorStates.end())
+        {
+            // if currently opening, then close, if closing, then open
+            mDoorStates[door] = !mDoorStates[door];
+        }
+        else
+        {
+            if (door.getRefData().getLocalRotation().rot[2] == 0)
+                mDoorStates[door] = 1; // open
+            else
+                mDoorStates[door] = 0; // close
+        }
     }
 }

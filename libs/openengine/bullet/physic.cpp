@@ -509,6 +509,43 @@ namespace Physic
         }
     }
 
+    class ContactTestResultCallback : public btCollisionWorld::ContactResultCallback
+    {
+    public:
+        std::vector<std::string> mResult;
+
+        // added in bullet 2.81
+        // this is just a quick hack, as there does not seem to be a BULLET_VERSION macro?
+#if defined(BT_COLLISION_OBJECT_WRAPPER_H)
+        virtual	btScalar addSingleResult(btManifoldPoint& cp,
+                                            const btCollisionObjectWrapper* colObj0Wrap,int partId0,int index0,
+                                            const btCollisionObjectWrapper* colObj1Wrap,int partId1,int index1)
+        {
+            const RigidBody* body = dynamic_cast<const RigidBody*>(colObj0Wrap->m_collisionObject);
+            if (body)
+                mResult.push_back(body->mName);
+            return 0.f;
+        }
+#else
+        virtual btScalar addSingleResult(btManifoldPoint& cp, const btCollisionObject* col0, int partId0, int index0,
+                                         const btCollisionObject* col1, int partId1, int index1)
+        {
+            const RigidBody* body = dynamic_cast<const RigidBody*>(col0);
+            if (body)
+                mResult.push_back(body->mName);
+            return 0.f;
+        }
+#endif
+    };
+
+    std::vector<std::string> PhysicEngine::getCollisions(const std::string& name)
+    {
+        RigidBody* body = getRigidBody(name);
+        ContactTestResultCallback callback;
+        dynamicsWorld->contactTest(body, callback);
+        return callback.mResult;
+    }
+
     void PhysicEngine::stepSimulation(double deltaT)
     {
         // This seems to be needed for character controller objects

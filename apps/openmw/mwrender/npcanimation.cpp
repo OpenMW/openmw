@@ -30,7 +30,7 @@ const NpcAnimation::PartInfo NpcAnimation::sPartList[NpcAnimation::sPartListSize
     { ESM::PRT_LHand, "Left Hand" },
     { ESM::PRT_RWrist, "Right Wrist" },
     { ESM::PRT_LWrist, "Left Wrist" },
-    { ESM::PRT_Shield, "Shield" },
+    { ESM::PRT_Shield, "Shield Bone" },
     { ESM::PRT_RForearm, "Right Forearm" },
     { ESM::PRT_LForearm, "Left Forearm" },
     { ESM::PRT_RUpperarm, "Right Upper Arm" },
@@ -45,7 +45,7 @@ const NpcAnimation::PartInfo NpcAnimation::sPartList[NpcAnimation::sPartListSize
     { ESM::PRT_LLeg, "Left Upper Leg" },
     { ESM::PRT_RPauldron, "Right Clavicle" },
     { ESM::PRT_LPauldron, "Left Clavicle" },
-    { ESM::PRT_Weapon, "Weapon" },
+    { ESM::PRT_Weapon, "Weapon Bone" },
     { ESM::PRT_Tail, "Tail" }
 };
 
@@ -74,7 +74,10 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
     mGloveL(inv.end()),
     mGloveR(inv.end()),
     mSkirtIter(inv.end()),
-    mViewMode(viewMode)
+    mWeapon(inv.end()),
+    mShield(inv.end()),
+    mViewMode(viewMode),
+    mShowWeapons(false)
 {
     mNpc = mPtr.get<ESM::NPC>()->mBase;
 
@@ -175,6 +178,7 @@ void NpcAnimation::updateParts(bool forceupdate)
         { &NpcAnimation::mGloveR,    MWWorld::InventoryStore::Slot_RightGauntlet, 0 },
         { &NpcAnimation::mShirt,     MWWorld::InventoryStore::Slot_Shirt,         0 },
         { &NpcAnimation::mPants,     MWWorld::InventoryStore::Slot_Pants,         0 },
+        { &NpcAnimation::mShield,    MWWorld::InventoryStore::Slot_CarriedLeft,   0 }
     };
     static const size_t slotlistsize = sizeof(slotlist)/sizeof(slotlist[0]);
 
@@ -333,6 +337,8 @@ void NpcAnimation::updateParts(bool forceupdate)
         if (mPartPriorities[part] < 1 && bodypart)
             addOrReplaceIndividualPart(part, -1,1, "meshes\\"+bodypart->mModel);
     }
+
+    showWeapons(mShowWeapons);
 }
 
 NifOgre::ObjectList NpcAnimation::insertBoundedPart(const std::string &model, int group, const std::string &bonename)
@@ -461,6 +467,25 @@ void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::
             addOrReplaceIndividualPart(part.mPart, group, priority, "meshes\\"+bodypart->mModel);
         else
             reserveIndividualPart(part.mPart, group, priority);
+    }
+}
+
+void NpcAnimation::showWeapons(bool showWeapon)
+{
+    mShowWeapons = showWeapon;
+    if(showWeapon)
+    {
+        MWWorld::InventoryStore &inv = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
+        mWeapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+        if(mWeapon != inv.end()) // special case for weapons
+        {
+            std::string mesh = MWWorld::Class::get(*mWeapon).getModel(*mWeapon);
+            addOrReplaceIndividualPart(ESM::PRT_Weapon,-1,1,mesh);
+        }
+    }
+    else
+    {
+        removeIndividualPart(ESM::PRT_Weapon);
     }
 }
 

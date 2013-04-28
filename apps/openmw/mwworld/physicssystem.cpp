@@ -131,7 +131,6 @@ namespace MWWorld
                 return position;
         }
 
-
         static Ogre::Vector3 move(const MWWorld::Ptr &ptr, const Ogre::Vector3 &movement, float time,
                                   bool gravity, OEngine::Physic::PhysicEngine *engine)
         {
@@ -388,6 +387,11 @@ namespace MWWorld
         {
             return std::make_pair(true, ray.getPoint(200*result.second));  /// \todo make this distance (ray length) configurable
         }
+    }
+
+    std::vector<std::string> PhysicsSystem::getCollisions(const Ptr &ptr)
+    {
+        return mEngine->getCollisions(ptr.getRefData().getBaseNode()->getName());
     }
 
     Ogre::Vector3 PhysicsSystem::move(const MWWorld::Ptr &ptr, const Ogre::Vector3 &movement, float time, bool gravity)
