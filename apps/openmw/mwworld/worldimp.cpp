@@ -998,19 +998,28 @@ namespace MWWorld
                 float targetRot = std::min(std::max(0.f, oldRot + diff * (it->second ? 1 : -1)), 90.f);
                 localRotateObject(it->first, 0, 0, targetRot);
 
+                // AABB of the door
+                Ogre::Vector3 min,max;
+                mPhysics->getObjectAABB(it->first, min, max);
+                Ogre::Vector3 dimensions = max-min;
+
                 std::vector<std::string> collisions = mPhysics->getCollisions(it->first);
                 for (std::vector<std::string>::iterator cit = collisions.begin(); cit != collisions.end(); ++cit)
                 {
                     MWWorld::Ptr ptr = getPtrViaHandle(*cit);
                     if (MWWorld::Class::get(ptr).isActor())
                     {
-                        // figure out which side of the door the object we collided with is
+                        // we collided with an actor, we need to undo the rotation and push the door away from the actor
+
+                        // figure out on which side of the door the actor we collided with is
                         Ogre::Vector3 relativePos = it->first.getRefData().getBaseNode()->
                                 convertWorldToLocalPosition(ptr.getRefData().getBaseNode()->_getDerivedPosition());
-                        if(relativePos.y >= 0)
-                            targetRot = std::min(std::max(0.f, oldRot + diff*0.1f), 90.f);
+
+                        float axisToCheck = (dimensions.x > dimensions.y) ? relativePos.y : -relativePos.x;
+                        if (axisToCheck >= 0)
+                            targetRot = std::min(std::max(0.f, oldRot + diff*0.5f), 90.f);
                         else
-                            targetRot = std::min(std::max(0.f, oldRot - diff*0.1f), 90.f);
+                            targetRot = std::min(std::max(0.f, oldRot - diff*0.5f), 90.f);
 
                         localRotateObject(it->first, 0, 0, targetRot);
                         break;
