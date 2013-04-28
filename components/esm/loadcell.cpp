@@ -8,9 +8,6 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
-#include <apps/openmw/mwworld/store.hpp>
-#include <apps/openmw/mwworld/cellstore.hpp>
-
 namespace ESM
 {
 
