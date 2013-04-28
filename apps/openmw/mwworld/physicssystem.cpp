@@ -145,7 +145,7 @@ namespace MWWorld
                 // FIXME: This works, but it's inconcsistent with how the rotations are applied elsewhere. Why?
                 return position + (Ogre::Quaternion(Ogre::Radian( -refpos.rot[2]), Ogre::Vector3::UNIT_Z)*
                                    Ogre::Quaternion(Ogre::Radian( -refpos.rot[1]), Ogre::Vector3::UNIT_Y)*
-                                   Ogre::Quaternion(Ogre::Radian( -refpos.rot[0]), Ogre::Vector3::UNIT_X)) *
+                                   Ogre::Quaternion(Ogre::Radian(  refpos.rot[0]), Ogre::Vector3::UNIT_X)) *
                                   movement;
             }
 
@@ -161,7 +161,7 @@ namespace MWWorld
             {
                 velocity = (Ogre::Quaternion(Ogre::Radian( -refpos.rot[2]), Ogre::Vector3::UNIT_Z)*
                             Ogre::Quaternion(Ogre::Radian( -refpos.rot[1]), Ogre::Vector3::UNIT_Y)*
-                            Ogre::Quaternion(Ogre::Radian( -refpos.rot[0]), Ogre::Vector3::UNIT_X)) *
+                            Ogre::Quaternion(Ogre::Radian(  refpos.rot[0]), Ogre::Vector3::UNIT_X)) *
                            movement / time;
             }
             else

@@ -264,37 +264,19 @@ void RenderingManager::scaleObject (const MWWorld::Ptr& ptr, const Ogre::Vector3
     ptr.getRefData().getBaseNode()->setScale(scale);
 }
 
-bool RenderingManager::rotateObject(const MWWorld::Ptr &ptr, Ogre::Vector3 &rot, bool adjust)
+void RenderingManager::rotateObject(const MWWorld::Ptr &ptr)
 {
-    bool isActive = ptr.getRefData().getBaseNode() != 0;
-    bool isPlayer = isActive && ptr.getRefData().getHandle() == "player";
-    bool force = true;
+    Ogre::Vector3 rot(ptr.getRefData().getPosition().rot);
 
-    if (isPlayer)
-        force = mPlayer->rotate(rot, adjust);
+    if(ptr.getRefData().getHandle() == mPlayer->getHandle())
+        mPlayer->rotateCamera(rot, false);
 
-    MWWorld::Class::get(ptr).adjustRotation(ptr, rot.x, rot.y, rot.z);
-    if (!isPlayer && isActive)
-    {
-        if(adjust)
-        {
-            const float *objRot = ptr.getRefData().getPosition().rot;
-            rot.x += objRot[0];
-            rot.y += objRot[1];
-            rot.z += objRot[2];
-        }
+    Ogre::Quaternion newo = Ogre::Quaternion(Ogre::Radian(-rot.z), Ogre::Vector3::UNIT_Z);
+    if(!MWWorld::Class::get(ptr).isActor())
+        newo = Ogre::Quaternion(Ogre::Radian(-rot.x), Ogre::Vector3::UNIT_X) *
+               Ogre::Quaternion(Ogre::Radian(-rot.y), Ogre::Vector3::UNIT_Y) * newo;
 
-        Ogre::Quaternion newo = Ogre::Quaternion(Ogre::Radian(-rot.x), Ogre::Vector3::UNIT_X) *
-                                Ogre::Quaternion(Ogre::Radian(-rot.y), Ogre::Vector3::UNIT_Y) *
-                                Ogre::Quaternion(Ogre::Radian(-rot.z), Ogre::Vector3::UNIT_Z);
-        ptr.getRefData().getBaseNode()->setOrientation(newo);
-    }
-    else if(isPlayer)
-    {
-        rot.x = -mPlayer->getPitch();
-        rot.z = mPlayer->getYaw();
-    }
-    return force;
+    ptr.getRefData().getBaseNode()->setOrientation(newo);
 }
 
 void

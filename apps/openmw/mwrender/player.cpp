@@ -40,17 +40,6 @@ namespace MWRender
     {
         delete mAnimation;
     }
-    
-    bool Player::rotate(const Ogre::Vector3 &rot, bool adjust)
-    {
-        if (mVanity.enabled)
-            toggleVanityMode(false);
-
-        if (mFreeLook || mVanity.enabled || mPreviewMode)
-            rotateCamera(rot, adjust);
-
-        return (!mVanity.enabled && !mPreviewMode);
-    }
 
     void Player::rotateCamera(const Ogre::Vector3 &rot, bool adjust)
     {
@@ -63,16 +52,15 @@ namespace MWRender
         }
 
         Ogre::Quaternion xr(Ogre::Radian(getPitch() + Ogre::Math::HALF_PI), Ogre::Vector3::UNIT_X);
-        Ogre::Quaternion zr(Ogre::Radian(getYaw()), Ogre::Vector3::NEGATIVE_UNIT_Z);
         if (!mVanity.enabled && !mPreviewMode) {
-            mPlayerNode->setOrientation(zr);
             mCameraNode->setOrientation(xr);
         } else {
+            Ogre::Quaternion zr(Ogre::Radian(getYaw()), Ogre::Vector3::NEGATIVE_UNIT_Z);
             mCameraNode->setOrientation(zr * xr);
         }
     }
 
-    std::string Player::getHandle() const
+    const std::string &Player::getHandle() const
     {
         return mPlayerNode->getName();
     }
@@ -316,19 +304,6 @@ namespace MWRender
     {
         pitch = mMainCam.pitch;
         yaw = mMainCam.yaw;
-    }
-
-    void Player::compensateYaw(float diff)
-    {
-        mPreviewCam.yaw -= diff;
-        Ogre::Quaternion zr(
-            Ogre::Radian(mPreviewCam.yaw),
-            Ogre::Vector3::NEGATIVE_UNIT_Z
-        );
-        Ogre::Quaternion xr(
-            Ogre::Radian(mPreviewCam.pitch),
-            Ogre::Vector3::UNIT_X);
-        mCameraNode->setOrientation(zr * xr);
     }
 
     void Player::togglePlayerLooking(bool enable)

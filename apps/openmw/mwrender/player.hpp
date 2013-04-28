@@ -57,9 +57,6 @@ namespace MWRender
 
         /// Set where the player is looking at. Uses Morrowind (euler) angles
         /// \param rot Rotation angles in radians
-        /// \return true if player object needs to bo rotated physically
-        bool rotate(const Ogre::Vector3 &rot, bool adjust);
-        
         void rotateCamera(const Ogre::Vector3 &rot, bool adjust);
 
         float getYaw();
@@ -68,9 +65,7 @@ namespace MWRender
         float getPitch();
         void setPitch(float angle);
 
-        void compensateYaw(float diff);
-        
-        std::string getHandle() const;
+        const std::string &getHandle() const;
 
         /// Attach camera to object
         /// \note there is no protection from attaching the same camera to
