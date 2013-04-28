@@ -12,6 +12,7 @@
 #include "../mwworld/nullaction.hpp"
 #include "../mwworld/failedaction.hpp"
 #include "../mwworld/actionteleport.hpp"
+#include "../mwworld/actiondoor.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/physicssystem.hpp"
 #include "../mwworld/inventorystore.hpp"
@@ -71,7 +72,7 @@ namespace MWClass
             ptr.get<ESM::Door>();
 
         const std::string &openSound = ref->mBase->mOpenSound;
-        //const std::string &closeSound = ref->mBase->closeSound;
+        const std::string &closeSound = ref->mBase->mCloseSound;
         const std::string lockedSound = "LockedDoor";
         const std::string trapActivationSound = "Disarm Trap Fail";
 
@@ -139,12 +140,11 @@ namespace MWClass
             else
             {
                 // animated door
-                // TODO return action for rotating the door
-
-                // This is a little pointless, but helps with testing
-                boost::shared_ptr<MWWorld::Action> action(new MWWorld::NullAction);
-
-                action->setSound(openSound);
+                boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionDoor(ptr));
+                if (ptr.getRefData().getLocalRotation().rot[2] == 0)
+                    action->setSound(openSound);
+                else
+                    action->setSound(closeSound);
 
                 return action;
             }

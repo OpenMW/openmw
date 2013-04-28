@@ -85,6 +85,9 @@ namespace MWWorld
             float mFaced2Distance;
             int mNumFacing;
 
+            std::map<MWWorld::Ptr, int> mDoorStates;
+            ///< only holds doors that are currently moving. 0 means closing, 1 opening
+
             unsigned long lastTick;
             Ogre::Timer mTimer;
 
@@ -367,6 +370,9 @@ namespace MWWorld
 
             virtual void setupPlayer(bool newGame);
             virtual void renderPlayer();
+
+            virtual void activateDoor(const MWWorld::Ptr& door);
+            ///< activate (open or close) an non-teleport door
 
             virtual void setupExternalRendering (MWRender::ExternalRendering& rendering);
 

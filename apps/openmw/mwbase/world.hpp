@@ -326,6 +326,9 @@ namespace MWBase
             virtual void setupPlayer(bool newGame) = 0;
             virtual void renderPlayer() = 0;
 
+            virtual void activateDoor(const MWWorld::Ptr& door) = 0;
+            ///< activate (open or close) an non-teleport door
+
             virtual void setupExternalRendering (MWRender::ExternalRendering& rendering) = 0;
 
             virtual int canRest() = 0;
