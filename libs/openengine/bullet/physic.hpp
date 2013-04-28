@@ -298,6 +298,8 @@ namespace Physic
          */
         std::vector< std::pair<float, std::string> > rayTest2(btVector3& from, btVector3& to);
 
+        std::vector<std::string> getCollisions(const std::string& name);
+
         //event list of non player object
         std::list<PhysicEvent> NPEventList;
 

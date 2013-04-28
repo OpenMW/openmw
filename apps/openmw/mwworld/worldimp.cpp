@@ -978,8 +978,51 @@ namespace MWWorld
                                                !isSwimming(player->first) && !isFlying(player->first));
             moveObjectImp(player->first, vec.x, vec.y, vec.z);
         }
-        // the only purpose this has currently is to update the debug drawer
+
+        processDoors(duration);
+
         mPhysEngine->stepSimulation (duration);
+    }
+
+    void World::processDoors(float duration)
+    {
+        std::map<MWWorld::Ptr, int>::iterator it = mDoorStates.begin();
+        while (it != mDoorStates.end())
+        {
+            if (!mWorldScene->isCellActive(*it->first.getCell()))
+                mDoorStates.erase(it++);
+            else
+            {
+                float oldRot = Ogre::Radian(it->first.getRefData().getLocalRotation().rot[2]).valueDegrees();
+                float diff = duration * 90;
+                float targetRot = std::min(std::max(0.f, oldRot + diff * (it->second ? 1 : -1)), 90.f);
+                localRotateObject(it->first, 0, 0, targetRot);
+
+                std::vector<std::string> collisions = mPhysics->getCollisions(it->first);
+                for (std::vector<std::string>::iterator cit = collisions.begin(); cit != collisions.end(); ++cit)
+                {
+                    MWWorld::Ptr ptr = getPtrViaHandle(*cit);
+                    if (MWWorld::Class::get(ptr).isActor())
+                    {
+                        // figure out which side of the door the object we collided with is
+                        Ogre::Vector3 relativePos = it->first.getRefData().getBaseNode()->
+                                convertWorldToLocalPosition(ptr.getRefData().getBaseNode()->_getDerivedPosition());
+                        if(relativePos.y >= 0)
+                            targetRot = std::min(std::max(0.f, oldRot + diff*0.1f), 90.f);
+                        else
+                            targetRot = std::min(std::max(0.f, oldRot - diff*0.1f), 90.f);
+
+                        localRotateObject(it->first, 0, 0, targetRot);
+                        break;
+                    }
+                }
+
+                if ((targetRot == 90.f && it->second) || targetRot == 0.f)
+                    mDoorStates.erase(it++);
+                else
+                    ++it;
+            }
+        }
     }
 
     bool World::toggleCollisionMode()
@@ -1479,5 +1522,21 @@ namespace MWWorld
     void World::frameStarted (float dt)
     {
         mRendering->frameStarted(dt);
+    }
+
+    void World::activateDoor(const MWWorld::Ptr& door)
+    {
+        if (mDoorStates.find(door) != mDoorStates.end())
+        {
+            // if currently opening, then close, if closing, then open
+            mDoorStates[door] = !mDoorStates[door];
+        }
+        else
+        {
+            if (door.getRefData().getLocalRotation().rot[2] == 0)
+                mDoorStates[door] = 1; // open
+            else
+                mDoorStates[door] = 0; // close
+        }
     }
 }
