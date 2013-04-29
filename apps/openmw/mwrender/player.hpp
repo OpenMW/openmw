@@ -76,6 +76,9 @@ namespace MWRender
 
         void togglePreviewMode(bool enable);
 
+        bool isFirstPerson() const
+        { return !(mVanity.enabled || mPreviewMode || !mFirstPersonView); }
+
         void update(float duration);
 
         /// Set camera distance for current mode. Don't work on 1st person view.
