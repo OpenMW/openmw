@@ -858,8 +858,9 @@ void RenderingManager::getTriangleBatchCount(unsigned int &triangles, unsigned i
     }
 }
 
-void RenderingManager::attachCameraTo(const MWWorld::Ptr &ptr)
+void RenderingManager::setupPlayer(const MWWorld::Ptr &ptr)
 {
+    ptr.getRefData().setBaseNode(mRendering.getScene()->getSceneNode("player"));
     mPlayer->attachTo(ptr);
 }
 

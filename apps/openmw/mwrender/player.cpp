@@ -2,6 +2,7 @@
 
 #include <OgreSceneNode.h>
 #include <OgreCamera.h>
+#include <OgreSceneManager.h>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -16,8 +17,7 @@ namespace MWRender
 {
     Player::Player (Ogre::Camera *camera, Ogre::SceneNode* node)
     : mCamera(camera),
-      mPlayerNode(node),
-      mCameraNode(mPlayerNode->createChildSceneNode()),
+      mCameraNode(NULL),
       mFirstPersonView(true),
       mPreviewMode(false),
       mFreeLook(true),
@@ -28,9 +28,6 @@ namespace MWRender
     {
         mVanity.enabled = false;
         mVanity.allowed = true;
-
-        mCameraNode->attachObject(mCamera);
-        mCameraNode->setPosition(0.f, 0.f, mHeight);
 
         mPreviewCam.yaw = 0.f;
         mPreviewCam.offset = 400.f;
@@ -62,12 +59,22 @@ namespace MWRender
 
     const std::string &Player::getHandle() const
     {
-        return mPlayerNode->getName();
+        return mTrackingPtr.getRefData().getHandle();
     }
 
     void Player::attachTo(const MWWorld::Ptr &ptr)
     {
-        ptr.getRefData().setBaseNode(mPlayerNode);
+        mTrackingPtr = ptr;
+        Ogre::SceneNode *node = mTrackingPtr.getRefData().getBaseNode()->createChildSceneNode(Ogre::Vector3(0.0f, 0.0f, mHeight));
+        if(mCameraNode)
+        {
+            node->setOrientation(mCameraNode->getOrientation());
+            node->setPosition(mCameraNode->getPosition());
+            node->setScale(mCameraNode->getScale());
+            mCameraNode->getCreator()->destroySceneNode(mCameraNode);
+        }
+        mCameraNode = node;
+        mCameraNode->attachObject(mCamera);
     }
 
     void Player::updateListener()
@@ -84,13 +91,11 @@ namespace MWRender
         updateListener();
 
         // only show the crosshair in game mode and in first person mode.
-        MWBase::Environment::get().getWindowManager ()->showCrosshair
-                (!MWBase::Environment::get().getWindowManager ()->isGuiMode () && (mFirstPersonView && !mVanity.enabled && !mPreviewMode));
+        MWBase::WindowManager *wm = MWBase::Environment::get().getWindowManager();
+        wm->showCrosshair(!wm->isGuiMode() && (mFirstPersonView && !mVanity.enabled && !mPreviewMode));
 
-        if (mFirstPersonView && !mVanity.enabled) {
-            return;
-        }
-        if (mVanity.enabled) {
+        if(mVanity.enabled)
+        {
             Ogre::Vector3 rot(0.f, 0.f, 0.f);
             rot.z = Ogre::Degree(3.f * duration).valueRadians();
             rotateCamera(rot, true);
@@ -283,21 +288,21 @@ namespace MWRender
 
     float Player::getHeight()
     {
-        return mHeight * mPlayerNode->getScale().z;
+        return mHeight * mTrackingPtr.getRefData().getBaseNode()->getScale().z;
     }
 
     bool Player::getPosition(Ogre::Vector3 &player, Ogre::Vector3 &camera)
     {
         mCamera->getParentSceneNode ()->needUpdate(true);
         camera = mCamera->getRealPosition();
-        player = mPlayerNode->getPosition();
+        player = mTrackingPtr.getRefData().getBaseNode()->getPosition();
 
         return mFirstPersonView && !mVanity.enabled && !mPreviewMode;
     }
 
     Ogre::Vector3 Player::getPosition()
     {
-        return mPlayerNode->getPosition();
+        return mTrackingPtr.getRefData().getBaseNode()->getPosition();
     }
 
     void Player::getSightAngles(float &pitch, float &yaw)

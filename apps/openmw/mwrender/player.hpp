@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include "../mwworld/ptr.hpp"
+
 namespace Ogre
 {
     class Vector3;
@@ -10,14 +12,10 @@ namespace Ogre
     class SceneNode;
 }
 
-namespace MWWorld
-{
-    class Ptr;
-}
-
 namespace MWRender
 {
     class NpcAnimation;
+
     /// \brief Player character rendering and camera control
     class Player
     {
@@ -25,9 +23,9 @@ namespace MWRender
             float pitch, yaw, offset;
         };
 
-        Ogre::Camera *mCamera;
+        MWWorld::Ptr mTrackingPtr;
 
-        Ogre::SceneNode *mPlayerNode;
+        Ogre::Camera *mCamera;
         Ogre::SceneNode *mCameraNode;
 
         NpcAnimation *mAnimation;

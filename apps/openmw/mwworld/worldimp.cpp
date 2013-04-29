@@ -1493,13 +1493,15 @@ namespace MWWorld
 
     void World::setupPlayer(bool newGame)
     {
-        const ESM::NPC* player = mStore.get<ESM::NPC>().find ("player");
-        mPlayer = new MWWorld::Player (player, *this);
-        mRendering->attachCameraTo(mPlayer->getPlayer());
-        if (newGame)
+        const ESM::NPC *player = mStore.get<ESM::NPC>().find("player");
+        mPlayer = new MWWorld::Player(player, *this);
+
+        Ptr ptr = mPlayer->getPlayer();
+        mRendering->setupPlayer(ptr);
+        if(newGame)
         {
-            MWWorld::Class::get(mPlayer->getPlayer()).getContainerStore(mPlayer->getPlayer()).fill(player->mInventory, "", mStore);
-            MWWorld::Class::get(mPlayer->getPlayer()).getInventoryStore(mPlayer->getPlayer()).autoEquip (mPlayer->getPlayer());
+            MWWorld::Class::get(ptr).getContainerStore(ptr).fill(player->mInventory, "", mStore);
+            MWWorld::Class::get(ptr).getInventoryStore(ptr).autoEquip(ptr);
         }
     }
 

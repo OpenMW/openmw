@@ -92,7 +92,7 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
 
     void getPlayerData(Ogre::Vector3 &eyepos, float &pitch, float &yaw);
 
-    void attachCameraTo(const MWWorld::Ptr &ptr);
+    void setupPlayer(const MWWorld::Ptr &ptr);
     void renderPlayer(const MWWorld::Ptr &ptr);
 
     SkyManager* getSkyManager();
