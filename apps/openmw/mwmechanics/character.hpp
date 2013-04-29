@@ -67,6 +67,20 @@ enum CharacterState {
     CharState_Death5
 };
 
+enum WeaponState {
+    WeapState_None,
+
+    WeapState_HandToHand,
+    WeapState_OneHand,
+    WeapState_TwoHand,
+    WeapState_TwoWide,
+    WeapState_BowAndArrow,
+    WeapState_Crossbow,
+    WeapState_ThowWeapon,
+
+    WeapState_Spell
+};
+
 class CharacterController
 {
     MWWorld::Ptr mPtr;
@@ -76,6 +90,7 @@ class CharacterController
     AnimationQueue mAnimQueue;
 
     CharacterState mCharState;
+    WeaponState mWeapState;
     bool mLooping;
     bool mSkipAnim;
 
