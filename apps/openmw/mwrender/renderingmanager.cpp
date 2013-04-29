@@ -270,7 +270,8 @@ void RenderingManager::rotateObject(const MWWorld::Ptr &ptr)
 {
     Ogre::Vector3 rot(ptr.getRefData().getPosition().rot);
 
-    if(ptr.getRefData().getHandle() == mCamera->getHandle())
+    if(ptr.getRefData().getHandle() == mCamera->getHandle() &&
+       !mCamera->isVanityOrPreviewModeEnabled())
         mCamera->rotateCamera(rot, false);
 
     Ogre::Quaternion newo = Ogre::Quaternion(Ogre::Radian(-rot.z), Ogre::Vector3::UNIT_Z);
