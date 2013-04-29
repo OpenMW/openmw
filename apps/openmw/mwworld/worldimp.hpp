@@ -85,6 +85,8 @@ namespace MWWorld
             float mFaced2Distance;
             int mNumFacing;
 
+            bool mNewGame;
+
             std::map<MWWorld::Ptr, int> mDoorStates;
             ///< only holds doors that are currently moving. 0 means closing, 1 opening
 
@@ -112,6 +114,9 @@ namespace MWWorld
             void removeContainerScripts(const Ptr& reference);
             void addContainerScripts(const Ptr& reference, Ptr::CellStore* cell);
             void PCDropped (const Ptr& item);
+
+            virtual void processDoors(float duration);
+            ///< Run physics simulation and modify \a world accordingly.
 
         public:
 
@@ -272,9 +277,6 @@ namespace MWWorld
             virtual void doPhysics(const PtrMovementList &actors, float duration);
             ///< Run physics simulation and modify \a world accordingly.
 
-            virtual void processDoors(float duration);
-            ///< Run physics simulation and modify \a world accordingly.
-
             virtual bool toggleCollisionMode();
             ///< Toggle collision mode for player. If disabled player object should ignore
             /// collisions and gravity.
@@ -371,9 +373,11 @@ namespace MWWorld
 
             virtual bool vanityRotateCamera(float * rot);
 
-            virtual void setupPlayer(bool newGame);
+            virtual void setupPlayer();
             virtual void renderPlayer();
 
+            virtual bool getOpenOrCloseDoor(const MWWorld::Ptr& door);
+            ///< if activated, should this door be opened or closed?
             virtual void activateDoor(const MWWorld::Ptr& door);
             ///< activate (open or close) an non-teleport door
 

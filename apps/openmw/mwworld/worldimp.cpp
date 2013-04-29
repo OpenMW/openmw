@@ -162,7 +162,8 @@ namespace MWWorld
         ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap, int mActivationDistanceOverride)
     : mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
       mSky (true), mCells (mStore, mEsm),
-      mNumFacing(0), mActivationDistanceOverride (mActivationDistanceOverride),mFallback(fallbackMap)
+      mNumFacing(0), mActivationDistanceOverride (mActivationDistanceOverride),
+      mFallback(fallbackMap), mNewGame(newGame)
     {
         mPhysics = new PhysicsSystem(renderer);
         mPhysEngine = mPhysics->getEngine();
@@ -213,7 +214,7 @@ namespace MWWorld
         // global variables
         mGlobalVariables = new Globals (mStore);
 
-        if (newGame)
+        if (mNewGame)
         {
             // set new game mark
             mGlobalVariables->setInt ("chargenstate", 1);
@@ -1490,14 +1491,14 @@ namespace MWWorld
         return mRendering->vanityRotateCamera(rot);
     }
 
-    void World::setupPlayer(bool newGame)
+    void World::setupPlayer()
     {
         const ESM::NPC *player = mStore.get<ESM::NPC>().find("player");
         mPlayer = new MWWorld::Player(player, *this);
 
         Ptr ptr = mPlayer->getPlayer();
         mRendering->setupPlayer(ptr);
-        if(newGame)
+        if (mNewGame)
         {
             MWWorld::Class::get(ptr).getContainerStore(ptr).fill(player->mInventory, "", mStore);
             MWWorld::Class::get(ptr).getInventoryStore(ptr).autoEquip(ptr);
@@ -1508,6 +1509,8 @@ namespace MWWorld
     {
         mRendering->renderPlayer(mPlayer->getPlayer());
         mPhysics->addActor(mPlayer->getPlayer());
+        if (mNewGame)
+            toggleCollisionMode();
     }
 
     void World::setupExternalRendering (MWRender::ExternalRendering& rendering)
@@ -1565,5 +1568,12 @@ namespace MWWorld
             else
                 mDoorStates[door] = 0; // close
         }
+    }
+
+    bool World::getOpenOrCloseDoor(const Ptr &door)
+    {
+        if (mDoorStates.find(door) != mDoorStates.end())
+            return !mDoorStates[door]; // if currently opening or closing, then do the opposite
+        return door.getRefData().getLocalRotation().rot[2] == 0;
     }
 }

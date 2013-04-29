@@ -176,12 +176,12 @@ namespace MWClass
         return MWWorld::Ptr(&cell.mBooks.insert(*ref), &cell);
     }
 
-    short Book::getEnchantmentPoints (const MWWorld::Ptr& ptr) const
+    float Book::getEnchantmentPoints (const MWWorld::Ptr& ptr) const
     {
         MWWorld::LiveCellRef<ESM::Book> *ref =
                 ptr.get<ESM::Book>();
 
-        return ref->mBase->mData.mEnchant;
+        return ref->mBase->mData.mEnchant/10.f;
     }
 
     bool Book::canSell (const MWWorld::Ptr& item, int npcServices) const

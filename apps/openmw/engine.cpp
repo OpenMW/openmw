@@ -368,7 +368,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     mEnvironment.setWorld( new MWWorld::World (*mOgre, mFileCollections, mMaster, mPlugins,
         mResDir, mCfgMgr.getCachePath(), mNewGame, mEncoder, mFallbackMap,
         mActivationDistanceOverride));
-    MWBase::Environment::get().getWorld()->setupPlayer(mNewGame);
+    MWBase::Environment::get().getWorld()->setupPlayer();
 
     //Load translation data
     mTranslationDataStorage.setEncoder(mEncoder);

@@ -57,8 +57,9 @@ namespace MWGui
 
     void EnchantingDialog::updateLabels()
     {
-        mEnchantmentPoints->setCaption(boost::lexical_cast<std::string>(mEnchanting.getEnchantCost())
-                                       + " / " + boost::lexical_cast<std::string>(mEnchanting.getMaxEnchantValue()));
+        std::stringstream enchantCost;
+        enchantCost << std::setprecision(1) << std::fixed << mEnchanting.getEnchantCost();
+        mEnchantmentPoints->setCaption(enchantCost.str() + " / " + boost::lexical_cast<std::string>(mEnchanting.getMaxEnchantValue()));
 
         mCharge->setCaption(boost::lexical_cast<std::string>(mEnchanting.getGemCharge()));
 
