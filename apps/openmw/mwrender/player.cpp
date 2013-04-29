@@ -15,7 +15,7 @@
 
 namespace MWRender
 {
-    Player::Player (Ogre::Camera *camera, Ogre::SceneNode* node)
+    Player::Player (Ogre::Camera *camera)
     : mCamera(camera),
       mCameraNode(NULL),
       mFirstPersonView(true),
@@ -35,7 +35,6 @@ namespace MWRender
 
     Player::~Player()
     {
-        delete mAnimation;
     }
 
     void Player::rotateCamera(const Ogre::Vector3 &rot, bool adjust)
@@ -273,11 +272,13 @@ namespace MWRender
 
     void Player::setAnimation(NpcAnimation *anim)
     {
-        anim->setViewMode((mVanity.enabled || mPreviewMode || !mFirstPersonView) ?
-                          NpcAnimation::VM_Normal : NpcAnimation::VM_FirstPerson);
-
-        delete mAnimation;
+        // If we're switching to a new NpcAnimation, ensure the old one is
+        // using a normal view mode
+        if(mAnimation && mAnimation != anim)
+            mAnimation->setViewMode(NpcAnimation::VM_Normal);
         mAnimation = anim;
+        mAnimation->setViewMode((mVanity.enabled || mPreviewMode || !mFirstPersonView) ?
+                                NpcAnimation::VM_Normal : NpcAnimation::VM_FirstPerson);
     }
 
     void Player::setHeight(float height)

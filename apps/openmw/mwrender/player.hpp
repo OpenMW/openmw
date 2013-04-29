@@ -49,8 +49,7 @@ namespace MWRender
         void setLowHeight(bool low = true);
 
     public:
-
-        Player (Ogre::Camera *camera, Ogre::SceneNode* mNode);
+        Player(Ogre::Camera *camera);
         ~Player();
 
         /// Set where the player is looking at. Uses Morrowind (euler) angles
@@ -89,8 +88,6 @@ namespace MWRender
         void setCameraDistance();
 
         void setAnimation(NpcAnimation *anim);
-        NpcAnimation *getAnimation() const
-        { return mAnimation; }
 
         void setHeight(float height);
         float getHeight();

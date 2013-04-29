@@ -238,6 +238,8 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     MWRender::Objects mObjects;
     MWRender::Actors mActors;
 
+    MWRender::NpcAnimation *mPlayerAnimation;
+
     // 0 normal, 1 more bright, 2 max
     int mAmbientMode;
 

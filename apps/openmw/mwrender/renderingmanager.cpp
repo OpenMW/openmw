@@ -53,8 +53,9 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
                                     const boost::filesystem::path& cacheDir, OEngine::Physic::PhysicEngine* engine,MWWorld::Fallback* fallback)
     : mRendering(_rend)
     , mFallback(fallback)
-    , mObjects(mRendering,mFallback)
+    , mObjects(mRendering, mFallback)
     , mActors(mRendering, this)
+    , mPlayerAnimation(NULL)
     , mAmbientMode(0)
     , mSunEnabled(0)
     , mPhysicsEngine(engine)
@@ -148,14 +149,13 @@ RenderingManager::RenderingManager (OEngine::Render::OgreRenderer& _rend, const 
 
     applyCompositors();
 
-    SceneNode *rt = mRendering.getScene()->getRootSceneNode();
-    mRootNode = rt;
+    mRootNode = mRendering.getScene()->getRootSceneNode();
+    mRootNode->createChildSceneNode("player");
 
     mObjects.setRootNode(mRootNode);
     mActors.setRootNode(mRootNode);
 
-    Ogre::SceneNode *playerNode = mRootNode->createChildSceneNode ("player");
-    mPlayer = new MWRender::Player (mRendering.getCamera(), playerNode);
+    mPlayer = new MWRender::Player(mRendering.getCamera());
 
     mShadows = new Shadows(&mRendering);
 
@@ -183,6 +183,7 @@ RenderingManager::~RenderingManager ()
     mRendering.getWindow()->removeListener(this);
     mRendering.removeWindowEventListener(this);
 
+    delete mPlayerAnimation;
     delete mPlayer;
     delete mSkyManager;
     delete mDebugging;
@@ -866,14 +867,23 @@ void RenderingManager::setupPlayer(const MWWorld::Ptr &ptr)
 
 void RenderingManager::renderPlayer(const MWWorld::Ptr &ptr)
 {
-    MWRender::NpcAnimation *anim =
-        new MWRender::NpcAnimation(
-            ptr, ptr.getRefData ().getBaseNode (),
-            MWWorld::Class::get(ptr).getInventoryStore(ptr), RV_Actors
-        );
-    mPlayer->setAnimation(anim);
-    mWater->removeEmitter (ptr);
-    mWater->addEmitter (ptr);
+    if(!mPlayerAnimation)
+    {
+        mPlayerAnimation = new NpcAnimation(ptr, ptr.getRefData().getBaseNode(),
+                                            MWWorld::Class::get(ptr).getInventoryStore(ptr),
+                                            RV_Actors);
+    }
+    else
+    {
+        // Reconstruct the NpcAnimation in-place
+        mPlayerAnimation->~NpcAnimation();
+        new(mPlayerAnimation) NpcAnimation(ptr, ptr.getRefData().getBaseNode(),
+                                           MWWorld::Class::get(ptr).getInventoryStore(ptr),
+                                           RV_Actors);
+    }
+    mPlayer->setAnimation(mPlayerAnimation);
+    mWater->removeEmitter(ptr);
+    mWater->addEmitter(ptr);
     // apply race height
     MWBase::Environment::get().getWorld()->scaleObject(ptr, 1.f);
 }
@@ -914,7 +924,7 @@ Animation* RenderingManager::getAnimation(const MWWorld::Ptr &ptr)
 {
     Animation *anim = mActors.getAnimation(ptr);
     if(!anim && ptr.getRefData().getHandle() == "player")
-        anim = mPlayer->getAnimation();
+        anim = mPlayerAnimation;
     return anim;
 }
 
