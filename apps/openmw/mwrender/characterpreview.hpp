@@ -53,6 +53,7 @@ namespace MWRender
         MWWorld::Ptr mCharacter;
 
         MWRender::NpcAnimation* mAnimation;
+        std::string mCurrentAnimGroup;
 
         std::string mName;
 

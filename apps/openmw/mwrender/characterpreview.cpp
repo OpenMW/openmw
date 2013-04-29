@@ -12,6 +12,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/inventorystore.hpp"
 
 #include "renderconst.hpp"
 #include "npcanimation.hpp"
@@ -134,6 +135,46 @@ namespace MWRender
 
     void InventoryPreview::update(int sizeX, int sizeY)
     {
+        MWWorld::InventoryStore &inv = MWWorld::Class::get(mCharacter).getInventoryStore(mCharacter);
+        MWWorld::ContainerStoreIterator iter = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+        std::string groupname;
+        if(iter == inv.end())
+            groupname = "inventoryhandtohand";
+        else
+        {
+            const std::string &type = iter->getTypeName();
+            if(type == typeid(ESM::Lockpick).name() || type == typeid(ESM::Probe).name())
+                groupname = "inventoryweapononehand";
+            else if(type == typeid(ESM::Weapon).name())
+            {
+                MWWorld::LiveCellRef<ESM::Weapon> *ref = iter->get<ESM::Weapon>();
+
+                int type = ref->mBase->mData.mType;
+                if(type == ESM::Weapon::ShortBladeOneHand ||
+                   type == ESM::Weapon::LongBladeOneHand ||
+                   type == ESM::Weapon::BluntOneHand ||
+                   type == ESM::Weapon::AxeOneHand)
+                    groupname = "inventoryweapononehand";
+                else if(type == ESM::Weapon::LongBladeTwoHand ||
+                        type == ESM::Weapon::BluntTwoClose ||
+                        type == ESM::Weapon::AxeTwoHand)
+                    groupname = "inventoryweapontwohand";
+                else if(type == ESM::Weapon::BluntTwoWide ||
+                        type == ESM::Weapon::SpearTwoWide)
+                    groupname = "inventoryweapontwowide";
+                else
+                    groupname = "inventoryhandtohand";
+            }
+            else
+                groupname = "inventoryhandtohand";
+        }
+
+        if(groupname != mCurrentAnimGroup)
+        {
+            mCurrentAnimGroup = groupname;
+            mAnimation->play(mCurrentAnimGroup, "start", "stop", 0.0f, 0);
+        }
+
         mAnimation->forceUpdate();
         mAnimation->runAnimation(0.0f);
 
@@ -155,7 +196,10 @@ namespace MWRender
         if (!mSelectionBuffer)
             mSelectionBuffer = new OEngine::Render::SelectionBuffer(mCamera, 512, 1024, 0);
 
-        mAnimation->play("inventoryhandtohand", "start", "stop", 0.0f, 0);
+        mAnimation->showWeapons(true);
+
+        mCurrentAnimGroup = "inventoryhandtohand";
+        mAnimation->play(mCurrentAnimGroup, "start", "stop", 0.0f, 0);
     }
 
     // --------------------------------------------------------------------------------------------------
