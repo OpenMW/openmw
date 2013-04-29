@@ -178,7 +178,8 @@ void NpcAnimation::updateParts(bool forceupdate)
         { &NpcAnimation::mGloveR,    MWWorld::InventoryStore::Slot_RightGauntlet, 0 },
         { &NpcAnimation::mShirt,     MWWorld::InventoryStore::Slot_Shirt,         0 },
         { &NpcAnimation::mPants,     MWWorld::InventoryStore::Slot_Pants,         0 },
-        { &NpcAnimation::mShield,    MWWorld::InventoryStore::Slot_CarriedLeft,   0 }
+        { &NpcAnimation::mShield,    MWWorld::InventoryStore::Slot_CarriedLeft,   0 },
+        { &NpcAnimation::mWeapon,    MWWorld::InventoryStore::Slot_CarriedRight,  0 }
     };
     static const size_t slotlistsize = sizeof(slotlist)/sizeof(slotlist[0]);
 
@@ -239,7 +240,7 @@ void NpcAnimation::updateParts(bool forceupdate)
                 ESM::PRT_RForearm, ESM::PRT_LForearm, ESM::PRT_RPauldron, ESM::PRT_LPauldron
             };
             size_t parts_size = sizeof(parts)/sizeof(parts[0]);
-            for(int p = 0;p < static_cast<int> (parts_size);++p)
+            for(size_t p = 0;p < parts_size;++p)
                 reserveIndividualPart(parts[p], slotlist[i].mSlot, prio);
         }
         else if(slotlist[i].mSlot == MWWorld::InventoryStore::Slot_Skirt)
@@ -259,6 +260,8 @@ void NpcAnimation::updateParts(bool forceupdate)
     }
     if(mViewMode == VM_HeadOnly)
         return;
+
+    showWeapons(mShowWeapons);
 
     std::map<int, int> bodypartMap;
     bodypartMap[ESM::PRT_Neck] = ESM::BodyPart::MP_Neck;
