@@ -54,8 +54,9 @@ namespace MWRender
 
     TerrainMaterial::Profile::~Profile()
     {
+        if (mMaterial)
+            sh::Factory::getInstance().destroyMaterialInstance(mMaterial->getName());
     }
-
 
     Ogre::MaterialPtr TerrainMaterial::Profile::generate(const Ogre::Terrain* terrain)
     {
