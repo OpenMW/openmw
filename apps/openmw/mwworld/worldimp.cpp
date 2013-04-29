@@ -1548,4 +1548,11 @@ namespace MWWorld
                 mDoorStates[door] = 0; // close
         }
     }
+
+    bool World::getOpenOrCloseDoor(const Ptr &door)
+    {
+        if (mDoorStates.find(door) != mDoorStates.end())
+            return !mDoorStates[door]; // if currently opening or closing, then do the opposite
+        return door.getRefData().getLocalRotation().rot[2] == 0;
+    }
 }

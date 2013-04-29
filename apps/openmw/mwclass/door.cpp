@@ -141,7 +141,7 @@ namespace MWClass
             {
                 // animated door
                 boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionDoor(ptr));
-                if (ptr.getRefData().getLocalRotation().rot[2] == 0)
+                if (MWBase::Environment::get().getWorld()->getOpenOrCloseDoor(ptr))
                     action->setSound(openSound);
                 else
                     action->setSound(closeSound);

@@ -326,6 +326,8 @@ namespace MWBase
             virtual void setupPlayer(bool newGame) = 0;
             virtual void renderPlayer() = 0;
 
+            virtual bool getOpenOrCloseDoor(const MWWorld::Ptr& door) = 0;
+            ///< if activated, should this door be opened or closed?
             virtual void activateDoor(const MWWorld::Ptr& door) = 0;
             ///< activate (open or close) an non-teleport door
 
