@@ -1110,6 +1110,13 @@ namespace MWGui
     {
         mLoadingScreen->loadingDone ();
     }
+    bool WindowManager::getRestEnabled()
+    {
+        //Enable rest dialogue if character creation finished
+        if(mRestAllowed==false && MWBase::Environment::get().getWorld()->getGlobalVariable ("chargenstate").mFloat==-1)
+            mRestAllowed=true;
+        return mRestAllowed;
+    }
 
     bool WindowManager::getPlayerSleeping ()
     {
