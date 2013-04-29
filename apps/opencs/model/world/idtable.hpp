@@ -48,7 +48,7 @@ namespace CSMWorld
 
             QModelIndex getModelIndex (const std::string& id, int column) const;
 
-            void setRecord (const RecordBase& record);
+            void setRecord (const std::string& id, const RecordBase& record);
             ///< Add record or overwrite existing recrod.
 
             const RecordBase& getRecord (const std::string& id) const;

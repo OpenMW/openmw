@@ -66,14 +66,11 @@ namespace CSMWorld
             ///< If the record type does not match, an exception is thrown.
             ///
             /// \attention \a record must not change the ID.
+            ///< \param type Will be ignored, unless the collection supports multiple record types
 
-            virtual void appendRecord (const RecordBase& record) = 0;
+            virtual void appendRecord (const RecordBase& record,
+                UniversalId::Type type = UniversalId::Type_None) = 0;
             ///< If the record type does not match, an exception is thrown.
-
-            virtual std::string getId (const RecordBase& record) const = 0;
-            ///< Return ID for \a record.
-            ///
-            /// \attention Throws an exception, if the type of \a record does not match.
 
             virtual const RecordBase& getRecord (const std::string& id) const = 0;
 
@@ -81,6 +78,9 @@ namespace CSMWorld
 
             virtual void load (ESM::ESMReader& reader, bool base,
                 UniversalId::Type type = UniversalId::Type_None) = 0;
+            ///< \param type Will be ignored, unless the collection supports multiple record types
+
+            virtual int getAppendIndex (UniversalId::Type type = UniversalId::Type_None) const = 0;
             ///< \param type Will be ignored, unless the collection supports multiple record types
     };
 
@@ -161,13 +161,10 @@ namespace CSMWorld
             ///
             /// \attention \a record must not change the ID.
 
-            virtual void appendRecord (const RecordBase& record);
+            virtual void appendRecord (const RecordBase& record,
+                UniversalId::Type type = UniversalId::Type_None);
             ///< If the record type does not match, an exception is thrown.
-
-            virtual std::string getId (const RecordBase& record) const;
-            ///< Return ID for \a record.
-            ///
-            /// \attention Throw san exception, if the type of \a record does not match.
+            ///< \param type Will be ignored, unless the collection supports multiple record types
 
             virtual const Record<ESXRecordT>& getRecord (const std::string& id) const;
 
@@ -175,6 +172,9 @@ namespace CSMWorld
 
             virtual void load (ESM::ESMReader& reader, bool base,
                 UniversalId::Type type = UniversalId::Type_None);
+            ///< \param type Will be ignored, unless the collection supports multiple record types
+
+            virtual int getAppendIndex (UniversalId::Type type = UniversalId::Type_None) const;
             ///< \param type Will be ignored, unless the collection supports multiple record types
 
             void addColumn (Column<ESXRecordT> *column);
@@ -344,17 +344,13 @@ namespace CSMWorld
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
-    void IdCollection<ESXRecordT, IdAccessorT>::appendRecord (const RecordBase& record)
+    void IdCollection<ESXRecordT, IdAccessorT>::appendRecord (const RecordBase& record,
+        UniversalId::Type type)
     {
         mRecords.push_back (dynamic_cast<const Record<ESXRecordT>&> (record));
-        mIndex.insert (std::make_pair (Misc::StringUtils::lowerCase (getId (record)), mRecords.size()-1));
-    }
-
-    template<typename ESXRecordT, typename IdAccessorT>
-    std::string IdCollection<ESXRecordT, IdAccessorT>::getId (const RecordBase& record) const
-    {
-        const Record<ESXRecordT>& record2 = dynamic_cast<const Record<ESXRecordT>&> (record);
-        return IdAccessorT().getId (record2.isModified() ? record2.mModified : record2.mBase);
+        mIndex.insert (std::make_pair (Misc::StringUtils::lowerCase (IdAccessorT().getId (
+            dynamic_cast<const ESXRecordT&> (record))),
+            mRecords.size()-1));
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
@@ -414,6 +410,12 @@ namespace CSMWorld
                     record2.setModified (record);
             }
         }
+    }
+
+    template<typename ESXRecordT, typename IdAccessorT>
+    int IdCollection<ESXRecordT, IdAccessorT>::getAppendIndex (UniversalId::Type type) const
+    {
+        return static_cast<int> (mRecords.size());
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
