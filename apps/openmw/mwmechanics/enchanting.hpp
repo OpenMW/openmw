@@ -35,9 +35,9 @@ namespace MWMechanics
             bool create(); //Return true if created, false if failed.
             void nextEnchantType(); //Set enchant type to next possible type (for mOldItemPtr object)
             int getEnchantType() const;
-            int getEnchantCost() const;
+            float getEnchantCost() const;
             int getEnchantPrice() const;
-            int getMaxEnchantValue() const;
+            float getMaxEnchantValue() const;
             int getGemCharge() const;
             float getEnchantChance() const;
             bool soulEmpty() const; //Return true if empty
