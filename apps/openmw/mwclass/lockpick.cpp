@@ -181,4 +181,12 @@ namespace MWClass
     {
         return npcServices & ESM::NPC::Picks;
     }
+
+    int Lockpick::getItemMaxHealth (const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Lockpick> *ref =
+            ptr.get<ESM::Lockpick>();
+
+        return ref->mBase->mData.mUses;
+    }
 }
