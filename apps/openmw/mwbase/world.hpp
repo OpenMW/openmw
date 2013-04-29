@@ -323,7 +323,7 @@ namespace MWBase
             virtual void changeVanityModeScale(float factor) = 0;
             virtual bool vanityRotateCamera(float * rot) = 0;
 
-            virtual void setupPlayer(bool newGame) = 0;
+            virtual void setupPlayer() = 0;
             virtual void renderPlayer() = 0;
 
             virtual void activateDoor(const MWWorld::Ptr& door) = 0;

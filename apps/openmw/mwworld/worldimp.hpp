@@ -85,6 +85,8 @@ namespace MWWorld
             float mFaced2Distance;
             int mNumFacing;
 
+            bool mNewGame;
+
             std::map<MWWorld::Ptr, int> mDoorStates;
             ///< only holds doors that are currently moving. 0 means closing, 1 opening
 
@@ -371,7 +373,7 @@ namespace MWWorld
 
             virtual bool vanityRotateCamera(float * rot);
 
-            virtual void setupPlayer(bool newGame);
+            virtual void setupPlayer();
             virtual void renderPlayer();
 
             virtual void activateDoor(const MWWorld::Ptr& door);
