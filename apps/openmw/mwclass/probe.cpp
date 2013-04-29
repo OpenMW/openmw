@@ -180,4 +180,12 @@ namespace MWClass
     {
         return npcServices & ESM::NPC::Probes;
     }
+
+    int Probe::getItemMaxHealth (const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Probe> *ref =
+            ptr.get<ESM::Probe>();
+
+        return ref->mBase->mData.mUses;
+    }
 }
