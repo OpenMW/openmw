@@ -679,7 +679,8 @@ namespace MWInput
 
     void InputManager::quickKey (int index)
     {
-        mWindows.activateQuickKey (index);
+        if (!mWindows.isGuiMode())
+            mWindows.activateQuickKey (index);
     }
 
     void InputManager::showQuickKeysMenu()
