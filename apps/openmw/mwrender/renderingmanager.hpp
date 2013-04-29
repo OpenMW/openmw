@@ -17,7 +17,7 @@
 
 #include "objects.hpp"
 #include "actors.hpp"
-#include "player.hpp"
+#include "camera.hpp"
 #include "occlusionquery.hpp"
 
 namespace Ogre
@@ -50,47 +50,42 @@ namespace MWRender
     class VideoPlayer;
     class Animation;
 
-class RenderingManager: private RenderingInterface, public Ogre::WindowEventListener, public Ogre::RenderTargetListener {
-
-  private:
-
-
+class RenderingManager: private RenderingInterface, public Ogre::WindowEventListener, public Ogre::RenderTargetListener
+{
+private:
     virtual MWRender::Objects& getObjects();
     virtual MWRender::Actors& getActors();
 
-  public:
+public:
     RenderingManager(OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir,
-                     const boost::filesystem::path& cacheDir, OEngine::Physic::PhysicEngine* engine,MWWorld::Fallback* fallback);
+                     const boost::filesystem::path& cacheDir, OEngine::Physic::PhysicEngine* engine,
+                     MWWorld::Fallback* fallback);
     virtual ~RenderingManager();
 
-    void togglePOV() {
-        mPlayer->toggleViewMode();
+    void togglePOV()
+    { mCamera->toggleViewMode(); }
+
+    void togglePreviewMode(bool enable)
+    { mCamera->togglePreviewMode(enable); }
+
+    bool toggleVanityMode(bool enable)
+    { return mCamera->toggleVanityMode(enable); }
+
+    void allowVanityMode(bool allow)
+    { mCamera->allowVanityMode(allow); }
+
+    void togglePlayerLooking(bool enable)
+    { mCamera->togglePlayerLooking(enable); }
+
+    void changeVanityModeScale(float factor)
+    {
+        if(mCamera->isVanityOrPreviewModeEnabled())
+            mCamera->setCameraDistance(-factor/120.f*10, true, true);
     }
 
-    void togglePreviewMode(bool enable) {
-        mPlayer->togglePreviewMode(enable);
-    }
+    bool vanityRotateCamera(const float *rot);
 
-    bool toggleVanityMode(bool enable) {
-        return mPlayer->toggleVanityMode(enable);
-    }
-
-    void allowVanityMode(bool allow) {
-        mPlayer->allowVanityMode(allow);
-    }
-
-    void togglePlayerLooking(bool enable) {
-        mPlayer->togglePlayerLooking(enable);
-    }
-
-    void changeVanityModeScale(float factor) {
-        if (mPlayer->isVanityOrPreviewModeEnabled())
-        mPlayer->setCameraDistance(-factor/120.f*10, true, true);
-    }
-
-    bool vanityRotateCamera(float* rot);
-
-    void getPlayerData(Ogre::Vector3 &eyepos, float &pitch, float &yaw);
+    void getCameraData(Ogre::Vector3 &eyepos, float &pitch, float &yaw);
 
     void setupPlayer(const MWWorld::Ptr &ptr);
     void renderPlayer(const MWWorld::Ptr &ptr);
@@ -204,12 +199,11 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     void stopVideo();
     void frameStarted(float dt);
 
-  protected:
-	virtual void windowResized(Ogre::RenderWindow* rw);
+protected:
+    virtual void windowResized(Ogre::RenderWindow* rw);
     virtual void windowClosed(Ogre::RenderWindow* rw);
 
-  private:
-
+private:
     sh::Factory* mFactory;
 
     void setAmbientMode();
@@ -254,7 +248,7 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
 
     OEngine::Physic::PhysicEngine* mPhysicsEngine;
 
-    MWRender::Player *mPlayer;
+    MWRender::Camera *mCamera;
 
     MWRender::Debugging *mDebugging;
 

@@ -1,5 +1,5 @@
-#ifndef GAME_MWRENDER_PLAYER_H
-#define GAME_MWRENDER_PLAYER_H
+#ifndef GAME_MWRENDER_CAMERA_H
+#define GAME_MWRENDER_CAMERA_H
 
 #include <string>
 
@@ -16,8 +16,8 @@ namespace MWRender
 {
     class NpcAnimation;
 
-    /// \brief Player character rendering and camera control
-    class Player
+    /// \brief Camera control
+    class Camera
     {
         struct CamData {
             float pitch, yaw, offset;
@@ -49,10 +49,10 @@ namespace MWRender
         void setLowHeight(bool low = true);
 
     public:
-        Player(Ogre::Camera *camera);
-        ~Player();
+        Camera(Ogre::Camera *camera);
+        ~Camera();
 
-        /// Set where the player is looking at. Uses Morrowind (euler) angles
+        /// Set where the camera is looking at. Uses Morrowind (euler) angles
         /// \param rot Rotation angles in radians
         void rotateCamera(const Ogre::Vector3 &rot, bool adjust);
 
@@ -65,8 +65,6 @@ namespace MWRender
         const std::string &getHandle() const;
 
         /// Attach camera to object
-        /// \note there is no protection from attaching the same camera to
-        /// several different objects
         void attachTo(const MWWorld::Ptr &);
 
         void toggleViewMode();

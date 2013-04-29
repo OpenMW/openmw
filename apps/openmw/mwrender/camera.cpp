@@ -1,4 +1,4 @@
-#include "player.hpp"
+#include "camera.hpp"
 
 #include <OgreSceneNode.h>
 #include <OgreCamera.h>
@@ -15,7 +15,7 @@
 
 namespace MWRender
 {
-    Player::Player (Ogre::Camera *camera)
+    Camera::Camera (Ogre::Camera *camera)
     : mCamera(camera),
       mCameraNode(NULL),
       mFirstPersonView(true),
@@ -33,11 +33,11 @@ namespace MWRender
         mPreviewCam.offset = 400.f;
     }
 
-    Player::~Player()
+    Camera::~Camera()
     {
     }
 
-    void Player::rotateCamera(const Ogre::Vector3 &rot, bool adjust)
+    void Camera::rotateCamera(const Ogre::Vector3 &rot, bool adjust)
     {
         if (adjust) {
             setYaw(getYaw() + rot.z);
@@ -56,12 +56,12 @@ namespace MWRender
         }
     }
 
-    const std::string &Player::getHandle() const
+    const std::string &Camera::getHandle() const
     {
         return mTrackingPtr.getRefData().getHandle();
     }
 
-    void Player::attachTo(const MWWorld::Ptr &ptr)
+    void Camera::attachTo(const MWWorld::Ptr &ptr)
     {
         mTrackingPtr = ptr;
         Ogre::SceneNode *node = mTrackingPtr.getRefData().getBaseNode()->createChildSceneNode(Ogre::Vector3(0.0f, 0.0f, mHeight));
@@ -76,7 +76,7 @@ namespace MWRender
         mCameraNode->attachObject(mCamera);
     }
 
-    void Player::updateListener()
+    void Camera::updateListener()
     {
         Ogre::Vector3 pos = mCamera->getRealPosition();
         Ogre::Vector3 dir = mCamera->getRealDirection();
@@ -85,7 +85,7 @@ namespace MWRender
         MWBase::Environment::get().getSoundManager()->setListenerPosDir(pos, dir, up);
     }
 
-    void Player::update(float duration)
+    void Camera::update(float duration)
     {
         updateListener();
 
@@ -101,7 +101,7 @@ namespace MWRender
         }
     }
 
-    void Player::toggleViewMode()
+    void Camera::toggleViewMode()
     {
         mFirstPersonView = !mFirstPersonView;
         mAnimation->setViewMode(isFirstPerson() ? NpcAnimation::VM_FirstPerson :
@@ -115,14 +115,14 @@ namespace MWRender
         }
     }
     
-    void Player::allowVanityMode(bool allow)
+    void Camera::allowVanityMode(bool allow)
     {
         if (!allow && mVanity.enabled)
             toggleVanityMode(false);
         mVanity.allowed = allow;
     }
 
-    bool Player::toggleVanityMode(bool enable)
+    bool Camera::toggleVanityMode(bool enable)
     {
         if(!mVanity.allowed && enable)
             return false;
@@ -155,7 +155,7 @@ namespace MWRender
         return true;
     }
 
-    void Player::togglePreviewMode(bool enable)
+    void Camera::togglePreviewMode(bool enable)
     {
         if(mPreviewMode == enable)
             return;
@@ -181,14 +181,14 @@ namespace MWRender
         rotateCamera(Ogre::Vector3(getPitch(), 0.f, getYaw()), false);
     }
 
-    float Player::getYaw()
+    float Camera::getYaw()
     {
         if(mVanity.enabled || mPreviewMode)
             return mPreviewCam.yaw;
         return mMainCam.yaw;
     }
 
-    void Player::setYaw(float angle)
+    void Camera::setYaw(float angle)
     {
         if (angle > Ogre::Math::PI) {
             angle -= Ogre::Math::TWO_PI;
@@ -202,7 +202,7 @@ namespace MWRender
         }
     }
 
-    float Player::getPitch()
+    float Camera::getPitch()
     {
         if (mVanity.enabled || mPreviewMode) {
             return mPreviewCam.pitch;
@@ -210,7 +210,7 @@ namespace MWRender
         return mMainCam.pitch;
     }
 
-    void Player::setPitch(float angle)
+    void Camera::setPitch(float angle)
     {
         const float epsilon = 0.000001f;
         float limit = Ogre::Math::HALF_PI - epsilon;
@@ -229,7 +229,7 @@ namespace MWRender
         }
     }
 
-    void Player::setCameraDistance(float dist, bool adjust, bool override)
+    void Camera::setCameraDistance(float dist, bool adjust, bool override)
     {
         if(mFirstPersonView && !mPreviewMode && !mVanity.enabled)
             return;
@@ -258,7 +258,7 @@ namespace MWRender
         }
     }
 
-    void Player::setCameraDistance()
+    void Camera::setCameraDistance()
     {
         if (mDistanceAdjusted) {
             if (mVanity.enabled || mPreviewMode) {
@@ -270,7 +270,7 @@ namespace MWRender
         mDistanceAdjusted = false;
     }
 
-    void Player::setAnimation(NpcAnimation *anim)
+    void Camera::setAnimation(NpcAnimation *anim)
     {
         // If we're switching to a new NpcAnimation, ensure the old one is
         // using a normal view mode
@@ -281,18 +281,18 @@ namespace MWRender
                                                   NpcAnimation::VM_Normal);
     }
 
-    void Player::setHeight(float height)
+    void Camera::setHeight(float height)
     {
         mHeight = height;
         mCameraNode->setPosition(0.f, 0.f, mHeight);
     }
 
-    float Player::getHeight()
+    float Camera::getHeight()
     {
         return mHeight * mTrackingPtr.getRefData().getBaseNode()->getScale().z;
     }
 
-    bool Player::getPosition(Ogre::Vector3 &player, Ogre::Vector3 &camera)
+    bool Camera::getPosition(Ogre::Vector3 &player, Ogre::Vector3 &camera)
     {
         mCamera->getParentSceneNode ()->needUpdate(true);
         camera = mCamera->getRealPosition();
@@ -301,23 +301,23 @@ namespace MWRender
         return mFirstPersonView && !mVanity.enabled && !mPreviewMode;
     }
 
-    Ogre::Vector3 Player::getPosition()
+    Ogre::Vector3 Camera::getPosition()
     {
         return mTrackingPtr.getRefData().getBaseNode()->getPosition();
     }
 
-    void Player::getSightAngles(float &pitch, float &yaw)
+    void Camera::getSightAngles(float &pitch, float &yaw)
     {
         pitch = mMainCam.pitch;
         yaw = mMainCam.yaw;
     }
 
-    void Player::togglePlayerLooking(bool enable)
+    void Camera::togglePlayerLooking(bool enable)
     {
         mFreeLook = enable;
     }
 
-    void Player::setLowHeight(bool low)
+    void Camera::setLowHeight(bool low)
     {
         if (low) {
             mCameraNode->setPosition(0.f, 0.f, mHeight * 0.85);
@@ -326,7 +326,7 @@ namespace MWRender
         }
     }
 
-    bool Player::isVanityOrPreviewModeEnabled()
+    bool Camera::isVanityOrPreviewModeEnabled()
     {
         return mPreviewMode || mVanity.enabled;
     }

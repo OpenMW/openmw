@@ -16,7 +16,6 @@
 #include "../mwmechanics/movement.hpp"
 
 #include "../mwrender/sky.hpp"
-#include "../mwrender/player.hpp"
 
 #include "../mwclass/door.hpp"
 
@@ -1146,8 +1145,8 @@ namespace MWWorld
 
         float pitch, yaw;
         Ogre::Vector3 eyepos;
-        mRendering->getPlayerData(eyepos, pitch, yaw);
-        mPhysics->updatePlayerData(eyepos, pitch, yaw);
+        mRendering->getCameraData(eyepos, pitch, yaw);
+        mPhysics->updateCameraData(eyepos, pitch, yaw);
 
         performUpdateSceneQueries ();
 
