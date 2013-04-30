@@ -6,6 +6,8 @@
 #include <components/files/collections.hpp>
 #include <components/compiler/locals.hpp>
 
+#include <boost/math/special_functions/sign.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -1016,7 +1018,11 @@ namespace MWWorld
                         Ogre::Vector3 relativePos = it->first.getRefData().getBaseNode()->
                                 convertWorldToLocalPosition(ptr.getRefData().getBaseNode()->_getDerivedPosition());
 
-                        float axisToCheck = (dimensions.x > dimensions.y) ? relativePos.y : -relativePos.x;
+                        float axisToCheck;
+                        if (dimensions.x > dimensions.y)
+                            axisToCheck = relativePos.y * boost::math::sign((min+max).y);
+                        else
+                            axisToCheck = relativePos.x * boost::math::sign((min+max).x);
                         if (axisToCheck >= 0)
                             targetRot = std::min(std::max(0.f, oldRot + diff*0.5f), 90.f);
                         else
