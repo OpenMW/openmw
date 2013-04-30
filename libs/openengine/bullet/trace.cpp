@@ -15,16 +15,16 @@ enum traceWorldType
     bothWorldTrace = collisionWorldTrace | pickWorldTrace
 };
 
-void newtrace(traceResults *results, const Ogre::Vector3& start, const Ogre::Vector3& end, const Ogre::Vector3& BBHalfExtents, bool isInterior, OEngine::Physic::PhysicEngine *enginePass)  //Traceobj was a Aedra Object
+void newtrace(traceResults *results, const Ogre::Quaternion& orient, const Ogre::Vector3& start, const Ogre::Vector3& end, const Ogre::Vector3& BBHalfExtents, bool isInterior, OEngine::Physic::PhysicEngine *enginePass)  //Traceobj was a Aedra Object
 {
     const btVector3 btstart(start.x, start.y, start.z + BBHalfExtents.z);
     const btVector3 btend(end.x, end.y, end.z + BBHalfExtents.z);
-    const btQuaternion btrot(0.0f, 0.0f, 0.0f);   //y, x, z
+    const btQuaternion btorient (orient.x, orient.y, orient.z, orient.w);
 
     const btBoxShape newshape(btVector3(BBHalfExtents.x, BBHalfExtents.y, BBHalfExtents.z));
     //const btCapsuleShapeZ newshape(BBHalfExtents.x, BBHalfExtents.z * 2 - BBHalfExtents.x * 2);
-    const btTransform from(btrot, btstart);
-    const btTransform to(btrot, btend);
+    const btTransform from(btorient, btstart);
+    const btTransform to(btorient, btend);
 
     btCollisionWorld::ClosestConvexResultCallback newTraceCallback(btstart, btend);
     newTraceCallback.m_collisionFilterMask = OEngine::Physic::CollisionType_World;

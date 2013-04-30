@@ -622,6 +622,41 @@ namespace Physic
         return std::pair<std::string,float>(name,d);
     }
 
+    // callback that ignores player in results
+    struct	OurClosestConvexResultCallback : public btCollisionWorld::ClosestConvexResultCallback
+    {
+    public:
+        OurClosestConvexResultCallback(const btVector3&	convexFromWorld,const btVector3&	convexToWorld)
+            : btCollisionWorld::ClosestConvexResultCallback(convexFromWorld, convexToWorld) {}
+
+        virtual	btScalar	addSingleResult(btCollisionWorld::LocalConvexResult& convexResult,bool normalInWorldSpace)
+        {
+            if (const RigidBody* body = dynamic_cast<const RigidBody*>(convexResult.m_hitCollisionObject))
+                if (body->mName == "player")
+                    return 0;
+            return btCollisionWorld::ClosestConvexResultCallback::addSingleResult(convexResult, normalInWorldSpace);
+        }
+    };
+
+    std::pair<bool, float> PhysicEngine::sphereCast (float radius, btVector3& from, btVector3& to)
+    {
+        OurClosestConvexResultCallback callback(from, to);
+        callback.m_collisionFilterMask = OEngine::Physic::CollisionType_World;
+
+        btSphereShape shape(radius);
+        const btQuaternion btrot(0.0f, 0.0f, 0.0f);
+
+        btTransform from_ (btrot, from);
+        btTransform to_ (btrot, to);
+
+        dynamicsWorld->convexSweepTest(&shape, from_, to_, callback);
+
+        if (callback.hasHit())
+            return std::make_pair(true, callback.m_closestHitFraction);
+        else
+            return std::make_pair(false, 1);
+    }
+
     std::vector< std::pair<float, std::string> > PhysicEngine::rayTest2(btVector3& from, btVector3& to)
     {
         MyRayResultCallback resultCallback1;
