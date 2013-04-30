@@ -207,7 +207,7 @@ struct RecordFactoryEntry {
 static const RecordFactoryEntry recordFactories [] = {
 
     { "NiNode",                     &construct <NiNode                      >, RC_NiNode                        },
-    { "AvoidNode",                  &construct <NiNode                      >, RC_NiNode                        },
+    { "AvoidNode",                  &construct <NiNode                      >, RC_AvoidNode                     },
     { "NiBSParticleNode",           &construct <NiNode                      >, RC_NiBSParticleNode              },
     { "NiBSAnimationNode",          &construct <NiNode                      >, RC_NiBSAnimationNode             },
     { "NiBillboardNode",            &construct <NiNode                      >, RC_NiNode                        },

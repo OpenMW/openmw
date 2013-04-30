@@ -185,6 +185,10 @@ void ManualBulletShapeLoader::handleNode(btTriangleMesh* mesh, const Nif::Node *
     else
         isCollisionNode = isCollisionNode && (node->recType != Nif::RC_RootCollisionNode);
 
+    // Don't collide with AvoidNode shapes
+    if(node->recType == Nif::RC_AvoidNode)
+        flags |= 0x800;
+
     // Marker objects
     /// \todo don't do this in the editor
     std::string nodename = node->name;

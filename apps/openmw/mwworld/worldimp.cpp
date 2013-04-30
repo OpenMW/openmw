@@ -18,7 +18,6 @@
 #include "../mwmechanics/movement.hpp"
 
 #include "../mwrender/sky.hpp"
-#include "../mwrender/player.hpp"
 
 #include "../mwclass/door.hpp"
 
@@ -813,33 +812,50 @@ namespace MWWorld
 
     void World::rotateObjectImp (const Ptr& ptr, Ogre::Vector3 rot, bool adjust)
     {
-        if (mRendering->rotateObject(ptr, rot, adjust))
+        const float two_pi = Ogre::Math::TWO_PI;
+        const float pi = Ogre::Math::PI;
+
+        float *objRot = ptr.getRefData().getPosition().rot;
+        if(adjust)
         {
-            // rotate physically iff renderer confirm so
-            float *objRot = ptr.getRefData().getPosition().rot;
+            objRot[0] += rot.x;
+            objRot[1] += rot.y;
+            objRot[2] += rot.z;
+        }
+        else
+        {
             objRot[0] = rot.x;
             objRot[1] = rot.y;
             objRot[2] = rot.z;
+        }
 
-            float fullRotateRad=Ogre::Degree(360).valueRadians();
+        if(Class::get(ptr).isActor())
+        {
+            /* HACK? Actors shouldn't really be rotating around X (or Y), but
+             * currently it's done so for rotating the camera, which needs
+             * clamping.
+             */
+            const float half_pi = Ogre::Math::HALF_PI;
 
-            while(objRot[0]>=fullRotateRad)
-                objRot[0] -= fullRotateRad;
-            while(objRot[1]>=fullRotateRad)
-                objRot[1] -= fullRotateRad;
-            while(objRot[2]>=fullRotateRad)
-                objRot[2] -= fullRotateRad;
+            if(objRot[0] < -half_pi)     objRot[0] = -half_pi;
+            else if(objRot[0] > half_pi) objRot[0] =  half_pi;
+        }
+        else
+        {
+            while(objRot[0] < -pi) objRot[0] += two_pi;
+            while(objRot[0] >  pi) objRot[0] -= two_pi;
+        }
 
-            while(objRot[0]<=-fullRotateRad)
-                objRot[0] += fullRotateRad;
-            while(objRot[1]<=-fullRotateRad)
-                objRot[1] += fullRotateRad;
-            while(objRot[2]<=-fullRotateRad)
-                objRot[2] += fullRotateRad;
+        while(objRot[1] < -pi) objRot[1] += two_pi;
+        while(objRot[1] >  pi) objRot[1] -= two_pi;
 
-            if (ptr.getRefData().getBaseNode() != 0) {
-                mPhysics->rotateObject(ptr);
-            }
+        while(objRot[2] < -pi) objRot[2] += two_pi;
+        while(objRot[2] >  pi) objRot[2] -= two_pi;
+
+        if(ptr.getRefData().getBaseNode() != 0)
+        {
+            mRendering->rotateObject(ptr);
+            mPhysics->rotateObject(ptr);
         }
     }
 
@@ -1136,8 +1152,8 @@ namespace MWWorld
 
         float pitch, yaw;
         Ogre::Vector3 eyepos;
-        mRendering->getPlayerData(eyepos, pitch, yaw);
-        mPhysics->updatePlayerData(eyepos, pitch, yaw);
+        mRendering->getCameraData(eyepos, pitch, yaw);
+        mPhysics->updateCameraData(eyepos, pitch, yaw);
 
         performUpdateSceneQueries ();
 
@@ -1483,13 +1499,15 @@ namespace MWWorld
 
     void World::setupPlayer()
     {
-        const ESM::NPC* player = mStore.get<ESM::NPC>().find ("player");
-        mPlayer = new MWWorld::Player (player, *this);
-        mRendering->attachCameraTo(mPlayer->getPlayer());
+        const ESM::NPC *player = mStore.get<ESM::NPC>().find("player");
+        mPlayer = new MWWorld::Player(player, *this);
+
+        Ptr ptr = mPlayer->getPlayer();
+        mRendering->setupPlayer(ptr);
         if (mNewGame)
         {
-            MWWorld::Class::get(mPlayer->getPlayer()).getContainerStore(mPlayer->getPlayer()).fill(player->mInventory, "", mStore);
-            MWWorld::Class::get(mPlayer->getPlayer()).getInventoryStore(mPlayer->getPlayer()).autoEquip (mPlayer->getPlayer());
+            MWWorld::Class::get(ptr).getContainerStore(ptr).fill(player->mInventory, "", mStore);
+            MWWorld::Class::get(ptr).getInventoryStore(ptr).autoEquip(ptr);
         }
     }
 

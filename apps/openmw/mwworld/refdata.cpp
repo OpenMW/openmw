@@ -81,10 +81,13 @@ namespace MWWorld
         {}
     }
 
-    std::string RefData::getHandle()
+    const std::string &RefData::getHandle()
     {
-        if (!mBaseNode)
-            return "";
+        if(!mBaseNode)
+        {
+            static const std::string empty;
+            return empty;
+        }
             
         return mBaseNode->getName();
     }

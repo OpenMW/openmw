@@ -178,7 +178,8 @@ void NpcAnimation::updateParts(bool forceupdate)
         { &NpcAnimation::mGloveR,    MWWorld::InventoryStore::Slot_RightGauntlet, 0 },
         { &NpcAnimation::mShirt,     MWWorld::InventoryStore::Slot_Shirt,         0 },
         { &NpcAnimation::mPants,     MWWorld::InventoryStore::Slot_Pants,         0 },
-        { &NpcAnimation::mShield,    MWWorld::InventoryStore::Slot_CarriedLeft,   0 }
+        { &NpcAnimation::mShield,    MWWorld::InventoryStore::Slot_CarriedLeft,   0 },
+        { &NpcAnimation::mWeapon,    MWWorld::InventoryStore::Slot_CarriedRight,  0 }
     };
     static const size_t slotlistsize = sizeof(slotlist)/sizeof(slotlist[0]);
 
@@ -239,7 +240,7 @@ void NpcAnimation::updateParts(bool forceupdate)
                 ESM::PRT_RForearm, ESM::PRT_LForearm, ESM::PRT_RPauldron, ESM::PRT_LPauldron
             };
             size_t parts_size = sizeof(parts)/sizeof(parts[0]);
-            for(int p = 0;p < static_cast<int> (parts_size);++p)
+            for(size_t p = 0;p < parts_size;++p)
                 reserveIndividualPart(parts[p], slotlist[i].mSlot, prio);
         }
         else if(slotlist[i].mSlot == MWWorld::InventoryStore::Slot_Skirt)
@@ -260,29 +261,7 @@ void NpcAnimation::updateParts(bool forceupdate)
     if(mViewMode == VM_HeadOnly)
         return;
 
-    std::map<int, int> bodypartMap;
-    bodypartMap[ESM::PRT_Neck] = ESM::BodyPart::MP_Neck;
-    bodypartMap[ESM::PRT_Cuirass] = ESM::BodyPart::MP_Chest;
-    bodypartMap[ESM::PRT_Groin] = ESM::BodyPart::MP_Groin;
-    bodypartMap[ESM::PRT_RHand] = ESM::BodyPart::MP_Hand;
-    bodypartMap[ESM::PRT_LHand] = ESM::BodyPart::MP_Hand;
-    bodypartMap[ESM::PRT_RWrist] = ESM::BodyPart::MP_Wrist;
-    bodypartMap[ESM::PRT_LWrist] = ESM::BodyPart::MP_Wrist;
-    bodypartMap[ESM::PRT_RForearm] = ESM::BodyPart::MP_Forearm;
-    bodypartMap[ESM::PRT_LForearm] = ESM::BodyPart::MP_Forearm;
-    bodypartMap[ESM::PRT_RUpperarm] = ESM::BodyPart::MP_Upperarm;
-    bodypartMap[ESM::PRT_LUpperarm] = ESM::BodyPart::MP_Upperarm;
-    bodypartMap[ESM::PRT_RFoot] = ESM::BodyPart::MP_Foot;
-    bodypartMap[ESM::PRT_LFoot] = ESM::BodyPart::MP_Foot;
-    bodypartMap[ESM::PRT_RAnkle] = ESM::BodyPart::MP_Ankle;
-    bodypartMap[ESM::PRT_LAnkle] = ESM::BodyPart::MP_Ankle;
-    bodypartMap[ESM::PRT_RKnee] = ESM::BodyPart::MP_Knee;
-    bodypartMap[ESM::PRT_LKnee] = ESM::BodyPart::MP_Knee;
-    bodypartMap[ESM::PRT_RLeg] = ESM::BodyPart::MP_Upperleg;
-    bodypartMap[ESM::PRT_LLeg] = ESM::BodyPart::MP_Upperleg;
-    bodypartMap[ESM::PRT_Tail] = ESM::BodyPart::MP_Tail;
-
-    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+    showWeapons(mShowWeapons);
 
     const int Flag_Female = 0x01;
     const int Flag_FirstPerson = 0x02;
@@ -299,21 +278,43 @@ void NpcAnimation::updateParts(bool forceupdate)
     std::pair<std::string, int> thisCombination = std::make_pair(race, flags);
     if (sRaceMapping.find(thisCombination) == sRaceMapping.end())
     {
-        sRaceMapping[thisCombination].resize(ESM::PRT_Count);
-        for (int i=0; i<ESM::PRT_Count; ++i)
-            sRaceMapping[thisCombination][i] = NULL;
+        static std::map<int, int> bodypartMap;
+        if(bodypartMap.size() == 0)
+        {
+            bodypartMap[ESM::PRT_Neck] = ESM::BodyPart::MP_Neck;
+            bodypartMap[ESM::PRT_Cuirass] = ESM::BodyPart::MP_Chest;
+            bodypartMap[ESM::PRT_Groin] = ESM::BodyPart::MP_Groin;
+            bodypartMap[ESM::PRT_RHand] = ESM::BodyPart::MP_Hand;
+            bodypartMap[ESM::PRT_LHand] = ESM::BodyPart::MP_Hand;
+            bodypartMap[ESM::PRT_RWrist] = ESM::BodyPart::MP_Wrist;
+            bodypartMap[ESM::PRT_LWrist] = ESM::BodyPart::MP_Wrist;
+            bodypartMap[ESM::PRT_RForearm] = ESM::BodyPart::MP_Forearm;
+            bodypartMap[ESM::PRT_LForearm] = ESM::BodyPart::MP_Forearm;
+            bodypartMap[ESM::PRT_RUpperarm] = ESM::BodyPart::MP_Upperarm;
+            bodypartMap[ESM::PRT_LUpperarm] = ESM::BodyPart::MP_Upperarm;
+            bodypartMap[ESM::PRT_RFoot] = ESM::BodyPart::MP_Foot;
+            bodypartMap[ESM::PRT_LFoot] = ESM::BodyPart::MP_Foot;
+            bodypartMap[ESM::PRT_RAnkle] = ESM::BodyPart::MP_Ankle;
+            bodypartMap[ESM::PRT_LAnkle] = ESM::BodyPart::MP_Ankle;
+            bodypartMap[ESM::PRT_RKnee] = ESM::BodyPart::MP_Knee;
+            bodypartMap[ESM::PRT_LKnee] = ESM::BodyPart::MP_Knee;
+            bodypartMap[ESM::PRT_RLeg] = ESM::BodyPart::MP_Upperleg;
+            bodypartMap[ESM::PRT_LLeg] = ESM::BodyPart::MP_Upperleg;
+            bodypartMap[ESM::PRT_Tail] = ESM::BodyPart::MP_Tail;
+        }
 
+        sRaceMapping[thisCombination].resize(ESM::PRT_Count, NULL);
+
+        const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
         const MWWorld::Store<ESM::BodyPart> &partStore = store.get<ESM::BodyPart>();
-
-        for (MWWorld::Store<ESM::BodyPart>::iterator it = partStore.begin(); it != partStore.end(); ++it)
+        for(MWWorld::Store<ESM::BodyPart>::iterator it = partStore.begin(); it != partStore.end(); ++it)
         {
             const ESM::BodyPart& bodypart = *it;
             if (bodypart.mData.mFlags & ESM::BodyPart::BPF_NotPlayable)
                 continue;
             if (bodypart.mData.mType != ESM::BodyPart::MT_Skin)
-            {
                 continue;
-            }
+
             if (!mNpc->isMale() != (bodypart.mData.mFlags & ESM::BodyPart::BPF_Female))
                 continue;
             if (!Misc::StringUtils::ciEqual(bodypart.mRace, mNpc->mRace))
@@ -480,7 +481,7 @@ void NpcAnimation::showWeapons(bool showWeapon)
         if(mWeapon != inv.end()) // special case for weapons
         {
             std::string mesh = MWWorld::Class::get(*mWeapon).getModel(*mWeapon);
-            addOrReplaceIndividualPart(ESM::PRT_Weapon,-1,1,mesh);
+            addOrReplaceIndividualPart(ESM::PRT_Weapon, MWWorld::InventoryStore::Slot_CarriedRight, 1, mesh);
         }
     }
     else

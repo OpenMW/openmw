@@ -720,19 +720,17 @@ namespace MWInput
 
     void InputManager::resetIdleTime()
     {
-        if (mTimeIdle < 0) {
-            MWBase::Environment::get().getWorld()->toggleVanityMode(false, false);
-        }
+        if (mTimeIdle < 0)
+            MWBase::Environment::get().getWorld()->toggleVanityMode(false);
         mTimeIdle = 0.f;
     }
 
     void InputManager::updateIdleTime(float dt)
     {
-        if (mTimeIdle >= 0.f) {
+        if (mTimeIdle >= 0.f)
             mTimeIdle += dt;
-        }
         if (mTimeIdle > 30.f) {
-            MWBase::Environment::get().getWorld()->toggleVanityMode(true, false);
+            MWBase::Environment::get().getWorld()->toggleVanityMode(true);
             mTimeIdle = -1.f;
         }
     }

@@ -282,10 +282,8 @@ namespace MWScript
                 MWBase::World *world =
                     MWBase::Environment::get().getWorld();
 
-                if (world->toggleVanityMode(sActivate, true)) {
-                    context.report(
-                        (sActivate) ? "Vanity Mode -> On" : "Vanity Mode -> Off"
-                    );
+                if (world->toggleVanityMode(sActivate)) {
+                    context.report(sActivate ? "Vanity Mode -> On" : "Vanity Mode -> Off");
                     sActivate = !sActivate;
                 } else {
                     context.report("Vanity Mode -> No");

@@ -144,7 +144,7 @@ namespace MWWorld
                 // FIXME: This works, but it's inconcsistent with how the rotations are applied elsewhere. Why?
                 return position + (Ogre::Quaternion(Ogre::Radian( -refpos.rot[2]), Ogre::Vector3::UNIT_Z)*
                                    Ogre::Quaternion(Ogre::Radian( -refpos.rot[1]), Ogre::Vector3::UNIT_Y)*
-                                   Ogre::Quaternion(Ogre::Radian( -refpos.rot[0]), Ogre::Vector3::UNIT_X)) *
+                                   Ogre::Quaternion(Ogre::Radian(  refpos.rot[0]), Ogre::Vector3::UNIT_X)) *
                                   movement;
             }
 
@@ -160,7 +160,7 @@ namespace MWWorld
             {
                 velocity = (Ogre::Quaternion(Ogre::Radian( -refpos.rot[2]), Ogre::Vector3::UNIT_Z)*
                             Ogre::Quaternion(Ogre::Radian( -refpos.rot[1]), Ogre::Vector3::UNIT_Y)*
-                            Ogre::Quaternion(Ogre::Radian( -refpos.rot[0]), Ogre::Vector3::UNIT_X)) *
+                            Ogre::Quaternion(Ogre::Radian(  refpos.rot[0]), Ogre::Vector3::UNIT_X)) *
                            movement / time;
             }
             else
@@ -260,14 +260,13 @@ namespace MWWorld
     std::pair<float, std::string> PhysicsSystem::getFacedHandle (MWWorld::World& world, float queryDistance)
     {
         btVector3 dir(0, 1, 0);
-        dir = dir.rotate(btVector3(1, 0, 0), mPlayerData.pitch);
-        dir = dir.rotate(btVector3(0, 0, 1), mPlayerData.yaw);
+        dir = dir.rotate(btVector3(1, 0, 0), mCameraData.pitch);
+        dir = dir.rotate(btVector3(0, 0, 1), mCameraData.yaw);
         dir.setX(-dir.x());
 
-        btVector3 origin(
-            mPlayerData.eyepos.x,
-            mPlayerData.eyepos.y,
-            mPlayerData.eyepos.z);
+        btVector3 origin(mCameraData.eyepos.x,
+                         mCameraData.eyepos.y,
+                         mCameraData.eyepos.z);
         origin += dir * 5;
 
         btVector3 dest = origin + dir * queryDistance;
@@ -280,14 +279,13 @@ namespace MWWorld
     std::vector < std::pair <float, std::string> > PhysicsSystem::getFacedHandles (float queryDistance)
     {
         btVector3 dir(0, 1, 0);
-        dir = dir.rotate(btVector3(1, 0, 0), mPlayerData.pitch);
-        dir = dir.rotate(btVector3(0, 0, 1), mPlayerData.yaw);
+        dir = dir.rotate(btVector3(1, 0, 0), mCameraData.pitch);
+        dir = dir.rotate(btVector3(0, 0, 1), mCameraData.yaw);
         dir.setX(-dir.x());
 
-        btVector3 origin(
-            mPlayerData.eyepos.x,
-            mPlayerData.eyepos.y,
-            mPlayerData.eyepos.z);
+        btVector3 origin(mCameraData.eyepos.x,
+                         mCameraData.eyepos.y,
+                         mCameraData.eyepos.z);
         origin += dir * 5;
 
         btVector3 dest = origin + dir * queryDistance;
@@ -552,10 +550,10 @@ namespace MWWorld
         return true;
     }
 
-    void PhysicsSystem::updatePlayerData(Ogre::Vector3 &eyepos, float pitch, float yaw)
+    void PhysicsSystem::updateCameraData(const Ogre::Vector3 &eyepos, float pitch, float yaw)
     {
-        mPlayerData.eyepos = eyepos;
-        mPlayerData.pitch = pitch;
-        mPlayerData.yaw = yaw;
+        mCameraData.eyepos = eyepos;
+        mCameraData.pitch = pitch;
+        mCameraData.yaw = yaw;
     }
 }

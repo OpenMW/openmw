@@ -355,8 +355,8 @@ namespace MWWorld
                 mRendering->togglePreviewMode(enable);
             }
 
-            virtual bool toggleVanityMode(bool enable, bool force) {
-                return mRendering->toggleVanityMode(enable, force);
+            virtual bool toggleVanityMode(bool enable) {
+                return mRendering->toggleVanityMode(enable);
             }
 
             virtual void allowVanityMode(bool allow) {
