@@ -105,18 +105,19 @@ namespace MWWorld
             physicActor->enableCollisions(false);
 
             Ogre::Vector3 halfExtents = physicActor->getHalfExtents();// + Vector3(1,1,1);
+            halfExtents.z = 1; // we trace the feet only, so we use a very thin box
 
             Ogre::Vector3 newPosition = position;
 
             traceResults trace; //no initialization needed
 
-            int maxHeight = 400.f;
+            int maxHeight = 200.f;
             newtrace(&trace, Ogre::Quaternion::IDENTITY, newPosition, newPosition-Ogre::Vector3(0,0,maxHeight), halfExtents, isInterior, engine);
             if(trace.fraction < 1.0f)
                 hit = true;
             newPosition = trace.endpos;
 
-            physicActor->setOnGround(hit);
+            physicActor->setOnGround(hit && getSlope(trace.planenormal) <= sMaxSlope);
             physicActor->enableCollisions(wasCollisionMode);
 
             if (hit)

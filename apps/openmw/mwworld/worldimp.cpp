@@ -911,7 +911,7 @@ namespace MWWorld
         float terrainHeight = mRendering->getTerrainHeightAt(pos);
 
         if (pos.z < terrainHeight)
-            pos.z = terrainHeight+400; // place slightly above. will snap down to ground with code below
+            pos.z = terrainHeight+5; // place slightly above. will snap down to ground with code below
 
         ptr.getRefData().getPosition().pos[2] = pos.z;
 
