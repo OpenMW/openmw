@@ -132,5 +132,81 @@ public:
     size_t numRoots() { return roots.size(); }
 };
 
+
+template<typename T>
+struct KeyT {
+    float mTime;
+    T mValue;
+    T mForwardValue;  // Only for Quadratic interpolation
+    T mBackwardValue; // Only for Quadratic interpolation
+    float mTension;    // Only for TBC interpolation
+    float mBias;       // Only for TBC interpolation
+    float mContinuity; // Only for TBC interpolation
+};
+typedef KeyT<float> FloatKey;
+typedef KeyT<Ogre::Vector3> Vector3Key;
+typedef KeyT<Ogre::Vector4> Vector4Key;
+typedef KeyT<Ogre::Quaternion> QuaternionKey;
+
+template<typename T, T (NIFStream::*getValue)()>
+struct KeyListT {
+    typedef std::vector< KeyT<T> > VecType;
+
+    static const int sLinearInterpolation = 1;
+    static const int sQuadraticInterpolation = 2;
+    static const int sTBCInterpolation = 3;
+
+    int mInterpolationType;
+    VecType mKeys;
+
+    void read(NIFStream *nif, bool force=false)
+    {
+        size_t count = nif->getInt();
+        if(count == 0 && !force)
+            return;
+
+        mInterpolationType = nif->getInt();
+        mKeys.resize(count);
+        if(mInterpolationType == sLinearInterpolation)
+        {
+            for(size_t i = 0;i < count;i++)
+            {
+                KeyT<T> &key = mKeys[i];
+                key.mTime = nif->getFloat();
+                key.mValue = (nif->*getValue)();
+            }
+        }
+        else if(mInterpolationType == sQuadraticInterpolation)
+        {
+            for(size_t i = 0;i < count;i++)
+            {
+                KeyT<T> &key = mKeys[i];
+                key.mTime = nif->getFloat();
+                key.mValue = (nif->*getValue)();
+                key.mForwardValue = (nif->*getValue)();
+                key.mBackwardValue = (nif->*getValue)();
+            }
+        }
+        else if(mInterpolationType == sTBCInterpolation)
+        {
+            for(size_t i = 0;i < count;i++)
+            {
+                KeyT<T> &key = mKeys[i];
+                key.mTime = nif->getFloat();
+                key.mValue = (nif->*getValue)();
+                key.mTension = nif->getFloat();
+                key.mBias = nif->getFloat();
+                key.mContinuity = nif->getFloat();
+            }
+        }
+        else
+            nif->file->warn("Unhandled interpolation type: "+Ogre::StringConverter::toString(mInterpolationType));
+    }
+};
+typedef KeyListT<float,&NIFStream::getFloat> FloatKeyList;
+typedef KeyListT<Ogre::Vector3,&NIFStream::getVector3> Vector3KeyList;
+typedef KeyListT<Ogre::Vector4,&NIFStream::getVector4> Vector4KeyList;
+typedef KeyListT<Ogre::Quaternion,&NIFStream::getQuaternion> QuaternionKeyList;
+
 } // Namespace
 #endif
