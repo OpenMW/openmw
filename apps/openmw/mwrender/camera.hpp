@@ -1,7 +1,9 @@
-#ifndef GAME_MWRENDER_PLAYER_H
-#define GAME_MWRENDER_PLAYER_H
+#ifndef GAME_MWRENDER_CAMERA_H
+#define GAME_MWRENDER_CAMERA_H
 
 #include <string>
+
+#include "../mwworld/ptr.hpp"
 
 namespace Ogre
 {
@@ -10,24 +12,20 @@ namespace Ogre
     class SceneNode;
 }
 
-namespace MWWorld
-{
-    class Ptr;
-}
-
 namespace MWRender
 {
     class NpcAnimation;
-    /// \brief Player character rendering and camera control
-    class Player
+
+    /// \brief Camera control
+    class Camera
     {
         struct CamData {
             float pitch, yaw, offset;
         };
 
-        Ogre::Camera *mCamera;
+        MWWorld::Ptr mTrackingPtr;
 
-        Ogre::SceneNode *mPlayerNode;
+        Ogre::Camera *mCamera;
         Ogre::SceneNode *mCameraNode;
 
         NpcAnimation *mAnimation;
@@ -37,7 +35,7 @@ namespace MWRender
         bool mFreeLook;
 
         struct {
-            bool enabled, allowed, forced;
+            bool enabled, allowed;
         } mVanity;
 
         float mHeight, mCameraDistance;
@@ -51,15 +49,11 @@ namespace MWRender
         void setLowHeight(bool low = true);
 
     public:
+        Camera(Ogre::Camera *camera);
+        ~Camera();
 
-        Player (Ogre::Camera *camera, Ogre::SceneNode* mNode);
-        ~Player();
-
-        /// Set where the player is looking at. Uses Morrowind (euler) angles
+        /// Set where the camera is looking at. Uses Morrowind (euler) angles
         /// \param rot Rotation angles in radians
-        /// \return true if player object needs to bo rotated physically
-        bool rotate(const Ogre::Vector3 &rot, bool adjust);
-        
         void rotateCamera(const Ogre::Vector3 &rot, bool adjust);
 
         float getYaw();
@@ -68,21 +62,20 @@ namespace MWRender
         float getPitch();
         void setPitch(float angle);
 
-        void compensateYaw(float diff);
-        
-        std::string getHandle() const;
+        const std::string &getHandle() const;
 
         /// Attach camera to object
-        /// \note there is no protection from attaching the same camera to
-        /// several different objects
         void attachTo(const MWWorld::Ptr &);
 
         void toggleViewMode();
 
-        bool toggleVanityMode(bool enable, bool force = false);
+        bool toggleVanityMode(bool enable);
         void allowVanityMode(bool allow);
 
         void togglePreviewMode(bool enable);
+
+        bool isFirstPerson() const
+        { return !(mVanity.enabled || mPreviewMode || !mFirstPersonView); }
 
         void update(float duration);
 
@@ -96,8 +89,6 @@ namespace MWRender
         void setCameraDistance();
 
         void setAnimation(NpcAnimation *anim);
-        NpcAnimation *getAnimation() const
-        { return mAnimation; }
 
         void setHeight(float height);
         float getHeight();

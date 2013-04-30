@@ -109,13 +109,26 @@ NIFMeshLoader::LoaderMap NIFMeshLoader::sLoaders;
 
 void NIFMeshLoader::createSubMesh(Ogre::Mesh *mesh, const Nif::NiTriShape *shape)
 {
-    Ogre::SkeletonPtr skel;
     const Nif::NiTriShapeData *data = shape->data.getPtr();
     const Nif::NiSkinInstance *skin = (shape->skin.empty() ? NULL : shape->skin.getPtr());
     std::vector<Ogre::Vector3> srcVerts = data->vertices;
     std::vector<Ogre::Vector3> srcNorms = data->normals;
     Ogre::HardwareBuffer::Usage vertUsage = Ogre::HardwareBuffer::HBU_STATIC;
     bool vertShadowBuffer = false;
+
+    if(!shape->controller.empty())
+    {
+        Nif::ControllerPtr ctrl = shape->controller;
+        do {
+            if(ctrl->recType == Nif::RC_NiGeomMorpherController)
+            {
+                vertUsage = Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY;
+                vertShadowBuffer = true;
+                break;
+            }
+        } while(!(ctrl=ctrl->next).empty());
+    }
+
     if(skin != NULL)
     {
         vertUsage = Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY;
@@ -124,10 +137,6 @@ void NIFMeshLoader::createSubMesh(Ogre::Mesh *mesh, const Nif::NiTriShape *shape
         // Only set a skeleton when skinning. Unskinned meshes with a skeleton will be
         // explicitly attached later.
         mesh->setSkeletonName(mName);
-
-        // Get the skeleton resource, so vertices can be transformed into the bones' initial state.
-        Ogre::SkeletonManager *skelMgr = Ogre::SkeletonManager::getSingletonPtr();
-        skel = skelMgr->getByName(mName);
 
         // Convert vertices and normals to bone space from bind position. It would be
         // better to transform the bones into bind position, but there doesn't seem to
@@ -139,11 +148,10 @@ void NIFMeshLoader::createSubMesh(Ogre::Mesh *mesh, const Nif::NiTriShape *shape
         const Nif::NodeList &bones = skin->bones;
         for(size_t b = 0;b < bones.length();b++)
         {
-            Ogre::Bone *bone = skel->getBone(bones[b]->name);
             Ogre::Matrix4 mat;
             mat.makeTransform(data->bones[b].trafo.trans, Ogre::Vector3(data->bones[b].trafo.scale),
                               Ogre::Quaternion(data->bones[b].trafo.rotation));
-            mat = bone->_getFullTransform() * mat;
+            mat = bones[b]->getWorldTransform() * mat;
 
             const std::vector<Nif::NiSkinData::VertWeight> &weights = data->bones[b].weights;
             for(size_t i = 0;i < weights.size();i++)
@@ -296,6 +304,8 @@ void NIFMeshLoader::createSubMesh(Ogre::Mesh *mesh, const Nif::NiTriShape *shape
     // Assign bone weights for this TriShape
     if(skin != NULL)
     {
+        Ogre::SkeletonPtr skel = Ogre::SkeletonManager::getSingleton().getByName(mName);
+
         const Nif::NiSkinData *data = skin->data.getPtr();
         const Nif::NodeList &bones = skin->bones;
         for(size_t i = 0;i < bones.length();i++)

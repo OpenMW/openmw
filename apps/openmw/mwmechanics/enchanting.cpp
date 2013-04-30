@@ -134,7 +134,7 @@ namespace MWMechanics
         }
     }
 
-    int Enchanting::getEnchantCost() const
+    float Enchanting::getEnchantCost() const
     {
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
         float cost = 0;
@@ -193,7 +193,7 @@ namespace MWMechanics
         return soul->mData.mSoul;
     }
 
-    int Enchanting::getMaxEnchantValue() const
+    float Enchanting::getMaxEnchantValue() const
     {
         if (itemEmpty())
             return 0;

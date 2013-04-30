@@ -397,11 +397,24 @@ namespace MWGui
 
     void Console::setSelectedObject(const MWWorld::Ptr& object)
     {
-        mPtr = object;
-        if (!mPtr.isEmpty())
-            setTitle("#{sConsoleTitle} (" + mPtr.getCellRef().mRefID + ")");
+        if (!object.isEmpty())
+        {
+            if (object == mPtr)
+            {
+                setTitle("#{sConsoleTitle}");
+                mPtr=MWWorld::Ptr();
+            }
+            else
+            {
+                setTitle("#{sConsoleTitle} (" + object.getCellRef().mRefID + ")");
+                mPtr = object;
+            }
+        }
         else
+        {
             setTitle("#{sConsoleTitle}");
+            mPtr = MWWorld::Ptr();
+        }
         MyGUI::InputManager::getInstance().setKeyFocusWidget(command);
     }
 

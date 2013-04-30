@@ -49,7 +49,12 @@ namespace
                     {
                         rendering.addObject(ptr);
                         class_.insertObject(ptr, physics);
-                        MWBase::Environment::get().getWorld()->rotateObject(ptr, 0, 0, 0, true);
+
+                        float ax = Ogre::Radian(ptr.getRefData().getLocalRotation().rot[0]).valueDegrees();
+                        float ay = Ogre::Radian(ptr.getRefData().getLocalRotation().rot[1]).valueDegrees();
+                        float az = Ogre::Radian(ptr.getRefData().getLocalRotation().rot[2]).valueDegrees();
+                        MWBase::Environment::get().getWorld()->localRotateObject(ptr, ax, ay, az);
+
                         MWBase::Environment::get().getWorld()->scaleObject(ptr, ptr.getCellRef().mScale);
                         class_.adjustPosition(ptr);
                     }

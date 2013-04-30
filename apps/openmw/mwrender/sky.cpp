@@ -205,7 +205,7 @@ unsigned int Moon::getPhaseInt() const
     return 0;
 }
 
-SkyManager::SkyManager (SceneNode* root, Camera* pCamera)
+SkyManager::SkyManager(Ogre::SceneNode *root, Ogre::Camera *pCamera)
     : mHour(0.0f)
     , mDay(0)
     , mMonth(0)

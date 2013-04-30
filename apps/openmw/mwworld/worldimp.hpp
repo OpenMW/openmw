@@ -85,6 +85,11 @@ namespace MWWorld
             float mFaced2Distance;
             int mNumFacing;
 
+            bool mNewGame;
+
+            std::map<MWWorld::Ptr, int> mDoorStates;
+            ///< only holds doors that are currently moving. 0 means closing, 1 opening
+
             unsigned long lastTick;
             Ogre::Timer mTimer;
 
@@ -109,6 +114,9 @@ namespace MWWorld
             void removeContainerScripts(const Ptr& reference);
             void addContainerScripts(const Ptr& reference, Ptr::CellStore* cell);
             void PCDropped (const Ptr& item);
+
+            virtual void processDoors(float duration);
+            ///< Run physics simulation and modify \a world accordingly.
 
         public:
 
@@ -254,6 +262,8 @@ namespace MWWorld
             /// \param adjust indicates rotation should be set or adjusted
             virtual void rotateObject (const Ptr& ptr,float x,float y,float z, bool adjust = false);
 
+            virtual void localRotateObject (const Ptr& ptr, float x, float y, float z);
+
             virtual void safePlaceObject(const MWWorld::Ptr& ptr,MWWorld::CellStore &Cell,ESM::Position pos);
             ///< place an object in a "safe" location (ie not in the void, etc). Makes a copy of the Ptr.
 
@@ -345,8 +355,8 @@ namespace MWWorld
                 mRendering->togglePreviewMode(enable);
             }
 
-            virtual bool toggleVanityMode(bool enable, bool force) {
-                return mRendering->toggleVanityMode(enable, force);
+            virtual bool toggleVanityMode(bool enable) {
+                return mRendering->toggleVanityMode(enable);
             }
 
             virtual void allowVanityMode(bool allow) {
@@ -363,8 +373,13 @@ namespace MWWorld
 
             virtual bool vanityRotateCamera(float * rot);
 
-            virtual void setupPlayer(bool newGame);
+            virtual void setupPlayer();
             virtual void renderPlayer();
+
+            virtual bool getOpenOrCloseDoor(const MWWorld::Ptr& door);
+            ///< if activated, should this door be opened or closed?
+            virtual void activateDoor(const MWWorld::Ptr& door);
+            ///< activate (open or close) an non-teleport door
 
             virtual void setupExternalRendering (MWRender::ExternalRendering& rendering);
 

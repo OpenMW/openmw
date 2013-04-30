@@ -46,6 +46,7 @@ private:
     std::string     mHairModel;
     std::string     mBodyPrefix;
     ViewMode        mViewMode;
+    bool mShowWeapons;
 
     float mTimeToChange;
     MWWorld::ContainerStoreIterator mRobe;
@@ -60,6 +61,8 @@ private:
     MWWorld::ContainerStoreIterator mGloveL;
     MWWorld::ContainerStoreIterator mGloveR;
     MWWorld::ContainerStoreIterator mSkirtIter;
+    MWWorld::ContainerStoreIterator mWeapon;
+    MWWorld::ContainerStoreIterator mShield;
 
     int mVisibilityFlags;
 
@@ -84,6 +87,8 @@ public:
     virtual ~NpcAnimation();
 
     virtual Ogre::Vector3 runAnimation(float timepassed);
+
+    virtual void showWeapons(bool showWeapon);
 
     void setViewMode(ViewMode viewMode);
 

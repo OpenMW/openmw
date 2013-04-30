@@ -654,6 +654,12 @@ namespace MWMechanics
         }
     }
 
+    void MechanicsManager::forceStateUpdate(const MWWorld::Ptr &ptr)
+    {
+        if(MWWorld::Class::get(ptr).isActor())
+            mActors.forceStateUpdate(ptr);
+    }
+
     void MechanicsManager::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number)
     {
         if(MWWorld::Class::get(ptr).isActor())

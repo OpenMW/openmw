@@ -230,6 +230,8 @@ namespace MWBase
 
             virtual void rotateObject(const MWWorld::Ptr& ptr,float x,float y,float z, bool adjust = false) = 0;
 
+            virtual void localRotateObject (const MWWorld::Ptr& ptr, float x, float y, float z) = 0;
+
             virtual void safePlaceObject(const MWWorld::Ptr& ptr,MWWorld::CellStore &Cell,ESM::Position pos) = 0;
             ///< place an object in a "safe" location (ie not in the void, etc).
 
@@ -315,14 +317,19 @@ namespace MWBase
 
             virtual void togglePOV() = 0;
             virtual void togglePreviewMode(bool enable) = 0;
-            virtual bool toggleVanityMode(bool enable, bool force) = 0;
+            virtual bool toggleVanityMode(bool enable) = 0;
             virtual void allowVanityMode(bool allow) = 0;
             virtual void togglePlayerLooking(bool enable) = 0;
             virtual void changeVanityModeScale(float factor) = 0;
             virtual bool vanityRotateCamera(float * rot) = 0;
 
-            virtual void setupPlayer(bool newGame) = 0;
+            virtual void setupPlayer() = 0;
             virtual void renderPlayer() = 0;
+
+            virtual bool getOpenOrCloseDoor(const MWWorld::Ptr& door) = 0;
+            ///< if activated, should this door be opened or closed?
+            virtual void activateDoor(const MWWorld::Ptr& door) = 0;
+            ///< activate (open or close) an non-teleport door
 
             virtual void setupExternalRendering (MWRender::ExternalRendering& rendering) = 0;
 

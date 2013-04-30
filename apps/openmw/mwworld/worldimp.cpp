@@ -6,6 +6,8 @@
 #include <components/files/collections.hpp>
 #include <components/compiler/locals.hpp>
 
+#include <boost/math/special_functions/sign.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -16,7 +18,6 @@
 #include "../mwmechanics/movement.hpp"
 
 #include "../mwrender/sky.hpp"
-#include "../mwrender/player.hpp"
 
 #include "../mwclass/door.hpp"
 
@@ -163,7 +164,8 @@ namespace MWWorld
         ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap, int mActivationDistanceOverride)
     : mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
       mSky (true), mCells (mStore, mEsm),
-      mNumFacing(0), mActivationDistanceOverride (mActivationDistanceOverride),mFallback(fallbackMap)
+      mNumFacing(0), mActivationDistanceOverride (mActivationDistanceOverride),
+      mFallback(fallbackMap), mNewGame(newGame)
     {
         mPhysics = new PhysicsSystem(renderer);
         mPhysEngine = mPhysics->getEngine();
@@ -214,7 +216,7 @@ namespace MWWorld
         // global variables
         mGlobalVariables = new Globals (mStore);
 
-        if (newGame)
+        if (mNewGame)
         {
             // set new game mark
             mGlobalVariables->setInt ("chargenstate", 1);
@@ -810,17 +812,89 @@ namespace MWWorld
 
     void World::rotateObjectImp (const Ptr& ptr, Ogre::Vector3 rot, bool adjust)
     {
-        if (mRendering->rotateObject(ptr, rot, adjust))
+        const float two_pi = Ogre::Math::TWO_PI;
+        const float pi = Ogre::Math::PI;
+
+        float *objRot = ptr.getRefData().getPosition().rot;
+        if(adjust)
         {
-            // rotate physically iff renderer confirm so
-            float *objRot = ptr.getRefData().getPosition().rot;
+            objRot[0] += rot.x;
+            objRot[1] += rot.y;
+            objRot[2] += rot.z;
+        }
+        else
+        {
             objRot[0] = rot.x;
             objRot[1] = rot.y;
             objRot[2] = rot.z;
+        }
 
-            if (ptr.getRefData().getBaseNode() != 0) {
-                mPhysics->rotateObject(ptr);
-            }
+        if(Class::get(ptr).isActor())
+        {
+            /* HACK? Actors shouldn't really be rotating around X (or Y), but
+             * currently it's done so for rotating the camera, which needs
+             * clamping.
+             */
+            const float half_pi = Ogre::Math::HALF_PI;
+
+            if(objRot[0] < -half_pi)     objRot[0] = -half_pi;
+            else if(objRot[0] > half_pi) objRot[0] =  half_pi;
+        }
+        else
+        {
+            while(objRot[0] < -pi) objRot[0] += two_pi;
+            while(objRot[0] >  pi) objRot[0] -= two_pi;
+        }
+
+        while(objRot[1] < -pi) objRot[1] += two_pi;
+        while(objRot[1] >  pi) objRot[1] -= two_pi;
+
+        while(objRot[2] < -pi) objRot[2] += two_pi;
+        while(objRot[2] >  pi) objRot[2] -= two_pi;
+
+        if(ptr.getRefData().getBaseNode() != 0)
+        {
+            mRendering->rotateObject(ptr);
+            mPhysics->rotateObject(ptr);
+        }
+    }
+
+    void World::localRotateObject (const Ptr& ptr, float x, float y, float z)
+    {
+        if (ptr.getRefData().getBaseNode() != 0) {
+
+            ptr.getRefData().getLocalRotation().rot[0]=Ogre::Degree(x).valueRadians();
+            ptr.getRefData().getLocalRotation().rot[1]=Ogre::Degree(y).valueRadians();
+            ptr.getRefData().getLocalRotation().rot[2]=Ogre::Degree(z).valueRadians();
+
+            float fullRotateRad=Ogre::Degree(360).valueRadians();
+
+            while(ptr.getRefData().getLocalRotation().rot[0]>=fullRotateRad)
+                ptr.getRefData().getLocalRotation().rot[0]-=fullRotateRad;
+            while(ptr.getRefData().getLocalRotation().rot[1]>=fullRotateRad)
+                ptr.getRefData().getLocalRotation().rot[1]-=fullRotateRad;
+            while(ptr.getRefData().getLocalRotation().rot[2]>=fullRotateRad)
+                ptr.getRefData().getLocalRotation().rot[2]-=fullRotateRad;
+
+            while(ptr.getRefData().getLocalRotation().rot[0]<=-fullRotateRad)
+                ptr.getRefData().getLocalRotation().rot[0]+=fullRotateRad;
+            while(ptr.getRefData().getLocalRotation().rot[1]<=-fullRotateRad)
+                ptr.getRefData().getLocalRotation().rot[1]+=fullRotateRad;
+            while(ptr.getRefData().getLocalRotation().rot[2]<=-fullRotateRad)
+                ptr.getRefData().getLocalRotation().rot[2]+=fullRotateRad;
+
+            float *worldRot = ptr.getRefData().getPosition().rot;
+
+            Ogre::Quaternion worldRotQuat(Ogre::Quaternion(Ogre::Radian(-worldRot[0]), Ogre::Vector3::UNIT_X)*
+            Ogre::Quaternion(Ogre::Radian(-worldRot[1]), Ogre::Vector3::UNIT_Y)*
+            Ogre::Quaternion(Ogre::Radian(-worldRot[2]), Ogre::Vector3::UNIT_Z));
+
+            Ogre::Quaternion rot(Ogre::Quaternion(Ogre::Radian(Ogre::Degree(-x).valueRadians()), Ogre::Vector3::UNIT_X)*
+            Ogre::Quaternion(Ogre::Radian(Ogre::Degree(-y).valueRadians()), Ogre::Vector3::UNIT_Y)*
+            Ogre::Quaternion(Ogre::Radian(Ogre::Degree(-z).valueRadians()), Ogre::Vector3::UNIT_Z));
+
+            ptr.getRefData().getBaseNode()->setOrientation(worldRotQuat*rot);
+            mPhysics->rotateObject(ptr);
         }
     }
 
@@ -923,8 +997,64 @@ namespace MWWorld
                                                !isSwimming(player->first) && !isFlying(player->first));
             moveObjectImp(player->first, vec.x, vec.y, vec.z);
         }
-        // the only purpose this has currently is to update the debug drawer
+
+        processDoors(duration);
+
         mPhysEngine->stepSimulation (duration);
+    }
+
+    void World::processDoors(float duration)
+    {
+        std::map<MWWorld::Ptr, int>::iterator it = mDoorStates.begin();
+        while (it != mDoorStates.end())
+        {
+            if (!mWorldScene->isCellActive(*it->first.getCell()))
+                mDoorStates.erase(it++);
+            else
+            {
+                float oldRot = Ogre::Radian(it->first.getRefData().getLocalRotation().rot[2]).valueDegrees();
+                float diff = duration * 90;
+                float targetRot = std::min(std::max(0.f, oldRot + diff * (it->second ? 1 : -1)), 90.f);
+                localRotateObject(it->first, 0, 0, targetRot);
+
+                // AABB of the door
+                Ogre::Vector3 min,max;
+                mPhysics->getObjectAABB(it->first, min, max);
+                Ogre::Vector3 dimensions = max-min;
+
+                std::vector<std::string> collisions = mPhysics->getCollisions(it->first);
+                for (std::vector<std::string>::iterator cit = collisions.begin(); cit != collisions.end(); ++cit)
+                {
+                    MWWorld::Ptr ptr = getPtrViaHandle(*cit);
+                    if (MWWorld::Class::get(ptr).isActor())
+                    {
+                        // we collided with an actor, we need to undo the rotation and push the door away from the actor
+
+                        // figure out on which side of the door the actor we collided with is
+                        Ogre::Vector3 relativePos = it->first.getRefData().getBaseNode()->
+                                convertWorldToLocalPosition(ptr.getRefData().getBaseNode()->_getDerivedPosition());
+
+                        float axisToCheck;
+                        if (dimensions.x > dimensions.y)
+                            axisToCheck = relativePos.y * boost::math::sign((min+max).y);
+                        else
+                            axisToCheck = relativePos.x * boost::math::sign((min+max).x);
+                        if (axisToCheck >= 0)
+                            targetRot = std::min(std::max(0.f, oldRot + diff*0.5f), 90.f);
+                        else
+                            targetRot = std::min(std::max(0.f, oldRot - diff*0.5f), 90.f);
+
+                        localRotateObject(it->first, 0, 0, targetRot);
+                        break;
+                    }
+                }
+
+                if ((targetRot == 90.f && it->second) || targetRot == 0.f)
+                    mDoorStates.erase(it++);
+                else
+                    ++it;
+            }
+        }
     }
 
     bool World::toggleCollisionMode()
@@ -1022,8 +1152,8 @@ namespace MWWorld
 
         float pitch, yaw;
         Ogre::Vector3 eyepos;
-        mRendering->getPlayerData(eyepos, pitch, yaw);
-        mPhysics->updatePlayerData(eyepos, pitch, yaw);
+        mRendering->getCameraData(eyepos, pitch, yaw);
+        mPhysics->updateCameraData(eyepos, pitch, yaw);
 
         performUpdateSceneQueries ();
 
@@ -1367,15 +1497,17 @@ namespace MWWorld
         return mRendering->vanityRotateCamera(rot);
     }
 
-    void World::setupPlayer(bool newGame)
+    void World::setupPlayer()
     {
-        const ESM::NPC* player = mStore.get<ESM::NPC>().find ("player");
-        mPlayer = new MWWorld::Player (player, *this);
-        mRendering->attachCameraTo(mPlayer->getPlayer());
-        if (newGame)
+        const ESM::NPC *player = mStore.get<ESM::NPC>().find("player");
+        mPlayer = new MWWorld::Player(player, *this);
+
+        Ptr ptr = mPlayer->getPlayer();
+        mRendering->setupPlayer(ptr);
+        if (mNewGame)
         {
-            MWWorld::Class::get(mPlayer->getPlayer()).getContainerStore(mPlayer->getPlayer()).fill(player->mInventory, "", mStore);
-            MWWorld::Class::get(mPlayer->getPlayer()).getInventoryStore(mPlayer->getPlayer()).autoEquip (mPlayer->getPlayer());
+            MWWorld::Class::get(ptr).getContainerStore(ptr).fill(player->mInventory, "", mStore);
+            MWWorld::Class::get(ptr).getInventoryStore(ptr).autoEquip(ptr);
         }
     }
 
@@ -1383,6 +1515,8 @@ namespace MWWorld
     {
         mRendering->renderPlayer(mPlayer->getPlayer());
         mPhysics->addActor(mPlayer->getPlayer());
+        if (mNewGame)
+            toggleCollisionMode();
     }
 
     void World::setupExternalRendering (MWRender::ExternalRendering& rendering)
@@ -1398,7 +1532,7 @@ namespace MWWorld
         Ogre::Vector3 playerPos(refdata.getPosition().pos);
 
         const OEngine::Physic::PhysicActor *physactor = mPhysEngine->getCharacter(refdata.getHandle());
-        if(!physactor->getOnGround() || isUnderwater(currentCell, playerPos))
+        if((!physactor->getOnGround()&&physactor->getCollisionMode()) || isUnderwater(currentCell, playerPos))
             return 2;
         if((currentCell->mCell->mData.mFlags&ESM::Cell::NoSleep))
             return 1;
@@ -1424,5 +1558,28 @@ namespace MWWorld
     void World::frameStarted (float dt)
     {
         mRendering->frameStarted(dt);
+    }
+
+    void World::activateDoor(const MWWorld::Ptr& door)
+    {
+        if (mDoorStates.find(door) != mDoorStates.end())
+        {
+            // if currently opening, then close, if closing, then open
+            mDoorStates[door] = !mDoorStates[door];
+        }
+        else
+        {
+            if (door.getRefData().getLocalRotation().rot[2] == 0)
+                mDoorStates[door] = 1; // open
+            else
+                mDoorStates[door] = 0; // close
+        }
+    }
+
+    bool World::getOpenOrCloseDoor(const Ptr &door)
+    {
+        if (mDoorStates.find(door) != mDoorStates.end())
+            return !mDoorStates[door]; // if currently opening or closing, then do the opposite
+        return door.getRefData().getLocalRotation().rot[2] == 0;
     }
 }

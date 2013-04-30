@@ -220,7 +220,7 @@ namespace MWGui
     virtual void loadingDone();
 
     virtual void enableRest() { mRestAllowed = true; }
-    virtual bool getRestEnabled() { return mRestAllowed; }
+    virtual bool getRestEnabled();
 
     virtual bool getPlayerSleeping();
     virtual void wakeUpPlayer();
