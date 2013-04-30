@@ -43,22 +43,6 @@ struct DialInfo
     {
         std::string mSelectRule; // This has a complicated format
         Variant mValue;
-
-#ifdef OPENMW_ESM_ENABLE_CPP11_MOVE
-        OPENMW_ESM_DEFINE_CPP11_MOVE_OPS(SelectStruct)
-        
-        static void copy (SelectStruct & d, SelectStruct const & s)
-        {
-            d.mSelectRule   = s.mSelectRule;
-            d.mValue        = s.mValue;
-        }
-
-        static void move (SelectStruct & d, SelectStruct & s)
-        {
-            d.mSelectRule   = std::move (s.mSelectRule);
-            d.mValue        = std::move (s.mValue);
-        }
-#endif // OPENMW_ESM_ENABLE_CPP11_MOVE
     };
 
     // Journal quest indices (introduced with the quest system in Tribunal)
@@ -116,50 +100,6 @@ struct DialInfo
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
-
-#ifdef OPENMW_ESM_ENABLE_CPP11_MOVE
-    OPENMW_ESM_DEFINE_CPP11_MOVE_OPS(DialInfo)
-
-    static void copy (DialInfo & d, DialInfo const & s)
-    {
-        d.mData             = s.mData;
-        d.mSelects          = s.mSelects;
-        d.mId               = s.mId;
-        d.mPrev             = s.mPrev;
-        d.mNext             = s.mNext;
-        d.mActor            = s.mActor;
-        d.mRace             = s.mRace;
-        d.mClass            = s.mClass;
-        d.mNpcFaction       = s.mNpcFaction;
-        d.mPcFaction        = s.mPcFaction;
-        d.mCell             = s.mCell;
-        d.mSound            = s.mSound;
-        d.mResponse         = s.mResponse;
-        d.mResultScript     = s.mResultScript;
-        d.mFactionLess      = s.mFactionLess;
-        d.mQuestStatus      = s.mQuestStatus;
-    }
-
-    static void move (DialInfo & d, DialInfo & s)
-    {
-        d.mData         = std::move (s.mData);
-        d.mSelects      = std::move (s.mSelects);
-        d.mId           = std::move (s.mId);
-        d.mPrev         = std::move (s.mPrev);
-        d.mNext         = std::move (s.mNext);
-        d.mActor        = std::move (s.mActor);
-        d.mRace         = std::move (s.mRace);
-        d.mClass        = std::move (s.mClass);
-        d.mNpcFaction   = std::move (s.mNpcFaction);
-        d.mPcFaction    = std::move (s.mPcFaction);
-        d.mCell         = std::move (s.mCell);
-        d.mSound        = std::move (s.mSound);
-        d.mResponse     = std::move (s.mResponse);
-        d.mResultScript = std::move (s.mResultScript);
-        d.mFactionLess  = std::move (s.mFactionLess);
-        d.mQuestStatus  = std::move (s.mQuestStatus);
-    }
-#endif // OPENMW_ESM_ENABLE_CPP11_MOVE
 };
 
 }
