@@ -31,6 +31,8 @@
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
 
+#include "../mwmechanics/stat.hpp"
+#include "../mwmechanics/creaturestats.hpp"
 
 namespace MWMechanics
 {
@@ -105,7 +107,7 @@ static void getStateInfo(CharacterState state, std::string *group)
 
 CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state, bool loop)
     : mPtr(ptr), mAnimation(anim), mCharState(state), mSkipAnim(false), mMovingAnim(false), 
-    mSecondsOfRunning(0), mSecondsOfSwimming(0), mSecondsOfFalling(0)
+    mSecondsOfRunning(0), mSecondsOfSwimming(0), mHighestPosition(0)
 {
     if(!mAnimation)
         return;
@@ -200,7 +202,28 @@ void CharacterController::update(float duration, Movement &movement)
                 movement.mPosition[2] += x * 0.707f * duration;
             }
 
+            //To calculate how much player will fall down
+            if(movement.mPosition[2] > mHighestPosition)
+                mHighestPosition = movement.mPosition[2];
+
             //decrease fatigue by fFatigueJumpBase + (1 - normalizedEncumbrance) * fFatigueJumpMult;
+        }
+        else if(vec.z==0.0f && getState()==CharState_Jump)
+        {
+            float healthLost = cls.getFallDamage(mPtr, mHighestPosition);
+
+            if(healthLost>0.0f)
+            {
+                DynamicStat<float> health = cls.getCreatureStats(mPtr).getHealth();
+                int fatigue = MWWorld::Class::get (mPtr).getCreatureStats (mPtr).getFatigue().getBase();
+                int iHealth = health.getBase();
+                health.setBase (iHealth-(healthLost * (1 - (0.25 * fatigue))));
+                cls.getCreatureStats(mPtr).setHealth (health);
+                MWWorld::Class::get(mPtr).skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, 1);
+            }
+
+            setState(CharState_Idle, true);
+            mHighestPosition=0;
         }
 
         if(std::abs(vec.x/2.0f) > std::abs(vec.y) && speed > 0.0f)
