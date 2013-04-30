@@ -104,7 +104,8 @@ static void getStateInfo(CharacterState state, std::string *group)
 
 
 CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state, bool loop)
-    : mPtr(ptr), mAnimation(anim), mCharState(state), mSkipAnim(false), mMovingAnim(false), mSecondsOfRunning(0), mSecondsOfSwimming(0)
+    : mPtr(ptr), mAnimation(anim), mCharState(state), mSkipAnim(false), mMovingAnim(false), 
+    mSecondsOfRunning(0), mSecondsOfSwimming(0), mSecondsOfFalling(0)
 {
     if(!mAnimation)
         return;
@@ -176,10 +177,16 @@ void CharacterController::update(float duration, Movement &movement)
             }
         }
 
-        /* FIXME: The state should be set to Jump, and X/Y movement should be disallowed except
-         * for the initial thrust (which would be carried by "physics" until landing). */
+        // FIXME: X/Y movement should be disallowed except for the initial thrust (which would be carried by "physics" until landing).
         if(onground && vec.z > 0.0f)
         {
+            //Advance acrobatics on jump
+            if(getState()!=CharState_Jump)
+            {
+                setState(CharState_Jump, true);
+                MWWorld::Class::get(mPtr).skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, 0);
+            }
+
             float x = cls.getJump(mPtr);
 
             if(vec.x == 0 && vec.y == 0)

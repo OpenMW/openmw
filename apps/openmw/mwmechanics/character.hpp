@@ -82,6 +82,7 @@ class CharacterController
     // counted for skill increase
     float mSecondsOfSwimming;
     float mSecondsOfRunning;
+    float mSecondsOfFalling;
 
     bool mMovingAnim;
 
