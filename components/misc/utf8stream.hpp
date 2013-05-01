@@ -3,22 +3,22 @@
 
 #include <boost/tuple/tuple.hpp>
 
-class utf8_stream
+class Utf8Stream
 {
 public:
 
-    typedef uint32_t unicode_char;
-    typedef unsigned char const * point;
+    typedef uint32_t UnicodeChar;
+    typedef unsigned char const * Point;
 
     //static const unicode_char sBadChar = 0xFFFFFFFF; gcc can't handle this
-    static unicode_char sBadChar () { return unicode_char (0xFFFFFFFF); }
+    static UnicodeChar sBadChar () { return UnicodeChar (0xFFFFFFFF); }
 
-    utf8_stream (point begin, point end) :
+    Utf8Stream (Point begin, Point end) :
         cur (begin), nxt (begin), end (end)
     {
     }
 
-    utf8_stream (std::pair <point, point> range) :
+    Utf8Stream (std::pair <Point, Point> range) :
         cur (range.first), nxt (range.first), end (range.second)
     {
     }
@@ -28,19 +28,19 @@ public:
         return cur == end;
     }
 
-    point current () const
+    Point current () const
     {
         return cur;
     }
 
-    unicode_char peek ()
+    UnicodeChar peek ()
     {
         if (cur == nxt)
             next ();
         return val;
     }
 
-    unicode_char consume ()
+    UnicodeChar consume ()
     {
         if (cur == nxt)
             next ();
@@ -48,24 +48,24 @@ public:
         return val;
     }
 
-    static std::pair <unicode_char, point> decode (point cur, point end)
+    static std::pair <UnicodeChar, Point> decode (Point cur, Point end)
     {
         if ((*cur & 0x80) == 0)
         {
-            unicode_char chr = *cur++;
+            UnicodeChar chr = *cur++;
 
             return std::make_pair (chr, cur);
         }
 
         int octets;
-        unicode_char chr;
+        UnicodeChar chr;
 
         boost::tie (octets, chr) = octet_count (*cur++);
 
         if (octets > 5)
             return std::make_pair (sBadChar(), cur);
 
-        point eoc = cur + octets;
+        Point eoc = cur + octets;
 
         if (eoc > end)
             return std::make_pair (sBadChar(), cur);
@@ -75,7 +75,7 @@ public:
             if ((*cur & 0xC0) != 0x80) // check continuation mark
                 return std::make_pair (sBadChar(), cur);;
 
-            chr = (chr << 6) | unicode_char ((*cur++) & 0x3F);
+            chr = (chr << 6) | UnicodeChar ((*cur++) & 0x3F);
         }
 
         return std::make_pair (chr, cur);
@@ -83,7 +83,7 @@ public:
 
 private:
 
-    static std::pair <int, unicode_char> octet_count (unsigned char octet)
+    static std::pair <int, UnicodeChar> octet_count (unsigned char octet)
     {
         int octets;
 
@@ -107,10 +107,10 @@ private:
         boost::tie (val, nxt) = decode (nxt, end);
     }
 
-    point cur;
-    point nxt;
-    point end;
-    unicode_char val;
+    Point cur;
+    Point nxt;
+    Point end;
+    UnicodeChar val;
 };
 
 #endif

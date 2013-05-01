@@ -13,17 +13,17 @@ namespace MWGui
     /// View-Model for the journal GUI
     ///
     /// This interface defines an abstract data model suited
-    //  specifically to the needs of the journal GUI. It isolates
+    ///  specifically to the needs of the journal GUI. It isolates
     /// the journal GUI from the implementation details of the
     /// game data store.
     struct JournalViewModel
     {
-        typedef boost::shared_ptr <JournalViewModel> ptr;
+        typedef boost::shared_ptr <JournalViewModel> Ptr;
 
-        typedef intptr_t quest_id;
-        typedef intptr_t topic_id;
-        typedef uint8_t const * utf8_point;
-        typedef std::pair <utf8_point, utf8_point> utf8_span;
+        typedef intptr_t QuestId;
+        typedef intptr_t TopicId;
+        typedef uint8_t const * Utf8Point;
+        typedef std::pair <Utf8Point, Utf8Point> Utf8Span;
 
         /// The base interface for both journal entries and topics.
         struct Entry
@@ -33,12 +33,12 @@ namespace MWGui
             /// This function returns a borrowed reference to the body of the
             /// journal entry. The returned reference becomes invalid when the
             /// entry is destroyed.
-            virtual utf8_span body () const = 0;
+            virtual Utf8Span body () const = 0;
 
             /// Visits each subset of text in the body, delivering the beginning
             /// and end of the span relative to the body, and a valid topic ID if
             /// the span represents a keyword, or zero if not.
-            virtual void visitSpans (boost::function <void (topic_id, size_t, size_t)> visitor) const = 0;
+            virtual void visitSpans (boost::function <void (TopicId, size_t, size_t)> visitor) const = 0;
         };
 
         /// An interface to topic data.
@@ -46,7 +46,7 @@ namespace MWGui
         {
             /// Returns a pre-formatted span of UTF8 encoded text representing
             /// the name of the NPC this portion of dialog was heard from.
-            virtual utf8_span source () const = 0;
+            virtual Utf8Span source () const = 0;
         };
 
         /// An interface to journal data.
@@ -54,7 +54,7 @@ namespace MWGui
         {
             /// Returns a pre-formatted span of UTF8 encoded text representing
             /// the in-game date this entry was added to the journal.
-            virtual utf8_span timestamp () const = 0;
+            virtual Utf8Span timestamp () const = 0;
         };
 
 
@@ -68,25 +68,25 @@ namespace MWGui
         virtual bool isEmpty () const = 0;
 
         /// provides access to the name of the quest with the specified identifier
-        virtual void visitQuestName (topic_id topicId, boost::function <void (utf8_span)> visitor) const = 0;
+        virtual void visitQuestName (TopicId topicId, boost::function <void (Utf8Span)> visitor) const = 0;
 
         /// walks the active and optionally completed, quests providing the quest id and name
-        virtual void visitQuestNames (bool active_only, boost::function <void (quest_id, utf8_span)> visitor) const = 0;
+        virtual void visitQuestNames (bool active_only, boost::function <void (QuestId, Utf8Span)> visitor) const = 0;
 
         /// walks over the journal entries related to the specified quest identified by its id
-        virtual void visitJournalEntries (quest_id questId, boost::function <void (JournalEntry const &)> visitor) const = 0;
+        virtual void visitJournalEntries (QuestId questId, boost::function <void (JournalEntry const &)> visitor) const = 0;
 
         /// provides the name of the topic specified by its id
-        virtual void visitTopicName (topic_id topicId, boost::function <void (utf8_span)> visitor) const = 0;
+        virtual void visitTopicName (TopicId topicId, boost::function <void (Utf8Span)> visitor) const = 0;
 
         /// walks over the topics whose names start with the specified character providing the topics id and name
-        virtual void visitTopicNamesStartingWith (int character, boost::function < void (topic_id , utf8_span) > visitor) const = 0;
+        virtual void visitTopicNamesStartingWith (char character, boost::function < void (TopicId , Utf8Span) > visitor) const = 0;
 
         /// walks over the topic entries for the topic specified by its identifier
-        virtual void visitTopicEntries (topic_id topicId, boost::function <void (TopicEntry const &)> visitor) const = 0;
+        virtual void visitTopicEntries (TopicId topicId, boost::function <void (TopicEntry const &)> visitor) const = 0;
 
         // create an instance of the default journal view model implementation
-        static ptr create ();
+        static Ptr create ();
     };
 }
 

@@ -51,21 +51,21 @@ namespace
     {
         struct DisplayState
         {
-            int mPage;
-            book mBook;
+            unsigned int mPage;
+            Book mBook;
         };
 
-        typedef std::stack <DisplayState> display_state_stack;
+        typedef std::stack <DisplayState> DisplayStateStack;
 
-        display_state_stack mStates;
-        book mTopicIndexBook;
+        DisplayStateStack mStates;
+        Book mTopicIndexBook;
         bool mQuestMode;
         bool mAllQuests;
 
-        template <typename widget_type>
-        widget_type * getWidget (char const * name)
+        template <typename T>
+        T * getWidget (char const * name)
         {
-            widget_type * widget;
+            T * widget;
             WindowBase::getWidget (widget, name);
             return widget;
         }
@@ -94,7 +94,7 @@ namespace
             return getWidget <MWGui::BookPage> (name);
         }
 
-        JournalWindowImpl (JournalViewModel::ptr Model)
+        JournalWindowImpl (JournalViewModel::Ptr Model)
             : WindowBase("openmw_journal.layout"), JournalBooks (Model)
         {
             mMainWidget->setVisible(false);
@@ -114,7 +114,7 @@ namespace
             adviseButtonClick (ShowActiveBTN, &JournalWindowImpl::notifyShowActive);
 
             {
-                BookPage::click_callback callback;
+                BookPage::ClickCallback callback;
                 
                 callback = boost::bind (&JournalWindowImpl::notifyTopicClicked, this, _1);
 
@@ -124,7 +124,7 @@ namespace
             }
 
             {
-                BookPage::click_callback callback;
+                BookPage::ClickCallback callback;
                 
                 callback = boost::bind (&JournalWindowImpl::notifyIndexLinkClicked, this, _1);
 
@@ -133,7 +133,7 @@ namespace
             }
 
             {
-                BookPage::click_callback callback;
+                BookPage::ClickCallback callback;
                 
                 callback = boost::bind (&JournalWindowImpl::notifyQuestClicked, this, _1);
 
@@ -146,14 +146,14 @@ namespace
 
         void open()
         {
-            Model->load ();
+            mModel->load ();
 
             setBookMode ();
 
             MWBase::Environment::get().getSoundManager()->playSound ("book open", 1.0, 1.0);
 
-            book journalBook;
-            if (Model->isEmpty ())
+            Book journalBook;
+            if (mModel->isEmpty ())
                 journalBook = createEmptyJournalBook ();
             else
                 journalBook = createJournalBook ();
@@ -163,10 +163,10 @@ namespace
 
         void close()
         {
-            Model->unload ();
+            mModel->unload ();
 
-            getPage (LeftBookPage)->showPage (book (), 0);
-            getPage (RightBookPage)->showPage (book (), 0);
+            getPage (LeftBookPage)->showPage (Book (), 0);
+            getPage (RightBookPage)->showPage (Book (), 0);
 
             while (!mStates.empty ())
                 mStates.pop ();
@@ -209,24 +209,24 @@ namespace
 
             //TODO: figure out how to make "options" page overlay book page
             //      correctly, so that text may show underneath
-            getPage (RightBookPage)->showPage (book (), 0);
+            getPage (RightBookPage)->showPage (Book (), 0);
         }
 
-        void pushBook (book Book, int Page)
+        void pushBook (Book book, unsigned int page)
         {
             DisplayState bs;
-            bs.mPage = Page;
-            bs.mBook = Book;
+            bs.mPage = page;
+            bs.mBook = book;
             mStates.push (bs);
             updateShowingPages ();
             updateCloseJournalButton ();
         }
 
-        void replaceBook (book Book, int Page)
+        void replaceBook (Book book, unsigned int page)
         {
             assert (!mStates.empty ());
-            mStates.top ().mBook = Book;
-            mStates.top ().mPage = Page;
+            mStates.top ().mBook = book;
+            mStates.top ().mPage = page;
             updateShowingPages ();
         }
 
@@ -245,38 +245,38 @@ namespace
 
         void updateShowingPages ()
         {
-            book Book;
-            int Page;
-            int relPages;
+            Book book;
+            unsigned int page;
+            unsigned int relPages;
 
             if (!mStates.empty ())
             {
-                Book = mStates.top ().mBook;
-                Page = mStates.top ().mPage;
-                relPages = Book->pageCount () - Page;
+                book = mStates.top ().mBook;
+                page = mStates.top ().mPage;
+                relPages = book->pageCount () - page;
             }
             else
             {
-                Page = 0;
+                page = 0;
                 relPages = 0;
             }
 
-            setVisible (PrevPageBTN, Page > 0);
+            setVisible (PrevPageBTN, page > 0);
             setVisible (NextPageBTN, relPages > 2);
 
             setVisible (PageOneNum, relPages > 0);
             setVisible (PageTwoNum, relPages > 1);
 
-            getPage (LeftBookPage)->showPage ((relPages > 0) ? Book : book (), Page+0);
-            getPage (RightBookPage)->showPage ((relPages > 0) ? Book : book (), Page+1);
+            getPage (LeftBookPage)->showPage ((relPages > 0) ? book : Book (), page+0);
+            getPage (RightBookPage)->showPage ((relPages > 0) ? book : Book (), page+1);
 
-            setText (PageOneNum, Page + 1);
-            setText (PageTwoNum, Page + 2);
+            setText (PageOneNum, page + 1);
+            setText (PageTwoNum, page + 2);
         }
 
         void notifyTopicClicked (intptr_t linkId)
         {
-            book topicBook = createTopicBook (linkId);
+            Book topicBook = createTopicBook (linkId);
 
             if (mStates.size () > 1)
                 replaceBook (topicBook, 0);
@@ -290,12 +290,12 @@ namespace
 
         void notifyQuestClicked (intptr_t questId)
         {
-            book Book = createQuestBook (questId);
+            Book book = createQuestBook (questId);
 
             if (mStates.size () > 1)
-                replaceBook (Book, 0);
+                replaceBook (book, 0);
             else
-                pushBook (Book, 0);
+                pushBook (book, 0);
 
             setVisible (OptionsOverlay, false);
             setVisible (OptionsBTN, true);
@@ -319,16 +319,16 @@ namespace
             popBook ();
         }
 
-        void showList (char const * ListId, char const * PageId, book book)
+        void showList (char const * listId, char const * pageId, Book book)
         {
             std::pair <int, int> size = book->getSize ();
 
-            getPage (PageId)->showPage (book, 0);
+            getPage (pageId)->showPage (book, 0);
 
-            getWidget <ScrollView> (ListId)->setCanvasSize (size.first, size.second);
+            getWidget <ScrollView> (listId)->setCanvasSize (size.first, size.second);
         }
 
-        void notifyIndexLinkClicked (TypesetBook::interactive_id character)
+        void notifyIndexLinkClicked (TypesetBook::InteractiveId character)
         {
             setVisible (LeftTopicIndex, false);
             setVisible (RightTopicIndex, false);
@@ -392,12 +392,12 @@ namespace
         {
             if (!mStates.empty ())
             {
-                int  & Page = mStates.top ().mPage;
-                book   Book = mStates.top ().mBook;
+                unsigned int  & page = mStates.top ().mPage;
+                Book   book = mStates.top ().mBook;
 
-                if (Page < Book->pageCount () - 2)
+                if (page < book->pageCount () - 2)
                 {
-                    Page += 2;
+                    page += 2;
                     updateShowingPages ();
                 }
             }
@@ -407,11 +407,11 @@ namespace
         {
             if (!mStates.empty ())
             {
-                int & Page = mStates.top ().mPage;
+                unsigned int & page = mStates.top ().mPage;
 
-                if(Page > 0)
+                if(page > 0)
                 {
-                    Page -= 2;
+                    page -= 2;
                     updateShowingPages ();
                 }
             }
@@ -420,7 +420,7 @@ namespace
 }
 
 // glue the implementation to the interface
-JournalWindow * MWGui::JournalWindow::create (JournalViewModel::ptr Model)
+JournalWindow * MWGui::JournalWindow::create (JournalViewModel::Ptr Model)
 {
     return new JournalWindowImpl (Model);
 }

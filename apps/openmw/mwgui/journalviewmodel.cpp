@@ -5,7 +5,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwdialogue/journalentry.hpp"
 
-//#include "MyGUI_LanguageManager.h"
+#include <MyGUI_LanguageManager.h>
 
 #include <components/misc/utf8stream.hpp>
 
@@ -24,18 +24,18 @@ class KeywordSearch
 {
 public:
 
-    typedef typename string_t::const_iterator point;
+    typedef typename string_t::const_iterator Point;
 
     struct Match
     {
-        point mBeg;
-        point mEnd;
+        Point mBeg;
+        Point mEnd;
         value_t mValue;
     };
 
-    void seed (string_t Keyword, value_t Value)
+    void seed (string_t keyword, value_t value)
     {
-        seed_impl  (/*std::move*/ (Keyword), /*std::move*/ (Value), 0, mRoot);
+        seed_impl  (/*std::move*/ (keyword), /*std::move*/ (value), 0, mRoot);
     }
 
     void clear ()
@@ -44,9 +44,9 @@ public:
         mRoot.mKeyword.clear ();
     }
 
-    bool search (point Beg, point End, Match & Match)
+    bool search (Point beg, Point end, Match & match)
     {
-        for (point i = Beg; i != End; ++i)
+        for (Point i = beg; i != end; ++i)
         {
             // check first character
             typename Entry::childen_t::iterator candidate = mRoot.mChildren.find (std::tolower (*i, mLocale));
@@ -56,9 +56,9 @@ public:
                 continue;
 
             // see how far the match goes
-            point j = i;
+            Point j = i;
 
-            while ((j + 1) != End)
+            while ((j + 1) != end)
             {
                 typename Entry::childen_t::iterator next = candidate->second.mChildren.find (std::tolower (*++j, mLocale));
 
@@ -75,7 +75,7 @@ public:
             // match the rest of the keyword
             typename string_t::const_iterator t = candidate->second.mKeyword.begin () + (j - i);
 
-            while (j != End && t != candidate->second.mKeyword.end ())
+            while (j != end && t != candidate->second.mKeyword.end ())
             {
                 if (std::tolower (*j, mLocale) != std::tolower (*t, mLocale))
                     break;
@@ -88,9 +88,9 @@ public:
                 continue;
 
             // we did it, report the good news
-            Match.mValue = candidate->second.mValue;
-            Match.mBeg = i;
-            Match.mEnd = j;
+            match.mValue = candidate->second.mValue;
+            match.mBeg = i;
+            match.mEnd = j;
 
             return true;
         }
@@ -110,22 +110,22 @@ private:
         childen_t mChildren;
     };
 
-    void seed_impl (string_t Keyword, value_t Value, size_t Depth, Entry  & Entry)
+    void seed_impl (string_t keyword, value_t value, size_t depth, Entry  & entry)
     {
-        int ch = tolower (Keyword.at (Depth), mLocale);
+        int ch = tolower (keyword.at (depth), mLocale);
 
-        typename Entry::childen_t::iterator j = Entry.mChildren.find (ch);
+        typename Entry::childen_t::iterator j = entry.mChildren.find (ch);
 
-        if (j == Entry.mChildren.end ())
+        if (j == entry.mChildren.end ())
         {
-            Entry.mChildren [ch].mValue = /*std::move*/ (Value);
-            Entry.mChildren [ch].mKeyword = /*std::move*/ (Keyword);
+            entry.mChildren [ch].mValue = /*std::move*/ (value);
+            entry.mChildren [ch].mKeyword = /*std::move*/ (keyword);
         }
         else
         {
             if (j->second.mKeyword.size () > 0)
             {
-                if (Keyword == j->second.mKeyword)
+                if (keyword == j->second.mKeyword)
                     throw std::runtime_error ("duplicate keyword inserted");
 
                 value_t pushValue = /*std::move*/ (j->second.mValue);
@@ -133,13 +133,15 @@ private:
 
                 j->second.mKeyword.clear ();
 
-                if (Depth >= pushKeyword.size ())
+                if (depth >= pushKeyword.size ())
                     throw std::runtime_error ("unexpected");
 
-                seed_impl (/*std::move*/ (pushKeyword), /*std::move*/ (pushValue), Depth+1, j->second);
+                if (depth+1 < pushKeyword.size())
+                    seed_impl (/*std::move*/ (pushKeyword), /*std::move*/ (pushValue), depth+1, j->second);
             }
 
-            seed_impl (/*std::move*/ (Keyword), /*std::move*/ (Value), Depth+1, j->second);
+            if (depth+1 < keyword.size())
+                seed_impl (/*std::move*/ (keyword), /*std::move*/ (value), depth+1, j->second);
         }
 
     }
@@ -166,15 +168,15 @@ struct MWGui::JournalViewModelImpl : JournalViewModel
     {
     }
 
-    //TODO: replace this nasty BS
-    static utf8_span toUtf8Span (std::string const & str)
+    /// \todo replace this nasty BS
+    static Utf8Span toUtf8Span (std::string const & str)
     {
         if (str.size () == 0)
-            return utf8_span (utf8_point (NULL), utf8_point (NULL));
+            return Utf8Span (Utf8Point (NULL), Utf8Point (NULL));
 
-        utf8_point point = reinterpret_cast <utf8_point> (str.c_str ());
+        Utf8Point point = reinterpret_cast <Utf8Point> (str.c_str ());
 
-        return utf8_span (point, point + str.size ());
+        return Utf8Span (point, point + str.size ());
     }
 
     void load ()
@@ -215,10 +217,10 @@ struct MWGui::JournalViewModelImpl : JournalViewModel
         typedef t_iterator iterator_t;
 
         iterator_t                      itr;
-        JournalViewModelImpl const *    Model;
+        JournalViewModelImpl const *    mModel;
 
-        BaseEntry (JournalViewModelImpl const * Model, iterator_t itr) :
-            Model (Model), itr (itr), loaded (false)
+        BaseEntry (JournalViewModelImpl const * model, iterator_t itr) :
+            mModel (model), itr (itr), loaded (false)
         {}
 
         virtual ~BaseEntry () {}
@@ -237,23 +239,23 @@ struct MWGui::JournalViewModelImpl : JournalViewModel
             }
         }
 
-        utf8_span body () const
+        Utf8Span body () const
         {
             ensureLoaded ();
 
             return toUtf8Span (utf8text);
         }
 
-        void visitSpans (boost::function < void (topic_id, size_t, size_t)> visitor) const
+        void visitSpans (boost::function < void (TopicId, size_t, size_t)> visitor) const
         {
             ensureLoaded ();
-            Model->ensureKeyWordSearchLoaded ();
+            mModel->ensureKeyWordSearchLoaded ();
 
             std::string::const_iterator i = utf8text.begin ();
 
             keyword_search_t::Match match;
 
-            while (i != utf8text.end () && Model->mKeywordSearch.search (i, utf8text.end (), match))
+            while (i != utf8text.end () && mModel->mKeywordSearch.search (i, utf8text.end (), match))
             {
                 if (i != match.mBeg)
                     visitor (0, i - utf8text.begin (), match.mBeg - utf8text.begin ());
@@ -269,7 +271,7 @@ struct MWGui::JournalViewModelImpl : JournalViewModel
 
     };
 
-    void visitQuestNames (bool active_only, boost::function <void (quest_id, utf8_span)> visitor) const
+    void visitQuestNames (bool active_only, boost::function <void (QuestId, Utf8Span)> visitor) const
     {
         MWBase::Journal * journal = MWBase::Environment::get ().getJournal ();
 
@@ -278,11 +280,11 @@ struct MWGui::JournalViewModelImpl : JournalViewModel
             if (active_only && i->second.isFinished ())
                 continue;
 
-            visitor (reinterpret_cast <quest_id> (&i->second), toUtf8Span (i->first));
+            visitor (reinterpret_cast <QuestId> (&i->second), toUtf8Span (i->first));
         }
     }
 
-    void visitQuestName (quest_id questId, boost::function <void (utf8_span)> visitor) const
+    void visitQuestName (QuestId questId, boost::function <void (Utf8Span)> visitor) const
     {
         MWDialogue::Quest const * quest = reinterpret_cast <MWDialogue::Quest const *> (questId);
 
@@ -307,7 +309,7 @@ struct MWGui::JournalViewModelImpl : JournalViewModel
             return itr->getText(MWBase::Environment::get().getWorld()->getStore());
         }
 
-        utf8_span timestamp () const
+        Utf8Span timestamp () const
         {
             if (timestamp_buffer.empty ())
             {
@@ -317,7 +319,8 @@ struct MWGui::JournalViewModelImpl : JournalViewModel
 
                 injectMonthName (os, itr->mMonth);
 
-                os << " (Day " << (itr->mDay + 1) << ')';
+                const std::string& dayStr = MyGUI::LanguageManager::getInstance().replaceTags("#{sDay}");
+                os << " (" << dayStr << " " << (itr->mDay + 1) << ')';
 
                 timestamp_buffer = os.str ();
             }
@@ -326,7 +329,7 @@ struct MWGui::JournalViewModelImpl : JournalViewModel
         }
     };
 
-    void visitJournalEntries (quest_id questId, boost::function <void (JournalEntry const &)> visitor) const
+    void visitJournalEntries (QuestId questId, boost::function <void (JournalEntry const &)> visitor) const
     {
         MWBase::Journal * journal = MWBase::Environment::get().getJournal();
 
@@ -350,19 +353,19 @@ struct MWGui::JournalViewModelImpl : JournalViewModel
         }
     }
 
-    void visitTopics (boost::function <void (topic_id, utf8_span)> visitor) const
+    void visitTopics (boost::function <void (TopicId, Utf8Span)> visitor) const
     {
         throw std::runtime_error ("not implemented");
     }
 
-    void visitTopicName (topic_id topicId, boost::function <void (utf8_span)> visitor) const
+    void visitTopicName (TopicId topicId, boost::function <void (Utf8Span)> visitor) const
     {
-        MWDialogue::Topic const & Topic = * reinterpret_cast <MWDialogue::Topic const *> (topicId);
+        MWDialogue::Topic const & topic = * reinterpret_cast <MWDialogue::Topic const *> (topicId);
 
-        visitor (toUtf8Span (Topic.getName ()));
+        visitor (toUtf8Span (topic.getName ()));
     }
 
-    void visitTopicNamesStartingWith (int character, boost::function < void (topic_id , utf8_span) > visitor) const
+    void visitTopicNamesStartingWith (char character, boost::function < void (TopicId , Utf8Span) > visitor) const
     {
         MWBase::Journal * journal = MWBase::Environment::get().getJournal();
 
@@ -371,28 +374,29 @@ struct MWGui::JournalViewModelImpl : JournalViewModel
             if (i->first [0] != std::tolower (character, mLocale))
                 continue;
 
-            visitor (topic_id (&i->second), toUtf8Span (i->first));
+            visitor (TopicId (&i->second), toUtf8Span (i->first));
         }
 
     }
 
     struct TopicEntryImpl : BaseEntry <MWDialogue::Topic::TEntryIter, TopicEntry>
     {
-        MWDialogue::Topic const & Topic;
+        MWDialogue::Topic const & mTopic;
 
         mutable std::string source_buffer;
 
-        TopicEntryImpl (JournalViewModelImpl const * Model, MWDialogue::Topic const & Topic, iterator_t itr) :
-            BaseEntry (Model, itr), Topic (Topic)
+        TopicEntryImpl (JournalViewModelImpl const * model, MWDialogue::Topic const & topic, iterator_t itr) :
+            BaseEntry (model, itr), mTopic (topic)
         {}
 
         std::string getText () const
         {
-            return Topic.getEntry (*itr).getText(MWBase::Environment::get().getWorld()->getStore());
+            /// \todo defines are not replaced (%PCName etc). should probably be done elsewhere though since we need the actor
+            return  mTopic.getEntry (*itr).getText(MWBase::Environment::get().getWorld()->getStore());
 
         }
 
-        utf8_span source () const
+        Utf8Span source () const
         {
             if (source_buffer.empty ())
                 source_buffer = "someone";
@@ -401,72 +405,50 @@ struct MWGui::JournalViewModelImpl : JournalViewModel
 
     };
 
-    void visitTopicEntries (topic_id topicId, boost::function <void (TopicEntry const &)> visitor) const
+    void visitTopicEntries (TopicId topicId, boost::function <void (TopicEntry const &)> visitor) const
     {
         typedef MWDialogue::Topic::TEntryIter iterator_t;
 
-        MWDialogue::Topic const & Topic = * reinterpret_cast <MWDialogue::Topic const *> (topicId);
+        MWDialogue::Topic const & topic = * reinterpret_cast <MWDialogue::Topic const *> (topicId);
 
-        for (iterator_t i = Topic.begin (); i != Topic.end (); ++i)
-            visitor (TopicEntryImpl (this, Topic, i));
+        for (iterator_t i = topic.begin (); i != topic.end (); ++i)
+            visitor (TopicEntryImpl (this, topic, i));
     }
 };
 
 static void injectMonthName (std::ostream & os, int month)
 {
-#ifndef MYGUI_SIGNLETON_FIXED_FOR_MSVC
-    static char const * month_names [] =
-    {
-        "Morning Star",
-        "Sun's Dawn",
-        "First Seed",
-        "Rain's Hand",
-        "Second Seed",
-        "Midyear",
-        "Sun's Height",
-        "Last Seed",
-        "Hearthfire",
-        "Frostfall",
-        "Sun's Dusk",
-        "Evening Star",
-    };
-    if (month >= 0 && month  <= 11)
-        os << month_names [month ];
-    else
-        os << month ;
-#else
-    auto lm = MyGUI::LanguageManager::getInstance();
+    MyGUI::LanguageManager& lm = MyGUI::LanguageManager::getInstance();
 
     if (month  == 0)
-        os << lm.getTag ("sMonthMorningstar");
+        os << lm.replaceTags ("#{sMonthMorningstar}");
     else if (month == 1)
-        os << lm.getTag ("sMonthSunsdawn");
+        os << lm.replaceTags ("#{sMonthSunsdawn}");
     else if (month == 2)
-        os << lm.getTag ("sMonthFirstseed");
+        os << lm.replaceTags ("#{sMonthFirstseed}");
     else if (month == 3)
-        os << lm.getTag ("sMonthRainshand");
+        os << lm.replaceTags ("#{sMonthRainshand}");
     else if (month == 4)
-        os << lm.getTag ("sMonthSecondseed");
+        os << lm.replaceTags ("#{sMonthSecondseed}");
     else if (month == 5)
-        os << lm.getTag ("sMonthMidyear");
+        os << lm.replaceTags ("#{sMonthMidyear}");
     else if (month == 6)
-        os << lm.getTag ("sMonthSunsheight");
+        os << lm.replaceTags ("#{sMonthSunsheight}");
     else if (month == 7)
-        os << lm.getTag ("sMonthLastseed");
+        os << lm.replaceTags ("#{sMonthLastseed}");
     else if (month == 8)
-        os << lm.getTag ("sMonthHeartfire");
+        os << lm.replaceTags ("#{sMonthHeartfire}");
     else if (month == 9)
-        os << lm.getTag ("sMonthFrostfall");
+        os << lm.replaceTags ("#{sMonthFrostfall}");
     else if (month == 10)
-        os << lm.getTag ("sMonthSunsdusk");
+        os << lm.replaceTags ("#{sMonthSunsdusk}");
     else if (month == 11)
-        os << lm.getTag ("sMonthEveningstar");
+        os << lm.replaceTags ("#{sMonthEveningstar}");
     else
         os << month;
-#endif
 }
 
-JournalViewModel::ptr JournalViewModel::create ()
+JournalViewModel::Ptr JournalViewModel::create ()
 {
     return boost::make_shared <JournalViewModelImpl> ();
 }

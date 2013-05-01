@@ -8,21 +8,21 @@ namespace MWGui
 {
     struct JournalBooks
     {
-        typedef TypesetBook::ptr book;
-        JournalViewModel::ptr Model;
+        typedef TypesetBook::Ptr Book;
+        JournalViewModel::Ptr mModel;
 
-        JournalBooks (JournalViewModel::ptr Model);
+        JournalBooks (JournalViewModel::Ptr model);
 
-        book createEmptyJournalBook ();
-        book createJournalBook ();
-        book createTopicBook (uintptr_t topicId);
-        book createQuestBook (uintptr_t questId);
-        book createTopicIndexBook ();
-        book createTopicIndexBook (char character);
-        book createQuestIndexBook (bool showAll);
+        Book createEmptyJournalBook ();
+        Book createJournalBook ();
+        Book createTopicBook (uintptr_t topicId);
+        Book createQuestBook (uintptr_t questId);
+        Book createTopicIndexBook ();
+        Book createTopicIndexBook (char character);
+        Book createQuestIndexBook (bool showAll);
 
     private:
-        BookTypesetter::ptr createTypesetter ();
+        BookTypesetter::Ptr createTypesetter ();
     };
 }
 
