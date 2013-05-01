@@ -115,8 +115,10 @@ namespace MWWorld
             void addContainerScripts(const Ptr& reference, Ptr::CellStore* cell);
             void PCDropped (const Ptr& item);
 
-            virtual void processDoors(float duration);
+            void processDoors(float duration);
             ///< Run physics simulation and modify \a world accordingly.
+
+            void ensureNeededRecords();
 
         public:
 

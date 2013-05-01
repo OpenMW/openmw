@@ -211,6 +211,10 @@ namespace MWWorld
             mStore.load (mEsm[idx]);
         }
 
+        // insert records that may not be present in all versions of MW
+        if (mEsm[0].getFormat() == 0)
+            ensureNeededRecords();
+
         mStore.setUp();
 
         // global variables
@@ -229,6 +233,41 @@ namespace MWWorld
         lastTick = mTimer.getMilliseconds();
     }
 
+
+    void World::ensureNeededRecords()
+    {
+        if (!mStore.get<ESM::GameSetting>().search("sCompanionShare"))
+        {
+            ESM::GameSetting sCompanionShare;
+            sCompanionShare.mId = "sCompanionShare";
+            ESM::Variant value;
+            value.setType(ESM::VT_String);
+            value.setString("Companion Share");
+            sCompanionShare.mValue = value;
+            mStore.insertStatic(sCompanionShare);
+        }
+        if (!mStore.get<ESM::Global>().search("dayspassed"))
+        {
+            // vanilla Morrowind does not define dayspassed.
+            ESM::Global dayspassed;
+            dayspassed.mId = "dayspassed";
+            ESM::Variant value;
+            value.setType(ESM::VT_Long);
+            value.setInteger(1); // but the addons start counting at 1 :(
+            dayspassed.mValue = value;
+            mStore.insertStatic(dayspassed);
+        }
+        if (!mStore.get<ESM::GameSetting>().search("fWereWolfRunMult"))
+        {
+            ESM::GameSetting fWereWolfRunMult;
+            fWereWolfRunMult.mId = "fWereWolfRunMult";
+            ESM::Variant value;
+            value.setType(ESM::VT_Float);
+            value.setFloat(1.f);
+            fWereWolfRunMult.mValue = value;
+            mStore.insertStatic(fWereWolfRunMult);
+        }
+    }
 
     World::~World()
     {
