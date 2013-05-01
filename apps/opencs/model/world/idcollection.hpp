@@ -349,7 +349,7 @@ namespace CSMWorld
     {
         mRecords.push_back (dynamic_cast<const Record<ESXRecordT>&> (record));
         mIndex.insert (std::make_pair (Misc::StringUtils::lowerCase (IdAccessorT().getId (
-            dynamic_cast<const ESXRecordT&> (record))),
+            dynamic_cast<const Record<ESXRecordT>&> (record).get())),
             mRecords.size()-1));
     }
 
