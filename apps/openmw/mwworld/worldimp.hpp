@@ -115,8 +115,10 @@ namespace MWWorld
             void addContainerScripts(const Ptr& reference, Ptr::CellStore* cell);
             void PCDropped (const Ptr& item);
 
-            virtual void processDoors(float duration);
+            void processDoors(float duration);
             ///< Run physics simulation and modify \a world accordingly.
+
+            void ensureNeededRecords();
 
         public:
 
@@ -380,6 +382,10 @@ namespace MWWorld
             ///< if activated, should this door be opened or closed?
             virtual void activateDoor(const MWWorld::Ptr& door);
             ///< activate (open or close) an non-teleport door
+
+            virtual bool getPlayerStandingOn (const MWWorld::Ptr& object); ///< @return true if the player is standing on \a object
+            virtual bool getActorStandingOn (const MWWorld::Ptr& object); ///< @return true if any actor is standing on \a object
+            virtual float getWindSpeed();
 
             virtual void setupExternalRendering (MWRender::ExternalRendering& rendering);
 

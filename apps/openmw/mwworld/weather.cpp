@@ -65,7 +65,7 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering,MWWorld::Fa
      mHour(14), mCurrentWeather("clear"), mFirstUpdate(true), mWeatherUpdateTime(0),
      mThunderFlash(0), mThunderChance(0), mThunderChanceNeeded(50), mThunderSoundDelay(0),
      mRemainingTransitionTime(0), mMonth(0), mDay(0),
-     mTimePassed(0), mFallback(fallback)
+     mTimePassed(0), mFallback(fallback), mWindSpeed(0.f)
 {
     mRendering = rendering;
     //Globals
@@ -367,6 +367,8 @@ void WeatherManager::update(float duration)
         else
             result = getResult(mCurrentWeather);
 
+        mWindSpeed = result.mWindSpeed;
+
         mRendering->configureFog(result.mFogDepth, result.mFogColor);
 
         // disable sun during night
@@ -652,4 +654,9 @@ void WeatherManager::changeWeather(const std::string& region, const unsigned int
     std::string playerRegion = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell()->mCell->mRegion;
     if (Misc::StringUtils::ciEqual(region, playerRegion))
         setWeather(weather);
+}
+
+float WeatherManager::getWindSpeed() const
+{
+    return mWindSpeed;
 }

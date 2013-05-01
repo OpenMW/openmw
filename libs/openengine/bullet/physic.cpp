@@ -267,8 +267,8 @@ namespace Physic
             }
         }
 
-        PhysicActorContainer::iterator pa_it = PhysicActorMap.begin();
-        for (; pa_it != PhysicActorMap.end(); ++pa_it)
+        PhysicActorContainer::iterator pa_it = mActorMap.begin();
+        for (; pa_it != mActorMap.end(); ++pa_it)
         {
             if (pa_it->second != NULL)
             {
@@ -567,13 +567,13 @@ namespace Physic
         
 
         //dynamicsWorld->addAction( newActor->mCharacter );
-        PhysicActorMap[name] = newActor;
+        mActorMap[name] = newActor;
     }
 
     void PhysicEngine::removeCharacter(const std::string &name)
     {
-        PhysicActorContainer::iterator it = PhysicActorMap.find(name);
-        if (it != PhysicActorMap.end() )
+        PhysicActorContainer::iterator it = mActorMap.find(name);
+        if (it != mActorMap.end() )
         {
             PhysicActor* act = it->second;
             if(act != NULL)
@@ -581,16 +581,16 @@ namespace Physic
                 
                 delete act;
             }
-            PhysicActorMap.erase(it);
+            mActorMap.erase(it);
         }
     }
 
     PhysicActor* PhysicEngine::getCharacter(const std::string &name)
     {
-        PhysicActorContainer::iterator it = PhysicActorMap.find(name);
-        if (it != PhysicActorMap.end() )
+        PhysicActorContainer::iterator it = mActorMap.find(name);
+        if (it != mActorMap.end() )
         {
-            PhysicActor* act = PhysicActorMap[name];
+            PhysicActor* act = mActorMap[name];
             return act;
         }
         else
@@ -700,4 +700,22 @@ namespace Physic
             max = btVector3(0,0,0);
         }
     }
-}}
+
+    bool PhysicEngine::isAnyActorStandingOn (const std::string& objectName)
+    {
+        for (PhysicActorContainer::iterator it = mActorMap.begin(); it != mActorMap.end(); ++it)
+        {
+            if (!it->second->getOnGround())
+                continue;
+            Ogre::Vector3 pos = it->second->getPosition();
+            btVector3 from (pos.x, pos.y, pos.z);
+            btVector3 to = from - btVector3(0,0,5);
+            std::pair<std::string, float> result = rayTest(from, to);
+            if (result.first == objectName)
+                return true;
+        }
+        return false;
+    }
+
+}
+}

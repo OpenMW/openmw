@@ -137,8 +137,7 @@ namespace MWClass
             fJumpAcrobaticsBase = gmst.find("fJumpAcrobaticsBase");
             fJumpAcroMultiplier = gmst.find("fJumpAcroMultiplier");
             fJumpRunMultiplier = gmst.find("fJumpRunMultiplier");
-            // Added in Tribunal/Bloodmoon, may not exist
-            fWereWolfRunMult = gmst.search("fWereWolfRunMult");
+            fWereWolfRunMult = gmst.find("fWereWolfRunMult");
 
             inited = true;
         }

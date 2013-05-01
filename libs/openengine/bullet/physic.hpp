@@ -288,6 +288,8 @@ namespace Physic
 
         void setSceneManager(Ogre::SceneManager* sceneMgr);
 
+        bool isAnyActorStandingOn (const std::string& objectName);
+
         /**
          * Return the closest object hit by a ray. If there are no objects, it will return ("",-1).
          */
@@ -329,7 +331,7 @@ namespace Physic
         RigidBodyContainer mRaycastingObjectMap;
 
         typedef std::map<std::string, PhysicActor*>  PhysicActorContainer;
-        PhysicActorContainer PhysicActorMap;
+        PhysicActorContainer mActorMap;
 
         Ogre::SceneManager* mSceneMgr;
 
