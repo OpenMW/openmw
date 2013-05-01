@@ -571,15 +571,9 @@ namespace MWInput
 
         MWMechanics::DrawState_ state = mPlayer.getDrawState();
         if (state == MWMechanics::DrawState_Weapon || state == MWMechanics::DrawState_Nothing)
-        {
             mPlayer.setDrawState(MWMechanics::DrawState_Spell);
-            std::cout << "Player has now readied his hands for spellcasting!\n" << std::endl;
-        }
         else
-        {
             mPlayer.setDrawState(MWMechanics::DrawState_Nothing);
-            std::cout << "Player does not have any kind of attack ready now.\n" << std::endl;
-        }
     }
 
     void InputManager::toggleWeapon()
@@ -588,15 +582,9 @@ namespace MWInput
 
         MWMechanics::DrawState_ state = mPlayer.getDrawState();
         if (state == MWMechanics::DrawState_Spell || state == MWMechanics::DrawState_Nothing)
-        {
             mPlayer.setDrawState(MWMechanics::DrawState_Weapon);
-            std::cout << "Player is now drawing his weapon.\n" << std::endl;
-        }
         else
-        {
             mPlayer.setDrawState(MWMechanics::DrawState_Nothing);
-            std::cout << "Player does not have any kind of attack ready now.\n" << std::endl;
-        }
     }
 
     void InputManager::rest()

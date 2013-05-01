@@ -118,6 +118,10 @@ public:
     CharacterState getState() const
     { return mCharState; }
 
+    void setWeaponState(WeaponState state);
+    WeaponState getWeaponState() const
+    { return mWeapState; }
+
     void forceStateUpdate();
 };
 

@@ -22,6 +22,7 @@
 #include <OgreStringConverter.h>
 
 #include "movement.hpp"
+#include "npcstats.hpp"
 
 #include "../mwrender/animation.hpp"
 
@@ -30,6 +31,7 @@
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/inventorystore.hpp"
 
 
 namespace MWMechanics
@@ -89,21 +91,55 @@ static const struct {
 };
 static const size_t sStateListSize = sizeof(sStateList)/sizeof(sStateList[0]);
 
+static const struct {
+    WeaponState state;
+    const char idlegroup[16];
+    const char movementgroup[16];
+    const char actiongroup[16];
+} sWeaponStateList[] = {
+    { WeapState_HandToHand, "hh", "hh", "handtohand" },
+    { WeapState_OneHand, "1h", "1h", "weapononehand" },
+    { WeapState_TwoHand, "2c", "2c", "weapontwohand" },
+    { WeapState_TwoWide, "2w", "2w", "weapontwowide" },
+    { WeapState_BowAndArrow, "1h", "1h", "bowandarrow" },
+    { WeapState_Crossbow, "crossbow", "2c", "crossbow" },
+    { WeapState_ThowWeapon, "1h", "1h", "throwweapon" },
+    { WeapState_Spell, "spell", "", "spellcast" },
+};
+static const size_t sWeaponStateListSize = sizeof(sWeaponStateList)/sizeof(sWeaponStateList[0]);
+
+
 void CharacterController::getCurrentGroup(std::string &group) const
 {
+    std::string name;
     for(size_t i = 0;i < sStateListSize;i++)
     {
         if(sStateList[i].state == mCharState)
         {
-            group = sStateList[i].groupname;
+            name = sStateList[i].groupname;
             break;
         }
     }
-    if(group.empty())
+    if(name.empty())
         throw std::runtime_error("Failed to find character state "+Ogre::StringConverter::toString(mCharState));
 
-    if(!mAnimation->hasAnimation(group))
-        group = std::string();
+    if(!(mCharState >= CharState_Death1) && mWeapState != WeapState_None)
+    {
+        for(size_t i = 0;i < sWeaponStateListSize;i++)
+        {
+            if(sWeaponStateList[i].state == mWeapState)
+            {
+                if(mCharState == CharState_Idle)
+                    (group=name) += sWeaponStateList[i].idlegroup;
+                else
+                    (group=name) += sWeaponStateList[i].movementgroup;
+                break;
+            }
+        }
+    }
+
+    if(group.empty() || !mAnimation->hasAnimation(group))
+        group = (mAnimation->hasAnimation(name) ? name : std::string());
 }
 
 
@@ -185,6 +221,64 @@ void CharacterController::update(float duration, Movement &movement)
                     mSecondsOfRunning -= 1;
                 }
             }
+        }
+
+        if(mPtr.getTypeName() == typeid(ESM::NPC).name())
+        {
+            NpcStats &stats = cls.getNpcStats(mPtr);
+            WeaponState weapstate = WeapState_None;
+
+            if(stats.getDrawState() == DrawState_Spell)
+                weapstate = WeapState_Spell;
+            else if(stats.getDrawState() == MWMechanics::DrawState_Weapon)
+            {
+                MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
+                MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+                if(weapon == inv.end())
+                    weapstate = WeapState_HandToHand;
+                else
+                {
+                    const std::string &type = weapon->getTypeName();
+                    if(type == typeid(ESM::Lockpick).name() || type == typeid(ESM::Probe).name())
+                        weapstate = WeapState_OneHand;
+                    else if(type == typeid(ESM::Weapon).name())
+                    {
+                        MWWorld::LiveCellRef<ESM::Weapon> *ref = weapon->get<ESM::Weapon>();
+                        ESM::Weapon::Type type = (ESM::Weapon::Type)ref->mBase->mData.mType;
+                        switch(type)
+                        {
+                            case ESM::Weapon::ShortBladeOneHand:
+                            case ESM::Weapon::LongBladeOneHand:
+                            case ESM::Weapon::BluntOneHand:
+                            case ESM::Weapon::AxeOneHand:
+                            case ESM::Weapon::Arrow:
+                            case ESM::Weapon::Bolt:
+                                weapstate = WeapState_OneHand;
+                                break;
+                            case ESM::Weapon::LongBladeTwoHand:
+                            case ESM::Weapon::BluntTwoClose:
+                            case ESM::Weapon::AxeTwoHand:
+                                weapstate = WeapState_TwoHand;
+                                break;
+                            case ESM::Weapon::BluntTwoWide:
+                            case ESM::Weapon::SpearTwoWide:
+                                weapstate = WeapState_TwoWide;
+                                break;
+                            case ESM::Weapon::MarksmanBow:
+                                weapstate = WeapState_BowAndArrow;
+                                break;
+                            case ESM::Weapon::MarksmanCrossbow:
+                                weapstate = WeapState_Crossbow;
+                                break;
+                            case ESM::Weapon::MarksmanThrown:
+                                weapstate = WeapState_ThowWeapon;
+                                break;
+                        }
+                    }
+                }
+            }
+
+            setWeaponState(weapstate);
         }
 
         /* FIXME: The state should be set to Jump, and X/Y movement should be disallowed except
@@ -312,6 +406,15 @@ void CharacterController::setState(CharacterState state, bool loop)
     forceStateUpdate();
 }
 
+void CharacterController::setWeaponState(WeaponState state)
+{
+    if(state == mWeapState)
+        return;
+    mWeapState = state;
+
+    forceStateUpdate();
+}
+
 void CharacterController::forceStateUpdate()
 {
     if(!mAnimation)
@@ -321,6 +424,9 @@ void CharacterController::forceStateUpdate()
     std::string group;
     getCurrentGroup(group);
     mMovingAnim = mAnimation->play(group, "start", "stop", 0.0f, mLooping ? (~(size_t)0) : 0);
+
+    mAnimation->showWeapons(mWeapState != WeapState_None && mWeapState != WeapState_HandToHand &&
+                            mWeapState != WeapState_Spell);
 }
 
 }
