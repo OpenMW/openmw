@@ -6,6 +6,8 @@
 #include <components/files/collections.hpp>
 #include <components/compiler/locals.hpp>
 
+#include <boost/math/special_functions/sign.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -909,7 +911,7 @@ namespace MWWorld
         float terrainHeight = mRendering->getTerrainHeightAt(pos);
 
         if (pos.z < terrainHeight)
-            pos.z = terrainHeight+400; // place slightly above. will snap down to ground with code below
+            pos.z = terrainHeight+5; // place slightly above. will snap down to ground with code below
 
         ptr.getRefData().getPosition().pos[2] = pos.z;
 
@@ -971,6 +973,8 @@ namespace MWWorld
         if(duration <= 0.0f)
             return;
 
+        processDoors(duration);
+
         PtrMovementList::const_iterator player(actors.end());
         for(PtrMovementList::const_iterator iter(actors.begin());iter != actors.end();iter++)
         {
@@ -996,8 +1000,6 @@ namespace MWWorld
             moveObjectImp(player->first, vec.x, vec.y, vec.z);
         }
 
-        processDoors(duration);
-
         mPhysEngine->stepSimulation (duration);
     }
 
@@ -1020,6 +1022,7 @@ namespace MWWorld
                 mPhysics->getObjectAABB(it->first, min, max);
                 Ogre::Vector3 dimensions = max-min;
 
+                /// \todo should use convexSweepTest here
                 std::vector<std::string> collisions = mPhysics->getCollisions(it->first);
                 for (std::vector<std::string>::iterator cit = collisions.begin(); cit != collisions.end(); ++cit)
                 {
@@ -1032,7 +1035,11 @@ namespace MWWorld
                         Ogre::Vector3 relativePos = it->first.getRefData().getBaseNode()->
                                 convertWorldToLocalPosition(ptr.getRefData().getBaseNode()->_getDerivedPosition());
 
-                        float axisToCheck = (dimensions.x > dimensions.y) ? relativePos.y : -relativePos.x;
+                        float axisToCheck;
+                        if (dimensions.x > dimensions.y)
+                            axisToCheck = relativePos.y * boost::math::sign((min+max).y);
+                        else
+                            axisToCheck = relativePos.x * boost::math::sign((min+max).x);
                         if (axisToCheck >= 0)
                             targetRot = std::min(std::max(0.f, oldRot + diff*0.5f), 90.f);
                         else
