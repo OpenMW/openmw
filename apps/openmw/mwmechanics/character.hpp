@@ -100,6 +100,9 @@ class CharacterController
 
     bool mMovingAnim;
 
+    // Gets an animation group name from the current character state.
+    void getCurrentGroup(std::string &group) const;
+
 public:
     CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state, bool loop);
     virtual ~CharacterController();

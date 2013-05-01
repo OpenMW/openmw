@@ -572,6 +572,9 @@ bool Animation::play(const std::string &groupname, const std::string &start, con
     mLayer[layeridx].mLoopCount = 0;
     mLayer[layeridx].mPlaying = false;
 
+    if(groupname.empty())
+        return false;
+
     bool movinganim = false;
     bool foundanim = false;
 

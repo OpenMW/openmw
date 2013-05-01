@@ -89,17 +89,21 @@ static const struct {
 };
 static const size_t sStateListSize = sizeof(sStateList)/sizeof(sStateList[0]);
 
-static void getStateInfo(CharacterState state, std::string *group)
+void CharacterController::getCurrentGroup(std::string &group) const
 {
     for(size_t i = 0;i < sStateListSize;i++)
     {
-        if(sStateList[i].state == state)
+        if(sStateList[i].state == mCharState)
         {
-            *group = sStateList[i].groupname;
-            return;
+            group = sStateList[i].groupname;
+            break;
         }
     }
-    throw std::runtime_error("Failed to find character state "+Ogre::StringConverter::toString(state));
+    if(group.empty())
+        throw std::runtime_error("Failed to find character state "+Ogre::StringConverter::toString(mCharState));
+
+    if(!mAnimation->hasAnimation(group))
+        group = std::string();
 }
 
 
@@ -116,8 +120,6 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     if(!mAnimation)
         return;
 
-    std::string group;
-    getStateInfo(mCharState, &group);
     if(MWWorld::Class::get(mPtr).isActor())
     {
         /* Accumulate along X/Y only for now, until we can figure out how we should
@@ -129,8 +131,10 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
         /* Don't accumulate with non-actors. */
         mAnimation->setAccumulation(Ogre::Vector3(0.0f));
     }
-    if(mAnimation->hasAnimation(group))
-        mMovingAnim = mAnimation->play(group, "start", "stop", 1.0f, loop ? (~(size_t)0) : 0);
+
+    std::string group;
+    getCurrentGroup(group);
+    mMovingAnim = mAnimation->play(group, "start", "stop", 1.0f, loop ? (~(size_t)0) : 0);
 }
 
 CharacterController::~CharacterController()
@@ -149,7 +153,7 @@ void CharacterController::update(float duration, Movement &movement)
     float speed = 0.0f;
     if(!(getState() >= CharState_Death1))
     {
-        const MWBase::World *world = MWBase::Environment::get().getWorld();
+        MWBase::World *world = MWBase::Environment::get().getWorld();
         const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
 
         bool onground = world->isOnGround(mPtr);
@@ -161,23 +165,23 @@ void CharacterController::update(float duration, Movement &movement)
         speed = cls.getSpeed(mPtr);
 
         // advance athletics
-        if (vec.squaredLength() > 0 && mPtr == MWBase::Environment::get().getWorld()->getPlayer().getPlayer())
+        if (vec.squaredLength() > 0 && mPtr == world->getPlayer().getPlayer())
         {
             if (inwater)
             {
                 mSecondsOfSwimming += duration;
-                while (mSecondsOfSwimming > 1)
+                while(mSecondsOfSwimming > 1)
                 {
-                    MWWorld::Class::get(mPtr).skillUsageSucceeded(mPtr, ESM::Skill::Athletics, 1);
+                    cls.skillUsageSucceeded(mPtr, ESM::Skill::Athletics, 1);
                     mSecondsOfSwimming -= 1;
                 }
             }
             else if (isrunning)
             {
                 mSecondsOfRunning += duration;
-                while (mSecondsOfRunning > 1)
+                while(mSecondsOfRunning > 1)
                 {
-                    MWWorld::Class::get(mPtr).skillUsageSucceeded(mPtr, ESM::Skill::Athletics, 0);
+                    cls.skillUsageSucceeded(mPtr, ESM::Skill::Athletics, 0);
                     mSecondsOfRunning -= 1;
                 }
             }
@@ -314,10 +318,9 @@ void CharacterController::forceStateUpdate()
         return;
     mAnimQueue.clear();
 
-    std::string anim;
-    getStateInfo(mCharState, &anim);
-    if((mMovingAnim=mAnimation->hasAnimation(anim)) != false)
-        mMovingAnim = mAnimation->play(anim, "start", "stop", 0.0f, mLooping ? (~(size_t)0) : 0);
+    std::string group;
+    getCurrentGroup(group);
+    mMovingAnim = mAnimation->play(group, "start", "stop", 0.0f, mLooping ? (~(size_t)0) : 0);
 }
 
 }
