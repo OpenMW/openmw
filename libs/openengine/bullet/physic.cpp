@@ -143,7 +143,7 @@ namespace Physic
 
     bool PhysicActor::getOnGround() const
     {
-        return onGround;
+        return collisionMode && onGround;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////

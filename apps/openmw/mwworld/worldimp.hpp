@@ -348,7 +348,6 @@ namespace MWWorld
             virtual bool isSwimming(const MWWorld::Ptr &object) const;
             virtual bool isUnderwater(const MWWorld::Ptr::CellStore* cell, const Ogre::Vector3 &pos) const;
             virtual bool isOnGround(const MWWorld::Ptr &ptr) const;
-            virtual bool isGravity(const MWWorld::Ptr &ptr) const;
 
             virtual void togglePOV() {
                 mRendering->togglePOV();
