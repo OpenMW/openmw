@@ -911,7 +911,7 @@ namespace MWWorld
         float terrainHeight = mRendering->getTerrainHeightAt(pos);
 
         if (pos.z < terrainHeight)
-            pos.z = terrainHeight+400; // place slightly above. will snap down to ground with code below
+            pos.z = terrainHeight+5; // place slightly above. will snap down to ground with code below
 
         ptr.getRefData().getPosition().pos[2] = pos.z;
 
@@ -973,6 +973,8 @@ namespace MWWorld
         if(duration <= 0.0f)
             return;
 
+        processDoors(duration);
+
         PtrMovementList::const_iterator player(actors.end());
         for(PtrMovementList::const_iterator iter(actors.begin());iter != actors.end();iter++)
         {
@@ -998,8 +1000,6 @@ namespace MWWorld
             moveObjectImp(player->first, vec.x, vec.y, vec.z);
         }
 
-        processDoors(duration);
-
         mPhysEngine->stepSimulation (duration);
     }
 
@@ -1022,6 +1022,7 @@ namespace MWWorld
                 mPhysics->getObjectAABB(it->first, min, max);
                 Ogre::Vector3 dimensions = max-min;
 
+                /// \todo should use convexSweepTest here
                 std::vector<std::string> collisions = mPhysics->getCollisions(it->first);
                 for (std::vector<std::string>::iterator cit = collisions.begin(); cit != collisions.end(); ++cit)
                 {

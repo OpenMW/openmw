@@ -322,10 +322,9 @@ void RenderingManager::update (float duration, bool paused)
 
         btVector3 btOrig(orig.x, orig.y, orig.z);
         btVector3 btDest(dest.x, dest.y, dest.z);
-        std::pair<std::string,float> test = mPhysicsEngine->rayTest(btOrig, btDest);
-        if (!test.first.empty()) {
+        std::pair<bool, float> test = mPhysicsEngine->sphereCast(mRendering.getCamera()->getNearClipDistance()*2.5, btOrig, btDest);
+        if (test.first)
             mCamera->setCameraDistance(test.second * orig.distance(dest), false, false);
-        }
     }
 
     mOcclusionQuery->update(duration);
