@@ -11,11 +11,11 @@ MWWorld::Ptr::CellStore *MWWorld::Cells::getCellStore (const ESM::Cell *cell)
 {
     if (cell->mData.mFlags & ESM::Cell::Interior)
     {
-        std::map<std::string, Ptr::CellStore>::iterator result = mInteriors.find (cell->mName);
+        std::map<std::string, Ptr::CellStore>::iterator result = mInteriors.find (Misc::StringUtils::lowerCase(cell->mName));
 
         if (result==mInteriors.end())
         {
-            result = mInteriors.insert (std::make_pair (cell->mName, Ptr::CellStore (cell))).first;
+            result = mInteriors.insert (std::make_pair (Misc::StringUtils::lowerCase(cell->mName), Ptr::CellStore (cell))).first;
         }
 
         return &result->second;
