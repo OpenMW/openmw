@@ -335,5 +335,7 @@ op 0x200020c: GetStandingPC
 op 0x200020d: GetStandingPC, explicit
 op 0x200020e: GetStandingActor
 op 0x200020f: GetStandingActor, explicit
+op 0x2000210: GetStartingAngle
+op 0x2000211: GetStartingAngle, explicit
 
-opcodes 0x2000210-0x3ffffff unused
+opcodes 0x2000212-0x3ffffff unused
