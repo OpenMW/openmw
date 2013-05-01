@@ -247,15 +247,15 @@ namespace MWScript
 
                     if(axis == "x")
                     {
-                        runtime.push(ptr.getRefData().getPosition().pos[0]);
+                        runtime.push(ptr.getCellRef().mPos.pos[0]);
                     }
                     else if(axis == "y")
                     {
-                        runtime.push(ptr.getRefData().getPosition().pos[1]);
+                        runtime.push(ptr.getCellRef().mPos.pos[1]);
                     }
                     else if(axis == "z")
                     {
-                        runtime.push(ptr.getRefData().getPosition().pos[2]);
+                        runtime.push(ptr.getCellRef().mPos.pos[2]);
                     }
                     else
                         throw std::runtime_error ("invalid axis: " + axis);

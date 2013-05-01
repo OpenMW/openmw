@@ -1583,4 +1583,20 @@ namespace MWWorld
             return !mDoorStates[door]; // if currently opening or closing, then do the opposite
         return door.getRefData().getLocalRotation().rot[2] == 0;
     }
+
+    bool World::getPlayerStandingOn (const MWWorld::Ptr& object)
+    {
+        MWWorld::Ptr player = mPlayer->getPlayer();
+        if (!mPhysEngine->getCharacter("player")->getOnGround())
+            return false;
+        btVector3 from (player.getRefData().getPosition().pos[0], player.getRefData().getPosition().pos[1], player.getRefData().getPosition().pos[2]);
+        btVector3 to = from - btVector3(0,0,5);
+        std::pair<std::string, float> result = mPhysEngine->rayTest(from, to);
+        return result.first == object.getRefData().getBaseNode()->getName();
+    }
+
+    bool World::getActorStandingOn (const MWWorld::Ptr& object)
+    {
+        return mPhysEngine->isAnyActorStandingOn(object.getRefData().getBaseNode()->getName());
+    }
 }
