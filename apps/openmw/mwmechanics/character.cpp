@@ -176,7 +176,6 @@ void CharacterController::update(float duration, Movement &movement)
                 health.setCurrent (current-static_cast<int>(realHealthLost));
                 cls.getCreatureStats(mPtr).setHealth (health);
                 MWWorld::Class::get(mPtr).skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, 1);
-                std::cout<<realHealthLost<<std::endl;
 
                 const float acrobaticsSkill = cls.getNpcStats (mPtr).getSkill (ESM::Skill::Acrobatics).getModified();
                 if(acrobaticsSkill*1.25f/*fatigueTerm*/<healthLost)
