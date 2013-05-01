@@ -33,6 +33,7 @@
 
 #include "../mwmechanics/stat.hpp"
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/npcstats.hpp"
 
 namespace MWMechanics
 {
@@ -107,7 +108,7 @@ static void getStateInfo(CharacterState state, std::string *group)
 
 CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state, bool loop)
     : mPtr(ptr), mAnimation(anim), mCharState(state), mSkipAnim(false), mMovingAnim(false), 
-    mSecondsOfRunning(0), mSecondsOfSwimming(0), mHighestPosition(0)
+    mSecondsOfRunning(0), mSecondsOfSwimming(0), mFallDistance(0), mLastHeight(0)
 {
     if(!mAnimation)
         return;
@@ -149,6 +150,7 @@ void CharacterController::update(float duration, Movement &movement)
         const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
 
         bool onground = world->isOnGround(mPtr);
+        bool gravity = world->isGravity(mPtr);
         bool inwater = world->isSwimming(mPtr);
         bool isrunning = cls.getStance(mPtr, MWWorld::Class::Run);
         bool sneak = cls.getStance(mPtr, MWWorld::Class::Sneak);
@@ -156,9 +158,36 @@ void CharacterController::update(float duration, Movement &movement)
         const Ogre::Vector3 &rot = cls.getRotationVector(mPtr);
         speed = cls.getSpeed(mPtr);
 
-        //To calculate how much player will fall down
-        if(movement.mPosition[2] > mHighestPosition)
-            mHighestPosition = movement.mPosition[2];
+        //player is falling down
+        if(!onground && gravity && mLastHeight>mPtr.getRefData().getPosition().pos[2])
+            mFallDistance+=(mLastHeight-mPtr.getRefData().getPosition().pos[2]);
+
+        //player just finished falling
+        if(onground && gravity && mFallDistance>0)
+        {
+            float healthLost = cls.getFallDamage(mPtr, mFallDistance);
+
+            if(healthLost>0.0f)
+            {
+                DynamicStat<float> health = cls.getCreatureStats(mPtr).getHealth();
+                int current = health.getCurrent();
+                float realHealthLost = healthLost * (1.0f - (0.25 * 1.25f/*fatigueTerm*/));
+                health.setModified (health.getModified()-static_cast<int>(realHealthLost), 0);
+                health.setCurrent (current-static_cast<int>(realHealthLost));
+                cls.getCreatureStats(mPtr).setHealth (health);
+                MWWorld::Class::get(mPtr).skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, 1);
+                std::cout<<realHealthLost<<std::endl;
+
+                const float acrobaticsSkill = cls.getNpcStats (mPtr).getSkill (ESM::Skill::Acrobatics).getModified();
+                if(acrobaticsSkill*1.25f/*fatigueTerm*/<healthLost)
+                {
+                    //TODO: actor falls over
+                }
+            }
+
+            setState(CharState_Idle, true);
+            mFallDistance=0;
+        }
 
         // advance athletics
         if (vec.squaredLength() > 0 && mPtr == MWBase::Environment::get().getWorld()->getPlayer().getPlayer())
@@ -184,7 +213,7 @@ void CharacterController::update(float duration, Movement &movement)
         }
 
         // FIXME: X/Y movement should be disallowed except for the initial thrust (which would be carried by "physics" until landing).
-        if(onground && vec.z > 0.0f)
+        if(onground && gravity && vec.z > 0.0f)
         {
             //Advance acrobatics on jump, decrease fatigue
             if(getState()!=CharState_Jump)
@@ -197,8 +226,8 @@ void CharacterController::update(float duration, Movement &movement)
                 const float fatigueJumpMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("fFatigueJumpMult")->getFloat();
                 DynamicStat<float> fatigue = cls.getCreatureStats(mPtr).getDynamic(2);
                 int current = fatigue.getCurrent();
-                fatigue.setModified(fatigue.getModified()-(fatigueJumpBase + ((1 - normalizedEncumbrance) * fatigueJumpMult)), 0);
-                fatigue.setCurrent(current-(fatigueJumpBase + ((1 - normalizedEncumbrance) * fatigueJumpMult)));
+                fatigue.setModified(fatigue.getModified()-static_cast<int>(fatigueJumpBase + ((1 - normalizedEncumbrance) * fatigueJumpMult)), 0);
+                fatigue.setCurrent(current-static_cast<int>(fatigueJumpBase + ((1 - normalizedEncumbrance) * fatigueJumpMult)));
                 cls.getCreatureStats(mPtr).setDynamic (2, fatigue);
             }
 
@@ -214,25 +243,6 @@ void CharacterController::update(float duration, Movement &movement)
                 //movement += Ogre::Vector3(lat.x, lat.y, 1.0f) * x * 0.707f * duration;
                 movement.mPosition[2] += x * 0.707f * duration;
             }
-        }
-
-        if(vec.z<=0.0f && getState()==CharState_Jump)
-        {
-            float healthLost = cls.getFallDamage(mPtr, mHighestPosition);
-
-            if(healthLost>0.0f)
-            {
-                DynamicStat<float> health = cls.getCreatureStats(mPtr).getHealth();
-                int fatigue = MWWorld::Class::get (mPtr).getCreatureStats (mPtr).getFatigue().getBase();
-                int current = health.getCurrent();
-                health.setModified (health.getModified()-(healthLost * (1 - (0.25 * fatigue))), 0);
-                health.setCurrent (current-(healthLost * (1 - (0.25 * fatigue))));
-                cls.getCreatureStats(mPtr).setHealth (health);
-                MWWorld::Class::get(mPtr).skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, 1);
-            }
-
-            setState(CharState_Idle, true);
-            mHighestPosition=0;
         }
 
         if(std::abs(vec.x/2.0f) > std::abs(vec.y) && speed > 0.0f)
@@ -299,6 +309,8 @@ void CharacterController::update(float duration, Movement &movement)
         movement.mPosition[2] += moved.z;
     }
     mSkipAnim = false;
+
+    mLastHeight = mPtr.getRefData().getPosition().pos[2];
 }
 
 
