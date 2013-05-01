@@ -171,6 +171,25 @@ namespace MWWorld
             return ptr;
         }
 
+        template <class T>
+        const T *insertStatic(const T &x) {
+            Store<T> &store = const_cast<Store<T> &>(get<T>());
+            if (store.search(x.mId) != 0) {
+                std::ostringstream msg;
+                msg << "Try to override existing record '" << x.mId << "'";
+                throw std::runtime_error(msg.str());
+            }
+            T record = x;
+
+            T *ptr = store.insertStatic(record);
+            for (iterator it = mStores.begin(); it != mStores.end(); ++it) {
+                if (it->second == &store) {
+                    mIds[ptr->mId] = it->first;
+                }
+            }
+            return ptr;
+        }
+
         // This method must be called once, after loading all master/plugin files. This can only be done
         //  from the outside, so it must be public.
         void setUp();
