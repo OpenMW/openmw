@@ -1599,4 +1599,12 @@ namespace MWWorld
     {
         return mPhysEngine->isAnyActorStandingOn(object.getRefData().getBaseNode()->getName());
     }
+
+    float World::getWindSpeed()
+    {
+        if (isCellExterior() || isCellQuasiExterior())
+            return mWeatherManager->getWindSpeed();
+        else
+            return 0.f;
+    }
 }
