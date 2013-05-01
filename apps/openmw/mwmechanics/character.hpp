@@ -83,6 +83,9 @@ class CharacterController
     float mSecondsOfSwimming;
     float mSecondsOfRunning;
 
+    float mFallDistance;
+    float mLastHeight;
+
     bool mMovingAnim;
 
 public:

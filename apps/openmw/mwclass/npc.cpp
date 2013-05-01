@@ -470,6 +470,34 @@ namespace MWClass
         return x;
     }
 
+    float Npc::getFallDamage(const MWWorld::Ptr &ptr, float fallHeight) const
+    {
+        const float fallDistanceMin = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("fFallDamageDistanceMin")->getFloat();
+
+        if(fallHeight>=fallDistanceMin)
+        {
+            const float acrobaticsSkill = MWWorld::Class::get(ptr).getNpcStats (ptr).getSkill (ESM::Skill::Acrobatics).getModified();
+            const CustomData *npcdata = static_cast<const CustomData*>(ptr.getRefData().getCustomData());
+            const float jumpSpellBonus = npcdata->mCreatureStats.getMagicEffects().get(MWMechanics::EffectKey(9/*jump*/)).mMagnitude;
+            const float fallAcroBase = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("fFallAcroBase")->getFloat();
+            const float fallAcroMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("fFallAcroMult")->getFloat();
+            const float fallDistanceBase = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("fFallDistanceBase")->getFloat();
+            const float fallDistanceMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("fFallDistanceMult")->getFloat();
+
+            float x = fallHeight - fallDistanceMin;
+            x -= (1.5 * acrobaticsSkill) + jumpSpellBonus;
+            x = std::max(0.0f, x);
+
+            float a = fallAcroBase + (fallAcroMult * (100 - acrobaticsSkill));
+            x = fallDistanceBase + (fallDistanceMult * x);
+            x *= a;
+
+            return x;
+        }
+
+        return 0;
+    }
+
     MWMechanics::Movement& Npc::getMovementSettings (const MWWorld::Ptr& ptr) const
     {
         ensureCustomData (ptr);

@@ -1493,6 +1493,13 @@ namespace MWWorld
         return physactor && physactor->getOnGround();
     }
 
+    bool World::isGravity(const MWWorld::Ptr &ptr) const
+    {
+        RefData &refdata = ptr.getRefData();
+        const OEngine::Physic::PhysicActor *physactor = mPhysEngine->getCharacter(refdata.getHandle());
+        return physactor && physactor->getCollisionMode();
+    }
+
     bool World::vanityRotateCamera(float * rot)
     {
         return mRendering->vanityRotateCamera(rot);
