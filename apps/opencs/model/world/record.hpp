@@ -81,7 +81,9 @@ namespace CSMWorld
             throw std::logic_error ("attempt to modify a deleted record");
 
         mModified = modified;
-        mState = State_Modified;
+
+        if (mState!=State_ModifiedOnly)
+            mState = State_Modified;
     }
 
     template <typename ESXRecordT>
