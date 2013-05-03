@@ -22,6 +22,9 @@ namespace CSMWorld
 
         virtual RecordBase *clone() const = 0;
 
+        virtual void assign (const RecordBase& record) = 0;
+        ///< Will throw an exception if the types don't match.
+
         bool isDeleted() const;
 
         bool isErased() const;
@@ -36,6 +39,8 @@ namespace CSMWorld
         ESXRecordT mModified;
 
         virtual RecordBase *clone() const;
+
+        virtual void assign (const RecordBase& record);
 
         const ESXRecordT& get() const;
         ///< Throws an exception, if the record is deleted.
@@ -54,6 +59,12 @@ namespace CSMWorld
     RecordBase *Record<ESXRecordT>::clone() const
     {
         return new Record<ESXRecordT> (*this);
+    }
+
+    template <typename ESXRecordT>
+    void Record<ESXRecordT>::assign (const RecordBase& record)
+    {
+        *this = dynamic_cast<const Record<ESXRecordT>& > (record);
     }
 
     template <typename ESXRecordT>
