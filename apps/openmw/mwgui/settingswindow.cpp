@@ -551,6 +551,8 @@ namespace MWGui
         while (mControlsBox->getChildCount())
             MyGUI::Gui::getInstance().destroyWidget(mControlsBox->getChildAt(0));
 
+        MWBase::Environment::get().getWindowManager ()->removeStaticMessageBox();
+
         std::vector<int> actions = MWBase::Environment::get().getInputManager()->getActionSorting ();
 
         const int h = 18;
@@ -585,7 +587,7 @@ namespace MWGui
 
         static_cast<MyGUI::Button*>(_sender)->setCaptionWithReplacing("#{sNone}");
 
-        MWBase::Environment::get().getWindowManager ()->messageBox ("#{sControlsMenu3}");
+        MWBase::Environment::get().getWindowManager ()->staticMessageBox ("#{sControlsMenu3}");
         MWBase::Environment::get().getWindowManager ()->disallowMouse();
 
         MWBase::Environment::get().getInputManager ()->enableDetectingBindingMode (actionId);
