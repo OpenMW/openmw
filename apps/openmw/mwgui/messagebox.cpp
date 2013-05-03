@@ -13,6 +13,7 @@ namespace MWGui
         // defines
         mMessageBoxSpeed = 0.1;
         mInterMessageBoxe = NULL;
+        mStaticMessageBox = NULL;
     }
 
     void MessageBoxManager::onFrame (float frameDuration)
@@ -68,11 +69,14 @@ namespace MWGui
         }
     }
 
-    void MessageBoxManager::createMessageBox (const std::string& message)
+    void MessageBoxManager::createMessageBox (const std::string& message, bool stat)
     {
         MessageBox *box = new MessageBox(*this, message);
 
-        removeMessageBox(message.length()*mMessageBoxSpeed, box);
+        if(stat)
+            mStaticMessageBox = box;
+        else
+            removeMessageBox(message.length()*mMessageBoxSpeed, box);
 
         mMessageBoxes.push_back(box);
         std::vector<MessageBox*>::iterator it;
@@ -88,6 +92,12 @@ namespace MWGui
             (*it)->update(height);
             height += (*it)->getHeight();
         }
+    }
+
+    void MessageBoxManager::removeStaticMessageBox ()
+    {
+        removeMessageBox(mStaticMessageBox);
+        mStaticMessageBox = NULL;
     }
 
     bool MessageBoxManager::createInteractiveMessageBox (const std::string& message, const std::vector<std::string>& buttons)

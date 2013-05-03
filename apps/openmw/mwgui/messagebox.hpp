@@ -31,7 +31,8 @@ namespace MWGui
         public:
             MessageBoxManager ();
             void onFrame (float frameDuration);
-            void createMessageBox (const std::string& message);
+            void createMessageBox (const std::string& message, bool stat = false);
+            void removeStaticMessageBox ();
             bool createInteractiveMessageBox (const std::string& message, const std::vector<std::string>& buttons);
             bool isInteractiveMessageBox ();
 
@@ -52,6 +53,7 @@ namespace MWGui
         private:
             std::vector<MessageBox*> mMessageBoxes;
             InteractiveMessageBox* mInterMessageBoxe;
+            MessageBox* mStaticMessageBox;
             std::vector<MessageBoxManagerTimer> mTimers;
             float mMessageBoxSpeed;
     };
