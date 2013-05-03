@@ -415,7 +415,7 @@
     float3 waterEyePos = intercept(worldPos, cameraPos.xyz - worldPos, float3(0,0,1), waterLevel);
 #endif
 
-#if SHADOWS
+#if SHADOWS || SHADOWS_PSSM
         shOutputColour(0) *= (lightResult - float4(directionalResult * (1.0-shadow),0));
 #else
         shOutputColour(0) *= lightResult;
