@@ -15,6 +15,7 @@ namespace sh
 	OgreMaterial::OgreMaterial (const std::string& name, const std::string& resourceGroup)
 		: Material()
 	{
+		mName = name;
 		assert (Ogre::MaterialManager::getSingleton().getByName(name).isNull() && "Material already exists");
 		mMaterial = Ogre::MaterialManager::getSingleton().create (name, resourceGroup);
 		mMaterial->removeAllTechniques();
@@ -22,9 +23,22 @@ namespace sh
 		mMaterial->compile();
 	}
 
+	void OgreMaterial::ensureLoaded()
+	{
+		if (mMaterial.isNull())
+			mMaterial = Ogre::MaterialManager::getSingleton().getByName(mName);
+	}
+
+	bool OgreMaterial::isUnreferenced()
+	{
+		// Resource system internals hold 3 shared pointers, we hold one, so usecount of 4 means unused
+		return (!mMaterial.isNull() && mMaterial.useCount() <= Ogre::ResourceGroupManager::RESOURCE_SYSTEM_NUM_REFERENCE_COUNTS+1);
+	}
+
 	OgreMaterial::~OgreMaterial()
 	{
-		Ogre::MaterialManager::getSingleton().remove(mMaterial->getName());
+		if (!mMaterial.isNull())
+			Ogre::MaterialManager::getSingleton().remove(mMaterial->getName());
 	}
 
 	boost::shared_ptr<Pass> OgreMaterial::createPass (const std::string& configuration, unsigned short lodIndex)
@@ -34,6 +48,8 @@ namespace sh
 
 	void OgreMaterial::removeAll ()
 	{
+		if (mMaterial.isNull())
+			return;
 		mMaterial->removeAllTechniques();
 		mMaterial->createTechnique()->setSchemeName (sDefaultTechniqueName);
 		mMaterial->compile();
