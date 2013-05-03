@@ -92,6 +92,7 @@ namespace MWWorld
         std::map<std::string, T> mDynamic;
 
         typedef std::map<std::string, T> Dynamic;
+        typedef std::map<std::string, T> Static;
 
         friend class ESMStore;
 
@@ -182,6 +183,20 @@ namespace MWWorld
             }
             return ptr;
         }
+
+        T *insertStatic(const T &item) {
+            std::string id = Misc::StringUtils::lowerCase(item.mId);
+            std::pair<typename Static::iterator, bool> result =
+                mStatic.insert(std::pair<std::string, T>(id, item));
+            T *ptr = &result.first->second;
+            if (result.second) {
+                mShared.push_back(ptr);
+            } else {
+                *ptr = item;
+            }
+            return ptr;
+        }
+
 
         bool eraseStatic(const std::string &id) {
             T item;

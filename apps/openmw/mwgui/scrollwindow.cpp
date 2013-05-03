@@ -39,7 +39,7 @@ namespace MWGui
         MWWorld::LiveCellRef<ESM::Book> *ref = mScroll.get<ESM::Book>();
 
         BookTextParser parser;
-        MyGUI::IntSize size = parser.parse(ref->mBase->mText, mTextView, 390);
+        MyGUI::IntSize size = parser.parseScroll(ref->mBase->mText, mTextView, 390);
 
         if (size.height > mTextView->getSize().height)
             mTextView->setCanvasSize(MyGUI::IntSize(410, size.height));

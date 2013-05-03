@@ -428,7 +428,12 @@ namespace Compiler
             if (get (c))
             {
                 if (c=='=')
+                {
                     special = S_cmpLE;
+
+                    if (get (c) && c!='=') // <== is a allowed as an alternative to <=  :(
+                        putback (c);
+                }
                 else
                 {
                     putback (c);
@@ -443,7 +448,12 @@ namespace Compiler
             if (get (c))
             {
                 if (c=='=')
+                {
                     special = S_cmpGE;
+
+                    if (get (c) && c!='=') // >== is a allowed as an alternative to >=  :(
+                        putback (c);
+                }
                 else
                 {
                     putback (c);

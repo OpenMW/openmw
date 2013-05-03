@@ -501,7 +501,7 @@ namespace MWWorld
 
     bool PhysicsSystem::toggleCollisionMode()
     {
-        for(std::map<std::string,OEngine::Physic::PhysicActor*>::iterator it = mEngine->PhysicActorMap.begin(); it != mEngine->PhysicActorMap.end();it++)
+        for(std::map<std::string,OEngine::Physic::PhysicActor*>::iterator it = mEngine->mActorMap.begin(); it != mEngine->mActorMap.end();it++)
         {
             if (it->first=="player")
             {

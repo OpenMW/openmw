@@ -211,6 +211,10 @@ namespace MWWorld
             mStore.load (mEsm[idx]);
         }
 
+        // insert records that may not be present in all versions of MW
+        if (mEsm[0].getFormat() == 0)
+            ensureNeededRecords();
+
         mStore.setUp();
 
         // global variables
@@ -229,6 +233,41 @@ namespace MWWorld
         lastTick = mTimer.getMilliseconds();
     }
 
+
+    void World::ensureNeededRecords()
+    {
+        if (!mStore.get<ESM::GameSetting>().search("sCompanionShare"))
+        {
+            ESM::GameSetting sCompanionShare;
+            sCompanionShare.mId = "sCompanionShare";
+            ESM::Variant value;
+            value.setType(ESM::VT_String);
+            value.setString("Companion Share");
+            sCompanionShare.mValue = value;
+            mStore.insertStatic(sCompanionShare);
+        }
+        if (!mStore.get<ESM::Global>().search("dayspassed"))
+        {
+            // vanilla Morrowind does not define dayspassed.
+            ESM::Global dayspassed;
+            dayspassed.mId = "dayspassed";
+            ESM::Variant value;
+            value.setType(ESM::VT_Long);
+            value.setInteger(1); // but the addons start counting at 1 :(
+            dayspassed.mValue = value;
+            mStore.insertStatic(dayspassed);
+        }
+        if (!mStore.get<ESM::GameSetting>().search("fWereWolfRunMult"))
+        {
+            ESM::GameSetting fWereWolfRunMult;
+            fWereWolfRunMult.mId = "fWereWolfRunMult";
+            ESM::Variant value;
+            value.setType(ESM::VT_Float);
+            value.setFloat(1.f);
+            fWereWolfRunMult.mValue = value;
+            mStore.insertStatic(fWereWolfRunMult);
+        }
+    }
 
     World::~World()
     {
@@ -1582,5 +1621,29 @@ namespace MWWorld
         if (mDoorStates.find(door) != mDoorStates.end())
             return !mDoorStates[door]; // if currently opening or closing, then do the opposite
         return door.getRefData().getLocalRotation().rot[2] == 0;
+    }
+
+    bool World::getPlayerStandingOn (const MWWorld::Ptr& object)
+    {
+        MWWorld::Ptr player = mPlayer->getPlayer();
+        if (!mPhysEngine->getCharacter("player")->getOnGround())
+            return false;
+        btVector3 from (player.getRefData().getPosition().pos[0], player.getRefData().getPosition().pos[1], player.getRefData().getPosition().pos[2]);
+        btVector3 to = from - btVector3(0,0,5);
+        std::pair<std::string, float> result = mPhysEngine->rayTest(from, to);
+        return result.first == object.getRefData().getBaseNode()->getName();
+    }
+
+    bool World::getActorStandingOn (const MWWorld::Ptr& object)
+    {
+        return mPhysEngine->isAnyActorStandingOn(object.getRefData().getBaseNode()->getName());
+    }
+
+    float World::getWindSpeed()
+    {
+        if (isCellExterior() || isCellQuasiExterior())
+            return mWeatherManager->getWindSpeed();
+        else
+            return 0.f;
     }
 }

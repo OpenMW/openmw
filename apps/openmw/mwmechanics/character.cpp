@@ -104,7 +104,14 @@ static void getStateInfo(CharacterState state, std::string *group)
 
 
 CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state, bool loop)
-    : mPtr(ptr), mAnimation(anim), mCharState(state), mSkipAnim(false), mMovingAnim(false), mSecondsOfRunning(0), mSecondsOfSwimming(0)
+    : mPtr(ptr)
+    , mAnimation(anim)
+    , mCharState(state)
+    , mSkipAnim(false)
+    , mMovingAnim(false)
+    , mSecondsOfRunning(0)
+    , mSecondsOfSwimming(0)
+    , mLooping(false)
 {
     if(!mAnimation)
         return;

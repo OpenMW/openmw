@@ -76,7 +76,7 @@ namespace MWGui
                 parent = mRightPage;
 
             MyGUI::Widget* pageWidget = parent->createWidgetReal<MyGUI::Widget>("", MyGUI::FloatCoord(0.0,0.0,1.0,1.0), MyGUI::Align::Default, "BookPage" + boost::lexical_cast<std::string>(i));
-            parser.parse(*it, pageWidget, mLeftPage->getSize().width);
+            parser.parsePage(*it, pageWidget, mLeftPage->getSize().width);
             mPages.push_back(pageWidget);
             ++i;
         }
@@ -156,6 +156,21 @@ namespace MWGui
                 (*it)->setVisible(false);
             }
             ++i;
+        }
+        
+        //If it is the last page, hide the button "Next Page"
+        if (   (mCurrentPage+1)*2 == mPages.size()
+            || (mCurrentPage+1)*2 == mPages.size() + 1)
+        {
+            mNextPageButton->setVisible(false);
+        } else {
+            mNextPageButton->setVisible(true);
+        }
+        //If it is the fist page, hide the button "Prev Page"
+        if (mCurrentPage == 0) {
+            mPrevPageButton->setVisible(false);
+        } else {
+            mPrevPageButton->setVisible(true);
         }
     }
 

@@ -247,15 +247,15 @@ namespace MWScript
 
                     if(axis == "x")
                     {
-                        runtime.push(ptr.getRefData().getPosition().pos[0]);
+                        runtime.push(ptr.getCellRef().mPos.pos[0]);
                     }
                     else if(axis == "y")
                     {
-                        runtime.push(ptr.getRefData().getPosition().pos[1]);
+                        runtime.push(ptr.getCellRef().mPos.pos[1]);
                     }
                     else if(axis == "z")
                     {
-                        runtime.push(ptr.getRefData().getPosition().pos[2]);
+                        runtime.push(ptr.getCellRef().mPos.pos[2]);
                     }
                     else
                         throw std::runtime_error ("invalid axis: " + axis);
@@ -721,6 +721,8 @@ namespace MWScript
         const int opcodeSetPosExplicit = 0x2000193;
         const int opcodeGetStartingPos = 0x2000194;
         const int opcodeGetStartingPosExplicit = 0x2000195;
+        const int opcodeGetStartingAngle = 0x2000210;
+        const int opcodeGetStartingAngleExplicit = 0x2000211;
         const int opcodePosition = 0x2000196;
         const int opcodePositionExplicit = 0x2000197;
         const int opcodePositionCell = 0x2000198;
@@ -765,6 +767,7 @@ namespace MWScript
             extensions.registerInstruction("setatstart","",opcodeSetAtStart,opcodeSetAtStartExplicit);
             extensions.registerInstruction("move","cf",opcodeMove,opcodeMoveExplicit);
             extensions.registerInstruction("moveworld","cf",opcodeMoveWorld,opcodeMoveWorldExplicit);
+            extensions.registerFunction("getstartingangle",'f',"c",opcodeGetStartingAngle,opcodeGetStartingAngleExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -804,6 +807,8 @@ namespace MWScript
             interpreter.installSegment5(opcodeMoveExplicit,new OpMove<ExplicitRef>);
             interpreter.installSegment5(opcodeMoveWorld,new OpMoveWorld<ImplicitRef>);
             interpreter.installSegment5(opcodeMoveWorldExplicit,new OpMoveWorld<ExplicitRef>);
+            interpreter.installSegment5(opcodeGetStartingAngle, new OpGetStartingAngle<ImplicitRef>);
+            interpreter.installSegment5(opcodeGetStartingAngleExplicit, new OpGetStartingAngle<ExplicitRef>);
         }
     }
 }

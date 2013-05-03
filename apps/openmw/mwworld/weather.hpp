@@ -131,6 +131,8 @@ namespace MWWorld
 
         void setHour(const float hour);
 
+        float getWindSpeed() const;
+
         void setDate(const int day, const int month);
 
         void advanceTime(double hours)
@@ -143,6 +145,7 @@ namespace MWWorld
     private:
         float mHour;
         int mDay, mMonth;
+        float mWindSpeed;
         MWWorld::Fallback* mFallback;
         void setFallbackWeather(Weather& weather,const std::string& name);
         MWRender::RenderingManager* mRendering;

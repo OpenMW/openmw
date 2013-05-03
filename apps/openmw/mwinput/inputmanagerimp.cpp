@@ -917,6 +917,10 @@ namespace MWInput
     void InputManager::keyBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
         , OIS::KeyCode key, ICS::Control::ControlChangingDirection direction)
     {
+        //Disallow binding escape key, and unassigned keys
+        if(key==OIS::KC_ESCAPE || key==OIS::KC_UNASSIGNED)
+            return
+
         clearAllBindings(control);
         ICS::DetectingBindingListener::keyBindingDetected (ICS, control, key, direction);
         MWBase::Environment::get().getWindowManager ()->notifyInputActionBound ();
