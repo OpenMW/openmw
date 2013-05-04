@@ -140,7 +140,7 @@ namespace MWGui
                 std::string displayName = link;
                 MWDialogue::RemovePseudoAsterisks(displayName);
 
-                mText.replace(pos_begin, pos_end+1, displayName);
+                mText.replace(pos_begin, pos_end+1-pos_begin, displayName);
 
                 assert(topicLinks.find(topicName) != topicLinks.end());
                 hyperLinks[std::make_pair(pos_begin, pos_begin+displayName.size())] = intptr_t(topicLinks[topicName]);
