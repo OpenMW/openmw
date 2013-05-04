@@ -70,6 +70,11 @@ namespace MWGui
         virtual void activated ();
     };
 
+    struct Goodbye : Link
+    {
+        virtual void activated ();
+    };
+
     typedef KeywordSearch <std::string, intptr_t> KeywordSearchT;
 
     struct DialogueText
@@ -90,11 +95,6 @@ namespace MWGui
     struct Message : DialogueText
     {
         Message(const std::string& text);
-        virtual void write (BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, Link*>& topicLinks);
-    };
-
-    struct Goodbye : DialogueText
-    {
         virtual void write (BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, Link*>& topicLinks);
     };
 
@@ -165,6 +165,8 @@ namespace MWGui
         int mServices;
 
         bool mEnabled;
+
+        bool mGoodbye;
 
         std::vector<DialogueText*> mHistoryContents;
         std::map<std::string, int> mChoices;

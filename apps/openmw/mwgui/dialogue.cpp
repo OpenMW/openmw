@@ -113,8 +113,7 @@ namespace MWGui
 
     void Response::write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, Link*>& topicLinks)
     {
-        BookTypesetter::Style* title = typesetter->createStyle("EB Garamond", MyGUI::Colour::White);
-        BookTypesetter::Style* body = typesetter->createStyle("EB Garamond", MyGUI::Colour::Green);
+        BookTypesetter::Style* title = typesetter->createStyle("EB Garamond", MyGUI::Colour(223/255.f, 201/255.f, 159/255.f));
         typesetter->sectionBreak(9);
         if (mTitle != "")
             typesetter->write(title, to_utf8_span(mTitle.c_str()));
@@ -123,10 +122,10 @@ namespace MWGui
         typedef std::pair<size_t, size_t> Range;
         std::map<Range, intptr_t> hyperLinks;
 
-        size_t pos_begin, pos_end, iteration_pos = 0;
+        size_t pos_begin, pos_end;
         for(;;)
         {
-            pos_begin = mText.find('@', iteration_pos);
+            pos_begin = mText.find('@');
             if (pos_begin != std::string::npos)
                 pos_end = mText.find('#', pos_begin);
 
@@ -156,9 +155,9 @@ namespace MWGui
         {
             intptr_t topicId = it->second;
             BookTypesetter::Style* style = typesetter->createStyle("EB Garamond", MyGUI::Colour::Green);
-            const MyGUI::Colour linkHot    (0.40f, 0.40f, 0.80f);
-            const MyGUI::Colour linkNormal (0.20f, 0.20f, 0.60f);
-            const MyGUI::Colour linkActive (0.50f, 0.50f, 1.00f);
+            const MyGUI::Colour linkHot    (143/255.f, 155/255.f, 218/255.f);
+            const MyGUI::Colour linkNormal (112/255.f, 126/255.f, 207/255.f);
+            const MyGUI::Colour linkActive (175/255.f, 184/255.f, 228/255.f);
             style = typesetter->createHotStyle (style, linkNormal, linkHot, linkActive, topicId);
             typesetter->write(style, it->first.first, it->first.second);
         }
@@ -181,13 +180,27 @@ namespace MWGui
 
     void Response::addTopicLink(BookTypesetter::Ptr typesetter, intptr_t topicId, size_t begin, size_t end)
     {
-        BookTypesetter::Style* style = typesetter->createStyle("EB Garamond", MyGUI::Colour::Green);
-        const MyGUI::Colour linkHot    (0.40f, 0.40f, 0.80f);
-        const MyGUI::Colour linkNormal (0.20f, 0.20f, 0.60f);
-        const MyGUI::Colour linkActive (0.50f, 0.50f, 1.00f);
+        BookTypesetter::Style* style = typesetter->createStyle("EB Garamond", MyGUI::Colour(202/255.f, 165/255.f, 96/255.f));
+
+        const MyGUI::Colour linkHot    (143/255.f, 155/255.f, 218/255.f);
+        const MyGUI::Colour linkNormal (112/255.f, 126/255.f, 207/255.f);
+        const MyGUI::Colour linkActive (175/255.f, 184/255.f, 228/255.f);
+
         if (topicId)
             style = typesetter->createHotStyle (style, linkNormal, linkHot, linkActive, topicId);
         typesetter->write (style, begin, end);
+    }
+
+    Message::Message(const std::string& text)
+    {
+        mText = text;
+    }
+
+    void Message::write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, Link*>& topicLinks)
+    {
+        BookTypesetter::Style* title = typesetter->createStyle("EB Garamond", MyGUI::Colour(223/255.f, 201/255.f, 159/255.f));
+        typesetter->sectionBreak(9);
+        typesetter->write(title, to_utf8_span(mText.c_str()));
     }
 
     // --------------------------------------------------------------------------------------------------
@@ -202,6 +215,11 @@ namespace MWGui
         MWBase::Environment::get().getDialogueManager()->keywordSelected(Misc::StringUtils::lowerCase(mTopicId));
     }
 
+    void Goodbye::activated()
+    {
+        MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
+    }
+
     // --------------------------------------------------------------------------------------------------
 
     DialogueWindow::DialogueWindow()
@@ -209,6 +227,7 @@ namespace MWGui
         , mPersuasionDialog()
         , mEnabled(false)
         , mServices(0)
+        , mGoodbye(false)
     {
         // Centre dialog
         center();
@@ -379,6 +398,7 @@ namespace MWGui
 
     void DialogueWindow::startDialogue(MWWorld::Ptr actor, std::string npcName)
     {
+        mGoodbye = false;
         mEnabled = true;
         mPtr = actor;
         mTopicsList->setEnabled(true);
@@ -452,7 +472,7 @@ namespace MWGui
             Topic* t = new Topic(*it);
             mTopicLinks[*it] = t;
 
-            mKeywordSearch.seed(*it, intptr_t(t));
+            mKeywordSearch.seed(Misc::StringUtils::lowerCase(*it), intptr_t(t));
         }
         mTopicsList->adjustSize();
 
@@ -559,18 +579,27 @@ namespace MWGui
         BookTypesetter::Style* body = typesetter->createStyle("EB Garamond", MyGUI::Colour::White);
 
         // choices
+        const MyGUI::Colour linkHot    (223/255.f, 201/255.f, 159/255.f);
+        const MyGUI::Colour linkNormal (150/255.f, 50/255.f, 30/255.f);
+        const MyGUI::Colour linkActive (243/255.f, 237/255.f, 221/255.f);
         for (std::map<std::string, int>::iterator it = mChoices.begin(); it != mChoices.end(); ++it)
         {
             Choice* link = new Choice(it->second);
             mLinks.push_back(link);
 
             typesetter->lineBreak();
-            const MyGUI::Colour linkHot    (0.40f, 0.40f, 0.80f);
-            const MyGUI::Colour linkNormal (0.20f, 0.20f, 0.60f);
-            const MyGUI::Colour linkActive (0.50f, 0.50f, 1.00f);
             BookTypesetter::Style* questionStyle = typesetter->createHotStyle(body, linkNormal, linkHot, linkActive,
                                                                               TypesetBook::InteractiveId(link));
             typesetter->write(questionStyle, to_utf8_span(it->first.c_str()));
+        }
+
+        if (mGoodbye)
+        {
+            std::string goodbye = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sGoodbye")->getString();
+            BookTypesetter::Style* questionStyle = typesetter->createHotStyle(body, linkNormal, linkHot, linkActive,
+                                                                              TypesetBook::InteractiveId(mLinks.back()));
+            typesetter->lineBreak();
+            typesetter->write(questionStyle, to_utf8_span(goodbye.c_str()));
         }
 
         TypesetBook::Ptr book = typesetter->complete();
@@ -584,6 +613,7 @@ namespace MWGui
             size_t range = book->getSize().second - viewHeight;
             mScrollBar->setScrollRange(range);
             mScrollBar->setScrollPosition(range-1);
+            mScrollBar->setTrackSize(viewHeight / static_cast<float>(book->getSize().second) * mScrollBar->getLineSize());
             onScrollbarMoved(mScrollBar, range-1);
         }
         else
@@ -628,7 +658,7 @@ namespace MWGui
 
     void DialogueWindow::addMessageBox(const std::string& text)
     {
-        //mHistoryContents.push_back(new Message(text));
+        mHistoryContents.push_back(new Message(text));
         updateHistory();
     }
 
@@ -661,9 +691,11 @@ namespace MWGui
 
     void DialogueWindow::goodbye()
     {
-        //mHistory->addDialogText("\n#572D21" + MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sGoodbye")->getString());
+        mLinks.push_back(new Goodbye());
+        mGoodbye = true;
         mTopicsList->setEnabled(false);
         mEnabled = false;
+        updateHistory();
     }
 
     void DialogueWindow::onReferenceUnavailable()
