@@ -146,6 +146,8 @@ namespace MWGui
                 assert(topicLinks.find(topicName) != topicLinks.end());
                 hyperLinks[std::make_pair(pos_begin, pos_begin+displayName.size())] = intptr_t(topicLinks[topicName]);
             }
+            else
+                break;
         }
 
         typesetter->addContent(to_utf8_span(mText.c_str()));
