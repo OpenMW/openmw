@@ -27,7 +27,7 @@ namespace MWGui
         /// it is the largest distance from the left edge to the
         /// right edge. The second integer is the height of all
         /// text combined prior to pagination.
-        virtual std::pair <int, int> getSize () const = 0;
+        virtual std::pair <unsigned int, unsigned int> getSize () const = 0;
     };
 
     /// A factory class for creating a typeset book instance.

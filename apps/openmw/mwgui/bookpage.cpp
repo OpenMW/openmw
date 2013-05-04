@@ -120,7 +120,7 @@ struct MWGui::TypesetBookImpl : TypesetBook
 
     size_t pageCount () const { return mPages.size (); }
 
-    std::pair <int, int> getSize () const
+    std::pair <unsigned int, unsigned int> getSize () const
     {
         return std::make_pair (mRect.width (), mRect.height ());
     }

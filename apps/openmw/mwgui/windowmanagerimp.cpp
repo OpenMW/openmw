@@ -108,7 +108,6 @@ namespace MWGui
         mGui = mGuiManager->getGui();
 
         //Register own widgets with MyGUI
-        MyGUI::FactoryManager::getInstance().registerFactory<DialogueHistory>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSkill>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWAttribute>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSpell>("Widget");

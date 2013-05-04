@@ -1,19 +1,23 @@
 #ifndef MWGUI_DIALOGE_HISTORY_H
 #define MWGUI_DIALOGE_HISTORY_H
 
-#include <openengine/gui/layout.hpp>
+#include "keywordsearch.hpp"
+
+#include <platform/stdint.h>
 
 namespace MWGui
 {
-    class DialogueHistory : public MyGUI::EditBox
+    class DialogueHistoryViewModel
     {
-        MYGUI_RTTI_DERIVED( DialogueHistory )
-        public:
-            Widget* getClient() { return mClient; }
-            MyGUI::UString getColorAtPos(size_t _pos);
-            MyGUI::UString getColorTextAt(size_t _pos);
-            void addDialogHeading(const MyGUI::UString& parText);
-            void addDialogText(const MyGUI::UString& parText);
+    public:
+        DialogueHistoryViewModel();
+
+    private:
+        typedef KeywordSearch <std::string, intptr_t> KeywordSearchT;
+
+        mutable bool             mKeywordSearchLoaded;
+        mutable KeywordSearchT mKeywordSearch;
+
     };
 }
 #endif

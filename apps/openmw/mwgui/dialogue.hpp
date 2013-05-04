@@ -4,6 +4,10 @@
 #include "windowbase.hpp"
 #include "referenceinterface.hpp"
 
+#include "bookpage.hpp"
+
+#include "keywordsearch.hpp"
+
 namespace MWGui
 {
     class WindowManager;
@@ -21,7 +25,8 @@ namespace MWGui
 
 namespace MWGui
 {
-    class DialogueHistory;
+    class DialogueHistoryViewModel;
+    class BookPage;
 
     class PersuasionDialog : public WindowModal
     {
@@ -44,6 +49,55 @@ namespace MWGui
         void onPersuade (MyGUI::Widget* sender);
     };
 
+
+    struct Link
+    {
+        virtual ~Link() {}
+        virtual void activated () = 0;
+    };
+
+    struct Topic : Link
+    {
+        Topic(const std::string& id) : mTopicId(id) {}
+        std::string mTopicId;
+        virtual void activated ();
+    };
+
+    struct Choice : Link
+    {
+        Choice(int id) : mChoiceId(id) {}
+        int mChoiceId;
+        virtual void activated ();
+    };
+
+    typedef KeywordSearch <std::string, intptr_t> KeywordSearchT;
+
+    struct DialogueText
+    {
+        virtual ~DialogueText() {}
+        virtual void write (BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, Link*>& topicLinks) = 0;
+        std::string mText;
+    };
+
+    struct Response : DialogueText
+    {
+        Response(const std::string& text, const std::string& title = "");
+        virtual void write (BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, Link*>& topicLinks);
+        void addTopicLink (BookTypesetter::Ptr typesetter, intptr_t topicId, size_t begin, size_t end);
+        std::string mTitle;
+    };
+
+    struct Message : DialogueText
+    {
+        Message(const std::string& text);
+        virtual void write (BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, Link*>& topicLinks);
+    };
+
+    struct Goodbye : DialogueText
+    {
+        virtual void write (BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, Link*>& topicLinks);
+    };
+
     class DialogueWindow: public WindowBase, public ReferenceInterface
     {
     public:
@@ -52,19 +106,19 @@ namespace MWGui
         // Events
         typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
 
-        /** Event : Dialog finished, OK button clicked.\n
-            signature : void method()\n
-        */
-        EventHandle_Void eventBye;
+        void notifyLinkClicked (TypesetBook::InteractiveId link);
 
         void startDialogue(MWWorld::Ptr actor, std::string npcName);
         void stopDialogue();
         void setKeywords(std::list<std::string> keyWord);
-        void removeKeyword(std::string keyWord);
-        void addText(std::string text);
+
+        void addResponse (const std::string& text, const std::string& title="");
+
         void addMessageBox(const std::string& text);
-        void addTitle(std::string text);
-        void askQuestion(std::string question);
+
+        void addChoice(const std::string& choice, int id);
+        void clearChoices();
+
         void goodbye();
         void onFrame();
 
@@ -89,6 +143,10 @@ namespace MWGui
         void onMouseWheel(MyGUI::Widget* _sender, int _rel);
         void onWindowResize(MyGUI::Window* _sender);
 
+        void onScrollbarMoved (MyGUI::ScrollBar* sender, size_t pos);
+
+        void updateHistory(bool scrollbar=false);
+
         virtual void onReferenceUnavailable();
 
         struct HyperLink
@@ -108,10 +166,21 @@ namespace MWGui
 
         bool mEnabled;
 
-        DialogueHistory*   mHistory;
+        std::vector<DialogueText*> mHistoryContents;
+        std::map<std::string, int> mChoices;
+
+        std::vector<Link*> mLinks;
+        std::map<std::string, Link*> mTopicLinks;
+
+        KeywordSearchT mKeywordSearch;
+
+        BookPage* mHistory;
         Widgets::MWList*   mTopicsList;
+        MyGUI::ScrollBar* mScrollBar;
         MyGUI::ProgressPtr mDispositionBar;
         MyGUI::EditBox*     mDispositionText;
+
+        std::stringstream mText;
 
         PersuasionDialog mPersuasionDialog;
 
