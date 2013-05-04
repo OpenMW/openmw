@@ -4,6 +4,8 @@
 #include <map>
 #include <locale>
 #include <stdexcept>
+#include <vector>
+#include <algorithm>    // std::reverse
 
 template <typename string_t, typename value_t>
 class KeywordSearch
@@ -44,41 +46,61 @@ public:
             // see how far the match goes
             Point j = i;
 
+            // some keywords might be longer variations of other keywords, so we definitely need a list of candidates
+            // the first element in the pair is length of the match, i.e. depth from the first character on
+            std::vector< typename std::pair<int, typename Entry::childen_t::iterator> > candidates;
+
             while ((j + 1) != end)
             {
                 typename Entry::childen_t::iterator next = candidate->second.mChildren.find (std::tolower (*++j, mLocale));
 
                 if (next == candidate->second.mChildren.end ())
+                {
+                    if (candidate->second.mKeyword.size() > 0)
+                        candidates.push_back(std::make_pair((j-i), candidate));
                     break;
+                }
 
                 candidate = next;
+
+                if (candidate->second.mKeyword.size() > 0)
+                    candidates.push_back(std::make_pair((j-i), candidate));
             }
 
-            // didn't match enough to disambiguate, on to next character
-            if (!candidate->second.mKeyword.size ())
-                continue;
+            if (!candidates.size())
+                continue; // didn't match enough to disambiguate, on to next character
 
-            // match the rest of the keyword
-            typename string_t::const_iterator t = candidate->second.mKeyword.begin () + (j - i);
+            // shorter candidates will be added to the vector first. however, we want to check against longer candidates first
+            std::reverse(candidates.begin(), candidates.end());
 
-            while (j != end && t != candidate->second.mKeyword.end ())
+            for (typename std::vector< std::pair<int, typename Entry::childen_t::iterator> >::iterator it = candidates.begin();
+                 it != candidates.end(); ++it)
             {
-                if (std::tolower (*j, mLocale) != std::tolower (*t, mLocale))
-                    break;
+                candidate = it->second;
+                // try to match the rest of the keyword
+                Point k = i + it->first;
+                typename string_t::const_iterator t = candidate->second.mKeyword.begin () + (k - i);
 
-                ++j, ++t;
+
+                while (k != end && t != candidate->second.mKeyword.end ())
+                {
+                    if (std::tolower (*k, mLocale) != std::tolower (*t, mLocale))
+                        break;
+
+                    ++k, ++t;
+                }
+
+                // didn't match full keyword, try the next candidate
+                if (t != candidate->second.mKeyword.end ())
+                    continue;
+
+                // we did it, report the good news
+                match.mValue = candidate->second.mValue;
+                match.mBeg = i;
+                match.mEnd = k;
+
+                return true;
             }
-
-            // didn't match full keyword, on to next character
-            if (t != candidate->second.mKeyword.end ())
-                continue;
-
-            // we did it, report the good news
-            match.mValue = candidate->second.mValue;
-            match.mBeg = i;
-            match.mEnd = j;
-
-            return true;
         }
 
         // no match in range, report the bad news
@@ -117,16 +139,18 @@ private:
                 value_t pushValue = /*std::move*/ (j->second.mValue);
                 string_t pushKeyword = /*std::move*/ (j->second.mKeyword);
 
-                j->second.mKeyword.clear ();
-
                 if (depth >= pushKeyword.size ())
                     throw std::runtime_error ("unexpected");
 
                 if (depth+1 < pushKeyword.size())
+                {
                     seed_impl (/*std::move*/ (pushKeyword), /*std::move*/ (pushValue), depth+1, j->second);
+                    j->second.mKeyword.clear ();
+                }
             }
-
-            if (depth+1 < keyword.size())
+            if (depth+1 == keyword.size())
+                j->second.mKeyword = value;
+            else // depth+1 < keyword.size()
                 seed_impl (/*std::move*/ (keyword), /*std::move*/ (value), depth+1, j->second);
         }
 
