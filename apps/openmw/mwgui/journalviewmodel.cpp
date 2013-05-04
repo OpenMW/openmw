@@ -152,6 +152,9 @@ struct MWGui::JournalViewModelImpl : JournalViewModel
             if (active_only && i->second.isFinished ())
                 continue;
 
+            /// \todo quest.getName() is broken? returns empty string
+            //const MWDialogue::Quest& quest = i->second;
+
             visitor (reinterpret_cast <QuestId> (&i->second), toUtf8Span (i->first));
         }
     }

@@ -163,6 +163,16 @@ namespace
                 journalBook = createJournalBook ();
 
             pushBook (journalBook, 0);
+
+            // fast forward to the last page
+            if (!mStates.empty ())
+            {
+                unsigned int  & page = mStates.top ().mPage;
+                page = mStates.top().mBook->pageCount()-1;
+                if (page%2)
+                    --page;
+            }
+            updateShowingPages();
         }
 
         void close()
