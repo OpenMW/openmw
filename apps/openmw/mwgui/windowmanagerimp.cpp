@@ -600,6 +600,16 @@ namespace MWGui
         }
     }
 
+    void WindowManager::staticMessageBox(const std::string& message)
+    {
+        mMessageBoxManager->createMessageBox(message, true);
+    }
+
+    void WindowManager::removeStaticMessageBox()
+    {
+        mMessageBoxManager->removeStaticMessageBox();
+    }
+
     void WindowManager::enterPressed ()
     {
         mMessageBoxManager->enterPressed();

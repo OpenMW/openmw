@@ -48,7 +48,7 @@ namespace MWMechanics
         {
             int sideX = sgn(actor.getCell()->mCell->mData.mX - player.getCell()->mCell->mData.mX);
             //check if actor is near the border of an inactive cell. If so, disable aitravel.
-            if(sideX*(pos.pos[0] - actor.getCell()->mCell->mData.mX * ESM::Land::REAL_SIZE) > sideX*(ESM::Land::REAL_SIZE/2. - 2000)) 
+            if(sideX*(pos.pos[0] - actor.getCell()->mCell->mData.mX * ESM::Land::REAL_SIZE) > sideX*(ESM::Land::REAL_SIZE/2. - 200)) 
             {
                 MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 0;
                 return true;
@@ -58,7 +58,7 @@ namespace MWMechanics
         {
             int sideY = sgn(actor.getCell()->mCell->mData.mY - player.getCell()->mCell->mData.mY);
             //check if actor is near the border of an inactive cell. If so, disable aitravel.
-            if(sideY*(pos.pos[1] - actor.getCell()->mCell->mData.mY * ESM::Land::REAL_SIZE) > sideY*(ESM::Land::REAL_SIZE/2. - 2000)) 
+            if(sideY*(pos.pos[1] - actor.getCell()->mCell->mData.mY * ESM::Land::REAL_SIZE) > sideY*(ESM::Land::REAL_SIZE/2. - 200)) 
             {
                 MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 0;
                 return true;
