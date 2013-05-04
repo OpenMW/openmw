@@ -292,19 +292,25 @@ namespace MWScript
 
         std::string factionId = MWWorld::Class::get (mReference).getNpcStats (mReference).getFactionRanks().begin()->first;
 
-        std::map<std::string, int> ranks = MWWorld::Class::get (player).getNpcStats (player).getFactionRanks();
-        std::map<std::string, int>::const_iterator it = ranks.begin();
-
         const MWWorld::ESMStore &store = world->getStore();
         const ESM::Faction *faction = store.get<ESM::Faction>().find(factionId);
 
-        if(it->second < 0 || it->second > 9)
-            return "";
+        std::map<std::string, int> ranks = MWWorld::Class::get (player).getNpcStats (player).getFactionRanks();
 
-        if(it->second <= 8) // If player is at max rank, there is no next rank
-            return faction->mRanks[it->second + 1];
+        if (ranks.size())
+        {
+            std::map<std::string, int>::const_iterator it = ranks.begin();
+
+            if(it->second < -1 || it->second > 9)
+                return "";
+
+            if(it->second <= 8) // If player is at max rank, there is no next rank
+                return faction->mRanks[it->second + 1];
+            else
+                return faction->mRanks[it->second];
+        }
         else
-            return faction->mRanks[it->second];
+            return faction->mRanks[0];
     }
 
     int InterpreterContext::getPCBounty() const
