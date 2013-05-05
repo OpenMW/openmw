@@ -133,6 +133,7 @@ namespace sh
 	class PropertySet
 	{
 	public:
+        virtual ~PropertySet() {}
 		void setProperty (const std::string& name, PropertyValuePtr& value, PropertySetGet* context);
 
 	protected:
@@ -151,18 +152,26 @@ namespace sh
 
 		virtual ~PropertySetGet() {}
 
-		void copyAll (PropertySet* target, PropertySetGet* context); ///< call setProperty for each property/value pair stored in \a this
+		void save (std::ofstream& stream, const std::string& indentation);
+
+		void copyAll (PropertySet* target, PropertySetGet* context, bool copyParent=true);
+		///< call setProperty for each property/value pair stored in \a this
+		void copyAll (PropertySetGet* target, PropertySetGet* context, bool copyParent=true);
+		///< call setProperty for each property/value pair stored in \a this
 
 		void setParent (PropertySetGet* parent);
+		PropertySetGet* getParent () { return mParent; }
 		void setContext (PropertySetGet* context);
 		PropertySetGet* getContext();
 
 		virtual void setProperty (const std::string& name, PropertyValuePtr value);
 		PropertyValuePtr& getProperty (const std::string& name);
 
+		void deleteProperty (const std::string& name);
+
 		const PropertyMap& listProperties() { return mProperties; }
 
-		bool hasProperty (const std::string& name);
+		bool hasProperty (const std::string& name) const;
 
 	private:
 		PropertyMap mProperties;
@@ -225,7 +234,7 @@ namespace sh
 
 	template <typename T>
 	/// Create a property of any type
-	/// Example: sh::makeProperty\<sh::Vector4\> (new sh::Vector4(1, 1, 1, 1))
+	/// Example: sh::makeProperty (new sh::Vector4(1, 1, 1, 1))
 	inline PropertyValuePtr makeProperty (T* p)
 	{
 		return PropertyValuePtr ( static_cast<PropertyValue*>(p) );

@@ -41,8 +41,12 @@ namespace sh
 		MaterialInstance (const std::string& name, Factory* f);
 		virtual ~MaterialInstance ();
 
+		PassVector* getParentPasses(); ///< gets the passes of the top-most parent
+
+		PassVector* getPasses(); ///< get our passes (for derived materials, none)
+
 		MaterialInstancePass* createPass ();
-		PassVector getPasses(); ///< gets the passes of the top-most parent
+		void deletePass (unsigned int index);
 
 		/// @attention Because the backend material passes are created on demand, the returned material here might not contain anything yet!
 		/// The only place where you should use this method, is for the MaterialInstance given by the MaterialListener::materialCreated event!
@@ -55,25 +59,25 @@ namespace sh
 
 		virtual void setProperty (const std::string& name, PropertyValuePtr value);
 
-	private:
-		void setParentInstance (const std::string& name);
-		std::string getParentInstance ();
-
-		void create (Platform* platform);
-		void createForConfiguration (const std::string& configuration, unsigned short lodIndex);
-
-		void destroyAll ();
-
-		void setShadersEnabled (bool enabled);
-
 		void setSourceFile(const std::string& sourceFile) { mSourceFile = sourceFile; }
 
 		std::string getSourceFile() { return mSourceFile; }
 		///< get the name of the file this material was read from, or empty if it was created dynamically by code
 
+	private:
+		void setParentInstance (const std::string& name);
+		std::string getParentInstance ();
+
+		void create (Platform* platform);
+		bool createForConfiguration (const std::string& configuration, unsigned short lodIndex);
+
+		void destroyAll ();
+
+		void setShadersEnabled (bool enabled);
+
 		void save (std::ofstream& stream);
-		///< this will only save the properties, not the passes and texture units, and as such
-		/// is only intended to be used for derived materials
+
+		bool mFailedToCreate;
 
 		friend class Factory;
 
