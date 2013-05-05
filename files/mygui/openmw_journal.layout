@@ -67,7 +67,7 @@
         <Widget type="BookPage" skin="MW_BookPage" position="0 0 30000 30000" name="TopicsPage"/>
       </Widget>
 
-      <Widget type="ScrollView" skin="MW_ScrollView" position="20 35 184 245" name="QuestsList" align="Right VStretch">
+      <Widget type="ScrollView" skin="MW_ScrollView" position="20 35 184 225" name="QuestsList" align="Right VStretch">
         <Property key="CanvasAlign" value="Left Top"/>
         <Widget type="BookPage" skin="MW_BookPage" position="0 0 30000 30000" name="QuestsPage"/>
       </Widget>
