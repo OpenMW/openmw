@@ -226,7 +226,7 @@ namespace Physic
         /**
          * Add a RigidBody to the simulation
          */
-        void addRigidBody(RigidBody* body, bool addToMap = true, RigidBody* raycastingBody = NULL);
+        void addRigidBody(RigidBody* body, bool addToMap = true, RigidBody* raycastingBody = NULL,bool actor = false);
 
         /**
          * Remove a RigidBody from the simulation. It does not delete it, and does not remove it from the RigidBodyMap.
@@ -293,7 +293,7 @@ namespace Physic
         /**
          * Return the closest object hit by a ray. If there are no objects, it will return ("",-1).
          */
-        std::pair<std::string,float> rayTest(btVector3& from,btVector3& to);
+        std::pair<std::string,float> rayTest(btVector3& from,btVector3& to,bool raycastingObjectOnly = true);
 
         /**
          * Return all objects hit by a ray.

@@ -1,4 +1,8 @@
 #include "pathfinding.hpp"
+
+#include "../mwbase/world.hpp"
+#include "../mwbase/environment.hpp"
+
 #include <boost/graph/dijkstra_shortest_paths.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include "boost/tuple/tuple.hpp"
@@ -169,15 +173,20 @@ namespace MWMechanics
     void PathFinder::buildPath(ESM::Pathgrid::Point startPoint,ESM::Pathgrid::Point endPoint,
         const ESM::Pathgrid* pathGrid,float xCell,float yCell)
     {
-        int start = getClosestPoint(pathGrid,startPoint.mX - xCell,startPoint.mY - yCell,startPoint.mZ);
-        int end = getClosestPoint(pathGrid,endPoint.mX - xCell,endPoint.mY - yCell,endPoint.mZ);
-
-        if(start != -1 && end != -1)
+        //first check if there is an obstacle
+        if(MWBase::Environment::get().getWorld()->castRay(startPoint.mX,startPoint.mY,startPoint.mZ,
+            endPoint.mX,endPoint.mY,endPoint.mZ) )
         {
-            PathGridGraph graph = buildGraph(pathGrid,xCell,yCell);
-            mPath = findPath(start,end,graph);
-        }
+            std::cout << "hit";
+            int start = getClosestPoint(pathGrid,startPoint.mX - xCell,startPoint.mY - yCell,startPoint.mZ);
+            int end = getClosestPoint(pathGrid,endPoint.mX - xCell,endPoint.mY - yCell,endPoint.mZ);
 
+            if(start != -1 && end != -1)
+            {
+                PathGridGraph graph = buildGraph(pathGrid,xCell,yCell);
+                mPath = findPath(start,end,graph);
+            }
+        }
         mPath.push_back(endPoint);
         mIsPathConstructed = true;
     }
