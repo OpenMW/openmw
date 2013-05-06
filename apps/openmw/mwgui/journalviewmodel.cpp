@@ -11,6 +11,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/journal.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwbase/windowmanager.hpp"
 #include "../mwdialogue/journalentry.hpp"
 
 #include "keywordsearch.hpp"
@@ -100,13 +101,50 @@ struct MWGui::JournalViewModelImpl : JournalViewModel
         mutable bool loaded;
         mutable std::string utf8text;
 
+        typedef std::pair<size_t, size_t> Range;
+
+        // hyperlinks in @link# notation
+        mutable std::map<Range, intptr_t> mHyperLinks;
+
         virtual std::string getText () const = 0;
 
         void ensureLoaded () const
         {
             if (!loaded)
             {
+                mModel->ensureKeyWordSearchLoaded ();
+
                 utf8text = getText ();
+
+                size_t pos_begin, pos_end;
+                for(;;)
+                {
+                    pos_begin = utf8text.find('@');
+                    if (pos_begin != std::string::npos)
+                        pos_end = utf8text.find('#', pos_begin);
+
+                    if (pos_begin != std::string::npos && pos_end != std::string::npos)
+                    {
+                        std::string link = utf8text.substr(pos_begin + 1, pos_end - pos_begin - 1);
+                        const char specialPseudoAsteriskCharacter = 127;
+                        std::replace(link.begin(), link.end(), specialPseudoAsteriskCharacter, '*');
+                        std::string topicName = MWBase::Environment::get().getWindowManager()->
+                                getTranslationDataStorage().topicStandardForm(link);
+
+                        std::string displayName = link;
+                        while (displayName[displayName.size()-1] == '*')
+                            displayName.erase(displayName.size()-1, 1);
+
+                        utf8text.replace(pos_begin, pos_end+1-pos_begin, displayName);
+
+                        intptr_t value;
+                        if (mModel->mKeywordSearch.containsKeyword(topicName, value))
+                            mHyperLinks[std::make_pair(pos_begin, pos_begin+displayName.size())] = value;
+                    }
+                    else
+                        break;
+                }
+
                 loaded = true;
             }
         }
@@ -123,22 +161,39 @@ struct MWGui::JournalViewModelImpl : JournalViewModel
             ensureLoaded ();
             mModel->ensureKeyWordSearchLoaded ();
 
-            std::string::const_iterator i = utf8text.begin ();
-
-            KeywordSearchT::Match match;
-
-            while (i != utf8text.end () && mModel->mKeywordSearch.search (i, utf8text.end (), match))
+            if (mHyperLinks.size() && MWBase::Environment::get().getWindowManager()->getTranslationDataStorage().hasTranslation())
             {
-                if (i != match.mBeg)
-                    visitor (0, i - utf8text.begin (), match.mBeg - utf8text.begin ());
-
-                visitor (match.mValue, match.mBeg - utf8text.begin (), match.mEnd - utf8text.begin ());
-
-                i = match.mEnd;
+                size_t formatted = 0; // points to the first character that is not laid out yet
+                for (std::map<Range, intptr_t>::const_iterator it = mHyperLinks.begin(); it != mHyperLinks.end(); ++it)
+                {
+                    intptr_t topicId = it->second;
+                    if (formatted < it->first.first)
+                        visitor (0, formatted, it->first.first);
+                    visitor (topicId, it->first.first, it->first.second);
+                    formatted = it->first.second;
+                }
+                if (formatted < utf8text.size())
+                    visitor (0, formatted, utf8text.size());
             }
+            else
+            {
+                std::string::const_iterator i = utf8text.begin ();
 
-            if (i != utf8text.end ())
-                visitor (0, i - utf8text.begin (), utf8text.size ());
+                KeywordSearchT::Match match;
+
+                while (i != utf8text.end () && mModel->mKeywordSearch.search (i, utf8text.end (), match))
+                {
+                    if (i != match.mBeg)
+                        visitor (0, i - utf8text.begin (), match.mBeg - utf8text.begin ());
+
+                    visitor (match.mValue, match.mBeg - utf8text.begin (), match.mEnd - utf8text.begin ());
+
+                    i = match.mEnd;
+                }
+
+                if (i != utf8text.end ())
+                    visitor (0, i - utf8text.begin (), utf8text.size ());
+            }
         }
 
     };

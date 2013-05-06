@@ -7,6 +7,11 @@
 #include <vector>
 #include <algorithm>    // std::reverse
 
+#include <components/misc/stringops.hpp>
+
+namespace MWGui
+{
+
 template <typename string_t, typename value_t>
 class KeywordSearch
 {
@@ -30,6 +35,35 @@ public:
     {
         mRoot.mChildren.clear ();
         mRoot.mKeyword.clear ();
+    }
+
+    bool containsKeyword (string_t keyword, value_t& value)
+    {
+        typename Entry::childen_t::iterator current;
+        typename Entry::childen_t::iterator next;
+
+        current = mRoot.mChildren.find (std::tolower (*keyword.begin(), mLocale));
+        if (current == mRoot.mChildren.end())
+            return false;
+        else if (current->second.mKeyword.size() && Misc::StringUtils::ciEqual(current->second.mKeyword, keyword))
+        {
+            value = current->second.mValue;
+            return true;
+        }
+
+        for (Point i = ++keyword.begin(); i != keyword.end(); ++i)
+        {
+            next = current->second.mChildren.find(std::tolower (*i, mLocale));
+            if (next == current->second.mChildren.end())
+                return false;
+            if (Misc::StringUtils::ciEqual(next->second.mKeyword, keyword))
+            {
+                value = next->second.mValue;
+                return true;
+            }
+            current = next;
+        }
+        return false;
     }
 
     bool search (Point beg, Point end, Match & match)
@@ -159,5 +193,7 @@ private:
     Entry mRoot;
     std::locale mLocale;
 };
+
+}
 
 #endif
