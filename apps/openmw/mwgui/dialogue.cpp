@@ -111,7 +111,7 @@ namespace MWGui
         mText = text;
     }
 
-    void Response::write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, Link*>& topicLinks)
+    void Response::write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, Link*>& topicLinks) const
     {
         BookTypesetter::Style* title = typesetter->createStyle("EB Garamond", MyGUI::Colour(223/255.f, 201/255.f, 159/255.f));
         typesetter->sectionBreak(9);
@@ -122,63 +122,78 @@ namespace MWGui
         typedef std::pair<size_t, size_t> Range;
         std::map<Range, intptr_t> hyperLinks;
 
+        // We need this copy for when @# hyperlinks are replaced
+        std::string text = mText;
+
         size_t pos_begin, pos_end;
         for(;;)
         {
-            pos_begin = mText.find('@');
+            pos_begin = text.find('@');
             if (pos_begin != std::string::npos)
-                pos_end = mText.find('#', pos_begin);
+                pos_end = text.find('#', pos_begin);
 
             if (pos_begin != std::string::npos && pos_end != std::string::npos)
             {
-                std::string link = mText.substr(pos_begin + 1, pos_end - pos_begin - 1);
+                std::string link = text.substr(pos_begin + 1, pos_end - pos_begin - 1);
                 const char specialPseudoAsteriskCharacter = 127;
                 std::replace(link.begin(), link.end(), specialPseudoAsteriskCharacter, '*');
                 std::string topicName = MWBase::Environment::get().getWindowManager()->
                         getTranslationDataStorage().topicStandardForm(link);
 
                 std::string displayName = link;
-                MWDialogue::RemovePseudoAsterisks(displayName);
+                while (displayName[displayName.size()-1] == '*')
+                    displayName.erase(displayName.size()-1, 1);
 
-                mText.replace(pos_begin, pos_end+1-pos_begin, displayName);
+                text.replace(pos_begin, pos_end+1-pos_begin, displayName);
 
-                assert(topicLinks.find(topicName) != topicLinks.end());
-                hyperLinks[std::make_pair(pos_begin, pos_begin+displayName.size())] = intptr_t(topicLinks[topicName]);
+                if (topicLinks.find(Misc::StringUtils::lowerCase(topicName)) != topicLinks.end())
+                    hyperLinks[std::make_pair(pos_begin, pos_begin+displayName.size())] = intptr_t(topicLinks[Misc::StringUtils::lowerCase(topicName)]);
             }
             else
                 break;
         }
 
-        typesetter->addContent(to_utf8_span(mText.c_str()));
+        typesetter->addContent(to_utf8_span(text.c_str()));
 
-        for (std::map<Range, intptr_t>::iterator it = hyperLinks.begin(); it != hyperLinks.end(); ++it)
+        if (hyperLinks.size() && MWBase::Environment::get().getWindowManager()->getTranslationDataStorage().hasTranslation())
         {
-            intptr_t topicId = it->second;
-            BookTypesetter::Style* style = typesetter->createStyle("EB Garamond", MyGUI::Colour::Green);
-            const MyGUI::Colour linkHot    (143/255.f, 155/255.f, 218/255.f);
-            const MyGUI::Colour linkNormal (112/255.f, 126/255.f, 207/255.f);
-            const MyGUI::Colour linkActive (175/255.f, 184/255.f, 228/255.f);
-            style = typesetter->createHotStyle (style, linkNormal, linkHot, linkActive, topicId);
-            typesetter->write(style, it->first.first, it->first.second);
+            BookTypesetter::Style* style = typesetter->createStyle("EB Garamond", MyGUI::Colour(202/255.f, 165/255.f, 96/255.f));
+            size_t formatted = 0; // points to the first character that is not laid out yet
+            for (std::map<Range, intptr_t>::iterator it = hyperLinks.begin(); it != hyperLinks.end(); ++it)
+            {
+                intptr_t topicId = it->second;
+                const MyGUI::Colour linkHot    (143/255.f, 155/255.f, 218/255.f);
+                const MyGUI::Colour linkNormal (112/255.f, 126/255.f, 207/255.f);
+                const MyGUI::Colour linkActive (175/255.f, 184/255.f, 228/255.f);
+                BookTypesetter::Style* hotStyle = typesetter->createHotStyle (style, linkNormal, linkHot, linkActive, topicId);
+                if (formatted < it->first.first)
+                    typesetter->write(style, formatted, it->first.first);
+                typesetter->write(hotStyle, it->first.first, it->first.second);
+                formatted = it->first.second;
+            }
+            if (formatted < text.size())
+                typesetter->write(style, formatted, text.size());
         }
-
-        std::string::const_iterator i = mText.begin ();
-        KeywordSearchT::Match match;
-        while (i != mText.end () && keywordSearch->search (i, mText.end (), match))
+        else
         {
-            if (i != match.mBeg)
-                addTopicLink (typesetter, 0, i - mText.begin (), match.mBeg - mText.begin ());
+            std::string::const_iterator i = text.begin ();
+            KeywordSearchT::Match match;
+            while (i != text.end () && keywordSearch->search (i, text.end (), match))
+            {
+                if (i != match.mBeg)
+                    addTopicLink (typesetter, 0, i - text.begin (), match.mBeg - text.begin ());
 
-            addTopicLink (typesetter, match.mValue, match.mBeg - mText.begin (), match.mEnd - mText.begin ());
+                addTopicLink (typesetter, match.mValue, match.mBeg - text.begin (), match.mEnd - text.begin ());
 
-            i = match.mEnd;
+                i = match.mEnd;
+            }
+
+            if (i != text.end ())
+                addTopicLink (typesetter, 0, i - text.begin (), text.size ());
         }
-
-        if (i != mText.end ())
-            addTopicLink (typesetter, 0, i - mText.begin (), mText.size ());
     }
 
-    void Response::addTopicLink(BookTypesetter::Ptr typesetter, intptr_t topicId, size_t begin, size_t end)
+    void Response::addTopicLink(BookTypesetter::Ptr typesetter, intptr_t topicId, size_t begin, size_t end) const
     {
         BookTypesetter::Style* style = typesetter->createStyle("EB Garamond", MyGUI::Colour(202/255.f, 165/255.f, 96/255.f));
 
@@ -196,7 +211,7 @@ namespace MWGui
         mText = text;
     }
 
-    void Message::write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, Link*>& topicLinks)
+    void Message::write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, Link*>& topicLinks) const
     {
         BookTypesetter::Style* title = typesetter->createStyle("EB Garamond", MyGUI::Colour(223/255.f, 201/255.f, 159/255.f));
         typesetter->sectionBreak(9);
@@ -420,7 +435,7 @@ namespace MWGui
             mTopicsList->addItem(*it);
 
             Topic* t = new Topic(*it);
-            mTopicLinks[*it] = t;
+            mTopicLinks[Misc::StringUtils::lowerCase(*it)] = t;
 
             mKeywordSearch.seed(Misc::StringUtils::lowerCase(*it), intptr_t(t));
         }
