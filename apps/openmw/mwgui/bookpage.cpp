@@ -15,13 +15,9 @@
 
 namespace MWGui
 {
-    struct TypesetBookImpl;
-    struct PageDisplay;
-    struct BookPageImpl;
-}
-
-using namespace MyGUI;
-using namespace MWGui;
+struct TypesetBookImpl;
+struct PageDisplay;
+struct BookPageImpl;
 
 static bool ucsSpace (int codePoint);
 static bool ucsLineBreak (int codePoint);
@@ -29,7 +25,7 @@ static bool ucsBreakingSpace (int codePoint);
 
 struct BookTypesetter::Style { virtual ~Style () {} };
 
-struct MWGui::TypesetBookImpl : TypesetBook
+struct TypesetBookImpl : TypesetBook
 {
     typedef std::vector <uint8_t> Content;
     typedef std::list <Content> Contents;
@@ -38,25 +34,28 @@ struct MWGui::TypesetBookImpl : TypesetBook
 
     struct StyleImpl : BookTypesetter::Style
     {
-        IFont*         mFont;
-        Colour         mHotColour;
-        Colour         mActiveColour;
-        Colour         mNormalColour;
+        MyGUI::IFont*         mFont;
+        MyGUI::Colour         mHotColour;
+        MyGUI::Colour         mActiveColour;
+        MyGUI::Colour         mNormalColour;
         InteractiveId mInteractiveId;
 
-        bool match (IFont* tstFont, Colour tstHotColour, Colour tstActiveColour, Colour tstNormalColour, intptr_t tstInteractiveId)
+        bool match (MyGUI::IFont* tstFont, MyGUI::Colour tstHotColour, MyGUI::Colour tstActiveColour,
+                    MyGUI::Colour tstNormalColour, intptr_t tstInteractiveId)
         {
             return (mFont == tstFont) &&
                    partal_match (tstHotColour, tstActiveColour, tstNormalColour, tstInteractiveId);
         }
 
-        bool match (char const * tstFont, Colour tstHotColour, Colour tstActiveColour, Colour tstNormalColour, intptr_t tstInteractiveId)
+        bool match (char const * tstFont, MyGUI::Colour tstHotColour, MyGUI::Colour tstActiveColour,
+                    MyGUI::Colour tstNormalColour, intptr_t tstInteractiveId)
         {
             return (mFont->getResourceName ()   == tstFont) &&
                    partal_match (tstHotColour, tstActiveColour, tstNormalColour, tstInteractiveId);
         }
 
-        bool partal_match (Colour tstHotColour, Colour tstActiveColour, Colour tstNormalColour, intptr_t tstInteractiveId)
+        bool partal_match (MyGUI::Colour tstHotColour, MyGUI::Colour tstActiveColour,
+                           MyGUI::Colour tstNormalColour, intptr_t tstInteractiveId)
         {
             return
                 (mHotColour                  == tstHotColour     ) &&
@@ -81,7 +80,7 @@ struct MWGui::TypesetBookImpl : TypesetBook
     struct Line
     {
         Runs mRuns;
-        IntRect mRect;
+        MyGUI::IntRect mRect;
     };
 
     typedef std::vector <Line> Lines;
@@ -89,7 +88,7 @@ struct MWGui::TypesetBookImpl : TypesetBook
     struct Section
     {
         Lines mLines;
-        IntRect mRect;
+        MyGUI::IntRect mRect;
     };
 
     typedef std::vector <Section> Sections;
@@ -101,7 +100,7 @@ struct MWGui::TypesetBookImpl : TypesetBook
     Sections mSections;
     Contents mContents;
     Styles mStyles;
-    IntRect mRect;
+    MyGUI::IntRect mRect;
 
     virtual ~TypesetBookImpl () {}
 
@@ -126,7 +125,7 @@ struct MWGui::TypesetBookImpl : TypesetBook
     }
 
     template <typename Visitor>
-    void visitRuns (int top, int bottom, IFont* Font, Visitor const & visitor) const
+    void visitRuns (int top, int bottom, MyGUI::IFont* Font, Visitor const & visitor) const
     {
         for (Sections::const_iterator i = mSections.begin (); i != mSections.end (); ++i)
         {
@@ -180,7 +179,7 @@ struct MWGui::TypesetBookImpl : TypesetBook
         return nullptr;
     }
 
-    IFont* affectedFont (StyleImpl* style)
+    MyGUI::IFont* affectedFont (StyleImpl* style)
     {
         for (Styles::iterator i = mStyles.begin (); i != mStyles.end (); ++i)
             if (&*i == style)
@@ -230,7 +229,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
 
         StyleImpl & style = *mBook->mStyles.insert (mBook->mStyles.end (), StyleImpl ());
 
-        style.mFont = FontManager::getInstance().getByName(fontName);
+        style.mFont = MyGUI::FontManager::getInstance().getByName(fontName);
         style.mHotColour = fontColour;
         style.mActiveColour = fontColour;
         style.mNormalColour = fontColour;
@@ -405,7 +404,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
 
             while (!stream.eof () && !ucsLineBreak (stream.peek ()) && ucsBreakingSpace (stream.peek ()))
             {
-                GlyphInfo* gi = style->mFont->getGlyphInfo (stream.peek ());
+                MyGUI::GlyphInfo* gi = style->mFont->getGlyphInfo (stream.peek ());
                 space_width += gi->advance;
                 stream.consume ();
             }
@@ -414,7 +413,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
 
             while (!stream.eof () && !ucsLineBreak (stream.peek ()) && !ucsBreakingSpace (stream.peek ()))
             {
-                GlyphInfo* gi = style->mFont->getGlyphInfo (stream.peek ());
+                MyGUI::GlyphInfo* gi = style->mFont->getGlyphInfo (stream.peek ());
                 word_width += gi->advance + gi->bearingX;
                 word_height = line_height;
                 ++character_count;
@@ -449,7 +448,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
         {
             mBook->mSections.push_back (Section ());
             mSection = &mBook->mSections.back ();
-            mSection->mRect = IntRect (0, mBook->mRect.bottom, 0, mBook->mRect.bottom);
+            mSection->mRect = MyGUI::IntRect (0, mBook->mRect.bottom, 0, mBook->mRect.bottom);
             mSectionAlignment.push_back (mCurrentAlignment);
         }
 
@@ -457,7 +456,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
         {
             mSection->mLines.push_back (Line ());
             mLine = &mSection->mLines.back ();
-            mLine->mRect = IntRect (0, mSection->mRect.bottom, 0, mBook->mRect.bottom);
+            mLine->mRect = MyGUI::IntRect (0, mSection->mRect.bottom, 0, mBook->mRect.bottom);
         }
 
         if (mBook->mRect.right < right)
@@ -527,7 +526,7 @@ namespace
         float hOffset;
         float vOffset;
 
-        RenderXform (ICroppedRectangle* croppedParent, RenderTargetInfo const & renderTargetInfo)
+        RenderXform (MyGUI::ICroppedRectangle* croppedParent, MyGUI::RenderTargetInfo const & renderTargetInfo)
         {
             clipTop    = croppedParent->_getMarginTop ();
             clipLeft   = croppedParent->_getMarginLeft ();
@@ -545,7 +544,7 @@ namespace
             vOffset     = renderTargetInfo.vOffset;
         }
 
-        bool clip (FloatRect & vr, FloatRect & tr)
+        bool clip (MyGUI::FloatRect & vr, MyGUI::FloatRect & tr)
         {
             if (vr.bottom <= clipTop    || vr.right  <= clipLeft   ||
                 vr.left   >= clipRight  || vr.top    >= clipBottom )
@@ -578,7 +577,7 @@ namespace
             return true;
         }
 
-        FloatPoint operator () (FloatPoint pt)
+        MyGUI::FloatPoint operator () (MyGUI::FloatPoint pt)
         {
             pt.left = absoluteLeft - leftOffset + pt.left;
             pt.top  = absoluteTop  - topOffset  + pt.top;
@@ -594,32 +593,32 @@ namespace
     {
         float mZ;
         uint32_t mC;
-        IFont* mFont;
-        FloatPoint mOrigin;
-        FloatPoint mCursor;
-        Vertex* mVertices;
+        MyGUI::IFont* mFont;
+        MyGUI::FloatPoint mOrigin;
+        MyGUI::FloatPoint mCursor;
+        MyGUI::Vertex* mVertices;
         RenderXform mRenderXform;
         MyGUI::VertexColourType mVertexColourType;
 
-        GlyphStream (IFont* font, float left, float top, float Z,
-                      Vertex* vertices, RenderXform const & renderXform) :
+        GlyphStream (MyGUI::IFont* font, float left, float top, float Z,
+                      MyGUI::Vertex* vertices, RenderXform const & renderXform) :
             mZ(Z), mOrigin (left, top),
             mFont (font), mVertices (vertices),
             mRenderXform (renderXform)
         {
-            mVertexColourType = RenderManager::getInstance().getVertexFormat();
+            mVertexColourType = MyGUI::RenderManager::getInstance().getVertexFormat();
         }
 
         ~GlyphStream ()
         {
         }
 
-        Vertex* end () const { return mVertices; }
+        MyGUI::Vertex* end () const { return mVertices; }
 
-        void reset (float left, float top, Colour colour)
+        void reset (float left, float top, MyGUI::Colour colour)
         {
-            mC = texture_utility::toColourARGB(colour) | 0xFF000000;
-            texture_utility::convertColour(mC, mVertexColourType);
+            mC = MyGUI::texture_utility::toColourARGB(colour) | 0xFF000000;
+            MyGUI::texture_utility::convertColour(mC, mVertexColourType);
 
             mCursor.left = mOrigin.left + left;
             mCursor.top = mOrigin.top + top;
@@ -627,16 +626,16 @@ namespace
 
         void emitGlyph (wchar_t ch)
         {
-            GlyphInfo* gi = mFont->getGlyphInfo (ch);
+            MyGUI::GlyphInfo* gi = mFont->getGlyphInfo (ch);
 
-            FloatRect vr;
+            MyGUI::FloatRect vr;
 
             vr.left = mCursor.left + gi->bearingX;
             vr.top = mCursor.top + gi->bearingY;
             vr.right = vr.left + gi->width;
             vr.bottom = vr.top + gi->height;
 
-            FloatRect tr = gi->uvRect;
+            MyGUI::FloatRect tr = gi->uvRect;
 
             if (mRenderXform.clip (vr, tr))
                 quad (vr, tr);
@@ -646,14 +645,14 @@ namespace
 
         void emitSpace (wchar_t ch)
         {
-            GlyphInfo* gi = mFont->getGlyphInfo (ch);
+            MyGUI::GlyphInfo* gi = mFont->getGlyphInfo (ch);
 
             mCursor.left += gi->bearingX + gi->advance;
         }
 
     private:
 
-        void quad (const FloatRect& vr, const FloatRect& tr)
+        void quad (const MyGUI::FloatRect& vr, const MyGUI::FloatRect& tr)
         {
             vertex (vr.left, vr.top, tr.left, tr.top);
             vertex (vr.right, vr.top, tr.right, tr.top);
@@ -665,7 +664,7 @@ namespace
 
         void vertex (float x, float y, float u, float v)
         {
-            FloatPoint pt = mRenderXform (FloatPoint (x, y));
+            MyGUI::FloatPoint pt = mRenderXform (MyGUI::FloatPoint (x, y));
 
             mVertices->x = pt.left;
             mVertices->y = pt.top ;
@@ -679,7 +678,7 @@ namespace
     };
 }
 
-class MWGui::PageDisplay : public ISubWidgetText
+class PageDisplay : public MyGUI::ISubWidgetText
 {
     MYGUI_RTTI_DERIVED(PageDisplay)
 protected:
@@ -690,15 +689,15 @@ protected:
 
     struct TextFormat : ISubWidget
     {
-        typedef IFont* Id;
+        typedef MyGUI::IFont* Id;
 
         Id mFont;
         int mCountVertex;
-        ITexture* mTexture;
-        RenderItem* mRenderItem;
+        MyGUI::ITexture* mTexture;
+        MyGUI::RenderItem* mRenderItem;
         PageDisplay * mDisplay;
 
-        TextFormat (IFont* id, PageDisplay * display) :
+        TextFormat (MyGUI::IFont* id, PageDisplay * display) :
             mFont (id),
             mTexture (NULL),
             mRenderItem (NULL),
@@ -707,7 +706,7 @@ protected:
         {
         }
 
-        void createDrawItem (ILayerNode* node)
+        void createDrawItem (MyGUI::ILayerNode* node)
         {
             assert (mRenderItem == NULL);
 
@@ -718,7 +717,7 @@ protected:
             }
         }
 
-        void destroyDrawItem (ILayerNode* node)
+        void destroyDrawItem (MyGUI::ILayerNode* node)
         {
             assert (mTexture != NULL ? mRenderItem != NULL : mRenderItem == NULL);
 
@@ -733,7 +732,7 @@ protected:
 
         // this isn't really a sub-widget, its just a "drawitem" which
         // should have its own interface
-        void createDrawItem(ITexture* _texture, ILayerNode* _node) {}
+        void createDrawItem(MyGUI::ITexture* _texture, MyGUI::ILayerNode* _node) {}
         void destroyDrawItem() {};
     };
 
@@ -747,14 +746,14 @@ public:
 
     Style* mFocusItem;
     bool mItemActive;
-    MouseButton mLastDown;
+    MyGUI::MouseButton mLastDown;
     boost::function <void (intptr_t)> mLinkClicked;
 
 
     boost::shared_ptr <TypesetBookImpl> mBook;
     size_t mPage;
 
-    ILayerNode* mNode;
+    MyGUI::ILayerNode* mNode;
     ActiveTextFormats mActiveTextFormats;
 
     PageDisplay ()
@@ -766,7 +765,7 @@ public:
     {
         if (mFocusItem != 0)
         {
-            IFont* Font = mBook->affectedFont (mFocusItem);
+            MyGUI::IFont* Font = mBook->affectedFont (mFocusItem);
 
             ActiveTextFormats::iterator i = mActiveTextFormats.find (Font);
 
@@ -795,7 +794,7 @@ public:
 
         Style * Hit = mBook->hitTest (left, mViewTop + top);
 
-        if (mLastDown == MouseButton::None)
+        if (mLastDown == MyGUI::MouseButton::None)
         {
             if (Hit != mFocusItem)
             {
@@ -821,7 +820,7 @@ public:
         }
     }
 
-    void onMouseButtonPressed (int left, int top, MouseButton id)
+    void onMouseButtonPressed (int left, int top, MyGUI::MouseButton id)
     {
         if (!mBook)
             return;
@@ -829,7 +828,7 @@ public:
         left -= mCroppedParent->getAbsoluteLeft ();
         top  -= mCroppedParent->getAbsoluteTop  ();
 
-        if (mLastDown == MouseButton::None)
+        if (mLastDown == MyGUI::MouseButton::None)
         {
             mFocusItem = mBook->hitTest (left, mViewTop + top);
             mItemActive = true;
@@ -840,7 +839,7 @@ public:
         }
     }
 
-    void onMouseButtonReleased(int left, int top, MouseButton id)
+    void onMouseButtonReleased(int left, int top, MyGUI::MouseButton id)
     {
         if (!mBook)
             return;
@@ -858,7 +857,7 @@ public:
 
             dirtyFocusItem ();
 
-            mLastDown = MouseButton::None;
+            mLastDown = MyGUI::MouseButton::None;
 
             if (clicked && mLinkClicked && mItem && mItem->mInteractiveId != 0)
                 mLinkClicked (mItem->mInteractiveId);
@@ -939,7 +938,7 @@ public:
 
         void operator () (Section const & section, Line const & line, Run const & run) const
         {
-            IFont* Font = run.mStyle->mFont;
+            MyGUI::IFont* Font = run.mStyle->mFont;
 
             ActiveTextFormats::iterator j = this_->mActiveTextFormats.find (Font);
 
@@ -975,7 +974,7 @@ public:
         if (mVisible)
         {
             // reset input state
-            mLastDown = MouseButton::None;
+            mLastDown = MyGUI::MouseButton::None;
             mFocusItem = nullptr;
             mItemActive = 0;
         }
@@ -987,7 +986,7 @@ public:
         }
     }
 
-    void createDrawItem(ITexture* texture, ILayerNode* node)
+    void createDrawItem(MyGUI::ITexture* texture, MyGUI::ILayerNode* node)
     {
         //test ();
 
@@ -1011,7 +1010,7 @@ public:
         {
             bool isActive = run.mStyle->mInteractiveId && (run.mStyle == this_->mFocusItem);
 
-            Colour colour = isActive ? (this_->mItemActive ? run.mStyle->mActiveColour: run.mStyle->mHotColour) : run.mStyle->mNormalColour;
+            MyGUI::Colour colour = isActive ? (this_->mItemActive ? run.mStyle->mActiveColour: run.mStyle->mHotColour) : run.mStyle->mNormalColour;
 
             glyphStream.reset (section.mRect.left + line.mRect.left + run.mLeft, line.mRect.top, colour);
 
@@ -1037,7 +1036,7 @@ public:
         if (!mVisible)
             return;
 
-        Vertex* vertices = textFormat.mRenderItem->getCurrentVertexBuffer();
+        MyGUI::Vertex* vertices = textFormat.mRenderItem->getCurrentVertexBuffer();
 
         RenderXform renderXform (mCroppedParent, textFormat.mRenderItem->getRenderTarget()->getInfo());
 
@@ -1080,7 +1079,7 @@ public:
 };
 
 
-class MWGui::BookPageImpl : public BookPage
+class BookPageImpl : public BookPage
 {
 MYGUI_RTTI_DERIVED(BookPage)
 public:
@@ -1131,7 +1130,7 @@ protected:
             Widget::onMouseMove (left, top);
     }
 
-    void onMouseButtonPressed (int left, int top, MouseButton id)
+    void onMouseButtonPressed (int left, int top, MyGUI::MouseButton id)
     {
         if (PageDisplay* pd = dynamic_cast <PageDisplay*> (getSubWidgetText ()))
         {
@@ -1141,7 +1140,7 @@ protected:
             Widget::onMouseButtonPressed (left, top, id);
     }
 
-    void onMouseButtonReleased(int left, int top, MouseButton id)
+    void onMouseButtonReleased(int left, int top, MyGUI::MouseButton id)
     {
         if (PageDisplay* pd = dynamic_cast <PageDisplay*> (getSubWidgetText ()))
         {
@@ -1154,7 +1153,7 @@ protected:
 
 void BookPage::registerMyGUIComponents ()
 {
-    FactoryManager & factory = FactoryManager::getInstance();
+    MyGUI::FactoryManager & factory = MyGUI::FactoryManager::getInstance();
 
     factory.registerFactory<BookPageImpl>("Widget");
     factory.registerFactory<PageDisplay>("BasisSkin");
@@ -1223,4 +1222,6 @@ static bool ucsBreakingSpace (int codePoint)
     default:
         return false;
     }
+}
+
 }

@@ -1,16 +1,14 @@
 #include "journalbooks.hpp"
 
-using namespace MWGui;
-
 namespace
 {
-    BookTypesetter::Utf8Span to_utf8_span (char const * text)
+    MWGui::BookTypesetter::Utf8Span to_utf8_span (char const * text)
     {
-        typedef BookTypesetter::Utf8Point point;
+        typedef MWGui::BookTypesetter::Utf8Point point;
 
         point begin = reinterpret_cast <point> (text);
 
-        return BookTypesetter::Utf8Span (begin, begin + strlen (text));
+        return MWGui::BookTypesetter::Utf8Span (begin, begin + strlen (text));
     }
 
     const MyGUI::Colour linkHot    (0.40f, 0.40f, 0.80f);
@@ -19,10 +17,10 @@ namespace
 
     struct AddContent
     {
-        BookTypesetter::Ptr mTypesetter;
-        BookTypesetter::Style* mBodyStyle;
+        MWGui::BookTypesetter::Ptr mTypesetter;
+        MWGui::BookTypesetter::Style* mBodyStyle;
 
-        AddContent (BookTypesetter::Ptr typesetter, BookTypesetter::Style* body_style) :
+        AddContent (MWGui::BookTypesetter::Ptr typesetter, MWGui::BookTypesetter::Style* body_style) :
             mTypesetter (typesetter), mBodyStyle (body_style)
         {
         }
@@ -30,14 +28,14 @@ namespace
 
     struct AddSpan : AddContent
     {
-        AddSpan (BookTypesetter::Ptr typesetter, BookTypesetter::Style* body_style) :
+        AddSpan (MWGui::BookTypesetter::Ptr typesetter, MWGui::BookTypesetter::Style* body_style) :
             AddContent (typesetter, body_style)
         {
         }
 
         void operator () (intptr_t topicId, size_t begin, size_t end)
         {
-            BookTypesetter::Style* style = mBodyStyle;
+            MWGui::BookTypesetter::Style* style = mBodyStyle;
 
             if (topicId)
                 style = mTypesetter->createHotStyle (mBodyStyle, linkNormal, linkHot, linkActive, topicId);
@@ -48,15 +46,15 @@ namespace
 
     struct AddEntry
     {
-        BookTypesetter::Ptr mTypesetter;
-        BookTypesetter::Style* mBodyStyle;
+        MWGui::BookTypesetter::Ptr mTypesetter;
+        MWGui::BookTypesetter::Style* mBodyStyle;
 
-        AddEntry (BookTypesetter::Ptr typesetter, BookTypesetter::Style* body_style) :
+        AddEntry (MWGui::BookTypesetter::Ptr typesetter, MWGui::BookTypesetter::Style* body_style) :
             mTypesetter (typesetter), mBodyStyle (body_style)
         {
         }
 
-        void operator () (JournalViewModel::Entry const & entry)
+        void operator () (MWGui::JournalViewModel::Entry const & entry)
         {
             mTypesetter->addContent (entry.body ());
 
@@ -67,17 +65,17 @@ namespace
     struct AddJournalEntry : AddEntry
     {
         bool mAddHeader;
-        BookTypesetter::Style* mHeaderStyle;
+        MWGui::BookTypesetter::Style* mHeaderStyle;
 
-        AddJournalEntry (BookTypesetter::Ptr typesetter, BookTypesetter::Style* body_style,
-                            BookTypesetter::Style* header_style, bool add_header) :
+        AddJournalEntry (MWGui::BookTypesetter::Ptr typesetter, MWGui::BookTypesetter::Style* body_style,
+                            MWGui::BookTypesetter::Style* header_style, bool add_header) :
             AddEntry (typesetter, body_style),
             mHeaderStyle (header_style),
             mAddHeader (add_header)
         {
         }
 
-        void operator () (JournalViewModel::JournalEntry const & entry)
+        void operator () (MWGui::JournalViewModel::JournalEntry const & entry)
         {
             if (mAddHeader)
             {
@@ -94,15 +92,15 @@ namespace
     struct AddTopicEntry : AddEntry
     {
         intptr_t mContentId;
-        BookTypesetter::Style* mHeaderStyle;
+        MWGui::BookTypesetter::Style* mHeaderStyle;
 
-        AddTopicEntry (BookTypesetter::Ptr typesetter, BookTypesetter::Style* body_style,
-                        BookTypesetter::Style* header_style, intptr_t contentId) :
+        AddTopicEntry (MWGui::BookTypesetter::Ptr typesetter, MWGui::BookTypesetter::Style* body_style,
+                        MWGui::BookTypesetter::Style* header_style, intptr_t contentId) :
             AddEntry (typesetter, body_style), mHeaderStyle (header_style), mContentId (contentId)
         {
         }
 
-        void operator () (JournalViewModel::TopicEntry const & entry)
+        void operator () (MWGui::JournalViewModel::TopicEntry const & entry)
         {
             mTypesetter->write (mBodyStyle, entry.source ());
             mTypesetter->write (mBodyStyle, 0, 3);// begin
@@ -118,12 +116,12 @@ namespace
 
     struct AddTopicName : AddContent
     {
-        AddTopicName (BookTypesetter::Ptr typesetter, BookTypesetter::Style* style) :
+        AddTopicName (MWGui::BookTypesetter::Ptr typesetter, MWGui::BookTypesetter::Style* style) :
             AddContent (typesetter, style)
         {
         }
 
-        void operator () (JournalViewModel::Utf8Span topicName)
+        void operator () (MWGui::JournalViewModel::Utf8Span topicName)
         {
             mTypesetter->write (mBodyStyle, topicName);
             mTypesetter->sectionBreak (10);
@@ -132,12 +130,12 @@ namespace
 
     struct AddQuestName : AddContent
     {
-        AddQuestName (BookTypesetter::Ptr typesetter, BookTypesetter::Style* style) :
+        AddQuestName (MWGui::BookTypesetter::Ptr typesetter, MWGui::BookTypesetter::Style* style) :
             AddContent (typesetter, style)
         {
         }
 
-        void operator () (JournalViewModel::Utf8Span topicName)
+        void operator () (MWGui::JournalViewModel::Utf8Span topicName)
         {
             mTypesetter->write (mBodyStyle, topicName);
             mTypesetter->sectionBreak (10);
@@ -146,14 +144,14 @@ namespace
 
     struct AddTopicLink : AddContent
     {
-        AddTopicLink (BookTypesetter::Ptr typesetter, BookTypesetter::Style* style) :
+        AddTopicLink (MWGui::BookTypesetter::Ptr typesetter, MWGui::BookTypesetter::Style* style) :
             AddContent (typesetter, style)
         {
         }
 
-        void operator () (JournalViewModel::TopicId topicId, JournalViewModel::Utf8Span name)
+        void operator () (MWGui::JournalViewModel::TopicId topicId, MWGui::JournalViewModel::Utf8Span name)
         {
-            BookTypesetter::Style* link = mTypesetter->createHotStyle (mBodyStyle, MyGUI::Colour::Black, linkHot, linkActive, topicId);
+            MWGui::BookTypesetter::Style* link = mTypesetter->createHotStyle (mBodyStyle, MyGUI::Colour::Black, linkHot, linkActive, topicId);
 
             mTypesetter->write (link, name);
             mTypesetter->lineBreak ();
@@ -162,20 +160,23 @@ namespace
 
     struct AddQuestLink : AddContent
     {
-        AddQuestLink (BookTypesetter::Ptr typesetter, BookTypesetter::Style* style) :
+        AddQuestLink (MWGui::BookTypesetter::Ptr typesetter, MWGui::BookTypesetter::Style* style) :
             AddContent (typesetter, style)
         {
         }
 
-        void operator () (JournalViewModel::QuestId id, JournalViewModel::Utf8Span name)
+        void operator () (MWGui::JournalViewModel::QuestId id, MWGui::JournalViewModel::Utf8Span name)
         {
-            BookTypesetter::Style* style = mTypesetter->createHotStyle (mBodyStyle, MyGUI::Colour::Black, linkHot, linkActive, id);
+            MWGui::BookTypesetter::Style* style = mTypesetter->createHotStyle (mBodyStyle, MyGUI::Colour::Black, linkHot, linkActive, id);
 
             mTypesetter->write (style, name);
             mTypesetter->lineBreak ();
         }
     };
 }
+
+namespace MWGui
+{
 
 typedef TypesetBook::Ptr book;
 
@@ -320,4 +321,6 @@ BookTypesetter::Ptr JournalBooks::createTypesetter ()
 {
     //TODO: determine page size from layout...
     return BookTypesetter::create (240, 300);
+}
+
 }

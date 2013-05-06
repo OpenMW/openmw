@@ -20,9 +20,6 @@
 #include "journalviewmodel.hpp"
 #include "journalbooks.hpp"
 
-using namespace MyGUI;
-using namespace MWGui;
-
 namespace
 {
     static char const OptionsOverlay [] = "OptionsOverlay";
@@ -47,7 +44,7 @@ namespace
     static char const LeftTopicIndex [] = "LeftTopicIndex";
     static char const RightTopicIndex [] = "RightTopicIndex";
 
-    struct JournalWindowImpl : WindowBase, JournalBooks, JournalWindow
+    struct JournalWindowImpl : MWGui::WindowBase, MWGui::JournalBooks, MWGui::JournalWindow
     {
         struct DisplayState
         {
@@ -73,17 +70,17 @@ namespace
         template <typename value_type>
         void setText (char const * name, value_type const & value)
         {
-            getWidget <TextBox> (name) ->
+            getWidget <MyGUI::TextBox> (name) ->
                 setCaption (boost::lexical_cast <std::string> (value));
         }
 
         void setVisible (char const * name, bool visible)
         {
-            getWidget <Widget> (name) ->
+            getWidget <MyGUI::Widget> (name) ->
                 setVisible (visible);
         }
 
-        void adviseButtonClick (char const * name, void (JournalWindowImpl::*Handler) (Widget* _sender))
+        void adviseButtonClick (char const * name, void (JournalWindowImpl::*Handler) (MyGUI::Widget* _sender))
         {
             getWidget <MWGui::ImageButton> (name) ->
                 eventMouseButtonClick += newDelegate(this, Handler);
@@ -94,7 +91,7 @@ namespace
             return getWidget <MWGui::BookPage> (name);
         }
 
-        JournalWindowImpl (JournalViewModel::Ptr Model)
+        JournalWindowImpl (MWGui::JournalViewModel::Ptr Model)
             : WindowBase("openmw_journal.layout"), JournalBooks (Model)
         {
             mMainWidget->setVisible(false);
@@ -114,7 +111,7 @@ namespace
             adviseButtonClick (ShowActiveBTN, &JournalWindowImpl::notifyShowActive);
 
             {
-                BookPage::ClickCallback callback;
+                MWGui::BookPage::ClickCallback callback;
                 
                 callback = boost::bind (&JournalWindowImpl::notifyTopicClicked, this, _1);
 
@@ -124,7 +121,7 @@ namespace
             }
 
             {
-                BookPage::ClickCallback callback;
+                MWGui::BookPage::ClickCallback callback;
                 
                 callback = boost::bind (&JournalWindowImpl::notifyIndexLinkClicked, this, _1);
 
@@ -133,7 +130,7 @@ namespace
             }
 
             {
-                BookPage::ClickCallback callback;
+                MWGui::BookPage::ClickCallback callback;
                 
                 callback = boost::bind (&JournalWindowImpl::notifyQuestClicked, this, _1);
 
@@ -312,7 +309,7 @@ namespace
             setVisible (JournalBTN, true);
         }
 
-        void notifyOptions(Widget* _sender)
+        void notifyOptions(MyGUI::Widget* _sender)
         {
             setOptionsMode ();
 
@@ -323,7 +320,7 @@ namespace
             getPage (RightTopicIndex)->showPage (mTopicIndexBook, 1);
         }
 
-        void notifyJournal(Widget* _sender)
+        void notifyJournal(MyGUI::Widget* _sender)
         {
             assert (mStates.size () > 1);
             popBook ();
@@ -335,10 +332,10 @@ namespace
 
             getPage (pageId)->showPage (book, 0);
 
-            getWidget <ScrollView> (listId)->setCanvasSize (size.first, size.second);
+            getWidget <MyGUI::ScrollView> (listId)->setCanvasSize (size.first, size.second);
         }
 
-        void notifyIndexLinkClicked (TypesetBook::InteractiveId character)
+        void notifyIndexLinkClicked (MWGui::TypesetBook::InteractiveId character)
         {
             setVisible (LeftTopicIndex, false);
             setVisible (RightTopicIndex, false);
@@ -347,7 +344,7 @@ namespace
             showList (TopicsList, TopicsPage, createTopicIndexBook ((char)character));
         }
 
-        void notifyTopics(Widget* _sender)
+        void notifyTopics(MyGUI::Widget* _sender)
         {
             mQuestMode = false;
             setVisible (LeftTopicIndex, true);
@@ -358,7 +355,7 @@ namespace
             setVisible (ShowActiveBTN, false);
         }
 
-        void notifyQuests(Widget* _sender)
+        void notifyQuests(MyGUI::Widget* _sender)
         {
             mQuestMode = true;
             setVisible (LeftTopicIndex, false);
@@ -371,7 +368,7 @@ namespace
             showList (QuestsList, QuestsPage, createQuestIndexBook (!mAllQuests));
         }
 
-        void notifyShowAll(Widget* _sender)
+        void notifyShowAll(MyGUI::Widget* _sender)
         {
             mAllQuests = true;
             setVisible (ShowAllBTN, !mAllQuests);
@@ -379,7 +376,7 @@ namespace
             showList (QuestsList, QuestsPage, createQuestIndexBook (!mAllQuests));
         }
 
-        void notifyShowActive(Widget* _sender)
+        void notifyShowActive(MyGUI::Widget* _sender)
         {
             mAllQuests = false;
             setVisible (ShowAllBTN, !mAllQuests);
@@ -387,18 +384,18 @@ namespace
             showList (QuestsList, QuestsPage, createQuestIndexBook (!mAllQuests));
         }
 
-        void notifyCancel(Widget* _sender)
+        void notifyCancel(MyGUI::Widget* _sender)
         {
             setBookMode ();
         }
 
-        void notifyClose(Widget* _sender)
+        void notifyClose(MyGUI::Widget* _sender)
         {
 
             MWBase::Environment::get().getWindowManager ()->popGuiMode ();
         }
 
-        void notifyNextPage(Widget* _sender)
+        void notifyNextPage(MyGUI::Widget* _sender)
         {
             if (!mStates.empty ())
             {
@@ -413,7 +410,7 @@ namespace
             }
         }
 
-        void notifyPrevPage(Widget* _sender)
+        void notifyPrevPage(MyGUI::Widget* _sender)
         {
             if (!mStates.empty ())
             {
@@ -430,7 +427,7 @@ namespace
 }
 
 // glue the implementation to the interface
-JournalWindow * MWGui::JournalWindow::create (JournalViewModel::Ptr Model)
+MWGui::JournalWindow * MWGui::JournalWindow::create (JournalViewModel::Ptr Model)
 {
     return new JournalWindowImpl (Model);
 }

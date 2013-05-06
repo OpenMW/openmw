@@ -16,14 +16,13 @@
 
 #include "keywordsearch.hpp"
 
+namespace MWGui {
 
-using namespace MWGui;
-
-namespace MWGui { struct JournalViewModelImpl; }
+struct JournalViewModelImpl;
 
 static void injectMonthName (std::ostream & os, int month);
 
-struct MWGui::JournalViewModelImpl : JournalViewModel
+struct JournalViewModelImpl : JournalViewModel
 {
     typedef KeywordSearch <std::string, intptr_t> KeywordSearchT;
 
@@ -385,4 +384,6 @@ static void injectMonthName (std::ostream & os, int month)
 JournalViewModel::Ptr JournalViewModel::create ()
 {
     return boost::make_shared <JournalViewModelImpl> ();
+}
+
 }
