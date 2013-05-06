@@ -10,7 +10,6 @@
 #include "journalviewmodel.hpp"
 #include "charactercreation.hpp"
 #include "dialogue.hpp"
-#include "dialoguehistory.hpp"
 #include "statswindow.hpp"
 #include "messagebox.hpp"
 #include "tooltips.hpp"

@@ -11,7 +11,6 @@
 
 #include "../mwdialogue/dialoguemanagerimp.hpp"
 
-#include "dialoguehistory.hpp"
 #include "widgets.hpp"
 #include "list.hpp"
 #include "tradewindow.hpp"
