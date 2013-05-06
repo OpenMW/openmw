@@ -83,8 +83,8 @@ struct JournalViewModelImpl : JournalViewModel
         return journal->begin () == journal->end ();
     }
 
-    template <typename t_iterator, typename IInterface>
-    struct BaseEntry : IInterface
+    template <typename t_iterator, typename Interface>
+    struct BaseEntry : Interface
     {
         typedef t_iterator iterator_t;
 
