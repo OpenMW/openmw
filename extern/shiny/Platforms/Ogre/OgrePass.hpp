@@ -14,7 +14,7 @@ namespace sh
 	public:
 		OgrePass (OgreMaterial* parent, const std::string& configuration, unsigned short lodIndex);
 
-		virtual boost::shared_ptr<TextureUnitState> createTextureUnitState ();
+		virtual boost::shared_ptr<TextureUnitState> createTextureUnitState (const std::string& name);
 		virtual void assignProgram (GpuProgramType type, const std::string& name);
 
 		Ogre::Pass* getOgrePass();

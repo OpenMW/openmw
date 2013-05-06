@@ -141,7 +141,7 @@ namespace Compiler
 
         if (mState==SetMemberVarState)
         {
-            mMemberName = Misc::StringUtils::lowerCase (name);
+            mMemberName = name;
             char type = getContext().getMemberType (mMemberName, mName);
 
             if (type!=' ')

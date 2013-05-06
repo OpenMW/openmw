@@ -52,6 +52,7 @@ Paul McElroy (Greendogo)
 Pieter van der Kloet (pvdk)
 Radu-Marius Popovici (rpopovici)
 Roman Melnik (Kromgart)
+Roman Proskuryakov (humbug)
 Sandy Carter (bwrsandman)
 Sebastian Wick (swick)
 Sergey Shambir

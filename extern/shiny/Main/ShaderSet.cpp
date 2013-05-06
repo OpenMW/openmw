@@ -37,6 +37,14 @@ namespace sh
 		parse();
 	}
 
+	ShaderSet::~ShaderSet()
+	{
+		for (ShaderInstanceMap::iterator it = mInstances.begin(); it != mInstances.end(); ++it)
+		{
+			sh::Factory::getInstance().getPlatform()->destroyGpuProgram(it->second.getName());
+		}
+	}
+
 	void ShaderSet::parse()
 	{
 		std::string currentToken;
