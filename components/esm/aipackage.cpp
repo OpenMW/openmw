@@ -5,6 +5,12 @@
 
 namespace ESM
 {
+    void AIData::blank()
+    {
+        mHello = mU1 = mFight = mFlee = mAlarm = mU2 = mU3 = mU4 = 0;
+        mServices = 0;
+    }
+
     void AIPackageList::load(ESMReader &esm)
     {
         while (esm.hasMoreSubs()) {

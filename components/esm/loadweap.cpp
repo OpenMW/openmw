@@ -25,4 +25,24 @@ void Weapon::save(ESMWriter &esm)
     esm.writeHNOCString("ENAM", mEnchant);
 }
 
+    void Weapon::blank()
+    {
+        mData.mWeight = 0;
+        mData.mValue = 0;
+        mData.mType = 0;
+        mData.mHealth = 0;
+        mData.mSpeed = 0;
+        mData.mReach = 0;
+        mData.mEnchant = 0;
+        mData.mChop[0] = mData.mChop[1] = 0;
+        mData.mSlash[0] = mData.mSlash[1] = 0;
+        mData.mThrust[0] = mData.mThrust[1] = 0;
+        mData.mFlags = 0;
+
+        mName.clear();
+        mModel.clear();
+        mIcon.clear();
+        mEnchant.clear();
+        mScript.clear();
+    }
 }

@@ -15,7 +15,7 @@ class ESMWriter;
  * to implement it once.
  *
  * We should later implement the ability to merge leveled lists from
- * several files. 
+ * several files.
  */
 
 struct LeveledListBase
@@ -52,6 +52,9 @@ struct LeveledListBase
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
+
+    void blank();
+    ///< Set record to default state (does not touch the ID).
 };
 
 struct CreatureLevList: LeveledListBase

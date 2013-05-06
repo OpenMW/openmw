@@ -17,4 +17,11 @@ void Activator::save(ESMWriter &esm)
     esm.writeHNCString("FNAM", mName);
     esm.writeHNOCString("SCRI", mScript);
 }
+
+    void Activator::blank()
+    {
+        mName.clear();
+        mScript.clear();
+        mModel.clear();
+    }
 }
