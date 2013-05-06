@@ -258,55 +258,6 @@ namespace MWGui
         static_cast<MyGUI::Window*>(mMainWidget)->eventWindowChangeCoord += MyGUI::newDelegate(this, &DialogueWindow::onWindowResize);
     }
 
-    void DialogueWindow::onHistoryClicked(MyGUI::Widget* _sender)
-    {
-        /*
-        MyGUI::ISubWidgetText* t = mHistory->getClient()->getSubWidgetText();
-        if(t == NULL)
-            return;
-
-        const MyGUI::IntPoint& lastPressed = MyGUI::InputManager::getInstance().getLastPressedPosition(MyGUI::MouseButton::Left);
-
-        size_t cursorPosition = t->getCursorPosition(lastPressed);
-        MyGUI::UString color = mHistory->getColorAtPos(cursorPosition);
-
-        if (!mEnabled && color == "#572D21")
-            MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
-
-        if (!mEnabled)
-            return;
-
-        if(color != "#B29154")
-        {
-            MyGUI::UString key = mHistory->getColorTextAt(cursorPosition);
-
-            if(color == "#686EBA")
-            {
-                std::map<size_t, HyperLink>::iterator i = mHyperLinks.upper_bound(cursorPosition);
-                if( !mHyperLinks.empty() )
-                {
-                    --i;
-
-                    if( i->first + i->second.mLength > cursorPosition)
-                    {
-                        MWBase::Environment::get().getDialogueManager()->keywordSelected(i->second.mTrueValue);
-                    }
-                }
-                else
-                {
-                    // the link was colored, but it is not in  mHyperLinks.
-                    // It means that those liunks are not marked with @# and found
-                    // by topic name search
-                    MWBase::Environment::get().getDialogueManager()->keywordSelected(lower_string(key));
-                }
-            }
-
-            if(color == "#572D21")
-                MWBase::Environment::get().getDialogueManager()->questionAnswered(lower_string(key));
-        }
-        */
-    }
-
     void DialogueWindow::onWindowResize(MyGUI::Window* _sender)
     {
         mTopicsList->adjustSize();
@@ -405,7 +356,6 @@ namespace MWGui
         setTitle(npcName);
 
         mTopicsList->clear();
-        mHyperLinks.clear();
 
         for (std::vector<DialogueText*>::iterator it = mHistoryContents.begin(); it != mHistoryContents.end(); ++it)
             delete (*it);
@@ -477,84 +427,6 @@ namespace MWGui
         mTopicsList->adjustSize();
 
         updateHistory();
-    }
-
-    std::string DialogueWindow::parseText(const std::string& text)
-    {
-        bool separatorReached = false; // only parse topics that are below the separator (this prevents actions like "Barter" that are not topics from getting blue-colored)
-
-        std::vector<std::string> topics;
-
-        bool hasSeparator = false;
-        for (unsigned int i=0; i<mTopicsList->getItemCount(); ++i)
-        {
-            if (mTopicsList->getItemNameAt(i) == "")
-                hasSeparator = true;
-        }
-
-        for(unsigned int i = 0;i<mTopicsList->getItemCount();i++)
-        {
-            std::string keyWord = mTopicsList->getItemNameAt(i);
-            if (separatorReached || !hasSeparator)
-                topics.push_back(keyWord);
-            else if (keyWord == "")
-                separatorReached = true;
-        }
-
-        std::vector<MWDialogue::HyperTextToken> hypertext = MWDialogue::ParseHyperText(text);
-
-        /*
-        size_t historySize = 0;
-        if(mHistory->getClient()->getSubWidgetText() != NULL)
-        {
-            historySize = mHistory->getOnlyText().size();
-        }
-        */
-
-        std::string result;
-
-        /*
-        size_t hypertextPos = 0;
-        for (size_t i = 0; i < hypertext.size(); ++i)
-        {
-            if (hypertext[i].mLink)
-            {
-                size_t asterisk_count = MWDialogue::RemovePseudoAsterisks(hypertext[i].mText);
-                std::string standardForm = hypertext[i].mText;
-                for(; asterisk_count > 0; --asterisk_count)
-                    standardForm.append("*");
-
-                standardForm =
-                    MWBase::Environment::get().getWindowManager()->
-                    getTranslationDataStorage().topicStandardForm(standardForm);
-
-                if( std::find(topics.begin(), topics.end(), std::string(standardForm) ) != topics.end() )
-                {
-                    result.append("#686EBA").append(hypertext[i].mText).append("#B29154");
-
-                    mHyperLinks[historySize+hypertextPos].mLength = MyGUI::UString(hypertext[i].mText).length();
-                    mHyperLinks[historySize+hypertextPos].mTrueValue = lower_string(standardForm);
-                }
-                else
-                    result += hypertext[i].mText;
-            }
-            else
-            {
-                if( !MWBase::Environment::get().getWindowManager()->getTranslationDataStorage().hasTranslation() )
-                {
-                    for(std::vector<std::string>::const_iterator it = topics.begin(); it != topics.end(); ++it)
-                    {
-                        addColorInString(hypertext[i].mText, *it, "#686EBA", "#B29154");
-                    }
-                }
-
-                result += hypertext[i].mText;
-            }
-
-            hypertextPos += MyGUI::UString(hypertext[i].mText).length();
-        }
-        */
-        return result;
     }
 
     void DialogueWindow::updateHistory(bool scrollbar)
@@ -678,7 +550,6 @@ namespace MWGui
     {
         //Clear the list of topics
         mTopicsList->clear();
-        mHyperLinks.clear();
 
         if (mPtr.getTypeName() == typeid(ESM::NPC).name())
         {

@@ -109,7 +109,6 @@ namespace MWGui
         void notifyLinkClicked (TypesetBook::InteractiveId link);
 
         void startDialogue(MWWorld::Ptr actor, std::string npcName);
-        void stopDialogue();
         void setKeywords(std::list<std::string> keyWord);
 
         void addResponse (const std::string& text, const std::string& title="");
@@ -139,7 +138,6 @@ namespace MWGui
     protected:
         void onSelectTopic(const std::string& topic, int id);
         void onByeClicked(MyGUI::Widget* _sender);
-        void onHistoryClicked(MyGUI::Widget* _sender);
         void onMouseWheel(MyGUI::Widget* _sender, int _rel);
         void onWindowResize(MyGUI::Window* _sender);
 
@@ -149,18 +147,8 @@ namespace MWGui
 
         virtual void onReferenceUnavailable();
 
-        struct HyperLink
-        {
-            size_t mLength;
-            std::string mTrueValue;
-        };
-
     private:
         void updateOptions();
-        /**
-        *Helper function that add topic keyword in blue in a text.
-        */
-        std::string parseText(const std::string& text);
 
         int mServices;
 
@@ -182,11 +170,7 @@ namespace MWGui
         MyGUI::ProgressPtr mDispositionBar;
         MyGUI::EditBox*     mDispositionText;
 
-        std::stringstream mText;
-
         PersuasionDialog mPersuasionDialog;
-
-        std::map<size_t, HyperLink> mHyperLinks;
     };
 }
 #endif
