@@ -1,5 +1,4 @@
 #include "occlusionquery.hpp"
-#include "renderconst.hpp"
 
 #include <OgreRenderSystem.h>
 #include <OgreRoot.h>
@@ -7,7 +6,10 @@
 #include <OgreHardwareOcclusionQuery.h>
 #include <OgreEntity.h>
 #include <OgreSubEntity.h>
+#include <OgreMeshManager.h>
 #include <OgreMaterialManager.h>
+
+#include "renderconst.hpp"
 
 using namespace MWRender;
 using namespace Ogre;
@@ -16,7 +18,7 @@ OcclusionQuery::OcclusionQuery(OEngine::Render::OgreRenderer* renderer, SceneNod
     mSunTotalAreaQuery(0), mSunVisibleAreaQuery(0), mActiveQuery(0),
     mDoQuery(0), mSunVisibility(0),
     mWasVisible(false),
-    mBBNode(0), mActive(false)
+    mActive(false)
 {
     mRendering = renderer;
     mSunNode = sunNode;
@@ -40,39 +42,24 @@ OcclusionQuery::OcclusionQuery(OEngine::Render::OgreRenderer* renderer, SceneNod
         return;
     }
 
-    MaterialPtr matBase = MaterialManager::getSingleton().getByName("BaseWhiteNoLighting");
-    MaterialPtr matQueryArea = matBase->clone("QueryTotalPixels");
-    matQueryArea->setDepthWriteEnabled(false);
-    matQueryArea->setColourWriteEnabled(false);
-    matQueryArea->setDepthCheckEnabled(false); // Not occluded by objects
-    MaterialPtr matQueryVisible = matBase->clone("QueryVisiblePixels");
-    matQueryVisible->setDepthWriteEnabled(false);
-    matQueryVisible->setColourWriteEnabled(false); // Uncomment this to visualize the occlusion query
-    matQueryVisible->setDepthCheckEnabled(true); // Occluded by objects
-    matQueryVisible->setCullingMode(CULL_NONE);
-    matQueryVisible->setManualCullingMode(MANUAL_CULL_NONE);
-
-    if (sunNode)
-        mBBNode = mSunNode->getParentSceneNode()->createChildSceneNode();
-
     mBBNodeReal = mRendering->getScene()->getRootSceneNode()->createChildSceneNode();
 
-    mBBQueryTotal = mRendering->getScene()->createBillboardSet(1);
+    static Ogre::MeshPtr plane = MeshManager::getSingleton().createPlane("occlusionbillboard",
+        ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,  Ogre::Plane(Ogre::Vector3(0,0,1), 0), 1, 1, 1, 1, true, 1, 1, 1, Vector3::UNIT_Y);
+    plane->_setBounds(Ogre::AxisAlignedBox::BOX_INFINITE);
+
+    mBBQueryTotal = mRendering->getScene()->createEntity(plane);
     mBBQueryTotal->setCastShadows(false);
-    mBBQueryTotal->setDefaultDimensions(150, 150);
-    mBBQueryTotal->createBillboard(Vector3::ZERO);
-    mBBQueryTotal->setMaterialName("QueryTotalPixels");
-    mBBQueryTotal->setRenderQueueGroup(RQG_OcclusionQuery+1);
     mBBQueryTotal->setVisibilityFlags(RV_OcclusionQuery);
+    mBBQueryTotal->setRenderQueueGroup(RQG_OcclusionQuery+1);
+    mBBQueryTotal->setMaterialName("QueryTotalPixels");
     mBBNodeReal->attachObject(mBBQueryTotal);
 
-    mBBQueryVisible = mRendering->getScene()->createBillboardSet(1);
+    mBBQueryVisible = mRendering->getScene()->createEntity(plane);
     mBBQueryVisible->setCastShadows(false);
-    mBBQueryVisible->setDefaultDimensions(150, 150);
-    mBBQueryVisible->createBillboard(Vector3::ZERO);
-    mBBQueryVisible->setMaterialName("QueryVisiblePixels");
-    mBBQueryVisible->setRenderQueueGroup(RQG_OcclusionQuery+1);
     mBBQueryVisible->setVisibilityFlags(RV_OcclusionQuery);
+    mBBQueryVisible->setRenderQueueGroup(RQG_OcclusionQuery+1);
+    mBBQueryVisible->setMaterialName("QueryVisiblePixels");
     mBBNodeReal->attachObject(mBBQueryVisible);
 
     mRendering->getScene()->addRenderObjectListener(this);
@@ -116,12 +103,12 @@ void OcclusionQuery::notifyRenderSingleObject(Renderable* rend, const Pass* pass
     // Open a new occlusion query
     if (mDoQuery == true)
     {
-        if (rend == mBBQueryTotal)
+        if (rend == mBBQueryTotal->getSubEntity(0))
         {
             mActiveQuery = mSunTotalAreaQuery;
             mWasVisible = true;
         }
-        else if (rend == mBBQueryVisible)
+        else if (rend == mBBQueryVisible->getSubEntity(0))
         {
             mActiveQuery = mSunVisibleAreaQuery;
         }
@@ -170,12 +157,11 @@ void OcclusionQuery::update(float duration)
     if (dist==0) dist = 10000000;
     dist -= 1000; // bias
     dist /= 1000.f;
-    if (mBBNode)
+    if (mSunNode)
     {
-        mBBNode->setPosition(mSunNode->getPosition() * dist);
-        mBBNode->setScale(dist, dist, dist);
-        mBBNodeReal->setPosition(mBBNode->_getDerivedPosition());
-        mBBNodeReal->setScale(mBBNode->getScale());
+        mBBNodeReal->setPosition(mSunNode->getPosition() * dist);
+        mBBNodeReal->setOrientation(Ogre::Vector3::UNIT_Z.getRotationTo(-mBBNodeReal->getPosition().normalisedCopy()));
+        mBBNodeReal->setScale(150.f*dist, 150.f*dist, 150.f*dist);
     }
 
     // Stop occlusion queries until we get their information
@@ -209,6 +195,4 @@ void OcclusionQuery::update(float duration)
 void OcclusionQuery::setSunNode(Ogre::SceneNode* node)
 {
     mSunNode = node;
-    if (!mBBNode)
-        mBBNode = node->getParentSceneNode()->createChildSceneNode();
 }

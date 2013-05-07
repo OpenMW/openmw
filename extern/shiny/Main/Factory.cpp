@@ -721,7 +721,6 @@ namespace sh
 					// delete any outdated shaders based on this shader set
 					if (removeCache (it->first))
 						removeBinaryCache = true;
-					mShadersLastModified[sourceRelative] = lastModified;
 				}
 			}
 			else
@@ -730,10 +729,12 @@ namespace sh
 				// in both cases we can safely delete
 				if (removeCache (it->first))
 					removeBinaryCache = true;
-				mShadersLastModified[sourceRelative] = lastModified;
 			}
 			mShaderSets.insert(std::make_pair(it->first, newSet));
 		}
+
+		// new is now current
+		mShadersLastModified = mShadersLastModifiedNew;
 
 		return removeBinaryCache;
 	}

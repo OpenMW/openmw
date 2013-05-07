@@ -12,6 +12,8 @@
 #include <OgreEntity.h>
 #include <OgreSubEntity.h>
 
+#include <OgreMeshManager.h>
+
 #include <boost/lexical_cast.hpp>
 
 #include <components/nifogre/ogrenifloader.hpp>
@@ -41,24 +43,24 @@ BillboardObject::BillboardObject( const String& textureName,
 
     static unsigned int bodyCount=0;
 
-    /// \todo These billboards are not 100% correct, might want to revisit them later
-    mBBSet = sceneMgr->createBillboardSet("SkyBillboardSet"+StringConverter::toString(bodyCount), 1);
-    mBBSet->setDefaultDimensions(550.f*initialSize, 550.f*initialSize);
-    mBBSet->setBillboardType(BBT_PERPENDICULAR_COMMON);
-    mBBSet->setCommonDirection( -position.normalisedCopy() );
-    mBBSet->setVisibilityFlags(RV_Sky);
+    mMaterial = sh::Factory::getInstance().createMaterialInstance ("BillboardMaterial"+StringConverter::toString(bodyCount), material);
+    mMaterial->setProperty("texture", sh::makeProperty(new sh::StringValue(textureName)));
+
+    static Ogre::MeshPtr plane = MeshManager::getSingleton().createPlane("billboard",
+        ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,  Ogre::Plane(Ogre::Vector3(0,0,1), 0), 1, 1, 1, 1, true, 1, 1, 1, Vector3::UNIT_Y);
+    plane->_setBounds(Ogre::AxisAlignedBox::BOX_INFINITE);
+    mEntity = sceneMgr->createEntity(plane);
+    mEntity->setMaterialName("BillboardMaterial"+StringConverter::toString(bodyCount));
+    mEntity->setVisibilityFlags(RV_Sky);
+    mEntity->setCastShadows(false);
+
     mNode = rootNode->createChildSceneNode();
     mNode->setPosition(finalPosition);
-    mNode->attachObject(mBBSet);
-    mBBSet->createBillboard(0,0,0);
-    mBBSet->setCastShadows(false);
-
-    mMaterial = sh::Factory::getInstance().createMaterialInstance ("BillboardMaterial"+StringConverter::toString(bodyCount), material);
-    mMaterial->setProperty("texture", sh::makeProperty<sh::StringValue>(new sh::StringValue(textureName)));
+    mNode->attachObject(mEntity);
+    mNode->setScale(Ogre::Vector3(550.f*initialSize));
+    mNode->setOrientation(Ogre::Vector3::UNIT_Z.getRotationTo(-position.normalisedCopy()));
 
     sh::Factory::getInstance().getMaterialInstance ("BillboardMaterial"+StringConverter::toString(bodyCount))->setListener(this);
-
-    mBBSet->setMaterialName("BillboardMaterial"+StringConverter::toString(bodyCount));
 
     bodyCount++;
 }
@@ -79,12 +81,12 @@ void BillboardObject::createdConfiguration (sh::MaterialInstance* m, const std::
 
 void BillboardObject::setVisible(const bool visible)
 {
-    mBBSet->setVisible(visible);
+    mEntity->setVisible(visible);
 }
 
 void BillboardObject::setSize(const float size)
 {
-    mNode->setScale(size, size, size);
+    mNode->setScale(550.f*size, 550.f*size, 550.f*size);
 }
 
 void BillboardObject::setVisibility(const float visibility)
@@ -103,21 +105,18 @@ void BillboardObject::setPosition(const Vector3& pPosition)
 {
     Vector3 normalised = pPosition.normalisedCopy();
     Vector3 finalPosition = normalised * 1000.f;
-
-    mBBSet->setCommonDirection( -normalised );
-
+    mNode->setOrientation(Ogre::Vector3::UNIT_Z.getRotationTo(-normalised));
     mNode->setPosition(finalPosition);
 }
 
 Vector3 BillboardObject::getPosition() const
 {
-    Vector3 p = mNode->_getDerivedPosition() - mNode->getParentSceneNode()->_getDerivedPosition();
-    return p;
+    return mNode->getPosition();
 }
 
 void BillboardObject::setVisibilityFlags(int flags)
 {
-    mBBSet->setVisibilityFlags(flags);
+    mEntity->setVisibilityFlags(flags);
 }
 
 void BillboardObject::setColour(const ColourValue& pColour)
@@ -134,7 +133,7 @@ void BillboardObject::setColour(const ColourValue& pColour)
 
 void BillboardObject::setRenderQueue(unsigned int id)
 {
-    mBBSet->setRenderQueueGroup(id);
+    mEntity->setRenderQueueGroup(id);
 }
 
 SceneNode* BillboardObject::getNode()
@@ -218,7 +217,6 @@ SkyManager::SkyManager(Ogre::SceneNode *root, Ogre::Camera *pCamera)
     , mSceneMgr(NULL)
     , mAtmosphereDay(NULL)
     , mAtmosphereNight(NULL)
-    , mCloudFragmentShader()
     , mClouds()
     , mNextClouds()
     , mCloudBlendFactor(0.0f)
@@ -283,8 +281,7 @@ void SkyManager::create()
     mSunGlare->setRenderQueue(RQG_SkiesLate);
     mSunGlare->setVisibilityFlags(RV_NoReflection);
 
-    Ogre::AxisAlignedBox aabInf;
-    aabInf.setInfinite ();
+    Ogre::AxisAlignedBox aabInf = Ogre::AxisAlignedBox::BOX_INFINITE;
 
     // Stars
     mAtmosphereNight = mRootNode->createChildSceneNode();
@@ -372,8 +369,6 @@ void SkyManager::update(float duration)
 {
     if (!mEnabled) return;
     const MWWorld::Fallback* fallback=MWBase::Environment::get().getWorld()->getFallback();
-    mCamera->getParentSceneNode ()->needUpdate ();
-    mRootNode->setPosition(mCamera->getDerivedPosition());
 
     // UV Scroll the clouds
     mCloudAnimationTimer += duration * mCloudSpeed;
@@ -407,8 +402,7 @@ void SkyManager::update(float duration)
         Vector3 cam = mCamera->getRealDirection();
         const Degree angle = sun.angleBetween( cam );
         float val = 1- (angle.valueDegrees() / 180.f);
-        val = (val*val*val*val)*2;
-
+        val = (val*val*val*val)*6;
         mSunGlare->setSize(val * mGlareFade);
     }
 
@@ -537,7 +531,7 @@ void SkyManager::setGlare(const float glare)
 Vector3 SkyManager::getRealSunPos()
 {
     if (!mCreated) return Vector3(0,0,0);
-    return mSun->getNode()->_getDerivedPosition();
+    return mSun->getNode()->getPosition() + mCamera->getRealPosition();
 }
 
 void SkyManager::sunEnable()
@@ -642,22 +636,6 @@ Ogre::SceneNode* SkyManager::getSunNode()
 {
     if (!mCreated) return 0;
     return mSun->getNode();
-}
-
-void SkyManager::setSkyPosition(const Ogre::Vector3& position)
-{
-    mRootNode->setPosition(position);
-}
-
-void SkyManager::resetSkyPosition()
-{
-    mCamera->getParentSceneNode ()->needUpdate ();
-    mRootNode->setPosition(mCamera->getDerivedPosition());
-}
-
-void SkyManager::scaleSky(float scale)
-{
-    mRootNode->setScale(scale, scale, scale);
 }
 
 void SkyManager::setGlareEnabled (bool enabled)
