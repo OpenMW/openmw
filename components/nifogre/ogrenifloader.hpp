@@ -68,6 +68,11 @@ public:
     static ObjectList createObjectBase(Ogre::SceneNode *parentNode,
                                        std::string name,
                                        const std::string &group="General");
+
+    static void createKfControllers(Ogre::Entity *skelBase,
+                                    const std::string &name,
+                                    TextKeyMap &textKeys,
+                                    std::vector<Ogre::Controller<Ogre::Real> > &ctrls);
 };
 
 // FIXME: Should be with other general Ogre extensions.

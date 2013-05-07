@@ -19,8 +19,7 @@ namespace MWRender
 {
 
 Animation::AnimLayer::AnimLayer()
-  : mControllers(NULL)
-  , mTextKeys(NULL)
+  : mSource(NULL)
   , mTime(0.0f)
   , mPlaying(false)
   , mLoopCount(0)
@@ -76,6 +75,8 @@ Animation::~Animation()
 {
     if(mInsert)
     {
+        mAnimSources.clear();
+
         Ogre::SceneManager *sceneMgr = mInsert->getCreator();
         destroyObjectList(sceneMgr, mObjectRoot);
     }
@@ -87,8 +88,22 @@ void Animation::setObjectRoot(Ogre::SceneNode *node, const std::string &model, b
     OgreAssert(!mInsert, "Object already has a root!");
     mInsert = node->createChildSceneNode();
 
-    mObjectRoot = (!baseonly ? NifOgre::Loader::createObjects(mInsert, model) :
-                               NifOgre::Loader::createObjectBase(mInsert, model));
+    std::string mdlname = Misc::StringUtils::lowerCase(model);
+    std::string::size_type p = mdlname.rfind('\\');
+    if(p == std::string::npos)
+        p = mdlname.rfind('/');
+    if(p != std::string::npos)
+        mdlname.insert(mdlname.begin()+p+1, 'x');
+    else
+        mdlname.insert(mdlname.begin(), 'x');
+    if(!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(mdlname))
+    {
+        mdlname = model;
+        Misc::StringUtils::toLower(mdlname);
+    }
+
+    mObjectRoot = (!baseonly ? NifOgre::Loader::createObjects(mInsert, mdlname) :
+                               NifOgre::Loader::createObjectBase(mInsert, mdlname));
     if(mObjectRoot.mSkelBase)
     {
         mSkelBase = mObjectRoot.mSkelBase;
@@ -109,12 +124,6 @@ void Animation::setObjectRoot(Ogre::SceneNode *node, const std::string &model, b
         Ogre::Skeleton::BoneIterator boneiter = skelinst->getBoneIterator();
         while(boneiter.hasMoreElements())
             boneiter.getNext()->setManuallyControlled(true);
-
-        if(mObjectRoot.mTextKeys.size() > 0)
-        {
-            mAccumRoot = mInsert;
-            mNonAccumRoot = skelinst->getBone(mObjectRoot.mTextKeys.begin()->first);
-        }
     }
     for(size_t i = 0;i < mObjectRoot.mControllers.size();i++)
     {
@@ -148,6 +157,75 @@ void Animation::setRenderProperties(const NifOgre::ObjectList &objlist, Ogre::ui
 }
 
 
+void Animation::addAnimSource(const std::string &model)
+{
+    OgreAssert(mInsert, "Object is missing a root!");
+    if(!mSkelBase)
+        return;
+
+    std::string kfname = Misc::StringUtils::lowerCase(model);
+    std::string::size_type p = kfname.rfind('\\');
+    if(p == std::string::npos)
+        p = kfname.rfind('/');
+    if(p != std::string::npos)
+        kfname.insert(kfname.begin()+p+1, 'x');
+    else
+        kfname.insert(kfname.begin(), 'x');
+
+    if(kfname.size() > 4 && kfname.compare(kfname.size()-4, 4, ".nif") == 0)
+        kfname.replace(kfname.size()-4, 4, ".kf");
+
+    if(!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(kfname))
+        return;
+
+    mAnimSources.push_back(AnimSource());
+    NifOgre::Loader::createKfControllers(mSkelBase, kfname,
+                                         mAnimSources.back().mTextKeys,
+                                         mAnimSources.back().mControllers);
+    if(mAnimSources.back().mTextKeys.size() == 0 || mAnimSources.back().mControllers.size() == 0)
+    {
+        mAnimSources.pop_back();
+        return;
+    }
+
+    std::vector<Ogre::Controller<Ogre::Real> > &ctrls = mAnimSources.back().mControllers;
+    NifOgre::NodeTargetValue<Ogre::Real> *dstval;
+
+    for(size_t i = 0;i < ctrls.size();i++)
+    {
+        dstval = static_cast<NifOgre::NodeTargetValue<Ogre::Real>*>(ctrls[i].getDestination().getPointer());
+
+        if(i == 0 && !mAccumRoot)
+        {
+            mAccumRoot = mInsert;
+            mNonAccumRoot = dstval->getNode();
+        }
+
+        ctrls[i].setSource(mAnimationValuePtr[0]);
+    }
+}
+
+void Animation::clearAnimSources()
+{
+    for(size_t layer = 0;layer < sMaxLayers;layer++)
+    {
+        mLayer[layer].mGroupName.clear();
+        mLayer[layer].mSource = NULL;
+        mLayer[layer].mTime = 0.0f;
+        mLayer[layer].mLoopCount = 0;
+        mLayer[layer].mPlaying = false;
+    }
+    mNonAccumCtrl = NULL;
+    mAnimVelocity = 0.0f;
+
+    mLastPosition = Ogre::Vector3(0.0f);
+    mAccumRoot = NULL;
+    mNonAccumRoot = NULL;
+
+    mAnimSources.clear();
+}
+
+
 Ogre::Node *Animation::getNode(const std::string &name)
 {
     if(mSkelBase)
@@ -175,12 +253,10 @@ NifOgre::TextKeyMap::const_iterator Animation::findGroupStart(const NifOgre::Tex
 
 bool Animation::hasAnimation(const std::string &anim)
 {
-    if(!mSkelBase)
-        return false;
-
-    if(mObjectRoot.mTextKeys.size() > 0)
+    AnimSourceList::const_iterator iter(mAnimSources.begin());
+    for(;iter != mAnimSources.end();iter++)
     {
-        const NifOgre::TextKeyMap &keys = mObjectRoot.mTextKeys.begin()->second;
+        const NifOgre::TextKeyMap &keys = iter->mTextKeys;
         if(findGroupStart(keys, anim) != keys.end())
             return true;
     }
@@ -415,8 +491,7 @@ bool Animation::play(const std::string &groupname, const std::string &start, con
         return false;
 
     mLayer[layeridx].mGroupName.clear();
-    mLayer[layeridx].mTextKeys = NULL;
-    mLayer[layeridx].mControllers = NULL;
+    mLayer[layeridx].mSource = NULL;
     mLayer[layeridx].mTime = 0.0f;
     mLayer[layeridx].mLoopCount = 0;
     mLayer[layeridx].mPlaying = false;
@@ -428,19 +503,17 @@ bool Animation::play(const std::string &groupname, const std::string &start, con
     bool foundanim = false;
 
     /* Look in reverse; last-inserted source has priority. */
-     do {
-        NifOgre::ObjectList &objlist = mObjectRoot;
-        if(objlist.mTextKeys.size() == 0)
-            continue;
-
-        const NifOgre::TextKeyMap &keys = objlist.mTextKeys.begin()->second;
+    AnimSourceList::reverse_iterator iter(mAnimSources.rbegin());
+    for(;iter != mAnimSources.rend();iter++)
+    {
+        const NifOgre::TextKeyMap &keys = iter->mTextKeys;
         NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl = NULL;
         if(layeridx == 0 && mNonAccumRoot)
         {
-            for(size_t i = 0;i < objlist.mControllers.size();i++)
+            for(size_t i = 0;i < iter->mControllers.size();i++)
             {
                 NifOgre::NodeTargetValue<Ogre::Real> *dstval;
-                dstval = dynamic_cast<NifOgre::NodeTargetValue<Ogre::Real>*>(objlist.mControllers[i].getDestination().getPointer());
+                dstval = dynamic_cast<NifOgre::NodeTargetValue<Ogre::Real>*>(iter->mControllers[i].getDestination().getPointer());
                 if(dstval && dstval->getNode() == mNonAccumRoot)
                 {
                     nonaccumctrl = dstval;
@@ -455,8 +528,7 @@ bool Animation::play(const std::string &groupname, const std::string &start, con
                 continue;
 
             mLayer[layeridx].mGroupName = groupname;
-            mLayer[layeridx].mTextKeys = &keys;
-            mLayer[layeridx].mControllers = &objlist.mControllers;
+            mLayer[layeridx].mSource = &*iter;
             mLayer[layeridx].mLoopCount = loops;
             mLayer[layeridx].mPlaying = true;
 
@@ -481,7 +553,7 @@ bool Animation::play(const std::string &groupname, const std::string &start, con
             movinganim = (nonaccumctrl==mNonAccumCtrl);
             break;
         }
-    } while(0);
+    }
     if(!foundanim)
         std::cerr<< "Failed to find animation "<<groupname <<std::endl;
 
@@ -494,8 +566,7 @@ void Animation::disable(size_t layeridx)
         return;
 
     mLayer[layeridx].mGroupName.clear();
-    mLayer[layeridx].mTextKeys = NULL;
-    mLayer[layeridx].mControllers = NULL;
+    mLayer[layeridx].mSource = NULL;
     mLayer[layeridx].mTime = 0.0f;
     mLayer[layeridx].mLoopCount = 0;
     mLayer[layeridx].mPlaying = false;
@@ -558,6 +629,14 @@ Ogre::Vector3 Animation::runAnimation(float duration)
 
     for(size_t i = 0;i < mObjectRoot.mControllers.size();i++)
         mObjectRoot.mControllers[i].update();
+    for(size_t layeridx = 0;layeridx < sMaxLayers;layeridx++)
+    {
+        if(mLayer[layeridx].mGroupName.empty())
+            continue;
+
+        for(size_t i = 0;i < mLayer[layeridx].mSource->mControllers.size();i++)
+            mLayer[layeridx].mSource->mControllers[i].update();
+    }
 
     if(mSkelBase)
     {

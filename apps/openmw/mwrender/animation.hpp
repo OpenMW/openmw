@@ -30,10 +30,15 @@ protected:
         virtual void setValue(Ogre::Real value);
     };
 
+    struct AnimSource {
+        NifOgre::TextKeyMap mTextKeys;
+        std::vector<Ogre::Controller<Ogre::Real> > mControllers;
+    };
+    typedef std::vector<AnimSource> AnimSourceList;
+
     struct AnimLayer {
         std::string mGroupName;
-        std::vector<Ogre::Controller<Ogre::Real> > *mControllers;
-        const NifOgre::TextKeyMap *mTextKeys;
+        AnimSource *mSource;
         NifOgre::TextKeyMap::const_iterator mStartKey;
         NifOgre::TextKeyMap::const_iterator mLoopStartKey;
         NifOgre::TextKeyMap::const_iterator mStopKey;
@@ -52,8 +57,9 @@ protected:
     Ogre::SceneNode *mInsert;
     Ogre::Entity *mSkelBase;
     NifOgre::ObjectList mObjectRoot;
+    AnimSourceList mAnimSources;
     Ogre::Node *mAccumRoot;
-    Ogre::Bone *mNonAccumRoot;
+    Ogre::Node *mNonAccumRoot;
     NifOgre::NodeTargetValue<Ogre::Real> *mNonAccumCtrl;
     Ogre::Vector3 mAccumulate;
     Ogre::Vector3 mLastPosition;
@@ -95,10 +101,13 @@ protected:
     bool handleTextKey(size_t layeridx, const NifOgre::TextKeyMap::const_iterator &key);
 
     void setObjectRoot(Ogre::SceneNode *node, const std::string &model, bool baseonly);
+    void addAnimSource(const std::string &model);
 
     static void destroyObjectList(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList &objects);
 
     static void setRenderProperties(const NifOgre::ObjectList &objlist, Ogre::uint32 visflags, Ogre::uint8 solidqueue, Ogre::uint8 transqueue);
+
+    void clearAnimSources();
 
 public:
     Animation(const MWWorld::Ptr &ptr);

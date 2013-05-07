@@ -23,6 +23,8 @@ ActivatorAnimation::ActivatorAnimation(const MWWorld::Ptr &ptr)
 
         setObjectRoot(mPtr.getRefData().getBaseNode(), name, false);
         setRenderProperties(mObjectRoot, RV_Misc, RQG_Main, RQG_Alpha);
+
+        addAnimSource(name);
     }
 }
 

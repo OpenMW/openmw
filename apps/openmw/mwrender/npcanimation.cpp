@@ -100,26 +100,26 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
     bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
     std::string smodel = (!isBeast ? "meshes\\base_anim.nif" : "meshes\\base_animkna.nif");
     setObjectRoot(node, smodel, true);
-#if 0
-    addAnimSource(node, smodel);
+
+    addAnimSource(smodel);
     if(mBodyPrefix.find("argonian") != std::string::npos)
-        addAnimSource(node, "meshes\\argonian_swimkna.nif");
+        addAnimSource("meshes\\argonian_swimkna.nif");
     else if(!mNpc->isMale() && !isBeast)
-        addAnimSource(node, "meshes\\base_anim_female.nif");
+        addAnimSource("meshes\\base_anim_female.nif");
     if(mNpc->mModel.length() > 0)
-        addAnimSource(node, "meshes\\"+mNpc->mModel);
+        addAnimSource("meshes\\"+mNpc->mModel);
     if(mViewMode == VM_FirstPerson)
     {
         /* A bit counter-intuitive, but unlike third-person anims, it seems
          * beast races get both base_anim.1st.nif and base_animkna.1st.nif.
          */
-        addAnimSource(node, "meshes\\base_anim.1st.nif");
+        addAnimSource("meshes\\base_anim.1st.nif");
         if(isBeast)
-            addAnimSource(node, "meshes\\base_animkna.1st.nif");
+            addAnimSource("meshes\\base_animkna.1st.nif");
         if(!mNpc->isMale() && !isBeast)
-            addAnimSource(node, "meshes\\base_anim_female.1st.nif");
+            addAnimSource("meshes\\base_anim_female.1st.nif");
     }
-#endif
+
     forceUpdate();
 }
 
@@ -134,28 +134,28 @@ void NpcAnimation::setViewMode(NpcAnimation::ViewMode viewMode)
     const ESM::Race *race = store.get<ESM::Race>().find(mNpc->mRace);
     bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
     std::string smodel = (!isBeast ? "meshes\\base_anim.nif" : "meshes\\base_animkna.nif");
-#if 0
+
     clearAnimSources();
-    addAnimSource(node, smodel);
+    addAnimSource(smodel);
     if(mBodyPrefix.find("argonian") != std::string::npos)
-        addAnimSource(node, "meshes\\argonian_swimkna.nif");
+        addAnimSource("meshes\\argonian_swimkna.nif");
     else if(!mNpc->isMale() && !isBeast)
-        addAnimSource(node, "meshes\\base_anim_female.nif");
+        addAnimSource("meshes\\base_anim_female.nif");
     if(mNpc->mModel.length() > 0)
-        addAnimSource(node, "meshes\\"+mNpc->mModel);
+        addAnimSource("meshes\\"+mNpc->mModel);
     if(mViewMode == VM_FirstPerson)
     {
         /* A bit counter-intuitive, but unlike third-person anims, it seems
          * beast races get both base_anim.1st.nif and base_animkna.1st.nif.
          */
-        addAnimSource(node, "meshes\\base_anim.1st.nif");
+        addAnimSource("meshes\\base_anim.1st.nif");
         if(isBeast)
-            addAnimSource(node, "meshes\\base_animkna.1st.nif");
+            addAnimSource("meshes\\base_animkna.1st.nif");
         if(!mNpc->isMale() && !isBeast)
-            addAnimSource(node, "meshes\\base_anim_female.1st.nif");
+            addAnimSource("meshes\\base_anim_female.1st.nif");
     }
     MWBase::Environment::get().getMechanicsManager()->forceStateUpdate(mPtr);
-#endif
+
     for(size_t i = 0;i < sPartListSize;i++)
         removeIndividualPart(i);
     forceUpdate();
