@@ -70,10 +70,6 @@ Animation::Animation(const MWWorld::Ptr &ptr)
 {
     for(size_t i = 0;i < sMaxLayers;i++)
         mAnimationValuePtr[i].bind(OGRE_NEW AnimationValue(this, i));
-
-    /* As long as we remain under 128 active controllers, we can avoid
-     * reallocations. */
-    mActiveCtrls.reserve(128);
 }
 
 Animation::~Animation()
@@ -81,34 +77,23 @@ Animation::~Animation()
     if(mInsert)
     {
         Ogre::SceneManager *sceneMgr = mInsert->getCreator();
-        for(size_t i = 0;i < mObjects.size();i++)
-            destroyObjectList(sceneMgr, mObjects[i].mObjectList);
-        mObjects.clear();
+        destroyObjectList(sceneMgr, mObjectRoot);
     }
 }
 
 
-void Animation::addObjectList(Ogre::SceneNode *node, const std::string &model, bool baseonly)
+void Animation::setObjectRoot(Ogre::SceneNode *node, const std::string &model, bool baseonly)
 {
-    if(!mInsert)
+    OgreAssert(!mInsert, "Object already has a root!");
+    mInsert = node->createChildSceneNode();
+
+    mObjectRoot = (!baseonly ? NifOgre::Loader::createObjects(mInsert, model) :
+                               NifOgre::Loader::createObjectBase(mInsert, model));
+    if(mObjectRoot.mSkelBase)
     {
-        mInsert = node->createChildSceneNode();
-        assert(mInsert);
-    }
+        mSkelBase = mObjectRoot.mSkelBase;
 
-    mObjects.push_back(ObjectInfo());
-    ObjectInfo &obj = mObjects.back();
-    obj.mActiveLayers = 0;
-    obj.mObjectList = (!baseonly ? NifOgre::Loader::createObjects(mInsert, model) :
-                                   NifOgre::Loader::createObjectBase(mInsert, model));
-
-    NifOgre::ObjectList &objlist = obj.mObjectList;
-    if(objlist.mSkelBase)
-    {
-        if(mObjects.size() == 1)
-            mSkelBase = objlist.mSkelBase;
-
-        Ogre::AnimationStateSet *aset = objlist.mSkelBase->getAllAnimationStates();
+        Ogre::AnimationStateSet *aset = mObjectRoot.mSkelBase->getAllAnimationStates();
         Ogre::AnimationStateIterator asiter = aset->getAnimationStateIterator();
         while(asiter.hasMoreElements())
         {
@@ -120,45 +105,22 @@ void Animation::addObjectList(Ogre::SceneNode *node, const std::string &model, b
         // Set the bones as manually controlled since we're applying the
         // transformations manually (needed if we want to apply an animation
         // from one skeleton onto another).
-        Ogre::SkeletonInstance *skelinst = objlist.mSkelBase->getSkeleton();
+        Ogre::SkeletonInstance *skelinst = mObjectRoot.mSkelBase->getSkeleton();
         Ogre::Skeleton::BoneIterator boneiter = skelinst->getBoneIterator();
         while(boneiter.hasMoreElements())
             boneiter.getNext()->setManuallyControlled(true);
-    }
-    if(objlist.mSkelBase && mSkelBase)
-    {
-        Ogre::SkeletonInstance *baseinst = mSkelBase->getSkeleton();
-        if(mSkelBase == objlist.mSkelBase)
-        {
-            if(objlist.mTextKeys.size() > 0)
-            {
-                mAccumRoot = mInsert;
-                mNonAccumRoot = baseinst->getBone(objlist.mTextKeys.begin()->first);
-            }
-        }
-        else
-        {
-            for(size_t i = 0;i < objlist.mControllers.size();i++)
-            {
-                NifOgre::NodeTargetValue<Ogre::Real> *dstval;
-                dstval = dynamic_cast<NifOgre::NodeTargetValue<Ogre::Real>*>(objlist.mControllers[i].getDestination().getPointer());
-                if(!dstval) continue;
 
-                const Ogre::String &trgtname = dstval->getNode()->getName();
-                if(!baseinst->hasBone(trgtname)) continue;
-
-                Ogre::Bone *bone = baseinst->getBone(trgtname);
-                dstval->setNode(bone);
-            }
+        if(mObjectRoot.mTextKeys.size() > 0)
+        {
+            mAccumRoot = mInsert;
+            mNonAccumRoot = skelinst->getBone(mObjectRoot.mTextKeys.begin()->first);
         }
     }
-    for(size_t i = 0;i < objlist.mControllers.size();i++)
+    for(size_t i = 0;i < mObjectRoot.mControllers.size();i++)
     {
-        if(objlist.mControllers[i].getSource().isNull())
-            objlist.mControllers[i].setSource(mAnimationValuePtr[0]);
+        if(mObjectRoot.mControllers[i].getSource().isNull())
+            mObjectRoot.mControllers[i].setSource(mAnimationValuePtr[0]);
     }
-
-    mActiveCtrls.insert(mActiveCtrls.end(), objlist.mControllers.begin(), objlist.mControllers.end());
 }
 
 void Animation::setRenderProperties(const NifOgre::ObjectList &objlist, Ogre::uint32 visflags, Ogre::uint8 solidqueue, Ogre::uint8 transqueue)
@@ -182,113 +144,6 @@ void Animation::setRenderProperties(const NifOgre::ObjectList &objlist, Ogre::ui
             part->setVisibilityFlags(visflags);
         // TODO: Check particle material for actual transparency
         part->setRenderQueueGroup(transqueue);
-    }
-}
-
-
-void Animation::clearExtraSources()
-{
-    for(size_t layer = 0;layer < sMaxLayers;layer++)
-    {
-        mLayer[layer].mGroupName.clear();
-        mLayer[layer].mTextKeys = NULL;
-        mLayer[layer].mControllers = NULL;
-        mLayer[layer].mTime = 0.0f;
-        mLayer[layer].mLoopCount = 0;
-        mLayer[layer].mPlaying = false;
-    }
-    mNonAccumCtrl = NULL;
-    mAnimVelocity = 0.0f;
-
-    mLastPosition = Ogre::Vector3(0.0f);
-    if(mAccumRoot)
-        mAccumRoot->setPosition(mLastPosition);
-
-    if(mObjects.size() > 1)
-    {
-        mObjects.resize(1);
-        mObjects[0].mActiveLayers = 0;
-
-        NifOgre::ObjectList &objlist = mObjects[0].mObjectList;
-        mActiveCtrls.clear();
-        mActiveCtrls.insert(mActiveCtrls.end(), objlist.mControllers.begin(), objlist.mControllers.end());
-    }
-}
-
-
-void Animation::updateActiveControllers()
-{
-    mActiveCtrls.clear();
-
-    /* First, get all controllers that don't target a node, or that target
-     * nodes that don't belong to any particular layer.
-     */
-    std::vector<ObjectInfo>::iterator obj(mObjects.begin());
-    for(;obj != mObjects.end();obj++)
-    {
-        std::vector<Ogre::Controller<Ogre::Real> >::const_iterator ctrl(obj->mObjectList.mControllers.begin());
-        for(;ctrl != obj->mObjectList.mControllers.end();ctrl++)
-        {
-            NifOgre::NodeTargetValue<Ogre::Real> *dstval;
-            dstval = dynamic_cast<NifOgre::NodeTargetValue<Ogre::Real>*>(ctrl->getDestination().getPointer());
-            if(dstval)
-            {
-                /*if(getLayerByName(dstval->getNode()->getName()) >= 0)*/
-                    continue;
-            }
-            mActiveCtrls.insert(mActiveCtrls.end(), *ctrl);
-        }
-    }
-
-    std::vector<Ogre::Controller<Ogre::Real> > *ctrls = NULL;
-    size_t layer = 0;
-    while(layer < sMaxLayers)
-    {
-        /* Now get controllers that target nodes that belong to this layer from
-         * whatever objectlist is active on this layer.
-         */
-        std::vector<ObjectInfo>::iterator obj(mObjects.begin());
-        for(;obj != mObjects.end();obj++)
-        {
-            if((obj->mActiveLayers&(1<<layer)))
-            {
-                ctrls = &obj->mObjectList.mControllers;
-                break;
-            }
-        }
-        if(ctrls == NULL)
-        {
-            layer++;
-            continue;
-        }
-
-        /* Check if any objectlists are active on subsequent layers. Include
-         * those layers if not.
-         */
-        size_t nextlayer = layer+1;
-        for(;nextlayer < sMaxLayers;nextlayer++)
-        {
-            for(obj = mObjects.begin();obj != mObjects.end();obj++)
-            {
-                if((obj->mActiveLayers&(1<<nextlayer)))
-                    break;
-            }
-        }
-
-        std::vector<Ogre::Controller<Ogre::Real> >::const_iterator ctrl(ctrls->begin());
-        for(;ctrl != ctrls->end();ctrl++)
-        {
-            NifOgre::NodeTargetValue<Ogre::Real> *dstval;
-            dstval = dynamic_cast<NifOgre::NodeTargetValue<Ogre::Real>*>(ctrl->getDestination().getPointer());
-            if(dstval)
-            {
-                /*ssize_t idx = getLayerByName(dstval->getNode()->getName());
-                if(idx >= (ssize_t)layer && idx < (ssize_t)nextlayer)*/
-                    mActiveCtrls.insert(mActiveCtrls.end(), *ctrl);
-            }
-        }
-
-        layer = nextlayer;
     }
 }
 
@@ -323,15 +178,13 @@ bool Animation::hasAnimation(const std::string &anim)
     if(!mSkelBase)
         return false;
 
-    for(std::vector<ObjectInfo>::const_iterator iter(mObjects.begin());iter != mObjects.end();iter++)
+    if(mObjectRoot.mTextKeys.size() > 0)
     {
-        if(iter->mObjectList.mTextKeys.size() == 0)
-            continue;
-
-        const NifOgre::TextKeyMap &keys = iter->mObjectList.mTextKeys.begin()->second;
+        const NifOgre::TextKeyMap &keys = mObjectRoot.mTextKeys.begin()->second;
         if(findGroupStart(keys, anim) != keys.end())
             return true;
     }
+
     return false;
 }
 
@@ -561,9 +414,6 @@ bool Animation::play(const std::string &groupname, const std::string &start, con
     if(!mSkelBase)
         return false;
 
-    for(std::vector<ObjectInfo>::iterator iter(mObjects.begin());iter != mObjects.end();iter++)
-        iter->mActiveLayers &= ~(1<<layeridx);
-
     mLayer[layeridx].mGroupName.clear();
     mLayer[layeridx].mTextKeys = NULL;
     mLayer[layeridx].mControllers = NULL;
@@ -578,9 +428,8 @@ bool Animation::play(const std::string &groupname, const std::string &start, con
     bool foundanim = false;
 
     /* Look in reverse; last-inserted source has priority. */
-    for(std::vector<ObjectInfo>::reverse_iterator iter(mObjects.rbegin());iter != mObjects.rend();iter++)
-    {
-        NifOgre::ObjectList &objlist = iter->mObjectList;
+     do {
+        NifOgre::ObjectList &objlist = mObjectRoot;
         if(objlist.mTextKeys.size() == 0)
             continue;
 
@@ -617,7 +466,6 @@ bool Animation::play(const std::string &groupname, const std::string &start, con
                 mAnimVelocity = 0.0f;
             }
 
-            iter->mActiveLayers |= (1<<layeridx);
             foundanim = true;
 
             if(mAccumulate == Ogre::Vector3(0.0f))
@@ -633,11 +481,9 @@ bool Animation::play(const std::string &groupname, const std::string &start, con
             movinganim = (nonaccumctrl==mNonAccumCtrl);
             break;
         }
-    }
+    } while(0);
     if(!foundanim)
         std::cerr<< "Failed to find animation "<<groupname <<std::endl;
-
-    updateActiveControllers();
 
     return movinganim;
 }
@@ -647,17 +493,12 @@ void Animation::disable(size_t layeridx)
     if(mLayer[layeridx].mGroupName.empty())
         return;
 
-    for(std::vector<ObjectInfo>::iterator iter(mObjects.begin());iter != mObjects.end();iter++)
-        iter->mActiveLayers &= ~(1<<layeridx);
-
     mLayer[layeridx].mGroupName.clear();
     mLayer[layeridx].mTextKeys = NULL;
     mLayer[layeridx].mControllers = NULL;
     mLayer[layeridx].mTime = 0.0f;
     mLayer[layeridx].mLoopCount = 0;
     mLayer[layeridx].mPlaying = false;
-
-    updateActiveControllers();
 }
 
 bool Animation::getInfo(size_t layeridx, float *complete, std::string *groupname, std::string *start, std::string *stop) const
@@ -715,30 +556,21 @@ Ogre::Vector3 Animation::runAnimation(float duration)
         }
     }
 
-    for(size_t i = 0;i < mActiveCtrls.size();i++)
-        mActiveCtrls[i].update();
+    for(size_t i = 0;i < mObjectRoot.mControllers.size();i++)
+        mObjectRoot.mControllers[i].update();
 
     if(mSkelBase)
     {
-        const Ogre::SkeletonInstance *baseinst = mSkelBase->getSkeleton();
-        for(std::vector<ObjectInfo>::iterator iter(mObjects.begin());iter != mObjects.end();iter++)
-        {
-            Ogre::Entity *ent = iter->mObjectList.mSkelBase;
-            if(!ent) continue;
-
-            Ogre::SkeletonInstance *inst = ent->getSkeleton();
-            if(baseinst != inst)
-                updateSkeletonInstance(baseinst, inst);
-
-            // HACK: Dirty the animation state set so that Ogre will apply the
-            // transformations to entities this skeleton instance is shared with.
-            ent->getAllAnimationStates()->_notifyDirty();
-        }
+        // HACK: Dirty the animation state set so that Ogre will apply the
+        // transformations to entities this skeleton instance is shared with.
+        mSkelBase->getAllAnimationStates()->_notifyDirty();
     }
 
     return movement;
 }
 
-void Animation::showWeapons(bool showWeapon){}
+void Animation::showWeapons(bool showWeapon)
+{
+}
 
 }

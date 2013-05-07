@@ -30,15 +30,6 @@ protected:
         virtual void setValue(Ogre::Real value);
     };
 
-    struct ObjectInfo {
-        NifOgre::ObjectList mObjectList;
-        /* Bit-field specifying which animation layers this object list is
-         * explicitly animating on (1 = layer 0, 2 = layer 1, 4 = layer 2.
-         * etc).
-         */
-        int mActiveLayers;
-    };
-
     struct AnimLayer {
         std::string mGroupName;
         std::vector<Ogre::Controller<Ogre::Real> > *mControllers;
@@ -60,21 +51,19 @@ protected:
 
     Ogre::SceneNode *mInsert;
     Ogre::Entity *mSkelBase;
-    std::vector<ObjectInfo> mObjects;
+    NifOgre::ObjectList mObjectRoot;
     Ogre::Node *mAccumRoot;
     Ogre::Bone *mNonAccumRoot;
     NifOgre::NodeTargetValue<Ogre::Real> *mNonAccumCtrl;
     Ogre::Vector3 mAccumulate;
     Ogre::Vector3 mLastPosition;
 
-    std::vector<Ogre::Controller<Ogre::Real> > mActiveCtrls;
-
     float mAnimVelocity;
     float mAnimSpeedMult;
 
     static const size_t sMaxLayers = 1;
     AnimLayer mLayer[sMaxLayers];
-    Ogre::SharedPtr<Ogre::ControllerValue<Ogre::Real> > mAnimationValuePtr[sMaxLayers];
+    Ogre::SharedPtr<AnimationValue> mAnimationValuePtr[sMaxLayers];
 
     static float calcAnimVelocity(const NifOgre::TextKeyMap &keys,
                                   NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl,
@@ -105,21 +94,15 @@ protected:
 
     bool handleTextKey(size_t layeridx, const NifOgre::TextKeyMap::const_iterator &key);
 
-    void addObjectList(Ogre::SceneNode *node, const std::string &model, bool baseonly);
+    void setObjectRoot(Ogre::SceneNode *node, const std::string &model, bool baseonly);
+
     static void destroyObjectList(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList &objects);
 
     static void setRenderProperties(const NifOgre::ObjectList &objlist, Ogre::uint32 visflags, Ogre::uint8 solidqueue, Ogre::uint8 transqueue);
 
-    void updateActiveControllers();
-
 public:
     Animation(const MWWorld::Ptr &ptr);
     virtual ~Animation();
-
-    /** Clears all ObjectLists except the first one. As a consequence, any
-     * playing animations are stopped.
-     */
-    void clearExtraSources();
 
     void updatePtr(const MWWorld::Ptr &ptr);
 

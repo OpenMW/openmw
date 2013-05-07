@@ -21,8 +21,8 @@ ActivatorAnimation::ActivatorAnimation(const MWWorld::Ptr &ptr)
     {
         const std::string name = "meshes\\"+ref->mBase->mModel;
 
-        addObjectList(mPtr.getRefData().getBaseNode(), name, false);
-        setRenderProperties(mObjects.back().mObjectList, RV_Misc, RQG_Main, RQG_Alpha);
+        setObjectRoot(mPtr.getRefData().getBaseNode(), name, false);
+        setRenderProperties(mObjectRoot, RV_Misc, RQG_Main, RQG_Alpha);
     }
 }
 
