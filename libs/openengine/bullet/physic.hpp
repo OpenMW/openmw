@@ -46,8 +46,8 @@ namespace Physic
     enum CollisionType {
         CollisionType_Nothing = 0, //<Collide with nothing
         CollisionType_World = 1<<0, //<Collide with world objects
-        CollisionType_Actor = 1<<1, //<Collide internal capsule Still Used?
-        CollisionType_HeightMap = 1<<2, //<collide with external capsule Still used?
+        CollisionType_Actor = 1<<1, //<Collide sith actors
+        CollisionType_HeightMap = 1<<2, //<collide with heightmap
         CollisionType_Raycasting = 1<<3 //Still used?
     };
 
