@@ -184,6 +184,10 @@ namespace MWWorld
         float mThunderFrequency;
         float mThunderThreshold;
         float mThunderSoundDelay;
+        float mNightStart;
+        float mNightEnd;
+        float mDayStart;
+        float mDayEnd;
         std::string mThunderSoundID0;
         std::string mThunderSoundID1;
         std::string mThunderSoundID2;

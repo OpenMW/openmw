@@ -65,9 +65,8 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering,MWWorld::Fa
      mHour(14), mCurrentWeather("clear"), mFirstUpdate(true), mWeatherUpdateTime(0),
      mThunderFlash(0), mThunderChance(0), mThunderChanceNeeded(50), mThunderSoundDelay(0),
      mRemainingTransitionTime(0), mMonth(0), mDay(0),
-     mTimePassed(0), mFallback(fallback), mWindSpeed(0.f)
+     mTimePassed(0), mFallback(fallback), mWindSpeed(0.f), mRendering(rendering)
 {
-    mRendering = rendering;
     //Globals
     mThunderSoundID0 = mFallback->getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_0");
     mThunderSoundID1 = mFallback->getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_1");
@@ -78,10 +77,22 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering,MWWorld::Fa
     mSunriseDuration = mFallback->getFallbackFloat("Weather_Sunrise_Duration");
     mSunsetDuration = mFallback->getFallbackFloat("Weather_Sunset_Duration");
     mHoursBetweenWeatherChanges = mFallback->getFallbackFloat("Weather_Hours_Between_Weather_Changes");
-    mWeatherUpdateTime = mHoursBetweenWeatherChanges*3600;
+    mWeatherUpdateTime = mHoursBetweenWeatherChanges * 3600;
     mThunderFrequency = mFallback->getFallbackFloat("Weather_Thunderstorm_Thunder_Frequency");
     mThunderThreshold = mFallback->getFallbackFloat("Weather_Thunderstorm_Thunder_Threshold");
     mThunderSoundDelay = 0.25;
+
+    //Some useful values
+    /* TODO: Use pre-sunrise_time, pre-sunset_time,
+     * post-sunrise_time, and post-sunset_time to better
+     * describe sunrise/sunset time.
+     * These values are fallbacks attached to weather.
+     */
+    mNightStart = mSunsetTime + mSunsetDuration;
+    mNightEnd = mSunriseTime - 0.5;
+    mDayStart = mSunriseTime + mSunriseDuration;
+    mDayEnd = mSunsetTime;
+
     //Weather
     Weather clear;
     clear.mCloudTexture = "tx_sky_clear.dds";
@@ -147,12 +158,12 @@ void WeatherManager::setWeather(const String& weather, bool instant)
         if (mNextWeather != "")
         {
             // transition more than 50% finished?
-            if (mRemainingTransitionTime/(mWeatherSettings[mCurrentWeather].mTransitionDelta*24.f*3600) <= 0.5)
+            if (mRemainingTransitionTime/(mWeatherSettings[mCurrentWeather].mTransitionDelta * 24.f * 3600) <= 0.5)
                 mCurrentWeather = mNextWeather;
         }
 
         mNextWeather = weather;
-        mRemainingTransitionTime = mWeatherSettings[mCurrentWeather].mTransitionDelta*24.f*3600;
+        mRemainingTransitionTime = mWeatherSettings[mCurrentWeather].mTransitionDelta * 24.f * 3600;
     }
     mFirstUpdate = false;
 }
@@ -170,13 +181,13 @@ WeatherResult WeatherManager::getResult(const String& weather)
     result.mGlareView = current.mGlareView;
     result.mAmbientLoopSoundID = current.mAmbientLoopSoundID;
     result.mSunColor = current.mSunDiscSunsetColor;
-
-    result.mNight = (mHour < 6 || mHour > 19);
+ 
+    result.mNight = (mHour < mSunriseTime || mHour > mNightStart - 1);
 
     result.mFogDepth = result.mNight ? current.mLandFogNightDepth : current.mLandFogDayDepth;
 
     // night
-    if (mHour <= 5.5f || mHour >= 21)
+    if (mHour <= mNightEnd || mHour >= mNightStart + 1)
     {
         result.mFogColor = current.mFogNightColor;
         result.mAmbientColor = current.mAmbientNightColor;
@@ -186,12 +197,12 @@ WeatherResult WeatherManager::getResult(const String& weather)
     }
 
     // sunrise
-    else if (mHour >= 5.5f && mHour <= 9)
+    else if (mHour >= mNightEnd && mHour <= mDayStart + 1)
     {
-        if (mHour <= 6)
+        if (mHour <= mSunriseTime)
         {
             // fade in
-            float advance = 6-mHour;
+            float advance = mSunriseTime - mHour;
             float factor = advance / 0.5f;
             result.mFogColor = lerp(current.mFogSunriseColor, current.mFogNightColor, factor);
             result.mAmbientColor = lerp(current.mAmbientSunriseColor, current.mAmbientNightColor, factor);
@@ -202,7 +213,7 @@ WeatherResult WeatherManager::getResult(const String& weather)
         else //if (mHour >= 6)
         {
             // fade out
-            float advance = mHour-6;
+            float advance = mHour - mSunriseTime;
             float factor = advance / 3.f;
             result.mFogColor = lerp(current.mFogSunriseColor, current.mFogDayColor, factor);
             result.mAmbientColor = lerp(current.mAmbientSunriseColor, current.mAmbientDayColor, factor);
@@ -212,7 +223,7 @@ WeatherResult WeatherManager::getResult(const String& weather)
     }
 
     // day
-    else if (mHour >= 9 && mHour <= 17)
+    else if (mHour >= mDayStart + 1 && mHour <= mDayEnd - 1)
     {
         result.mFogColor = current.mFogDayColor;
         result.mAmbientColor = current.mAmbientDayColor;
@@ -221,12 +232,12 @@ WeatherResult WeatherManager::getResult(const String& weather)
     }
 
     // sunset
-    else if (mHour >= 17 && mHour <= 21)
+    else if (mHour >= mDayEnd - 1 && mHour <= mNightStart + 1)
     {
-        if (mHour <= 19)
+        if (mHour <= mDayEnd + 1)
         {
             // fade in
-            float advance = 19-mHour;
+            float advance = (mDayEnd + 1) - mHour;
             float factor = (advance / 2);
             result.mFogColor = lerp(current.mFogSunsetColor, current.mFogDayColor, factor);
             result.mAmbientColor = lerp(current.mAmbientSunsetColor, current.mAmbientDayColor, factor);
@@ -236,7 +247,7 @@ WeatherResult WeatherManager::getResult(const String& weather)
         else //if (mHour >= 19)
         {
             // fade out
-            float advance = mHour-19;
+            float advance = mHour - (mDayEnd + 1);
             float factor = advance / 2.f;
             result.mFogColor = lerp(current.mFogSunsetColor, current.mFogNightColor, factor);
             result.mAmbientColor = lerp(current.mAmbientSunsetColor, current.mAmbientNightColor, factor);
@@ -294,7 +305,7 @@ void WeatherManager::update(float duration)
         if (mWeatherUpdateTime <= 0 || regionstr != mCurrentRegion)
         {
             mCurrentRegion = regionstr;
-            mWeatherUpdateTime = mHoursBetweenWeatherChanges*3600;
+            mWeatherUpdateTime = mHoursBetweenWeatherChanges * 3600;
 
             std::string weather = "clear";
 
@@ -363,7 +374,7 @@ void WeatherManager::update(float duration)
         }
 
         if (mNextWeather != "")
-            result = transition(1-(mRemainingTransitionTime/(mWeatherSettings[mCurrentWeather].mTransitionDelta*24.f*3600)));
+            result = transition(1 - (mRemainingTransitionTime / (mWeatherSettings[mCurrentWeather].mTransitionDelta * 24.f * 3600)));
         else
             result = getResult(mCurrentWeather);
 
@@ -372,7 +383,7 @@ void WeatherManager::update(float duration)
         mRendering->configureFog(result.mFogDepth, result.mFogColor);
 
         // disable sun during night
-        if (mHour >= 20 || mHour <= 6.f)
+        if (mHour >= mNightStart || mHour <= mSunriseTime)
             mRendering->getSkyManager()->sunDisable();
         else
             mRendering->getSkyManager()->sunEnable();
@@ -380,28 +391,31 @@ void WeatherManager::update(float duration)
         // sun angle
         float height;
 
-        // rise at 6, set at 20
-        if (mHour >= 6 && mHour <= 20)
-            height = 1-std::abs(((mHour-13)/7.f));
-        else if (mHour > 20)
-            height = (mHour-20.f)/4.f;
-        else //if (mHour > 0 && mHour < 6)
-            height = 1-(mHour/6.f);
+        //Day duration
+        float dayDuration = (mNightStart - 1) - mSunriseTime;
 
-        int facing = (mHour > 13.f) ? 1 : -1;
+        // rise at 6, set at 20
+        if (mHour >= mSunriseTime && mHour <= mNightStart)
+            height = 1 - std::abs(((mHour - dayDuration) / 7.f));
+        else if (mHour > mNightStart)
+            height = (mHour - mNightStart) / 4.f;
+        else //if (mHour > 0 && mHour < 6)
+            height = 1 - (mHour / mSunriseTime);
+
+        int facing = (mHour > dayDuration) ? 1 : -1;
 
         Vector3 final(
-            -(1-height)*facing,
-            -(1-height)*facing,
+            -(1 - height) * facing,
+            -(1 - height) * facing,
             height);
         mRendering->setSunDirection(final);
 
         // moon calculations
         float night;
         if (mHour >= 14)
-            night = mHour-14;
+            night = mHour - 14;
         else if (mHour <= 10)
-            night = mHour+10;
+            night = mHour + 10;
         else
             night = 0;
 
@@ -409,16 +423,16 @@ void WeatherManager::update(float duration)
 
         if (night != 0)
         {
-            float moonHeight = 1-std::abs((night-0.5)*2);
-            int facing = (mHour > 0.f && mHour<12.f) ? 1 : -1;
+            float moonHeight = 1 - std::abs((night - 0.5) * 2);
+            int facing = (mHour > 0.f && mHour< 12.f) ? 1 : -1;
             Vector3 masser(
-                (1-moonHeight)*facing,
-                (1-moonHeight)*facing,
+                (1 - moonHeight) * facing,
+                (1 - moonHeight) * facing,
                 moonHeight);
 
             Vector3 secunda(
-                (1-moonHeight)*facing*0.8,
-                (1-moonHeight)*facing*1.25,
+                (1 - moonHeight) * facing * 0.8,
+                (1 - moonHeight) * facing * 1.25,
                 moonHeight);
 
             mRendering->getSkyManager()->setMasserDirection(masser);
@@ -426,56 +440,56 @@ void WeatherManager::update(float duration)
             mRendering->getSkyManager()->masserEnable();
             mRendering->getSkyManager()->secundaEnable();
 
-            float secunda_hour_fade;
-            float secunda_fadeout_start=mFallback->getFallbackFloat("Moons_Secunda_Fade_Out_Start");
-            float secunda_fadein_start=mFallback->getFallbackFloat("Moons_Secunda_Fade_In_Start");
-            float secunda_fadein_finish=mFallback->getFallbackFloat("Moons_Secunda_Fade_In_Finish");
+            float secundaHourFade;
+            float secundaFadeOutStart=mFallback->getFallbackFloat("Moons_Secunda_Fade_Out_Start");
+            float secundaFadeInStart=mFallback->getFallbackFloat("Moons_Secunda_Fade_In_Start");
+            float secundaFadeInFinish=mFallback->getFallbackFloat("Moons_Secunda_Fade_In_Finish");
 
-            if (mHour >= secunda_fadeout_start && mHour <= secunda_fadein_start)
-                secunda_hour_fade = 1-(mHour-secunda_fadeout_start)/3.f;
-            else if (mHour >= secunda_fadein_start && mHour <= secunda_fadein_finish)
-                secunda_hour_fade = mHour-secunda_fadein_start;
+            if (mHour >= secundaFadeOutStart && mHour <= secundaFadeInStart)
+                secundaHourFade = 1 - (mHour - secundaFadeOutStart) / 3.f;
+            else if (mHour >= secundaFadeInStart && mHour <= secundaFadeInFinish)
+                secundaHourFade = mHour - secundaFadeInStart;
             else
-                secunda_hour_fade = 1;
+                secundaHourFade = 1;
 
-            float masser_hour_fade;
-            float masser_fadeout_start=mFallback->getFallbackFloat("Moons_Masser_Fade_Out_Start");
-            float masser_fadein_start=mFallback->getFallbackFloat("Moons_Masser_Fade_In_Start");
-            float masser_fadein_finish=mFallback->getFallbackFloat("Moons_Masser_Fade_In_Finish");
-            if (mHour >= masser_fadeout_start && mHour <= masser_fadein_start)
-                masser_hour_fade = 1-(mHour-masser_fadeout_start)/3.f;
-            else if (mHour >= masser_fadein_start && mHour <= masser_fadein_finish)
-                masser_hour_fade = mHour-masser_fadein_start;
+            float masserHourFade;
+            float masserFadeOutStart=mFallback->getFallbackFloat("Moons_Masser_Fade_Out_Start");
+            float masserFadeInStart=mFallback->getFallbackFloat("Moons_Masser_Fade_In_Start");
+            float masserFadeInFinish=mFallback->getFallbackFloat("Moons_Masser_Fade_In_Finish");
+            if (mHour >= masserFadeOutStart && mHour <= masserFadeInStart)
+                masserHourFade = 1 - (mHour - masserFadeOutStart) / 3.f;
+            else if (mHour >= masserFadeInStart && mHour <= masserFadeInFinish)
+                masserHourFade = mHour - masserFadeInStart;
             else
-                masser_hour_fade = 1;
+                masserHourFade = 1;
 
-            float angle = moonHeight*90.f;
+            float angle = moonHeight * 90.f;
 
-            float secunda_angle_fade;
-            float secunda_end_angle=mFallback->getFallbackFloat("Moons_Secunda_Fade_End_Angle");
-            float secunda_start_angle=mFallback->getFallbackFloat("Moons_Secunda_Fade_Start_Angle");
-            if (angle >= secunda_end_angle && angle <= secunda_start_angle)
-                secunda_angle_fade = (angle-secunda_end_angle)/20.f;
-            else if (angle < secunda_end_angle)
-                secunda_angle_fade = 0.f;
+            float secundaAngleFade;
+            float secundaEndAngle=mFallback->getFallbackFloat("Moons_Secunda_Fade_End_Angle");
+            float secundaStartAngle=mFallback->getFallbackFloat("Moons_Secunda_Fade_Start_Angle");
+            if (angle >= secundaEndAngle && angle <= secundaStartAngle)
+                secundaAngleFade = (angle - secundaEndAngle) / 20.f;
+            else if (angle < secundaEndAngle)
+                secundaAngleFade = 0.f;
             else
-                secunda_angle_fade = 1.f;
+                secundaAngleFade = 1.f;
 
-            float masser_angle_fade;
-            float masser_end_angle=mFallback->getFallbackFloat("Moons_Masser_Fade_End_Angle");
-            float masser_start_angle=mFallback->getFallbackFloat("Moons_Masser_Fade_Start_Angle");
-            if (angle >= masser_end_angle && angle <= masser_start_angle)
-                masser_angle_fade = (angle-masser_end_angle)/10.f;
-            else if (angle < masser_end_angle)
-                masser_angle_fade = 0.f;
+            float masserAngleFade;
+            float masserEndAngle=mFallback->getFallbackFloat("Moons_Masser_Fade_End_Angle");
+            float masserStartAngle=mFallback->getFallbackFloat("Moons_Masser_Fade_Start_Angle");
+            if (angle >= masserEndAngle && angle <= masserStartAngle)
+                masserAngleFade = (angle - masserEndAngle) / 10.f;
+            else if (angle < masserEndAngle)
+                masserAngleFade = 0.f;
             else
-                masser_angle_fade = 1.f;
+                masserAngleFade = 1.f;
 
-            masser_angle_fade *= masser_hour_fade;
-            secunda_angle_fade *= secunda_hour_fade;
+            masserAngleFade *= masserHourFade;
+            secundaAngleFade *= secundaHourFade;
 
-            mRendering->getSkyManager()->setMasserFade(masser_angle_fade);
-            mRendering->getSkyManager()->setSecundaFade(secunda_angle_fade);
+            mRendering->getSkyManager()->setMasserFade(masserAngleFade);
+            mRendering->getSkyManager()->setSecundaFade(secundaAngleFade);
         }
         else
         {
