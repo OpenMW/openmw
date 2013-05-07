@@ -605,7 +605,7 @@ namespace Physic
     {
     }
 
-    std::pair<std::string,float> PhysicEngine::rayTest(btVector3& from,btVector3& to,bool raycastingObjectOnly)
+    std::pair<std::string,float> PhysicEngine::rayTest(btVector3& from,btVector3& to,bool raycastingObjectOnly,bool ignoreHeightMap)
     {
         std::string name = "";
         float d = -1;
@@ -614,6 +614,8 @@ namespace Physic
         btCollisionWorld::ClosestRayResultCallback resultCallback1(from, to);
         if(raycastingObjectOnly) resultCallback1.m_collisionFilterMask = CollisionType_Raycasting;
         else resultCallback1.m_collisionFilterMask = CollisionType_World;
+
+        if(!ignoreHeightMap) resultCallback1.m_collisionFilterMask = resultCallback1.m_collisionFilterMask|| CollisionType_HeightMap;
         dynamicsWorld->rayTest(from, to, resultCallback1);
         if (resultCallback1.hasHit())
         {

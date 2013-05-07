@@ -1046,7 +1046,7 @@ namespace MWWorld
     {
         Ogre::Vector3 a(x1,y1,z1);std::cout << x1 << " " << x2;
         Ogre::Vector3 b(x2,y2,z2);
-        return mPhysics->castRay(a,b,false);
+        return mPhysics->castRay(a,b,false,true);
     }
 
     void World::processDoors(float duration)
