@@ -83,7 +83,7 @@ QVariant CSMWorld::RefIdCollection::getData (int index, int column) const
 
     const RefIdAdapter& adaptor = findAdaptor (localIndex.second);
 
-    return adaptor.getData (&mColumns.at (column), mData);
+    return adaptor.getData (&mColumns.at (column), mData, localIndex.first);
 }
 
 void CSMWorld::RefIdCollection::setData (int index, int column, const QVariant& data)
@@ -92,7 +92,7 @@ void CSMWorld::RefIdCollection::setData (int index, int column, const QVariant& 
 
     const RefIdAdapter& adaptor = findAdaptor (localIndex.second);
 
-    adaptor.setData (&mColumns.at (column), mData, data);
+    adaptor.setData (&mColumns.at (column), mData, localIndex.first, data);
 }
 
 void CSMWorld::RefIdCollection::removeRows (int index, int count)
