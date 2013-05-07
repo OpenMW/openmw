@@ -12,7 +12,7 @@ namespace sh
 	class OgreTextureUnitState : public TextureUnitState
 	{
 	public:
-		OgreTextureUnitState (OgrePass* parent);
+		OgreTextureUnitState (OgrePass* parent, const std::string& name);
 
 		virtual void setTextureName (const std::string& textureName);
 

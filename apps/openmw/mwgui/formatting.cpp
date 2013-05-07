@@ -6,7 +6,10 @@
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/trim.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/range/adaptor/filtered.hpp>
+#include <boost/range/algorithm/copy.hpp>
 #include <OgreUTFString.h>
 
 namespace
@@ -74,6 +77,12 @@ namespace
         Ogre::UTFString string(s);
         return string.getChar(0);
     }
+    
+    bool is_not_empty(const std::string s) {
+        std::string temp = s;
+        boost::algorithm::trim(temp);
+        return !temp.empty();
+    }
 }
 
 namespace MWGui
@@ -88,6 +97,7 @@ namespace MWGui
         utf8Text = Interpreter::fixDefinesBook(utf8Text, interpreterContext);
 
         boost::algorithm::replace_all(utf8Text, "\n", "");
+        boost::algorithm::replace_all(utf8Text, "\r", "");
         boost::algorithm::replace_all(utf8Text, "<BR>", "\n");
         boost::algorithm::replace_all(utf8Text, "<P>", "\n\n");
 
@@ -106,6 +116,14 @@ namespace MWGui
 
             size_t currentWordStart = 0;
             size_t index = 0;
+            
+            {
+                std::string texToTrim = text.asUTF8();
+                boost::algorithm::trim( texToTrim );
+                text = UTFString(texToTrim);
+            }
+            
+            
             while (currentHeight <= height - spacing && index < text.size())
             {
                 const UTFString::unicode_char ch = text.getChar(index);
@@ -176,8 +194,10 @@ namespace MWGui
             result.push_back(text.substr(0, pageEnd).asUTF8());
             text.erase(0, pageEnd);
         }
-
-        return result;
+        
+        std::vector<std::string> nonEmptyPages;
+        boost::copy(result | boost::adaptors::filtered(is_not_empty), std::back_inserter(nonEmptyPages));
+        return nonEmptyPages;
     }
 
     float BookTextParser::widthForCharGlyph(unsigned unicodeChar) const
@@ -193,7 +213,30 @@ namespace MWGui
         return MyGUI::FontManager::getInstance().getByName(fontName)->getDefaultHeight();
     }
 
-    MyGUI::IntSize BookTextParser::parse(std::string text, MyGUI::Widget* parent, const int width)
+    MyGUI::IntSize BookTextParser::parsePage(std::string text, MyGUI::Widget* parent, const int width)
+    {
+        MWScript::InterpreterContext interpreterContext(NULL, MWWorld::Ptr()); // empty arguments, because there is no locals or actor
+        text = Interpreter::fixDefinesBook(text, interpreterContext);
+
+        mParent = parent;
+        mWidth = width;
+        mHeight = 0;
+
+        assert(mParent);
+        while (mParent->getChildCount())
+        {
+            MyGUI::Gui::getInstance().destroyWidget(mParent->getChildAt(0));
+        }
+
+        // remove trailing "
+        if (text[text.size()-1] == '\"')
+            text.erase(text.size()-1);
+
+        parseSubText(text);
+        return MyGUI::IntSize(mWidth, mHeight);
+    }
+    
+    MyGUI::IntSize BookTextParser::parseScroll(std::string text, MyGUI::Widget* parent, const int width)
     {
         MWScript::InterpreterContext interpreterContext(NULL, MWWorld::Ptr()); // empty arguments, because there is no locals or actor
         text = Interpreter::fixDefinesBook(text, interpreterContext);
@@ -209,12 +252,10 @@ namespace MWGui
         }
 
         boost::algorithm::replace_all(text, "\n", "");
+        boost::algorithm::replace_all(text, "\r", "");
         boost::algorithm::replace_all(text, "<BR>", "\n");
         boost::algorithm::replace_all(text, "<P>", "\n\n");
-
-        // remove leading newlines
-    //    while (text[0] == '\n')
-    //        text.erase(0);
+        boost::algorithm::trim_left(text);
 
         // remove trailing "
         if (text[text.size()-1] == '\"')
@@ -223,6 +264,7 @@ namespace MWGui
         parseSubText(text);
         return MyGUI::IntSize(mWidth, mHeight);
     }
+    
 
     void BookTextParser::parseImage(std::string tag, bool createWidget)
     {
@@ -309,7 +351,7 @@ namespace MWGui
                 parseImage(tag);
             if (boost::algorithm::starts_with(tag, "FONT"))
                 parseFont(tag);
-            if (boost::algorithm::starts_with(tag, "DOV"))
+            if (boost::algorithm::starts_with(tag, "DIV"))
                 parseDiv(tag);
 
             text.erase(0, tagEnd + 1);

@@ -7,9 +7,9 @@
 
 #include "console.hpp"
 #include "journalwindow.hpp"
+#include "journalviewmodel.hpp"
 #include "charactercreation.hpp"
 #include "dialogue.hpp"
-#include "dialoguehistory.hpp"
 #include "statswindow.hpp"
 #include "messagebox.hpp"
 #include "tooltips.hpp"
@@ -38,6 +38,7 @@
 #include "soulgemdialog.hpp"
 #include "companionwindow.hpp"
 #include "inventorywindow.hpp"
+#include "bookpage.hpp"
 
 namespace MWGui
 {
@@ -106,7 +107,6 @@ namespace MWGui
         mGui = mGuiManager->getGui();
 
         //Register own widgets with MyGUI
-        MyGUI::FactoryManager::getInstance().registerFactory<DialogueHistory>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSkill>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWAttribute>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSpell>("Widget");
@@ -122,6 +122,7 @@ namespace MWGui
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::ImageButton>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::ExposedWindow>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWScrollView>("Widget");
+        BookPage::registerMyGUIComponents ();
 
         MyGUI::FactoryManager::getInstance().registerFactory<ResourceImageSetPointerFix>("Resource", "ResourceImageSetPointer");
         MyGUI::ResourceManager::getInstance().load("core.xml");
@@ -145,7 +146,7 @@ namespace MWGui
         mMap = new MapWindow(cacheDir);
         mStatsWindow = new StatsWindow();
         mConsole = new Console(w,h, consoleOnlyScripts);
-        mJournal = new JournalWindow();
+        mJournal = JournalWindow::create(JournalViewModel::create ());
         mMessageBoxManager = new MessageBoxManager();
         mInventoryWindow = new InventoryWindow(mDragAndDrop);
         mTradeWindow = new TradeWindow();
@@ -598,6 +599,16 @@ namespace MWGui
             mMessageBoxManager->createInteractiveMessageBox(message, buttons);
             MWBase::Environment::get().getInputManager()->changeInputMode(isGuiMode());
         }
+    }
+
+    void WindowManager::staticMessageBox(const std::string& message)
+    {
+        mMessageBoxManager->createMessageBox(message, true);
+    }
+
+    void WindowManager::removeStaticMessageBox()
+    {
+        mMessageBoxManager->removeStaticMessageBox();
     }
 
     void WindowManager::enterPressed ()

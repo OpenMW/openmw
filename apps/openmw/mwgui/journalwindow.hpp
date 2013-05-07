@@ -1,39 +1,26 @@
 #ifndef MWGUI_JOURNAL_H
 #define MWGUI_JOURNAL_H
 
-#include <string>
+#include <memory>
+#include <boost/shared_ptr.hpp>
 
-#include "windowbase.hpp"
-#include "imagebutton.hpp"
+namespace MWBase { class WindowManager; }
 
 namespace MWGui
 {
-    class JournalWindow : public WindowBase
+    struct JournalViewModel;
+
+    struct JournalWindow
     {
-        public:
-            JournalWindow();
-            virtual void open();
+        /// construct a new instance of the one JournalWindow implementation
+        static JournalWindow * create (boost::shared_ptr <JournalViewModel> Model);
 
-        private:
-            void displayLeftText(std::string text);
-            void displayRightText(std::string text);
+        /// destroy this instance of the JournalWindow implementation
+        virtual ~JournalWindow () {};
 
-
-            /**
-            *Called when next/prev button is used.
-            */
-            void notifyNextPage(MyGUI::Widget* _sender);
-            void notifyPrevPage(MyGUI::Widget* _sender);
-
-            MyGUI::EditBox* mLeftTextWidget;
-            MyGUI::EditBox* mRightTextWidget;
-            MWGui::ImageButton* mPrevBtn;
-            MWGui::ImageButton* mNextBtn;
-            std::vector<std::string> mLeftPages;
-            std::vector<std::string> mRightPages;
-            int mPageNumber; //store the number of the current left page
+        /// show/hide the journal window
+        virtual void setVisible (bool newValue) = 0;
     };
-
 }
 
 #endif

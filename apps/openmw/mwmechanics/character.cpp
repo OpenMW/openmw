@@ -152,6 +152,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     , mMovingAnim(false)
     , mSecondsOfRunning(0)
     , mSecondsOfSwimming(0)
+    , mLooping(false)
 {
     if(!mAnimation)
         return;

@@ -18,6 +18,9 @@ namespace sh
 		virtual boost::shared_ptr<Pass> createPass (const std::string& configuration, unsigned short lodIndex);
 		virtual bool createConfiguration (const std::string& name, unsigned short lodIndex);
 
+		virtual bool isUnreferenced();
+		virtual void ensureLoaded();
+
 		virtual void removeAll ();
 
 		Ogre::MaterialPtr getOgreMaterial();
@@ -30,6 +33,7 @@ namespace sh
 
 	private:
 		Ogre::MaterialPtr mMaterial;
+		std::string mName;
 
 		std::string mShadowCasterMaterial;
 	};

@@ -14,6 +14,7 @@
 #include <OgreCompositionPass.h>
 #include <OgreHardwarePixelBuffer.h>
 #include <OgreControllerManager.h>
+#include <OgreMeshManager.h>
 
 #include <extern/shiny/Main/Factory.hpp>
 #include <extern/shiny/Platforms/Ogre/OgrePlatform.hpp>
@@ -120,12 +121,10 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
     MaterialManager::getSingleton().setDefaultTextureFiltering(tfo);
     MaterialManager::getSingleton().setDefaultAnisotropy( (filter == "anisotropic") ? Settings::Manager::getInt("anisotropy", "General") : 1 );
 
-    //ResourceGroupManager::getSingleton ().declareResource ("GlobalMap.png", "Texture", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+    Ogre::TextureManager::getSingleton().setMemoryBudget(126*1024*1024);
+    Ogre::MeshManager::getSingleton().setMemoryBudget(64*1024*1024);
 
     ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
-
-    // causes light flicker in opengl when moving..
-    //mRendering.getScene()->setCameraRelativeRendering(true);
 
     // disable unsupported effects
     if (!Settings::Manager::getBool("shaders", "Objects"))
@@ -236,6 +235,7 @@ void RenderingManager::toggleWater()
 
 void RenderingManager::cellAdded (MWWorld::Ptr::CellStore *store)
 {
+    sh::Factory::getInstance().unloadUnreferencedMaterials();
     mObjects.buildStaticGeometry (*store);
     mDebugging->cellAdded(store);
     if (store->mCell->isExterior())
@@ -306,7 +306,6 @@ void RenderingManager::update (float duration, bool paused)
 
     int blind = MWWorld::Class::get(player).getCreatureStats(player).getMagicEffects().get(MWMechanics::EffectKey(ESM::MagicEffect::Blind)).mMagnitude;
     mRendering.getFader()->setFactor(1.f-(blind / 100.f));
-
     setAmbientMode();
 
     // player position

@@ -21,6 +21,7 @@ namespace sh
 	public:
 		ShaderSet (const std::string& type, const std::string& cgProfile, const std::string& hlslProfile, const std::string& sourceFile, const std::string& basePath,
 				   const std::string& name, PropertySetGet* globalSettingsPtr);
+		~ShaderSet();
 
 		/// Retrieve a shader instance for the given properties. \n
 		/// If a \a ShaderInstance with the same properties exists already, simply returns this instance. \n

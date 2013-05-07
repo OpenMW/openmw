@@ -20,9 +20,9 @@ namespace sh
 		mPass = t->createPass();
 	}
 
-	boost::shared_ptr<TextureUnitState> OgrePass::createTextureUnitState ()
+	boost::shared_ptr<TextureUnitState> OgrePass::createTextureUnitState (const std::string& name)
 	{
-		return boost::shared_ptr<TextureUnitState> (new OgreTextureUnitState (this));
+		return boost::shared_ptr<TextureUnitState> (new OgreTextureUnitState (this, name));
 	}
 
 	void OgrePass::assignProgram (GpuProgramType type, const std::string& name)
@@ -105,7 +105,17 @@ namespace sh
 		else if (type == GPT_Fragment)
 			params = mPass->getFragmentProgramParameters();
 
-		params->addSharedParameters (name);
+		try
+		{
+			params->addSharedParameters (name);
+		}
+		catch (Ogre::Exception& e)
+		{
+			std::stringstream msg;
+			msg << "Could not create a shared parameter instance for '"
+				   << name << "'. Make sure this shared parameter has a value set (via Factory::setSharedParameter)!";
+			throw std::runtime_error(msg.str());
+		}
 	}
 
 	void OgrePass::setTextureUnitIndex (int programType, const std::string& name, int index)

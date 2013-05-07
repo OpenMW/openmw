@@ -41,7 +41,7 @@ namespace MWBase
             //calbacks for the GUI
             virtual void keywordSelected (const std::string& keyword) = 0;
             virtual void goodbyeSelected() = 0;
-            virtual void questionAnswered (const std::string& answer) = 0;
+            virtual void questionAnswered (int answer) = 0;
 
             virtual bool checkServiceRefused () = 0;
 

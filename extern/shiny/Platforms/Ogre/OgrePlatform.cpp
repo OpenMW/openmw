@@ -4,6 +4,7 @@
 
 #include <OgreDataStream.h>
 #include <OgreGpuProgramManager.h>
+#include <OgreHighLevelGpuProgramManager.h>
 #include <OgreRoot.h>
 
 #include "OgreMaterial.hpp"
@@ -76,6 +77,11 @@ namespace sh
 		return boost::shared_ptr<Material> (material);
 	}
 
+	void OgrePlatform::destroyGpuProgram(const std::string &name)
+	{
+		Ogre::HighLevelGpuProgramManager::getSingleton().remove(name);
+	}
+
 	boost::shared_ptr<GpuProgram> OgrePlatform::createGpuProgram (
 		GpuProgramType type,
 		const std::string& compileArguments,
@@ -122,6 +128,7 @@ namespace sh
 		if (mSharedParameters.find(name) == mSharedParameters.end())
 		{
 			params = Ogre::GpuProgramManager::getSingleton().createSharedParameters(name);
+
 			Ogre::GpuConstantType type;
 			if (typeid(*value) == typeid(Vector4))
 				type = Ogre::GCT_FLOAT4;
