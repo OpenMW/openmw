@@ -339,8 +339,7 @@ namespace MWWorld
         _from = btVector3(from.x, from.y, from.z);
         _to = btVector3(to.x, to.y, to.z);
 
-        std::pair<std::string, float> result = mEngine->rayTest(_from, _to, false);//raycastingObjectOnly);
-        std::cout << result.first << " " << result.second;
+        std::pair<std::string, float> result = mEngine->rayTest(_from, _to, raycastingObjectOnly);
         return !(result.first == "");
     }
 
@@ -419,7 +418,6 @@ namespace MWWorld
         OEngine::Physic::RigidBody* raycastingBody = mEngine->createAndAdjustRigidBody(
             mesh, node->getName(), node->getScale().x, node->getPosition(), node->getOrientation(), 0, 0, true, placeable);
         mEngine->addRigidBody(body, true, raycastingBody);
-        std::cout << "Object:" << mesh;
     }
 
     void PhysicsSystem::addActor (const Ptr& ptr)
@@ -428,7 +426,6 @@ namespace MWWorld
         Ogre::SceneNode* node = ptr.getRefData().getBaseNode();
         //TODO:optimize this. Searching the std::map isn't very efficient i think.
         mEngine->addCharacter(node->getName(), mesh, node->getPosition(), node->getScale().x, node->getOrientation());
-        std::cout << "Actor:" << mesh;
     }
 
     void PhysicsSystem::removeObject (const std::string& handle)
