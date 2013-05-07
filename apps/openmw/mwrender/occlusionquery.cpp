@@ -44,18 +44,18 @@ OcclusionQuery::OcclusionQuery(OEngine::Render::OgreRenderer* renderer, SceneNod
 
     mBBNodeReal = mRendering->getScene()->getRootSceneNode()->createChildSceneNode();
 
-    static Ogre::MeshPtr plane = MeshManager::getSingleton().createPlane("occlusionbillboard",
-        ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,  Ogre::Plane(Ogre::Vector3(0,0,1), 0), 1, 1, 1, 1, true, 1, 1, 1, Vector3::UNIT_Y);
+    static Ogre::Mesh* plane = MeshManager::getSingleton().createPlane("occlusionbillboard",
+        ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,  Ogre::Plane(Ogre::Vector3(0,0,1), 0), 1, 1, 1, 1, true, 1, 1, 1, Vector3::UNIT_Y).get();
     plane->_setBounds(Ogre::AxisAlignedBox::BOX_INFINITE);
 
-    mBBQueryTotal = mRendering->getScene()->createEntity(plane);
+    mBBQueryTotal = mRendering->getScene()->createEntity("occlusionbillboard");
     mBBQueryTotal->setCastShadows(false);
     mBBQueryTotal->setVisibilityFlags(RV_OcclusionQuery);
     mBBQueryTotal->setRenderQueueGroup(RQG_OcclusionQuery+1);
     mBBQueryTotal->setMaterialName("QueryTotalPixels");
     mBBNodeReal->attachObject(mBBQueryTotal);
 
-    mBBQueryVisible = mRendering->getScene()->createEntity(plane);
+    mBBQueryVisible = mRendering->getScene()->createEntity("occlusionbillboard");
     mBBQueryVisible->setCastShadows(false);
     mBBQueryVisible->setVisibilityFlags(RV_OcclusionQuery);
     mBBQueryVisible->setRenderQueueGroup(RQG_OcclusionQuery+1);

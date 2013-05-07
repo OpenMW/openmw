@@ -46,10 +46,10 @@ BillboardObject::BillboardObject( const String& textureName,
     mMaterial = sh::Factory::getInstance().createMaterialInstance ("BillboardMaterial"+StringConverter::toString(bodyCount), material);
     mMaterial->setProperty("texture", sh::makeProperty(new sh::StringValue(textureName)));
 
-    static Ogre::MeshPtr plane = MeshManager::getSingleton().createPlane("billboard",
-        ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,  Ogre::Plane(Ogre::Vector3(0,0,1), 0), 1, 1, 1, 1, true, 1, 1, 1, Vector3::UNIT_Y);
+    static Ogre::Mesh* plane = MeshManager::getSingleton().createPlane("billboard",
+                                                                       ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,  Ogre::Plane(Ogre::Vector3(0,0,1), 0), 1, 1, 1, 1, true, 1, 1, 1, Vector3::UNIT_Y).get();
     plane->_setBounds(Ogre::AxisAlignedBox::BOX_INFINITE);
-    mEntity = sceneMgr->createEntity(plane);
+    mEntity = sceneMgr->createEntity("billboard");
     mEntity->setMaterialName("BillboardMaterial"+StringConverter::toString(bodyCount));
     mEntity->setVisibilityFlags(RV_Sky);
     mEntity->setCastShadows(false);
