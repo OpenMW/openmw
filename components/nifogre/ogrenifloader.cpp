@@ -748,9 +748,7 @@ class NIFObjectLoader
 
         if(node->recType == Nif::RC_NiCamera)
         {
-            int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, node->recIndex);
-            Ogre::Bone *trgtbone = objectlist.mSkelBase->getSkeleton()->getBone(trgtid);
-            objectlist.mCameras.push_back(trgtbone);
+            /* Ignored */
         }
 
         if(node->recType == Nif::RC_NiTriShape && !(flags&0x80000000))
