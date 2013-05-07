@@ -46,10 +46,12 @@ namespace CSMWorld
 
             virtual void setData (int index, int column, const QVariant& data) = 0;
 
-            virtual void merge() = 0;
+// Not in use. Temporarily removed so that the implementation of RefIdCollection can continue without
+// these functions for now.
+//            virtual void merge() = 0;
             ///< Merge modified into base.
 
-            virtual void purge() = 0;
+//            virtual void purge() = 0;
             ///< Remove records that are flagged as erased.
 
             virtual void removeRows (int index, int count) = 0;

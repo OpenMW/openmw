@@ -140,6 +140,8 @@ CSMWorld::Data::Data()
     addModel (new IdTable (&mBirthsigns), UniversalId::Type_Birthsigns, UniversalId::Type_Birthsign);
     addModel (new IdTable (&mSpells), UniversalId::Type_Spells, UniversalId::Type_Spell);
     addModel (new IdTable (&mCells), UniversalId::Type_Cells, UniversalId::Type_Cell);
+    addModel (new IdTable (&mReferenceables), UniversalId::Type_Referenceables,
+        UniversalId::Type_Referenceable);
 }
 
 CSMWorld::Data::~Data()
@@ -266,6 +268,16 @@ const CSMWorld::IdCollection<CSMWorld::Cell>& CSMWorld::Data::getCells() const
 CSMWorld::IdCollection<CSMWorld::Cell>& CSMWorld::Data::getCells()
 {
     return mCells;
+}
+
+const CSMWorld::RefIdCollection& CSMWorld::Data::getReferenceables() const
+{
+    return mReferenceables;
+}
+
+CSMWorld::RefIdCollection& CSMWorld::Data::getReferenceables()
+{
+    return mReferenceables;
 }
 
 QAbstractItemModel *CSMWorld::Data::getTableModel (const UniversalId& id)
