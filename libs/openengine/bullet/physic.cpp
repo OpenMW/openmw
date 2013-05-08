@@ -28,7 +28,7 @@ namespace Physic
         mRaycastingBody = mEngine->createAndAdjustRigidBody(mMesh, mName, scale, position, rotation, &mBoxScaledTranslation, &mBoxRotation, true);
         Ogre::Quaternion inverse = mBoxRotation.Inverse();
         mBoxRotationInverse = btQuaternion(inverse.x, inverse.y, inverse.z,inverse.w);
-        mEngine->addRigidBody(mBody, false, mRaycastingBody);  //Add rigid body to dynamics world, but do not add to object map
+        mEngine->addRigidBody(mBody, false, mRaycastingBody,true);  //Add rigid body to dynamics world, but do not add to object map
     }
 
     PhysicActor::~PhysicActor()
@@ -109,7 +109,7 @@ namespace Physic
         //Create the newly scaled rigid body
         mBody = mEngine->createAndAdjustRigidBody(mMesh, mName, scale, pos, rot);
         mRaycastingBody = mEngine->createAndAdjustRigidBody(mMesh, mName, scale, pos, rot, 0, 0, true);
-        mEngine->addRigidBody(mBody, false, mRaycastingBody);  //Add rigid body to dynamics world, but do not add to object map
+        mEngine->addRigidBody(mBody, false, mRaycastingBody,true);  //Add rigid body to dynamics world, but do not add to object map
     }
 
     Ogre::Vector3 PhysicActor::getHalfExtents() const
@@ -331,8 +331,8 @@ namespace Physic
 
         mHeightFieldMap [name] = hf;
 
-        dynamicsWorld->addRigidBody(body,CollisionType_World|CollisionType_Raycasting,
-                                    CollisionType_World|CollisionType_ActorInternal|CollisionType_ActorExternal|CollisionType_Raycasting);
+        dynamicsWorld->addRigidBody(body,CollisionType_HeightMap|CollisionType_Raycasting,
+                                    CollisionType_World|CollisionType_Actor|CollisionType_Raycasting);
     }
 
     void PhysicEngine::removeHeightField(int x, int y)
@@ -422,15 +422,17 @@ namespace Physic
 
     }
 
-    void PhysicEngine::addRigidBody(RigidBody* body, bool addToMap, RigidBody* raycastingBody)
+    void PhysicEngine::addRigidBody(RigidBody* body, bool addToMap, RigidBody* raycastingBody,bool actor)
     {
         if(!body && !raycastingBody)
             return; // nothing to do
 
         const std::string& name = (body ? body->mName : raycastingBody->mName);
 
-        if (body)
-            dynamicsWorld->addRigidBody(body,CollisionType_World,CollisionType_World|CollisionType_ActorInternal|CollisionType_ActorExternal);
+        if (body){
+            if(actor) dynamicsWorld->addRigidBody(body,CollisionType_Actor,CollisionType_World|CollisionType_HeightMap);
+            else dynamicsWorld->addRigidBody(body,CollisionType_World,CollisionType_World|CollisionType_Actor|CollisionType_HeightMap);
+        }
 
         if (raycastingBody)
             dynamicsWorld->addRigidBody(raycastingBody,CollisionType_Raycasting,CollisionType_Raycasting|CollisionType_World);
@@ -603,14 +605,17 @@ namespace Physic
     {
     }
 
-    std::pair<std::string,float> PhysicEngine::rayTest(btVector3& from,btVector3& to)
+    std::pair<std::string,float> PhysicEngine::rayTest(btVector3& from,btVector3& to,bool raycastingObjectOnly,bool ignoreHeightMap)
     {
         std::string name = "";
         float d = -1;
 
         float d1 = 10000.;
         btCollisionWorld::ClosestRayResultCallback resultCallback1(from, to);
-        resultCallback1.m_collisionFilterMask = CollisionType_Raycasting;
+        if(raycastingObjectOnly) resultCallback1.m_collisionFilterMask = CollisionType_Raycasting;
+        else resultCallback1.m_collisionFilterMask = CollisionType_World;
+
+        if(!ignoreHeightMap) resultCallback1.m_collisionFilterMask = resultCallback1.m_collisionFilterMask|| CollisionType_HeightMap;
         dynamicsWorld->rayTest(from, to, resultCallback1);
         if (resultCallback1.hasHit())
         {
@@ -641,7 +646,7 @@ namespace Physic
     std::pair<bool, float> PhysicEngine::sphereCast (float radius, btVector3& from, btVector3& to)
     {
         OurClosestConvexResultCallback callback(from, to);
-        callback.m_collisionFilterMask = OEngine::Physic::CollisionType_World;
+        callback.m_collisionFilterMask = OEngine::Physic::CollisionType_World|OEngine::Physic::CollisionType_HeightMap;
 
         btSphereShape shape(radius);
         const btQuaternion btrot(0.0f, 0.0f, 0.0f);
