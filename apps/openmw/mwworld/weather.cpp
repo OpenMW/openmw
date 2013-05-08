@@ -24,6 +24,7 @@ namespace
     {
         return x * (1-factor) + y * factor;
     }
+
     Ogre::ColourValue lerp (const Ogre::ColourValue& x, const Ogre::ColourValue& y, float factor)
     {
         return x * (1-factor) + y * factor;
@@ -59,6 +60,33 @@ void WeatherManager::setFallbackWeather(Weather& weather,const std::string& name
     weather.mCloudSpeed = mFallback->getFallbackFloat("Weather_"+upper+"_Cloud_Speed");
     weather.mGlareView = mFallback->getFallbackFloat("Weather_"+upper+"_Glare_View");
     mWeatherSettings[name] = weather;
+}
+
+
+float WeatherManager::calculateHourFade (const std::string& moonName)
+{
+    float fadeOutStart=mFallback->getFallbackFloat("Moons_"+moonName+"_Fade_Out_Start");
+    float fadeInStart=mFallback->getFallbackFloat("Moons_"+moonName+"_Fade_In_Start");
+    float fadeInFinish=mFallback->getFallbackFloat("Moons_"+moonName+"_Fade_In_Finish");
+
+    if (mHour >= fadeOutStart && mHour <= fadeInStart)
+        return (1 - (mHour - fadeOutStart));
+    else if (mHour >= fadeInStart && mHour <= fadeInFinish)
+        return (mHour - fadeInStart);
+    else
+        return 1;
+}
+
+float WeatherManager::calculateAngleFade (const std::string& moonName, float angle)
+{
+    float endAngle=mFallback->getFallbackFloat("Moons_"+moonName+"_Fade_End_Angle");
+    float startAngle=mFallback->getFallbackFloat("Moons_"+moonName+"_Fade_Start_Angle");
+    if (angle >= endAngle && angle <= startAngle)
+        return (angle - endAngle);
+    else if (angle < endAngle)
+        return 0.f;
+    else
+        return 1.f;
 }
 
 WeatherManager::WeatherManager(MWRender::RenderingManager* rendering,MWWorld::Fallback* fallback) :
@@ -440,50 +468,11 @@ void WeatherManager::update(float duration)
             mRendering->getSkyManager()->masserEnable();
             mRendering->getSkyManager()->secundaEnable();
 
-            float secundaHourFade;
-            float secundaFadeOutStart=mFallback->getFallbackFloat("Moons_Secunda_Fade_Out_Start");
-            float secundaFadeInStart=mFallback->getFallbackFloat("Moons_Secunda_Fade_In_Start");
-            float secundaFadeInFinish=mFallback->getFallbackFloat("Moons_Secunda_Fade_In_Finish");
-
-            if (mHour >= secundaFadeOutStart && mHour <= secundaFadeInStart)
-                secundaHourFade = 1 - (mHour - secundaFadeOutStart) / 3.f;
-            else if (mHour >= secundaFadeInStart && mHour <= secundaFadeInFinish)
-                secundaHourFade = mHour - secundaFadeInStart;
-            else
-                secundaHourFade = 1;
-
-            float masserHourFade;
-            float masserFadeOutStart=mFallback->getFallbackFloat("Moons_Masser_Fade_Out_Start");
-            float masserFadeInStart=mFallback->getFallbackFloat("Moons_Masser_Fade_In_Start");
-            float masserFadeInFinish=mFallback->getFallbackFloat("Moons_Masser_Fade_In_Finish");
-            if (mHour >= masserFadeOutStart && mHour <= masserFadeInStart)
-                masserHourFade = 1 - (mHour - masserFadeOutStart) / 3.f;
-            else if (mHour >= masserFadeInStart && mHour <= masserFadeInFinish)
-                masserHourFade = mHour - masserFadeInStart;
-            else
-                masserHourFade = 1;
-
             float angle = moonHeight * 90.f;
-
-            float secundaAngleFade;
-            float secundaEndAngle=mFallback->getFallbackFloat("Moons_Secunda_Fade_End_Angle");
-            float secundaStartAngle=mFallback->getFallbackFloat("Moons_Secunda_Fade_Start_Angle");
-            if (angle >= secundaEndAngle && angle <= secundaStartAngle)
-                secundaAngleFade = (angle - secundaEndAngle) / 20.f;
-            else if (angle < secundaEndAngle)
-                secundaAngleFade = 0.f;
-            else
-                secundaAngleFade = 1.f;
-
-            float masserAngleFade;
-            float masserEndAngle=mFallback->getFallbackFloat("Moons_Masser_Fade_End_Angle");
-            float masserStartAngle=mFallback->getFallbackFloat("Moons_Masser_Fade_Start_Angle");
-            if (angle >= masserEndAngle && angle <= masserStartAngle)
-                masserAngleFade = (angle - masserEndAngle) / 10.f;
-            else if (angle < masserEndAngle)
-                masserAngleFade = 0.f;
-            else
-                masserAngleFade = 1.f;
+            float masserHourFade = calculateHourFade("Masser");
+            float secundaHourFade = calculateHourFade("Secunda");
+            float masserAngleFade = calculateAngleFade("Masser", angle);
+            float secundaAngleFade = calculateAngleFade("Secunda", angle);
 
             masserAngleFade *= masserHourFade;
             secundaAngleFade *= secundaHourFade;
