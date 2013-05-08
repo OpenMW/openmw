@@ -9,14 +9,14 @@
 #include <QDockWidget>
 
 #include "../../model/doc/document.hpp"
-
 #include "../world/subviews.hpp"
-
 #include "../tools/subviews.hpp"
-
+#include "../../settings/usersettingsdialog.hpp"
 #include "viewmanager.hpp"
 #include "operations.hpp"
 #include "subview.hpp"
+
+#include <QDebug>
 
 void CSVDoc::View::closeEvent (QCloseEvent *event)
 {
@@ -80,12 +80,23 @@ void CSVDoc::View::setupWorldMenu()
     world->addAction (mVerify);
 }
 
+void CSVDoc::View::setupSettingsMenu()
+{
+    QMenu *settings = menuBar()->addMenu( (tr ("&Settings")));
+
+    QAction *userSettings = new QAction (tr ("User Settings"), this);
+    connect (userSettings, SIGNAL (triggered()), this, SLOT (showUserSettings()));
+    settings->addAction (userSettings);
+
+}
+
 void CSVDoc::View::setupUi()
 {
     setupFileMenu();
     setupEditMenu();
     setupViewMenu();
     setupWorldMenu();
+    setupSettingsMenu();
 }
 
 void CSVDoc::View::updateTitle()
@@ -242,4 +253,30 @@ void CSVDoc::View::abortOperation (int type)
 QDockWidget *CSVDoc::View::getOperations() const
 {
     return mOperations;
+}
+
+void CSVDoc::View::showUserSettings()
+{
+    CsSettings::UserSettingsDialog *settingsDialog = new CsSettings::UserSettingsDialog(this);
+
+    connect (settingsDialog, SIGNAL (signalUpdateEditorSetting (const QString &, const QString &)),
+             this, SLOT (slotUpdateEditorSetting (const QString &, const QString &)) );
+
+    settingsDialog->show();
+}
+
+void CSVDoc::View::slotUpdateEditorSetting(const QString &settingName, const QString &settingValue)
+{
+    static QString lastValue = "";
+
+    if (lastValue != settingValue)
+    {
+        if (settingName == "Undo Stack Size");
+
+        if (settingName == "Top-Level Window Count");
+
+        if (settingName == "Reuse Subwindows");
+
+        lastValue = settingValue;
+    }
 }

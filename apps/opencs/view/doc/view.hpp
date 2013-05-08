@@ -59,6 +59,8 @@ namespace CSVDoc
 
             void setupWorldMenu();
 
+            void setupSettingsMenu();
+
             void setupUi();
 
             void updateTitle();
@@ -94,6 +96,8 @@ namespace CSVDoc
 
             void addSubView (const CSMWorld::UniversalId& id);
 
+            void slotUpdateEditorSetting (const QString &settingName, const QString &settingValue);
+
         private slots:
 
             void newView();
@@ -107,6 +111,8 @@ namespace CSVDoc
             void addGmstsSubView();
 
             void abortOperation (int type);
+
+            void showUserSettings();
     };
 }
 

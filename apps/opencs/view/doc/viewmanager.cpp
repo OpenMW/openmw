@@ -3,6 +3,9 @@
 
 #include <map>
 
+#include <QApplication>
+#include <QDesktopWidget>
+
 #include "../../model/doc/documentmanager.hpp"
 #include "../../model/doc/document.hpp"
 
@@ -69,6 +72,12 @@ CSVDoc::View *CSVDoc::ViewManager::addView (CSMDoc::Document *document)
 
     mViews.push_back (view);
 
+    if (mViews.size()==1)
+    {
+        QRect scr = QApplication::desktop()->screenGeometry();
+        QRect rect = view->geometry();
+        view->move (scr.center().x() - rect.center().x(), scr.center().y() - rect.center().y());
+    }
     view->show();
 
     connect (view, SIGNAL (newDocumentRequest ()), this, SIGNAL (newDocumentRequest()));
