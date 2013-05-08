@@ -38,6 +38,8 @@ class NIFSkeletonLoader : public Ogre::ManualResourceLoader
 
     void buildBones(Ogre::Skeleton *skel, const Nif::Node *node, Ogre::Bone *parent=NULL);
 
+    static bool needSkeleton(const Nif::Node *node);
+
     // Lookup to retrieve an Ogre bone handle for a given Nif record index
     std::map<int,int> mNifToOgreHandleMap;
 

@@ -81,7 +81,7 @@ void NIFSkeletonLoader::loadResource(Ogre::Resource *resource)
 }
 
 
-Ogre::SkeletonPtr NIFSkeletonLoader::createSkeleton(const std::string &name, const std::string &group, const Nif::Node *node)
+bool NIFSkeletonLoader::needSkeleton(const Nif::Node *node)
 {
     /* We need to be a little aggressive here, since some NIFs have a crap-ton
      * of nodes and Ogre only supports 256 bones. We will skip a skeleton if:
@@ -89,32 +89,49 @@ Ogre::SkeletonPtr NIFSkeletonLoader::createSkeleton(const std::string &name, con
      * are no nodes named "AttachLight", and the tree consists of NiNode,
      * NiTriShape, and RootCollisionNode types only.
      */
-    if(!node->boneTrafo)
+    if(node->boneTrafo)
+        return true;
+
+    if(!node->controller.empty() || node->name == "AttachLight")
+        return true;
+
+    if(node->recType == Nif::RC_NiNode || node->recType == Nif::RC_RootCollisionNode)
     {
-        if(node->controller.empty() && node->name != "AttachLight")
+        const Nif::NiNode *ninode = static_cast<const Nif::NiNode*>(node);
+        const Nif::NodeList &children = ninode->children;
+        for(size_t i = 0;i < children.length();i++)
         {
-            if(node->recType == Nif::RC_NiTriShape)
-                return Ogre::SkeletonPtr();
-            if(node->recType == Nif::RC_NiNode || node->recType == Nif::RC_RootCollisionNode)
+            if(!children[i].empty())
             {
-                const Nif::NiNode *ninode = static_cast<const Nif::NiNode*>(node);
-                const Nif::NodeList &children = ninode->children;
-                for(size_t i = 0;i < children.length();i++)
-                {
-                    if(!children[i].empty())
-                    {
-                        Ogre::SkeletonPtr skel = createSkeleton(name, group, children[i].getPtr());
-                        if(!skel.isNull())
-                            return skel;
-                    }
-                }
-                return Ogre::SkeletonPtr();
+                if(needSkeleton(children[i].getPtr()))
+                    return true;
             }
         }
+        return false;
+    }
+    if(node->recType == Nif::RC_NiTriShape)
+        return false;
+
+    return true;
+}
+
+Ogre::SkeletonPtr NIFSkeletonLoader::createSkeleton(const std::string &name, const std::string &group, const Nif::Node *node)
+{
+    bool forceskel = false;
+    std::string::size_type extpos = name.rfind('.');
+    if(extpos != std::string::npos && name.compare(extpos, name.size()-extpos, ".nif") == 0)
+    {
+        Ogre::ResourceGroupManager &resMgr = Ogre::ResourceGroupManager::getSingleton();
+        forceskel = resMgr.resourceExistsInAnyGroup(name.substr(0, extpos)+".kf");
     }
 
-    Ogre::SkeletonManager &skelMgr = Ogre::SkeletonManager::getSingleton();
-    return skelMgr.create(name, group, true, &sLoaders[name]);
+    if(forceskel || needSkeleton(node))
+    {
+        Ogre::SkeletonManager &skelMgr = Ogre::SkeletonManager::getSingleton();
+        return skelMgr.create(name, group, true, &sLoaders[name]);
+    }
+
+    return Ogre::SkeletonPtr();
 }
 
 // Looks up an Ogre Bone handle ID from a NIF's record index. Should only be
