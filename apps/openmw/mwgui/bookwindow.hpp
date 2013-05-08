@@ -27,6 +27,7 @@ namespace MWGui
 
             void updatePages();
             void clearPages();
+            void adjustButton(MWGui::ImageButton* button);
 
         private:
             MWGui::ImageButton* mCloseButton;

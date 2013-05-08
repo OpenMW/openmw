@@ -10,6 +10,18 @@
 
 #include "formatting.hpp"
 
+namespace
+{
+    void adjustButton (MWGui::ImageButton* button)
+    {
+        MyGUI::IntSize diff = button->getSize() - button->getRequestedSize();
+        button->setSize(button->getRequestedSize());
+
+        if (button->getAlign().isRight())
+            button->setPosition(button->getPosition() + MyGUI::IntPoint(diff.width,0));
+    }
+}
+
 namespace MWGui
 {
 
@@ -25,6 +37,9 @@ namespace MWGui
 
         getWidget(mTakeButton, "TakeButton");
         mTakeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ScrollWindow::onTakeButtonClicked);
+
+        adjustButton(mCloseButton);
+        adjustButton(mTakeButton);
 
         center();
     }

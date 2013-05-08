@@ -8,25 +8,27 @@
         <Property key="ImageTexture" value="textures\tx_menubook.dds"/>
         <Property key="ImageCoord" value="50 0 412 256"/>
 
-        <Widget type="ImageButton" skin="ImageBox" position="300 350 48 32" name="NextPageBTN">
-            <Property key="ImageCoord" value="0 0 48 32"/>
-            <Property key="ImageHighlighted" value="textures\tx_menubook_next_over.dds"/>
-            <Property key="ImageNormal" value="textures\tx_menubook_next_idle.dds"/>
-            <Property key="ImagePushed" value="textures\tx_menubook_next_pressed.dds"/>
+        <Widget type="Widget" position="0 0 282 390">
+            <Widget type="ImageButton" skin="ImageBox" position="205 350 48 32" name="PrevPageBTN">
+                <Property key="ImageHighlighted" value="textures\tx_menubook_prev_over.dds"/>
+                <Property key="ImageNormal" value="textures\tx_menubook_prev_idle.dds"/>
+                <Property key="ImagePushed" value="textures\tx_menubook_prev_pressed.dds"/>
+            </Widget>
         </Widget>
-        <Widget type="ImageButton" skin="ImageBox" position="220 350 48 32" name="PrevPageBTN">
-            <Property key="ImageCoord" value="0 0 48 32"/>
-            <Property key="ImageHighlighted" value="textures\tx_menubook_prev_over.dds"/>
-            <Property key="ImageNormal" value="textures\tx_menubook_prev_idle.dds"/>
-            <Property key="ImagePushed" value="textures\tx_menubook_prev_pressed.dds"/>
+        <Widget type="Widget" position="282 0 282 390">
+            <Widget type="ImageButton" skin="ImageBox" position="18 350 48 32" name="NextPageBTN">
+                <Property key="ImageHighlighted" value="textures\tx_menubook_next_over.dds"/>
+                <Property key="ImageNormal" value="textures\tx_menubook_next_idle.dds"/>
+                <Property key="ImagePushed" value="textures\tx_menubook_next_pressed.dds"/>
+            </Widget>
         </Widget>
+
         <Widget type="ImageButton" skin="ImageBox" position="40 350 64 32" name="TakeButton">
             <Property key="ImageHighlighted" value="textures\tx_menubook_take_over.dds"/>
             <Property key="ImageNormal" value="textures\tx_menubook_take_idle.dds"/>
             <Property key="ImagePushed" value="textures\tx_menubook_take_pressed.dds"/>
         </Widget>
-        <Widget type="ImageButton" skin="ImageBox" position="475 350 48 32" name="CloseButton">
-            <Property key="ImageCoord" value="0 0 48 32"/>
+        <Widget type="ImageButton" skin="ImageBox" position="460 350 48 32" name="CloseButton">
             <Property key="ImageHighlighted" value="textures\tx_menubook_close_over.dds"/>
             <Property key="ImageNormal" value="textures\tx_menubook_close_idle.dds"/>
             <Property key="ImagePushed" value="textures\tx_menubook_close_pressed.dds"/>

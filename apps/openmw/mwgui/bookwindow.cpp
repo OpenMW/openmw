@@ -38,6 +38,18 @@ namespace MWGui
         getWidget(mLeftPage, "LeftPage");
         getWidget(mRightPage, "RightPage");
 
+        adjustButton(mCloseButton);
+        adjustButton(mTakeButton);
+        adjustButton(mNextPageButton);
+        adjustButton(mPrevPageButton);
+
+        if (mNextPageButton->getSize().width == 64)
+        {
+            // english button has a 7 pixel wide strip of garbage on its right edge
+            mNextPageButton->setSize(64-7, mNextPageButton->getSize().height);
+            mNextPageButton->setImageCoord(MyGUI::IntCoord(0,0,64-7,mNextPageButton->getSize().height));
+        }
+
         center();
     }
 
@@ -172,6 +184,15 @@ namespace MWGui
         } else {
             mPrevPageButton->setVisible(true);
         }
+    }
+
+    void BookWindow::adjustButton (MWGui::ImageButton* button)
+    {
+        MyGUI::IntSize diff = button->getSize() - button->getRequestedSize();
+        button->setSize(button->getRequestedSize());
+
+        if (button->getAlign().isRight())
+            button->setPosition(button->getPosition() + MyGUI::IntPoint(diff.width,0));
     }
 
 }
