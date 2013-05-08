@@ -92,7 +92,7 @@ namespace
         const PathGridGraph & mGraph;
         PointID mGoal;
     };*/
-	
+
 	class goalVisited : public boost::default_dijkstra_visitor
 	{
 	public:
@@ -177,7 +177,6 @@ namespace MWMechanics
         if(MWBase::Environment::get().getWorld()->castRay(startPoint.mX,startPoint.mY,startPoint.mZ,
             endPoint.mX,endPoint.mY,endPoint.mZ) )
         {
-            std::cout << "hit";
             int start = getClosestPoint(pathGrid,startPoint.mX - xCell,startPoint.mY - yCell,startPoint.mZ);
             int end = getClosestPoint(pathGrid,endPoint.mX - xCell,endPoint.mY - yCell,endPoint.mZ);
 
