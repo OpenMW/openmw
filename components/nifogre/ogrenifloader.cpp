@@ -832,13 +832,13 @@ public:
         const Nif::Record *r = nif->getRoot(0);
         assert(r != NULL);
 
-        const Nif::NiSequenceStreamHelper *seq = dynamic_cast<const Nif::NiSequenceStreamHelper*>(r);
-        if(seq == NULL)
+        if(r->recType != Nif::RC_NiSequenceStreamHelper)
         {
             nif->warn("First root was not a NiSequenceStreamHelper, but a "+
                       r->recName+".");
             return;
         }
+        const Nif::NiSequenceStreamHelper *seq = static_cast<const Nif::NiSequenceStreamHelper*>(r);
 
         Nif::ExtraPtr extra = seq->extra;
         if(extra.empty() || extra->recType != Nif::RC_NiTextKeyExtraData)
