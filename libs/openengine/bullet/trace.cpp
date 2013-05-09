@@ -27,7 +27,7 @@ void newtrace(traceResults *results, const Ogre::Quaternion& orient, const Ogre:
     const btTransform to(btorient, btend);
 
     btCollisionWorld::ClosestConvexResultCallback newTraceCallback(btstart, btend);
-    newTraceCallback.m_collisionFilterMask = OEngine::Physic::CollisionType_World|OEngine::Physic::CollisionType_HeightMap;
+    newTraceCallback.m_collisionFilterMask = OEngine::Physic::CollisionType_World|OEngine::Physic::CollisionType_HeightMap|OEngine::Physic::CollisionType_Actor;
 
     enginePass->dynamicsWorld->convexSweepTest(&newshape, from, to, newTraceCallback);
 
