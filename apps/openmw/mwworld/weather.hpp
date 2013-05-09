@@ -174,8 +174,8 @@ namespace MWWorld
         WeatherResult transition(const float factor);
         WeatherResult getResult(const Ogre::String& weather);
 
-        float calculateHourFade (const std::string& moonName);
-        float calculateAngleFade (const std::string& moonName, float angle);
+        float calculateHourFade (const std::string& moonName) const;
+        float calculateAngleFade (const std::string& moonName, float angle) const;
 
         void setWeather(const Ogre::String& weather, bool instant=false);
         float mSunriseTime;

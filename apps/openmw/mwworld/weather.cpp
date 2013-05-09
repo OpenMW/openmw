@@ -63,7 +63,7 @@ void WeatherManager::setFallbackWeather(Weather& weather,const std::string& name
 }
 
 
-float WeatherManager::calculateHourFade (const std::string& moonName)
+float WeatherManager::calculateHourFade (const std::string& moonName) const
 {
     float fadeOutStart=mFallback->getFallbackFloat("Moons_"+moonName+"_Fade_Out_Start");
     float fadeInStart=mFallback->getFallbackFloat("Moons_"+moonName+"_Fade_In_Start");
@@ -77,7 +77,7 @@ float WeatherManager::calculateHourFade (const std::string& moonName)
         return 1;
 }
 
-float WeatherManager::calculateAngleFade (const std::string& moonName, float angle)
+float WeatherManager::calculateAngleFade (const std::string& moonName, float angle) const
 {
     float endAngle=mFallback->getFallbackFloat("Moons_"+moonName+"_Fade_End_Angle");
     float startAngle=mFallback->getFallbackFloat("Moons_"+moonName+"_Fade_Start_Angle");
