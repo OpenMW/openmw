@@ -50,6 +50,7 @@ namespace MWMechanics
             float mX;
             float mY;
             float mZ;
+            float mMaxDist;
             unsigned int mStartingSecond;
             unsigned int mDuration;
 

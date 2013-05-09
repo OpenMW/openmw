@@ -3,13 +3,14 @@
 #include <cmath>
 
 #include "character.hpp"
+#include "movement.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwbase/world.hpp"
-#include "../mwworld/timestamp.hpp"
-#include "../mwbase/environment.hpp"
 #include "../mwworld/player.hpp"
-#include "movement.hpp"
+#include "../mwworld/timestamp.hpp"
+#include "../mwbase/world.hpp"
+#include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include <boost/graph/astar_search.hpp>
 #include <boost/graph/adjacency_list.hpp>
@@ -22,53 +23,20 @@ namespace
         if(a>0) return 1.;
         else return -1.;
     }
-
-    /*
-
-    MWWorld::Ptr InterpreterContext::getReference (
-        const std::string& id, bool activeOnly)
-    {
-        if (!id.empty())
-        {
-            return MWBase::Environment::get().getWorld()->getPtr (id, activeOnly);
-        }
-        else
-        {
-            if (mReference.isEmpty())
-                throw std::runtime_error ("no implicit reference");
-
-            return mReference;
-        }
-    }
-
-    float InterpreterContext::getDistance (const std::string& name, const std::string& id) const
-    {
-        // TODO handle exterior cells (when ref and ref2 are located in different cells)
-        /const MWWorld::Ptr ref2 = MWBase::Environment::get().getWorld()->getPtr(id, false);
-
-        double diff[3];
-
-        const float* const pos1 = actor.getRefData().getPosition().pos;
-        const float* const pos2 = ref2.getRefData().getPosition().pos;
-
-        for (int i=0; i<3; ++i)
-            diff[i] = pos1[i] - pos2[i];
-
-        return std::sqrt (diff[0]*diff[0] + diff[1]*diff[1] + diff[2]*diff[2]);
-    }
-    */
-
 }
 
-// TODO: Fix all commenting!
-// TODO: Test vanilla behavior on passing x0, y0, and z0 with duration of anything including 0.
-// TODO: Different behavior for AIEscort a d x y z and AIEscortCell a c d x y z.
-// Necessary?     MWWorld::Ptr follower = MWBase::Environment::get().getWorld()->getPtr(mActorId, true);
+/*
+    TODO: Test vanilla behavior on passing x0, y0, and z0 with duration of anything including 0.
+    TODO: Different behavior for AIEscort a d x y z and AIEscortCell a c d x y z.
+    TODO: Take account for actors being in different cells.
+*/
 
 MWMechanics::AiEscort::AiEscort(const std::string &actorId,int duration, float x, float y, float z)
 : mActorId(actorId), mX(x), mY(y), mZ(z), mDuration(duration)
 {
-    //\ < The CS Help File states that if a duration is givin, the AI package will run for that long
+    mMaxDist = 470;
+
+    // The CS Help File states that if a duration is givin, the AI package will run for that long
     // BUT if a location is givin, it "trumps" the duration so it will simply escort to that location.
     if(mX != 0 || mY != 0 || mZ != 0)
         mDuration = 0;
@@ -85,7 +53,9 @@ MWMechanics::AiEscort::AiEscort(const std::string &actorId,int duration, float x
 MWMechanics::AiEscort::AiEscort(const std::string &actorId,const std::string &cellId,int duration, float x, float y, float z)
 : mActorId(actorId), mCellId(cellId), mX(x), mY(y), mZ(z), mDuration(duration)
 {
-    //\ < The CS Help File states that if a duration is givin, the AI package will run for that long
+    mMaxDist = 470;
+
+    // The CS Help File states that if a duration is givin, the AI package will run for that long
     // BUT if a location is givin, it "trumps" the duration so it will simply escort to that location.
     if(mX != 0 || mY != 0 || mZ != 0)
         mDuration = 0;
@@ -195,17 +165,19 @@ bool MWMechanics::AiEscort::execute (const MWWorld::Ptr& actor)
     float distanceBetweenResult =
         std::sqrt((differenceBetween[0] * differenceBetween[0]) + (differenceBetween[1] * differenceBetween[1]) + (differenceBetween[2] * differenceBetween[2]));
 
-    if(distanceBetweenResult <= 500)
+    if(distanceBetweenResult <= mMaxDist)
     {
         float zAngle = mPathFinder.getZAngleToNext(pos.pos[0],pos.pos[1],pos.pos[2]);
         MWBase::Environment::get().getWorld()->rotateObject(actor,0,0,zAngle,false);
         MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 1;
+        mMaxDist = 470;
     }
-    // Stop moving if the player is to far away
     else
     {
-        // TODO: Set the actor to do the equivilent of AIWander 0 0 0 playing the "look back" idle animation.
+        // Stop moving if the player is to far away
+        MWBase::Environment::get().getMechanicsManager()->playAnimationGroup(actor, "idle3", 0, 1);
         MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 0;
+        mMaxDist = 330;
     }
 
     return false;
