@@ -1,5 +1,4 @@
 #include "aiescort.hpp"
-#include <iostream>
 #include <cmath>
 
 #include "character.hpp"
@@ -45,8 +44,6 @@ MWMechanics::AiEscort::AiEscort(const std::string &actorId,int duration, float x
     {
         MWWorld::TimeStamp startTime = MWBase::Environment::get().getWorld()->getTimeStamp();
         mStartingSecond = ((startTime.getHour() - int(startTime.getHour())) * 100);
-        std::cout << "AiEscort Started at: " << mStartingSecond << " For: "
-            << duration << "Started At: " << mStartingSecond << std::endl;
     }
 }
 
@@ -64,8 +61,6 @@ MWMechanics::AiEscort::AiEscort(const std::string &actorId,const std::string &ce
     {
         MWWorld::TimeStamp startTime = MWBase::Environment::get().getWorld()->getTimeStamp();
         mStartingSecond = ((startTime.getHour() - int(startTime.getHour())) * 100);
-        std::cout << "AiEscort Started at: " << mStartingSecond << " For: "
-            << duration << "Started At: " << mStartingSecond << std::endl;
     }
 }
 
@@ -86,8 +81,6 @@ bool MWMechanics::AiEscort::execute (const MWWorld::Ptr& actor)
         std::cout << "AiEscort: " << currentSecond << " time: " << currentSecond - mStartingSecond << std::endl;
         if(currentSecond - mStartingSecond >= mDuration)
         {
-            std::cout << "AiEscort Has Run It's Duration: " << currentSecond - mStartingSecond
-                << " >= " << mDuration << std::endl;
             return true;
         }
     }
