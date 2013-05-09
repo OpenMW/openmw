@@ -1,5 +1,4 @@
 #include "aiescort.hpp"
-#include <cmath>
 
 #include "character.hpp"
 #include "movement.hpp"
@@ -156,9 +155,9 @@ bool MWMechanics::AiEscort::execute (const MWWorld::Ptr& actor)
         differenceBetween[i] = (leaderPos[i] - followerPos[i]);
 
     float distanceBetweenResult =
-        std::sqrt((differenceBetween[0] * differenceBetween[0]) + (differenceBetween[1] * differenceBetween[1]) + (differenceBetween[2] * differenceBetween[2]));
+        (differenceBetween[0] * differenceBetween[0]) + (differenceBetween[1] * differenceBetween[1]) + (differenceBetween[2] * differenceBetween[2]);
 
-    if(distanceBetweenResult <= mMaxDist)
+    if(distanceBetweenResult <= mMaxDist * mMaxDist)
     {
         float zAngle = mPathFinder.getZAngleToNext(pos.pos[0],pos.pos[1],pos.pos[2]);
         MWBase::Environment::get().getWorld()->rotateObject(actor,0,0,zAngle,false);
