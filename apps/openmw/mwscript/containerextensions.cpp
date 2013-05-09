@@ -66,8 +66,8 @@ namespace MWScript
 
                     MWWorld::Class::get (ptr).getContainerStore (ptr).add (ref.getPtr());
 
-                    // Spawn a messagebox (only for items added to player's inventory)
-                    if (ptr == MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer())
+                    // Spawn a messagebox (only for items added to player's inventory and if player is talking to someone)
+                    if (ptr == MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer() )
                     {
                         // The two GMST entries below expand to strings informing the player of what, and how many of it has been added to their inventory
                         std::string msgBox;
@@ -82,8 +82,8 @@ namespace MWScript
                             msgBox = MyGUI::LanguageManager::getInstance().replaceTags("#{sNotifyMessage61}");
                             msgBox = boost::str(boost::format(msgBox) % count % itemName);
                         }
-
-                        MWBase::Environment::get().getWindowManager()->messageBox(msgBox);
+                        std::vector <std::string> noButtons;
+                        MWBase::Environment::get().getWindowManager()->messageBox(msgBox, noButtons, /*showInDialogueModeOnly*/ true);
                     }
                 }
         };
@@ -161,12 +161,15 @@ namespace MWScript
                         }
                     }
                   
-                    // Spawn a messagebox (only for items added to player's inventory)
+                    // Spawn a messagebox (only for items removed from player's inventory)
                     if (ptr == MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer())
                     {
                         // The two GMST entries below expand to strings informing the player of what, and how many of it has been removed from their inventory
                         std::string msgBox;
                         int numRemoved = (originalCount - count);
+                        if (numRemoved == 0)
+                            return;
+                        
                         if(numRemoved > 1)
                         {
                             msgBox = MyGUI::LanguageManager::getInstance().replaceTags("#{sNotifyMessage63}");
@@ -177,9 +180,8 @@ namespace MWScript
                             msgBox = MyGUI::LanguageManager::getInstance().replaceTags("#{sNotifyMessage62}");
                             msgBox = boost::str (boost::format(msgBox) % itemName);
                         }
-
-                        if (numRemoved > 0)
-                            MWBase::Environment::get().getWindowManager()->messageBox(msgBox);
+                        std::vector <std::string> noButtons;
+                        MWBase::Environment::get().getWindowManager()->messageBox(msgBox, noButtons, /*showInDialogueModeOnly*/ true);
                     }
                 }
         };
