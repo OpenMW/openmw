@@ -1,5 +1,6 @@
 #include "aiescort.hpp"
 #include <iostream>
+#include <cmath>
 
 #include "character.hpp"
 
@@ -21,6 +22,42 @@ namespace
         if(a>0) return 1.;
         else return -1.;
     }
+
+    /*
+
+    MWWorld::Ptr InterpreterContext::getReference (
+        const std::string& id, bool activeOnly)
+    {
+        if (!id.empty())
+        {
+            return MWBase::Environment::get().getWorld()->getPtr (id, activeOnly);
+        }
+        else
+        {
+            if (mReference.isEmpty())
+                throw std::runtime_error ("no implicit reference");
+
+            return mReference;
+        }
+    }
+
+    float InterpreterContext::getDistance (const std::string& name, const std::string& id) const
+    {
+        // TODO handle exterior cells (when ref and ref2 are located in different cells)
+        /const MWWorld::Ptr ref2 = MWBase::Environment::get().getWorld()->getPtr(id, false);
+
+        double diff[3];
+
+        const float* const pos1 = actor.getRefData().getPosition().pos;
+        const float* const pos2 = ref2.getRefData().getPosition().pos;
+
+        for (int i=0; i<3; ++i)
+            diff[i] = pos1[i] - pos2[i];
+
+        return std::sqrt (diff[0]*diff[0] + diff[1]*diff[1] + diff[2]*diff[2]);
+    }
+    */
+
 }
 
 // TODO: Fix all commenting!
@@ -147,8 +184,18 @@ bool MWMechanics::AiEscort::execute (const MWWorld::Ptr& actor)
         return true;
     }
 
-/*
-    if(getDistanceBetween() <= ???)
+    const MWWorld::Ptr follower = MWBase::Environment::get().getWorld()->getPtr(mActorId, false);
+    const float* const leaderPos = actor.getRefData().getPosition().pos;
+    const float* const followerPos = follower.getRefData().getPosition().pos;
+    double differenceBetween[3];
+
+    for (short i = 0; i < 3; ++i)
+        differenceBetween[i] = (leaderPos[i] - followerPos[i]);
+
+    float distanceBetweenResult =
+        std::sqrt((differenceBetween[0] * differenceBetween[0]) + (differenceBetween[1] * differenceBetween[1]) + (differenceBetween[2] * differenceBetween[2]));
+
+    if(distanceBetweenResult <= 500)
     {
         float zAngle = mPathFinder.getZAngleToNext(pos.pos[0],pos.pos[1],pos.pos[2]);
         MWBase::Environment::get().getWorld()->rotateObject(actor,0,0,zAngle,false);
@@ -160,13 +207,6 @@ bool MWMechanics::AiEscort::execute (const MWWorld::Ptr& actor)
         // TODO: Set the actor to do the equivilent of AIWander 0 0 0 playing the "look back" idle animation.
         MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 0;
     }
-*/
-    // Delete these three when above code is enabled!
-
-
-    float zAngle = mPathFinder.getZAngleToNext(pos.pos[0],pos.pos[1],pos.pos[2]);
-    MWBase::Environment::get().getWorld()->rotateObject(actor,0,0,zAngle,false);
-    MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 1;
 
     return false;
 }
