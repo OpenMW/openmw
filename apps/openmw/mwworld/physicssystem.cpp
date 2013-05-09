@@ -333,14 +333,13 @@ namespace MWWorld
         return result;
     }
 
-    bool PhysicsSystem::castRay(const Vector3& from, const Vector3& to)
+    bool PhysicsSystem::castRay(const Vector3& from, const Vector3& to, bool raycastingObjectOnly,bool ignoreHeightMap)
     {
         btVector3 _from, _to;
         _from = btVector3(from.x, from.y, from.z);
         _to = btVector3(to.x, to.y, to.z);
 
-        std::pair<std::string, float> result = mEngine->rayTest(_from, _to);
-
+        std::pair<std::string, float> result = mEngine->rayTest(_from, _to, raycastingObjectOnly,ignoreHeightMap);
         return !(result.first == "");
     }
 

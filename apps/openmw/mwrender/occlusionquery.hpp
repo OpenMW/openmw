@@ -49,11 +49,10 @@ namespace MWRender
         Ogre::HardwareOcclusionQuery* mSunVisibleAreaQuery;
         Ogre::HardwareOcclusionQuery* mActiveQuery;
 
-        Ogre::BillboardSet* mBBQueryVisible;
-        Ogre::BillboardSet* mBBQueryTotal;
+        Ogre::Entity* mBBQueryVisible;
+        Ogre::Entity* mBBQueryTotal;
 
         Ogre::SceneNode* mSunNode;
-        Ogre::SceneNode* mBBNode;
         Ogre::SceneNode* mBBNodeReal;
         float mSunVisibility;
 

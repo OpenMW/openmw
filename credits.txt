@@ -58,7 +58,7 @@ Sebastian Wick (swick)
 Sergey Shambir
 Sylvain Thesnieres (Garvek)
 Tom Mason (wheybags)
-
+Torben Leif Carrington (TorbenC)
 
 Packagers:
 Alexander Olofsson (Ace) - Windows

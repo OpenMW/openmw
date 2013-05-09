@@ -279,6 +279,9 @@ namespace MWWorld
             virtual void doPhysics(const PtrMovementList &actors, float duration);
             ///< Run physics simulation and modify \a world accordingly.
 
+            virtual bool castRay (float x1, float y1, float z1, float x2, float y2, float z2);
+            ///< cast a Ray and return true if there is an object in the ray path.
+
             virtual bool toggleCollisionMode();
             ///< Toggle collision mode for player. If disabled player object should ignore
             /// collisions and gravity.

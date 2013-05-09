@@ -1042,6 +1042,13 @@ namespace MWWorld
         mPhysEngine->stepSimulation (duration);
     }
 
+    bool World::castRay (float x1, float y1, float z1, float x2, float y2, float z2)
+    {
+        Ogre::Vector3 a(x1,y1,z1);std::cout << x1 << " " << x2;
+        Ogre::Vector3 b(x2,y2,z2);
+        return mPhysics->castRay(a,b,false,true);
+    }
+
     void World::processDoors(float duration)
     {
         std::map<MWWorld::Ptr, int>::iterator it = mDoorStates.begin();

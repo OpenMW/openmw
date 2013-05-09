@@ -137,8 +137,45 @@ namespace
                 getPage (QuestsPage)->adviseLinkClicked (callback);
             }
 
+            adjustButton(OptionsBTN);
+            adjustButton(PrevPageBTN);
+            adjustButton(NextPageBTN);
+            adjustButton(CloseBTN);
+            adjustButton(CancelBTN);
+            adjustButton(ShowAllBTN);
+            adjustButton(ShowActiveBTN);
+            adjustButton(JournalBTN);
+
+            MWGui::ImageButton* nextButton = getWidget<MWGui::ImageButton>(NextPageBTN);
+            if (nextButton->getSize().width == 64)
+            {
+                // english button has a 7 pixel wide strip of garbage on its right edge
+                nextButton->setSize(64-7, nextButton->getSize().height);
+                nextButton->setImageCoord(MyGUI::IntCoord(0,0,64-7,nextButton->getSize().height));
+            }
+
+            adjustButton(TopicsBTN);
+            adjustButton(QuestsBTN);
+            int width = getWidget<MyGUI::Widget>(TopicsBTN)->getSize().width + getWidget<MyGUI::Widget>(QuestsBTN)->getSize().width;
+            int topicsWidth = getWidget<MyGUI::Widget>(TopicsBTN)->getSize().width;
+            int pageWidth = getWidget<MyGUI::Widget>(RightBookPage)->getSize().width;
+
+            getWidget<MyGUI::Widget>(TopicsBTN)->setPosition((pageWidth - width)/2, getWidget<MyGUI::Widget>(TopicsBTN)->getPosition().top);
+            getWidget<MyGUI::Widget>(QuestsBTN)->setPosition((pageWidth - width)/2 + topicsWidth, getWidget<MyGUI::Widget>(QuestsBTN)->getPosition().top);
+
             mQuestMode = false;
             mAllQuests = false;
+        }
+
+        void adjustButton (char const * name)
+        {
+            MWGui::ImageButton* button = getWidget<MWGui::ImageButton>(name);
+
+            MyGUI::IntSize diff = button->getSize() - button->getRequestedSize();
+            button->setSize(button->getRequestedSize());
+
+            if (button->getAlign().isRight())
+                button->setPosition(button->getPosition() + MyGUI::IntPoint(diff.width,0));
         }
 
         void open()
@@ -391,6 +428,7 @@ namespace
 
         void notifyClose(MyGUI::Widget* _sender)
         {
+            MWBase::Environment::get().getSoundManager()->playSound ("book close", 1.0, 1.0);
 
             MWBase::Environment::get().getWindowManager ()->popGuiMode ();
         }
