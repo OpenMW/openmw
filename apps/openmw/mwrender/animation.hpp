@@ -35,7 +35,7 @@ protected:
     };
     typedef std::vector<AnimSource> AnimSourceList;
 
-    struct AnimLayer {
+    struct AnimState {
         NifOgre::TextKeyMap::const_iterator mStartKey;
         NifOgre::TextKeyMap::const_iterator mLoopStartKey;
         NifOgre::TextKeyMap::const_iterator mStopKey;
@@ -46,10 +46,10 @@ protected:
         bool mPlaying;
         size_t mLoopCount;
 
-        AnimLayer() : mTime(0.0f), mPlaying(false), mLoopCount(0)
+        AnimState() : mTime(0.0f), mPlaying(false), mLoopCount(0)
         { }
     };
-    typedef std::map<std::string,AnimLayer> AnimLayerMap;
+    typedef std::map<std::string,AnimState> AnimStateMap;
 
     MWWorld::Ptr mPtr;
 
@@ -66,7 +66,7 @@ protected:
     float mAnimVelocity;
     float mAnimSpeedMult;
 
-    AnimLayerMap mLayers;
+    AnimStateMap mStates;
 
     // Note: One per animation group (lower body, upper body, left arm, etc).
     AnimSource *mSource;
@@ -93,14 +93,14 @@ protected:
      * the marker is not found, or if the markers are the same, it returns
      * false.
      */
-    bool reset(AnimLayer &layer, const NifOgre::TextKeyMap &keys,
+    bool reset(AnimState &state, const NifOgre::TextKeyMap &keys,
                NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl,
                const std::string &groupname, const std::string &start, const std::string &stop,
                float startpoint);
 
-    bool doLoop(AnimLayer &layer);
+    bool doLoop(AnimState &state);
 
-    bool handleTextKey(AnimLayer &layer, const std::string &groupname, const NifOgre::TextKeyMap::const_iterator &key);
+    bool handleTextKey(AnimState &state, const std::string &groupname, const NifOgre::TextKeyMap::const_iterator &key);
 
     void setObjectRoot(Ogre::SceneNode *node, const std::string &model, bool baseonly);
     void addAnimSource(const std::string &model);

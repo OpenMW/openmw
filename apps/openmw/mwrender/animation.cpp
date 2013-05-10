@@ -20,17 +20,14 @@ namespace MWRender
 
 Ogre::Real Animation::AnimationValue::getValue() const
 {
-    AnimLayerMap::const_iterator iter = mAnimation->mLayers.find(mAnimation->mAnimationName);
-    if(iter != mAnimation->mLayers.end())
+    AnimStateMap::const_iterator iter = mAnimation->mStates.find(mAnimation->mAnimationName);
+    if(iter != mAnimation->mStates.end())
         return iter->second.mTime;
     return 0.0f;
 }
 
-void Animation::AnimationValue::setValue(Ogre::Real value)
+void Animation::AnimationValue::setValue(Ogre::Real)
 {
-    AnimLayerMap::iterator iter = mAnimation->mLayers.find(mAnimation->mAnimationName);
-    if(iter != mAnimation->mLayers.end())
-        iter->second.mTime = value;
 }
 
 
@@ -197,7 +194,7 @@ void Animation::addAnimSource(const std::string &model)
 
 void Animation::clearAnimSources()
 {
-    mLayers.clear();
+    mStates.clear();
 
     mSource = NULL;
     mAnimationName.empty();
@@ -356,7 +353,7 @@ void Animation::updatePosition(float time, Ogre::Vector3 &position)
     mAccumRoot->setPosition(-mLastPosition);
 }
 
-bool Animation::reset(AnimLayer &layer, const NifOgre::TextKeyMap &keys, NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl, const std::string &groupname, const std::string &start, const std::string &stop, float startpoint)
+bool Animation::reset(AnimState &state, const NifOgre::TextKeyMap &keys, NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl, const std::string &groupname, const std::string &start, const std::string &stop, float startpoint)
 {
     std::string tag = groupname+": "+start;
     NifOgre::TextKeyMap::const_iterator startkey(keys.begin());
@@ -382,45 +379,45 @@ bool Animation::reset(AnimLayer &layer, const NifOgre::TextKeyMap &keys, NifOgre
     if(startkey == stopkey)
         return false;
 
-    layer.mStartKey = startkey;
-    layer.mLoopStartKey = startkey;
-    layer.mStopKey = stopkey;
-    layer.mNextKey = startkey;
+    state.mStartKey = startkey;
+    state.mLoopStartKey = startkey;
+    state.mStopKey = stopkey;
+    state.mNextKey = startkey;
 
-    layer.mTime = layer.mStartKey->first + ((layer.mStopKey->first - layer.mStartKey->first) * startpoint);
+    state.mTime = state.mStartKey->first + ((state.mStopKey->first - state.mStartKey->first) * startpoint);
 
     tag = groupname+": loop start";
-    while(layer.mNextKey->first <= layer.mTime && layer.mNextKey != layer.mStopKey)
+    while(state.mNextKey->first <= state.mTime && state.mNextKey != state.mStopKey)
     {
-        if(layer.mNextKey->second == tag)
-            layer.mLoopStartKey = layer.mNextKey;
-        layer.mNextKey++;
+        if(state.mNextKey->second == tag)
+            state.mLoopStartKey = state.mNextKey;
+        state.mNextKey++;
     }
 
     if(nonaccumctrl)
-        mLastPosition = nonaccumctrl->getTranslation(layer.mTime) * mAccumulate;
+        mLastPosition = nonaccumctrl->getTranslation(state.mTime) * mAccumulate;
 
     return true;
 }
 
-bool Animation::doLoop(AnimLayer &layer)
+bool Animation::doLoop(AnimState &state)
 {
-    if(layer.mLoopCount == 0)
+    if(state.mLoopCount == 0)
         return false;
-    layer.mLoopCount--;
+    state.mLoopCount--;
 
-    layer.mTime = layer.mLoopStartKey->first;
-    layer.mNextKey = layer.mLoopStartKey;
-    layer.mNextKey++;
-    layer.mPlaying = true;
+    state.mTime = state.mLoopStartKey->first;
+    state.mNextKey = state.mLoopStartKey;
+    state.mNextKey++;
+    state.mPlaying = true;
     if(mNonAccumCtrl)
-        mLastPosition = mNonAccumCtrl->getTranslation(layer.mTime) * mAccumulate;
+        mLastPosition = mNonAccumCtrl->getTranslation(state.mTime) * mAccumulate;
 
     return true;
 }
 
 
-bool Animation::handleTextKey(AnimLayer &layer, const std::string &groupname, const NifOgre::TextKeyMap::const_iterator &key)
+bool Animation::handleTextKey(AnimState &state, const std::string &groupname, const NifOgre::TextKeyMap::const_iterator &key)
 {
     float time = key->first;
     const std::string &evt = key->second;
@@ -449,15 +446,15 @@ bool Animation::handleTextKey(AnimLayer &layer, const std::string &groupname, co
 
     if(evt.compare(off, len, "start") == 0 || evt.compare(off, len, "loop start") == 0)
     {
-        layer.mLoopStartKey = key;
+        state.mLoopStartKey = key;
         return true;
     }
 
     if(evt.compare(off, len, "loop stop") == 0 || evt.compare(off, len, "stop") == 0)
     {
-        if(doLoop(layer))
+        if(doLoop(state))
         {
-            if(layer.mTime >= time)
+            if(state.mTime >= time)
                 return false;
         }
         return true;
@@ -473,11 +470,11 @@ bool Animation::play(const std::string &groupname, const std::string &start, con
     if(!mSkelBase || groupname.empty())
         return false;
 
-    AnimLayerMap::iterator layeriter = mLayers.find(groupname);
-    if(layeriter != mLayers.end())
-        mLayers.erase(layeriter);
+    AnimStateMap::iterator stateiter = mStates.find(groupname);
+    if(stateiter != mStates.end())
+        mStates.erase(stateiter);
     // HACK: Don't clear all active animations
-    mLayers.clear();
+    mStates.clear();
 
     bool movinganim = false;
     bool foundanim = false;
@@ -504,14 +501,14 @@ bool Animation::play(const std::string &groupname, const std::string &start, con
 
         if(!foundanim)
         {
-            AnimLayer layer;
-            if(!reset(layer, keys, nonaccumctrl, groupname, start, stop, startpoint))
+            AnimState state;
+            if(!reset(state, keys, nonaccumctrl, groupname, start, stop, startpoint))
                 continue;
             foundanim = true;
 
-            layer.mLoopCount = loops;
-            layer.mPlaying = true;
-            mLayers[groupname] = layer;
+            state.mLoopCount = loops;
+            state.mPlaying = true;
+            mStates[groupname] = state;
 
             // FIXME
             mSource = &*iter;
@@ -542,8 +539,8 @@ bool Animation::play(const std::string &groupname, const std::string &start, con
 
 bool Animation::getInfo(const std::string &groupname, float *complete, std::string *start, std::string *stop) const
 {
-    AnimLayerMap::const_iterator iter = mLayers.find(groupname);
-    if(iter == mLayers.end())
+    AnimStateMap::const_iterator iter = mStates.find(groupname);
+    if(iter == mStates.end())
     {
         if(complete) *complete = 0.0f;
         if(start) *start = "";
@@ -564,31 +561,31 @@ Ogre::Vector3 Animation::runAnimation(float duration)
     Ogre::Vector3 movement(0.0f);
 
     duration *= mAnimSpeedMult;
-    AnimLayerMap::iterator layeriter = mLayers.begin();
-    for(;layeriter != mLayers.end();layeriter++)
+    AnimStateMap::iterator stateiter = mStates.begin();
+    for(;stateiter != mStates.end();stateiter++)
     {
-        AnimLayer &layer = layeriter->second;
+        AnimState &state = stateiter->second;
         float timepassed = duration;
-        while(layer.mPlaying)
+        while(state.mPlaying)
         {
-            float targetTime = layer.mTime + timepassed;
-            if(layer.mNextKey->first > targetTime)
+            float targetTime = state.mTime + timepassed;
+            if(state.mNextKey->first > targetTime)
             {
-                layer.mTime = targetTime;
+                state.mTime = targetTime;
                 if(mNonAccumCtrl)
-                    updatePosition(layer.mTime, movement);
+                    updatePosition(state.mTime, movement);
                 break;
             }
 
-            NifOgre::TextKeyMap::const_iterator key(layer.mNextKey++);
-            layer.mTime = key->first;
+            NifOgre::TextKeyMap::const_iterator key(state.mNextKey++);
+            state.mTime = key->first;
             if(mNonAccumCtrl)
-                updatePosition(layer.mTime, movement);
+                updatePosition(state.mTime, movement);
 
-            layer.mPlaying = (key != layer.mStopKey);
-            timepassed = targetTime - layer.mTime;
+            state.mPlaying = (key != state.mStopKey);
+            timepassed = targetTime - state.mTime;
 
-            if(!handleTextKey(layer, layeriter->first, key))
+            if(!handleTextKey(state, stateiter->first, key))
                 break;
         }
     }
