@@ -657,7 +657,7 @@ if (NOT WIN32 AND NOT DPKG_PROGRAM AND NOT APPLE)
     # paths
     set(BINDIR "${CMAKE_INSTALL_PREFIX}/usr/bin" CACHE PATH "Where to install binaries")
     set(DATAROOTDIR "${CMAKE_INSTALL_PREFIX}/usr/share" CACHE PATH "Sets the root of data directories to a non-default location")
-    set(DATADIR "${DATAROOTDIR}/openmw" CACHE PATH "Sets the openmw data directories to a non-default location")
+    set(DATADIR "${DATAROOTDIR}/games/openmw" CACHE PATH "Sets the openmw data directories to a non-default location")
     set(DOCDIR "${DATAROOTDIR}/doc/openmw" CACHE PATH "Sets the doc directory to a non-default location.")
     set(MANDIR "${DATAROOTDIR}/man" CACHE PATH "Where to install manpages")
     set(SYSCONFDIR "${CMAKE_INSTALL_PREFIX}/etc/openmw" CACHE PATH "Set config dir")
@@ -684,6 +684,10 @@ if (NOT WIN32 AND NOT DPKG_PROGRAM AND NOT APPLE)
     # Install icon and .desktop
     INSTALL(FILES "${OpenMW_SOURCE_DIR}/files/launcher/images/openmw.png" DESTINATION "${ICONDIR}")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.desktop" DESTINATION "${DATAROOTDIR}/applications")
+    IF(BUILD_OPENCS)
+        INSTALL(FILES "${OpenMW_SOURCE_DIR}/files/opencs/opencs.png" DESTINATION "${ICONDIR}")
+        INSTALL(FILES "${OpenMW_BINARY_DIR}/opencs.desktop" DESTINATION "${DATAROOTDIR}/applications")
+    ENDIF(BUILD_OPENCS)
 
     # Install global configuration files
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "${SYSCONFDIR}" RENAME "openmw.cfg" )
