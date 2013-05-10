@@ -19,11 +19,10 @@ protected:
     {
     private:
         Animation *mAnimation;
-        size_t mIndex;
 
     public:
-        AnimationValue(Animation *anim, size_t layeridx)
-          : mAnimation(anim), mIndex(layeridx)
+        AnimationValue(Animation *anim)
+          : mAnimation(anim)
         { }
 
         virtual Ogre::Real getValue() const;
@@ -37,8 +36,6 @@ protected:
     typedef std::vector<AnimSource> AnimSourceList;
 
     struct AnimLayer {
-        std::string mGroupName;
-        AnimSource *mSource;
         NifOgre::TextKeyMap::const_iterator mStartKey;
         NifOgre::TextKeyMap::const_iterator mLoopStartKey;
         NifOgre::TextKeyMap::const_iterator mStopKey;
@@ -49,8 +46,10 @@ protected:
         bool mPlaying;
         size_t mLoopCount;
 
-        AnimLayer();
+        AnimLayer() : mTime(0.0f), mPlaying(false), mLoopCount(0)
+        { }
     };
+    typedef std::map<std::string,AnimLayer> AnimLayerMap;
 
     MWWorld::Ptr mPtr;
 
@@ -67,9 +66,12 @@ protected:
     float mAnimVelocity;
     float mAnimSpeedMult;
 
-    static const size_t sMaxLayers = 1;
-    AnimLayer mLayer[sMaxLayers];
-    Ogre::SharedPtr<AnimationValue> mAnimationValuePtr[sMaxLayers];
+    AnimLayerMap mLayers;
+
+    // Note: One per animation group (lower body, upper body, left arm, etc).
+    AnimSource *mSource;
+    std::string mAnimationName;
+    Ogre::SharedPtr<AnimationValue> mAnimationValuePtr;
 
     static float calcAnimVelocity(const NifOgre::TextKeyMap &keys,
                                   NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl,
@@ -80,9 +82,9 @@ protected:
      * bone names) are positioned identically. */
     void updateSkeletonInstance(const Ogre::SkeletonInstance *skelsrc, Ogre::SkeletonInstance *skel);
 
-    /* Updates the position of the accum root node for the current time, and
+    /* Updates the position of the accum root node for the given time, and
      * returns the wanted movement vector from the previous update. */
-    void updatePosition(Ogre::Vector3 &position);
+    void updatePosition(float time, Ogre::Vector3 &position);
 
     static NifOgre::TextKeyMap::const_iterator findGroupStart(const NifOgre::TextKeyMap &keys, const std::string &groupname);
 
@@ -91,14 +93,14 @@ protected:
      * the marker is not found, or if the markers are the same, it returns
      * false.
      */
-    bool reset(size_t layeridx, const NifOgre::TextKeyMap &keys,
+    bool reset(AnimLayer &layer, const NifOgre::TextKeyMap &keys,
                NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl,
                const std::string &groupname, const std::string &start, const std::string &stop,
                float startpoint);
 
-    bool doLoop(size_t layeridx);
+    bool doLoop(AnimLayer &layer);
 
-    bool handleTextKey(size_t layeridx, const NifOgre::TextKeyMap::const_iterator &key);
+    bool handleTextKey(AnimLayer &layer, const std::string &groupname, const NifOgre::TextKeyMap::const_iterator &key);
 
     void setObjectRoot(Ogre::SceneNode *node, const std::string &model, bool baseonly);
     void addAnimSource(const std::string &model);
@@ -138,26 +140,20 @@ public:
      */
     bool play(const std::string &groupname, const std::string &start, const std::string &stop, float startpoint, size_t loops);
 
-    /** Stops and removes the animation from the given layer. */
-    void disable(size_t layeridx);
+    void disable(const std::string &groupname);
 
-    /** Gets info about the given animation layer.
-     * \param layeridx Layer index to get info about.
+    /** Gets info about the given animation group.
+     * \param groupname Animation group to check.
      * \param complete Stores completion amount (0 = at start key, 0.5 = half way between start and stop keys), etc.
-     * \param groupname Stores animation group being played.
      * \param start Stores the start key
      * \param stop Stores the stop key
-     * \return True if an animation is active on the layer, false otherwise.
+     * \return True if the animation is active, false otherwise.
      */
-    bool getInfo(size_t layeridx, float *complete=NULL, std::string *groupname=NULL, std::string *start=NULL, std::string *stop=NULL) const;
+    bool getInfo(const std::string &groupname, float *complete=NULL, std::string *start=NULL, std::string *stop=NULL) const;
 
     virtual Ogre::Vector3 runAnimation(float duration);
 
     virtual void showWeapons(bool showWeapon);
-
-    /* Returns if there's an animation playing on the given layer. */
-    bool isPlaying(size_t layeridx) const
-    { return mLayer[layeridx].mPlaying; }
 
     Ogre::Node *getNode(const std::string &name);
 };

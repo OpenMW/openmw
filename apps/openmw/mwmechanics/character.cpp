@@ -339,7 +339,7 @@ void CharacterController::update(float duration, Movement &movement)
             else if(rot.z < 0.0f)
                 setState(CharState_TurnLeft, true);
         }
-        else if(getState() != CharState_SpecialIdle || !mAnimation->isPlaying(0))
+        else if(getState() != CharState_SpecialIdle)
         {
             if(mAnimQueue.size() == 0)
                 setState((inwater ? CharState_IdleSwim : (sneak ? CharState_IdleSneak : CharState_Idle)), true);
