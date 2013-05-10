@@ -83,7 +83,7 @@ float WeatherManager::calculateAngleFade (const std::string& moonName, float ang
     float endAngle=mFallback->getFallbackFloat("Moons_"+moonName+"_Fade_End_Angle");
     float startAngle=mFallback->getFallbackFloat("Moons_"+moonName+"_Fade_Start_Angle");
     if (angle >= endAngle && angle <= startAngle)
-        return ((angle - endAngle)/10); //10 is hardcoded, it just works this way
+        return ((angle - endAngle)/(startAngle-endAngle));
     else if (angle < endAngle)
         return 0.f;
     else
