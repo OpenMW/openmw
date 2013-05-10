@@ -36,6 +36,7 @@ protected:
     typedef std::vector<AnimSource> AnimSourceList;
 
     struct AnimState {
+        AnimSource *mSource;
         NifOgre::TextKeyMap::const_iterator mStartKey;
         NifOgre::TextKeyMap::const_iterator mLoopStartKey;
         NifOgre::TextKeyMap::const_iterator mStopKey;
@@ -46,7 +47,7 @@ protected:
         bool mPlaying;
         size_t mLoopCount;
 
-        AnimState() : mTime(0.0f), mPlaying(false), mLoopCount(0)
+        AnimState() : mSource(NULL), mTime(0.0f), mPlaying(false), mLoopCount(0)
         { }
     };
     typedef std::map<std::string,AnimState> AnimStateMap;
@@ -69,7 +70,6 @@ protected:
     AnimStateMap mStates;
 
     // Note: One per animation group (lower body, upper body, left arm, etc).
-    AnimSource *mSource;
     std::string mAnimationName;
     Ogre::SharedPtr<AnimationValue> mAnimationValuePtr;
 

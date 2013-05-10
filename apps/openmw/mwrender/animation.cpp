@@ -55,7 +55,6 @@ Animation::Animation(const MWWorld::Ptr &ptr)
     , mAnimVelocity(0.0f)
     , mAnimSpeedMult(1.0f)
 {
-    mSource = NULL;
     mAnimationValuePtr.bind(OGRE_NEW AnimationValue(this));
 }
 
@@ -196,7 +195,6 @@ void Animation::clearAnimSources()
 {
     mStates.clear();
 
-    mSource = NULL;
     mAnimationName.empty();
 
     mNonAccumCtrl = NULL;
@@ -506,12 +504,12 @@ bool Animation::play(const std::string &groupname, const std::string &start, con
                 continue;
             foundanim = true;
 
+            state.mSource = &*iter;
             state.mLoopCount = loops;
             state.mPlaying = true;
             mStates[groupname] = state;
 
             // FIXME
-            mSource = &*iter;
             mAnimationName = groupname;
 
             mNonAccumCtrl = nonaccumctrl;
@@ -592,10 +590,11 @@ Ogre::Vector3 Animation::runAnimation(float duration)
 
     for(size_t i = 0;i < mObjectRoot.mControllers.size();i++)
         mObjectRoot.mControllers[i].update();
-    if(mSource)
+    if(!mAnimationName.empty() && (stateiter=mStates.find(mAnimationName)) != mStates.end())
     {
-        for(size_t i = 0;i < mSource->mControllers.size();i++)
-            mSource->mControllers[i].update();
+        AnimSource *src = stateiter->second.mSource;
+        for(size_t i = 0;i < src->mControllers.size();i++)
+            src->mControllers[i].update();
     }
 
     if(mSkelBase)
