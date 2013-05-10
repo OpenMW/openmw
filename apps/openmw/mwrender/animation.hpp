@@ -15,15 +15,23 @@ namespace MWRender
 class Animation
 {
 protected:
+    static const size_t sNumGroups = 1;
+
     class AnimationValue : public Ogre::ControllerValue<Ogre::Real>
     {
     private:
         Animation *mAnimation;
+        std::string mAnimationName;
 
     public:
         AnimationValue(Animation *anim)
           : mAnimation(anim)
         { }
+
+        void setAnimName(const std::string &name)
+        { mAnimationName = name; }
+        const std::string &getAnimName() const
+        { return mAnimationName; }
 
         virtual Ogre::Real getValue() const;
         virtual void setValue(Ogre::Real value);
@@ -31,7 +39,7 @@ protected:
 
     struct AnimSource {
         NifOgre::TextKeyMap mTextKeys;
-        std::vector<Ogre::Controller<Ogre::Real> > mControllers;
+        std::vector<Ogre::Controller<Ogre::Real> > mControllers[sNumGroups];
     };
     typedef std::vector<AnimSource> AnimSourceList;
 
@@ -69,9 +77,9 @@ protected:
 
     AnimStateMap mStates;
 
-    // Note: One per animation group (lower body, upper body, left arm, etc).
-    std::string mAnimationName;
-    Ogre::SharedPtr<AnimationValue> mAnimationValuePtr;
+    Ogre::SharedPtr<AnimationValue> mAnimationValuePtr[sNumGroups];
+
+    static size_t detectAnimGroup(const Ogre::Node *node);
 
     static float calcAnimVelocity(const NifOgre::TextKeyMap &keys,
                                   NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl,

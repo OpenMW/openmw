@@ -20,7 +20,7 @@ namespace MWRender
 
 Ogre::Real Animation::AnimationValue::getValue() const
 {
-    AnimStateMap::const_iterator iter = mAnimation->mStates.find(mAnimation->mAnimationName);
+    AnimStateMap::const_iterator iter = mAnimation->mStates.find(mAnimationName);
     if(iter != mAnimation->mStates.end())
         return iter->second.mTime;
     return 0.0f;
@@ -55,7 +55,8 @@ Animation::Animation(const MWWorld::Ptr &ptr)
     , mAnimVelocity(0.0f)
     , mAnimSpeedMult(1.0f)
 {
-    mAnimationValuePtr.bind(OGRE_NEW AnimationValue(this));
+    for(size_t i = 0;i < sNumGroups;i++)
+        mAnimationValuePtr[i].bind(OGRE_NEW AnimationValue(this));
 }
 
 Animation::~Animation()
@@ -114,7 +115,7 @@ void Animation::setObjectRoot(Ogre::SceneNode *node, const std::string &model, b
     for(size_t i = 0;i < mObjectRoot.mControllers.size();i++)
     {
         if(mObjectRoot.mControllers[i].getSource().isNull())
-            mObjectRoot.mControllers[i].setSource(mAnimationValuePtr);
+            mObjectRoot.mControllers[i].setSource(mAnimationValuePtr[0]);
     }
 }
 
@@ -143,6 +144,23 @@ void Animation::setRenderProperties(const NifOgre::ObjectList &objlist, Ogre::ui
 }
 
 
+size_t Animation::detectAnimGroup(const Ogre::Node *node)
+{
+    while(node)
+    {
+#if 0
+        const Ogre::String &name = node->getName();
+        if(name == "Bip01 L Clavicle")
+            return 2;
+        if(name == "Bip01 Spine1")
+            return 1;
+#endif
+        node = node->getParent();
+    }
+    return 0;
+}
+
+
 void Animation::addAnimSource(const std::string &model)
 {
     OgreAssert(mInsert, "Object is missing a root!");
@@ -164,30 +182,32 @@ void Animation::addAnimSource(const std::string &model)
     if(!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(kfname))
         return;
 
+    std::vector<Ogre::Controller<Ogre::Real> > ctrls;
     mAnimSources.push_back(AnimSource());
-    NifOgre::Loader::createKfControllers(mSkelBase, kfname,
-                                         mAnimSources.back().mTextKeys,
-                                         mAnimSources.back().mControllers);
-    if(mAnimSources.back().mTextKeys.size() == 0 || mAnimSources.back().mControllers.size() == 0)
+    NifOgre::Loader::createKfControllers(mSkelBase, kfname, mAnimSources.back().mTextKeys, ctrls);
+    if(mAnimSources.back().mTextKeys.size() == 0 || ctrls.size() == 0)
     {
         mAnimSources.pop_back();
         return;
     }
 
-    std::vector<Ogre::Controller<Ogre::Real> > &ctrls = mAnimSources.back().mControllers;
+    std::vector<Ogre::Controller<Ogre::Real> > *grpctrls = mAnimSources.back().mControllers;
     NifOgre::NodeTargetValue<Ogre::Real> *dstval;
 
     for(size_t i = 0;i < ctrls.size();i++)
     {
         dstval = static_cast<NifOgre::NodeTargetValue<Ogre::Real>*>(ctrls[i].getDestination().getPointer());
 
-        if(i == 0 && !mAccumRoot)
+        size_t grp = detectAnimGroup(dstval->getNode());
+
+        if(!mAccumRoot && grp == 0)
         {
             mAccumRoot = mInsert;
             mNonAccumRoot = dstval->getNode();
         }
 
-        ctrls[i].setSource(mAnimationValuePtr);
+        ctrls[i].setSource(mAnimationValuePtr[grp]);
+        grpctrls[grp].push_back(ctrls[i]);
     }
 }
 
@@ -195,7 +215,8 @@ void Animation::clearAnimSources()
 {
     mStates.clear();
 
-    mAnimationName.empty();
+    for(size_t i = 0;i < sNumGroups;i++)
+        mAnimationValuePtr[i]->setAnimName(std::string());
 
     mNonAccumCtrl = NULL;
     mAnimVelocity = 0.0f;
@@ -485,10 +506,10 @@ bool Animation::play(const std::string &groupname, const std::string &start, con
         NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl = NULL;
         if(mNonAccumRoot)
         {
-            for(size_t i = 0;i < iter->mControllers.size();i++)
+            for(size_t i = 0;i < iter->mControllers[0].size();i++)
             {
                 NifOgre::NodeTargetValue<Ogre::Real> *dstval;
-                dstval = dynamic_cast<NifOgre::NodeTargetValue<Ogre::Real>*>(iter->mControllers[i].getDestination().getPointer());
+                dstval = dynamic_cast<NifOgre::NodeTargetValue<Ogre::Real>*>(iter->mControllers[0][i].getDestination().getPointer());
                 if(dstval && dstval->getNode() == mNonAccumRoot)
                 {
                     nonaccumctrl = dstval;
@@ -510,7 +531,7 @@ bool Animation::play(const std::string &groupname, const std::string &start, con
             mStates[groupname] = state;
 
             // FIXME
-            mAnimationName = groupname;
+            mAnimationValuePtr[0]->setAnimName(groupname);
 
             mNonAccumCtrl = nonaccumctrl;
             mAnimVelocity = 0.0f;
@@ -590,11 +611,17 @@ Ogre::Vector3 Animation::runAnimation(float duration)
 
     for(size_t i = 0;i < mObjectRoot.mControllers.size();i++)
         mObjectRoot.mControllers[i].update();
-    if(!mAnimationName.empty() && (stateiter=mStates.find(mAnimationName)) != mStates.end())
+
+    // Apply group controllers
+    for(size_t grp = 0;grp < sNumGroups;grp++)
     {
-        AnimSource *src = stateiter->second.mSource;
-        for(size_t i = 0;i < src->mControllers.size();i++)
-            src->mControllers[i].update();
+        const std::string &name = mAnimationValuePtr[grp]->getAnimName();
+        if(!name.empty() && (stateiter=mStates.find(name)) != mStates.end())
+        {
+            AnimSource *src = stateiter->second.mSource;
+            for(size_t i = 0;i < src->mControllers[grp].size();i++)
+                src->mControllers[grp][i].update();
+        }
     }
 
     if(mSkelBase)
