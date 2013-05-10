@@ -13,7 +13,7 @@
 #include <QPlastiqueStyle>
 #endif
 
-#include "usersettings.hpp"
+#include "../../model/settings/usersettings.hpp"
 #include "groupblock.hpp"
 #include "toggleblock.hpp"
 

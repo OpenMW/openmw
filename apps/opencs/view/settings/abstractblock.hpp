@@ -5,7 +5,7 @@
 #include <QList>
 
 #include "settingwidget.hpp"
-#include "settingsitem.hpp"
+#include "../../model/settings/settingsitem.hpp"
 #include "groupbox.hpp"
 
 namespace CsSettings

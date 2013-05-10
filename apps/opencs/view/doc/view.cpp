@@ -11,7 +11,7 @@
 #include "../../model/doc/document.hpp"
 #include "../world/subviews.hpp"
 #include "../tools/subviews.hpp"
-#include "../../settings/usersettingsdialog.hpp"
+#include "../settings/usersettingsdialog.hpp"
 #include "viewmanager.hpp"
 #include "operations.hpp"
 #include "subview.hpp"

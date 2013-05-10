@@ -12,7 +12,7 @@
 
 #include "blankpage.hpp"
 #include "editorpage.hpp"
-#include "support.hpp"
+#include "../../model/settings/support.hpp"
 
 #include "settingwidget.hpp"
 #include <QDebug>

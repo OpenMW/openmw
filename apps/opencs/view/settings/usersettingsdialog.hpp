@@ -5,8 +5,8 @@
 #include <QStackedWidget>
 
 #include <components/files/configurationmanager.hpp>
-#include "usersettings.hpp"
-#include "support.hpp"
+#include "../../model/settings/usersettings.hpp"
+#include "../../model/settings/support.hpp"
 
 class QHBoxLayout;
 class AbstractWidget;

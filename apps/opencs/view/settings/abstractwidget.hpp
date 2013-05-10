@@ -2,7 +2,7 @@
 #define ABSTRACTWIDGET_HPP
 
 #include <QWidget>
-#include "support.hpp"
+#include "../../model/settings/support.hpp"
 
 class QLayout;
 

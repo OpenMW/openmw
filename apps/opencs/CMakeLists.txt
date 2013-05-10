@@ -72,12 +72,10 @@ opencs_units_noqt (view/tools
     subviews
     )
 
-opencs_units (settings
+opencs_units (view/settings
     customblock
     proxyblock
-    settingcontainer
     groupbox
-    settingsitem
     abstractblock
     settingwidget
     itemblock
@@ -90,7 +88,12 @@ opencs_units (settings
     editorpage
     )
 
-opencs_units_noqt (settings
+opencs_units (model/settings
+    settingcontainer
+    settingsitem
+    )
+
+opencs_units_noqt (model/settings
     support
     usersettings
     )
