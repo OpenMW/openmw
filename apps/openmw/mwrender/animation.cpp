@@ -118,8 +118,7 @@ void Animation::setObjectRoot(Ogre::SceneNode *node, const std::string &model, b
         }
 
         // Set the bones as manually controlled since we're applying the
-        // transformations manually (needed if we want to apply an animation
-        // from one skeleton onto another).
+        // transformations manually
         Ogre::SkeletonInstance *skelinst = mObjectRoot.mSkelBase->getSkeleton();
         Ogre::Skeleton::BoneIterator boneiter = skelinst->getBoneIterator();
         while(boneiter.hasMoreElements())
