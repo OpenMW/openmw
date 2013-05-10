@@ -655,12 +655,12 @@ endif (APPLE)
 if (NOT WIN32 AND NOT DPKG_PROGRAM AND NOT APPLE)
     ## Non Debian based Linux building
     # paths
-    set(BINDIR "${CMAKE_INSTALL_PREFIX}/usr/bin" CACHE PATH "Where to install binaries")
-    set(DATAROOTDIR "${CMAKE_INSTALL_PREFIX}/usr/share" CACHE PATH "Sets the root of data directories to a non-default location")
+    set(BINDIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH "Where to install binaries")
+    set(DATAROOTDIR "${CMAKE_INSTALL_PREFIX}/share" CACHE PATH "Sets the root of data directories to a non-default location")
     set(DATADIR "${DATAROOTDIR}/games/openmw" CACHE PATH "Sets the openmw data directories to a non-default location")
     set(DOCDIR "${DATAROOTDIR}/doc/openmw" CACHE PATH "Sets the doc directory to a non-default location.")
     set(MANDIR "${DATAROOTDIR}/man" CACHE PATH "Where to install manpages")
-    set(SYSCONFDIR "${CMAKE_INSTALL_PREFIX}/etc/openmw" CACHE PATH "Set config dir")
+    set(SYSCONFDIR "/etc/openmw" CACHE PATH "Set config dir")
     set(ICONDIR "${DATAROOTDIR}/pixmaps" CACHE PATH "Set icon dir")
 
     # Install binaries
