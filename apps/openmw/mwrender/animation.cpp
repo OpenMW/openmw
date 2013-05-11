@@ -546,8 +546,9 @@ bool Animation::resetActiveGroups()
 
     bool ismoving = false;
 
-    const NifOgre::TextKeyMap &keys = state->second.mSource->mTextKeys;
-    std::vector<Ogre::Controller<Ogre::Real> >&ctrls = state->second.mSource->mControllers[0];
+    const AnimSource *animsrc = state->second.mSource;
+    const NifOgre::TextKeyMap &keys = animsrc->mTextKeys;
+    const std::vector<Ogre::Controller<Ogre::Real> >&ctrls = animsrc->mControllers[0];
     for(size_t i = 0;i < ctrls.size();i++)
     {
         NifOgre::NodeTargetValue<Ogre::Real> *dstval;
@@ -559,6 +560,23 @@ bool Animation::resetActiveGroups()
 
             mNonAccumCtrl = dstval;
             break;
+        }
+    }
+
+    // If there's no velocity, keep looking
+    while(!(mAnimVelocity > 1.0f) && animsrc-- != &mAnimSources[0])
+    {
+        const NifOgre::TextKeyMap &keys = animsrc->mTextKeys;
+        const std::vector<Ogre::Controller<Ogre::Real> >&ctrls = animsrc->mControllers[0];
+        for(size_t i = 0;i < ctrls.size();i++)
+        {
+            NifOgre::NodeTargetValue<Ogre::Real> *dstval;
+            dstval = static_cast<NifOgre::NodeTargetValue<Ogre::Real>*>(ctrls[i].getDestination().getPointer());
+            if(dstval->getNode() == mNonAccumRoot)
+            {
+                mAnimVelocity = calcAnimVelocity(keys, dstval, mAccumulate, state->first);
+                break;
+            }
         }
     }
 
