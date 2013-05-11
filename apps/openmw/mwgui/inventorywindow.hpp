@@ -3,13 +3,18 @@
 
 #include "../mwrender/characterpreview.hpp"
 
-#include "container.hpp"
 #include "windowpinnablebase.hpp"
 #include "widgets.hpp"
 
 namespace MWGui
 {
-    class InventoryWindow : public ContainerBase, public WindowPinnableBase
+    class ItemView;
+    class SortFilterItemModel;
+    class TradeItemModel;
+    class DragAndDrop;
+    class ItemModel;
+
+    class InventoryWindow : public WindowPinnableBase
     {
         public:
             InventoryWindow(DragAndDrop* dragAndDrop);
@@ -19,7 +24,7 @@ namespace MWGui
             void doRenderUpdate();
 
             /// start trading, disables item drag&drop
-            void startTrade();
+            void setTrading(bool trading);
 
             void onFrame();
 
@@ -35,8 +40,22 @@ namespace MWGui
                 mPreview.rebuild();
             }
 
-        protected:
+            TradeItemModel* getTradeModel();
+            ItemModel* getModel();
+
+            void updateItemView();
+
+        private:
+            DragAndDrop* mDragAndDrop;
+
             bool mPreviewDirty;
+            size_t mSelectedItem;
+
+            MWWorld::Ptr mPtr;
+
+            MWGui::ItemView* mItemView;
+            SortFilterItemModel* mSortModel;
+            TradeItemModel* mTradeModel;
 
             MyGUI::Widget* mAvatar;
             MyGUI::ImageBox* mAvatarImage;
@@ -59,20 +78,22 @@ namespace MWGui
 
             bool mTrading;
 
+            void onItemSelected(int index);
+            void onItemSelectedFromSourceModel(int index);
+
+            void onBackgroundSelected();
+
+            void sellItem(MyGUI::Widget* sender, int count);
+            void dragItem(MyGUI::Widget* sender, int count);
+
             void onWindowResize(MyGUI::Window* _sender);
             void onFilterChanged(MyGUI::Widget* _sender);
             void onAvatarClicked(MyGUI::Widget* _sender);
             void onPinToggled();
 
+            void unequipItem(const MWWorld::Ptr& item);
             void updateEncumbranceBar();
-
-            virtual bool isTrading() { return mTrading; }
-            virtual bool isInventory() { return true; }
-            virtual void _unequipItem(MWWorld::Ptr item);
-
-            virtual void onReferenceUnavailable() { ; }
-
-            virtual void notifyContentChanged();
+            void notifyContentChanged();
     };
 }
 

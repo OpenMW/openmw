@@ -188,4 +188,11 @@ namespace MWClass
 
         return ref->mBase->mData.mUses;
     }
+
+    float Probe::getWeight(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Probe> *ref =
+            ptr.get<ESM::Probe>();
+        return ref->mBase->mData.mWeight;
+    }
 }

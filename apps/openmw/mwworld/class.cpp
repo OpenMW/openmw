@@ -52,6 +52,11 @@ namespace MWWorld
         return false;
     }
 
+    int Class::getServices(const Ptr &actor) const
+    {
+        throw std::runtime_error ("class does not have services");
+    }
+
     MWMechanics::CreatureStats& Class::getCreatureStats (const Ptr& ptr) const
     {
         throw std::runtime_error ("class does not have creature stats");
@@ -170,6 +175,11 @@ namespace MWWorld
     float Class::getCapacity (const MWWorld::Ptr& ptr) const
     {
         throw std::runtime_error ("capacity not supported by this class");
+    }
+
+    float Class::getWeight(const Ptr &ptr) const
+    {
+        throw std::runtime_error ("weight not supported by this class");
     }
 
     float Class::getEncumbrance (const MWWorld::Ptr& ptr) const

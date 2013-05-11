@@ -127,6 +127,8 @@ namespace MWClass
 
             virtual bool isEssential (const MWWorld::Ptr& ptr) const;
             ///< Is \a ptr essential? (i.e. may losing \a ptr make the game unwinnable)
+
+            virtual int getServices (const MWWorld::Ptr& actor) const;
             
             static void registerSelf();
 

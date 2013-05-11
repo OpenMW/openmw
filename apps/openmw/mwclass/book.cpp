@@ -188,4 +188,11 @@ namespace MWClass
     {
         return npcServices & ESM::NPC::Books;
     }
+
+    float Book::getWeight(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Book> *ref =
+            ptr.get<ESM::Book>();
+        return ref->mBase->mData.mWeight;
+    }
 }

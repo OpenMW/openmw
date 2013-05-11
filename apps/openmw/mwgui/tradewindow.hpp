@@ -17,23 +17,32 @@ namespace MWGui
 
 namespace MWGui
 {
-    class TradeWindow : public ContainerBase, public WindowBase
+    class ItemView;
+    class SortFilterItemModel;
+    class TradeItemModel;
+
+    class TradeWindow : public WindowBase, public ReferenceInterface
     {
         public:
             TradeWindow();
 
-            void startTrade(MWWorld::Ptr actor);
-
-            void sellToNpc(MWWorld::Ptr item, int count, bool boughtItem); ///< only used for adjusting the gold balance
-            void buyFromNpc(MWWorld::Ptr item, int count, bool soldItem); ///< only used for adjusting the gold balance
-
-            bool npcAcceptsItem(MWWorld::Ptr item);
+            void startTrade(const MWWorld::Ptr& actor);
 
             void addOrRemoveGold(int gold);
 
             void onFrame(float frameDuration);
 
-        protected:
+            void borrowItem (int index, size_t count);
+            void returnItem (int index, size_t count);
+
+            int getMerchantServices();
+
+
+        private:
+            ItemView* mItemView;
+            SortFilterItemModel* mSortModel;
+            TradeItemModel* mTradeModel;
+
             static const float sBalanceChangeInitialPause; // in seconds
             static const float sBalanceChangeInterval; // in seconds
 
@@ -56,6 +65,8 @@ namespace MWGui
             MyGUI::TextBox* mPlayerGold;
             MyGUI::TextBox* mMerchantGold;
 
+            int mItemToSell;
+
             int mCurrentBalance;
             int mCurrentMerchantOffer;
 
@@ -67,7 +78,12 @@ namespace MWGui
             /// pause before next balance change will trigger while user holds +/- button pressed
             float mBalanceChangePause;
 
-            void onWindowResize(MyGUI::Window* _sender);
+            void sellToNpc(const MWWorld::Ptr& item, int count, bool boughtItem); ///< only used for adjusting the gold balance
+            void buyFromNpc(const MWWorld::Ptr& item, int count, bool soldItem); ///< only used for adjusting the gold balance
+
+            void onItemSelected (int index);
+            void sellItem (MyGUI::Widget* sender, int count);
+
             void onFilterChanged(MyGUI::Widget* _sender);
             void onOfferButtonClicked(MyGUI::Widget* _sender);
             void onCancelButtonClicked(MyGUI::Widget* _sender);
@@ -79,16 +95,10 @@ namespace MWGui
             void onIncreaseButtonTriggered();
             void onDecreaseButtonTriggered();
 
-            virtual bool isTrading() { return true; }
-            virtual bool isTradeWindow() { return true; }
-
-            virtual std::vector<MWWorld::Ptr> itemsToIgnore();
-
             void updateLabels();
 
             virtual void onReferenceUnavailable();
 
-        private:
             int getMerchantGold();
     };
 }

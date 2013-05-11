@@ -387,4 +387,11 @@ namespace MWClass
     {
         return npcServices & ESM::NPC::Armor;
     }
+
+    float Armor::getWeight(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Armor> *ref =
+            ptr.get<ESM::Armor>();
+        return ref->mBase->mData.mWeight;
+    }
 }

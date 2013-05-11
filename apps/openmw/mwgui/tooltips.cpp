@@ -6,8 +6,12 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 
+#include "../mwworld/class.hpp"
+
 #include "mapwindow.hpp"
 #include "inventorywindow.hpp"
+
+#include "itemmodel.hpp"
 
 namespace MWGui
 {
@@ -175,6 +179,16 @@ namespace MWGui
                 {
                     mFocusObject = *focus->getUserData<MWWorld::Ptr>();
                     tooltipSize = getToolTipViaPtr(false);
+                }
+                else if (type == "ItemModelIndex")
+                {
+                    std::pair<ItemModel::ModelIndex, ItemModel*> pair = *focus->getUserData<std::pair<ItemModel::ModelIndex, ItemModel*> >();
+                    mFocusObject = pair.second->getItem(pair.first).mBase;
+                    // HACK: To get the correct count for multiple item stack sources
+                    int oldCount = mFocusObject.getRefData().getCount();
+                    mFocusObject.getRefData().setCount(pair.second->getItem(pair.first).mCount);
+                    tooltipSize = getToolTipViaPtr(false);
+                    mFocusObject.getRefData().setCount(oldCount);
                 }
                 else if (type == "ToolTipInfo")
                 {

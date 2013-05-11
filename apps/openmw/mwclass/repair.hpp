@@ -62,6 +62,8 @@ namespace MWClass
             ///< Return item max health or throw an exception, if class does not have item health
             /// (default implementation: throw an exceoption)
 
+            virtual float getWeight (const MWWorld::Ptr& ptr) const;
+
             virtual bool canSell (const MWWorld::Ptr& item, int npcServices) const;
     };
 }

@@ -390,6 +390,9 @@ namespace MWWorld
             virtual bool getActorStandingOn (const MWWorld::Ptr& object); ///< @return true if any actor is standing on \a object
             virtual float getWindSpeed();
 
+            virtual void getContainersOwnedBy (const MWWorld::Ptr& npc, std::vector<MWWorld::Ptr>& out);
+            ///< get all containers in active cells owned by this Npc
+
             virtual void setupExternalRendering (MWRender::ExternalRendering& rendering);
 
             virtual int canRest();
