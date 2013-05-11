@@ -34,14 +34,20 @@ const CSMWorld::RefIdAdapter& CSMWorld::RefIdCollection::findAdaptor (UniversalI
 
 CSMWorld::RefIdCollection::RefIdCollection()
 {
+    BaseColumns baseColumns;
+
     mColumns.push_back (RefIdColumn ("ID", ColumnBase::Display_String,
         ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue, false, false));
+    baseColumns.mId = &mColumns.back();
     mColumns.push_back (RefIdColumn ("*", ColumnBase::Display_Integer,
         ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue, false, false));
+    baseColumns.mModified = &mColumns.back();
 //    mColumns.push_back (RefIdColumn ("Name", ColumnBase::Display_String));
 
-    mAdapters.insert (std::make_pair (UniversalId::Type_Static, new StaticRefIdAdapter (&mColumns[0],
-        &mColumns[1])));
+
+
+    mAdapters.insert (std::make_pair (UniversalId::Type_Static,
+        new BaseRefIdAdapter<ESM::Static> (UniversalId::Type_Static, baseColumns)));
 
 }
 

@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <map>
+#include <deque>
 
 #include "columnbase.hpp"
 #include "idcollection.hpp"
@@ -33,7 +34,7 @@ namespace CSMWorld
         private:
 
             RefIdData mData;
-            std::vector<RefIdColumn> mColumns;
+            std::deque<RefIdColumn> mColumns;
             std::map<UniversalId::Type, RefIdAdapter *> mAdapters;
 
         private:
