@@ -148,6 +148,62 @@ namespace CSMWorld
         else
             BaseRefIdAdapter<RecordT>::setData (column, data, index, value);
     }
+
+    struct NameColumns : public ModelColumns
+    {
+        const RefIdColumn *mName;
+
+        NameColumns (const ModelColumns& base) : ModelColumns (base) {}
+    };
+
+    /// \brief Adapter for IDs with names (all but levelled lists and statics)
+    template<typename RecordT>
+    class NameRefIdAdapter : public ModelRefIdAdapter<RecordT>
+    {
+            NameColumns mName;
+
+        public:
+
+            NameRefIdAdapter (UniversalId::Type type, const NameColumns& columns);
+
+            virtual QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
+                const;
+
+            virtual void setData (const RefIdColumn *column, RefIdData& data, int index,
+                const QVariant& value) const;
+            ///< If the data type does not match an exception is thrown.
+    };
+
+    template<typename RecordT>
+    NameRefIdAdapter<RecordT>::NameRefIdAdapter (UniversalId::Type type, const NameColumns& columns)
+    : ModelRefIdAdapter<RecordT> (type, columns), mName (columns)
+    {}
+
+    template<typename RecordT>
+    QVariant NameRefIdAdapter<RecordT>::getData (const RefIdColumn *column, const RefIdData& data,
+        int index) const
+    {
+        const Record<RecordT>& record = static_cast<const Record<RecordT>&> (
+            data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<RecordT>::getType())));
+
+        if (column==mName.mName)
+            return QString::fromUtf8 (record.get().mName.c_str());
+
+        return ModelRefIdAdapter<RecordT>::getData (column, data, index);
+    }
+
+    template<typename RecordT>
+    void NameRefIdAdapter<RecordT>::setData (const RefIdColumn *column, RefIdData& data, int index,
+        const QVariant& value) const
+    {
+        Record<RecordT>& record = static_cast<Record<RecordT>&> (
+            data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<RecordT>::getType())));
+
+        if (column==mName.mName)
+            record.get().mName = value.toString().toUtf8().constData();
+        else
+            ModelRefIdAdapter<RecordT>::setData (column, data, index, value);
+    }
 }
 
 #endif
