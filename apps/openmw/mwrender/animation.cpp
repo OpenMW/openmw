@@ -145,17 +145,24 @@ void Animation::setRenderProperties(const NifOgre::ObjectList &objlist, Ogre::ui
 
 size_t Animation::detectAnimGroup(const Ogre::Node *node)
 {
+    static const char sGroupRoots[sNumGroups][32] = {
+        "", /* Lower body / character root */
+        "Bip01 Spine1", /* Upper body */
+        "Bip01 L Clavicle", /* Left arm */
+    };
+
     while(node)
     {
-#if 0
         const Ogre::String &name = node->getName();
-        if(name == "Bip01 L Clavicle")
-            return 2;
-        if(name == "Bip01 Spine1")
-            return 1;
-#endif
+        for(size_t i = 1;i < sNumGroups;i++)
+        {
+            if(name == sGroupRoots[i])
+                return i;
+        }
+
         node = node->getParent();
     }
+
     return 0;
 }
 
@@ -482,14 +489,21 @@ bool Animation::play(const std::string &groupname, Priority priority, int groups
     if(groupname.empty())
         return resetActiveGroups();
 
-    AnimStateMap::iterator stateiter = mStates.find(groupname);
+    AnimStateMap::iterator stateiter = mStates.begin();
+    while(stateiter != mStates.end())
+    {
+        if(stateiter->second.mPriority == priority)
+            mStates.erase(stateiter++);
+        else
+            stateiter++;
+    }
+
+    stateiter = mStates.find(groupname);
     if(stateiter != mStates.end())
     {
         stateiter->second.mPriority = priority;
         return resetActiveGroups();
     }
-    // HACK: Don't clear all active animations
-    mStates.clear();
 
     /* Look in reverse; last-inserted source has priority. */
     AnimSourceList::reverse_iterator iter(mAnimSources.rbegin());
