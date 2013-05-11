@@ -338,6 +338,9 @@ namespace MWBase
             virtual bool getActorStandingOn (const MWWorld::Ptr& object) = 0; ///< @return true if any actor is standing on \a object
             virtual float getWindSpeed() = 0;
 
+            virtual void getContainersOwnedBy (const MWWorld::Ptr& npc, std::vector<MWWorld::Ptr>& out) = 0;
+            ///< get all containers in active cells owned by this Npc
+
             virtual void setupExternalRendering (MWRender::ExternalRendering& rendering) = 0;
 
             virtual int canRest() = 0;

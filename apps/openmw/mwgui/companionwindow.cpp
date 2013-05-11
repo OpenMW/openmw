@@ -7,51 +7,102 @@
 
 #include "../mwmechanics/npcstats.hpp"
 
+#include "../mwworld/class.hpp"
+
 #include "messagebox.hpp"
+#include "itemview.hpp"
+#include "sortfilteritemmodel.hpp"
+#include "companionitemmodel.hpp"
+#include "container.hpp"
+#include "countdialog.hpp"
 
 namespace MWGui
 {
 
 CompanionWindow::CompanionWindow(DragAndDrop *dragAndDrop, MessageBoxManager* manager)
-    : ContainerBase(dragAndDrop)
-    , WindowBase("openmw_companion_window.layout")
+    : WindowBase("openmw_companion_window.layout")
+    , mDragAndDrop(dragAndDrop)
     , mMessageBoxManager(manager)
+    , mSelectedItem(-1)
+    , mModel(NULL)
+    , mSortModel(NULL)
 {
-    MyGUI::ScrollView* itemView;
-    MyGUI::Widget* containerWidget;
-    getWidget(containerWidget, "Items");
-    getWidget(itemView, "ItemView");
-    setWidgets(containerWidget, itemView);
-
     getWidget(mCloseButton, "CloseButton");
     getWidget(mProfitLabel, "ProfitLabel");
     getWidget(mEncumbranceBar, "EncumbranceBar");
+    getWidget(mItemView, "ItemView");
+    mItemView->eventBackgroundClicked += MyGUI::newDelegate(this, &CompanionWindow::onBackgroundSelected);
+    mItemView->eventItemClicked += MyGUI::newDelegate(this, &CompanionWindow::onItemSelected);
 
     mCloseButton->eventMouseButtonClick += MyGUI::newDelegate(this, &CompanionWindow::onCloseButtonClicked);
 
     setCoord(200,0,600,300);
 }
 
-void CompanionWindow::open(MWWorld::Ptr npc)
+void CompanionWindow::onItemSelected(int index)
 {
-    openContainer(npc);
-    setTitle(MWWorld::Class::get(npc).getName(npc));
-    drawItems();
-    updateEncumbranceBar();
+    if (mDragAndDrop->mIsOnDragAndDrop)
+    {
+        mDragAndDrop->drop(mModel, mItemView);
+        updateEncumbranceBar();
+        return;
+    }
+
+    const ItemStack& item = mSortModel->getItem(index);
+
+    MWWorld::Ptr object = item.mBase;
+    int count = item.mCount;
+    bool shift = MyGUI::InputManager::getInstance().isShiftPressed();
+    if (MyGUI::InputManager::getInstance().isControlPressed())
+        count = 1;
+
+    mSelectedItem = mSortModel->mapToSource(index);
+
+    if (count > 1 && !shift)
+    {
+        CountDialog* dialog = MWBase::Environment::get().getWindowManager()->getCountDialog();
+        dialog->open(MWWorld::Class::get(object).getName(object), "#{sTake}", count);
+        dialog->eventOkClicked.clear();
+        dialog->eventOkClicked += MyGUI::newDelegate(this, &CompanionWindow::dragItem);
+    }
+    else
+        dragItem (NULL, count);
 }
 
-void CompanionWindow::notifyItemDragged(MWWorld::Ptr item, int count)
+void CompanionWindow::dragItem(MyGUI::Widget* sender, int count)
 {
-    if (mPtr.getTypeName() == typeid(ESM::NPC).name())
+    mDragAndDrop->startDrag(mSelectedItem, mSortModel, mModel, mItemView, count);
+}
+
+void CompanionWindow::onBackgroundSelected()
+{
+    if (mDragAndDrop->mIsOnDragAndDrop)
     {
-        MWMechanics::NpcStats& stats = MWWorld::Class::get(mPtr).getNpcStats(mPtr);
-        stats.modifyProfit(MWWorld::Class::get(item).getValue(item) * count);
+        mDragAndDrop->drop(mModel, mItemView);
+        updateEncumbranceBar();
     }
+}
+
+void CompanionWindow::open(const MWWorld::Ptr& npc)
+{
+    mPtr = npc;
+    setTitle(MWWorld::Class::get(npc).getName(npc));
+    updateEncumbranceBar();
+
+    mModel = new CompanionItemModel(npc);
+    mSortModel = new SortFilterItemModel(mModel);
+    mItemView->setModel(mSortModel);
+}
+
+void CompanionWindow::onFrame()
+{
     updateEncumbranceBar();
 }
 
 void CompanionWindow::updateEncumbranceBar()
 {
+    if (mPtr.isEmpty())
+        return;
     float capacity = MWWorld::Class::get(mPtr).getCapacity(mPtr);
     float encumbrance = MWWorld::Class::get(mPtr).getEncumbrance(mPtr);
     mEncumbranceBar->setValue(encumbrance, capacity);
@@ -63,11 +114,6 @@ void CompanionWindow::updateEncumbranceBar()
         MWMechanics::NpcStats& stats = MWWorld::Class::get(mPtr).getNpcStats(mPtr);
         mProfitLabel->setCaptionWithReplacing("#{sProfitValue} " + boost::lexical_cast<std::string>(stats.getProfit()));
     }
-}
-
-void CompanionWindow::onWindowResize(MyGUI::Window* window)
-{
-    drawItems();
 }
 
 void CompanionWindow::onCloseButtonClicked(MyGUI::Widget* _sender)

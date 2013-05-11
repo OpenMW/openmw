@@ -9,6 +9,8 @@
 
 #include "../mwmechanics/npcstats.hpp"
 
+#include "../mwworld/class.hpp"
+
 #include "../mwdialogue/dialoguemanagerimp.hpp"
 
 #include "widgets.hpp"

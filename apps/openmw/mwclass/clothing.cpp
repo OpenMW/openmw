@@ -307,4 +307,11 @@ namespace MWClass
     {
         return npcServices & ESM::NPC::Clothing;
     }
+
+    float Clothing::getWeight(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Clothing> *ref =
+            ptr.get<ESM::Clothing>();
+        return ref->mBase->mData.mWeight;
+    }
 }

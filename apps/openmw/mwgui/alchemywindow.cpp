@@ -1,6 +1,7 @@
 #include "alchemywindow.hpp"
 
 #include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -8,6 +9,11 @@
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/player.hpp"
+#include "../mwworld/class.hpp"
+
+#include "inventoryitemmodel.hpp"
+#include "sortfilteritemmodel.hpp"
+#include "itemview.hpp"
 
 namespace
 {
@@ -20,13 +26,25 @@ namespace
         path.append(".dds");
         return path;
     }
+
+    std::string getCountString(const int count)
+    {
+        if (count == 1)
+            return "";
+        if (count > 9999)
+            return boost::lexical_cast<std::string>(int(count/1000.f)) + "k";
+        else
+            return boost::lexical_cast<std::string>(count);
+    }
+
 }
 
 namespace MWGui
 {
     AlchemyWindow::AlchemyWindow()
         : WindowBase("openmw_alchemy_window.layout")
-        , ContainerBase(0), mApparatus (4), mIngredients (4)
+        , mApparatus (4)
+        , mIngredients (4)
     {
         getWidget(mCreateButton, "CreateButton");
         getWidget(mCancelButton, "CancelButton");
@@ -40,6 +58,13 @@ namespace MWGui
         getWidget(mApparatus[3], "Apparatus4");
         getWidget(mEffectsBox, "CreatedEffects");
         getWidget(mNameEdit, "NameEdit");
+        getWidget(mItemView, "ItemView");
+
+        InventoryItemModel* model = new InventoryItemModel(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+        mSortModel = new SortFilterItemModel(model);
+        mSortModel->setFilter(SortFilterItemModel::Filter_OnlyIngredients);
+        mItemView->setModel (mSortModel);
+        mItemView->eventItemClicked += MyGUI::newDelegate(this, &AlchemyWindow::onSelectedItem);
 
         mIngredients[0]->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onIngredientSelected);
         mIngredients[1]->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onIngredientSelected);
@@ -48,12 +73,6 @@ namespace MWGui
 
         mCreateButton->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onCreateButtonClicked);
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onCancelButtonClicked);
-
-        MyGUI::ScrollView* itemView;
-        MyGUI::Widget* containerWidget;
-        getWidget(containerWidget, "Items");
-        getWidget(itemView, "ItemView");
-        setWidgets(containerWidget, itemView);
 
         center();
     }
@@ -126,12 +145,9 @@ namespace MWGui
 
     void AlchemyWindow::open()
     {
-        openContainer (MWBase::Environment::get().getWorld()->getPlayer().getPlayer()); // this sets mPtr
-        setFilter (ContainerBase::Filter_Ingredients);
-
         mNameEdit->setCaption("");
 
-        mAlchemy.setAlchemist (mPtr);
+        mAlchemy.setAlchemist (MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
 
         int index = 0;
 
@@ -155,8 +171,9 @@ namespace MWGui
         update();
     }
 
-    void AlchemyWindow::onSelectedItemImpl(MWWorld::Ptr item)
+    void AlchemyWindow::onSelectedItem(int index)
     {
+        MWWorld::Ptr item = mSortModel->getItem(index).mBase;
         int res = mAlchemy.addIngredient(item);
 
         if (res != -1)
@@ -168,19 +185,10 @@ namespace MWGui
         }
     }
 
-    std::vector<MWWorld::Ptr> AlchemyWindow::itemsToIgnore()
-    {
-        std::vector<MWWorld::Ptr> ignore;
-        // don't show ingredients that are currently selected in the "available ingredients" box.
-        for (int i=0; i<4; ++i)
-            if (mIngredients[i]->isUserString("ToolTipType"))
-                ignore.push_back(*mIngredients[i]->getUserData<MWWorld::Ptr>());
-
-        return ignore;
-    }
-
     void AlchemyWindow::update()
     {
+        mSortModel->clearDragItems();
+
         MWMechanics::Alchemy::TIngredientsIterator it = mAlchemy.beginIngredients ();
         for (int i=0; i<4; ++i)
         {
@@ -192,6 +200,9 @@ namespace MWGui
                 item = *it;
                 ++it;
             }
+
+            if (!item.isEmpty())
+                mSortModel->addDragItem(item, item.getRefData().getCount());
 
             if (ingredient->getChildCount())
                 MyGUI::Gui::getInstance().destroyWidget(ingredient->getChildAt(0));
@@ -214,7 +225,7 @@ namespace MWGui
             text->setCaption(getCountString(ingredient->getUserData<MWWorld::Ptr>()->getRefData().getCount()));
         }
 
-        drawItems();
+        mItemView->update();
 
         std::vector<ESM::ENAMstruct> effects;
         ESM::EffectList list;

@@ -10,6 +10,8 @@
 #include "../mwbase/dialoguemanager.hpp"
 
 #include "../mwworld/manualref.hpp"
+#include "../mwworld/class.hpp"
+#include "../mwworld/containerstore.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
@@ -17,28 +19,24 @@
 #include "../mwworld/player.hpp"
 
 #include "inventorywindow.hpp"
+#include "itemview.hpp"
+#include "sortfilteritemmodel.hpp"
+#include "containeritemmodel.hpp"
+#include "tradeitemmodel.hpp"
+#include "countdialog.hpp"
 
 namespace MWGui
 {
     const float TradeWindow::sBalanceChangeInitialPause = 0.5;
     const float TradeWindow::sBalanceChangeInterval = 0.1;
 
-    TradeWindow::TradeWindow() :
-        WindowBase("openmw_trade_window.layout")
-        , ContainerBase(NULL) // no drag&drop
+    TradeWindow::TradeWindow()
+        : WindowBase("openmw_trade_window.layout")
         , mCurrentBalance(0)
         , mBalanceButtonsState(BBS_None)
         , mBalanceChangePause(0.0)
+        , mItemToSell(-1)
     {
-        // items the NPC is wearing should not be for trade
-        mDisplayEquippedItems = false;
-
-        MyGUI::ScrollView* itemView;
-        MyGUI::Widget* containerWidget;
-        getWidget(containerWidget, "Items");
-        getWidget(itemView, "ItemView");
-        setWidgets(containerWidget, itemView);
-
         getWidget(mFilterAll, "AllButton");
         getWidget(mFilterWeapon, "WeaponButton");
         getWidget(mFilterApparel, "ApparelButton");
@@ -55,6 +53,9 @@ namespace MWGui
         getWidget(mTotalBalance, "TotalBalance");
         getWidget(mTotalBalanceLabel, "TotalBalanceLabel");
         getWidget(mBottomPane, "BottomPane");
+
+        getWidget(mItemView, "ItemView");
+        mItemView->eventItemClicked += MyGUI::newDelegate(this, &TradeWindow::onItemSelected);
 
         mFilterAll->setStateSelected(true);
 
@@ -73,40 +74,40 @@ namespace MWGui
         mDecreaseButton->eventMouseButtonReleased += MyGUI::newDelegate(this, &TradeWindow::onBalanceButtonReleased);
 
         setCoord(400, 0, 400, 300);
-
-        static_cast<MyGUI::Window*>(mMainWidget)->eventWindowChangeCoord += MyGUI::newDelegate(this, &TradeWindow::onWindowResize);
     }
 
-    void TradeWindow::startTrade(MWWorld::Ptr actor)
+    void TradeWindow::startTrade(const MWWorld::Ptr& actor)
     {
+        mPtr = actor;
         setTitle(MWWorld::Class::get(actor).getName(actor));
 
         mCurrentBalance = 0;
         mCurrentMerchantOffer = 0;
 
-        MWBase::Environment::get().getWindowManager()->getInventoryWindow()->startTrade();
+        std::vector<MWWorld::Ptr> itemSources;
+        MWBase::Environment::get().getWorld()->getContainersOwnedBy(actor, itemSources);
+        // Important: actor goes last, so that items purchased by the merchant go into his inventory
+        itemSources.push_back(actor);
 
-        mBoughtItems.clear();
-
-        ContainerBase::openContainer(actor);
+        mTradeModel = new TradeItemModel(new ContainerItemModel(itemSources), mPtr);
+        mSortModel = new SortFilterItemModel(mTradeModel);
+        mItemView->setModel (mSortModel);
 
         updateLabels();
-
-        drawItems();
     }
 
     void TradeWindow::onFilterChanged(MyGUI::Widget* _sender)
     {
         if (_sender == mFilterAll)
-            setFilter(ContainerBase::Filter_All);
+            mSortModel->setCategory(SortFilterItemModel::Category_All);
         else if (_sender == mFilterWeapon)
-            setFilter(ContainerBase::Filter_Weapon);
+            mSortModel->setCategory(SortFilterItemModel::Category_Weapon);
         else if (_sender == mFilterApparel)
-            setFilter(ContainerBase::Filter_Apparel);
+            mSortModel->setCategory(SortFilterItemModel::Category_Apparel);
         else if (_sender == mFilterMagic)
-            setFilter(ContainerBase::Filter_Magic);
+            mSortModel->setCategory(SortFilterItemModel::Category_Magic);
         else if (_sender == mFilterMisc)
-            setFilter(ContainerBase::Filter_Misc);
+            mSortModel->setCategory(SortFilterItemModel::Category_Misc);
 
         mFilterAll->setStateSelected(false);
         mFilterWeapon->setStateSelected(false);
@@ -115,18 +116,91 @@ namespace MWGui
         mFilterMisc->setStateSelected(false);
 
         static_cast<MyGUI::Button*>(_sender)->setStateSelected(true);
+
+        mItemView->update();
     }
 
-    void TradeWindow::onWindowResize(MyGUI::Window* _sender)
+    int TradeWindow::getMerchantServices()
     {
-        drawItems();
+        return MWWorld::Class::get(mPtr).getServices(mPtr);
+    }
+
+    void TradeWindow::onItemSelected (int index)
+    {
+        const ItemStack& item = mSortModel->getItem(index);
+
+        MWWorld::Ptr object = item.mBase;
+        int count = item.mCount;
+        bool shift = MyGUI::InputManager::getInstance().isShiftPressed();
+        if (MyGUI::InputManager::getInstance().isControlPressed())
+            count = 1;
+
+        if (count > 1 && !shift)
+        {
+            CountDialog* dialog = MWBase::Environment::get().getWindowManager()->getCountDialog();
+            std::string message = "#{sQuanityMenuMessage02}";
+            dialog->open(MWWorld::Class::get(object).getName(object), message, count);
+            dialog->eventOkClicked.clear();
+            dialog->eventOkClicked += MyGUI::newDelegate(this, &TradeWindow::sellItem);
+            mItemToSell = mSortModel->mapToSource(index);
+        }
+        else
+        {
+            mItemToSell = mSortModel->mapToSource(index);
+            sellItem (NULL, count);
+        }
+    }
+
+    void TradeWindow::sellItem(MyGUI::Widget* sender, int count)
+    {
+        const ItemStack& item = mTradeModel->getItem(mItemToSell);
+        std::string sound = MWWorld::Class::get(item.mBase).getDownSoundId(item.mBase);
+        MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
+
+        TradeItemModel* playerTradeModel = MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getTradeModel();
+
+        if (item.mType == ItemStack::Type_Barter)
+        {
+            // this was an item borrowed to us by the player
+            mTradeModel->returnItemBorrowedToUs(mItemToSell, count);
+            playerTradeModel->returnItemBorrowedFromUs(mItemToSell, mTradeModel, count);
+            buyFromNpc(item.mBase, count, true);
+        }
+        else
+        {
+            // borrow item to player
+            playerTradeModel->borrowItemToUs(mItemToSell, mTradeModel, count);
+            mTradeModel->borrowItemFromUs(mItemToSell, count);
+            buyFromNpc(item.mBase, count, false);
+        }
+
+        MWBase::Environment::get().getWindowManager()->getInventoryWindow()->updateItemView();
+        mItemView->update();
+    }
+
+    void TradeWindow::borrowItem (int index, size_t count)
+    {
+        TradeItemModel* playerTradeModel = MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getTradeModel();
+        mTradeModel->borrowItemToUs(index, playerTradeModel, count);
+        mItemView->update();
+        sellToNpc(playerTradeModel->getItem(index).mBase, count, false);
+    }
+
+    void TradeWindow::returnItem (int index, size_t count)
+    {
+        TradeItemModel* playerTradeModel = MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getTradeModel();
+        const ItemStack& item = playerTradeModel->getItem(index);
+        mTradeModel->returnItemBorrowedFromUs(index, playerTradeModel, count);
+        mItemView->update();
+        sellToNpc(item.mBase, count, true);
     }
 
     void TradeWindow::addOrRemoveGold(int amount)
     {
         bool goldFound = false;
         MWWorld::Ptr gold;
-        MWWorld::ContainerStore& playerStore = MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getContainerStore();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::ContainerStore& playerStore = MWWorld::Class::get(player).getContainerStore(player);
 
         for (MWWorld::ContainerStoreIterator it = playerStore.begin();
                 it != playerStore.end(); ++it)
@@ -167,13 +241,15 @@ namespace MWGui
 
     void TradeWindow::onOfferButtonClicked(MyGUI::Widget* _sender)
     {
+        TradeItemModel* playerItemModel = MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getTradeModel();
+
         const MWWorld::Store<ESM::GameSetting> &gmst =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
         // were there any items traded at all?
-        MWWorld::ContainerStore& playerBought = MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getBoughtItems();
-        MWWorld::ContainerStore& merchantBought = getBoughtItems();
-        if (playerBought.begin() == playerBought.end() && merchantBought.begin() == merchantBought.end())
+        std::vector<ItemStack> playerBought = playerItemModel->getItemsBorrowedToUs();
+        std::vector<ItemStack> merchantBought = mTradeModel->getItemsBorrowedToUs();
+        if (!playerBought.size() && !merchantBought.size())
         {
             // user notification
             MWBase::Environment::get().getWindowManager()->
@@ -250,21 +326,14 @@ namespace MWGui
 
             //skill use!
             MWWorld::Class::get(playerPtr).skillUsageSucceeded(playerPtr, ESM::Skill::Mercantile, 0);
-    }
+        }
 
         int iBarterSuccessDisposition = gmst.find("iBarterSuccessDisposition")->getInt();
         MWBase::Environment::get().getDialogueManager()->applyTemporaryDispositionChange(iBarterSuccessDisposition);
 
-        // success! make the item transfer.
-        MWWorld::ContainerStore& playerBoughtItems =
-            MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getBoughtItems();
-        for (MWWorld::ContainerStoreIterator it = playerBoughtItems.begin(); it != playerBoughtItems.end(); ++it)
-        {
-            if (Misc::StringUtils::ciEqual(it->getCellRef().mOwner, MWWorld::Class::get(mPtr).getId(mPtr)))
-                it->getCellRef().mOwner = "";
-        }
-        transferBoughtItems();
-        MWBase::Environment::get().getWindowManager()->getInventoryWindow()->transferBoughtItems();
+        // make the item transfer
+        mTradeModel->transferItems();
+        playerItemModel->transferItems();
 
         // add or remove gold from the player.
         if (mCurrentBalance != 0)
@@ -278,11 +347,8 @@ namespace MWGui
 
     void TradeWindow::onCancelButtonClicked(MyGUI::Widget* _sender)
     {
-        // i give you back your stuff!
-        returnBoughtItems(MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getContainerStore());
-        // now gimme back my stuff!
-        MWBase::Environment::get().getWindowManager()->getInventoryWindow()->returnBoughtItems(MWWorld::Class::get(mPtr).getContainerStore(mPtr));
-
+        mTradeModel->abort();
+        MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getTradeModel()->abort();
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Barter);
     }
 
@@ -343,44 +409,7 @@ namespace MWGui
         mMerchantGold->setCaptionWithReplacing("#{sSellerGold} " + boost::lexical_cast<std::string>(getMerchantGold()));
     }
 
-    bool TradeWindow::npcAcceptsItem(MWWorld::Ptr item)
-    {
-        if (Misc::StringUtils::ciEqual(item.getCellRef().mRefID, "gold_001"))
-            return false;
-
-        int services = 0;
-        if (mPtr.getTypeName() == typeid(ESM::NPC).name())
-        {
-            MWWorld::LiveCellRef<ESM::NPC>* ref = mPtr.get<ESM::NPC>();
-            if (ref->mBase->mHasAI)
-                services = ref->mBase->mAiData.mServices;
-        }
-        else if (mPtr.getTypeName() == typeid(ESM::Creature).name())
-        {
-            MWWorld::LiveCellRef<ESM::Creature>* ref = mPtr.get<ESM::Creature>();
-            if (ref->mBase->mHasAI)
-                services = ref->mBase->mAiData.mServices;
-        }
-
-        return MWWorld::Class::get(item).canSell(item, services);
-    }
-
-    std::vector<MWWorld::Ptr> TradeWindow::itemsToIgnore()
-    {
-        std::vector<MWWorld::Ptr> items;
-        MWWorld::ContainerStore& invStore = MWWorld::Class::get(mPtr).getContainerStore(mPtr);
-
-        for (MWWorld::ContainerStoreIterator it = invStore.begin();
-                it != invStore.end(); ++it)
-        {
-            if (!npcAcceptsItem(*it))
-                items.push_back(*it);
-        }
-
-        return items;
-    }
-
-    void TradeWindow::sellToNpc(MWWorld::Ptr item, int count, bool boughtItem)
+    void TradeWindow::sellToNpc(const MWWorld::Ptr& item, int count, bool boughtItem)
     {
         int diff = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, MWWorld::Class::get(item).getValue(item) * count, boughtItem);
 
@@ -390,7 +419,7 @@ namespace MWGui
         updateLabels();
     }
 
-    void TradeWindow::buyFromNpc(MWWorld::Ptr item, int count, bool soldItem)
+    void TradeWindow::buyFromNpc(const MWWorld::Ptr& item, int count, bool soldItem)
     {
         int diff = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, MWWorld::Class::get(item).getValue(item) * count, !soldItem);
 

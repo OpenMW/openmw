@@ -7,10 +7,13 @@
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/player.hpp"
+#include "../mwworld/class.hpp"
 
 #include "inventorywindow.hpp"
 #include "console.hpp"
 #include "spellicons.hpp"
+#include "itemmodel.hpp"
+#include "container.hpp"
 
 namespace MWGui
 {
@@ -195,7 +198,7 @@ namespace MWGui
         if (mDragAndDrop->mIsOnDragAndDrop)
         {
             // drop item into the gameworld
-            MWWorld::Ptr object = *mDragAndDrop->mDraggedWidget->getUserData<MWWorld::Ptr>();
+            MWWorld::Ptr object = mDragAndDrop->mItem.mBase;
 
             MWBase::World* world = MWBase::Environment::get().getWorld();
 
@@ -217,16 +220,11 @@ namespace MWGui
             std::string sound = MWWorld::Class::get(object).getDownSoundId(object);
             MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
 
+            object.getRefData().setCount(origCount);
+
             // remove object from the container it was coming from
-            object.getRefData().setCount(origCount - mDragAndDrop->mDraggedCount);
-
-            mDragAndDrop->mIsOnDragAndDrop = false;
-            MyGUI::Gui::getInstance().destroyWidget(mDragAndDrop->mDraggedWidget);
-            mDragAndDrop->mDraggedWidget = 0;
-
-            MWBase::Environment::get().getWindowManager()->setDragDrop(false);
-            mDragAndDrop->mDraggedFrom->drawItems();
-            mDragAndDrop->mDraggedFrom->notifyItemDragged(object, -mDragAndDrop->mDraggedCount);
+            mDragAndDrop->mSourceModel->removeItem(mDragAndDrop->mItem, mDragAndDrop->mDraggedCount);
+            mDragAndDrop->finish();
         }
         else
         {

@@ -1,5 +1,7 @@
 #include "inventorywindow.hpp"
 
+#include <stdexcept>
+
 #include <boost/lexical_cast.hpp>
 
 #include "../mwbase/world.hpp"
@@ -9,22 +11,31 @@
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/inventorystore.hpp"
+#include "../mwworld/class.hpp"
+#include "../mwworld/action.hpp"
 
 #include "bookwindow.hpp"
 #include "scrollwindow.hpp"
 #include "spellwindow.hpp"
+#include "itemview.hpp"
+#include "inventoryitemmodel.hpp"
+#include "sortfilteritemmodel.hpp"
+#include "tradeitemmodel.hpp"
+#include "countdialog.hpp"
+#include "tradewindow.hpp"
+#include "container.hpp"
 
 namespace MWGui
 {
 
     InventoryWindow::InventoryWindow(DragAndDrop* dragAndDrop)
-        : ContainerBase(dragAndDrop)
-        , WindowPinnableBase("openmw_inventory_window.layout")
+        : WindowPinnableBase("openmw_inventory_window.layout")
         , mTrading(false)
         , mLastXSize(0)
         , mLastYSize(0)
         , mPreview(MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer ())
         , mPreviewDirty(true)
+        , mDragAndDrop(dragAndDrop)
     {
         static_cast<MyGUI::Window*>(mMainWidget)->eventWindowChangeCoord += MyGUI::newDelegate(this, &InventoryWindow::onWindowResize);
 
@@ -42,11 +53,14 @@ namespace MWGui
 
         mAvatar->eventMouseButtonClick += MyGUI::newDelegate(this, &InventoryWindow::onAvatarClicked);
 
-        MyGUI::ScrollView* itemView;
-        MyGUI::Widget* containerWidget;
-        getWidget(containerWidget, "Items");
-        getWidget(itemView, "ItemView");
-        setWidgets(containerWidget, itemView);
+        mPtr = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer ();
+
+        getWidget(mItemView, "ItemView");
+        mTradeModel = new TradeItemModel(new InventoryItemModel(mPtr), MWWorld::Ptr());
+        mSortModel = new SortFilterItemModel(mTradeModel);
+        mItemView->setModel(mSortModel);
+        mItemView->eventItemClicked += MyGUI::newDelegate(this, &InventoryWindow::onItemSelected);
+        mItemView->eventBackgroundClicked += MyGUI::newDelegate(this, &InventoryWindow::onBackgroundSelected);
 
         mFilterAll->eventMouseButtonClick += MyGUI::newDelegate(this, &InventoryWindow::onFilterChanged);
         mFilterWeapon->eventMouseButtonClick += MyGUI::newDelegate(this, &InventoryWindow::onFilterChanged);
@@ -57,23 +71,127 @@ namespace MWGui
         mFilterAll->setStateSelected(true);
 
         setCoord(0, 342, 498, 258);
+        onWindowResize(static_cast<MyGUI::Window*>(mMainWidget));
 
         mPreview.setup();
+    }
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-        openContainer(player);
+    TradeItemModel* InventoryWindow::getTradeModel()
+    {
+        return mTradeModel;
+    }
+
+    ItemModel* InventoryWindow::getModel()
+    {
+        return mTradeModel;
+    }
+
+    void InventoryWindow::onBackgroundSelected()
+    {
+        if (mDragAndDrop->mIsOnDragAndDrop)
+            mDragAndDrop->drop(mTradeModel, mItemView);
+    }
+
+    void InventoryWindow::onItemSelected (int index)
+    {
+        onItemSelectedFromSourceModel (mSortModel->mapToSource(index));
+    }
+
+    void InventoryWindow::onItemSelectedFromSourceModel (int index)
+    {
+        if (mDragAndDrop->mIsOnDragAndDrop)
+        {
+            mDragAndDrop->drop(mTradeModel, mItemView);
+            return;
+        }
+
+        const ItemStack& item = mTradeModel->getItem(index);
+
+        unequipItem(item.mBase);
+
+        MWWorld::Ptr object = item.mBase;
+        int count = item.mCount;
+        bool shift = MyGUI::InputManager::getInstance().isShiftPressed();
+        if (MyGUI::InputManager::getInstance().isControlPressed())
+            count = 1;
+
+        if (mTrading)
+        {
+            // check if merchant accepts item
+            int services = MWBase::Environment::get().getWindowManager()->getTradeWindow()->getMerchantServices();
+            if (!MWWorld::Class::get(object).canSell(object, services))
+            {
+                MWBase::Environment::get().getWindowManager()->
+                        messageBox("#{sBarterDialog4}");
+                return;
+            }
+        }
+
+        if (count > 1 && !shift)
+        {
+            CountDialog* dialog = MWBase::Environment::get().getWindowManager()->getCountDialog();
+            std::string message = mTrading ? "#{sQuanityMenuMessage01}" : "#{sTake}";
+            dialog->open(MWWorld::Class::get(object).getName(object), message, count);
+            dialog->eventOkClicked.clear();
+            if (mTrading)
+                dialog->eventOkClicked += MyGUI::newDelegate(this, &InventoryWindow::sellItem);
+            else
+                dialog->eventOkClicked += MyGUI::newDelegate(this, &InventoryWindow::dragItem);
+            mSelectedItem = index;
+        }
+        else
+        {
+            mSelectedItem = index;
+            if (mTrading)
+                sellItem (NULL, count);
+            else
+                dragItem (NULL, count);
+        }
+
+        // item might have been unequipped
+        notifyContentChanged();
+    }
+
+    void InventoryWindow::dragItem(MyGUI::Widget* sender, int count)
+    {
+        mDragAndDrop->startDrag(mSelectedItem, mSortModel, mTradeModel, mItemView, count);
+    }
+
+    void InventoryWindow::sellItem(MyGUI::Widget* sender, int count)
+    {
+        const ItemStack& item = mTradeModel->getItem(mSelectedItem);
+        std::string sound = MWWorld::Class::get(item.mBase).getDownSoundId(item.mBase);
+        MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
+
+        if (item.mType == ItemStack::Type_Barter)
+        {
+            // this was an item borrowed to us by the merchant
+            MWBase::Environment::get().getWindowManager()->getTradeWindow()->returnItem(mSelectedItem, count);
+            mTradeModel->returnItemBorrowedToUs(mSelectedItem, count);
+        }
+        else
+        {
+            // borrow item to the merchant
+            MWBase::Environment::get().getWindowManager()->getTradeWindow()->borrowItem(mSelectedItem, count);
+            mTradeModel->borrowItemFromUs(mSelectedItem, count);
+        }
+
+        mItemView->update();
+    }
+
+    void InventoryWindow::updateItemView()
+    {
+        mItemView->update();
+        mPreviewDirty = true;
     }
 
     void InventoryWindow::open()
     {
         updateEncumbranceBar();
 
-        mTrading = false;
+        mItemView->update();
 
-        mBoughtItems.clear();
-
-        onWindowResize(static_cast<MyGUI::Window*>(mMainWidget));
-        drawItems();
+        notifyContentChanged();
     }
 
     void InventoryWindow::onWindowResize(MyGUI::Window* _sender)
@@ -87,30 +205,32 @@ namespace MWGui
 
         if (mMainWidget->getSize().width != mLastXSize || mMainWidget->getSize().height != mLastYSize)
         {
-            drawItems();
             mLastXSize = mMainWidget->getSize().width;
             mLastYSize = mMainWidget->getSize().height;
+            mPreviewDirty = true;
         }
     }
 
     void InventoryWindow::onFilterChanged(MyGUI::Widget* _sender)
     {
         if (_sender == mFilterAll)
-            setFilter(ContainerBase::Filter_All);
+            mSortModel->setCategory(SortFilterItemModel::Category_All);
         else if (_sender == mFilterWeapon)
-            setFilter(ContainerBase::Filter_Weapon);
+            mSortModel->setCategory(SortFilterItemModel::Category_Weapon);
         else if (_sender == mFilterApparel)
-            setFilter(ContainerBase::Filter_Apparel);
+            mSortModel->setCategory(SortFilterItemModel::Category_Apparel);
         else if (_sender == mFilterMagic)
-            setFilter(ContainerBase::Filter_Magic);
+            mSortModel->setCategory(SortFilterItemModel::Category_Magic);
         else if (_sender == mFilterMisc)
-            setFilter(ContainerBase::Filter_Misc);
+            mSortModel->setCategory(SortFilterItemModel::Category_Misc);
 
         mFilterAll->setStateSelected(false);
         mFilterWeapon->setStateSelected(false);
         mFilterApparel->setStateSelected(false);
         mFilterMagic->setStateSelected(false);
         mFilterMisc->setStateSelected(false);
+
+        mItemView->update();
 
         static_cast<MyGUI::Button*>(_sender)->setStateSelected(true);
     }
@@ -124,23 +244,23 @@ namespace MWGui
     {
         if (mDragAndDrop->mIsOnDragAndDrop)
         {
-            MWWorld::Ptr ptr = *mDragAndDrop->mDraggedWidget->getUserData<MWWorld::Ptr>();
+            MWWorld::Ptr ptr = mDragAndDrop->mItem.mBase;
+            mDragAndDrop->finish();
 
-            if (mDragAndDrop->mDraggedFrom != this)
+            if (mDragAndDrop->mSourceModel != mTradeModel)
             {
                 // add item to the player's inventory
                 MWWorld::ContainerStore& invStore = MWWorld::Class::get(mPtr).getContainerStore(mPtr);
                 MWWorld::ContainerStoreIterator it = invStore.begin();
 
                 int origCount = ptr.getRefData().getCount();
-                ptr.getRefData().setCount(origCount - mDragAndDrop->mDraggedCount);
+                ptr.getRefData().setCount(mDragAndDrop->mDraggedCount);
                 it = invStore.add(ptr);
-                (*it).getRefData().setCount(mDragAndDrop->mDraggedCount);
-                ptr = *it;
-                mDragAndDrop->mDraggedFrom->notifyItemDragged(ptr, -mDragAndDrop->mDraggedCount);
-            }
+                ptr.getRefData().setCount(origCount);
 
-            /// \todo scripts
+                mDragAndDrop->mSourceModel->removeItem(mDragAndDrop->mItem, mDragAndDrop->mDraggedCount);
+                ptr = *it;
+            }
 
             boost::shared_ptr<MWWorld::Action> action = MWWorld::Class::get(ptr).use(ptr);
 
@@ -153,12 +273,7 @@ namespace MWGui
             MWBase::Environment::get().getWindowManager()->getBookWindow()->setTakeButtonShow(false);
             MWBase::Environment::get().getWindowManager()->getScrollWindow()->setTakeButtonShow(false);
 
-            mDragAndDrop->mIsOnDragAndDrop = false;
-            MyGUI::Gui::getInstance().destroyWidget(mDragAndDrop->mDraggedWidget);
-
-            MWBase::Environment::get().getWindowManager()->setDragDrop(false);
-
-            drawItems();
+            mItemView->update();
 
             notifyContentChanged();
         }
@@ -173,16 +288,15 @@ namespace MWGui
             if (itemSelected.isEmpty ())
                 return;
 
-            for (unsigned int i=0; i < mContainerWidget->getChildCount (); ++i)
+            for (size_t i=0; i < mTradeModel->getItemCount (); ++i)
             {
-                MyGUI::Widget* w = mContainerWidget->getChildAt (i);
-
-                if (*w->getUserData<MWWorld::Ptr>() == itemSelected)
+                if (mTradeModel->getItem(i).mBase == itemSelected)
                 {
-                    onSelectedItem(w);
+                    onItemSelectedFromSourceModel(i);
                     return;
                 }
             }
+            throw std::runtime_error("Can't find clicked item");
         }
     }
 
@@ -201,7 +315,7 @@ namespace MWGui
             return MWWorld::Ptr();
     }
 
-    void InventoryWindow::_unequipItem(MWWorld::Ptr item)
+    void InventoryWindow::unequipItem(const MWWorld::Ptr& item)
     {
         MWWorld::InventoryStore& invStore = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
 
@@ -252,9 +366,9 @@ namespace MWGui
         return 0;
     }
 
-    void InventoryWindow::startTrade()
+    void InventoryWindow::setTrading(bool trading)
     {
-        mTrading = true;
+        mTrading = trading;
     }
 
     void InventoryWindow::doRenderUpdate ()
@@ -282,7 +396,7 @@ namespace MWGui
         if (weaponSlot == invStore.end())
             MWBase::Environment::get().getWindowManager()->unsetSelectedWeapon();
         else
-            MWBase::Environment::get().getWindowManager()->setSelectedWeapon(*weaponSlot); /// \todo track weapon durability
+            MWBase::Environment::get().getWindowManager()->setSelectedWeapon(*weaponSlot);
 
         mPreviewDirty = true;
 
@@ -292,8 +406,6 @@ namespace MWGui
 
     void InventoryWindow::pickUpObject (MWWorld::Ptr object)
     {
-        /// \todo scripts
-
         // make sure the object is of a type that can be picked up
         std::string type = object.getTypeName();
         if ( (type != typeid(ESM::Apparatus).name())
@@ -313,11 +425,9 @@ namespace MWGui
         if (MWWorld::Class::get(object).getName(object) == "") // objects without name presented to user can never be picked up
             return;
 
-        // sound
-        std::string sound = MWWorld::Class::get(object).getUpSoundId(object);
-        MWBase::Environment::get().getSoundManager()->playSound(sound, 1, 1);
-
         int count = object.getRefData().getCount();
+        if (object.getCellRef().mGoldValue > 1)
+            count = object.getCellRef().mGoldValue;
 
         // add to player inventory
         // can't use ActionTake here because we need an MWWorld::Ptr to the newly inserted object
@@ -326,31 +436,17 @@ namespace MWGui
         // remove from world
         MWBase::Environment::get().getWorld()->deleteObject (object);
 
-        mDragAndDrop->mIsOnDragAndDrop = true;
-        mDragAndDrop->mDraggedCount = count;
-
-        std::string path = std::string("icons\\");
-        path += MWWorld::Class::get(newObject).getInventoryIcon(newObject);
-        MyGUI::ImageBox* baseWidget = mContainerWidget->createWidget<MyGUI::ImageBox>("ImageBox", MyGUI::IntCoord(0, 0, 42, 42), MyGUI::Align::Default);
-        baseWidget->detachFromWidget();
-        baseWidget->attachToWidget(mDragAndDrop->mDragAndDropWidget);
-        baseWidget->setUserData(newObject);
-        mDragAndDrop->mDraggedWidget = baseWidget;
-        MyGUI::ImageBox* image = baseWidget->createWidget<MyGUI::ImageBox>("ImageBox", MyGUI::IntCoord(5, 5, 32, 32), MyGUI::Align::Default);
-        int pos = path.rfind(".");
-        path.erase(pos);
-        path.append(".dds");
-        image->setImageTexture(path);
-        image->setNeedMouseFocus(false);
-
-        // text widget that shows item count
-        MyGUI::TextBox* text = image->createWidget<MyGUI::TextBox>("SandBrightText", MyGUI::IntCoord(0, 14, 32, 18), MyGUI::Align::Default, std::string("Label"));
-        text->setTextAlign(MyGUI::Align::Right);
-        text->setNeedMouseFocus(false);
-        text->setTextShadow(true);
-        text->setTextShadowColour(MyGUI::Colour(0,0,0));
-        text->setCaption(getCountString(count));
-        mDragAndDrop->mDraggedFrom = this;
+        // get ModelIndex to the item
+        mTradeModel->update();
+        size_t i=0;
+        for (; i<mTradeModel->getItemCount(); ++i)
+        {
+            if (mTradeModel->getItem(i).mBase == newObject)
+                break;
+        }
+        if (i == mTradeModel->getItemCount())
+            throw std::runtime_error("Added item not found");
+        mDragAndDrop->startDrag(i, mSortModel, mTradeModel, mItemView, count);
     }
 
     MyGUI::IntCoord InventoryWindow::getAvatarScreenCoord ()

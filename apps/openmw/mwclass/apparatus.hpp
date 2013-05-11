@@ -13,6 +13,8 @@ namespace MWClass
 
         public:
 
+            virtual float getWeight (const MWWorld::Ptr& ptr) const;
+
             virtual void insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const;
             ///< Add reference into a cell for rendering
 

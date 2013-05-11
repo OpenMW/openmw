@@ -202,4 +202,12 @@ namespace MWClass
     {
         return npcServices & ESM::NPC::Ingredients;
     }
+
+
+    float Ingredient::getWeight(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Ingredient> *ref =
+            ptr.get<ESM::Ingredient>();
+        return ref->mBase->mData.mWeight;
+    }
 }

@@ -648,6 +648,15 @@ namespace MWClass
             scale *= race->mData.mHeight.mFemale;
     }
 
+    int Npc::getServices(const MWWorld::Ptr &actor) const
+    {
+        MWWorld::LiveCellRef<ESM::NPC>* ref = actor.get<ESM::NPC>();
+        if (ref->mBase->mHasAI)
+            return ref->mBase->mAiData.mServices;
+        else
+            return 0;
+    }
+
     MWWorld::Ptr
     Npc::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
     {

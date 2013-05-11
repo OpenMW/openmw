@@ -241,6 +241,8 @@ namespace MWWorld
             virtual bool canSell (const MWWorld::Ptr& item, int npcServices) const;
             ///< Determine whether or not \a item can be sold to an npc with the given \a npcServices
 
+            virtual int getServices (const MWWorld::Ptr& actor) const;
+
             virtual std::string getModel(const MWWorld::Ptr &ptr) const;
 
             virtual void applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const;
@@ -248,6 +250,8 @@ namespace MWWorld
             virtual std::pair<int, std::string> canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const;
             ///< Return 0 if player cannot equip item. 1 if can equip. 2 if it's twohanded weapon. 3 if twohanded weapon conflicts with that.
             ///  Second item in the pair specifies the error message
+
+            virtual float getWeight (const MWWorld::Ptr& ptr) const;
 
             virtual Ptr
             copyToCell(const Ptr &ptr, CellStore &cell) const;

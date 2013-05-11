@@ -79,6 +79,8 @@ namespace MWClass
 
             virtual bool canSell (const MWWorld::Ptr& item, int npcServices) const;
 
+            virtual float getWeight (const MWWorld::Ptr& ptr) const;
+
             virtual float getEnchantmentPoints (const MWWorld::Ptr& ptr) const;
     };
 }
