@@ -16,8 +16,6 @@
 #include "operations.hpp"
 #include "subview.hpp"
 
-#include <QDebug>
-
 void CSVDoc::View::closeEvent (QCloseEvent *event)
 {
     if (!mViewManager.closeRequest (this))
@@ -52,6 +50,10 @@ void CSVDoc::View::setupEditMenu()
     mRedo= mDocument->getUndoStack().createRedoAction (this, tr("&Redo"));
     mRedo->setShortcuts (QKeySequence::Redo);
     edit->addAction (mRedo);
+
+    QAction *userSettings = new QAction (tr ("&Preferences"), this);
+    connect (userSettings, SIGNAL (triggered()), this, SLOT (showUserSettings()));
+    edit->addAction (userSettings);
 }
 
 void CSVDoc::View::setupViewMenu()
@@ -80,23 +82,12 @@ void CSVDoc::View::setupWorldMenu()
     world->addAction (mVerify);
 }
 
-void CSVDoc::View::setupSettingsMenu()
-{
-    QMenu *settings = menuBar()->addMenu( (tr ("&Settings")));
-
-    QAction *userSettings = new QAction (tr ("User Settings"), this);
-    connect (userSettings, SIGNAL (triggered()), this, SLOT (showUserSettings()));
-    settings->addAction (userSettings);
-
-}
-
 void CSVDoc::View::setupUi()
 {
     setupFileMenu();
     setupEditMenu();
     setupViewMenu();
     setupWorldMenu();
-    setupSettingsMenu();
 }
 
 void CSVDoc::View::updateTitle()

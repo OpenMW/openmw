@@ -59,8 +59,6 @@ namespace CSVDoc
 
             void setupWorldMenu();
 
-            void setupSettingsMenu();
-
             void setupUi();
 
             void updateTitle();
