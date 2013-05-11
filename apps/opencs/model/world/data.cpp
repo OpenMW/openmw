@@ -327,7 +327,29 @@ void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base)
             case ESM::REC_SPEL: mSpells.load (reader, base); break;
             case ESM::REC_CELL: mCells.load (reader, base); break;
 
+            case ESM::REC_ACTI: mReferenceables.load (reader, base, UniversalId::Type_Activator); break;
+            case ESM::REC_ALCH: mReferenceables.load (reader, base, UniversalId::Type_Potion); break;
+            case ESM::REC_APPA: mReferenceables.load (reader, base, UniversalId::Type_Apparatus); break;
+            case ESM::REC_ARMO: mReferenceables.load (reader, base, UniversalId::Type_Armor); break;
+            case ESM::REC_BOOK: mReferenceables.load (reader, base, UniversalId::Type_Book); break;
+            case ESM::REC_CLOT: mReferenceables.load (reader, base, UniversalId::Type_Clothing); break;
+            case ESM::REC_CONT: mReferenceables.load (reader, base, UniversalId::Type_Container); break;
+            case ESM::REC_CREA: mReferenceables.load (reader, base, UniversalId::Type_Creature); break;
+            case ESM::REC_DOOR: mReferenceables.load (reader, base, UniversalId::Type_Door); break;
+            case ESM::REC_INGR: mReferenceables.load (reader, base, UniversalId::Type_Ingredient); break;
+            case ESM::REC_LEVC:
+                mReferenceables.load (reader, base, UniversalId::Type_CreatureLevelledList); break;
+            case ESM::REC_LEVI:
+                mReferenceables.load (reader, base, UniversalId::Type_ItemLevelledList); break;
+            case ESM::REC_LIGH: mReferenceables.load (reader, base, UniversalId::Type_Light); break;
+            case ESM::REC_LOCK: mReferenceables.load (reader, base, UniversalId::Type_Lockpick); break;
+            case ESM::REC_MISC:
+                mReferenceables.load (reader, base, UniversalId::Type_Miscellaneous); break;
+            case ESM::REC_NPC_: mReferenceables.load (reader, base, UniversalId::Type_Npc); break;
+            case ESM::REC_PROB: mReferenceables.load (reader, base, UniversalId::Type_Probe); break;
+            case ESM::REC_REPA: mReferenceables.load (reader, base, UniversalId::Type_Repair); break;
             case ESM::REC_STAT: mReferenceables.load (reader, base, UniversalId::Type_Static); break;
+            case ESM::REC_WEAP: mReferenceables.load (reader, base, UniversalId::Type_Weapon); break;
 
             default:
 
