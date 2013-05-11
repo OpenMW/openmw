@@ -71,7 +71,7 @@ CSMWorld::RefIdData::LocalIndex CSMWorld::RefIdData::searchId (
 
     std::map<std::string, std::pair<int, UniversalId::Type> >::const_iterator iter = mIndex.find (id2);
 
-    if (iter!=mIndex.end())
+    if (iter==mIndex.end())
         return std::make_pair (-1, CSMWorld::UniversalId::Type_None);
 
     return iter->second;

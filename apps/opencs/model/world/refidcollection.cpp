@@ -4,6 +4,7 @@
 #include <stdexcept>
 
 #include "refidadapter.hpp"
+#include "refidadapterimp.hpp"
 
 CSMWorld::RefIdColumn::RefIdColumn (const std::string& title, Display displayType, int flag,
     bool editable, bool userEditable)
@@ -37,7 +38,11 @@ CSMWorld::RefIdCollection::RefIdCollection()
         ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue, false, false));
     mColumns.push_back (RefIdColumn ("*", ColumnBase::Display_Integer,
         ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue, false, false));
-    mColumns.push_back (RefIdColumn ("Name", ColumnBase::Display_String));
+//    mColumns.push_back (RefIdColumn ("Name", ColumnBase::Display_String));
+
+    mAdapters.insert (std::make_pair (UniversalId::Type_Static, new StaticRefIdAdapter (&mColumns[0],
+        &mColumns[1])));
+
 }
 
 CSMWorld::RefIdCollection::~RefIdCollection()
@@ -107,7 +112,12 @@ void CSMWorld::RefIdCollection::appendBlankRecord (const std::string& id, Univer
 
 int CSMWorld::RefIdCollection::searchId (const std::string& id) const
 {
-    return mData.localToGlobalIndex (mData.searchId (id));
+    RefIdData::LocalIndex localIndex = mData.searchId (id);
+
+    if (localIndex.first==-1)
+        return -1;
+
+    return mData.localToGlobalIndex (localIndex);
 }
 
 void CSMWorld::RefIdCollection::replace (int index, const RecordBase& record)
