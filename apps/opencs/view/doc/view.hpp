@@ -135,6 +135,8 @@ namespace CSVDoc
             void addSpellsSubView();
 
             void addCellsSubView();
+
+            void addReferenceablesSubView();
     };
 }
 

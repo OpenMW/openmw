@@ -1,4 +1,4 @@
-#ifndef CSM_WOLRD_REDIDADAPTER_H
+#ifndef CSM_WOLRD_REFIDADAPTER_H
 #define CSM_WOLRD_REFIDADAPTER_H
 
 #include <string>

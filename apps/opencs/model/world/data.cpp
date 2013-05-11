@@ -327,6 +327,8 @@ void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base)
             case ESM::REC_SPEL: mSpells.load (reader, base); break;
             case ESM::REC_CELL: mCells.load (reader, base); break;
 
+            case ESM::REC_STAT: mReferenceables.load (reader, base, UniversalId::Type_Static); break;
+
             default:
 
                 /// \todo throw an exception instead, once all records are implemented
