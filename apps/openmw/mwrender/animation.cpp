@@ -474,7 +474,7 @@ bool Animation::handleTextKey(AnimState &state, const std::string &groupname, co
 }
 
 
-bool Animation::play(const std::string &groupname, Priority priority, const std::string &start, const std::string &stop, float startpoint, size_t loops)
+bool Animation::play(const std::string &groupname, Priority priority, int groups, const std::string &start, const std::string &stop, float startpoint, size_t loops)
 {
     if(!mSkelBase)
         return false;
@@ -502,6 +502,7 @@ bool Animation::play(const std::string &groupname, Priority priority, const std:
             state.mLoopCount = loops;
             state.mPlaying = true;
             state.mPriority = priority;
+            state.mGroups = groups;
             mStates[groupname] = state;
 
             break;
@@ -522,10 +523,9 @@ bool Animation::resetActiveGroups()
         AnimStateMap::const_iterator state = mStates.begin();
         for(;state != mStates.end();state++)
         {
-#if 0
             if(!(state->second.mGroups&(1<<grp)))
                 continue;
-#endif
+
             if(active == mStates.end() || active->second.mPriority < state->second.mPriority)
                 active = state;
         }

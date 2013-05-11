@@ -22,6 +22,11 @@ public:
         Num_Priorities
     };
 
+    enum Group {
+        Group_Default = 1<<0,
+        Group_All = Group_Default
+    };
+
 protected:
     static const size_t sNumGroups = 1;
 
@@ -64,6 +69,7 @@ protected:
         size_t mLoopCount;
 
         int mPriority;
+        int mGroups;
 
         AnimState() : mSource(NULL), mTime(0.0f), mPlaying(false), mLoopCount(0)
         { }
@@ -152,6 +158,7 @@ public:
      * \param priority Priority of the animation. The animation will play on
      *                 bone groups that don't have another animation set of a
      *                 higher priority.
+     * \param groups Bone groups to play the animation on.
      * \param start Key marker from which to start.
      * \param stop Key marker to stop at.
      * \param startpoint How far in between the two markers to start. 0 starts
@@ -162,9 +169,9 @@ public:
      * \return Boolean specifying whether the animation will return movement
      *         for the character at all.
      */
-    bool play(const std::string &groupname, Priority priority, const std::string &start, const std::string &stop, float startpoint, size_t loops);
-
-    void disable(const std::string &groupname);
+    bool play(const std::string &groupname, Priority priority, int groups,
+              const std::string &start, const std::string &stop,
+              float startpoint, size_t loops);
 
     /** Gets info about the given animation group.
      * \param groupname Animation group to check.

@@ -171,7 +171,9 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
 
     std::string group;
     getCurrentGroup(group);
-    mMovingAnim = mAnimation->play(group, MWRender::Animation::Priority_Default, "start", "stop", 1.0f, loop ? (~(size_t)0) : 0);
+    mMovingAnim = mAnimation->play(group, MWRender::Animation::Priority_Default,
+                                   MWRender::Animation::Group_All,
+                                   "start", "stop", 1.0f, loop ? (~(size_t)0) : 0);
 }
 
 CharacterController::~CharacterController()
@@ -347,6 +349,7 @@ void CharacterController::update(float duration, Movement &movement)
             {
                 mMovingAnim = mAnimation->play(mAnimQueue.front().first,
                                                MWRender::Animation::Priority_Default,
+                                               MWRender::Animation::Group_All,
                                                "start", "stop", 0.0f,
                                                mAnimQueue.front().second);
                 mAnimQueue.pop_front();
@@ -383,6 +386,7 @@ void CharacterController::playGroup(const std::string &groupname, int mode, int 
             mCharState = CharState_SpecialIdle;
             mLooping = false;
             mMovingAnim = mAnimation->play(groupname, MWRender::Animation::Priority_Default,
+                                           MWRender::Animation::Group_All,
                                            ((mode==2) ? "loop start" : "start"), "stop", 0.0f, count-1);
         }
         else if(mode == 0)
@@ -427,6 +431,7 @@ void CharacterController::forceStateUpdate()
     std::string group;
     getCurrentGroup(group);
     mMovingAnim = mAnimation->play(group, MWRender::Animation::Priority_Default,
+                                   MWRender::Animation::Group_All,
                                    "start", "stop", 0.0f, mLooping ? (~(size_t)0) : 0);
 
     mAnimation->showWeapons(mWeapState != WeapState_None && mWeapState != WeapState_HandToHand &&
