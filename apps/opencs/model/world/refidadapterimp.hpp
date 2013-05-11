@@ -14,6 +14,7 @@ namespace CSMWorld
     {
         const RefIdColumn *mId;
         const RefIdColumn *mModified;
+        const RefIdColumn *mType;
     };
 
     template<typename RecordT>
@@ -64,6 +65,9 @@ namespace CSMWorld
 
             return static_cast<int> (record.mState);
         }
+
+        if (column==mBase.mType)
+            return static_cast<int> (mType);
 
         return QVariant();
     }
