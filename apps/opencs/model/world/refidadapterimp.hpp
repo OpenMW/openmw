@@ -152,6 +152,7 @@ namespace CSMWorld
     struct NameColumns : public ModelColumns
     {
         const RefIdColumn *mName;
+        const RefIdColumn *mScript;
 
         NameColumns (const ModelColumns& base) : ModelColumns (base) {}
     };
@@ -189,6 +190,9 @@ namespace CSMWorld
         if (column==mName.mName)
             return QString::fromUtf8 (record.get().mName.c_str());
 
+        if (column==mName.mScript)
+            return QString::fromUtf8 (record.get().mScript.c_str());
+
         return ModelRefIdAdapter<RecordT>::getData (column, data, index);
     }
 
@@ -201,6 +205,8 @@ namespace CSMWorld
 
         if (column==mName.mName)
             record.get().mName = value.toString().toUtf8().constData();
+        else if (column==mName.mScript)
+            record.get().mScript = value.toString().toUtf8().constData();
         else
             ModelRefIdAdapter<RecordT>::setData (column, data, index, value);
     }

@@ -55,6 +55,8 @@ CSMWorld::RefIdCollection::RefIdCollection()
 
     mColumns.push_back (RefIdColumn ("Name", ColumnBase::Display_String));
     nameColumns.mName = &mColumns.back();
+    mColumns.push_back (RefIdColumn ("Script", ColumnBase::Display_String));
+    nameColumns.mScript = &mColumns.back();
 
     mAdapters.insert (std::make_pair (UniversalId::Type_Activator,
         new NameRefIdAdapter<ESM::Activator> (UniversalId::Type_Activator, nameColumns)));
