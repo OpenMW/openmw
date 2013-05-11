@@ -58,18 +58,27 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.push_back (RefIdColumn ("Script", ColumnBase::Display_String));
     nameColumns.mScript = &mColumns.back();
 
+    InventoryColumns inventoryColumns (nameColumns);
+
+    mColumns.push_back (RefIdColumn ("Icon", ColumnBase::Display_String));
+    inventoryColumns.mIcon = &mColumns.back();
+    mColumns.push_back (RefIdColumn ("Weight", ColumnBase::Display_Float));
+    inventoryColumns.mWeight = &mColumns.back();
+    mColumns.push_back (RefIdColumn ("Value", ColumnBase::Display_Integer));
+    inventoryColumns.mValue = &mColumns.back();
+
     mAdapters.insert (std::make_pair (UniversalId::Type_Activator,
         new NameRefIdAdapter<ESM::Activator> (UniversalId::Type_Activator, nameColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Potion,
-        new NameRefIdAdapter<ESM::Potion> (UniversalId::Type_Potion, nameColumns)));
+        new InventoryRefIdAdapter<ESM::Potion> (UniversalId::Type_Potion, inventoryColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Apparatus,
-        new NameRefIdAdapter<ESM::Apparatus> (UniversalId::Type_Apparatus, nameColumns)));
+        new InventoryRefIdAdapter<ESM::Apparatus> (UniversalId::Type_Apparatus, inventoryColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Armor,
-        new NameRefIdAdapter<ESM::Armor> (UniversalId::Type_Armor, nameColumns)));
+        new InventoryRefIdAdapter<ESM::Armor> (UniversalId::Type_Armor, inventoryColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Book,
-        new NameRefIdAdapter<ESM::Book> (UniversalId::Type_Book, nameColumns)));
+        new InventoryRefIdAdapter<ESM::Book> (UniversalId::Type_Book, inventoryColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Clothing,
-        new NameRefIdAdapter<ESM::Clothing> (UniversalId::Type_Clothing, nameColumns)));
+        new InventoryRefIdAdapter<ESM::Clothing> (UniversalId::Type_Clothing, inventoryColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Container,
         new NameRefIdAdapter<ESM::Container> (UniversalId::Type_Container, nameColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Creature,
@@ -77,28 +86,29 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mAdapters.insert (std::make_pair (UniversalId::Type_Door,
         new NameRefIdAdapter<ESM::Door> (UniversalId::Type_Door, nameColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Ingredient,
-        new NameRefIdAdapter<ESM::Ingredient> (UniversalId::Type_Ingredient, nameColumns)));
+        new InventoryRefIdAdapter<ESM::Ingredient> (UniversalId::Type_Ingredient, inventoryColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_CreatureLevelledList,
         new BaseRefIdAdapter<ESM::CreatureLevList> (
         UniversalId::Type_CreatureLevelledList, baseColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_ItemLevelledList,
         new BaseRefIdAdapter<ESM::ItemLevList> (UniversalId::Type_ItemLevelledList, baseColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Light,
-        new NameRefIdAdapter<ESM::Light> (UniversalId::Type_Light, nameColumns)));
+        new InventoryRefIdAdapter<ESM::Light> (UniversalId::Type_Light, inventoryColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Lockpick,
-        new NameRefIdAdapter<ESM::Lockpick> (UniversalId::Type_Lockpick, nameColumns)));
+        new InventoryRefIdAdapter<ESM::Lockpick> (UniversalId::Type_Lockpick, inventoryColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Miscellaneous,
-        new NameRefIdAdapter<ESM::Miscellaneous> (UniversalId::Type_Miscellaneous, nameColumns)));
+        new InventoryRefIdAdapter<ESM::Miscellaneous> (UniversalId::Type_Miscellaneous,
+        inventoryColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Npc,
         new NameRefIdAdapter<ESM::NPC> (UniversalId::Type_Npc, nameColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Probe,
-        new NameRefIdAdapter<ESM::Probe> (UniversalId::Type_Probe, nameColumns)));
+        new InventoryRefIdAdapter<ESM::Probe> (UniversalId::Type_Probe, inventoryColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Repair,
-        new NameRefIdAdapter<ESM::Repair> (UniversalId::Type_Repair, nameColumns)));
+        new InventoryRefIdAdapter<ESM::Repair> (UniversalId::Type_Repair, inventoryColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Static,
         new ModelRefIdAdapter<ESM::Static> (UniversalId::Type_Static, modelColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Weapon,
-        new NameRefIdAdapter<ESM::Weapon> (UniversalId::Type_Weapon, nameColumns)));
+        new InventoryRefIdAdapter<ESM::Weapon> (UniversalId::Type_Weapon, inventoryColumns)));
 }
 
 CSMWorld::RefIdCollection::~RefIdCollection()
