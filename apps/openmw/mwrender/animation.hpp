@@ -80,7 +80,6 @@ protected:
     Ogre::Node *mNonAccumRoot;
     NifOgre::NodeTargetValue<Ogre::Real> *mNonAccumCtrl;
     Ogre::Vector3 mAccumulate;
-    Ogre::Vector3 mLastPosition;
 
     float mAnimVelocity;
     float mAnimSpeedMult;
@@ -106,8 +105,8 @@ protected:
     void updateSkeletonInstance(const Ogre::SkeletonInstance *skelsrc, Ogre::SkeletonInstance *skel);
 
     /* Updates the position of the accum root node for the given time, and
-     * returns the wanted movement vector from the previous update. */
-    void updatePosition(float time, Ogre::Vector3 &position);
+     * returns the wanted movement vector from the previous time. */
+    void updatePosition(float oldtime, float newtime, Ogre::Vector3 &position);
 
     static NifOgre::TextKeyMap::const_iterator findGroupStart(const NifOgre::TextKeyMap &keys, const std::string &groupname);
 

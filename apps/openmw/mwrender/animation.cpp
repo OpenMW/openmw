@@ -51,7 +51,6 @@ Animation::Animation(const MWWorld::Ptr &ptr)
     , mNonAccumRoot(NULL)
     , mNonAccumCtrl(NULL)
     , mAccumulate(0.0f)
-    , mLastPosition(0.0f)
     , mAnimVelocity(0.0f)
     , mAnimSpeedMult(1.0f)
 {
@@ -221,7 +220,6 @@ void Animation::clearAnimSources()
     mNonAccumCtrl = NULL;
     mAnimVelocity = 0.0f;
 
-    mLastPosition = Ogre::Vector3(0.0f);
     mAccumRoot = NULL;
     mNonAccumRoot = NULL;
 
@@ -357,19 +355,16 @@ void Animation::updateSkeletonInstance(const Ogre::SkeletonInstance *skelsrc, Og
 }
 
 
-void Animation::updatePosition(float time, Ogre::Vector3 &position)
+void Animation::updatePosition(float oldtime, float newtime, Ogre::Vector3 &position)
 {
-    Ogre::Vector3 posdiff;
-
     /* Get the non-accumulation root's difference from the last update, and move the position
      * accordingly.
      */
-    posdiff = (mNonAccumCtrl->getTranslation(time) - mLastPosition) * mAccumulate;
-    position += posdiff;
+    Ogre::Vector3 off = mNonAccumCtrl->getTranslation(newtime)*mAccumulate;
+    position += off - mNonAccumCtrl->getTranslation(oldtime)*mAccumulate;
 
     /* Translate the accumulation root back to compensate for the move. */
-    mLastPosition += posdiff;
-    mAccumRoot->setPosition(-mLastPosition);
+    mAccumRoot->setPosition(-off);
 }
 
 bool Animation::reset(AnimState &state, const NifOgre::TextKeyMap &keys, const std::string &groupname, const std::string &start, const std::string &stop, float startpoint)
@@ -471,11 +466,6 @@ bool Animation::handleTextKey(AnimState &state, const std::string &groupname, co
             if(state.mTime >= time)
                 return false;
         }
-
-        // Ugly
-        if(mNonAccumCtrl && groupname == mAnimationValuePtr[0]->getAnimName())
-            mLastPosition = mNonAccumCtrl->getTranslation(state.mTime) * mAccumulate;
-
         return true;
     }
 
@@ -546,7 +536,6 @@ bool Animation::resetActiveGroups()
 
     mNonAccumCtrl = NULL;
     mAnimVelocity = 0.0f;
-    mLastPosition = Ogre::Vector3(0.0f);
 
     if(!mNonAccumRoot || mAccumulate == Ogre::Vector3(0.0f))
         return false;
@@ -567,8 +556,6 @@ bool Animation::resetActiveGroups()
         {
             mAnimVelocity = calcAnimVelocity(keys, dstval, mAccumulate, state->first);
             ismoving = (mAnimVelocity > 1.0f);
-
-            mLastPosition = dstval->getTranslation(state->second.mTime) * mAccumulate;
 
             mNonAccumCtrl = dstval;
             break;
@@ -613,16 +600,16 @@ Ogre::Vector3 Animation::runAnimation(float duration)
             float targetTime = state.mTime + timepassed;
             if(state.mNextKey->first > targetTime)
             {
-                state.mTime = targetTime;
                 if(mNonAccumCtrl && stateiter->first == mAnimationValuePtr[0]->getAnimName())
-                    updatePosition(state.mTime, movement);
+                    updatePosition(state.mTime, targetTime, movement);
+                state.mTime = targetTime;
                 break;
             }
 
             NifOgre::TextKeyMap::const_iterator key(state.mNextKey++);
-            state.mTime = key->first;
             if(mNonAccumCtrl && stateiter->first == mAnimationValuePtr[0]->getAnimName())
-                updatePosition(state.mTime, movement);
+                updatePosition(state.mTime, key->first, movement);
+            state.mTime = key->first;
 
             state.mPlaying = (key != state.mStopKey);
             timepassed = targetTime - state.mTime;
