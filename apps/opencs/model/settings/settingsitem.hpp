@@ -5,7 +5,7 @@
 #include "support.hpp"
 #include "settingcontainer.hpp"
 
-namespace CsSettings
+namespace CSMSettings
 {
     class SettingsItem : public SettingContainer
     {

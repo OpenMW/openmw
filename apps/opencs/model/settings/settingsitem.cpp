@@ -1,6 +1,6 @@
 #include "settingsitem.hpp"
 
-bool CsSettings::SettingsItem::updateItem (const QStringList *values)
+bool CSMSettings::SettingsItem::updateItem (const QStringList *values)
 {
     QStringList::ConstIterator it = values->begin();
 
@@ -30,7 +30,7 @@ bool CsSettings::SettingsItem::updateItem (const QStringList *values)
     return isValid;
 }
 
-bool CsSettings::SettingsItem::updateItem (const QString &value)
+bool CSMSettings::SettingsItem::updateItem (const QString &value)
 {
     //takes a value or a SettingsContainer and updates itself accordingly
     //after validating the data against it's own definition
@@ -52,7 +52,7 @@ bool CsSettings::SettingsItem::updateItem (const QString &value)
     return success;
 }
 
-bool CsSettings::SettingsItem::updateItem(int valueListIndex)
+bool CSMSettings::SettingsItem::updateItem(int valueListIndex)
 {
     bool success = false;
 
@@ -64,7 +64,7 @@ bool CsSettings::SettingsItem::updateItem(int valueListIndex)
     return success;
 }
 
-bool CsSettings::SettingsItem::validate (const QString &value)
+bool CSMSettings::SettingsItem::validate (const QString &value)
 {
     bool isValid = true;
 
@@ -90,13 +90,13 @@ bool CsSettings::SettingsItem::validate (const QString &value)
     return isValid;
 }
 
-void CsSettings::SettingsItem::setDefaultValue (const QString &value)
+void CSMSettings::SettingsItem::setDefaultValue (const QString &value)
 {
     mDefaultValue = value;
     update (value);
 }
 
-QString CsSettings::SettingsItem::getDefaultValue() const
+QString CSMSettings::SettingsItem::getDefaultValue() const
 {
     return mDefaultValue;
 }

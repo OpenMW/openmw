@@ -1,21 +1,21 @@
 #include "groupbox.hpp"
 
-const QString CsSettings::GroupBox::INVISIBLE_BOX_STYLE =
+const QString CSVSettings::GroupBox::INVISIBLE_BOX_STYLE =
         QString::fromUtf8("QGroupBox { border: 0px; padding 0px; margin: 0px;}");
 
-CsSettings::GroupBox::GroupBox(QWidget *parent) :
+CSVSettings::GroupBox::GroupBox(QWidget *parent) :
     QGroupBox (parent)
 {
     initBox();
 }
 
-CsSettings::GroupBox::GroupBox (bool isVisible, QWidget *parent) :
+CSVSettings::GroupBox::GroupBox (bool isVisible, QWidget *parent) :
     QGroupBox (parent)
 {
     initBox(isVisible);
 }
 
-void CsSettings::GroupBox::initBox(bool isVisible)
+void CSVSettings::GroupBox::initBox(bool isVisible)
 {
     setFlat (true);
     VISIBLE_BOX_STYLE = styleSheet();
@@ -24,12 +24,12 @@ void CsSettings::GroupBox::initBox(bool isVisible)
         setStyleSheet (INVISIBLE_BOX_STYLE);
 }
 
-bool CsSettings::GroupBox::borderVisibile() const
+bool CSVSettings::GroupBox::borderVisibile() const
 {
     return (styleSheet() != INVISIBLE_BOX_STYLE);
 }
 
-void CsSettings::GroupBox::setTitle (const QString &title)
+void CSVSettings::GroupBox::setTitle (const QString &title)
 {
     if (borderVisibile() )
     {
@@ -38,7 +38,7 @@ void CsSettings::GroupBox::setTitle (const QString &title)
     }
 }
 
-void CsSettings::GroupBox::setBorderVisibility (bool value)
+void CSVSettings::GroupBox::setBorderVisibility (bool value)
 {
     if (value)
         setStyleSheet(VISIBLE_BOX_STYLE);
@@ -46,7 +46,7 @@ void CsSettings::GroupBox::setBorderVisibility (bool value)
         setStyleSheet(INVISIBLE_BOX_STYLE);
 }
 
-void CsSettings::GroupBox::setMinimumWidth()
+void CSVSettings::GroupBox::setMinimumWidth()
 {
     //set minimum width to accommodate title, if needed
     //1.5 multiplier to account for bold title.

@@ -10,14 +10,12 @@
 class SettingMap;
 class SettingList;
 
-namespace CsSettings {
+namespace CSVSettings {
 
     typedef QList<AbstractBlock *> AbstractBlockList;
 
     class AbstractPage: public QWidget
     {
-
-        Q_OBJECT
 
     protected:
 
@@ -32,9 +30,9 @@ namespace CsSettings {
 
         virtual void setupUi()=0;
 
-        virtual void initializeWidgets (const SettingMap &settings) = 0;
+        virtual void initializeWidgets (const CSMSettings::SettingMap &settings) = 0;
 
-        SettingList *getSettings();
+        CSMSettings::SettingList *getSettings();
 
         void setObjectName();
 

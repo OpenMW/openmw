@@ -3,7 +3,7 @@
 
 #include "abstractblock.hpp"
 
-namespace CsSettings
+namespace CSVSettings
 {
 
     class ProxyBlock;
@@ -19,8 +19,8 @@ namespace CsSettings
 
         explicit CustomBlock (QWidget *parent = 0);
 
-        bool updateSettings (const SettingMap &settings);
-        SettingList *getSettings();
+        bool updateSettings (const CSMSettings::SettingMap &settings);
+        CSMSettings::SettingList *getSettings();
         int build (GroupBlockDefList &defList, GroupBlockDefList::Iterator *it = 0);
 
     protected:

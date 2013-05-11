@@ -3,11 +3,11 @@
 #include "itemblock.hpp"
 #include "proxyblock.hpp"
 
-CsSettings::CustomBlock::CustomBlock (QWidget *parent) : AbstractBlock (parent)
+CSVSettings::CustomBlock::CustomBlock (QWidget *parent) : AbstractBlock (parent)
 {
 }
 
-int CsSettings::CustomBlock::build(GroupBlockDefList &defList, GroupBlockDefList::iterator *it)
+int CSVSettings::CustomBlock::build(GroupBlockDefList &defList, GroupBlockDefList::iterator *it)
 {
     int retVal = 0;
 
@@ -37,7 +37,7 @@ int CsSettings::CustomBlock::build(GroupBlockDefList &defList, GroupBlockDefList
     return retVal;
 }
 
-CsSettings::GroupBox *CsSettings::CustomBlock::buildGroupBox (CsSettings::OcsWidgetOrientation orientation)
+CSVSettings::GroupBox *CSVSettings::CustomBlock::buildGroupBox (OcsWidgetOrientation orientation)
 {
     GroupBox *box = new GroupBox (false, mBox);
     QLayout *layout = createLayout (orientation, true, box);
@@ -45,7 +45,7 @@ CsSettings::GroupBox *CsSettings::CustomBlock::buildGroupBox (CsSettings::OcsWid
     return box;
 }
 
-int CsSettings::CustomBlock::buildGroupBlock(GroupBlockDef &def)
+int CSVSettings::CustomBlock::buildGroupBlock(GroupBlockDef &def)
 {
     GroupBlock *block = new GroupBlock (getParent());
 
@@ -57,7 +57,7 @@ int CsSettings::CustomBlock::buildGroupBlock(GroupBlockDef &def)
     return block->build(def);
 }
 
-int CsSettings::CustomBlock::buildProxyBlock(GroupBlockDef& def, ProxyBlock *block)
+int CSVSettings::CustomBlock::buildProxyBlock(GroupBlockDef& def, ProxyBlock *block)
 {
     if (def.properties.size() != 1)
         return -1;
@@ -91,13 +91,13 @@ int CsSettings::CustomBlock::buildProxyBlock(GroupBlockDef& def, ProxyBlock *blo
     return 0;
 }
 
-CsSettings::SettingList *CsSettings::CustomBlock::getSettings()
+CSMSettings::SettingList *CSVSettings::CustomBlock::getSettings()
 {
-    SettingList *settings = new SettingList();
+    CSMSettings::SettingList *settings = new CSMSettings::SettingList();
 
     foreach (GroupBlock *block, mGroupList)
     {
-        SettingList *groupSettings = block->getSettings();
+        CSMSettings::SettingList *groupSettings = block->getSettings();
 
         if (groupSettings)
             settings->append(*groupSettings);
@@ -106,7 +106,7 @@ CsSettings::SettingList *CsSettings::CustomBlock::getSettings()
     return settings;
 }
 
-bool CsSettings::CustomBlock::updateSettings (const SettingMap &settings)
+bool CSVSettings::CustomBlock::updateSettings (const CSMSettings::SettingMap &settings)
 {
     bool success = true;
 

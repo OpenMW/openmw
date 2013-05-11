@@ -13,7 +13,7 @@ class AbstractWidget;
 class QStackedWidget;
 class QListWidget;
 
-namespace CsSettings {
+namespace CSVSettings {
 
     class AbstractPage;
     class UserSettingsDialog : public QMainWindow
@@ -23,7 +23,7 @@ namespace CsSettings {
         QStringList mPaths;
         QListWidget *mListWidget;
         QStackedWidget *mStackedWidget;
-        UserSettings mUserSettings;
+        CSMSettings::UserSettings mUserSettings;
         Files::ConfigurationManager mCfgMgr;
 
     public:
@@ -34,10 +34,10 @@ namespace CsSettings {
 
         void closeEvent (QCloseEvent *event);
         AbstractPage *getAbstractPage (int index);
-        void setWidgetStates (SectionMap settingsMap);
+        void setWidgetStates (CSMSettings::SectionMap settingsMap);
         void buildPages();
         void positionWindow ();
-        SectionMap loadSettings();
+        CSMSettings::SectionMap loadSettings();
         void writeSettings();
         void createSamplePage();
 

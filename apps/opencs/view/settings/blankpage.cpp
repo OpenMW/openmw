@@ -17,19 +17,19 @@
 #include "groupblock.hpp"
 #include "toggleblock.hpp"
 
-CsSettings::BlankPage::BlankPage(QWidget *parent):
+CSVSettings::BlankPage::BlankPage(QWidget *parent):
     AbstractPage("Blank", parent)
 {
     initPage();
 }
 
-CsSettings::BlankPage::BlankPage(const QString &title, QWidget *parent):
+CSVSettings::BlankPage::BlankPage(const QString &title, QWidget *parent):
     AbstractPage(title, parent)
 {
     initPage();
 }
 
-void CsSettings::BlankPage::initPage()
+void CSVSettings::BlankPage::initPage()
 {
     // Hacks to get the stylesheet look properly
 #ifdef Q_OS_MAC
@@ -40,7 +40,7 @@ void CsSettings::BlankPage::initPage()
     setupUi();
 }
 
-void CsSettings::BlankPage::setupUi()
+void CSVSettings::BlankPage::setupUi()
 {
     QGroupBox *pageBox = new QGroupBox(this);
     QLayout* pageLayout = new QVBoxLayout();
@@ -49,7 +49,7 @@ void CsSettings::BlankPage::setupUi()
     pageLayout->addWidget(pageBox);
 }
 
-void CsSettings::BlankPage::initializeWidgets (const SettingMap &settings)
+void CSVSettings::BlankPage::initializeWidgets (const CSMSettings::SettingMap &settings)
 {
     //iterate each item in each blocks in this section
     //validate the corresponding setting against the defined valuelist if any.

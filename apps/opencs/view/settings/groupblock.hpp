@@ -4,7 +4,7 @@
 #include <QList>
 #include "abstractblock.hpp"
 
-namespace CsSettings
+namespace CSVSettings
 {
     class ItemBlock;
 
@@ -18,9 +18,9 @@ namespace CsSettings
 
         int build (GroupBlockDef &def);
 
-        bool updateSettings (const SettingMap &settings);
+        bool updateSettings (const CSMSettings::SettingMap &settings);
 
-        SettingList *getSettings();
+        CSMSettings::SettingList *getSettings();
         ItemBlock *getItemBlock (const QString &name, ItemBlockList *blockList = 0);
         ItemBlock *getItemBlock (int index);
 

@@ -14,7 +14,7 @@
 
 #include "abstractwidget.hpp"
 
-namespace CsSettings
+namespace CSVSettings
 {
     //VALID FOR RADIOBUTTON / CHECKBOX (or other toggle widget with it's own label)
     template <typename T1>
@@ -25,7 +25,7 @@ namespace CsSettings
 
     public:
 
-        explicit SettingWidget(WidgetDef &def, QLayout *layout, QWidget* parent = 0)
+        explicit SettingWidget (WidgetDef &def, QLayout *layout, QWidget* parent = 0)
             : AbstractWidget (layout, parent), mWidget (new T1 (parent))
         {
             mWidget->setText(def.caption);
@@ -55,7 +55,7 @@ namespace CsSettings
 
     public:
 
-        SettingWidget(WidgetDef &def, QLayout *layout, QWidget *parent = 0)
+        SettingWidget (WidgetDef &def, QLayout *layout, QWidget *parent = 0)
             : AbstractWidget (layout, parent), mWidget (new QSpinBox (parent))
         {
             def.caption += tr(" (%1 to %2)").arg(def.minMax->left).arg(def.minMax->right);
@@ -91,7 +91,7 @@ namespace CsSettings
     };
 
     template <>
-    class SettingWidget <QComboBox>: public CsSettings::AbstractWidget
+    class SettingWidget <QComboBox>: public CSVSettings::AbstractWidget
     {
 
         QComboBox *mWidget;
@@ -143,7 +143,7 @@ namespace CsSettings
     };
 
     template <>
-    class SettingWidget <QLineEdit>: public CsSettings::AbstractWidget
+    class SettingWidget <QLineEdit>: public CSVSettings::AbstractWidget
     {
 
         QLineEdit *mWidget;
@@ -176,7 +176,7 @@ namespace CsSettings
     };
 
     template <>
-    class SettingWidget <QListWidget>: public CsSettings::AbstractWidget
+    class SettingWidget <QListWidget>: public CSVSettings::AbstractWidget
     {
 
         QListWidget *mWidget;

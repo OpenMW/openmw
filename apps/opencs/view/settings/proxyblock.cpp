@@ -1,11 +1,11 @@
 #include "proxyblock.hpp"
 #include "itemblock.hpp"
 
-CsSettings::ProxyBlock::ProxyBlock (QWidget *parent)
+CSVSettings::ProxyBlock::ProxyBlock (QWidget *parent)
     : GroupBlock (parent)
 {
 }
-int CsSettings::ProxyBlock::build (GroupBlockDef &proxyDef)
+int CSVSettings::ProxyBlock::build (GroupBlockDef &proxyDef)
 {
     //get the list of pre-defined values for the proxy
     mValueList = proxyDef.properties.at(0)->valueList;
@@ -19,7 +19,7 @@ int CsSettings::ProxyBlock::build (GroupBlockDef &proxyDef)
     return success;
 }
 
-void CsSettings::ProxyBlock::addSetting (ItemBlock *settingBlock, QStringList *proxyList)
+void CSVSettings::ProxyBlock::addSetting (ItemBlock *settingBlock, QStringList *proxyList)
 {
     //connect the item block of the proxied seting to the generic update slot
     connect (settingBlock, SIGNAL (signalUpdateSetting(const QString &, const QString &)),
@@ -29,23 +29,23 @@ void CsSettings::ProxyBlock::addSetting (ItemBlock *settingBlock, QStringList *p
     mProxyList << proxyList;
 }
 
-bool CsSettings::ProxyBlock::updateSettings (const SettingMap &settings)
+bool CSVSettings::ProxyBlock::updateSettings (const CSMSettings::SettingMap &settings)
 {
     return updateByProxiedSettings(&settings);
 }
 
-bool CsSettings::ProxyBlock::updateBySignal(const QString &name, const QString &value, bool &doEmit)
+bool CSVSettings::ProxyBlock::updateBySignal(const QString &name, const QString &value, bool &doEmit)
 {
     doEmit = false;
     return updateProxiedSettings();
 }
 
-void CsSettings::ProxyBlock::slotUpdateProxySetting (const QString &name, const QString &value)
+void CSVSettings::ProxyBlock::slotUpdateProxySetting (const QString &name, const QString &value)
 {
     updateByProxiedSettings();
 }
 
-bool CsSettings::ProxyBlock::updateProxiedSettings()
+bool CSVSettings::ProxyBlock::updateProxiedSettings()
 {
     foreach (ItemBlock *block, mProxiedItemBlockList)
     {
@@ -74,7 +74,7 @@ bool CsSettings::ProxyBlock::updateProxiedSettings()
     return true;
 }
 
-bool CsSettings::ProxyBlock::updateByProxiedSettings(const SettingMap *settings)
+bool CSVSettings::ProxyBlock::updateByProxiedSettings(const CSMSettings::SettingMap *settings)
 {
     bool success = false;
     int commonIndex = -1;
@@ -143,7 +143,7 @@ bool CsSettings::ProxyBlock::updateByProxiedSettings(const SettingMap *settings)
     return success;
 }
 
-CsSettings::ItemBlock *CsSettings::ProxyBlock::getProxiedItemBlock (const QString &name)
+CSVSettings::ItemBlock *CSVSettings::ProxyBlock::getProxiedItemBlock (const QString &name)
 {
     return getItemBlock (name, &mProxiedItemBlockList);
 }

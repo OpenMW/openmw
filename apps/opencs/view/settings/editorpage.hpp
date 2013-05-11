@@ -5,7 +5,7 @@
 
 class QGroupBox;
 
-namespace CsSettings {
+namespace CSVSettings {
 
     class UserSettings;
     class AbstractBlock;
@@ -19,7 +19,7 @@ namespace CsSettings {
         EditorPage(QWidget *parent = 0);
 
         void setupUi();
-        void initializeWidgets (const SettingMap &settings);
+        void initializeWidgets (const CSMSettings::SettingMap &settings);
 
     signals:
         void signalUpdateEditorSetting (const QString &settingName, const QString &settingValue);

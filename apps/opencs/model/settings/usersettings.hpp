@@ -15,7 +15,7 @@ namespace Files { typedef std::vector<boost::filesystem::path> PathContainer;
 
 class QFile;
 
-namespace CsSettings {
+namespace CSMSettings {
 
     class UserSettings
     {

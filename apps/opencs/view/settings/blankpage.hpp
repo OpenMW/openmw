@@ -5,14 +5,13 @@
 
 class QGroupBox;
 
-namespace CsSettings {
+namespace CSVSettings {
 
     class UserSettings;
     class AbstractBlock;
 
     class BlankPage : public AbstractPage
     {
-        Q_OBJECT
 
     public:
 
@@ -20,7 +19,7 @@ namespace CsSettings {
         BlankPage (const QString &title, QWidget *parent);
 
         void setupUi();
-        void initializeWidgets (const SettingMap &settings);
+        void initializeWidgets (const CSMSettings::SettingMap &settings);
 
     private:
         void initPage();

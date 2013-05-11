@@ -2,17 +2,17 @@
 
 #include <QStringList>
 
-CsSettings::SettingContainer::SettingContainer(QObject *parent) :
+CSMSettings::SettingContainer::SettingContainer(QObject *parent) :
     QObject(parent), mValue (0), mValues (0)
 {
 }
 
-CsSettings::SettingContainer::SettingContainer(const QString &value, QObject *parent) :
+CSMSettings::SettingContainer::SettingContainer(const QString &value, QObject *parent) :
     QObject(parent), mValue (new QString (value)), mValues (0)
 {
 }
 
-void CsSettings::SettingContainer::insert (const QString &value)
+void CSMSettings::SettingContainer::insert (const QString &value)
 {
     if (mValue)
     {
@@ -31,7 +31,7 @@ void CsSettings::SettingContainer::insert (const QString &value)
 
 }
 
-void CsSettings::SettingContainer::update (const QString &value, int index)
+void CSMSettings::SettingContainer::update (const QString &value, int index)
 {
     if (isEmpty())
         mValue = new QString(value);
@@ -43,7 +43,7 @@ void CsSettings::SettingContainer::update (const QString &value, int index)
         mValues->replace(index, value);
 }
 
-QString CsSettings::SettingContainer::getValue (int index) const
+QString CSMSettings::SettingContainer::getValue (int index) const
 {
     QString retVal("");
 
@@ -66,7 +66,7 @@ QString CsSettings::SettingContainer::getValue (int index) const
     return retVal;
 }
 
-int CsSettings::SettingContainer::count () const
+int CSMSettings::SettingContainer::count () const
 {
     int retVal = 0;
 

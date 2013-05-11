@@ -2,11 +2,11 @@
 #define ABSTRACTWIDGET_HPP
 
 #include <QWidget>
-#include "../../model/settings/support.hpp"
+#include "support.hpp"
 
 class QLayout;
 
-namespace CsSettings
+namespace CSVSettings
 {
     class AbstractWidget : public QObject
     {
@@ -35,12 +35,12 @@ namespace CsSettings
         virtual void updateWidget (const QString &value) = 0;
 
         //converts user-defined enum to Qt equivalents
-        QFlags<Qt::AlignmentFlag> getAlignment (CsSettings::OcsAlignment flag);
+        QFlags<Qt::AlignmentFlag> getAlignment (OcsAlignment flag);
 
     private:
 
         //widget initialization utilities
-        void createLayout (CsSettings::OcsWidgetOrientation direction, bool isZeroMargin);
+        void createLayout (OcsWidgetOrientation direction, bool isZeroMargin);
         void buildLabelAndWidget (QWidget *widget, WidgetDef &def, bool noLabel);
 
 

@@ -17,7 +17,7 @@
 #include "settingwidget.hpp"
 #include <QDebug>
 
-CsSettings::UserSettingsDialog::UserSettingsDialog(QMainWindow *parent) :
+CSVSettings::UserSettingsDialog::UserSettingsDialog(QMainWindow *parent) :
     QMainWindow (parent), mUserSettings (mCfgMgr), mStackedWidget (0)
 {
     setWindowTitle(QString::fromUtf8 ("User Settings"));
@@ -31,22 +31,22 @@ CsSettings::UserSettingsDialog::UserSettingsDialog(QMainWindow *parent) :
              SLOT (slotChangePage (QListWidgetItem*, QListWidgetItem*)));
 }
 
-CsSettings::UserSettingsDialog::~UserSettingsDialog()
+CSVSettings::UserSettingsDialog::~UserSettingsDialog()
 {
 }
 
-void CsSettings::UserSettingsDialog::closeEvent (QCloseEvent *event)
+void CSVSettings::UserSettingsDialog::closeEvent (QCloseEvent *event)
 {
     writeSettings();
 }
 
-void CsSettings::UserSettingsDialog::setWidgetStates (SectionMap settingsMap)
+void CSVSettings::UserSettingsDialog::setWidgetStates (CSMSettings::SectionMap settingsMap)
 {
     //iterate the tabWidget's pages (sections)
     for (int i = 0; i < mStackedWidget->count(); i++)
     {
         //get the settings defined for the entire section
-        CsSettings::SettingMap *settings = settingsMap [mStackedWidget->widget(i)->objectName()];
+        CSMSettings::SettingMap *settings = settingsMap [mStackedWidget->widget(i)->objectName()];
 
         //if found, initialize the page's widgets
         if (settings)
@@ -57,7 +57,7 @@ void CsSettings::UserSettingsDialog::setWidgetStates (SectionMap settingsMap)
     }
 }
 
-void CsSettings::UserSettingsDialog::buildPages()
+void CSVSettings::UserSettingsDialog::buildPages()
 {
     //craete central widget with it's layout and immediate children
     QWidget *centralWidget = new QWidget (this);
@@ -75,17 +75,17 @@ void CsSettings::UserSettingsDialog::buildPages()
     setCentralWidget (centralWidget);
     setDockOptions (QMainWindow::AllowNestedDocks);
     //uncomment to test with sample editor page.
-    //createSamplePage();
+    createSamplePage();
     createPage<BlankPage>("Page1");
     createPage<BlankPage>("Page2");
     createPage<BlankPage>("Page3");
 }
 
-void CsSettings::UserSettingsDialog::createSamplePage()
+void CSVSettings::UserSettingsDialog::createSamplePage()
 {
     //add pages to stackedwidget and items to listwidget
-    CsSettings::AbstractPage *page
-            = new CsSettings::EditorPage(this);
+    CSVSettings::AbstractPage *page
+            = new CSVSettings::EditorPage(this);
 
     mStackedWidget->addWidget (page);
 
@@ -95,7 +95,7 @@ void CsSettings::UserSettingsDialog::createSamplePage()
               this, SIGNAL ( signalUpdateEditorSetting (const QString &, const QString &)));
 }
 
-void CsSettings::UserSettingsDialog::positionWindow ()
+void CSVSettings::UserSettingsDialog::positionWindow ()
 {
     QRect scr = QApplication::desktop()->screenGeometry();
 
@@ -103,14 +103,14 @@ void CsSettings::UserSettingsDialog::positionWindow ()
 
 }
 
-CsSettings::SectionMap CsSettings::UserSettingsDialog::loadSettings ()
+CSMSettings::SectionMap CSVSettings::UserSettingsDialog::loadSettings ()
 {
     QString userPath = QString::fromStdString(mCfgMgr.getUserPath().string());
 
     mPaths.append(QString("opencs.cfg"));
     mPaths.append(userPath + QString("opencs.cfg"));
 
-    SectionMap settingsMap;
+    CSMSettings::SectionMap settingsMap;
 
     foreach (const QString &path, mPaths)
     {
@@ -144,9 +144,9 @@ CsSettings::SectionMap CsSettings::UserSettingsDialog::loadSettings ()
     return settingsMap;
 }
 
-void CsSettings::UserSettingsDialog::writeSettings()
+void CSVSettings::UserSettingsDialog::writeSettings()
 {
-    QMap<QString, SettingList *> settings;
+    QMap<QString, CSMSettings::SettingList *> settings;
 
     for (int i = 0; i < mStackedWidget->count(); ++i)
     {
@@ -158,12 +158,12 @@ void CsSettings::UserSettingsDialog::writeSettings()
 
 }
 
-CsSettings::AbstractPage *CsSettings::UserSettingsDialog::getAbstractPage (int index)
+CSVSettings::AbstractPage *CSVSettings::UserSettingsDialog::getAbstractPage (int index)
 {
     return dynamic_cast<AbstractPage *>(mStackedWidget->widget(index));
 }
 
-void CsSettings::UserSettingsDialog::slotChangePage(QListWidgetItem *current, QListWidgetItem *previous)
+void CSVSettings::UserSettingsDialog::slotChangePage(QListWidgetItem *current, QListWidgetItem *previous)
 {
     if (!current)
         current = previous;

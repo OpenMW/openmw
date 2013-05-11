@@ -1,15 +1,15 @@
 #include "groupblock.hpp"
 #include "itemblock.hpp"
 
-CsSettings::GroupBlock::GroupBlock (QWidget* parent)
+CSVSettings::GroupBlock::GroupBlock (QWidget* parent)
     : AbstractBlock (parent)
 {}
 
-CsSettings::GroupBlock::GroupBlock (bool isVisible, QWidget *parent)
+CSVSettings::GroupBlock::GroupBlock (bool isVisible, QWidget *parent)
     : AbstractBlock (isVisible, parent)
 {}
 
-int CsSettings::GroupBlock::build (GroupBlockDef &def)
+int CSVSettings::GroupBlock::build (GroupBlockDef &def)
 {
 
     if (def.properties.size() == 0)
@@ -44,14 +44,14 @@ int CsSettings::GroupBlock::build (GroupBlockDef &def)
     return retVal;
 }
 
-CsSettings::SettingList *CsSettings::GroupBlock::getSettings()
+CSMSettings::SettingList *CSVSettings::GroupBlock::getSettings()
 {
-    SettingList *settings = 0;
+    CSMSettings::SettingList *settings = 0;
 
     foreach (ItemBlock *block, mItemBlockList)
     {
         if (!settings)
-            settings = new SettingList();
+            settings = new CSMSettings::SettingList();
 
         settings->append(*(block->getSettings ()));
     }
@@ -59,7 +59,7 @@ CsSettings::SettingList *CsSettings::GroupBlock::getSettings()
     return settings;
 }
 
-CsSettings::ItemBlock *CsSettings::GroupBlock::getItemBlock (const QString &name, ItemBlockList *blockList)
+CSVSettings::ItemBlock *CSVSettings::GroupBlock::getItemBlock (const QString &name, ItemBlockList *blockList)
 {
     ItemBlock *retBlock = 0;
 
@@ -78,7 +78,7 @@ CsSettings::ItemBlock *CsSettings::GroupBlock::getItemBlock (const QString &name
     return retBlock;
 }
 
-CsSettings::ItemBlock *CsSettings::GroupBlock::getItemBlock (int index)
+CSVSettings::ItemBlock *CSVSettings::GroupBlock::getItemBlock (int index)
 {
     ItemBlock *retBlock = 0;
 
@@ -88,14 +88,14 @@ CsSettings::ItemBlock *CsSettings::GroupBlock::getItemBlock (int index)
     return retBlock;
 }
 
-bool CsSettings::GroupBlock::updateSettings (const SettingMap &settings)
+bool CSVSettings::GroupBlock::updateSettings (const CSMSettings::SettingMap &settings)
 {
     bool success = true;
 
     //update all non-proxy settings
     foreach (ItemBlock *block, mItemBlockList)
     {
-        SettingContainer *setting = settings[block->objectName()];
+        CSMSettings::SettingContainer *setting = settings[block->objectName()];
 
         if (setting)
         {

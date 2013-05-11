@@ -3,7 +3,7 @@
 #include <QLayout>
 #include <QLabel>
 
-void CsSettings::AbstractWidget::build(QWidget *widget, WidgetDef &def, bool noLabel)
+void CSVSettings::AbstractWidget::build(QWidget *widget, WidgetDef &def, bool noLabel)
 {
     if (!mLayout)
         createLayout(def.orientation, true);
@@ -12,7 +12,7 @@ void CsSettings::AbstractWidget::build(QWidget *widget, WidgetDef &def, bool noL
 
 }
 
-void CsSettings::AbstractWidget::buildLabelAndWidget (QWidget *widget, WidgetDef &def, bool noLabel)
+void CSVSettings::AbstractWidget::buildLabelAndWidget (QWidget *widget, WidgetDef &def, bool noLabel)
 {
     if (def.widgetWidth > -1)
         widget->setFixedWidth (def.widgetWidth);
@@ -31,7 +31,7 @@ void CsSettings::AbstractWidget::buildLabelAndWidget (QWidget *widget, WidgetDef
     mLayout->setAlignment (widget, getAlignment (def.widgetAlignment));
 }
 
-void CsSettings::AbstractWidget::createLayout
+void CSVSettings::AbstractWidget::createLayout
         (OcsWidgetOrientation direction, bool isZeroMargin)
 {
     if (direction == OCS_VERTICAL)
@@ -43,36 +43,36 @@ void CsSettings::AbstractWidget::createLayout
         mLayout->setContentsMargins(0, 0, 0, 0);
 }
 
-QFlags<Qt::AlignmentFlag> CsSettings::AbstractWidget::getAlignment (CsSettings::OcsAlignment flag)
+QFlags<Qt::AlignmentFlag> CSVSettings::AbstractWidget::getAlignment (CSVSettings::OcsAlignment flag)
 {
     return QFlags<Qt::AlignmentFlag>(static_cast<int>(flag));
 }
 
-QLayout *CsSettings::AbstractWidget::getLayout()
+QLayout *CSVSettings::AbstractWidget::getLayout()
 {
     return mLayout;
 }
 
-void CsSettings::AbstractWidget::slotUpdateWidget (const QString &value)
+void CSVSettings::AbstractWidget::slotUpdateWidget (const QString &value)
 {
     updateWidget (value);
 }
 
-void CsSettings::AbstractWidget::slotUpdateItem(const QString &value)
+void CSVSettings::AbstractWidget::slotUpdateItem(const QString &value)
 {
     emit signalUpdateItem (value);
 }
 
-void CsSettings::AbstractWidget::slotUpdateItem(bool value)
+void CSVSettings::AbstractWidget::slotUpdateItem(bool value)
 {
     if (value)
         emit signalUpdateItem (widget()->objectName());
 }
 
-void CsSettings::AbstractWidget::slotUpdateItem(int value)
+void CSVSettings::AbstractWidget::slotUpdateItem(int value)
 {
     emit signalUpdateItem (QString::number(value));
 }
 
-void CsSettings::AbstractWidget::slotUpdateItem (QListWidgetItem* current, QListWidgetItem* previous)
+void CSVSettings::AbstractWidget::slotUpdateItem (QListWidgetItem* current, QListWidgetItem* previous)
 {}

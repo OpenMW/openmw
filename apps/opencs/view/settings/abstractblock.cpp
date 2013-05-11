@@ -1,14 +1,15 @@
 #include "abstractblock.hpp"
 
-CsSettings::AbstractBlock::AbstractBlock(QWidget* parent)
+CSVSettings::AbstractBlock::AbstractBlock(QWidget* parent)
     : QObject (parent), mBox ( new GroupBox (parent) ), mWidgetParent (parent)
 {}
 
-CsSettings::AbstractBlock::AbstractBlock(bool isVisible, QWidget* parent)
+CSVSettings::AbstractBlock::AbstractBlock(bool isVisible, QWidget* parent)
     : QObject (parent), mBox ( new GroupBox (isVisible, parent)), mWidgetParent (parent)
 {}
 
-QLayout *CsSettings::AbstractBlock::createLayout (OcsWidgetOrientation direction, bool isZeroMargin, QWidget* parent)
+QLayout *CSVSettings::AbstractBlock::createLayout (OcsWidgetOrientation direction,
+                                                   bool isZeroMargin, QWidget* parent)
 {
     QLayout *layout = 0;
 
@@ -23,13 +24,13 @@ QLayout *CsSettings::AbstractBlock::createLayout (OcsWidgetOrientation direction
     return layout;
 }
 
-QGroupBox *CsSettings::AbstractBlock::getGroupBox()
+QGroupBox *CSVSettings::AbstractBlock::getGroupBox()
 {
     return mBox;
 }
 
-CsSettings::AbstractWidget *CsSettings::AbstractBlock::buildWidget (const QString& widgetName, WidgetDef &def,
-                                                 QLayout *layout, bool isConnected) const
+CSVSettings::AbstractWidget *CSVSettings::AbstractBlock::buildWidget (const QString& widgetName, WidgetDef &def,
+                                                                        QLayout *layout, bool isConnected) const
 {
     AbstractWidget *widg = 0;
 
@@ -76,32 +77,32 @@ CsSettings::AbstractWidget *CsSettings::AbstractBlock::buildWidget (const QStrin
     return widg;
 }
 
-void CsSettings::AbstractBlock::setVisible (bool isVisible)
+void CSVSettings::AbstractBlock::setVisible (bool isVisible)
 {
     mBox->setBorderVisibility (isVisible);
 }
 
-bool CsSettings::AbstractBlock::isVisible () const
+bool CSVSettings::AbstractBlock::isVisible () const
 {
     return mBox->borderVisibile();
 }
 
-QWidget *CsSettings::AbstractBlock::getParent() const
+QWidget *CSVSettings::AbstractBlock::getParent() const
 {
     return mWidgetParent;
 }
 
-void CsSettings::AbstractBlock::slotUpdate (const QString &value)
+void CSVSettings::AbstractBlock::slotUpdate (const QString &value)
 {
     slotUpdateSetting (objectName(), value);
 }
 
-void CsSettings::AbstractBlock::slotSetEnabled(bool value)
+void CSVSettings::AbstractBlock::slotSetEnabled(bool value)
 {
     mBox->setEnabled(value);
 }
 
-void CsSettings::AbstractBlock::slotUpdateSetting (const QString &settingName, const QString &settingValue)
+void CSVSettings::AbstractBlock::slotUpdateSetting (const QString &settingName, const QString &settingValue)
 {
     bool doEmit = true;
     updateBySignal (settingName, settingValue, doEmit);

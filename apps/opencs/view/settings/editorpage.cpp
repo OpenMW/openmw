@@ -17,7 +17,7 @@
 #include "groupblock.hpp"
 #include "toggleblock.hpp"
 
-CsSettings::EditorPage::EditorPage(QWidget *parent):
+CSVSettings::EditorPage::EditorPage(QWidget *parent):
     AbstractPage("Editor", parent)
 {
     // Hacks to get the stylesheet look properly
@@ -29,7 +29,7 @@ CsSettings::EditorPage::EditorPage(QWidget *parent):
     setupUi();
 }
 
-void CsSettings::EditorPage::setupUi()
+void CSVSettings::EditorPage::setupUi()
 {
     GroupBlockDef undoStack (QString("Undo Stack Size"));
     GroupBlockDef topLevelWindowCount (QString("Maximum Top-Level Window Count"));
@@ -153,7 +153,7 @@ void CsSettings::EditorPage::setupUi()
      }
 }
 
-void CsSettings::EditorPage::initializeWidgets (const SettingMap &settings)
+void CSVSettings::EditorPage::initializeWidgets (const CSMSettings::SettingMap &settings)
 {
     //iterate each item in each blocks in this section
     //validate the corresponding setting against the defined valuelist if any.

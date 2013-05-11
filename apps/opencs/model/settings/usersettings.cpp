@@ -30,16 +30,16 @@ namespace boost
 #endif /* (BOOST_VERSION <= 104600) */
 
 
-CsSettings::UserSettings::UserSettings(Files::ConfigurationManager &cfg)
+CSMSettings::UserSettings::UserSettings(Files::ConfigurationManager &cfg)
     : mCfgMgr(cfg)
 {
 }
 
-CsSettings::UserSettings::~UserSettings()
+CSMSettings::UserSettings::~UserSettings()
 {
 }
 
-QFile *CsSettings::UserSettings::openFile (const QString &filename)
+QFile *CSMSettings::UserSettings::openFile (const QString &filename)
 {
     QFile *file = new QFile(filename);
 
@@ -63,7 +63,7 @@ QFile *CsSettings::UserSettings::openFile (const QString &filename)
     return file;
 }
 
-bool CsSettings::UserSettings::writeFile(QFile *file, QMap<QString, CsSettings::SettingList *> &settings)
+bool CSMSettings::UserSettings::writeFile(QFile *file, QMap<QString, CSMSettings::SettingList *> &settings)
 {
     if (!file)
         return false;
@@ -88,7 +88,7 @@ bool CsSettings::UserSettings::writeFile(QFile *file, QMap<QString, CsSettings::
     return true;
 }
 
-void CsSettings::UserSettings::getSettings(QTextStream &stream, SectionMap &sections)
+void CSMSettings::UserSettings::getSettings(QTextStream &stream, SectionMap &sections)
 {
     //looks for a square bracket, "'\\["
     //that has one or more "not nothing" in it, "([^]]+)"
@@ -102,7 +102,7 @@ void CsSettings::UserSettings::getSettings(QTextStream &stream, SectionMap &sect
 
     QRegExp keyRe("^([^=]+)\\s*=\\s*(.+)$");
 
-    CsSettings::SettingMap *settings = 0;
+    CSMSettings::SettingMap *settings = 0;
     QString section = "none";
 
     while (!stream.atEnd())

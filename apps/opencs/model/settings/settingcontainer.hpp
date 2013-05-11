@@ -5,7 +5,7 @@
 
 class QStringList;
 
-namespace CsSettings
+namespace CSMSettings
 {
     class SettingContainer : public QObject
     {

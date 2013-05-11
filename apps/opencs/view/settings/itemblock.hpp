@@ -3,21 +3,21 @@
 
 #include "abstractblock.hpp"
 
-namespace CsSettings
+namespace CSVSettings
 {
 
     class ItemBlock : public AbstractBlock
     {
-        SettingsItem *mSetting;
+        CSMSettings::SettingsItem *mSetting;
         WidgetList mWidgetList;
 
     public:
 
         ItemBlock (QWidget* parent = 0);
 
-        bool updateSettings (const SettingMap &settings) { return false; }
+        bool updateSettings (const CSMSettings::SettingMap &settings) { return false; }
 
-        SettingList *getSettings ();
+        CSMSettings::SettingList *getSettings ();
         QString getValue () const;
 
         int getSettingCount();

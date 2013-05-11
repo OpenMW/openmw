@@ -3,12 +3,10 @@
 
 #include <QGroupBox>
 
-namespace CsSettings
+namespace CSVSettings
 {
     class GroupBox : public QGroupBox
     {
-        Q_OBJECT
-
         static const QString INVISIBLE_BOX_STYLE;
         QString VISIBLE_BOX_STYLE;                  //not a const...
 

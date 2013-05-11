@@ -8,7 +8,7 @@
 #include "../../model/settings/settingsitem.hpp"
 #include "groupbox.hpp"
 
-namespace CsSettings
+namespace CSVSettings
 {
 
     class AbstractBlock : public QObject
@@ -17,7 +17,7 @@ namespace CsSettings
 
     protected:
 
-        typedef QMap<QString, SettingsItem*> SettingsItemMap;
+        typedef QMap<QString, CSMSettings::SettingsItem*> SettingsItemMap;
         GroupBox *mBox;
         QWidget *mWidgetParent;
 
@@ -30,8 +30,8 @@ namespace CsSettings
         void setVisible (bool isVisible);
         bool isVisible() const;
 
-        virtual SettingList *getSettings() = 0;
-        virtual bool updateSettings (const SettingMap &settings) = 0;
+        virtual CSMSettings::SettingList *getSettings() = 0;
+        virtual bool updateSettings (const CSMSettings::SettingMap &settings) = 0;
         virtual bool updateBySignal (const QString &name, const QString &value, bool &doEmit)
         { return false; }
 

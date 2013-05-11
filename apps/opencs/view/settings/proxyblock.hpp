@@ -3,7 +3,7 @@
 
 #include "groupblock.hpp"
 
-namespace CsSettings
+namespace CSVSettings
 {
     class ProxyBlock : public GroupBlock
     {
@@ -23,14 +23,14 @@ namespace CsSettings
         void addSetting (ItemBlock* settingBlock, QStringList *proxyList);
         int build (GroupBlockDef &def);
 
-        SettingList *getSettings()  { return 0; }
-        bool updateSettings (const SettingMap &settings);
+        CSMSettings::SettingList *getSettings()  { return 0; }
+        bool updateSettings (const CSMSettings::SettingMap &settings);
         bool updateBySignal (const QString &name, const QString &value, bool &doEmit);
 
     private:
 
         ItemBlock *getProxiedItemBlock (const QString &name);
-        bool updateByProxiedSettings(const SettingMap *settings = 0);
+        bool updateByProxiedSettings(const CSMSettings::SettingMap *settings = 0);
         bool updateProxiedSettings();
 
     private slots:

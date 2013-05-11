@@ -73,29 +73,33 @@ opencs_units_noqt (view/tools
     )
 
 opencs_units (view/settings
-    customblock
-    proxyblock
-    groupbox
     abstractblock
-    settingwidget
-    itemblock
-    groupblock
-    toggleblock
-    usersettingsdialog
-    abstractpage
+    proxyblock
     abstractwidget
-    blankpage
+    usersettingsdialog
     editorpage
+    )
+
+opencs_units_noqt (view/settings
+    abstractpage
+    blankpage
+    groupblock
+    customblock
+    groupbox
+    itemblock
+    settingwidget
+    toggleblock
+    support
     )
 
 opencs_units (model/settings
     settingcontainer
-    settingsitem
     )
 
 opencs_units_noqt (model/settings
     support
     usersettings
+    settingsitem
     )
 
 set (OPENCS_US

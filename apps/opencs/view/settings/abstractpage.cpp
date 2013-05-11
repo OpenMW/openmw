@@ -10,28 +10,28 @@
 #include <QLineEdit>
 #include <QMargins>
 
-CsSettings::AbstractPage::AbstractPage(QWidget *parent):
+CSVSettings::AbstractPage::AbstractPage(QWidget *parent):
     QWidget(parent)
 {
 }
 
-CsSettings::AbstractPage::AbstractPage(const QString &pageName, QWidget *parent):
+CSVSettings::AbstractPage::AbstractPage(const QString &pageName, QWidget *parent):
     QWidget(parent)
 {
     QWidget::setObjectName (pageName);
 }
 
-CsSettings::AbstractPage::~AbstractPage()
+CSVSettings::AbstractPage::~AbstractPage()
 {
 }
 
-CsSettings::SettingList *CsSettings::AbstractPage::getSettings()
+CSMSettings::SettingList *CSVSettings::AbstractPage::getSettings()
 {
-    SettingList *settings = new SettingList();
+    CSMSettings::SettingList *settings = new CSMSettings::SettingList();
 
     foreach (AbstractBlock *block, mAbstractBlocks)
     {
-        SettingList *groupSettings = block->getSettings();
+        CSMSettings::SettingList *groupSettings = block->getSettings();
         settings->append (*groupSettings);
     }
 

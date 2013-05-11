@@ -3,11 +3,11 @@
 #include "groupbox.hpp"
 #include "itemblock.hpp"
 
-CsSettings::ToggleBlock::ToggleBlock(QWidget *parent) :
+CSVSettings::ToggleBlock::ToggleBlock(QWidget *parent) :
     CustomBlock(parent)
 {}
 
-int CsSettings::ToggleBlock::build(CustomBlockDef &def)
+int CSVSettings::ToggleBlock::build(CustomBlockDef &def)
 {
     if (def.blockDefList.size()==0)
         return -1;
@@ -49,7 +49,7 @@ int CsSettings::ToggleBlock::build(CustomBlockDef &def)
     return 0;
 }
 
-CsSettings::GroupBox *CsSettings::ToggleBlock::buildToggleWidgets (GroupBlockDef &def, QString &defaultToggle)
+CSVSettings::GroupBox *CSVSettings::ToggleBlock::buildToggleWidgets (GroupBlockDef &def, QString &defaultToggle)
 {
     GroupBox *box = new GroupBox (false, getParent());
 

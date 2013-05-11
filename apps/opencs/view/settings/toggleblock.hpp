@@ -5,7 +5,7 @@
 
 #include "customblock.hpp"
 
-namespace CsSettings
+namespace CSVSettings
 {
     class GroupBlock;
     class GroupBox;

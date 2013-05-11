@@ -257,7 +257,7 @@ QDockWidget *CSVDoc::View::getOperations() const
 
 void CSVDoc::View::showUserSettings()
 {
-    CsSettings::UserSettingsDialog *settingsDialog = new CsSettings::UserSettingsDialog(this);
+    CSVSettings::UserSettingsDialog *settingsDialog = new CSVSettings::UserSettingsDialog(this);
 
     connect (settingsDialog, SIGNAL (signalUpdateEditorSetting (const QString &, const QString &)),
              this, SLOT (slotUpdateEditorSetting (const QString &, const QString &)) );
@@ -271,11 +271,7 @@ void CSVDoc::View::slotUpdateEditorSetting(const QString &settingName, const QSt
 
     if (lastValue != settingValue)
     {
-        if (settingName == "Undo Stack Size");
-
-        if (settingName == "Top-Level Window Count");
-
-        if (settingName == "Reuse Subwindows");
+        //evaluate settingName against tokens to determine which function to call to update Editor application.
 
         lastValue = settingValue;
     }

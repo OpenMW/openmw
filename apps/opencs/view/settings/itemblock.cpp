@@ -2,12 +2,12 @@
 
 #include <QFontMetrics>
 
-CsSettings::ItemBlock::ItemBlock (QWidget* parent)
+CSVSettings::ItemBlock::ItemBlock (QWidget* parent)
     : mSetting (0), AbstractBlock (false, parent)
 {
 }
 
-int CsSettings::ItemBlock::build(SettingsItemDef &iDef)
+int CSVSettings::ItemBlock::build(SettingsItemDef &iDef)
 {
     buildItemBlock (iDef);
     buildItemBlockWidgets (iDef);
@@ -15,7 +15,7 @@ int CsSettings::ItemBlock::build(SettingsItemDef &iDef)
     return 0;
 }
 
-void CsSettings::ItemBlock::buildItemBlockWidgets (SettingsItemDef &iDef)
+void CSVSettings::ItemBlock::buildItemBlockWidgets (SettingsItemDef &iDef)
 {
     WidgetDef wDef = iDef.widget;
     QLayout *blockLayout = 0;
@@ -56,13 +56,13 @@ void CsSettings::ItemBlock::buildItemBlockWidgets (SettingsItemDef &iDef)
     }
 }
 
-void CsSettings::ItemBlock::buildItemBlock (SettingsItemDef &iDef)
+void CSVSettings::ItemBlock::buildItemBlock (SettingsItemDef &iDef)
 {
     QString defaultValue = iDef.defaultValue;
 
     setObjectName(iDef.name);
 
-    mSetting = new SettingsItem (objectName(),
+    mSetting = new CSMSettings::SettingsItem (objectName(),
                                  iDef.hasMultipleValues, iDef.defaultValue,
                                  parent());
 
@@ -74,7 +74,7 @@ void CsSettings::ItemBlock::buildItemBlock (SettingsItemDef &iDef)
 }
 
 
-bool CsSettings::ItemBlock::update (const QString &value)
+bool CSVSettings::ItemBlock::update (const QString &value)
 {
     bool success = updateItem (value);
 
@@ -85,13 +85,13 @@ bool CsSettings::ItemBlock::update (const QString &value)
 }
 
 
-bool CsSettings::ItemBlock::updateItem (const QString &value)
+bool CSVSettings::ItemBlock::updateItem (const QString &value)
 {
     return mSetting->updateItem(value);
 }
 
 
-bool CsSettings::ItemBlock::updateBySignal(const QString &name, const QString &value, bool &doEmit)
+bool CSVSettings::ItemBlock::updateBySignal(const QString &name, const QString &value, bool &doEmit)
 {
     bool success = (mSetting->getValue() != value);
 
@@ -101,15 +101,15 @@ bool CsSettings::ItemBlock::updateBySignal(const QString &name, const QString &v
     return success;
 }
 
-CsSettings::SettingList *CsSettings::ItemBlock::getSettings ()
+CSMSettings::SettingList *CSVSettings::ItemBlock::getSettings ()
 {
-    SettingList *list = new SettingList();
+    CSMSettings::SettingList *list = new CSMSettings::SettingList();
     list->push_back(mSetting);
 
     return list;
 }
 
-QString CsSettings::ItemBlock::getValue() const
+QString CSVSettings::ItemBlock::getValue() const
 {
     return mSetting->getValue();
 }
