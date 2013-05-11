@@ -45,6 +45,9 @@ namespace CSMWorld
         const ESXRecordT& get() const;
         ///< Throws an exception, if the record is deleted.
 
+        ESXRecordT& get();
+        ///< Throws an exception, if the record is deleted.
+
         const ESXRecordT& getBase() const;
         ///< Throws an exception, if the record is deleted. Returns modified, if there is no base.
 
@@ -69,6 +72,15 @@ namespace CSMWorld
 
     template <typename ESXRecordT>
     const ESXRecordT& Record<ESXRecordT>::get() const
+    {
+        if (mState==State_Erased)
+            throw std::logic_error ("attempt to access a deleted record");
+
+        return mState==State_BaseOnly || mState==State_Deleted ? mBase : mModified;
+    }
+
+    template <typename ESXRecordT>
+    ESXRecordT& Record<ESXRecordT>::get()
     {
         if (mState==State_Erased)
             throw std::logic_error ("attempt to access a deleted record");

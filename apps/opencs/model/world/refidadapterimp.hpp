@@ -17,6 +17,7 @@ namespace CSMWorld
         const RefIdColumn *mType;
     };
 
+    /// \brief Base adapter for all refereceable record types
     template<typename RecordT>
     class BaseRefIdAdapter : public RefIdAdapter
     {
@@ -35,6 +36,8 @@ namespace CSMWorld
             virtual void setData (const RefIdColumn *column, RefIdData& data, int index,
                 const QVariant& value) const;
             ///< If the data type does not match an exception is thrown.
+
+            UniversalId::Type getType() const;
     };
 
     template<typename RecordT>
@@ -81,6 +84,69 @@ namespace CSMWorld
 
         if (column==mBase.mModified)
             record.mState = static_cast<RecordBase::State> (value.toInt());
+    }
+
+    template<typename RecordT>
+    UniversalId::Type BaseRefIdAdapter<RecordT>::getType() const
+    {
+        return mType;
+    }
+
+
+    struct ModelColumns : public BaseColumns
+    {
+        const RefIdColumn *mModel;
+
+        ModelColumns (const BaseColumns& base) : BaseColumns (base) {}
+    };
+
+    /// \brief Adapter for IDs with models (all but levelled lists)
+    template<typename RecordT>
+    class ModelRefIdAdapter : public BaseRefIdAdapter<RecordT>
+    {
+            ModelColumns mModel;
+
+        public:
+
+            ModelRefIdAdapter (UniversalId::Type type, const ModelColumns& columns);
+
+            virtual QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
+                const;
+
+            virtual void setData (const RefIdColumn *column, RefIdData& data, int index,
+                const QVariant& value) const;
+            ///< If the data type does not match an exception is thrown.
+    };
+
+    template<typename RecordT>
+    ModelRefIdAdapter<RecordT>::ModelRefIdAdapter (UniversalId::Type type, const ModelColumns& columns)
+    : BaseRefIdAdapter<RecordT> (type, columns), mModel (columns)
+    {}
+
+    template<typename RecordT>
+    QVariant ModelRefIdAdapter<RecordT>::getData (const RefIdColumn *column, const RefIdData& data,
+        int index) const
+    {
+        const Record<RecordT>& record = static_cast<const Record<RecordT>&> (
+            data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<RecordT>::getType())));
+
+        if (column==mModel.mModel)
+            return QString::fromUtf8 (record.get().mModel.c_str());
+
+        return BaseRefIdAdapter<RecordT>::getData (column, data, index);
+    }
+
+    template<typename RecordT>
+    void ModelRefIdAdapter<RecordT>::setData (const RefIdColumn *column, RefIdData& data, int index,
+        const QVariant& value) const
+    {
+        Record<RecordT>& record = static_cast<Record<RecordT>&> (
+            data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<RecordT>::getType())));
+
+        if (column==mModel.mModel)
+            record.get().mModel = value.toString().toUtf8().constData();
+        else
+            BaseRefIdAdapter<RecordT>::setData (column, data, index, value);
     }
 }
 

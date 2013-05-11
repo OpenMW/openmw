@@ -47,49 +47,52 @@ CSMWorld::RefIdCollection::RefIdCollection()
     baseColumns.mType = &mColumns.back();
 //    mColumns.push_back (RefIdColumn ("Name", ColumnBase::Display_String));
 
+    ModelColumns modelColumns (baseColumns);
 
+    mColumns.push_back (RefIdColumn ("Model", ColumnBase::Display_String));
+    modelColumns.mModel = &mColumns.back();
 
     mAdapters.insert (std::make_pair (UniversalId::Type_Activator,
-        new BaseRefIdAdapter<ESM::Activator> (UniversalId::Type_Activator, baseColumns)));
+        new ModelRefIdAdapter<ESM::Activator> (UniversalId::Type_Activator, modelColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Potion,
-        new BaseRefIdAdapter<ESM::Potion> (UniversalId::Type_Potion, baseColumns)));
+        new ModelRefIdAdapter<ESM::Potion> (UniversalId::Type_Potion, modelColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Apparatus,
-        new BaseRefIdAdapter<ESM::Apparatus> (UniversalId::Type_Apparatus, baseColumns)));
+        new ModelRefIdAdapter<ESM::Apparatus> (UniversalId::Type_Apparatus, modelColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Armor,
-        new BaseRefIdAdapter<ESM::Armor> (UniversalId::Type_Armor, baseColumns)));
+        new ModelRefIdAdapter<ESM::Armor> (UniversalId::Type_Armor, modelColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Book,
-        new BaseRefIdAdapter<ESM::Book> (UniversalId::Type_Book, baseColumns)));
+        new ModelRefIdAdapter<ESM::Book> (UniversalId::Type_Book, modelColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Clothing,
-        new BaseRefIdAdapter<ESM::Clothing> (UniversalId::Type_Clothing, baseColumns)));
+        new ModelRefIdAdapter<ESM::Clothing> (UniversalId::Type_Clothing, modelColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Container,
-        new BaseRefIdAdapter<ESM::Container> (UniversalId::Type_Container, baseColumns)));
+        new ModelRefIdAdapter<ESM::Container> (UniversalId::Type_Container, modelColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Creature,
-        new BaseRefIdAdapter<ESM::Creature> (UniversalId::Type_Creature, baseColumns)));
+        new ModelRefIdAdapter<ESM::Creature> (UniversalId::Type_Creature, modelColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Door,
-        new BaseRefIdAdapter<ESM::Door> (UniversalId::Type_Door, baseColumns)));
+        new ModelRefIdAdapter<ESM::Door> (UniversalId::Type_Door, modelColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Ingredient,
-        new BaseRefIdAdapter<ESM::Ingredient> (UniversalId::Type_Ingredient, baseColumns)));
+        new ModelRefIdAdapter<ESM::Ingredient> (UniversalId::Type_Ingredient, modelColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_CreatureLevelledList,
         new BaseRefIdAdapter<ESM::CreatureLevList> (
         UniversalId::Type_CreatureLevelledList, baseColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_ItemLevelledList,
         new BaseRefIdAdapter<ESM::ItemLevList> (UniversalId::Type_ItemLevelledList, baseColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Light,
-        new BaseRefIdAdapter<ESM::Light> (UniversalId::Type_Light, baseColumns)));
+        new ModelRefIdAdapter<ESM::Light> (UniversalId::Type_Light, modelColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Lockpick,
-        new BaseRefIdAdapter<ESM::Lockpick> (UniversalId::Type_Lockpick, baseColumns)));
+        new ModelRefIdAdapter<ESM::Lockpick> (UniversalId::Type_Lockpick, modelColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Miscellaneous,
-        new BaseRefIdAdapter<ESM::Miscellaneous> (UniversalId::Type_Miscellaneous, baseColumns)));
+        new ModelRefIdAdapter<ESM::Miscellaneous> (UniversalId::Type_Miscellaneous, modelColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Npc,
-        new BaseRefIdAdapter<ESM::NPC> (UniversalId::Type_Npc, baseColumns)));
+        new ModelRefIdAdapter<ESM::NPC> (UniversalId::Type_Npc, modelColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Probe,
-        new BaseRefIdAdapter<ESM::Probe> (UniversalId::Type_Probe, baseColumns)));
+        new ModelRefIdAdapter<ESM::Probe> (UniversalId::Type_Probe, modelColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Repair,
-        new BaseRefIdAdapter<ESM::Repair> (UniversalId::Type_Repair, baseColumns)));
+        new ModelRefIdAdapter<ESM::Repair> (UniversalId::Type_Repair, modelColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Static,
-        new BaseRefIdAdapter<ESM::Static> (UniversalId::Type_Static, baseColumns)));
+        new ModelRefIdAdapter<ESM::Static> (UniversalId::Type_Static, modelColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Weapon,
-        new BaseRefIdAdapter<ESM::Weapon> (UniversalId::Type_Weapon, baseColumns)));
+        new ModelRefIdAdapter<ESM::Weapon> (UniversalId::Type_Weapon, modelColumns)));
 }
 
 CSMWorld::RefIdCollection::~RefIdCollection()
