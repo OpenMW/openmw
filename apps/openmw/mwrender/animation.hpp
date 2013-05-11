@@ -73,6 +73,7 @@ protected:
 
         int mPriority;
         int mGroups;
+        bool mAutoDisable;
 
         AnimState() : mSource(NULL), mTime(0.0f), mPlaying(false), mLoopCount(0)
         { }
@@ -162,6 +163,8 @@ public:
      *                 bone groups that don't have another animation set of a
      *                 higher priority.
      * \param groups Bone groups to play the animation on.
+     * \param autodisable Automatically disable the animation when it stops
+     *                    playing.
      * \param start Key marker from which to start.
      * \param stop Key marker to stop at.
      * \param startpoint How far in between the two markers to start. 0 starts
@@ -172,7 +175,7 @@ public:
      * \return Boolean specifying whether the animation will return movement
      *         for the character at all.
      */
-    bool play(const std::string &groupname, Priority priority, int groups,
+    bool play(const std::string &groupname, Priority priority, int groups, bool autodisable,
               const std::string &start, const std::string &stop,
               float startpoint, size_t loops);
 
@@ -184,6 +187,13 @@ public:
      * \return True if the animation is active, false otherwise.
      */
     bool getInfo(const std::string &groupname, float *complete=NULL, std::string *start=NULL, std::string *stop=NULL) const;
+
+    /** Disables the specified animation group;
+     * \param groupname Animation group to disable.
+     * \return Boolean specifying whether the animation will continue to return
+     *         movement for the character at all.
+     */
+    bool disable(const std::string &groupname);
 
     virtual Ogre::Vector3 runAnimation(float duration);
 

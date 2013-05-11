@@ -173,7 +173,7 @@ namespace MWRender
         {
             mCurrentAnimGroup = groupname;
             mAnimation->play(mCurrentAnimGroup, Animation::Priority_Default,
-                             Animation::Group_All, "start", "stop", 0.0f, 0);
+                             Animation::Group_All, false, "start", "stop", 0.0f, 0);
         }
 
         mAnimation->forceUpdate();
@@ -201,7 +201,7 @@ namespace MWRender
 
         mCurrentAnimGroup = "inventoryhandtohand";
         mAnimation->play(mCurrentAnimGroup, Animation::Priority_Default,
-                         Animation::Group_All, "start", "stop", 0.0f, 0);
+                         Animation::Group_All, false, "start", "stop", 0.0f, 0);
     }
 
     // --------------------------------------------------------------------------------------------------
@@ -235,7 +235,8 @@ namespace MWRender
 
     void RaceSelectionPreview::onSetup ()
     {
-        mAnimation->play("idle", Animation::Priority_Default, Animation::Group_All, "start", "stop", 0.0f, 0);
+        mAnimation->play("idle", Animation::Priority_Default, Animation::Group_All,
+                         false, "start", "stop", 0.0f, 0);
 
         updateCamera();
     }

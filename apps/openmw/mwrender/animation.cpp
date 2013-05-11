@@ -481,7 +481,7 @@ bool Animation::handleTextKey(AnimState &state, const std::string &groupname, co
 }
 
 
-bool Animation::play(const std::string &groupname, Priority priority, int groups, const std::string &start, const std::string &stop, float startpoint, size_t loops)
+bool Animation::play(const std::string &groupname, Priority priority, int groups, bool autodisable, const std::string &start, const std::string &stop, float startpoint, size_t loops)
 {
     if(!mSkelBase)
         return false;
@@ -517,6 +517,7 @@ bool Animation::play(const std::string &groupname, Priority priority, int groups
             state.mPlaying = true;
             state.mPriority = priority;
             state.mGroups = groups;
+            state.mAutoDisable = autodisable;
             mStates[groupname] = state;
 
             break;
@@ -617,13 +618,22 @@ bool Animation::getInfo(const std::string &groupname, float *complete, std::stri
 }
 
 
+bool Animation::disable(const std::string &groupname)
+{
+    AnimStateMap::iterator iter = mStates.find(groupname);
+    if(iter != mStates.end())
+        mStates.erase(iter);
+    return resetActiveGroups();
+}
+
+
 Ogre::Vector3 Animation::runAnimation(float duration)
 {
     Ogre::Vector3 movement(0.0f);
 
     duration *= mAnimSpeedMult;
     AnimStateMap::iterator stateiter = mStates.begin();
-    for(;stateiter != mStates.end();stateiter++)
+    while(stateiter != mStates.end())
     {
         AnimState &state = stateiter->second;
         float timepassed = duration;
@@ -649,6 +659,11 @@ Ogre::Vector3 Animation::runAnimation(float duration)
             if(!handleTextKey(state, stateiter->first, key))
                 break;
         }
+
+        if(!state.mPlaying && state.mAutoDisable)
+            mStates.erase(stateiter++);
+        else
+            stateiter++;
     }
 
     for(size_t i = 0;i < mObjectRoot.mControllers.size();i++)

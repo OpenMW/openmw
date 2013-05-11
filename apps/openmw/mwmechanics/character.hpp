@@ -67,18 +67,18 @@ enum CharacterState {
     CharState_Death5
 };
 
-enum WeaponState {
-    WeapState_None,
+enum WeaponType {
+    WeapType_None,
 
-    WeapState_HandToHand,
-    WeapState_OneHand,
-    WeapState_TwoHand,
-    WeapState_TwoWide,
-    WeapState_BowAndArrow,
-    WeapState_Crossbow,
-    WeapState_ThowWeapon,
+    WeapType_HandToHand,
+    WeapType_OneHand,
+    WeapType_TwoHand,
+    WeapType_TwoWide,
+    WeapType_BowAndArrow,
+    WeapType_Crossbow,
+    WeapType_ThowWeapon,
 
-    WeapState_Spell
+    WeapType_Spell
 };
 
 class CharacterController
@@ -90,7 +90,7 @@ class CharacterController
     AnimationQueue mAnimQueue;
 
     CharacterState mCharState;
-    WeaponState mWeapState;
+    WeaponType mWeaponType;
     bool mLooping;
     bool mSkipAnim;
 
@@ -117,10 +117,6 @@ public:
     void setState(CharacterState state, bool loop);
     CharacterState getState() const
     { return mCharState; }
-
-    void setWeaponState(WeaponState state);
-    WeaponState getWeaponState() const
-    { return mWeapState; }
 
     void forceStateUpdate();
 };
