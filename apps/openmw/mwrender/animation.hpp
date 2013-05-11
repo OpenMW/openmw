@@ -14,6 +14,14 @@ namespace MWRender
 
 class Animation
 {
+public:
+    enum Priority {
+        Priority_Nil = -1, /* Do not use */
+        Priority_Default,
+
+        Num_Priorities
+    };
+
 protected:
     static const size_t sNumGroups = 1;
 
@@ -55,6 +63,8 @@ protected:
         bool mPlaying;
         size_t mLoopCount;
 
+        int mPriority;
+
         AnimState() : mSource(NULL), mTime(0.0f), mPlaying(false), mLoopCount(0)
         { }
     };
@@ -79,6 +89,11 @@ protected:
 
     Ogre::SharedPtr<AnimationValue> mAnimationValuePtr[sNumGroups];
 
+    /* Sets the appropriate animations on the bone groups based on priority.
+     * Returns true if the NonAccum root will provide movement.
+     */
+    bool resetActiveGroups();
+
     static size_t detectAnimGroup(const Ogre::Node *node);
 
     static float calcAnimVelocity(const NifOgre::TextKeyMap &keys,
@@ -102,7 +117,6 @@ protected:
      * false.
      */
     bool reset(AnimState &state, const NifOgre::TextKeyMap &keys,
-               NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl,
                const std::string &groupname, const std::string &start, const std::string &stop,
                float startpoint);
 
@@ -136,6 +150,9 @@ public:
 
     /** Plays an animation.
      * \param groupname Name of the animation group to play.
+     * \param priority Priority of the animation. The animation will play on
+     *                 bone groups that don't have another animation set of a
+     *                 higher priority.
      * \param start Key marker from which to start.
      * \param stop Key marker to stop at.
      * \param startpoint How far in between the two markers to start. 0 starts
@@ -146,7 +163,7 @@ public:
      * \return Boolean specifying whether the animation will return movement
      *         for the character at all.
      */
-    bool play(const std::string &groupname, const std::string &start, const std::string &stop, float startpoint, size_t loops);
+    bool play(const std::string &groupname, Priority priority, const std::string &start, const std::string &stop, float startpoint, size_t loops);
 
     void disable(const std::string &groupname);
 

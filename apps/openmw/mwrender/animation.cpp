@@ -372,7 +372,7 @@ void Animation::updatePosition(float time, Ogre::Vector3 &position)
     mAccumRoot->setPosition(-mLastPosition);
 }
 
-bool Animation::reset(AnimState &state, const NifOgre::TextKeyMap &keys, NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl, const std::string &groupname, const std::string &start, const std::string &stop, float startpoint)
+bool Animation::reset(AnimState &state, const NifOgre::TextKeyMap &keys, const std::string &groupname, const std::string &start, const std::string &stop, float startpoint)
 {
     std::string tag = groupname+": "+start;
     NifOgre::TextKeyMap::const_iterator startkey(keys.begin());
@@ -413,9 +413,6 @@ bool Animation::reset(AnimState &state, const NifOgre::TextKeyMap &keys, NifOgre
         state.mNextKey++;
     }
 
-    if(nonaccumctrl)
-        mLastPosition = nonaccumctrl->getTranslation(state.mTime) * mAccumulate;
-
     return true;
 }
 
@@ -429,8 +426,6 @@ bool Animation::doLoop(AnimState &state)
     state.mNextKey = state.mLoopStartKey;
     state.mNextKey++;
     state.mPlaying = true;
-    if(mNonAccumCtrl)
-        mLastPosition = mNonAccumCtrl->getTranslation(state.mTime) * mAccumulate;
 
     return true;
 }
@@ -476,6 +471,11 @@ bool Animation::handleTextKey(AnimState &state, const std::string &groupname, co
             if(state.mTime >= time)
                 return false;
         }
+
+        // Ugly
+        if(mNonAccumCtrl && groupname == mAnimationValuePtr[0]->getAnimName())
+            mLastPosition = mNonAccumCtrl->getTranslation(state.mTime) * mAccumulate;
+
         return true;
     }
 
@@ -484,77 +484,100 @@ bool Animation::handleTextKey(AnimState &state, const std::string &groupname, co
 }
 
 
-bool Animation::play(const std::string &groupname, const std::string &start, const std::string &stop, float startpoint, size_t loops)
+bool Animation::play(const std::string &groupname, Priority priority, const std::string &start, const std::string &stop, float startpoint, size_t loops)
 {
-    if(!mSkelBase || groupname.empty())
+    if(!mSkelBase)
         return false;
+
+    if(groupname.empty())
+        return resetActiveGroups();
 
     AnimStateMap::iterator stateiter = mStates.find(groupname);
     if(stateiter != mStates.end())
-        mStates.erase(stateiter);
+    {
+        stateiter->second.mPriority = priority;
+        return resetActiveGroups();
+    }
     // HACK: Don't clear all active animations
     mStates.clear();
-
-    bool movinganim = false;
-    bool foundanim = false;
 
     /* Look in reverse; last-inserted source has priority. */
     AnimSourceList::reverse_iterator iter(mAnimSources.rbegin());
     for(;iter != mAnimSources.rend();iter++)
     {
-        const NifOgre::TextKeyMap &keys = iter->mTextKeys;
-        NifOgre::NodeTargetValue<Ogre::Real> *nonaccumctrl = NULL;
-        if(mNonAccumRoot)
+        AnimState state;
+        if(reset(state, iter->mTextKeys, groupname, start, stop, startpoint))
         {
-            for(size_t i = 0;i < iter->mControllers[0].size();i++)
-            {
-                NifOgre::NodeTargetValue<Ogre::Real> *dstval;
-                dstval = dynamic_cast<NifOgre::NodeTargetValue<Ogre::Real>*>(iter->mControllers[0][i].getDestination().getPointer());
-                if(dstval && dstval->getNode() == mNonAccumRoot)
-                {
-                    nonaccumctrl = dstval;
-                    break;
-                }
-            }
-        }
-
-        if(!foundanim)
-        {
-            AnimState state;
-            if(!reset(state, keys, nonaccumctrl, groupname, start, stop, startpoint))
-                continue;
-            foundanim = true;
-
             state.mSource = &*iter;
             state.mLoopCount = loops;
             state.mPlaying = true;
+            state.mPriority = priority;
             mStates[groupname] = state;
 
-            // FIXME
-            mAnimationValuePtr[0]->setAnimName(groupname);
-
-            mNonAccumCtrl = nonaccumctrl;
-            mAnimVelocity = 0.0f;
-
-            if(mAccumulate == Ogre::Vector3(0.0f))
-                break;
-        }
-
-        if(!nonaccumctrl)
-            break;
-
-        mAnimVelocity = calcAnimVelocity(keys, nonaccumctrl, mAccumulate, groupname);
-        if(mAnimVelocity > 1.0f)
-        {
-            movinganim = (nonaccumctrl==mNonAccumCtrl);
             break;
         }
     }
-    if(!foundanim)
+    if(iter == mAnimSources.rend())
         std::cerr<< "Failed to find animation "<<groupname <<std::endl;
 
-    return movinganim;
+    return resetActiveGroups();
 }
+
+bool Animation::resetActiveGroups()
+{
+    for(size_t grp = 0;grp < sNumGroups;grp++)
+    {
+        AnimStateMap::const_iterator active = mStates.end();
+
+        AnimStateMap::const_iterator state = mStates.begin();
+        for(;state != mStates.end();state++)
+        {
+#if 0
+            if(!(state->second.mGroups&(1<<grp)))
+                continue;
+#endif
+            if(active == mStates.end() || active->second.mPriority < state->second.mPriority)
+                active = state;
+        }
+
+        mAnimationValuePtr[grp]->setAnimName((active == mStates.end()) ?
+                                             std::string() : active->first);
+    }
+
+    mNonAccumCtrl = NULL;
+    mAnimVelocity = 0.0f;
+    mLastPosition = Ogre::Vector3(0.0f);
+
+    if(!mNonAccumRoot || mAccumulate == Ogre::Vector3(0.0f))
+        return false;
+
+    AnimStateMap::const_iterator state = mStates.find(mAnimationValuePtr[0]->getAnimName());
+    if(state == mStates.end())
+        return false;
+
+    bool ismoving = false;
+
+    const NifOgre::TextKeyMap &keys = state->second.mSource->mTextKeys;
+    std::vector<Ogre::Controller<Ogre::Real> >&ctrls = state->second.mSource->mControllers[0];
+    for(size_t i = 0;i < ctrls.size();i++)
+    {
+        NifOgre::NodeTargetValue<Ogre::Real> *dstval;
+        dstval = static_cast<NifOgre::NodeTargetValue<Ogre::Real>*>(ctrls[i].getDestination().getPointer());
+        if(dstval->getNode() == mNonAccumRoot)
+        {
+            mAnimVelocity = calcAnimVelocity(keys, dstval, mAccumulate, state->first);
+            ismoving = (mAnimVelocity > 1.0f);
+
+            mLastPosition = dstval->getTranslation(state->second.mTime) * mAccumulate;
+
+            mNonAccumCtrl = dstval;
+            break;
+        }
+    }
+
+    return ismoving;
+}
+
 
 bool Animation::getInfo(const std::string &groupname, float *complete, std::string *start, std::string *stop) const
 {
@@ -591,14 +614,14 @@ Ogre::Vector3 Animation::runAnimation(float duration)
             if(state.mNextKey->first > targetTime)
             {
                 state.mTime = targetTime;
-                if(mNonAccumCtrl)
+                if(mNonAccumCtrl && stateiter->first == mAnimationValuePtr[0]->getAnimName())
                     updatePosition(state.mTime, movement);
                 break;
             }
 
             NifOgre::TextKeyMap::const_iterator key(state.mNextKey++);
             state.mTime = key->first;
-            if(mNonAccumCtrl)
+            if(mNonAccumCtrl && stateiter->first == mAnimationValuePtr[0]->getAnimName())
                 updatePosition(state.mTime, movement);
 
             state.mPlaying = (key != state.mStopKey);
