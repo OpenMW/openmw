@@ -67,10 +67,13 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.push_back (RefIdColumn ("Value", ColumnBase::Display_Integer));
     inventoryColumns.mValue = &mColumns.back();
 
+    mColumns.push_back (RefIdColumn ("Auto Calc", ColumnBase::Display_Boolean));
+    const RefIdColumn *autoCalc = &mColumns.back();
+
     mAdapters.insert (std::make_pair (UniversalId::Type_Activator,
         new NameRefIdAdapter<ESM::Activator> (UniversalId::Type_Activator, nameColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Potion,
-        new InventoryRefIdAdapter<ESM::Potion> (UniversalId::Type_Potion, inventoryColumns)));
+        new PotionRefIdAdapter (inventoryColumns, autoCalc)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Apparatus,
         new InventoryRefIdAdapter<ESM::Apparatus> (UniversalId::Type_Apparatus, inventoryColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Armor,
