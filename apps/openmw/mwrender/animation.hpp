@@ -92,17 +92,16 @@ protected:
     NifOgre::NodeTargetValue<Ogre::Real> *mNonAccumCtrl;
     Ogre::Vector3 mAccumulate;
 
-    float mAnimVelocity;
-    float mAnimSpeedMult;
-
     AnimStateMap mStates;
 
     Ogre::SharedPtr<AnimationValue> mAnimationValuePtr[sNumGroups];
 
+    float mAnimVelocity;
+    float mAnimSpeedMult;
+
     /* Sets the appropriate animations on the bone groups based on priority.
-     * Returns true if the NonAccum root will provide movement.
      */
-    bool resetActiveGroups();
+    void resetActiveGroups();
 
     static size_t detectAnimGroup(const Ogre::Node *node);
 
@@ -173,10 +172,8 @@ public:
      * \param loops How many times to loop the animation. This will use the
      *              "loop start" and "loop stop" markers if they exist,
      *              otherwise it will use "start" and "stop".
-     * \return Boolean specifying whether the animation will return movement
-     *         for the character at all.
      */
-    bool play(const std::string &groupname, Priority priority, int groups, bool autodisable,
+    void play(const std::string &groupname, Priority priority, int groups, bool autodisable,
               const std::string &start, const std::string &stop,
               float startpoint, size_t loops);
 
@@ -191,10 +188,8 @@ public:
 
     /** Disables the specified animation group;
      * \param groupname Animation group to disable.
-     * \return Boolean specifying whether the animation will continue to return
-     *         movement for the character at all.
      */
-    bool disable(const std::string &groupname);
+    void disable(const std::string &groupname);
 
     virtual Ogre::Vector3 runAnimation(float duration);
 

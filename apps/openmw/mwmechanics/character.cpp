@@ -149,7 +149,6 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     , mCharState(state)
     , mWeaponType(WeapType_None)
     , mSkipAnim(false)
-    , mMovingAnim(false)
     , mSecondsOfRunning(0)
     , mSecondsOfSwimming(0)
     , mLooping(false)
@@ -171,9 +170,9 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
 
     std::string group;
     getCurrentGroup(group);
-    mMovingAnim = mAnimation->play(group, MWRender::Animation::Priority_Default,
-                                   MWRender::Animation::Group_All, false,
-                                   "start", "stop", 1.0f, loop ? (~(size_t)0) : 0);
+    mAnimation->play(group, MWRender::Animation::Priority_Default,
+                     MWRender::Animation::Group_All, false,
+                     "start", "stop", 1.0f, loop ? (~(size_t)0) : 0);
 }
 
 CharacterController::~CharacterController()
@@ -317,10 +316,7 @@ void CharacterController::update(float duration, Movement &movement)
                 setState(inwater ? (isrunning ? CharState_SwimRunLeft : CharState_SwimWalkLeft)
                                  : (sneak ? CharState_SneakLeft : (isrunning ? CharState_RunLeft : CharState_WalkLeft)), true);
 
-            // If this animation isn't moving us sideways, do it manually
-            if(!mMovingAnim)
-                movement.mPosition[0] += vec.x * (speed*duration);
-            // Apply any forward/backward movement manually
+            movement.mPosition[0] += vec.x * (speed*duration);
             movement.mPosition[1] += vec.y * (speed*duration);
         }
         else if(vec.y != 0.0f && speed > 0.0f)
@@ -332,11 +328,8 @@ void CharacterController::update(float duration, Movement &movement)
                 setState(inwater ? (isrunning ? CharState_SwimRunBack : CharState_SwimWalkBack)
                                  : (sneak ? CharState_SneakBack : (isrunning ? CharState_RunBack : CharState_WalkBack)), true);
 
-            // Apply any sideways movement manually
             movement.mPosition[0] += vec.x * (speed*duration);
-            // If this animation isn't moving us forward/backward, do it manually
-            if(!mMovingAnim)
-                movement.mPosition[1] += vec.y * (speed*duration);
+            movement.mPosition[1] += vec.y * (speed*duration);
         }
         else if(rot.z != 0.0f && !inwater && !sneak)
         {
@@ -351,11 +344,9 @@ void CharacterController::update(float duration, Movement &movement)
                 setState((inwater ? CharState_IdleSwim : (sneak ? CharState_IdleSneak : CharState_Idle)), true);
             else
             {
-                mMovingAnim = mAnimation->play(mAnimQueue.front().first,
-                                               MWRender::Animation::Priority_Default,
-                                               MWRender::Animation::Group_All, false,
-                                               "start", "stop", 0.0f,
-                                               mAnimQueue.front().second);
+                mAnimation->play(mAnimQueue.front().first, MWRender::Animation::Priority_Default,
+                                 MWRender::Animation::Group_All, false,
+                                 "start", "stop", 0.0f, mAnimQueue.front().second);
                 mAnimQueue.pop_front();
             }
         }
@@ -368,10 +359,22 @@ void CharacterController::update(float duration, Movement &movement)
     if(mAnimation && !mSkipAnim)
     {
         mAnimation->setSpeed(speed);
+
         Ogre::Vector3 moved = mAnimation->runAnimation(duration);
-        movement.mPosition[0] += moved.x;
-        movement.mPosition[1] += moved.y;
-        movement.mPosition[2] += moved.z;
+        // Ensure we're moving in generally the right direction
+        if((movement.mPosition[0] < 0.0f && movement.mPosition[0] < moved.x*2.0f) ||
+           (movement.mPosition[0] > 0.0f && movement.mPosition[0] > moved.x*2.0f))
+            moved.x = movement.mPosition[0];
+        if((movement.mPosition[1] < 0.0f && movement.mPosition[1] < moved.y*2.0f) ||
+           (movement.mPosition[1] > 0.0f && movement.mPosition[1] > moved.y*2.0f))
+            moved.y = movement.mPosition[1];
+        if((movement.mPosition[2] < 0.0f && movement.mPosition[2] < moved.z*2.0f) ||
+           (movement.mPosition[2] > 0.0f && movement.mPosition[2] > moved.z*2.0f))
+            moved.z = movement.mPosition[2];
+
+        movement.mPosition[0] = moved.x;
+        movement.mPosition[1] = moved.y;
+        movement.mPosition[2] = moved.z;
     }
     mSkipAnim = false;
 }
@@ -389,9 +392,9 @@ void CharacterController::playGroup(const std::string &groupname, int mode, int 
             mAnimQueue.clear();
             mCharState = CharState_SpecialIdle;
             mLooping = false;
-            mMovingAnim = mAnimation->play(groupname, MWRender::Animation::Priority_Default,
-                                           MWRender::Animation::Group_All, false,
-                                           ((mode==2) ? "loop start" : "start"), "stop", 0.0f, count-1);
+            mAnimation->play(groupname, MWRender::Animation::Priority_Default,
+                             MWRender::Animation::Group_All, false,
+                             ((mode==2) ? "loop start" : "start"), "stop", 0.0f, count-1);
         }
         else if(mode == 0)
         {
@@ -425,9 +428,9 @@ void CharacterController::forceStateUpdate()
 
     std::string group;
     getCurrentGroup(group);
-    mMovingAnim = mAnimation->play(group, MWRender::Animation::Priority_Default,
-                                   MWRender::Animation::Group_All, false,
-                                   "start", "stop", 0.0f, mLooping ? (~(size_t)0) : 0);
+    mAnimation->play(group, MWRender::Animation::Priority_Default,
+                     MWRender::Animation::Group_All, false,
+                     "start", "stop", 0.0f, mLooping ? (~(size_t)0) : 0);
 
     mAnimation->showWeapons(mWeaponType != WeapType_None && mWeaponType != WeapType_HandToHand &&
                             mWeaponType != WeapType_Spell);

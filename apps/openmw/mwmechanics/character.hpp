@@ -98,8 +98,6 @@ class CharacterController
     float mSecondsOfSwimming;
     float mSecondsOfRunning;
 
-    bool mMovingAnim;
-
     // Gets an animation group name from the current character state.
     void getCurrentGroup(std::string &group) const;
 
