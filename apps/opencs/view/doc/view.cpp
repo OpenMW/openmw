@@ -16,6 +16,8 @@
 #include "operations.hpp"
 #include "subview.hpp"
 
+#include <QDebug>
+
 void CSVDoc::View::closeEvent (QCloseEvent *event)
 {
     if (!mViewManager.closeRequest (this))
@@ -250,7 +252,7 @@ void CSVDoc::View::showUserSettings()
 {
     CSVSettings::UserSettingsDialog *settingsDialog = new CSVSettings::UserSettingsDialog(this);
 
-    connect (settingsDialog, SIGNAL (signalUpdateEditorSetting (const QString &, const QString &)),
+    connect (&(CSMSettings::UserSettings::instance()), SIGNAL (signalUpdateEditorSetting (const QString &, const QString &)),
              this, SLOT (slotUpdateEditorSetting (const QString &, const QString &)) );
 
     settingsDialog->show();
@@ -259,6 +261,8 @@ void CSVDoc::View::showUserSettings()
 void CSVDoc::View::slotUpdateEditorSetting(const QString &settingName, const QString &settingValue)
 {
     static QString lastValue = "";
+
+    qDebug() << "updating setting: " << settingName << " = " << settingValue;
 
     if (lastValue != settingValue)
     {

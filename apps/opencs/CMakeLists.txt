@@ -93,12 +93,12 @@ opencs_units_noqt (view/settings
     )
 
 opencs_units (model/settings
+    usersettings
     settingcontainer
     )
 
 opencs_units_noqt (model/settings
     support
-    usersettings
     settingsitem
     )
 

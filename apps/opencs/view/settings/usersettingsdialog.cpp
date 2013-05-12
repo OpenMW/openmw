@@ -92,7 +92,7 @@ void CSVSettings::UserSettingsDialog::createSamplePage()
     new QListWidgetItem (page->objectName(), mListWidget);
 
     connect ( page, SIGNAL ( signalUpdateEditorSetting (const QString &, const QString &)),
-              this, SIGNAL ( signalUpdateEditorSetting (const QString &, const QString &)));
+              &(CSMSettings::UserSettings::instance()), SIGNAL ( signalUpdateEditorSetting (const QString &, const QString &)));
 }
 
 void CSVSettings::UserSettingsDialog::positionWindow ()

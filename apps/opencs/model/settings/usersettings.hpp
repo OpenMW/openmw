@@ -17,8 +17,11 @@ class QFile;
 
 namespace CSMSettings {
 
-    struct UserSettings
+    struct UserSettings: public QObject
     {
+
+        Q_OBJECT
+
     public:
 
         static UserSettings &instance()
@@ -40,6 +43,9 @@ namespace CSMSettings {
 
         UserSettings (UserSettings const &);        //not implemented
         void operator= (UserSettings const &);      //not implemented
+
+    signals:
+        void signalUpdateEditorSetting (const QString &settingName, const QString &settingValue);
 
     };
 }

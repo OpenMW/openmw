@@ -16,6 +16,7 @@ class QListWidget;
 namespace CSVSettings {
 
     class AbstractPage;
+
     class UserSettingsDialog : public QMainWindow
     {
         Q_OBJECT
@@ -58,9 +59,6 @@ namespace CSVSettings {
 
             resize (mStackedWidget->sizeHint());
         }
-
-    signals:
-        void signalUpdateEditorSetting (const QString &settingName, const QString &settingValue);
 
     public slots:
         void slotChangePage (QListWidgetItem*, QListWidgetItem*);
