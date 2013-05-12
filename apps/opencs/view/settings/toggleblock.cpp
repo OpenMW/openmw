@@ -61,7 +61,7 @@ CSVSettings::GroupBox *CSVSettings::ToggleBlock::buildToggleWidgets (GroupBlockD
         WidgetDef *wDef = def.widgets.at(i);
 
         wDef->caption = caption;
-        wDef->widgetAlignment = OCS_LEFT;
+        wDef->widgetAlignment = Align_Left;
 
         AbstractWidget *widg = buildWidget (caption, *wDef, layout, false);
 

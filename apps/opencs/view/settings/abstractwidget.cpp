@@ -32,9 +32,9 @@ void CSVSettings::AbstractWidget::buildLabelAndWidget (QWidget *widget, WidgetDe
 }
 
 void CSVSettings::AbstractWidget::createLayout
-        (OcsWidgetOrientation direction, bool isZeroMargin)
+        (Orientation direction, bool isZeroMargin)
 {
-    if (direction == OCS_VERTICAL)
+    if (direction == Orient_Vertical)
         mLayout = new QVBoxLayout ();
     else
         mLayout = new QHBoxLayout ();
@@ -43,7 +43,7 @@ void CSVSettings::AbstractWidget::createLayout
         mLayout->setContentsMargins(0, 0, 0, 0);
 }
 
-QFlags<Qt::AlignmentFlag> CSVSettings::AbstractWidget::getAlignment (CSVSettings::OcsAlignment flag)
+QFlags<Qt::AlignmentFlag> CSVSettings::AbstractWidget::getAlignment (CSVSettings::Alignment flag)
 {
     return QFlags<Qt::AlignmentFlag>(static_cast<int>(flag));
 }

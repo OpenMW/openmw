@@ -37,7 +37,7 @@ namespace CSVSettings
 
     protected:
 
-        QLayout *createLayout (OcsWidgetOrientation direction, bool isZeroMargin, QWidget* parent = 0);
+        QLayout *createLayout (Orientation direction, bool isZeroMargin, QWidget* parent = 0);
         AbstractWidget *buildWidget (const QString &widgetName, WidgetDef &wDef,
                                      QLayout *layout = 0, bool isConnected = true) const;
 

@@ -48,7 +48,7 @@ void CSVSettings::EditorPage::setupUi()
     undoStackItem->minMax.left = "0";
     undoStackItem->minMax.right = "64";
 
-    WidgetDef stackWidget (OCS_SPIN_WIDGET);
+    WidgetDef stackWidget (Widget_SpinBox);
     stackWidget.minMax = &(undoStackItem->minMax);
     stackWidget.widgetWidth = 50;
 
@@ -63,7 +63,7 @@ void CSVSettings::EditorPage::setupUi()
     topLevelItem->minMax.left = "1";
     topLevelItem->minMax.right = "256";
 
-    WidgetDef topLvlWinWidget (OCS_SPIN_WIDGET);
+    WidgetDef topLvlWinWidget (Widget_SpinBox);
     topLvlWinWidget.minMax = &(topLevelItem->minMax);
     topLvlWinWidget.widgetWidth = 50;
 
@@ -76,9 +76,9 @@ void CSVSettings::EditorPage::setupUi()
     SettingsItemDef *reuseSubItem = new SettingsItemDef (reuseSubwindow.title, "Reuse Subwindows");
     *(reuseSubItem->valueList) << "None" << "Top-Level" << "Document-Level";
 
-    WidgetDef reuseSubWidget (OCS_RADIO_WIDGET);
+    WidgetDef reuseSubWidget (Widget_RadioButton);
     reuseSubWidget.valueList = (reuseSubItem->valueList);
-    reuseSubWidget.widgetAlignment = OCS_LEFT;
+    reuseSubWidget.widgetAlignment = Align_Left;
 
     reuseSubwindow.properties << reuseSubItem;
     reuseSubItem->widget = reuseSubWidget;
@@ -89,23 +89,23 @@ void CSVSettings::EditorPage::setupUi()
 
     //custom width
     SettingsItemDef *widthItem = new SettingsItemDef ("Window Width", "640");
-    widthItem->widget = WidgetDef (OCS_TEXT_WIDGET);
+    widthItem->widget = WidgetDef (Widget_LineEdit);
     widthItem->widget.widgetWidth = 45;
 
     //custom height
     SettingsItemDef *heightItem = new SettingsItemDef ("Window Height", "480");
-    heightItem->widget = WidgetDef (OCS_TEXT_WIDGET);
+    heightItem->widget = WidgetDef (Widget_LineEdit);
     heightItem->widget.widgetWidth = 45;
     heightItem->widget.caption = "x";
 
     customWindowSize.properties << widthItem << heightItem;
-    customWindowSize.widgetOrientation = OCS_HORIZONTAL;
+    customWindowSize.widgetOrientation = Orient_Horizontal;
     customWindowSize.isVisible = false;
 
 
     //pre-defined
     SettingsItemDef *widthByHeightItem = new SettingsItemDef ("Window Size", "640x480");
-    WidgetDef widthByHeightWidget = WidgetDef (OCS_COMBO_WIDGET);
+    WidgetDef widthByHeightWidget = WidgetDef (Widget_ComboBox);
     widthByHeightWidget.widgetWidth = 90;
     *(widthByHeightItem->valueList) << "640x480" << "800x600" << "1024x768";
 
@@ -125,12 +125,12 @@ void CSVSettings::EditorPage::setupUi()
 
     // window size toggle
     windowSizeToggle.captions << "Pre-Defined" << "Custom";
-    windowSizeToggle.widgetOrientation = OCS_VERTICAL;
+    windowSizeToggle.widgetOrientation = Orient_Vertical;
     windowSizeToggle.isVisible = false;
 
     //define a widget for each group in the toggle
     for (int i = 0; i < 2; i++)
-        windowSizeToggle.widgets << new WidgetDef (OCS_RADIO_WIDGET);
+        windowSizeToggle.widgets << new WidgetDef (Widget_RadioButton);
 
     windowSizeToggle.widgets.at(0)->isDefault = false;
 

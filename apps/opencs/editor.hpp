@@ -10,7 +10,6 @@
 #include "view/doc/viewmanager.hpp"
 #include "view/doc/startup.hpp"
 #include "view/doc/filedialog.hpp"
-#include "model/settings/usersettings.hpp"
 
 namespace CS
 {

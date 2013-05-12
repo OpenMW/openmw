@@ -24,8 +24,8 @@ void CSVSettings::ItemBlock::buildItemBlockWidgets (SettingsItemDef &iDef)
     switch (wDef.type)
     {
 
-    case OCS_CHECK_WIDGET:
-    case OCS_RADIO_WIDGET:
+    case Widget_CheckBox:
+    case Widget_RadioButton:
 
         foreach (QString item, *(iDef.valueList))
         {
@@ -37,8 +37,8 @@ void CSVSettings::ItemBlock::buildItemBlockWidgets (SettingsItemDef &iDef)
 
     break;
 
-    case OCS_COMBO_WIDGET:
-    case OCS_LIST_WIDGET:
+    case Widget_ComboBox:
+    case Widget_ListBox:
 
         //assign the item's value list to the widget's value list.
         //pass through to default to finish widget construction.

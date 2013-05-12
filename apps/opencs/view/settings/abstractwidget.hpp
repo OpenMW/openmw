@@ -35,12 +35,12 @@ namespace CSVSettings
         virtual void updateWidget (const QString &value) = 0;
 
         //converts user-defined enum to Qt equivalents
-        QFlags<Qt::AlignmentFlag> getAlignment (OcsAlignment flag);
+        QFlags<Qt::AlignmentFlag> getAlignment (Alignment flag);
 
     private:
 
         //widget initialization utilities
-        void createLayout (OcsWidgetOrientation direction, bool isZeroMargin);
+        void createLayout (Orientation direction, bool isZeroMargin);
         void buildLabelAndWidget (QWidget *widget, WidgetDef &def, bool noLabel);
 
 

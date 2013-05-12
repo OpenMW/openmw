@@ -25,7 +25,7 @@ namespace CSVSettings
 
     protected:
 
-        GroupBox *buildGroupBox (OcsWidgetOrientation orientation);
+        GroupBox *buildGroupBox (Orientation orientation);
 
     private:
 

@@ -8,12 +8,12 @@ CSVSettings::AbstractBlock::AbstractBlock(bool isVisible, QWidget* parent)
     : QObject (parent), mBox ( new GroupBox (isVisible, parent)), mWidgetParent (parent)
 {}
 
-QLayout *CSVSettings::AbstractBlock::createLayout (OcsWidgetOrientation direction,
+QLayout *CSVSettings::AbstractBlock::createLayout (Orientation direction,
                                                    bool isZeroMargin, QWidget* parent)
 {
     QLayout *layout = 0;
 
-    if (direction == OCS_VERTICAL)
+    if (direction == Orient_Vertical)
         layout = new QVBoxLayout (parent);
     else
         layout = new QHBoxLayout (parent);
@@ -37,27 +37,27 @@ CSVSettings::AbstractWidget *CSVSettings::AbstractBlock::buildWidget (const QStr
     switch (def.type)
     {
 
-    case OCS_RADIO_WIDGET:
+    case Widget_RadioButton:
         widg = createSettingWidget<QRadioButton> (def, layout);
         break;
 
-    case OCS_SPIN_WIDGET:
+    case Widget_SpinBox:
         widg = createSettingWidget<QSpinBox> (def, layout);
         break;
 
-    case OCS_CHECK_WIDGET:
+    case Widget_CheckBox:
         widg = createSettingWidget<QCheckBox> (def, layout);
         break;
 
-    case OCS_TEXT_WIDGET:
+    case Widget_LineEdit:
         widg = createSettingWidget<QLineEdit> (def, layout);
         break;
 
-    case OCS_LIST_WIDGET:
+    case Widget_ListBox:
         widg = createSettingWidget<QListWidget> (def, layout);
         break;
 
-    case OCS_COMBO_WIDGET:
+    case Widget_ComboBox:
         widg = createSettingWidget<QComboBox> (def, layout);
         break;
 

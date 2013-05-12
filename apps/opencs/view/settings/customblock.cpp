@@ -37,7 +37,7 @@ int CSVSettings::CustomBlock::build(GroupBlockDefList &defList, GroupBlockDefLis
     return retVal;
 }
 
-CSVSettings::GroupBox *CSVSettings::CustomBlock::buildGroupBox (OcsWidgetOrientation orientation)
+CSVSettings::GroupBox *CSVSettings::CustomBlock::buildGroupBox (Orientation orientation)
 {
     GroupBox *box = new GroupBox (false, mBox);
     QLayout *layout = createLayout (orientation, true, box);
