@@ -91,18 +91,17 @@ class CharacterController
 
     CharacterState mCharState;
     WeaponType mWeaponType;
-    bool mLooping;
     bool mSkipAnim;
 
     // counted for skill increase
     float mSecondsOfSwimming;
     float mSecondsOfRunning;
 
-    // Gets an animation group name from the current character state.
-    void getCurrentGroup(std::string &group) const;
+    // Gets an animation group name from the current character state, and whether it should loop.
+    void getCurrentGroup(std::string &group, bool &loops) const;
 
 public:
-    CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state, bool loop);
+    CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state);
     virtual ~CharacterController();
 
     void updatePtr(const MWWorld::Ptr &ptr);
@@ -112,7 +111,7 @@ public:
     void playGroup(const std::string &groupname, int mode, int count);
     void skipAnim();
 
-    void setState(CharacterState state, bool loop);
+    void setState(CharacterState state);
     CharacterState getState() const
     { return mCharState; }
 

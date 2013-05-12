@@ -40,54 +40,55 @@ namespace MWMechanics
 static const struct {
     CharacterState state;
     const char groupname[32];
+    bool loops;
 } sStateList[] = {
-    { CharState_Idle, "idle" },
-    { CharState_Idle2, "idle2" },
-    { CharState_Idle3, "idle3" },
-    { CharState_Idle4, "idle4" },
-    { CharState_Idle5, "idle5" },
-    { CharState_Idle6, "idle6" },
-    { CharState_Idle7, "idle7" },
-    { CharState_Idle8, "idle8" },
-    { CharState_Idle9, "idle9" },
-    { CharState_IdleSwim, "idleswim" },
-    { CharState_IdleSneak, "idlesneak" },
+    { CharState_Idle, "idle", true },
+    { CharState_Idle2, "idle2", true },
+    { CharState_Idle3, "idle3", true },
+    { CharState_Idle4, "idle4", true },
+    { CharState_Idle5, "idle5", true },
+    { CharState_Idle6, "idle6", true },
+    { CharState_Idle7, "idle7", true },
+    { CharState_Idle8, "idle8", true },
+    { CharState_Idle9, "idle9", true },
+    { CharState_IdleSwim, "idleswim", true },
+    { CharState_IdleSneak, "idlesneak", true },
 
-    { CharState_WalkForward, "walkforward" },
-    { CharState_WalkBack, "walkback" },
-    { CharState_WalkLeft, "walkleft" },
-    { CharState_WalkRight, "walkright" },
+    { CharState_WalkForward, "walkforward", true },
+    { CharState_WalkBack, "walkback", true },
+    { CharState_WalkLeft, "walkleft", true },
+    { CharState_WalkRight, "walkright", true },
 
-    { CharState_SwimWalkForward, "swimwalkforward" },
-    { CharState_SwimWalkBack, "swimwalkback" },
-    { CharState_SwimWalkLeft, "swimwalkleft" },
-    { CharState_SwimWalkRight, "swimwalkright" },
+    { CharState_SwimWalkForward, "swimwalkforward", true },
+    { CharState_SwimWalkBack, "swimwalkback", true },
+    { CharState_SwimWalkLeft, "swimwalkleft", true },
+    { CharState_SwimWalkRight, "swimwalkright", true },
 
-    { CharState_RunForward, "runforward" },
-    { CharState_RunBack, "runback" },
-    { CharState_RunLeft, "runleft" },
-    { CharState_RunRight, "runright" },
+    { CharState_RunForward, "runforward", true },
+    { CharState_RunBack, "runback", true },
+    { CharState_RunLeft, "runleft", true },
+    { CharState_RunRight, "runright", true },
 
-    { CharState_SwimRunForward, "swimrunforward" },
-    { CharState_SwimRunBack, "swimrunback" },
-    { CharState_SwimRunLeft, "swimrunleft" },
-    { CharState_SwimRunRight, "swimrunright" },
+    { CharState_SwimRunForward, "swimrunforward", true },
+    { CharState_SwimRunBack, "swimrunback", true },
+    { CharState_SwimRunLeft, "swimrunleft", true },
+    { CharState_SwimRunRight, "swimrunright", true },
 
-    { CharState_SneakForward, "sneakforward" },
-    { CharState_SneakBack, "sneakback" },
-    { CharState_SneakLeft, "sneakleft" },
-    { CharState_SneakRight, "sneakright" },
+    { CharState_SneakForward, "sneakforward", true },
+    { CharState_SneakBack, "sneakback", true },
+    { CharState_SneakLeft, "sneakleft", true },
+    { CharState_SneakRight, "sneakright", true },
 
-    { CharState_TurnLeft, "turnleft" },
-    { CharState_TurnRight, "turnright" },
+    { CharState_TurnLeft, "turnleft", true },
+    { CharState_TurnRight, "turnright", true },
 
-    { CharState_Jump, "jump" },
+    { CharState_Jump, "jump", true },
 
-    { CharState_Death1, "death1" },
-    { CharState_Death2, "death2" },
-    { CharState_Death3, "death3" },
-    { CharState_Death4, "death4" },
-    { CharState_Death5, "death5" },
+    { CharState_Death1, "death1", false },
+    { CharState_Death2, "death2", false },
+    { CharState_Death3, "death3", false },
+    { CharState_Death4, "death4", false },
+    { CharState_Death5, "death5", false },
 };
 static const size_t sStateListSize = sizeof(sStateList)/sizeof(sStateList[0]);
 
@@ -109,7 +110,7 @@ static const struct {
 static const size_t sWeaponTypeListSize = sizeof(sWeaponTypeList)/sizeof(sWeaponTypeList[0]);
 
 
-void CharacterController::getCurrentGroup(std::string &group) const
+void CharacterController::getCurrentGroup(std::string &group, bool &loops) const
 {
     std::string name;
     for(size_t i = 0;i < sStateListSize;i++)
@@ -117,6 +118,7 @@ void CharacterController::getCurrentGroup(std::string &group) const
         if(sStateList[i].state == mCharState)
         {
             name = sStateList[i].groupname;
+            loops = sStateList[i].loops;
             break;
         }
     }
@@ -143,7 +145,7 @@ void CharacterController::getCurrentGroup(std::string &group) const
 }
 
 
-CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state, bool loop)
+CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state)
     : mPtr(ptr)
     , mAnimation(anim)
     , mCharState(state)
@@ -151,7 +153,6 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     , mSkipAnim(false)
     , mSecondsOfRunning(0)
     , mSecondsOfSwimming(0)
-    , mLooping(false)
 {
     if(!mAnimation)
         return;
@@ -169,10 +170,11 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     }
 
     std::string group;
-    getCurrentGroup(group);
+    bool loops;
+    getCurrentGroup(group, loops);
     mAnimation->play(group, MWRender::Animation::Priority_Default,
                      MWRender::Animation::Group_All, false,
-                     "start", "stop", 1.0f, loop ? (~(size_t)0) : 0);
+                     "start", "stop", 1.0f, loops ? (~(size_t)0) : 0);
 }
 
 CharacterController::~CharacterController()
@@ -311,10 +313,10 @@ void CharacterController::update(float duration, Movement &movement)
         {
             if(vec.x > 0.0f)
                 setState(inwater ? (isrunning ? CharState_SwimRunRight : CharState_SwimWalkRight)
-                                 : (sneak ? CharState_SneakRight : (isrunning ? CharState_RunRight : CharState_WalkRight)), true);
+                                 : (sneak ? CharState_SneakRight : (isrunning ? CharState_RunRight : CharState_WalkRight)));
             else if(vec.x < 0.0f)
                 setState(inwater ? (isrunning ? CharState_SwimRunLeft : CharState_SwimWalkLeft)
-                                 : (sneak ? CharState_SneakLeft : (isrunning ? CharState_RunLeft : CharState_WalkLeft)), true);
+                                 : (sneak ? CharState_SneakLeft : (isrunning ? CharState_RunLeft : CharState_WalkLeft)));
 
             movement.mPosition[0] += vec.x * (speed*duration);
             movement.mPosition[1] += vec.y * (speed*duration);
@@ -323,10 +325,10 @@ void CharacterController::update(float duration, Movement &movement)
         {
             if(vec.y > 0.0f)
                 setState(inwater ? (isrunning ? CharState_SwimRunForward : CharState_SwimWalkForward)
-                                 : (sneak ? CharState_SneakForward : (isrunning ? CharState_RunForward : CharState_WalkForward)), true);
+                                 : (sneak ? CharState_SneakForward : (isrunning ? CharState_RunForward : CharState_WalkForward)));
             else if(vec.y < 0.0f)
                 setState(inwater ? (isrunning ? CharState_SwimRunBack : CharState_SwimWalkBack)
-                                 : (sneak ? CharState_SneakBack : (isrunning ? CharState_RunBack : CharState_WalkBack)), true);
+                                 : (sneak ? CharState_SneakBack : (isrunning ? CharState_RunBack : CharState_WalkBack)));
 
             movement.mPosition[0] += vec.x * (speed*duration);
             movement.mPosition[1] += vec.y * (speed*duration);
@@ -334,9 +336,9 @@ void CharacterController::update(float duration, Movement &movement)
         else if(rot.z != 0.0f && !inwater && !sneak)
         {
             if(rot.z > 0.0f)
-                setState(CharState_TurnRight, true);
+                setState(CharState_TurnRight);
             else if(rot.z < 0.0f)
-                setState(CharState_TurnLeft, true);
+                setState(CharState_TurnLeft);
         }
         else if(mAnimQueue.size() > 0)
         {
@@ -351,7 +353,7 @@ void CharacterController::update(float duration, Movement &movement)
             }
         }
         else if(getState() != CharState_SpecialIdle)
-            setState((inwater ? CharState_IdleSwim : (sneak ? CharState_IdleSneak : CharState_Idle)), true);
+            setState((inwater ? CharState_IdleSwim : (sneak ? CharState_IdleSneak : CharState_Idle)));
 
         movement.mRotation[0] += rot.x * duration;
         movement.mRotation[1] += rot.y * duration;
@@ -395,7 +397,6 @@ void CharacterController::playGroup(const std::string &groupname, int mode, int 
             mAnimQueue.push_back(std::make_pair(groupname, count-1));
 
             mCharState = CharState_SpecialIdle;
-            mLooping = false;
             mAnimation->play(groupname, MWRender::Animation::Priority_Default,
                              MWRender::Animation::Group_All, false,
                              ((mode==2) ? "loop start" : "start"), "stop", 0.0f, count-1);
@@ -414,12 +415,11 @@ void CharacterController::skipAnim()
 }
 
 
-void CharacterController::setState(CharacterState state, bool loop)
+void CharacterController::setState(CharacterState state)
 {
     if(mCharState == state)
         return;
     mCharState = state;
-    mLooping = loop;
 
     forceStateUpdate();
 }
@@ -431,10 +431,11 @@ void CharacterController::forceStateUpdate()
     mAnimQueue.clear();
 
     std::string group;
-    getCurrentGroup(group);
+    bool loops;
+    getCurrentGroup(group, loops);
     mAnimation->play(group, MWRender::Animation::Priority_Default,
                      MWRender::Animation::Group_All, false,
-                     "start", "stop", 0.0f, mLooping ? (~(size_t)0) : 0);
+                     "start", "stop", 0.0f, loops ? (~(size_t)0) : 0);
 
     mAnimation->showWeapons(mWeaponType != WeapType_None && mWeaponType != WeapType_HandToHand &&
                             mWeaponType != WeapType_Spell);
