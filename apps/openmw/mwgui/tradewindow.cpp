@@ -288,8 +288,10 @@ namespace MWGui
             int a = abs(mCurrentMerchantOffer);
             int b = abs(mCurrentBalance);
             int d = 0;
-            if (mCurrentMerchantOffer<0) d = int(100 * (a - b) / a);
-            else d = int(100 * (b - a) / a);
+            if (mCurrentBalance<0)
+                d = int(100 * (a - b) / a);
+            else
+                d = int(100 * (b - a) / a);
 
             float clampedDisposition = std::max<int>(0,std::min<int>(int(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr)
                 + MWBase::Environment::get().getDialogueManager()->getTemporaryDispositionChange()),100));
@@ -310,8 +312,10 @@ namespace MWGui
             float pcTerm = (clampedDisposition - 50 + a1 + b1 + c1) * playerStats.getFatigueTerm();
             float npcTerm = (d1 + e1 + f1) * sellerStats.getFatigueTerm();
             float x = gmst.find("fBargainOfferMulti")->getFloat() * d + gmst.find("fBargainOfferBase")->getFloat();
-            if (mCurrentMerchantOffer<0) x += abs(int(pcTerm - npcTerm));
-            else x += abs(int(npcTerm - pcTerm));
+            if (mCurrentBalance<0)
+                x += abs(int(pcTerm - npcTerm));
+            else
+                x += abs(int(npcTerm - pcTerm));
 
             int roll = std::rand()%100 + 1;
             if(roll > x) //trade refused
