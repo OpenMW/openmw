@@ -189,19 +189,17 @@ void Animation::addAnimSource(const std::string &model)
         return;
 
     std::vector<Ogre::Controller<Ogre::Real> > ctrls;
-    mAnimSources.push_back(AnimSource());
-    NifOgre::Loader::createKfControllers(mSkelBase, kfname, mAnimSources.back().mTextKeys, ctrls);
-    if(mAnimSources.back().mTextKeys.size() == 0 || ctrls.size() == 0)
-    {
-        mAnimSources.pop_back();
+    Ogre::SharedPtr<AnimSource> animsrc(OGRE_NEW AnimSource);
+    NifOgre::Loader::createKfControllers(mSkelBase, kfname, animsrc->mTextKeys, ctrls);
+    if(animsrc->mTextKeys.size() == 0 || ctrls.size() == 0)
         return;
-    }
 
-    std::vector<Ogre::Controller<Ogre::Real> > *grpctrls = mAnimSources.back().mControllers;
-    NifOgre::NodeTargetValue<Ogre::Real> *dstval;
+    mAnimSources.push_back(animsrc);
 
+    std::vector<Ogre::Controller<Ogre::Real> > *grpctrls = animsrc->mControllers;
     for(size_t i = 0;i < ctrls.size();i++)
     {
+        NifOgre::NodeTargetValue<Ogre::Real> *dstval;
         dstval = static_cast<NifOgre::NodeTargetValue<Ogre::Real>*>(ctrls[i].getDestination().getPointer());
 
         size_t grp = detectAnimGroup(dstval->getNode());
@@ -264,7 +262,7 @@ bool Animation::hasAnimation(const std::string &anim)
     AnimSourceList::const_iterator iter(mAnimSources.begin());
     for(;iter != mAnimSources.end();iter++)
     {
-        const NifOgre::TextKeyMap &keys = iter->mTextKeys;
+        const NifOgre::TextKeyMap &keys = (*iter)->mTextKeys;
         if(findGroupStart(keys, anim) != keys.end())
             return true;
     }
@@ -510,9 +508,9 @@ bool Animation::play(const std::string &groupname, Priority priority, int groups
     for(;iter != mAnimSources.rend();iter++)
     {
         AnimState state;
-        if(reset(state, iter->mTextKeys, groupname, start, stop, startpoint))
+        if(reset(state, (*iter)->mTextKeys, groupname, start, stop, startpoint))
         {
-            state.mSource = &*iter;
+            state.mSource = *iter;
             state.mLoopCount = loops;
             state.mPlaying = true;
             state.mPriority = priority;
@@ -561,7 +559,7 @@ bool Animation::resetActiveGroups()
 
     bool ismoving = false;
 
-    const AnimSource *animsrc = state->second.mSource;
+    const Ogre::SharedPtr<AnimSource> &animsrc = state->second.mSource;
     const NifOgre::TextKeyMap &keys = animsrc->mTextKeys;
     const std::vector<Ogre::Controller<Ogre::Real> >&ctrls = animsrc->mControllers[0];
     for(size_t i = 0;i < ctrls.size();i++)
@@ -579,18 +577,25 @@ bool Animation::resetActiveGroups()
     }
 
     // If there's no velocity, keep looking
-    while(!(mAnimVelocity > 1.0f) && animsrc-- != &mAnimSources[0])
+    if(!(mAnimVelocity > 1.0f))
     {
-        const NifOgre::TextKeyMap &keys = animsrc->mTextKeys;
-        const std::vector<Ogre::Controller<Ogre::Real> >&ctrls = animsrc->mControllers[0];
-        for(size_t i = 0;i < ctrls.size();i++)
+        AnimSourceList::const_reverse_iterator animiter = mAnimSources.rbegin();
+        while(*animiter != animsrc)
+            ++animiter;
+
+        while(!(mAnimVelocity > 1.0f) && ++animiter != mAnimSources.rend())
         {
-            NifOgre::NodeTargetValue<Ogre::Real> *dstval;
-            dstval = static_cast<NifOgre::NodeTargetValue<Ogre::Real>*>(ctrls[i].getDestination().getPointer());
-            if(dstval->getNode() == mNonAccumRoot)
+            const NifOgre::TextKeyMap &keys = (*animiter)->mTextKeys;
+            const std::vector<Ogre::Controller<Ogre::Real> >&ctrls = (*animiter)->mControllers[0];
+            for(size_t i = 0;i < ctrls.size();i++)
             {
-                mAnimVelocity = calcAnimVelocity(keys, dstval, mAccumulate, state->first);
-                break;
+                NifOgre::NodeTargetValue<Ogre::Real> *dstval;
+                dstval = static_cast<NifOgre::NodeTargetValue<Ogre::Real>*>(ctrls[i].getDestination().getPointer());
+                if(dstval->getNode() == mNonAccumRoot)
+                {
+                    mAnimVelocity = calcAnimVelocity(keys, dstval, mAccumulate, state->first);
+                    break;
+                }
             }
         }
     }
@@ -675,7 +680,7 @@ Ogre::Vector3 Animation::runAnimation(float duration)
         const std::string &name = mAnimationValuePtr[grp]->getAnimName();
         if(!name.empty() && (stateiter=mStates.find(name)) != mStates.end())
         {
-            AnimSource *src = stateiter->second.mSource;
+            const Ogre::SharedPtr<AnimSource> &src = stateiter->second.mSource;
             for(size_t i = 0;i < src->mControllers[grp].size();i++)
                 src->mControllers[grp][i].update();
         }

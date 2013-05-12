@@ -57,10 +57,10 @@ protected:
         NifOgre::TextKeyMap mTextKeys;
         std::vector<Ogre::Controller<Ogre::Real> > mControllers[sNumGroups];
     };
-    typedef std::vector<AnimSource> AnimSourceList;
+    typedef std::vector< Ogre::SharedPtr<AnimSource> > AnimSourceList;
 
     struct AnimState {
-        AnimSource *mSource;
+        Ogre::SharedPtr<AnimSource> mSource;
         NifOgre::TextKeyMap::const_iterator mStartKey;
         NifOgre::TextKeyMap::const_iterator mLoopStartKey;
         NifOgre::TextKeyMap::const_iterator mStopKey;
@@ -75,7 +75,8 @@ protected:
         int mGroups;
         bool mAutoDisable;
 
-        AnimState() : mSource(NULL), mTime(0.0f), mPlaying(false), mLoopCount(0)
+        AnimState() : mTime(0.0f), mPlaying(false), mLoopCount(0),
+                      mPriority(0), mGroups(0), mAutoDisable(true)
         { }
     };
     typedef std::map<std::string,AnimState> AnimStateMap;
