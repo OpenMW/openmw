@@ -664,7 +664,10 @@ Ogre::Vector3 Animation::runAnimation(float duration)
         }
 
         if(!state.mPlaying && state.mAutoDisable)
+        {
             mStates.erase(stateiter++);
+            resetActiveGroups();
+        }
         else
             stateiter++;
     }
