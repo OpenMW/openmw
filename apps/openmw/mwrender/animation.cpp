@@ -531,6 +531,14 @@ void Animation::play(const std::string &groupname, Priority priority, int groups
     resetActiveGroups();
 }
 
+bool Animation::isPlaying(const std::string &groupname) const
+{
+    AnimStateMap::const_iterator state(mStates.find(groupname));
+    if(state != mStates.end())
+        return state->second.mPlaying;
+    return false;
+}
+
 void Animation::resetActiveGroups()
 {
     for(size_t grp = 0;grp < sNumGroups;grp++)

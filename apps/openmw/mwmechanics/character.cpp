@@ -338,18 +338,20 @@ void CharacterController::update(float duration, Movement &movement)
             else if(rot.z < 0.0f)
                 setState(CharState_TurnLeft, true);
         }
-        else if(getState() != CharState_SpecialIdle)
+        else if(mAnimQueue.size() > 0)
         {
-            if(mAnimQueue.size() == 0)
-                setState((inwater ? CharState_IdleSwim : (sneak ? CharState_IdleSneak : CharState_Idle)), true);
-            else
+            if(mAnimation->isPlaying(mAnimQueue.front().first) == false)
             {
-                mAnimation->play(mAnimQueue.front().first, MWRender::Animation::Priority_Default,
-                                 MWRender::Animation::Group_All, false,
-                                 "start", "stop", 0.0f, mAnimQueue.front().second);
                 mAnimQueue.pop_front();
+                if(mAnimQueue.size() > 0)
+                    mAnimation->play(mAnimQueue.front().first,
+                                     MWRender::Animation::Priority_Default,
+                                     MWRender::Animation::Group_All, false,
+                                     "start", "stop", 0.0f, mAnimQueue.front().second);
             }
         }
+        else if(getState() != CharState_SpecialIdle)
+            setState((inwater ? CharState_IdleSwim : (sneak ? CharState_IdleSneak : CharState_Idle)), true);
 
         movement.mRotation[0] += rot.x * duration;
         movement.mRotation[1] += rot.y * duration;
@@ -387,9 +389,11 @@ void CharacterController::playGroup(const std::string &groupname, int mode, int 
     else
     {
         count = std::max(count, 1);
-        if(mode != 0 || getState() != CharState_SpecialIdle)
+        if(mode != 0 || mAnimQueue.size() == 0)
         {
             mAnimQueue.clear();
+            mAnimQueue.push_back(std::make_pair(groupname, count-1));
+
             mCharState = CharState_SpecialIdle;
             mLooping = false;
             mAnimation->play(groupname, MWRender::Animation::Priority_Default,
@@ -398,7 +402,7 @@ void CharacterController::playGroup(const std::string &groupname, int mode, int 
         }
         else if(mode == 0)
         {
-            mAnimQueue.clear();
+            mAnimQueue.resize(1);
             mAnimQueue.push_back(std::make_pair(groupname, count-1));
         }
     }

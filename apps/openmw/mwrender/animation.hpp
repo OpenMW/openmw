@@ -177,6 +177,9 @@ public:
               const std::string &start, const std::string &stop,
               float startpoint, size_t loops);
 
+    /** Returns true if the named animation group is playing. */
+    bool isPlaying(const std::string &groupname) const;
+
     /** Gets info about the given animation group.
      * \param groupname Animation group to check.
      * \param complete Stores completion amount (0 = at start key, 0.5 = half way between start and stop keys), etc.
