@@ -23,7 +23,6 @@ namespace CSVSettings {
         QStringList mPaths;
         QListWidget *mListWidget;
         QStackedWidget *mStackedWidget;
-        CSMSettings::UserSettings mUserSettings;
         Files::ConfigurationManager mCfgMgr;
 
     public:

@@ -18,7 +18,7 @@
 #include <QDebug>
 
 CSVSettings::UserSettingsDialog::UserSettingsDialog(QMainWindow *parent) :
-    QMainWindow (parent), mUserSettings (mCfgMgr), mStackedWidget (0)
+    QMainWindow (parent), mStackedWidget (0)
 {
     setWindowTitle(QString::fromUtf8 ("User Settings"));
     buildPages();
@@ -135,7 +135,7 @@ CSMSettings::SectionMap CSVSettings::UserSettingsDialog::loadSettings ()
             QTextStream stream(&file);
             stream.setCodec(QTextCodec::codecForName("UTF-8"));
 
-            mUserSettings.getSettings(stream, settingsMap);
+            CSMSettings::UserSettings::instance().getSettings(stream, settingsMap);
         }
 
         file.close();
@@ -154,7 +154,7 @@ void CSVSettings::UserSettingsDialog::writeSettings()
         settings [page->objectName()] = page->getSettings();
     }
 
-    mUserSettings.writeFile(mUserSettings.openFile(mPaths.back()), settings);
+    CSMSettings::UserSettings::instance().writeFile(CSMSettings::UserSettings::instance().openFile(mPaths.back()), settings);
 
 }
 

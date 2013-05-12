@@ -30,9 +30,9 @@ namespace boost
 #endif /* (BOOST_VERSION <= 104600) */
 
 
-CSMSettings::UserSettings::UserSettings(Files::ConfigurationManager &cfg)
-    : mCfgMgr(cfg)
+CSMSettings::UserSettings::UserSettings()
 {
+    mUserSettingsInstance = this;
 }
 
 CSMSettings::UserSettings::~UserSettings()

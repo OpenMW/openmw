@@ -17,18 +17,29 @@ class QFile;
 
 namespace CSMSettings {
 
-    class UserSettings
+    struct UserSettings
     {
     public:
-        UserSettings(Files::ConfigurationManager &cfg);
-        ~UserSettings();
+
+        static UserSettings &instance()
+        {
+            static UserSettings instance;
+
+            return instance;
+        }
 
         QFile *openFile (const QString &);
         bool writeFile(QFile *file, QMap<QString, SettingList *> &sections);
         void getSettings (QTextStream &stream, SectionMap &settings);
 
     private:
-        Files::ConfigurationManager &mCfgMgr;
+
+        UserSettings *mUserSettingsInstance;
+        UserSettings();
+        ~UserSettings();
+
+        UserSettings (UserSettings const &);        //not implemented
+        void operator= (UserSettings const &);      //not implemented
 
     };
 }
