@@ -185,7 +185,7 @@ namespace MWScript
 
                     for (int i=2; i<10 && arg0; ++i)
                     {
-                        Interpreter::Type_Integer idleValue = runtime[0].mFloat;
+                        Interpreter::Type_Integer idleValue = runtime[0].mInteger;
                         idleList.push_back(idleValue);
                         runtime.pop();
                         --arg0;
