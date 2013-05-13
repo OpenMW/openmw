@@ -14,7 +14,7 @@ QVariant CSMWorld::PotionRefIdAdapter::getData (const RefIdColumn *column, const
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Potion)));
 
     if (column==mAutoCalc)
-        return record.get().mData.mAutoCalc;
+        return record.get().mData.mAutoCalc!=0;
 
     return InventoryRefIdAdapter<ESM::Potion>::getData (column, data, index);
 }
