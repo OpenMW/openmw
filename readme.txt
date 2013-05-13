@@ -31,7 +31,7 @@ Open DMG file, copy OpenMW folder anywhere, for example in /Applications
 
 BUILD FROM SOURCE
 
-TODO add description here
+https://wiki.openmw.org/index.php?title=Development_Environment_Setup
 
 
 THE DATA PATH
