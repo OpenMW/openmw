@@ -181,7 +181,6 @@ namespace MWScript
                     runtime.pop();
 
                     std::vector<int> idleList;
-                    idleList.push_back (0); // why MW, why?
 
                     for (int i=2; i<10 && arg0; ++i)
                     {
