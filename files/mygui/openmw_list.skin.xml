@@ -126,6 +126,15 @@
 
     </Skin>
 
+    <Skin name="MW_ItemView" size="516 516" align="ALIGN_LEFT ALIGN_TOP">
+        <Child type="Widget" skin="MW_Box" offset="0 0 516 516" align="ALIGN_STRETCH"/>
+
+        <Child type="ScrollView" skin="MW_ScrollViewH" offset="3 3 509 509" align="ALIGN_STRETCH" name="ScrollView">
+            <Property key="CanvasAlign" value="Left Top"/>
+            <Property key="NeedMouse" value="true"/>
+        </Child>
+    </Skin>
+
     <Skin name="MW_SimpleList" size="516 516" align="ALIGN_LEFT ALIGN_TOP">
 
         <Child type="Widget" skin="MW_Box" offset="0 0 516 516" align="ALIGN_STRETCH"/>

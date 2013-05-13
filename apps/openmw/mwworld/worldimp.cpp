@@ -1653,4 +1653,22 @@ namespace MWWorld
         else
             return 0.f;
     }
+
+    void World::getContainersOwnedBy (const MWWorld::Ptr& npc, std::vector<MWWorld::Ptr>& out)
+    {
+        std::string refId = npc.getCellRef().mRefID;
+
+        const Scene::CellStoreCollection& collection = mWorldScene->getActiveCells();
+        for (Scene::CellStoreCollection::const_iterator cellIt = collection.begin(); cellIt != collection.end(); ++cellIt)
+        {
+            MWWorld::CellRefList<ESM::Container>& containers = (*cellIt)->mContainers;
+            CellRefList<ESM::Container>::List& refList = containers.mList;
+            for (CellRefList<ESM::Container>::List::iterator container = refList.begin(); container != refList.end(); ++container)
+            {
+                MWWorld::Ptr ptr (&*container, *cellIt);
+                if (Misc::StringUtils::ciEqual(ptr.getCellRef().mOwner, npc.getCellRef().mRefID))
+                    out.push_back(ptr);
+            }
+        }
+    }
 }

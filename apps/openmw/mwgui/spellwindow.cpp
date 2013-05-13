@@ -369,7 +369,7 @@ namespace MWGui
             action.execute (MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer ());
 
             // since we changed equipping status, update the inventory window
-            MWBase::Environment::get().getWindowManager()->getInventoryWindow()->drawItems();
+            MWBase::Environment::get().getWindowManager()->getInventoryWindow()->updateItemView();
         }
 
         store.setSelectedEnchantItem(it);

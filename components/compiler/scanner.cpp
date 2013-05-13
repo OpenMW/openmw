@@ -372,7 +372,18 @@ namespace Compiler
         else if (c==')')
             special = S_close;
         else if (c=='.')
+        {
+            // check, if this starts a float literal
+            if (get (c))
+            {
+                putback (c);
+
+                if (std::isdigit (c))
+                    return scanFloat ("", parser, cont);
+            }
+
             special = S_member;
+        }
         else if (c=='=')
         {
             if (get (c))

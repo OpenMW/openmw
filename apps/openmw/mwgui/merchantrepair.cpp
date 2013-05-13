@@ -9,6 +9,8 @@
 #include "../mwbase/soundmanager.hpp"
 
 #include "../mwworld/player.hpp"
+#include "../mwworld/class.hpp"
+#include "../mwworld/containerstore.hpp"
 
 #include "inventorywindow.hpp"
 #include "tradewindow.hpp"

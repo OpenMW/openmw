@@ -24,11 +24,7 @@
         </Widget>
 
         <!-- Items -->
-        <Widget type="Widget" skin="MW_Box" position="8 38 566 185" name="box" align="Left Top Stretch">
-            <Widget type="ScrollView" skin="MW_ScrollViewH" position="4 4 558 181" align="Left Top Stretch" name="ItemView">
-                <Property key="CanvasAlign" value="Left Top"/>
-                <Widget type="Button" skin="" name="Items" position="0 0 558 181" name="Items" align="Left Top Stretch"/>
-            </Widget>
+        <Widget type="ItemView" skin="MW_ItemView" position="8 38 566 185" name="ItemView" align="Left Top Stretch">
         </Widget>
 
         <Widget type="Widget" skin="" position="8 231 566 92" name="BottomPane" align="Left Bottom HStretch">

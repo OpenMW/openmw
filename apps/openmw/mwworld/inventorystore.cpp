@@ -276,6 +276,8 @@ bool MWWorld::InventoryStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
     {
         if (*iter != end() && ptr1 == **iter)
             return false;
+        if (*iter != end() && ptr2 == **iter)
+            return false;
     }
 
     return true;

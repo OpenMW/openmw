@@ -90,8 +90,6 @@ namespace MWWorld
             ///< \attention This function is internal to the world model and should not be called from
             /// outside.
 
-        protected:
-
             virtual bool stacks (const Ptr& ptr1, const Ptr& ptr2);
             ///< @return true if the two specified objects can stack with each other
             /// @note ptr1 is the item that is already in this container

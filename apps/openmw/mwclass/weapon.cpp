@@ -440,4 +440,11 @@ namespace MWClass
     {
         return npcServices & ESM::NPC::Weapon;
     }
+
+    float Weapon::getWeight(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Weapon> *ref =
+            ptr.get<ESM::Weapon>();
+        return ref->mBase->mData.mWeight;
+    }
 }

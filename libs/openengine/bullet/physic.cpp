@@ -612,10 +612,13 @@ namespace Physic
 
         float d1 = 10000.;
         btCollisionWorld::ClosestRayResultCallback resultCallback1(from, to);
-        if(raycastingObjectOnly) resultCallback1.m_collisionFilterMask = CollisionType_Raycasting;
-        else resultCallback1.m_collisionFilterMask = CollisionType_World;
+        if(raycastingObjectOnly)
+            resultCallback1.m_collisionFilterMask = CollisionType_Raycasting;
+        else
+            resultCallback1.m_collisionFilterMask = CollisionType_World;
 
-        if(!ignoreHeightMap) resultCallback1.m_collisionFilterMask = resultCallback1.m_collisionFilterMask|| CollisionType_HeightMap;
+        if(!ignoreHeightMap)
+            resultCallback1.m_collisionFilterMask = resultCallback1.m_collisionFilterMask | CollisionType_HeightMap;
         dynamicsWorld->rayTest(from, to, resultCallback1);
         if (resultCallback1.hasHit())
         {

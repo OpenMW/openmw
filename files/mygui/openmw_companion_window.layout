@@ -4,11 +4,7 @@
     <Widget type="Window" skin="MW_Window" layer="Windows" position="0 0 600 300" name="_Main">
 
         <!-- Items -->
-        <Widget type="Widget" skin="MW_Box" position="5 5 575 225" name="box" align="Left Top Stretch">
-            <Widget type="ScrollView" skin="MW_ScrollViewH" position="4 4 567 217" name="ItemView" align="Left Top Stretch">
-                <Property key="CanvasAlign" value="Left Top"/>
-                <Widget type="Button" skin="" name="Items" position="0 0 567 217" name="Items" align="Left Top Stretch"/>
-            </Widget>
+        <Widget type="ItemView" skin="MW_ItemView" position="5 5 575 225" name="ItemView" align="Left Top Stretch">
         </Widget>
 
         <Widget type="HBox" position="5 235 575 24" align="Bottom HStretch">

@@ -5,6 +5,8 @@
 
 #include "../mwbase/inputmanager.hpp"
 
+#include "../mwworld/class.hpp"
+
 #include "console.hpp"
 #include "journalwindow.hpp"
 #include "journalviewmodel.hpp"
@@ -39,6 +41,7 @@
 #include "companionwindow.hpp"
 #include "inventorywindow.hpp"
 #include "bookpage.hpp"
+#include "itemview.hpp"
 
 namespace MWGui
 {
@@ -123,6 +126,7 @@ namespace MWGui
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::ExposedWindow>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWScrollView>("Widget");
         BookPage::registerMyGUIComponents ();
+        ItemView::registerComponents();
 
         MyGUI::FactoryManager::getInstance().registerFactory<ResourceImageSetPointerFix>("Resource", "ResourceImageSetPointer");
         MyGUI::ResourceManager::getInstance().load("core.xml");
@@ -302,6 +306,7 @@ namespace MWGui
         mMerchantRepair->setVisible(false);
         mRepair->setVisible(false);
         mCompanionWindow->setVisible(false);
+        mInventoryWindow->setTrading(false);
 
         mHud->setVisible(mHudEnabled);
 
@@ -411,6 +416,7 @@ namespace MWGui
                 break;
             case GM_Barter:
                 mInventoryWindow->setVisible(true);
+                mInventoryWindow->setTrading(true);
                 mTradeWindow->setVisible(true);
                 break;
             case GM_SpellBuying:
@@ -584,18 +590,21 @@ namespace MWGui
         mGarbageDialogs.push_back(dialog);
     }
 
-    void WindowManager::messageBox (const std::string& message, const std::vector<std::string>& buttons)
+    void WindowManager::messageBox (const std::string& message, const std::vector<std::string>& buttons, bool showInDialogueModeOnly)
     {
-        if(buttons.empty()){
+        if (buttons.empty()) {
             /* If there are no buttons, and there is a dialogue window open, messagebox goes to the dialogue window */
-            if(!mGuiModes.empty() && mGuiModes.back() == GM_Dialogue)
+            if (getMode() == GM_Dialogue) {
                 mDialogueWindow->addMessageBox(MyGUI::LanguageManager::getInstance().replaceTags(message));
-            else
-                mMessageBoxManager->createMessageBox(message);
-        }
-
-        else
-        {
+            } else {
+                if (showInDialogueModeOnly) {
+                    if (getMode() == GM_Dialogue)
+                        mMessageBoxManager->createMessageBox(message);
+                } else {
+                    mMessageBoxManager->createMessageBox(message);
+                }
+            }
+        } else {
             mMessageBoxManager->createInteractiveMessageBox(message, buttons);
             MWBase::Environment::get().getInputManager()->changeInputMode(isGuiMode());
         }
@@ -632,17 +641,6 @@ namespace MWGui
         return default_;
     }
 
-    void WindowManager::onDialogueWindowBye()
-    {
-        if (mDialogueWindow)
-        {
-            //FIXME set some state and stuff?
-            //removeDialog(dialogueWindow);
-            mDialogueWindow->setVisible(false);
-        }
-        removeGuiMode(GM_Dialogue);
-    }
-
     void WindowManager::onFrame (float frameDuration)
     {
         mMessageBoxManager->onFrame(frameDuration);
@@ -677,6 +675,7 @@ namespace MWGui
         mContainerWindow->checkReferenceAvailable();
         mCompanionWindow->checkReferenceAvailable();
         mConsole->checkReferenceAvailable();
+        mCompanionWindow->onFrame();
     }
 
     void WindowManager::changeCell(MWWorld::Ptr::CellStore* cell)

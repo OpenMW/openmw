@@ -10,6 +10,7 @@
 #include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/player.hpp"
+#include "../mwworld/class.hpp"
 
 #include "inventorywindow.hpp"
 #include "tradewindow.hpp"
