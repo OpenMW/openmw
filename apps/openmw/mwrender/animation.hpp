@@ -17,14 +17,19 @@ class Animation
 public:
     enum Group {
         Group_LowerBody = 1<<0,
-        Group_UpperBody = 1<<1,
-        Group_LeftArm = 1<<2,
 
-        Group_All = Group_LowerBody | Group_UpperBody | Group_LeftArm
+        Group_Torso = 1<<1,
+        Group_LeftArm = 1<<2,
+        Group_RightArm = 1<<3,
+
+        Group_UpperBody = Group_Torso | Group_LeftArm | Group_RightArm,
+
+        Group_All = Group_LowerBody | Group_UpperBody
     };
 
 protected:
-    static const size_t sNumGroups = 3;
+    /* This is the number of *discrete* groups. */
+    static const size_t sNumGroups = 4;
 
     class AnimationValue : public Ogre::ControllerValue<Ogre::Real>
     {

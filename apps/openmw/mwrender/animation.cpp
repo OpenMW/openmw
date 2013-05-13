@@ -147,8 +147,9 @@ size_t Animation::detectAnimGroup(const Ogre::Node *node)
 {
     static const char sGroupRoots[sNumGroups][32] = {
         "", /* Lower body / character root */
-        "Bip01 Spine1", /* Upper body */
+        "Bip01 Spine1", /* Torso */
         "Bip01 L Clavicle", /* Left arm */
+        "Bip01 R Clavicle", /* Right arm */
     };
 
     while(node)
@@ -473,6 +474,11 @@ bool Animation::handleTextKey(AnimState &state, const std::string &groupname, co
         }
         return true;
     }
+
+    /* Nothing to do for these */
+    if(evt.compare(off, len, "equip start") == 0 || evt.compare(off, len, "equip stop") == 0 ||
+       evt.compare(off, len, "unequip start") == 0 || evt.compare(off, len, "unequip stop") == 0)
+        return true;
 
     std::cerr<< "Unhandled animation textkey: "<<evt <<std::endl;
     return true;
