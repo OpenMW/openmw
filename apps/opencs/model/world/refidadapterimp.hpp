@@ -4,6 +4,7 @@
 #include <QVariant>
 
 #include <components/esm/loadalch.hpp>
+#include <components/esm/loadappa.hpp>
 
 #include "record.hpp"
 #include "refiddata.hpp"
@@ -289,6 +290,24 @@ namespace CSMWorld
         public:
 
             PotionRefIdAdapter (const InventoryColumns& columns, const RefIdColumn *autoCalc);
+
+            virtual QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
+                const;
+
+            virtual void setData (const RefIdColumn *column, RefIdData& data, int index,
+                const QVariant& value) const;
+            ///< If the data type does not match an exception is thrown.
+    };
+
+    class ApparatusRefIdAdapter : public InventoryRefIdAdapter<ESM::Apparatus>
+    {
+            const RefIdColumn *mType;
+            const RefIdColumn *mQuality;
+
+        public:
+
+            ApparatusRefIdAdapter (const InventoryColumns& columns, const RefIdColumn *type,
+                const RefIdColumn *quality);
 
             virtual QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
                 const;
