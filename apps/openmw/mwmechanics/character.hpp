@@ -4,6 +4,7 @@
 #include <OgreVector3.h>
 
 #include "../mwworld/ptr.hpp"
+#include "../mwrender/animation.hpp"
 
 namespace MWRender
 {
@@ -98,7 +99,7 @@ class CharacterController
     float mSecondsOfRunning;
 
     // Gets an animation group name from the current character state, and whether it should loop.
-    void getCurrentGroup(std::string &group, bool &loops) const;
+    void getCurrentGroup(std::string &group, MWRender::Animation::Priority &prio, bool &loops) const;
 
 public:
     CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state);

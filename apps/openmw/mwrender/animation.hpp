@@ -19,6 +19,8 @@ public:
         Priority_Nil = -1, /* Do not use */
         Priority_Default,
 
+        Priority_Death,
+
         Num_Priorities
     };
 

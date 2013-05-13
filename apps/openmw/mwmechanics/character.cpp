@@ -40,55 +40,56 @@ namespace MWMechanics
 static const struct {
     CharacterState state;
     const char groupname[32];
+    MWRender::Animation::Priority priority;
     bool loops;
 } sStateList[] = {
-    { CharState_Idle, "idle", true },
-    { CharState_Idle2, "idle2", true },
-    { CharState_Idle3, "idle3", true },
-    { CharState_Idle4, "idle4", true },
-    { CharState_Idle5, "idle5", true },
-    { CharState_Idle6, "idle6", true },
-    { CharState_Idle7, "idle7", true },
-    { CharState_Idle8, "idle8", true },
-    { CharState_Idle9, "idle9", true },
-    { CharState_IdleSwim, "idleswim", true },
-    { CharState_IdleSneak, "idlesneak", true },
+    { CharState_Idle, "idle", MWRender::Animation::Priority_Default, true },
+    { CharState_Idle2, "idle2", MWRender::Animation::Priority_Default, true },
+    { CharState_Idle3, "idle3", MWRender::Animation::Priority_Default, true },
+    { CharState_Idle4, "idle4", MWRender::Animation::Priority_Default, true },
+    { CharState_Idle5, "idle5", MWRender::Animation::Priority_Default, true },
+    { CharState_Idle6, "idle6", MWRender::Animation::Priority_Default, true },
+    { CharState_Idle7, "idle7", MWRender::Animation::Priority_Default, true },
+    { CharState_Idle8, "idle8", MWRender::Animation::Priority_Default, true },
+    { CharState_Idle9, "idle9", MWRender::Animation::Priority_Default, true },
+    { CharState_IdleSwim, "idleswim", MWRender::Animation::Priority_Default, true },
+    { CharState_IdleSneak, "idlesneak", MWRender::Animation::Priority_Default, true },
 
-    { CharState_WalkForward, "walkforward", true },
-    { CharState_WalkBack, "walkback", true },
-    { CharState_WalkLeft, "walkleft", true },
-    { CharState_WalkRight, "walkright", true },
+    { CharState_WalkForward, "walkforward", MWRender::Animation::Priority_Default, true },
+    { CharState_WalkBack, "walkback", MWRender::Animation::Priority_Default, true },
+    { CharState_WalkLeft, "walkleft", MWRender::Animation::Priority_Default, true },
+    { CharState_WalkRight, "walkright", MWRender::Animation::Priority_Default, true },
 
-    { CharState_SwimWalkForward, "swimwalkforward", true },
-    { CharState_SwimWalkBack, "swimwalkback", true },
-    { CharState_SwimWalkLeft, "swimwalkleft", true },
-    { CharState_SwimWalkRight, "swimwalkright", true },
+    { CharState_SwimWalkForward, "swimwalkforward", MWRender::Animation::Priority_Default, true },
+    { CharState_SwimWalkBack, "swimwalkback", MWRender::Animation::Priority_Default, true },
+    { CharState_SwimWalkLeft, "swimwalkleft", MWRender::Animation::Priority_Default, true },
+    { CharState_SwimWalkRight, "swimwalkright", MWRender::Animation::Priority_Default, true },
 
-    { CharState_RunForward, "runforward", true },
-    { CharState_RunBack, "runback", true },
-    { CharState_RunLeft, "runleft", true },
-    { CharState_RunRight, "runright", true },
+    { CharState_RunForward, "runforward", MWRender::Animation::Priority_Default, true },
+    { CharState_RunBack, "runback", MWRender::Animation::Priority_Default, true },
+    { CharState_RunLeft, "runleft", MWRender::Animation::Priority_Default, true },
+    { CharState_RunRight, "runright", MWRender::Animation::Priority_Default, true },
 
-    { CharState_SwimRunForward, "swimrunforward", true },
-    { CharState_SwimRunBack, "swimrunback", true },
-    { CharState_SwimRunLeft, "swimrunleft", true },
-    { CharState_SwimRunRight, "swimrunright", true },
+    { CharState_SwimRunForward, "swimrunforward", MWRender::Animation::Priority_Default, true },
+    { CharState_SwimRunBack, "swimrunback", MWRender::Animation::Priority_Default, true },
+    { CharState_SwimRunLeft, "swimrunleft", MWRender::Animation::Priority_Default, true },
+    { CharState_SwimRunRight, "swimrunright", MWRender::Animation::Priority_Default, true },
 
-    { CharState_SneakForward, "sneakforward", true },
-    { CharState_SneakBack, "sneakback", true },
-    { CharState_SneakLeft, "sneakleft", true },
-    { CharState_SneakRight, "sneakright", true },
+    { CharState_SneakForward, "sneakforward", MWRender::Animation::Priority_Default, true },
+    { CharState_SneakBack, "sneakback", MWRender::Animation::Priority_Default, true },
+    { CharState_SneakLeft, "sneakleft", MWRender::Animation::Priority_Default, true },
+    { CharState_SneakRight, "sneakright", MWRender::Animation::Priority_Default, true },
 
-    { CharState_TurnLeft, "turnleft", true },
-    { CharState_TurnRight, "turnright", true },
+    { CharState_TurnLeft, "turnleft", MWRender::Animation::Priority_Default, true },
+    { CharState_TurnRight, "turnright", MWRender::Animation::Priority_Default, true },
 
-    { CharState_Jump, "jump", true },
+    { CharState_Jump, "jump", MWRender::Animation::Priority_Default, true },
 
-    { CharState_Death1, "death1", false },
-    { CharState_Death2, "death2", false },
-    { CharState_Death3, "death3", false },
-    { CharState_Death4, "death4", false },
-    { CharState_Death5, "death5", false },
+    { CharState_Death1, "death1", MWRender::Animation::Priority_Death, false },
+    { CharState_Death2, "death2", MWRender::Animation::Priority_Death, false },
+    { CharState_Death3, "death3", MWRender::Animation::Priority_Death, false },
+    { CharState_Death4, "death4", MWRender::Animation::Priority_Death, false },
+    { CharState_Death5, "death5", MWRender::Animation::Priority_Death, false },
 };
 static const size_t sStateListSize = sizeof(sStateList)/sizeof(sStateList[0]);
 
@@ -110,7 +111,7 @@ static const struct {
 static const size_t sWeaponTypeListSize = sizeof(sWeaponTypeList)/sizeof(sWeaponTypeList[0]);
 
 
-void CharacterController::getCurrentGroup(std::string &group, bool &loops) const
+void CharacterController::getCurrentGroup(std::string &group, MWRender::Animation::Priority &priority, bool &loops) const
 {
     std::string name;
     for(size_t i = 0;i < sStateListSize;i++)
@@ -118,6 +119,7 @@ void CharacterController::getCurrentGroup(std::string &group, bool &loops) const
         if(sStateList[i].state == mCharState)
         {
             name = sStateList[i].groupname;
+            priority = sStateList[i].priority;
             loops = sStateList[i].loops;
             break;
         }
@@ -170,10 +172,10 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     }
 
     std::string group;
+    MWRender::Animation::Priority prio;
     bool loops;
-    getCurrentGroup(group, loops);
-    mAnimation->play(group, MWRender::Animation::Priority_Default,
-                     MWRender::Animation::Group_All, false,
+    getCurrentGroup(group, prio, loops);
+    mAnimation->play(group, prio, MWRender::Animation::Group_All, false,
                      "start", "stop", 1.0f, loops ? (~(size_t)0) : 0);
 }
 
@@ -431,10 +433,10 @@ void CharacterController::forceStateUpdate()
     mAnimQueue.clear();
 
     std::string group;
+    MWRender::Animation::Priority prio;
     bool loops;
-    getCurrentGroup(group, loops);
-    mAnimation->play(group, MWRender::Animation::Priority_Default,
-                     MWRender::Animation::Group_All, false,
+    getCurrentGroup(group, prio, loops);
+    mAnimation->play(group, prio, MWRender::Animation::Group_All, false,
                      "start", "stop", 0.0f, loops ? (~(size_t)0) : 0);
 
     mAnimation->showWeapons(mWeaponType != WeapType_None && mWeaponType != WeapType_HandToHand &&
