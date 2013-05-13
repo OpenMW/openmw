@@ -18,7 +18,8 @@ OcclusionQuery::OcclusionQuery(OEngine::Render::OgreRenderer* renderer, SceneNod
     mSunTotalAreaQuery(0), mSunVisibleAreaQuery(0), mActiveQuery(0),
     mDoQuery(0), mSunVisibility(0),
     mWasVisible(false),
-    mActive(false)
+    mActive(false),
+    mFirstFrame(true)
 {
     mRendering = renderer;
     mSunNode = sunNode;
@@ -147,6 +148,12 @@ void OcclusionQuery::renderQueueEnded(uint8 queueGroupId, const String& invocati
 
 void OcclusionQuery::update(float duration)
 {
+    if (mFirstFrame)
+    {
+        // GLHardwareOcclusionQuery::isStillOutstanding doesn't seem to like getting called when nothing has been rendered yet
+        mFirstFrame = false;
+        return;
+    }
     if (!mSupported) return;
 
     mWasVisible = false;

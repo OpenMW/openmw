@@ -59,6 +59,7 @@ namespace MWRender
         bool mWasVisible;
 
         bool mActive;
+        bool mFirstFrame;
 
         bool mSupported;
         bool mDoQuery;
