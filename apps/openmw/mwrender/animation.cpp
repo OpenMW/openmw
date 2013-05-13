@@ -475,6 +475,17 @@ bool Animation::handleTextKey(AnimState &state, const std::string &groupname, co
         return true;
     }
 
+    if(evt.compare(off, len, "equip attach") == 0)
+    {
+        showWeapons(true);
+        return true;
+    }
+    if(evt.compare(off, len, "unequip detach") == 0)
+    {
+        showWeapons(false);
+        return true;
+    }
+
     /* Nothing to do for these */
     if(evt.compare(off, len, "equip start") == 0 || evt.compare(off, len, "equip stop") == 0 ||
        evt.compare(off, len, "unequip start") == 0 || evt.compare(off, len, "unequip stop") == 0)

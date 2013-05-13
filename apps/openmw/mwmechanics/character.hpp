@@ -17,6 +17,7 @@ class Movement;
 
 enum Priority {
     Priority_Default,
+    Priority_Weapon,
 
     Priority_Death,
 
@@ -107,6 +108,8 @@ class CharacterController
 
     // Gets an animation group name from the current character state, and whether it should loop.
     void getCurrentGroup(std::string &group, Priority &prio, bool &loops) const;
+
+    static void getWeaponGroup(WeaponType weaptype, std::string &group);
 
 public:
     CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state);

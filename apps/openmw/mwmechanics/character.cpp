@@ -104,7 +104,7 @@ static const struct {
     { WeapType_TwoHand, "2c", "2c", "weapontwohand" },
     { WeapType_TwoWide, "2w", "2w", "weapontwowide" },
     { WeapType_BowAndArrow, "1h", "1h", "bowandarrow" },
-    { WeapType_Crossbow, "crossbow", "2c", "crossbow" },
+    { WeapType_Crossbow, "crossbow", "1h", "crossbow" },
     { WeapType_ThowWeapon, "1h", "1h", "throwweapon" },
     { WeapType_Spell, "spell", "", "spellcast" },
 };
@@ -144,6 +144,19 @@ void CharacterController::getCurrentGroup(std::string &group, Priority &priority
 
     if(group.empty() || !mAnimation->hasAnimation(group))
         group = (mAnimation->hasAnimation(name) ? name : std::string());
+}
+
+
+void CharacterController::getWeaponGroup(WeaponType weaptype, std::string &group)
+{
+    for(size_t i = 0;i < sWeaponTypeListSize;i++)
+    {
+        if(sWeaponTypeList[i].type == weaptype)
+        {
+            group = sWeaponTypeList[i].actiongroup;
+            break;
+        }
+    }
 }
 
 
@@ -229,68 +242,6 @@ void CharacterController::update(float duration, Movement &movement)
             }
         }
 
-        if(mPtr.getTypeName() == typeid(ESM::NPC).name())
-        {
-            NpcStats &stats = cls.getNpcStats(mPtr);
-            WeaponType weaptype = WeapType_None;
-
-            if(stats.getDrawState() == DrawState_Spell)
-                weaptype = WeapType_Spell;
-            else if(stats.getDrawState() == MWMechanics::DrawState_Weapon)
-            {
-                MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
-                MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-                if(weapon == inv.end())
-                    weaptype = WeapType_HandToHand;
-                else
-                {
-                    const std::string &type = weapon->getTypeName();
-                    if(type == typeid(ESM::Lockpick).name() || type == typeid(ESM::Probe).name())
-                        weaptype = WeapType_OneHand;
-                    else if(type == typeid(ESM::Weapon).name())
-                    {
-                        MWWorld::LiveCellRef<ESM::Weapon> *ref = weapon->get<ESM::Weapon>();
-                        ESM::Weapon::Type type = (ESM::Weapon::Type)ref->mBase->mData.mType;
-                        switch(type)
-                        {
-                            case ESM::Weapon::ShortBladeOneHand:
-                            case ESM::Weapon::LongBladeOneHand:
-                            case ESM::Weapon::BluntOneHand:
-                            case ESM::Weapon::AxeOneHand:
-                            case ESM::Weapon::Arrow:
-                            case ESM::Weapon::Bolt:
-                                weaptype = WeapType_OneHand;
-                                break;
-                            case ESM::Weapon::LongBladeTwoHand:
-                            case ESM::Weapon::BluntTwoClose:
-                            case ESM::Weapon::AxeTwoHand:
-                                weaptype = WeapType_TwoHand;
-                                break;
-                            case ESM::Weapon::BluntTwoWide:
-                            case ESM::Weapon::SpearTwoWide:
-                                weaptype = WeapType_TwoWide;
-                                break;
-                            case ESM::Weapon::MarksmanBow:
-                                weaptype = WeapType_BowAndArrow;
-                                break;
-                            case ESM::Weapon::MarksmanCrossbow:
-                                weaptype = WeapType_Crossbow;
-                                break;
-                            case ESM::Weapon::MarksmanThrown:
-                                weaptype = WeapType_ThowWeapon;
-                                break;
-                        }
-                    }
-                }
-            }
-
-            if(weaptype != mWeaponType)
-            {
-                mWeaponType = weaptype;
-                forceStateUpdate();
-            }
-        }
-
         /* FIXME: The state should be set to Jump, and X/Y movement should be disallowed except
          * for the initial thrust (which would be carried by "physics" until landing). */
         if(onground && vec.z > 0.0f)
@@ -359,6 +310,85 @@ void CharacterController::update(float duration, Movement &movement)
         movement.mRotation[0] += rot.x * duration;
         movement.mRotation[1] += rot.y * duration;
         movement.mRotation[2] += rot.z * duration;
+
+        if(mPtr.getTypeName() == typeid(ESM::NPC).name())
+        {
+            NpcStats &stats = cls.getNpcStats(mPtr);
+            WeaponType weaptype = WeapType_None;
+
+            if(stats.getDrawState() == DrawState_Spell)
+                weaptype = WeapType_Spell;
+            else if(stats.getDrawState() == MWMechanics::DrawState_Weapon)
+            {
+                MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
+                MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+                if(weapon == inv.end())
+                    weaptype = WeapType_HandToHand;
+                else
+                {
+                    const std::string &type = weapon->getTypeName();
+                    if(type == typeid(ESM::Lockpick).name() || type == typeid(ESM::Probe).name())
+                        weaptype = WeapType_OneHand;
+                    else if(type == typeid(ESM::Weapon).name())
+                    {
+                        MWWorld::LiveCellRef<ESM::Weapon> *ref = weapon->get<ESM::Weapon>();
+                        ESM::Weapon::Type type = (ESM::Weapon::Type)ref->mBase->mData.mType;
+                        switch(type)
+                        {
+                            case ESM::Weapon::ShortBladeOneHand:
+                            case ESM::Weapon::LongBladeOneHand:
+                            case ESM::Weapon::BluntOneHand:
+                            case ESM::Weapon::AxeOneHand:
+                            case ESM::Weapon::Arrow:
+                            case ESM::Weapon::Bolt:
+                                weaptype = WeapType_OneHand;
+                                break;
+                            case ESM::Weapon::LongBladeTwoHand:
+                            case ESM::Weapon::BluntTwoClose:
+                            case ESM::Weapon::AxeTwoHand:
+                                weaptype = WeapType_TwoHand;
+                                break;
+                            case ESM::Weapon::BluntTwoWide:
+                            case ESM::Weapon::SpearTwoWide:
+                                weaptype = WeapType_TwoWide;
+                                break;
+                            case ESM::Weapon::MarksmanBow:
+                                weaptype = WeapType_BowAndArrow;
+                                break;
+                            case ESM::Weapon::MarksmanCrossbow:
+                                weaptype = WeapType_Crossbow;
+                                break;
+                            case ESM::Weapon::MarksmanThrown:
+                                weaptype = WeapType_ThowWeapon;
+                                break;
+                        }
+                    }
+                }
+            }
+
+            if(weaptype != mWeaponType)
+            {
+                std::string weapgroup;
+                if(weaptype == WeapType_None)
+                {
+                    getWeaponGroup(mWeaponType, weapgroup);
+                    mAnimation->play(weapgroup, Priority_Weapon,
+                                     MWRender::Animation::Group_UpperBody, true,
+                                     "unequip start", "unequip stop", 0.0f, 0);
+                }
+                else
+                {
+                    getWeaponGroup(weaptype, weapgroup);
+                    mAnimation->showWeapons(false);
+                    mAnimation->play(weapgroup, Priority_Weapon,
+                                     MWRender::Animation::Group_UpperBody, true,
+                                     "equip start", "equip stop", 0.0f, 0);
+                }
+
+                mWeaponType = weaptype;
+                forceStateUpdate();
+            }
+        }
     }
 
     if(mAnimation && !mSkipAnim)
@@ -437,9 +467,6 @@ void CharacterController::forceStateUpdate()
     getCurrentGroup(group, prio, loops);
     mAnimation->play(group, prio, MWRender::Animation::Group_All, false,
                      "start", "stop", 0.0f, loops ? (~(size_t)0) : 0);
-
-    mAnimation->showWeapons(mWeaponType != WeapType_None && mWeaponType != WeapType_HandToHand &&
-                            mWeaponType != WeapType_Spell);
 }
 
 }
