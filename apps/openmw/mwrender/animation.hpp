@@ -15,15 +15,6 @@ namespace MWRender
 class Animation
 {
 public:
-    enum Priority {
-        Priority_Nil = -1, /* Do not use */
-        Priority_Default,
-
-        Priority_Death,
-
-        Num_Priorities
-    };
-
     enum Group {
         Group_LowerBody = 1<<0,
         Group_UpperBody = 1<<1,
@@ -175,7 +166,7 @@ public:
      *              "loop start" and "loop stop" markers if they exist,
      *              otherwise it will use "start" and "stop".
      */
-    void play(const std::string &groupname, Priority priority, int groups, bool autodisable,
+    void play(const std::string &groupname, int priority, int groups, bool autodisable,
               const std::string &start, const std::string &stop,
               float startpoint, size_t loops);
 
