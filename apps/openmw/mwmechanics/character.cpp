@@ -37,7 +37,7 @@
 namespace MWMechanics
 {
 
-static const struct {
+static const struct StateInfo {
     CharacterState state;
     const char groupname[32];
     Priority priority;
@@ -91,9 +91,20 @@ static const struct {
     { CharState_Death4, "death4", Priority_Death, false },
     { CharState_Death5, "death5", Priority_Death, false },
 };
-static const size_t sStateListSize = sizeof(sStateList)/sizeof(sStateList[0]);
+static const StateInfo *sStateListEnd = &sStateList[sizeof(sStateList)/sizeof(sStateList[0])];
 
-static const struct {
+class FindCharState {
+    CharacterState state;
+
+public:
+    FindCharState(CharacterState _state) : state(_state) { }
+
+    bool operator()(const StateInfo &info) const
+    { return info.state == state; }
+};
+
+
+static const struct WeaponInfo {
     WeaponType type;
     const char idlegroup[16];
     const char movementgroup[16];
@@ -108,37 +119,39 @@ static const struct {
     { WeapType_ThowWeapon, "1h", "1h", "throwweapon" },
     { WeapType_Spell, "spell", "", "spellcast" },
 };
-static const size_t sWeaponTypeListSize = sizeof(sWeaponTypeList)/sizeof(sWeaponTypeList[0]);
+static const WeaponInfo *sWeaponTypeListEnd = &sWeaponTypeList[sizeof(sWeaponTypeList)/sizeof(sWeaponTypeList[0])];
+
+class FindWeaponType {
+    WeaponType type;
+
+public:
+    FindWeaponType(WeaponType _type) : type(_type) { }
+
+    bool operator()(const WeaponInfo &weap) const
+    { return weap.type == type; }
+};
 
 
 void CharacterController::getCurrentGroup(std::string &group, Priority &priority, bool &loops) const
 {
     std::string name;
-    for(size_t i = 0;i < sStateListSize;i++)
-    {
-        if(sStateList[i].state == mCharState)
-        {
-            name = sStateList[i].groupname;
-            priority = sStateList[i].priority;
-            loops = sStateList[i].loops;
-            break;
-        }
-    }
-    if(name.empty())
+    const StateInfo *state = std::find_if(sStateList, sStateListEnd, FindCharState(mCharState));
+    if(state == sStateListEnd)
         throw std::runtime_error("Failed to find character state "+Ogre::StringConverter::toString(mCharState));
+
+    name = state->groupname;
+    priority = state->priority;
+    loops = state->loops;
 
     if(!(mCharState >= CharState_Death1) && mWeaponType != WeapType_None)
     {
-        for(size_t i = 0;i < sWeaponTypeListSize;i++)
+        const WeaponInfo *weap = std::find_if(sWeaponTypeList, sWeaponTypeListEnd, FindWeaponType(mWeaponType));
+        if(weap != sWeaponTypeListEnd)
         {
-            if(sWeaponTypeList[i].type == mWeaponType)
-            {
-                if(mCharState == CharState_Idle)
-                    (group=name) += sWeaponTypeList[i].idlegroup;
-                else
-                    (group=name) += sWeaponTypeList[i].movementgroup;
-                break;
-            }
+            if(mCharState == CharState_Idle)
+                (group=name) += weap->idlegroup;
+            else
+                (group=name) += weap->movementgroup;
         }
     }
 
@@ -149,14 +162,9 @@ void CharacterController::getCurrentGroup(std::string &group, Priority &priority
 
 void CharacterController::getWeaponGroup(WeaponType weaptype, std::string &group)
 {
-    for(size_t i = 0;i < sWeaponTypeListSize;i++)
-    {
-        if(sWeaponTypeList[i].type == weaptype)
-        {
-            group = sWeaponTypeList[i].actiongroup;
-            break;
-        }
-    }
+    const WeaponInfo *info = std::find_if(sWeaponTypeList, sWeaponTypeListEnd, FindWeaponType(weaptype));
+    if(info != sWeaponTypeListEnd)
+        group = info->actiongroup;
 }
 
 
