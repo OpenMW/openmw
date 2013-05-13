@@ -67,6 +67,13 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.push_back (RefIdColumn ("Value", ColumnBase::Display_Integer));
     inventoryColumns.mValue = &mColumns.back();
 
+    EnchantableColumns enchantableColumns (inventoryColumns);
+
+    mColumns.push_back (RefIdColumn ("Enchantment", ColumnBase::Display_String));
+    enchantableColumns.mEnchantment = &mColumns.back();
+    mColumns.push_back (RefIdColumn ("Enchantment Points", ColumnBase::Display_Integer));
+    enchantableColumns.mEnchantmentPoints = &mColumns.back();
+
     mColumns.push_back (RefIdColumn ("Auto Calc", ColumnBase::Display_Boolean));
     const RefIdColumn *autoCalc = &mColumns.back();
 
@@ -83,11 +90,11 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mAdapters.insert (std::make_pair (UniversalId::Type_Apparatus,
         new ApparatusRefIdAdapter (inventoryColumns, apparatusType, quality)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Armor,
-        new InventoryRefIdAdapter<ESM::Armor> (UniversalId::Type_Armor, inventoryColumns)));
+        new EnchantableRefIdAdapter<ESM::Armor> (UniversalId::Type_Armor, enchantableColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Book,
-        new InventoryRefIdAdapter<ESM::Book> (UniversalId::Type_Book, inventoryColumns)));
+        new EnchantableRefIdAdapter<ESM::Book> (UniversalId::Type_Book, enchantableColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Clothing,
-        new InventoryRefIdAdapter<ESM::Clothing> (UniversalId::Type_Clothing, inventoryColumns)));
+        new EnchantableRefIdAdapter<ESM::Clothing> (UniversalId::Type_Clothing, enchantableColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Container,
         new NameRefIdAdapter<ESM::Container> (UniversalId::Type_Container, nameColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Creature,
@@ -117,7 +124,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mAdapters.insert (std::make_pair (UniversalId::Type_Static,
         new ModelRefIdAdapter<ESM::Static> (UniversalId::Type_Static, modelColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Weapon,
-        new InventoryRefIdAdapter<ESM::Weapon> (UniversalId::Type_Weapon, inventoryColumns)));
+        new EnchantableRefIdAdapter<ESM::Weapon> (UniversalId::Type_Weapon, enchantableColumns)));
 }
 
 CSMWorld::RefIdCollection::~RefIdCollection()

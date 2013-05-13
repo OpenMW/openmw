@@ -223,11 +223,11 @@ namespace CSMWorld
         InventoryColumns (const NameColumns& base) : NameColumns (base) {}
     };
 
-    /// \brief Adapter for IDs with names (all but levelled lists and statics)
+    /// \brief Adapter for IDs that can go into an inventory
     template<typename RecordT>
     class InventoryRefIdAdapter : public NameRefIdAdapter<RecordT>
     {
-            InventoryColumns mName;
+            InventoryColumns mInventory;
 
         public:
 
@@ -244,7 +244,7 @@ namespace CSMWorld
     template<typename RecordT>
     InventoryRefIdAdapter<RecordT>::InventoryRefIdAdapter (UniversalId::Type type,
         const InventoryColumns& columns)
-    : NameRefIdAdapter<RecordT> (type, columns), mName (columns)
+    : NameRefIdAdapter<RecordT> (type, columns), mInventory (columns)
     {}
 
     template<typename RecordT>
@@ -254,13 +254,13 @@ namespace CSMWorld
         const Record<RecordT>& record = static_cast<const Record<RecordT>&> (
             data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<RecordT>::getType())));
 
-        if (column==mName.mIcon)
+        if (column==mInventory.mIcon)
             return QString::fromUtf8 (record.get().mIcon.c_str());
 
-        if (column==mName.mWeight)
+        if (column==mInventory.mWeight)
             return record.get().mData.mWeight;
 
-        if (column==mName.mValue)
+        if (column==mInventory.mValue)
             return record.get().mData.mValue;
 
         return NameRefIdAdapter<RecordT>::getData (column, data, index);
@@ -273,11 +273,11 @@ namespace CSMWorld
         Record<RecordT>& record = static_cast<Record<RecordT>&> (
             data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<RecordT>::getType())));
 
-        if (column==mName.mIcon)
+        if (column==mInventory.mIcon)
             record.get().mIcon = value.toString().toUtf8().constData();
-        else if (column==mName.mWeight)
+        else if (column==mInventory.mWeight)
             record.get().mData.mWeight = value.toFloat();
-        else if (column==mName.mValue)
+        else if (column==mInventory.mValue)
             record.get().mData.mValue = value.toInt();
         else
             NameRefIdAdapter<RecordT>::setData (column, data, index, value);
@@ -298,6 +298,69 @@ namespace CSMWorld
                 const QVariant& value) const;
             ///< If the data type does not match an exception is thrown.
     };
+
+    struct EnchantableColumns : public InventoryColumns
+    {
+        const RefIdColumn *mEnchantment;
+        const RefIdColumn *mEnchantmentPoints;
+
+        EnchantableColumns (const InventoryColumns& base) : InventoryColumns (base) {}
+    };
+
+    /// \brief Adapter for enchantable IDs
+    template<typename RecordT>
+    class EnchantableRefIdAdapter : public InventoryRefIdAdapter<RecordT>
+    {
+            EnchantableColumns mEnchantable;
+
+        public:
+
+            EnchantableRefIdAdapter (UniversalId::Type type, const EnchantableColumns& columns);
+
+            virtual QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
+                const;
+
+            virtual void setData (const RefIdColumn *column, RefIdData& data, int index,
+                const QVariant& value) const;
+            ///< If the data type does not match an exception is thrown.
+    };
+
+    template<typename RecordT>
+    EnchantableRefIdAdapter<RecordT>::EnchantableRefIdAdapter (UniversalId::Type type,
+        const EnchantableColumns& columns)
+    : InventoryRefIdAdapter<RecordT> (type, columns), mEnchantable (columns)
+    {}
+
+    template<typename RecordT>
+    QVariant EnchantableRefIdAdapter<RecordT>::getData (const RefIdColumn *column, const RefIdData& data,
+        int index) const
+    {
+        const Record<RecordT>& record = static_cast<const Record<RecordT>&> (
+            data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<RecordT>::getType())));
+
+        if (column==mEnchantable.mEnchantment)
+            return QString::fromUtf8 (record.get().mEnchant.c_str());
+
+        if (column==mEnchantable.mEnchantmentPoints)
+            return static_cast<int> (record.get().mData.mEnchant);
+
+        return InventoryRefIdAdapter<RecordT>::getData (column, data, index);
+    }
+
+    template<typename RecordT>
+    void EnchantableRefIdAdapter<RecordT>::setData (const RefIdColumn *column, RefIdData& data,
+        int index, const QVariant& value) const
+    {
+        Record<RecordT>& record = static_cast<Record<RecordT>&> (
+            data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<RecordT>::getType())));
+
+        if (column==mEnchantable.mEnchantment)
+            record.get().mEnchant = value.toString().toUtf8().constData();
+        else if (column==mEnchantable.mEnchantmentPoints)
+            record.get().mData.mEnchant = value.toInt();
+        else
+            InventoryRefIdAdapter<RecordT>::setData (column, data, index, value);
+    }
 
     class ApparatusRefIdAdapter : public InventoryRefIdAdapter<ESM::Apparatus>
     {
