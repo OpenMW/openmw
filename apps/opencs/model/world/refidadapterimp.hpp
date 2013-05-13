@@ -362,6 +362,68 @@ namespace CSMWorld
             InventoryRefIdAdapter<RecordT>::setData (column, data, index, value);
     }
 
+    struct ToolColumns : public InventoryColumns
+    {
+        const RefIdColumn *mQuality;
+        const RefIdColumn *mUses;
+
+        ToolColumns (const InventoryColumns& base) : InventoryColumns (base) {}
+    };
+
+    /// \brief Adapter for tools with limited uses IDs (lockpick, repair, probes)
+    template<typename RecordT>
+    class ToolRefIdAdapter : public InventoryRefIdAdapter<RecordT>
+    {
+            ToolColumns mTools;
+
+        public:
+
+            ToolRefIdAdapter (UniversalId::Type type, const ToolColumns& columns);
+
+            virtual QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
+                const;
+
+            virtual void setData (const RefIdColumn *column, RefIdData& data, int index,
+                const QVariant& value) const;
+            ///< If the data type does not match an exception is thrown.
+    };
+
+    template<typename RecordT>
+    ToolRefIdAdapter<RecordT>::ToolRefIdAdapter (UniversalId::Type type, const ToolColumns& columns)
+    : InventoryRefIdAdapter<RecordT> (type, columns), mTools (columns)
+    {}
+
+    template<typename RecordT>
+    QVariant ToolRefIdAdapter<RecordT>::getData (const RefIdColumn *column, const RefIdData& data,
+        int index) const
+    {
+        const Record<RecordT>& record = static_cast<const Record<RecordT>&> (
+            data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<RecordT>::getType())));
+
+        if (column==mTools.mQuality)
+            return record.get().mData.mQuality;
+
+        if (column==mTools.mUses)
+            return record.get().mData.mUses;
+
+        return InventoryRefIdAdapter<RecordT>::getData (column, data, index);
+    }
+
+    template<typename RecordT>
+    void ToolRefIdAdapter<RecordT>::setData (const RefIdColumn *column, RefIdData& data,
+        int index, const QVariant& value) const
+    {
+        Record<RecordT>& record = static_cast<Record<RecordT>&> (
+            data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<RecordT>::getType())));
+
+        if (column==mTools.mQuality)
+            record.get().mData.mQuality = value.toFloat();
+        else if (column==mTools.mUses)
+            record.get().mData.mUses = value.toInt();
+        else
+            InventoryRefIdAdapter<RecordT>::setData (column, data, index, value);
+    }
+
     class ApparatusRefIdAdapter : public InventoryRefIdAdapter<ESM::Apparatus>
     {
             const RefIdColumn *mType;

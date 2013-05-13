@@ -74,21 +74,25 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.push_back (RefIdColumn ("Enchantment Points", ColumnBase::Display_Integer));
     enchantableColumns.mEnchantmentPoints = &mColumns.back();
 
+    ToolColumns toolsColumns (inventoryColumns);
+
+    mColumns.push_back (RefIdColumn ("Quality", ColumnBase::Display_Float));
+    toolsColumns.mQuality = &mColumns.back();
+    mColumns.push_back (RefIdColumn ("Uses", ColumnBase::Display_Integer));
+    toolsColumns.mUses = &mColumns.back();
+
     mColumns.push_back (RefIdColumn ("Auto Calc", ColumnBase::Display_Boolean));
     const RefIdColumn *autoCalc = &mColumns.back();
 
     mColumns.push_back (RefIdColumn ("Apparatus Type", ColumnBase::Display_ApparatusType));
     const RefIdColumn *apparatusType = &mColumns.back();
 
-    mColumns.push_back (RefIdColumn ("Quality", ColumnBase::Display_Float));
-    const RefIdColumn *quality = &mColumns.back();
-
     mAdapters.insert (std::make_pair (UniversalId::Type_Activator,
         new NameRefIdAdapter<ESM::Activator> (UniversalId::Type_Activator, nameColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Potion,
         new PotionRefIdAdapter (inventoryColumns, autoCalc)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Apparatus,
-        new ApparatusRefIdAdapter (inventoryColumns, apparatusType, quality)));
+        new ApparatusRefIdAdapter (inventoryColumns, apparatusType, toolsColumns.mQuality)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Armor,
         new EnchantableRefIdAdapter<ESM::Armor> (UniversalId::Type_Armor, enchantableColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Book,
@@ -111,16 +115,16 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mAdapters.insert (std::make_pair (UniversalId::Type_Light,
         new InventoryRefIdAdapter<ESM::Light> (UniversalId::Type_Light, inventoryColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Lockpick,
-        new InventoryRefIdAdapter<ESM::Lockpick> (UniversalId::Type_Lockpick, inventoryColumns)));
+        new ToolRefIdAdapter<ESM::Lockpick> (UniversalId::Type_Lockpick, toolsColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Miscellaneous,
         new InventoryRefIdAdapter<ESM::Miscellaneous> (UniversalId::Type_Miscellaneous,
         inventoryColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Npc,
         new NameRefIdAdapter<ESM::NPC> (UniversalId::Type_Npc, nameColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Probe,
-        new InventoryRefIdAdapter<ESM::Probe> (UniversalId::Type_Probe, inventoryColumns)));
+        new ToolRefIdAdapter<ESM::Probe> (UniversalId::Type_Probe, toolsColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Repair,
-        new InventoryRefIdAdapter<ESM::Repair> (UniversalId::Type_Repair, inventoryColumns)));
+        new ToolRefIdAdapter<ESM::Repair> (UniversalId::Type_Repair, toolsColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Static,
         new ModelRefIdAdapter<ESM::Static> (UniversalId::Type_Static, modelColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Weapon,
