@@ -66,14 +66,14 @@ void WeatherManager::setFallbackWeather(Weather& weather,const std::string& name
 float WeatherManager::calculateHourFade (const std::string& moonName) const
 {
     float fadeOutStart=mFallback->getFallbackFloat("Moons_"+moonName+"_Fade_Out_Start");
+    float fadeOutFinish=mFallback->getFallbackFloat("Moons_"+moonName+"_Fade_Out_Finish");
     float fadeInStart=mFallback->getFallbackFloat("Moons_"+moonName+"_Fade_In_Start");
     float fadeInFinish=mFallback->getFallbackFloat("Moons_"+moonName+"_Fade_In_Finish");
-    float fadeOutFinish=mFallback->getFallbackFloat("Moons_"+moonName+"_Fade_Out_Finish");
 
     if (mHour >= fadeOutStart && mHour <= fadeOutFinish)
-        return (1 / (mHour - fadeOutStart));
-    else if (mHour >= fadeInStart && mHour <= fadeInFinish)
-        return (1 / (mHour - fadeInStart));
+        return (1 - ((mHour - fadeOutStart) / (fadeOutFinish - fadeOutStart)));
+    if (mHour >= fadeInStart && mHour <= fadeInFinish)
+        return (1 - ((mHour - fadeInStart) / (fadeInFinish - fadeInStart)));
     else
         return 1;
 }
@@ -82,9 +82,9 @@ float WeatherManager::calculateAngleFade (const std::string& moonName, float ang
 {
     float endAngle=mFallback->getFallbackFloat("Moons_"+moonName+"_Fade_End_Angle");
     float startAngle=mFallback->getFallbackFloat("Moons_"+moonName+"_Fade_Start_Angle");
-    if (angle >= endAngle && angle <= startAngle)
-        return ((angle - endAngle)/(startAngle-endAngle));
-    else if (angle < endAngle)
+    if (angle <= startAngle && angle >= endAngle)
+        return (1 - ((angle - endAngle)/(startAngle-endAngle)));
+    else if (angle > startAngle)
         return 0.f;
     else
         return 1.f;
@@ -439,29 +439,36 @@ void WeatherManager::update(float duration)
             height);
         mRendering->setSunDirection(final);
 
-        // moon calculations
-        float night;
-        if (mHour >= 14)
-            night = mHour - 14;
-        else if (mHour <= 10)
-            night = mHour + 10;
+        /*
+         * TODO: import separated fadeInStart/Finish, fadeOutStart/Finish
+         * for masser and secunda
+         */
+
+        float fadeOutFinish=mFallback->getFallbackFloat("Moons_Masser_Fade_Out_Finish");
+        float fadeInStart=mFallback->getFallbackFloat("Moons_Masser_Fade_In_Start");
+
+        //moon calculations
+        float moonHeight;
+        if (mHour >= fadeInStart)
+            moonHeight = mHour - fadeInStart;
+        else if (mHour <= fadeOutFinish)
+            moonHeight = mHour + fadeOutFinish;
         else
-            night = 0;
+            moonHeight = 0;
 
-        night /= 20.f;
+        moonHeight /= (24.f - (fadeInStart - fadeOutFinish));
 
-        if (night != 0)
+        if (moonHeight != 0)
         {
-            float moonHeight = 1 - std::abs((night - 0.5) * 2);
-            int facing = (mHour > 0.f && mHour< 12.f) ? 1 : -1;
+            int facing = (moonHeight <= 1) ? 1 : -1;
             Vector3 masser(
-                (1 - moonHeight) * facing,
+                (moonHeight - 1) * facing,
                 (1 - moonHeight) * facing,
                 moonHeight);
 
             Vector3 secunda(
+                (moonHeight - 1) * facing * 1.25,
                 (1 - moonHeight) * facing * 0.8,
-                (1 - moonHeight) * facing * 1.25,
                 moonHeight);
 
             mRendering->getSkyManager()->setMasserDirection(masser);
@@ -469,7 +476,7 @@ void WeatherManager::update(float duration)
             mRendering->getSkyManager()->masserEnable();
             mRendering->getSkyManager()->secundaEnable();
 
-            float angle = moonHeight * 90.f;
+            float angle = (1-moonHeight) * 90.f * facing;
             float masserHourFade = calculateHourFade("Masser");
             float secundaHourFade = calculateHourFade("Secunda");
             float masserAngleFade = calculateAngleFade("Masser", angle);
