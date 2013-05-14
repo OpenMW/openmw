@@ -37,7 +37,8 @@ namespace CSMWorld
             Display_Boolean,
             Display_SpellType,
             Display_Script,
-            Display_ApparatusType
+            Display_ApparatusType,
+            Display_ArmorType
         };
 
         std::string mTitle;

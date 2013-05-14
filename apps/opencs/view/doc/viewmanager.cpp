@@ -59,6 +59,12 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
         "Mortar & Pestle", "Albemic", "Calcinator", "Retort", 0
     };
 
+    static const char *sArmorTypes[] =
+    {
+        "Helmet", "Cuirass", "Left Pauldron", "Right Pauldron", "Greaves", "Boots", "Left Gauntlet",
+        "Right Gauntlet", "Shield", "Left Bracer", "Right Bracer", 0
+    };
+
     mDelegateFactories = new CSVWorld::CommandDelegateFactoryCollection;
 
     mDelegateFactories->add (CSMWorld::ColumnBase::Display_GmstVarType,
@@ -78,6 +84,9 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
 
     mDelegateFactories->add (CSMWorld::ColumnBase::Display_ApparatusType,
         new CSVWorld::EnumDelegateFactory (sApparatusTypes));
+
+    mDelegateFactories->add (CSMWorld::ColumnBase::Display_ArmorType,
+        new CSVWorld::EnumDelegateFactory (sArmorTypes));
 }
 
 CSVDoc::ViewManager::~ViewManager()

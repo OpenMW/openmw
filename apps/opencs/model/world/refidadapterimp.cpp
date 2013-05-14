@@ -66,3 +66,44 @@ void CSMWorld::ApparatusRefIdAdapter::setData (const RefIdColumn *column, RefIdD
     else
         InventoryRefIdAdapter<ESM::Apparatus>::setData (column, data, index, value);
 }
+
+
+CSMWorld::ArmorRefIdAdapter::ArmorRefIdAdapter (const EnchantableColumns& columns,
+    const RefIdColumn *type, const RefIdColumn *health, const RefIdColumn *armor)
+: EnchantableRefIdAdapter<ESM::Armor> (UniversalId::Type_Armor, columns),
+    mType (type), mHealth (health), mArmor (armor)
+{}
+
+QVariant CSMWorld::ArmorRefIdAdapter::getData (const RefIdColumn *column,
+    const RefIdData& data, int index) const
+{
+    const Record<ESM::Armor>& record = static_cast<const Record<ESM::Armor>&> (
+        data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Armor)));
+
+    if (column==mType)
+        return record.get().mData.mType;
+
+    if (column==mHealth)
+        return record.get().mData.mHealth;
+
+    if (column==mArmor)
+        return record.get().mData.mArmor;
+
+    return EnchantableRefIdAdapter<ESM::Armor>::getData (column, data, index);
+}
+
+void CSMWorld::ArmorRefIdAdapter::setData (const RefIdColumn *column, RefIdData& data, int index,
+    const QVariant& value) const
+{
+    Record<ESM::Armor>& record = static_cast<Record<ESM::Armor>&> (
+        data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Armor)));
+
+    if (column==mType)
+        record.get().mData.mType = value.toInt();
+    else if (column==mHealth)
+        record.get().mData.mHealth = value.toInt();
+    else if (column==mArmor)
+        record.get().mData.mArmor = value.toInt();
+    else
+        EnchantableRefIdAdapter<ESM::Armor>::setData (column, data, index, value);
+}
