@@ -23,6 +23,7 @@
 
 #include "movement.hpp"
 #include "npcstats.hpp"
+#include "creaturestats.hpp"
 
 #include "../mwrender/animation.hpp"
 
@@ -213,22 +214,37 @@ void CharacterController::updatePtr(const MWWorld::Ptr &ptr)
 
 void CharacterController::update(float duration, Movement &movement)
 {
+    const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
     float speed = 0.0f;
-    if(!(getState() >= CharState_Death1))
+
+    if(!cls.isActor())
+    {
+        if(mAnimQueue.size() > 0)
+        {
+            if(mAnimation->isPlaying(mAnimQueue.front().first) == false)
+            {
+                mAnimQueue.pop_front();
+                if(mAnimQueue.size() > 0)
+                    mAnimation->play(mAnimQueue.front().first, Priority_Default,
+                                     MWRender::Animation::Group_All, false,
+                                     "start", "stop", 0.0f, mAnimQueue.front().second);
+            }
+        }
+    }
+    else if(!cls.getCreatureStats(mPtr).isDead())
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();
-        const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
 
         bool onground = world->isOnGround(mPtr);
         bool inwater = world->isSwimming(mPtr);
         bool isrunning = cls.getStance(mPtr, MWWorld::Class::Run);
         bool sneak = cls.getStance(mPtr, MWWorld::Class::Sneak);
-        const Ogre::Vector3 &vec = cls.getMovementVector(mPtr);
-        const Ogre::Vector3 &rot = cls.getRotationVector(mPtr);
+        Ogre::Vector3 vec = cls.getMovementVector(mPtr);
+        Ogre::Vector3 rot = cls.getRotationVector(mPtr);
         speed = cls.getSpeed(mPtr);
 
         // advance athletics
-        if (vec.squaredLength() > 0 && mPtr == world->getPlayer().getPlayer())
+        if (vec.squaredLength() > 0 && mPtr.getRefData().getHandle() == "player")
         {
             if (inwater)
             {
@@ -254,17 +270,17 @@ void CharacterController::update(float duration, Movement &movement)
          * for the initial thrust (which would be carried by "physics" until landing). */
         if(onground && vec.z > 0.0f)
         {
-            float x = cls.getJump(mPtr);
+            float z = cls.getJump(mPtr);
 
             if(vec.x == 0 && vec.y == 0)
-                movement.mPosition[2] += x*duration;
+                vec.z *= z;
             else
             {
                 /* FIXME: this would be more correct if we were going into a jumping state,
                  * rather than normal walking/idle states. */
                 //Ogre::Vector3 lat = Ogre::Vector3(vec.x, vec.y, 0.0f).normalisedCopy();
-                //movement += Ogre::Vector3(lat.x, lat.y, 1.0f) * x * 0.707f * duration;
-                movement.mPosition[2] += x * 0.707f * duration;
+                //vec *= Ogre::Vector3(lat.x, lat.y, 1.0f) * z * 0.707f;
+                vec.z *= z * 0.707f;
             }
 
             //decrease fatigue by fFatigueJumpBase + (1 - normalizedEncumbrance) * fFatigueJumpMult;
@@ -279,8 +295,8 @@ void CharacterController::update(float duration, Movement &movement)
                 setState(inwater ? (isrunning ? CharState_SwimRunLeft : CharState_SwimWalkLeft)
                                  : (sneak ? CharState_SneakLeft : (isrunning ? CharState_RunLeft : CharState_WalkLeft)));
 
-            movement.mPosition[0] += vec.x * (speed*duration);
-            movement.mPosition[1] += vec.y * (speed*duration);
+            vec.x *= speed;
+            vec.y *= speed;
         }
         else if(vec.y != 0.0f && speed > 0.0f)
         {
@@ -291,8 +307,8 @@ void CharacterController::update(float duration, Movement &movement)
                 setState(inwater ? (isrunning ? CharState_SwimRunBack : CharState_SwimWalkBack)
                                  : (sneak ? CharState_SneakBack : (isrunning ? CharState_RunBack : CharState_WalkBack)));
 
-            movement.mPosition[0] += vec.x * (speed*duration);
-            movement.mPosition[1] += vec.y * (speed*duration);
+            vec.x *= speed;
+            vec.y *= speed;
         }
         else if(rot.z != 0.0f && !inwater && !sneak)
         {
@@ -315,6 +331,9 @@ void CharacterController::update(float duration, Movement &movement)
         else if(getState() != CharState_SpecialIdle)
             setState((inwater ? CharState_IdleSwim : (sneak ? CharState_IdleSneak : CharState_Idle)));
 
+        movement.mPosition[0] += vec.x * duration;
+        movement.mPosition[1] += vec.y * duration;
+        movement.mPosition[2] += vec.z * duration;
         movement.mRotation[0] += rot.x * duration;
         movement.mRotation[1] += rot.y * duration;
         movement.mRotation[2] += rot.z * duration;
