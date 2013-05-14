@@ -81,6 +81,52 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.push_back (RefIdColumn ("Uses", ColumnBase::Display_Integer));
     toolsColumns.mUses = &mColumns.back();
 
+    ActorColumns actorsColumns (nameColumns);
+
+    mColumns.push_back (RefIdColumn ("AI", ColumnBase::Display_Boolean));
+    actorsColumns.mHasAi = &mColumns.back();
+    mColumns.push_back (RefIdColumn ("AI Hello", ColumnBase::Display_Integer));
+    actorsColumns.mHello = &mColumns.back();
+    mColumns.push_back (RefIdColumn ("AI Flee", ColumnBase::Display_Integer));
+    actorsColumns.mFlee = &mColumns.back();
+    mColumns.push_back (RefIdColumn ("AI Fight", ColumnBase::Display_Integer));
+    actorsColumns.mFight = &mColumns.back();
+    mColumns.push_back (RefIdColumn ("AI Alarm", ColumnBase::Display_Integer));
+    actorsColumns.mAlarm = &mColumns.back();
+
+    static const struct
+    {
+        const char *mName;
+        unsigned int mFlag;
+    } sServiceTable[] =
+    {
+        { "Buys Weapons", ESM::NPC::Weapon},
+        { "Buys Armor", ESM::NPC::Armor},
+        { "Buys Clothing", ESM::NPC::Clothing},
+        { "Buys Books", ESM::NPC::Books},
+        { "Buys Ingredients", ESM::NPC::Ingredients},
+        { "Buys Lockpicks", ESM::NPC::Picks},
+        { "Buys Probes", ESM::NPC::Probes},
+        { "Buys Lights", ESM::NPC::Lights},
+        { "Buys Apparati", ESM::NPC::Apparatus},
+        { "Buys Repair Items", ESM::NPC::RepairItem},
+        { "Buys Misc Items", ESM::NPC::Misc},
+        { "Buys Potions", ESM::NPC::Potions},
+        { "Buys Magic Items", ESM::NPC::MagicItems},
+        { "Sells Spells", ESM::NPC::Spells},
+        { "Trainer", ESM::NPC::Training},
+        { "Spellmaking", ESM::NPC::Spellmaking},
+        { "Enchanting Service", ESM::NPC::Enchanting},
+        { "Repair Serivce", ESM::NPC::Repair},
+        { 0, 0 }
+    };
+
+    for (int i=0; sServiceTable[i].mName; ++i)
+    {
+        mColumns.push_back (RefIdColumn (sServiceTable[i].mName, ColumnBase::Display_Boolean));
+        actorsColumns.mServices.insert (std::make_pair (&mColumns.back(), sServiceTable[i].mFlag));
+    }
+
     mColumns.push_back (RefIdColumn ("Auto Calc", ColumnBase::Display_Boolean));
     const RefIdColumn *autoCalc = &mColumns.back();
 
@@ -102,7 +148,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mAdapters.insert (std::make_pair (UniversalId::Type_Container,
         new NameRefIdAdapter<ESM::Container> (UniversalId::Type_Container, nameColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Creature,
-        new NameRefIdAdapter<ESM::Creature> (UniversalId::Type_Creature, nameColumns)));
+        new ActorRefIdAdapter<ESM::Creature> (UniversalId::Type_Creature, actorsColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Door,
         new NameRefIdAdapter<ESM::Door> (UniversalId::Type_Door, nameColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Ingredient,
@@ -120,7 +166,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
         new InventoryRefIdAdapter<ESM::Miscellaneous> (UniversalId::Type_Miscellaneous,
         inventoryColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Npc,
-        new NameRefIdAdapter<ESM::NPC> (UniversalId::Type_Npc, nameColumns)));
+        new ActorRefIdAdapter<ESM::NPC> (UniversalId::Type_Npc, actorsColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Probe,
         new ToolRefIdAdapter<ESM::Probe> (UniversalId::Type_Probe, toolsColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Repair,

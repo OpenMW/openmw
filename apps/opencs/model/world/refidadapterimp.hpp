@@ -1,6 +1,8 @@
 #ifndef CSM_WOLRD_REFIDADAPTERIMP_H
 #define CSM_WOLRD_REFIDADAPTERIMP_H
 
+#include <map>
+
 #include <QVariant>
 
 #include <components/esm/loadalch.hpp>
@@ -422,6 +424,106 @@ namespace CSMWorld
             record.get().mData.mUses = value.toInt();
         else
             InventoryRefIdAdapter<RecordT>::setData (column, data, index, value);
+    }
+
+    struct ActorColumns : public NameColumns
+    {
+        const RefIdColumn *mHasAi;
+        const RefIdColumn *mHello;
+        const RefIdColumn *mFlee;
+        const RefIdColumn *mFight;
+        const RefIdColumn *mAlarm;
+        std::map<const RefIdColumn *, unsigned int> mServices;
+
+        ActorColumns (const NameColumns& base) : NameColumns (base) {}
+    };
+
+    /// \brief Adapter for actor IDs (handles common AI functionality)
+    template<typename RecordT>
+    class ActorRefIdAdapter : public NameRefIdAdapter<RecordT>
+    {
+            ActorColumns mActors;
+
+        public:
+
+            ActorRefIdAdapter (UniversalId::Type type, const ActorColumns& columns);
+
+            virtual QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
+                const;
+
+            virtual void setData (const RefIdColumn *column, RefIdData& data, int index,
+                const QVariant& value) const;
+            ///< If the data type does not match an exception is thrown.
+    };
+
+    template<typename RecordT>
+    ActorRefIdAdapter<RecordT>::ActorRefIdAdapter (UniversalId::Type type,
+        const ActorColumns& columns)
+    : NameRefIdAdapter<RecordT> (type, columns), mActors (columns)
+    {}
+
+    template<typename RecordT>
+    QVariant ActorRefIdAdapter<RecordT>::getData (const RefIdColumn *column, const RefIdData& data,
+        int index) const
+    {
+        const Record<RecordT>& record = static_cast<const Record<RecordT>&> (
+            data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<RecordT>::getType())));
+
+        if (column==mActors.mHasAi)
+            return record.get().mHasAI!=0;
+
+        if (column==mActors.mHello)
+            return record.get().mAiData.mHello;
+
+        if (column==mActors.mFlee)
+            return record.get().mAiData.mFlee;
+
+        if (column==mActors.mFight)
+            return record.get().mAiData.mFight;
+
+        if (column==mActors.mAlarm)
+            return record.get().mAiData.mAlarm;
+
+        std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
+            mActors.mServices.find (column);
+
+        if (iter!=mActors.mServices.end())
+            return (record.get().mAiData.mServices & iter->second)!=0;
+
+        return NameRefIdAdapter<RecordT>::getData (column, data, index);
+    }
+
+    template<typename RecordT>
+    void ActorRefIdAdapter<RecordT>::setData (const RefIdColumn *column, RefIdData& data, int index,
+        const QVariant& value) const
+    {
+        Record<RecordT>& record = static_cast<Record<RecordT>&> (
+            data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<RecordT>::getType())));
+
+        if (column==mActors.mHasAi)
+            record.get().mHasAI = value.toInt();
+        else if (column==mActors.mHello)
+            record.get().mAiData.mHello = value.toInt();
+        else if (column==mActors.mFlee)
+            record.get().mAiData.mFlee = value.toInt();
+        else if (column==mActors.mFight)
+            record.get().mAiData.mFight = value.toInt();
+        else if (column==mActors.mAlarm)
+            record.get().mAiData.mAlarm = value.toInt();
+        else
+        {
+            typename std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
+                mActors.mServices.find (column);
+            if (iter!=mActors.mServices.end())
+            {
+                if (value.toInt()!=0)
+                    record.get().mAiData.mServices |= iter->second;
+                else
+                    record.get().mAiData.mServices &= ~iter->second;
+            }
+            else
+                NameRefIdAdapter<RecordT>::setData (column, data, index, value);
+        }
     }
 
     class ApparatusRefIdAdapter : public InventoryRefIdAdapter<ESM::Apparatus>
