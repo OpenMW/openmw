@@ -51,7 +51,7 @@ protected:
         virtual void setValue(Ogre::Real value);
     };
 
-    struct AnimSource : public Ogre::AnimationAllocatedObject {
+    struct AnimSource : public Ogre::AnimationAlloc {
         NifOgre::TextKeyMap mTextKeys;
         std::vector<Ogre::Controller<Ogre::Real> > mControllers[sNumGroups];
     };
