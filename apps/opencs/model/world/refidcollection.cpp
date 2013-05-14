@@ -142,6 +142,12 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.push_back (RefIdColumn ("Armor Value", ColumnBase::Display_Integer));
     const RefIdColumn *armor = &mColumns.back();
 
+    mColumns.push_back (RefIdColumn ("Scroll", ColumnBase::Display_Boolean));
+    const RefIdColumn *scroll = &mColumns.back();
+
+    mColumns.push_back (RefIdColumn ("Attribute", ColumnBase::Display_Attribute));
+    const RefIdColumn *attribute = &mColumns.back();
+
     mAdapters.insert (std::make_pair (UniversalId::Type_Activator,
         new NameRefIdAdapter<ESM::Activator> (UniversalId::Type_Activator, nameColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Potion,
@@ -151,7 +157,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mAdapters.insert (std::make_pair (UniversalId::Type_Armor,
         new ArmorRefIdAdapter (enchantableColumns, armorType, health, armor)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Book,
-        new EnchantableRefIdAdapter<ESM::Book> (UniversalId::Type_Book, enchantableColumns)));
+        new BookRefIdAdapter (enchantableColumns, scroll, attribute)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Clothing,
         new EnchantableRefIdAdapter<ESM::Clothing> (UniversalId::Type_Clothing, enchantableColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Container,
