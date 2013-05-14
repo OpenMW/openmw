@@ -453,24 +453,23 @@ bool NpcAnimation::addOrReplaceIndividualPart(int type, int group, int priority,
 
 void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::PartReference> &parts)
 {
+    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+    const MWWorld::Store<ESM::BodyPart> &partStore = store.get<ESM::BodyPart>();
+
     const char *ext = (mViewMode == VM_FirstPerson) ? ".1st" : "";
-    for(std::size_t i = 0; i < parts.size(); i++)
+    std::vector<ESM::PartReference>::const_iterator part(parts.begin());
+    for(;part != parts.end();part++)
     {
-        const ESM::PartReference &part = parts[i];
-
-        const MWWorld::Store<ESM::BodyPart> &partStore =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>();
-
         const ESM::BodyPart *bodypart = 0;
-        if(!mNpc->isMale())
-            bodypart = partStore.search(part.mFemale+ext);
-        if(!bodypart)
-            bodypart = partStore.search(part.mMale+ext);
+        if(!mNpc->isMale() && !part->mFemale.empty())
+            bodypart = partStore.search(part->mFemale+ext);
+        if(!bodypart && !part->mMale.empty())
+            bodypart = partStore.search(part->mMale+ext);
 
         if(bodypart)
-            addOrReplaceIndividualPart(part.mPart, group, priority, "meshes\\"+bodypart->mModel);
+            addOrReplaceIndividualPart(part->mPart, group, priority, "meshes\\"+bodypart->mModel);
         else
-            reserveIndividualPart(part.mPart, group, priority);
+            reserveIndividualPart(part->mPart, group, priority);
     }
 }
 
