@@ -36,6 +36,14 @@ MWWorld::Ptr::CellStore *MWWorld::Cells::getCellStore (const ESM::Cell *cell)
     }
 }
 
+void MWWorld::Cells::clear()
+{
+    mInteriors.clear();
+    mExteriors.clear();
+    std::fill(mIdCache.begin(), mIdCache.end(), std::make_pair("", (MWWorld::Ptr::CellStore*)0));
+    mIdCacheIndex = 0;
+}
+
 void MWWorld::Cells::fillContainers (Ptr::CellStore& cellStore)
 {
     for (CellRefList<ESM::Container>::List::iterator iter (

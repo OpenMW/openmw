@@ -29,6 +29,13 @@ namespace MWDialogue
     Journal::Journal()
     {}
 
+    void Journal::clear()
+    {
+        mJournal.clear();
+        mQuests.clear();
+        mTopics.clear();
+    }
+
     void Journal::addEntry (const std::string& id, int index)
     {
         // bail out of we already have heard this...

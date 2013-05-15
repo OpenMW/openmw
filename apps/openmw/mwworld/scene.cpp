@@ -186,6 +186,15 @@ namespace MWWorld
         MWBase::Environment::get().getWindowManager()->changeCell(mCurrentCell);
     }
 
+    void Scene::changeToVoid()
+    {
+        CellStoreCollection::iterator active = mActiveCells.begin();
+        while (active!=mActiveCells.end())
+            unloadCell (active++);
+        assert(mActiveCells.empty());
+        mCurrentCell = NULL;
+    }
+
     void Scene::changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos)
     {
         Nif::NIFFile::CacheLock cachelock;

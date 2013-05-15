@@ -21,6 +21,7 @@ namespace MWWorld
         virtual void load(ESM::ESMReader &esm, const std::string &id) = 0;
 
         virtual bool eraseStatic(const std::string &id) {return false;}
+        virtual void clearDynamic() {}
     };
 
     template <class T>
@@ -105,6 +106,13 @@ namespace MWWorld
         {}
 
         typedef SharedIterator<T> iterator;
+
+        // setUp needs to be called again after
+        virtual void clearDynamic()
+        {
+            mDynamic.clear();
+            mShared.clear();
+        }
 
         const T *search(const std::string &id) const {
             T item;

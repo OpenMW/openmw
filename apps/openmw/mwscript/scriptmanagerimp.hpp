@@ -61,6 +61,8 @@ namespace MWScript
             ///< Compile script with the given namen
             /// \return Success?
 
+            virtual void resetGlobalScripts();
+
             virtual std::pair<int, int> compileAll();
             ///< Compile all scripts
             /// \return count, success

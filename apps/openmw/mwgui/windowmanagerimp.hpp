@@ -80,7 +80,7 @@ namespace MWGui
     typedef std::pair<std::string, int> Faction;
     typedef std::vector<Faction> FactionList;
 
-    WindowManager(const Compiler::Extensions& extensions, int fpsLevel, bool newGame,
+    WindowManager(const Compiler::Extensions& extensions, int fpsLevel,
                   OEngine::Render::OgreRenderer *mOgre, const std::string& logpath,
                   const std::string& cacheDir, bool consoleOnlyScripts,
                   Translation::Storage& translationDataStorage);
@@ -92,6 +92,8 @@ namespace MWGui
      * new dialogs.
      */
     virtual void update();
+
+    virtual void setNewGame(bool newgame);
 
     virtual void pushGuiMode(GuiMode mode);
     virtual void popGuiMode();
@@ -226,6 +228,8 @@ namespace MWGui
 
     virtual bool getPlayerSleeping();
     virtual void wakeUpPlayer();
+
+    virtual void updatePlayer();
 
     virtual void showCompanionWindow(MWWorld::Ptr actor);
     virtual void startSpellMaking(MWWorld::Ptr actor);

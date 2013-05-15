@@ -121,7 +121,7 @@ namespace MWWorld
             physicActor->enableCollisions(wasCollisionMode);
 
             if (hit)
-                return newPosition;
+                return newPosition+Ogre::Vector3(0,0,4);
             else
                 return position;
         }

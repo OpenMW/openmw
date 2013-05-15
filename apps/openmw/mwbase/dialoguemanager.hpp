@@ -23,6 +23,8 @@ namespace MWBase
 
             DialogueManager() {}
 
+            virtual void clear() = 0;
+
             virtual ~DialogueManager() {}
 
             virtual bool isInChoice() const = 0;

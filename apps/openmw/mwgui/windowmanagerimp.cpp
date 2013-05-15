@@ -47,7 +47,7 @@ namespace MWGui
 {
 
     WindowManager::WindowManager(
-        const Compiler::Extensions& extensions, int fpsLevel, bool newGame, OEngine::Render::OgreRenderer *ogre,
+        const Compiler::Extensions& extensions, int fpsLevel, OEngine::Render::OgreRenderer *ogre,
             const std::string& logpath, const std::string& cacheDir, bool consoleOnlyScripts,
             Translation::Storage& translationDataStorage)
       : mGuiManager(NULL)
@@ -94,8 +94,8 @@ namespace MWGui
       , mGui(NULL)
       , mGarbageDialogs()
       , mShown(GW_ALL)
-      , mAllowed(newGame ? GW_None : GW_ALL)
-      , mRestAllowed(newGame ? false : true)
+      , mAllowed(GW_ALL)
+      , mRestAllowed(true)
       , mShowFPSLevel(fpsLevel)
       , mFPS(0.0f)
       , mTriangleCount(0)
@@ -203,11 +203,23 @@ namespace MWGui
         unsetSelectedSpell();
         unsetSelectedWeapon();
 
-        if (newGame)
-            disallowAll ();
-
         // Set up visibility
         updateVisible();
+    }
+
+    void WindowManager::setNewGame(bool newgame)
+    {
+        if (newgame)
+        {
+            disallowAll();
+            delete mCharGen;
+            mCharGen = new CharacterCreation();
+            mGuiModes.clear();
+        }
+        else
+            allow(GW_ALL);
+
+        mRestAllowed = !newgame;
     }
 
     WindowManager::~WindowManager()
@@ -1198,6 +1210,11 @@ namespace MWGui
     void WindowManager::frameStarted (float dt)
     {
         mInventoryWindow->doRenderUpdate ();
+    }
+
+    void WindowManager::updatePlayer()
+    {
+        mInventoryWindow->updatePlayer();
     }
 
 }
