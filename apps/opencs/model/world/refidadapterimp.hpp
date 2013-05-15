@@ -580,6 +580,22 @@ namespace CSMWorld
                 const QVariant& value) const;
             ///< If the data type does not match an exception is thrown.
     };
+
+    class ClothingRefIdAdapter : public EnchantableRefIdAdapter<ESM::Clothing>
+    {
+            const RefIdColumn *mType;
+
+        public:
+
+            ClothingRefIdAdapter (const EnchantableColumns& columns, const RefIdColumn *type);
+
+            virtual QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
+                const;
+
+            virtual void setData (const RefIdColumn *column, RefIdData& data, int index,
+                const QVariant& value) const;
+            ///< If the data type does not match an exception is thrown.
+    };
 }
 
 #endif

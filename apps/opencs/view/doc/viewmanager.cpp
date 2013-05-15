@@ -65,6 +65,12 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
         "Right Gauntlet", "Shield", "Left Bracer", "Right Bracer", 0
     };
 
+    static const char *sClothingTypes[] =
+    {
+        "Pants", "Shoes", "Shirt", "Belt", "Robe", "Right Glove", "Left Glove", "Skirt", "Ring",
+        "Amulet", 0
+    };
+
     mDelegateFactories = new CSVWorld::CommandDelegateFactoryCollection;
 
     mDelegateFactories->add (CSMWorld::ColumnBase::Display_GmstVarType,
@@ -87,6 +93,9 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
 
     mDelegateFactories->add (CSMWorld::ColumnBase::Display_ArmorType,
         new CSVWorld::EnumDelegateFactory (sArmorTypes));
+
+    mDelegateFactories->add (CSMWorld::ColumnBase::Display_ClothingType,
+        new CSVWorld::EnumDelegateFactory (sClothingTypes));
 }
 
 CSVDoc::ViewManager::~ViewManager()

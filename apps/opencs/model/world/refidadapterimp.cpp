@@ -142,3 +142,32 @@ void CSMWorld::BookRefIdAdapter::setData (const RefIdColumn *column, RefIdData& 
     else
         EnchantableRefIdAdapter<ESM::Book>::setData (column, data, index, value);
 }
+
+CSMWorld::ClothingRefIdAdapter::ClothingRefIdAdapter (const EnchantableColumns& columns,
+    const RefIdColumn *type)
+: EnchantableRefIdAdapter<ESM::Clothing> (UniversalId::Type_Clothing, columns), mType (type)
+{}
+
+QVariant CSMWorld::ClothingRefIdAdapter::getData (const RefIdColumn *column,
+    const RefIdData& data, int index) const
+{
+    const Record<ESM::Clothing>& record = static_cast<const Record<ESM::Clothing>&> (
+        data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Clothing)));
+
+    if (column==mType)
+        return record.get().mData.mType;
+
+    return EnchantableRefIdAdapter<ESM::Clothing>::getData (column, data, index);
+}
+
+void CSMWorld::ClothingRefIdAdapter::setData (const RefIdColumn *column, RefIdData& data, int index,
+    const QVariant& value) const
+{
+    Record<ESM::Clothing>& record = static_cast<Record<ESM::Clothing>&> (
+        data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Clothing)));
+
+    if (column==mType)
+        record.get().mData.mType = value.toInt();
+    else
+        EnchantableRefIdAdapter<ESM::Clothing>::setData (column, data, index, value);
+}
