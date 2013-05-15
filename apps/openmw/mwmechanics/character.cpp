@@ -268,7 +268,9 @@ void CharacterController::update(float duration, Movement &movement)
 
         /* FIXME: The state should be set to Jump, and X/Y movement should be disallowed except
          * for the initial thrust (which would be carried by "physics" until landing). */
-        if(onground && vec.z > 0.0f)
+        if(!onground)
+            vec.z = 0.0f;
+        else if(vec.z > 0.0f)
         {
             float z = cls.getJump(mPtr);
 
@@ -331,12 +333,14 @@ void CharacterController::update(float duration, Movement &movement)
         else if(getState() != CharState_SpecialIdle)
             setState((inwater ? CharState_IdleSwim : (sneak ? CharState_IdleSneak : CharState_Idle)));
 
-        movement.mPosition[0] += vec.x * duration;
-        movement.mPosition[1] += vec.y * duration;
-        movement.mPosition[2] += vec.z * duration;
-        movement.mRotation[0] += rot.x * duration;
-        movement.mRotation[1] += rot.y * duration;
-        movement.mRotation[2] += rot.z * duration;
+        vec *= duration;
+        movement.mPosition[0] += vec.x;
+        movement.mPosition[1] += vec.y;
+        movement.mPosition[2] += vec.z;
+        rot *= duration;
+        movement.mRotation[0] += rot.x;
+        movement.mRotation[1] += rot.y;
+        movement.mRotation[2] += rot.z;
 
         if(mPtr.getTypeName() == typeid(ESM::NPC).name())
         {
