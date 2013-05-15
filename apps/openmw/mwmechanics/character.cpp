@@ -29,6 +29,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
@@ -346,13 +347,14 @@ void CharacterController::update(float duration, Movement &movement)
         {
             NpcStats &stats = cls.getNpcStats(mPtr);
             WeaponType weaptype = WeapType_None;
+            MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
+            MWWorld::ContainerStoreIterator weapon = inv.end();
 
             if(stats.getDrawState() == DrawState_Spell)
                 weaptype = WeapType_Spell;
             else if(stats.getDrawState() == MWMechanics::DrawState_Weapon)
             {
-                MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
-                MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+                weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
                 if(weapon == inv.end())
                     weaptype = WeapType_HandToHand;
                 else
@@ -396,6 +398,8 @@ void CharacterController::update(float duration, Movement &movement)
                     }
                 }
             }
+            else
+                weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
 
             if(weaptype != mWeaponType)
             {
@@ -418,6 +422,18 @@ void CharacterController::update(float duration, Movement &movement)
 
                 mWeaponType = weaptype;
                 forceStateUpdate();
+
+                if(weapon != inv.end())
+                {
+                    std::string soundid = (mWeaponType == WeapType_None) ?
+                                          MWWorld::Class::get(*weapon).getDownSoundId(*weapon) :
+                                          MWWorld::Class::get(*weapon).getUpSoundId(*weapon);
+                    if(!soundid.empty())
+                    {
+                        MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+                        sndMgr->playSound3D(mPtr, soundid, 1.0f, 1.0f);
+                    }
+                }
             }
         }
     }
