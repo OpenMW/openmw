@@ -5,6 +5,9 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/world.hpp"
+#include "../mwbase/journal.hpp"
+#include "../mwbase/dialoguemanager.hpp"
 
 namespace MWGui
 {
@@ -29,7 +32,7 @@ namespace MWGui
 
         std::vector<std::string> buttons;
         buttons.push_back("return");
-        //buttons.push_back("newgame");
+        buttons.push_back("newgame");
         //buttons.push_back("loadgame");
         //buttons.push_back("savegame");
         buttons.push_back("options");
@@ -72,6 +75,13 @@ namespace MWGui
             MWBase::Environment::get().getWindowManager ()->pushGuiMode (GM_Settings);
         else if (sender == mButtons["exitgame"])
             Ogre::Root::getSingleton ().queueEndRendering ();
+        else if (sender == mButtons["newgame"])
+        {
+            MWBase::Environment::get().getWorld()->startNewGame();
+            MWBase::Environment::get().getWindowManager()->setNewGame(true);
+            MWBase::Environment::get().getDialogueManager()->clear();
+            MWBase::Environment::get().getJournal()->clear();
+        }
     }
 
 }

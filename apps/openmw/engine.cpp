@@ -131,7 +131,6 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mFpsLevel(0)
   , mDebug (false)
   , mVerboseScripts (false)
-  , mNewGame (false)
   , mUseSound (true)
   , mCompileAll (false)
   , mScriptContext (0)
@@ -278,11 +277,6 @@ void OMW::Engine::setScriptsVerbosity(bool scriptsVerbosity)
     mVerboseScripts = scriptsVerbosity;
 }
 
-void OMW::Engine::setNewGame(bool newGame)
-{
-    mNewGame = newGame;
-}
-
 std::string OMW::Engine::loadSettings (Settings::Manager & settings)
 {
     // Create the settings manager and load default settings file
@@ -366,7 +360,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     // Create the world
     mEnvironment.setWorld( new MWWorld::World (*mOgre, mFileCollections, mMaster, mPlugins,
-        mResDir, mCfgMgr.getCachePath(), mNewGame, mEncoder, mFallbackMap,
+        mResDir, mCfgMgr.getCachePath(), mEncoder, mFallbackMap,
         mActivationDistanceOverride));
     MWBase::Environment::get().getWorld()->setupPlayer();
 
@@ -379,7 +373,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     MWScript::registerExtensions (mExtensions);
 
     mEnvironment.setWindowManager (new MWGui::WindowManager(
-        mExtensions, mFpsLevel, mNewGame, mOgre, mCfgMgr.getLogPath().string() + std::string("/"),
+        mExtensions, mFpsLevel, mOgre, mCfgMgr.getLogPath().string() + std::string("/"),
         mCfgMgr.getCachePath ().string(), mScriptConsoleMode, mTranslationDataStorage));
 
     // Create sound system

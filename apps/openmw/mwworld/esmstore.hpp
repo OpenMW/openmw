@@ -141,6 +141,23 @@ namespace MWWorld
             mStores[ESM::REC_WEAP] = &mWeapons;
         }
 
+        void clearDynamic ()
+        {
+            ESM::NPC playerNpc = *mNpcs.find("player");
+
+            for (std::map<int, StoreBase *>::iterator it = mStores.begin(); it != mStores.end(); ++it)
+                it->second->clearDynamic();
+
+            mNpcs.insert(playerNpc);
+        }
+
+        void movePlayerRecord ()
+        {
+            ESM::NPC playerNpc = *mNpcs.find("player");
+            mNpcs.eraseStatic(playerNpc.mId);
+            mNpcs.insert(playerNpc);
+        }
+
         void load(ESM::ESMReader &esm);
 
         template <class T>

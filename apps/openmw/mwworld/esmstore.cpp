@@ -134,15 +134,6 @@ void ESMStore::setUp()
     mSkills.setUp();
     mMagicEffects.setUp();
     mAttributes.setUp();
-
-    ESM::NPC item;
-    item.mId = "player";
-
-    const ESM::NPC *pIt = mNpcs.find("player");
-    assert(pIt != NULL);
-
-    mNpcs.insert(*pIt);
-    mNpcs.eraseStatic(pIt->mId);
 }
 
 } // end namespace

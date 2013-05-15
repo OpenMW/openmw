@@ -35,6 +35,8 @@ namespace MWWorld
 
         Player(const ESM::NPC *player, const MWBase::World& world);
 
+        void set (const ESM::NPC *player);
+
         void setCell (MWWorld::CellStore *cellStore);
 
         MWWorld::Ptr getPlayer();

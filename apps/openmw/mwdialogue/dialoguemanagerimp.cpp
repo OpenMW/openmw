@@ -50,12 +50,11 @@ namespace MWDialogue
       , mTemporaryDispositionChange(0.f)
       , mPermanentDispositionChange(0.f), mScriptVerbose (scriptVerbose)
       , mTranslationDataStorage(translationDataStorage)
+      , mTalkedTo(false)
     {
         mChoice = -1;
         mIsInChoice = false;
         mCompilerContext.setExtensions (&extensions);
-        mDialogueMap.clear();
-        mActorKnownTopics.clear();
 
         const MWWorld::Store<ESM::Dialogue> &dialogs =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
@@ -65,6 +64,14 @@ namespace MWDialogue
         {
             mDialogueMap[Misc::StringUtils::lowerCase(it->mId)] = *it;
         }
+    }
+
+    void DialogueManager::clear()
+    {
+        mKnownTopics.clear();
+        mTalkedTo = false;
+        mTemporaryDispositionChange = 0;
+        mPermanentDispositionChange = 0;
     }
 
     void DialogueManager::addTopic (const std::string& topic)

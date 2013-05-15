@@ -45,6 +45,8 @@ namespace MWGui
 
             void updateItemView();
 
+            void updatePlayer();
+
         private:
             DragAndDrop* mDragAndDrop;
 
