@@ -151,6 +151,15 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.push_back (RefIdColumn ("Clothing Type", ColumnBase::Display_ClothingType));
     const RefIdColumn *clothingType = &mColumns.back();
 
+    mColumns.push_back (RefIdColumn ("Weight Capacity", ColumnBase::Display_Float));
+    const RefIdColumn *weightCapacity = &mColumns.back();
+
+    mColumns.push_back (RefIdColumn ("Organic Container", ColumnBase::Display_Boolean));
+    const RefIdColumn *organic = &mColumns.back();
+
+    mColumns.push_back (RefIdColumn ("Respawn", ColumnBase::Display_Boolean));
+    const RefIdColumn *respawn = &mColumns.back();
+
     mAdapters.insert (std::make_pair (UniversalId::Type_Activator,
         new NameRefIdAdapter<ESM::Activator> (UniversalId::Type_Activator, nameColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Potion,
@@ -164,7 +173,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mAdapters.insert (std::make_pair (UniversalId::Type_Clothing,
         new ClothingRefIdAdapter (enchantableColumns, clothingType)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Container,
-        new NameRefIdAdapter<ESM::Container> (UniversalId::Type_Container, nameColumns)));
+        new ContainerRefIdAdapter (nameColumns, weightCapacity, organic, respawn)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Creature,
         new ActorRefIdAdapter<ESM::Creature> (UniversalId::Type_Creature, actorsColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Door,

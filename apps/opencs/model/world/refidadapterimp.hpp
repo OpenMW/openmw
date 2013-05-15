@@ -596,6 +596,26 @@ namespace CSMWorld
                 const QVariant& value) const;
             ///< If the data type does not match an exception is thrown.
     };
+
+    class ContainerRefIdAdapter : public NameRefIdAdapter<ESM::Container>
+    {
+            const RefIdColumn *mWeight;
+            const RefIdColumn *mOrganic;
+            const RefIdColumn *mRespawn;
+
+        public:
+
+            ContainerRefIdAdapter (const NameColumns& columns, const RefIdColumn *weight,
+                const RefIdColumn *organic, const RefIdColumn *respawn);
+
+            virtual QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
+                const;
+
+            virtual void setData (const RefIdColumn *column, RefIdData& data, int index,
+                const QVariant& value) const;
+            ///< If the data type does not match an exception is thrown.
+
+    };
 }
 
 #endif

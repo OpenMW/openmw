@@ -171,3 +171,53 @@ void CSMWorld::ClothingRefIdAdapter::setData (const RefIdColumn *column, RefIdDa
     else
         EnchantableRefIdAdapter<ESM::Clothing>::setData (column, data, index, value);
 }
+
+CSMWorld::ContainerRefIdAdapter::ContainerRefIdAdapter (const NameColumns& columns,
+    const RefIdColumn *weight, const RefIdColumn *organic, const RefIdColumn *respawn)
+: NameRefIdAdapter<ESM::Container> (UniversalId::Type_Container, columns), mWeight (weight),
+  mOrganic (organic), mRespawn (respawn)
+{}
+
+QVariant CSMWorld::ContainerRefIdAdapter::getData (const RefIdColumn *column, const RefIdData& data,
+    int index) const
+{
+    const Record<ESM::Container>& record = static_cast<const Record<ESM::Container>&> (
+        data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Container)));
+
+    if (column==mWeight)
+        return record.get().mWeight;
+
+    if (column==mOrganic)
+        return (record.get().mFlags & ESM::Container::Organic)!=0;
+
+    if (column==mRespawn)
+        return (record.get().mFlags & ESM::Container::Respawn)!=0;
+
+    return NameRefIdAdapter<ESM::Container>::getData (column, data, index);
+}
+
+void CSMWorld::ContainerRefIdAdapter::setData (const RefIdColumn *column, RefIdData& data, int index,
+    const QVariant& value) const
+{
+    Record<ESM::Container>& record = static_cast<Record<ESM::Container>&> (
+        data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Container)));
+
+    if (column==mWeight)
+        record.get().mWeight = value.toFloat();
+    else if (column==mOrganic)
+    {
+        if (value.toInt())
+            record.get().mFlags |= ESM::Container::Organic;
+        else
+            record.get().mFlags &= ~ESM::Container::Organic;
+    }
+    else if (column==mRespawn)
+    {
+        if (value.toInt())
+            record.get().mFlags |= ESM::Container::Respawn;
+        else
+            record.get().mFlags &= ~ESM::Container::Respawn;
+    }
+    else
+        NameRefIdAdapter<ESM::Container>::setData (column, data, index, value);
+}
