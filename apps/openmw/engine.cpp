@@ -428,6 +428,10 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
         MWBase::Environment::get().getWorld()->changeToInteriorCell (mCellName, pos);
     }
 
+    Ogre::FrameEvent event;
+    event.timeSinceLastEvent = 0;
+    event.timeSinceLastFrame = 0;
+    frameRenderingQueued(event);
     mOgre->getRoot()->addFrameListener (this);
 
     // scripts

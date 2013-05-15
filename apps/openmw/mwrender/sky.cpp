@@ -57,7 +57,7 @@ BillboardObject::BillboardObject( const String& textureName,
     mNode = rootNode->createChildSceneNode();
     mNode->setPosition(finalPosition);
     mNode->attachObject(mEntity);
-    mNode->setScale(Ogre::Vector3(550.f*initialSize));
+    mNode->setScale(Ogre::Vector3(450.f*initialSize));
     mNode->setOrientation(Ogre::Vector3::UNIT_Z.getRotationTo(-position.normalisedCopy()));
 
     sh::Factory::getInstance().getMaterialInstance ("BillboardMaterial"+StringConverter::toString(bodyCount))->setListener(this);
@@ -86,7 +86,7 @@ void BillboardObject::setVisible(const bool visible)
 
 void BillboardObject::setSize(const float size)
 {
-    mNode->setScale(550.f*size, 550.f*size, 550.f*size);
+    mNode->setScale(450.f*size, 450.f*size, 450.f*size);
 }
 
 void BillboardObject::setVisibility(const float visibility)
@@ -267,11 +267,11 @@ void SkyManager::create()
     mLightning->setDiffuseColour (ColourValue(3,3,3));
 
     const MWWorld::Fallback* fallback=MWBase::Environment::get().getWorld()->getFallback();
-    mSecunda = new Moon("secunda_texture", /*0.5*/fallback->getFallbackFloat("Moons_Secunda_Size")/100, Vector3(-0.4, 0.4, 0.5), mRootNode, "openmw_moon");
+    mSecunda = new Moon("secunda_texture", fallback->getFallbackFloat("Moons_Secunda_Size")/100, Vector3(-0.4, 0.4, 0.5), mRootNode, "openmw_moon");
     mSecunda->setType(Moon::Type_Secunda);
     mSecunda->setRenderQueue(RQG_SkiesEarly+4);
 
-    mMasser = new Moon("masser_texture", /*0.75*/fallback->getFallbackFloat("Moons_Masser_Size")/100, Vector3(-0.4, 0.4, 0.5), mRootNode, "openmw_moon");
+    mMasser = new Moon("masser_texture", fallback->getFallbackFloat("Moons_Masser_Size")/100, Vector3(-0.4, 0.4, 0.5), mRootNode, "openmw_moon");
     mMasser->setRenderQueue(RQG_SkiesEarly+3);
     mMasser->setType(Moon::Type_Masser);
 
