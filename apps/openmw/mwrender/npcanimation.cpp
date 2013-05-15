@@ -341,8 +341,6 @@ void NpcAnimation::updateParts(bool forceupdate)
         if (mPartPriorities[part] < 1 && bodypart)
             addOrReplaceIndividualPart(part, -1,1, "meshes\\"+bodypart->mModel);
     }
-
-    showWeapons(mShowWeapons);
 }
 
 NifOgre::ObjectList NpcAnimation::insertBoundedPart(const std::string &model, int group, const std::string &bonename)
