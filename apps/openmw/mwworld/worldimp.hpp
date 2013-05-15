@@ -122,7 +122,7 @@ namespace MWWorld
             World (OEngine::Render::OgreRenderer& renderer,
                 const Files::Collections& fileCollections,
                 const std::vector<std::string>& master, const std::vector<std::string>& plugins,
-            const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir,
+                const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir,
                 ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap, int mActivationDistanceOverride);
 
             virtual ~World();

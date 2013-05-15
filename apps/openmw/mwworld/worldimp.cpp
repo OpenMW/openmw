@@ -225,7 +225,6 @@ namespace MWWorld
 
     void World::startNewGame()
     {
-
         mWorldScene->changeToVoid();
 
         mStore.clearDynamic();

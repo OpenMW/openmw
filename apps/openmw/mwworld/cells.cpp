@@ -40,10 +40,7 @@ void MWWorld::Cells::clear()
 {
     mInteriors.clear();
     mExteriors.clear();
-
-    mIdCache  = std::vector<std::pair<std::string, MWWorld::CellStore *> >(
-                40, std::pair<std::string, MWWorld::Ptr::CellStore *> ("", (MWWorld::Ptr::CellStore*)0)), /// \todo make cache size configurable
-
+    std::fill(mIdCache.begin(), mIdCache.end(), std::make_pair("", (MWWorld::Ptr::CellStore*)0));
     mIdCacheIndex = 0;
 }
 

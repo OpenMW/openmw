@@ -131,6 +131,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mFpsLevel(0)
   , mDebug (false)
   , mVerboseScripts (false)
+  , mNewGame (false)
   , mUseSound (true)
   , mCompileAll (false)
   , mScriptContext (0)
@@ -277,6 +278,11 @@ void OMW::Engine::setScriptsVerbosity(bool scriptsVerbosity)
     mVerboseScripts = scriptsVerbosity;
 }
 
+void OMW::Engine::setNewGame(bool newGame)
+{
+    mNewGame = newGame;
+}
+
 std::string OMW::Engine::loadSettings (Settings::Manager & settings)
 {
     // Create the settings manager and load default settings file
@@ -375,6 +381,8 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     mEnvironment.setWindowManager (new MWGui::WindowManager(
         mExtensions, mFpsLevel, mOgre, mCfgMgr.getLogPath().string() + std::string("/"),
         mCfgMgr.getCachePath ().string(), mScriptConsoleMode, mTranslationDataStorage));
+    if (mNewGame)
+        mEnvironment.getWindowManager()->setNewGame(true);
 
     // Create sound system
     mEnvironment.setSoundManager (new MWSound::SoundManager(mUseSound));
@@ -403,24 +411,29 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
         MWBase::Environment::get().getWorld()->getPlayer(),
          *MWBase::Environment::get().getWindowManager(), mDebug, *this, keybinderUser, keybinderUserExists));
 
-    // load cell
-    ESM::Position pos;
-    pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
-    pos.pos[2] = 0;
-
     mEnvironment.getWorld()->renderPlayer();
 
-    if (const ESM::Cell *exterior = MWBase::Environment::get().getWorld()->getExterior (mCellName))
+    if (!mNewGame)
     {
-        MWBase::Environment::get().getWorld()->indexToPosition (exterior->mData.mX, exterior->mData.mY,
-            pos.pos[0], pos.pos[1], true);
-        MWBase::Environment::get().getWorld()->changeToExteriorCell (pos);
+        // load cell
+        ESM::Position pos;
+        pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
+        pos.pos[2] = 0;
+
+        if (const ESM::Cell *exterior = MWBase::Environment::get().getWorld()->getExterior (mCellName))
+        {
+            MWBase::Environment::get().getWorld()->indexToPosition (exterior->mData.mX, exterior->mData.mY,
+                pos.pos[0], pos.pos[1], true);
+            MWBase::Environment::get().getWorld()->changeToExteriorCell (pos);
+        }
+        else
+        {
+            pos.pos[0] = pos.pos[1] = 0;
+            MWBase::Environment::get().getWorld()->changeToInteriorCell (mCellName, pos);
+        }
     }
     else
-    {
-        pos.pos[0] = pos.pos[1] = 0;
-        MWBase::Environment::get().getWorld()->changeToInteriorCell (mCellName, pos);
-    }
+        mEnvironment.getWorld()->startNewGame();
 
     Ogre::FrameEvent event;
     event.timeSinceLastEvent = 0;
