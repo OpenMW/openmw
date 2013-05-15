@@ -51,6 +51,8 @@ namespace MWDialogue
 
             DialogueManager (const Compiler::Extensions& extensions, bool scriptVerbose, Translation::Storage& translationDataStorage);
 
+            virtual void clear();
+
             virtual bool isInChoice() const;
 
             virtual void startDialogue (const MWWorld::Ptr& actor);

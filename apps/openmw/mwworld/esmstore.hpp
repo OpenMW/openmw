@@ -67,6 +67,8 @@ namespace MWWorld
         std::map<std::string, int> mIds;
         std::map<int, StoreBase *> mStores;
 
+        ESM::NPC mPlayerTemplate;
+
         unsigned int mDynamicCount;
 
     public:
@@ -139,6 +141,21 @@ namespace MWWorld
             mStores[ESM::REC_SSCR] = &mStartScripts;
             mStores[ESM::REC_STAT] = &mStatics;
             mStores[ESM::REC_WEAP] = &mWeapons;
+        }
+
+        void clearDynamic ()
+        {
+            for (std::map<int, StoreBase *>::iterator it = mStores.begin(); it != mStores.end(); ++it)
+                it->second->clearDynamic();
+
+            mNpcs.insert(mPlayerTemplate);
+        }
+
+        void movePlayerRecord ()
+        {
+            mPlayerTemplate = *mNpcs.find("player");
+            mNpcs.eraseStatic(mPlayerTemplate.mId);
+            mNpcs.insert(mPlayerTemplate);
         }
 
         void load(ESM::ESMReader &esm);

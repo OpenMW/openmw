@@ -119,7 +119,7 @@ namespace MWInput
 
     private:
         OEngine::Render::OgreRenderer &mOgre;
-        MWWorld::Player &mPlayer;
+        MWWorld::Player& mPlayer;
         MWBase::WindowManager &mWindows;
         OMW::Engine& mEngine;
 

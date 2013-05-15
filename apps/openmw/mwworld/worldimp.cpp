@@ -160,12 +160,12 @@ namespace MWWorld
     World::World (OEngine::Render::OgreRenderer& renderer,
         const Files::Collections& fileCollections,
         const std::vector<std::string>& master, const std::vector<std::string>& plugins,
-	const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir, bool newGame,
+        const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir,
         ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap, int mActivationDistanceOverride)
     : mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
       mSky (true), mCells (mStore, mEsm),
       mNumFacing(0), mActivationDistanceOverride (mActivationDistanceOverride),
-      mFallback(fallbackMap), mNewGame(newGame)
+      mFallback(fallbackMap), mPlayIntro(0)
     {
         mPhysics = new PhysicsSystem(renderer);
         mPhysEngine = mPhysics->getEngine();
@@ -215,22 +215,70 @@ namespace MWWorld
         if (mEsm[0].getFormat() == 0)
             ensureNeededRecords();
 
+        mStore.movePlayerRecord();
         mStore.setUp();
 
-        // global variables
         mGlobalVariables = new Globals (mStore);
 
-        if (mNewGame)
-        {
-            // set new game mark
-            mGlobalVariables->setInt ("chargenstate", 1);
-        }
+        mWorldScene = new Scene(*mRendering, mPhysics);
+    }
 
+    void World::startNewGame()
+    {
+        mWorldScene->changeToVoid();
+
+        mStore.clearDynamic();
+        mStore.setUp();
+
+        mCells.clear();
+
+        // Rebuild player
+        setupPlayer();
+        const ESM::NPC* playerNpc = mStore.get<ESM::NPC>().find("player");
+        MWWorld::Ptr player = mPlayer->getPlayer();
+
+        // removes NpcStats, ContainerStore etc
+        player.getRefData().setCustomData(NULL);
+
+        // make sure to do this so that local scripts from items that were in the players inventory are removed
+        mLocalScripts.clear();
+
+        MWWorld::Class::get(player).getContainerStore(player).fill(playerNpc->mInventory, "", mStore);
+        MWWorld::Class::get(player).getInventoryStore(player).autoEquip(player);
+
+        MWBase::Environment::get().getWindowManager()->updatePlayer();
+
+        ESM::Position pos;
+        const int cellSize = 8192;
+        pos.pos[0] = cellSize/2;
+        pos.pos[1] = cellSize/2;
+        pos.pos[2] = 0;
+        pos.rot[0] = 0;
+        pos.rot[1] = 0;
+        pos.rot[2] = 0;
+        mWorldScene->changeToExteriorCell(pos);
+
+
+        // enable collision
+        if(!mPhysics->toggleCollisionMode())
+            mPhysics->toggleCollisionMode();
+
+        // FIXME: should be set to 1, but the sound manager won't pause newly started sounds
+        mPlayIntro = 2;
+
+        // global variables
+        delete mGlobalVariables;
+        mGlobalVariables = new Globals (mStore);
+
+        // set new game mark
+        mGlobalVariables->setInt ("chargenstate", 1);
         mGlobalVariables->setInt ("pcrace", 3);
 
-        mWorldScene = new Scene(*mRendering, mPhysics);
+        // we don't want old weather to persist on a new game
+        delete mWeatherManager;
+        mWeatherManager = new MWWorld::WeatherManager(mRendering,&mFallback);
 
-        lastTick = mTimer.getMilliseconds();
+        MWBase::Environment::get().getScriptManager()->resetGlobalScripts();
     }
 
 
@@ -754,7 +802,7 @@ namespace MWWorld
 
         CellStore *currCell = ptr.getCell();
         bool isPlayer = ptr == mPlayer->getPlayer();
-        bool haveToMove = mWorldScene->isCellActive(*currCell) || isPlayer;
+        bool haveToMove = isPlayer || mWorldScene->isCellActive(*currCell);
 
         if (*currCell != newCell)
         {
@@ -950,9 +998,9 @@ namespace MWWorld
         float terrainHeight = mRendering->getTerrainHeightAt(pos);
 
         if (pos.z < terrainHeight)
-            pos.z = terrainHeight+5; // place slightly above. will snap down to ground with code below
+            pos.z = terrainHeight;
 
-        ptr.getRefData().getPosition().pos[2] = pos.z;
+        ptr.getRefData().getPosition().pos[2] = pos.z + 20; // place slightly above. will snap down to ground with code below
 
         if (!isFlying(ptr))
         {
@@ -961,7 +1009,7 @@ namespace MWWorld
                 pos.z = traced.z;
         }
 
-        moveObject(ptr, pos.x, pos.y, pos.z);
+        moveObject(ptr, *ptr.getCell(), pos.x, pos.y, pos.z);
     }
 
     void World::rotateObject (const Ptr& ptr,float x,float y,float z, bool adjust)
@@ -1193,6 +1241,13 @@ namespace MWWorld
 
     void World::update (float duration, bool paused)
     {
+        if (mPlayIntro)
+        {
+            --mPlayIntro;
+            if (mPlayIntro == 0)
+                mRendering->playVideo("mw_intro.bik", true);
+        }
+
         mWeatherManager->update (duration);
 
         mWorldScene->update (duration, paused);
@@ -1547,23 +1602,19 @@ namespace MWWorld
     void World::setupPlayer()
     {
         const ESM::NPC *player = mStore.get<ESM::NPC>().find("player");
-        mPlayer = new MWWorld::Player(player, *this);
+        if (!mPlayer)
+            mPlayer = new MWWorld::Player(player, *this);
+        else
+            mPlayer->set(player);
 
         Ptr ptr = mPlayer->getPlayer();
         mRendering->setupPlayer(ptr);
-        if (mNewGame)
-        {
-            MWWorld::Class::get(ptr).getContainerStore(ptr).fill(player->mInventory, "", mStore);
-            MWWorld::Class::get(ptr).getInventoryStore(ptr).autoEquip(ptr);
-        }
     }
 
     void World::renderPlayer()
     {
         mRendering->renderPlayer(mPlayer->getPlayer());
         mPhysics->addActor(mPlayer->getPlayer());
-        if (mNewGame)
-            toggleCollisionMode();
     }
 
     void World::setupExternalRendering (MWRender::ExternalRendering& rendering)

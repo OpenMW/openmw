@@ -81,11 +81,15 @@ namespace MWBase
              */
             virtual void update() = 0;
 
+            virtual void setNewGame(bool newgame) = 0;
+
             virtual void pushGuiMode (MWGui::GuiMode mode) = 0;
             virtual void popGuiMode() = 0;
 
             virtual void removeGuiMode (MWGui::GuiMode mode) = 0;
             ///< can be anywhere in the stack
+
+            virtual void updatePlayer() = 0;
 
             virtual MWGui::GuiMode getMode() const = 0;
 

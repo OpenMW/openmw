@@ -85,13 +85,8 @@ namespace MWWorld
             float mFaced2Distance;
             int mNumFacing;
 
-            bool mNewGame;
-
             std::map<MWWorld::Ptr, int> mDoorStates;
             ///< only holds doors that are currently moving. 0 means closing, 1 opening
-
-            unsigned long lastTick;
-            Ogre::Timer mTimer;
 
             int getDaysPerMonth (int month) const;
 
@@ -120,15 +115,19 @@ namespace MWWorld
 
             void ensureNeededRecords();
 
+            int mPlayIntro;
+
         public:
 
             World (OEngine::Render::OgreRenderer& renderer,
                 const Files::Collections& fileCollections,
                 const std::vector<std::string>& master, const std::vector<std::string>& plugins,
-        	const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir, bool newGame,
+                const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir,
                 ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap, int mActivationDistanceOverride);
 
             virtual ~World();
+
+            virtual void startNewGame();
 
             virtual OEngine::Render::Fader* getFader();
             ///< \ŧodo remove this function. Rendering details should not be exposed.

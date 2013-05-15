@@ -24,6 +24,14 @@ namespace MWWorld
         playerPos[0] = playerPos[1] = playerPos[2] = 0;
     }
 
+    void Player::set(const ESM::NPC *player)
+    {
+        mPlayer.mBase = player;
+
+        float* playerPos = mPlayer.mData.getPosition().pos;
+        playerPos[0] = playerPos[1] = playerPos[2] = 0;
+    }
+
     void Player::setCell (MWWorld::CellStore *cellStore)
     {
         mCellStore = cellStore;

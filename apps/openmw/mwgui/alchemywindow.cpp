@@ -45,6 +45,7 @@ namespace MWGui
         : WindowBase("openmw_alchemy_window.layout")
         , mApparatus (4)
         , mIngredients (4)
+        , mSortModel(NULL)
     {
         getWidget(mCreateButton, "CreateButton");
         getWidget(mCancelButton, "CancelButton");
@@ -60,10 +61,7 @@ namespace MWGui
         getWidget(mNameEdit, "NameEdit");
         getWidget(mItemView, "ItemView");
 
-        InventoryItemModel* model = new InventoryItemModel(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
-        mSortModel = new SortFilterItemModel(model);
-        mSortModel->setFilter(SortFilterItemModel::Filter_OnlyIngredients);
-        mItemView->setModel (mSortModel);
+
         mItemView->eventItemClicked += MyGUI::newDelegate(this, &AlchemyWindow::onSelectedItem);
 
         mIngredients[0]->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onIngredientSelected);
@@ -145,6 +143,11 @@ namespace MWGui
 
     void AlchemyWindow::open()
     {
+        InventoryItemModel* model = new InventoryItemModel(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+        mSortModel = new SortFilterItemModel(model);
+        mSortModel->setFilter(SortFilterItemModel::Filter_OnlyIngredients);
+        mItemView->setModel (mSortModel);
+
         mNameEdit->setCaption("");
 
         mAlchemy.setAlchemist (MWBase::Environment::get().getWorld()->getPlayer().getPlayer());

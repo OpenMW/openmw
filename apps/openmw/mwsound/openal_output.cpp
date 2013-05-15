@@ -586,7 +586,7 @@ void OpenAL_Sound::update()
 
     alSourcef(mSource, AL_GAIN, gain);
     alSourcef(mSource, AL_PITCH, pitch);
-    alSource3f(mSource, AL_POSITION, mPos[0], mPos[2], -mPos[1]);
+    alSource3f(mSource, AL_POSITION, mPos[0], mPos[1], mPos[2]);
     alSource3f(mSource, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
     alSource3f(mSource, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
     throwALerror();
@@ -606,7 +606,7 @@ void OpenAL_Sound3D::update()
 
     alSourcef(mSource, AL_GAIN, gain);
     alSourcef(mSource, AL_PITCH, pitch);
-    alSource3f(mSource, AL_POSITION, mPos[0], mPos[2], -mPos[1]);
+    alSource3f(mSource, AL_POSITION, mPos[0], mPos[1], mPos[2]);
     alSource3f(mSource, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
     alSource3f(mSource, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
     throwALerror();
@@ -923,10 +923,10 @@ void OpenAL_Output::updateListener(const Ogre::Vector3 &pos, const Ogre::Vector3
     if(mContext)
     {
         ALfloat orient[6] = {
-            atdir.x, atdir.z, -atdir.y,
-            updir.x, updir.z, -updir.y
+            atdir.x, atdir.y, atdir.z,
+            updir.x, updir.y, updir.z
         };
-        alListener3f(AL_POSITION, mPos.x, mPos.z, -mPos.y);
+        alListener3f(AL_POSITION, mPos.x, mPos.y, mPos.z);
         alListenerfv(AL_ORIENTATION, orient);
         throwALerror();
     }

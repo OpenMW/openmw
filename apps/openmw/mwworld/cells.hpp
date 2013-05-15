@@ -37,6 +37,8 @@ namespace MWWorld
 
         public:
 
+            void clear();
+
             Cells (const MWWorld::ESMStore& store, std::vector<ESM::ESMReader>& reader);
             ///< \todo pass the dynamic part of the ESMStore isntead (once it is written) of the whole
             /// world

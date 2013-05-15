@@ -29,7 +29,7 @@
 namespace MWInput
 {
     InputManager::InputManager(OEngine::Render::OgreRenderer &ogre,
-            MWWorld::Player &player,
+            MWWorld::Player& player,
             MWBase::WindowManager &windows,
             bool debug,
             OMW::Engine& engine,

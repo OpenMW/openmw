@@ -53,14 +53,11 @@ namespace MWGui
 
         mAvatar->eventMouseButtonClick += MyGUI::newDelegate(this, &InventoryWindow::onAvatarClicked);
 
-        mPtr = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer ();
-
         getWidget(mItemView, "ItemView");
-        mTradeModel = new TradeItemModel(new InventoryItemModel(mPtr), MWWorld::Ptr());
-        mSortModel = new SortFilterItemModel(mTradeModel);
-        mItemView->setModel(mSortModel);
         mItemView->eventItemClicked += MyGUI::newDelegate(this, &InventoryWindow::onItemSelected);
         mItemView->eventBackgroundClicked += MyGUI::newDelegate(this, &InventoryWindow::onBackgroundSelected);
+
+        updatePlayer();
 
         mFilterAll->eventMouseButtonClick += MyGUI::newDelegate(this, &InventoryWindow::onFilterChanged);
         mFilterWeapon->eventMouseButtonClick += MyGUI::newDelegate(this, &InventoryWindow::onFilterChanged);
@@ -73,6 +70,16 @@ namespace MWGui
         setCoord(0, 342, 498, 258);
         onWindowResize(static_cast<MyGUI::Window*>(mMainWidget));
 
+        mPreview.setup();
+    }
+
+    void InventoryWindow::updatePlayer()
+    {
+        mPtr = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer ();
+        mTradeModel = new TradeItemModel(new InventoryItemModel(mPtr), MWWorld::Ptr());
+        mSortModel = new SortFilterItemModel(mTradeModel);
+        mItemView->setModel(mSortModel);
+        mPreview = MWRender::InventoryPreview(mPtr);
         mPreview.setup();
     }
 
