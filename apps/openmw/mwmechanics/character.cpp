@@ -220,15 +220,16 @@ void CharacterController::update(float duration, Movement &movement)
 
     if(!cls.isActor())
     {
-        if(mAnimQueue.size() > 0)
+        if(mAnimQueue.size() > 1)
         {
             if(mAnimation->isPlaying(mAnimQueue.front().first) == false)
             {
+                mAnimation->disable(mAnimQueue.front().first);
                 mAnimQueue.pop_front();
-                if(mAnimQueue.size() > 0)
-                    mAnimation->play(mAnimQueue.front().first, Priority_Default,
-                                     MWRender::Animation::Group_All, false,
-                                     "start", "stop", 0.0f, mAnimQueue.front().second);
+
+                mAnimation->play(mAnimQueue.front().first, Priority_Default,
+                                 MWRender::Animation::Group_All, false,
+                                 "start", "stop", 0.0f, mAnimQueue.front().second);
             }
         }
     }
@@ -322,16 +323,20 @@ void CharacterController::update(float duration, Movement &movement)
         }
         else if(mAnimQueue.size() > 0)
         {
-            if(mAnimation->isPlaying(mAnimQueue.front().first) == false)
+            if(mAnimQueue.size() > 1)
             {
-                mAnimQueue.pop_front();
-                if(mAnimQueue.size() > 0)
+                if(mAnimation->isPlaying(mAnimQueue.front().first) == false)
+                {
+                    mAnimation->disable(mAnimQueue.front().first);
+                    mAnimQueue.pop_front();
+
                     mAnimation->play(mAnimQueue.front().first, Priority_Default,
-                                     MWRender::Animation::Group_All, false,
-                                     "start", "stop", 0.0f, mAnimQueue.front().second);
+                                    MWRender::Animation::Group_All, false,
+                                    "start", "stop", 0.0f, mAnimQueue.front().second);
+                }
             }
         }
-        else if(getState() != CharState_SpecialIdle)
+        else
             setState((inwater ? CharState_IdleSwim : (sneak ? CharState_IdleSneak : CharState_Idle)));
 
         vec *= duration;
@@ -471,6 +476,8 @@ void CharacterController::playGroup(const std::string &groupname, int mode, int 
         count = std::max(count, 1);
         if(mode != 0 || mAnimQueue.size() == 0)
         {
+            if(mAnimQueue.size() > 0)
+                mAnimation->disable(mAnimQueue.front().first);
             mAnimQueue.clear();
             mAnimQueue.push_back(std::make_pair(groupname, count-1));
 
@@ -506,6 +513,8 @@ void CharacterController::forceStateUpdate()
 {
     if(!mAnimation)
         return;
+    if(mAnimQueue.size() > 0)
+        mAnimation->disable(mAnimQueue.front().first);
     mAnimQueue.clear();
 
     std::string group;
