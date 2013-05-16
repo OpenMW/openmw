@@ -100,6 +100,8 @@ struct NPC
 
     int mFlags;
 
+    bool mPersistent;
+
     InventoryList mInventory;
     SpellList mSpells;
 

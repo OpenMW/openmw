@@ -235,6 +235,12 @@ namespace MWClass
         MWBase::Environment::get().getMechanicsManager()->add(ptr);
     }
 
+    bool Npc::isPersistent(const MWWorld::Ptr &actor) const
+    {
+        MWWorld::LiveCellRef<ESM::NPC>* ref = actor.get<ESM::NPC>();
+        return ref->mBase->mPersistent;
+    }
+
     std::string Npc::getModel(const MWWorld::Ptr &ptr) const
     {
         MWWorld::LiveCellRef<ESM::NPC> *ref =
