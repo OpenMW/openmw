@@ -4,7 +4,10 @@
 #include <QMainWindow>
 #include <QStackedWidget>
 
+#ifndef Q_MOC_RUN
 #include <components/files/configurationmanager.hpp>
+#endif
+
 #include "../../model/settings/usersettings.hpp"
 #include "../../model/settings/support.hpp"
 
