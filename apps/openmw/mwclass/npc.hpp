@@ -130,6 +130,8 @@ namespace MWClass
 
             virtual int getServices (const MWWorld::Ptr& actor) const;
             
+            virtual bool isPersistent (const MWWorld::Ptr& ptr) const;
+
             static void registerSelf();
 
             virtual std::string getModel(const MWWorld::Ptr &ptr) const;

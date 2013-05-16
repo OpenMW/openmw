@@ -7,6 +7,8 @@ namespace ESM {
 
 void Creature::load(ESMReader &esm)
 {
+    mPersistent = esm.getRecordFlags() & 0x0400;
+
     mModel = esm.getHNString("MODL");
     mOriginal = esm.getHNOString("CNAM");
     mName = esm.getHNOString("FNAM");

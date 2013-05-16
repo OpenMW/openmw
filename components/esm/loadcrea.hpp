@@ -69,6 +69,9 @@ struct Creature
     NPDTstruct mData;
 
     int mFlags;
+
+    bool mPersistent;
+
     float mScale;
 
     std::string mId, mModel, mName, mScript;

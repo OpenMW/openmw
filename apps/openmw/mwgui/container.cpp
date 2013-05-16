@@ -201,7 +201,7 @@ namespace MWGui
     {
         mPtr = container;
 
-        if (container.getTypeName() == typeid(ESM::NPC).name() && !loot)
+        if (!loot)
         {
             // we are stealing stuff
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
@@ -258,9 +258,9 @@ namespace MWGui
             onTakeAllButtonClicked(mTakeButton);
 
             /// \todo if corpse is non-disposable: messagebox #{sDisposeCorpseFail}
-            //if ()
-            //    MWBase::Environment::get().getWindowManager()->messageBox("#{sDisposeCorpseFail}");
-            //else
+            if (MWWorld::Class::get(mPtr).isPersistent(mPtr))
+                MWBase::Environment::get().getWindowManager()->messageBox("#{sDisposeCorpseFail}");
+            else
                 MWBase::Environment::get().getWorld()->deleteObject(mPtr);
 
             mPtr = MWWorld::Ptr();
