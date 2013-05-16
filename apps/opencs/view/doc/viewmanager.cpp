@@ -71,6 +71,11 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
         "Amulet", 0
     };
 
+    static const char *sCreatureTypes[] =
+    {
+        "Creature", "Deadra", "Undead", "Humanoid", 0
+    };
+
     mDelegateFactories = new CSVWorld::CommandDelegateFactoryCollection;
 
     mDelegateFactories->add (CSMWorld::ColumnBase::Display_GmstVarType,
@@ -96,6 +101,9 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
 
     mDelegateFactories->add (CSMWorld::ColumnBase::Display_ClothingType,
         new CSVWorld::EnumDelegateFactory (sClothingTypes));
+
+    mDelegateFactories->add (CSMWorld::ColumnBase::Display_CreatureType,
+        new CSVWorld::EnumDelegateFactory (sCreatureTypes));
 }
 
 CSVDoc::ViewManager::~ViewManager()

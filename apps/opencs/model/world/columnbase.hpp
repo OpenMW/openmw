@@ -39,7 +39,8 @@ namespace CSMWorld
             Display_Script,
             Display_ApparatusType,
             Display_ArmorType,
-            Display_ClothingType
+            Display_ClothingType,
+            Display_CreatureType
         };
 
         std::string mTitle;

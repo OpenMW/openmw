@@ -160,6 +160,43 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.push_back (RefIdColumn ("Respawn", ColumnBase::Display_Boolean));
     const RefIdColumn *respawn = &mColumns.back();
 
+    CreatureColumns creatureColumns (actorsColumns);
+
+    mColumns.push_back (RefIdColumn ("Creature Type", ColumnBase::Display_CreatureType));
+    creatureColumns.mType = &mColumns.back();
+    mColumns.push_back (RefIdColumn ("Soul Points", ColumnBase::Display_Integer));
+    creatureColumns.mSoul = &mColumns.back();
+    mColumns.push_back (RefIdColumn ("Scale", ColumnBase::Display_Float));
+    creatureColumns.mScale = &mColumns.back();
+    mColumns.push_back (RefIdColumn ("Original Creature", ColumnBase::Display_String));
+    creatureColumns.mOriginal = &mColumns.back();
+
+    static const struct
+    {
+        const char *mName;
+        unsigned int mFlag;
+    } sCreatureFlagTable[] =
+    {
+        { "Biped", ESM::Creature::Biped },
+        { "Has Weapon", ESM::Creature::Weapon },
+        { "No Movement", ESM::Creature::None },
+        { "Swims", ESM::Creature::Swims },
+        { "Flies", ESM::Creature::Flies },
+        { "Walks", ESM::Creature::Walks },
+        { "Essential", ESM::Creature::Essential },
+        { "Skeleton Blood", ESM::Creature::Skeleton },
+        { "Metal Blood", ESM::Creature::Metal },
+        { 0, 0 }
+    };
+
+    for (int i=0; sCreatureFlagTable[i].mName; ++i)
+    {
+        mColumns.push_back (RefIdColumn (sCreatureFlagTable[i].mName, ColumnBase::Display_Boolean));
+        creatureColumns.mFlags.insert (std::make_pair (&mColumns.back(), sCreatureFlagTable[i].mFlag));
+    }
+
+    creatureColumns.mFlags.insert (std::make_pair (respawn, ESM::Creature::Respawn));
+
     mAdapters.insert (std::make_pair (UniversalId::Type_Activator,
         new NameRefIdAdapter<ESM::Activator> (UniversalId::Type_Activator, nameColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Potion,
@@ -175,7 +212,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mAdapters.insert (std::make_pair (UniversalId::Type_Container,
         new ContainerRefIdAdapter (nameColumns, weightCapacity, organic, respawn)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Creature,
-        new ActorRefIdAdapter<ESM::Creature> (UniversalId::Type_Creature, actorsColumns)));
+        new CreatureRefIdAdapter (creatureColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Door,
         new NameRefIdAdapter<ESM::Door> (UniversalId::Type_Door, nameColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Ingredient,

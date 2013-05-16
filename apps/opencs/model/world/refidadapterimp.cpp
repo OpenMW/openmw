@@ -221,3 +221,69 @@ void CSMWorld::ContainerRefIdAdapter::setData (const RefIdColumn *column, RefIdD
     else
         NameRefIdAdapter<ESM::Container>::setData (column, data, index, value);
 }
+
+CSMWorld::CreatureColumns::CreatureColumns (const ActorColumns& actorColumns)
+: ActorColumns (actorColumns)
+{}
+
+CSMWorld::CreatureRefIdAdapter::CreatureRefIdAdapter (const CreatureColumns& columns)
+: ActorRefIdAdapter<ESM::Creature> (UniversalId::Type_Creature, columns), mColumns (columns)
+{}
+
+QVariant CSMWorld::CreatureRefIdAdapter::getData (const RefIdColumn *column, const RefIdData& data,
+    int index) const
+{
+    const Record<ESM::Creature>& record = static_cast<const Record<ESM::Creature>&> (
+        data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Creature)));
+
+    if (column==mColumns.mType)
+        return record.get().mData.mType;
+
+    if (column==mColumns.mSoul)
+        return record.get().mData.mSoul;
+
+    if (column==mColumns.mScale)
+        return record.get().mScale;
+
+    if (column==mColumns.mOriginal)
+        return QString::fromUtf8 (record.get().mOriginal.c_str());
+
+    std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
+        mColumns.mFlags.find (column);
+
+    if (iter!=mColumns.mFlags.end())
+        return (record.get().mFlags & iter->second)!=0;
+
+    return ActorRefIdAdapter<ESM::Creature>::getData (column, data, index);
+}
+
+void CSMWorld::CreatureRefIdAdapter::setData (const RefIdColumn *column, RefIdData& data, int index,
+    const QVariant& value) const
+{
+    Record<ESM::Creature>& record = static_cast<Record<ESM::Creature>&> (
+        data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Creature)));
+
+    if (column==mColumns.mType)
+        record.get().mData.mType = value.toInt();
+    else if (column==mColumns.mSoul)
+        record.get().mData.mSoul = value.toInt();
+    else if (column==mColumns.mScale)
+        record.get().mScale = value.toFloat();
+    else if (column==mColumns.mOriginal)
+        record.get().mOriginal = value.toString().toUtf8().constData();
+    else
+    {
+        std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
+            mColumns.mFlags.find (column);
+
+        if (iter!=mColumns.mFlags.end())
+        {
+            if (value.toInt()!=0)
+                record.get().mFlags |= iter->second;
+            else
+                record.get().mFlags &= ~iter->second;
+        }
+        else
+            ActorRefIdAdapter<ESM::Creature>::setData (column, data, index, value);
+    }
+}

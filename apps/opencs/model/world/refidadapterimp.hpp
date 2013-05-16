@@ -614,7 +614,33 @@ namespace CSMWorld
             virtual void setData (const RefIdColumn *column, RefIdData& data, int index,
                 const QVariant& value) const;
             ///< If the data type does not match an exception is thrown.
+    };
 
+    struct CreatureColumns : public ActorColumns
+    {
+        std::map<const RefIdColumn *, unsigned int> mFlags;
+        const RefIdColumn *mType;
+        const RefIdColumn *mSoul;
+        const RefIdColumn *mScale;
+        const RefIdColumn *mOriginal;
+
+        CreatureColumns (const ActorColumns& actorColumns);
+    };
+
+    class CreatureRefIdAdapter : public ActorRefIdAdapter<ESM::Creature>
+    {
+            CreatureColumns mColumns;
+
+        public:
+
+            CreatureRefIdAdapter (const CreatureColumns& columns);
+
+            virtual QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
+                const;
+
+            virtual void setData (const RefIdColumn *column, RefIdData& data, int index,
+                const QVariant& value) const;
+            ///< If the data type does not match an exception is thrown.
     };
 }
 
