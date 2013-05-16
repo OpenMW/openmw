@@ -18,8 +18,8 @@ namespace MWGui
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &CountDialog::onOkButtonClicked);
         mItemEdit->eventEditTextChange += MyGUI::newDelegate(this, &CountDialog::onEditTextChange);
         mSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &CountDialog::onSliderMoved);
-		// make sure we read the enter key being pressed to accept multiple items
-		mItemEdit->eventEditSelectAccept += MyGUI::newDelegate(this, &CountDialog::onEnterKeyPressed);
+        // make sure we read the enter key being pressed to accept multiple items
+        mItemEdit->eventEditSelectAccept += MyGUI::newDelegate(this, &CountDialog::onEnterKeyPressed);
     }
 
     void CountDialog::open(const std::string& item, const std::string& message, const int maxCount)
@@ -64,7 +64,7 @@ namespace MWGui
     {
         eventOkClicked(NULL, mSlider->getScrollPosition()+1);
 	
-		setVisible(false);
+        setVisible(false);
     }
     
     void CountDialog::onEditTextChange(MyGUI::EditBox* _sender)

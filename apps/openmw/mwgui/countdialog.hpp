@@ -30,7 +30,7 @@ namespace MWGui
             void onOkButtonClicked(MyGUI::Widget* _sender);
             void onEditTextChange(MyGUI::EditBox* _sender);
             void onSliderMoved(MyGUI::ScrollBar* _sender, size_t _position);
-			void onEnterKeyPressed(MyGUI::EditBox* _sender);
+            void onEnterKeyPressed(MyGUI::EditBox* _sender);
     };
 
 }
