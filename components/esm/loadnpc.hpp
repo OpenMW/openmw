@@ -62,7 +62,7 @@ struct NPC
     struct NPDTstruct52
     {
         short mLevel;
-        char mStrength,
+        unsigned char mStrength,
              mIntelligence,
              mWillpower,
              mAgility,
