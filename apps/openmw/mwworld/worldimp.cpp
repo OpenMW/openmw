@@ -1245,7 +1245,7 @@ namespace MWWorld
         {
             --mPlayIntro;
             if (mPlayIntro == 0)
-                mRendering->playVideo("mw_intro.bik", true);
+                mRendering->playVideo(mFallback.getFallbackString("Movies_New_Game"), true);
         }
 
         mWeatherManager->update (duration);
