@@ -3,6 +3,9 @@
 
 #include <map>
 
+#include <QApplication>
+#include <QDesktopWidget>
+
 #include "../../model/doc/documentmanager.hpp"
 #include "../../model/doc/document.hpp"
 

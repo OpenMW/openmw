@@ -102,6 +102,8 @@ namespace CSVDoc
 
             void abortOperation (int type);
 
+            void slotUpdateEditorSetting (const QString &settingName, const QString &settingValue);
+
         private slots:
 
             void newView();
@@ -135,6 +137,8 @@ namespace CSVDoc
             void addSpellsSubView();
 
             void addCellsSubView();
+
+            void showUserSettings();
     };
 }
 
