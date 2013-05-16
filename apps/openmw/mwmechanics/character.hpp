@@ -111,6 +111,8 @@ class CharacterController
 
     static void getWeaponGroup(WeaponType weaptype, std::string &group);
 
+    void clearAnimQueue();
+
 public:
     CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state);
     virtual ~CharacterController();

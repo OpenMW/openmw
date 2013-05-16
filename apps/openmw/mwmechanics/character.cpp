@@ -476,9 +476,7 @@ void CharacterController::playGroup(const std::string &groupname, int mode, int 
         count = std::max(count, 1);
         if(mode != 0 || mAnimQueue.size() == 0)
         {
-            if(mAnimQueue.size() > 0)
-                mAnimation->disable(mAnimQueue.front().first);
-            mAnimQueue.clear();
+            clearAnimQueue();
             mAnimQueue.push_back(std::make_pair(groupname, count-1));
 
             mCharState = CharState_SpecialIdle;
@@ -500,6 +498,14 @@ void CharacterController::skipAnim()
 }
 
 
+void CharacterController::clearAnimQueue()
+{
+    if(mAnimQueue.size() > 0)
+        mAnimation->disable(mAnimQueue.front().first);
+    mAnimQueue.clear();
+}
+
+
 void CharacterController::setState(CharacterState state)
 {
     if(mCharState == state)
@@ -513,9 +519,7 @@ void CharacterController::forceStateUpdate()
 {
     if(!mAnimation)
         return;
-    if(mAnimQueue.size() > 0)
-        mAnimation->disable(mAnimQueue.front().first);
-    mAnimQueue.clear();
+    clearAnimQueue();
 
     std::string group;
     Priority prio;
