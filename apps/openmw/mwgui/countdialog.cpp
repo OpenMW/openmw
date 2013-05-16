@@ -18,6 +18,8 @@ namespace MWGui
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &CountDialog::onOkButtonClicked);
         mItemEdit->eventEditTextChange += MyGUI::newDelegate(this, &CountDialog::onEditTextChange);
         mSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &CountDialog::onSliderMoved);
+		// make sure we read the enter key being pressed to accept multiple items
+		mItemEdit->eventEditSelectAccept += MyGUI::newDelegate(this, &CountDialog::onEnterKeyPressed);
     }
 
     void CountDialog::open(const std::string& item, const std::string& message, const int maxCount)
@@ -37,6 +39,7 @@ namespace MWGui
                 width,
                 mMainWidget->getHeight());
 
+        // by default, the text edit field has the focus of the keyboard
         MyGUI::InputManager::getInstance().setKeyFocusWidget(mItemEdit);
 
         mSlider->setScrollPosition(maxCount-1);
@@ -54,7 +57,16 @@ namespace MWGui
 
         setVisible(false);
     }
-
+    
+    // essentially duplicating what the OK button does if user presses
+    // Enter key
+    void CountDialog::onEnterKeyPressed(MyGUI::EditBox* _sender)
+    {
+        eventOkClicked(NULL, mSlider->getScrollPosition()+1);
+	
+		setVisible(false);
+    }
+    
     void CountDialog::onEditTextChange(MyGUI::EditBox* _sender)
     {
         if (_sender->getCaption() == "")
