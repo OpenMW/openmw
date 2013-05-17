@@ -75,7 +75,7 @@ void CSVSettings::UserSettingsDialog::buildPages()
     setCentralWidget (centralWidget);
     setDockOptions (QMainWindow::AllowNestedDocks);
     //uncomment to test with sample editor page.
-    createSamplePage();
+    //createSamplePage();
     createPage<BlankPage>("Page1");
     createPage<BlankPage>("Page2");
     createPage<BlankPage>("Page3");
