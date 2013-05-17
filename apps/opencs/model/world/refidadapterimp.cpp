@@ -287,3 +287,39 @@ void CSMWorld::CreatureRefIdAdapter::setData (const RefIdColumn *column, RefIdDa
             ActorRefIdAdapter<ESM::Creature>::setData (column, data, index, value);
     }
 }
+
+
+CSMWorld::DoorRefIdAdapter::DoorRefIdAdapter (const NameColumns& columns,
+    const RefIdColumn *openSound, const RefIdColumn *closeSound)
+: NameRefIdAdapter<ESM::Door> (UniversalId::Type_Door, columns), mOpenSound (openSound),
+  mCloseSound (closeSound)
+{}
+
+QVariant CSMWorld::DoorRefIdAdapter::getData (const RefIdColumn *column, const RefIdData& data,
+    int index) const
+{
+    const Record<ESM::Door>& record = static_cast<const Record<ESM::Door>&> (
+        data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Door)));
+
+    if (column==mOpenSound)
+        return QString::fromUtf8 (record.get().mOpenSound.c_str());
+
+    if (column==mCloseSound)
+        return QString::fromUtf8 (record.get().mCloseSound.c_str());
+
+    return NameRefIdAdapter<ESM::Door>::getData (column, data, index);
+}
+
+void CSMWorld::DoorRefIdAdapter::setData (const RefIdColumn *column, RefIdData& data, int index,
+    const QVariant& value) const
+{
+    Record<ESM::Door>& record = static_cast<Record<ESM::Door>&> (
+        data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Door)));
+
+    if (column==mOpenSound)
+        record.get().mOpenSound = value.toString().toUtf8().constData();
+    else if (column==mCloseSound)
+        record.get().mCloseSound = value.toString().toUtf8().constData();
+    else
+        NameRefIdAdapter<ESM::Door>::setData (column, data, index, value);
+}

@@ -197,6 +197,12 @@ CSMWorld::RefIdCollection::RefIdCollection()
 
     creatureColumns.mFlags.insert (std::make_pair (respawn, ESM::Creature::Respawn));
 
+    mColumns.push_back (RefIdColumn ("Open Sound", ColumnBase::Display_String));
+    const RefIdColumn *openSound = &mColumns.back();
+
+    mColumns.push_back (RefIdColumn ("Close Sound", ColumnBase::Display_String));
+    const RefIdColumn *closeSound = &mColumns.back();
+
     mAdapters.insert (std::make_pair (UniversalId::Type_Activator,
         new NameRefIdAdapter<ESM::Activator> (UniversalId::Type_Activator, nameColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Potion,
@@ -214,7 +220,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mAdapters.insert (std::make_pair (UniversalId::Type_Creature,
         new CreatureRefIdAdapter (creatureColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Door,
-        new NameRefIdAdapter<ESM::Door> (UniversalId::Type_Door, nameColumns)));
+        new DoorRefIdAdapter (nameColumns, openSound, closeSound)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Ingredient,
         new InventoryRefIdAdapter<ESM::Ingredient> (UniversalId::Type_Ingredient, inventoryColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_CreatureLevelledList,

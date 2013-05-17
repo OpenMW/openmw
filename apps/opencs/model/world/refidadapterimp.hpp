@@ -642,6 +642,24 @@ namespace CSMWorld
                 const QVariant& value) const;
             ///< If the data type does not match an exception is thrown.
     };
+
+    class DoorRefIdAdapter : public NameRefIdAdapter<ESM::Door>
+    {
+            const RefIdColumn *mOpenSound;
+            const RefIdColumn *mCloseSound;
+
+        public:
+
+            DoorRefIdAdapter (const NameColumns& columns, const RefIdColumn *openSound,
+                const RefIdColumn *closeSound);
+
+            virtual QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
+                const;
+
+            virtual void setData (const RefIdColumn *column, RefIdData& data, int index,
+                const QVariant& value) const;
+            ///< If the data type does not match an exception is thrown.
+    };
 }
 
 #endif

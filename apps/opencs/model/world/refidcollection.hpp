@@ -89,7 +89,6 @@ namespace CSMWorld
 
             virtual int getAppendIndex (UniversalId::Type type) const;
             ///< \param type Will be ignored, unless the collection supports multiple record types
-
     };
 }
 
