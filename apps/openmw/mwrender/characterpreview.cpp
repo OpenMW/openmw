@@ -175,6 +175,16 @@ namespace MWRender
             mAnimation->play(mCurrentAnimGroup, 1, Animation::Group_All, false, "start", "stop", 0.0f, 0);
         }
 
+        MWWorld::ContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
+        if(torch != inv.end() && torch->getTypeName() == typeid(ESM::Light).name())
+        {
+            if(!mAnimation->getInfo("torch"))
+                mAnimation->play("torch", 2, MWRender::Animation::Group_LeftArm, false,
+                                 "start", "stop", 0.0f, (~(size_t)0));
+        }
+        else if(mAnimation->getInfo("torch"))
+            mAnimation->disable("torch");
+
         mAnimation->forceUpdate();
         mAnimation->runAnimation(0.0f);
 

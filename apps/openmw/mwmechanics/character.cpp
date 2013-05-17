@@ -441,6 +441,17 @@ void CharacterController::update(float duration, Movement &movement)
                     }
                 }
             }
+
+            MWWorld::ContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
+            if(torch != inv.end() && torch->getTypeName() == typeid(ESM::Light).name())
+            {
+                if(!mAnimation->isPlaying("torch"))
+                    mAnimation->play("torch", Priority_Torch,
+                                     MWRender::Animation::Group_LeftArm, false,
+                                     "start", "stop", 0.0f, (~(size_t)0));
+            }
+            else if(mAnimation->isPlaying("torch"))
+                mAnimation->disable("torch");
         }
     }
 

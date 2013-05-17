@@ -18,6 +18,7 @@ class Movement;
 enum Priority {
     Priority_Default,
     Priority_Weapon,
+    Priority_Torch,
 
     Priority_Death,
 
