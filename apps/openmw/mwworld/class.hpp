@@ -253,6 +253,8 @@ namespace MWWorld
 
             virtual float getWeight (const MWWorld::Ptr& ptr) const;
 
+            virtual bool isPersistent (const MWWorld::Ptr& ptr) const;
+
             virtual Ptr
             copyToCell(const Ptr &ptr, CellStore &cell) const;
 

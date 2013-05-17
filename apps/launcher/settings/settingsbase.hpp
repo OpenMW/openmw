@@ -48,6 +48,7 @@ public:
         mCache.clear();
 
         QString sectionPrefix;
+
         QRegExp sectionRe("^\\[([^]]+)\\]");
         QRegExp keyRe("^([^=]+)\\s*=\\s*(.+)$");
 

@@ -23,7 +23,6 @@ namespace CS
             FileDialog mFileDialog;
 
             Files::ConfigurationManager mCfgMgr;
-
             void setupDataFiles();
 
             // not implemented

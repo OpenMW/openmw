@@ -15,8 +15,9 @@ ESM_Context ESMReader::getContext()
     return mCtx;
 }
 
-ESMReader::ESMReader():
-    mBuffer(50*1024)
+ESMReader::ESMReader()
+    : mBuffer(50*1024)
+    , mRecordFlags(0)
 {
 }
 

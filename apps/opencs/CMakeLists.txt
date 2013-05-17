@@ -2,6 +2,7 @@ set (OPENCS_SRC main.cpp)
 
 opencs_units (. editor)
 
+set (CMAKE_BUILD_TYPE DEBUG)
 
 opencs_units (model/doc
     document
@@ -71,6 +72,35 @@ opencs_units_noqt (view/tools
     subviews
     )
 
+opencs_units (view/settings
+    abstractblock
+    proxyblock
+    abstractwidget
+    usersettingsdialog
+    editorpage
+    )
+
+opencs_units_noqt (view/settings
+    abstractpage
+    blankpage
+    groupblock
+    customblock
+    groupbox
+    itemblock
+    settingwidget
+    toggleblock
+    support
+    )
+
+opencs_units (model/settings
+    usersettings
+    settingcontainer
+    )
+
+opencs_units_noqt (model/settings
+    support
+    settingsitem
+    )
 
 set (OPENCS_US
     )

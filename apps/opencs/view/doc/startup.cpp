@@ -1,8 +1,11 @@
 
 #include "startup.hpp"
 
+#include <QApplication>
+#include <QDesktopWidget>
 #include <QPushButton>
 #include <QHBoxLayout>
+#include <QRect>
 
 CSVDoc::StartupDialogue::StartupDialogue()
 {
@@ -17,4 +20,8 @@ CSVDoc::StartupDialogue::StartupDialogue()
     layout->addWidget (loadDocument);
 
     setLayout (layout);
+
+    QRect scr = QApplication::desktop()->screenGeometry();
+    QRect rect = geometry();
+    move (scr.center().x() - rect.center().x(), scr.center().y() - rect.center().y());
 }

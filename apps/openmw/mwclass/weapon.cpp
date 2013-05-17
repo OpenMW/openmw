@@ -404,8 +404,8 @@ namespace MWClass
                 {
                     return std::make_pair (2, "");
                 }
-                return std::make_pair (1, "");
             }
+            return std::make_pair(1, "");
         }
         return std::make_pair (0, "");
     }

@@ -62,7 +62,7 @@ struct NPC
     struct NPDTstruct52
     {
         short mLevel;
-        char mStrength,
+        unsigned char mStrength,
              mIntelligence,
              mWillpower,
              mAgility,
@@ -99,6 +99,8 @@ struct NPC
     NPDTstruct12 mNpdt12; // Use this if npdt52.gold == -10
 
     int mFlags;
+
+    bool mPersistent;
 
     InventoryList mInventory;
     SpellList mSpells;

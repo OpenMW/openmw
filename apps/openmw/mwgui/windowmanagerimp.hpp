@@ -226,6 +226,8 @@ namespace MWGui
     virtual void enableRest() { mRestAllowed = true; }
     virtual bool getRestEnabled();
 
+    virtual bool getJournalAllowed() { return (mAllowed & GW_Magic); }
+
     virtual bool getPlayerSleeping();
     virtual void wakeUpPlayer();
 

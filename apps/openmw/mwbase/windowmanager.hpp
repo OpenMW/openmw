@@ -238,6 +238,7 @@ namespace MWBase
 
             virtual void enableRest() = 0;
             virtual bool getRestEnabled() = 0;
+            virtual bool getJournalAllowed() = 0; 
 
             virtual bool getPlayerSleeping() = 0;
             virtual void wakeUpPlayer() = 0;

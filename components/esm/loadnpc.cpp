@@ -10,6 +10,8 @@ void NPC::load(ESMReader &esm)
 {
     mNpdt52.mGold = -10;
 
+    mPersistent = esm.getRecordFlags() & 0x0400;
+
     mModel = esm.getHNOString("MODL");
     mName = esm.getHNOString("FNAM");
 
