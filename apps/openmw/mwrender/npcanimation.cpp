@@ -474,7 +474,8 @@ void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::
 void NpcAnimation::showWeapons(bool showWeapon)
 {
     mShowWeapons = showWeapon;
-    if(showWeapon)
+    if(showWeapon &&
+       mViewMode != VM_FirstPerson/* FIXME: Remove this once first-person bodies work */)
     {
         MWWorld::InventoryStore &inv = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
         mWeapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
