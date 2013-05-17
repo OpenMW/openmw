@@ -201,7 +201,7 @@ namespace MWGui
     {
         mPtr = container;
 
-        if (!loot)
+        if (mPtr.getTypeName() == typeid(ESM::NPC).name() && !loot)
         {
             // we are stealing stuff
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
