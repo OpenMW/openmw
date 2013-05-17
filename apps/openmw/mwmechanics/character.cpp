@@ -119,6 +119,7 @@ static const struct WeaponInfo {
     { WeapType_BowAndArrow, "1h", "1h", "bowandarrow" },
     { WeapType_Crossbow, "crossbow", "1h", "crossbow" },
     { WeapType_ThowWeapon, "1h", "1h", "throwweapon" },
+    { WeapType_PickProbe, "1h", "1h", "pickprobe" },
     { WeapType_Spell, "spell", "", "spellcast" },
 };
 static const WeaponInfo *sWeaponTypeListEnd = &sWeaponTypeList[sizeof(sWeaponTypeList)/sizeof(sWeaponTypeList[0])];
@@ -366,7 +367,7 @@ void CharacterController::update(float duration, Movement &movement)
                 {
                     const std::string &type = weapon->getTypeName();
                     if(type == typeid(ESM::Lockpick).name() || type == typeid(ESM::Probe).name())
-                        weaptype = WeapType_OneHand;
+                        weaptype = WeapType_PickProbe;
                     else if(type == typeid(ESM::Weapon).name())
                     {
                         MWWorld::LiveCellRef<ESM::Weapon> *ref = weapon->get<ESM::Weapon>();
