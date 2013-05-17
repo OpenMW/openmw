@@ -950,4 +950,9 @@ void RenderingManager::frameStarted(float dt)
     mWater->frameStarted(dt);
 }
 
+void RenderingManager::resetCamera()
+{
+    mCamera->reset();
+}
+
 } // namespace

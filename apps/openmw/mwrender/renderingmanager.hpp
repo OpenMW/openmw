@@ -83,6 +83,8 @@ public:
             mCamera->setCameraDistance(-factor/120.f*10, true, true);
     }
 
+    void resetCamera();
+
     bool vanityRotateCamera(const float *rot);
 
     void getCameraData(Ogre::Vector3 &eyepos, float &pitch, float &yaw);

@@ -37,6 +37,14 @@ namespace MWRender
     {
     }
 
+    void Camera::reset()
+    {
+        togglePreviewMode(false);
+        toggleVanityMode(false);
+        if (!mFirstPersonView)
+            toggleViewMode();
+    }
+
     void Camera::rotateCamera(const Ogre::Vector3 &rot, bool adjust)
     {
         if (adjust) {

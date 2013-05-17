@@ -236,6 +236,8 @@ namespace MWWorld
         setupPlayer();
         const ESM::NPC* playerNpc = mStore.get<ESM::NPC>().find("player");
         MWWorld::Ptr player = mPlayer->getPlayer();
+        renderPlayer();
+        mRendering->resetCamera();
 
         // removes NpcStats, ContainerStore etc
         player.getRefData().setCustomData(NULL);

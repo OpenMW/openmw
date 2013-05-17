@@ -52,6 +52,9 @@ namespace MWRender
         Camera(Ogre::Camera *camera);
         ~Camera();
 
+        /// Reset to defaults
+        void reset();
+
         /// Set where the camera is looking at. Uses Morrowind (euler) angles
         /// \param rot Rotation angles in radians
         void rotateCamera(const Ogre::Vector3 &rot, bool adjust);
