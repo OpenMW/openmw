@@ -241,6 +241,9 @@ CSMWorld::RefIdCollection::RefIdCollection()
         lightColumns.mFlags.insert (std::make_pair (&mColumns.back(), sLightFlagTable[i].mFlag));
     }
 
+    mColumns.push_back (RefIdColumn ("Key", ColumnBase::Display_Boolean));
+    const RefIdColumn *key = &mColumns.back();
+
     mAdapters.insert (std::make_pair (UniversalId::Type_Activator,
         new NameRefIdAdapter<ESM::Activator> (UniversalId::Type_Activator, nameColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Potion,
@@ -271,8 +274,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mAdapters.insert (std::make_pair (UniversalId::Type_Lockpick,
         new ToolRefIdAdapter<ESM::Lockpick> (UniversalId::Type_Lockpick, toolsColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Miscellaneous,
-        new InventoryRefIdAdapter<ESM::Miscellaneous> (UniversalId::Type_Miscellaneous,
-        inventoryColumns)));
+        new MiscRefIdAdapter (inventoryColumns, key)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Npc,
         new ActorRefIdAdapter<ESM::NPC> (UniversalId::Type_Npc, actorsColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Probe,

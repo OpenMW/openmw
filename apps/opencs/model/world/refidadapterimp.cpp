@@ -387,3 +387,31 @@ void CSMWorld::LightRefIdAdapter::setData (const RefIdColumn *column, RefIdData&
             InventoryRefIdAdapter<ESM::Light>::setData (column, data, index, value);
     }
 }
+
+CSMWorld::MiscRefIdAdapter::MiscRefIdAdapter (const InventoryColumns& columns, const RefIdColumn *key)
+: InventoryRefIdAdapter<ESM::Miscellaneous> (UniversalId::Type_Miscellaneous, columns), mKey (key)
+{}
+
+QVariant CSMWorld::MiscRefIdAdapter::getData (const RefIdColumn *column, const RefIdData& data,
+    int index) const
+{
+    const Record<ESM::Miscellaneous>& record = static_cast<const Record<ESM::Miscellaneous>&> (
+        data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Miscellaneous)));
+
+    if (column==mKey)
+        return record.get().mData.mIsKey!=0;
+
+    return InventoryRefIdAdapter<ESM::Miscellaneous>::getData (column, data, index);
+}
+
+void CSMWorld::MiscRefIdAdapter::setData (const RefIdColumn *column, RefIdData& data, int index,
+    const QVariant& value) const
+{
+    Record<ESM::Miscellaneous>& record = static_cast<Record<ESM::Miscellaneous>&> (
+        data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Miscellaneous)));
+
+    if (column==mKey)
+        record.get().mData.mIsKey = value.toInt();
+    else
+        InventoryRefIdAdapter<ESM::Miscellaneous>::setData (column, data, index, value);
+}
