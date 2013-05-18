@@ -235,8 +235,8 @@ void RenderingManager::toggleWater()
 
 void RenderingManager::cellAdded (MWWorld::Ptr::CellStore *store)
 {
-    sh::Factory::getInstance().unloadUnreferencedMaterials();
     mObjects.buildStaticGeometry (*store);
+    sh::Factory::getInstance().unloadUnreferencedMaterials();
     mDebugging->cellAdded(store);
     if (store->mCell->isExterior())
         mTerrainManager->cellAdded(store);
