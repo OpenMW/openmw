@@ -164,9 +164,7 @@ namespace Compiler
     bool Scanner::scanInt (char c, Parser& parser, bool& cont)
     {
         std::string value;
-
         value += c;
-        bool empty = false;
 
         bool error = false;
 
@@ -175,7 +173,6 @@ namespace Compiler
             if (std::isdigit (c))
             {
                 value += c;
-                empty = false;
             }
             else if (std::isalpha (c) || c=='_')
                 error = true;
@@ -190,7 +187,11 @@ namespace Compiler
             }
         }
 
-        if (empty || error)
+        /*
+         * value could be empty only if scanInt is called with c == '\0'.
+         * That is unlikely so it should be replaced by assertion.
+         */
+        if (value.empty() || error)
             return false;
 
         TokenLoc loc (mLoc);
