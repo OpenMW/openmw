@@ -203,6 +203,44 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.push_back (RefIdColumn ("Close Sound", ColumnBase::Display_String));
     const RefIdColumn *closeSound = &mColumns.back();
 
+    LightColumns lightColumns (inventoryColumns);
+
+    mColumns.push_back (RefIdColumn ("Duration", ColumnBase::Display_Integer));
+    lightColumns.mTime = &mColumns.back();
+
+    mColumns.push_back (RefIdColumn ("Radius", ColumnBase::Display_Integer));
+    lightColumns.mRadius = &mColumns.back();
+
+    mColumns.push_back (RefIdColumn ("Colour", ColumnBase::Display_Integer));
+    lightColumns.mColor = &mColumns.back();
+
+    mColumns.push_back (RefIdColumn ("Sound", ColumnBase::Display_String));
+    lightColumns.mSound = &mColumns.back();
+
+    static const struct
+    {
+        const char *mName;
+        unsigned int mFlag;
+    } sLightFlagTable[] =
+    {
+        { "Dynamic", ESM::Light::Dynamic },
+        { "Portable", ESM::Light::Carry },
+        { "Negative Light", ESM::Light::Negative },
+        { "Flickering", ESM::Light::Flicker },
+        { "Slow Flickering", ESM::Light::Flicker },
+        { "Pulsing", ESM::Light::Pulse },
+        { "Slow Pulsing", ESM::Light::PulseSlow },
+        { "Fire", ESM::Light::Fire },
+        { "Off by default", ESM::Light::OffDefault },
+        { 0, 0 }
+    };
+
+    for (int i=0; sLightFlagTable[i].mName; ++i)
+    {
+        mColumns.push_back (RefIdColumn (sLightFlagTable[i].mName, ColumnBase::Display_Boolean));
+        lightColumns.mFlags.insert (std::make_pair (&mColumns.back(), sLightFlagTable[i].mFlag));
+    }
+
     mAdapters.insert (std::make_pair (UniversalId::Type_Activator,
         new NameRefIdAdapter<ESM::Activator> (UniversalId::Type_Activator, nameColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Potion,
@@ -229,7 +267,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mAdapters.insert (std::make_pair (UniversalId::Type_ItemLevelledList,
         new BaseRefIdAdapter<ESM::ItemLevList> (UniversalId::Type_ItemLevelledList, baseColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Light,
-        new InventoryRefIdAdapter<ESM::Light> (UniversalId::Type_Light, inventoryColumns)));
+        new LightRefIdAdapter (lightColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Lockpick,
         new ToolRefIdAdapter<ESM::Lockpick> (UniversalId::Type_Lockpick, toolsColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Miscellaneous,

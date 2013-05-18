@@ -660,6 +660,33 @@ namespace CSMWorld
                 const QVariant& value) const;
             ///< If the data type does not match an exception is thrown.
     };
+
+    struct LightColumns : public InventoryColumns
+    {
+        const RefIdColumn *mTime;
+        const RefIdColumn *mRadius;
+        const RefIdColumn *mColor;
+        const RefIdColumn *mSound;
+        std::map<const RefIdColumn *, unsigned int> mFlags;
+
+        LightColumns (const InventoryColumns& columns);
+    };
+
+    class LightRefIdAdapter : public InventoryRefIdAdapter<ESM::Light>
+    {
+            LightColumns mColumns;
+
+        public:
+
+            LightRefIdAdapter (const LightColumns& columns);
+
+            virtual QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
+                const;
+
+            virtual void setData (const RefIdColumn *column, RefIdData& data, int index,
+                const QVariant& value) const;
+            ///< If the data type does not match an exception is thrown.
+    };
 }
 
 #endif

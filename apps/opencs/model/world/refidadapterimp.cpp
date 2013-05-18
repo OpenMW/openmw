@@ -288,7 +288,6 @@ void CSMWorld::CreatureRefIdAdapter::setData (const RefIdColumn *column, RefIdDa
     }
 }
 
-
 CSMWorld::DoorRefIdAdapter::DoorRefIdAdapter (const NameColumns& columns,
     const RefIdColumn *openSound, const RefIdColumn *closeSound)
 : NameRefIdAdapter<ESM::Door> (UniversalId::Type_Door, columns), mOpenSound (openSound),
@@ -322,4 +321,69 @@ void CSMWorld::DoorRefIdAdapter::setData (const RefIdColumn *column, RefIdData& 
         record.get().mCloseSound = value.toString().toUtf8().constData();
     else
         NameRefIdAdapter<ESM::Door>::setData (column, data, index, value);
+}
+
+CSMWorld::LightColumns::LightColumns (const InventoryColumns& columns)
+: InventoryColumns (columns) {}
+
+CSMWorld::LightRefIdAdapter::LightRefIdAdapter (const LightColumns& columns)
+: InventoryRefIdAdapter<ESM::Light> (UniversalId::Type_Light, columns), mColumns (columns)
+{}
+
+QVariant CSMWorld::LightRefIdAdapter::getData (const RefIdColumn *column, const RefIdData& data,
+    int index) const
+{
+    const Record<ESM::Light>& record = static_cast<const Record<ESM::Light>&> (
+        data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Light)));
+
+    if (column==mColumns.mTime)
+        return record.get().mData.mTime;
+
+    if (column==mColumns.mRadius)
+        return record.get().mData.mRadius;
+
+    if (column==mColumns.mColor)
+        return record.get().mData.mColor;
+
+    if (column==mColumns.mSound)
+        return QString::fromUtf8 (record.get().mSound.c_str());
+
+    std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
+        mColumns.mFlags.find (column);
+
+    if (iter!=mColumns.mFlags.end())
+        return (record.get().mData.mFlags & iter->second)!=0;
+
+    return InventoryRefIdAdapter<ESM::Light>::getData (column, data, index);
+}
+
+void CSMWorld::LightRefIdAdapter::setData (const RefIdColumn *column, RefIdData& data, int index,
+    const QVariant& value) const
+{
+    Record<ESM::Light>& record = static_cast<Record<ESM::Light>&> (
+        data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Light)));
+
+    if (column==mColumns.mTime)
+        record.get().mData.mTime = value.toInt();
+    else if (column==mColumns.mRadius)
+        record.get().mData.mRadius = value.toInt();
+    else if (column==mColumns.mColor)
+        record.get().mData.mColor = value.toInt();
+    else if (column==mColumns.mSound)
+        record.get().mSound = value.toString().toUtf8().constData();
+    else
+    {
+        std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
+            mColumns.mFlags.find (column);
+
+        if (iter!=mColumns.mFlags.end())
+        {
+            if (value.toInt()!=0)
+                record.get().mData.mFlags |= iter->second;
+            else
+                record.get().mData.mFlags &= ~iter->second;
+        }
+        else
+            InventoryRefIdAdapter<ESM::Light>::setData (column, data, index, value);
+    }
 }
