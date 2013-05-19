@@ -21,11 +21,21 @@ void Lockpick::save(ESMWriter &esm)
 {
     esm.writeHNCString("MODL", mModel);
     esm.writeHNCString("FNAM", mName);
-    
+
     esm.writeHNT("LKDT", mData, 16);
     esm.writeHNOString("SCRI", mScript);
     esm.writeHNOCString("ITEX", mIcon);
 }
 
-
+    void Lockpick::blank()
+    {
+        mData.mWeight = 0;
+        mData.mValue = 0;
+        mData.mQuality = 0;
+        mData.mUses = 0;
+        mName.clear();
+        mModel.clear();
+        mIcon.clear();
+        mScript.clear();
+    }
 }

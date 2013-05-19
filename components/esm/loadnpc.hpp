@@ -116,20 +116,15 @@ struct NPC
     // body parts
     std::string mHair, mHead;
 
-    // Implementation moved to load_impl.cpp
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
 
-    bool isMale() const {
-        return (mFlags & Female) == 0;
-    }
+    bool isMale() const;
 
-    void setIsMale(bool value) {
-        mFlags |= Female;
-        if (value) {
-            mFlags ^= Female;
-        }
-    }
+    void setIsMale(bool value);
+
+    void blank();
+    ///< Set record to default state (does not touch the ID).
 };
 }
 #endif

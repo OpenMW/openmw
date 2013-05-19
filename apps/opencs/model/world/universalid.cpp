@@ -29,6 +29,8 @@ namespace
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Birthsigns, "Birthsigns" },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Spells, "Spells" },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Cells, "Cells" },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Referenceables,
+            "Referenceables" },
 
         { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0 } // end marker
     };
@@ -47,6 +49,30 @@ namespace
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Birthsign, "Birthsign" },
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Spell, "Spell" },
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Cell, "Cell" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Referenceable, "Referenceables" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Activator, "Activator" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Potion, "Potion" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Apparatus, "Apparatus" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Armor, "Armor" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Book, "Book" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Clothing, "Clothing" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Container, "Container" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Creature, "Creature" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Door, "Door" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Ingredient, "Ingredient" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_CreatureLevelledList,
+            "Creature Levelled List" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_ItemLevelledList,
+            "Item Levelled List" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Light, "Light" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Lockpick, "Lockpick" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Miscellaneous,
+            "Miscellaneous" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Npc, "NPC" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Probe, "Probe" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Repair, "Repair" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Static, "Static" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Weapon, "Weapon" },
 
         { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0 } // end marker
     };

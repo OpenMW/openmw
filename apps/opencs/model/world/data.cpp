@@ -140,6 +140,8 @@ CSMWorld::Data::Data()
     addModel (new IdTable (&mBirthsigns), UniversalId::Type_Birthsigns, UniversalId::Type_Birthsign);
     addModel (new IdTable (&mSpells), UniversalId::Type_Spells, UniversalId::Type_Spell);
     addModel (new IdTable (&mCells), UniversalId::Type_Cells, UniversalId::Type_Cell);
+    addModel (new IdTable (&mReferenceables), UniversalId::Type_Referenceables,
+        UniversalId::Type_Referenceable);
 }
 
 CSMWorld::Data::~Data()
@@ -268,6 +270,16 @@ CSMWorld::IdCollection<CSMWorld::Cell>& CSMWorld::Data::getCells()
     return mCells;
 }
 
+const CSMWorld::RefIdCollection& CSMWorld::Data::getReferenceables() const
+{
+    return mReferenceables;
+}
+
+CSMWorld::RefIdCollection& CSMWorld::Data::getReferenceables()
+{
+    return mReferenceables;
+}
+
 QAbstractItemModel *CSMWorld::Data::getTableModel (const UniversalId& id)
 {
     std::map<UniversalId::Type, QAbstractItemModel *>::iterator iter = mModelIndex.find (id.getType());
@@ -314,6 +326,30 @@ void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base)
             case ESM::REC_BSGN: mBirthsigns.load (reader, base); break;
             case ESM::REC_SPEL: mSpells.load (reader, base); break;
             case ESM::REC_CELL: mCells.load (reader, base); break;
+
+            case ESM::REC_ACTI: mReferenceables.load (reader, base, UniversalId::Type_Activator); break;
+            case ESM::REC_ALCH: mReferenceables.load (reader, base, UniversalId::Type_Potion); break;
+            case ESM::REC_APPA: mReferenceables.load (reader, base, UniversalId::Type_Apparatus); break;
+            case ESM::REC_ARMO: mReferenceables.load (reader, base, UniversalId::Type_Armor); break;
+            case ESM::REC_BOOK: mReferenceables.load (reader, base, UniversalId::Type_Book); break;
+            case ESM::REC_CLOT: mReferenceables.load (reader, base, UniversalId::Type_Clothing); break;
+            case ESM::REC_CONT: mReferenceables.load (reader, base, UniversalId::Type_Container); break;
+            case ESM::REC_CREA: mReferenceables.load (reader, base, UniversalId::Type_Creature); break;
+            case ESM::REC_DOOR: mReferenceables.load (reader, base, UniversalId::Type_Door); break;
+            case ESM::REC_INGR: mReferenceables.load (reader, base, UniversalId::Type_Ingredient); break;
+            case ESM::REC_LEVC:
+                mReferenceables.load (reader, base, UniversalId::Type_CreatureLevelledList); break;
+            case ESM::REC_LEVI:
+                mReferenceables.load (reader, base, UniversalId::Type_ItemLevelledList); break;
+            case ESM::REC_LIGH: mReferenceables.load (reader, base, UniversalId::Type_Light); break;
+            case ESM::REC_LOCK: mReferenceables.load (reader, base, UniversalId::Type_Lockpick); break;
+            case ESM::REC_MISC:
+                mReferenceables.load (reader, base, UniversalId::Type_Miscellaneous); break;
+            case ESM::REC_NPC_: mReferenceables.load (reader, base, UniversalId::Type_Npc); break;
+            case ESM::REC_PROB: mReferenceables.load (reader, base, UniversalId::Type_Probe); break;
+            case ESM::REC_REPA: mReferenceables.load (reader, base, UniversalId::Type_Repair); break;
+            case ESM::REC_STAT: mReferenceables.load (reader, base, UniversalId::Type_Static); break;
+            case ESM::REC_WEAP: mReferenceables.load (reader, base, UniversalId::Type_Weapon); break;
 
             default:
 

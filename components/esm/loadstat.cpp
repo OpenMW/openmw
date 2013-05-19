@@ -15,4 +15,8 @@ void Static::save(ESMWriter &esm)
     esm.writeHNCString("MODL", mModel);
 }
 
+    void Static::blank()
+    {
+        mModel.clear();
+    }
 }

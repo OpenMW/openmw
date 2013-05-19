@@ -21,6 +21,7 @@
 #include "idcollection.hpp"
 #include "universalid.hpp"
 #include "cell.hpp"
+#include "refidcollection.hpp"
 
 class QAbstractItemModel;
 
@@ -40,6 +41,7 @@ namespace CSMWorld
             IdCollection<ESM::BirthSign> mBirthsigns;
             IdCollection<ESM::Spell> mSpells;
             IdCollection<Cell> mCells;
+            RefIdCollection mReferenceables;
             std::vector<QAbstractItemModel *> mModels;
             std::map<UniversalId::Type, QAbstractItemModel *> mModelIndex;
 
@@ -103,6 +105,10 @@ namespace CSMWorld
             const IdCollection<Cell>& getCells() const;
 
             IdCollection<Cell>& getCells();
+
+            const RefIdCollection& getReferenceables() const;
+
+            RefIdCollection& getReferenceables();
 
             QAbstractItemModel *getTableModel (const UniversalId& id);
             ///< If no table model is available for \a id, an exception is thrown.
