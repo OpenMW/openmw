@@ -13,7 +13,8 @@
 namespace MWMechanics
 {
 
-    void Security::pickLock(const MWWorld::Ptr &actor, const MWWorld::Ptr &lock, const MWWorld::Ptr &lockpick)
+    void Security::pickLock(const MWWorld::Ptr &actor, const MWWorld::Ptr &lock, const MWWorld::Ptr &lockpick,
+                            std::string& resultMessage, std::string& resultSound)
     {
         if (lock.getCellRef().mLockLevel <= 0)
             return;
@@ -35,25 +36,21 @@ namespace MWMechanics
         x *= pickQuality * fatigueTerm;
         x += fPickLockMult * lockStrength;
 
-        bool isPlayer = actor == MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-
+        resultSound = "Open Lock Fail";
         if (x <= 0)
-        {
-            if (isPlayer)
-                MWBase::Environment::get().getWindowManager()->messageBox("#{sLockImpossible}");
-        }
+            resultMessage = "#{sLockImpossible}";
         else
         {
             int roll = static_cast<float> (std::rand()) / RAND_MAX * 100;
             if (roll <= x)
             {
                 MWWorld::Class::get(lock).unlock(lock);
-                if (isPlayer)
-                    MWBase::Environment::get().getWindowManager()->messageBox("#{sLockSuccess}");
+                resultMessage = "#{sLockSuccess}";
+                resultSound = "Open Lock";
                 MWWorld::Class::get(actor).skillUsageSucceeded(actor, ESM::Skill::Security, 1);
             }
-            else if (isPlayer)
-                MWBase::Environment::get().getWindowManager()->messageBox("#{sLockFail}");
+            else
+                resultMessage = "#{sLockFail}";
         }
 
         if (lockpick.getCellRef().mCharge == -1)
@@ -63,7 +60,8 @@ namespace MWMechanics
             lockpick.getRefData().setCount(0);
     }
 
-    void Security::probeTrap(const MWWorld::Ptr &actor, const MWWorld::Ptr &trap, const MWWorld::Ptr &probe)
+    void Security::probeTrap(const MWWorld::Ptr &actor, const MWWorld::Ptr &trap, const MWWorld::Ptr &probe,
+                             std::string& resultMessage, std::string& resultSound)
     {
         if (trap.getCellRef().mTrap  == "")
             return;
@@ -87,25 +85,22 @@ namespace MWMechanics
         x += fTrapCostMult * trapSpellPoints;
         x *= probeQuality * fatigueTerm;
 
-        bool isPlayer = actor == MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-
+        resultSound = "Disarm Trap Fail";
         if (x <= 0)
-        {
-            if (isPlayer)
-                MWBase::Environment::get().getWindowManager()->messageBox("#{sTrapImpossible}");
-        }
+            resultMessage = "#{sTrapImpossible}";
         else
         {
             int roll = static_cast<float> (std::rand()) / RAND_MAX * 100;
             if (roll <= x)
             {
                 trap.getCellRef().mTrap = "";
-                if (isPlayer)
-                    MWBase::Environment::get().getWindowManager()->messageBox("#{sTrapSuccess}");
+
+                resultSound = "Disarm Trap";
+                resultMessage = "#{sTrapSuccess}";
                 MWWorld::Class::get(actor).skillUsageSucceeded(actor, ESM::Skill::Security, 0);
             }
-            else if (isPlayer)
-                MWBase::Environment::get().getWindowManager()->messageBox("#{sTrapFail}");
+            else
+                resultMessage = "#{sTrapFail}";
         }
 
         if (probe.getCellRef().mCharge == -1)

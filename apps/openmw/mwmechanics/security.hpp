@@ -10,8 +10,10 @@ namespace MWMechanics
     class Security
     {
     public:
-        static void pickLock (const MWWorld::Ptr& actor, const MWWorld::Ptr& lock, const MWWorld::Ptr& lockpick);
-        static void probeTrap (const MWWorld::Ptr& actor, const MWWorld::Ptr& trap, const MWWorld::Ptr& probe);
+        static void pickLock (const MWWorld::Ptr& actor, const MWWorld::Ptr& lock, const MWWorld::Ptr& lockpick,
+                              std::string& resultMessage, std::string& resultSound);
+        static void probeTrap (const MWWorld::Ptr& actor, const MWWorld::Ptr& trap, const MWWorld::Ptr& probe,
+                               std::string& resultMessage, std::string& resultSound);
     };
 
 }

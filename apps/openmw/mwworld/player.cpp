@@ -4,6 +4,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/inventorystore.hpp"
@@ -156,18 +157,25 @@ namespace MWWorld
                 if (anim->isPriorityActive(MWMechanics::Priority_Weapon))
                     return;
 
+                std::string resultMessage, resultSound;
+
                 if (item.getTypeName() == typeid(ESM::Lockpick).name())
                 {
                     if (!target.isEmpty())
-                        MWMechanics::Security::pickLock(getPlayer(), target, item);
+                        MWMechanics::Security::pickLock(getPlayer(), target, item, resultMessage, resultSound);
                     anim->play("pickprobe", MWMechanics::Priority_Weapon, MWRender::Animation::Group_UpperBody, true, "start", "stop", 0.0, 0);
                 }
                 else if (item.getTypeName() == typeid(ESM::Probe).name())
                 {
                     if (!target.isEmpty())
-                        MWMechanics::Security::probeTrap(getPlayer(), target, item);
+                        MWMechanics::Security::probeTrap(getPlayer(), target, item, resultMessage, resultSound);
                     anim->play("pickprobe", MWMechanics::Priority_Weapon, MWRender::Animation::Group_UpperBody, true, "start", "stop", 0.0, 0);
                 }
+
+                if (!resultMessage.empty())
+                    MWBase::Environment::get().getWindowManager()->messageBox(resultMessage);
+                if (!resultSound.empty())
+                    MWBase::Environment::get().getSoundManager()->playSound(resultSound,1,1);
 
                 // tool used up?
                 if (!item.getRefData().getCount())
