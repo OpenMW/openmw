@@ -73,8 +73,6 @@ namespace MWRender
 
         int getSlotSelected(int posX, int posY);
 
-        void setNpcAnimation (NpcAnimation* anim);
-
     private:
 
         OEngine::Render::SelectionBuffer* mSelectionBuffer;

@@ -233,6 +233,7 @@ namespace MWGui
         {
             // transfer everything into the player's inventory
             ItemModel* playerModel = MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getModel();
+            mModel->update();
             for (size_t i=0; i<mModel->getItemCount(); ++i)
             {
                 if (i==0)
@@ -257,7 +258,6 @@ namespace MWGui
         {
             onTakeAllButtonClicked(mTakeButton);
 
-            /// \todo if corpse is non-disposable: messagebox #{sDisposeCorpseFail}
             if (MWWorld::Class::get(mPtr).isPersistent(mPtr))
                 MWBase::Environment::get().getWindowManager()->messageBox("#{sDisposeCorpseFail}");
             else
