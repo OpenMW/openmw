@@ -162,13 +162,13 @@ namespace MWWorld
                 if (item.getTypeName() == typeid(ESM::Lockpick).name())
                 {
                     if (!target.isEmpty())
-                        MWMechanics::Security::pickLock(getPlayer(), target, item, resultMessage, resultSound);
+                        MWMechanics::Security(getPlayer()).pickLock(target, item, resultMessage, resultSound);
                     anim->play("pickprobe", MWMechanics::Priority_Weapon, MWRender::Animation::Group_UpperBody, true, "start", "stop", 0.0, 0);
                 }
                 else if (item.getTypeName() == typeid(ESM::Probe).name())
                 {
                     if (!target.isEmpty())
-                        MWMechanics::Security::probeTrap(getPlayer(), target, item, resultMessage, resultSound);
+                        MWMechanics::Security(getPlayer()).probeTrap(target, item, resultMessage, resultSound);
                     anim->play("pickprobe", MWMechanics::Priority_Weapon, MWRender::Animation::Group_UpperBody, true, "start", "stop", 0.0, 0);
                 }
 

@@ -13,7 +13,17 @@
 namespace MWMechanics
 {
 
-    void Security::pickLock(const MWWorld::Ptr &actor, const MWWorld::Ptr &lock, const MWWorld::Ptr &lockpick,
+    Security::Security(const MWWorld::Ptr &actor)
+    {
+        CreatureStats& creatureStats = MWWorld::Class::get(actor).getCreatureStats(actor);
+        NpcStats& npcStats = MWWorld::Class::get(actor).getNpcStats(actor);
+        mAgility = creatureStats.getAttribute(ESM::Attribute::Agility).getModified();
+        mLuck = creatureStats.getAttribute(ESM::Attribute::Luck).getModified();
+        mSecuritySkill = npcStats.getSkill(ESM::Skill::Security).getModified();
+        mFatigueTerm = creatureStats.getFatigueTerm();
+    }
+
+    void Security::pickLock(const MWWorld::Ptr &lock, const MWWorld::Ptr &lockpick,
                             std::string& resultMessage, std::string& resultSound)
     {
         if (lock.getCellRef().mLockLevel <= 0)
@@ -23,17 +33,10 @@ namespace MWMechanics
 
         float pickQuality = lockpick.get<ESM::Lockpick>()->mBase->mData.mQuality;
 
-        CreatureStats& creatureStats = MWWorld::Class::get(actor).getCreatureStats(actor);
-        NpcStats& npcStats = MWWorld::Class::get(actor).getNpcStats(actor);
-        float pcAgility = creatureStats.getAttribute(ESM::Attribute::Agility).getModified();
-        float pcLuck = creatureStats.getAttribute(ESM::Attribute::Luck).getModified();
-        float securitySkill = npcStats.getSkill(ESM::Skill::Security).getModified();
-        float fatigueTerm = creatureStats.getFatigueTerm();
-
         float fPickLockMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fPickLockMult")->getFloat();
 
-        float x = 0.2 * pcAgility + 0.1 * pcLuck + securitySkill;
-        x *= pickQuality * fatigueTerm;
+        float x = 0.2 * mAgility + 0.1 * mLuck + mSecuritySkill;
+        x *= pickQuality * mFatigueTerm;
         x += fPickLockMult * lockStrength;
 
         resultSound = "Open Lock Fail";
@@ -47,7 +50,7 @@ namespace MWMechanics
                 MWWorld::Class::get(lock).unlock(lock);
                 resultMessage = "#{sLockSuccess}";
                 resultSound = "Open Lock";
-                MWWorld::Class::get(actor).skillUsageSucceeded(actor, ESM::Skill::Security, 1);
+                MWWorld::Class::get(mActor).skillUsageSucceeded(mActor, ESM::Skill::Security, 1);
             }
             else
                 resultMessage = "#{sLockFail}";
@@ -60,30 +63,22 @@ namespace MWMechanics
             lockpick.getRefData().setCount(0);
     }
 
-    void Security::probeTrap(const MWWorld::Ptr &actor, const MWWorld::Ptr &trap, const MWWorld::Ptr &probe,
+    void Security::probeTrap(const MWWorld::Ptr &trap, const MWWorld::Ptr &probe,
                              std::string& resultMessage, std::string& resultSound)
     {
         if (trap.getCellRef().mTrap  == "")
             return;
-
-        CreatureStats& creatureStats = MWWorld::Class::get(actor).getCreatureStats(actor);
-        NpcStats& npcStats = MWWorld::Class::get(actor).getNpcStats(actor);
 
         float probeQuality = probe.get<ESM::Probe>()->mBase->mData.mQuality;
 
         const ESM::Spell* trapSpell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(trap.getCellRef().mTrap);
         float trapSpellPoints = trapSpell->mData.mCost;
 
-        float pcAgility = creatureStats.getAttribute(ESM::Attribute::Agility).getModified();
-        float pcLuck = creatureStats.getAttribute(ESM::Attribute::Luck).getModified();
-        float securitySkill = npcStats.getSkill(ESM::Skill::Security).getModified();
-        float fatigueTerm = creatureStats.getFatigueTerm();
-
         float fTrapCostMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fTrapCostMult")->getFloat();
 
-        float x = 0.2 * pcAgility + 0.1 * pcLuck + securitySkill;
+        float x = 0.2 * mAgility + 0.1 * mLuck + mSecuritySkill;
         x += fTrapCostMult * trapSpellPoints;
-        x *= probeQuality * fatigueTerm;
+        x *= probeQuality * mFatigueTerm;
 
         resultSound = "Disarm Trap Fail";
         if (x <= 0)
@@ -97,7 +92,7 @@ namespace MWMechanics
 
                 resultSound = "Disarm Trap";
                 resultMessage = "#{sTrapSuccess}";
-                MWWorld::Class::get(actor).skillUsageSucceeded(actor, ESM::Skill::Security, 0);
+                MWWorld::Class::get(mActor).skillUsageSucceeded(mActor, ESM::Skill::Security, 0);
             }
             else
                 resultMessage = "#{sTrapFail}";
