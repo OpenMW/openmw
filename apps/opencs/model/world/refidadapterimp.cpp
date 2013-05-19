@@ -484,3 +484,92 @@ void CSMWorld::NpcRefIdAdapter::setData (const RefIdColumn *column, RefIdData& d
             ActorRefIdAdapter<ESM::NPC>::setData (column, data, index, value);
     }
 }
+
+CSMWorld::WeaponColumns::WeaponColumns (const EnchantableColumns& columns)
+: EnchantableColumns (columns) {}
+
+CSMWorld::WeaponRefIdAdapter::WeaponRefIdAdapter (const WeaponColumns& columns)
+: EnchantableRefIdAdapter<ESM::Weapon> (UniversalId::Type_Weapon, columns), mColumns (columns)
+{}
+
+QVariant CSMWorld::WeaponRefIdAdapter::getData (const RefIdColumn *column, const RefIdData& data,
+    int index) const
+{
+    const Record<ESM::Weapon>& record = static_cast<const Record<ESM::Weapon>&> (
+        data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Weapon)));
+
+    if (column==mColumns.mType)
+        return record.get().mData.mType;
+
+    if (column==mColumns.mHealth)
+        return record.get().mData.mHealth;
+
+    if (column==mColumns.mSpeed)
+        return record.get().mData.mSpeed;
+
+    if (column==mColumns.mReach)
+        return record.get().mData.mReach;
+
+    for (int i=0; i<2; ++i)
+    {
+        if (column==mColumns.mChop[i])
+            return record.get().mData.mChop[i];
+
+        if (column==mColumns.mSlash[i])
+            return record.get().mData.mSlash[i];
+
+        if (column==mColumns.mThrust[i])
+            return record.get().mData.mThrust[i];
+    }
+
+    std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
+        mColumns.mFlags.find (column);
+
+    if (iter!=mColumns.mFlags.end())
+        return (record.get().mData.mFlags & iter->second)!=0;
+
+    return EnchantableRefIdAdapter<ESM::Weapon>::getData (column, data, index);
+}
+
+void CSMWorld::WeaponRefIdAdapter::setData (const RefIdColumn *column, RefIdData& data, int index,
+    const QVariant& value) const
+{
+    Record<ESM::Weapon>& record = static_cast<Record<ESM::Weapon>&> (
+        data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Weapon)));
+
+    if (column==mColumns.mType)
+        record.get().mData.mType = value.toInt();
+    else if (column==mColumns.mHealth)
+        record.get().mData.mHealth = value.toInt();
+    else if (column==mColumns.mSpeed)
+        record.get().mData.mSpeed = value.toFloat();
+    else if (column==mColumns.mReach)
+        record.get().mData.mReach = value.toFloat();
+    else if (column==mColumns.mChop[0])
+        record.get().mData.mChop[0] = value.toInt();
+    else if (column==mColumns.mChop[1])
+        record.get().mData.mChop[1] = value.toInt();
+    else if (column==mColumns.mSlash[0])
+        record.get().mData.mSlash[0] = value.toInt();
+    else if (column==mColumns.mSlash[1])
+        record.get().mData.mSlash[1] = value.toInt();
+    else if (column==mColumns.mThrust[0])
+        record.get().mData.mThrust[0] = value.toInt();
+    else if (column==mColumns.mThrust[1])
+        record.get().mData.mThrust[1] = value.toInt();
+    else
+    {
+        std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
+            mColumns.mFlags.find (column);
+
+        if (iter!=mColumns.mFlags.end())
+        {
+            if (value.toInt()!=0)
+                record.get().mData.mFlags |= iter->second;
+            else
+                record.get().mData.mFlags &= ~iter->second;
+        }
+        else
+            EnchantableRefIdAdapter<ESM::Weapon>::setData (column, data, index, value);
+    }
+}

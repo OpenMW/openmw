@@ -76,6 +76,13 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
         "Creature", "Deadra", "Undead", "Humanoid", 0
     };
 
+    static const char *sWeaponTypes[] =
+    {
+        "Short Blade 1H", "Long Blade 1H", "Long Blade 2H", "Blunt 1H", "Blunt 2H Close",
+        "Blunt 2H Wide", "Spear 2H", "Axe 1H", "Axe 2H", "Bow", "Crossbow", "Thrown", "Arrow",
+        "Bolt", 0
+    };
+
     mDelegateFactories = new CSVWorld::CommandDelegateFactoryCollection;
 
     mDelegateFactories->add (CSMWorld::ColumnBase::Display_GmstVarType,
@@ -104,6 +111,9 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
 
     mDelegateFactories->add (CSMWorld::ColumnBase::Display_CreatureType,
         new CSVWorld::EnumDelegateFactory (sCreatureTypes));
+
+    mDelegateFactories->add (CSMWorld::ColumnBase::Display_WeaponType,
+        new CSVWorld::EnumDelegateFactory (sWeaponTypes));
 }
 
 CSVDoc::ViewManager::~ViewManager()

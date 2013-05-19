@@ -286,6 +286,50 @@ CSMWorld::RefIdCollection::RefIdCollection()
 
     npcColumns.mFlags.insert (std::make_pair (metalBlood, ESM::NPC::Metal));
 
+    WeaponColumns weaponColumns (enchantableColumns);
+
+    mColumns.push_back (RefIdColumn ("Weapon Type", ColumnBase::Display_WeaponType));
+    weaponColumns.mType = &mColumns.back();
+
+    weaponColumns.mHealth = health;
+
+    mColumns.push_back (RefIdColumn ("Weapon Speed", ColumnBase::Display_Float));
+    weaponColumns.mSpeed = &mColumns.back();
+
+    mColumns.push_back (RefIdColumn ("Weapon Reach", ColumnBase::Display_Float));
+    weaponColumns.mReach = &mColumns.back();
+
+    for (int i=0; i<2; ++i)
+    {
+        std::string suffix = i==0 ? "Min " : "Max ";
+
+        mColumns.push_back (RefIdColumn ("Chop" + suffix, ColumnBase::Display_Integer));
+        weaponColumns.mChop[i] = &mColumns.back();
+
+        mColumns.push_back (RefIdColumn ("Slash" + suffix, ColumnBase::Display_Integer));
+        weaponColumns.mSlash[i] = &mColumns.back();
+
+        mColumns.push_back (RefIdColumn ("Thrust" + suffix, ColumnBase::Display_Integer));
+        weaponColumns.mThrust[i] = &mColumns.back();
+    }
+
+    static const struct
+    {
+        const char *mName;
+        unsigned int mFlag;
+    } sWeaponFlagTable[] =
+    {
+        { "Magical", ESM::Weapon::Magical },
+        { "Silver", ESM::Weapon::Silver },
+        { 0, 0 }
+    };
+
+    for (int i=0; sWeaponFlagTable[i].mName; ++i)
+    {
+        mColumns.push_back (RefIdColumn (sWeaponFlagTable[i].mName, ColumnBase::Display_Boolean));
+        weaponColumns.mFlags.insert (std::make_pair (&mColumns.back(), sWeaponFlagTable[i].mFlag));
+    }
+
     mAdapters.insert (std::make_pair (UniversalId::Type_Activator,
         new NameRefIdAdapter<ESM::Activator> (UniversalId::Type_Activator, nameColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Potion,
@@ -326,7 +370,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mAdapters.insert (std::make_pair (UniversalId::Type_Static,
         new ModelRefIdAdapter<ESM::Static> (UniversalId::Type_Static, modelColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Weapon,
-        new EnchantableRefIdAdapter<ESM::Weapon> (UniversalId::Type_Weapon, enchantableColumns)));
+        new WeaponRefIdAdapter (weaponColumns)));
 }
 
 CSMWorld::RefIdCollection::~RefIdCollection()

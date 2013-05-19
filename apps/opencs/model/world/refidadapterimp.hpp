@@ -731,6 +731,36 @@ namespace CSMWorld
                 const QVariant& value) const;
             ///< If the data type does not match an exception is thrown.
     };
+
+    struct WeaponColumns : public EnchantableColumns
+    {
+        const RefIdColumn *mType;
+        const RefIdColumn *mHealth;
+        const RefIdColumn *mSpeed;
+        const RefIdColumn *mReach;
+        const RefIdColumn *mChop[2];
+        const RefIdColumn *mSlash[2];
+        const RefIdColumn *mThrust[2];
+        std::map<const RefIdColumn *, unsigned int> mFlags;
+
+        WeaponColumns (const EnchantableColumns& columns);
+    };
+
+    class WeaponRefIdAdapter : public EnchantableRefIdAdapter<ESM::Weapon>
+    {
+            WeaponColumns mColumns;
+
+        public:
+
+            WeaponRefIdAdapter (const WeaponColumns& columns);
+
+            virtual QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
+                const;
+
+            virtual void setData (const RefIdColumn *column, RefIdData& data, int index,
+                const QVariant& value) const;
+            ///< If the data type does not match an exception is thrown.
+    };
 }
 
 #endif
