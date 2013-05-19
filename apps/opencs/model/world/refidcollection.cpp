@@ -189,10 +189,22 @@ CSMWorld::RefIdCollection::RefIdCollection()
         { 0, 0 }
     };
 
+    // for re-use in NPC records
+    const RefIdColumn *essential = 0;
+    const RefIdColumn *skeletonBlood = 0;
+    const RefIdColumn *metalBlood = 0;
+
     for (int i=0; sCreatureFlagTable[i].mName; ++i)
     {
         mColumns.push_back (RefIdColumn (sCreatureFlagTable[i].mName, ColumnBase::Display_Boolean));
         creatureColumns.mFlags.insert (std::make_pair (&mColumns.back(), sCreatureFlagTable[i].mFlag));
+
+        switch (sCreatureFlagTable[i].mFlag)
+        {
+            case ESM::Creature::Essential: essential = &mColumns.back(); break;
+            case ESM::Creature::Skeleton: skeletonBlood = &mColumns.back(); break;
+            case ESM::Creature::Metal: metalBlood = &mColumns.back(); break;
+        }
     }
 
     creatureColumns.mFlags.insert (std::make_pair (respawn, ESM::Creature::Respawn));
@@ -244,6 +256,36 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.push_back (RefIdColumn ("Key", ColumnBase::Display_Boolean));
     const RefIdColumn *key = &mColumns.back();
 
+    NpcColumns npcColumns (actorsColumns);
+
+    mColumns.push_back (RefIdColumn ("Race", ColumnBase::Display_String));
+    npcColumns.mRace = &mColumns.back();
+
+    mColumns.push_back (RefIdColumn ("Class", ColumnBase::Display_String));
+    npcColumns.mClass = &mColumns.back();
+
+    mColumns.push_back (RefIdColumn ("Faction", ColumnBase::Display_String));
+    npcColumns.mFaction = &mColumns.back();
+
+    mColumns.push_back (RefIdColumn ("Hair", ColumnBase::Display_String));
+    npcColumns.mHair = &mColumns.back();
+
+    mColumns.push_back (RefIdColumn ("Head", ColumnBase::Display_String));
+    npcColumns.mHead = &mColumns.back();
+
+    mColumns.push_back (RefIdColumn ("Female", ColumnBase::Display_Boolean));
+    npcColumns.mFlags.insert (std::make_pair (&mColumns.back(), ESM::NPC::Female));
+
+    npcColumns.mFlags.insert (std::make_pair (essential, ESM::NPC::Essential));
+
+    npcColumns.mFlags.insert (std::make_pair (respawn, ESM::NPC::Respawn));
+
+    npcColumns.mFlags.insert (std::make_pair (autoCalc, ESM::NPC::Autocalc));
+
+    npcColumns.mFlags.insert (std::make_pair (skeletonBlood, ESM::NPC::Skeleton));
+
+    npcColumns.mFlags.insert (std::make_pair (metalBlood, ESM::NPC::Metal));
+
     mAdapters.insert (std::make_pair (UniversalId::Type_Activator,
         new NameRefIdAdapter<ESM::Activator> (UniversalId::Type_Activator, nameColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Potion,
@@ -276,7 +318,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mAdapters.insert (std::make_pair (UniversalId::Type_Miscellaneous,
         new MiscRefIdAdapter (inventoryColumns, key)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Npc,
-        new ActorRefIdAdapter<ESM::NPC> (UniversalId::Type_Npc, actorsColumns)));
+        new NpcRefIdAdapter (npcColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Probe,
         new ToolRefIdAdapter<ESM::Probe> (UniversalId::Type_Probe, toolsColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Repair,

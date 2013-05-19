@@ -703,6 +703,34 @@ namespace CSMWorld
                 const QVariant& value) const;
             ///< If the data type does not match an exception is thrown.
     };
+
+    struct NpcColumns : public ActorColumns
+    {
+        std::map<const RefIdColumn *, unsigned int> mFlags;
+        const RefIdColumn *mRace;
+        const RefIdColumn *mClass;
+        const RefIdColumn *mFaction;
+        const RefIdColumn *mHair;
+        const RefIdColumn *mHead;
+
+        NpcColumns (const ActorColumns& actorColumns);
+    };
+
+    class NpcRefIdAdapter : public ActorRefIdAdapter<ESM::NPC>
+    {
+            NpcColumns mColumns;
+
+        public:
+
+            NpcRefIdAdapter (const NpcColumns& columns);
+
+            virtual QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
+                const;
+
+            virtual void setData (const RefIdColumn *column, RefIdData& data, int index,
+                const QVariant& value) const;
+            ///< If the data type does not match an exception is thrown.
+    };
 }
 
 #endif

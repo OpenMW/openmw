@@ -415,3 +415,72 @@ void CSMWorld::MiscRefIdAdapter::setData (const RefIdColumn *column, RefIdData& 
     else
         InventoryRefIdAdapter<ESM::Miscellaneous>::setData (column, data, index, value);
 }
+
+CSMWorld::NpcColumns::NpcColumns (const ActorColumns& actorColumns) : ActorColumns (actorColumns) {}
+
+CSMWorld::NpcRefIdAdapter::NpcRefIdAdapter (const NpcColumns& columns)
+: ActorRefIdAdapter<ESM::NPC> (UniversalId::Type_Npc, columns), mColumns (columns)
+{}
+
+QVariant CSMWorld::NpcRefIdAdapter::getData (const RefIdColumn *column, const RefIdData& data, int index)
+    const
+{
+    const Record<ESM::NPC>& record = static_cast<const Record<ESM::NPC>&> (
+        data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Npc)));
+
+    if (column==mColumns.mRace)
+        return QString::fromUtf8 (record.get().mRace.c_str());
+
+    if (column==mColumns.mClass)
+        return QString::fromUtf8 (record.get().mClass.c_str());
+
+    if (column==mColumns.mFaction)
+        return QString::fromUtf8 (record.get().mFaction.c_str());
+
+    if (column==mColumns.mHair)
+        return QString::fromUtf8 (record.get().mHair.c_str());
+
+    if (column==mColumns.mHead)
+        return QString::fromUtf8 (record.get().mHead.c_str());
+
+    std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
+        mColumns.mFlags.find (column);
+
+    if (iter!=mColumns.mFlags.end())
+        return (record.get().mFlags & iter->second)!=0;
+
+    return ActorRefIdAdapter<ESM::NPC>::getData (column, data, index);
+}
+
+void CSMWorld::NpcRefIdAdapter::setData (const RefIdColumn *column, RefIdData& data, int index,
+    const QVariant& value) const
+{
+    Record<ESM::NPC>& record = static_cast<Record<ESM::NPC>&> (
+        data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Npc)));
+
+    if (column==mColumns.mRace)
+        record.get().mRace = value.toString().toUtf8().constData();
+    else if (column==mColumns.mClass)
+        record.get().mClass = value.toString().toUtf8().constData();
+    else if (column==mColumns.mFaction)
+        record.get().mFaction = value.toString().toUtf8().constData();
+    else if (column==mColumns.mHair)
+        record.get().mHair = value.toString().toUtf8().constData();
+    else if (column==mColumns.mHead)
+        record.get().mHead = value.toString().toUtf8().constData();
+    else
+    {
+        std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
+            mColumns.mFlags.find (column);
+
+        if (iter!=mColumns.mFlags.end())
+        {
+            if (value.toInt()!=0)
+                record.get().mFlags |= iter->second;
+            else
+                record.get().mFlags &= ~iter->second;
+        }
+        else
+            ActorRefIdAdapter<ESM::NPC>::setData (column, data, index, value);
+    }
+}
