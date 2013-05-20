@@ -14,6 +14,7 @@ namespace MWMechanics
 {
 
     Security::Security(const MWWorld::Ptr &actor)
+        : mActor(actor)
     {
         CreatureStats& creatureStats = MWWorld::Class::get(actor).getCreatureStats(actor);
         NpcStats& npcStats = MWWorld::Class::get(actor).getNpcStats(actor);
