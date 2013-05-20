@@ -128,8 +128,6 @@ void NpcAnimation::setViewMode(NpcAnimation::ViewMode viewMode)
     assert(viewMode != VM_HeadOnly);
     mViewMode = viewMode;
 
-    Ogre::SceneNode *node = mInsert->getParentSceneNode();
-
     const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
     const ESM::Race *race = store.get<ESM::Race>().find(mNpc->mRace);
     bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;

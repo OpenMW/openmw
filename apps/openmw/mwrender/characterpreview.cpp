@@ -193,6 +193,7 @@ namespace MWRender
         mNode->setOrientation (Ogre::Quaternion::IDENTITY);
 
         mRenderTarget->update();
+
         mSelectionBuffer->update();
     }
 
@@ -203,8 +204,8 @@ namespace MWRender
 
     void InventoryPreview::onSetup ()
     {
-        if (!mSelectionBuffer)
-            mSelectionBuffer = new OEngine::Render::SelectionBuffer(mCamera, 512, 1024, 0);
+        delete mSelectionBuffer;
+        mSelectionBuffer = new OEngine::Render::SelectionBuffer(mCamera, 512, 1024, 0);
 
         mAnimation->showWeapons(true);
 

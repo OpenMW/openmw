@@ -241,6 +241,10 @@ namespace MWInput
             case A_ToggleHUD:
                 mWindows.toggleHud();
                 break;
+            case A_Use:
+                if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
+                    mPlayer.use();
+                break;
             }
         }
     }
@@ -803,6 +807,7 @@ namespace MWInput
     {
         std::map<int, std::string> descriptions;
 
+        descriptions[A_Use] = "sUse";
         descriptions[A_Activate] = "sActivate";
         descriptions[A_MoveBackward] = "sBack";
         descriptions[A_MoveForward] = "sForward";
@@ -865,6 +870,7 @@ namespace MWInput
         ret.push_back(A_AlwaysRun);
         ret.push_back(A_Sneak);
         ret.push_back(A_Activate);
+        ret.push_back(A_Use);
         ret.push_back(A_ToggleWeapon);
         ret.push_back(A_ToggleSpell);
         ret.push_back(A_AutoMove);
