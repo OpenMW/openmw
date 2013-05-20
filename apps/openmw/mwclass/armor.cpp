@@ -341,13 +341,14 @@ namespace MWClass
                 if(weapon == invStore.end())
                     return std::make_pair(1,"");
 
-                if(weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::LongBladeTwoHand ||
+                if(weapon->getTypeName() == typeid(ESM::Weapon).name() &&
+                        (weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::LongBladeTwoHand ||
                 weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::BluntTwoClose || 
                 weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::BluntTwoWide || 
                 weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::SpearTwoWide ||
                 weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::AxeTwoHand || 
                 weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanBow || 
-                weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanCrossbow)
+                weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanCrossbow))
                 {
                     return std::make_pair(3,"");
                 }

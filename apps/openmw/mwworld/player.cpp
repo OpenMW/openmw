@@ -179,7 +179,9 @@ namespace MWWorld
 
                 // tool used up?
                 if (!item.getRefData().getCount())
-                    MWBase::Environment::get().getWindowManager()->setSelectedWeapon(MWWorld::Ptr());
+                    MWBase::Environment::get().getWindowManager()->unsetSelectedWeapon();
+                else
+                    MWBase::Environment::get().getWindowManager()->setSelectedWeapon(item);
             }
         }
     }
