@@ -138,6 +138,8 @@ namespace CSVDoc
 
             void addCellsSubView();
 
+            void addReferenceablesSubView();
+
             void showUserSettings();
     };
 }

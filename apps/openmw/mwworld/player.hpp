@@ -58,6 +58,9 @@ namespace MWWorld
         void setForwardBackward (int value);
         void setUpDown(int value);
 
+        void use ();
+        ///< Use item equipped on right hand, or fists
+
         void setRunState(bool run);
         void setSneak(bool sneak);
 

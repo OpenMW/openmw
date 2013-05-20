@@ -36,4 +36,16 @@ void Apparatus::save(ESMWriter &esm)
     esm.writeHNOCString("SCRI", mScript);
     esm.writeHNCString("ITEX", mIcon);
 }
+
+    void Apparatus::blank()
+    {
+        mData.mType = 0;
+        mData.mQuality = 0;
+        mData.mWeight = 0;
+        mData.mValue = 0;
+        mModel.clear();
+        mIcon.clear();
+        mScript.clear();
+        mName.clear();
+    }
 }

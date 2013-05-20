@@ -24,4 +24,12 @@ void Door::save(ESMWriter &esm)
     esm.writeHNOCString("ANAM", mCloseSound);
 }
 
+    void Door::blank()
+    {
+        mName.clear();
+        mModel.clear();
+        mScript.clear();
+        mOpenSound.clear();
+        mCloseSound.clear();
+    }
 }

@@ -640,7 +640,7 @@ Ogre::SceneNode* SkyManager::getSunNode()
 
 void SkyManager::setGlareEnabled (bool enabled)
 {
-    if (!mCreated)
+    if (!mCreated || !mEnabled)
         return;
     mSunGlare->setVisible (mSunEnabled && enabled);
 }

@@ -22,6 +22,9 @@ namespace CSMWorld
 
         virtual RecordBase *clone() const = 0;
 
+        virtual void assign (const RecordBase& record) = 0;
+        ///< Will throw an exception if the types don't match.
+
         bool isDeleted() const;
 
         bool isErased() const;
@@ -37,7 +40,12 @@ namespace CSMWorld
 
         virtual RecordBase *clone() const;
 
+        virtual void assign (const RecordBase& record);
+
         const ESXRecordT& get() const;
+        ///< Throws an exception, if the record is deleted.
+
+        ESXRecordT& get();
         ///< Throws an exception, if the record is deleted.
 
         const ESXRecordT& getBase() const;
@@ -57,7 +65,22 @@ namespace CSMWorld
     }
 
     template <typename ESXRecordT>
+    void Record<ESXRecordT>::assign (const RecordBase& record)
+    {
+        *this = dynamic_cast<const Record<ESXRecordT>& > (record);
+    }
+
+    template <typename ESXRecordT>
     const ESXRecordT& Record<ESXRecordT>::get() const
+    {
+        if (mState==State_Erased)
+            throw std::logic_error ("attempt to access a deleted record");
+
+        return mState==State_BaseOnly || mState==State_Deleted ? mBase : mModified;
+    }
+
+    template <typename ESXRecordT>
+    ESXRecordT& Record<ESXRecordT>::get()
     {
         if (mState==State_Erased)
             throw std::logic_error ("attempt to access a deleted record");
@@ -81,7 +104,9 @@ namespace CSMWorld
             throw std::logic_error ("attempt to modify a deleted record");
 
         mModified = modified;
-        mState = State_Modified;
+
+        if (mState!=State_ModifiedOnly)
+            mState = State_Modified;
     }
 
     template <typename ESXRecordT>

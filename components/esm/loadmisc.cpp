@@ -23,4 +23,14 @@ void Miscellaneous::save(ESMWriter &esm)
     esm.writeHNOCString("ITEX", mIcon);
 }
 
+    void Miscellaneous::blank()
+    {
+        mData.mWeight = 0;
+        mData.mValue = 0;
+        mData.mIsKey = 0;
+        mName.clear();
+        mModel.clear();
+        mIcon.clear();
+        mScript.clear();
+    }
 }

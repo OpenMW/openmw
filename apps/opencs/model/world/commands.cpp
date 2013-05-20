@@ -71,7 +71,7 @@ void CSMWorld::RevertCommand::redo()
 
 void CSMWorld::RevertCommand::undo()
 {
-    mModel.setRecord (*mOld);
+    mModel.setRecord (mId, *mOld);
 }
 
 CSMWorld::DeleteCommand::DeleteCommand (IdTable& model, const std::string& id, QUndoCommand *parent)
@@ -104,5 +104,5 @@ void CSMWorld::DeleteCommand::redo()
 
 void CSMWorld::DeleteCommand::undo()
 {
-    mModel.setRecord (*mOld);
+    mModel.setRecord (mId, *mOld);
 }

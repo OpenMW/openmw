@@ -116,6 +116,16 @@ void CSVWorld::CommandDelegate::setModelData (QWidget *editor, QAbstractItemMode
     ///< \todo provide some kind of feedback to the user, indicating that editing is currently not possible.
 }
 
+QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleOptionViewItem& option,
+    const QModelIndex& index) const
+{
+    if (!index.data().isValid())
+        return 0;
+
+    return QStyledItemDelegate::createEditor (parent, option, index);
+}
+
+
 void CSVWorld::CommandDelegate::setEditLock (bool locked)
 {
     mEditLock = locked;

@@ -57,7 +57,30 @@ namespace CSMWorld
                 Type_Spells,
                 Type_Spell,
                 Type_Cells,
-                Type_Cell
+                Type_Cell,
+                Type_Referenceables,
+                Type_Referenceable,
+                Type_Activator,
+                Type_Potion,
+                Type_Apparatus,
+                Type_Armor,
+                Type_Book,
+                Type_Clothing,
+                Type_Container,
+                Type_Creature,
+                Type_Door,
+                Type_Ingredient,
+                Type_CreatureLevelledList,
+                Type_ItemLevelledList,
+                Type_Light,
+                Type_Lockpick,
+                Type_Miscellaneous,
+                Type_Npc,
+                Type_Probe,
+                Type_Repair,
+                Type_Static,
+                Type_Weapon
+
             };
 
         private:

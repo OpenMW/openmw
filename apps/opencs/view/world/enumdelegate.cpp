@@ -44,6 +44,9 @@ CSVWorld::EnumDelegate::EnumDelegate (const std::vector<std::pair<int, QString> 
 QWidget *CSVWorld::EnumDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem& option,
     const QModelIndex& index) const
 {
+    if (!index.data().isValid())
+        return 0;
+
     QComboBox *comboBox = new QComboBox (parent);
 
     for (std::vector<std::pair<int, QString> >::const_iterator iter (mValues.begin());
@@ -73,20 +76,23 @@ void CSVWorld::EnumDelegate::setEditorData (QWidget *editor, const QModelIndex& 
 void CSVWorld::EnumDelegate::paint (QPainter *painter, const QStyleOptionViewItem& option,
     const QModelIndex& index) const
 {
-    QStyleOptionViewItemV4 option2 (option);
+    if (index.data().isValid())
+    {
+        QStyleOptionViewItemV4 option2 (option);
 
-    int value = index.data().toInt();
+        int value = index.data().toInt();
 
-    for (std::vector<std::pair<int, QString> >::const_iterator iter (mValues.begin());
-        iter!=mValues.end(); ++iter)
-        if (iter->first==value)
-        {
-            option2.text = iter->second;
+        for (std::vector<std::pair<int, QString> >::const_iterator iter (mValues.begin());
+            iter!=mValues.end(); ++iter)
+            if (iter->first==value)
+            {
+                option2.text = iter->second;
 
-            QApplication::style()->drawControl (QStyle::CE_ItemViewItem, &option2, painter);
+                QApplication::style()->drawControl (QStyle::CE_ItemViewItem, &option2, painter);
 
-            break;
-        }
+                break;
+            }
+    }
 }
 
 

@@ -728,4 +728,12 @@ void Animation::showWeapons(bool showWeapon)
 {
 }
 
+bool Animation::isPriorityActive(int priority) const
+{
+    for (AnimStateMap::const_iterator it = mStates.begin(); it != mStates.end(); ++it)
+        if (it->second.mPriority == priority)
+            return true;
+    return false;
+}
+
 }
