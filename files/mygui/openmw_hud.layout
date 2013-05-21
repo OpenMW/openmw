@@ -108,20 +108,20 @@
             name="FPSBoxAdv">
             <Property key="Visible" value="false"/>
 
-            <Widget type="TextBox" skin="NumFPS" position="3 3 71 17">
+            <Widget type="TextBox" skin="NumFPS" position="3 3 82 17">
                     <Property key="Caption" value="FPS: "/>
             </Widget>
-            <Widget type="TextBox" skin="NumFPS" position="53 3 71 17" name="FPSCounterAdv"/>
+            <Widget type="TextBox" skin="NumFPS" position="53 3 82 17" name="FPSCounterAdv"/>
 
-            <Widget type="TextBox" skin="NumFPS" position="3 3 71 32">
+            <Widget type="TextBox" skin="NumFPS" position="3 3 82 32">
                     <Property key="Caption" value="Tri Count: "/>
             </Widget>
-            <Widget type="TextBox" skin="NumFPS" position="53 3 71 32" name="TriangleCounter"/>
+            <Widget type="TextBox" skin="NumFPS" position="53 3 82 32" name="TriangleCounter"/>
 
-            <Widget type="TextBox" skin="NumFPS" position="3 3 71 47">
+            <Widget type="TextBox" skin="NumFPS" position="3 3 82 47">
                     <Property key="Caption" value="Batch Count: "/>
             </Widget>
-            <Widget type="TextBox" skin="NumFPS" position="53 3 71 47" name="BatchCounter"/>
+            <Widget type="TextBox" skin="NumFPS" position="53 3 82 47" name="BatchCounter"/>
         </Widget>
 
     </Widget>
