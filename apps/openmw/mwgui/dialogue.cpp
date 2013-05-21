@@ -1,5 +1,6 @@
 #include "dialogue.hpp"
 
+#include <boost/bind.hpp>
 #include <boost/lexical_cast.hpp>
 
 #include "../mwbase/environment.hpp"
