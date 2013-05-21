@@ -209,6 +209,7 @@ namespace MWScript
 
                 offset = script->mData.mNumShorts+script->mData.mNumLongs;
                 size = script->mData.mNumFloats;
+                break;
 
             default:
 
