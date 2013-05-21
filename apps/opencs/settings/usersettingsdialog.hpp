@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QStackedWidget>
+#include <QListWidgetItem>
 
 #include <components/files/configurationmanager.hpp>
 #include "usersettings.hpp"
