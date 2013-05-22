@@ -24,7 +24,9 @@ namespace
 			return "hlsl";
 		else if (lang == sh::Language_GLSL)
 			return "glsl";
-		throw std::runtime_error ("invalid language, valid are: cg, hlsl, glsl");
+		else if (lang == sh::Language_GLSLES)
+			return "glsles";
+		throw std::runtime_error ("invalid language, valid are: cg, hlsl, glsl, glsles");
 	}
 }
 

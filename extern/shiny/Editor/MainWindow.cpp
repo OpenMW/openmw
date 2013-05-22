@@ -1,6 +1,8 @@
 #include "MainWindow.hpp"
 #include "ui_mainwindow.h"
 
+#include <iostream>
+
 #include <QCloseEvent>
 #include <QTimer>
 

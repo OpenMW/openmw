@@ -181,15 +181,8 @@ if (UNIX AND NOT APPLE)
     find_package (Threads)
 endif()
 
-# find boost without components so we can use Boost_VERSION
-find_package(Boost REQUIRED)
 
-set(BOOST_COMPONENTS system filesystem program_options thread date_time)
-
-if (Boost_VERSION LESS 104900)
-    set(SHINY_USE_WAVE_SYSTEM_INSTALL "TRUE")
-    set(BOOST_COMPONENTS ${BOOST_COMPONENTS} wave)
-endif()
+set(BOOST_COMPONENTS system filesystem program_options thread date_time wave)
 
 IF(BOOST_STATIC)
     set(Boost_USE_STATIC_LIBS   ON)

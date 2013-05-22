@@ -84,7 +84,8 @@
 	 - There is no entry_point property because the entry point is always \a main.
 	 - Both profiles_cg and profiles_hlsl are a list of shader profiles. The first profile that is supported is automatically picked. GLSL does not have shader profiles.
 
-	Now, let's get into writing our shader! As you can guess from above, the filename should be 'example.shader'
+	Now, let's get into writing our shader! As you can guess from above, the filename should be 'example.shader'.
+	Make sure to also copy the 'core.h' file to the same location. It is included in shiny's source tree under 'Extra/'.
 
 	\code
 	#include "core.h"
@@ -93,7 +94,7 @@
 
 	SH_BEGIN_PROGRAM
 		shUniform(float4x4, wvp) @shAutoConstant(wvp, worldviewproj_matrix)
-		shInput(float2, uv0)
+		shVertexInput(float2, uv0)
 		shOutput(float2, UV)
 	SH_START_PROGRAM
 	{
