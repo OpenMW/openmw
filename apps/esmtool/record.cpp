@@ -758,6 +758,16 @@ void Record<ESM::DialInfo>::print()
     if (mData.mSound != "")
         std::cout << "  Sound File: " << mData.mSound << std::endl;
 
+
+    std::cout << "  Quest Status: " << questStatusLabel(mData.mQuestStatus)
+              << " (" << mData.mQuestStatus << ")" << std::endl;
+    std::cout << "  Unknown1: " << mData.mData.mUnknown1 << std::endl;
+    std::cout << "  Unknown2: " << (int)mData.mData.mUnknown2 << std::endl;
+
+    std::vector<ESM::DialInfo::SelectStruct>::iterator sit;
+    for (sit = mData.mSelects.begin(); sit != mData.mSelects.end(); sit++)
+        std::cout << "  Select Rule: " << ruleString(*sit) << std::endl;
+
     if (mData.mResultScript != "")
     {
         if (mPrintPlain)
@@ -772,15 +782,6 @@ void Record<ESM::DialInfo>::print()
         	std::cout << "  Result Script: [skipped]" << std::endl;
         }
     }
-
-    std::cout << "  Quest Status: " << questStatusLabel(mData.mQuestStatus)
-              << " (" << mData.mQuestStatus << ")" << std::endl;
-    std::cout << "  Unknown1: " << mData.mData.mUnknown1 << std::endl;
-    std::cout << "  Unknown2: " << (int)mData.mData.mUnknown2 << std::endl;
-
-    std::vector<ESM::DialInfo::SelectStruct>::iterator sit;
-    for (sit = mData.mSelects.begin(); sit != mData.mSelects.end(); sit++)
-        std::cout << "  Select Rule: " << ruleString(*sit) << std::endl;
 }
 
 template<>
@@ -1181,6 +1182,17 @@ void Record<ESM::Script>::print()
     std::cout << "  Script Data Size: " << mData.mData.mScriptDataSize << std::endl;
     std::cout << "  Table Size: " << mData.mData.mStringTableSize << std::endl;
 
+
+    std::vector<std::string>::iterator vit;
+    for (vit = mData.mVarNames.begin(); vit != mData.mVarNames.end(); vit++)
+        std::cout << "  Variable: " << *vit << std::endl;
+
+    std::cout << "  ByteCode: ";
+    std::vector<unsigned char>::iterator cit;
+    for (cit = mData.mScriptData.begin(); cit != mData.mScriptData.end(); cit++)
+        std::cout << boost::format("%02X") % (int)(*cit);
+    std::cout << std::endl;
+
     if (mPrintPlain)
     {
     	std::cout << "  Script:" << std::endl;
@@ -1192,16 +1204,6 @@ void Record<ESM::Script>::print()
     {
     	std::cout << "  Script: [skipped]" << std::endl;
     }
-
-    std::vector<std::string>::iterator vit;
-    for (vit = mData.mVarNames.begin(); vit != mData.mVarNames.end(); vit++)
-        std::cout << "  Variable: " << *vit << std::endl;
-
-    std::cout << "  ByteCode: ";
-    std::vector<unsigned char>::iterator cit;
-    for (cit = mData.mScriptData.begin(); cit != mData.mScriptData.end(); cit++)
-        std::cout << boost::format("%02X") % (int)(*cit);
-    std::cout << std::endl;
 }
 
 template<>
