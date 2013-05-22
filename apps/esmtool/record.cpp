@@ -464,12 +464,17 @@ void Record<ESM::Book>::print()
     std::cout << "  IsScroll: " << mData.mData.mIsScroll << std::endl;
     std::cout << "  SkillID: " << mData.mData.mSkillID << std::endl;
     std::cout << "  Enchantment Points: " << mData.mData.mEnchant << std::endl;
-    std::cout << "  Text: [skipped]" << std::endl;
-    // Skip until multi-line fields is controllable by a command line option.
-    // Mildly problematic because there are no parameter to print() currently.
-    // std::cout << "-------------------------------------------" << std::endl;
-    // std::cout << mData.mText << std::endl;
-    // std::cout << "-------------------------------------------" << std::endl;
+    if (mPrintPlain)
+    {
+    	std::cout << "  Text:" << std::endl;
+    	std::cout << "START--------------------------------------" << std::endl;
+    	std::cout << mData.mText << std::endl;
+    	std::cout << "END----------------------------------------" << std::endl;
+    }
+    else
+    {
+    	std::cout << "  Text: [skipped]" << std::endl;
+    }
 }
 
 template<>
@@ -753,15 +758,6 @@ void Record<ESM::DialInfo>::print()
     if (mData.mSound != "")
         std::cout << "  Sound File: " << mData.mSound << std::endl;
 
-    if (mData.mResultScript != "")
-    {
-        std::cout << "  Result Script: [skipped]" << std::endl;
-        // Skip until multi-line fields is controllable by a command line option.
-        // Mildly problematic because there are no parameter to print() currently.
-        // std::cout << "-------------------------------------------" << std::endl;
-        // std::cout << mData.mResultScript << std::endl;
-        // std::cout << "-------------------------------------------" << std::endl;
-    }
 
     std::cout << "  Quest Status: " << questStatusLabel(mData.mQuestStatus)
               << " (" << mData.mQuestStatus << ")" << std::endl;
@@ -771,6 +767,21 @@ void Record<ESM::DialInfo>::print()
     std::vector<ESM::DialInfo::SelectStruct>::iterator sit;
     for (sit = mData.mSelects.begin(); sit != mData.mSelects.end(); sit++)
         std::cout << "  Select Rule: " << ruleString(*sit) << std::endl;
+
+    if (mData.mResultScript != "")
+    {
+        if (mPrintPlain)
+        {
+        	std::cout << "  Result Script:" << std::endl;
+        	std::cout << "START--------------------------------------" << std::endl;
+        	std::cout << mData.mResultScript << std::endl;
+        	std::cout << "END----------------------------------------" << std::endl;
+        }
+        else
+        {
+        	std::cout << "  Result Script: [skipped]" << std::endl;
+        }
+    }
 }
 
 template<>
@@ -1171,12 +1182,7 @@ void Record<ESM::Script>::print()
     std::cout << "  Script Data Size: " << mData.mData.mScriptDataSize << std::endl;
     std::cout << "  Table Size: " << mData.mData.mStringTableSize << std::endl;
 
-    std::cout << "  Script: [skipped]" << std::endl;
-    // Skip until multi-line fields is controllable by a command line option.
-    // Mildly problematic because there are no parameter to print() currently.
-    // std::cout << "-------------------------------------------" << std::endl;
-    // std::cout << s->scriptText << std::endl;
-    // std::cout << "-------------------------------------------" << std::endl;
+
     std::vector<std::string>::iterator vit;
     for (vit = mData.mVarNames.begin(); vit != mData.mVarNames.end(); vit++)
         std::cout << "  Variable: " << *vit << std::endl;
@@ -1186,6 +1192,18 @@ void Record<ESM::Script>::print()
     for (cit = mData.mScriptData.begin(); cit != mData.mScriptData.end(); cit++)
         std::cout << boost::format("%02X") % (int)(*cit);
     std::cout << std::endl;
+
+    if (mPrintPlain)
+    {
+    	std::cout << "  Script:" << std::endl;
+    	std::cout << "START--------------------------------------" << std::endl;
+    	std::cout << mData.mScriptText << std::endl;
+    	std::cout << "END----------------------------------------" << std::endl;
+    }
+    else
+    {
+    	std::cout << "  Script: [skipped]" << std::endl;
+    }
 }
 
 template<>
