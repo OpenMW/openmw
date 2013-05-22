@@ -21,9 +21,10 @@ namespace EsmTool
         std::string mId;
         int mFlags;
         ESM::NAME mType;
+        bool mPrintPlain;
 
     public:
-        RecordBase () {}
+        RecordBase () { mPrintPlain = false; }
         virtual ~RecordBase() {}
 
         const std::string &getId() const {
@@ -44,6 +45,14 @@ namespace EsmTool
 
         ESM::NAME getType() const {
             return mType;
+        }
+
+        bool getPrintPlain() const {
+        	return mPrintPlain;
+        }
+
+        void setPrintPlain(bool plain) {
+        	mPrintPlain = plain;
         }
 
         virtual void load(ESM::ESMReader &esm) = 0;
