@@ -1,6 +1,7 @@
 
 #include "scanner.hpp"
 
+#include <cassert>
 #include <cctype>
 #include <sstream>
 #include <algorithm>
@@ -163,6 +164,7 @@ namespace Compiler
 
     bool Scanner::scanInt (char c, Parser& parser, bool& cont)
     {
+        assert(c != '\0');
         std::string value;
         value += c;
 
@@ -187,11 +189,7 @@ namespace Compiler
             }
         }
 
-        /*
-         * value could be empty only if scanInt is called with c == '\0'.
-         * That is unlikely so it should be replaced by assertion.
-         */
-        if (value.empty() || error)
+        if (error)
             return false;
 
         TokenLoc loc (mLoc);
