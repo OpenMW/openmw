@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QStackedWidget>
+#include <QListWidgetItem>
 
 #ifndef Q_MOC_RUN
 #include <components/files/configurationmanager.hpp>
