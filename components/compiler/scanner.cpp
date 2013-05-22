@@ -1,6 +1,7 @@
 
 #include "scanner.hpp"
 
+#include <cassert>
 #include <cctype>
 #include <sstream>
 #include <algorithm>
@@ -163,10 +164,9 @@ namespace Compiler
 
     bool Scanner::scanInt (char c, Parser& parser, bool& cont)
     {
+        assert(c != '\0');
         std::string value;
-
         value += c;
-        bool empty = false;
 
         bool error = false;
 
@@ -175,7 +175,6 @@ namespace Compiler
             if (std::isdigit (c))
             {
                 value += c;
-                empty = false;
             }
             else if (std::isalpha (c) || c=='_')
                 error = true;
@@ -190,7 +189,7 @@ namespace Compiler
             }
         }
 
-        if (empty || error)
+        if (error)
             return false;
 
         TokenLoc loc (mLoc);
