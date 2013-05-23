@@ -251,10 +251,10 @@ namespace MWGui
             MyGUI::Gui::getInstance().destroyWidget(mParent->getChildAt(0));
         }
 
-        boost::algorithm::replace_all(text, "\n", "");
-        boost::algorithm::replace_all(text, "\r", "");
-        boost::algorithm::replace_all(text, "<BR>", "\n");
-        boost::algorithm::replace_all(text, "<P>", "\n\n");
+        boost::algorithm::replace_all(text, "\n", "\n");
+        boost::algorithm::replace_all(text, "\r", "\r");
+        boost::algorithm::replace_all(text, "<BR>", "\n\n");
+        boost::algorithm::replace_all(text, "<P>", "\n\n");   // tweaking by adding another newline to see if that spaces out better
         boost::algorithm::trim_left(text);
 
         // remove trailing "
