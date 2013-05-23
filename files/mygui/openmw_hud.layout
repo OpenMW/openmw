@@ -104,24 +104,24 @@
         </Widget>
 
         <!-- Advanced FPSCounter box -->
-        <Widget type="Widget" skin="HUD_Box" position="12 12 118 51" align="Left Top"
+        <Widget type="Widget" skin="HUD_Box" position="12 12 138 51" align="Left Top"
             name="FPSBoxAdv">
             <Property key="Visible" value="false"/>
 
-            <Widget type="TextBox" skin="NumFPS" position="3 3 82 17">
+            <Widget type="TextBox" skin="NumFPS" position="4 3 71 17">
                     <Property key="Caption" value="FPS: "/>
             </Widget>
-            <Widget type="TextBox" skin="NumFPS" position="53 3 82 17" name="FPSCounterAdv"/>
+            <Widget type="TextBox" skin="NumFPS" position="68 3 71 17" name="FPSCounterAdv"/>
 
-            <Widget type="TextBox" skin="NumFPS" position="3 3 82 32">
+            <Widget type="TextBox" skin="NumFPS" position="2 3 71 32">
                     <Property key="Caption" value="Tri Count: "/>
             </Widget>
-            <Widget type="TextBox" skin="NumFPS" position="53 3 82 32" name="TriangleCounter"/>
+            <Widget type="TextBox" skin="NumFPS" position="78 3 71 32" name="TriangleCounter"/>
 
-            <Widget type="TextBox" skin="NumFPS" position="3 3 82 47">
+            <Widget type="TextBox" skin="NumFPS" position="4 3 82 47">
                     <Property key="Caption" value="Batch Count: "/>
             </Widget>
-            <Widget type="TextBox" skin="NumFPS" position="53 3 82 47" name="BatchCounter"/>
+            <Widget type="TextBox" skin="NumFPS" position="65 3 82 47" name="BatchCounter"/>
         </Widget>
 
     </Widget>
