@@ -181,11 +181,21 @@ namespace MWScript
                     runtime.pop();
 
                     std::vector<int> idleList;
+                    bool repeat = false;
 
-                    for (int i=2; i<10 && arg0; ++i)
+                    for(short i=1; i < 10 && arg0; ++i)
                     {
+                        if(!repeat)
+                            repeat = true;
                         Interpreter::Type_Integer idleValue = runtime[0].mInteger;
                         idleList.push_back(idleValue);
+                        runtime.pop();
+                        --arg0;
+                    }
+
+                    if(arg0)
+                    {
+                        repeat = runtime[0].mInteger;
                         runtime.pop();
                         --arg0;
                     }
@@ -193,7 +203,7 @@ namespace MWScript
                     // discard additional arguments (reset), because we have no idea what they mean.
                     for (unsigned int i=0; i<arg0; ++i) runtime.pop();
 
-                    MWMechanics::AiWander wanderPackage(range, duration, time, idleList);
+                    MWMechanics::AiWander wanderPackage(range, duration, time, idleList, repeat);
                     MWWorld::Class::get (ptr).getCreatureStats (ptr).getAiSequence().stack(wanderPackage);
                 }
         };
