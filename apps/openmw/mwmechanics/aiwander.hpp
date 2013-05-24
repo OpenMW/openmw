@@ -6,24 +6,24 @@
 
 namespace MWMechanics
 {
-
     class AiWander : public AiPackage
     {
-    public:
+        public:
 
-        AiWander(int distance, int duration, int timeOfDay, const std::vector<int>& idle);
-        virtual AiPackage *clone() const;
-        virtual bool execute (const MWWorld::Ptr& actor);
-        ///< \return Package completed?
-        virtual int getTypeId() const;
-        ///< 0: Wander
+            AiWander(int distance, int duration, int timeOfDay, const std::vector<int>& idle, bool repeat);
+            virtual AiPackage *clone() const;
+            virtual bool execute (const MWWorld::Ptr& actor);
+            ///< \return Package completed?
+            virtual int getTypeId() const;
+            ///< 0: Wander
 
-    private:
-        int mDistance;
-        int mDuration;
-        int mTimeOfDay;
-        std::vector<int> mIdle;
+        private:
+            int mDistance;
+            int mDuration;
+            int mTimeOfDay;
+            std::vector<int> mIdle;
+            bool mRepeat;
     };
-    }
+}
 
 #endif
