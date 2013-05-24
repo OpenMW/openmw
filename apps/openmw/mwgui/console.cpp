@@ -137,7 +137,7 @@ namespace MWGui
     void Console::disable()
     {
         setVisible(false);
-        setSelectedObject(MWWorld::Ptr());
+
         // Remove keyboard focus from the console input whenever the
         // console is turned off
         MyGUI::InputManager::getInstance().setKeyFocusWidget(NULL);
