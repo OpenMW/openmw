@@ -183,7 +183,7 @@ namespace MWScript
                     std::vector<int> idleList;
                     bool repeat = false;
 
-                    for(short i=1; i < 10 && arg0; ++i)
+                    for(int i=1; i < 10 && arg0; ++i)
                     {
                         if(!repeat)
                             repeat = true;
@@ -195,7 +195,7 @@ namespace MWScript
 
                     if(arg0)
                     {
-                        repeat = runtime[0].mInteger;
+                        repeat = runtime[0].mInteger != 0;
                         runtime.pop();
                         --arg0;
                     }
