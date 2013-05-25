@@ -1,7 +1,7 @@
 #ifndef MWGUI_BOOKWINDOW_H
 #define MWGUI_BOOKWINDOW_H
 
-#include "window_base.hpp"
+#include "windowbase.hpp"
 
 #include "../mwworld/ptr.hpp"
 
@@ -12,7 +12,7 @@ namespace MWGui
     class BookWindow : public WindowBase
     {
         public:
-            BookWindow(MWBase::WindowManager& parWindowManager);
+            BookWindow();
 
             void open(MWWorld::Ptr book);
             void setTakeButtonShow(bool show);
@@ -27,6 +27,7 @@ namespace MWGui
 
             void updatePages();
             void clearPages();
+            void adjustButton(MWGui::ImageButton* button);
 
         private:
             MWGui::ImageButton* mCloseButton;

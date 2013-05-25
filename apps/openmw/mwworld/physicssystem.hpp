@@ -29,7 +29,7 @@ namespace MWWorld
             PhysicsSystem (OEngine::Render::OgreRenderer &_rend);
             ~PhysicsSystem ();
 
-            void addObject (const MWWorld::Ptr& ptr);
+            void addObject (const MWWorld::Ptr& ptr, bool placeable=false);
 
             void addActor (const MWWorld::Ptr& ptr);
 
@@ -51,6 +51,8 @@ namespace MWWorld
             bool toggleCollisionMode();
             
             Ogre::Vector3 move(const MWWorld::Ptr &ptr, const Ogre::Vector3 &movement, float time, bool gravity);
+            std::vector<std::string> getCollisions(const MWWorld::Ptr &ptr); ///< get handles this object collides with
+            Ogre::Vector3 traceDown(const MWWorld::Ptr &ptr);
 
             std::pair<float, std::string> getFacedHandle (MWWorld::World& world, float queryDistance);
             std::vector < std::pair <float, std::string> > getFacedHandles (float queryDistance);
@@ -60,8 +62,8 @@ namespace MWWorld
             btVector3 getRayPoint(float extent, float mouseX, float mouseY);
 
 
-            // cast ray, return true if it hit something
-            bool castRay(const Ogre::Vector3& from, const Ogre::Vector3& to);
+            // cast ray, return true if it hit something. if raycasringObjectOnlt is set to false, it ignores NPCs and objects with no collisions.
+            bool castRay(const Ogre::Vector3& from, const Ogre::Vector3& to, bool raycastingObjectOnly = true,bool ignoreHeightMap = false);
 
             std::pair<bool, Ogre::Vector3>
             castRay(const Ogre::Vector3 &orig, const Ogre::Vector3 &dir, float len);
@@ -75,13 +77,13 @@ namespace MWWorld
 
             bool getObjectAABB(const MWWorld::Ptr &ptr, Ogre::Vector3 &min, Ogre::Vector3 &max);
 
-            void updatePlayerData(Ogre::Vector3 &eyepos, float pitch, float yaw);
+            void updateCameraData(const Ogre::Vector3 &eyepos, float pitch, float yaw);
 
         private:
             struct {
                 Ogre::Vector3 eyepos;
                 float pitch, yaw;
-            } mPlayerData;
+            } mCameraData;
 
             OEngine::Render::OgreRenderer &mRender;
             OEngine::Physic::PhysicEngine* mEngine;

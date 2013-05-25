@@ -68,7 +68,7 @@ namespace MWWorld
 
             Ptr::CellStore *getCell() const
             {
-                assert (mCell);
+                assert(mCell);
                 return mCell;
             }
 

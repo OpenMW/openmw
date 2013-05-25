@@ -275,7 +275,7 @@ RecordBase::create(ESM::NAME type)
     }
     case ESM::REC_LOCK:
     {
-        record = new EsmTool::Record<ESM::Tool>;
+        record = new EsmTool::Record<ESM::Lockpick>;
         break;
     }
     case ESM::REC_LTEX:
@@ -439,7 +439,7 @@ void Record<ESM::Apparatus>::print()
 template<>
 void Record<ESM::BodyPart>::print()
 {
-    std::cout << "  Name: " << mData.mName << std::endl;
+    std::cout << "  Race: " << mData.mRace << std::endl;
     std::cout << "  Model: " << mData.mModel << std::endl;
     std::cout << "  Type: " << meshTypeLabel(mData.mData.mType)
               << " (" << (int)mData.mData.mType << ")" << std::endl;
@@ -464,12 +464,17 @@ void Record<ESM::Book>::print()
     std::cout << "  IsScroll: " << mData.mData.mIsScroll << std::endl;
     std::cout << "  SkillID: " << mData.mData.mSkillID << std::endl;
     std::cout << "  Enchantment Points: " << mData.mData.mEnchant << std::endl;
-    std::cout << "  Text: [skipped]" << std::endl;
-    // Skip until multi-line fields is controllable by a command line option.
-    // Mildly problematic because there are no parameter to print() currently.
-    // std::cout << "-------------------------------------------" << std::endl;
-    // std::cout << mData.mText << std::endl;
-    // std::cout << "-------------------------------------------" << std::endl;
+    if (mPrintPlain)
+    {
+    	std::cout << "  Text:" << std::endl;
+    	std::cout << "START--------------------------------------" << std::endl;
+    	std::cout << mData.mText << std::endl;
+    	std::cout << "END----------------------------------------" << std::endl;
+    }
+    else
+    {
+    	std::cout << "  Text: [skipped]" << std::endl;
+    }
 }
 
 template<>
@@ -679,14 +684,14 @@ void Record<ESM::Faction>::print()
     std::cout << "  Hidden: " << mData.mData.mIsHidden << std::endl;
     if (mData.mData.mUnknown != -1)
         std::cout << "  Unknown: " << mData.mData.mUnknown << std::endl;
-    std::cout << "  Attribute1: " << attributeLabel(mData.mData.mAttribute1)
-              << " (" << mData.mData.mAttribute1 << ")" << std::endl;
-    std::cout << "  Attribute2: " << attributeLabel(mData.mData.mAttribute2)
-              << " (" << mData.mData.mAttribute2 << ")" << std::endl;
+    std::cout << "  Attribute1: " << attributeLabel(mData.mData.mAttribute[0])
+              << " (" << mData.mData.mAttribute[0] << ")" << std::endl;
+    std::cout << "  Attribute2: " << attributeLabel(mData.mData.mAttribute[1])
+              << " (" << mData.mData.mAttribute[1] << ")" << std::endl;
     for (int i = 0; i != 6; i++)
-        if (mData.mData.mSkillID[i] != -1)
-            std::cout << "  Skill: " << skillLabel(mData.mData.mSkillID[i])
-                      << " (" << mData.mData.mSkillID[i] << ")" << std::endl;
+        if (mData.mData.mSkills[i] != -1)
+            std::cout << "  Skill: " << skillLabel(mData.mData.mSkills[i])
+                      << " (" << mData.mData.mSkills[i] << ")" << std::endl;
     for (int i = 0; i != 10; i++)
         if (mData.mRanks[i] != "")
         {
@@ -753,15 +758,6 @@ void Record<ESM::DialInfo>::print()
     if (mData.mSound != "")
         std::cout << "  Sound File: " << mData.mSound << std::endl;
 
-    if (mData.mResultScript != "")
-    {
-        std::cout << "  Result Script: [skipped]" << std::endl;
-        // Skip until multi-line fields is controllable by a command line option.
-        // Mildly problematic because there are no parameter to print() currently.
-        // std::cout << "-------------------------------------------" << std::endl;
-        // std::cout << mData.mResultScript << std::endl;
-        // std::cout << "-------------------------------------------" << std::endl;
-    }
 
     std::cout << "  Quest Status: " << questStatusLabel(mData.mQuestStatus)
               << " (" << mData.mQuestStatus << ")" << std::endl;
@@ -771,6 +767,21 @@ void Record<ESM::DialInfo>::print()
     std::vector<ESM::DialInfo::SelectStruct>::iterator sit;
     for (sit = mData.mSelects.begin(); sit != mData.mSelects.end(); sit++)
         std::cout << "  Select Rule: " << ruleString(*sit) << std::endl;
+
+    if (mData.mResultScript != "")
+    {
+        if (mPrintPlain)
+        {
+        	std::cout << "  Result Script:" << std::endl;
+        	std::cout << "START--------------------------------------" << std::endl;
+        	std::cout << mData.mResultScript << std::endl;
+        	std::cout << "END----------------------------------------" << std::endl;
+        }
+        else
+        {
+        	std::cout << "  Result Script: [skipped]" << std::endl;
+        }
+    }
 }
 
 template<>
@@ -864,14 +875,13 @@ void Record<ESM::Light>::print()
 }
 
 template<>
-void Record<ESM::Tool>::print()
+void Record<ESM::Lockpick>::print()
 {
     std::cout << "  Name: " << mData.mName << std::endl;
     std::cout << "  Model: " << mData.mModel << std::endl;
     std::cout << "  Icon: " << mData.mIcon << std::endl;
     if (mData.mScript != "")
         std::cout << "  Script: " << mData.mScript << std::endl;
-    std::cout << "  Type: " << mData.mType << std::endl;
     std::cout << "  Weight: " << mData.mData.mWeight << std::endl;
     std::cout << "  Value: " << mData.mData.mValue << std::endl;
     std::cout << "  Quality: " << mData.mData.mQuality << std::endl;
@@ -886,8 +896,6 @@ void Record<ESM::Probe>::print()
     std::cout << "  Icon: " << mData.mIcon << std::endl;
     if (mData.mScript != "")
         std::cout << "  Script: " << mData.mScript << std::endl;
-    // BUG? No Type Label?
-    std::cout << "  Type: " << mData.mType << std::endl;
     std::cout << "  Weight: " << mData.mData.mWeight << std::endl;
     std::cout << "  Value: " << mData.mData.mValue << std::endl;
     std::cout << "  Quality: " << mData.mData.mQuality << std::endl;
@@ -902,7 +910,6 @@ void Record<ESM::Repair>::print()
     std::cout << "  Icon: " << mData.mIcon << std::endl;
     if (mData.mScript != "")
         std::cout << "  Script: " << mData.mScript << std::endl;
-    std::cout << "  Type: " << mData.mType << std::endl;
     std::cout << "  Weight: " << mData.mData.mWeight << std::endl;
     std::cout << "  Value: " << mData.mData.mValue << std::endl;
     std::cout << "  Quality: " << mData.mData.mQuality << std::endl;
@@ -1103,53 +1110,29 @@ void Record<ESM::Pathgrid>::print()
 template<>
 void Record<ESM::Race>::print()
 {
+    static const char *sAttributeNames[8] =
+    {
+        "Strength", "Intelligence", "Willpower", "Agility",
+        "Speed", "Endurance", "Personality", "Luck"
+    };
+
     std::cout << "  Name: " << mData.mName << std::endl;
     std::cout << "  Description: " << mData.mDescription << std::endl;
     std::cout << "  Flags: " << raceFlags(mData.mData.mFlags) << std::endl;
 
-    std::cout << "  Male:" << std::endl;
-    std::cout << "    Strength: "
-              << mData.mData.mStrength.mMale << std::endl;
-    std::cout << "    Intelligence: "
-              << mData.mData.mIntelligence.mMale << std::endl;
-    std::cout << "    Willpower: "
-              << mData.mData.mWillpower.mMale << std::endl;
-    std::cout << "    Agility: "
-              << mData.mData.mAgility.mMale << std::endl;
-    std::cout << "    Speed: "
-              << mData.mData.mSpeed.mMale << std::endl;
-    std::cout << "    Endurance: "
-              << mData.mData.mEndurance.mMale << std::endl;
-    std::cout << "    Personality: "
-              << mData.mData.mPersonality.mMale << std::endl;
-    std::cout << "    Luck: "
-              << mData.mData.mLuck.mMale << std::endl;
-    std::cout << "    Height: "
-              << mData.mData.mHeight.mMale << std::endl;
-    std::cout << "    Weight: "
-              << mData.mData.mWeight.mMale << std::endl;
+    for (int i=0; i<2; ++i)
+    {
+        bool male = i==0;
 
-    std::cout << "  Female:" << std::endl;
-    std::cout << "    Strength: "
-              << mData.mData.mStrength.mFemale << std::endl;
-    std::cout << "    Intelligence: "
-              << mData.mData.mIntelligence.mFemale << std::endl;
-    std::cout << "    Willpower: "
-              << mData.mData.mWillpower.mFemale << std::endl;
-    std::cout << "    Agility: "
-              << mData.mData.mAgility.mFemale << std::endl;
-    std::cout << "    Speed: "
-              << mData.mData.mSpeed.mFemale << std::endl;
-    std::cout << "    Endurance: "
-              << mData.mData.mEndurance.mFemale << std::endl;
-    std::cout << "    Personality: "
-              << mData.mData.mPersonality.mFemale << std::endl;
-    std::cout << "    Luck: "
-              << mData.mData.mLuck.mFemale << std::endl;
-    std::cout << "    Height: "
-              << mData.mData.mHeight.mFemale << std::endl;
-    std::cout << "    Weight: "
-              << mData.mData.mWeight.mFemale << std::endl;
+        std::cout << (male ? "  Male:" : "  Female:") << std::endl;
+
+        for (int i=0; i<8; ++i)
+            std::cout << "    " << sAttributeNames[i] << ": "
+                << mData.mData.mAttributeValues[i].getValue (male) << std::endl;
+
+        std::cout << "    Height: " << mData.mData.mHeight.getValue (male) << std::endl;
+        std::cout << "    Weight: " << mData.mData.mWeight.getValue (male) << std::endl;
+    }
 
     for (int i = 0; i != 7; i++)
         // Not all races have 7 skills.
@@ -1199,21 +1182,28 @@ void Record<ESM::Script>::print()
     std::cout << "  Script Data Size: " << mData.mData.mScriptDataSize << std::endl;
     std::cout << "  Table Size: " << mData.mData.mStringTableSize << std::endl;
 
-    std::cout << "  Script: [skipped]" << std::endl;
-    // Skip until multi-line fields is controllable by a command line option.
-    // Mildly problematic because there are no parameter to print() currently.
-    // std::cout << "-------------------------------------------" << std::endl;
-    // std::cout << s->scriptText << std::endl;
-    // std::cout << "-------------------------------------------" << std::endl;
+
     std::vector<std::string>::iterator vit;
     for (vit = mData.mVarNames.begin(); vit != mData.mVarNames.end(); vit++)
         std::cout << "  Variable: " << *vit << std::endl;
 
     std::cout << "  ByteCode: ";
-    std::vector<char>::iterator cit;
+    std::vector<unsigned char>::iterator cit;
     for (cit = mData.mScriptData.begin(); cit != mData.mScriptData.end(); cit++)
         std::cout << boost::format("%02X") % (int)(*cit);
     std::cout << std::endl;
+
+    if (mPrintPlain)
+    {
+    	std::cout << "  Script:" << std::endl;
+    	std::cout << "START--------------------------------------" << std::endl;
+    	std::cout << mData.mScriptText << std::endl;
+    	std::cout << "END----------------------------------------" << std::endl;
+    }
+    else
+    {
+    	std::cout << "  Script: [skipped]" << std::endl;
+    }
 }
 
 template<>

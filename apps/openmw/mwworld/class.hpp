@@ -81,6 +81,9 @@ namespace MWWorld
             ///< \return name (the one that is to be presented to the user; not the internal one);
             /// can return an empty string.
 
+            virtual void adjustPosition(const MWWorld::Ptr& ptr) const;
+            ///< Adjust position to stand on ground. Must be called post model load
+
             virtual MWMechanics::CreatureStats& getCreatureStats (const Ptr& ptr) const;
             ///< Return creature stats or throw an exception, if class does not have creature stats
             /// (default implementation: throw an exceoption)
@@ -150,6 +153,9 @@ namespace MWWorld
             ///< Return desired movement vector (determined based on movement settings,
             /// stance and stats).
 
+            virtual Ogre::Vector3 getRotationVector (const Ptr& ptr) const;
+            ///< Return desired rotations, as euler angles.
+
             virtual std::pair<std::vector<int>, bool> getEquipmentSlots (const Ptr& ptr) const;
             ///< \return first: Return IDs of the slot this object can be equipped in; second: can object
             /// stay stacked when equipped?
@@ -215,6 +221,9 @@ namespace MWWorld
             ///< Return the down sound ID of \a ptr or throw an exception, if class does not support ID retrieval
             /// (default implementation: throw an exception)
 
+            virtual float getArmorRating (const MWWorld::Ptr& ptr) const;
+            ///< @return combined armor rating of this actor
+
             virtual std::string getInventoryIcon (const MWWorld::Ptr& ptr) const;
             ///< Return name of inventory icon.
 
@@ -222,11 +231,29 @@ namespace MWWorld
             ///< @return the enchantment ID if the object is enchanted, otherwise an empty string
             /// (default implementation: return empty string)
 
+            virtual float getEnchantmentPoints (const MWWorld::Ptr& ptr) const;
+            ///< @return the number of enchantment points available for possible enchanting
+
             virtual void adjustScale(const MWWorld::Ptr& ptr,float& scale) const;
 
             virtual void adjustRotation(const MWWorld::Ptr& ptr,float& x,float& y,float& z) const;
 
+            virtual bool canSell (const MWWorld::Ptr& item, int npcServices) const;
+            ///< Determine whether or not \a item can be sold to an npc with the given \a npcServices
+
+            virtual int getServices (const MWWorld::Ptr& actor) const;
+
             virtual std::string getModel(const MWWorld::Ptr &ptr) const;
+
+            virtual void applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const;
+
+            virtual std::pair<int, std::string> canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const;
+            ///< Return 0 if player cannot equip item. 1 if can equip. 2 if it's twohanded weapon. 3 if twohanded weapon conflicts with that.
+            ///  Second item in the pair specifies the error message
+
+            virtual float getWeight (const MWWorld::Ptr& ptr) const;
+
+            virtual bool isPersistent (const MWWorld::Ptr& ptr) const;
 
             virtual Ptr
             copyToCell(const Ptr &ptr, CellStore &cell) const;

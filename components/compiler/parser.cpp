@@ -148,6 +148,11 @@ namespace Compiler
         return false;
     }
 
+    bool Parser::parseComment (const std::string& comment, const TokenLoc& loc, Scanner& scanner)
+    {
+        return true;
+    }
+
     // Handle an EOF token.
     //
     // - Default-implementation: Report an error.

@@ -47,7 +47,7 @@ namespace MWWorld
         private:
 
             //OEngine::Render::OgreRenderer& mRenderer;
-            CellStore* mCurrentCell; // the cell, the player is in
+            CellStore* mCurrentCell; // the cell the player is in
             CellStoreCollection mActiveCells;
             bool mCellChanged;
             PhysicsSystem *mPhysics;
@@ -84,6 +84,9 @@ namespace MWWorld
 
             void changeToExteriorCell (const ESM::Position& position);
             ///< Move to exterior cell.
+
+            void changeToVoid();
+            ///< Change into a void
 
             void markCellAsUnchanged();
 

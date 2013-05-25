@@ -41,7 +41,8 @@ namespace CSVDoc
             std::vector<QAction *> mEditingActions;
             Operations *mOperations;
             SubViewFactoryManager mSubViewFactory;
-            QMainWindow* mSubViewWindow;
+            QMainWindow mSubViewWindow;
+
 
             // not implemented
             View (const View&);
@@ -59,17 +60,18 @@ namespace CSVDoc
 
             void setupWorldMenu();
 
-            void setupSettingsMenu();
-
             void setupUi();
 
             void updateTitle();
 
             void updateActions();
 
+            void exitApplication();
+
         public:
 
-            View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews, QMainWindow *viewParent);
+            View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews);
+
             ///< The ownership of \a document is not transferred to *this.
 
             virtual ~View();
@@ -84,7 +86,7 @@ namespace CSVDoc
 
             void updateProgress (int current, int max, int type, int threads);
 
-            QDockWidget *getOperations() const;
+            Operations *getOperations() const;
 
         signals:
 
@@ -92,9 +94,13 @@ namespace CSVDoc
 
             void loadDocumentRequest();
 
+            void exitApplicationRequest (CSVDoc::View *view);
+
         public slots:
 
             void addSubView (const CSMWorld::UniversalId& id);
+
+            void abortOperation (int type);
 
             void slotUpdateEditorSetting (const QString &settingName, const QString &settingValue);
 
@@ -104,13 +110,35 @@ namespace CSVDoc
 
             void save();
 
+            void exit();
+
             void verify();
 
             void addGlobalsSubView();
 
             void addGmstsSubView();
 
-            void abortOperation (int type);
+            void addSkillsSubView();
+
+            void addClassesSubView();
+
+            void addFactionsSubView();
+
+            void addRacesSubView();
+
+            void addSoundsSubView();
+
+            void addScriptsSubView();
+
+            void addRegionsSubView();
+
+            void addBirthsignsSubView();
+
+            void addSpellsSubView();
+
+            void addCellsSubView();
+
+            void addReferenceablesSubView();
 
             void showUserSettings();
     };

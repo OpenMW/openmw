@@ -4,7 +4,6 @@
 #include <cstdlib>
 
 #include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -13,95 +12,116 @@
 
 #include "player.hpp"
 #include "esmstore.hpp"
+#include "fallback.hpp"
 
 using namespace Ogre;
 using namespace MWWorld;
 using namespace MWSound;
 
-#define lerp(x, y) (x * (1-factor) + y * factor)
-std::string WeatherManager::getFallback (const std::string& key) const
+namespace
 {
-    std::map<std::string,std::string>::const_iterator it;
-    if((it = mFallback.find(key)) == mFallback.end())
+    float lerp (float x, float y, float factor)
     {
-        return "";
+        return x * (1-factor) + y * factor;
     }
-    return it->second;
-}
-std::string WeatherManager::getFallbackString(const std::string& fall) const
-{
-    return getFallback(fall);
+
+    Ogre::ColourValue lerp (const Ogre::ColourValue& x, const Ogre::ColourValue& y, float factor)
+    {
+        return x * (1-factor) + y * factor;
+    }
 }
 
-float WeatherManager::getFallbackFloat(const std::string& fall) const
-{
-    std::string fallback=getFallbackString(fall);
-    return boost::lexical_cast<float>(fallback);
-}
-
-ColourValue WeatherManager::getFallbackColour(const std::string& fall) const
-{
-    std::string sum;
-    std::string ret[3];
-    sum=getFallback(fall);
-    unsigned int j=0;
-    for(unsigned int i=0;i<sum.length();i++){
-            if(sum[i]==',') j++;
-            else ret[j]+=sum[i];
-    }
-    return ColourValue(boost::lexical_cast<int>(ret[0])/255.f,boost::lexical_cast<int>(ret[1])/255.f,boost::lexical_cast<int>(ret[2])/255.f);
-}
 void WeatherManager::setFallbackWeather(Weather& weather,const std::string& name)
 {
     std::string upper=name;
     upper[0]=toupper(name[0]);
-    weather.mCloudsMaximumPercent = getFallbackFloat("Weather_"+upper+"_Clouds_Maximum_Percent");
-    weather.mTransitionDelta = getFallbackFloat("Weather_"+upper+"_Transition_Delta");
-    weather.mSkySunriseColor=getFallbackColour("Weather_"+upper+"_Sky_Sunrise_Color");
-    weather.mSkyDayColor = getFallbackColour("Weather_"+upper+"_Sky_Day_Color");
-    weather.mSkySunsetColor = getFallbackColour("Weather_"+upper+"_Sky_Sunset_Color");
-    weather.mSkyNightColor = getFallbackColour("Weather_"+upper+"_Sky_Night_Color");
-    weather.mFogSunriseColor = getFallbackColour("Weather_"+upper+"_Fog_Sunrise_Color");
-    weather.mFogDayColor = getFallbackColour("Weather_"+upper+"_Fog_Day_Color");
-    weather.mFogSunsetColor = getFallbackColour("Weather_"+upper+"_Fog_Sunset_Color");
-    weather.mFogNightColor = getFallbackColour("Weather_"+upper+"_Fog_Night_Color");
-    weather.mAmbientSunriseColor = getFallbackColour("Weather_"+upper+"_Ambient_Sunrise_Color");
-    weather.mAmbientDayColor = getFallbackColour("Weather_"+upper+"_Ambient_Day_Color");
-    weather.mAmbientSunsetColor = getFallbackColour("Weather_"+upper+"_Ambient_Sunset_Color");
-    weather.mAmbientNightColor = getFallbackColour("Weather_"+upper+"_Ambient_Night_Color");
-    weather.mSunSunriseColor = getFallbackColour("Weather_"+upper+"_Sun_Sunrise_Color");
-    weather.mSunDayColor = getFallbackColour("Weather_"+upper+"_Sun_Day_Color");
-    weather.mSunSunsetColor = getFallbackColour("Weather_"+upper+"_Sun_Sunset_Color");
-    weather.mSunNightColor = getFallbackColour("Weather_"+upper+"_Sun_Night_Color");
-    weather.mSunDiscSunsetColor = getFallbackColour("Weather_"+upper+"_Sun_Disc_Sunset_Color");
-    weather.mLandFogDayDepth = getFallbackFloat("Weather_"+upper+"_Land_Fog_Day_Depth");
-    weather.mLandFogNightDepth = getFallbackFloat("Weather_"+upper+"_Land_Fog_Night_Depth");
-    weather.mWindSpeed = getFallbackFloat("Weather_"+upper+"_Wind_Speed");
-    weather.mCloudSpeed = getFallbackFloat("Weather_"+upper+"_Cloud_Speed");
-    weather.mGlareView = getFallbackFloat("Weather_"+upper+"_Glare_View");
+    weather.mCloudsMaximumPercent = mFallback->getFallbackFloat("Weather_"+upper+"_Clouds_Maximum_Percent");
+    weather.mTransitionDelta = mFallback->getFallbackFloat("Weather_"+upper+"_Transition_Delta");
+    weather.mSkySunriseColor=mFallback->getFallbackColour("Weather_"+upper+"_Sky_Sunrise_Color");
+    weather.mSkyDayColor = mFallback->getFallbackColour("Weather_"+upper+"_Sky_Day_Color");
+    weather.mSkySunsetColor = mFallback->getFallbackColour("Weather_"+upper+"_Sky_Sunset_Color");
+    weather.mSkyNightColor = mFallback->getFallbackColour("Weather_"+upper+"_Sky_Night_Color");
+    weather.mFogSunriseColor = mFallback->getFallbackColour("Weather_"+upper+"_Fog_Sunrise_Color");
+    weather.mFogDayColor = mFallback->getFallbackColour("Weather_"+upper+"_Fog_Day_Color");
+    weather.mFogSunsetColor = mFallback->getFallbackColour("Weather_"+upper+"_Fog_Sunset_Color");
+    weather.mFogNightColor = mFallback->getFallbackColour("Weather_"+upper+"_Fog_Night_Color");
+    weather.mAmbientSunriseColor = mFallback->getFallbackColour("Weather_"+upper+"_Ambient_Sunrise_Color");
+    weather.mAmbientDayColor = mFallback->getFallbackColour("Weather_"+upper+"_Ambient_Day_Color");
+    weather.mAmbientSunsetColor = mFallback->getFallbackColour("Weather_"+upper+"_Ambient_Sunset_Color");
+    weather.mAmbientNightColor = mFallback->getFallbackColour("Weather_"+upper+"_Ambient_Night_Color");
+    weather.mSunSunriseColor = mFallback->getFallbackColour("Weather_"+upper+"_Sun_Sunrise_Color");
+    weather.mSunDayColor = mFallback->getFallbackColour("Weather_"+upper+"_Sun_Day_Color");
+    weather.mSunSunsetColor = mFallback->getFallbackColour("Weather_"+upper+"_Sun_Sunset_Color");
+    weather.mSunNightColor = mFallback->getFallbackColour("Weather_"+upper+"_Sun_Night_Color");
+    weather.mSunDiscSunsetColor = mFallback->getFallbackColour("Weather_"+upper+"_Sun_Disc_Sunset_Color");
+    weather.mLandFogDayDepth = mFallback->getFallbackFloat("Weather_"+upper+"_Land_Fog_Day_Depth");
+    weather.mLandFogNightDepth = mFallback->getFallbackFloat("Weather_"+upper+"_Land_Fog_Night_Depth");
+    weather.mWindSpeed = mFallback->getFallbackFloat("Weather_"+upper+"_Wind_Speed");
+    weather.mCloudSpeed = mFallback->getFallbackFloat("Weather_"+upper+"_Cloud_Speed");
+    weather.mGlareView = mFallback->getFallbackFloat("Weather_"+upper+"_Glare_View");
     mWeatherSettings[name] = weather;
 }
 
-WeatherManager::WeatherManager(MWRender::RenderingManager* rendering,const std::map<std::string,std::string>& fallbackMap) :
+
+float WeatherManager::calculateHourFade (const std::string& moonName) const
+{
+    float fadeOutStart=mFallback->getFallbackFloat("Moons_"+moonName+"_Fade_Out_Start");
+    float fadeOutFinish=mFallback->getFallbackFloat("Moons_"+moonName+"_Fade_Out_Finish");
+    float fadeInStart=mFallback->getFallbackFloat("Moons_"+moonName+"_Fade_In_Start");
+    float fadeInFinish=mFallback->getFallbackFloat("Moons_"+moonName+"_Fade_In_Finish");
+
+    if (mHour >= fadeOutStart && mHour <= fadeOutFinish)
+        return (1 - ((mHour - fadeOutStart) / (fadeOutFinish - fadeOutStart)));
+    if (mHour >= fadeInStart && mHour <= fadeInFinish)
+        return (1 - ((mHour - fadeInStart) / (fadeInFinish - fadeInStart)));
+    else
+        return 1;
+}
+
+float WeatherManager::calculateAngleFade (const std::string& moonName, float angle) const
+{
+    float endAngle=mFallback->getFallbackFloat("Moons_"+moonName+"_Fade_End_Angle");
+    float startAngle=mFallback->getFallbackFloat("Moons_"+moonName+"_Fade_Start_Angle");
+    if (angle <= startAngle && angle >= endAngle)
+        return (1 - ((angle - endAngle)/(startAngle-endAngle)));
+    else if (angle > startAngle)
+        return 0.f;
+    else
+        return 1.f;
+}
+
+WeatherManager::WeatherManager(MWRender::RenderingManager* rendering,MWWorld::Fallback* fallback) :
      mHour(14), mCurrentWeather("clear"), mFirstUpdate(true), mWeatherUpdateTime(0),
      mThunderFlash(0), mThunderChance(0), mThunderChanceNeeded(50), mThunderSoundDelay(0),
      mRemainingTransitionTime(0), mMonth(0), mDay(0),
-     mTimePassed(0), mFallback(fallbackMap)
+     mTimePassed(0), mFallback(fallback), mWindSpeed(0.f), mRendering(rendering)
 {
-    mRendering = rendering;
     //Globals
-    mThunderSoundID0 = getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_0");
-    mThunderSoundID1 = getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_1");
-    mThunderSoundID2 = getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_2");
-    mThunderSoundID3 = getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_3");
-    mSunriseTime = getFallbackFloat("Weather_Sunrise_Time");
-    mSunsetTime = getFallbackFloat("Weather_Sunset_Time");
-    mSunriseDuration = getFallbackFloat("Weather_Sunrise_Duration");
-    mSunsetDuration = getFallbackFloat("Weather_Sunset_Duration");
-    mWeatherUpdateTime = getFallbackFloat("Weather_Hours_Between_Weather_Changes");
-    mThunderFrequency = getFallbackFloat("Weather_Thunderstorm_Thunder_Frequency");
-    mThunderThreshold = getFallbackFloat("Weather_Thunderstorm_Thunder_Threshold");
+    mThunderSoundID0 = mFallback->getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_0");
+    mThunderSoundID1 = mFallback->getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_1");
+    mThunderSoundID2 = mFallback->getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_2");
+    mThunderSoundID3 = mFallback->getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_3");
+    mSunriseTime = mFallback->getFallbackFloat("Weather_Sunrise_Time");
+    mSunsetTime = mFallback->getFallbackFloat("Weather_Sunset_Time");
+    mSunriseDuration = mFallback->getFallbackFloat("Weather_Sunrise_Duration");
+    mSunsetDuration = mFallback->getFallbackFloat("Weather_Sunset_Duration");
+    mHoursBetweenWeatherChanges = mFallback->getFallbackFloat("Weather_Hours_Between_Weather_Changes");
+    mWeatherUpdateTime = mHoursBetweenWeatherChanges * 3600;
+    mThunderFrequency = mFallback->getFallbackFloat("Weather_Thunderstorm_Thunder_Frequency");
+    mThunderThreshold = mFallback->getFallbackFloat("Weather_Thunderstorm_Thunder_Threshold");
     mThunderSoundDelay = 0.25;
+
+    //Some useful values
+    /* TODO: Use pre-sunrise_time, pre-sunset_time,
+     * post-sunrise_time, and post-sunset_time to better
+     * describe sunrise/sunset time.
+     * These values are fallbacks attached to weather.
+     */
+    mNightStart = mSunsetTime + mSunsetDuration;
+    mNightEnd = mSunriseTime - 0.5;
+    mDayStart = mSunriseTime + mSunriseDuration;
+    mDayEnd = mSunsetTime;
+
     //Weather
     Weather clear;
     clear.mCloudTexture = "tx_sky_clear.dds";
@@ -139,64 +159,14 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering,const std::
     blight.mAmbientLoopSoundID = "blight";
     setFallbackWeather(blight,"blight");
 
-    /*
     Weather snow;
     snow.mCloudTexture = "tx_bm_sky_snow.dds";
-    snow.mCloudsMaximumPercent = 1.0;
-    snow.mTransitionDelta = 0.014;
-    snow.mSkySunriseColor = clr(196, 91, 91);
-    snow.mSkyDayColor = clr(153, 158, 166);
-    snow.mSkySunsetColor = clr(96, 115, 134);
-    snow.mSkyNightColor = clr(31, 35, 39);
-    snow.mFogSunriseColor = clr(106, 91, 91);
-    snow.mFogDayColor = clr(153, 158, 166);
-    snow.mFogSunsetColor = clr(96, 115, 134);
-    snow.mFogNightColor = clr(31, 35, 39);
-    snow.mAmbientSunriseColor = clr(92, 84, 84);
-    snow.mAmbientDayColor = clr(93, 96, 105);
-    snow.mAmbientSunsetColor = clr(70, 79, 87);
-    snow.mAmbientNightColor = clr(49, 58, 68);
-    snow.mSunSunriseColor = clr(141, 109, 109);
-    snow.mSunDayColor = clr(163, 169, 183);
-    snow.mSunSunsetColor = clr(101, 121, 141);
-    snow.mSunNightColor = clr(55, 66, 77);
-    snow.mSunDiscSunsetColor = clr(128, 128, 128);
-    snow.mLandFogDayDepth = 1.0;
-    snow.mLandFogNightDepth = 1.2;
-    snow.mWindSpeed = 0;
-    snow.mCloudSpeed = 1.5;
-    snow.mGlareView = 0;
-    mWeatherSettings["snow"] = snow;
+    setFallbackWeather(snow, "snow");
 
     Weather blizzard;
     blizzard.mCloudTexture = "tx_bm_sky_blizzard.dds";
-    blizzard.mCloudsMaximumPercent = 1.0;
-    blizzard.mTransitionDelta = 0.030;
-    blizzard.mSkySunriseColor = clr(91, 99, 106);
-    blizzard.mSkyDayColor = clr(121, 133, 145);
-    blizzard.mSkySunsetColor = clr(108, 115, 121);
-    blizzard.mSkyNightColor = clr(27, 29, 31);
-    blizzard.mFogSunriseColor = clr(91, 99, 106);
-    blizzard.mFogDayColor = clr(121, 133, 145);
-    blizzard.mFogSunsetColor = clr(108, 115, 121);
-    blizzard.mFogNightColor = clr(21, 24, 28);
-    blizzard.mAmbientSunriseColor = clr(84, 88, 92);
-    blizzard.mAmbientDayColor = clr(93, 96, 105);
-    blizzard.mAmbientSunsetColor = clr(83, 77, 75);
-    blizzard.mAmbientNightColor = clr(53, 62, 70);
-    blizzard.mSunSunriseColor = clr(114, 128, 146);
-    blizzard.mSunDayColor = clr(163, 169, 183);
-    blizzard.mSunSunsetColor = clr(106, 114, 136);
-    blizzard.mSunNightColor = clr(57, 66, 74);
-    blizzard.mSunDiscSunsetColor = clr(128, 128, 128);
-    blizzard.mLandFogDayDepth = 2.8;
-    blizzard.mLandFogNightDepth = 3.0;
-    blizzard.mWindSpeed = 0.9;
-    blizzard.mCloudSpeed = 7.5;
-    blizzard.mGlareView = 0;
     blizzard.mAmbientLoopSoundID = "BM Blizzard";
-    mWeatherSettings["blizzard"] = blizzard;
-    */
+    setFallbackWeather(blizzard,"blizzard");
 }
 
 void WeatherManager::setWeather(const String& weather, bool instant)
@@ -217,12 +187,12 @@ void WeatherManager::setWeather(const String& weather, bool instant)
         if (mNextWeather != "")
         {
             // transition more than 50% finished?
-            if (mRemainingTransitionTime/(mWeatherSettings[mCurrentWeather].mTransitionDelta*24.f*3600) <= 0.5)
+            if (mRemainingTransitionTime/(mWeatherSettings[mCurrentWeather].mTransitionDelta * 24.f * 3600) <= 0.5)
                 mCurrentWeather = mNextWeather;
         }
 
         mNextWeather = weather;
-        mRemainingTransitionTime = mWeatherSettings[mCurrentWeather].mTransitionDelta*24.f*3600;
+        mRemainingTransitionTime = mWeatherSettings[mCurrentWeather].mTransitionDelta * 24.f * 3600;
     }
     mFirstUpdate = false;
 }
@@ -240,13 +210,13 @@ WeatherResult WeatherManager::getResult(const String& weather)
     result.mGlareView = current.mGlareView;
     result.mAmbientLoopSoundID = current.mAmbientLoopSoundID;
     result.mSunColor = current.mSunDiscSunsetColor;
-
-    result.mNight = (mHour < 6 || mHour > 19);
+ 
+    result.mNight = (mHour < mSunriseTime || mHour > mNightStart - 1);
 
     result.mFogDepth = result.mNight ? current.mLandFogNightDepth : current.mLandFogDayDepth;
 
     // night
-    if (mHour <= 5.5f || mHour >= 21)
+    if (mHour <= mNightEnd || mHour >= mNightStart + 1)
     {
         result.mFogColor = current.mFogNightColor;
         result.mAmbientColor = current.mAmbientNightColor;
@@ -256,33 +226,33 @@ WeatherResult WeatherManager::getResult(const String& weather)
     }
 
     // sunrise
-    else if (mHour >= 5.5f && mHour <= 9)
+    else if (mHour >= mNightEnd && mHour <= mDayStart + 1)
     {
-        if (mHour <= 6)
+        if (mHour <= mSunriseTime)
         {
             // fade in
-            float advance = 6-mHour;
+            float advance = mSunriseTime - mHour;
             float factor = advance / 0.5f;
-            result.mFogColor = lerp(current.mFogSunriseColor, current.mFogNightColor);
-            result.mAmbientColor = lerp(current.mAmbientSunriseColor, current.mAmbientNightColor);
-            result.mSunColor = lerp(current.mSunSunriseColor, current.mSunNightColor);
-            result.mSkyColor = lerp(current.mSkySunriseColor, current.mSkyNightColor);
+            result.mFogColor = lerp(current.mFogSunriseColor, current.mFogNightColor, factor);
+            result.mAmbientColor = lerp(current.mAmbientSunriseColor, current.mAmbientNightColor, factor);
+            result.mSunColor = lerp(current.mSunSunriseColor, current.mSunNightColor, factor);
+            result.mSkyColor = lerp(current.mSkySunriseColor, current.mSkyNightColor, factor);
             result.mNightFade = factor;
         }
         else //if (mHour >= 6)
         {
             // fade out
-            float advance = mHour-6;
+            float advance = mHour - mSunriseTime;
             float factor = advance / 3.f;
-            result.mFogColor = lerp(current.mFogSunriseColor, current.mFogDayColor);
-            result.mAmbientColor = lerp(current.mAmbientSunriseColor, current.mAmbientDayColor);
-            result.mSunColor = lerp(current.mSunSunriseColor, current.mSunDayColor);
-            result.mSkyColor = lerp(current.mSkySunriseColor, current.mSkyDayColor);
+            result.mFogColor = lerp(current.mFogSunriseColor, current.mFogDayColor, factor);
+            result.mAmbientColor = lerp(current.mAmbientSunriseColor, current.mAmbientDayColor, factor);
+            result.mSunColor = lerp(current.mSunSunriseColor, current.mSunDayColor, factor);
+            result.mSkyColor = lerp(current.mSkySunriseColor, current.mSkyDayColor, factor);
         }
     }
 
     // day
-    else if (mHour >= 9 && mHour <= 17)
+    else if (mHour >= mDayStart + 1 && mHour <= mDayEnd - 1)
     {
         result.mFogColor = current.mFogDayColor;
         result.mAmbientColor = current.mAmbientDayColor;
@@ -291,27 +261,27 @@ WeatherResult WeatherManager::getResult(const String& weather)
     }
 
     // sunset
-    else if (mHour >= 17 && mHour <= 21)
+    else if (mHour >= mDayEnd - 1 && mHour <= mNightStart + 1)
     {
-        if (mHour <= 19)
+        if (mHour <= mDayEnd + 1)
         {
             // fade in
-            float advance = 19-mHour;
+            float advance = (mDayEnd + 1) - mHour;
             float factor = (advance / 2);
-            result.mFogColor = lerp(current.mFogSunsetColor, current.mFogDayColor);
-            result.mAmbientColor = lerp(current.mAmbientSunsetColor, current.mAmbientDayColor);
-            result.mSunColor = lerp(current.mSunSunsetColor, current.mSunDayColor);
-            result.mSkyColor = lerp(current.mSkySunsetColor, current.mSkyDayColor);
+            result.mFogColor = lerp(current.mFogSunsetColor, current.mFogDayColor, factor);
+            result.mAmbientColor = lerp(current.mAmbientSunsetColor, current.mAmbientDayColor, factor);
+            result.mSunColor = lerp(current.mSunSunsetColor, current.mSunDayColor, factor);
+            result.mSkyColor = lerp(current.mSkySunsetColor, current.mSkyDayColor, factor);
         }
         else //if (mHour >= 19)
         {
             // fade out
-            float advance = mHour-19;
+            float advance = mHour - (mDayEnd + 1);
             float factor = advance / 2.f;
-            result.mFogColor = lerp(current.mFogSunsetColor, current.mFogNightColor);
-            result.mAmbientColor = lerp(current.mAmbientSunsetColor, current.mAmbientNightColor);
-            result.mSunColor = lerp(current.mSunSunsetColor, current.mSunNightColor);
-            result.mSkyColor = lerp(current.mSkySunsetColor, current.mSkyNightColor);
+            result.mFogColor = lerp(current.mFogSunsetColor, current.mFogNightColor, factor);
+            result.mAmbientColor = lerp(current.mAmbientSunsetColor, current.mAmbientNightColor, factor);
+            result.mSunColor = lerp(current.mSunSunsetColor, current.mSunNightColor, factor);
+            result.mSkyColor = lerp(current.mSkySunsetColor, current.mSkyNightColor, factor);
             result.mNightFade = factor;
         }
     }
@@ -329,19 +299,19 @@ WeatherResult WeatherManager::transition(float factor)
     result.mNextCloudTexture = other.mCloudTexture;
     result.mCloudBlendFactor = factor;
 
-    result.mCloudOpacity = lerp(current.mCloudOpacity, other.mCloudOpacity);
-    result.mFogColor = lerp(current.mFogColor, other.mFogColor);
-    result.mSunColor = lerp(current.mSunColor, other.mSunColor);
-    result.mSkyColor = lerp(current.mSkyColor, other.mSkyColor);
+    result.mCloudOpacity = lerp(current.mCloudOpacity, other.mCloudOpacity, factor);
+    result.mFogColor = lerp(current.mFogColor, other.mFogColor, factor);
+    result.mSunColor = lerp(current.mSunColor, other.mSunColor, factor);
+    result.mSkyColor = lerp(current.mSkyColor, other.mSkyColor, factor);
 
-    result.mAmbientColor = lerp(current.mAmbientColor, other.mAmbientColor);
-    result.mSunDiscColor = lerp(current.mSunDiscColor, other.mSunDiscColor);
-    result.mFogDepth = lerp(current.mFogDepth, other.mFogDepth);
-    result.mWindSpeed = lerp(current.mWindSpeed, other.mWindSpeed);
-    result.mCloudSpeed = lerp(current.mCloudSpeed, other.mCloudSpeed);
-    result.mCloudOpacity = lerp(current.mCloudOpacity, other.mCloudOpacity);
-    result.mGlareView = lerp(current.mGlareView, other.mGlareView);
-    result.mNightFade = lerp(current.mNightFade, other.mNightFade);
+    result.mAmbientColor = lerp(current.mAmbientColor, other.mAmbientColor, factor);
+    result.mSunDiscColor = lerp(current.mSunDiscColor, other.mSunDiscColor, factor);
+    result.mFogDepth = lerp(current.mFogDepth, other.mFogDepth, factor);
+    result.mWindSpeed = lerp(current.mWindSpeed, other.mWindSpeed, factor);
+    result.mCloudSpeed = lerp(current.mCloudSpeed, other.mCloudSpeed, factor);
+    result.mCloudOpacity = lerp(current.mCloudOpacity, other.mCloudOpacity, factor);
+    result.mGlareView = lerp(current.mGlareView, other.mGlareView, factor);
+    result.mNightFade = lerp(current.mNightFade, other.mNightFade, factor);
 
     result.mNight = current.mNight;
 
@@ -359,13 +329,12 @@ void WeatherManager::update(float duration)
 
     if (exterior)
     {
-        std::string regionstr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell()->mCell->mRegion;
-        Misc::StringUtils::toLower(regionstr);
+        std::string regionstr = Misc::StringUtils::lowerCase(MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell()->mCell->mRegion);
 
         if (mWeatherUpdateTime <= 0 || regionstr != mCurrentRegion)
         {
             mCurrentRegion = regionstr;
-            mWeatherUpdateTime = mWeatherUpdateTime*3600;
+            mWeatherUpdateTime = mHoursBetweenWeatherChanges * 3600;
 
             std::string weather = "clear";
 
@@ -387,19 +356,19 @@ void WeatherManager::update(float duration)
                     float thunder = region->mData.mThunder/255.f;
                     float ash = region->mData.mAsh/255.f;
                     float blight = region->mData.mBlight/255.f;
-                    //float snow = region->mData.a/255.f;
-                    //float blizzard = region->mData.b/255.f;
+                    float snow = region->mData.mA/255.f;
+                    float blizzard = region->mData.mB/255.f;
 
                     // re-scale to 100 percent
-                    const float total = clear+cloudy+foggy+overcast+rain+thunder+ash+blight;//+snow+blizzard;
+                    const float total = clear+cloudy+foggy+overcast+rain+thunder+ash+blight+snow+blizzard;
 
                     float random = ((rand()%100)/100.f) * total;
 
-                    //if (random >= snow+blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
-                    //    weather = "blizzard";
-                    //else if (random >= blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
-                    //    weather = "snow";
-                    /*else*/ if (random >= ash+thunder+rain+overcast+foggy+cloudy+clear)
+                    if (random >= snow+blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
+                        weather = "blizzard";
+                    else if (random >= blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
+                        weather = "snow";
+                    else if (random >= ash+thunder+rain+overcast+foggy+cloudy+clear)
                         weather = "blight";
                     else if (random >= thunder+rain+overcast+foggy+cloudy+clear)
                         weather = "ashstorm";
@@ -434,14 +403,16 @@ void WeatherManager::update(float duration)
         }
 
         if (mNextWeather != "")
-            result = transition(1-(mRemainingTransitionTime/(mWeatherSettings[mCurrentWeather].mTransitionDelta*24.f*3600)));
+            result = transition(1 - (mRemainingTransitionTime / (mWeatherSettings[mCurrentWeather].mTransitionDelta * 24.f * 3600)));
         else
             result = getResult(mCurrentWeather);
+
+        mWindSpeed = result.mWindSpeed;
 
         mRendering->configureFog(result.mFogDepth, result.mFogColor);
 
         // disable sun during night
-        if (mHour >= 20 || mHour <= 6.f)
+        if (mHour >= mNightStart || mHour <= mSunriseTime)
             mRendering->getSkyManager()->sunDisable();
         else
             mRendering->getSkyManager()->sunEnable();
@@ -449,45 +420,55 @@ void WeatherManager::update(float duration)
         // sun angle
         float height;
 
+        //Day duration
+        float dayDuration = (mNightStart - 1) - mSunriseTime;
+
         // rise at 6, set at 20
-        if (mHour >= 6 && mHour <= 20)
-            height = 1-std::abs(((mHour-13)/7.f));
-        else if (mHour > 20)
-            height = (mHour-20.f)/4.f;
+        if (mHour >= mSunriseTime && mHour <= mNightStart)
+            height = 1 - std::abs(((mHour - dayDuration) / 7.f));
+        else if (mHour > mNightStart)
+            height = (mHour - mNightStart) / 4.f;
         else //if (mHour > 0 && mHour < 6)
-            height = 1-(mHour/6.f);
+            height = 1 - (mHour / mSunriseTime);
 
         int facing = (mHour > 13.f) ? 1 : -1;
 
         Vector3 final(
-            -(1-height)*facing,
-            -(1-height)*facing,
+            -(1 - height) * facing,
+            -(1 - height) * facing,
             height);
         mRendering->setSunDirection(final);
 
-        // moon calculations
-        float night;
-        if (mHour >= 14)
-            night = mHour-14;
-        else if (mHour <= 10)
-            night = mHour+10;
+        /*
+         * TODO: import separated fadeInStart/Finish, fadeOutStart/Finish
+         * for masser and secunda
+         */
+
+        float fadeOutFinish=mFallback->getFallbackFloat("Moons_Masser_Fade_Out_Finish");
+        float fadeInStart=mFallback->getFallbackFloat("Moons_Masser_Fade_In_Start");
+
+        //moon calculations
+        float moonHeight;
+        if (mHour >= fadeInStart)
+            moonHeight = mHour - fadeInStart;
+        else if (mHour <= fadeOutFinish)
+            moonHeight = mHour + fadeOutFinish;
         else
-            night = 0;
+            moonHeight = 0;
 
-        night /= 20.f;
+        moonHeight /= (24.f - (fadeInStart - fadeOutFinish));
 
-        if (night != 0)
+        if (moonHeight != 0)
         {
-            float moonHeight = 1-std::abs((night-0.5)*2);
-            int facing = (mHour > 0.f && mHour<12.f) ? 1 : -1;
+            int facing = (moonHeight <= 1) ? 1 : -1;
             Vector3 masser(
-                (1-moonHeight)*facing,
-                (1-moonHeight)*facing,
+                (moonHeight - 1) * facing,
+                (1 - moonHeight) * facing,
                 moonHeight);
 
             Vector3 secunda(
-                (1-moonHeight)*facing*0.8,
-                (1-moonHeight)*facing*1.25,
+                (moonHeight - 1) * facing * 1.25,
+                (1 - moonHeight) * facing * 0.8,
                 moonHeight);
 
             mRendering->getSkyManager()->setMasserDirection(masser);
@@ -495,37 +476,17 @@ void WeatherManager::update(float duration)
             mRendering->getSkyManager()->masserEnable();
             mRendering->getSkyManager()->secundaEnable();
 
-            float hour_fade;
-            if (mHour >= 7.f && mHour <= 14.f)
-                hour_fade = 1-(mHour-7)/3.f;
-            else if (mHour >= 14 && mHour <= 15.f)
-                hour_fade = mHour-14;
-            else
-                hour_fade = 1;
+            float angle = (1-moonHeight) * 90.f * facing;
+            float masserHourFade = calculateHourFade("Masser");
+            float secundaHourFade = calculateHourFade("Secunda");
+            float masserAngleFade = calculateAngleFade("Masser", angle);
+            float secundaAngleFade = calculateAngleFade("Secunda", angle);
 
-            float secunda_angle_fade;
-            float masser_angle_fade;
-            float angle = moonHeight*90.f;
+            masserAngleFade *= masserHourFade;
+            secundaAngleFade *= secundaHourFade;
 
-            if (angle >= 30 && angle <= 50)
-                secunda_angle_fade = (angle-30)/20.f;
-            else if (angle <30)
-                secunda_angle_fade = 0.f;
-            else
-                secunda_angle_fade = 1.f;
-
-            if (angle >= 40 && angle <= 50)
-                masser_angle_fade = (angle-40)/10.f;
-            else if (angle <40)
-                masser_angle_fade = 0.f;
-            else
-                masser_angle_fade = 1.f;
-
-            masser_angle_fade *= hour_fade;
-            secunda_angle_fade *= hour_fade;
-
-            mRendering->getSkyManager()->setMasserFade(masser_angle_fade);
-            mRendering->getSkyManager()->setSecundaFade(secunda_angle_fade);
+            mRendering->getSkyManager()->setMasserFade(masserAngleFade);
+            mRendering->getSkyManager()->setSecundaFade(secundaAngleFade);
         }
         else
         {
@@ -672,6 +633,9 @@ unsigned int WeatherManager::getWeatherID() const
 
 void WeatherManager::changeWeather(const std::string& region, const unsigned int id)
 {
+    // make sure this region exists
+    MWBase::Environment::get().getWorld()->getStore().get<ESM::Region>().find(region);
+
     std::string weather;
     if (id==0)
         weather = "clear";
@@ -696,5 +660,14 @@ void WeatherManager::changeWeather(const std::string& region, const unsigned int
     else
         weather = "clear";
 
-    mRegionOverrides[region] = weather;
+    mRegionOverrides[Misc::StringUtils::lowerCase(region)] = weather;
+
+    std::string playerRegion = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell()->mCell->mRegion;
+    if (Misc::StringUtils::ciEqual(region, playerRegion))
+        setWeather(weather);
+}
+
+float WeatherManager::getWindSpeed() const
+{
+    return mWindSpeed;
 }

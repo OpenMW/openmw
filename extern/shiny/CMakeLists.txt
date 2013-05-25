@@ -9,8 +9,6 @@ set(SHINY_LIBRARY "shiny")
 set(SHINY_OGREPLATFORM_LIBRARY "shiny.OgrePlatform")
 
 # Sources
-file(GLOB SOURCE_FILES Main/*.cpp )
-
 set(SOURCE_FILES
     Main/Factory.cpp
     Main/MaterialInstance.cpp
@@ -23,26 +21,6 @@ set(SOURCE_FILES
     Main/ShaderInstance.cpp
     Main/ShaderSet.cpp
 )
-
-if (DEFINED SHINY_USE_WAVE_SYSTEM_INSTALL)
-    # use system install
-else()
-    list(APPEND SOURCE_FILES
-        Preprocessor/aq.cpp
-        Preprocessor/cpp_re.cpp
-        Preprocessor/instantiate_cpp_literalgrs.cpp
-        Preprocessor/instantiate_cpp_exprgrammar.cpp
-        Preprocessor/instantiate_cpp_grammar.cpp
-        Preprocessor/instantiate_defined_grammar.cpp
-        Preprocessor/instantiate_predef_macros.cpp
-        Preprocessor/instantiate_re2c_lexer.cpp
-        Preprocessor/instantiate_re2c_lexer_str.cpp
-        Preprocessor/token_ids.cpp
-    )
-
-    # Don't use thread-safe boost::wave. Results in a huge speed-up for the preprocessor.
-    add_definitions(-DBOOST_WAVE_SUPPORT_THREADING=0)
-endif()
 
 set(OGRE_PLATFORM_SOURCE_FILES
     Platforms/Ogre/OgreGpuProgram.cpp
@@ -57,12 +35,20 @@ file(GLOB OGRE_PLATFORM_SOURCE_FILES Platforms/Ogre/*.cpp)
 
 add_library(${SHINY_LIBRARY} STATIC ${SOURCE_FILES})
 
+set(SHINY_LIBRARIES ${SHINY_LIBRARY})
+
 if (SHINY_BUILD_OGRE_PLATFORM)
     add_library(${SHINY_OGREPLATFORM_LIBRARY} STATIC ${OGRE_PLATFORM_SOURCE_FILES})
+    set(SHINY_LIBRARIES ${SHINY_LIBRARIES} ${SHINY_OGREPLATFORM_LIBRARY})
 endif()
 
+set(SHINY_LIBRARY ${SHINY_LIBRARY} PARENT_SCOPE)
+
+if (DEFINED SHINY_BUILD_MATERIAL_EDITOR)
+    add_subdirectory(Editor)
+
+    set(SHINY_BUILD_EDITOR_FLAG ${SHINY_BUILD_EDITOR_FLAG} PARENT_SCOPE)
+endif()
 
 link_directories(${CMAKE_CURRENT_BINARY_DIR})
-
-set(SHINY_LIBRARY ${SHINY_LIBRARY} PARENT_SCOPE)
-set(SHINY_OGREPLATFORM_LIBRARY ${SHINY_OGREPLATFORM_LIBRARY} PARENT_SCOPE)
+set(SHINY_LIBRARIES ${SHINY_LIBRARIES} PARENT_SCOPE)

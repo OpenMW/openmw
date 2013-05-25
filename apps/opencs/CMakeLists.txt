@@ -1,4 +1,3 @@
-
 set (OPENCS_SRC main.cpp)
 
 opencs_units (. editor)
@@ -24,7 +23,8 @@ opencs_units (model/world
 
 
 opencs_units_noqt (model/world
-    universalid data record idcollection commands columnbase
+    universalid data record idcollection commands columnbase scriptcontext cell refidcollection
+    refidadapter refiddata refidadapterimp
     )
 
 opencs_hdrs_noqt (model/world
@@ -37,7 +37,8 @@ opencs_units (model/tools
     )
 
 opencs_units_noqt (model/tools
-    stage verifier mandatoryid
+    stage verifier mandatoryid skillcheck classcheck factioncheck racecheck soundcheck regioncheck
+    birthsigncheck spellcheck
     )
 
 
@@ -56,11 +57,11 @@ opencs_hdrs_noqt (view/doc
 
 
 opencs_units (view/world
-    table tablesubview
+    table tablesubview scriptsubview
     )
 
 opencs_units_noqt (view/world
-    dialoguesubview util subviews enumdelegate vartypedelegate
+    dialoguesubview util subviews enumdelegate vartypedelegate scripthighlighter
     )
 
 
@@ -72,27 +73,34 @@ opencs_units_noqt (view/tools
     subviews
     )
 
-opencs_units (settings
-    customblock
-    proxyblock
-    settingcontainer
-    groupbox
-    settingsitem
+opencs_units (view/settings
     abstractblock
-    settingwidget
-    itemblock
-    groupblock
-    toggleblock
-    usersettingsdialog
-    abstractpage
+    proxyblock
     abstractwidget
-    blankpage
+    usersettingsdialog
     editorpage
     )
 
-opencs_units_noqt (settings
+opencs_units_noqt (view/settings
+    abstractpage
+    blankpage
+    groupblock
+    customblock
+    groupbox
+    itemblock
+    settingwidget
+    toggleblock
     support
+    )
+
+opencs_units (model/settings
     usersettings
+    settingcontainer
+    )
+
+opencs_units_noqt (model/settings
+    support
+    settingsitem
     )
 
 set (OPENCS_US

@@ -34,17 +34,20 @@ namespace Interpreter
 
     std::string Runtime::getStringLiteral (int index) const
     {
-        assert (index>=0 && index<static_cast<int> (mCode[3]));
+        assert (index>=0 && static_cast<int> (mCode[3])>0);
 
         const char *literalBlock =
             reinterpret_cast<const char *> (mCode + 4 + mCode[0] + mCode[1] + mCode[2]);
 
+        int offset = 0;
+
         for (; index; --index)
         {
-            literalBlock += std::strlen (literalBlock) + 1;
+            offset += std::strlen (literalBlock+offset) + 1;
+            assert (offset/4<static_cast<int> (mCode[3]));
         }
 
-        return literalBlock;
+        return literalBlock+offset;
     }
 
     void Runtime::configure (const Interpreter::Type_Code *code, int codeSize, Context& context)

@@ -7,16 +7,15 @@
 #include <QMenuBar>
 #include <QMdiArea>
 #include <QDockWidget>
+#include <QtGui/QApplication>
 
 #include "../../model/doc/document.hpp"
 #include "../world/subviews.hpp"
 #include "../tools/subviews.hpp"
-#include "../../settings/usersettingsdialog.hpp"
+#include "../settings/usersettingsdialog.hpp"
 #include "viewmanager.hpp"
 #include "operations.hpp"
 #include "subview.hpp"
-
-#include <QDebug>
 
 void CSVDoc::View::closeEvent (QCloseEvent *event)
 {
@@ -39,6 +38,20 @@ void CSVDoc::View::setupFileMenu()
     mSave = new QAction (tr ("&Save"), this);
     connect (mSave, SIGNAL (triggered()), this, SLOT (save()));
     file->addAction (mSave);
+
+    mVerify = new QAction (tr ("&Verify"), this);
+    connect (mVerify, SIGNAL (triggered()), this, SLOT (verify()));
+    file->addAction (mVerify);
+
+    QAction *close = new QAction (tr ("&Close"), this);
+    connect (close, SIGNAL (triggered()), this, SLOT (close()));
+    file->addAction(close);
+
+    QAction *exit = new QAction (tr ("&Exit"), this);
+    connect (exit, SIGNAL (triggered()), this, SLOT (exit()));
+    connect (this, SIGNAL(exitApplicationRequest(CSVDoc::View *)), &mViewManager, SLOT(exitApplication(CSVDoc::View *)));
+
+    file->addAction(exit);
 }
 
 void CSVDoc::View::setupEditMenu()
@@ -52,6 +65,10 @@ void CSVDoc::View::setupEditMenu()
     mRedo= mDocument->getUndoStack().createRedoAction (this, tr("&Redo"));
     mRedo->setShortcuts (QKeySequence::Redo);
     edit->addAction (mRedo);
+
+    QAction *userSettings = new QAction (tr ("&Preferences"), this);
+    connect (userSettings, SIGNAL (triggered()), this, SLOT (showUserSettings()));
+    edit->addAction (userSettings);
 }
 
 void CSVDoc::View::setupViewMenu()
@@ -75,18 +92,49 @@ void CSVDoc::View::setupWorldMenu()
     connect (gmsts, SIGNAL (triggered()), this, SLOT (addGmstsSubView()));
     world->addAction (gmsts);
 
-    mVerify = new QAction (tr ("&Verify"), this);
-    connect (mVerify, SIGNAL (triggered()), this, SLOT (verify()));
-    world->addAction (mVerify);
-}
+    QAction *skills = new QAction (tr ("Skills"), this);
+    connect (skills, SIGNAL (triggered()), this, SLOT (addSkillsSubView()));
+    world->addAction (skills);
 
-void CSVDoc::View::setupSettingsMenu()
-{
-    QMenu *settings = menuBar()->addMenu( (tr ("&Settings")));
+    QAction *classes = new QAction (tr ("Classes"), this);
+    connect (classes, SIGNAL (triggered()), this, SLOT (addClassesSubView()));
+    world->addAction (classes);
 
-    QAction *userSettings = new QAction (tr ("User Settings"), this);
-    connect (userSettings, SIGNAL (triggered()), this, SLOT (showUserSettings()));
-    settings->addAction (userSettings);
+    QAction *factions = new QAction (tr ("Factions"), this);
+    connect (factions, SIGNAL (triggered()), this, SLOT (addFactionsSubView()));
+    world->addAction (factions);
+
+    QAction *races = new QAction (tr ("Races"), this);
+    connect (races, SIGNAL (triggered()), this, SLOT (addRacesSubView()));
+    world->addAction (races);
+
+    QAction *sounds = new QAction (tr ("Sounds"), this);
+    connect (sounds, SIGNAL (triggered()), this, SLOT (addSoundsSubView()));
+    world->addAction (sounds);
+
+    QAction *scripts = new QAction (tr ("Scripts"), this);
+    connect (scripts, SIGNAL (triggered()), this, SLOT (addScriptsSubView()));
+    world->addAction (scripts);
+
+    QAction *regions = new QAction (tr ("Regions"), this);
+    connect (regions, SIGNAL (triggered()), this, SLOT (addRegionsSubView()));
+    world->addAction (regions);
+
+    QAction *birthsigns = new QAction (tr ("Birthsigns"), this);
+    connect (birthsigns, SIGNAL (triggered()), this, SLOT (addBirthsignsSubView()));
+    world->addAction (birthsigns);
+
+    QAction *spells = new QAction (tr ("Spells"), this);
+    connect (spells, SIGNAL (triggered()), this, SLOT (addSpellsSubView()));
+    world->addAction (spells);
+
+    QAction *cells = new QAction (tr ("Cells"), this);
+    connect (cells, SIGNAL (triggered()), this, SLOT (addCellsSubView()));
+    world->addAction (cells);
+
+    QAction *referenceables = new QAction (tr ("Referenceables"), this);
+    connect (referenceables, SIGNAL (triggered()), this, SLOT (addReferenceablesSubView()));
+    world->addAction (referenceables);
 
 }
 
@@ -96,7 +144,6 @@ void CSVDoc::View::setupUi()
     setupEditMenu();
     setupViewMenu();
     setupWorldMenu();
-    setupSettingsMenu();
 }
 
 void CSVDoc::View::updateTitle()
@@ -128,15 +175,15 @@ void CSVDoc::View::updateActions()
     mVerify->setEnabled (!(mDocument->getState() & CSMDoc::State_Verifying));
 }
 
-CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews, QMainWindow *viewParent)
-    : mViewManager (viewManager), mDocument (document), mViewIndex (totalViews-1), mViewTotal (totalViews), QMainWindow (viewParent)
+CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews)
+    : mViewManager (viewManager), mDocument (document), mViewIndex (totalViews-1),
+      mViewTotal (totalViews)
 {
-    setDockOptions (QMainWindow::AllowNestedDocks);
-
     resize (300, 300); /// \todo get default size from settings and set reasonable minimal size
 
-    mSubViewWindow = new QMainWindow();
-    setCentralWidget (mSubViewWindow);
+    mSubViewWindow.setDockOptions (QMainWindow::AllowNestedDocks);
+
+    setCentralWidget (&mSubViewWindow);
 
     mOperations = new Operations;
     addDockWidget (Qt::BottomDockWidgetArea, mOperations);
@@ -211,7 +258,7 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id)
     /// \todo add an user setting to reuse sub views (on a per document basis or on a per top level view basis)
 
     SubView *view = mSubViewFactory.makeSubView (id, *mDocument);
-    mSubViewWindow->addDockWidget (Qt::TopDockWidgetArea, view);
+    mSubViewWindow.addDockWidget (Qt::TopDockWidgetArea, view);
 
     connect (view, SIGNAL (focusId (const CSMWorld::UniversalId&)), this,
         SLOT (addSubView (const CSMWorld::UniversalId&)));
@@ -244,22 +291,82 @@ void CSVDoc::View::addGmstsSubView()
     addSubView (CSMWorld::UniversalId::Type_Gmsts);
 }
 
+void CSVDoc::View::addSkillsSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Skills);
+}
+
+void CSVDoc::View::addClassesSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Classes);
+}
+
+void CSVDoc::View::addFactionsSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Factions);
+}
+
+void CSVDoc::View::addRacesSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Races);
+}
+
+void CSVDoc::View::addSoundsSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Sounds);
+}
+
+void CSVDoc::View::addScriptsSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Scripts);
+}
+
+void CSVDoc::View::addRegionsSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Regions);
+}
+
+void CSVDoc::View::addBirthsignsSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Birthsigns);
+}
+
+void CSVDoc::View::addSpellsSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Spells);
+}
+
+void CSVDoc::View::addCellsSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Cells);
+}
+
+void CSVDoc::View::addReferenceablesSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Referenceables);
+}
+
 void CSVDoc::View::abortOperation (int type)
 {
     mDocument->abortOperation (type);
     updateActions();
 }
 
-QDockWidget *CSVDoc::View::getOperations() const
+CSVDoc::Operations *CSVDoc::View::getOperations() const
 {
     return mOperations;
 }
 
+void CSVDoc::View::exit()
+{
+    emit exitApplicationRequest (this);
+}
+
 void CSVDoc::View::showUserSettings()
 {
-    CsSettings::UserSettingsDialog *settingsDialog = new CsSettings::UserSettingsDialog(this);
+    CSVSettings::UserSettingsDialog *settingsDialog = new CSVSettings::UserSettingsDialog(this);
 
-    connect (settingsDialog, SIGNAL (signalUpdateEditorSetting (const QString &, const QString &)),
+    connect (&(CSMSettings::UserSettings::instance()), SIGNAL (signalUpdateEditorSetting (const QString &, const QString &)),
              this, SLOT (slotUpdateEditorSetting (const QString &, const QString &)) );
 
     settingsDialog->show();
@@ -271,11 +378,7 @@ void CSVDoc::View::slotUpdateEditorSetting(const QString &settingName, const QSt
 
     if (lastValue != settingValue)
     {
-        if (settingName == "Undo Stack Size");
-
-        if (settingName == "Top-Level Window Count");
-
-        if (settingName == "Reuse Subwindows");
+        //evaluate settingName against tokens to determine which function to call to update Editor application.
 
         lastValue = settingValue;
     }

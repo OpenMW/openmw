@@ -1,14 +1,14 @@
 #ifndef MWGUI_CONFIRMATIONDIALOG_H
 #define MWGUI_CONFIRMATIONDIALOG_H
 
-#include "window_base.hpp"
+#include "windowbase.hpp"
 
 namespace MWGui
 {
     class ConfirmationDialog : public WindowModal
     {
         public:
-            ConfirmationDialog(MWBase::WindowManager& parWindowManager);
+            ConfirmationDialog();
             void open(const std::string& message);
 
             typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;

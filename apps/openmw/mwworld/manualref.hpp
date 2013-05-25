@@ -53,7 +53,7 @@ namespace MWWorld
                     !create (store.get<ESM::CreatureLevList>(), name) &&
                     !create (store.get<ESM::ItemLevList>(), name) &&
                     !create (store.get<ESM::Light>(), name) &&
-                    !create (store.get<ESM::Tool>(), name) &&
+                    !create (store.get<ESM::Lockpick>(), name) &&
                     !create (store.get<ESM::Miscellaneous>(), name) &&
                     !create (store.get<ESM::NPC>(), name) &&
                     !create (store.get<ESM::Probe>(), name) &&
@@ -68,12 +68,12 @@ namespace MWWorld
                 cellRef.mRefnum = -1;
                 cellRef.mScale = 1;
                 cellRef.mFactIndex = 0;
-                cellRef.mCharge = 0;
-                cellRef.mIntv = 0;
-                cellRef.mNam9 = 0;
+                cellRef.mCharge = -1;
+                cellRef.mGoldValue = 1;
+                cellRef.mEnchantmentCharge = -1;
                 cellRef.mTeleport = false;
                 cellRef.mLockLevel = 0;
-                cellRef.mUnam = 0;
+                cellRef.mReferenceBlocked = 0;
             }
 
             const Ptr& getPtr() const

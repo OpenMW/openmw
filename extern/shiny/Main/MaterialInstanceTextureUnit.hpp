@@ -18,6 +18,7 @@ namespace sh
 	public:
 		MaterialInstanceTextureUnit (const std::string& name);
 		std::string getName() const;
+		void setName (const std::string& name) { mName = name; }
 	private:
 		std::string mName;
 	};

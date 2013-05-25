@@ -1,10 +1,14 @@
 #include "objects.hpp"
 
+#include <cmath>
+
 #include <OgreSceneNode.h>
 #include <OgreSceneManager.h>
 #include <OgreEntity.h>
 #include <OgreLight.h>
 #include <OgreSubEntity.h>
+#include <OgreParticleSystem.h>
+#include <OgreParticleEmitter.h>
 #include <OgreStaticGeometry.h>
 
 #include <components/nifogre/ogrenifloader.hpp>
@@ -16,16 +20,31 @@
 #include "renderconst.hpp"
 
 using namespace MWRender;
+float Objects::lightLinearValue()
+{
+    return mFallback->getFallbackFloat("LightAttenuation_LinearValue");
+}
+float Objects::lightLinearRadiusMult()
+{
+    return mFallback->getFallbackFloat("LightAttenuation_LinearRadiusMult");
+}
+float Objects::lightQuadraticValue()
+{
+    return mFallback->getFallbackFloat("LightAttenuation_QuadraticValue");
+}
+float Objects::lightQuadraticRadiusMult()
+{
+    return mFallback->getFallbackFloat("LightAttenuation_QuadraticRadiusMult");
+}
 
-/// \todo Replace these, once fallback values from the ini file are available.
-float Objects::lightLinearValue = 3;
-float Objects::lightLinearRadiusMult = 1;
-
-float Objects::lightQuadraticValue = 16;
-float Objects::lightQuadraticRadiusMult = 1;
-
-bool Objects::lightOutQuadInLin = true;
-bool Objects::lightQuadratic = false;
+bool Objects::lightOutQuadInLin()
+{
+    return mFallback->getFallbackBool("LightAttenuation_OutQuadInLin");
+}
+bool Objects::lightQuadratic()
+{
+    return mFallback->getFallbackBool("LightAttenuation_UseQuadratic");
+}
 
 int Objects::uniqueID = 0;
 
@@ -111,9 +130,9 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh, bool
     assert(insert);
 
     Ogre::AxisAlignedBox bounds = Ogre::AxisAlignedBox::BOX_NULL;
-    NifOgre::EntityList entities = NifOgre::Loader::createEntities(insert, mesh);
-    for(size_t i = 0;i < entities.mEntities.size();i++)
-        bounds.merge(entities.mEntities[i]->getWorldBoundingBox(true));
+    NifOgre::ObjectList objects = NifOgre::Loader::createObjects(insert, mesh);
+    for(size_t i = 0;i < objects.mEntities.size();i++)
+        bounds.merge(objects.mEntities[i]->getWorldBoundingBox(true));
 
     Ogre::Vector3 extents = bounds.getSize();
     extents *= insert->getScale();
@@ -130,20 +149,21 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh, bool
     mBounds[ptr.getCell()].merge(bounds);
 
     bool anyTransparency = false;
-    for(size_t i = 0;!anyTransparency && i < entities.mEntities.size();i++)
+    for(size_t i = 0;!anyTransparency && i < objects.mEntities.size();i++)
     {
-        Ogre::Entity *ent = entities.mEntities[i];
+        Ogre::Entity *ent = objects.mEntities[i];
         for(unsigned int i=0;!anyTransparency && i < ent->getNumSubEntities(); ++i)
         {
             anyTransparency = ent->getSubEntity(i)->getMaterial()->isTransparent();
         }
     }
 
-    if(!mIsStatic || !Settings::Manager::getBool("use static geometry", "Objects") || anyTransparency)
+    if(!mIsStatic || !Settings::Manager::getBool("use static geometry", "Objects") ||
+       anyTransparency || objects.mParticles.size() > 0)
     {
-        for(size_t i = 0;i < entities.mEntities.size();i++)
+        for(size_t i = 0;i < objects.mEntities.size();i++)
         {
-            Ogre::Entity *ent = entities.mEntities[i];
+            Ogre::Entity *ent = objects.mEntities[i];
             for(unsigned int i=0; i < ent->getNumSubEntities(); ++i)
             {
                 Ogre::SubEntity* subEnt = ent->getSubEntity(i);
@@ -151,6 +171,14 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh, bool
             }
             ent->setRenderingDistance(small ? Settings::Manager::getInt("small object distance", "Viewing distance") : 0);
             ent->setVisibilityFlags(mIsStatic ? (small ? RV_StaticsSmall : RV_Statics) : RV_Misc);
+        }
+        for(size_t i = 0;i < objects.mParticles.size();i++)
+        {
+            Ogre::ParticleSystem *part = objects.mParticles[i];
+            // TODO: Check the particle system's material for actual transparency
+            part->setRenderQueueGroup(RQG_Alpha);
+            part->setRenderingDistance(small ? Settings::Manager::getInt("small object distance", "Viewing distance") : 0);
+            part->setVisibilityFlags(mIsStatic ? (small ? RV_StaticsSmall : RV_Statics) : RV_Misc);
         }
     }
     else
@@ -197,8 +225,8 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh, bool
 
         sg->setRenderQueueGroup(RQG_Main);
 
-        std::vector<Ogre::Entity*>::reverse_iterator iter = entities.mEntities.rbegin();
-        while(iter != entities.mEntities.rend())
+        std::vector<Ogre::Entity*>::reverse_iterator iter = objects.mEntities.rbegin();
+        while(iter != objects.mEntities.rend())
         {
             Ogre::Node *node = (*iter)->getParentNode();
             sg->addEntity(*iter, node->_getDerivedPosition(), node->_getDerivedOrientation(), node->_getDerivedScale());
@@ -211,7 +239,7 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh, bool
 
     if (light)
     {
-        insertLight(ptr, entities.mSkelBase, bounds.getCenter() - insert->_getDerivedPosition());
+        insertLight(ptr, objects.mSkelBase, bounds.getCenter() - insert->_getDerivedPosition());
     }
 }
 
@@ -256,28 +284,25 @@ void Objects::insertLight (const MWWorld::Ptr& ptr, Ogre::Entity* skelBase, Ogre
     info.time = Ogre::Math::RangeRandom(-500, +500);
     info.phase = Ogre::Math::RangeRandom(-500, +500);
 
-    // changed to linear to look like morrowind
-    bool quadratic = false;
-    /*
-    if (!lightOutQuadInLin)
-        quadratic = lightQuadratic;
-    else
-    {
-        quadratic = !info.interior;
-    }
-    */
+    bool quadratic = lightOutQuadInLin() ? !info.interior : lightQuadratic();
+
+    // with the standard 1 / (c + d*l + d*d*q) equation the attenuation factor never becomes zero,
+    // so we ignore lights if their attenuation falls below this factor.
+    const float threshold = 0.03;
 
     if (!quadratic)
     {
-        float r = radius * lightLinearRadiusMult;
-        float attenuation = lightLinearValue / r;
-        light->setAttenuation(r*10, 0, attenuation, 0);
+        float r = radius * lightLinearRadiusMult();
+        float attenuation = lightLinearValue() / r;
+        float activationRange = 1 / (threshold * attenuation);
+        light->setAttenuation(activationRange, 0, attenuation, 0);
     }
     else
     {
-        float r = radius * lightQuadraticRadiusMult;
-        float attenuation = lightQuadraticValue / pow(r, 2);
-        light->setAttenuation(r*10, 0, 0, attenuation);
+        float r = radius * lightQuadraticRadiusMult();
+        float attenuation = lightQuadraticValue() / std::pow(r, 2);
+        float activationRange = std::sqrt(1 / (threshold * attenuation));
+        light->setAttenuation(activationRange, 0, 0, attenuation);
     }
 
     // If there's an AttachLight bone, attach the light to that, otherwise attach it to the base scene node

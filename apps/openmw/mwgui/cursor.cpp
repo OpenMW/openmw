@@ -2,12 +2,10 @@
 
 #include <MyGUI_PointerManager.h>
 #include <MyGUI_InputManager.h>
-#include <MyGUI_RenderManager.h>
 #include <MyGUI_RotatingSkin.h>
 #include <MyGUI_Gui.h>
 
 #include <OgreMath.h>
-
 
 namespace MWGui
 {

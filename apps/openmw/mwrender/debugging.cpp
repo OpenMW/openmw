@@ -20,7 +20,6 @@
 
 #include "../mwworld/ptr.hpp"
 
-#include "player.hpp"
 #include "renderconst.hpp"
 
 using namespace Ogre;

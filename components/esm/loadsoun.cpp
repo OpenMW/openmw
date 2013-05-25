@@ -23,4 +23,12 @@ void Sound::save(ESMWriter &esm)
     esm.writeHNT("DATA", mData, 3);
 }
 
+    void Sound::blank()
+    {
+        mSound.clear();
+
+        mData.mVolume = 128;
+        mData.mMinRange = 0;
+        mData.mMaxRange = 255;
+    }
 }

@@ -49,6 +49,67 @@ namespace
     {
         return new CustomData (*this);
     }
+
+    void autoCalculateAttributes (const ESM::NPC* npc, MWMechanics::CreatureStats& creatureStats)
+    {
+        // race bonus
+        const ESM::Race *race =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npc->mRace);
+
+        bool male = (npc->mFlags & ESM::NPC::Female) == 0;
+
+        int level = creatureStats.getLevel();
+
+        for (int i=0; i<ESM::Attribute::Length; ++i)
+        {
+            const ESM::Race::MaleFemale& attribute = race->mData.mAttributeValues[i];
+            creatureStats.getAttribute(i).setBase (male ? attribute.mMale : attribute.mFemale);
+        }
+
+        // class bonus
+        const ESM::Class *class_ =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(npc->mClass);
+
+        for (int i=0; i<2; ++i)
+        {
+            int attribute = class_->mData.mAttribute[i];
+            if (attribute>=0 && attribute<8)
+            {
+                creatureStats.getAttribute(attribute).setBase (
+                    creatureStats.getAttribute(attribute).getBase() + 10);
+            }
+        }
+
+        // skill bonus
+        for (int attribute=0; attribute<ESM::Attribute::Length; ++attribute)
+        {
+            float modifierSum = 0;
+
+            for (int j=0; j<ESM::Skill::Length; ++j)
+            {
+                const ESM::Skill* skill = MWBase::Environment::get().getWorld()->getStore().get<ESM::Skill>().find(j);
+
+                if (skill->mData.mAttribute != attribute)
+                    continue;
+
+                // is this a minor or major skill?
+                float add=0.2;
+                for (int k=0; k<5; ++k)
+                {
+                    if (class_->mData.mSkills[k][0] == j)
+                        add=0.5;
+                }
+                for (int k=0; k<5; ++k)
+                {
+                    if (class_->mData.mSkills[k][1] == j)
+                        add=1.0;
+                }
+                modifierSum += add;
+            }
+            creatureStats.getAttribute(attribute).setBase ( std::min(creatureStats.getAttribute(attribute).getBase()
+                + static_cast<int>((level-1) * modifierSum+0.5), 100) );
+        }
+    }
 }
 
 namespace MWClass
@@ -76,8 +137,7 @@ namespace MWClass
             fJumpAcrobaticsBase = gmst.find("fJumpAcrobaticsBase");
             fJumpAcroMultiplier = gmst.find("fJumpAcroMultiplier");
             fJumpRunMultiplier = gmst.find("fJumpRunMultiplier");
-            // Added in Tribunal/Bloodmoon, may not exist
-            fWereWolfRunMult = gmst.search("fWereWolfRunMult");
+            fWereWolfRunMult = gmst.find("fWereWolfRunMult");
 
             inited = true;
         }
@@ -126,15 +186,14 @@ namespace MWClass
             }
             else
             {
-                for (int i=0; i<8; ++i)
-                    data->mCreatureStats.getAttribute (i).set (10);
-
                 for (int i=0; i<3; ++i)
                     data->mCreatureStats.setDynamic (i, 10);
 
                 data->mCreatureStats.setLevel(ref->mBase->mNpdt12.mLevel);
                 data->mNpcStats.setBaseDisposition(ref->mBase->mNpdt12.mDisposition);
                 data->mNpcStats.setReputation(ref->mBase->mNpdt12.mReputation);
+
+                autoCalculateAttributes(ref->mBase, data->mCreatureStats);
             }
 
             data->mCreatureStats.setAiSetting (0, ref->mBase->mAiData.mHello);
@@ -160,6 +219,11 @@ namespace MWClass
         return ref->mBase->mId;
     }
 
+    void Npc::adjustPosition(const MWWorld::Ptr& ptr) const
+    {
+        MWBase::Environment::get().getWorld()->adjustPosition(ptr);
+    }
+
     void Npc::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
         renderingInterface.getActors().insertNPC(ptr, getInventoryStore(ptr));
@@ -169,6 +233,12 @@ namespace MWClass
     {
         physics.addActor(ptr);
         MWBase::Environment::get().getMechanicsManager()->add(ptr);
+    }
+
+    bool Npc::isPersistent(const MWWorld::Ptr &actor) const
+    {
+        MWWorld::LiveCellRef<ESM::NPC>* ref = actor.get<ESM::NPC>();
+        return ref->mBase->mPersistent;
     }
 
     std::string Npc::getModel(const MWWorld::Ptr &ptr) const
@@ -368,7 +438,7 @@ namespace MWClass
             moveSpeed = runSpeed;
         else
             moveSpeed = walkSpeed;
-        if(getMovementSettings(ptr).mLeftRight != 0 && getMovementSettings(ptr).mForwardBackward == 0)
+        if(getMovementSettings(ptr).mPosition[0] != 0 && getMovementSettings(ptr).mPosition[1] == 0)
             moveSpeed *= 0.75f;
 
         return moveSpeed;
@@ -414,14 +484,24 @@ namespace MWClass
 
     Ogre::Vector3 Npc::getMovementVector (const MWWorld::Ptr& ptr) const
     {
-        Ogre::Vector3 vector;
-        vector.x = getMovementSettings(ptr).mLeftRight;
-        vector.y = getMovementSettings(ptr).mForwardBackward;
-        vector.z = getMovementSettings(ptr).mUpDown;
-
-        return vector;
+        MWMechanics::Movement &movement = getMovementSettings(ptr);
+        Ogre::Vector3 vec(movement.mPosition);
+        movement.mPosition[0] = 0.0f;
+        movement.mPosition[1] = 0.0f;
+        movement.mPosition[2] = 0.0f;
+        return vec;
     }
-    
+
+    Ogre::Vector3 Npc::getRotationVector (const MWWorld::Ptr& ptr) const
+    {
+        MWMechanics::Movement &movement = getMovementSettings(ptr);
+        Ogre::Vector3 vec(movement.mRotation);
+        movement.mRotation[0] = 0.0f;
+        movement.mRotation[1] = 0.0f;
+        movement.mRotation[2] = 0.0f;
+        return vec;
+    }
+
     bool Npc::isEssential (const MWWorld::Ptr& ptr) const
     {
         MWWorld::LiveCellRef<ESM::NPC> *ref =
@@ -471,9 +551,9 @@ namespace MWClass
 
         const MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
 
-        weight -= stats.getMagicEffects().get (MWMechanics::EffectKey (8)).mMagnitude; // feather
+        weight -= stats.getMagicEffects().get (MWMechanics::EffectKey (ESM::MagicEffect::Feather)).mMagnitude;
 
-        weight += stats.getMagicEffects().get (MWMechanics::EffectKey (7)).mMagnitude; // burden
+        weight += stats.getMagicEffects().get (MWMechanics::EffectKey (ESM::MagicEffect::Burden)).mMagnitude;
 
         if (weight<0)
             weight = 0;
@@ -505,10 +585,82 @@ namespace MWClass
         stats.useSkill (skill, *class_, usageType);
     }
 
+    float Npc::getArmorRating (const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::InventoryStore& invStore = MWWorld::Class::get(ptr).getInventoryStore(ptr);
+        const MWWorld::Store<ESM::GameSetting> &gmst =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+        int ratings[MWWorld::InventoryStore::Slots];
+
+        int iBaseArmorSkill = gmst.find("iBaseArmorSkill")->getInt();
+        float fUnarmoredBase1 = gmst.find("fUnarmoredBase1")->getFloat();
+        float fUnarmoredBase2 = gmst.find("fUnarmoredBase2")->getFloat();
+        int unarmoredSkill = MWWorld::Class::get(ptr).getNpcStats(ptr).getSkill(ESM::Skill::Unarmored).getModified();
+
+        for (int i = 0; i < MWWorld::InventoryStore::Slots; ++i)
+        {
+            MWWorld::ContainerStoreIterator it = invStore.getSlot(i);
+            if (it == invStore.end() || it->getTypeName() != typeid(ESM::Armor).name())
+            {
+                // unarmored
+                ratings[i] = (fUnarmoredBase1 * unarmoredSkill) * (fUnarmoredBase2 * unarmoredSkill);
+            }
+            else
+            {
+                MWWorld::LiveCellRef<ESM::Armor> *ref =
+                    it->get<ESM::Armor>();
+
+                int armorSkillType = MWWorld::Class::get(*it).getEquipmentSkill(*it);
+                int armorSkill = MWWorld::Class::get(ptr).getNpcStats(ptr).getSkill(armorSkillType).getModified();
+
+                if (ref->mBase->mData.mWeight == 0)
+                    ratings[i] = ref->mBase->mData.mArmor;
+                else
+                    ratings[i] = ref->mBase->mData.mArmor * armorSkill / iBaseArmorSkill;
+            }
+        }
+
+        float shield = MWWorld::Class::get(ptr).getCreatureStats(ptr).getMagicEffects().get(ESM::MagicEffect::Shield).mMagnitude;
+
+        return ratings[MWWorld::InventoryStore::Slot_Cuirass] * 0.3
+                + (ratings[MWWorld::InventoryStore::Slot_CarriedLeft] + ratings[MWWorld::InventoryStore::Slot_Helmet]
+                    + ratings[MWWorld::InventoryStore::Slot_Greaves] + ratings[MWWorld::InventoryStore::Slot_Boots]
+                    + ratings[MWWorld::InventoryStore::Slot_LeftPauldron] + ratings[MWWorld::InventoryStore::Slot_RightPauldron]
+                    ) * 0.1
+                + (ratings[MWWorld::InventoryStore::Slot_LeftGauntlet] + MWWorld::InventoryStore::Slot_RightGauntlet)
+                    * 0.05
+                + shield;
+    }
+
+
     void Npc::adjustRotation(const MWWorld::Ptr& ptr,float& x,float& y,float& z) const
     {
         y = 0;
         x = 0;
+    }
+
+    void Npc::adjustScale(const MWWorld::Ptr &ptr, float &scale) const
+    {
+        MWWorld::LiveCellRef<ESM::NPC> *ref =
+            ptr.get<ESM::NPC>();
+
+        const ESM::Race* race =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(ref->mBase->mRace);
+
+        if (ref->mBase->isMale())
+            scale *= race->mData.mHeight.mMale;
+        else
+            scale *= race->mData.mHeight.mFemale;
+    }
+
+    int Npc::getServices(const MWWorld::Ptr &actor) const
+    {
+        MWWorld::LiveCellRef<ESM::NPC>* ref = actor.get<ESM::NPC>();
+        if (ref->mBase->mHasAI)
+            return ref->mBase->mAiData.mServices;
+        else
+            return 0;
     }
 
     MWWorld::Ptr

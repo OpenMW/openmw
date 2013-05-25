@@ -44,6 +44,8 @@ namespace MWClass
 
             virtual void insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const;
 
+            virtual void adjustPosition(const MWWorld::Ptr& ptr) const;
+
             virtual std::string getName (const MWWorld::Ptr& ptr) const;
             ///< \return name (the one that is to be presented to the user; not the internal one);
             /// can return an empty string.
@@ -81,7 +83,7 @@ namespace MWClass
 
             virtual bool getStance (const MWWorld::Ptr& ptr, Stance stance, bool ignoreForce = false)
                 const;
-            ////< Check if a stance is active or not.
+            ///< Check if a stance is active or not.
 
             virtual float getSpeed (const MWWorld::Ptr& ptr) const;
             ///< Return movement speed.
@@ -96,6 +98,9 @@ namespace MWClass
             ///< Return desired movement vector (determined based on movement settings,
             /// stance and stats).
 
+            virtual Ogre::Vector3 getRotationVector (const MWWorld::Ptr& ptr) const;
+            ///< Return desired rotations, as euler angles.
+
             virtual float getCapacity (const MWWorld::Ptr& ptr) const;
             ///< Return total weight that fits into the object. Throws an exception, if the object can't
             /// hold other objects.
@@ -104,11 +109,16 @@ namespace MWClass
             ///< Returns total weight of objects inside this object (including modifications from magic
             /// effects). Throws an exception, if the object can't hold other objects.
 
+            virtual float getArmorRating (const MWWorld::Ptr& ptr) const;
+            ///< @return combined armor rating of this actor
+
             virtual bool apply (const MWWorld::Ptr& ptr, const std::string& id,
                 const MWWorld::Ptr& actor) const;
             ///< Apply \a id on \a ptr.
             /// \param actor Actor that is resposible for the ID being applied to \a ptr.
             /// \return Any effect?
+
+            virtual void adjustScale (const MWWorld::Ptr &ptr, float &scale) const;
 
             virtual void skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType) const;
             ///< Inform actor \a ptr that a skill use has succeeded.
@@ -117,7 +127,11 @@ namespace MWClass
 
             virtual bool isEssential (const MWWorld::Ptr& ptr) const;
             ///< Is \a ptr essential? (i.e. may losing \a ptr make the game unwinnable)
+
+            virtual int getServices (const MWWorld::Ptr& actor) const;
             
+            virtual bool isPersistent (const MWWorld::Ptr& ptr) const;
+
             static void registerSelf();
 
             virtual std::string getModel(const MWWorld::Ptr &ptr) const;

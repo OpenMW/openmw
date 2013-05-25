@@ -2,9 +2,6 @@
 #define MWGUI_TravelWINDOW_H
 
 #include "container.hpp"
-#include "window_base.hpp"
-
-#include "../mwworld/ptr.hpp"
 
 namespace MyGUI
 {
@@ -23,7 +20,7 @@ namespace MWGui
     class TravelWindow : public ReferenceInterface, public WindowBase
     {
         public:
-            TravelWindow(MWBase::WindowManager& parWindowManager);
+            TravelWindow();
 
             void startTravel(const MWWorld::Ptr& actor);
 

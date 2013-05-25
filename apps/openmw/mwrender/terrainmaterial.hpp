@@ -72,6 +72,9 @@ namespace MWRender
         private:
             sh::MaterialInstance* mMaterial;
 
+            int getRequiredPasses (const Ogre::Terrain* terrain);
+            int getMaxLayersPerPass (const Ogre::Terrain* terrain);
+
             bool mGlobalColourMap;
 
         };

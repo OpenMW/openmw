@@ -13,6 +13,18 @@ namespace MWRender
 namespace MWMechanics
 {
 
+class Movement;
+
+enum Priority {
+    Priority_Default,
+    Priority_Weapon,
+    Priority_Torch,
+
+    Priority_Death,
+
+    Num_Priorities
+};
+
 enum CharacterState {
     CharState_SpecialIdle,
     CharState_Idle,
@@ -52,6 +64,9 @@ enum CharacterState {
     CharState_SneakLeft,
     CharState_SneakRight,
 
+    CharState_TurnLeft,
+    CharState_TurnRight,
+
     CharState_Jump,
 
     /* Death states must be last! */
@@ -62,39 +77,60 @@ enum CharacterState {
     CharState_Death5
 };
 
+enum WeaponType {
+    WeapType_None,
+
+    WeapType_HandToHand,
+    WeapType_OneHand,
+    WeapType_TwoHand,
+    WeapType_TwoWide,
+    WeapType_BowAndArrow,
+    WeapType_Crossbow,
+    WeapType_ThowWeapon,
+    WeapType_PickProbe,
+
+    WeapType_Spell
+};
+
 class CharacterController
 {
     MWWorld::Ptr mPtr;
     MWRender::Animation *mAnimation;
 
-    typedef std::deque<std::string> AnimationQueue;
+    typedef std::deque<std::pair<std::string,size_t> > AnimationQueue;
     AnimationQueue mAnimQueue;
 
-    std::string mCurrentGroup;
-    CharacterState mState;
+    CharacterState mCharState;
+    WeaponType mWeaponType;
     bool mSkipAnim;
 
-protected:
-    /* Called by the animation whenever a new text key is reached. */
-    void markerEvent(float time, const std::string &evt);
+    // counted for skill increase
+    float mSecondsOfSwimming;
+    float mSecondsOfRunning;
 
-    friend class MWRender::Animation;
+    // Gets an animation group name from the current character state, and whether it should loop.
+    void getCurrentGroup(std::string &group, Priority &prio, bool &loops) const;
+
+    static void getWeaponGroup(WeaponType weaptype, std::string &group);
+
+    void clearAnimQueue();
 
 public:
-    CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state, bool loop);
-    CharacterController(const CharacterController &rhs);
+    CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state);
     virtual ~CharacterController();
 
     void updatePtr(const MWWorld::Ptr &ptr);
 
-    Ogre::Vector3 update(float duration);
+    void update(float duration, Movement &movement);
 
     void playGroup(const std::string &groupname, int mode, int count);
     void skipAnim();
 
-    void setState(CharacterState state, bool loop);
+    void setState(CharacterState state);
     CharacterState getState() const
-    { return mState; }
+    { return mCharState; }
+
+    void forceStateUpdate();
 };
 
 }

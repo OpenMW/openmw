@@ -11,6 +11,8 @@ namespace MWRender
 
 namespace MWWorld
 {
+    class Fallback;
+
     /// Defines the actual weather that results from weather setting (see below), time of day and weather transition
     struct WeatherResult
     {
@@ -112,7 +114,7 @@ namespace MWWorld
     class WeatherManager
     {
     public:
-        WeatherManager(MWRender::RenderingManager*,const std::map<std::string,std::string>& fallbackMap);
+        WeatherManager(MWRender::RenderingManager*,MWWorld::Fallback* fallback);
 
         /**
          * Change the weather in the specified region
@@ -129,6 +131,8 @@ namespace MWWorld
 
         void setHour(const float hour);
 
+        float getWindSpeed() const;
+
         void setDate(const int day, const int month);
 
         void advanceTime(double hours)
@@ -141,11 +145,8 @@ namespace MWWorld
     private:
         float mHour;
         int mDay, mMonth;
-        std::map<std::string,std::string> mFallback;
-        std::string getFallback (const std::string& key) const;
-        std::string getFallbackString(const std::string& fall) const;
-        float getFallbackFloat(const std::string& fall) const;
-        Ogre::ColourValue getFallbackColour(const std::string& fall) const;
+        float mWindSpeed;
+        MWWorld::Fallback* mFallback;
         void setFallbackWeather(Weather& weather,const std::string& name);
         MWRender::RenderingManager* mRendering;
 
@@ -173,15 +174,23 @@ namespace MWWorld
         WeatherResult transition(const float factor);
         WeatherResult getResult(const Ogre::String& weather);
 
+        float calculateHourFade (const std::string& moonName) const;
+        float calculateAngleFade (const std::string& moonName, float angle) const;
+
         void setWeather(const Ogre::String& weather, bool instant=false);
         float mSunriseTime;
         float mSunsetTime;
         float mSunriseDuration;
         float mSunsetDuration;
         float mWeatherUpdateTime;
+        float mHoursBetweenWeatherChanges;
         float mThunderFrequency;
         float mThunderThreshold;
         float mThunderSoundDelay;
+        float mNightStart;
+        float mNightEnd;
+        float mDayStart;
+        float mDayEnd;
         std::string mThunderSoundID0;
         std::string mThunderSoundID1;
         std::string mThunderSoundID2;

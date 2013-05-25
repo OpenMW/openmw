@@ -50,7 +50,7 @@ namespace MWClass
         const std::string &model = ref->mBase->mModel;
 
         if(!model.empty())
-            physics.addObject(ptr);
+            physics.addObject(ptr,ref->mBase->mData.mFlags & ESM::Light::Carry);
 
         if (!ref->mBase->mSound.empty())
             MWBase::Environment::get().getSoundManager()->playSound3D(ptr, ref->mBase->mSound, 1.0, 1.0, MWBase::SoundManager::Play_Loop);
@@ -202,5 +202,17 @@ namespace MWClass
             ptr.get<ESM::Light>();
 
         return MWWorld::Ptr(&cell.mLights.insert(*ref), &cell);
+    }
+
+    bool Light::canSell (const MWWorld::Ptr& item, int npcServices) const
+    {
+        return npcServices & ESM::NPC::Lights;
+    }
+
+    float Light::getWeight(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Light> *ref =
+            ptr.get<ESM::Light>();
+        return ref->mBase->mData.mWeight;
     }
 }

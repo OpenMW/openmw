@@ -1,6 +1,7 @@
 #include "alchemywindow.hpp"
 
 #include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -8,8 +9,11 @@
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/player.hpp"
-#include "../mwworld/manualref.hpp"
-#include "../mwworld/containerstore.hpp"
+#include "../mwworld/class.hpp"
+
+#include "inventoryitemmodel.hpp"
+#include "sortfilteritemmodel.hpp"
+#include "itemview.hpp"
 
 namespace
 {
@@ -22,13 +26,26 @@ namespace
         path.append(".dds");
         return path;
     }
+
+    std::string getCountString(const int count)
+    {
+        if (count == 1)
+            return "";
+        if (count > 9999)
+            return boost::lexical_cast<std::string>(int(count/1000.f)) + "k";
+        else
+            return boost::lexical_cast<std::string>(count);
+    }
+
 }
 
 namespace MWGui
 {
-    AlchemyWindow::AlchemyWindow(MWBase::WindowManager& parWindowManager)
-        : WindowBase("openmw_alchemy_window.layout", parWindowManager)
-        , ContainerBase(0), mApparatus (4), mIngredients (4)
+    AlchemyWindow::AlchemyWindow()
+        : WindowBase("openmw_alchemy_window.layout")
+        , mApparatus (4)
+        , mIngredients (4)
+        , mSortModel(NULL)
     {
         getWidget(mCreateButton, "CreateButton");
         getWidget(mCancelButton, "CancelButton");
@@ -42,6 +59,10 @@ namespace MWGui
         getWidget(mApparatus[3], "Apparatus4");
         getWidget(mEffectsBox, "CreatedEffects");
         getWidget(mNameEdit, "NameEdit");
+        getWidget(mItemView, "ItemView");
+
+
+        mItemView->eventItemClicked += MyGUI::newDelegate(this, &AlchemyWindow::onSelectedItem);
 
         mIngredients[0]->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onIngredientSelected);
         mIngredients[1]->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onIngredientSelected);
@@ -51,12 +72,6 @@ namespace MWGui
         mCreateButton->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onCreateButtonClicked);
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onCancelButtonClicked);
 
-        MyGUI::ScrollView* itemView;
-        MyGUI::Widget* containerWidget;
-        getWidget(containerWidget, "Items");
-        getWidget(itemView, "ItemView");
-        setWidgets(containerWidget, itemView);
-
         center();
     }
 
@@ -64,8 +79,8 @@ namespace MWGui
     {
         mAlchemy.clear();
 
-        mWindowManager.removeGuiMode(GM_Alchemy);
-        mWindowManager.removeGuiMode(GM_Inventory);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Alchemy);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Inventory);
     }
 
     void AlchemyWindow::onCreateButtonClicked(MyGUI::Widget* _sender)
@@ -77,40 +92,40 @@ namespace MWGui
 
         if (result == MWMechanics::Alchemy::Result_NoName)
         {
-            mWindowManager.messageBox("#{sNotifyMessage37}", std::vector<std::string>());
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage37}");
             return;
         }
 
         // check if mortar & pestle is available (always needed)
         if (result == MWMechanics::Alchemy::Result_NoMortarAndPestle)
         {
-            mWindowManager.messageBox("#{sNotifyMessage45}", std::vector<std::string>());
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage45}");
             return;
         }
 
         // make sure 2 or more ingredients were selected
         if (result == MWMechanics::Alchemy::Result_LessThanTwoIngredients)
         {
-            mWindowManager.messageBox("#{sNotifyMessage6a}", std::vector<std::string>());
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage6a}");
             return;
         }
 
         if (result == MWMechanics::Alchemy::Result_NoEffects)
         {
-            mWindowManager.messageBox("#{sNotifyMessage8}", std::vector<std::string>());
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage8}");
             MWBase::Environment::get().getSoundManager()->playSound("potion fail", 1.f, 1.f);
             return;
         }
 
         if (result == MWMechanics::Alchemy::Result_Success)
         {
-            mWindowManager.messageBox("#{sPotionSuccess}", std::vector<std::string>());
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sPotionSuccess}");
             MWBase::Environment::get().getSoundManager()->playSound("potion success", 1.f, 1.f);
         }
         else if (result == MWMechanics::Alchemy::Result_RandomFailure)
         {
             // potion failed
-            mWindowManager.messageBox("#{sNotifyMessage8}", std::vector<std::string>());
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage8}");
             MWBase::Environment::get().getSoundManager()->playSound("potion fail", 1.f, 1.f);
         }
 
@@ -128,12 +143,14 @@ namespace MWGui
 
     void AlchemyWindow::open()
     {
-        openContainer (MWBase::Environment::get().getWorld()->getPlayer().getPlayer()); // this sets mPtr
-        setFilter (ContainerBase::Filter_Ingredients);
+        InventoryItemModel* model = new InventoryItemModel(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+        mSortModel = new SortFilterItemModel(model);
+        mSortModel->setFilter(SortFilterItemModel::Filter_OnlyIngredients);
+        mItemView->setModel (mSortModel);
 
         mNameEdit->setCaption("");
 
-        mAlchemy.setAlchemist (mPtr);
+        mAlchemy.setAlchemist (MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
 
         int index = 0;
 
@@ -157,8 +174,9 @@ namespace MWGui
         update();
     }
 
-    void AlchemyWindow::onSelectedItemImpl(MWWorld::Ptr item)
+    void AlchemyWindow::onSelectedItem(int index)
     {
+        MWWorld::Ptr item = mSortModel->getItem(index).mBase;
         int res = mAlchemy.addIngredient(item);
 
         if (res != -1)
@@ -170,19 +188,10 @@ namespace MWGui
         }
     }
 
-    std::vector<MWWorld::Ptr> AlchemyWindow::itemsToIgnore()
-    {
-        std::vector<MWWorld::Ptr> ignore;
-        // don't show ingredients that are currently selected in the "available ingredients" box.
-        for (int i=0; i<4; ++i)
-            if (mIngredients[i]->isUserString("ToolTipType"))
-                ignore.push_back(*mIngredients[i]->getUserData<MWWorld::Ptr>());
-
-        return ignore;
-    }
-
     void AlchemyWindow::update()
     {
+        mSortModel->clearDragItems();
+
         MWMechanics::Alchemy::TIngredientsIterator it = mAlchemy.beginIngredients ();
         for (int i=0; i<4; ++i)
         {
@@ -194,6 +203,9 @@ namespace MWGui
                 item = *it;
                 ++it;
             }
+
+            if (!item.isEmpty())
+                mSortModel->addDragItem(item, item.getRefData().getCount());
 
             if (ingredient->getChildCount())
                 MyGUI::Gui::getInstance().destroyWidget(ingredient->getChildAt(0));
@@ -216,7 +228,7 @@ namespace MWGui
             text->setCaption(getCountString(ingredient->getUserData<MWWorld::Ptr>()->getRefData().getCount()));
         }
 
-        drawItems();
+        mItemView->update();
 
         std::vector<ESM::ENAMstruct> effects;
         ESM::EffectList list;
@@ -232,7 +244,6 @@ namespace MWGui
         MyGUI::IntCoord coord(0, 0, mEffectsBox->getWidth(), 24);
         Widgets::MWEffectListPtr effectsWidget = mEffectsBox->createWidget<Widgets::MWEffectList>
             ("MW_StatName", coord, MyGUI::Align::Left | MyGUI::Align::Top);
-        effectsWidget->setWindowManager(&mWindowManager);
 
         Widgets::SpellEffectList _list = Widgets::MWEffectList::effectListFromESM(&list);
         effectsWidget->setEffectList(_list);

@@ -19,8 +19,8 @@ Ogre::Resource(creator, name, handle, group, isManual, loader)
     */
     mCollisionShape = NULL;
     mRaycastingShape = NULL;
+    mHasCollisionNode = false;
     mCollide = true;
-    mIgnore = false;
     createParamDictionary("BulletShape");
 }
 

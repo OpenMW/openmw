@@ -3,7 +3,7 @@
 
 
 #include "widgets.hpp"
-#include "window_base.hpp"
+#include "windowbase.hpp"
 
 /*
   This file contains the dialogs for choosing a class.
@@ -15,7 +15,7 @@ namespace MWGui
     class InfoBoxDialog : public WindowModal
     {
     public:
-        InfoBoxDialog(MWBase::WindowManager& parWindowManager);
+        InfoBoxDialog();
 
         typedef std::vector<std::string> ButtonList;
 
@@ -60,13 +60,13 @@ namespace MWGui
             Class_Create = 2,
             Class_Back = 3
         };
-        ClassChoiceDialog(MWBase::WindowManager& parWindowManager);
+        ClassChoiceDialog();
     };
 
     class GenerateClassResultDialog : public WindowModal
     {
     public:
-        GenerateClassResultDialog(MWBase::WindowManager& parWindowManager);
+        GenerateClassResultDialog();
 
         std::string getClassId() const;
         void setClassId(const std::string &classId);
@@ -93,7 +93,7 @@ namespace MWGui
     class PickClassDialog : public WindowModal
     {
     public:
-        PickClassDialog(MWBase::WindowManager& parWindowManager);
+        PickClassDialog();
 
         const std::string &getClassId() const { return mCurrentClassId; }
         void setClassId(const std::string &classId);
@@ -132,7 +132,7 @@ namespace MWGui
     class SelectSpecializationDialog : public WindowModal
     {
     public:
-        SelectSpecializationDialog(MWBase::WindowManager& parWindowManager);
+        SelectSpecializationDialog();
         ~SelectSpecializationDialog();
 
         ESM::Class::Specialization getSpecializationId() const { return mSpecializationId; }
@@ -163,7 +163,7 @@ namespace MWGui
     class SelectAttributeDialog : public WindowModal
     {
     public:
-        SelectAttributeDialog(MWBase::WindowManager& parWindowManager);
+        SelectAttributeDialog();
         ~SelectAttributeDialog();
 
         ESM::Attribute::AttributeID getAttributeId() const { return mAttributeId; }
@@ -192,7 +192,7 @@ namespace MWGui
     class SelectSkillDialog : public WindowModal
     {
     public:
-        SelectSkillDialog(MWBase::WindowManager& parWindowManager);
+        SelectSkillDialog();
         ~SelectSkillDialog();
 
         ESM::Skill::SkillEnum getSkillId() const { return mSkillId; }
@@ -225,7 +225,7 @@ namespace MWGui
     class DescriptionDialog : public WindowModal
     {
     public:
-        DescriptionDialog(MWBase::WindowManager& parWindowManager);
+        DescriptionDialog();
         ~DescriptionDialog();
 
         std::string getTextInput() const { return mTextEdit ? mTextEdit->getOnlyText() : ""; }
@@ -241,7 +241,7 @@ namespace MWGui
     class CreateClassDialog : public WindowModal
     {
     public:
-        CreateClassDialog(MWBase::WindowManager& parWindowManager);
+        CreateClassDialog();
         virtual ~CreateClassDialog();
 
         std::string getName() const;

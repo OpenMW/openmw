@@ -31,7 +31,17 @@ namespace CSMWorld
             Display_Float,
             Display_Var,
             Display_GmstVarType,
-            Display_GlobalVarType
+            Display_GlobalVarType,
+            Display_Specialisation,
+            Display_Attribute,
+            Display_Boolean,
+            Display_SpellType,
+            Display_Script,
+            Display_ApparatusType,
+            Display_ArmorType,
+            Display_ClothingType,
+            Display_CreatureType,
+            Display_WeaponType
         };
 
         std::string mTitle;

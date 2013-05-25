@@ -5,14 +5,13 @@
 
         <Widget type="Widget" skin="MW_Box" position="8 8 415 381" align="Stretch" name = "Client"/>
 
-        <!-- The Dialogue history -->
-        <Widget type="DialogueHistory" skin="MW_TextBoxEdit" position="13 13 405 371" name="History"  align="ALIGN_LEFT ALIGN_TOP ALIGN_STRETCH">
-            <Property key="Static" value="true"/>
-            <Property key="WordWrap" value="true"/>
-            <Property key="MultiLine" value="1" />
-            <Property key="VisibleVScroll" value="1" />
-            <!-- box for receiving mouse events -->
-            <Widget type="Widget" skin="" position="0 0 400 375" name="EventBox" align="ALIGN_LEFT ALIGN_TOP ALIGN_STRETCH"/>
+        <Widget type="Widget" position="13 13 391 371" align="ALIGN_LEFT ALIGN_TOP ALIGN_STRETCH">
+            <Widget type="BookPage" skin="MW_BookPage" position="0 0 391 371" name="History" align="ALIGN_LEFT ALIGN_TOP ALIGN_STRETCH">
+            </Widget>
+        </Widget>
+
+        <Widget type="ScrollBar" skin="MW_VScroll" position="404 13 14 371" align="ALIGN_RIGHT ALIGN_VSTRETCH" name="VScroll">
+            <Property key="Visible" value="false"/>
         </Widget>
 
 		<!-- The disposition bar-->

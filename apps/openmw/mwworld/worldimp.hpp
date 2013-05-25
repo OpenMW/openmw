@@ -10,6 +10,7 @@
 #include "cells.hpp"
 #include "localscripts.hpp"
 #include "timestamp.hpp"
+#include "fallback.hpp"
 
 #include "../mwbase/world.hpp"
 
@@ -49,6 +50,7 @@ namespace MWWorld
 
     class World : public MWBase::World
     {
+            MWWorld::Fallback mFallback;
             MWRender::RenderingManager* mRendering;
 
             MWWorld::WeatherManager* mWeatherManager;
@@ -82,12 +84,13 @@ namespace MWWorld
             float mFaced1Distance;
             float mFaced2Distance;
             int mNumFacing;
-            std::map<std::string,std::string> mFallback;
 
-            unsigned long lastTick;
-            Ogre::Timer mTimer;
+            std::map<MWWorld::Ptr, int> mDoorStates;
+            ///< only holds doors that are currently moving. 0 means closing, 1 opening
 
             int getDaysPerMonth (int month) const;
+
+            void rotateObjectImp (const Ptr& ptr, Ogre::Vector3 rot, bool adjust);
 
             bool moveObjectImp (const Ptr& ptr, float x, float y, float z);
             ///< @return true if the active cell (cell player is in) changed
@@ -107,15 +110,24 @@ namespace MWWorld
             void addContainerScripts(const Ptr& reference, Ptr::CellStore* cell);
             void PCDropped (const Ptr& item);
 
+            void processDoors(float duration);
+            ///< Run physics simulation and modify \a world accordingly.
+
+            void ensureNeededRecords();
+
+            int mPlayIntro;
+
         public:
 
             World (OEngine::Render::OgreRenderer& renderer,
                 const Files::Collections& fileCollections,
                 const std::vector<std::string>& master, const std::vector<std::string>& plugins,
-        	const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir, bool newGame,
+                const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir,
                 ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap, int mActivationDistanceOverride);
 
             virtual ~World();
+
+            virtual void startNewGame();
 
             virtual OEngine::Render::Fader* getFader();
             ///< \ŧodo remove this function. Rendering details should not be exposed.
@@ -132,11 +144,7 @@ namespace MWWorld
 
             virtual void getTriangleBatchCount(unsigned int &triangles, unsigned int &batches);
 
-            virtual void setFallbackValues (const std::map<std::string,std::string>& fallbackMap);
-
-            virtual std::string getFallback (const std::string& key) const;
-
-            virtual std::string getFallback (const std::string& key, const std::string& def) const;
+            virtual const Fallback *getFallback() const;
 
             virtual Player& getPlayer();
 
@@ -188,6 +196,9 @@ namespace MWWorld
 
             virtual Ptr searchPtrViaHandle (const std::string& handle);
             ///< Return a pointer to a liveCellRef with the given Ogre handle or Ptr() if not found
+
+            virtual void adjustPosition (const Ptr& ptr);
+            ///< Adjust position after load to be on ground. Must be called after model load.
 
             virtual void enable (const Ptr& ptr);
 
@@ -252,6 +263,8 @@ namespace MWWorld
             /// \param adjust indicates rotation should be set or adjusted
             virtual void rotateObject (const Ptr& ptr,float x,float y,float z, bool adjust = false);
 
+            virtual void localRotateObject (const Ptr& ptr, float x, float y, float z);
+
             virtual void safePlaceObject(const MWWorld::Ptr& ptr,MWWorld::CellStore &Cell,ESM::Position pos);
             ///< place an object in a "safe" location (ie not in the void, etc). Makes a copy of the Ptr.
 
@@ -265,6 +278,9 @@ namespace MWWorld
             virtual void doPhysics(const PtrMovementList &actors, float duration);
             ///< Run physics simulation and modify \a world accordingly.
 
+            virtual bool castRay (float x1, float y1, float z1, float x2, float y2, float z2);
+            ///< cast a Ray and return true if there is an object in the ray path.
+
             virtual bool toggleCollisionMode();
             ///< Toggle collision mode for player. If disabled player object should ignore
             /// collisions and gravity.
@@ -275,25 +291,44 @@ namespace MWWorld
             ///< \return Resulting mode
 
             virtual const ESM::Potion *createRecord (const ESM::Potion& record);
-            ///< Create a new recrod (of type potion) in the ESM store.
+            ///< Create a new record (of type potion) in the ESM store.
             /// \return pointer to created record
 
             virtual const ESM::Spell *createRecord (const ESM::Spell& record);
-            ///< Create a new recrod (of type spell) in the ESM store.
+            ///< Create a new record (of type spell) in the ESM store.
             /// \return pointer to created record
 
             virtual const ESM::Class *createRecord (const ESM::Class& record);
-            ///< Create a new recrod (of type class) in the ESM store.
+            ///< Create a new record (of type class) in the ESM store.
             /// \return pointer to created record
 
             virtual const ESM::Cell *createRecord (const ESM::Cell& record);
-            ///< Create a new recrod (of type cell) in the ESM store.
+            ///< Create a new record (of type cell) in the ESM store.
             /// \return pointer to created record
 
             virtual const ESM::NPC *createRecord(const ESM::NPC &record);
-            ///< Create a new recrod (of type npc) in the ESM store.
+            ///< Create a new record (of type npc) in the ESM store.
             /// \return pointer to created record
 
+            virtual const ESM::Armor *createRecord (const ESM::Armor& record);
+            ///< Create a new record (of type armor) in the ESM store.
+            /// \return pointer to created record
+
+            virtual const ESM::Weapon *createRecord (const ESM::Weapon& record);
+            ///< Create a new record (of type weapon) in the ESM store.
+            /// \return pointer to created record
+
+            virtual const ESM::Clothing *createRecord (const ESM::Clothing& record);
+            ///< Create a new record (of type clothing) in the ESM store.
+            /// \return pointer to created record
+
+            virtual const ESM::Enchantment *createRecord (const ESM::Enchantment& record);
+            ///< Create a new record (of type enchantment) in the ESM store.
+            /// \return pointer to created record
+
+            virtual const ESM::Book *createRecord (const ESM::Book& record);
+            ///< Create a new record (of type book) in the ESM store.
+            /// \return pointer to created record
 
             virtual void update (float duration, bool paused);
 
@@ -324,8 +359,8 @@ namespace MWWorld
                 mRendering->togglePreviewMode(enable);
             }
 
-            virtual bool toggleVanityMode(bool enable, bool force) {
-                return mRendering->toggleVanityMode(enable, force);
+            virtual bool toggleVanityMode(bool enable) {
+                return mRendering->toggleVanityMode(enable);
             }
 
             virtual void allowVanityMode(bool allow) {
@@ -340,7 +375,22 @@ namespace MWWorld
                 mRendering->changeVanityModeScale(factor);
             }
 
+            virtual bool vanityRotateCamera(float * rot);
+
+            virtual void setupPlayer();
             virtual void renderPlayer();
+
+            virtual bool getOpenOrCloseDoor(const MWWorld::Ptr& door);
+            ///< if activated, should this door be opened or closed?
+            virtual void activateDoor(const MWWorld::Ptr& door);
+            ///< activate (open or close) an non-teleport door
+
+            virtual bool getPlayerStandingOn (const MWWorld::Ptr& object); ///< @return true if the player is standing on \a object
+            virtual bool getActorStandingOn (const MWWorld::Ptr& object); ///< @return true if any actor is standing on \a object
+            virtual float getWindSpeed();
+
+            virtual void getContainersOwnedBy (const MWWorld::Ptr& npc, std::vector<MWWorld::Ptr>& out);
+            ///< get all containers in active cells owned by this Npc
 
             virtual void setupExternalRendering (MWRender::ExternalRendering& rendering);
 

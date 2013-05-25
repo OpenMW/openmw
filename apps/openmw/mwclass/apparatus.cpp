@@ -35,7 +35,7 @@ namespace MWClass
     {
         const std::string model = getModel(ptr);
         if(!model.empty())
-            physics.addObject(ptr);
+            physics.addObject(ptr,true);
     }
 
     std::string Apparatus::getModel(const MWWorld::Ptr &ptr) const
@@ -158,5 +158,17 @@ namespace MWClass
             ptr.get<ESM::Apparatus>();
 
         return MWWorld::Ptr(&cell.mAppas.insert(*ref), &cell);
+    }
+
+    bool Apparatus::canSell (const MWWorld::Ptr& item, int npcServices) const
+    {
+        return npcServices & ESM::NPC::Apparatus;
+    }
+
+    float Apparatus::getWeight(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Apparatus> *ref =
+            ptr.get<ESM::Apparatus>();
+        return ref->mBase->mData.mWeight;
     }
 }

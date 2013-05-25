@@ -1025,6 +1025,37 @@ namespace MWScript
                 }
         };
 
+        template <class R>
+        class OpOnDeath : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    Interpreter::Type_Integer value =
+                        MWWorld::Class::get (ptr).getCreatureStats (ptr).hasDied();
+
+                    if (value)
+                        MWWorld::Class::get (ptr).getCreatureStats (ptr).clearHasDied();
+
+                    runtime.push (value);
+                }
+        };
+
+        template <class R>
+        class OpIsWerewolf : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+                    runtime.push(MWWorld::Class::get(ptr).getNpcStats(ptr).isWerewolf());
+                }
+        };
+
         const int numberOfAttributes = 8;
 
         const int opcodeGetAttribute = 0x2000027;
@@ -1113,6 +1144,10 @@ namespace MWScript
         const int opcodeRaiseRankExplicit = 0x20001e9;
         const int opcodeLowerRank = 0x20001ea;
         const int opcodeLowerRankExplicit = 0x20001eb;
+        const int opcodeOnDeath = 0x20001fc;
+        const int opcodeOnDeathExplicit = 0x2000205;
+        const int opcodeIsWerewolf = 0x20001fd;
+        const int opcodeIsWerewolfExplicit = 0x20001fe;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -1227,6 +1262,10 @@ namespace MWScript
             extensions.registerInstruction ("pcclearexpelled", "/S", opcodePcClearExpelled, opcodePcClearExpelledExplicit);
             extensions.registerInstruction ("raiserank", "", opcodeRaiseRank, opcodeRaiseRankExplicit);
             extensions.registerInstruction ("lowerrank", "", opcodeLowerRank, opcodeLowerRankExplicit);
+
+            extensions.registerFunction ("ondeath", 'l', "", opcodeOnDeath, opcodeOnDeathExplicit);
+
+            extensions.registerFunction ("iswerewolf", 'l', "", opcodeIsWerewolf, opcodeIsWerewolfExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -1341,6 +1380,12 @@ namespace MWScript
             interpreter.installSegment5 (opcodeRaiseRankExplicit, new OpRaiseRank<ExplicitRef>);
             interpreter.installSegment5 (opcodeLowerRank, new OpLowerRank<ImplicitRef>);
             interpreter.installSegment5 (opcodeLowerRankExplicit, new OpLowerRank<ExplicitRef>);
+
+            interpreter.installSegment5 (opcodeOnDeath, new OpOnDeath<ImplicitRef>);
+            interpreter.installSegment5 (opcodeOnDeathExplicit, new OpOnDeath<ExplicitRef>);
+
+            interpreter.installSegment5 (opcodeIsWerewolf, new OpIsWerewolf<ImplicitRef>);
+            interpreter.installSegment5 (opcodeIsWerewolfExplicit, new OpIsWerewolf<ExplicitRef>);
         }
     }
 }

@@ -1,7 +1,7 @@
 #ifndef MWGUI_SpellBuyingWINDOW_H
 #define MWGUI_SpellBuyingWINDOW_H
 
-#include "window_base.hpp"
+#include "windowbase.hpp"
 #include "referenceinterface.hpp"
 
 namespace MyGUI
@@ -21,15 +21,13 @@ namespace MWGui
     class SpellBuyingWindow : public ReferenceInterface, public WindowBase
     {
         public:
-            SpellBuyingWindow(MWBase::WindowManager& parWindowManager);
+            SpellBuyingWindow();
 
             void startSpellBuying(const MWWorld::Ptr& actor);
 
         protected:
             MyGUI::Button* mCancelButton;
             MyGUI::TextBox* mPlayerGold;
-            MyGUI::TextBox* mSpells;
-            MyGUI::TextBox* mSelect;
 
             MyGUI::ScrollView* mSpellsView;
 

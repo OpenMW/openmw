@@ -32,7 +32,16 @@ namespace MWGui
              * @param maximum width
              * @return size of the created widgets
              */
-            MyGUI::IntSize parse(std::string text, MyGUI::Widget* parent, const int width);
+            MyGUI::IntSize parsePage(std::string text, MyGUI::Widget* parent, const int width);
+            
+            /**
+             * Parse markup as MyGUI widgets
+             * @param markup to parse
+             * @param parent for the created widgets
+             * @param maximum width
+             * @return size of the created widgets
+             */
+            MyGUI::IntSize parseScroll(std::string text, MyGUI::Widget* parent, const int width);
 
             /**
              * Split the specified text into pieces that fit in the area specified by width and height parameters

@@ -2,13 +2,9 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
 #include "../mwworld/player.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/actionequip.hpp"
-#include "../mwmechanics/spells.hpp"
-#include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/spellsuccess.hpp"
 #include "../mwgui/inventorywindow.hpp"
 #include "../mwgui/bookwindow.hpp"
@@ -43,8 +39,8 @@ namespace
 namespace MWGui
 {
 
-    QuickKeysMenu::QuickKeysMenu(MWBase::WindowManager& parWindowManager)
-        : WindowBase("openmw_quickkeys_menu.layout", parWindowManager)
+    QuickKeysMenu::QuickKeysMenu()
+        : WindowBase("openmw_quickkeys_menu.layout")
         , mAssignDialog(0)
         , mItemSelectionDialog(0)
         , mMagicSelectionDialog(0)
@@ -109,14 +105,14 @@ namespace MWGui
         {
             // open assign dialog
             if (!mAssignDialog)
-                mAssignDialog = new QuickKeysMenuAssign(mWindowManager, this);
+                mAssignDialog = new QuickKeysMenuAssign(this);
             mAssignDialog->setVisible (true);
         }
     }
 
     void QuickKeysMenu::onOkButtonClicked (MyGUI::Widget *sender)
     {
-        mWindowManager.removeGuiMode(GM_QuickKeysMenu);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_QuickKeysMenu);
     }
 
 
@@ -124,13 +120,12 @@ namespace MWGui
     {
         if (!mItemSelectionDialog )
         {
-            mItemSelectionDialog = new ItemSelectionDialog("#{sQuickMenu6}", ContainerBase::Filter_All, mWindowManager);
+            mItemSelectionDialog = new ItemSelectionDialog("#{sQuickMenu6}");
             mItemSelectionDialog->eventItemSelected += MyGUI::newDelegate(this, &QuickKeysMenu::onAssignItem);
             mItemSelectionDialog->eventDialogCanceled += MyGUI::newDelegate(this, &QuickKeysMenu::onAssignItemCancel);
         }
         mItemSelectionDialog->setVisible(true);
         mItemSelectionDialog->openContainer(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
-        mItemSelectionDialog->drawItems ();
 
         mAssignDialog->setVisible (false);
     }
@@ -139,7 +134,7 @@ namespace MWGui
     {
         if (!mMagicSelectionDialog )
         {
-            mMagicSelectionDialog = new MagicSelectionDialog(mWindowManager, this);
+            mMagicSelectionDialog = new MagicSelectionDialog(this);
         }
         mMagicSelectionDialog->setVisible(true);
 
@@ -281,7 +276,7 @@ namespace MWGui
             std::string spellId = button->getChildAt(0)->getUserString("Spell");
             spells.setSelectedSpell(spellId);
             store.setSelectedEnchantItem(store.end());
-            mWindowManager.setSelectedSpell(spellId, int(MWMechanics::getSpellSuccessChance(spellId, player)));
+            MWBase::Environment::get().getWindowManager()->setSelectedSpell(spellId, int(MWMechanics::getSpellSuccessChance(spellId, player)));
         }
         else if (type == Type_Item)
         {
@@ -291,7 +286,7 @@ namespace MWGui
             if (item.getRefData ().getCount() == 0)
             {
                 MWBase::Environment::get().getWindowManager ()->messageBox (
-                            "#{sQuickMenu5} " + MWWorld::Class::get(item).getName(item), std::vector<std::string>());
+                            "#{sQuickMenu5} " + MWWorld::Class::get(item).getName(item));
                 return;
             }
 
@@ -303,11 +298,11 @@ namespace MWGui
             // the "Take" button should not be visible.
             // NOTE: the take button is "reset" when the window opens, so we can safely do the following
             // without screwing up future book windows
-            mWindowManager.getBookWindow()->setTakeButtonShow(false);
-            mWindowManager.getScrollWindow()->setTakeButtonShow(false);
+            MWBase::Environment::get().getWindowManager()->getBookWindow()->setTakeButtonShow(false);
+            MWBase::Environment::get().getWindowManager()->getScrollWindow()->setTakeButtonShow(false);
 
             // since we changed equipping status, update the inventory window
-            mWindowManager.getInventoryWindow()->drawItems();
+            MWBase::Environment::get().getWindowManager()->getInventoryWindow()->updateItemView();
         }
         else if (type == Type_MagicItem)
         {
@@ -317,7 +312,7 @@ namespace MWGui
             if (item.getRefData ().getCount() == 0)
             {
                 MWBase::Environment::get().getWindowManager ()->messageBox (
-                            "#{sQuickMenu5} " + MWWorld::Class::get(item).getName(item), std::vector<std::string>());
+                            "#{sQuickMenu5} " + MWWorld::Class::get(item).getName(item));
                 return;
             }
 
@@ -341,19 +336,19 @@ namespace MWGui
                 action.execute (MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer ());
 
                 // since we changed equipping status, update the inventory window
-                mWindowManager.getInventoryWindow()->drawItems();
+                MWBase::Environment::get().getWindowManager()->getInventoryWindow()->updateItemView();
             }
 
             store.setSelectedEnchantItem(it);
             spells.setSelectedSpell("");
-            mWindowManager.setSelectedEnchantItem(item, 100); /// \todo track charge %
+            MWBase::Environment::get().getWindowManager()->setSelectedEnchantItem(item);
         }
     }
 
     // ---------------------------------------------------------------------------------------------------------
 
-    QuickKeysMenuAssign::QuickKeysMenuAssign (MWBase::WindowManager &parWindowManager, QuickKeysMenu* parent)
-        : WindowModal("openmw_quickkeys_menu_assign.layout", parWindowManager)
+    QuickKeysMenuAssign::QuickKeysMenuAssign (QuickKeysMenu* parent)
+        : WindowModal("openmw_quickkeys_menu_assign.layout")
         , mParent(parent)
     {
         getWidget(mLabel, "Label");
@@ -399,8 +394,8 @@ namespace MWGui
 
     // ---------------------------------------------------------------------------------------------------------
 
-    MagicSelectionDialog::MagicSelectionDialog(MWBase::WindowManager &parWindowManager, QuickKeysMenu* parent)
-        : WindowModal("openmw_magicselection_dialog.layout", parWindowManager)
+    MagicSelectionDialog::MagicSelectionDialog(QuickKeysMenu* parent)
+        : WindowModal("openmw_magicselection_dialog.layout")
         , mParent(parent)
         , mWidth(0)
         , mHeight(0)

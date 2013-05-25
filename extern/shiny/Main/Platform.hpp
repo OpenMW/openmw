@@ -24,6 +24,7 @@ namespace sh
 	class GpuProgram
 	{
 	public:
+        virtual ~GpuProgram() {}
 		virtual bool getSupported () = 0; ///< @return true if the compilation was successful
 
 		/// @param name name of the uniform in the shader
@@ -35,8 +36,7 @@ namespace sh
 	class TextureUnitState : public PropertySet
 	{
 	public:
-		virtual ~TextureUnitState();
-
+        virtual ~TextureUnitState();
 		virtual void setTextureName (const std::string& textureName) = 0;
 
 	protected:
@@ -46,7 +46,7 @@ namespace sh
 	class Pass : public PropertySet
 	{
 	public:
-		virtual boost::shared_ptr<TextureUnitState> createTextureUnitState () = 0;
+		virtual boost::shared_ptr<TextureUnitState> createTextureUnitState (const std::string& name) = 0;
 		virtual void assignProgram (GpuProgramType type, const std::string& name) = 0;
 
 		/// @param type gpu program type
@@ -68,6 +68,9 @@ namespace sh
 		virtual bool createConfiguration (const std::string& name, unsigned short lodIndex) = 0; ///< @return false if already exists
 		virtual void removeAll () = 0; ///< remove all configurations
 
+		virtual bool isUnreferenced() = 0;
+		virtual void ensureLoaded() = 0;
+
 		virtual void setLodLevels (const std::string& lodLevels) = 0;
 
 		virtual void setShadowCasterMaterial (const std::string& name) = 0;
@@ -78,8 +81,6 @@ namespace sh
 	public:
 		Platform (const std::string& basePath);
 		virtual ~Platform ();
-
-		void setShaderCachingEnabled (bool enabled);
 
 		/// set the folder to use for shader caching
 		void setCacheFolder (const std::string& folder);
@@ -93,6 +94,8 @@ namespace sh
 			const std::string& name, const std::string& profile,
 			const std::string& source, Language lang) = 0;
 
+		virtual void destroyGpuProgram (const std::string& name) = 0;
+
 		virtual void setSharedParameter (const std::string& name, PropertyValuePtr value) = 0;
 
 		virtual bool isProfileSupported (const std::string& profile) = 0;
@@ -105,6 +108,7 @@ namespace sh
 		friend class Factory;
 		friend class MaterialInstance;
 		friend class ShaderInstance;
+		friend class ShaderSet;
 
 	protected:
 		/**
@@ -130,9 +134,6 @@ namespace sh
 
 		std::string mCacheFolder;
 		Factory* mFactory;
-
-	protected:
-		bool mShaderCachingEnabled;
 
 	private:
 		void setFactory (Factory* factory);

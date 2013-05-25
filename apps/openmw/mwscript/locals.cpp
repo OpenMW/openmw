@@ -1,8 +1,11 @@
 #include "locals.hpp"
 
+#include <components/esm/loadscpt.hpp>
+
+#include <components/compiler/locals.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/scriptmanager.hpp"
-#include <components/compiler/locals.hpp>
 
 namespace MWScript
 {
@@ -15,9 +18,33 @@ namespace MWScript
         mFloats.clear();
         mFloats.resize (script.mData.mNumFloats, 0);
     }
-        
+
+    int Locals::getIntVar(const std::string &script, const std::string &var)
+    {
+        Compiler::Locals locals = MWBase::Environment::get().getScriptManager()->getLocals(script);
+        int index = locals.getIndex(var);
+        char type = locals.getType(var);
+        if(index != -1)
+        {
+            switch(type)
+            {
+                case 's':
+                    return mShorts.at (index);
+
+                case 'l':
+                    return mLongs.at (index);
+
+                case 'f':
+                    return mFloats.at (index);
+                default:
+                    return 0;
+            }
+        }
+        return 0;
+    }
+
     bool Locals::setVarByInt(const std::string& script, const std::string& var, int val)
-    {    
+    {
         Compiler::Locals locals = MWBase::Environment::get().getScriptManager()->getLocals(script);
         int index = locals.getIndex(var);
         char type = locals.getType(var);
@@ -27,10 +54,10 @@ namespace MWScript
             {
                 case 's':
                     mShorts.at (index) = val; break;
-                
+
                 case 'l':
                     mLongs.at (index) = val; break;
-                
+
                 case 'f':
                     mFloats.at (index) = val; break;
             }

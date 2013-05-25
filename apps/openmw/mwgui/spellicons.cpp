@@ -1,9 +1,5 @@
 #include "spellicons.hpp"
 
-#include <MyGUI_Widget.h>
-#include <MyGUI_Gui.h>
-#include <MyGUI_ImageBox.h>
-
 #include <boost/lexical_cast.hpp>
 
 #include "../mwbase/world.hpp"
@@ -14,7 +10,6 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
 
-#include "../mwmechanics/activespells.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 
 #include "tooltips.hpp"
@@ -139,12 +134,13 @@ namespace MWGui
             }
         }
 
-        parent->setVisible(effects.size() != 0);
-
         int w=2;
+
         if (adjustSize)
         {
             int s = effects.size() * 16+4;
+            if (!effects.size())
+                s = 0;
             int diff = parent->getWidth() - s;
             parent->setSize(s, parent->getHeight());
             parent->setPosition(parent->getLeft()+diff, parent->getTop());

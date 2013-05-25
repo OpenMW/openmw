@@ -197,11 +197,11 @@ void LocalMap::render(const float x, const float y,
                     const float zlow, const float zhigh,
                     const float xw, const float yw, const std::string& texture)
 {
-    //mCellCamera->setFarClipDistance( (zhigh-zlow) * 1.1 );
-    mCellCamera->setFarClipDistance(0); // infinite
+    mCellCamera->setFarClipDistance( (zhigh-zlow) + 2000 );
+    mCellCamera->setNearClipDistance(50);
 
     mCellCamera->setOrthoWindow(xw, yw);
-    mCameraNode->setPosition(Vector3(x, y, zhigh+100000));
+    mCameraNode->setPosition(Vector3(x, y, zhigh+1000));
 
     // disable fog (only necessary for fixed function, the shader based
     // materials already do this through local_map material configuration)

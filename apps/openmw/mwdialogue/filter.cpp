@@ -73,6 +73,11 @@ bool MWDialogue::Filter::testActor (const ESM::DialInfo& info) const
         if (iter->second < info.mData.mRank)
             return false;
     }
+    else if (info.mData.mRank != -1)
+    {
+        // if there is a rank condition, but the NPC is not in a faction, always fail
+        return false;
+    }
 
     // Gender
     if (!isCreature)
@@ -121,7 +126,7 @@ bool MWDialogue::Filter::testSelectStructs (const ESM::DialInfo& info) const
     return true;
 }
 
-bool MWDialogue::Filter::testDisposition (const ESM::DialInfo& info) const
+bool MWDialogue::Filter::testDisposition (const ESM::DialInfo& info, bool invert) const
 {
     bool isCreature = (mActor.getTypeName() != typeid (ESM::NPC).name());
 
@@ -129,14 +134,19 @@ bool MWDialogue::Filter::testDisposition (const ESM::DialInfo& info) const
         return true;
 
     int actorDisposition = MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mActor);
-
-    return actorDisposition >= info.mData.mDisposition;
+    // For service refusal, the disposition check is inverted. However, a value of 0 still means "always succeed".
+    return invert ? (info.mData.mDisposition == 0 || actorDisposition < info.mData.mDisposition)
+                  : (actorDisposition >= info.mData.mDisposition);
 }
 
 bool MWDialogue::Filter::testSelectStruct (const SelectWrapper& select) const
 {
-    if (select.isNpcOnly() && mActor.getTypeName()!=typeid (ESM::NPC).name())
-        return select.isInverted();
+    if (select.isNpcOnly() && (mActor.getTypeName() != typeid (ESM::NPC).name()))
+        // If the actor is a creature, we do not test the conditions applicable
+        // only to NPCs. Such conditions can never be satisfied, apart
+        // inverted ones (NotClass, NotRace, NotFaction return true
+        // because creatures are not of any race, class or faction).
+        return select.getType() == SelectWrapper::Type_Inverted;
 
     switch (select.getType())
     {
@@ -144,6 +154,9 @@ bool MWDialogue::Filter::testSelectStruct (const SelectWrapper& select) const
         case SelectWrapper::Type_Integer: return select.selectCompare (getSelectStructInteger (select));
         case SelectWrapper::Type_Numeric: return testSelectStructNumeric (select);
         case SelectWrapper::Type_Boolean: return select.selectCompare (getSelectStructBoolean (select));
+
+        // We must not do the comparison for inverted functions (eg. Function_NotClass)
+        case SelectWrapper::Type_Inverted: return getSelectStructBoolean (select);
     }
 
     return true;
@@ -190,7 +203,7 @@ bool MWDialogue::Filter::testSelectStructNumeric (const SelectWrapper& select) c
             if (i<script->mData.mNumLongs)
                 return select.selectCompare (locals.mLongs[i]);
 
-            i -= script->mData.mNumShorts;
+            i -= script->mData.mNumLongs;
 
             return select.selectCompare (locals.mFloats.at (i));
         }
@@ -412,25 +425,49 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
 
             return false;
 
-        case SelectWrapper::Function_Id:
+        case SelectWrapper::Function_NotId:
 
-            return select.getName()==Misc::StringUtils::lowerCase (MWWorld::Class::get (mActor).getId (mActor));
+            return select.getName()!=Misc::StringUtils::lowerCase (MWWorld::Class::get (mActor).getId (mActor));
 
-        case SelectWrapper::Function_Faction:
+        case SelectWrapper::Function_NotFaction:
 
-            return Misc::StringUtils::lowerCase (mActor.get<ESM::NPC>()->mBase->mFaction)==select.getName();
+            return Misc::StringUtils::lowerCase (mActor.get<ESM::NPC>()->mBase->mFaction)!=select.getName();
 
-        case SelectWrapper::Function_Class:
+        case SelectWrapper::Function_NotClass:
 
-            return Misc::StringUtils::lowerCase (mActor.get<ESM::NPC>()->mBase->mClass)==select.getName();
+            return Misc::StringUtils::lowerCase (mActor.get<ESM::NPC>()->mBase->mClass)!=select.getName();
 
-        case SelectWrapper::Function_Race:
+        case SelectWrapper::Function_NotRace:
 
-            return Misc::StringUtils::lowerCase (mActor.get<ESM::NPC>()->mBase->mRace)==select.getName();
+            return Misc::StringUtils::lowerCase (mActor.get<ESM::NPC>()->mBase->mRace)!=select.getName();
 
-        case SelectWrapper::Function_Cell:
+        case SelectWrapper::Function_NotCell:
 
-            return Misc::StringUtils::lowerCase (mActor.getCell()->mCell->mName)==select.getName();
+            return Misc::StringUtils::lowerCase (mActor.getCell()->mCell->mName)!=select.getName();
+
+        case SelectWrapper::Function_NotLocal:
+        {
+            std::string scriptName = MWWorld::Class::get (mActor).getScript (mActor);
+
+            if (scriptName.empty())
+                // This actor has no attached script, so there is no local variable
+                return true;
+
+            const ESM::Script *script =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find (scriptName);
+
+            std::string name = select.getName();
+
+            int i = 0;
+            for (; i < static_cast<int> (script->mVarNames.size()); ++i)
+                if (Misc::StringUtils::lowerCase(script->mVarNames[i]) == name)
+                    break;
+
+            if (i >= static_cast<int> (script->mVarNames.size()))
+                return true; // script does not have a variable of this name
+
+            return false;
+        }
 
         case SelectWrapper::Function_SameGender:
 
@@ -458,7 +495,7 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
         case SelectWrapper::Function_PcCorprus:
 
             return MWWorld::Class::get (player).getCreatureStats (player).
-                getMagicEffects().get (132).mMagnitude!=0;
+                getMagicEffects().get (ESM::MagicEffect::Corprus).mMagnitude!=0;
 
         case SelectWrapper::Function_PcExpelled:
         {
@@ -537,8 +574,8 @@ bool MWDialogue::Filter::hasFactionRankSkillRequirements (const MWWorld::Ptr& ac
 
     MWMechanics::CreatureStats& stats = MWWorld::Class::get (actor).getCreatureStats (actor);
 
-    return stats.getAttribute (faction.mData.mAttribute1).getBase()>=faction.mData.mRankData[rank].mAttribute1 &&
-        stats.getAttribute (faction.mData.mAttribute2).getBase()>=faction.mData.mRankData[rank].mAttribute2;
+    return stats.getAttribute (faction.mData.mAttribute[0]).getBase()>=faction.mData.mRankData[rank].mAttribute1 &&
+        stats.getAttribute (faction.mData.mAttribute[1]).getBase()>=faction.mData.mRankData[rank].mAttribute2;
 }
 
 bool MWDialogue::Filter::hasFactionRankReputationRequirements (const MWWorld::Ptr& actor,
@@ -570,7 +607,7 @@ const ESM::DialInfo* MWDialogue::Filter::search (const ESM::Dialogue& dialogue, 
 }
 
 std::vector<const ESM::DialInfo *> MWDialogue::Filter::list (const ESM::Dialogue& dialogue,
-    bool fallbackToInfoRefusal, bool searchAll) const
+    bool fallbackToInfoRefusal, bool searchAll, bool invertDisposition) const
 {
     std::vector<const ESM::DialInfo *> infos;
 
@@ -582,7 +619,7 @@ std::vector<const ESM::DialInfo *> MWDialogue::Filter::list (const ESM::Dialogue
     {
         if (testActor (*iter) && testPlayer (*iter) && testSelectStructs (*iter))
         {
-            if (testDisposition (*iter)) {
+            if (testDisposition (*iter, invertDisposition)) {
                 infos.push_back(&*iter);
                 if (!searchAll)
                     break;
@@ -604,7 +641,7 @@ std::vector<const ESM::DialInfo *> MWDialogue::Filter::list (const ESM::Dialogue
 
         for (std::vector<ESM::DialInfo>::const_iterator iter = infoRefusalDialogue.mInfo.begin();
             iter!=infoRefusalDialogue.mInfo.end(); ++iter)
-            if (testActor (*iter) && testPlayer (*iter) && testSelectStructs (*iter) && testDisposition(*iter)) {
+            if (testActor (*iter) && testPlayer (*iter) && testSelectStructs (*iter) && testDisposition(*iter, invertDisposition)) {
                 infos.push_back(&*iter);
                 if (!searchAll)
                     break;

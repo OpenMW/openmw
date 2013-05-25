@@ -2,9 +2,9 @@
 #define CS_EDITOR_H
 
 #include <QObject>
-
+#ifndef Q_MOC_RUN
 #include <components/files/configurationmanager.hpp>
-
+#endif
 #include "model/doc/documentmanager.hpp"
 
 #include "view/doc/viewmanager.hpp"
@@ -23,7 +23,6 @@ namespace CS
             FileDialog mFileDialog;
 
             Files::ConfigurationManager mCfgMgr;
-
             void setupDataFiles();
 
             // not implemented

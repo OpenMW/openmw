@@ -2,6 +2,7 @@
 #include "mechanicsmanagerimp.hpp"
 
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/inventorystore.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -52,21 +53,9 @@ namespace MWMechanics
 
             for (int i=0; i<8; ++i)
             {
-                const ESM::Race::MaleFemale *attribute = 0;
-                switch (i)
-                {
-                    case 0: attribute = &race->mData.mStrength; break;
-                    case 1: attribute = &race->mData.mIntelligence; break;
-                    case 2: attribute = &race->mData.mWillpower; break;
-                    case 3: attribute = &race->mData.mAgility; break;
-                    case 4: attribute = &race->mData.mSpeed; break;
-                    case 5: attribute = &race->mData.mEndurance; break;
-                    case 6: attribute = &race->mData.mPersonality; break;
-                    case 7: attribute = &race->mData.mLuck; break;
-                }
+                const ESM::Race::MaleFemale& attribute = race->mData.mAttributeValues[i];
 
-                creatureStats.getAttribute(i).setBase (
-                    static_cast<int> (male ? attribute->mMale : attribute->mFemale));
+                creatureStats.getAttribute(i).setBase (male ? attribute.mMale : attribute.mFemale);
             }
 
             for (int i=0; i<27; ++i)
@@ -160,12 +149,18 @@ namespace MWMechanics
         // forced update and current value adjustments
         mActors.updateActor (ptr, 0);
 
-        for (int i=0; i<2; ++i)
+        for (int i=0; i<3; ++i)
         {
             DynamicStat<float> stat = creatureStats.getDynamic (i);
             stat.setCurrent (stat.getModified());
             creatureStats.setDynamic (i, stat);
         }
+
+        // auto-equip again. we need this for when the race is changed to a beast race
+        MWWorld::InventoryStore& invStore = MWWorld::Class::get(ptr).getInventoryStore(ptr);
+        for (int i=0; i<MWWorld::InventoryStore::Slots; ++i)
+            invStore.equip(i, invStore.end());
+        invStore.autoEquip(ptr);
     }
 
     MechanicsManager::MechanicsManager()
@@ -177,10 +172,10 @@ namespace MWMechanics
 
     void MechanicsManager::add(const MWWorld::Ptr& ptr)
     {
-        if(ptr.getTypeName() == typeid(ESM::Activator).name())
-            mActivators.addActivator(ptr);
-        else
+        if(MWWorld::Class::get(ptr).isActor())
             mActors.addActor(ptr);
+        else
+            mObjects.addObject(ptr);
     }
 
     void MechanicsManager::remove(const MWWorld::Ptr& ptr)
@@ -188,15 +183,15 @@ namespace MWMechanics
         if(ptr == mWatched)
             mWatched = MWWorld::Ptr();
         mActors.removeActor(ptr);
-        mActivators.removeActivator(ptr);
+        mObjects.removeObject(ptr);
     }
 
     void MechanicsManager::updateCell(const MWWorld::Ptr &old, const MWWorld::Ptr &ptr)
     {
-        if(ptr.getTypeName() == typeid(ESM::Activator).name())
-            mActivators.updateActivator(old, ptr);
-        else
+        if(MWWorld::Class::get(ptr).isActor())
             mActors.updateActor(old, ptr);
+        else
+            mObjects.updateObject(old, ptr);
     }
 
 
@@ -206,7 +201,7 @@ namespace MWMechanics
             mWatched = MWWorld::Ptr();
 
         mActors.dropActors(cellStore);
-        mActivators.dropActivators(cellStore);
+        mObjects.dropObjects(cellStore);
     }
 
 
@@ -318,7 +313,7 @@ namespace MWMechanics
         }
 
         mActors.update(duration, paused);
-        mActivators.update(duration, paused);
+        mObjects.update(duration, paused);
     }
 
     void MechanicsManager::restoreDynamicStats()
@@ -547,7 +542,7 @@ namespace MWMechanics
 
         float bribeMod;
         if (type == PT_Bribe10) bribeMod = gmst.find("fBribe10Mod")->getFloat();
-        if (type == PT_Bribe100) bribeMod = gmst.find("fBribe100Mod")->getFloat();
+        else if (type == PT_Bribe100) bribeMod = gmst.find("fBribe100Mod")->getFloat();
         else bribeMod = gmst.find("fBribe1000Mod")->getFloat();
 
         float target3 = d * (playerRating3 - npcRating3 + 50) + bribeMod;
@@ -653,19 +648,25 @@ namespace MWMechanics
         }
     }
 
+    void MechanicsManager::forceStateUpdate(const MWWorld::Ptr &ptr)
+    {
+        if(MWWorld::Class::get(ptr).isActor())
+            mActors.forceStateUpdate(ptr);
+    }
+
     void MechanicsManager::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number)
     {
-        if(ptr.getTypeName() == typeid(ESM::Activator).name())
-            mActivators.playAnimationGroup(ptr, groupName, mode, number);
-        else
+        if(MWWorld::Class::get(ptr).isActor())
             mActors.playAnimationGroup(ptr, groupName, mode, number);
+        else
+            mObjects.playAnimationGroup(ptr, groupName, mode, number);
     }
     void MechanicsManager::skipAnimation(const MWWorld::Ptr& ptr)
     {
-        if(ptr.getTypeName() == typeid(ESM::Activator).name())
-            mActivators.skipAnimation(ptr);
-        else
+        if(MWWorld::Class::get(ptr).isActor())
             mActors.skipAnimation(ptr);
+        else
+            mObjects.skipAnimation(ptr);
     }
 
 }

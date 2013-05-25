@@ -16,6 +16,7 @@ Alexander Nadeau (wareya)
 Alexander Olofsson (Ace)
 Artem Kotsynyak (greye)
 athile
+Britt Mathis (galdor557)
 BrotherBrick
 Chris Robinson (KittyCat)
 Cory F. Cohen (cfcohen)
@@ -51,12 +52,13 @@ Paul McElroy (Greendogo)
 Pieter van der Kloet (pvdk)
 Radu-Marius Popovici (rpopovici)
 Roman Melnik (Kromgart)
+Roman Proskuryakov (humbug)
 Sandy Carter (bwrsandman)
 Sebastian Wick (swick)
 Sergey Shambir
 Sylvain Thesnieres (Garvek)
 Tom Mason (wheybags)
-
+Torben Leif Carrington (TorbenC)
 
 Packagers:
 Alexander Olofsson (Ace) - Windows

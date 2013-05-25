@@ -4,9 +4,8 @@
 #include "../mwworld/esmstore.hpp"
 #include "../mwmechanics/stat.hpp"
 
-#include <MyGUI_Widget.h>
-#include <MyGUI_TextBox.h>
 #include <MyGUI_Button.h>
+#include <MyGUI_EditBox.h>
 
 namespace MyGUI
 {
@@ -93,12 +92,10 @@ namespace MWGui
 
             typedef MWMechanics::Stat<float> SkillValue;
 
-            void setWindowManager(MWBase::WindowManager *m) { mManager = m; } /// \todo remove
             void setSkillId(ESM::Skill::SkillEnum skillId);
             void setSkillNumber(int skillId);
             void setSkillValue(const SkillValue& value);
 
-            MWBase::WindowManager *getWindowManager() const { return mManager; }
             ESM::Skill::SkillEnum getSkillId() const { return mSkillId; }
             const SkillValue& getSkillValue() const { return mValue; }
 
@@ -121,7 +118,6 @@ namespace MWGui
 
             void updateWidgets();
 
-            MWBase::WindowManager *mManager;
             ESM::Skill::SkillEnum mSkillId;
             SkillValue mValue;
             MyGUI::Widget* mSkillNameWidget;
@@ -137,11 +133,9 @@ namespace MWGui
 
             typedef MWMechanics::Stat<int> AttributeValue;
 
-            void setWindowManager(MWBase::WindowManager *m) { mManager = m; }
             void setAttributeId(int attributeId);
             void setAttributeValue(const AttributeValue& value);
 
-            MWBase::WindowManager *getWindowManager() const { return mManager; }
             int getAttributeId() const { return mId; }
             const AttributeValue& getAttributeValue() const { return mValue; }
 
@@ -164,7 +158,6 @@ namespace MWGui
 
             void updateWidgets();
 
-            MWBase::WindowManager *mManager;
             int mId;
             AttributeValue mValue;
             MyGUI::Widget* mAttributeNameWidget;
@@ -184,7 +177,6 @@ namespace MWGui
 
             typedef MWMechanics::Stat<int> SpellValue;
 
-            void setWindowManager(MWBase::WindowManager* parWindowManager) { mWindowManager = parWindowManager; }
             void setSpellId(const std::string &id);
 
             /**
@@ -206,7 +198,6 @@ namespace MWGui
         private:
             void updateWidgets();
 
-            MWBase::WindowManager* mWindowManager;
             std::string mId;
             MyGUI::TextBox* mSpellNameWidget;
         };
@@ -226,7 +217,6 @@ namespace MWGui
                 EF_Constant = 0x02 // constant effect means that duration will not be displayed
             };
 
-            void setWindowManager(MWBase::WindowManager* parWindowManager) { mWindowManager = parWindowManager; }
             void setEffectList(const SpellEffectList& list);
 
             static SpellEffectList effectListFromESM(const ESM::EffectList* effects);
@@ -248,7 +238,6 @@ namespace MWGui
         private:
             void updateWidgets();
 
-            MWBase::WindowManager* mWindowManager;
             SpellEffectList mEffectList;
         };
         typedef MWEffectList* MWEffectListPtr;
@@ -261,7 +250,6 @@ namespace MWGui
 
             typedef ESM::ENAMstruct SpellEffectValue;
 
-            void setWindowManager(MWBase::WindowManager* parWindowManager) { mWindowManager = parWindowManager; }
             void setSpellEffect(const SpellEffectParams& params);
 
             int getRequestedWidth() const { return mRequestedWidth; }
@@ -275,7 +263,6 @@ namespace MWGui
 
             void updateWidgets();
 
-            MWBase::WindowManager* mWindowManager;
             SpellEffectParams mEffectParams;
             MyGUI::ImageBox* mImageWidget;
             MyGUI::TextBox* mTextWidget;
@@ -340,6 +327,18 @@ namespace MWGui
             virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
         };
 
+        class AutoSizedEditBox : public AutoSizedWidget, public MyGUI::EditBox
+        {
+            MYGUI_RTTI_DERIVED( AutoSizedEditBox )
+
+        public:
+            virtual MyGUI::IntSize getRequestedSize();
+            virtual void setCaption(const MyGUI::UString& _value);
+
+        protected:
+            virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
+        };
+
         class AutoSizedButton : public AutoSizedWidget, public MyGUI::Button
         {
             MYGUI_RTTI_DERIVED( AutoSizedButton )
@@ -390,7 +389,6 @@ namespace MWGui
             virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
 
             virtual void onWidgetCreated(MyGUI::Widget* _widget);
-            virtual void onWidgetDestroy(MyGUI::Widget* _widget);
         };
 
         class VBox : public Box, public MyGUI::Widget
@@ -408,7 +406,6 @@ namespace MWGui
             virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
 
             virtual void onWidgetCreated(MyGUI::Widget* _widget);
-            virtual void onWidgetDestroy(MyGUI::Widget* _widget);
         };
     }
 }

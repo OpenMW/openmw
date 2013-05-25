@@ -136,9 +136,6 @@ void PlaneReflection::preRenderTargetUpdate(const Ogre::RenderTargetEvent& evt)
     mCamera->setFOVy(mParentCamera->getFOVy());
     mRenderActive = true;
 
-    Vector3 pos = mParentCamera->getRealPosition();
-    pos.y = (mWaterPlane).d*2 - pos.y;
-    mSky->setSkyPosition(pos);
     mCamera->enableReflection(mWaterPlane);
 
     // for depth calculation, we want the original viewproj matrix _without_ the custom near clip plane.
@@ -153,7 +150,6 @@ void PlaneReflection::preRenderTargetUpdate(const Ogre::RenderTargetEvent& evt)
 
 void PlaneReflection::postRenderTargetUpdate(const Ogre::RenderTargetEvent& evt)
 {
-    mSky->resetSkyPosition();
     mCamera->disableReflection();
     mCamera->disableCustomNearClipPlane();
     mRenderActive = false;

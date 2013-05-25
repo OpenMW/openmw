@@ -10,11 +10,6 @@
    this class.
 **/
 
-#include <vector>
-#include <string>
-
-#include <components/esm/loadclas.hpp>
-
 #include "../mwbase/windowmanager.hpp"
 
 namespace MyGUI
@@ -74,6 +69,10 @@ namespace MWGui
   class TrainingWindow;
   class Cursor;
   class SpellIcons;
+  class MerchantRepair;
+  class Repair;
+  class SoulgemDialog;
+  class CompanionWindow;
 
   class WindowManager : public MWBase::WindowManager
   {
@@ -81,7 +80,7 @@ namespace MWGui
     typedef std::pair<std::string, int> Faction;
     typedef std::vector<Faction> FactionList;
 
-    WindowManager(const Compiler::Extensions& extensions, int fpsLevel, bool newGame,
+    WindowManager(const Compiler::Extensions& extensions, int fpsLevel,
                   OEngine::Render::OgreRenderer *mOgre, const std::string& logpath,
                   const std::string& cacheDir, bool consoleOnlyScripts,
                   Translation::Storage& translationDataStorage);
@@ -94,6 +93,8 @@ namespace MWGui
      */
     virtual void update();
 
+    virtual void setNewGame(bool newgame);
+
     virtual void pushGuiMode(GuiMode mode);
     virtual void popGuiMode();
     virtual void removeGuiMode(GuiMode mode); ///< can be anywhere in the stack
@@ -101,6 +102,8 @@ namespace MWGui
     virtual GuiMode getMode() const;
 
     virtual bool isGuiMode() const;
+
+    virtual bool isConsoleMode() const;
 
     virtual void toggleVisible(GuiWindow wnd);
 
@@ -173,8 +176,8 @@ namespace MWGui
     virtual void activateQuickKey  (int index);
 
     virtual void setSelectedSpell(const std::string& spellId, int successChancePercent);
-    virtual void setSelectedEnchantItem(const MWWorld::Ptr& item, int chargePercent);
-    virtual void setSelectedWeapon(const MWWorld::Ptr& item, int durabilityPercent);
+    virtual void setSelectedEnchantItem(const MWWorld::Ptr& item);
+    virtual void setSelectedWeapon(const MWWorld::Ptr& item);
     virtual void unsetSelectedSpell();
     virtual void unsetSelectedWeapon();
 
@@ -190,7 +193,9 @@ namespace MWGui
 
     virtual void removeDialog(OEngine::GUI::Layout* dialog); ///< Hides dialog and schedules dialog to be deleted.
 
-    virtual void messageBox (const std::string& message, const std::vector<std::string>& buttons = std::vector<std::string>());
+    virtual void messageBox (const std::string& message, const std::vector<std::string>& buttons = std::vector<std::string>(), bool showInDialogueModeOnly = false);
+    virtual void staticMessageBox(const std::string& message);
+    virtual void removeStaticMessageBox();
     virtual void enterPressed ();
     virtual int readPressedButton (); ///< returns the index of the pressed button or -1 if no button was pressed (->MessageBoxmanager->InteractiveMessageBox)
 
@@ -219,18 +224,32 @@ namespace MWGui
     virtual void loadingDone();
 
     virtual void enableRest() { mRestAllowed = true; }
-    virtual bool getRestEnabled() { return mRestAllowed; }
+    virtual bool getRestEnabled();
+
+    virtual bool getJournalAllowed() { return (mAllowed & GW_Magic); }
 
     virtual bool getPlayerSleeping();
     virtual void wakeUpPlayer();
 
+    virtual void updatePlayer();
+
+    virtual void showCompanionWindow(MWWorld::Ptr actor);
     virtual void startSpellMaking(MWWorld::Ptr actor);
     virtual void startEnchanting(MWWorld::Ptr actor);
+    virtual void startSelfEnchanting(MWWorld::Ptr soulgem);
     virtual void startTraining(MWWorld::Ptr actor);
+    virtual void startRepair(MWWorld::Ptr actor);
+    virtual void startRepairItem(MWWorld::Ptr item);
+
+    virtual void frameStarted(float dt);
+
+    virtual void showSoulgemDialog (MWWorld::Ptr item);
 
     virtual void changePointer (const std::string& name);
 
     virtual const Translation::Storage& getTranslationDataStorage() const;
+
+    void onSoulgemDialogButtonPressed (int button);
 
   private:
     OEngine::GUI::MyGUIManager *mGuiManager;
@@ -264,6 +283,11 @@ namespace MWGui
     SpellCreationDialog* mSpellCreationDialog;
     EnchantingDialog* mEnchantingDialog;
     TrainingWindow* mTrainingWindow;
+    MerchantRepair* mMerchantRepair;
+    SoulgemDialog* mSoulgemDialog;
+    Repair* mRepair;
+    CompanionWindow* mCompanionWindow;
+
     Translation::Storage& mTranslationDataStorage;
     Cursor* mCursor;
 
@@ -308,8 +332,6 @@ namespace MWGui
     float mFPS;
     unsigned int mTriangleCount;
     unsigned int mBatchCount;
-
-    void onDialogueWindowBye();
 
     /**
      * Called when MyGUI tries to retrieve a tag. This usually corresponds to a GMST string,

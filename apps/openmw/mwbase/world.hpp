@@ -44,8 +44,14 @@ namespace MWRender
     class Animation;
 }
 
+namespace MWMechanics
+{
+    class Movement;
+}
+
 namespace MWWorld
 {
+    class Fallback;
     class CellStore;
     class Player;
     class LocalScripts;
@@ -53,7 +59,7 @@ namespace MWWorld
     class ESMStore;
     class RefData;
 
-    typedef std::vector<std::pair<MWWorld::Ptr,Ogre::Vector3> > PtrMovementList;
+    typedef std::vector<std::pair<MWWorld::Ptr,MWMechanics::Movement> > PtrMovementList;
 }
 
 namespace MWBase
@@ -88,6 +94,8 @@ namespace MWBase
 
             virtual ~World() {}
 
+            virtual void startNewGame() = 0;
+
             virtual OEngine::Render::Fader* getFader() = 0;
             ///< \ŧodo remove this function. Rendering details should not be exposed.
 
@@ -103,11 +111,7 @@ namespace MWBase
 
             virtual void getTriangleBatchCount(unsigned int &triangles, unsigned int &batches) = 0;
 
-            virtual void setFallbackValues (const std::map<std::string, std::string>& fallbackMap) = 0;
-
-            virtual std::string getFallback (const std::string& key) const = 0;
-
-            virtual std::string getFallback (const std::string& key, const std::string& def) const = 0;
+            virtual const MWWorld::Fallback *getFallback () const = 0;
 
             virtual MWWorld::Player& getPlayer() = 0;
 
@@ -142,7 +146,7 @@ namespace MWBase
 
             virtual char getGlobalVariableType (const std::string& name) const = 0;
             ///< Return ' ', if there is no global variable with this name.
-            
+
             virtual std::vector<std::string> getGlobals () const = 0;
 
             virtual std::string getCurrentCellName() const = 0;
@@ -214,6 +218,9 @@ namespace MWBase
             virtual MWWorld::Ptr  getFacedObject() = 0;
             ///< Return pointer to the object the player is looking at, if it is within activation range
 
+            virtual void adjustPosition (const MWWorld::Ptr& ptr) = 0;
+            ///< Adjust position after load to be on ground. Must be called after model load.
+
             virtual void deleteObject (const MWWorld::Ptr& ptr) = 0;
 
             virtual void moveObject (const MWWorld::Ptr& ptr, float x, float y, float z) = 0;
@@ -224,6 +231,8 @@ namespace MWBase
             virtual void scaleObject (const MWWorld::Ptr& ptr, float scale) = 0;
 
             virtual void rotateObject(const MWWorld::Ptr& ptr,float x,float y,float z, bool adjust = false) = 0;
+
+            virtual void localRotateObject (const MWWorld::Ptr& ptr, float x, float y, float z) = 0;
 
             virtual void safePlaceObject(const MWWorld::Ptr& ptr,MWWorld::CellStore &Cell,ESM::Position pos) = 0;
             ///< place an object in a "safe" location (ie not in the void, etc).
@@ -238,6 +247,9 @@ namespace MWBase
             virtual void doPhysics (const MWWorld::PtrMovementList &actors, float duration) = 0;
             ///< Run physics simulation and modify \a world accordingly.
 
+            virtual bool castRay (float x1, float y1, float z1, float x2, float y2, float z2) = 0;
+            ///< cast a Ray and return true if there is an object in the ray path.
+
             virtual bool toggleCollisionMode() = 0;
             ///< Toggle collision mode for player. If disabled player object should ignore
             /// collisions and gravity.
@@ -247,27 +259,44 @@ namespace MWBase
             ///< Toggle a render mode.
             ///< \return Resulting mode
 
-            virtual const ESM::Potion *createRecord (const ESM::Potion& record)
-                = 0;
-            ///< Create a new recrod (of type potion) in the ESM store.
+            virtual const ESM::Potion *createRecord (const ESM::Potion& record) = 0;
+            ///< Create a new record (of type potion) in the ESM store.
             /// \return pointer to created record
 
-            virtual const ESM::Spell *createRecord (const ESM::Spell& record)
-                = 0;
-            ///< Create a new recrod (of type spell) in the ESM store.
+            virtual const ESM::Spell *createRecord (const ESM::Spell& record) = 0;
+            ///< Create a new record (of type spell) in the ESM store.
             /// \return pointer to created record
 
-            virtual const ESM::Class *createRecord (const ESM::Class& record)
-                = 0;
-            ///< Create a new recrod (of type class) in the ESM store.
+            virtual const ESM::Class *createRecord (const ESM::Class& record) = 0;
+            ///< Create a new record (of type class) in the ESM store.
             /// \return pointer to created record
 
             virtual const ESM::Cell *createRecord (const ESM::Cell& record) = 0;
-            ///< Create a new recrod (of type cell) in the ESM store.
+            ///< Create a new record (of type cell) in the ESM store.
             /// \return pointer to created record
 
             virtual const ESM::NPC *createRecord(const ESM::NPC &record) = 0;
-            ///< Create a new recrod (of type npc) in the ESM store.
+            ///< Create a new record (of type npc) in the ESM store.
+            /// \return pointer to created record
+
+            virtual const ESM::Armor *createRecord (const ESM::Armor& record) = 0;
+            ///< Create a new record (of type armor) in the ESM store.
+            /// \return pointer to created record
+
+            virtual const ESM::Weapon *createRecord (const ESM::Weapon& record) = 0;
+            ///< Create a new record (of type weapon) in the ESM store.
+            /// \return pointer to created record
+
+            virtual const ESM::Clothing *createRecord (const ESM::Clothing& record) = 0;
+            ///< Create a new record (of type clothing) in the ESM store.
+            /// \return pointer to created record
+
+            virtual const ESM::Enchantment *createRecord (const ESM::Enchantment& record) = 0;
+            ///< Create a new record (of type enchantment) in the ESM store.
+            /// \return pointer to created record
+
+            virtual const ESM::Book *createRecord (const ESM::Book& record) = 0;
+            ///< Create a new record (of type book) in the ESM store.
             /// \return pointer to created record
 
             virtual void update (float duration, bool paused) = 0;
@@ -293,13 +322,27 @@ namespace MWBase
 
             virtual void togglePOV() = 0;
             virtual void togglePreviewMode(bool enable) = 0;
-            virtual bool toggleVanityMode(bool enable, bool force) = 0;
+            virtual bool toggleVanityMode(bool enable) = 0;
             virtual void allowVanityMode(bool allow) = 0;
             virtual void togglePlayerLooking(bool enable) = 0;
             virtual void changeVanityModeScale(float factor) = 0;
+            virtual bool vanityRotateCamera(float * rot) = 0;
 
+            virtual void setupPlayer() = 0;
             virtual void renderPlayer() = 0;
-            
+
+            virtual bool getOpenOrCloseDoor(const MWWorld::Ptr& door) = 0;
+            ///< if activated, should this door be opened or closed?
+            virtual void activateDoor(const MWWorld::Ptr& door) = 0;
+            ///< activate (open or close) an non-teleport door
+
+            virtual bool getPlayerStandingOn (const MWWorld::Ptr& object) = 0; ///< @return true if the player is standing on \a object
+            virtual bool getActorStandingOn (const MWWorld::Ptr& object) = 0; ///< @return true if any actor is standing on \a object
+            virtual float getWindSpeed() = 0;
+
+            virtual void getContainersOwnedBy (const MWWorld::Ptr& npc, std::vector<MWWorld::Ptr>& out) = 0;
+            ///< get all containers in active cells owned by this Npc
+
             virtual void setupExternalRendering (MWRender::ExternalRendering& rendering) = 0;
 
             virtual int canRest() = 0;

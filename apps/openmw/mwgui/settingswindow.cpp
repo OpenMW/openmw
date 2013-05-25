@@ -1,23 +1,17 @@
 #include "settingswindow.hpp"
 
 #include <OgreRoot.h>
-#include <OgreRenderSystem.h>
 #include <OgrePlugin.h>
-#include <OgreString.h>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/math/common_factor_rt.hpp>
-
-#include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/inputmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
-
-#include "../mwrender/renderingmanager.hpp"
 
 #include "confirmationdialog.hpp"
 
@@ -93,8 +87,8 @@ namespace
 
 namespace MWGui
 {
-    SettingsWindow::SettingsWindow(MWBase::WindowManager& parWindowManager) :
-        WindowBase("openmw_settings_window.layout", parWindowManager)
+    SettingsWindow::SettingsWindow() :
+        WindowBase("openmw_settings_window.layout")
     {
         getWidget(mOkButton, "OkButton");
         getWidget(mSubtitlesButton, "SubtitlesButton");
@@ -236,9 +230,7 @@ namespace MWGui
         mReflectTerrainButton->setCaptionWithReplacing(Settings::Manager::getBool("reflect terrain", "Water") ? "#{sOn}" : "#{sOff}");
 
         mShadowsTextureSize->setCaption (Settings::Manager::getString ("texture size", "Shadows"));
-        //mShadowsLargeDistance->setCaptionWithReplacing(Settings::Manager::getBool("split", "Shadows") ? "#{sOn}" : "#{sOff}");
-        mShadowsLargeDistance->setCaptionWithReplacing("#{sOff}");
-        mShadowsLargeDistance->setEnabled (false);
+        mShadowsLargeDistance->setCaptionWithReplacing(Settings::Manager::getBool("split", "Shadows") ? "#{sOn}" : "#{sOff}");
 
         mShadowsEnabledButton->setCaptionWithReplacing(Settings::Manager::getBool("enabled", "Shadows") ? "#{sOn}" : "#{sOff}");
         mActorShadows->setCaptionWithReplacing(Settings::Manager::getBool("actor shadows", "Shadows") ? "#{sOn}" : "#{sOff}");
@@ -274,7 +266,7 @@ namespace MWGui
 
     void SettingsWindow::onOkButtonClicked(MyGUI::Widget* _sender)
     {
-        mWindowManager.removeGuiMode(GM_Settings);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Settings);
     }
 
     void SettingsWindow::onResolutionSelected(MyGUI::ListBox* _sender, size_t index)
@@ -282,7 +274,7 @@ namespace MWGui
         if (index == MyGUI::ITEM_NONE)
             return;
 
-        ConfirmationDialog* dialog = mWindowManager.getConfirmationDialog();
+        ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
         dialog->open("#{sNotifyMessage67}");
         dialog->eventOkClicked.clear();
         dialog->eventOkClicked += MyGUI::newDelegate(this, &SettingsWindow::onResolutionAccept);
@@ -329,8 +321,8 @@ namespace MWGui
 
     void SettingsWindow::onButtonToggled(MyGUI::Widget* _sender)
     {
-        std::string on = mWindowManager.getGameSettingString("sOn", "On");
-        std::string off = mWindowManager.getGameSettingString("sOff", "On");
+        std::string on = MWBase::Environment::get().getWindowManager()->getGameSettingString("sOn", "On");
+        std::string off = MWBase::Environment::get().getWindowManager()->getGameSettingString("sOff", "On");
         bool newState;
         if (_sender->castType<MyGUI::Button>()->getCaption() == on)
         {
@@ -362,7 +354,7 @@ namespace MWGui
             {
                 std::string msg = "This resolution is not supported in Fullscreen mode. Please select a resolution from the list.";
                 MWBase::Environment::get().getWindowManager()->
-                    messageBox(msg, std::vector<std::string>());
+                    messageBox(msg);
                 _sender->castType<MyGUI::Button>()->setCaption(off);
             }
             else
@@ -437,8 +429,8 @@ namespace MWGui
 
     void SettingsWindow::onShadersToggled(MyGUI::Widget* _sender)
     {
-        std::string on = mWindowManager.getGameSettingString("sOn", "On");
-        std::string off = mWindowManager.getGameSettingString("sOff", "On");
+        std::string on = MWBase::Environment::get().getWindowManager()->getGameSettingString("sOn", "On");
+        std::string off = MWBase::Environment::get().getWindowManager()->getGameSettingString("sOff", "On");
 
         std::string val = static_cast<MyGUI::Button*>(_sender)->getCaption();
         if (val == off)
@@ -559,6 +551,8 @@ namespace MWGui
         while (mControlsBox->getChildCount())
             MyGUI::Gui::getInstance().destroyWidget(mControlsBox->getChildAt(0));
 
+        MWBase::Environment::get().getWindowManager ()->removeStaticMessageBox();
+
         std::vector<int> actions = MWBase::Environment::get().getInputManager()->getActionSorting ();
 
         const int h = 18;
@@ -593,7 +587,7 @@ namespace MWGui
 
         static_cast<MyGUI::Button*>(_sender)->setCaptionWithReplacing("#{sNone}");
 
-        MWBase::Environment::get().getWindowManager ()->messageBox ("#{sControlsMenu3}", std::vector<std::string>());
+        MWBase::Environment::get().getWindowManager ()->staticMessageBox ("#{sControlsMenu3}");
         MWBase::Environment::get().getWindowManager ()->disallowMouse();
 
         MWBase::Environment::get().getInputManager ()->enableDetectingBindingMode (actionId);
@@ -610,7 +604,7 @@ namespace MWGui
 
     void SettingsWindow::onResetDefaultBindings(MyGUI::Widget* _sender)
     {
-        ConfirmationDialog* dialog = mWindowManager.getConfirmationDialog();
+        ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
         dialog->open("#{sNotifyMessage66}");
         dialog->eventOkClicked.clear();
         dialog->eventOkClicked += MyGUI::newDelegate(this, &SettingsWindow::onResetDefaultBindingsAccept);

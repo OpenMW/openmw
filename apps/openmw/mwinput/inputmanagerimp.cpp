@@ -29,7 +29,7 @@
 namespace MWInput
 {
     InputManager::InputManager(OEngine::Render::OgreRenderer &ogre,
-            MWWorld::Player &player,
+            MWWorld::Player& player,
             MWBase::WindowManager &windows,
             bool debug,
             OMW::Engine& engine,
@@ -55,6 +55,7 @@ namespace MWInput
         , mPreviewPOVDelay(0.f)
         , mTimeIdle(0.f)
         , mOverencumberedMessageDelay(0.f)
+        , mAlwaysRunActive(false)
     {
         Ogre::RenderWindow* window = mOgre.getWindow ();
         size_t windowHnd;
@@ -180,12 +181,11 @@ namespace MWInput
                 break;
             case A_Activate:
                 resetIdleTime();
-                activate();
-                if( MWBase::Environment::get().getWindowManager()->isGuiMode()
-                    && MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_InterMessageBox ) {
+                if( MWBase::Environment::get().getWindowManager()->isGuiMode()) {
                         // Pressing the activation key when a messagebox is prompting for "ok" will activate the ok button
                         MWBase::Environment::get().getWindowManager()->enterPressed();
                     }
+                activate();
                 break;
             case A_Journal:
                 toggleJournal ();
@@ -193,7 +193,7 @@ namespace MWInput
             case A_AutoMove:
                 toggleAutoMove ();
                 break;
-            case A_ToggleWalk:
+            case A_AlwaysRun:
                 toggleWalking ();
                 break;
             case A_ToggleWeapon:
@@ -241,6 +241,10 @@ namespace MWInput
             case A_ToggleHUD:
                 mWindows.toggleHud();
                 break;
+            case A_Use:
+                if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
+                    mPlayer.use();
+                break;
             }
         }
     }
@@ -287,8 +291,6 @@ namespace MWInput
                 triedToMove = true;
                 mPlayer.setLeftRight (1);
             }
-            else
-                mPlayer.setLeftRight (0);
 
             if (actionIsActive(A_MoveForward))
             {
@@ -302,8 +304,12 @@ namespace MWInput
                 mPlayer.setAutoMove (false);
                 mPlayer.setForwardBackward (-1);
             }
-            else
-                mPlayer.setForwardBackward (0);
+
+            else if(mPlayer.getAutoMove())
+            {
+                triedToMove = true;
+                mPlayer.setForwardBackward (1);
+            }
 
             mPlayer.setSneak(actionIsActive(A_Sneak));
 
@@ -312,13 +318,11 @@ namespace MWInput
                 mPlayer.setUpDown (1);
                 triedToMove = true;
             }
-            else
-                mPlayer.setUpDown (0);
 
-            if(actionIsActive(A_Run))
-                mPlayer.setRunState(true);
+            if (mAlwaysRunActive)
+                mPlayer.setRunState(!actionIsActive(A_Run));
             else
-                mPlayer.setRunState(false);
+                mPlayer.setRunState(actionIsActive(A_Run));
 
             // if player tried to start moving, but can't (due to being overencumbered), display a notification.
             if (triedToMove)
@@ -327,6 +331,7 @@ namespace MWInput
                 mOverencumberedMessageDelay -= dt;
                 if (MWWorld::Class::get(player).getEncumbrance(player) >= MWWorld::Class::get(player).getCapacity(player))
                 {
+                    mPlayer.setAutoMove (false);
                     if (mOverencumberedMessageDelay <= 0)
                     {
                         MWBase::Environment::get().getWindowManager ()->messageBox("#{sNotifyMessage59}");
@@ -377,27 +382,12 @@ namespace MWInput
 
     void InputManager::changeInputMode(bool guiMode)
     {
-        // Are we in GUI mode now?
-        if(guiMode)
-        {
-            // Disable mouse look
-            mMouseLookEnabled = false;
-
-            mWindows.showCrosshair (false);
-
-            // Enable GUI events
-            mGuiCursorEnabled = true;
-        }
-        else
-        {
-            // Enable mouse look
-            mMouseLookEnabled = true;
-
-            mWindows.showCrosshair (false);
-
-            // Disable GUI events
-            mGuiCursorEnabled = false;
-        }
+        MWBase::Environment::get().getWindowManager()->setMouseVisible(guiMode);
+        mGuiCursorEnabled = guiMode;
+        mMouseLookEnabled = !guiMode;
+        if (guiMode)
+            mWindows.showCrosshair(false);
+        // if not in gui mode, the camera decides whether to show crosshair or not.
     }
 
     void InputManager::processChangedSettings(const Settings::CategorySettingVector& changed)
@@ -461,8 +451,7 @@ namespace MWInput
     bool InputManager::keyPressed( const OIS::KeyEvent &arg )
     {
         if(arg.key == OIS::KC_RETURN
-            && MWBase::Environment::get().getWindowManager()->isGuiMode()
-            && MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_InterMessageBox )
+            && MWBase::Environment::get().getWindowManager()->isGuiMode())
         {
             // Pressing enter when a messagebox is prompting for "ok" will activate the ok button
             MWBase::Environment::get().getWindowManager()->enterPressed();
@@ -543,11 +532,22 @@ namespace MWInput
         {
             resetIdleTime();
 
-            float x = arg.state.X.rel * mCameraSensitivity * 0.2;
-            float y = arg.state.Y.rel * mCameraSensitivity * 0.2 * (mInvertY ? -1 : 1) * mUIYMultiplier;
+            float x = arg.state.X.rel * (1.0f/256.0f) * mCameraSensitivity;
+            float y = arg.state.Y.rel * (1.0f/256.0f) * mCameraSensitivity * mCameraYMultiplier * (mInvertY ? -1 : 1);
+            float scale = MWBase::Environment::get().getFrameDuration();
+            if(scale <= 0.0f) scale = 1.0f;
 
-            MWBase::World *world = MWBase::Environment::get().getWorld();
-            world->rotateObject(world->getPlayer().getPlayer(), -y, 0.f, x, true);
+            float rot[3];
+            rot[0] = -y;
+            rot[1] = 0.0f;
+            rot[2] = x;
+            
+            // Only actually turn player when we're not in vanity mode 
+            if(!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot))
+            {
+                mPlayer.setYaw(x/scale);
+                mPlayer.setPitch(-y/scale);
+            }
 
             if (arg.state.Z.rel)
                 MWBase::Environment::get().getWorld()->changeVanityModeScale(arg.state.Z.rel);
@@ -575,15 +575,9 @@ namespace MWInput
 
         MWMechanics::DrawState_ state = mPlayer.getDrawState();
         if (state == MWMechanics::DrawState_Weapon || state == MWMechanics::DrawState_Nothing)
-        {
             mPlayer.setDrawState(MWMechanics::DrawState_Spell);
-            std::cout << "Player has now readied his hands for spellcasting!\n" << std::endl;
-        }
         else
-        {
             mPlayer.setDrawState(MWMechanics::DrawState_Nothing);
-            std::cout << "Player does not have any kind of attack ready now.\n" << std::endl;
-        }
     }
 
     void InputManager::toggleWeapon()
@@ -592,15 +586,9 @@ namespace MWInput
 
         MWMechanics::DrawState_ state = mPlayer.getDrawState();
         if (state == MWMechanics::DrawState_Spell || state == MWMechanics::DrawState_Nothing)
-        {
             mPlayer.setDrawState(MWMechanics::DrawState_Weapon);
-            std::cout << "Player is now drawing his weapon.\n" << std::endl;
-        }
         else
-        {
             mPlayer.setDrawState(MWMechanics::DrawState_Nothing);
-            std::cout << "Player does not have any kind of attack ready now.\n" << std::endl;
-        }
     }
 
     void InputManager::rest()
@@ -622,6 +610,9 @@ namespace MWInput
 
     void InputManager::toggleInventory()
     {
+        if (MyGUI::InputManager::getInstance ().isModalAny())
+            return;
+
         bool gameMode = !mWindows.isGuiMode();
 
         // Toggle between game mode and inventory mode
@@ -659,19 +650,29 @@ namespace MWInput
 
     void InputManager::toggleJournal()
     {
+        if (MyGUI::InputManager::getInstance ().isModalAny())
+            return;
+
         // Toggle between game mode and journal mode
         bool gameMode = !mWindows.isGuiMode();
 
         if(gameMode)
+        {
+            MWBase::Environment::get().getSoundManager()->playSound ("book open", 1.0, 1.0);
             mWindows.pushGuiMode(MWGui::GM_Journal);
+        }
         else if(mWindows.getMode() == MWGui::GM_Journal)
+        {
+            MWBase::Environment::get().getSoundManager()->playSound ("book close", 1.0, 1.0);
             mWindows.popGuiMode();
+        }
         // .. but don't touch any other mode.
     }
 
     void InputManager::quickKey (int index)
     {
-        mWindows.activateQuickKey (index);
+        if (!mWindows.isGuiMode())
+            mWindows.activateQuickKey (index);
     }
 
     void InputManager::showQuickKeysMenu()
@@ -699,7 +700,7 @@ namespace MWInput
     void InputManager::toggleWalking()
     {
         if (mWindows.isGuiMode()) return;
-        mPlayer.toggleRunning();
+        mAlwaysRunActive = !mAlwaysRunActive;
     }
 
     // Exit program now button (which is disabled in GUI mode)
@@ -711,19 +712,17 @@ namespace MWInput
 
     void InputManager::resetIdleTime()
     {
-        if (mTimeIdle < 0) {
-            MWBase::Environment::get().getWorld()->toggleVanityMode(false, false);
-        }
+        if (mTimeIdle < 0)
+            MWBase::Environment::get().getWorld()->toggleVanityMode(false);
         mTimeIdle = 0.f;
     }
 
     void InputManager::updateIdleTime(float dt)
     {
-        if (mTimeIdle >= 0.f) {
+        if (mTimeIdle >= 0.f)
             mTimeIdle += dt;
-        }
         if (mTimeIdle > 30.f) {
-            MWBase::Environment::get().getWorld()->toggleVanityMode(true, false);
+            MWBase::Environment::get().getWorld()->toggleVanityMode(true);
             mTimeIdle = -1.f;
         }
     }
@@ -768,6 +767,7 @@ namespace MWInput
         defaultKeyBindings[A_QuickKey10] = OIS::KC_0;
         defaultKeyBindings[A_Screenshot] = OIS::KC_SYSRQ;
         defaultKeyBindings[A_ToggleHUD] = OIS::KC_F12;
+        defaultKeyBindings[A_AlwaysRun] = OIS::KC_Y;
 
         std::map<int, int> defaultMouseButtonBindings;
         defaultMouseButtonBindings[A_Inventory] = OIS::MB_Right;
@@ -807,6 +807,7 @@ namespace MWInput
     {
         std::map<int, std::string> descriptions;
 
+        descriptions[A_Use] = "sUse";
         descriptions[A_Activate] = "sActivate";
         descriptions[A_MoveBackward] = "sBack";
         descriptions[A_MoveForward] = "sForward";
@@ -834,6 +835,7 @@ namespace MWInput
         descriptions[A_QuickKey8] = "sQuick8Cmd";
         descriptions[A_QuickKey9] = "sQuick9Cmd";
         descriptions[A_QuickKey10] = "sQuick10Cmd";
+        descriptions[A_AlwaysRun] = "sAlways_Run";
 
         if (descriptions[action] == "")
             return ""; // not configurable
@@ -865,8 +867,10 @@ namespace MWInput
         ret.push_back(A_MoveRight);
         ret.push_back(A_TogglePOV);
         ret.push_back(A_Run);
+        ret.push_back(A_AlwaysRun);
         ret.push_back(A_Sneak);
         ret.push_back(A_Activate);
+        ret.push_back(A_Use);
         ret.push_back(A_ToggleWeapon);
         ret.push_back(A_ToggleSpell);
         ret.push_back(A_AutoMove);
@@ -907,6 +911,10 @@ namespace MWInput
     void InputManager::keyBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
         , OIS::KeyCode key, ICS::Control::ControlChangingDirection direction)
     {
+        //Disallow binding escape key, and unassigned keys
+        if(key==OIS::KC_ESCAPE || key==OIS::KC_UNASSIGNED)
+            return
+
         clearAllBindings(control);
         ICS::DetectingBindingListener::keyBindingDetected (ICS, control, key, direction);
         MWBase::Environment::get().getWindowManager ()->notifyInputActionBound ();

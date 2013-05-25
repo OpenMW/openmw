@@ -38,7 +38,7 @@ namespace MWClass
     {
         const std::string model = getModel(ptr);
         if(!model.empty())
-            physics.addObject(ptr);
+            physics.addObject(ptr,true);
     }
 
     std::string Potion::getModel(const MWWorld::Ptr &ptr) const
@@ -193,5 +193,17 @@ namespace MWClass
             ptr.get<ESM::Potion>();
 
         return MWWorld::Ptr(&cell.mPotions.insert(*ref), &cell);
+    }
+
+    bool Potion::canSell (const MWWorld::Ptr& item, int npcServices) const
+    {
+        return npcServices & ESM::NPC::Potions;
+    }
+
+    float Potion::getWeight(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Potion> *ref =
+            ptr.get<ESM::Potion>();
+        return ref->mBase->mData.mWeight;
     }
 }

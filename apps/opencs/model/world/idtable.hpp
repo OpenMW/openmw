@@ -1,14 +1,14 @@
 #ifndef CSM_WOLRD_IDTABLE_H
 #define CSM_WOLRD_IDTABLE_H
 
-#include <QAbstractTableModel>
+#include <QAbstractItemModel>
 
 namespace CSMWorld
 {
     class IdCollectionBase;
     class RecordBase;
 
-    class IdTable : public QAbstractTableModel
+    class IdTable : public QAbstractItemModel
     {
             Q_OBJECT
 
@@ -39,11 +39,16 @@ namespace CSMWorld
 
             virtual bool removeRows (int row, int count, const QModelIndex& parent = QModelIndex());
 
+            virtual QModelIndex index (int row, int column, const QModelIndex& parent = QModelIndex())
+                const;
+
+            virtual QModelIndex parent (const QModelIndex& index) const;
+
             void addRecord (const std::string& id);
 
             QModelIndex getModelIndex (const std::string& id, int column) const;
 
-            void setRecord (const RecordBase& record);
+            void setRecord (const std::string& id, const RecordBase& record);
             ///< Add record or overwrite existing recrod.
 
             const RecordBase& getRecord (const std::string& id) const;

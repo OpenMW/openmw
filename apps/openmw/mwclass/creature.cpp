@@ -9,6 +9,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
@@ -84,6 +85,11 @@ namespace MWClass
             ptr.get<ESM::Creature>();
 
         return ref->mBase->mId;
+    }
+
+    void Creature::adjustPosition(const MWWorld::Ptr& ptr) const
+    {
+        MWBase::Environment::get().getWorld()->adjustPosition(ptr);
     }
 
     void Creature::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
@@ -191,6 +197,12 @@ namespace MWClass
         return info;
     }
 
+    float Creature::getArmorRating (const MWWorld::Ptr& ptr) const
+    {
+        /// \todo add Shield magic effect magnitude here, controlled by a GMST (Vanilla vs MCP behaviour)
+        return 0.f;
+    }
+
     float Creature::getCapacity (const MWWorld::Ptr& ptr) const
     {
         const MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
@@ -203,14 +215,30 @@ namespace MWClass
 
         const MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
 
-        weight -= stats.getMagicEffects().get (MWMechanics::EffectKey (8)).mMagnitude; // feather
+        weight -= stats.getMagicEffects().get (MWMechanics::EffectKey (ESM::MagicEffect::Feather)).mMagnitude;
 
-        weight += stats.getMagicEffects().get (MWMechanics::EffectKey (7)).mMagnitude; // burden
+        weight += stats.getMagicEffects().get (MWMechanics::EffectKey (ESM::MagicEffect::Burden)).mMagnitude;
 
         if (weight<0)
             weight = 0;
 
         return weight;
+    }
+
+
+    int Creature::getServices(const MWWorld::Ptr &actor) const
+    {
+        MWWorld::LiveCellRef<ESM::Creature>* ref = actor.get<ESM::Creature>();
+        if (ref->mBase->mHasAI)
+            return ref->mBase->mAiData.mServices;
+        else
+            return 0;
+    }
+
+    bool Creature::isPersistent(const MWWorld::Ptr &actor) const
+    {
+        MWWorld::LiveCellRef<ESM::Creature>* ref = actor.get<ESM::Creature>();
+        return ref->mBase->mPersistent;
     }
 
     MWWorld::Ptr

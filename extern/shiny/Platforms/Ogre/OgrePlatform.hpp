@@ -47,6 +47,8 @@ namespace sh
 			const std::string& name, const std::string& profile,
 			const std::string& source, Language lang);
 
+		virtual void destroyGpuProgram (const std::string& name);
+
 		virtual void setSharedParameter (const std::string& name, PropertyValuePtr value);
 
 		friend class ShaderInstance;

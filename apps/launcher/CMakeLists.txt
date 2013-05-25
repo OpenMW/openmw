@@ -102,3 +102,9 @@ if (BUILD_WITH_CODE_COVERAGE)
   add_definitions (--coverage)
   target_link_libraries(omwlauncher gcov)
 endif()
+
+# Workaround for binutil => 2.23 problem when linking, should be fixed eventually upstream
+if (UNIX AND NOT APPLE)
+target_link_libraries(omwlauncher dl Xt)
+endif()
+

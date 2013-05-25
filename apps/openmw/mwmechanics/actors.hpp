@@ -7,6 +7,7 @@
 #include <map>
 
 #include "character.hpp"
+#include "movement.hpp"
 #include "../mwbase/world.hpp"
 
 namespace Ogre
@@ -76,6 +77,8 @@ namespace MWMechanics
             
             int countDeaths (const std::string& id) const;
             ///< Return the number of deaths for actors with the given ID.
+
+        void forceStateUpdate(const MWWorld::Ptr &ptr);
 
         void playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number);
         void skipAnimation(const MWWorld::Ptr& ptr);

@@ -21,6 +21,5 @@ void CSVWorld::TableSubView::setEditLock (bool locked)
 
 void CSVWorld::TableSubView::rowActivated (const QModelIndex& index)
 {
-    /// \todo re-enable, after dialogue sub views have been fixed up
-//    focusId (mTable->getUniversalId (index.row()));
+    focusId (mTable->getUniversalId (index.row()));
 }

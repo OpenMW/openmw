@@ -2,6 +2,7 @@
 #define GAME_MWMECHANICS_AITRAVEL_H
 
 #include "aipackage.hpp"
+#include "pathfinding.hpp"
 
 namespace MWMechanics
 {
@@ -20,6 +21,13 @@ namespace MWMechanics
             float mX;
             float mY;
             float mZ;
+
+            int cellX;
+            int cellY;
+
+            //bool isPathConstructed;
+            //std::list<ESM::Pathgrid::Point> mPath;
+            PathFinder mPathFinder;
 
     };
 }

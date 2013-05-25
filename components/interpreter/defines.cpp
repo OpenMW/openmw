@@ -23,7 +23,6 @@ namespace Interpreter{
     }
 
     std::string fixDefinesReal(std::string text, char eschar, bool isBook, Context& context){
-
         unsigned int start = 0;
         std::ostringstream retval;
         for(unsigned int i = 0; i < text.length(); i++){

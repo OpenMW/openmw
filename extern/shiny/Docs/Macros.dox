@@ -107,6 +107,23 @@
 
 	\section properties Property retrieval / binding
 
+	\subsection shPropertyHasValue shPropertyHasValue
+	
+	<B>Usage:</B> \@shPropertyHasValue(property)
+
+	Gets replaced by 1 if the property's value is not empty, or 0 if it is empty.
+	Useful for checking whether an optional texture is present or not.
+	
+	<B>Example:</B>
+	\code	
+	#if @shPropertyHasValue(specularMap)
+	 // specular mapping code
+	#endif
+	#if @shPropertyHasValue(normalMap)
+	 // normal mapping code
+	#endif
+	\endcode
+
 	\subsection shUniformProperty shUniformProperty
 
 	<B>Usage:</B> \@shUniformProperty<4f|3f|2f|1f|int> (uniformName, property)
@@ -130,14 +147,10 @@
 
 	<B>Example:</B>
 	\code
-	#if @shPropertyBool(has_normal_map)
+	#if @shPropertyBool(has_vertex_colors)
 	...
 	#endif
 	\endcode
-
-	\subsection shPropertyNotBool shPropertyNotBool
-
-	Same as shPropertyBool, but inverts the result (i.e. when shPropertyBool would return 0, this returns 1 and vice versa)
 
 	\subsection shPropertyString shPropertyString
 
