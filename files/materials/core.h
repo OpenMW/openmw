@@ -64,6 +64,11 @@
 
     @version 120
 
+#if SH_GLSLES == 1
+precision mediump int;
+precision mediump float;
+#endif
+
     #define float2 vec2
     #define float3 vec3
     #define float4 vec4
