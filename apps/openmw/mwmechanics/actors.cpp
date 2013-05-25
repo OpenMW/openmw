@@ -309,4 +309,12 @@ namespace MWMechanics
         if(iter != mActors.end())
             iter->second.skipAnim();
     }
+
+    bool Actors::checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string& groupName)
+    {
+        PtrControllerMap::iterator iter = mActors.find(ptr);
+        if(iter != mActors.end())
+            return iter->second.isAnimPlaying(groupName);
+        return false;
+    }
 }

@@ -112,6 +112,8 @@ namespace MWBase
         virtual void skipAnimation(const MWWorld::Ptr& ptr) = 0;
         ///< Skip the animation for the given MW-reference for one frame. Calls to this function for
         /// references that are currently not in the scene should be ignored.
+
+        virtual bool checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string& groupName) = 0;
     };
 }
 

@@ -100,6 +100,7 @@ namespace MWMechanics
 
         virtual void playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number);
         virtual void skipAnimation(const MWWorld::Ptr& ptr);
+        virtual bool checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string &groupName);
     };
 }
 

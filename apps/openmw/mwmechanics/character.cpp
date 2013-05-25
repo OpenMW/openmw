@@ -509,6 +509,14 @@ void CharacterController::skipAnim()
     mSkipAnim = true;
 }
 
+bool CharacterController::isAnimPlaying(const std::string &groupName)
+{
+    if(mAnimation == NULL)
+        return false;
+    else
+        return mAnimation->isPlaying(groupName);
+}
+
 
 void CharacterController::clearAnimQueue()
 {
