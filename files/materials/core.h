@@ -62,7 +62,11 @@
 
 	#define shFract(val) fract(val)
 
+#if SH_GLSLES == 1
+    @version 100
+#else
     @version 120
+#endif
 
 #if SH_GLSLES == 1 && SH_FRAGMENT_SHADER
 precision mediump int;
