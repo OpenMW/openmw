@@ -64,13 +64,16 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
 {
     // select best shader mode
     bool openGL = (Ogre::Root::getSingleton ().getRenderSystem ()->getName().find("OpenGL") != std::string::npos);
+    bool glES = (Ogre::Root::getSingleton ().getRenderSystem ()->getName().find("OpenGL ES") != std::string::npos);
 
     // glsl is only supported in opengl mode and hlsl only in direct3d mode.
-    if (Settings::Manager::getString("shader mode", "General") == ""
-            || (openGL && Settings::Manager::getString("shader mode", "General") == "hlsl")
-            || (!openGL && Settings::Manager::getString("shader mode", "General") == "glsl"))
+    std::string currentMode = Settings::Manager::getString("shader mode", "General");
+    if (currentMode == ""
+            || (openGL && currentMode == "hlsl")
+            || (!openGL && currentMode == "glsl")
+            || (glES && currentMode != "glsles"))
     {
-        Settings::Manager::setString("shader mode", "General", openGL ? "glsl" : "hlsl");
+        Settings::Manager::setString("shader mode", "General", openGL ? (glES ? "glsles" : "glsl") : "hlsl");
     }
 
     mRendering.createScene("PlayerCam", Settings::Manager::getFloat("field of view", "General"), 5);
@@ -93,6 +96,8 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
     std::string l = Settings::Manager::getString("shader mode", "General");
     if (l == "glsl")
         lang = sh::Language_GLSL;
+    else if (l == "glsles")
+        lang = sh::Language_GLSLES;
     else if (l == "hlsl")
         lang = sh::Language_HLSL;
     else

@@ -58,7 +58,7 @@
 
 #endif
 
-#if SH_GLSL == 1
+#if SH_GLSL == 1 || SH_GLSLES == 1
 
 	#define shFract(val) fract(val)
 
