@@ -1,5 +1,4 @@
 #include "aiwander.hpp"
-#include <iostream>
 
 #include "movement.hpp"
 
@@ -23,14 +22,11 @@ namespace
 MWMechanics::AiWander::AiWander(int distance, int duration, int timeOfDay, const std::vector<int>& idle, bool repeat):
     mDistance(distance), mDuration(duration), mTimeOfDay(timeOfDay), mIdle(idle), mRepeat(repeat)
 {
-    std::cout << "AIWander: " << mDistance << " " << mDuration << " " << mTimeOfDay << " ";
     for(unsigned short counter = 0; counter < mIdle.size(); counter++)
     {
-        std::cout << mIdle[counter] << " ";
         if(mIdle[counter] >= 127 || mIdle[counter] < 0)
             mIdle[counter] = 0;
     }
-    std::cout << mRepeat << std::endl;
 
     if(mDistance < 0)
         mDistance = 0;
@@ -42,7 +38,7 @@ MWMechanics::AiWander::AiWander(int distance, int duration, int timeOfDay, const
     srand(time(NULL));
     mStartTime = MWBase::Environment::get().getWorld()->getTimeStamp();
     mPlayedIdle = 0;
-    mChanceMultiplyer =
+    mIdleChanceMultiplier =
         MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fIdleChanceMultiplier")->getFloat();
 
     mStoredAvailableNodes = false;
@@ -98,7 +94,6 @@ bool MWMechanics::AiWander::execute (const MWWorld::Ptr& actor)
 
         if(mDistance && !mPathgrid->mPoints.empty())
         {
-            // TODO: Limit selecting range in the Z axis.
             mXCell = 0;
             mYCell = 0;
             if(actor.getCell()->mCell->isExterior())
@@ -173,8 +168,8 @@ bool MWMechanics::AiWander::execute (const MWWorld::Ptr& actor)
 
         for(unsigned int counter = 1; counter < mIdle.size(); counter++)
         {
-            unsigned short idleChance = mChanceMultiplyer * mIdle[counter];
-            unsigned short randSelect = (int)(rand() / ((double)RAND_MAX + 1) * int(100 / mChanceMultiplyer));
+            unsigned short idleChance = mIdleChanceMultiplier * mIdle[counter];
+            unsigned short randSelect = (int)(rand() / ((double)RAND_MAX + 1) * int(100 / mIdleChanceMultiplier));
             if(randSelect < idleChance && randSelect > idleRoll)
             {
                 mPlayedIdle = counter;
@@ -241,14 +236,23 @@ bool MWMechanics::AiWander::execute (const MWWorld::Ptr& actor)
         float zAngle = mPathFinder.getZAngleToNext(pos.pos[0],pos.pos[1],pos.pos[2]);
         MWBase::Environment::get().getWorld()->rotateObject(actor,0,0,zAngle,false);
         MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 1;
-    }
 
-    if(mWalking && mPathFinder.checkIfNextPointReached(pos.pos[0],pos.pos[1],pos.pos[2]))
-    {
-        stopWalking(actor, mPathFinder);
-        mMoveNow = false;
-        mWalking = false;
-        mChooseAction = true;
+        // Unclog path nodes by allowing the NPC to be a small distance away from the center. This way two NPCs can be
+        // at the same path node at the same time and both will complete instead of endlessly walking into eachother:
+        Ogre::Vector3 destNodePos(mCurrentNode.mX, mCurrentNode.mY, mCurrentNode.mZ);
+        Ogre::Vector3 actorPos(actor.getRefData().getPosition().pos);
+        actorPos[0] = actorPos[0] - mXCell;
+        actorPos[1] = actorPos[1] - mYCell;
+        float distance = actorPos.squaredDistance(destNodePos);
+
+        if(distance < 1200 || mPathFinder.checkIfNextPointReached(pos.pos[0],pos.pos[1],pos.pos[2]))
+        {
+            stopWalking(actor, mPathFinder);
+            mMoveNow = false;
+            mWalking = false;
+            mChooseAction = true;
+        }
+        
     }
 
     return false;

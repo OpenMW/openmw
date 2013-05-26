@@ -47,7 +47,7 @@ namespace MWMechanics
             bool mMoveNow;
             bool mWalking;
 
-            float mChanceMultiplyer;
+            float mIdleChanceMultiplier;
             unsigned short mPlayedIdle;
 
             MWWorld::TimeStamp mStartTime;
