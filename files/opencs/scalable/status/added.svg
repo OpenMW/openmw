@@ -24,17 +24,17 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="5.6568542"
-     inkscape:cx="27.462558"
-     inkscape:cy="10.232345"
+     inkscape:cx="-11.693264"
+     inkscape:cy="10.222785"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
      showguides="true"
      inkscape:guide-bbox="true"
      inkscape:window-width="1280"
-     inkscape:window-height="994"
+     inkscape:window-height="1001"
      inkscape:window-x="0"
-     inkscape:window-y="30"
+     inkscape:window-y="23"
      inkscape:window-maximized="1"
      inkscape:snap-page="true"
      inkscape:snap-bbox="true"
@@ -870,14 +870,6 @@
          stdDeviation="57.354192"
          id="feGaussianBlur4624" />
     </filter>
-    <filter
-       inkscape:collect="always"
-       id="filter4630">
-      <feGaussianBlur
-         inkscape:collect="always"
-         stdDeviation="57.354192"
-         id="feGaussianBlur4632" />
-    </filter>
     <radialGradient
        inkscape:collect="always"
        xlink:href="#linearGradient3133-9"
@@ -960,7 +952,7 @@
        d="m 17.873381,1008.757 0,13.4786 -13.478558,0 0,12.2533 13.478558,0 0,13.4785 12.278765,0 0,-13.4785 13.453031,0 0,-12.2533 -13.453031,0 0,-13.4786 -12.278765,0 z"
        style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:4;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-linejoin:round" />
     <path
-       style="fill:#ffffff;fill-opacity:1;stroke:none;filter:url(#filter4630)"
+       style="fill:#ffffff;fill-opacity:1;stroke:none;"
        d="m 37.487494,1067.0361 0,788.6201 -788.620104,0 0,716.9274 788.620104,0 0,788.6202 718.421036,0 0,-788.6202 787.12657,0 0,-716.9274 -787.12657,0 0,-788.6201 -718.421036,0 z"
        id="path4628"
        inkscape:connector-curvature="0"
