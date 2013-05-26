@@ -3,6 +3,8 @@
 
 #ifdef _WIN32
 #include <boost/tr1/tr1/unordered_map>
+#elif defined HAVE_UNORDERED_MAP
+#include <unordered_map>
 #else
 #include <tr1/unordered_map>
 #endif
@@ -48,7 +50,11 @@ struct ConfigurationManager
         typedef Files::FixedPath<> FixedPathType;
 
         typedef const boost::filesystem::path& (FixedPathType::*path_type_f)() const;
-        typedef std::tr1::unordered_map<std::string, path_type_f> TokensMappingContainer;
+	#if defined HAVE_UNORDERED_MAP
+            typedef std::unordered_map<std::string, path_type_f> TokensMappingContainer;
+	#else
+            typedef std::tr1::unordered_map<std::string, path_type_f> TokensMappingContainer;
+	#endif
 
         void loadConfig(const boost::filesystem::path& path,
             boost::program_options::variables_map& variables,
