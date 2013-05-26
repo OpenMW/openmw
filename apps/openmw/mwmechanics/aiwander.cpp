@@ -41,8 +41,9 @@ MWMechanics::AiWander::AiWander(int distance, int duration, int timeOfDay, const
 
     srand(time(NULL));
     mStartTime = MWBase::Environment::get().getWorld()->getTimeStamp();
-    mChanceMultiplyer = 0.75;
     mPlayedIdle = 0;
+    mChanceMultiplyer =
+        MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fIdleChanceMultiplier")->getFloat();
 
     mStoredAvailableNodes = false;
     mChooseAction = true;
@@ -74,8 +75,6 @@ bool MWMechanics::AiWander::execute (const MWWorld::Ptr& actor)
         }
         else if(int(currentTime.getHour()) == 0 && currentTime.getDay() != mStartTime.getDay())
         {
-            stopWalking(actor, mPathFinder);
-
             if(!mRepeat)
             {
                 stopWalking(actor, mPathFinder);
@@ -97,7 +96,7 @@ bool MWMechanics::AiWander::execute (const MWWorld::Ptr& actor)
         mCellX = actor.getCell()->mCell->mData.mX;
         mCellY = actor.getCell()->mCell->mData.mY;
 
-        if(mDistance != 0 && !mPathgrid->mPoints.empty())
+        if(mDistance && !mPathgrid->mPoints.empty())
         {
             // TODO: Limit selecting range in the Z axis.
             mXCell = 0;
@@ -164,7 +163,7 @@ bool MWMechanics::AiWander::execute (const MWWorld::Ptr& actor)
     }
 
     // Don't try to move if you are in a new cell (ie: positioncell command called) but still play idles.
-    if(cellChange || (mCellX != actor.getCell()->mCell->mData.mX || mCellY != actor.getCell()->mCell->mData.mY))
+    if(mDistance && (cellChange || (mCellX != actor.getCell()->mCell->mData.mX || mCellY != actor.getCell()->mCell->mData.mY)))
         mDistance = 0;
 
     if(mChooseAction)
@@ -185,14 +184,12 @@ bool MWMechanics::AiWander::execute (const MWWorld::Ptr& actor)
 
         if(!mPlayedIdle && mDistance)
         {
-            std::cout << "Walking!" << std::endl;
             mChooseAction = false;
             mMoveNow = true;
         }
         else
         {
             // Play idle animation and recreate vanilla (broken?) behavior of resetting start time of AIWander:
-            std::cout << "Idling!" << std::endl;
             MWWorld::TimeStamp currentTime = MWBase::Environment::get().getWorld()->getTimeStamp();
             mStartTime = currentTime;
             playIdle(actor, mPlayedIdle + 1);
@@ -203,18 +200,15 @@ bool MWMechanics::AiWander::execute (const MWWorld::Ptr& actor)
 
     if(mIdleNow)
     {
-        // TODO: This is where we should be checking to see if the current idle animation is done, if it is then
-        // set mChooseAction to true, because there is no function for this yet we will only set mChooseAction to true.
         if(!checkIdle(actor, mPlayedIdle + 1))
         {
-            std::cout << "Idle Really Completed" << std::endl;
             mPlayedIdle = 0;
             mIdleNow = false;
             mChooseAction = true;
         }
     }
 
-    if(mMoveNow == true && (mDistance != 0 && !mAllowedNodes.empty()))
+    if(mMoveNow && mDistance && !mAllowedNodes.empty())
     {
         if(!mPathFinder.isPathConstructed())
         {
