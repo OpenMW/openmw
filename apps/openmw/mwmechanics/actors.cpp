@@ -30,7 +30,8 @@ namespace MWMechanics
 
         // AI
         CreatureStats& creatureStats =  MWWorld::Class::get (ptr).getCreatureStats (ptr);
-        creatureStats.getAiSequence().execute (ptr);
+        if(!MWBase::Environment::get().getWindowManager()->isGuiMode())
+            creatureStats.getAiSequence().execute (ptr);
     }
 
     void Actors::updateNpc (const MWWorld::Ptr& ptr, float duration, bool paused)
