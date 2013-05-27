@@ -107,7 +107,7 @@ namespace MWMechanics
         }
 
         const bool powerfulSoul = getGemCharge() >= \
-        		MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("iSoulAmountForConstantEffect")->getInt();
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("iSoulAmountForConstantEffect")->getInt();
         if ((mObjectType == typeid(ESM::Armor).name()) || (mObjectType == typeid(ESM::Clothing).name()))
         { // Armor or Clothing
             switch(mCastStyle)
@@ -126,17 +126,17 @@ namespace MWMechanics
             switch(mCastStyle)
             {
                 case ESM::CastingStyle_WhenStrikes:
-                	mCastStyle = ESM::CastingStyle_WhenUsed;
-                	return;
+                    mCastStyle = ESM::CastingStyle_WhenUsed;
+                    return;
                 case ESM::CastingStyle_WhenUsed:
-                	if (powerfulSoul)
-                		mCastStyle = ESM::CastingStyle_ConstantEffect;
-                	else
-                		mCastStyle = ESM::CastingStyle_WhenStrikes;
-                	return;
+                    if (powerfulSoul)
+                        mCastStyle = ESM::CastingStyle_ConstantEffect;
+                    else
+                        mCastStyle = ESM::CastingStyle_WhenStrikes;
+                    return;
                 default: // takes care of Constant effect too
-                	mCastStyle = ESM::CastingStyle_WhenStrikes;
-                	return;
+                    mCastStyle = ESM::CastingStyle_WhenStrikes;
+                    return;
             }
         }
         else if(mObjectType == typeid(ESM::Book).name())
@@ -149,25 +149,25 @@ namespace MWMechanics
         mCastStyle = ESM::CastingStyle_CastOnce;
     }
 
-	/*
-	 * Vanilla enchant cost formula:
-	 *
-	 * 	Touch/Self:          (min + max) * baseCost * 0.025 * duration + area * baseCost * 0.025
-	 * 	Target:       1.5 * ((min + max) * baseCost * 0.025 * duration + area * baseCost * 0.025)
-	 * 	Constant eff:        (min + max) * baseCost * 2.5              + area * baseCost * 0.025
-	 *
-	 *	For multiple effects - cost of each effect is multiplied by number of effects that follows +1.
-	 *
-	 * 	Note: Minimal value inside formula for 'min' and 'max' is 1. So in vanilla:
-	 * 		  (0 + 0) == (1 + 0) == (1 + 1) => 2 or (2 + 0) == (1 + 2) => 3
-	 *
-	 *  Formula on UESPWiki is not entirely correct.
-	 */
+    /*
+     * Vanilla enchant cost formula:
+     *
+     *  Touch/Self:          (min + max) * baseCost * 0.025 * duration + area * baseCost * 0.025
+     *  Target:       1.5 * ((min + max) * baseCost * 0.025 * duration + area * baseCost * 0.025)
+     *  Constant eff:        (min + max) * baseCost * 2.5              + area * baseCost * 0.025
+     *
+     *  For multiple effects - cost of each effect is multiplied by number of effects that follows +1.
+     *
+     *  Note: Minimal value inside formula for 'min' and 'max' is 1. So in vanilla:
+     *        (0 + 0) == (1 + 0) == (1 + 1) => 2 or (2 + 0) == (1 + 2) => 3
+     *
+     *  Formula on UESPWiki is not entirely correct.
+     */
     float Enchanting::getEnchantPoints() const
     {
-    	if (mEffectList.mList.empty())
-    		// No effects added, cost = 0
-    		return 0;
+        if (mEffectList.mList.empty())
+            // No effects added, cost = 0
+            return 0;
 
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
         std::vector<ESM::ENAMstruct> mEffects = mEffectList.mList;
@@ -186,18 +186,18 @@ namespace MWMechanics
 
             if (mCastStyle == ESM::CastingStyle_ConstantEffect)
             {
-            	magnitudeCost = (magMin + magMax) * baseCost * 2.5;
+                magnitudeCost = (magMin + magMax) * baseCost * 2.5;
             }
             else
             {
-            	magnitudeCost = (magMin + magMax) * it->mDuration * baseCost * 0.025;
-            	if(it->mRange == ESM::RT_Target)
-            		magnitudeCost *= 1.5;
+                magnitudeCost = (magMin + magMax) * it->mDuration * baseCost * 0.025;
+                if(it->mRange == ESM::RT_Target)
+                    magnitudeCost *= 1.5;
             }
 
             areaCost = area * 0.025 * baseCost;
             if (it->mRange == ESM::RT_Target)
-            	areaCost *= 1.5;
+                areaCost *= 1.5;
 
             enchantmentCost += (magnitudeCost + areaCost) * effectsLeftCnt;
             --effectsLeftCnt;
@@ -209,21 +209,21 @@ namespace MWMechanics
 
     float Enchanting::getCastCost() const
     {
-    	if (mCastStyle == ESM::CastingStyle_ConstantEffect)
-    		return 0;
+        if (mCastStyle == ESM::CastingStyle_ConstantEffect)
+            return 0;
 
-    	const float enchantCost = getEnchantPoints();
-    	MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-    	MWMechanics::NpcStats &stats = MWWorld::Class::get(player).getNpcStats(player);
-    	int eSkill = stats.getSkill(ESM::Skill::Enchant).getModified();
+        const float enchantCost = getEnchantPoints();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWMechanics::NpcStats &stats = MWWorld::Class::get(player).getNpcStats(player);
+        int eSkill = stats.getSkill(ESM::Skill::Enchant).getModified();
 
-    	/*
-    	 * Each point of enchant skill above/under 10 subtracts/adds
-    	 * one percent of enchantment cost while minimum is 1.
-    	 */
-    	const float castCost = enchantCost - (enchantCost / 100) * (eSkill - 10);
+        /*
+         * Each point of enchant skill above/under 10 subtracts/adds
+         * one percent of enchantment cost while minimum is 1.
+         */
+        const float castCost = enchantCost - (enchantCost / 100) * (eSkill - 10);
 
-    	return (castCost < 1) ? 1 : castCost;
+        return (castCost < 1) ? 1 : castCost;
     }
 
 
