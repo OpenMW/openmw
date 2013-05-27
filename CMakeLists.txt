@@ -181,6 +181,12 @@ if (UNIX AND NOT APPLE)
     find_package (Threads)
 endif()
 
+include (CheckIncludeFileCXX)
+check_include_file_cxx(unordered_map HAVE_UNORDERED_MAP)
+if (HAVE_UNORDERED_MAP)
+    add_definitions(-DHAVE_UNORDERED_MAP)
+endif ()
+
 
 set(BOOST_COMPONENTS system filesystem program_options thread date_time wave)
 

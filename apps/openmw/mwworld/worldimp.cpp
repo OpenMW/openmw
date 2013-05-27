@@ -1724,4 +1724,31 @@ namespace MWWorld
             }
         }
     }
+
+    struct ListHandlesFunctor
+    {
+        std::vector<std::string> mHandles;
+
+        bool operator() (ESM::CellRef& ref, RefData& data)
+        {
+            Ogre::SceneNode* handle = data.getBaseNode();
+            if (handle)
+                mHandles.push_back(handle->getName());
+            return true;
+        }
+    };
+
+    void World::getItemsOwnedBy (const MWWorld::Ptr& npc, std::vector<MWWorld::Ptr>& out)
+    {
+        const Scene::CellStoreCollection& collection = mWorldScene->getActiveCells();
+        for (Scene::CellStoreCollection::const_iterator cellIt = collection.begin(); cellIt != collection.end(); ++cellIt)
+        {
+            ListHandlesFunctor functor;
+            (*cellIt)->forEach<ListHandlesFunctor>(functor);
+
+            for (std::vector<std::string>::iterator it = functor.mHandles.begin(); it != functor.mHandles.end(); ++it)
+                if (Misc::StringUtils::ciEqual(searchPtrViaHandle(*it).mCellRef->mOwner, npc.getCellRef().mRefID))
+                    out.push_back(searchPtrViaHandle(*it));
+        }
+    }
 }

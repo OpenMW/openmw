@@ -71,7 +71,7 @@ namespace MWGui
         if (item.mType == ItemStack::Type_Equipped && !mShowEquipped)
             return false;
 
-        int category;
+        int category = 0;
         if (base.getTypeName() == typeid(ESM::Armor).name()
                 || base.getTypeName() == typeid(ESM::Clothing).name())
             category = Category_Apparel;
