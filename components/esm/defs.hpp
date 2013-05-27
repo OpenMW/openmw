@@ -23,6 +23,15 @@ enum RangeType
     RT_Target = 2
 };
 
+// Casting style (in enchanting)
+enum Type
+{
+    CS_CastOnce = 0,
+    CS_WhenStrikes = 1,
+    CS_WhenUsed = 2,
+    CS_ConstantEffect = 3
+};
+
 #pragma pack(push)
 #pragma pack(1)
 

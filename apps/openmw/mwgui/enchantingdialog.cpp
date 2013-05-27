@@ -70,7 +70,7 @@ namespace MWGui
 
         mPrice->setCaption(boost::lexical_cast<std::string>(mEnchanting.getEnchantPrice()));
 
-        switch(mEnchanting.getEnchantType())
+        switch(mEnchanting.getCastStyle())
         {
             case 0:
                 mTypeButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastOnce","Cast Once"));
@@ -169,7 +169,7 @@ namespace MWGui
         image->eventMouseButtonClick += MyGUI::newDelegate(this, &EnchantingDialog::onRemoveItem);
 
         mEnchanting.setOldItem(item);
-        mEnchanting.nextEnchantType();
+        mEnchanting.nextCastStyle();
         updateLabels();
     }
 
@@ -248,7 +248,7 @@ namespace MWGui
 
     void EnchantingDialog::onTypeButtonClicked(MyGUI::Widget* sender)
     {
-        mEnchanting.nextEnchantType();
+        mEnchanting.nextCastStyle();
         updateLabels();
     }
 

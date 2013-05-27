@@ -12,7 +12,7 @@
 namespace MWMechanics
 {
     Enchanting::Enchanting():
-    mEnchantType(0)
+    mCastStyle(ESM::CS_CastOnce)
     {}
 
     void Enchanting::setOldItem(MWWorld::Ptr oldItem)
@@ -41,9 +41,9 @@ namespace MWMechanics
         mEffectList=effectList;
     }
 
-    int Enchanting::getEnchantType() const
+    int Enchanting::getCastStyle() const
     {
-        return mEnchantType;
+        return mCastStyle;
     }
 
     void Enchanting::setSoulGem(MWWorld::Ptr soulGem)
@@ -74,11 +74,11 @@ namespace MWMechanics
             MWWorld::Class::get (mEnchanter).skillUsageSucceeded (mEnchanter, ESM::Skill::Enchant, 1);
         }
 
-        if(mEnchantType==3)
+        if(mCastStyle==3)
         {
             enchantment.mData.mCharge=0;
         }
-        enchantment.mData.mType = mEnchantType;
+        enchantment.mData.mType = mCastStyle;
         enchantment.mData.mCost = getEnchantCost();
         enchantment.mEffects = mEffectList;
 
@@ -98,78 +98,97 @@ namespace MWMechanics
         return true;
     }
     
-    void Enchanting::nextEnchantType()
+    void Enchanting::nextCastStyle()
     {
-        mEnchantType++;
+        mCastStyle++;
         if (itemEmpty())
         {
-            mEnchantType = 0;
+            mCastStyle = 0;
             return;
         }
         if ((mObjectType == typeid(ESM::Armor).name())||(mObjectType == typeid(ESM::Clothing).name()))
         {
             int soulConstAmount = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("iSoulAmountForConstantEffect")->getInt();
-            switch(mEnchantType)
+            switch(mCastStyle)
             {
                 case 1:
-                    mEnchantType = 2;
+                    mCastStyle = 2;
                 case 3:
                     if(getGemCharge()<soulConstAmount)
-                        mEnchantType=2;
+                        mCastStyle=2;
                 case 4:
-                    mEnchantType = 2;
+                    mCastStyle = 2;
             }
         }
         else if(mObjectType == typeid(ESM::Weapon).name())
         {
-            switch(mEnchantType)
+            switch(mCastStyle)
             {
                 case 3:
-                    mEnchantType = 1;
+                    mCastStyle = 1;
             }
         }
         else if(mObjectType == typeid(ESM::Book).name())
         {
-            mEnchantType=0;
+            mCastStyle=0;
         }
     }
 
+	/*
+	 * Vanilla enchant cost formula:
+	 *
+	 * 	Touch/Self:          (min + max) * baseCost * 0.025 * duration + area * baseCost * 0.025
+	 * 	Target:       1.5 * ((min + max) * baseCost * 0.025 * duration + area * baseCost * 0.025)
+	 * 	Constant eff:        (min + max) * baseCost * 2.5              + area * baseCost * 0.025
+	 *
+	 *	For multiple effects - cost of each effect is multiplied by number of effects that follows +1.
+	 *
+	 * 	Note: Minimal value inside formula for 'min' and 'max' is 1. So in vanilla:
+	 * 		  (0 + 0) == (1 + 0) == (1 + 1) => 2 or (2 + 0) == (1 + 2) => 3
+	 *
+	 *  Formula on UESPWiki is not entirely correct.
+	 */
     float Enchanting::getEnchantCost() const
     {
-        const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-        float cost = 0;
-        std::vector<ESM::ENAMstruct> mEffects = mEffectList.mList;
-        int i=mEffects.size();
-        if(i<=0)
-            return 0;
+    	if (mEffectList.mList.empty())
+    		// No effects added, cost = 0
+    		return 0;
 
-        /*
-        Formula from http://www.uesp.net/wiki/Morrowind:Enchant
-        */
+        const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+        std::vector<ESM::ENAMstruct> mEffects = mEffectList.mList;
+
+        float enchantmentCost = 0;
+        int effectsLeftCnt = mEffects.size();
+        float baseCost, magnitudeCost, areaCost;
+        int magMin, magMax, area;
         for (std::vector<ESM::ENAMstruct>::const_iterator it = mEffects.begin(); it != mEffects.end(); ++it)
         {
-            const ESM::MagicEffect* effect = store.get<ESM::MagicEffect>().find(it->mEffectID);
+            baseCost = (store.get<ESM::MagicEffect>().find(it->mEffectID))->mData.mBaseCost;
+            // To reflect vanilla behavior
+            magMin = (it->mMagnMin == 0) ? 1 : it->mMagnMin;
+            magMax = (it->mMagnMax == 0) ? 1 : it->mMagnMax;
+            area = (it->mArea == 0) ? 1 : it->mArea;
 
-            float cost1 = ((it->mMagnMin + it->mMagnMax)*it->mDuration*effect->mData.mBaseCost*0.025);
-
-            float cost2 = (std::max(1, it->mArea)*0.125*effect->mData.mBaseCost);
-
-            if(mEnchantType==3)
+            if (mCastStyle == ESM::CS_ConstantEffect)
             {
-                int constDurationMultipler = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("fEnchantmentConstantDurationMult")->getFloat();
-                cost1 *= constDurationMultipler;
-                cost2 *= 2;
+            	magnitudeCost = (magMin + magMax) * baseCost * 2.5;
             }
-            if(it->mRange == ESM::RT_Target)
-                cost1 *= 1.5;
+            else
+            {
+            	magnitudeCost = (magMin + magMax) * it->mDuration * baseCost * 0.025;
+            	if(it->mRange == ESM::RT_Target)
+            		magnitudeCost *= 1.5;
+            }
 
-            float fullcost = cost1+cost2;
-            fullcost*= i;
-            i--;
+            areaCost = area * 0.025 * baseCost;
+            if (it->mRange == ESM::RT_Target)
+            	areaCost *= 1.5;
 
-            cost+=fullcost;
+            enchantmentCost += (magnitudeCost + areaCost) * effectsLeftCnt;
+            --effectsLeftCnt;
         }
-        return cost;
+
+        return enchantmentCost;
     }
 
     int Enchanting::getEnchantPrice() const
@@ -236,7 +255,7 @@ namespace MWMechanics
         + (0.125 * creatureStats.getAttribute (ESM::Attribute::Luck).getModified()));
 
         float chance2 = 2.5 * getEnchantCost();
-        if(mEnchantType==3)
+        if(mCastStyle==3)
         {
             float constantChance = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("fEnchantmentConstantChanceMult")->getFloat();
             chance2 /= constantChance;
