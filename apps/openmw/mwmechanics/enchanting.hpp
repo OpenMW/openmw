@@ -37,6 +37,7 @@ namespace MWMechanics
             void nextCastStyle(); //Set enchant type to next possible type (for mOldItemPtr object)
             int getCastStyle() const;
             float getEnchantCost() const;
+            float getCastCost() const;
             int getEnchantPrice() const;
             float getMaxEnchantValue() const;
             int getGemCharge() const;

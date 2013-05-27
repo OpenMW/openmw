@@ -206,6 +206,24 @@ namespace MWMechanics
         return enchantmentCost;
     }
 
+
+    float Enchanting::getCastCost() const
+    {
+    	const float enchantCost = getEnchantCost();
+    	MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+    	MWMechanics::NpcStats &stats = MWWorld::Class::get(player).getNpcStats(player);
+    	int eSkill = stats.getSkill(ESM::Skill::Enchant).getModified();
+
+    	/*
+    	 * Each point of enchant skill above/under 10 subtracts/adds
+    	 * one percent of enchantment cost while minimum is 1.
+    	 */
+    	const float castCost = enchantCost - (enchantCost / 100) * (eSkill - 10);
+
+    	return (castCost < 1) ? 1 : castCost;
+    }
+
+
     int Enchanting::getEnchantPrice() const
     {
         if(mEnchanter.isEmpty())
