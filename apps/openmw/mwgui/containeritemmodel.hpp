@@ -11,7 +11,7 @@ namespace MWGui
     class ContainerItemModel : public ItemModel
     {
     public:
-        ContainerItemModel (const std::vector<MWWorld::Ptr>& itemSources);
+        ContainerItemModel (const std::vector<MWWorld::Ptr>& itemSources, const std::vector<MWWorld::Ptr>& worldItems);
         ///< @note The order of elements \a itemSources matters here. The first element has the highest priority for removal,
         ///  while the last element will be used to add new items to.
 
@@ -28,6 +28,7 @@ namespace MWGui
 
     private:
         std::vector<MWWorld::Ptr> mItemSources;
+        std::vector<MWWorld::Ptr> mWorldItems;
 
         std::vector<ItemStack> mItems;
     };
