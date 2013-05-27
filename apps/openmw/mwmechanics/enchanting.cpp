@@ -209,6 +209,9 @@ namespace MWMechanics
 
     float Enchanting::getCastCost() const
     {
+    	if (mCastStyle == ESM::CS_ConstantEffect)
+    		return 0;
+
     	const float enchantCost = getEnchantCost();
     	MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
     	MWMechanics::NpcStats &stats = MWWorld::Class::get(player).getNpcStats(player);

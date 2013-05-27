@@ -66,7 +66,9 @@ namespace MWGui
 
         mCharge->setCaption(boost::lexical_cast<std::string>(mEnchanting.getGemCharge()));
 
-        mCastCost->setCaption(boost::lexical_cast<std::string>(mEnchanting.getCastCost()));
+        std::stringstream castCost;
+        castCost << std::setprecision(1) << std::fixed << mEnchanting.getCastCost();
+        mCastCost->setCaption(boost::lexical_cast<std::string>(castCost.str()));
 
         mPrice->setCaption(boost::lexical_cast<std::string>(mEnchanting.getEnchantPrice()));
 
