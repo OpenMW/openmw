@@ -160,7 +160,7 @@ namespace MWMechanics
                 cost1 *= constDurationMultipler;
                 cost2 *= 2;
             }
-            if(effect->mData.mFlags & ESM::MagicEffect::CastTarget)
+            if(it->mRange == ESM::RT_Target)
                 cost1 *= 1.5;
 
             float fullcost = cost1+cost2;
