@@ -126,7 +126,11 @@ bool MWMechanics::AiWander::execute (const MWWorld::Ptr& actor)
                 }
                 mCurrentNode = mAllowedNodes[index];
                 mAllowedNodes.erase(mAllowedNodes.begin() + index);
+                if(mAllowedNodes.empty())
+                    mDistance = 0;
             }
+            else
+                mDistance = 0;
         }
     }
 
@@ -203,7 +207,7 @@ bool MWMechanics::AiWander::execute (const MWWorld::Ptr& actor)
         }
     }
 
-    if(mMoveNow && mDistance && !mAllowedNodes.empty())
+    if(mMoveNow && mDistance)
     {
         if(!mPathFinder.isPathConstructed())
         {
