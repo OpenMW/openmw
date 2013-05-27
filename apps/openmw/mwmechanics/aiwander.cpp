@@ -38,6 +38,7 @@ MWMechanics::AiWander::AiWander(int distance, int duration, int timeOfDay, const
     srand(time(NULL));
     mStartTime = MWBase::Environment::get().getWorld()->getTimeStamp();
     mPlayedIdle = 0;
+    mPathgrid = NULL;
     mIdleChanceMultiplier =
         MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fIdleChanceMultiplier")->getFloat();
 
@@ -92,7 +93,9 @@ bool MWMechanics::AiWander::execute (const MWWorld::Ptr& actor)
         mCellX = actor.getCell()->mCell->mData.mX;
         mCellY = actor.getCell()->mCell->mData.mY;
 
-        if(mPathgrid->mPoints.empty())
+        if(!mPathgrid)
+            mDistance = 0;
+        else if(mPathgrid->mPoints.empty())
             mDistance = 0;
 
         if(mDistance)
