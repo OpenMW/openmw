@@ -5,6 +5,7 @@
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/magiceffects.hpp"
+#include "../mwmechanics/movement.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -29,6 +30,7 @@ namespace
     {
         MWMechanics::CreatureStats mCreatureStats;
         MWWorld::ContainerStore mContainerStore;
+        MWMechanics::Movement mMovement;
 
         virtual MWWorld::CustomData *clone() const;
     };
@@ -46,6 +48,18 @@ namespace MWClass
         if (!ptr.getRefData().getCustomData())
         {
             std::auto_ptr<CustomData> data (new CustomData);
+
+            static bool inited = false;
+            if(!inited)
+            {
+                const MWBase::World *world = MWBase::Environment::get().getWorld();
+                const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
+
+                fMinWalkSpeedCreature = gmst.find("fMinWalkSpeedCreature");
+                fMaxWalkSpeedCreature = gmst.find("fMaxWalkSpeedCreature");
+
+                inited = true;
+            }
 
             MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
 
@@ -181,6 +195,42 @@ namespace MWClass
         return true;
     }
 
+    float Creature::getSpeed(const MWWorld::Ptr &ptr) const
+    {
+        MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
+        float walkSpeed = fMinWalkSpeedCreature->getFloat() + 0.01 * stats.getAttribute(ESM::Attribute::Speed).getModified()
+                * (fMaxWalkSpeedCreature->getFloat() - fMinWalkSpeedCreature->getFloat());
+        /// \todo what about the rest?
+        return walkSpeed;
+    }
+
+    MWMechanics::Movement& Creature::getMovementSettings (const MWWorld::Ptr& ptr) const
+    {
+        ensureCustomData (ptr);
+
+        return dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mMovement;
+    }
+
+    Ogre::Vector3 Creature::getMovementVector (const MWWorld::Ptr& ptr) const
+    {
+        MWMechanics::Movement &movement = getMovementSettings(ptr);
+        Ogre::Vector3 vec(movement.mPosition);
+        movement.mPosition[0] = 0.0f;
+        movement.mPosition[1] = 0.0f;
+        movement.mPosition[2] = 0.0f;
+        return vec;
+    }
+
+    Ogre::Vector3 Creature::getRotationVector (const MWWorld::Ptr& ptr) const
+    {
+        MWMechanics::Movement &movement = getMovementSettings(ptr);
+        Ogre::Vector3 vec(movement.mRotation);
+        movement.mRotation[0] = 0.0f;
+        movement.mRotation[1] = 0.0f;
+        movement.mRotation[2] = 0.0f;
+        return vec;
+    }
+
     MWGui::ToolTipInfo Creature::getToolTipInfo (const MWWorld::Ptr& ptr) const
     {
         MWWorld::LiveCellRef<ESM::Creature> *ref =
@@ -249,4 +299,7 @@ namespace MWClass
 
         return MWWorld::Ptr(&cell.mCreatures.insert(*ref), &cell);
     }
+
+    const ESM::GameSetting* Creature::fMinWalkSpeedCreature;
+    const ESM::GameSetting* Creature::fMaxWalkSpeedCreature;
 }
