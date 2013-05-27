@@ -92,7 +92,10 @@ bool MWMechanics::AiWander::execute (const MWWorld::Ptr& actor)
         mCellX = actor.getCell()->mCell->mData.mX;
         mCellY = actor.getCell()->mCell->mData.mY;
 
-        if(mDistance && !mPathgrid->mPoints.empty())
+        if(mPathgrid->mPoints.empty())
+            mDistance = 0;
+
+        if(mDistance)
         {
             mXCell = 0;
             mYCell = 0;
@@ -126,10 +129,9 @@ bool MWMechanics::AiWander::execute (const MWWorld::Ptr& actor)
                 }
                 mCurrentNode = mAllowedNodes[index];
                 mAllowedNodes.erase(mAllowedNodes.begin() + index);
-                if(mAllowedNodes.empty())
-                    mDistance = 0;
             }
-            else
+
+            if(mAllowedNodes.empty())
                 mDistance = 0;
         }
     }
