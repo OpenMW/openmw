@@ -26,10 +26,10 @@ enum RangeType
 // Casting style (in enchanting)
 enum CastingStyle
 {
-    CS_CastOnce = 0,
-    CS_WhenStrikes = 1,
-    CS_WhenUsed = 2,
-    CS_ConstantEffect = 3
+    CastingStyle_CastOnce = 0,
+    CastingStyle_WhenStrikes = 1,
+    CastingStyle_WhenUsed = 2,
+    CastingStyle_ConstantEffect = 3
 };
 
 #pragma pack(push)

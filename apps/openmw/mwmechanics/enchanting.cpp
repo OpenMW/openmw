@@ -12,7 +12,7 @@
 namespace MWMechanics
 {
     Enchanting::Enchanting():
-    mCastStyle(ESM::CS_CastOnce)
+    mCastStyle(ESM::CastingStyle_CastOnce)
     {}
 
     void Enchanting::setOldItem(MWWorld::Ptr oldItem)
@@ -74,12 +74,12 @@ namespace MWMechanics
             MWWorld::Class::get (mEnchanter).skillUsageSucceeded (mEnchanter, ESM::Skill::Enchant, 1);
         }
 
-        if(mCastStyle==ESM::CS_ConstantEffect)
+        if(mCastStyle==ESM::CastingStyle_ConstantEffect)
         {
             enchantment.mData.mCharge=0;
         }
         enchantment.mData.mType = mCastStyle;
-        enchantment.mData.mCost = getEnchantCost();
+        enchantment.mData.mCost = getEnchantPoints();
         enchantment.mEffects = mEffectList;
 
         const ESM::Enchantment *enchantmentPtr = MWBase::Environment::get().getWorld()->createRecord (enchantment);
@@ -102,7 +102,7 @@ namespace MWMechanics
     {
         if (itemEmpty())
         {
-            mCastStyle = ESM::CS_WhenUsed;
+            mCastStyle = ESM::CastingStyle_WhenUsed;
             return;
         }
 
@@ -112,12 +112,12 @@ namespace MWMechanics
         { // Armor or Clothing
             switch(mCastStyle)
             {
-                case ESM::CS_WhenUsed:
+                case ESM::CastingStyle_WhenUsed:
                     if (powerfulSoul)
-                        mCastStyle = ESM::CS_ConstantEffect;
+                        mCastStyle = ESM::CastingStyle_ConstantEffect;
                     return;
                 default: // takes care of Constant effect too
-                    mCastStyle = ESM::CS_WhenUsed;
+                    mCastStyle = ESM::CastingStyle_WhenUsed;
                     return;
             }
         }
@@ -125,28 +125,28 @@ namespace MWMechanics
         { // Weapon
             switch(mCastStyle)
             {
-                case ESM::CS_WhenStrikes:
-                	mCastStyle = ESM::CS_WhenUsed;
+                case ESM::CastingStyle_WhenStrikes:
+                	mCastStyle = ESM::CastingStyle_WhenUsed;
                 	return;
-                case ESM::CS_WhenUsed:
+                case ESM::CastingStyle_WhenUsed:
                 	if (powerfulSoul)
-                		mCastStyle = ESM::CS_ConstantEffect;
+                		mCastStyle = ESM::CastingStyle_ConstantEffect;
                 	else
-                		mCastStyle = ESM::CS_WhenStrikes;
+                		mCastStyle = ESM::CastingStyle_WhenStrikes;
                 	return;
                 default: // takes care of Constant effect too
-                	mCastStyle = ESM::CS_WhenStrikes;
+                	mCastStyle = ESM::CastingStyle_WhenStrikes;
                 	return;
             }
         }
         else if(mObjectType == typeid(ESM::Book).name())
         { // Scroll or Book
-            mCastStyle = ESM::CS_CastOnce;
+            mCastStyle = ESM::CastingStyle_CastOnce;
             return;
         }
 
         // Fail case
-        mCastStyle = ESM::CS_CastOnce;
+        mCastStyle = ESM::CastingStyle_CastOnce;
     }
 
 	/*
@@ -163,7 +163,7 @@ namespace MWMechanics
 	 *
 	 *  Formula on UESPWiki is not entirely correct.
 	 */
-    float Enchanting::getEnchantCost() const
+    float Enchanting::getEnchantPoints() const
     {
     	if (mEffectList.mList.empty())
     		// No effects added, cost = 0
@@ -184,7 +184,7 @@ namespace MWMechanics
             magMax = (it->mMagnMax == 0) ? 1 : it->mMagnMax;
             area = (it->mArea == 0) ? 1 : it->mArea;
 
-            if (mCastStyle == ESM::CS_ConstantEffect)
+            if (mCastStyle == ESM::CastingStyle_ConstantEffect)
             {
             	magnitudeCost = (magMin + magMax) * baseCost * 2.5;
             }
@@ -209,10 +209,10 @@ namespace MWMechanics
 
     float Enchanting::getCastCost() const
     {
-    	if (mCastStyle == ESM::CS_ConstantEffect)
+    	if (mCastStyle == ESM::CastingStyle_ConstantEffect)
     		return 0;
 
-    	const float enchantCost = getEnchantCost();
+    	const float enchantCost = getEnchantPoints();
     	MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
     	MWMechanics::NpcStats &stats = MWWorld::Class::get(player).getNpcStats(player);
     	int eSkill = stats.getSkill(ESM::Skill::Enchant).getModified();
@@ -233,7 +233,7 @@ namespace MWMechanics
             return 0;
 
         float priceMultipler = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("fEnchantmentValueMult")->getFloat();
-        int price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mEnchanter, (getEnchantCost() * priceMultipler), true);
+        int price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mEnchanter, (getEnchantPoints() * priceMultipler), true);
         return price;
     }
 
@@ -290,8 +290,8 @@ namespace MWMechanics
         (0.25 * creatureStats.getAttribute (ESM::Attribute::Intelligence).getModified())
         + (0.125 * creatureStats.getAttribute (ESM::Attribute::Luck).getModified()));
 
-        float chance2 = 2.5 * getEnchantCost();
-        if(mCastStyle==ESM::CS_ConstantEffect)
+        float chance2 = 2.5 * getEnchantPoints();
+        if(mCastStyle==ESM::CastingStyle_ConstantEffect)
         {
             float constantChance = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("fEnchantmentConstantChanceMult")->getFloat();
             chance2 /= constantChance;

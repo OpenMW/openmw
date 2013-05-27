@@ -36,7 +36,7 @@ namespace MWMechanics
             bool create(); //Return true if created, false if failed.
             void nextCastStyle(); //Set enchant type to next possible type (for mOldItemPtr object)
             int getCastStyle() const;
-            float getEnchantCost() const;
+            float getEnchantPoints() const;
             float getCastCost() const;
             int getEnchantPrice() const;
             float getMaxEnchantValue() const;

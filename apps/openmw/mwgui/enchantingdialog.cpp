@@ -61,7 +61,7 @@ namespace MWGui
     void EnchantingDialog::updateLabels()
     {
         std::stringstream enchantCost;
-        enchantCost << std::setprecision(1) << std::fixed << mEnchanting.getEnchantCost();
+        enchantCost << std::setprecision(1) << std::fixed << mEnchanting.getEnchantPoints();
         mEnchantmentPoints->setCaption(enchantCost.str() + " / " + boost::lexical_cast<std::string>(mEnchanting.getMaxEnchantValue()));
 
         mCharge->setCaption(boost::lexical_cast<std::string>(mEnchanting.getGemCharge()));
@@ -74,19 +74,19 @@ namespace MWGui
 
         switch(mEnchanting.getCastStyle())
         {
-            case ESM::CS_CastOnce:
+            case ESM::CastingStyle_CastOnce:
                 mTypeButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastOnce","Cast Once"));
                 mAddEffectDialog.constantEffect=false;
                 break;
-            case ESM::CS_WhenStrikes:
+            case ESM::CastingStyle_WhenStrikes:
                 mTypeButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastWhenStrikes", "When Strikes"));
                 mAddEffectDialog.constantEffect=false;
                 break;
-            case ESM::CS_WhenUsed:
+            case ESM::CastingStyle_WhenUsed:
                 mTypeButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastWhenUsed", "When Used"));
                 mAddEffectDialog.constantEffect=false;
                 break;
-            case ESM::CS_ConstantEffect:
+            case ESM::CastingStyle_ConstantEffect:
                 mTypeButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastConstant", "Cast Constant"));
                 mAddEffectDialog.constantEffect=true;
                 break;
@@ -280,7 +280,7 @@ namespace MWGui
             return;
         }
 
-        if (mEnchanting.getEnchantCost() > mEnchanting.getMaxEnchantValue())
+        if (mEnchanting.getEnchantPoints() > mEnchanting.getMaxEnchantValue())
         {
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage29}");
             return;
