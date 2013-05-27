@@ -24,7 +24,7 @@ enum RangeType
 };
 
 // Casting style (in enchanting)
-enum Type
+enum CastingStyle
 {
     CS_CastOnce = 0,
     CS_WhenStrikes = 1,
