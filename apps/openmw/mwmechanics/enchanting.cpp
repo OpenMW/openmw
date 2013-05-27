@@ -74,7 +74,7 @@ namespace MWMechanics
             MWWorld::Class::get (mEnchanter).skillUsageSucceeded (mEnchanter, ESM::Skill::Enchant, 1);
         }
 
-        if(mCastStyle==3)
+        if(mCastStyle==ESM::CS_ConstantEffect)
         {
             enchantment.mData.mCharge=0;
         }
@@ -255,7 +255,7 @@ namespace MWMechanics
         + (0.125 * creatureStats.getAttribute (ESM::Attribute::Luck).getModified()));
 
         float chance2 = 2.5 * getEnchantCost();
-        if(mCastStyle==3)
+        if(mCastStyle==ESM::CS_ConstantEffect)
         {
             float constantChance = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("fEnchantmentConstantChanceMult")->getFloat();
             chance2 /= constantChance;

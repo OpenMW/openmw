@@ -72,19 +72,19 @@ namespace MWGui
 
         switch(mEnchanting.getCastStyle())
         {
-            case 0:
+            case ESM::CS_CastOnce:
                 mTypeButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastOnce","Cast Once"));
                 mAddEffectDialog.constantEffect=false;
                 break;
-            case 1:
+            case ESM::CS_WhenStrikes:
                 mTypeButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastWhenStrikes", "When Strikes"));
                 mAddEffectDialog.constantEffect=false;
                 break;
-            case 2:
+            case ESM::CS_WhenUsed:
                 mTypeButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastWhenUsed", "When Used"));
                 mAddEffectDialog.constantEffect=false;
                 break;
-            case 3:
+            case ESM::CS_ConstantEffect:
                 mTypeButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastConstant", "Cast Constant"));
                 mAddEffectDialog.constantEffect=true;
                 break;
