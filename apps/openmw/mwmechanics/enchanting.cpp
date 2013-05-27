@@ -100,38 +100,53 @@ namespace MWMechanics
     
     void Enchanting::nextCastStyle()
     {
-        mCastStyle++;
         if (itemEmpty())
         {
-            mCastStyle = 0;
+            mCastStyle = ESM::CS_WhenUsed;
             return;
         }
-        if ((mObjectType == typeid(ESM::Armor).name())||(mObjectType == typeid(ESM::Clothing).name()))
-        {
-            int soulConstAmount = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("iSoulAmountForConstantEffect")->getInt();
+
+        const bool powerfulSoul = getGemCharge() >= \
+        		MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("iSoulAmountForConstantEffect")->getInt();
+        if ((mObjectType == typeid(ESM::Armor).name()) || (mObjectType == typeid(ESM::Clothing).name()))
+        { // Armor or Clothing
             switch(mCastStyle)
             {
-                case 1:
-                    mCastStyle = 2;
-                case 3:
-                    if(getGemCharge()<soulConstAmount)
-                        mCastStyle=2;
-                case 4:
-                    mCastStyle = 2;
+                case ESM::CS_WhenUsed:
+                    if (powerfulSoul)
+                        mCastStyle = ESM::CS_ConstantEffect;
+                    return;
+                default: // takes care of Constant effect too
+                    mCastStyle = ESM::CS_WhenUsed;
+                    return;
             }
         }
         else if(mObjectType == typeid(ESM::Weapon).name())
-        {
+        { // Weapon
             switch(mCastStyle)
             {
-                case 3:
-                    mCastStyle = 1;
+                case ESM::CS_WhenStrikes:
+                	mCastStyle = ESM::CS_WhenUsed;
+                	return;
+                case ESM::CS_WhenUsed:
+                	if (powerfulSoul)
+                		mCastStyle = ESM::CS_ConstantEffect;
+                	else
+                		mCastStyle = ESM::CS_WhenStrikes;
+                	return;
+                default: // takes care of Constant effect too
+                	mCastStyle = ESM::CS_WhenStrikes;
+                	return;
             }
         }
         else if(mObjectType == typeid(ESM::Book).name())
-        {
-            mCastStyle=0;
+        { // Scroll or Book
+            mCastStyle = ESM::CS_CastOnce;
+            return;
         }
+
+        // Fail case
+        mCastStyle = ESM::CS_CastOnce;
     }
 
 	/*
