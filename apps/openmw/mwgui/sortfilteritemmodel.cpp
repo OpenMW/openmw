@@ -106,6 +106,7 @@ namespace MWGui
         if ((mFilter & Filter_OnlyEnchantable) && (item.mFlags & ItemStack::Flag_Enchanted
                                                || (base.getTypeName() != typeid(ESM::Armor).name()
                                                    && base.getTypeName() != typeid(ESM::Clothing).name()
+                                                   && base.getTypeName() != typeid(ESM::Weapon).name()
                                                    && base.getTypeName() != typeid(ESM::Book).name())))
             return false;
         if ((mFilter & Filter_OnlyEnchantable) && base.getTypeName() == typeid(ESM::Book).name()
