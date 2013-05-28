@@ -61,30 +61,32 @@ namespace MWGui
     void EnchantingDialog::updateLabels()
     {
         std::stringstream enchantCost;
-        enchantCost << std::setprecision(1) << std::fixed << mEnchanting.getEnchantCost();
+        enchantCost << std::setprecision(1) << std::fixed << mEnchanting.getEnchantPoints();
         mEnchantmentPoints->setCaption(enchantCost.str() + " / " + boost::lexical_cast<std::string>(mEnchanting.getMaxEnchantValue()));
 
         mCharge->setCaption(boost::lexical_cast<std::string>(mEnchanting.getGemCharge()));
 
-        mCastCost->setCaption(boost::lexical_cast<std::string>(mEnchanting.getEnchantCost()));
+        std::stringstream castCost;
+        castCost << std::setprecision(1) << std::fixed << mEnchanting.getCastCost();
+        mCastCost->setCaption(boost::lexical_cast<std::string>(castCost.str()));
 
         mPrice->setCaption(boost::lexical_cast<std::string>(mEnchanting.getEnchantPrice()));
 
-        switch(mEnchanting.getEnchantType())
+        switch(mEnchanting.getCastStyle())
         {
-            case 0:
+            case ESM::CastingStyle_CastOnce:
                 mTypeButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastOnce","Cast Once"));
                 mAddEffectDialog.constantEffect=false;
                 break;
-            case 1:
+            case ESM::CastingStyle_WhenStrikes:
                 mTypeButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastWhenStrikes", "When Strikes"));
                 mAddEffectDialog.constantEffect=false;
                 break;
-            case 2:
+            case ESM::CastingStyle_WhenUsed:
                 mTypeButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastWhenUsed", "When Used"));
                 mAddEffectDialog.constantEffect=false;
                 break;
-            case 3:
+            case ESM::CastingStyle_ConstantEffect:
                 mTypeButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastConstant", "Cast Constant"));
                 mAddEffectDialog.constantEffect=true;
                 break;
@@ -169,7 +171,7 @@ namespace MWGui
         image->eventMouseButtonClick += MyGUI::newDelegate(this, &EnchantingDialog::onRemoveItem);
 
         mEnchanting.setOldItem(item);
-        mEnchanting.nextEnchantType();
+        mEnchanting.nextCastStyle();
         updateLabels();
     }
 
@@ -248,7 +250,7 @@ namespace MWGui
 
     void EnchantingDialog::onTypeButtonClicked(MyGUI::Widget* sender)
     {
-        mEnchanting.nextEnchantType();
+        mEnchanting.nextCastStyle();
         updateLabels();
     }
 
@@ -278,7 +280,7 @@ namespace MWGui
             return;
         }
 
-        if (mEnchanting.getEnchantCost() > mEnchanting.getMaxEnchantValue())
+        if (mEnchanting.getEnchantPoints() > mEnchanting.getMaxEnchantValue())
         {
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage29}");
             return;
