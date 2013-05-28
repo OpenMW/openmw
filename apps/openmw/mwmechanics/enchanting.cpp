@@ -12,7 +12,7 @@
 namespace MWMechanics
 {
     Enchanting::Enchanting():
-    mCastStyle(ESM::CastingStyle_CastOnce)
+    mCastStyle(ESM::Enchantment::CastOnce)
     {}
 
     void Enchanting::setOldItem(MWWorld::Ptr oldItem)
@@ -74,7 +74,7 @@ namespace MWMechanics
             MWWorld::Class::get (mEnchanter).skillUsageSucceeded (mEnchanter, ESM::Skill::Enchant, 1);
         }
 
-        if(mCastStyle==ESM::CastingStyle_ConstantEffect)
+        if(mCastStyle==ESM::Enchantment::ConstantEffect)
         {
             enchantment.mData.mCharge=0;
         }
@@ -102,7 +102,7 @@ namespace MWMechanics
     {
         if (itemEmpty())
         {
-            mCastStyle = ESM::CastingStyle_WhenUsed;
+            mCastStyle = ESM::Enchantment::WhenUsed;
             return;
         }
 
@@ -112,12 +112,12 @@ namespace MWMechanics
         { // Armor or Clothing
             switch(mCastStyle)
             {
-                case ESM::CastingStyle_WhenUsed:
+                case ESM::Enchantment::WhenUsed:
                     if (powerfulSoul)
-                        mCastStyle = ESM::CastingStyle_ConstantEffect;
+                        mCastStyle = ESM::Enchantment::ConstantEffect;
                     return;
                 default: // takes care of Constant effect too
-                    mCastStyle = ESM::CastingStyle_WhenUsed;
+                    mCastStyle = ESM::Enchantment::WhenUsed;
                     return;
             }
         }
@@ -125,28 +125,28 @@ namespace MWMechanics
         { // Weapon
             switch(mCastStyle)
             {
-                case ESM::CastingStyle_WhenStrikes:
-                    mCastStyle = ESM::CastingStyle_WhenUsed;
+                case ESM::Enchantment::WhenStrikes:
+                    mCastStyle = ESM::Enchantment::WhenUsed;
                     return;
-                case ESM::CastingStyle_WhenUsed:
+                case ESM::Enchantment::WhenUsed:
                     if (powerfulSoul)
-                        mCastStyle = ESM::CastingStyle_ConstantEffect;
+                        mCastStyle = ESM::Enchantment::ConstantEffect;
                     else
-                        mCastStyle = ESM::CastingStyle_WhenStrikes;
+                        mCastStyle = ESM::Enchantment::WhenStrikes;
                     return;
                 default: // takes care of Constant effect too
-                    mCastStyle = ESM::CastingStyle_WhenStrikes;
+                    mCastStyle = ESM::Enchantment::WhenStrikes;
                     return;
             }
         }
         else if(mObjectType == typeid(ESM::Book).name())
         { // Scroll or Book
-            mCastStyle = ESM::CastingStyle_CastOnce;
+            mCastStyle = ESM::Enchantment::CastOnce;
             return;
         }
 
         // Fail case
-        mCastStyle = ESM::CastingStyle_CastOnce;
+        mCastStyle = ESM::Enchantment::CastOnce;
     }
 
     /*
@@ -184,7 +184,7 @@ namespace MWMechanics
             magMax = (it->mMagnMax == 0) ? 1 : it->mMagnMax;
             area = (it->mArea == 0) ? 1 : it->mArea;
 
-            if (mCastStyle == ESM::CastingStyle_ConstantEffect)
+            if (mCastStyle == ESM::Enchantment::ConstantEffect)
             {
                 magnitudeCost = (magMin + magMax) * baseCost * 2.5;
             }
@@ -209,7 +209,7 @@ namespace MWMechanics
 
     float Enchanting::getCastCost() const
     {
-        if (mCastStyle == ESM::CastingStyle_ConstantEffect)
+        if (mCastStyle == ESM::Enchantment::ConstantEffect)
             return 0;
 
         const float enchantCost = getEnchantPoints();
@@ -256,16 +256,12 @@ namespace MWMechanics
     }
     bool Enchanting::soulEmpty() const
     {
-        if (mSoulGemPtr.isEmpty())
-            return true;
-        return false;
+        return mSoulGemPtr.isEmpty();
     }
 
     bool Enchanting::itemEmpty() const
     {
-        if(mOldItemPtr.isEmpty())
-            return true;
-        return false;
+        return mOldItemPtr.isEmpty();
     }
 
     void Enchanting::setSelfEnchanting(bool selfEnchanting)
@@ -291,7 +287,7 @@ namespace MWMechanics
         + (0.125 * creatureStats.getAttribute (ESM::Attribute::Luck).getModified()));
 
         float chance2 = 2.5 * getEnchantPoints();
-        if(mCastStyle==ESM::CastingStyle_ConstantEffect)
+        if(mCastStyle==ESM::Enchantment::ConstantEffect)
         {
             float constantChance = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("fEnchantmentConstantChanceMult")->getFloat();
             chance2 /= constantChance;

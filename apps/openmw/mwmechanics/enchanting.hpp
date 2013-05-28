@@ -3,7 +3,6 @@
 #include <string>
 #include "../mwworld/ptr.hpp"
 #include <components/esm/effectlist.hpp>
-#include <components/esm/defs.hpp>
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 namespace MWMechanics
