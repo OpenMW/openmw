@@ -10,7 +10,7 @@
 
 namespace
 {
-//helpers functions
+    // helpers functions
     float distanceZCorrected(ESM::Pathgrid::Point point,float x,float y,float z)
     {
         return sqrt((point.mX - x) * (point.mX - x) + (point.mY - y) * (point.mY - y) + 0.1 * (point.mZ - z) * (point.mZ - z));
@@ -28,8 +28,10 @@ namespace
 
     static float sgn(float a)
     {
-        if(a > 0) return 1.0;
-        else return -1.0;
+        if(a > 0)
+            return 1.0;
+        else
+            return -1.0;
     }
 
     int getClosestPoint(const ESM::Pathgrid* grid,float x,float y,float z)
@@ -95,19 +97,20 @@ const PathGridGraph & mGraph;
 PointID mGoal;
 };*/
 
-class goalVisited : public boost::default_dijkstra_visitor
-{
-public:
-goalVisited(PointID goal) : mGoal(goal) {}
+    class goalVisited : public boost::default_dijkstra_visitor
+    {
+        public:
+            goalVisited(PointID goal) : mGoal(goal) {}
 
-void examine_vertex(PointID u, const PathGridGraph g)
-{
-if(u == mGoal)
-throw found_path();
-}
-private:
-PointID mGoal;
-};
+            void examine_vertex(PointID u, const PathGridGraph g)
+            {
+                if(u == mGoal)
+                    throw found_path();
+            }
+
+        private:
+            PointID mGoal;
+    };
 
 
     PathGridGraph buildGraph(const ESM::Pathgrid* pathgrid,float xCell = 0,float yCell = 0)
@@ -206,8 +209,8 @@ namespace MWMechanics
         ESM::Pathgrid::Point nextPoint = *mPath.begin();
         float dX = nextPoint.mX - x;
         float dY = nextPoint.mY - y;
-        float h = sqrt(dX*dX+dY*dY);
-        return Ogre::Radian(acos(dY/h)*sgn(asin(dX/h))).valueDegrees();
+        float h = sqrt(dX * dX + dY * dY);
+        return Ogre::Radian(acos(dY / h) * sgn(asin(dX / h))).valueDegrees();
     }
 
     bool PathFinder::checkIfNextPointReached(float x,float y,float z)
