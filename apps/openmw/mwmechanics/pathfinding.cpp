@@ -3,46 +3,48 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 
+#include "OgreMath.h"
+
 #include <boost/graph/dijkstra_shortest_paths.hpp>
 #include <boost/graph/adjacency_list.hpp>
-#include "boost/tuple/tuple.hpp"
-#include "OgreMath.h"
 
 namespace
 {
-	//helpers functions
+//helpers functions
     float distanceZCorrected(ESM::Pathgrid::Point point,float x,float y,float z)
     {
-        return sqrt((point.mX - x)*(point.mX - x)+(point.mY - y)*(point.mY - y)+0.1*(point.mZ - z)*(point.mZ - z));
+        return sqrt((point.mX - x) * (point.mX - x) + (point.mY - y) * (point.mY - y) + 0.1 * (point.mZ - z) * (point.mZ - z));
     }
 
     float distance(ESM::Pathgrid::Point point,float x,float y,float z)
     {
-        return sqrt((point.mX - x)*(point.mX - x)+(point.mY - y)*(point.mY - y)+(point.mZ - z)*(point.mZ - z));
+        return sqrt((point.mX - x) * (point.mX - x) + (point.mY - y) * (point.mY - y) + (point.mZ - z) * (point.mZ - z));
     }
 
     float distance(ESM::Pathgrid::Point a,ESM::Pathgrid::Point b)
     {
-        return sqrt(float(a.mX - b.mX)*(a.mX - b.mX)+(a.mY - b.mY)*(a.mY - b.mY)+(a.mZ - b.mZ)*(a.mZ - b.mZ));
+        return sqrt(float(a.mX - b.mX) * (a.mX - b.mX) + (a.mY - b.mY) * (a.mY - b.mY) + (a.mZ - b.mZ) * (a.mZ - b.mZ));
     }
 
     static float sgn(float a)
     {
-        if(a>0) return 1.;
-        else return -1.;
+        if(a > 0) return 1.0;
+        else return -1.0;
     }
 
     int getClosestPoint(const ESM::Pathgrid* grid,float x,float y,float z)
     {
-        if(!grid) return -1;
-        if(grid->mPoints.empty()) return -1;
+        if(!grid)
+            return -1;
+        if(grid->mPoints.empty())
+            return -1;
 
         float m = distance(grid->mPoints[0],x,y,z);
         int i0 = 0;
 
-        for(unsigned int i=1; i<grid->mPoints.size();++i)
+        for(unsigned int i = 1; i < grid->mPoints.size(); ++i)
         {
-            if(distance(grid->mPoints[i],x,y,z)<m)
+            if(distance(grid->mPoints[i],x,y,z) < m)
             {
                 m = distance(grid->mPoints[i],x,y,z);
                 i0 = i;
@@ -55,64 +57,64 @@ namespace
         boost::property<boost::vertex_index_t,int,ESM::Pathgrid::Point>,boost::property<boost::edge_weight_t,float> > PathGridGraph;
     typedef boost::property_map<PathGridGraph, boost::edge_weight_t>::type WeightMap;
     typedef PathGridGraph::vertex_descriptor PointID;
-    typedef PathGridGraph::edge_descriptor   PointConnectionID;
+    typedef PathGridGraph::edge_descriptor PointConnectionID;
 
     struct found_path {};
 
     /*class goalVisited : public boost::default_astar_visitor
-    {
-    public:
-        goalVisited(PointID goal) : mGoal(goal) {}
+{
+public:
+goalVisited(PointID goal) : mGoal(goal) {}
 
-        void examine_vertex(PointID u, const PathGridGraph g)
-        {
-            if(u == mGoal)
-                throw found_path();
-        }
-    private:
-        PointID mGoal;
-    };
+void examine_vertex(PointID u, const PathGridGraph g)
+{
+if(u == mGoal)
+throw found_path();
+}
+private:
+PointID mGoal;
+};
 
-    class DistanceHeuristic : public boost::atasr_heuristic <PathGridGraph, float>
-    {
-    public:
-        DistanceHeuristic(const PathGridGraph & l, PointID goal)
-            : mGraph(l), mGoal(goal) {}
+class DistanceHeuristic : public boost::atasr_heuristic <PathGridGraph, float>
+{
+public:
+DistanceHeuristic(const PathGridGraph & l, PointID goal)
+: mGraph(l), mGoal(goal) {}
 
-        float operator()(PointID u)
-        {
-            const ESM::Pathgrid::Point & U = mGraph[u];
-            const ESM::Pathgrid::Point & V = mGraph[mGoal];
-            float dx = U.mX - V.mX;
-            float dy = U.mY - V.mY;
-            float dz = U.mZ - V.mZ;
-            return sqrt(dx * dx + dy * dy + dz * dz);
-        }
-    private:
-        const PathGridGraph & mGraph;
-        PointID mGoal;
-    };*/
+float operator()(PointID u)
+{
+const ESM::Pathgrid::Point & U = mGraph[u];
+const ESM::Pathgrid::Point & V = mGraph[mGoal];
+float dx = U.mX - V.mX;
+float dy = U.mY - V.mY;
+float dz = U.mZ - V.mZ;
+return sqrt(dx * dx + dy * dy + dz * dz);
+}
+private:
+const PathGridGraph & mGraph;
+PointID mGoal;
+};*/
 
-	class goalVisited : public boost::default_dijkstra_visitor
-	{
-	public:
-		goalVisited(PointID goal) : mGoal(goal) {}
+class goalVisited : public boost::default_dijkstra_visitor
+{
+public:
+goalVisited(PointID goal) : mGoal(goal) {}
 
-		void examine_vertex(PointID u, const PathGridGraph g)
-		{
-			if(u == mGoal)
-				throw found_path();
-		}
-	private:
-		PointID mGoal;
-	};
+void examine_vertex(PointID u, const PathGridGraph g)
+{
+if(u == mGoal)
+throw found_path();
+}
+private:
+PointID mGoal;
+};
 
 
     PathGridGraph buildGraph(const ESM::Pathgrid* pathgrid,float xCell = 0,float yCell = 0)
     {
         PathGridGraph graph;
 
-        for(unsigned int i = 0;i<pathgrid->mPoints.size();++i)
+        for(unsigned int i = 0; i < pathgrid->mPoints.size(); ++i)
         {
             PointID pID = boost::add_vertex(graph);
             graph[pID].mX = pathgrid->mPoints[i].mX + xCell;
@@ -130,7 +132,6 @@ namespace
             boost::tie(edge,done) = boost::add_edge(u,v,graph);
             WeightMap weightmap = boost::get(boost::edge_weight, graph);
             weightmap[edge] = distance(graph[u],graph[v]);
-
         }
 
         return graph;
@@ -147,10 +148,10 @@ namespace
                 graph,
                 start,
                 boost::predecessor_map(&p[0]).distance_map(&d[0]).visitor(goalVisited(end))//.weight_map(boost::get(&Edge::distance, graph))
-				);
+);
 
         } catch(found_path fg) {
-            for(PointID v = end;; v = p[v]) {
+            for(PointID v = end; ; v = p[v]) {
                 shortest_path.push_front(graph[v]);
                 if(p[v] == v)
                     break;
@@ -167,6 +168,13 @@ namespace MWMechanics
 {
     PathFinder::PathFinder()
     {
+        mIsPathConstructed = false;
+    }
+
+    void PathFinder::clearPath()
+    {
+        if(!mPath.empty())
+            mPath.clear();
         mIsPathConstructed = false;
     }
 
@@ -193,9 +201,8 @@ namespace MWMechanics
     float PathFinder::getZAngleToNext(float x,float y,float z)
     {
         if(mPath.empty())
-        {
-            return 0;/// shouldn't happen!
-        }
+            return 0; /// shouldn't happen!
+
         ESM::Pathgrid::Point nextPoint = *mPath.begin();
         float dX = nextPoint.mX - x;
         float dY = nextPoint.mY - y;
@@ -206,17 +213,16 @@ namespace MWMechanics
     bool PathFinder::checkIfNextPointReached(float x,float y,float z)
     {
         if(mPath.empty())
-        {
             return true;
-        }
+
         ESM::Pathgrid::Point nextPoint = *mPath.begin();
         if(distanceZCorrected(nextPoint,x,y,z) < 20)
         {
             mPath.pop_front();
+
             if(mPath.empty())
-            {
                 return true;
-            }
+
             nextPoint = *mPath.begin();
         }
         return false;
@@ -226,8 +232,10 @@ namespace MWMechanics
     {
         return mPath;
     }
+
     bool PathFinder::isPathConstructed()
     {
         return mIsPathConstructed;
     }
 }
+
