@@ -12,6 +12,7 @@
 #include "../world/util.hpp"
 #include "../world/enumdelegate.hpp"
 #include "../world/vartypedelegate.hpp"
+#include "../world/recordstatusdelegate.hpp"
 
 #include "view.hpp"
 
@@ -117,6 +118,9 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
 
     mDelegateFactories->add (CSMWorld::ColumnBase::Display_WeaponType,
         new CSVWorld::EnumDelegateFactory (sWeaponTypes));
+
+    mDelegateFactories->add (CSMWorld::ColumnBase::Display_RecordState,
+        new CSVWorld::RecordStatusDelegateFactory() );
 }
 
 CSVDoc::ViewManager::~ViewManager()
