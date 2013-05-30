@@ -2,24 +2,31 @@
 #define RECORDSTATUSDELEGATE_H
 
 #include "util.hpp"
+#include <QTextOption>
+#include <QFont>
 
 class QIcon;
+class QFont;
+class QFontMetrics;
 
 namespace CSVWorld
 {
     class RecordStatusDelegate : public CommandDelegate
     {
+        QFont mFont;
+        QFontMetrics *mFontMetrics;
 
-    QIcon *mModifiedIcon;
-    QIcon *mAddedIcon;
-    QIcon *mDeletedIcon;
-    int mStatusDisplay;
+        QTextOption mTextAlignment;
 
-    int mIconSize;
-    int mIconTopOffset;
-    int mIconLeftOffset;
-    int mTextTopOffset;
-    int mTextLeftOffset;
+        QIcon *mModifiedIcon;
+        QIcon *mAddedIcon;
+        QIcon *mDeletedIcon;
+
+        int mStatusDisplay;
+
+        int mIconSize;
+        int mIconTopOffset;
+        int mTextLeftOffset;
 
     public:
         explicit RecordStatusDelegate(QUndoStack& undoStack, QObject *parent = 0);

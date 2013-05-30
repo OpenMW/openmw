@@ -1,10 +1,7 @@
 #include "recordstatusdelegate.hpp"
 #include <QPainter>
 #include <QApplication>
-#include <QFont>
 #include <QUndoStack>
-
-#include <QDebug>
 
 CSVWorld::RecordStatusDelegate::RecordStatusDelegate(QUndoStack &undoStack, QObject *parent)
     : CommandDelegate (undoStack, parent)
@@ -16,22 +13,22 @@ CSVWorld::RecordStatusDelegate::RecordStatusDelegate(QUndoStack &undoStack, QObj
 
     //Offset values are most likely device-dependent.
     //Need to replace with device-independent references.
-    mTextTopOffset = -1;
     mTextLeftOffset = 3;
     mIconTopOffset = -3;
-    mIconLeftOffset = 0;
 
-    mStatusDisplay = 0;  //icons and text by default
+    mStatusDisplay = 0;  //icons and text by default.  Remove when implemented as a user preference
+
+    mFont = QApplication::font();
+    mFont.setPointSize(10);
+
+    mFontMetrics = new QFontMetrics(mFont);
+
+    mTextAlignment.setAlignment (Qt::AlignLeft | Qt::AlignVCenter );
 }
 
 void CSVWorld::RecordStatusDelegate::paint (QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
    painter->save();
-
-   QFont font = QApplication::font();
-   font.setPointSize(10);
-
-   QFontMetrics fm(font);
 
    QString text = "";
    QIcon *icon = 0;
@@ -73,30 +70,23 @@ void CSVWorld::RecordStatusDelegate::paint (QPainter *painter, const QStyleOptio
 
     if (mStatusDisplay == 0 && (icon) )
     {
-        iconRect.setRight (iconRect.left() + mIconSize);
-        textRect.setLeft (iconRect.right() + (mIconSize/4) * 3);
-        textRect.setRight (textRect.left() + fm.width(text));
+        iconRect.setRight (iconRect.left() + mIconSize*2);
+        textRect.setLeft (iconRect.right() + mTextLeftOffset *2);
     }
     else
         textRect.setLeft (textRect.left() + mTextLeftOffset );
 
-    textRect.setTop (textRect.top() + ((option.rect.height() - fm.height()) / 2) + mTextTopOffset);
-
-   if (mStatusDisplay == 0 || mStatusDisplay == 1)
-   {
-        if (icon)
+    if ( (mStatusDisplay == 0 || mStatusDisplay == 1) && (icon) )
            painter->drawPixmap(iconRect.center(),icon->pixmap(mIconSize, mIconSize));
-   }
 
    // icon + text or text only, or force text if no icon exists for status
    if (mStatusDisplay == 0 || mStatusDisplay == 2 || !(icon) )
    {
-        painter->setFont(font);
-        painter->drawText(textRect,text);
+        painter->setFont(mFont);
+        painter->drawText(textRect, text, mTextAlignment);
    }
 
    painter->restore();
-
 }
 
 QSize CSVWorld::RecordStatusDelegate::sizeHint (const QStyleOptionViewItem &option, const QModelIndex &index) const
