@@ -235,7 +235,7 @@ bool MWMechanics::AiWander::execute (const MWWorld::Ptr& actor)
             start.mY = pos.pos[1];
             start.mZ = pos.pos[2];
 
-            mPathFinder.buildPath(start,dest,mPathgrid,mXCell,mYCell);
+            mPathFinder.buildPath(start, dest, mPathgrid, mXCell, mYCell, 0);
             mWalking = true;
         }
     }
@@ -254,7 +254,7 @@ bool MWMechanics::AiWander::execute (const MWWorld::Ptr& actor)
         actorPos[1] = actorPos[1] - mYCell;
         float distance = actorPos.squaredDistance(destNodePos);
 
-        if(distance < 1200 || mPathFinder.checkIfNextPointReached(pos.pos[0],pos.pos[1],pos.pos[2]))
+        if(distance < 1200 || mPathFinder.checkPathCompleted(pos.pos[0],pos.pos[1],pos.pos[2]))
         {
             stopWalking(actor);
             mMoveNow = false;

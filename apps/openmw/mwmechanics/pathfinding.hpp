@@ -13,9 +13,9 @@ namespace MWMechanics
 
             void clearPath();
             void buildPath(ESM::Pathgrid::Point startPoint, ESM::Pathgrid::Point endPoint,
-                const ESM::Pathgrid* pathGrid, float xCell = 0, float yCell = 0);
+                const ESM::Pathgrid* pathGrid, float xCell = 0, float yCell = 0, bool allowShortcuts = 1);
 
-            bool checkIfNextPointReached(float x, float y, float z);
+            bool checkPathCompleted(float x, float y, float z);
             ///< \Returns true if the last point of the path has been reached.
             float getZAngleToNext(float x, float y);
 

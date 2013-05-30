@@ -148,11 +148,16 @@ namespace MWMechanics
     }
 
     void PathFinder::buildPath(ESM::Pathgrid::Point startPoint, ESM::Pathgrid::Point endPoint,
-        const ESM::Pathgrid* pathGrid, float xCell, float yCell)
+        const ESM::Pathgrid* pathGrid, float xCell, float yCell, bool allowShortcuts)
     {
+        if(allowShortcuts)
+        {
+            if(MWBase::Environment::get().getWorld()->castRay(startPoint.mX, startPoint.mY, startPoint.mZ, endPoint.mX, endPoint.mY,
+                endPoint.mZ))
+                allowShortcuts = false;
+        }
         //first check if there is an obstacle
-        if(MWBase::Environment::get().getWorld()->castRay(startPoint.mX, startPoint.mY, startPoint.mZ,
-            endPoint.mX, endPoint.mY, endPoint.mZ) )
+        if(!allowShortcuts)
         {
             int startNode = getClosestPoint(pathGrid, startPoint.mX - xCell, startPoint.mY - yCell,startPoint.mZ);
             int endNode = getClosestPoint(pathGrid, endPoint.mX - xCell, endPoint.mY - yCell, endPoint.mZ);
@@ -175,14 +180,14 @@ namespace MWMechanics
             return 0;
 
         ESM::Pathgrid::Point nextPoint = *mPath.begin();
-        float dX = nextPoint.mX - x;
-        float dY = nextPoint.mY - y;
-        float h = sqrt(dX * dX + dY * dY);
+        float directionX = nextPoint.mX - x;
+        float directionY = nextPoint.mY - y;
+        float directionResult = sqrt(directionX * directionX + directionY * directionY);
 
-        return Ogre::Radian(acos(dY / h) * sgn(asin(dX / h))).valueDegrees();
+        return Ogre::Radian(acos(directionY / directionResult) * sgn(asin(directionX / directionResult))).valueDegrees();
     }
 
-    bool PathFinder::checkIfNextPointReached(float x, float y, float z)
+    bool PathFinder::checkPathCompleted(float x, float y, float z)
     {
         if(mPath.empty())
             return true;
@@ -192,7 +197,10 @@ namespace MWMechanics
         {
             mPath.pop_front();
             if(mPath.empty())
+            {
+                mIsPathConstructed = false;
                 return true;
+            }
         }
 
         return false;

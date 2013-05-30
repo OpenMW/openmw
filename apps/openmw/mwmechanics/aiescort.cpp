@@ -129,10 +129,10 @@ bool MWMechanics::AiEscort::execute (const MWWorld::Ptr& actor)
         start.mY = pos.pos[1];
         start.mZ = pos.pos[2];
 
-        mPathFinder.buildPath(start,dest,pathgrid,xCell,yCell);
+        mPathFinder.buildPath(start, dest, pathgrid, xCell, yCell, 1);
     }
 
-    if(mPathFinder.checkIfNextPointReached(pos.pos[0],pos.pos[1],pos.pos[2]))
+    if(mPathFinder.checkPathCompleted(pos.pos[0],pos.pos[1],pos.pos[2]))
     {
         MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 0;
         return true;
