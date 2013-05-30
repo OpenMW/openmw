@@ -22,7 +22,7 @@ namespace MWMechanics
             ///< 0: Wander
 
         private:
-            void stopWalking(const MWWorld::Ptr& actor, PathFinder& path);
+            void stopWalking(const MWWorld::Ptr& actor);
             void playIdle(const MWWorld::Ptr& actor, unsigned short idleSelect);
             bool checkIdle(const MWWorld::Ptr& actor, unsigned short idleSelect);
 

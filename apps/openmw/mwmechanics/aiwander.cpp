@@ -64,7 +64,7 @@ bool MWMechanics::AiWander::execute (const MWWorld::Ptr& actor)
         {
             if(!mRepeat)
             {
-                stopWalking(actor, mPathFinder);
+                stopWalking(actor);
                 return true;
             }
             else
@@ -74,7 +74,7 @@ bool MWMechanics::AiWander::execute (const MWWorld::Ptr& actor)
         {
             if(!mRepeat)
             {
-                stopWalking(actor, mPathFinder);
+                stopWalking(actor);
                 return true;
             }
             else
@@ -149,7 +149,7 @@ bool MWMechanics::AiWander::execute (const MWWorld::Ptr& actor)
         // FIXME: This *should* pause the AiWander package instead of terminating it.
         if(sideX*(pos.pos[0] - actor.getCell()->mCell->mData.mX * ESM::Land::REAL_SIZE) > sideX * (ESM::Land::REAL_SIZE / 2.0 - 200)) 
         {
-            MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 0;
+            stopWalking(actor);
             return true;
         }
     }
@@ -161,7 +161,7 @@ bool MWMechanics::AiWander::execute (const MWWorld::Ptr& actor)
         // FIXME: This *should* pause the AiWander package instead of terminating it.
         if(sideY*(pos.pos[1] - actor.getCell()->mCell->mData.mY * ESM::Land::REAL_SIZE) > sideY * (ESM::Land::REAL_SIZE / 2.0 - 200)) 
         {
-            MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 0;
+            stopWalking(actor);
             return true;
         }
     }
@@ -242,7 +242,7 @@ bool MWMechanics::AiWander::execute (const MWWorld::Ptr& actor)
 
     if(mWalking)
     {
-        float zAngle = mPathFinder.getZAngleToNext(pos.pos[0],pos.pos[1],pos.pos[2]);
+        float zAngle = mPathFinder.getZAngleToNext(pos.pos[0],pos.pos[1]);
         MWBase::Environment::get().getWorld()->rotateObject(actor,0,0,zAngle,false);
         MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 1;
 
@@ -256,7 +256,7 @@ bool MWMechanics::AiWander::execute (const MWWorld::Ptr& actor)
 
         if(distance < 1200 || mPathFinder.checkIfNextPointReached(pos.pos[0],pos.pos[1],pos.pos[2]))
         {
-            stopWalking(actor, mPathFinder);
+            stopWalking(actor);
             mMoveNow = false;
             mWalking = false;
             mChooseAction = true;
@@ -272,10 +272,9 @@ int MWMechanics::AiWander::getTypeId() const
     return 0;
 }
 
-void MWMechanics::AiWander::stopWalking(const MWWorld::Ptr& actor, PathFinder& path)
+void MWMechanics::AiWander::stopWalking(const MWWorld::Ptr& actor)
 {
-    PathFinder pathClearer;
-    path = pathClearer;
+    mPathFinder.clearPath();
     MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 0;
 }
 

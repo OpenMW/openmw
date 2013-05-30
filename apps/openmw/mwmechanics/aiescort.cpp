@@ -151,7 +151,7 @@ bool MWMechanics::AiEscort::execute (const MWWorld::Ptr& actor)
 
     if(distanceBetweenResult <= mMaxDist * mMaxDist)
     {
-        float zAngle = mPathFinder.getZAngleToNext(pos.pos[0],pos.pos[1],pos.pos[2]);
+        float zAngle = mPathFinder.getZAngleToNext(pos.pos[0],pos.pos[1]);
         MWBase::Environment::get().getWorld()->rotateObject(actor,0,0,zAngle,false);
         MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 1;
         mMaxDist = 470;

@@ -31,17 +31,26 @@ namespace
 
     float distanceZCorrected(ESM::Pathgrid::Point point, float x, float y, float z)
     {
-        return sqrt((point.mX - x) * (point.mX - x) + (point.mY - y) * (point.mY - y) + 0.1 * (point.mZ - z) * (point.mZ - z));
+        x -= point.mX;
+        y -= point.mY;
+        z -= point.mZ;
+        return sqrt(x * x + y * y + 0.1 * z * z);
     }
 
     float distance(ESM::Pathgrid::Point point, float x, float y, float z)
     {
-        return sqrt((point.mX - x) * (point.mX - x) + (point.mY - y) * (point.mY - y) + (point.mZ - z) * (point.mZ - z));
+        x -= point.mX;
+        y -= point.mY;
+        z -= point.mZ;
+        return sqrt(x * x + y * y + z * z);
     }
 
     float distance(ESM::Pathgrid::Point a, ESM::Pathgrid::Point b)
     {
-        return sqrt(float(a.mX - b.mX) * (a.mX - b.mX) + (a.mY - b.mY) * (a.mY - b.mY) + (a.mZ - b.mZ) * (a.mZ - b.mZ));
+        float x = a.mX - b.mX;
+        float y = a.mY - b.mY;
+        float z = a.mZ - b.mZ;
+        return sqrt(x * x + y * y + z * z);
     }
 
     static float sgn(float a)
@@ -75,18 +84,18 @@ namespace
     {
         PathGridGraph graph;
 
-        for(unsigned int i = 0; i < pathgrid->mPoints.size(); ++i)
+        for(unsigned int counter = 0; counter < pathgrid->mPoints.size(); counter++)
         {
             PointID pID = boost::add_vertex(graph);
-            graph[pID].mX = pathgrid->mPoints[i].mX + xCell;
-            graph[pID].mY = pathgrid->mPoints[i].mY + yCell;
-            graph[pID].mZ = pathgrid->mPoints[i].mZ;
+            graph[pID].mX = pathgrid->mPoints[counter].mX + xCell;
+            graph[pID].mY = pathgrid->mPoints[counter].mY + yCell;
+            graph[pID].mZ = pathgrid->mPoints[counter].mZ;
         }
 
-        for(unsigned int i = 0;i<pathgrid->mEdges.size();++i)
+        for(unsigned int counterTwo = 0; counterTwo < pathgrid->mEdges.size(); counterTwo++)
         {
-            PointID u = pathgrid->mEdges[i].mV0;
-            PointID v = pathgrid->mEdges[i].mV1;
+            PointID u = pathgrid->mEdges[counterTwo].mV0;
+            PointID v = pathgrid->mEdges[counterTwo].mV1;
 
             PointConnectionID edge;
             bool done;
@@ -145,13 +154,13 @@ namespace MWMechanics
         if(MWBase::Environment::get().getWorld()->castRay(startPoint.mX, startPoint.mY, startPoint.mZ,
             endPoint.mX, endPoint.mY, endPoint.mZ) )
         {
-            int start = getClosestPoint(pathGrid, startPoint.mX - xCell, startPoint.mY - yCell,startPoint.mZ);
-            int end = getClosestPoint(pathGrid, endPoint.mX - xCell, endPoint.mY - yCell, endPoint.mZ);
+            int startNode = getClosestPoint(pathGrid, startPoint.mX - xCell, startPoint.mY - yCell,startPoint.mZ);
+            int endNode = getClosestPoint(pathGrid, endPoint.mX - xCell, endPoint.mY - yCell, endPoint.mZ);
 
-            if(start != -1 && end != -1)
+            if(startNode != -1 && endNode != -1)
             {
                 PathGridGraph graph = buildGraph(pathGrid, xCell, yCell);
-                mPath = findPath(start, end, graph);
+                mPath = findPath(startNode, endNode, graph);
             }
         }
 
@@ -159,10 +168,11 @@ namespace MWMechanics
         mIsPathConstructed = true;
     }
 
-    float PathFinder::getZAngleToNext(float x, float y, float z)
+    float PathFinder::getZAngleToNext(float x, float y)
     {
+        // This if should never be true:
         if(mPath.empty())
-            return 0; // shouldn't happen!
+            return 0;
 
         ESM::Pathgrid::Point nextPoint = *mPath.begin();
         float dX = nextPoint.mX - x;
