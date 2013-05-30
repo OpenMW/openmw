@@ -23,11 +23,11 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2.8284271"
-     inkscape:cx="-48.002913"
-     inkscape:cy="11.790793"
+     inkscape:zoom="5.6568542"
+     inkscape:cx="5.8735623"
+     inkscape:cy="23.288227"
      inkscape:document-units="px"
-     inkscape:current-layer="layer1"
+     inkscape:current-layer="g6138"
      showgrid="false"
      showguides="true"
      inkscape:guide-bbox="true"
@@ -913,33 +913,7 @@
      inkscape:label="Livello 1">
     <g
        id="g6138"
-       transform="translate(3.5529905,1004.1857)">
-      <g
-         transform="matrix(3.2000002,0,0,3.2000002,101.31818,-39.364891)"
-         id="g6116">
-        <g
-           id="g5601"
-           transform="matrix(0.5587946,0,0,-0.5587946,-32.12983,25.499674)">
-          <g
-             id="g4846"
-             transform="matrix(1.2,0,0,1.2,-39.498448,18.180689)">
-            <g
-               id="g4867">
-              <rect
-                 style="fill:url(#radialGradient6149);fill-opacity:1;stroke:none"
-                 id="rect2160"
-                 width="22.369577"
-                 height="22.369577"
-                 x="31.957346"
-                 y="-4.4496365"
-                 rx="1.5732449"
-                 ry="1.5732449"
-                 transform="scale(1,-1)" />
-            </g>
-          </g>
-        </g>
-      </g>
-    </g>
+       transform="translate(3.5529905,1004.1857)" />
     <path
        style="fill:none;stroke:#000000;stroke-width:234.03692627;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;filter:url(#filter4622)"
        d="m -1468.0601,1067.0361 0,788.6201 -788.6201,0 0,716.9274 788.6201,0 0,788.6202 718.42104,0 0,-788.6202 787.126554,0 0,-716.9274 -787.126554,0 0,-788.6201 -718.42104,0 z"
