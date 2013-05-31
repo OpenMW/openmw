@@ -461,15 +461,18 @@ void CharacterController::update(float duration, Movement &movement)
 
         Ogre::Vector3 moved = mAnimation->runAnimation(duration);
         // Ensure we're moving in generally the right direction
-        if((movement.mPosition[0] < 0.0f && movement.mPosition[0] < moved.x*2.0f) ||
-           (movement.mPosition[0] > 0.0f && movement.mPosition[0] > moved.x*2.0f))
-            moved.x = movement.mPosition[0];
-        if((movement.mPosition[1] < 0.0f && movement.mPosition[1] < moved.y*2.0f) ||
-           (movement.mPosition[1] > 0.0f && movement.mPosition[1] > moved.y*2.0f))
-            moved.y = movement.mPosition[1];
-        if((movement.mPosition[2] < 0.0f && movement.mPosition[2] < moved.z*2.0f) ||
-           (movement.mPosition[2] > 0.0f && movement.mPosition[2] > moved.z*2.0f))
-            moved.z = movement.mPosition[2];
+        if (speed > 0.f)
+        {
+            if((movement.mPosition[0] < 0.0f && movement.mPosition[0] < moved.x*2.0f) ||
+               (movement.mPosition[0] > 0.0f && movement.mPosition[0] > moved.x*2.0f))
+                moved.x = movement.mPosition[0];
+            if((movement.mPosition[1] < 0.0f && movement.mPosition[1] < moved.y*2.0f) ||
+               (movement.mPosition[1] > 0.0f && movement.mPosition[1] > moved.y*2.0f))
+                moved.y = movement.mPosition[1];
+            if((movement.mPosition[2] < 0.0f && movement.mPosition[2] < moved.z*2.0f) ||
+               (movement.mPosition[2] > 0.0f && movement.mPosition[2] > moved.z*2.0f))
+                moved.z = movement.mPosition[2];
+        }
 
         movement.mPosition[0] = moved.x;
         movement.mPosition[1] = moved.y;
