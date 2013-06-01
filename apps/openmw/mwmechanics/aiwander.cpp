@@ -219,12 +219,6 @@ bool MWMechanics::AiWander::execute (const MWWorld::Ptr& actor)
             unsigned int randNode = (int)(rand() / ((double)RAND_MAX + 1) * mAllowedNodes.size());
             Ogre::Vector3 destNodePos(mAllowedNodes[randNode].mX, mAllowedNodes[randNode].mY, mAllowedNodes[randNode].mZ);
 
-            // Remove this node as an option and add back the previously used node (stops NPC from picking the same node):
-            ESM::Pathgrid::Point temp = mAllowedNodes[randNode];
-            mAllowedNodes.erase(mAllowedNodes.begin() + randNode);
-            mAllowedNodes.push_back(mCurrentNode);
-            mCurrentNode = temp;
-
             ESM::Pathgrid::Point dest;
             dest.mX = destNodePos[0] + mXCell;
             dest.mY = destNodePos[1] + mYCell;
@@ -236,7 +230,21 @@ bool MWMechanics::AiWander::execute (const MWWorld::Ptr& actor)
             start.mZ = pos.pos[2];
 
             mPathFinder.buildPath(start, dest, mPathgrid, mXCell, mYCell, 0);
-            mWalking = true;
+
+            if(mPathFinder.isPathConstructed())
+            {
+                // Remove this node as an option and add back the previously used node (stops NPC from picking the same node):
+                ESM::Pathgrid::Point temp = mAllowedNodes[randNode];
+                mAllowedNodes.erase(mAllowedNodes.begin() + randNode);
+                mAllowedNodes.push_back(mCurrentNode);
+                mCurrentNode = temp;
+
+                mMoveNow = false;
+                mWalking = true;
+            }
+            // Choose a different node and delete this one from possible nodes because it is uncreachable:
+            else
+                mAllowedNodes.erase(mAllowedNodes.begin() + randNode);
         }
     }
 
@@ -254,14 +262,13 @@ bool MWMechanics::AiWander::execute (const MWWorld::Ptr& actor)
         actorPos[1] = actorPos[1] - mYCell;
         float distance = actorPos.squaredDistance(destNodePos);
 
-        if(distance < 1200 || mPathFinder.checkPathCompleted(pos.pos[0],pos.pos[1],pos.pos[2]))
+        if(distance < 1200 || mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], pos.pos[2]))
         {
             stopWalking(actor);
             mMoveNow = false;
             mWalking = false;
             mChooseAction = true;
         }
-        
     }
 
     return false;

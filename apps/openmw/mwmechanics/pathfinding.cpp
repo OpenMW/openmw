@@ -156,7 +156,7 @@ namespace MWMechanics
                 endPoint.mZ))
                 allowShortcuts = false;
         }
-        //first check if there is an obstacle
+
         if(!allowShortcuts)
         {
             int startNode = getClosestPoint(pathGrid, startPoint.mX - xCell, startPoint.mY - yCell,startPoint.mZ);
@@ -166,16 +166,28 @@ namespace MWMechanics
             {
                 PathGridGraph graph = buildGraph(pathGrid, xCell, yCell);
                 mPath = findPath(startNode, endNode, graph);
+
+                if(!mPath.empty())
+                {
+                    mPath.push_back(endPoint);
+                    mIsPathConstructed = true;
+                }
             }
         }
+        else
+        {
+            mPath.push_back(endPoint);
+            mIsPathConstructed = true;
+        }
 
-        mPath.push_back(endPoint);
-        mIsPathConstructed = true;
+        if(mPath.empty())
+            mIsPathConstructed = false;
     }
 
     float PathFinder::getZAngleToNext(float x, float y)
     {
-        // This if should never be true:
+        // This should never happen (programmers should have an if statement checking mIsPathConstructed that prevents this call
+        // if otherwise).
         if(mPath.empty())
             return 0;
 
