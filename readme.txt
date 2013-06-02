@@ -94,6 +94,53 @@ Allowed options:
 
 CHANGELOG
 
+0.24.0
+
+Bug #284: Book's text misalignment
+Bug #445: Camera able to get slightly below floor / terrain
+Bug #582: Seam issue in Red Mountain
+Bug #632: Journal Next Button shows white square
+Bug #653: IndexedStore ignores index
+Bug #694: Parser does not recognize float values starting with .
+Bug #699: Resource handling broken with Ogre 1.9 trunk
+Bug #718: components/esm/loadcell is using the mwworld subsystem
+Bug #729: Levelled item list tries to add nonexistent item
+Bug #730: Arrow buttons in the settings menu do not work.
+Bug #732: Erroneous behavior when binding keys
+Bug #733: Unclickable dialogue topic
+Bug #734: Book empty line problem
+Bug #738: OnDeath only works with implicit references
+Bug #740: Script compiler fails on scripts with special names
+Bug #742: Wait while no clipping
+Bug #743: Problem with changeweather console command
+Bug #744: No wait dialogue after starting a new game
+Bug #748: Player is not able to unselect objects with the console
+Bug #751: AddItem should only spawn a message box when called from dialogue
+Bug #752: The enter button has several functions in trade and looting that is not impelemted.
+Bug #753: Fargoth's Ring Quest Strange Behavior
+Bug #759: Second quest in mages guild does not work
+Bug #763: Enchantment cast cost is wrong
+Bug #770: The "Take" and "Close" buttons in the scroll GUI are stretched incorrectly
+Bug #773: AIWander Isn't Being Passed The Correct idle Values
+Bug #778: The journal can be opened at the start of a new game
+Bug #779: Divayth Fyr starts as dead
+Bug #787: "Batch count" on detailed FPS counter gets cut-off
+Bug #788: chargen scroll layout does not match vanilla
+Feature #60: Atlethics Skill
+Feature #65: Security Skill
+Feature #74: Interaction with non-load-doors
+Feature #98: Render Weapon and Shield
+Feature #102: AI Package: Escort, EscortCell
+Feature #182: Advanced Journal GUI
+Feature #288: Trading enhancements
+Feature #405: Integrate "new game" into the menu
+Feature #537: Highlight dialogue topic links
+Feature #658: Rotate, RotateWorld script instructions and local rotations
+Feature #690: Animation Layering
+Feature #722: Night Eye/Blind magic effects
+Feature #735: Move, MoveWorld script instructions.
+Feature #760: Non-removable corpses
+
 0.23.0
 
 Bug #522: Player collides with placeable items
