@@ -118,6 +118,7 @@ Bug #748: Player is not able to unselect objects with the console
 Bug #751: AddItem should only spawn a message box when called from dialogue
 Bug #752: The enter button has several functions in trade and looting that is not impelemted.
 Bug #753: Fargoth's Ring Quest Strange Behavior
+Bug #755: Launcher writes duplicate lines into settings.cfg
 Bug #759: Second quest in mages guild does not work
 Bug #763: Enchantment cast cost is wrong
 Bug #770: The "Take" and "Close" buttons in the scroll GUI are stretched incorrectly
