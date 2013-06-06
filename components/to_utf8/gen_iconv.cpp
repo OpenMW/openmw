@@ -46,7 +46,7 @@ void writeMissing(bool last)
 int write_table(const std::string &charset, const std::string &tableName)
 {
   // Write table header
-  cout << "static char " << tableName << "[] =\n{\n";
+  cout << "static signed char " << tableName << "[] =\n{\n";
 
   // Open conversion system
   iconv_t cd = iconv_open ("UTF-8", charset.c_str());
@@ -105,6 +105,8 @@ int main()
   cout << "\n/// Latin alphabet used by English and some other Western languages"
           "\n";
   write_table("WINDOWS-1252", "windows_1252");
+
+  write_table("CP437", "cp437");
 
   // Close namespace
   cout << "\n}\n\n";

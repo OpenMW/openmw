@@ -115,7 +115,7 @@ namespace MWGui
 
     void Response::write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, Link*>& topicLinks) const
     {
-        BookTypesetter::Style* title = typesetter->createStyle("EB Garamond", MyGUI::Colour(223/255.f, 201/255.f, 159/255.f));
+        BookTypesetter::Style* title = typesetter->createStyle("", MyGUI::Colour(223/255.f, 201/255.f, 159/255.f));
         typesetter->sectionBreak(9);
         if (mTitle != "")
             typesetter->write(title, to_utf8_span(mTitle.c_str()));
@@ -159,7 +159,7 @@ namespace MWGui
 
         if (hyperLinks.size() && MWBase::Environment::get().getWindowManager()->getTranslationDataStorage().hasTranslation())
         {
-            BookTypesetter::Style* style = typesetter->createStyle("EB Garamond", MyGUI::Colour(202/255.f, 165/255.f, 96/255.f));
+            BookTypesetter::Style* style = typesetter->createStyle("", MyGUI::Colour(202/255.f, 165/255.f, 96/255.f));
             size_t formatted = 0; // points to the first character that is not laid out yet
             for (std::map<Range, intptr_t>::iterator it = hyperLinks.begin(); it != hyperLinks.end(); ++it)
             {
@@ -197,7 +197,7 @@ namespace MWGui
 
     void Response::addTopicLink(BookTypesetter::Ptr typesetter, intptr_t topicId, size_t begin, size_t end) const
     {
-        BookTypesetter::Style* style = typesetter->createStyle("EB Garamond", MyGUI::Colour(202/255.f, 165/255.f, 96/255.f));
+        BookTypesetter::Style* style = typesetter->createStyle("", MyGUI::Colour(202/255.f, 165/255.f, 96/255.f));
 
         const MyGUI::Colour linkHot    (143/255.f, 155/255.f, 218/255.f);
         const MyGUI::Colour linkNormal (112/255.f, 126/255.f, 207/255.f);
@@ -215,7 +215,7 @@ namespace MWGui
 
     void Message::write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, Link*>& topicLinks) const
     {
-        BookTypesetter::Style* title = typesetter->createStyle("EB Garamond", MyGUI::Colour(223/255.f, 201/255.f, 159/255.f));
+        BookTypesetter::Style* title = typesetter->createStyle("", MyGUI::Colour(223/255.f, 201/255.f, 159/255.f));
         typesetter->sectionBreak(9);
         typesetter->write(title, to_utf8_span(mText.c_str()));
     }
@@ -465,7 +465,7 @@ namespace MWGui
             (*it)->write(typesetter, &mKeywordSearch, mTopicLinks);
 
 
-        BookTypesetter::Style* body = typesetter->createStyle("EB Garamond", MyGUI::Colour::White);
+        BookTypesetter::Style* body = typesetter->createStyle("", MyGUI::Colour::White);
 
         // choices
         const MyGUI::Colour linkHot    (223/255.f, 201/255.f, 159/255.f);

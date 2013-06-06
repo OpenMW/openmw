@@ -380,7 +380,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     mEnvironment.setWindowManager (new MWGui::WindowManager(
         mExtensions, mFpsLevel, mOgre, mCfgMgr.getLogPath().string() + std::string("/"),
-        mCfgMgr.getCachePath ().string(), mScriptConsoleMode, mTranslationDataStorage));
+        mCfgMgr.getCachePath ().string(), mScriptConsoleMode, mTranslationDataStorage, mEncoding));
     if (mNewGame)
         mEnvironment.getWindowManager()->setNewGame(true);
 

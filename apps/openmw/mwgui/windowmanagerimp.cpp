@@ -42,6 +42,7 @@
 #include "inventorywindow.hpp"
 #include "bookpage.hpp"
 #include "itemview.hpp"
+#include "fontloader.hpp"
 
 namespace MWGui
 {
@@ -49,7 +50,7 @@ namespace MWGui
     WindowManager::WindowManager(
         const Compiler::Extensions& extensions, int fpsLevel, OEngine::Render::OgreRenderer *ogre,
             const std::string& logpath, const std::string& cacheDir, bool consoleOnlyScripts,
-            Translation::Storage& translationDataStorage)
+            Translation::Storage& translationDataStorage, ToUTF8::FromType encoding)
       : mGuiManager(NULL)
       , mRendering(ogre)
       , mHud(NULL)
@@ -108,6 +109,10 @@ namespace MWGui
         // Set up the GUI system
         mGuiManager = new OEngine::GUI::MyGUIManager(mRendering->getWindow(), mRendering->getScene(), false, logpath);
         mGui = mGuiManager->getGui();
+
+        // Load fonts
+        FontLoader fontLoader (encoding);
+        fontLoader.loadAllFonts();
 
         //Register own widgets with MyGUI
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSkill>("Widget");
