@@ -202,14 +202,14 @@ namespace MWGui
 
     float BookTextParser::widthForCharGlyph(unsigned unicodeChar) const
     {
-        std::string fontName(mTextStyle.mFont == "Default" ? "EB Garamond" : mTextStyle.mFont);
+        std::string fontName(mTextStyle.mFont == "Default" ? MyGUI::FontManager::getInstance().getDefaultFont() : mTextStyle.mFont);
         return MyGUI::FontManager::getInstance().getByName(fontName)
                 ->getGlyphInfo(unicodeChar)->width;
     }
 
     float BookTextParser::currentFontHeight() const
     {
-        std::string fontName(mTextStyle.mFont == "Default" ? "EB Garamond" : mTextStyle.mFont);
+        std::string fontName(mTextStyle.mFont == "Default" ? MyGUI::FontManager::getInstance().getDefaultFont() : mTextStyle.mFont);
         return MyGUI::FontManager::getInstance().getByName(fontName)->getDefaultHeight();
     }
 

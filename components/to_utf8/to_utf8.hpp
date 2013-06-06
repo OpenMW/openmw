@@ -12,8 +12,9 @@ namespace ToUTF8
     {
         WINDOWS_1250,      // Central ane Eastern European languages
         WINDOWS_1251,      // Cyrillic languages
-        WINDOWS_1252       // Used by English version of Morrowind (and
+        WINDOWS_1252,       // Used by English version of Morrowind (and
             // probably others)
+        CP437           // Used for fonts (*.fnt) if data files encoding is 1252. Otherwise, uses the same encoding as the data files.
     };
 
     FromType calculateEncoding(const std::string& encodingName);
