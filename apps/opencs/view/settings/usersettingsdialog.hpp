@@ -45,6 +45,9 @@ namespace CSVSettings {
         void writeSettings();
         void createSamplePage();
 
+        //Pages
+        void createWindowPage();
+
         template <typename T>
         void createPage (const QString &title)
         {

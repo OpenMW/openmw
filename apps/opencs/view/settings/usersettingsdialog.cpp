@@ -9,13 +9,14 @@
 #include <QFile>
 #include <QPushButton>
 #include <QDockWidget>
+#include <QDebug>
 
 #include "blankpage.hpp"
 #include "editorpage.hpp"
+#include "windowpage.hpp"
 #include "../../model/settings/support.hpp"
 
 #include "settingwidget.hpp"
-#include <QDebug>
 
 CSVSettings::UserSettingsDialog::UserSettingsDialog(QMainWindow *parent) :
     QMainWindow (parent), mStackedWidget (0)
@@ -76,9 +77,10 @@ void CSVSettings::UserSettingsDialog::buildPages()
     setDockOptions (QMainWindow::AllowNestedDocks);
     //uncomment to test with sample editor page.
     //createSamplePage();
-    createPage<BlankPage>("Page1");
+    /*createPage<BlankPage>("Page1");
     createPage<BlankPage>("Page2");
-    createPage<BlankPage>("Page3");
+    createPage<BlankPage>("Page3");*/
+    createWindowPage();
 }
 
 void CSVSettings::UserSettingsDialog::createSamplePage()
@@ -86,6 +88,20 @@ void CSVSettings::UserSettingsDialog::createSamplePage()
     //add pages to stackedwidget and items to listwidget
     CSVSettings::AbstractPage *page
             = new CSVSettings::EditorPage(this);
+
+    mStackedWidget->addWidget (page);
+
+    new QListWidgetItem (page->objectName(), mListWidget);
+
+    connect ( page, SIGNAL ( signalUpdateEditorSetting (const QString &, const QString &)),
+              &(CSMSettings::UserSettings::instance()), SIGNAL ( signalUpdateEditorSetting (const QString &, const QString &)));
+}
+
+void CSVSettings::UserSettingsDialog::createWindowPage()
+{
+    //add pages to stackedwidget and items to listwidget
+    CSVSettings::AbstractPage *page
+            = new CSVSettings::WindowPage(this);
 
     mStackedWidget->addWidget (page);
 

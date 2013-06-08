@@ -34,6 +34,7 @@ namespace CSMSettings {
         QFile *openFile (const QString &);
         bool writeFile(QFile *file, QMap<QString, SettingList *> &sections);
         void getSettings (QTextStream &stream, SectionMap &settings);
+        QString getSettingValue(QString section, QString setting);
 
     private:
 
