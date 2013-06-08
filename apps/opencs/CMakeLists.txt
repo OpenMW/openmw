@@ -24,7 +24,7 @@ opencs_units (model/world
 
 opencs_units_noqt (model/world
     universalid data record idcollection commands columnbase scriptcontext cell refidcollection
-    refidadapter refiddata refidadapterimp
+    refidadapter refiddata refidadapterimp ref
     )
 
 opencs_hdrs_noqt (model/world
