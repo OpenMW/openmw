@@ -22,58 +22,6 @@ bool operator==(const CellRef& ref, int pRefnum)
   return (ref.mRefnum == pRefnum);
 }
 
-void CellRef::save(ESMWriter &esm)
-{
-    esm.writeHNT("FRMR", mRefnum);
-    esm.writeHNCString("NAME", mRefID);
-
-    if (mScale != 1.0) {
-        esm.writeHNT("XSCL", mScale);
-    }
-
-    esm.writeHNOCString("ANAM", mOwner);
-    esm.writeHNOCString("BNAM", mGlob);
-    esm.writeHNOCString("XSOL", mSoul);
-
-    esm.writeHNOCString("CNAM", mFaction);
-    if (mFactIndex != -2) {
-        esm.writeHNT("INDX", mFactIndex);
-    }
-
-    if (mEnchantmentCharge != -1)
-        esm.writeHNT("XCHG", mEnchantmentCharge);
-
-    if (mCharge != -1)
-        esm.writeHNT("INTV", mCharge);
-
-    if (mGoldValue != 1) {
-        esm.writeHNT("NAM9", mGoldValue);
-    }
-
-    if (mTeleport)
-    {
-        esm.writeHNT("DODT", mDoorDest);
-        esm.writeHNOCString("DNAM", mDestCell);
-    }
-
-    if (mLockLevel != -1) {
-        esm.writeHNT("FLTV", mLockLevel);
-    }
-    esm.writeHNOCString("KNAM", mKey);
-    esm.writeHNOCString("TNAM", mTrap);
-
-    if (mReferenceBlocked != -1) {
-        esm.writeHNT("UNAM", mReferenceBlocked);
-    }
-    if (mFltv != 0) {
-        esm.writeHNT("FLTV", mFltv);
-    }
-
-    esm.writeHNT("DATA", mPos, 24);
-    if (mNam0 != 0) {
-        esm.writeHNT("NAM0", mNam0);
-    }
-}
 
 void Cell::load(ESMReader &esm, bool saveContext)
 {

@@ -84,6 +84,8 @@ namespace ESM
             Position mPos;
 
             void save(ESMWriter &esm);
+
+            void blank();
     };
 }
 
