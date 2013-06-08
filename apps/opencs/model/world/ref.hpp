@@ -17,8 +17,7 @@ namespace CSMWorld
     {
         std::string mId;
 
-        void load (ESM::ESMReader &esm, Cell& cell, const std::string& id);
-        ///< Load cell ref and register it with \a cell.
+        void load (ESM::ESMReader &esm);
     };
 }
 
