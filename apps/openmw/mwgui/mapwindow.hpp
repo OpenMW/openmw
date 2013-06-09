@@ -14,6 +14,7 @@ namespace MWGui
     {
     public:
         LocalMapBase();
+        virtual ~LocalMapBase();
         void init(MyGUI::ScrollView* widget, MyGUI::ImageBox* compass, OEngine::GUI::Layout* layout, bool mapDragAndDrop=false);
 
         void setCellPrefix(const std::string& prefix);
