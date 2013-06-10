@@ -183,7 +183,12 @@ namespace
             if (!MWBase::Environment::get().getWindowManager ()->getJournalAllowed ())
             {
                 MWBase::Environment::get().getWindowManager()->popGuiMode ();
-            } 
+            }
+            else
+            {
+				// play opening sound only if the player has the journal
+				MWBase::Environment::get().getSoundManager()->playSound ("book open", 1.0, 1.0);
+			}
             mModel->load ();
 
             setBookMode ();
@@ -213,6 +218,7 @@ namespace
 
         void close()
         {
+			MWBase::Environment::get().getSoundManager()->playSound ("book close", 1.0, 1.0);
             mModel->unload ();
 
             getPage (LeftBookPage)->showPage (Book (), 0);
@@ -432,8 +438,6 @@ namespace
 
         void notifyClose(MyGUI::Widget* _sender)
         {
-            MWBase::Environment::get().getSoundManager()->playSound ("book close", 1.0, 1.0);
-
             MWBase::Environment::get().getWindowManager ()->popGuiMode ();
         }
 
