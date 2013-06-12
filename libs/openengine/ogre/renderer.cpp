@@ -54,6 +54,9 @@ void OgreRenderer::cleanup()
     delete mRoot;
     mRoot = NULL;
 
+    // If we don't do this, the desktop resolution is not restored on exit
+    SDL_SetWindowFullscreen(mSDLWindow, 0);
+
     SDL_DestroyWindow(mSDLWindow);
     mSDLWindow = NULL;
 
@@ -283,7 +286,7 @@ void OgreRenderer::createWindow(const std::string &title, const WindowSettings& 
       settings.window_x,                               //    width, in pixels
       settings.window_y,                               //    height, in pixels
       SDL_WINDOW_SHOWN|SDL_WINDOW_RESIZABLE
-        | (settings.fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0)
+        | (settings.fullscreen ? SDL_WINDOW_FULLSCREEN : 0)
     );
 
 

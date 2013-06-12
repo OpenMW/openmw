@@ -968,8 +968,9 @@ namespace MWGui
                 Uint8 size_y = imgSetPtr->getSize().height;
                 Uint8 hotspot_x = imgSetPtr->getHotSpot().left;
                 Uint8 hotspot_y = imgSetPtr->getHotSpot().top;
+                int rotation = imgSetPtr->getRotation();
 
-                mCursorManager->receiveCursorInfo(name, tex, size_x, size_y, hotspot_x, hotspot_y);
+                mCursorManager->receiveCursorInfo(name, rotation, tex, size_x, size_y, hotspot_x, hotspot_y);
             }
         }
     }

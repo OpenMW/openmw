@@ -22,7 +22,7 @@ public:
     virtual bool cursorChanged(const std::string &name) = 0;
 
     /// \brief Follow up a cursorChanged() call with enough info to create an cursor.
-    virtual void receiveCursorInfo(const std::string &name, Ogre::TexturePtr tex, Uint8 size_x, Uint8 size_y, Uint8 hotspot_x, Uint8 hotspot_y) = 0;
+    virtual void receiveCursorInfo(const std::string &name, int rotDegrees, Ogre::TexturePtr tex, Uint8 size_x, Uint8 size_y, Uint8 hotspot_x, Uint8 hotspot_y) = 0;
 
     /// \brief Tell the manager when the cursor visibility changed
     virtual void cursorVisibilityChange(bool visible) = 0;

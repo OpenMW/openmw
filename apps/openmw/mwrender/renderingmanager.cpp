@@ -16,6 +16,8 @@
 #include <OgreControllerManager.h>
 #include <OgreMeshManager.h>
 
+#include "SDL2/SDL.h"
+
 #include <extern/shiny/Main/Factory.hpp>
 #include <extern/shiny/Platforms/Ogre/OgrePlatform.hpp>
 
@@ -796,8 +798,10 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
 
         if (x != mRendering.getWindow()->getWidth() || y != mRendering.getWindow()->getHeight())
         {
+            SDL_SetWindowSize(mRendering.getSDLWindow(), x, y);
             mRendering.getWindow()->resize(x, y);
         }
+        SDL_SetWindowFullscreen(mRendering.getSDLWindow(), Settings::Manager::getBool("fullscreen", "Video") ? SDL_WINDOW_FULLSCREEN : 0);
         mRendering.getWindow()->setFullscreen(Settings::Manager::getBool("fullscreen", "Video"), x, y);
     }
 

@@ -77,6 +77,7 @@ set(OENGINE_OGRE
   ${LIBDIR}/openengine/ogre/fader.cpp
   ${LIBDIR}/openengine/ogre/particles.cpp
   ${LIBDIR}/openengine/ogre/selectionbuffer.cpp
+  ${LIBDIR}/openengine/ogre/imagerotate.cpp
 )
 set(OENGINE_GUI
   ${LIBDIR}/openengine/gui/manager.cpp

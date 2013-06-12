@@ -3,6 +3,8 @@
 #include <OgreHardwarePixelBuffer.h>
 #include <OgreRoot.h>
 
+#include <openengine/ogre/imagerotate.hpp>
+
 namespace SFO
 {
 
@@ -96,37 +98,28 @@ namespace SFO
         _setCursorVisible(visible);
     }
 
-    void SDLCursorManager::receiveCursorInfo(const std::string& name, Ogre::TexturePtr tex, Uint8 size_x, Uint8 size_y, Uint8 hotspot_x, Uint8 hotspot_y)
+    void SDLCursorManager::receiveCursorInfo(const std::string& name, int rotDegrees, Ogre::TexturePtr tex, Uint8 size_x, Uint8 size_y, Uint8 hotspot_x, Uint8 hotspot_y)
     {
-        _createCursorFromResource(name, tex, size_x, size_y, hotspot_x, hotspot_y);
+        _createCursorFromResource(name, rotDegrees, tex, size_x, size_y, hotspot_x, hotspot_y);
     }
 
     /// \brief creates an SDL cursor from an Ogre texture
-    void SDLCursorManager::_createCursorFromResource(const std::string& name, Ogre::TexturePtr tex, Uint8 size_x, Uint8 size_y, Uint8 hotspot_x, Uint8 hotspot_y)
+    void SDLCursorManager::_createCursorFromResource(const std::string& name, int rotDegrees, Ogre::TexturePtr tex, Uint8 size_x, Uint8 size_y, Uint8 hotspot_x, Uint8 hotspot_y)
     {
-        //get the surfaces set up
-        Ogre::HardwarePixelBufferSharedPtr buffer = tex.get()->getBuffer();
-        buffer.get()->lock(Ogre::HardwarePixelBuffer::HBL_READ_ONLY);
+        if (mCursorMap.find(name) != mCursorMap.end())
+            return;
 
-        std::string tempName = "_" + name + "_processing";
+        std::string tempName = tex->getName() + "_rotated";
 
-        //we need to copy this to a temporary texture first because the cursors might be in DDS format,
-        //and Ogre doesn't have an interface to read DDS
-        Ogre::TexturePtr tempTexture = Ogre::TextureManager::getSingleton().createManual(
-                tempName,
-                Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                Ogre::TEX_TYPE_2D,
-                size_x, size_y,
-                0,
-                Ogre::PF_FLOAT16_RGBA,
-                Ogre::TU_STATIC);
+        // we use a render target to uncompress the DDS texture
+        // just blitting doesn't seem to work on D3D9
+        OEngine::Render::ImageRotate::rotate(tex->getName(), tempName, -rotDegrees);
 
-        tempTexture->getBuffer()->blit(buffer);
-        buffer->unlock();
+        Ogre::TexturePtr resultTexture = Ogre::TextureManager::getSingleton().getByName(tempName);
 
         // now blit to memory
         Ogre::Image destImage;
-        tempTexture->convertToImage(destImage);
+        resultTexture->convertToImage(destImage);
 
         SDL_Surface* surf = SDL_CreateRGBSurface(0,size_x,size_y,32,0xFF000000,0x00FF0000,0x0000FF00,0x000000FF);
 

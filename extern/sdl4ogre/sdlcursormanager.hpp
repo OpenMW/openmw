@@ -18,11 +18,11 @@ namespace SFO
         virtual void setEnabled(bool enabled);
 
         virtual bool cursorChanged(const std::string &name);
-        virtual void receiveCursorInfo(const std::string &name, Ogre::TexturePtr tex, Uint8 size_x, Uint8 size_y, Uint8 hotspot_x, Uint8 hotspot_y);
+        virtual void receiveCursorInfo(const std::string &name, int rotDegrees, Ogre::TexturePtr tex, Uint8 size_x, Uint8 size_y, Uint8 hotspot_x, Uint8 hotspot_y);
         virtual void cursorVisibilityChange(bool visible);
 
     private:
-        void _createCursorFromResource(const std::string &name, Ogre::TexturePtr tex, Uint8 size_x, Uint8 size_y, Uint8 hotspot_x, Uint8 hotspot_y);
+        void _createCursorFromResource(const std::string &name, int rotDegrees, Ogre::TexturePtr tex, Uint8 size_x, Uint8 size_y, Uint8 hotspot_x, Uint8 hotspot_y);
         void _putPixel(SDL_Surface *surface, int x, int y, Uint32 pixel);
 
         void _setGUICursor(const std::string& name);

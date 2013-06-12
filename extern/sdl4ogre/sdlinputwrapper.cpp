@@ -167,14 +167,8 @@ namespace SFO
         //eep, wrap the pointer manually if the input driver doesn't support
         //relative positioning natively
         int success = SDL_SetRelativeMouseMode(relative ? SDL_TRUE : SDL_FALSE);
-
-        if(relative)
-        {
-            if(success != 0)
-            {
-                mWrapPointer = true;
-            }
-        }
+        if(relative && success != 0)
+            mWrapPointer = true;
 
         //now remove all mouse events using the old setting from the queue
         SDL_PumpEvents();
