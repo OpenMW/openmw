@@ -125,20 +125,20 @@ namespace MWWorld
         MWWorld::Class::get (ptr).setStance (ptr, MWWorld::Class::Sneak, sneak);
     }
 
-    void Player::setYaw(float yaw)
+    void Player::yaw(float yaw)
     {
         MWWorld::Ptr ptr = getPlayer();
-        MWWorld::Class::get(ptr).getMovementSettings(ptr).mRotation[2] = yaw;
+        MWWorld::Class::get(ptr).getMovementSettings(ptr).mRotation[2] += yaw;
     }
-    void Player::setPitch(float pitch)
+    void Player::pitch(float pitch)
     {
         MWWorld::Ptr ptr = getPlayer();
-        MWWorld::Class::get(ptr).getMovementSettings(ptr).mRotation[0] = pitch;
+        MWWorld::Class::get(ptr).getMovementSettings(ptr).mRotation[0] += pitch;
     }
-    void Player::setRoll(float roll)
+    void Player::roll(float roll)
     {
         MWWorld::Ptr ptr = getPlayer();
-        MWWorld::Class::get(ptr).getMovementSettings(ptr).mRotation[1] = roll;
+        MWWorld::Class::get(ptr).getMovementSettings(ptr).mRotation[1] += roll;
     }
 
     void Player::use()

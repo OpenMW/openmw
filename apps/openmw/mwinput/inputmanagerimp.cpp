@@ -206,7 +206,6 @@ namespace MWInput
     {
         // Tell OIS to handle all input events
         mInputManager->capture();
-
         // inject some fake mouse movement to force updating MyGUI's widget states
         // this shouldn't do any harm since we're moving back to the original position afterwards
         MyGUI::InputManager::getInstance().injectMouseMove( int(mMouseX+1), int(mMouseY+1), mMouseWheel);
@@ -501,10 +500,6 @@ namespace MWInput
 
             // We keep track of our own mouse position, so that moving the mouse while in
             // game mode does not move the position of the GUI cursor
-
-            // Don't support the UI sensitivity slider to reduce headache
-            // related to when the mouse can leave the window, and what to
-            // do when it re-enters
             mMouseX = arg.x;
             mMouseY = arg.y;
 
@@ -533,8 +528,8 @@ namespace MWInput
             // Only actually turn player when we're not in vanity mode 
             if(!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot))
             {
-                mPlayer.setYaw(x/scale);
-                mPlayer.setPitch(-y/scale);
+                mPlayer.yaw(x/scale);
+                mPlayer.pitch(-y/scale);
             }
 
             if (arg.zrel)
