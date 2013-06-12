@@ -205,8 +205,8 @@ namespace SFO
 
         SDL_GetWindowSize(mSDLWindow, &width, &height);
 
-        const int FUDGE_FACTOR_X = width / 8;
-        const int FUDGE_FACTOR_Y = height / 8;
+        const int FUDGE_FACTOR_X = width;
+        const int FUDGE_FACTOR_Y = height;
 
         //warp the mouse if it's about to go outside the window
         if(evt.x - FUDGE_FACTOR_X < 0  || evt.x + FUDGE_FACTOR_X > width

@@ -54,6 +54,9 @@ void OgreRenderer::cleanup()
     delete mRoot;
     mRoot = NULL;
 
+    if (mWindowIconSurface)
+        SDL_FreeSurface(mWindowIconSurface);
+
     // If we don't do this, the desktop resolution is not restored on exit
     SDL_SetWindowFullscreen(mSDLWindow, 0);
 
@@ -289,7 +292,6 @@ void OgreRenderer::createWindow(const std::string &title, const WindowSettings& 
         | (settings.fullscreen ? SDL_WINDOW_FULLSCREEN : 0)
     );
 
-
     //get the native whnd
     struct SDL_SysWMinfo wmInfo;
     SDL_VERSION(&wmInfo.version);
@@ -329,6 +331,13 @@ void OgreRenderer::createWindow(const std::string &title, const WindowSettings& 
     params.insert(std::make_pair("externalWindowHandle",  winHandle));
 
     mWindow = mRoot->createRenderWindow(title, settings.window_x, settings.window_y, settings.fullscreen, &params);
+
+    // Set the window icon
+    if (settings.icon != "")
+    {
+        mWindowIconSurface = ogreTextureToSDLSurface(settings.icon);
+        SDL_SetWindowIcon(mSDLWindow, mWindowIconSurface);
+    }
 
     // create the semi-transparent black background texture used by the GUI.
     // has to be created in code with TU_DYNAMIC_WRITE_ONLY param
@@ -387,4 +396,60 @@ void OgreRenderer::removeWindowEventListener(Ogre::WindowEventListener* listener
 void OgreRenderer::setFov(float fov)
 {
     mCamera->setFOVy(Degree(fov));
+}
+
+SDL_Surface* OgreRenderer::ogreTextureToSDLSurface(const std::string& name)
+{
+    Ogre::TexturePtr texture = Ogre::TextureManager::getSingleton().load(name, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME);
+    if (texture.isNull())
+    {
+        std::stringstream error;
+        error << "Window icon not found: " << name;
+        throw std::runtime_error(error.str());
+    }
+    Ogre::Image image;
+    texture->convertToImage(image);
+
+    SDL_Surface* surface = SDL_CreateRGBSurface(0,texture->getWidth(),texture->getHeight(),32,0xFF000000,0x00FF0000,0x0000FF00,0x000000FF);
+
+    //copy the Ogre texture to an SDL surface
+    for(size_t x = 0; x < texture->getWidth(); ++x)
+    {
+        for(size_t y = 0; y < texture->getHeight(); ++y)
+        {
+            Ogre::ColourValue clr = image.getColourAt(x, y, 0);
+
+            //set the pixel on the SDL surface to the same value as the Ogre texture's
+            int bpp = surface->format->BytesPerPixel;
+            /* Here p is the address to the pixel we want to set */
+            Uint8 *p = (Uint8 *)surface->pixels + y * surface->pitch + x * bpp;
+            Uint32 pixel = SDL_MapRGBA(surface->format, clr.r*255, clr.g*255, clr.b*255, clr.a*255);
+            switch(bpp) {
+            case 1:
+                *p = pixel;
+                break;
+
+            case 2:
+                *(Uint16 *)p = pixel;
+                break;
+
+            case 3:
+                if(SDL_BYTEORDER == SDL_BIG_ENDIAN) {
+                    p[0] = (pixel >> 16) & 0xff;
+                    p[1] = (pixel >> 8) & 0xff;
+                    p[2] = pixel & 0xff;
+                } else {
+                    p[0] = pixel & 0xff;
+                    p[1] = (pixel >> 8) & 0xff;
+                    p[2] = (pixel >> 16) & 0xff;
+                }
+                break;
+
+            case 4:
+                *(Uint32 *)p = pixel;
+                break;
+            }
+        }
+    }
+    return surface;
 }

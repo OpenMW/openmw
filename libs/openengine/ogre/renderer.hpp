@@ -32,6 +32,7 @@
 #endif
 
 struct SDL_Window;
+struct SDL_Surface;
 
 namespace Ogre
 {
@@ -56,6 +57,7 @@ namespace OEngine
             bool fullscreen;
             int window_x, window_y;
             std::string fsaa;
+            std::string icon;
         };
 
 #if defined(__APPLE__) && !defined(__LP64__)
@@ -80,6 +82,7 @@ namespace OEngine
 #endif
             Ogre::RenderWindow *mWindow;
             SDL_Window *mSDLWindow;
+            SDL_Surface *mWindowIconSurface;
             Ogre::SceneManager *mScene;
             Ogre::Camera *mCamera;
             Ogre::Viewport *mView;
@@ -103,6 +106,8 @@ namespace OEngine
             std::vector<Ogre::ParticleAffectorFactory*> mAffectorFactories;
             bool logging;
 
+            SDL_Surface* ogreTextureToSDLSurface(const std::string& name);
+
         public:
             OgreRenderer()
             : mRoot(NULL)
@@ -111,6 +116,7 @@ namespace OEngine
             , mScene(NULL)
             , mCamera(NULL)
             , mView(NULL)
+            , mWindowIconSurface(NULL)
             #ifdef ENABLE_PLUGIN_CgProgramManager
             , mCgPlugin(NULL)
             #endif

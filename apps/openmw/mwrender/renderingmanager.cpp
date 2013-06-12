@@ -131,7 +131,7 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
     Ogre::TextureManager::getSingleton().setMemoryBudget(126*1024*1024);
     Ogre::MeshManager::getSingleton().setMemoryBudget(64*1024*1024);
 
-    ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
+    Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
     // disable unsupported effects
     if (!Settings::Manager::getBool("shaders", "Objects"))
@@ -312,7 +312,7 @@ void RenderingManager::update (float duration, bool paused)
     MWWorld::Ptr player = world->getPlayer().getPlayer();
 
     int blind = MWWorld::Class::get(player).getCreatureStats(player).getMagicEffects().get(MWMechanics::EffectKey(ESM::MagicEffect::Blind)).mMagnitude;
-    mRendering.getFader()->setFactor(1.f-(blind / 100.f));
+    mRendering.getFader()->setFactor(std::max(0.f, 1.f-(blind / 100.f)));
     setAmbientMode();
 
     // player position
