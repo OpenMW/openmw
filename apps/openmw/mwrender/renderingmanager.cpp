@@ -796,13 +796,16 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
         unsigned int x = Settings::Manager::getInt("resolution x", "Video");
         unsigned int y = Settings::Manager::getInt("resolution y", "Video");
 
+        SDL_SetWindowFullscreen(mRendering.getSDLWindow(), 0);
+
         if (x != mRendering.getWindow()->getWidth() || y != mRendering.getWindow()->getHeight())
         {
             SDL_SetWindowSize(mRendering.getSDLWindow(), x, y);
             mRendering.getWindow()->resize(x, y);
         }
+
         SDL_SetWindowFullscreen(mRendering.getSDLWindow(), Settings::Manager::getBool("fullscreen", "Video") ? SDL_WINDOW_FULLSCREEN : 0);
-        mRendering.getWindow()->setFullscreen(Settings::Manager::getBool("fullscreen", "Video"), x, y);
+        //mRendering.getWindow()->setFullscreen(Settings::Manager::getBool("fullscreen", "Video"), x, y);
     }
 
     mWater->processChangedSettings(settings);

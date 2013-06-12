@@ -39,7 +39,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "tinyxml.h"
 
-#include "SDL_input.h"
 #include "SDL_keyboard.h"
 #include "SDL_mouse.h"
 #include "SDL_joystick.h"
