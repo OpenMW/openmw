@@ -1,8 +1,7 @@
 #ifndef MWGUI_REVIEW_H
 #define MWGUI_REVIEW_H
 
-#include "window_base.hpp"
-#include "../mwmechanics/stat.hpp"
+#include "windowbase.hpp"
 #include "widgets.hpp"
 
 namespace MWGui
@@ -17,7 +16,7 @@ Layout is defined by resources/mygui/openmw_chargen_review.layout.
 
 namespace MWGui
 {
-    class ReviewDialog : public WindowBase
+    class ReviewDialog : public WindowModal
     {
     public:
         enum Dialogs {
@@ -28,7 +27,7 @@ namespace MWGui
         };
         typedef std::vector<int> SkillList;
 
-        ReviewDialog(MWBase::WindowManager& parWindowManager);
+        ReviewDialog();
 
         void setPlayerName(const std::string &name);
         void setRace(const std::string &raceId);
@@ -91,7 +90,7 @@ namespace MWGui
         std::map<int, MyGUI::TextBox*> mSkillWidgetMap;
         std::string mName, mRaceId, mBirthSignId;
         ESM::Class mKlass;
-        std::vector<MyGUI::WidgetPtr> mSkillWidgets; //< Skills and other information
+        std::vector<MyGUI::Widget*> mSkillWidgets; //< Skills and other information
     };
 }
 #endif

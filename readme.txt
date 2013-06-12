@@ -3,13 +3,13 @@ OpenMW: A reimplementation of The Elder Scrolls III: Morrowind
 OpenMW is an attempt at recreating the engine for the popular role-playing game
 Morrowind by Bethesda Softworks. You need to own and install the original game for OpenMW to work.
 
-Version: 0.20.0
+Version: 0.23.0
 License: GPL (see GPL3.txt for more information)
 Website: http://www.openmw.org
 
 Font Licenses:
 EBGaramond-Regular.ttf: OFL (see OFL.txt for more information)
-VeraMono.ttf: custom (see Bitstream Vera License.txt for more information)
+DejaVuLGCSansMono.ttf: custom (see DejaVu Font License.txt for more information)
 
 
 
@@ -31,7 +31,7 @@ Open DMG file, copy OpenMW folder anywhere, for example in /Applications
 
 BUILD FROM SOURCE
 
-TODO add description here
+https://wiki.openmw.org/index.php?title=Development_Environment_Setup
 
 
 THE DATA PATH
@@ -93,6 +93,178 @@ Allowed options:
 
 
 CHANGELOG
+
+0.23.0
+
+Bug #522: Player collides with placeable items
+Bug #553: Open/Close sounds played when accessing main menu w/ Journal Open
+Bug #561: Tooltip word wrapping delay
+Bug #578: Bribing works incorrectly
+Bug #601: PositionCell fails on negative coordinates
+Bug #606: Some NPCs hairs not rendered with Better Heads addon
+Bug #609: Bad rendering of bone boots
+Bug #613: Messagebox causing assert to fail
+Bug #631: Segfault on shutdown
+Bug #634: Exception when talking to Calvus Horatius in Mournhold, royal palace courtyard
+Bug #635: Scale NPCs depending on race
+Bug #643: Dialogue Race select function is inverted
+Bug #646: Twohanded weapons don't work properly
+Bug #654: Crash when dropping objects without a collision shape
+Bug #655/656: Objects that were disabled or deleted (but not both) were added to the scene when re-entering a cell
+Bug #660: "g" in "change" cut off in Race Menu
+Bug #661: Arrille sells me the key to his upstairs room
+Bug #662: Day counter starts at 2 instead of 1
+Bug #663: Cannot select "come unprepared" topic in dialog with Dagoth Ur
+Bug #665: Pickpocket -> "Grab all" grabs all NPC inventory, even not listed in container window.
+Bug #666: Looking up/down problem
+Bug #667: Active effects border visible during loading
+Bug #669: incorrect player position at new game start
+Bug #670: race selection menu: sex, face and hair left button not totally clickable
+Bug #671: new game: player is naked
+Bug #674: buying or selling items doesn't change amount of gold
+Bug #675: fatigue is not set to its maximum when starting a new game
+Bug #678: Wrong rotation order causes RefData's rotation to be stored incorrectly
+Bug #680: different gold coins in Tel Mara
+Bug #682: Race menu ignores playable flag for some hairs and faces
+Bug #685: Script compiler does not accept ":" after a function name
+Bug #688: dispose corpse makes cross-hair to disappear
+Bug #691: Auto equipping ignores equipment conditions
+Bug #692: OpenMW doesnt load "loose file" texture packs that places resources directly in data folder
+Bug #696: Draugr incorrect head offset
+Bug #697: Sail transparency issue
+Bug #700: "On the rocks" mod does not load its UV coordinates correctly.
+Bug #702: Some race mods don't work
+Bug #711: Crash during character creation
+Bug #715: Growing Tauryon
+Bug #725: Auto calculate stats
+Bug #728: Failure to open container and talk dialogue
+Bug #731: Crash with Mush-Mere's "background" topic
+Feature #55/657: Item Repairing
+Feature #62/87: Enchanting
+Feature #99: Pathfinding
+Feature #104: AI Package: Travel
+Feature #129: Levelled items
+Feature #204: Texture animations
+Feature #239: Fallback-Settings
+Feature #535: Console object selection improvements
+Feature #629: Add levelup description in levelup layout dialog
+Feature #630: Optional format subrecord in (tes3) header
+Feature #641: Armor rating
+Feature #645: OnDeath script function
+Feature #683: Companion item UI
+Feature #698: Basic Particles
+Task #648: Split up components/esm/loadlocks
+Task #695: mwgui cleanup
+
+0.22.0
+
+Bug #311: Potential infinite recursion in script compiler
+Bug #355: Keyboard repeat rate (in Xorg) are left disabled after game exit.
+Bug #382: Weird effect in 3rd person on water
+Bug #387: Always use detailed shape for physics raycasts
+Bug #420: Potion/ingredient effects do not stack
+Bug #429: Parts of dwemer door not picked up correctly for activation/tooltips
+Bug #434/Bug #605: Object movement between cells not properly implemented
+Bug #502: Duplicate player collision model at origin
+Bug #509: Dialogue topic list shifts inappropriately
+Bug #513: Sliding stairs
+Bug #515: Launcher does not support non-latin strings
+Bug #525: Race selection preview camera wrong position
+Bug #526: Attributes / skills should not go below zero
+Bug #529: Class and Birthsign menus options should be preselected
+Bug #530: Lock window button graphic missing
+Bug #532: Missing map menu graphics
+Bug #545: ESX selector does not list ESM files properly
+Bug #547: Global variables of type short are read incorrectly
+Bug #550: Invisible meshes collision and tooltip
+Bug #551: Performance drop when loading multiple ESM files
+Bug #552: Don't list CG in options if it is not available
+Bug #555: Character creation windows "OK" button broken
+Bug #558: Segmentation fault when Alt-tabbing with console opened
+Bug #559: Dialog window should not be available before character creation is finished
+Bug #560: Tooltip borders should be stretched
+Bug #562: Sound should not be played when an object cannot be picked up
+Bug #565: Water animation speed + timescale
+Bug #572: Better Bodies' textures don't work
+Bug #573: OpenMW doesn't load if TR_Mainland.esm is enabled (Tamriel Rebuilt mod)
+Bug #574: Moving left/right should not cancel auto-run
+Bug #575: Crash entering the Chamber of Song
+Bug #576: Missing includes
+Bug #577: Left Gloves Addon causes ESMReader exception
+Bug #579: Unable to open container "Kvama Egg Sack"
+Bug #581: Mimicking vanilla Morrowind water
+Bug #583: Gender not recognized
+Bug #586: Wrong char gen behaviour
+Bug #587: "End" script statements with spaces don't work
+Bug #589: Closing message boxes by pressing the activation key
+Bug #590: Ugly Dagoth Ur rendering
+Bug #591: Race selection issues
+Bug #593: Persuasion response should be random
+Bug #595: Footless guard
+Bug #599: Waterfalls are invisible from a certain distance
+Bug #600: Waterfalls rendered incorrectly, cut off by water
+Bug #607: New beast bodies mod crashes
+Bug #608: Crash in cell "Mournhold, Royal Palace"
+Bug #611: OpenMW doesn't find some of textures used in Tamriel Rebuilt
+Bug #613: Messagebox causing assert to fail
+Bug #615: Meshes invisible from above water
+Bug #617: Potion effects should be hidden until discovered
+Bug #619: certain moss hanging from tree has rendering bug
+Bug #621: Batching bloodmoon's trees
+Bug #623: NiMaterialProperty alpha unhandled
+Bug #628: Launcher in latest master crashes the game
+Bug #633: Crash on startup: Better Heads
+Bug #636: Incorrect Char Gen Menu Behavior
+Feature #29: Allow ESPs and multiple ESMs
+Feature #94: Finish class selection-dialogue
+Feature #149: Texture Alphas
+Feature #237: Run Morrowind-ini importer from launcher
+Feature #286: Update Active Spell Icons
+Feature #334: Swimming animation
+Feature #335: Walking animation
+Feature #360: Proper collision shapes for NPCs and creatures
+Feature #367: Lights that behave more like original morrowind implementation
+Feature #477: Special local scripting variables
+Feature #528: Message boxes should close when enter is pressed under certain conditions.
+Feature #543: Add bsa files to the settings imported by the ini importer
+Feature #594: coordinate space and utility functions
+Feature #625: Zoom in vanity mode
+Task #464: Refactor launcher ESX selector into a re-usable component
+Task #624: Unified implementation of type-variable sub-records
+
+0.21.0
+
+Bug #253: Dialogs don't work for Russian version of Morrowind
+Bug #267: Activating creatures without dialogue can still activate the dialogue GUI
+Bug #354: True flickering lights
+Bug #386: The main menu's first entry is wrong (in french)
+Bug #479: Adding the spell "Ash Woe Blight" to the player causes strange attribute oscillations
+Bug #495: Activation Range
+Bug #497: Failed Disposition check doesn't stop a dialogue entry from being returned
+Bug #498: Failing a disposition check shouldn't eliminate topics from the the list of those available
+Bug #500: Disposition for most NPCs is 0/100
+Bug #501: Getdisposition command wrongly returns base disposition
+Bug #506: Journal UI doesn't update anymore
+Bug #507: EnableRestMenu is not a valid command - change it to EnableRest
+Bug #508: Crash in Ald Daedroth Shrine
+Bug #517: Wrong price calculation when untrading an item
+Bug #521: MWGui::InventoryWindow creates a duplicate player actor at the origin
+Bug #524: Beast races are able to wear shoes
+Bug #527: Background music fails to play
+Bug #533: The arch at Gnisis entrance is not displayed
+Bug #534: Terrain gets its correct shape only some time after the cell is loaded
+Bug #536: The same entry can be added multiple times to the journal
+Bug #539: Race selection is broken
+Bug #544: Terrain normal map corrupt when the map is rendered
+Feature #39: Video Playback
+Feature #151: ^-escape sequences in text output
+Feature #392: Add AI related script functions
+Feature #456: Determine required ini fallback values and adjust the ini importer accordingly
+Feature #460: Experimental DirArchives improvements
+Feature #540: Execute scripts of objects in containers/inventories in active cells
+Task #401: Review GMST fixing
+Task #453: Unify case smashing/folding
+Task #512: Rewrite utf8 component
 
 0.20.0
 

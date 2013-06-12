@@ -1,5 +1,4 @@
 #include "occlusionquery.hpp"
-#include "renderconst.hpp"
 
 #include <OgreRenderSystem.h>
 #include <OgreRoot.h>
@@ -7,16 +6,20 @@
 #include <OgreHardwareOcclusionQuery.h>
 #include <OgreEntity.h>
 #include <OgreSubEntity.h>
+#include <OgreMeshManager.h>
 #include <OgreMaterialManager.h>
+
+#include "renderconst.hpp"
 
 using namespace MWRender;
 using namespace Ogre;
 
 OcclusionQuery::OcclusionQuery(OEngine::Render::OgreRenderer* renderer, SceneNode* sunNode) :
-    mSunTotalAreaQuery(0), mSunVisibleAreaQuery(0), mSingleObjectQuery(0), mActiveQuery(0),
-    mDoQuery(0), mSunVisibility(0), mQuerySingleObjectStarted(false), mTestResult(false),
-    mQuerySingleObjectRequested(false), mWasVisible(false), mObjectWasVisible(false), mDoQuery2(false),
-    mBBNode(0)
+    mSunTotalAreaQuery(0), mSunVisibleAreaQuery(0), mActiveQuery(0),
+    mDoQuery(0), mSunVisibility(0),
+    mWasVisible(false),
+    mActive(false),
+    mFirstFrame(true)
 {
     mRendering = renderer;
     mSunNode = sunNode;
@@ -26,9 +29,8 @@ OcclusionQuery::OcclusionQuery(OEngine::Render::OgreRenderer* renderer, SceneNod
 
         mSunTotalAreaQuery = renderSystem->createHardwareOcclusionQuery();
         mSunVisibleAreaQuery = renderSystem->createHardwareOcclusionQuery();
-        mSingleObjectQuery = renderSystem->createHardwareOcclusionQuery();
 
-        mSupported = (mSunTotalAreaQuery != 0) && (mSunVisibleAreaQuery != 0) && (mSingleObjectQuery != 0);
+        mSupported = (mSunTotalAreaQuery != 0) && (mSunVisibleAreaQuery != 0);
     }
     catch (Ogre::Exception e)
     {
@@ -41,51 +43,25 @@ OcclusionQuery::OcclusionQuery(OEngine::Render::OgreRenderer* renderer, SceneNod
         return;
     }
 
-    MaterialPtr matBase = MaterialManager::getSingleton().getByName("BaseWhiteNoLighting");
-    MaterialPtr matQueryArea = matBase->clone("QueryTotalPixels");
-    matQueryArea->setDepthWriteEnabled(false);
-    matQueryArea->setColourWriteEnabled(false);
-    matQueryArea->setDepthCheckEnabled(false); // Not occluded by objects
-    MaterialPtr matQueryVisible = matBase->clone("QueryVisiblePixels");
-    matQueryVisible->setDepthWriteEnabled(false);
-    matQueryVisible->setColourWriteEnabled(false); // Uncomment this to visualize the occlusion query
-    matQueryVisible->setDepthCheckEnabled(true); // Occluded by objects
-    matQueryVisible->setCullingMode(CULL_NONE);
-    matQueryVisible->setManualCullingMode(MANUAL_CULL_NONE);
-
-    if (sunNode)
-        mBBNode = mSunNode->getParentSceneNode()->createChildSceneNode();
-
-    mObjectNode = mRendering->getScene()->getRootSceneNode()->createChildSceneNode();
     mBBNodeReal = mRendering->getScene()->getRootSceneNode()->createChildSceneNode();
 
-    mBBQueryTotal = mRendering->getScene()->createBillboardSet(1);
+    static Ogre::Mesh* plane = MeshManager::getSingleton().createPlane("occlusionbillboard",
+        ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,  Ogre::Plane(Ogre::Vector3(0,0,1), 0), 1, 1, 1, 1, true, 1, 1, 1, Vector3::UNIT_Y).get();
+    plane->_setBounds(Ogre::AxisAlignedBox::BOX_INFINITE);
+
+    mBBQueryTotal = mRendering->getScene()->createEntity("occlusionbillboard");
     mBBQueryTotal->setCastShadows(false);
-    mBBQueryTotal->setDefaultDimensions(150, 150);
-    mBBQueryTotal->createBillboard(Vector3::ZERO);
-    mBBQueryTotal->setMaterialName("QueryTotalPixels");
-    mBBQueryTotal->setRenderQueueGroup(RQG_OcclusionQuery+1);
     mBBQueryTotal->setVisibilityFlags(RV_OcclusionQuery);
+    mBBQueryTotal->setRenderQueueGroup(RQG_OcclusionQuery+1);
+    mBBQueryTotal->setMaterialName("QueryTotalPixels");
     mBBNodeReal->attachObject(mBBQueryTotal);
 
-    mBBQueryVisible = mRendering->getScene()->createBillboardSet(1);
+    mBBQueryVisible = mRendering->getScene()->createEntity("occlusionbillboard");
     mBBQueryVisible->setCastShadows(false);
-    mBBQueryVisible->setDefaultDimensions(150, 150);
-    mBBQueryVisible->createBillboard(Vector3::ZERO);
-    mBBQueryVisible->setMaterialName("QueryVisiblePixels");
-    mBBQueryVisible->setRenderQueueGroup(RQG_OcclusionQuery+1);
     mBBQueryVisible->setVisibilityFlags(RV_OcclusionQuery);
+    mBBQueryVisible->setRenderQueueGroup(RQG_OcclusionQuery+1);
+    mBBQueryVisible->setMaterialName("QueryVisiblePixels");
     mBBNodeReal->attachObject(mBBQueryVisible);
-
-    mBBQuerySingleObject = mRendering->getScene()->createBillboardSet(1);
-    /// \todo ideally this should occupy exactly 1 pixel on the screen
-    mBBQuerySingleObject->setCastShadows(false);
-    mBBQuerySingleObject->setDefaultDimensions(0.003, 0.003);
-    mBBQuerySingleObject->createBillboard(Vector3::ZERO);
-    mBBQuerySingleObject->setMaterialName("QueryVisiblePixels");
-    mBBQuerySingleObject->setRenderQueueGroup(RQG_OcclusionQuery);
-    mBBQuerySingleObject->setVisibilityFlags(RV_OcclusionQuery);
-    mObjectNode->attachObject(mBBQuerySingleObject);
 
     mRendering->getScene()->addRenderObjectListener(this);
     mRendering->getScene()->addRenderQueueListener(this);
@@ -94,10 +70,14 @@ OcclusionQuery::OcclusionQuery(OEngine::Render::OgreRenderer* renderer, SceneNod
 
 OcclusionQuery::~OcclusionQuery()
 {
+    mRendering->getScene()->removeRenderObjectListener (this);
+    mRendering->getScene()->removeRenderQueueListener(this);
+
     RenderSystem* renderSystem = Root::getSingleton().getRenderSystem();
-    if (mSunTotalAreaQuery) renderSystem->destroyHardwareOcclusionQuery(mSunTotalAreaQuery);
-    if (mSunVisibleAreaQuery) renderSystem->destroyHardwareOcclusionQuery(mSunVisibleAreaQuery);
-    if (mSingleObjectQuery) renderSystem->destroyHardwareOcclusionQuery(mSingleObjectQuery);
+    if (mSunTotalAreaQuery)
+        renderSystem->destroyHardwareOcclusionQuery(mSunTotalAreaQuery);
+    if (mSunVisibleAreaQuery)
+        renderSystem->destroyHardwareOcclusionQuery(mSunVisibleAreaQuery);
 }
 
 bool OcclusionQuery::supported()
@@ -108,8 +88,10 @@ bool OcclusionQuery::supported()
 void OcclusionQuery::notifyRenderSingleObject(Renderable* rend, const Pass* pass, const AutoParamDataSource* source,
 			const LightList* pLightList, bool suppressRenderStateChanges)
 {
+    if (!mActive) return;
+
     // The following code activates and deactivates the occlusion queries
-    // so that the queries only include the rendering of their intended targets
+    // so that the queries only include the rendering of the intended meshes
 
     // Close the last occlusion query
     // Each occlusion query should only last a single rendering
@@ -122,22 +104,15 @@ void OcclusionQuery::notifyRenderSingleObject(Renderable* rend, const Pass* pass
     // Open a new occlusion query
     if (mDoQuery == true)
     {
-        if (rend == mBBQueryTotal)
+        if (rend == mBBQueryTotal->getSubEntity(0))
         {
             mActiveQuery = mSunTotalAreaQuery;
             mWasVisible = true;
         }
-        else if (rend == mBBQueryVisible)
+        else if (rend == mBBQueryVisible->getSubEntity(0))
         {
             mActiveQuery = mSunVisibleAreaQuery;
         }
-    }
-    if (mDoQuery == true && rend == mBBQuerySingleObject)
-    {
-        mQuerySingleObjectStarted = true;
-        mQuerySingleObjectRequested = false;
-        mActiveQuery = mSingleObjectQuery;
-        mObjectWasVisible = true;
     }
 
     if (mActiveQuery != NULL)
@@ -146,6 +121,8 @@ void OcclusionQuery::notifyRenderSingleObject(Renderable* rend, const Pass* pass
 
 void OcclusionQuery::renderQueueEnded(uint8 queueGroupId, const String& invocation, bool& repeatThisInvocation)
 {
+    if (!mActive) return;
+
     if (mActiveQuery != NULL)
     {
         mActiveQuery->endOcclusionQuery();
@@ -166,22 +143,20 @@ void OcclusionQuery::renderQueueEnded(uint8 queueGroupId, const String& invocati
             mSunVisibleAreaQuery->beginOcclusionQuery();
             mSunVisibleAreaQuery->endOcclusionQuery();
         }
-        if (mObjectWasVisible == false && mDoQuery)
-        {
-            mSingleObjectQuery->beginOcclusionQuery();
-            mSingleObjectQuery->endOcclusionQuery();
-            mQuerySingleObjectStarted = true;
-            mQuerySingleObjectRequested = false;
-        }
     }
 }
 
 void OcclusionQuery::update(float duration)
 {
+    if (mFirstFrame)
+    {
+        // GLHardwareOcclusionQuery::isStillOutstanding doesn't seem to like getting called when nothing has been rendered yet
+        mFirstFrame = false;
+        return;
+    }
     if (!mSupported) return;
 
     mWasVisible = false;
-    mObjectWasVisible = false;
 
     // Adjust the position of the sun billboards according to camera viewing distance
     // we need to do this to make sure that _everything_ can occlude the sun
@@ -189,12 +164,11 @@ void OcclusionQuery::update(float duration)
     if (dist==0) dist = 10000000;
     dist -= 1000; // bias
     dist /= 1000.f;
-    if (mBBNode)
+    if (mSunNode)
     {
-        mBBNode->setPosition(mSunNode->getPosition() * dist);
-        mBBNode->setScale(dist, dist, dist);
-        mBBNodeReal->setPosition(mBBNode->_getDerivedPosition());
-        mBBNodeReal->setScale(mBBNode->getScale());
+        mBBNodeReal->setPosition(mSunNode->getPosition() * dist);
+        mBBNodeReal->setOrientation(Ogre::Vector3::UNIT_Z.getRotationTo(-mBBNodeReal->getPosition().normalisedCopy()));
+        mBBNodeReal->setScale(150.f*dist, 150.f*dist, 150.f*dist);
     }
 
     // Stop occlusion queries until we get their information
@@ -202,8 +176,7 @@ void OcclusionQuery::update(float duration)
     mDoQuery = false;
 
     if (!mSunTotalAreaQuery->isStillOutstanding()
-        && !mSunVisibleAreaQuery->isStillOutstanding()
-        && !mSingleObjectQuery->isStillOutstanding())
+        && !mSunVisibleAreaQuery->isStillOutstanding())
     {
         unsigned int totalPixels;
         unsigned int visiblePixels;
@@ -222,86 +195,11 @@ void OcclusionQuery::update(float duration)
             if (mSunVisibility > 1) mSunVisibility = 1;
         }
 
-        unsigned int result;
-
-        mSingleObjectQuery->pullOcclusionQuery(&result);
-
-        mTestResult = (result != 0);
-
-        mQuerySingleObjectStarted = false;
-        mQuerySingleObjectRequested = false;
-
         mDoQuery = true;
     }
-}
-
-void OcclusionQuery::occlusionTest(const Ogre::Vector3& position, Ogre::SceneNode* object)
-{
-    assert( !occlusionTestPending()
-        && "Occlusion test still pending");
-
-    mBBQuerySingleObject->setVisible(true);
-
-    mObjectNode->setPosition(position);
-    // scale proportional to camera distance, in order to always give the billboard the same size in screen-space
-    mObjectNode->setScale( Vector3(1,1,1)*(position - mRendering->getCamera()->getRealPosition()).length() );
-
-    mQuerySingleObjectRequested = true;
-}
-
-bool OcclusionQuery::occlusionTestPending()
-{
-    return (mQuerySingleObjectRequested || mQuerySingleObjectStarted);
 }
 
 void OcclusionQuery::setSunNode(Ogre::SceneNode* node)
 {
     mSunNode = node;
-    if (!mBBNode)
-        mBBNode = node->getParentSceneNode()->createChildSceneNode();
-}
-
-bool OcclusionQuery::getTestResult()
-{
-    assert( !occlusionTestPending()
-        && "Occlusion test still pending");
-
-    return mTestResult;
-}
-
-bool OcclusionQuery::isPotentialOccluder(Ogre::SceneNode* node)
-{
-    bool result = false;
-    for (unsigned int i=0; i < node->numAttachedObjects(); ++i)
-    {
-        MovableObject* ob = node->getAttachedObject(i);
-        std::string type = ob->getMovableType();
-        if (type == "Entity")
-        {
-            Entity* ent = static_cast<Entity*>(ob);
-            for (unsigned int j=0; j < ent->getNumSubEntities(); ++j)
-            {
-                // if any sub entity has a material with depth write off,
-                // consider the object as not an occluder
-                MaterialPtr mat = ent->getSubEntity(j)->getMaterial();
-
-                Material::TechniqueIterator techIt = mat->getTechniqueIterator();
-                while (techIt.hasMoreElements())
-                {
-                    Technique* tech = techIt.getNext();
-                    Technique::PassIterator passIt = tech->getPassIterator();
-                    while (passIt.hasMoreElements())
-                    {
-                        Pass* pass = passIt.getNext();
-
-                        if (pass->getDepthWriteEnabled() == false)
-                            return false;
-                        else
-                            result = true;
-                    }
-                }
-            }
-        }
-    }
-    return result;
 }

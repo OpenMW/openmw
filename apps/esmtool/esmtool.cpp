@@ -23,8 +23,7 @@ struct ESMData
     std::string author;
     std::string description;
     int version;
-    int type;
-    ESM::ESMReader::MasterList masters;
+    std::vector<ESM::Header::MasterData> masters;
 
     std::deque<EsmTool::RecordBase *> mRecords;
     std::map<ESM::Cell *, std::deque<ESM::CellRef> > mCellRefs;
@@ -52,6 +51,7 @@ struct Arguments
     unsigned int raw_given;
     unsigned int quiet_given;
     unsigned int loadcells_given;
+    bool plain_given;
 
     std::string mode;
     std::string encoding;
@@ -78,6 +78,9 @@ bool parseOptions (int argc, char** argv, Arguments &info)
         ("type,t", bpo::value< std::vector<std::string> >(),
          "Show only records of this type (four character record code).  May "
          "be specified multiple times.  Only affects dump mode.")
+        ("plain,p", "Print contents of dialogs, books and scripts. "
+         "(skipped by default)"
+         "Only affects dump mode.")
         ("quiet,q", "Supress all record information. Useful for speed tests.")
         ("loadcells,C", "Browse through contents of all cells.")
 
@@ -162,6 +165,7 @@ bool parseOptions (int argc, char** argv, Arguments &info)
     info.raw_given = variables.count ("raw");
     info.quiet_given = variables.count ("quiet");
     info.loadcells_given = variables.count ("loadcells");
+    info.plain_given = (variables.count("plain") > 0);
 
     // Font encoding settings
     info.encoding = variables["encoding"].as<std::string>();
@@ -209,7 +213,10 @@ void loadCell(ESM::Cell &cell, ESM::ESMReader &esm, Arguments& info)
     bool save = (info.mode == "clone");
 
     // Skip back to the beginning of the reference list
-    cell.restore(esm);
+    // FIXME: Changes to the references backend required to support multiple plugins have
+    //  almost certainly broken this following line. I'll leave it as is for now, so that
+    //  the compiler does not complain.
+    cell.restore(esm, 0);
 
     // Loop through all the references
     ESM::CellRef ref;
@@ -225,7 +232,10 @@ void loadCell(ESM::Cell &cell, ESM::ESMReader &esm, Arguments& info)
         std::cout << "    Refnum: " << ref.mRefnum << std::endl;
         std::cout << "    ID: '" << ref.mRefID << "'\n";
         std::cout << "    Owner: '" << ref.mOwner << "'\n";
-        std::cout << "    INTV: " << ref.mIntv << "   NAM9: " << ref.mIntv << std::endl;
+        std::cout << "    Enchantment charge: '" << ref.mEnchantmentCharge << "'\n";
+        std::cout << "    Uses/health: '" << ref.mCharge << "'\n";
+        std::cout << "    Gold value: '" << ref.mGoldValue << "'\n";
+        std::cout << "    Blocked: '" << static_cast<int>(ref.mReferenceBlocked) << "'" << std::endl;
     }
 }
 
@@ -281,16 +291,13 @@ int load(Arguments& info)
         info.data.author = esm.getAuthor();
         info.data.description = esm.getDesc();
         info.data.masters = esm.getMasters();
-        info.data.version = esm.getVer();
-        info.data.type = esm.getType();
 
         if (!quiet)
         {
             std::cout << "Author: " << esm.getAuthor() << std::endl
                  << "Description: " << esm.getDesc() << std::endl
-                 << "File format version: " << esm.getFVer() << std::endl
-                 << "Special flag: " << esm.getSpecial() << std::endl;
-            ESM::ESMReader::MasterList m = esm.getMasters();
+                 << "File format version: " << esm.getFVer() << std::endl;
+            std::vector<ESM::Header::MasterData> m = esm.getMasters();
             if (!m.empty())
             {
                 std::cout << "Masters:" << std::endl;
@@ -341,6 +348,7 @@ int load(Arguments& info)
                 }
                 record->setId(id);
                 record->setFlags((int) flags);
+                record->setPrintPlain(info.plain_given);
                 record->load(esm);
                 if (!quiet && interested) record->print();
 
@@ -427,9 +435,9 @@ int clone(Arguments& info)
     esm.setAuthor(info.data.author);
     esm.setDescription(info.data.description);
     esm.setVersion(info.data.version);
-    esm.setType(info.data.type);
+    esm.setRecordCount (recordCount);
 
-    for (ESM::ESMReader::MasterList::iterator it = info.data.masters.begin(); it != info.data.masters.end(); ++it)
+    for (std::vector<ESM::Header::MasterData>::iterator it = info.data.masters.begin(); it != info.data.masters.end(); ++it)
         esm.addMaster(it->name, it->size);
 
     std::fstream save(info.outname.c_str(), std::fstream::out | std::fstream::binary);

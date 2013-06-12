@@ -13,6 +13,7 @@
 #include "../mwworld/physicssystem.hpp"
 #include "../mwworld/actioneat.hpp"
 #include "../mwworld/player.hpp"
+#include "../mwworld/nullaction.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 
@@ -45,7 +46,7 @@ namespace MWClass
     {
         const std::string model = getModel(ptr);
         if(!model.empty())
-            physics.addObject(ptr);
+            physics.addObject(ptr,true);
     }
 
     std::string Ingredient::getModel(const MWWorld::Ptr &ptr) const
@@ -72,6 +73,9 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Ingredient::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
+        if (!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
+            return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction ());
+
         boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTake (ptr));
 
         action->setSound(getUpSoundId(ptr));
@@ -192,5 +196,18 @@ namespace MWClass
             ptr.get<ESM::Ingredient>();
 
         return MWWorld::Ptr(&cell.mIngreds.insert(*ref), &cell);
+    }
+
+    bool Ingredient::canSell (const MWWorld::Ptr& item, int npcServices) const
+    {
+        return npcServices & ESM::NPC::Ingredients;
+    }
+
+
+    float Ingredient::getWeight(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Ingredient> *ref =
+            ptr.get<ESM::Ingredient>();
+        return ref->mBase->mData.mWeight;
     }
 }

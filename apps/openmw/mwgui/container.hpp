@@ -1,15 +1,10 @@
 #ifndef MGUI_CONTAINER_H
 #define MGUI_CONTAINER_H
 
-#include "../mwworld/esmstore.hpp"
-
-#include "window_base.hpp"
+#include "windowbase.hpp"
 #include "referenceinterface.hpp"
 
-#include "../mwclass/container.hpp"
-#include "../mwworld/ptr.hpp"
-#include "../mwworld/containerstore.hpp"
-
+#include "itemmodel.hpp"
 
 namespace MWWorld
 {
@@ -26,7 +21,8 @@ namespace MWGui
 {
     class WindowManager;
     class ContainerWindow;
-    class ContainerBase;
+    class ItemView;
+    class SortFilterItemModel;
 }
 
 
@@ -38,108 +34,44 @@ namespace MWGui
         bool mIsOnDragAndDrop;
         MyGUI::Widget* mDraggedWidget;
         MyGUI::Widget* mDragAndDropWidget;
-        ContainerBase* mDraggedFrom;
+        ItemModel* mSourceModel;
+        ItemView* mSourceView;
+        SortFilterItemModel* mSourceSortModel;
+        ItemStack mItem;
         int mDraggedCount;
+
+        void startDrag (int index, SortFilterItemModel* sortModel, ItemModel* sourceModel, ItemView* sourceView, int count);
+        void drop (ItemModel* targetModel, ItemView* targetView);
+
+        void finish();
     };
 
-    class ContainerBase : public ReferenceInterface
+    class ContainerWindow : public WindowBase, public ReferenceInterface
     {
     public:
-        ContainerBase(DragAndDrop* dragAndDrop);
-        virtual ~ContainerBase();
+        ContainerWindow(DragAndDrop* dragAndDrop);
 
-        enum Filter
-        {
-            Filter_All = 0x01,
-            Filter_Weapon = 0x02,
-            Filter_Apparel = 0x03,
-            Filter_Magic = 0x04,
-            Filter_Misc = 0x05,
+        void open(const MWWorld::Ptr& container, bool loot=false);
 
-            Filter_Ingredients = 0x06
-        };
-
-        enum ItemState
-        {
-            ItemState_Normal = 0x01,
-            ItemState_Equipped = 0x02,
-            ItemState_Barter = 0x03
-        };
-
-        void setWidgets(MyGUI::Widget* containerWidget, MyGUI::ScrollView* itemView); ///< only call once
-
-        void addBarteredItem(MWWorld::Ptr item, int count);
-        void addItem(MWWorld::Ptr item, int count);
-
-        void transferBoughtItems(); ///< transfer bought items into the inventory
-        void returnBoughtItems(MWWorld::ContainerStore& store); ///< return bought items into the specified ContainerStore
-
-        MWWorld::ContainerStore& getContainerStore();
-        MWWorld::ContainerStore& getBoughtItems() { return mBoughtItems; }
-
-        void openContainer(MWWorld::Ptr container);
-        void setFilter(Filter filter); ///< set category filter
-        void drawItems();
-
-    protected:
-        MyGUI::ScrollView* mItemView;
-        MyGUI::Widget* mContainerWidget;
-
-        MyGUI::Widget* mSelectedItem;
-
+    private:
         DragAndDrop* mDragAndDrop;
 
-        Filter mFilter;
+        MWGui::ItemView* mItemView;
+        SortFilterItemModel* mSortModel;
+        ItemModel* mModel;
+        size_t mSelectedItem;
 
-        // bought items are put in a separate ContainerStore so that they don't stack with other (not bought) items.
-        MWWorld::ContainerStore mBoughtItems;
-
-        void onSelectedItem(MyGUI::Widget* _sender);
-        void onContainerClicked(MyGUI::Widget* _sender);
-        void onMouseWheel(MyGUI::Widget* _sender, int _rel);
-
-        /// start dragging an item (drag & drop)
-        void startDragItem(MyGUI::Widget* _sender, int count);
-
-        /// sell an item from this container
-        void sellItem(MyGUI::Widget* _sender, int count);
-
-        /// sell an item from this container, that was previously just bought
-        void sellAlreadyBoughtItem(MyGUI::Widget* _sender, int count);
-
-        std::string getCountString(const int count);
-
-        virtual bool isTradeWindow() { return false; }
-        virtual bool isInventory() { return false; }
-        virtual std::vector<MWWorld::Ptr> getEquippedItems() { return std::vector<MWWorld::Ptr>(); }
-        virtual void _unequipItem(MWWorld::Ptr item) { ; }
-
-        virtual bool isTrading() { return false; }
-
-        virtual void onSelectedItemImpl(MWWorld::Ptr item) { ; }
-
-        virtual bool ignoreEquippedItems() { return false; }
-        virtual std::vector<MWWorld::Ptr> itemsToIgnore() { return std::vector<MWWorld::Ptr>(); }
-
-        virtual void notifyContentChanged() { ; }
-    };
-
-    class ContainerWindow : public ContainerBase, public WindowBase
-    {
-    public:
-        ContainerWindow(MWBase::WindowManager& parWindowManager,DragAndDrop* dragAndDrop);
-
-        virtual ~ContainerWindow();
-
-        void open(MWWorld::Ptr container);
-
-    protected:
+        MyGUI::Button* mDisposeCorpseButton;
         MyGUI::Button* mTakeButton;
         MyGUI::Button* mCloseButton;
 
-        void onWindowResize(MyGUI::Window* window);
+        void onItemSelected(int index);
+        void onBackgroundSelected();
+        void dragItem(MyGUI::Widget* sender, int count);
+        void dropItem();
         void onCloseButtonClicked(MyGUI::Widget* _sender);
         void onTakeAllButtonClicked(MyGUI::Widget* _sender);
+        void onDisposeCorpseButtonClicked(MyGUI::Widget* sender);
 
         virtual void onReferenceUnavailable();
     };

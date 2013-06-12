@@ -36,14 +36,9 @@ namespace MWClass
         objects.insertBegin(ptr, ptr.getRefData().isEnabled(), false);
 
         if (!model.empty())
-            objects.insertMesh(ptr, "meshes\\" + model);
-
-        const int color = ref->mBase->mData.mColor;
-        const float r = ((color >> 0) & 0xFF) / 255.0f;
-        const float g = ((color >> 8) & 0xFF) / 255.0f;
-        const float b = ((color >> 16) & 0xFF) / 255.0f;
-        const float radius = float (ref->mBase->mData.mRadius);
-        objects.insertLight (ptr, r, g, b, radius);
+            objects.insertMesh(ptr, "meshes\\" + model, true);
+        else
+            objects.insertLight(ptr);
     }
 
     void Light::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
@@ -55,7 +50,7 @@ namespace MWClass
         const std::string &model = ref->mBase->mModel;
 
         if(!model.empty())
-            physics.addObject(ptr);
+            physics.addObject(ptr,ref->mBase->mData.mFlags & ESM::Light::Carry);
 
         if (!ref->mBase->mSound.empty())
             MWBase::Environment::get().getSoundManager()->playSound3D(ptr, ref->mBase->mSound, 1.0, 1.0, MWBase::SoundManager::Play_Loop);
@@ -88,6 +83,9 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Light::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
+        if (!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
+            return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction ());
+
         MWWorld::LiveCellRef<ESM::Light> *ref =
             ptr.get<ESM::Light>();
 
@@ -204,5 +202,17 @@ namespace MWClass
             ptr.get<ESM::Light>();
 
         return MWWorld::Ptr(&cell.mLights.insert(*ref), &cell);
+    }
+
+    bool Light::canSell (const MWWorld::Ptr& item, int npcServices) const
+    {
+        return npcServices & ESM::NPC::Lights;
+    }
+
+    float Light::getWeight(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Light> *ref =
+            ptr.get<ESM::Light>();
+        return ref->mBase->mData.mWeight;
     }
 }

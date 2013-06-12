@@ -1,6 +1,4 @@
-#include "map_window.hpp"
-
-#include <openengine/gui/layout.hpp>
+#include "mapwindow.hpp"
 
 #include "../mwmechanics/stat.hpp"
 #include "../mwworld/ptr.hpp"
@@ -8,12 +6,13 @@
 namespace MWGui
 {
     class DragAndDrop;
+    class SpellIcons;
 
     class HUD : public OEngine::GUI::Layout, public LocalMapBase
     {
     public:
         HUD(int width, int height, int fpsLevel, DragAndDrop* dragAndDrop);
-        void setEffect(const char *img);
+        virtual ~HUD();
         void setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value);
         void setFPS(float fps);
         void setTriangleCount(unsigned int count);
@@ -43,6 +42,10 @@ namespace MWGui
 
         bool getWorldMouseOver() { return mWorldMouseOver; }
 
+        MyGUI::Widget* getEffectBox() { return mEffectBox; }
+
+        void update();
+
     private:
         MyGUI::ProgressPtr mHealth, mMagicka, mStamina;
         MyGUI::Widget* mHealthFrame;
@@ -51,7 +54,6 @@ namespace MWGui
         MyGUI::ProgressPtr mWeapStatus, mSpellStatus;
         MyGUI::Widget *mEffectBox, *mMinimapBox;
         MyGUI::Button* mMinimapButton;
-        MyGUI::ImageBox* mEffect1;
         MyGUI::ScrollView* mMinimap;
         MyGUI::ImageBox* mCompass;
         MyGUI::ImageBox* mCrosshair;
@@ -60,7 +62,7 @@ namespace MWGui
 
         MyGUI::Widget* mDummy;
 
-        MyGUI::WidgetPtr mFpsBox;
+        MyGUI::Widget* mFpsBox;
         MyGUI::TextBox* mFpsCounter;
         MyGUI::TextBox* mTriangleCounter;
         MyGUI::TextBox* mBatchCounter;
@@ -84,6 +86,8 @@ namespace MWGui
         bool mSpellVisible;
 
         bool mWorldMouseOver;
+
+        SpellIcons* mSpellIcons;
 
         void onWorldClicked(MyGUI::Widget* _sender);
         void onWorldMouseOver(MyGUI::Widget* _sender, int x, int y);

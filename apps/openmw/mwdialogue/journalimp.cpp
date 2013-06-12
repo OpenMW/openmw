@@ -29,8 +29,21 @@ namespace MWDialogue
     Journal::Journal()
     {}
 
+    void Journal::clear()
+    {
+        mJournal.clear();
+        mQuests.clear();
+        mTopics.clear();
+    }
+
     void Journal::addEntry (const std::string& id, int index)
     {
+        // bail out of we already have heard this...
+        std::string infoId = JournalEntry::idFromIndex (id, index);
+        for (TEntryIter i = mJournal.begin (); i != mJournal.end (); ++i)
+            if (i->mTopic == id && i->mInfoId == infoId)
+                return;
+
         StampedJournalEntry entry = StampedJournalEntry::makeFromQuest (id, index);
 
         mJournal.push_back (entry);

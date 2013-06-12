@@ -1,13 +1,17 @@
 #include "objects.hpp"
 
+#include <cmath>
+
 #include <OgreSceneNode.h>
 #include <OgreSceneManager.h>
 #include <OgreEntity.h>
 #include <OgreLight.h>
 #include <OgreSubEntity.h>
+#include <OgreParticleSystem.h>
+#include <OgreParticleEmitter.h>
 #include <OgreStaticGeometry.h>
 
-#include <components/nifogre/ogre_nif_loader.hpp>
+#include <components/nifogre/ogrenifloader.hpp>
 #include <components/settings/settings.hpp>
 
 #include "../mwworld/ptr.hpp"
@@ -16,16 +20,31 @@
 #include "renderconst.hpp"
 
 using namespace MWRender;
+float Objects::lightLinearValue()
+{
+    return mFallback->getFallbackFloat("LightAttenuation_LinearValue");
+}
+float Objects::lightLinearRadiusMult()
+{
+    return mFallback->getFallbackFloat("LightAttenuation_LinearRadiusMult");
+}
+float Objects::lightQuadraticValue()
+{
+    return mFallback->getFallbackFloat("LightAttenuation_QuadraticValue");
+}
+float Objects::lightQuadraticRadiusMult()
+{
+    return mFallback->getFallbackFloat("LightAttenuation_QuadraticRadiusMult");
+}
 
-/// \todo Replace these, once fallback values from the ini file are available.
-float Objects::lightLinearValue = 3;
-float Objects::lightLinearRadiusMult = 1;
-
-float Objects::lightQuadraticValue = 16;
-float Objects::lightQuadraticRadiusMult = 1;
-
-bool Objects::lightOutQuadInLin = true;
-bool Objects::lightQuadratic = false;
+bool Objects::lightOutQuadInLin()
+{
+    return mFallback->getFallbackBool("LightAttenuation_OutQuadInLin");
+}
+bool Objects::lightQuadratic()
+{
+    return mFallback->getFallbackBool("LightAttenuation_UseQuadratic");
+}
 
 int Objects::uniqueID = 0;
 
@@ -34,19 +53,37 @@ void Objects::clearSceneNode (Ogre::SceneNode *node)
     for (int i=node->numAttachedObjects()-1; i>=0; --i)
     {
         Ogre::MovableObject *object = node->getAttachedObject (i);
+
+        // for entities, destroy any objects attached to bones
+        if (object->getTypeFlags () == Ogre::SceneManager::ENTITY_TYPE_MASK)
+        {
+            Ogre::Entity* ent = static_cast<Ogre::Entity*>(object);
+            Ogre::Entity::ChildObjectListIterator children = ent->getAttachedObjectIterator ();
+            while (children.hasMoreElements())
+            {
+                mRenderer.getScene ()->destroyMovableObject (children.getNext ());
+            }
+        }
+
         node->detachObject (object);
         mRenderer.getScene()->destroyMovableObject (object);
     }
+
+    Ogre::Node::ChildNodeIterator it = node->getChildIterator ();
+    while (it.hasMoreElements ())
+    {
+        clearSceneNode(static_cast<Ogre::SceneNode*>(it.getNext ()));
+    }
 }
 
-void Objects::setMwRoot(Ogre::SceneNode* root)
+void Objects::setRootNode(Ogre::SceneNode* root)
 {
-    mMwRoot = root;
+    mRootNode = root;
 }
 
 void Objects::insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_)
 {
-    Ogre::SceneNode* root = mMwRoot;
+    Ogre::SceneNode* root = mRootNode;
     Ogre::SceneNode* cellnode;
     if(mCellSceneNodes.find(ptr.getCell()) == mCellSceneNodes.end())
     {
@@ -87,20 +124,16 @@ void Objects::insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_)
     mIsStatic = static_;
 }
 
-void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
+void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh, bool light)
 {
     Ogre::SceneNode* insert = ptr.getRefData().getBaseNode();
     assert(insert);
 
     Ogre::AxisAlignedBox bounds = Ogre::AxisAlignedBox::BOX_NULL;
-    NifOgre::EntityList entities = NifOgre::NIFLoader::createEntities(insert, NULL, mesh);
-    for(size_t i = 0;i < entities.mEntities.size();i++)
-    {
-        const Ogre::AxisAlignedBox &tmp = entities.mEntities[i]->getBoundingBox();
-        bounds.merge(Ogre::AxisAlignedBox(insert->_getDerivedPosition() + tmp.getMinimum(),
-                                          insert->_getDerivedPosition() + tmp.getMaximum())
-        );
-    }
+    NifOgre::ObjectList objects = NifOgre::Loader::createObjects(insert, mesh);
+    for(size_t i = 0;i < objects.mEntities.size();i++)
+        bounds.merge(objects.mEntities[i]->getWorldBoundingBox(true));
+
     Ogre::Vector3 extents = bounds.getSize();
     extents *= insert->getScale();
     float size = std::max(std::max(extents.x, extents.y), extents.z);
@@ -115,38 +148,37 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
         mBounds[ptr.getCell()] = Ogre::AxisAlignedBox::BOX_NULL;
     mBounds[ptr.getCell()].merge(bounds);
 
-    bool transparent = false;
-    for(size_t i = 0;i < entities.mEntities.size();i++)
+    bool anyTransparency = false;
+    for(size_t i = 0;!anyTransparency && i < objects.mEntities.size();i++)
     {
-        Ogre::Entity *ent = entities.mEntities[i];
-        for (unsigned int i=0; i<ent->getNumSubEntities(); ++i)
+        Ogre::Entity *ent = objects.mEntities[i];
+        for(unsigned int i=0;!anyTransparency && i < ent->getNumSubEntities(); ++i)
         {
-            Ogre::MaterialPtr mat = ent->getSubEntity(i)->getMaterial();
-            Ogre::Material::TechniqueIterator techIt = mat->getTechniqueIterator();
-            while (techIt.hasMoreElements())
-            {
-                Ogre::Technique* tech = techIt.getNext();
-                Ogre::Technique::PassIterator passIt = tech->getPassIterator();
-                while (passIt.hasMoreElements())
-                {
-                    Ogre::Pass* pass = passIt.getNext();
-
-                    if (pass->getDepthWriteEnabled() == false)
-                        transparent = true;
-                }
-            }
+            anyTransparency = ent->getSubEntity(i)->getMaterial()->isTransparent();
         }
     }
 
-    if(!mIsStatic || !Settings::Manager::getBool("use static geometry", "Objects") || transparent)
+    if(!mIsStatic || !Settings::Manager::getBool("use static geometry", "Objects") ||
+       anyTransparency || objects.mParticles.size() > 0)
     {
-        for(size_t i = 0;i < entities.mEntities.size();i++)
+        for(size_t i = 0;i < objects.mEntities.size();i++)
         {
-            Ogre::Entity *ent = entities.mEntities[i];
-
+            Ogre::Entity *ent = objects.mEntities[i];
+            for(unsigned int i=0; i < ent->getNumSubEntities(); ++i)
+            {
+                Ogre::SubEntity* subEnt = ent->getSubEntity(i);
+                subEnt->setRenderQueueGroup(subEnt->getMaterial()->isTransparent() ? RQG_Alpha : RQG_Main);
+            }
             ent->setRenderingDistance(small ? Settings::Manager::getInt("small object distance", "Viewing distance") : 0);
             ent->setVisibilityFlags(mIsStatic ? (small ? RV_StaticsSmall : RV_Statics) : RV_Misc);
-            ent->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
+        }
+        for(size_t i = 0;i < objects.mParticles.size();i++)
+        {
+            Ogre::ParticleSystem *part = objects.mParticles[i];
+            // TODO: Check the particle system's material for actual transparency
+            part->setRenderQueueGroup(RQG_Alpha);
+            part->setRenderingDistance(small ? Settings::Manager::getInt("small object distance", "Viewing distance") : 0);
+            part->setVisibilityFlags(mIsStatic ? (small ? RV_StaticsSmall : RV_Statics) : RV_Misc);
         }
     }
     else
@@ -191,27 +223,41 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
 
         sg->setCastShadows(true);
 
-        sg->setRenderQueueGroup(transparent ? RQG_Alpha : RQG_Main);
+        sg->setRenderQueueGroup(RQG_Main);
 
-        for(size_t i = 0;i < entities.mEntities.size();i++)
+        std::vector<Ogre::Entity*>::reverse_iterator iter = objects.mEntities.rbegin();
+        while(iter != objects.mEntities.rend())
         {
-            Ogre::Entity *ent = entities.mEntities[i];
-            insert->detachObject(ent);
-            sg->addEntity(ent,insert->_getDerivedPosition(),insert->_getDerivedOrientation(),insert->_getDerivedScale());
+            Ogre::Node *node = (*iter)->getParentNode();
+            sg->addEntity(*iter, node->_getDerivedPosition(), node->_getDerivedOrientation(), node->_getDerivedScale());
 
-            mRenderer.getScene()->destroyEntity(ent);
+            (*iter)->detachFromParent();
+            mRenderer.getScene()->destroyEntity(*iter);
+            iter++;
         }
+    }
+
+    if (light)
+    {
+        insertLight(ptr, objects.mSkelBase, bounds.getCenter() - insert->_getDerivedPosition());
     }
 }
 
-void Objects::insertLight (const MWWorld::Ptr& ptr, float r, float g, float b, float radius)
+void Objects::insertLight (const MWWorld::Ptr& ptr, Ogre::Entity* skelBase, Ogre::Vector3 fallbackCenter)
 {
     Ogre::SceneNode* insert = mRenderer.getScene()->getSceneNode(ptr.getRefData().getHandle());
     assert(insert);
-    Ogre::Light *light = mRenderer.getScene()->createLight();
-    light->setDiffuseColour (r, g, b);
 
     MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
+
+    const int color = ref->mBase->mData.mColor;
+    const float r = ((color >> 0) & 0xFF) / 255.0f;
+    const float g = ((color >> 8) & 0xFF) / 255.0f;
+    const float b = ((color >> 16) & 0xFF) / 255.0f;
+    const float radius = float (ref->mBase->mData.mRadius);
+
+    Ogre::Light *light = mRenderer.getScene()->createLight();
+    light->setDiffuseColour (r, g, b);
 
     LightInfo info;
     info.name = light->getName();
@@ -238,32 +284,38 @@ void Objects::insertLight (const MWWorld::Ptr& ptr, float r, float g, float b, f
     info.time = Ogre::Math::RangeRandom(-500, +500);
     info.phase = Ogre::Math::RangeRandom(-500, +500);
 
-    // adjust the lights depending if we're in an interior or exterior cell
-    // quadratic means the light intensity falls off quite fast, resulting in a
-    // dark, atmospheric environment (perfect for exteriors)
-    // for interiors, we want more "warm" lights, so use linear attenuation.
-    bool quadratic = false;
-    if (!lightOutQuadInLin)
-        quadratic = lightQuadratic;
-    else
-    {
-        quadratic = !info.interior;
-    }
+    bool quadratic = lightOutQuadInLin() ? !info.interior : lightQuadratic();
+
+    // with the standard 1 / (c + d*l + d*d*q) equation the attenuation factor never becomes zero,
+    // so we ignore lights if their attenuation falls below this factor.
+    const float threshold = 0.03;
 
     if (!quadratic)
     {
-        float r = radius * lightLinearRadiusMult;
-        float attenuation = lightLinearValue / r;
-        light->setAttenuation(r*10, 0, attenuation, 0);
+        float r = radius * lightLinearRadiusMult();
+        float attenuation = lightLinearValue() / r;
+        float activationRange = 1 / (threshold * attenuation);
+        light->setAttenuation(activationRange, 0, attenuation, 0);
     }
     else
     {
-        float r = radius * lightQuadraticRadiusMult;
-        float attenuation = lightQuadraticValue / pow(r, 2);
-        light->setAttenuation(r*10, 0, 0, attenuation);
+        float r = radius * lightQuadraticRadiusMult();
+        float attenuation = lightQuadraticValue() / std::pow(r, 2);
+        float activationRange = std::sqrt(1 / (threshold * attenuation));
+        light->setAttenuation(activationRange, 0, 0, attenuation);
     }
 
-    insert->attachObject(light);
+    // If there's an AttachLight bone, attach the light to that, otherwise attach it to the base scene node
+    if (skelBase && skelBase->getSkeleton ()->hasBone ("AttachLight"))
+    {
+        skelBase->attachObjectToBone ("AttachLight", light);
+    }
+    else
+    {
+        Ogre::SceneNode* childNode = insert->createChildSceneNode (fallbackCenter);
+        childNode->attachObject(light);
+    }
+
     mLights.push_back(info);
 }
 
@@ -348,9 +400,9 @@ void Objects::enableLights()
     std::vector<LightInfo>::iterator it = mLights.begin();
     while (it != mLights.end())
     {
-        if (mMwRoot->getCreator()->hasLight(it->name))
+        if (mRootNode->getCreator()->hasLight(it->name))
         {
-            mMwRoot->getCreator()->getLight(it->name)->setVisible(true);
+            mRootNode->getCreator()->getLight(it->name)->setVisible(true);
             ++it;
         }
         else
@@ -363,9 +415,9 @@ void Objects::disableLights()
     std::vector<LightInfo>::iterator it = mLights.begin();
     while (it != mLights.end())
     {
-        if (mMwRoot->getCreator()->hasLight(it->name))
+        if (mRootNode->getCreator()->hasLight(it->name))
         {
-            mMwRoot->getCreator()->getLight(it->name)->setVisible(false);
+            mRootNode->getCreator()->getLight(it->name)->setVisible(false);
             ++it;
         }
         else
@@ -418,9 +470,9 @@ void Objects::update(const float dt)
     std::vector<LightInfo>::iterator it = mLights.begin();
     while (it != mLights.end())
     {
-        if (mMwRoot->getCreator()->hasLight(it->name))
+        if (mRootNode->getCreator()->hasLight(it->name))
         {
-            Ogre::Light* light = mMwRoot->getCreator()->getLight(it->name);
+            Ogre::Light* light = mRootNode->getCreator()->getLight(it->name);
 
             float brightness;
             float cycle_time;
@@ -502,21 +554,17 @@ void Objects::rebuildStaticGeometry()
     }
 }
 
-void Objects::updateObjectCell(const MWWorld::Ptr &ptr)
+void Objects::updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
 {
     Ogre::SceneNode *node;
-    MWWorld::CellStore *newCell = ptr.getCell();
+    MWWorld::CellStore *newCell = cur.getCell();
 
     if(mCellSceneNodes.find(newCell) == mCellSceneNodes.end()) {
-        node = mMwRoot->createChildSceneNode();
+        node = mRootNode->createChildSceneNode();
         mCellSceneNodes[newCell] = node;
     } else {
         node = mCellSceneNodes[newCell];
     }
-    node->addChild(ptr.getRefData().getBaseNode());
-
-    /// \note Still unaware how to move aabb and static w/o full rebuild,
-    /// moving static objects may cause problems
-    insertMesh(ptr, MWWorld::Class::get(ptr).getModel(ptr));
+    node->addChild(cur.getRefData().getBaseNode());
 }
 

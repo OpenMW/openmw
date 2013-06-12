@@ -21,6 +21,7 @@ namespace sh
 	public:
 		ShaderSet (const std::string& type, const std::string& cgProfile, const std::string& hlslProfile, const std::string& sourceFile, const std::string& basePath,
 				   const std::string& name, PropertySetGet* globalSettingsPtr);
+		~ShaderSet();
 
 		/// Retrieve a shader instance for the given properties. \n
 		/// If a \a ShaderInstance with the same properties exists already, simply returns this instance. \n
@@ -30,9 +31,6 @@ namespace sh
 		/// so it does not matter if you pass any extra properties that the shader does not care about.
 		ShaderInstance* getInstance (PropertySetGet* properties);
 
-		void markDirty() { mIsDirty = true; }
-		///< Signals that the cache is out of date, and thus should not be used this time
-
 	private:
 		PropertySetGet* getCurrentGlobalSettings() const;
 		std::string getBasePath() const;
@@ -41,11 +39,7 @@ namespace sh
 		std::string getHlslProfile() const;
 		int getType() const;
 
-		bool isDirty() { return mIsDirty; }
-
 		friend class ShaderInstance;
-
-		bool mIsDirty;
 
 	private:
 		GpuProgramType mType;
@@ -59,6 +53,10 @@ namespace sh
 
 		std::vector <std::string> mGlobalSettings; ///< names of the global settings that affect the shader source
 		std::vector <std::string> mProperties; ///< names of the per-material properties that affect the shader source
+
+		std::vector <std::string> mPropertiesToExist;
+		///< same as mProperties, however in this case, it is only relevant if the property is empty or not
+		/// (we don't care about the value)
 
 		ShaderInstanceMap mInstances; ///< maps permutation ID (generated from the properties) to \a ShaderInstance
 

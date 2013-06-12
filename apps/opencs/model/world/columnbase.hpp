@@ -14,7 +14,8 @@ namespace CSMWorld
     {
         enum Roles
         {
-            Role_Flags = Qt::UserRole
+            Role_Flags = Qt::UserRole,
+            Role_Display = Qt::UserRole+1
         };
 
         enum Flags
@@ -23,10 +24,31 @@ namespace CSMWorld
             Flag_Dialogue = 2 // column should be displayed in dialogue view
         };
 
+        enum Display
+        {
+            Display_String,
+            Display_Integer,
+            Display_Float,
+            Display_Var,
+            Display_GmstVarType,
+            Display_GlobalVarType,
+            Display_Specialisation,
+            Display_Attribute,
+            Display_Boolean,
+            Display_SpellType,
+            Display_Script,
+            Display_ApparatusType,
+            Display_ArmorType,
+            Display_ClothingType,
+            Display_CreatureType,
+            Display_WeaponType
+        };
+
         std::string mTitle;
         int mFlags;
+        Display mDisplayType;
 
-        ColumnBase (const std::string& title, int flag);
+        ColumnBase (const std::string& title, Display displayType, int flag);
 
         virtual ~ColumnBase();
 
@@ -34,6 +56,7 @@ namespace CSMWorld
 
         virtual bool isUserEditable() const;
         ///< Can this column be edited directly by the user?
+
     };
 
     template<typename ESXRecordT>
@@ -42,8 +65,8 @@ namespace CSMWorld
         std::string mTitle;
         int mFlags;
 
-        Column (const std::string& title, int flags = Flag_Table | Flag_Dialogue)
-        : ColumnBase (title, flags) {}
+        Column (const std::string& title, Display displayType, int flags = Flag_Table | Flag_Dialogue)
+        : ColumnBase (title, displayType, flags) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const = 0;
 

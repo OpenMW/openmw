@@ -1,22 +1,16 @@
 #include "travelwindow.hpp"
 
-#include <algorithm>
-
 #include <boost/lexical_cast.hpp>
 
 #include <libs/openengine/ogre/fader.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
-#include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/player.hpp"
-#include "../mwworld/manualref.hpp"
-
-#include "../mwmechanics/spells.hpp"
-#include "../mwmechanics/creaturestats.hpp"
+#include "../mwworld/class.hpp"
 
 #include "inventorywindow.hpp"
 #include "tradewindow.hpp"
@@ -25,8 +19,8 @@ namespace MWGui
 {
     const int TravelWindow::sLineHeight = 18;
 
-    TravelWindow::TravelWindow(MWBase::WindowManager& parWindowManager) :
-        WindowBase("openmw_travel_window.layout", parWindowManager)
+    TravelWindow::TravelWindow() :
+        WindowBase("openmw_travel_window.layout")
         , mCurrentY(0)
         , mLastPos(0)
     {
@@ -71,7 +65,7 @@ namespace MWGui
 
         price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr,price,true);
 
-        MyGUI::Button* toAdd = mDestinationsView->createWidget<MyGUI::Button>((price>mWindowManager.getInventoryWindow()->getPlayerGold()) ? "SandTextGreyedOut" : "SandTextButton", 0, mCurrentY, 200, sLineHeight, MyGUI::Align::Default);
+        MyGUI::Button* toAdd = mDestinationsView->createWidget<MyGUI::Button>((price>MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getPlayerGold()) ? "SandTextGreyedOut" : "SandTextButton", 0, mCurrentY, 200, sLineHeight, MyGUI::Align::Default);
         mCurrentY += sLineHeight;
         if(interior)
             toAdd->setUserString("interior","y");
@@ -129,8 +123,10 @@ namespace MWGui
         int price;
         iss >> price;
 
-        if (mWindowManager.getInventoryWindow()->getPlayerGold()<price)
+        if (MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getPlayerGold()<price)
             return;
+
+        MWBase::Environment::get().getWindowManager()->getTradeWindow ()->addOrRemoveGold (-price);
 
         MWBase::Environment::get().getWorld ()->getFader ()->fadeOut(1);
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
@@ -139,35 +135,38 @@ namespace MWGui
         int x,y;
         bool interior = _sender->getUserString("interior") == "y";
         MWBase::Environment::get().getWorld()->positionToIndex(pos.pos[0],pos.pos[1],x,y);
-        MWWorld::CellStore* cell;
-        if(interior) cell = MWBase::Environment::get().getWorld()->getInterior(cellname);
+        if(interior)
+            MWBase::Environment::get().getWorld()->changeToInteriorCell(cellname, pos);
         else
         {
-            cell = MWBase::Environment::get().getWorld()->getExterior(x,y);
-            ESM::Position PlayerPos = player.getRefData().getPosition();
-            float d = sqrt( pow(pos.pos[0] - PlayerPos.pos[0],2) + pow(pos.pos[1] - PlayerPos.pos[1],2) + pow(pos.pos[2] - PlayerPos.pos[2],2)   );
-            int time = int(d /MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fTravelTimeMult")->getFloat());
-            for(int i = 0;i < time;i++)
+            ESM::Position playerPos = player.getRefData().getPosition();
+            float d = Ogre::Vector3(pos.pos[0], pos.pos[1], 0).distance(
+                        Ogre::Vector3(playerPos.pos[0], playerPos.pos[1], 0));
+            int hours = static_cast<int>(d /MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fTravelTimeMult")->getFloat());
+            for(int i = 0;i < hours;i++)
             {
                 MWBase::Environment::get().getMechanicsManager ()->restoreDynamicStats ();
             }
-            MWBase::Environment::get().getWorld()->advanceTime(time);
+            MWBase::Environment::get().getWorld()->advanceTime(hours);
+
+            MWBase::Environment::get().getWorld()->changeToExteriorCell(pos);
         }
-        MWBase::Environment::get().getWorld()->moveObject(player,*cell,pos.pos[0],pos.pos[1],pos.pos[2]);
-        mWindowManager.removeGuiMode(GM_Travel);
-        mWindowManager.removeGuiMode(GM_Dialogue);
+
+        MWWorld::Class::get(player).adjustPosition(player);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Travel);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Dialogue);
         MWBase::Environment::get().getWorld ()->getFader ()->fadeOut(0);
         MWBase::Environment::get().getWorld ()->getFader ()->fadeIn(1);
     }
 
     void TravelWindow::onCancelButtonClicked(MyGUI::Widget* _sender)
     {
-        mWindowManager.removeGuiMode(GM_Travel);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Travel);
     }
 
     void TravelWindow::updateLabels()
     {
-        mPlayerGold->setCaptionWithReplacing("#{sGold}: " + boost::lexical_cast<std::string>(mWindowManager.getInventoryWindow()->getPlayerGold()));
+        mPlayerGold->setCaptionWithReplacing("#{sGold}: " + boost::lexical_cast<std::string>(MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getPlayerGold()));
         mPlayerGold->setCoord(8,
                               mPlayerGold->getTop(),
                               mPlayerGold->getTextSize().width,
@@ -176,8 +175,8 @@ namespace MWGui
 
     void TravelWindow::onReferenceUnavailable()
     {
-        mWindowManager.removeGuiMode(GM_Travel);
-        mWindowManager.removeGuiMode(GM_Dialogue);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Travel);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Dialogue);
     }
 
     void TravelWindow::onMouseWheel(MyGUI::Widget* _sender, int _rel)

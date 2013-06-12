@@ -15,3 +15,9 @@ makefile
 data
 *.kdev4
 CMakeLists.txt.user
+*.swp
+*.swo
+*.kate-swp
+.cproject
+.project
+.settings/

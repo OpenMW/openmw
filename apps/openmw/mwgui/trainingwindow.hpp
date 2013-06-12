@@ -1,7 +1,7 @@
 #ifndef MWGUI_TRAININGWINDOW_H
 #define MWGUI_TRAININGWINDOW_H
 
-#include "window_base.hpp"
+#include "windowbase.hpp"
 #include "referenceinterface.hpp"
 
 namespace MWGui
@@ -10,7 +10,7 @@ namespace MWGui
     class TrainingWindow : public WindowBase, public ReferenceInterface
     {
     public:
-        TrainingWindow(MWBase::WindowManager& parWindowManager);
+        TrainingWindow();
 
         virtual void open();
 

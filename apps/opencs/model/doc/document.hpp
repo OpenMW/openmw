@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include <boost/filesystem/path.hpp>
+
 #include <QUndoStack>
 #include <QObject>
 #include <QTimer>
@@ -14,6 +16,12 @@
 #include "state.hpp"
 
 class QAbstractItemModel;
+
+namespace ESM
+{
+    struct GameSetting;
+    struct Global;
+}
 
 namespace CSMDoc
 {
@@ -38,10 +46,24 @@ namespace CSMDoc
             Document (const Document&);
             Document& operator= (const Document&);
 
+            void load (const std::vector<boost::filesystem::path>::const_iterator& begin,
+                const std::vector<boost::filesystem::path>::const_iterator& end, bool lastAsModified);
+            ///< \param lastAsModified Store the last file in Modified instead of merging it into Base.
+
+            void createBase();
+
+            void addOptionalGmsts();
+
+            void addOptionalGlobals();
+
+            void addOptionalGmst (const ESM::GameSetting& gmst);
+
+            void addOptionalGlobal (const ESM::Global& global);
+
         public:
 
-            Document (const std::string& name);
-            ///< \todo replace name with ESX list
+            Document (const std::vector<boost::filesystem::path>& files, bool new_);
+            ~Document();
 
             QUndoStack& getUndoStack();
 

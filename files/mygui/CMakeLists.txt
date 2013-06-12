@@ -9,7 +9,6 @@ set(MYGUI_FILES
     core.skin
     core.xml
     EBGaramond-Regular.ttf
-    mwgui.png
     Obliviontt.zip
     openmw_alchemy_window.layout
     openmw_book.layout
@@ -79,8 +78,11 @@ set(MYGUI_FILES
     openmw_trainingwindow.layout
     openmw_travel_window.layout
     openmw_persuasion_dialog.layout
+    openmw_merchantrepair.layout
+    openmw_repair.layout
+    openmw_companion_window.layout
     smallbars.png
-    VeraMono.ttf
+    DejaVuLGCSansMono.ttf
     markers.png
 )
 

@@ -2,6 +2,7 @@
 #include "mechanicsmanagerimp.hpp"
 
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/inventorystore.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -52,21 +53,9 @@ namespace MWMechanics
 
             for (int i=0; i<8; ++i)
             {
-                const ESM::Race::MaleFemale *attribute = 0;
-                switch (i)
-                {
-                    case 0: attribute = &race->mData.mStrength; break;
-                    case 1: attribute = &race->mData.mIntelligence; break;
-                    case 2: attribute = &race->mData.mWillpower; break;
-                    case 3: attribute = &race->mData.mAgility; break;
-                    case 4: attribute = &race->mData.mSpeed; break;
-                    case 5: attribute = &race->mData.mEndurance; break;
-                    case 6: attribute = &race->mData.mPersonality; break;
-                    case 7: attribute = &race->mData.mLuck; break;
-                }
+                const ESM::Race::MaleFemale& attribute = race->mData.mAttributeValues[i];
 
-                creatureStats.getAttribute(i).setBase (
-                    static_cast<int> (male ? attribute->mMale : attribute->mFemale));
+                creatureStats.getAttribute(i).setBase (male ? attribute.mMale : attribute.mFemale);
             }
 
             for (int i=0; i<27; ++i)
@@ -160,12 +149,18 @@ namespace MWMechanics
         // forced update and current value adjustments
         mActors.updateActor (ptr, 0);
 
-        for (int i=0; i<2; ++i)
+        for (int i=0; i<3; ++i)
         {
             DynamicStat<float> stat = creatureStats.getDynamic (i);
             stat.setCurrent (stat.getModified());
             creatureStats.setDynamic (i, stat);
         }
+
+        // auto-equip again. we need this for when the race is changed to a beast race
+        MWWorld::InventoryStore& invStore = MWWorld::Class::get(ptr).getInventoryStore(ptr);
+        for (int i=0; i<MWWorld::InventoryStore::Slots; ++i)
+            invStore.equip(i, invStore.end());
+        invStore.autoEquip(ptr);
     }
 
     MechanicsManager::MechanicsManager()
@@ -175,34 +170,47 @@ namespace MWMechanics
         buildPlayer();
     }
 
-    void MechanicsManager::addActor (const MWWorld::Ptr& ptr)
+    void MechanicsManager::add(const MWWorld::Ptr& ptr)
     {
-        mActors.addActor (ptr);
+        if(MWWorld::Class::get(ptr).isActor())
+            mActors.addActor(ptr);
+        else
+            mObjects.addObject(ptr);
     }
 
-    void MechanicsManager::removeActor (const MWWorld::Ptr& ptr)
+    void MechanicsManager::remove(const MWWorld::Ptr& ptr)
     {
-        if (ptr==mWatched)
+        if(ptr == mWatched)
+            mWatched = MWWorld::Ptr();
+        mActors.removeActor(ptr);
+        mObjects.removeObject(ptr);
+    }
+
+    void MechanicsManager::updateCell(const MWWorld::Ptr &old, const MWWorld::Ptr &ptr)
+    {
+        if(MWWorld::Class::get(ptr).isActor())
+            mActors.updateActor(old, ptr);
+        else
+            mObjects.updateObject(old, ptr);
+    }
+
+
+    void MechanicsManager::drop(const MWWorld::CellStore *cellStore)
+    {
+        if(!mWatched.isEmpty() && mWatched.getCell() == cellStore)
             mWatched = MWWorld::Ptr();
 
-        mActors.removeActor (ptr);
+        mActors.dropActors(cellStore);
+        mObjects.dropObjects(cellStore);
     }
 
-    void MechanicsManager::dropActors (const MWWorld::Ptr::CellStore *cellStore)
-    {
-        if (!mWatched.isEmpty() && mWatched.getCell()==cellStore)
-            mWatched = MWWorld::Ptr();
 
-        mActors.dropActors (cellStore);
-    }
-
-    void MechanicsManager::watchActor (const MWWorld::Ptr& ptr)
+    void MechanicsManager::watchActor(const MWWorld::Ptr& ptr)
     {
         mWatched = ptr;
     }
 
-    void MechanicsManager::update (std::vector<std::pair<std::string, Ogre::Vector3> >& movement,
-        float duration, bool paused)
+    void MechanicsManager::update(float duration, bool paused)
     {
         if (!mWatched.isEmpty())
         {
@@ -296,9 +304,16 @@ namespace MWMechanics
             }
 
             winMgr->configureSkills (majorSkills, minorSkills);
+
+            // HACK? The player has been changed, so a new Animation object may
+            // have been made for them. Make sure they're properly updated.
+            MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+            mActors.removeActor(ptr);
+            mActors.addActor(ptr);
         }
 
-        mActors.update (movement, duration, paused);
+        mActors.update(duration, paused);
+        mObjects.update(duration, paused);
     }
 
     void MechanicsManager::restoreDynamicStats()
@@ -471,8 +486,10 @@ namespace MWMechanics
         if(buying) x = buyTerm;
         else x = std::min(buyTerm, sellTerm);
         int offerPrice;
-        if (x < 1) offerPrice = int(x * basePrice);
-        if (x >= 1) offerPrice = basePrice + int((x - 1) * basePrice);
+        if (x < 1)
+            offerPrice = int(x * basePrice);
+        else
+            offerPrice = basePrice + int((x - 1) * basePrice);
         offerPrice = std::max(1, offerPrice);
         return offerPrice;
     }
@@ -525,7 +542,7 @@ namespace MWMechanics
 
         float bribeMod;
         if (type == PT_Bribe10) bribeMod = gmst.find("fBribe10Mod")->getFloat();
-        if (type == PT_Bribe100) bribeMod = gmst.find("fBribe100Mod")->getFloat();
+        else if (type == PT_Bribe100) bribeMod = gmst.find("fBribe100Mod")->getFloat();
         else bribeMod = gmst.find("fBribe1000Mod")->getFloat();
 
         float target3 = d * (playerRating3 - npcRating3 + 50) + bribeMod;
@@ -535,7 +552,8 @@ namespace MWMechanics
         float fPerDieRollMult = gmst.find("fPerDieRollMult")->getFloat();
         float fPerTempMult = gmst.find("fPerTempMult")->getFloat();
 
-        float x,y;
+        float x = 0;
+        float y = 0;
 
         float roll = static_cast<float> (std::rand()) / RAND_MAX * 100;
 
@@ -629,4 +647,33 @@ namespace MWMechanics
             permChange = success ? -int(cappedDispositionChange/ fPerTempMult) : y;
         }
     }
+
+    void MechanicsManager::forceStateUpdate(const MWWorld::Ptr &ptr)
+    {
+        if(MWWorld::Class::get(ptr).isActor())
+            mActors.forceStateUpdate(ptr);
+    }
+
+    void MechanicsManager::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number)
+    {
+        if(MWWorld::Class::get(ptr).isActor())
+            mActors.playAnimationGroup(ptr, groupName, mode, number);
+        else
+            mObjects.playAnimationGroup(ptr, groupName, mode, number);
+    }
+    void MechanicsManager::skipAnimation(const MWWorld::Ptr& ptr)
+    {
+        if(MWWorld::Class::get(ptr).isActor())
+            mActors.skipAnimation(ptr);
+        else
+            mObjects.skipAnimation(ptr);
+    }
+    bool MechanicsManager::checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string &groupName)
+    {
+        if(MWWorld::Class::get(ptr).isActor())
+            return mActors.checkAnimationPlaying(ptr, groupName);
+        else
+            return false;
+    }
+
 }

@@ -15,25 +15,31 @@ namespace MWGui
     public:
         ToolTipInfo()
             : isPotion(false)
+            , imageSize(32)
+            , wordWrap(true)
+            , remainingEnchantCharge(-1)
         {}
 
         std::string caption;
         std::string text;
         std::string icon;
+        int imageSize;
 
         // enchantment (for cloth, armor, weapons)
         std::string enchant;
+        int remainingEnchantCharge;
 
         // effects (for potions, ingredients)
         Widgets::SpellEffectList effects;
 
         bool isPotion; // potions do not show target in the tooltip
+        bool wordWrap;
     };
 
     class ToolTips : public OEngine::GUI::Layout
     {
     public:
-        ToolTips(MWBase::WindowManager* windowManager);
+        ToolTips();
 
         void onFrame(float frameDuration);
 
@@ -76,8 +82,6 @@ namespace MWGui
     private:
         MyGUI::Widget* mDynamicToolTipBox;
 
-        MWBase::WindowManager* mWindowManager;
-
         MWWorld::Ptr mFocusObject;
 
         void findImageExtension(std::string& image);
@@ -90,9 +94,9 @@ namespace MWGui
 
         float mFocusToolTipX;
         float mFocusToolTipY;
-	
+
 	int mHorizontalScrollIndex;
-	
+
 
         float mDelay;
         float mRemainingDelay; // remaining time until tooltip will show

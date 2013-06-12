@@ -33,7 +33,7 @@ namespace MWClass
     {
         const std::string model = getModel(ptr);
         if(!model.empty())
-            physics.addObject(ptr);
+            physics.addObject(ptr,true);
     }
 
     std::string Book::getModel(const MWWorld::Ptr &ptr) const
@@ -147,6 +147,21 @@ namespace MWClass
         return ref->mBase->mEnchant;
     }
 
+    void Book::applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
+    {
+        MWWorld::LiveCellRef<ESM::Book> *ref =
+            ptr.get<ESM::Book>();
+
+        ESM::Book newItem = *ref->mBase;
+        newItem.mId="";
+        newItem.mName=newName;
+        newItem.mData.mIsScroll = 1;
+        newItem.mData.mEnchant=enchCharge;
+        newItem.mEnchant=enchId;
+        const ESM::Book *record = MWBase::Environment::get().getWorld()->createRecord (newItem);
+        ref->mBase = record;
+    }
+
     boost::shared_ptr<MWWorld::Action> Book::use (const MWWorld::Ptr& ptr) const
     {
         return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionRead(ptr));
@@ -159,5 +174,25 @@ namespace MWClass
             ptr.get<ESM::Book>();
 
         return MWWorld::Ptr(&cell.mBooks.insert(*ref), &cell);
+    }
+
+    float Book::getEnchantmentPoints (const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Book> *ref =
+                ptr.get<ESM::Book>();
+
+        return ref->mBase->mData.mEnchant/10.f;
+    }
+
+    bool Book::canSell (const MWWorld::Ptr& item, int npcServices) const
+    {
+        return npcServices & ESM::NPC::Books;
+    }
+
+    float Book::getWeight(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Book> *ref =
+            ptr.get<ESM::Book>();
+        return ref->mBase->mData.mWeight;
     }
 }

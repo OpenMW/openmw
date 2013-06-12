@@ -42,6 +42,8 @@ namespace Ogre
     class SceneManager;
     class Camera;
     class Viewport;
+    class ParticleEmitterFactory;
+    class ParticleAffectorFactory;
 }
 
 namespace OEngine
@@ -68,6 +70,7 @@ namespace OEngine
 #endif
 
         class Fader;
+
         class OgreRenderer
         {
 #if defined(__APPLE__) && !defined(__LP64__)
@@ -96,6 +99,8 @@ namespace OEngine
             Ogre::D3D9Plugin* mD3D9Plugin;
             #endif
             Fader* mFader;
+            std::vector<Ogre::ParticleEmitterFactory*> mEmitterFactories;
+            std::vector<Ogre::ParticleAffectorFactory*> mAffectorFactories;
             bool logging;
 
         public:
@@ -141,6 +146,8 @@ namespace OEngine
 
             /// Create a window with the given title
             void createWindow(const std::string &title, const WindowSettings& settings);
+
+            void recreateWindow (const std::string &title, const WindowSettings& settings);
 
             /// Set up the scene manager, camera and viewport
             void createScene(const std::string& camName="Camera",// Camera name

@@ -9,11 +9,10 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
-#include "../mwworld/timestamp.hpp"
 #include "../mwworld/player.hpp"
-#include "../mwworld/ptr.hpp"
 #include "../mwworld/class.hpp"
 
+#include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
 
 #include "widgets.hpp"
@@ -22,8 +21,8 @@
 namespace MWGui
 {
 
-    WaitDialogProgressBar::WaitDialogProgressBar(MWBase::WindowManager &parWindowManager)
-        : WindowBase("openmw_wait_dialog_progressbar.layout", parWindowManager)
+    WaitDialogProgressBar::WaitDialogProgressBar()
+        : WindowBase("openmw_wait_dialog_progressbar.layout")
     {
         getWidget(mProgressBar, "ProgressBar");
         getWidget(mProgressText, "ProgressText");
@@ -43,9 +42,9 @@ namespace MWGui
 
     // ---------------------------------------------------------------------------------------------------------
 
-    WaitDialog::WaitDialog(MWBase::WindowManager &parWindowManager)
-        : WindowBase("openmw_wait_dialog.layout", parWindowManager)
-        , mProgressBar(parWindowManager)
+    WaitDialog::WaitDialog()
+        : WindowBase("openmw_wait_dialog.layout")
+        , mProgressBar()
         , mWaiting(false)
         , mSleeping(false)
         , mHours(1)
@@ -72,7 +71,7 @@ namespace MWGui
     {
         if (!MWBase::Environment::get().getWindowManager ()->getRestEnabled ())
         {
-            mWindowManager.popGuiMode ();
+            MWBase::Environment::get().getWindowManager()->popGuiMode ();
         }
 
         int canRest = MWBase::Environment::get().getWorld ()->canRest ();
@@ -80,8 +79,8 @@ namespace MWGui
         if (canRest == 2)
         {
             // resting underwater or mid-air not allowed
-            mWindowManager.messageBox ("#{sNotifyMessage1}", std::vector<std::string>());
-            mWindowManager.popGuiMode ();
+            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage1}");
+            MWBase::Environment::get().getWindowManager()->popGuiMode ();
         }
 
         setCanRest(canRest == 0);
@@ -92,31 +91,46 @@ namespace MWGui
         // http://www.uesp.net/wiki/Lore:Calendar
         std::string month;
         int m = MWBase::Environment::get().getWorld ()->getMonth ();
-        if (m == 0)
-            month = "#{sMonthMorningstar}";
-        else if (m == 1)
-            month = "#{sMonthSunsdawn}";
-        else if (m == 2)
-            month = "#{sMonthFirstseed}";
-        else if (m == 3)
-            month = "#{sMonthRainshand}";
-        else if (m == 4)
-            month = "#{sMonthSecondseed}";
-        else if (m == 5)
-            month = "#{sMonthMidyear}";
-        else if (m == 6)
-            month = "#{sMonthSunsheight}";
-        else if (m == 7)
-            month = "#{sMonthLastseed}";
-        else if (m == 8)
-            month = "#{sMonthHeartfire}";
-        else if (m == 9)
-            month = "#{sMonthFrostfall}";
-        else if (m == 10)
-            month = "#{sMonthSunsdusk}";
-        else if (m == 11)
-            month = "#{sMonthEveningstar}";
-
+        switch (m) {
+            case 0:
+                month = "#{sMonthMorningstar}";
+                break;
+            case 1:
+                month = "#{sMonthSunsdawn}";
+                break;
+            case 2:
+                month = "#{sMonthFirstseed}";
+                break;
+            case 3:
+                month = "#{sMonthRainshand}";
+                break;
+            case 4:
+                month = "#{sMonthSecondseed}";
+                break;
+            case 5:
+                month = "#{sMonthMidyear}";
+                break;
+            case 6:
+                month = "#{sMonthSunsheight}";
+                break;
+            case 7:
+                month = "#{sMonthLastseed}";
+                break;
+            case 8:
+                month = "#{sMonthHeartfire}";
+                break;
+            case 9:
+                month = "#{sMonthFrostfall}";
+                break;
+            case 10:
+                month = "#{sMonthSunsdusk}";
+                break;
+            case 11:
+                month = "#{sMonthEveningstar}";
+                break;
+            default:
+                break;
+        }
         int hour = MWBase::Environment::get().getWorld ()->getTimeStamp ().getHour ();
         bool pm = hour >= 12;
         if (hour >= 13) hour -= 12;
@@ -124,7 +138,7 @@ namespace MWGui
 
         std::string dateTimeText =
                 boost::lexical_cast<std::string>(MWBase::Environment::get().getWorld ()->getDay ()) + " "
-                + month + " (#{sDay} " + boost::lexical_cast<std::string>(MWBase::Environment::get().getWorld ()->getTimeStamp ().getDay ()+1)
+                + month + " (#{sDay} " + boost::lexical_cast<std::string>(MWBase::Environment::get().getWorld ()->getTimeStamp ().getDay())
                 + ") " + boost::lexical_cast<std::string>(hour) + " " + (pm ? "#{sSaveMenuHelp05}" : "#{sSaveMenuHelp04}");
 
         mDateTimeText->setCaptionWithReplacing (dateTimeText);
@@ -132,34 +146,75 @@ namespace MWGui
 
     void WaitDialog::onUntilHealedButtonClicked(MyGUI::Widget* sender)
     {
-        startWaiting();
+        // we need to sleep for a specific time, and since that isn't calculated yet, we'll do it here
+        // I'm making the assumption here that the # of hours rested is calculated when rest is started
+        // TODO: the rougher logic here (calculating the hourly deltas) should really go into helper funcs elsewhere
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWMechanics::CreatureStats stats = MWWorld::Class::get(player).getCreatureStats(player);
+        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+
+        float hourlyHealthDelta  = stats.getAttribute(ESM::Attribute::Endurance).getModified() * 0.1;
+
+        bool stunted = (stats.getMagicEffects().get(MWMechanics::EffectKey(ESM::MagicEffect::StuntedMagicka)).mMagnitude > 0);
+        float fRestMagicMult = store.get<ESM::GameSetting>().find("fRestMagicMult")->getFloat();
+        float hourlyMagickaDelta = fRestMagicMult * stats.getAttribute(ESM::Attribute::Intelligence).getModified();
+
+        // this massive duplication is why it has to be put into helper functions instead
+        float fFatigueReturnBase = store.get<ESM::GameSetting>().find("fFatigueReturnBase")->getFloat();
+        float fFatigueReturnMult = store.get<ESM::GameSetting>().find("fFatigueReturnMult")->getFloat();
+        float fEndFatigueMult = store.get<ESM::GameSetting>().find("fEndFatigueMult")->getFloat();
+        float capacity = MWWorld::Class::get(player).getCapacity(player);
+        float encumbrance = MWWorld::Class::get(player).getEncumbrance(player);
+        float normalizedEncumbrance = (capacity == 0 ? 1 : encumbrance/capacity);
+        if (normalizedEncumbrance > 1)
+            normalizedEncumbrance = 1;
+        float hourlyFatigueDelta = fFatigueReturnBase + fFatigueReturnMult * (1 - normalizedEncumbrance);
+        hourlyFatigueDelta *= 3600 * fEndFatigueMult * stats.getAttribute(ESM::Attribute::Endurance).getModified();
+
+        float healthHours  = hourlyHealthDelta  >= 0.0
+                             ? (stats.getHealth().getBase() - stats.getHealth().getCurrent()) / hourlyHealthDelta
+                             : 1.0f;
+        float magickaHours = stunted ? 0.0 :
+                              hourlyMagickaDelta >= 0.0
+                              ? (stats.getMagicka().getBase() - stats.getMagicka().getCurrent()) / hourlyMagickaDelta
+                              : 1.0f;
+        float fatigueHours = hourlyFatigueDelta >= 0.0
+                             ? (stats.getFatigue().getBase() - stats.getFatigue().getCurrent()) / hourlyFatigueDelta
+                             : 1.0f;
+
+        int autoHours = int(std::ceil( std::max(std::max(healthHours, magickaHours), std::max(fatigueHours, 1.0f)) )); // this should use a variadic max if possible
+
+        startWaiting(autoHours);
     }
 
     void WaitDialog::onWaitButtonClicked(MyGUI::Widget* sender)
     {
-        startWaiting();
+        startWaiting(mManualHours);
     }
 
-    void WaitDialog::startWaiting ()
+    void WaitDialog::startWaiting(int hoursToWait)
     {
         MWBase::Environment::get().getWorld ()->getFader ()->fadeOut(0.2);
         setVisible(false);
         mProgressBar.setVisible (true);
+
         mWaiting = true;
         mCurHour = 0;
+        mHours = hoursToWait;
+
         mRemainingTime = 0.05;
         mProgressBar.setProgress (0, mHours);
     }
 
     void WaitDialog::onCancelButtonClicked(MyGUI::Widget* sender)
     {
-        mWindowManager.popGuiMode ();
+        MWBase::Environment::get().getWindowManager()->popGuiMode ();
     }
 
     void WaitDialog::onHourSliderChangedPosition(MyGUI::ScrollBar* sender, size_t position)
     {
         mHourText->setCaptionWithReplacing (boost::lexical_cast<std::string>(position+1) + " #{sRestMenu2}");
-        mHours = position+1;
+        mManualHours = position+1;
     }
 
     void WaitDialog::setCanRest (bool canRest)
@@ -181,9 +236,9 @@ namespace MWGui
 
         mRemainingTime -= dt;
 
-        if (mRemainingTime < 0)
+        while (mRemainingTime < 0)
         {
-            mRemainingTime = 0.05;
+            mRemainingTime += 0.05;
             ++mCurHour;
             mProgressBar.setProgress (mCurHour, mHours);
 
@@ -197,14 +252,15 @@ namespace MWGui
 
         if (mCurHour > mHours)
             stopWaiting();
+
     }
 
     void WaitDialog::stopWaiting ()
     {
         MWBase::Environment::get().getWorld ()->getFader ()->fadeIn(0.2);
         mProgressBar.setVisible (false);
-        mWindowManager.removeGuiMode (GM_Rest);
-        mWindowManager.removeGuiMode (GM_RestBed);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Rest);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_RestBed);
         mWaiting = false;
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
@@ -213,7 +269,7 @@ namespace MWGui
         // trigger levelup if possible
         if (mSleeping && pcstats.getLevelProgress () >= 10)
         {
-            mWindowManager.pushGuiMode (GM_Levelup);
+            MWBase::Environment::get().getWindowManager()->pushGuiMode (GM_Levelup);
         }
     }
 

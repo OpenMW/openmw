@@ -4,6 +4,8 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 
+#include <components/compiler/locals.hpp>
+
 #include "inventorystore.hpp"
 #include "player.hpp"
 #include "class.hpp"
@@ -16,7 +18,26 @@ namespace MWWorld
 
     void ActionEquip::executeImp (const Ptr& actor)
     {
+        MWWorld::Ptr object = getTarget();
         MWWorld::InventoryStore& invStore = MWWorld::Class::get(actor).getInventoryStore(actor);
+
+        std::pair <int, std::string> result = MWWorld::Class::get (object).canBeEquipped (object, actor);
+
+        // display error message if the player tried to equip something
+        if (!result.second.empty() && actor == MWBase::Environment::get().getWorld()->getPlayer().getPlayer())
+            MWBase::Environment::get().getWindowManager()->messageBox(result.second);
+
+        switch(result.first)
+        {
+            case 0:
+                return;
+            case 2:
+                invStore.equip(MWWorld::InventoryStore::Slot_CarriedLeft, invStore.end());
+                break;
+            case 3:
+                invStore.equip(MWWorld::InventoryStore::Slot_CarriedRight, invStore.end());
+                break;
+        }
 
         // slots that this item can be equipped in
         std::pair<std::vector<int>, bool> slots = MWWorld::Class::get(getTarget()).getEquipmentSlots(getTarget());
@@ -25,72 +46,26 @@ namespace MWWorld
         MWWorld::ContainerStoreIterator it = invStore.begin();
         for (; it != invStore.end(); ++it)
         {
-            if (*it == getTarget())
+            if (*it == object)
             {
                 break;
             }
         }
 
         assert(it != invStore.end());
-        
-        std::string npcRace = actor.get<ESM::NPC>()->mBase->mRace;
+
+        bool equipped = false;
 
         // equip the item in the first free slot
         for (std::vector<int>::const_iterator slot=slots.first.begin();
             slot!=slots.first.end(); ++slot)
         {
 
-            // Beast races cannot equip shoes / boots, or full helms (head part vs hair part)
-            if(npcRace == "argonian" || npcRace == "khajiit")
-            {
-                if(*slot == MWWorld::InventoryStore::Slot_Helmet){ 
-                    std::vector<ESM::PartReference> parts;
-
-                    if(it.getType() == MWWorld::ContainerStore::Type_Clothing)
-                        parts = it->get<ESM::Clothing>()->mBase->mParts.mParts;
-                    else
-                        parts = it->get<ESM::Armor>()->mBase->mParts.mParts;
-
-                    bool allow = true;
-                    for(std::vector<ESM::PartReference>::iterator itr = parts.begin(); itr != parts.end(); ++itr)
-                    {
-                        if((*itr).mPart == ESM::PartReferenceType::PRT_Head)
-                        {
-                            if(actor == MWBase::Environment::get().getWorld()->getPlayer().getPlayer() )
-                                MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage13}", std::vector<std::string>());
-                        
-                            allow = false;
-                            break;
-                        }
-                    }
-                    
-                    if(!allow)
-                        break;
-                }
-
-                if (*slot == MWWorld::InventoryStore::Slot_Boots)
-                {  
-                    // Only notify the player, not npcs
-                    if(actor == MWBase::Environment::get().getWorld()->getPlayer().getPlayer() )
-                    {
-                        if(it.getType() == MWWorld::ContainerStore::Type_Clothing){ // It's shoes
-                            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage15}", std::vector<std::string>());
-                        }
-
-                        else // It's boots
-                        {
-                            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage14}", std::vector<std::string>());
-                        }
-                    }
-                    break;
-                }
-
-            }
-
             // if all slots are occupied, replace the last slot
             if (slot == --slots.first.end())
             {
                 invStore.equip(*slot, it);
+                equipped = true;
                 break;
             }
 
@@ -98,8 +73,15 @@ namespace MWWorld
             {
                 // slot is not occupied
                 invStore.equip(*slot, it);
+                equipped = true;
                 break;
             }
         }
+
+        std::string script = MWWorld::Class::get(object).getScript(object);
+        
+        /* Set OnPCEquip Variable on item's script, if the player is equipping it, and it has a script with that variable declared */
+        if(equipped && actor == MWBase::Environment::get().getWorld()->getPlayer().getPlayer() && script != "")
+            (object).mRefData->getLocals().setVarByInt(script, "onpcequip", 1);
     }
 }

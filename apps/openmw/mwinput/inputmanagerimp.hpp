@@ -123,7 +123,7 @@ namespace MWInput
 
     private:
         OEngine::Render::OgreRenderer &mOgre;
-        MWWorld::Player &mPlayer;
+        MWWorld::Player& mPlayer;
         MWBase::WindowManager &mWindows;
         OMW::Engine& mEngine;
 
@@ -141,7 +141,6 @@ namespace MWInput
         float mCameraSensitivity;
         float mUISensitivity;
         float mCameraYMultiplier;
-        float mUIYMultiplier;
         float mPreviewPOVDelay;
         float mTimeIdle;
 
@@ -149,9 +148,13 @@ namespace MWInput
         bool mGuiCursorEnabled;
         bool mDebug;
 
+        float mOverencumberedMessageDelay;
+
         float mMouseX;
         float mMouseY;
         int mMouseWheel;
+        bool mUserFileExists;
+        bool mAlwaysRunActive;
 
         std::map<std::string, bool> mControlSwitch;
 
@@ -212,14 +215,14 @@ namespace MWInput
             A_Journal,    //Journal
             A_Weapon,     //Draw/Sheath weapon
             A_Spell,      //Ready/Unready Casting
-            A_AlwaysRun,  //Toggle Always Run
+            A_Run,        //Run when held
             A_CycleSpellLeft, //cycling through spells
             A_CycleSpellRight,
             A_CycleWeaponLeft,//Cycling through weapons
             A_CycleWeaponRight,
-            A_ToggleSneak,    //Toggles Sneak, add Push-Sneak later
-            A_ToggleWalk, //Toggle Walking/Running
-            A_Crouch,
+            A_ToggleSneak,    //Toggles Sneak
+            A_AlwaysRun, //Toggle Walking/Running
+            A_Sneak,
 
             A_QuickSave,
             A_QuickLoad,

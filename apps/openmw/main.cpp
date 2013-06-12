@@ -100,6 +100,9 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("data-local", bpo::value<std::string>()->default_value(""),
             "set local data directory (highest priority)")
 
+        ("fallback-archive", bpo::value<StringsVector>()->default_value(StringsVector(), "fallback-archive")
+            ->multitoken(), "set fallback BSA archives (later archives have higher priority)")
+
         ("resources", bpo::value<std::string>()->default_value("resources"),
             "set resources directory")
 
@@ -201,6 +204,13 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
     engine.setDataDirs(dataDirs);
 
+    // fallback archives
+    StringsVector archives = variables["fallback-archive"].as<StringsVector>();
+    for (StringsVector::const_iterator it = archives.begin(); it != archives.end(); it++)
+    {
+        engine.addArchive(*it);
+    }
+
     engine.setResourceDir(variables["resources"].as<std::string>());
 
     // master and plugin
@@ -211,18 +221,21 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         master.push_back("Morrowind");
     }
 
-    if (master.size() > 1)
-    {
-        std::cout
-            << "Ignoring all but the first master file (multiple master files not yet supported)."
-            << std::endl;
-    }
-    engine.addMaster(master[0]);
-
     StringsVector plugin = variables["plugin"].as<StringsVector>();
-    if (!plugin.empty())
+    // Removed check for 255 files, which would be the hard-coded limit in Morrowind.
+    //  I'll keep the following variable in, maybe we can use it for something different.
+    //  Say, a feedback like "loading file x/cnt".
+    // Commenting this out for now to silence compiler warning.
+    //int cnt = master.size() + plugin.size();
+
+    // Prepare loading master/plugin files (i.e. send filenames to engine)
+    for (std::vector<std::string>::size_type i = 0; i < master.size(); i++)
     {
-        std::cout << "Ignoring plugin files (plugins not yet supported)." << std::endl;
+        engine.addMaster(master[i]);
+    }
+    for (std::vector<std::string>::size_type i = 0; i < plugin.size(); i++)
+    {
+        engine.addPlugin(plugin[i]);
     }
 
     // startup-settings

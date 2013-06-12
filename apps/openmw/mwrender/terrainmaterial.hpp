@@ -67,9 +67,13 @@ namespace MWRender
 
             void setGlobalColourMapEnabled(bool enabled);
             void setGlobalColourMap (Ogre::Terrain* terrain, const std::string& name);
+            virtual void setLightmapEnabled(bool) {}
 
         private:
             sh::MaterialInstance* mMaterial;
+
+            int getRequiredPasses (const Ogre::Terrain* terrain);
+            int getMaxLayersPerPass (const Ogre::Terrain* terrain);
 
             bool mGlobalColourMap;
 

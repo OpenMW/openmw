@@ -88,6 +88,51 @@ static ALenum getALFormat(ChannelConfig chans, SampleType type)
             }
         }
     }
+    if(alIsExtensionPresent("AL_EXT_FLOAT32"))
+    {
+        static const struct {
+            char name[32];
+            ChannelConfig chans;
+            SampleType type;
+        } fltfmtlist[] = {
+            { "AL_FORMAT_MONO_FLOAT32",   ChannelConfig_Mono,   SampleType_Float32 },
+            { "AL_FORMAT_STEREO_FLOAT32", ChannelConfig_Stereo, SampleType_Float32 },
+        };
+        static const size_t fltfmtlistsize = sizeof(fltfmtlist)/sizeof(fltfmtlist[0]);
+
+        for(size_t i = 0;i < fltfmtlistsize;i++)
+        {
+            if(fltfmtlist[i].chans == chans && fltfmtlist[i].type == type)
+            {
+                ALenum format = alGetEnumValue(fltfmtlist[i].name);
+                if(format != 0 && format != -1)
+                    return format;
+            }
+        }
+        if(alIsExtensionPresent("AL_EXT_MCFORMATS"))
+        {
+            static const struct {
+                char name[32];
+                ChannelConfig chans;
+                SampleType type;
+            } fltmcfmtlist[] = {
+                { "AL_FORMAT_QUAD32",  ChannelConfig_Quad,    SampleType_Float32 },
+                { "AL_FORMAT_51CHN32", ChannelConfig_5point1, SampleType_Float32 },
+                { "AL_FORMAT_71CHN32", ChannelConfig_7point1, SampleType_Float32 },
+            };
+            static const size_t fltmcfmtlistsize = sizeof(fltmcfmtlist)/sizeof(fltmcfmtlist[0]);
+
+            for(size_t i = 0;i < fltmcfmtlistsize;i++)
+            {
+                if(fltmcfmtlist[i].chans == chans && fltmcfmtlist[i].type == type)
+                {
+                    ALenum format = alGetEnumValue(fltmcfmtlist[i].name);
+                    if(format != 0 && format != -1)
+                        return format;
+                }
+            }
+        }
+    }
 
     fail(std::string("Unsupported sound format (")+getChannelConfigName(chans)+", "+getSampleTypeName(type)+")");
     return AL_NONE;
@@ -541,7 +586,7 @@ void OpenAL_Sound::update()
 
     alSourcef(mSource, AL_GAIN, gain);
     alSourcef(mSource, AL_PITCH, pitch);
-    alSource3f(mSource, AL_POSITION, mPos[0], mPos[2], -mPos[1]);
+    alSource3f(mSource, AL_POSITION, mPos[0], mPos[1], mPos[2]);
     alSource3f(mSource, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
     alSource3f(mSource, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
     throwALerror();
@@ -561,7 +606,7 @@ void OpenAL_Sound3D::update()
 
     alSourcef(mSource, AL_GAIN, gain);
     alSourcef(mSource, AL_PITCH, pitch);
-    alSource3f(mSource, AL_POSITION, mPos[0], mPos[2], -mPos[1]);
+    alSource3f(mSource, AL_POSITION, mPos[0], mPos[1], mPos[2]);
     alSource3f(mSource, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
     alSource3f(mSource, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
     throwALerror();
@@ -878,10 +923,10 @@ void OpenAL_Output::updateListener(const Ogre::Vector3 &pos, const Ogre::Vector3
     if(mContext)
     {
         ALfloat orient[6] = {
-            atdir.x, atdir.z, -atdir.y,
-            updir.x, updir.z, -updir.y
+            atdir.x, atdir.y, atdir.z,
+            updir.x, updir.y, updir.z
         };
-        alListener3f(AL_POSITION, mPos.x, mPos.z, -mPos.y);
+        alListener3f(AL_POSITION, mPos.x, mPos.y, mPos.z);
         alListenerfv(AL_ORIENTATION, orient);
         throwALerror();
     }

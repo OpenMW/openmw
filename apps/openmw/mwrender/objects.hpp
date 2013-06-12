@@ -2,8 +2,10 @@
 #define _GAME_RENDER_OBJECTS_H
 
 #include <OgreColourValue.h>
+#include <OgreAxisAlignedBox.h>
 
 #include <openengine/ogre/renderer.hpp>
+#include "../mwworld/fallback.hpp"
 
 namespace MWWorld
 {
@@ -52,28 +54,28 @@ class Objects{
     std::map<MWWorld::CellStore *, Ogre::StaticGeometry*> mStaticGeometrySmall;
     std::map<MWWorld::CellStore *, Ogre::AxisAlignedBox> mBounds;
     std::vector<LightInfo> mLights;
-    Ogre::SceneNode* mMwRoot;
+    Ogre::SceneNode* mRootNode;
     bool mIsStatic;
     static int uniqueID;
+    MWWorld::Fallback* mFallback;
+    float lightLinearValue();
+    float lightLinearRadiusMult();
 
-    static float lightLinearValue;
-    static float lightLinearRadiusMult;
+    bool lightQuadratic();
+    float lightQuadraticValue();
+    float lightQuadraticRadiusMult();
 
-    static bool lightQuadratic;
-    static float lightQuadraticValue;
-    static float lightQuadraticRadiusMult;
-
-    static bool lightOutQuadInLin;
+    bool lightOutQuadInLin();
 
     void clearSceneNode (Ogre::SceneNode *node);
     ///< Remove all movable objects from \a node.
 
 public:
-    Objects(OEngine::Render::OgreRenderer& renderer): mRenderer (renderer), mIsStatic(false) {}
+    Objects(OEngine::Render::OgreRenderer& renderer, MWWorld::Fallback* fallback): mRenderer (renderer), mIsStatic(false), mFallback(fallback) {}
     ~Objects(){}
     void insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_);
-    void insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh);
-    void insertLight (const MWWorld::Ptr& ptr, float r, float g, float b, float radius);
+    void insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh, bool light=false);
+    void insertLight (const MWWorld::Ptr& ptr, Ogre::Entity *skelBase=0, Ogre::Vector3 fallbackCenter=Ogre::Vector3(0.0f));
 
     void enableLights();
     void disableLights();
@@ -89,12 +91,12 @@ public:
 
     void removeCell(MWWorld::CellStore* store);
     void buildStaticGeometry(MWWorld::CellStore &cell);
-    void setMwRoot(Ogre::SceneNode* root);
+    void setRootNode(Ogre::SceneNode* root);
 
     void rebuildStaticGeometry();
 
     /// Updates containing cell for object rendering data
-    void updateObjectCell(const MWWorld::Ptr &ptr);
+    void updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur);
 };
 }
 #endif

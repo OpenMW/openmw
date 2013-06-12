@@ -1,14 +1,17 @@
 #ifndef MWGUI_SPELLWINDOW_H
 #define MWGUI_SPELLWINDOW_H
 
-#include "window_pinnable_base.hpp"
+#include "windowpinnablebase.hpp"
 
 namespace MWGui
 {
+    class SpellIcons;
+
     class SpellWindow : public WindowPinnableBase
     {
     public:
-        SpellWindow(MWBase::WindowManager& parWindowManager);
+        SpellWindow();
+        virtual ~SpellWindow();
 
         void updateSpells();
 
@@ -33,6 +36,8 @@ namespace MWGui
 
         virtual void onPinToggled();
         virtual void open();
+
+        SpellIcons* mSpellIcons;
     };
 }
 

@@ -3,14 +3,14 @@
 
 #include <OgrePlatform.h>
 #include <OgreRoot.h>
-#include <cstdint>
 
+/*
 #if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
 #   include <X11/Xlib.h>
 #   include <X11/Xutil.h>
 #   include <X11/Xos.h>
 #endif
-
+*/
 
 namespace SFO
 {
@@ -41,6 +41,7 @@ namespace SFO
         SDL_StopTextInput();
     }
 
+    /*
     void InputWrapper::initFromRenderWindow(Ogre::RenderWindow *win)
     {
         assert(mSDLWindow == NULL);
@@ -92,6 +93,7 @@ namespace SFO
         }
 #endif
     }
+    */
 
     void InputWrapper::capture()
     {

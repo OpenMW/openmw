@@ -10,6 +10,7 @@
 #include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/player.hpp"
+#include "../mwworld/class.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 
@@ -20,8 +21,8 @@
 namespace MWGui
 {
 
-    TrainingWindow::TrainingWindow(MWBase::WindowManager &parWindowManager)
-        : WindowBase("openmw_trainingwindow.layout", parWindowManager)
+    TrainingWindow::TrainingWindow()
+        : WindowBase("openmw_trainingwindow.layout")
         , mFadeTimeRemaining(0)
     {
         getWidget(mTrainingOptions, "TrainingOptions");
@@ -40,7 +41,7 @@ namespace MWGui
     {
         mPtr = actor;
 
-        mPlayerGold->setCaptionWithReplacing("#{sGold}: " + boost::lexical_cast<std::string>(mWindowManager.getInventoryWindow()->getPlayerGold()));
+        mPlayerGold->setCaptionWithReplacing("#{sGold}: " + boost::lexical_cast<std::string>(MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getPlayerGold()));
 
         MWMechanics::NpcStats& npcStats = MWWorld::Class::get(actor).getNpcStats (actor);
 
@@ -82,7 +83,7 @@ namespace MWGui
             int price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer
                     (mPtr,pcStats.getSkill (bestSkills[i].first).getBase() * gmst.find("iTrainingMod")->getInt (),true);
 
-            std::string skin = (price > mWindowManager.getInventoryWindow ()->getPlayerGold ()) ? "SandTextGreyedOut" : "SandTextButton";
+            std::string skin = (price > MWBase::Environment::get().getWindowManager()->getInventoryWindow ()->getPlayerGold ()) ? "SandTextGreyedOut" : "SandTextButton";
 
             MyGUI::Button* button = mTrainingOptions->createWidget<MyGUI::Button>(skin,
                 MyGUI::IntCoord(5, 5+i*18, mTrainingOptions->getWidth()-10, 18), MyGUI::Align::Default);
@@ -102,12 +103,12 @@ namespace MWGui
 
     void TrainingWindow::onReferenceUnavailable ()
     {
-        mWindowManager.removeGuiMode(GM_Training);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Training);
     }
 
     void TrainingWindow::onCancelButtonClicked (MyGUI::Widget *sender)
     {
-        mWindowManager.removeGuiMode (GM_Training);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Training);
     }
 
     void TrainingWindow::onTrainingSelected (MyGUI::Widget *sender)
@@ -123,13 +124,13 @@ namespace MWGui
         int price = pcStats.getSkill (skillId).getBase() * store.get<ESM::GameSetting>().find("iTrainingMod")->getInt ();
         price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr,price,true);
 
-        if (mWindowManager.getInventoryWindow()->getPlayerGold()<price)
+        if (MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getPlayerGold()<price)
             return;
 
         MWMechanics::NpcStats& npcStats = MWWorld::Class::get(mPtr).getNpcStats (mPtr);
         if (npcStats.getSkill (skillId).getBase () <= pcStats.getSkill (skillId).getBase ())
         {
-            mWindowManager.messageBox ("#{sServiceTrainingWords}", std::vector<std::string>());
+            MWBase::Environment::get().getWindowManager()->messageBox ("#{sServiceTrainingWords}");
             return;
         }
 
@@ -141,11 +142,11 @@ namespace MWGui
         pcStats.increaseSkill (skillId, *class_, true);
 
         // remove gold
-        mWindowManager.getTradeWindow()->addOrRemoveGold(-price);
+        MWBase::Environment::get().getWindowManager()->getTradeWindow()->addOrRemoveGold(-price);
 
         // go back to game mode
-        mWindowManager.removeGuiMode (GM_Training);
-        mWindowManager.removeGuiMode (GM_Dialogue);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Training);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Dialogue);
 
         // advance time
         MWBase::Environment::get().getWorld ()->advanceTime (2);

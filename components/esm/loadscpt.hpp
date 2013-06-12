@@ -52,11 +52,14 @@ public:
     SCHDstruct mData;
 
     std::vector<std::string> mVarNames; // Variable names
-    std::vector<char> mScriptData; // Compiled bytecode
+    std::vector<unsigned char> mScriptData; // Compiled bytecode
     std::string mScriptText; // Uncompiled script
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
+
+    void blank();
+    ///< Set record to default state (does not touch the ID/index).
 };
 }
 #endif

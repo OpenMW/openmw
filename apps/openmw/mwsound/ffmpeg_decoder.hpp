@@ -1,8 +1,6 @@
 #ifndef GAME_SOUND_FFMPEG_DECODER_H
 #define GAME_SOUND_FFMPEG_DECODER_H
 
-#include <string>
-
 // FIXME: This can't be right? The headers refuse to build without UINT64_C,
 // which only gets defined in stdint.h in either C99 mode or with this macro
 // defined...
@@ -13,6 +11,8 @@ extern "C"
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 }
+
+#include <string>
 
 #include "sound_decoder.hpp"
 

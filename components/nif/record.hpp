@@ -21,8 +21,8 @@
 
  */
 
-#ifndef _NIF_RECORD_H_
-#define _NIF_RECORD_H_
+#ifndef OPENMW_COMPONENTS_NIF_RECORD_HPP
+#define OPENMW_COMPONENTS_NIF_RECORD_HPP
 
 #include <string>
 
@@ -30,14 +30,17 @@ namespace Nif
 {
 
 class NIFFile;
+class NIFStream;
 
 enum RecordType
 {
   RC_MISSING = 0,
   RC_NiNode,
+  RC_AvoidNode,
   RC_NiTriShape,
   RC_NiRotatingParticles,
   RC_NiAutoNormalParticles,
+  RC_NiBSParticleNode,
   RC_NiCamera,
   RC_NiTexturingProperty,
   RC_NiMaterialProperty,
@@ -48,6 +51,7 @@ enum RecordType
   RC_NiDitherProperty,
   RC_NiWireframeProperty,
   RC_NiSpecularProperty,
+  RC_NiStencilProperty,
   RC_NiVisController,
   RC_NiGeomMorpherController,
   RC_NiKeyframeController,
@@ -57,6 +61,8 @@ enum RecordType
   RC_NiMaterialColorController,
   RC_NiBSPArrayController,
   RC_NiParticleSystemController,
+  RC_NiFlipController,
+  RC_NiBSAnimationNode,
   RC_NiLight,
   RC_NiTextureEffect,
   RC_NiVertWeightsExtraData,
@@ -96,7 +102,7 @@ struct Record
     Record() : recType(RC_MISSING), recIndex(~(size_t)0) {}
 
     /// Parses the record from file
-    virtual void read(NIFFile *nif) = 0;
+    virtual void read(NIFStream *nif) = 0;
 
     /// Does post-processing, after the entire tree is loaded
     virtual void post(NIFFile *nif) {}

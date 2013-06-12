@@ -40,6 +40,9 @@ namespace MWRender{
 
         void cellAdded(MWWorld::CellStore* store);
         void cellRemoved(MWWorld::CellStore* store);
+
+        float getTerrainHeightAt (Ogre::Vector3 worldPos);
+
     private:
         Ogre::TerrainGlobalOptions* mTerrainGlobals;
         Ogre::TerrainGroup mTerrainGroup;
@@ -75,7 +78,7 @@ namespace MWRender{
         void initTerrainTextures(Ogre::Terrain::ImportData* terrainData,
                                  int cellX, int cellY,
                                  int fromX, int fromY, int size,
-                                 std::map<uint16_t, int>& indexes);
+                                 std::map<uint16_t, int>& indexes, size_t plugin);
 
         /**
          * Creates the blend (splatting maps) for the given terrain from the ltex data.

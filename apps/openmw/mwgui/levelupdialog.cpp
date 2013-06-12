@@ -8,21 +8,22 @@
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
-#include "../mwworld/esmstore.hpp"
+#include "../mwworld/fallback.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
-#include "../mwmechanics/stat.hpp"
 
 namespace MWGui
 {
 
-    LevelupDialog::LevelupDialog(MWBase::WindowManager &parWindowManager)
-        : WindowBase("openmw_levelup_dialog.layout", parWindowManager)
+    LevelupDialog::LevelupDialog()
+        : WindowBase("openmw_levelup_dialog.layout")
     {
         getWidget(mOkButton, "OkButton");
         getWidget(mClassImage, "ClassImage");
         getWidget(mLevelText, "LevelText");
+        getWidget(mLevelDescription, "LevelDescription");
+        getWidget(mCoinBox, "Coins");
 
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &LevelupDialog::onOkButtonClicked);
 
@@ -80,11 +81,13 @@ namespace MWGui
 
     void LevelupDialog::resetCoins ()
     {
-        int curX = mMainWidget->getWidth()/2 - (16 + 2) * 1.5;
+        int curX = 0;
         for (int i=0; i<3; ++i)
         {
             MyGUI::ImageBox* image = mCoins[i];
-            image->setCoord(MyGUI::IntCoord(curX,250,16,16));
+            image->detachFromWidget();
+            image->attachToWidget(mCoinBox);
+            image->setCoord(MyGUI::IntCoord(curX,0,16,16));
             curX += 24+2;
         }
     }
@@ -95,6 +98,9 @@ namespace MWGui
         for (unsigned int i=0; i<mSpentAttributes.size(); ++i)
         {
             MyGUI::ImageBox* image = mCoins[i];
+            image->detachFromWidget();
+            image->attachToWidget(mMainWidget);
+
             int attribute = mSpentAttributes[i];
 
             int xdiff = mAttributeMultipliers[attribute]->getCaption() == "" ? 0 : 30;
@@ -113,8 +119,6 @@ namespace MWGui
         MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get(player).getCreatureStats (player);
         MWMechanics::NpcStats& pcStats = MWWorld::Class::get(player).getNpcStats (player);
 
-        center();
-
         mSpentAttributes.clear();
         resetCoins();
 
@@ -128,9 +132,16 @@ namespace MWGui
 
         mClassImage->setImageTexture ("textures\\levelup\\" + cls->mId + ".dds");
 
-        /// \todo replace this with INI-imported texts
         int level = creatureStats.getLevel ()+1;
         mLevelText->setCaptionWithReplacing("#{sLevelUpMenu1} " + boost::lexical_cast<std::string>(level));
+
+        std::string levelupdescription;
+        if(level>20)
+            levelupdescription=world->getFallback()->getFallbackString("Level_Up_Default");
+        else
+            levelupdescription=world->getFallback()->getFallbackString("Level_Up_Level"+boost::lexical_cast<std::string>(level));
+
+        mLevelDescription->setCaption (levelupdescription);
 
         for (int i=0; i<8; ++i)
         {
@@ -138,6 +149,8 @@ namespace MWGui
             int mult = pcStats.getLevelupAttributeMultiplier (i);
             text->setCaption(mult <= 1 ? "" : "x" + boost::lexical_cast<std::string>(mult));
         }
+
+        center();
     }
 
     void LevelupDialog::onOkButtonClicked (MyGUI::Widget* sender)
@@ -147,7 +160,7 @@ namespace MWGui
         MWMechanics::NpcStats& pcStats = MWWorld::Class::get(player).getNpcStats (player);
 
         if (mSpentAttributes.size() < 3)
-            MWBase::Environment::get().getWindowManager ()->messageBox("#{sNotifyMessage36}", std::vector<std::string>());
+            MWBase::Environment::get().getWindowManager ()->messageBox("#{sNotifyMessage36}");
         else
         {
             // increase attributes
@@ -168,7 +181,7 @@ namespace MWGui
             creatureStats.setLevel (creatureStats.getLevel()+1);
             pcStats.levelUp ();
 
-            mWindowManager.removeGuiMode (GM_Levelup);
+            MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Levelup);
         }
 
     }

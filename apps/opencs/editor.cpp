@@ -1,49 +1,119 @@
 
 #include "editor.hpp"
 
-#include <sstream>
-
 #include <QtGui/QApplication>
 
 #include "model/doc/document.hpp"
 #include "model/world/data.hpp"
 
-CS::Editor::Editor() : mViewManager (mDocumentManager), mNewDocumentIndex (0)
+CS::Editor::Editor() : mViewManager (mDocumentManager)
 {
     connect (&mViewManager, SIGNAL (newDocumentRequest ()), this, SLOT (createDocument ()));
+    connect (&mViewManager, SIGNAL (loadDocumentRequest ()), this, SLOT (loadDocument ()));
+
+    connect (&mStartup, SIGNAL (createDocument()), this, SLOT (createDocument ()));
+    connect (&mStartup, SIGNAL (loadDocument()), this, SLOT (loadDocument ()));
+
+    connect (&mFileDialog, SIGNAL(openFiles()), this, SLOT(openFiles()));
+    connect (&mFileDialog, SIGNAL(createNewFile()), this, SLOT(createNewFile()));
+
+    setupDataFiles();
+}
+
+void CS::Editor::setupDataFiles()
+{
+    boost::program_options::variables_map variables;
+    boost::program_options::options_description desc;
+
+    desc.add_options()
+    ("data", boost::program_options::value<Files::PathContainer>()->default_value(Files::PathContainer(), "data")->multitoken())
+    ("data-local", boost::program_options::value<std::string>()->default_value(""))
+    ("fs-strict", boost::program_options::value<bool>()->implicit_value(true)->default_value(false))
+    ("encoding", boost::program_options::value<std::string>()->default_value("win1252"));
+
+    boost::program_options::notify(variables);
+
+    mCfgMgr.readConfiguration(variables, desc);
+
+    Files::PathContainer mDataDirs, mDataLocal;
+    if (!variables["data"].empty()) {
+        mDataDirs = Files::PathContainer(variables["data"].as<Files::PathContainer>());
+    }
+
+    std::string local = variables["data-local"].as<std::string>();
+    if (!local.empty()) {
+        mDataLocal.push_back(Files::PathContainer::value_type(local));
+    }
+
+    mCfgMgr.processPaths(mDataDirs);
+    mCfgMgr.processPaths(mDataLocal);
+
+    // Set the charset for reading the esm/esp files
+    QString encoding = QString::fromStdString(variables["encoding"].as<std::string>());
+    mFileDialog.setEncoding(encoding);
+
+    Files::PathContainer dataDirs;
+    dataDirs.insert(dataDirs.end(), mDataDirs.begin(), mDataDirs.end());
+    dataDirs.insert(dataDirs.end(), mDataLocal.begin(), mDataLocal.end());
+
+    for (Files::PathContainer::const_iterator iter = dataDirs.begin(); iter != dataDirs.end(); ++iter)
+    {
+        QString path = QString::fromStdString(iter->string());
+        mFileDialog.addFiles(path);
+    }
 }
 
 void CS::Editor::createDocument()
 {
-    std::ostringstream stream;
+    mStartup.hide();
 
-    stream << "NewDocument" << (++mNewDocumentIndex);
+    mFileDialog.newFile();
+}
 
-    CSMDoc::Document *document = mDocumentManager.addDocument (stream.str());
+void CS::Editor::loadDocument()
+{
+    mStartup.hide();
 
-    static const char *sGlobals[] =
-    {
-            "Day", "DaysPassed", "GameHour", "Month", "PCRace", "PCVampire", "PCWerewolf", "PCYear", 0
-    };
+    mFileDialog.openFile();
+}
 
-    for (int i=0; sGlobals[i]; ++i)
-    {
-        ESM::Global record;
-        record.mId = sGlobals[i];
-        record.mValue = i==0 ? 1 : 0;
-        record.mType = ESM::VT_Float;
-        document->getData().getGlobals().add (record);
+void CS::Editor::openFiles()
+{
+    std::vector<boost::filesystem::path> files;
+    QStringList paths = mFileDialog.checkedItemsPaths();
+
+    foreach (const QString &path, paths) {
+        files.push_back(path.toStdString());
     }
 
-    document->getData().merge(); /// \todo remove once proper ESX loading is implemented
+    CSMDoc::Document *document = mDocumentManager.addDocument(files, false);
 
     mViewManager.addView (document);
+    mFileDialog.hide();
+}
+
+void CS::Editor::createNewFile()
+{
+    std::vector<boost::filesystem::path> files;
+    QStringList paths = mFileDialog.checkedItemsPaths();
+
+    foreach (const QString &path, paths) {
+        files.push_back(path.toStdString());
+    }
+
+    files.push_back(mFileDialog.fileName().toStdString());
+
+    CSMDoc::Document *document = mDocumentManager.addDocument (files, true);
+
+    mViewManager.addView (document);
+    mFileDialog.hide();
 }
 
 int CS::Editor::run()
 {
-    /// \todo Instead of creating an empty document, open a small welcome dialogue window with buttons for new/load/recent projects
-    createDocument();
+    mStartup.show();
+
+    QApplication::setQuitOnLastWindowClosed (true);
 
     return QApplication::exec();
 }

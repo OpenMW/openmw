@@ -4,22 +4,14 @@
 
 #include "../mwbase/windowmanager.hpp"
 
-#include "../mwbase/world.hpp"
-#include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
-#include "../mwworld/esmstore.hpp"
 #include "../mwworld/player.hpp"
-#include "../mwworld/class.hpp"
 
-#include "../mwmechanics/spells.hpp"
-#include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/spellsuccess.hpp"
 
-
 #include "tooltips.hpp"
-#include "widgets.hpp"
 #include "class.hpp"
 #include "inventorywindow.hpp"
 #include "tradewindow.hpp"
@@ -40,8 +32,8 @@ namespace
 namespace MWGui
 {
 
-    EditEffectDialog::EditEffectDialog(MWBase::WindowManager &parWindowManager)
-        : WindowModal("openmw_edit_effect.layout", parWindowManager)
+    EditEffectDialog::EditEffectDialog()
+        : WindowModal("openmw_edit_effect.layout")
         , mEditing(false)
     {
         getWidget(mCancelButton, "CancelButton");
@@ -72,6 +64,7 @@ namespace MWGui
         mMagnitudeMaxSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &EditEffectDialog::onMagnitudeMaxChanged);
         mDurationSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &EditEffectDialog::onDurationChanged);
         mAreaSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &EditEffectDialog::onAreaChanged);
+        constantEffect=false;
     }
 
     void EditEffectDialog::open()
@@ -164,7 +157,7 @@ namespace MWGui
             mMagnitudeBox->setVisible (true);
             curY += mMagnitudeBox->getSize().height;
         }
-        if (!(mMagicEffect->mData.mFlags & ESM::MagicEffect::NoDuration))
+        if (!(mMagicEffect->mData.mFlags & ESM::MagicEffect::NoDuration)&&constantEffect==false)
         {
             mDurationBox->setPosition(mDurationBox->getPosition().left, curY);
             mDurationBox->setVisible (true);
@@ -273,9 +266,9 @@ namespace MWGui
 
     // ------------------------------------------------------------------------------------------------
 
-    SpellCreationDialog::SpellCreationDialog(MWBase::WindowManager &parWindowManager)
-        : WindowBase("openmw_spellcreation_dialog.layout", parWindowManager)
-        , EffectEditorBase(parWindowManager)
+    SpellCreationDialog::SpellCreationDialog()
+        : WindowBase("openmw_spellcreation_dialog.layout")
+        , EffectEditorBase()
     {
         getWidget(mNameEdit, "NameEdit");
         getWidget(mMagickaCost, "MagickaCost");
@@ -302,38 +295,38 @@ namespace MWGui
 
     void SpellCreationDialog::onCancelButtonClicked (MyGUI::Widget* sender)
     {
-        mWindowManager.removeGuiMode (MWGui::GM_SpellCreation);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (MWGui::GM_SpellCreation);
     }
 
     void SpellCreationDialog::onBuyButtonClicked (MyGUI::Widget* sender)
     {
         if (mEffects.size() <= 0)
         {
-            mWindowManager.messageBox ("#{sNotifyMessage30}", std::vector<std::string>());
+            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage30}");
             return;
         }
 
         if (mNameEdit->getCaption () == "")
         {
-            mWindowManager.messageBox ("#{sNotifyMessage10}", std::vector<std::string>());
+            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage10}");
             return;
         }
 
         if (mMagickaCost->getCaption() == "0")
         {
-            mWindowManager.messageBox ("#{sEnchantmentMenu8}", std::vector<std::string>());
+            MWBase::Environment::get().getWindowManager()->messageBox ("#{sEnchantmentMenu8}");
             return;
         }
 
-        if (boost::lexical_cast<int>(mPriceLabel->getCaption()) > mWindowManager.getInventoryWindow()->getPlayerGold())
+        if (boost::lexical_cast<int>(mPriceLabel->getCaption()) > MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getPlayerGold())
         {
-            mWindowManager.messageBox ("#{sNotifyMessage18}", std::vector<std::string>());
+            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage18}");
             return;
         }
 
         mSpell.mName = mNameEdit->getCaption();
 
-        mWindowManager.getTradeWindow()->addOrRemoveGold(-boost::lexical_cast<int>(mPriceLabel->getCaption()));
+        MWBase::Environment::get().getWindowManager()->getTradeWindow()->addOrRemoveGold(-boost::lexical_cast<int>(mPriceLabel->getCaption()));
 
         MWBase::Environment::get().getSoundManager()->playSound ("Item Gold Up", 1.0, 1.0);
 
@@ -346,7 +339,7 @@ namespace MWGui
 
         MWBase::Environment::get().getSoundManager()->playSound ("Item Gold Up", 1.0, 1.0);
 
-        mWindowManager.removeGuiMode (GM_SpellCreation);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_SpellCreation);
     }
 
     void SpellCreationDialog::open()
@@ -356,8 +349,8 @@ namespace MWGui
 
     void SpellCreationDialog::onReferenceUnavailable ()
     {
-        mWindowManager.removeGuiMode (GM_Dialogue);
-        mWindowManager.removeGuiMode (GM_SpellCreation);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Dialogue);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_SpellCreation);
     }
 
     void SpellCreationDialog::notifyEffectsChanged ()
@@ -411,8 +404,8 @@ namespace MWGui
     // ------------------------------------------------------------------------------------------------
 
 
-    EffectEditorBase::EffectEditorBase(MWBase::WindowManager& parWindowManager)
-        : mAddEffectDialog(parWindowManager)
+    EffectEditorBase::EffectEditorBase()
+        : mAddEffectDialog()
         , mSelectAttributeDialog(NULL)
         , mSelectSkillDialog(NULL)
     {
@@ -454,10 +447,13 @@ namespace MWGui
 
         mAvailableEffectsList->clear ();
 
+        int i=0;
         for (std::vector<short>::const_iterator it = knownEffects.begin(); it != knownEffects.end(); ++it)
         {
             mAvailableEffectsList->addItem(MWBase::Environment::get().getWorld ()->getStore ().get<ESM::GameSetting>().find(
                                                ESM::MagicEffect::effectIdToString  (*it))->getString());
+            mButtonMapping[i] = *it;
+            ++i;
         }
         mAvailableEffectsList->adjustSize ();
 
@@ -466,7 +462,6 @@ namespace MWGui
             std::string name = MWBase::Environment::get().getWorld ()->getStore ().get<ESM::GameSetting>().find(
                                                ESM::MagicEffect::effectIdToString  (*it))->getString();
             MyGUI::Widget* w = mAvailableEffectsList->getItemWidget(name);
-            w->setUserData(*it);
 
             ToolTips::createMagicEffectToolTip (w, *it);
         }
@@ -514,17 +509,18 @@ namespace MWGui
     {
         if (mEffects.size() >= 8)
         {
-            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage28}", std::vector<std::string>());
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage28}");
             return;
         }
 
-        short effectId = *sender->getUserData<short>();
+        int buttonId = *sender->getUserData<int>();
+        short effectId = mButtonMapping[buttonId];
 
         for (std::vector<ESM::ENAMstruct>::const_iterator it = mEffects.begin(); it != mEffects.end(); ++it)
         {
             if (it->mEffectID == effectId)
             {
-                MWBase::Environment::get().getWindowManager()->messageBox ("#{sOnetypeEffectMessage}", std::vector<std::string>());
+                MWBase::Environment::get().getWindowManager()->messageBox ("#{sOnetypeEffectMessage}");
                 return;
             }
         }
@@ -537,7 +533,7 @@ namespace MWGui
         if (effect->mData.mFlags & ESM::MagicEffect::TargetSkill)
         {
             delete mSelectSkillDialog;
-            mSelectSkillDialog = new SelectSkillDialog(*MWBase::Environment::get().getWindowManager ());
+            mSelectSkillDialog = new SelectSkillDialog();
             mSelectSkillDialog->eventCancel += MyGUI::newDelegate(this, &SpellCreationDialog::onAttributeOrSkillCancel);
             mSelectSkillDialog->eventItemSelected += MyGUI::newDelegate(this, &SpellCreationDialog::onSelectSkill);
             mSelectSkillDialog->setVisible (true);
@@ -545,7 +541,7 @@ namespace MWGui
         else if (effect->mData.mFlags & ESM::MagicEffect::TargetAttribute)
         {
             delete mSelectAttributeDialog;
-            mSelectAttributeDialog = new SelectAttributeDialog(*MWBase::Environment::get().getWindowManager ());
+            mSelectAttributeDialog = new SelectAttributeDialog();
             mSelectAttributeDialog->eventCancel += MyGUI::newDelegate(this, &SpellCreationDialog::onAttributeOrSkillCancel);
             mSelectAttributeDialog->eventItemSelected += MyGUI::newDelegate(this, &SpellCreationDialog::onSelectAttribute);
             mSelectAttributeDialog->setVisible (true);
@@ -597,7 +593,6 @@ namespace MWGui
             Widgets::MWSpellEffectPtr effect = button->createWidget<Widgets::MWSpellEffect>("MW_EffectImage", MyGUI::IntCoord(0,0,0,24), MyGUI::Align::Default);
 
             effect->setNeedMouseFocus (false);
-            effect->setWindowManager (MWBase::Environment::get().getWindowManager ());
             effect->setSpellEffect (params);
 
             effect->setSize(effect->getRequestedWidth (), 24);

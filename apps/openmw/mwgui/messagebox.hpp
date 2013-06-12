@@ -1,14 +1,18 @@
 #ifndef MWGUI_MESSAGE_BOX_H
 #define MWGUI_MESSAGE_BOX_H
 
-#include <openengine/gui/layout.hpp>
-#include <MyGUI.h>
-
-#include "window_base.hpp"
+#include "windowbase.hpp"
 
 #include "../mwbase/windowmanager.hpp"
 
 #undef MessageBox
+
+namespace MyGUI
+{
+    class Widget;
+    class Button;
+    class EditBox;
+}
 
 namespace MWGui
 {
@@ -25,9 +29,10 @@ namespace MWGui
     class MessageBoxManager
     {
         public:
-            MessageBoxManager (MWBase::WindowManager* windowManager);
+            MessageBoxManager ();
             void onFrame (float frameDuration);
-            void createMessageBox (const std::string& message);
+            void createMessageBox (const std::string& message, bool stat = false);
+            void removeStaticMessageBox ();
             bool createInteractiveMessageBox (const std::string& message, const std::vector<std::string>& buttons);
             bool isInteractiveMessageBox ();
 
@@ -35,13 +40,20 @@ namespace MWGui
             bool removeMessageBox (MessageBox *msgbox);
             void setMessageBoxSpeed (int speed);
 
+            void enterPressed();
             int readPressedButton ();
 
-            MWBase::WindowManager *mWindowManager;
+            typedef MyGUI::delegates::CMultiDelegate1<int> EventHandle_Int;
+
+            // Note: this delegate unassigns itself after it was fired, i.e. works once.
+            EventHandle_Int eventButtonPressed;
+
+            void onButtonPressed(int button) { eventButtonPressed(button); eventButtonPressed.clear(); }
 
         private:
             std::vector<MessageBox*> mMessageBoxes;
             InteractiveMessageBox* mInterMessageBoxe;
+            MessageBox* mStaticMessageBox;
             std::vector<MessageBoxManagerTimer> mTimers;
             float mMessageBoxSpeed;
     };
@@ -60,26 +72,29 @@ namespace MWGui
             MessageBoxManager& mMessageBoxManager;
             int mHeight;
             const std::string& mMessage;
-            MyGUI::EditPtr mMessageWidget;
+            MyGUI::EditBox* mMessageWidget;
             int mFixedWidth;
             int mBottomPadding;
             int mNextBoxPadding;
     };
 
-    class InteractiveMessageBox : public OEngine::GUI::Layout
+    class InteractiveMessageBox : public WindowModal
     {
         public:
             InteractiveMessageBox (MessageBoxManager& parMessageBoxManager, const std::string& message, const std::vector<std::string>& buttons);
+            void enterPressed ();
             void mousePressed (MyGUI::Widget* _widget);
             int readPressedButton ();
 
             bool mMarkedToDelete;
 
         private:
+            void buttonActivated (MyGUI::Widget* _widget);
+
             MessageBoxManager& mMessageBoxManager;
-            MyGUI::EditPtr mMessageWidget;
-            MyGUI::WidgetPtr mButtonsWidget;
-            std::vector<MyGUI::ButtonPtr> mButtons;
+            MyGUI::EditBox* mMessageWidget;
+            MyGUI::Widget* mButtonsWidget;
+            std::vector<MyGUI::Button*> mButtons;
 
             int mTextButtonPadding;
             int mButtonPressed;

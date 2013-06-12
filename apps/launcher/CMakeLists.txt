@@ -5,17 +5,14 @@ set(LAUNCHER
     maindialog.cpp
     playpage.cpp
 
-    model/datafilesmodel.cpp
-    model/modelitem.cpp
-    model/esm/esmfile.cpp
+    settings/gamesettings.cpp
+    settings/graphicssettings.cpp
+    settings/launchersettings.cpp
 
-    utils/filedialog.cpp
-    utils/naturalsort.cpp
-    utils/lineedit.cpp
-    utils/profilescombobox.cpp
+    utils/checkablemessagebox.cpp
     utils/textinputdialog.cpp
 
-    launcher.rc
+    ${CMAKE_SOURCE_DIR}/files/launcher/launcher.rc
 )
 
 set(LAUNCHER_HEADER
@@ -24,14 +21,12 @@ set(LAUNCHER_HEADER
     maindialog.hpp
     playpage.hpp
 
-    model/datafilesmodel.hpp
-    model/modelitem.hpp
-    model/esm/esmfile.hpp
+    settings/gamesettings.hpp
+    settings/graphicssettings.hpp
+    settings/launchersettings.hpp
+    settings/settingsbase.hpp
 
-    utils/lineedit.hpp
-    utils/filedialog.hpp
-    utils/naturalsort.hpp
-    utils/profilescombobox.hpp
+    utils/checkablemessagebox.hpp
     utils/textinputdialog.hpp
 
 )
@@ -43,17 +38,18 @@ set(LAUNCHER_HEADER_MOC
     maindialog.hpp
     playpage.hpp
 
-    model/datafilesmodel.hpp
-    model/modelitem.hpp
-    model/esm/esmfile.hpp
-
-    utils/lineedit.hpp
-    utils/filedialog.hpp
-    utils/profilescombobox.hpp
+    utils/checkablemessagebox.hpp
     utils/textinputdialog.hpp
 )
 
-source_group(launcher FILES ${LAUNCHER} ${LAUNCHER_HEADER} ${LAUNCHER_HEADER_MOC})
+set(LAUNCHER_UI
+    ${CMAKE_SOURCE_DIR}/files/ui/datafilespage.ui
+    ${CMAKE_SOURCE_DIR}/files/ui/graphicspage.ui
+    ${CMAKE_SOURCE_DIR}/files/ui/mainwindow.ui
+    ${CMAKE_SOURCE_DIR}/files/ui/playpage.ui
+)
+
+source_group(launcher FILES ${LAUNCHER} ${LAUNCHER_HEADER})
 
 find_package(Qt4 REQUIRED)
 set(QT_USE_QTGUI 1)
@@ -64,10 +60,12 @@ if(WIN32)
     set(QT_USE_QTMAIN TRUE)
 endif(WIN32)
 
-QT4_ADD_RESOURCES(RCC_SRCS resources.qrc)
+QT4_ADD_RESOURCES(RCC_SRCS ${CMAKE_SOURCE_DIR}/files/launcher/launcher.qrc)
 QT4_WRAP_CPP(MOC_SRCS ${LAUNCHER_HEADER_MOC})
+QT4_WRAP_UI(UI_HDRS ${LAUNCHER_UI})
 
 include(${QT_USE_FILE})
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 # Main executable
 IF(OGRE_STATIC)
@@ -82,8 +80,10 @@ ENDIF(OGRE_STATIC)
 add_executable(omwlauncher
     ${GUI_TYPE}
     ${LAUNCHER}
+    ${LAUNCHER_HEADER}
     ${RCC_SRCS}
     ${MOC_SRCS}
+    ${UI_HDRS}
 )
 
 target_link_libraries(omwlauncher
@@ -98,19 +98,13 @@ if(DPKG_PROGRAM)
     INSTALL(TARGETS omwlauncher RUNTIME DESTINATION games COMPONENT omwlauncher)
 endif()
 
-if (APPLE)
-    configure_file(${CMAKE_SOURCE_DIR}/files/launcher.qss
-        "${APP_BUNDLE_DIR}/../launcher.qss")
-else()
-    configure_file(${CMAKE_SOURCE_DIR}/files/launcher.qss
-        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources/launcher.qss")
-
-    # Fallback in case getGlobalDataPath does not point to resources
-    configure_file(${CMAKE_SOURCE_DIR}/files/launcher.qss
-        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launcher.qss")
-endif()
-
 if (BUILD_WITH_CODE_COVERAGE)
   add_definitions (--coverage)
   target_link_libraries(omwlauncher gcov)
 endif()
+
+# Workaround for binutil => 2.23 problem when linking, should be fixed eventually upstream
+if (UNIX AND NOT APPLE)
+target_link_libraries(omwlauncher dl Xt)
+endif()
+

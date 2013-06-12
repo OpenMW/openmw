@@ -21,8 +21,8 @@
 
  */
 
-#ifndef _NIF_EFFECT_H_
-#define _NIF_EFFECT_H_
+#ifndef OPENMW_COMPONENTS_NIF_EFFECT_HPP
+#define OPENMW_COMPONENTS_NIF_EFFECT_HPP
 
 #include "node.hpp"
 
@@ -42,7 +42,7 @@ struct NiLight : Effect
         Ogre::Vector3 diffuse;
         Ogre::Vector3 specular;
 
-        void read(NIFFile *nif)
+        void read(NIFStream *nif)
         {
             dimmer = nif->getFloat();
             ambient = nif->getVector3();
@@ -52,7 +52,7 @@ struct NiLight : Effect
     };
     SLight light;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         Effect::read(nif);
 
@@ -66,7 +66,7 @@ struct NiTextureEffect : Effect
 {
     NiSourceTexturePtr texture;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         Effect::read(nif);
 

@@ -17,6 +17,13 @@
 #include "../mwsound/sound_decoder.hpp"
 #include "../mwsound/sound.hpp"
 
+#include "renderconst.hpp"
+
+#ifdef _WIN32
+#include <BaseTsd.h>
+
+typedef SSIZE_T ssize_t;
+#endif
 
 namespace MWRender
 {
@@ -361,7 +368,11 @@ class MovieAudioDecoder : public MWSound::Sound_Decoder
     }
 
     void open(const std::string&)
+#ifdef _WIN32
+    { fail(std::string("Invalid call to ")+__FUNCSIG__); }
+#else
     { fail(std::string("Invalid call to ")+__PRETTY_FUNCTION__); }
+#endif
 
     void close() { }
 
@@ -395,6 +406,8 @@ public:
             *type = MWSound::SampleType_UInt8;
         else if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_S16)
             *type = MWSound::SampleType_Int16;
+        else if(mAVStream->codec->sample_fmt == AV_SAMPLE_FMT_FLT)
+            *type = MWSound::SampleType_Float32;
         else
             fail(std::string("Unsupported sample format: ")+
                  av_get_sample_fmt_name(mAVStream->codec->sample_fmt));
@@ -775,8 +788,8 @@ void VideoState::decode_thread_loop(VideoState *self)
         // main decode loop
         while(!self->quit)
         {
-            if((self->audio_st >= 0 && self->audioq.size > MAX_AUDIOQ_SIZE) ||
-               (self->video_st >= 0 && self->videoq.size > MAX_VIDEOQ_SIZE))
+            if((self->audio_st && self->audioq.size > MAX_AUDIOQ_SIZE) ||
+               (self->video_st && self->videoq.size > MAX_VIDEOQ_SIZE))
             {
                 boost::this_thread::sleep(boost::posix_time::milliseconds(10));
                 continue;
@@ -1056,9 +1069,9 @@ VideoPlayer::VideoPlayer(Ogre::SceneManager* sceneMgr)
     mBackgroundNode->attachObject(mBackgroundRectangle);
 
     mRectangle->setVisible(false);
-    mRectangle->setVisibilityFlags(0x1);
+    mRectangle->setVisibilityFlags(RV_Overlay);
     mBackgroundRectangle->setVisible(false);
-    mBackgroundRectangle->setVisibilityFlags(0x1);
+    mBackgroundRectangle->setVisibilityFlags(RV_Overlay);
 }
 
 VideoPlayer::~VideoPlayer()

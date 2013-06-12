@@ -6,6 +6,9 @@
 #include "customdata.hpp"
 #include "cellstore.hpp"
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+
 namespace MWWorld
 {
     void RefData::copy (const RefData& refData)
@@ -16,6 +19,7 @@ namespace MWWorld
         mEnabled = refData.mEnabled;
         mCount = refData.mCount;
         mPosition = refData.mPosition;
+        mLocalRotation = refData.mLocalRotation;
 
         mCustomData = refData.mCustomData ? refData.mCustomData->clone() : 0;
     }
@@ -31,7 +35,11 @@ namespace MWWorld
     RefData::RefData (const ESM::CellRef& cellRef)
     : mBaseNode(0), mHasLocals (false), mEnabled (true), mCount (1), mPosition (cellRef.mPos),
       mCustomData (0)
-    {}
+    {
+        mLocalRotation.rot[0]=0;
+        mLocalRotation.rot[1]=0;
+        mLocalRotation.rot[2]=0;
+    }
 
     RefData::RefData (const RefData& refData)
     : mBaseNode(0), mCustomData (0)
@@ -73,10 +81,13 @@ namespace MWWorld
         {}
     }
 
-    std::string RefData::getHandle()
+    const std::string &RefData::getHandle()
     {
-        if (!mBaseNode)
-            return "";
+        if(!mBaseNode)
+        {
+            static const std::string empty;
+            return empty;
+        }
             
         return mBaseNode->getName();
     }
@@ -107,6 +118,9 @@ namespace MWWorld
 
     void RefData::setCount (int count)
     {
+        if(count == 0)
+            MWBase::Environment::get().getWorld()->removeRefScript(this);
+        
         mCount = count;
     }
 
@@ -133,6 +147,11 @@ namespace MWWorld
     ESM::Position& RefData::getPosition()
     {
         return mPosition;
+    }
+
+    LocalRotation& RefData::getLocalRotation()
+    {
+        return mLocalRotation;
     }
 
     void RefData::setCustomData (CustomData *data)

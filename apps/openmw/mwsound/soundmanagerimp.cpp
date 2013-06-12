@@ -160,7 +160,7 @@ namespace MWSound
         return volume;
     }
 
-    bool SoundManager::isPlaying(MWWorld::Ptr ptr, const std::string &id) const
+    bool SoundManager::isPlaying(const MWWorld::Ptr &ptr, const std::string &id) const
     {
         SoundMap::const_iterator snditer = mActiveSounds.begin();
         while(snditer != mActiveSounds.end())
@@ -208,14 +208,21 @@ namespace MWSound
 
     void SoundManager::startRandomTitle()
     {
-        Ogre::StringVectorPtr filelist;
-        filelist = mResourceMgr.findResourceNames(Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                                                  "Music/"+mCurrentPlaylist+"/*");
-        if(!filelist->size())
+        Ogre::StringVector filelist;
+
+        Ogre::StringVector groups = Ogre::ResourceGroupManager::getSingleton().getResourceGroups ();
+        for (Ogre::StringVector::iterator it = groups.begin(); it != groups.end(); ++it)
+        {
+            Ogre::StringVectorPtr resourcesInThisGroup = mResourceMgr.findResourceNames(*it,
+                                                                                        "Music/"+mCurrentPlaylist+"/*");
+            filelist.insert(filelist.end(), resourcesInThisGroup->begin(), resourcesInThisGroup->end());
+        }
+
+        if(!filelist.size())
             return;
 
-        int i = rand()%filelist->size();
-        streamMusicFull((*filelist)[i]);
+        int i = rand()%filelist.size();
+        streamMusicFull(filelist[i]);
     }
 
     bool SoundManager::isMusicPlaying()
@@ -229,7 +236,7 @@ namespace MWSound
         startRandomTitle();
     }
 
-    void SoundManager::say(MWWorld::Ptr ptr, const std::string& filename)
+    void SoundManager::say(const MWWorld::Ptr &ptr, const std::string& filename)
     {
         if(!mOutput->isInitialized())
             return;
@@ -269,12 +276,12 @@ namespace MWSound
         }
     }
 
-    bool SoundManager::sayDone(MWWorld::Ptr ptr) const
+    bool SoundManager::sayDone(const MWWorld::Ptr &ptr) const
     {
         return !isPlaying(ptr, "_say_sound");
     }
 
-    void SoundManager::stopSay(MWWorld::Ptr ptr)
+    void SoundManager::stopSay(const MWWorld::Ptr &ptr)
     {
         SoundMap::iterator snditer = mActiveSounds.begin();
         while(snditer != mActiveSounds.end())
@@ -328,7 +335,7 @@ namespace MWSound
         return sound;
     }
 
-    MWBase::SoundPtr SoundManager::playSound3D(MWWorld::Ptr ptr, const std::string& soundId,
+    MWBase::SoundPtr SoundManager::playSound3D(const MWWorld::Ptr &ptr, const std::string& soundId,
                                                float volume, float pitch, PlayMode mode)
     {
         MWBase::SoundPtr sound;
@@ -356,7 +363,7 @@ namespace MWSound
         return sound;
     }
 
-    void SoundManager::stopSound3D(MWWorld::Ptr ptr, const std::string& soundId)
+    void SoundManager::stopSound3D(const MWWorld::Ptr &ptr, const std::string& soundId)
     {
         SoundMap::iterator snditer = mActiveSounds.begin();
         while(snditer != mActiveSounds.end())
@@ -371,7 +378,7 @@ namespace MWSound
         }
     }
 
-    void SoundManager::stopSound3D(MWWorld::Ptr ptr)
+    void SoundManager::stopSound3D(const MWWorld::Ptr &ptr)
     {
         SoundMap::iterator snditer = mActiveSounds.begin();
         while(snditer != mActiveSounds.end())
@@ -418,7 +425,7 @@ namespace MWSound
         }
     }
 
-    bool SoundManager::getSoundPlaying(MWWorld::Ptr ptr, const std::string& soundId) const
+    bool SoundManager::getSoundPlaying(const MWWorld::Ptr &ptr, const std::string& soundId) const
     {
         return isPlaying(ptr, soundId);
     }
@@ -607,6 +614,7 @@ namespace MWSound
         {
             case SampleType_UInt8: return "U8";
             case SampleType_Int16: return "S16";
+            case SampleType_Float32: return "Float32";
         }
         return "(unknown sample type)";
     }
@@ -638,6 +646,7 @@ namespace MWSound
         {
             case SampleType_UInt8: frames *= 1; break;
             case SampleType_Int16: frames *= 2; break;
+            case SampleType_Float32: frames *= 4; break;
         }
         return frames;
     }

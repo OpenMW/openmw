@@ -1,14 +1,9 @@
 #ifndef MWGUI_RACE_H
 #define MWGUI_RACE_H
 
-
-#include <boost/array.hpp>
-
-#include "../mwworld/esmstore.hpp"
-
 #include "../mwrender/characterpreview.hpp"
 
-#include "window_base.hpp"
+#include "windowbase.hpp"
 
 
 namespace MWGui
@@ -23,10 +18,10 @@ namespace MWGui
 
 namespace MWGui
 {
-    class RaceDialog : public WindowBase
+    class RaceDialog : public WindowModal
     {
     public:
-        RaceDialog(MWBase::WindowManager& parWindowManager);
+        RaceDialog();
 
         enum Gender
         {
@@ -81,18 +76,22 @@ namespace MWGui
         void updatePreview();
         void recountParts();
 
+        void getBodyParts (int part, std::vector<std::string>& out);
+
+        std::vector<std::string> mAvailableHeads;
+        std::vector<std::string> mAvailableHairs;
+
         MyGUI::ImageBox*  mPreviewImage;
         MyGUI::ListBox*   mRaceList;
         MyGUI::ScrollBar* mHeadRotate;
 
-        MyGUI::WidgetPtr mSkillList;
-        std::vector<MyGUI::WidgetPtr> mSkillItems;
+        MyGUI::Widget* mSkillList;
+        std::vector<MyGUI::Widget*> mSkillItems;
 
-        MyGUI::WidgetPtr mSpellPowerList;
-        std::vector<MyGUI::WidgetPtr> mSpellPowerItems;
+        MyGUI::Widget* mSpellPowerList;
+        std::vector<MyGUI::Widget*> mSpellPowerItems;
 
         int mGenderIndex, mFaceIndex, mHairIndex;
-        int mFaceCount, mHairCount;
 
         std::string mCurrentRaceId;
 

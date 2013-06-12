@@ -1,5 +1,9 @@
 #include "OgreMaterialSerializer.hpp"
 
+#include <OgrePass.h>
+
+#include <OgreStringConverter.h>
+
 namespace sh
 {
 	void OgreMaterialSerializer::reset()
@@ -19,6 +23,13 @@ namespace sh
 
 	bool OgreMaterialSerializer::setPassProperty (const std::string& param, std::string value, Ogre::Pass* pass)
 	{
+		// workaround https://ogre3d.atlassian.net/browse/OGRE-158
+		if (param == "transparent_sorting" && value == "force")
+		{
+			pass->setTransparentSortingForced(true);
+			return true;
+		}
+
 		reset();
 
 		mScriptContext.section = Ogre::MSS_PASS;
@@ -35,6 +46,13 @@ namespace sh
 
 	bool OgreMaterialSerializer::setTextureUnitProperty (const std::string& param, std::string value, Ogre::TextureUnitState* t)
 	{
+		// quick access to automip setting, without having to use 'texture' which doesn't like spaces in filenames
+		if (param == "num_mipmaps")
+		{
+			t->setNumMipmaps(Ogre::StringConverter::parseInt(value));
+			return true;
+		}
+		
 		reset();
 
 		mScriptContext.section = Ogre::MSS_TEXTUREUNIT;

@@ -18,11 +18,15 @@ class btSequentialImpulseConstraintSolver;
 class btCollisionDispatcher;
 class btDiscreteDynamicsWorld;
 class btHeightfieldTerrainShape;
-struct playerMove;
 
 namespace BtOgre
 {
     class DebugDrawer;
+}
+
+namespace Ogre
+{
+    class SceneManager;
 }
 
 namespace MWWorld
@@ -38,6 +42,14 @@ namespace Physic
     struct PhysicEvent;
     class PhysicEngine;
     class RigidBody;
+
+    enum CollisionType {
+        CollisionType_Nothing = 0, //<Collide with nothing
+        CollisionType_World = 1<<0, //<Collide with world objects
+        CollisionType_Actor = 1<<1, //<Collide sith actors
+        CollisionType_HeightMap = 1<<2, //<collide with heightmap
+        CollisionType_Raycasting = 1<<3 //Still used?
+    };
 
     /**
     *This is just used to be able to name objects.
@@ -61,33 +73,26 @@ namespace Physic
     class PhysicActor
     {
     public:
-        PhysicActor(std::string name, std::string mesh, PhysicEngine *engine, Ogre::Vector3 position, Ogre::Quaternion rotation, float scale);
+        PhysicActor(const std::string &name, const std::string &mesh, PhysicEngine *engine, const Ogre::Vector3 &position, const Ogre::Quaternion &rotation, float scale);
 
         ~PhysicActor();
 
-        void setCurrentWater(bool hasWater, int waterHeight);
-
-        /**
-         * This function sets the movement keys for pmove
-         */
-        void setMovement(signed char rightmove, signed char forwardmove, signed char upmove);
+        void setPosition(const Ogre::Vector3 &pos);
 
         /**
          * This adjusts the rotation of a PhysicActor
          * If we have any problems with this (getting stuck in pmove) we should change it 
          * from setting the visual orientation to setting the orientation of the rigid body directly.
          */
-        void setRotation(const Ogre::Quaternion quat);
-
-        void setGravity(float gravity);
-
-        void setSpeed(float speed);
-
-        void setJumpVelocity(float velocity);
+        void setRotation(const Ogre::Quaternion &quat);
 
         void enableCollisions(bool collision);
 
-        bool getCollisionMode();
+        bool getCollisionMode() const
+        {
+            return collisionMode;
+        }
+
 
         /**
          * This returns the visual position of the PhysicActor (used to position a scenenode).
@@ -101,26 +106,28 @@ namespace Physic
         Ogre::Quaternion getRotation();
 
         /**
-         * Sets the position of mBody from a visual position input.
-         * For most cases this should not be used.  We should instead let pmove move the PhysicActor around for us
-         */
-        void setPosition(const Ogre::Vector3 pos);
-
-        /**
-         * Sets the view angles for pmove directly.
-         * Remember, add 90 for yaw.  Set roll to 0.
-         */
-        void setPmoveViewAngles(float pitch, float yaw, float roll);
-
-        /**
          * Sets the scale of the PhysicActor
          */
         void setScale(float scale);
 
         /**
-         * Runs pmove for this PhysicActor
+         * Returns the half extents for this PhysiActor
          */
-        void runPmove();
+        Ogre::Vector3 getHalfExtents() const;
+
+        /**
+         * Sets the current amount of vertical force (gravity) affecting this physic actor
+         */
+        void setVerticalForce(float force);
+
+        /**
+         * Gets the current amount of vertical force (gravity) affecting this physic actor
+         */
+        float getVerticalForce() const;
+
+        void setOnGround(bool grounded);
+
+        bool getOnGround() const;
 
 //HACK: in Visual Studio 2010 and presumably above, this structures alignment
 //		must be 16, but the built in operator new & delete don't properly
@@ -130,18 +137,20 @@ namespace Physic
 		void operator delete (void * Data) { _aligned_free (Data); }
 #endif
 
+
     private:
-        
+
         OEngine::Physic::RigidBody* mBody;
+        OEngine::Physic::RigidBody* mRaycastingBody;
         Ogre::Vector3 mBoxScaledTranslation;
         btQuaternion mBoxRotationInverse;
         Ogre::Quaternion mBoxRotation;
+        float verticalForce;
+        bool onGround;
         bool collisionMode;
         std::string mMesh;
         PhysicEngine* mEngine;
         std::string mName;
-        playerMove* pmove;
-       
     };
 
     /**
@@ -155,10 +164,7 @@ namespace Physic
         RigidBody(btRigidBody::btRigidBodyConstructionInfo& CI,std::string name);
         virtual ~RigidBody();
         std::string mName;
-
-        //is this body used for raycasting only?
-        bool mCollide;
-        bool mIgnore;
+        bool mPlaceable;
     };
 
     struct HeightField
@@ -190,19 +196,21 @@ namespace Physic
          * Creates a RigidBody.  It does not add it to the simulation.
          * After created, the body is set to the correct rotation, position, and scale
          */
-        RigidBody* createAndAdjustRigidBody(std::string mesh,std::string name,float scale, Ogre::Vector3 position, Ogre::Quaternion rotation, 
-            Ogre::Vector3* scaledBoxTranslation = 0, Ogre::Quaternion* boxRotation = 0);
+        RigidBody* createAndAdjustRigidBody(const std::string &mesh, const std::string &name,
+            float scale, const Ogre::Vector3 &position, const Ogre::Quaternion &rotation,
+            Ogre::Vector3* scaledBoxTranslation = 0, Ogre::Quaternion* boxRotation = 0, bool raycasting=false, bool placeable=false);
 
         /**
          * Adjusts a rigid body to the right position and rotation
          */
 
-        void adjustRigidBody(RigidBody* body, Ogre::Vector3 position, Ogre::Quaternion rotation, 
-            Ogre::Vector3 scaledBoxTranslation = Ogre::Vector3::ZERO, Ogre::Quaternion boxRotation = Ogre::Quaternion::IDENTITY);
+        void adjustRigidBody(RigidBody* body, const Ogre::Vector3 &position, const Ogre::Quaternion &rotation,
+            const Ogre::Vector3 &scaledBoxTranslation = Ogre::Vector3::ZERO,
+            const Ogre::Quaternion &boxRotation = Ogre::Quaternion::IDENTITY);
         /**
          Mainly used to (but not limited to) adjust rigid bodies based on box shapes to the right position and rotation.
          */
-        void boxAdjustExternal(std::string mesh, RigidBody* body, float scale, Ogre::Vector3 position, Ogre::Quaternion rotation);
+        void boxAdjustExternal(const std::string &mesh, RigidBody* body, float scale, const Ogre::Vector3 &position, const Ogre::Quaternion &rotation);
         /**
          * Add a HeightField to the simulation
          */
@@ -218,40 +226,39 @@ namespace Physic
         /**
          * Add a RigidBody to the simulation
          */
-        void addRigidBody(RigidBody* body, bool addToMap = true);
+        void addRigidBody(RigidBody* body, bool addToMap = true, RigidBody* raycastingBody = NULL,bool actor = false);
 
         /**
          * Remove a RigidBody from the simulation. It does not delete it, and does not remove it from the RigidBodyMap.
          */
-        void removeRigidBody(std::string name);
+        void removeRigidBody(const std::string &name);
 
         /**
          * Delete a RigidBody, and remove it from RigidBodyMap.
          */
-        void deleteRigidBody(std::string name);
+        void deleteRigidBody(const std::string &name);
 
         /**
          * Return a pointer to a given rigid body.
-         * TODO:check if exist
          */
-        RigidBody* getRigidBody(std::string name);
+        RigidBody* getRigidBody(const std::string &name, bool raycasting=false);
 
         /**
          * Create and add a character to the scene, and add it to the ActorMap.
          */
-        void addCharacter(std::string name, std::string mesh,
-        Ogre::Vector3 position, float scale, Ogre::Quaternion rotation);
+        void addCharacter(const std::string &name, const std::string &mesh,
+        const Ogre::Vector3 &position, float scale, const Ogre::Quaternion &rotation);
 
         /**
          * Remove a character from the scene. TODO:delete it! for now, a small memory leak^^ done?
          */
-        void removeCharacter(std::string name);
+        void removeCharacter(const std::string &name);
 
         /**
          * Return a pointer to a character
          * TODO:check if the actor exist...
          */
-        PhysicActor* getCharacter(std::string name);
+        PhysicActor* getCharacter(const std::string &name);
 
         /**
          * This step the simulation of a given time.
@@ -279,15 +286,24 @@ namespace Physic
 
         void getObjectAABB(const std::string &mesh, float scale, btVector3 &min, btVector3 &max);
 
+        void setSceneManager(Ogre::SceneManager* sceneMgr);
+
+        bool isAnyActorStandingOn (const std::string& objectName);
+
         /**
          * Return the closest object hit by a ray. If there are no objects, it will return ("",-1).
          */
-        std::pair<std::string,float> rayTest(btVector3& from,btVector3& to);
+        std::pair<std::string,float> rayTest(btVector3& from,btVector3& to,bool raycastingObjectOnly = true,bool ignoreHeightMap = false);
 
         /**
          * Return all objects hit by a ray.
          */
         std::vector< std::pair<float, std::string> > rayTest2(btVector3& from, btVector3& to);
+
+        std::pair<bool, float> sphereCast (float radius, btVector3& from, btVector3& to);
+        ///< @return (hit, relative distance)
+
+        std::vector<std::string> getCollisions(const std::string& name);
 
         //event list of non player object
         std::list<PhysicEvent> NPEventList;
@@ -310,16 +326,19 @@ namespace Physic
         HeightFieldContainer mHeightFieldMap;
 
         typedef std::map<std::string,RigidBody*> RigidBodyContainer;
-        RigidBodyContainer ObjectMap;
+        RigidBodyContainer mCollisionObjectMap;
+
+        RigidBodyContainer mRaycastingObjectMap;
 
         typedef std::map<std::string, PhysicActor*>  PhysicActorContainer;
-        PhysicActorContainer PhysicActorMap;
+        PhysicActorContainer mActorMap;
+
+        Ogre::SceneManager* mSceneMgr;
 
         //debug rendering
         BtOgre::DebugDrawer* mDebugDrawer;
         bool isDebugCreated;
         bool mDebugActive;
-       
     };
 
 

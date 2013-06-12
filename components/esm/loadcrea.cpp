@@ -7,6 +7,8 @@ namespace ESM {
 
 void Creature::load(ESMReader &esm)
 {
+    mPersistent = esm.getRecordFlags() & 0x0400;
+
     mModel = esm.getHNString("MODL");
     mOriginal = esm.getHNOString("CNAM");
     mName = esm.getHNOString("FNAM");
@@ -53,4 +55,28 @@ void Creature::save(ESMWriter &esm)
     mAiPackage.save(esm);
 }
 
+    void Creature::blank()
+    {
+        mData.mType = 0;
+        mData.mLevel = 0;
+        mData.mStrength = mData.mIntelligence = mData.mWillpower = mData.mAgility =
+            mData.mSpeed = mData.mEndurance = mData.mPersonality = mData.mLuck = 0;
+        mData.mHealth = mData.mMana = mData.mFatigue = 0;
+        mData.mSoul = 0;
+        mData.mCombat = mData.mMagic = mData.mStealth = 0;
+        for (int i=0; i<6; ++i) mData.mAttack[i] = 0;
+        mData.mGold = 0;
+        mFlags = 0;
+        mScale = 0;
+        mModel.clear();
+        mName.clear();
+        mScript.clear();
+        mOriginal.clear();
+        mInventory.mList.clear();
+        mSpells.mList.clear();
+        mHasAI = false;
+        mAiData.blank();
+        mAiData.mServices = 0;
+        mAiPackage.mList.clear();
+    }
 }

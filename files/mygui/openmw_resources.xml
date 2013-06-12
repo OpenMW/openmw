@@ -17,27 +17,6 @@
             </Index>
         </Group>
     </Resource>
-    <Resource type="ResourceImageSet" name="VResizePointerImage">
-        <Group name="Pointer" texture="mwpointer_vresize.png" size="32 32">
-            <Index name="Pointer" >
-                <Frame point="0 0"/>
-            </Index>
-        </Group>
-    </Resource>
-    <Resource type="ResourceImageSet" name="DResizePointerImage">
-        <Group name="Pointer" texture="mwpointer_dresize1.png" size="32 32">
-            <Index name="Pointer" >
-                <Frame point="o o"/>
-            </Index>
-        </Group>
-    </Resource>
-    <Resource type="ResourceImageSet" name="DResize2PointerImage">
-        <Group name="Pointer" texture="mwpointer_dresize2.png" size="32 32">
-            <Index name="Pointer" >
-                <Frame point="0 0"/>
-            </Index>
-        </Group>
-    </Resource>
     <Resource type="ResourceImageSet" name="DropGroundPointerImage">
         <Group name="Pointer" texture="textures\cursor_drop_ground.dds" size="32 32">
             <Index name="Pointer" >

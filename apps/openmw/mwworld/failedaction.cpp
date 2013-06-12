@@ -15,7 +15,7 @@ namespace MWWorld
     {
         if ( actor.getRefData().getHandle()=="player" && !(message.empty()))
 	{
-	  MWBase::Environment::get().getWindowManager() ->messageBox(message, std::vector<std::string>());
+      MWBase::Environment::get().getWindowManager() ->messageBox(message);
 	}
     }
 }

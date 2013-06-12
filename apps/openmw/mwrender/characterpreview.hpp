@@ -36,6 +36,8 @@ namespace MWRender
         virtual void rebuild();
 
     protected:
+        virtual bool renderHeadOnly() { return false; }
+
         Ogre::TexturePtr mTexture;
         Ogre::RenderTarget* mRenderTarget;
         Ogre::Viewport* mViewport;
@@ -51,6 +53,7 @@ namespace MWRender
         MWWorld::Ptr mCharacter;
 
         MWRender::NpcAnimation* mAnimation;
+        std::string mCurrentAnimGroup;
 
         std::string mName;
 
@@ -70,8 +73,6 @@ namespace MWRender
 
         int getSlotSelected(int posX, int posY);
 
-        void setNpcAnimation (NpcAnimation* anim);
-
     private:
 
         OEngine::Render::SelectionBuffer* mSelectionBuffer;
@@ -82,8 +83,16 @@ namespace MWRender
         ESM::NPC                        mBase;
         MWWorld::LiveCellRef<ESM::NPC>  mRef;
 
+    protected:
+
+        virtual bool renderHeadOnly() { return true; }
+
+        void updateCamera();
+
     public:
         RaceSelectionPreview();
+
+        virtual void onSetup();
 
         void update(float angle);
 

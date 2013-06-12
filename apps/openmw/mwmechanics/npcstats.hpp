@@ -53,6 +53,7 @@ namespace MWMechanics
             int mReputation;
             bool mWerewolf;
             int mWerewolfKills;
+            int mProfit;
 
             int mLevelProgress; // 0-10
 
@@ -63,6 +64,10 @@ namespace MWMechanics
         public:
 
             NpcStats();
+
+            /// for mercenary companions. starts out as 0, and changes when items are added or removed through the UI.
+            int getProfit() const;
+            void modifyProfit(int diff);
 
             DrawState_ getDrawState() const;
 

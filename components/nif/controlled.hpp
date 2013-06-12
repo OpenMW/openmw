@@ -21,8 +21,8 @@
 
  */
 
-#ifndef _NIF_CONTROLLED_H_
-#define _NIF_CONTROLLED_H_
+#ifndef OPENMW_COMPONENTS_NIF_CONTROLLED_HPP
+#define OPENMW_COMPONENTS_NIF_CONTROLLED_HPP
 
 #include "extra.hpp"
 #include "controller.hpp"
@@ -36,7 +36,7 @@ class Controlled : public Extra
 public:
     ControllerPtr controller;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         Extra::read(nif);
         controller.read(nif);
@@ -55,7 +55,7 @@ class Named : public Controlled
 public:
     std::string name;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         name = nif->getString();
         Controlled::read(nif);
@@ -66,12 +66,14 @@ typedef Named NiSequenceStreamHelper;
 class NiParticleGrowFade : public Controlled
 {
 public:
-    void read(NIFFile *nif)
+    float growTime;
+    float fadeTime;
+
+    void read(NIFStream *nif)
     {
         Controlled::read(nif);
-
-        // Two floats.
-        nif->skip(8);
+        growTime = nif->getFloat();
+        fadeTime = nif->getFloat();
     }
 };
 
@@ -80,7 +82,7 @@ class NiParticleColorModifier : public Controlled
 public:
     NiColorDataPtr data;
 
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         Controlled::read(nif);
         data.read(nif);
@@ -96,12 +98,23 @@ public:
 class NiGravity : public Controlled
 {
 public:
-    void read(NIFFile *nif)
+    float mForce;
+    /* 0 - Wind (fixed direction)
+     * 1 - Point (fixed origin)
+     */
+    int mType;
+    Ogre::Vector3 mPosition;
+    Ogre::Vector3 mDirection;
+
+    void read(NIFStream *nif)
     {
         Controlled::read(nif);
 
-        // two floats, one int, six floats
-        nif->skip(9*4);
+        /*unknown*/nif->getFloat();
+        mForce = nif->getFloat();
+        mType = nif->getUInt();
+        mPosition = nif->getVector3();
+        mDirection = nif->getVector3();
     }
 };
 
@@ -109,7 +122,7 @@ public:
 class NiPlanarCollider : public Controlled
 {
 public:
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         Controlled::read(nif);
 
@@ -121,7 +134,7 @@ public:
 class NiParticleRotation : public Controlled
 {
 public:
-    void read(NIFFile *nif)
+    void read(NIFStream *nif)
     {
         Controlled::read(nif);
 

@@ -1,3 +1,34 @@
+material QueryTotalPixels
+{
+    allow_fixed_function false
+    pass
+    {
+        vertex_program sun_vertex
+        fragment_program sun_fragment
+        cull_hardware none
+        polygon_mode_overrideable off
+        depth_check off
+        depth_write off
+        colour_write off
+    }
+}
+
+material QueryVisiblePixels
+{
+    allow_fixed_function false
+    pass
+    {
+        vertex_program sun_vertex
+        fragment_program sun_fragment
+        cull_hardware none
+        cull_software none
+        polygon_mode_overrideable off
+        depth_check on
+        depth_write off
+        colour_write off
+    }
+}
+
 material openmw_moon
 {
     allow_fixed_function false
@@ -5,7 +36,8 @@ material openmw_moon
     {
         vertex_program moon_vertex
         fragment_program moon_fragment
-        
+        cull_hardware none
+
         polygon_mode_overrideable off
         depth_write off
         depth_check off
@@ -59,7 +91,6 @@ material openmw_atmosphere
         
         polygon_mode_overrideable off
         
-        scene_blend alpha_blend
         depth_write off
     }
 }
@@ -93,6 +124,7 @@ material openmw_sun
     {
         vertex_program sun_vertex
         fragment_program sun_fragment
+        cull_hardware none
 
         polygon_mode_overrideable off
         

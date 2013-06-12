@@ -21,8 +21,16 @@
 #include "../mwbase/soundmanager.hpp"
 
 MWMechanics::NpcStats::NpcStats()
-: mMovementFlags (0), mDrawState (DrawState_Nothing), mBounty (0)
-, mLevelProgress(0), mDisposition(0), mVampire (0), mReputation(0), mWerewolf (false), mWerewolfKills (0)
+: mMovementFlags (0)
+, mDrawState (DrawState_Nothing)
+, mBounty (0)
+, mLevelProgress(0)
+, mDisposition(0)
+, mVampire (0)
+, mReputation(0)
+, mWerewolf (false)
+, mWerewolfKills (0)
+, mProfit(0)
 {
     mSkillIncreases.resize (ESM::Attribute::Length);
     for (int i=0; i<ESM::Attribute::Length; ++i)
@@ -161,8 +169,7 @@ float MWMechanics::NpcStats::getSkillGain (int skillIndex, const ESM::Class& cla
         if (specialisationFactor<=0)
             throw std::runtime_error ("invalid skill specialisation factor");
     }
-
-    return 1.0 / (level +1) * (1.0 / (skillFactor)) * typeFactor * specialisationFactor;
+    return 1.0 / ((level+1) * (1.0/skillFactor) * typeFactor * specialisationFactor);
 }
 
 void MWMechanics::NpcStats::useSkill (int skillIndex, const ESM::Class& class_, int usageType)
@@ -221,12 +228,12 @@ void MWMechanics::NpcStats::increaseSkill(int skillIndex, const ESM::Class &clas
     message << boost::format(MWBase::Environment::get().getWindowManager ()->getGameSettingString ("sNotifyMessage39", ""))
                % std::string("#{" + ESM::Skill::sSkillNameIds[skillIndex] + "}")
                % static_cast<int> (base);
-    MWBase::Environment::get().getWindowManager ()->messageBox(message.str(), std::vector<std::string>());
+    MWBase::Environment::get().getWindowManager ()->messageBox(message.str());
 
     if (mLevelProgress >= 10)
     {
         // levelup is possible now
-        MWBase::Environment::get().getWindowManager ()->messageBox ("#{sLevelUpMsg}", std::vector<std::string>());
+        MWBase::Environment::get().getWindowManager ()->messageBox ("#{sLevelUpMsg}");
     }
 
     getSkill (skillIndex).setBase (base);
@@ -326,7 +333,7 @@ bool MWMechanics::NpcStats::hasSkillsForRank (const std::string& factionId, int 
     std::vector<int> skills;
 
     for (int i=0; i<6; ++i)
-        skills.push_back (static_cast<int> (getSkill (faction.mData.mSkillID[i]).getModified()));
+        skills.push_back (static_cast<int> (getSkill (faction.mData.mSkills[i]).getModified()));
 
     std::sort (skills.begin(), skills.end());
 
@@ -353,4 +360,14 @@ void MWMechanics::NpcStats::setWerewolf (bool set)
 int MWMechanics::NpcStats::getWerewolfKills() const
 {
     return mWerewolfKills;
+}
+
+int MWMechanics::NpcStats::getProfit() const
+{
+    return mProfit;
+}
+
+void MWMechanics::NpcStats::modifyProfit(int diff)
+{
+    mProfit += diff;
 }

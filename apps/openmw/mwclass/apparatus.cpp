@@ -12,6 +12,7 @@
 #include "../mwworld/actionalchemy.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/physicssystem.hpp"
+#include "../mwworld/nullaction.hpp"
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
@@ -34,7 +35,7 @@ namespace MWClass
     {
         const std::string model = getModel(ptr);
         if(!model.empty())
-            physics.addObject(ptr);
+            physics.addObject(ptr,true);
     }
 
     std::string Apparatus::getModel(const MWWorld::Ptr &ptr) const
@@ -61,6 +62,9 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Apparatus::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
+        if (!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
+            return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction ());
+
     	boost::shared_ptr<MWWorld::Action> action(
     	            new MWWorld::ActionTake (ptr));
 
@@ -154,5 +158,17 @@ namespace MWClass
             ptr.get<ESM::Apparatus>();
 
         return MWWorld::Ptr(&cell.mAppas.insert(*ref), &cell);
+    }
+
+    bool Apparatus::canSell (const MWWorld::Ptr& item, int npcServices) const
+    {
+        return npcServices & ESM::NPC::Apparatus;
+    }
+
+    float Apparatus::getWeight(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Apparatus> *ref =
+            ptr.get<ESM::Apparatus>();
+        return ref->mBase->mData.mWeight;
     }
 }

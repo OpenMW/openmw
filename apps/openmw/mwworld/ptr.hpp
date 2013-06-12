@@ -68,13 +68,13 @@ namespace MWWorld
 
             Ptr::CellStore *getCell() const
             {
-                assert (mCell);
+                assert(mCell);
                 return mCell;
             }
 
             bool isInCell() const
             {
-                return (mCell != 0);
+                return (mContainerStore == 0);
             }
 
             void setContainerStore (ContainerStore *store);

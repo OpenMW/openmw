@@ -1,7 +1,7 @@
 #ifndef MWGUI_BIRTH_H
 #define MWGUI_BIRTH_H
 
-#include "window_base.hpp"
+#include "windowbase.hpp"
 
 /*
   This file contains the dialog for choosing a birth sign.
@@ -10,10 +10,10 @@
 
 namespace MWGui
 {
-    class BirthDialog : public WindowBase
+    class BirthDialog : public WindowModal
     {
     public:
-        BirthDialog(MWBase::WindowManager& parWindowManager);
+        BirthDialog();
 
         enum Gender
         {
@@ -46,9 +46,9 @@ namespace MWGui
         void updateSpells();
 
         MyGUI::ListBox* mBirthList;
-        MyGUI::WidgetPtr  mSpellArea;
+        MyGUI::Widget*  mSpellArea;
         MyGUI::ImageBox* mBirthImage;
-        std::vector<MyGUI::WidgetPtr> mSpellItems;
+        std::vector<MyGUI::Widget*> mSpellItems;
 
         std::string mCurrentBirthId;
     };

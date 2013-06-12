@@ -51,6 +51,9 @@ QVariant CSMWorld::IdTable::headerData (int section, Qt::Orientation orientation
     if (role==ColumnBase::Role_Flags)
         return mIdCollection->getColumn (section).mFlags;
 
+    if (role==ColumnBase::Role_Display)
+        return mIdCollection->getColumn (section).mDisplayType;
+
     return QVariant();
 }
 
@@ -93,9 +96,28 @@ bool CSMWorld::IdTable::removeRows (int row, int count, const QModelIndex& paren
     return true;
 }
 
+QModelIndex CSMWorld::IdTable::index (int row, int column, const QModelIndex& parent) const
+{
+    if (parent.isValid())
+        return QModelIndex();
+
+    if (row<0 || row>=mIdCollection->getSize())
+        return QModelIndex();
+
+    if (column<0 || column>=mIdCollection->getColumns())
+        return QModelIndex();
+
+    return createIndex (row, column);
+}
+
+QModelIndex CSMWorld::IdTable::parent (const QModelIndex& index) const
+{
+    return QModelIndex();
+}
+
 void CSMWorld::IdTable::addRecord (const std::string& id)
 {
-    int index = mIdCollection->getSize();
+    int index = mIdCollection->getAppendIndex();
 
     beginInsertRows (QModelIndex(), index, index);
 
@@ -109,13 +131,13 @@ QModelIndex CSMWorld::IdTable::getModelIndex (const std::string& id, int column)
     return index (mIdCollection->getIndex (id), column);
 }
 
-void CSMWorld::IdTable::setRecord (const RecordBase& record)
+void CSMWorld::IdTable::setRecord (const std::string& id, const RecordBase& record)
 {
-    int index = mIdCollection->searchId (mIdCollection->getId (record));
+    int index = mIdCollection->searchId (id);
 
     if (index==-1)
     {
-        int index = mIdCollection->getSize();
+        int index = mIdCollection->getAppendIndex();
 
         beginInsertRows (QModelIndex(), index, index);
 

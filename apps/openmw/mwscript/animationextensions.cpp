@@ -9,7 +9,7 @@
 #include <components/interpreter/runtime.hpp>
 #include <components/interpreter/opcodes.hpp>
 
-#include "../mwbase/world.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "interpretercontext.hpp"
 #include "ref.hpp"
@@ -27,7 +27,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    MWBase::Environment::get().getWorld()->skipAnimation (ptr);
+                    MWBase::Environment::get().getMechanicsManager()->skipAnimation (ptr);
                }
         };
 
@@ -54,7 +54,7 @@ namespace MWScript
                             throw std::runtime_error ("animation mode out of range");
                     }
 
-                    MWBase::Environment::get().getWorld()->playAnimationGroup (ptr, group, mode, 1);
+                    MWBase::Environment::get().getMechanicsManager()->playAnimationGroup (ptr, group, mode, 1);
                }
         };
 
@@ -87,7 +87,7 @@ namespace MWScript
                             throw std::runtime_error ("animation mode out of range");
                     }
 
-                    MWBase::Environment::get().getWorld()->playAnimationGroup (ptr, group, mode, loops);
+                    MWBase::Environment::get().getMechanicsManager()->playAnimationGroup (ptr, group, mode, loops);
                }
         };
 

@@ -47,6 +47,16 @@ namespace MWWorld
         throw std::runtime_error ("class does not represent an actor");
     }
 
+    bool Class::canSell (const MWWorld::Ptr& item, int npcServices) const
+    {
+        return false;
+    }
+
+    int Class::getServices(const Ptr &actor) const
+    {
+        throw std::runtime_error ("class does not have services");
+    }
+
     MWMechanics::CreatureStats& Class::getCreatureStats (const Ptr& ptr) const
     {
         throw std::runtime_error ("class does not have creature stats");
@@ -122,12 +132,27 @@ namespace MWWorld
         return 0;
     }
 
+    float Class::getJump (const Ptr& ptr) const
+    {
+        return 0;
+    }
+
+    float Class::getEnchantmentPoints (const MWWorld::Ptr& ptr) const
+    {
+        throw std::runtime_error ("class does not support enchanting");
+    }
+
     MWMechanics::Movement& Class::getMovementSettings (const Ptr& ptr) const
     {
         throw std::runtime_error ("movement settings not supported by class");
     }
 
     Ogre::Vector3 Class::getMovementVector (const Ptr& ptr) const
+    {
+        return Ogre::Vector3 (0, 0, 0);
+    }
+
+    Ogre::Vector3 Class::getRotationVector (const Ptr& ptr) const
     {
         return Ogre::Vector3 (0, 0, 0);
     }
@@ -152,6 +177,11 @@ namespace MWWorld
         throw std::runtime_error ("capacity not supported by this class");
     }
 
+    float Class::getWeight(const Ptr &ptr) const
+    {
+        throw std::runtime_error ("weight not supported by this class");
+    }
+
     float Class::getEncumbrance (const MWWorld::Ptr& ptr) const
     {
         throw std::runtime_error ("encumbrance not supported by class");
@@ -162,17 +192,25 @@ namespace MWWorld
         return false;
     }
 
-     bool Class::hasDetected (const MWWorld::Ptr& ptr, const MWWorld::Ptr& ptr2) const
+    bool Class::hasDetected (const MWWorld::Ptr& ptr, const MWWorld::Ptr& ptr2) const
     {
-        return false;
+        return true;
+    }
+
+    float Class::getArmorRating (const MWWorld::Ptr& ptr) const
+    {
+        throw std::runtime_error("Class does not support armor rating");
     }
 
     const Class& Class::get (const std::string& key)
     {
+        if (key.empty())
+            throw std::logic_error ("Class::get(): attempting to get an empty key");
+
         std::map<std::string, boost::shared_ptr<Class> >::const_iterator iter = sClasses.find (key);
 
         if (iter==sClasses.end())
-            throw std::logic_error ("unknown class key: " + key);
+            throw std::logic_error ("Class::get(): unknown class key: " + key);
 
         return *iter->second;
     }
@@ -180,6 +218,11 @@ namespace MWWorld
     const Class& Class::get (const Ptr& ptr)
     {
         return get (ptr.getTypeName());
+    }
+
+    bool Class::isPersistent(const Ptr &ptr) const
+    {
+        throw std::runtime_error ("class does not support persistence");
     }
 
     void Class::registerClass (const std::string& key,  boost::shared_ptr<Class> instance)
@@ -229,6 +272,20 @@ namespace MWWorld
     std::string Class::getModel(const MWWorld::Ptr &ptr) const
     {
         return "";
+    }
+
+    void Class::applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
+    {
+        throw std::runtime_error ("class can't be enchanted");
+    }
+
+    std::pair<int, std::string> Class::canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const
+    {
+        return std::make_pair (1, "");
+    }
+
+    void Class::adjustPosition(const MWWorld::Ptr& ptr) const
+    {
     }
 
     MWWorld::Ptr

@@ -2,22 +2,23 @@
 #define MWGUI_LOADINGSCREEN_H
 
 #include <OgreSceneManager.h>
-#include <OgreResourceGroupManager.h>
 
-#include "window_base.hpp"
+#include "windowbase.hpp"
 
 namespace MWGui
 {
     class LoadingScreen : public WindowBase
     {
     public:
-        LoadingScreen(Ogre::SceneManager* sceneMgr, Ogre::RenderWindow* rw, MWBase::WindowManager& parWindowManager);
+        LoadingScreen(Ogre::SceneManager* sceneMgr, Ogre::RenderWindow* rw);
         virtual ~LoadingScreen();
 
         void setLoadingProgress (const std::string& stage, int depth, int current, int total);
         void loadingDone();
 
         void onResChange(int w, int h);
+
+        void updateWindow(Ogre::RenderWindow* rw) { mWindow = rw; }
 
     private:
         bool mFirstLoad;
@@ -42,7 +43,7 @@ namespace MWGui
         Ogre::Rectangle2D* mRectangle;
         Ogre::MaterialPtr mBackgroundMaterial;
 
-        Ogre::StringVectorPtr mResources;
+        Ogre::StringVector mResources;
 
         bool mLoadingOn;
 

@@ -11,6 +11,8 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwworld/player.hpp"
+#include "../mwworld/class.hpp"
+#include "../mwworld/inventorystore.hpp"
 
 #include "renderconst.hpp"
 #include "npcanimation.hpp"
@@ -20,13 +22,15 @@ namespace MWRender
 
     CharacterPreview::CharacterPreview(MWWorld::Ptr character, int sizeX, int sizeY, const std::string& name,
                                        Ogre::Vector3 position, Ogre::Vector3 lookAt)
-        : mSizeX(sizeX)
-        , mSizeY(sizeY)
-        , mName(name)
+
+        : mSceneMgr (0)
         , mPosition(position)
         , mLookAt(lookAt)
         , mCharacter(character)
         , mAnimation(NULL)
+        , mName(name)
+        , mSizeX(sizeX)
+        , mSizeY(sizeY)
     {
 
     }
@@ -39,6 +43,15 @@ namespace MWRender
     void CharacterPreview::setup ()
     {
         mSceneMgr = Ogre::Root::getSingleton().createSceneManager(Ogre::ST_GENERIC);
+
+        /// \todo Read the fallback values from INIImporter (Inventory:Directional*)
+        Ogre::Light* l = mSceneMgr->createLight();
+        l->setType (Ogre::Light::LT_DIRECTIONAL);
+        l->setDirection (Ogre::Vector3(0.3, -0.7, 0.3));
+        l->setDiffuseColour (Ogre::ColourValue(1,1,1));
+
+        mSceneMgr->setAmbientLight (Ogre::ColourValue(0.5, 0.5, 0.5));
+
         mCamera = mSceneMgr->createCamera (mName);
         mCamera->setAspectRatio (float(mSizeX) / float(mSizeY));
 
@@ -49,10 +62,8 @@ namespace MWRender
 
         mNode = renderRoot->createChildSceneNode();
 
-        mAnimation = new NpcAnimation(mCharacter, mNode,
-            MWWorld::Class::get(mCharacter).getInventoryStore (mCharacter), RV_PlayerPreview);
-
-        mNode->setVisible (false);
+        mAnimation = new NpcAnimation(mCharacter, mNode, MWWorld::Class::get(mCharacter).getInventoryStore(mCharacter),
+                                      0, (renderHeadOnly() ? NpcAnimation::VM_HeadOnly : NpcAnimation::VM_Normal));
 
         Ogre::Vector3 scale = mNode->getScale();
         mCamera->setPosition(mPosition * scale);
@@ -72,8 +83,6 @@ namespace MWRender
         mViewport->setOverlaysEnabled(false);
         mViewport->setBackgroundColour(Ogre::ColourValue(0, 0, 0, 0));
         mViewport->setShadowsEnabled(false);
-        mViewport->setMaterialScheme("local_map");
-        mViewport->setVisibilityMask (RV_PlayerPreview);
         mRenderTarget->setActive(true);
         mRenderTarget->setAutoUpdated (false);
 
@@ -82,25 +91,30 @@ namespace MWRender
 
     CharacterPreview::~CharacterPreview ()
     {
-        //Ogre::TextureManager::getSingleton().remove(mName);
-        mSceneMgr->destroyCamera (mName);
-        delete mAnimation;
-        Ogre::Root::getSingleton().destroySceneManager(mSceneMgr);
+        if (mSceneMgr)
+        {
+            //Ogre::TextureManager::getSingleton().remove(mName);
+            mSceneMgr->destroyAllCameras();
+            delete mAnimation;
+            Ogre::Root::getSingleton().destroySceneManager(mSceneMgr);
+        }
     }
 
     void CharacterPreview::rebuild()
     {
         assert(mAnimation);
         delete mAnimation;
+        mAnimation = 0;
 
-        mAnimation = new NpcAnimation(mCharacter, mNode,
-            MWWorld::Class::get(mCharacter).getInventoryStore (mCharacter), RV_PlayerPreview);
+        mAnimation = new NpcAnimation(mCharacter, mNode, MWWorld::Class::get(mCharacter).getInventoryStore(mCharacter),
+                                      0, (renderHeadOnly() ? NpcAnimation::VM_HeadOnly : NpcAnimation::VM_Normal));
 
-        mNode->setVisible (false);
+        float scale=1.f;
+        MWWorld::Class::get(mCharacter).adjustScale(mCharacter, scale);
+        mNode->setScale(Ogre::Vector3(scale));
 
-        Ogre::Vector3 scale = mNode->getScale();
-        mCamera->setPosition(mPosition * scale);
-        mCamera->lookAt(mLookAt * scale);
+        mCamera->setPosition(mPosition * mNode->getScale());
+        mCamera->lookAt(mLookAt * mNode->getScale());
 
         onSetup();
     }
@@ -110,6 +124,7 @@ namespace MWRender
 
     InventoryPreview::InventoryPreview(MWWorld::Ptr character)
         : CharacterPreview(character, 512, 1024, "CharacterPreview", Ogre::Vector3(0, 65, -180), Ogre::Vector3(0,65,0))
+        , mSelectionBuffer(NULL)
     {
     }
 
@@ -120,18 +135,66 @@ namespace MWRender
 
     void InventoryPreview::update(int sizeX, int sizeY)
     {
-        mAnimation->forceUpdate ();
+        MWWorld::InventoryStore &inv = MWWorld::Class::get(mCharacter).getInventoryStore(mCharacter);
+        MWWorld::ContainerStoreIterator iter = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+        std::string groupname;
+        if(iter == inv.end())
+            groupname = "inventoryhandtohand";
+        else
+        {
+            const std::string &type = iter->getTypeName();
+            if(type == typeid(ESM::Lockpick).name() || type == typeid(ESM::Probe).name())
+                groupname = "inventoryweapononehand";
+            else if(type == typeid(ESM::Weapon).name())
+            {
+                MWWorld::LiveCellRef<ESM::Weapon> *ref = iter->get<ESM::Weapon>();
+
+                int type = ref->mBase->mData.mType;
+                if(type == ESM::Weapon::ShortBladeOneHand ||
+                   type == ESM::Weapon::LongBladeOneHand ||
+                   type == ESM::Weapon::BluntOneHand ||
+                   type == ESM::Weapon::AxeOneHand)
+                    groupname = "inventoryweapononehand";
+                else if(type == ESM::Weapon::LongBladeTwoHand ||
+                        type == ESM::Weapon::BluntTwoClose ||
+                        type == ESM::Weapon::AxeTwoHand)
+                    groupname = "inventoryweapontwohand";
+                else if(type == ESM::Weapon::BluntTwoWide ||
+                        type == ESM::Weapon::SpearTwoWide)
+                    groupname = "inventoryweapontwowide";
+                else
+                    groupname = "inventoryhandtohand";
+            }
+            else
+                groupname = "inventoryhandtohand";
+        }
+
+        if(groupname != mCurrentAnimGroup)
+        {
+            mCurrentAnimGroup = groupname;
+            mAnimation->play(mCurrentAnimGroup, 1, Animation::Group_All, false, "start", "stop", 0.0f, 0);
+        }
+
+        MWWorld::ContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
+        if(torch != inv.end() && torch->getTypeName() == typeid(ESM::Light).name())
+        {
+            if(!mAnimation->getInfo("torch"))
+                mAnimation->play("torch", 2, MWRender::Animation::Group_LeftArm, false,
+                                 "start", "stop", 0.0f, (~(size_t)0));
+        }
+        else if(mAnimation->getInfo("torch"))
+            mAnimation->disable("torch");
+
+        mAnimation->forceUpdate();
+        mAnimation->runAnimation(0.0f);
 
         mViewport->setDimensions (0, 0, std::min(1.f, float(sizeX) / float(512)), std::min(1.f, float(sizeY) / float(1024)));
 
         mNode->setOrientation (Ogre::Quaternion::IDENTITY);
 
-        mNode->setVisible (true);
-
         mRenderTarget->update();
-        mSelectionBuffer->update();
 
-        mNode->setVisible (false);
+        mSelectionBuffer->update();
     }
 
     int InventoryPreview::getSlotSelected (int posX, int posY)
@@ -141,17 +204,20 @@ namespace MWRender
 
     void InventoryPreview::onSetup ()
     {
-        mSelectionBuffer = new OEngine::Render::SelectionBuffer(mCamera, 512, 1024, RV_PlayerPreview);
+        delete mSelectionBuffer;
+        mSelectionBuffer = new OEngine::Render::SelectionBuffer(mCamera, 512, 1024, 0);
 
-        mAnimation->playGroup ("inventoryhandtohand", 0, 1);
-        mAnimation->runAnimation (0);
+        mAnimation->showWeapons(true);
+
+        mCurrentAnimGroup = "inventoryhandtohand";
+        mAnimation->play(mCurrentAnimGroup, 1, Animation::Group_All, false, "start", "stop", 0.0f, 0);
     }
 
     // --------------------------------------------------------------------------------------------------
 
     RaceSelectionPreview::RaceSelectionPreview()
         : CharacterPreview(MWBase::Environment::get().getWorld()->getPlayer().getPlayer(),
-            512, 512, "CharacterHeadPreview", Ogre::Vector3(0, 120, -35), Ogre::Vector3(0,125,0))
+            512, 512, "CharacterHeadPreview", Ogre::Vector3(0, 6, -35), Ogre::Vector3(0,125,0))
         , mRef(&mBase)
     {
         mBase = *mCharacter.get<ESM::NPC>()->mBase;
@@ -160,11 +226,12 @@ namespace MWRender
 
     void RaceSelectionPreview::update(float angle)
     {
+        mAnimation->runAnimation(0.0f);
         mNode->roll(Ogre::Radian(angle), Ogre::SceneNode::TS_LOCAL);
 
-        mNode->setVisible (true);
+        updateCamera();
+
         mRenderTarget->update();
-        mNode->setVisible (false);
     }
 
     void RaceSelectionPreview::setPrototype(const ESM::NPC &proto)
@@ -173,5 +240,22 @@ namespace MWRender
         mBase.mId = "player";
         rebuild();
         update(0);
+    }
+
+    void RaceSelectionPreview::onSetup ()
+    {
+        mAnimation->play("idle", 1, Animation::Group_All, false, "start", "stop", 0.0f, 0);
+
+        updateCamera();
+    }
+
+    void RaceSelectionPreview::updateCamera()
+    {
+        Ogre::Vector3 scale = mNode->getScale();
+        Ogre::Vector3 headOffset = mAnimation->getNode("Bip01 Head")->_getDerivedPosition();
+        headOffset = mNode->convertLocalToWorldPosition(headOffset);
+
+        mCamera->setPosition(headOffset + mPosition * scale);
+        mCamera->lookAt(headOffset + mPosition*Ogre::Vector3(0,1,0) * scale);
     }
 }

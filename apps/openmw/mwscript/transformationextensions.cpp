@@ -84,21 +84,27 @@ namespace MWScript
                     Interpreter::Type_Float angle = runtime[0].mFloat;
                     runtime.pop();
 
-                    float ax = Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees();
-                    float ay = Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees();
-                    float az = Ogre::Radian(ptr.getRefData().getPosition().rot[2]).valueDegrees();
+                    float ax = Ogre::Radian(ptr.getRefData().getLocalRotation().rot[0]).valueDegrees();
+                    float ay = Ogre::Radian(ptr.getRefData().getLocalRotation().rot[1]).valueDegrees();
+                    float az = Ogre::Radian(ptr.getRefData().getLocalRotation().rot[2]).valueDegrees();
+
+                    float *objRot = ptr.getRefData().getPosition().rot;
+
+                    float lx = Ogre::Radian(objRot[0]).valueDegrees();
+                    float ly = Ogre::Radian(objRot[1]).valueDegrees();
+                    float lz = Ogre::Radian(objRot[2]).valueDegrees();
 
                     if (axis == "x")
                     {
-                        MWBase::Environment::get().getWorld()->rotateObject(ptr,angle,ay,az);
+                        MWBase::Environment::get().getWorld()->localRotateObject(ptr,angle-lx,ay,az);
                     }
                     else if (axis == "y")
                     {
-                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,angle,az);
+                        MWBase::Environment::get().getWorld()->localRotateObject(ptr,ax,angle-ly,az);
                     }
                     else if (axis == "z")
                     {
-                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,angle);
+                        MWBase::Environment::get().getWorld()->localRotateObject(ptr,ax,ay,angle-lz);
                     }
                     else
                         throw std::runtime_error ("invalid ration axis: " + axis);
@@ -119,15 +125,15 @@ namespace MWScript
 
                     if (axis == "x")
                     {
-                        runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees());
+                        runtime.push(Ogre::Radian(ptr.getCellRef().mPos.rot[0]).valueDegrees());
                     }
                     else if (axis == "y")
                     {
-                        runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees());
+                        runtime.push(Ogre::Radian(ptr.getCellRef().mPos.rot[1]).valueDegrees());
                     }
                     else if (axis == "z")
                     {
-                        runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[2]).valueDegrees());
+                        runtime.push(Ogre::Radian(ptr.getCellRef().mPos.rot[2]).valueDegrees());
                     }
                     else
                         throw std::runtime_error ("invalid ration axis: " + axis);
@@ -148,15 +154,15 @@ namespace MWScript
 
                     if (axis=="x")
                     {
-                        runtime.push(Ogre::Radian(ptr.getCellRef().mPos.rot[0]).valueDegrees());
+                        runtime.push(Ogre::Radian(ptr.getCellRef().mPos.rot[0]).valueDegrees()+Ogre::Radian(ptr.getRefData().getLocalRotation().rot[0]).valueDegrees());
                     }
                     else if (axis=="y")
                     {
-                        runtime.push(Ogre::Radian(ptr.getCellRef().mPos.rot[1]).valueDegrees());
+                        runtime.push(Ogre::Radian(ptr.getCellRef().mPos.rot[1]).valueDegrees()+Ogre::Radian(ptr.getRefData().getLocalRotation().rot[1]).valueDegrees());
                     }
                     else if (axis=="z")
                     {
-                        runtime.push(Ogre::Radian(ptr.getCellRef().mPos.rot[2]).valueDegrees());
+                        runtime.push(Ogre::Radian(ptr.getCellRef().mPos.rot[2]).valueDegrees()+Ogre::Radian(ptr.getRefData().getLocalRotation().rot[2]).valueDegrees());
                     }
                     else
                         throw std::runtime_error ("invalid ration axis: " + axis);
@@ -303,6 +309,8 @@ namespace MWScript
                             zRot = zRot/60.;
                         }
                         MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,zRot);
+
+                        MWWorld::Class::get(ptr).adjustPosition(ptr);
                     }
                     else
                     {
@@ -341,6 +349,7 @@ namespace MWScript
                         zRot = zRot/60.;
                     }
                     MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,zRot);
+                    MWWorld::Class::get(ptr).adjustPosition(ptr);
                 }
         };
 
@@ -457,6 +466,13 @@ namespace MWScript
                     Interpreter::Type_Integer direction = runtime[0].mInteger;
                     runtime.pop();
 
+                    if (count<0)
+                        throw std::runtime_error ("count must be non-negative");
+
+                    // no-op
+                    if (count == 0)
+                        return;
+
                     ESM::Position ipos = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getRefData().getPosition();
                     Ogre::Vector3 pos(ipos.pos[0],ipos.pos[1],ipos.pos[2]);
                     Ogre::Quaternion rot(Ogre::Radian(-ipos.rot[2]), Ogre::Vector3::UNIT_Z);
@@ -500,6 +516,13 @@ namespace MWScript
                     Interpreter::Type_Integer direction = runtime[0].mInteger;
                     runtime.pop();
 
+                    if (count<0)
+                        throw std::runtime_error ("count must be non-negative");
+
+                    // no-op
+                    if (count == 0)
+                        return;
+
                     ESM::Position ipos = me.getRefData().getPosition();
                     Ogre::Vector3 pos(ipos.pos[0],ipos.pos[1],ipos.pos[2]);
                     Ogre::Quaternion rot(Ogre::Radian(-ipos.rot[2]), Ogre::Vector3::UNIT_Z);
@@ -525,6 +548,165 @@ namespace MWScript
                 }
         };
 
+        template<class R>
+        class OpRotate : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    const MWWorld::Ptr& ptr = R()(runtime);
+
+                    std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+                    Interpreter::Type_Float rotation = (runtime[0].mFloat*MWBase::Environment::get().getFrameDuration());
+                    runtime.pop();
+
+                    float ax = Ogre::Radian(ptr.getRefData().getLocalRotation().rot[0]).valueDegrees();
+                    float ay = Ogre::Radian(ptr.getRefData().getLocalRotation().rot[1]).valueDegrees();
+                    float az = Ogre::Radian(ptr.getRefData().getLocalRotation().rot[2]).valueDegrees();
+
+                    if (axis == "x")
+                    {
+                        MWBase::Environment::get().getWorld()->localRotateObject(ptr,ax+rotation,ay,az);
+                    }
+                    else if (axis == "y")
+                    {
+                        MWBase::Environment::get().getWorld()->localRotateObject(ptr,ax,ay+rotation,az);
+                    }
+                    else if (axis == "z")
+                    {
+                        MWBase::Environment::get().getWorld()->localRotateObject(ptr,ax,ay,az+rotation);
+                    }
+                    else
+                        throw std::runtime_error ("invalid rotation axis: " + axis);
+                }
+        };
+
+        template<class R>
+        class OpRotateWorld : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+                    Interpreter::Type_Float rotation = (runtime[0].mFloat*MWBase::Environment::get().getFrameDuration());
+                    runtime.pop();
+
+                    float *objRot = ptr.getRefData().getPosition().rot;
+
+                    float ax = Ogre::Radian(objRot[0]).valueDegrees();
+                    float ay = Ogre::Radian(objRot[1]).valueDegrees();
+                    float az = Ogre::Radian(objRot[2]).valueDegrees();
+
+                    if (axis == "x")
+                    {
+                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax+rotation,ay,az);
+                    }
+                    else if (axis == "y")
+                    {
+                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay+rotation,az);
+                    }
+                    else if (axis == "z")
+                    {
+                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,az+rotation);
+                    }
+                    else
+                        throw std::runtime_error ("invalid rotation axis: " + axis);
+                }
+        };
+
+        template<class R>
+        class OpSetAtStart : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+                    ptr.getRefData().getLocalRotation().rot[0] = 0;
+                    ptr.getRefData().getLocalRotation().rot[1] = 0;
+                    ptr.getRefData().getLocalRotation().rot[2] = 0;
+                    MWBase::Environment::get().getWorld()->rotateObject(ptr, 0,0,0,true);
+                    MWBase::Environment::get().getWorld()->moveObject(ptr, ptr.getCellRef().mPos.pos[0],
+                            ptr.getCellRef().mPos.pos[1], ptr.getCellRef().mPos.pos[2]);
+
+                }
+        };
+
+        template<class R>
+        class OpMove : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    const MWWorld::Ptr& ptr = R()(runtime);
+
+                    std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+                    Interpreter::Type_Float movement = (runtime[0].mFloat*MWBase::Environment::get().getFrameDuration());
+                    runtime.pop();
+
+                    Ogre::Vector3 posChange;
+                    if (axis == "x")
+                    {
+                        posChange=Ogre::Vector3(movement, 0, 0);
+                    }
+                    else if (axis == "y")
+                    {
+                        posChange=Ogre::Vector3(0, movement, 0);
+                    }
+                    else if (axis == "z")
+                    {
+                        posChange=Ogre::Vector3(0, 0, movement);
+                    }
+                    else
+                        throw std::runtime_error ("invalid movement axis: " + axis);
+
+                    Ogre::Vector3 worldPos = ptr.getRefData().getBaseNode()->convertLocalToWorldPosition(posChange);
+                    MWBase::Environment::get().getWorld()->moveObject(ptr, worldPos.x, worldPos.y, worldPos.z);
+                }
+        };
+
+        template<class R>
+        class OpMoveWorld : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+                    Interpreter::Type_Float movement = (runtime[0].mFloat*MWBase::Environment::get().getFrameDuration());
+                    runtime.pop();
+
+                    float *objPos = ptr.getRefData().getPosition().pos;
+
+                    if (axis == "x")
+                    {
+                        MWBase::Environment::get().getWorld()->moveObject(ptr, objPos[0]+movement, objPos[1], objPos[2]);
+                    }
+                    else if (axis == "y")
+                    {
+                        MWBase::Environment::get().getWorld()->moveObject(ptr, objPos[0], objPos[1]+movement, objPos[2]);
+                    }
+                    else if (axis == "z")
+                    {
+                        MWBase::Environment::get().getWorld()->moveObject(ptr, objPos[0], objPos[1], objPos[2]+movement);
+                    }
+                    else
+                        throw std::runtime_error ("invalid movement axis: " + axis);
+                }
+        };
+
+
         const int opcodeSetScale = 0x2000164;
         const int opcodeSetScaleExplicit = 0x2000165;
         const int opcodeSetAngle = 0x2000166;
@@ -539,6 +721,8 @@ namespace MWScript
         const int opcodeSetPosExplicit = 0x2000193;
         const int opcodeGetStartingPos = 0x2000194;
         const int opcodeGetStartingPosExplicit = 0x2000195;
+        const int opcodeGetStartingAngle = 0x2000210;
+        const int opcodeGetStartingAngleExplicit = 0x2000211;
         const int opcodePosition = 0x2000196;
         const int opcodePositionExplicit = 0x2000197;
         const int opcodePositionCell = 0x2000198;
@@ -551,6 +735,16 @@ namespace MWScript
         const int opcodePlaceAtMeExplicit = 0x200019e;
         const int opcodeModScale = 0x20001e3;
         const int opcodeModScaleExplicit = 0x20001e4;
+        const int opcodeRotate = 0x20001ff;
+        const int opcodeRotateExplicit = 0x2000200;
+        const int opcodeRotateWorld = 0x2000201;
+        const int opcodeRotateWorldExplicit = 0x2000202;
+        const int opcodeSetAtStart = 0x2000203;
+        const int opcodeSetAtStartExplicit = 0x2000204;
+        const int opcodeMove = 0x2000206;
+        const int opcodeMoveExplicit = 0x2000207;
+        const int opcodeMoveWorld = 0x2000208;
+        const int opcodeMoveWorldExplicit = 0x2000209;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -568,6 +762,12 @@ namespace MWScript
             extensions.registerInstruction("placeatpc","clfl",opcodePlaceAtPc);
             extensions.registerInstruction("placeatme","clfl",opcodePlaceAtMe,opcodePlaceAtMeExplicit);
             extensions.registerInstruction("modscale","f",opcodeModScale,opcodeModScaleExplicit);
+            extensions.registerInstruction("rotate","cf",opcodeRotate,opcodeRotateExplicit);
+            extensions.registerInstruction("rotateworld","cf",opcodeRotateWorld,opcodeRotateWorldExplicit);
+            extensions.registerInstruction("setatstart","",opcodeSetAtStart,opcodeSetAtStartExplicit);
+            extensions.registerInstruction("move","cf",opcodeMove,opcodeMoveExplicit);
+            extensions.registerInstruction("moveworld","cf",opcodeMoveWorld,opcodeMoveWorldExplicit);
+            extensions.registerFunction("getstartingangle",'f',"c",opcodeGetStartingAngle,opcodeGetStartingAngleExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -597,6 +797,18 @@ namespace MWScript
             interpreter.installSegment5(opcodePlaceAtMeExplicit,new OpPlaceAtMe<ExplicitRef>);
             interpreter.installSegment5(opcodeModScale,new OpModScale<ImplicitRef>);
             interpreter.installSegment5(opcodeModScaleExplicit,new OpModScale<ExplicitRef>);
+            interpreter.installSegment5(opcodeRotate,new OpRotate<ImplicitRef>);
+            interpreter.installSegment5(opcodeRotateExplicit,new OpRotate<ExplicitRef>);
+            interpreter.installSegment5(opcodeRotateWorld,new OpRotateWorld<ImplicitRef>);
+            interpreter.installSegment5(opcodeRotateWorldExplicit,new OpRotateWorld<ExplicitRef>);
+            interpreter.installSegment5(opcodeSetAtStart,new OpSetAtStart<ImplicitRef>);
+            interpreter.installSegment5(opcodeSetAtStartExplicit,new OpSetAtStart<ExplicitRef>);
+            interpreter.installSegment5(opcodeMove,new OpMove<ImplicitRef>);
+            interpreter.installSegment5(opcodeMoveExplicit,new OpMove<ExplicitRef>);
+            interpreter.installSegment5(opcodeMoveWorld,new OpMoveWorld<ImplicitRef>);
+            interpreter.installSegment5(opcodeMoveWorldExplicit,new OpMoveWorld<ExplicitRef>);
+            interpreter.installSegment5(opcodeGetStartingAngle, new OpGetStartingAngle<ImplicitRef>);
+            interpreter.installSegment5(opcodeGetStartingAngleExplicit, new OpGetStartingAngle<ExplicitRef>);
         }
     }
 }

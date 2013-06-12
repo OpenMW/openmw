@@ -32,7 +32,16 @@ namespace MWGui
              * @param maximum width
              * @return size of the created widgets
              */
-            MyGUI::IntSize parse(std::string text, MyGUI::Widget* parent, const int width);
+            MyGUI::IntSize parsePage(std::string text, MyGUI::Widget* parent, const int width);
+            
+            /**
+             * Parse markup as MyGUI widgets
+             * @param markup to parse
+             * @param parent for the created widgets
+             * @param maximum width
+             * @return size of the created widgets
+             */
+            MyGUI::IntSize parseScroll(std::string text, MyGUI::Widget* parent, const int width);
 
             /**
              * Split the specified text into pieces that fit in the area specified by width and height parameters
@@ -40,6 +49,8 @@ namespace MWGui
             std::vector<std::string> split(std::string text, const int width, const int height);
 
         protected:
+            float widthForCharGlyph(unsigned unicodeChar) const;
+            float currentFontHeight() const;
             void parseSubText(std::string text);
 
             void parseImage(std::string tag, bool createWidget=true);

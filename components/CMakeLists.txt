@@ -15,15 +15,15 @@ add_component_dir (bsa
     )
 
 add_component_dir (nif
-    controlled effect nif_types record controller extra node record_ptr data nif_file property
+    controlled effect niftypes record controller extra node record_ptr data niffile property
     )
 
 add_component_dir (nifogre
-    ogre_nif_loader
+    ogrenifloader skeleton material mesh
     )
 
 add_component_dir (nifbullet
-    bullet_nif_loader
+    bulletnifloader
     )
 
 add_component_dir (to_utf8
@@ -37,9 +37,9 @@ add_component_dir (file_finder
 add_component_dir (esm
     attr defs esmcommon esmreader esmwriter loadacti loadalch loadappa loadarmo loadbody loadbook loadbsgn loadcell
     loadclas loadclot loadcont loadcrea loadcrec loaddial loaddoor loadench loadfact loadglob loadgmst
-    loadinfo loadingr loadland loadlevlist loadligh loadlocks loadltex loadmgef loadmisc loadnpcc
+    loadinfo loadingr loadland loadlevlist loadligh loadlock loadprob loadrepa loadltex loadmgef loadmisc loadnpcc
     loadnpc loadpgrd loadrace loadregn loadscpt loadskil loadsndg loadsoun loadspel loadsscr loadstat
-    loadweap records aipackage effectlist spelllist
+    loadweap records aipackage effectlist spelllist variant variantimp loadtes3 cellref
     )
 
 add_component_dir (misc
@@ -54,7 +54,7 @@ add_component_dir (files
 add_component_dir (compiler
     context controlparser errorhandler exception exprparser extensions fileparser generator
     lineparser literals locals output parser scanner scriptparser skipparser streamerrorhandler
-    stringparser tokenloc
+    stringparser tokenloc nullerrorhandler
     )
 
 add_component_dir (interpreter
@@ -66,9 +66,21 @@ add_component_dir (translation
     translation
     )
 
+find_package(Qt4 COMPONENTS QtCore QtGui)
+
+if(QT_QTGUI_LIBRARY AND QT_QTCORE_LIBRARY)
+   add_component_qt_dir (fileorderlist
+       model/modelitem model/datafilesmodel model/pluginsproxymodel model/esm/esmfile
+       utils/profilescombobox utils/comboboxlineedit utils/lineedit utils/naturalsort
+       )
+
+   include(${QT_USE_FILE})
+   QT4_WRAP_CPP(MOC_SRCS ${COMPONENT_MOC_FILES})
+endif(QT_QTGUI_LIBRARY AND QT_QTCORE_LIBRARY)
+
 include_directories(${BULLET_INCLUDE_DIRS})
 
-add_library(components STATIC ${COMPONENT_FILES})
+add_library(components STATIC ${COMPONENT_FILES} ${MOC_SRCS})
 
 target_link_libraries(components ${Boost_LIBRARIES} ${OGRE_LIBRARIES})
 

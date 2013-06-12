@@ -38,7 +38,7 @@ void LeveledListBase::save(ESMWriter &esm)
     esm.writeHNT("DATA", mFlags);
     esm.writeHNT("NNAM", mChanceNone);
     esm.writeHNT<int>("INDX", mList.size());
-    
+
     for (std::vector<LevelItem>::iterator it = mList.begin(); it != mList.end(); ++it)
     {
         esm.writeHNCString(mRecName, it->mId);
@@ -46,4 +46,10 @@ void LeveledListBase::save(ESMWriter &esm)
     }
 }
 
+    void LeveledListBase::blank()
+    {
+        mFlags = 0;
+        mChanceNone = 0;
+        mList.clear();
+    }
 }

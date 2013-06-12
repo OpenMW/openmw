@@ -63,6 +63,12 @@ Utf8Encoder::Utf8Encoder(const FromType sourceEncoding):
             translationArray = ToUTF8::windows_1251;
             break;
         }
+        case ToUTF8::CP437:
+        {
+            translationArray = ToUTF8::cp437;
+            break;
+        }
+
         default:
         {
             assert(0);
@@ -70,7 +76,7 @@ Utf8Encoder::Utf8Encoder(const FromType sourceEncoding):
     }
 }
 
-std::string Utf8Encoder::getUtf8(const char* input, int size)
+std::string Utf8Encoder::getUtf8(const char* input, size_t size)
 {
     // Double check that the input string stops at some point (it might
     // contain zero terminators before this, inside its own data, which
@@ -111,7 +117,7 @@ std::string Utf8Encoder::getUtf8(const char* input, int size)
     return std::string(&mOutput[0], outlen);
 }
 
-std::string Utf8Encoder::getLegacyEnc(const char *input, int size)
+std::string Utf8Encoder::getLegacyEnc(const char *input, size_t size)
 {
     // Double check that the input string stops at some point (it might
     // contain zero terminators before this, inside its own data, which
@@ -216,7 +222,7 @@ void Utf8Encoder::copyFromArray(unsigned char ch, char* &out)
         return;
     }
 
-    const char *in = translationArray + ch*6;
+    const signed char *in = translationArray + ch*6;
     int len = *(in++);
     for (int i=0; i<len; i++)
         *(out++) = *(in++);

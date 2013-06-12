@@ -3,7 +3,6 @@
 
 #include <utility>
 #include <openengine/ogre/renderer.hpp>
-#include <openengine/bullet/physic.hpp>
 
 #include <vector>
 #include <string>
@@ -11,6 +10,14 @@
 namespace ESM
 {
     struct Pathgrid;
+}
+
+namespace OEngine
+{
+    namespace Physic
+    {
+        class PhysicEngine;
+    }
 }
 
 namespace Ogre
@@ -32,8 +39,6 @@ namespace MWWorld
 
 namespace MWRender
 {
-    class Player;
-
     class Debugging
     {
         OEngine::Physic::PhysicEngine* mEngine;
@@ -47,7 +52,7 @@ namespace MWRender
         typedef std::vector<MWWorld::CellStore *> CellList;
         CellList mActiveCells;
 
-        Ogre::SceneNode *mMwRoot;
+        Ogre::SceneNode *mRootNode;
 
         Ogre::SceneNode *mPathGridRoot;
 
@@ -71,7 +76,7 @@ namespace MWRender
         Ogre::ManualObject *createPathgridLines(const ESM::Pathgrid *pathgrid);
         Ogre::ManualObject *createPathgridPoints(const ESM::Pathgrid *pathgrid);
     public:
-        Debugging(Ogre::SceneNode* mwRoot, OEngine::Physic::PhysicEngine *engine);
+        Debugging(Ogre::SceneNode* root, OEngine::Physic::PhysicEngine *engine);
         ~Debugging();
         bool toggleRenderMode (int mode);
 

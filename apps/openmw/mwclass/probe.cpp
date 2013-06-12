@@ -1,7 +1,7 @@
 
 #include "probe.hpp"
 
-#include <components/esm/loadlocks.hpp>
+#include <components/esm/loadprob.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -13,6 +13,7 @@
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/physicssystem.hpp"
+#include "../mwworld/nullaction.hpp"
 
 #include "../mwgui/tooltips.hpp"
 
@@ -35,7 +36,7 @@ namespace MWClass
     {
         const std::string model = getModel(ptr);
         if(!model.empty())
-            physics.addObject(ptr);
+            physics.addObject(ptr,true);
     }
 
     std::string Probe::getModel(const MWWorld::Ptr &ptr) const
@@ -61,6 +62,9 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Probe::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
+        if (!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
+            return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction ());
+
         boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTake (ptr));
 
         action->setSound(getUpSoundId(ptr));
@@ -137,9 +141,9 @@ namespace MWClass
 
         std::string text;
 
-        /// \todo store remaining uses somewhere
+        int remainingUses = (ptr.getCellRef().mCharge != -1) ? ptr.getCellRef().mCharge : ref->mBase->mData.mUses;
 
-        text += "\n#{sUses}: " + MWGui::ToolTips::toString(ref->mBase->mData.mUses);
+        text += "\n#{sUses}: " + MWGui::ToolTips::toString(remainingUses);
         text += "\n#{sQuality}: " + MWGui::ToolTips::toString(ref->mBase->mData.mQuality);
         text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight);
         text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
@@ -170,5 +174,25 @@ namespace MWClass
             ptr.get<ESM::Probe>();
 
         return MWWorld::Ptr(&cell.mProbes.insert(*ref), &cell);
+    }
+
+    bool Probe::canSell (const MWWorld::Ptr& item, int npcServices) const
+    {
+        return npcServices & ESM::NPC::Probes;
+    }
+
+    int Probe::getItemMaxHealth (const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Probe> *ref =
+            ptr.get<ESM::Probe>();
+
+        return ref->mBase->mData.mUses;
+    }
+
+    float Probe::getWeight(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Probe> *ref =
+            ptr.get<ESM::Probe>();
+        return ref->mBase->mData.mWeight;
     }
 }

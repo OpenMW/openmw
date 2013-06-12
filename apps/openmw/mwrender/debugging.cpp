@@ -8,6 +8,8 @@
 #include <OgreMaterialManager.h>
 #include <OgreManualObject.h>
 
+#include <openengine/bullet/physic.hpp>
+
 #include <components/esm/loadstat.hpp>
 #include <components/esm/loadpgrd.hpp>
 
@@ -18,7 +20,6 @@
 
 #include "../mwworld/ptr.hpp"
 
-#include "player.hpp"
 #include "renderconst.hpp"
 
 using namespace Ogre;
@@ -148,9 +149,9 @@ ManualObject *Debugging::createPathgridPoints(const ESM::Pathgrid *pathgrid)
     return result;
 }
 
-Debugging::Debugging(SceneNode *mwRoot, OEngine::Physic::PhysicEngine *engine) :
-    mMwRoot(mwRoot), mEngine(engine),
-    mSceneMgr(mwRoot->getCreator()),
+Debugging::Debugging(SceneNode *root, OEngine::Physic::PhysicEngine *engine) :
+    mRootNode(root), mEngine(engine),
+    mSceneMgr(root->getCreator()),
     mPathgridEnabled(false),
     mInteriorPathgridNode(NULL), mPathGridRoot(NULL),
     mGridMatsCreated(false)
@@ -206,7 +207,7 @@ void Debugging::togglePathgrid()
         createGridMaterials();
 
         // add path grid meshes to already loaded cells
-        mPathGridRoot = mMwRoot->createChildSceneNode();
+        mPathGridRoot = mRootNode->createChildSceneNode();
         for(CellList::iterator it = mActiveCells.begin(); it != mActiveCells.end(); ++it)
         {
             enableCellPathgrid(*it);

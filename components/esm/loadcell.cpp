@@ -2,12 +2,25 @@
 
 #include <string>
 #include <sstream>
+#include <list>
+#include <boost/concept_check.hpp>
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
 namespace ESM
 {
+
+/// Some overloaded compare operators.
+bool operator==(const MovedCellRef& ref, int pRefnum)
+{
+  return (ref.mRefnum == pRefnum);
+}
+
+bool operator==(const CellRef& ref, int pRefnum)
+{
+  return (ref.mRefnum == pRefnum);
+}
 
 void CellRef::save(ESMWriter &esm)
 {
@@ -27,15 +40,14 @@ void CellRef::save(ESMWriter &esm)
         esm.writeHNT("INDX", mFactIndex);
     }
 
-    if (mCharge != -1.0) {
-        esm.writeHNT("XCHG", mCharge);
-    }
+    if (mEnchantmentCharge != -1)
+        esm.writeHNT("XCHG", mEnchantmentCharge);
 
-    if (mIntv != -1) {
-        esm.writeHNT("INTV", mIntv);
-    }
-    if (mNam9 != 0) {
-        esm.writeHNT("NAM9", mNam9);
+    if (mCharge != -1)
+        esm.writeHNT("INTV", mCharge);
+
+    if (mGoldValue != 1) {
+        esm.writeHNT("NAM9", mGoldValue);
     }
 
     if (mTeleport)
@@ -50,8 +62,8 @@ void CellRef::save(ESMWriter &esm)
     esm.writeHNOCString("KNAM", mKey);
     esm.writeHNOCString("TNAM", mTrap);
 
-    if (mUnam != -1) {
-        esm.writeHNT("UNAM", mUnam);
+    if (mReferenceBlocked != -1) {
+        esm.writeHNT("UNAM", mReferenceBlocked);
     }
     if (mFltv != 0) {
         esm.writeHNT("FLTV", mFltv);
@@ -63,10 +75,11 @@ void CellRef::save(ESMWriter &esm)
     }
 }
 
-void Cell::load(ESMReader &esm)
+void Cell::load(ESMReader &esm, bool saveContext)
 {
     // Ignore this for now, it might mean we should delete the entire
     // cell?
+    // TODO: treat the special case "another plugin moved this ref, but we want to delete it"!
     if (esm.isNextSub("DELE")) {
         esm.skipHSub();
     }
@@ -95,8 +108,8 @@ void Cell::load(ESMReader &esm)
         // instead.
         if (mData.mFlags & QuasiEx)
             mRegion = esm.getHNOString("RGNN");
-        else
-            esm.getHNT(mAmbi, "AMBI", 16);
+        else if (esm.isNextSub("AMBI"))
+            esm.getHT(mAmbi);
     }
     else
     {
@@ -110,8 +123,21 @@ void Cell::load(ESMReader &esm)
         esm.getHT(mNAM0);
     }
 
+    if (saveContext) {
+        mContextList.push_back(esm.getContext());
+        esm.skipRecord();
+    }
+}
+
+void Cell::preLoad(ESMReader &esm) //Can't be "load" because it conflicts with function in esmtool
+{
+    this->load(esm, false);
+}
+
+void Cell::postLoad(ESMReader &esm)
+{
     // Save position of the cell references and move on
-    mContext = esm.getContext();
+    mContextList.push_back(esm.getContext());
     esm.skipRecord();
 }
 
@@ -141,14 +167,14 @@ void Cell::save(ESMWriter &esm)
         if (mMapColor != 0)
             esm.writeHNT("NAM5", mMapColor);
     }
-    
+
     if (mNAM0 != 0)
         esm.writeHNT("NAM0", mNAM0);
 }
 
-void Cell::restore(ESMReader &esm) const
+void Cell::restore(ESMReader &esm, int iCtx) const
 {
-    esm.restoreContext(mContext);
+    esm.restoreContext(mContextList[iCtx]);
 }
 
 std::string Cell::getDescription() const
@@ -167,16 +193,60 @@ std::string Cell::getDescription() const
 
 bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
 {
+    // TODO: Try and document reference numbering, I don't think this has been done anywhere else.
     if (!esm.hasMoreSubs())
         return false;
 
+    // NOTE: We should not need this check. It is a safety check until we have checked
+    // more plugins, and how they treat these moved references.
+    if (esm.isNextSub("MVRF")) {
+        esm.skipRecord(); // skip MVRF
+        esm.skipRecord(); // skip CNDT
+        // That should be it, I haven't seen any other fields yet.
+    }
+
     esm.getHNT(ref.mRefnum, "FRMR");
     ref.mRefID = esm.getHNString("NAME");
+
+    // Identify references belonging to a parent file and adapt the ID accordingly.
+    int local = (ref.mRefnum & 0xff000000) >> 24;
+    size_t global = esm.getIndex() + 1;
+    if (local)
+    {
+        // If the most significant 8 bits are used, then this reference already exists.
+        // In this case, do not spawn a new reference, but overwrite the old one.
+        ref.mRefnum &= 0x00ffffff; // delete old plugin ID
+        const std::vector<Header::MasterData> &masters = esm.getMasters();
+        global = masters[local-1].index + 1;
+        ref.mRefnum |= global << 24; // insert global plugin ID
+    }
+    else
+    {
+        // This is an addition by the present plugin. Set the corresponding plugin index.
+        ref.mRefnum |= global << 24; // insert global plugin ID
+    }
 
     // getHNOT will not change the existing value if the subrecord is
     // missing
     ref.mScale = 1.0;
     esm.getHNOT(ref.mScale, "XSCL");
+
+    // TODO: support loading references from saves, there are tons of keys not recognized yet.
+    // The following is just an incomplete list.
+    if (esm.isNextSub("ACTN"))
+        esm.skipHSub();
+    if (esm.isNextSub("STPR"))
+        esm.skipHSub();
+    if (esm.isNextSub("ACDT"))
+        esm.skipHSub();
+    if (esm.isNextSub("ACSC"))
+        esm.skipHSub();
+    if (esm.isNextSub("ACSL"))
+        esm.skipHSub();
+    if (esm.isNextSub("CHRD"))
+        esm.skipHSub();
+    else if (esm.isNextSub("CRED")) // ???
+        esm.skipHSub();
 
     ref.mOwner = esm.getHNOString("ANAM");
     ref.mGlob = esm.getHNOString("BNAM");
@@ -186,13 +256,15 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
     ref.mFactIndex = -2;
     esm.getHNOT(ref.mFactIndex, "INDX");
 
-    ref.mCharge = -1.0;
-    esm.getHNOT(ref.mCharge, "XCHG");
+    ref.mGoldValue = 1;
+    ref.mCharge = -1;
+    ref.mEnchantmentCharge = -1;
 
-    ref.mIntv = -1;
-    ref.mNam9 = 0;
-    esm.getHNOT(ref.mIntv, "INTV");
-    esm.getHNOT(ref.mNam9, "NAM9");
+    esm.getHNOT(ref.mEnchantmentCharge, "XCHG");
+
+    esm.getHNOT(ref.mCharge, "INTV");
+
+    esm.getHNOT(ref.mGoldValue, "NAM9");
 
     // Present for doors that teleport you to another cell.
     if (esm.isNextSub("DODT"))
@@ -210,16 +282,19 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
     ref.mKey = esm.getHNOString("KNAM");
     ref.mTrap = esm.getHNOString("TNAM");
 
-    ref.mUnam = -1;
+    ref.mReferenceBlocked = -1;
     ref.mFltv = 0;
-    esm.getHNOT(ref.mUnam, "UNAM");
+    esm.getHNOT(ref.mReferenceBlocked, "UNAM");
     esm.getHNOT(ref.mFltv, "FLTV");
 
-    esm.getHNT(ref.mPos, "DATA", 24);
+    esm.getHNOT(ref.mPos, "DATA", 24);
 
     // Number of references in the cell? Maximum once in each cell,
     // but not always at the beginning, and not always right. In other
     // words, completely useless.
+    // Update: Well, maybe not completely useless. This might actually be
+    //  number_of_references + number_of_references_moved_here_Across_boundaries,
+    //  and could be helpful for collecting these weird moved references.
     ref.mNam0 = 0;
     if (esm.isNextSub("NAM0"))
     {
@@ -227,7 +302,48 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
         //esm.getHNOT(NAM0, "NAM0");
     }
 
+    if (esm.isNextSub("DELE")) {
+        esm.skipHSub();
+        ref.mDeleted = 2; // Deleted, will not respawn.
+        // TODO: find out when references do respawn.
+    } else
+        ref.mDeleted = 0;
+
     return true;
 }
 
+bool Cell::getNextMVRF(ESMReader &esm, MovedCellRef &mref)
+{
+    esm.getHT(mref.mRefnum);
+    esm.getHNOT(mref.mTarget, "CNDT");
+
+    // Identify references belonging to a parent file and adapt the ID accordingly.
+    int local = (mref.mRefnum & 0xff000000) >> 24;
+    size_t global = esm.getIndex() + 1;
+    mref.mRefnum &= 0x00ffffff; // delete old plugin ID
+    const std::vector<Header::MasterData> &masters = esm.getMasters();
+    global = masters[local-1].index + 1;
+    mref.mRefnum |= global << 24; // insert global plugin ID
+
+    return true;
+}
+
+    void Cell::blank()
+    {
+        mName.clear();
+        mRegion.clear();
+        mWater = 0;
+        mWaterInt = false;
+        mMapColor = 0;
+        mNAM0 = 0;
+
+        mData.mFlags = 0;
+        mData.mX = 0;
+        mData.mY = 0;
+
+        mAmbi.mAmbient = 0;
+        mAmbi.mSunlight = 0;
+        mAmbi.mFog = 0;
+        mAmbi.mFogDensity = 0;
+    }
 }

@@ -1,5 +1,5 @@
-#ifndef _GAME_RENDER_SKY_H
-#define _GAME_RENDER_SKY_H
+#ifndef GAME_RENDER_SKY_H
+#define GAME_RENDER_SKY_H
 
 #include <vector>
 
@@ -61,7 +61,7 @@ namespace MWRender
         Ogre::ColourValue mColour;
         Ogre::SceneNode* mNode;
         sh::MaterialInstance* mMaterial;
-        Ogre::BillboardSet* mBBSet;
+        Ogre::Entity* mEntity;
     };
 
 
@@ -112,13 +112,10 @@ namespace MWRender
     class SkyManager
     {
     public:
-        SkyManager(Ogre::SceneNode* pMwRoot, Ogre::Camera* pCamera);
+        SkyManager(Ogre::SceneNode* root, Ogre::Camera* pCamera);
         ~SkyManager();
 
         void update(float duration);
-
-        void create();
-        ///< no need to call this, automatically done on first enable()
 
         void enable();
 
@@ -167,16 +164,16 @@ namespace MWRender
 
         void setLightningStrength(const float factor);
         void setLightningDirection(const Ogre::Vector3& dir);
+        void setLightningEnabled(bool enabled); ///< disable prior to map render
 
         void setGlare(const float glare);
         void setGlareEnabled(bool enabled);
         Ogre::Vector3 getRealSunPos();
 
-        void setSkyPosition(const Ogre::Vector3& position);
-        void resetSkyPosition();
-        void scaleSky(float scale);
-
     private:
+        void create();
+        ///< no need to call this, automatically done on first enable()
+
         bool mCreated;
 
         bool mMoonRed;
@@ -199,8 +196,6 @@ namespace MWRender
         Ogre::SceneNode* mAtmosphereDay;
         Ogre::SceneNode* mAtmosphereNight;
 
-        Ogre::HighLevelGpuProgramPtr mCloudFragmentShader;
-
         // remember some settings so we don't have to apply them again if they didnt change
         Ogre::String mClouds;
         Ogre::String mNextClouds;
@@ -210,6 +205,7 @@ namespace MWRender
         float mStarsOpacity;
         Ogre::ColourValue mCloudColour;
         Ogre::ColourValue mSkyColour;
+        Ogre::ColourValue mFogColour;
 
         Ogre::Light* mLightning;
 
@@ -218,8 +214,6 @@ namespace MWRender
         float mGlare; // target
         float mGlareFade; // actual
 
-        void ModVertexAlpha(Ogre::Entity* ent, unsigned int meshType);
-
         bool mEnabled;
         bool mSunEnabled;
         bool mMasserEnabled;
@@ -227,4 +221,4 @@ namespace MWRender
     };
 }
 
-#endif // _GAME_RENDER_SKY_H
+#endif // GAME_RENDER_SKY_H

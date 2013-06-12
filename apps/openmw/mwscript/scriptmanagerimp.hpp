@@ -47,6 +47,7 @@ namespace MWScript
 
             ScriptCollection mScripts;
             GlobalScripts mGlobalScripts;
+            std::map<std::string, Compiler::Locals> mOtherLocals;
 
         public:
 
@@ -59,6 +60,8 @@ namespace MWScript
             virtual bool compile (const std::string& name);
             ///< Compile script with the given namen
             /// \return Success?
+
+            virtual void resetGlobalScripts();
 
             virtual std::pair<int, int> compileAll();
             ///< Compile all scripts

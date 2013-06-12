@@ -282,10 +282,8 @@ namespace MWScript
                 MWBase::World *world =
                     MWBase::Environment::get().getWorld();
 
-                if (world->toggleVanityMode(sActivate, true)) {
-                    context.report(
-                        (sActivate) ? "Vanity Mode -> On" : "Vanity Mode -> Off"
-                    );
+                if (world->toggleVanityMode(sActivate)) {
+                    context.report(sActivate ? "Vanity Mode -> On" : "Vanity Mode -> Off");
                     sActivate = !sActivate;
                 } else {
                     context.report("Vanity Mode -> No");
@@ -398,6 +396,13 @@ namespace MWScript
 
                     Interpreter::Type_Integer amount = runtime[0].mInteger;
                     runtime.pop();
+
+                    if (amount<0)
+                        throw std::runtime_error ("amount must be non-negative");
+
+                    // no-op
+                    if (amount == 0)
+                        return;
 
                     MWWorld::ContainerStore& store = MWWorld::Class::get (ptr).getContainerStore (ptr);
 
@@ -550,6 +555,50 @@ namespace MWScript
                 }
         };
 
+        template <class R>
+        class OpFall : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                }
+        };
+
+        template <class R>
+        class OpGetStandingPc : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+                    runtime.push (MWBase::Environment::get().getWorld()->getPlayerStandingOn(ptr));
+                }
+        };
+
+        template <class R>
+        class OpGetStandingActor : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+                    runtime.push (MWBase::Environment::get().getWorld()->getActorStandingOn(ptr));
+                }
+        };
+
+        class OpGetWindSpeed : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    runtime.push(MWBase::Environment::get().getWorld()->getWindSpeed());
+                }
+        };
+
         const int opcodeXBox = 0x200000c;
         const int opcodeOnActivate = 0x200000d;
         const int opcodeActivate = 0x2000075;
@@ -591,6 +640,13 @@ namespace MWScript
         const int opcodeSetDelete = 0x20001e5;
         const int opcodeSetDeleteExplicit = 0x20001e6;
         const int opcodeGetSquareRoot = 0x20001e7;
+        const int opcodeFall = 0x200020a;
+        const int opcodeFallExplicit = 0x200020b;
+        const int opcodeGetStandingPc = 0x200020c;
+        const int opcodeGetStandingPcExplicit = 0x200020d;
+        const int opcodeGetStandingActor = 0x200020e;
+        const int opcodeGetStandingActorExplicit = 0x200020f;
+        const int opcodeGetWindSpeed = 0x2000212;
 
         const int opcodePlayBink = 0x20001f7;
 
@@ -632,6 +688,10 @@ namespace MWScript
             extensions.registerFunction ("getcurrenttime", 'f', "", opcodeGetCurrentTime);
             extensions.registerInstruction ("setdelete", "l", opcodeSetDelete, opcodeSetDeleteExplicit);
             extensions.registerFunction ("getsquareroot", 'f', "f", opcodeGetSquareRoot);
+            extensions.registerInstruction ("fall", "", opcodeFall, opcodeFallExplicit);
+            extensions.registerFunction ("getstandingpc", 'l', "", opcodeGetStandingPc, opcodeGetStandingPcExplicit);
+            extensions.registerFunction ("getstandingactor", 'l', "", opcodeGetStandingActor, opcodeGetStandingActorExplicit);
+            extensions.registerFunction ("getwindspeed", 'f', "", opcodeGetWindSpeed);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -678,6 +738,13 @@ namespace MWScript
             interpreter.installSegment5 (opcodeSetDelete, new OpSetDelete<ImplicitRef>);
             interpreter.installSegment5 (opcodeSetDeleteExplicit, new OpSetDelete<ExplicitRef>);
             interpreter.installSegment5 (opcodeGetSquareRoot, new OpGetSquareRoot);
+            interpreter.installSegment5 (opcodeFall, new OpFall<ImplicitRef>);
+            interpreter.installSegment5 (opcodeFallExplicit, new OpFall<ExplicitRef>);
+            interpreter.installSegment5 (opcodeGetStandingPc, new OpGetStandingPc<ImplicitRef>);
+            interpreter.installSegment5 (opcodeGetStandingPcExplicit, new OpGetStandingPc<ExplicitRef>);
+            interpreter.installSegment5 (opcodeGetStandingActor, new OpGetStandingActor<ImplicitRef>);
+            interpreter.installSegment5 (opcodeGetStandingActorExplicit, new OpGetStandingActor<ExplicitRef>);
+            interpreter.installSegment5 (opcodeGetWindSpeed, new OpGetWindSpeed);
         }
     }
 }

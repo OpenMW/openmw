@@ -58,6 +58,12 @@ struct Class
 
         // I have no idea how to autocalculate these items...
         int mCalc;
+
+        int& getSkill (int index, bool major);
+        ///< Throws an exception for invalid values of \a index.
+
+        int getSkill (int index, bool major) const;
+        ///< Throws an exception for invalid values of \a index.
     }; // 60 bytes
 
     std::string mId, mName, mDescription;
@@ -65,6 +71,10 @@ struct Class
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
+
+    void blank();
+     ///< Set record to default state (does not touch the ID/index).
+
 };
 }
 #endif

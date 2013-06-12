@@ -64,10 +64,12 @@ namespace OMW
             ToUTF8::FromType mEncoding;
             ToUTF8::Utf8Encoder* mEncoder;
             Files::PathContainer mDataDirs;
+            std::vector<std::string> mArchives;
             boost::filesystem::path mResDir;
             OEngine::Render::OgreRenderer *mOgre;
             std::string mCellName;
-            std::string mMaster;
+            std::vector<std::string> mMaster;
+            std::vector<std::string> mPlugins;
             int mFpsLevel;
             bool mDebug;
             bool mVerboseScripts;
@@ -98,7 +100,7 @@ namespace OMW
             /// add a .zip resource
             void addZipResource (const boost::filesystem::path& path);
 
-            /// Load all BSA files in data directory.
+            /// Load BSA files
             void loadBSA();
 
             void executeLocalScripts();
@@ -106,6 +108,7 @@ namespace OMW
             void handleSDLMessages();
 
             virtual bool frameRenderingQueued (const Ogre::FrameEvent& evt);
+            virtual bool frameStarted (const Ogre::FrameEvent& evt);
 
             /// Load settings from various files, returns the path to the user settings file
             std::string loadSettings (Settings::Manager & settings);
@@ -126,6 +129,9 @@ namespace OMW
             /// Set data dirs
             void setDataDirs(const Files::PathContainer& dataDirs);
 
+            /// Add BSA archive
+            void addArchive(const std::string& archive);
+
             /// Set resource dir
             void setResourceDir(const boost::filesystem::path& parResDir);
 
@@ -134,8 +140,11 @@ namespace OMW
 
             /// Set master file (esm)
             /// - If the given name does not have an extension, ".esm" is added automatically
-            /// - Currently OpenMW only supports one master at the same time.
             void addMaster(const std::string& master);
+
+            /// Same as "addMaster", but for plugin files (esp)
+            /// - If the given name does not have an extension, ".esp" is added automatically
+            void addPlugin(const std::string& plugin);
 
             /// Enable fps counter
             void showFPS(int level);

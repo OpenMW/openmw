@@ -3,6 +3,10 @@
 #include "esmstore.hpp"
 #include "cellstore.hpp"
 
+#include "class.hpp"
+#include "containerstore.hpp"
+
+
 namespace
 {
     template<typename T>
@@ -16,6 +20,32 @@ namespace
             if (!iter->mBase->mScript.empty() && iter->mData.getCount())
             {
                 localScripts.add (iter->mBase->mScript, MWWorld::Ptr (&*iter, cell));
+            }
+        }
+    }
+
+    // Adds scripts for items in containers (containers/npcs/creatures)
+    template<typename T>
+    void listCellScriptsCont (MWWorld::LocalScripts& localScripts,
+        MWWorld::CellRefList<T>& cellRefList,  MWWorld::Ptr::CellStore *cell)
+    {
+        for (typename MWWorld::CellRefList<T>::List::iterator iter (
+            cellRefList.mList.begin());
+            iter!=cellRefList.mList.end(); ++iter)
+        {
+           
+            MWWorld::Ptr containerPtr (&*iter, cell); 
+            
+            MWWorld::ContainerStore& container = MWWorld::Class::get(containerPtr).getContainerStore(containerPtr);
+            for(MWWorld::ContainerStoreIterator it3 = container.begin(); it3 != container.end(); ++it3)
+            {
+                std::string script = MWWorld::Class::get(*it3).getScript(*it3);
+                if(script != "")
+                {
+                    MWWorld::Ptr item = *it3;
+                    item.mCell = cell;
+                    localScripts.add (script, item);
+                }
             }
         }
     }
@@ -78,13 +108,16 @@ void MWWorld::LocalScripts::addCell (Ptr::CellStore *cell)
     listCellScripts (*this, cell->mBooks, cell);
     listCellScripts (*this, cell->mClothes, cell);
     listCellScripts (*this, cell->mContainers, cell);
+    listCellScriptsCont (*this, cell->mContainers, cell);
     listCellScripts (*this, cell->mCreatures, cell);
+    listCellScriptsCont (*this, cell->mCreatures, cell);
     listCellScripts (*this, cell->mDoors, cell);
     listCellScripts (*this, cell->mIngreds, cell);
     listCellScripts (*this, cell->mLights, cell);
     listCellScripts (*this, cell->mLockpicks, cell);
     listCellScripts (*this, cell->mMiscItems, cell);
     listCellScripts (*this, cell->mNpcs, cell);
+    listCellScriptsCont (*this, cell->mNpcs, cell);
     listCellScripts (*this, cell->mProbes, cell);
     listCellScripts (*this, cell->mRepairs, cell);
     listCellScripts (*this, cell->mWeapons, cell);
@@ -101,7 +134,7 @@ void MWWorld::LocalScripts::clearCell (Ptr::CellStore *cell)
 
     while (iter!=mScripts.end())
     {
-        if (iter->second.getCell()==cell)
+        if (iter->second.mCell==cell)
         {
             if (iter==mIter)
                ++mIter;
@@ -111,6 +144,20 @@ void MWWorld::LocalScripts::clearCell (Ptr::CellStore *cell)
         else
             ++iter;
     }
+}
+
+void MWWorld::LocalScripts::remove (RefData *ref)
+{
+    for (std::list<std::pair<std::string, Ptr> >::iterator iter = mScripts.begin();
+        iter!=mScripts.end(); ++iter)
+        if (&(iter->second.getRefData()) == ref)
+        {
+            if (iter==mIter)
+                ++mIter;
+
+            mScripts.erase (iter);
+            break;
+        }
 }
 
 void MWWorld::LocalScripts::remove (const Ptr& ptr)

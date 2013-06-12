@@ -1,9 +1,9 @@
 #ifndef MWGUI_CLASS_H
 #define MWGUI_CLASS_H
 
-#include <MyGUI.h>
+
 #include "widgets.hpp"
-#include "window_base.hpp"
+#include "windowbase.hpp"
 
 /*
   This file contains the dialogs for choosing a class.
@@ -12,10 +12,10 @@
 
 namespace MWGui
 {
-    class InfoBoxDialog : public WindowBase
+    class InfoBoxDialog : public WindowModal
     {
     public:
-        InfoBoxDialog(MWBase::WindowManager& parWindowManager);
+        InfoBoxDialog();
 
         typedef std::vector<std::string> ButtonList;
 
@@ -35,17 +35,17 @@ namespace MWGui
         EventHandle_Int eventButtonSelected;
 
     protected:
-        void onButtonClicked(MyGUI::WidgetPtr _sender);
+        void onButtonClicked(MyGUI::Widget* _sender);
 
     private:
 
         void fitToText(MyGUI::TextBox* widget);
-        void layoutVertically(MyGUI::WidgetPtr widget, int margin);
+        void layoutVertically(MyGUI::Widget* widget, int margin);
         int mCurrentButton;
-        MyGUI::WidgetPtr mTextBox;
+        MyGUI::Widget* mTextBox;
         MyGUI::TextBox* mText;
-        MyGUI::WidgetPtr mButtonBar;
-        std::vector<MyGUI::ButtonPtr> mButtons;
+        MyGUI::Widget* mButtonBar;
+        std::vector<MyGUI::Button*> mButtons;
     };
 
     // Lets the player choose between 3 ways of creating a class
@@ -60,13 +60,13 @@ namespace MWGui
             Class_Create = 2,
             Class_Back = 3
         };
-        ClassChoiceDialog(MWBase::WindowManager& parWindowManager);
+        ClassChoiceDialog();
     };
 
-    class GenerateClassResultDialog : public WindowBase
+    class GenerateClassResultDialog : public WindowModal
     {
     public:
-        GenerateClassResultDialog(MWBase::WindowManager& parWindowManager);
+        GenerateClassResultDialog();
 
         std::string getClassId() const;
         void setClassId(const std::string &classId);
@@ -90,10 +90,10 @@ namespace MWGui
         std::string mCurrentClassId;
     };
 
-    class PickClassDialog : public WindowBase
+    class PickClassDialog : public WindowModal
     {
     public:
-        PickClassDialog(MWBase::WindowManager& parWindowManager);
+        PickClassDialog();
 
         const std::string &getClassId() const { return mCurrentClassId; }
         void setClassId(const std::string &classId);
@@ -132,7 +132,7 @@ namespace MWGui
     class SelectSpecializationDialog : public WindowModal
     {
     public:
-        SelectSpecializationDialog(MWBase::WindowManager& parWindowManager);
+        SelectSpecializationDialog();
         ~SelectSpecializationDialog();
 
         ESM::Class::Specialization getSpecializationId() const { return mSpecializationId; }
@@ -163,7 +163,7 @@ namespace MWGui
     class SelectAttributeDialog : public WindowModal
     {
     public:
-        SelectAttributeDialog(MWBase::WindowManager& parWindowManager);
+        SelectAttributeDialog();
         ~SelectAttributeDialog();
 
         ESM::Attribute::AttributeID getAttributeId() const { return mAttributeId; }
@@ -192,7 +192,7 @@ namespace MWGui
     class SelectSkillDialog : public WindowModal
     {
     public:
-        SelectSkillDialog(MWBase::WindowManager& parWindowManager);
+        SelectSkillDialog();
         ~SelectSkillDialog();
 
         ESM::Skill::SkillEnum getSkillId() const { return mSkillId; }
@@ -225,7 +225,7 @@ namespace MWGui
     class DescriptionDialog : public WindowModal
     {
     public:
-        DescriptionDialog(MWBase::WindowManager& parWindowManager);
+        DescriptionDialog();
         ~DescriptionDialog();
 
         std::string getTextInput() const { return mTextEdit ? mTextEdit->getOnlyText() : ""; }
@@ -235,13 +235,13 @@ namespace MWGui
         void onOkClicked(MyGUI::Widget* _sender);
 
     private:
-        MyGUI::EditPtr mTextEdit;
+        MyGUI::EditBox* mTextEdit;
     };
 
-    class CreateClassDialog : public WindowBase
+    class CreateClassDialog : public WindowModal
     {
     public:
-        CreateClassDialog(MWBase::WindowManager& parWindowManager);
+        CreateClassDialog();
         virtual ~CreateClassDialog();
 
         std::string getName() const;
@@ -265,7 +265,7 @@ namespace MWGui
         void onOkClicked(MyGUI::Widget* _sender);
         void onBackClicked(MyGUI::Widget* _sender);
 
-        void onSpecializationClicked(MyGUI::WidgetPtr _sender);
+        void onSpecializationClicked(MyGUI::Widget* _sender);
         void onSpecializationSelected();
         void onAttributeClicked(Widgets::MWAttributePtr _sender);
         void onAttributeSelected();
@@ -280,7 +280,7 @@ namespace MWGui
         void update();
 
     private:
-        MyGUI::EditPtr                   mEditName;
+        MyGUI::EditBox*                   mEditName;
         MyGUI::TextBox*                  mSpecializationName;
         Widgets::MWAttributePtr          mFavoriteAttribute0, mFavoriteAttribute1;
         Widgets::MWSkillPtr              mMajorSkill[5];

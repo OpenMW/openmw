@@ -1,5 +1,6 @@
 #include "renderer.hpp"
 #include "fader.hpp"
+#include "particles.hpp"
 
 #include <SDL.h>
 #include <SDL_syswm.h>
@@ -11,6 +12,8 @@
 #include "OgreTextureManager.h"
 #include "OgreTexture.h"
 #include "OgreHardwarePixelBuffer.h"
+#include <OgreParticleSystemManager.h>
+#include "OgreParticleAffectorFactory.h"
 
 #include <boost/filesystem.hpp>
 
@@ -26,6 +29,7 @@
 
 using namespace Ogre;
 using namespace OEngine::Render;
+
 
 #if defined(__APPLE__) && !defined(__LP64__)
 
@@ -114,6 +118,16 @@ void OgreRenderer::loadPlugins()
 
 void OgreRenderer::unloadPlugins()
 {
+    std::vector<Ogre::ParticleEmitterFactory*>::iterator ei;
+    for(ei = mEmitterFactories.begin();ei != mEmitterFactories.end();ei++)
+        OGRE_DELETE (*ei);
+    mEmitterFactories.clear();
+
+    std::vector<Ogre::ParticleAffectorFactory*>::iterator ai;
+    for(ai = mAffectorFactories.begin();ai != mAffectorFactories.end();ai++)
+        OGRE_DELETE (*ai);
+    mAffectorFactories.clear();
+
     #ifdef ENABLE_PLUGIN_GL
     delete mGLPlugin;
     mGLPlugin = NULL;
@@ -200,8 +214,28 @@ void OgreRenderer::configure(const std::string &logPath,
     pluginDir = absPluginPath.string();
 
     Files::loadOgrePlugin(pluginDir, "RenderSystem_GL", *mRoot);
+    Files::loadOgrePlugin(pluginDir, "RenderSystem_GLES2", *mRoot);
+    Files::loadOgrePlugin(pluginDir, "RenderSystem_GL3Plus", *mRoot);
     Files::loadOgrePlugin(pluginDir, "RenderSystem_Direct3D9", *mRoot);
     Files::loadOgrePlugin(pluginDir, "Plugin_CgProgramManager", *mRoot);
+    Files::loadOgrePlugin(pluginDir, "Plugin_ParticleFX", *mRoot);
+
+
+    Ogre::ParticleEmitterFactory *emitter;
+    emitter = OGRE_NEW NifEmitterFactory();
+    Ogre::ParticleSystemManager::getSingleton().addEmitterFactory(emitter);
+    mEmitterFactories.push_back(emitter);
+
+
+    Ogre::ParticleAffectorFactory *affector;
+    affector = OGRE_NEW GrowFadeAffectorFactory();
+    Ogre::ParticleSystemManager::getSingleton().addAffectorFactory(affector);
+    mAffectorFactories.push_back(affector);
+
+    affector = OGRE_NEW GravityAffectorFactory();
+    Ogre::ParticleSystemManager::getSingleton().addAffectorFactory(affector);
+    mAffectorFactories.push_back(affector);
+
 
     RenderSystem* rs = mRoot->getRenderSystemByName(renderSystem);
     if (rs == 0)
@@ -210,6 +244,25 @@ void OgreRenderer::configure(const std::string &logPath,
 
     if (rs->getName().find("OpenGL") != std::string::npos)
         rs->setConfigOption ("RTT Preferred Mode", rttMode);
+}
+
+void OgreRenderer::recreateWindow(const std::string &title, const WindowSettings &settings)
+{
+    Ogre::ColourValue viewportBG = mView->getBackgroundColour();
+
+    mRoot->destroyRenderTarget(mWindow);
+    NameValuePairList params;
+    params.insert(std::make_pair("title", title));
+    params.insert(std::make_pair("FSAA", settings.fsaa));
+    params.insert(std::make_pair("vsync", settings.vsync ? "true" : "false"));
+
+    mWindow = mRoot->createRenderWindow(title, settings.window_x, settings.window_y, settings.fullscreen, &params);
+
+    // Create one viewport, entire window
+    mView = mWindow->addViewport(mCamera);
+    mView->setBackgroundColour(viewportBG);
+
+    adjustViewport();
 }
 
 void OgreRenderer::createWindow(const std::string &title, const WindowSettings& settings)
@@ -320,12 +373,12 @@ void OgreRenderer::adjustViewport()
 
 void OgreRenderer::setWindowEventListener(Ogre::WindowEventListener* listener)
 {
-	Ogre::WindowEventUtilities::addWindowEventListener(mWindow, listener);
+    Ogre::WindowEventUtilities::addWindowEventListener(mWindow, listener);
 }
 
 void OgreRenderer::removeWindowEventListener(Ogre::WindowEventListener* listener)
 {
-	Ogre::WindowEventUtilities::removeWindowEventListener(mWindow, listener);
+    Ogre::WindowEventUtilities::removeWindowEventListener(mWindow, listener);
 }
 
 void OgreRenderer::setFov(float fov)

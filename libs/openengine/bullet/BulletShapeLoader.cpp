@@ -17,15 +17,17 @@ Ogre::Resource(creator, name, handle, group, isManual, loader)
     list all the options that need to be set before loading, of which
     we have none as such. Full details can be set through scripts.
     */
-    Shape = NULL;
+    mCollisionShape = NULL;
+    mRaycastingShape = NULL;
+    mHasCollisionNode = false;
     mCollide = true;
-    mIgnore = false;
     createParamDictionary("BulletShape");
 }
 
 BulletShape::~BulletShape()
 {
-    deleteShape(Shape);
+    deleteShape(mCollisionShape);
+    deleteShape(mRaycastingShape);
 }
 
 // farm out to BulletShapeLoader
@@ -34,27 +36,28 @@ void BulletShape::loadImpl()
     mLoader->loadResource(this);
 }
 
-void BulletShape::deleteShape(btCollisionShape* mShape)
+void BulletShape::deleteShape(btCollisionShape* shape)
 {
-    if(mShape!=NULL)
+    if(shape!=NULL)
     {
-        if(mShape->isCompound())
+        if(shape->isCompound())
         {
-            btCompoundShape* ms = static_cast<btCompoundShape*>(Shape);
+            btCompoundShape* ms = static_cast<btCompoundShape*>(mCollisionShape);
             int a = ms->getNumChildShapes();
             for(int i=0; i <a;i++)
             {
                 deleteShape(ms->getChildShape(i));
             }
         }
-        delete mShape;
+        delete shape;
     }
-    mShape = NULL;
+    shape = NULL;
 }
 
 void BulletShape::unloadImpl()
 {
-    deleteShape(Shape);
+    deleteShape(mCollisionShape);
+    deleteShape(mRaycastingShape);
 }
 
 //TODO:change this?

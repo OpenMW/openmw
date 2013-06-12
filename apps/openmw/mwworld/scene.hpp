@@ -3,7 +3,7 @@
 
 #include "../mwrender/renderingmanager.hpp"
 
-#include "physicssystem.hpp"
+#include "ptr.hpp"
 #include "globals.hpp"
 
 namespace Ogre
@@ -34,9 +34,9 @@ namespace MWRender
 
 namespace MWWorld
 {
+    class PhysicsSystem;
     class Player;
     class CellStore;
-    class Ptr;
 
     class Scene
     {
@@ -47,7 +47,7 @@ namespace MWWorld
         private:
 
             //OEngine::Render::OgreRenderer& mRenderer;
-            CellStore* mCurrentCell; // the cell, the player is in
+            CellStore* mCurrentCell; // the cell the player is in
             CellStoreCollection mActiveCells;
             bool mCellChanged;
             PhysicsSystem *mPhysics;
@@ -56,6 +56,7 @@ namespace MWWorld
             void playerCellChange (CellStore *cell, const ESM::Position& position,
                 bool adjustPlayerPos = true);
 
+            void insertCell (Ptr::CellStore &cell, bool rescale);
 
         public:
 
@@ -84,9 +85,10 @@ namespace MWWorld
             void changeToExteriorCell (const ESM::Position& position);
             ///< Move to exterior cell.
 
-            void markCellAsUnchanged();
+            void changeToVoid();
+            ///< Change into a void
 
-            void insertCell (Ptr::CellStore &cell);
+            void markCellAsUnchanged();
 
             void update (float duration, bool paused);
 
