@@ -43,6 +43,7 @@ public:
     inline QStringList getDataDirs() { return mDataDirs; }
     inline void addDataDir(const QString &dir) { if(!dir.isEmpty()) mDataDirs.append(dir); }
     inline QString getDataLocal() {return mDataLocal; }
+    inline bool hasMaster() { return mSettings.count(QString("master")) > 0; }
 
     QStringList values(const QString &key, const QStringList &defaultValues = QStringList());
     bool readFile(QTextStream &stream);
