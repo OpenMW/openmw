@@ -106,7 +106,6 @@ target_link_libraries(openmw
     ${OGRE_LIBRARIES}
     ${OGRE_Terrain_LIBRARY}
     ${OGRE_STATIC_PLUGINS}
-    ${OIS_LIBRARIES}
     ${Boost_LIBRARIES}
     ${OPENAL_LIBRARY}
     ${SOUND_INPUT_LIBRARY}
@@ -114,8 +113,7 @@ target_link_libraries(openmw
     ${MYGUI_LIBRARIES}
     ${SDL2_LIBRARY}
     ${MYGUI_PLATFORM_LIBRARIES}
-    "shiny"
-    "shiny.OgrePlatform"
+    ${SHINY_LIBRARIES}
     "oics"
     "sdl4ogre"
     components
