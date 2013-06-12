@@ -608,8 +608,10 @@ void MainDialog::closeEvent(QCloseEvent *event)
 
 void MainDialog::play()
 {
-    if (!writeSettings())
+    if (!writeSettings()) {
         qApp->quit();
+        return;
+    }
 
     // Launch the game detached
     startProgram(QString("openmw"), true);
