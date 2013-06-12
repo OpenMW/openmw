@@ -23,7 +23,7 @@ CSVSettings::UserSettingsDialog::UserSettingsDialog(QMainWindow *parent) :
 {
     setWindowTitle(QString::fromUtf8 ("User Settings"));
     buildPages();
-    setWidgetStates (loadSettings());
+    setWidgetStates (CSMSettings::UserSettings::instance().getSettingsMap());
     positionWindow ();
 
     connect (mListWidget,
@@ -119,46 +119,6 @@ void CSVSettings::UserSettingsDialog::positionWindow ()
 
 }
 
-CSMSettings::SectionMap CSVSettings::UserSettingsDialog::loadSettings ()
-{
-    QString userPath = QString::fromStdString(mCfgMgr.getUserPath().string());
-
-    mPaths.append(QString("opencs.cfg"));
-    mPaths.append(userPath + QString("opencs.cfg"));
-
-    CSMSettings::SectionMap settingsMap;
-
-    foreach (const QString &path, mPaths)
-    {
-        qDebug() << "Loading config file:" << qPrintable(path);
-        QFile file(path);
-
-        if (file.exists())
-        {
-            if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-            {
-                QMessageBox msgBox;
-                msgBox.setWindowTitle(tr("Error opening OpenCS configuration file"));
-                msgBox.setIcon(QMessageBox::Critical);
-                msgBox.setStandardButtons(QMessageBox::Ok);
-                msgBox.setText(QObject::tr("<br><b>Could not open %0 for reading</b><br><br> \
-                                  Please make sure you have the right permissions \
-                                  and try again.<br>").arg(file.fileName()));
-                msgBox.exec();
-                return settingsMap;
-            }
-
-            QTextStream stream(&file);
-            stream.setCodec(QTextCodec::codecForName("UTF-8"));
-
-            CSMSettings::UserSettings::instance().getSettings(stream, settingsMap);
-        }
-
-        file.close();
-    }
-
-    return settingsMap;
-}
 
 void CSVSettings::UserSettingsDialog::writeSettings()
 {
@@ -170,7 +130,9 @@ void CSVSettings::UserSettingsDialog::writeSettings()
         settings [page->objectName()] = page->getSettings();
     }
 
-    CSMSettings::UserSettings::instance().writeFile(CSMSettings::UserSettings::instance().openFile(mPaths.back()), settings);
+    QStringList paths = CSMSettings::UserSettings::instance().getSettingsFiles();
+
+    CSMSettings::UserSettings::instance().writeFile(CSMSettings::UserSettings::instance().openFile(paths.back()), settings);
 
 }
 

@@ -30,17 +30,25 @@ namespace boost
 } /* namespace boost */
 #endif /* (BOOST_VERSION <= 104600) */
 
+CSMSettings::UserSettings *CSMSettings::UserSettings::mUserSettingsInstance = 0;
 
 CSMSettings::UserSettings::UserSettings()
 {
+    assert(!mUserSettingsInstance);
     mUserSettingsInstance = this;
 }
 
 CSMSettings::UserSettings::~UserSettings()
 {
+    mUserSettingsInstance = 0;
 }
 
-QFile *CSMSettings::UserSettings::openFile (const QString &filename)
+CSMSettings::SectionMap CSMSettings::UserSettings::getSettingsMap() const
+{
+    return mSectionMap;
+}
+
+QFile *CSMSettings::UserSettings::openFile (const QString &filename) const
 {
     QFile *file = new QFile(filename);
 
@@ -64,7 +72,7 @@ QFile *CSMSettings::UserSettings::openFile (const QString &filename)
     return file;
 }
 
-bool CSMSettings::UserSettings::writeFile(QFile *file, QMap<QString, CSMSettings::SettingList *> &settings)
+bool CSMSettings::UserSettings::writeFile(QFile *file, QMap<QString, CSMSettings::SettingList *> &settings) const
 {
     if (!file)
         return false;
@@ -89,7 +97,7 @@ bool CSMSettings::UserSettings::writeFile(QFile *file, QMap<QString, CSMSettings
     return true;
 }
 
-void CSMSettings::UserSettings::getSettings(QTextStream &stream, SectionMap &sections)
+void CSMSettings::UserSettings::getSettings(QTextStream &stream, SectionMap &sections) const
 {
     //looks for a square bracket, "'\\["
     //that has one or more "not nothing" in it, "([^]]+)"
@@ -137,19 +145,11 @@ void CSMSettings::UserSettings::getSettings(QTextStream &stream, SectionMap &sec
     sections.insert(section, settings);
 }
 
-QString CSMSettings::UserSettings::getSettingValue(QString section, QString setting)
+void CSMSettings::UserSettings::readSettings()
 {
-    Files::ConfigurationManager configMgr;
-    QString userPath = QString::fromStdString(configMgr.getUserPath().string());
-    QStringList list;
-
-    list.append(QString("opencs.cfg"));
-    list.append(userPath + QString("opencs.cfg"));
-
-
     CSMSettings::SectionMap sectionMap;
 
-    foreach (const QString &path, list)
+    foreach (const QString &path, mSettingsFiles)
     {
         qDebug() << "Loading config file:" << qPrintable(path);
         QFile file(path);
@@ -166,22 +166,36 @@ QString CSMSettings::UserSettings::getSettingValue(QString section, QString sett
                                   Please make sure you have the right permissions \
                                   and try again.<br>").arg(file.fileName()));
                 msgBox.exec();
-                return QString();
+                return;
             }
 
             QTextStream stream(&file);
             stream.setCodec(QTextCodec::codecForName("UTF-8"));
+            
 
-            getSettings(stream, sectionMap);
+            getSettings(stream, mSectionMap);
         }
 
         file.close();
     }
+}
 
-    if(sectionMap.find(section) == sectionMap.end())
+void CSMSettings::UserSettings::setSettingsFiles(QStringList files)
+{
+    mSettingsFiles = files;
+}
+
+QStringList CSMSettings::UserSettings::getSettingsFiles () const
+{
+    return mSettingsFiles;
+}
+
+QString CSMSettings::UserSettings::getSettingValue(QString section, QString setting) const
+{
+    if(mSectionMap.find(section) == mSectionMap.end())
         return QString();
 
-    CSMSettings::SettingMap *settings = sectionMap.value(section);
+    CSMSettings::SettingMap *settings = mSectionMap.value(section);
 
     if(settings->find(setting) == settings->end())
         return QString();
@@ -189,5 +203,11 @@ QString CSMSettings::UserSettings::getSettingValue(QString section, QString sett
     CSMSettings::SettingContainer *settingContainer = settings->value(setting);
 
     return settingContainer->getValue();
+}
+
+const CSMSettings::UserSettings& CSMSettings::UserSettings::instance()
+{
+            assert(mUserSettingsInstance);
+            return *mUserSettingsInstance;
 }
 

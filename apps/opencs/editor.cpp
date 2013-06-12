@@ -61,6 +61,17 @@ void CS::Editor::setupDataFiles()
         QString path = QString::fromStdString(iter->string());
         mFileDialog.addFiles(path);
     }
+
+    //Settings setup
+    QStringList settingFiles;
+    QString userPath = QString::fromStdString(mCfgMgr.getUserPath().string());
+
+    settingFiles.append(QString("opencs.cfg"));
+    settingFiles.append(userPath + QString("opencs.cfg"));
+
+    mUserSettings.setSettingsFiles(settingFiles);
+    mUserSettings.readSettings();
+    
 }
 
 void CS::Editor::createDocument()
