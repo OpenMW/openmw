@@ -310,6 +310,8 @@ void MainDialog::changePage(QListWidgetItem *current, QListWidgetItem *previous)
 
 bool MainDialog::setupLauncherSettings()
 {
+    mLauncherSettings.setMultiValueEnabled(true);
+
     QString userPath = QString::fromStdString(mCfgMgr.getUserPath().string());
 
     QStringList paths;
@@ -427,6 +429,8 @@ bool MainDialog::setupGameSettings()
 
 bool MainDialog::setupGraphicsSettings()
 {
+    mGraphicsSettings.setMultiValueEnabled(false);
+
     QString userPath = QString::fromStdString(mCfgMgr.getUserPath().string());
     QString globalPath = QString::fromStdString(mCfgMgr.getGlobalPath().string());
 
