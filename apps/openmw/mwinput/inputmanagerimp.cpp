@@ -463,6 +463,9 @@ namespace MWInput
     {
         mInputBinder->mousePressed (arg, id);
 
+        if (id != SDL_BUTTON_LEFT && id != SDL_BUTTON_RIGHT)
+            return true; // MyGUI has no use for these events
+
         MyGUI::InputManager::getInstance().injectMousePress(mMouseX, mMouseY, sdlButtonToMyGUI(id));
 
         if (MyGUI::InputManager::getInstance ().getMouseFocusWidget () != 0)
