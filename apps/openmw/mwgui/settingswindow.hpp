@@ -71,7 +71,6 @@ namespace MWGui
             MyGUI::ScrollView* mControlsBox;
             MyGUI::Button* mResetControlsButton;
             MyGUI::Button* mInvertYButton;
-            MyGUI::ScrollBar* mUISensitivitySlider;
             MyGUI::ScrollBar* mCameraSensitivitySlider;
 
             void onOkButtonClicked(MyGUI::Widget* _sender);

@@ -114,33 +114,17 @@
                     </Widget>
                 </Widget>
 
-                <Widget type="TextBox" skin="NormalText" position="4 228 160 18" align="Left Top">
-                    <Property key="Caption" value="UI cursor sensitivity"/>
-                </Widget>
-                <Widget type="ScrollBar" skin="MW_HScroll" position="4 252 160 18" align="Left Top" name="UISensitivitySlider">
-                    <Property key="Range" value="100"/>
-                </Widget>
-                <Widget type="TextBox" skin="SandText" position="4 276 160 18" align="Left Top">
-                    <Property key="Caption" value="#{sLow}"/>
-                    <Property key="TextAlign" value="Left"/>
-                </Widget>
-                <Widget type="TextBox" skin="SandText" position="4 276 160 18" align="Left Top">
-                    <Property key="Caption" value="#{sHigh}"/>
-                    <Property key="TextAlign" value="Right"/>
-                </Widget>
-
-
-                <Widget type="TextBox" skin="NormalText" position="180 228 160 18" align="Left Top">
+                <Widget type="TextBox" skin="NormalText" position="4 228 336 18" align="Left Top">
                     <Property key="Caption" value="Camera sensitivity"/>
                 </Widget>
-                <Widget type="ScrollBar" skin="MW_HScroll" position="180 252 160 18" align="Left Top" name="CameraSensitivitySlider">
+                <Widget type="ScrollBar" skin="MW_HScroll" position="4 252 336 18" align="Left Top" name="CameraSensitivitySlider">
                     <Property key="Range" value="100"/>
                 </Widget>
-                <Widget type="TextBox" skin="SandText" position="180 276 160 18" align="Left Top">
+                <Widget type="TextBox" skin="SandText" position="4 276 336 18" align="Left Top">
                     <Property key="Caption" value="#{sLow}"/>
                     <Property key="TextAlign" value="Left"/>
                 </Widget>
-                <Widget type="TextBox" skin="SandText" position="180 276 160 18" align="Left Top">
+                <Widget type="TextBox" skin="SandText" position="4 276 336 18" align="Left Top">
                     <Property key="Caption" value="#{sHigh}"/>
                     <Property key="TextAlign" value="Right"/>
                 </Widget>

@@ -126,7 +126,6 @@ namespace MWGui
         getWidget(mControlsBox, "ControlsBox");
         getWidget(mResetControlsButton, "ResetControlsButton");
         getWidget(mInvertYButton, "InvertYButton");
-        getWidget(mUISensitivitySlider, "UISensitivitySlider");
         getWidget(mCameraSensitivitySlider, "CameraSensitivitySlider");
         getWidget(mRefractionButton, "RefractionButton");
 
@@ -240,11 +239,7 @@ namespace MWGui
 
         float cameraSens = (Settings::Manager::getFloat("camera sensitivity", "Input")-0.2)/(5.0-0.2);
         mCameraSensitivitySlider->setScrollPosition (cameraSens * (mCameraSensitivitySlider->getScrollRange()-1));
-        float uiSens = (Settings::Manager::getFloat("ui sensitivity", "Input")-0.2)/(5.0-0.2);
-        mUISensitivitySlider->setScrollPosition (uiSens * (mUISensitivitySlider->getScrollRange()-1));
         mCameraSensitivitySlider->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
-        mUISensitivitySlider->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
-
 
         mInvertYButton->setCaptionWithReplacing(Settings::Manager::getBool("invert y axis", "Input") ? "#{sOn}" : "#{sOff}");
 
@@ -529,8 +524,6 @@ namespace MWGui
             Settings::Manager::setFloat("footsteps volume", "Sound", val);
         else if (scroller == mMusicVolumeSlider)
             Settings::Manager::setFloat("music volume", "Sound", val);
-        else if (scroller == mUISensitivitySlider)
-            Settings::Manager::setFloat("ui sensitivity", "Input", (1-val) * 0.2 + val * 5.f);
         else if (scroller == mCameraSensitivitySlider)
             Settings::Manager::setFloat("camera sensitivity", "Input", (1-val) * 0.2 + val * 5.f);
 
