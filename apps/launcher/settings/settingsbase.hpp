@@ -66,8 +66,8 @@ public:
 
             if (keyRe.indexIn(line) != -1) {
 
-                QString key = keyRe.cap(1);
-                QString value = keyRe.cap(2);
+                QString key = keyRe.cap(1).trimmed();
+                QString value = keyRe.cap(2).trimmed();
 
                 if (!sectionPrefix.isEmpty())
                     key.prepend(sectionPrefix);
