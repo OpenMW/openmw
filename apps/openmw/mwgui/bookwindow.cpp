@@ -183,7 +183,7 @@ namespace MWGui
     
     void BookWindow::nextPage()
     {
-	if ((mCurrentPage+1)*2 < mPages.size())
+        if ((mCurrentPage+1)*2 < mPages.size())
         {
             MWBase::Environment::get().getSoundManager()->playSound ("book page2", 1.0, 1.0);
 
@@ -194,7 +194,7 @@ namespace MWGui
     }
     void BookWindow::prevPage()
     {
-	if (mCurrentPage > 0)
+        if (mCurrentPage > 0)
         {
             MWBase::Environment::get().getSoundManager()->playSound ("book page", 1.0, 1.0);
 
