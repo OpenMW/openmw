@@ -13,12 +13,6 @@
 
 #include <extern/sdl4ogre/sdlcursormanager.hpp>
 
-#include <components/settings/settings.hpp>
-#include <components/translation/translation.hpp>
-
-#include "../mwbase/environment.hpp"
-#include "../mwbase/mechanicsmanager.hpp"
-
 #include "../mwbase/inputmanager.hpp"
 
 #include "../mwworld/class.hpp"

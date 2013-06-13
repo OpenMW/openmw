@@ -562,9 +562,7 @@ namespace MWInput
         if (MyGUI::InputManager::getInstance ().isModalAny())
             return;
 
-        if (mWindows.isGuiMode () && (mWindows.getMode () == MWGui::GM_MainMenu || mWindows.getMode () == MWGui::GM_Settings))
-            mWindows.popGuiMode();
-        else if (mWindows.isGuiMode () && mWindows.getMode () == MWGui::GM_Video)
+        if (mWindows.isGuiMode () && mWindows.getMode () == MWGui::GM_Video)
             MWBase::Environment::get().getWorld ()->stopVideo ();
         else if (mWindows.containsMode(MWGui::GM_MainMenu))
             mWindows.popGuiMode();
