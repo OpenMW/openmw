@@ -213,7 +213,6 @@ namespace
 
         void close()
         {
-			
             mModel->unload ();
 
             getPage (LeftBookPage)->showPage (Book (), 0);
@@ -433,7 +432,7 @@ namespace
 
         void notifyClose(MyGUI::Widget* _sender)
         {
-			MWBase::Environment::get().getSoundManager()->playSound ("book close", 1.0, 1.0);
+            MWBase::Environment::get().getSoundManager()->playSound ("book close", 1.0, 1.0);
             MWBase::Environment::get().getWindowManager ()->popGuiMode ();
         }
 

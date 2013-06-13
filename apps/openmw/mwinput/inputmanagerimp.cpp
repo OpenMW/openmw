@@ -668,7 +668,7 @@ namespace MWInput
 
         if(gameMode && MWBase::Environment::get().getWindowManager ()->getJournalAllowed())
         {
-			MWBase::Environment::get().getSoundManager()->playSound ("book open", 1.0, 1.0);
+            MWBase::Environment::get().getSoundManager()->playSound ("book open", 1.0, 1.0);
             mWindows.pushGuiMode(MWGui::GM_Journal);
         }
         else if(mWindows.getMode() == MWGui::GM_Journal)
