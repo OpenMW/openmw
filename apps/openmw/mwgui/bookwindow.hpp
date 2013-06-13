@@ -16,7 +16,8 @@ namespace MWGui
 
             void open(MWWorld::Ptr book);
             void setTakeButtonShow(bool show);
-
+            void nextPage();
+            void prevPage();
             void setInventoryAllowed(bool allowed);
 
         protected:

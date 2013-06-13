@@ -25,6 +25,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwgui/bookwindow.hpp"
 
 namespace MWInput
 {
@@ -551,6 +552,15 @@ namespace MWInput
 
             if (arg.state.Z.rel)
                 MWBase::Environment::get().getWorld()->changeVanityModeScale(arg.state.Z.rel);
+        }
+        
+        //if the player is reading a book and flicking the mouse wheel
+        if (MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_Book && arg.state.Z.rel)
+        {
+            if (arg.state.Z.rel < 0)
+                MWBase::Environment::get().getWindowManager()->getBookWindow()->nextPage();
+            else
+                MWBase::Environment::get().getWindowManager()->getBookWindow()->prevPage();
         }
 
         return true;
