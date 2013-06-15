@@ -23,28 +23,8 @@
 #include <cstdlib>
 #include <stdexcept>
 
-#if defined(__APPLE__) && !defined(__LP64__)
-#include <Carbon/Carbon.h>
-#endif
-
 using namespace Ogre;
 using namespace OEngine::Render;
-
-
-#if defined(__APPLE__) && !defined(__LP64__)
-
-CustomRoot::CustomRoot(const Ogre::String& pluginFileName, 
-                    const Ogre::String& configFileName, 
-                    const Ogre::String& logFileName)
-: Ogre::Root(pluginFileName, configFileName, logFileName)
-{}
-
-bool CustomRoot::isQueuedEnd() const
-{
-    return mQueuedEnd;
-}
-
-#endif
 
 void OgreRenderer::cleanup()
 {
@@ -68,34 +48,7 @@ void OgreRenderer::cleanup()
 
 void OgreRenderer::start()
 {
-    //TODO: Check if we still need to do this if we're using SDL's
-    //message pump
-#if defined(__APPLE__) && !defined(__LP64__)
-    // OSX Carbon Message Pump
-    do {
-        EventRef event = NULL;
-        EventTargetRef targetWindow;
-        targetWindow = GetEventDispatcherTarget();
-
-        // If we are unable to get the target then we no longer care about events.
-        if (!targetWindow) return;
-
-        // Grab the next event while possible
-        while (ReceiveNextEvent(0, NULL, kEventDurationNoWait, true, &event) == noErr)
-        {
-            // Dispatch the event
-            SendEventToEventTarget(event, targetWindow);
-            ReleaseEvent(event);
-        }
-
-        if (!mRoot->renderOneFrame()) {
-            break;
-        }
-
-    } while (!mRoot->isQueuedEnd());
-#else
     mRoot->startRendering();
-#endif
 }
 
 void OgreRenderer::loadPlugins() 
@@ -188,11 +141,7 @@ void OgreRenderer::configure(const std::string &logPath,
         // Disable logging
         log->setDebugOutputEnabled(false);
 
-#if defined(__APPLE__) && !defined(__LP64__)
-    mRoot = new CustomRoot("", "", "");
-#else
     mRoot = new Root("", "", "");
-#endif
 
     #if defined(ENABLE_PLUGIN_GL) || defined(ENABLE_PLUGIN_Direct3D9) || defined(ENABLE_PLUGIN_CgProgramManager) || defined(ENABLE_PLUGIN_OctreeSceneManager) || defined(ENABLE_PLUGIN_ParticleFX)
     loadPlugins();
