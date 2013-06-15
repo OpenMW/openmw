@@ -30,6 +30,7 @@ namespace SFO
     {
         _setupOISKeys();
 
+        // FIXME: text input should only be enabled when a text input widget currently has focus
         SDL_StartTextInput();
     }
 
@@ -41,60 +42,6 @@ namespace SFO
 
         SDL_StopTextInput();
     }
-
-    /*
-    void InputWrapper::initFromRenderWindow(Ogre::RenderWindow *win)
-    {
-        assert(mSDLWindow == NULL);
-
-        mOwnWindow = true;
-
-        //get the HWND from ogre's renderwindow
-        size_t windowHnd;
-        win->getCustomAttribute("WINDOW", &windowHnd);
-
-        //wrap our own event handler around ogre's
-        mSDLWindow = SDL_CreateWindowFrom((void*)windowHnd);
-
-        assert(mSDLWindow != NULL);
-
-        //without this SDL will take ownership of the window and iconify it when
-        //we alt-tab away.
-        //SDL_SetWindowFullscreen(mSDLWindow, 0);
-
-#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
-        //linux-specific event-handling fixups
-        //see http://bugzilla.libsdl.org/show_bug.cgi?id=730
-        SDL_SysWMinfo wm_info;
-        SDL_VERSION(&wm_info.version);
-
-        if(SDL_GetWindowWMInfo(mSDLWindow,&wm_info))
-        {
-            Display* display = wm_info.info.x11.display;
-            Window w = wm_info.info.x11.window;
-
-            // Set the input hints so we get keyboard input
-            XWMHints *wmhints = XAllocWMHints();
-            if (wmhints) {
-                wmhints->input = True;
-                wmhints->flags = InputHint;
-                XSetWMHints(display, w, wmhints);
-                XFree(wmhints);
-            }
-
-            //make sure to subscribe to XLib's events
-            XSelectInput(display, w,
-                         (FocusChangeMask | EnterWindowMask | LeaveWindowMask |
-                         ExposureMask | ButtonPressMask | ButtonReleaseMask |
-                         PointerMotionMask | KeyPressMask | KeyReleaseMask |
-                         PropertyChangeMask | StructureNotifyMask |
-                         KeymapStateMask));
-
-            XFlush(display);
-        }
-#endif
-    }
-    */
 
     void InputWrapper::capture()
     {

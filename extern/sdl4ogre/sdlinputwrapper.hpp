@@ -19,8 +19,6 @@ namespace SFO
         InputWrapper(SDL_Window *window, Ogre::RenderWindow* ogreWindow);
         ~InputWrapper();
 
-        //void initFromRenderWindow(Ogre::RenderWindow* win);
-
         void setMouseEventCallback(MouseListener* listen) { mMouseListener = listen; }
         void setKeyboardEventCallback(KeyListener* listen) { mKeyboardListener = listen; }
         void setWindowEventCallback(WindowListener* listen) { mWindowListener = listen; }

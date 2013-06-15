@@ -9,7 +9,6 @@
 #include <MyGUI_RenderManager.h>
 #include <MyGUI_Widget.h>
 #include <MyGUI_Button.h>
-#include <MyGUI_PointerManager.h>
 
 #include <openengine/ogre/renderer.hpp>
 

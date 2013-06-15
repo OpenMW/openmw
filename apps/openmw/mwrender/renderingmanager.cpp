@@ -16,8 +16,6 @@
 #include <OgreControllerManager.h>
 #include <OgreMeshManager.h>
 
-#include "SDL2/SDL.h"
-
 #include <extern/shiny/Main/Factory.hpp>
 #include <extern/shiny/Platforms/Ogre/OgrePlatform.hpp>
 
