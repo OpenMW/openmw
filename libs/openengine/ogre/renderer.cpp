@@ -23,6 +23,10 @@
 #include <cstdlib>
 #include <stdexcept>
 
+#ifdef __MACOSX__
+#include "osx_utils.h"
+#endif
+
 using namespace Ogre;
 using namespace OEngine::Render;
 
@@ -257,13 +261,13 @@ void OgreRenderer::createWindow(const std::string &title, const WindowSettings& 
         // Windows code
         winHandle = Ogre::StringConverter::toString((unsigned long)wmInfo.info.win.window);
         break;
-#elif __APPLE__
+#elif __MACOSX__
     case SDL_SYSWM_COCOA:
         //required to make OGRE play nice with our window
         params.insert(std::make_pair("macAPI", "cocoa"));
         params.insert(std::make_pair("macAPICocoaUseNSView", "true"));
 
-        winHandle  = Ogre::StringConverter::toString((unsigned long)wmInfo.info.cocoa.window);
+        winHandle  = Ogre::StringConverter::toString(WindowContentViewHandle(wmInfo));
         break;
 #else
     case SDL_SYSWM_X11:

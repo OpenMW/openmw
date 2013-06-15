@@ -79,6 +79,11 @@ set(OENGINE_OGRE
   ${LIBDIR}/openengine/ogre/selectionbuffer.cpp
   ${LIBDIR}/openengine/ogre/imagerotate.cpp
 )
+
+if (APPLE)
+    set(OENGINE_OGRE ${OENGINE_OGRE} ${LIBDIR}/openengine/ogre/osx_utils.mm)
+endif ()
+
 set(OENGINE_GUI
   ${LIBDIR}/openengine/gui/manager.cpp
 )
