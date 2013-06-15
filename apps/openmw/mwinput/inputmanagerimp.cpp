@@ -420,16 +420,6 @@ namespace MWInput
             MWBase::Environment::get().getWindowManager()->enterPressed();
         }
 
-        //TODO: Check if we need this with SDL
-        /*
-#ifdef __APPLE__ // filter \016 symbol for F-keys on OS X
-        if ((arg.key >= SDLK_F1 && arg.key <= SDLK_F10) ||
-            (arg.key >= SDLK_F11 && arg.key <= SDLK_F15)) {
-            text = 0;
-        }
-#endif
-        */
-
         OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(arg.keysym.sym);
 
         MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::Enum(kc), text);
