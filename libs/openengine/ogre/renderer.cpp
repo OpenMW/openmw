@@ -308,7 +308,7 @@ void OgreRenderer::createWindow(const std::string &title, const WindowSettings& 
         // Windows code
         winHandle = Ogre::StringConverter::toString((unsigned long)wmInfo.info.win.window);
         break;
-#elif MACOS
+#elif __APPLE__
     case SDL_SYSWM_COCOA:
         //required to make OGRE play nice with our window
         params.insert(std::make_pair("macAPI", "cocoa"));
