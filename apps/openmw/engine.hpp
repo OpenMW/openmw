@@ -105,8 +105,6 @@ namespace OMW
 
             void executeLocalScripts();
 
-            void handleSDLMessages();
-
             virtual bool frameRenderingQueued (const Ogre::FrameEvent& evt);
             virtual bool frameStarted (const Ogre::FrameEvent& evt);
 

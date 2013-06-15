@@ -77,7 +77,6 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 {
     try
     {
-        handleSDLMessages();
         float frametime = std::min(evt.timeSinceLastFrame, 0.2f);
 
         mEnvironment.setFrameDuration (frametime);
@@ -122,9 +121,6 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         MWBase::Environment::get().getWindowManager()->wmUpdateFps(window->getLastFPS(), tri, batch);
 
         MWBase::Environment::get().getWindowManager()->onFrame(frametime);
-
-        //Flush any events that weren't handled this frame
-        SDL_FlushEvents(0x0, 0xFFFFFFFF);
     }
     catch (const std::exception& e)
     {
@@ -132,50 +128,6 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
     }
 
     return true;
-}
-
-void OMW::Engine::handleSDLMessages()
-{
-    /*
-    //Pump messages since the last frame
-    const int max_events = 20;
-    SDL_Event events[max_events];
-
-    SDL_PumpEvents();
-    int num_events = SDL_PeepEvents(events, max_events, SDL_PEEKEVENT, SDL_WINDOWEVENT, SDL_WINDOWEVENT);
-
-    bool resize = false;
-
-    unsigned int size_x = 0;
-    unsigned int size_y = 0;
-
-    if(num_events != 0)
-    {
-        for(int i=0; i < num_events; ++i)
-        {
-            switch(events[i].window.event)
-            {
-            case SDL_WINDOWEVENT_RESIZED:
-                resize = true;
-                size_x = events[i].window.data1;
-                size_y = events[i].window.data2;
-                break;
-            }
-        }
-    }
-
-    //handle window movements
-    if(resize)
-    {
-        mOgre->getWindow()->resize(size_x, size_y);
-    }
-
-    if(SDL_PeepEvents(NULL, 1, SDL_PEEKEVENT, SDL_QUIT, SDL_QUIT) != 0)
-    {
-        //user requested a quit, break out.
-        mOgre->getRoot()->queueEndRendering();
-    }
-    */
 }
 
 OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
