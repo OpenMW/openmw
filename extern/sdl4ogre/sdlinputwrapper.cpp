@@ -123,10 +123,12 @@ namespace SFO
                     mMouseListener->mouseReleased(evt.button, evt.button.button);
                     break;
                 case SDL_KEYDOWN:
-                    _handleKeyPress(evt.key);
+                    if (!evt.key.repeat)
+                        _handleKeyPress(evt.key);
                     break;
                 case SDL_KEYUP:
-                    mKeyboardListener->keyReleased(evt.key);
+                    if (!evt.key.repeat)
+                        mKeyboardListener->keyReleased(evt.key);
                     break;
                 case SDL_WINDOWEVENT:
                     handleWindowEvent(evt);
