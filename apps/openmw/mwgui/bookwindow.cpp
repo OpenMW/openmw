@@ -130,26 +130,12 @@ namespace MWGui
 
     void BookWindow::onNextPageButtonClicked (MyGUI::Widget* sender)
     {
-        if ((mCurrentPage+1)*2 < mPages.size())
-        {
-            MWBase::Environment::get().getSoundManager()->playSound ("book page2", 1.0, 1.0);
-
-            ++mCurrentPage;
-
-            updatePages();
-        }
+        nextPage();
     }
 
     void BookWindow::onPrevPageButtonClicked (MyGUI::Widget* sender)
     {
-        if (mCurrentPage > 0)
-        {
-            MWBase::Environment::get().getSoundManager()->playSound ("book page", 1.0, 1.0);
-
-            --mCurrentPage;
-
-            updatePages();
-        }
+        prevPage();
     }
 
     void BookWindow::updatePages()
@@ -193,6 +179,29 @@ namespace MWGui
 
         if (button->getAlign().isRight())
             button->setPosition(button->getPosition() + MyGUI::IntPoint(diff.width,0));
+    }
+    
+    void BookWindow::nextPage()
+    {
+        if ((mCurrentPage+1)*2 < mPages.size())
+        {
+            MWBase::Environment::get().getSoundManager()->playSound ("book page2", 1.0, 1.0);
+
+            ++mCurrentPage;
+
+            updatePages();
+        }
+    }
+    void BookWindow::prevPage()
+    {
+        if (mCurrentPage > 0)
+        {
+            MWBase::Environment::get().getSoundManager()->playSound ("book page", 1.0, 1.0);
+
+            --mCurrentPage;
+
+            updatePages();
+        }
     }
 
 }

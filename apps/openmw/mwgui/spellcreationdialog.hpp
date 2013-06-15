@@ -84,7 +84,7 @@ namespace MWGui
     {
     public:
         EffectEditorBase();
-
+        virtual ~EffectEditorBase();
 
     protected:
         std::map<int, short> mButtonMapping; // maps button ID to effect ID

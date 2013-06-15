@@ -401,29 +401,24 @@ void RenderingManager::setWaterHeight(const float height)
 
 void RenderingManager::skyEnable ()
 {
-    if(mSkyManager)
     mSkyManager->enable();
-
     mOcclusionQuery->setSunNode(mSkyManager->getSunNode());
 }
 
 void RenderingManager::skyDisable ()
 {
-    if(mSkyManager)
-        mSkyManager->disable();
+    mSkyManager->disable();
 }
 
 void RenderingManager::skySetHour (double hour)
 {
-    if(mSkyManager)
-        mSkyManager->setHour(hour);
+    mSkyManager->setHour(hour);
 }
 
 
 void RenderingManager::skySetDate (int day, int month)
 {
-    if(mSkyManager)
-        mSkyManager->setDate(day, month);
+    mSkyManager->setDate(day, month);
 }
 
 int RenderingManager::skyGetMasserPhase() const
@@ -438,8 +433,7 @@ int RenderingManager::skyGetSecundaPhase() const
 }
 
 void RenderingManager::skySetMoonColour (bool red){
-    if(mSkyManager)
-        mSkyManager->setMoonColour(red);
+    mSkyManager->setMoonColour(red);
 }
 
 bool RenderingManager::toggleRenderMode(int mode)

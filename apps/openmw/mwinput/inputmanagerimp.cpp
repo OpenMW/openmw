@@ -19,6 +19,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwgui/bookwindow.hpp"
 
 using namespace ICS;
 
@@ -488,6 +489,15 @@ namespace MWInput
             mMouseWheel = int(arg.z);
 
             MyGUI::InputManager::getInstance().injectMouseMove( int(mMouseX), int(mMouseY), mMouseWheel);
+
+            //if the player is reading a book and flicking the mouse wheel
+            if (MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_Book && arg.zrel)
+            {
+                if (arg.zrel < 0)
+                    MWBase::Environment::get().getWindowManager()->getBookWindow()->nextPage();
+                else
+                    MWBase::Environment::get().getWindowManager()->getBookWindow()->prevPage();
+            }
         }
 
         if (mMouseLookEnabled)
@@ -636,7 +646,7 @@ namespace MWInput
         // Toggle between game mode and journal mode
         bool gameMode = !mWindows.isGuiMode();
 
-        if(gameMode)
+        if(gameMode && MWBase::Environment::get().getWindowManager ()->getJournalAllowed())
         {
             MWBase::Environment::get().getSoundManager()->playSound ("book open", 1.0, 1.0);
             mWindows.pushGuiMode(MWGui::GM_Journal);

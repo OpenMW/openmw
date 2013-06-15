@@ -79,6 +79,7 @@ opencs_units (view/settings
     abstractwidget
     usersettingsdialog
     editorpage
+    windowpage
     )
 
 opencs_units_noqt (view/settings

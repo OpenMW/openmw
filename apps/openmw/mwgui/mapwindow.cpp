@@ -34,6 +34,10 @@ namespace MWGui
     {
     }
 
+    LocalMapBase::~LocalMapBase()
+    {
+    }
+
     void LocalMapBase::init(MyGUI::ScrollView* widget, MyGUI::ImageBox* compass, OEngine::GUI::Layout* layout, bool mapDragAndDrop)
     {
         mLocalMap = widget;

@@ -4,6 +4,10 @@ if (APPLE)
     set(APP_BUNDLE_NAME "${CMAKE_PROJECT_NAME}.app")
 
     set(APP_BUNDLE_DIR "${OpenMW_BINARY_DIR}/${APP_BUNDLE_NAME}")
+
+    set(CMAKE_EXE_LINKER_FLAGS "-F /Library/Frameworks")
+    set(CMAKE_SHARED_LINKER_FLAGS "-F /Library/Frameworks")
+    set(CMAKE_MODULE_LINKER_FLAGS "-F /Library/Frameworks")
 endif (APPLE)
 
 # Macros
@@ -15,7 +19,7 @@ include (OpenMWMacros)
 # Version
 
 set (OPENMW_VERSION_MAJOR 0)
-set (OPENMW_VERSION_MINOR 23)
+set (OPENMW_VERSION_MINOR 24)
 set (OPENMW_VERSION_RELEASE 0)
 
 set (OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
