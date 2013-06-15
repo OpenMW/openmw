@@ -38,6 +38,8 @@ namespace SFO
 
     private:
 
+        void handleWindowEvent(const SDL_Event& evt);
+
         bool _handleWarpMotion(const SDL_MouseMotionEvent& evt);
         void _wrapMousePointer(const SDL_MouseMotionEvent &evt);
         MouseMotionEvent _packageMouseMotion(const SDL_Event& evt);
@@ -63,6 +65,8 @@ namespace SFO
         Sint32 mMouseZ;
         Sint32 mMouseX;
         Sint32 mMouseY;
+
+        bool mMouseInWindow;
 
         SDL_Window* mSDLWindow;
         Ogre::RenderWindow* mOgreWindow;

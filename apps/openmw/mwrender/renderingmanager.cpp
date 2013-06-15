@@ -719,7 +719,7 @@ Compositors* RenderingManager::getCompositors()
 
 void RenderingManager::processChangedSettings(const Settings::CategorySettingVector& settings)
 {
-    bool changeRes = false;
+    //bool changeRes = false;
     bool rebuild = false; // rebuild static geometry (necessary after any material changes)
     for (Settings::CategorySettingVector::const_iterator it=settings.begin();
             it != settings.end(); ++it)
@@ -733,11 +733,11 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
             if (!MWBase::Environment::get().getWorld()->isCellExterior() && !MWBase::Environment::get().getWorld()->isCellQuasiExterior())
                 configureFog(*MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell());
         }
-        else if (it->first == "Video" && (
+        /*else if (it->first == "Video" && (
                 it->second == "resolution x"
                 || it->second == "resolution y"
                 || it->second == "fullscreen"))
-            changeRes = true;
+            changeRes = true;*/
         else if (it->second == "field of view" && it->first == "General")
             mRendering.setFov(Settings::Manager::getFloat("field of view", "General"));
         else if ((it->second == "texture filtering" && it->first == "General")
@@ -791,6 +791,7 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
         }
     }
 
+    /*
     if (changeRes)
     {
         unsigned int x = Settings::Manager::getInt("resolution x", "Video");
@@ -807,6 +808,7 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
         SDL_SetWindowFullscreen(mRendering.getSDLWindow(), Settings::Manager::getBool("fullscreen", "Video") ? SDL_WINDOW_FULLSCREEN : 0);
         //mRendering.getWindow()->setFullscreen(Settings::Manager::getBool("fullscreen", "Video"), x, y);
     }
+    */
 
     mWater->processChangedSettings(settings);
 

@@ -241,7 +241,7 @@ void OgreRenderer::createWindow(const std::string &title, const WindowSettings& 
       SDL_WINDOWPOS_UNDEFINED,           //    initial y position
       settings.window_x,                               //    width, in pixels
       settings.window_y,                               //    height, in pixels
-      SDL_WINDOW_SHOWN|SDL_WINDOW_RESIZABLE
+      SDL_WINDOW_SHOWN
         | (settings.fullscreen ? SDL_WINDOW_FULLSCREEN : 0)
     );
 

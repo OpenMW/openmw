@@ -220,12 +220,12 @@ namespace MWInput
             bool was_relative = mInputManager->getMouseRelative();
             bool is_relative = !mWindows.isGuiMode();
 
-            //we let the mouse escape in the main menu
-            mInputManager->setGrabPointer(!main_menu);
-
             // don't keep the pointer away from the window edge in gui mode
             // stop using raw mouse motions and switch to system cursor movements
             mInputManager->setMouseRelative(is_relative);
+
+            //we let the mouse escape in the main menu
+            mInputManager->setGrabPointer(!main_menu);
 
             //we switched to non-relative mode, move our cursor to where the in-game
             //cursor is

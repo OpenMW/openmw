@@ -876,18 +876,18 @@ namespace MWGui
 
         setUseHardwareCursors(Settings::Manager::getBool("hardware cursors", "GUI"));
 
-        bool changeRes = false;
+        //bool changeRes = false;
         bool windowRecreated = false;
         for (Settings::CategorySettingVector::const_iterator it = changed.begin();
             it != changed.end(); ++it)
         {
-            if (it->first == "Video" &&  (
+            /*if (it->first == "Video" &&  (
                 it->second == "resolution x"
                 || it->second == "resolution y"))
             {
                 changeRes = true;
-            }
-            else if (it->first == "Video" && it->second == "vsync")
+            }*/
+            if (it->first == "Video" && it->second == "vsync")
                 windowRecreated = true;
             else if (it->first == "HUD" && it->second == "crosshair")
                 mCrosshairEnabled = Settings::Manager::getBool ("crosshair", "HUD");
@@ -895,6 +895,7 @@ namespace MWGui
                 mSubtitlesEnabled = Settings::Manager::getBool ("subtitles", "GUI");
         }
 
+        /*
         if (changeRes)
         {
             int x = Settings::Manager::getInt("resolution x", "Video");
@@ -912,6 +913,7 @@ namespace MWGui
             mDragAndDrop->mDragAndDropWidget->setSize(MyGUI::IntSize(x, y));
             mInputBlocker->setSize(MyGUI::IntSize(x,y));
         }
+        */
         if (windowRecreated)
         {
             mGuiManager->updateWindow (mRendering->getWindow ());

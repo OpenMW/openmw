@@ -269,12 +269,15 @@ namespace MWGui
         if (index == MyGUI::ITEM_NONE)
             return;
 
+        /*
         ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
         dialog->open("#{sNotifyMessage67}");
         dialog->eventOkClicked.clear();
         dialog->eventOkClicked += MyGUI::newDelegate(this, &SettingsWindow::onResolutionAccept);
         dialog->eventCancelClicked.clear();
         dialog->eventCancelClicked += MyGUI::newDelegate(this, &SettingsWindow::onResolutionCancel);
+        */
+        onResolutionAccept();
     }
 
     void SettingsWindow::onResolutionAccept()
@@ -287,7 +290,9 @@ namespace MWGui
         Settings::Manager::setInt("resolution y", "Video", resY);
 
         apply();
-        mResolutionList->setIndexSelected(MyGUI::ITEM_NONE);
+
+        MWBase::Environment::get().getWindowManager()->
+            messageBox("New resolution will be applied after a restart", std::vector<std::string>());
     }
 
     void SettingsWindow::onResolutionCancel()
@@ -356,6 +361,8 @@ namespace MWGui
             {
                 Settings::Manager::setBool("fullscreen", "Video", newState);
                 apply();
+                MWBase::Environment::get().getWindowManager()->
+                    messageBox("Fullscreen will be applied after a restart", std::vector<std::string>());
             }
         }
         else if (_sender == mVSyncButton)
