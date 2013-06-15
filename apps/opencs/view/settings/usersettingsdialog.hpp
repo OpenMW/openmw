@@ -4,13 +4,12 @@
 #include <QMainWindow>
 #include <QStackedWidget>
 #include <QListWidgetItem>
-
-#ifndef Q_MOC_RUN
-#include <components/files/configurationmanager.hpp>
-#endif
+#include <QApplication>
 
 #include "../../model/settings/usersettings.hpp"
 #include "../../model/settings/support.hpp"
+
+#include "editorpage.hpp"
 
 class QHBoxLayout;
 class AbstractWidget;
@@ -28,7 +27,6 @@ namespace CSVSettings {
         QStringList mPaths;
         QListWidget *mListWidget;
         QStackedWidget *mStackedWidget;
-        Files::ConfigurationManager mCfgMgr;
 
     public:
         UserSettingsDialog(QMainWindow *parent = 0);
@@ -38,10 +36,9 @@ namespace CSVSettings {
 
         void closeEvent (QCloseEvent *event);
         AbstractPage *getAbstractPage (int index);
-        void setWidgetStates (CSMSettings::SectionMap settingsMap);
+        void setWidgetStates ();
         void buildPages();
         void positionWindow ();
-        CSMSettings::SectionMap loadSettings();
         void writeSettings();
         void createSamplePage();
 
@@ -60,6 +57,12 @@ namespace CSVSettings {
 
             if (mStackedWidget->sizeHint().height() < 480)
                 mStackedWidget->sizeHint().setHeight(480);
+
+            QFontMetrics fm (QApplication::font());
+            int textWidth = fm.width(page->objectName());
+
+            if ((textWidth + 50) > mListWidget->minimumWidth())
+                mListWidget->setMinimumWidth(textWidth + 50);
 
             resize (mStackedWidget->sizeHint());
         }

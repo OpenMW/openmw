@@ -68,6 +68,8 @@ namespace CSVDoc
 
             void exitApplication();
 
+            void loadUserSettings();
+
         public:
 
             View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews);
@@ -88,6 +90,8 @@ namespace CSVDoc
 
             Operations *getOperations() const;
 
+            void updateEditorSetting (const QString &, const QString &);
+
         signals:
 
             void newDocumentRequest();
@@ -101,8 +105,6 @@ namespace CSVDoc
             void addSubView (const CSMWorld::UniversalId& id);
 
             void abortOperation (int type);
-
-            void slotUpdateEditorSetting (const QString &settingName, const QString &settingValue);
 
         private slots:
 

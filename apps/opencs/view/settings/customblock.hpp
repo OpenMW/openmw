@@ -29,8 +29,8 @@ namespace CSVSettings
 
     private:
 
-        int buildGroupBlock(GroupBlockDef &def);
-        int buildProxyBlock(GroupBlockDef &def, ProxyBlock *block);
+        int buildGroupBlock(GroupBlockDef *def);
+        int buildProxyBlock(GroupBlockDef *def, ProxyBlock *block);
     };
 }
 #endif // CUSTOMBLOCK_HPP

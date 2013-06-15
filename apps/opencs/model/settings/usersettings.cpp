@@ -7,12 +7,15 @@
 #include <QMap>
 #include <QMessageBox>
 #include <QTextCodec>
+#include <QFile>
 
 #include <components/files/configurationmanager.hpp>
 
 #include "settingcontainer.hpp"
 
 #include <boost/version.hpp>
+
+#include <QDebug>
 /**
  * Workaround for problems with whitespaces in paths in older versions of Boost library
  */
@@ -29,47 +32,67 @@ namespace boost
 } /* namespace boost */
 #endif /* (BOOST_VERSION <= 104600) */
 
-
 CSMSettings::UserSettings::UserSettings()
 {
     mUserSettingsInstance = this;
+
+    mReadWriteMessage = QObject::tr("<br><b>Could not open or create file for writing</b><br><br> \
+            Please make sure you have the right permissions and try again.<br>");
+
+    mReadOnlyMessage = QObject::tr("<br><b>Could not open file for reading</b><br><br> \
+            Please make sure you have the right permissions and try again.<br>");
 }
 
 CSMSettings::UserSettings::~UserSettings()
 {
 }
 
-QFile *CSMSettings::UserSettings::openFile (const QString &filename)
+QTextStream *CSMSettings::UserSettings::openFileStream (const QString &filePath, bool isReadOnly)
 {
-    QFile *file = new QFile(filename);
+    QFile *file = new QFile(filePath);
 
-    bool success = (file->open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate)) ;
+    QIODevice::OpenMode openFlags;
 
-    if (!success)
+    if (isReadOnly)
+        openFlags = QIODevice::ReadOnly | QIODevice::Text;
+    else
+        openFlags = QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate;
+
+    if (!(file->open(openFlags)))
     {
         // File cannot be opened or created
         QMessageBox msgBox;
-        msgBox.setWindowTitle(QObject::tr("Error writing OpenMW configuration file"));
+        msgBox.setWindowTitle(QObject::tr("OpenCS configuration file I/O error"));
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(QObject::tr("<br><b>Could not open or create %0 for writing</b><br><br> \
-                          Please make sure you have the right permissions \
-                          and try again.<br>").arg(file->fileName()));
+
+        QString fileMessage = QObject::tr("<br> File: %0").arg(file->fileName());
+
+        if (!isReadOnly)
+            msgBox.setText (mReadWriteMessage + fileMessage);
+        else
+            msgBox.setText (mReadOnlyMessage + fileMessage);
+
         msgBox.exec();
         delete file;
         file = 0;
     }
 
-    return file;
+    QTextStream *stream = 0;
+
+    if (file)
+    {
+        stream = new QTextStream(file);
+        stream->setCodec(QTextCodec::codecForName("UTF-8"));
+    }
+
+    return stream;
+
 }
 
-bool CSMSettings::UserSettings::writeFile(QFile *file, QMap<QString, CSMSettings::SettingList *> &settings)
+bool CSMSettings::UserSettings::writeFile(QMap<QString, CSMSettings::SettingList *> &settings)
 {
-    if (!file)
-        return false;
-
-    QTextStream stream(file);
-    stream.setCodec(QTextCodec::codecForName("UTF-8"));
+    QTextStream *stream = openFileStream(mPaths.back());
 
     QList<QString> keyList = settings.keys();
 
@@ -77,61 +100,121 @@ bool CSMSettings::UserSettings::writeFile(QFile *file, QMap<QString, CSMSettings
     {
         SettingList *sectionSettings = settings[key];
 
-        stream << "[" << key << "]" << '\n';
+        *stream << "[" << key << "]" << '\n';
 
         foreach (SettingContainer *item, *sectionSettings)
-            stream << item->getName() << " = " << item->getValue() << '\n';
+            *stream << item->objectName() << " = " << item->getValue() << '\n';
     }
 
-    file->close();
+    stream->device()->close();
 
     return true;
 }
 
-void CSMSettings::UserSettings::getSettings(QTextStream &stream, SectionMap &sections)
+const CSMSettings::SectionMap &CSMSettings::UserSettings::getSettings()
 {
-    //looks for a square bracket, "'\\["
-    //that has one or more "not nothing" in it, "([^]]+)"
-    //and is closed with a square bracket, "\\]"
+    return mSectionSettings;
+}
 
-    QRegExp sectionRe("^\\[([^]]+)\\]");
+void CSMSettings::UserSettings::loadFromFile(const QString &filePath)
+{
+    if (filePath.isEmpty())
+        return;
 
-    //Find any character(s) that is/are not equal sign(s), "[^=]+"
-    //followed by an optional whitespace, an equal sign, and another optional whirespace, "\\s*=\\s*"
-    //and one or more periods, "(.+)"
+    mSectionSettings.clear();
 
-    QRegExp keyRe("^([^=]+)\\s*=\\s*(.+)$");
+    QTextStream *stream = openFileStream (filePath, true);
 
-    CSMSettings::SettingMap *settings = 0;
-    QString section = "none";
-
-    while (!stream.atEnd())
+    if (stream)
     {
-        QString line = stream.readLine().simplified();
+        //looks for a square bracket, "'\\["
+        //that has one or more "not nothing" in it, "([^]]+)"
+        //and is closed with a square bracket, "\\]"
 
-        if (line.isEmpty() || line.startsWith("#"))
-            continue;
+        QRegExp sectionRe("^\\[([^]]+)\\]");
 
-        //if a section is found, push it onto a new QStringList
-        //and push the QStringList onto
-        if (sectionRe.exactMatch(line))
+        //Find any character(s) that is/are not equal sign(s), "[^=]+"
+        //followed by an optional whitespace, an equal sign, and another optional whitespace, "\\s*=\\s*"
+        //and one or more periods, "(.+)"
+
+        QRegExp keyRe("^([^=]+)\\s*=\\s*(.+)$");
+
+        CSMSettings::SettingMap *settings = 0;
+        QString section = "none";
+
+        while (!stream->atEnd())
         {
-            //add the previous section's settings to the member map
-            if (settings)
-                sections.insert(section, settings);
+            QString line = stream->readLine().simplified();
 
-            //save new section and create a new list
-            section = sectionRe.cap(1);
-            settings = new SettingMap;
-            continue;
+            if (line.isEmpty() || line.startsWith("#"))
+                continue;
+
+            //if a section is found, push it onto a new QStringList
+            //and push the QStringList onto
+            if (sectionRe.exactMatch(line))
+            {
+                //add the previous section's settings to the member map
+                if (settings)
+                    mSectionSettings.insert(section, settings);
+
+                //save new section and create a new list
+                section = sectionRe.cap(1);
+                settings = new SettingMap;
+                continue;
+            }
+
+            if (keyRe.indexIn(line) != -1)
+            {
+                SettingContainer *sc  = new SettingContainer (keyRe.cap(2).simplified());
+                sc->setObjectName(keyRe.cap(1).simplified());
+                (*settings)[keyRe.cap(1).simplified()]  = sc;
+            }
+
         }
 
-        if (keyRe.indexIn(line) != -1)
-        {
-            SettingContainer *sc  = new SettingContainer (keyRe.cap(2).simplified());
-            (*settings)[keyRe.cap(1).simplified()]  = sc;
-        }
-
+        mSectionSettings.insert(section, settings);
     }
-    sections.insert(section, settings);
+
+    stream->device()->close();
+
+    return;
+}
+
+void CSMSettings::UserSettings::loadSettings (const QString &fileName)
+{
+    if (mPaths.count() == 0)
+    {
+        mPaths.append(QString::fromStdString(mCfgMgr.getGlobalPath().string()) + fileName);
+        mPaths.append(QString::fromStdString(mCfgMgr.getLocalPath().string()) + fileName);
+        mPaths.append(QString::fromStdString(mCfgMgr.getUserPath().string()) + fileName);
+    }
+
+    foreach (const QString &path, mPaths)
+    {
+        qDebug() << "Loading config file:" << qPrintable(path);
+        loadFromFile(path);
+    }
+}
+
+void CSMSettings::UserSettings::updateSettings (const QString &sectionName, const QString &settingName)
+{
+    SettingMap *settings = mSectionSettings[sectionName];
+
+    if (!settings)
+        return;
+
+    SettingContainer *setting = 0;
+
+    if (settingName.isEmpty())
+    {
+        foreach (setting, *settings)
+            emit signalUpdateEditorSetting (setting->objectName(), setting->getValue());
+    }
+    else
+    {
+        setting = (*settings)[settingName];
+
+        if (setting)
+            emit signalUpdateEditorSetting (setting->objectName(), setting->getValue());
+    }
 }

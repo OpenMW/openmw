@@ -21,7 +21,7 @@ namespace CSVSettings
         explicit ProxyBlock (ItemBlock *proxyItemBlock, QWidget *parent = 0);
 
         void addSetting (ItemBlock* settingBlock, QStringList *proxyList);
-        int build (GroupBlockDef &def);
+        int build (GroupBlockDef *def);
 
         CSMSettings::SettingList *getSettings()  { return 0; }
         bool updateSettings (const CSMSettings::SettingMap &settings);

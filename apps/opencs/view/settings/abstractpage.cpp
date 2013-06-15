@@ -13,18 +13,32 @@
 CSVSettings::AbstractPage::AbstractPage(QWidget *parent):
     QWidget(parent)
 {
+    QGridLayout *pageLayout = new QGridLayout(this);
+    setLayout (pageLayout);
 }
 
 CSVSettings::AbstractPage::AbstractPage(const QString &pageName, QWidget *parent):
     QWidget(parent)
 {
     QWidget::setObjectName (pageName);
+
+    QGridLayout *pageLayout = new QGridLayout(this);
+    setLayout (pageLayout);
 }
 
 CSVSettings::AbstractPage::~AbstractPage()
 {
 }
-
+/*
+void CSVSettings::AbstractPage::setupUi()
+{
+    // Hacks to get the stylesheet look properly
+    #ifdef Q_OS_MAC
+        QPlastiqueStyle *style = new QPlastiqueStyle;
+        //profilesComboBox->setStyle(style);
+    #endif
+}
+*/
 CSMSettings::SettingList *CSVSettings::AbstractPage::getSettings()
 {
     CSMSettings::SettingList *settings = new CSMSettings::SettingList();

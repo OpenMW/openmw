@@ -23,3 +23,10 @@ void CSVWorld::TableSubView::rowActivated (const QModelIndex& index)
 {
     focusId (mTable->getUniversalId (index.row()));
 }
+
+void CSVWorld::TableSubView::updateEditorSetting(const QString &settingName, const QString &settingValue)
+{
+
+    if (settingName == "Record Status Display")
+        mTable->updateEditorSetting(settingName, settingValue);
+}

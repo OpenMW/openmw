@@ -1,28 +1,30 @@
-#ifndef EDITORPAGE_H
-#define EDITORPAGE_H
+#ifndef EDITORPAGE_HPP
+#define EDITORPAGE_HPP
 
+#include "support.hpp"
 #include "abstractpage.hpp"
 
-class QGroupBox;
-
-namespace CSVSettings {
-
-    class UserSettings;
-    class AbstractBlock;
-
+namespace CSVSettings
+{
     class EditorPage : public AbstractPage
     {
         Q_OBJECT
 
     public:
+        explicit EditorPage(QWidget *parent = 0);
+        explicit EditorPage (const QString &pageName, QWidget* parent = 0);
 
-        EditorPage(QWidget *parent = 0);
-
-        void setupUi();
         void initializeWidgets (const CSMSettings::SettingMap &settings);
+        void setupUi();
+
+    private:
+        GroupBlockDef *setupRecordStatusDisplay();
 
     signals:
         void signalUpdateEditorSetting (const QString &settingName, const QString &settingValue);
+
+    public slots:
     };
 }
-#endif //EDITORPAGE_H
+
+#endif // EDITORPAGE_HPP

@@ -16,7 +16,7 @@ namespace CSVSettings
         GroupBlock (QWidget* parent = 0);
         GroupBlock (bool isVisible, QWidget *parent = 0);
 
-        int build (GroupBlockDef &def);
+        int build (GroupBlockDef *def);
 
         bool updateSettings (const CSMSettings::SettingMap &settings);
 

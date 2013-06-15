@@ -28,7 +28,7 @@ namespace CSVSettings {
 
         ~AbstractPage();
 
-        virtual void setupUi()=0;
+        virtual void setupUi() = 0;
 
         virtual void initializeWidgets (const CSMSettings::SettingMap &settings) = 0;
 
@@ -39,7 +39,7 @@ namespace CSVSettings {
     protected:
 
         template <typename S, typename T>
-        AbstractBlock *buildBlock (T &def)
+        AbstractBlock *buildBlock (T *def)
         {
             S *block = new S (this);
             int ret = block->build (def);
@@ -47,11 +47,11 @@ namespace CSVSettings {
             if (ret < 0)
                 return 0;
 
-            QWidget::layout()->addWidget (block->getGroupBox());
+            QGroupBox *box = block->getGroupBox();
+            QWidget::layout()->addWidget (box);
 
             return block;
         }
-
 
     };
 }

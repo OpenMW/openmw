@@ -13,13 +13,13 @@
 #include "../world/enumdelegate.hpp"
 #include "../world/vartypedelegate.hpp"
 #include "../world/recordstatusdelegate.hpp"
+#include "../settings/usersettingsdialog.hpp"
 
 #include "view.hpp"
 
 #include <QMessageBox>
 #include <QPushButton>
 #include <QtGui/QApplication>
-#include <QDebug>
 
 void CSVDoc::ViewManager::updateIndices()
 {
@@ -121,6 +121,11 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
 
     mDelegateFactories->add (CSMWorld::ColumnBase::Display_RecordState,
         new CSVWorld::RecordStatusDelegateFactory() );
+
+    connect (&CSMSettings::UserSettings::instance(), SIGNAL (signalUpdateEditorSetting (const QString &, const QString &)),
+             this, SLOT (slotUpdateEditorSetting (const QString &, const QString &)));
+
+    CSMSettings::UserSettings::instance().loadSettings("opencs.cfg");
 }
 
 CSVDoc::ViewManager::~ViewManager()
@@ -346,4 +351,11 @@ void CSVDoc::ViewManager::exitApplication (CSVDoc::View *view)
 {
     if (notifySaveOnClose (view))
         QApplication::instance()->exit();
+}
+
+void CSVDoc::ViewManager::slotUpdateEditorSetting (const QString &settingName, const QString &settingValue)
+{
+    if (settingName == "Record Status Display")
+        foreach (CSVDoc::View *view, mViews)
+            view->updateEditorSetting (settingName, settingValue);
 }

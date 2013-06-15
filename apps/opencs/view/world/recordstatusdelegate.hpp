@@ -35,12 +35,12 @@ namespace CSVWorld
 
         QSize sizeHint (const QStyleOptionViewItem &option, const QModelIndex &index) const;
 
+        void updateEditorSetting (const QString &settingName, const QString &settingValue);
+
     };
 
     class RecordStatusDelegateFactory : public CommandDelegateFactory
     {
-            //std::vector<std::pair<int, QString> > mValues;
-
         public:
 
             virtual CommandDelegate *makeDelegate (QUndoStack& undoStack, QObject *parent) const;

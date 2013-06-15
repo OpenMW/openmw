@@ -2,6 +2,7 @@
 #include <QPainter>
 #include <QApplication>
 #include <QUndoStack>
+#include "../../model/settings/usersettings.hpp"
 
 CSVWorld::RecordStatusDelegate::RecordStatusDelegate(QUndoStack &undoStack, QObject *parent)
     : CommandDelegate (undoStack, parent)
@@ -36,23 +37,23 @@ void CSVWorld::RecordStatusDelegate::paint (QPainter *painter, const QStyleOptio
    switch (index.data().toInt())
    {
    case 0: // State_BaseOnly
-       text = "base";
+       text = "Base";
        break;
 
    case 1: // State_Modified
-       text = "modified";
+       text = "Modified";
        icon = mModifiedIcon;
        break;
 
    case 2: // State_Modified_Only
-       text = "added";
+       text = "Added";
        icon = mAddedIcon;
        break;
 
    case 3: // State_Deleted
 
    case 4: // State_Erased
-       text = "deleted";
+       text = "Deleted";
        icon = mDeletedIcon;
        break;
 
@@ -70,14 +71,14 @@ void CSVWorld::RecordStatusDelegate::paint (QPainter *painter, const QStyleOptio
 
     if (mStatusDisplay == 0 && (icon) )
     {
-        iconRect.setRight (iconRect.left() + mIconSize*2);
-        textRect.setLeft (iconRect.right() + mTextLeftOffset *2);
+        iconRect.setRight (iconRect.left()+ mIconSize*2);
+        textRect.setLeft (iconRect.right() + mTextLeftOffset *1.25);
     }
     else
         textRect.setLeft (textRect.left() + mTextLeftOffset );
 
     if ( (mStatusDisplay == 0 || mStatusDisplay == 1) && (icon) )
-           painter->drawPixmap(iconRect.center(),icon->pixmap(mIconSize, mIconSize));
+        painter->drawPixmap(iconRect.center().x()-10,iconRect.center().y()+2, icon->pixmap(mIconSize, mIconSize));
 
    // icon + text or text only, or force text if no icon exists for status
    if (mStatusDisplay == 0 || mStatusDisplay == 2 || !(icon) )
@@ -98,4 +99,22 @@ CSVWorld::CommandDelegate *CSVWorld::RecordStatusDelegateFactory::makeDelegate (
     QObject *parent) const
 {
     return new RecordStatusDelegate (undoStack, parent);
+}
+
+void CSVWorld::RecordStatusDelegate::updateEditorSetting (const QString &settingName, const QString &settingValue)
+{
+    if (settingName == "Record Status Display")
+    {
+        if (settingValue == "Icon and Text")
+            mStatusDisplay = 0;
+
+        else if (settingValue == "Icon Only")
+            mStatusDisplay = 1;
+
+        else if (settingValue == "Text Only")
+            mStatusDisplay = 2;
+
+        else
+            mStatusDisplay = 0;
+    }
 }

@@ -18,10 +18,10 @@ namespace CSVSettings
     public:
         explicit ToggleBlock(QWidget *parent = 0);
 
-        int build (CustomBlockDef &def);
+        int build (CustomBlockDef *def);
 
     private:
-        GroupBox *buildToggleWidgets (GroupBlockDef &def, QString &defaultToggle);
+        GroupBox *buildToggleWidgets (GroupBlockDef *def, QString &defaultToggle);
     };
 }
 #endif // TOGGLEBLOCK_HPP

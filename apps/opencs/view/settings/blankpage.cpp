@@ -43,10 +43,7 @@ void CSVSettings::BlankPage::initPage()
 void CSVSettings::BlankPage::setupUi()
 {
     QGroupBox *pageBox = new QGroupBox(this);
-    QLayout* pageLayout = new QVBoxLayout();
-
-    setLayout(pageLayout);
-    pageLayout->addWidget(pageBox);
+    layout()->addWidget(pageBox);
 }
 
 void CSVSettings::BlankPage::initializeWidgets (const CSMSettings::SettingMap &settings)

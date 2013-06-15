@@ -12,7 +12,6 @@ namespace CSMSettings
         QStringPair *mValuePair;
         QStringList *mValueList;
         bool mIsMultiValue;
-        QString mName;
         QString mDefaultValue;
 
     public:
@@ -20,8 +19,10 @@ namespace CSMSettings
                               const QString& defaultValue, QObject *parent = 0)
             : SettingContainer(defaultValue, parent),
               mIsMultiValue (isMultiValue), mValueList (0),
-              mName (name), mValuePair (0), mDefaultValue (defaultValue)
-        {}
+              mValuePair (0), mDefaultValue (defaultValue)
+        {
+            QObject::setObjectName(name);
+        }
 
         bool updateItem (const QStringList *values);
         bool updateItem (const QString &value);
@@ -33,7 +34,6 @@ namespace CSMSettings
         inline QStringPair *getValuePair()                  { return mValuePair; }
         inline void setValuePair (QStringPair valuePair)    { mValuePair = new QStringPair(valuePair); }
 
-        inline QString getName () const                     { return mName; }
         inline bool isMultivalue ()                         { return mIsMultiValue; }
 
         void setDefaultValue (const QString &value);

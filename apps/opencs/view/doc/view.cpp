@@ -258,10 +258,13 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id)
     /// \todo add an user setting to reuse sub views (on a per document basis or on a per top level view basis)
 
     SubView *view = mSubViewFactory.makeSubView (id, *mDocument);
+    view->setObjectName ("subview");
     mSubViewWindow.addDockWidget (Qt::TopDockWidgetArea, view);
 
     connect (view, SIGNAL (focusId (const CSMWorld::UniversalId&)), this,
         SLOT (addSubView (const CSMWorld::UniversalId&)));
+
+    CSMSettings::UserSettings::instance().updateSettings("Editor", "Record Status Display");
 
     view->show();
 }
@@ -366,20 +369,13 @@ void CSVDoc::View::showUserSettings()
 {
     CSVSettings::UserSettingsDialog *settingsDialog = new CSVSettings::UserSettingsDialog(this);
 
-    connect (&(CSMSettings::UserSettings::instance()), SIGNAL (signalUpdateEditorSetting (const QString &, const QString &)),
-             this, SLOT (slotUpdateEditorSetting (const QString &, const QString &)) );
-
     settingsDialog->show();
 }
 
-void CSVDoc::View::slotUpdateEditorSetting(const QString &settingName, const QString &settingValue)
+void CSVDoc::View::updateEditorSetting (const QString &settingName, const QString &settingValue)
 {
-    static QString lastValue = "";
-
-    if (lastValue != settingValue)
-    {
-        //evaluate settingName against tokens to determine which function to call to update Editor application.
-
-        lastValue = settingValue;
-    }
+    if (settingName == "Record Status Display")
+        foreach (QObject *view, mSubViewWindow.children())
+            if (view->objectName() == "subview")
+                dynamic_cast<CSVDoc::SubView *>(view)->updateEditorSetting (settingName, settingValue);
 }

@@ -18,8 +18,6 @@ namespace CSMSettings
         explicit SettingContainer (QObject *parent = 0);
         explicit SettingContainer (const QString &value, QObject *parent = 0);
 
-        virtual QString getName() const {return "";}
-
         void insert (const QString &value);
         void update (const QString &value, int index = 0);
 

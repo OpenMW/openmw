@@ -72,6 +72,8 @@ namespace CSVDoc
             void progress (int current, int max, int type, int threads, CSMDoc::Document *document);
 
             void onExitWarningHandler(int state, CSMDoc::Document* document);
+
+            void slotUpdateEditorSetting (const QString &, const QString &);
     };
 
 }
