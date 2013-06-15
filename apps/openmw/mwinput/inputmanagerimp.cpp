@@ -1,9 +1,5 @@
 #include "inputmanagerimp.hpp"
 
-#if defined(__APPLE__) && !defined(__LP64__)
-#include <Carbon/Carbon.h>
-#endif
-
 #include <OgreRoot.h>
 #include <OgreRenderWindow.h>
 
@@ -56,12 +52,6 @@ namespace MWInput
         , mOverencumberedMessageDelay(0.f)
         , mAlwaysRunActive(false)
     {
-#if defined(__APPLE__) && !defined(__LP64__)
-        // Give the application window focus to receive input events
-        ProcessSerialNumber psn = { 0, kCurrentProcess };
-        TransformProcessType(&psn, kProcessTransformToForegroundApplication);
-        SetFrontProcess(&psn);
-#endif
 
         Ogre::RenderWindow* window = ogre.getWindow ();
 
@@ -429,16 +419,6 @@ namespace MWInput
             // Pressing enter when a messagebox is prompting for "ok" will activate the ok button
             MWBase::Environment::get().getWindowManager()->enterPressed();
         }
-
-        //TODO: Check if we need this with SDL
-        /*
-#ifdef __APPLE__ // filter \016 symbol for F-keys on OS X
-        if ((arg.key >= SDLK_F1 && arg.key <= SDLK_F10) ||
-            (arg.key >= SDLK_F11 && arg.key <= SDLK_F15)) {
-            text = 0;
-        }
-#endif
-        */
 
         OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(arg.keysym.sym);
 

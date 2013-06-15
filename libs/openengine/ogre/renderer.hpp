@@ -27,18 +27,12 @@
 #include "OgreTexture.h"
 #include <OgreWindowEventUtilities.h>
 
-#if defined(__APPLE__) && !defined(__LP64__)  
-#include <OgreRoot.h>
-#endif
-
 struct SDL_Window;
 struct SDL_Surface;
 
 namespace Ogre
 {
-#if !defined(__APPLE__) || defined(__LP64__)
     class Root;
-#endif
     class RenderWindow;
     class SceneManager;
     class Camera;
@@ -60,26 +54,11 @@ namespace OEngine
             std::string icon;
         };
 
-#if defined(__APPLE__) && !defined(__LP64__)
-        class CustomRoot : public Ogre::Root {
-        public:
-            bool isQueuedEnd() const;
-
-            CustomRoot(const Ogre::String& pluginFileName = "plugins.cfg", 
-                    const Ogre::String& configFileName = "ogre.cfg", 
-                    const Ogre::String& logFileName = "Ogre.log");
-        };
-#endif
-
         class Fader;
 
         class OgreRenderer
         {
-#if defined(__APPLE__) && !defined(__LP64__)
-            CustomRoot *mRoot;
-#else
             Ogre::Root *mRoot;
-#endif
             Ogre::RenderWindow *mWindow;
             SDL_Window *mSDLWindow;
             SDL_Surface *mWindowIconSurface;
