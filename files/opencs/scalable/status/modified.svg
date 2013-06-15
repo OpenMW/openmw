@@ -23,9 +23,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="7.2407734"
-     inkscape:cx="-9.3480405"
-     inkscape:cy="41.78388"
+     inkscape:zoom="5.12"
+     inkscape:cx="-14.949424"
+     inkscape:cy="44.402567"
      inkscape:document-units="px"
      inkscape:current-layer="g5966"
      showgrid="true"
@@ -1096,35 +1096,6 @@
     <g
        id="g5966"
        transform="matrix(0.97772023,0,0,0.97772023,100.68016,77.074325)">
-      <g
-         id="g6138"
-         transform="matrix(1.0227875,0,0,1.0227875,-99.340453,948.2379)">
-        <g
-           transform="matrix(3.2000002,0,0,3.2000002,101.31818,-39.364891)"
-           id="g6116">
-          <g
-             id="g5601"
-             transform="matrix(0.5587946,0,0,-0.5587946,-32.12983,25.499674)">
-            <g
-               id="g4846"
-               transform="matrix(1.2,0,0,1.2,-39.498448,18.180689)">
-              <g
-                 id="g4867">
-                <rect
-                   style="fill:url(#radialGradient6149);fill-opacity:1;stroke:none"
-                   id="rect2160"
-                   width="22.369577"
-                   height="22.369577"
-                   x="31.957346"
-                   y="-4.4496365"
-                   rx="1.5732449"
-                   ry="1.5732449"
-                   transform="scale(1,-1)" />
-              </g>
-            </g>
-          </g>
-        </g>
-      </g>
       <path
          sodipodi:type="star"
          style="fill:none;stroke:#000000;stroke-width:9.83509541;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;filter:url(#filter7327)"
@@ -1163,7 +1134,7 @@
          sodipodi:type="star" />
       <path
          sodipodi:type="star"
-         style="fill:#ffffff;fill-opacity:1;stroke:none;"
+         style="fill:#ffe791;fill-opacity:1;stroke:none"
          id="path7333"
          sodipodi:sides="5"
          sodipodi:cx="0.5859375"
