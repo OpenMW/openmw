@@ -16,7 +16,7 @@ namespace SFO
     class InputWrapper
     {
     public:
-        InputWrapper(SDL_Window *window=NULL);
+        InputWrapper(SDL_Window *window, Ogre::RenderWindow* ogreWindow);
         ~InputWrapper();
 
         //void initFromRenderWindow(Ogre::RenderWindow* win);
@@ -65,6 +65,7 @@ namespace SFO
         Sint32 mMouseY;
 
         SDL_Window* mSDLWindow;
+        Ogre::RenderWindow* mOgreWindow;
         bool mOwnWindow;
     };
 

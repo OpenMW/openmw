@@ -65,7 +65,7 @@ namespace MWInput
 
         Ogre::RenderWindow* window = ogre.getWindow ();
 
-        mInputManager = new SFO::InputWrapper(mOgre.getSDLWindow());
+        mInputManager = new SFO::InputWrapper(mOgre.getSDLWindow(), mOgre.getWindow());
         mInputManager->setMouseEventCallback (this);
         mInputManager->setKeyboardEventCallback (this);
         mInputManager->setWindowEventCallback(this);
@@ -912,9 +912,9 @@ namespace MWInput
     void InputManager::keyBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
         , SDL_Keycode key, ICS::Control::ControlChangingDirection direction)
     {
-        //Disallow binding escape key, and unassigned keys
-        if(key==OIS::KC_ESCAPE || key==OIS::KC_UNASSIGNED)
-            return
+        //Disallow binding escape key
+        if(key==SDLK_ESCAPE)
+            return;
 
         clearAllBindings(control);
         ICS::DetectingBindingListener::keyBindingDetected (ICS, control, key, direction);

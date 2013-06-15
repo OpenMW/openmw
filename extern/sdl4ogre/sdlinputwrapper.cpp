@@ -16,8 +16,9 @@ namespace SFO
 {
     /// \brief General purpose wrapper for OGRE applications around SDL's event
     ///        queue, mostly used for handling input-related events.
-    InputWrapper::InputWrapper(SDL_Window* window) :
+    InputWrapper::InputWrapper(SDL_Window* window, Ogre::RenderWindow* ogreWindow) :
         mSDLWindow(window),
+        mOgreWindow(ogreWindow),
         mOwnWindow(false),
         mWarpCompensate(false),
         mMouseRelative(false),
@@ -98,6 +99,9 @@ namespace SFO
     void InputWrapper::capture()
     {
         SDL_Event evt;
+        bool resize=false;
+        size_t size_x = 0;
+        size_t size_y = 0;
         while(SDL_PollEvent(&evt))
         {
             switch(evt.type)
@@ -128,8 +132,18 @@ namespace SFO
                 case SDL_KEYUP:
                     mKeyboardListener->keyReleased(evt.key);
                     break;
+                case SDL_WINDOWEVENT_RESIZED:
+                    resize = true;
+                    size_x = evt.window.data1;
+                    size_y = evt.window.data2;
+                    break;
+                case SDL_QUIT:
+                    Ogre::Root::getSingleton().queueEndRendering();
+                    break;
             }
         }
+        if (resize)
+            mOgreWindow->resize(size_x, size_y);
     }
 
     bool InputWrapper::isModifierHeld(int mod)

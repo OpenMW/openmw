@@ -136,6 +136,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 
 void OMW::Engine::handleSDLMessages()
 {
+    /*
     //Pump messages since the last frame
     const int max_events = 20;
     SDL_Event events[max_events];
@@ -174,6 +175,7 @@ void OMW::Engine::handleSDLMessages()
         //user requested a quit, break out.
         mOgre->getRoot()->queueEndRendering();
     }
+    */
 }
 
 OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
