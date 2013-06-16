@@ -30,9 +30,6 @@ namespace SFO
         mMouseInWindow(true)
     {
         _setupOISKeys();
-
-        // FIXME: text input should only be enabled when a text input widget currently has focus
-        SDL_StartTextInput();
     }
 
     InputWrapper::~InputWrapper()
@@ -40,8 +37,6 @@ namespace SFO
         if(mSDLWindow != NULL && mOwnWindow)
             SDL_DestroyWindow(mSDLWindow);
         mSDLWindow = NULL;
-
-        SDL_StopTextInput();
     }
 
     void InputWrapper::capture()

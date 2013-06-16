@@ -407,7 +407,7 @@ namespace MWGui
         getWidget(mEditName, "EditName");
 
         // Make sure the edit box has focus
-        MyGUI::InputManager::getInstance().setKeyFocusWidget(mEditName);
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mEditName);
 
         MyGUI::Button* descriptionButton;
         getWidget(descriptionButton, "DescriptionButton");
@@ -866,7 +866,7 @@ namespace MWGui
         okButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sInputMenu1", ""));
 
         // Make sure the edit box has focus
-        MyGUI::InputManager::getInstance().setKeyFocusWidget(mTextEdit);
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mTextEdit);
     }
 
     DescriptionDialog::~DescriptionDialog()
