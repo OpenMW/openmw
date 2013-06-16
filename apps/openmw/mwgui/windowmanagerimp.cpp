@@ -357,11 +357,6 @@ namespace MWGui
         setCursorVisible(!gameMode);
 
         if (gameMode)
-            mToolTips->enterGameMode();
-        else
-            mToolTips->enterGuiMode();
-
-        if (gameMode)
             setKeyFocusWidget (NULL);
 
         setMinimapVisibility((mAllowed & GW_Map) && !mMap->pinned());

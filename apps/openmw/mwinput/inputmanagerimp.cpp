@@ -408,6 +408,7 @@ namespace MWInput
         mMouseLookEnabled = !guiMode;
         if (guiMode)
             mWindows.showCrosshair(false);
+        mWindows.setCursorVisible(guiMode);
         // if not in gui mode, the camera decides whether to show crosshair or not.
     }
 
@@ -470,7 +471,6 @@ namespace MWInput
     bool InputManager::keyPressed( const SDL_KeyboardEvent &arg )
     {
         mInputBinder->keyPressed (arg);
-        unsigned int text = arg.keysym.unicode;
 
         if(arg.keysym.sym == SDLK_RETURN
             && MWBase::Environment::get().getWindowManager()->isGuiMode())
