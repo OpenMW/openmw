@@ -26,7 +26,8 @@ namespace SFO
         mWrapPointer(false),
         mMouseZ(0),
         mMouseY(0),
-        mMouseX(0)
+        mMouseX(0),
+        mMouseInWindow(true)
     {
         _setupOISKeys();
 
