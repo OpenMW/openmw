@@ -217,8 +217,8 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     StringsVector master = variables["master"].as<StringsVector>();
     if (master.empty())
     {
-        std::cout << "No master file given. Assuming Morrowind.esm" << std::endl;
-        master.push_back("Morrowind");
+        std::cout << "No master file given. Aborting...\n";
+        std::exit(1);
     }
 
     StringsVector plugin = variables["plugin"].as<StringsVector>();
