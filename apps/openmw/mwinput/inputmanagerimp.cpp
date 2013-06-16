@@ -99,7 +99,6 @@ namespace MWInput
         , mMouseWheel(0)
         , mDragDrop(false)
         , mGuiCursorEnabled(false)
-        , mDebug(Settings::Manager::getBool("debug", "Engine"))
         , mUserFile(userFile)
         , mUserFileExists(userFileExists)
         , mInvertY (Settings::Manager::getBool("invert y axis", "Input"))
@@ -272,26 +271,23 @@ namespace MWInput
         // event callbacks (which may crash)
         mWindows.update();
 
-        if(!mDebug)
+        bool main_menu = mWindows.containsMode(MWGui::GM_MainMenu);
+
+        bool was_relative = mInputManager->getMouseRelative();
+        bool is_relative = !mWindows.isGuiMode();
+
+        // don't keep the pointer away from the window edge in gui mode
+        // stop using raw mouse motions and switch to system cursor movements
+        mInputManager->setMouseRelative(is_relative);
+
+        //we let the mouse escape in the main menu
+        mInputManager->setGrabPointer(!main_menu);
+
+        //we switched to non-relative mode, move our cursor to where the in-game
+        //cursor is
+        if( !is_relative && was_relative != is_relative )
         {
-            bool main_menu = mWindows.containsMode(MWGui::GM_MainMenu);
-
-            bool was_relative = mInputManager->getMouseRelative();
-            bool is_relative = !mWindows.isGuiMode();
-
-            // don't keep the pointer away from the window edge in gui mode
-            // stop using raw mouse motions and switch to system cursor movements
-            mInputManager->setMouseRelative(is_relative);
-
-            //we let the mouse escape in the main menu
-            mInputManager->setGrabPointer(!main_menu);
-
-            //we switched to non-relative mode, move our cursor to where the in-game
-            //cursor is
-            if( !is_relative && was_relative != is_relative )
-            {
-                mInputManager->warpMouse(mMouseX, mMouseY);
-            }
+            mInputManager->warpMouse(mMouseX, mMouseY);
         }
 
         // Disable movement in Gui mode
@@ -597,19 +593,12 @@ namespace MWInput
 
     bool InputManager::windowFocusChange(bool have_focus)
     {
-        if(!mDebug)
-        {
-
-        }
         return true;
     }
 
     bool InputManager::windowVisibilityChange(bool visible)
     {
-        if(!mDebug)
-        {
             //TODO: Pause game?
-        }
         return true;
     }
 
