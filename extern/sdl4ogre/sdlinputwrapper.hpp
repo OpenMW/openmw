@@ -42,8 +42,6 @@ namespace SFO
         void _wrapMousePointer(const SDL_MouseMotionEvent &evt);
         MouseMotionEvent _packageMouseMotion(const SDL_Event& evt);
 
-        void _handleKeyPress(SDL_KeyboardEvent& evt);
-        Uint32 _UTF8ToUTF32(const unsigned char *buf);
         void _setupOISKeys();
 
         SFO::MouseListener* mMouseListener;

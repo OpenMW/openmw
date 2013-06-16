@@ -35,6 +35,7 @@ class KeyListener
 {
 public:
     virtual ~KeyListener() {}
+    virtual void textInput (const SDL_TextInputEvent& arg) {}
     virtual bool keyPressed(const SDL_KeyboardEvent &arg) = 0;
     virtual bool keyReleased(const SDL_KeyboardEvent &arg) = 0;
 };
