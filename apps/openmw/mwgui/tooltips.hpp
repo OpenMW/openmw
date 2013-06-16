@@ -43,9 +43,6 @@ namespace MWGui
 
         void onFrame(float frameDuration);
 
-        void enterGameMode();
-        void enterGuiMode();
-
         void setEnabled(bool enabled);
 
         void toggleFullHelp(); ///< show extra info in item tooltips (owner, script)
@@ -103,8 +100,6 @@ namespace MWGui
 
         int mLastMouseX;
         int mLastMouseY;
-
-        bool mGameMode;
 
         bool mEnabled;
 

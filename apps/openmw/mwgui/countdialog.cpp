@@ -2,6 +2,9 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/windowmanager.hpp"
+
 namespace MWGui
 {
     CountDialog::CountDialog() :
@@ -40,7 +43,7 @@ namespace MWGui
                 mMainWidget->getHeight());
 
         // by default, the text edit field has the focus of the keyboard
-        MyGUI::InputManager::getInstance().setKeyFocusWidget(mItemEdit);
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mItemEdit);
 
         mSlider->setScrollPosition(maxCount-1);
         mItemEdit->setCaption(boost::lexical_cast<std::string>(maxCount));

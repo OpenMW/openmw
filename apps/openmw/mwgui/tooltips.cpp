@@ -18,7 +18,6 @@ namespace MWGui
 
     ToolTips::ToolTips() :
         Layout("openmw_tooltips.layout")
-        , mGameMode(true)
         , mFullHelp(false)
         , mEnabled(true)
         , mFocusToolTipX(0.0)
@@ -73,7 +72,9 @@ namespace MWGui
             return;
         }
 
-        if (!mGameMode)
+        bool gameMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
+
+        if (gameMode)
         {
             const MyGUI::IntPoint& mousePos = MyGUI::InputManager::getInstance().getMousePosition();
 
@@ -295,16 +296,6 @@ namespace MWGui
                 mDynamicToolTipBox->setVisible(true);
             }
         }
-    }
-
-    void ToolTips::enterGameMode()
-    {
-        mGameMode = true;
-    }
-
-    void ToolTips::enterGuiMode()
-    {
-        mGameMode = false;
     }
 
     void ToolTips::setFocusObject(const MWWorld::Ptr& focus)

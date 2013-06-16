@@ -225,6 +225,8 @@ namespace MWGui
 
         MyGUI::PointerManager::getInstance().eventChangeMousePointer += MyGUI::newDelegate(this, &WindowManager::onCursorChange);
 
+        MyGUI::InputManager::getInstance().eventChangeKeyFocus += MyGUI::newDelegate(this, &WindowManager::onKeyFocusChanged);
+
         setUseHardwareCursors(mUseHardwareCursors);
         onCursorChange(MyGUI::PointerManager::getInstance().getDefaultPointer());
         mCursorManager->cursorVisibilityChange(false);
@@ -355,12 +357,7 @@ namespace MWGui
         setCursorVisible(!gameMode);
 
         if (gameMode)
-            mToolTips->enterGameMode();
-        else
-            mToolTips->enterGuiMode();
-
-        if (gameMode)
-            MyGUI::InputManager::getInstance ().setKeyFocusWidget (NULL);
+            setKeyFocusWidget (NULL);
 
         setMinimapVisibility((mAllowed & GW_Map) && !mMap->pinned());
         setWeaponVisibility((mAllowed & GW_Inventory) && !mInventoryWindow->pinned());
@@ -1297,6 +1294,23 @@ namespace MWGui
     void WindowManager::updatePlayer()
     {
         mInventoryWindow->updatePlayer();
+    }
+
+    void WindowManager::setKeyFocusWidget(MyGUI::Widget *widget)
+    {
+        if (widget == NULL)
+            MyGUI::InputManager::getInstance().resetKeyFocusWidget();
+        else
+            MyGUI::InputManager::getInstance().setKeyFocusWidget(widget);
+        onKeyFocusChanged(widget);
+    }
+
+    void WindowManager::onKeyFocusChanged(MyGUI::Widget *widget)
+    {
+        if (widget && widget->castType<MyGUI::EditBox>(false))
+            SDL_StartTextInput();
+        else
+            SDL_StopTextInput();
     }
 
 }
