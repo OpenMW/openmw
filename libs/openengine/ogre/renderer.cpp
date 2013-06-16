@@ -173,7 +173,7 @@ void OgreRenderer::configure(const std::string &logPath,
         // Disable logging
         log->setDebugOutputEnabled(false);
 
-#if defined(__APPLE__) && !defined(__LP64__)
+#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
     mRoot = new CustomRoot("", "", "");
 #else
     mRoot = new Root("", "", "");
