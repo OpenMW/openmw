@@ -23,12 +23,28 @@
 #include <cstdlib>
 #include <stdexcept>
 
-#ifdef __MACOSX__
+#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
 #include "osx_utils.h"
 #endif
 
 using namespace Ogre;
 using namespace OEngine::Render;
+
+
+#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+
+CustomRoot::CustomRoot(const Ogre::String& pluginFileName, 
+                    const Ogre::String& configFileName, 
+                    const Ogre::String& logFileName)
+: Ogre::Root(pluginFileName, configFileName, logFileName)
+{}
+
+bool CustomRoot::isQueuedEnd() const
+{
+    return mQueuedEnd;
+}
+
+#endif
 
 void OgreRenderer::cleanup()
 {
@@ -52,7 +68,19 @@ void OgreRenderer::cleanup()
 
 void OgreRenderer::start()
 {
+#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+    // we need this custom main loop because otherwise Ogre's Carbon message pump will
+    // steal input events even from our Cocoa window
+    // There's no way to disable Ogre's message pump other that comment pump code in Ogre's source
+    do {
+        if (!mRoot->renderOneFrame()) {
+            break;
+        }
+
+    } while (!mRoot->isQueuedEnd());
+#else
     mRoot->startRendering();
+#endif
 }
 
 void OgreRenderer::loadPlugins() 
@@ -145,7 +173,11 @@ void OgreRenderer::configure(const std::string &logPath,
         // Disable logging
         log->setDebugOutputEnabled(false);
 
+#if defined(__APPLE__) && !defined(__LP64__)
+    mRoot = new CustomRoot("", "", "");
+#else
     mRoot = new Root("", "", "");
+#endif
 
     #if defined(ENABLE_PLUGIN_GL) || defined(ENABLE_PLUGIN_Direct3D9) || defined(ENABLE_PLUGIN_CgProgramManager) || defined(ENABLE_PLUGIN_OctreeSceneManager) || defined(ENABLE_PLUGIN_ParticleFX)
     loadPlugins();
