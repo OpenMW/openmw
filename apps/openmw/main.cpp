@@ -218,7 +218,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     if (master.empty())
     {
         std::cout << "No master file given. Aborting...\n";
-        std::exit(1);
+        return false;
     }
 
     StringsVector plugin = variables["plugin"].as<StringsVector>();
