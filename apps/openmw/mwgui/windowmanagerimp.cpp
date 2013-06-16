@@ -221,7 +221,7 @@ namespace MWGui
         unsetSelectedWeapon();
 
         //set up the hardware cursor manager
-        mCursorManager = new SFO::SDLCursorManager(Settings::Manager::getBool("debug", "Engine"));
+        mCursorManager = new SFO::SDLCursorManager();
 
         MyGUI::PointerManager::getInstance().eventChangeMousePointer += MyGUI::newDelegate(this, &WindowManager::onCursorChange);
 

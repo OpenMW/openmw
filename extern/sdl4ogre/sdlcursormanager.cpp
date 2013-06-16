@@ -8,8 +8,7 @@
 namespace SFO
 {
 
-    SDLCursorManager::SDLCursorManager(bool debug) :
-        mDebug(debug),
+    SDLCursorManager::SDLCursorManager() :
         mEnabled(false),
         mCursorVisible(false),
         mInitialized(false)
@@ -45,8 +44,7 @@ namespace SFO
         //turn off hardware cursors
         else
         {
-            if(!mDebug)
-                SDL_ShowCursor(SDL_FALSE);
+            SDL_ShowCursor(SDL_FALSE);
         }
     }
 
@@ -72,7 +70,7 @@ namespace SFO
 
     void SDLCursorManager::_setGUICursor(const std::string &name)
     {
-        if(mEnabled && (mDebug || mCursorVisible))
+        if(mEnabled && mCursorVisible)
         {
             SDL_SetCursor(mCursorMap.find(name)->second);
             _setCursorVisible(mCursorVisible);
@@ -83,9 +81,6 @@ namespace SFO
     {
         if(!mEnabled)
             return;
-
-        if(mDebug)
-            visible = true;
 
         SDL_ShowCursor(visible ? SDL_TRUE : SDL_FALSE);
     }

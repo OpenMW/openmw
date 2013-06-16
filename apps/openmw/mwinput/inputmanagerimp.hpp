@@ -147,7 +147,6 @@ namespace MWInput
 
         bool mMouseLookEnabled;
         bool mGuiCursorEnabled;
-        bool mDebug;
 
         float mOverencumberedMessageDelay;
 
