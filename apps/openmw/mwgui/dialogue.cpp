@@ -467,6 +467,7 @@ namespace MWGui
 
         BookTypesetter::Style* body = typesetter->createStyle("", MyGUI::Colour::White);
 
+        typesetter->sectionBreak(9);
         // choices
         const MyGUI::Colour linkHot    (223/255.f, 201/255.f, 159/255.f);
         const MyGUI::Colour linkNormal (150/255.f, 50/255.f, 30/255.f);
