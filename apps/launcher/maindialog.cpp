@@ -531,17 +531,6 @@ bool MainDialog::writeSettings()
         }
     }
 
-    if(!mGameSettings.hasMaster()) {
-            QMessageBox msgBox;
-            msgBox.setWindowTitle(tr("Error writing OpenMW configuration file"));
-            msgBox.setIcon(QMessageBox::Critical);
-            msgBox.setStandardButtons(QMessageBox::Ok);
-            msgBox.setText(tr("<br><b>You do not have any master files selected.</b><br><br> \
-                              Please select one and try again.<br>"));
-            msgBox.exec();
-            return false;
-    }
-
     // Game settings
     QFile file(userPath + QString("openmw.cfg"));
 
@@ -622,6 +611,17 @@ void MainDialog::play()
     if (!writeSettings()) {
         qApp->quit();
         return;
+    }
+
+    if(!mGameSettings.hasMaster()) {
+            QMessageBox msgBox;
+            msgBox.setWindowTitle(tr("No master file selected"));
+            msgBox.setIcon(QMessageBox::Warning);
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setText(tr("<br><b>You do not have any master files selected.</b><br><br> \
+                              OpenMW will not start without a master file selected.<br>"));
+            msgBox.exec();
+            return;
     }
 
     // Launch the game detached
