@@ -55,10 +55,8 @@ int main(int argc, char *argv[]) {
         std::cerr << "ini file does not exist" << std::endl;
         return -3;
     }
-    if(!boost::filesystem::exists(cfgFile)) {
+    if(!boost::filesystem::exists(cfgFile))
         std::cerr << "cfg file does not exist" << std::endl;
-        return -4;
-    }
 
     MwIniImporter importer;
     importer.setVerbose(vm.count("verbose"));
