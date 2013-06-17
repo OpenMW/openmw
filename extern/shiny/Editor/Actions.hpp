@@ -10,7 +10,7 @@ namespace sh
 	{
 	public:
 		virtual void execute() = 0;
-		virtual ~Action();
+		virtual ~Action() {}
 	};
 
 	class ActionDeleteMaterial : public Action

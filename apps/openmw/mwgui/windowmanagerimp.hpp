@@ -83,7 +83,7 @@ namespace MWGui
     WindowManager(const Compiler::Extensions& extensions, int fpsLevel,
                   OEngine::Render::OgreRenderer *mOgre, const std::string& logpath,
                   const std::string& cacheDir, bool consoleOnlyScripts,
-                  Translation::Storage& translationDataStorage);
+                  Translation::Storage& translationDataStorage, ToUTF8::FromType encoding);
     virtual ~WindowManager();
 
     /**

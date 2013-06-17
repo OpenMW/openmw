@@ -8,6 +8,7 @@
 #include <QMdiArea>
 #include <QDockWidget>
 #include <QtGui/QApplication>
+#include <QDebug>
 
 #include "../../model/doc/document.hpp"
 #include "../world/subviews.hpp"
@@ -179,7 +180,12 @@ CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int to
     : mViewManager (viewManager), mDocument (document), mViewIndex (totalViews-1),
       mViewTotal (totalViews)
 {
-    resize (300, 300); /// \todo get default size from settings and set reasonable minimal size
+    QString width = CSMSettings::UserSettings::instance().getSettingValue(QString("Window Size"), QString("Width"));
+    QString height = CSMSettings::UserSettings::instance().getSettingValue(QString("Window Size"), QString("Height"));
+    if(width==QString() || height==QString())
+        resize(800, 600);
+    else
+        resize (width.toInt(), height.toInt());
 
     mSubViewWindow.setDockOptions (QMainWindow::AllowNestedDocks);
 

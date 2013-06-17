@@ -189,14 +189,14 @@ book JournalBooks::createEmptyJournalBook ()
 {
     BookTypesetter::Ptr typesetter = createTypesetter ();
 
-    BookTypesetter::Style* header = typesetter->createStyle ("EB Garamond", MyGUI::Colour (0.60f, 0.00f, 0.00f));
-    BookTypesetter::Style* body   = typesetter->createStyle ("EB Garamond", MyGUI::Colour::Black);
+    BookTypesetter::Style* header = typesetter->createStyle ("", MyGUI::Colour (0.60f, 0.00f, 0.00f));
+    BookTypesetter::Style* body   = typesetter->createStyle ("", MyGUI::Colour::Black);
 
     typesetter->write (header, to_utf8_span ("You have no journal entries!"));
     typesetter->lineBreak ();
     typesetter->write (body, to_utf8_span ("You should have gone though the starting quest and got an initial quest."));
 
-    BookTypesetter::Style* big    = typesetter->createStyle ("EB Garamond 24", MyGUI::Colour::Black);
+    BookTypesetter::Style* big    = typesetter->createStyle ("", MyGUI::Colour::Black);
     BookTypesetter::Style* test   = typesetter->createStyle ("MonoFont", MyGUI::Colour::Blue);
 
     typesetter->sectionBreak (20);
@@ -231,8 +231,8 @@ book JournalBooks::createJournalBook ()
 {
     BookTypesetter::Ptr typesetter = createTypesetter ();
 
-    BookTypesetter::Style* header = typesetter->createStyle ("EB Garamond", MyGUI::Colour (0.60f, 0.00f, 0.00f));
-    BookTypesetter::Style* body   = typesetter->createStyle ("EB Garamond", MyGUI::Colour::Black);
+    BookTypesetter::Style* header = typesetter->createStyle ("", MyGUI::Colour (0.60f, 0.00f, 0.00f));
+    BookTypesetter::Style* body   = typesetter->createStyle ("", MyGUI::Colour::Black);
 
     mModel->visitJournalEntries (0, AddJournalEntry (typesetter, body, header, true));
 
@@ -243,8 +243,8 @@ book JournalBooks::createTopicBook (uintptr_t topicId)
 {
     BookTypesetter::Ptr typesetter = createTypesetter ();
 
-    BookTypesetter::Style* header = typesetter->createStyle ("EB Garamond", MyGUI::Colour (0.60f, 0.00f, 0.00f));
-    BookTypesetter::Style* body   = typesetter->createStyle ("EB Garamond", MyGUI::Colour::Black);
+    BookTypesetter::Style* header = typesetter->createStyle ("", MyGUI::Colour (0.60f, 0.00f, 0.00f));
+    BookTypesetter::Style* body   = typesetter->createStyle ("", MyGUI::Colour::Black);
 
     mModel->visitTopicName (topicId, AddTopicName (typesetter, header));
 
@@ -259,8 +259,8 @@ book JournalBooks::createQuestBook (uintptr_t questId)
 {
     BookTypesetter::Ptr typesetter = createTypesetter ();
 
-    BookTypesetter::Style* header = typesetter->createStyle ("EB Garamond", MyGUI::Colour (0.60f, 0.00f, 0.00f));
-    BookTypesetter::Style* body   = typesetter->createStyle ("EB Garamond", MyGUI::Colour::Black);
+    BookTypesetter::Style* header = typesetter->createStyle ("", MyGUI::Colour (0.60f, 0.00f, 0.00f));
+    BookTypesetter::Style* body   = typesetter->createStyle ("", MyGUI::Colour::Black);
 
     mModel->visitQuestName (questId, AddQuestName (typesetter, header));
 
@@ -275,7 +275,7 @@ book JournalBooks::createTopicIndexBook ()
 
     typesetter->setSectionAlignment (BookTypesetter::AlignCenter);
 
-    BookTypesetter::Style* body   = typesetter->createStyle ("EB Garamond", MyGUI::Colour::Black);
+    BookTypesetter::Style* body   = typesetter->createStyle ("", MyGUI::Colour::Black);
 
     for (int i = 0; i < 26; ++i)
     {
@@ -300,7 +300,7 @@ book JournalBooks::createTopicIndexBook ()
 book JournalBooks::createTopicIndexBook (char character)
 {
     BookTypesetter::Ptr typesetter = BookTypesetter::create (0x7FFFFFFF, 0x7FFFFFFF);
-    BookTypesetter::Style* style = typesetter->createStyle ("EB Garamond", MyGUI::Colour::Black);
+    BookTypesetter::Style* style = typesetter->createStyle ("", MyGUI::Colour::Black);
 
     mModel->visitTopicNamesStartingWith (character, AddTopicLink (typesetter, style));
 
@@ -310,7 +310,7 @@ book JournalBooks::createTopicIndexBook (char character)
 book JournalBooks::createQuestIndexBook (bool activeOnly)
 {
     BookTypesetter::Ptr typesetter = BookTypesetter::create (0x7FFFFFFF, 0x7FFFFFFF);
-    BookTypesetter::Style* base = typesetter->createStyle ("EB Garamond", MyGUI::Colour::Black);
+    BookTypesetter::Style* base = typesetter->createStyle ("", MyGUI::Colour::Black);
 
     mModel->visitQuestNames (activeOnly, AddQuestLink (typesetter, base));
 

@@ -125,6 +125,7 @@ public:
 
     void playGroup(const std::string &groupname, int mode, int count);
     void skipAnim();
+    bool isAnimPlaying(const std::string &groupName);
 
     void setState(CharacterState state);
     CharacterState getState() const

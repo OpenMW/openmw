@@ -223,6 +223,9 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
 
     Style * createStyle (char const * fontName, Colour fontColour)
     {
+        if (strcmp(fontName, "") == 0)
+            return createStyle(MyGUI::FontManager::getInstance().getDefaultFont().c_str(), fontColour);
+
         for (Styles::iterator i = mBook->mStyles.begin (); i != mBook->mStyles.end (); ++i)
             if (i->match (fontName, fontColour, fontColour, fontColour, 0))
                 return &*i;
@@ -405,7 +408,8 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
             while (!stream.eof () && !ucsLineBreak (stream.peek ()) && ucsBreakingSpace (stream.peek ()))
             {
                 MyGUI::GlyphInfo* gi = style->mFont->getGlyphInfo (stream.peek ());
-                space_width += gi->advance;
+                if (gi)
+                    space_width += gi->advance + gi->bearingX;
                 stream.consume ();
             }
 
@@ -414,7 +418,8 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
             while (!stream.eof () && !ucsLineBreak (stream.peek ()) && !ucsBreakingSpace (stream.peek ()))
             {
                 MyGUI::GlyphInfo* gi = style->mFont->getGlyphInfo (stream.peek ());
-                word_width += gi->advance + gi->bearingX;
+                if (gi)
+                    word_width += gi->advance + gi->bearingX;
                 word_height = line_height;
                 ++character_count;
                 stream.consume ();
@@ -628,6 +633,9 @@ namespace
         {
             MyGUI::GlyphInfo* gi = mFont->getGlyphInfo (ch);
 
+            if (!gi)
+                return;
+
             MyGUI::FloatRect vr;
 
             vr.left = mCursor.left + gi->bearingX;
@@ -647,7 +655,8 @@ namespace
         {
             MyGUI::GlyphInfo* gi = mFont->getGlyphInfo (ch);
 
-            mCursor.left += gi->bearingX + gi->advance;
+            if (gi)
+                mCursor.left += gi->bearingX + gi->advance;
         }
 
     private:

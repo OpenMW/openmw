@@ -10,6 +10,7 @@
 #include "view/doc/viewmanager.hpp"
 #include "view/doc/startup.hpp"
 #include "view/doc/filedialog.hpp"
+#include "model/settings/usersettings.hpp"
 
 namespace CS
 {
@@ -17,6 +18,7 @@ namespace CS
     {
             Q_OBJECT
 
+            CSMSettings::UserSettings mUserSettings;
             CSMDoc::DocumentManager mDocumentManager;
             CSVDoc::ViewManager mViewManager;
             CSVDoc::StartupDialogue mStartup;

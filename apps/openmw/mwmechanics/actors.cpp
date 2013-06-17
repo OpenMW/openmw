@@ -29,8 +29,11 @@ namespace MWMechanics
         calculateCreatureStatModifiers (ptr);
 
         // AI
-        CreatureStats& creatureStats =  MWWorld::Class::get (ptr).getCreatureStats (ptr);
-        creatureStats.getAiSequence().execute (ptr);
+        if(!MWBase::Environment::get().getWindowManager()->isGuiMode())
+        {
+            CreatureStats& creatureStats =  MWWorld::Class::get (ptr).getCreatureStats (ptr);
+            creatureStats.getAiSequence().execute (ptr);
+        }
     }
 
     void Actors::updateNpc (const MWWorld::Ptr& ptr, float duration, bool paused)
@@ -308,5 +311,13 @@ namespace MWMechanics
         PtrControllerMap::iterator iter = mActors.find(ptr);
         if(iter != mActors.end())
             iter->second.skipAnim();
+    }
+
+    bool Actors::checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string& groupName)
+    {
+        PtrControllerMap::iterator iter = mActors.find(ptr);
+        if(iter != mActors.end())
+            return iter->second.isAnimPlaying(groupName);
+        return false;
     }
 }

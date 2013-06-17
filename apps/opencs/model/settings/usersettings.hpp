@@ -36,13 +36,15 @@ namespace CSMSettings {
 
     public:
 
-        static UserSettings &instance()
-        {
-            static UserSettings instance;
+        UserSettings();
+        ~UserSettings();
 
-            return instance;
-        }
+        static const UserSettings& instance();
 
+        void readSettings();
+        void setSettingsFiles(QStringList files);
+
+<<<<<<< HEAD
         bool writeFile(QMap<QString, SettingList *> &sections);
         const SectionMap &getSettings ();
         void updateSettings (const QString &sectionName, const QString &settingName = "");
@@ -52,6 +54,21 @@ namespace CSMSettings {
 
         UserSettings();
         ~UserSettings();
+=======
+        QFile *openFile (const QString &) const;
+        bool writeFile(QFile *file, QMap<QString, SettingList *> &sections) const;
+        void getSettings (QTextStream &stream, SectionMap &settings) const;
+        QStringList getSettingsFiles () const;
+        CSMSettings::SectionMap getSettingsMap() const;
+        QString getSettingValue(QString section, QString setting) const;
+
+    private:
+
+        static UserSettings *mUserSettingsInstance;
+
+        CSMSettings::SectionMap mSectionMap;
+        QStringList mSettingsFiles;
+>>>>>>> df1f1bd5c81d94a1ea2693000ec5dc589b069826
 
         UserSettings (UserSettings const &);        //not implemented
         void operator= (UserSettings const &);      //not implemented

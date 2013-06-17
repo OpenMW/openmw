@@ -32,9 +32,16 @@ namespace MWRender
 
 extern "C"
 {
-#include <libavcodec/avcodec.h>
-#include <libavformat/avformat.h>
-#include <libswscale/swscale.h>
+    #include <libavcodec/avcodec.h>
+    #include <libavformat/avformat.h>
+    #include <libswscale/swscale.h>
+
+    // From libavformat version 55.0.100 and onward the declaration of av_gettime() is removed from libavformat/avformat.h and moved
+    // to libavutil/time.h
+    // https://github.com/FFmpeg/FFmpeg/commit/06a83505992d5f49846c18507a6c3eb8a47c650e
+    #if AV_VERSION_INT(55, 0, 100) <= AV_VERSION_INT(LIBAVFORMAT_VERSION_MAJOR, LIBAVFORMAT_VERSION_MINOR, LIBAVFORMAT_VERSION_MICRO)
+        #include <libavutil/time.h>
+    #endif
 }
 
 #define MAX_AUDIOQ_SIZE (5 * 16 * 1024)

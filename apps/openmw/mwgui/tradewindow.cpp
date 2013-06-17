@@ -88,8 +88,10 @@ namespace MWGui
         MWBase::Environment::get().getWorld()->getContainersOwnedBy(actor, itemSources);
         // Important: actor goes last, so that items purchased by the merchant go into his inventory
         itemSources.push_back(actor);
+        std::vector<MWWorld::Ptr> worldItems;
+        MWBase::Environment::get().getWorld()->getItemsOwnedBy(actor, worldItems);
 
-        mTradeModel = new TradeItemModel(new ContainerItemModel(itemSources), mPtr);
+        mTradeModel = new TradeItemModel(new ContainerItemModel(itemSources, worldItems), mPtr);
         mSortModel = new SortFilterItemModel(mTradeModel);
         mItemView->setModel (mSortModel);
 

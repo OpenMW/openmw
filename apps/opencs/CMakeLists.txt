@@ -80,6 +80,7 @@ opencs_units (view/settings
     usersettingsdialog
     samplepage
     editorpage
+    windowpage
     )
 
 opencs_units_noqt (view/settings

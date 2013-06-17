@@ -12,6 +12,9 @@ namespace MWClass
             virtual MWWorld::Ptr
             copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const;
 
+            static const ESM::GameSetting *fMinWalkSpeedCreature;
+            static const ESM::GameSetting *fMaxWalkSpeedCreature;
+
         public:
 
             virtual std::string getId (const MWWorld::Ptr& ptr) const;
@@ -65,6 +68,18 @@ namespace MWClass
             virtual int getServices (const MWWorld::Ptr& actor) const;
 
             virtual bool isPersistent (const MWWorld::Ptr& ptr) const;
+
+            virtual MWMechanics::Movement& getMovementSettings (const MWWorld::Ptr& ptr) const;
+            ///< Return desired movement.
+
+            virtual Ogre::Vector3 getMovementVector (const MWWorld::Ptr& ptr) const;
+            ///< Return desired movement vector (determined based on movement settings,
+            /// stance and stats).
+
+            virtual Ogre::Vector3 getRotationVector (const MWWorld::Ptr& ptr) const;
+            ///< Return desired rotations, as euler angles.
+
+            float getSpeed (const MWWorld::Ptr& ptr) const;
 
             static void registerSelf();
 

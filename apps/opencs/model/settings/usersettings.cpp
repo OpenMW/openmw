@@ -7,7 +7,10 @@
 #include <QMap>
 #include <QMessageBox>
 #include <QTextCodec>
+
 #include <QFile>
+
+#include <QDebug>
 
 #include <components/files/configurationmanager.hpp>
 
@@ -32,8 +35,11 @@ namespace boost
 } /* namespace boost */
 #endif /* (BOOST_VERSION <= 104600) */
 
+CSMSettings::UserSettings *CSMSettings::UserSettings::mUserSettingsInstance = 0;
+
 CSMSettings::UserSettings::UserSettings()
 {
+    assert(!mUserSettingsInstance);
     mUserSettingsInstance = this;
 
     mReadWriteMessage = QObject::tr("<br><b>Could not open or create file for writing</b><br><br> \
@@ -45,9 +51,18 @@ CSMSettings::UserSettings::UserSettings()
 
 CSMSettings::UserSettings::~UserSettings()
 {
+    mUserSettingsInstance = 0;
 }
 
-QTextStream *CSMSettings::UserSettings::openFileStream (const QString &filePath, bool isReadOnly)
+
+//QTextStream *CSMSettings::UserSettings::openFileStream (const QString &filePath, bool isReadOnly)
+
+CSMSettings::SectionMap CSMSettings::UserSettings::getSettingsMap() const
+{
+    return mSectionMap;
+}
+
+QFile *CSMSettings::UserSettings::openFile (const QString &filename) const
 {
     QFile *file = new QFile(filePath);
 
@@ -91,6 +106,9 @@ QTextStream *CSMSettings::UserSettings::openFileStream (const QString &filePath,
 }
 
 bool CSMSettings::UserSettings::writeFile(QMap<QString, CSMSettings::SettingList *> &settings)
+
+//bool CSMSettings::UserSettings::writeFile(QFile *file, QMap<QString, CSMSettings::SettingList *> &settings) const
+
 {
     QTextStream *stream = openFileStream(mPaths.back());
 
@@ -111,7 +129,11 @@ bool CSMSettings::UserSettings::writeFile(QMap<QString, CSMSettings::SettingList
     return true;
 }
 
+
 const CSMSettings::SectionMap &CSMSettings::UserSettings::getSettings()
+
+//void CSMSettings::UserSettings::getSettings(QTextStream &stream, SectionMap &sections) const
+
 {
     return mSectionSettings;
 }
@@ -218,3 +240,70 @@ void CSMSettings::UserSettings::updateSettings (const QString &sectionName, cons
             emit signalUpdateEditorSetting (setting->objectName(), setting->getValue());
     }
 }
+
+void CSMSettings::UserSettings::readSettings()
+{
+    CSMSettings::SectionMap sectionMap;
+
+    foreach (const QString &path, mSettingsFiles)
+    {
+        qDebug() << "Loading config file:" << qPrintable(path);
+        QFile file(path);
+
+        if (file.exists())
+        {
+            if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+            {
+                QMessageBox msgBox;
+                msgBox.setWindowTitle(tr("Error opening OpenCS configuration file"));
+                msgBox.setIcon(QMessageBox::Critical);
+                msgBox.setStandardButtons(QMessageBox::Ok);
+                msgBox.setText(QObject::tr("<br><b>Could not open %0 for reading</b><br><br> \
+                                  Please make sure you have the right permissions \
+                                  and try again.<br>").arg(file.fileName()));
+                msgBox.exec();
+                return;
+            }
+
+            QTextStream stream(&file);
+            stream.setCodec(QTextCodec::codecForName("UTF-8"));
+            
+
+            getSettings(stream, mSectionMap);
+        }
+
+        file.close();
+    }
+}
+
+void CSMSettings::UserSettings::setSettingsFiles(QStringList files)
+{
+    mSettingsFiles = files;
+}
+
+QStringList CSMSettings::UserSettings::getSettingsFiles () const
+{
+    return mSettingsFiles;
+}
+
+QString CSMSettings::UserSettings::getSettingValue(QString section, QString setting) const
+{
+    if(mSectionMap.find(section) == mSectionMap.end())
+        return QString();
+
+    CSMSettings::SettingMap *settings = mSectionMap.value(section);
+
+    if(settings->find(setting) == settings->end())
+        return QString();
+
+    CSMSettings::SettingContainer *settingContainer = settings->value(setting);
+
+    return settingContainer->getValue();
+}
+
+const CSMSettings::UserSettings& CSMSettings::UserSettings::instance()
+{
+            assert(mUserSettingsInstance);
+            return *mUserSettingsInstance;
+}
+

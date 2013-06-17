@@ -24,7 +24,6 @@ namespace CSVSettings {
     {
         Q_OBJECT
 
-        QStringList mPaths;
         QListWidget *mListWidget;
         QStackedWidget *mStackedWidget;
 
@@ -41,6 +40,9 @@ namespace CSVSettings {
         void positionWindow ();
         void writeSettings();
         void createSamplePage();
+
+        //Pages
+        void createWindowPage();
 
         template <typename T>
         void createPage (const QString &title)

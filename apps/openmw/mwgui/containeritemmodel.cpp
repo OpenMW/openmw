@@ -3,11 +3,39 @@
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
 
+#include "../mwbase/world.hpp"
+#include "../mwbase/environment.hpp"
+
+namespace
+{
+
+    bool stacks (const MWWorld::Ptr& left, const MWWorld::Ptr& right)
+    {
+        if (left == right)
+            return true;
+
+        // If one of the items is in an inventory and currently equipped, we need to check stacking both ways to be sure
+        if (left.getContainerStore() && right.getContainerStore())
+            return left.getContainerStore()->stacks(left, right)
+                    && right.getContainerStore()->stacks(left, right);
+
+        if (left.getContainerStore())
+            return left.getContainerStore()->stacks(left, right);
+        if (right.getContainerStore())
+            return right.getContainerStore()->stacks(left, right);
+
+        MWWorld::ContainerStore store;
+        return store.stacks(left, right);
+    }
+
+}
+
 namespace MWGui
 {
 
-ContainerItemModel::ContainerItemModel(const std::vector<MWWorld::Ptr>& itemSources)
+ContainerItemModel::ContainerItemModel(const std::vector<MWWorld::Ptr>& itemSources, const std::vector<MWWorld::Ptr>& worldItems)
     : mItemSources(itemSources)
+    , mWorldItems(worldItems)
 {
     assert (mItemSources.size());
 }
@@ -65,8 +93,7 @@ void ContainerItemModel::removeItem (const ItemStack& item, size_t count)
 
         for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
         {
-            // If one of the items is in an inventory and currently equipped, we need to check stacking both ways to be sure
-            if (*it == item.mBase || (store.stacks(*it, item.mBase) && item.mBase.getContainerStore()->stacks(*it, item.mBase)))
+            if (stacks(*it, item.mBase))
             {
                 int refCount = it->getRefData().getCount();
                 it->getRefData().setCount(std::max(0, refCount - toRemove));
@@ -76,6 +103,21 @@ void ContainerItemModel::removeItem (const ItemStack& item, size_t count)
             }
         }
     }
+    for (std::vector<MWWorld::Ptr>::iterator source = mWorldItems.begin(); source != mWorldItems.end(); ++source)
+    {
+        if (stacks(*source, item.mBase))
+        {
+            int refCount = source->getRefData().getCount();
+            if (refCount - toRemove <= 0)
+                MWBase::Environment::get().getWorld()->deleteObject(*source);
+            else
+                source->getRefData().setCount(std::max(0, refCount - toRemove));
+            toRemove -= refCount;
+            if (toRemove <= 0)
+                return;
+        }
+    }
+
     throw std::runtime_error("Not enough items to remove could be found");
 }
 
@@ -91,8 +133,7 @@ void ContainerItemModel::update()
             std::vector<ItemStack>::iterator itemStack = mItems.begin();
             for (; itemStack != mItems.end(); ++itemStack)
             {
-                // If one of the items is in an inventory and currently equipped, we need to check stacking both ways to be sure
-                if (store.stacks(itemStack->mBase, *it) && it->getContainerStore()->stacks(itemStack->mBase, *it))
+                if (stacks(*it, itemStack->mBase))
                 {
                     // we already have an item stack of this kind, add to it
                     itemStack->mCount += it->getRefData().getCount();
@@ -106,6 +147,26 @@ void ContainerItemModel::update()
                 ItemStack newItem (*it, this, it->getRefData().getCount());
                 mItems.push_back(newItem);
             }
+        }
+    }
+    for (std::vector<MWWorld::Ptr>::iterator source = mWorldItems.begin(); source != mWorldItems.end(); ++source)
+    {
+        std::vector<ItemStack>::iterator itemStack = mItems.begin();
+        for (; itemStack != mItems.end(); ++itemStack)
+        {
+            if (stacks(*source, itemStack->mBase))
+            {
+                // we already have an item stack of this kind, add to it
+                itemStack->mCount += source->getRefData().getCount();
+                break;
+            }
+        }
+
+        if (itemStack == mItems.end())
+        {
+            // no stack yet, create one
+            ItemStack newItem (*source, this, source->getRefData().getCount());
+            mItems.push_back(newItem);
         }
     }
 }

@@ -202,14 +202,14 @@ namespace MWGui
 
     float BookTextParser::widthForCharGlyph(unsigned unicodeChar) const
     {
-        std::string fontName(mTextStyle.mFont == "Default" ? "EB Garamond" : mTextStyle.mFont);
+        std::string fontName(mTextStyle.mFont == "Default" ? MyGUI::FontManager::getInstance().getDefaultFont() : mTextStyle.mFont);
         return MyGUI::FontManager::getInstance().getByName(fontName)
                 ->getGlyphInfo(unicodeChar)->width;
     }
 
     float BookTextParser::currentFontHeight() const
     {
-        std::string fontName(mTextStyle.mFont == "Default" ? "EB Garamond" : mTextStyle.mFont);
+        std::string fontName(mTextStyle.mFont == "Default" ? MyGUI::FontManager::getInstance().getDefaultFont() : mTextStyle.mFont);
         return MyGUI::FontManager::getInstance().getByName(fontName)->getDefaultHeight();
     }
 
@@ -251,10 +251,8 @@ namespace MWGui
             MyGUI::Gui::getInstance().destroyWidget(mParent->getChildAt(0));
         }
 
-        boost::algorithm::replace_all(text, "\n", "\n");
-        boost::algorithm::replace_all(text, "\r", "\r");
-        boost::algorithm::replace_all(text, "<BR>", "\n\n");
-        boost::algorithm::replace_all(text, "<P>", "\n\n");   // tweaking by adding another newline to see if that spaces out better
+        boost::algorithm::replace_all(text, "<BR>", "\n");
+        boost::algorithm::replace_all(text, "<P>", "\n\n");
         boost::algorithm::trim_left(text);
 
         // remove trailing "

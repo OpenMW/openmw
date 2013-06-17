@@ -668,5 +668,12 @@ namespace MWMechanics
         else
             mObjects.skipAnimation(ptr);
     }
+    bool MechanicsManager::checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string &groupName)
+    {
+        if(MWWorld::Class::get(ptr).isActor())
+            return mActors.checkAnimationPlaying(ptr, groupName);
+        else
+            return false;
+    }
 
 }
