@@ -13,6 +13,11 @@ namespace CSMWorld
     struct RecordBase;
 
     /// \brief Base class for record collections
+    ///
+    /// \attention Modifying records through the interface does not update connected views.
+    /// Such modifications should be done through the table model interface instead unless no views
+    /// are connected to the model or special precautions have been taken to send update signals
+    /// manually.
     class CollectionBase
     {
             // not implemented
