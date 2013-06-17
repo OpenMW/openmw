@@ -41,23 +41,23 @@ namespace CSMWorld
         return record.mId;
     }
 
-    ///< \brief Collection of ID-based records
+    /// \brief Single-type record collection
     template<typename ESXRecordT, typename IdAccessorT = IdAccessor<ESXRecordT> >
-    class IdCollection : public CollectionBase
+    class Collection : public CollectionBase
     {
             std::vector<Record<ESXRecordT> > mRecords;
             std::map<std::string, int> mIndex;
             std::vector<Column<ESXRecordT> *> mColumns;
 
             // not implemented
-            IdCollection (const IdCollection&);
-            IdCollection& operator= (const IdCollection&);
+            Collection (const Collection&);
+            Collection& operator= (const Collection&);
 
         public:
 
-            IdCollection();
+            Collection();
 
-            virtual ~IdCollection();
+            virtual ~Collection();
 
             void add (const ESXRecordT& record);
             ///< Add a new record (modified)
@@ -113,26 +113,21 @@ namespace CSMWorld
 
             void setRecord (int index, const Record<ESXRecordT>& record);
             ///< \attention This function must not change the ID.
-
-            void load (ESM::ESMReader& reader, bool base,
-                UniversalId::Type type = UniversalId::Type_None);
-            ///< \param type Will be ignored, unless the collection supports multiple record types
-
     };
 
     template<typename ESXRecordT, typename IdAccessorT>
-    IdCollection<ESXRecordT, IdAccessorT>::IdCollection()
+    Collection<ESXRecordT, IdAccessorT>::Collection()
     {}
 
     template<typename ESXRecordT, typename IdAccessorT>
-    IdCollection<ESXRecordT, IdAccessorT>::~IdCollection()
+    Collection<ESXRecordT, IdAccessorT>::~Collection()
     {
         for (typename std::vector<Column<ESXRecordT> *>::iterator iter (mColumns.begin()); iter!=mColumns.end(); ++iter)
             delete *iter;
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
-    void IdCollection<ESXRecordT, IdAccessorT>::add (const ESXRecordT& record)
+    void Collection<ESXRecordT, IdAccessorT>::add (const ESXRecordT& record)
     {
         std::string id = Misc::StringUtils::lowerCase (IdAccessorT().getId (record));
 
@@ -154,19 +149,19 @@ namespace CSMWorld
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
-    int IdCollection<ESXRecordT, IdAccessorT>::getSize() const
+    int Collection<ESXRecordT, IdAccessorT>::getSize() const
     {
         return mRecords.size();
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
-    std::string IdCollection<ESXRecordT, IdAccessorT>::getId (int index) const
+    std::string Collection<ESXRecordT, IdAccessorT>::getId (int index) const
     {
         return IdAccessorT().getId (mRecords.at (index).get());
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
-    int  IdCollection<ESXRecordT, IdAccessorT>::getIndex (const std::string& id) const
+    int  Collection<ESXRecordT, IdAccessorT>::getIndex (const std::string& id) const
     {
         int index = searchId (id);
 
@@ -177,37 +172,37 @@ namespace CSMWorld
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
-    int IdCollection<ESXRecordT, IdAccessorT>::getColumns() const
+    int Collection<ESXRecordT, IdAccessorT>::getColumns() const
     {
         return mColumns.size();
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
-    QVariant IdCollection<ESXRecordT, IdAccessorT>::getData (int index, int column) const
+    QVariant Collection<ESXRecordT, IdAccessorT>::getData (int index, int column) const
     {
         return mColumns.at (column)->get (mRecords.at (index));
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
-    void IdCollection<ESXRecordT, IdAccessorT>::setData (int index, int column, const QVariant& data)
+    void Collection<ESXRecordT, IdAccessorT>::setData (int index, int column, const QVariant& data)
     {
         return mColumns.at (column)->set (mRecords.at (index), data);
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
-    const ColumnBase& IdCollection<ESXRecordT, IdAccessorT>::getColumn (int column) const
+    const ColumnBase& Collection<ESXRecordT, IdAccessorT>::getColumn (int column) const
     {
         return *mColumns.at (column);
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
-    void IdCollection<ESXRecordT, IdAccessorT>::addColumn (Column<ESXRecordT> *column)
+    void Collection<ESXRecordT, IdAccessorT>::addColumn (Column<ESXRecordT> *column)
     {
         mColumns.push_back (column);
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
-    void IdCollection<ESXRecordT, IdAccessorT>::merge()
+    void Collection<ESXRecordT, IdAccessorT>::merge()
     {
         for (typename std::vector<Record<ESXRecordT> >::iterator iter (mRecords.begin()); iter!=mRecords.end(); ++iter)
             iter->merge();
@@ -216,7 +211,7 @@ namespace CSMWorld
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
-    void  IdCollection<ESXRecordT, IdAccessorT>::purge()
+    void  Collection<ESXRecordT, IdAccessorT>::purge()
     {
         int i = 0;
 
@@ -230,7 +225,7 @@ namespace CSMWorld
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
-    void IdCollection<ESXRecordT, IdAccessorT>::removeRows (int index, int count)
+    void Collection<ESXRecordT, IdAccessorT>::removeRows (int index, int count)
     {
         mRecords.erase (mRecords.begin()+index, mRecords.begin()+index+count);
 
@@ -255,7 +250,7 @@ namespace CSMWorld
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
-    void  IdCollection<ESXRecordT, IdAccessorT>::appendBlankRecord (const std::string& id,
+    void  Collection<ESXRecordT, IdAccessorT>::appendBlankRecord (const std::string& id,
         UniversalId::Type type)
     {
         ESXRecordT record;
@@ -265,7 +260,7 @@ namespace CSMWorld
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
-    int IdCollection<ESXRecordT, IdAccessorT>::searchId (const std::string& id) const
+    int Collection<ESXRecordT, IdAccessorT>::searchId (const std::string& id) const
     {
         std::string id2 = Misc::StringUtils::lowerCase(id);
 
@@ -278,13 +273,13 @@ namespace CSMWorld
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
-    void IdCollection<ESXRecordT, IdAccessorT>::replace (int index, const RecordBase& record)
+    void Collection<ESXRecordT, IdAccessorT>::replace (int index, const RecordBase& record)
     {
         mRecords.at (index) = dynamic_cast<const Record<ESXRecordT>&> (record);
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
-    void IdCollection<ESXRecordT, IdAccessorT>::appendRecord (const RecordBase& record,
+    void Collection<ESXRecordT, IdAccessorT>::appendRecord (const RecordBase& record,
         UniversalId::Type type)
     {
         mRecords.push_back (dynamic_cast<const Record<ESXRecordT>&> (record));
@@ -294,32 +289,43 @@ namespace CSMWorld
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
-    int IdCollection<ESXRecordT, IdAccessorT>::getAppendIndex (UniversalId::Type type) const
+    int Collection<ESXRecordT, IdAccessorT>::getAppendIndex (UniversalId::Type type) const
     {
         return static_cast<int> (mRecords.size());
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
-    const Record<ESXRecordT>& IdCollection<ESXRecordT, IdAccessorT>::getRecord (const std::string& id) const
+    const Record<ESXRecordT>& Collection<ESXRecordT, IdAccessorT>::getRecord (const std::string& id) const
     {
         int index = getIndex (id);
         return mRecords.at (index);
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
-    const Record<ESXRecordT>& IdCollection<ESXRecordT, IdAccessorT>::getRecord (int index) const
+    const Record<ESXRecordT>& Collection<ESXRecordT, IdAccessorT>::getRecord (int index) const
     {
         return mRecords.at (index);
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
-    void IdCollection<ESXRecordT, IdAccessorT>::setRecord (int index, const Record<ESXRecordT>& record)
+    void Collection<ESXRecordT, IdAccessorT>::setRecord (int index, const Record<ESXRecordT>& record)
     {
         if (IdAccessorT().getId (mRecords.at (index).get())!=IdAccessorT().getId (record.get()))
             throw std::runtime_error ("attempt to change the ID of a record");
 
         mRecords.at (index) = record;
     }
+
+    /// \brief Single type collection of top level records
+    template<typename ESXRecordT, typename IdAccessorT = IdAccessor<ESXRecordT> >
+    class IdCollection : public Collection<ESXRecordT, IdAccessorT>
+    {
+        public:
+
+            void load (ESM::ESMReader& reader, bool base,
+                UniversalId::Type type = UniversalId::Type_None);
+            ///< \param type Will be ignored, unless the collection supports multiple record types
+    };
 
     template<typename ESXRecordT, typename IdAccessorT>
     void IdCollection<ESXRecordT, IdAccessorT>::load (ESM::ESMReader& reader, bool base,
@@ -329,7 +335,7 @@ namespace CSMWorld
 
         if (reader.isNextSub ("DELE"))
         {
-            int index = searchId (id);
+            int index = Collection<ESXRecordT, IdAccessorT>::searchId (id);
 
             reader.skipRecord();
 
@@ -343,11 +349,11 @@ namespace CSMWorld
             }
             else if (base)
             {
-                removeRows (index, 1);
+                Collection<ESXRecordT, IdAccessorT>::removeRows (index, 1);
             }
             else
             {
-                Record<ESXRecordT> record = getRecord (index);
+                Record<ESXRecordT> record = Collection<ESXRecordT, IdAccessorT>::getRecord (index);
                 record.mState = RecordBase::State_Deleted;
                 setRecord (index, record);
             }
@@ -372,7 +378,7 @@ namespace CSMWorld
             else
             {
                 // old record
-                Record<ESXRecordT> record2 = getRecord (index);
+                Record<ESXRecordT> record2 = Collection<ESXRecordT, IdAccessorT>::getRecord (index);
 
                 if (base)
                     record2.mBase = record;
