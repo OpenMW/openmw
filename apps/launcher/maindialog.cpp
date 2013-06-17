@@ -612,8 +612,21 @@ void MainDialog::closeEvent(QCloseEvent *event)
 
 void MainDialog::play()
 {
-    if (!writeSettings())
+    if (!writeSettings()) {
         qApp->quit();
+        return;
+    }
+
+    if(!mGameSettings.hasMaster()) {
+            QMessageBox msgBox;
+            msgBox.setWindowTitle(tr("No master file selected"));
+            msgBox.setIcon(QMessageBox::Warning);
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setText(tr("<br><b>You do not have any master files selected.</b><br><br> \
+                              OpenMW will not start without a master file selected.<br>"));
+            msgBox.exec();
+            return;
+    }
 
     // Launch the game detached
     startProgram(QString("openmw"), true);
