@@ -17,7 +17,7 @@ class MwIniImporter {
 
     MwIniImporter();
     void    setInputEncoding(const ToUTF8::FromType& encoding);
-    void    setVerbose(const bool verbose);
+    void    setVerbose(bool verbose);
     multistrmap  loadIniFile(const std::string& filename) const;
     static multistrmap  loadCfgFile(const std::string& filename);
     void    merge(multistrmap &cfg, const multistrmap &ini) const;
@@ -28,7 +28,7 @@ class MwIniImporter {
 
   private:
     static void insertMultistrmap(multistrmap &cfg, const std::string& key, const std::string& value);
-    static std::string numberToString(const int n);
+    static std::string numberToString(int n);
     bool mVerbose;
     strmap mMergeMap;
     std::vector<std::string> mMergeFallback;

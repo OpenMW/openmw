@@ -635,11 +635,11 @@ MwIniImporter::MwIniImporter()
     }
 }
 
-void MwIniImporter::setVerbose(const bool verbose) {
+void MwIniImporter::setVerbose(bool verbose) {
     mVerbose = verbose;
 }
 
-std::string MwIniImporter::numberToString(const int n) {
+std::string MwIniImporter::numberToString(int n) {
     std::stringstream str;
     str << n;
     return str.str();
