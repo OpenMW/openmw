@@ -106,14 +106,18 @@ namespace CSMWorld
 
             virtual const Record<ESXRecordT>& getRecord (int index) const;
 
-            virtual void load (ESM::ESMReader& reader, bool base,
-                UniversalId::Type type = UniversalId::Type_None);
-            ///< \param type Will be ignored, unless the collection supports multiple record types
-
             virtual int getAppendIndex (UniversalId::Type type = UniversalId::Type_None) const;
             ///< \param type Will be ignored, unless the collection supports multiple record types
 
             void addColumn (Column<ESXRecordT> *column);
+
+            void setRecord (int index, const Record<ESXRecordT>& record);
+            ///< \attention This function must not change the ID.
+
+            void load (ESM::ESMReader& reader, bool base,
+                UniversalId::Type type = UniversalId::Type_None);
+            ///< \param type Will be ignored, unless the collection supports multiple record types
+
     };
 
     template<typename ESXRecordT, typename IdAccessorT>
@@ -290,6 +294,34 @@ namespace CSMWorld
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
+    int IdCollection<ESXRecordT, IdAccessorT>::getAppendIndex (UniversalId::Type type) const
+    {
+        return static_cast<int> (mRecords.size());
+    }
+
+    template<typename ESXRecordT, typename IdAccessorT>
+    const Record<ESXRecordT>& IdCollection<ESXRecordT, IdAccessorT>::getRecord (const std::string& id) const
+    {
+        int index = getIndex (id);
+        return mRecords.at (index);
+    }
+
+    template<typename ESXRecordT, typename IdAccessorT>
+    const Record<ESXRecordT>& IdCollection<ESXRecordT, IdAccessorT>::getRecord (int index) const
+    {
+        return mRecords.at (index);
+    }
+
+    template<typename ESXRecordT, typename IdAccessorT>
+    void IdCollection<ESXRecordT, IdAccessorT>::setRecord (int index, const Record<ESXRecordT>& record)
+    {
+        if (IdAccessorT().getId (mRecords.at (index).get())!=IdAccessorT().getId (record.get()))
+            throw std::runtime_error ("attempt to change the ID of a record");
+
+        mRecords.at (index) = record;
+    }
+
+    template<typename ESXRecordT, typename IdAccessorT>
     void IdCollection<ESXRecordT, IdAccessorT>::load (ESM::ESMReader& reader, bool base,
         UniversalId::Type type)
     {
@@ -315,7 +347,9 @@ namespace CSMWorld
             }
             else
             {
-                mRecords[index].mState = RecordBase::State_Deleted;
+                Record<ESXRecordT> record = getRecord (index);
+                record.mState = RecordBase::State_Deleted;
+                setRecord (index, record);
             }
         }
         else
@@ -338,35 +372,17 @@ namespace CSMWorld
             else
             {
                 // old record
-                Record<ESXRecordT>& record2 = mRecords[index];
+                Record<ESXRecordT> record2 = getRecord (index);
 
                 if (base)
                     record2.mBase = record;
                 else
                     record2.setModified (record);
+
+                setRecord (index, record2);
             }
         }
     }
-
-    template<typename ESXRecordT, typename IdAccessorT>
-    int IdCollection<ESXRecordT, IdAccessorT>::getAppendIndex (UniversalId::Type type) const
-    {
-        return static_cast<int> (mRecords.size());
-    }
-
-    template<typename ESXRecordT, typename IdAccessorT>
-    const Record<ESXRecordT>& IdCollection<ESXRecordT, IdAccessorT>::getRecord (const std::string& id) const
-    {
-        int index = getIndex (id);
-        return mRecords.at (index);
-    }
-
-    template<typename ESXRecordT, typename IdAccessorT>
-    const Record<ESXRecordT>& IdCollection<ESXRecordT, IdAccessorT>::getRecord (int index) const
-    {
-        return mRecords.at (index);
-    }
-
 }
 
 #endif
