@@ -6,7 +6,7 @@
 #include <deque>
 
 #include "columnbase.hpp"
-#include "idcollection.hpp"
+#include "collectionbase.hpp"
 #include "refiddata.hpp"
 
 namespace CSMWorld
@@ -29,7 +29,7 @@ namespace CSMWorld
             virtual bool isUserEditable() const;
     };
 
-    class RefIdCollection : public IdCollectionBase
+    class RefIdCollection : public CollectionBase
     {
         private:
 
@@ -85,7 +85,7 @@ namespace CSMWorld
 
             virtual const RecordBase& getRecord (int index) const;
 
-            virtual void load (ESM::ESMReader& reader, bool base, UniversalId::Type type);
+            void load (ESM::ESMReader& reader, bool base, UniversalId::Type type);
 
             virtual int getAppendIndex (UniversalId::Type type) const;
             ///< \param type Will be ignored, unless the collection supports multiple record types

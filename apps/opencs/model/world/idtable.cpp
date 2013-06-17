@@ -1,9 +1,10 @@
 
 #include "idtable.hpp"
 
-#include "idcollection.hpp"
+#include "collectionbase.hpp"
+#include "columnbase.hpp"
 
-CSMWorld::IdTable::IdTable (IdCollectionBase *idCollection) : mIdCollection (idCollection)
+CSMWorld::IdTable::IdTable (CollectionBase *idCollection) : mIdCollection (idCollection)
 {
 
 }

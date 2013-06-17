@@ -5,14 +5,14 @@
 
 namespace CSMWorld
 {
-    class IdCollectionBase;
+    class CollectionBase;
     class RecordBase;
 
     class IdTable : public QAbstractItemModel
     {
             Q_OBJECT
 
-            IdCollectionBase *mIdCollection;
+            CollectionBase *mIdCollection;
 
             // not implemented
             IdTable (const IdTable&);
@@ -20,7 +20,7 @@ namespace CSMWorld
 
         public:
 
-            IdTable (IdCollectionBase *idCollection);
+            IdTable (CollectionBase *idCollection);
             ///< The ownership of \a idCollection is not transferred.
 
             virtual ~IdTable();

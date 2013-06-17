@@ -3,7 +3,6 @@
 
 #include <vector>
 #include <map>
-#include <string>
 #include <algorithm>
 #include <cctype>
 #include <stdexcept>
@@ -16,77 +15,12 @@
 #include <components/misc/stringops.hpp>
 
 #include "columnbase.hpp"
-#include "universalid.hpp"
+
+#include "collectionbase.hpp"
 
 namespace CSMWorld
 {
-    class IdCollectionBase
-    {
-            // not implemented
-            IdCollectionBase (const IdCollectionBase&);
-            IdCollectionBase& operator= (const IdCollectionBase&);
-
-        public:
-
-            IdCollectionBase();
-
-            virtual ~IdCollectionBase();
-
-            virtual int getSize() const = 0;
-
-            virtual std::string getId (int index) const = 0;
-
-            virtual int getIndex (const std::string& id) const = 0;
-
-            virtual int getColumns() const = 0;
-
-            virtual const ColumnBase& getColumn (int column) const = 0;
-
-            virtual QVariant getData (int index, int column) const = 0;
-
-            virtual void setData (int index, int column, const QVariant& data) = 0;
-
-// Not in use. Temporarily removed so that the implementation of RefIdCollection can continue without
-// these functions for now.
-//            virtual void merge() = 0;
-            ///< Merge modified into base.
-
-//            virtual void purge() = 0;
-            ///< Remove records that are flagged as erased.
-
-            virtual void removeRows (int index, int count) = 0;
-
-            virtual void appendBlankRecord (const std::string& id,
-                UniversalId::Type type = UniversalId::Type_None) = 0;
-            ///< \param type Will be ignored, unless the collection supports multiple record types
-
-            virtual int searchId (const std::string& id) const = 0;
-            ////< Search record with \a id.
-            /// \return index of record (if found) or -1 (not found)
-
-            virtual void replace (int index, const RecordBase& record) = 0;
-            ///< If the record type does not match, an exception is thrown.
-            ///
-            /// \attention \a record must not change the ID.
-            ///< \param type Will be ignored, unless the collection supports multiple record types
-
-            virtual void appendRecord (const RecordBase& record,
-                UniversalId::Type type = UniversalId::Type_None) = 0;
-            ///< If the record type does not match, an exception is thrown.
-
-            virtual const RecordBase& getRecord (const std::string& id) const = 0;
-
-            virtual const RecordBase& getRecord (int index) const = 0;
-
-            virtual void load (ESM::ESMReader& reader, bool base,
-                UniversalId::Type type = UniversalId::Type_None) = 0;
-            ///< \param type Will be ignored, unless the collection supports multiple record types
-
-            virtual int getAppendIndex (UniversalId::Type type = UniversalId::Type_None) const = 0;
-            ///< \param type Will be ignored, unless the collection supports multiple record types
-    };
-
-    ///< \brief Access to ID field in records
+    /// \brief Access to ID field in records
     template<typename ESXRecordT>
     struct IdAccessor
     {
@@ -109,7 +43,7 @@ namespace CSMWorld
 
     ///< \brief Collection of ID-based records
     template<typename ESXRecordT, typename IdAccessorT = IdAccessor<ESXRecordT> >
-    class IdCollection : public IdCollectionBase
+    class IdCollection : public CollectionBase
     {
             std::vector<Record<ESXRecordT> > mRecords;
             std::map<std::string, int> mIndex;

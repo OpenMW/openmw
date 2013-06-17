@@ -3,6 +3,8 @@
 
 #include <stdexcept>
 
+#include <components/esm/esmreader.hpp>
+
 #include "refidadapter.hpp"
 #include "refidadapterimp.hpp"
 
