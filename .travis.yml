@@ -16,7 +16,7 @@ before_install:
  - sudo apt-get install -qq libopenal-dev libmpg123-dev libsndfile1-dev
  - sudo apt-get install -qq libcg nvidia-cg-toolkit
  - sudo apt-get install -qq libavcodec-dev libavformat-dev libavdevice-dev libavutil-dev libswscale-dev libpostproc-dev
- - sudo apt-get install -qq libois-dev libbullet-dev libogre-static-dev libmygui-static-dev
+ - sudo apt-get install -qq libois-dev libbullet-dev libogre-static-dev libmygui-static-dev libsdl2-static-dev
  - sudo mkdir /usr/src/gtest/build
  - cd /usr/src/gtest/build
  - sudo cmake .. -DBUILD_SHARED_LIBS=1
