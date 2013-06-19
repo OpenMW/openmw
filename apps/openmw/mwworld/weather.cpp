@@ -118,9 +118,9 @@ float WeatherManager::calculateAngleFade (const std::string& moonName, float ang
 }
 
 WeatherManager::WeatherManager(MWRender::RenderingManager* rendering,MWWorld::Fallback* fallback) :
-     mHour(14), mCurrentWeather(Weather::Type_Clear), mFirstUpdate(true), mWeatherUpdateTime(0),
-     mThunderFlash(0), mThunderChance(0), mThunderChanceNeeded(50), mThunderSoundDelay(0),
-     mRemainingTransitionTime(0), mMonth(0), mDay(0),
+     mHour(14), mCurrentWeather(Weather::Type_Clear), mNextWeather(Weather::Type_Unknown),
+     mFirstUpdate(true), mWeatherUpdateTime(0), mThunderFlash(0), mThunderChance(0),
+     mThunderChanceNeeded(50), mThunderSoundDelay(0), mRemainingTransitionTime(0), mMonth(0), mDay(0),
      mTimePassed(0), mFallback(fallback), mWindSpeed(0.f), mRendering(rendering)
 {
     //Globals
@@ -545,14 +545,14 @@ void WeatherManager::update(float duration)
     if (mNextWeather == Weather::Type_Unknown)
     {
         std::string ambientSnd = mWeatherSettings[mCurrentWeather].mAmbientLoopSoundID;
-        if (std::find(mSoundsPlaying.begin(), mSoundsPlaying.end(), ambientSnd) == mSoundsPlaying.end())
+        if (!ambientSnd.empty() && std::find(mSoundsPlaying.begin(), mSoundsPlaying.end(), ambientSnd) == mSoundsPlaying.end())
         {
             mSoundsPlaying.push_back(ambientSnd);
             MWBase::Environment::get().getSoundManager()->playSound(ambientSnd, 1.0, 1.0, MWBase::SoundManager::Play_Loop);
         }
 
         std::string rainSnd = mWeatherSettings[mCurrentWeather].mRainLoopSoundID;
-        if (std::find(mSoundsPlaying.begin(), mSoundsPlaying.end(), rainSnd) == mSoundsPlaying.end())
+        if (!rainSnd.empty() && std::find(mSoundsPlaying.begin(), mSoundsPlaying.end(), rainSnd) == mSoundsPlaying.end())
         {
             mSoundsPlaying.push_back(rainSnd);
             MWBase::Environment::get().getSoundManager()->playSound(rainSnd, 1.0, 1.0, MWBase::SoundManager::Play_Loop);
@@ -568,14 +568,14 @@ void WeatherManager::stopSounds(bool stopAll)
     while (it!=mSoundsPlaying.end())
     {
         if (stopAll || \
-                !(*it == mWeatherSettings[mCurrentWeather].mAmbientLoopSoundID || \
-                *it == mWeatherSettings[mCurrentWeather].mRainLoopSoundID))
+                !((*it == mWeatherSettings[mCurrentWeather].mAmbientLoopSoundID) || \
+                (*it == mWeatherSettings[mCurrentWeather].mRainLoopSoundID)))
         {
             MWBase::Environment::get().getSoundManager()->stopSound(*it);
             it = mSoundsPlaying.erase(it);
         }
-
-        ++it;
+        else
+            ++it;
     }
 }
 
