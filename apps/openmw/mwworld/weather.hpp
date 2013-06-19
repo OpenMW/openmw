@@ -188,13 +188,14 @@ namespace MWWorld
 
         double mTimePassed; // time passed since last update
 
-        WeatherResult transition(const float factor);
-        WeatherResult getResult(Weather::Type weatherType);
+        void transition(const float factor);
+        void setResult(Weather::Type weatherType);
 
         float calculateHourFade (const std::string& moonName) const;
         float calculateAngleFade (const std::string& moonName, float angle) const;
 
         void setWeather(Weather::Type weatherType, bool instant=false);
+        WeatherResult mResult;
         float mSunriseTime;
         float mSunsetTime;
         float mSunriseDuration;
