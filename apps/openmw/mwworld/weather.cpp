@@ -348,243 +348,210 @@ void WeatherManager::update(float duration)
 
     mWeatherUpdateTime -= timePassed;
 
-    bool exterior = (MWBase::Environment::get().getWorld()->isCellExterior() || MWBase::Environment::get().getWorld()->isCellQuasiExterior());
-
-    if (exterior)
-    {
-        std::string regionstr = Misc::StringUtils::lowerCase(MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell()->mCell->mRegion);
-
-        if (mWeatherUpdateTime <= 0 || regionstr != mCurrentRegion)
-        {
-            mCurrentRegion = regionstr;
-            mWeatherUpdateTime = mHoursBetweenWeatherChanges * 3600;
-
-            Weather::Type weatherType = Weather::Type_Clear;
-
-            if (mRegionOverrides.find(regionstr) != mRegionOverrides.end())
-                weatherType = mRegionOverrides[regionstr];
-            else
-            {
-                // get weather probabilities for the current region
-                const ESM::Region *region =
-                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Region>().search (regionstr);
-
-                if (region != 0)
-                {
-                    /*
-                     * All probabilities must add to 100 (responsibility of the user).
-                     * If chances A and B has values 30 and 70 then by generating
-                     * 100 numbers 1..100, 30% will be lesser or equal 30 and
-                     * 70% will be greater than 30 (in theory).
-                     */
-                    const int probability[] = {
-                        region->mData.mClear,
-                        region->mData.mCloudy,
-                        region->mData.mFoggy,
-                        region->mData.mOvercast,
-                        region->mData.mRain,
-                        region->mData.mThunder,
-                        region->mData.mAsh,
-                        region->mData.mBlight,
-                        region->mData.mA,
-                        region->mData.mB
-                    }; // 10 elements
-
-                    int chance = (rand() % 100) + 1; // 1..100
-                    int sum = 0;
-                    for (int i = 0; i < 10; ++i)
-                    {
-                        sum += probability[i];
-                        if (chance < sum)
-                        {
-                            weatherType = (Weather::Type)i;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            setWeather(weatherType, false);
-        }
-
-        if (mNextWeather != Weather::Type_Unknown)
-        {
-            mRemainingTransitionTime -= timePassed;
-            if (mRemainingTransitionTime < 0)
-            {
-                mCurrentWeather = mNextWeather;
-                mNextWeather = Weather::Type_Unknown;
-            }
-        }
-
-        if (mNextWeather != Weather::Type_Unknown)
-            transition(1 - (mRemainingTransitionTime / (mWeatherSettings[mCurrentWeather].mTransitionDelta * 24.f * 3600)));
-        else
-            setResult(mCurrentWeather);
-
-        mWindSpeed = mResult.mWindSpeed;
-
-        mRendering->configureFog(mResult.mFogDepth, mResult.mFogColor);
-
-        // disable sun during night
-        if (mHour >= mNightStart || mHour <= mSunriseTime)
-            mRendering->getSkyManager()->sunDisable();
-        else
-            mRendering->getSkyManager()->sunEnable();
-
-        // sun angle
-        float height;
-
-        //Day duration
-        float dayDuration = (mNightStart - 1) - mSunriseTime;
-
-        // rise at 6, set at 20
-        if (mHour >= mSunriseTime && mHour <= mNightStart)
-            height = 1 - std::abs(((mHour - dayDuration) / 7.f));
-        else if (mHour > mNightStart)
-            height = (mHour - mNightStart) / 4.f;
-        else //if (mHour > 0 && mHour < 6)
-            height = 1 - (mHour / mSunriseTime);
-
-        int facing = (mHour > 13.f) ? 1 : -1;
-
-        Vector3 final(
-            (height - 1) * facing,
-            (height - 1) * facing,
-            height);
-        mRendering->setSunDirection(final);
-
-        /*
-         * TODO: import separated fadeInStart/Finish, fadeOutStart/Finish
-         * for masser and secunda
-         */
-
-        float fadeOutFinish=mFallback->getFallbackFloat("Moons_Masser_Fade_Out_Finish");
-        float fadeInStart=mFallback->getFallbackFloat("Moons_Masser_Fade_In_Start");
-
-        //moon calculations
-        float moonHeight;
-        if (mHour >= fadeInStart)
-            moonHeight = mHour - fadeInStart;
-        else if (mHour <= fadeOutFinish)
-            moonHeight = mHour + fadeOutFinish;
-        else
-            moonHeight = 0;
-
-        moonHeight /= (24.f - (fadeInStart - fadeOutFinish));
-
-        if (moonHeight != 0)
-        {
-            int facing = (moonHeight <= 1) ? 1 : -1;
-            Vector3 masser(
-                (moonHeight - 1) * facing,
-                (1 - moonHeight) * facing,
-                moonHeight);
-
-            Vector3 secunda(
-                (moonHeight - 1) * facing * 1.25,
-                (1 - moonHeight) * facing * 0.8,
-                moonHeight);
-
-            mRendering->getSkyManager()->setMasserDirection(masser);
-            mRendering->getSkyManager()->setSecundaDirection(secunda);
-            mRendering->getSkyManager()->masserEnable();
-            mRendering->getSkyManager()->secundaEnable();
-
-            float angle = (1-moonHeight) * 90.f * facing;
-            float masserHourFade = calculateHourFade("Masser");
-            float secundaHourFade = calculateHourFade("Secunda");
-            float masserAngleFade = calculateAngleFade("Masser", angle);
-            float secundaAngleFade = calculateAngleFade("Secunda", angle);
-
-            masserAngleFade *= masserHourFade;
-            secundaAngleFade *= secundaHourFade;
-
-            mRendering->getSkyManager()->setMasserFade(masserAngleFade);
-            mRendering->getSkyManager()->setSecundaFade(secundaAngleFade);
-        }
-        else
-        {
-            mRendering->getSkyManager()->masserDisable();
-            mRendering->getSkyManager()->secundaDisable();
-        }
-
-        if (mCurrentWeather == Weather::Type_Thunderstorm && mNextWeather == Weather::Type_Unknown && exterior)
-        {
-            if (mThunderFlash > 0)
-            {
-                // play the sound after a delay
-                mThunderSoundDelay -= duration;
-                if (mThunderSoundDelay <= 0)
-                {
-                    // pick a random sound
-                    int sound = rand() % 4;
-                    std::string soundname;
-                    if (sound == 0) soundname = mThunderSoundID0;
-                    else if (sound == 1) soundname = mThunderSoundID1;
-                    else if (sound == 2) soundname = mThunderSoundID2;
-                    else if (sound == 3) soundname = mThunderSoundID3;
-                    MWBase::Environment::get().getSoundManager()->playSound(soundname, 1.0, 1.0);
-                    mThunderSoundDelay = 1000;
-                }
-
-                mThunderFlash -= duration;
-                if (mThunderFlash > 0)
-                    mRendering->getSkyManager()->setLightningStrength( mThunderFlash / mThunderThreshold );
-                else
-                {
-                    srand(time(NULL));
-                    mThunderChanceNeeded = rand() % 100;
-                    mThunderChance = 0;
-                    mRendering->getSkyManager()->setLightningStrength( 0.f );
-                }
-            }
-            else
-            {
-                // no thunder active
-                mThunderChance += duration*4; // chance increases by 4 percent every second
-                if (mThunderChance >= mThunderChanceNeeded)
-                {
-                    mThunderFlash = mThunderThreshold;
-
-                    mRendering->getSkyManager()->setLightningStrength( mThunderFlash / mThunderThreshold );
-
-                    mThunderSoundDelay = 0.25;
-                }
-            }
-        }
-        else
-            mRendering->getSkyManager()->setLightningStrength(0.f);
-
-        mRendering->setAmbientColour(mResult.mAmbientColor);
-        mRendering->sunEnable(false);
-        mRendering->setSunColour(mResult.mSunColor);
-
-        mRendering->getSkyManager()->setWeather(mResult);
-    }
-    else
+    const bool exterior = (MWBase::Environment::get().getWorld()->isCellExterior() || MWBase::Environment::get().getWorld()->isCellQuasiExterior());
+    if (!exterior)
     {
         mRendering->sunDisable(false);
         mRendering->skyDisable();
         mRendering->getSkyManager()->setLightningStrength(0.f);
+        stopSounds(true);
+        return;
     }
 
-    // play sounds
-    std::string ambientSnd = (mNextWeather == Weather::Type_Unknown ? mWeatherSettings[mCurrentWeather].mAmbientLoopSoundID : "");
-    if (!exterior) ambientSnd = "";
-    if (ambientSnd != "")
+    // Exterior
+    std::string regionstr = Misc::StringUtils::lowerCase(MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell()->mCell->mRegion);
+
+    if (mWeatherUpdateTime <= 0 || regionstr != mCurrentRegion)
     {
+        mCurrentRegion = regionstr;
+        mWeatherUpdateTime = mHoursBetweenWeatherChanges * 3600;
+
+        Weather::Type weatherType = Weather::Type_Clear;
+
+        if (mRegionOverrides.find(regionstr) != mRegionOverrides.end())
+            weatherType = mRegionOverrides[regionstr];
+        else
+        {
+            // get weather probabilities for the current region
+            const ESM::Region *region =
+                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Region>().search (regionstr);
+
+            if (region != 0)
+            {
+                weatherType = nextWeather(region);
+            }
+        }
+
+        setWeather(weatherType, false);
+    }
+
+    if (mNextWeather != Weather::Type_Unknown)
+    {
+        mRemainingTransitionTime -= timePassed;
+        if (mRemainingTransitionTime < 0)
+        {
+            mCurrentWeather = mNextWeather;
+            mNextWeather = Weather::Type_Unknown;
+        }
+    }
+
+    if (mNextWeather != Weather::Type_Unknown)
+        transition(1 - (mRemainingTransitionTime / (mWeatherSettings[mCurrentWeather].mTransitionDelta * 24.f * 3600)));
+    else
+        setResult(mCurrentWeather);
+
+    mWindSpeed = mResult.mWindSpeed;
+
+    mRendering->configureFog(mResult.mFogDepth, mResult.mFogColor);
+
+    // disable sun during night
+    if (mHour >= mNightStart || mHour <= mSunriseTime)
+        mRendering->getSkyManager()->sunDisable();
+    else
+        mRendering->getSkyManager()->sunEnable();
+
+    // sun angle
+    float height;
+
+    //Day duration
+    float dayDuration = (mNightStart - 1) - mSunriseTime;
+
+    // rise at 6, set at 20
+    if (mHour >= mSunriseTime && mHour <= mNightStart)
+        height = 1 - std::abs(((mHour - dayDuration) / 7.f));
+    else if (mHour > mNightStart)
+        height = (mHour - mNightStart) / 4.f;
+    else //if (mHour > 0 && mHour < 6)
+        height = 1 - (mHour / mSunriseTime);
+
+    int facing = (mHour > 13.f) ? 1 : -1;
+
+    Vector3 final(
+            (height - 1) * facing,
+            (height - 1) * facing,
+            height);
+    mRendering->setSunDirection(final);
+
+    /*
+     * TODO: import separated fadeInStart/Finish, fadeOutStart/Finish
+     * for masser and secunda
+     */
+
+    float fadeOutFinish=mFallback->getFallbackFloat("Moons_Masser_Fade_Out_Finish");
+    float fadeInStart=mFallback->getFallbackFloat("Moons_Masser_Fade_In_Start");
+
+    //moon calculations
+    float moonHeight;
+    if (mHour >= fadeInStart)
+        moonHeight = mHour - fadeInStart;
+    else if (mHour <= fadeOutFinish)
+        moonHeight = mHour + fadeOutFinish;
+    else
+        moonHeight = 0;
+
+    moonHeight /= (24.f - (fadeInStart - fadeOutFinish));
+
+    if (moonHeight != 0)
+    {
+        int facing = (moonHeight <= 1) ? 1 : -1;
+        Vector3 masser(
+                (moonHeight - 1) * facing,
+                (1 - moonHeight) * facing,
+                moonHeight);
+
+        Vector3 secunda(
+                (moonHeight - 1) * facing * 1.25,
+                (1 - moonHeight) * facing * 0.8,
+                moonHeight);
+
+        mRendering->getSkyManager()->setMasserDirection(masser);
+        mRendering->getSkyManager()->setSecundaDirection(secunda);
+        mRendering->getSkyManager()->masserEnable();
+        mRendering->getSkyManager()->secundaEnable();
+
+        float angle = (1-moonHeight) * 90.f * facing;
+        float masserHourFade = calculateHourFade("Masser");
+        float secundaHourFade = calculateHourFade("Secunda");
+        float masserAngleFade = calculateAngleFade("Masser", angle);
+        float secundaAngleFade = calculateAngleFade("Secunda", angle);
+
+        masserAngleFade *= masserHourFade;
+        secundaAngleFade *= secundaHourFade;
+
+        mRendering->getSkyManager()->setMasserFade(masserAngleFade);
+        mRendering->getSkyManager()->setSecundaFade(secundaAngleFade);
+    }
+    else
+    {
+        mRendering->getSkyManager()->masserDisable();
+        mRendering->getSkyManager()->secundaDisable();
+    }
+
+    if (mCurrentWeather == Weather::Type_Thunderstorm && mNextWeather == Weather::Type_Unknown)
+    {
+        if (mThunderFlash > 0)
+        {
+            // play the sound after a delay
+            mThunderSoundDelay -= duration;
+            if (mThunderSoundDelay <= 0)
+            {
+                // pick a random sound
+                int sound = rand() % 4;
+                std::string* soundName;
+                if (sound == 0) soundName = &mThunderSoundID0;
+                else if (sound == 1) soundName = &mThunderSoundID1;
+                else if (sound == 2) soundName = &mThunderSoundID2;
+                else if (sound == 3) soundName = &mThunderSoundID3;
+                MWBase::Environment::get().getSoundManager()->playSound(*soundName, 1.0, 1.0);
+                mThunderSoundDelay = 1000;
+            }
+
+            mThunderFlash -= duration;
+            if (mThunderFlash > 0)
+                mRendering->getSkyManager()->setLightningStrength( mThunderFlash / mThunderThreshold );
+            else
+            {
+                srand(time(NULL));
+                mThunderChanceNeeded = rand() % 100;
+                mThunderChance = 0;
+                mRendering->getSkyManager()->setLightningStrength( 0.f );
+            }
+        }
+        else
+        {
+            // no thunder active
+            mThunderChance += duration*4; // chance increases by 4 percent every second
+            if (mThunderChance >= mThunderChanceNeeded)
+            {
+                mThunderFlash = mThunderThreshold;
+
+                mRendering->getSkyManager()->setLightningStrength( mThunderFlash / mThunderThreshold );
+
+                mThunderSoundDelay = 0.25;
+            }
+        }
+    }
+    else
+        mRendering->getSkyManager()->setLightningStrength(0.f);
+
+    mRendering->setAmbientColour(mResult.mAmbientColor);
+    mRendering->sunEnable(false);
+    mRendering->setSunColour(mResult.mSunColor);
+
+    mRendering->getSkyManager()->setWeather(mResult);
+
+
+    // Play sounds
+    if (mNextWeather == Weather::Type_Unknown)
+    {
+        std::string ambientSnd = mWeatherSettings[mCurrentWeather].mAmbientLoopSoundID;
         if (std::find(mSoundsPlaying.begin(), mSoundsPlaying.end(), ambientSnd) == mSoundsPlaying.end())
         {
             mSoundsPlaying.push_back(ambientSnd);
             MWBase::Environment::get().getSoundManager()->playSound(ambientSnd, 1.0, 1.0, MWBase::SoundManager::Play_Loop);
         }
-    }
 
-    std::string rainSnd = (mNextWeather == Weather::Type_Unknown ? mWeatherSettings[mCurrentWeather].mRainLoopSoundID : "");
-    if (!exterior) rainSnd = "";
-    if (rainSnd != "")
-    {
+        std::string rainSnd = mWeatherSettings[mCurrentWeather].mRainLoopSoundID;
         if (std::find(mSoundsPlaying.begin(), mSoundsPlaying.end(), rainSnd) == mSoundsPlaying.end())
         {
             mSoundsPlaying.push_back(rainSnd);
@@ -592,18 +559,59 @@ void WeatherManager::update(float duration)
         }
     }
 
-    // stop sounds
-    std::vector<std::string>::iterator it=mSoundsPlaying.begin();
+    stopSounds(false);
+}
+
+void WeatherManager::stopSounds(bool stopAll)
+{
+    std::vector<std::string>::iterator it = mSoundsPlaying.begin();
     while (it!=mSoundsPlaying.end())
     {
-        if ( *it != ambientSnd && *it != rainSnd)
+        if (stopAll || \
+                !(*it == mWeatherSettings[mCurrentWeather].mAmbientLoopSoundID || \
+                *it == mWeatherSettings[mCurrentWeather].mRainLoopSoundID))
         {
             MWBase::Environment::get().getSoundManager()->stopSound(*it);
             it = mSoundsPlaying.erase(it);
         }
-        else
-            ++it;
+
+        ++it;
     }
+}
+
+Weather::Type WeatherManager::nextWeather(const ESM::Region* region)
+{
+    /*
+     * All probabilities must add to 100 (responsibility of the user).
+     * If chances A and B has values 30 and 70 then by generating
+     * 100 numbers 1..100, 30% will be lesser or equal 30 and
+     * 70% will be greater than 30 (in theory).
+     */
+    const int probability[] = {
+            region->mData.mClear,
+            region->mData.mCloudy,
+            region->mData.mFoggy,
+            region->mData.mOvercast,
+            region->mData.mRain,
+            region->mData.mThunder,
+            region->mData.mAsh,
+            region->mData.mBlight,
+            region->mData.mA,
+            region->mData.mB
+    }; // 10 elements
+
+    int chance = (rand() % 100) + 1; // 1..100
+    int sum = 0;
+    int i = 0;
+    for (; i < 10; ++i)
+    {
+        sum += probability[i];
+        if (chance < sum)
+        {
+            break;
+        }
+    }
+    return (Weather::Type) i;
 }
 
 void WeatherManager::setHour(const float hour)

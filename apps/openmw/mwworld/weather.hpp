@@ -4,6 +4,11 @@
 #include <OgreString.h>
 #include <OgreColourValue.h>
 
+namespace ESM
+{
+    struct Region;
+}
+
 namespace MWRender
 {
     class RenderingManager;
@@ -146,6 +151,8 @@ namespace MWWorld
          */
         void update(float duration);
 
+        void stopSounds(bool stopAll);
+
         void setHour(const float hour);
 
         float getWindSpeed() const;
@@ -195,6 +202,7 @@ namespace MWWorld
         float calculateAngleFade (const std::string& moonName, float angle) const;
 
         void setWeather(Weather::Type weatherType, bool instant=false);
+        Weather::Type nextWeather(const ESM::Region* region);
         WeatherResult mResult;
         float mSunriseTime;
         float mSunsetTime;
