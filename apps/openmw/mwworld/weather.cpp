@@ -579,7 +579,7 @@ void WeatherManager::stopSounds(bool stopAll)
     }
 }
 
-Weather::Type WeatherManager::nextWeather(const ESM::Region* region)
+Weather::Type WeatherManager::nextWeather(const ESM::Region* region) const
 {
     /*
      * All probabilities must add to 100 (responsibility of the user).

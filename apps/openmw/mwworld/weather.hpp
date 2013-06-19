@@ -202,7 +202,7 @@ namespace MWWorld
         float calculateAngleFade (const std::string& moonName, float angle) const;
 
         void setWeather(Weather::Type weatherType, bool instant=false);
-        Weather::Type nextWeather(const ESM::Region* region);
+        Weather::Type nextWeather(const ESM::Region* region) const;
         WeatherResult mResult;
         float mSunriseTime;
         float mSunsetTime;
