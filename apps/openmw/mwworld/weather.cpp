@@ -375,42 +375,36 @@ void WeatherManager::update(float duration)
 
                 if (region != 0)
                 {
-                    float clear = region->mData.mClear/255.f;
-                    float cloudy = region->mData.mCloudy/255.f;
-                    float foggy = region->mData.mFoggy/255.f;
-                    float overcast = region->mData.mOvercast/255.f;
-                    float rain = region->mData.mRain/255.f;
-                    float thunder = region->mData.mThunder/255.f;
-                    float ash = region->mData.mAsh/255.f;
-                    float blight = region->mData.mBlight/255.f;
-                    float snow = region->mData.mA/255.f;
-                    float blizzard = region->mData.mB/255.f;
+                    /*
+                     * All probabilities must add to 100 (responsibility of the user).
+                     * If chances A and B has values 30 and 70 then by generating
+                     * 100 numbers 1..100, 30% will be lesser or equal 30 and
+                     * 70% will be greater than 30 (in theory).
+                     */
+                    const int probability[] = {
+                        region->mData.mClear,
+                        region->mData.mCloudy,
+                        region->mData.mFoggy,
+                        region->mData.mOvercast,
+                        region->mData.mRain,
+                        region->mData.mThunder,
+                        region->mData.mAsh,
+                        region->mData.mBlight,
+                        region->mData.mA,
+                        region->mData.mB
+                    }; // 10 elements
 
-                    // re-scale to 100 percent
-                    const float total = clear+cloudy+foggy+overcast+rain+thunder+ash+blight+snow+blizzard;
-
-                    float random = ((rand()%100)/100.f) * total;
-
-                    if (random >= snow+blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
-                        weatherType = Weather::Type_Blizzard;
-                    else if (random >= blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
-                        weatherType = Weather::Type_Snow;
-                    else if (random >= ash+thunder+rain+overcast+foggy+cloudy+clear)
-                        weatherType = Weather::Type_Blight;
-                    else if (random >= thunder+rain+overcast+foggy+cloudy+clear)
-                        weatherType = Weather::Type_Ashstorm;
-                    else if (random >= rain+overcast+foggy+cloudy+clear)
-                        weatherType = Weather::Type_Thunderstorm;
-                    else if (random >= overcast+foggy+cloudy+clear)
-                        weatherType = Weather::Type_Rain;
-                    else if (random >= foggy+cloudy+clear)
-                        weatherType = Weather::Type_Overcast;
-                    else if (random >= cloudy+clear)
-                        weatherType = Weather::Type_Foggy;
-                    else if (random >= clear)
-                        weatherType = Weather::Type_Cloudy;
-                    else
-                        weatherType = Weather::Type_Clear;
+                    int chance = (rand() % 100) + 1; // 1..100
+                    int sum = 0;
+                    for (int i = 0; i < 10; ++i)
+                    {
+                        sum += probability[i];
+                        if (chance < sum)
+                        {
+                            weatherType = (Weather::Type)i;
+                            break;
+                        }
+                    }
                 }
             }
 
@@ -461,8 +455,8 @@ void WeatherManager::update(float duration)
         int facing = (mHour > 13.f) ? 1 : -1;
 
         Vector3 final(
-            -(1 - height) * facing,
-            -(1 - height) * facing,
+            (height - 1) * facing,
+            (height - 1) * facing,
             height);
         mRendering->setSunDirection(final);
 
