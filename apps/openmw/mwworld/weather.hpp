@@ -50,6 +50,21 @@ namespace MWWorld
     /// Defines a single weather setting (according to INI)
     struct Weather
     {
+        enum Type
+        {
+            Type_Clear = 0,
+            Type_Cloudy,
+            Type_Foggy,
+            Type_Overcast,
+            Type_Rain,
+            Type_Thunderstorm,
+            Type_Ashstorm,
+            Type_Blight,
+            Type_Snow,
+            Type_Blizzard,
+            Type_Unknown
+        };
+
         Ogre::String mCloudTexture;
 
         // Sky (atmosphere) colors
@@ -106,6 +121,8 @@ namespace MWWorld
         Ogre::String mRainLoopSoundID;
 
         /// \todo disease chance
+
+        static std::string weatherTypeToStr(Weather::Type type);
     };
 
     ///
@@ -121,7 +138,7 @@ namespace MWWorld
          * @param region that should be changed
          * @param ID of the weather setting to shift to
          */
-        void changeWeather(const std::string& region, const unsigned int id);
+        void changeWeather(const std::string& region, const int id);
 
         /**
          * Per-frame update
@@ -147,17 +164,17 @@ namespace MWWorld
         int mDay, mMonth;
         float mWindSpeed;
         MWWorld::Fallback* mFallback;
-        void setFallbackWeather(Weather& weather,const std::string& name);
+        void setFallbackWeather(Weather& weather, Weather::Type type);
         MWRender::RenderingManager* mRendering;
 
-        std::map<Ogre::String, Weather> mWeatherSettings;
+        std::map<Weather::Type, Weather> mWeatherSettings;
 
-        std::map<std::string, std::string> mRegionOverrides;
+        std::map<std::string, Weather::Type> mRegionOverrides;
 
         std::vector<std::string> mSoundsPlaying;
 
-        Ogre::String mCurrentWeather;
-        Ogre::String mNextWeather;
+        Weather::Type mCurrentWeather;
+        Weather::Type mNextWeather;
 
         std::string mCurrentRegion;
 
@@ -172,12 +189,12 @@ namespace MWWorld
         double mTimePassed; // time passed since last update
 
         WeatherResult transition(const float factor);
-        WeatherResult getResult(const Ogre::String& weather);
+        WeatherResult getResult(Weather::Type weatherType);
 
         float calculateHourFade (const std::string& moonName) const;
         float calculateAngleFade (const std::string& moonName, float angle) const;
 
-        void setWeather(const Ogre::String& weather, bool instant=false);
+        void setWeather(Weather::Type weatherType, bool instant=false);
         float mSunriseTime;
         float mSunsetTime;
         float mSunriseDuration;

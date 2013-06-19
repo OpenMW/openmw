@@ -31,35 +31,62 @@ namespace
     }
 }
 
-void WeatherManager::setFallbackWeather(Weather& weather,const std::string& name)
+std::string Weather::weatherTypeToStr(Weather::Type type)
 {
-    std::string upper=name;
-    upper[0]=toupper(name[0]);
-    weather.mCloudsMaximumPercent = mFallback->getFallbackFloat("Weather_"+upper+"_Clouds_Maximum_Percent");
-    weather.mTransitionDelta = mFallback->getFallbackFloat("Weather_"+upper+"_Transition_Delta");
-    weather.mSkySunriseColor=mFallback->getFallbackColour("Weather_"+upper+"_Sky_Sunrise_Color");
-    weather.mSkyDayColor = mFallback->getFallbackColour("Weather_"+upper+"_Sky_Day_Color");
-    weather.mSkySunsetColor = mFallback->getFallbackColour("Weather_"+upper+"_Sky_Sunset_Color");
-    weather.mSkyNightColor = mFallback->getFallbackColour("Weather_"+upper+"_Sky_Night_Color");
-    weather.mFogSunriseColor = mFallback->getFallbackColour("Weather_"+upper+"_Fog_Sunrise_Color");
-    weather.mFogDayColor = mFallback->getFallbackColour("Weather_"+upper+"_Fog_Day_Color");
-    weather.mFogSunsetColor = mFallback->getFallbackColour("Weather_"+upper+"_Fog_Sunset_Color");
-    weather.mFogNightColor = mFallback->getFallbackColour("Weather_"+upper+"_Fog_Night_Color");
-    weather.mAmbientSunriseColor = mFallback->getFallbackColour("Weather_"+upper+"_Ambient_Sunrise_Color");
-    weather.mAmbientDayColor = mFallback->getFallbackColour("Weather_"+upper+"_Ambient_Day_Color");
-    weather.mAmbientSunsetColor = mFallback->getFallbackColour("Weather_"+upper+"_Ambient_Sunset_Color");
-    weather.mAmbientNightColor = mFallback->getFallbackColour("Weather_"+upper+"_Ambient_Night_Color");
-    weather.mSunSunriseColor = mFallback->getFallbackColour("Weather_"+upper+"_Sun_Sunrise_Color");
-    weather.mSunDayColor = mFallback->getFallbackColour("Weather_"+upper+"_Sun_Day_Color");
-    weather.mSunSunsetColor = mFallback->getFallbackColour("Weather_"+upper+"_Sun_Sunset_Color");
-    weather.mSunNightColor = mFallback->getFallbackColour("Weather_"+upper+"_Sun_Night_Color");
-    weather.mSunDiscSunsetColor = mFallback->getFallbackColour("Weather_"+upper+"_Sun_Disc_Sunset_Color");
-    weather.mLandFogDayDepth = mFallback->getFallbackFloat("Weather_"+upper+"_Land_Fog_Day_Depth");
-    weather.mLandFogNightDepth = mFallback->getFallbackFloat("Weather_"+upper+"_Land_Fog_Night_Depth");
-    weather.mWindSpeed = mFallback->getFallbackFloat("Weather_"+upper+"_Wind_Speed");
-    weather.mCloudSpeed = mFallback->getFallbackFloat("Weather_"+upper+"_Cloud_Speed");
-    weather.mGlareView = mFallback->getFallbackFloat("Weather_"+upper+"_Glare_View");
-    mWeatherSettings[name] = weather;
+    switch (type) {
+        case Type_Clear:
+            return "Clear";
+        case Type_Cloudy:
+            return "Cloudy";
+        case Type_Foggy:
+            return "Foggy";
+        case Type_Overcast:
+            return "Overcast";
+        case Type_Rain:
+            return "Rain";
+        case Type_Thunderstorm:
+            return "Thunderstorm";
+        case Type_Ashstorm:
+            return "Ashstorm";
+        case Type_Blight:
+            return "Blight";
+        case Type_Snow:
+            return "Snow";
+        case Type_Blizzard:
+            return "Blizzard";
+        default: // Type_Unknown
+            return "";
+    }
+}
+
+void WeatherManager::setFallbackWeather(Weather& weather, Weather::Type type)
+{
+    const std::string weatherName = Weather::weatherTypeToStr(type);
+    weather.mCloudsMaximumPercent = mFallback->getFallbackFloat("Weather_"+weatherName+"_Clouds_Maximum_Percent");
+    weather.mTransitionDelta = mFallback->getFallbackFloat("Weather_"+weatherName+"_Transition_Delta");
+    weather.mSkySunriseColor= mFallback->getFallbackColour("Weather_"+weatherName+"_Sky_Sunrise_Color");
+    weather.mSkyDayColor = mFallback->getFallbackColour("Weather_"+weatherName+"_Sky_Day_Color");
+    weather.mSkySunsetColor = mFallback->getFallbackColour("Weather_"+weatherName+"_Sky_Sunset_Color");
+    weather.mSkyNightColor = mFallback->getFallbackColour("Weather_"+weatherName+"_Sky_Night_Color");
+    weather.mFogSunriseColor = mFallback->getFallbackColour("Weather_"+weatherName+"_Fog_Sunrise_Color");
+    weather.mFogDayColor = mFallback->getFallbackColour("Weather_"+weatherName+"_Fog_Day_Color");
+    weather.mFogSunsetColor = mFallback->getFallbackColour("Weather_"+weatherName+"_Fog_Sunset_Color");
+    weather.mFogNightColor = mFallback->getFallbackColour("Weather_"+weatherName+"_Fog_Night_Color");
+    weather.mAmbientSunriseColor = mFallback->getFallbackColour("Weather_"+weatherName+"_Ambient_Sunrise_Color");
+    weather.mAmbientDayColor = mFallback->getFallbackColour("Weather_"+weatherName+"_Ambient_Day_Color");
+    weather.mAmbientSunsetColor = mFallback->getFallbackColour("Weather_"+weatherName+"_Ambient_Sunset_Color");
+    weather.mAmbientNightColor = mFallback->getFallbackColour("Weather_"+weatherName+"_Ambient_Night_Color");
+    weather.mSunSunriseColor = mFallback->getFallbackColour("Weather_"+weatherName+"_Sun_Sunrise_Color");
+    weather.mSunDayColor = mFallback->getFallbackColour("Weather_"+weatherName+"_Sun_Day_Color");
+    weather.mSunSunsetColor = mFallback->getFallbackColour("Weather_"+weatherName+"_Sun_Sunset_Color");
+    weather.mSunNightColor = mFallback->getFallbackColour("Weather_"+weatherName+"_Sun_Night_Color");
+    weather.mSunDiscSunsetColor = mFallback->getFallbackColour("Weather_"+weatherName+"_Sun_Disc_Sunset_Color");
+    weather.mLandFogDayDepth = mFallback->getFallbackFloat("Weather_"+weatherName+"_Land_Fog_Day_Depth");
+    weather.mLandFogNightDepth = mFallback->getFallbackFloat("Weather_"+weatherName+"_Land_Fog_Night_Depth");
+    weather.mWindSpeed = mFallback->getFallbackFloat("Weather_"+weatherName+"_Wind_Speed");
+    weather.mCloudSpeed = mFallback->getFallbackFloat("Weather_"+weatherName+"_Cloud_Speed");
+    weather.mGlareView = mFallback->getFallbackFloat("Weather_"+weatherName+"_Glare_View");
+    mWeatherSettings[type] = weather;
 }
 
 
@@ -91,7 +118,7 @@ float WeatherManager::calculateAngleFade (const std::string& moonName, float ang
 }
 
 WeatherManager::WeatherManager(MWRender::RenderingManager* rendering,MWWorld::Fallback* fallback) :
-     mHour(14), mCurrentWeather("clear"), mFirstUpdate(true), mWeatherUpdateTime(0),
+     mHour(14), mCurrentWeather(Weather::Type_Clear), mFirstUpdate(true), mWeatherUpdateTime(0),
      mThunderFlash(0), mThunderChance(0), mThunderChanceNeeded(50), mThunderSoundDelay(0),
      mRemainingTransitionTime(0), mMonth(0), mDay(0),
      mTimePassed(0), mFallback(fallback), mWindSpeed(0.f), mRendering(rendering)
@@ -125,53 +152,53 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering,MWWorld::Fa
     //Weather
     Weather clear;
     clear.mCloudTexture = "tx_sky_clear.dds";
-    setFallbackWeather(clear,"clear");
+    setFallbackWeather(clear, Weather::Type_Clear);
 
     Weather cloudy;
     cloudy.mCloudTexture = "tx_sky_cloudy.dds";
-    setFallbackWeather(cloudy,"cloudy");
+    setFallbackWeather(cloudy, Weather::Type_Cloudy);
 
     Weather foggy;
     foggy.mCloudTexture = "tx_sky_foggy.dds";
-    setFallbackWeather(foggy,"foggy");
+    setFallbackWeather(foggy, Weather::Type_Foggy);
 
     Weather thunderstorm;
     thunderstorm.mCloudTexture = "tx_sky_thunder.dds";
     thunderstorm.mRainLoopSoundID = "rain heavy";
-    setFallbackWeather(thunderstorm,"thunderstorm");
+    setFallbackWeather(thunderstorm, Weather::Type_Thunderstorm);
 
     Weather rain;
     rain.mCloudTexture = "tx_sky_rainy.dds";
     rain.mRainLoopSoundID = "rain";
-    setFallbackWeather(rain,"rain");
+    setFallbackWeather(rain, Weather::Type_Rain);
 
     Weather overcast;
     overcast.mCloudTexture = "tx_sky_overcast.dds";
-    setFallbackWeather(overcast,"overcast");
+    setFallbackWeather(overcast, Weather::Type_Overcast);
 
     Weather ashstorm;
     ashstorm.mCloudTexture = "tx_sky_ashstorm.dds";
     ashstorm.mAmbientLoopSoundID = "ashstorm";
-    setFallbackWeather(ashstorm,"ashstorm");
+    setFallbackWeather(ashstorm, Weather::Type_Ashstorm);
 
     Weather blight;
     blight.mCloudTexture = "tx_sky_blight.dds";
     blight.mAmbientLoopSoundID = "blight";
-    setFallbackWeather(blight,"blight");
+    setFallbackWeather(blight, Weather::Type_Blight);
 
     Weather snow;
     snow.mCloudTexture = "tx_bm_sky_snow.dds";
-    setFallbackWeather(snow, "snow");
+    setFallbackWeather(snow, Weather::Type_Snow);
 
     Weather blizzard;
     blizzard.mCloudTexture = "tx_bm_sky_blizzard.dds";
     blizzard.mAmbientLoopSoundID = "BM Blizzard";
-    setFallbackWeather(blizzard,"blizzard");
+    setFallbackWeather(blizzard, Weather::Type_Blizzard);
 }
 
-void WeatherManager::setWeather(const String& weather, bool instant)
+void WeatherManager::setWeather(Weather::Type weatherType, bool instant)
 {
-    if (weather == mCurrentWeather && mNextWeather == "")
+    if (weatherType == mCurrentWeather && mNextWeather == Weather::Type_Unknown)
     {
         mFirstUpdate = false;
         return;
@@ -179,27 +206,27 @@ void WeatherManager::setWeather(const String& weather, bool instant)
 
     if (instant || mFirstUpdate)
     {
-        mNextWeather = "";
-        mCurrentWeather = weather;
+        mNextWeather = Weather::Type_Unknown;
+        mCurrentWeather = weatherType;
     }
     else
     {
-        if (mNextWeather != "")
+        if (mNextWeather != Weather::Type_Unknown)
         {
             // transition more than 50% finished?
             if (mRemainingTransitionTime/(mWeatherSettings[mCurrentWeather].mTransitionDelta * 24.f * 3600) <= 0.5)
                 mCurrentWeather = mNextWeather;
         }
 
-        mNextWeather = weather;
+        mNextWeather = weatherType;
         mRemainingTransitionTime = mWeatherSettings[mCurrentWeather].mTransitionDelta * 24.f * 3600;
     }
     mFirstUpdate = false;
 }
 
-WeatherResult WeatherManager::getResult(const String& weather)
+WeatherResult WeatherManager::getResult(Weather::Type weatherType)
 {
-    const Weather& current = mWeatherSettings[weather];
+    const Weather& current = mWeatherSettings[weatherType];
     WeatherResult result;
 
     result.mCloudTexture = current.mCloudTexture;
@@ -336,10 +363,10 @@ void WeatherManager::update(float duration)
             mCurrentRegion = regionstr;
             mWeatherUpdateTime = mHoursBetweenWeatherChanges * 3600;
 
-            std::string weather = "clear";
+            Weather::Type weatherType = Weather::Type_Clear;
 
             if (mRegionOverrides.find(regionstr) != mRegionOverrides.end())
-                weather = mRegionOverrides[regionstr];
+                weatherType = mRegionOverrides[regionstr];
             else
             {
                 // get weather probabilities for the current region
@@ -365,44 +392,44 @@ void WeatherManager::update(float duration)
                     float random = ((rand()%100)/100.f) * total;
 
                     if (random >= snow+blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
-                        weather = "blizzard";
+                        weatherType = Weather::Type_Blizzard;
                     else if (random >= blight+ash+thunder+rain+overcast+foggy+cloudy+clear)
-                        weather = "snow";
+                        weatherType = Weather::Type_Snow;
                     else if (random >= ash+thunder+rain+overcast+foggy+cloudy+clear)
-                        weather = "blight";
+                        weatherType = Weather::Type_Blight;
                     else if (random >= thunder+rain+overcast+foggy+cloudy+clear)
-                        weather = "ashstorm";
+                        weatherType = Weather::Type_Ashstorm;
                     else if (random >= rain+overcast+foggy+cloudy+clear)
-                        weather = "thunderstorm";
+                        weatherType = Weather::Type_Thunderstorm;
                     else if (random >= overcast+foggy+cloudy+clear)
-                        weather = "rain";
+                        weatherType = Weather::Type_Rain;
                     else if (random >= foggy+cloudy+clear)
-                        weather = "overcast";
+                        weatherType = Weather::Type_Overcast;
                     else if (random >= cloudy+clear)
-                        weather = "foggy";
+                        weatherType = Weather::Type_Foggy;
                     else if (random >= clear)
-                        weather = "cloudy";
+                        weatherType = Weather::Type_Cloudy;
                     else
-                        weather = "clear";
+                        weatherType = Weather::Type_Clear;
                 }
             }
 
-            setWeather(weather, false);
+            setWeather(weatherType, false);
         }
 
         WeatherResult result;
 
-        if (mNextWeather != "")
+        if (mNextWeather != Weather::Type_Unknown)
         {
             mRemainingTransitionTime -= timePassed;
             if (mRemainingTransitionTime < 0)
             {
                 mCurrentWeather = mNextWeather;
-                mNextWeather = "";
+                mNextWeather = Weather::Type_Unknown;
             }
         }
 
-        if (mNextWeather != "")
+        if (mNextWeather != Weather::Type_Unknown)
             result = transition(1 - (mRemainingTransitionTime / (mWeatherSettings[mCurrentWeather].mTransitionDelta * 24.f * 3600)));
         else
             result = getResult(mCurrentWeather);
@@ -494,7 +521,7 @@ void WeatherManager::update(float duration)
             mRendering->getSkyManager()->secundaDisable();
         }
 
-        if (mCurrentWeather == "thunderstorm" && mNextWeather == "" && exterior)
+        if (mCurrentWeather == Weather::Type_Thunderstorm && mNextWeather == Weather::Type_Unknown && exterior)
         {
             if (mThunderFlash > 0)
             {
@@ -555,7 +582,7 @@ void WeatherManager::update(float duration)
     }
 
     // play sounds
-    std::string ambientSnd = (mNextWeather == "" ? mWeatherSettings[mCurrentWeather].mAmbientLoopSoundID : "");
+    std::string ambientSnd = (mNextWeather == Weather::Type_Unknown ? mWeatherSettings[mCurrentWeather].mAmbientLoopSoundID : "");
     if (!exterior) ambientSnd = "";
     if (ambientSnd != "")
     {
@@ -566,7 +593,7 @@ void WeatherManager::update(float duration)
         }
     }
 
-    std::string rainSnd = (mNextWeather == "" ? mWeatherSettings[mCurrentWeather].mRainLoopSoundID : "");
+    std::string rainSnd = (mNextWeather == Weather::Type_Unknown ? mWeatherSettings[mCurrentWeather].mRainLoopSoundID : "");
     if (!exterior) rainSnd = "";
     if (rainSnd != "")
     {
@@ -605,66 +632,23 @@ void WeatherManager::setDate(const int day, const int month)
 unsigned int WeatherManager::getWeatherID() const
 {
     // Source: http://www.uesp.net/wiki/Tes3Mod:GetCurrentWeather
-
-    if (mCurrentWeather == "clear")
-        return 0;
-    else if (mCurrentWeather == "cloudy")
-        return 1;
-    else if (mCurrentWeather == "foggy")
-        return 2;
-    else if (mCurrentWeather == "overcast")
-        return 3;
-    else if (mCurrentWeather == "rain")
-        return 4;
-    else if (mCurrentWeather == "thunderstorm")
-        return 5;
-    else if (mCurrentWeather == "ashstorm")
-        return 6;
-    else if (mCurrentWeather == "blight")
-        return 7;
-    else if (mCurrentWeather == "snow")
-        return 8;
-    else if (mCurrentWeather == "blizzard")
-        return 9;
-
-    else
-        return 0;
+    return mCurrentWeather;
 }
 
-void WeatherManager::changeWeather(const std::string& region, const unsigned int id)
+void WeatherManager::changeWeather(const std::string& region, const int id)
 {
     // make sure this region exists
     MWBase::Environment::get().getWorld()->getStore().get<ESM::Region>().find(region);
 
-    std::string weather;
-    if (id==0)
-        weather = "clear";
-    else if (id==1)
-        weather = "cloudy";
-    else if (id==2)
-        weather = "foggy";
-    else if (id==3)
-        weather = "overcast";
-    else if (id==4)
-        weather = "rain";
-    else if (id==5)
-        weather = "thunderstorm";
-    else if (id==6)
-        weather = "ashstorm";
-    else if (id==7)
-        weather = "blight";
-    else if (id==8)
-        weather = "snow";
-    else if (id==9)
-        weather = "blizzard";
-    else
-        weather = "clear";
+    Weather::Type weatherType = Weather::Type_Clear;
+    if (id >= Weather::Type_Clear && id < Weather::Type_Unknown)
+        weatherType = (Weather::Type)id;
 
-    mRegionOverrides[Misc::StringUtils::lowerCase(region)] = weather;
+    mRegionOverrides[Misc::StringUtils::lowerCase(region)] = weatherType;
 
     std::string playerRegion = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell()->mCell->mRegion;
     if (Misc::StringUtils::ciEqual(region, playerRegion))
-        setWeather(weather);
+        setWeather(weatherType);
 }
 
 float WeatherManager::getWindSpeed() const
