@@ -180,7 +180,7 @@ namespace CSVSettings
     };
 
     /// list widget template
-    /// TODO: Not fully implemented.  Only widget supporting multi-valued settings
+    /// \todo Not fully implemented.  Only widget supporting multi-valued settings
     template <>
     class SettingWidget <QListWidget>: public CSVSettings::AbstractWidget
     {

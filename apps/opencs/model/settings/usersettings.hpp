@@ -53,8 +53,8 @@ namespace CSMSettings {
 
         /// Retrieves the settings file at all three levels (global, local and user).
 
-        /// TODO:  Multi-valued settings are not fully implemented.  Setting values
-        /// loaded in later files will always overwrite previously loaded values.
+        /// \todo Multi-valued settings are not fully implemented.  Setting values
+        /// \todo loaded in later files will always overwrite previously loaded values.
         void loadSettings (const QString &fileName);
 
         /// Returns the entire map of settings across all sections

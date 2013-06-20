@@ -56,7 +56,6 @@ namespace CSMSettings
         /// Verifies that the supplied value is one of the following:
         ///  1.  Within the limits of the value pair (min / max)
         ///  2.  One of the values indicated in the value list
-        ///  TODO:  value list logic iterates QList.  Should use find() instead.
         bool validate (const QString &value);
     };
 }
