@@ -20,16 +20,11 @@
 CSVSettings::BlankPage::BlankPage(QWidget *parent):
     AbstractPage("Blank", parent)
 {
-    initPage();
+
 }
 
 CSVSettings::BlankPage::BlankPage(const QString &title, QWidget *parent):
     AbstractPage(title, parent)
-{
-    initPage();
-}
-
-void CSVSettings::BlankPage::initPage()
 {
     // Hacks to get the stylesheet look properly
 #ifdef Q_OS_MAC

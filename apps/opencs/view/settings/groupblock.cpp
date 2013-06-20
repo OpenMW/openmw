@@ -12,7 +12,7 @@ CSVSettings::GroupBlock::GroupBlock (bool isVisible, QWidget *parent)
 int CSVSettings::GroupBlock::build (GroupBlockDef *def)
 {
 
-    if (def->properties.size() == 0)
+    if (def->settingItems.size() == 0)
         return -1;
 
     int retVal = 0;
@@ -24,7 +24,7 @@ int CSVSettings::GroupBlock::build (GroupBlockDef *def)
     setObjectName (def->title);
     mBox->setTitle (def->title);
 
-    foreach (SettingsItemDef *itemDef, def->properties)
+    foreach (SettingsItemDef *itemDef, def->settingItems)
     {
         ItemBlock *block = new ItemBlock (mBox);
 

@@ -29,16 +29,7 @@ CSVSettings::AbstractPage::AbstractPage(const QString &pageName, QWidget *parent
 CSVSettings::AbstractPage::~AbstractPage()
 {
 }
-/*
-void CSVSettings::AbstractPage::setupUi()
-{
-    // Hacks to get the stylesheet look properly
-    #ifdef Q_OS_MAC
-        QPlastiqueStyle *style = new QPlastiqueStyle;
-        //profilesComboBox->setStyle(style);
-    #endif
-}
-*/
+
 CSMSettings::SettingList *CSVSettings::AbstractPage::getSettings()
 {
     CSMSettings::SettingList *settings = new CSMSettings::SettingList();

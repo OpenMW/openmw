@@ -66,21 +66,10 @@ bool CSMSettings::SettingsItem::updateItem(int valueListIndex)
 
 bool CSMSettings::SettingsItem::validate (const QString &value)
 {
-    bool isValid = true;
-
     //validation required only if a value list or min/max value pair has been provided
-    if (mValueList->size()>0)
-    {
-        for (QStringList::ConstIterator it = mValueList->begin(); it !=mValueList->end(); ++it)
-        {
-            isValid = ( value == *it);
+    bool isValid = (mValueList->find(value) != mValueList->end());
 
-            if (isValid)
-                break;
-        }
-    }
-
-    else if (mValuePair)
+    if (!isValid && mValuePair)
     {
         int numVal = value.toInt();
 

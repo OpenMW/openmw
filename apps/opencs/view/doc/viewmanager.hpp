@@ -73,6 +73,7 @@ namespace CSVDoc
 
             void onExitWarningHandler(int state, CSMDoc::Document* document);
 
+            /// connected to update signal in UserSettings
             void slotUpdateEditorSetting (const QString &, const QString &);
     };
 

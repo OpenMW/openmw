@@ -38,27 +38,27 @@ CSVSettings::AbstractWidget *CSVSettings::AbstractBlock::buildWidget (const QStr
     {
 
     case Widget_RadioButton:
-        widg = createSettingWidget<QRadioButton> (def, layout);
+        widg = new SettingWidget<QRadioButton> (def, layout, mBox);
         break;
 
     case Widget_SpinBox:
-        widg = createSettingWidget<QSpinBox> (def, layout);
+        widg =  new SettingWidget<QSpinBox> (def, layout, mBox);
         break;
 
     case Widget_CheckBox:
-        widg = createSettingWidget<QCheckBox> (def, layout);
+        widg = new SettingWidget<QCheckBox> (def, layout, mBox);
         break;
 
     case Widget_LineEdit:
-        widg = createSettingWidget<QLineEdit> (def, layout);
+        widg = new SettingWidget<QLineEdit> (def, layout, mBox);
         break;
 
     case Widget_ListBox:
-        widg = createSettingWidget<QListWidget> (def, layout);
+        widg = new SettingWidget<QListWidget> (def, layout, mBox);
         break;
 
     case Widget_ComboBox:
-        widg = createSettingWidget<QComboBox> (def, layout);
+        widg = new SettingWidget<QComboBox> (def, layout, mBox);
         break;
 
     default:

@@ -4,5 +4,6 @@
         <file>added.png</file>
         <file>modified.png</file>
         <file>removed.png</file>
+        <file>base.png</file>
     </qresource>
 </RCC>

@@ -33,33 +33,27 @@ namespace CSVSettings {
 
     private:
 
+        /// Settings are written on close
         void closeEvent (QCloseEvent *event);
+
+        /// return the setting page by name
+        /// performs dynamic cast to AbstractPage *
         AbstractPage *getAbstractPage (int index);
         void setWidgetStates ();
         void buildPages();
-        void positionWindow ();
         void writeSettings();
-        void createSamplePage();
 
-        //Pages
-        void createWindowPage();
-
+        /// Templated function to create a custom user preference page
         template <typename T>
-        void createPage (const QString &title)
+        void createPage ()
         {
-            T *page = new T(title, this);
+            T *page = new T(mStackedWidget);
 
             mStackedWidget->addWidget (dynamic_cast<QWidget *>(page));
 
             new QListWidgetItem (page->objectName(), mListWidget);
 
             //finishing touches
-            if (mStackedWidget->sizeHint().width() < 640)
-                mStackedWidget->sizeHint().setWidth(640);
-
-            if (mStackedWidget->sizeHint().height() < 480)
-                mStackedWidget->sizeHint().setHeight(480);
-
             QFontMetrics fm (QApplication::font());
             int textWidth = fm.width(page->objectName());
 
@@ -70,6 +64,8 @@ namespace CSVSettings {
         }
 
     public slots:
+
+        /// Called when a different page is selected in the left-hand list widget
         void slotChangePage (QListWidgetItem*, QListWidgetItem*);
     };
 

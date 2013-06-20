@@ -12,15 +12,18 @@ namespace CSVSettings
 
     public:
         explicit EditorPage(QWidget *parent = 0);
-        explicit EditorPage (const QString &pageName, QWidget* parent = 0);
 
         void initializeWidgets (const CSMSettings::SettingMap &settings);
         void setupUi();
 
     private:
+
+        /// User preference view of the record status delegate's icon / text setting
         GroupBlockDef *setupRecordStatusDisplay();
 
     signals:
+
+        /// Signals up for changes to editor application-level settings
         void signalUpdateEditorSetting (const QString &settingName, const QString &settingValue);
 
     public slots:

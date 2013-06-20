@@ -11,6 +11,7 @@
 namespace CSVSettings
 {
 
+    /// Abstract base class for all blocks
     class AbstractBlock : public QObject
     {
         Q_OBJECT
@@ -31,40 +32,50 @@ namespace CSVSettings
         bool isVisible() const;
 
         virtual CSMSettings::SettingList *getSettings() = 0;
+
+        /// update settings found in the passed map and are encapsulated by the block
         virtual bool updateSettings (const CSMSettings::SettingMap &settings) = 0;
+
+        /// update callback function called from update slot
+        /// used for updating application-level settings in the editor
         virtual bool updateBySignal (const QString &name, const QString &value, bool &doEmit)
         { return false; }
 
     protected:
 
+        /// Creates the layout which for the blocks QGroupBox
         QLayout *createLayout (Orientation direction, bool isZeroMargin, QWidget* parent = 0);
+
+        /// Creates widgets that exist as direct children of the block
         AbstractWidget *buildWidget (const QString &widgetName, WidgetDef &wDef,
                                      QLayout *layout = 0, bool isConnected = true) const;
-
-        template <typename T>
-        AbstractWidget *createSettingWidget (WidgetDef &wDef, QLayout *layout) const
-        {
-            return new SettingWidget<T> (wDef, layout, mBox);
-        }
 
         QWidget *getParent() const;
 
     public slots:
 
+        /// enables / disables block-level widgets based on signals from other widgets
+        /// used in ToggleBlock
         void slotSetEnabled (bool value);
+
+        /// receives updates to applicaion-level settings in the Editor
         void slotUpdateSetting (const QString &settingName, const QString &settingValue);
 
     private slots:
 
+        /// receives updates to a setting in the block pushed from the application level
         void slotUpdate (const QString &value);
 
     signals:
 
-        //signal to functions outside the settings tab widget
+        /// signal to UserSettings instance
         void signalUpdateSetting (const QString &propertyName, const QString &propertyValue);
+
+        /// signal to widget for updating widget value
         void signalUpdateWidget (const QString & value);
 
-        //propertyName and propertyValue are for properties for which the updated setting acts as a proxy
+        /// ProxyBlock use only.
+        /// Name and value correspond to settings for which the block is a proxy.
         void signalUpdateProxySetting (const QString &propertyName, const QString &propertyValue);
     };
 }

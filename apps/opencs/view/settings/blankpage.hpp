@@ -10,6 +10,8 @@ namespace CSVSettings {
     class UserSettings;
     class AbstractBlock;
 
+    /// Derived page with no widgets
+    /// Reference use only.
     class BlankPage : public AbstractPage
     {
 
@@ -20,9 +22,6 @@ namespace CSVSettings {
 
         void setupUi();
         void initializeWidgets (const CSMSettings::SettingMap &settings);
-
-    private:
-        void initPage();
     };
 }
 

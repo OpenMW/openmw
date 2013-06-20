@@ -21,6 +21,7 @@ namespace CSVWorld
         QIcon *mModifiedIcon;
         QIcon *mAddedIcon;
         QIcon *mDeletedIcon;
+        QIcon *mBaseIcon;
 
         int mStatusDisplay;
 

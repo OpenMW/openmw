@@ -78,7 +78,6 @@ opencs_units (view/settings
     proxyblock
     abstractwidget
     usersettingsdialog
-    samplepage
     editorpage
     windowpage
     )

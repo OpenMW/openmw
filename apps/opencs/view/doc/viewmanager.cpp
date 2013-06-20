@@ -21,6 +21,7 @@
 #include <QPushButton>
 #include <QtGui/QApplication>
 
+#include <QDebug>
 void CSVDoc::ViewManager::updateIndices()
 {
     std::map<CSMDoc::Document *, std::pair<int, int> > documents;
@@ -124,8 +125,6 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
 
     connect (&CSMSettings::UserSettings::instance(), SIGNAL (signalUpdateEditorSetting (const QString &, const QString &)),
              this, SLOT (slotUpdateEditorSetting (const QString &, const QString &)));
-
-    CSMSettings::UserSettings::instance().loadSettings("opencs.cfg");
 }
 
 CSVDoc::ViewManager::~ViewManager()
@@ -355,7 +354,10 @@ void CSVDoc::ViewManager::exitApplication (CSVDoc::View *view)
 
 void CSVDoc::ViewManager::slotUpdateEditorSetting (const QString &settingName, const QString &settingValue)
 {
-    if (settingName == "Record Status Display")
+    if (settingName == "Record Status Display" ||
+        settingName == "Width" || settingName == "Height")
+    {
         foreach (CSVDoc::View *view, mViews)
             view->updateEditorSetting (settingName, settingValue);
+    }
 }

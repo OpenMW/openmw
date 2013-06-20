@@ -3,13 +3,7 @@
 #include "../../model/settings/usersettings.hpp"
 
 CSVSettings::EditorPage::EditorPage(QWidget* parent) :
-    AbstractPage(parent)
-{
-    setupUi();
-}
-
-CSVSettings::EditorPage::EditorPage (const QString &pageName, QWidget* parent)
-    : AbstractPage (pageName, parent)
+    AbstractPage("Editor", parent)
 {
     setupUi();
 }
@@ -26,7 +20,7 @@ CSVSettings::GroupBlockDef *CSVSettings::EditorPage::setupRecordStatusDisplay()
 
     statusItem->widget = statusWidget;
 
-    statusBlock->properties << statusItem;
+    statusBlock->settingItems << statusItem;
 
     return statusBlock;
 }

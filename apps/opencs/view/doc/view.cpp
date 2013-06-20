@@ -180,8 +180,9 @@ CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int to
     : mViewManager (viewManager), mDocument (document), mViewIndex (totalViews-1),
       mViewTotal (totalViews)
 {
-    QString width = CSMSettings::UserSettings::instance().getSettingValue(QString("Window Size"), QString("Width"));
-    QString height = CSMSettings::UserSettings::instance().getSettingValue(QString("Window Size"), QString("Height"));
+    QString width = CSMSettings::UserSettings::instance().getSetting(QString("Window Size"), QString("Width"));
+    QString height = CSMSettings::UserSettings::instance().getSetting(QString("Window Size"), QString("Height"));
+
     if(width==QString() || height==QString())
         resize(800, 600);
     else
@@ -378,10 +379,31 @@ void CSVDoc::View::showUserSettings()
     settingsDialog->show();
 }
 
+void CSVDoc::View::resizeViewWidth (int width)
+{
+    if (width >= 0)
+        resize (width, geometry().height());
+}
+
+void CSVDoc::View::resizeViewHeight (int height)
+{
+    if (height >= 0)
+        resize (geometry().width(), height);
+}
+
 void CSVDoc::View::updateEditorSetting (const QString &settingName, const QString &settingValue)
 {
     if (settingName == "Record Status Display")
+    {
         foreach (QObject *view, mSubViewWindow.children())
+        {
             if (view->objectName() == "subview")
                 dynamic_cast<CSVDoc::SubView *>(view)->updateEditorSetting (settingName, settingValue);
+        }
+    }
+    else if (settingName == "Width")
+            resizeViewWidth (settingValue.toInt());
+
+    else if (settingName == "Height")
+            resizeViewHeight (settingValue.toInt());
 }

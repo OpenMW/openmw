@@ -44,7 +44,7 @@ void CSVSettings::SamplePage::setupUi()
     ///////////////////////////
 
     SettingsItemDef *undoStackItem = new SettingsItemDef (undoStack->title, "32");
-    undoStack->properties << undoStackItem;
+    undoStack->settingItems << undoStackItem;
     undoStackItem->minMax.left = "0";
     undoStackItem->minMax.right = "64";
 
@@ -59,7 +59,7 @@ void CSVSettings::SamplePage::setupUi()
     /////////////////////////////////////
 
     SettingsItemDef *topLevelItem = new SettingsItemDef (topLevelWindowCount->title, "100");
-    topLevelWindowCount->properties << topLevelItem;
+    topLevelWindowCount->settingItems << topLevelItem;
     topLevelItem->minMax.left = "1";
     topLevelItem->minMax.right = "256";
 
@@ -80,7 +80,7 @@ void CSVSettings::SamplePage::setupUi()
     reuseSubWidget.valueList = (reuseSubItem->valueList);
     reuseSubWidget.widgetAlignment = Align_Left;
 
-    reuseSubwindow->properties << reuseSubItem;
+    reuseSubwindow->settingItems << reuseSubItem;
     reuseSubItem->widget = reuseSubWidget;
 
     ///////////////////////////////
@@ -98,7 +98,7 @@ void CSVSettings::SamplePage::setupUi()
     heightItem->widget.widgetWidth = 45;
     heightItem->widget.caption = "x";
 
-    customWindowSize->properties << widthItem << heightItem;
+    customWindowSize->settingItems << widthItem << heightItem;
     customWindowSize->widgetOrientation = Orient_Horizontal;
     customWindowSize->isVisible = false;
 
@@ -119,7 +119,7 @@ void CSVSettings::SamplePage::setupUi()
 
     widthByHeightItem->widget = widthByHeightWidget;
 
-    definedWindowSize->properties << widthByHeightItem;
+    definedWindowSize->settingItems << widthByHeightItem;
     definedWindowSize->isProxy = true;
     definedWindowSize->isVisible = false;
 

@@ -8,7 +8,7 @@ CSVSettings::ProxyBlock::ProxyBlock (QWidget *parent)
 int CSVSettings::ProxyBlock::build (GroupBlockDef *proxyDef)
 {
     //get the list of pre-defined values for the proxy
-    mValueList = proxyDef->properties.at(0)->valueList;
+    mValueList = proxyDef->settingItems.at(0)->valueList;
 
     bool success = GroupBlock::build(proxyDef);
 

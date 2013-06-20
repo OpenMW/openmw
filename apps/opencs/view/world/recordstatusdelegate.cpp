@@ -10,6 +10,7 @@ CSVWorld::RecordStatusDelegate::RecordStatusDelegate(QUndoStack &undoStack, QObj
     mModifiedIcon = new QIcon (":./modified.png");
     mAddedIcon = new QIcon (":./added.png");
     mDeletedIcon = new QIcon (":./removed.png");
+    mBaseIcon = new QIcon (":./base.png");
     mIconSize = 16;
 
     //Offset values are most likely device-dependent.
@@ -38,6 +39,7 @@ void CSVWorld::RecordStatusDelegate::paint (QPainter *painter, const QStyleOptio
    {
    case 0: // State_BaseOnly
        text = "Base";
+       icon = mBaseIcon;
        break;
 
    case 1: // State_Modified

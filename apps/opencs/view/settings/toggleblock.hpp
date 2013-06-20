@@ -21,6 +21,8 @@ namespace CSVSettings
         int build (CustomBlockDef *def);
 
     private:
+        /// Constructor for toggle widgets that are specific to toggle block
+        /// Widgets are not a part of the user preference settings
         GroupBox *buildToggleWidgets (GroupBlockDef *def, QString &defaultToggle);
     };
 }
