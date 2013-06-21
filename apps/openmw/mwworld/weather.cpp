@@ -1,8 +1,5 @@
 #include "weather.hpp"
 
-#include <ctime>
-#include <cstdlib>
-
 #include <boost/algorithm/string.hpp>
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -210,7 +207,7 @@ void WeatherManager::setResult(const String& weatherType)
     mResult.mGlareView = current.mGlareView;
     mResult.mAmbientLoopSoundID = current.mAmbientLoopSoundID;
     mResult.mSunColor = current.mSunDiscSunsetColor;
- 
+
     mResult.mNight = (mHour < mSunriseTime || mHour > mNightStart - 1);
 
     mResult.mFogDepth = mResult.mNight ? current.mLandFogNightDepth : current.mLandFogDayDepth;
@@ -485,7 +482,6 @@ void WeatherManager::update(float duration)
                 mRendering->getSkyManager()->setLightningStrength( mThunderFlash / mThunderThreshold );
             else
             {
-                srand(time(NULL));
                 mThunderChanceNeeded = rand() % 100;
                 mThunderChance = 0;
                 mRendering->getSkyManager()->setLightningStrength( 0.f );
