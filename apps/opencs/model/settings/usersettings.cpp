@@ -177,9 +177,9 @@ void CSMSettings::UserSettings::loadFromFile(const QString &filePath)
         }
 
         mSectionSettings.insert(section, settings);
-    }
 
-    stream->device()->close();
+        stream->device()->close();
+    }
 
     return;
 }
