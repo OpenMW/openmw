@@ -35,7 +35,7 @@ GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, GraphicsSettings &g
     setupUi(this);
 
     // Set the maximum res we can set in windowed mode
-    QRect res = QApplication::desktop()->screenGeometry();
+    QRect res = getMaximumResolution();
     customWidthSpinBox->setMaximum(res.width());
     customHeightSpinBox->setMaximum(res.height());
 
@@ -287,6 +287,21 @@ QStringList GraphicsPage::getAvailableResolutions(Ogre::RenderSystem *renderer)
     qSort(result.begin(), result.end(), naturalSortGreaterThanCI);
 
     return result;
+}
+
+QRect GraphicsPage::getMaximumResolution()
+{
+    QRect max, res;
+    int i, screens = QApplication::desktop()->screenCount();
+    for (i = 0; i < screens; i++)
+    {
+        res = QApplication::desktop()->screenGeometry(i);
+        if (res.width() > max.width())
+            max.setWidth(res.width());
+        if (res.height() > max.height())
+            max.setHeight(res.height());
+    }
+    return max;
 }
 
 void GraphicsPage::rendererChanged(const QString &renderer)

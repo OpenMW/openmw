@@ -56,6 +56,7 @@ private:
 
     QStringList getAvailableOptions(const QString &key, Ogre::RenderSystem *renderer);
     QStringList getAvailableResolutions(Ogre::RenderSystem *renderer);
+    QRect getMaximumResolution();
 
     void loadSettings();
 
