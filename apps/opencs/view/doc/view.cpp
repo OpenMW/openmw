@@ -8,7 +8,6 @@
 #include <QMdiArea>
 #include <QDockWidget>
 #include <QtGui/QApplication>
-#include <QDebug>
 
 #include "../../model/doc/document.hpp"
 #include "../world/subviews.hpp"

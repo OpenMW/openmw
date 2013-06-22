@@ -7,8 +7,6 @@
 #include <QRegExp>
 #include <QMap>
 
-#include <QDebug>
-
 template <class Map>
 class SettingsBase
 {

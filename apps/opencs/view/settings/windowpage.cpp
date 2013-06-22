@@ -64,12 +64,14 @@ CSVSettings::GroupBlockDef *CSVSettings::WindowPage::buildCustomWindowSize()
     SettingsItemDef *widthItem = new SettingsItemDef ("Width", "640");
     widthItem->widget = WidgetDef (Widget_LineEdit);
     widthItem->widget.widgetWidth = 45;
+    widthItem->widget.inputMask = "9999";
 
     //custom height
     SettingsItemDef *heightItem = new SettingsItemDef ("Height", "480");
     heightItem->widget = WidgetDef (Widget_LineEdit);
     heightItem->widget.widgetWidth = 45;
     heightItem->widget.caption = "x";
+    heightItem->widget.inputMask = "9999";
 
     block->settingItems << widthItem << heightItem;
     block->widgetOrientation = Orient_Horizontal;

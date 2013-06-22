@@ -53,6 +53,8 @@ bool CSVSettings::ProxyBlock::updateProxiedSettings()
 
         bool success = false;
         int i = 0;
+
+        //find the value index of the selected value in the proxy setting
         for (; i < mValueList->size(); ++i)
         {
             success =  (value == mValueList->at(i));
@@ -64,6 +66,7 @@ bool CSVSettings::ProxyBlock::updateProxiedSettings()
         if (!success)
             return false;
 
+        // update the containing the proxied item's name
         foreach (QStringList *list, mProxyList)
         {
             if ( list->at(0) == block->objectName())

@@ -12,10 +12,6 @@
 
 #include <QGridLayout>
 
-#include "samplepage.hpp"
-
-#include <QDebug>
-
 #include "editorpage.hpp"
 #include "windowpage.hpp"
 

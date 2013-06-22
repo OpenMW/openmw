@@ -21,7 +21,6 @@
 #include <QPushButton>
 #include <QtGui/QApplication>
 
-#include <QDebug>
 void CSVDoc::ViewManager::updateIndices()
 {
     std::map<CSMDoc::Document *, std::pair<int, int> > documents;

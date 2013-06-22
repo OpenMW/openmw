@@ -1,9 +1,6 @@
-
 #include "document.hpp"
-
 #include <cassert>
 
-#include <QDebug>
 void CSMDoc::Document::load (const std::vector<boost::filesystem::path>::const_iterator& begin,
     const std::vector<boost::filesystem::path>::const_iterator& end, bool lastAsModified)
 {

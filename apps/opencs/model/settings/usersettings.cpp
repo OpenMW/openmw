@@ -9,16 +9,12 @@
 #include <QTextCodec>
 
 #include <QFile>
-
 #include <QDebug>
 
 #include <components/files/configurationmanager.hpp>
-
 #include "settingcontainer.hpp"
-
 #include <boost/version.hpp>
 
-#include <QDebug>
 /**
  * Workaround for problems with whitespaces in paths in older versions of Boost library
  */
