@@ -133,7 +133,6 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   : mOgre (0)
   , mFpsLevel(0)
-  , mDebug (false)
   , mVerboseScripts (false)
   , mNewGame (false)
   , mUseSound (true)
@@ -283,11 +282,6 @@ void OMW::Engine::addPlugin (const std::string& plugin)
     }
 }
 
-void OMW::Engine::setDebugMode(bool debugMode)
-{
-    mDebug = debugMode;
-}
-
 void OMW::Engine::setScriptsVerbosity(bool scriptsVerbosity)
 {
     mVerboseScripts = scriptsVerbosity;
@@ -331,7 +325,6 @@ std::string OMW::Engine::loadSettings (Settings::Manager & settings)
         nifOverrides.loadTransparencyOverrides(mCfgMgr.getGlobalPath().string() + "/transparency-overrides.cfg");
 
     settings.setBool("hardware cursors", "GUI", true);
-    settings.setBool("debug", "Engine", mDebug);
 
     return settingspath;
 }

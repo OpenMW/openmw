@@ -88,6 +88,7 @@ namespace MWInput
     public:
         virtual bool keyPressed(const SDL_KeyboardEvent &arg );
         virtual bool keyReleased( const SDL_KeyboardEvent &arg );
+        virtual void textInput (const SDL_TextInputEvent &arg);
 
         virtual bool mousePressed( const SDL_MouseButtonEvent &arg, Uint8 id );
         virtual bool mouseReleased( const SDL_MouseButtonEvent &arg, Uint8 id );
@@ -146,7 +147,6 @@ namespace MWInput
 
         bool mMouseLookEnabled;
         bool mGuiCursorEnabled;
-        bool mDebug;
 
         float mOverencumberedMessageDelay;
 

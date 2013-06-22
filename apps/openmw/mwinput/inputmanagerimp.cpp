@@ -23,6 +23,65 @@
 
 using namespace ICS;
 
+namespace
+{
+    std::vector<unsigned long> utf8ToUnicode(const std::string& utf8)
+    {
+        std::vector<unsigned long> unicode;
+        size_t i = 0;
+        while (i < utf8.size())
+        {
+            unsigned long uni;
+            size_t todo;
+            unsigned char ch = utf8[i++];
+            if (ch <= 0x7F)
+            {
+                uni = ch;
+                todo = 0;
+            }
+            else if (ch <= 0xBF)
+            {
+                throw std::logic_error("not a UTF-8 string");
+            }
+            else if (ch <= 0xDF)
+            {
+                uni = ch&0x1F;
+                todo = 1;
+            }
+            else if (ch <= 0xEF)
+            {
+                uni = ch&0x0F;
+                todo = 2;
+            }
+            else if (ch <= 0xF7)
+            {
+                uni = ch&0x07;
+                todo = 3;
+            }
+            else
+            {
+                throw std::logic_error("not a UTF-8 string");
+            }
+            for (size_t j = 0; j < todo; ++j)
+            {
+                if (i == utf8.size())
+                    throw std::logic_error("not a UTF-8 string");
+                unsigned char ch = utf8[i++];
+                if (ch < 0x80 || ch > 0xBF)
+                    throw std::logic_error("not a UTF-8 string");
+                uni <<= 6;
+                uni += ch & 0x3F;
+            }
+            if (uni >= 0xD800 && uni <= 0xDFFF)
+                throw std::logic_error("not a UTF-8 string");
+            if (uni > 0x10FFFF)
+                throw std::logic_error("not a UTF-8 string");
+            unicode.push_back(uni);
+        }
+        return unicode;
+    }
+}
+
 namespace MWInput
 {
     InputManager::InputManager(OEngine::Render::OgreRenderer &ogre,
@@ -40,7 +99,6 @@ namespace MWInput
         , mMouseWheel(0)
         , mDragDrop(false)
         , mGuiCursorEnabled(false)
-        , mDebug(Settings::Manager::getBool("debug", "Engine"))
         , mUserFile(userFile)
         , mUserFileExists(userFileExists)
         , mInvertY (Settings::Manager::getBool("invert y axis", "Input"))
@@ -213,26 +271,23 @@ namespace MWInput
         // event callbacks (which may crash)
         mWindows.update();
 
-        if(!mDebug)
+        bool main_menu = mWindows.containsMode(MWGui::GM_MainMenu);
+
+        bool was_relative = mInputManager->getMouseRelative();
+        bool is_relative = !mWindows.isGuiMode();
+
+        // don't keep the pointer away from the window edge in gui mode
+        // stop using raw mouse motions and switch to system cursor movements
+        mInputManager->setMouseRelative(is_relative);
+
+        //we let the mouse escape in the main menu
+        mInputManager->setGrabPointer(!main_menu);
+
+        //we switched to non-relative mode, move our cursor to where the in-game
+        //cursor is
+        if( !is_relative && was_relative != is_relative )
         {
-            bool main_menu = mWindows.containsMode(MWGui::GM_MainMenu);
-
-            bool was_relative = mInputManager->getMouseRelative();
-            bool is_relative = !mWindows.isGuiMode();
-
-            // don't keep the pointer away from the window edge in gui mode
-            // stop using raw mouse motions and switch to system cursor movements
-            mInputManager->setMouseRelative(is_relative);
-
-            //we let the mouse escape in the main menu
-            mInputManager->setGrabPointer(!main_menu);
-
-            //we switched to non-relative mode, move our cursor to where the in-game
-            //cursor is
-            if( !is_relative && was_relative != is_relative )
-            {
-                mInputManager->warpMouse(mMouseX, mMouseY);
-            }
+            mInputManager->warpMouse(mMouseX, mMouseY);
         }
 
         // Disable movement in Gui mode
@@ -349,6 +404,7 @@ namespace MWInput
         mMouseLookEnabled = !guiMode;
         if (guiMode)
             mWindows.showCrosshair(false);
+        mWindows.setCursorVisible(guiMode);
         // if not in gui mode, the camera decides whether to show crosshair or not.
     }
 
@@ -411,7 +467,6 @@ namespace MWInput
     bool InputManager::keyPressed( const SDL_KeyboardEvent &arg )
     {
         mInputBinder->keyPressed (arg);
-        unsigned int text = arg.keysym.unicode;
 
         if(arg.keysym.sym == SDLK_RETURN
             && MWBase::Environment::get().getWindowManager()->isGuiMode())
@@ -422,9 +477,17 @@ namespace MWInput
 
         OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(arg.keysym.sym);
 
-        MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::Enum(kc), text);
-
+        if (kc != OIS::KC_UNASSIGNED)
+            MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::Enum(kc), 0);
         return true;
+    }
+
+    void InputManager::textInput(const SDL_TextInputEvent &arg)
+    {
+        const char* text = &arg.text[0];
+        std::vector<unsigned long> unicode = utf8ToUnicode(std::string(text));
+        for (std::vector<unsigned long>::iterator it = unicode.begin(); it != unicode.end(); ++it)
+            MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::None, *it);
     }
 
     bool InputManager::keyReleased(const SDL_KeyboardEvent &arg )
@@ -530,19 +593,12 @@ namespace MWInput
 
     bool InputManager::windowFocusChange(bool have_focus)
     {
-        if(!mDebug)
-        {
-
-        }
         return true;
     }
 
     bool InputManager::windowVisibilityChange(bool visible)
     {
-        if(!mDebug)
-        {
             //TODO: Pause game?
-        }
         return true;
     }
 

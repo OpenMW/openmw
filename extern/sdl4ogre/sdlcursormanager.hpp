@@ -12,7 +12,7 @@ namespace SFO
             public CursorManager
     {
     public:
-        SDLCursorManager(bool debug=false);
+        SDLCursorManager();
         virtual ~SDLCursorManager();
 
         virtual void setEnabled(bool enabled);
@@ -36,8 +36,6 @@ namespace SFO
         bool mEnabled;
         bool mInitialized;
         bool mCursorVisible;
-        bool mDebug;
-
     };
 }
 

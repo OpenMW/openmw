@@ -98,6 +98,8 @@ namespace MWGui
      */
     virtual void update();
 
+    virtual void setKeyFocusWidget (MyGUI::Widget* widget);
+
     virtual void setNewGame(bool newgame);
 
     virtual void pushGuiMode(GuiMode mode);
@@ -353,6 +355,7 @@ namespace MWGui
     void onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result);
 
     void onCursorChange(const std::string& name);
+    void onKeyFocusChanged(MyGUI::Widget* widget);
   };
 }
 

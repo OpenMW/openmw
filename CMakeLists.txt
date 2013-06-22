@@ -31,6 +31,7 @@ configure_file ("${OpenMW_SOURCE_DIR}/Docs/mainpage.hpp.cmake" "${OpenMW_SOURCE_
 option(MYGUI_STATIC "Link static build of Mygui into the binaries" FALSE)
 option(OGRE_STATIC  "Link static build of Ogre and Ogre Plugins into the binaries" FALSE)
 option(BOOST_STATIC "Link static build of Boost into the binaries" FALSE)
+option(SDL2_STATIC "Link static build of SDL into the binaries" FALSE)
 
 # Apps and tools
 option(BUILD_BSATOOL "build BSA extractor" OFF)

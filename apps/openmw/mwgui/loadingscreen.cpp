@@ -10,6 +10,7 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/inputmanager.hpp"
 
 namespace MWGui
 {
@@ -126,7 +127,7 @@ namespace MWGui
 
             // always update input before rendering something, otherwise mygui goes crazy when something was entered in the frame before
             // (e.g. when using "coc" console command, it would enter an infinite loop and crash due to overflow)
-            //MWBase::Environment::get().getInputManager()->update(0, true);
+            MWBase::Environment::get().getInputManager()->update(0, true);
 
             Ogre::CompositorChain* chain = Ogre::CompositorManager::getSingleton().getCompositorChain(mWindow->getViewport(0));
 

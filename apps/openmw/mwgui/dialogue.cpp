@@ -7,6 +7,7 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 
@@ -224,16 +225,22 @@ namespace MWGui
 
     void Choice::activated()
     {
+
+        MWBase::Environment::get().getSoundManager()->playSound("Menu Click", 1.0, 1.0);
         MWBase::Environment::get().getDialogueManager()->questionAnswered(mChoiceId);
     }
 
     void Topic::activated()
     {
+
+        MWBase::Environment::get().getSoundManager()->playSound("Menu Click", 1.f, 1.f);
         MWBase::Environment::get().getDialogueManager()->keywordSelected(Misc::StringUtils::lowerCase(mTopicId));
     }
 
     void Goodbye::activated()
     {
+
+        MWBase::Environment::get().getSoundManager()->playSound("Menu Click", 1.f, 1.f);
         MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
     }
 
@@ -467,11 +474,12 @@ namespace MWGui
 
         BookTypesetter::Style* body = typesetter->createStyle("", MyGUI::Colour::White);
 
+        typesetter->sectionBreak(9);
         // choices
         const MyGUI::Colour linkHot    (223/255.f, 201/255.f, 159/255.f);
         const MyGUI::Colour linkNormal (150/255.f, 50/255.f, 30/255.f);
         const MyGUI::Colour linkActive (243/255.f, 237/255.f, 221/255.f);
-        for (std::map<std::string, int>::iterator it = mChoices.begin(); it != mChoices.end(); ++it)
+        for (std::map<std::string, int>::reverse_iterator it = mChoices.rbegin(); it != mChoices.rend(); ++it)
         {
             Choice* link = new Choice(it->second);
             mLinks.push_back(link);
