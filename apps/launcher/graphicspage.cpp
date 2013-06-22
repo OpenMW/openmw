@@ -291,11 +291,11 @@ QStringList GraphicsPage::getAvailableResolutions(Ogre::RenderSystem *renderer)
 
 QRect GraphicsPage::getMaximumResolution()
 {
-    QRect max, res;
-    int i, screens = QApplication::desktop()->screenCount();
-    for (i = 0; i < screens; i++)
+    QRect max;
+    int screens = QApplication::desktop()->screenCount();
+    for (int i = 0; i < screens; ++i)
     {
-        res = QApplication::desktop()->screenGeometry(i);
+        QRect res = QApplication::desktop()->screenGeometry(i);
         if (res.width() > max.width())
             max.setWidth(res.width());
         if (res.height() > max.height())
