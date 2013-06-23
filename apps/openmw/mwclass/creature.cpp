@@ -78,6 +78,8 @@ namespace MWClass
             stats->mDynamic[1].set (ref->base->data.mana);
             stats->mDynamic[2].set (ref->base->data.fatigue);
 
+            stats->mLevel = ref->base->data.level;
+
             ptr.getRefData().getCreatureStats() = stats;
         }
 
@@ -88,7 +90,7 @@ namespace MWClass
         const MWWorld::Ptr& actor, const MWWorld::Environment& environment) const
     {
         return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionTalk (ptr));
-	}
+    }
 
     MWWorld::ContainerStore<MWWorld::RefData>& Creature::getContainerStore (const MWWorld::Ptr& ptr)
         const
@@ -104,7 +106,7 @@ namespace MWClass
         }
 
         return *ptr.getRefData().getContainerStore();
-	}
+    }
 
     std::string Creature::getScript (const MWWorld::Ptr& ptr) const
     {

@@ -9,6 +9,10 @@ option(USE_MPG123 "use mpg123 + libsndfile for sound" ON)
 set(MORROWIND_DATA_FILES "data"
     CACHE PATH "location of Morrowind data files")
 
+if (WIN32)
+    option(USE_DEBUG_CONSOLE "whether a debug console should be enabled for debug builds, if false debug output is redirected to Visual Studio output" ON)
+endif()
+
 # We probably support older versions than this.
 cmake_minimum_required(VERSION 2.6)
 
@@ -102,6 +106,9 @@ source_group(components\\esm_store FILES ${ESM_STORE} ${ESM_STORE_HEADER})
 file(GLOB ESM_HEADER ${COMP_DIR}/esm/*.hpp)
 set(ESM
     ${COMP_DIR}/esm/load_impl.cpp
+    ${COMP_DIR}/esm/skill.cpp
+    ${COMP_DIR}/esm/attr.cpp
+    ${COMP_DIR}/esm/class.cpp
 )
 source_group(components\\esm FILES ${ESM_HEADER} ${ESM})
 
@@ -198,9 +205,12 @@ if (WIN32)
     add_definitions(-DBOOST_ALL_NO_LIB)
 else (WIN32)
 set(PLATFORM_INCLUDE_DIR "")
+find_path (UUID_INCLUDE_DIR uuid/uuid.h)
+include_directories(${UUID_INCLUDE_DIR})
 endif (WIN32)
 if (MSVC10)
-set(PLATFORM_INCLUDE_DIR "")
+    set(PLATFORM_INCLUDE_DIR "")
+    add_definitions(-DMYGUI_DONT_REPLACE_NULLPTR)
 endif()
 
 # Dependencies
@@ -210,13 +220,14 @@ find_package(Boost REQUIRED COMPONENTS system filesystem program_options thread)
 find_package(OIS REQUIRED)
 find_package(OpenAL REQUIRED)
 include_directories("."
-    ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre
+    ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre ${OGRE_INCLUDE_DIR}/OGRE
     ${OIS_INCLUDE_DIR} ${Boost_INCLUDE_DIR}
     ${PLATFORM_INCLUDE_DIR}
     ${CMAKE_HOME_DIRECTORY}/extern/caelum/include
     ${CMAKE_HOME_DIRECTORY}/extern/mygui_3.0.1/MyGUIEngine/include
     ${CMAKE_HOME_DIRECTORY}/extern/mygui_3.0.1/OgrePlatform/include
     ${OPENAL_INCLUDE_DIR}
+    ${UUID_INCLUDE_DIR}
     ${LIBDIR}
 )
 
@@ -224,6 +235,16 @@ link_directories(${Boost_LIBRARY_DIRS} ${OGRE_LIB_DIR})
 
 add_subdirectory( extern/caelum )
 add_subdirectory( extern/mygui_3.0.1 )
+
+# Make sure that certain libraries are used as static libraries
+# This is in effect turns off __declspec (dllexport) for windows
+# Each library will also need to be configured to build as a static lib
+
+# MyGUI: extern/mygui_3.0.0/
+add_definitions(-DMYGUI_STATIC)
+
+# Caelum: extern/caelum/
+add_definitions(-DCAELUM_STATIC)
 
 # Specify build paths
 
@@ -288,4 +309,43 @@ add_subdirectory( apps/openmw )
 option(BUILD_ESMTOOL "build ESM inspector" ON)
 if (BUILD_ESMTOOL)
   add_subdirectory( apps/esmtool )
+endif()
+
+if (WIN32)
+  if (MSVC)
+    if (USE_DEBUG_CONSOLE)
+      set_target_properties(openmw PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
+      set_target_properties(openmw PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE")
+      set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS_DEBUG "_CONSOLE")
+    else()
+      # Turn off debug console, debug output will be written to visual studio output instead
+      set_target_properties(openmw PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:WINDOWS")
+      set_target_properties(openmw PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:WINDOWS")
+    endif()
+    
+    # Release builds use the debug console
+    set_target_properties(openmw PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:CONSOLE")
+    set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS_RELEASE "_CONSOLE")
+    set_target_properties(openmw PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:CONSOLE")
+  endif(MSVC)
+
+  # Same for MinGW
+  if (MINGW)
+    if (USE_DEBUG_CONSOLE)
+      set_target_properties(openmw PROPERTIES LINK_FLAGS_DEBUG "-Wl,-subsystem,console")
+      set_target_properties(openmw PROPERTIES LINK_FLAGS_RELWITHDEBINFO "-Wl,-subsystem,console")
+      set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS_DEBUG "_CONSOLE")
+    else(USE_DEBUG_CONSOLE)
+      set_target_properties(openmw PROPERTIES LINK_FLAGS_DEBUG "-Wl,-subsystem,windows")
+      set_target_properties(openmw PROPERTIES LINK_FLAGS_RELWITHDEBINFO "-Wl,-subsystem,windows")
+    endif(USE_DEBUG_CONSOLE)
+
+    set_target_properties(openmw PROPERTIES LINK_FLAGS_RELEASE "-Wl,-subsystem,console")
+    set_target_properties(openmw PROPERTIES LINK_FLAGS_MINSIZEREL "-Wl,-subsystem,console")
+    set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS_RELEASE "_CONSOLE")
+  endif(MINGW)
+  
+  # TODO: At some point release builds should not use the console but rather write to a log file
+  #set_target_properties(openmw PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
+  #set_target_properties(openmw PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS")
 endif()

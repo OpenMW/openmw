@@ -16,24 +16,24 @@ struct Creature
   // Default is 0x48?
   enum Flags
     {
-      Biped		= 0x001,
-      Respawn		= 0x002,
-      Weapon		= 0x004, // Has weapon and shield
-      None		= 0x008, // ??
-      Swims		= 0x010,
-      Flies		= 0x020, // Don't know what happens if several
-      Walks		= 0x040, // of these are set
-      Essential		= 0x080,
-      Skeleton		= 0x400, // Does not have normal blood
-      Metal		= 0x800  // Has 'golden' blood
+      Biped     = 0x001,
+      Respawn       = 0x002,
+      Weapon        = 0x004, // Has weapon and shield
+      None      = 0x008, // ??
+      Swims     = 0x010,
+      Flies     = 0x020, // Don't know what happens if several
+      Walks     = 0x040, // of these are set
+      Essential     = 0x080,
+      Skeleton      = 0x400, // Does not have normal blood
+      Metal     = 0x800  // Has 'golden' blood
     };
 
   enum Type
     {
       Creatures = 0,
-      Deadra	= 1,
-      Undead	= 2,
-      Humanoid	= 3
+      Deadra    = 1,
+      Undead    = 2,
+      Humanoid  = 3
     };
 
   struct NPDTstruct

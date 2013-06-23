@@ -14,7 +14,7 @@ struct PathGrid
   {
     int x, y; // Grid location, matches cell for exterior cells
     short s1; // ?? Usually but not always a power of 2. Doesn't seem
-	      // to have any relation to the size of PGRC.
+          // to have any relation to the size of PGRC.
     short s2; // Number of path points? Size of PGRP block is always 16 * s2;
   }; // 12 bytes
 
@@ -35,9 +35,9 @@ struct PathGrid
     if(esm.isNextSub("PGRP"))
       {
         esm.skipHSub();
-	int size = esm.getSubSize();
-	if(size != 16*data.s2)
-	  esm.fail("Path grid table size mismatch");
+    int size = esm.getSubSize();
+    if(size != 16*data.s2)
+      esm.fail("Path grid table size mismatch");
       }
 
     // Size varies. Path grid chances? Connections? Multiples of 4
@@ -45,10 +45,10 @@ struct PathGrid
     // it later.
     if(esm.isNextSub("PGRC"))
       {
-	esm.skipHSub();
-	int size = esm.getSubSize();
-	if(size % 4 != 0)
-	  esm.fail("PGRC size not a multiple of 4");
+    esm.skipHSub();
+    int size = esm.getSubSize();
+    if(size % 4 != 0)
+      esm.fail("PGRC size not a multiple of 4");
       }
   }
 };

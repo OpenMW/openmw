@@ -11,6 +11,8 @@
 
 #include "../mwgui/window_manager.hpp"
 
+#include "../mwinput/inputmanager.hpp"
+
 #include "locals.hpp"
 #include "globalscripts.hpp"
 
@@ -261,6 +263,11 @@ namespace MWScript
     MWGui::WindowManager& InterpreterContext::getWindowManager()
     {
         return *mEnvironment.mWindowManager;
+    }
+
+    MWInput::MWInputManager& InterpreterContext::getInputManager()
+    {
+        return *mEnvironment.mInputManager;
     }
 
     MWWorld::World& InterpreterContext::getWorld()

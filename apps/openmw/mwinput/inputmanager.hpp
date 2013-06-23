@@ -1,6 +1,8 @@
 #ifndef _MWINPUT_MWINPUTMANAGER_H
 #define _MWINPUT_MWINPUTMANAGER_H
 
+#include "../mwgui/mode.hpp"
+
 namespace OEngine
 {
   namespace Render
@@ -9,9 +11,9 @@ namespace OEngine
   }
 }
 
-namespace MWRender
+namespace MWWorld
 {
-  class PlayerPos;
+  class Player;
 }
 
 namespace MWGui
@@ -40,11 +42,13 @@ namespace MWInput
 
   public:
     MWInputManager(OEngine::Render::OgreRenderer &_ogre,
-                   MWRender::PlayerPos &_player,
+                   MWWorld::Player&_player,
                    MWGui::WindowManager &_windows,
                    bool debug,
                    OMW::Engine& engine);
     ~MWInputManager();
+
+    void setGuiMode(MWGui::GuiMode mode);
   };
 }
 #endif

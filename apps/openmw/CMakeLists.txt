@@ -14,16 +14,18 @@ set(GAMEREND
     mwrender/cellimp.cpp
     mwrender/interior.cpp
     mwrender/exterior.cpp
-    mwrender/playerpos.cpp
-    mwrender/sky.cpp)
+    mwrender/sky.cpp
+    mwrender/player.cpp
+    )
 set(GAMEREND_HEADER
     mwrender/cell.hpp
     mwrender/cellimp.hpp
     mwrender/mwscene.hpp
     mwrender/interior.hpp
     mwrender/exterior.hpp
-    mwrender/playerpos.hpp
-    mwrender/sky.hpp)
+    mwrender/sky.hpp
+    mwrender/player.hpp
+    )
 source_group(apps\\openmw\\mwrender FILES ${GAMEREND} ${GAMEREND_HEADER})
 
 set(GAMEINPUT
@@ -34,13 +36,32 @@ set(GAMEINPUT_HEADER
 source_group(apps\\openmw\\mwinput FILES ${GAMEINPUT} ${GAMEINPUT_HEADER})
 
 set(GAMEGUI_HEADER
-    mwgui/mw_layouts.hpp
+    mwgui/layouts.hpp
+    mwgui/text_input.hpp
+    mwgui/widgets.hpp
+    mwgui/race.hpp
+    mwgui/class.hpp
+    mwgui/birth.hpp
+    mwgui/review.hpp
     mwgui/window_manager.hpp
     mwgui/console.hpp
+    mwgui/dialogue.hpp
+    mwgui/dialogue_history.hpp
+    mwgui/window_base.hpp
 )
 set(GAMEGUI
     mwgui/window_manager.cpp
+    mwgui/layouts.cpp
     mwgui/console.cpp
+    mwgui/text_input.cpp
+    mwgui/widgets.cpp
+    mwgui/race.cpp
+    mwgui/birth.cpp
+    mwgui/class.cpp
+    mwgui/review.cpp
+    mwgui/dialogue.cpp
+    mwgui/dialogue_history.cpp
+    mwgui/window_base.cpp
 )
 source_group(apps\\openmw\\mwgui FILES ${GAMEGUI_HEADER} ${GAMEGUI})
 
@@ -84,6 +105,7 @@ set(GAMESCRIPT_HEADER
     mwscript/controlextensions.hpp
     mwscript/extensions.hpp
     mwscript/globalscripts.hpp
+    mwscript/ref.hpp
     )
 source_group(apps\\openmw\\mwscript FILES ${GAMESCRIPT} ${GAMESCRIPT_HEADER})
 
@@ -101,6 +123,7 @@ set(GAMEWORLD
     mwworld/actiontalk.cpp
     mwworld/actiontake.cpp
     mwworld/containerutil.cpp
+    mwworld/player.cpp
     )
 set(GAMEWORLD_HEADER
     mwworld/refdata.hpp
@@ -118,6 +141,7 @@ set(GAMEWORLD_HEADER
     mwworld/containerstore.hpp
     mwworld/manualref.hpp
     mwworld/containerutil.hpp
+    mwworld/player.hpp
     )
 source_group(apps\\openmw\\mwworld FILES ${GAMEWORLD} ${GAMEWORLD_HEADER})
 
@@ -171,11 +195,14 @@ set(GAMECLASS_HEADER
 source_group(apps\\openmw\\mwclass FILES ${GAMECLASS} ${GAMECLASS_HEADER})
 
 set(GAMEMECHANICS
-    mwmechanics/mechanicsmanager.cpp)
+    mwmechanics/mechanicsmanager.cpp
+    mwmechanics/magiceffects.cpp
+    )
 set(GAMEMECHANICS_HEADER
     mwmechanics/mechanicsmanager.hpp
     mwmechanics/stat.hpp
     mwmechanics/creaturestats.hpp
+    mwmechanics/magiceffects.hpp
     )
 source_group(apps\\openmw\\mwmechanics FILES ${GAMEMECHANICS} ${GAMEMECHANICS_HEADER})
 

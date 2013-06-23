@@ -17,8 +17,8 @@ struct Misc
     float weight;
     int value;
     int isKey; // There are many keys in Morrowind.esm that has this
-	       // set to 0. TODO: Check what this field corresponds to
-	       // in the editor.
+           // set to 0. TODO: Check what this field corresponds to
+           // in the editor.
   };
   MCDTstruct data;
 

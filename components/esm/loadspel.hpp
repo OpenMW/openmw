@@ -12,7 +12,7 @@ struct Spell
       ST_Spell          = 0, // Normal spell, must be cast and costs mana
       ST_Ability        = 1, // Inert ability, always in effect
       ST_Blight         = 2, // Blight disease
-      ST_Disease	= 3, // Common disease
+      ST_Disease    = 3, // Common disease
       ST_Curse          = 4, // Curse (?)
       ST_Power          = 5  // Power, can use once a day
     };

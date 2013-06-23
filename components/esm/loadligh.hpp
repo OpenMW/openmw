@@ -14,15 +14,15 @@ struct Light
 {
   enum Flags
     {
-      Dynamic		= 0x001,
-      Carry		= 0x002, // Can be carried
-      Negative		= 0x004, // Negative light?
-      Flicker		= 0x008,
-      Fire		= 0x010,
-      OffDefault	= 0x020, // Off by default
-      FlickerSlow	= 0x040,
-      Pulse		= 0x080,
-      PulseSlow		= 0x100
+      Dynamic       = 0x001,
+      Carry     = 0x002, // Can be carried
+      Negative      = 0x004, // Negative light?
+      Flicker       = 0x008,
+      Fire      = 0x010,
+      OffDefault    = 0x020, // Off by default
+      FlickerSlow   = 0x040,
+      Pulse     = 0x080,
+      PulseSlow     = 0x100
     };
 
   struct LHDTstruct

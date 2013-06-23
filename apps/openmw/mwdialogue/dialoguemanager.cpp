@@ -13,8 +13,9 @@
 #include "../mwworld/environment.hpp"
 #include "../mwworld/world.hpp"
 #include "../mwworld/refdata.hpp"
+#include "../mwworld/player.hpp"
 
-#include "../mwgui/window_manager.hpp"
+#include "../mwinput/inputmanager.hpp"
 
 #include <iostream>
 
@@ -225,7 +226,7 @@ namespace MWDialogue
 
         // check cell
         if (!info.cell.empty())
-            if (mEnvironment.mWorld->getPlayerPos().getPlayer().getCell()->cell->name != info.cell)
+            if (mEnvironment.mWorld->getPlayer().getPlayer().getCell()->cell->name != info.cell)
                 return false;
 
         // TODO check DATAstruct
@@ -275,7 +276,7 @@ namespace MWDialogue
                     // TODO execute script
                 }
 
-                mEnvironment.mWindowManager->setMode (MWGui::GM_Dialogue);
+                mEnvironment.mInputManager->setGuiMode(MWGui::GM_Dialogue);
                 break;
             }
         }

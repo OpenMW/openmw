@@ -1,9 +1,9 @@
-// Wrapper for string.h on Mac
+// Wrapper for string.h on Mac and MinGW
 #ifndef _STRING_WRAPPER_H
 #define _STRING_WRAPPER_H
 
 #include <string.h>
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__MINGW32__)
 // need our own implementation of strnlen
 static size_t strnlen(const char *s, size_t n)
 {

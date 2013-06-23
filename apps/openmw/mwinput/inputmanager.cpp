@@ -15,9 +15,12 @@
 #include <mangle/input/filters/eventlist.hpp>
 
 #include <libs/platform/strings.h>
-#include "../mwrender/playerpos.hpp"
 
 #include "../engine.hpp"
+
+#include "../mwworld/player.hpp"
+
+#include "../mwrender/player.hpp"
 
 #include <boost/bind.hpp>
 #include <boost/filesystem.hpp>
@@ -58,7 +61,7 @@ namespace MWInput
     OEngine::Input::Poller poller;
     OEngine::Render::MouseLookEventPtr mouse;
     OEngine::GUI::EventInjectorPtr guiEvents;
-    MWRender::PlayerPos &player;
+    MWWorld::Player &player;
     MWGui::WindowManager &windows;
     OMW::Engine& mEngine;
 
@@ -77,34 +80,6 @@ namespace MWInput
       } while (boost::filesystem::exists(buf));
 
       ogre.screenshot(buf);
-    }
-
-    // Switch between gui modes. Besides controlling the Gui windows
-    // this also makes sure input is directed to the right place
-    void setGuiMode(MWGui::GuiMode mode)
-    {
-      // Tell the GUI what to show (this also takes care of the mouse
-      // pointer)
-      windows.setMode(mode);
-
-      // Are we in GUI mode now?
-      if(windows.isGuiMode())
-        {
-          // Disable mouse look
-          mouse->setCamera(NULL);
-
-          // Enable GUI events
-          guiEvents->enabled = true;
-        }
-      else
-        {
-          // Start mouse-looking again. TODO: This should also allow
-          // for other ways to disable mouselook, like paralyzation.
-          mouse->setCamera(player.getCamera());
-
-          // Disable GUI events
-          guiEvents->enabled = false;
-        }
     }
 
     // Called when the user presses the button to toggle the inventory
@@ -152,7 +127,7 @@ namespace MWInput
 
   public:
     InputImpl(OEngine::Render::OgreRenderer &_ogre,
-                   MWRender::PlayerPos &_player,
+                   MWWorld::Player &_player,
                    MWGui::WindowManager &_windows,
                    bool debug,
                    OMW::Engine& engine)
@@ -192,7 +167,7 @@ namespace MWInput
       ogre.getRoot()->addFrameListener(this);
 
       // Set up the mouse handler and tell it about the player camera
-      mouse = MouseLookEventPtr(new MouseLookEvent(player.getCamera()));
+      mouse = MouseLookEventPtr(new MouseLookEvent(player.getRenderer()->getCamera()));
 
       // This event handler pumps events into MyGUI
       guiEvents = EventInjectorPtr(new EventInjector(windows.getGui()));
@@ -253,6 +228,14 @@ namespace MWInput
       // Tell OIS to handle all input events
       input.capture();
 
+      // Update windows/gui as a result of input events
+      // For instance this could mean opening a new window/dialog,
+      // by doing this after the input events are handled we
+      // ensure that window/gui changes appear quickly while
+      // avoiding that window/gui changes does not happen in
+      // event callbacks (which may crash)
+      windows.update();
+
       // Disable movement in Gui mode
       if(windows.isGuiMode()) return true;
 
@@ -275,10 +258,38 @@ namespace MWInput
 
       return true;
     }
+
+    // Switch between gui modes. Besides controlling the Gui windows
+    // this also makes sure input is directed to the right place
+    void setGuiMode(MWGui::GuiMode mode)
+    {
+      // Tell the GUI what to show (this also takes care of the mouse
+      // pointer)
+      windows.setMode(mode);
+
+      // Are we in GUI mode now?
+      if(windows.isGuiMode())
+        {
+          // Disable mouse look
+          mouse->setCamera(NULL);
+
+          // Enable GUI events
+          guiEvents->enabled = true;
+        }
+      else
+        {
+          // Start mouse-looking again. TODO: This should also allow
+          // for other ways to disable mouselook, like paralyzation.
+          mouse->setCamera(player.getRenderer()->getCamera());
+
+          // Disable GUI events
+          guiEvents->enabled = false;
+        }
+    }
   };
 
   MWInputManager::MWInputManager(OEngine::Render::OgreRenderer &ogre,
-                                 MWRender::PlayerPos &player,
+                                 MWWorld::Player &player,
                                  MWGui::WindowManager &windows,
                                  bool debug,
                                  OMW::Engine& engine)
@@ -289,5 +300,10 @@ namespace MWInput
   MWInputManager::~MWInputManager()
   {
     delete impl;
+  }
+
+  void MWInputManager::setGuiMode(MWGui::GuiMode mode)
+  {
+      impl->setGuiMode(mode);
   }
 }
