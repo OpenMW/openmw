@@ -334,7 +334,6 @@ QStringList GraphicsPage::getAvailableOptions(const QString &key, Ogre::RenderSy
     return result;
 }
 
-#if 1
 QStringList GraphicsPage::getAvailableResolutions(int screen)
 {
     QStringList result;
@@ -358,58 +357,6 @@ QStringList GraphicsPage::getAvailableResolutions(int screen)
     }
     return result;
 }
-#endif
-
-#if 0
-QStringList GraphicsPage::getAvailableResolutions(Ogre::RenderSystem *renderer)
-{
-    QString key("Video Mode");
-    QStringList result;
-
-    uint row = 0;
-    Ogre::ConfigOptionMap options = renderer->getConfigOptions();
-
-    for (Ogre::ConfigOptionMap::iterator i = options.begin (); i != options.end (); i++, row++)
-    {
-        if (key.toStdString() != i->first)
-            continue;
-
-        Ogre::StringVector::iterator opt_it;
-        uint idx = 0;
-
-        for (opt_it = i->second.possibleValues.begin ();
-             opt_it != i->second.possibleValues.end (); opt_it++, idx++)
-        {
-            QRegExp resolutionRe(QString("(\\d+) x (\\d+).*"));
-            QString resolution = QString::fromStdString(*opt_it).simplified();
-
-            if (resolutionRe.exactMatch(resolution)) {
-
-                int width = resolutionRe.cap(1).toInt();
-                int height = resolutionRe.cap(2).toInt();
-
-                QString aspect = getAspect(width, height);
-                QString cleanRes = resolutionRe.cap(1) + QString(" x ") + resolutionRe.cap(2);
-
-                if (aspect == QLatin1String("16:9") || aspect == QLatin1String("16:10")) {
-                    cleanRes.append(tr("\t(Wide ") + aspect + ")");
-
-                } else if (aspect == QLatin1String("4:3")) {
-                    cleanRes.append(tr("\t(Standard 4:3)"));
-                }
-                // do not add duplicate resolutions
-                if (!result.contains(cleanRes))
-                    result.append(cleanRes);
-            }
-        }
-    }
-
-    // Sort the resolutions in descending order
-    qSort(result.begin(), result.end(), naturalSortGreaterThanCI);
-
-    return result;
-}
-#endif
 
 QRect GraphicsPage::getMaximumResolution()
 {
