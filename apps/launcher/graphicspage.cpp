@@ -205,6 +205,19 @@ bool GraphicsPage::setupSDLWordaround() {
                 SDL_Quit();
                 return false;
             }
+
+            bool isDouble = false;
+            for (std::vector<VideoMode>::iterator it = mVideoModes.begin(); it != mVideoModes.end(); it++)
+            {
+                if ((*it).w == mode.w && (*it).h == mode.h && (*it).screen == displayIndex)
+                {
+                    isDouble = true;
+                    break;
+                }
+            }
+            if (isDouble)
+                continue;
+
             VideoMode vmode;
             vmode.w = mode.w;
             vmode.h = mode.h;
