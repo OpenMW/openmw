@@ -157,7 +157,12 @@ bool GraphicsPage::setupSDL()
 
     if (displays < 0)
     {
-        qDebug() << "SDL_GetNumVideoDisplays failed: " << QString::fromStdString(SDL_GetError());
+        QMessageBox msgBox;
+        msgBox.setWindowTitle(tr("Error receiving number of screens"));
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setText(tr("<br><b>SDL_GetNumDisplayModes failed:</b><br><br>") + QString::fromStdString(SDL_GetError()) + "<br>");
+        msgBox.exec();
         return false;
     }
 
@@ -281,7 +286,12 @@ QStringList GraphicsPage::getAvailableResolutions(int screen)
 
     if (modes < 0)
     {
-        qDebug() << "SDL_GetNumDisplayModes failed: " << QString::fromStdString(SDL_GetError());
+        QMessageBox msgBox;
+        msgBox.setWindowTitle(tr("Error receiving resolutions"));
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setText(tr("<br><b>SDL_GetNumDisplayModes failed:</b><br><br>") + QString::fromStdString(SDL_GetError()) + "<br>");
+        msgBox.exec();
         return result;
     }
 
@@ -289,7 +299,12 @@ QStringList GraphicsPage::getAvailableResolutions(int screen)
     {
         if (SDL_GetDisplayMode(screen, modeIndex, &mode) < 0)
         {
-            qDebug() << "SDL_GetDisplayMode failed: " << QString::fromStdString(SDL_GetError());
+            QMessageBox msgBox;
+            msgBox.setWindowTitle(tr("Error receiving resolutions"));
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setText(tr("<br><b>SDL_GetDisplayMode failed:</b><br><br>") + QString::fromStdString(SDL_GetError()) + "<br>");
+            msgBox.exec();
             return result;
         }
 
