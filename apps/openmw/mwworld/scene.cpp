@@ -2,6 +2,8 @@
 
 #include <components/nif/niffile.hpp>
 
+#include <libs/openengine/ogre/fader.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp" /// FIXME
 #include "../mwbase/soundmanager.hpp"
@@ -353,7 +355,7 @@ namespace MWWorld
 
     void Scene::changeToInteriorCell (const std::string& cellName, const ESM::Position& position)
     {
-
+        MWBase::Environment::get().getWorld ()->getFader ()->fadeOut(0.5);
         const MWWorld::Store<ESM::GameSetting> &gmst =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
@@ -422,6 +424,7 @@ namespace MWWorld
         MWBase::Environment::get().getWorld()->adjustSky();
 
         mCellChanged = true;
+        MWBase::Environment::get().getWorld ()->getFader ()->fadeIn(0.5);
 
         MWBase::Environment::get().getWindowManager ()->loadingDone ();
     }

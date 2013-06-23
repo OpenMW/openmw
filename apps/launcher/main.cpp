@@ -3,9 +3,14 @@
 #include <QDir>
 
 #include "maindialog.hpp"
+// SDL workaround
+#include "graphicspage.hpp"
 
 int main(int argc, char *argv[])
 {
+    // SDL woraround
+    GraphicsPage::setupSDLWordaround();
+
     QApplication app(argc, argv);
 
     // Now we make sure the current dir is set to application path

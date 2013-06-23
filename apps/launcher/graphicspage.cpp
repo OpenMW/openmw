@@ -3,6 +3,7 @@
 #include <QDesktopWidget>
 #include <QMessageBox>
 #include <QDir>
+#include <SDL.h>
 
 #include <cstdlib>
 
@@ -35,13 +36,14 @@ GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, GraphicsSettings &g
     setupUi(this);
 
     // Set the maximum res we can set in windowed mode
-    QRect res = QApplication::desktop()->screenGeometry();
+    QRect res = getMaximumResolution();
     customWidthSpinBox->setMaximum(res.width());
     customHeightSpinBox->setMaximum(res.height());
 
     connect(rendererComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(rendererChanged(const QString&)));
     connect(fullScreenCheckBox, SIGNAL(stateChanged(int)), this, SLOT(slotFullScreenChanged(int)));
     connect(standardRadioButton, SIGNAL(toggled(bool)), this, SLOT(slotStandardToggled(bool)));
+    connect(screenComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(screenChanged(const QString&)));
 
 }
 
@@ -144,17 +146,97 @@ bool GraphicsPage::setupOgre()
     }
 
     antiAliasingComboBox->clear();
-    resolutionComboBox->clear();
     antiAliasingComboBox->addItems(getAvailableOptions(QString("FSAA"), mSelectedRenderSystem));
-    resolutionComboBox->addItems(getAvailableResolutions(mSelectedRenderSystem));
 
-    // Load the rest of the values
-    loadSettings();
     return true;
 }
 
-void GraphicsPage::loadSettings()
+bool GraphicsPage::setupSDL()
 {
+    // FIXME: do setupSDLWordaround here instead.
+    // seems like Qt, SDL and Ogre don't like each other
+    // results in a segfault if SDL is initialized after Qt
+
+    QStringList screens;
+    for (int i = 0; i < mScreenCount; i++)
+    {
+        screens.append(QString("Screen ") + QString::number(i + 1));
+    }
+    screenComboBox->addItems(screens);
+
+    return true;
+}
+
+std::vector<VideoMode> GraphicsPage::mVideoModes;
+int GraphicsPage::mScreenCount;
+
+bool GraphicsPage::setupSDLWordaround() {
+    if (SDL_Init(SDL_INIT_VIDEO) != 0)
+    {
+        std::cout << "SDL_Init failed: " << SDL_GetError() << std::endl;
+        return false;
+    }
+
+    SDL_DisplayMode mode;
+    int displayIndex, modeIndex, displays = SDL_GetNumVideoDisplays();
+    mScreenCount = displays;
+
+    if(displays < 0)
+    {
+        std::cout << "SDL_GetNumVideoDisplays failed: " << SDL_GetError() << std::endl;
+        SDL_Quit();
+        return false;
+    }
+
+    for (displayIndex = 0; displayIndex < displays; displayIndex++)
+    {
+        int modes = SDL_GetNumDisplayModes(displayIndex);
+        if(modes < 0)
+        {
+            std::cout << "SDL_GetNumDisplayModes failed: " << SDL_GetError() << std::endl;
+            SDL_Quit();
+            return false;
+        }
+        for (modeIndex = 0; modeIndex < modes; modeIndex++)
+        {
+            if (SDL_GetDisplayMode(displayIndex, modeIndex, &mode) < 0)
+            {
+                std::cout << "SDL_GetDisplayMode failed: " << SDL_GetError() << std::endl;
+                SDL_Quit();
+                return false;
+            }
+
+            bool isDouble = false;
+            for (std::vector<VideoMode>::iterator it = mVideoModes.begin(); it != mVideoModes.end(); it++)
+            {
+                if ((*it).w == mode.w && (*it).h == mode.h && (*it).screen == displayIndex)
+                {
+                    isDouble = true;
+                    break;
+                }
+            }
+            if (isDouble)
+                continue;
+
+            VideoMode vmode;
+            vmode.w = mode.w;
+            vmode.h = mode.h;
+            vmode.screen = displayIndex;
+            mVideoModes.push_back(vmode);
+        }
+    }
+
+    SDL_Quit();
+    return true;
+}
+
+bool GraphicsPage::loadSettings()
+{
+    if (!setupSDL())
+        return false;
+    if (!setupOgre())
+        return false;
+
     if (mGraphicsSettings.value(QString("Video/vsync")) == QLatin1String("true"))
         vSyncCheckBox->setCheckState(Qt::Checked);
 
@@ -168,6 +250,11 @@ void GraphicsPage::loadSettings()
     QString width = mGraphicsSettings.value(QString("Video/resolution x"));
     QString height = mGraphicsSettings.value(QString("Video/resolution y"));
     QString resolution = width + QString(" x ") + height;
+    QString screen = mGraphicsSettings.value(QString("Video/screen"));
+
+    int screenIndex = screenComboBox->findText(QString("Screen ") + screen);
+    if (screenIndex != -1)
+        screenComboBox->setCurrentIndex(screenIndex);
 
     int resIndex = resolutionComboBox->findText(resolution, Qt::MatchStartsWith);
 
@@ -180,6 +267,8 @@ void GraphicsPage::loadSettings()
         customHeightSpinBox->setValue(height.toInt());
 
     }
+
+    return true;
 }
 
 void GraphicsPage::saveSettings()
@@ -204,6 +293,11 @@ void GraphicsPage::saveSettings()
     } else {
         mGraphicsSettings.setValue(QString("Video/resolution x"), QString::number(customWidthSpinBox->value()));
         mGraphicsSettings.setValue(QString("Video/resolution y"), QString::number(customHeightSpinBox->value()));
+    }
+
+    QRegExp screenRe(QString(".*(\\d+)"));
+    if(screenRe.exactMatch(screenComboBox->currentText())) {
+        mGraphicsSettings.setValue(QString("Video/screen"), screenRe.cap(1));
     }
 }
 
@@ -240,53 +334,43 @@ QStringList GraphicsPage::getAvailableOptions(const QString &key, Ogre::RenderSy
     return result;
 }
 
-QStringList GraphicsPage::getAvailableResolutions(Ogre::RenderSystem *renderer)
+QStringList GraphicsPage::getAvailableResolutions(int screen)
 {
-    QString key("Video Mode");
     QStringList result;
-
-    uint row = 0;
-    Ogre::ConfigOptionMap options = renderer->getConfigOptions();
-
-    for (Ogre::ConfigOptionMap::iterator i = options.begin (); i != options.end (); i++, row++)
+    for (std::vector<VideoMode>::iterator it = mVideoModes.begin(); it != mVideoModes.end(); it++)
     {
-        if (key.toStdString() != i->first)
+        VideoMode mode = *it;
+        if(mode.screen != screen)
             continue;
 
-        Ogre::StringVector::iterator opt_it;
-        uint idx = 0;
+        QString aspect = getAspect(mode.w, mode.h);
+        QString resolution = QString::number(mode.w) + QString(" x ") + QString::number(mode.h);
 
-        for (opt_it = i->second.possibleValues.begin ();
-             opt_it != i->second.possibleValues.end (); opt_it++, idx++)
-        {
-            QRegExp resolutionRe(QString("(\\d+) x (\\d+).*"));
-            QString resolution = QString::fromStdString(*opt_it).simplified();
+        if (aspect == QLatin1String("16:9") || aspect == QLatin1String("16:10")) {
+            resolution.append(tr("\t(Wide ") + aspect + ")");
 
-            if (resolutionRe.exactMatch(resolution)) {
-
-                int width = resolutionRe.cap(1).toInt();
-                int height = resolutionRe.cap(2).toInt();
-
-                QString aspect = getAspect(width, height);
-                QString cleanRes = resolutionRe.cap(1) + QString(" x ") + resolutionRe.cap(2);
-
-                if (aspect == QLatin1String("16:9") || aspect == QLatin1String("16:10")) {
-                    cleanRes.append(tr("\t(Wide ") + aspect + ")");
-
-                } else if (aspect == QLatin1String("4:3")) {
-                    cleanRes.append(tr("\t(Standard 4:3)"));
-                }
-                // do not add duplicate resolutions
-                if (!result.contains(cleanRes))
-                    result.append(cleanRes);
-            }
+        } else if (aspect == QLatin1String("4:3")) {
+            resolution.append(tr("\t(Standard 4:3)"));
         }
+
+        result.append(resolution);
     }
-
-    // Sort the resolutions in descending order
-    qSort(result.begin(), result.end(), naturalSortGreaterThanCI);
-
     return result;
+}
+
+QRect GraphicsPage::getMaximumResolution()
+{
+    QRect max;
+    int screens = QApplication::desktop()->screenCount();
+    for (int i = 0; i < screens; ++i)
+    {
+        QRect res = QApplication::desktop()->screenGeometry(i);
+        if (res.width() > max.width())
+            max.setWidth(res.width());
+        if (res.height() > max.height())
+            max.setHeight(res.height());
+    }
+    return max;
 }
 
 void GraphicsPage::rendererChanged(const QString &renderer)
@@ -294,10 +378,17 @@ void GraphicsPage::rendererChanged(const QString &renderer)
     mSelectedRenderSystem = mOgre->getRenderSystemByName(renderer.toStdString());
 
     antiAliasingComboBox->clear();
-    resolutionComboBox->clear();
 
     antiAliasingComboBox->addItems(getAvailableOptions(QString("FSAA"), mSelectedRenderSystem));
-    resolutionComboBox->addItems(getAvailableResolutions(mSelectedRenderSystem));
+}
+
+void GraphicsPage::screenChanged(const QString &screen)
+{
+    QRegExp screenRe(QString(".*(\\d+)"));
+    if(screenRe.exactMatch(screen)) {
+        resolutionComboBox->clear();
+        resolutionComboBox->addItems(getAvailableResolutions(screenRe.cap(1).toInt() - 1));
+    }
 }
 
 void GraphicsPage::slotFullScreenChanged(int state)

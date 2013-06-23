@@ -4,6 +4,11 @@
 #include <OgreString.h>
 #include <OgreColourValue.h>
 
+namespace ESM
+{
+    struct Region;
+}
+
 namespace MWRender
 {
     class RenderingManager;
@@ -129,6 +134,8 @@ namespace MWWorld
          */
         void update(float duration);
 
+        void stopSounds(bool stopAll);
+
         void setHour(const float hour);
 
         float getWindSpeed() const;
@@ -171,13 +178,16 @@ namespace MWWorld
 
         double mTimePassed; // time passed since last update
 
-        WeatherResult transition(const float factor);
-        WeatherResult getResult(const Ogre::String& weather);
+        void transition(const float factor);
+        void setResult(const Ogre::String& weatherType);
 
         float calculateHourFade (const std::string& moonName) const;
         float calculateAngleFade (const std::string& moonName, float angle) const;
 
-        void setWeather(const Ogre::String& weather, bool instant=false);
+        void setWeather(const Ogre::String& weatherType, bool instant=false);
+        Ogre::String nextWeather(const ESM::Region* region) const;
+        WeatherResult mResult;
+
         float mSunriseTime;
         float mSunsetTime;
         float mSunriseDuration;

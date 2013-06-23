@@ -90,6 +90,7 @@ target_link_libraries(omwlauncher
     ${Boost_LIBRARIES}
     ${OGRE_LIBRARIES}
     ${OGRE_STATIC_PLUGINS}
+    ${SDL2_LIBRARY}
     ${QT_LIBRARIES}
     components
 )
