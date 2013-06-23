@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
     {
         qDebug() << "SDL_Init failed: " << QString::fromStdString(SDL_GetError());
-        return false;
+        return 0;
     }
 
     QApplication app(argc, argv);

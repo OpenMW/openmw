@@ -155,7 +155,7 @@ bool GraphicsPage::setupSDL()
 {
     int displays = SDL_GetNumVideoDisplays();
 
-    if(displays < 0)
+    if (displays < 0)
     {
         qDebug() << "SDL_GetNumVideoDisplays failed: " << QString::fromStdString(SDL_GetError());
         return false;
@@ -235,7 +235,7 @@ void GraphicsPage::saveSettings()
     }
 
     QRegExp screenRe(QString(".*(\\d+)"));
-    if(screenRe.exactMatch(screenComboBox->currentText())) {
+    if (screenRe.exactMatch(screenComboBox->currentText())) {
         mGraphicsSettings.setValue(QString("Video/screen"), screenRe.cap(1));
     }
 }
@@ -279,7 +279,7 @@ QStringList GraphicsPage::getAvailableResolutions(int screen)
     SDL_DisplayMode mode;
     int modeIndex, modes = SDL_GetNumDisplayModes(screen);
 
-    if(modes < 0)
+    if (modes < 0)
     {
         qDebug() << "SDL_GetNumDisplayModes failed: " << QString::fromStdString(SDL_GetError());
         return result;
@@ -351,7 +351,7 @@ void GraphicsPage::rendererChanged(const QString &renderer)
 void GraphicsPage::screenChanged(const QString &screen)
 {
     QRegExp screenRe(QString(".*(\\d+)"));
-    if(screenRe.exactMatch(screen)) {
+    if (screenRe.exactMatch(screen)) {
         resolutionComboBox->clear();
         resolutionComboBox->addItems(getAvailableResolutions(screenRe.cap(1).toInt() - 1));
     }
