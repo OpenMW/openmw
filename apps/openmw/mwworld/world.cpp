@@ -18,6 +18,10 @@
 #include "environment.hpp"
 #include "class.hpp"
 
+
+#include "refdata.hpp"
+#include "globals.hpp"
+
 namespace
 {
     template<typename T>
@@ -62,6 +66,7 @@ namespace
 
 namespace MWWorld
 {
+
     void World::insertInteriorScripts (ESMS::CellStore<RefData>& cell)
     {
         listCellScripts (mStore, cell.activators, mLocalScripts, &cell);
@@ -605,6 +610,7 @@ namespace MWWorld
         adjustSky();
 
         mCellChanged = true;
+		//currentRegion->name = "";
     }
 
     void World::changeCell (int X, int Y, const ESM::Position& position)
@@ -681,7 +687,8 @@ namespace MWWorld
         mCellChanged = true;
     }
 
-    void World::changeToExteriorCell (const ESM::Position& position)
+
+ void World::changeToExteriorCell (const ESM::Position& position)
     {
         int x = 0;
         int y = 0;
@@ -714,7 +721,6 @@ namespace MWWorld
 
         return 0;
     }
-
     void World::markCellAsUnchanged()
     {
         mCellChanged = false;
@@ -793,6 +799,8 @@ namespace MWWorld
             y += cellSize/2;
         }
     }
+
+	
 
     void World::positionToIndex (float x, float y, int &cellX, int &cellY) const
     {

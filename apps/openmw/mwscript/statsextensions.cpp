@@ -468,6 +468,160 @@ namespace MWScript
                 }
         };
 
+        class OpGetSkill : public Interpreter::Opcode0
+        {
+                int mIndex;
+
+            public:
+
+                OpGetSkill (int index) : mIndex (index) {}
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWScript::InterpreterContext& context
+                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+
+                    MWWorld::Ptr ptr = context.getReference();
+
+                    Interpreter::Type_Integer value =
+                        MWWorld::Class::get (ptr).getNpcStats (ptr).mSkill[mIndex].
+                        getModified();
+
+                    runtime.push (value);
+                }
+        };
+
+        class OpGetSkillExplicit : public Interpreter::Opcode0
+        {
+                int mIndex;
+
+            public:
+
+                OpGetSkillExplicit (int index) : mIndex (index) {}
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWScript::InterpreterContext& context
+                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+
+                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    MWWorld::Ptr ptr = context.getWorld().getPtr (id, false);
+
+                    Interpreter::Type_Integer value =
+                        MWWorld::Class::get (ptr).getNpcStats (ptr).mSkill[mIndex].
+                        getModified();
+
+                    runtime.push (value);
+                }
+        };
+
+        class OpSetSkill : public Interpreter::Opcode0
+        {
+                int mIndex;
+
+            public:
+
+                OpSetSkill (int index) : mIndex (index) {}
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWScript::InterpreterContext& context
+                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+
+                    Interpreter::Type_Integer value = runtime[0].mInteger;
+                    runtime.pop();
+
+                    MWWorld::Ptr ptr = context.getReference();
+
+                    MWWorld::Class::get (ptr).getNpcStats (ptr).mSkill[mIndex].
+                        setModified (value, 0);
+                }
+        };
+
+        class OpSetSkillExplicit : public Interpreter::Opcode0
+        {
+                int mIndex;
+
+            public:
+
+                OpSetSkillExplicit (int index) : mIndex (index) {}
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWScript::InterpreterContext& context
+                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+
+                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    Interpreter::Type_Integer value = runtime[0].mInteger;
+                    runtime.pop();
+
+                    MWWorld::Ptr ptr = context.getWorld().getPtr (id, false);
+
+                    MWWorld::Class::get (ptr).getNpcStats (ptr).mSkill[mIndex].
+                        setModified (value, 0);
+                }
+        };
+
+        class OpModSkill : public Interpreter::Opcode0
+        {
+                int mIndex;
+
+            public:
+
+                OpModSkill (int index) : mIndex (index) {}
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWScript::InterpreterContext& context
+                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+
+                    Interpreter::Type_Integer value = runtime[0].mInteger;
+                    runtime.pop();
+
+                    MWWorld::Ptr ptr = context.getReference();
+
+                    value += MWWorld::Class::get (ptr).getNpcStats (ptr).mSkill[mIndex].
+                        getModified();
+
+                    MWWorld::Class::get (ptr).getNpcStats (ptr).mSkill[mIndex].
+                        setModified (value, 0, 100);
+                }
+        };
+
+        class OpModSkillExplicit : public Interpreter::Opcode0
+        {
+                int mIndex;
+
+            public:
+
+                OpModSkillExplicit (int index) : mIndex (index) {}
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWScript::InterpreterContext& context
+                        = static_cast<MWScript::InterpreterContext&> (runtime.getContext());
+
+                    std::string id = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    Interpreter::Type_Integer value = runtime[0].mInteger;
+                    runtime.pop();
+
+                    MWWorld::Ptr ptr = context.getWorld().getPtr (id, false);
+
+                    value +=
+                        MWWorld::Class::get (ptr).getNpcStats (ptr).mSkill[mIndex].
+                        getModified();
+
+                    MWWorld::Class::get (ptr).getNpcStats (ptr).mSkill[mIndex].
+                        setModified (value, 0, 100);
+                }
+        };
+
         const int numberOfAttributes = 8;
 
         const int opcodeGetAttribute = 0x2000027;
@@ -490,6 +644,15 @@ namespace MWScript
         const int opcodeGetDynamicGetRatio = 0x200006f;
         const int opcodeGetDynamicGetRatioExplicit = 0x2000072;
 
+        const int numberOfSkills = 27;
+
+        const int opcodeGetSkill = 0x200008e;
+        const int opcodeGetSkillExplicit = 0x20000a9;
+        const int opcodeSetSkill = 0x20000c4;
+        const int opcodeSetSkillExplicit = 0x20000df;
+        const int opcodeModSkill = 0x20000fa;
+        const int opcodeModSkillExplicit = 0x2000115;
+
         void registerExtensions (Compiler::Extensions& extensions)
         {
             static const char *attributes[numberOfAttributes] =
@@ -501,6 +664,16 @@ namespace MWScript
             static const char *dynamics[numberOfDynamics] =
             {
                 "health", "magicka", "fatigue"
+            };
+
+            static const char *skills[numberOfSkills] =
+            {
+                "block", "armorer", "mediumarmor", "heavyarmor", "bluntweapon",
+                "longblade", "axe", "spear", "athletics", "enchant", "destruction",
+                "alteration", "illusion", "conjuration", "mysticism",
+                "restoration", "alchemy", "unarmored", "security", "sneak",
+                "acrobatics", "lightarmor", "shortblade", "marksman",
+                "merchantile", "speechcraft", "handtohand"
             };
 
             std::string get ("get");
@@ -537,7 +710,18 @@ namespace MWScript
 
                 extensions.registerFunction (get + dynamics[i] + getRatio, 'f', "",
                     opcodeGetDynamicGetRatio+i, opcodeGetDynamicGetRatioExplicit+i);
+            }
 
+            for (int i=0; i<numberOfSkills; ++i)
+            {
+                extensions.registerFunction (get + skills[i], 'l', "",
+                    opcodeGetSkill+i, opcodeGetSkillExplicit+i);
+
+                extensions.registerInstruction (set + skills[i], "l",
+                    opcodeSetSkill+i, opcodeSetSkillExplicit+i);
+
+                extensions.registerInstruction (mod + skills[i], "l",
+                    opcodeModSkill+i, opcodeModSkillExplicit+i);
             }
         }
 
@@ -580,6 +764,18 @@ namespace MWScript
                     new OpGetDynamicGetRatio (i));
                 interpreter.installSegment5 (opcodeGetDynamicGetRatioExplicit+i,
                     new OpGetDynamicGetRatioExplicit (i));
+            }
+
+            for (int i=0; i<numberOfSkills; ++i)
+            {
+                interpreter.installSegment5 (opcodeGetSkill+i, new OpGetSkill (i));
+                interpreter.installSegment5 (opcodeGetSkillExplicit+i, new OpGetSkillExplicit (i));
+
+                interpreter.installSegment5 (opcodeSetSkill+i, new OpSetSkill (i));
+                interpreter.installSegment5 (opcodeSetSkillExplicit+i, new OpSetSkillExplicit (i));
+
+                interpreter.installSegment5 (opcodeModSkill+i, new OpModSkill (i));
+                interpreter.installSegment5 (opcodeModSkillExplicit+i, new OpModSkillExplicit (i));
             }
         }
     }

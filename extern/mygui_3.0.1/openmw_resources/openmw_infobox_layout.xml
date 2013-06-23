@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 545 265" name="_Main">
+
+        <!-- Edit box -->
+        <Widget type="Widget" skin="MW_Box" position="14 14 516 70" name="TextBox" align="ALIGN_TOP ALIGN_HCENTER">
+            <Widget type="StaticText" skin="SandText" position="4 4 508 62" name="Text" align="ALIGN_TOP ALIGN_HCENTER">
+                <Property key="Edit_WordWrap" value="1" />
+            </Widget>
+        </Widget>
+
+        <!-- Button bar, buttons are created as children -->
+        <Widget type="Widget" skin="" position="72 98 400 150" name="ButtonBar" align="ALIGN_TOP ALIGN_HCENTER" />
+    </Widget>
+</MyGUI>

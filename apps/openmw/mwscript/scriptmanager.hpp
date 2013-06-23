@@ -27,7 +27,7 @@ namespace Interpreter
 }
 
 namespace MWScript
-{    
+{
     class ScriptManager
     {
             Compiler::StreamErrorHandler mErrorHandler;
@@ -35,19 +35,21 @@ namespace MWScript
             bool mVerbose;
             Compiler::Context& mCompilerContext;
             Compiler::FileParser mParser;
-            
+
             std::map<std::string, std::vector<Interpreter::Type_Code> > mScripts;
-            
-            bool compile (const std::string& name);
-            
+
         public:
-        
+
             ScriptManager (const ESMS::ESMStore& store, bool verbose,
                 Compiler::Context& compilerContext);
-            
+
             void run (const std::string& name, Interpreter::Context& interpreterContext);
+            ///< Run the script with the given name (compile first, if not compiled yet)
+
+            bool compile (const std::string& name);
+            ///< Compile script with the given namen
+            /// \return Success?
     };
 };
 
 #endif
-

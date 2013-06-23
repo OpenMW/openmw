@@ -14,7 +14,7 @@
 #include "../mwworld/world.hpp"
 #include "../mwworld/refdata.hpp"
 
-#include "../mwgui/window_manager.hpp"
+#include "../mwinput/inputmanager.hpp"
 
 #include <iostream>
 
@@ -275,7 +275,7 @@ namespace MWDialogue
                     // TODO execute script
                 }
 
-                mEnvironment.mWindowManager->setMode (MWGui::GM_Dialogue);
+                mEnvironment.mInputManager->setGuiMode(MWGui::GM_Dialogue);
                 break;
             }
         }

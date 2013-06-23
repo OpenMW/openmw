@@ -78,6 +78,8 @@ namespace MWClass
             stats->mDynamic[1].set (ref->base->data.mana);
             stats->mDynamic[2].set (ref->base->data.fatigue);
 
+            stats->mLevel = ref->base->data.level;
+
             ptr.getRefData().getCreatureStats() = stats;
         }
 

@@ -9,6 +9,10 @@ option(USE_MPG123 "use mpg123 + libsndfile for sound" ON)
 set(MORROWIND_DATA_FILES "data"
     CACHE PATH "location of Morrowind data files")
 
+if (WIN32)
+    option(USE_DEBUG_CONSOLE "whether a debug console should be enabled for debug builds, if false debug output is redirected to Visual Studio output" ON)
+endif()
+
 # We probably support older versions than this.
 cmake_minimum_required(VERSION 2.6)
 
@@ -102,6 +106,9 @@ source_group(components\\esm_store FILES ${ESM_STORE} ${ESM_STORE_HEADER})
 file(GLOB ESM_HEADER ${COMP_DIR}/esm/*.hpp)
 set(ESM
     ${COMP_DIR}/esm/load_impl.cpp
+    ${COMP_DIR}/esm/skill.cpp
+    ${COMP_DIR}/esm/attr.cpp
+    ${COMP_DIR}/esm/class.cpp
 )
 source_group(components\\esm FILES ${ESM_HEADER} ${ESM})
 
@@ -225,6 +232,16 @@ link_directories(${Boost_LIBRARY_DIRS} ${OGRE_LIB_DIR})
 add_subdirectory( extern/caelum )
 add_subdirectory( extern/mygui_3.0.1 )
 
+# Make sure that certain libraries are used as static libraries
+# This is in effect turns off __declspec (dllexport) for windows
+# Each library will also need to be configured to build as a static lib
+
+# MyGUI: extern/mygui_3.0.0/
+add_definitions(-DMYGUI_STATIC)
+
+# Caelum: extern/caelum/
+add_definitions(-DCAELUM_STATIC)
+
 # Specify build paths
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${OpenMW_BINARY_DIR}")
@@ -288,4 +305,25 @@ add_subdirectory( apps/openmw )
 option(BUILD_ESMTOOL "build ESM inspector" ON)
 if (BUILD_ESMTOOL)
   add_subdirectory( apps/esmtool )
+endif()
+
+if (WIN32)
+    if (USE_DEBUG_CONSOLE)
+        set_target_properties(openmw PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
+        set_target_properties(openmw PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE")
+        set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS_DEBUG "_CONSOLE")
+    else()
+        # Turn off debug console, debug output will be written to visual studio output instead
+        set_target_properties(openmw PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:WINDOWS")
+        set_target_properties(openmw PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:WINDOWS")
+    endif()
+
+    # Release builds use the debug console
+    set_target_properties(openmw PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:CONSOLE")
+    set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS_RELEASE "_CONSOLE")
+    set_target_properties(openmw PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:CONSOLE")
+
+    # TODO: At some point release builds should not use the console but rather write to a log file
+    #set_target_properties(openmw PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
+    #set_target_properties(openmw PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS")
 endif()

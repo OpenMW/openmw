@@ -1,6 +1,8 @@
 #ifndef _MWINPUT_MWINPUTMANAGER_H
 #define _MWINPUT_MWINPUTMANAGER_H
 
+#include "../mwgui/mode.hpp"
+
 namespace OEngine
 {
   namespace Render
@@ -45,6 +47,8 @@ namespace MWInput
                    bool debug,
                    OMW::Engine& engine);
     ~MWInputManager();
+
+    void setGuiMode(MWGui::GuiMode mode);
   };
 }
 #endif

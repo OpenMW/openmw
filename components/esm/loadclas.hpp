@@ -35,6 +35,16 @@ struct Class
       RepairItem	= 0x20000
     };
 
+  enum Specialization
+    {
+      Combat = 0,
+      Magic = 1,
+      Stealth = 2
+    };
+
+  static const Specialization specializationIds[3];
+  static const char *gmstSpecializationIds[3];
+
   struct CLDTstruct
   {
     int attribute[2];   // Attributes that get class bonus
