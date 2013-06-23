@@ -34,7 +34,7 @@ public:
 
 public slots:
     void rendererChanged(const QString &renderer);
-    void screenChanged(const QString &screen);
+    void screenChanged(int screen);
 
 private slots:
     void slotFullScreenChanged(int state);

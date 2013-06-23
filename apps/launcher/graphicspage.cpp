@@ -43,7 +43,7 @@ GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, GraphicsSettings &g
     connect(rendererComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(rendererChanged(const QString&)));
     connect(fullScreenCheckBox, SIGNAL(stateChanged(int)), this, SLOT(slotFullScreenChanged(int)));
     connect(standardRadioButton, SIGNAL(toggled(bool)), this, SLOT(slotStandardToggled(bool)));
-    connect(screenComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(screenChanged(const QString&)));
+    connect(screenComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(screenChanged(int)));
 
 }
 
@@ -168,7 +168,7 @@ bool GraphicsPage::setupSDL()
 
     for (int i = 0; i < displays; i++)
     {
-        screenComboBox->addItem(QString("Screen ") + QString::number(i + 1));
+        screenComboBox->addItem(QString(tr("Screen ")) + QString::number(i + 1));
     }
 
     return true;
@@ -196,9 +196,7 @@ bool GraphicsPage::loadSettings()
     QString resolution = width + QString(" x ") + height;
     QString screen = mGraphicsSettings.value(QString("Video/screen"));
 
-    int screenIndex = screenComboBox->findText(QString("Screen ") + screen);
-    if (screenIndex != -1)
-        screenComboBox->setCurrentIndex(screenIndex);
+    screenComboBox->setCurrentIndex(screen.toInt());
 
     int resIndex = resolutionComboBox->findText(resolution, Qt::MatchStartsWith);
 
@@ -239,10 +237,7 @@ void GraphicsPage::saveSettings()
         mGraphicsSettings.setValue(QString("Video/resolution y"), QString::number(customHeightSpinBox->value()));
     }
 
-    QRegExp screenRe(QString(".*(\\d+)"));
-    if (screenRe.exactMatch(screenComboBox->currentText())) {
-        mGraphicsSettings.setValue(QString("Video/screen"), screenRe.cap(1));
-    }
+    mGraphicsSettings.setValue(QString("Video/screen"), QString::number(screenComboBox->currentIndex()));
 }
 
 QStringList GraphicsPage::getAvailableOptions(const QString &key, Ogre::RenderSystem *renderer)
@@ -349,12 +344,11 @@ void GraphicsPage::rendererChanged(const QString &renderer)
     antiAliasingComboBox->addItems(getAvailableOptions(QString("FSAA"), mSelectedRenderSystem));
 }
 
-void GraphicsPage::screenChanged(const QString &screen)
+void GraphicsPage::screenChanged(int screen)
 {
-    QRegExp screenRe(QString(".*(\\d+)"));
-    if (screenRe.exactMatch(screen)) {
+    if (screen >= 0) {
         resolutionComboBox->clear();
-        resolutionComboBox->addItems(getAvailableResolutions(screenRe.cap(1).toInt() - 1));
+        resolutionComboBox->addItems(getAvailableResolutions(screen));
     }
 }
 
