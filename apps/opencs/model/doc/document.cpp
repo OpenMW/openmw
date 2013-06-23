@@ -24,7 +24,7 @@ void CSMDoc::Document::load (const std::vector<boost::filesystem::path>::const_i
         getData().loadFile (*end2, false);
 }
 
-void CSMDoc::Document::addBaseGmsts()
+void CSMDoc::Document::addGmsts()
 {
     static const char *gmstFloats[] =
     {
@@ -1922,8 +1922,8 @@ void CSMDoc::Document::addBaseGmsts()
         ESM::GameSetting gmst;
         gmst.mId = gmstFloats[i];
         gmst.mValue.setType (ESM::VT_Float);
-        gmst.mValue.setFloat(gmstFloatsValues[i]);
-        addOptionalGmst (gmst);
+        gmst.mValue.setFloat (gmstFloatsValues[i]);
+        getData().getGmsts().add (gmst);
     }
 
     for (int i=0; gmstIntegers[i]; i++)
@@ -1931,8 +1931,8 @@ void CSMDoc::Document::addBaseGmsts()
         ESM::GameSetting gmst;
         gmst.mId = gmstIntegers[i];
         gmst.mValue.setType (ESM::VT_Int);
-        gmst.mValue.setInteger(gmstIntegersValues[i]);
-        addOptionalGmst (gmst);
+        gmst.mValue.setInteger (gmstIntegersValues[i]);
+        getData().getGmsts().add (gmst);
     }
 
     for (int i=0; gmstStrings[i]; i++)
@@ -1941,7 +1941,7 @@ void CSMDoc::Document::addBaseGmsts()
         gmst.mId = gmstStrings[i];
         gmst.mValue.setType (ESM::VT_String);
         gmst.mValue.setString ("");
-        addOptionalGmst (gmst);
+        getData().getGmsts().add (gmst);
     }
 }
 
@@ -2123,9 +2123,7 @@ void CSMDoc::Document::createBase()
     for (int i=0; sGlobals[i]; ++i)
     {
         ESM::Global record;
-
         record.mId = sGlobals[i];
-
         record.mValue.setType (i==2 ? ESM::VT_Float : ESM::VT_Long);
 
         if (i==0 || i==1)
@@ -2134,7 +2132,7 @@ void CSMDoc::Document::createBase()
         getData().getGlobals().add (record);
     }
 
-    addBaseGmsts();
+    addGmsts();
 
     for (int i=0; i<27; ++i)
     {

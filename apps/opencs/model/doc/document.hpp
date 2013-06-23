@@ -52,7 +52,7 @@ namespace CSMDoc
 
             void createBase();
 
-            void addBaseGmsts();
+            void addGmsts();
 
             void addOptionalGmsts();
 
