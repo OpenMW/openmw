@@ -3,10 +3,6 @@
 
 #include <cassert>
 
-#include <QDebug>
-
-#include <iostream>
-
 void CSMDoc::Document::load (const std::vector<boost::filesystem::path>::const_iterator& begin,
     const std::vector<boost::filesystem::path>::const_iterator& end, bool lastAsModified)
 {
@@ -738,7 +734,7 @@ void CSMDoc::Document::addGmsts()
         20,     // iWereWolfLevelToAttack
     };
 
-    static const char *gmstStrings[] = 
+    static const char *gmstStrings[] =
     {
         "s3dAudio",
         "s3dHardware",
