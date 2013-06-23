@@ -239,7 +239,9 @@ bool GraphicsPage::loadSettings()
     QString resolution = width + QString(" x ") + height;
     QString screen = mGraphicsSettings.value(QString("Video/screen"));
 
-    screenComboBox->setCurrentIndex(screenComboBox->findText(QString("Screen ") + screen));
+    int screenIndex = screenComboBox->findText(QString("Screen ") + screen);
+    if (screenIndex != -1)
+        screenComboBox->setCurrentIndex(screenIndex);
 
     int resIndex = resolutionComboBox->findText(resolution, Qt::MatchStartsWith);
 
