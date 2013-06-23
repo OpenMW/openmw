@@ -152,7 +152,9 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
         //might this be related to http://bugzilla.libsdl.org/show_bug.cgi?id=748 ?
         SDL_SetHint(SDL_HINT_RENDER_DRIVER, "software");
         if(SDL_Init(flags) != 0)
-            throw std::runtime_error("Couldn't initialize SDL!");
+        {
+            throw std::runtime_error("Could not initialize SDL! " + std::string(SDL_GetError()));
+        }
     }
 }
 
