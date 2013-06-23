@@ -153,80 +153,19 @@ bool GraphicsPage::setupOgre()
 
 bool GraphicsPage::setupSDL()
 {
-    // FIXME: do setupSDLWordaround here instead.
-    // seems like Qt, SDL and Ogre don't like each other
-    // results in a segfault if SDL is initialized after Qt
-
-    QStringList screens;
-    for (int i = 0; i < mScreenCount; i++)
-    {
-        screens.append(QString("Screen ") + QString::number(i + 1));
-    }
-    screenComboBox->addItems(screens);
-
-    return true;
-}
-
-std::vector<VideoMode> GraphicsPage::mVideoModes;
-int GraphicsPage::mScreenCount;
-
-bool GraphicsPage::setupSDLWordaround() {
-    if (SDL_Init(SDL_INIT_VIDEO) != 0)
-    {
-        std::cout << "SDL_Init failed: " << SDL_GetError() << std::endl;
-        return false;
-    }
-
-    SDL_DisplayMode mode;
-    int displayIndex, modeIndex, displays = SDL_GetNumVideoDisplays();
-    mScreenCount = displays;
+    int displays = SDL_GetNumVideoDisplays();
 
     if(displays < 0)
     {
-        std::cout << "SDL_GetNumVideoDisplays failed: " << SDL_GetError() << std::endl;
-        SDL_Quit();
+        qDebug() << "SDL_GetNumVideoDisplays failed: " << QString::fromStdString(SDL_GetError());
         return false;
     }
 
-    for (displayIndex = 0; displayIndex < displays; displayIndex++)
+    for (int i = 0; i < displays; i++)
     {
-        int modes = SDL_GetNumDisplayModes(displayIndex);
-        if(modes < 0)
-        {
-            std::cout << "SDL_GetNumDisplayModes failed: " << SDL_GetError() << std::endl;
-            SDL_Quit();
-            return false;
-        }
-        for (modeIndex = 0; modeIndex < modes; modeIndex++)
-        {
-            if (SDL_GetDisplayMode(displayIndex, modeIndex, &mode) < 0)
-            {
-                std::cout << "SDL_GetDisplayMode failed: " << SDL_GetError() << std::endl;
-                SDL_Quit();
-                return false;
-            }
-
-            bool isDouble = false;
-            for (std::vector<VideoMode>::iterator it = mVideoModes.begin(); it != mVideoModes.end(); it++)
-            {
-                if ((*it).w == mode.w && (*it).h == mode.h && (*it).screen == displayIndex)
-                {
-                    isDouble = true;
-                    break;
-                }
-            }
-            if (isDouble)
-                continue;
-
-            VideoMode vmode;
-            vmode.w = mode.w;
-            vmode.h = mode.h;
-            vmode.screen = displayIndex;
-            mVideoModes.push_back(vmode);
-        }
+        screenComboBox->addItem(QString("Screen ") + QString::number(i + 1));
     }
 
-    SDL_Quit();
     return true;
 }
 
@@ -337,10 +276,35 @@ QStringList GraphicsPage::getAvailableOptions(const QString &key, Ogre::RenderSy
 QStringList GraphicsPage::getAvailableResolutions(int screen)
 {
     QStringList result;
-    for (std::vector<VideoMode>::iterator it = mVideoModes.begin(); it != mVideoModes.end(); it++)
+    SDL_DisplayMode mode;
+    int modeIndex, modes = SDL_GetNumDisplayModes(screen);
+
+    if(modes < 0)
     {
-        VideoMode mode = *it;
-        if(mode.screen != screen)
+        qDebug() << "SDL_GetNumDisplayModes failed: " << QString::fromStdString(SDL_GetError());
+        return result;
+    }
+
+    QList<SDL_DisplayMode> resolutions;
+    for (modeIndex = 0; modeIndex < modes; modeIndex++)
+    {
+        if (SDL_GetDisplayMode(screen, modeIndex, &mode) < 0)
+        {
+            qDebug() << "SDL_GetDisplayMode failed: " << QString::fromStdString(SDL_GetError());
+            return result;
+        }
+
+        bool isDuplicate = false;
+        for (int i = 0; i < resolutions.count(); i++)
+        {
+            SDL_DisplayMode omode = resolutions.at(i);
+            if (omode.w == mode.w && omode.h == mode.h)
+            {
+                isDuplicate = true;
+                break;
+            }
+        }
+        if (isDuplicate)
             continue;
 
         QString aspect = getAspect(mode.w, mode.h);
@@ -353,8 +317,10 @@ QStringList GraphicsPage::getAvailableResolutions(int screen)
             resolution.append(tr("\t(Standard 4:3)"));
         }
 
+        resolutions.append(mode);
         result.append(resolution);
     }
+
     return result;
 }
 

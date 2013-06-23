@@ -1,6 +1,7 @@
 #include <QApplication>
 #include <QTextCodec>
 #include <QDir>
+#include <SDL.h>
 
 #include "maindialog.hpp"
 // SDL workaround
@@ -8,8 +9,11 @@
 
 int main(int argc, char *argv[])
 {
-    // SDL woraround
-    GraphicsPage::setupSDLWordaround();
+    if (SDL_Init(SDL_INIT_VIDEO) != 0)
+    {
+        qDebug() << "SDL_Init failed: " << QString::fromStdString(SDL_GetError());
+        return false;
+    }
 
     QApplication app(argc, argv);
 
@@ -46,6 +50,8 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    return app.exec();
+    int returnValue = app.exec();
+    SDL_Quit();
+    return returnValue;
 }
 
