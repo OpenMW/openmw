@@ -22,6 +22,7 @@
  */
 
 #include "bsa_file.hpp"
+#include <components/file_finder/file_finder.hpp>
 
 #include <libs/mangle/stream/servers/file_stream.hpp>
 #include <libs/mangle/stream/filters/slice_stream.hpp>
@@ -29,6 +30,7 @@
 #include <stdexcept>
 #include <stdlib.h>
 #include <assert.h>
+#include <iostream>
 
 using namespace std;
 using namespace Mangle::Stream;
@@ -119,13 +121,16 @@ void BSAFile::readHeader()
   stringBuf.resize(dirsize-12*filenum);
   input->read(&stringBuf[0], stringBuf.size());
 
-  // Check our position
-  assert(input->tell() == 12+dirsize);
+  // Check our position assert(input->tell() == 12+dirsize);
 
   // Calculate the offset of the data buffer. All file offsets are
   // relative to this. 12 header bytes + directory + hash table
   // (skipped)
   size_t fileDataOffset = 12 + dirsize + 8*filenum;
+
+  // Setup FileFinder
+
+  FileFinder::FileFinder data_files(data_dir);
 
   // Set up the the FileStruct table
   files.resize(filenum);
@@ -139,9 +144,40 @@ void BSAFile::readHeader()
       if(fs.offset + fs.fileSize > fsize)
         fail("Archive contains offsets outside itself");
 
-      // Add the file name to the lookup
-      lookup[fs.name] = i;
+
+
+          if(!data_files.has(fs.name)) {
+          // Add the file name to the lookup
+            lookup[fs.name] = i;
+            fs.external = false;
+
+          }
+          else {
+              fs.external = true;
+              //std::cout << "fs->name: " << fs.name << std::endl;
+              //std::cout << "data_files.lookup: " << data_files.lookup(fs.name) << std::endl;
+              //std::cout << std::endl;
+              try {
+              external = StreamPtr(new FileStream(data_files.lookup(fs.name)));
+              } catch (std::runtime_error) {
+                  lookup[fs.name] = i;
+                  fs.external = false;
+              }
+              if(fs.external) {
+
+                  assert(external);
+                  assert(external->hasPosition);
+                  assert(external->isSeekable);
+
+                  fs.offset = 0;
+                  fs.fileSize = external->size();
+
+                  lookup[fs.name] = i;
+              }
+          }
     }
+         
+    
 
   isLoaded = true;
 }
@@ -162,9 +198,10 @@ int BSAFile::getIndex(const char *str)
 }
 
 /// Open an archive file.
-void BSAFile::open(const string &file)
+void BSAFile::open(const string &file, const string &data)
 {
   filename = file;
+  data_dir = data;
   input = StreamPtr(new FileStream(file));
   readHeader();
 }
@@ -172,7 +209,7 @@ void BSAFile::open(const string &file)
 /** Open an archive from a generic stream. The 'name' parameter is
     used for error messages.
 */
-void BSAFile::open(StreamPtr inp, const string &name)
+void BSAFile::open(StreamPtr inp, const string &name, const string &data)
 {
   filename = name;
   input = inp;
@@ -188,5 +225,11 @@ StreamPtr BSAFile::getFile(const char *file)
 
   FileStruct &fs = files[i];
 
-  return StreamPtr(new SliceStream(input, fs.offset, fs.fileSize));
+  if(!fs.external)
+    return StreamPtr(new SliceStream(input, fs.offset, fs.fileSize));
+  else {
+    // return a FileStreamPtr here
+    FileFinder::FileFinder data_files(data_dir);
+    return StreamPtr(new SliceStream(StreamPtr(new FileStream(data_files.lookup(fs.name))),fs.offset, fs.fileSize));
+  }
 }

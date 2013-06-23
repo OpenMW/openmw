@@ -28,6 +28,6 @@
 
 /// Add the given BSA file as an input archive in the Ogre resource
 /// system.
-void addBSA(const std::string& file, const std::string& group="General");
+void addBSA(const std::string& file, const std::string& group="General", const std::string& data_dir="./");
 
 #endif

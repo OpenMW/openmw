@@ -48,6 +48,7 @@ class BSAFile
 
     // Zero-terminated file name
     char* name;
+    bool external; // Offset is set to 0 if this is true
   };
 
   typedef std::vector<FileStruct> FileList;
@@ -56,6 +57,7 @@ class BSAFile
 
   /// The archive source
   Mangle::Stream::StreamPtr input;
+  Mangle::Stream::StreamPtr external; // Used for opening an external file temporarily
 
   /// Table of files in this archive
   FileList files;
@@ -68,6 +70,7 @@ class BSAFile
 
   /// Used for error messages
   std::string filename;
+  std::string data_dir; // Where might 'filename' have newer files to load than what is in the BSA?
 
   /// Case insensitive string comparison
   struct iltstr
@@ -103,12 +106,12 @@ class BSAFile
     : input(), isLoaded(false) {}
 
   /// Open an archive file.
-  void open(const std::string &file);
+  void open(const std::string &file, const std::string &data);
 
   /** Open an archive from a generic stream. The 'name' parameter is
       used for error messages.
   */
-  void open(Mangle::Stream::StreamPtr inp, const std::string &name);
+  void open(Mangle::Stream::StreamPtr inp, const std::string &name, const std::string &data);
 
   /* -----------------------------------
    * Archive file routines

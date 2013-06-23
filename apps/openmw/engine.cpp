@@ -137,7 +137,7 @@ void OMW::Engine::loadBSA()
         if (boost::filesystem::extension (iter->path())==".bsa")
         {
             std::cout << "Adding " << iter->path().string() << std::endl;
-            addBSA(iter->path().file_string());
+            addBSA(iter->path().file_string(),"General", mDataDir.native_directory_string());
         }
     }
 }
