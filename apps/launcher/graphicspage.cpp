@@ -285,7 +285,6 @@ QStringList GraphicsPage::getAvailableResolutions(int screen)
         return result;
     }
 
-    QList<SDL_DisplayMode> resolutions;
     for (modeIndex = 0; modeIndex < modes; modeIndex++)
     {
         if (SDL_GetDisplayMode(screen, modeIndex, &mode) < 0)
@@ -293,19 +292,6 @@ QStringList GraphicsPage::getAvailableResolutions(int screen)
             qDebug() << "SDL_GetDisplayMode failed: " << QString::fromStdString(SDL_GetError());
             return result;
         }
-
-        bool isDuplicate = false;
-        for (int i = 0; i < resolutions.count(); i++)
-        {
-            SDL_DisplayMode omode = resolutions.at(i);
-            if (omode.w == mode.w && omode.h == mode.h)
-            {
-                isDuplicate = true;
-                break;
-            }
-        }
-        if (isDuplicate)
-            continue;
 
         QString aspect = getAspect(mode.w, mode.h);
         QString resolution = QString::number(mode.w) + QString(" x ") + QString::number(mode.h);
@@ -317,10 +303,10 @@ QStringList GraphicsPage::getAvailableResolutions(int screen)
             resolution.append(tr("\t(Standard 4:3)"));
         }
 
-        resolutions.append(mode);
         result.append(resolution);
     }
 
+    result.removeDuplicates();
     return result;
 }
 
