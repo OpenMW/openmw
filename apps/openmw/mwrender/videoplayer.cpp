@@ -42,6 +42,14 @@ extern "C"
     #if AV_VERSION_INT(55, 0, 100) <= AV_VERSION_INT(LIBAVFORMAT_VERSION_MAJOR, LIBAVFORMAT_VERSION_MINOR, LIBAVFORMAT_VERSION_MICRO)
         #include <libavutil/time.h>
     #endif
+
+    // From libavcodec version 54.0.0 and onward the declaration of
+    // AV_CH_LAYOUT_* is removed from libavcodec/avcodec.h and moved to
+    // libavutil/channel_layout.h
+    #if AV_VERSION_INT(54, 0, 0) <= AV_VERSION_INT(LIBAVCODEC_VERSION_MAJOR, \
+        LIBAVCODEC_VERSION_MINOR, LIBAVCODEC_VERSION_MICRO)
+        #include <libavutil/channel_layout.h>
+    #endif
 }
 
 #define MAX_AUDIOQ_SIZE (5 * 16 * 1024)
