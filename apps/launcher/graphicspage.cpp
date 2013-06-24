@@ -43,7 +43,7 @@ GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, GraphicsSettings &g
     connect(rendererComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(rendererChanged(const QString&)));
     connect(fullScreenCheckBox, SIGNAL(stateChanged(int)), this, SLOT(slotFullScreenChanged(int)));
     connect(standardRadioButton, SIGNAL(toggled(bool)), this, SLOT(slotStandardToggled(bool)));
-    connect(screenComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(screenChanged(const QString&)));
+    connect(screenComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(screenChanged(int)));
 
 }
 
@@ -153,80 +153,24 @@ bool GraphicsPage::setupOgre()
 
 bool GraphicsPage::setupSDL()
 {
-    // FIXME: do setupSDLWordaround here instead.
-    // seems like Qt, SDL and Ogre don't like each other
-    // results in a segfault if SDL is initialized after Qt
+    int displays = SDL_GetNumVideoDisplays();
 
-    QStringList screens;
-    for (int i = 0; i < mScreenCount; i++)
+    if (displays < 0)
     {
-        screens.append(QString("Screen ") + QString::number(i + 1));
-    }
-    screenComboBox->addItems(screens);
-
-    return true;
-}
-
-std::vector<VideoMode> GraphicsPage::mVideoModes;
-int GraphicsPage::mScreenCount;
-
-bool GraphicsPage::setupSDLWordaround() {
-    if (SDL_Init(SDL_INIT_VIDEO) != 0)
-    {
-        std::cout << "SDL_Init failed: " << SDL_GetError() << std::endl;
+        QMessageBox msgBox;
+        msgBox.setWindowTitle(tr("Error receiving number of screens"));
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setText(tr("<br><b>SDL_GetNumDisplayModes failed:</b><br><br>") + QString::fromStdString(SDL_GetError()) + "<br>");
+        msgBox.exec();
         return false;
     }
 
-    SDL_DisplayMode mode;
-    int displayIndex, modeIndex, displays = SDL_GetNumVideoDisplays();
-    mScreenCount = displays;
-
-    if(displays < 0)
+    for (int i = 0; i < displays; i++)
     {
-        std::cout << "SDL_GetNumVideoDisplays failed: " << SDL_GetError() << std::endl;
-        SDL_Quit();
-        return false;
+        screenComboBox->addItem(QString(tr("Screen ")) + QString::number(i + 1));
     }
 
-    for (displayIndex = 0; displayIndex < displays; displayIndex++)
-    {
-        int modes = SDL_GetNumDisplayModes(displayIndex);
-        if(modes < 0)
-        {
-            std::cout << "SDL_GetNumDisplayModes failed: " << SDL_GetError() << std::endl;
-            SDL_Quit();
-            return false;
-        }
-        for (modeIndex = 0; modeIndex < modes; modeIndex++)
-        {
-            if (SDL_GetDisplayMode(displayIndex, modeIndex, &mode) < 0)
-            {
-                std::cout << "SDL_GetDisplayMode failed: " << SDL_GetError() << std::endl;
-                SDL_Quit();
-                return false;
-            }
-
-            bool isDouble = false;
-            for (std::vector<VideoMode>::iterator it = mVideoModes.begin(); it != mVideoModes.end(); it++)
-            {
-                if ((*it).w == mode.w && (*it).h == mode.h && (*it).screen == displayIndex)
-                {
-                    isDouble = true;
-                    break;
-                }
-            }
-            if (isDouble)
-                continue;
-
-            VideoMode vmode;
-            vmode.w = mode.w;
-            vmode.h = mode.h;
-            vmode.screen = displayIndex;
-            mVideoModes.push_back(vmode);
-        }
-    }
-
-    SDL_Quit();
     return true;
 }
 
@@ -252,9 +196,7 @@ bool GraphicsPage::loadSettings()
     QString resolution = width + QString(" x ") + height;
     QString screen = mGraphicsSettings.value(QString("Video/screen"));
 
-    int screenIndex = screenComboBox->findText(QString("Screen ") + screen);
-    if (screenIndex != -1)
-        screenComboBox->setCurrentIndex(screenIndex);
+    screenComboBox->setCurrentIndex(screen.toInt());
 
     int resIndex = resolutionComboBox->findText(resolution, Qt::MatchStartsWith);
 
@@ -295,10 +237,7 @@ void GraphicsPage::saveSettings()
         mGraphicsSettings.setValue(QString("Video/resolution y"), QString::number(customHeightSpinBox->value()));
     }
 
-    QRegExp screenRe(QString(".*(\\d+)"));
-    if(screenRe.exactMatch(screenComboBox->currentText())) {
-        mGraphicsSettings.setValue(QString("Video/screen"), screenRe.cap(1));
-    }
+    mGraphicsSettings.setValue(QString("Video/screen"), QString::number(screenComboBox->currentIndex()));
 }
 
 QStringList GraphicsPage::getAvailableOptions(const QString &key, Ogre::RenderSystem *renderer)
@@ -337,11 +276,32 @@ QStringList GraphicsPage::getAvailableOptions(const QString &key, Ogre::RenderSy
 QStringList GraphicsPage::getAvailableResolutions(int screen)
 {
     QStringList result;
-    for (std::vector<VideoMode>::iterator it = mVideoModes.begin(); it != mVideoModes.end(); it++)
+    SDL_DisplayMode mode;
+    int modeIndex, modes = SDL_GetNumDisplayModes(screen);
+
+    if (modes < 0)
     {
-        VideoMode mode = *it;
-        if(mode.screen != screen)
-            continue;
+        QMessageBox msgBox;
+        msgBox.setWindowTitle(tr("Error receiving resolutions"));
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setText(tr("<br><b>SDL_GetNumDisplayModes failed:</b><br><br>") + QString::fromStdString(SDL_GetError()) + "<br>");
+        msgBox.exec();
+        return result;
+    }
+
+    for (modeIndex = 0; modeIndex < modes; modeIndex++)
+    {
+        if (SDL_GetDisplayMode(screen, modeIndex, &mode) < 0)
+        {
+            QMessageBox msgBox;
+            msgBox.setWindowTitle(tr("Error receiving resolutions"));
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setText(tr("<br><b>SDL_GetDisplayMode failed:</b><br><br>") + QString::fromStdString(SDL_GetError()) + "<br>");
+            msgBox.exec();
+            return result;
+        }
 
         QString aspect = getAspect(mode.w, mode.h);
         QString resolution = QString::number(mode.w) + QString(" x ") + QString::number(mode.h);
@@ -355,6 +315,8 @@ QStringList GraphicsPage::getAvailableResolutions(int screen)
 
         result.append(resolution);
     }
+
+    result.removeDuplicates();
     return result;
 }
 
@@ -382,12 +344,11 @@ void GraphicsPage::rendererChanged(const QString &renderer)
     antiAliasingComboBox->addItems(getAvailableOptions(QString("FSAA"), mSelectedRenderSystem));
 }
 
-void GraphicsPage::screenChanged(const QString &screen)
+void GraphicsPage::screenChanged(int screen)
 {
-    QRegExp screenRe(QString(".*(\\d+)"));
-    if(screenRe.exactMatch(screen)) {
+    if (screen >= 0) {
         resolutionComboBox->clear();
-        resolutionComboBox->addItems(getAvailableResolutions(screenRe.cap(1).toInt() - 1));
+        resolutionComboBox->addItems(getAvailableResolutions(screen));
     }
 }
 

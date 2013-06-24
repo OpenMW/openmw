@@ -18,13 +18,6 @@
 
 #include "ui_graphicspage.h"
 
-struct VideoMode
-{
-    int w;
-    int h;
-    int screen;
-};
-
 class GraphicsSettings;
 
 namespace Files { struct ConfigurationManager; }
@@ -39,12 +32,9 @@ public:
     void saveSettings();
     bool loadSettings();
 
-    // SDL workaround
-    static bool setupSDLWordaround();
-
 public slots:
     void rendererChanged(const QString &renderer);
-    void screenChanged(const QString &screen);
+    void screenChanged(int screen);
 
 private slots:
     void slotFullScreenChanged(int state);
@@ -68,9 +58,6 @@ private:
     QStringList getAvailableOptions(const QString &key, Ogre::RenderSystem *renderer);
     QStringList getAvailableResolutions(int screen);
     QRect getMaximumResolution();
-
-    static std::vector<VideoMode> mVideoModes;
-    static int mScreenCount;
 
     bool setupOgre();
     bool setupSDL();
