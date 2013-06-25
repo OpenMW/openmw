@@ -2,6 +2,7 @@
 
 #include <components/files/configurationmanager.hpp>
 
+#include <SDL_main.h>
 #include "engine.hpp"
 
 #if defined(_WIN32) && !defined(_CONSOLE)

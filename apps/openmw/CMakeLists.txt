@@ -112,6 +112,7 @@ target_link_libraries(openmw
     ${BULLET_LIBRARIES}
     ${MYGUI_LIBRARIES}
     ${SDL2_LIBRARY}
+    ${SDL2MAIN_LIBRARY}
     ${MYGUI_PLATFORM_LIBRARIES}
     ${SHINY_LIBRARIES}
     "oics"
