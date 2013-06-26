@@ -179,6 +179,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     , mSkipAnim(false)
     , mSecondsOfRunning(0)
     , mSecondsOfSwimming(0)
+    , mUpdateWeapon(true)
 {
     if(!mAnimation)
         return;
@@ -406,6 +407,13 @@ void CharacterController::update(float duration, Movement &movement)
             }
             else
                 weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+
+            if(mUpdateWeapon)
+            {
+                mWeaponType = weaptype;
+                forceStateUpdate();
+                mUpdateWeapon = false;
+            }
 
             if(weaptype != mWeaponType)
             {
