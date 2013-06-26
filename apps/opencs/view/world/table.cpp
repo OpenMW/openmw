@@ -12,6 +12,7 @@
 #include "../../model/world/idtableproxymodel.hpp"
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/record.hpp"
+#include "recordstatusdelegate.hpp"
 
 #include "util.hpp"
 
@@ -80,7 +81,7 @@ std::vector<std::string> CSVWorld::Table::listDeletableSelectedIds() const
 
 CSVWorld::Table::Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, QUndoStack& undoStack,
     bool createAndDelete)
-: mUndoStack (undoStack), mCreateAction (0), mEditLock (false)
+    : mUndoStack (undoStack), mCreateAction (0), mEditLock (false), mRecordStatusDisplay (0)
 {
     mModel = &dynamic_cast<CSMWorld::IdTable&> (*data.getTableModel (id));
 
@@ -161,6 +162,7 @@ void CSVWorld::Table::createRecord()
 
         mUndoStack.push (new CSMWorld::CreateCommand (*mProxyModel, stream.str()));
     }
+
 }
 
 void CSVWorld::Table::revertRecord()
@@ -200,5 +202,14 @@ void CSVWorld::Table::deleteRecord()
             if (deletableIds.size()>1)
                 mUndoStack.endMacro();
         }
+    }
+}
+
+void CSVWorld::Table::updateEditorSetting (const QString &settingName, const QString &settingValue)
+{
+    if (settingName == "Record Status Display")
+    {
+        dynamic_cast<CSVWorld::RecordStatusDelegate *>(this->itemDelegateForColumn(1))->updateEditorSetting (settingName, settingValue);
+        emit dataChanged(mModel->index(0,1), mModel->index(mModel->rowCount()-1, 1));
     }
 }

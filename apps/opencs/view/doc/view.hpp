@@ -68,6 +68,14 @@ namespace CSVDoc
 
             void exitApplication();
 
+            void loadUserSettings();
+
+            /// User preference function
+            void resizeViewWidth (int width);
+
+            /// User preference function
+            void resizeViewHeight (int height);
+
         public:
 
             View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews);
@@ -88,6 +96,9 @@ namespace CSVDoc
 
             Operations *getOperations() const;
 
+            /// Function called by view manager when user preferences are updated
+            void updateEditorSetting (const QString &, const QString &);
+
         signals:
 
             void newDocumentRequest();
@@ -101,8 +112,6 @@ namespace CSVDoc
             void addSubView (const CSMWorld::UniversalId& id);
 
             void abortOperation (int type);
-
-            void slotUpdateEditorSetting (const QString &settingName, const QString &settingValue);
 
         private slots:
 

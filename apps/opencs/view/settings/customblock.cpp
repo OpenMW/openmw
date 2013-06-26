@@ -23,7 +23,7 @@ int CSVSettings::CustomBlock::build(GroupBlockDefList &defList, GroupBlockDefLis
     for (; listIt != defList.end(); ++listIt)
     {
         if (!(*listIt)->isProxy)
-            retVal = buildGroupBlock (*(*listIt));
+            retVal = buildGroupBlock (*listIt);
         else
         {
             mGroupList << proxyBlock;
@@ -32,7 +32,7 @@ int CSVSettings::CustomBlock::build(GroupBlockDefList &defList, GroupBlockDefLis
     }
 
     if (proxyIt != defaultIt)
-        retVal = buildProxyBlock (*(*proxyIt), proxyBlock);
+        retVal = buildProxyBlock (*proxyIt, proxyBlock);
 
     return retVal;
 }
@@ -45,7 +45,7 @@ CSVSettings::GroupBox *CSVSettings::CustomBlock::buildGroupBox (Orientation orie
     return box;
 }
 
-int CSVSettings::CustomBlock::buildGroupBlock(GroupBlockDef &def)
+int CSVSettings::CustomBlock::buildGroupBlock(GroupBlockDef *def)
 {
     GroupBlock *block = new GroupBlock (getParent());
 
@@ -57,9 +57,9 @@ int CSVSettings::CustomBlock::buildGroupBlock(GroupBlockDef &def)
     return block->build(def);
 }
 
-int CSVSettings::CustomBlock::buildProxyBlock(GroupBlockDef& def, ProxyBlock *block)
+int CSVSettings::CustomBlock::buildProxyBlock(GroupBlockDef *def, ProxyBlock *block)
 {
-    if (def.properties.size() != 1)
+    if (def->settingItems.size() != 1)
         return -1;
 
     int retVal = block->build(def);
@@ -67,7 +67,8 @@ int CSVSettings::CustomBlock::buildProxyBlock(GroupBlockDef& def, ProxyBlock *bl
     if (retVal != 0)
         return retVal;
 
-    foreach (QStringList *list, *(def.properties.at(0)->proxyList))
+    // The first settingItem is the proxy setting, containing the list of settings bound to it.
+    foreach (QStringList *list, *(def->settingItems.at(0)->proxyList))
     {
         QString proxiedBlockName = list->at(0);
 

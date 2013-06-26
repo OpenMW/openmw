@@ -34,6 +34,7 @@ namespace CSVWorld
             CSMWorld::IdTableProxyModel *mProxyModel;
             CSMWorld::IdTable *mModel;
             bool mEditLock;
+            int mRecordStatusDisplay;
 
         private:
 
@@ -51,6 +52,8 @@ namespace CSVWorld
             void setEditLock (bool locked);
 
             CSMWorld::UniversalId getUniversalId (int row) const;
+
+            void updateEditorSetting (const QString &settingName, const QString &settingValue);
 
         private slots:
 

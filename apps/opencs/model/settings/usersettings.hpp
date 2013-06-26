@@ -10,6 +10,10 @@
 
 #include "support.hpp"
 
+#ifndef Q_MOC_RUN
+#include <components/files/configurationmanager.hpp>
+#endif
+
 namespace Files { typedef std::vector<boost::filesystem::path> PathContainer;
                   struct ConfigurationManager;}
 
@@ -22,34 +26,56 @@ namespace CSMSettings {
 
         Q_OBJECT
 
+        SectionMap mSectionSettings;
+        static UserSettings *mUserSettingsInstance;
+        QString mUserFilePath;
+        Files::ConfigurationManager mCfgMgr;
+        QString mReadOnlyMessage;
+        QString mReadWriteMessage;
+
     public:
+
+        /// Singleton implementation
+        static UserSettings& instance();
 
         UserSettings();
         ~UserSettings();
 
-        static const UserSettings& instance();
-
-        void readSettings();
-        void setSettingsFiles(QStringList files);
-
-        QFile *openFile (const QString &) const;
-        bool writeFile(QFile *file, QMap<QString, SettingList *> &sections) const;
-        void getSettings (QTextStream &stream, SectionMap &settings) const;
-        QStringList getSettingsFiles () const;
-        CSMSettings::SectionMap getSettingsMap() const;
-        QString getSettingValue(QString section, QString setting) const;
-
-    private:
-
-        static UserSettings *mUserSettingsInstance;
-
-        CSMSettings::SectionMap mSectionMap;
-        QStringList mSettingsFiles;
-
         UserSettings (UserSettings const &);        //not implemented
         void operator= (UserSettings const &);      //not implemented
 
+        /// Writes settings to the last loaded settings file
+        bool writeSettings(QMap<QString, SettingList *> &sections);
+
+        /// Called from editor to trigger signal to update the specified setting.
+        /// If no setting name is specified, all settings found in the specified section are updated.
+        void updateSettings (const QString &sectionName, const QString &settingName = "");
+
+        /// Retrieves the settings file at all three levels (global, local and user).
+
+        /// \todo Multi-valued settings are not fully implemented.  Setting values
+        /// \todo loaded in later files will always overwrite previously loaded values.
+        void loadSettings (const QString &fileName);
+
+        /// Returns the entire map of settings across all sections
+        const SectionMap &getSettings () const;
+
+        /// Retrieves the value as a QString of the specified setting in the specified section
+        QString getSetting(const QString &section, const QString &setting) const;
+
+    private:
+
+
+        /// Opens a QTextStream from the provided path as read-only or read-write.
+        QTextStream *openFileStream (const QString &filePath, bool isReadOnly = false) const;
+
+        ///  Parses a setting file specified in filePath from the provided text stream.
+        bool loadFromFile (const QString &filePath = "");
+
+        void displayFileErrorMessage(const QString &message, bool isReadOnly);
+
     signals:
+
         void signalUpdateEditorSetting (const QString &settingName, const QString &settingValue);
 
     };

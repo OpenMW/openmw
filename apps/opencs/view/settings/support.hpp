@@ -44,21 +44,44 @@ namespace CSVSettings
         Align_Right   = Qt::AlignRight
     };
 
-    //template for defining the widget of a property.
+    /// definition struct for widgets
     struct WidgetDef
     {
-        WidgetType type;               //type of widget providing input
-        int labelWidth;                   //width of caption label
-        int widgetWidth;                  //width of input widget
-        Orientation orientation; //label / widget orientation (horizontal / vertical)
-        QString inputMask;                //input mask (line edit)
-        QString caption;                  //label caption.  Leave empty for multiple items.  See BlockDef::captionList
-        QString value;                    //widget value.   Leave empty for multiple items.  See BlockDef::valueList
-        CSMSettings::QStringPair *minMax; //Min/Max QString value pair.  If empty, assigned to property item value pair.
-        QStringList *valueList;           //value list for list widgets.  If left empty, is assigned to property item value list during block build().
-        bool isDefault;                   //isDefault - determined at runtime.
-        Alignment valueAlignment;      //left / center / right-justify text in widget
-        Alignment widgetAlignment;     //left / center / right-justify widget in group box
+        /// type of widget providing input
+        WidgetType type;
+
+        /// width of caption label
+        int labelWidth;
+
+        /// width of input widget
+        int widgetWidth;
+
+        /// label / widget orientation (horizontal / vertical)
+        Orientation orientation;
+
+        /// input mask (line edit only)
+        QString inputMask;
+
+        /// label caption.  Leave empty for multiple items.  See BlockDef::captionList
+        QString caption;
+
+        /// widget value.   Leave empty for multiple items.  See BlockDef::valueList
+        QString value;
+
+        /// Min/Max QString value pair.  If empty, assigned to property item value pair.
+        CSMSettings::QStringPair *minMax;
+
+        /// value list for list widgets.  If left empty, is assigned to property item value list during block build().
+        QStringList *valueList;
+
+        /// determined at runtime
+        bool isDefault;
+
+        /// left / center / right-justify text in widget
+        Alignment valueAlignment;
+
+        /// left / center / right-justify widget in group box
+        Alignment widgetAlignment;
 
 
         WidgetDef() :   labelWidth (-1), widgetWidth (-1),
@@ -79,20 +102,34 @@ namespace CSVSettings
 
     };
 
-    //Defines the attributes of the property as it is represented in the config file
-    //as well as the UI elements (group box and widget) that serve it.
-    //Only one widget may serve as the input widget for the property.
+    /// Defines the attributes of the setting as it is represented in the config file
+    /// as well as the UI elements (group box and widget) that serve it.
+    /// Only one widget may serve as the input widget for the setting.
     struct SettingsItemDef
     {
-        QString name;                       //property name
-        QStringList *valueList;             //list of valid values for the property.
-                                            //Used to populate option widget captions or list widget item lists (see WidgetDef::caption / value)
+        /// setting name
+        QString name;
+
+        /// list of valid values for the setting
+        QStringList *valueList;
+
+        /// Used to populate option widget captions or list widget item lists (see WidgetDef::caption / value)
         QString defaultValue;
+
+        /// flag indicating multi-valued setting
         bool hasMultipleValues;
-        CSMSettings::QStringPair minMax;    //minimum / maximum value pair
-        WidgetDef widget;                   //definition of the input widget for this setting
-        Orientation orientation;   //general orientation of the widget / label for this property
-        ProxyList *proxyList;               //list of property and corresponding default values for proxy widget
+
+        /// minimum / maximum value pair
+        CSMSettings::QStringPair minMax;
+
+        /// definition of the input widget for this setting
+        WidgetDef widget;
+
+        /// general orientation of the widget / label for this setting
+        Orientation orientation;
+
+        /// list of settings and corresponding default values for proxy widget
+        ProxyList *proxyList;
 
         SettingsItemDef() : name (""), defaultValue (""), orientation (Orient_Vertical), hasMultipleValues (false)
         {}
@@ -104,18 +141,32 @@ namespace CSVSettings
     };
 
 
-    //Hierarchically, this is a "sub-section" of properties within a section, solely for UI organization.
-    //Does not correlate to config file structure.
+    /// Generic container block
     struct GroupBlockDef
     {
-        QString title;                          //title of the block containing the property or properties of this sub-section
-        QStringList captions;                   //list of captions for widgets at the block level (not associated with any particular property)
-        WidgetList widgets;                     //list of widgets at the block level (not associated with any particular property)
-        QList<SettingsItemDef *> properties;    //list of the property(ies) which are subordinate to the property block.
-        Orientation widgetOrientation; //general orientation of widgets in group block
-        bool isVisible;                         //determines whether or not box border/title are visible
-        bool isProxy;                           //indicates whether or not this block defines a proxy block
-        QString defaultValue;                   //generic default value attribute
+        /// block title
+        QString title;
+
+        /// list of captions for widgets at the block level (not associated with any particular setting)
+        QStringList captions;
+
+        /// list of widgets at the block level (not associated with any particular setting)
+        WidgetList widgets;
+
+        /// list of the settings which are subordinate to the setting block.
+        QList<SettingsItemDef *> settingItems;
+
+        /// general orientation of widgets in group block
+        Orientation widgetOrientation;
+
+        /// determines whether or not box border/title are visible
+        bool isVisible;
+
+        /// indicates whether or not this block defines a proxy block
+        bool isProxy;
+
+        /// generic default value attribute
+        QString defaultValue;
 
         GroupBlockDef (): title(""), widgetOrientation (Orient_Vertical), isVisible (true), isProxy (false), defaultValue ("")
         {}
@@ -125,11 +176,19 @@ namespace CSVSettings
         {}
     };
 
+    /// used to create unique, complex blocks
     struct CustomBlockDef
     {
+        /// block title
         QString title;
-        QString defaultValue;                   //default value for widgets unique to the custom block
-        GroupBlockDefList blockDefList;         //list of settings groups that comprise the settings within the custom block
+
+        /// default value for widgets unique to the custom block
+        QString defaultValue;
+
+        /// list of settings groups that comprise the settings within the custom block
+        GroupBlockDefList blockDefList;
+
+        /// orientation of the widgets within the block
         Orientation blockOrientation;
 
         CustomBlockDef (): title (""), defaultValue (""), blockOrientation (Orient_Horizontal)

@@ -9,22 +9,22 @@ CSVSettings::GroupBlock::GroupBlock (bool isVisible, QWidget *parent)
     : AbstractBlock (isVisible, parent)
 {}
 
-int CSVSettings::GroupBlock::build (GroupBlockDef &def)
+int CSVSettings::GroupBlock::build (GroupBlockDef *def)
 {
 
-    if (def.properties.size() == 0)
+    if (def->settingItems.size() == 0)
         return -1;
 
     int retVal = 0;
 
-    setVisible (def.isVisible);
+    setVisible (def->isVisible);
 
-    mBox->setLayout(createLayout (def.widgetOrientation, true));
+    mBox->setLayout(createLayout (def->widgetOrientation, true));
 
-    setObjectName (def.title);
-    mBox->setTitle (def.title);
+    setObjectName (def->title);
+    mBox->setTitle (def->title);
 
-    foreach (SettingsItemDef *itemDef, def.properties)
+    foreach (SettingsItemDef *itemDef, def->settingItems)
     {
         ItemBlock *block = new ItemBlock (mBox);
 

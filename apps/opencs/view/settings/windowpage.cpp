@@ -16,6 +16,7 @@
 #include "../../model/settings/usersettings.hpp"
 #include "groupblock.hpp"
 #include "toggleblock.hpp"
+#include "../../view/settings/abstractblock.hpp"
 
 CSVSettings::WindowPage::WindowPage(QWidget *parent):
     AbstractPage("Window Size", parent)
@@ -29,35 +30,10 @@ CSVSettings::WindowPage::WindowPage(QWidget *parent):
     setupUi();
 }
 
-void CSVSettings::WindowPage::setupUi()
+CSVSettings::GroupBlockDef * CSVSettings::WindowPage::buildDefinedWindowSize()
 {
-    GroupBlockDef customWindowSize (QString ("Custom Window Size"));
-    GroupBlockDef definedWindowSize (QString ("Pre-Defined Window Size"));
-    GroupBlockDef windowSizeToggle (QString ("Window Size"));
-    CustomBlockDef windowSize (QString ("Window Size"));
+    GroupBlockDef *block = new GroupBlockDef ( "Defined Size");
 
-
-    ///////////////////////////////
-    //custom window size properties
-    ///////////////////////////////
-
-    //custom width
-    SettingsItemDef *widthItem = new SettingsItemDef ("Width", "640");
-    widthItem->widget = WidgetDef (Widget_LineEdit);
-    widthItem->widget.widgetWidth = 45;
-
-    //custom height
-    SettingsItemDef *heightItem = new SettingsItemDef ("Height", "480");
-    heightItem->widget = WidgetDef (Widget_LineEdit);
-    heightItem->widget.widgetWidth = 45;
-    heightItem->widget.caption = "x";
-
-    customWindowSize.properties << widthItem << heightItem;
-    customWindowSize.widgetOrientation = Orient_Horizontal;
-    customWindowSize.isVisible = false;
-
-
-    //pre-defined
     SettingsItemDef *widthByHeightItem = new SettingsItemDef ("Window Size", "640x480");
     WidgetDef widthByHeightWidget = WidgetDef (Widget_ComboBox);
     widthByHeightWidget.widgetWidth = 90;
@@ -73,27 +49,74 @@ void CSVSettings::WindowPage::setupUi()
 
     widthByHeightItem->widget = widthByHeightWidget;
 
-    definedWindowSize.properties << widthByHeightItem;
-    definedWindowSize.isProxy = true;
-    definedWindowSize.isVisible = false;
+    block->settingItems << widthByHeightItem;
+    block->isProxy = true;
+    block->isVisible = false;
+
+    return block;
+}
+
+CSVSettings::GroupBlockDef *CSVSettings::WindowPage::buildCustomWindowSize()
+{
+    GroupBlockDef *block = new GroupBlockDef ("Custom Size");
+
+    //custom width
+    SettingsItemDef *widthItem = new SettingsItemDef ("Width", "640");
+    widthItem->widget = WidgetDef (Widget_LineEdit);
+    widthItem->widget.widgetWidth = 45;
+    widthItem->widget.inputMask = "9999";
+
+    //custom height
+    SettingsItemDef *heightItem = new SettingsItemDef ("Height", "480");
+    heightItem->widget = WidgetDef (Widget_LineEdit);
+    heightItem->widget.widgetWidth = 45;
+    heightItem->widget.caption = "x";
+    heightItem->widget.inputMask = "9999";
+
+    block->settingItems << widthItem << heightItem;
+    block->widgetOrientation = Orient_Horizontal;
+    block->isVisible = false;
+
+    return block;
+}
+
+CSVSettings::GroupBlockDef *CSVSettings::WindowPage::buildWindowSizeToggle()
+{
+    GroupBlockDef *block = new GroupBlockDef ("Window Size");
 
     // window size toggle
-    windowSizeToggle.captions << "Pre-Defined" << "Custom";
-    windowSizeToggle.widgetOrientation = Orient_Vertical;
-    windowSizeToggle.isVisible = false;
+    block->captions << "Pre-Defined" << "Custom";
+    block->widgetOrientation = Orient_Vertical;
+    block->isVisible = false;
 
     //define a widget for each group in the toggle
     for (int i = 0; i < 2; i++)
-        windowSizeToggle.widgets << new WidgetDef (Widget_RadioButton);
+        block->widgets << new WidgetDef (Widget_RadioButton);
 
-    windowSizeToggle.widgets.at(0)->isDefault = false;
+    block->widgets.at(0)->isDefault = false;
 
-    windowSize.blockDefList << &windowSizeToggle << &definedWindowSize << &customWindowSize;
-    windowSize.defaultValue = "Custom";
+    return block;
+}
 
-    QGridLayout *pageLayout = new QGridLayout(this);
+CSVSettings::CustomBlockDef *CSVSettings::WindowPage::buildWindowSize(GroupBlockDef *toggle_def,
+                                                                     GroupBlockDef *defined_def,
+                                                                     GroupBlockDef *custom_def)
+{
+    CustomBlockDef *block = new CustomBlockDef(QString ("Window Size"));
 
-    setLayout (pageLayout);
+    block->blockDefList << toggle_def << defined_def << custom_def;
+    block->defaultValue = "Custom";
+
+    return block;
+
+}
+
+void CSVSettings::WindowPage::setupUi()
+{
+    CustomBlockDef *windowSize = buildWindowSize(buildWindowSizeToggle(),
+                                                 buildDefinedWindowSize(),
+                                                 buildCustomWindowSize()
+                                                 );
 
     mAbstractBlocks << buildBlock<ToggleBlock> (windowSize);
 
@@ -102,7 +125,14 @@ void CSVSettings::WindowPage::setupUi()
         connect (block, SIGNAL (signalUpdateSetting (const QString &, const QString &)),
             this, SIGNAL (signalUpdateEditorSetting (const QString &, const QString &)) );
     }
+
+    connect ( this,
+              SIGNAL ( signalUpdateEditorSetting (const QString &, const QString &)),
+              &(CSMSettings::UserSettings::instance()),
+              SIGNAL ( signalUpdateEditorSetting (const QString &, const QString &)));
+
 }
+
 
 void CSVSettings::WindowPage::initializeWidgets (const CSMSettings::SettingMap &settings)
 {

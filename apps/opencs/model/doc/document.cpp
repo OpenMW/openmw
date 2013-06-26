@@ -1,6 +1,4 @@
-
 #include "document.hpp"
-
 #include <cassert>
 
 void CSMDoc::Document::load (const std::vector<boost::filesystem::path>::const_iterator& begin,

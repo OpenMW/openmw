@@ -57,11 +57,11 @@ opencs_hdrs_noqt (view/doc
 
 
 opencs_units (view/world
-    table tablesubview scriptsubview
+    table tablesubview scriptsubview util
     )
 
 opencs_units_noqt (view/world
-    dialoguesubview util subviews enumdelegate vartypedelegate scripthighlighter
+    dialoguesubview subviews enumdelegate vartypedelegate scripthighlighter recordstatusdelegate
     )
 
 

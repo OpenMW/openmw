@@ -5,10 +5,10 @@ CSVSettings::ProxyBlock::ProxyBlock (QWidget *parent)
     : GroupBlock (parent)
 {
 }
-int CSVSettings::ProxyBlock::build (GroupBlockDef &proxyDef)
+int CSVSettings::ProxyBlock::build (GroupBlockDef *proxyDef)
 {
     //get the list of pre-defined values for the proxy
-    mValueList = proxyDef.properties.at(0)->valueList;
+    mValueList = proxyDef->settingItems.at(0)->valueList;
 
     bool success = GroupBlock::build(proxyDef);
 
@@ -53,6 +53,8 @@ bool CSVSettings::ProxyBlock::updateProxiedSettings()
 
         bool success = false;
         int i = 0;
+
+        //find the value index of the selected value in the proxy setting
         for (; i < mValueList->size(); ++i)
         {
             success =  (value == mValueList->at(i));
@@ -64,6 +66,7 @@ bool CSVSettings::ProxyBlock::updateProxiedSettings()
         if (!success)
             return false;
 
+        // update the containing the proxied item's name
         foreach (QStringList *list, mProxyList)
         {
             if ( list->at(0) == block->objectName())

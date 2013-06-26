@@ -82,6 +82,8 @@ namespace CSVWorld
     ///< \brief Use commands instead of manipulating the model directly
     class CommandDelegate : public QStyledItemDelegate
     {
+            Q_OBJECT
+
             QUndoStack& mUndoStack;
             bool mEditLock;
 
@@ -105,6 +107,10 @@ namespace CSVWorld
             void setEditLock (bool locked);
 
             bool isEditLocked() const;
+
+        private slots:
+
+            virtual void slotUpdateEditorSetting (const QString &settingName, const QString &settingValue) {}
     };
 }
 

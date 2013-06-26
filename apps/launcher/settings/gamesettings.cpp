@@ -6,8 +6,6 @@
 #include <QRegExp>
 #include <QMap>
 
-#include <QDebug>
-
 #include <components/files/configurationmanager.hpp>
 
 #include <boost/version.hpp>

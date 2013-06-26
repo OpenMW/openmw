@@ -8,7 +8,6 @@
 #include <QMdiArea>
 #include <QDockWidget>
 #include <QtGui/QApplication>
-#include <QDebug>
 
 #include "../../model/doc/document.hpp"
 #include "../world/subviews.hpp"
@@ -180,8 +179,9 @@ CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int to
     : mViewManager (viewManager), mDocument (document), mViewIndex (totalViews-1),
       mViewTotal (totalViews)
 {
-    QString width = CSMSettings::UserSettings::instance().getSettingValue(QString("Window Size"), QString("Width"));
-    QString height = CSMSettings::UserSettings::instance().getSettingValue(QString("Window Size"), QString("Height"));
+    QString width = CSMSettings::UserSettings::instance().getSetting(QString("Window Size"), QString("Width"));
+    QString height = CSMSettings::UserSettings::instance().getSetting(QString("Window Size"), QString("Height"));
+
     if(width==QString() || height==QString())
         resize(800, 600);
     else
@@ -264,10 +264,13 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id)
     /// \todo add an user setting to reuse sub views (on a per document basis or on a per top level view basis)
 
     SubView *view = mSubViewFactory.makeSubView (id, *mDocument);
+    view->setObjectName ("subview");
     mSubViewWindow.addDockWidget (Qt::TopDockWidgetArea, view);
 
     connect (view, SIGNAL (focusId (const CSMWorld::UniversalId&)), this,
         SLOT (addSubView (const CSMWorld::UniversalId&)));
+
+    CSMSettings::UserSettings::instance().updateSettings("Editor", "Record Status Display");
 
     view->show();
 }
@@ -372,20 +375,34 @@ void CSVDoc::View::showUserSettings()
 {
     CSVSettings::UserSettingsDialog *settingsDialog = new CSVSettings::UserSettingsDialog(this);
 
-    connect (&(CSMSettings::UserSettings::instance()), SIGNAL (signalUpdateEditorSetting (const QString &, const QString &)),
-             this, SLOT (slotUpdateEditorSetting (const QString &, const QString &)) );
-
     settingsDialog->show();
 }
 
-void CSVDoc::View::slotUpdateEditorSetting(const QString &settingName, const QString &settingValue)
+void CSVDoc::View::resizeViewWidth (int width)
 {
-    static QString lastValue = "";
+    if (width >= 0)
+        resize (width, geometry().height());
+}
 
-    if (lastValue != settingValue)
+void CSVDoc::View::resizeViewHeight (int height)
+{
+    if (height >= 0)
+        resize (geometry().width(), height);
+}
+
+void CSVDoc::View::updateEditorSetting (const QString &settingName, const QString &settingValue)
+{
+    if (settingName == "Record Status Display")
     {
-        //evaluate settingName against tokens to determine which function to call to update Editor application.
-
-        lastValue = settingValue;
+        foreach (QObject *view, mSubViewWindow.children())
+        {
+            if (view->objectName() == "subview")
+                dynamic_cast<CSVDoc::SubView *>(view)->updateEditorSetting (settingName, settingValue);
+        }
     }
+    else if (settingName == "Width")
+            resizeViewWidth (settingValue.toInt());
+
+    else if (settingName == "Height")
+            resizeViewHeight (settingValue.toInt());
 }
