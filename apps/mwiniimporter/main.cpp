@@ -43,8 +43,11 @@ int main(int argc, char *argv[]) {
         std::cerr << "ERROR: " << x.what() << std::endl;
         return false;
     }
-
-    
+    catch(boost::program_options::invalid_command_line_syntax & x)
+    {
+        std::cerr << "ERROR: " << x.what() << std::endl;
+        return false;
+    }
 
     if(vm.count("help") || !vm.count("ini") || !vm.count("cfg")) {
         std::cout << desc;

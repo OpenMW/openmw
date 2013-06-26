@@ -122,6 +122,11 @@ bool parseOptions (int argc, char** argv, Arguments &info)
         std::cerr << "ERROR: " << x.what() << std::endl;
         return false;
     }
+    catch(boost::program_options::invalid_command_line_syntax & x)
+    {
+        std::cerr << "ERROR: " << x.what() << std::endl;
+        return false;
+    }
 
     bpo::notify(variables);
 
