@@ -40,7 +40,7 @@ int CSVSettings::CustomBlock::build(GroupBlockDefList &defList, GroupBlockDefLis
 CSVSettings::GroupBox *CSVSettings::CustomBlock::buildGroupBox (Orientation orientation)
 {
     GroupBox *box = new GroupBox (false, mBox);
-    QLayout *layout = createLayout (orientation, true, box);
+    createLayout (orientation, true, box);
 
     return box;
 }

@@ -1,6 +1,8 @@
 #include <QApplication>
 #include <QTextCodec>
 #include <QDir>
+#include <QDebug>
+
 #include <SDL.h>
 
 #include "maindialog.hpp"
