@@ -28,7 +28,7 @@ namespace CSMSettings {
 
         SectionMap mSectionSettings;
         static UserSettings *mUserSettingsInstance;
-        QStringList mPaths;
+        QString mUserFilePath;
         Files::ConfigurationManager mCfgMgr;
         QString mReadOnlyMessage;
         QString mReadWriteMessage;
@@ -70,7 +70,9 @@ namespace CSMSettings {
         QTextStream *openFileStream (const QString &filePath, bool isReadOnly = false) const;
 
         ///  Parses a setting file specified in filePath from the provided text stream.
-        void loadFromFile (const QString &filePath = "");
+        bool loadFromFile (const QString &filePath = "");
+
+        void displayFileErrorMessage(const QString &message, bool isReadOnly);
 
     signals:
 

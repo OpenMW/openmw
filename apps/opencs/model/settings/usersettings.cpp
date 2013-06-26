@@ -61,32 +61,18 @@ QTextStream *CSMSettings::UserSettings::openFileStream (const QString &filePath,
     else
         openFlags = QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate;
 
-    if (!(file->open(openFlags)))
-    {
-        // File cannot be opened or created
-        QMessageBox msgBox;
-        msgBox.setWindowTitle(QObject::tr("OpenCS configuration file I/O error"));
-        msgBox.setIcon(QMessageBox::Critical);
-        msgBox.setStandardButtons(QMessageBox::Ok);
-
-        QString fileMessage = QObject::tr("<br> File: %0").arg(file->fileName());
-
-        if (!isReadOnly)
-            msgBox.setText (mReadWriteMessage + fileMessage);
-        else
-            msgBox.setText (mReadOnlyMessage + fileMessage);
-
-        msgBox.exec();
-        delete file;
-        file = 0;
-    }
-
     QTextStream *stream = 0;
 
-    if (file)
+    if (file->open(openFlags))
     {
         stream = new QTextStream(file);
         stream->setCodec(QTextCodec::codecForName("UTF-8"));
+    }
+
+    if (!stream)
+    {
+        delete file;
+        file = 0;
     }
 
     return stream;
@@ -95,23 +81,29 @@ QTextStream *CSMSettings::UserSettings::openFileStream (const QString &filePath,
 
 bool CSMSettings::UserSettings::writeSettings(QMap<QString, CSMSettings::SettingList *> &settings)
 {
-    QTextStream *stream = openFileStream(mPaths.back());
+    QTextStream *stream = openFileStream(mUserFilePath);
 
-    QList<QString> keyList = settings.keys();
+    if (!stream)
+        displayFileErrorMessage(mReadWriteMessage, false);
 
-    foreach (QString key, keyList)
+    if (stream)
     {
-        SettingList *sectionSettings = settings[key];
+        QList<QString> keyList = settings.keys();
 
-        *stream << "[" << key << "]" << '\n';
+        foreach (QString key, keyList)
+        {
+            SettingList *sectionSettings = settings[key];
 
-        foreach (SettingContainer *item, *sectionSettings)
-            *stream << item->objectName() << " = " << item->getValue() << '\n';
+            *stream << "[" << key << "]" << '\n';
+
+            foreach (SettingContainer *item, *sectionSettings)
+                *stream << item->objectName() << " = " << item->getValue() << '\n';
+        }
+
+        stream->device()->close();
     }
 
-    stream->device()->close();
-
-    return true;
+    return (stream);
 }
 
 
@@ -120,10 +112,10 @@ const CSMSettings::SectionMap &CSMSettings::UserSettings::getSettings() const
     return mSectionSettings;
 }
 
-void CSMSettings::UserSettings::loadFromFile(const QString &filePath)
+bool CSMSettings::UserSettings::loadFromFile(const QString &filePath)
 {
     if (filePath.isEmpty())
-        return;
+        return false;
 
     mSectionSettings.clear();
 
@@ -181,22 +173,37 @@ void CSMSettings::UserSettings::loadFromFile(const QString &filePath)
         stream->device()->close();
     }
 
-    return;
+    return (stream);
 }
 
 void CSMSettings::UserSettings::loadSettings (const QString &fileName)
 {
-    if (mPaths.count() == 0)
-    {
-        mPaths.append(QString::fromStdString(mCfgMgr.getGlobalPath().string()) + fileName);
-        mPaths.append(QString::fromStdString(mCfgMgr.getLocalPath().string()) + fileName);
-        mPaths.append(QString::fromStdString(mCfgMgr.getUserPath().string()) + fileName);
-    }
+    bool globalOk;
+    bool localOk;
 
-    foreach (const QString &path, mPaths)
+    //global
+    QString globalFilePath = QString::fromStdString(mCfgMgr.getGlobalPath().string()) + fileName;
+    globalOk = loadFromFile(globalFilePath);
+
+
+    //local
+    QString localFilePath = QString::fromStdString(mCfgMgr.getLocalPath().string()) + fileName;
+    localOk = loadFromFile(localFilePath);
+
+    //user
+    mUserFilePath = QString::fromStdString(mCfgMgr.getUserPath().string()) + fileName;
+    loadFromFile(mUserFilePath);
+
+    if (!(localOk || globalOk))
     {
-        qDebug() << "Loading config file:" << qPrintable(path);
-        loadFromFile(path);
+        QString message = QObject::tr("<br><b>Could not open user settings files for reading</b><br><br> \
+                Global and local settings files could not be read.\
+                You may have incorrect file permissions or the OpenCS installation may be corrupted.<br>");
+
+        message += QObject::tr("<br>Global filepath: ") + globalFilePath;
+        message += QObject::tr("<br>Local filepath: ") + localFilePath;
+
+        displayFileErrorMessage ( message, true);
     }
 }
 
@@ -245,3 +252,18 @@ CSMSettings::UserSettings& CSMSettings::UserSettings::instance()
             return *mUserSettingsInstance;
 }
 
+void CSMSettings::UserSettings::displayFileErrorMessage(const QString &message, bool isReadOnly)
+{
+        // File cannot be opened or created
+        QMessageBox msgBox;
+        msgBox.setWindowTitle(QObject::tr("OpenCS configuration file I/O error"));
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+
+        if (!isReadOnly)
+            msgBox.setText (mReadWriteMessage + message);
+        else
+            msgBox.setText (message);
+
+        msgBox.exec();
+}
