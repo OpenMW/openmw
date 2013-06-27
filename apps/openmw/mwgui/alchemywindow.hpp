@@ -5,20 +5,25 @@
 
 #include "../mwmechanics/alchemy.hpp"
 
-#include "window_base.hpp"
-#include "container.hpp"
 #include "widgets.hpp"
+#include "windowbase.hpp"
 
 namespace MWGui
 {
-    class AlchemyWindow : public WindowBase, public ContainerBase
+    class ItemView;
+    class SortFilterItemModel;
+
+    class AlchemyWindow : public WindowBase
     {
     public:
-        AlchemyWindow(MWBase::WindowManager& parWindowManager);
+        AlchemyWindow();
 
         virtual void open();
 
-    protected:
+    private:
+        ItemView* mItemView;
+        SortFilterItemModel* mSortModel;
+
         MyGUI::Button* mCreateButton;
         MyGUI::Button* mCancelButton;
 
@@ -30,16 +35,11 @@ namespace MWGui
         void onCreateButtonClicked(MyGUI::Widget* _sender);
         void onIngredientSelected(MyGUI::Widget* _sender);
 
-        virtual void onSelectedItemImpl(MWWorld::Ptr item);
-        virtual std::vector<MWWorld::Ptr> itemsToIgnore();
+        void onSelectedItem(int index);
 
         void removeIngredient(MyGUI::Widget* ingredient);
 
-        virtual void onReferenceUnavailable() { ; }
-
         void update();
-        
-    private:
 
         MWMechanics::Alchemy mAlchemy;
 

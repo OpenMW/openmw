@@ -27,19 +27,24 @@
 #include "OgreTexture.h"
 #include <OgreWindowEventUtilities.h>
 
-#if defined(__APPLE__) && !defined(__LP64__)  
+#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
 #include <OgreRoot.h>
 #endif
 
+struct SDL_Window;
+struct SDL_Surface;
+
 namespace Ogre
 {
-#if !defined(__APPLE__) || defined(__LP64__)
+#if OGRE_PLATFORM != OGRE_PLATFORM_APPLE
     class Root;
 #endif
     class RenderWindow;
     class SceneManager;
     class Camera;
     class Viewport;
+    class ParticleEmitterFactory;
+    class ParticleAffectorFactory;
 }
 
 namespace OEngine
@@ -52,9 +57,10 @@ namespace OEngine
             bool fullscreen;
             int window_x, window_y;
             std::string fsaa;
+            std::string icon;
         };
 
-#if defined(__APPLE__) && !defined(__LP64__)
+#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
         class CustomRoot : public Ogre::Root {
         public:
             bool isQueuedEnd() const;
@@ -69,12 +75,14 @@ namespace OEngine
 
         class OgreRenderer
         {
-#if defined(__APPLE__) && !defined(__LP64__)
+#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
             CustomRoot *mRoot;
 #else
             Ogre::Root *mRoot;
 #endif
             Ogre::RenderWindow *mWindow;
+            SDL_Window *mSDLWindow;
+            SDL_Surface *mWindowIconSurface;
             Ogre::SceneManager *mScene;
             Ogre::Camera *mCamera;
             Ogre::Viewport *mView;
@@ -94,15 +102,21 @@ namespace OEngine
             Ogre::D3D9Plugin* mD3D9Plugin;
             #endif
             Fader* mFader;
+            std::vector<Ogre::ParticleEmitterFactory*> mEmitterFactories;
+            std::vector<Ogre::ParticleAffectorFactory*> mAffectorFactories;
             bool logging;
+
+            SDL_Surface* ogreTextureToSDLSurface(const std::string& name);
 
         public:
             OgreRenderer()
             : mRoot(NULL)
             , mWindow(NULL)
+            , mSDLWindow(NULL)
             , mScene(NULL)
             , mCamera(NULL)
             , mView(NULL)
+            , mWindowIconSurface(NULL)
             #ifdef ENABLE_PLUGIN_CgProgramManager
             , mCgPlugin(NULL)
             #endif
@@ -171,6 +185,9 @@ namespace OEngine
 
             /// Get the rendering window
             Ogre::RenderWindow *getWindow() { return mWindow; }
+
+            /// Get the SDL Window
+            SDL_Window *getSDLWindow() { return mSDLWindow; }
 
             /// Get the scene manager
             Ogre::SceneManager *getScene() { return mScene; }

@@ -4,6 +4,11 @@
 #include <OgreString.h>
 #include <OgreColourValue.h>
 
+namespace ESM
+{
+    struct Region;
+}
+
 namespace MWRender
 {
     class RenderingManager;
@@ -129,7 +134,11 @@ namespace MWWorld
          */
         void update(float duration);
 
+        void stopSounds(bool stopAll);
+
         void setHour(const float hour);
+
+        float getWindSpeed() const;
 
         void setDate(const int day, const int month);
 
@@ -143,6 +152,7 @@ namespace MWWorld
     private:
         float mHour;
         int mDay, mMonth;
+        float mWindSpeed;
         MWWorld::Fallback* mFallback;
         void setFallbackWeather(Weather& weather,const std::string& name);
         MWRender::RenderingManager* mRendering;
@@ -168,10 +178,16 @@ namespace MWWorld
 
         double mTimePassed; // time passed since last update
 
-        WeatherResult transition(const float factor);
-        WeatherResult getResult(const Ogre::String& weather);
+        void transition(const float factor);
+        void setResult(const Ogre::String& weatherType);
 
-        void setWeather(const Ogre::String& weather, bool instant=false);
+        float calculateHourFade (const std::string& moonName) const;
+        float calculateAngleFade (const std::string& moonName, float angle) const;
+
+        void setWeather(const Ogre::String& weatherType, bool instant=false);
+        Ogre::String nextWeather(const ESM::Region* region) const;
+        WeatherResult mResult;
+
         float mSunriseTime;
         float mSunsetTime;
         float mSunriseDuration;
@@ -181,6 +197,10 @@ namespace MWWorld
         float mThunderFrequency;
         float mThunderThreshold;
         float mThunderSoundDelay;
+        float mNightStart;
+        float mNightEnd;
+        float mDayStart;
+        float mDayEnd;
         std::string mThunderSoundID0;
         std::string mThunderSoundID1;
         std::string mThunderSoundID2;

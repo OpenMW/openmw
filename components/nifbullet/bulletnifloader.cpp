@@ -91,21 +91,20 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
     // likely a sign of incomplete code rather than faulty input.
     Nif::NIFFile::ptr pnif (Nif::NIFFile::create (resourceName.substr(0, resourceName.length()-7)));
     Nif::NIFFile & nif = *pnif.get ();
-    if (nif.numRecords() < 1)
+    if (nif.numRoots() < 1)
     {
-        warn("Found no records in NIF.");
+        warn("Found no root nodes in NIF.");
         return;
     }
 
-    // The first record is assumed to be the root node
-    Nif::Record *r = nif.getRecord(0);
+    Nif::Record *r = nif.getRoot(0);
     assert(r != NULL);
 
     Nif::Node *node = dynamic_cast<Nif::Node*>(r);
     if (node == NULL)
     {
-        warn("First record in file was not a node, but a " +
-                r->recName + ". Skipping file.");
+        warn("First root in file was not a node, but a " +
+             r->recName + ". Skipping file.");
         return;
     }
 
@@ -186,6 +185,10 @@ void ManualBulletShapeLoader::handleNode(btTriangleMesh* mesh, const Nif::Node *
     else
         isCollisionNode = isCollisionNode && (node->recType != Nif::RC_RootCollisionNode);
 
+    // Don't collide with AvoidNode shapes
+    if(node->recType == Nif::RC_AvoidNode)
+        flags |= 0x800;
+
     // Marker objects
     /// \todo don't do this in the editor
     std::string nodename = node->name;
@@ -256,9 +259,9 @@ void ManualBulletShapeLoader::handleNiTriShape(btTriangleMesh* mesh, const Nif::
     assert(shape != NULL);
 
     // Interpret flags
-    bool hidden    = (flags & 0x01) != 0; // Not displayed
-    bool collide   = (flags & 0x02) != 0; // Use mesh for collision
-    bool bbcollide = (flags & 0x04) != 0; // Use bounding box for collision
+    bool hidden    = (flags&Nif::NiNode::Flag_Hidden) != 0;
+    bool collide   = (flags&Nif::NiNode::Flag_MeshCollision) != 0;
+    bool bbcollide = (flags&Nif::NiNode::Flag_BBoxCollision) != 0;
 
     // If the object was marked "NCO" earlier, it shouldn't collide with
     // anything. So don't do anything.

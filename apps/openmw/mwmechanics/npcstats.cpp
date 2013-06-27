@@ -169,8 +169,7 @@ float MWMechanics::NpcStats::getSkillGain (int skillIndex, const ESM::Class& cla
         if (specialisationFactor<=0)
             throw std::runtime_error ("invalid skill specialisation factor");
     }
-
-    return 1.0 / (level +1) * (1.0 / (skillFactor)) * typeFactor * specialisationFactor;
+    return 1.0 / ((level+1) * (1.0/skillFactor) * typeFactor * specialisationFactor);
 }
 
 void MWMechanics::NpcStats::useSkill (int skillIndex, const ESM::Class& class_, int usageType)
@@ -334,7 +333,7 @@ bool MWMechanics::NpcStats::hasSkillsForRank (const std::string& factionId, int 
     std::vector<int> skills;
 
     for (int i=0; i<6; ++i)
-        skills.push_back (static_cast<int> (getSkill (faction.mData.mSkillID[i]).getModified()));
+        skills.push_back (static_cast<int> (getSkill (faction.mData.mSkills[i]).getModified()));
 
     std::sort (skills.begin(), skills.end());
 

@@ -82,6 +82,13 @@ namespace Compiler
             ///
             /// - Default-implementation: Report an error.
 
+            virtual bool parseComment (const std::string& comment, const TokenLoc& loc,
+                Scanner& scanner);
+            ///< Handle comment token.
+            /// \return fetch another token?
+            ///
+            /// - Default-implementation: ignored (and return true).
+
             virtual void parseEOF (Scanner& scanner);
             ///< Handle EOF token.
             ///

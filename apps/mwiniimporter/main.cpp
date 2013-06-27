@@ -28,12 +28,26 @@ int main(int argc, char *argv[]) {
     p_desc.add("ini", 1).add("cfg", 1);
 
     bpo::variables_map vm;
-    bpo::parsed_options parsed = bpo::command_line_parser(argc, argv)
-        .options(desc)
-        .positional(p_desc)
-        .run();
     
-    bpo::store(parsed, vm);
+    try
+    {
+        bpo::parsed_options parsed = bpo::command_line_parser(argc, argv)
+            .options(desc)
+            .positional(p_desc)
+            .run();
+
+        bpo::store(parsed, vm);
+    }
+    catch(boost::program_options::unknown_option & x)
+    {
+        std::cerr << "ERROR: " << x.what() << std::endl;
+        return false;
+    }
+    catch(boost::program_options::invalid_command_line_syntax & x)
+    {
+        std::cerr << "ERROR: " << x.what() << std::endl;
+        return false;
+    }
 
     if(vm.count("help") || !vm.count("ini") || !vm.count("cfg")) {
         std::cout << desc;
@@ -55,10 +69,8 @@ int main(int argc, char *argv[]) {
         std::cerr << "ini file does not exist" << std::endl;
         return -3;
     }
-    if(!boost::filesystem::exists(cfgFile)) {
+    if(!boost::filesystem::exists(cfgFile))
         std::cerr << "cfg file does not exist" << std::endl;
-        return -4;
-    }
 
     MwIniImporter importer;
     importer.setVerbose(vm.count("verbose"));

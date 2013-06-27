@@ -8,18 +8,16 @@
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
-#include "../mwworld/esmstore.hpp"
 #include "../mwworld/fallback.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
-#include "../mwmechanics/stat.hpp"
 
 namespace MWGui
 {
 
-    LevelupDialog::LevelupDialog(MWBase::WindowManager &parWindowManager)
-        : WindowBase("openmw_levelup_dialog.layout", parWindowManager)
+    LevelupDialog::LevelupDialog()
+        : WindowBase("openmw_levelup_dialog.layout")
     {
         getWidget(mOkButton, "OkButton");
         getWidget(mClassImage, "ClassImage");
@@ -183,7 +181,7 @@ namespace MWGui
             creatureStats.setLevel (creatureStats.getLevel()+1);
             pcStats.levelUp ();
 
-            mWindowManager.removeGuiMode (GM_Levelup);
+            MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Levelup);
         }
 
     }

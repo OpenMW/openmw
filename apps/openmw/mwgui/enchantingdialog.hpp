@@ -1,8 +1,6 @@
 #ifndef MWGUI_ENCHANTINGDIALOG_H
 #define MWGUI_ENCHANTINGDIALOG_H
 
-#include "window_base.hpp"
-#include "referenceinterface.hpp"
 #include "spellcreationdialog.hpp"
 
 #include "../mwbase/windowmanager.hpp"
@@ -17,7 +15,7 @@ namespace MWGui
     class EnchantingDialog : public WindowBase, public ReferenceInterface, public EffectEditorBase
     {
     public:
-        EnchantingDialog(MWBase::WindowManager& parWindowManager);
+        EnchantingDialog();
         virtual ~EnchantingDialog();
 
         virtual void open();
@@ -56,6 +54,7 @@ namespace MWGui
         MyGUI::TextBox* mCastCost;
         MyGUI::TextBox* mCharge;
         MyGUI::TextBox* mPrice;
+        MyGUI::TextBox* mPriceText;
 
         MWMechanics::Enchanting mEnchanting;
         ESM::EffectList mEffectList;

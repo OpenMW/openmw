@@ -29,15 +29,17 @@ namespace MWMechanics
         calculateCreatureStatModifiers (ptr);
 
         // AI
-        CreatureStats& creatureStats =  MWWorld::Class::get (ptr).getCreatureStats (ptr);
-        creatureStats.getAiSequence().execute (ptr);
+        if(!MWBase::Environment::get().getWindowManager()->isGuiMode())
+        {
+            CreatureStats& creatureStats =  MWWorld::Class::get (ptr).getCreatureStats (ptr);
+            creatureStats.getAiSequence().execute (ptr);
+        }
     }
 
     void Actors::updateNpc (const MWWorld::Ptr& ptr, float duration, bool paused)
     {
         if (!paused && ptr.getRefData().getHandle()!="player")
-            MWWorld::Class::get (ptr).getInventoryStore (ptr).autoEquip (
-                MWWorld::Class::get (ptr).getNpcStats (ptr));
+            MWWorld::Class::get (ptr).getInventoryStore (ptr).autoEquip (ptr);
     }
 
     void Actors::adjustMagicEffects (const MWWorld::Ptr& creature)
@@ -170,9 +172,9 @@ namespace MWMechanics
 
         MWRender::Animation *anim = MWBase::Environment::get().getWorld()->getAnimation(ptr);
         if(!MWWorld::Class::get(ptr).getCreatureStats(ptr).isDead())
-            mActors.insert(std::make_pair(ptr, CharacterController(ptr, anim, CharState_Idle, true)));
+            mActors.insert(std::make_pair(ptr, CharacterController(ptr, anim, CharState_Idle)));
         else
-            mActors.insert(std::make_pair(ptr, CharacterController(ptr, anim, CharState_Death1, false)));
+            mActors.insert(std::make_pair(ptr, CharacterController(ptr, anim, CharState_Death1)));
     }
 
     void Actors::removeActor (const MWWorld::Ptr& ptr)
@@ -211,7 +213,7 @@ namespace MWMechanics
     {
         mDuration += duration;
 
-        if (mDuration>=0.25)
+        //if (mDuration>=0.25)
         {
             float totalDuration = mDuration;
             mDuration = 0;
@@ -221,7 +223,7 @@ namespace MWMechanics
                 if(!MWWorld::Class::get(iter->first).getCreatureStats(iter->first).isDead())
                 {
                     if(iter->second.getState() >= CharState_Death1)
-                        iter->second.setState(CharState_Idle, true);
+                        iter->second.setState(CharState_Idle);
 
                     updateActor(iter->first, totalDuration);
                     if(iter->first.getTypeName() == typeid(ESM::NPC).name())
@@ -251,7 +253,7 @@ namespace MWMechanics
                 if(iter->second.getState() >= CharState_Death1)
                     continue;
 
-                iter->second.setState(CharState_Death1, false);
+                iter->second.setState(CharState_Death1);
 
                 ++mDeathCount[MWWorld::Class::get(iter->first).getId(iter->first)];
 
@@ -291,6 +293,13 @@ namespace MWMechanics
         return 0;
     }
 
+    void Actors::forceStateUpdate(const MWWorld::Ptr & ptr)
+    {
+        PtrControllerMap::iterator iter = mActors.find(ptr);
+        if(iter != mActors.end())
+            iter->second.forceStateUpdate();
+    }
+
     void Actors::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number)
     {
         PtrControllerMap::iterator iter = mActors.find(ptr);
@@ -302,5 +311,13 @@ namespace MWMechanics
         PtrControllerMap::iterator iter = mActors.find(ptr);
         if(iter != mActors.end())
             iter->second.skipAnim();
+    }
+
+    bool Actors::checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string& groupName)
+    {
+        PtrControllerMap::iterator iter = mActors.find(ptr);
+        if(iter != mActors.end())
+            return iter->second.isAnimPlaying(groupName);
+        return false;
     }
 }

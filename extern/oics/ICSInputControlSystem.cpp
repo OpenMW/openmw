@@ -41,7 +41,7 @@ namespace ICS
 
 		this->mActive = active;
 
-		this->fillOISKeysMap();
+		this->fillSDLKeysMap();
 
 		ICS_LOG("Channel count = " + ToString<size_t>(channelCount) );
 		for(size_t i=0;i<channelCount;i++)
@@ -429,7 +429,7 @@ namespace ICS
 				control.SetAttribute( "axisBindable", "false" );
 			}
 
-			if(getKeyBinding(*o, Control/*::ControlChangingDirection*/::INCREASE) != OIS::KC_UNASSIGNED)
+			if(getKeyBinding(*o, Control/*::ControlChangingDirection*/::INCREASE) != SDLK_UNKNOWN)
 			{
 				TiXmlElement keyBinder( "KeyBinder" );
 
@@ -439,7 +439,7 @@ namespace ICS
 				control.InsertEndChild(keyBinder);
 			}
 
-			if(getKeyBinding(*o, Control/*::ControlChangingDirection*/::DECREASE) != OIS::KC_UNASSIGNED)
+			if(getKeyBinding(*o, Control/*::ControlChangingDirection*/::DECREASE) != SDLK_UNKNOWN)
 			{
 				TiXmlElement keyBinder( "KeyBinder" );
 
@@ -503,15 +503,15 @@ namespace ICS
 				TiXmlElement binder( "MouseButtonBinder" );
 
 				unsigned int button = getMouseButtonBinding(*o, Control/*::ControlChangingDirection*/::INCREASE);
-				if(button == OIS::/*MouseButtonID::*/MB_Left)
+				if(button == SDL_BUTTON_LEFT)
 				{
 					binder.SetAttribute( "button", "LEFT" );
 				}
-				else if(button == OIS::/*MouseButtonID::*/MB_Middle)
+				else if(button == SDL_BUTTON_MIDDLE)
 				{
 					binder.SetAttribute( "button", "MIDDLE" );
 				}
-				else if(button == OIS::/*MouseButtonID::*/MB_Right)
+				else if(button == SDL_BUTTON_RIGHT)
 				{
 					binder.SetAttribute( "button", "RIGHT" );
 				}
@@ -529,15 +529,15 @@ namespace ICS
 				TiXmlElement binder( "MouseButtonBinder" );
 
 				unsigned int button = getMouseButtonBinding(*o, Control/*::ControlChangingDirection*/::DECREASE);
-				if(button == OIS::/*MouseButtonID::*/MB_Left)
+				if(button == SDL_BUTTON_LEFT)
 				{
 					binder.SetAttribute( "button", "LEFT" );
 				}
-				else if(button == OIS::/*MouseButtonID::*/MB_Middle)
+				else if(button == SDL_BUTTON_MIDDLE)
 				{
 					binder.SetAttribute( "button", "MIDDLE" );
 				}
-				else if(button == OIS::/*MouseButtonID::*/MB_Right)
+				else if(button == SDL_BUTTON_RIGHT)
 				{
 					binder.SetAttribute( "button", "RIGHT" );
 				}
@@ -801,129 +801,133 @@ namespace ICS
 		mDetectingBindingControl = NULL;
 	}
 
-	void InputControlSystem::fillOISKeysMap()
+	void InputControlSystem::fillSDLKeysMap()
 	{
-		mKeys["UNASSIGNED"]= OIS::KC_UNASSIGNED;
-		mKeys["ESCAPE"]= OIS::KC_ESCAPE;
-		mKeys["1"]= OIS::KC_1;
-		mKeys["2"]= OIS::KC_2;
-		mKeys["3"]= OIS::KC_3;
-		mKeys["4"]= OIS::KC_4;
-		mKeys["5"]= OIS::KC_5;
-		mKeys["6"]= OIS::KC_6;
-		mKeys["7"]= OIS::KC_7;
-		mKeys["8"]= OIS::KC_8;
-		mKeys["9"]= OIS::KC_9;
-		mKeys["0"]= OIS::KC_0;
-		mKeys["MINUS"]= OIS::KC_MINUS;
-		mKeys["EQUALS"]= OIS::KC_EQUALS;
-		mKeys["BACK"]= OIS::KC_BACK;
-		mKeys["TAB"]= OIS::KC_TAB;
-		mKeys["Q"]= OIS::KC_Q;
-		mKeys["W"]= OIS::KC_W;
-		mKeys["E"]= OIS::KC_E;
-		mKeys["R"]= OIS::KC_R;
-		mKeys["T"]= OIS::KC_T;
-		mKeys["Y"]= OIS::KC_Y;
-		mKeys["U"]= OIS::KC_U;
-		mKeys["I"]= OIS::KC_I;
-		mKeys["O"]= OIS::KC_O;
-		mKeys["P"]= OIS::KC_P;
-		mKeys["LBRACKET"]= OIS::KC_LBRACKET;
-		mKeys["RBRACKET"]= OIS::KC_RBRACKET;
-		mKeys["RETURN"]= OIS::KC_RETURN;
-		mKeys["LCONTROL"]= OIS::KC_LCONTROL;
-		mKeys["A"]= OIS::KC_A;
-		mKeys["S"]= OIS::KC_S;
-		mKeys["D"]= OIS::KC_D;
-		mKeys["F"]= OIS::KC_F;
-		mKeys["G"]= OIS::KC_G;
-		mKeys["H"]= OIS::KC_H;
-		mKeys["J"]= OIS::KC_J;
-		mKeys["K"]= OIS::KC_K;
-		mKeys["L"]= OIS::KC_L;
-		mKeys["SEMICOLON"]= OIS::KC_SEMICOLON;
-		mKeys["APOSTROPHE"]= OIS::KC_APOSTROPHE;
-		mKeys["GRAVE"]= OIS::KC_GRAVE;
-		mKeys["LSHIFT"]= OIS::KC_LSHIFT;
-		mKeys["BACKSLASH"]= OIS::KC_BACKSLASH;
-		mKeys["Z"]= OIS::KC_Z;
-		mKeys["X"]= OIS::KC_X;
-		mKeys["C"]= OIS::KC_C;
-		mKeys["V"]= OIS::KC_V;
-		mKeys["B"]= OIS::KC_B;
-		mKeys["N"]= OIS::KC_N;
-		mKeys["M"]= OIS::KC_M;
-		mKeys["COMMA"]= OIS::KC_COMMA;
-		mKeys["PERIOD"]= OIS::KC_PERIOD;
-		mKeys["SLASH"]= OIS::KC_SLASH;
-		mKeys["RSHIFT"]= OIS::KC_RSHIFT;
-		mKeys["MULTIPLY"]= OIS::KC_MULTIPLY;
-		mKeys["LMENU"]= OIS::KC_LMENU;
-		mKeys["SPACE"]= OIS::KC_SPACE;
-		mKeys["CAPITAL"]= OIS::KC_CAPITAL;
-		mKeys["F1"]= OIS::KC_F1;
-		mKeys["F2"]= OIS::KC_F2;
-		mKeys["F3"]= OIS::KC_F3;
-		mKeys["F4"]= OIS::KC_F4;
-		mKeys["F5"]= OIS::KC_F5;
-		mKeys["F6"]= OIS::KC_F6;
-		mKeys["F7"]= OIS::KC_F7;
-		mKeys["F8"]= OIS::KC_F8;
-		mKeys["F9"]= OIS::KC_F9;
-		mKeys["F10"]= OIS::KC_F10;
-		mKeys["F11"]= OIS::KC_F11;
-		mKeys["F12"]= OIS::KC_F12;
-		mKeys["NUMLOCK"]= OIS::KC_NUMLOCK;
-		mKeys["SCROLL"]= OIS::KC_SCROLL;
-		mKeys["NUMPAD7"]= OIS::KC_NUMPAD7;
-		mKeys["NUMPAD8"]= OIS::KC_NUMPAD8;
-		mKeys["NUMPAD9"]= OIS::KC_NUMPAD9;
-		mKeys["SUBTRACT"]= OIS::KC_SUBTRACT;
-		mKeys["NUMPAD4"]= OIS::KC_NUMPAD4;
-		mKeys["NUMPAD5"]= OIS::KC_NUMPAD5;
-		mKeys["NUMPAD6"]= OIS::KC_NUMPAD6;
-		mKeys["ADD"]= OIS::KC_ADD;
-		mKeys["NUMPAD1"]= OIS::KC_NUMPAD1;
-		mKeys["NUMPAD2"]= OIS::KC_NUMPAD2;
-		mKeys["NUMPAD3"]= OIS::KC_NUMPAD3;
-		mKeys["NUMPAD0"]= OIS::KC_NUMPAD0;
-		mKeys["DECIMAL"]= OIS::KC_DECIMAL;
-		mKeys["RCONTROL"]= OIS::KC_RCONTROL;
-		mKeys["DIVIDE"]= OIS::KC_DIVIDE;
-		mKeys["SYSRQ"]= OIS::KC_SYSRQ;
-		mKeys["RMENU"]= OIS::KC_RMENU;
-		mKeys["PAUSE"]= OIS::KC_PAUSE;
-		mKeys["HOME"]= OIS::KC_HOME;
-		mKeys["UP"]= OIS::KC_UP;
-		mKeys["PGUP"]= OIS::KC_PGUP;
-		mKeys["LEFT"]= OIS::KC_LEFT;
-		mKeys["RIGHT"]= OIS::KC_RIGHT;
-		mKeys["END"]= OIS::KC_END;
-		mKeys["DOWN"]= OIS::KC_DOWN;
-		mKeys["PGDOWN"]= OIS::KC_PGDOWN;
-		mKeys["INSERT"]= OIS::KC_INSERT;
-		mKeys["DELETE"]= OIS::KC_DELETE;
-		mKeys["LWIN"]= OIS::KC_LWIN;
-		mKeys["RWIN"]= OIS::KC_RWIN;
-		mKeys["APPS"]= OIS::KC_APPS;
+		mKeys["UNASSIGNED"]= SDLK_UNKNOWN;
+		mKeys["ESCAPE"]= SDLK_ESCAPE;
+		mKeys["1"]= SDLK_1;
+		mKeys["2"]= SDLK_2;
+		mKeys["3"]= SDLK_3;
+		mKeys["4"]= SDLK_4;
+		mKeys["5"]= SDLK_5;
+		mKeys["6"]= SDLK_6;
+		mKeys["7"]= SDLK_7;
+		mKeys["8"]= SDLK_8;
+		mKeys["9"]= SDLK_9;
+		mKeys["0"]= SDLK_0;
+		mKeys["MINUS"]= SDLK_MINUS;
+		mKeys["EQUALS"]= SDLK_EQUALS;
+		mKeys["BACK"]= SDLK_BACKSPACE;
+		mKeys["TAB"]= SDLK_TAB;
+		mKeys["Q"]= SDLK_q;
+		mKeys["W"]= SDLK_w;
+		mKeys["E"]= SDLK_e;
+		mKeys["R"]= SDLK_r;
+		mKeys["T"]= SDLK_t;
+		mKeys["Y"]= SDLK_y;
+		mKeys["U"]= SDLK_u;
+		mKeys["I"]= SDLK_i;
+		mKeys["O"]= SDLK_o;
+		mKeys["P"]= SDLK_p;
+		mKeys["LBRACKET"]= SDLK_LEFTBRACKET;
+		mKeys["RBRACKET"]= SDLK_RIGHTBRACKET;
+		mKeys["RETURN"]= SDLK_RETURN;
+		mKeys["LCONTROL"]= SDLK_LCTRL;
+		mKeys["A"]= SDLK_a;
+		mKeys["S"]= SDLK_s;
+		mKeys["D"]= SDLK_d;
+		mKeys["F"]= SDLK_f;
+		mKeys["G"]= SDLK_g;
+		mKeys["H"]= SDLK_h;
+		mKeys["J"]= SDLK_j;
+		mKeys["K"]= SDLK_k;
+		mKeys["L"]= SDLK_l;
+		mKeys["SEMICOLON"]= SDLK_SEMICOLON;
+		mKeys["APOSTROPHE"]= SDLK_QUOTE;
+		mKeys["GRAVE"]= SDLK_BACKQUOTE;
+		mKeys["LSHIFT"]= SDLK_LSHIFT;
+		mKeys["BACKSLASH"]= SDLK_BACKSLASH;
+		mKeys["Z"]= SDLK_z;
+		mKeys["X"]= SDLK_x;
+		mKeys["C"]= SDLK_c;
+		mKeys["V"]= SDLK_v;
+		mKeys["B"]= SDLK_b;
+		mKeys["N"]= SDLK_n;
+		mKeys["M"]= SDLK_m;
+		mKeys["COMMA"]= SDLK_COMMA;
+		mKeys["PERIOD"]= SDLK_PERIOD;
+		mKeys["SLASH"]= SDLK_SLASH;
+		mKeys["RSHIFT"]= SDLK_RSHIFT;
+		mKeys["MULTIPLY"]= SDLK_ASTERISK;
+		mKeys["LMENU"]= SDLK_LALT;
+		mKeys["SPACE"]= SDLK_SPACE;
+		mKeys["CAPITAL"]= SDLK_CAPSLOCK;
+		mKeys["F1"]= SDLK_F1;
+		mKeys["F2"]= SDLK_F2;
+		mKeys["F3"]= SDLK_F3;
+		mKeys["F4"]= SDLK_F4;
+		mKeys["F5"]= SDLK_F5;
+		mKeys["F6"]= SDLK_F6;
+		mKeys["F7"]= SDLK_F7;
+		mKeys["F8"]= SDLK_F8;
+		mKeys["F9"]= SDLK_F9;
+		mKeys["F10"]= SDLK_F10;
+		mKeys["F11"]= SDLK_F11;
+		mKeys["F12"]= SDLK_F12;
+		mKeys["NUMLOCK"]= SDLK_NUMLOCKCLEAR;
+		mKeys["SCROLL"]= SDLK_SCROLLLOCK;
+		mKeys["NUMPAD7"]= SDLK_KP_7;
+		mKeys["NUMPAD8"]= SDLK_KP_8;
+		mKeys["NUMPAD9"]= SDLK_KP_9;
+		mKeys["SUBTRACT"]= SDLK_KP_MINUS;
+		mKeys["NUMPAD4"]= SDLK_KP_4;
+		mKeys["NUMPAD5"]= SDLK_KP_5;
+		mKeys["NUMPAD6"]= SDLK_KP_6;
+		mKeys["ADD"]= SDLK_KP_PLUS;
+		mKeys["NUMPAD1"]= SDLK_KP_1;
+		mKeys["NUMPAD2"]= SDLK_KP_2;
+		mKeys["NUMPAD3"]= SDLK_KP_3;
+		mKeys["NUMPAD0"]= SDLK_KP_0;
+		mKeys["DECIMAL"]= SDLK_KP_DECIMAL;
+		mKeys["RCONTROL"]= SDLK_RCTRL;
+		mKeys["DIVIDE"]= SDLK_SLASH;
+		mKeys["SYSRQ"]= SDLK_SYSREQ;
+		mKeys["PRNTSCRN"] = SDLK_PRINTSCREEN;
+		mKeys["RMENU"]= SDLK_RALT;
+		mKeys["PAUSE"]= SDLK_PAUSE;
+		mKeys["HOME"]= SDLK_HOME;
+		mKeys["UP"]= SDLK_UP;
+		mKeys["PGUP"]= SDLK_PAGEUP;
+		mKeys["LEFT"]= SDLK_LEFT;
+		mKeys["RIGHT"]= SDLK_RIGHT;
+		mKeys["END"]= SDLK_END;
+		mKeys["DOWN"]= SDLK_DOWN;
+		mKeys["PGDOWN"]= SDLK_PAGEDOWN;
+		mKeys["INSERT"]= SDLK_INSERT;
+		mKeys["DELETE"]= SDLK_DELETE;
 
-		mKeys["NUMPADENTER"]= OIS::KC_NUMPADENTER;
+		mKeys["NUMPADENTER"]= SDLK_KP_ENTER;
 
-		for(std::map<std::string, OIS::KeyCode>::iterator it = mKeys.begin()
+		for(std::map<std::string, SDL_Keycode>::iterator it = mKeys.begin()
 			; it != mKeys.end() ; it++)
 		{
 			mKeyCodes[ it->second ] = it->first;
 		}
 	}
 
-	std::string InputControlSystem::keyCodeToString(OIS::KeyCode key)
+	std::string InputControlSystem::keyCodeToString(SDL_Keycode key)
 	{
 		return mKeyCodes[key];
 	}
 
-	OIS::KeyCode InputControlSystem::stringToKeyCode(std::string key)
+	SDL_Keycode InputControlSystem::stringToKeyCode(std::string key)
 	{
 		return mKeys[key];
 	}
+
+    void InputControlSystem::adjustMouseRegion(Uint16 width, Uint16 height)
+    {
+        mClientWidth = width;
+        mClientHeight = height;
+    }
 }

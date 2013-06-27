@@ -194,4 +194,16 @@ namespace MWClass
 
         return MWWorld::Ptr(&cell.mPotions.insert(*ref), &cell);
     }
+
+    bool Potion::canSell (const MWWorld::Ptr& item, int npcServices) const
+    {
+        return npcServices & ESM::NPC::Potions;
+    }
+
+    float Potion::getWeight(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Potion> *ref =
+            ptr.get<ESM::Potion>();
+        return ref->mBase->mData.mWeight;
+    }
 }

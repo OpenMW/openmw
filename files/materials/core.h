@@ -58,11 +58,20 @@
 
 #endif
 
-#if SH_GLSL == 1
+#if SH_GLSL == 1 || SH_GLSLES == 1
 
 	#define shFract(val) fract(val)
 
+#if SH_GLSLES == 1
+    @version 100
+#else
     @version 120
+#endif
+
+#if SH_GLSLES == 1 && SH_FRAGMENT_SHADER
+precision mediump int;
+precision mediump float;
+#endif
 
     #define float2 vec2
     #define float3 vec3

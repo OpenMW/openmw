@@ -67,6 +67,8 @@ namespace MWWorld
         std::map<std::string, int> mIds;
         std::map<int, StoreBase *> mStores;
 
+        ESM::NPC mPlayerTemplate;
+
         unsigned int mDynamicCount;
 
     public:
@@ -141,6 +143,21 @@ namespace MWWorld
             mStores[ESM::REC_WEAP] = &mWeapons;
         }
 
+        void clearDynamic ()
+        {
+            for (std::map<int, StoreBase *>::iterator it = mStores.begin(); it != mStores.end(); ++it)
+                it->second->clearDynamic();
+
+            mNpcs.insert(mPlayerTemplate);
+        }
+
+        void movePlayerRecord ()
+        {
+            mPlayerTemplate = *mNpcs.find("player");
+            mNpcs.eraseStatic(mPlayerTemplate.mId);
+            mNpcs.insert(mPlayerTemplate);
+        }
+
         void load(ESM::ESMReader &esm);
 
         template <class T>
@@ -163,6 +180,25 @@ namespace MWWorld
             record.mId = id.str();
 
             T *ptr = store.insert(record);
+            for (iterator it = mStores.begin(); it != mStores.end(); ++it) {
+                if (it->second == &store) {
+                    mIds[ptr->mId] = it->first;
+                }
+            }
+            return ptr;
+        }
+
+        template <class T>
+        const T *insertStatic(const T &x) {
+            Store<T> &store = const_cast<Store<T> &>(get<T>());
+            if (store.search(x.mId) != 0) {
+                std::ostringstream msg;
+                msg << "Try to override existing record '" << x.mId << "'";
+                throw std::runtime_error(msg.str());
+            }
+            T record = x;
+
+            T *ptr = store.insertStatic(record);
             for (iterator it = mStores.begin(); it != mStores.end(); ++it) {
                 if (it->second == &store) {
                     mIds[ptr->mId] = it->first;

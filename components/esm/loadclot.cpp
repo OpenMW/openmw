@@ -16,7 +16,7 @@ void Clothing::load(ESMReader &esm)
     mIcon = esm.getHNOString("ITEX");
 
     mParts.load(esm);
-    
+
 
     mEnchant = esm.getHNOString("ENAM");
 }
@@ -28,10 +28,24 @@ void Clothing::save(ESMWriter &esm)
 
     esm.writeHNOCString("SCRI", mScript);
     esm.writeHNOCString("ITEX", mIcon);
-    
+
     mParts.save(esm);
-    
+
     esm.writeHNOCString("ENAM", mEnchant);
 }
 
+    void Clothing::blank()
+    {
+        mData.mType = 0;
+        mData.mWeight = 0;
+        mData.mValue = 0;
+        mData.mEnchant = 0;
+        mParts.mParts.clear();
+        mName.clear();
+        mModel.clear();
+        mIcon.clear();
+        mIcon.clear();
+        mEnchant.clear();
+        mScript.clear();
+    }
 }

@@ -71,6 +71,19 @@ namespace Compiler
             return true;
         }
 
+        if (mState==EndNameState)
+        {
+            // optional repeated name after end statement
+            if (mName!=loc.mLiteral)
+                reportWarning ("Names for script " + mName + " do not match", loc);
+
+            mState = EndCompleteState;
+            return false; // we are stopping here, because there might be more garbage on the end line,
+                          // that we must ignore.
+                          //
+                          /// \todo allow this workaround to be disabled for newer scripts
+        }
+
         return Parser::parseKeyword (keyword, loc, scanner);
     }
 

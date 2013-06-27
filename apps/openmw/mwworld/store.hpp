@@ -21,6 +21,7 @@ namespace MWWorld
         virtual void load(ESM::ESMReader &esm, const std::string &id) = 0;
 
         virtual bool eraseStatic(const std::string &id) {return false;}
+        virtual void clearDynamic() {}
     };
 
     template <class T>
@@ -92,6 +93,7 @@ namespace MWWorld
         std::map<std::string, T> mDynamic;
 
         typedef std::map<std::string, T> Dynamic;
+        typedef std::map<std::string, T> Static;
 
         friend class ESMStore;
 
@@ -104,6 +106,13 @@ namespace MWWorld
         {}
 
         typedef SharedIterator<T> iterator;
+
+        // setUp needs to be called again after
+        virtual void clearDynamic()
+        {
+            mDynamic.clear();
+            mShared.clear();
+        }
 
         const T *search(const std::string &id) const {
             T item;
@@ -182,6 +191,20 @@ namespace MWWorld
             }
             return ptr;
         }
+
+        T *insertStatic(const T &item) {
+            std::string id = Misc::StringUtils::lowerCase(item.mId);
+            std::pair<typename Static::iterator, bool> result =
+                mStatic.insert(std::pair<std::string, T>(id, item));
+            T *ptr = &result.first->second;
+            if (result.second) {
+                mShared.push_back(ptr);
+            } else {
+                *ptr = item;
+            }
+            return ptr;
+        }
+
 
         bool eraseStatic(const std::string &id) {
             T item;
@@ -415,8 +438,18 @@ namespace MWWorld
             }
         };
 
-        typedef std::map<std::string, ESM::Cell>            DynamicInt;
-        typedef std::map<std::pair<int, int>, ESM::Cell>    DynamicExt;
+        struct DynamicExtCmp
+        {
+            bool operator()(const std::pair<int, int> &left, const std::pair<int, int> &right) const {
+                if (left.first == right.first) {
+                    return left.second < right.second;
+                }
+                return left.first < right.first;
+            }
+        };
+
+        typedef std::map<std::string, ESM::Cell>                           DynamicInt;
+        typedef std::map<std::pair<int, int>, ESM::Cell, DynamicExtCmp>    DynamicExt;
 
         DynamicInt      mInt;
         DynamicExt      mExt;
@@ -465,7 +498,7 @@ namespace MWWorld
             cell.mData.mX = x, cell.mData.mY = y;
 
             std::pair<int, int> key(x, y);
-            std::map<std::pair<int, int>, ESM::Cell>::const_iterator it = mExt.find(key);
+            DynamicExt::const_iterator it = mExt.find(key);
             if (it != mExt.end()) {
                 return &(it->second);
             }
@@ -483,7 +516,7 @@ namespace MWWorld
             cell.mData.mX = x, cell.mData.mY = y;
 
             std::pair<int, int> key(x, y);
-            std::map<std::pair<int, int>, ESM::Cell>::const_iterator it = mExt.find(key);
+            DynamicExt::const_iterator it = mExt.find(key);
             if (it != mExt.end()) {
                 return &(it->second);
             }
@@ -524,7 +557,7 @@ namespace MWWorld
 
         void setUp() {
             //typedef std::vector<ESM::Cell>::iterator Iterator;
-            typedef std::map<std::pair<int, int>, ESM::Cell>::iterator ExtIterator;
+            typedef DynamicExt::iterator ExtIterator;
             typedef std::map<std::string, ESM::Cell>::iterator IntIterator;
 
             //std::sort(mInt.begin(), mInt.end(), RecordCmp());
@@ -862,7 +895,28 @@ namespace MWWorld
         }
 
         void setUp() {
-            std::sort(mStatic.begin(), mStatic.end(), Compare());
+            /// \note This method sorts indexed values for further
+            /// searches. Every loaded item is present in storage, but
+            /// latest loaded shadows any previous while searching.
+            /// If memory cost will be too high, it is possible to remove
+            /// unused values.
+
+            Compare cmp;
+
+            std::stable_sort(mStatic.begin(), mStatic.end(), cmp);
+
+            typename std::vector<T>::iterator first, next;
+            next = first = mStatic.begin();
+
+            while (first != mStatic.end() && ++next != mStatic.end()) {
+                while (next != mStatic.end() && !cmp(*first, *next)) {
+                    ++next;
+                }
+                if (first != --next) {
+                    std::swap(*first, *next);
+                }
+                first = ++next;
+            }
         }
 
         const T *search(int index) const {

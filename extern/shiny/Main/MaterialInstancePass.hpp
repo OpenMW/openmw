@@ -18,10 +18,10 @@ namespace sh
 	public:
 		MaterialInstanceTextureUnit* createTextureUnit (const std::string& name);
 
+		void save (std::ofstream& stream);
+
 		PropertySetGet mShaderProperties;
 
-		std::vector <MaterialInstanceTextureUnit> getTexUnits ();
-	private:
 		std::vector <MaterialInstanceTextureUnit> mTexUnits;
 	};
 }

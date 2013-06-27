@@ -9,33 +9,41 @@ namespace MWMechanics
 {
     class Enchanting
     {
-            
             MWWorld::Ptr mOldItemPtr;
             MWWorld::Ptr mSoulGemPtr;
             MWWorld::Ptr mEnchanter;
-            const MWWorld::Ptr *mNewItemPtr;
-            int mEnchantType;
+
+            int mCastStyle;
+
+            bool mSelfEnchanting;
 
             ESM::EffectList mEffectList;
-            ESM::Enchantment mEnchantment;
 
             std::string mNewItemName;
             std::string mObjectType;
             std::string mOldItemId;
+            int mOldItemCount;
+
         public:
-            Enchanting(MWWorld::Ptr enchanter);
+            Enchanting();
+            void setEnchanter(MWWorld::Ptr enchanter);
+            void setSelfEnchanting(bool selfEnchanting);
             void setOldItem(MWWorld::Ptr oldItem);
-            void setNewItemName(std::string s);
+            void setNewItemName(const std::string& s);
             void setEffect(ESM::EffectList effectList);
             void setSoulGem(MWWorld::Ptr soulGem);
-            void create();
-            void nextEnchantType();
-            int getEnchantType();
-            int getEnchantCost();
-            int getMaxEnchantValue();
-            int getGemCharge();
-            bool soulEmpty();
-            bool itemEmpty();
+            bool create(); //Return true if created, false if failed.
+            void nextCastStyle(); //Set enchant type to next possible type (for mOldItemPtr object)
+            int getCastStyle() const;
+            float getEnchantPoints() const;
+            float getCastCost() const;
+            int getEnchantPrice() const;
+            float getMaxEnchantValue() const;
+            int getGemCharge() const;
+            float getEnchantChance() const;
+            bool soulEmpty() const; //Return true if empty
+            bool itemEmpty() const; //Return true if empty
+            void payForEnchantment() const;
     };
 }
 #endif

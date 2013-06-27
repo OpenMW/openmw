@@ -313,21 +313,26 @@ public:
   void destroyInstance( Archive* arch) { delete arch; }
 };
 
-class DirArchiveFactory : public FileSystemArchiveFactory
+class DirArchiveFactory : public ArchiveFactory
 {
 public:
-  const String& getType() const
-  {
-    static String name = "Dir";
-    return name;
-  }
+    const String& getType() const
+    {
+      static String name = "Dir";
+      return name;
+    }
 
-  Archive *createInstance( const String& name )
-  {
-    return new DirArchive(name);
-  }
+    Archive *createInstance( const String& name )
+    {
+      return new DirArchive(name);
+    }
 
-  void destroyInstance( Archive* arch) { delete arch; }
+    virtual Archive* createInstance(const String& name, bool readOnly)
+    {
+      return new DirArchive(name);
+    }
+
+    void destroyInstance( Archive* arch) { delete arch; }
 };
 
 

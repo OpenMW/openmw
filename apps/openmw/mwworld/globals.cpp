@@ -74,15 +74,6 @@ namespace MWWorld
 
             mVariables.insert (std::make_pair (iter->mId, std::make_pair (type, value)));
         }
-
-        if (mVariables.find ("dayspassed")==mVariables.end())
-        {
-            // vanilla Morrowind does not define dayspassed.
-            Data value;
-            value.mLong = 1; // but the addons start counting at 1 :(
-
-            mVariables.insert (std::make_pair ("dayspassed", std::make_pair ('l', value)));
-        }
     }
 
     const Globals::Data& Globals::operator[] (const std::string& name) const

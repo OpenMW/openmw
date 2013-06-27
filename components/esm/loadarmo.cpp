@@ -50,4 +50,19 @@ void Armor::save(ESMWriter &esm)
     esm.writeHNOCString("ENAM", mEnchant);
 }
 
+    void Armor::blank()
+    {
+        mData.mType = 0;
+        mData.mWeight = 0;
+        mData.mValue = 0;
+        mData.mHealth = 0;
+        mData.mEnchant = 0;
+        mData.mArmor = 0;
+        mParts.mParts.clear();
+        mName.clear();
+        mModel.clear();
+        mIcon.clear();
+        mScript.clear();
+        mEnchant.clear();
+    }
 }

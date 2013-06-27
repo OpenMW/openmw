@@ -27,5 +27,15 @@ void Repair::save(ESMWriter &esm)
     esm.writeHNOCString("ITEX", mIcon);
 }
 
-
+    void Repair::blank()
+    {
+        mData.mWeight = 0;
+        mData.mValue = 0;
+        mData.mQuality = 0;
+        mData.mUses = 0;
+        mName.clear();
+        mModel.clear();
+        mIcon.clear();
+        mScript.clear();
+    }
 }

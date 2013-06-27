@@ -2,24 +2,108 @@
 
 <MyGUI type="Layout">
 
-<Widget type="Window" skin="" layer="Windows" align="Left|Top" position="00 200 512 256" name="_Main">
+  <Widget type="Window" skin="" layer="Windows" align="Left|Top" position="0 0 565 390" name="_Main">
+    <!-- pages -->
+    <Widget type="ImageBox" skin="ImageBox" position="0 0 565 390" align="Top|Right" name="JImage">
+      <Property key="ImageTexture" value="textures\tx_menubook.dds"/>
+      <Property key="ImageCoord" value="50 0 412 256"/>
 
-    <Widget type="ImageBox" skin="ImageBox" position_real="0 0 1 1" align="Top|Right" name="JImage">     
-        <Property key="ImageTexture" value="textures\tx_menubook.dds"/>
-
-        <Widget type="ImageButton" skin="ImageBox" position="370 220 128 32" name="NextPageBTN">
-            <Property key="ImageHighlighted" value="textures\tx_menubook_next_over.dds"/>
-            <Property key="ImageNormal" value="textures\tx_menubook_next_idle.dds"/>
-            <Property key="ImagePushed" value="textures\tx_menubook_next_pressed.dds"/>
-        </Widget>
-        <Widget type="ImageButton" skin="ImageBox" position="80 220 128 32" name="PrevPageBTN">
+      <Widget type="Widget" position="0 0 282 390">
+          <Widget type="ImageButton" skin="ImageBox" position="205 350 48 32" name="PrevPageBTN">
             <Property key="ImageHighlighted" value="textures\tx_menubook_prev_over.dds"/>
             <Property key="ImageNormal" value="textures\tx_menubook_prev_idle.dds"/>
             <Property key="ImagePushed" value="textures\tx_menubook_prev_pressed.dds"/>
-        </Widget>
-        <Widget type="EditBox" skin="MW_BookPage" position_real="0.15 0.1 0.3 0.75" name = "LeftText"/>
-        <Widget type="EditBox" skin="MW_BookPage" position_real="0.55 0.1 0.3 0.75" name = "RightText"/>
-    </Widget>
-</Widget>
+          </Widget>
+      </Widget>
+      <Widget type="Widget" position="282 0 282 390">
+          <Widget type="ImageButton" skin="ImageBox" position="18 350 48 32" name="NextPageBTN">
+            <Property key="ImageHighlighted" value="textures\tx_menubook_next_over.dds"/>
+            <Property key="ImageNormal" value="textures\tx_menubook_next_idle.dds"/>
+            <Property key="ImagePushed" value="textures\tx_menubook_next_pressed.dds"/>
+          </Widget>
+      </Widget>
 
+      <!-- buttons -->
+      <Widget type="ImageButton" skin="ImageBox" position="40 350 64 32" name="OptionsBTN">
+        <Property key="ImageHighlighted" value="textures\tx_menubook_options_over.dds"/>
+        <Property key="ImageNormal" value="textures\tx_menubook_options_idle.dds"/>
+        <Property key="ImagePushed" value="textures\tx_menubook_options_pressed.dds"/>
+      </Widget>
+      <Widget type="TextBox" skin="NormalText" position="150 350 32 16" name="PageOneNum">
+        <Property key="TextColour" value="0 0 0"/>
+      </Widget>
+
+      <Widget type="TextBox" skin="NormalText" position="410 350 32 16" name="PageTwoNum">
+        <Property key="TextColour" value="0 0 0"/>
+      </Widget>
+      <Widget type="ImageButton" skin="ImageBox" position="460 350 48 32" name="CloseBTN">
+        <Property key="ImageHighlighted" value="textures\tx_menubook_close_over.dds"/>
+        <Property key="ImageNormal" value="textures\tx_menubook_close_idle.dds"/>
+        <Property key="ImagePushed" value="textures\tx_menubook_close_pressed.dds"/>
+      </Widget>
+      <Widget type="ImageButton" skin="ImageBox" position="460 350 64 32" name="JournalBTN">
+        <Property key="ImageHighlighted" value="textures\tx_menubook_journal_over.dds"/>
+        <Property key="ImageNormal" value="textures\tx_menubook_journal_idle.dds"/>
+        <Property key="ImagePushed" value="textures\tx_menubook_journal_pressed.dds"/>
+      </Widget>
+
+
+      <!-- text pages -->
+      <Widget type="BookPage" skin="MW_BookPage" position="30 22 240 300" name="LeftBookPage"/>
+      <Widget type="BookPage" skin="MW_BookPage" position="300 22 240 300" name="RightBookPage"/>
+
+      <!-- options overlay -->
+
+    </Widget>
+
+    <!-- "options" -->
+    <Widget type="ImageBox" skin="ImageBox" position="300 0 224 350" name="OptionsOverlay">
+      <Property key="ImageTexture" value="textures\tx_menubook_bookmark.dds"/>
+      <Property key="ImageCoord" value="0 0 164 256"/>
+
+      <Widget type="BookPage" skin="MW_BookPage" position="20 15 92 250" name="LeftTopicIndex"/>
+      <Widget type="BookPage" skin="MW_BookPage" position="112 15 92 250" name="RightTopicIndex"/>
+
+      <Widget type="ImageButton" skin="ImageBox" position="62 15 100 20" Align="Top|Left" name="ShowActiveBTN">
+        <Property key="ImageHighlighted" value="textures\tx_menubook_quests_active_over.dds"/>
+        <Property key="ImageNormal" value="textures\tx_menubook_quests_active_idle.dds"/>
+        <Property key="ImagePushed" value="textures\tx_menubook_quests_active_pressed.dds"/>
+      </Widget>
+
+      <Widget type="ImageButton" skin="ImageBox" position="76 15 72 20" Align="Top|Left" name="ShowAllBTN">
+        <Property key="ImageHighlighted" value="textures\tx_menubook_quests_all_over.dds"/>
+        <Property key="ImageNormal" value="textures\tx_menubook_quests_all_idle.dds"/>
+        <Property key="ImagePushed" value="textures\tx_menubook_quests_all_pressed.dds"/>
+      </Widget>
+
+      <Widget type="ScrollView" skin="MW_ScrollView" position="20 15 184 245" name="TopicsList" align="Right VStretch">
+        <Property key="CanvasAlign" value="Left Top"/>
+        <Widget type="BookPage" skin="MW_BookPage" position="0 0 30000 30000" name="TopicsPage"/>
+      </Widget>
+
+      <Widget type="ScrollView" skin="MW_ScrollView" position="20 35 184 225" name="QuestsList" align="Right VStretch">
+        <Property key="CanvasAlign" value="Left Top"/>
+        <Widget type="BookPage" skin="MW_BookPage" position="0 0 30000 30000" name="QuestsPage"/>
+      </Widget>
+
+      <Widget type="ImageButton" skin="ImageBox" position="20 265 56 32" Align="Top|Left" name="TopicsBTN">
+        <Property key="ImageHighlighted" value="textures\tx_menubook_topics_over.dds"/>
+        <Property key="ImageNormal" value="textures\tx_menubook_topics_idle.dds"/>
+        <Property key="ImagePushed" value="textures\tx_menubook_topics_pressed.dds"/>
+      </Widget>
+
+      <Widget type="ImageButton" skin="ImageBox" position="130 265 56 32" Align="Top|Left" name="QuestsBTN">
+        <Property key="ImageHighlighted" value="textures\tx_menubook_quests_over.dds"/>
+        <Property key="ImageNormal" value="textures\tx_menubook_quests_idle.dds"/>
+        <Property key="ImagePushed" value="textures\tx_menubook_quests_pressed.dds"/>
+      </Widget>
+
+      <Widget type="ImageButton" skin="ImageBox" position="85 290 56 32" Align="Top|Left" name="CancelBTN">
+        <Property key="ImageHighlighted" value="textures\tx_menubook_cancel_over.dds"/>
+        <Property key="ImageNormal" value="textures\tx_menubook_cancel_idle.dds"/>
+        <Property key="ImagePushed" value="textures\tx_menubook_cancel_pressed.dds"/>
+      </Widget>
+
+    </Widget>
+  </Widget>
 </MyGUI>

@@ -13,7 +13,7 @@
             <Property key="ImagePushed" value="textures\tx_menubook_take_pressed.dds"/>
         </Widget>
 
-        <Widget type="ImageButton" skin="ImageBox" position="418 24 128 32" name="CloseButton">
+        <Widget type="ImageButton" skin="ImageBox" position="415 24 128 32" name="CloseButton">
             <Property key="ImageHighlighted" value="textures\tx_menubook_close_over.dds"/>
             <Property key="ImageNormal" value="textures\tx_menubook_close_idle.dds"/>
             <Property key="ImagePushed" value="textures\tx_menubook_close_pressed.dds"/>

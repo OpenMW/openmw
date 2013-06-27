@@ -44,6 +44,8 @@ namespace MWClass
 
             virtual void insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const;
 
+            virtual void adjustPosition(const MWWorld::Ptr& ptr) const;
+
             virtual std::string getName (const MWWorld::Ptr& ptr) const;
             ///< \return name (the one that is to be presented to the user; not the internal one);
             /// can return an empty string.
@@ -125,7 +127,11 @@ namespace MWClass
 
             virtual bool isEssential (const MWWorld::Ptr& ptr) const;
             ///< Is \a ptr essential? (i.e. may losing \a ptr make the game unwinnable)
+
+            virtual int getServices (const MWWorld::Ptr& actor) const;
             
+            virtual bool isPersistent (const MWWorld::Ptr& ptr) const;
+
             static void registerSelf();
 
             virtual std::string getModel(const MWWorld::Ptr &ptr) const;

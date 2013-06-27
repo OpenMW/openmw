@@ -1,6 +1,4 @@
-#include "map_window.hpp"
-
-#include <openengine/gui/layout.hpp>
+#include "mapwindow.hpp"
 
 #include "../mwmechanics/stat.hpp"
 #include "../mwworld/ptr.hpp"

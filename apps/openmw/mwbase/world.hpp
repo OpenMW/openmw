@@ -94,6 +94,8 @@ namespace MWBase
 
             virtual ~World() {}
 
+            virtual void startNewGame() = 0;
+
             virtual OEngine::Render::Fader* getFader() = 0;
             ///< \ŧodo remove this function. Rendering details should not be exposed.
 
@@ -216,6 +218,9 @@ namespace MWBase
             virtual MWWorld::Ptr  getFacedObject() = 0;
             ///< Return pointer to the object the player is looking at, if it is within activation range
 
+            virtual void adjustPosition (const MWWorld::Ptr& ptr) = 0;
+            ///< Adjust position after load to be on ground. Must be called after model load.
+
             virtual void deleteObject (const MWWorld::Ptr& ptr) = 0;
 
             virtual void moveObject (const MWWorld::Ptr& ptr, float x, float y, float z) = 0;
@@ -226,6 +231,8 @@ namespace MWBase
             virtual void scaleObject (const MWWorld::Ptr& ptr, float scale) = 0;
 
             virtual void rotateObject(const MWWorld::Ptr& ptr,float x,float y,float z, bool adjust = false) = 0;
+
+            virtual void localRotateObject (const MWWorld::Ptr& ptr, float x, float y, float z) = 0;
 
             virtual void safePlaceObject(const MWWorld::Ptr& ptr,MWWorld::CellStore &Cell,ESM::Position pos) = 0;
             ///< place an object in a "safe" location (ie not in the void, etc).
@@ -239,6 +246,9 @@ namespace MWBase
 
             virtual void doPhysics (const MWWorld::PtrMovementList &actors, float duration) = 0;
             ///< Run physics simulation and modify \a world accordingly.
+
+            virtual bool castRay (float x1, float y1, float z1, float x2, float y2, float z2) = 0;
+            ///< cast a Ray and return true if there is an object in the ray path.
 
             virtual bool toggleCollisionMode() = 0;
             ///< Toggle collision mode for player. If disabled player object should ignore
@@ -312,12 +322,28 @@ namespace MWBase
 
             virtual void togglePOV() = 0;
             virtual void togglePreviewMode(bool enable) = 0;
-            virtual bool toggleVanityMode(bool enable, bool force) = 0;
+            virtual bool toggleVanityMode(bool enable) = 0;
             virtual void allowVanityMode(bool allow) = 0;
             virtual void togglePlayerLooking(bool enable) = 0;
             virtual void changeVanityModeScale(float factor) = 0;
+            virtual bool vanityRotateCamera(float * rot) = 0;
 
+            virtual void setupPlayer() = 0;
             virtual void renderPlayer() = 0;
+
+            virtual bool getOpenOrCloseDoor(const MWWorld::Ptr& door) = 0;
+            ///< if activated, should this door be opened or closed?
+            virtual void activateDoor(const MWWorld::Ptr& door) = 0;
+            ///< activate (open or close) an non-teleport door
+
+            virtual bool getPlayerStandingOn (const MWWorld::Ptr& object) = 0; ///< @return true if the player is standing on \a object
+            virtual bool getActorStandingOn (const MWWorld::Ptr& object) = 0; ///< @return true if any actor is standing on \a object
+            virtual float getWindSpeed() = 0;
+
+            virtual void getContainersOwnedBy (const MWWorld::Ptr& npc, std::vector<MWWorld::Ptr>& out) = 0;
+            ///< get all containers in active cells owned by this Npc
+            virtual void getItemsOwnedBy (const MWWorld::Ptr& npc, std::vector<MWWorld::Ptr>& out) = 0;
+            ///< get all items in active cells owned by this Npc
 
             virtual void setupExternalRendering (MWRender::ExternalRendering& rendering) = 0;
 

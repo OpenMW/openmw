@@ -6,8 +6,6 @@
 #include <QRegExp>
 #include <QMap>
 
-#include <QDebug>
-
 #include <components/files/configurationmanager.hpp>
 
 #include <boost/version.hpp>
@@ -96,15 +94,15 @@ bool GameSettings::readFile(QTextStream &stream)
     QRegExp keyRe("^([^=]+)\\s*=\\s*(.+)$");
 
     while (!stream.atEnd()) {
-        QString line = stream.readLine().simplified();
+        QString line = stream.readLine();
 
         if (line.isEmpty() || line.startsWith("#"))
             continue;
 
         if (keyRe.indexIn(line) != -1) {
 
-            QString key = keyRe.cap(1).simplified();
-            QString value = keyRe.cap(2).simplified();
+            QString key = keyRe.cap(1).trimmed();
+            QString value = keyRe.cap(2).trimmed();
 
             // Don't remove existing data entries
             if (key != QLatin1String("data"))

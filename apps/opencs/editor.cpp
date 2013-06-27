@@ -61,6 +61,11 @@ void CS::Editor::setupDataFiles()
         QString path = QString::fromStdString(iter->string());
         mFileDialog.addFiles(path);
     }
+
+    //load the settings into the userSettings instance.
+    const QString settingFileName = "opencs.cfg";
+    CSMSettings::UserSettings::instance().loadSettings(settingFileName);
+    
 }
 
 void CS::Editor::createDocument()

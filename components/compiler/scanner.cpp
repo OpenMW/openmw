@@ -1,6 +1,7 @@
 
 #include "scanner.hpp"
 
+#include <cassert>
 #include <cctype>
 #include <sstream>
 #include <algorithm>
@@ -88,6 +89,10 @@ namespace Compiler
         }
         else if (c==';')
         {
+            std::string comment;
+
+            comment += c;
+
             while (get (c))
             {
                 if (c=='\n')
@@ -95,11 +100,14 @@ namespace Compiler
                     putback (c);
                     break;
                 }
+                else
+                    comment += c;
             }
 
+            TokenLoc loc (mLoc);
             mLoc.mLiteral.clear();
 
-            return true;
+            return parser.parseComment (comment, loc, *this);
         }
         else if (isWhitespace (c))
         {
@@ -156,10 +164,9 @@ namespace Compiler
 
     bool Scanner::scanInt (char c, Parser& parser, bool& cont)
     {
+        assert(c != '\0');
         std::string value;
-
         value += c;
-        bool empty = false;
 
         bool error = false;
 
@@ -168,7 +175,6 @@ namespace Compiler
             if (std::isdigit (c))
             {
                 value += c;
-                empty = false;
             }
             else if (std::isalpha (c) || c=='_')
                 error = true;
@@ -183,7 +189,7 @@ namespace Compiler
             }
         }
 
-        if (empty || error)
+        if (error)
             return false;
 
         TokenLoc loc (mLoc);
@@ -365,7 +371,18 @@ namespace Compiler
         else if (c==')')
             special = S_close;
         else if (c=='.')
+        {
+            // check, if this starts a float literal
+            if (get (c))
+            {
+                putback (c);
+
+                if (std::isdigit (c))
+                    return scanFloat ("", parser, cont);
+            }
+
             special = S_member;
+        }
         else if (c=='=')
         {
             if (get (c))
@@ -421,7 +438,12 @@ namespace Compiler
             if (get (c))
             {
                 if (c=='=')
+                {
                     special = S_cmpLE;
+
+                    if (get (c) && c!='=') // <== is a allowed as an alternative to <=  :(
+                        putback (c);
+                }
                 else
                 {
                     putback (c);
@@ -436,7 +458,12 @@ namespace Compiler
             if (get (c))
             {
                 if (c=='=')
+                {
                     special = S_cmpGE;
+
+                    if (get (c) && c!='=') // >== is a allowed as an alternative to >=  :(
+                        putback (c);
+                }
                 else
                 {
                     putback (c);

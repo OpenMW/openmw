@@ -3,19 +3,23 @@
 
 #include <map>
 
+#include <QApplication>
+#include <QDesktopWidget>
+
 #include "../../model/doc/documentmanager.hpp"
 #include "../../model/doc/document.hpp"
 
 #include "../world/util.hpp"
 #include "../world/enumdelegate.hpp"
 #include "../world/vartypedelegate.hpp"
+#include "../world/recordstatusdelegate.hpp"
+#include "../settings/usersettingsdialog.hpp"
 
 #include "view.hpp"
 
 #include <QMessageBox>
 #include <QPushButton>
 #include <QtGui/QApplication>
-#include <QDebug>
 
 void CSVDoc::ViewManager::updateIndices()
 {
@@ -49,6 +53,40 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
         "Luck", 0
     };
 
+    static const char *sSpellTypes[] =
+    {
+        "Spell", "Ability", "Blight", "Disease", "Curse", "Power", 0
+    };
+
+    static const char *sApparatusTypes[] =
+    {
+        "Mortar & Pestle", "Albemic", "Calcinator", "Retort", 0
+    };
+
+    static const char *sArmorTypes[] =
+    {
+        "Helmet", "Cuirass", "Left Pauldron", "Right Pauldron", "Greaves", "Boots", "Left Gauntlet",
+        "Right Gauntlet", "Shield", "Left Bracer", "Right Bracer", 0
+    };
+
+    static const char *sClothingTypes[] =
+    {
+        "Pants", "Shoes", "Shirt", "Belt", "Robe", "Right Glove", "Left Glove", "Skirt", "Ring",
+        "Amulet", 0
+    };
+
+    static const char *sCreatureTypes[] =
+    {
+        "Creature", "Deadra", "Undead", "Humanoid", 0
+    };
+
+    static const char *sWeaponTypes[] =
+    {
+        "Short Blade 1H", "Long Blade 1H", "Long Blade 2H", "Blunt 1H", "Blunt 2H Close",
+        "Blunt 2H Wide", "Spear 2H", "Axe 1H", "Axe 2H", "Bow", "Crossbow", "Thrown", "Arrow",
+        "Bolt", 0
+    };
+
     mDelegateFactories = new CSVWorld::CommandDelegateFactoryCollection;
 
     mDelegateFactories->add (CSMWorld::ColumnBase::Display_GmstVarType,
@@ -61,7 +99,31 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
         new CSVWorld::EnumDelegateFactory (sSpecialisations));
 
     mDelegateFactories->add (CSMWorld::ColumnBase::Display_Attribute,
-        new CSVWorld::EnumDelegateFactory (sAttributes));
+        new CSVWorld::EnumDelegateFactory (sAttributes, true));
+
+    mDelegateFactories->add (CSMWorld::ColumnBase::Display_SpellType,
+        new CSVWorld::EnumDelegateFactory (sSpellTypes));
+
+    mDelegateFactories->add (CSMWorld::ColumnBase::Display_ApparatusType,
+        new CSVWorld::EnumDelegateFactory (sApparatusTypes));
+
+    mDelegateFactories->add (CSMWorld::ColumnBase::Display_ArmorType,
+        new CSVWorld::EnumDelegateFactory (sArmorTypes));
+
+    mDelegateFactories->add (CSMWorld::ColumnBase::Display_ClothingType,
+        new CSVWorld::EnumDelegateFactory (sClothingTypes));
+
+    mDelegateFactories->add (CSMWorld::ColumnBase::Display_CreatureType,
+        new CSVWorld::EnumDelegateFactory (sCreatureTypes));
+
+    mDelegateFactories->add (CSMWorld::ColumnBase::Display_WeaponType,
+        new CSVWorld::EnumDelegateFactory (sWeaponTypes));
+
+    mDelegateFactories->add (CSMWorld::ColumnBase::Display_RecordState,
+        new CSVWorld::RecordStatusDelegateFactory() );
+
+    connect (&CSMSettings::UserSettings::instance(), SIGNAL (signalUpdateEditorSetting (const QString &, const QString &)),
+             this, SLOT (slotUpdateEditorSetting (const QString &, const QString &)));
 }
 
 CSVDoc::ViewManager::~ViewManager()
@@ -287,4 +349,14 @@ void CSVDoc::ViewManager::exitApplication (CSVDoc::View *view)
 {
     if (notifySaveOnClose (view))
         QApplication::instance()->exit();
+}
+
+void CSVDoc::ViewManager::slotUpdateEditorSetting (const QString &settingName, const QString &settingValue)
+{
+    if (settingName == "Record Status Display" ||
+        settingName == "Width" || settingName == "Height")
+    {
+        foreach (CSVDoc::View *view, mViews)
+            view->updateEditorSetting (settingName, settingValue);
+    }
 }

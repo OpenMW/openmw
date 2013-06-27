@@ -292,8 +292,8 @@ bool MainDialog::setup()
     // Now create the pages as they need the settings
     createPages();
 
-    // Call this so we can exit on Ogre errors before mainwindow is shown
-    if (!mGraphicsPage->setupOgre())
+    // Call this so we can exit on Ogre/SDL errors before mainwindow is shown
+    if (!mGraphicsPage->loadSettings())
         return false;
 
     loadSettings();
@@ -310,6 +310,8 @@ void MainDialog::changePage(QListWidgetItem *current, QListWidgetItem *previous)
 
 bool MainDialog::setupLauncherSettings()
 {
+    mLauncherSettings.setMultiValueEnabled(true);
+
     QString userPath = QString::fromStdString(mCfgMgr.getUserPath().string());
 
     QStringList paths;
@@ -427,6 +429,8 @@ bool MainDialog::setupGameSettings()
 
 bool MainDialog::setupGraphicsSettings()
 {
+    mGraphicsSettings.setMultiValueEnabled(false);
+
     QString userPath = QString::fromStdString(mCfgMgr.getUserPath().string());
     QString globalPath = QString::fromStdString(mCfgMgr.getGlobalPath().string());
 
@@ -608,8 +612,21 @@ void MainDialog::closeEvent(QCloseEvent *event)
 
 void MainDialog::play()
 {
-    if (!writeSettings())
+    if (!writeSettings()) {
         qApp->quit();
+        return;
+    }
+
+    if(!mGameSettings.hasMaster()) {
+            QMessageBox msgBox;
+            msgBox.setWindowTitle(tr("No master file selected"));
+            msgBox.setIcon(QMessageBox::Warning);
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setText(tr("<br><b>You do not have any master files selected.</b><br><br> \
+                              OpenMW will not start without a master file selected.<br>"));
+            msgBox.exec();
+            return;
+    }
 
     // Launch the game detached
     startProgram(QString("openmw"), true);

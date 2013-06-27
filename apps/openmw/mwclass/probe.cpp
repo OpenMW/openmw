@@ -175,4 +175,24 @@ namespace MWClass
 
         return MWWorld::Ptr(&cell.mProbes.insert(*ref), &cell);
     }
+
+    bool Probe::canSell (const MWWorld::Ptr& item, int npcServices) const
+    {
+        return npcServices & ESM::NPC::Probes;
+    }
+
+    int Probe::getItemMaxHealth (const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Probe> *ref =
+            ptr.get<ESM::Probe>();
+
+        return ref->mBase->mData.mUses;
+    }
+
+    float Probe::getWeight(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Probe> *ref =
+            ptr.get<ESM::Probe>();
+        return ref->mBase->mData.mWeight;
+    }
 }

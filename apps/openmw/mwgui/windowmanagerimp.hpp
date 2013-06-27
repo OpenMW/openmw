@@ -10,11 +10,6 @@
    this class.
 **/
 
-#include <vector>
-#include <string>
-
-#include <components/esm/loadclas.hpp>
-
 #include "../mwbase/windowmanager.hpp"
 
 namespace MyGUI
@@ -46,6 +41,11 @@ namespace OEngine
     {
         class OgreRenderer;
     }
+}
+
+namespace SFO
+{
+    class CursorManager;
 }
 
 namespace MWGui
@@ -85,10 +85,10 @@ namespace MWGui
     typedef std::pair<std::string, int> Faction;
     typedef std::vector<Faction> FactionList;
 
-    WindowManager(const Compiler::Extensions& extensions, int fpsLevel, bool newGame,
+    WindowManager(const Compiler::Extensions& extensions, int fpsLevel,
                   OEngine::Render::OgreRenderer *mOgre, const std::string& logpath,
                   const std::string& cacheDir, bool consoleOnlyScripts,
-                  Translation::Storage& translationDataStorage);
+                  Translation::Storage& translationDataStorage, ToUTF8::FromType encoding);
     virtual ~WindowManager();
 
     /**
@@ -98,11 +98,16 @@ namespace MWGui
      */
     virtual void update();
 
+    virtual void setKeyFocusWidget (MyGUI::Widget* widget);
+
+    virtual void setNewGame(bool newgame);
+
     virtual void pushGuiMode(GuiMode mode);
     virtual void popGuiMode();
     virtual void removeGuiMode(GuiMode mode); ///< can be anywhere in the stack
 
     virtual GuiMode getMode() const;
+    virtual bool containsMode(GuiMode mode) const;
 
     virtual bool isGuiMode() const;
 
@@ -156,7 +161,6 @@ namespace MWGui
     virtual void setFocusObject(const MWWorld::Ptr& focus);
     virtual void setFocusObjectScreenCoords(float min_x, float min_y, float max_x, float max_y);
 
-    virtual void setMouseVisible(bool visible);
     virtual void getMousePosition(int &x, int &y);
     virtual void getMousePosition(float &x, float &y);
     virtual void setDragDrop(bool dragDrop);
@@ -179,8 +183,8 @@ namespace MWGui
     virtual void activateQuickKey  (int index);
 
     virtual void setSelectedSpell(const std::string& spellId, int successChancePercent);
-    virtual void setSelectedEnchantItem(const MWWorld::Ptr& item, int chargePercent);
-    virtual void setSelectedWeapon(const MWWorld::Ptr& item, int durabilityPercent);
+    virtual void setSelectedEnchantItem(const MWWorld::Ptr& item);
+    virtual void setSelectedWeapon(const MWWorld::Ptr& item);
     virtual void unsetSelectedSpell();
     virtual void unsetSelectedWeapon();
 
@@ -196,7 +200,9 @@ namespace MWGui
 
     virtual void removeDialog(OEngine::GUI::Layout* dialog); ///< Hides dialog and schedules dialog to be deleted.
 
-    virtual void messageBox (const std::string& message, const std::vector<std::string>& buttons = std::vector<std::string>());
+    virtual void messageBox (const std::string& message, const std::vector<std::string>& buttons = std::vector<std::string>(), bool showInDialogueModeOnly = false);
+    virtual void staticMessageBox(const std::string& message);
+    virtual void removeStaticMessageBox();
     virtual void enterPressed ();
     virtual int readPressedButton (); ///< returns the index of the pressed button or -1 if no button was pressed (->MessageBoxmanager->InteractiveMessageBox)
 
@@ -225,10 +231,14 @@ namespace MWGui
     virtual void loadingDone();
 
     virtual void enableRest() { mRestAllowed = true; }
-    virtual bool getRestEnabled() { return mRestAllowed; }
+    virtual bool getRestEnabled();
+
+    virtual bool getJournalAllowed() { return (mAllowed & GW_Magic); }
 
     virtual bool getPlayerSleeping();
     virtual void wakeUpPlayer();
+
+    virtual void updatePlayer();
 
     virtual void showCompanionWindow(MWWorld::Ptr actor);
     virtual void startSpellMaking(MWWorld::Ptr actor);
@@ -237,6 +247,8 @@ namespace MWGui
     virtual void startTraining(MWWorld::Ptr actor);
     virtual void startRepair(MWWorld::Ptr actor);
     virtual void startRepairItem(MWWorld::Ptr item);
+
+    virtual void frameStarted(float dt);
 
     virtual void showSoulgemDialog (MWWorld::Ptr item);
 
@@ -284,7 +296,7 @@ namespace MWGui
     CompanionWindow* mCompanionWindow;
 
     Translation::Storage& mTranslationDataStorage;
-    Cursor* mCursor;
+    Cursor* mSoftwareCursor;
 
     CharacterCreation* mCharGen;
 
@@ -293,6 +305,9 @@ namespace MWGui
     bool mCrosshairEnabled;
     bool mSubtitlesEnabled;
     bool mHudEnabled;
+    bool mCursorVisible;
+
+    void setCursorVisible(bool visible);
 
     /// \todo get rid of this stuff. Move it to the respective UI element classes, if needed.
     // Various stats about player as needed by window manager
@@ -306,6 +321,8 @@ namespace MWGui
 
     MyGUI::Gui *mGui; // Gui
     std::vector<GuiMode> mGuiModes;
+
+    SFO::CursorManager* mCursorManager;
 
     std::vector<OEngine::GUI::Layout*> mGarbageDialogs;
     void cleanupGarbage();
@@ -328,13 +345,17 @@ namespace MWGui
     unsigned int mTriangleCount;
     unsigned int mBatchCount;
 
-    void onDialogueWindowBye();
+    bool mUseHardwareCursors;
+    void setUseHardwareCursors(bool use);
 
     /**
      * Called when MyGUI tries to retrieve a tag. This usually corresponds to a GMST string,
      * so this method will retrieve the GMST with the name \a _tag and place the result in \a _result
      */
     void onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result);
+
+    void onCursorChange(const std::string& name);
+    void onKeyFocusChanged(MyGUI::Widget* widget);
   };
 }
 

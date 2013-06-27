@@ -63,6 +63,12 @@ Utf8Encoder::Utf8Encoder(const FromType sourceEncoding):
             translationArray = ToUTF8::windows_1251;
             break;
         }
+        case ToUTF8::CP437:
+        {
+            translationArray = ToUTF8::cp437;
+            break;
+        }
+
         default:
         {
             assert(0);

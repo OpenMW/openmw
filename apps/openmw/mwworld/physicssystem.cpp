@@ -33,23 +33,23 @@ namespace MWWorld
     class MovementSolver
     {
     private:
-        static bool stepMove(Ogre::Vector3& position, const Ogre::Vector3 &velocity, float remainingTime,
+        static bool stepMove(Ogre::Vector3& position, const Ogre::Quaternion& orient, const Ogre::Vector3 &velocity, float remainingTime,
                              const Ogre::Vector3 &halfExtents, bool isInterior,
                              OEngine::Physic::PhysicEngine *engine)
         {
             traceResults trace; // no initialization needed
 
-            newtrace(&trace, position, position+Ogre::Vector3(0.0f,0.0f,sStepSize),
+            newtrace(&trace, orient, position, position+Ogre::Vector3(0.0f,0.0f,sStepSize),
                      halfExtents, isInterior, engine);
             if(trace.fraction == 0.0f)
                 return false;
 
-            newtrace(&trace, trace.endpos, trace.endpos + velocity*remainingTime,
+            newtrace(&trace, orient, trace.endpos, trace.endpos + velocity*remainingTime,
                      halfExtents, isInterior, engine);
             if(trace.fraction == 0.0f || (trace.fraction != 1.0f && getSlope(trace.planenormal) > sMaxSlope))
                 return false;
 
-            newtrace(&trace, trace.endpos, trace.endpos-Ogre::Vector3(0.0f,0.0f,sStepSize), halfExtents, isInterior, engine);
+            newtrace(&trace, orient, trace.endpos, trace.endpos-Ogre::Vector3(0.0f,0.0f,sStepSize), halfExtents, isInterior, engine);
             if(getSlope(trace.planenormal) <= sMaxSlope)
             {
                 // only step down onto semi-horizontal surfaces. don't step down onto the side of a house or a wall.
@@ -88,6 +88,44 @@ namespace MWWorld
         }
 
     public:
+        static Ogre::Vector3 traceDown(const MWWorld::Ptr &ptr, OEngine::Physic::PhysicEngine *engine)
+        {
+            const ESM::Position &refpos = ptr.getRefData().getPosition();
+            Ogre::Vector3 position(refpos.pos);
+
+            bool hit=false;
+            bool isInterior = !ptr.getCell()->isExterior();
+
+            OEngine::Physic::PhysicActor *physicActor = engine->getCharacter(ptr.getRefData().getHandle());
+            if (!physicActor)
+                return position;
+
+            bool wasCollisionMode = physicActor->getCollisionMode();
+
+            physicActor->enableCollisions(false);
+
+            Ogre::Vector3 halfExtents = physicActor->getHalfExtents();// + Vector3(1,1,1);
+            halfExtents.z = 1; // we trace the feet only, so we use a very thin box
+
+            Ogre::Vector3 newPosition = position;
+
+            traceResults trace; //no initialization needed
+
+            int maxHeight = 200.f;
+            newtrace(&trace, Ogre::Quaternion::IDENTITY, newPosition, newPosition-Ogre::Vector3(0,0,maxHeight), halfExtents, isInterior, engine);
+            if(trace.fraction < 1.0f)
+                hit = true;
+            newPosition = trace.endpos;
+
+            physicActor->setOnGround(hit && getSlope(trace.planenormal) <= sMaxSlope);
+            physicActor->enableCollisions(wasCollisionMode);
+
+            if (hit)
+                return newPosition+Ogre::Vector3(0,0,4);
+            else
+                return position;
+        }
+
         static Ogre::Vector3 move(const MWWorld::Ptr &ptr, const Ogre::Vector3 &movement, float time,
                                   bool gravity, OEngine::Physic::PhysicEngine *engine)
         {
@@ -101,7 +139,7 @@ namespace MWWorld
                 // FIXME: This works, but it's inconcsistent with how the rotations are applied elsewhere. Why?
                 return position + (Ogre::Quaternion(Ogre::Radian( -refpos.rot[2]), Ogre::Vector3::UNIT_Z)*
                                    Ogre::Quaternion(Ogre::Radian( -refpos.rot[1]), Ogre::Vector3::UNIT_Y)*
-                                   Ogre::Quaternion(Ogre::Radian( -refpos.rot[0]), Ogre::Vector3::UNIT_X)) *
+                                   Ogre::Quaternion(Ogre::Radian(  refpos.rot[0]), Ogre::Vector3::UNIT_X)) *
                                   movement;
             }
 
@@ -111,20 +149,20 @@ namespace MWWorld
             bool isInterior = !ptr.getCell()->isExterior();
             Ogre::Vector3 halfExtents = physicActor->getHalfExtents();// + Vector3(1,1,1);
             physicActor->enableCollisions(false);
-
+            Ogre::Quaternion orient = Ogre::Quaternion(Ogre::Radian(ptr.getRefData().getPosition().rot[2]), Ogre::Vector3::UNIT_Z);
             Ogre::Vector3 velocity;
             if(!gravity)
             {
                 velocity = (Ogre::Quaternion(Ogre::Radian( -refpos.rot[2]), Ogre::Vector3::UNIT_Z)*
                             Ogre::Quaternion(Ogre::Radian( -refpos.rot[1]), Ogre::Vector3::UNIT_Y)*
-                            Ogre::Quaternion(Ogre::Radian( -refpos.rot[0]), Ogre::Vector3::UNIT_X)) *
+                            Ogre::Quaternion(Ogre::Radian(  refpos.rot[0]), Ogre::Vector3::UNIT_X)) *
                            movement / time;
             }
             else
             {
                 if(!(movement.z > 0.0f))
                 {
-                    newtrace(&trace, position, position-Ogre::Vector3(0,0,4), halfExtents, isInterior, engine);
+                    newtrace(&trace, orient, position, position-Ogre::Vector3(0,0,4), halfExtents, isInterior, engine);
                     if(trace.fraction < 1.0f && getSlope(trace.planenormal) <= sMaxSlope)
                         onground = true;
                 }
@@ -145,7 +183,7 @@ namespace MWWorld
             int iterations = 0;
             do {
                 // trace to where character would go if there were no obstructions
-                newtrace(&trace, newPosition, newPosition+clippedVelocity*remainingTime, halfExtents, isInterior, engine);
+                newtrace(&trace, orient, newPosition, newPosition+clippedVelocity*remainingTime, halfExtents, isInterior, engine);
                 newPosition = trace.endpos;
                 remainingTime = remainingTime * (1.0f-trace.fraction);
 
@@ -164,7 +202,7 @@ namespace MWWorld
                     {
                         // Can't walk on this. Try to step up onto it.
                         if((gravity && !onground) ||
-                           !stepMove(newPosition, velocity, remainingTime, halfExtents, isInterior, engine))
+                           !stepMove(newPosition, orient, velocity, remainingTime, halfExtents, isInterior, engine))
                         {
                             Ogre::Vector3 resultantDirection = trace.planenormal.crossProduct(up);
                             resultantDirection.normalise();
@@ -182,7 +220,7 @@ namespace MWWorld
 
             if(onground)
             {
-                newtrace(&trace, newPosition, newPosition-Ogre::Vector3(0,0,sStepSize+4.0f), halfExtents, isInterior, engine);
+                newtrace(&trace, orient, newPosition, newPosition-Ogre::Vector3(0,0,sStepSize+4.0f), halfExtents, isInterior, engine);
                 if(trace.fraction < 1.0f && getSlope(trace.planenormal) <= sMaxSlope)
                     newPosition.z = trace.endpos.z + 2.0f;
                 else
@@ -217,14 +255,13 @@ namespace MWWorld
     std::pair<float, std::string> PhysicsSystem::getFacedHandle (MWWorld::World& world, float queryDistance)
     {
         btVector3 dir(0, 1, 0);
-        dir = dir.rotate(btVector3(1, 0, 0), mPlayerData.pitch);
-        dir = dir.rotate(btVector3(0, 0, 1), mPlayerData.yaw);
+        dir = dir.rotate(btVector3(1, 0, 0), mCameraData.pitch);
+        dir = dir.rotate(btVector3(0, 0, 1), mCameraData.yaw);
         dir.setX(-dir.x());
 
-        btVector3 origin(
-            mPlayerData.eyepos.x,
-            mPlayerData.eyepos.y,
-            mPlayerData.eyepos.z);
+        btVector3 origin(mCameraData.eyepos.x,
+                         mCameraData.eyepos.y,
+                         mCameraData.eyepos.z);
         origin += dir * 5;
 
         btVector3 dest = origin + dir * queryDistance;
@@ -237,14 +274,13 @@ namespace MWWorld
     std::vector < std::pair <float, std::string> > PhysicsSystem::getFacedHandles (float queryDistance)
     {
         btVector3 dir(0, 1, 0);
-        dir = dir.rotate(btVector3(1, 0, 0), mPlayerData.pitch);
-        dir = dir.rotate(btVector3(0, 0, 1), mPlayerData.yaw);
+        dir = dir.rotate(btVector3(1, 0, 0), mCameraData.pitch);
+        dir = dir.rotate(btVector3(0, 0, 1), mCameraData.yaw);
         dir.setX(-dir.x());
 
-        btVector3 origin(
-            mPlayerData.eyepos.x,
-            mPlayerData.eyepos.y,
-            mPlayerData.eyepos.z);
+        btVector3 origin(mCameraData.eyepos.x,
+                         mCameraData.eyepos.y,
+                         mCameraData.eyepos.z);
         origin += dir * 5;
 
         btVector3 dest = origin + dir * queryDistance;
@@ -297,14 +333,13 @@ namespace MWWorld
         return result;
     }
 
-    bool PhysicsSystem::castRay(const Vector3& from, const Vector3& to)
+    bool PhysicsSystem::castRay(const Vector3& from, const Vector3& to, bool raycastingObjectOnly,bool ignoreHeightMap)
     {
         btVector3 _from, _to;
         _from = btVector3(from.x, from.y, from.z);
         _to = btVector3(to.x, to.y, to.z);
 
-        std::pair<std::string, float> result = mEngine->rayTest(_from, _to);
-
+        std::pair<std::string, float> result = mEngine->rayTest(_from, _to, raycastingObjectOnly,ignoreHeightMap);
         return !(result.first == "");
     }
 
@@ -318,7 +353,7 @@ namespace MWWorld
         btVector3 btTo = btVector3(to.x, to.y, to.z);
 
         std::pair<std::string, float> test = mEngine->rayTest(btFrom, btTo);
-        if (test.first == "") {
+        if (test.second == -1) {
             return std::make_pair(false, Ogre::Vector3());
         }
         return std::make_pair(true, ray.getPoint(len * test.second));
@@ -346,11 +381,20 @@ namespace MWWorld
         }
     }
 
+    std::vector<std::string> PhysicsSystem::getCollisions(const Ptr &ptr)
+    {
+        return mEngine->getCollisions(ptr.getRefData().getBaseNode()->getName());
+    }
+
     Ogre::Vector3 PhysicsSystem::move(const MWWorld::Ptr &ptr, const Ogre::Vector3 &movement, float time, bool gravity)
     {
         return MovementSolver::move(ptr, movement, time, gravity, mEngine);
     }
 
+    Ogre::Vector3 PhysicsSystem::traceDown(const MWWorld::Ptr &ptr)
+    {
+        return MovementSolver::traceDown(ptr, mEngine);
+    }
 
     void PhysicsSystem::addHeightField (float* heights,
                 int x, int y, float yoffset,
@@ -456,7 +500,7 @@ namespace MWWorld
 
     bool PhysicsSystem::toggleCollisionMode()
     {
-        for(std::map<std::string,OEngine::Physic::PhysicActor*>::iterator it = mEngine->PhysicActorMap.begin(); it != mEngine->PhysicActorMap.end();it++)
+        for(std::map<std::string,OEngine::Physic::PhysicActor*>::iterator it = mEngine->mActorMap.begin(); it != mEngine->mActorMap.end();it++)
         {
             if (it->first=="player")
             {
@@ -500,10 +544,10 @@ namespace MWWorld
         return true;
     }
 
-    void PhysicsSystem::updatePlayerData(Ogre::Vector3 &eyepos, float pitch, float yaw)
+    void PhysicsSystem::updateCameraData(const Ogre::Vector3 &eyepos, float pitch, float yaw)
     {
-        mPlayerData.eyepos = eyepos;
-        mPlayerData.pitch = pitch;
-        mPlayerData.yaw = yaw;
+        mCameraData.eyepos = eyepos;
+        mCameraData.pitch = pitch;
+        mCameraData.yaw = yaw;
     }
 }

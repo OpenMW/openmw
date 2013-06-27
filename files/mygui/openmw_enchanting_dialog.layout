@@ -97,11 +97,11 @@
                 <UserString key="HStretch" value="true"/>
             </Widget>
 
-            <Widget type="AutoSizedTextBox" skin="NormalText">
+            <Widget type="AutoSizedTextBox" skin="NormalText" name="PriceTextLabel">
                 <Property key="Caption" value="#{sBarterDialog7}"/>
             </Widget>
             <Widget type="AutoSizedTextBox" skin="SandText" name="PriceLabel">
-                <Property key="Caption" value="30"/>
+                <Property key="Caption" value="0"/>
             </Widget>
 
 

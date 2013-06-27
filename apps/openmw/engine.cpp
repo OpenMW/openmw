@@ -1,4 +1,5 @@
 #include "engine.hpp"
+
 #include "components/esm/loadcell.hpp"
 
 #include <OgreRoot.h>
@@ -37,6 +38,8 @@
 #include "mwmechanics/mechanicsmanagerimp.hpp"
 
 
+#include <SDL.h>
+
 void OMW::Engine::executeLocalScripts()
 {
     MWWorld::LocalScripts& localScripts = MWBase::Environment::get().getWorld()->getLocalScripts();
@@ -66,6 +69,7 @@ bool OMW::Engine::frameStarted (const Ogre::FrameEvent& evt)
 {
     if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
         MWBase::Environment::get().getWorld()->frameStarted(evt.timeSinceLastFrame);
+    MWBase::Environment::get().getWindowManager ()->frameStarted(evt.timeSinceLastFrame);
     return true;
 }
 
@@ -74,7 +78,8 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
     try
     {
         float frametime = std::min(evt.timeSinceLastFrame, 0.2f);
-        mEnvironment.setFrameDuration(frametime);
+
+        mEnvironment.setFrameDuration (frametime);
 
         // update input
         MWBase::Environment::get().getInputManager()->update(frametime, false);
@@ -128,7 +133,6 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   : mOgre (0)
   , mFpsLevel(0)
-  , mDebug (false)
   , mVerboseScripts (false)
   , mNewGame (false)
   , mUseSound (true)
@@ -140,6 +144,18 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
 {
     std::srand ( std::time(NULL) );
     MWClass::registerClasses();
+
+    Uint32 flags = SDL_INIT_VIDEO|SDL_INIT_NOPARACHUTE;
+    if(SDL_WasInit(flags) == 0)
+    {
+        //kindly ask SDL not to trash our OGL context
+        //might this be related to http://bugzilla.libsdl.org/show_bug.cgi?id=748 ?
+        SDL_SetHint(SDL_HINT_RENDER_DRIVER, "software");
+        if(SDL_Init(flags) != 0)
+        {
+            throw std::runtime_error("Could not initialize SDL! " + std::string(SDL_GetError()));
+        }
+    }
 }
 
 OMW::Engine::~Engine()
@@ -147,33 +163,48 @@ OMW::Engine::~Engine()
     mEnvironment.cleanup();
     delete mScriptContext;
     delete mOgre;
+    SDL_Quit();
 }
 
 // Load BSA files
 
 void OMW::Engine::loadBSA()
 {
+    // We use separate resource groups to handle location priority.
+    const Files::PathContainer& dataDirs = mFileCollections.getPaths();
+
+    int i=0;
+    for (Files::PathContainer::const_iterator iter = dataDirs.begin(); iter != dataDirs.end(); ++iter)
+    {
+        // Last data dir has the highest priority
+        std::string groupName = "Data" + Ogre::StringConverter::toString(dataDirs.size()-i, 8, '0');
+        Ogre::ResourceGroupManager::getSingleton ().createResourceGroup (groupName);
+
+        std::string dataDirectory = iter->string();
+        std::cout << "Data dir " << dataDirectory << std::endl;
+        Bsa::addDir(dataDirectory, mFSStrict, groupName);
+        ++i;
+    }
+
+    i=0;
     for (std::vector<std::string>::const_iterator archive = mArchives.begin(); archive != mArchives.end(); ++archive)
     {
         if (mFileCollections.doesExist(*archive))
         {
+            // Last BSA has the highest priority
+            std::string groupName = "DataBSA" + Ogre::StringConverter::toString(mArchives.size()-i, 8, '0');
+
+            Ogre::ResourceGroupManager::getSingleton ().createResourceGroup (groupName);
+
             const std::string archivePath = mFileCollections.getPath(*archive).string();
             std::cout << "Adding BSA archive " << archivePath << std::endl;
-            Bsa::addBSA(archivePath);
+            Bsa::addBSA(archivePath, groupName);
+            ++i;
         }
         else
         {
             std::cout << "Archive " << *archive << " not found" << std::endl;
         }
-    }
-
-    const Files::PathContainer& dataDirs = mFileCollections.getPaths();
-    std::string dataDirectory;
-    for (Files::PathContainer::const_iterator iter = dataDirs.begin(); iter != dataDirs.end(); ++iter)
-    {
-        dataDirectory = iter->string();
-        std::cout << "Data dir " << dataDirectory << std::endl;
-        Bsa::addDir(dataDirectory, mFSStrict);
     }
 }
 
@@ -253,11 +284,6 @@ void OMW::Engine::addPlugin (const std::string& plugin)
     }
 }
 
-void OMW::Engine::setDebugMode(bool debugMode)
-{
-    mDebug = debugMode;
-}
-
 void OMW::Engine::setScriptsVerbosity(bool scriptsVerbosity)
 {
     mVerboseScripts = scriptsVerbosity;
@@ -300,6 +326,8 @@ std::string OMW::Engine::loadSettings (Settings::Manager & settings)
     else if (boost::filesystem::exists(mCfgMgr.getGlobalPath().string() + "/transparency-overrides.cfg"))
         nifOverrides.loadTransparencyOverrides(mCfgMgr.getGlobalPath().string() + "/transparency-overrides.cfg");
 
+    settings.setBool("hardware cursors", "GUI", true);
+
     return settingspath;
 }
 
@@ -337,22 +365,24 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     addResourcesDirectory(mResDir / "shadows");
     addZipResource(mResDir / "mygui" / "Obliviontt.zip");
 
-    // Create the window
     OEngine::Render::WindowSettings windowSettings;
     windowSettings.fullscreen = settings.getBool("fullscreen", "Video");
     windowSettings.window_x = settings.getInt("resolution x", "Video");
     windowSettings.window_y = settings.getInt("resolution y", "Video");
     windowSettings.vsync = settings.getBool("vsync", "Video");
+    windowSettings.icon = "openmw.png";
     std::string aa = settings.getString("antialiasing", "Video");
     windowSettings.fsaa = (aa.substr(0, 4) == "MSAA") ? aa.substr(5, aa.size()-5) : "0";
+
     mOgre->createWindow("OpenMW", windowSettings);
 
     loadBSA();
 
     // Create the world
     mEnvironment.setWorld( new MWWorld::World (*mOgre, mFileCollections, mMaster, mPlugins,
-        mResDir, mCfgMgr.getCachePath(), mNewGame, mEncoder, mFallbackMap,
+        mResDir, mCfgMgr.getCachePath(), mEncoder, mFallbackMap,
         mActivationDistanceOverride));
+    MWBase::Environment::get().getWorld()->setupPlayer();
 
     //Load translation data
     mTranslationDataStorage.setEncoder(mEncoder);
@@ -363,8 +393,10 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     MWScript::registerExtensions (mExtensions);
 
     mEnvironment.setWindowManager (new MWGui::WindowManager(
-        mExtensions, mFpsLevel, mNewGame, mOgre, mCfgMgr.getLogPath().string() + std::string("/"),
-        mCfgMgr.getCachePath ().string(), mScriptConsoleMode, mTranslationDataStorage));
+        mExtensions, mFpsLevel, mOgre, mCfgMgr.getLogPath().string() + std::string("/"),
+        mCfgMgr.getCachePath ().string(), mScriptConsoleMode, mTranslationDataStorage, mEncoding));
+    if (mNewGame)
+        mEnvironment.getWindowManager()->setNewGame(true);
 
     // Create sound system
     mEnvironment.setSoundManager (new MWSound::SoundManager(mUseSound));
@@ -391,27 +423,36 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     mEnvironment.setInputManager (new MWInput::InputManager (*mOgre,
         MWBase::Environment::get().getWorld()->getPlayer(),
-         *MWBase::Environment::get().getWindowManager(), mDebug, *this, keybinderUser, keybinderUserExists));
-
-    // load cell
-    ESM::Position pos;
-    pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
-    pos.pos[2] = 0;
+         *MWBase::Environment::get().getWindowManager(), *this, keybinderUser, keybinderUserExists));
 
     mEnvironment.getWorld()->renderPlayer();
 
-    if (const ESM::Cell *exterior = MWBase::Environment::get().getWorld()->getExterior (mCellName))
+    if (!mNewGame)
     {
-        MWBase::Environment::get().getWorld()->indexToPosition (exterior->mData.mX, exterior->mData.mY,
-            pos.pos[0], pos.pos[1], true);
-        MWBase::Environment::get().getWorld()->changeToExteriorCell (pos);
+        // load cell
+        ESM::Position pos;
+        pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
+        pos.pos[2] = 0;
+
+        if (const ESM::Cell *exterior = MWBase::Environment::get().getWorld()->getExterior (mCellName))
+        {
+            MWBase::Environment::get().getWorld()->indexToPosition (exterior->mData.mX, exterior->mData.mY,
+                pos.pos[0], pos.pos[1], true);
+            MWBase::Environment::get().getWorld()->changeToExteriorCell (pos);
+        }
+        else
+        {
+            pos.pos[0] = pos.pos[1] = 0;
+            MWBase::Environment::get().getWorld()->changeToInteriorCell (mCellName, pos);
+        }
     }
     else
-    {
-        pos.pos[0] = pos.pos[1] = 0;
-        MWBase::Environment::get().getWorld()->changeToInteriorCell (mCellName, pos);
-    }
+        mEnvironment.getWorld()->startNewGame();
 
+    Ogre::FrameEvent event;
+    event.timeSinceLastEvent = 0;
+    event.timeSinceLastFrame = 0;
+    frameRenderingQueued(event);
     mOgre->getRoot()->addFrameListener (this);
 
     // scripts

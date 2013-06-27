@@ -78,7 +78,7 @@ namespace MWWorld
 
             ContainerStoreIterator getSlot (int slot);
 
-            void autoEquip (const MWMechanics::NpcStats& stats);
+            void autoEquip (const MWWorld::Ptr& npc);
             ///< Auto equip items according to stats and item value.
 
             const MWMechanics::MagicEffects& getMagicEffects();
@@ -89,8 +89,6 @@ namespace MWWorld
             virtual void flagAsModified();
             ///< \attention This function is internal to the world model and should not be called from
             /// outside.
-
-        protected:
 
             virtual bool stacks (const Ptr& ptr1, const Ptr& ptr2);
             ///< @return true if the two specified objects can stack with each other

@@ -25,11 +25,11 @@
 #define OPENMW_COMPONENTS_NIFOGRE_OGRENIFLOADER_HPP
 
 #include <OgreResource.h>
-#include <OgreMesh.h>
-#include <OgreSkeleton.h>
+#include <OgreController.h>
 
 #include <vector>
 #include <string>
+#include <map>
 
 
 // FIXME: This namespace really doesn't do anything Nif-specific. Any supportable
@@ -39,53 +39,63 @@ namespace NifOgre
 
 typedef std::multimap<float,std::string> TextKeyMap;
 static const char sTextKeyExtraDataID[] = "TextKeyExtraData";
-struct EntityList {
-    std::vector<Ogre::Entity*> mEntities;
+struct ObjectList {
     Ogre::Entity *mSkelBase;
+    std::vector<Ogre::Entity*> mEntities;
+    std::vector<Ogre::ParticleSystem*> mParticles;
 
-    EntityList() : mSkelBase(0)
+    std::map<int,TextKeyMap> mTextKeys;
+
+    std::vector<Ogre::Controller<Ogre::Real> > mControllers;
+
+    ObjectList() : mSkelBase(0)
     { }
 };
 
-
-/* This holds a list of mesh names, the names of their parent nodes, and the offset
- * from their parent nodes. */
-struct MeshInfo {
-    std::string mMeshName;
-    std::string mTargetNode;
-
-    MeshInfo(const std::string &name, const std::string &target)
-      : mMeshName(name), mTargetNode(target)
-    { }
-};
-typedef std::vector<MeshInfo> MeshInfoList;
 
 class Loader
 {
-    static MeshInfoList load(const std::string &name, const std::string &group);
-
 public:
-    static EntityList createEntities(Ogre::Entity *parent, const std::string &bonename,
-                                     Ogre::SceneNode *parentNode,
-                                     std::string name,
-                                     const std::string &group="General");
+    static ObjectList createObjects(Ogre::Entity *parent, const std::string &bonename,
+                                    Ogre::SceneNode *parentNode,
+                                    std::string name,
+                                    const std::string &group="General");
 
-    static EntityList createEntities(Ogre::SceneNode *parentNode,
-                                     std::string name,
-                                     const std::string &group="General");
+    static ObjectList createObjects(Ogre::SceneNode *parentNode,
+                                    std::string name,
+                                    const std::string &group="General");
 
-    static Ogre::SkeletonPtr getSkeleton(std::string name, const std::string &group="General");
+    static ObjectList createObjectBase(Ogre::SceneNode *parentNode,
+                                       std::string name,
+                                       const std::string &group="General");
+
+    static void createKfControllers(Ogre::Entity *skelBase,
+                                    const std::string &name,
+                                    TextKeyMap &textKeys,
+                                    std::vector<Ogre::Controller<Ogre::Real> > &ctrls);
 };
 
-}
-
-namespace std
+// FIXME: Should be with other general Ogre extensions.
+template<typename T>
+class NodeTargetValue : public Ogre::ControllerValue<T>
 {
+protected:
+    Ogre::Node *mNode;
 
-// These operators allow extra data types to be stored in an Ogre::Any
-// object, which can then be stored in user object bindings on the nodes
+public:
+    NodeTargetValue(Ogre::Node *target) : mNode(target)
+    { }
 
-ostream& operator<<(ostream &o, const NifOgre::TextKeyMap&);
+    virtual Ogre::Quaternion getRotation(T value) const = 0;
+    virtual Ogre::Vector3 getTranslation(T value) const = 0;
+    virtual Ogre::Vector3 getScale(T value) const = 0;
+
+    void setNode(Ogre::Node *target)
+    { mNode = target; }
+    Ogre::Node *getNode() const
+    { return mNode; }
+};
+typedef Ogre::SharedPtr<NodeTargetValue<Ogre::Real> > NodeTargetValueRealPtr;
 
 }
 

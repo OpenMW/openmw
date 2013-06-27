@@ -26,4 +26,18 @@ void Light::save(ESMWriter &esm)
     esm.writeHNOCString("SNAM", mSound);
 }
 
+    void Light::blank()
+    {
+        mData.mWeight = 0;
+        mData.mValue = 0;
+        mData.mTime = 0;
+        mData.mRadius = 0;
+        mData.mColor = 0;
+        mData.mFlags = 0;
+        mSound.clear();
+        mScript.clear();
+        mModel.clear();
+        mIcon.clear();
+        mName.clear();
+    }
 }

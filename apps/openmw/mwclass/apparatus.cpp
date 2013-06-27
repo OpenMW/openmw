@@ -159,4 +159,16 @@ namespace MWClass
 
         return MWWorld::Ptr(&cell.mAppas.insert(*ref), &cell);
     }
+
+    bool Apparatus::canSell (const MWWorld::Ptr& item, int npcServices) const
+    {
+        return npcServices & ESM::NPC::Apparatus;
+    }
+
+    float Apparatus::getWeight(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Apparatus> *ref =
+            ptr.get<ESM::Apparatus>();
+        return ref->mBase->mData.mWeight;
+    }
 }

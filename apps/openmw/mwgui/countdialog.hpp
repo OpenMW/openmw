@@ -1,14 +1,14 @@
 #ifndef MWGUI_COUNTDIALOG_H
 #define MWGUI_COUNTDIALOG_H
 
-#include "window_base.hpp"
+#include "windowbase.hpp"
 
 namespace MWGui
 {
     class CountDialog : public WindowModal
     {
         public:
-            CountDialog(MWBase::WindowManager& parWindowManager);
+            CountDialog();
             void open(const std::string& item, const std::string& message, const int maxCount);
 
             typedef MyGUI::delegates::CMultiDelegate2<MyGUI::Widget*, int> EventHandle_WidgetInt;
@@ -25,11 +25,12 @@ namespace MWGui
             MyGUI::TextBox* mLabelText;
             MyGUI::Button* mOkButton;
             MyGUI::Button* mCancelButton;
-
+	    
             void onCancelButtonClicked(MyGUI::Widget* _sender);
             void onOkButtonClicked(MyGUI::Widget* _sender);
             void onEditTextChange(MyGUI::EditBox* _sender);
             void onSliderMoved(MyGUI::ScrollBar* _sender, size_t _position);
+            void onEnterKeyPressed(MyGUI::EditBox* _sender);
     };
 
 }

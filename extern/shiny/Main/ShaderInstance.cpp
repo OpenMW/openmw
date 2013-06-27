@@ -22,8 +22,11 @@ namespace
 			return "SH_CG";
 		else if (lang == sh::Language_HLSL)
 			return "SH_HLSL";
-		else //if (lang == sh::Language_GLSL)
+		else if (lang == sh::Language_GLSL)
 			return "SH_GLSL";
+		else if (lang == sh::Language_GLSLES)
+			return "SH_GLSLES";
+		throw std::runtime_error("invalid language");
 	}
 
 	char getComponent(int num)
@@ -194,13 +197,6 @@ namespace sh
 					bool val = retrieveValue<BooleanValue>(value, properties->getContext()).get();
 					replaceValue = val ? "1" : "0";
 				}
-				else if (cmd == "shPropertyNotBool") // same as above, but inverts the result
-				{
-					std::string propertyName = args[0];
-					PropertyValuePtr value = properties->getProperty(propertyName);
-					bool val = retrieveValue<BooleanValue>(value, properties->getContext()).get();
-					replaceValue = val ? "0" : "1";
-				}
 				else if (cmd == "shPropertyString")
 				{
 					std::string propertyName = args[0];
@@ -213,6 +209,14 @@ namespace sh
 					std::string comparedAgainst = args[1];
 					std::string value = retrieveValue<StringValue>(properties->getProperty(propertyName), properties->getContext()).get();
 					replaceValue = (value == comparedAgainst) ? "1" : "0";
+				}
+				else if (isCmd(source, pos, "@shPropertyHasValue"))
+				{
+					assert(args.size() == 1);
+					std::string propertyName = args[0];
+					PropertyValuePtr value = properties->getProperty(propertyName);
+					std::string val = retrieveValue<StringValue>(value, properties->getContext()).get();
+					replaceValue = (val.empty() ? "0" : "1");
 				}
 				else
 					throw std::runtime_error ("unknown command \"" + cmd + "\"");

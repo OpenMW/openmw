@@ -32,9 +32,24 @@ namespace MWRender
 
 extern "C"
 {
-#include <libavcodec/avcodec.h>
-#include <libavformat/avformat.h>
-#include <libswscale/swscale.h>
+    #include <libavcodec/avcodec.h>
+    #include <libavformat/avformat.h>
+    #include <libswscale/swscale.h>
+
+    // From libavformat version 55.0.100 and onward the declaration of av_gettime() is removed from libavformat/avformat.h and moved
+    // to libavutil/time.h
+    // https://github.com/FFmpeg/FFmpeg/commit/06a83505992d5f49846c18507a6c3eb8a47c650e
+    #if AV_VERSION_INT(55, 0, 100) <= AV_VERSION_INT(LIBAVFORMAT_VERSION_MAJOR, LIBAVFORMAT_VERSION_MINOR, LIBAVFORMAT_VERSION_MICRO)
+        #include <libavutil/time.h>
+    #endif
+
+    // From libavutil version 52.2.0 and onward the declaration of
+    // AV_CH_LAYOUT_* is removed from libavcodec/avcodec.h and moved to
+    // libavutil/channel_layout.h
+    #if AV_VERSION_INT(52, 2, 0) <= AV_VERSION_INT(LIBAVUTIL_VERSION_MAJOR, \
+        LIBAVUTIL_VERSION_MINOR, LIBAVUTIL_VERSION_MICRO)
+        #include <libavutil/channel_layout.h>
+    #endif
 }
 
 #define MAX_AUDIOQ_SIZE (5 * 16 * 1024)
@@ -788,8 +803,8 @@ void VideoState::decode_thread_loop(VideoState *self)
         // main decode loop
         while(!self->quit)
         {
-            if((self->audio_st >= 0 && self->audioq.size > MAX_AUDIOQ_SIZE) ||
-               (self->video_st >= 0 && self->videoq.size > MAX_VIDEOQ_SIZE))
+            if((self->audio_st && self->audioq.size > MAX_AUDIOQ_SIZE) ||
+               (self->video_st && self->videoq.size > MAX_VIDEOQ_SIZE))
             {
                 boost::this_thread::sleep(boost::posix_time::milliseconds(10));
                 continue;

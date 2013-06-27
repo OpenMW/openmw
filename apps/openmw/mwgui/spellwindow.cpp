@@ -1,22 +1,14 @@
 #include "spellwindow.hpp"
 
-#include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
 
-#include "../mwworld/esmstore.hpp"
-
-#include "../mwbase/world.hpp"
-#include "../mwbase/environment.hpp"
-#include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/actionequip.hpp"
 
-#include "../mwmechanics/spells.hpp"
-#include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/spellsuccess.hpp"
 
 #include "spellicons.hpp"
@@ -47,8 +39,8 @@ namespace
 
 namespace MWGui
 {
-    SpellWindow::SpellWindow(MWBase::WindowManager& parWindowManager)
-        : WindowPinnableBase("openmw_spell_window.layout", parWindowManager)
+    SpellWindow::SpellWindow()
+        : WindowPinnableBase("openmw_spell_window.layout")
         , mHeight(0)
         , mWidth(0)
     {
@@ -71,7 +63,7 @@ namespace MWGui
 
     void SpellWindow::onPinToggled()
     {
-        mWindowManager.setSpellVisibility(!mPinned);
+        MWBase::Environment::get().getWindowManager()->setSpellVisibility(!mPinned);
     }
 
     void SpellWindow::open()
@@ -140,7 +132,7 @@ namespace MWGui
             {
                 store.setSelectedEnchantItem(store.end());
                 spells.setSelectedSpell("");
-                mWindowManager.unsetSelectedSpell();
+                MWBase::Environment::get().getWindowManager()->unsetSelectedSpell();
                 selectedItem = MWWorld::Ptr();
             }
         }
@@ -377,12 +369,12 @@ namespace MWGui
             action.execute (MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer ());
 
             // since we changed equipping status, update the inventory window
-            mWindowManager.getInventoryWindow()->drawItems();
+            MWBase::Environment::get().getWindowManager()->getInventoryWindow()->updateItemView();
         }
 
         store.setSelectedEnchantItem(it);
         spells.setSelectedSpell("");
-        mWindowManager.setSelectedEnchantItem(item, 100); /// \todo track charge %
+        MWBase::Environment::get().getWindowManager()->setSelectedEnchantItem(item);
 
         updateSpells();
     }
@@ -404,14 +396,14 @@ namespace MWGui
             if (spell->mData.mFlags & ESM::Spell::F_Always
                 || spell->mData.mType == ESM::Spell::ST_Power)
             {
-                mWindowManager.messageBox("#{sDeleteSpellError}");
+                MWBase::Environment::get().getWindowManager()->messageBox("#{sDeleteSpellError}");
             }
             else
             {
                 // ask for confirmation
                 mSpellToDelete = spellId;
-                ConfirmationDialog* dialog = mWindowManager.getConfirmationDialog();
-                std::string question = mWindowManager.getGameSettingString("sQuestionDeleteSpell", "Delete %s?");
+                ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
+                std::string question = MWBase::Environment::get().getWindowManager()->getGameSettingString("sQuestionDeleteSpell", "Delete %s?");
                 question = boost::str(boost::format(question) % spell->mName);
                 dialog->open(question);
                 dialog->eventOkClicked.clear();
@@ -423,7 +415,7 @@ namespace MWGui
         {
             spells.setSelectedSpell(spellId);
             store.setSelectedEnchantItem(store.end());
-            mWindowManager.setSelectedSpell(spellId, int(MWMechanics::getSpellSuccessChance(spellId, player)));
+            MWBase::Environment::get().getWindowManager()->setSelectedSpell(spellId, int(MWMechanics::getSpellSuccessChance(spellId, player)));
         }
 
         updateSpells();
@@ -454,7 +446,7 @@ namespace MWGui
         if (spells.getSelectedSpell() == mSpellToDelete)
         {
             spells.setSelectedSpell("");
-            mWindowManager.unsetSelectedSpell();
+            MWBase::Environment::get().getWindowManager()->unsetSelectedSpell();
         }
 
         spells.remove(mSpellToDelete);

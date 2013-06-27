@@ -98,10 +98,12 @@ namespace Compiler
 
             if (type!=' ')
             {
-                getErrorHandler().error ("catoLowern't re-declare local variable", loc);
+                /// \todo add option to make re-declared local variables an error
+                getErrorHandler().warning ("can't re-declare local variable", loc);
                 SkipParser skip (getErrorHandler(), getContext());
                 scanner.scan (skip);
-                return false;
+                mState = EndState;
+                return true;
             }
 
             mLocals.declare (mState==ShortState ? 's' : (mState==LongState ? 'l' : 'f'),
@@ -139,7 +141,7 @@ namespace Compiler
 
         if (mState==SetMemberVarState)
         {
-            mMemberName = Misc::StringUtils::lowerCase (name);
+            mMemberName = name;
             char type = getContext().getMemberType (mMemberName, mName);
 
             if (type!=' ')

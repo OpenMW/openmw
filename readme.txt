@@ -3,7 +3,7 @@ OpenMW: A reimplementation of The Elder Scrolls III: Morrowind
 OpenMW is an attempt at recreating the engine for the popular role-playing game
 Morrowind by Bethesda Softworks. You need to own and install the original game for OpenMW to work.
 
-Version: 0.22.0
+Version: 0.24.0
 License: GPL (see GPL3.txt for more information)
 Website: http://www.openmw.org
 
@@ -31,7 +31,7 @@ Open DMG file, copy OpenMW folder anywhere, for example in /Applications
 
 BUILD FROM SOURCE
 
-TODO add description here
+https://wiki.openmw.org/index.php?title=Development_Environment_Setup
 
 
 THE DATA PATH
@@ -93,6 +93,116 @@ Allowed options:
 
 
 CHANGELOG
+
+0.24.0
+
+Bug #284: Book's text misalignment
+Bug #445: Camera able to get slightly below floor / terrain
+Bug #582: Seam issue in Red Mountain
+Bug #632: Journal Next Button shows white square
+Bug #653: IndexedStore ignores index
+Bug #694: Parser does not recognize float values starting with .
+Bug #699: Resource handling broken with Ogre 1.9 trunk
+Bug #718: components/esm/loadcell is using the mwworld subsystem
+Bug #729: Levelled item list tries to add nonexistent item
+Bug #730: Arrow buttons in the settings menu do not work.
+Bug #732: Erroneous behavior when binding keys
+Bug #733: Unclickable dialogue topic
+Bug #734: Book empty line problem
+Bug #738: OnDeath only works with implicit references
+Bug #740: Script compiler fails on scripts with special names
+Bug #742: Wait while no clipping
+Bug #743: Problem with changeweather console command
+Bug #744: No wait dialogue after starting a new game
+Bug #748: Player is not able to unselect objects with the console
+Bug #751: AddItem should only spawn a message box when called from dialogue
+Bug #752: The enter button has several functions in trade and looting that is not impelemted.
+Bug #753: Fargoth's Ring Quest Strange Behavior
+Bug #755: Launcher writes duplicate lines into settings.cfg
+Bug #759: Second quest in mages guild does not work
+Bug #763: Enchantment cast cost is wrong
+Bug #770: The "Take" and "Close" buttons in the scroll GUI are stretched incorrectly
+Bug #773: AIWander Isn't Being Passed The Correct idle Values
+Bug #778: The journal can be opened at the start of a new game
+Bug #779: Divayth Fyr starts as dead
+Bug #787: "Batch count" on detailed FPS counter gets cut-off
+Bug #788: chargen scroll layout does not match vanilla
+Feature #60: Atlethics Skill
+Feature #65: Security Skill
+Feature #74: Interaction with non-load-doors
+Feature #98: Render Weapon and Shield
+Feature #102: AI Package: Escort, EscortCell
+Feature #182: Advanced Journal GUI
+Feature #288: Trading enhancements
+Feature #405: Integrate "new game" into the menu
+Feature #537: Highlight dialogue topic links
+Feature #658: Rotate, RotateWorld script instructions and local rotations
+Feature #690: Animation Layering
+Feature #722: Night Eye/Blind magic effects
+Feature #735: Move, MoveWorld script instructions.
+Feature #760: Non-removable corpses
+
+0.23.0
+
+Bug #522: Player collides with placeable items
+Bug #553: Open/Close sounds played when accessing main menu w/ Journal Open
+Bug #561: Tooltip word wrapping delay
+Bug #578: Bribing works incorrectly
+Bug #601: PositionCell fails on negative coordinates
+Bug #606: Some NPCs hairs not rendered with Better Heads addon
+Bug #609: Bad rendering of bone boots
+Bug #613: Messagebox causing assert to fail
+Bug #631: Segfault on shutdown
+Bug #634: Exception when talking to Calvus Horatius in Mournhold, royal palace courtyard
+Bug #635: Scale NPCs depending on race
+Bug #643: Dialogue Race select function is inverted
+Bug #646: Twohanded weapons don't work properly
+Bug #654: Crash when dropping objects without a collision shape
+Bug #655/656: Objects that were disabled or deleted (but not both) were added to the scene when re-entering a cell
+Bug #660: "g" in "change" cut off in Race Menu
+Bug #661: Arrille sells me the key to his upstairs room
+Bug #662: Day counter starts at 2 instead of 1
+Bug #663: Cannot select "come unprepared" topic in dialog with Dagoth Ur
+Bug #665: Pickpocket -> "Grab all" grabs all NPC inventory, even not listed in container window.
+Bug #666: Looking up/down problem
+Bug #667: Active effects border visible during loading
+Bug #669: incorrect player position at new game start
+Bug #670: race selection menu: sex, face and hair left button not totally clickable
+Bug #671: new game: player is naked
+Bug #674: buying or selling items doesn't change amount of gold
+Bug #675: fatigue is not set to its maximum when starting a new game
+Bug #678: Wrong rotation order causes RefData's rotation to be stored incorrectly
+Bug #680: different gold coins in Tel Mara
+Bug #682: Race menu ignores playable flag for some hairs and faces
+Bug #685: Script compiler does not accept ":" after a function name
+Bug #688: dispose corpse makes cross-hair to disappear
+Bug #691: Auto equipping ignores equipment conditions
+Bug #692: OpenMW doesnt load "loose file" texture packs that places resources directly in data folder
+Bug #696: Draugr incorrect head offset
+Bug #697: Sail transparency issue
+Bug #700: "On the rocks" mod does not load its UV coordinates correctly.
+Bug #702: Some race mods don't work
+Bug #711: Crash during character creation
+Bug #715: Growing Tauryon
+Bug #725: Auto calculate stats
+Bug #728: Failure to open container and talk dialogue
+Bug #731: Crash with Mush-Mere's "background" topic
+Feature #55/657: Item Repairing
+Feature #62/87: Enchanting
+Feature #99: Pathfinding
+Feature #104: AI Package: Travel
+Feature #129: Levelled items
+Feature #204: Texture animations
+Feature #239: Fallback-Settings
+Feature #535: Console object selection improvements
+Feature #629: Add levelup description in levelup layout dialog
+Feature #630: Optional format subrecord in (tes3) header
+Feature #641: Armor rating
+Feature #645: OnDeath script function
+Feature #683: Companion item UI
+Feature #698: Basic Particles
+Task #648: Split up components/esm/loadlocks
+Task #695: mwgui cleanup
 
 0.22.0
 

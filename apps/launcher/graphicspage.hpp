@@ -30,10 +30,11 @@ public:
     GraphicsPage(Files::ConfigurationManager &cfg, GraphicsSettings &graphicsSettings, QWidget *parent = 0);
 
     void saveSettings();
-    bool setupOgre();
+    bool loadSettings();
 
 public slots:
     void rendererChanged(const QString &renderer);
+    void screenChanged(int screen);
 
 private slots:
     void slotFullScreenChanged(int state);
@@ -55,10 +56,11 @@ private:
     GraphicsSettings &mGraphicsSettings;
 
     QStringList getAvailableOptions(const QString &key, Ogre::RenderSystem *renderer);
-    QStringList getAvailableResolutions(Ogre::RenderSystem *renderer);
+    QStringList getAvailableResolutions(int screen);
+    QRect getMaximumResolution();
 
-    void loadSettings();
-
+    bool setupOgre();
+    bool setupSDL();
 };
 
 #endif

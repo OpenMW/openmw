@@ -64,7 +64,7 @@ public:
         bool inUse;
         NiSourceTexturePtr texture;
 
-        int clamp, set, filter;
+        int clamp, uvSet, filter;
         short unknown2;
 
         void read(NIFStream *nif)
@@ -75,7 +75,7 @@ public:
             texture.read(nif);
             clamp = nif->getInt();
             filter = nif->getInt();
-            set = nif->getInt();
+            uvSet = nif->getInt();
 
             // I have no idea, but I think these are actually two
             // PS2-specific shorts (ps2L and ps2K), followed by an unknown
@@ -109,6 +109,17 @@ public:
      * 5 - Bump map texture
      * 6 - Decal texture
      */
+    enum TextureType
+    {
+        BaseTexture = 0,
+        DarkTexture = 1,
+        DetailTexture = 2,
+        GlossTexture = 3,
+        GlowTexture = 4,
+        BumpTexture = 5,
+        DecalTexture = 6
+    };
+
     Texture textures[7];
 
     void read(NIFStream *nif)
@@ -145,11 +156,11 @@ public:
 };
 
 // These contain no other data than the 'flags' field in Property
-typedef Property NiShadeProperty;
-typedef Property NiDitherProperty;
-typedef Property NiZBufferProperty;
-typedef Property NiSpecularProperty;
-typedef Property NiWireframeProperty;
+class NiShadeProperty : public Property { };
+class NiDitherProperty : public Property { };
+class NiZBufferProperty : public Property { };
+class NiSpecularProperty : public Property { };
+class NiWireframeProperty : public Property { };
 
 // The rest are all struct-based
 template <typename T>
@@ -313,10 +324,10 @@ struct S_StencilProperty
     }
 };
 
-typedef StructPropT<S_AlphaProperty> NiAlphaProperty;
-typedef StructPropT<S_MaterialProperty> NiMaterialProperty;
-typedef StructPropT<S_VertexColorProperty> NiVertexColorProperty;
-typedef StructPropT<S_StencilProperty> NiStencilProperty;
+class NiAlphaProperty : public StructPropT<S_AlphaProperty> { };
+class NiMaterialProperty : public StructPropT<S_MaterialProperty> { };
+class NiVertexColorProperty : public StructPropT<S_VertexColorProperty> { };
+class NiStencilProperty : public StructPropT<S_StencilProperty> { };
 
 } // Namespace
 #endif

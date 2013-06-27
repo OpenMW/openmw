@@ -39,8 +39,6 @@ namespace MWWorld
 
 namespace MWRender
 {
-    class Player;
-
     class Debugging
     {
         OEngine::Physic::PhysicEngine* mEngine;

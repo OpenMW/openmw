@@ -2,14 +2,15 @@
 #define CS_EDITOR_H
 
 #include <QObject>
-
+#ifndef Q_MOC_RUN
 #include <components/files/configurationmanager.hpp>
-
+#endif
 #include "model/doc/documentmanager.hpp"
 
 #include "view/doc/viewmanager.hpp"
 #include "view/doc/startup.hpp"
 #include "view/doc/filedialog.hpp"
+#include "model/settings/usersettings.hpp"
 
 namespace CS
 {
@@ -17,13 +18,13 @@ namespace CS
     {
             Q_OBJECT
 
+            CSMSettings::UserSettings mUserSettings;
             CSMDoc::DocumentManager mDocumentManager;
             CSVDoc::ViewManager mViewManager;
             CSVDoc::StartupDialogue mStartup;
             FileDialog mFileDialog;
 
             Files::ConfigurationManager mCfgMgr;
-
             void setupDataFiles();
 
             // not implemented

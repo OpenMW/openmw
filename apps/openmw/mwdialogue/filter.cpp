@@ -73,6 +73,11 @@ bool MWDialogue::Filter::testActor (const ESM::DialInfo& info) const
         if (iter->second < info.mData.mRank)
             return false;
     }
+    else if (info.mData.mRank != -1)
+    {
+        // if there is a rank condition, but the NPC is not in a faction, always fail
+        return false;
+    }
 
     // Gender
     if (!isCreature)
@@ -569,8 +574,8 @@ bool MWDialogue::Filter::hasFactionRankSkillRequirements (const MWWorld::Ptr& ac
 
     MWMechanics::CreatureStats& stats = MWWorld::Class::get (actor).getCreatureStats (actor);
 
-    return stats.getAttribute (faction.mData.mAttribute1).getBase()>=faction.mData.mRankData[rank].mAttribute1 &&
-        stats.getAttribute (faction.mData.mAttribute2).getBase()>=faction.mData.mRankData[rank].mAttribute2;
+    return stats.getAttribute (faction.mData.mAttribute[0]).getBase()>=faction.mData.mRankData[rank].mAttribute1 &&
+        stats.getAttribute (faction.mData.mAttribute[1]).getBase()>=faction.mData.mRankData[rank].mAttribute2;
 }
 
 bool MWDialogue::Filter::hasFactionRankReputationRequirements (const MWWorld::Ptr& actor,

@@ -51,14 +51,18 @@ namespace MWClass
             virtual std::string getEnchantment (const MWWorld::Ptr& ptr) const;
             ///< @return the enchantment ID if the object is enchanted, otherwise an empty string
 
-            virtual std::string applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const;
+            virtual void applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const;
 
             virtual boost::shared_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr) const;
             ///< Generate action for using via inventory menu
 
             virtual std::string getModel(const MWWorld::Ptr &ptr) const;
 
-            virtual short getEnchantmentPoints (const MWWorld::Ptr& ptr) const; 
+            virtual float getEnchantmentPoints (const MWWorld::Ptr& ptr) const;
+
+            virtual float getWeight (const MWWorld::Ptr& ptr) const;
+
+            virtual bool canSell (const MWWorld::Ptr& item, int npcServices) const;
     };
 }
 

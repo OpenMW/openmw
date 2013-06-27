@@ -19,7 +19,7 @@ namespace Physic
 
     PhysicActor::PhysicActor(const std::string &name, const std::string &mesh, PhysicEngine *engine, const Ogre::Vector3 &position, const Ogre::Quaternion &rotation, float scale)
       : mName(name), mEngine(engine), mMesh(mesh), mBoxScaledTranslation(0,0,0), mBoxRotationInverse(0,0,0,0)
-      , mBody(0), onGround(false), collisionMode(true), mBoxRotation(0,0,0,0), verticalForce(0.0f)
+      , mBody(0), mRaycastingBody(0), onGround(false), collisionMode(true), mBoxRotation(0,0,0,0), verticalForce(0.0f)
     {
         // FIXME: Force player to start in no-collision mode for now, until he spawns at a proper door marker.
         if(name == "player")
@@ -28,7 +28,7 @@ namespace Physic
         mRaycastingBody = mEngine->createAndAdjustRigidBody(mMesh, mName, scale, position, rotation, &mBoxScaledTranslation, &mBoxRotation, true);
         Ogre::Quaternion inverse = mBoxRotation.Inverse();
         mBoxRotationInverse = btQuaternion(inverse.x, inverse.y, inverse.z,inverse.w);
-        mEngine->addRigidBody(mBody, false, mRaycastingBody);  //Add rigid body to dynamics world, but do not add to object map
+        mEngine->addRigidBody(mBody, false, mRaycastingBody,true);  //Add rigid body to dynamics world, but do not add to object map
     }
 
     PhysicActor::~PhysicActor()
@@ -47,6 +47,7 @@ namespace Physic
 
     void PhysicActor::enableCollisions(bool collision)
     {
+        assert(mBody);
         if(collision && !collisionMode) mBody->translate(btVector3(0,0,-1000));
         if(!collision && collisionMode) mBody->translate(btVector3(0,0,1000));
         collisionMode = collision;
@@ -55,6 +56,7 @@ namespace Physic
 
     void PhysicActor::setPosition(const Ogre::Vector3 &pos)
     {
+        assert(mBody);
         if(pos != getPosition())
         {
             mEngine->adjustRigidBody(mBody, pos, getRotation(), mBoxScaledTranslation, mBoxRotation);
@@ -64,6 +66,7 @@ namespace Physic
 
     void PhysicActor::setRotation(const Ogre::Quaternion &quat)
     {
+        assert(mBody);
         if(!quat.equals(getRotation(), Ogre::Radian(0))){
             mEngine->adjustRigidBody(mBody, getPosition(), quat, mBoxScaledTranslation, mBoxRotation);
             mEngine->adjustRigidBody(mRaycastingBody, getPosition(), quat, mBoxScaledTranslation, mBoxRotation);
@@ -74,6 +77,7 @@ namespace Physic
 
     Ogre::Vector3 PhysicActor::getPosition()
     {
+        assert(mBody);
         btVector3 vec = mBody->getWorldTransform().getOrigin();
         Ogre::Quaternion rotation = Ogre::Quaternion(mBody->getWorldTransform().getRotation().getW(), mBody->getWorldTransform().getRotation().getX(),
             mBody->getWorldTransform().getRotation().getY(), mBody->getWorldTransform().getRotation().getZ());
@@ -84,14 +88,18 @@ namespace Physic
 
     Ogre::Quaternion PhysicActor::getRotation()
     {
+        assert(mBody);
         btQuaternion quat = mBody->getWorldTransform().getRotation() * mBoxRotationInverse;
         return Ogre::Quaternion(quat.getW(), quat.getX(), quat.getY(), quat.getZ());
     }
 
     void PhysicActor::setScale(float scale){
         //We only need to change the scaled box translation, box rotations remain the same.
+        assert(mBody);
         mBoxScaledTranslation = mBoxScaledTranslation / mBody->getCollisionShape()->getLocalScaling().getX();
         mBoxScaledTranslation *= scale;
+        Ogre::Vector3 pos = getPosition();
+        Ogre::Quaternion rot = getRotation();
         if(mBody){
             mEngine->dynamicsWorld->removeRigidBody(mBody);
             mEngine->dynamicsWorld->removeRigidBody(mRaycastingBody);
@@ -99,9 +107,9 @@ namespace Physic
             delete mRaycastingBody;
         }
         //Create the newly scaled rigid body
-        mBody = mEngine->createAndAdjustRigidBody(mMesh, mName, scale, getPosition(), getRotation());
-        mRaycastingBody = mEngine->createAndAdjustRigidBody(mMesh, mName, scale, getPosition(), getRotation(), 0, 0, true);
-        mEngine->addRigidBody(mBody, false, mRaycastingBody);  //Add rigid body to dynamics world, but do not add to object map
+        mBody = mEngine->createAndAdjustRigidBody(mMesh, mName, scale, pos, rot);
+        mRaycastingBody = mEngine->createAndAdjustRigidBody(mMesh, mName, scale, pos, rot, 0, 0, true);
+        mEngine->addRigidBody(mBody, false, mRaycastingBody,true);  //Add rigid body to dynamics world, but do not add to object map
     }
 
     Ogre::Vector3 PhysicActor::getHalfExtents() const
@@ -259,8 +267,8 @@ namespace Physic
             }
         }
 
-        PhysicActorContainer::iterator pa_it = PhysicActorMap.begin();
-        for (; pa_it != PhysicActorMap.end(); ++pa_it)
+        PhysicActorContainer::iterator pa_it = mActorMap.begin();
+        for (; pa_it != mActorMap.end(); ++pa_it)
         {
             if (pa_it->second != NULL)
             {
@@ -323,7 +331,8 @@ namespace Physic
 
         mHeightFieldMap [name] = hf;
 
-        dynamicsWorld->addRigidBody(body,CollisionType_World,CollisionType_World|CollisionType_ActorInternal|CollisionType_ActorExternal);
+        dynamicsWorld->addRigidBody(body,CollisionType_HeightMap|CollisionType_Raycasting,
+                                    CollisionType_World|CollisionType_Actor|CollisionType_Raycasting);
     }
 
     void PhysicEngine::removeHeightField(int x, int y)
@@ -413,15 +422,17 @@ namespace Physic
 
     }
 
-    void PhysicEngine::addRigidBody(RigidBody* body, bool addToMap, RigidBody* raycastingBody)
+    void PhysicEngine::addRigidBody(RigidBody* body, bool addToMap, RigidBody* raycastingBody,bool actor)
     {
         if(!body && !raycastingBody)
             return; // nothing to do
 
         const std::string& name = (body ? body->mName : raycastingBody->mName);
 
-        if (body)
-            dynamicsWorld->addRigidBody(body,CollisionType_World,CollisionType_World|CollisionType_ActorInternal|CollisionType_ActorExternal);
+        if (body){
+            if(actor) dynamicsWorld->addRigidBody(body,CollisionType_Actor,CollisionType_World|CollisionType_HeightMap);
+            else dynamicsWorld->addRigidBody(body,CollisionType_World,CollisionType_World|CollisionType_Actor|CollisionType_HeightMap);
+        }
 
         if (raycastingBody)
             dynamicsWorld->addRigidBody(raycastingBody,CollisionType_Raycasting,CollisionType_Raycasting|CollisionType_World);
@@ -500,10 +511,47 @@ namespace Physic
         }
     }
 
+    class ContactTestResultCallback : public btCollisionWorld::ContactResultCallback
+    {
+    public:
+        std::vector<std::string> mResult;
+
+        // added in bullet 2.81
+        // this is just a quick hack, as there does not seem to be a BULLET_VERSION macro?
+#if defined(BT_COLLISION_OBJECT_WRAPPER_H)
+        virtual	btScalar addSingleResult(btManifoldPoint& cp,
+                                            const btCollisionObjectWrapper* colObj0Wrap,int partId0,int index0,
+                                            const btCollisionObjectWrapper* colObj1Wrap,int partId1,int index1)
+        {
+            const RigidBody* body = dynamic_cast<const RigidBody*>(colObj0Wrap->m_collisionObject);
+            if (body)
+                mResult.push_back(body->mName);
+            return 0.f;
+        }
+#else
+        virtual btScalar addSingleResult(btManifoldPoint& cp, const btCollisionObject* col0, int partId0, int index0,
+                                         const btCollisionObject* col1, int partId1, int index1)
+        {
+            const RigidBody* body = dynamic_cast<const RigidBody*>(col0);
+            if (body)
+                mResult.push_back(body->mName);
+            return 0.f;
+        }
+#endif
+    };
+
+    std::vector<std::string> PhysicEngine::getCollisions(const std::string& name)
+    {
+        RigidBody* body = getRigidBody(name);
+        ContactTestResultCallback callback;
+        dynamicsWorld->contactTest(body, callback);
+        return callback.mResult;
+    }
+
     void PhysicEngine::stepSimulation(double deltaT)
     {
-        // This isn't needed as there are no dynamic objects at this point
-        //dynamicsWorld->stepSimulation(deltaT,10, 1/60.0);
+        // This seems to be needed for character controller objects
+        dynamicsWorld->stepSimulation(deltaT,10, 1/60.0);
         if(isDebugCreated)
         {
             mDebugDrawer->step();
@@ -521,13 +569,13 @@ namespace Physic
         
 
         //dynamicsWorld->addAction( newActor->mCharacter );
-        PhysicActorMap[name] = newActor;
+        mActorMap[name] = newActor;
     }
 
     void PhysicEngine::removeCharacter(const std::string &name)
     {
-        PhysicActorContainer::iterator it = PhysicActorMap.find(name);
-        if (it != PhysicActorMap.end() )
+        PhysicActorContainer::iterator it = mActorMap.find(name);
+        if (it != mActorMap.end() )
         {
             PhysicActor* act = it->second;
             if(act != NULL)
@@ -535,16 +583,16 @@ namespace Physic
                 
                 delete act;
             }
-            PhysicActorMap.erase(it);
+            mActorMap.erase(it);
         }
     }
 
     PhysicActor* PhysicEngine::getCharacter(const std::string &name)
     {
-        PhysicActorContainer::iterator it = PhysicActorMap.find(name);
-        if (it != PhysicActorMap.end() )
+        PhysicActorContainer::iterator it = mActorMap.find(name);
+        if (it != mActorMap.end() )
         {
-            PhysicActor* act = PhysicActorMap[name];
+            PhysicActor* act = mActorMap[name];
             return act;
         }
         else
@@ -557,14 +605,20 @@ namespace Physic
     {
     }
 
-    std::pair<std::string,float> PhysicEngine::rayTest(btVector3& from,btVector3& to)
+    std::pair<std::string,float> PhysicEngine::rayTest(btVector3& from,btVector3& to,bool raycastingObjectOnly,bool ignoreHeightMap)
     {
         std::string name = "";
         float d = -1;
 
         float d1 = 10000.;
         btCollisionWorld::ClosestRayResultCallback resultCallback1(from, to);
-        resultCallback1.m_collisionFilterMask = CollisionType_Raycasting;
+        if(raycastingObjectOnly)
+            resultCallback1.m_collisionFilterMask = CollisionType_Raycasting;
+        else
+            resultCallback1.m_collisionFilterMask = CollisionType_World;
+
+        if(!ignoreHeightMap)
+            resultCallback1.m_collisionFilterMask = resultCallback1.m_collisionFilterMask | CollisionType_HeightMap;
         dynamicsWorld->rayTest(from, to, resultCallback1);
         if (resultCallback1.hasHit())
         {
@@ -574,6 +628,41 @@ namespace Physic
         }
 
         return std::pair<std::string,float>(name,d);
+    }
+
+    // callback that ignores player in results
+    struct	OurClosestConvexResultCallback : public btCollisionWorld::ClosestConvexResultCallback
+    {
+    public:
+        OurClosestConvexResultCallback(const btVector3&	convexFromWorld,const btVector3&	convexToWorld)
+            : btCollisionWorld::ClosestConvexResultCallback(convexFromWorld, convexToWorld) {}
+
+        virtual	btScalar	addSingleResult(btCollisionWorld::LocalConvexResult& convexResult,bool normalInWorldSpace)
+        {
+            if (const RigidBody* body = dynamic_cast<const RigidBody*>(convexResult.m_hitCollisionObject))
+                if (body->mName == "player")
+                    return 0;
+            return btCollisionWorld::ClosestConvexResultCallback::addSingleResult(convexResult, normalInWorldSpace);
+        }
+    };
+
+    std::pair<bool, float> PhysicEngine::sphereCast (float radius, btVector3& from, btVector3& to)
+    {
+        OurClosestConvexResultCallback callback(from, to);
+        callback.m_collisionFilterMask = OEngine::Physic::CollisionType_World|OEngine::Physic::CollisionType_HeightMap;
+
+        btSphereShape shape(radius);
+        const btQuaternion btrot(0.0f, 0.0f, 0.0f);
+
+        btTransform from_ (btrot, from);
+        btTransform to_ (btrot, to);
+
+        dynamicsWorld->convexSweepTest(&shape, from_, to_, callback);
+
+        if (callback.hasHit())
+            return std::make_pair(true, callback.m_closestHitFraction);
+        else
+            return std::make_pair(false, 1);
     }
 
     std::vector< std::pair<float, std::string> > PhysicEngine::rayTest2(btVector3& from, btVector3& to)
@@ -619,4 +708,22 @@ namespace Physic
             max = btVector3(0,0,0);
         }
     }
-}}
+
+    bool PhysicEngine::isAnyActorStandingOn (const std::string& objectName)
+    {
+        for (PhysicActorContainer::iterator it = mActorMap.begin(); it != mActorMap.end(); ++it)
+        {
+            if (!it->second->getOnGround())
+                continue;
+            Ogre::Vector3 pos = it->second->getPosition();
+            btVector3 from (pos.x, pos.y, pos.z);
+            btVector3 to = from - btVector3(0,0,5);
+            std::pair<std::string, float> result = rayTest(from, to);
+            if (result.first == objectName)
+                return true;
+        }
+        return false;
+    }
+
+}
+}

@@ -216,7 +216,7 @@ public:
      follows the header, ie beyond the entire record. You should use
      leftRec to orient yourself inside the record itself.
   */
-  void getRecHeader() { uint32_t u; getRecHeader(u); }
+  void getRecHeader() { getRecHeader(mRecordFlags); }
   void getRecHeader(uint32_t &flags);
 
   bool hasMoreRecs() const { return mCtx.leftFile > 0; }
@@ -249,10 +249,15 @@ public:
   /// Sets font encoder for ESM strings
   void setEncoder(ToUTF8::Utf8Encoder* encoder);
 
+  /// Get record flags of last record
+  unsigned int getRecordFlags() { return mRecordFlags; }
+
 private:
   Ogre::DataStreamPtr mEsm;
 
   ESM_Context mCtx;
+
+  unsigned int mRecordFlags;
 
   // Special file signifier (see SpecialFile enum above)
 

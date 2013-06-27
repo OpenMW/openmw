@@ -4,6 +4,8 @@
 #include "aipackage.hpp"
 #include <string>
 
+#include "pathfinding.hpp"
+
 namespace MWMechanics
 {
     class AiEscort : public AiPackage
@@ -27,8 +29,13 @@ namespace MWMechanics
             float mX;
             float mY;
             float mZ;
-            int mDuration;
+            float mMaxDist;
+            unsigned int mStartingSecond;
+            unsigned int mDuration;
 
+            PathFinder mPathFinder;
+            int cellX;
+            int cellY;
     };
 }
 #endif

@@ -19,6 +19,9 @@ namespace ESM
         // These are probabilities
         char mHello, mU1, mFight, mFlee, mAlarm, mU2, mU3, mU4;
         int mServices; // See the Services enum
+
+        void blank();
+        ///< Set record to default state (does not touch the ID).
     }; // 12 bytes
 
     struct AIWander

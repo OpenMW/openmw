@@ -52,6 +52,8 @@ namespace CSMDoc
 
             void createBase();
 
+            void addGmsts();
+
             void addOptionalGmsts();
 
             void addOptionalGlobals();

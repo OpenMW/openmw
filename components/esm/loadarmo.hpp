@@ -38,7 +38,9 @@ enum PartReferenceType
     PRT_RPauldron = 23,
     PRT_LPauldron = 24,
     PRT_Weapon = 25,
-    PRT_Tail = 26
+    PRT_Tail = 26,
+
+    PRT_Count = 27
 };
 
 // Reference to body parts
@@ -88,6 +90,9 @@ struct Armor
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
+
+    void blank();
+    ///< Set record to default state (does not touch the ID).
 };
 }
 #endif

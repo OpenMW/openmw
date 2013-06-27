@@ -23,4 +23,16 @@ void Potion::save(ESMWriter &esm)
     esm.writeHNT("ALDT", mData, 12);
     mEffects.save(esm);
 }
+
+    void Potion::blank()
+    {
+        mData.mWeight = 0;
+        mData.mValue = 0;
+        mData.mAutoCalc = 0;
+        mName.clear();
+        mModel.clear();
+        mIcon.clear();
+        mScript.clear();
+        mEffects.mList.clear();
+    }
 }

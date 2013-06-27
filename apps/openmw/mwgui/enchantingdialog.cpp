@@ -6,20 +6,22 @@
 #include "../mwbase/world.hpp"
 #include "../mwworld/player.hpp"
 #include "../mwworld/manualref.hpp"
+#include "../mwworld/class.hpp"
 
 #include "itemselection.hpp"
 #include "container.hpp"
 #include "inventorywindow.hpp"
 
+#include "sortfilteritemmodel.hpp"
+
 namespace MWGui
 {
 
 
-    EnchantingDialog::EnchantingDialog(MWBase::WindowManager &parWindowManager)
-        : WindowBase("openmw_enchanting_dialog.layout", parWindowManager)
-        , EffectEditorBase(parWindowManager)
+    EnchantingDialog::EnchantingDialog()
+        : WindowBase("openmw_enchanting_dialog.layout")
+        , EffectEditorBase()
         , mItemSelectionDialog(NULL)
-        , mEnchanting(MWBase::Environment::get().getWorld()->getPlayer().getPlayer())
     {
         getWidget(mName, "NameEdit");
         getWidget(mCancelButton, "CancelButton");
@@ -33,6 +35,7 @@ namespace MWGui
         getWidget(mTypeButton, "TypeButton");
         getWidget(mBuyButton, "BuyButton");
         getWidget(mPrice, "PriceLabel");
+        getWidget(mPriceText, "PriceTextLabel");
 
         setWidgets(mAvailableEffectsList, mUsedEffectsView);
 
@@ -57,29 +60,34 @@ namespace MWGui
 
     void EnchantingDialog::updateLabels()
     {
-        mEnchantmentPoints->setCaption(boost::lexical_cast<std::string>(mEnchanting.getEnchantCost())
-                                       + " / " + boost::lexical_cast<std::string>(mEnchanting.getMaxEnchantValue()));
+        std::stringstream enchantCost;
+        enchantCost << std::setprecision(1) << std::fixed << mEnchanting.getEnchantPoints();
+        mEnchantmentPoints->setCaption(enchantCost.str() + " / " + boost::lexical_cast<std::string>(mEnchanting.getMaxEnchantValue()));
 
         mCharge->setCaption(boost::lexical_cast<std::string>(mEnchanting.getGemCharge()));
 
-        mCastCost->setCaption(boost::lexical_cast<std::string>(mEnchanting.getEnchantCost()));
+        std::stringstream castCost;
+        castCost << std::setprecision(1) << std::fixed << mEnchanting.getCastCost();
+        mCastCost->setCaption(boost::lexical_cast<std::string>(castCost.str()));
 
-        switch(mEnchanting.getEnchantType())
+        mPrice->setCaption(boost::lexical_cast<std::string>(mEnchanting.getEnchantPrice()));
+
+        switch(mEnchanting.getCastStyle())
         {
-            case 0:
-                mTypeButton->setCaption(mWindowManager.getGameSettingString("sItemCastOnce","Cast Once"));
+            case ESM::Enchantment::CastOnce:
+                mTypeButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastOnce","Cast Once"));
                 mAddEffectDialog.constantEffect=false;
                 break;
-            case 1:
-                mTypeButton->setCaption(mWindowManager.getGameSettingString("sItemCastWhenStrikes", "When Strikes"));
+            case ESM::Enchantment::WhenStrikes:
+                mTypeButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastWhenStrikes", "When Strikes"));
                 mAddEffectDialog.constantEffect=false;
                 break;
-            case 2:
-                mTypeButton->setCaption(mWindowManager.getGameSettingString("sItemCastWhenUsed", "When Used"));
+            case ESM::Enchantment::WhenUsed:
+                mTypeButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastWhenUsed", "When Used"));
                 mAddEffectDialog.constantEffect=false;
                 break;
-            case 3:
-                mTypeButton->setCaption(mWindowManager.getGameSettingString("sItemCastConstant", "Cast Constant"));
+            case ESM::Enchantment::ConstantEffect:
+                mTypeButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastConstant", "Cast Constant"));
                 mAddEffectDialog.constantEffect=true;
                 break;
         }
@@ -87,6 +95,9 @@ namespace MWGui
 
     void EnchantingDialog::startEnchanting (MWWorld::Ptr actor)
     {
+        mEnchanting.setSelfEnchanting(false);
+        mEnchanting.setEnchanter(actor);
+
         mPtr = actor;
 
         startEditing ();
@@ -94,30 +105,51 @@ namespace MWGui
 
     void EnchantingDialog::startSelfEnchanting(MWWorld::Ptr soulgem)
     {
-        /// \todo
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+
+        mEnchanting.setSelfEnchanting(true);
+        mEnchanting.setEnchanter(player);
+
+        mPtr = player;
+        startEditing();
+        mEnchanting.setSoulGem(soulgem);
+
+        MyGUI::ImageBox* image = mSoulBox->createWidget<MyGUI::ImageBox>("ImageBox", MyGUI::IntCoord(0, 0, 32, 32), MyGUI::Align::Default);
+        std::string path = std::string("icons\\");
+        path += MWWorld::Class::get(soulgem).getInventoryIcon(soulgem);
+        int pos = path.rfind(".");
+        path.erase(pos);
+        path.append(".dds");
+        image->setImageTexture (path);
+        image->setUserString ("ToolTipType", "ItemPtr");
+        image->setUserData(soulgem);
+        image->eventMouseButtonClick += MyGUI::newDelegate(this, &EnchantingDialog::onRemoveSoul);
+
+        mPrice->setVisible(false);
+        mPriceText->setVisible(false);
+        updateLabels();
     }
 
     void EnchantingDialog::onReferenceUnavailable ()
     {
-        mWindowManager.removeGuiMode (GM_Dialogue);
-        mWindowManager.removeGuiMode (GM_Enchanting);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Dialogue);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Enchanting);
     }
 
     void EnchantingDialog::onCancelButtonClicked(MyGUI::Widget* sender)
     {
-        mWindowManager.removeGuiMode (GM_Enchanting);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Enchanting);
     }
 
     void EnchantingDialog::onSelectItem(MyGUI::Widget *sender)
     {
         delete mItemSelectionDialog;
-        mItemSelectionDialog = new ItemSelectionDialog("#{sEnchantItems}",
-            ContainerBase::Filter_Apparel|ContainerBase::Filter_Weapon|ContainerBase::Filter_NoMagic, mWindowManager);
+        mItemSelectionDialog = new ItemSelectionDialog("#{sEnchantItems}");
         mItemSelectionDialog->eventItemSelected += MyGUI::newDelegate(this, &EnchantingDialog::onItemSelected);
         mItemSelectionDialog->eventDialogCanceled += MyGUI::newDelegate(this, &EnchantingDialog::onItemCancel);
         mItemSelectionDialog->setVisible(true);
         mItemSelectionDialog->openContainer(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
-        mItemSelectionDialog->drawItems ();
+        mItemSelectionDialog->setFilter(SortFilterItemModel::Filter_OnlyEnchantable);
     }
 
     void EnchantingDialog::onItemSelected(MWWorld::Ptr item)
@@ -139,7 +171,7 @@ namespace MWGui
         image->eventMouseButtonClick += MyGUI::newDelegate(this, &EnchantingDialog::onRemoveItem);
 
         mEnchanting.setOldItem(item);
-        mEnchanting.nextEnchantType();
+        mEnchanting.nextCastStyle();
         updateLabels();
     }
 
@@ -163,7 +195,7 @@ namespace MWGui
 
         if(mEnchanting.getGemCharge()==0)
         {
-            mWindowManager.messageBox ("#{sNotifyMessage32}");
+            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage32}");
             return;
         }
 
@@ -199,15 +231,14 @@ namespace MWGui
     void EnchantingDialog::onSelectSoul(MyGUI::Widget *sender)
     {
         delete mItemSelectionDialog;
-        mItemSelectionDialog = new ItemSelectionDialog("#{sSoulGemsWithSouls}",
-            ContainerBase::Filter_Misc|ContainerBase::Filter_ChargedSoulstones, mWindowManager);
+        mItemSelectionDialog = new ItemSelectionDialog("#{sSoulGemsWithSouls}");
         mItemSelectionDialog->eventItemSelected += MyGUI::newDelegate(this, &EnchantingDialog::onSoulSelected);
         mItemSelectionDialog->eventDialogCanceled += MyGUI::newDelegate(this, &EnchantingDialog::onSoulCancel);
         mItemSelectionDialog->setVisible(true);
         mItemSelectionDialog->openContainer(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
-        mItemSelectionDialog->drawItems ();
+        mItemSelectionDialog->setFilter(SortFilterItemModel::Filter_OnlyChargedSoulstones);
 
-        //mWindowManager.messageBox("#{sInventorySelectNoSoul}");
+        //MWBase::Environment::get().getWindowManager()->messageBox("#{sInventorySelectNoSoul}");
     }
 
     void EnchantingDialog::notifyEffectsChanged ()
@@ -219,7 +250,7 @@ namespace MWGui
 
     void EnchantingDialog::onTypeButtonClicked(MyGUI::Widget* sender)
     {
-        mEnchanting.nextEnchantType();
+        mEnchanting.nextCastStyle();
         updateLabels();
     }
 
@@ -227,45 +258,50 @@ namespace MWGui
     {
         if (mEffects.size() <= 0)
         {
-            mWindowManager.messageBox ("#{sNotifyMessage30}");
+            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage30}");
             return;
         }
 
         if (mName->getCaption ().empty())
         {
-            mWindowManager.messageBox ("#{sNotifyMessage10}");
-            return;
-        }
-
-        if (boost::lexical_cast<int>(mPrice->getCaption()) > mWindowManager.getInventoryWindow()->getPlayerGold())
-        {
-            mWindowManager.messageBox ("#{sNotifyMessage18}");
+            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage10}");
             return;
         }
 
         if (mEnchanting.soulEmpty())
         {
-            mWindowManager.messageBox ("#{sNotifyMessage52}");
+            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage52}");
             return;
         }
 
         if (mEnchanting.itemEmpty())
         {
-            mWindowManager.messageBox ("#{sNotifyMessage11}");
+            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage11}");
             return;
         }
 
-        if (mEnchanting.getEnchantCost() > mEnchanting.getMaxEnchantValue())
+        if (mEnchanting.getEnchantPoints() > mEnchanting.getMaxEnchantValue())
         {
-            mWindowManager.messageBox ("#{sNotifyMessage29}");
+            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage29}");
             return;
         }
 
         mEnchanting.setNewItemName(mName->getCaption());
         mEnchanting.setEffect(mEffectList);
 
-        mEnchanting.create();
-        mWindowManager.messageBox ("#{sEnchantmentMenu12}");
-        mWindowManager.removeGuiMode (GM_Enchanting);
+        if (mEnchanting.getEnchantPrice() > MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getPlayerGold())
+        {
+            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage18}");
+            return;
+        }
+
+        int result = mEnchanting.create();
+
+        if(result==1)
+            MWBase::Environment::get().getWindowManager()->messageBox ("#{sEnchantmentMenu12}");
+        else
+            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage34}");
+
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Enchanting);
     }
 }

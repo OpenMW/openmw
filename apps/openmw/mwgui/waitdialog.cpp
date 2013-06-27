@@ -1,7 +1,5 @@
 #include "waitdialog.hpp"
 
-#include <cmath>
-
 #include <boost/lexical_cast.hpp>
 
 #include <libs/openengine/ogre/fader.hpp>
@@ -11,9 +9,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
-#include "../mwworld/timestamp.hpp"
 #include "../mwworld/player.hpp"
-#include "../mwworld/ptr.hpp"
 #include "../mwworld/class.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
@@ -25,8 +21,8 @@
 namespace MWGui
 {
 
-    WaitDialogProgressBar::WaitDialogProgressBar(MWBase::WindowManager &parWindowManager)
-        : WindowBase("openmw_wait_dialog_progressbar.layout", parWindowManager)
+    WaitDialogProgressBar::WaitDialogProgressBar()
+        : WindowBase("openmw_wait_dialog_progressbar.layout")
     {
         getWidget(mProgressBar, "ProgressBar");
         getWidget(mProgressText, "ProgressText");
@@ -46,9 +42,9 @@ namespace MWGui
 
     // ---------------------------------------------------------------------------------------------------------
 
-    WaitDialog::WaitDialog(MWBase::WindowManager &parWindowManager)
-        : WindowBase("openmw_wait_dialog.layout", parWindowManager)
-        , mProgressBar(parWindowManager)
+    WaitDialog::WaitDialog()
+        : WindowBase("openmw_wait_dialog.layout")
+        , mProgressBar()
         , mWaiting(false)
         , mSleeping(false)
         , mHours(1)
@@ -75,7 +71,7 @@ namespace MWGui
     {
         if (!MWBase::Environment::get().getWindowManager ()->getRestEnabled ())
         {
-            mWindowManager.popGuiMode ();
+            MWBase::Environment::get().getWindowManager()->popGuiMode ();
         }
 
         int canRest = MWBase::Environment::get().getWorld ()->canRest ();
@@ -83,8 +79,8 @@ namespace MWGui
         if (canRest == 2)
         {
             // resting underwater or mid-air not allowed
-            mWindowManager.messageBox ("#{sNotifyMessage1}");
-            mWindowManager.popGuiMode ();
+            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage1}");
+            MWBase::Environment::get().getWindowManager()->popGuiMode ();
         }
 
         setCanRest(canRest == 0);
@@ -212,7 +208,7 @@ namespace MWGui
 
     void WaitDialog::onCancelButtonClicked(MyGUI::Widget* sender)
     {
-        mWindowManager.popGuiMode ();
+        MWBase::Environment::get().getWindowManager()->popGuiMode ();
     }
 
     void WaitDialog::onHourSliderChangedPosition(MyGUI::ScrollBar* sender, size_t position)
@@ -263,8 +259,8 @@ namespace MWGui
     {
         MWBase::Environment::get().getWorld ()->getFader ()->fadeIn(0.2);
         mProgressBar.setVisible (false);
-        mWindowManager.removeGuiMode (GM_Rest);
-        mWindowManager.removeGuiMode (GM_RestBed);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Rest);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_RestBed);
         mWaiting = false;
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
@@ -273,7 +269,7 @@ namespace MWGui
         // trigger levelup if possible
         if (mSleeping && pcstats.getLevelProgress () >= 10)
         {
-            mWindowManager.pushGuiMode (GM_Levelup);
+            MWBase::Environment::get().getWindowManager()->pushGuiMode (GM_Levelup);
         }
     }
 

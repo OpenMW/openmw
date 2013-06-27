@@ -246,4 +246,19 @@ namespace MWClass
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionSoulgem(ptr));
     }
 
+    bool Miscellaneous::canSell (const MWWorld::Ptr& item, int npcServices) const
+    {
+        MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
+            item.get<ESM::Miscellaneous>();
+
+        return !ref->mBase->mData.mIsKey && (npcServices & ESM::NPC::Misc);
+    }
+
+    float Miscellaneous::getWeight(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
+            ptr.get<ESM::Miscellaneous>();
+        return ref->mBase->mData.mWeight;
+    }
+
 }

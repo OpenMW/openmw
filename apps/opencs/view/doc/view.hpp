@@ -68,6 +68,14 @@ namespace CSVDoc
 
             void exitApplication();
 
+            void loadUserSettings();
+
+            /// User preference function
+            void resizeViewWidth (int width);
+
+            /// User preference function
+            void resizeViewHeight (int height);
+
         public:
 
             View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews);
@@ -87,6 +95,9 @@ namespace CSVDoc
             void updateProgress (int current, int max, int type, int threads);
 
             Operations *getOperations() const;
+
+            /// Function called by view manager when user preferences are updated
+            void updateEditorSetting (const QString &, const QString &);
 
         signals:
 
@@ -119,6 +130,26 @@ namespace CSVDoc
             void addSkillsSubView();
 
             void addClassesSubView();
+
+            void addFactionsSubView();
+
+            void addRacesSubView();
+
+            void addSoundsSubView();
+
+            void addScriptsSubView();
+
+            void addRegionsSubView();
+
+            void addBirthsignsSubView();
+
+            void addSpellsSubView();
+
+            void addCellsSubView();
+
+            void addReferenceablesSubView();
+
+            void showUserSettings();
     };
 }
 

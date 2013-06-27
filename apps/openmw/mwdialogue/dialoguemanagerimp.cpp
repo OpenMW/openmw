@@ -50,12 +50,11 @@ namespace MWDialogue
       , mTemporaryDispositionChange(0.f)
       , mPermanentDispositionChange(0.f), mScriptVerbose (scriptVerbose)
       , mTranslationDataStorage(translationDataStorage)
+      , mTalkedTo(false)
     {
         mChoice = -1;
         mIsInChoice = false;
         mCompilerContext.setExtensions (&extensions);
-        mDialogueMap.clear();
-        mActorKnownTopics.clear();
 
         const MWWorld::Store<ESM::Dialogue> &dialogs =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
@@ -65,6 +64,14 @@ namespace MWDialogue
         {
             mDialogueMap[Misc::StringUtils::lowerCase(it->mId)] = *it;
         }
+    }
+
+    void DialogueManager::clear()
+    {
+        mKnownTopics.clear();
+        mTalkedTo = false;
+        mTemporaryDispositionChange = 0;
+        mPermanentDispositionChange = 0;
     }
 
     void DialogueManager::addTopic (const std::string& topic)
@@ -161,7 +168,7 @@ namespace MWDialogue
                     parseText (info->mResponse);
 
                     MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
-                    win->addText (Interpreter::fixDefinesDialog(info->mResponse, interpreterContext));
+                    win->addResponse (Interpreter::fixDefinesDialog(info->mResponse, interpreterContext));
                     executeScript (info->mResultScript);
                     mLastTopic = Misc::StringUtils::lowerCase(it->mId);
                     mLastDialogue = *info;
@@ -263,6 +270,7 @@ namespace MWDialogue
 
             parseText (info->mResponse);
 
+            std::string title;
             if (dialogue.mType==ESM::Dialogue::Persuasion)
             {
                 std::string modifiedTopic = "s" + topic;
@@ -272,13 +280,13 @@ namespace MWDialogue
                 const MWWorld::Store<ESM::GameSetting>& gmsts =
                     MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-                win->addTitle (gmsts.find (modifiedTopic)->getString());
+                title = gmsts.find (modifiedTopic)->getString();
             }
             else
-                win->addTitle (topic);
+                title = topic;
 
             MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
-            win->addText (Interpreter::fixDefinesDialog(info->mResponse, interpreterContext));
+            win->addResponse (Interpreter::fixDefinesDialog(info->mResponse, interpreterContext), title);
             MWBase::Environment::get().getJournal()->addTopic (topic, info->mId);
 
             executeScript (info->mResultScript);
@@ -289,9 +297,7 @@ namespace MWDialogue
         else
         {
             // no response found, print a fallback text
-            win->addTitle (topic);
-            win->addText ("…");
-
+            win->addResponse ("…", topic);
         }
     }
 
@@ -424,51 +430,42 @@ namespace MWDialogue
         mTemporaryDispositionChange = 0;
     }
 
-    void DialogueManager::questionAnswered (const std::string& answer)
+    void DialogueManager::questionAnswered (int answer)
     {
-        if (mChoiceMap.find(answer) != mChoiceMap.end())
+        mChoice = answer;
+
+        if (mDialogueMap.find(mLastTopic) != mDialogueMap.end())
         {
-            mChoice = mChoiceMap[answer];
+            Filter filter (mActor, mChoice, mTalkedTo);
 
-            if (mDialogueMap.find(mLastTopic) != mDialogueMap.end())
+            if (mDialogueMap[mLastTopic].mType == ESM::Dialogue::Topic
+                    || mDialogueMap[mLastTopic].mType == ESM::Dialogue::Greeting)
             {
-                Filter filter (mActor, mChoice, mTalkedTo);
-
-                if (mDialogueMap[mLastTopic].mType == ESM::Dialogue::Topic
-                        || mDialogueMap[mLastTopic].mType == ESM::Dialogue::Greeting)
+                if (const ESM::DialInfo *info = filter.search (mDialogueMap[mLastTopic], true))
                 {
-                    if (const ESM::DialInfo *info = filter.search (mDialogueMap[mLastTopic], true))
-                    {
-                        std::string text = info->mResponse;
-                        parseText (text);
+                    std::string text = info->mResponse;
+                    parseText (text);
 
-                        MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
-                        MWBase::Environment::get().getWindowManager()->getDialogueWindow()->addText (Interpreter::fixDefinesDialog(text, interpreterContext));
-                        MWBase::Environment::get().getJournal()->addTopic (mLastTopic, info->mId);
-                        executeScript (info->mResultScript);
-                        mLastDialogue = *info;
-                    }
+                    mChoice = -1;
+                    mIsInChoice = false;
+                    MWBase::Environment::get().getWindowManager()->getDialogueWindow()->clearChoices();
+
+                    MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
+                    MWBase::Environment::get().getWindowManager()->getDialogueWindow()->addResponse (Interpreter::fixDefinesDialog(text, interpreterContext));
+                    MWBase::Environment::get().getJournal()->addTopic (mLastTopic, info->mId);
+                    executeScript (info->mResultScript);
+                    mLastDialogue = *info;
                 }
-                mChoiceMap.clear();
-                mChoice = -1;
-                mIsInChoice = false;
             }
-
-            updateTopics();
         }
-    }
 
-    void DialogueManager::printError (const std::string& error)
-    {
-        MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
-        win->addText(error);
+        updateTopics();
     }
 
     void DialogueManager::askQuestion (const std::string& question, int choice)
     {
         MWGui::DialogueWindow* win = MWBase::Environment::get().getWindowManager()->getDialogueWindow();
-        win->askQuestion(question);
-        mChoiceMap[Misc::StringUtils::lowerCase(question)] = choice;
+        win->addChoice(question, choice);
         mIsInChoice = true;
     }
 
@@ -549,10 +546,10 @@ namespace MWDialogue
             const MWWorld::Store<ESM::GameSetting>& gmsts =
                 MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-            win->addTitle (gmsts.find ("sServiceRefusal")->getString());
-
             MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
-            win->addText (Interpreter::fixDefinesDialog(info->mResponse, interpreterContext));
+
+            win->addResponse (Interpreter::fixDefinesDialog(info->mResponse, interpreterContext),
+                              gmsts.find ("sServiceRefusal")->getString());
 
             executeScript (info->mResultScript);
             return true;
@@ -563,9 +560,7 @@ namespace MWDialogue
     std::vector<HyperTextToken> ParseHyperText(const std::string& text)
     {
         std::vector<HyperTextToken> result;
-
         MyGUI::UString utext(text);
-
         size_t pos_begin, pos_end, iteration_pos = 0;
         for(;;)
         {

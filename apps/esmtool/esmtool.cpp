@@ -51,6 +51,7 @@ struct Arguments
     unsigned int raw_given;
     unsigned int quiet_given;
     unsigned int loadcells_given;
+    bool plain_given;
 
     std::string mode;
     std::string encoding;
@@ -77,6 +78,9 @@ bool parseOptions (int argc, char** argv, Arguments &info)
         ("type,t", bpo::value< std::vector<std::string> >(),
          "Show only records of this type (four character record code).  May "
          "be specified multiple times.  Only affects dump mode.")
+        ("plain,p", "Print contents of dialogs, books and scripts. "
+         "(skipped by default)"
+         "Only affects dump mode.")
         ("quiet,q", "Supress all record information. Useful for speed tests.")
         ("loadcells,C", "Browse through contents of all cells.")
 
@@ -104,11 +108,26 @@ bool parseOptions (int argc, char** argv, Arguments &info)
     // there might be a better way to do this
     bpo::options_description all;
     all.add(desc).add(hidden);
-    bpo::parsed_options valid_opts = bpo::command_line_parser(argc, argv)
-        .options(all).positional(p).run();
-
     bpo::variables_map variables;
-    bpo::store(valid_opts, variables);
+
+    try
+    {
+        bpo::parsed_options valid_opts = bpo::command_line_parser(argc, argv)
+            .options(all).positional(p).run();
+
+        bpo::store(valid_opts, variables);
+    }
+    catch(boost::program_options::unknown_option & x)
+    {
+        std::cerr << "ERROR: " << x.what() << std::endl;
+        return false;
+    }
+    catch(boost::program_options::invalid_command_line_syntax & x)
+    {
+        std::cerr << "ERROR: " << x.what() << std::endl;
+        return false;
+    }
+
     bpo::notify(variables);
 
     if (variables.count ("help"))
@@ -161,6 +180,7 @@ bool parseOptions (int argc, char** argv, Arguments &info)
     info.raw_given = variables.count ("raw");
     info.quiet_given = variables.count ("quiet");
     info.loadcells_given = variables.count ("loadcells");
+    info.plain_given = (variables.count("plain") > 0);
 
     // Font encoding settings
     info.encoding = variables["encoding"].as<std::string>();
@@ -343,6 +363,7 @@ int load(Arguments& info)
                 }
                 record->setId(id);
                 record->setFlags((int) flags);
+                record->setPrintPlain(info.plain_given);
                 record->load(esm);
                 if (!quiet && interested) record->print();
 

@@ -10,6 +10,8 @@ void NPC::load(ESMReader &esm)
 {
     mNpdt52.mGold = -10;
 
+    mPersistent = esm.getRecordFlags() & 0x0400;
+
     mModel = esm.getHNOString("MODL");
     mName = esm.getHNOString("FNAM");
 
@@ -56,7 +58,7 @@ void NPC::load(ESMReader &esm)
             mTransport.push_back(dodt);
         } else if (esm.retSubName() == 0x4d414e44) { // DNAM struct
             mTransport.back().mCellName = esm.getHString();
-        } 
+        }
     }
     mAiPackage.load(esm);
     esm.skipRecord();
@@ -71,14 +73,14 @@ void NPC::save(ESMWriter &esm)
     esm.writeHNCString("BNAM", mHead);
     esm.writeHNCString("KNAM", mHair);
     esm.writeHNOCString("SCRI", mScript);
-    
+
     if (mNpdtType == 52)
         esm.writeHNT("NPDT", mNpdt52, 52);
     else if (mNpdtType == 12)
         esm.writeHNT("NPDT", mNpdt12, 12);
 
     esm.writeHNT("FLAG", mFlags);
-    
+
     mInventory.save(esm);
     mSpells.save(esm);
     if (mHasAI) {
@@ -93,4 +95,53 @@ void NPC::save(ESMWriter &esm)
     mAiPackage.save(esm);
 }
 
+    bool NPC::isMale() const {
+        return (mFlags & Female) == 0;
+    }
+
+    void NPC::setIsMale(bool value) {
+        mFlags |= Female;
+        if (value) {
+            mFlags ^= Female;
+        }
+    }
+
+    void NPC::blank()
+    {
+        mNpdtType = 0;
+        mNpdt52.mLevel = 0;
+        mNpdt52.mStrength = mNpdt52.mIntelligence = mNpdt52.mWillpower = mNpdt52.mAgility =
+            mNpdt52.mSpeed = mNpdt52.mEndurance = mNpdt52.mPersonality = mNpdt52.mLuck = 0;
+        for (int i=0; i<27; ++i) mNpdt52.mSkills[i] = 0;
+        mNpdt52.mReputation = 0;
+        mNpdt52.mHealth = mNpdt52.mMana = mNpdt52.mFatigue = 0;
+        mNpdt52.mDisposition = 0;
+        mNpdt52.mFactionID = 0;
+        mNpdt52.mRank = 0;
+        mNpdt52.mUnknown = 0;
+        mNpdt52.mGold = 0;
+        mNpdt12.mLevel = 0;
+        mNpdt12.mDisposition = 0;
+        mNpdt12.mReputation = 0;
+        mNpdt12.mRank = 0;
+        mNpdt12.mUnknown1 = 0;
+        mNpdt12.mUnknown2 = 0;
+        mNpdt12.mUnknown3 = 0;
+        mNpdt12.mGold = 0;
+        mFlags = 0;
+        mInventory.mList.clear();
+        mSpells.mList.clear();
+        mAiData.blank();
+        mHasAI = false;
+        mTransport.clear();
+        mAiPackage.mList.clear();
+        mName.clear();
+        mModel.clear();
+        mRace.clear();
+        mClass.clear();
+        mFaction.clear();
+        mScript.clear();
+        mHair.clear();
+        mHead.clear();
+    }
 }

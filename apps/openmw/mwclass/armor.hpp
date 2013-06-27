@@ -12,6 +12,8 @@ namespace MWClass
 
         public:
 
+            virtual float getWeight (const MWWorld::Ptr& ptr) const;
+
             virtual void insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const;
             ///< Add reference into a cell for rendering
 
@@ -65,7 +67,11 @@ namespace MWClass
             virtual std::string getEnchantment (const MWWorld::Ptr& ptr) const;
             ///< @return the enchantment ID if the object is enchanted, otherwise an empty string
 
-            virtual std::string applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const;
+            virtual void applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const;
+
+            virtual std::pair<int, std::string> canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const;
+            ///< Return 0 if player cannot equip item. 1 if can equip. 2 if it's twohanded weapon. 3 if twohanded weapon conflicts with that. \n
+            ///  Second item in the pair specifies the error message
 
             virtual boost::shared_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr)
                 const;
@@ -73,7 +79,9 @@ namespace MWClass
 
             virtual std::string getModel(const MWWorld::Ptr &ptr) const;
 
-            virtual short getEnchantmentPoints (const MWWorld::Ptr& ptr) const;
+            virtual float getEnchantmentPoints (const MWWorld::Ptr& ptr) const;
+
+            virtual bool canSell (const MWWorld::Ptr& item, int npcServices) const;
     };
 }
 

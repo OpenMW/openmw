@@ -3,7 +3,7 @@
 
 #include <string>
 
-namespace MWWorld 
+namespace MWWorld
 {
     struct ESMStore;
 }
@@ -27,7 +27,7 @@ namespace MWDialogue
         static std::string idFromIndex (const std::string& topic, int index);
     };
 
-    /// \biref A quest entry with a timestamp.
+    /// \brief A quest entry with a timestamp.
     struct StampedJournalEntry : public JournalEntry
     {
         int mDay;

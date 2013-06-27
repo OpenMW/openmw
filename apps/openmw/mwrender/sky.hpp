@@ -1,5 +1,5 @@
-#ifndef _GAME_RENDER_SKY_H
-#define _GAME_RENDER_SKY_H
+#ifndef GAME_RENDER_SKY_H
+#define GAME_RENDER_SKY_H
 
 #include <vector>
 
@@ -61,7 +61,7 @@ namespace MWRender
         Ogre::ColourValue mColour;
         Ogre::SceneNode* mNode;
         sh::MaterialInstance* mMaterial;
-        Ogre::BillboardSet* mBBSet;
+        Ogre::Entity* mEntity;
     };
 
 
@@ -117,9 +117,6 @@ namespace MWRender
 
         void update(float duration);
 
-        void create();
-        ///< no need to call this, automatically done on first enable()
-
         void enable();
 
         void disable();
@@ -173,11 +170,10 @@ namespace MWRender
         void setGlareEnabled(bool enabled);
         Ogre::Vector3 getRealSunPos();
 
-        void setSkyPosition(const Ogre::Vector3& position);
-        void resetSkyPosition();
-        void scaleSky(float scale);
-
     private:
+        void create();
+        ///< no need to call this, automatically done on first enable()
+
         bool mCreated;
 
         bool mMoonRed;
@@ -199,8 +195,6 @@ namespace MWRender
 
         Ogre::SceneNode* mAtmosphereDay;
         Ogre::SceneNode* mAtmosphereNight;
-
-        Ogre::HighLevelGpuProgramPtr mCloudFragmentShader;
 
         // remember some settings so we don't have to apply them again if they didnt change
         Ogre::String mClouds;
@@ -227,4 +221,4 @@ namespace MWRender
     };
 }
 
-#endif // _GAME_RENDER_SKY_H
+#endif // GAME_RENDER_SKY_H

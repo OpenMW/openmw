@@ -31,14 +31,14 @@ void Region::load(ESMReader &esm)
 void Region::save(ESMWriter &esm)
 {
     esm.writeHNCString("FNAM", mName);
-    
+
     if (esm.getVersion() == VER_12)
         esm.writeHNT("WEAT", mData, sizeof(mData) - 2);
     else
         esm.writeHNT("WEAT", mData);
-    
+
     esm.writeHNOCString("BNAM", mSleepList);
-    
+
     esm.writeHNT("CNAM", mMapColor);
     for (std::vector<SoundRef>::iterator it = mSoundList.begin(); it != mSoundList.end(); ++it)
     {
@@ -46,4 +46,17 @@ void Region::save(ESMWriter &esm)
     }
 }
 
+    void Region::blank()
+    {
+        mName.clear();
+
+        mData.mClear = mData.mCloudy = mData.mFoggy = mData.mOvercast = mData.mRain =
+            mData.mThunder = mData.mAsh, mData.mBlight = mData.mA = mData.mB = 0;
+
+        mMapColor = 0;
+
+        mName.clear();
+        mSleepList.clear();
+        mSoundList.clear();
+    }
 }

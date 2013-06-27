@@ -84,6 +84,7 @@ set(MYGUI_FILES
     smallbars.png
     DejaVuLGCSansMono.ttf
     markers.png
+    ../launcher/images/openmw.png
 )
 
 

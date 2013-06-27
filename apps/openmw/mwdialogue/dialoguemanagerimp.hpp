@@ -30,7 +30,6 @@ namespace MWDialogue
             bool mTalkedTo;
 
             int mChoice;
-            std::map<std::string, int> mChoiceMap;
             std::string mLastTopic;
             ESM::DialInfo mLastDialogue;
             bool mIsInChoice;
@@ -46,13 +45,13 @@ namespace MWDialogue
             bool compile (const std::string& cmd,std::vector<Interpreter::Type_Code>& code);
             void executeScript (const std::string& script);
 
-            void printError (const std::string& error);
-
             void executeTopic (const std::string& topic, bool randomResponse=false);
 
         public:
 
             DialogueManager (const Compiler::Extensions& extensions, bool scriptVerbose, Translation::Storage& translationDataStorage);
+
+            virtual void clear();
 
             virtual bool isInChoice() const;
 
@@ -72,7 +71,7 @@ namespace MWDialogue
             //calbacks for the GUI
             virtual void keywordSelected (const std::string& keyword);
             virtual void goodbyeSelected();
-            virtual void questionAnswered (const std::string& answer);
+            virtual void questionAnswered (int answer);
 
             virtual void persuade (int type);
             virtual int getTemporaryDispositionChange () const;

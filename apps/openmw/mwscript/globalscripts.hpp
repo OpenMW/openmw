@@ -22,6 +22,8 @@ namespace MWScript
 
             GlobalScripts (const MWWorld::ESMStore& store);
 
+            void reset();
+
             void addScript (const std::string& name);
 
             void removeScript (const std::string& name);

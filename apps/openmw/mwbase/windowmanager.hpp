@@ -55,6 +55,11 @@ namespace MWGui
     class DialogueWindow;
 }
 
+namespace SFO
+{
+    class CursorManager;
+}
+
 namespace MWBase
 {
     /// \brief Interface for widnow manager (implemented in MWGui)
@@ -81,13 +86,18 @@ namespace MWBase
              */
             virtual void update() = 0;
 
+            virtual void setNewGame(bool newgame) = 0;
+
             virtual void pushGuiMode (MWGui::GuiMode mode) = 0;
             virtual void popGuiMode() = 0;
 
             virtual void removeGuiMode (MWGui::GuiMode mode) = 0;
             ///< can be anywhere in the stack
 
+            virtual void updatePlayer() = 0;
+
             virtual MWGui::GuiMode getMode() const = 0;
+            virtual bool containsMode(MWGui::GuiMode) const = 0;
 
             virtual bool isGuiMode() const = 0;
 
@@ -155,7 +165,7 @@ namespace MWBase
             virtual void setFocusObject(const MWWorld::Ptr& focus) = 0;
             virtual void setFocusObjectScreenCoords(float min_x, float min_y, float max_x, float max_y) = 0;
 
-            virtual void setMouseVisible(bool visible) = 0;
+            virtual void setCursorVisible(bool visible) = 0;
             virtual void getMousePosition(int &x, int &y) = 0;
             virtual void getMousePosition(float &x, float &y) = 0;
             virtual void setDragDrop(bool dragDrop) = 0;
@@ -182,8 +192,8 @@ namespace MWBase
             virtual void activateQuickKey  (int index) = 0;
 
             virtual void setSelectedSpell(const std::string& spellId, int successChancePercent) = 0;
-            virtual void setSelectedEnchantItem(const MWWorld::Ptr& item, int chargePercent) = 0;
-            virtual void setSelectedWeapon(const MWWorld::Ptr& item, int durabilityPercent) = 0;
+            virtual void setSelectedEnchantItem(const MWWorld::Ptr& item) = 0;
+            virtual void setSelectedWeapon(const MWWorld::Ptr& item) = 0;
             virtual void unsetSelectedSpell() = 0;
             virtual void unsetSelectedWeapon() = 0;
 
@@ -200,7 +210,9 @@ namespace MWBase
             virtual void removeDialog(OEngine::GUI::Layout* dialog) = 0;
             ///< Hides dialog and schedules dialog to be deleted.
 
-            virtual void messageBox (const std::string& message, const std::vector<std::string>& buttons = std::vector<std::string>()) = 0;
+            virtual void messageBox (const std::string& message, const std::vector<std::string>& buttons = std::vector<std::string>(), bool showInDialogueModeOnly = false) = 0;
+            virtual void staticMessageBox(const std::string& message) = 0;
+            virtual void removeStaticMessageBox() = 0;
 
             virtual void enterPressed () = 0;
             virtual int readPressedButton() = 0;
@@ -232,6 +244,7 @@ namespace MWBase
 
             virtual void enableRest() = 0;
             virtual bool getRestEnabled() = 0;
+            virtual bool getJournalAllowed() = 0; 
 
             virtual bool getPlayerSleeping() = 0;
             virtual void wakeUpPlayer() = 0;
@@ -246,9 +259,13 @@ namespace MWBase
 
             virtual void showSoulgemDialog (MWWorld::Ptr item) = 0;
 
+            virtual void frameStarted(float dt) = 0;
+
             virtual void changePointer (const std::string& name) = 0;
 
             virtual const Translation::Storage& getTranslationDataStorage() const = 0;
+
+            virtual void setKeyFocusWidget (MyGUI::Widget* widget) = 0;
     };
 }
 

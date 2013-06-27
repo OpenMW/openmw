@@ -47,6 +47,16 @@ namespace MWWorld
         throw std::runtime_error ("class does not represent an actor");
     }
 
+    bool Class::canSell (const MWWorld::Ptr& item, int npcServices) const
+    {
+        return false;
+    }
+
+    int Class::getServices(const Ptr &actor) const
+    {
+        throw std::runtime_error ("class does not have services");
+    }
+
     MWMechanics::CreatureStats& Class::getCreatureStats (const Ptr& ptr) const
     {
         throw std::runtime_error ("class does not have creature stats");
@@ -127,7 +137,7 @@ namespace MWWorld
         return 0;
     }
 
-    short Class::getEnchantmentPoints (const MWWorld::Ptr& ptr) const
+    float Class::getEnchantmentPoints (const MWWorld::Ptr& ptr) const
     {
         throw std::runtime_error ("class does not support enchanting");
     }
@@ -167,6 +177,11 @@ namespace MWWorld
         throw std::runtime_error ("capacity not supported by this class");
     }
 
+    float Class::getWeight(const Ptr &ptr) const
+    {
+        throw std::runtime_error ("weight not supported by this class");
+    }
+
     float Class::getEncumbrance (const MWWorld::Ptr& ptr) const
     {
         throw std::runtime_error ("encumbrance not supported by class");
@@ -203,6 +218,11 @@ namespace MWWorld
     const Class& Class::get (const Ptr& ptr)
     {
         return get (ptr.getTypeName());
+    }
+
+    bool Class::isPersistent(const Ptr &ptr) const
+    {
+        throw std::runtime_error ("class does not support persistence");
     }
 
     void Class::registerClass (const std::string& key,  boost::shared_ptr<Class> instance)
@@ -254,9 +274,18 @@ namespace MWWorld
         return "";
     }
 
-    std::string Class::applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
+    void Class::applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
     {
         throw std::runtime_error ("class can't be enchanted");
+    }
+
+    std::pair<int, std::string> Class::canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const
+    {
+        return std::make_pair (1, "");
+    }
+
+    void Class::adjustPosition(const MWWorld::Ptr& ptr) const
+    {
     }
 
     MWWorld::Ptr

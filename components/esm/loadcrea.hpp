@@ -69,6 +69,9 @@ struct Creature
     NPDTstruct mData;
 
     int mFlags;
+
+    bool mPersistent;
+
     float mScale;
 
     std::string mId, mModel, mName, mScript;
@@ -84,6 +87,9 @@ struct Creature
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
+
+    void blank();
+    ///< Set record to default state (does not touch the ID).
 };
 
 }
