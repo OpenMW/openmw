@@ -112,13 +112,16 @@ target_link_libraries(openmw
     ${BULLET_LIBRARIES}
     ${MYGUI_LIBRARIES}
     ${SDL2_LIBRARY}
-    ${SDL2MAIN_LIBRARY}
     ${MYGUI_PLATFORM_LIBRARIES}
     ${SHINY_LIBRARIES}
     "oics"
     "sdl4ogre"
     components
 )
+
+if (NOT UNIX)
+target_link_libraries(openmw ${SDL2MAIN_LIBRARY})
+endif()
 
 # Fix for not visible pthreads functions for linker with glibc 2.15
 if (UNIX AND NOT APPLE)
