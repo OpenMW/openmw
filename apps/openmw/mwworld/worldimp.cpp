@@ -1751,4 +1751,18 @@ namespace MWWorld
                     out.push_back(searchPtrViaHandle(*it));
         }
     }
+
+    void World::enableActorCollision(const MWWorld::Ptr& actor, bool enable)
+    {
+        OEngine::Physic::PhysicActor *physicActor = mPhysEngine->getCharacter(actor.getRefData().getHandle());
+        
+        if (!enable)
+        {
+            physicActor->setScale(0.15);
+        }
+        else
+        {
+            physicActor->setScale(1);
+        }
+    }
 }
