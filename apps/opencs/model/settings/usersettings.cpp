@@ -52,27 +52,20 @@ CSMSettings::UserSettings::~UserSettings()
 
 QTextStream *CSMSettings::UserSettings::openFileStream (const QString &filePath, bool isReadOnly) const
 {
-    QFile *file = new QFile(filePath);
-
-    QIODevice::OpenMode openFlags;
+    QIODevice::OpenMode openFlags = QIODevice::Text;
 
     if (isReadOnly)
-        openFlags = QIODevice::ReadOnly | QIODevice::Text;
+        openFlags = QIODevice::ReadOnly | openFlags;
     else
-        openFlags = QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate;
+        openFlags = QIODevice::ReadWrite | QIODevice::Truncate | openFlags;
 
+    QFile *file = new QFile(filePath);
     QTextStream *stream = 0;
 
     if (file->open(openFlags))
     {
         stream = new QTextStream(file);
         stream->setCodec(QTextCodec::codecForName("UTF-8"));
-    }
-
-    if (!stream)
-    {
-        delete file;
-        file = 0;
     }
 
     return stream;
@@ -83,10 +76,9 @@ bool CSMSettings::UserSettings::writeSettings(QMap<QString, CSMSettings::Setting
 {
     QTextStream *stream = openFileStream(mUserFilePath);
 
-    if (!stream)
-        displayFileErrorMessage(mReadWriteMessage, false);
+    bool success = (stream);
 
-    if (stream)
+    if (success)
     {
         QList<QString> keyList = settings.keys();
 
@@ -101,9 +93,15 @@ bool CSMSettings::UserSettings::writeSettings(QMap<QString, CSMSettings::Setting
         }
 
         stream->device()->close();
+        delete stream;
+        stream = 0;
+    }
+    else
+    {
+        displayFileErrorMessage(mReadWriteMessage, false);
     }
 
-    return (stream);
+    return (success);
 }
 
 
@@ -121,7 +119,9 @@ bool CSMSettings::UserSettings::loadFromFile(const QString &filePath)
 
     QTextStream *stream = openFileStream (filePath, true);
 
-    if (stream)
+    bool success = (stream);
+
+    if (success)
     {
         //looks for a square bracket, "'\\["
         //that has one or more "not nothing" in it, "([^]]+)"
@@ -171,24 +171,23 @@ bool CSMSettings::UserSettings::loadFromFile(const QString &filePath)
         mSectionSettings.insert(section, settings);
 
         stream->device()->close();
+        delete stream;
+        stream = 0;
     }
 
-    return (stream);
+    return success;
 }
 
 void CSMSettings::UserSettings::loadSettings (const QString &fileName)
 {
-    bool globalOk;
-    bool localOk;
-
     //global
     QString globalFilePath = QString::fromStdString(mCfgMgr.getGlobalPath().string()) + fileName;
-    globalOk = loadFromFile(globalFilePath);
+    bool globalOk = loadFromFile(globalFilePath);
 
 
     //local
     QString localFilePath = QString::fromStdString(mCfgMgr.getLocalPath().string()) + fileName;
-    localOk = loadFromFile(localFilePath);
+    bool localOk = loadFromFile(localFilePath);
 
     //user
     mUserFilePath = QString::fromStdString(mCfgMgr.getUserPath().string()) + fileName;
@@ -209,23 +208,21 @@ void CSMSettings::UserSettings::loadSettings (const QString &fileName)
 
 void CSMSettings::UserSettings::updateSettings (const QString &sectionName, const QString &settingName)
 {
-    SettingMap *settings = mSectionSettings[sectionName];
-
-    if (!settings)
+    if (mSectionSettings.find(sectionName) == mSectionSettings.end())
         return;
 
-    SettingContainer *setting = 0;
+    SettingMap *settings = mSectionSettings.value(sectionName);
 
     if (settingName.isEmpty())
     {
-        foreach (setting, *settings)
+        foreach (const SettingContainer *setting, *settings)
             emit signalUpdateEditorSetting (setting->objectName(), setting->getValue());
     }
     else
     {
-        if (settings->find(settingName)!=settings->end())
+        if (settings->find(settingName) != settings->end())
         {
-            setting = settings->value(settingName);
+            const SettingContainer *setting = settings->value(settingName);
             emit signalUpdateEditorSetting (setting->objectName(), setting->getValue());
         }
     }
@@ -233,23 +230,23 @@ void CSMSettings::UserSettings::updateSettings (const QString &sectionName, cons
 
 QString CSMSettings::UserSettings::getSetting (const QString &section, const QString &setting) const
 {
-    if(mSectionSettings.find(section) == mSectionSettings.end())
-        return QString();
+    QString retVal = "";
 
-    CSMSettings::SettingMap *settings = mSectionSettings.value(section);
+    if (mSectionSettings.find(section) != mSectionSettings.end())
+    {
+        CSMSettings::SettingMap *settings = mSectionSettings.value(section);
 
-    if(settings->find(setting) == settings->end())
-        return QString();
+        if (settings->find(setting) != settings->end())
+            retVal = settings->value(setting)->getValue();
+    }
 
-    CSMSettings::SettingContainer *settingContainer = settings->value(setting);
-
-    return settingContainer->getValue();
+    return retVal;
 }
 
 CSMSettings::UserSettings& CSMSettings::UserSettings::instance()
 {
-            assert(mUserSettingsInstance);
-            return *mUserSettingsInstance;
+    assert(mUserSettingsInstance);
+    return *mUserSettingsInstance;
 }
 
 void CSMSettings::UserSettings::displayFileErrorMessage(const QString &message, bool isReadOnly)

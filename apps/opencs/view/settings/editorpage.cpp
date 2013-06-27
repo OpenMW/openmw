@@ -3,7 +3,7 @@
 #include "../../model/settings/usersettings.hpp"
 
 CSVSettings::EditorPage::EditorPage(QWidget* parent) :
-    AbstractPage("Editor", parent)
+    AbstractPage("Display Format", parent)
 {
     setupUi();
 }

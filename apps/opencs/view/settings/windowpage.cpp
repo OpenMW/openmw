@@ -19,7 +19,7 @@
 #include "../../view/settings/abstractblock.hpp"
 
 CSVSettings::WindowPage::WindowPage(QWidget *parent):
-    AbstractPage("Window Size", parent)
+    AbstractPage("Window", parent)
 {
     // Hacks to get the stylesheet look properly
 #ifdef Q_OS_MAC
