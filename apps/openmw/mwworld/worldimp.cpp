@@ -1756,13 +1756,13 @@ namespace MWWorld
     {
         OEngine::Physic::PhysicActor *physicActor = mPhysEngine->getCharacter(actor.getRefData().getHandle());
         
-        if (!enable)
+        if (enable)
         {
-            physicActor->setScale(0.15);
+            physicActor->enableCollisionBody();
         }
         else
         {
-            physicActor->setScale(1);
+            physicActor->disableCollisionBody();
         }
     }
 }
