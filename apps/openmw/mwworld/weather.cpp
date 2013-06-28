@@ -572,35 +572,36 @@ Ogre::String WeatherManager::nextWeather(const ESM::Region* region) const
 
     int chance = (rand() % 100) + 1; // 1..100
     int sum = 0;
-    for (int i = 0; i < 10; ++i)
+    int i = 0;
+    for (; i < 10; ++i)
     {
         sum += probability[i];
         if (chance < sum)
-        {
-            switch (i)
-            {
-            case 1:
-                return "cloudy";
-            case 2:
-                return "foggy";
-            case 3:
-                return "overcast";
-            case 4:
-                return "rain";
-            case 5:
-                return "thunderstorm";
-            case 6:
-                return "ashstorm";
-            case 7:
-                return "blight";
-            case 8:
-                return "snow";
-            case 9:
-                return "blizzard";
-            default: // case 0
-                return "clear";
-            }
-        }
+            break;
+    }
+
+    switch (i)
+    {
+        case 1:
+            return "cloudy";
+        case 2:
+            return "foggy";
+        case 3:
+            return "overcast";
+        case 4:
+            return "rain";
+        case 5:
+            return "thunderstorm";
+        case 6:
+            return "ashstorm";
+        case 7:
+            return "blight";
+        case 8:
+            return "snow";
+        case 9:
+            return "blizzard";
+        default: // case 0
+            return "clear";
     }
 }
 
