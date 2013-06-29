@@ -61,7 +61,9 @@ opencs_units (view/world
     )
 
 opencs_units_noqt (view/world
-    dialoguesubview subviews enumdelegate vartypedelegate scripthighlighter recordstatusdelegate
+    dialoguesubview subviews
+    enumdelegate vartypedelegate recordstatusdelegate refrecordtypedelegate
+    scripthighlighter
     )
 
 

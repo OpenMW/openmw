@@ -13,6 +13,7 @@
 #include "../world/enumdelegate.hpp"
 #include "../world/vartypedelegate.hpp"
 #include "../world/recordstatusdelegate.hpp"
+#include "../world/refrecordtypedelegate.hpp"
 #include "../settings/usersettingsdialog.hpp"
 
 #include "view.hpp"
@@ -121,6 +122,9 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
 
     mDelegateFactories->add (CSMWorld::ColumnBase::Display_RecordState,
         new CSVWorld::RecordStatusDelegateFactory() );
+
+    mDelegateFactories->add (CSMWorld::ColumnBase::Display_RefRecordType,
+        new CSVWorld::RefRecordTypeDelegateFactory() );
 
     connect (&CSMSettings::UserSettings::instance(), SIGNAL (signalUpdateEditorSetting (const QString &, const QString &)),
              this, SLOT (slotUpdateEditorSetting (const QString &, const QString &)));

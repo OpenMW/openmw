@@ -42,7 +42,8 @@ namespace CSMWorld
             Display_ClothingType,
             Display_CreatureType,
             Display_WeaponType,
-            Display_RecordState
+            Display_RecordState,
+            Display_RefRecordType
         };
 
         std::string mTitle;
