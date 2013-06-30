@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <sstream>
 
+#include <QDebug>
 namespace
 {
     struct TypeData
@@ -83,6 +84,8 @@ namespace
 
         { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0 } // end marker
     };
+
+    static const unsigned int IDARG_SIZE = sizeof (sIdArg) / sizeof (TypeData);
 }
 
 CSMWorld::UniversalId::UniversalId (const std::string& universalId)
@@ -260,6 +263,26 @@ std::string CSMWorld::UniversalId::toString() const
 
     return stream.str();
 }
+
+
+std::pair<int, const char *> CSMWorld::UniversalId::getIdArgPair (unsigned int index)
+{
+    std::pair<int, const char *> retPair;
+
+    if ( index < IDARG_SIZE )
+    {
+        retPair.first = sIdArg[index].mType;
+        retPair.second = sIdArg[index].mName;
+    }
+
+    return retPair;
+}
+
+unsigned int CSMWorld::UniversalId::getIdArgSize()
+{
+   return IDARG_SIZE;
+}
+
 
 bool CSMWorld::operator== (const CSMWorld::UniversalId& left, const CSMWorld::UniversalId& right)
 {

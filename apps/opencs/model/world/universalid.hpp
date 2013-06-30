@@ -123,6 +123,9 @@ namespace CSMWorld
             std::string getTypeName() const;
 
             std::string toString() const;
+
+            static std::pair<int, const char *> getIdArgPair (unsigned int index);
+            static unsigned int getIdArgSize ();
     };
 
     bool operator== (const UniversalId& left, const UniversalId& right);

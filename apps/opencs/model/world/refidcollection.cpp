@@ -42,7 +42,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.push_back (RefIdColumn ("*", ColumnBase::Display_RecordState,
         ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue, false, false));
     baseColumns.mModified = &mColumns.back();
-    mColumns.push_back (RefIdColumn ("Type", ColumnBase::Display_Integer,
+    mColumns.push_back (RefIdColumn ("Type", ColumnBase::Display_RefRecordType,
         ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue, false, false));
     baseColumns.mType = &mColumns.back();
 
