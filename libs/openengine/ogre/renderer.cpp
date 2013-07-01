@@ -266,15 +266,23 @@ void OgreRenderer::createWindow(const std::string &title, const WindowSettings& 
     params.insert(std::make_pair("FSAA", settings.fsaa));
     params.insert(std::make_pair("vsync", settings.vsync ? "true" : "false"));
 
-    SDL_Rect display_bounds;
-    if(SDL_GetDisplayBounds(settings.screen, &display_bounds) != 0)
-        throw std::runtime_error("Couldn't get display bounds!");
+    int pos_x = SDL_WINDOWPOS_UNDEFINED,
+        pos_y = SDL_WINDOWPOS_UNDEFINED;
+
+    if(settings.fullscreen)
+    {
+        SDL_Rect display_bounds;
+        if(SDL_GetDisplayBounds(settings.screen, &display_bounds) != 0)
+            throw std::runtime_error("Couldn't get display bounds!");
+        pos_x = display_bounds.x;
+        pos_y = display_bounds.y;
+    }
 
     // Create an application window with the following settings:
     mSDLWindow = SDL_CreateWindow(
       "OpenMW",                  //    window title
-      display_bounds.x,           //    initial x position
-      display_bounds.y,           //    initial y position
+      pos_x,                     //    initial x position
+      pos_y,                     //    initial y position
       settings.window_x,                               //    width, in pixels
       settings.window_y,                               //    height, in pixels
       SDL_WINDOW_SHOWN
