@@ -9,7 +9,6 @@
 #include <QTextCodec>
 
 #include <QFile>
-#include <QDebug>
 
 #include <components/files/configurationmanager.hpp>
 #include "settingcontainer.hpp"

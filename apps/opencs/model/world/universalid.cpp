@@ -5,7 +5,6 @@
 #include <stdexcept>
 #include <sstream>
 
-#include <QDebug>
 namespace
 {
     struct TypeData
