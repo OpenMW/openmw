@@ -56,6 +56,7 @@ namespace OEngine
             bool vsync;
             bool fullscreen;
             int window_x, window_y;
+            int screen;
             std::string fsaa;
             std::string icon;
         };
