@@ -369,6 +369,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     windowSettings.fullscreen = settings.getBool("fullscreen", "Video");
     windowSettings.window_x = settings.getInt("resolution x", "Video");
     windowSettings.window_y = settings.getInt("resolution y", "Video");
+    windowSettings.screen = settings.getInt("screen", "Video");
     windowSettings.vsync = settings.getBool("vsync", "Video");
     windowSettings.icon = "openmw.png";
     std::string aa = settings.getString("antialiasing", "Video");
