@@ -893,5 +893,97 @@ namespace MWGui
         {
             align();
         }
+
+        MWScrollBar::MWScrollBar()
+            : mEnableRepeat(true)
+            , mRepeatTriggerTime(0.5)
+            , mRepeatStepTime(0.1)
+            , mStepDecrease(0)
+            , mStepIncrease(0)
+        {
+        }
+
+        MWScrollBar::~MWScrollBar()
+        {
+        }
+
+        void MWScrollBar::initialiseOverride()
+        {
+            Base::initialiseOverride();
+
+            mWidgetStart->eventMouseButtonPressed += MyGUI::newDelegate(this, &MWScrollBar::onDecreaseButtonPressed);
+            mWidgetStart->eventMouseButtonReleased += MyGUI::newDelegate(this, &MWScrollBar::onDecreaseButtonReleased);
+            mWidgetEnd->eventMouseButtonPressed += MyGUI::newDelegate(this, &MWScrollBar::onIncreaseButtonPressed);
+            mWidgetEnd->eventMouseButtonReleased += MyGUI::newDelegate(this, &MWScrollBar::onIncreaseButtonReleased);
+        }
+
+        void MWScrollBar::setEnableRepeat(bool enable)
+        {
+            mEnableRepeat = enable;
+        }
+
+        bool MWScrollBar::getEnableRepeat()
+        {
+            return mEnableRepeat;
+        }
+
+        void MWScrollBar::getRepeat(float &trigger, float &step)
+        {
+            trigger = mRepeatTriggerTime;
+            step = mRepeatStepTime;
+        }
+
+        void MWScrollBar::setRepeat(float trigger, float step)
+        {
+            mRepeatTriggerTime = trigger;
+            mRepeatStepTime = step;
+        }
+
+        void MWScrollBar::updateTime(float dt)
+        {
+            if(!mEnableRepeat)
+                return;
+
+            if(mStepDecrease > 0)
+            {
+                mStepDecrease -= dt;
+                if(mStepDecrease <= 0 && mScrollPosition > 0)
+                {
+                    mScrollPosition -= 1;
+                    eventScrollChangePosition(this, mScrollPosition);
+                    mStepDecrease += mRepeatStepTime;
+                }
+            }
+            if(mStepIncrease > 0)
+            {
+                mStepIncrease -= dt;
+                if(mStepIncrease <= 0 && mScrollPosition < mScrollRange-1)
+                {
+                    mScrollPosition += 1;
+                    eventScrollChangePosition(this, mScrollPosition);
+                    mStepIncrease += mRepeatStepTime;
+                }
+            }
+        }
+
+        void MWScrollBar::onDecreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
+        {
+            mStepDecrease = mRepeatTriggerTime;
+        }
+
+        void MWScrollBar::onDecreaseButtonReleased(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
+        {
+            mStepDecrease = 0;
+        }
+
+        void MWScrollBar::onIncreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
+        {
+            mStepIncrease = mRepeatTriggerTime;
+        }
+
+        void MWScrollBar::onIncreaseButtonReleased(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
+        {
+            mStepIncrease = 0;
+        }
     }
 }

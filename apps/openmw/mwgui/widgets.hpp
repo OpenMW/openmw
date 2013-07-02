@@ -6,6 +6,7 @@
 
 #include <MyGUI_Button.h>
 #include <MyGUI_EditBox.h>
+#include <MyGUI_ScrollBar.h>
 
 namespace MyGUI
 {
@@ -406,6 +407,36 @@ namespace MWGui
             virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
 
             virtual void onWidgetCreated(MyGUI::Widget* _widget);
+        };
+
+        class MWScrollBar : public MyGUI::ScrollBar
+        {
+            MYGUI_RTTI_DERIVED(MWScrollBar)
+
+        public:
+            MWScrollBar();
+
+            void setEnableRepeat(bool enable);
+            bool getEnableRepeat();
+            void getRepeat(float &trigger, float &step);
+            void setRepeat(float trigger, float step);
+            void updateTime(float dt);
+
+        protected:
+            virtual ~MWScrollBar();
+            virtual void initialiseOverride();
+
+            bool mEnableRepeat;
+            float mRepeatTriggerTime;
+            float mRepeatStepTime;
+            float mStepDecrease;
+            float mStepIncrease;
+
+        private:
+            void onDecreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
+            void onDecreaseButtonReleased(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
+            void onIncreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
+            void onIncreaseButtonReleased(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
         };
     }
 }

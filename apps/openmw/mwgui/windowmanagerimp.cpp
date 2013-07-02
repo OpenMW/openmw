@@ -142,6 +142,7 @@ namespace MWGui
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::ImageButton>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::ExposedWindow>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWScrollView>("Widget");
+        MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWScrollBar>("Widget");
         BookPage::registerMyGUIComponents ();
         ItemView::registerComponents();
 
