@@ -146,6 +146,16 @@ namespace Physic
         return collisionMode && onGround;
     }
 
+    void PhysicActor::disableCollisionBody()
+    {
+        mEngine->dynamicsWorld->removeRigidBody(mBody);
+    }
+    
+    void PhysicActor::enableCollisionBody()
+    {
+        mEngine->dynamicsWorld->addRigidBody(mBody);
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
