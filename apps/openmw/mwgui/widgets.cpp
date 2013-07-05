@@ -899,6 +899,7 @@ namespace MWGui
             : mEnableRepeat(true)
             , mRepeatTriggerTime(0.5)
             , mRepeatStepTime(0.1)
+            , mStepSize(0)
         {
         }
 
@@ -908,12 +909,18 @@ namespace MWGui
 
         void MWScrollBar::initialiseOverride()
         {
-            Base::initialiseOverride();
+            ScrollBar::initialiseOverride();
 
-            mWidgetStart->eventMouseButtonPressed += MyGUI::newDelegate(this, &MWScrollBar::onDecreaseButtonPressed);
-            mWidgetStart->eventMouseButtonReleased += MyGUI::newDelegate(this, &MWScrollBar::onDecreaseButtonReleased);
-            mWidgetEnd->eventMouseButtonPressed += MyGUI::newDelegate(this, &MWScrollBar::onIncreaseButtonPressed);
-            mWidgetEnd->eventMouseButtonReleased += MyGUI::newDelegate(this, &MWScrollBar::onIncreaseButtonReleased);
+            if(mWidgetStart)
+            {
+                mWidgetStart->eventMouseButtonPressed += MyGUI::newDelegate(this, &MWScrollBar::onDecreaseButtonPressed);
+                mWidgetStart->eventMouseButtonReleased += MyGUI::newDelegate(this, &MWScrollBar::onDecreaseButtonReleased);
+            }
+            if(mWidgetEnd)
+            {
+                mWidgetEnd->eventMouseButtonPressed += MyGUI::newDelegate(this, &MWScrollBar::onIncreaseButtonPressed);
+                mWidgetEnd->eventMouseButtonReleased += MyGUI::newDelegate(this, &MWScrollBar::onIncreaseButtonReleased);
+            }
         }
 
         void MWScrollBar::setEnableRepeat(bool enable)
@@ -938,17 +945,42 @@ namespace MWGui
             mRepeatStepTime = step;
         }
 
+        void MWScrollBar::setStepSize(int step)
+        {
+            mStepSize = step;
+        }
+
+        int MWScrollBar::getStepSize()
+        {
+            return mStepSize;
+        }
+
         void MWScrollBar::repeatClick(MyGUI::Widget* _widget, MyGUI::ControllerItem* _controller)
         {
+            int stepSize = mStepSize;
+            if(stepSize == 0)
+                stepSize = mScrollRange/20;
+
             if(mIsIncreasing && mScrollPosition < mScrollRange-1)
             {
-                mScrollPosition += 1;
+                if(mScrollPosition + stepSize > mScrollRange-1)
+                    mScrollPosition = mScrollRange-1;
+                else
+                    mScrollPosition += stepSize;
+
                 eventScrollChangePosition(this, mScrollPosition);
+                updateTrack();
             }
             else if(!mIsIncreasing && mScrollPosition > 0)
             {
-                mScrollPosition -= 1;
+                int newPos = mScrollPosition - stepSize;
+                if(newPos < 0)
+                    mScrollPosition = 0;
+                else
+                    mScrollPosition -= stepSize;
+
                 eventScrollChangePosition(this, mScrollPosition);
+                updateTrack();
             }
         }
 
