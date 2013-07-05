@@ -228,8 +228,6 @@ namespace MWGui
 
     void WaitDialog::onFrame(float dt)
     {
-        mHourSlider->updateTime(dt);
-
         if (!mWaiting)
             return;
 

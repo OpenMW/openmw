@@ -3,6 +3,7 @@
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwmechanics/stat.hpp"
+#include "controllers.hpp"
 
 #include <MyGUI_Button.h>
 #include <MyGUI_EditBox.h>
@@ -415,22 +416,21 @@ namespace MWGui
 
         public:
             MWScrollBar();
+            virtual ~MWScrollBar();
 
             void setEnableRepeat(bool enable);
             bool getEnableRepeat();
             void getRepeat(float &trigger, float &step);
             void setRepeat(float trigger, float step);
-            void updateTime(float dt);
 
         protected:
-            virtual ~MWScrollBar();
             virtual void initialiseOverride();
+            void repeatClick(MyGUI::Widget* _widget, MyGUI::ControllerItem* _controller);
 
             bool mEnableRepeat;
             float mRepeatTriggerTime;
             float mRepeatStepTime;
-            float mStepDecrease;
-            float mStepIncrease;
+            bool mIsIncreasing;
 
         private:
             void onDecreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
