@@ -899,7 +899,6 @@ namespace MWGui
             : mEnableRepeat(true)
             , mRepeatTriggerTime(0.5)
             , mRepeatStepTime(0.1)
-            , mStepSize(0)
         {
         }
 
@@ -945,21 +944,9 @@ namespace MWGui
             mRepeatStepTime = step;
         }
 
-        void MWScrollBar::setStepSize(int step)
-        {
-            mStepSize = step;
-        }
-
-        int MWScrollBar::getStepSize()
-        {
-            return mStepSize;
-        }
-
         void MWScrollBar::repeatClick(MyGUI::Widget* _widget, MyGUI::ControllerItem* _controller)
         {
-            int stepSize = mStepSize;
-            if(stepSize == 0)
-                stepSize = mScrollRange/20;
+            int stepSize = mScrollPage;
 
             if(mIsIncreasing && mScrollPosition < mScrollRange-1)
             {

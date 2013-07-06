@@ -422,8 +422,6 @@ namespace MWGui
             bool getEnableRepeat();
             void getRepeat(float &trigger, float &step);
             void setRepeat(float trigger, float step);
-            void setStepSize(int step);
-            int getStepSize();
 
         protected:
             virtual void initialiseOverride();
@@ -433,7 +431,6 @@ namespace MWGui
             float mRepeatTriggerTime;
             float mRepeatStepTime;
             bool mIsIncreasing;
-            int mStepSize;
 
         private:
             void onDecreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);

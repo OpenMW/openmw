@@ -23,9 +23,9 @@ namespace MWGui
                 mTimeLeft = mInit;
 
             mTimeLeft -= _time;
-            if(mTimeLeft <= 0)
+            while (mTimeLeft <= 0)
             {
-                mTimeLeft = mStep;
+                mTimeLeft += mStep;
                 eventRepeatClick(_widget, this);
             }
             return true;

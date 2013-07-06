@@ -16,7 +16,8 @@
                     <Property key="Caption" value="#{sTransparency_Menu}"/>
                 </Widget>
                 <Widget type="MWScrollBar" skin="MW_HScroll" position="4 28 352 18" align="Left Top" name="MenuTransparencySlider">
-                    <Property key="Range" value="100"/>
+                    <Property key="Range" value="10000"/>
+                    <Property key="Page" value="300"/>
                 </Widget>
                 <Widget type="TextBox" skin="SandText" position="4 52 352 18" align="Left Top">
                     <Property key="Caption" value="#{sFull}"/>
@@ -31,7 +32,8 @@
                     <Property key="Caption" value="#{sMenu_Help_Delay}"/>
                 </Widget>
                 <Widget type="MWScrollBar" skin="MW_HScroll" position="4 102 352 18" align="Left Top" name="ToolTipDelaySlider">
-                    <Property key="Range" value="100"/>
+                    <Property key="Range" value="10000"/>
+                    <Property key="Page" value="300"/>
                 </Widget>
                 <Widget type="TextBox" skin="SandText" position="4 126 352 18" align="Left Top">
                     <Property key="Caption" value="#{sFast}"/>
@@ -65,35 +67,40 @@
                     <Property key="Caption" value="#{sMaster}"/>
                 </Widget>
                 <Widget type="MWScrollBar" skin="MW_HScroll" position="4 28 352 18" align="Left Top" name="MasterVolume">
-                    <Property key="Range" value="100"/>
+                    <Property key="Range" value="10000"/>
+                    <Property key="Page" value="300"/>
                 </Widget>
 
                 <Widget type="TextBox" skin="NormalText" position="4 54 352 18" align="Left Top">
                     <Property key="Caption" value="#{sVoice}"/>
                 </Widget>
                 <Widget type="MWScrollBar" skin="MW_HScroll" position="4 78 352 18" align="Left Top" name="VoiceVolume">
-                    <Property key="Range" value="100"/>
+                    <Property key="Range" value="10000"/>
+                    <Property key="Page" value="300"/>
                 </Widget>
 
                 <Widget type="TextBox" skin="NormalText" position="4 104 352 18" align="Left Top">
                     <Property key="Caption" value="#{sEffects}"/>
                 </Widget>
                 <Widget type="MWScrollBar" skin="MW_HScroll" position="4 128 352 18" align="Left Top" name="EffectsVolume">
-                    <Property key="Range" value="100"/>
+                    <Property key="Range" value="10000"/>
+                    <Property key="Page" value="300"/>
                 </Widget>
 
                 <Widget type="TextBox" skin="NormalText" position="4 154 352 18" align="Left Top">
                     <Property key="Caption" value="#{sFootsteps}"/>
                 </Widget>
                 <Widget type="MWScrollBar" skin="MW_HScroll" position="4 178 352 18" align="Left Top" name="FootstepsVolume">
-                    <Property key="Range" value="100"/>
+                    <Property key="Range" value="10000"/>
+                    <Property key="Page" value="300"/>
                 </Widget>
 
                 <Widget type="TextBox" skin="NormalText" position="4 204 352 18" align="Left Top">
                     <Property key="Caption" value="#{sMusic}"/>
                 </Widget>
                 <Widget type="MWScrollBar" skin="MW_HScroll" position="4 228 352 18" align="Left Top" name="MusicVolume">
-                    <Property key="Range" value="100"/>
+                    <Property key="Range" value="10000"/>
+                    <Property key="Page" value="300"/>
                 </Widget>
             </Widget>
             <Widget type="TabItem" skin="" position="4 28 360 312">
@@ -118,7 +125,8 @@
                     <Property key="Caption" value="Camera sensitivity"/>
                 </Widget>
                 <Widget type="MWScrollBar" skin="MW_HScroll" position="4 252 336 18" align="Left Top" name="CameraSensitivitySlider">
-                    <Property key="Range" value="100"/>
+                    <Property key="Range" value="10000"/>
+                    <Property key="Page" value="300"/>
                 </Widget>
                 <Widget type="TextBox" skin="SandText" position="4 276 336 18" align="Left Top">
                     <Property key="Caption" value="#{sLow}"/>
@@ -183,7 +191,8 @@
                             <Property key="Caption" value="Field of View"/>
                         </Widget>
                         <Widget type="MWScrollBar" skin="MW_HScroll" position="4 222 329 18" align="Left Top" name="FOVSlider">
-                            <Property key="Range" value="100"/>
+                            <Property key="Range" value="10000"/>
+                            <Property key="Page" value="300"/>
                         </Widget>
                         <Widget type="TextBox" skin="SandText" position="4 246 329 18" align="Left Top">
                             <Property key="Caption" value="#{sLow}"/>
@@ -208,7 +217,8 @@
                                 <Property key="Caption" value="Anisotropy"/>
                             </Widget>
                             <Widget type="MWScrollBar" skin="MW_HScroll" position="0 28 150 18" align="Left Top" name="AnisotropySlider">
-                                <Property key="Range" value="100"/>
+                                <Property key="Range" value="10000"/>
+                                <Property key="Page" value="300"/>
                             </Widget>
                         </Widget>
 
@@ -216,7 +226,8 @@
                             <Property key="Caption" value="#{sRender_Distance}"/>
                         </Widget>
                         <Widget type="MWScrollBar" skin="MW_HScroll" position="4 154 322 18" align="Left Top" name="ViewDistanceSlider">
-                            <Property key="Range" value="100"/>
+                            <Property key="Range" value="10000"/>
+                            <Property key="Page" value="300"/>
                         </Widget>
                         <Widget type="TextBox" skin="SandText" position="4 178 332 18" align="Left Top">
                             <Property key="Caption" value="#{sNear}"/>
