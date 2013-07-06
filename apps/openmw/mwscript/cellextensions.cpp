@@ -34,25 +34,85 @@ namespace MWScript
         {
             public:
 
+                static bool findInteriorPosition(const std::string &name, ESM::Position &pos)
+                {
+                    typedef MWWorld::CellRefList<ESM::Door>::List DoorList;
+
+                    pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
+                    pos.pos[0] = pos.pos[1] = pos.pos[2] = 0;
+
+                    MWBase::World *world = MWBase::Environment::get().getWorld();
+                    MWWorld::CellStore *cellStore = world->getInterior(name);
+
+                    if (0 == cellStore) {
+                        return false;
+                    }
+                    const DoorList &doors = cellStore->mDoors.mList;
+                    for (DoorList::const_iterator it = doors.begin(); it != doors.end(); ++it) {
+                        if (!it->mRef.mTeleport) {
+                            continue;
+                        }
+
+                        MWWorld::CellStore *source = 0;
+
+                        // door to exterior
+                        if (it->mRef.mDestCell.empty()) {
+                            int x, y;
+                            const float *pos = it->mRef.mDoorDest.pos;
+                            world->positionToIndex(pos[0], pos[1], x, y);
+                            source = world->getExterior(x, y);
+                        }
+                        // door to interior
+                        else {
+                            source = world->getInterior(it->mRef.mDestCell);
+                        }
+                        if (0 != source) {
+                            // Find door leading to our current teleport door
+                            // and use it destination to position inside cell.
+                            const DoorList &doors = source->mDoors.mList;
+                            for (DoorList::const_iterator jt = doors.begin(); jt != doors.end(); ++jt) {
+                                if (it->mRef.mTeleport &&
+                                    Misc::StringUtils::ciEqual(name, jt->mRef.mDestCell))
+                                {
+                                    /// \note Using _any_ door pointed to the interior,
+                                    /// not the one pointed to current door.
+                                    pos = jt->mRef.mDoorDest;
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                    return false;
+                }
+
+                static bool findExteriorPosition(const std::string &name, ESM::Position &pos)
+                {
+                    MWBase::World *world = MWBase::Environment::get().getWorld();
+
+                    if (const ESM::Cell *ext = world->getExterior(name)) {
+                        world->indexToPosition(ext->mData.mX, ext->mData.mY, pos.pos[0], pos.pos[1], true);
+
+                        return true;
+                    }
+                    return false;
+                }
+
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     std::string cell = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
                     ESM::Position pos;
-                    pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
-                    pos.pos[2] = 0;
+                    MWBase::World *world = MWBase::Environment::get().getWorld();
 
-                    if (const ESM::Cell *exterior = MWBase::Environment::get().getWorld()->getExterior (cell))
-                    {
-                        MWBase::Environment::get().getWorld()->indexToPosition (exterior->mData.mX, exterior->mData.mY,
-                            pos.pos[0], pos.pos[1], true);
-                        MWBase::Environment::get().getWorld()->changeToExteriorCell (pos);
+                    if (findExteriorPosition(cell, pos)) {
+                        world->changeToExteriorCell(pos);
                     }
-                    else
-                    {
-                        pos.pos[0] = pos.pos[1] = 0;
-                        MWBase::Environment::get().getWorld()->changeToInteriorCell (cell, pos);
+                    else {
+                        // Change to interior even if findInteriorPosition()
+                        // yields false. In this case position will be zero-point.
+                        findInteriorPosition(cell, pos);
+                        world->changeToInteriorCell(cell, pos);
                     }
                 }
         };
