@@ -230,7 +230,10 @@ namespace MWRender
         mNode->roll(Ogre::Radian(angle), Ogre::SceneNode::TS_LOCAL);
 
         updateCamera();
+    }
 
+    void RaceSelectionPreview::render()
+    {
         mRenderTarget->update();
     }
 

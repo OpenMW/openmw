@@ -1292,6 +1292,7 @@ namespace MWGui
     void WindowManager::frameStarted (float dt)
     {
         mInventoryWindow->doRenderUpdate ();
+        mCharGen->doRenderUpdate();
     }
 
     void WindowManager::updatePlayer()

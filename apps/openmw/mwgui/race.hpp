@@ -52,6 +52,8 @@ namespace MWGui
         */
         EventHandle_Void eventBack;
 
+        void doRenderUpdate();
+
     protected:
         void onHeadRotate(MyGUI::ScrollBar* _sender, size_t _position);
 
@@ -98,6 +100,8 @@ namespace MWGui
         float mCurrentAngle;
 
         MWRender::RaceSelectionPreview* mPreview;
+
+        bool mPreviewDirty;
     };
 }
 #endif

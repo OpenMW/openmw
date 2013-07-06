@@ -93,6 +93,7 @@ namespace MWRender
         RaceSelectionPreview();
 
         virtual void onSetup();
+        void render();
 
         void update(float angle);
 
