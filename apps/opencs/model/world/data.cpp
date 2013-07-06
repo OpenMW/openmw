@@ -128,6 +128,7 @@ CSMWorld::Data::Data() : mRefs (mCells)
     mCells.addColumn (new FlagColumn<Cell> ("Interior Sky", ESM::Cell::QuasiEx));
     mCells.addColumn (new RegionColumn<Cell>);
 
+    mRefs.addColumn (new StringIdColumn<CellRef> (true));
     mRefs.addColumn (new RecordStateColumn<CellRef>);
     mRefs.addColumn (new CellColumn<CellRef>);
     mRefs.addColumn (new IdColumn<CellRef>);

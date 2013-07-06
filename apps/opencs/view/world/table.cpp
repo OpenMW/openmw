@@ -209,7 +209,7 @@ void CSVWorld::Table::updateEditorSetting (const QString &settingName, const QSt
 {
     if (settingName == "Record Status Display")
     {
-        dynamic_cast<CSVWorld::RecordStatusDelegate *>(this->itemDelegateForColumn(1))->updateEditorSetting (settingName, settingValue);
+        dynamic_cast<CSVWorld::RecordStatusDelegate&> (*itemDelegateForColumn(1)).updateEditorSetting (settingName, settingValue);
         emit dataChanged(mModel->index(0,1), mModel->index(mModel->rowCount()-1, 1));
     }
 }

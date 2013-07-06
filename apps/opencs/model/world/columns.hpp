@@ -37,7 +37,10 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct StringIdColumn : public Column<ESXRecordT>
     {
-        StringIdColumn() : Column<ESXRecordT> ("ID", ColumnBase::Display_String) {}
+        StringIdColumn (bool hidden = false)
+        : Column<ESXRecordT> ("ID", ColumnBase::Display_String,
+            hidden ? 0 : ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue)
+        {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
