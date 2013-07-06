@@ -28,6 +28,7 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         CSMWorld::UniversalId::Type_Spells,
         CSMWorld::UniversalId::Type_Cells,
         CSMWorld::UniversalId::Type_Referenceables,
+        CSMWorld::UniversalId::Type_References,
 
         CSMWorld::UniversalId::Type_None // end marker
     };

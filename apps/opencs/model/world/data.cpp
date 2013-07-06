@@ -22,7 +22,7 @@ void CSMWorld::Data::addModel (QAbstractItemModel *model, UniversalId::Type type
         mModelIndex.insert (std::make_pair (type2, model));
 }
 
-CSMWorld::Data::Data()
+CSMWorld::Data::Data() : mRefs (mCells)
 {
     mGlobals.addColumn (new StringIdColumn<ESM::Global>);
     mGlobals.addColumn (new RecordStateColumn<ESM::Global>);
@@ -128,6 +128,8 @@ CSMWorld::Data::Data()
     mCells.addColumn (new FlagColumn<Cell> ("Interior Sky", ESM::Cell::QuasiEx));
     mCells.addColumn (new RegionColumn<Cell>);
 
+    mRefs.addColumn (new RecordStateColumn<CellRef>);
+
     addModel (new IdTable (&mGlobals), UniversalId::Type_Globals, UniversalId::Type_Global);
     addModel (new IdTable (&mGmsts), UniversalId::Type_Gmsts, UniversalId::Type_Gmst);
     addModel (new IdTable (&mSkills), UniversalId::Type_Skills, UniversalId::Type_Skill);
@@ -142,6 +144,7 @@ CSMWorld::Data::Data()
     addModel (new IdTable (&mCells), UniversalId::Type_Cells, UniversalId::Type_Cell);
     addModel (new IdTable (&mReferenceables), UniversalId::Type_Referenceables,
         UniversalId::Type_Referenceable);
+    addModel (new IdTable (&mRefs), UniversalId::Type_References, UniversalId::Type_Reference);
 }
 
 CSMWorld::Data::~Data()
@@ -325,7 +328,11 @@ void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base)
             case ESM::REC_REGN: mRegions.load (reader, base); break;
             case ESM::REC_BSGN: mBirthsigns.load (reader, base); break;
             case ESM::REC_SPEL: mSpells.load (reader, base); break;
-            case ESM::REC_CELL: mCells.load (reader, base); break;
+
+            case ESM::REC_CELL:
+                mCells.load (reader, base);
+                mRefs.load (reader, mCells.getSize()-1, base);
+                break;
 
             case ESM::REC_ACTI: mReferenceables.load (reader, base, UniversalId::Type_Activator); break;
             case ESM::REC_ALCH: mReferenceables.load (reader, base, UniversalId::Type_Potion); break;

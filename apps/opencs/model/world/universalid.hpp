@@ -79,8 +79,9 @@ namespace CSMWorld
                 Type_Probe,
                 Type_Repair,
                 Type_Static,
-                Type_Weapon
-
+                Type_Weapon,
+                Type_References,
+                Type_Reference
             };
 
         private:

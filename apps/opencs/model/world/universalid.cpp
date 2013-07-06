@@ -31,6 +31,8 @@ namespace
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Cells, "Cells" },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Referenceables,
             "Referenceables" },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_References,
+            "References" },
 
         { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0 } // end marker
     };
@@ -73,6 +75,7 @@ namespace
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Repair, "Repair" },
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Static, "Static" },
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Weapon, "Weapon" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Reference, "Reference" },
 
         { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0 } // end marker
     };

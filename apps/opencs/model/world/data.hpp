@@ -22,6 +22,7 @@
 #include "universalid.hpp"
 #include "cell.hpp"
 #include "refidcollection.hpp"
+#include "refcollection.hpp"
 
 class QAbstractItemModel;
 
@@ -42,6 +43,7 @@ namespace CSMWorld
             IdCollection<ESM::Spell> mSpells;
             IdCollection<Cell> mCells;
             RefIdCollection mReferenceables;
+            RefCollection mRefs;
             std::vector<QAbstractItemModel *> mModels;
             std::map<UniversalId::Type, QAbstractItemModel *> mModelIndex;
 

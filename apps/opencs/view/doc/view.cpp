@@ -136,6 +136,9 @@ void CSVDoc::View::setupWorldMenu()
     connect (referenceables, SIGNAL (triggered()), this, SLOT (addReferenceablesSubView()));
     world->addAction (referenceables);
 
+    QAction *references = new QAction (tr ("References"), this);
+    connect (references, SIGNAL (triggered()), this, SLOT (addReferencesSubView()));
+    world->addAction (references);
 }
 
 void CSVDoc::View::setupUi()
@@ -344,6 +347,11 @@ void CSVDoc::View::addCellsSubView()
 void CSVDoc::View::addReferenceablesSubView()
 {
     addSubView (CSMWorld::UniversalId::Type_Referenceables);
+}
+
+void CSVDoc::View::addReferencesSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_References);
 }
 
 void CSVDoc::View::abortOperation (int type)
