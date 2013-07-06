@@ -4,6 +4,7 @@
 
 #include <MyGUI_ProgressBar.h>
 #include <MyGUI_ImageBox.h>
+#include <MyGUI_ControllerManager.h>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -892,6 +893,127 @@ namespace MWGui
         void VBox::onWidgetCreated(MyGUI::Widget* _widget)
         {
             align();
+        }
+
+        MWScrollBar::MWScrollBar()
+            : mEnableRepeat(true)
+            , mRepeatTriggerTime(0.5)
+            , mRepeatStepTime(0.1)
+            , mStepSize(0)
+        {
+        }
+
+        MWScrollBar::~MWScrollBar()
+        {
+        }
+
+        void MWScrollBar::initialiseOverride()
+        {
+            ScrollBar::initialiseOverride();
+
+            if(mWidgetStart)
+            {
+                mWidgetStart->eventMouseButtonPressed += MyGUI::newDelegate(this, &MWScrollBar::onDecreaseButtonPressed);
+                mWidgetStart->eventMouseButtonReleased += MyGUI::newDelegate(this, &MWScrollBar::onDecreaseButtonReleased);
+            }
+            if(mWidgetEnd)
+            {
+                mWidgetEnd->eventMouseButtonPressed += MyGUI::newDelegate(this, &MWScrollBar::onIncreaseButtonPressed);
+                mWidgetEnd->eventMouseButtonReleased += MyGUI::newDelegate(this, &MWScrollBar::onIncreaseButtonReleased);
+            }
+        }
+
+        void MWScrollBar::setEnableRepeat(bool enable)
+        {
+            mEnableRepeat = enable;
+        }
+
+        bool MWScrollBar::getEnableRepeat()
+        {
+            return mEnableRepeat;
+        }
+
+        void MWScrollBar::getRepeat(float &trigger, float &step)
+        {
+            trigger = mRepeatTriggerTime;
+            step = mRepeatStepTime;
+        }
+
+        void MWScrollBar::setRepeat(float trigger, float step)
+        {
+            mRepeatTriggerTime = trigger;
+            mRepeatStepTime = step;
+        }
+
+        void MWScrollBar::setStepSize(int step)
+        {
+            mStepSize = step;
+        }
+
+        int MWScrollBar::getStepSize()
+        {
+            return mStepSize;
+        }
+
+        void MWScrollBar::repeatClick(MyGUI::Widget* _widget, MyGUI::ControllerItem* _controller)
+        {
+            int stepSize = mStepSize;
+            if(stepSize == 0)
+                stepSize = mScrollRange/20;
+
+            if(mIsIncreasing && mScrollPosition < mScrollRange-1)
+            {
+                if(mScrollPosition + stepSize > mScrollRange-1)
+                    mScrollPosition = mScrollRange-1;
+                else
+                    mScrollPosition += stepSize;
+
+                eventScrollChangePosition(this, mScrollPosition);
+                updateTrack();
+            }
+            else if(!mIsIncreasing && mScrollPosition > 0)
+            {
+                int newPos = mScrollPosition - stepSize;
+                if(newPos < 0)
+                    mScrollPosition = 0;
+                else
+                    mScrollPosition -= stepSize;
+
+                eventScrollChangePosition(this, mScrollPosition);
+                updateTrack();
+            }
+        }
+
+        void MWScrollBar::onDecreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
+        {
+            mIsIncreasing = false;
+            MyGUI::ControllerItem* item = MyGUI::ControllerManager::getInstance().createItem(MWGui::Controllers::ControllerRepeatClick::getClassTypeName());
+            MWGui::Controllers::ControllerRepeatClick* controller = item->castType<MWGui::Controllers::ControllerRepeatClick>();
+            controller->eventRepeatClick += newDelegate(this, &MWScrollBar::repeatClick);
+            controller->setEnabled(mEnableRepeat);
+            controller->setRepeat(mRepeatTriggerTime, mRepeatStepTime);
+			MyGUI::ControllerManager::getInstance().addItem(this, controller);
+        }
+
+        void MWScrollBar::onDecreaseButtonReleased(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
+        {
+            MyGUI::ControllerManager::getInstance().removeItem(this);
+        }
+
+        void MWScrollBar::onIncreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
+        {
+            mIsIncreasing = true;
+            MyGUI::ControllerItem* item = MyGUI::ControllerManager::getInstance().createItem(MWGui::Controllers::ControllerRepeatClick::getClassTypeName());
+            MWGui::Controllers::ControllerRepeatClick* controller = item->castType<MWGui::Controllers::ControllerRepeatClick>();
+            controller->eventRepeatClick += newDelegate(this, &MWScrollBar::repeatClick);
+            controller->setEnabled(mEnableRepeat);
+            controller->setRepeat(mRepeatTriggerTime, mRepeatStepTime);
+			MyGUI::ControllerManager::getInstance().addItem(this, controller);
+        }
+
+        void MWScrollBar::onIncreaseButtonReleased(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
+        {
+            MyGUI::ControllerManager::getInstance().removeItem(this);
         }
     }
 }

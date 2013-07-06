@@ -3,9 +3,11 @@
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwmechanics/stat.hpp"
+#include "controllers.hpp"
 
 #include <MyGUI_Button.h>
 #include <MyGUI_EditBox.h>
+#include <MyGUI_ScrollBar.h>
 
 namespace MyGUI
 {
@@ -406,6 +408,38 @@ namespace MWGui
             virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
 
             virtual void onWidgetCreated(MyGUI::Widget* _widget);
+        };
+
+        class MWScrollBar : public MyGUI::ScrollBar
+        {
+            MYGUI_RTTI_DERIVED(MWScrollBar)
+
+        public:
+            MWScrollBar();
+            virtual ~MWScrollBar();
+
+            void setEnableRepeat(bool enable);
+            bool getEnableRepeat();
+            void getRepeat(float &trigger, float &step);
+            void setRepeat(float trigger, float step);
+            void setStepSize(int step);
+            int getStepSize();
+
+        protected:
+            virtual void initialiseOverride();
+            void repeatClick(MyGUI::Widget* _widget, MyGUI::ControllerItem* _controller);
+
+            bool mEnableRepeat;
+            float mRepeatTriggerTime;
+            float mRepeatStepTime;
+            bool mIsIncreasing;
+            int mStepSize;
+
+        private:
+            void onDecreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
+            void onDecreaseButtonReleased(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
+            void onIncreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
+            void onIncreaseButtonReleased(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
         };
     }
 }

@@ -15,8 +15,6 @@
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
 
-#include "widgets.hpp"
-
 
 namespace MWGui
 {
@@ -53,15 +51,14 @@ namespace MWGui
         getWidget(mDateTimeText, "DateTimeText");
         getWidget(mRestText, "RestText");
         getWidget(mHourText, "HourText");
-        getWidget(mHourSlider, "HourSlider");
         getWidget(mUntilHealedButton, "UntilHealedButton");
         getWidget(mWaitButton, "WaitButton");
         getWidget(mCancelButton, "CancelButton");
+        getWidget(mHourSlider, "HourSlider");
 
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &WaitDialog::onCancelButtonClicked);
         mUntilHealedButton->eventMouseButtonClick += MyGUI::newDelegate(this, &WaitDialog::onUntilHealedButtonClicked);
         mWaitButton->eventMouseButtonClick += MyGUI::newDelegate(this, &WaitDialog::onWaitButtonClicked);
-
         mHourSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &WaitDialog::onHourSliderChangedPosition);
 
         mProgressBar.setVisible (false);
