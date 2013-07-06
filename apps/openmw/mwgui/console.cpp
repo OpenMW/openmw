@@ -5,6 +5,7 @@
 #include "../mwscript/extensions.hpp"
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 namespace MWGui
 {
@@ -131,16 +132,12 @@ namespace MWGui
 
         // Give keyboard focus to the combo box whenever the console is
         // turned on
-        MyGUI::InputManager::getInstance().setKeyFocusWidget(command);
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(command);
     }
 
     void Console::disable()
     {
         setVisible(false);
-        setSelectedObject(MWWorld::Ptr());
-        // Remove keyboard focus from the console input whenever the
-        // console is turned off
-        MyGUI::InputManager::getInstance().setKeyFocusWidget(NULL);
     }
 
     void Console::setFont(const std::string &fntName)
@@ -415,7 +412,7 @@ namespace MWGui
             setTitle("#{sConsoleTitle}");
             mPtr = MWWorld::Ptr();
         }
-        MyGUI::InputManager::getInstance().setKeyFocusWidget(command);
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(command);
     }
 
     void Console::onReferenceUnavailable()

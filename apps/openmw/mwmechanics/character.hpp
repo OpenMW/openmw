@@ -104,6 +104,9 @@ class CharacterController
     WeaponType mWeaponType;
     bool mSkipAnim;
 
+    // Workaround for playing weapon draw animation and sound when going to new cell
+    bool mUpdateWeapon;
+
     // counted for skill increase
     float mSecondsOfSwimming;
     float mSecondsOfRunning;
@@ -125,6 +128,7 @@ public:
 
     void playGroup(const std::string &groupname, int mode, int count);
     void skipAnim();
+    bool isAnimPlaying(const std::string &groupName);
 
     void setState(CharacterState state);
     CharacterState getState() const

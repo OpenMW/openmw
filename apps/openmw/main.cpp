@@ -2,6 +2,7 @@
 
 #include <components/files/configurationmanager.hpp>
 
+#include <SDL_main.h>
 #include "engine.hpp"
 
 #if defined(_WIN32) && !defined(_CONSOLE)
@@ -118,9 +119,6 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("anim-verbose", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "output animation indices files")
 
-        ("debug", bpo::value<bool>()->implicit_value(true)
-            ->default_value(false), "debug mode")
-
         ("nosound", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "disable all sounds")
 
@@ -217,8 +215,8 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     StringsVector master = variables["master"].as<StringsVector>();
     if (master.empty())
     {
-        std::cout << "No master file given. Assuming Morrowind.esm" << std::endl;
-        master.push_back("Morrowind");
+        std::cout << "No master file given. Aborting...\n";
+        return false;
     }
 
     StringsVector plugin = variables["plugin"].as<StringsVector>();
@@ -243,7 +241,6 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setNewGame(variables["new-game"].as<bool>());
 
     // other settings
-    engine.setDebugMode(variables["debug"].as<bool>());
     engine.setSoundUsage(!variables["nosound"].as<bool>());
     engine.setScriptsVerbosity(variables["script-verbose"].as<bool>());
     engine.setCompileAll(variables["script-all"].as<bool>());

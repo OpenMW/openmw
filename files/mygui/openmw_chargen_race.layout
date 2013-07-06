@@ -14,7 +14,7 @@
 
         <!-- Sliders -->
         <!-- Rotation of head -->
-        <Widget type="ScrollBar" skin="MW_HScroll" position="8 270 241 14" name="HeadRotate"/>
+        <Widget type="MWScrollBar" skin="MW_HScroll" position="8 270 241 14" name="HeadRotate"/>
 
         <!-- Gender choice -->
 

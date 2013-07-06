@@ -20,16 +20,11 @@
 CSVSettings::BlankPage::BlankPage(QWidget *parent):
     AbstractPage("Blank", parent)
 {
-    initPage();
+
 }
 
 CSVSettings::BlankPage::BlankPage(const QString &title, QWidget *parent):
     AbstractPage(title, parent)
-{
-    initPage();
-}
-
-void CSVSettings::BlankPage::initPage()
 {
     // Hacks to get the stylesheet look properly
 #ifdef Q_OS_MAC
@@ -43,10 +38,7 @@ void CSVSettings::BlankPage::initPage()
 void CSVSettings::BlankPage::setupUi()
 {
     QGroupBox *pageBox = new QGroupBox(this);
-    QLayout* pageLayout = new QVBoxLayout();
-
-    setLayout(pageLayout);
-    pageLayout->addWidget(pageBox);
+    layout()->addWidget(pageBox);
 }
 
 void CSVSettings::BlankPage::initializeWidgets (const CSMSettings::SettingMap &settings)

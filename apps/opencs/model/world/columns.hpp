@@ -53,7 +53,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct RecordStateColumn : public Column<ESXRecordT>
     {
-        RecordStateColumn() : Column<ESXRecordT> ("*", ColumnBase::Display_Integer) {}
+        RecordStateColumn() : Column<ESXRecordT> ("*", ColumnBase::Display_RecordState) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {

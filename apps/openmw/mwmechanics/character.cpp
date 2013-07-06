@@ -179,6 +179,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     , mSkipAnim(false)
     , mSecondsOfRunning(0)
     , mSecondsOfSwimming(0)
+    , mUpdateWeapon(true)
 {
     if(!mAnimation)
         return;
@@ -407,6 +408,13 @@ void CharacterController::update(float duration, Movement &movement)
             else
                 weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
 
+            if(mUpdateWeapon)
+            {
+                mWeaponType = weaptype;
+                forceStateUpdate();
+                mUpdateWeapon = false;
+            }
+
             if(weaptype != mWeaponType)
             {
                 std::string weapgroup;
@@ -454,6 +462,10 @@ void CharacterController::update(float duration, Movement &movement)
                 mAnimation->disable("torch");
         }
     }
+    else if (cls.getCreatureStats(mPtr).isDead())
+    {
+        MWBase::Environment::get().getWorld()->enableActorCollision(mPtr, false);
+    }
 
     if(mAnimation && !mSkipAnim)
     {
@@ -461,15 +473,18 @@ void CharacterController::update(float duration, Movement &movement)
 
         Ogre::Vector3 moved = mAnimation->runAnimation(duration);
         // Ensure we're moving in generally the right direction
-        if((movement.mPosition[0] < 0.0f && movement.mPosition[0] < moved.x*2.0f) ||
-           (movement.mPosition[0] > 0.0f && movement.mPosition[0] > moved.x*2.0f))
-            moved.x = movement.mPosition[0];
-        if((movement.mPosition[1] < 0.0f && movement.mPosition[1] < moved.y*2.0f) ||
-           (movement.mPosition[1] > 0.0f && movement.mPosition[1] > moved.y*2.0f))
-            moved.y = movement.mPosition[1];
-        if((movement.mPosition[2] < 0.0f && movement.mPosition[2] < moved.z*2.0f) ||
-           (movement.mPosition[2] > 0.0f && movement.mPosition[2] > moved.z*2.0f))
-            moved.z = movement.mPosition[2];
+        if (speed > 0.f)
+        {
+            if((movement.mPosition[0] < 0.0f && movement.mPosition[0] < moved.x*2.0f) ||
+               (movement.mPosition[0] > 0.0f && movement.mPosition[0] > moved.x*2.0f))
+                moved.x = movement.mPosition[0];
+            if((movement.mPosition[1] < 0.0f && movement.mPosition[1] < moved.y*2.0f) ||
+               (movement.mPosition[1] > 0.0f && movement.mPosition[1] > moved.y*2.0f))
+                moved.y = movement.mPosition[1];
+            if((movement.mPosition[2] < 0.0f && movement.mPosition[2] < moved.z*2.0f) ||
+               (movement.mPosition[2] > 0.0f && movement.mPosition[2] > moved.z*2.0f))
+                moved.z = movement.mPosition[2];
+        }
 
         movement.mPosition[0] = moved.x;
         movement.mPosition[1] = moved.y;
@@ -507,6 +522,14 @@ void CharacterController::playGroup(const std::string &groupname, int mode, int 
 void CharacterController::skipAnim()
 {
     mSkipAnim = true;
+}
+
+bool CharacterController::isAnimPlaying(const std::string &groupName)
+{
+    if(mAnimation == NULL)
+        return false;
+    else
+        return mAnimation->isPlaying(groupName);
 }
 
 

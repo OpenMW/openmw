@@ -87,6 +87,8 @@
 	Now, let's get into writing our shader! As you can guess from above, the filename should be 'example.shader'.
 	Make sure to also copy the 'core.h' file to the same location. It is included in shiny's source tree under 'Extra/'.
 
+	Important: a newline at the end of the file is <b>required</b>. Many editors do this automatically or can be configured to do so. If there is no newline at the end of the file, and the last line is '#endif', you will get the rather cryptic error message " ill formed preprocessor directive: #endif" from boost::wave.
+
 	\code
 	#include "core.h"
 

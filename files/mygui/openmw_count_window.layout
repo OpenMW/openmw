@@ -16,7 +16,7 @@
             <Property key="TextAlign" value="Center"/>
         </Widget>
 
-        <Widget type="ScrollBar" skin="MW_HScroll" position="28 60 544 18" name="CountSlider" align="Left Top HStretch">
+        <Widget type="MWScrollBar" skin="MW_HScroll" position="28 60 544 18" name="CountSlider" align="Left Top HStretch">
             <Property key="MoveToClick" value="true"/>
         </Widget>
 

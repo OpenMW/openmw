@@ -39,11 +39,10 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "tinyxml.h"
 
-#include <OIS.h>
-#include <OISMouse.h>
-#include <OISKeyboard.h>
-#include <OISJoyStick.h>
-#include <OISInputManager.h>
+#include "SDL_keyboard.h"
+#include "SDL_mouse.h"
+#include "SDL_joystick.h"
+#include "SDL_events.h"
 
 /// Define the dll export qualifier if compiling for Windows
 
@@ -65,8 +64,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /// Version defines
 #define ICS_VERSION_MAJOR 0
-#define ICS_VERSION_MINOR 3
-#define ICS_VERSION_PATCH 1
+#define ICS_VERSION_MINOR 4
+#define ICS_VERSION_PATCH 0
 
 #define ICS_MAX_DEVICE_BUTTONS 30
 

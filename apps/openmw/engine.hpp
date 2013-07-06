@@ -71,7 +71,6 @@ namespace OMW
             std::vector<std::string> mMaster;
             std::vector<std::string> mPlugins;
             int mFpsLevel;
-            bool mDebug;
             bool mVerboseScripts;
             bool mNewGame;
             bool mUseSound;
@@ -146,10 +145,6 @@ namespace OMW
 
             /// Enable fps counter
             void showFPS(int level);
-
-            /// Enable debug mode:
-            /// - non-exclusive input
-            void setDebugMode(bool debugMode);
 
             /// Enable or disable verbose script output
             void setScriptsVerbosity(bool scriptsVerbosity);

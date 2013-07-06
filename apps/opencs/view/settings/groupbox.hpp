@@ -5,6 +5,7 @@
 
 namespace CSVSettings
 {
+    /// Custom implementation of QGroupBox to be used with block classes
     class GroupBox : public QGroupBox
     {
         static const QString INVISIBLE_BOX_STYLE;

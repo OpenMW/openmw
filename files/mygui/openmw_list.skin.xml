@@ -120,7 +120,7 @@
 
         <Child type="Widget" skin="MW_Box" offset="0 0 516 516" align="ALIGN_STRETCH"/>
 
-        <Child type="ScrollBar" skin="MW_VScroll" offset="498 3 14 509" align="ALIGN_RIGHT ALIGN_VSTRETCH" name="VScroll"/>
+        <Child type="MWScrollBar" skin="MW_VScroll" offset="498 3 14 509" align="ALIGN_RIGHT ALIGN_VSTRETCH" name="VScroll"/>
 
         <Child type="Widget" skin="" offset="3 3 493 509" align="ALIGN_STRETCH" name="Client"/>
 
@@ -150,7 +150,7 @@
 
         <Child type="Widget" skin="MW_Box" offset="0 0 516 516" align="ALIGN_STRETCH"/>
 
-        <Child type="ScrollBar" skin="MW_VScroll" offset="498 3 14 509" align="ALIGN_RIGHT ALIGN_VSTRETCH" name="VScroll"/>
+        <Child type="MWScrollBar" skin="MW_VScroll" offset="498 3 14 509" align="ALIGN_RIGHT ALIGN_VSTRETCH" name="VScroll"/>
 
         <Child type="Widget" skin="Default" offset="3 3 493 509" align="ALIGN_STRETCH" name="Client"/>
 

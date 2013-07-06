@@ -64,13 +64,16 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
 {
     // select best shader mode
     bool openGL = (Ogre::Root::getSingleton ().getRenderSystem ()->getName().find("OpenGL") != std::string::npos);
+    bool glES = (Ogre::Root::getSingleton ().getRenderSystem ()->getName().find("OpenGL ES") != std::string::npos);
 
     // glsl is only supported in opengl mode and hlsl only in direct3d mode.
-    if (Settings::Manager::getString("shader mode", "General") == ""
-            || (openGL && Settings::Manager::getString("shader mode", "General") == "hlsl")
-            || (!openGL && Settings::Manager::getString("shader mode", "General") == "glsl"))
+    std::string currentMode = Settings::Manager::getString("shader mode", "General");
+    if (currentMode == ""
+            || (openGL && currentMode == "hlsl")
+            || (!openGL && currentMode == "glsl")
+            || (glES && currentMode != "glsles"))
     {
-        Settings::Manager::setString("shader mode", "General", openGL ? "glsl" : "hlsl");
+        Settings::Manager::setString("shader mode", "General", openGL ? (glES ? "glsles" : "glsl") : "hlsl");
     }
 
     mRendering.createScene("PlayerCam", Settings::Manager::getFloat("field of view", "General"), 5);
@@ -93,6 +96,8 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
     std::string l = Settings::Manager::getString("shader mode", "General");
     if (l == "glsl")
         lang = sh::Language_GLSL;
+    else if (l == "glsles")
+        lang = sh::Language_GLSLES;
     else if (l == "hlsl")
         lang = sh::Language_HLSL;
     else
@@ -124,7 +129,7 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
     Ogre::TextureManager::getSingleton().setMemoryBudget(126*1024*1024);
     Ogre::MeshManager::getSingleton().setMemoryBudget(64*1024*1024);
 
-    ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
+    Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
     // disable unsupported effects
     if (!Settings::Manager::getBool("shaders", "Objects"))
@@ -305,7 +310,7 @@ void RenderingManager::update (float duration, bool paused)
     MWWorld::Ptr player = world->getPlayer().getPlayer();
 
     int blind = MWWorld::Class::get(player).getCreatureStats(player).getMagicEffects().get(MWMechanics::EffectKey(ESM::MagicEffect::Blind)).mMagnitude;
-    mRendering.getFader()->setFactor(1.f-(blind / 100.f));
+    mRendering.getFader()->setFactor(std::max(0.f, 1.f-(blind / 100.f)));
     setAmbientMode();
 
     // player position
@@ -396,29 +401,24 @@ void RenderingManager::setWaterHeight(const float height)
 
 void RenderingManager::skyEnable ()
 {
-    if(mSkyManager)
     mSkyManager->enable();
-
     mOcclusionQuery->setSunNode(mSkyManager->getSunNode());
 }
 
 void RenderingManager::skyDisable ()
 {
-    if(mSkyManager)
-        mSkyManager->disable();
+    mSkyManager->disable();
 }
 
 void RenderingManager::skySetHour (double hour)
 {
-    if(mSkyManager)
-        mSkyManager->setHour(hour);
+    mSkyManager->setHour(hour);
 }
 
 
 void RenderingManager::skySetDate (int day, int month)
 {
-    if(mSkyManager)
-        mSkyManager->setDate(day, month);
+    mSkyManager->setDate(day, month);
 }
 
 int RenderingManager::skyGetMasserPhase() const
@@ -433,8 +433,7 @@ int RenderingManager::skyGetSecundaPhase() const
 }
 
 void RenderingManager::skySetMoonColour (bool red){
-    if(mSkyManager)
-        mSkyManager->setMoonColour(red);
+    mSkyManager->setMoonColour(red);
 }
 
 bool RenderingManager::toggleRenderMode(int mode)
@@ -712,7 +711,7 @@ Compositors* RenderingManager::getCompositors()
 
 void RenderingManager::processChangedSettings(const Settings::CategorySettingVector& settings)
 {
-    bool changeRes = false;
+    //bool changeRes = false;
     bool rebuild = false; // rebuild static geometry (necessary after any material changes)
     for (Settings::CategorySettingVector::const_iterator it=settings.begin();
             it != settings.end(); ++it)
@@ -726,11 +725,11 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
             if (!MWBase::Environment::get().getWorld()->isCellExterior() && !MWBase::Environment::get().getWorld()->isCellQuasiExterior())
                 configureFog(*MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell());
         }
-        else if (it->first == "Video" && (
+        /*else if (it->first == "Video" && (
                 it->second == "resolution x"
                 || it->second == "resolution y"
                 || it->second == "fullscreen"))
-            changeRes = true;
+            changeRes = true;*/
         else if (it->second == "field of view" && it->first == "General")
             mRendering.setFov(Settings::Manager::getFloat("field of view", "General"));
         else if ((it->second == "texture filtering" && it->first == "General")
@@ -784,17 +783,24 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
         }
     }
 
+    /*
     if (changeRes)
     {
         unsigned int x = Settings::Manager::getInt("resolution x", "Video");
         unsigned int y = Settings::Manager::getInt("resolution y", "Video");
 
+        SDL_SetWindowFullscreen(mRendering.getSDLWindow(), 0);
+
         if (x != mRendering.getWindow()->getWidth() || y != mRendering.getWindow()->getHeight())
         {
+            SDL_SetWindowSize(mRendering.getSDLWindow(), x, y);
             mRendering.getWindow()->resize(x, y);
         }
-        mRendering.getWindow()->setFullscreen(Settings::Manager::getBool("fullscreen", "Video"), x, y);
+
+        SDL_SetWindowFullscreen(mRendering.getSDLWindow(), Settings::Manager::getBool("fullscreen", "Video") ? SDL_WINDOW_FULLSCREEN : 0);
+        //mRendering.getWindow()->setFullscreen(Settings::Manager::getBool("fullscreen", "Video"), x, y);
     }
+    */
 
     mWater->processChangedSettings(settings);
 
@@ -816,7 +822,6 @@ void RenderingManager::windowResized(Ogre::RenderWindow* rw)
 {
     Settings::Manager::setInt("resolution x", "Video", rw->getWidth());
     Settings::Manager::setInt("resolution y", "Video", rw->getHeight());
-
 
     mRendering.adjustViewport();
     mCompositors->recreate();

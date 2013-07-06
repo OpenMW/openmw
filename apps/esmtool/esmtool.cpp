@@ -108,11 +108,26 @@ bool parseOptions (int argc, char** argv, Arguments &info)
     // there might be a better way to do this
     bpo::options_description all;
     all.add(desc).add(hidden);
-    bpo::parsed_options valid_opts = bpo::command_line_parser(argc, argv)
-        .options(all).positional(p).run();
-
     bpo::variables_map variables;
-    bpo::store(valid_opts, variables);
+
+    try
+    {
+        bpo::parsed_options valid_opts = bpo::command_line_parser(argc, argv)
+            .options(all).positional(p).run();
+
+        bpo::store(valid_opts, variables);
+    }
+    catch(boost::program_options::unknown_option & x)
+    {
+        std::cerr << "ERROR: " << x.what() << std::endl;
+        return false;
+    }
+    catch(boost::program_options::invalid_command_line_syntax & x)
+    {
+        std::cerr << "ERROR: " << x.what() << std::endl;
+        return false;
+    }
+
     bpo::notify(variables);
 
     if (variables.count ("help"))

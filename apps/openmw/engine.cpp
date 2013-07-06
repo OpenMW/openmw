@@ -1,4 +1,5 @@
 #include "engine.hpp"
+
 #include "components/esm/loadcell.hpp"
 
 #include <OgreRoot.h>
@@ -36,6 +37,8 @@
 
 #include "mwmechanics/mechanicsmanagerimp.hpp"
 
+
+#include <SDL.h>
 
 void OMW::Engine::executeLocalScripts()
 {
@@ -75,7 +78,8 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
     try
     {
         float frametime = std::min(evt.timeSinceLastFrame, 0.2f);
-        mEnvironment.setFrameDuration(frametime);
+
+        mEnvironment.setFrameDuration (frametime);
 
         // update input
         MWBase::Environment::get().getInputManager()->update(frametime, false);
@@ -129,7 +133,6 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   : mOgre (0)
   , mFpsLevel(0)
-  , mDebug (false)
   , mVerboseScripts (false)
   , mNewGame (false)
   , mUseSound (true)
@@ -141,6 +144,18 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
 {
     std::srand ( std::time(NULL) );
     MWClass::registerClasses();
+
+    Uint32 flags = SDL_INIT_VIDEO|SDL_INIT_NOPARACHUTE;
+    if(SDL_WasInit(flags) == 0)
+    {
+        //kindly ask SDL not to trash our OGL context
+        //might this be related to http://bugzilla.libsdl.org/show_bug.cgi?id=748 ?
+        SDL_SetHint(SDL_HINT_RENDER_DRIVER, "software");
+        if(SDL_Init(flags) != 0)
+        {
+            throw std::runtime_error("Could not initialize SDL! " + std::string(SDL_GetError()));
+        }
+    }
 }
 
 OMW::Engine::~Engine()
@@ -148,6 +163,7 @@ OMW::Engine::~Engine()
     mEnvironment.cleanup();
     delete mScriptContext;
     delete mOgre;
+    SDL_Quit();
 }
 
 // Load BSA files
@@ -268,11 +284,6 @@ void OMW::Engine::addPlugin (const std::string& plugin)
     }
 }
 
-void OMW::Engine::setDebugMode(bool debugMode)
-{
-    mDebug = debugMode;
-}
-
 void OMW::Engine::setScriptsVerbosity(bool scriptsVerbosity)
 {
     mVerboseScripts = scriptsVerbosity;
@@ -315,6 +326,8 @@ std::string OMW::Engine::loadSettings (Settings::Manager & settings)
     else if (boost::filesystem::exists(mCfgMgr.getGlobalPath().string() + "/transparency-overrides.cfg"))
         nifOverrides.loadTransparencyOverrides(mCfgMgr.getGlobalPath().string() + "/transparency-overrides.cfg");
 
+    settings.setBool("hardware cursors", "GUI", true);
+
     return settingspath;
 }
 
@@ -352,14 +365,16 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     addResourcesDirectory(mResDir / "shadows");
     addZipResource(mResDir / "mygui" / "Obliviontt.zip");
 
-    // Create the window
     OEngine::Render::WindowSettings windowSettings;
     windowSettings.fullscreen = settings.getBool("fullscreen", "Video");
     windowSettings.window_x = settings.getInt("resolution x", "Video");
     windowSettings.window_y = settings.getInt("resolution y", "Video");
+    windowSettings.screen = settings.getInt("screen", "Video");
     windowSettings.vsync = settings.getBool("vsync", "Video");
+    windowSettings.icon = "openmw.png";
     std::string aa = settings.getString("antialiasing", "Video");
     windowSettings.fsaa = (aa.substr(0, 4) == "MSAA") ? aa.substr(5, aa.size()-5) : "0";
+
     mOgre->createWindow("OpenMW", windowSettings);
 
     loadBSA();
@@ -380,7 +395,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     mEnvironment.setWindowManager (new MWGui::WindowManager(
         mExtensions, mFpsLevel, mOgre, mCfgMgr.getLogPath().string() + std::string("/"),
-        mCfgMgr.getCachePath ().string(), mScriptConsoleMode, mTranslationDataStorage));
+        mCfgMgr.getCachePath ().string(), mScriptConsoleMode, mTranslationDataStorage, mEncoding));
     if (mNewGame)
         mEnvironment.getWindowManager()->setNewGame(true);
 
@@ -409,7 +424,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     mEnvironment.setInputManager (new MWInput::InputManager (*mOgre,
         MWBase::Environment::get().getWorld()->getPlayer(),
-         *MWBase::Environment::get().getWindowManager(), mDebug, *this, keybinderUser, keybinderUserExists));
+         *MWBase::Environment::get().getWindowManager(), *this, keybinderUser, keybinderUserExists));
 
     mEnvironment.getWorld()->renderPlayer();
 

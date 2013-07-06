@@ -4,13 +4,12 @@
 #include <QMainWindow>
 #include <QStackedWidget>
 #include <QListWidgetItem>
-
-#ifndef Q_MOC_RUN
-#include <components/files/configurationmanager.hpp>
-#endif
+#include <QApplication>
 
 #include "../../model/settings/usersettings.hpp"
 #include "../../model/settings/support.hpp"
+
+#include "editorpage.hpp"
 
 class QHBoxLayout;
 class AbstractWidget;
@@ -25,10 +24,8 @@ namespace CSVSettings {
     {
         Q_OBJECT
 
-        QStringList mPaths;
         QListWidget *mListWidget;
         QStackedWidget *mStackedWidget;
-        Files::ConfigurationManager mCfgMgr;
 
     public:
         UserSettingsDialog(QMainWindow *parent = 0);
@@ -36,35 +33,39 @@ namespace CSVSettings {
 
     private:
 
+        /// Settings are written on close
         void closeEvent (QCloseEvent *event);
-        AbstractPage *getAbstractPage (int index);
-        void setWidgetStates (CSMSettings::SectionMap settingsMap);
-        void buildPages();
-        void positionWindow ();
-        CSMSettings::SectionMap loadSettings();
-        void writeSettings();
-        void createSamplePage();
 
+        /// return the setting page by name
+        /// performs dynamic cast to AbstractPage *
+        AbstractPage *getAbstractPage (int index);
+        void setWidgetStates ();
+        void buildPages();
+        void writeSettings();
+
+        /// Templated function to create a custom user preference page
         template <typename T>
-        void createPage (const QString &title)
+        void createPage ()
         {
-            T *page = new T(title, this);
+            T *page = new T(mStackedWidget);
 
             mStackedWidget->addWidget (dynamic_cast<QWidget *>(page));
 
             new QListWidgetItem (page->objectName(), mListWidget);
 
             //finishing touches
-            if (mStackedWidget->sizeHint().width() < 640)
-                mStackedWidget->sizeHint().setWidth(640);
+            QFontMetrics fm (QApplication::font());
+            int textWidth = fm.width(page->objectName());
 
-            if (mStackedWidget->sizeHint().height() < 480)
-                mStackedWidget->sizeHint().setHeight(480);
+            if ((textWidth + 50) > mListWidget->minimumWidth())
+                mListWidget->setMinimumWidth(textWidth + 50);
 
             resize (mStackedWidget->sizeHint());
         }
 
     public slots:
+
+        /// Called when a different page is selected in the left-hand list widget
         void slotChangePage (QListWidgetItem*, QListWidgetItem*);
     };
 

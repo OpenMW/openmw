@@ -238,6 +238,12 @@ namespace MWGui
         }
     }
 
+    void CharacterCreation::doRenderUpdate()
+    {
+        if (mRaceDialog)
+            mRaceDialog->doRenderUpdate();
+    }
+
     void CharacterCreation::setPlayerHealth (const MWMechanics::DynamicStat<float>& value)
     {
         mPlayerHealth = value;

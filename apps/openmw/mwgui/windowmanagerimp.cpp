@@ -1,7 +1,17 @@
 #include "windowmanagerimp.hpp"
 
+#include <cassert>
+#include <iterator>
+
+#include "MyGUI_UString.h"
+#include "MyGUI_IPointer.h"
+#include "MyGUI_ResourceImageSetPointer.h"
+#include "MyGUI_TextureUtility.h"
+
 #include <openengine/ogre/renderer.hpp>
 #include <openengine/gui/manager.hpp>
+
+#include <extern/sdl4ogre/sdlcursormanager.hpp>
 
 #include "../mwbase/inputmanager.hpp"
 
@@ -42,6 +52,7 @@
 #include "inventorywindow.hpp"
 #include "bookpage.hpp"
 #include "itemview.hpp"
+#include "fontloader.hpp"
 
 namespace MWGui
 {
@@ -49,7 +60,7 @@ namespace MWGui
     WindowManager::WindowManager(
         const Compiler::Extensions& extensions, int fpsLevel, OEngine::Render::OgreRenderer *ogre,
             const std::string& logpath, const std::string& cacheDir, bool consoleOnlyScripts,
-            Translation::Storage& translationDataStorage)
+            Translation::Storage& translationDataStorage, ToUTF8::FromType encoding)
       : mGuiManager(NULL)
       , mRendering(ogre)
       , mHud(NULL)
@@ -104,10 +115,16 @@ namespace MWGui
       , mSubtitlesEnabled(Settings::Manager::getBool ("subtitles", "GUI"))
       , mHudEnabled(true)
       , mTranslationDataStorage (translationDataStorage)
+      , mCursorManager(NULL)
+      , mUseHardwareCursors(Settings::Manager::getBool("hardware cursors", "GUI"))
     {
         // Set up the GUI system
         mGuiManager = new OEngine::GUI::MyGUIManager(mRendering->getWindow(), mRendering->getScene(), false, logpath);
         mGui = mGuiManager->getGui();
+
+        // Load fonts
+        FontLoader fontLoader (encoding);
+        fontLoader.loadAllFonts();
 
         //Register own widgets with MyGUI
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSkill>("Widget");
@@ -125,8 +142,11 @@ namespace MWGui
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::ImageButton>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::ExposedWindow>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWScrollView>("Widget");
+        MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWScrollBar>("Widget");
         BookPage::registerMyGUIComponents ();
         ItemView::registerComponents();
+
+        MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Controllers::ControllerRepeatClick>("Controller");
 
         MyGUI::FactoryManager::getInstance().registerFactory<ResourceImageSetPointerFix>("Resource", "ResourceImageSetPointer");
         MyGUI::ResourceManager::getInstance().load("core.xml");
@@ -183,7 +203,7 @@ namespace MWGui
 
         mInputBlocker = mGui->createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Default,"Windows","");
 
-        mCursor = new Cursor();
+        mSoftwareCursor = new Cursor();
 
         mHud->setVisible(mHudEnabled);
 
@@ -202,6 +222,17 @@ namespace MWGui
 
         unsetSelectedSpell();
         unsetSelectedWeapon();
+
+        //set up the hardware cursor manager
+        mCursorManager = new SFO::SDLCursorManager();
+
+        MyGUI::PointerManager::getInstance().eventChangeMousePointer += MyGUI::newDelegate(this, &WindowManager::onCursorChange);
+
+        MyGUI::InputManager::getInstance().eventChangeKeyFocus += MyGUI::newDelegate(this, &WindowManager::onKeyFocusChanged);
+
+        setUseHardwareCursors(mUseHardwareCursors);
+        onCursorChange(MyGUI::PointerManager::getInstance().getDefaultPointer());
+        mCursorManager->cursorVisibilityChange(false);
 
         // Set up visibility
         updateVisible();
@@ -257,7 +288,8 @@ namespace MWGui
         delete mMerchantRepair;
         delete mRepair;
         delete mSoulgemDialog;
-        delete mCursor;
+        delete mSoftwareCursor;
+        delete mCursorManager;
 
         cleanupGarbage();
 
@@ -287,7 +319,7 @@ namespace MWGui
 
         mHud->update();
 
-        mCursor->update();
+        mSoftwareCursor->update();
     }
 
     void WindowManager::updateVisible()
@@ -325,14 +357,10 @@ namespace MWGui
         bool gameMode = !isGuiMode();
 
         mInputBlocker->setVisible (gameMode);
+        setCursorVisible(!gameMode);
 
         if (gameMode)
-            mToolTips->enterGameMode();
-        else
-            mToolTips->enterGuiMode();
-
-        if (gameMode)
-            MyGUI::InputManager::getInstance ().setKeyFocusWidget (NULL);
+            setKeyFocusWidget (NULL);
 
         setMinimapVisibility((mAllowed & GW_Map) && !mMap->pinned());
         setWeaponVisibility((mAllowed & GW_Inventory) && !mInventoryWindow->pinned());
@@ -457,7 +485,7 @@ namespace MWGui
                 break;
             case GM_LoadingWallpaper:
                 mHud->setVisible(false);
-                mCursor->setVisible(false);
+                setCursorVisible(false);
                 break;
             case GM_Loading:
                 // Show the pinned windows
@@ -466,10 +494,10 @@ namespace MWGui
                 mInventoryWindow->setVisible(mInventoryWindow->pinned());
                 mSpellWindow->setVisible(mSpellWindow->pinned());
 
-                mCursor->setVisible(false);
+                setCursorVisible(false);
                 break;
             case GM_Video:
-                mCursor->setVisible(false);
+                setCursorVisible(false);
                 mHud->setVisible(false);
                 break;
             default:
@@ -795,15 +823,27 @@ namespace MWGui
         mHud->setEffectVisible (visible);
     }
 
-    void WindowManager::setMouseVisible(bool visible)
-    {
-        mCursor->setVisible(visible);
-    }
-
     void WindowManager::setDragDrop(bool dragDrop)
     {
         mToolTips->setEnabled(!dragDrop);
         MWBase::Environment::get().getInputManager()->setDragDrop(dragDrop);
+    }
+
+    void WindowManager::setUseHardwareCursors(bool use)
+    {
+        mCursorManager->setEnabled(use);
+        mSoftwareCursor->setVisible(!use && mCursorVisible);
+    }
+
+    void WindowManager::setCursorVisible(bool visible)
+    {
+        if(mCursorVisible == visible)
+            return;
+
+        mCursorVisible = visible;
+        mCursorManager->cursorVisibilityChange(visible);
+
+        mSoftwareCursor->setVisible(!mUseHardwareCursors && visible);
     }
 
     void WindowManager::onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result)
@@ -834,18 +874,20 @@ namespace MWGui
         mHud->setFpsLevel(Settings::Manager::getInt("fps", "HUD"));
         mToolTips->setDelay(Settings::Manager::getFloat("tooltip delay", "GUI"));
 
-        bool changeRes = false;
+        setUseHardwareCursors(Settings::Manager::getBool("hardware cursors", "GUI"));
+
+        //bool changeRes = false;
         bool windowRecreated = false;
         for (Settings::CategorySettingVector::const_iterator it = changed.begin();
             it != changed.end(); ++it)
         {
-            if (it->first == "Video" &&  (
+            /*if (it->first == "Video" &&  (
                 it->second == "resolution x"
                 || it->second == "resolution y"))
             {
                 changeRes = true;
-            }
-            else if (it->first == "Video" && it->second == "vsync")
+            }*/
+            if (it->first == "Video" && it->second == "vsync")
                 windowRecreated = true;
             else if (it->first == "HUD" && it->second == "crosshair")
                 mCrosshairEnabled = Settings::Manager::getBool ("crosshair", "HUD");
@@ -853,6 +895,7 @@ namespace MWGui
                 mSubtitlesEnabled = Settings::Manager::getBool ("subtitles", "GUI");
         }
 
+        /*
         if (changeRes)
         {
             int x = Settings::Manager::getInt("resolution x", "Video");
@@ -870,6 +913,7 @@ namespace MWGui
             mDragAndDrop->mDragAndDropWidget->setSize(MyGUI::IntSize(x, y));
             mInputBlocker->setSize(MyGUI::IntSize(x,y));
         }
+        */
         if (windowRecreated)
         {
             mGuiManager->updateWindow (mRendering->getWindow ());
@@ -895,6 +939,36 @@ namespace MWGui
         MWBase::Environment::get().getInputManager()->changeInputMode(!gameMode);
 
         updateVisible();
+    }
+
+    void WindowManager::onCursorChange(const std::string &name)
+    {
+        mSoftwareCursor->onCursorChange(name);
+
+        if(!mCursorManager->cursorChanged(name))
+            return; //the cursor manager doesn't want any more info about this cursor
+        //See if we can get the information we need out of the cursor resource
+        ResourceImageSetPointerFix* imgSetPtr = dynamic_cast<ResourceImageSetPointerFix*>(MyGUI::PointerManager::getInstance().getByName(name));
+        if(imgSetPtr != NULL)
+        {
+            MyGUI::ResourceImageSet* imgSet = imgSetPtr->getImageSet();
+
+            std::string tex_name = imgSet->getIndexInfo(0,0).texture;
+
+            Ogre::TexturePtr tex = Ogre::TextureManager::getSingleton().getByName(tex_name);
+
+            //everything looks good, send it to the cursor manager
+            if(!tex.isNull())
+            {
+                Uint8 size_x = imgSetPtr->getSize().width;
+                Uint8 size_y = imgSetPtr->getSize().height;
+                Uint8 hotspot_x = imgSetPtr->getHotSpot().left;
+                Uint8 hotspot_y = imgSetPtr->getHotSpot().top;
+                int rotation = imgSetPtr->getRotation();
+
+                mCursorManager->receiveCursorInfo(name, rotation, tex, size_x, size_y, hotspot_x, hotspot_y);
+            }
+        }
     }
 
     void WindowManager::popGuiMode()
@@ -1104,6 +1178,14 @@ namespace MWGui
         allowMouse();
     }
 
+    bool WindowManager::containsMode(GuiMode mode) const
+    {
+        if(mGuiModes.empty())
+            return false;
+
+        return std::find(mGuiModes.begin(), mGuiModes.end(), mode) != mGuiModes.end();
+    }
+
     void WindowManager::showCrosshair (bool show)
     {
         mHud->setCrosshairVisible (show && mCrosshairEnabled);
@@ -1199,7 +1281,7 @@ namespace MWGui
 
     void WindowManager::changePointer(const std::string &name)
     {
-        mCursor->onCursorChange(name);
+        onCursorChange(name);
     }
 
     void WindowManager::showSoulgemDialog(MWWorld::Ptr item)
@@ -1210,11 +1292,29 @@ namespace MWGui
     void WindowManager::frameStarted (float dt)
     {
         mInventoryWindow->doRenderUpdate ();
+        mCharGen->doRenderUpdate();
     }
 
     void WindowManager::updatePlayer()
     {
         mInventoryWindow->updatePlayer();
+    }
+
+    void WindowManager::setKeyFocusWidget(MyGUI::Widget *widget)
+    {
+        if (widget == NULL)
+            MyGUI::InputManager::getInstance().resetKeyFocusWidget();
+        else
+            MyGUI::InputManager::getInstance().setKeyFocusWidget(widget);
+        onKeyFocusChanged(widget);
+    }
+
+    void WindowManager::onKeyFocusChanged(MyGUI::Widget *widget)
+    {
+        if (widget && widget->castType<MyGUI::EditBox>(false))
+            SDL_StartTextInput();
+        else
+            SDL_StopTextInput();
     }
 
 }

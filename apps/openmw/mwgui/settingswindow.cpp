@@ -126,7 +126,6 @@ namespace MWGui
         getWidget(mControlsBox, "ControlsBox");
         getWidget(mResetControlsButton, "ResetControlsButton");
         getWidget(mInvertYButton, "InvertYButton");
-        getWidget(mUISensitivitySlider, "UISensitivitySlider");
         getWidget(mCameraSensitivitySlider, "CameraSensitivitySlider");
         getWidget(mRefractionButton, "RefractionButton");
 
@@ -240,11 +239,7 @@ namespace MWGui
 
         float cameraSens = (Settings::Manager::getFloat("camera sensitivity", "Input")-0.2)/(5.0-0.2);
         mCameraSensitivitySlider->setScrollPosition (cameraSens * (mCameraSensitivitySlider->getScrollRange()-1));
-        float uiSens = (Settings::Manager::getFloat("ui sensitivity", "Input")-0.2)/(5.0-0.2);
-        mUISensitivitySlider->setScrollPosition (uiSens * (mUISensitivitySlider->getScrollRange()-1));
         mCameraSensitivitySlider->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
-        mUISensitivitySlider->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
-
 
         mInvertYButton->setCaptionWithReplacing(Settings::Manager::getBool("invert y axis", "Input") ? "#{sOn}" : "#{sOff}");
 
@@ -274,12 +269,15 @@ namespace MWGui
         if (index == MyGUI::ITEM_NONE)
             return;
 
+        /*
         ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
         dialog->open("#{sNotifyMessage67}");
         dialog->eventOkClicked.clear();
         dialog->eventOkClicked += MyGUI::newDelegate(this, &SettingsWindow::onResolutionAccept);
         dialog->eventCancelClicked.clear();
         dialog->eventCancelClicked += MyGUI::newDelegate(this, &SettingsWindow::onResolutionCancel);
+        */
+        onResolutionAccept();
     }
 
     void SettingsWindow::onResolutionAccept()
@@ -292,7 +290,9 @@ namespace MWGui
         Settings::Manager::setInt("resolution y", "Video", resY);
 
         apply();
-        mResolutionList->setIndexSelected(MyGUI::ITEM_NONE);
+
+        MWBase::Environment::get().getWindowManager()->
+            messageBox("New resolution will be applied after a restart", std::vector<std::string>());
     }
 
     void SettingsWindow::onResolutionCancel()
@@ -361,6 +361,8 @@ namespace MWGui
             {
                 Settings::Manager::setBool("fullscreen", "Video", newState);
                 apply();
+                MWBase::Environment::get().getWindowManager()->
+                    messageBox("Fullscreen will be applied after a restart", std::vector<std::string>());
             }
         }
         else if (_sender == mVSyncButton)
@@ -529,8 +531,6 @@ namespace MWGui
             Settings::Manager::setFloat("footsteps volume", "Sound", val);
         else if (scroller == mMusicVolumeSlider)
             Settings::Manager::setFloat("music volume", "Sound", val);
-        else if (scroller == mUISensitivitySlider)
-            Settings::Manager::setFloat("ui sensitivity", "Input", (1-val) * 0.2 + val * 5.f);
         else if (scroller == mCameraSensitivitySlider)
             Settings::Manager::setFloat("camera sensitivity", "Input", (1-val) * 0.2 + val * 5.f);
 

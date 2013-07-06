@@ -2,9 +2,17 @@
 <ui version="4.0">
  <class>PlayPage</class>
  <widget class="QWidget" name="PlayPage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>274</width>
+    <height>317</height>
+   </rect>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QFrame" name="Scroll">
+    <widget class="QWidget" name="Scroll" native="true">
      <property name="styleSheet">
       <string notr="true">#Scroll {
     background-image: url(&quot;:/images/playpage-background.png&quot;);
@@ -12,15 +20,6 @@
     background-position: top;
 }
 </string>
-     </property>
-     <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Plain</enum>
-     </property>
-     <property name="lineWidth">
-      <number>0</number>
      </property>
      <layout class="QGridLayout" name="gridLayout">
       <property name="leftMargin">

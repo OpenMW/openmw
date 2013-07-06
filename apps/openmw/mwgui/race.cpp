@@ -32,6 +32,7 @@ namespace MWGui
       , mFaceIndex(0)
       , mHairIndex(0)
       , mCurrentAngle(0)
+      , mPreviewDirty(true)
     {
         // Centre dialog
         center();
@@ -126,6 +127,8 @@ namespace MWGui
         mHairIndex = boost::lexical_cast<int>(index) - 1;
 
         mPreviewImage->setImageTexture ("CharacterHeadPreview");
+
+        mPreviewDirty = true;
     }
 
 
@@ -174,6 +177,7 @@ namespace MWGui
         float angle = (float(_position) / 49.f - 0.5) * 3.14 * 2;
         float diff = angle - mCurrentAngle;
         mPreview->update (diff);
+        mPreviewDirty = true;
         mCurrentAngle += diff;
     }
 
@@ -286,6 +290,16 @@ namespace MWGui
         record.mHair = mAvailableHairs[mHairIndex];
 
         mPreview->setPrototype(record);
+        mPreviewDirty = true;
+    }
+
+    void RaceDialog::doRenderUpdate()
+    {
+        if (mPreviewDirty)
+        {
+            mPreview->render();
+            mPreviewDirty = false;
+        }
     }
 
     void RaceDialog::updateRaces()

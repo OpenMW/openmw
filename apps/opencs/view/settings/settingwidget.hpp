@@ -16,7 +16,8 @@
 
 namespace CSVSettings
 {
-    //VALID FOR RADIOBUTTON / CHECKBOX (or other toggle widget with it's own label)
+
+    /// Generic template for radiobuttons / checkboxes
     template <typename T1>
     class SettingWidget : public AbstractWidget
     {
@@ -47,6 +48,7 @@ namespace CSVSettings
         }
     };
 
+    /// spin box template
     template <>
     class SettingWidget <QSpinBox>: public AbstractWidget
     {
@@ -90,6 +92,7 @@ namespace CSVSettings
 
     };
 
+    /// combo box template
     template <>
     class SettingWidget <QComboBox>: public CSVSettings::AbstractWidget
     {
@@ -142,6 +145,7 @@ namespace CSVSettings
 
     };
 
+    /// line edit template
     template <>
     class SettingWidget <QLineEdit>: public CSVSettings::AbstractWidget
     {
@@ -175,6 +179,8 @@ namespace CSVSettings
         }
     };
 
+    /// list widget template
+    /// \todo Not fully implemented.  Only widget supporting multi-valued settings
     template <>
     class SettingWidget <QListWidget>: public CSVSettings::AbstractWidget
     {

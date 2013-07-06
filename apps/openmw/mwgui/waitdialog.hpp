@@ -2,6 +2,7 @@
 #define MWGUI_WAIT_DIALOG_H
 
 #include "windowbase.hpp"
+#include "widgets.hpp"
 
 namespace MWGui
 {
@@ -38,10 +39,10 @@ namespace MWGui
         MyGUI::TextBox* mDateTimeText;
         MyGUI::TextBox* mRestText;
         MyGUI::TextBox* mHourText;
-        MyGUI::ScrollBar* mHourSlider;
         MyGUI::Button* mUntilHealedButton;
         MyGUI::Button* mWaitButton;
         MyGUI::Button* mCancelButton;
+        MWGui::Widgets::MWScrollBar* mHourSlider;
 
         bool mWaiting;
         bool mSleeping;

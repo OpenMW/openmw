@@ -1,5 +1,7 @@
 #include "settingsitem.hpp"
 
+#include <QStringList>
+
 bool CSMSettings::SettingsItem::updateItem (const QStringList *values)
 {
     QStringList::ConstIterator it = values->begin();
@@ -66,21 +68,21 @@ bool CSMSettings::SettingsItem::updateItem(int valueListIndex)
 
 bool CSMSettings::SettingsItem::validate (const QString &value)
 {
-    bool isValid = true;
+    //if there is no value list or value pair, there is no validation to do
+    bool isValid = !(!mValueList->isEmpty() || mValuePair);
 
-    //validation required only if a value list or min/max value pair has been provided
-    if (mValueList->size()>0)
+    if (!isValid && !mValueList->isEmpty())
     {
-        for (QStringList::ConstIterator it = mValueList->begin(); it !=mValueList->end(); ++it)
+        for (QStringList::Iterator it = mValueList->begin(); it != mValueList->end(); ++it)
+    //    foreach (QString listItem, *mValueList)
         {
-            isValid = ( value == *it);
+            isValid = (value == *it);
 
             if (isValid)
                 break;
         }
     }
-
-    else if (mValuePair)
+    else if (!isValid && mValuePair)
     {
         int numVal = value.toInt();
 

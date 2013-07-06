@@ -12,6 +12,7 @@ Marc Zinnschlag (Zini) - Lead Programmer/Project Manager
 
 Adam Hogan (aurix)
 Aleksandar Jovanov
+Alex McKibben (WeirdSexy)
 Alexander Nadeau (wareya)
 Alexander Olofsson (Ace)
 Artem Kotsynyak (greye)
@@ -21,6 +22,7 @@ BrotherBrick
 Chris Robinson (KittyCat)
 Cory F. Cohen (cfcohen)
 Cris Mihalache (Mirceam)
+darkf
 Douglas Diniz (Dgdiniz)
 Douglas Mencken (dougmencken)
 Edmondo Tommasina (edmondo)
@@ -32,6 +34,7 @@ Jacob Essex (Yacoby)
 Jannik Heller (scrawl)
 Jason Hooks (jhooks)
 Joel Graff (graffy)
+John Blomberg (fstp)
 Jordan Milne
 Julien Voisin (jvoisin/ap0)
 Karl-Felix Glatzer (k1ll)
@@ -77,7 +80,7 @@ Julien Voisin (jvoisin/ap0) - French News Writer
 Mickey Lyle (raevol) - Release Manager
 Pithorn - Chinese News Writer
 sir_herrbatka - English/Polish News Writer
-WeirdSexy - Podcaster
+Alex McKibben (WeirdSexy) - Podcaster
 
 
 Website:

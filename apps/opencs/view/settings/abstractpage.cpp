@@ -13,12 +13,17 @@
 CSVSettings::AbstractPage::AbstractPage(QWidget *parent):
     QWidget(parent)
 {
+    QGridLayout *pageLayout = new QGridLayout(this);
+    setLayout (pageLayout);
 }
 
 CSVSettings::AbstractPage::AbstractPage(const QString &pageName, QWidget *parent):
     QWidget(parent)
 {
     QWidget::setObjectName (pageName);
+
+    QGridLayout *pageLayout = new QGridLayout(this);
+    setLayout (pageLayout);
 }
 
 CSVSettings::AbstractPage::~AbstractPage()

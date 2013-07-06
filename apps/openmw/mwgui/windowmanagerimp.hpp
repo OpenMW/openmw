@@ -43,6 +43,11 @@ namespace OEngine
     }
 }
 
+namespace SFO
+{
+    class CursorManager;
+}
+
 namespace MWGui
 {
   class WindowBase;
@@ -83,7 +88,7 @@ namespace MWGui
     WindowManager(const Compiler::Extensions& extensions, int fpsLevel,
                   OEngine::Render::OgreRenderer *mOgre, const std::string& logpath,
                   const std::string& cacheDir, bool consoleOnlyScripts,
-                  Translation::Storage& translationDataStorage);
+                  Translation::Storage& translationDataStorage, ToUTF8::FromType encoding);
     virtual ~WindowManager();
 
     /**
@@ -93,6 +98,8 @@ namespace MWGui
      */
     virtual void update();
 
+    virtual void setKeyFocusWidget (MyGUI::Widget* widget);
+
     virtual void setNewGame(bool newgame);
 
     virtual void pushGuiMode(GuiMode mode);
@@ -100,6 +107,7 @@ namespace MWGui
     virtual void removeGuiMode(GuiMode mode); ///< can be anywhere in the stack
 
     virtual GuiMode getMode() const;
+    virtual bool containsMode(GuiMode mode) const;
 
     virtual bool isGuiMode() const;
 
@@ -153,7 +161,6 @@ namespace MWGui
     virtual void setFocusObject(const MWWorld::Ptr& focus);
     virtual void setFocusObjectScreenCoords(float min_x, float min_y, float max_x, float max_y);
 
-    virtual void setMouseVisible(bool visible);
     virtual void getMousePosition(int &x, int &y);
     virtual void getMousePosition(float &x, float &y);
     virtual void setDragDrop(bool dragDrop);
@@ -289,7 +296,7 @@ namespace MWGui
     CompanionWindow* mCompanionWindow;
 
     Translation::Storage& mTranslationDataStorage;
-    Cursor* mCursor;
+    Cursor* mSoftwareCursor;
 
     CharacterCreation* mCharGen;
 
@@ -298,6 +305,9 @@ namespace MWGui
     bool mCrosshairEnabled;
     bool mSubtitlesEnabled;
     bool mHudEnabled;
+    bool mCursorVisible;
+
+    void setCursorVisible(bool visible);
 
     /// \todo get rid of this stuff. Move it to the respective UI element classes, if needed.
     // Various stats about player as needed by window manager
@@ -311,6 +321,8 @@ namespace MWGui
 
     MyGUI::Gui *mGui; // Gui
     std::vector<GuiMode> mGuiModes;
+
+    SFO::CursorManager* mCursorManager;
 
     std::vector<OEngine::GUI::Layout*> mGarbageDialogs;
     void cleanupGarbage();
@@ -333,11 +345,17 @@ namespace MWGui
     unsigned int mTriangleCount;
     unsigned int mBatchCount;
 
+    bool mUseHardwareCursors;
+    void setUseHardwareCursors(bool use);
+
     /**
      * Called when MyGUI tries to retrieve a tag. This usually corresponds to a GMST string,
      * so this method will retrieve the GMST with the name \a _tag and place the result in \a _result
      */
     void onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result);
+
+    void onCursorChange(const std::string& name);
+    void onKeyFocusChanged(MyGUI::Widget* widget);
   };
 }
 

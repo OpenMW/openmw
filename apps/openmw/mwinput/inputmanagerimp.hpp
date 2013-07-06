@@ -6,6 +6,7 @@
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/inputmanager.hpp"
+#include <extern/sdl4ogre/sdlinputwrapper.hpp>
 
 namespace OEngine
 {
@@ -35,15 +36,10 @@ namespace ICS
     class InputControlSystem;
 }
 
-namespace OIS
+namespace MyGUI
 {
-    class Keyboard;
-    class Mouse;
-    class InputManager;
+    class MouseButton;
 }
-
-#include <OISKeyboard.h>
-#include <OISMouse.h>
 
 #include <extern/oics/ICSChannelListener.h>
 #include <extern/oics/ICSInputControlSystem.h>
@@ -54,13 +50,18 @@ namespace MWInput
     /**
     * @brief Class that handles all input and key bindings for OpenMW.
     */
-    class InputManager : public MWBase::InputManager, public OIS::KeyListener, public OIS::MouseListener, public ICS::ChannelListener, public ICS::DetectingBindingListener
+    class InputManager :
+            public MWBase::InputManager,
+            public SFO::KeyListener,
+            public SFO::MouseListener,
+            public SFO::WindowListener,
+            public ICS::ChannelListener,
+            public ICS::DetectingBindingListener
     {
     public:
         InputManager(OEngine::Render::OgreRenderer &_ogre,
             MWWorld::Player&_player,
             MWBase::WindowManager &_windows,
-            bool debug,
             OMW::Engine& engine,
             const std::string& userFile, bool userFileExists);
 
@@ -85,12 +86,16 @@ namespace MWInput
         virtual void resetToDefaultBindings();
 
     public:
-        virtual bool keyPressed( const OIS::KeyEvent &arg );
-        virtual bool keyReleased( const OIS::KeyEvent &arg );
+        virtual bool keyPressed(const SDL_KeyboardEvent &arg );
+        virtual bool keyReleased( const SDL_KeyboardEvent &arg );
+        virtual void textInput (const SDL_TextInputEvent &arg);
 
-        virtual bool mousePressed( const OIS::MouseEvent &arg, OIS::MouseButtonID id );
-        virtual bool mouseReleased( const OIS::MouseEvent &arg, OIS::MouseButtonID id );
-        virtual bool mouseMoved( const OIS::MouseEvent &arg );
+        virtual bool mousePressed( const SDL_MouseButtonEvent &arg, Uint8 id );
+        virtual bool mouseReleased( const SDL_MouseButtonEvent &arg, Uint8 id );
+        virtual bool mouseMoved( const SFO::MouseMotionEvent &arg );
+
+        virtual bool windowVisibilityChange( bool visible );
+        virtual bool windowFocusChange( bool have_focus );
 
         virtual void channelChanged(ICS::Channel* channel, float currentValue, float previousValue);
 
@@ -98,7 +103,7 @@ namespace MWInput
             , ICS::InputControlSystem::NamedAxis axis, ICS::Control::ControlChangingDirection direction);
 
         virtual void keyBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
-            , OIS::KeyCode key, ICS::Control::ControlChangingDirection direction);
+            , SDL_Keycode key, ICS::Control::ControlChangingDirection direction);
 
         virtual void mouseButtonBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
             , unsigned int button, ICS::Control::ControlChangingDirection direction);
@@ -123,11 +128,10 @@ namespace MWInput
         MWBase::WindowManager &mWindows;
         OMW::Engine& mEngine;
 
-        ICS::InputControlSystem* mInputCtrl;
+        ICS::InputControlSystem* mInputBinder;
 
-        OIS::Keyboard* mKeyboard;
-        OIS::Mouse* mMouse;
-        OIS::InputManager* mInputManager;
+
+        SFO::InputWrapper* mInputManager;
 
         std::string mUserFile;
 
@@ -138,7 +142,6 @@ namespace MWInput
         float mCameraSensitivity;
         float mUISensitivity;
         float mCameraYMultiplier;
-        float mUIYMultiplier;
         float mPreviewPOVDelay;
         float mTimeIdle;
 
@@ -150,7 +153,6 @@ namespace MWInput
         float mMouseX;
         float mMouseY;
         int mMouseWheel;
-        bool mDebug;
         bool mUserFileExists;
         bool mAlwaysRunActive;
 
@@ -158,6 +160,7 @@ namespace MWInput
 
     private:
         void adjustMouseRegion(int width, int height);
+        MyGUI::MouseButton sdlButtonToMyGUI(Uint8 button);
 
         void resetIdleTime();
         void updateIdleTime(float dt);

@@ -7,14 +7,12 @@
 #include <QRegExp>
 #include <QMap>
 
-#include <QDebug>
-
 template <class Map>
 class SettingsBase
 {
 
 public:
-    SettingsBase() {}
+    SettingsBase() { mMultiValue = false; }
     ~SettingsBase() {}
 
     inline QString value(const QString &key, const QString &defaultValue = QString())
@@ -34,6 +32,11 @@ public:
         QStringList values = mSettings.values(key);
         if (!values.contains(value))
             mSettings.insertMulti(key, value);
+    }
+
+    inline void setMultiValueEnabled(bool enable)
+    {
+        mMultiValue = enable;
     }
 
     inline void remove(const QString &key)
@@ -66,8 +69,8 @@ public:
 
             if (keyRe.indexIn(line) != -1) {
 
-                QString key = keyRe.cap(1);
-                QString value = keyRe.cap(2);
+                QString key = keyRe.cap(1).trimmed();
+                QString value = keyRe.cap(2).trimmed();
 
                 if (!sectionPrefix.isEmpty())
                     key.prepend(sectionPrefix);
@@ -75,8 +78,13 @@ public:
                 mSettings.remove(key);
 
                 QStringList values = mCache.values(key);
+
                 if (!values.contains(value)) {
-                    mCache.insertMulti(key, value);
+                    if (mMultiValue) {
+                        mCache.insertMulti(key, value);
+                    } else {
+                        mCache.insert(key, value);
+                    }
                 }
             }
         }
@@ -94,6 +102,8 @@ public:
 private:
     Map mSettings;
     Map mCache;
+
+    bool mMultiValue;
 };
 
 #endif // SETTINGSBASE_HPP

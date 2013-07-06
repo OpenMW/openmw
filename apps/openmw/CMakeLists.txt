@@ -33,7 +33,7 @@ add_openmw_dir (mwgui
     enchantingdialog trainingwindow travelwindow imagebutton exposedwindow cursor spellicons
     merchantrepair repair soulgemdialog companionwindow bookpage journalviewmodel journalbooks
     keywordsearch itemmodel containeritemmodel inventoryitemmodel sortfilteritemmodel itemview
-    tradeitemmodel companionitemmodel pickpocketitemmodel
+    tradeitemmodel companionitemmodel pickpocketitemmodel fontloader controllers
     )
 
 add_openmw_dir (mwdialogue
@@ -106,18 +106,22 @@ target_link_libraries(openmw
     ${OGRE_LIBRARIES}
     ${OGRE_Terrain_LIBRARY}
     ${OGRE_STATIC_PLUGINS}
-    ${OIS_LIBRARIES}
     ${Boost_LIBRARIES}
     ${OPENAL_LIBRARY}
     ${SOUND_INPUT_LIBRARY}
     ${BULLET_LIBRARIES}
     ${MYGUI_LIBRARIES}
+    ${SDL2_LIBRARY}
     ${MYGUI_PLATFORM_LIBRARIES}
-    "shiny"
-    "shiny.OgrePlatform"
+    ${SHINY_LIBRARIES}
     "oics"
+    "sdl4ogre"
     components
 )
+
+if (NOT UNIX)
+target_link_libraries(openmw ${SDL2MAIN_LIBRARY})
+endif()
 
 # Fix for not visible pthreads functions for linker with glibc 2.15
 if (UNIX AND NOT APPLE)
@@ -131,10 +135,9 @@ endif()
 
 
 if(APPLE)
-    find_library(CARBON_FRAMEWORK Carbon)
     find_library(COCOA_FRAMEWORK Cocoa)
     find_library(IOKIT_FRAMEWORK IOKit)
-    target_link_libraries(openmw ${CARBON_FRAMEWORK} ${COCOA_FRAMEWORK} ${IOKIT_FRAMEWORK})
+    target_link_libraries(openmw ${COCOA_FRAMEWORK} ${IOKIT_FRAMEWORK})
 
     if (FFMPEG_FOUND)
         find_library(COREVIDEO_FRAMEWORK CoreVideo)

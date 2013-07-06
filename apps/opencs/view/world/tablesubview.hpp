@@ -23,8 +23,8 @@ namespace CSVWorld
         public:
 
             TableSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document, bool createAndDelete);
-
             virtual void setEditLock (bool locked);
+            void updateEditorSetting (const QString &, const QString &);
 
         private slots:
 

@@ -391,6 +391,10 @@ namespace MWWorld
 
             virtual void getContainersOwnedBy (const MWWorld::Ptr& npc, std::vector<MWWorld::Ptr>& out);
             ///< get all containers in active cells owned by this Npc
+            virtual void getItemsOwnedBy (const MWWorld::Ptr& npc, std::vector<MWWorld::Ptr>& out);
+            ///< get all items in active cells owned by this Npc
+
+            virtual void enableActorCollision(const MWWorld::Ptr& actor, bool enable);
 
             virtual void setupExternalRendering (MWRender::ExternalRendering& rendering);
 

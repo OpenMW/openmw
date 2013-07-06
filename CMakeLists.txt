@@ -4,6 +4,10 @@ if (APPLE)
     set(APP_BUNDLE_NAME "${CMAKE_PROJECT_NAME}.app")
 
     set(APP_BUNDLE_DIR "${OpenMW_BINARY_DIR}/${APP_BUNDLE_NAME}")
+
+    set(CMAKE_EXE_LINKER_FLAGS "-F /Library/Frameworks")
+    set(CMAKE_SHARED_LINKER_FLAGS "-F /Library/Frameworks")
+    set(CMAKE_MODULE_LINKER_FLAGS "-F /Library/Frameworks")
 endif (APPLE)
 
 # Macros
@@ -15,7 +19,7 @@ include (OpenMWMacros)
 # Version
 
 set (OPENMW_VERSION_MAJOR 0)
-set (OPENMW_VERSION_MINOR 23)
+set (OPENMW_VERSION_MINOR 24)
 set (OPENMW_VERSION_RELEASE 0)
 
 set (OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
@@ -27,6 +31,7 @@ configure_file ("${OpenMW_SOURCE_DIR}/Docs/mainpage.hpp.cmake" "${OpenMW_SOURCE_
 option(MYGUI_STATIC "Link static build of Mygui into the binaries" FALSE)
 option(OGRE_STATIC  "Link static build of Ogre and Ogre Plugins into the binaries" FALSE)
 option(BOOST_STATIC "Link static build of Boost into the binaries" FALSE)
+option(SDL2_STATIC "Link static build of SDL into the binaries" FALSE)
 
 # Apps and tools
 option(BUILD_BSATOOL "build BSA extractor" OFF)
@@ -77,7 +82,13 @@ set(OENGINE_OGRE
   ${LIBDIR}/openengine/ogre/fader.cpp
   ${LIBDIR}/openengine/ogre/particles.cpp
   ${LIBDIR}/openengine/ogre/selectionbuffer.cpp
+  ${LIBDIR}/openengine/ogre/imagerotate.cpp
 )
+
+if (APPLE)
+    set(OENGINE_OGRE ${OENGINE_OGRE} ${LIBDIR}/openengine/ogre/osx_utils.mm)
+endif ()
+
 set(OENGINE_GUI
   ${LIBDIR}/openengine/gui/manager.cpp
 )
@@ -181,6 +192,12 @@ if (UNIX AND NOT APPLE)
     find_package (Threads)
 endif()
 
+include (CheckIncludeFileCXX)
+check_include_file_cxx(unordered_map HAVE_UNORDERED_MAP)
+if (HAVE_UNORDERED_MAP)
+    add_definitions(-DHAVE_UNORDERED_MAP)
+endif ()
+
 
 set(BOOST_COMPONENTS system filesystem program_options thread date_time wave)
 
@@ -191,7 +208,7 @@ endif()
 find_package(OGRE REQUIRED)
 find_package(MyGUI REQUIRED)
 find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
-find_package(OIS REQUIRED)
+find_package(SDL2 REQUIRED)
 find_package(OpenAL REQUIRED)
 find_package(Bullet REQUIRED)
 IF(OGRE_STATIC)
@@ -205,7 +222,8 @@ ENDIF(OGRE_STATIC)
 include_directories("."
     ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre ${OGRE_INCLUDE_DIR}/OGRE ${OGRE_PLUGIN_INCLUDE_DIRS}
     ${OGRE_Terrain_INCLUDE_DIR}
-    ${OIS_INCLUDE_DIRS} ${Boost_INCLUDE_DIR}
+    ${SDL2_INCLUDE_DIR}
+    ${Boost_INCLUDE_DIR}
     ${PLATFORM_INCLUDE_DIR}
     ${MYGUI_INCLUDE_DIRS}
     ${MYGUI_PLATFORM_INCLUDE_DIRS}
@@ -214,7 +232,7 @@ include_directories("."
     ${LIBDIR}
 )
 
-link_directories(${Boost_LIBRARY_DIRS} ${OGRE_LIB_DIR} ${MYGUI_LIB_DIR})
+link_directories(${SDL2_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS} ${OGRE_LIB_DIR} ${MYGUI_LIB_DIR})
 
 if (APPLE)
     # List used Ogre plugins
@@ -287,9 +305,12 @@ configure_file(${OpenMW_SOURCE_DIR}/files/transparency-overrides.cfg
 
 configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
     "${OpenMW_BINARY_DIR}/openmw.cfg")
+
 configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
     "${OpenMW_BINARY_DIR}/openmw.cfg.install")
 
+configure_file(${OpenMW_SOURCE_DIR}/files/opencs.cfg
+    "${OpenMW_BINARY_DIR}/opencs.cfg")
 
 if (NOT WIN32 AND NOT APPLE)
     configure_file(${OpenMW_SOURCE_DIR}/files/openmw.desktop
@@ -300,15 +321,15 @@ endif()
 
 # Compiler settings
 if (CMAKE_COMPILER_IS_GNUCC)
-    add_definitions (-Wall -Wextra -Wno-unused-parameter -Wno-reorder -std=c++98 -pedantic -Wno-long-long)
+    SET(CMAKE_CXX_FLAGS "-Wall -Wextra -Wno-unused-parameter -Wno-reorder -std=c++98 -pedantic -Wno-long-long ${CMAKE_CXX_FLAGS}")
 
     # Silence warnings in OGRE headers. Remove once OGRE got fixed!
-    add_definitions (-Wno-ignored-qualifiers)
+    SET(CMAKE_CXX_FLAGS "-Wno-ignored-qualifiers ${CMAKE_CXX_FLAGS}")
 
     execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpversion
                 OUTPUT_VARIABLE GCC_VERSION)
     if ("${GCC_VERSION}" VERSION_GREATER 4.6 OR "${GCC_VERSION}" VERSION_EQUAL 4.6)
-        add_definitions (-Wno-unused-but-set-parameter)
+        SET(CMAKE_CXX_FLAGS "-Wno-unused-but-set-parameter ${CMAKE_CXX_FLAGS}")
     endif("${GCC_VERSION}" VERSION_GREATER 4.6 OR "${GCC_VERSION}" VERSION_EQUAL 4.6)
 endif (CMAKE_COMPILER_IS_GNUCC)
 
@@ -334,6 +355,7 @@ if(DPKG_PROGRAM)
     INSTALL(FILES "${OpenMW_BINARY_DIR}/settings-default.cfg" DESTINATION "../etc/openmw/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/transparency-overrides.cfg" DESTINATION "../etc/openmw/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "../etc/openmw/" RENAME "openmw.cfg" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/opencs.cfg" DESTINATION "../etc/openmw/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
 
     #Install resources
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION "share/games/openmw/" FILE_PERMISSIONS OWNER_READ GROUP_READ WORLD_READ COMPONENT "Resources")
@@ -349,8 +371,8 @@ if(DPKG_PROGRAM)
  Data files from the original game is required to run it.")
     SET(CPACK_DEBIAN_PACKAGE_NAME "openmw")
     SET(CPACK_DEBIAN_PACKAGE_VERSION "${VERSION_STRING}")
-        SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW bsatool;Bsatool esmtool;Esmtool omwlauncher;OMWLauncher mwiniimporter;MWiniImporter")
-    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.11.2), libfreetype6 (>= 2.2.1), libgcc1 (>= 1:4.1.1), libmpg123-0 (>= 1.12.1), libois-1.3.0 (>= 1.3.0), libopenal1 (>= 1:1.12.854), libsndfile1 (>= 1.0.23), libstdc++6 (>= 4.4.5), libuuid1 (>= 2.17.2), libqtgui4 (>= 4.7.0)")
+    SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW bsatool;Bsatool esmtool;Esmtool omwlauncher;OMWLauncher mwiniimporter;MWiniImporter")
+    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.11.2), libfreetype6 (>= 2.2.1), libgcc1 (>= 1:4.1.1), libmpg123-0 (>= 1.12.1), libopenal1 (>= 1:1.12.854), libsndfile1 (>= 1.0.23), libstdc++6 (>= 4.4.5), libuuid1 (>= 2.17.2), libqtgui4 (>= 4.7.0)")
 
     SET(CPACK_DEBIAN_PACKAGE_SECTION "Games")
 
@@ -437,6 +459,7 @@ endif(WIN32)
 # Extern
 add_subdirectory (extern/shiny)
 add_subdirectory (extern/oics)
+add_subdirectory (extern/sdl4ogre)
 
 # Components
 add_subdirectory (components)
@@ -572,6 +595,7 @@ if (APPLE)
     install(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" RENAME "openmw.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
     install(FILES "${OpenMW_BINARY_DIR}/settings-default.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
     install(FILES "${OpenMW_BINARY_DIR}/transparency-overrides.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
+    install(FILES "${OpenMW_BINARY_DIR}/opencs.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
 
     set(CPACK_GENERATOR "DragNDrop")
     set(CPACK_PACKAGE_VERSION ${OPENMW_VERSION})
@@ -687,6 +711,7 @@ if (NOT WIN32 AND NOT DPKG_PROGRAM AND NOT APPLE)
     #INSTALL(FILES "${OpenMW_BINARY_DIR}/plugins.cfg" DESTINATION "${SYSCONFDIR}" )
     INSTALL(FILES "${OpenMW_BINARY_DIR}/settings-default.cfg" DESTINATION "${SYSCONFDIR}" )
     INSTALL(FILES "${OpenMW_BINARY_DIR}/transparency-overrides.cfg" DESTINATION "${SYSCONFDIR}" )
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/opencs.cfg" DESTINATION "${SYSCONFDIR}" )
 
     # Install resources
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION "${DATADIR}" )

@@ -416,6 +416,10 @@ namespace MWGui
         mAddEffectDialog.setVisible (false);
     }
 
+    EffectEditorBase::~EffectEditorBase()
+    {
+    }
+
     void EffectEditorBase::startEditing ()
     {
         // get the list of magic effects that are known to the player

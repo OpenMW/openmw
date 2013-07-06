@@ -2,7 +2,6 @@
 #include <QTextCodec>
 #include <QFileInfo>
 #include <QDir>
-#include <QDebug>
 
 #include <stdexcept>
 
@@ -11,6 +10,8 @@
 #include "esm/esmfile.hpp"
 
 #include "datafilesmodel.hpp"
+
+#include <QDebug>
 
 DataFilesModel::DataFilesModel(QObject *parent) :
     QAbstractTableModel(parent)

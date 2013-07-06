@@ -13,7 +13,7 @@ namespace MWMechanics
             MWWorld::Ptr mSoulGemPtr;
             MWWorld::Ptr mEnchanter;
 
-            int mEnchantType;
+            int mCastStyle;
 
             bool mSelfEnchanting;
 
@@ -33,9 +33,10 @@ namespace MWMechanics
             void setEffect(ESM::EffectList effectList);
             void setSoulGem(MWWorld::Ptr soulGem);
             bool create(); //Return true if created, false if failed.
-            void nextEnchantType(); //Set enchant type to next possible type (for mOldItemPtr object)
-            int getEnchantType() const;
-            float getEnchantCost() const;
+            void nextCastStyle(); //Set enchant type to next possible type (for mOldItemPtr object)
+            int getCastStyle() const;
+            float getEnchantPoints() const;
+            float getCastCost() const;
             int getEnchantPrice() const;
             float getMaxEnchantValue() const;
             int getGemCharge() const;
