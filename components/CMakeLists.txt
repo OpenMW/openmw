@@ -170,6 +170,10 @@ if (GIT_CHECKOUT)
     add_dependencies (components git-version)
 endif (GIT_CHECKOUT)
 
+if(MINGW)
+target_link_libraries(components ${QT_LIBRARIES})
+endif()
+
 if (WIN32)
 target_link_libraries(components shlwapi)
 endif()
