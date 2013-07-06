@@ -127,6 +127,9 @@ set (ESM_UI ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
     )
 
 find_package(Qt4 COMPONENTS QtCore QtGui)
+if(MINGW)
+find_package(Bullet REQUIRED COMPONENTS Collision)
+endif()
 
 if(QT_QTGUI_LIBRARY AND QT_QTCORE_LIBRARY)
     add_component_qt_dir (contentselector
@@ -171,7 +174,7 @@ if (GIT_CHECKOUT)
 endif (GIT_CHECKOUT)
 
 if(MINGW)
-target_link_libraries(components ${QT_LIBRARIES})
+target_link_libraries(components ${QT_LIBRARIES} ${BULLET_LIBRARIES})
 endif()
 
 if (WIN32)
