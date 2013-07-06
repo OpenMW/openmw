@@ -129,6 +129,21 @@ CSMWorld::Data::Data() : mRefs (mCells)
     mCells.addColumn (new RegionColumn<Cell>);
 
     mRefs.addColumn (new RecordStateColumn<CellRef>);
+    mRefs.addColumn (new CellColumn<CellRef>);
+    mRefs.addColumn (new IdColumn<CellRef>);
+    mRefs.addColumn (new ScaleColumn<CellRef>);
+    mRefs.addColumn (new OwnerColumn<CellRef>);
+    mRefs.addColumn (new SoulColumn<CellRef>);
+    mRefs.addColumn (new FactionColumn<CellRef>);
+    mRefs.addColumn (new FactionIndexColumn<CellRef>);
+    mRefs.addColumn (new ChargesColumn<CellRef>);
+    mRefs.addColumn (new EnchantmentChargesColumn<CellRef>);
+    mRefs.addColumn (new GoldValueColumn<CellRef>);
+    mRefs.addColumn (new TeleportColumn<CellRef>);
+    mRefs.addColumn (new TeleportCellColumn<CellRef>);
+    mRefs.addColumn (new LockLevelColumn<CellRef>);
+    mRefs.addColumn (new KeyColumn<CellRef>);
+    mRefs.addColumn (new TrapColumn<CellRef>);
 
     addModel (new IdTable (&mGlobals), UniversalId::Type_Globals, UniversalId::Type_Global);
     addModel (new IdTable (&mGmsts), UniversalId::Type_Gmsts, UniversalId::Type_Gmst);
