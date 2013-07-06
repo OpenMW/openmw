@@ -462,6 +462,10 @@ void CharacterController::update(float duration, Movement &movement)
                 mAnimation->disable("torch");
         }
     }
+    else if (cls.getCreatureStats(mPtr).isDead())
+    {
+        MWBase::Environment::get().getWorld()->enableActorCollision(mPtr, false);
+    }
 
     if(mAnimation && !mSkipAnim)
     {
