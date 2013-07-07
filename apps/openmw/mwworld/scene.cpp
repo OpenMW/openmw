@@ -378,6 +378,7 @@ namespace MWWorld
             world->rotateObject(world->getPlayer().getPlayer(), x, y, z);
 
             MWWorld::Class::get(world->getPlayer().getPlayer()).adjustPosition(world->getPlayer().getPlayer());
+            world->getFader()->fadeIn(0.5f);
             return;
         }
 
