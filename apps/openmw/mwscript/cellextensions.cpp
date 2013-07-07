@@ -87,10 +87,21 @@ namespace MWScript
 
                 static bool findExteriorPosition(const std::string &name, ESM::Position &pos)
                 {
+                    pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
                     MWBase::World *world = MWBase::Environment::get().getWorld();
 
                     if (const ESM::Cell *ext = world->getExterior(name)) {
-                        world->indexToPosition(ext->mData.mX, ext->mData.mY, pos.pos[0], pos.pos[1], true);
+                        int x = ext->getGridX();
+                        int y = ext->getGridY();
+                        world->indexToPosition(x, y, pos.pos[0], pos.pos[1], true);
+
+                        ESM::Land* land =
+                            world->getStore().get<ESM::Land>().search(x, y);
+                        assert(land && "Correctly found exteriors must have land data");
+                        if (!land->isDataLoaded(ESM::Land::DATA_VHGT)) {
+                            land->loadData(ESM::Land::DATA_VHGT);
+                        }
+                        pos.pos[2] = land->mLandData->mHeights[ESM::Land::LAND_NUM_VERTS / 2 + 1];
 
                         return true;
                     }
