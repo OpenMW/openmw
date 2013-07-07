@@ -105,6 +105,12 @@ namespace SFO
             case SDL_WINDOWEVENT_FOCUS_LOST:
             case SDL_WINDOWEVENT_CLOSE:
                 break;
+            case SDL_WINDOWEVENT_SHOWN:
+                mOgreWindow->setVisible(true);
+                break;
+            case SDL_WINDOWEVENT_HIDDEN:
+                mOgreWindow->setVisible(false);
+                break;
         }
     }
 

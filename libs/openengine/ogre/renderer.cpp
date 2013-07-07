@@ -315,9 +315,7 @@ void OgreRenderer::createWindow(const std::string &title, const WindowSettings& 
         break;
 #else
     case SDL_SYSWM_X11:
-        winHandle = Ogre::StringConverter::toString((unsigned long)wmInfo.info.x11.display);
-        winHandle += ":0:";
-        winHandle += Ogre::StringConverter::toString((unsigned long)wmInfo.info.x11.window);
+        winHandle = Ogre::StringConverter::toString((unsigned long)wmInfo.info.x11.window);
         break;
 #endif
     default:
@@ -325,6 +323,8 @@ void OgreRenderer::createWindow(const std::string &title, const WindowSettings& 
         break;
     }
 
+    /// \todo externalWindowHandle is deprecated according to the source code. Figure out a way to get parentWindowHandle
+    /// to work properly. On Linux/X11 it causes an occasional GLXBadDrawable error.
     params.insert(std::make_pair("externalWindowHandle",  winHandle));
 
     mWindow = mRoot->createRenderWindow(title, settings.window_x, settings.window_y, settings.fullscreen, &params);
