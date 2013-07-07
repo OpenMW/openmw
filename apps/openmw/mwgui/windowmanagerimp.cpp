@@ -117,6 +117,7 @@ namespace MWGui
       , mTranslationDataStorage (translationDataStorage)
       , mCursorManager(NULL)
       , mUseHardwareCursors(Settings::Manager::getBool("hardware cursors", "GUI"))
+      , mCursorVisible(true)
     {
         // Set up the GUI system
         mGuiManager = new OEngine::GUI::MyGUIManager(mRendering->getWindow(), mRendering->getScene(), false, logpath);
