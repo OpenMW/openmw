@@ -432,19 +432,14 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     {
         // load cell
         ESM::Position pos;
-        pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
-        pos.pos[2] = 0;
+        MWBase::World *world = MWBase::Environment::get().getWorld();
 
-        if (const ESM::Cell *exterior = MWBase::Environment::get().getWorld()->getExterior (mCellName))
-        {
-            MWBase::Environment::get().getWorld()->indexToPosition (exterior->mData.mX, exterior->mData.mY,
-                pos.pos[0], pos.pos[1], true);
-            MWBase::Environment::get().getWorld()->changeToExteriorCell (pos);
+        if (world->findExteriorPosition(mCellName, pos)) {
+            world->changeToExteriorCell (pos);
         }
-        else
-        {
-            pos.pos[0] = pos.pos[1] = 0;
-            MWBase::Environment::get().getWorld()->changeToInteriorCell (mCellName, pos);
+        else {
+            world->findInteriorPosition(mCellName, pos);
+            world->changeToInteriorCell (mCellName, pos);
         }
     }
     else

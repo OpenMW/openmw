@@ -1745,4 +1745,80 @@ namespace MWWorld
             physicActor->disableCollisionBody();
         }
     }
+
+    bool World::findInteriorPosition(const std::string &name, ESM::Position &pos)
+    {
+        typedef MWWorld::CellRefList<ESM::Door>::List DoorList;
+
+        pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
+        pos.pos[0] = pos.pos[1] = pos.pos[2] = 0;
+
+        MWWorld::CellStore *cellStore = getInterior(name);
+
+        if (0 == cellStore) {
+            return false;
+        }
+        const DoorList &doors = cellStore->mDoors.mList;
+        for (DoorList::const_iterator it = doors.begin(); it != doors.end(); ++it) {
+            if (!it->mRef.mTeleport) {
+                continue;
+            }
+
+            MWWorld::CellStore *source = 0;
+
+            // door to exterior
+            if (it->mRef.mDestCell.empty()) {
+                int x, y;
+                const float *pos = it->mRef.mDoorDest.pos;
+                positionToIndex(pos[0], pos[1], x, y);
+                source = getExterior(x, y);
+            }
+            // door to interior
+            else {
+                source = getInterior(it->mRef.mDestCell);
+            }
+            if (0 != source) {
+                // Find door leading to our current teleport door
+                // and use it destination to position inside cell.
+                const DoorList &doors = source->mDoors.mList;
+                for (DoorList::const_iterator jt = doors.begin(); jt != doors.end(); ++jt) {
+                    if (it->mRef.mTeleport &&
+                        Misc::StringUtils::ciEqual(name, jt->mRef.mDestCell))
+                    {
+                        /// \note Using _any_ door pointed to the interior,
+                        /// not the one pointed to current door.
+                        pos = jt->mRef.mDoorDest;
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    bool World::findExteriorPosition(const std::string &name, ESM::Position &pos)
+    {
+        pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
+
+        if (const ESM::Cell *ext = getExterior(name)) {
+            int x = ext->getGridX();
+            int y = ext->getGridY();
+            indexToPosition(x, y, pos.pos[0], pos.pos[1], true);
+
+            ESM::Land* land = getStore().get<ESM::Land>().search(x, y);
+            if (land) {
+                if (!land->isDataLoaded(ESM::Land::DATA_VHGT)) {
+                    land->loadData(ESM::Land::DATA_VHGT);
+                }
+                pos.pos[2] = land->mLandData->mHeights[ESM::Land::LAND_NUM_VERTS / 2 + 1];
+            }
+            else {
+                std::cerr << "Land data for cell at (" << x << ", " << y << ") not found\n";
+                pos.pos[2] = 0;
+            }
+
+            return true;
+        }
+        return false;
+    }
 }

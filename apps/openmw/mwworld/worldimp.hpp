@@ -412,6 +412,14 @@ namespace MWWorld
             virtual void playVideo(const std::string& name, bool allowSkipping);
             virtual void stopVideo();
             virtual void frameStarted (float dt);
+
+            /// Find center of exterior cell above land surface
+            /// \return false if exterior with given name not exists, true otherwise
+            virtual bool findExteriorPosition(const std::string &name, ESM::Position &pos);
+
+            /// Find position in interior cell near door entrance
+            /// \return false if interior with given name not exists, true otherwise
+            virtual bool findInteriorPosition(const std::string &name, ESM::Position &pos);
     };
 }
 

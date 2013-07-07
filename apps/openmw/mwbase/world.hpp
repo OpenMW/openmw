@@ -363,6 +363,14 @@ namespace MWBase
             virtual void playVideo(const std::string& name, bool allowSkipping) = 0;
             virtual void stopVideo() = 0;
             virtual void frameStarted (float dt) = 0;
+
+            /// Find default position inside exterior cell specified by name
+            /// \return false if exterior with given name not exists, true otherwise
+            virtual bool findExteriorPosition(const std::string &name, ESM::Position &pos) = 0;
+
+            /// Find default position inside interior cell specified by name
+            /// \return false if interior with given name not exists, true otherwise
+            virtual bool findInteriorPosition(const std::string &name, ESM::Position &pos) = 0;
     };
 }
 
