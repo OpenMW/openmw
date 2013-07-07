@@ -343,7 +343,7 @@ namespace Compiler
             }
             else if (!(c=='"' && name.empty()))
             {
-                if (!(std::isalpha (c) || std::isdigit (c) || c=='_' ||
+                if (!(std::isalpha (c) || std::isdigit (c) || c=='_' || c=='`' ||
                     /// \todo add an option to disable the following hack. Also, find out who is
                     /// responsible for allowing it in the first place and meet up with that person in
                     /// a dark alley.
