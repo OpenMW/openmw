@@ -162,8 +162,6 @@ CSMWorld::Data::Data() : mRefs (mCells)
     addModel (new IdTable (&mReferenceables), UniversalId::Type_Referenceables,
         UniversalId::Type_Referenceable);
     addModel (new IdTable (&mRefs), UniversalId::Type_References, UniversalId::Type_Reference);
-
-    addModel (new RegionMap, UniversalId::Type_RegionMap, UniversalId::Type_None);
 }
 
 CSMWorld::Data::~Data()
@@ -307,7 +305,20 @@ QAbstractItemModel *CSMWorld::Data::getTableModel (const UniversalId& id)
     std::map<UniversalId::Type, QAbstractItemModel *>::iterator iter = mModelIndex.find (id.getType());
 
     if (iter==mModelIndex.end())
+    {
+        // try creating missing (secondary) tables on the fly
+        //
+        // Note: We create these tables here so we don't have to deal with them during load/initial
+        // construction of the ESX data where no update signals are available.
+        if (id.getType()==UniversalId::Type_RegionMap)
+        {
+            RegionMap *table = 0;
+            addModel (table = new RegionMap (*this), UniversalId::Type_RegionMap,
+                UniversalId::Type_None);
+            return table;
+        }
         throw std::logic_error ("No table model available for " + id.toString());
+    }
 
     return iter->second;
 }

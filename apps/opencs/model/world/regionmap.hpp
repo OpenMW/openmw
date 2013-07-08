@@ -8,11 +8,15 @@
 
 namespace CSMWorld
 {
+    class Data;
+
     /// \brief Model for the region map
     ///
     /// This class does not holds any record data (other than for the purpose of buffering).
     class RegionMap : public QAbstractTableModel
     {
+            Q_OBJECT
+
             std::map<std::pair<int, int>, std::string> mMap; ///< cell index, region
             std::pair<int, int> mMin; ///< inclusive
             std::pair<int, int> mMax; ///< exclusive
@@ -21,9 +25,13 @@ namespace CSMWorld
             std::pair<int, int> getIndex (const QModelIndex& index) const;
             ///< Translates a Qt model index into a cell index (which can contain negative components)
 
+            void buildRegions (Data& data);
+
+            void buildMap (Data& data);
+
         public:
 
-            RegionMap();
+            RegionMap (Data& data);
 
             virtual int rowCount (const QModelIndex& parent = QModelIndex()) const;
 
@@ -32,6 +40,20 @@ namespace CSMWorld
             virtual QVariant data (const QModelIndex& index, int role = Qt::DisplayRole) const;
 
             virtual Qt::ItemFlags flags (const QModelIndex& index) const;
+
+        private slots:
+
+            void regionsAboutToBeRemoved (const QModelIndex& parent, int start, int end);
+
+            void regionsInserted (const QModelIndex& parent, int start, int end);
+
+            void regionsChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
+
+            void cellsAboutToBeRemoved (const QModelIndex& parent, int start, int end);
+
+            void cellsInserted (const QModelIndex& parent, int start, int end);
+
+            void cellsChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
     };
 }
 
