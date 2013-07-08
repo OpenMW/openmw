@@ -11,6 +11,7 @@
 
 #include "idtable.hpp"
 #include "columns.hpp"
+#include "regionmap.hpp"
 
 void CSMWorld::Data::addModel (QAbstractItemModel *model, UniversalId::Type type1,
     UniversalId::Type type2)
@@ -161,6 +162,8 @@ CSMWorld::Data::Data() : mRefs (mCells)
     addModel (new IdTable (&mReferenceables), UniversalId::Type_Referenceables,
         UniversalId::Type_Referenceable);
     addModel (new IdTable (&mRefs), UniversalId::Type_References, UniversalId::Type_Reference);
+
+    addModel (new RegionMap, UniversalId::Type_RegionMap, UniversalId::Type_None);
 }
 
 CSMWorld::Data::~Data()

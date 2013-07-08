@@ -18,7 +18,7 @@ opencs_hdrs_noqt (model/doc
 
 
 opencs_units (model/world
-    idtable idtableproxymodel
+    idtable idtableproxymodel regionmap
     )
 
 
@@ -57,7 +57,7 @@ opencs_hdrs_noqt (view/doc
 
 
 opencs_units (view/world
-    table tablesubview scriptsubview util
+    table tablesubview scriptsubview util regionmapsubview
     )
 
 opencs_units_noqt (view/world
