@@ -130,6 +130,11 @@ QVariant CSMWorld::RegionMap::data (const QModelIndex& index, int role) const
                 return QBrush (
                     QColor (iter->second>>24, (iter->second>>16) & 255, (iter->second>>8) & 255,
                     iter->second & 255));
+
+            if (cell->second.empty())
+                return QBrush (Qt::Dense6Pattern); // no region
+
+            return QBrush (Qt::red, Qt::Dense6Pattern);
         }
 
         return QBrush (Qt::DiagCrossPattern);
