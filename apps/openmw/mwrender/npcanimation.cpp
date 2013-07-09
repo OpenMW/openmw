@@ -283,29 +283,30 @@ void NpcAnimation::updateParts(bool forceupdate)
     std::pair<std::string, int> thisCombination = std::make_pair(race, flags);
     if (sRaceMapping.find(thisCombination) == sRaceMapping.end())
     {
-        static std::map<int, int> bodypartMap;
-        if(bodypartMap.size() == 0)
+        typedef std::multimap<ESM::BodyPart::MeshPart,ESM::PartReferenceType> BodyPartMapType;
+        static BodyPartMapType sBodyPartMap;
+        if(sBodyPartMap.size() == 0)
         {
-            bodypartMap[ESM::PRT_Neck] = ESM::BodyPart::MP_Neck;
-            bodypartMap[ESM::PRT_Cuirass] = ESM::BodyPart::MP_Chest;
-            bodypartMap[ESM::PRT_Groin] = ESM::BodyPart::MP_Groin;
-            bodypartMap[ESM::PRT_RHand] = ESM::BodyPart::MP_Hand;
-            bodypartMap[ESM::PRT_LHand] = ESM::BodyPart::MP_Hand;
-            bodypartMap[ESM::PRT_RWrist] = ESM::BodyPart::MP_Wrist;
-            bodypartMap[ESM::PRT_LWrist] = ESM::BodyPart::MP_Wrist;
-            bodypartMap[ESM::PRT_RForearm] = ESM::BodyPart::MP_Forearm;
-            bodypartMap[ESM::PRT_LForearm] = ESM::BodyPart::MP_Forearm;
-            bodypartMap[ESM::PRT_RUpperarm] = ESM::BodyPart::MP_Upperarm;
-            bodypartMap[ESM::PRT_LUpperarm] = ESM::BodyPart::MP_Upperarm;
-            bodypartMap[ESM::PRT_RFoot] = ESM::BodyPart::MP_Foot;
-            bodypartMap[ESM::PRT_LFoot] = ESM::BodyPart::MP_Foot;
-            bodypartMap[ESM::PRT_RAnkle] = ESM::BodyPart::MP_Ankle;
-            bodypartMap[ESM::PRT_LAnkle] = ESM::BodyPart::MP_Ankle;
-            bodypartMap[ESM::PRT_RKnee] = ESM::BodyPart::MP_Knee;
-            bodypartMap[ESM::PRT_LKnee] = ESM::BodyPart::MP_Knee;
-            bodypartMap[ESM::PRT_RLeg] = ESM::BodyPart::MP_Upperleg;
-            bodypartMap[ESM::PRT_LLeg] = ESM::BodyPart::MP_Upperleg;
-            bodypartMap[ESM::PRT_Tail] = ESM::BodyPart::MP_Tail;
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Neck, ESM::PRT_Neck));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Chest, ESM::PRT_Cuirass));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Groin, ESM::PRT_Groin));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Hand, ESM::PRT_RHand));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Hand, ESM::PRT_LHand));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Wrist, ESM::PRT_RWrist));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Wrist, ESM::PRT_LWrist));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Forearm, ESM::PRT_RForearm));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Forearm, ESM::PRT_LForearm));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Upperarm, ESM::PRT_RUpperarm));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Upperarm, ESM::PRT_LUpperarm));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Foot, ESM::PRT_RFoot));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Foot, ESM::PRT_LFoot));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Ankle, ESM::PRT_RAnkle));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Ankle, ESM::PRT_LAnkle));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Knee, ESM::PRT_RKnee));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Knee, ESM::PRT_LKnee));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Upperleg, ESM::PRT_RLeg));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Upperleg, ESM::PRT_LLeg));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Tail, ESM::PRT_Tail));
         }
 
         std::vector<const ESM::BodyPart*> &parts = sRaceMapping[thisCombination];
@@ -337,20 +338,22 @@ void NpcAnimation::updateParts(bool forceupdate)
                                                    bodypart.mData.mPart == ESM::BodyPart::MP_Forearm))
                 {
                     /* Allow 3rd person skins as a fallback for the forearms if 1st person is missing. */
-                    for(std::map<int,int>::iterator bIt = bodypartMap.begin();bIt != bodypartMap.end();++bIt)
+                    BodyPartMapType::const_iterator bIt = sBodyPartMap.lower_bound(BodyPartMapType::key_type(bodypart.mData.mPart));
+                    while(bIt != sBodyPartMap.end() && bIt->first == bodypart.mData.mPart)
                     {
-                        if(bIt->second == bodypart.mData.mPart)
-                        {
-                            if(!parts[bIt->first])
-                                parts[bIt->first] = &*it;
-                        }
+                        if(!parts[bIt->second])
+                            parts[bIt->second] = &*it;
+                        bIt++;
                     }
                 }
                 continue;
             }
-            for(std::map<int,int>::iterator bIt = bodypartMap.begin();bIt != bodypartMap.end();++bIt)
-                if(bIt->second == bodypart.mData.mPart)
-                    parts[bIt->first] = &*it;
+            BodyPartMapType::const_iterator bIt = sBodyPartMap.lower_bound(BodyPartMapType::key_type(bodypart.mData.mPart));
+            while(bIt != sBodyPartMap.end() && bIt->first == bodypart.mData.mPart)
+            {
+                parts[bIt->second] = &*it;
+                bIt++;
+            }
         }
     }
 
