@@ -98,17 +98,22 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
     Misc::StringUtils::toLower(mBodyPrefix);
 
     bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
-    std::string smodel = (!isBeast ? "meshes\\base_anim.nif" : "meshes\\base_animkna.nif");
+    std::string smodel = (viewMode != VM_FirstPerson) ?
+                         (!isBeast ? "meshes\\base_anim.nif"     : "meshes\\base_animkna.nif") :
+                         (!isBeast ? "meshes\\base_anim.1st.nif" : "meshes\\base_animkna.1st.nif") ;
     setObjectRoot(node, smodel, true);
 
-    addAnimSource(smodel);
-    if(mBodyPrefix.find("argonian") != std::string::npos)
-        addAnimSource("meshes\\argonian_swimkna.nif");
-    else if(!mNpc->isMale() && !isBeast)
-        addAnimSource("meshes\\base_anim_female.nif");
-    if(mNpc->mModel.length() > 0)
-        addAnimSource("meshes\\"+mNpc->mModel);
-    if(mViewMode == VM_FirstPerson)
+    if(mViewMode != VM_FirstPerson)
+    {
+        addAnimSource(smodel);
+        if(mBodyPrefix.find("argonian") != std::string::npos)
+            addAnimSource("meshes\\argonian_swimkna.nif");
+        else if(!mNpc->isMale() && !isBeast)
+            addAnimSource("meshes\\base_anim_female.nif");
+        if(mNpc->mModel.length() > 0)
+            addAnimSource("meshes\\"+mNpc->mModel);
+    }
+    else
     {
         /* A bit counter-intuitive, but unlike third-person anims, it seems
          * beast races get both base_anim.1st.nif and base_animkna.1st.nif.
@@ -128,20 +133,28 @@ void NpcAnimation::setViewMode(NpcAnimation::ViewMode viewMode)
     assert(viewMode != VM_HeadOnly);
     mViewMode = viewMode;
 
+    clearAnimSources();
+
     const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
     const ESM::Race *race = store.get<ESM::Race>().find(mNpc->mRace);
-    bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
-    std::string smodel = (!isBeast ? "meshes\\base_anim.nif" : "meshes\\base_animkna.nif");
 
-    clearAnimSources();
-    addAnimSource(smodel);
-    if(mBodyPrefix.find("argonian") != std::string::npos)
-        addAnimSource("meshes\\argonian_swimkna.nif");
-    else if(!mNpc->isMale() && !isBeast)
-        addAnimSource("meshes\\base_anim_female.nif");
-    if(mNpc->mModel.length() > 0)
-        addAnimSource("meshes\\"+mNpc->mModel);
-    if(mViewMode == VM_FirstPerson)
+    bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
+    std::string smodel = (viewMode != VM_FirstPerson) ?
+                         (!isBeast ? "meshes\\base_anim.nif"     : "meshes\\base_animkna.nif") :
+                         (!isBeast ? "meshes\\base_anim.1st.nif" : "meshes\\base_animkna.1st.nif") ;
+    setObjectRoot(mInsert->getParentSceneNode(), smodel, true);
+
+    if(mViewMode != VM_FirstPerson)
+    {
+        addAnimSource(smodel);
+        if(mBodyPrefix.find("argonian") != std::string::npos)
+            addAnimSource("meshes\\argonian_swimkna.nif");
+        else if(!mNpc->isMale() && !isBeast)
+            addAnimSource("meshes\\base_anim_female.nif");
+        if(mNpc->mModel.length() > 0)
+            addAnimSource("meshes\\"+mNpc->mModel);
+    }
+    else
     {
         /* A bit counter-intuitive, but unlike third-person anims, it seems
          * beast races get both base_anim.1st.nif and base_animkna.1st.nif.
@@ -207,9 +220,9 @@ void NpcAnimation::updateParts(bool forceupdate)
 
     for(size_t i = 0;i < slotlistsize && mViewMode != VM_HeadOnly;i++)
     {
-        MWWorld::ContainerStoreIterator iter = inv.getSlot(slotlist[i].mSlot);
+        MWWorld::ContainerStoreIterator store = inv.getSlot(slotlist[i].mSlot);
 
-        this->*slotlist[i].mPart = iter;
+        this->*slotlist[i].mPart = store;
         removePartGroup(slotlist[i].mSlot);
 
         if(this->*slotlist[i].mPart == inv.end())
@@ -219,7 +232,6 @@ void NpcAnimation::updateParts(bool forceupdate)
             removeIndividualPart(ESM::PRT_Hair);
 
         int prio = 1;
-        MWWorld::ContainerStoreIterator &store = this->*slotlist[i].mPart;
         if(store->getTypeName() == typeid(ESM::Clothing).name())
         {
             prio = ((slotlist[i].mBasePriority+1)<<1) + 0;

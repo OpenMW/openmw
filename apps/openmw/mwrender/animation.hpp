@@ -131,7 +131,18 @@ protected:
 
     bool handleTextKey(AnimState &state, const std::string &groupname, const NifOgre::TextKeyMap::const_iterator &key);
 
+    /* Sets the root model of the object. If 'baseonly' is true, then any meshes or particle
+     * systems in the model are ignored (useful for NPCs, where only the skeleton is needed for
+     * the root).
+     *
+     * Note that you must make sure all animation sources are cleared before reseting the object
+     * root. All nodes previously retrieved with getNode will also become invalidated.
+     */
     void setObjectRoot(Ogre::SceneNode *node, const std::string &model, bool baseonly);
+
+    /* Adds the keyframe controllers in the specified model as a new animation source. Note that
+     * the filename portion of the provided model name will be prepended with 'x', and the .nif
+     * extension will be replaced with .kf. */
     void addAnimSource(const std::string &model);
 
     static void destroyObjectList(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList &objects);

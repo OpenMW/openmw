@@ -72,8 +72,9 @@ Animation::~Animation()
 
 void Animation::setObjectRoot(Ogre::SceneNode *node, const std::string &model, bool baseonly)
 {
-    OgreAssert(!mInsert, "Object already has a root!");
-    mInsert = node->createChildSceneNode();
+    OgreAssert(mAnimSources.size() != 0, "Setting object root while animation sources are set!");
+    if(!mInsert)
+        mInsert = node->createChildSceneNode();
 
     std::string mdlname = Misc::StringUtils::lowerCase(model);
     std::string::size_type p = mdlname.rfind('\\');
@@ -88,6 +89,9 @@ void Animation::setObjectRoot(Ogre::SceneNode *node, const std::string &model, b
         mdlname = model;
         Misc::StringUtils::toLower(mdlname);
     }
+
+    mSkelBase = NULL;
+    destroyObjectList(mInsert->getCreator(), mObjectRoot);
 
     mObjectRoot = (!baseonly ? NifOgre::Loader::createObjects(mInsert, mdlname) :
                                NifOgre::Loader::createObjectBase(mInsert, mdlname));
