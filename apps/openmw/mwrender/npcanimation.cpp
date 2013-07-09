@@ -210,14 +210,6 @@ void NpcAnimation::updateParts(bool forceupdate)
     if(!forceupdate)
         return;
 
-    /* FIXME: Remove this once we figure out how to show what in first-person */
-    if(mViewMode == VM_FirstPerson)
-    {
-        for(size_t i = 0;i < slotlistsize;i++)
-            this->*slotlist[i].mPart = inv.getSlot(slotlist[i].mSlot);
-        return;
-    }
-
     for(size_t i = 0;i < slotlistsize && mViewMode != VM_HeadOnly;i++)
     {
         MWWorld::ContainerStoreIterator store = inv.getSlot(slotlist[i].mSlot);
@@ -316,7 +308,8 @@ void NpcAnimation::updateParts(bool forceupdate)
             bodypartMap[ESM::PRT_Tail] = ESM::BodyPart::MP_Tail;
         }
 
-        sRaceMapping[thisCombination].resize(ESM::PRT_Count, NULL);
+        std::vector<const ESM::BodyPart*> &parts = sRaceMapping[thisCombination];
+        parts.resize(ESM::PRT_Count, NULL);
 
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
         const MWWorld::Store<ESM::BodyPart> &partStore = store.get<ESM::BodyPart>();
@@ -337,11 +330,27 @@ void NpcAnimation::updateParts(bool forceupdate)
                     && bodypart.mId[bodypart.mId.size()-3] == '1'
                     && bodypart.mId[bodypart.mId.size()-2] == 's'
                     && bodypart.mId[bodypart.mId.size()-1] == 't';
-            if (firstPerson != (mViewMode == VM_FirstPerson))
+            if(firstPerson != (mViewMode == VM_FirstPerson))
+            {
+                if(mViewMode == VM_FirstPerson && (bodypart.mData.mPart == ESM::BodyPart::MP_Hand ||
+                                                   bodypart.mData.mPart == ESM::BodyPart::MP_Wrist ||
+                                                   bodypart.mData.mPart == ESM::BodyPart::MP_Forearm))
+                {
+                    /* Allow 3rd person skins as a fallback for the forearms if 1st person is missing. */
+                    for(std::map<int,int>::iterator bIt = bodypartMap.begin();bIt != bodypartMap.end();++bIt)
+                    {
+                        if(bIt->second == bodypart.mData.mPart)
+                        {
+                            if(!parts[bIt->first])
+                                parts[bIt->first] = &*it;
+                        }
+                    }
+                }
                 continue;
-            for (std::map<int, int>::iterator bIt = bodypartMap.begin(); bIt != bodypartMap.end(); ++bIt )
-                if (bIt->second == bodypart.mData.mPart)
-                    sRaceMapping[thisCombination][bIt->first] = &*it;
+            }
+            for(std::map<int,int>::iterator bIt = bodypartMap.begin();bIt != bodypartMap.end();++bIt)
+                if(bIt->second == bodypart.mData.mPart)
+                    parts[bIt->first] = &*it;
         }
     }
 
@@ -484,8 +493,7 @@ void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::
 void NpcAnimation::showWeapons(bool showWeapon)
 {
     mShowWeapons = showWeapon;
-    if(showWeapon &&
-       mViewMode != VM_FirstPerson/* FIXME: Remove this once first-person bodies work */)
+    if(showWeapon)
     {
         MWWorld::InventoryStore &inv = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
         mWeapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
