@@ -3,6 +3,8 @@
 
 #include <QBrush>
 
+#include <components/misc/stringops.hpp>
+
 #include "data.hpp"
 #include "universalid.hpp"
 
@@ -24,7 +26,8 @@ void CSMWorld::RegionMap::buildRegions (Data& data)
         const Record<ESM::Region>& region = regions.getRecord (i);
 
         if (!region.isDeleted())
-            mColours.insert (std::make_pair (region.get().mId, region.get().mMapColor));
+            mColours.insert (std::make_pair (Misc::StringUtils::lowerCase (region.get().mId),
+                region.get().mMapColor));
     }
 }
 
@@ -134,7 +137,7 @@ QVariant CSMWorld::RegionMap::data (const QModelIndex& index, int role) const
                 return QBrush (Qt::red, Qt::DiagCrossPattern);
 
             std::map<std::string, unsigned int>::const_iterator iter =
-                mColours.find (cell->second.mRegion);
+                mColours.find (Misc::StringUtils::lowerCase (cell->second.mRegion));
 
             if (iter!=mColours.end())
                 return QBrush (
