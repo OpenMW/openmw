@@ -17,12 +17,26 @@ namespace CSMWorld
     {
             Q_OBJECT
 
-            std::map<std::pair<int, int>, std::string> mMap; ///< cell index, region
-            std::pair<int, int> mMin; ///< inclusive
-            std::pair<int, int> mMax; ///< exclusive
+        public:
+
+            typedef std::pair<int, int> CellIndex;
+
+        private:
+
+            struct CellDescription
+            {
+                bool mDeleted;
+                std::string mRegion;
+
+                CellDescription();
+            };
+
+            std::map<CellIndex, CellDescription> mMap;
+            CellIndex mMin; ///< inclusive
+            CellIndex mMax; ///< exclusive
             std::map<std::string, unsigned int> mColours; ///< region ID, colour (RGBA)
 
-            std::pair<int, int> getIndex (const QModelIndex& index) const;
+            CellIndex getIndex (const QModelIndex& index) const;
             ///< Translates a Qt model index into a cell index (which can contain negative components)
 
             void buildRegions (Data& data);

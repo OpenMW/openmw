@@ -6,9 +6,11 @@
 #include "data.hpp"
 #include "universalid.hpp"
 
+CSMWorld::RegionMap::CellDescription::CellDescription() : mDeleted (false) {}
+
 std::pair<int, int> CSMWorld::RegionMap::getIndex (const QModelIndex& index) const
 {
-    return std::make_pair (index.column()+mMin.first, index.row()+mMin.second);
+    return CellIndex (index.column()+mMin.first, index.row()+mMin.second);
 }
 
 void CSMWorld::RegionMap::buildRegions (Data& data)
@@ -38,34 +40,38 @@ void CSMWorld::RegionMap::buildMap (Data& data)
     {
         const Record<Cell>& cell = cells.getRecord (i);
 
-        if (!cell.isDeleted())
+        const Cell& cell2 = cell.get();
+
+        if (cell2.isExterior())
         {
-            const Cell& cell2 = cell.get();
+            CellDescription description;
 
-            if (cell2.isExterior())
+            if (cell.isDeleted())
+                description.mDeleted = true;
+            else
+                description.mRegion = cell2.mRegion;
+
+            CellIndex index (cell2.mData.mX, cell2.mData.mY);
+
+            if (mMap.empty())
             {
-                std::pair<int, int> index (cell2.mData.mX, cell2.mData.mY);
-
-                if (mMap.empty())
-                {
-                    mMin = index;
-                    mMax = std::make_pair (mMin.first+1, mMin.second+1);
-                }
-                else
-                {
-                    if (index.first<mMin.first)
-                        mMin.first = index.first;
-                    else if (index.first>=mMax.first)
-                        mMax.first = index.first + 1;
-
-                    if (index.second<mMin.second)
-                        mMin.second = index.second;
-                    else if (index.second>=mMax.second)
-                        mMax.second = index.second + 1;
-                }
-
-                mMap.insert (std::make_pair (index, cell2.mRegion));
+                mMin = index;
+                mMax = std::make_pair (mMin.first+1, mMin.second+1);
             }
+            else
+            {
+                if (index.first<mMin.first)
+                    mMin.first = index.first;
+                else if (index.first>=mMax.first)
+                    mMax.first = index.first + 1;
+
+                if (index.second<mMin.second)
+                    mMin.second = index.second;
+                else if (index.second>=mMax.second)
+                    mMax.second = index.second + 1;
+            }
+
+            mMap.insert (std::make_pair (index, description));
         }
     }
 }
@@ -119,22 +125,26 @@ QVariant CSMWorld::RegionMap::data (const QModelIndex& index, int role) const
     {
         /// \todo GUI class in non-GUI code. Needs to be addressed eventually.
 
-        std::map<std::pair<int, int>, std::string>::const_iterator cell =
+        std::map<CellIndex, CellDescription>::const_iterator cell =
             mMap.find (getIndex (index));
 
         if (cell!=mMap.end())
         {
-            std::map<std::string, unsigned int>::const_iterator iter = mColours.find (cell->second);
+            if (cell->second.mDeleted)
+                return QBrush (Qt::red, Qt::DiagCrossPattern);
+
+            std::map<std::string, unsigned int>::const_iterator iter =
+                mColours.find (cell->second.mRegion);
 
             if (iter!=mColours.end())
                 return QBrush (
                     QColor (iter->second>>24, (iter->second>>16) & 255, (iter->second>>8) & 255,
                     iter->second & 255));
 
-            if (cell->second.empty())
+            if (cell->second.mRegion.empty())
                 return QBrush (Qt::Dense6Pattern); // no region
 
-            return QBrush (Qt::red, Qt::Dense6Pattern);
+            return QBrush (Qt::red, Qt::Dense6Pattern); // invalid region
         }
 
         return QBrush (Qt::DiagCrossPattern);
