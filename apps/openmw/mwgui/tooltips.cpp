@@ -102,17 +102,8 @@ namespace MWGui
                 else
                     tooltipSize = getToolTipViaPtr(true);
 
-                MyGUI::IntPoint tooltipPosition = MyGUI::InputManager::getInstance().getMousePosition() + MyGUI::IntPoint(0, 24);
-
-                // make the tooltip stay completely in the viewport
-                if ((tooltipPosition.left + tooltipSize.width) > viewSize.width)
-                {
-                    tooltipPosition.left = viewSize.width - tooltipSize.width;
-                }
-                if ((tooltipPosition.top + tooltipSize.height) > viewSize.height)
-                {
-                    tooltipPosition.top = viewSize.height - tooltipSize.height;
-                }
+                MyGUI::IntPoint tooltipPosition = MyGUI::InputManager::getInstance().getMousePosition();
+                position(tooltipPosition, tooltipSize, viewSize);
 
                 setCoord(tooltipPosition.left, tooltipPosition.top, tooltipSize.width, tooltipSize.height);
             }
@@ -267,17 +258,9 @@ namespace MWGui
                 else
                     throw std::runtime_error ("unknown tooltip type");
 
-                MyGUI::IntPoint tooltipPosition = MyGUI::InputManager::getInstance().getMousePosition() + MyGUI::IntPoint(0, 24);
+                MyGUI::IntPoint tooltipPosition = MyGUI::InputManager::getInstance().getMousePosition();
 
-                // make the tooltip stay completely in the viewport
-                if ((tooltipPosition.left + tooltipSize.width) > viewSize.width)
-                {
-                    tooltipPosition.left = viewSize.width - tooltipSize.width;
-                }
-                if ((tooltipPosition.top + tooltipSize.height) > viewSize.height)
-                {
-                    tooltipPosition.top = viewSize.height - tooltipSize.height;
-                }
+                position(tooltipPosition, tooltipSize, viewSize);
 
                 setCoord(tooltipPosition.left, tooltipPosition.top, tooltipSize.width, tooltipSize.height);
             }
@@ -295,6 +278,21 @@ namespace MWGui
 
                 mDynamicToolTipBox->setVisible(true);
             }
+        }
+    }
+
+    void ToolTips::position(MyGUI::IntPoint& position, MyGUI::IntSize size, MyGUI::IntSize viewportSize)
+    {
+        position += MyGUI::IntPoint(0, 32)
+        - MyGUI::IntPoint((MyGUI::InputManager::getInstance().getMousePosition().left / float(viewportSize.width) * size.width), 0);
+
+        if ((position.left + size.width) > viewportSize.width)
+        {
+            position.left = viewportSize.width - size.width;
+        }
+        if ((position.top + size.height) > viewportSize.height)
+        {
+            position.top = MyGUI::InputManager::getInstance().getMousePosition().top - size.height - 8;
         }
     }
 
@@ -412,12 +410,6 @@ namespace MWGui
                 MyGUI::Align::Stretch, "ToolTipEffectArea");
 
             MyGUI::IntCoord coord(0, 6, totalSize.width, 24);
-
-            /**
-             * \todo
-             * the various potion effects should appear in the tooltip depending if the player
-             * has enough skill in alchemy to know about the effects of this potion.
-             */
 
             Widgets::MWEffectListPtr effectsWidget = effectArea->createWidget<Widgets::MWEffectList>
                 ("MW_StatName", coord, MyGUI::Align::Default, "ToolTipEffectsWidget");

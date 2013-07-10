@@ -92,6 +92,9 @@ namespace MWGui
         float mFocusToolTipX;
         float mFocusToolTipY;
 
+        /// Adjust position for a tooltip so that it doesn't leave the screen and does not obscure the mouse cursor
+        void position(MyGUI::IntPoint& position, MyGUI::IntSize size, MyGUI::IntSize viewportSize);
+
 	int mHorizontalScrollIndex;
 
 
