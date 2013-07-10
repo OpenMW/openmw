@@ -371,7 +371,12 @@ NifOgre::ObjectList NpcAnimation::insertBoundedPart(const std::string &model, in
     setRenderProperties(objects, mVisibilityFlags, RQG_Main, RQG_Alpha);
 
     for(size_t i = 0;i < objects.mEntities.size();i++)
-        objects.mEntities[i]->getUserObjectBindings().setUserAny(Ogre::Any(group));
+    {
+        Ogre::Entity *ent = objects.mEntities[i];
+        ent->getUserObjectBindings().setUserAny(Ogre::Any(group));
+        if(mViewMode == VM_FirstPerson)
+            ent->setCastShadows(false);
+    }
     for(size_t i = 0;i < objects.mParticles.size();i++)
         objects.mParticles[i]->getUserObjectBindings().setUserAny(Ogre::Any(group));
 
