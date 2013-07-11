@@ -3,6 +3,7 @@
 
 #include <map>
 #include <string>
+#include <vector>
 
 #include <QAbstractTableModel>
 
@@ -31,6 +32,7 @@ namespace CSMWorld
                 CellDescription();
             };
 
+            Data& mData;
             std::map<CellIndex, CellDescription> mMap;
             CellIndex mMin; ///< inclusive
             CellIndex mMax; ///< exclusive
@@ -39,9 +41,38 @@ namespace CSMWorld
             CellIndex getIndex (const QModelIndex& index) const;
             ///< Translates a Qt model index into a cell index (which can contain negative components)
 
-            void buildRegions (Data& data);
+            QModelIndex getIndex (const CellIndex& index) const;
 
-            void buildMap (Data& data);
+            void buildRegions();
+
+            void buildMap();
+
+            void addCell (const CellIndex& index, const CellDescription& description);
+            ///< May be called on a cell that is already in the map (in which case an update is
+            // performed)
+
+            void addCells (int start, int end);
+
+            void removeCell (const CellIndex& index);
+            ///< May be called on a cell that is not in the map (in which case the call is ignored)
+
+            void addRegion (const std::string& region, unsigned int colour);
+            ///< May be called on a region that is already listed (in which case an update is
+            /// performed)
+            ///
+            /// \note This function does not update the region map.
+
+            void removeRegion (const std::string& region);
+            ///< May be called on a region that is not listed (in which case the call is ignored)
+            ///
+            /// \note This function does not update the region map.
+
+            void updateRegions (const std::vector<std::string>& regions);
+            ///< Update cells affected by the listed regions
+
+            void updateSize();
+
+            std::pair<CellIndex, CellIndex> getSize() const;
 
         public:
 
