@@ -22,6 +22,8 @@ CSVSettings::GroupBlockDef *CSVSettings::DataDisplayFormatPage::setupDataDisplay
 
     statusBlock->settingItems << statusItem;
 
+    statusBlock->isZeroMargin = false;
+
     return statusBlock;
 }
 

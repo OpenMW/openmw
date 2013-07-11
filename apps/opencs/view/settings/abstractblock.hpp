@@ -43,7 +43,7 @@ namespace CSVSettings
 
     protected:
 
-        /// Creates the layout which for the blocks QGroupBox
+        /// Creates the layout for the block's QGroupBox
         QLayout *createLayout (Orientation direction, bool isZeroMargin, QWidget* parent = 0);
 
         /// Creates widgets that exist as direct children of the block

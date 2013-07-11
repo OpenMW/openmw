@@ -19,7 +19,7 @@ int CSVSettings::GroupBlock::build (GroupBlockDef *def)
 
     setVisible (def->isVisible);
 
-    mBox->setLayout(createLayout (def->widgetOrientation, true));
+    mBox->setLayout(createLayout (def->widgetOrientation, def->isZeroMargin));
 
     setObjectName (def->title);
     mBox->setTitle (def->title);

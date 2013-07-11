@@ -24,7 +24,7 @@ void CSVWorld::RecordStatusDelegate::updateEditorSetting (const QString &setting
             mDisplayMode = Mode_IconAndText;
 
         else if (settingValue == "Icon Only")
-            mDoisplayMode = Mode_IconOnly;
+            mDisplayMode = Mode_IconOnly;
 
         else if (settingValue == "Text Only")
             mDisplayMode = Mode_TextOnly;

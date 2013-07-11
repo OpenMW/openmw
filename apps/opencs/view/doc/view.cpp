@@ -391,10 +391,11 @@ void CSVDoc::View::resizeViewHeight (int height)
 
 void CSVDoc::View::updateEditorSetting (const QString &settingName, const QString &settingValue)
 {
-    if ( (settingName == "Record Status Display") || (settingName == "Referenceable ID Type Display")
+    if ( (settingName == "Record Status Display") || (settingName == "Referenceable ID Type Display") )
     {
         foreach (QObject *view, mSubViewWindow.children())
         {
+         // not all mSubviewWindow children are CSVDoc::Subview objects
          CSVDoc::SubView *subview = dynamic_cast<CSVDoc::SubView *>(view);
 
          if (subview)

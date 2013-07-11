@@ -56,8 +56,8 @@ void CSVSettings::UserSettingsDialog::setWidgetStates ()
         if (sectionSettings.find(pageName) != sectionSettings.end())
         {
             CSMSettings::SettingMap *settings = sectionSettings.value(pageName);
-            AbstractPage *page = getAbstractPage (i);
-            page->initializeWidgets(*settings);
+            AbstractPage &page = getAbstractPage (i);
+            page.initializeWidgets(*settings);
         }
     }
 }
@@ -96,16 +96,15 @@ void CSVSettings::UserSettingsDialog::writeSettings()
 
     for (int i = 0; i < mStackedWidget->count(); ++i)
     {
-        AbstractPage *page = getAbstractPage (i);
-        settings [page->objectName()] = page->getSettings();
+        AbstractPage &page = getAbstractPage (i);
+        settings [page.objectName()] = page.getSettings();
     }
     CSMSettings::UserSettings::instance().writeSettings(settings);
 }
 
-CSVSettings::AbstractPage *CSVSettings::UserSettingsDialog::getAbstractPage (int index)
+CSVSettings::AbstractPage &CSVSettings::UserSettingsDialog::getAbstractPage (int index)
 {
-    AbstractPage *page = dynamic_cast<AbstractPage *> (mStackedWidget->widget (index));
-    return page;
+    return dynamic_cast<AbstractPage &> (*(mStackedWidget->widget (index)));
 }
 
 void CSVSettings::UserSettingsDialog::slotChangePage(QListWidgetItem *current, QListWidgetItem *previous)

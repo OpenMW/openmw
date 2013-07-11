@@ -19,7 +19,7 @@ void CSVSettings::AbstractWidget::buildLabelAndWidget (QWidget *widget, WidgetDe
 
     if (!(def.caption.isEmpty() || noLabel) )
     {
-        QLabel *label = new QLabel (def.caption, dynamic_cast<QWidget*>(parent()));
+        QLabel *label = new QLabel (def.caption, &dynamic_cast<QWidget &>( *parent()));
         label->setBuddy (widget);
         mLayout->addWidget (label);
 
