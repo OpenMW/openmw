@@ -12,7 +12,7 @@
 
 #include <QGridLayout>
 
-#include "editorpage.hpp"
+#include "datadisplayformatpage.hpp"
 #include "windowpage.hpp"
 
 #include "../../model/settings/support.hpp"
@@ -86,7 +86,7 @@ void CSVSettings::UserSettingsDialog::buildPages()
     setDockOptions (QMainWindow::AllowNestedDocks);
 
     createPage<WindowPage>();
-    createPage<EditorPage>();
+    createPage<DataDisplayFormatPage>();
 
 }
 
@@ -104,7 +104,8 @@ void CSVSettings::UserSettingsDialog::writeSettings()
 
 CSVSettings::AbstractPage *CSVSettings::UserSettingsDialog::getAbstractPage (int index)
 {
-    return dynamic_cast<AbstractPage *>(mStackedWidget->widget(index));
+    AbstractPage *page = dynamic_cast<AbstractPage *> (mStackedWidget->widget (index));
+    return page;
 }
 
 void CSVSettings::UserSettingsDialog::slotChangePage(QListWidgetItem *current, QListWidgetItem *previous)

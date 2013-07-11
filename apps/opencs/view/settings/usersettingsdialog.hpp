@@ -9,8 +9,6 @@
 #include "../../model/settings/usersettings.hpp"
 #include "../../model/settings/support.hpp"
 
-#include "editorpage.hpp"
-
 class QHBoxLayout;
 class AbstractWidget;
 class QStackedWidget;

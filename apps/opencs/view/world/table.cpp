@@ -13,7 +13,7 @@
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/record.hpp"
 #include "recordstatusdelegate.hpp"
-
+#include "refidtypedelegate.hpp"
 #include "util.hpp"
 
 void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
@@ -209,7 +209,23 @@ void CSVWorld::Table::updateEditorSetting (const QString &settingName, const QSt
 {
     if (settingName == "Record Status Display")
     {
-        dynamic_cast<CSVWorld::RecordStatusDelegate *>(this->itemDelegateForColumn(1))->updateEditorSetting (settingName, settingValue);
-        emit dataChanged(mModel->index(0,1), mModel->index(mModel->rowCount()-1, 1));
+        RecordStatusDelegate *rsDelegate = dynamic_cast <CSVWorld::RecordStatusDelegate *> (itemDelegateForColumn(1));
+
+        if (rsDelegate)
+        {
+            rsDelegate->updateEditorSetting (settingName, settingValue);
+            emit dataChanged(mModel->index(0,1), mModel->index(mModel->rowCount()-1, 1));
+        }
+    }
+
+    if (settingName == "Referenceable ID Type Display")
+    {
+        RefIdTypeDelegate *refidDelegate = dynamic_cast <CSVWorld::RefIdTypeDelegate *> (itemDelegateForColumn(2));
+
+        if (refidDelegate)
+        {
+            refidDelegate->updateEditorSetting (settingName, settingValue);
+            emit dataChanged(mModel->index(0,1), mModel->index(mModel->rowCount()-1, 1));
+        }
     }
 }

@@ -5,5 +5,25 @@
         <file>modified.png</file>
         <file>removed.png</file>
         <file>base.png</file>
+        <file>activator.png</file>
+        <file>apparatus.png</file>
+        <file>armor.png</file>
+        <file>book.png</file>
+        <file>clothing.png</file>
+        <file>container.png</file>
+        <file>creature.png</file>
+        <file>door.png</file>
+        <file>ingredient.png</file>
+        <file>leveled-creature.png</file>
+        <file>leveled-item.png</file>
+        <file>light.png</file>
+        <file>lockpick.png</file>
+        <file>miscellaneous.png</file>
+        <file>npc.png</file>
+        <file>potion.png</file>
+        <file>probe.png</file>
+        <file>repair.png</file>
+        <file>static.png</file>
+        <file>weapon.png</file>
     </qresource>
 </RCC>

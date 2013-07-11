@@ -13,7 +13,7 @@
 #include "../world/enumdelegate.hpp"
 #include "../world/vartypedelegate.hpp"
 #include "../world/recordstatusdelegate.hpp"
-#include "../world/refrecordtypedelegate.hpp"
+#include "../world/refidtypedelegate.hpp"
 #include "../settings/usersettingsdialog.hpp"
 
 #include "view.hpp"
@@ -124,7 +124,7 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
         new CSVWorld::RecordStatusDelegateFactory() );
 
     mDelegateFactories->add (CSMWorld::ColumnBase::Display_RefRecordType,
-        new CSVWorld::RefRecordTypeDelegateFactory() );
+        new CSVWorld::RefIdTypeDelegateFactory() );
 
     connect (&CSMSettings::UserSettings::instance(), SIGNAL (signalUpdateEditorSetting (const QString &, const QString &)),
              this, SLOT (slotUpdateEditorSetting (const QString &, const QString &)));
@@ -357,10 +357,6 @@ void CSVDoc::ViewManager::exitApplication (CSVDoc::View *view)
 
 void CSVDoc::ViewManager::slotUpdateEditorSetting (const QString &settingName, const QString &settingValue)
 {
-    if (settingName == "Record Status Display" ||
-        settingName == "Width" || settingName == "Height")
-    {
-        foreach (CSVDoc::View *view, mViews)
-            view->updateEditorSetting (settingName, settingValue);
-    }
+    foreach (CSVDoc::View *view, mViews)
+        view->updateEditorSetting (settingName, settingValue);
 }

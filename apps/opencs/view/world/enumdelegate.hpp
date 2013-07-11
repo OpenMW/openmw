@@ -14,6 +14,8 @@ namespace CSVWorld
     /// \brief Integer value that represents an enum and is interacted with via a combobox
     class EnumDelegate : public CommandDelegate
     {
+        protected:
+
             std::vector<std::pair<int, QString> > mValues;
 
         private:
@@ -41,6 +43,7 @@ namespace CSVWorld
 
     class EnumDelegateFactory : public CommandDelegateFactory
     {
+        protected:
             std::vector<std::pair<int, QString> > mValues;
 
         public:

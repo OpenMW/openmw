@@ -62,7 +62,7 @@ opencs_units (view/world
 
 opencs_units_noqt (view/world
     dialoguesubview subviews
-    enumdelegate vartypedelegate recordstatusdelegate refrecordtypedelegate
+    enumdelegate vartypedelegate recordstatusdelegate refidtypedelegate datadisplaydelegate
     scripthighlighter
     )
 
@@ -80,7 +80,7 @@ opencs_units (view/settings
     proxyblock
     abstractwidget
     usersettingsdialog
-    editorpage
+    datadisplayformatpage
     windowpage
     )
 

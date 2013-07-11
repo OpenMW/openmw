@@ -264,13 +264,12 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id)
     /// \todo add an user setting to reuse sub views (on a per document basis or on a per top level view basis)
 
     SubView *view = mSubViewFactory.makeSubView (id, *mDocument);
-    view->setObjectName ("subview");
     mSubViewWindow.addDockWidget (Qt::TopDockWidgetArea, view);
 
     connect (view, SIGNAL (focusId (const CSMWorld::UniversalId&)), this,
         SLOT (addSubView (const CSMWorld::UniversalId&)));
 
-    CSMSettings::UserSettings::instance().updateSettings("Editor", "Record Status Display");
+    CSMSettings::UserSettings::instance().updateSettings("Display Format");
 
     view->show();
 }
@@ -392,12 +391,14 @@ void CSVDoc::View::resizeViewHeight (int height)
 
 void CSVDoc::View::updateEditorSetting (const QString &settingName, const QString &settingValue)
 {
-    if (settingName == "Record Status Display")
+    if ( (settingName == "Record Status Display") || (settingName == "Referenceable ID Type Display")
     {
         foreach (QObject *view, mSubViewWindow.children())
         {
-            if (view->objectName() == "subview")
-                dynamic_cast<CSVDoc::SubView *>(view)->updateEditorSetting (settingName, settingValue);
+         CSVDoc::SubView *subview = dynamic_cast<CSVDoc::SubView *>(view);
+
+         if (subview)
+             subview->updateEditorSetting (settingName, settingValue);
         }
     }
     else if (settingName == "Width")
