@@ -27,6 +27,6 @@ void CSVWorld::TableSubView::rowActivated (const QModelIndex& index)
 void CSVWorld::TableSubView::updateEditorSetting(const QString &settingName, const QString &settingValue)
 {
 
-    if (settingName == "Record Status Display")
+    if ( (settingName == "Record Status Display") || settingName == "Referenceable ID Type Display" )
         mTable->updateEditorSetting(settingName, settingValue);
 }

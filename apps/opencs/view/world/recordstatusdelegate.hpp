@@ -5,49 +5,36 @@
 #include <QTextOption>
 #include <QFont>
 
+#include "datadisplaydelegate.hpp"
+#include "../../model/world/record.hpp"
+
 class QIcon;
 class QFont;
-class QFontMetrics;
 
 namespace CSVWorld
 {
-    class RecordStatusDelegate : public CommandDelegate
+    class RecordStatusDelegate : public DataDisplayDelegate
     {
-        QFont mFont;
-        QFontMetrics *mFontMetrics;
-
-        QTextOption mTextAlignment;
-
-        QIcon *mModifiedIcon;
-        QIcon *mAddedIcon;
-        QIcon *mDeletedIcon;
-        QIcon *mBaseIcon;
-
-        int mStatusDisplay;
-
-        int mIconSize;
-        int mIconTopOffset;
-        int mTextLeftOffset;
-
     public:
-        explicit RecordStatusDelegate(QUndoStack& undoStack, QObject *parent = 0);
 
-        void paint (QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
-
-        QSize sizeHint (const QStyleOptionViewItem &option, const QModelIndex &index) const;
+        explicit RecordStatusDelegate(const ValueList& values,
+                                      const IconList& icons,
+                                      QUndoStack& undoStack, QObject *parent = 0);
 
         void updateEditorSetting (const QString &settingName, const QString &settingValue);
 
     };
 
-    class RecordStatusDelegateFactory : public CommandDelegateFactory
+    class RecordStatusDelegateFactory : public DataDisplayDelegateFactory
     {
         public:
+
+            RecordStatusDelegateFactory();
 
             virtual CommandDelegate *makeDelegate (QUndoStack& undoStack, QObject *parent) const;
             ///< The ownership of the returned CommandDelegate is transferred to the caller.
 
     };
 }
-#endif // RECORDSTATUSDELEGATE_H
+#endif // RECORDSTATUSDELEGATE_HPP
 

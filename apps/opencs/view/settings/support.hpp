@@ -168,11 +168,14 @@ namespace CSVSettings
         /// generic default value attribute
         QString defaultValue;
 
-        GroupBlockDef (): title(""), widgetOrientation (Orient_Vertical), isVisible (true), isProxy (false), defaultValue ("")
+        /// shows / hides margins
+        bool isZeroMargin;
+
+        GroupBlockDef (): title(""), widgetOrientation (Orient_Vertical), isVisible (true), isProxy (false), defaultValue (""), isZeroMargin (true)
         {}
 
         GroupBlockDef (QString blockTitle)
-            : title (blockTitle), widgetOrientation (Orient_Vertical), isProxy (false), isVisible (true), defaultValue ("")
+            : title (blockTitle), widgetOrientation (Orient_Vertical), isProxy (false), isVisible (true), defaultValue (""), isZeroMargin (true)
         {}
     };
 

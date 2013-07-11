@@ -9,8 +9,6 @@
 #include "../../model/settings/usersettings.hpp"
 #include "../../model/settings/support.hpp"
 
-#include "editorpage.hpp"
-
 class QHBoxLayout;
 class AbstractWidget;
 class QStackedWidget;
@@ -38,7 +36,7 @@ namespace CSVSettings {
 
         /// return the setting page by name
         /// performs dynamic cast to AbstractPage *
-        AbstractPage *getAbstractPage (int index);
+        AbstractPage &getAbstractPage (int index);
         void setWidgetStates ();
         void buildPages();
         void writeSettings();
@@ -49,7 +47,7 @@ namespace CSVSettings {
         {
             T *page = new T(mStackedWidget);
 
-            mStackedWidget->addWidget (dynamic_cast<QWidget *>(page));
+            mStackedWidget->addWidget (&dynamic_cast<QWidget &>(*page));
 
             new QListWidgetItem (page->objectName(), mListWidget);
 
