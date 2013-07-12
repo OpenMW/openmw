@@ -7,6 +7,9 @@
 
 #include <QAbstractTableModel>
 
+#include "record.hpp"
+#include "cell.hpp"
+
 namespace CSMWorld
 {
     class Data;
@@ -28,8 +31,11 @@ namespace CSMWorld
             {
                 bool mDeleted;
                 std::string mRegion;
+                std::string mName;
 
                 CellDescription();
+
+                CellDescription (const Record<Cell>& cell);
             };
 
             Data& mData;

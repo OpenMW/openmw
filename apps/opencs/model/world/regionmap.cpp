@@ -12,6 +12,19 @@
 
 CSMWorld::RegionMap::CellDescription::CellDescription() : mDeleted (false) {}
 
+CSMWorld::RegionMap::CellDescription::CellDescription (const Record<Cell>& cell)
+{
+    const Cell& cell2 = cell.get();
+
+    if (!cell2.isExterior())
+        throw std::logic_error ("Interior cell in region map");
+
+    mDeleted = cell.isDeleted();
+
+    mRegion = cell2.mRegion;
+    mName = cell2.mName;
+}
+
 CSMWorld::RegionMap::CellIndex CSMWorld::RegionMap::getIndex (const QModelIndex& index) const
 {
     return CellIndex (index.column()+mMin.first, index.row()+mMin.second);
@@ -53,12 +66,7 @@ void CSMWorld::RegionMap::buildMap()
 
         if (cell2.isExterior())
         {
-            CellDescription description;
-
-            if (cell.isDeleted())
-                description.mDeleted = true;
-            else
-                description.mRegion = cell2.mRegion;
+            CellDescription description (cell);
 
             CellIndex index (cell2.mData.mX, cell2.mData.mY);
 
@@ -106,12 +114,7 @@ void CSMWorld::RegionMap::addCells (int start, int end)
         {
             CellIndex index (cell2.mData.mX, cell2.mData.mY);
 
-            CellDescription description;
-
-            if (cell.isDeleted())
-                description.mDeleted = true;
-            else
-                description.mRegion = cell2.mRegion;
+            CellDescription description (cell);
 
             addCell (index, description);
         }
@@ -361,6 +364,44 @@ QVariant CSMWorld::RegionMap::data (const QModelIndex& index, int role) const
         }
 
         return QBrush (Qt::DiagCrossPattern);
+    }
+
+    if (role==Qt::ToolTipRole)
+    {
+        CellIndex cellIndex = getIndex (index);
+
+        std::ostringstream stream;
+
+        stream << cellIndex.first << ", " << cellIndex.second;
+
+        std::map<CellIndex, CellDescription>::const_iterator cell =
+            mMap.find (cellIndex);
+
+        if (cell!=mMap.end())
+        {
+            if (!cell->second.mName.empty())
+                stream << " " << cell->second.mName;
+
+            if (cell->second.mDeleted)
+                stream << " (deleted)";
+
+            if (!cell->second.mRegion.empty())
+            {
+                stream << "<br>";
+
+                std::map<std::string, unsigned int>::const_iterator iter =
+                    mColours.find (Misc::StringUtils::lowerCase (cell->second.mRegion));
+
+                if (iter!=mColours.end())
+                    stream << cell->second.mRegion;
+                else
+                    stream << "<font color=red>" << cell->second.mRegion << "</font>";
+            }
+        }
+        else
+            stream << " (no cell)";
+
+        return QString::fromUtf8 (stream.str().c_str());
     }
 
     return QVariant();
