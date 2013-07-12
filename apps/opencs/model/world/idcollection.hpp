@@ -47,7 +47,7 @@ namespace CSMWorld
             {
                 Record<ESXRecordT> record = Collection<ESXRecordT, IdAccessorT>::getRecord (index);
                 record.mState = RecordBase::State_Deleted;
-                setRecord (index, record);
+                this->setRecord (index, record);
             }
         }
         else
@@ -56,7 +56,7 @@ namespace CSMWorld
             IdAccessorT().getId (record) = id;
             record.load (reader);
 
-            int index = searchId (IdAccessorT().getId (record));
+            int index = this->searchId (IdAccessorT().getId (record));
 
             if (index==-1)
             {
@@ -65,7 +65,7 @@ namespace CSMWorld
                 record2.mState = base ? RecordBase::State_BaseOnly : RecordBase::State_ModifiedOnly;
                 (base ? record2.mBase : record2.mModified) = record;
 
-                appendRecord (record2);
+                this->appendRecord (record2);
             }
             else
             {
@@ -77,7 +77,7 @@ namespace CSMWorld
                 else
                     record2.setModified (record);
 
-                setRecord (index, record2);
+                this->setRecord (index, record2);
             }
         }
     }
