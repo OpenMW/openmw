@@ -4,9 +4,9 @@
 
 <Widget type="Window" skin="" layer="Windows" align="Left|Top" position="0 0 565 390" name="_Main">
 
-    <Widget type="ImageBox" skin="ImageBox" position="0 0 565 390" align="Top|Right" name="JImage">     
-        <Property key="ImageTexture" value="textures\tx_menubook.dds"/>
-        <Property key="ImageCoord" value="50 0 412 256"/>
+    <Widget type="ImageBox" skin="ImageBox" position="-70 0 705 390" align="Top|Right" name="JImage">
+    <Property key="ImageTexture" value="textures\tx_menubook.dds"/>
+    <Widget type="Widget" position="70 0 565 390" align="Top|Right">
 
         <Widget type="Widget" position="0 0 282 390">
             <Widget type="ImageButton" skin="ImageBox" position="205 350 48 32" name="PrevPageBTN">
@@ -43,6 +43,7 @@
 
         <Widget type="Widget" skin="" position="30 22 240 300" name = "LeftPage"/>
         <Widget type="Widget" skin="" position="300 22 240 300" name = "RightPage"/>
+    </Widget>
     </Widget>
 </Widget>
 
