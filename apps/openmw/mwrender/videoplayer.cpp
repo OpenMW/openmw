@@ -8,6 +8,7 @@
 
 #include <OgreRoot.h>
 #include <OgreHardwarePixelBuffer.h>
+#include <OgreRenderWindow.h>
 
 #include <boost/thread.hpp>
 
@@ -16,6 +17,7 @@
 #include "../mwbase/soundmanager.hpp"
 #include "../mwsound/sound_decoder.hpp"
 #include "../mwsound/sound.hpp"
+#include "../mwbase/inputmanager.hpp"
 
 #include "renderconst.hpp"
 
@@ -1032,13 +1034,14 @@ public:
 #endif // defined OPENMW_USE_FFMPEG
 
 
-VideoPlayer::VideoPlayer(Ogre::SceneManager* sceneMgr)
+VideoPlayer::VideoPlayer(Ogre::SceneManager* sceneMgr, Ogre::RenderWindow* window)
     : mState(NULL)
     , mSceneMgr(sceneMgr)
     , mVideoMaterial(NULL)
     , mRectangle(NULL)
     , mNode(NULL)
     , mAllowSkipping(false)
+    , mWindow(window)
 {
     mVideoMaterial = Ogre::MaterialManager::getSingleton().getByName("VideoMaterial", "General");
     if (mVideoMaterial.isNull ())
@@ -1129,6 +1132,14 @@ void VideoPlayer::playVideo(const std::string &resourceName, bool allowSkipping)
     try {
         mState = new VideoState;
         mState->init(resourceName);
+
+        while (isPlaying())
+        {
+            MWBase::Environment::get().getInputManager()->update(0, false);
+            update();
+            mWindow->update();
+        }
+
     }
     catch(std::exception& e) {
         std::cerr<< "Failed to play video: "<<e.what() <<std::endl;
