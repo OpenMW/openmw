@@ -27,13 +27,15 @@ CSMWorld::RegionMap::CellDescription::CellDescription (const Record<Cell>& cell)
 
 CSMWorld::RegionMap::CellIndex CSMWorld::RegionMap::getIndex (const QModelIndex& index) const
 {
-    return CellIndex (index.column()+mMin.first, index.row()+mMin.second);
+    return CellIndex (index.column()+mMin.first,
+        (mMax.second-mMin.second - index.row()-1)+mMin.second);
 }
 
 QModelIndex CSMWorld::RegionMap::getIndex (const CellIndex& index) const
 {
     // I hate you, Qt API naming scheme!
-    return QAbstractTableModel::index (index.second-mMin.second, index.first-mMin.first);
+    return QAbstractTableModel::index (mMax.second-mMin.second - (index.second-mMin.second)-1,
+        index.first-mMin.first);
 }
 
 void CSMWorld::RegionMap::buildRegions()
