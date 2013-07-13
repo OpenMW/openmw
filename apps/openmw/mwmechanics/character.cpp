@@ -175,6 +175,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     : mPtr(ptr)
     , mAnimation(anim)
     , mCharState(state)
+    , mUpperBodyState(UpperCharState_Nothing)
     , mWeaponType(WeapType_None)
     , mSkipAnim(false)
     , mSecondsOfRunning(0)
@@ -237,6 +238,26 @@ void CharacterController::update(float duration, Movement &movement)
     }
     else if(!cls.getCreatureStats(mPtr).isDead())
     {
+        std::list<std::pair<std::string,std::string>> lastKeys = cls.getCreatureStats(mPtr).getLastAnimKey();
+        for(std::list<std::pair<std::string,std::string>>::iterator it = cls.getCreatureStats(mPtr).getLastAnimKey().begin();
+            it!=cls.getCreatureStats(mPtr).getLastAnimKey().end();)
+        {
+            std::cout << "NE";
+            std::pair<std::string,std::string> lastKey = *it;
+            if(!lastKey.first.empty())
+            {
+                std::cout << lastKey.first << " " << lastKey.second << " ";
+                //const std::string &evt = key->second;
+                size_t off = lastKey.second.size()+2;
+                size_t len = lastKey.first.size() - off;
+
+                if(lastKey.first.compare(off, len, "equip stop") == 0) mUpperBodyState = UpperCharState_WeapEquiped;
+                if(lastKey.first.compare(off, len, "unequip stop") == 0) mUpperBodyState = UpperCharState_Nothing;
+                if(lastKey.first.compare(off, len, "chop large follow stop") == 0){ mUpperBodyState = UpperCharState_WeapEquiped;std::cout << "FINISHED";}
+            }
+            it = cls.getCreatureStats(mPtr).getLastAnimKey().erase(it);
+        }
+
         MWBase::World *world = MWBase::Environment::get().getWorld();
 
         bool onground = world->isOnGround(mPtr);
@@ -333,7 +354,7 @@ void CharacterController::update(float duration, Movement &movement)
                     mAnimQueue.pop_front();
 
                     mAnimation->play(mAnimQueue.front().first, Priority_Default,
-                                    MWRender::Animation::Group_All, false,
+                                    MWRender::Animation::Group_All, true,
                                     "start", "stop", 0.0f, mAnimQueue.front().second);
                 }
             }
@@ -424,6 +445,7 @@ void CharacterController::update(float duration, Movement &movement)
                     mAnimation->play(weapgroup, Priority_Weapon,
                                      MWRender::Animation::Group_UpperBody, true,
                                      "unequip start", "unequip stop", 0.0f, 0);
+                    mUpperBodyState = UpperCharState_UnEquipingWeap;
                 }
                 else
                 {
@@ -432,6 +454,7 @@ void CharacterController::update(float duration, Movement &movement)
                     mAnimation->play(weapgroup, Priority_Weapon,
                                      MWRender::Animation::Group_UpperBody, true,
                                      "equip start", "equip stop", 0.0f, 0);
+                    mUpperBodyState = UpperCharState_EquipingWeap;
                 }
 
                 mWeaponType = weaptype;
@@ -448,6 +471,23 @@ void CharacterController::update(float duration, Movement &movement)
                         sndMgr->playSound3D(mPtr, soundid, 1.0f, 1.0f);
                     }
                 }
+            }
+
+            if(cls.getCreatureStats(mPtr).getAttackingOrSpell())
+            {
+                if(mUpperBodyState == UpperCharState_WeapEquiped)
+                {
+                    std::string weapgroup;
+                    getWeaponGroup(mWeaponType, weapgroup);
+                    mAnimation->play(weapgroup, Priority_Weapon,
+                            MWRender::Animation::Group_UpperBody, true,
+                            "chop start", "chop large follow stop", 0.0f, 0);
+                    mUpperBodyState = UpperCharState_ChopReadyingMouseHold;
+                }
+            }
+            else if(mUpperBodyState == UpperCharState_ChopReadyingMouseHold)
+            {
+                mUpperBodyState = UpperCharState_ChopReadying;
             }
 
             MWWorld::ContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);

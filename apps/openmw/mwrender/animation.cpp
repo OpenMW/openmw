@@ -15,6 +15,11 @@
 
 #include "../mwmechanics/character.hpp"
 
+
+//TODO: remove that and create a class interface
+#include "../mwmechanics/creaturestats.hpp"
+#include "../mwworld/class.hpp"
+
 namespace MWRender
 {
 
@@ -474,6 +479,8 @@ bool Animation::handleTextKey(AnimState &state, const std::string &groupname, co
         }
         return true;
     }
+
+    MWWorld::Class::get(mPtr).getCreatureStats(mPtr).getLastAnimKey().push_back(std::pair<std::string,std::string>(key->second,groupname));
 
     if(evt.compare(off, len, "equip attach") == 0)
     {

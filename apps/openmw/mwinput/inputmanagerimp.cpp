@@ -20,6 +20,7 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwgui/bookwindow.hpp"
+#include "../mwmechanics/creaturestats.hpp"
 
 using namespace ICS;
 
@@ -498,6 +499,8 @@ namespace MWInput
 
         MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::Enum(kc));
 
+        MWWorld::Class::get(mPlayer.getPlayer()).getCreatureStats(mPlayer.getPlayer()).setAttackingOrSpell(false);
+
         return true;
     }
 
@@ -509,7 +512,6 @@ namespace MWInput
             return true; // MyGUI has no use for these events
 
         MyGUI::InputManager::getInstance().injectMousePress(mMouseX, mMouseY, sdlButtonToMyGUI(id));
-
         if (MyGUI::InputManager::getInstance ().getMouseFocusWidget () != 0)
         {
             MyGUI::Button* b = MyGUI::InputManager::getInstance ().getMouseFocusWidget ()->castType<MyGUI::Button>(false);
@@ -518,6 +520,8 @@ namespace MWInput
                 MWBase::Environment::get().getSoundManager ()->playSound ("Menu Click", 1.f, 1.f);
             }
         }
+
+        MWWorld::Class::get(mPlayer.getPlayer()).getCreatureStats(mPlayer.getPlayer()).setAttackingOrSpell(true);
 
         return true;
     }
