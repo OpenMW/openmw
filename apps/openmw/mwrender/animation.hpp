@@ -80,6 +80,8 @@ protected:
     };
     typedef std::map<std::string,AnimState> AnimStateMap;
 
+    typedef std::map<Ogre::MovableObject*,std::string> ObjectAttachMap;
+
     MWWorld::Ptr mPtr;
     Camera *mCamera;
 
@@ -95,6 +97,8 @@ protected:
     AnimStateMap mStates;
 
     Ogre::SharedPtr<AnimationValue> mAnimationValuePtr[sNumGroups];
+
+    ObjectAttachMap mAttachedObjects;
 
     float mAnimVelocity;
     float mAnimSpeedMult;
@@ -216,6 +220,12 @@ public:
     { mCamera = cam; }
 
     Ogre::Node *getNode(const std::string &name);
+
+    // Attaches the given object to a bone on this object's base skeleton. If the bone doesn't
+    // exist, the object isn't attached and NULL is returned. The returned TagPoint is only
+    // valid until the next setObjectRoot call.
+    Ogre::TagPoint *attachObjectToBone(const Ogre::String &bonename, Ogre::MovableObject *obj);
+    void detachObjectFromBone(Ogre::MovableObject *obj);
 };
 
 }
