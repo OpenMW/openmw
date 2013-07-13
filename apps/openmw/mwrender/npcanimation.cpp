@@ -14,6 +14,7 @@
 #include "../mwbase/mechanicsmanager.hpp"
 
 #include "renderconst.hpp"
+#include "camera.hpp"
 
 
 namespace MWRender
@@ -415,6 +416,13 @@ Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
     Ogre::Vector3 ret = Animation::runAnimation(timepassed);
 
     Ogre::SkeletonInstance *baseinst = mSkelBase->getSkeleton();
+    if(mViewMode == VM_FirstPerson && mCamera)
+    {
+        float pitch = mCamera->getPitch();
+        Ogre::Node *node = baseinst->getBone("Bip01 Neck");
+        node->pitch(Ogre::Radian(pitch*0.75f), Ogre::Node::TS_WORLD);
+    }
+
     for(size_t i = 0;i < sPartListSize;i++)
     {
         Ogre::Entity *ent = mObjectParts[i].mSkelBase;

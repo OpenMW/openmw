@@ -11,6 +11,7 @@
 
 namespace MWRender
 {
+class Camera;
 
 class Animation
 {
@@ -80,6 +81,7 @@ protected:
     typedef std::map<std::string,AnimState> AnimStateMap;
 
     MWWorld::Ptr mPtr;
+    Camera *mCamera;
 
     Ogre::SceneNode *mInsert;
     Ogre::Entity *mSkelBase;
@@ -209,6 +211,9 @@ public:
     virtual Ogre::Vector3 runAnimation(float duration);
 
     virtual void showWeapons(bool showWeapon);
+
+    void setCamera(Camera *cam)
+    { mCamera = cam; }
 
     Ogre::Node *getNode(const std::string &name);
 };

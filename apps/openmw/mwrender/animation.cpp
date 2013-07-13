@@ -45,6 +45,7 @@ void Animation::destroyObjectList(Ogre::SceneManager *sceneMgr, NifOgre::ObjectL
 
 Animation::Animation(const MWWorld::Ptr &ptr)
     : mPtr(ptr)
+    , mCamera(NULL)
     , mInsert(NULL)
     , mSkelBase(NULL)
     , mAccumRoot(NULL)

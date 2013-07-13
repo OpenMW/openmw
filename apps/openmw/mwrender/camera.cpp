@@ -283,10 +283,14 @@ namespace MWRender
         // If we're switching to a new NpcAnimation, ensure the old one is
         // using a normal view mode
         if(mAnimation && mAnimation != anim)
+        {
             mAnimation->setViewMode(NpcAnimation::VM_Normal);
+            mAnimation->setCamera(NULL);
+        }
         mAnimation = anim;
         mAnimation->setViewMode(isFirstPerson() ? NpcAnimation::VM_FirstPerson :
                                                   NpcAnimation::VM_Normal);
+        mAnimation->setCamera(this);
     }
 
     void Camera::setHeight(float height)
