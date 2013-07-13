@@ -357,11 +357,15 @@ void NpcAnimation::updateParts(bool forceupdate)
         }
     }
 
-    for (int part = ESM::PRT_Neck; part < ESM::PRT_Count; ++part)
+    const std::vector<const ESM::BodyPart*> &parts = sRaceMapping[thisCombination];
+    for(int part = ESM::PRT_Neck; part < ESM::PRT_Count; ++part)
     {
-        const ESM::BodyPart* bodypart = sRaceMapping[thisCombination][part];
-        if (mPartPriorities[part] < 1 && bodypart)
-            addOrReplaceIndividualPart(part, -1,1, "meshes\\"+bodypart->mModel);
+        if(mPartPriorities[part] < 1)
+        {
+            const ESM::BodyPart* bodypart = parts[part];
+            if(bodypart)
+                addOrReplaceIndividualPart(part, -1,1, "meshes\\"+bodypart->mModel);
+        }
     }
 }
 
