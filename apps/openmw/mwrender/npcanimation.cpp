@@ -374,14 +374,12 @@ void NpcAnimation::updateParts(bool forceupdate)
 NifOgre::ObjectList NpcAnimation::insertBoundedPart(const std::string &model, int group, const std::string &bonename)
 {
     NifOgre::ObjectList objects = NifOgre::Loader::createObjects(mSkelBase, bonename, mInsert, model);
-    setRenderProperties(objects, mVisibilityFlags, RQG_Main, RQG_Alpha);
+    setRenderProperties(objects, (mViewMode == VM_FirstPerson) ? RV_FirstPerson : mVisibilityFlags, RQG_Main, RQG_Alpha);
 
     for(size_t i = 0;i < objects.mEntities.size();i++)
     {
         Ogre::Entity *ent = objects.mEntities[i];
         ent->getUserObjectBindings().setUserAny(Ogre::Any(group));
-        if(mViewMode == VM_FirstPerson)
-            ent->setCastShadows(false);
     }
     for(size_t i = 0;i < objects.mParticles.size();i++)
         objects.mParticles[i]->getUserObjectBindings().setUserAny(Ogre::Any(group));

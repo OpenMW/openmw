@@ -73,7 +73,7 @@ Animation::~Animation()
 
 void Animation::setObjectRoot(Ogre::SceneNode *node, const std::string &model, bool baseonly)
 {
-    OgreAssert(mAnimSources.size() != 0, "Setting object root while animation sources are set!");
+    OgreAssert(mAnimSources.size() == 0, "Setting object root while animation sources are set!");
     if(!mInsert)
         mInsert = node->createChildSceneNode();
 
