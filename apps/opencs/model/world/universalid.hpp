@@ -81,7 +81,8 @@ namespace CSMWorld
                 Type_Static,
                 Type_Weapon,
                 Type_References,
-                Type_Reference
+                Type_Reference,
+                Type_RegionMap
             };
 
         private:
