@@ -336,9 +336,10 @@ void NpcAnimation::updateParts(bool forceupdate)
             {
                 if(mViewMode == VM_FirstPerson && (bodypart.mData.mPart == ESM::BodyPart::MP_Hand ||
                                                    bodypart.mData.mPart == ESM::BodyPart::MP_Wrist ||
-                                                   bodypart.mData.mPart == ESM::BodyPart::MP_Forearm))
+                                                   bodypart.mData.mPart == ESM::BodyPart::MP_Forearm ||
+                                                   bodypart.mData.mPart == ESM::BodyPart::MP_Upperarm))
                 {
-                    /* Allow 3rd person skins as a fallback for the forearms if 1st person is missing. */
+                    /* Allow 3rd person skins as a fallback for the arms if 1st person is missing. */
                     BodyPartMapType::const_iterator bIt = sBodyPartMap.lower_bound(BodyPartMapType::key_type(bodypart.mData.mPart));
                     while(bIt != sBodyPartMap.end() && bIt->first == bodypart.mData.mPart)
                     {
@@ -499,9 +500,31 @@ void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::
     {
         const ESM::BodyPart *bodypart = 0;
         if(!mNpc->isMale() && !part->mFemale.empty())
+        {
             bodypart = partStore.search(part->mFemale+ext);
+            if(!bodypart && mViewMode == VM_FirstPerson)
+            {
+                bodypart = partStore.search(part->mFemale);
+                if(bodypart && !(bodypart->mData.mPart == ESM::BodyPart::MP_Hand ||
+                                 bodypart->mData.mPart == ESM::BodyPart::MP_Wrist ||
+                                 bodypart->mData.mPart == ESM::BodyPart::MP_Forearm ||
+                                 bodypart->mData.mPart == ESM::BodyPart::MP_Upperarm))
+                    bodypart = NULL;
+            }
+        }
         if(!bodypart && !part->mMale.empty())
+        {
             bodypart = partStore.search(part->mMale+ext);
+            if(!bodypart && mViewMode == VM_FirstPerson)
+            {
+                bodypart = partStore.search(part->mMale);
+                if(bodypart && !(bodypart->mData.mPart == ESM::BodyPart::MP_Hand ||
+                                 bodypart->mData.mPart == ESM::BodyPart::MP_Wrist ||
+                                 bodypart->mData.mPart == ESM::BodyPart::MP_Forearm ||
+                                 bodypart->mData.mPart == ESM::BodyPart::MP_Upperarm))
+                    bodypart = NULL;
+            }
+        }
 
         if(bodypart)
             addOrReplaceIndividualPart(part->mPart, group, priority, "meshes\\"+bodypart->mModel);
