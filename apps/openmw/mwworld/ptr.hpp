@@ -1,40 +1,40 @@
 #ifndef GAME_MWWORLD_PTR_H
 #define GAME_MWWORLD_PTR_H
 
-#include <cassert>
-
 #include <boost/any.hpp>
 
-#include <components/esm_store/cell_store.hpp>
-
-#include "refdata.hpp"
+#include "cellstore.hpp"
 
 namespace MWWorld
 {
+    class ContainerStore;
+
     /// \brief Pointer to a LiveCellRef
 
     class Ptr
     {
         public:
 
-            typedef ESMS::CellStore<RefData> CellStore;
+            typedef MWWorld::CellStore CellStore;
+            ///< \deprecated
 
             boost::any mPtr;
             ESM::CellRef *mCellRef;
             RefData *mRefData;
             CellStore *mCell;
             std::string mTypeName;
+            ContainerStore *mContainerStore;
 
         public:
 
-            Ptr() : mCellRef (0), mRefData (0), mCell (0) {}
+            Ptr() : mCellRef (0), mRefData (0), mCell (0), mContainerStore (0) {}
 
             bool isEmpty() const
             {
                 return mPtr.empty();
             }
 
-            const std::type_info& getType()
+            const std::type_info& getType() const
             {
                 assert (!mPtr.empty());
                 return mPtr.type();
@@ -46,38 +46,42 @@ namespace MWWorld
             }
 
             template<typename T>
-            Ptr (ESMS::LiveCellRef<T, RefData> *liveCellRef, CellStore *cell)
+            Ptr (MWWorld::LiveCellRef<T> *liveCellRef, CellStore *cell)
+            : mContainerStore (0)
             {
                 mPtr = liveCellRef;
-                mCellRef = &liveCellRef->ref;
+                mCellRef = &liveCellRef->mRef;
                 mRefData = &liveCellRef->mData;
                 mCell = cell;
                 mTypeName = typeid (T).name();
             }
 
             template<typename T>
-            ESMS::LiveCellRef<T, RefData> *get() const
+            MWWorld::LiveCellRef<T> *get() const
             {
-                return boost::any_cast<ESMS::LiveCellRef<T, RefData>*> (mPtr);
+                return boost::any_cast<MWWorld::LiveCellRef<T>*> (mPtr);
             }
 
-            ESM::CellRef& getCellRef() const
-            {
-                assert (mCellRef);
-                return *mCellRef;
-            }
+            ESM::CellRef& getCellRef() const;
 
-            RefData& getRefData() const
-            {
-                assert (mRefData);
-                return *mRefData;
-            }
+            RefData& getRefData() const;
 
             Ptr::CellStore *getCell() const
             {
-                assert (mCell);
+                assert(mCell);
                 return mCell;
             }
+
+            bool isInCell() const
+            {
+                return (mContainerStore == 0);
+            }
+
+            void setContainerStore (ContainerStore *store);
+            ///< Must not be called on references that are in a cell.
+
+            ContainerStore *getContainerStore() const;
+            ///< May return a 0-pointer, if reference is not in a container.
     };
 
     inline bool operator== (const Ptr& left, const Ptr& right)

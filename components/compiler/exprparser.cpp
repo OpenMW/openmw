@@ -14,6 +14,7 @@
 #include "stringparser.hpp"
 #include "extensions.hpp"
 #include "context.hpp"
+#include <components/misc/stringops.hpp>
 
 namespace Compiler
 {
@@ -195,10 +196,31 @@ namespace Compiler
         return parseArguments (arguments, scanner, mCode);
     }
 
+    bool ExprParser::handleMemberAccess (const std::string& name)
+    {
+        mMemberOp = false;
+
+        std::string name2 = Misc::StringUtils::lowerCase (name);
+        std::string id = Misc::StringUtils::lowerCase (mExplicit);
+
+        char type = getContext().getMemberType (name2, id);
+
+        if (type!=' ')
+        {
+            Generator::fetchMember (mCode, mLiterals, type, name2, id);
+            mNextOperand = false;
+            mExplicit.clear();
+            mOperands.push_back (type=='f' ? 'f' : 'l');
+            return true;
+        }
+
+        return false;
+    }
+
     ExprParser::ExprParser (ErrorHandler& errorHandler, Context& context, Locals& locals,
         Literals& literals, bool argument)
     : Parser (errorHandler, context), mLocals (locals), mLiterals (literals),
-      mNextOperand (true), mFirst (true), mArgument (argument)
+      mNextOperand (true), mFirst (true), mArgument (argument), mRefOp (false), mMemberOp (false)
     {}
 
     bool ExprParser::parseInt (int value, const TokenLoc& loc, Scanner& scanner)
@@ -251,7 +273,12 @@ namespace Compiler
         Scanner& scanner)
     {
         if (!mExplicit.empty())
+        {
+            if (mMemberOp && handleMemberAccess (name))
+                return true;
+
             return Parser::parseName (name, loc, scanner);
+        }
 
         mFirst = false;
 
@@ -259,7 +286,7 @@ namespace Compiler
         {
             start();
 
-            std::string name2 = toLower (name);
+            std::string name2 = Misc::StringUtils::lowerCase (name);
 
             char type = mLocals.getType (name2);
 
@@ -281,9 +308,9 @@ namespace Compiler
                 return true;
             }
 
-            if (mExplicit.empty() && getContext().isId (name))
+            if (mExplicit.empty() && getContext().isId (name2))
             {
-                mExplicit = name;
+                mExplicit = name2;
                 return true;
             }
         }
@@ -497,6 +524,12 @@ namespace Compiler
                 return true;
             }
 
+            if (!mMemberOp && code==Scanner::S_member)
+            {
+                mMemberOp = true;
+                return true;
+            }
+
             return Parser::parseSpecial (code, loc, scanner);
         }
 
@@ -570,8 +603,8 @@ namespace Compiler
 
             switch (code)
             {
-                case Scanner::S_plus: pushBinaryOperator ('+'); return true;
-                case Scanner::S_minus: pushBinaryOperator ('-'); return true;
+                case Scanner::S_plus: c = '+'; break;
+                case Scanner::S_minus: c = '-'; break;
                 case Scanner::S_mult: pushBinaryOperator ('*'); return true;
                 case Scanner::S_div: pushBinaryOperator ('/'); return true;
                 case Scanner::S_cmpEQ: c = 'e'; break;
@@ -609,6 +642,7 @@ namespace Compiler
         mFirst = true;
         mExplicit.clear();
         mRefOp = false;
+        mMemberOp = false;
         Parser::reset();
     }
 
@@ -639,7 +673,7 @@ namespace Compiler
         std::vector<Interpreter::Type_Code>& code, bool invert)
     {
         bool optional = false;
-        bool optionalCount = 0;
+        int optionalCount = 0;
 
         ExprParser parser (getErrorHandler(), getContext(), mLocals, mLiterals, true);
         StringParser stringParser (getErrorHandler(), getContext(), mLiterals);

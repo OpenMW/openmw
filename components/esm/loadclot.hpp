@@ -1,10 +1,15 @@
-#ifndef _ESM_CLOT_H
-#define _ESM_CLOT_H
+#ifndef OPENMW_ESM_CLOT_H
+#define OPENMW_ESM_CLOT_H
 
-#include "esm_reader.hpp"
+#include <string>
+
 #include "loadarmo.hpp"
 
-namespace ESM {
+namespace ESM
+{
+
+class ESMReader;
+class ESMWriter;
 
 /*
  * Clothing
@@ -12,46 +17,38 @@ namespace ESM {
 
 struct Clothing
 {
-  enum Type
+    enum Type
     {
-      Pants	= 0,
-      Shoes	= 1,
-      Shirt	= 2,
-      Belt	= 3,
-      Robe	= 4,
-      RGlove	= 5,
-      LGlove	= 6,
-      Skirt	= 7,
-      Ring	= 8,
-      Amulet	= 9
+        Pants = 0,
+        Shoes = 1,
+        Shirt = 2,
+        Belt = 3,
+        Robe = 4,
+        RGlove = 5,
+        LGlove = 6,
+        Skirt = 7,
+        Ring = 8,
+        Amulet = 9
     };
 
-  struct CTDTstruct
-  {
-    int type;
-    float weight;
-    short value;
-    short enchant;
-  };
-  CTDTstruct data;
+    struct CTDTstruct
+    {
+        int mType;
+        float mWeight;
+        short mValue;
+        short mEnchant;
+    };
+    CTDTstruct mData;
 
-  PartReferenceList parts;
+    PartReferenceList mParts;
 
-  std::string name, model, icon, enchant, script;
+    std::string mId, mName, mModel, mIcon, mEnchant, mScript;
 
-  void load(ESMReader &esm)
-  {
-    model = esm.getHNString("MODL");
-    name = esm.getHNOString("FNAM");
-    esm.getHNT(data, "CTDT", 12);
+    void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 
-    script = esm.getHNOString("SCRI");
-    icon = esm.getHNOString("ITEX");
-
-    parts.load(esm);
-
-    enchant = esm.getHNOString("ENAM");
-  }
+    void blank();
+    ///< Set record to default state (does not touch the ID).
 };
 }
 #endif

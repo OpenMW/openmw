@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MyGUI type="Layout">
+    <Widget type="Window" skin="MW_Dialog" position="0 0 330 370" layer="Windows" name="_Main">
+
+        <Widget type="TextBox" skin="SandText" position="8 8 292 24">
+            <Property key="Caption" value="Select a magic to quick key."/>
+        </Widget>
+
+        <Widget type="Widget" skin="MW_Box" position="8 38 306 285" name="box" align="Left Top Stretch">
+            <Widget type="ScrollView" skin="MW_ScrollView" position="4 4 298 277" name="MagicList" align="Left Top Stretch">
+            </Widget>
+        </Widget>
+
+        <Widget type="AutoSizedButton" skin="MW_Button" name="CancelButton" position="284 330 32 24" align="Right Bottom">
+            <Property key="ExpandDirection" value="Left"/>
+            <Property key="Caption" value="#{sCancel}"/>
+        </Widget>
+
+    </Widget>
+</MyGUI>

@@ -26,6 +26,7 @@ namespace Compiler
             bool mArgument;
             std::string mExplicit;
             bool mRefOp;
+            bool mMemberOp;
 
             int getPriority (char op) const;
 
@@ -52,6 +53,8 @@ namespace Compiler
             void close();
 
             int parseArguments (const std::string& arguments, Scanner& scanner);
+
+            bool handleMemberAccess (const std::string& name);
 
         public:
 

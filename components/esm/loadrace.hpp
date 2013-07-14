@@ -1,9 +1,15 @@
-#ifndef _ESM_RACE_H
-#define _ESM_RACE_H
+#ifndef OPENMW_ESM_RACE_H
+#define OPENMW_ESM_RACE_H
 
-#include "esm_reader.hpp"
+#include <string>
 
-namespace ESM {
+#include "spelllist.hpp"
+
+namespace ESM
+{
+
+class ESMReader;
+class ESMWriter;
 
 /*
  * Race definition
@@ -11,58 +17,59 @@ namespace ESM {
 
 struct Race
 {
-  struct SkillBonus
-  {
-    int skill; // SkillEnum
-    int bonus;
-  };
-
-  struct MaleFemale
-  {
-    int male, female;
-  };
-
-  struct MaleFemaleF
-  {
-    float male, female;
-  };
-
-  enum Flags
+    struct SkillBonus
     {
-      Playable	= 0x01,
-      Beast	= 0x02
+        int mSkill; // SkillEnum
+        int mBonus;
     };
 
-  struct RADTstruct
-  {
-    // List of skills that get a bonus
-    SkillBonus bonus[7];
+    struct MaleFemale
+    {
+        int mMale, mFemale;
 
-    // Attribute values for male/female
-    MaleFemale strength, intelligence, willpower, agility,
-      speed, endurance, personality, luck;
+        int getValue (bool male) const;
+    };
 
-    // The actual eye level height (in game units) is (probably) given
-    // as 'height' times 128. This has not been tested yet.
-    MaleFemaleF height, weight;
+    struct MaleFemaleF
+    {
+        float mMale, mFemale;
 
-    int flags; // 0x1 - playable, 0x2 - beast race
+        int getValue (bool male) const;
+    };
 
-    // Size = 140 bytes
-  };
+    enum Flags
+    {
+        Playable = 0x01,
+        Beast = 0x02
+    };
 
-  RADTstruct data;
+    struct RADTstruct
+    {
+        // List of skills that get a bonus
+        SkillBonus mBonus[7];
 
-  std::string name, description;
-  SpellList powers;
+        // Attribute values for male/female
+        MaleFemale mAttributeValues[8];
 
-  void load(ESMReader &esm)
-  {
-    name = esm.getHNString("FNAM");
-    esm.getHNT(data, "RADT", 140);
-    powers.load(esm);
-    description = esm.getHNOString("DESC");
-  }
+        // The actual eye level height (in game units) is (probably) given
+        // as 'height' times 128. This has not been tested yet.
+        MaleFemaleF mHeight, mWeight;
+
+        int mFlags; // 0x1 - playable, 0x2 - beast race
+
+    }; // Size = 140 bytes
+
+    RADTstruct mData;
+
+    std::string mId, mName, mDescription;
+    SpellList mPowers;
+
+    void load(ESMReader &esm);
+    void save(ESMWriter &esm);
+
+    void blank();
+    ///< Set record to default state (does not touch the ID/index).
 };
+
 }
 #endif

@@ -13,11 +13,11 @@ const char* mesh = "meshes\\f\\ex_ashl_a_banner_r.nif";
 void C::doTest()
 {
   // Add Morrowind.bsa resource location
-  addBSA("../../data/Morrowind.bsa");
+  Bsa::addBSA("../../data/Morrowind.bsa");
 
   // Insert the mesh
-  NIFLoader::load(mesh);
-  NIFLoader::load(mesh);
+  NifOgre::NIFLoader::load(mesh);
+  NifOgre::NIFLoader::load(mesh);
 
   /*
   SceneNode *node = mgr->getRootSceneNode()->createChildSceneNode("node");

@@ -1,26 +1,28 @@
-#ifndef _ESM_BSGN_H
-#define _ESM_BSGN_H
+#ifndef OPENMW_ESM_BSGN_H
+#define OPENMW_ESM_BSGN_H
 
-#include "defs.hpp"
-#include "esm_reader.hpp"
+#include <string>
 
-namespace ESM {
+#include "spelllist.hpp"
+
+namespace ESM
+{
+
+class ESMReader;
+class ESMWriter;
 
 struct BirthSign
 {
-  std::string name, description, texture;
+    std::string mId, mName, mDescription, mTexture;
 
-  // List of powers and abilities that come with this birth sign.
-  SpellList powers;
+    // List of powers and abilities that come with this birth sign.
+    SpellList mPowers;
 
-  void load(ESMReader &esm)
-  {
-    name = esm.getHNString("FNAM");
-    texture = esm.getHNOString("TNAM");
-    description = esm.getHNOString("DESC");
+    void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 
-    powers.load(esm);
-  };
+    void blank();
+    ///< Set record to default state (does not touch the ID/index).
 };
 }
 #endif

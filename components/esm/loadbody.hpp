@@ -1,61 +1,63 @@
-#ifndef _ESM_BODY_H
-#define _ESM_BODY_H
+#ifndef OPENMW_ESM_BODY_H
+#define OPENMW_ESM_BODY_H
 
-#include "esm_reader.hpp"
+#include <string>
 
-namespace ESM {
+namespace ESM
+{
+
+class ESMReader;
+class ESMWriter;
 
 struct BodyPart
 {
-  enum MeshPart
+    enum MeshPart
     {
-      MP_Head           = 0,
-      MP_Hair           = 1,
-      MP_Neck           = 2,
-      MP_Chest          = 3,
-      MP_Groin          = 4,
-      MP_Hand           = 5,
-      MP_Wrist          = 6,
-      MP_Forearm        = 7,
-      MP_Upperarm       = 8,
-      MP_Foot           = 9,
-      MP_Ankle          = 10,
-      MP_Knee           = 11,
-      MP_Upperleg       = 12,
-      MP_Clavicle       = 13,
-      MP_Tail           = 14
+        MP_Head = 0,
+        MP_Hair = 1,
+        MP_Neck = 2,
+        MP_Chest = 3,
+        MP_Groin = 4,
+        MP_Hand = 5,
+        MP_Wrist = 6,
+        MP_Forearm = 7,
+        MP_Upperarm = 8,
+        MP_Foot = 9,
+        MP_Ankle = 10,
+        MP_Knee = 11,
+        MP_Upperleg = 12,
+        MP_Clavicle = 13,
+        MP_Tail = 14,
+
+        MP_Count = 15
     };
 
-  enum Flags
+    enum Flags
     {
-      BPF_Female        = 1,
-      BPF_Playable      = 2
+        BPF_Female = 1,
+        BPF_NotPlayable = 2
     };
 
-  enum MeshType
+    enum MeshType
     {
-      MT_Skin           = 0,
-      MT_Clothing       = 1,
-      MT_Armor          = 2
+        MT_Skin = 0,
+        MT_Clothing = 1,
+        MT_Armor = 2
     };
 
-  struct BYDTstruct
-  {
-    char part;
-    char vampire;
-    char flags;
-    char type;
-  };
+    struct BYDTstruct
+    {
+        char mPart;
+        char mVampire;
+        char mFlags;
+        char mType;
+    };
 
-  BYDTstruct data;
-  std::string model, name;
+    BYDTstruct mData;
+    std::string mId, mModel, mRace;
 
-  void load(ESMReader &esm)
-  {
-    model = esm.getHNString("MODL");
-    name = esm.getHNString("FNAM");
-    esm.getHNT(data, "BYDT", 4);
-  }
+    void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 }
 #endif

@@ -1,23 +1,24 @@
 
 #include "actiontake.hpp"
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+#include "../mwbase/windowmanager.hpp"
+
 #include "class.hpp"
-#include "environment.hpp"
-#include "world.hpp"
+#include "containerstore.hpp"
 
 namespace MWWorld
 {
-    ActionTake::ActionTake (const MWWorld::Ptr& object) : mObject (object) {}
+    ActionTake::ActionTake (const MWWorld::Ptr& object) : Action (true, object) {}
 
-    void ActionTake::execute (Environment& environment)
+    void ActionTake::executeImp (const Ptr& actor)
     {
         // insert into player's inventory
-        MWWorld::Ptr player = environment.mWorld->getPtr ("player", true);
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPtr ("player", true);
 
-        MWWorld::Class::get (mObject).insertIntoContainer (mObject,
-            MWWorld::Class::get (player).getContainerStore (player));
+        MWWorld::Class::get (player).getContainerStore (player).add (getTarget());
 
-        // remove from world
-        environment.mWorld->deleteObject (mObject);
+        MWBase::Environment::get().getWorld()->deleteObject (getTarget());
     }
 }

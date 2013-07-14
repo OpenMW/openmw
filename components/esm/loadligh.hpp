@@ -1,9 +1,13 @@
-#ifndef _ESM_LIGH_H
-#define _ESM_LIGH_H
+#ifndef OPENMW_ESM_LIGH_H
+#define OPENMW_ESM_LIGH_H
 
-#include "esm_reader.hpp"
+#include <string>
 
-namespace ESM {
+namespace ESM
+{
+
+class ESMReader;
+class ESMWriter;
 
 /*
  * Lights. Includes static light sources and also carryable candles
@@ -12,43 +16,38 @@ namespace ESM {
 
 struct Light
 {
-  enum Flags
+    enum Flags
     {
-      Dynamic		= 0x001,
-      Carry		= 0x002, // Can be carried
-      Negative		= 0x004, // Negative light?
-      Flicker		= 0x008,
-      Fire		= 0x010,
-      OffDefault	= 0x020, // Off by default
-      FlickerSlow	= 0x040,
-      Pulse		= 0x080,
-      PulseSlow		= 0x100
+        Dynamic     = 0x001,
+        Carry       = 0x002, // Can be carried
+        Negative    = 0x004, // Negative light - i.e. darkness
+        Flicker     = 0x008,
+        Fire        = 0x010,
+        OffDefault  = 0x020, // Off by default
+        FlickerSlow = 0x040,
+        Pulse       = 0x080,
+        PulseSlow   = 0x100
     };
 
-  struct LHDTstruct
-  {
-    float weight;
-    int value;
-    int time; // Duration
-    int radius;
-    int color; // 4-byte rgba value
-    int flags;
-  }; // Size = 24 bytes
+    struct LHDTstruct
+    {
+        float mWeight;
+        int mValue;
+        int mTime; // Duration
+        int mRadius;
+        int mColor; // 4-byte rgba value
+        int mFlags;
+    }; // Size = 24 bytes
 
-  LHDTstruct data;
+    LHDTstruct mData;
 
-  std::string sound, script, model, icon, name;
+    std::string mSound, mScript, mModel, mIcon, mName, mId;
 
-  void load(ESMReader &esm)
-  {
-    model = esm.getHNString("MODL");
-    name = esm.getHNOString("FNAM");
-    icon = esm.getHNOString("ITEX");
-    assert(sizeof(data) == 24);
-    esm.getHNT(data, "LHDT", 24);
-    script = esm.getHNOString("SCRI");
-    sound = esm.getHNOString("SNAM");
-  }
+    void load(ESMReader &esm);
+    void save(ESMWriter &esm);
+
+    void blank();
+    ///< Set record to default state (does not touch the ID).
 };
 }
 #endif

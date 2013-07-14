@@ -10,9 +10,71 @@
 
 #include "opcodes.hpp"
 #include "runtime.hpp"
+#include "defines.hpp"
 
 namespace Interpreter
 {
+    inline std::string formatMessage (const std::string& message, Runtime& runtime)
+    {
+        std::string formattedMessage;
+
+        for (std::size_t i=0; i<message.size(); ++i)
+        {
+            char c = message[i];
+
+            if (c!='%')
+                formattedMessage += c;
+            else
+            {
+                ++i;
+                if (i<message.size())
+                {
+                    c = message[i];
+
+                    if (c=='S' || c=='s')
+                    {
+                        int index = runtime[0].mInteger;
+                        runtime.pop();
+                        formattedMessage += runtime.getStringLiteral (index);
+                    }
+                    else if (c=='g' || c=='G')
+                    {
+                        Type_Integer value = runtime[0].mInteger;
+                        runtime.pop();
+
+                        std::ostringstream out;
+                        out << value;
+                        formattedMessage += out.str();
+                    }
+                    else if (c=='f' || c=='F' || c=='.')
+                    {
+                        while (c!='f' && i<message.size())
+                        {
+                            ++i;
+                        }
+
+                        float value = runtime[0].mFloat;
+                        runtime.pop();
+
+                        std::ostringstream out;
+                        out << value;
+                        formattedMessage += out.str();
+                    }
+                    else if (c=='%')
+                        formattedMessage += "%";
+                    else
+                    {
+                        formattedMessage += "%";
+                        formattedMessage += c;
+                    }
+                }
+            }
+        }
+        
+        formattedMessage = fixDefinesMsgBox(formattedMessage, runtime.getContext());
+        return formattedMessage;
+    }
+
     class OpMessageBox : public Opcode1
     {
         public:
@@ -36,63 +98,28 @@ namespace Interpreter
 
                 std::reverse (buttons.begin(), buttons.end());
 
-                // additional parameters
-                std::string formattedMessage;
-
-                for (std::size_t i=0; i<message.size(); ++i)
-                {
-                    char c = message[i];
-
-                    if (c!='%')
-                        formattedMessage += c;
-                    else
-                    {
-                        ++i;
-                        if (i<message.size())
-                        {
-                            c = message[i];
-
-                            if (c=='S' || c=='s')
-                            {
-                                int index = runtime[0].mInteger;
-                                runtime.pop();
-                                formattedMessage += runtime.getStringLiteral (index);
-                            }
-                            else if (c=='g' || c=='G')
-                            {
-                                Type_Integer value = runtime[0].mInteger;
-                                runtime.pop();
-
-                                std::ostringstream out;
-                                out << value;
-                                formattedMessage += out.str();
-                            }
-                            else if (c=='f' || c=='F' || c=='.')
-                            {
-                                while (c!='f' && i<message.size())
-                                {
-                                    ++i;
-                                }
-
-                                float value = runtime[0].mFloat;
-                                runtime.pop();
-
-                                std::ostringstream out;
-                                out << value;
-                                formattedMessage += out.str();
-                            }
-                            else if (c=='%')
-                                formattedMessage += "%";
-                            else
-                            {
-                                formattedMessage += "%";
-                                formattedMessage += c;
-                            }
-                        }
-                    }
-                }
+                // handle additional parameters
+                std::string formattedMessage = formatMessage (message, runtime);
 
                 runtime.getContext().messageBox (formattedMessage, buttons);
+            }
+    };
+
+    class OpReport : public Opcode0
+    {
+        public:
+
+            virtual void execute (Runtime& runtime)
+            {
+                // message
+                int index = runtime[0].mInteger;
+                runtime.pop();
+                std::string message = runtime.getStringLiteral (index);
+
+                // handle additional parameters
+                std::string formattedMessage = formatMessage (message, runtime);
+
+                runtime.getContext().report (formattedMessage);
             }
     };
 

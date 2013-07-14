@@ -1,16 +1,15 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
-#include <string>
-
-#include <boost/filesystem.hpp>
-
 #include <OgreFrameListener.h>
 
-#include <openengine/ogre/renderer.hpp>
 #include <components/compiler/extensions.hpp>
+#include <components/files/collections.hpp>
+#include <components/translation/translation.hpp>
+#include <components/settings/settings.hpp>
 
-#include "mwworld/environment.hpp"
+#include "mwbase/environment.hpp"
+
 #include "mwworld/ptr.hpp"
 
 namespace Compiler
@@ -44,33 +43,50 @@ namespace OEngine
   {
     class MyGUIManager;
   }
+
+  namespace Render
+  {
+    class OgreRenderer;
+  }
+}
+
+namespace Files
+{
+    struct ConfigurationManager;
 }
 
 namespace OMW
 {
     /// \brief Main engine class, that brings together all the components of OpenMW
-
     class Engine : private Ogre::FrameListener
     {
-            boost::filesystem::path mDataDir;
-            OEngine::Render::OgreRenderer mOgre;
+            MWBase::Environment mEnvironment;
+            ToUTF8::FromType mEncoding;
+            ToUTF8::Utf8Encoder* mEncoder;
+            Files::PathContainer mDataDirs;
+            std::vector<std::string> mArchives;
+            boost::filesystem::path mResDir;
+            OEngine::Render::OgreRenderer *mOgre;
             std::string mCellName;
-            std::string mMaster;
-            bool mDebug;
+            std::vector<std::string> mMaster;
+            std::vector<std::string> mPlugins;
+            int mFpsLevel;
             bool mVerboseScripts;
             bool mNewGame;
             bool mUseSound;
+            bool mCompileAll;
+            std::string mFocusName;
+            std::map<std::string,std::string> mFallbackMap;
+            bool mScriptConsoleMode;
+            std::string mStartupScript;
+            int mActivationDistanceOverride;
 
-            MWWorld::Environment mEnvironment;
-            MWScript::ScriptManager *mScriptManager;
             Compiler::Extensions mExtensions;
             Compiler::Context *mScriptContext;
-            OEngine::GUI::MyGUIManager *mGuiManager;
 
-            int focusFrameCounter;
-            static const int focusUpdateFrame = 10;
-
-            MWWorld::Ptr mIgnoreLocalPtr;
+            Files::Collections mFileCollections;
+            bool mFSStrict;
+            Translation::Storage mTranslationDataStorage;
 
             // not implemented
             Engine (const Engine&);
@@ -80,54 +96,96 @@ namespace OMW
             /// \note This function works recursively.
             void addResourcesDirectory (const boost::filesystem::path& path);
 
-            /// Load all BSA files in data directory.
+            /// add a .zip resource
+            void addZipResource (const boost::filesystem::path& path);
+
+            /// Load BSA files
             void loadBSA();
 
             void executeLocalScripts();
 
-            virtual bool frameStarted(const Ogre::FrameEvent& evt);
+            virtual bool frameRenderingQueued (const Ogre::FrameEvent& evt);
+            virtual bool frameStarted (const Ogre::FrameEvent& evt);
 
-            /// Process pending commands
+            /// Load settings from various files, returns the path to the user settings file
+            std::string loadSettings (Settings::Manager & settings);
+
+            /// Prepare engine for game play
+            void prepareEngine (Settings::Manager & settings);
 
         public:
+            Engine(Files::ConfigurationManager& configurationManager);
+            virtual ~Engine();
 
-            Engine();
+            /// Enable strict filesystem mode (do not fold case)
+            ///
+            /// \attention The strict mode must be specified before any path-related settings
+            /// are given to the engine.
+            void enableFSStrict(bool fsStrict);
 
-            ~Engine();
+            /// Set data dirs
+            void setDataDirs(const Files::PathContainer& dataDirs);
 
-            /// Set data dir
-            void setDataDir (const boost::filesystem::path& dataDir);
+            /// Add BSA archive
+            void addArchive(const std::string& archive);
+
+            /// Set resource dir
+            void setResourceDir(const boost::filesystem::path& parResDir);
 
             /// Set start cell name (only interiors for now)
-            void setCell (const std::string& cellName);
+            void setCell(const std::string& cellName);
 
             /// Set master file (esm)
             /// - If the given name does not have an extension, ".esm" is added automatically
-            /// - Currently OpenMW only supports one master at the same time.
-            void addMaster (const std::string& master);
+            void addMaster(const std::string& master);
 
-            /// Enable debug mode:
-            /// - non-exclusive input
-            void enableDebugMode();
+            /// Same as "addMaster", but for plugin files (esp)
+            /// - If the given name does not have an extension, ".esp" is added automatically
+            void addPlugin(const std::string& plugin);
 
-            /// Enable the command server so external apps can send commands to the console.
-            /// Must be set before go().
+            /// Enable fps counter
+            void showFPS(int level);
 
-            /// Enable verbose script output
-            void enableVerboseScripts();
+            /// Enable or disable verbose script output
+            void setScriptsVerbosity(bool scriptsVerbosity);
 
-            /// Disable all sound
-            void disableSound() { mUseSound = false; }
+            /// Disable or enable all sounds
+            void setSoundUsage(bool soundUsage);
 
             /// Start as a new game.
-            void setNewGame();
+            void setNewGame(bool newGame);
 
             /// Initialise and enter main loop.
             void go();
 
             /// Activate the focussed object.
             void activate();
+
+            /// Write screenshot to file.
+            void screenshot();
+
+            /// Compile all scripts (excludign dialogue scripts) at startup?
+            void setCompileAll (bool all);
+
+            /// Font encoding
+            void setEncoding(const ToUTF8::FromType& encoding);
+
+            void setAnimationVerbose(bool animverbose);
+
+            void setFallbackValues(std::map<std::string,std::string> map);
+
+            /// Enable console-only script functionality
+            void setScriptConsoleMode (bool enabled);
+
+            /// Set path for a script that is run on startup in the console.
+            void setStartupScript (const std::string& path);
+
+            /// Override the game setting specified activation distance.
+            void setActivationDistanceOverride (int distance);
+
+        private:
+            Files::ConfigurationManager& mCfgMgr;
     };
 }
 
-#endif
+#endif /* ENGINE_H */

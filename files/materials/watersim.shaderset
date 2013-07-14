@@ -1,0 +1,31 @@
+shader_set transform_vertex
+{
+    source quad.shader
+    type vertex
+    profiles_cg vs_2_0 vp40 arbvp1
+    profiles_hlsl vs_2_0
+}
+
+shader_set watersim_fragment
+{
+	source watersim_heightmap.shader
+	type fragment
+	profiles_cg ps_3_0 ps_2_x ps_2_0 fp40 arbfp1
+	profiles_hlsl ps_3_0 ps_2_0
+}
+
+shader_set height_to_normal_fragment
+{
+	source watersim_heighttonormal.shader
+	type fragment
+	profiles_cg ps_3_0 ps_2_x ps_2_0 fp40 arbfp1
+	profiles_hlsl ps_3_0 ps_2_0
+}
+
+shader_set add_impulse_fragment
+{
+	source watersim_addimpulse.shader
+	type fragment
+	profiles_cg ps_3_0 ps_2_x ps_2_0 fp40 arbfp1
+	profiles_hlsl ps_3_0 ps_2_0
+}

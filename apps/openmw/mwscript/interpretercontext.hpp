@@ -5,14 +5,19 @@
 
 #include <components/interpreter/context.hpp>
 
+#include "../mwbase/world.hpp"
+
 #include "../mwworld/ptr.hpp"
-#include "../mwworld/environment.hpp"
-#include "../mwworld/world.hpp"
 #include "../mwworld/action.hpp"
 
 namespace MWSound
 {
     class SoundManager;
+}
+
+namespace MWInput
+{
+    struct MWInputManager;
 }
 
 namespace MWScript
@@ -21,7 +26,6 @@ namespace MWScript
 
     class InterpreterContext : public Interpreter::Context
     {
-            MWWorld::Environment& mEnvironment;
             Locals *mLocals;
             MWWorld::Ptr mReference;
 
@@ -35,8 +39,7 @@ namespace MWScript
 
         public:
 
-            InterpreterContext (MWWorld::Environment& environment,
-                MWScript::Locals *locals, MWWorld::Ptr reference);
+            InterpreterContext (MWScript::Locals *locals, MWWorld::Ptr reference);
             ///< The ownership of \a locals is not transferred. 0-pointer allowed.
 
             virtual int getLocalShort (int index) const;
@@ -52,8 +55,12 @@ namespace MWScript
             virtual void setLocalFloat (int index, float value);
 
             using Interpreter::Context::messageBox;
+
             virtual void messageBox (const std::string& message,
                 const std::vector<std::string>& buttons);
+
+            virtual void report (const std::string& message);
+            ///< By default echo via messageBox.
 
             virtual bool menuMode();
 
@@ -68,6 +75,36 @@ namespace MWScript
             virtual void setGlobalLong (const std::string& name, int value);
 
             virtual void setGlobalFloat (const std::string& name, float value);
+            
+            virtual std::vector<std::string> getGlobals () const;
+
+            virtual char getGlobalType (const std::string& name) const;
+            
+            virtual std::string getActionBinding(const std::string& action) const;
+            
+            virtual std::string getNPCName() const;
+            
+            virtual std::string getNPCRace() const;
+            
+            virtual std::string getNPCClass() const;
+            
+            virtual std::string getNPCFaction() const;
+
+            virtual std::string getNPCRank() const;
+            
+            virtual std::string getPCName() const;
+            
+            virtual std::string getPCRace() const;
+            
+            virtual std::string getPCClass() const;
+            
+            virtual std::string getPCRank() const;
+            
+            virtual std::string getPCNextRank() const;
+            
+            virtual int getPCBounty() const;
+            
+            virtual std::string getCurrentCellName() const;
 
             virtual bool isScriptRunning (const std::string& name) const;
 
@@ -101,11 +138,17 @@ namespace MWScript
 
             virtual void disable (const std::string& id = "");
 
-            MWWorld::World& getWorld();
+            virtual int getMemberShort (const std::string& id, const std::string& name) const;
 
-            MWSound::SoundManager& getSoundManager();
+            virtual int getMemberLong (const std::string& id, const std::string& name) const;
 
-            MWGui::WindowManager& getWindowManager();
+            virtual float getMemberFloat (const std::string& id, const std::string& name) const;
+
+            virtual void setMemberShort (const std::string& id, const std::string& name, int value);
+
+            virtual void setMemberLong (const std::string& id, const std::string& name, int value);
+
+            virtual void setMemberFloat (const std::string& id, const std::string& name, float value);
 
             MWWorld::Ptr getReference();
             ///< Reference, that the script is running from (can be empty)

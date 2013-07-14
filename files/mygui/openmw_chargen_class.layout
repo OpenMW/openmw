@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 491 302" name="_Main">
+        <!-- Class list -->
+        <Widget type="ListBox" skin="MW_List" position="14 13 181 131" name="ClassList" />
+
+        <!-- Class image -->
+        <Widget type="Widget" skin="MW_Box" position="212 9 265 138" align="ALIGN_LEFT ALIGN_TOP">
+            <Widget type="ImageBox" skin="ImageBox" position="2 2 261 134" name="ClassImage" align="ALIGN_LEFT ALIGN_TOP" />
+        </Widget>
+
+        <!-- Specialization -->
+        <Widget type="Widget" skin="" position="15 152 484 178" align="ALIGN_LEFT ALIGN_TOP">
+
+        <Widget type="TextBox" skin="HeaderText" position="0 0 162 18" name="SpecializationT" align="ALIGN_LEFT ALIGN_TOP">
+            <Property key="Caption" value="#{sChooseClassMenu1}"/>
+            <Property key="TextAlign" value="ALIGN_LEFT ALIGN_TOP"/>
+            <UserString key="ToolTipType" value="Layout"/>
+            <UserString key="ToolTipLayout" value="TextToolTip"/>
+            <UserString key="Caption_Text" value="#{sCreateClassMenuHelp1}"/>
+        </Widget>
+        <Widget type="TextBox" skin="SandText" position="0 18 162 18" name="SpecializationName" align="ALIGN_LEFT ALIGN_TOP">
+            <Property key="TextAlign" value="ALIGN_LEFT ALIGN_TOP"/>
+        </Widget>
+
+        <!-- Favorite Attributes -->
+        <Widget type="TextBox" skin="HeaderText" position="0 41 162 18" name="FavoriteAttributesT" align="ALIGN_LEFT ALIGN_TOP">
+            <Property key="Caption" value="#{sChooseClassMenu2}"/>
+            <Property key="TextAlign" value="ALIGN_LEFT ALIGN_TOP"/>
+            <UserString key="ToolTipType" value="Layout"/>
+            <UserString key="ToolTipLayout" value="TextToolTip"/>
+            <UserString key="Caption_Text" value="#{sCreateClassMenuHelp2}"/>
+        </Widget>
+        <Widget type="MWAttribute" skin="MW_StatName" position="0 59 162 18" name="FavoriteAttribute0" align="ALIGN_LEFT ALIGN_TOP" />
+        <Widget type="MWAttribute" skin="MW_StatName" position="0 77 162 18" name="FavoriteAttribute1" align="ALIGN_LEFT ALIGN_TOP" />
+
+        <!-- Major Skills -->
+        <Widget type="TextBox" skin="HeaderText" position="162 0 162 18" name="MajorSkillT" align="ALIGN_LEFT ALIGN_TOP">
+            <Property key="TextAlign" value="ALIGN_LEFT ALIGN_TOP"/>
+            <Property key="Caption" value="#{sChooseClassMenu3}"/>
+        </Widget>
+        <Widget type="MWSkill" skin="MW_StatName" position="162 18 162 18" name="MajorSkill0" align="ALIGN_LEFT ALIGN_TOP" />
+        <Widget type="MWSkill" skin="MW_StatName" position="162 36 162 18" name="MajorSkill1" align="ALIGN_LEFT ALIGN_TOP" />
+        <Widget type="MWSkill" skin="MW_StatName" position="162 54 162 18" name="MajorSkill2" align="ALIGN_LEFT ALIGN_TOP" />
+        <Widget type="MWSkill" skin="MW_StatName" position="162 72 162 18" name="MajorSkill3" align="ALIGN_LEFT ALIGN_TOP" />
+        <Widget type="MWSkill" skin="MW_StatName" position="162 90 162 18" name="MajorSkill4" align="ALIGN_LEFT ALIGN_TOP" />
+
+        <!-- Minor Skills -->
+        <Widget type="TextBox" skin="HeaderText" position="325 0 162 18" name="MinorSkillT" align="ALIGN_LEFT ALIGN_TOP">
+            <Property key="Caption" value="#{sChooseClassMenu4}"/>
+            <Property key="TextAlign" value="ALIGN_LEFT ALIGN_TOP"/>
+        </Widget>
+        <Widget type="MWSkill" skin="MW_StatName" position="325 18 162 18" name="MinorSkill0" align="ALIGN_LEFT ALIGN_TOP" />
+        <Widget type="MWSkill" skin="MW_StatName" position="325 36 162 18" name="MinorSkill1" align="ALIGN_LEFT ALIGN_TOP" />
+        <Widget type="MWSkill" skin="MW_StatName" position="325 54 162 18" name="MinorSkill2" align="ALIGN_LEFT ALIGN_TOP" />
+        <Widget type="MWSkill" skin="MW_StatName" position="325 72 162 18" name="MinorSkill3" align="ALIGN_LEFT ALIGN_TOP" />
+        <Widget type="MWSkill" skin="MW_StatName" position="325 90 162 18" name="MinorSkill4" align="ALIGN_LEFT ALIGN_TOP" />
+
+        </Widget>
+
+        <!-- Dialog buttons -->
+        <Widget type="HBox" position="0 265 476 24">
+            <Widget type="Widget">
+                <UserString key="HStretch" value="true"/>
+            </Widget>
+            <Widget type="AutoSizedButton" skin="MW_Button" name="BackButton">
+                <Property key="Caption" value="#{sBack}"/>
+            </Widget>
+            <Widget type="AutoSizedButton" skin="MW_Button" name="OKButton">
+                <Property key="Caption" value="#{sOK}"/>
+            </Widget>
+        </Widget>
+    </Widget>
+</MyGUI>

@@ -1,9 +1,16 @@
-#ifndef _ESM_CONT_H
-#define _ESM_CONT_H
+#ifndef OPENMW_ESM_CONT_H
+#define OPENMW_ESM_CONT_H
 
-#include "esm_reader.hpp"
+#include <string>
+#include <vector>
 
-namespace ESM {
+#include "esmcommon.hpp"
+
+namespace ESM
+{
+
+class ESMReader;
+class ESMWriter;
 
 /*
  * Container definition
@@ -11,54 +18,38 @@ namespace ESM {
 
 struct ContItem
 {
-  int count;
-  NAME32 item;
+    int mCount;
+    NAME32 mItem;
 };
 
 struct InventoryList
 {
-  std::vector<ContItem> list;
+    std::vector<ContItem> mList;
 
-  void load(ESMReader &esm)
-  {
-    ContItem ci;
-    while(esm.isNextSub("NPCO"))
-      {
-        esm.getHT(ci, 36);
-        list.push_back(ci);
-      }
-  }	
+    void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 
 struct Container
 {
-  enum Flags
+    enum Flags
     {
-      Organic	= 1, // Objects cannot be placed in this container
-      Respawn	= 2, // Respawns after 4 months
-      Unknown	= 8
+        Organic = 1, // Objects cannot be placed in this container
+        Respawn = 2, // Respawns after 4 months
+        Unknown = 8
     };
 
-  std::string name, model, script;
+    std::string mId, mName, mModel, mScript;
 
-  float weight; // Not sure, might be max total weight allowed?
-  int flags;
-  InventoryList inventory;
+    float mWeight; // Not sure, might be max total weight allowed?
+    int mFlags;
+    InventoryList mInventory;
 
-  void load(ESMReader &esm)
-  {
-    model = esm.getHNString("MODL");
-    name = esm.getHNOString("FNAM");
-    esm.getHNT(weight, "CNDT", 4);
-    esm.getHNT(flags, "FLAG", 4);
+    void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 
-    if(flags & 0xf4) esm.fail("Unknown flags");
-    if(!(flags & 0x8)) esm.fail("Flag 8 not set");
-
-    script = esm.getHNOString("SCRI");
-
-    inventory.load(esm);
-  }
+    void blank();
+    ///< Set record to default state (does not touch the ID).
 };
 }
 #endif

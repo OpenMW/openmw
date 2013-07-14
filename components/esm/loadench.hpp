@@ -1,9 +1,15 @@
-#ifndef _ESM_ENCH_H
-#define _ESM_ENCH_H
+#ifndef OPENMW_ESM_ENCH_H
+#define OPENMW_ESM_ENCH_H
 
-#include "esm_reader.hpp"
+#include <string>
 
-namespace ESM {
+#include "effectlist.hpp"
+
+namespace ESM
+{
+
+class ESMReader;
+class ESMWriter;
 
 /*
  * Enchantments
@@ -11,31 +17,29 @@ namespace ESM {
 
 struct Enchantment
 {
-  enum Type
+    enum Type
     {
-      CastOnce		= 0,
-      WhenStrikes	= 1,
-      WhenUsed		= 2,
-      ConstantEffect	= 3
+        CastOnce = 0,
+        WhenStrikes = 1,
+        WhenUsed = 2,
+        ConstantEffect = 3
     };
 
-  struct ENDTstruct
-  {
-    int type;
-    int cost;
-    int charge;
-    int autocalc; // Guessing this is 1 if we are supposed to auto
-		  // calculate
-  };
+    struct ENDTstruct
+    {
+        int mType;
+        int mCost;
+        int mCharge;
+        int mAutocalc; // Guessing this is 1 if we are supposed to auto
+        // calculate
+    };
 
-  ENDTstruct data;
-  EffectList effects;
+    std::string mId;
+    ENDTstruct mData;
+    EffectList mEffects;
 
-  void load(ESMReader &esm)
-  {
-    esm.getHNT(data, "ENDT", 16);
-    effects.load(esm);
-  }
+    void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 }
 #endif

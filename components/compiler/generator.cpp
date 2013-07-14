@@ -125,6 +125,11 @@ namespace
         code.push_back (Compiler::Generator::segment3 (0, buttons));
     }
 
+    void opReport (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (58));
+    }
+
     void opFetchLocalShort (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (Compiler::Generator::segment5 (21));
@@ -253,6 +258,36 @@ namespace
     void opFetchGlobalFloat (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (Compiler::Generator::segment5 (44));
+    }
+
+    void opStoreMemberShort (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (59));
+    }
+
+    void opStoreMemberLong (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (60));
+    }
+
+    void opStoreMemberFloat (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (61));
+    }
+
+    void opFetchMemberShort (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (62));
+    }
+
+    void opFetchMemberLong (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (63));
+    }
+
+    void opFetchMemberFloat (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (64));
     }
 
     void opRandom (Compiler::Generator::CodeContainer& code)
@@ -516,6 +551,14 @@ namespace Compiler
             opMessageBox (code, buttons);
         }
 
+        void report (CodeContainer& code, Literals& literals, const std::string& message)
+        {
+            int index = literals.addString (message);
+
+            opPushInt (code, index);
+            opReport (code);
+        }
+
         void fetchLocal (CodeContainer& code, char localType, int localIndex)
         {
             opPushInt (code, localIndex);
@@ -631,7 +674,7 @@ namespace Compiler
 
             if (localType!=valueType)
             {
-                if (localType=='f' && valueType=='l')
+                if (localType=='f' && (valueType=='l' || valueType=='s'))
                 {
                     opIntToFloat (code);
                 }
@@ -694,6 +737,88 @@ namespace Compiler
             }
         }
 
+        void assignToMember (CodeContainer& code, Literals& literals, char localType,
+            const std::string& name, const std::string& id, const CodeContainer& value, char valueType)
+        {
+            int index = literals.addString (name);
+
+            opPushInt (code, index);
+
+            index = literals.addString (id);
+
+            opPushInt (code, index);
+
+            std::copy (value.begin(), value.end(), std::back_inserter (code));
+
+            if (localType!=valueType)
+            {
+                if (localType=='f' && (valueType=='l' || valueType=='s'))
+                {
+                    opIntToFloat (code);
+                }
+                else if ((localType=='l' || localType=='s') && valueType=='f')
+                {
+                    opFloatToInt (code);
+                }
+            }
+
+            switch (localType)
+            {
+                case 'f':
+
+                    opStoreMemberFloat (code);
+                    break;
+
+                case 's':
+
+                    opStoreMemberShort (code);
+                    break;
+
+                case 'l':
+
+                    opStoreMemberLong (code);
+                    break;
+
+                default:
+
+                    assert (0);
+            }
+        }
+
+        void fetchMember (CodeContainer& code, Literals& literals, char localType,
+            const std::string& name, const std::string& id)
+        {
+            int index = literals.addString (name);
+
+            opPushInt (code, index);
+
+            index = literals.addString (id);
+
+            opPushInt (code, index);
+
+            switch (localType)
+            {
+                case 'f':
+
+                    opFetchMemberFloat (code);
+                    break;
+
+                case 's':
+
+                    opFetchMemberShort (code);
+                    break;
+
+                case 'l':
+
+                    opFetchMemberLong (code);
+                    break;
+
+                default:
+
+                    assert (0);
+            }
+        }
+
         void random (CodeContainer& code)
         {
             opRandom (code);
@@ -714,7 +839,7 @@ namespace Compiler
             opStopScript (code);
         }
 
-        void getDistance (CodeContainer& code, Literals& literals, const std::string id)
+        void getDistance (CodeContainer& code, Literals& literals, const std::string& id)
         {
             if (id.empty())
             {
@@ -733,7 +858,7 @@ namespace Compiler
             opGetSecondsPassed (code);
         }
 
-        void getDisabled (CodeContainer& code, Literals& literals, const std::string id)
+        void getDisabled (CodeContainer& code, Literals& literals, const std::string& id)
         {
             if (id.empty())
             {
@@ -747,7 +872,7 @@ namespace Compiler
             }
         }
 
-        void enable (CodeContainer& code, Literals& literals, const std::string id)
+        void enable (CodeContainer& code, Literals& literals, const std::string& id)
         {
             if (id.empty())
             {
@@ -761,7 +886,7 @@ namespace Compiler
             }
         }
 
-        void disable (CodeContainer& code, Literals& literals, const std::string id)
+        void disable (CodeContainer& code, Literals& literals, const std::string& id)
         {
             if (id.empty())
             {

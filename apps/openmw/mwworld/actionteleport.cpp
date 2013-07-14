@@ -1,21 +1,22 @@
 
 #include "actionteleport.hpp"
 
-#include "environment.hpp"
-#include "world.hpp"
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 namespace MWWorld
 {
-    ActionTeleportPlayer::ActionTeleportPlayer (const std::string& cellName,
+    ActionTeleport::ActionTeleport (const std::string& cellName,
         const ESM::Position& position)
-    : mCellName (cellName), mPosition (position)
-    {}
+    : Action (true), mCellName (cellName), mPosition (position)
+    {
+    }
 
-    void ActionTeleportPlayer::execute (Environment& environment)
+    void ActionTeleport::executeImp (const Ptr& actor)
     {
         if (mCellName.empty())
-            environment.mWorld->changeToExteriorCell (mPosition);
+            MWBase::Environment::get().getWorld()->changeToExteriorCell (mPosition);
         else
-            environment.mWorld->changeCell (mCellName, mPosition);
+            MWBase::Environment::get().getWorld()->changeToInteriorCell (mCellName, mPosition);
     }
 }

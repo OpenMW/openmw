@@ -1,18 +1,16 @@
 #ifndef GAME_MWWORLD_GLOBALS_H
 #define GAME_MWWORLD_GLOBALS_H
 
+#include <vector>
 #include <string>
 #include <map>
 
 #include <components/interpreter/types.hpp>
 
-namespace ESMS
-{
-    struct ESMStore;
-}
-
 namespace MWWorld
 {
+    class ESMStore;
+
     class Globals
     {
         public:
@@ -36,7 +34,7 @@ namespace MWWorld
         
         public:
         
-            Globals (const ESMS::ESMStore& store);
+            Globals (const MWWorld::ESMStore& store);
         
             const Data& operator[] (const std::string& name) const;
 
@@ -56,6 +54,8 @@ namespace MWWorld
             
             char getType (const std::string& name) const;
             ///< If there is no global variable with this name, ' ' is returned.
+
+            std::vector<std::string> getGlobals () const;
     };
 }
 

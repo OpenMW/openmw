@@ -1,9 +1,13 @@
-#ifndef _ESM_INGR_H
-#define _ESM_INGR_H
+#ifndef OPENMW_ESM_INGR_H
+#define OPENMW_ESM_INGR_H
 
-#include "esm_reader.hpp"
+#include <string>
 
-namespace ESM {
+namespace ESM
+{
+
+class ESMReader;
+class ESMWriter;
 
 /*
  * Alchemy ingredient
@@ -11,26 +15,23 @@ namespace ESM {
 
 struct Ingredient
 {
-  struct IRDTstruct
-  {
-    float weight;
-    int value;
-    int effectID[4];    // Effect, 0 or -1 means none
-    int skills[4];      // SkillEnum related to effect
-    int attributes[4];  // Attribute related to effect
-  };
+    struct IRDTstruct
+    {
+        float mWeight;
+        int mValue;
+        int mEffectID[4]; // Effect, 0 or -1 means none
+        int mSkills[4]; // SkillEnum related to effect
+        int mAttributes[4]; // Attribute related to effect
+    };
 
-  IRDTstruct data;
-  std::string name, model, icon, script;
+    IRDTstruct mData;
+    std::string mId, mName, mModel, mIcon, mScript;
 
-  void load(ESMReader &esm)
-  {
-    model = esm.getHNString("MODL");
-    name = esm.getHNString("FNAM");
-    esm.getHNT(data, "IRDT", 56);
-    script = esm.getHNOString("SCRI");
-    icon = esm.getHNOString("ITEX");
-  }
+    void load(ESMReader &esm);
+    void save(ESMWriter &esm);
+
+    void blank();
+    ///< Set record to default state (does not touch the ID).
 };
 }
 #endif

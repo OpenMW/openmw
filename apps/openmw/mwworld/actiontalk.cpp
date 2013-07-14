@@ -1,16 +1,15 @@
 
 #include "actiontalk.hpp"
 
-#include "environment.hpp"
-
-#include "../mwdialogue/dialoguemanager.hpp"
+#include "../mwbase/environment.hpp"
+#include "../mwbase/dialoguemanager.hpp"
 
 namespace MWWorld
 {
-    ActionTalk::ActionTalk (const Ptr& actor) : mActor (actor) {}
+    ActionTalk::ActionTalk (const Ptr& actor) : Action (false, actor) {}
 
-    void ActionTalk::execute (Environment& environment)
+    void ActionTalk::executeImp (const Ptr& actor)
     {
-        environment.mDialogueManager->startDialogue (mActor);
+        MWBase::Environment::get().getDialogueManager()->startDialogue (getTarget());
     }
 }

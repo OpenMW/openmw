@@ -1,0 +1,283 @@
+/*!
+	\page macros Shader Macros
+
+	\tableofcontents
+
+	\section Shader Language
+
+	These macros are automatically defined, depending on the shader language that has been set by the application using sh::Factory::setCurrentLanguage.
+
+	 - SH_GLSL
+	 - SH_HLSL
+	 - SH_CG
+
+	<B>Example:</B>
+
+	\code
+	#if SH_GLSL == 1
+	 // glsl porting code
+	#endif
+
+	#if SH_CG == 1 || SH_HLSL == 1
+	 // cg / hlsl porting code (similiar syntax)
+	#endif
+	\endcode
+
+	\note It is encouraged to use the shipped porting header (extra/core.h) by #include-ing it in your shaders. If you do that, you should not have to use the above macros directly. 
+
+	\section vertex-fragment Vertex / fragment shader
+
+	These macros are automatically defined, depending on the type of shader that is currently being compiled.
+
+	 - SH_VERTEX_SHADER
+	 - SH_FRAGMENT_SHADER
+
+	If you use the same source file for both vertex and fragment shader, then it is advised to use these macros for blending out the unused source. This will reduce your compile time.
+
+	\section passthrough Vertex -> Fragment passthrough
+
+	In shader development, a common task is to pass variables from the vertex to the fragment shader. This is no problem if you have a deterministic shader source (i.e. no #ifdefs).
+
+	However, as soon as you begin to have lots of permutations of the same shader source, a problem arises. All current GPUs have a limit of 8 vertex to fragment passthroughs (with 4 components each, for example a float4).
+
+	A common optimization is to put several individual float values together in a float4 (so-called "Packing"). But if your shader has lots of permutations and the passthrough elements you actually need are not known beforehand, it can be very tedious to pack manually. With the following macros, packing can become easier.
+
+	\subsection shAllocatePassthrough shAllocatePassthrough
+
+	<B>Usage:</B> \@shAllocatePassthrough(num_components, name)
+
+	<B>Example:</B>
+	\code
+	#if FRAGMENT_NEED_DEPTH
+	@shAllocatePassthrough(1, depth)
+	#endif
+	\endcode
+
+	This is the first thing you should do before using any of the macros below.
+
+	\subsection shPassthroughVertexOutputs shPassthroughVertexOutputs
+
+	<B>Usage:</B> \@shPassthroughVertexOutputs
+
+	Use this in the inputs/outputs section of your vertex shader, in order to declare all the outputs that are needed for packing the variables that you want passed to the fragment.
+
+	\subsection shPassthroughFragmentInputs shPassthroughFragmentInputs
+
+	<B>Usage:</B> \@shPassthroughFragmentInputs
+
+	Use this in the inputs/outputs section of your fragment shader, in order to declare all the inputs that are needed for receiving the variables that you want passed to the fragment.
+
+	\subsection shPassthroughAssign shPassthroughAssign
+
+	<B>Usage:</B> \@shPassthroughAssign(name, value)
+
+	Use this in the vertex shader for assigning a value to the variable you want passed to the fragment.
+
+	<B>Example:</B>
+	\code
+	#if FRAGMENT_NEED_DEPTH
+	@shPassthroughAssign(depth, shOutputPosition.z);
+	#endif
+
+	\endcode
+
+	\subsection shPassthroughReceive shPassthroughReceive
+
+	<B>Usage:</B> \@shPassthroughReceive(name)
+
+	Use this in the fragment shader to receive the passed value.
+
+	<B>Example:</B>
+
+	\code
+	#if FRAGMENT_NEED_DEPTH
+	float depth = @shPassthroughReceive(depth);
+	#endif
+	\endcode
+
+	\section texUnits Texture units
+
+	\subsection shUseSampler shUseSampler
+
+	<B>Usage:</B> \@shUseSampler(samplerName)
+
+	Requests the texture unit with name \a samplerName to be available for use in this pass.
+
+	Why is this necessary? If you have a derived material that does not use all of the texture units that its parent defines (for example, if an optional asset such as a normal map is not available), there would be no way to know which texture units are actually needed and which can be skipped in the creation process (those that are never referenced in the shader).
+
+	\section properties Property retrieval / binding
+
+	\subsection shPropertyHasValue shPropertyHasValue
+	
+	<B>Usage:</B> \@shPropertyHasValue(property)
+
+	Gets replaced by 1 if the property's value is not empty, or 0 if it is empty.
+	Useful for checking whether an optional texture is present or not.
+	
+	<B>Example:</B>
+	\code	
+	#if @shPropertyHasValue(specularMap)
+	 // specular mapping code
+	#endif
+	#if @shPropertyHasValue(normalMap)
+	 // normal mapping code
+	#endif
+	\endcode
+
+	\subsection shUniformProperty shUniformProperty
+
+	<B>Usage:</B> \@shUniformProperty<4f|3f|2f|1f|int> (uniformName, property)
+
+	Binds the value of \a property (from the shader_properties of the pass this shader belongs to) to the uniform with name \a uniformName.
+
+	The following variants are available, depending on the type of your uniform variable:
+	 - \@shUniformProperty4f
+	 - \@shUniformProperty3f
+	 - \@shUniformProperty2f
+	 - \@shUniformProperty1f
+	 - \@shUniformPropertyInt
+
+	<B>Example:</B> \@shUniformProperty1f (uFresnelScale, fresnelScale)
+
+	\subsection shPropertyBool shPropertyBool
+
+	Retrieve a boolean property of the pass that this shader belongs to, gets replaced with either 0 or 1.
+
+	<B>Usage:</B> \@shPropertyBool(propertyName)
+
+	<B>Example:</B>
+	\code
+	#if @shPropertyBool(has_vertex_colors)
+	...
+	#endif
+	\endcode
+
+	\subsection shPropertyString shPropertyString
+
+	Retrieve a string property of the pass that this shader belongs to
+
+	<B>Usage:</B> \@shPropertyString(propertyName)
+
+	\subsection shPropertyEqual shPropertyEqual
+
+	Check if the value of a property equals a specific value, gets replaced with either 0 or 1. This is useful because the preprocessor cannot compare strings, only numbers.
+
+	<B>Usage:</B> \@shPropertyEqual(propertyName, value)
+
+	<B>Example:</B>
+	\code
+	#if @shPropertyEqual(lighting_mode, phong)
+	...
+	#endif
+	\endcode
+
+	\section globalSettings Global settings
+
+	\subsection shGlobalSettingBool shGlobalSettingBool
+
+	Retrieves the boolean value of a specific global setting, gets replaced with either 0 or 1. The value can be set using sh::Factory::setGlobalSetting.
+
+	<B>Usage:</B> \@shGlobalSettingBool(settingName)
+
+	\subsection shGlobalSettingEqual shGlobalSettingEqual
+
+	Check if the value of a global setting equals a specific value, gets replaced with either 0 or 1. This is useful because the preprocessor cannot compare strings, only numbers.
+
+	<B>Usage:</B> \@shGlobalSettingEqual(settingName, value)
+
+	\subsection shGlobalSettingString shGlobalSettingString
+
+	Gets replaced with the current value of a given global setting. The value can be set using sh::Factory::setGlobalSetting.
+
+	<B>Usage:</B> \@shGlobalSettingString(settingName)
+
+	\section sharedParams Shared parameters
+
+	\subsection shSharedParameter shSharedParameter
+
+	Allows you to bind a custom value to a uniform parameter.
+
+	<B>Usage</B>: \@shSharedParameter(sharedParameterName)
+
+	<B>Example</B>: \@shSharedParameter(pssmSplitPoints) - now the uniform parameter 'pssmSplitPoints' can be altered in all shaders that use it by executing sh::Factory::setSharedParameter("pssmSplitPoints", value)
+
+	\note You may use the same shared parameter in as many shaders as you want. But don't forget to add the \@shSharedParameter macro to every shader that uses this shared parameter. 
+
+	\section autoconstants Auto constants
+
+	\subsection shAutoConstant shAutoConstant
+
+	<B>Usage:</B> \@shAutoConstant(uniformName, autoConstantName, [extraData])
+
+	<B>Example</B>: \@shAutoConstant(uModelViewMatrix, worldviewproj_matrix)
+	
+	<B>Example</B>: \@shAutoConstant(uLightPosition4, light_position, 4)
+	
+	Binds auto constant with name \a autoConstantName to the uniform \a uniformName. Optionally, you may specify extra data (for example the light index), as required by some auto constants.
+
+	The auto constant names are the same as Ogre's. Read the section "3.1.9 Using Vertex/Geometry/Fragment Programs in a Pass" of the Ogre manual for a list of all auto constant names.
+
+	\section misc Misc
+
+	\subsection shForeach shForeach
+
+	<B>Usage:</B> \@shForeach(n)
+
+	Repeats the content of this foreach block \a n times. The end of the block is marked via \@shEndForeach, and the current iteration number can be retrieved via \@shIterator.
+
+	\note Nested foreach blocks are currently \a not supported.
+
+	\note For technical reasons, you can only use constant numbers, properties (\@shPropertyString) or global settings (\@shGlobalSettingString) as \a n parameter.
+
+	<B>Example:</B>
+
+	\code
+	@shForeach(3)
+	this is iteration number @shIterator
+	@shEndForeach
+
+	Gets replaced with:
+
+	this is iteration number 0
+	this is iteration number 1
+	this is iteration number 2
+	\endcode
+
+	Optionally, you can pass a constant offset to \@shIterator. Example:
+
+	\code
+	@shForeach(3)
+	this is iteration number @shIterator(7)
+	@shEndForeach
+
+	Gets replaced with:
+
+	this is iteration number 7
+	this is iteration number 8
+	this is iteration number 9
+	\endcode
+
+	\subsection shCounter shCounter
+
+	Gets replaced after the preprocessing step with the number that equals the n-th occurence of counters of the same ID.
+
+	<B>Usage:</B> \@shCounter(ID)
+
+	<B>Example</B>:
+	\code
+	@shCounter(0)
+	@shCounter(0)
+	@shCounter(1)
+	@shCounter(0)
+	\endcode
+
+	Gets replaced with:
+
+	\code
+	0
+	1
+	0
+	2
+	\endcode
+
+*/

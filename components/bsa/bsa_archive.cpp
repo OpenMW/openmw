@@ -23,19 +23,184 @@
 
 #include "bsa_archive.hpp"
 
+#include <OgreFileSystem.h>
 #include <OgreArchive.h>
 #include <OgreArchiveFactory.h>
 #include <OgreArchiveManager.h>
 #include "bsa_file.hpp"
-#include <libs/mangle/stream/clients/ogre_datastream.hpp>
+
+#include "../files/constrainedfiledatastream.hpp"
 
 using namespace Ogre;
-using namespace Mangle::Stream;
+
+static bool fsstrict = false;
+
+static char strict_normalize_char(char ch)
+{
+    return ch == '\\' ? '/' : ch;
+}
+
+static char nonstrict_normalize_char(char ch)
+{
+    return ch == '\\' ? '/' : std::tolower(ch);
+}
+
+template<typename T1, typename T2>
+static std::string normalize_path(T1 begin, T2 end)
+{
+    std::string normalized;
+    normalized.reserve(std::distance(begin, end));
+    char (*normalize_char)(char) = fsstrict ? &strict_normalize_char : &nonstrict_normalize_char;
+    std::transform(begin, end, std::back_inserter(normalized), normalize_char);
+    return normalized;
+}
 
 /// An OGRE Archive wrapping a BSAFile archive
+class DirArchive: public Ogre::Archive
+{
+    typedef std::map <std::string, std::string> index;
+
+    index mIndex;
+
+    index::const_iterator lookup_filename (std::string const & filename) const
+    {
+        std::string normalized = normalize_path (filename.begin (), filename.end ());
+        return mIndex.find (normalized);
+    }
+
+public:
+
+    DirArchive(const String& name)
+        : Archive(name, "Dir")
+    {
+        typedef boost::filesystem::recursive_directory_iterator directory_iterator;
+
+        directory_iterator end;
+
+        size_t prefix = name.size ();
+
+        if (name.size () > 0 && name [prefix - 1] != '\\' && name [prefix - 1] != '/')
+            ++prefix;
+
+        for (directory_iterator i (name); i != end; ++i)
+        {
+            if(boost::filesystem::is_directory (*i))
+                continue;
+
+            std::string proper = i->path ().string ();
+
+            std::string searchable = normalize_path (proper.begin () + prefix, proper.end ());
+
+            mIndex.insert (std::make_pair (searchable, proper));
+        }
+    }
+
+    bool isCaseSensitive() const { return fsstrict; }
+
+  // The archive is loaded in the constructor, and never unloaded.
+    void load() {}
+    void unload() {}
+
+    DataStreamPtr open(const String& filename, bool readonly = true) const
+    {
+        index::const_iterator i = lookup_filename (filename);
+
+        if (i == mIndex.end ())
+        {
+            std::ostringstream os;
+            os << "The file '" << filename << "' could not be found.";
+            throw std::runtime_error (os.str ());
+        }
+
+        return openConstrainedFileDataStream (i->second.c_str ());
+    }
+
+    StringVectorPtr list(bool recursive = true, bool dirs = false)
+    {
+        return find ("*", recursive, dirs);
+    }
+
+    FileInfoListPtr listFileInfo(bool recursive = true, bool dirs = false)
+    {
+        return findFileInfo ("*", recursive, dirs);
+    }
+
+    StringVectorPtr find(const String& pattern, bool recursive = true,
+                        bool dirs = false)
+    {
+        std::string normalizedPattern = normalize_path(pattern.begin(), pattern.end());
+        StringVectorPtr ptr = StringVectorPtr(new StringVector());
+        for(index::const_iterator iter = mIndex.begin();iter != mIndex.end();iter++)
+        {
+            if(Ogre::StringUtil::match(iter->first, normalizedPattern) ||
+               (recursive && Ogre::StringUtil::match(iter->first, "*/"+normalizedPattern)))
+                ptr->push_back(iter->first);
+        }
+        return ptr;
+    }
+
+    bool exists(const String& filename)
+    {
+        return lookup_filename(filename) != mIndex.end ();
+    }
+
+    time_t getModifiedTime(const String&) { return 0; }
+
+    FileInfoListPtr findFileInfo(const String& pattern, bool recursive = true,
+                            bool dirs = false) const
+    {
+        std::string normalizedPattern = normalize_path(pattern.begin(), pattern.end());
+        FileInfoListPtr ptr = FileInfoListPtr(new FileInfoList());
+
+        index::const_iterator i = mIndex.find(normalizedPattern);
+        if(i != mIndex.end())
+        {
+            std::string::size_type pt = i->first.rfind('/');
+            if(pt == std::string::npos)
+                pt = 0;
+
+            FileInfo fi;
+            fi.archive = const_cast<DirArchive*>(this);
+            fi.path = i->first.substr(0, pt);
+            fi.filename = i->first.substr((i->first[pt]=='/') ? pt+1 : pt);
+            fi.compressedSize = fi.uncompressedSize = 0;
+
+            ptr->push_back(fi);
+        }
+        else
+        {
+            for(index::const_iterator iter = mIndex.begin();iter != mIndex.end();iter++)
+            {
+                if(Ogre::StringUtil::match(iter->first, normalizedPattern) ||
+                   (recursive && Ogre::StringUtil::match(iter->first, "*/"+normalizedPattern)))
+                {
+                    std::string::size_type pt = iter->first.rfind('/');
+                    if(pt == std::string::npos)
+                        pt = 0;
+
+                    FileInfo fi;
+                    fi.archive = const_cast<DirArchive*>(this);
+                    fi.path = iter->first.substr(0, pt);
+                    fi.filename = iter->first.substr((iter->first[pt]=='/') ? pt+1 : pt);
+                    fi.compressedSize = fi.uncompressedSize = 0;
+
+                    ptr->push_back(fi);
+                }
+            }
+        }
+
+        return ptr;
+    }
+};
+
 class BSAArchive : public Archive
 {
-  BSAFile arc;
+  Bsa::BSAFile arc;
+
+  static const char *extractFilename(const Bsa::BSAFile::FileStruct &entry)
+  {
+      return entry.name;
+  }
 
 public:
   BSAArchive(const String& name)
@@ -48,83 +213,81 @@ public:
   void load() {}
   void unload() {}
 
-  DataStreamPtr open(const String& filename, bool recursive = true) const
+  DataStreamPtr open(const String& filename, bool readonly = true) const
   {
     // Get a non-const reference to arc. This is a hack and it's all
     // OGRE's fault. You should NOT expect an open() command not to
     // have any side effects on the archive, and hence this function
     // should not have been declared const in the first place.
-    BSAFile *narc = (BSAFile*)&arc;
+    Bsa::BSAFile *narc = const_cast<Bsa::BSAFile*>(&arc);
 
     // Open the file
-    StreamPtr strm = narc->getFile(filename.c_str());
-
-    // Wrap it into an Ogre::DataStream.
-    return DataStreamPtr(new Mangle2OgreStream(strm));
+    return narc->getFile(filename.c_str());
   }
 
-  // Check if the file exists.
-  bool exists(const String& filename) { return arc.exists(filename.c_str()); }
+  bool exists(const String& filename) {
+    return arc.exists(filename.c_str());
+  }
+
   time_t getModifiedTime(const String&) { return 0; }
 
   // This is never called as far as I can see.
   StringVectorPtr list(bool recursive = true, bool dirs = false)
   {
-    //std::cout << "list(" << recursive << ", " << dirs << ")\n";
-    StringVectorPtr ptr = StringVectorPtr(new StringVector());
-    return ptr;
+    return find ("*", recursive, dirs);
   }
 
   // Also never called.
   FileInfoListPtr listFileInfo(bool recursive = true, bool dirs = false)
   {
-    //std::cout << "listFileInfo(" << recursive << ", " << dirs << ")\n";
-    FileInfoListPtr ptr = FileInfoListPtr(new FileInfoList());
-    return ptr;
+    return findFileInfo ("*", recursive, dirs);
   }
 
-  // After load() is called, find("*") is called once. It doesn't seem
-  // to matter that we return an empty list, exists() gets called on
-  // the correct files anyway.
-  StringVectorPtr find(const String& pattern, bool recursive = true,
-                       bool dirs = false)
-  {
-    //std::cout << "find(" << pattern << ", " << recursive
-    //          << ", " << dirs << ")\n";
-    StringVectorPtr ptr = StringVectorPtr(new StringVector());
-    return ptr;
-  }
+    StringVectorPtr find(const String& pattern, bool recursive = true,
+                         bool dirs = false)
+    {
+        std::string normalizedPattern = normalize_path(pattern.begin(), pattern.end());
+        const Bsa::BSAFile::FileList &filelist = arc.getList();
+        StringVectorPtr ptr = StringVectorPtr(new StringVector());
+        for(Bsa::BSAFile::FileList::const_iterator iter = filelist.begin();iter != filelist.end();iter++)
+        {
+            std::string ent = normalize_path(iter->name, iter->name+std::strlen(iter->name));
+            if(Ogre::StringUtil::match(ent, normalizedPattern) ||
+               (recursive && Ogre::StringUtil::match(ent, "*/"+normalizedPattern)))
+                ptr->push_back(iter->name);
+        }
+        return ptr;
+    }
 
-  /* Gets called once for each of the ogre formats, *.program,
-     *.material etc. We ignore all these.
+    FileInfoListPtr findFileInfo(const String& pattern, bool recursive = true,
+                                bool dirs = false) const
+    {
+        std::string normalizedPattern = normalize_path(pattern.begin(), pattern.end());
+        FileInfoListPtr ptr = FileInfoListPtr(new FileInfoList());
+        const Bsa::BSAFile::FileList &filelist = arc.getList();
 
-     However, it's also called by MyGUI to find individual textures,
-     and we can't ignore these since many of the GUI textures are
-     located in BSAs. So instead we channel it through exists() and
-     set up a single-element result list if the file is found.
-  */
-  FileInfoListPtr findFileInfo(const String& pattern, bool recursive = true,
-                               bool dirs = false)
-  {
-    FileInfoListPtr ptr = FileInfoListPtr(new FileInfoList());
+        for(Bsa::BSAFile::FileList::const_iterator iter = filelist.begin();iter != filelist.end();iter++)
+        {
+            std::string ent = normalize_path(iter->name, iter->name+std::strlen(iter->name));
+            if(Ogre::StringUtil::match(ent, normalizedPattern) ||
+                (recursive && Ogre::StringUtil::match(ent, "*/"+normalizedPattern)))
+            {
+                std::string::size_type pt = ent.rfind('/');
+                if(pt == std::string::npos)
+                    pt = 0;
 
-    // Check if the file exists (only works for single files - wild
-    // cards and recursive search isn't implemented.)
-    if(exists(pattern))
-      {
-        FileInfo fi;
-        fi.archive = this;
-        fi.filename = pattern;
-        // It apparently doesn't matter that we return bogus
-        // information
-        fi.path = "";
-        fi.compressedSize = fi.uncompressedSize = 0;
+                FileInfo fi;
+                fi.archive = const_cast<BSAArchive*>(this);
+                fi.path = std::string(iter->name, pt);
+                fi.filename = std::string(iter->name + ((ent[pt]=='/') ? pt+1 : pt));
+                fi.compressedSize = fi.uncompressedSize = iter->fileSize;
 
-        ptr->push_back(fi);
-      }
+                ptr->push_back(fi);
+            }
+        }
 
-    return ptr;
-  }
+        return ptr;
+    }
 };
 
 // An archive factory for BSA archives
@@ -142,10 +305,40 @@ public:
     return new BSAArchive(name);
   }
 
+  virtual Archive* createInstance(const String& name, bool readOnly)
+  {
+    return new BSAArchive(name);
+  }
+
   void destroyInstance( Archive* arch) { delete arch; }
 };
 
+class DirArchiveFactory : public ArchiveFactory
+{
+public:
+    const String& getType() const
+    {
+      static String name = "Dir";
+      return name;
+    }
+
+    Archive *createInstance( const String& name )
+    {
+      return new DirArchive(name);
+    }
+
+    virtual Archive* createInstance(const String& name, bool readOnly)
+    {
+      return new DirArchive(name);
+    }
+
+    void destroyInstance( Archive* arch) { delete arch; }
+};
+
+
 static bool init = false;
+static bool init2 = false;
+
 static void insertBSAFactory()
 {
   if(!init)
@@ -155,11 +348,35 @@ static void insertBSAFactory()
     }
 }
 
+static void insertDirFactory()
+{
+  if(!init2)
+    {
+      ArchiveManager::getSingleton().addArchiveFactory( new DirArchiveFactory );
+      init2 = true;
+    }
+}
+
+
+namespace Bsa
+{
+
 // The function below is the only publicly exposed part of this file
 
 void addBSA(const std::string& name, const std::string& group)
 {
   insertBSAFactory();
   ResourceGroupManager::getSingleton().
-    addResourceLocation(name, "BSA", group);
+    addResourceLocation(name, "BSA", group, true);
+}
+
+void addDir(const std::string& name, const bool& fs, const std::string& group)
+{
+    fsstrict = fs;
+    insertDirFactory();
+
+    ResourceGroupManager::getSingleton().
+    addResourceLocation(name, "Dir", group, true);
+}
+
 }

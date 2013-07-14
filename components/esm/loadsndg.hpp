@@ -1,9 +1,13 @@
-#ifndef _ESM_SNDG_H
-#define _ESM_SNDG_H
+#ifndef OPENMW_ESM_SNDG_H
+#define OPENMW_ESM_SNDG_H
 
-#include "esm_reader.hpp"
+#include <string>
 
-namespace ESM {
+namespace ESM
+{
+
+class ESMReader;
+class ESMWriter;
 
 /*
  * Sound generator. This describes the sounds a creature make.
@@ -11,30 +15,25 @@ namespace ESM {
 
 struct SoundGenerator
 {
-  enum Type
+    enum Type
     {
-      LeftFoot	= 0,
-      RightFoot = 1,
-      SwimLeft	= 2,
-      SwimRight = 3,
-      Moan	= 4,
-      Roar	= 5,
-      Scream	= 6,
-      Land	= 7
+        LeftFoot = 0,
+        RightFoot = 1,
+        SwimLeft = 2,
+        SwimRight = 3,
+        Moan = 4,
+        Roar = 5,
+        Scream = 6,
+        Land = 7
     };
 
-  // Type 
-  int type;
+    // Type
+    int mType;
 
-  std::string creature, sound;
+    std::string mId, mCreature, mSound;
 
-  void load(ESMReader &esm)
-  {
-    esm.getHNT(type, "DATA", 4);
-
-    creature = esm.getHNOString("CNAM");
-    sound = esm.getHNOString("SNAM");
-  }
+    void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 };
 }
 #endif

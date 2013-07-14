@@ -1,9 +1,15 @@
-#ifndef _ESM_GLOB_H
-#define _ESM_GLOB_H
+#ifndef OPENMW_ESM_GLOB_H
+#define OPENMW_ESM_GLOB_H
 
-#include "esm_reader.hpp"
+#include <string>
 
-namespace ESM {
+#include "variant.hpp"
+
+namespace ESM
+{
+
+class ESMReader;
+class ESMWriter;
 
 /*
  * Global script variables
@@ -11,22 +17,17 @@ namespace ESM {
 
 struct Global
 {
-  unsigned value;
-  VarType type;
+    std::string mId;
+    Variant mValue;
 
-  void load(ESMReader &esm)
-  {
-    VarType t;
-    std::string tmp = esm.getHNString("FNAM");
-    if(tmp == "s") t = VT_Short;
-    else if(tmp == "l") t = VT_Int;
-    else if(tmp == "f") t = VT_Float;
-    else esm.fail("Illegal global variable type " + tmp);
-    type = t;
+    void load(ESMReader &esm);
+    void save(ESMWriter &esm);
 
-    // Note: Both floats and longs are represented as floats.
-    esm.getHNT(value, "FLTV");
-  }
+    void blank();
+    ///< Set record to default state (does not touch the ID).
 };
+
+bool operator== (const Global& left, const Global& right);
+
 }
 #endif

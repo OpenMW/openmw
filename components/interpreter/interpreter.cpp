@@ -134,8 +134,7 @@ namespace Interpreter
         throw std::runtime_error (error.str());
     }
 
-    Interpreter::Interpreter (Context& context)
-    : mRuntime (context)
+    Interpreter::Interpreter()
     {}
 
     Interpreter::~Interpreter()
@@ -195,11 +194,11 @@ namespace Interpreter
         mSegment5.insert (std::make_pair (code, opcode));
     }
 
-    void Interpreter::run (const Type_Code *code, int codeSize)
+    void Interpreter::run (const Type_Code *code, int codeSize, Context& context)
     {
         assert (codeSize>=4);
 
-        mRuntime.configure (code, codeSize);
+        mRuntime.configure (code, codeSize, context);
 
         int opcodes = static_cast<int> (code[0]);
 

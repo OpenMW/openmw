@@ -1,6 +1,7 @@
 
 #include "scanner.hpp"
 
+#include <cassert>
 #include <cctype>
 #include <sstream>
 #include <algorithm>
@@ -10,6 +11,8 @@
 #include "errorhandler.hpp"
 #include "parser.hpp"
 #include "extensions.hpp"
+
+#include <components/misc/stringops.hpp>
 
 namespace Compiler
 {
@@ -86,6 +89,10 @@ namespace Compiler
         }
         else if (c==';')
         {
+            std::string comment;
+
+            comment += c;
+
             while (get (c))
             {
                 if (c=='\n')
@@ -93,14 +100,23 @@ namespace Compiler
                     putback (c);
                     break;
                 }
+                else
+                    comment += c;
             }
 
+            TokenLoc loc (mLoc);
             mLoc.mLiteral.clear();
 
-            return true;
+            return parser.parseComment (comment, loc, *this);
         }
         else if (isWhitespace (c))
         {
+            mLoc.mLiteral.clear();
+            return true;
+        }
+        else if (c==':')
+        {
+            // treat : as a whitespace :(
             mLoc.mLiteral.clear();
             return true;
         }
@@ -148,10 +164,9 @@ namespace Compiler
 
     bool Scanner::scanInt (char c, Parser& parser, bool& cont)
     {
+        assert(c != '\0');
         std::string value;
-
         value += c;
-        bool empty = false;
 
         bool error = false;
 
@@ -160,7 +175,6 @@ namespace Compiler
             if (std::isdigit (c))
             {
                 value += c;
-                empty = false;
             }
             else if (std::isalpha (c) || c=='_')
                 error = true;
@@ -175,7 +189,7 @@ namespace Compiler
             }
         }
 
-        if (empty || error)
+        if (error)
             return false;
 
         TokenLoc loc (mLoc);
@@ -230,27 +244,27 @@ namespace Compiler
         return true;
     }
 
+    static const char *keywords[] =
+    {
+        "begin", "end",
+        "short", "long", "float",
+        "if", "endif", "else", "elseif",
+        "while", "endwhile",
+        "return",
+        "messagebox",
+        "set", "to",
+        "getsquareroot",
+        "menumode",
+        "random",
+        "startscript", "stopscript", "scriptrunning",
+        "getdistance",
+        "getsecondspassed",
+        "enable", "disable", "getdisabled",
+        0
+    };
+
     bool Scanner::scanName (char c, Parser& parser, bool& cont)
     {
-        static const char *keywords[] =
-        {
-            "begin", "end",
-            "short", "long", "float",
-            "if", "endif", "else", "elseif",
-            "while", "endwhile",
-            "return",
-            "messagebox",
-            "set", "to",
-            "getsquareroot",
-            "menumode",
-            "random",
-            "startscript", "stopscript", "scriptrunning",
-            "getdistance",
-            "getsecondspassed",
-            "enable", "disable", "getdisabled",
-            0
-        };
-
         std::string name;
 
         if (!scanName (c, name))
@@ -268,11 +282,7 @@ namespace Compiler
 
         int i = 0;
 
-        std::string lowerCase;
-        lowerCase.reserve (name.size());
-
-        std::transform (name.begin(), name.end(), std::back_inserter (lowerCase),
-            (int(*)(int)) std::tolower);
+        std::string lowerCase = Misc::StringUtils::lowerCase(name);
 
         for (; keywords[i]; ++i)
             if (lowerCase==keywords[i])
@@ -333,7 +343,11 @@ namespace Compiler
             }
             else if (!(c=='"' && name.empty()))
             {
-                if (!(std::isalpha (c) || std::isdigit (c) || c=='_'))
+                if (!(std::isalpha (c) || std::isdigit (c) || c=='_' || c=='`' ||
+                    /// \todo add an option to disable the following hack. Also, find out who is
+                    /// responsible for allowing it in the first place and meet up with that person in
+                    /// a dark alley.
+                    (c=='-' && !name.empty() && std::isalpha (mStream.peek()))))
                 {
                     putback (c);
                     break;
@@ -360,6 +374,19 @@ namespace Compiler
             special = S_open;
         else if (c==')')
             special = S_close;
+        else if (c=='.')
+        {
+            // check, if this starts a float literal
+            if (get (c))
+            {
+                putback (c);
+
+                if (std::isdigit (c))
+                    return scanFloat ("", parser, cont);
+            }
+
+            special = S_member;
+        }
         else if (c=='=')
         {
             if (get (c))
@@ -368,8 +395,10 @@ namespace Compiler
                     special = S_cmpEQ;
                 else
                 {
+                    special = S_cmpEQ;
                     putback (c);
-                    return false;
+//                    return false;
+// Allow = as synonym for ==. \todo optionally disable for post-1.0 scripting improvements.
                 }
             }
             else
@@ -413,7 +442,12 @@ namespace Compiler
             if (get (c))
             {
                 if (c=='=')
+                {
                     special = S_cmpLE;
+
+                    if (get (c) && c!='=') // <== is a allowed as an alternative to <=  :(
+                        putback (c);
+                }
                 else
                 {
                     putback (c);
@@ -428,7 +462,12 @@ namespace Compiler
             if (get (c))
             {
                 if (c=='=')
+                {
                     special = S_cmpGE;
+
+                    if (get (c) && c!='=') // >== is a allowed as an alternative to >=  :(
+                        putback (c);
+                }
                 else
                 {
                     putback (c);
@@ -512,5 +551,14 @@ namespace Compiler
         mPutback = Putback_Keyword;
         mPutbackCode = keyword;
         mPutbackLoc = loc;
+    }
+
+    void Scanner::listKeywords (std::vector<std::string>& keywords)
+    {
+        for (int i=0; Compiler::keywords[i]; ++i)
+            keywords.push_back (Compiler::keywords[i]);
+
+        if (mExtensions)
+            mExtensions->listKeywords (keywords);
     }
 }

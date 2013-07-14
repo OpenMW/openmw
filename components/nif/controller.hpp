@@ -21,12 +21,12 @@
 
  */
 
-#ifndef _NIF_CONTROLLER_H_
-#define _NIF_CONTROLLER_H_
+#ifndef OPENMW_COMPONENTS_NIF_CONTROLLER_HPP
+#define OPENMW_COMPONENTS_NIF_CONTROLLER_HPP
 
 #include "record.hpp"
-#include "nif_file.hpp"
-#include "record_ptr.hpp"
+#include "niffile.hpp"
+#include "recordptr.hpp"
 
 namespace Nif
 {
@@ -34,136 +34,296 @@ namespace Nif
 class Controller : public Record
 {
 public:
-  ControllerPtr next;
-  int flags;
-  float frequency, phase;
-  float timeStart, timeStop;
-  ControlledPtr target;
+    ControllerPtr next;
+    int flags;
+    float frequency, phase;
+    float timeStart, timeStop;
+    ControlledPtr target;
 
-  void read(NIFFile *nif)
-  {
-    next.read(nif);
+    void read(NIFStream *nif)
+    {
+        next.read(nif);
 
-    flags = nif->getShort();
+        flags = nif->getUShort();
 
-    frequency = nif->getFloat();
-    phase = nif->getFloat();
-    timeStart = nif->getFloat();
-    timeStop = nif->getFloat();
+        frequency = nif->getFloat();
+        phase = nif->getFloat();
+        timeStart = nif->getFloat();
+        timeStop = nif->getFloat();
 
-    target.read(nif);
-  }
+        target.read(nif);
+    }
+
+    void post(NIFFile *nif)
+    {
+        Record::post(nif);
+        next.post(nif);
+        target.post(nif);
+    }
 };
 
-class NiBSPArrayController : public Controller
+class NiParticleSystemController : public Controller
 {
 public:
-  void read(NIFFile *nif)
-  {
-    Controller::read(nif);
+    struct Particle {
+        Ogre::Vector3 velocity;
+        float lifetime;
+        float lifespan;
+        float timestamp;
+        int vertex;
+    };
 
-    // At the moment, just skip it all
-    nif->skip(111);
-    int s = nif->getShort();
-    nif->skip(15 + s*40);
-  }
+    float velocity;
+    float velocityRandom;
+
+    float verticalDir; // 0=up, pi/2=horizontal, pi=down
+    float verticalAngle;
+    float horizontalDir;
+    float horizontalAngle;
+
+    float size;
+    float startTime;
+    float stopTime;
+
+    float emitRate;
+    float lifetime;
+    float lifetimeRandom;
+
+    int emitFlags; // Bit 0: Emit Rate toggle bit (0 = auto adjust, 1 = use Emit Rate value)
+    Ogre::Vector3 offsetRandom;
+
+    NodePtr emitter;
+
+    int numParticles;
+    int activeCount;
+    std::vector<Particle> particles;
+
+    ExtraPtr extra;
+
+    void read(NIFStream *nif)
+    {
+        Controller::read(nif);
+
+        velocity = nif->getFloat();
+        velocityRandom = nif->getFloat();
+        verticalDir = nif->getFloat();
+        verticalAngle = nif->getFloat();
+        horizontalDir = nif->getFloat();
+        horizontalAngle = nif->getFloat();
+        /*normal?*/ nif->getVector3();
+        /*color?*/ nif->getVector4();
+        size = nif->getFloat();
+        startTime = nif->getFloat();
+        stopTime = nif->getFloat();
+        nif->getChar();
+        emitRate = nif->getFloat();
+        lifetime = nif->getFloat();
+        lifetimeRandom = nif->getFloat();
+
+        emitFlags = nif->getUShort();
+        offsetRandom = nif->getVector3();
+
+        emitter.read(nif);
+
+        /* Unknown Short, 0?
+         * Unknown Float, 1.0?
+         * Unknown Int, 1?
+         * Unknown Int, 0?
+         * Unknown Short, 0?
+         */
+        nif->skip(16);
+
+        numParticles = nif->getUShort();
+        activeCount = nif->getUShort();
+
+        particles.resize(numParticles);
+        for(size_t i = 0;i < particles.size();i++)
+        {
+            particles[i].velocity = nif->getVector3();
+            nif->getVector3(); /* unknown */
+            particles[i].lifetime = nif->getFloat();
+            particles[i].lifespan = nif->getFloat();
+            particles[i].timestamp = nif->getFloat();
+            nif->getUShort(); /* unknown */
+            particles[i].vertex = nif->getUShort();
+        }
+
+        nif->getUInt(); /* -1? */
+        extra.read(nif);
+        nif->getUInt(); /* -1? */
+        nif->getChar();
+    }
+
+    void post(NIFFile *nif)
+    {
+        Controller::post(nif);
+        emitter.post(nif);
+        extra.post(nif);
+    }
 };
-typedef NiBSPArrayController NiParticleSystemController;
+typedef NiParticleSystemController NiBSPArrayController;
 
 class NiMaterialColorController : public Controller
 {
 public:
-  NiPosDataPtr data;
+    NiPosDataPtr data;
 
-  void read(NIFFile *nif)
-  {
-    Controller::read(nif);
-    data.read(nif);
-  }
+    void read(NIFStream *nif)
+    {
+        Controller::read(nif);
+        data.read(nif);
+    }
+
+    void post(NIFFile *nif)
+    {
+        Controller::post(nif);
+        data.post(nif);
+    }
 };
 
 class NiPathController : public Controller
 {
 public:
-  NiPosDataPtr posData;
-  NiFloatDataPtr floatData;
+    NiPosDataPtr posData;
+    NiFloatDataPtr floatData;
 
-  void read(NIFFile *nif)
-  {
-    Controller::read(nif);
+    void read(NIFStream *nif)
+    {
+        Controller::read(nif);
 
-    /*
-      int = 1
-      2xfloat
-      short = 0 or 1
-     */
-    nif->skip(14);
-    posData.read(nif);
-    floatData.read(nif);
-  }
+        /*
+           int = 1
+           2xfloat
+           short = 0 or 1
+        */
+        nif->skip(14);
+        posData.read(nif);
+        floatData.read(nif);
+    }
+
+    void post(NIFFile *nif)
+    {
+        Controller::post(nif);
+
+        posData.post(nif);
+        floatData.post(nif);
+    }
 };
 
 class NiUVController : public Controller
 {
 public:
-  NiUVDataPtr data;
+    NiUVDataPtr data;
 
-  void read(NIFFile *nif)
-  {
-    Controller::read(nif);
+    void read(NIFStream *nif)
+    {
+        Controller::read(nif);
 
-    nif->getShort(); // always 0
-    data.read(nif);
-  }
+        nif->getUShort(); // always 0
+        data.read(nif);
+    }
+
+    void post(NIFFile *nif)
+    {
+        Controller::post(nif);
+        data.post(nif);
+    }
 };
 
 class NiKeyframeController : public Controller
 {
 public:
-  NiKeyframeDataPtr data;
+    NiKeyframeDataPtr data;
 
-  void read(NIFFile *nif)
-  {
-    Controller::read(nif);
-    data.read(nif);
-  }
+    void read(NIFStream *nif)
+    {
+        Controller::read(nif);
+        data.read(nif);
+    }
+
+    void post(NIFFile *nif)
+    {
+        Controller::post(nif);
+        data.post(nif);
+    }
 };
 
 class NiAlphaController : public Controller
 {
 public:
-  NiFloatDataPtr data;
+    NiFloatDataPtr data;
 
-  void read(NIFFile *nif)
-  {
-    Controller::read(nif);
-    data.read(nif);
-  }
+    void read(NIFStream *nif)
+    {
+        Controller::read(nif);
+        data.read(nif);
+    }
+
+    void post(NIFFile *nif)
+    {
+        Controller::post(nif);
+        data.post(nif);
+    }
 };
 
 class NiGeomMorpherController : public Controller
 {
 public:
-  NiMorphDataPtr data;
+    NiMorphDataPtr data;
 
-  void read(NIFFile *nif)
-  {
-    Controller::read(nif);
-    data.read(nif);
-    nif->getByte(); // always 0
-  }
+    void read(NIFStream *nif)
+    {
+        Controller::read(nif);
+        data.read(nif);
+        nif->getChar(); // always 0
+    }
+
+    void post(NIFFile *nif)
+    {
+        Controller::post(nif);
+        data.post(nif);
+    }
 };
 
 class NiVisController : public Controller
 {
 public:
-  NiVisDataPtr data;
+    NiVisDataPtr data;
 
-  void read(NIFFile *nif)
-  {
-    Controller::read(nif);
-    data.read(nif);
-  }
+    void read(NIFStream *nif)
+    {
+        Controller::read(nif);
+        data.read(nif);
+    }
+
+    void post(NIFFile *nif)
+    {
+        Controller::post(nif);
+        data.post(nif);
+    }
+};
+
+class NiFlipController : public Controller
+{
+public:
+    int mTexSlot;
+    float mDelta; // Time between two flips. delta = (start_time - stop_time) / num_sources
+    NiSourceTextureList mSources;
+
+    void read(NIFStream *nif)
+    {
+        Controller::read(nif);
+        mTexSlot = nif->getUInt();
+        /*unknown=*/nif->getUInt();/*0?*/
+        mDelta = nif->getFloat();
+        mSources.read(nif);
+    }
+
+    void post(NIFFile *nif)
+    {
+        Controller::post(nif);
+        mSources.post(nif);
+    }
 };
 
 } // Namespace

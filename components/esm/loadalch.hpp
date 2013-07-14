@@ -1,10 +1,15 @@
-#ifndef _ESM_ALCH_H
-#define _ESM_ALCH_H
+#ifndef OPENMW_ESM_ALCH_H
+#define OPENMW_ESM_ALCH_H
 
-#include "esm_reader.hpp"
-#include "defs.hpp"
+#include <string>
 
-namespace ESM {
+#include "effectlist.hpp"
+
+namespace ESM
+{
+
+class ESMReader;
+class ESMWriter;
 
 /*
  * Alchemy item (potions)
@@ -12,26 +17,23 @@ namespace ESM {
 
 struct Potion
 {
-  struct ALDTstruct
-  {
-    float weight;
-    int value;
-    int autoCalc;
-  };
-  ALDTstruct data;
+    struct ALDTstruct
+    {
+        float mWeight;
+        int mValue;
+        int mAutoCalc;
+    };
+    ALDTstruct mData;
 
-  std::string name, model, icon, script;
-  EffectList effects;
+    std::string mId, mName, mModel, mIcon, mScript;
+    EffectList mEffects;
 
-  void load(ESMReader &esm)
-  {
-    model = esm.getHNString("MODL");
-    icon = esm.getHNOString("TEXT"); // not ITEX here for some reason
-    script = esm.getHNOString("SCRI");
-    name = esm.getHNOString("FNAM");
-    esm.getHNT(data, "ALDT", 12);
-    effects.load(esm);
-  }
-};
+    void load(ESMReader &esm);
+    void save(ESMWriter &esm);
+
+    void blank();
+    ///< Set record to default state (does not touch the ID).
+
+    };
 }
 #endif
