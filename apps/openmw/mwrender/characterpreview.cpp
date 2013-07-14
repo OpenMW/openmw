@@ -44,8 +44,13 @@ namespace MWRender
     {
         mSceneMgr = Ogre::Root::getSingleton().createSceneManager(Ogre::ST_GENERIC);
 
-        /// \todo Read the fallback values from INIImporter (Inventory:Directional*)
+        // This is a dummy light to turn off shadows without having to use a separate set of shaders
         Ogre::Light* l = mSceneMgr->createLight();
+        l->setType (Ogre::Light::LT_DIRECTIONAL);
+        l->setDiffuseColour (Ogre::ColourValue(0,0,0));
+
+        /// \todo Read the fallback values from INIImporter (Inventory:Directional*)
+        l = mSceneMgr->createLight();
         l->setType (Ogre::Light::LT_DIRECTIONAL);
         l->setDirection (Ogre::Vector3(0.3, -0.7, 0.3));
         l->setDiffuseColour (Ogre::ColourValue(1,1,1));
