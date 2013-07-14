@@ -4,6 +4,7 @@
     <Property key="Caption" value="#{sConsoleTitle}"/>
     <Property key="MinSize" value="200 100"/>
     <Property key="MaxSize" value="2000 2000"/>
+    <Property key="Visible" value="false"/>
 
     <!-- Log window -->
     <Widget type="EditBox" skin="MW_ConsoleLog" position="5 5 380 330" align="Stretch" name="list_History">

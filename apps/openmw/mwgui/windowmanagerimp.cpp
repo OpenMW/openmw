@@ -329,7 +329,7 @@ namespace MWGui
         mMap->setVisible(false);
         mMenu->setVisible(false);
         mStatsWindow->setVisible(false);
-        mConsole->disable();
+        mConsole->setVisible(false);
         mJournal->setVisible(false);
         mDialogueWindow->setVisible(false);
         mContainerWindow->setVisible(false);
@@ -398,7 +398,7 @@ namespace MWGui
                 mInventoryWindow->setVisible(mInventoryWindow->pinned());
                 mSpellWindow->setVisible(mSpellWindow->pinned());
 
-                mConsole->enable();
+                mConsole->setVisible(true);
                 break;
             case GM_Scroll:
                 mScrollWindow->setVisible(true);
