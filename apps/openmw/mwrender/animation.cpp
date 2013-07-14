@@ -45,6 +45,7 @@ void Animation::destroyObjectList(Ogre::SceneManager *sceneMgr, NifOgre::ObjectL
 
 Animation::Animation(const MWWorld::Ptr &ptr)
     : mPtr(ptr)
+    , mCamera(NULL)
     , mInsert(NULL)
     , mSkelBase(NULL)
     , mAccumRoot(NULL)
@@ -72,8 +73,9 @@ Animation::~Animation()
 
 void Animation::setObjectRoot(Ogre::SceneNode *node, const std::string &model, bool baseonly)
 {
-    OgreAssert(!mInsert, "Object already has a root!");
-    mInsert = node->createChildSceneNode();
+    OgreAssert(mAnimSources.size() == 0, "Setting object root while animation sources are set!");
+    if(!mInsert)
+        mInsert = node->createChildSceneNode();
 
     std::string mdlname = Misc::StringUtils::lowerCase(model);
     std::string::size_type p = mdlname.rfind('\\');
@@ -88,6 +90,9 @@ void Animation::setObjectRoot(Ogre::SceneNode *node, const std::string &model, b
         mdlname = model;
         Misc::StringUtils::toLower(mdlname);
     }
+
+    mSkelBase = NULL;
+    destroyObjectList(mInsert->getCreator(), mObjectRoot);
 
     mObjectRoot = (!baseonly ? NifOgre::Loader::createObjects(mInsert, mdlname) :
                                NifOgre::Loader::createObjectBase(mInsert, mdlname));
@@ -110,7 +115,23 @@ void Animation::setObjectRoot(Ogre::SceneNode *node, const std::string &model, b
         Ogre::Skeleton::BoneIterator boneiter = skelinst->getBoneIterator();
         while(boneiter.hasMoreElements())
             boneiter.getNext()->setManuallyControlled(true);
+
+        // Reattach any objects that have been attached to this one
+        ObjectAttachMap::iterator iter = mAttachedObjects.begin();
+        while(iter != mAttachedObjects.end())
+        {
+            if(!skelinst->hasBone(iter->second))
+                mAttachedObjects.erase(iter++);
+            else
+            {
+                mSkelBase->attachObjectToBone(iter->second, iter->first);
+                iter++;
+            }
+        }
     }
+    else
+        mAttachedObjects.clear();
+
     for(size_t i = 0;i < mObjectRoot.mControllers.size();i++)
     {
         if(mObjectRoot.mControllers[i].getSource().isNull())
@@ -734,6 +755,26 @@ bool Animation::isPriorityActive(int priority) const
         if (it->second.mPriority == priority)
             return true;
     return false;
+}
+
+Ogre::TagPoint *Animation::attachObjectToBone(const Ogre::String &bonename, Ogre::MovableObject *obj)
+{
+    Ogre::TagPoint *tag = NULL;
+    Ogre::SkeletonInstance *skel = (mSkelBase ? mSkelBase->getSkeleton() : NULL);
+    if(skel && skel->hasBone(bonename))
+    {
+        tag = mSkelBase->attachObjectToBone(bonename, obj);
+        mAttachedObjects[obj] = bonename;
+    }
+    return tag;
+}
+
+void Animation::detachObjectFromBone(Ogre::MovableObject *obj)
+{
+    ObjectAttachMap::iterator iter = mAttachedObjects.find(obj);
+    if(iter != mAttachedObjects.end())
+        mAttachedObjects.erase(iter);
+    mSkelBase->detachObjectFromBone(obj);
 }
 
 }

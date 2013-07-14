@@ -59,6 +59,9 @@ enum VisibilityFlags
     // overlays, we only want these on the main render target
     RV_Overlay = 1024,
 
+    // First person meshes do not cast shadows
+    RV_FirstPerson = 2048,
+
     RV_Map = RV_Terrain + RV_Statics + RV_StaticsSmall + RV_Misc + RV_Water
 };
 

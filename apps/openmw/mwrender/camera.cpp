@@ -3,6 +3,7 @@
 #include <OgreSceneNode.h>
 #include <OgreCamera.h>
 #include <OgreSceneManager.h>
+#include <OgreTagPoint.h>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -57,10 +58,10 @@ namespace MWRender
 
         Ogre::Quaternion xr(Ogre::Radian(getPitch() + Ogre::Math::HALF_PI), Ogre::Vector3::UNIT_X);
         if (!mVanity.enabled && !mPreviewMode) {
-            mCameraNode->setOrientation(xr);
+            mCamera->getParentNode()->setOrientation(xr);
         } else {
             Ogre::Quaternion zr(Ogre::Radian(getYaw()), Ogre::Vector3::NEGATIVE_UNIT_Z);
-            mCameraNode->setOrientation(zr * xr);
+            mCamera->getParentNode()->setOrientation(zr * xr);
         }
     }
 
@@ -112,14 +113,12 @@ namespace MWRender
     void Camera::toggleViewMode()
     {
         mFirstPersonView = !mFirstPersonView;
-        mAnimation->setViewMode(isFirstPerson() ? NpcAnimation::VM_FirstPerson :
-                                                  NpcAnimation::VM_Normal);
+        processViewChange();
+
         if (mFirstPersonView) {
             mCamera->setPosition(0.f, 0.f, 0.f);
-            setLowHeight(false);
         } else {
             mCamera->setPosition(0.f, 0.f, mCameraDistance);
-            setLowHeight(true);
         }
     }
     
@@ -139,21 +138,16 @@ namespace MWRender
             return true;
         mVanity.enabled = enable;
 
-        mAnimation->setViewMode(isFirstPerson() ? NpcAnimation::VM_FirstPerson :
-                                                  NpcAnimation::VM_Normal);
+        processViewChange();
 
         float offset = mPreviewCam.offset;
         Ogre::Vector3 rot(0.f, 0.f, 0.f);
         if (mVanity.enabled) {
             rot.x = Ogre::Degree(-30.f).valueRadians();
             mMainCam.offset = mCamera->getPosition().z;
-
-            setLowHeight(true);
         } else {
             rot.x = getPitch();
             offset = mMainCam.offset;
-
-            setLowHeight(!mFirstPersonView);
         }
         rot.z = getYaw();
 
@@ -169,20 +163,15 @@ namespace MWRender
             return;
 
         mPreviewMode = enable;
-        mAnimation->setViewMode(isFirstPerson() ? NpcAnimation::VM_FirstPerson :
-                                                  NpcAnimation::VM_Normal);
+        processViewChange();
 
         float offset = mCamera->getPosition().z;
         if (mPreviewMode) {
             mMainCam.offset = offset;
             offset = mPreviewCam.offset;
-
-            setLowHeight(true);
         } else {
             mPreviewCam.offset = offset;
             offset = mMainCam.offset;
-
-            setLowHeight(!mFirstPersonView);
         }
 
         mCamera->setPosition(0.f, 0.f, offset);
@@ -283,26 +272,48 @@ namespace MWRender
         // If we're switching to a new NpcAnimation, ensure the old one is
         // using a normal view mode
         if(mAnimation && mAnimation != anim)
+        {
             mAnimation->setViewMode(NpcAnimation::VM_Normal);
+            mAnimation->setCamera(NULL);
+            mAnimation->detachObjectFromBone(mCamera);
+        }
         mAnimation = anim;
-        mAnimation->setViewMode(isFirstPerson() ? NpcAnimation::VM_FirstPerson :
-                                                  NpcAnimation::VM_Normal);
+        mAnimation->setCamera(this);
+
+        processViewChange();
     }
 
-    void Camera::setHeight(float height)
+    void Camera::processViewChange()
     {
-        mHeight = height;
-        mCameraNode->setPosition(0.f, 0.f, mHeight);
+        mAnimation->detachObjectFromBone(mCamera);
+        mCamera->detachFromParent();
+
+        if(isFirstPerson())
+        {
+            mAnimation->setViewMode(NpcAnimation::VM_FirstPerson);
+            Ogre::TagPoint *tag = mAnimation->attachObjectToBone("Head", mCamera);
+            tag->setInheritOrientation(false);
+        }
+        else
+        {
+            mAnimation->setViewMode(NpcAnimation::VM_Normal);
+            mCameraNode->attachObject(mCamera);
+        }
     }
 
     float Camera::getHeight()
     {
-        return mHeight * mTrackingPtr.getRefData().getBaseNode()->getScale().z;
+        if(mCamera->isParentTagPoint())
+        {
+            Ogre::TagPoint *tag = static_cast<Ogre::TagPoint*>(mCamera->getParentNode());
+            return tag->_getFullLocalTransform().getTrans().z;
+        }
+        return mCamera->getParentNode()->getPosition().z;
     }
 
     bool Camera::getPosition(Ogre::Vector3 &player, Ogre::Vector3 &camera)
     {
-        mCamera->getParentSceneNode ()->needUpdate(true);
+        mCamera->getParentSceneNode()->needUpdate(true);
         camera = mCamera->getRealPosition();
         player = mTrackingPtr.getRefData().getBaseNode()->getPosition();
 
@@ -323,15 +334,6 @@ namespace MWRender
     void Camera::togglePlayerLooking(bool enable)
     {
         mFreeLook = enable;
-    }
-
-    void Camera::setLowHeight(bool low)
-    {
-        if (low) {
-            mCameraNode->setPosition(0.f, 0.f, mHeight * 0.85);
-        } else {
-            mCameraNode->setPosition(0.f, 0.f, mHeight);
-        }
     }
 
     bool Camera::isVanityOrPreviewModeEnabled()

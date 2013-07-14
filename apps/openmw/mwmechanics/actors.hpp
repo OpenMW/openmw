@@ -25,7 +25,7 @@ namespace MWMechanics
 {
     class Actors
     {
-        typedef std::map<MWWorld::Ptr,CharacterController> PtrControllerMap;
+        typedef std::map<MWWorld::Ptr,CharacterController*> PtrControllerMap;
         PtrControllerMap mActors;
 
         MWWorld::PtrMovementList mMovement;

@@ -11,6 +11,7 @@
 
 namespace MWRender
 {
+class Camera;
 
 class Animation
 {
@@ -79,7 +80,10 @@ protected:
     };
     typedef std::map<std::string,AnimState> AnimStateMap;
 
+    typedef std::map<Ogre::MovableObject*,std::string> ObjectAttachMap;
+
     MWWorld::Ptr mPtr;
+    Camera *mCamera;
 
     Ogre::SceneNode *mInsert;
     Ogre::Entity *mSkelBase;
@@ -93,6 +97,8 @@ protected:
     AnimStateMap mStates;
 
     Ogre::SharedPtr<AnimationValue> mAnimationValuePtr[sNumGroups];
+
+    ObjectAttachMap mAttachedObjects;
 
     float mAnimVelocity;
     float mAnimSpeedMult;
@@ -131,7 +137,18 @@ protected:
 
     bool handleTextKey(AnimState &state, const std::string &groupname, const NifOgre::TextKeyMap::const_iterator &key);
 
+    /* Sets the root model of the object. If 'baseonly' is true, then any meshes or particle
+     * systems in the model are ignored (useful for NPCs, where only the skeleton is needed for
+     * the root).
+     *
+     * Note that you must make sure all animation sources are cleared before reseting the object
+     * root. All nodes previously retrieved with getNode will also become invalidated.
+     */
     void setObjectRoot(Ogre::SceneNode *node, const std::string &model, bool baseonly);
+
+    /* Adds the keyframe controllers in the specified model as a new animation source. Note that
+     * the filename portion of the provided model name will be prepended with 'x', and the .nif
+     * extension will be replaced with .kf. */
     void addAnimSource(const std::string &model);
 
     static void destroyObjectList(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList &objects);
@@ -199,7 +216,16 @@ public:
 
     virtual void showWeapons(bool showWeapon);
 
+    void setCamera(Camera *cam)
+    { mCamera = cam; }
+
     Ogre::Node *getNode(const std::string &name);
+
+    // Attaches the given object to a bone on this object's base skeleton. If the bone doesn't
+    // exist, the object isn't attached and NULL is returned. The returned TagPoint is only
+    // valid until the next setObjectRoot call.
+    Ogre::TagPoint *attachObjectToBone(const Ogre::String &bonename, Ogre::MovableObject *obj);
+    void detachObjectFromBone(Ogre::MovableObject *obj);
 };
 
 }
