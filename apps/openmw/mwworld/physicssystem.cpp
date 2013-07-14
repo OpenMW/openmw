@@ -254,15 +254,12 @@ namespace MWWorld
 
     std::pair<float, std::string> PhysicsSystem::getFacedHandle (MWWorld::World& world, float queryDistance)
     {
-        btVector3 dir(0, 1, 0);
-        dir = dir.rotate(btVector3(1, 0, 0), mCameraData.pitch);
-        dir = dir.rotate(btVector3(0, 0, 1), mCameraData.yaw);
-        dir.setX(-dir.x());
+        Ray ray = mRender.getCamera()->getCameraToViewportRay(0.5, 0.5);
 
-        btVector3 origin(mCameraData.eyepos.x,
-                         mCameraData.eyepos.y,
-                         mCameraData.eyepos.z);
-        origin += dir * 5;
+        Ogre::Vector3 origin_ = ray.getOrigin();
+        btVector3 origin(origin_.x, origin_.y, origin_.z);
+        Ogre::Vector3 dir_ = ray.getDirection().normalisedCopy();
+        btVector3 dir(dir_.x, dir_.y, dir_.z);
 
         btVector3 dest = origin + dir * queryDistance;
         std::pair <std::string, float> result;
@@ -273,15 +270,12 @@ namespace MWWorld
 
     std::vector < std::pair <float, std::string> > PhysicsSystem::getFacedHandles (float queryDistance)
     {
-        btVector3 dir(0, 1, 0);
-        dir = dir.rotate(btVector3(1, 0, 0), mCameraData.pitch);
-        dir = dir.rotate(btVector3(0, 0, 1), mCameraData.yaw);
-        dir.setX(-dir.x());
+        Ray ray = mRender.getCamera()->getCameraToViewportRay(0.5, 0.5);
 
-        btVector3 origin(mCameraData.eyepos.x,
-                         mCameraData.eyepos.y,
-                         mCameraData.eyepos.z);
-        origin += dir * 5;
+        Ogre::Vector3 origin_ = ray.getOrigin();
+        btVector3 origin(origin_.x, origin_.y, origin_.z);
+        Ogre::Vector3 dir_ = ray.getDirection().normalisedCopy();
+        btVector3 dir(dir_.x, dir_.y, dir_.z);
 
         btVector3 dest = origin + dir * queryDistance;
         std::vector < std::pair <float, std::string> > results;
@@ -542,12 +536,5 @@ namespace MWWorld
         max.z = btMax.z();
 
         return true;
-    }
-
-    void PhysicsSystem::updateCameraData(const Ogre::Vector3 &eyepos, float pitch, float yaw)
-    {
-        mCameraData.eyepos = eyepos;
-        mCameraData.pitch = pitch;
-        mCameraData.yaw = yaw;
     }
 }
