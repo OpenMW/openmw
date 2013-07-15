@@ -96,11 +96,6 @@ namespace MWMechanics
         return mAttackingOrSpell;
     }
 
-    std::list<std::pair<std::string,std::string>> &CreatureStats::getLastAnimKey()
-    {
-        return mLastAnimKeys;
-    }
-
     int CreatureStats::getLevel() const
     {
         return mLevel;
@@ -206,12 +201,6 @@ namespace MWMechanics
     {
         mAttackingOrSpell = attackingOrSpell;
     }
-
-    /*void CreatureStats::setLastAnimKey(std::string key,std::string animGroup)
-    {
-        mLastAnimKey = key;
-        mLastAnimGroup = animGroup;
-    }*/
 
     void CreatureStats::setAiSetting (int index, int value)
     {

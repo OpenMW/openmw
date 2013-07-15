@@ -35,7 +35,6 @@ namespace MWMechanics
         bool mAttacked;
         bool mHostile;
         bool mAttackingOrSpell;//for the player, this is true if the left mouse button is pressed, false if not.
-        std::list<std::pair<std::string,std::string>> mLastAnimKeys;
 
     public:
         CreatureStats();
@@ -57,8 +56,6 @@ namespace MWMechanics
         const MagicEffects & getMagicEffects() const;
 
         const bool & getAttackingOrSpell() const;
-
-        std::list<std::pair<std::string,std::string>> & getLastAnimKey();
 
         int getLevel() const;
 
@@ -90,8 +87,6 @@ namespace MWMechanics
         void setMagicEffects(const MagicEffects &effects);
 
         void setAttackingOrSpell(const bool &attackingOrSpell);
-
-        //void addLastAnimKey(std::string key,std::string animGroup);
 
         void setLevel(int level);
 

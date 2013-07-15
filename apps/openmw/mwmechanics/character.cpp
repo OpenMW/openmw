@@ -238,7 +238,7 @@ void CharacterController::update(float duration, Movement &movement)
     }
     else if(!cls.getCreatureStats(mPtr).isDead())
     {
-        std::list<std::pair<std::string,std::string>> lastKeys = cls.getCreatureStats(mPtr).getLastAnimKey();
+        /*std::list<std::pair<std::string,std::string>> lastKeys = cls.getCreatureStats(mPtr).getLastAnimKey();
         for(std::list<std::pair<std::string,std::string>>::iterator it = cls.getCreatureStats(mPtr).getLastAnimKey().begin();
             it!=cls.getCreatureStats(mPtr).getLastAnimKey().end();)
         {
@@ -256,7 +256,7 @@ void CharacterController::update(float duration, Movement &movement)
                 if(lastKey.first.compare(off, len, "chop large follow stop") == 0){ mUpperBodyState = UpperCharState_WeapEquiped;std::cout << "FINISHED";}
             }
             it = cls.getCreatureStats(mPtr).getLastAnimKey().erase(it);
-        }
+        }*/
 
         MWBase::World *world = MWBase::Environment::get().getWorld();
 
@@ -478,6 +478,7 @@ void CharacterController::update(float duration, Movement &movement)
                 if(mUpperBodyState == UpperCharState_WeapEquiped)
                 {
                     std::string weapgroup;
+                    std::cout << "attaquing";
                     getWeaponGroup(mWeaponType, weapgroup);
                     mAnimation->play(weapgroup, Priority_Weapon,
                             MWRender::Animation::Group_UpperBody, true,
@@ -489,6 +490,16 @@ void CharacterController::update(float duration, Movement &movement)
             {
                 mUpperBodyState = UpperCharState_ChopReadying;
             }
+
+            std::string weapgroup;
+            getWeaponGroup(mWeaponType, weapgroup);
+            std::string start;
+            std::string stop;
+            float complete;
+            bool animPlaying = mAnimation->getInfo(weapgroup,&complete,&start,&stop);
+            if(mUpperBodyState == UpperCharState_EquipingWeap && !animPlaying) mUpperBodyState = UpperCharState_WeapEquiped;
+            if(mUpperBodyState == UpperCharState_UnEquipingWeap && !animPlaying) mUpperBodyState = UpperCharState_Nothing;
+            if(mUpperBodyState == UpperCharState_ChopReadying && !animPlaying) mUpperBodyState = UpperCharState_WeapEquiped;
 
             MWWorld::ContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
             if(torch != inv.end() && torch->getTypeName() == typeid(ESM::Light).name())
