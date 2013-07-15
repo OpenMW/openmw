@@ -173,7 +173,7 @@ namespace MWInput
                 break;
             case A_Screenshot:
                 screenshot()
-;                break;
+                break;
             case A_Inventory:
                 toggleInventory ();
                 break;
