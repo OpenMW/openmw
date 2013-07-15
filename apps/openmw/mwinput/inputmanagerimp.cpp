@@ -172,7 +172,7 @@ namespace MWInput
                 exitNow();
                 break;
             case A_Screenshot:
-                screenshot()
+                screenshot();
                 break;
             case A_Inventory:
                 toggleInventory ();
