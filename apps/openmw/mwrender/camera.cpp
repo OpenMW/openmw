@@ -82,6 +82,7 @@ namespace MWRender
             mCameraNode->getCreator()->destroySceneNode(mCameraNode);
         }
         mCameraNode = node;
+        mCamera->detachFromParent();
         mCameraNode->attachObject(mCamera);
     }
 
