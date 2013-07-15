@@ -77,13 +77,7 @@ namespace MWWorld
 
             bool getObjectAABB(const MWWorld::Ptr &ptr, Ogre::Vector3 &min, Ogre::Vector3 &max);
 
-            void updateCameraData(const Ogre::Vector3 &eyepos, float pitch, float yaw);
-
         private:
-            struct {
-                Ogre::Vector3 eyepos;
-                float pitch, yaw;
-            } mCameraData;
 
             OEngine::Render::OgreRenderer &mRender;
             OEngine::Physic::PhysicEngine* mEngine;

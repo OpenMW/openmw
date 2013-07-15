@@ -1234,11 +1234,6 @@ namespace MWWorld
 
         mWorldScene->update (duration, paused);
 
-        float pitch, yaw;
-        Ogre::Vector3 eyepos;
-        mRendering->getCameraData(eyepos, pitch, yaw);
-        mPhysics->updateCameraData(eyepos, pitch, yaw);
-
         performUpdateSceneQueries ();
 
         updateWindowManager ();

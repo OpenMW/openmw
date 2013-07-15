@@ -884,13 +884,6 @@ void RenderingManager::renderPlayer(const MWWorld::Ptr &ptr)
     MWBase::Environment::get().getWorld()->scaleObject(ptr, 1.f);
 }
 
-void RenderingManager::getCameraData(Ogre::Vector3 &eyepos, float &pitch, float &yaw)
-{
-    eyepos = mCamera->getPosition();
-    eyepos.z += mCamera->getHeight();
-    mCamera->getSightAngles(pitch, yaw);
-}
-
 bool RenderingManager::vanityRotateCamera(const float *rot)
 {
     if(!mCamera->isVanityOrPreviewModeEnabled())

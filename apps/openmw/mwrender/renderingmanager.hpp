@@ -87,8 +87,6 @@ public:
 
     bool vanityRotateCamera(const float *rot);
 
-    void getCameraData(Ogre::Vector3 &eyepos, float &pitch, float &yaw);
-
     void setupPlayer(const MWWorld::Ptr &ptr);
     void renderPlayer(const MWWorld::Ptr &ptr);
 
