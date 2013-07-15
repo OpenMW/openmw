@@ -182,11 +182,14 @@ namespace MWInput
                 break;
             case A_Activate:
                 resetIdleTime();
-                if( MWBase::Environment::get().getWindowManager()->isGuiMode()) {
-                        // Pressing the activation key when a messagebox is prompting for "ok" will activate the ok button
-                        MWBase::Environment::get().getWindowManager()->enterPressed();
-                    }
-                activate();
+
+                if (mWindows.getMode() == MWGui::GM_Container) {
+                    toggleContainer (); 
+                } else if (MWBase::Environment::get().getWindowManager()->isGuiMode()) {
+                    MWBase::Environment::get().getWindowManager()->enterPressed();
+                } else {
+                    activate();
+                }
                 break;
             case A_Journal:
                 toggleJournal ();
@@ -673,6 +676,24 @@ namespace MWInput
 
         // .. but don't touch any other mode, except container.
     }
+
+    void InputManager::toggleContainer()
+    {
+        if (MyGUI::InputManager::getInstance ().isModalAny())
+            return;
+
+        bool gameMode = !mWindows.isGuiMode();
+
+        if(!gameMode)
+        {
+            if (mWindows.getMode() == MWGui::GM_Container)
+                mWindows.popGuiMode();
+            else
+                mWindows.pushGuiMode(MWGui::GM_Container);
+        }
+
+    }
+
 
     void InputManager::toggleConsole()
     {
