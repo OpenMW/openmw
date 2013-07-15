@@ -499,8 +499,6 @@ namespace MWInput
 
         MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::Enum(kc));
 
-        MWWorld::Class::get(mPlayer.getPlayer()).getCreatureStats(mPlayer.getPlayer()).setAttackingOrSpell(false);
-
         return true;
     }
 
@@ -531,6 +529,8 @@ namespace MWInput
         mInputBinder->mouseReleased (arg, id);
 
         MyGUI::InputManager::getInstance().injectMouseRelease(mMouseX, mMouseY, sdlButtonToMyGUI(id));
+
+        MWWorld::Class::get(mPlayer.getPlayer()).getCreatureStats(mPlayer.getPlayer()).setAttackingOrSpell(false);
 
         return true;
     }
