@@ -98,9 +98,15 @@ enum UpperBodyCharacterState {
     UpperCharState_UnEquipingWeap,
     UpperCharState_WeapEquiped,
     UpperCharState_Slashing,
-    UpperCharState_ChopReadying,
-    UpperCharState_ChopReadyingMouseHold,  //when you keep your mouse clicked to ready your weapon
-    UpperCharState_ChopReadyWaiting, //when your weapon is ready and you keep mouse hold
+    UpperCharState_ChopStartToMinAttack,
+    UpperCharState_ChopMinAttackToMaxAttack,
+    UpperCharState_ChopMaxAttackToMinHit,
+    UpperCharState_ChopMinHitToHit,
+    UpperCharState_ChopLargeFollowStartToLargeFollowStop,
+    UpperCharState_ChopMediumFollowStartToMediumFollowStop,
+    UpperCharState_ChopSmallFollowStartToSmallFollowStop,
+    //UpperCharState_ChopReadyingMouseHold,  //when you keep your mouse clicked to ready your weapon
+    //UpperCharState_ChopReadyWaiting, //when your weapon is ready and you keep mouse hold
     UpperCharState_Choping,
     UpperCharState_Thrusting,
     UpperCharState_EquipingSpell,
