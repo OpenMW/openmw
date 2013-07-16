@@ -17,6 +17,7 @@ class Movement;
 
 enum Priority {
     Priority_Default,
+    Priority_Movement,
     Priority_Weapon,
     Priority_Torch,
 
@@ -26,6 +27,8 @@ enum Priority {
 };
 
 enum CharacterState {
+    CharState_None,
+
     CharState_SpecialIdle,
     CharState_Idle,
     CharState_Idle2,
@@ -100,6 +103,11 @@ class CharacterController
     typedef std::deque<std::pair<std::string,size_t> > AnimationQueue;
     AnimationQueue mAnimQueue;
 
+    CharacterState mIdleState;
+    std::string mCurrentIdle;
+    CharacterState mMovementState;
+    std::string mCurrentMovement;
+
     CharacterState mCharState;
     WeaponType mWeaponType;
     bool mSkipAnim;
@@ -111,8 +119,7 @@ class CharacterController
     float mSecondsOfSwimming;
     float mSecondsOfRunning;
 
-    // Gets an animation group name from the current character state, and whether it should loop.
-    void getCurrentGroup(std::string &group, Priority &prio, bool &loops) const;
+    void refreshCurrentAnims(CharacterState idle, CharacterState movement, bool force=false);
 
     static void getWeaponGroup(WeaponType weaptype, std::string &group);
 
