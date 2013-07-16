@@ -146,6 +146,8 @@ class CharacterController
     float mSecondsOfSwimming;
     float mSecondsOfRunning;
 
+    std::string mAttackType; // slash, chop or thrust
+
     void refreshCurrentAnims(CharacterState idle, CharacterState movement, bool force=false);
 
     static void getWeaponGroup(WeaponType weaptype, std::string &group);

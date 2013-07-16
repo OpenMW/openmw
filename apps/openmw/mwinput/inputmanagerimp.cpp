@@ -165,6 +165,20 @@ namespace MWInput
         if (action == A_Use)
         {
             MWWorld::Class::get(mPlayer.getPlayer()).getCreatureStats(mPlayer.getPlayer()).setAttackingOrSpell(currentValue);
+            if (currentValue == 1)
+            {
+                int type = MWMechanics::CreatureStats::AT_Chop;
+                bool forward = (mInputBinder->getChannel(A_MoveForward)->getValue() > 0
+                                || mInputBinder->getChannel(A_MoveBackward)->getValue() > 0);
+                bool side = (mInputBinder->getChannel(A_MoveLeft)->getValue() > 0
+                             || mInputBinder->getChannel(A_MoveRight)->getValue() > 0);
+                if (side && !forward)
+                    type = MWMechanics::CreatureStats::AT_Slash;
+                if (forward && !side)
+                    type = MWMechanics::CreatureStats::AT_Thrust;
+
+                MWWorld::Class::get(mPlayer.getPlayer()).getCreatureStats(mPlayer.getPlayer()).setAttackType(type);
+            }
         }
 
         if (currentValue == 1)

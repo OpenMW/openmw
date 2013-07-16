@@ -44,6 +44,12 @@
                     <Property key="TextAlign" value="Right"/>
                 </Widget>
 
+                <Widget type="HBox" skin="" position="4 170 260 24">
+                    <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="BestAttackButton"/>
+                    <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
+                        <Property key="Caption" value="#{sBestAttack}"/>
+                    </Widget>
+                </Widget>
 
                 <Widget type="HBox" skin="" position="4 200 260 24">
                     <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="SubtitlesButton"/>

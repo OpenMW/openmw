@@ -36,6 +36,8 @@ namespace MWMechanics
         bool mHostile;
         bool mAttackingOrSpell;//for the player, this is true if the left mouse button is pressed, false if not.
 
+        int mAttackType;
+
     public:
         CreatureStats();
 
@@ -87,6 +89,15 @@ namespace MWMechanics
         void setMagicEffects(const MagicEffects &effects);
 
         void setAttackingOrSpell(const bool &attackingOrSpell);
+
+        enum AttackType
+        {
+            AT_Slash,
+            AT_Thrust,
+            AT_Chop
+        };
+        void setAttackType(int attackType) { mAttackType = attackType; }
+        int getAttackType() { return mAttackType; }
 
         void setLevel(int level);
 
