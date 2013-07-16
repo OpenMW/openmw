@@ -517,7 +517,7 @@ bool Animation::handleTextKey(AnimState &state, const std::string &groupname, co
 }
 
 
-void Animation::play(const std::string &groupname, int priority, int groups, bool autodisable, const std::string &start, const std::string &stop, float startpoint, size_t loops)
+void Animation::play(const std::string &groupname, int priority, int groups, bool autodisable, float speedmult, const std::string &start, const std::string &stop, float startpoint, size_t loops)
 {
     if(!mSkelBase)
         return;
@@ -555,6 +555,7 @@ void Animation::play(const std::string &groupname, int priority, int groups, boo
         if(reset(state, (*iter)->mTextKeys, groupname, start, stop, startpoint))
         {
             state.mSource = *iter;
+            state.mSpeedMult = speedmult;
             state.mLoopCount = loops;
             state.mPlaying = true;
             state.mPriority = priority;
@@ -650,12 +651,13 @@ void Animation::resetActiveGroups()
 }
 
 
-bool Animation::getInfo(const std::string &groupname, float *complete, std::string *start, std::string *stop) const
+bool Animation::getInfo(const std::string &groupname, float *complete, float *speedmult, std::string *start, std::string *stop) const
 {
     AnimStateMap::const_iterator iter = mStates.find(groupname);
     if(iter == mStates.end())
     {
         if(complete) *complete = 0.0f;
+        if(speedmult) *speedmult = 0.0f;
         if(start) *start = "";
         if(stop) *stop = "";
         return false;
@@ -663,6 +665,7 @@ bool Animation::getInfo(const std::string &groupname, float *complete, std::stri
 
     if(complete) *complete = (iter->second.mTime - iter->second.mStartKey->first) /
                              (iter->second.mStopKey->first - iter->second.mStartKey->first);
+    if(speedmult) *speedmult = iter->second.mSpeedMult;
     if(start) *start = iter->second.mStartKey->second.substr(groupname.size()+2);
     if(stop) *stop = iter->second.mStopKey->second.substr(groupname.size()+2);
     return true;
@@ -687,7 +690,7 @@ Ogre::Vector3 Animation::runAnimation(float duration)
     while(stateiter != mStates.end())
     {
         AnimState &state = stateiter->second;
-        float timepassed = duration;
+        float timepassed = duration * state.mSpeedMult;
         while(state.mPlaying)
         {
             float targetTime = state.mTime + timepassed;

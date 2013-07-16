@@ -166,7 +166,7 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
         mAnimation->disable(mCurrentIdle);
         mCurrentIdle = idle;
         mAnimation->play(mCurrentIdle, Priority_Default, MWRender::Animation::Group_All, false,
-                         "start", "stop", 0.0f, ~0ul);
+                         1.0f, "start", "stop", 0.0f, ~0ul);
     }
 
     if(force || movement != mMovementState)
@@ -208,7 +208,7 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
         mCurrentMovement = movement;
         if(!mCurrentMovement.empty())
             mAnimation->play(mCurrentMovement, Priority_Movement, movegroup, false,
-                             "start", "stop", 0.0f, ~0ul);
+                             1.0f, "start", "stop", 0.0f, ~0ul);
     }
 }
 
@@ -263,7 +263,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
 
         mCurrentDeath = state->groupname;
         mAnimation->play(mCurrentDeath, Priority_Death, MWRender::Animation::Group_All,
-                         false, "start", "stop", 1.0f, 0);
+                         false, 1.0f, "start", "stop", 1.0f, 0);
     }
 }
 
@@ -294,7 +294,7 @@ void CharacterController::update(float duration, Movement &movement)
 
                 mAnimation->play(mAnimQueue.front().first, Priority_Default,
                                  MWRender::Animation::Group_All, false,
-                                 "start", "stop", 0.0f, mAnimQueue.front().second);
+                                 1.0f, "start", "stop", 0.0f, mAnimQueue.front().second);
             }
         }
     }
@@ -406,7 +406,7 @@ void CharacterController::update(float duration, Movement &movement)
 
                 mAnimation->play(mAnimQueue.front().first, Priority_Default,
                                  MWRender::Animation::Group_All, false,
-                                 "start", "stop", 0.0f, mAnimQueue.front().second);
+                                 1.0f, "start", "stop", 0.0f, mAnimQueue.front().second);
             }
         }
 
@@ -494,7 +494,7 @@ void CharacterController::update(float duration, Movement &movement)
                     getWeaponGroup(mWeaponType, weapgroup);
                     mAnimation->play(weapgroup, Priority_Weapon,
                                      MWRender::Animation::Group_UpperBody, true,
-                                     "unequip start", "unequip stop", 0.0f, 0);
+                                     1.0f, "unequip start", "unequip stop", 0.0f, 0);
                 }
                 else
                 {
@@ -502,7 +502,7 @@ void CharacterController::update(float duration, Movement &movement)
                     mAnimation->showWeapons(false);
                     mAnimation->play(weapgroup, Priority_Weapon,
                                      MWRender::Animation::Group_UpperBody, true,
-                                     "equip start", "equip stop", 0.0f, 0);
+                                     1.0f, "equip start", "equip stop", 0.0f, 0);
                 }
 
                 mWeaponType = weaptype;
@@ -526,7 +526,7 @@ void CharacterController::update(float duration, Movement &movement)
                 if(!mAnimation->isPlaying("torch"))
                     mAnimation->play("torch", Priority_Torch,
                                      MWRender::Animation::Group_LeftArm, false,
-                                     "start", "stop", 0.0f, (~(size_t)0));
+                                     1.0f, "start", "stop", 0.0f, (~(size_t)0));
             }
             else if(mAnimation->isPlaying("torch"))
                 mAnimation->disable("torch");
@@ -583,7 +583,7 @@ void CharacterController::playGroup(const std::string &groupname, int mode, int 
 
             mIdleState = CharState_SpecialIdle;
             mAnimation->play(groupname, Priority_Default,
-                             MWRender::Animation::Group_All, false,
+                             MWRender::Animation::Group_All, false, 1.0f,
                              ((mode==2) ? "loop start" : "start"), "stop", 0.0f, count-1);
         }
         else if(mode == 0)
@@ -631,7 +631,7 @@ void CharacterController::forceStateUpdate()
         mCurrentDeath = state->groupname;
         if(!mAnimation->getInfo(mCurrentDeath))
             mAnimation->play(mCurrentDeath, Priority_Death, MWRender::Animation::Group_All,
-                             false, "start", "stop", 0.0f, 0);
+                             false, 1.0f, "start", "stop", 0.0f, 0);
     }
 }
 
@@ -652,7 +652,7 @@ void CharacterController::kill()
     mCurrentDeath = state->groupname;
     if(mAnimation && !mAnimation->getInfo(mCurrentDeath))
         mAnimation->play(mCurrentDeath, Priority_Death, MWRender::Animation::Group_All,
-                         false, "start", "stop", 0.0f, 0);
+                         false, 1.0f, "start", "stop", 0.0f, 0);
 }
 
 void CharacterController::resurrect()
