@@ -52,8 +52,6 @@ Animation::Animation(const MWWorld::Ptr &ptr)
     , mNonAccumRoot(NULL)
     , mNonAccumCtrl(NULL)
     , mAccumulate(0.0f)
-    , mAnimVelocity(0.0f)
-    , mAnimSpeedMult(1.0f)
 {
     for(size_t i = 0;i < sNumGroups;i++)
         mAnimationValuePtr[i].bind(OGRE_NEW AnimationValue(this));
@@ -245,7 +243,6 @@ void Animation::clearAnimSources()
         mAnimationValuePtr[i]->setAnimName(std::string());
 
     mNonAccumCtrl = NULL;
-    mAnimVelocity = 0.0f;
 
     mAccumRoot = NULL;
     mNonAccumRoot = NULL;
@@ -298,13 +295,6 @@ void Animation::setAccumulation(const Ogre::Vector3 &accum)
     mAccumulate = accum;
 }
 
-void Animation::setSpeed(float speed)
-{
-    mAnimSpeedMult = 1.0f;
-    if(speed > 0.0f && mAnimVelocity > 1.0f)
-        mAnimSpeedMult = speed / mAnimVelocity;
-}
-
 
 void Animation::updatePtr(const MWWorld::Ptr &ptr)
 {
@@ -343,6 +333,61 @@ float Animation::calcAnimVelocity(const NifOgre::TextKeyMap &keys, NifOgre::Node
 
     return 0.0f;
 }
+
+float Animation::getVelocity(const std::string &groupname) const
+{
+    /* Look in reverse; last-inserted source has priority. */
+    AnimSourceList::const_reverse_iterator animsrc(mAnimSources.rbegin());
+    for(;animsrc != mAnimSources.rend();animsrc++)
+    {
+        const NifOgre::TextKeyMap &keys = (*animsrc)->mTextKeys;
+        if(findGroupStart(keys, groupname) != keys.end())
+            break;
+    }
+    if(animsrc == mAnimSources.rend())
+        return 0.0f;
+
+    float velocity = 0.0f;
+    const NifOgre::TextKeyMap &keys = (*animsrc)->mTextKeys;
+    const std::vector<Ogre::Controller<Ogre::Real> >&ctrls = (*animsrc)->mControllers[0];
+    for(size_t i = 0;i < ctrls.size();i++)
+    {
+        NifOgre::NodeTargetValue<Ogre::Real> *dstval;
+        dstval = static_cast<NifOgre::NodeTargetValue<Ogre::Real>*>(ctrls[i].getDestination().getPointer());
+        if(dstval->getNode() == mNonAccumRoot)
+        {
+            velocity = calcAnimVelocity(keys, dstval, mAccumulate, groupname);
+            break;
+        }
+    }
+
+    // If there's no velocity, keep looking
+    if(!(velocity > 1.0f))
+    {
+        AnimSourceList::const_reverse_iterator animiter = mAnimSources.rbegin();
+        while(*animiter != *animsrc)
+            ++animiter;
+
+        while(!(velocity > 1.0f) && ++animiter != mAnimSources.rend())
+        {
+            const NifOgre::TextKeyMap &keys = (*animiter)->mTextKeys;
+            const std::vector<Ogre::Controller<Ogre::Real> >&ctrls = (*animiter)->mControllers[0];
+            for(size_t i = 0;i < ctrls.size();i++)
+            {
+                NifOgre::NodeTargetValue<Ogre::Real> *dstval;
+                dstval = static_cast<NifOgre::NodeTargetValue<Ogre::Real>*>(ctrls[i].getDestination().getPointer());
+                if(dstval->getNode() == mNonAccumRoot)
+                {
+                    velocity = calcAnimVelocity(keys, dstval, mAccumulate, groupname);
+                    break;
+                }
+            }
+        }
+    }
+
+    return velocity;
+}
+
 
 static void updateBoneTree(const Ogre::SkeletonInstance *skelsrc, Ogre::Bone *bone)
 {
@@ -599,9 +644,7 @@ void Animation::resetActiveGroups()
         mAnimationValuePtr[grp]->setAnimName((active == mStates.end()) ?
                                              std::string() : active->first);
     }
-
     mNonAccumCtrl = NULL;
-    mAnimVelocity = 0.0f;
 
     if(!mNonAccumRoot || mAccumulate == Ogre::Vector3(0.0f))
         return;
@@ -619,33 +662,8 @@ void Animation::resetActiveGroups()
         dstval = static_cast<NifOgre::NodeTargetValue<Ogre::Real>*>(ctrls[i].getDestination().getPointer());
         if(dstval->getNode() == mNonAccumRoot)
         {
-            mAnimVelocity = calcAnimVelocity(keys, dstval, mAccumulate, state->first);
             mNonAccumCtrl = dstval;
             break;
-        }
-    }
-
-    // If there's no velocity, keep looking
-    if(!(mAnimVelocity > 1.0f))
-    {
-        AnimSourceList::const_reverse_iterator animiter = mAnimSources.rbegin();
-        while(*animiter != animsrc)
-            ++animiter;
-
-        while(!(mAnimVelocity > 1.0f) && ++animiter != mAnimSources.rend())
-        {
-            const NifOgre::TextKeyMap &keys = (*animiter)->mTextKeys;
-            const std::vector<Ogre::Controller<Ogre::Real> >&ctrls = (*animiter)->mControllers[0];
-            for(size_t i = 0;i < ctrls.size();i++)
-            {
-                NifOgre::NodeTargetValue<Ogre::Real> *dstval;
-                dstval = static_cast<NifOgre::NodeTargetValue<Ogre::Real>*>(ctrls[i].getDestination().getPointer());
-                if(dstval->getNode() == mNonAccumRoot)
-                {
-                    mAnimVelocity = calcAnimVelocity(keys, dstval, mAccumulate, state->first);
-                    break;
-                }
-            }
         }
     }
 }
@@ -685,7 +703,6 @@ Ogre::Vector3 Animation::runAnimation(float duration)
 {
     Ogre::Vector3 movement(0.0f);
 
-    duration *= mAnimSpeedMult;
     AnimStateMap::iterator stateiter = mStates.begin();
     while(stateiter != mStates.end())
     {

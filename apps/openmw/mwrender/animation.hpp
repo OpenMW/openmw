@@ -101,9 +101,6 @@ protected:
 
     ObjectAttachMap mAttachedObjects;
 
-    float mAnimVelocity;
-    float mAnimSpeedMult;
-
     /* Sets the appropriate animations on the bone groups based on priority.
      */
     void resetActiveGroups();
@@ -174,8 +171,6 @@ public:
     // should be on the scale of 0 to 1.
     void setAccumulation(const Ogre::Vector3 &accum);
 
-    void setSpeed(float speed);
-
     /** Plays an animation.
      * \param groupname Name of the animation group to play.
      * \param priority Priority of the animation. The animation will play on
@@ -214,6 +209,9 @@ public:
      * \param groupname Animation group to disable.
      */
     void disable(const std::string &groupname);
+
+    /** Retrieves the velocity (in units per second) that the animation will move. */
+    float getVelocity(const std::string &groupname) const;
 
     virtual Ogre::Vector3 runAnimation(float duration);
 

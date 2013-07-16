@@ -105,8 +105,10 @@ class CharacterController
 
     CharacterState mIdleState;
     std::string mCurrentIdle;
+
     CharacterState mMovementState;
     std::string mCurrentMovement;
+    float mMovementSpeed;
 
     CharacterState mDeathState;
     std::string mCurrentDeath;

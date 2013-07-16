@@ -207,8 +207,13 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
         mAnimation->disable(mCurrentMovement);
         mCurrentMovement = movement;
         if(!mCurrentMovement.empty())
+        {
+            float vel, speed = 0.0f;
+            if(mMovementSpeed > 0.0f && (vel=mAnimation->getVelocity(mCurrentMovement)) > 1.0f)
+                speed = mMovementSpeed / vel;
             mAnimation->play(mCurrentMovement, Priority_Movement, movegroup, false,
-                             1.0f, "start", "stop", 0.0f, ~0ul);
+                             speed, "start", "stop", 0.0f, ~0ul);
+        }
     }
 }
 
@@ -226,6 +231,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     , mAnimation(anim)
     , mIdleState(CharState_Idle)
     , mMovementState(CharState_None)
+    , mMovementSpeed(0.0f)
     , mDeathState(CharState_None)
     , mWeaponType(WeapType_None)
     , mSkipAnim(false)
@@ -281,7 +287,6 @@ void CharacterController::updatePtr(const MWWorld::Ptr &ptr)
 void CharacterController::update(float duration, Movement &movement)
 {
     const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
-    float speed = 0.0f;
 
     if(!cls.isActor())
     {
@@ -308,7 +313,7 @@ void CharacterController::update(float duration, Movement &movement)
         bool sneak = cls.getStance(mPtr, MWWorld::Class::Sneak);
         Ogre::Vector3 vec = cls.getMovementVector(mPtr);
         Ogre::Vector3 rot = cls.getRotationVector(mPtr);
-        speed = cls.getSpeed(mPtr);
+        mMovementSpeed = cls.getSpeed(mPtr);
 
         // advance athletics
         if(vec.squaredLength() > 0 && mPtr.getRefData().getHandle() == "player")
@@ -355,8 +360,8 @@ void CharacterController::update(float duration, Movement &movement)
             //decrease fatigue by fFatigueJumpBase + (1 - normalizedEncumbrance) * fFatigueJumpMult;
         }
 
-        vec.x *= speed;
-        vec.y *= speed;
+        vec.x *= mMovementSpeed;
+        vec.y *= mMovementSpeed;
 
         CharacterState movestate = CharState_None;
         CharacterState idlestate = CharState_SpecialIdle;
@@ -541,11 +546,9 @@ void CharacterController::update(float duration, Movement &movement)
 
     if(mAnimation && !mSkipAnim)
     {
-        mAnimation->setSpeed(speed);
-
         Ogre::Vector3 moved = mAnimation->runAnimation(duration);
         // Ensure we're moving in generally the right direction
-        if (speed > 0.f)
+        if(mMovementSpeed > 0.f)
         {
             if((movement.mPosition[0] < 0.0f && movement.mPosition[0] < moved.x*2.0f) ||
                (movement.mPosition[0] > 0.0f && movement.mPosition[0] > moved.x*2.0f))
