@@ -477,16 +477,18 @@ void CharacterController::update(float duration, Movement &movement)
             {
                 if(mUpperBodyState == UpperCharState_WeapEquiped)
                 {
+                    std::cout << "ATTaquiomg \n";
                     std::string weapgroup;
                     getWeaponGroup(mWeaponType, weapgroup);
                     mAnimation->play(weapgroup, Priority_Weapon,
-                            MWRender::Animation::Group_UpperBody, true,
+                            MWRender::Animation::Group_UpperBody, false,
                             "chop start", "chop min attack", 0.0f, 0);
                     mUpperBodyState = UpperCharState_ChopStartToMinAttack;
                 }
             }
             else if(mUpperBodyState == UpperCharState_ChopMinAttackToMaxAttack)
             {
+                std::cout << "OMG \n";
                 std::string weapgroup;
                 getWeaponGroup(mWeaponType, weapgroup);
                 std::string start;
@@ -498,8 +500,14 @@ void CharacterController::update(float duration, Movement &movement)
                     std::cout << "BLABLABLA";
                     mAnimation->disable(weapgroup);
                     mAnimation->play(weapgroup, Priority_Weapon,
-                        MWRender::Animation::Group_UpperBody, true,
+                        MWRender::Animation::Group_UpperBody, false,
                         "chop max attack", "chop min hit", 1-complete, 0);
+                }
+                else
+                {
+                    mAnimation->play(weapgroup, Priority_Weapon,
+                        MWRender::Animation::Group_UpperBody, false,
+                        "chop max attack", "chop min hit", 0, 0);
                 }
                 mUpperBodyState = UpperCharState_ChopMaxAttackToMinHit;
             }
@@ -510,33 +518,40 @@ void CharacterController::update(float duration, Movement &movement)
             std::string stop;
             float complete;
             bool animPlaying = mAnimation->getInfo(weapgroup,&complete,&start,&stop);
+            std::cout << "update";
+            if(animPlaying) std::cout << "playing\n";
             if(mUpperBodyState == UpperCharState_EquipingWeap && !animPlaying) mUpperBodyState = UpperCharState_WeapEquiped;
             if(mUpperBodyState == UpperCharState_UnEquipingWeap && !animPlaying) mUpperBodyState = UpperCharState_Nothing;
-            if(mUpperBodyState == UpperCharState_ChopStartToMinAttack && !animPlaying) 
+            if(animPlaying)
             {
-                mAnimation->play(weapgroup, Priority_Weapon,
-                    MWRender::Animation::Group_UpperBody, true,
-                    "chop min attack", "chop max attack",0, 0);
-                std::cout << "changing 1";
-                mUpperBodyState = UpperCharState_ChopMinAttackToMaxAttack;
-            }
-            if(mUpperBodyState == UpperCharState_ChopMaxAttackToMinHit && !animPlaying) 
-            {
-                mAnimation->play(weapgroup, Priority_Weapon,
-                    MWRender::Animation::Group_UpperBody, true,
-                    "chop min hit", "chop hit",0, 0);
-                mUpperBodyState = UpperCharState_ChopMinHitToHit;
-            }
-            if(mUpperBodyState == UpperCharState_ChopMinHitToHit && !animPlaying) 
-            {
-                mAnimation->play(weapgroup, Priority_Weapon,
-                    MWRender::Animation::Group_UpperBody, true,
-                    "chop large follow start", "chop large follow stop",0, 0);
-                mUpperBodyState = UpperCharState_ChopLargeFollowStartToLargeFollowStop;
-            }
-            if(mUpperBodyState == UpperCharState_ChopLargeFollowStartToLargeFollowStop && !animPlaying) 
-            {
-                mUpperBodyState = UpperCharState_WeapEquiped;
+                if(mUpperBodyState == UpperCharState_ChopStartToMinAttack && complete == 1) 
+                {
+                    mAnimation->disable(weapgroup);
+                    mAnimation->play(weapgroup, Priority_Weapon,
+                        MWRender::Animation::Group_UpperBody, false,
+                        "chop min attack", "chop max attack",0, 0);
+                    mUpperBodyState = UpperCharState_ChopMinAttackToMaxAttack;
+                }
+                else if(mUpperBodyState == UpperCharState_ChopMaxAttackToMinHit && complete == 1) 
+                {
+                    mAnimation->disable(weapgroup);
+                    mAnimation->play(weapgroup, Priority_Weapon,
+                        MWRender::Animation::Group_UpperBody, false,
+                        "chop min hit", "chop hit",0, 0);
+                    mUpperBodyState = UpperCharState_ChopMinHitToHit;
+                }
+                else if(mUpperBodyState == UpperCharState_ChopMinHitToHit && complete == 1) 
+                {
+                    mAnimation->disable(weapgroup);
+                    mAnimation->play(weapgroup, Priority_Weapon,
+                        MWRender::Animation::Group_UpperBody, false,
+                        "chop large follow start", "chop large follow stop",0, 0);
+                    mUpperBodyState = UpperCharState_ChopLargeFollowStartToLargeFollowStop;
+                }
+                else if(mUpperBodyState == UpperCharState_ChopLargeFollowStartToLargeFollowStop && complete == 1) 
+                {
+                    mUpperBodyState = UpperCharState_WeapEquiped;
+                }
             }
 
             MWWorld::ContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
