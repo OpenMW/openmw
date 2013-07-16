@@ -14,6 +14,7 @@
 #include "../mwbase/mechanicsmanager.hpp"
 
 #include "renderconst.hpp"
+#include "camera.hpp"
 
 
 namespace MWRender
@@ -98,17 +99,22 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
     Misc::StringUtils::toLower(mBodyPrefix);
 
     bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
-    std::string smodel = (!isBeast ? "meshes\\base_anim.nif" : "meshes\\base_animkna.nif");
+    std::string smodel = (viewMode != VM_FirstPerson) ?
+                         (!isBeast ? "meshes\\base_anim.nif"     : "meshes\\base_animkna.nif") :
+                         (!isBeast ? "meshes\\base_anim.1st.nif" : "meshes\\base_animkna.1st.nif") ;
     setObjectRoot(node, smodel, true);
 
-    addAnimSource(smodel);
-    if(mBodyPrefix.find("argonian") != std::string::npos)
-        addAnimSource("meshes\\argonian_swimkna.nif");
-    else if(!mNpc->isMale() && !isBeast)
-        addAnimSource("meshes\\base_anim_female.nif");
-    if(mNpc->mModel.length() > 0)
-        addAnimSource("meshes\\"+mNpc->mModel);
-    if(mViewMode == VM_FirstPerson)
+    if(mViewMode != VM_FirstPerson)
+    {
+        addAnimSource(smodel);
+        if(mBodyPrefix.find("argonian") != std::string::npos)
+            addAnimSource("meshes\\argonian_swimkna.nif");
+        else if(!mNpc->isMale() && !isBeast)
+            addAnimSource("meshes\\base_anim_female.nif");
+        if(mNpc->mModel.length() > 0)
+            addAnimSource("meshes\\"+mNpc->mModel);
+    }
+    else
     {
         /* A bit counter-intuitive, but unlike third-person anims, it seems
          * beast races get both base_anim.1st.nif and base_animkna.1st.nif.
@@ -128,20 +134,28 @@ void NpcAnimation::setViewMode(NpcAnimation::ViewMode viewMode)
     assert(viewMode != VM_HeadOnly);
     mViewMode = viewMode;
 
+    clearAnimSources();
+
     const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
     const ESM::Race *race = store.get<ESM::Race>().find(mNpc->mRace);
-    bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
-    std::string smodel = (!isBeast ? "meshes\\base_anim.nif" : "meshes\\base_animkna.nif");
 
-    clearAnimSources();
-    addAnimSource(smodel);
-    if(mBodyPrefix.find("argonian") != std::string::npos)
-        addAnimSource("meshes\\argonian_swimkna.nif");
-    else if(!mNpc->isMale() && !isBeast)
-        addAnimSource("meshes\\base_anim_female.nif");
-    if(mNpc->mModel.length() > 0)
-        addAnimSource("meshes\\"+mNpc->mModel);
-    if(mViewMode == VM_FirstPerson)
+    bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
+    std::string smodel = (viewMode != VM_FirstPerson) ?
+                         (!isBeast ? "meshes\\base_anim.nif"     : "meshes\\base_animkna.nif") :
+                         (!isBeast ? "meshes\\base_anim.1st.nif" : "meshes\\base_animkna.1st.nif") ;
+    setObjectRoot(mInsert->getParentSceneNode(), smodel, true);
+
+    if(mViewMode != VM_FirstPerson)
+    {
+        addAnimSource(smodel);
+        if(mBodyPrefix.find("argonian") != std::string::npos)
+            addAnimSource("meshes\\argonian_swimkna.nif");
+        else if(!mNpc->isMale() && !isBeast)
+            addAnimSource("meshes\\base_anim_female.nif");
+        if(mNpc->mModel.length() > 0)
+            addAnimSource("meshes\\"+mNpc->mModel);
+    }
+    else
     {
         /* A bit counter-intuitive, but unlike third-person anims, it seems
          * beast races get both base_anim.1st.nif and base_animkna.1st.nif.
@@ -197,19 +211,11 @@ void NpcAnimation::updateParts(bool forceupdate)
     if(!forceupdate)
         return;
 
-    /* FIXME: Remove this once we figure out how to show what in first-person */
-    if(mViewMode == VM_FirstPerson)
-    {
-        for(size_t i = 0;i < slotlistsize;i++)
-            this->*slotlist[i].mPart = inv.getSlot(slotlist[i].mSlot);
-        return;
-    }
-
     for(size_t i = 0;i < slotlistsize && mViewMode != VM_HeadOnly;i++)
     {
-        MWWorld::ContainerStoreIterator iter = inv.getSlot(slotlist[i].mSlot);
+        MWWorld::ContainerStoreIterator store = inv.getSlot(slotlist[i].mSlot);
 
-        this->*slotlist[i].mPart = iter;
+        this->*slotlist[i].mPart = store;
         removePartGroup(slotlist[i].mSlot);
 
         if(this->*slotlist[i].mPart == inv.end())
@@ -219,7 +225,6 @@ void NpcAnimation::updateParts(bool forceupdate)
             removeIndividualPart(ESM::PRT_Hair);
 
         int prio = 1;
-        MWWorld::ContainerStoreIterator &store = this->*slotlist[i].mPart;
         if(store->getTypeName() == typeid(ESM::Clothing).name())
         {
             prio = ((slotlist[i].mBasePriority+1)<<1) + 0;
@@ -279,32 +284,34 @@ void NpcAnimation::updateParts(bool forceupdate)
     std::pair<std::string, int> thisCombination = std::make_pair(race, flags);
     if (sRaceMapping.find(thisCombination) == sRaceMapping.end())
     {
-        static std::map<int, int> bodypartMap;
-        if(bodypartMap.size() == 0)
+        typedef std::multimap<ESM::BodyPart::MeshPart,ESM::PartReferenceType> BodyPartMapType;
+        static BodyPartMapType sBodyPartMap;
+        if(sBodyPartMap.size() == 0)
         {
-            bodypartMap[ESM::PRT_Neck] = ESM::BodyPart::MP_Neck;
-            bodypartMap[ESM::PRT_Cuirass] = ESM::BodyPart::MP_Chest;
-            bodypartMap[ESM::PRT_Groin] = ESM::BodyPart::MP_Groin;
-            bodypartMap[ESM::PRT_RHand] = ESM::BodyPart::MP_Hand;
-            bodypartMap[ESM::PRT_LHand] = ESM::BodyPart::MP_Hand;
-            bodypartMap[ESM::PRT_RWrist] = ESM::BodyPart::MP_Wrist;
-            bodypartMap[ESM::PRT_LWrist] = ESM::BodyPart::MP_Wrist;
-            bodypartMap[ESM::PRT_RForearm] = ESM::BodyPart::MP_Forearm;
-            bodypartMap[ESM::PRT_LForearm] = ESM::BodyPart::MP_Forearm;
-            bodypartMap[ESM::PRT_RUpperarm] = ESM::BodyPart::MP_Upperarm;
-            bodypartMap[ESM::PRT_LUpperarm] = ESM::BodyPart::MP_Upperarm;
-            bodypartMap[ESM::PRT_RFoot] = ESM::BodyPart::MP_Foot;
-            bodypartMap[ESM::PRT_LFoot] = ESM::BodyPart::MP_Foot;
-            bodypartMap[ESM::PRT_RAnkle] = ESM::BodyPart::MP_Ankle;
-            bodypartMap[ESM::PRT_LAnkle] = ESM::BodyPart::MP_Ankle;
-            bodypartMap[ESM::PRT_RKnee] = ESM::BodyPart::MP_Knee;
-            bodypartMap[ESM::PRT_LKnee] = ESM::BodyPart::MP_Knee;
-            bodypartMap[ESM::PRT_RLeg] = ESM::BodyPart::MP_Upperleg;
-            bodypartMap[ESM::PRT_LLeg] = ESM::BodyPart::MP_Upperleg;
-            bodypartMap[ESM::PRT_Tail] = ESM::BodyPart::MP_Tail;
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Neck, ESM::PRT_Neck));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Chest, ESM::PRT_Cuirass));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Groin, ESM::PRT_Groin));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Hand, ESM::PRT_RHand));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Hand, ESM::PRT_LHand));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Wrist, ESM::PRT_RWrist));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Wrist, ESM::PRT_LWrist));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Forearm, ESM::PRT_RForearm));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Forearm, ESM::PRT_LForearm));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Upperarm, ESM::PRT_RUpperarm));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Upperarm, ESM::PRT_LUpperarm));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Foot, ESM::PRT_RFoot));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Foot, ESM::PRT_LFoot));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Ankle, ESM::PRT_RAnkle));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Ankle, ESM::PRT_LAnkle));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Knee, ESM::PRT_RKnee));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Knee, ESM::PRT_LKnee));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Upperleg, ESM::PRT_RLeg));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Upperleg, ESM::PRT_LLeg));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Tail, ESM::PRT_Tail));
         }
 
-        sRaceMapping[thisCombination].resize(ESM::PRT_Count, NULL);
+        std::vector<const ESM::BodyPart*> &parts = sRaceMapping[thisCombination];
+        parts.resize(ESM::PRT_Count, NULL);
 
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
         const MWWorld::Store<ESM::BodyPart> &partStore = store.get<ESM::BodyPart>();
@@ -325,29 +332,55 @@ void NpcAnimation::updateParts(bool forceupdate)
                     && bodypart.mId[bodypart.mId.size()-3] == '1'
                     && bodypart.mId[bodypart.mId.size()-2] == 's'
                     && bodypart.mId[bodypart.mId.size()-1] == 't';
-            if (firstPerson != (mViewMode == VM_FirstPerson))
+            if(firstPerson != (mViewMode == VM_FirstPerson))
+            {
+                if(mViewMode == VM_FirstPerson && (bodypart.mData.mPart == ESM::BodyPart::MP_Hand ||
+                                                   bodypart.mData.mPart == ESM::BodyPart::MP_Wrist ||
+                                                   bodypart.mData.mPart == ESM::BodyPart::MP_Forearm ||
+                                                   bodypart.mData.mPart == ESM::BodyPart::MP_Upperarm))
+                {
+                    /* Allow 3rd person skins as a fallback for the arms if 1st person is missing. */
+                    BodyPartMapType::const_iterator bIt = sBodyPartMap.lower_bound(BodyPartMapType::key_type(bodypart.mData.mPart));
+                    while(bIt != sBodyPartMap.end() && bIt->first == bodypart.mData.mPart)
+                    {
+                        if(!parts[bIt->second])
+                            parts[bIt->second] = &*it;
+                        bIt++;
+                    }
+                }
                 continue;
-            for (std::map<int, int>::iterator bIt = bodypartMap.begin(); bIt != bodypartMap.end(); ++bIt )
-                if (bIt->second == bodypart.mData.mPart)
-                    sRaceMapping[thisCombination][bIt->first] = &*it;
+            }
+            BodyPartMapType::const_iterator bIt = sBodyPartMap.lower_bound(BodyPartMapType::key_type(bodypart.mData.mPart));
+            while(bIt != sBodyPartMap.end() && bIt->first == bodypart.mData.mPart)
+            {
+                parts[bIt->second] = &*it;
+                bIt++;
+            }
         }
     }
 
-    for (int part = ESM::PRT_Neck; part < ESM::PRT_Count; ++part)
+    const std::vector<const ESM::BodyPart*> &parts = sRaceMapping[thisCombination];
+    for(int part = ESM::PRT_Neck; part < ESM::PRT_Count; ++part)
     {
-        const ESM::BodyPart* bodypart = sRaceMapping[thisCombination][part];
-        if (mPartPriorities[part] < 1 && bodypart)
-            addOrReplaceIndividualPart(part, -1,1, "meshes\\"+bodypart->mModel);
+        if(mPartPriorities[part] < 1)
+        {
+            const ESM::BodyPart* bodypart = parts[part];
+            if(bodypart)
+                addOrReplaceIndividualPart(part, -1,1, "meshes\\"+bodypart->mModel);
+        }
     }
 }
 
 NifOgre::ObjectList NpcAnimation::insertBoundedPart(const std::string &model, int group, const std::string &bonename)
 {
     NifOgre::ObjectList objects = NifOgre::Loader::createObjects(mSkelBase, bonename, mInsert, model);
-    setRenderProperties(objects, mVisibilityFlags, RQG_Main, RQG_Alpha);
+    setRenderProperties(objects, (mViewMode == VM_FirstPerson) ? RV_FirstPerson : mVisibilityFlags, RQG_Main, RQG_Alpha);
 
     for(size_t i = 0;i < objects.mEntities.size();i++)
-        objects.mEntities[i]->getUserObjectBindings().setUserAny(Ogre::Any(group));
+    {
+        Ogre::Entity *ent = objects.mEntities[i];
+        ent->getUserObjectBindings().setUserAny(Ogre::Any(group));
+    }
     for(size_t i = 0;i < objects.mParticles.size();i++)
         objects.mParticles[i]->getUserObjectBindings().setUserAny(Ogre::Any(group));
 
@@ -382,6 +415,13 @@ Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
     Ogre::Vector3 ret = Animation::runAnimation(timepassed);
 
     Ogre::SkeletonInstance *baseinst = mSkelBase->getSkeleton();
+    if(mViewMode == VM_FirstPerson && mCamera)
+    {
+        float pitch = mCamera->getPitch();
+        Ogre::Node *node = baseinst->getBone("Bip01 Neck");
+        node->pitch(Ogre::Radian(pitch*0.75f), Ogre::Node::TS_WORLD);
+    }
+
     for(size_t i = 0;i < sPartListSize;i++)
     {
         Ogre::Entity *ent = mObjectParts[i].mSkelBase;
@@ -458,9 +498,31 @@ void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::
     {
         const ESM::BodyPart *bodypart = 0;
         if(!mNpc->isMale() && !part->mFemale.empty())
+        {
             bodypart = partStore.search(part->mFemale+ext);
+            if(!bodypart && mViewMode == VM_FirstPerson)
+            {
+                bodypart = partStore.search(part->mFemale);
+                if(bodypart && !(bodypart->mData.mPart == ESM::BodyPart::MP_Hand ||
+                                 bodypart->mData.mPart == ESM::BodyPart::MP_Wrist ||
+                                 bodypart->mData.mPart == ESM::BodyPart::MP_Forearm ||
+                                 bodypart->mData.mPart == ESM::BodyPart::MP_Upperarm))
+                    bodypart = NULL;
+            }
+        }
         if(!bodypart && !part->mMale.empty())
+        {
             bodypart = partStore.search(part->mMale+ext);
+            if(!bodypart && mViewMode == VM_FirstPerson)
+            {
+                bodypart = partStore.search(part->mMale);
+                if(bodypart && !(bodypart->mData.mPart == ESM::BodyPart::MP_Hand ||
+                                 bodypart->mData.mPart == ESM::BodyPart::MP_Wrist ||
+                                 bodypart->mData.mPart == ESM::BodyPart::MP_Forearm ||
+                                 bodypart->mData.mPart == ESM::BodyPart::MP_Upperarm))
+                    bodypart = NULL;
+            }
+        }
 
         if(bodypart)
             addOrReplaceIndividualPart(part->mPart, group, priority, "meshes\\"+bodypart->mModel);
@@ -472,8 +534,7 @@ void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::
 void NpcAnimation::showWeapons(bool showWeapon)
 {
     mShowWeapons = showWeapon;
-    if(showWeapon &&
-       mViewMode != VM_FirstPerson/* FIXME: Remove this once first-person bodies work */)
+    if(showWeapon)
     {
         MWWorld::InventoryStore &inv = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
         mWeapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);

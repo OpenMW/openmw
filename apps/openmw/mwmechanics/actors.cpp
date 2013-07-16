@@ -168,20 +168,20 @@ namespace MWMechanics
     void Actors::addActor (const MWWorld::Ptr& ptr)
     {
         // erase previous death events since we are currently only tracking them while in an active cell
-        MWWorld::Class::get (ptr).getCreatureStats (ptr).clearHasDied();
+        MWWorld::Class::get(ptr).getCreatureStats(ptr).clearHasDied();
 
         MWRender::Animation *anim = MWBase::Environment::get().getWorld()->getAnimation(ptr);
-        if(!MWWorld::Class::get(ptr).getCreatureStats(ptr).isDead())
-            mActors.insert(std::make_pair(ptr, CharacterController(ptr, anim, CharState_Idle)));
-        else
-            mActors.insert(std::make_pair(ptr, CharacterController(ptr, anim, CharState_Death1)));
+        mActors.insert(std::make_pair(ptr, new CharacterController(ptr, anim)));
     }
 
     void Actors::removeActor (const MWWorld::Ptr& ptr)
     {
         PtrControllerMap::iterator iter = mActors.find(ptr);
         if(iter != mActors.end())
+        {
+            delete iter->second;
             mActors.erase(iter);
+        }
     }
 
     void Actors::updateActor(const MWWorld::Ptr &old, const MWWorld::Ptr &ptr)
@@ -189,10 +189,10 @@ namespace MWMechanics
         PtrControllerMap::iterator iter = mActors.find(old);
         if(iter != mActors.end())
         {
-            CharacterController ctrl = iter->second;
+            CharacterController *ctrl = iter->second;
             mActors.erase(iter);
 
-            ctrl.updatePtr(ptr);
+            ctrl->updatePtr(ptr);
             mActors.insert(std::make_pair(ptr, ctrl));
         }
     }
@@ -203,7 +203,10 @@ namespace MWMechanics
         while(iter != mActors.end())
         {
             if(iter->first.getCell()==cellStore)
+            {
+                delete iter->second;
                 mActors.erase(iter++);
+            }
             else
                 ++iter;
         }
@@ -222,8 +225,8 @@ namespace MWMechanics
             {
                 if(!MWWorld::Class::get(iter->first).getCreatureStats(iter->first).isDead())
                 {
-                    if(iter->second.getState() >= CharState_Death1)
-                        iter->second.setState(CharState_Idle);
+                    if(iter->second->isDead())
+                        iter->second->resurrect();
 
                     updateActor(iter->first, totalDuration);
                     if(iter->first.getTypeName() == typeid(ESM::NPC).name())
@@ -250,10 +253,10 @@ namespace MWMechanics
                     continue;
                 }
 
-                if(iter->second.getState() >= CharState_Death1)
+                if(iter->second->isDead())
                     continue;
 
-                iter->second.setState(CharState_Death1);
+                iter->second->kill();
 
                 ++mDeathCount[MWWorld::Class::get(iter->first).getId(iter->first)];
 
@@ -270,7 +273,7 @@ namespace MWMechanics
             for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
             {
                 Movement movement;
-                iter->second.update(duration, movement);
+                iter->second->update(duration, movement);
                 mMovement.push_back(std::make_pair(iter->first, movement));
             }
             MWBase::Environment::get().getWorld()->doPhysics(mMovement, duration);
@@ -297,27 +300,27 @@ namespace MWMechanics
     {
         PtrControllerMap::iterator iter = mActors.find(ptr);
         if(iter != mActors.end())
-            iter->second.forceStateUpdate();
+            iter->second->forceStateUpdate();
     }
 
     void Actors::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number)
     {
         PtrControllerMap::iterator iter = mActors.find(ptr);
         if(iter != mActors.end())
-            iter->second.playGroup(groupName, mode, number);
+            iter->second->playGroup(groupName, mode, number);
     }
     void Actors::skipAnimation(const MWWorld::Ptr& ptr)
     {
         PtrControllerMap::iterator iter = mActors.find(ptr);
         if(iter != mActors.end())
-            iter->second.skipAnim();
+            iter->second->skipAnim();
     }
 
     bool Actors::checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string& groupName)
     {
         PtrControllerMap::iterator iter = mActors.find(ptr);
         if(iter != mActors.end())
-            return iter->second.isAnimPlaying(groupName);
+            return iter->second->isAnimPlaying(groupName);
         return false;
     }
 }

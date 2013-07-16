@@ -46,8 +46,6 @@ namespace MWRender
         /// Updates sound manager listener data
         void updateListener();
 
-        void setLowHeight(bool low = true);
-
     public:
         Camera(Ogre::Camera *camera);
         ~Camera();
@@ -80,6 +78,8 @@ namespace MWRender
         bool isFirstPerson() const
         { return !(mVanity.enabled || mPreviewMode || !mFirstPersonView); }
 
+        void processViewChange();
+
         void update(float duration);
 
         /// Set camera distance for current mode. Don't work on 1st person view.
@@ -93,7 +93,6 @@ namespace MWRender
 
         void setAnimation(NpcAnimation *anim);
 
-        void setHeight(float height);
         float getHeight();
 
         /// Stores player and camera world positions in passed arguments

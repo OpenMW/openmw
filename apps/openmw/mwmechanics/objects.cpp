@@ -17,15 +17,17 @@ Objects::Objects()
 void Objects::addObject(const MWWorld::Ptr& ptr)
 {
     MWRender::Animation *anim = MWBase::Environment::get().getWorld()->getAnimation(ptr);
-    if(anim != NULL)
-        mObjects.insert(std::make_pair(ptr, CharacterController(ptr, anim, CharState_Idle)));
+    if(anim) mObjects.insert(std::make_pair(ptr, new CharacterController(ptr, anim)));
 }
 
 void Objects::removeObject(const MWWorld::Ptr& ptr)
 {
     PtrControllerMap::iterator iter = mObjects.find(ptr);
     if(iter != mObjects.end())
+    {
+        delete iter->second;
         mObjects.erase(iter);
+    }
 }
 
 void Objects::updateObject(const MWWorld::Ptr &old, const MWWorld::Ptr &ptr)
@@ -33,10 +35,10 @@ void Objects::updateObject(const MWWorld::Ptr &old, const MWWorld::Ptr &ptr)
     PtrControllerMap::iterator iter = mObjects.find(old);
     if(iter != mObjects.end())
     {
-        CharacterController ctrl = iter->second;
+        CharacterController *ctrl = iter->second;
         mObjects.erase(iter);
 
-        ctrl.updatePtr(ptr);
+        ctrl->updatePtr(ptr);
         mObjects.insert(std::make_pair(ptr, ctrl));
     }
 }
@@ -47,7 +49,10 @@ void Objects::dropObjects (const MWWorld::Ptr::CellStore *cellStore)
     while(iter != mObjects.end())
     {
         if(iter->first.getCell()==cellStore)
+        {
+            delete iter->second;
             mObjects.erase(iter++);
+        }
         else
             ++iter;
     }
@@ -60,7 +65,7 @@ void Objects::update(float duration, bool paused)
         for(PtrControllerMap::iterator iter(mObjects.begin());iter != mObjects.end();++iter)
         {
             Movement movement;
-            iter->second.update(duration, movement);
+            iter->second->update(duration, movement);
         }
     }
 }
@@ -69,13 +74,13 @@ void Objects::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& gro
 {
     PtrControllerMap::iterator iter = mObjects.find(ptr);
     if(iter != mObjects.end())
-        iter->second.playGroup(groupName, mode, number);
+        iter->second->playGroup(groupName, mode, number);
 }
 void Objects::skipAnimation(const MWWorld::Ptr& ptr)
 {
     PtrControllerMap::iterator iter = mObjects.find(ptr);
     if(iter != mObjects.end())
-        iter->second.skipAnim();
+        iter->second->skipAnim();
 }
 
 }

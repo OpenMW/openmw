@@ -163,13 +163,13 @@ namespace MWWorld
                 {
                     if (!target.isEmpty())
                         MWMechanics::Security(getPlayer()).pickLock(target, item, resultMessage, resultSound);
-                    anim->play("pickprobe", MWMechanics::Priority_Weapon, MWRender::Animation::Group_UpperBody, true, "start", "stop", 0.0, 0);
+                    anim->play("pickprobe", MWMechanics::Priority_Weapon, MWRender::Animation::Group_UpperBody, true, 1.0f, "start", "stop", 0.0, 0);
                 }
                 else if (item.getTypeName() == typeid(ESM::Probe).name())
                 {
                     if (!target.isEmpty())
                         MWMechanics::Security(getPlayer()).probeTrap(target, item, resultMessage, resultSound);
-                    anim->play("pickprobe", MWMechanics::Priority_Weapon, MWRender::Animation::Group_UpperBody, true, "start", "stop", 0.0, 0);
+                    anim->play("pickprobe", MWMechanics::Priority_Weapon, MWRender::Animation::Group_UpperBody, true, 1.0f, "start", "stop", 0.0, 0);
                 }
 
                 if (!resultMessage.empty())

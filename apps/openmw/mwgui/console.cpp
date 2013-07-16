@@ -101,59 +101,58 @@ namespace MWGui
     }
 
     Console::Console(int w, int h, bool consoleOnlyScripts)
-      : Layout("openmw_console.layout"),
+      : WindowBase("openmw_console.layout"),
         mCompilerContext (MWScript::CompilerContext::Type_Console),
         mConsoleOnlyScripts (consoleOnlyScripts)
     {
         setCoord(10,10, w-10, h/2);
 
-        getWidget(command, "edit_Command");
-        getWidget(history, "list_History");
+        getWidget(mCommandLine, "edit_Command");
+        getWidget(mHistory, "list_History");
 
         // Set up the command line box
-        command->eventEditSelectAccept +=
+        mCommandLine->eventEditSelectAccept +=
             newDelegate(this, &Console::acceptCommand);
-        command->eventKeyButtonPressed +=
+        mCommandLine->eventKeyButtonPressed +=
             newDelegate(this, &Console::keyPress);
 
         // Set up the log window
-        history->setOverflowToTheLeft(true);
-        history->setEditStatic(true);
-        history->setVisibleVScroll(true);
+        mHistory->setOverflowToTheLeft(true);
+        mHistory->setEditStatic(true);
+        mHistory->setVisibleVScroll(true);
 
         // compiler
         MWScript::registerExtensions (mExtensions, mConsoleOnlyScripts);
         mCompilerContext.setExtensions (&mExtensions);
     }
 
-    void Console::enable()
+    void Console::open()
     {
-        setVisible(true);
-
         // Give keyboard focus to the combo box whenever the console is
         // turned on
-        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(command);
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCommandLine);
     }
 
-    void Console::disable()
+    void Console::close()
     {
-        setVisible(false);
+        // Apparently, hidden widgets can retain key focus
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(NULL);
     }
 
     void Console::setFont(const std::string &fntName)
     {
-        history->setFontName(fntName);
-        command->setFontName(fntName);
+        mHistory->setFontName(fntName);
+        mCommandLine->setFontName(fntName);
     }
 
     void Console::clearHistory()
     {
-        history->setCaption("");
+        mHistory->setCaption("");
     }
 
     void Console::print(const std::string &msg)
     {
-        history->addText(msg);
+        mHistory->addText(msg);
     }
 
     void Console::printOK(const std::string &msg)
@@ -215,7 +214,7 @@ namespace MWGui
         {
             std::vector<std::string> matches;
             listNames();
-            command->setCaption(complete( command->getCaption(), matches ));
+            mCommandLine->setCaption(complete( mCommandLine->getCaption(), matches ));
 #if 0
             int i = 0;
             for(std::vector<std::string>::iterator it=matches.begin(); it < matches.end(); it++,i++ )
@@ -227,50 +226,50 @@ namespace MWGui
 #endif
         }
 
-        if(command_history.empty()) return;
+        if(mCommandHistory.empty()) return;
 
         // Traverse history with up and down arrows
         if(key == MyGUI::KeyCode::ArrowUp)
         {
             // If the user was editing a string, store it for later
-            if(current == command_history.end())
-                editString = command->getCaption();
+            if(mCurrent == mCommandHistory.end())
+                mEditString = mCommandLine->getCaption();
 
-            if(current != command_history.begin())
+            if(mCurrent != mCommandHistory.begin())
             {
-                current--;
-                command->setCaption(*current);
+                mCurrent--;
+                mCommandLine->setCaption(*mCurrent);
             }
         }
         else if(key == MyGUI::KeyCode::ArrowDown)
         {
-            if(current != command_history.end())
+            if(mCurrent != mCommandHistory.end())
             {
-                current++;
+                mCurrent++;
 
-                if(current != command_history.end())
-                    command->setCaption(*current);
+                if(mCurrent != mCommandHistory.end())
+                    mCommandLine->setCaption(*mCurrent);
                 else
                     // Restore the edit string
-                    command->setCaption(editString);
+                    mCommandLine->setCaption(mEditString);
             }
         }
     }
 
     void Console::acceptCommand(MyGUI::EditBox* _sender)
     {
-        const std::string &cm = command->getCaption();
+        const std::string &cm = mCommandLine->getCaption();
         if(cm.empty()) return;
 
         // Add the command to the history, and set the current pointer to
         // the end of the list
-        command_history.push_back(cm);
-        current = command_history.end();
-        editString.clear();
+        mCommandHistory.push_back(cm);
+        mCurrent = mCommandHistory.end();
+        mEditString.clear();
 
         execute (cm);
 
-        command->setCaption("");
+        mCommandLine->setCaption("");
     }
 
     std::string Console::complete( std::string input, std::vector<std::string> &matches )
@@ -412,7 +411,7 @@ namespace MWGui
             setTitle("#{sConsoleTitle}");
             mPtr = MWWorld::Ptr();
         }
-        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(command);
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCommandLine);
     }
 
     void Console::onReferenceUnavailable()

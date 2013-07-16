@@ -33,6 +33,8 @@ namespace
             "Referenceables" },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_References,
             "References" },
+        { CSMWorld::UniversalId::Class_NonRecord, CSMWorld::UniversalId::Type_RegionMap,
+            "Region Map" },
 
         { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0 } // end marker
     };

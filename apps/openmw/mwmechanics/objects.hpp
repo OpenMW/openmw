@@ -16,7 +16,7 @@ namespace MWMechanics
 {
     class Objects
     {
-        typedef std::map<MWWorld::Ptr,CharacterController> PtrControllerMap;
+        typedef std::map<MWWorld::Ptr,CharacterController*> PtrControllerMap;
         PtrControllerMap mObjects;
 
     public:

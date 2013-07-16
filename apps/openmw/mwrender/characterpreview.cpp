@@ -44,8 +44,13 @@ namespace MWRender
     {
         mSceneMgr = Ogre::Root::getSingleton().createSceneManager(Ogre::ST_GENERIC);
 
-        /// \todo Read the fallback values from INIImporter (Inventory:Directional*)
+        // This is a dummy light to turn off shadows without having to use a separate set of shaders
         Ogre::Light* l = mSceneMgr->createLight();
+        l->setType (Ogre::Light::LT_DIRECTIONAL);
+        l->setDiffuseColour (Ogre::ColourValue(0,0,0));
+
+        /// \todo Read the fallback values from INIImporter (Inventory:Directional*)
+        l = mSceneMgr->createLight();
         l->setType (Ogre::Light::LT_DIRECTIONAL);
         l->setDirection (Ogre::Vector3(0.3, -0.7, 0.3));
         l->setDiffuseColour (Ogre::ColourValue(1,1,1));
@@ -172,7 +177,7 @@ namespace MWRender
         if(groupname != mCurrentAnimGroup)
         {
             mCurrentAnimGroup = groupname;
-            mAnimation->play(mCurrentAnimGroup, 1, Animation::Group_All, false, "start", "stop", 0.0f, 0);
+            mAnimation->play(mCurrentAnimGroup, 1, Animation::Group_All, false, 1.0f, "start", "stop", 0.0f, 0);
         }
 
         MWWorld::ContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
@@ -180,7 +185,7 @@ namespace MWRender
         {
             if(!mAnimation->getInfo("torch"))
                 mAnimation->play("torch", 2, MWRender::Animation::Group_LeftArm, false,
-                                 "start", "stop", 0.0f, (~(size_t)0));
+                                 1.0f, "start", "stop", 0.0f, ~0ul);
         }
         else if(mAnimation->getInfo("torch"))
             mAnimation->disable("torch");
@@ -210,7 +215,7 @@ namespace MWRender
         mAnimation->showWeapons(true);
 
         mCurrentAnimGroup = "inventoryhandtohand";
-        mAnimation->play(mCurrentAnimGroup, 1, Animation::Group_All, false, "start", "stop", 0.0f, 0);
+        mAnimation->play(mCurrentAnimGroup, 1, Animation::Group_All, false, 1.0f, "start", "stop", 0.0f, 0);
     }
 
     // --------------------------------------------------------------------------------------------------
@@ -247,7 +252,7 @@ namespace MWRender
 
     void RaceSelectionPreview::onSetup ()
     {
-        mAnimation->play("idle", 1, Animation::Group_All, false, "start", "stop", 0.0f, 0);
+        mAnimation->play("idle", 1, Animation::Group_All, false, 1.0f, "start", "stop", 0.0f, 0);
 
         updateCamera();
     }

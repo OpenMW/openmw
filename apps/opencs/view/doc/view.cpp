@@ -139,6 +139,10 @@ void CSVDoc::View::setupWorldMenu()
     QAction *references = new QAction (tr ("References"), this);
     connect (references, SIGNAL (triggered()), this, SLOT (addReferencesSubView()));
     world->addAction (references);
+
+    QAction *regionMap = new QAction (tr ("Region Map"), this);
+    connect (regionMap, SIGNAL (triggered()), this, SLOT (addRegionMapSubView()));
+    world->addAction (regionMap);
 }
 
 void CSVDoc::View::setupUi()
@@ -360,6 +364,11 @@ void CSVDoc::View::addReferenceablesSubView()
 void CSVDoc::View::addReferencesSubView()
 {
     addSubView (CSMWorld::UniversalId::Type_References);
+}
+
+void CSVDoc::View::addRegionMapSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_RegionMap);
 }
 
 void CSVDoc::View::abortOperation (int type)

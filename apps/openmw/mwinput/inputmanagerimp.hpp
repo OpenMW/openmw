@@ -170,6 +170,7 @@ namespace MWInput
         void toggleSpell();
         void toggleWeapon();
         void toggleInventory();
+        void toggleContainer();
         void toggleConsole();
         void screenshot();
         void toggleJournal();

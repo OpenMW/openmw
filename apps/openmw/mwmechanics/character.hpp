@@ -17,6 +17,7 @@ class Movement;
 
 enum Priority {
     Priority_Default,
+    Priority_Movement,
     Priority_Weapon,
     Priority_Torch,
 
@@ -26,6 +27,8 @@ enum Priority {
 };
 
 enum CharacterState {
+    CharState_None,
+
     CharState_SpecialIdle,
     CharState_Idle,
     CharState_Idle2,
@@ -121,8 +124,18 @@ class CharacterController
     typedef std::deque<std::pair<std::string,size_t> > AnimationQueue;
     AnimationQueue mAnimQueue;
 
-    CharacterState mCharState;
+    CharacterState mIdleState;
+    std::string mCurrentIdle;
+
+    CharacterState mMovementState;
+    std::string mCurrentMovement;
+    float mMovementSpeed;
+
+    CharacterState mDeathState;
+    std::string mCurrentDeath;
+
     UpperBodyCharacterState mUpperBodyState;
+
     WeaponType mWeaponType;
     bool mSkipAnim;
 
@@ -133,15 +146,14 @@ class CharacterController
     float mSecondsOfSwimming;
     float mSecondsOfRunning;
 
-    // Gets an animation group name from the current character state, and whether it should loop.
-    void getCurrentGroup(std::string &group, Priority &prio, bool &loops) const;
+    void refreshCurrentAnims(CharacterState idle, CharacterState movement, bool force=false);
 
     static void getWeaponGroup(WeaponType weaptype, std::string &group);
 
     void clearAnimQueue();
 
 public:
-    CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state);
+    CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim);
     virtual ~CharacterController();
 
     void updatePtr(const MWWorld::Ptr &ptr);
@@ -152,9 +164,10 @@ public:
     void skipAnim();
     bool isAnimPlaying(const std::string &groupName);
 
-    void setState(CharacterState state);
-    CharacterState getState() const
-    { return mCharState; }
+    void kill();
+    void resurrect();
+    bool isDead() const
+    { return mDeathState != CharState_None; }
 
     void forceStateUpdate();
 };
