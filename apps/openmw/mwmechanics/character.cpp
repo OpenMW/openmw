@@ -528,74 +528,77 @@ void CharacterController::update(float duration, Movement &movement)
                 }
             }
 
-            std::string weapgroup;
-            getWeaponGroup(mWeaponType, weapgroup);
-            float weapSpeed = 1;
-            if(weapon != inv.end()) {weapSpeed = weapon->get<ESM::Weapon>()->mBase->mData.mSpeed;std::cout << "setspeed "<< weapSpeed<< "\n";}
-            std::string start;
-            std::string stop;
-            float complete;
-            float speedMult;
-            bool animPlaying = mAnimation->getInfo(weapgroup,&complete,&speedMult,&start,&stop);
-            if(cls.getCreatureStats(mPtr).getAttackingOrSpell())
+            if(weaptype != WeapType_PickProbe)
             {
-                if(mUpperBodyState == UpperCharState_WeapEquiped)
+                std::string weapgroup;
+                getWeaponGroup(mWeaponType, weapgroup);
+                float weapSpeed = 1;
+                if(weapon != inv.end()) weapSpeed = weapon->get<ESM::Weapon>()->mBase->mData.mSpeed;
+                std::string start;
+                std::string stop;
+                float complete;
+                float speedMult;
+                bool animPlaying = mAnimation->getInfo(weapgroup,&complete,&speedMult,&start,&stop);
+                if(cls.getCreatureStats(mPtr).getAttackingOrSpell())
                 {
-                    mAnimation->play(weapgroup, Priority_Weapon,
+                    if(mUpperBodyState == UpperCharState_WeapEquiped)
+                    {
+                        mAnimation->play(weapgroup, Priority_Weapon,
                             MWRender::Animation::Group_UpperBody, false,
                             weapSpeed,"chop start", "chop min attack", 0.0f, 0);
-                    mUpperBodyState = UpperCharState_ChopStartToMinAttack;
+                        mUpperBodyState = UpperCharState_ChopStartToMinAttack;
+                    }
                 }
-            }
-            else if(mUpperBodyState == UpperCharState_ChopMinAttackToMaxAttack)
-            {
+                else if(mUpperBodyState == UpperCharState_ChopMinAttackToMaxAttack)
+                {
+                    if(animPlaying)
+                    {
+                        mAnimation->disable(weapgroup);
+                        mAnimation->play(weapgroup, Priority_Weapon,
+                            MWRender::Animation::Group_UpperBody, false,
+                            weapSpeed,"chop max attack", "chop min hit", 1-complete, 0);
+                    }
+                    else
+                    {
+                        mAnimation->play(weapgroup, Priority_Weapon,
+                            MWRender::Animation::Group_UpperBody, false,
+                            weapSpeed,"chop max attack", "chop min hit", 0, 0);
+                    }
+                    mUpperBodyState = UpperCharState_ChopMaxAttackToMinHit;
+                }
+
+                if(mUpperBodyState == UpperCharState_EquipingWeap && !animPlaying) mUpperBodyState = UpperCharState_WeapEquiped;
+                if(mUpperBodyState == UpperCharState_UnEquipingWeap && !animPlaying) mUpperBodyState = UpperCharState_Nothing;
                 if(animPlaying)
                 {
-                    mAnimation->disable(weapgroup);
-                    mAnimation->play(weapgroup, Priority_Weapon,
-                        MWRender::Animation::Group_UpperBody, false,
-                        weapSpeed,"chop max attack", "chop min hit", 1-complete, 0);
-                }
-                else
-                {
-                    mAnimation->play(weapgroup, Priority_Weapon,
-                        MWRender::Animation::Group_UpperBody, false,
-                        weapSpeed,"chop max attack", "chop min hit", 0, 0);
-                }
-                mUpperBodyState = UpperCharState_ChopMaxAttackToMinHit;
-            }
-
-            if(mUpperBodyState == UpperCharState_EquipingWeap && !animPlaying) mUpperBodyState = UpperCharState_WeapEquiped;
-            if(mUpperBodyState == UpperCharState_UnEquipingWeap && !animPlaying) mUpperBodyState = UpperCharState_Nothing;
-            if(animPlaying)
-            {
-                if(mUpperBodyState == UpperCharState_ChopStartToMinAttack && complete == 1) 
-                {
-                    mAnimation->disable(weapgroup);
-                    mAnimation->play(weapgroup, Priority_Weapon,
-                        MWRender::Animation::Group_UpperBody, false,
-                        weapSpeed,"chop min attack", "chop max attack",0, 0);
-                    mUpperBodyState = UpperCharState_ChopMinAttackToMaxAttack;
-                }
-                else if(mUpperBodyState == UpperCharState_ChopMaxAttackToMinHit && complete == 1) 
-                {
-                    mAnimation->disable(weapgroup);
-                    mAnimation->play(weapgroup, Priority_Weapon,
-                        MWRender::Animation::Group_UpperBody, false,
-                        weapSpeed,"chop min hit", "chop hit",0, 0);
-                    mUpperBodyState = UpperCharState_ChopMinHitToHit;
-                }
-                else if(mUpperBodyState == UpperCharState_ChopMinHitToHit && complete == 1) 
-                {
-                    mAnimation->disable(weapgroup);
-                    mAnimation->play(weapgroup, Priority_Weapon,
-                        MWRender::Animation::Group_UpperBody, false,
-                        weapSpeed,"chop large follow start", "chop large follow stop",0, 0);
-                    mUpperBodyState = UpperCharState_ChopLargeFollowStartToLargeFollowStop;
-                }
-                else if(mUpperBodyState == UpperCharState_ChopLargeFollowStartToLargeFollowStop && complete == 1) 
-                {
-                    mUpperBodyState = UpperCharState_WeapEquiped;
+                    if(mUpperBodyState == UpperCharState_ChopStartToMinAttack && complete == 1) 
+                    {
+                        mAnimation->disable(weapgroup);
+                        mAnimation->play(weapgroup, Priority_Weapon,
+                            MWRender::Animation::Group_UpperBody, false,
+                            weapSpeed,"chop min attack", "chop max attack",0, 0);
+                        mUpperBodyState = UpperCharState_ChopMinAttackToMaxAttack;
+                    }
+                    else if(mUpperBodyState == UpperCharState_ChopMaxAttackToMinHit && complete == 1) 
+                    {
+                        mAnimation->disable(weapgroup);
+                        mAnimation->play(weapgroup, Priority_Weapon,
+                            MWRender::Animation::Group_UpperBody, false,
+                            weapSpeed,"chop min hit", "chop hit",0, 0);
+                        mUpperBodyState = UpperCharState_ChopMinHitToHit;
+                    }
+                    else if(mUpperBodyState == UpperCharState_ChopMinHitToHit && complete == 1) 
+                    {
+                        mAnimation->disable(weapgroup);
+                        mAnimation->play(weapgroup, Priority_Weapon,
+                            MWRender::Animation::Group_UpperBody, false,
+                            weapSpeed,"chop large follow start", "chop large follow stop",0, 0);
+                        mUpperBodyState = UpperCharState_ChopLargeFollowStartToLargeFollowStop;
+                    }
+                    else if(mUpperBodyState == UpperCharState_ChopLargeFollowStartToLargeFollowStop && complete == 1) 
+                    {
+                        mUpperBodyState = UpperCharState_WeapEquiped;
+                    }
                 }
             }
 
