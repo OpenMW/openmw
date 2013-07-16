@@ -16,8 +16,6 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
 
     Cell& cell2 = base ? cell.mBase : cell.mModified;
 
-    cell2.restore (reader, 0); /// \todo fix the index
-
     CellRef ref;
 
     while (cell2.getNextRef (reader, ref))

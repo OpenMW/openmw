@@ -122,7 +122,7 @@ void Cell::save(ESMWriter &esm)
 
 void Cell::restore(ESMReader &esm, int iCtx) const
 {
-    esm.restoreContext(mContextList[iCtx]);
+    esm.restoreContext(mContextList.at (iCtx));
 }
 
 std::string Cell::getDescription() const
