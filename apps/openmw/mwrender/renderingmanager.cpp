@@ -319,7 +319,8 @@ void RenderingManager::update (float duration, bool paused)
     Ogre::Vector3 playerPos(_playerPos[0], _playerPos[1], _playerPos[2]);
 
     Ogre::Vector3 orig, dest;
-    mCamera->setCameraDistance();
+   //Why is this line here?
+   // mCamera->setCameraDistance();
     if(!mCamera->getPosition(orig, dest))
     {
         orig.z += mCamera->getHeight() * mRootNode->getScale().z;

@@ -588,7 +588,10 @@ namespace MWInput
             }
 
             if (arg.zrel)
+            {
                 MWBase::Environment::get().getWorld()->changeVanityModeScale(arg.zrel);
+                MWBase::Environment::get().getWorld()->setCameraDistance(arg.zrel, true, true);
+            }
         }
 
         return true;

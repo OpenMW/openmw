@@ -86,6 +86,13 @@ public:
     void resetCamera();
 
     bool vanityRotateCamera(const float *rot);
+    void setCameraDistance(float dist, bool adjust = false, bool override = true)
+    {
+        if(!mCamera->isVanityOrPreviewModeEnabled() && !mCamera->isFirstPerson())
+        {
+            mCamera->setCameraDistance(-dist/120.f*10, adjust, override);
+        }
+    }
 
     void setupPlayer(const MWWorld::Ptr &ptr);
     void renderPlayer(const MWWorld::Ptr &ptr);

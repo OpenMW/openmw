@@ -376,6 +376,7 @@ namespace MWWorld
             }
 
             virtual bool vanityRotateCamera(float * rot);
+            virtual void setCameraDistance(float dist, bool adjust = false, bool override = true);
 
             virtual void setupPlayer();
             virtual void renderPlayer();
