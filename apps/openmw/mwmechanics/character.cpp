@@ -528,7 +528,8 @@ void CharacterController::update(float duration, Movement &movement)
                 }
             }
 
-            if(weaptype != WeapType_PickProbe)
+            if(weaptype != WeapType_PickProbe && weaptype != WeapType_BowAndArrow
+                && weaptype != WeapType_Crossbow && weaptype != WeapType_ThowWeapon)
             {
                 std::string weapgroup;
                 getWeaponGroup(mWeaponType, weapgroup);
