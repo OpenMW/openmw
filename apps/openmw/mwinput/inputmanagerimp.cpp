@@ -161,6 +161,12 @@ namespace MWInput
         resetIdleTime ();
 
         int action = channel->getNumber();
+
+        if (action == A_Use)
+        {
+            MWWorld::Class::get(mPlayer.getPlayer()).getCreatureStats(mPlayer.getPlayer()).setAttackingOrSpell(currentValue);
+        }
+
         if (currentValue == 1)
         {
             // trigger action activated
@@ -522,8 +528,6 @@ namespace MWInput
             }
         }
 
-        MWWorld::Class::get(mPlayer.getPlayer()).getCreatureStats(mPlayer.getPlayer()).setAttackingOrSpell(true);
-
         return true;
     }
 
@@ -532,8 +536,6 @@ namespace MWInput
         mInputBinder->mouseReleased (arg, id);
 
         MyGUI::InputManager::getInstance().injectMouseRelease(mMouseX, mMouseY, sdlButtonToMyGUI(id));
-
-        MWWorld::Class::get(mPlayer.getPlayer()).getCreatureStats(mPlayer.getPlayer()).setAttackingOrSpell(false);
 
         return true;
     }
