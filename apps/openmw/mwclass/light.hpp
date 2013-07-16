@@ -61,6 +61,8 @@ namespace MWClass
             virtual float getWeight (const MWWorld::Ptr& ptr) const;
 
             virtual bool canSell (const MWWorld::Ptr& item, int npcServices) const;
+
+            std::pair<int, std::string> canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const;
     };
 }
 
