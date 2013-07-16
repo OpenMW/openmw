@@ -17,8 +17,7 @@ Objects::Objects()
 void Objects::addObject(const MWWorld::Ptr& ptr)
 {
     MWRender::Animation *anim = MWBase::Environment::get().getWorld()->getAnimation(ptr);
-    if(anim != NULL)
-        mObjects.insert(std::make_pair(ptr, CharacterController(ptr, anim, CharState_Idle)));
+    if(anim) mObjects.insert(std::make_pair(ptr, CharacterController(ptr, anim)));
 }
 
 void Objects::removeObject(const MWWorld::Ptr& ptr)

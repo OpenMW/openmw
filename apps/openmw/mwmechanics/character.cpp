@@ -221,12 +221,12 @@ void CharacterController::getWeaponGroup(WeaponType weaptype, std::string &group
 }
 
 
-CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state)
+CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim)
     : mPtr(ptr)
     , mAnimation(anim)
     , mIdleState(CharState_Idle)
     , mMovementState(CharState_None)
-    , mCharState(state)
+    , mDeathState(CharState_None)
     , mWeaponType(WeapType_None)
     , mSkipAnim(false)
     , mSecondsOfRunning(0)
@@ -241,6 +241,12 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
         /* Accumulate along X/Y only for now, until we can figure out how we should
          * handle knockout and death which moves the character down. */
         mAnimation->setAccumulation(Ogre::Vector3(1.0f, 1.0f, 0.0f));
+
+        if(MWWorld::Class::get(mPtr).getCreatureStats(mPtr).isDead())
+        {
+            /* FIXME: Get the actual death state used. */
+            mDeathState = CharState_Death1;
+        }
     }
     else
     {
@@ -249,13 +255,14 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     }
 
     refreshCurrentAnims(mIdleState, mMovementState, true);
-    if(mCharState >= CharState_Death1)
+    if(mDeathState != CharState_None)
     {
-        const StateInfo *state = std::find_if(sStateList, sStateListEnd, FindCharState(mCharState));
+        const StateInfo *state = std::find_if(sStateList, sStateListEnd, FindCharState(mDeathState));
         if(state == sStateListEnd)
-            throw std::runtime_error("Failed to find character state "+Ogre::StringConverter::toString(mCharState));
+            throw std::runtime_error("Failed to find character state "+Ogre::StringConverter::toString(mDeathState));
 
-        mAnimation->play(state->groupname, Priority_Death, MWRender::Animation::Group_All,
+        mCurrentDeath = state->groupname;
+        mAnimation->play(mCurrentDeath, Priority_Death, MWRender::Animation::Group_All,
                          false, "start", "stop", 1.0f, 0);
     }
 }
@@ -608,15 +615,6 @@ void CharacterController::clearAnimQueue()
 }
 
 
-void CharacterController::setState(CharacterState state)
-{
-    if(mCharState == state)
-        return;
-    mCharState = state;
-
-    forceStateUpdate();
-}
-
 void CharacterController::forceStateUpdate()
 {
     if(!mAnimation)
@@ -624,16 +622,49 @@ void CharacterController::forceStateUpdate()
     clearAnimQueue();
 
     refreshCurrentAnims(mIdleState, mMovementState, true);
-    if(mCharState >= CharState_Death1)
+    if(mDeathState != CharState_None)
     {
-        const StateInfo *state = std::find_if(sStateList, sStateListEnd, FindCharState(mCharState));
+        const StateInfo *state = std::find_if(sStateList, sStateListEnd, FindCharState(mDeathState));
         if(state == sStateListEnd)
-            throw std::runtime_error("Failed to find character state "+Ogre::StringConverter::toString(mCharState));
+            throw std::runtime_error("Failed to find character state "+Ogre::StringConverter::toString(mDeathState));
 
-        if(!mAnimation->getInfo(state->groupname))
-            mAnimation->play(state->groupname, Priority_Death, MWRender::Animation::Group_All,
+        mCurrentDeath = state->groupname;
+        if(!mAnimation->getInfo(mCurrentDeath))
+            mAnimation->play(mCurrentDeath, Priority_Death, MWRender::Animation::Group_All,
                              false, "start", "stop", 0.0f, 0);
     }
 }
+
+void CharacterController::kill()
+{
+    static const CharacterState deathstates[] = {
+        CharState_Death1, CharState_Death2, CharState_Death3, CharState_Death4, CharState_Death5
+    };
+
+    if(mDeathState != CharState_None)
+        return;
+
+    mDeathState = deathstates[(int)(rand()/((double)RAND_MAX+1.0)*5.0)];
+    const StateInfo *state = std::find_if(sStateList, sStateListEnd, FindCharState(mDeathState));
+    if(state == sStateListEnd)
+        throw std::runtime_error("Failed to find character state "+Ogre::StringConverter::toString(mDeathState));
+
+    mCurrentDeath = state->groupname;
+    if(mAnimation && !mAnimation->getInfo(mCurrentDeath))
+        mAnimation->play(mCurrentDeath, Priority_Death, MWRender::Animation::Group_All,
+                         false, "start", "stop", 0.0f, 0);
+}
+
+void CharacterController::resurrect()
+{
+    if(mDeathState == CharState_None)
+        return;
+
+    if(mAnimation)
+        mAnimation->disable(mCurrentDeath);
+    mCurrentDeath.empty();
+    mDeathState = CharState_None;
+}
+
 
 }

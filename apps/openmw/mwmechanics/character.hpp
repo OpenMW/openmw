@@ -108,7 +108,9 @@ class CharacterController
     CharacterState mMovementState;
     std::string mCurrentMovement;
 
-    CharacterState mCharState;
+    CharacterState mDeathState;
+    std::string mCurrentDeath;
+
     WeaponType mWeaponType;
     bool mSkipAnim;
 
@@ -126,7 +128,7 @@ class CharacterController
     void clearAnimQueue();
 
 public:
-    CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state);
+    CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim);
     virtual ~CharacterController();
 
     void updatePtr(const MWWorld::Ptr &ptr);
@@ -137,9 +139,10 @@ public:
     void skipAnim();
     bool isAnimPlaying(const std::string &groupName);
 
-    void setState(CharacterState state);
-    CharacterState getState() const
-    { return mCharState; }
+    void kill();
+    void resurrect();
+    bool isDead() const
+    { return mDeathState != CharState_None; }
 
     void forceStateUpdate();
 };
