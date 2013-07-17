@@ -663,8 +663,14 @@ void CharacterController::kill()
     }
 
     if(mAnimation)
+    {
         mAnimation->play(mCurrentDeath, Priority_Death, MWRender::Animation::Group_All,
                          false, 1.0f, "start", "stop", 0.0f, 0);
+        mAnimation->disable(mCurrentIdle);
+    }
+
+    mIdleState = CharState_None;
+    mCurrentIdle.clear();
 }
 
 void CharacterController::resurrect()
