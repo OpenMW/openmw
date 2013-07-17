@@ -208,11 +208,11 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
         mCurrentMovement = movement;
         if(!mCurrentMovement.empty())
         {
-            float vel, speed = 0.0f;
+            float vel, speedmult = 1.0f;
             if(mMovementSpeed > 0.0f && (vel=mAnimation->getVelocity(mCurrentMovement)) > 1.0f)
-                speed = mMovementSpeed / vel;
+                speedmult = mMovementSpeed / vel;
             mAnimation->play(mCurrentMovement, Priority_Movement, movegroup, false,
-                             speed, "start", "stop", 0.0f, ~0ul);
+                             speedmult, "start", "stop", 0.0f, ~0ul);
         }
     }
 }
@@ -640,22 +640,37 @@ void CharacterController::forceStateUpdate()
 
 void CharacterController::kill()
 {
-    static const CharacterState deathstates[] = {
-        CharState_Death1, CharState_Death2, CharState_Death3, CharState_Death4, CharState_Death5
-    };
-
     if(mDeathState != CharState_None)
         return;
 
-    mDeathState = deathstates[(int)(rand()/((double)RAND_MAX+1.0)*5.0)];
-    const StateInfo *state = std::find_if(sStateList, sStateListEnd, FindCharState(mDeathState));
-    if(state == sStateListEnd)
-        throw std::runtime_error("Failed to find character state "+Ogre::StringConverter::toString(mDeathState));
+    if(mPtr.getTypeName() == typeid(ESM::NPC).name())
+    {
+        static const CharacterState deathstates[] = {
+            CharState_Death1, CharState_Death2, CharState_Death3, CharState_Death4, CharState_Death5
+        };
 
-    mCurrentDeath = state->groupname;
-    if(mAnimation && !mAnimation->getInfo(mCurrentDeath))
+        mDeathState = deathstates[(int)(rand()/((double)RAND_MAX+1.0)*5.0)];
+        const StateInfo *state = std::find_if(sStateList, sStateListEnd, FindCharState(mDeathState));
+        if(state == sStateListEnd)
+            throw std::runtime_error("Failed to find character state "+Ogre::StringConverter::toString(mDeathState));
+
+        mCurrentDeath = state->groupname;
+    }
+    else
+    {
+        mDeathState = CharState_Death1;
+        mCurrentDeath = "death1";
+    }
+
+    if(mAnimation)
+    {
         mAnimation->play(mCurrentDeath, Priority_Death, MWRender::Animation::Group_All,
                          false, 1.0f, "start", "stop", 0.0f, 0);
+        mAnimation->disable(mCurrentIdle);
+    }
+
+    mIdleState = CharState_None;
+    mCurrentIdle.clear();
 }
 
 void CharacterController::resurrect()
