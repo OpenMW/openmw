@@ -170,6 +170,8 @@ namespace MWMechanics
         // erase previous death events since we are currently only tracking them while in an active cell
         MWWorld::Class::get(ptr).getCreatureStats(ptr).clearHasDied();
 
+        removeActor(ptr);
+
         MWRender::Animation *anim = MWBase::Environment::get().getWorld()->getAnimation(ptr);
         mActors.insert(std::make_pair(ptr, new CharacterController(ptr, anim)));
     }
