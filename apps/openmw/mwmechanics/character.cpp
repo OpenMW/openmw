@@ -152,7 +152,7 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
             idle = "idleswim";
         else if(mIdleState == CharState_IdleSneak && mAnimation->hasAnimation("idlesneak"))
             idle = "idlesneak";
-        else
+        else if(mIdleState != CharState_None)
         {
             idle = "idle";
             if(weap != sWeaponTypeListEnd)
@@ -165,8 +165,9 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
 
         mAnimation->disable(mCurrentIdle);
         mCurrentIdle = idle;
-        mAnimation->play(mCurrentIdle, Priority_Default, MWRender::Animation::Group_All, false,
-                         1.0f, "start", "stop", 0.0f, ~0ul);
+        if(!mCurrentIdle.empty())
+            mAnimation->play(mCurrentIdle, Priority_Default, MWRender::Animation::Group_All, false,
+                             1.0f, "start", "stop", 0.0f, ~0ul);
     }
 
     if(force || movement != mMovementState)
@@ -229,7 +230,7 @@ void CharacterController::getWeaponGroup(WeaponType weaptype, std::string &group
 CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim)
     : mPtr(ptr)
     , mAnimation(anim)
-    , mIdleState(CharState_Idle)
+    , mIdleState(CharState_None)
     , mMovementState(CharState_None)
     , mMovementSpeed(0.0f)
     , mDeathState(CharState_None)
@@ -248,7 +249,9 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
          * handle knockout and death which moves the character down. */
         mAnimation->setAccumulation(Ogre::Vector3(1.0f, 1.0f, 0.0f));
 
-        if(MWWorld::Class::get(mPtr).getCreatureStats(mPtr).isDead())
+        if(!MWWorld::Class::get(mPtr).getCreatureStats(mPtr).isDead())
+            mIdleState = CharState_Idle;
+        else
         {
             /* FIXME: Get the actual death state used. */
             mDeathState = CharState_Death1;
@@ -258,6 +261,8 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     {
         /* Don't accumulate with non-actors. */
         mAnimation->setAccumulation(Ogre::Vector3(0.0f));
+
+        mIdleState = CharState_Idle;
     }
 
     refreshCurrentAnims(mIdleState, mMovementState, true);
