@@ -663,6 +663,42 @@ namespace MWClass
             return 0;
     }
 
+
+    std::string Npc::getSoundIdFromSndGen(const MWWorld::Ptr &ptr, const std::string &name) const
+    {
+        if(name == "left")
+        {
+            MWBase::World *world = MWBase::Environment::get().getWorld();
+            Ogre::Vector3 pos(ptr.getRefData().getPosition().pos);
+            if(world->isUnderwater(ptr.getCell(), pos))
+                return "FootWaterLeft";
+            if(world->isOnGround(ptr))
+                return "FootBareLeft";
+            return "";
+        }
+        if(name == "right")
+        {
+            MWBase::World *world = MWBase::Environment::get().getWorld();
+            Ogre::Vector3 pos(ptr.getRefData().getPosition().pos);
+            if(world->isUnderwater(ptr.getCell(), pos))
+                return "FootWaterRight";
+            if(world->isOnGround(ptr))
+                return "FootBareRight";
+            return "";
+        }
+        // TODO: I have no idea what these are supposed to do for NPCs since they use
+        // voiced dialog for various conditions like health loss and combat taunts. Maybe
+        // only for biped creatures?
+        if(name == "moan")
+            return "";
+        if(name == "roar")
+            return "";
+        if(name == "scream")
+            return "";
+
+        throw std::runtime_error(std::string("Unexpected soundgen type: ")+name);
+    }
+
     MWWorld::Ptr
     Npc::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
     {

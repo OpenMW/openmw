@@ -221,6 +221,9 @@ namespace MWWorld
             ///< Return the down sound ID of \a ptr or throw an exception, if class does not support ID retrieval
             /// (default implementation: throw an exception)
 
+            virtual std::string getSoundIdFromSndGen(const Ptr &ptr, const std::string &type) const;
+            ///< Returns the sound ID for \a ptr of the given soundgen \a type.
+
             virtual float getArmorRating (const MWWorld::Ptr& ptr) const;
             ///< @return combined armor rating of this actor
 

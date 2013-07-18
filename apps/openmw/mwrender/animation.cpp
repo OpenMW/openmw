@@ -14,6 +14,7 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwmechanics/character.hpp"
+#include "../mwworld/class.hpp"
 
 namespace MWRender
 {
@@ -511,8 +512,12 @@ bool Animation::handleTextKey(AnimState &state, const std::string &groupname, co
     }
     if(evt.compare(0, 10, "soundgen: ") == 0)
     {
-        // FIXME: Lookup the SoundGen (SNDG) for the specified sound that corresponds
-        // to this actor type
+        std::string sound = MWWorld::Class::get(mPtr).getSoundIdFromSndGen(mPtr, evt.substr(10));
+        if(!sound.empty())
+        {
+            MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+            sndMgr->playSound3D(mPtr, sound, 1.0f, 1.0f);
+        }
         return true;
     }
 

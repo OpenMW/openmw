@@ -291,6 +291,33 @@ namespace MWClass
         return ref->mBase->mPersistent;
     }
 
+    std::string Creature::getSoundIdFromSndGen(const MWWorld::Ptr &ptr, const std::string &name) const
+    {
+        const MWWorld::Store<ESM::SoundGenerator> &store = MWBase::Environment::get().getWorld()->getStore().get<ESM::SoundGenerator>();
+
+        int type = getSndGenTypeFromName(ptr, name);
+        if(type >= 0)
+        {
+            std::vector<const ESM::SoundGenerator*> sounds;
+            sounds.reserve(8);
+
+            std::string ptrid = Creature::getId(ptr);
+            MWWorld::Store<ESM::SoundGenerator>::iterator sound = store.begin();
+            while(sound != store.end())
+            {
+                if(type == sound->mType && sound->mCreature.size() > 0 &&
+                   Misc::StringUtils::ciEqual(ptrid.substr(0, sound->mCreature.size()),
+                                              sound->mCreature))
+                    sounds.push_back(&*sound);
+                sound++;
+            }
+            if(sounds.size() > 0)
+                return sounds[(int)(rand()/(RAND_MAX+1.0)*sounds.size())]->mSound;
+        }
+
+        return "";
+    }
+
     MWWorld::Ptr
     Creature::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
     {
@@ -298,6 +325,38 @@ namespace MWClass
             ptr.get<ESM::Creature>();
 
         return MWWorld::Ptr(&cell.mCreatures.insert(*ref), &cell);
+    }
+
+    int Creature::getSndGenTypeFromName(const MWWorld::Ptr &ptr, const std::string &name)
+    {
+        if(name == "left")
+        {
+            MWBase::World *world = MWBase::Environment::get().getWorld();
+            Ogre::Vector3 pos(ptr.getRefData().getPosition().pos);
+            if(world->isUnderwater(ptr.getCell(), pos))
+                return 2;
+            if(world->isOnGround(ptr))
+                return 0;
+            return -1;
+        }
+        if(name == "right")
+        {
+            MWBase::World *world = MWBase::Environment::get().getWorld();
+            Ogre::Vector3 pos(ptr.getRefData().getPosition().pos);
+            if(world->isUnderwater(ptr.getCell(), pos))
+                return 3;
+            if(world->isOnGround(ptr))
+                return 1;
+            return -1;
+        }
+        if(name == "moan")
+            return 4;
+        if(name == "roar")
+            return 5;
+        if(name == "scream")
+            return 6;
+
+        throw std::runtime_error(std::string("Unexpected soundgen type: ")+name);
     }
 
     const ESM::GameSetting* Creature::fMinWalkSpeedCreature;

@@ -12,6 +12,8 @@ namespace MWClass
             virtual MWWorld::Ptr
             copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const;
 
+            static int getSndGenTypeFromName(const MWWorld::Ptr &ptr, const std::string &name);
+
             static const ESM::GameSetting *fMinWalkSpeedCreature;
             static const ESM::GameSetting *fMaxWalkSpeedCreature;
 
@@ -68,6 +70,8 @@ namespace MWClass
             virtual int getServices (const MWWorld::Ptr& actor) const;
 
             virtual bool isPersistent (const MWWorld::Ptr& ptr) const;
+
+            virtual std::string getSoundIdFromSndGen(const MWWorld::Ptr &ptr, const std::string &name) const;
 
             virtual MWMechanics::Movement& getMovementSettings (const MWWorld::Ptr& ptr) const;
             ///< Return desired movement.
