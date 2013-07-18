@@ -659,7 +659,6 @@ void Animation::resetActiveGroups()
         return;
 
     const Ogre::SharedPtr<AnimSource> &animsrc = state->second.mSource;
-    const NifOgre::TextKeyMap &keys = animsrc->mTextKeys;
     const std::vector<Ogre::Controller<Ogre::Real> >&ctrls = animsrc->mControllers[0];
     for(size_t i = 0;i < ctrls.size();i++)
     {
