@@ -303,6 +303,14 @@ RenderingManager::updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &
     }
 }
 
+void RenderingManager::updatePlayerPtr(const MWWorld::Ptr &ptr)
+{
+    if(mPlayerAnimation)
+        mPlayerAnimation->updatePtr(ptr);
+    if(mCamera->getHandle() == ptr.getRefData().getHandle())
+        mCamera->attachTo(ptr);
+}
+
 void RenderingManager::update (float duration, bool paused)
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();

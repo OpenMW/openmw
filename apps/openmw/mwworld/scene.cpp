@@ -167,6 +167,7 @@ namespace MWWorld
         world->getPlayer().setCell(cell);
 
         MWWorld::Ptr player = world->getPlayer().getPlayer();
+        mRendering.updatePlayerPtr(player);
 
         if (adjustPlayerPos) {
             world->moveObject(player, pos.pos[0], pos.pos[1], pos.pos[2]);

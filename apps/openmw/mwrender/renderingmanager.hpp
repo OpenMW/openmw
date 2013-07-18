@@ -127,6 +127,9 @@ public:
     /// \param cur Object reference in new cell
     void updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur);
 
+    /// Specifies an updated Ptr object for the player (used on cell change).
+    void updatePlayerPtr(const MWWorld::Ptr &ptr);
+
     void update (float duration, bool paused);
 
     void setAmbientColour(const Ogre::ColourValue& colour);
