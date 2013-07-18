@@ -191,13 +191,13 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
 
             if(!mAnimation->hasAnimation(movement))
             {
-                std::string::size_type sneakpos = movement.find("sneak");
-                if(sneakpos == std::string::npos)
+                std::string::size_type swimpos = movement.find("swim");
+                if(swimpos == std::string::npos)
                     movement.clear();
                 else
                 {
                     movegroup = MWRender::Animation::Group_LowerBody;
-                    movement.erase(sneakpos, 5);
+                    movement.erase(swimpos, 4);
                     if(!mAnimation->hasAnimation(movement))
                         movement.clear();
                 }
