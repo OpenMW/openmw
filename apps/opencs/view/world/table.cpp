@@ -217,9 +217,12 @@ void CSVWorld::Table::updateEditorSetting (const QString &settingName, const QSt
 
     if (settingName == "Referenceable ID Type Display")
     {
-        RefIdTypeDelegate &refidDelegate = dynamic_cast <CSVWorld::RefIdTypeDelegate &> (*itemDelegateForColumn(2));
+        RefIdTypeDelegate *refidDelegate = dynamic_cast <CSVWorld::RefIdTypeDelegate *> (itemDelegateForColumn(2));
 
-        refidDelegate.updateEditorSetting (settingName, settingValue);
-        emit dataChanged(mModel->index(0,1), mModel->index(mModel->rowCount()-1, 1));
+        if (refidDelegate)
+        {
+            refidDelegate->updateEditorSetting (settingName, settingValue);
+            emit dataChanged(mModel->index(0,1), mModel->index(mModel->rowCount()-1, 1));
+        }
     }
 }
