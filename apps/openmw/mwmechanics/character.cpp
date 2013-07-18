@@ -62,6 +62,7 @@ static const StateInfo sStateList[] = {
     { CharState_Death3, "death3" },
     { CharState_Death4, "death4" },
     { CharState_Death5, "death5" },
+    { CharState_SwimDeath, "swimdeath" },
 };
 static const StateInfo *sStateListEnd = &sStateList[sizeof(sStateList)/sizeof(sStateList[0])];
 
@@ -650,15 +651,30 @@ void CharacterController::kill()
 
     if(mPtr.getTypeName() == typeid(ESM::NPC).name())
     {
-        static const CharacterState deathstates[] = {
+        const StateInfo *state = NULL;
+        if(MWBase::Environment::get().getWorld()->isSwimming(mPtr))
+        {
+            mDeathState = CharState_SwimDeath;
+            state = std::find_if(sStateList, sStateListEnd, FindCharState(mDeathState));
+            if(state == sStateListEnd)
+                throw std::runtime_error("Failed to find character state "+Ogre::StringConverter::toString(mDeathState));
+        }
+
+        static const CharacterState deathstates[5] = {
             CharState_Death1, CharState_Death2, CharState_Death3, CharState_Death4, CharState_Death5
         };
+        std::vector<CharacterState> states(&deathstates[0], &deathstates[5]);
 
-        mDeathState = deathstates[(int)(rand()/((double)RAND_MAX+1.0)*5.0)];
-        const StateInfo *state = std::find_if(sStateList, sStateListEnd, FindCharState(mDeathState));
-        if(state == sStateListEnd)
-            throw std::runtime_error("Failed to find character state "+Ogre::StringConverter::toString(mDeathState));
+        while(states.size() > 1 && (!state || !mAnimation->hasAnimation(state->groupname)))
+        {
+            int pos = (int)(rand()/((double)RAND_MAX+1.0)*states.size());
+            mDeathState = states[pos];
+            states.erase(states.begin()+pos);
 
+            state = std::find_if(sStateList, sStateListEnd, FindCharState(mDeathState));
+            if(state == sStateListEnd)
+                throw std::runtime_error("Failed to find character state "+Ogre::StringConverter::toString(mDeathState));
+        }
         mCurrentDeath = state->groupname;
     }
     else
@@ -688,6 +704,5 @@ void CharacterController::resurrect()
     mCurrentDeath.empty();
     mDeathState = CharState_None;
 }
-
 
 }

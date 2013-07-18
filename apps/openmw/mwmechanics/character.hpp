@@ -72,12 +72,12 @@ enum CharacterState {
 
     CharState_Jump,
 
-    /* Death states must be last! */
     CharState_Death1,
     CharState_Death2,
     CharState_Death3,
     CharState_Death4,
-    CharState_Death5
+    CharState_Death5,
+    CharState_SwimDeath
 };
 
 enum WeaponType {
