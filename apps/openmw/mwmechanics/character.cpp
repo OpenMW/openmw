@@ -44,19 +44,7 @@ struct StateInfo {
     const char groupname[32];
 };
 
-static const StateInfo sStateList[] = {
-    { CharState_Idle, "idle" },
-    { CharState_Idle2, "idle2" },
-    { CharState_Idle3, "idle3" },
-    { CharState_Idle4, "idle4" },
-    { CharState_Idle5, "idle5" },
-    { CharState_Idle6, "idle6" },
-    { CharState_Idle7, "idle7" },
-    { CharState_Idle8, "idle8" },
-    { CharState_Idle9, "idle9" },
-    { CharState_IdleSwim, "idleswim" },
-    { CharState_IdleSneak, "idlesneak" },
-
+static const StateInfo sDeathList[] = {
     { CharState_Death1, "death1" },
     { CharState_Death2, "death2" },
     { CharState_Death3, "death3" },
@@ -64,8 +52,7 @@ static const StateInfo sStateList[] = {
     { CharState_Death5, "death5" },
     { CharState_SwimDeath, "swimdeath" },
 };
-static const StateInfo *sStateListEnd = &sStateList[sizeof(sStateList)/sizeof(sStateList[0])];
-
+static const StateInfo *sDeathListEnd = &sDeathList[sizeof(sDeathList)/sizeof(sDeathList[0])];
 
 static const StateInfo sMovementList[] = {
     { CharState_WalkForward, "walkforward" },
@@ -269,8 +256,8 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     refreshCurrentAnims(mIdleState, mMovementState, true);
     if(mDeathState != CharState_None)
     {
-        const StateInfo *state = std::find_if(sStateList, sStateListEnd, FindCharState(mDeathState));
-        if(state == sStateListEnd)
+        const StateInfo *state = std::find_if(sDeathList, sDeathListEnd, FindCharState(mDeathState));
+        if(state == sDeathListEnd)
             throw std::runtime_error("Failed to find character state "+Ogre::StringConverter::toString(mDeathState));
 
         mCurrentDeath = state->groupname;
@@ -633,8 +620,8 @@ void CharacterController::forceStateUpdate()
     refreshCurrentAnims(mIdleState, mMovementState, true);
     if(mDeathState != CharState_None)
     {
-        const StateInfo *state = std::find_if(sStateList, sStateListEnd, FindCharState(mDeathState));
-        if(state == sStateListEnd)
+        const StateInfo *state = std::find_if(sDeathList, sDeathListEnd, FindCharState(mDeathState));
+        if(state == sDeathListEnd)
             throw std::runtime_error("Failed to find character state "+Ogre::StringConverter::toString(mDeathState));
 
         mCurrentDeath = state->groupname;
@@ -655,8 +642,8 @@ void CharacterController::kill()
         if(MWBase::Environment::get().getWorld()->isSwimming(mPtr))
         {
             mDeathState = CharState_SwimDeath;
-            state = std::find_if(sStateList, sStateListEnd, FindCharState(mDeathState));
-            if(state == sStateListEnd)
+            state = std::find_if(sDeathList, sDeathListEnd, FindCharState(mDeathState));
+            if(state == sDeathListEnd)
                 throw std::runtime_error("Failed to find character state "+Ogre::StringConverter::toString(mDeathState));
         }
 
@@ -671,8 +658,8 @@ void CharacterController::kill()
             mDeathState = states[pos];
             states.erase(states.begin()+pos);
 
-            state = std::find_if(sStateList, sStateListEnd, FindCharState(mDeathState));
-            if(state == sStateListEnd)
+            state = std::find_if(sDeathList, sDeathListEnd, FindCharState(mDeathState));
+            if(state == sDeathListEnd)
                 throw std::runtime_error("Failed to find character state "+Ogre::StringConverter::toString(mDeathState));
         }
         mCurrentDeath = state->groupname;
