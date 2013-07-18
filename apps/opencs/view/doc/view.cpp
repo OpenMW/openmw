@@ -189,10 +189,7 @@ CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int to
     QString width = CSMSettings::UserSettings::instance().getSetting(QString("Window Size"), QString("Width"));
     QString height = CSMSettings::UserSettings::instance().getSetting(QString("Window Size"), QString("Height"));
 
-    if(width==QString() || height==QString())
-        resize(800, 600);
-    else
-        resize (width.toInt(), height.toInt());
+    resize (width.toInt(), height.toInt());
 
     mSubViewWindow.setDockOptions (QMainWindow::AllowNestedDocks);
 

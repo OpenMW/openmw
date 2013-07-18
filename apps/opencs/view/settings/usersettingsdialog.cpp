@@ -44,7 +44,6 @@ void CSVSettings::UserSettingsDialog::closeEvent (QCloseEvent *event)
 void CSVSettings::UserSettingsDialog::setWidgetStates ()
 {
     CSMSettings::UserSettings::instance().loadSettings("opencs.cfg");
-    const CSMSettings::SectionMap &sectionSettings = CSMSettings::UserSettings::instance().getSettings();
 
     //iterate the tabWidget's pages (sections)
     for (int i = 0; i < mStackedWidget->count(); i++)
@@ -53,12 +52,9 @@ void CSVSettings::UserSettingsDialog::setWidgetStates ()
         //and update widget
         QString pageName = mStackedWidget->widget(i)->objectName();
 
-        if (sectionSettings.find(pageName) != sectionSettings.end())
-        {
-            CSMSettings::SettingMap *settings = sectionSettings.value(pageName);
-            AbstractPage &page = getAbstractPage (i);
-            page.initializeWidgets(*settings);
-        }
+        const CSMSettings::SettingMap *settings = CSMSettings::UserSettings::instance().getSettings(pageName);
+        AbstractPage &page = getAbstractPage (i);
+        page.initializeWidgets(*settings);
     }
 }
 

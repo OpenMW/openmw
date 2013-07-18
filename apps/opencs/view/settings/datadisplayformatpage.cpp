@@ -12,7 +12,7 @@ CSVSettings::GroupBlockDef *CSVSettings::DataDisplayFormatPage::setupDataDisplay
 {
     GroupBlockDef *statusBlock = new GroupBlockDef(QString(title));
 
-    SettingsItemDef *statusItem = new SettingsItemDef (statusBlock->title, "Icon and Text");
+    SettingsItemDef *statusItem = new SettingsItemDef (statusBlock->title, "Icon Only");
     *(statusItem->valueList) << QString("Icon and Text") << QString("Icon Only") << QString("Text Only");
 
     WidgetDef statusWidget (Widget_RadioButton);
