@@ -19,7 +19,7 @@
 #include "../../view/settings/abstractblock.hpp"
 
 CSVSettings::WindowPage::WindowPage(QWidget *parent):
-    AbstractPage("Window", parent)
+    AbstractPage("Window Size", parent)
 {
     // Hacks to get the stylesheet look properly
 #ifdef Q_OS_MAC
@@ -82,7 +82,7 @@ CSVSettings::GroupBlockDef *CSVSettings::WindowPage::buildCustomWindowSize()
 
 CSVSettings::GroupBlockDef *CSVSettings::WindowPage::buildWindowSizeToggle()
 {
-    GroupBlockDef *block = new GroupBlockDef ("Window Size");
+    GroupBlockDef *block = new GroupBlockDef (objectName());
 
     // window size toggle
     block->captions << "Pre-Defined" << "Custom";

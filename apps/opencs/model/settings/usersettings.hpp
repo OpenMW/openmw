@@ -27,6 +27,8 @@ namespace CSMSettings {
         Q_OBJECT
 
         SectionMap mSectionSettings;
+        SectionMap mEditorSettingDefaults;
+
         static UserSettings *mUserSettingsInstance;
         QString mUserFilePath;
         Files::ConfigurationManager mCfgMgr;
@@ -58,7 +60,9 @@ namespace CSMSettings {
         void loadSettings (const QString &fileName);
 
         /// Returns the entire map of settings across all sections
-        const SectionMap &getSettings () const;
+        const SectionMap &getSectionMap () const;
+
+        const SettingMap *getSettings (const QString &sectionName) const;
 
         /// Retrieves the value as a QString of the specified setting in the specified section
         QString getSetting(const QString &section, const QString &setting) const;
@@ -72,7 +76,14 @@ namespace CSMSettings {
         ///  Parses a setting file specified in filePath from the provided text stream.
         bool loadFromFile (const QString &filePath = "");
 
+        /// merge the passed map into mSectionSettings
+        void mergeMap (const SectionMap &);
+
         void displayFileErrorMessage(const QString &message, bool isReadOnly);
+
+        void buildEditorSettingDefaults();
+
+        SettingMap *getValidSettings (const QString &sectionName) const;
 
     signals:
 

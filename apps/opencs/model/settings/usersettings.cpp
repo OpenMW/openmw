@@ -42,6 +42,33 @@ CSMSettings::UserSettings::UserSettings()
 
     mReadOnlyMessage = QObject::tr("<br><b>Could not open file for reading</b><br><br> \
             Please make sure you have the right permissions and try again.<br>");
+
+    buildEditorSettingDefaults();
+}
+
+void CSMSettings::UserSettings::buildEditorSettingDefaults()
+{
+    SettingContainer *windowHeight = new SettingContainer("768", this);
+    SettingContainer *windowWidth = new SettingContainer("1024", this);
+    SettingContainer *rsDelegate = new SettingContainer("Icon and Text", this);
+    SettingContainer *refIdTypeDelegate = new SettingContainer("Icon and Text", this);
+
+    windowHeight->setObjectName ("Height");
+    windowWidth->setObjectName ("Width");
+    rsDelegate->setObjectName ("Record Status Display");
+    refIdTypeDelegate->setObjectName ("Referenceable ID Type Display");
+
+    SettingMap *displayFormatMap = new SettingMap;
+    SettingMap *windowSizeMap = new SettingMap;
+
+    displayFormatMap->insert (rsDelegate->objectName(), rsDelegate );
+    displayFormatMap->insert (refIdTypeDelegate->objectName(), refIdTypeDelegate);
+
+    windowSizeMap->insert (windowWidth->objectName(), windowWidth );
+    windowSizeMap->insert (windowHeight->objectName(), windowHeight );
+
+    mEditorSettingDefaults.insert ("Display Format", displayFormatMap);
+    mEditorSettingDefaults.insert ("Window Size", windowSizeMap);
 }
 
 CSMSettings::UserSettings::~UserSettings()
@@ -104,9 +131,14 @@ bool CSMSettings::UserSettings::writeSettings(QMap<QString, CSMSettings::Setting
 }
 
 
-const CSMSettings::SectionMap &CSMSettings::UserSettings::getSettings() const
+const CSMSettings::SectionMap &CSMSettings::UserSettings::getSectionMap() const
 {
     return mSectionSettings;
+}
+
+const CSMSettings::SettingMap *CSMSettings::UserSettings::getSettings(const QString &sectionName) const
+{
+    return getValidSettings(sectionName);
 }
 
 bool CSMSettings::UserSettings::loadFromFile(const QString &filePath)
@@ -114,7 +146,7 @@ bool CSMSettings::UserSettings::loadFromFile(const QString &filePath)
     if (filePath.isEmpty())
         return false;
 
-    mSectionSettings.clear();
+    SectionMap loadedSettings;
 
     QTextStream *stream = openFileStream (filePath, true);
 
@@ -150,7 +182,7 @@ bool CSMSettings::UserSettings::loadFromFile(const QString &filePath)
             {
                 //add the previous section's settings to the member map
                 if (settings)
-                    mSectionSettings.insert(section, settings);
+                    loadedSettings.insert(section, settings);
 
                 //save new section and create a new list
                 section = sectionRe.cap(1);
@@ -167,18 +199,48 @@ bool CSMSettings::UserSettings::loadFromFile(const QString &filePath)
 
         }
 
-        mSectionSettings.insert(section, settings);
+        loadedSettings.insert(section, settings);
 
         stream->device()->close();
         delete stream;
         stream = 0;
     }
 
+    mergeMap (loadedSettings);
+
     return success;
+}
+
+void CSMSettings::UserSettings::mergeMap (const CSMSettings::SectionMap &sectionSettings)
+{
+    foreach (QString key, sectionSettings.uniqueKeys())
+    {
+        // insert entire section if it does not already exist in the loaded files
+        if (mSectionSettings.find(key) == mSectionSettings.end())
+            mSectionSettings.insert(key, sectionSettings.value(key));
+        else
+        {
+            SettingMap *passedSettings = sectionSettings.value(key);
+            SettingMap *settings = mSectionSettings.value(key);
+
+            foreach (QString key2, passedSettings->uniqueKeys())
+            {
+                //insert section settings individially if they do not already exist
+                if (settings->find(key2) == settings->end())
+                    settings->insert(key2, passedSettings->value(key2));
+                else
+                {
+                    settings->value(key2)->update(passedSettings->value(key2)->getValue());
+                }
+            }
+        }
+    }
 }
 
 void CSMSettings::UserSettings::loadSettings (const QString &fileName)
 {
+    mSectionSettings.clear();
+
     //global
     QString globalFilePath = QString::fromStdString(mCfgMgr.getGlobalPath().string()) + fileName;
     bool globalOk = loadFromFile(globalFilePath);
@@ -207,10 +269,11 @@ void CSMSettings::UserSettings::loadSettings (const QString &fileName)
 
 void CSMSettings::UserSettings::updateSettings (const QString &sectionName, const QString &settingName)
 {
-    if (mSectionSettings.find(sectionName) == mSectionSettings.end())
-        return;
 
-    SettingMap *settings = mSectionSettings.value(sectionName);
+    SettingMap *settings = getValidSettings(sectionName);
+
+    if (!settings)
+        return;
 
     if (settingName.isEmpty())
     {
@@ -229,15 +292,12 @@ void CSMSettings::UserSettings::updateSettings (const QString &sectionName, cons
 
 QString CSMSettings::UserSettings::getSetting (const QString &section, const QString &setting) const
 {
+    SettingMap *settings = getValidSettings(section);
+
     QString retVal = "";
 
-    if (mSectionSettings.find(section) != mSectionSettings.end())
-    {
-        CSMSettings::SettingMap *settings = mSectionSettings.value(section);
-
-        if (settings->find(setting) != settings->end())
-            retVal = settings->value(setting)->getValue();
-    }
+    if (settings->find(setting) != settings->end())
+        retVal = settings->value(setting)->getValue();
 
     return retVal;
 }
@@ -262,4 +322,34 @@ void CSMSettings::UserSettings::displayFileErrorMessage(const QString &message, 
             msgBox.setText (message);
 
         msgBox.exec();
+}
+
+CSMSettings::SettingMap *
+CSMSettings::UserSettings::getValidSettings (const QString &sectionName) const
+{
+    SettingMap *settings = 0;
+
+    //copy the default values for the entire section if it's not found
+    if (mSectionSettings.find(sectionName) == mSectionSettings.end())
+    {
+        if (mEditorSettingDefaults.find(sectionName) != mEditorSettingDefaults.end())
+            settings = mEditorSettingDefaults.value (sectionName);
+    }
+    //otherwise, iterate the section's settings, looking for missing values and replacing them with defaults.
+    else
+    {
+        SettingMap *loadedSettings = mSectionSettings[sectionName];
+        SettingMap *defaultSettings = mEditorSettingDefaults[sectionName];
+
+        foreach (QString key, defaultSettings->uniqueKeys())
+        {
+            //write the default value to the loaded settings
+            if (loadedSettings->find((key))==loadedSettings->end())
+                loadedSettings->insert(key, defaultSettings->value(key));
+        }
+
+        settings = mSectionSettings.value (sectionName);
+    }
+
+    return settings;
 }
