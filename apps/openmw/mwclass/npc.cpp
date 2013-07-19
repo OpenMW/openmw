@@ -673,7 +673,22 @@ namespace MWClass
             if(world->isUnderwater(ptr.getCell(), pos))
                 return "FootWaterLeft";
             if(world->isOnGround(ptr))
-                return "FootBareLeft";
+            {
+                MWWorld::InventoryStore &inv = Npc::getInventoryStore(ptr);
+                MWWorld::ContainerStoreIterator boots = inv.getSlot(MWWorld::InventoryStore::Slot_Boots);
+                if(boots == inv.end() || boots->getTypeName() != typeid(ESM::Armor).name())
+                    return "FootBareLeft";
+
+                switch(Class::get(*boots).getEquipmentSkill(*boots))
+                {
+                    case ESM::Skill::LightArmor:
+                        return "FootLightLeft";
+                    case ESM::Skill::MediumArmor:
+                        return "FootMediumLeft";
+                    case ESM::Skill::HeavyArmor:
+                        return "FootHeavyLeft";
+                }
+            }
             return "";
         }
         if(name == "right")
@@ -683,7 +698,22 @@ namespace MWClass
             if(world->isUnderwater(ptr.getCell(), pos))
                 return "FootWaterRight";
             if(world->isOnGround(ptr))
-                return "FootBareRight";
+            {
+                MWWorld::InventoryStore &inv = Npc::getInventoryStore(ptr);
+                MWWorld::ContainerStoreIterator boots = inv.getSlot(MWWorld::InventoryStore::Slot_Boots);
+                if(boots == inv.end() || boots->getTypeName() != typeid(ESM::Armor).name())
+                    return "FootBareRight";
+
+                switch(Class::get(*boots).getEquipmentSkill(*boots))
+                {
+                    case ESM::Skill::LightArmor:
+                        return "FootLightRight";
+                    case ESM::Skill::MediumArmor:
+                        return "FootMediumRight";
+                    case ESM::Skill::HeavyArmor:
+                        return "FootHeavyRight";
+                }
+            }
             return "";
         }
         // TODO: I have no idea what these are supposed to do for NPCs since they use
