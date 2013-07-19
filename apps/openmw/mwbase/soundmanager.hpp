@@ -46,9 +46,10 @@ namespace MWBase
             enum PlayType {
                 Play_TypeSfx   = 1<<3, /* Normal SFX sound */
                 Play_TypeVoice = 1<<4, /* Voice sound */
-                Play_TypeMusic = 1<<5, /* Music track */
-                Play_TypeMovie = 1<<6, /* Movie audio track */
-                Play_TypeMask  = Play_TypeSfx|Play_TypeVoice|Play_TypeMusic|Play_TypeMovie
+                Play_TypeFoot  = 1<<5, /* Footstep sound */
+                Play_TypeMusic = 1<<6, /* Music track */
+                Play_TypeMovie = 1<<7, /* Movie audio track */
+                Play_TypeMask  = Play_TypeSfx|Play_TypeVoice|Play_TypeFoot|Play_TypeMusic|Play_TypeMovie
             };
 
         private:
@@ -102,11 +103,12 @@ namespace MWBase
             ///< Play a 2D audio track, using a custom decoder
 
             virtual SoundPtr playSound(const std::string& soundId, float volume, float pitch,
-                                       PlayMode mode=Play_Normal) = 0;
+                                       PlayType type=Play_TypeSfx, PlayMode mode=Play_Normal) = 0;
             ///< Play a sound, independently of 3D-position
 
             virtual SoundPtr playSound3D(const MWWorld::Ptr &reference, const std::string& soundId,
-                                         float volume, float pitch, PlayMode mode=Play_Normal) = 0;
+                                         float volume, float pitch, PlayType type=Play_TypeSfx,
+                                         PlayMode mode=Play_Normal) = 0;
             ///< Play a sound from an object
 
             virtual void stopSound3D(const MWWorld::Ptr &reference, const std::string& soundId) = 0;

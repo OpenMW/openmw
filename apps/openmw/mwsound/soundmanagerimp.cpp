@@ -150,6 +150,9 @@ namespace MWSound
             case Play_TypeVoice:
                 volume *= mVoiceVolume;
                 break;
+            case Play_TypeFoot:
+                volume *= mFootstepsVolume;
+                break;
             case Play_TypeMusic:
             case Play_TypeMovie:
                 volume *= mMusicVolume;
@@ -314,18 +317,18 @@ namespace MWSound
     }
 
 
-    MWBase::SoundPtr SoundManager::playSound(const std::string& soundId, float volume, float pitch, PlayMode mode)
+    MWBase::SoundPtr SoundManager::playSound(const std::string& soundId, float volume, float pitch, PlayType type, PlayMode mode)
     {
         MWBase::SoundPtr sound;
         if(!mOutput->isInitialized())
             return sound;
         try
         {
-            float basevol = volumeFromType(Play_TypeSfx);
+            float basevol = volumeFromType(type);
             float min, max;
             std::string file = lookup(soundId, volume, min, max);
 
-            sound = mOutput->playSound(file, volume, basevol, pitch, mode|Play_TypeSfx);
+            sound = mOutput->playSound(file, volume, basevol, pitch, mode|type);
             mActiveSounds[sound] = std::make_pair(MWWorld::Ptr(), soundId);
         }
         catch(std::exception &e)
@@ -336,7 +339,7 @@ namespace MWSound
     }
 
     MWBase::SoundPtr SoundManager::playSound3D(const MWWorld::Ptr &ptr, const std::string& soundId,
-                                               float volume, float pitch, PlayMode mode)
+                                               float volume, float pitch, PlayType type, PlayMode mode)
     {
         MWBase::SoundPtr sound;
         if(!mOutput->isInitialized())
@@ -344,13 +347,13 @@ namespace MWSound
         try
         {
             // Look up the sound in the ESM data
-            float basevol = volumeFromType(Play_TypeSfx);
+            float basevol = volumeFromType(type);
             float min, max;
             std::string file = lookup(soundId, volume, min, max);
             const ESM::Position &pos = ptr.getRefData().getPosition();;
             const Ogre::Vector3 objpos(pos.pos[0], pos.pos[1], pos.pos[2]);
 
-            sound = mOutput->playSound3D(file, objpos, volume, basevol, pitch, min, max, mode|Play_TypeSfx);
+            sound = mOutput->playSound3D(file, objpos, volume, basevol, pitch, min, max, mode|type);
             if((mode&Play_NoTrack))
                 mActiveSounds[sound] = std::make_pair(MWWorld::Ptr(), soundId);
             else

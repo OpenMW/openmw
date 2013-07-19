@@ -120,7 +120,7 @@ namespace MWGui
 
     void BookWindow::onTakeButtonClicked (MyGUI::Widget* sender)
     {
-        MWBase::Environment::get().getSoundManager()->playSound ("Item Book Up", 1.0, 1.0, MWBase::SoundManager::Play_NoTrack);
+        MWBase::Environment::get().getSoundManager()->playSound("Item Book Up", 1.0, 1.0);
 
         MWWorld::ActionTake take(mBook);
         take.execute (MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
