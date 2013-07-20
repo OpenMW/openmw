@@ -109,6 +109,10 @@ namespace
             creatureStats.getAttribute(attribute).setBase ( std::min(creatureStats.getAttribute(attribute).getBase()
                 + static_cast<int>((level-1) * modifierSum+0.5), 100) );
         }
+
+        int strength = creatureStats.getAttribute(ESM::Attribute::Strength).getBase();
+        int endurance = creatureStats.getAttribute(ESM::Attribute::Endurance).getBase();
+        creatureStats.setHealth(static_cast<int> (0.5 * (strength + endurance)) + creatureStats.getLevelHealthBonus());
     }
 }
 

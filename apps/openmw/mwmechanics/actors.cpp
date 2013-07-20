@@ -76,10 +76,6 @@ namespace MWMechanics
         double magickaFactor =
             creatureStats.getMagicEffects().get (EffectKey (ESM::MagicEffect::FortifyMaximumMagicka)).mMagnitude * 0.1 + 0.5;
 
-        DynamicStat<float> health = creatureStats.getHealth();
-        health.setBase (static_cast<int> (0.5 * (strength + endurance)) + creatureStats.getLevelHealthBonus ());
-        creatureStats.setHealth (health);
-
         DynamicStat<float> magicka = creatureStats.getMagicka();
         magicka.setBase (static_cast<int> (intelligence + magickaFactor * intelligence));
         creatureStats.setMagicka (magicka);
