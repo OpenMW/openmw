@@ -60,6 +60,10 @@ namespace CSVDoc
 
             void setupWorldMenu();
 
+            void setupMechanicsMenu();
+
+            void setupAssetsMenu();
+
             void setupUi();
 
             void updateTitle();
