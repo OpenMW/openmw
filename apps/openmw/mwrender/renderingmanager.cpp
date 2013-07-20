@@ -319,8 +319,6 @@ void RenderingManager::update (float duration, bool paused)
     Ogre::Vector3 playerPos(_playerPos[0], _playerPos[1], _playerPos[2]);
 
     Ogre::Vector3 orig, dest;
-   //Why is this line here?
-   // mCamera->setCameraDistance();
     if(!mCamera->getPosition(orig, dest))
     {
         orig.z += mCamera->getHeight() * mRootNode->getScale().z;
@@ -893,6 +891,14 @@ bool RenderingManager::vanityRotateCamera(const float *rot)
     Ogre::Vector3 vRot(rot);
     mCamera->rotateCamera(vRot, true);
     return true;
+}
+
+void RenderingManager::setCameraDistance(float dist, bool adjust, bool override)
+{
+    if(!mCamera->isVanityOrPreviewModeEnabled() && !mCamera->isFirstPerson())
+    {
+        mCamera->setCameraDistance(-dist / 120.f * 10, adjust, override);
+    }
 }
 
 void RenderingManager::getInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y)
