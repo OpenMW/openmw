@@ -95,9 +95,9 @@ namespace MWMechanics
         float getFatigueTerm() const;
         ///< Return effective fatigue
 
-        // small hack to allow the fact that Health permanently increases by 10% of endurance on each level up
-        void increaseLevelHealthBonus(float value);
         float getLevelHealthBonus() const;
+
+        void levelUp();
 
         bool isDead() const;
 

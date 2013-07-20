@@ -173,12 +173,7 @@ namespace MWGui
                     attribute.setBase(100);
             }
 
-            // "When you gain a level, in addition to increasing three primary attributes, your Health
-            // will automatically increase by 10% of your Endurance attribute. If you increased Endurance this level,
-            // the Health increase is calculated from the increased Endurance"
-            creatureStats.increaseLevelHealthBonus (creatureStats.getAttribute(ESM::Attribute::Endurance).getBase() * 0.1f);
-
-            creatureStats.setLevel (creatureStats.getLevel()+1);
+            creatureStats.levelUp();
             pcStats.levelUp ();
 
             MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Levelup);
