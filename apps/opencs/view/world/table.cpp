@@ -207,22 +207,11 @@ void CSVWorld::Table::deleteRecord()
 
 void CSVWorld::Table::updateEditorSetting (const QString &settingName, const QString &settingValue)
 {
-    if (settingName == "Record Status Display")
-    {
-        RecordStatusDelegate &rsDelegate = dynamic_cast <CSVWorld::RecordStatusDelegate &> (*itemDelegateForColumn(1));
+    int columns = mModel->columnCount();
 
-        rsDelegate.updateEditorSetting (settingName, settingValue);
-        emit dataChanged(mModel->index(0,1), mModel->index(mModel->rowCount()-1, 1));
-    }
-
-    if (settingName == "Referenceable ID Type Display")
-    {
-        RefIdTypeDelegate *refidDelegate = dynamic_cast <CSVWorld::RefIdTypeDelegate *> (itemDelegateForColumn(2));
-
-        if (refidDelegate)
-        {
-            refidDelegate->updateEditorSetting (settingName, settingValue);
-            emit dataChanged(mModel->index(0,1), mModel->index(mModel->rowCount()-1, 1));
-        }
-    }
+    for (int i=0; i<columns; ++i)
+        if (QAbstractItemDelegate *delegate = itemDelegateForColumn (i))
+            if (dynamic_cast<CommandDelegate&> (*delegate).
+                updateEditorSetting (settingName, settingValue))
+                emit dataChanged (mModel->index (0, i), mModel->index (mModel->rowCount()-1, i));
 }

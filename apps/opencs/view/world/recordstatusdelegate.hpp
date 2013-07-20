@@ -21,7 +21,7 @@ namespace CSVWorld
                                       const IconList& icons,
                                       QUndoStack& undoStack, QObject *parent = 0);
 
-        void updateEditorSetting (const QString &settingName, const QString &settingValue);
+        virtual bool updateEditorSetting (const QString &settingName, const QString &settingValue);
 
     };
 

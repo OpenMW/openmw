@@ -135,3 +135,9 @@ bool CSVWorld::CommandDelegate::isEditLocked() const
 {
     return mEditLock;
 }
+
+bool CSVWorld::CommandDelegate::updateEditorSetting (const QString &settingName,
+    const QString &settingValue)
+{
+    return false;
+}

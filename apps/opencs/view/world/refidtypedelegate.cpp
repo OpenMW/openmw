@@ -51,7 +51,7 @@ CSVWorld::RefIdTypeDelegateFactory::UidTypeList CSVWorld::RefIdTypeDelegateFacto
     return list;
 }
 
-void CSVWorld::RefIdTypeDelegate::updateEditorSetting (const QString &settingName, const QString &settingValue)
+bool CSVWorld::RefIdTypeDelegate::updateEditorSetting (const QString &settingName, const QString &settingValue)
 {
     if (settingName == "Referenceable ID Type Display")
     {
@@ -63,5 +63,9 @@ void CSVWorld::RefIdTypeDelegate::updateEditorSetting (const QString &settingNam
 
         else if (settingValue == "Text Only")
             mDisplayMode = Mode_TextOnly;
+
+        return true;
     }
+
+    return false;
 }
