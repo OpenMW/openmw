@@ -1576,6 +1576,11 @@ namespace MWWorld
         return mRendering->vanityRotateCamera(rot);
     }
 
+    void World::setCameraDistance(float dist, bool adjust, bool override)
+    {
+        return mRendering->setCameraDistance(dist, adjust, override);;
+    }
+
     void World::setupPlayer()
     {
         const ESM::NPC *player = mStore.get<ESM::NPC>().find("player");
