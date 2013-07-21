@@ -28,6 +28,7 @@ namespace CSVWorld
 
             std::vector<CommandDelegate *> mDelegates;
             QUndoStack& mUndoStack;
+            QAction *mEditAction;
             QAction *mCreateAction;
             QAction *mRevertAction;
             QAction *mDeleteAction;
@@ -55,6 +56,10 @@ namespace CSVWorld
 
             void updateEditorSetting (const QString &settingName, const QString &settingValue);
 
+        signals:
+
+            void editRequest (int row);
+
         private slots:
 
             void createRecord();
@@ -62,6 +67,8 @@ namespace CSVWorld
             void revertRecord();
 
             void deleteRecord();
+
+            void editRecord();
     };
 }
 

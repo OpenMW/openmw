@@ -11,7 +11,7 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 {
     setWidget (mTable = new Table (id, document.getData(), document.getUndoStack(), createAndDelete));
 
-    connect (mTable, SIGNAL (doubleClicked (const QModelIndex&)), this, SLOT (rowActivated (const QModelIndex&)));
+    connect (mTable, SIGNAL (editRequest (int)), this, SLOT (editRequest (int)));
 }
 
 void CSVWorld::TableSubView::setEditLock (bool locked)
@@ -19,14 +19,12 @@ void CSVWorld::TableSubView::setEditLock (bool locked)
     mTable->setEditLock (locked);
 }
 
-void CSVWorld::TableSubView::rowActivated (const QModelIndex& index)
+void CSVWorld::TableSubView::editRequest (int row)
 {
-    focusId (mTable->getUniversalId (index.row()));
+    focusId (mTable->getUniversalId (row));
 }
 
 void CSVWorld::TableSubView::updateEditorSetting(const QString &settingName, const QString &settingValue)
 {
-
-    if ( (settingName == "Record Status Display") || settingName == "Referenceable ID Type Display" )
-        mTable->updateEditorSetting(settingName, settingValue);
+    mTable->updateEditorSetting(settingName, settingValue);
 }

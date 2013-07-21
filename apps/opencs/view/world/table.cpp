@@ -26,6 +26,9 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
 
     if (!mEditLock)
     {
+        if (selectedRows.size()==1)
+            menu.addAction (mEditAction);
+
         if (mCreateAction)
             menu.addAction (mCreateAction);
 
@@ -116,7 +119,9 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, Q
             hideColumn (i);
     }
 
-    /// \todo make initial layout fill the whole width of the table
+    mEditAction = new QAction (tr ("Edit Record"), this);
+    connect (mEditAction, SIGNAL (triggered()), this, SLOT (editRecord()));
+    addAction (mEditAction);
 
     if (createAndDelete)
     {
@@ -202,6 +207,17 @@ void CSVWorld::Table::deleteRecord()
             if (deletableIds.size()>1)
                 mUndoStack.endMacro();
         }
+    }
+}
+
+void CSVWorld::Table::editRecord()
+{
+    if (!mEditLock)
+    {
+        QModelIndexList selectedRows = selectionModel()->selectedRows();
+
+        if (selectedRows.size()==1)
+            emit editRequest (selectedRows.begin()->row());
     }
 }
 

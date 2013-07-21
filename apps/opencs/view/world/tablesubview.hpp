@@ -28,7 +28,7 @@ namespace CSVWorld
 
         private slots:
 
-            void rowActivated (const QModelIndex& index);
+            void editRequest (int row);
     };
 }
 
