@@ -110,9 +110,10 @@ namespace
                 + static_cast<int>((level-1) * modifierSum+0.5), 100) );
         }
 
+        // initial health
         int strength = creatureStats.getAttribute(ESM::Attribute::Strength).getBase();
         int endurance = creatureStats.getAttribute(ESM::Attribute::Endurance).getBase();
-        creatureStats.setHealth(static_cast<int> (0.5 * (strength + endurance)) + creatureStats.getLevelHealthBonus());
+        creatureStats.setHealth(static_cast<int> (0.5 * (strength + endurance)) + 4 * (creatureStats.getLevel() - 1));
     }
 }
 
