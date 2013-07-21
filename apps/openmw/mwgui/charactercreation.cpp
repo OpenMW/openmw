@@ -10,7 +10,10 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwmechanics/creaturestats.hpp"
+#include "../mwworld/class.hpp"
 #include "../mwworld/fallback.hpp"
+#include "../mwworld/player.hpp"
 
 namespace
 {
@@ -41,6 +44,14 @@ namespace
         // Note: Order is taken from http://www.uesp.net/wiki/Morrowind:Class_Quiz
         unsigned int points[3];
     };
+
+    void updatePlayerHealth()
+    {
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get(player).getCreatureStats(player);
+
+        creatureStats.updateHealth();
+    }
 }
 
 namespace MWGui
@@ -334,6 +345,8 @@ namespace MWGui
             mCreationStage = CSE_ClassChosen;
             MWBase::Environment::get().getWindowManager()->popGuiMode();
         }
+
+        updatePlayerHealth();
     }
 
     void CharacterCreation::onPickClassDialogBack()
@@ -461,6 +474,8 @@ namespace MWGui
             mCreationStage = CSE_RaceChosen;
             MWBase::Environment::get().getWindowManager()->popGuiMode();
         }
+
+        updatePlayerHealth();
     }
 
     void CharacterCreation::onBirthSignDialogDone(WindowBase* parWindow)
@@ -484,6 +499,8 @@ namespace MWGui
             mCreationStage = CSE_BirthSignChosen;
             MWBase::Environment::get().getWindowManager()->popGuiMode();
         }
+
+        updatePlayerHealth();
     }
 
     void CharacterCreation::onBirthSignDialogBack()
@@ -547,6 +564,8 @@ namespace MWGui
             mCreationStage = CSE_ClassChosen;
             MWBase::Environment::get().getWindowManager()->popGuiMode();
         }
+
+        updatePlayerHealth();
     }
 
     void CharacterCreation::onCreateClassDialogBack()
@@ -715,6 +734,8 @@ namespace MWGui
             mCreationStage = CSE_ClassChosen;
             MWBase::Environment::get().getWindowManager()->popGuiMode();
         }
+
+        updatePlayerHealth();
     }
 
     CharacterCreation::~CharacterCreation()

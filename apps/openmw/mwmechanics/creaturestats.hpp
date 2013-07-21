@@ -99,6 +99,10 @@ namespace MWMechanics
 
         void levelUp();
 
+        void updateHealth();
+        ///< Calculate health based on endurance and strength.
+        ///  Called at character creation and at level up.
+
         bool isDead() const;
 
         bool hasDied() const;
