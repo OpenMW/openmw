@@ -39,7 +39,7 @@ add_component_dir (esm
     loadclas loadclot loadcont loadcrea loadcrec loaddial loaddoor loadench loadfact loadglob loadgmst
     loadinfo loadingr loadland loadlevlist loadligh loadlock loadprob loadrepa loadltex loadmgef loadmisc loadnpcc
     loadnpc loadpgrd loadrace loadregn loadscpt loadskil loadsndg loadsoun loadspel loadsscr loadstat
-    loadweap records aipackage effectlist spelllist variant variantimp loadtes3 cellref
+    loadweap records aipackage effectlist spelllist variant variantimp loadtes3 cellref filter
     )
 
 add_component_dir (misc
