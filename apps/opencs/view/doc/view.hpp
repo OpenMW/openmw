@@ -157,6 +157,8 @@ namespace CSVDoc
 
             void addRegionMapSubView();
 
+            void addFiltersSubView();
+
             void showUserSettings();
     };
 }

@@ -106,6 +106,10 @@ opencs_units_noqt (model/settings
     settingsitem
     )
 
+opencs_hdrs_noqt (model/filter
+    filter
+    )
+
 set (OPENCS_US
     )
 

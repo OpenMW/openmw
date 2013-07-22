@@ -35,6 +35,7 @@ namespace
             "References" },
         { CSMWorld::UniversalId::Class_NonRecord, CSMWorld::UniversalId::Type_RegionMap,
             "Region Map" },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Filters, "Filters" },
 
         { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0 } // end marker
     };
@@ -78,6 +79,7 @@ namespace
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Static, "Static" },
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Weapon, "Weapon" },
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Reference, "Reference" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Filter, "Reference" },
 
         { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0 } // end marker
     };

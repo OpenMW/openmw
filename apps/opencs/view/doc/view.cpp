@@ -78,6 +78,10 @@ void CSVDoc::View::setupViewMenu()
     QAction *newWindow = new QAction (tr ("&New View"), this);
     connect (newWindow, SIGNAL (triggered()), this, SLOT (newView()));
     view->addAction (newWindow);
+
+    QAction *filters = new QAction (tr ("Filters"), this);
+    connect (filters, SIGNAL (triggered()), this, SLOT (addFiltersSubView()));
+    view->addAction (filters);
 }
 
 void CSVDoc::View::setupWorldMenu()
@@ -380,6 +384,11 @@ void CSVDoc::View::addReferencesSubView()
 void CSVDoc::View::addRegionMapSubView()
 {
     addSubView (CSMWorld::UniversalId::Type_RegionMap);
+}
+
+void CSVDoc::View::addFiltersSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Filters);
 }
 
 void CSVDoc::View::abortOperation (int type)

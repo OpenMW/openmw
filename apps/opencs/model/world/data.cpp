@@ -147,6 +147,9 @@ CSMWorld::Data::Data() : mRefs (mCells)
     mRefs.addColumn (new KeyColumn<CellRef>);
     mRefs.addColumn (new TrapColumn<CellRef>);
 
+    mFilters.addColumn (new StringIdColumn<CSMFilter::Filter>);
+    mFilters.addColumn (new RecordStateColumn<CSMFilter::Filter>);
+
     addModel (new IdTable (&mGlobals), UniversalId::Type_Globals, UniversalId::Type_Global);
     addModel (new IdTable (&mGmsts), UniversalId::Type_Gmsts, UniversalId::Type_Gmst);
     addModel (new IdTable (&mSkills), UniversalId::Type_Skills, UniversalId::Type_Skill);
@@ -162,6 +165,7 @@ CSMWorld::Data::Data() : mRefs (mCells)
     addModel (new IdTable (&mReferenceables), UniversalId::Type_Referenceables,
         UniversalId::Type_Referenceable);
     addModel (new IdTable (&mRefs), UniversalId::Type_References, UniversalId::Type_Reference);
+    addModel (new IdTable (&mFilters), UniversalId::Type_Filters, UniversalId::Type_Filter);
 }
 
 CSMWorld::Data::~Data()
