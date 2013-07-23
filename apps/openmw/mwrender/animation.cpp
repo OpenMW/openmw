@@ -554,7 +554,7 @@ bool Animation::handleTextKey(AnimState &state, const std::string &groupname, co
 
 void Animation::play(const std::string &groupname, int priority, int groups, bool autodisable, float speedmult, const std::string &start, const std::string &stop, float startpoint, size_t loops)
 {
-    if(!mSkelBase)
+    if(!mSkelBase || mAnimSources.size() == 0)
         return;
 
     if(groupname.empty())
@@ -602,7 +602,7 @@ void Animation::play(const std::string &groupname, int priority, int groups, boo
         }
     }
     if(iter == mAnimSources.rend())
-        std::cerr<< "Failed to find animation "<<groupname <<std::endl;
+        std::cerr<< "Failed to find animation "<<groupname<<" for "<<mPtr.getCellRef().mRefID <<std::endl;
 
     resetActiveGroups();
 }
@@ -644,7 +644,6 @@ void Animation::resetActiveGroups()
         return;
 
     const Ogre::SharedPtr<AnimSource> &animsrc = state->second.mSource;
-
     const std::vector<Ogre::Controller<Ogre::Real> >&ctrls = animsrc->mControllers[0];
     for(size_t i = 0;i < ctrls.size();i++)
     {
