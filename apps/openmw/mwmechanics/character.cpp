@@ -298,6 +298,7 @@ void CharacterController::updatePtr(const MWWorld::Ptr &ptr)
 bool CharacterController::updateNpcState()
 {
     const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
+    CreatureStats &crstats = cls.getCreatureStats(mPtr);
     NpcStats &stats = cls.getNpcStats(mPtr);
     WeaponType weaptype = WeapType_None;
     MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
@@ -411,32 +412,58 @@ bool CharacterController::updateNpcState()
     float complete;
     bool animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete);
 
-    if(cls.getCreatureStats(mPtr).getAttackingOrSpell())
+    if(crstats.getAttackingOrSpell())
     {
-        if(mUpperBodyState == UpperCharState_WeapEquiped && mWeaponType != WeapType_PickProbe)
+        if(mUpperBodyState == UpperCharState_WeapEquiped)
         {
-            if(mWeaponType == WeapType_Crossbow || mWeaponType == WeapType_BowAndArrow ||
-               mWeaponType == WeapType_ThowWeapon)
-                mAttackType = "shoot";
-            else
+            if(mWeaponType == WeapType_Spell)
             {
-                int attackType = cls.getCreatureStats(mPtr).getAttackType();
-                if(isWeapon && Settings::Manager::getBool("best attack", "Game"))
-                    attackType = getBestAttack(weapon->get<ESM::Weapon>()->mBase);
+                const std::string spellid = crstats.getSpells().getSelectedSpell();
+                if(!spellid.empty())
+                {
+                    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+                    const ESM::Spell *spell = store.get<ESM::Spell>().find(spellid);
 
-                if (attackType == MWMechanics::CreatureStats::AT_Chop)
-                    mAttackType = "chop";
-                else if (attackType == MWMechanics::CreatureStats::AT_Slash)
-                    mAttackType = "slash";
-                else
-                    mAttackType = "thrust";
+                    switch(spell->mEffects.mList.at(0).mRange)
+                    {
+                        case 0: mAttackType = "self"; break;
+                        case 1: mAttackType = "touch"; break;
+                        case 2: mAttackType = "target"; break;
+                        default: mAttackType = ""; break;
+                    }
+
+                    mAnimation->play(mCurrentWeapon, Priority_Weapon,
+                                     MWRender::Animation::Group_UpperBody, true,
+                                     weapSpeed, mAttackType+" start", mAttackType+" stop",
+                                     0.0f, 0);
+                    mUpperBodyState = UpperCharState_CastingSpell;
+                }
             }
+            else if(mWeaponType != WeapType_PickProbe)
+            {
+                if(mWeaponType == WeapType_Crossbow || mWeaponType == WeapType_BowAndArrow ||
+                   mWeaponType == WeapType_ThowWeapon)
+                    mAttackType = "shoot";
+                else
+                {
+                    int attackType = crstats.getAttackType();
+                    if(isWeapon && Settings::Manager::getBool("best attack", "Game"))
+                        attackType = getBestAttack(weapon->get<ESM::Weapon>()->mBase);
 
-            mAnimation->play(mCurrentWeapon, Priority_Weapon,
-                             MWRender::Animation::Group_UpperBody, false,
-                             weapSpeed, mAttackType+" start", mAttackType+" min attack",
-                             0.0f, 0);
-            mUpperBodyState = UpperCharState_StartToMinAttack;
+                    if (attackType == MWMechanics::CreatureStats::AT_Chop)
+                        mAttackType = "chop";
+                    else if (attackType == MWMechanics::CreatureStats::AT_Slash)
+                        mAttackType = "slash";
+                    else
+                        mAttackType = "thrust";
+                }
+
+                mAnimation->play(mCurrentWeapon, Priority_Weapon,
+                                 MWRender::Animation::Group_UpperBody, false,
+                                 weapSpeed, mAttackType+" start", mAttackType+" min attack",
+                                 0.0f, 0);
+                mUpperBodyState = UpperCharState_StartToMinAttack;
+            }
         }
     }
     else if(mUpperBodyState == UpperCharState_MinAttackToMaxAttack)
@@ -452,7 +479,8 @@ bool CharacterController::updateNpcState()
     if(!animPlaying)
     {
         if(mUpperBodyState == UpperCharState_EquipingWeap ||
-           mUpperBodyState == UpperCharState_FollowStartToFollowStop)
+           mUpperBodyState == UpperCharState_FollowStartToFollowStop ||
+           mUpperBodyState == UpperCharState_CastingSpell)
             mUpperBodyState = UpperCharState_WeapEquiped;
         else if(mUpperBodyState == UpperCharState_UnEquipingWeap)
             mUpperBodyState = UpperCharState_Nothing;
