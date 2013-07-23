@@ -448,7 +448,7 @@ bool CharacterController::updateNpcState()
     if(!animPlaying)
     {
         if(mUpperBodyState == UpperCharState_EquipingWeap ||
-           mUpperBodyState == UpperCharState_LargeFollowStartToLargeFollowStop)
+           mUpperBodyState == UpperCharState_FollowStartToFollowStop)
             mUpperBodyState = UpperCharState_WeapEquiped;
         else if(mUpperBodyState == UpperCharState_UnEquipingWeap)
             mUpperBodyState = UpperCharState_Nothing;
@@ -480,12 +480,7 @@ bool CharacterController::updateNpcState()
                              MWRender::Animation::Group_UpperBody, true,
                              weapSpeed, mAttackType+" large follow start", mAttackType+" large follow stop",
                              0.0f, 0);
-            mUpperBodyState = UpperCharState_LargeFollowStartToLargeFollowStop;
-        }
-        else if(mUpperBodyState == UpperCharState_LargeFollowStartToLargeFollowStop)
-        {
-            mAnimation->disable(mCurrentWeapon);
-            mUpperBodyState = UpperCharState_WeapEquiped;
+            mUpperBodyState = UpperCharState_FollowStartToFollowStop;
         }
     }
 

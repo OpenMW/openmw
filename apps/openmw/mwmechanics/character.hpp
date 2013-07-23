@@ -104,11 +104,7 @@ enum UpperBodyCharacterState {
     UpperCharState_MinAttackToMaxAttack,
     UpperCharState_MaxAttackToMinHit,
     UpperCharState_MinHitToHit,
-    UpperCharState_LargeFollowStartToLargeFollowStop,
-    UpperCharState_MediumFollowStartToMediumFollowStop,
-    UpperCharState_SmallFollowStartToSmallFollowStop,
-    UpperCharState_EquipingSpell,
-    UpperCharState_UnEquipingSpell
+    UpperCharState_FollowStartToFollowStop
 };
 
 class CharacterController
