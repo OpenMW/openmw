@@ -295,6 +295,215 @@ void CharacterController::updatePtr(const MWWorld::Ptr &ptr)
 }
 
 
+bool CharacterController::updateNpcState()
+{
+    const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
+    NpcStats &stats = cls.getNpcStats(mPtr);
+    WeaponType weaptype = WeapType_None;
+    MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
+    MWWorld::ContainerStoreIterator weapon = inv.end();
+
+    if(stats.getDrawState() == DrawState_Spell)
+        weaptype = WeapType_Spell;
+    else if(stats.getDrawState() == MWMechanics::DrawState_Weapon)
+    {
+        weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+        if(weapon == inv.end())
+            weaptype = WeapType_HandToHand;
+        else
+        {
+            const std::string &type = weapon->getTypeName();
+            if(type == typeid(ESM::Lockpick).name() || type == typeid(ESM::Probe).name())
+                weaptype = WeapType_PickProbe;
+            else if(type == typeid(ESM::Weapon).name())
+            {
+                MWWorld::LiveCellRef<ESM::Weapon> *ref = weapon->get<ESM::Weapon>();
+                ESM::Weapon::Type type = (ESM::Weapon::Type)ref->mBase->mData.mType;
+                switch(type)
+                {
+                    case ESM::Weapon::ShortBladeOneHand:
+                    case ESM::Weapon::LongBladeOneHand:
+                    case ESM::Weapon::BluntOneHand:
+                    case ESM::Weapon::AxeOneHand:
+                    case ESM::Weapon::Arrow:
+                    case ESM::Weapon::Bolt:
+                        weaptype = WeapType_OneHand;
+                        break;
+                    case ESM::Weapon::LongBladeTwoHand:
+                    case ESM::Weapon::BluntTwoClose:
+                    case ESM::Weapon::AxeTwoHand:
+                        weaptype = WeapType_TwoHand;
+                        break;
+                    case ESM::Weapon::BluntTwoWide:
+                    case ESM::Weapon::SpearTwoWide:
+                        weaptype = WeapType_TwoWide;
+                        break;
+                    case ESM::Weapon::MarksmanBow:
+                        weaptype = WeapType_BowAndArrow;
+                        break;
+                    case ESM::Weapon::MarksmanCrossbow:
+                        weaptype = WeapType_Crossbow;
+                        break;
+                    case ESM::Weapon::MarksmanThrown:
+                        weaptype = WeapType_ThowWeapon;
+                        break;
+                }
+            }
+        }
+    }
+    else
+        weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+
+    bool forcestateupdate = false;
+    if(mUpdateWeapon)
+    {
+        forcestateupdate = (mWeaponType != weaptype);
+        mWeaponType = weaptype;
+        getWeaponGroup(mWeaponType, mCurrentWeapon);
+        mUpdateWeapon = false;
+    }
+
+    if(weaptype != mWeaponType)
+    {
+        forcestateupdate = true;
+
+        std::string weapgroup;
+        if(weaptype == WeapType_None)
+        {
+            getWeaponGroup(mWeaponType, weapgroup);
+            mAnimation->play(weapgroup, Priority_Weapon,
+                             MWRender::Animation::Group_UpperBody, true,
+                             1.0f, "unequip start", "unequip stop", 0.0f, 0);
+            mUpperBodyState = UpperCharState_UnEquipingWeap;
+        }
+        else
+        {
+            getWeaponGroup(weaptype, weapgroup);
+            mAnimation->showWeapons(false);
+            mAnimation->play(weapgroup, Priority_Weapon,
+                             MWRender::Animation::Group_UpperBody, true,
+                             1.0f, "equip start", "equip stop", 0.0f, 0);
+            mUpperBodyState = UpperCharState_EquipingWeap;
+        }
+
+        mWeaponType = weaptype;
+        getWeaponGroup(mWeaponType, mCurrentWeapon);
+
+        if(weapon != inv.end())
+        {
+            std::string soundid = (mWeaponType == WeapType_None) ?
+                                   MWWorld::Class::get(*weapon).getDownSoundId(*weapon) :
+                                   MWWorld::Class::get(*weapon).getUpSoundId(*weapon);
+            if(!soundid.empty())
+            {
+                MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+                sndMgr->playSound3D(mPtr, soundid, 1.0f, 1.0f);
+            }
+        }
+    }
+
+
+    bool isWeapon = (weapon != inv.end() && weapon->getTypeName() == typeid(ESM::Weapon).name());
+    float weapSpeed = 1.0f;
+    if(isWeapon)
+        weapSpeed = weapon->get<ESM::Weapon>()->mBase->mData.mSpeed;
+
+    float complete;
+    bool animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete);
+
+    if(cls.getCreatureStats(mPtr).getAttackingOrSpell())
+    {
+        if(mUpperBodyState == UpperCharState_WeapEquiped && mWeaponType != WeapType_Crossbow &&
+           mWeaponType != WeapType_BowAndArrow && mWeaponType != WeapType_ThowWeapon &&
+           mWeaponType != WeapType_PickProbe)
+        {
+            int attackType = cls.getCreatureStats(mPtr).getAttackType();
+            if(isWeapon && Settings::Manager::getBool("best attack", "Game"))
+                attackType = getBestAttack(weapon->get<ESM::Weapon>()->mBase);
+
+            if (attackType == MWMechanics::CreatureStats::AT_Chop)
+                mAttackType = "chop";
+            else if (attackType == MWMechanics::CreatureStats::AT_Slash)
+                mAttackType = "slash";
+            else
+                mAttackType = "thrust";
+
+            mAnimation->play(mCurrentWeapon, Priority_Weapon,
+                             MWRender::Animation::Group_UpperBody, false,
+                             weapSpeed, mAttackType+" start", mAttackType+" min attack",
+                             0.0f, 0);
+            mUpperBodyState = UpperCharState_StartToMinAttack;
+        }
+    }
+    else if(mUpperBodyState == UpperCharState_MinAttackToMaxAttack)
+    {
+        mAnimation->disable(mCurrentWeapon);
+        mAnimation->play(mCurrentWeapon, Priority_Weapon,
+                         MWRender::Animation::Group_UpperBody, false,
+                         weapSpeed, mAttackType+" max attack", mAttackType+" min hit",
+                         1.0f-complete, 0);
+        mUpperBodyState = UpperCharState_MaxAttackToMinHit;
+    }
+
+    if(!animPlaying)
+    {
+        if(mUpperBodyState == UpperCharState_EquipingWeap ||
+           mUpperBodyState == UpperCharState_LargeFollowStartToLargeFollowStop)
+            mUpperBodyState = UpperCharState_WeapEquiped;
+        else if(mUpperBodyState == UpperCharState_UnEquipingWeap)
+            mUpperBodyState = UpperCharState_Nothing;
+    }
+    else if(complete >= 1.0f)
+    {
+        if(mUpperBodyState == UpperCharState_StartToMinAttack)
+        {
+            mAnimation->disable(mCurrentWeapon);
+            mAnimation->play(mCurrentWeapon, Priority_Weapon,
+                             MWRender::Animation::Group_UpperBody, false,
+                             weapSpeed, mAttackType+" min attack", mAttackType+" max attack",
+                             0.0f, 0);
+            mUpperBodyState = UpperCharState_MinAttackToMaxAttack;
+        }
+        else if(mUpperBodyState == UpperCharState_MaxAttackToMinHit)
+        {
+            mAnimation->disable(mCurrentWeapon);
+            mAnimation->play(mCurrentWeapon, Priority_Weapon,
+                             MWRender::Animation::Group_UpperBody, false,
+                             weapSpeed, mAttackType+" min hit", mAttackType+" hit",
+                             0.0f, 0);
+            mUpperBodyState = UpperCharState_MinHitToHit;
+        }
+        else if(mUpperBodyState == UpperCharState_MinHitToHit)
+        {
+            mAnimation->disable(mCurrentWeapon);
+            mAnimation->play(mCurrentWeapon, Priority_Weapon,
+                             MWRender::Animation::Group_UpperBody, true,
+                             weapSpeed, mAttackType+" large follow start", mAttackType+" large follow stop",
+                             0.0f, 0);
+            mUpperBodyState = UpperCharState_LargeFollowStartToLargeFollowStop;
+        }
+        else if(mUpperBodyState == UpperCharState_LargeFollowStartToLargeFollowStop)
+        {
+            mAnimation->disable(mCurrentWeapon);
+            mUpperBodyState = UpperCharState_WeapEquiped;
+        }
+    }
+
+
+    MWWorld::ContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
+    if(torch != inv.end() && torch->getTypeName() == typeid(ESM::Light).name())
+    {
+        if(!mAnimation->isPlaying("torch"))
+            mAnimation->play("torch", Priority_Torch,
+                             MWRender::Animation::Group_LeftArm, false,
+                             1.0f, "start", "stop", 0.0f, (~(size_t)0));
+    }
+    else if(mAnimation->isPlaying("torch"))
+        mAnimation->disable("torch");
+
+    return forcestateupdate;
+}
+
 void CharacterController::update(float duration, Movement &movement)
 {
     const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
@@ -436,206 +645,7 @@ void CharacterController::update(float duration, Movement &movement)
         movement.mRotation[2] += rot.z;
 
         if(mPtr.getTypeName() == typeid(ESM::NPC).name())
-        {
-            NpcStats &stats = cls.getNpcStats(mPtr);
-            WeaponType weaptype = WeapType_None;
-            MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
-            MWWorld::ContainerStoreIterator weapon = inv.end();
-
-            if(stats.getDrawState() == DrawState_Spell)
-                weaptype = WeapType_Spell;
-            else if(stats.getDrawState() == MWMechanics::DrawState_Weapon)
-            {
-                weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-                if(weapon == inv.end())
-                    weaptype = WeapType_HandToHand;
-                else
-                {
-                    const std::string &type = weapon->getTypeName();
-                    if(type == typeid(ESM::Lockpick).name() || type == typeid(ESM::Probe).name())
-                        weaptype = WeapType_PickProbe;
-                    else if(type == typeid(ESM::Weapon).name())
-                    {
-                        MWWorld::LiveCellRef<ESM::Weapon> *ref = weapon->get<ESM::Weapon>();
-                        ESM::Weapon::Type type = (ESM::Weapon::Type)ref->mBase->mData.mType;
-                        switch(type)
-                        {
-                            case ESM::Weapon::ShortBladeOneHand:
-                            case ESM::Weapon::LongBladeOneHand:
-                            case ESM::Weapon::BluntOneHand:
-                            case ESM::Weapon::AxeOneHand:
-                            case ESM::Weapon::Arrow:
-                            case ESM::Weapon::Bolt:
-                                weaptype = WeapType_OneHand;
-                                break;
-                            case ESM::Weapon::LongBladeTwoHand:
-                            case ESM::Weapon::BluntTwoClose:
-                            case ESM::Weapon::AxeTwoHand:
-                                weaptype = WeapType_TwoHand;
-                                break;
-                            case ESM::Weapon::BluntTwoWide:
-                            case ESM::Weapon::SpearTwoWide:
-                                weaptype = WeapType_TwoWide;
-                                break;
-                            case ESM::Weapon::MarksmanBow:
-                                weaptype = WeapType_BowAndArrow;
-                                break;
-                            case ESM::Weapon::MarksmanCrossbow:
-                                weaptype = WeapType_Crossbow;
-                                break;
-                            case ESM::Weapon::MarksmanThrown:
-                                weaptype = WeapType_ThowWeapon;
-                                break;
-                        }
-                    }
-                }
-            }
-            else
-                weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-
-            if(mUpdateWeapon)
-            {
-                forcestateupdate = (mWeaponType != weaptype);
-                mWeaponType = weaptype;
-                getWeaponGroup(mWeaponType, mCurrentWeapon);
-                mUpdateWeapon = false;
-            }
-
-            if(weaptype != mWeaponType)
-            {
-                forcestateupdate = true;
-
-                std::string weapgroup;
-                if(weaptype == WeapType_None)
-                {
-                    getWeaponGroup(mWeaponType, weapgroup);
-                    mAnimation->play(weapgroup, Priority_Weapon,
-                                     MWRender::Animation::Group_UpperBody, true,
-                                     1.0f, "unequip start", "unequip stop", 0.0f, 0);
-                    mUpperBodyState = UpperCharState_UnEquipingWeap;
-                }
-                else
-                {
-                    getWeaponGroup(weaptype, weapgroup);
-                    mAnimation->showWeapons(false);
-                    mAnimation->play(weapgroup, Priority_Weapon,
-                                     MWRender::Animation::Group_UpperBody, true,
-                                     1.0f, "equip start", "equip stop", 0.0f, 0);
-                    mUpperBodyState = UpperCharState_EquipingWeap;
-                }
-
-                mWeaponType = weaptype;
-                getWeaponGroup(mWeaponType, mCurrentWeapon);
-
-                if(weapon != inv.end())
-                {
-                    std::string soundid = (mWeaponType == WeapType_None) ?
-                                          MWWorld::Class::get(*weapon).getDownSoundId(*weapon) :
-                                          MWWorld::Class::get(*weapon).getUpSoundId(*weapon);
-                    if(!soundid.empty())
-                    {
-                        MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-                        sndMgr->playSound3D(mPtr, soundid, 1.0f, 1.0f);
-                    }
-                }
-            }
-
-            if(1)
-            {
-                bool isWeapon = (weapon != inv.end() && weapon->getTypeName() == typeid(ESM::Weapon).name());
-                float weapSpeed = 1.0f;
-                if(isWeapon)
-                    weapSpeed = weapon->get<ESM::Weapon>()->mBase->mData.mSpeed;
-
-                float complete;
-                bool animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete);
-
-                if(cls.getCreatureStats(mPtr).getAttackingOrSpell())
-                {
-                    if(mUpperBodyState == UpperCharState_WeapEquiped && mWeaponType != WeapType_Crossbow &&
-                       mWeaponType != WeapType_BowAndArrow && mWeaponType != WeapType_ThowWeapon &&
-                       mWeaponType != WeapType_PickProbe)
-                    {
-                        int attackType = cls.getCreatureStats(mPtr).getAttackType();
-                        if(isWeapon && Settings::Manager::getBool("best attack", "Game"))
-                            attackType = getBestAttack(weapon->get<ESM::Weapon>()->mBase);
-
-                        if (attackType == MWMechanics::CreatureStats::AT_Chop)
-                            mAttackType = "chop";
-                        else if (attackType == MWMechanics::CreatureStats::AT_Slash)
-                            mAttackType = "slash";
-                        else
-                            mAttackType = "thrust";
-
-                        mAnimation->play(mCurrentWeapon, Priority_Weapon,
-                                         MWRender::Animation::Group_UpperBody, false,
-                                         weapSpeed, mAttackType+" start", mAttackType+" min attack",
-                                         0.0f, 0);
-                        mUpperBodyState = UpperCharState_StartToMinAttack;
-                    }
-                }
-                else if(mUpperBodyState == UpperCharState_MinAttackToMaxAttack)
-                {
-                    mAnimation->disable(mCurrentWeapon);
-                    mAnimation->play(mCurrentWeapon, Priority_Weapon,
-                                     MWRender::Animation::Group_UpperBody, false,
-                                     weapSpeed, mAttackType+" max attack", mAttackType+" min hit",
-                                     1.0f-complete, 0);
-                    mUpperBodyState = UpperCharState_MaxAttackToMinHit;
-                }
-
-                if(mUpperBodyState == UpperCharState_EquipingWeap && !animPlaying)
-                    mUpperBodyState = UpperCharState_WeapEquiped;
-                else if(mUpperBodyState == UpperCharState_UnEquipingWeap && !animPlaying)
-                    mUpperBodyState = UpperCharState_Nothing;
-                else if(animPlaying)
-                {
-                    if(mUpperBodyState == UpperCharState_StartToMinAttack && complete == 1.0f)
-                    {
-                        mAnimation->disable(mCurrentWeapon);
-                        mAnimation->play(mCurrentWeapon, Priority_Weapon,
-                                         MWRender::Animation::Group_UpperBody, false,
-                                         weapSpeed, mAttackType+" min attack", mAttackType+" max attack",
-                                         0.0f, 0);
-                        mUpperBodyState = UpperCharState_MinAttackToMaxAttack;
-                    }
-                    else if(mUpperBodyState == UpperCharState_MaxAttackToMinHit && complete == 1.0f)
-                    {
-                        mAnimation->disable(mCurrentWeapon);
-                        mAnimation->play(mCurrentWeapon, Priority_Weapon,
-                                         MWRender::Animation::Group_UpperBody, false,
-                                         weapSpeed, mAttackType+" min hit", mAttackType+" hit",
-                                         0.0f, 0);
-                        mUpperBodyState = UpperCharState_MinHitToHit;
-                    }
-                    else if(mUpperBodyState == UpperCharState_MinHitToHit && complete == 1.0f)
-                    {
-                        mAnimation->disable(mCurrentWeapon);
-                        mAnimation->play(mCurrentWeapon, Priority_Weapon,
-                                         MWRender::Animation::Group_UpperBody, false,
-                                         weapSpeed, mAttackType+" large follow start", mAttackType+" large follow stop",
-                                         0.0f, 0);
-                        mUpperBodyState = UpperCharState_LargeFollowStartToLargeFollowStop;
-                    }
-                    else if(mUpperBodyState == UpperCharState_LargeFollowStartToLargeFollowStop && complete == 1.0f)
-                    {
-                        mAnimation->disable(mCurrentWeapon);
-                        mUpperBodyState = UpperCharState_WeapEquiped;
-                    }
-                }
-            }
-
-            MWWorld::ContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
-            if(torch != inv.end() && torch->getTypeName() == typeid(ESM::Light).name())
-            {
-                if(!mAnimation->isPlaying("torch"))
-                    mAnimation->play("torch", Priority_Torch,
-                                     MWRender::Animation::Group_LeftArm, false,
-                                     1.0f, "start", "stop", 0.0f, (~(size_t)0));
-            }
-            else if(mAnimation->isPlaying("torch"))
-                mAnimation->disable("torch");
-        }
+            forcestateupdate = updateNpcState();
 
         refreshCurrentAnims(idlestate, movestate, forcestateupdate);
     }

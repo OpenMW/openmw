@@ -151,6 +151,8 @@ class CharacterController
 
     void clearAnimQueue();
 
+    bool updateNpcState();
+
 public:
     CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim);
     virtual ~CharacterController();
