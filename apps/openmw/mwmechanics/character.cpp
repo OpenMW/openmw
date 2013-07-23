@@ -538,25 +538,26 @@ void CharacterController::update(float duration, Movement &movement)
                 }
             }
 
-            if(weaptype != WeapType_PickProbe && weaptype != WeapType_BowAndArrow
-                && weaptype != WeapType_Crossbow && weaptype != WeapType_ThowWeapon)
+            if(1)
             {
+                bool isWeapon = (weapon != inv.end() && weapon->getTypeName() == typeid(ESM::Weapon).name());
+                float weapSpeed = 1.0f;
+                if(isWeapon)
+                    weapSpeed = weapon->get<ESM::Weapon>()->mBase->mData.mSpeed;
+
                 std::string weapgroup;
                 getWeaponGroup(mWeaponType, weapgroup);
-                float weapSpeed = 1;
-                if(weapon != inv.end()) weapSpeed = weapon->get<ESM::Weapon>()->mBase->mData.mSpeed;
-                std::string start;
-                std::string stop;
                 float complete;
-                float speedMult;
-                bool animPlaying = mAnimation->getInfo(weapgroup,&complete,&speedMult,&start,&stop);
+                bool animPlaying = mAnimation->getInfo(weapgroup, &complete);
 
                 if(cls.getCreatureStats(mPtr).getAttackingOrSpell())
                 {
-                    if(mUpperBodyState == UpperCharState_WeapEquiped)
+                    if(mUpperBodyState == UpperCharState_WeapEquiped && mWeaponType != WeapType_Crossbow &&
+                       mWeaponType != WeapType_BowAndArrow && mWeaponType != WeapType_ThowWeapon &&
+                       mWeaponType != WeapType_PickProbe)
                     {
                         int attackType = cls.getCreatureStats(mPtr).getAttackType();
-                        if (Settings::Manager::getBool("best attack", "Game") && weapon != inv.end())
+                        if(isWeapon && Settings::Manager::getBool("best attack", "Game"))
                             attackType = getBestAttack(weapon->get<ESM::Weapon>()->mBase);
 
                         if (attackType == MWMechanics::CreatureStats::AT_Chop)
@@ -590,11 +591,13 @@ void CharacterController::update(float duration, Movement &movement)
                     mUpperBodyState = UpperCharState_MaxAttackToMinHit;
                 }
 
-                if(mUpperBodyState == UpperCharState_EquipingWeap && !animPlaying) mUpperBodyState = UpperCharState_WeapEquiped;
-                if(mUpperBodyState == UpperCharState_UnEquipingWeap && !animPlaying) mUpperBodyState = UpperCharState_Nothing;
-                if(animPlaying)
+                if(mUpperBodyState == UpperCharState_EquipingWeap && !animPlaying)
+                    mUpperBodyState = UpperCharState_WeapEquiped;
+                else if(mUpperBodyState == UpperCharState_UnEquipingWeap && !animPlaying)
+                    mUpperBodyState = UpperCharState_Nothing;
+                else if(animPlaying)
                 {
-                    if(mUpperBodyState == UpperCharState_StartToMinAttack && complete == 1)
+                    if(mUpperBodyState == UpperCharState_StartToMinAttack && complete == 1.0f)
                     {
                         mAnimation->disable(weapgroup);
                         mAnimation->play(weapgroup, Priority_Weapon,
@@ -602,7 +605,7 @@ void CharacterController::update(float duration, Movement &movement)
                             weapSpeed, mAttackType+" min attack", mAttackType+" max attack",0, 0);
                         mUpperBodyState = UpperCharState_MinAttackToMaxAttack;
                     }
-                    else if(mUpperBodyState == UpperCharState_MaxAttackToMinHit && complete == 1)
+                    else if(mUpperBodyState == UpperCharState_MaxAttackToMinHit && complete == 1.0f)
                     {
                         mAnimation->disable(weapgroup);
                         mAnimation->play(weapgroup, Priority_Weapon,
@@ -610,7 +613,7 @@ void CharacterController::update(float duration, Movement &movement)
                             weapSpeed, mAttackType+" min hit", mAttackType+" hit",0, 0);
                         mUpperBodyState = UpperCharState_MinHitToHit;
                     }
-                    else if(mUpperBodyState == UpperCharState_MinHitToHit && complete == 1)
+                    else if(mUpperBodyState == UpperCharState_MinHitToHit && complete == 1.0f)
                     {
                         mAnimation->disable(weapgroup);
                         mAnimation->play(weapgroup, Priority_Weapon,
@@ -618,8 +621,9 @@ void CharacterController::update(float duration, Movement &movement)
                             weapSpeed, mAttackType+" large follow start", mAttackType+" large follow stop",0, 0);
                         mUpperBodyState = UpperCharState_LargeFollowStartToLargeFollowStop;
                     }
-                    else if(mUpperBodyState == UpperCharState_LargeFollowStartToLargeFollowStop && complete == 1)
+                    else if(mUpperBodyState == UpperCharState_LargeFollowStartToLargeFollowStop && complete == 1.0f)
                     {
+                        mAnimation->disable(weapgroup);
                         mUpperBodyState = UpperCharState_WeapEquiped;
                     }
                 }
