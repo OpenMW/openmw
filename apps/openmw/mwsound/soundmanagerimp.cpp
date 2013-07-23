@@ -499,18 +499,14 @@ namespace MWSound
         soundIter = regn->mSoundList.begin();
         while(soundIter != regn->mSoundList.end())
         {
-            const std::string go = soundIter->mSound.toString();
-            int chance = (int) soundIter->mChance;
-            //std::cout << "Sound: " << go.name <<" Chance:" <<  chance << "\n";
-            soundIter++;
-            if(r - pos < chance)
+            if(r - pos < soundIter->mChance)
             {
-                //play sound
-                std::cout << "Sound: " << go <<" Chance:" <<  chance << "\n";
-                playSound(go, 1.0f, 1.0f);
+                playSound(soundIter->mSound.toString(), 1.0f, 1.0f);
                 break;
             }
-            pos += chance;
+            pos += soundIter->mChance;
+
+            soundIter++;
         }
     }
 

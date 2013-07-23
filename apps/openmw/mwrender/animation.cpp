@@ -534,38 +534,20 @@ bool Animation::handleTextKey(AnimState &state, const std::string &groupname, co
     size_t len = evt.size() - off;
 
     if(evt.compare(off, len, "start") == 0 || evt.compare(off, len, "loop start") == 0)
-    {
         state.mLoopStartKey = key;
-        return true;
-    }
-
-    if(evt.compare(off, len, "loop stop") == 0 || evt.compare(off, len, "stop") == 0)
+    else if(evt.compare(off, len, "loop stop") == 0 || evt.compare(off, len, "stop") == 0)
     {
         if(doLoop(state))
         {
             if(state.mTime >= time)
                 return false;
         }
-        return true;
     }
-
-    if(evt.compare(off, len, "equip attach") == 0)
-    {
+    else if(evt.compare(off, len, "equip attach") == 0)
         showWeapons(true);
-        return true;
-    }
-    if(evt.compare(off, len, "unequip detach") == 0)
-    {
+    else if(evt.compare(off, len, "unequip detach") == 0)
         showWeapons(false);
-        return true;
-    }
 
-    /* Nothing to do for these */
-    if(evt.compare(off, len, "equip start") == 0 || evt.compare(off, len, "equip stop") == 0 ||
-       evt.compare(off, len, "unequip start") == 0 || evt.compare(off, len, "unequip stop") == 0)
-        return true;
-
-    std::cerr<< "Unhandled animation textkey: "<<evt <<std::endl;
     return true;
 }
 
