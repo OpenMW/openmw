@@ -1,6 +1,8 @@
 
 #include "tablesubview.hpp"
 
+#include <QVBoxLayout>
+
 #include "../../model/doc/document.hpp"
 
 #include "table.hpp"
@@ -9,7 +11,18 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
     bool createAndDelete)
 : SubView (id)
 {
-    setWidget (mTable = new Table (id, document.getData(), document.getUndoStack(), createAndDelete));
+    QVBoxLayout *layout = new QVBoxLayout;
+
+    layout->setContentsMargins (QMargins (0, 0, 0, 0));
+
+    layout->addWidget (
+        mTable = new Table (id, document.getData(), document.getUndoStack(), createAndDelete), 2);
+
+    QWidget *widget = new QWidget;
+
+    widget->setLayout (layout);
+
+    setWidget (widget);
 
     connect (mTable, SIGNAL (editRequest (int)), this, SLOT (editRequest (int)));
 }
