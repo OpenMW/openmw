@@ -410,26 +410,47 @@ bool CharacterController::updateNpcState()
         weapSpeed = weapon->get<ESM::Weapon>()->mBase->mData.mSpeed;
 
     float complete;
-    bool animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete);
-
+    bool animPlaying;
     if(crstats.getAttackingOrSpell())
     {
         if(mUpperBodyState == UpperCharState_WeapEquiped)
         {
+            mAttackType.clear();
             if(mWeaponType == WeapType_Spell)
             {
+                const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+                const ESM::EffectList *effects = NULL;
+
                 const std::string spellid = crstats.getSpells().getSelectedSpell();
                 if(!spellid.empty())
+                    effects = &store.get<ESM::Spell>().find(spellid)->mEffects;
+                else if(inv.getSelectedEnchantItem() != inv.end())
                 {
-                    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-                    const ESM::Spell *spell = store.get<ESM::Spell>().find(spellid);
+                    MWWorld::Ptr item = *inv.getSelectedEnchantItem();
+                    const std::string enchid = MWWorld::Class::get(item).getEnchantment(item);
+                    if(!enchid.empty())
+                        effects = &store.get<ESM::Enchantment>().find(enchid)->mEffects;
+                }
 
-                    switch(spell->mEffects.mList.at(0).mRange)
+                if(effects)
+                {
+                    static const std::string schools[] = {
+                        "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
+                    };
+                    const ESM::MagicEffect *effect;
+                    effect = store.get<ESM::MagicEffect>().find(effects->mList.at(0).mEffectID);
+
+                    MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+                    if(!effect->mCastSound.empty())
+                        sndMgr->playSound3D(mPtr, effect->mCastSound, 1.0f, 1.0f);
+                    else
+                        sndMgr->playSound3D(mPtr, schools[effect->mData.mSchool]+" cast", 1.0f, 1.0f);
+
+                    switch(effects->mList[0].mRange)
                     {
                         case 0: mAttackType = "self"; break;
                         case 1: mAttackType = "touch"; break;
                         case 2: mAttackType = "target"; break;
-                        default: mAttackType = ""; break;
                     }
 
                     mAnimation->play(mCurrentWeapon, Priority_Weapon,
@@ -465,15 +486,20 @@ bool CharacterController::updateNpcState()
                 mUpperBodyState = UpperCharState_StartToMinAttack;
             }
         }
+        animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete);
     }
-    else if(mUpperBodyState == UpperCharState_MinAttackToMaxAttack)
+    else
     {
-        mAnimation->disable(mCurrentWeapon);
-        mAnimation->play(mCurrentWeapon, Priority_Weapon,
-                         MWRender::Animation::Group_UpperBody, false,
-                         weapSpeed, mAttackType+" max attack", mAttackType+" min hit",
-                         1.0f-complete, 0);
-        mUpperBodyState = UpperCharState_MaxAttackToMinHit;
+        animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete);
+        if(mUpperBodyState == UpperCharState_MinAttackToMaxAttack)
+        {
+            mAnimation->disable(mCurrentWeapon);
+            mAnimation->play(mCurrentWeapon, Priority_Weapon,
+                             MWRender::Animation::Group_UpperBody, false,
+                             weapSpeed, mAttackType+" max attack", mAttackType+" min hit",
+                             1.0f-complete, 0);
+            mUpperBodyState = UpperCharState_MaxAttackToMinHit;
+        }
     }
 
     if(!animPlaying)
