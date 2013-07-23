@@ -91,6 +91,7 @@ namespace MWGui
         WindowBase("openmw_settings_window.layout")
     {
         getWidget(mOkButton, "OkButton");
+        getWidget(mBestAttackButton, "BestAttackButton");
         getWidget(mSubtitlesButton, "SubtitlesButton");
         getWidget(mCrosshairButton, "CrosshairButton");
         getWidget(mResolutionList, "ResolutionList");
@@ -131,6 +132,7 @@ namespace MWGui
 
         mSubtitlesButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mCrosshairButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
+        mBestAttackButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mInvertYButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onOkButtonClicked);
         mShadersButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onShadersToggled);
@@ -200,6 +202,7 @@ namespace MWGui
 
         mSubtitlesButton->setCaptionWithReplacing(Settings::Manager::getBool("subtitles", "GUI") ? "#{sOn}" : "#{sOff}");
         mCrosshairButton->setCaptionWithReplacing(Settings::Manager::getBool("crosshair", "HUD") ? "#{sOn}" : "#{sOff}");
+        mBestAttackButton->setCaptionWithReplacing(Settings::Manager::getBool("best attack", "Game") ? "#{sOn}" : "#{sOff}");
 
         float fovVal = (Settings::Manager::getFloat("field of view", "General")-sFovMin)/(sFovMax-sFovMin);
         mFOVSlider->setScrollPosition(fovVal * (mFOVSlider->getScrollRange()-1));
@@ -407,6 +410,8 @@ namespace MWGui
                 Settings::Manager::setBool("crosshair", "HUD", newState);
             else if (_sender == mSubtitlesButton)
                 Settings::Manager::setBool("subtitles", "GUI", newState);
+            else if (_sender == mBestAttackButton)
+                Settings::Manager::setBool("best attack", "Game", newState);
 
             apply();
         }

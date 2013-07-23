@@ -95,6 +95,22 @@ enum WeaponType {
     WeapType_Spell
 };
 
+enum UpperBodyCharacterState {
+    UpperCharState_Nothing,
+    UpperCharState_EquipingWeap,
+    UpperCharState_UnEquipingWeap,
+    UpperCharState_WeapEquiped,
+    UpperCharState_StartToMinAttack,
+    UpperCharState_MinAttackToMaxAttack,
+    UpperCharState_MaxAttackToMinHit,
+    UpperCharState_MinHitToHit,
+    UpperCharState_LargeFollowStartToLargeFollowStop,
+    UpperCharState_MediumFollowStartToMediumFollowStop,
+    UpperCharState_SmallFollowStartToSmallFollowStop,
+    UpperCharState_EquipingSpell,
+    UpperCharState_UnEquipingSpell
+};
+
 class CharacterController
 {
     MWWorld::Ptr mPtr;
@@ -113,6 +129,8 @@ class CharacterController
     CharacterState mDeathState;
     std::string mCurrentDeath;
 
+    UpperBodyCharacterState mUpperBodyState;
+
     WeaponType mWeaponType;
     bool mSkipAnim;
 
@@ -122,6 +140,8 @@ class CharacterController
     // counted for skill increase
     float mSecondsOfSwimming;
     float mSecondsOfRunning;
+
+    std::string mAttackType; // slash, chop or thrust
 
     void refreshCurrentAnims(CharacterState idle, CharacterState movement, bool force=false);
 

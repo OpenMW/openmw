@@ -20,6 +20,7 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwgui/bookwindow.hpp"
+#include "../mwmechanics/creaturestats.hpp"
 
 using namespace ICS;
 
@@ -160,6 +161,26 @@ namespace MWInput
         resetIdleTime ();
 
         int action = channel->getNumber();
+
+        if (action == A_Use)
+        {
+            MWWorld::Class::get(mPlayer.getPlayer()).getCreatureStats(mPlayer.getPlayer()).setAttackingOrSpell(currentValue);
+            if (currentValue == 1)
+            {
+                int type = MWMechanics::CreatureStats::AT_Chop;
+                bool forward = (mInputBinder->getChannel(A_MoveForward)->getValue() > 0
+                                || mInputBinder->getChannel(A_MoveBackward)->getValue() > 0);
+                bool side = (mInputBinder->getChannel(A_MoveLeft)->getValue() > 0
+                             || mInputBinder->getChannel(A_MoveRight)->getValue() > 0);
+                if (side && !forward)
+                    type = MWMechanics::CreatureStats::AT_Slash;
+                if (forward && !side)
+                    type = MWMechanics::CreatureStats::AT_Thrust;
+
+                MWWorld::Class::get(mPlayer.getPlayer()).getCreatureStats(mPlayer.getPlayer()).setAttackType(type);
+            }
+        }
+
         if (currentValue == 1)
         {
             // trigger action activated
@@ -512,7 +533,6 @@ namespace MWInput
             return true; // MyGUI has no use for these events
 
         MyGUI::InputManager::getInstance().injectMousePress(mMouseX, mMouseY, sdlButtonToMyGUI(id));
-
         if (MyGUI::InputManager::getInstance ().getMouseFocusWidget () != 0)
         {
             MyGUI::Button* b = MyGUI::InputManager::getInstance ().getMouseFocusWidget ()->castType<MyGUI::Button>(false);

@@ -12,7 +12,8 @@ namespace MWMechanics
     CreatureStats::CreatureStats()
         : mLevel (0), mLevelHealthBonus(0.f), mDead (false), mDied (false), mFriendlyHits (0),
           mTalkedTo (false), mAlarmed (false),
-          mAttacked (false), mHostile (false)
+          mAttacked (false), mHostile (false),
+          mAttackingOrSpell(false)
     {
         for (int i=0; i<4; ++i)
             mAiSettings[i] = 0;
@@ -107,6 +108,11 @@ namespace MWMechanics
     const MagicEffects &CreatureStats::getMagicEffects() const
     {
         return mMagicEffects;
+    }
+
+    const bool &CreatureStats::getAttackingOrSpell() const
+    {
+        return mAttackingOrSpell;
     }
 
     int CreatureStats::getLevel() const
@@ -208,6 +214,11 @@ namespace MWMechanics
     void CreatureStats::setMagicEffects(const MagicEffects &effects)
     {
         mMagicEffects = effects;
+    }
+
+    void CreatureStats::setAttackingOrSpell(const bool &attackingOrSpell)
+    {
+        mAttackingOrSpell = attackingOrSpell;
     }
 
     void CreatureStats::setAiSetting (int index, int value)
