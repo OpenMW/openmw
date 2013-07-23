@@ -323,18 +323,18 @@ void RenderingManager::update (float duration, bool paused)
 
     // player position
     MWWorld::RefData &data = player.getRefData();
-    float *_playerPos = data.getPosition().pos;
-    Ogre::Vector3 playerPos(_playerPos[0], _playerPos[1], _playerPos[2]);
+    Ogre::Vector3 playerPos(data.getPosition().pos);
 
-    Ogre::Vector3 orig, dest;
-    if(!mCamera->getPosition(orig, dest))
+    mCamera->setCameraDistance();
+    if(!mCamera->isFirstPerson())
     {
-        orig.z += mCamera->getHeight() * mRootNode->getScale().z;
+        Ogre::Vector3 orig, dest;
+        mCamera->getPosition(orig, dest);
 
         btVector3 btOrig(orig.x, orig.y, orig.z);
         btVector3 btDest(dest.x, dest.y, dest.z);
-        std::pair<bool, float> test = mPhysicsEngine->sphereCast(mRendering.getCamera()->getNearClipDistance()*2.5, btOrig, btDest);
-        if (test.first)
+        std::pair<bool,float> test = mPhysicsEngine->sphereCast(mRendering.getCamera()->getNearClipDistance()*2.5, btOrig, btDest);
+        if(test.first)
             mCamera->setCameraDistance(test.second * orig.distance(dest), false, false);
     }
 

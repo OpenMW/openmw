@@ -302,34 +302,13 @@ namespace MWRender
         }
     }
 
-    float Camera::getHeight()
-    {
-        if(mCamera->isParentTagPoint())
-        {
-            Ogre::TagPoint *tag = static_cast<Ogre::TagPoint*>(mCamera->getParentNode());
-            return tag->_getFullLocalTransform().getTrans().z;
-        }
-        return mCamera->getParentNode()->getPosition().z;
-    }
-
-    bool Camera::getPosition(Ogre::Vector3 &player, Ogre::Vector3 &camera)
+    void Camera::getPosition(Ogre::Vector3 &focal, Ogre::Vector3 &camera)
     {
         mCamera->getParentSceneNode()->needUpdate(true);
+
         camera = mCamera->getRealPosition();
-        player = mTrackingPtr.getRefData().getBaseNode()->getPosition();
-
-        return mFirstPersonView && !mVanity.enabled && !mPreviewMode;
-    }
-
-    Ogre::Vector3 Camera::getPosition()
-    {
-        return mTrackingPtr.getRefData().getBaseNode()->getPosition();
-    }
-
-    void Camera::getSightAngles(float &pitch, float &yaw)
-    {
-        pitch = mMainCam.pitch;
-        yaw = mMainCam.yaw;
+        focal = Ogre::Vector3((mCamera->getParentNode()->_getFullTransform() *
+                               Ogre::Vector4(0.0f, 0.0f, 0.0f, 1.0f)).ptr());
     }
 
     void Camera::togglePlayerLooking(bool enable)
