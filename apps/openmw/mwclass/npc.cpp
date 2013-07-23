@@ -113,7 +113,19 @@ namespace
         // initial health
         int strength = creatureStats.getAttribute(ESM::Attribute::Strength).getBase();
         int endurance = creatureStats.getAttribute(ESM::Attribute::Endurance).getBase();
-        creatureStats.setHealth(static_cast<int> (0.5 * (strength + endurance)) + 4 * (creatureStats.getLevel() - 1));
+
+        int multiplier = 3;
+
+        if (class_->mData.mSpecialization == ESM::Class::Combat)
+            multiplier += 2;
+        else if (class_->mData.mSpecialization == ESM::Class::Stealth)
+            multiplier += 1;
+
+        if (class_->mData.mAttribute[0] == ESM::Attribute::Endurance
+            || class_->mData.mAttribute[1] == ESM::Attribute::Endurance)
+            multiplier += 1;
+
+        creatureStats.setHealth(static_cast<int> (0.5 * (strength + endurance)) + multiplier * (creatureStats.getLevel() - 1));
     }
 }
 
