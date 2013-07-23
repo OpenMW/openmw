@@ -413,20 +413,24 @@ bool CharacterController::updateNpcState()
 
     if(cls.getCreatureStats(mPtr).getAttackingOrSpell())
     {
-        if(mUpperBodyState == UpperCharState_WeapEquiped && mWeaponType != WeapType_Crossbow &&
-           mWeaponType != WeapType_BowAndArrow && mWeaponType != WeapType_ThowWeapon &&
-           mWeaponType != WeapType_PickProbe)
+        if(mUpperBodyState == UpperCharState_WeapEquiped && mWeaponType != WeapType_PickProbe)
         {
-            int attackType = cls.getCreatureStats(mPtr).getAttackType();
-            if(isWeapon && Settings::Manager::getBool("best attack", "Game"))
-                attackType = getBestAttack(weapon->get<ESM::Weapon>()->mBase);
-
-            if (attackType == MWMechanics::CreatureStats::AT_Chop)
-                mAttackType = "chop";
-            else if (attackType == MWMechanics::CreatureStats::AT_Slash)
-                mAttackType = "slash";
+            if(mWeaponType == WeapType_Crossbow || mWeaponType == WeapType_BowAndArrow ||
+               mWeaponType == WeapType_ThowWeapon)
+                mAttackType = "shoot";
             else
-                mAttackType = "thrust";
+            {
+                int attackType = cls.getCreatureStats(mPtr).getAttackType();
+                if(isWeapon && Settings::Manager::getBool("best attack", "Game"))
+                    attackType = getBestAttack(weapon->get<ESM::Weapon>()->mBase);
+
+                if (attackType == MWMechanics::CreatureStats::AT_Chop)
+                    mAttackType = "chop";
+                else if (attackType == MWMechanics::CreatureStats::AT_Slash)
+                    mAttackType = "slash";
+                else
+                    mAttackType = "thrust";
+            }
 
             mAnimation->play(mCurrentWeapon, Priority_Weapon,
                              MWRender::Animation::Group_UpperBody, false,
@@ -467,19 +471,31 @@ bool CharacterController::updateNpcState()
         else if(mUpperBodyState == UpperCharState_MaxAttackToMinHit)
         {
             mAnimation->disable(mCurrentWeapon);
-            mAnimation->play(mCurrentWeapon, Priority_Weapon,
-                             MWRender::Animation::Group_UpperBody, false,
-                             weapSpeed, mAttackType+" min hit", mAttackType+" hit",
-                             0.0f, 0);
+            if(mAttackType == "shoot")
+                mAnimation->play(mCurrentWeapon, Priority_Weapon,
+                                 MWRender::Animation::Group_UpperBody, false,
+                                 weapSpeed, mAttackType+" min hit", mAttackType+" follow start",
+                                 0.0f, 0);
+            else
+                mAnimation->play(mCurrentWeapon, Priority_Weapon,
+                                 MWRender::Animation::Group_UpperBody, false,
+                                 weapSpeed, mAttackType+" min hit", mAttackType+" hit",
+                                 0.0f, 0);
             mUpperBodyState = UpperCharState_MinHitToHit;
         }
         else if(mUpperBodyState == UpperCharState_MinHitToHit)
         {
             mAnimation->disable(mCurrentWeapon);
-            mAnimation->play(mCurrentWeapon, Priority_Weapon,
-                             MWRender::Animation::Group_UpperBody, true,
-                             weapSpeed, mAttackType+" large follow start", mAttackType+" large follow stop",
-                             0.0f, 0);
+            if(mAttackType == "shoot")
+                mAnimation->play(mCurrentWeapon, Priority_Weapon,
+                                 MWRender::Animation::Group_UpperBody, true,
+                                 weapSpeed, mAttackType+" follow start", mAttackType+" follow stop",
+                                 0.0f, 0);
+            else
+                mAnimation->play(mCurrentWeapon, Priority_Weapon,
+                                 MWRender::Animation::Group_UpperBody, true,
+                                 weapSpeed, mAttackType+" large follow start", mAttackType+" large follow stop",
+                                 0.0f, 0);
             mUpperBodyState = UpperCharState_FollowStartToFollowStop;
         }
     }
