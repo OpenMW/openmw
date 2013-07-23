@@ -132,6 +132,8 @@ class CharacterController
     UpperBodyCharacterState mUpperBodyState;
 
     WeaponType mWeaponType;
+    std::string mCurrentWeapon;
+
     bool mSkipAnim;
 
     // Workaround for playing weapon draw animation and sound when going to new cell
