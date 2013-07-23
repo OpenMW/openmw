@@ -670,8 +670,14 @@ bool Animation::getInfo(const std::string &groupname, float *complete, float *sp
         return false;
     }
 
-    if(complete) *complete = (iter->second.mTime - iter->second.mStartKey->first) /
-                             (iter->second.mStopKey->first - iter->second.mStartKey->first);
+    if(complete)
+    {
+        if(iter->second.mStopKey->first > iter->second.mStartKey->first)
+            *complete = (iter->second.mTime - iter->second.mStartKey->first) /
+                        (iter->second.mStopKey->first - iter->second.mStartKey->first);
+        else
+            *complete = (iter->second.mPlaying ? 0.0f : 1.0f);
+    }
     if(speedmult) *speedmult = iter->second.mSpeedMult;
     if(start) *start = iter->second.mStartKey->second.substr(groupname.size()+2);
     if(stop) *stop = iter->second.mStopKey->second.substr(groupname.size()+2);
