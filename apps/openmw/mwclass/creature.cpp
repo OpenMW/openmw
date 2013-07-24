@@ -388,6 +388,8 @@ namespace MWClass
             return 5;
         if(name == "scream")
             return 6;
+        if(name == "land")
+            return 7;
 
         throw std::runtime_error(std::string("Unexpected soundgen type: ")+name);
     }
