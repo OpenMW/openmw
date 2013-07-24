@@ -493,6 +493,8 @@ bool CharacterController::updateNpcState()
         animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete);
         if(mUpperBodyState == UpperCharState_MinAttackToMaxAttack)
         {
+            stats.setAttackStrength(complete);
+
             mAnimation->disable(mCurrentWeapon);
             mAnimation->play(mCurrentWeapon, Priority_Weapon,
                              MWRender::Animation::Group_UpperBody, false,

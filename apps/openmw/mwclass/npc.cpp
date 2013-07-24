@@ -314,16 +314,22 @@ namespace MWClass
         // hand-to-hand, which damages fatique unless in werewolf form).
         if(weapon)
         {
-            float health = othercls.getCreatureStats(victim).getHealth().getCurrent();
-            // FIXME: Modify damage based on strength?
+            const unsigned char *att = NULL;
             if(type == MWMechanics::CreatureStats::AT_Chop)
-                health -= weapon->mBase->mData.mChop[1];
+                att = weapon->mBase->mData.mChop;
             else if(type == MWMechanics::CreatureStats::AT_Slash)
-                health -= weapon->mBase->mData.mSlash[1];
+                att = weapon->mBase->mData.mSlash;
             else if(type == MWMechanics::CreatureStats::AT_Thrust)
-                health -= weapon->mBase->mData.mThrust[1];
+                att = weapon->mBase->mData.mThrust;
 
-            othercls.setActorHealth(victim, std::max(health, 0.0f), ptr);
+            if(att)
+            {
+                float health = othercls.getCreatureStats(victim).getHealth().getCurrent();
+                // FIXME: Modify damage based on strength attribute?
+                health -= att[0] + ((att[1]-att[0])*Npc::getNpcStats(ptr).getAttackStrength());
+
+                othercls.setActorHealth(victim, std::max(health, 0.0f), ptr);
+            }
         }
     }
 
