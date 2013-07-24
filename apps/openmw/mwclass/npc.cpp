@@ -13,6 +13,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/dialoguemanager.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
@@ -343,6 +344,8 @@ namespace MWClass
             // 'ptr' is losing health. Play a 'hit' voiced dialog entry if not already saying
             // something, alert the character controller, scripts, etc.
             // NOTE: 'attacker' may be empty.
+
+            MWBase::Environment::get().getDialogueManager()->say(ptr, "hit");
         }
 
         bool wasDead = crstats.isDead();

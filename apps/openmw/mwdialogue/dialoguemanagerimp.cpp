@@ -25,6 +25,7 @@
 #include "../mwbase/scriptmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
@@ -556,6 +557,30 @@ namespace MWDialogue
         }
         return false;
     }
+
+    void DialogueManager::say(const MWWorld::Ptr &actor, const std::string &topic) const
+    {
+        MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+        if(!sndMgr->sayDone(actor))
+        {
+            // Actor is already saying something.
+            return;
+        }
+
+        const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+        const ESM::Dialogue *dial = store.get<ESM::Dialogue>().find(topic);
+
+        Filter filter(actor, 0, false);
+        const ESM::DialInfo *info = filter.search(*dial, false);
+        if(info != NULL)
+        {
+            MWBase::WindowManager *winMgr = MWBase::Environment::get().getWindowManager();
+            if(winMgr->getSubtitlesEnabled())
+                winMgr->messageBox(info->mResponse);
+            sndMgr->say(actor, info->mSound);
+        }
+    }
+
 
     std::vector<HyperTextToken> ParseHyperText(const std::string& text)
     {
