@@ -419,34 +419,21 @@ bool CharacterController::updateNpcState()
             if(mWeaponType == WeapType_Spell)
             {
                 const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-                const ESM::EffectList *effects = NULL;
 
                 const std::string spellid = crstats.getSpells().getSelectedSpell();
                 if(!spellid.empty())
-                    effects = &store.get<ESM::Spell>().find(spellid)->mEffects;
-                else if(inv.getSelectedEnchantItem() != inv.end())
-                {
-                    MWWorld::Ptr item = *inv.getSelectedEnchantItem();
-                    const std::string enchid = MWWorld::Class::get(item).getEnchantment(item);
-                    if(!enchid.empty())
-                        effects = &store.get<ESM::Enchantment>().find(enchid)->mEffects;
-                }
-
-                if(effects)
                 {
                     static const std::string schools[] = {
                         "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
                     };
+
+                    const ESM::Spell *spell = store.get<ESM::Spell>().find(spellid);
+                    const ESM::ENAMstruct &effectentry = spell->mEffects.mList.at(0);
+
                     const ESM::MagicEffect *effect;
-                    effect = store.get<ESM::MagicEffect>().find(effects->mList.at(0).mEffectID);
+                    effect = store.get<ESM::MagicEffect>().find(effectentry.mEffectID);
 
-                    MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-                    if(!effect->mCastSound.empty())
-                        sndMgr->playSound3D(mPtr, effect->mCastSound, 1.0f, 1.0f);
-                    else
-                        sndMgr->playSound3D(mPtr, schools[effect->mData.mSchool]+" cast", 1.0f, 1.0f);
-
-                    switch(effects->mList[0].mRange)
+                    switch(effectentry.mRange)
                     {
                         case 0: mAttackType = "self"; break;
                         case 1: mAttackType = "touch"; break;
@@ -458,6 +445,12 @@ bool CharacterController::updateNpcState()
                                      weapSpeed, mAttackType+" start", mAttackType+" stop",
                                      0.0f, 0);
                     mUpperBodyState = UpperCharState_CastingSpell;
+
+                    MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+                    if(!effect->mCastSound.empty())
+                        sndMgr->playSound3D(mPtr, effect->mCastSound, 1.0f, 1.0f);
+                    else
+                        sndMgr->playSound3D(mPtr, schools[effect->mData.mSchool]+" cast", 1.0f, 1.0f);
                 }
             }
             else if(mWeaponType != WeapType_PickProbe)
