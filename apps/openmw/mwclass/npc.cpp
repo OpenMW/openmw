@@ -288,6 +288,74 @@ namespace MWClass
         return dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mNpcStats;
     }
 
+
+    void Npc::attack(const MWWorld::Ptr& ptr, int type) const
+    {
+        // FIXME: Detect what was hit
+        MWWorld::Ptr victim;
+        if(victim.isEmpty()) // Didn't hit anything
+            return;
+
+        const MWWorld::Class &othercls = MWWorld::Class::get(victim);
+        if(!othercls.isActor() || othercls.getCreatureStats(victim).isDead())
+        {
+            // Can't hit non-actors, or dead actors
+            return;
+        }
+
+        // Get the weapon used
+        MWWorld::LiveCellRef<ESM::Weapon> *weapon = NULL;
+        MWWorld::InventoryStore &inv = Npc::getInventoryStore(ptr);
+        MWWorld::ContainerStoreIterator iter = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+        if(iter != inv.end() && iter->getTypeName() == typeid(ESM::Weapon).name())
+            weapon = iter->get<ESM::Weapon>();
+
+        // TODO: Check weapon skill against victim's armor skill (if !weapon, attacker is using
+        // hand-to-hand, which damages fatique unless in werewolf form).
+        if(weapon)
+        {
+            float health = othercls.getCreatureStats(victim).getHealth().getCurrent();
+            // FIXME: Modify damage based on strength?
+            if(type == MWMechanics::CreatureStats::AT_Chop)
+                health -= weapon->mBase->mData.mChop[1];
+            else if(type == MWMechanics::CreatureStats::AT_Slash)
+                health -= weapon->mBase->mData.mSlash[1];
+            else if(type == MWMechanics::CreatureStats::AT_Thrust)
+                health -= weapon->mBase->mData.mThrust[1];
+
+            othercls.setActorHealth(victim, std::max(health, 0.0f), ptr);
+        }
+    }
+
+    void Npc::setActorHealth(const MWWorld::Ptr& ptr, float health, const MWWorld::Ptr& attacker) const
+    {
+        MWMechanics::CreatureStats &crstats = getCreatureStats(ptr);
+        float diff = health - crstats.getHealth().getCurrent();
+
+        if(diff < 0.0f)
+        {
+            // 'ptr' is losing health. Play a 'hit' voiced dialog entry if not already saying
+            // something, alert the character controller, scripts, etc.
+            // NOTE: 'attacker' may be empty.
+        }
+
+        bool wasDead = crstats.isDead();
+
+        MWMechanics::DynamicStat<float> stat(crstats.getHealth());
+        stat.setCurrent(health);
+        crstats.setHealth(stat);
+
+        if(!wasDead && crstats.isDead())
+        {
+            // actor was just killed
+        }
+        else if(wasDead && !crstats.isDead())
+        {
+            // actor was just resurrected
+        }
+    }
+
+
     boost::shared_ptr<MWWorld::Action> Npc::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {

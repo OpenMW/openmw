@@ -105,6 +105,19 @@ namespace MWWorld
             ///< Return item max health or throw an exception, if class does not have item health
             /// (default implementation: throw an exceoption)
 
+            virtual void attack(const Ptr& ptr, int type) const;
+            ///< Execute a melee hit, using the current weapon. This will check the relevant skills
+            /// of the given attacker, and whoever is hit.
+            /// \a type - type of attack, one of the MWMechanics::CreatureStats::AttackType enums.
+            ///           ignored for creature attacks.
+            /// (default implementation: throw an exceoption)
+
+            virtual void setActorHealth(const Ptr& ptr, float health, const Ptr& attacker=Ptr()) const;
+            ///< Sets a new current health value for the actor, optionally specifying the object causing
+            /// the change. Use this instead of using CreatureStats directly as this will make sure the
+            /// correct dialog and actor states are properly handled when being hurt or healed.
+            /// (default implementation: throw an exceoption)
+
             virtual boost::shared_ptr<Action> activate (const Ptr& ptr, const Ptr& actor) const;
             ///< Generate action for activation (default implementation: return a null action).
 

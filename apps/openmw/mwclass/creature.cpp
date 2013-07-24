@@ -148,6 +148,39 @@ namespace MWClass
         return dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mCreatureStats;
     }
 
+
+    void Creature::attack(const MWWorld::Ptr& ptr, int type) const
+    {
+    }
+
+    void Creature::setActorHealth(const MWWorld::Ptr& ptr, float health, const MWWorld::Ptr& attacker) const
+    {
+        MWMechanics::CreatureStats &crstats = getCreatureStats(ptr);
+        float diff = health - crstats.getHealth().getCurrent();
+
+        if(diff < 0.0f)
+        {
+            // actor is losing health. Alert the character controller, scripts, etc.
+            // NOTE: 'attacker' may be empty.
+        }
+
+        bool wasDead = crstats.isDead();
+
+        MWMechanics::DynamicStat<float> stat(crstats.getHealth());
+        stat.setCurrent(health);
+        crstats.setHealth(stat);
+
+        if(!wasDead && crstats.isDead())
+        {
+            // actor was just killed
+        }
+        else if(wasDead && !crstats.isDead())
+        {
+            // actor was just resurrected
+        }
+    }
+
+
     boost::shared_ptr<MWWorld::Action> Creature::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {

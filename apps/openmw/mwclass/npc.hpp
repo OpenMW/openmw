@@ -68,6 +68,10 @@ namespace MWClass
             virtual MWWorld::InventoryStore& getInventoryStore (const MWWorld::Ptr& ptr) const;
             ///< Return inventory store
 
+            virtual void attack(const MWWorld::Ptr& ptr, int type) const;
+
+            virtual void setActorHealth(const MWWorld::Ptr& ptr, float health, const MWWorld::Ptr& attacker) const;
+
             virtual boost::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
                 const MWWorld::Ptr& actor) const;
             ///< Generate action for activation

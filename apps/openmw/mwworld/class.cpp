@@ -77,6 +77,16 @@ namespace MWWorld
         throw std::runtime_error ("class does not have item health");
     }
 
+    void Class::attack(const Ptr& ptr, int type) const
+    {
+        throw std::runtime_error("class cannot attack");
+    }
+
+    void Class::setActorHealth(const Ptr& ptr, float health, const Ptr& attacker) const
+    {
+        throw std::runtime_error("class does not have actor health");
+    }
+
     boost::shared_ptr<Action> Class::activate (const Ptr& ptr, const Ptr& actor) const
     {
         return boost::shared_ptr<Action> (new NullAction);
