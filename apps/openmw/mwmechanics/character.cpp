@@ -486,6 +486,13 @@ bool CharacterController::updateNpcState()
         animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete);
         if(mUpperBodyState == UpperCharState_MinAttackToMaxAttack)
         {
+            if(mAttackType != "shoot")
+            {
+                MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+                // NOTE: SwishL, SwishM, SwishS - large, medium, small.
+                // Based on weapon weight, speed, or attack strength?
+                sndMgr->playSound3D(mPtr, "SwishL", 1.0f, 1.0f);
+            }
             stats.setAttackStrength(complete);
 
             mAnimation->disable(mCurrentWeapon);
