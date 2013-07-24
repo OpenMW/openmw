@@ -52,6 +52,15 @@ protected:
         virtual void setValue(Ogre::Real value);
     };
 
+    class NullAnimationValue : public Ogre::ControllerValue<Ogre::Real>
+    {
+    public:
+        virtual Ogre::Real getValue() const
+        { return 0.0f; }
+        virtual void setValue(Ogre::Real value)
+        { }
+    };
+
     struct AnimSource : public Ogre::AnimationAlloc {
         NifOgre::TextKeyMap mTextKeys;
         std::vector<Ogre::Controller<Ogre::Real> > mControllers[sNumGroups];
@@ -98,6 +107,7 @@ protected:
     AnimStateMap mStates;
 
     Ogre::SharedPtr<AnimationValue> mAnimationValuePtr[sNumGroups];
+    Ogre::SharedPtr<NullAnimationValue> mNullAnimationValuePtr;
 
     ObjectAttachMap mAttachedObjects;
 
