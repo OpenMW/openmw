@@ -293,7 +293,7 @@ void OgreRenderer::createWindow(const std::string &title, const WindowSettings& 
     struct SDL_SysWMinfo wmInfo;
     SDL_VERSION(&wmInfo.version);
 
-    if(-1 == SDL_GetWindowWMInfo(mSDLWindow, &wmInfo))
+    if(SDL_FALSE == SDL_GetWindowWMInfo(mSDLWindow, &wmInfo))
         throw std::runtime_error("Couldn't get WM Info!");
 
     Ogre::String winHandle;
