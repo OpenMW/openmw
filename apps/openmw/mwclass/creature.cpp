@@ -149,7 +149,7 @@ namespace MWClass
     }
 
 
-    void Creature::attack(const MWWorld::Ptr& ptr, int type) const
+    void Creature::hit(const MWWorld::Ptr& ptr, int type) const
     {
     }
 

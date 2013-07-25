@@ -77,9 +77,9 @@ namespace MWWorld
         throw std::runtime_error ("class does not have item health");
     }
 
-    void Class::attack(const Ptr& ptr, int type) const
+    void Class::hit(const Ptr& ptr, int type) const
     {
-        throw std::runtime_error("class cannot attack");
+        throw std::runtime_error("class cannot hit");
     }
 
     void Class::setActorHealth(const Ptr& ptr, float health, const Ptr& attacker) const

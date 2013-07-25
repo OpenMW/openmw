@@ -290,7 +290,7 @@ namespace MWClass
     }
 
 
-    void Npc::attack(const MWWorld::Ptr& ptr, int type) const
+    void Npc::hit(const MWWorld::Ptr& ptr, int type) const
     {
         // FIXME: Detect what was hit
         MWWorld::Ptr victim;

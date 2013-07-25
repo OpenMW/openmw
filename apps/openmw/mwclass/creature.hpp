@@ -42,7 +42,7 @@ namespace MWClass
             virtual MWMechanics::CreatureStats& getCreatureStats (const MWWorld::Ptr& ptr) const;
             ///< Return creature stats
 
-            virtual void attack(const MWWorld::Ptr& ptr, int type) const;
+            virtual void hit(const MWWorld::Ptr& ptr, int type) const;
 
             virtual void setActorHealth(const MWWorld::Ptr& ptr, float health, const MWWorld::Ptr& attacker) const;
 

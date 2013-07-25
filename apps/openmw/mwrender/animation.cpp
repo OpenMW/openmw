@@ -538,13 +538,13 @@ void Animation::handleTextKey(AnimState &state, const std::string &groupname, co
     else if(evt.compare(off, len, "unequip detach") == 0)
         showWeapons(false);
     else if(evt.compare(off, len, "chop hit") == 0)
-        MWWorld::Class::get(mPtr).attack(mPtr, MWMechanics::CreatureStats::AT_Chop);
+        MWWorld::Class::get(mPtr).hit(mPtr, MWMechanics::CreatureStats::AT_Chop);
     else if(evt.compare(off, len, "slash hit") == 0)
-        MWWorld::Class::get(mPtr).attack(mPtr, MWMechanics::CreatureStats::AT_Slash);
+        MWWorld::Class::get(mPtr).hit(mPtr, MWMechanics::CreatureStats::AT_Slash);
     else if(evt.compare(off, len, "thrust hit") == 0)
-        MWWorld::Class::get(mPtr).attack(mPtr, MWMechanics::CreatureStats::AT_Thrust);
+        MWWorld::Class::get(mPtr).hit(mPtr, MWMechanics::CreatureStats::AT_Thrust);
     else if(evt.compare(off, len, "hit") == 0)
-        MWWorld::Class::get(mPtr).attack(mPtr, -1);
+        MWWorld::Class::get(mPtr).hit(mPtr);
 }
 
 
