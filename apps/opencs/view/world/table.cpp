@@ -44,6 +44,7 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
 
 std::vector<std::string> CSVWorld::Table::listRevertableSelectedIds() const
 {
+    /// \todo columns filtering fixes
     QModelIndexList selectedRows = selectionModel()->selectedRows();
 
     std::vector<std::string> revertableIds;
@@ -64,6 +65,7 @@ std::vector<std::string> CSVWorld::Table::listRevertableSelectedIds() const
 
 std::vector<std::string> CSVWorld::Table::listDeletableSelectedIds() const
 {
+    /// \todo columns filtering fixes
     QModelIndexList selectedRows = selectionModel()->selectedRows();
 
     std::vector<std::string> deletableIds;
@@ -137,6 +139,17 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, Q
     mDeleteAction = new QAction (tr ("Delete Record"), this);
     connect (mDeleteAction, SIGNAL (triggered()), this, SLOT (deleteRecord()));
     addAction (mDeleteAction);
+
+    connect (mProxyModel, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
+        this, SLOT (tableSizeUpdate()));
+
+    /// \note This signal could instead be connected to a slot that filters out changes not affecting
+    /// the records status column (for permanence reasons)
+    connect (mProxyModel, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
+        this, SLOT (tableSizeUpdate()));
+
+    connect (selectionModel(), SIGNAL (selectionChanged (const QItemSelection&, const QItemSelection&)),
+        this, SLOT (selectionSizeUpdate ()));
 }
 
 void CSVWorld::Table::setEditLock (bool locked)
@@ -230,4 +243,39 @@ void CSVWorld::Table::updateEditorSetting (const QString &settingName, const QSt
             if (dynamic_cast<CommandDelegate&> (*delegate).
                 updateEditorSetting (settingName, settingValue))
                 emit dataChanged (mModel->index (0, i), mModel->index (mModel->rowCount()-1, i));
+}
+
+void CSVWorld::Table::tableSizeUpdate()
+{
+    int size = 0;
+    int deleted = 0;
+    int modified = 0;
+
+    if (mModel->columnCount()>0)
+    {
+        int rows = mModel->rowCount();
+
+        for (int i=0; i<rows; ++i)
+        {
+            QModelIndex index = mProxyModel->mapToSource (mProxyModel->index (i, 0));
+
+            /// \todo Do not use hardcoded column numbers
+            int state = mModel->data (mModel->index (index.row(), 1)).toInt();
+
+            switch (state)
+            {
+                case CSMWorld::RecordBase::State_BaseOnly: ++size; break;
+                case CSMWorld::RecordBase::State_Modified: ++size; ++modified; break;
+                case CSMWorld::RecordBase::State_ModifiedOnly: ++size; ++modified; break;
+                case CSMWorld::RecordBase:: State_Deleted: ++deleted; ++modified; break;
+            }
+        }
+    }
+
+    tableSizeChanged (size, deleted, modified);
+}
+
+void CSVWorld::Table::selectionSizeUpdate()
+{
+    selectionSizeChanged (selectionModel()->selectedRows().size());
 }

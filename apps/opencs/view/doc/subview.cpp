@@ -15,3 +15,5 @@ CSMWorld::UniversalId CSVDoc::SubView::getUniversalId() const
 void CSVDoc::SubView::updateEditorSetting (const QString &settingName, const QString &settingValue)
 {
 }
+
+void CSVDoc::SubView::setStatusBar (bool show) {}

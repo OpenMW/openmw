@@ -6,6 +6,7 @@
 #include "../../model/doc/document.hpp"
 
 #include "table.hpp"
+#include "tablebottombox.hpp"
 
 CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document,
     bool createAndDelete)
@@ -18,6 +19,8 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
     layout->addWidget (
         mTable = new Table (id, document.getData(), document.getUndoStack(), createAndDelete), 2);
 
+    layout->addWidget (mBottom = new TableBottomBox (this), 0);
+
     QWidget *widget = new QWidget;
 
     widget->setLayout (layout);
@@ -25,6 +28,14 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
     setWidget (widget);
 
     connect (mTable, SIGNAL (editRequest (int)), this, SLOT (editRequest (int)));
+
+    connect (mTable, SIGNAL (selectionSizeChanged (int)),
+        mBottom, SLOT (selectionSizeChanged (int)));
+    connect (mTable, SIGNAL (tableSizeChanged (int, int, int)),
+        mBottom, SLOT (tableSizeChanged (int, int, int)));
+
+    mTable->tableSizeUpdate();
+    mTable->selectionSizeUpdate();
 }
 
 void CSVWorld::TableSubView::setEditLock (bool locked)
@@ -40,4 +51,9 @@ void CSVWorld::TableSubView::editRequest (int row)
 void CSVWorld::TableSubView::updateEditorSetting(const QString &settingName, const QString &settingValue)
 {
     mTable->updateEditorSetting(settingName, settingValue);
+}
+
+void CSVWorld::TableSubView::setStatusBar (bool show)
+{
+    mBottom->setStatusBar (show);
 }

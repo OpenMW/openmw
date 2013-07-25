@@ -60,6 +60,13 @@ namespace CSVWorld
 
             void editRequest (int row);
 
+            void selectionSizeChanged (int size);
+
+            void tableSizeChanged (int size, int deleted, int modified);
+            ///< \param size Number of not deleted records
+            /// \param deleted Number of deleted records
+            /// \param modified Number of added and modified records
+
         private slots:
 
             void createRecord();
@@ -69,6 +76,12 @@ namespace CSVWorld
             void deleteRecord();
 
             void editRecord();
+
+        public slots:
+
+            void tableSizeUpdate();
+
+            void selectionSizeUpdate();
     };
 }
 

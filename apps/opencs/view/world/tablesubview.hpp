@@ -13,18 +13,24 @@ namespace CSMDoc
 namespace CSVWorld
 {
     class Table;
+    class TableBottomBox;
 
     class TableSubView : public CSVDoc::SubView
     {
             Q_OBJECT
 
             Table *mTable;
+            TableBottomBox *mBottom;
 
         public:
 
             TableSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document, bool createAndDelete);
+
             virtual void setEditLock (bool locked);
-            void updateEditorSetting (const QString &, const QString &);
+
+            virtual void updateEditorSetting (const QString& key, const QString& value);
+
+            virtual void setStatusBar (bool show);
 
         private slots:
 
