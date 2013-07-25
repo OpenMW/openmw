@@ -399,12 +399,9 @@ bool CharacterController::updateNpcState()
             mUpperBodyState = UpperCharState_EquipingWeap;
         }
 
-        mWeaponType = weaptype;
-        getWeaponGroup(mWeaponType, mCurrentWeapon);
-
-        if(weapon != inv.end())
+        if(weapon != inv.end() && !(weaptype == WeapType_None && mWeaponType == WeapType_Spell))
         {
-            std::string soundid = (mWeaponType == WeapType_None) ?
+            std::string soundid = (weaptype == WeapType_None) ?
                                    MWWorld::Class::get(*weapon).getDownSoundId(*weapon) :
                                    MWWorld::Class::get(*weapon).getUpSoundId(*weapon);
             if(!soundid.empty())
@@ -413,6 +410,9 @@ bool CharacterController::updateNpcState()
                 sndMgr->playSound3D(mPtr, soundid, 1.0f, 1.0f);
             }
         }
+
+        mWeaponType = weaptype;
+        getWeaponGroup(mWeaponType, mCurrentWeapon);
     }
 
 
