@@ -5,6 +5,12 @@
 
 #include "../mwworld/ptr.hpp"
 
+namespace MWWorld
+{
+    class ContainerStoreIterator;
+    class InventoryStore;
+}
+
 namespace MWRender
 {
     class Animation;
@@ -14,6 +20,7 @@ namespace MWMechanics
 {
 
 class Movement;
+class NpcStats;
 
 enum Priority {
     Priority_Default,
@@ -133,9 +140,6 @@ class CharacterController
 
     bool mSkipAnim;
 
-    // Workaround for playing weapon draw animation and sound when going to new cell
-    bool mUpdateWeapon;
-
     // counted for skill increase
     float mSecondsOfSwimming;
     float mSecondsOfRunning;
@@ -145,6 +149,10 @@ class CharacterController
     void refreshCurrentAnims(CharacterState idle, CharacterState movement, bool force=false);
 
     static void getWeaponGroup(WeaponType weaptype, std::string &group);
+
+    static MWWorld::ContainerStoreIterator getActiveWeapon(NpcStats &stats,
+                                                           MWWorld::InventoryStore &inv,
+                                                           WeaponType *weaptype);
 
     void clearAnimQueue();
 

@@ -232,6 +232,67 @@ void CharacterController::getWeaponGroup(WeaponType weaptype, std::string &group
 }
 
 
+MWWorld::ContainerStoreIterator CharacterController::getActiveWeapon(NpcStats &stats, MWWorld::InventoryStore &inv, WeaponType *weaptype)
+{
+    if(stats.getDrawState() == DrawState_Spell)
+    {
+        *weaptype = WeapType_Spell;
+        return inv.end();
+    }
+
+    if(stats.getDrawState() == MWMechanics::DrawState_Weapon)
+    {
+        MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+        if(weapon == inv.end())
+            *weaptype = WeapType_HandToHand;
+        else
+        {
+            const std::string &type = weapon->getTypeName();
+            if(type == typeid(ESM::Lockpick).name() || type == typeid(ESM::Probe).name())
+                *weaptype = WeapType_PickProbe;
+            else if(type == typeid(ESM::Weapon).name())
+            {
+                MWWorld::LiveCellRef<ESM::Weapon> *ref = weapon->get<ESM::Weapon>();
+                ESM::Weapon::Type type = (ESM::Weapon::Type)ref->mBase->mData.mType;
+                switch(type)
+                {
+                    case ESM::Weapon::ShortBladeOneHand:
+                    case ESM::Weapon::LongBladeOneHand:
+                    case ESM::Weapon::BluntOneHand:
+                    case ESM::Weapon::AxeOneHand:
+                    case ESM::Weapon::Arrow:
+                    case ESM::Weapon::Bolt:
+                        *weaptype = WeapType_OneHand;
+                        break;
+                    case ESM::Weapon::LongBladeTwoHand:
+                    case ESM::Weapon::BluntTwoClose:
+                    case ESM::Weapon::AxeTwoHand:
+                        *weaptype = WeapType_TwoHand;
+                        break;
+                    case ESM::Weapon::BluntTwoWide:
+                    case ESM::Weapon::SpearTwoWide:
+                        *weaptype = WeapType_TwoWide;
+                        break;
+                    case ESM::Weapon::MarksmanBow:
+                        *weaptype = WeapType_BowAndArrow;
+                        break;
+                    case ESM::Weapon::MarksmanCrossbow:
+                        *weaptype = WeapType_Crossbow;
+                        break;
+                    case ESM::Weapon::MarksmanThrown:
+                        *weaptype = WeapType_ThowWeapon;
+                        break;
+                }
+            }
+        }
+
+        return weapon;
+    }
+
+    return inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+}
+
+
 CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim)
     : mPtr(ptr)
     , mAnimation(anim)
@@ -244,18 +305,28 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     , mSkipAnim(false)
     , mSecondsOfRunning(0)
     , mSecondsOfSwimming(0)
-    , mUpdateWeapon(true)
 {
     if(!mAnimation)
         return;
 
-    if(MWWorld::Class::get(mPtr).isActor())
+    const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
+    if(cls.isActor())
     {
         /* Accumulate along X/Y only for now, until we can figure out how we should
          * handle knockout and death which moves the character down. */
         mAnimation->setAccumulation(Ogre::Vector3(1.0f, 1.0f, 0.0f));
 
-        if(!MWWorld::Class::get(mPtr).getCreatureStats(mPtr).isDead())
+        if(mPtr.getTypeName() == typeid(ESM::NPC).name())
+        {
+            getActiveWeapon(cls.getNpcStats(mPtr), cls.getInventoryStore(mPtr), &mWeaponType);
+            if(mWeaponType != WeapType_None)
+            {
+                getWeaponGroup(mWeaponType, mCurrentWeapon);
+                mUpperBodyState = UpperCharState_WeapEquiped;
+            }
+        }
+
+        if(!cls.getCreatureStats(mPtr).isDead())
             mIdleState = CharState_Idle;
         else
         {
@@ -302,68 +373,9 @@ bool CharacterController::updateNpcState()
     NpcStats &stats = cls.getNpcStats(mPtr);
     WeaponType weaptype = WeapType_None;
     MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
-    MWWorld::ContainerStoreIterator weapon = inv.end();
-
-    if(stats.getDrawState() == DrawState_Spell)
-        weaptype = WeapType_Spell;
-    else if(stats.getDrawState() == MWMechanics::DrawState_Weapon)
-    {
-        weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-        if(weapon == inv.end())
-            weaptype = WeapType_HandToHand;
-        else
-        {
-            const std::string &type = weapon->getTypeName();
-            if(type == typeid(ESM::Lockpick).name() || type == typeid(ESM::Probe).name())
-                weaptype = WeapType_PickProbe;
-            else if(type == typeid(ESM::Weapon).name())
-            {
-                MWWorld::LiveCellRef<ESM::Weapon> *ref = weapon->get<ESM::Weapon>();
-                ESM::Weapon::Type type = (ESM::Weapon::Type)ref->mBase->mData.mType;
-                switch(type)
-                {
-                    case ESM::Weapon::ShortBladeOneHand:
-                    case ESM::Weapon::LongBladeOneHand:
-                    case ESM::Weapon::BluntOneHand:
-                    case ESM::Weapon::AxeOneHand:
-                    case ESM::Weapon::Arrow:
-                    case ESM::Weapon::Bolt:
-                        weaptype = WeapType_OneHand;
-                        break;
-                    case ESM::Weapon::LongBladeTwoHand:
-                    case ESM::Weapon::BluntTwoClose:
-                    case ESM::Weapon::AxeTwoHand:
-                        weaptype = WeapType_TwoHand;
-                        break;
-                    case ESM::Weapon::BluntTwoWide:
-                    case ESM::Weapon::SpearTwoWide:
-                        weaptype = WeapType_TwoWide;
-                        break;
-                    case ESM::Weapon::MarksmanBow:
-                        weaptype = WeapType_BowAndArrow;
-                        break;
-                    case ESM::Weapon::MarksmanCrossbow:
-                        weaptype = WeapType_Crossbow;
-                        break;
-                    case ESM::Weapon::MarksmanThrown:
-                        weaptype = WeapType_ThowWeapon;
-                        break;
-                }
-            }
-        }
-    }
-    else
-        weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+    MWWorld::ContainerStoreIterator weapon = getActiveWeapon(stats, inv, &weaptype);
 
     bool forcestateupdate = false;
-    if(mUpdateWeapon)
-    {
-        forcestateupdate = (mWeaponType != weaptype);
-        mWeaponType = weaptype;
-        getWeaponGroup(mWeaponType, mCurrentWeapon);
-        mUpdateWeapon = false;
-    }
-
     if(weaptype != mWeaponType)
     {
         forcestateupdate = true;
