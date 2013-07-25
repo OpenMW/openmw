@@ -71,16 +71,26 @@ public:
     }
 
     /// Look up the actual object from the index
-    X* getPtr() const
+    const X* getPtr() const
     {
         assert(ptr != NULL);
         return ptr;
     }
-    X& get() const
+    X* getPtr()
+    {
+        assert(ptr != NULL);
+        return ptr;
+    }
+
+    const X& get() const
+    { return *getPtr(); }
+    X& get()
     { return *getPtr(); }
 
     /// Syntactic sugar
-    X* operator->() const
+    const X* operator->() const
+    { return getPtr(); }
+    X* operator->()
     { return getPtr(); }
 
     /// Pointers are allowed to be empty
@@ -115,6 +125,8 @@ public:
     }
 
     const Ptr& operator[](size_t index) const
+    { return list.at(index); }
+    Ptr& operator[](size_t index)
     { return list.at(index); }
 
     size_t length() const
