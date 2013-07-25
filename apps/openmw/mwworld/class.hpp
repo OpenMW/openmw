@@ -105,6 +105,9 @@ namespace MWWorld
             ///< Return item max health or throw an exception, if class does not have item health
             /// (default implementation: throw an exceoption)
 
+            virtual float getEvasion(const Ptr& ptr) const;
+            ///< Gets the chance the given object can evade an attack
+
             virtual void hit(const Ptr& ptr, int type=-1) const;
             ///< Execute a melee hit, using the current weapon. This will check the relevant skills
             /// of the given attacker, and whoever is hit.

@@ -13,6 +13,8 @@
 #include "containerstore.hpp"
 
 #include "../mwgui/tooltips.hpp"
+#include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/magiceffects.hpp"
 
 namespace MWWorld
 {
@@ -75,6 +77,18 @@ namespace MWWorld
     int Class::getItemMaxHealth (const Ptr& ptr) const
     {
         throw std::runtime_error ("class does not have item health");
+    }
+
+    float Class::getEvasion(const Ptr& ptr) const
+    {
+        MWMechanics::CreatureStats &crstats = getCreatureStats(ptr);
+        const MWMechanics::MagicEffects &mageffects = crstats.getMagicEffects();
+        float evasion = (crstats.getAttribute(ESM::Attribute::Agility).getModified() / 5.0f) +
+                        (crstats.getAttribute(ESM::Attribute::Luck).getModified() / 10.0f);
+        evasion *= crstats.getFatigueTerm();
+        evasion += mageffects.get(MWMechanics::EffectKey(ESM::MagicEffect::Sanctuary)).mMagnitude;
+
+        return evasion;
     }
 
     void Class::hit(const Ptr& ptr, int type) const

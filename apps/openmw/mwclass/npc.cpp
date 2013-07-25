@@ -14,6 +14,7 @@
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/dialoguemanager.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
@@ -304,6 +305,12 @@ namespace MWClass
 
     void Npc::hit(const MWWorld::Ptr& ptr, int type) const
     {
+        // Get the weapon used (if hand-to-hand, weapon = inv.end())
+        MWWorld::InventoryStore &inv = getInventoryStore(ptr);
+        MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+        if(weapon != inv.end() && weapon->getTypeName() != typeid(ESM::Weapon).name())
+            weapon = inv.end();
+
         // FIXME: Detect what was hit
         MWWorld::Ptr victim;
         if(victim.isEmpty()) // Didn't hit anything
@@ -316,34 +323,58 @@ namespace MWClass
             return;
         }
 
-        // Get the weapon used
-        MWWorld::LiveCellRef<ESM::Weapon> *weapon = NULL;
-        MWWorld::InventoryStore &inv = Npc::getInventoryStore(ptr);
-        MWWorld::ContainerStoreIterator iter = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-        if(iter != inv.end() && iter->getTypeName() == typeid(ESM::Weapon).name())
-            weapon = iter->get<ESM::Weapon>();
+        int weapskill = ESM::Skill::HandToHand;
+        if(weapon != inv.end())
+            weapskill = MWWorld::Class::get(*weapon).getEquipmentSkill(*weapon);
 
-        // TODO: Check weapon skill against victim's armor skill (if !weapon, attacker is using
-        // hand-to-hand, which damages fatique unless in werewolf form).
-        if(weapon)
+        MWMechanics::CreatureStats &crstats = getCreatureStats(ptr);
+        MWMechanics::NpcStats &npcstats = getNpcStats(ptr);
+        const MWMechanics::MagicEffects &mageffects = crstats.getMagicEffects();
+        float hitchance = npcstats.getSkill(weapskill).getModified() +
+                          (crstats.getAttribute(ESM::Attribute::Agility).getModified() / 5.0f) +
+                          (crstats.getAttribute(ESM::Attribute::Luck).getModified() / 10.0f);
+        hitchance *= crstats.getFatigueTerm();
+        hitchance += mageffects.get(MWMechanics::EffectKey(ESM::MagicEffect::FortifyAttack)).mMagnitude -
+                     mageffects.get(MWMechanics::EffectKey(ESM::MagicEffect::Blind)).mMagnitude;
+        hitchance -= othercls.getEvasion(victim);
+
+        if((::rand()/(RAND_MAX+1.0)) > hitchance)
         {
-            const unsigned char *att = NULL;
+            // Missed
+            MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+            sndMgr->playSound3D(victim, "miss", 1.0f, 1.0f);
+            return;
+        }
+
+        if(weapon != inv.end())
+        {
+            const unsigned char *attack = NULL;
             if(type == MWMechanics::CreatureStats::AT_Chop)
-                att = weapon->mBase->mData.mChop;
+                attack = weapon->get<ESM::Weapon>()->mBase->mData.mChop;
             else if(type == MWMechanics::CreatureStats::AT_Slash)
-                att = weapon->mBase->mData.mSlash;
+                attack = weapon->get<ESM::Weapon>()->mBase->mData.mSlash;
             else if(type == MWMechanics::CreatureStats::AT_Thrust)
-                att = weapon->mBase->mData.mThrust;
-
-            if(att)
+                attack = weapon->get<ESM::Weapon>()->mBase->mData.mThrust;
+            if(attack)
             {
-                float health = othercls.getCreatureStats(victim).getHealth().getCurrent();
-                // FIXME: Modify damage based on strength attribute?
-                health -= att[0] + ((att[1]-att[0])*Npc::getNpcStats(ptr).getAttackStrength());
+                float damage = attack[0] + ((attack[1]-attack[0])*npcstats.getAttackStrength());
+                damage *= 0.5f + (crstats.getAttribute(ESM::Attribute::Luck).getModified() / 100.0f);
+                //damage *= weapon_current_health / weapon_max_health;
+                if(!othercls.hasDetected(victim, ptr))
+                {
+                    const MWBase::World *world = MWBase::Environment::get().getWorld();
+                    const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
+                    damage *= gmst.find("fCombatCriticalStrikeMult")->getFloat();
+                    MWBase::Environment::get().getWindowManager()->messageBox("#{sTargetCriticalStrike}");
+                }
+                damage /= std::min(1.0f + othercls.getArmorRating(victim) / std::max(1.0f, damage), 4.0f);
 
-                othercls.setActorHealth(victim, std::max(health, 0.0f), ptr);
+                float health = othercls.getCreatureStats(victim).getHealth().getCurrent() - damage;
+                othercls.setActorHealth(victim, health, ptr);
             }
         }
+
+        skillUsageSucceeded(ptr, weapskill, 0);
     }
 
     void Npc::setActorHealth(const MWWorld::Ptr& ptr, float health, const MWWorld::Ptr& attacker) const
