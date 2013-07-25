@@ -304,6 +304,19 @@ namespace MWWorld
         return results;
     }
 
+    std::pair<std::string,float> PhysicsSystem::getFacedHandle(const Ogre::Vector3 &origin_, const Ogre::Quaternion &orient_, float queryDistance)
+    {
+        Ogre::Vector3 dest_ = origin_ +  orient_.yAxis()*queryDistance;
+
+        btVector3 origin(origin_.x, origin_.y, origin_.z);
+        btVector3 dest(dest_.x, dest_.y, dest_.z);
+
+        std::pair<std::string,float> result = mEngine->rayTest(origin, dest);
+        result.second *= queryDistance;
+        return result;
+    }
+
+
     void PhysicsSystem::setCurrentWater(bool hasWater, int waterHeight)
     {
         // TODO: store and use

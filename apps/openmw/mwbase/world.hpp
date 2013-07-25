@@ -218,6 +218,10 @@ namespace MWBase
             virtual MWWorld::Ptr  getFacedObject() = 0;
             ///< Return pointer to the object the player is looking at, if it is within activation range
 
+            /// Returns a pointer to the object the provided object is facing (if within the
+            /// specified distance). This will attempt to use the "Bip01 Head" node as a basis.
+            virtual MWWorld::Ptr getFacedObject(const MWWorld::Ptr &ptr, float distance) = 0;
+
             virtual void adjustPosition (const MWWorld::Ptr& ptr) = 0;
             ///< Adjust position after load to be on ground. Must be called after model load.
 

@@ -305,14 +305,19 @@ namespace MWClass
 
     void Npc::hit(const MWWorld::Ptr& ptr, int type) const
     {
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+        const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
+
         // Get the weapon used (if hand-to-hand, weapon = inv.end())
         MWWorld::InventoryStore &inv = getInventoryStore(ptr);
         MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
         if(weapon != inv.end() && weapon->getTypeName() != typeid(ESM::Weapon).name())
             weapon = inv.end();
 
-        // FIXME: Detect what was hit
-        MWWorld::Ptr victim;
+        float dist = 100.0f * ((weapon != inv.end()) ?
+                               weapon->get<ESM::Weapon>()->mBase->mData.mReach :
+                               gmst.find("fHandToHandReach")->getFloat());
+        MWWorld::Ptr victim = world->getFacedObject(ptr, dist);
         if(victim.isEmpty()) // Didn't hit anything
             return;
 
@@ -362,8 +367,6 @@ namespace MWClass
                 //damage *= weapon_current_health / weapon_max_health;
                 if(!othercls.hasDetected(victim, ptr))
                 {
-                    const MWBase::World *world = MWBase::Environment::get().getWorld();
-                    const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
                     damage *= gmst.find("fCombatCriticalStrikeMult")->getFloat();
                     MWBase::Environment::get().getWindowManager()->messageBox("#{sTargetCriticalStrike}");
                 }
