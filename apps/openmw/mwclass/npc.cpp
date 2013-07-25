@@ -343,7 +343,7 @@ namespace MWClass
                      mageffects.get(MWMechanics::EffectKey(ESM::MagicEffect::Blind)).mMagnitude;
         hitchance -= othercls.getEvasion(victim);
 
-        if((::rand()/(RAND_MAX+1.0)) > hitchance)
+        if((::rand()/(RAND_MAX+1.0)) > hitchance/100.0f)
         {
             // Missed
             MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
