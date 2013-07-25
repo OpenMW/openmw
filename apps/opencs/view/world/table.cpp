@@ -44,20 +44,30 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
 
 std::vector<std::string> CSVWorld::Table::listRevertableSelectedIds() const
 {
-    /// \todo columns filtering fixes
-    QModelIndexList selectedRows = selectionModel()->selectedRows();
-
+    /// \todo Do not use hardcoded column numbers
     std::vector<std::string> revertableIds;
 
-    for (QModelIndexList::const_iterator iter (selectedRows.begin()); iter!=selectedRows.end(); ++iter)
+    if (mProxyModel->columnCount()>0)
     {
-        std::string id = mProxyModel->data (*iter).toString().toStdString();
+        QModelIndexList selectedRows = selectionModel()->selectedRows();
 
-        CSMWorld::RecordBase::State state =
-            static_cast<CSMWorld::RecordBase::State> (mModel->data (mModel->getModelIndex (id, 1)).toInt());
+        for (QModelIndexList::const_iterator iter (selectedRows.begin()); iter!=selectedRows.end();
+             ++iter)
+        {
+            QModelIndex index = mProxyModel->mapToSource (mProxyModel->index (iter->row(), 0));
 
-        if (state!=CSMWorld::RecordBase::State_BaseOnly)
-            revertableIds.push_back (id);
+            CSMWorld::RecordBase::State state =
+                static_cast<CSMWorld::RecordBase::State> (
+                mModel->data (mModel->index (index.row(), 1)).toInt());
+
+            if (state!=CSMWorld::RecordBase::State_BaseOnly)
+            {
+                std::string id = mModel->data (mModel->index (index.row(), 0)).
+                    toString().toUtf8().constData();
+
+                revertableIds.push_back (id);
+            }
+        }
     }
 
     return revertableIds;
@@ -65,20 +75,30 @@ std::vector<std::string> CSVWorld::Table::listRevertableSelectedIds() const
 
 std::vector<std::string> CSVWorld::Table::listDeletableSelectedIds() const
 {
-    /// \todo columns filtering fixes
-    QModelIndexList selectedRows = selectionModel()->selectedRows();
-
+    /// \todo Do not use hardcoded column numbers
     std::vector<std::string> deletableIds;
 
-    for (QModelIndexList::const_iterator iter (selectedRows.begin()); iter!=selectedRows.end(); ++iter)
+    if (mProxyModel->columnCount()>0)
     {
-        std::string id = mProxyModel->data (*iter).toString().toStdString();
+        QModelIndexList selectedRows = selectionModel()->selectedRows();
 
-        CSMWorld::RecordBase::State state =
-            static_cast<CSMWorld::RecordBase::State> (mModel->data (mModel->getModelIndex (id, 1)).toInt());
+        for (QModelIndexList::const_iterator iter (selectedRows.begin()); iter!=selectedRows.end();
+            ++iter)
+        {
+            QModelIndex index = mProxyModel->mapToSource (mProxyModel->index (iter->row(), 0));
 
-        if (state!=CSMWorld::RecordBase::State_Deleted)
-            deletableIds.push_back (id);
+            CSMWorld::RecordBase::State state =
+                static_cast<CSMWorld::RecordBase::State> (
+                mModel->data (mModel->index (index.row(), 1)).toInt());
+
+            if (state!=CSMWorld::RecordBase::State_Deleted)
+            {
+                std::string id = mModel->data (mModel->index (index.row(), 0)).
+                    toString().toUtf8().constData();
+
+                deletableIds.push_back (id);
+            }
+        }
     }
 
     return deletableIds;
