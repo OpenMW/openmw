@@ -7,6 +7,8 @@
 #include <QStackedLayout>
 #include <QLabel>
 
+#include "creator.hpp"
+
 void CSVWorld::TableBottomBox::updateStatus()
 {
     if (mShowStatusBar)
@@ -37,7 +39,7 @@ void CSVWorld::TableBottomBox::updateStatus()
     }
 }
 
-CSVWorld::TableBottomBox::TableBottomBox (QWidget *parent)
+CSVWorld::TableBottomBox::TableBottomBox (const CreatorFactoryBase& creatorFactory, QWidget *parent)
 : QWidget (parent), mShowStatusBar (false)
 {
     for (int i=0; i<4; ++i)
@@ -60,6 +62,13 @@ CSVWorld::TableBottomBox::TableBottomBox (QWidget *parent)
     layout->addWidget (statusBar2);
 
     setLayout (layout);
+
+    mCreator = creatorFactory.makeCreator();
+}
+
+CSVWorld::TableBottomBox::~TableBottomBox()
+{
+    delete mCreator;
 }
 
 void CSVWorld::TableBottomBox::setStatusBar (bool show)
@@ -73,6 +82,11 @@ void CSVWorld::TableBottomBox::setStatusBar (bool show)
         if (show)
             updateStatus();
     }
+}
+
+bool CSVWorld::TableBottomBox::canCreateAndDelete() const
+{
+    return mCreator;
 }
 
 void CSVWorld::TableBottomBox::selectionSizeChanged (int size)

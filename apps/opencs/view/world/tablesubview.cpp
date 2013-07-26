@@ -18,14 +18,10 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
     layout->setContentsMargins (QMargins (0, 0, 0, 0));
 
-    Creator *creator = creatorFactory.makeCreator();
-    bool createAndDelete = creator!=0;
-    delete creator;
+    layout->addWidget (mBottom = new TableBottomBox (creatorFactory, this), 0);
 
-    layout->addWidget (
-        mTable = new Table (id, document.getData(), document.getUndoStack(), createAndDelete), 2);
-
-    layout->addWidget (mBottom = new TableBottomBox (this), 0);
+    layout->insertWidget (0, mTable =
+        new Table (id, document.getData(), document.getUndoStack(), mBottom->canCreateAndDelete()), 2);
 
     QWidget *widget = new QWidget;
 

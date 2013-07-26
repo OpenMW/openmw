@@ -7,6 +7,9 @@ class QLabel;
 
 namespace CSVWorld
 {
+    class CreatorFactoryBase;
+    class Creator;
+
     class TableBottomBox : public QWidget
     {
             Q_OBJECT
@@ -14,16 +17,28 @@ namespace CSVWorld
             bool mShowStatusBar;
             QLabel *mStatus;
             int mStatusCount[4];
+            Creator *mCreator;
 
         private:
+
+            // not implemented
+            TableBottomBox (const TableBottomBox&);
+            TableBottomBox& operator= (const TableBottomBox&);
 
             void updateStatus();
 
         public:
 
-            TableBottomBox (QWidget *parent = 0);
+            TableBottomBox (const CreatorFactoryBase& creatorFactory, QWidget *parent = 0);
+
+            virtual ~TableBottomBox();
 
             void setStatusBar (bool show);
+
+            bool canCreateAndDelete() const;
+            ///< Is record creation and deletion supported?
+            ///
+            /// \note The BotomBox does not partake in the deletion of records.
 
         public slots:
 
