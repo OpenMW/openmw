@@ -167,7 +167,15 @@ namespace MWClass
             return;
         }
 
-        // TODO: Handle HitOnMe script function and OnPCHitMe script variable.
+        // TODO: Handle HitOnMe script function
+
+        if(!attacker.isEmpty() && attacker.getRefData().getHandle() == "player")
+        {
+            const std::string &script = ptr.get<ESM::Creature>()->mBase->mScript;
+            /* Set the OnPCHitMe script variable. The script is responsible for clearing it. */
+            if(!script.empty())
+                ptr.getRefData().getLocals().setVarByInt(script, "onpchitme", 1);
+        }
 
         float health = getCreatureStats(ptr).getHealth().getCurrent() - damage;
         setActorHealth(ptr, health, attacker);
