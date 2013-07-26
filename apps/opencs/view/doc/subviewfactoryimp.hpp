@@ -35,7 +35,7 @@ namespace CSVDoc
     CSVDoc::SubView *SubViewFactoryWithCreator<SubViewT, CreatorFactoryT>::makeSubView (
         const CSMWorld::UniversalId& id, CSMDoc::Document& document)
     {
-        return new SubViewT (id, document, CreatorFactoryT().makeCreator());
+        return new SubViewT (id, document, CreatorFactoryT());
     }
 }
 

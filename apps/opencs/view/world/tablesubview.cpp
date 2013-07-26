@@ -10,15 +10,17 @@
 #include "creator.hpp"
 
 CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document,
-    Creator *creator)
+    const CreatorFactoryBase& creatorFactory)
 : SubView (id)
 {
-    bool createAndDelete = creator!=0;
-    delete creator;
 
     QVBoxLayout *layout = new QVBoxLayout;
 
     layout->setContentsMargins (QMargins (0, 0, 0, 0));
+
+    Creator *creator = creatorFactory.makeCreator();
+    bool createAndDelete = creator!=0;
+    delete creator;
 
     layout->addWidget (
         mTable = new Table (id, document.getData(), document.getUndoStack(), createAndDelete), 2);
