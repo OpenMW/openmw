@@ -57,10 +57,6 @@ CSVWorld::TableBottomBox::TableBottomBox (const CreatorFactoryBase& creatorFacto
 
     layout->addWidget (statusBar);
 
-    QStatusBar *statusBar2 = new QStatusBar;
-
-    layout->addWidget (statusBar2);
-
     setLayout (layout);
 
     mCreator = creatorFactory.makeCreator();
