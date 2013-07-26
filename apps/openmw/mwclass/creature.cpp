@@ -11,6 +11,7 @@
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
@@ -153,17 +154,28 @@ namespace MWClass
     {
     }
 
+    void Creature::onHit(const MWWorld::Ptr &ptr, float damage, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, bool successful) const
+    {
+        // NOTE: 'object' and/or 'attacker' may be empty.
+
+        if(!successful)
+        {
+            // TODO: Handle HitAttemptOnMe script function
+
+            // Missed
+            MWBase::Environment::get().getSoundManager()->playSound3D(ptr, "miss", 1.0f, 1.0f);
+            return;
+        }
+
+        // TODO: Handle HitOnMe script function and OnPCHitMe script variable.
+
+        float health = getCreatureStats(ptr).getHealth().getCurrent() - damage;
+        setActorHealth(ptr, health, attacker);
+    }
+
     void Creature::setActorHealth(const MWWorld::Ptr& ptr, float health, const MWWorld::Ptr& attacker) const
     {
         MWMechanics::CreatureStats &crstats = getCreatureStats(ptr);
-        float diff = health - crstats.getHealth().getCurrent();
-
-        if(diff < 0.0f)
-        {
-            // actor is losing health. Alert the character controller, scripts, etc.
-            // NOTE: 'attacker' may be empty.
-        }
-
         bool wasDead = crstats.isDead();
 
         MWMechanics::DynamicStat<float> stat(crstats.getHealth());
