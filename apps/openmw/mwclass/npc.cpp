@@ -392,7 +392,8 @@ namespace MWClass
             return;
         }
 
-        // TODO: Handle HitOnMe script function
+        if(!object.isEmpty())
+            getCreatureStats(ptr).setLastHitObject(MWWorld::Class::get(object).getId(object));
 
         if(!attacker.isEmpty() && attacker.getRefData().getHandle() == "player")
         {

@@ -338,5 +338,7 @@ op 0x200020f: GetStandingActor, explicit
 op 0x2000210: GetStartingAngle
 op 0x2000211: GetStartingAngle, explicit
 op 0x2000212: GetWindSpeed
+op 0x2000213: HitOnMe
+op 0x2000214: HitOnMe, explicit
 
-opcodes 0x2000213-0x3ffffff unused
+opcodes 0x2000215-0x3ffffff unused

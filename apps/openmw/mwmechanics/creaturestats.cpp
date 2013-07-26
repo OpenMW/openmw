@@ -318,4 +318,14 @@ namespace MWMechanics
     {
         return false;
     }
+
+    void CreatureStats::setLastHitObject(const std::string& objectid)
+    {
+        mLastHitObject = objectid;
+    }
+
+    const std::string &CreatureStats::getLastHitObject() const
+    {
+        return mLastHitObject;
+    }
 }

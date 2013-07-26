@@ -38,6 +38,8 @@ namespace MWMechanics
 
         int mAttackType;
 
+        std::string mLastHitObject; // The last object to hit this actor
+
     public:
         CreatureStats();
 
@@ -155,6 +157,9 @@ namespace MWMechanics
         void setHostile (bool hostile);
 
         bool getCreatureTargetted() const;
+
+        void setLastHitObject(const std::string &objectid);
+        const std::string &getLastHitObject() const;
     };
 }
 

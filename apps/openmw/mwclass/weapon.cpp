@@ -22,6 +22,13 @@
 
 namespace MWClass
 {
+    std::string Weapon::getId (const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Weapon> *ref = ptr.get<ESM::Weapon>();
+
+        return ref->mBase->mId;
+    }
+
     void Weapon::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
         const std::string model = getModel(ptr);
