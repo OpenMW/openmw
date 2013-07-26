@@ -373,7 +373,8 @@ namespace MWClass
                 damage /= std::min(1.0f + othercls.getArmorRating(victim)/std::max(1.0f, damage), 4.0f);
             }
         }
-        skillUsageSucceeded(ptr, weapskill, 0);
+        if(ptr.getRefData().getHandle() == "player")
+            skillUsageSucceeded(ptr, weapskill, 0);
 
         othercls.onHit(victim, damage, weapon, ptr, true);
     }
