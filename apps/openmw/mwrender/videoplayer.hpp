@@ -8,6 +8,7 @@ namespace Ogre
     class SceneManager;
     class SceneNode;
     class Rectangle2D;
+    class RenderWindow;
 }
 
 namespace MWRender
@@ -17,7 +18,7 @@ namespace MWRender
     class VideoPlayer
     {
     public:
-        VideoPlayer(Ogre::SceneManager* sceneMgr);
+        VideoPlayer(Ogre::SceneManager* sceneMgr, Ogre::RenderWindow* window);
         ~VideoPlayer();
 
         void playVideo (const std::string& resourceName, bool allowSkipping);
@@ -43,6 +44,7 @@ namespace MWRender
         Ogre::Rectangle2D* mBackgroundRectangle;
         Ogre::SceneNode* mNode;
         Ogre::SceneNode* mBackgroundNode;
+        Ogre::RenderWindow* mWindow;
 
         int mWidth;
         int mHeight;

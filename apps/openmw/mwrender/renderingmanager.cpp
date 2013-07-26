@@ -170,7 +170,7 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
 
     mOcclusionQuery = new OcclusionQuery(&mRendering, mSkyManager->getSunNode());
 
-    mVideoPlayer = new VideoPlayer(mRendering.getScene ());
+    mVideoPlayer = new VideoPlayer(mRendering.getScene (), mRendering.getWindow());
     mVideoPlayer->setResolution (Settings::Manager::getInt ("resolution x", "Video"), Settings::Manager::getInt ("resolution y", "Video"));
 
     mSun = 0;
