@@ -115,6 +115,11 @@ namespace MWWorld
             ///               enums. ignored for creature attacks.
             /// (default implementation: throw an exceoption)
 
+            virtual void onHit(const Ptr& ptr, float damage, const Ptr &object, const Ptr &attacker, bool successful) const;
+            ///< Alerts \a ptr that it's being hit for \a damage health by \a object (sword, arrow,
+            /// etc). \a attacker specifies the actor responsible for the attack, and \a successful
+            /// specifies if the hit is successful or not.
+
             virtual void setActorHealth(const Ptr& ptr, float health, const Ptr& attacker=Ptr()) const;
             ///< Sets a new current health value for the actor, optionally specifying the object causing
             /// the change. Use this instead of using CreatureStats directly as this will make sure the

@@ -310,12 +310,13 @@ namespace MWClass
 
         // Get the weapon used (if hand-to-hand, weapon = inv.end())
         MWWorld::InventoryStore &inv = getInventoryStore(ptr);
-        MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-        if(weapon != inv.end() && weapon->getTypeName() != typeid(ESM::Weapon).name())
-            weapon = inv.end();
+        MWWorld::ContainerStoreIterator weaponslot = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+        MWWorld::Ptr weapon = ((weaponslot != inv.end()) ? *weaponslot : MWWorld::Ptr());
+        if(!weapon.isEmpty() && weapon.getTypeName() != typeid(ESM::Weapon).name())
+            weapon = MWWorld::Ptr();
 
-        float dist = 100.0f * ((weapon != inv.end()) ?
-                               weapon->get<ESM::Weapon>()->mBase->mData.mReach :
+        float dist = 100.0f * (!weapon.isEmpty() ?
+                               weapon.get<ESM::Weapon>()->mBase->mData.mReach :
                                gmst.find("fHandToHandReach")->getFloat());
         MWWorld::Ptr victim = world->getFacedObject(ptr, dist);
         if(victim.isEmpty()) // Didn't hit anything
@@ -329,8 +330,8 @@ namespace MWClass
         }
 
         int weapskill = ESM::Skill::HandToHand;
-        if(weapon != inv.end())
-            weapskill = MWWorld::Class::get(*weapon).getEquipmentSkill(*weapon);
+        if(!weapon.isEmpty())
+            weapskill = MWWorld::Class::get(weapon).getEquipmentSkill(weapon);
 
         MWMechanics::CreatureStats &crstats = getCreatureStats(ptr);
         MWMechanics::NpcStats &npcstats = getNpcStats(ptr);
@@ -345,24 +346,23 @@ namespace MWClass
 
         if((::rand()/(RAND_MAX+1.0)) > hitchance/100.0f)
         {
-            // Missed
-            MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-            sndMgr->playSound3D(victim, "miss", 1.0f, 1.0f);
+            othercls.onHit(victim, 0.0f, weapon, ptr, false);
             return;
         }
 
-        if(weapon != inv.end())
+        float damage = 0.0f;
+        if(!weapon.isEmpty())
         {
             const unsigned char *attack = NULL;
             if(type == MWMechanics::CreatureStats::AT_Chop)
-                attack = weapon->get<ESM::Weapon>()->mBase->mData.mChop;
+                attack = weapon.get<ESM::Weapon>()->mBase->mData.mChop;
             else if(type == MWMechanics::CreatureStats::AT_Slash)
-                attack = weapon->get<ESM::Weapon>()->mBase->mData.mSlash;
+                attack = weapon.get<ESM::Weapon>()->mBase->mData.mSlash;
             else if(type == MWMechanics::CreatureStats::AT_Thrust)
-                attack = weapon->get<ESM::Weapon>()->mBase->mData.mThrust;
+                attack = weapon.get<ESM::Weapon>()->mBase->mData.mThrust;
             if(attack)
             {
-                float damage = attack[0] + ((attack[1]-attack[0])*npcstats.getAttackStrength());
+                damage  = attack[0] + ((attack[1]-attack[0])*npcstats.getAttackStrength());
                 damage *= 0.5f + (crstats.getAttribute(ESM::Attribute::Luck).getModified() / 100.0f);
                 //damage *= weapon_current_health / weapon_max_health;
                 if(!othercls.hasDetected(victim, ptr))
@@ -370,30 +370,44 @@ namespace MWClass
                     damage *= gmst.find("fCombatCriticalStrikeMult")->getFloat();
                     MWBase::Environment::get().getWindowManager()->messageBox("#{sTargetCriticalStrike}");
                 }
-                damage /= std::min(1.0f + othercls.getArmorRating(victim) / std::max(1.0f, damage), 4.0f);
-
-                float health = othercls.getCreatureStats(victim).getHealth().getCurrent() - damage;
-                othercls.setActorHealth(victim, health, ptr);
+                damage /= std::min(1.0f + othercls.getArmorRating(victim)/std::max(1.0f, damage), 4.0f);
             }
         }
-
         skillUsageSucceeded(ptr, weapskill, 0);
+
+        othercls.onHit(victim, damage, weapon, ptr, true);
+    }
+
+    void Npc::onHit(const MWWorld::Ptr &ptr, float damage, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, bool successful) const
+    {
+        // NOTE: 'object' and/or 'attacker' may be empty.
+
+        if(!successful)
+        {
+            // TODO: Handle HitAttemptOnMe script function
+
+            // Missed
+            MWBase::Environment::get().getSoundManager()->playSound3D(ptr, "miss", 1.0f, 1.0f);
+            return;
+        }
+
+        // TODO: Handle HitOnMe script function and OnPCHitMe script variable.
+
+        if(damage > 0.0f)
+        {
+            // 'ptr' is losing health. Play a 'hit' voiced dialog entry if not already saying
+            // something, alert the character controller, scripts, etc.
+
+            MWBase::Environment::get().getDialogueManager()->say(ptr, "hit");
+        }
+
+        float health = getCreatureStats(ptr).getHealth().getCurrent() - damage;
+        setActorHealth(ptr, health, attacker);
     }
 
     void Npc::setActorHealth(const MWWorld::Ptr& ptr, float health, const MWWorld::Ptr& attacker) const
     {
         MWMechanics::CreatureStats &crstats = getCreatureStats(ptr);
-        float diff = health - crstats.getHealth().getCurrent();
-
-        if(diff < 0.0f)
-        {
-            // 'ptr' is losing health. Play a 'hit' voiced dialog entry if not already saying
-            // something, alert the character controller, scripts, etc.
-            // NOTE: 'attacker' may be empty.
-
-            MWBase::Environment::get().getDialogueManager()->say(ptr, "hit");
-        }
-
         bool wasDead = crstats.isDead();
 
         MWMechanics::DynamicStat<float> stat(crstats.getHealth());

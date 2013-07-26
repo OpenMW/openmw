@@ -96,6 +96,11 @@ namespace MWWorld
         throw std::runtime_error("class cannot hit");
     }
 
+    void Class::onHit(const Ptr& ptr, float damage, const Ptr& object, const Ptr& attacker, bool successful) const
+    {
+        throw std::runtime_error("class cannot be hit");
+    }
+
     void Class::setActorHealth(const Ptr& ptr, float health, const Ptr& attacker) const
     {
         throw std::runtime_error("class does not have actor health");
