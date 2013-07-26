@@ -7,14 +7,15 @@
 #include "dialoguesubview.hpp"
 #include "scriptsubview.hpp"
 #include "regionmapsubview.hpp"
+#include "genericcreator.hpp"
 
 void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
 {
     manager.add (CSMWorld::UniversalId::Type_Gmsts,
-        new CSVDoc::SubViewFactoryWithCreateFlag<TableSubView> (false));
+        new CSVDoc::SubViewFactoryWithCreator<TableSubView, NullCreatorFactory>);
 
     manager.add (CSMWorld::UniversalId::Type_Skills,
-        new CSVDoc::SubViewFactoryWithCreateFlag<TableSubView> (false));
+        new CSVDoc::SubViewFactoryWithCreator<TableSubView, NullCreatorFactory>);
 
     static const CSMWorld::UniversalId::Type sTableTypes[] =
     {
@@ -35,12 +36,10 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
     };
 
     for (int i=0; sTableTypes[i]!=CSMWorld::UniversalId::Type_None; ++i)
-        manager.add (sTableTypes[i], new CSVDoc::SubViewFactoryWithCreateFlag<TableSubView> (true));
+        manager.add (sTableTypes[i],
+            new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<GenericCreator> >);
 
     manager.add (CSMWorld::UniversalId::Type_Script, new CSVDoc::SubViewFactory<ScriptSubView>);
 
     manager.add (CSMWorld::UniversalId::Type_RegionMap, new CSVDoc::SubViewFactory<RegionMapSubView>);
-
-//    manager.add (CSMWorld::UniversalId::Type_Global,
-//        new CSVDoc::SubViewFactoryWithCreateFlag<DialogueSubView> (true));
 }

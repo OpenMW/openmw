@@ -14,6 +14,7 @@ namespace CSVWorld
 {
     class Table;
     class TableBottomBox;
+    class Creator;
 
     class TableSubView : public CSVDoc::SubView
     {
@@ -24,7 +25,9 @@ namespace CSVWorld
 
         public:
 
-            TableSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document, bool createAndDelete);
+            TableSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document,
+                Creator *creator = 0);
+            ///< The ownership of \a creator is transferred to this.
 
             virtual void setEditLock (bool locked);
 
