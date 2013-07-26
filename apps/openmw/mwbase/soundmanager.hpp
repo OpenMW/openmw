@@ -103,13 +103,16 @@ namespace MWBase
             ///< Play a 2D audio track, using a custom decoder
 
             virtual SoundPtr playSound(const std::string& soundId, float volume, float pitch,
-                                       PlayType type=Play_TypeSfx, PlayMode mode=Play_Normal) = 0;
+                                       PlayType type=Play_TypeSfx, PlayMode mode=Play_Normal,
+                                       float offset=0) = 0;
             ///< Play a sound, independently of 3D-position
+            ///< @param offset Value from [0,1] meaning from which fraction the sound the playback starts.
 
             virtual SoundPtr playSound3D(const MWWorld::Ptr &reference, const std::string& soundId,
                                          float volume, float pitch, PlayType type=Play_TypeSfx,
-                                         PlayMode mode=Play_Normal) = 0;
+                                         PlayMode mode=Play_Normal, float offset=0) = 0;
             ///< Play a sound from an object
+            ///< @param offset Value from [0,1] meaning from which fraction the sound the playback starts.
 
             virtual void stopSound3D(const MWWorld::Ptr &reference, const std::string& soundId) = 0;
             ///< Stop the given object from playing the given sound,
@@ -122,6 +125,12 @@ namespace MWBase
 
             virtual void stopSound(const std::string& soundId) = 0;
             ///< Stop a non-3d looping sound
+
+            virtual void fadeOutSound3D(const MWWorld::Ptr &reference, const std::string& soundId, float duration) = 0;
+            ///< Fade out given sound (that is already playing) of given object
+            ///< @param reference Reference to object, whose sound is faded out
+            ///< @param soundId ID of the sound to fade out.
+            ///< @param duration Time until volume reaches 0.
 
             virtual bool getSoundPlaying(const MWWorld::Ptr &reference, const std::string& soundId) const = 0;
             ///< Is the given sound currently playing on the given object?
