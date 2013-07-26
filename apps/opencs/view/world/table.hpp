@@ -67,6 +67,8 @@ namespace CSVWorld
             /// \param deleted Number of deleted records
             /// \param modified Number of added and modified records
 
+            void createRequest();
+
         private slots:
 
             void createRecord();
@@ -82,6 +84,7 @@ namespace CSVWorld
             void tableSizeUpdate();
 
             void selectionSizeUpdate();
+
     };
 }
 

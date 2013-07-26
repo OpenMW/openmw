@@ -1,10 +1,12 @@
 #ifndef CSV_WORLD_CREATOR_H
 #define CSV_WORLD_CREATOR_H
 
+#include <QWidget>
+
 namespace CSVWorld
 {
     /// \brief Record creator UI base class
-    class Creator
+    class Creator : public QWidget
     {
         public:
 

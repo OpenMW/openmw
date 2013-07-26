@@ -60,6 +60,8 @@ CSVWorld::TableBottomBox::TableBottomBox (const CreatorFactoryBase& creatorFacto
     setLayout (layout);
 
     mCreator = creatorFactory.makeCreator();
+
+    layout->addWidget (mCreator);
 }
 
 CSVWorld::TableBottomBox::~TableBottomBox()
@@ -118,4 +120,10 @@ void CSVWorld::TableBottomBox::tableSizeChanged (int size, int deleted, int modi
 
     if (changed)
         updateStatus();
+}
+
+#include <iostream>
+void CSVWorld::TableBottomBox::createRequest()
+{
+ std::cout<<"create"<<std::endl;
 }

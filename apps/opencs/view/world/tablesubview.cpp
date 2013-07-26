@@ -38,6 +38,9 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
     mTable->tableSizeUpdate();
     mTable->selectionSizeUpdate();
+
+    if (mBottom->canCreateAndDelete())
+        connect (mTable, SIGNAL (createRequest()), mBottom, SLOT (createRequest()));
 }
 
 void CSVWorld::TableSubView::setEditLock (bool locked)

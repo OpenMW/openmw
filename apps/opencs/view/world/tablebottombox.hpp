@@ -48,6 +48,8 @@ namespace CSVWorld
             ///< \param size Number of not deleted records
             /// \param deleted Number of deleted records
             /// \param modified Number of added and modified records
+
+            void createRequest();
     };
 }
 
