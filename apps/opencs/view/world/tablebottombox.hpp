@@ -4,6 +4,8 @@
 #include <QWidget>
 
 class QLabel;
+class QStackedLayout;
+class QStatusBar;
 
 namespace CSVWorld
 {
@@ -16,8 +18,11 @@ namespace CSVWorld
 
             bool mShowStatusBar;
             QLabel *mStatus;
+            QStatusBar *mStatusBar;
             int mStatusCount[4];
             Creator *mCreator;
+            bool mCreating;
+            QStackedLayout *mLayout;
 
         private:
 
@@ -39,6 +44,11 @@ namespace CSVWorld
             ///< Is record creation and deletion supported?
             ///
             /// \note The BotomBox does not partake in the deletion of records.
+
+        private slots:
+
+            void createRequestDone();
+            ///< \note This slot being called does not imply success.
 
         public slots:
 

@@ -8,9 +8,17 @@ namespace CSVWorld
     /// \brief Record creator UI base class
     class Creator : public QWidget
     {
+            Q_OBJECT
+
         public:
 
             virtual ~Creator();
+
+            virtual void reset() = 0;
+
+        signals:
+
+            void done();
     };
 
     /// \brief Base class for Creator factory

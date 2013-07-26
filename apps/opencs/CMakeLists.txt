@@ -57,13 +57,13 @@ opencs_hdrs_noqt (view/doc
 
 
 opencs_units (view/world
-    table tablesubview scriptsubview util regionmapsubview tablebottombox
+    table tablesubview scriptsubview util regionmapsubview tablebottombox creator genericcreator
     )
 
 opencs_units_noqt (view/world
     dialoguesubview subviews
     enumdelegate vartypedelegate recordstatusdelegate refidtypedelegate datadisplaydelegate
-    scripthighlighter creator genericcreator
+    scripthighlighter
     )
 
 

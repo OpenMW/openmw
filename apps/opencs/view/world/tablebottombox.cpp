@@ -40,28 +40,30 @@ void CSVWorld::TableBottomBox::updateStatus()
 }
 
 CSVWorld::TableBottomBox::TableBottomBox (const CreatorFactoryBase& creatorFactory, QWidget *parent)
-: QWidget (parent), mShowStatusBar (false)
+: QWidget (parent), mShowStatusBar (false), mCreating (false)
 {
     for (int i=0; i<4; ++i)
         mStatusCount[i] = 0;
 
     setVisible (false);
 
-    QStackedLayout *layout = new QStackedLayout;
+    mLayout = new QStackedLayout;
 
     mStatus = new QLabel;
 
-    QStatusBar *statusBar = new QStatusBar;
+    mStatusBar = new QStatusBar;
 
-    statusBar->addWidget (mStatus);
+    mStatusBar->addWidget (mStatus);
 
-    layout->addWidget (statusBar);
+    mLayout->addWidget (mStatusBar);
 
-    setLayout (layout);
+    setLayout (mLayout);
 
     mCreator = creatorFactory.makeCreator();
 
-    layout->addWidget (mCreator);
+    mLayout->addWidget (mCreator);
+
+    connect (mCreator, SIGNAL (done()), this, SLOT (createRequestDone()));
 }
 
 CSVWorld::TableBottomBox::~TableBottomBox()
@@ -73,7 +75,7 @@ void CSVWorld::TableBottomBox::setStatusBar (bool show)
 {
     if (show!=mShowStatusBar)
     {
-        setVisible (show);
+        setVisible (show || mCreating);
 
         mShowStatusBar = show;
 
@@ -85,6 +87,18 @@ void CSVWorld::TableBottomBox::setStatusBar (bool show)
 bool CSVWorld::TableBottomBox::canCreateAndDelete() const
 {
     return mCreator;
+}
+
+void CSVWorld::TableBottomBox::createRequestDone()
+{
+    if (!mShowStatusBar)
+        setVisible (false);
+    else
+        updateStatus();
+
+    mLayout->setCurrentWidget (mStatusBar);
+
+    mCreating = false;
 }
 
 void CSVWorld::TableBottomBox::selectionSizeChanged (int size)
@@ -122,8 +136,9 @@ void CSVWorld::TableBottomBox::tableSizeChanged (int size, int deleted, int modi
         updateStatus();
 }
 
-#include <iostream>
 void CSVWorld::TableBottomBox::createRequest()
 {
- std::cout<<"create"<<std::endl;
+    mLayout->setCurrentWidget (mCreator);
+    setVisible (true);
+    mCreating = true;
 }

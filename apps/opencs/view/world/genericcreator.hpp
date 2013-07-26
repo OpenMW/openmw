@@ -7,7 +7,13 @@ namespace CSVWorld
 {
     class GenericCreator : public Creator
     {
+            Q_OBJECT
+
         public:
+
+            GenericCreator();
+
+            virtual void reset();
     };
 }
 
