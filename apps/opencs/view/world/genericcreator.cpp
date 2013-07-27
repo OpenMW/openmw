@@ -5,7 +5,7 @@
 #include <QPushButton>
 #include <QLineEdit>
 
-CSVWorld::GenericCreator::GenericCreator()
+CSVWorld::GenericCreator::GenericCreator (CSMWorld::Data& data, QUndoStack& undoStack)
 {
     QHBoxLayout *layout = new QHBoxLayout;
 

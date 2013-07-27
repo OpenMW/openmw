@@ -11,7 +11,7 @@ namespace CSVWorld
 
         public:
 
-            GenericCreator();
+            GenericCreator (CSMWorld::Data& data, QUndoStack& undoStack);
 
             virtual void reset();
     };

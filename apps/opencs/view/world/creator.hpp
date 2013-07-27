@@ -3,6 +3,13 @@
 
 #include <QWidget>
 
+class QUndoStack;
+
+namespace CSMWorld
+{
+    class Data;
+}
+
 namespace CSVWorld
 {
     /// \brief Record creator UI base class
@@ -28,7 +35,7 @@ namespace CSVWorld
 
             virtual ~CreatorFactoryBase();
 
-            virtual Creator *makeCreator() const = 0;
+            virtual Creator *makeCreator (CSMWorld::Data& data, QUndoStack& undoStack) const = 0;
             ///< The ownership of the returned Creator is transferred to the caller.
             ///
             /// \note The function can return a 0-pointer, which means no UI for creating/deleting
@@ -40,7 +47,7 @@ namespace CSVWorld
     {
         public:
 
-            virtual Creator *makeCreator() const;
+            virtual Creator *makeCreator (CSMWorld::Data& data, QUndoStack& undoStack) const;
             ///< The ownership of the returned Creator is transferred to the caller.
             ///
             /// \note The function always returns 0.
@@ -51,7 +58,7 @@ namespace CSVWorld
     {
         public:
 
-            virtual Creator *makeCreator() const;
+            virtual Creator *makeCreator (CSMWorld::Data& data, QUndoStack& undoStac) const;
             ///< The ownership of the returned Creator is transferred to the caller.
             ///
             /// \note The function can return a 0-pointer, which means no UI for creating/deleting
@@ -59,9 +66,9 @@ namespace CSVWorld
     };
 
     template<class CreatorT>
-    Creator *CreatorFactory<CreatorT>::makeCreator() const
+    Creator *CreatorFactory<CreatorT>::makeCreator (CSMWorld::Data& data, QUndoStack& undoStack) const
     {
-        return new CreatorT;
+        return new CreatorT (data, undoStack);
     }
 }
 
