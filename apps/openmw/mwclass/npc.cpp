@@ -369,6 +369,7 @@ namespace MWClass
                 {
                     damage *= gmst.find("fCombatCriticalStrikeMult")->getFloat();
                     MWBase::Environment::get().getWindowManager()->messageBox("#{sTargetCriticalStrike}");
+                    MWBase::Environment::get().getSoundManager()->playSound3D(victim, "critical damage", 1.0f, 1.0f);
                 }
                 damage /= std::min(1.0f + othercls.getArmorRating(victim)/std::max(1.0f, damage), 4.0f);
             }
@@ -393,7 +394,7 @@ namespace MWClass
         }
 
         if(!object.isEmpty())
-            getCreatureStats(ptr).setLastHitObject(MWWorld::Class::get(object).getId(object));
+            getCreatureStats(ptr).setLastHitObject(get(object).getId(object));
 
         if(!attacker.isEmpty() && attacker.getRefData().getHandle() == "player")
         {
@@ -409,6 +410,46 @@ namespace MWClass
             // something, alert the character controller, scripts, etc.
 
             MWBase::Environment::get().getDialogueManager()->say(ptr, "hit");
+
+            // Hit percentages:
+            // cuirass = 30%
+            // shield, helmet, greaves, boots, pauldrons = 10% each
+            // guantlets = 5% each
+            static const int hitslots[20] = {
+                MWWorld::InventoryStore::Slot_Cuirass, MWWorld::InventoryStore::Slot_Cuirass,
+                MWWorld::InventoryStore::Slot_Cuirass, MWWorld::InventoryStore::Slot_Cuirass,
+                MWWorld::InventoryStore::Slot_Cuirass, MWWorld::InventoryStore::Slot_Cuirass,
+                MWWorld::InventoryStore::Slot_CarriedLeft, MWWorld::InventoryStore::Slot_CarriedLeft,
+                MWWorld::InventoryStore::Slot_Helmet, MWWorld::InventoryStore::Slot_Helmet,
+                MWWorld::InventoryStore::Slot_Greaves, MWWorld::InventoryStore::Slot_Greaves,
+                MWWorld::InventoryStore::Slot_Boots, MWWorld::InventoryStore::Slot_Boots,
+                MWWorld::InventoryStore::Slot_LeftPauldron, MWWorld::InventoryStore::Slot_LeftPauldron,
+                MWWorld::InventoryStore::Slot_RightPauldron, MWWorld::InventoryStore::Slot_RightPauldron,
+                MWWorld::InventoryStore::Slot_LeftGauntlet, MWWorld::InventoryStore::Slot_RightGauntlet
+            };
+            int hitslot = hitslots[(int)(::rand()/(RAND_MAX+1.0)*20.0)];
+
+            MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+            MWWorld::InventoryStore &inv = getInventoryStore(ptr);
+            MWWorld::ContainerStoreIterator armorslot = inv.getSlot(hitslot);
+            MWWorld::Ptr armor = ((armorslot != inv.end()) ? *armorslot : MWWorld::Ptr());
+            if(!armor.isEmpty() && armor.getTypeName() == typeid(ESM::Armor).name())
+            {
+                switch(get(armor).getEquipmentSkill(armor))
+                {
+                    case ESM::Skill::LightArmor:
+                        sndMgr->playSound3D(ptr, "Light Armor Hit", 1.0f, 1.0f);
+                        break;
+                    case ESM::Skill::MediumArmor:
+                        sndMgr->playSound3D(ptr, "Medium Armor Hit", 1.0f, 1.0f);
+                        break;
+                    case ESM::Skill::HeavyArmor:
+                        sndMgr->playSound3D(ptr, "Heavy Armor Hit", 1.0f, 1.0f);
+                        break;
+                }
+            }
+
+            sndMgr->playSound3D(ptr, "Health Damage", 1.0f, 1.0f);
         }
 
         float health = getCreatureStats(ptr).getHealth().getCurrent() - damage;

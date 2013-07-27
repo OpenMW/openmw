@@ -178,6 +178,11 @@ namespace MWClass
                 ptr.getRefData().getLocals().setVarByInt(script, "onpchitme", 1);
         }
 
+        if(damage > 0.0f)
+        {
+            MWBase::Environment::get().getSoundManager()->playSound3D(ptr, "Health Damage", 1.0f, 1.0f);
+        }
+
         float health = getCreatureStats(ptr).getHealth().getCurrent() - damage;
         setActorHealth(ptr, health, attacker);
     }
