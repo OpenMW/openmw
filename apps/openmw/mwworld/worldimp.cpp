@@ -166,7 +166,7 @@ namespace MWWorld
     : mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
       mSky (true), mCells (mStore, mEsm),
       mNumFacing(0), mActivationDistanceOverride (mActivationDistanceOverride),
-      mFallback(fallbackMap), mPlayIntro(0)
+      mFallback(fallbackMap), mPlayIntro(0), mTeleportEnabled(true)
     {
         mPhysics = new PhysicsSystem(renderer);
         mPhysEngine = mPhysics->getEngine();
@@ -1844,4 +1844,15 @@ namespace MWWorld
         }
         return false;
     }
+
+    void World::enableTeleporting(bool enable)
+    {
+        mTeleportEnabled = enable;
+    }
+
+    bool World::isTeleportingEnabled() const
+    {
+        return mTeleportEnabled;
+    }
+
 }

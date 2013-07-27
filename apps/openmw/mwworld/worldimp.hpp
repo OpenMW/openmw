@@ -117,6 +117,8 @@ namespace MWWorld
 
             int mPlayIntro;
 
+            bool mTeleportEnabled;
+
         public:
 
             World (OEngine::Render::OgreRenderer& renderer,
@@ -425,6 +427,12 @@ namespace MWWorld
             /// Find position in interior cell near door entrance
             /// \return false if interior with given name not exists, true otherwise
             virtual bool findInteriorPosition(const std::string &name, ESM::Position &pos);
+
+            /// Enables or disables use of teleport spell effects (recall, intervention, etc).
+            virtual void enableTeleporting(bool enable);
+
+            /// Returns true if teleport spell effects are allowed.
+            virtual bool isTeleportingEnabled() const;
     };
 }
 
