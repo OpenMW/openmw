@@ -546,6 +546,13 @@ namespace MWSound
                 mActiveSounds.erase(snditer++);
             else
             {
+                const MWWorld::Ptr &ptr = snditer->second.first;
+                if(!ptr.isEmpty())
+                {
+                    const ESM::Position &pos = ptr.getRefData().getPosition();
+                    const Ogre::Vector3 objpos(pos.pos[0], pos.pos[1], pos.pos[2]);
+                    snditer->first->setPosition(objpos);
+                }
                 snditer->first->update();
                 snditer++;
             }
