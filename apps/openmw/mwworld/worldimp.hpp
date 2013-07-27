@@ -237,6 +237,8 @@ namespace MWWorld
 
             virtual void setMoonColour (bool red);
 
+            virtual void modRegion(const std::string &regionid, const std::vector<char> &chances);
+
             virtual float getTimeScaleFactor() const;
 
             virtual void changeToInteriorCell (const std::string& cellName,

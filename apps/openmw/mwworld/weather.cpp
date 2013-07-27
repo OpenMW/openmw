@@ -537,8 +537,8 @@ void WeatherManager::stopSounds(bool stopAll)
     std::vector<std::string>::iterator it = mSoundsPlaying.begin();
     while (it!=mSoundsPlaying.end())
     {
-        if (stopAll || \
-                !((*it == mWeatherSettings[mCurrentWeather].mAmbientLoopSoundID) || \
+        if (stopAll ||
+                !((*it == mWeatherSettings[mCurrentWeather].mAmbientLoopSoundID) ||
                 (*it == mWeatherSettings[mCurrentWeather].mRainLoopSoundID)))
         {
             MWBase::Environment::get().getSoundManager()->stopSound(*it);
@@ -551,29 +551,38 @@ void WeatherManager::stopSounds(bool stopAll)
 
 Ogre::String WeatherManager::nextWeather(const ESM::Region* region) const
 {
+    const MWBase::World *world = MWBase::Environment::get().getWorld();
+    std::vector<char> probability;
+
+    RegionModMap::const_iterator iter = mRegionMods.find(Misc::StringUtils::lowerCase(region->mId));
+    if(iter != mRegionMods.end())
+        probability = iter->second;
+    else
+    {
+        probability.reserve(10);
+        probability.push_back(region->mData.mClear);
+        probability.push_back(region->mData.mCloudy);
+        probability.push_back(region->mData.mFoggy);
+        probability.push_back(region->mData.mOvercast);
+        probability.push_back(region->mData.mRain);
+        probability.push_back(region->mData.mThunder);
+        probability.push_back(region->mData.mAsh);
+        probability.push_back(region->mData.mBlight);
+        probability.push_back(region->mData.mA);
+        probability.push_back(region->mData.mB);
+    }
+
     /*
      * All probabilities must add to 100 (responsibility of the user).
      * If chances A and B has values 30 and 70 then by generating
      * 100 numbers 1..100, 30% will be lesser or equal 30 and
      * 70% will be greater than 30 (in theory).
      */
-    const int probability[] = {
-            region->mData.mClear,
-            region->mData.mCloudy,
-            region->mData.mFoggy,
-            region->mData.mOvercast,
-            region->mData.mRain,
-            region->mData.mThunder,
-            region->mData.mAsh,
-            region->mData.mBlight,
-            region->mData.mA,
-            region->mData.mB
-    }; // 10 elements
 
     int chance = (rand() % 100) + 1; // 1..100
     int sum = 0;
     int i = 0;
-    for (; i < 10; ++i)
+    for (; i < probability.size(); ++i)
     {
         sum += probability[i];
         if (chance < sum)
@@ -679,6 +688,15 @@ void WeatherManager::changeWeather(const std::string& region, const unsigned int
     std::string playerRegion = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell()->mCell->mRegion;
     if (Misc::StringUtils::ciEqual(region, playerRegion))
         setWeather(weather);
+}
+
+void WeatherManager::modRegion(const std::string &regionid, const std::vector<char> &chances)
+{
+    mRegionMods[Misc::StringUtils::lowerCase(regionid)] = chances;
+    // Start transitioning right away if the region no longer supports the current weather type
+    unsigned int current = getWeatherID();
+    if(current >= chances.size() || chances[current] == 0)
+        mWeatherUpdateTime = 0.0f;
 }
 
 float WeatherManager::getWindSpeed() const

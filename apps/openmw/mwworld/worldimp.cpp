@@ -1374,6 +1374,11 @@ namespace MWWorld
         mWeatherManager->changeWeather(region, id);
     }
 
+    void World::modRegion(const std::string &regionid, const std::vector<char> &chances)
+    {
+        mWeatherManager->modRegion(regionid, chances);
+    }
+
     OEngine::Render::Fader* World::getFader()
     {
         return mRendering->getFader();
