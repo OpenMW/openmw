@@ -44,7 +44,7 @@ namespace MWClass
 
             virtual void hit(const MWWorld::Ptr& ptr, int type) const;
 
-            virtual void onHit(const MWWorld::Ptr &ptr, float damage, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, bool successful) const;
+            virtual void onHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, bool successful) const;
 
             virtual void setActorHealth(const MWWorld::Ptr& ptr, float health, const MWWorld::Ptr& attacker) const;
 

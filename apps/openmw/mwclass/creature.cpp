@@ -154,7 +154,7 @@ namespace MWClass
     {
     }
 
-    void Creature::onHit(const MWWorld::Ptr &ptr, float damage, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, bool successful) const
+    void Creature::onHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, bool successful) const
     {
         // NOTE: 'object' and/or 'attacker' may be empty.
 
@@ -178,13 +178,19 @@ namespace MWClass
                 ptr.getRefData().getLocals().setVarByInt(script, "onpchitme", 1);
         }
 
-        if(damage > 0.0f)
+        if(ishealth)
         {
-            MWBase::Environment::get().getSoundManager()->playSound3D(ptr, "Health Damage", 1.0f, 1.0f);
+            if(damage > 0.0f)
+                MWBase::Environment::get().getSoundManager()->playSound3D(ptr, "Health Damage", 1.0f, 1.0f);
+            float health = getCreatureStats(ptr).getHealth().getCurrent() - damage;
+            setActorHealth(ptr, health, attacker);
         }
-
-        float health = getCreatureStats(ptr).getHealth().getCurrent() - damage;
-        setActorHealth(ptr, health, attacker);
+        else
+        {
+            MWMechanics::DynamicStat<float> fatigue(getCreatureStats(ptr).getFatigue());
+            fatigue.setCurrent(fatigue.getCurrent() - damage);
+            getCreatureStats(ptr).setFatigue(fatigue);
+        }
     }
 
     void Creature::setActorHealth(const MWWorld::Ptr& ptr, float health, const MWWorld::Ptr& attacker) const

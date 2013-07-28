@@ -346,10 +346,11 @@ namespace MWClass
 
         if((::rand()/(RAND_MAX+1.0)) > hitchance/100.0f)
         {
-            othercls.onHit(victim, 0.0f, weapon, ptr, false);
+            othercls.onHit(victim, 0.0f, false, weapon, ptr, false);
             return;
         }
 
+        bool healthdmg;
         float damage = 0.0f;
         if(!weapon.isEmpty())
         {
@@ -373,15 +374,43 @@ namespace MWClass
                 }
                 damage /= std::min(1.0f + othercls.getArmorRating(victim)/std::max(1.0f, damage), 4.0f);
             }
+            healthdmg = true;
+        }
+        else
+        {
+            // Note: MCP contains an option to include Strength in hand-to-hand damage
+            // calculations. Some mods recommend using it, so we may want to include am
+            // option for it.
+            float minstrike = gmst.find("fMinHandToHandMult")->getFloat();
+            float maxstrike = gmst.find("fMaxHandToHandMult")->getFloat();
+            damage  = npcstats.getSkill(weapskill).getModified();
+            damage *= minstrike + ((maxstrike-minstrike)*npcstats.getAttackStrength());
+            if(!othercls.hasDetected(victim, ptr))
+            {
+                damage *= gmst.find("fCombatCriticalStrikeMult")->getFloat();
+                MWBase::Environment::get().getWindowManager()->messageBox("#{sTargetCriticalStrike}");
+                MWBase::Environment::get().getSoundManager()->playSound3D(victim, "critical damage", 1.0f, 1.0f);
+            }
+
+            healthdmg = (othercls.getCreatureStats(victim).getFatigue().getCurrent() < 1.0f ||
+                         npcstats.isWerewolf());
+            if(healthdmg)
+            {
+                // Not sure this is right...
+                damage *= gmst.find("fHandtoHandHealthPer")->getFloat() * 1.5f;
+                damage /= othercls.getArmorRating(victim);
+            }
         }
         if(ptr.getRefData().getHandle() == "player")
             skillUsageSucceeded(ptr, weapskill, 0);
 
-        othercls.onHit(victim, damage, weapon, ptr, true);
+        othercls.onHit(victim, damage, healthdmg, weapon, ptr, true);
     }
 
-    void Npc::onHit(const MWWorld::Ptr &ptr, float damage, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, bool successful) const
+    void Npc::onHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, bool successful) const
     {
+        MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+
         // NOTE: 'object' and/or 'attacker' may be empty.
 
         if(!successful)
@@ -389,7 +418,7 @@ namespace MWClass
             // TODO: Handle HitAttemptOnMe script function
 
             // Missed
-            MWBase::Environment::get().getSoundManager()->playSound3D(ptr, "miss", 1.0f, 1.0f);
+            sndMgr->playSound3D(ptr, "miss", 1.0f, 1.0f);
             return;
         }
 
@@ -429,13 +458,14 @@ namespace MWClass
             };
             int hitslot = hitslots[(int)(::rand()/(RAND_MAX+1.0)*20.0)];
 
-            MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
             MWWorld::InventoryStore &inv = getInventoryStore(ptr);
             MWWorld::ContainerStoreIterator armorslot = inv.getSlot(hitslot);
             MWWorld::Ptr armor = ((armorslot != inv.end()) ? *armorslot : MWWorld::Ptr());
             if(!armor.isEmpty() && armor.getTypeName() == typeid(ESM::Armor).name())
             {
-                switch(get(armor).getEquipmentSkill(armor))
+                if(object.isEmpty())
+                    sndMgr->playSound3D(ptr, "Hand To Hand Hit", 1.0f, 1.0f);
+                else switch(get(armor).getEquipmentSkill(armor))
                 {
                     case ESM::Skill::LightArmor:
                         sndMgr->playSound3D(ptr, "Light Armor Hit", 1.0f, 1.0f);
@@ -448,12 +478,23 @@ namespace MWClass
                         break;
                 }
             }
-
-            sndMgr->playSound3D(ptr, "Health Damage", 1.0f, 1.0f);
+            else if(object.isEmpty())
+                sndMgr->playSound3D(ptr, "Hand To Hand Hit", 1.0f, 1.0f);
         }
 
-        float health = getCreatureStats(ptr).getHealth().getCurrent() - damage;
-        setActorHealth(ptr, health, attacker);
+        if(ishealth)
+        {
+            if(damage > 0.0f)
+                sndMgr->playSound3D(ptr, "Health Damage", 1.0f, 1.0f);
+            float health = getCreatureStats(ptr).getHealth().getCurrent() - damage;
+            setActorHealth(ptr, health, attacker);
+        }
+        else
+        {
+            MWMechanics::DynamicStat<float> fatigue(getCreatureStats(ptr).getFatigue());
+            fatigue.setCurrent(fatigue.getCurrent() - damage);
+            getCreatureStats(ptr).setFatigue(fatigue);
+        }
     }
 
     void Npc::setActorHealth(const MWWorld::Ptr& ptr, float health, const MWWorld::Ptr& attacker) const
