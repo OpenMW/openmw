@@ -877,7 +877,7 @@ namespace MWClass
                     case ESM::Skill::LightArmor:
                         return "FootLightLeft";
                     case ESM::Skill::MediumArmor:
-                        return "FootMediumLeft";
+                        return "FootMedLeft";
                     case ESM::Skill::HeavyArmor:
                         return "FootHeavyLeft";
                 }
@@ -902,7 +902,7 @@ namespace MWClass
                     case ESM::Skill::LightArmor:
                         return "FootLightRight";
                     case ESM::Skill::MediumArmor:
-                        return "FootMediumRight";
+                        return "FootMedRight";
                     case ESM::Skill::HeavyArmor:
                         return "FootHeavyRight";
                 }
