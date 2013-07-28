@@ -589,7 +589,7 @@ void Animation::play(const std::string &groupname, int priority, int groups, boo
             state.mSource = *iter;
             state.mSpeedMult = speedmult;
             state.mLoopCount = loops;
-            state.mPlaying = true;
+            state.mPlaying = (state.mTime < state.mStopTime);
             state.mPriority = priority;
             state.mGroups = groups;
             state.mAutoDisable = autodisable;
@@ -600,6 +600,22 @@ void Animation::play(const std::string &groupname, int priority, int groups, boo
             {
                 handleTextKey(state, groupname, textkey);
                 textkey++;
+            }
+
+            if(state.mTime >= state.mLoopStopTime && state.mLoopCount > 0)
+            {
+                state.mLoopCount--;
+                state.mTime = state.mLoopStartTime;
+                state.mPlaying = true;
+                if(state.mTime >= state.mLoopStopTime)
+                    break;
+
+                textkey = textkeys.lower_bound(state.mTime);
+                while(textkey != textkeys.end() && textkey->first <= state.mTime)
+                {
+                    handleTextKey(state, groupname, textkey);
+                    textkey++;
+                }
             }
 
             break;
