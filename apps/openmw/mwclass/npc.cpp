@@ -382,8 +382,6 @@ namespace MWClass
                 weapon.getCellRef().mCharge -= std::min(std::max(1,
                                                                  (int)(damage * gmst.find("fWeaponDamageMult")->getFloat())),
                                                         weapon.getCellRef().mCharge);
-
-                damage /= std::min(1.0f + othercls.getArmorRating(victim)/std::max(1.0f, damage), 4.0f);
             }
             healthdmg = true;
         }
@@ -406,10 +404,7 @@ namespace MWClass
             healthdmg = (othercls.getCreatureStats(victim).getFatigue().getCurrent() < 1.0f ||
                          npcstats.isWerewolf());
             if(healthdmg)
-            {
                 damage *= gmst.find("fHandtoHandHealthPer")->getFloat();
-                damage /= othercls.getArmorRating(victim);
-            }
         }
         if(ptr.getRefData().getHandle() == "player")
             skillUsageSucceeded(ptr, weapskill, 0);
@@ -451,8 +446,12 @@ namespace MWClass
             MWBase::Environment::get().getDialogueManager()->say(ptr, "hit");
 
             if(object.isEmpty())
+            {
+                if(ishealth)
+                    damage /= getArmorRating(ptr);
                 sndMgr->playSound3D(ptr, "Hand To Hand Hit", 1.0f, 1.0f);
-            else
+            }
+            else if(ishealth)
             {
                 // Hit percentages:
                 // cuirass = 30%
@@ -472,11 +471,20 @@ namespace MWClass
                 };
                 int hitslot = hitslots[(int)(::rand()/(RAND_MAX+1.0)*20.0)];
 
+                float damagediff = damage;
+                damage /= std::min(1.0f + getArmorRating(ptr)/std::max(1.0f, damage), 4.0f);
+                damagediff -= damage;
+
                 MWWorld::InventoryStore &inv = getInventoryStore(ptr);
                 MWWorld::ContainerStoreIterator armorslot = inv.getSlot(hitslot);
                 MWWorld::Ptr armor = ((armorslot != inv.end()) ? *armorslot : MWWorld::Ptr());
                 if(!armor.isEmpty() && armor.getTypeName() == typeid(ESM::Armor).name())
                 {
+                    ESM::CellRef &armorref = armor.getCellRef();
+                    if(armorref.mCharge == -1)
+                        armorref.mCharge = armor.get<ESM::Armor>()->mBase->mData.mHealth;
+                    armorref.mCharge -= std::min(std::max(1, (int)damagediff),
+                                                 armorref.mCharge);
                     switch(get(armor).getEquipmentSkill(armor))
                     {
                         case ESM::Skill::LightArmor:
