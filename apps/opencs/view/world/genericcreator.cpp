@@ -18,12 +18,12 @@ void CSVWorld::GenericCreator::update()
 
     mCreate->setToolTip (QString::fromUtf8 (mErrors.c_str()));
 
-    mCreate->setEnabled (mErrors.empty());
+    mCreate->setEnabled (mErrors.empty() && !mLocked);
 }
 
 CSVWorld::GenericCreator::GenericCreator (CSMWorld::Data& data, QUndoStack& undoStack,
     const CSMWorld::UniversalId& id)
-: mData (data), mUndoStack (undoStack), mListId (id)
+: mData (data), mUndoStack (undoStack), mListId (id), mLocked (false)
 {
     QHBoxLayout *layout = new QHBoxLayout;
     layout->setContentsMargins (0, 0, 0, 0);
@@ -44,6 +44,12 @@ CSVWorld::GenericCreator::GenericCreator (CSMWorld::Data& data, QUndoStack& undo
     connect (mCreate, SIGNAL (clicked (bool)), this, SLOT (create()));
 
     connect (mId, SIGNAL (textChanged (const QString&)), this, SLOT (textChanged (const QString&)));
+}
+
+void CSVWorld::GenericCreator::setEditLock (bool locked)
+{
+    mLocked = locked;
+    update();
 }
 
 void CSVWorld::GenericCreator::reset()
@@ -77,9 +83,12 @@ void CSVWorld::GenericCreator::textChanged (const QString& text)
 
 void CSVWorld::GenericCreator::create()
 {
-    mUndoStack.push (new CSMWorld::CreateCommand (
-        dynamic_cast<CSMWorld::IdTable&> (*mData.getTableModel (mListId)),
-        mId->text().toUtf8().constData()));
+    if (!mLocked)
+    {
+        mUndoStack.push (new CSMWorld::CreateCommand (
+            dynamic_cast<CSMWorld::IdTable&> (*mData.getTableModel (mListId)),
+            mId->text().toUtf8().constData()));
 
-    emit done();
+        emit done();
+    }
 }

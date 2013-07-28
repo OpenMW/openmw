@@ -46,6 +46,8 @@ namespace CSVWorld
 
             virtual ~TableBottomBox();
 
+            void setEditLock (bool locked);
+
             void setStatusBar (bool show);
 
             bool canCreateAndDelete() const;

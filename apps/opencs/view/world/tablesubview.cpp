@@ -46,6 +46,7 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 void CSVWorld::TableSubView::setEditLock (bool locked)
 {
     mTable->setEditLock (locked);
+    mBottom->setEditLock (locked);
 }
 
 void CSVWorld::TableSubView::editRequest (int row)

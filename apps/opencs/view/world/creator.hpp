@@ -24,6 +24,8 @@ namespace CSVWorld
 
             virtual void reset() = 0;
 
+            virtual void setEditLock (bool locked) = 0;
+
         signals:
 
             void done();

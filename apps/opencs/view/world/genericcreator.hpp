@@ -20,6 +20,7 @@ namespace CSVWorld
             QPushButton *mCreate;
             QLineEdit *mId;
             std::string mErrors;
+            bool mLocked;
 
         private:
 
@@ -29,6 +30,8 @@ namespace CSVWorld
 
             GenericCreator (CSMWorld::Data& data, QUndoStack& undoStack,
                 const CSMWorld::UniversalId& id);
+
+            virtual void setEditLock (bool locked);
 
             virtual void reset();
 

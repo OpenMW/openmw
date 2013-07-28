@@ -68,6 +68,12 @@ CSVWorld::TableBottomBox::TableBottomBox (const CreatorFactoryBase& creatorFacto
     connect (mCreator, SIGNAL (done()), this, SLOT (createRequestDone()));
 }
 
+void CSVWorld::TableBottomBox::setEditLock (bool locked)
+{
+    if (mCreator)
+        mCreator->setEditLock (locked);
+}
+
 CSVWorld::TableBottomBox::~TableBottomBox()
 {
     delete mCreator;
