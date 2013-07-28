@@ -17,6 +17,7 @@ void CSVWorld::GenericCreator::update()
     mErrors = getErrors();
 
     mCreate->setToolTip (QString::fromUtf8 (mErrors.c_str()));
+    mId->setToolTip (QString::fromUtf8 (mErrors.c_str()));
 
     mCreate->setEnabled (mErrors.empty() && !mLocked);
 }
