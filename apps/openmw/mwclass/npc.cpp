@@ -448,7 +448,7 @@ namespace MWClass
             if(object.isEmpty())
             {
                 if(ishealth)
-                    damage /= getArmorRating(ptr);
+                    damage /= std::min(1.0f + getArmorRating(ptr)/std::max(1.0f, damage), 4.0f);
                 sndMgr->playSound3D(ptr, "Hand To Hand Hit", 1.0f, 1.0f);
             }
             else if(ishealth)
