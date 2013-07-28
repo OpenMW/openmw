@@ -10,6 +10,8 @@
 #include "../../model/world/data.hpp"
 #include "../../model/world/idtable.hpp"
 
+#include "idvalidator.hpp"
+
 void CSVWorld::GenericCreator::update()
 {
     mErrors = getErrors();
@@ -27,6 +29,7 @@ CSVWorld::GenericCreator::GenericCreator (CSMWorld::Data& data, QUndoStack& undo
     layout->setContentsMargins (0, 0, 0, 0);
 
     mId = new QLineEdit;
+    mId->setValidator (new IdValidator (this));
     layout->addWidget (mId, 1);
 
     mCreate = new QPushButton ("Create");
