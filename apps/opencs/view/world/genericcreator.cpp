@@ -22,24 +22,39 @@ void CSVWorld::GenericCreator::update()
     mCreate->setEnabled (mErrors.empty() && !mLocked);
 }
 
+void CSVWorld::GenericCreator::setManualEditing (bool enabled)
+{
+    mId->setVisible (enabled);
+}
+
+void CSVWorld::GenericCreator::insertAtBeginning (QWidget *widget, bool stretched)
+{
+    mLayout->insertWidget (0, widget, stretched ? 1 : 0);
+}
+
+std::string CSVWorld::GenericCreator::getId() const
+{
+    return mId->text().toUtf8().constData();
+}
+
 CSVWorld::GenericCreator::GenericCreator (CSMWorld::Data& data, QUndoStack& undoStack,
     const CSMWorld::UniversalId& id)
 : mData (data), mUndoStack (undoStack), mListId (id), mLocked (false)
 {
-    QHBoxLayout *layout = new QHBoxLayout;
-    layout->setContentsMargins (0, 0, 0, 0);
+    mLayout = new QHBoxLayout;
+    mLayout->setContentsMargins (0, 0, 0, 0);
 
     mId = new QLineEdit;
     mId->setValidator (new IdValidator (this));
-    layout->addWidget (mId, 1);
+    mLayout->addWidget (mId, 1);
 
     mCreate = new QPushButton ("Create");
-    layout->addWidget (mCreate);
+    mLayout->addWidget (mCreate);
 
     QPushButton *cancelButton = new QPushButton ("Cancel");
-    layout->addWidget (cancelButton);
+    mLayout->addWidget (cancelButton);
 
-    setLayout (layout);
+    setLayout (mLayout);
 
     connect (cancelButton, SIGNAL (clicked (bool)), this, SIGNAL (done()));
     connect (mCreate, SIGNAL (clicked (bool)), this, SLOT (create()));
@@ -63,7 +78,7 @@ std::string CSVWorld::GenericCreator::getErrors() const
 {
     std::string errors;
 
-    std::string id = mId->text().toUtf8().constData();
+    std::string id = getId();
 
     if (id.empty())
     {
@@ -87,8 +102,7 @@ void CSVWorld::GenericCreator::create()
     if (!mLocked)
     {
         mUndoStack.push (new CSMWorld::CreateCommand (
-            dynamic_cast<CSMWorld::IdTable&> (*mData.getTableModel (mListId)),
-            mId->text().toUtf8().constData()));
+            dynamic_cast<CSMWorld::IdTable&> (*mData.getTableModel (mListId)), getId()));
 
         emit done();
     }

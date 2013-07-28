@@ -3,6 +3,7 @@
 
 class QPushButton;
 class QLineEdit;
+class QHBoxLayout;
 
 #include "creator.hpp"
 
@@ -20,11 +21,19 @@ namespace CSVWorld
             QPushButton *mCreate;
             QLineEdit *mId;
             std::string mErrors;
+            QHBoxLayout *mLayout;
             bool mLocked;
 
-        private:
+        protected:
 
             void update();
+
+            virtual void setManualEditing (bool enabled);
+            ///< Enable/disable manual ID editing (enabled by default).
+
+            void insertAtBeginning (QWidget *widget, bool stretched);
+
+            virtual std::string getId() const;
 
         public:
 
@@ -38,6 +47,7 @@ namespace CSVWorld
             virtual std::string getErrors() const;
             ///< Return formatted error descriptions for the current state of the creator. if an empty
             /// string is returned, there is no error.
+
 
         private slots:
 
