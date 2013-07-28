@@ -14,7 +14,7 @@ class QAbstractItemModel;
 
 namespace CSMWorld
 {
-    class IdTableProxyModel;
+    class IdTable;
     class IdTable;
     class RecordBase;
 
@@ -37,12 +37,12 @@ namespace CSMWorld
 
     class CreateCommand : public QUndoCommand
     {
-            IdTableProxyModel& mModel;
+            IdTable& mModel;
             std::string mId;
 
         public:
 
-            CreateCommand (IdTableProxyModel& model, const std::string& id, QUndoCommand *parent = 0);
+            CreateCommand (IdTable& model, const std::string& id, QUndoCommand *parent = 0);
 
             virtual void redo();
 

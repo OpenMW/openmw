@@ -3,7 +3,7 @@
 
 #include <QAbstractItemModel>
 
-#include "idtableproxymodel.hpp"
+#include "idtable.hpp"
 #include "idtable.hpp"
 
 CSMWorld::ModifyCommand::ModifyCommand (QAbstractItemModel& model, const QModelIndex& index,
@@ -25,7 +25,7 @@ void CSMWorld::ModifyCommand::undo()
     mModel.setData (mIndex, mOld);
 }
 
-CSMWorld::CreateCommand::CreateCommand (IdTableProxyModel& model, const std::string& id, QUndoCommand *parent)
+CSMWorld::CreateCommand::CreateCommand (IdTable& model, const std::string& id, QUndoCommand *parent)
 : QUndoCommand (parent), mModel (model), mId (id)
 {
     setText (("Create record " + id).c_str());
