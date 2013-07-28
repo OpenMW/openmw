@@ -49,6 +49,7 @@ CSVWorld::TableBottomBox::TableBottomBox (const CreatorFactoryBase& creatorFacto
     setVisible (false);
 
     mLayout = new QStackedLayout;
+    mLayout->setContentsMargins (0, 0, 0, 0);
 
     mStatus = new QLabel;
 

@@ -24,6 +24,7 @@ CSVWorld::GenericCreator::GenericCreator (CSMWorld::Data& data, QUndoStack& undo
 : mData (data), mUndoStack (undoStack), mListId (id)
 {
     QHBoxLayout *layout = new QHBoxLayout;
+    layout->setContentsMargins (0, 0, 0, 0);
 
     mId = new QLineEdit;
     layout->addWidget (mId, 1);
