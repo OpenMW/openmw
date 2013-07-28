@@ -187,22 +187,6 @@ CSMWorld::UniversalId CSVWorld::Table::getUniversalId (int row) const
         mProxyModel->data (mProxyModel->index (row, 0)).toString().toStdString());
 }
 
-#include <sstream> /// \todo remove
-void CSVWorld::Table::createRecord()
-{
-    if (!mEditLock)
-    {
-        /// \todo ask the user for an ID instead.
-        static int index = 0;
-
-        std::ostringstream stream;
-        stream << "id" << index++;
-
-        mUndoStack.push (new CSMWorld::CreateCommand (*mProxyModel, stream.str()));
-    }
-
-}
-
 void CSVWorld::Table::revertRecord()
 {
     if (!mEditLock)

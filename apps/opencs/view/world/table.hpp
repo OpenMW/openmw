@@ -71,8 +71,6 @@ namespace CSVWorld
 
         private slots:
 
-            void createRecord();
-
             void revertRecord();
 
             void deleteRecord();

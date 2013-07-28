@@ -8,6 +8,7 @@ class QUndoStack;
 namespace CSMWorld
 {
     class Data;
+    class UniversalId;
 }
 
 namespace CSVWorld
@@ -35,7 +36,8 @@ namespace CSVWorld
 
             virtual ~CreatorFactoryBase();
 
-            virtual Creator *makeCreator (CSMWorld::Data& data, QUndoStack& undoStack) const = 0;
+            virtual Creator *makeCreator (CSMWorld::Data& data, QUndoStack& undoStack,
+                const CSMWorld::UniversalId& id) const = 0;
             ///< The ownership of the returned Creator is transferred to the caller.
             ///
             /// \note The function can return a 0-pointer, which means no UI for creating/deleting
@@ -47,7 +49,8 @@ namespace CSVWorld
     {
         public:
 
-            virtual Creator *makeCreator (CSMWorld::Data& data, QUndoStack& undoStack) const;
+            virtual Creator *makeCreator (CSMWorld::Data& data, QUndoStack& undoStack,
+                const CSMWorld::UniversalId& id) const;
             ///< The ownership of the returned Creator is transferred to the caller.
             ///
             /// \note The function always returns 0.
@@ -58,7 +61,8 @@ namespace CSVWorld
     {
         public:
 
-            virtual Creator *makeCreator (CSMWorld::Data& data, QUndoStack& undoStac) const;
+            virtual Creator *makeCreator (CSMWorld::Data& data, QUndoStack& undoStack,
+                const CSMWorld::UniversalId& id) const;
             ///< The ownership of the returned Creator is transferred to the caller.
             ///
             /// \note The function can return a 0-pointer, which means no UI for creating/deleting
@@ -66,9 +70,10 @@ namespace CSVWorld
     };
 
     template<class CreatorT>
-    Creator *CreatorFactory<CreatorT>::makeCreator (CSMWorld::Data& data, QUndoStack& undoStack) const
+    Creator *CreatorFactory<CreatorT>::makeCreator (CSMWorld::Data& data, QUndoStack& undoStack,
+        const CSMWorld::UniversalId& id) const
     {
-        return new CreatorT (data, undoStack);
+        return new CreatorT (data, undoStack, id);
     }
 }
 

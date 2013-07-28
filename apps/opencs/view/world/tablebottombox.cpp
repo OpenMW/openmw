@@ -40,7 +40,7 @@ void CSVWorld::TableBottomBox::updateStatus()
 }
 
 CSVWorld::TableBottomBox::TableBottomBox (const CreatorFactoryBase& creatorFactory,
-    CSMWorld::Data& data, QUndoStack& undoStack, QWidget *parent)
+    CSMWorld::Data& data, QUndoStack& undoStack, const CSMWorld::UniversalId& id, QWidget *parent)
 : QWidget (parent), mShowStatusBar (false), mCreating (false)
 {
     for (int i=0; i<4; ++i)
@@ -60,7 +60,7 @@ CSVWorld::TableBottomBox::TableBottomBox (const CreatorFactoryBase& creatorFacto
 
     setLayout (mLayout);
 
-    mCreator = creatorFactory.makeCreator (data, undoStack);
+    mCreator = creatorFactory.makeCreator (data, undoStack, id);
 
     mLayout->addWidget (mCreator);
 
@@ -139,6 +139,7 @@ void CSVWorld::TableBottomBox::tableSizeChanged (int size, int deleted, int modi
 
 void CSVWorld::TableBottomBox::createRequest()
 {
+    mCreator->reset();
     mLayout->setCurrentWidget (mCreator);
     setVisible (true);
     mCreating = true;

@@ -11,6 +11,7 @@ class QUndoStack;
 namespace CSMWorld
 {
     class Data;
+    class UniversalId;
 }
 
 namespace CSVWorld
@@ -41,7 +42,7 @@ namespace CSVWorld
         public:
 
             TableBottomBox (const CreatorFactoryBase& creatorFactory, CSMWorld::Data& data,
-                QUndoStack& undoStack, QWidget *parent = 0);
+                QUndoStack& undoStack, const CSMWorld::UniversalId& id, QWidget *parent = 0);
 
             virtual ~TableBottomBox();
 

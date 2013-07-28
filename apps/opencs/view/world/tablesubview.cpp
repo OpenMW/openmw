@@ -18,7 +18,7 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
     layout->setContentsMargins (QMargins (0, 0, 0, 0));
 
     layout->addWidget (mBottom =
-        new TableBottomBox (creatorFactory, document.getData(), document.getUndoStack(), this), 0);
+        new TableBottomBox (creatorFactory, document.getData(), document.getUndoStack(), id, this), 0);
 
     layout->insertWidget (0, mTable =
         new Table (id, document.getData(), document.getUndoStack(), mBottom->canCreateAndDelete()), 2);
