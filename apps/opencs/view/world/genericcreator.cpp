@@ -68,9 +68,9 @@ std::string CSVWorld::GenericCreator::getErrors() const
     {
         errors = "Missing ID";
     }
-    else
+    else if (mData.hasId (id))
     {
-
+        errors = "ID is already in use";
     }
 
     return errors;

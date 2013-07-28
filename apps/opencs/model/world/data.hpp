@@ -123,6 +123,8 @@ namespace CSMWorld
 
             void loadFile (const boost::filesystem::path& path, bool base);
             ///< Merging content of a file into base or modified.
+
+            bool hasId (const std::string& id) const;
     };
 }
 
