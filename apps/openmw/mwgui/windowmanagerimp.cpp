@@ -877,49 +877,31 @@ namespace MWGui
 
         setUseHardwareCursors(Settings::Manager::getBool("hardware cursors", "GUI"));
 
-        //bool changeRes = false;
-        bool windowRecreated = false;
         for (Settings::CategorySettingVector::const_iterator it = changed.begin();
             it != changed.end(); ++it)
         {
-            /*if (it->first == "Video" &&  (
-                it->second == "resolution x"
-                || it->second == "resolution y"))
-            {
-                changeRes = true;
-            }*/
-            if (it->first == "Video" && it->second == "vsync")
-                windowRecreated = true;
-            else if (it->first == "HUD" && it->second == "crosshair")
+            if (it->first == "HUD" && it->second == "crosshair")
                 mCrosshairEnabled = Settings::Manager::getBool ("crosshair", "HUD");
             else if (it->first == "GUI" && it->second == "subtitles")
                 mSubtitlesEnabled = Settings::Manager::getBool ("subtitles", "GUI");
         }
+    }
 
-        /*
-        if (changeRes)
-        {
-            int x = Settings::Manager::getInt("resolution x", "Video");
-            int y = Settings::Manager::getInt("resolution y", "Video");
-            mHud->onResChange(x, y);
-            mConsole->onResChange(x, y);
-            mMenu->onResChange(x, y);
-            mSettingsWindow->center();
-            mAlchemyWindow->center();
-            mScrollWindow->center();
-            mBookWindow->center();
-            mQuickKeysMenu->center();
-            mSpellBuyingWindow->center();
-            mLoadingScreen->onResChange (x,y);
-            mDragAndDrop->mDragAndDropWidget->setSize(MyGUI::IntSize(x, y));
-            mInputBlocker->setSize(MyGUI::IntSize(x,y));
-        }
-        */
-        if (windowRecreated)
-        {
-            mGuiManager->updateWindow (mRendering->getWindow ());
-            mLoadingScreen->updateWindow (mRendering->getWindow ());
-        }
+    void WindowManager::windowResized(int x, int y)
+    {
+        mHud->onResChange(x, y);
+        mConsole->onResChange(x, y);
+        mMenu->onResChange(x, y);
+        mSettingsWindow->center();
+        mAlchemyWindow->center();
+        mScrollWindow->center();
+        mBookWindow->center();
+        mQuickKeysMenu->center();
+        mSpellBuyingWindow->center();
+        mLoadingScreen->onResChange (x,y);
+        mDragAndDrop->mDragAndDropWidget->setSize(MyGUI::IntSize(x, y));
+        mInputBlocker->setSize(MyGUI::IntSize(x,y));
+        mGuiManager->windowResized();
     }
 
     void WindowManager::pushGuiMode(GuiMode mode)

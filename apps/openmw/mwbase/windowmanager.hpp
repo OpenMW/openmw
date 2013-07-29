@@ -237,6 +237,8 @@ namespace MWBase
 
             virtual void processChangedSettings(const Settings::CategorySettingVector& changed) = 0;
 
+            virtual void windowResized(int x, int y) = 0;
+
             virtual void executeInConsole (const std::string& path) = 0;
 
             virtual void setLoadingProgress (const std::string& stage, int depth, int current, int total) = 0;

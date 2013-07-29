@@ -551,7 +551,6 @@ void WeatherManager::stopSounds(bool stopAll)
 
 Ogre::String WeatherManager::nextWeather(const ESM::Region* region) const
 {
-    const MWBase::World *world = MWBase::Environment::get().getWorld();
     std::vector<char> probability;
 
     RegionModMap::const_iterator iter = mRegionMods.find(Misc::StringUtils::lowerCase(region->mId));
@@ -581,7 +580,7 @@ Ogre::String WeatherManager::nextWeather(const ESM::Region* region) const
 
     int chance = (rand() % 100) + 1; // 1..100
     int sum = 0;
-    int i = 0;
+    unsigned int i = 0;
     for (; i < probability.size(); ++i)
     {
         sum += probability[i];

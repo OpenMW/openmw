@@ -385,7 +385,7 @@ namespace MWInput
             if (mControlSwitch["playerviewswitch"]) {
 
                 // work around preview mode toggle when pressing Alt+Tab
-                if (actionIsActive(A_TogglePOV) && !mInputManager->isModifierHeld(KMOD_ALT)) {
+                if (actionIsActive(A_TogglePOV) && !mInputManager->isModifierHeld(SDL_Keymod(KMOD_ALT))) {
                     if (mPreviewPOVDelay <= 0.5 &&
                         (mPreviewPOVDelay += dt) > 0.5)
                     {
@@ -434,13 +434,9 @@ namespace MWInput
 
     void InputManager::processChangedSettings(const Settings::CategorySettingVector& changed)
     {
-        bool changeRes = false;
         for (Settings::CategorySettingVector::const_iterator it = changed.begin();
         it != changed.end(); ++it)
         {
-            if (it->first == "Video" && (it->second == "resolution x" || it->second == "resolution y"))
-                changeRes = true;
-
             if (it->first == "Input" && it->second == "invert y axis")
                 mInvertY = Settings::Manager::getBool("invert y axis", "Input");
 
@@ -451,9 +447,6 @@ namespace MWInput
                 mUISensitivity = Settings::Manager::getFloat("ui sensitivity", "Input");
 
         }
-
-        if (changeRes)
-            adjustMouseRegion(Settings::Manager::getInt("resolution x", "Video"), Settings::Manager::getInt("resolution y", "Video"));
     }
 
     bool InputManager::getControlSwitch (const std::string& sw)
@@ -617,15 +610,18 @@ namespace MWInput
         return true;
     }
 
-    bool InputManager::windowFocusChange(bool have_focus)
+    void InputManager::windowFocusChange(bool have_focus)
     {
-        return true;
     }
 
-    bool InputManager::windowVisibilityChange(bool visible)
+    void InputManager::windowVisibilityChange(bool visible)
     {
             //TODO: Pause game?
-        return true;
+    }
+
+    void InputManager::windowResized(int x, int y)
+    {
+        mOgre.windowResized(x,y);
     }
 
     void InputManager::toggleMainMenu()
