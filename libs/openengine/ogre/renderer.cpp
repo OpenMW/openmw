@@ -245,25 +245,23 @@ void OgreRenderer::createWindow(const std::string &title, const WindowSettings& 
     params.insert(std::make_pair("FSAA", settings.fsaa));
     params.insert(std::make_pair("vsync", settings.vsync ? "true" : "false"));
 
-    int pos_x = SDL_WINDOWPOS_UNDEFINED,
-        pos_y = SDL_WINDOWPOS_UNDEFINED;
+    int pos_x = SDL_WINDOWPOS_CENTERED_DISPLAY(settings.screen),
+        pos_y = SDL_WINDOWPOS_CENTERED_DISPLAY(settings.screen);
 
     if(settings.fullscreen)
     {
-        SDL_Rect display_bounds;
-        if(SDL_GetDisplayBounds(settings.screen, &display_bounds) != 0)
-            throw std::runtime_error("Couldn't get display bounds!");
-        pos_x = display_bounds.x;
-        pos_y = display_bounds.y;
+        pos_x = SDL_WINDOWPOS_UNDEFINED_DISPLAY(settings.screen);
+        pos_y = SDL_WINDOWPOS_UNDEFINED_DISPLAY(settings.screen);
     }
+
 
     // Create an application window with the following settings:
     mSDLWindow = SDL_CreateWindow(
-      "OpenMW",                  //    window title
-      pos_x,                     //    initial x position
-      pos_y,                     //    initial y position
-      settings.window_x,                               //    width, in pixels
-      settings.window_y,                               //    height, in pixels
+      "OpenMW",          // window title
+      pos_x,             // initial x position
+      pos_y,             // initial y position
+      settings.window_x, // width, in pixels
+      settings.window_y, // height, in pixels
       SDL_WINDOW_SHOWN
         | (settings.fullscreen ? SDL_WINDOW_FULLSCREEN : 0) | SDL_WINDOW_RESIZABLE
     );
