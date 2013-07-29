@@ -3,6 +3,7 @@
 
 #include <string>
 #include <iosfwd>
+#include <vector>
 
 #include <QMetaType>
 
@@ -14,13 +15,14 @@ namespace CSMWorld
 
             enum Class
             {
-                    Class_None = 0,
-                    Class_Record,
-                    Class_SubRecord,
-                    Class_RecordList,
-                    Class_Collection, // multiple types of records combined
-                    Class_Transient, // not part of the world data or the project data
-                    Class_NonRecord // record like data that is not part of the world
+                Class_None = 0,
+                Class_Record,
+                Class_RefRecord, // referenceable record
+                Class_SubRecord,
+                Class_RecordList,
+                Class_Collection, // multiple types of records combined
+                Class_Transient, // not part of the world data or the project data
+                Class_NonRecord // record like data that is not part of the world
             };
 
             enum ArgumentType
@@ -125,6 +127,11 @@ namespace CSMWorld
             std::string getTypeName() const;
 
             std::string toString() const;
+
+            std::string getIcon() const;
+            ///< Will return an empty string, if no icon is available.
+
+            static std::vector<Type> listReferenceableTypes();
 
             static std::pair<int, const char *> getIdArgPair (unsigned int index);
             static unsigned int getIdArgSize ();
