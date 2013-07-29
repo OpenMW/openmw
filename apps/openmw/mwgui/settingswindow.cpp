@@ -7,6 +7,8 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/math/common_factor_rt.hpp>
 
+#include <SDL_video.h>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -172,16 +174,14 @@ namespace MWGui
         mResetControlsButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onResetDefaultBindings);
 
         // fill resolution list
-        Ogre::RenderSystem* rs = Ogre::Root::getSingleton().getRenderSystem();
-        Ogre::StringVector videoModes = rs->getConfigOptions()["Video Mode"].possibleValues;
+        int screen = Settings::Manager::getInt("screen", "Video");
+        int numDisplayModes = SDL_GetNumDisplayModes(screen);
         std::vector < std::pair<int, int> > resolutions;
-        for (Ogre::StringVector::const_iterator it=videoModes.begin();
-            it!=videoModes.end(); ++it)
+        for (int i = 0; i < numDisplayModes; i++)
         {
-
-            int resX, resY;
-            parseResolution (resX, resY, *it);
-            resolutions.push_back(std::make_pair(resX, resY));
+            SDL_DisplayMode mode;
+            SDL_GetDisplayMode(screen, i, &mode);
+            resolutions.push_back(std::make_pair(mode.w, mode.h));
         }
         std::sort(resolutions.begin(), resolutions.end(), sortResolutions);
         for (std::vector < std::pair<int, int> >::const_iterator it=resolutions.begin();
