@@ -41,6 +41,9 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
     if (mBottom->canCreateAndDelete())
         connect (mTable, SIGNAL (createRequest()), mBottom, SLOT (createRequest()));
+
+    connect (mBottom, SIGNAL (requestFocus (const std::string&)),
+        mTable, SLOT (requestFocus (const std::string&)));
 }
 
 void CSVWorld::TableSubView::setEditLock (bool locked)

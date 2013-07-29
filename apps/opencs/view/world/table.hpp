@@ -83,6 +83,8 @@ namespace CSVWorld
 
             void selectionSizeUpdate();
 
+            void requestFocus (const std::string& id);
+
     };
 }
 

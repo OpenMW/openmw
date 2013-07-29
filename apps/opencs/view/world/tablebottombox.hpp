@@ -55,6 +55,12 @@ namespace CSVWorld
             ///
             /// \note The BotomBox does not partake in the deletion of records.
 
+        signals:
+
+            void requestFocus (const std::string& id);
+            ///< Request owner of this box to focus the just created \a id. The owner may
+            /// ignore this request.
+
         private slots:
 
             void createRequestDone();

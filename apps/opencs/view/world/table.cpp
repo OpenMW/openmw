@@ -283,3 +283,11 @@ void CSVWorld::Table::selectionSizeUpdate()
 {
     selectionSizeChanged (selectionModel()->selectedRows().size());
 }
+
+void CSVWorld::Table::requestFocus (const std::string& id)
+{
+    QModelIndex index = mProxyModel->getModelIndex (id, 0);
+
+    if (index.isValid())
+        scrollTo (index, QAbstractItemView::PositionAtTop);
+}

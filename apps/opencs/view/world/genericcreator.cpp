@@ -101,9 +101,12 @@ void CSVWorld::GenericCreator::create()
 {
     if (!mLocked)
     {
+        std::string id = getId();
+
         mUndoStack.push (new CSMWorld::CreateCommand (
-            dynamic_cast<CSMWorld::IdTable&> (*mData.getTableModel (mListId)), getId()));
+            dynamic_cast<CSMWorld::IdTable&> (*mData.getTableModel (mListId)), id));
 
         emit done();
+        emit requestFocus (id);
     }
 }

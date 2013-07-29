@@ -29,6 +29,10 @@ namespace CSVWorld
         signals:
 
             void done();
+
+            void requestFocus (const std::string& id);
+            ///< Request owner of this creator to focus the just created \a id. The owner may
+            /// ignore this request.
     };
 
     /// \brief Base class for Creator factory

@@ -66,6 +66,9 @@ CSVWorld::TableBottomBox::TableBottomBox (const CreatorFactoryBase& creatorFacto
     mLayout->addWidget (mCreator);
 
     connect (mCreator, SIGNAL (done()), this, SLOT (createRequestDone()));
+
+    connect (mCreator, SIGNAL (requestFocus (const std::string&)),
+        this, SIGNAL (requestFocus (const std::string&)));
 }
 
 void CSVWorld::TableBottomBox::setEditLock (bool locked)
