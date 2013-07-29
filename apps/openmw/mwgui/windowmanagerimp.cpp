@@ -669,7 +669,7 @@ namespace MWGui
     void WindowManager::activateKeyPressed ()
     {
         mMessageBoxManager->okayPressed();
-        mCountDialog->setVisible(false);
+        mCountDialog->cancel();
     }
 
     int WindowManager::readPressedButton ()
