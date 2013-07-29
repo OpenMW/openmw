@@ -903,7 +903,15 @@ void RenderingManager::setCameraDistance(float dist, bool adjust, bool override)
 {
     if(!mCamera->isVanityOrPreviewModeEnabled() && !mCamera->isFirstPerson())
     {
-        mCamera->setCameraDistance(-dist / 120.f * 10, adjust, override);
+        if(mCamera->isNearest() && dist > 0.f)
+            mCamera->toggleViewMode();
+        else
+            mCamera->setCameraDistance(-dist / 120.f * 10, adjust, override);
+    }
+    else if(mCamera->isFirstPerson() && dist < 0.f)
+    {
+        mCamera->toggleViewMode();
+        mCamera->setCameraDistance(0.f, false, override);
     }
 }
 
