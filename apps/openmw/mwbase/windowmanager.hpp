@@ -215,6 +215,7 @@ namespace MWBase
             virtual void removeStaticMessageBox() = 0;
 
             virtual void enterPressed () = 0;
+            virtual void activateKeyPressed () = 0;
             virtual int readPressedButton() = 0;
             ///< returns the index of the pressed button or -1 if no button was pressed (->MessageBoxmanager->InteractiveMessageBox)
 

@@ -49,9 +49,14 @@ namespace MWGui
         mItemEdit->setCaption(boost::lexical_cast<std::string>(maxCount));
     }
 
-    void CountDialog::onCancelButtonClicked(MyGUI::Widget* _sender)
+    void CountDialog::cancel()
     {
         setVisible(false);
+    }
+
+    void CountDialog::onCancelButtonClicked(MyGUI::Widget* _sender)
+    {
+        cancel();
     }
 
     void CountDialog::onOkButtonClicked(MyGUI::Widget* _sender)

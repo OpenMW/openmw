@@ -663,7 +663,13 @@ namespace MWGui
 
     void WindowManager::enterPressed ()
     {
-        mMessageBoxManager->enterPressed();
+        mMessageBoxManager->okayPressed();
+    }
+
+    void WindowManager::activateKeyPressed ()
+    {
+        mMessageBoxManager->okayPressed();
+        mCountDialog->setVisible(false);
     }
 
     int WindowManager::readPressedButton ()

@@ -146,10 +146,10 @@ namespace MWGui
         mMessageBoxSpeed = speed;
     }
 
-    void MessageBoxManager::enterPressed ()
+    void MessageBoxManager::okayPressed ()
     {
         if(mInterMessageBoxe != NULL)
-            mInterMessageBoxe->enterPressed();
+            mInterMessageBoxe->okayPressed();
     }
 
     int MessageBoxManager::readPressedButton ()
@@ -379,7 +379,7 @@ namespace MWGui
         }
     }
 
-    void InteractiveMessageBox::enterPressed()
+    void InteractiveMessageBox::okayPressed()
     {
 
         std::string ok = Misc::StringUtils::lowerCase(MyGUI::LanguageManager::getInstance().replaceTags("#{sOK}"));

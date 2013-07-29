@@ -204,13 +204,15 @@ namespace MWInput
             case A_Activate:
                 resetIdleTime();
 
-                if (mWindows.getMode() == MWGui::GM_Container) {
-                    toggleContainer (); 
-                } else if (MWBase::Environment::get().getWindowManager()->isGuiMode()) {
-                    MWBase::Environment::get().getWindowManager()->enterPressed();
-                } else {
-                    activate();
+                if (mWindows.isGuiMode())
+                {
+                    if (mWindows.getMode() == MWGui::GM_Container)
+                        toggleContainer ();
+                    else
+                        MWBase::Environment::get().getWindowManager()->activateKeyPressed();
                 }
+                else
+                    activate();
                 break;
             case A_Journal:
                 toggleJournal ();
@@ -681,10 +683,8 @@ namespace MWInput
         if (MyGUI::InputManager::getInstance ().isModalAny())
             return;
 
-        bool gameMode = !mWindows.isGuiMode();
-
         // Toggle between game mode and inventory mode
-        if(gameMode)
+        if(!mWindows.isGuiMode())
             mWindows.pushGuiMode(MWGui::GM_Inventory);
         else
         {
@@ -701,9 +701,7 @@ namespace MWInput
         if (MyGUI::InputManager::getInstance ().isModalAny())
             return;
 
-        bool gameMode = !mWindows.isGuiMode();
-
-        if(!gameMode)
+        if(mWindows.isGuiMode())
         {
             if (mWindows.getMode() == MWGui::GM_Container)
                 mWindows.popGuiMode();
@@ -713,17 +711,14 @@ namespace MWInput
 
     }
 
-
     void InputManager::toggleConsole()
     {
         if (MyGUI::InputManager::getInstance ().isModalAny())
             return;
 
-        bool gameMode = !mWindows.isGuiMode();
-
         // Switch to console mode no matter what mode we are currently
         // in, except of course if we are already in console mode
-        if (!gameMode)
+        if (mWindows.isGuiMode())
         {
             if (mWindows.getMode() == MWGui::GM_Console)
                 mWindows.popGuiMode();
@@ -740,9 +735,7 @@ namespace MWInput
             return;
 
         // Toggle between game mode and journal mode
-        bool gameMode = !mWindows.isGuiMode();
-
-        if(gameMode && MWBase::Environment::get().getWindowManager ()->getJournalAllowed())
+        if(!mWindows.isGuiMode() && MWBase::Environment::get().getWindowManager ()->getJournalAllowed())
         {
             MWBase::Environment::get().getSoundManager()->playSound ("book open", 1.0, 1.0);
             mWindows.pushGuiMode(MWGui::GM_Journal);
