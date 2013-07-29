@@ -4,13 +4,6 @@
 #include <OgrePlatform.h>
 #include <OgreRoot.h>
 
-/*
-#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
-#   include <X11/Xlib.h>
-#   include <X11/Xutil.h>
-#   include <X11/Xos.h>
-#endif
-*/
 
 namespace SFO
 {
@@ -19,7 +12,6 @@ namespace SFO
     InputWrapper::InputWrapper(SDL_Window* window, Ogre::RenderWindow* ogreWindow) :
         mSDLWindow(window),
         mOgreWindow(ogreWindow),
-        mOwnWindow(false),
         mWarpCompensate(false),
         mMouseRelative(false),
         mGrabPointer(false),
@@ -27,14 +19,18 @@ namespace SFO
         mMouseZ(0),
         mMouseY(0),
         mMouseX(0),
-        mMouseInWindow(true)
+		mMouseInWindow(true),
+		mJoyListener(NULL),
+		mKeyboardListener(NULL),
+		mMouseListener(NULL),
+		mWindowListener(NULL)
     {
         _setupOISKeys();
     }
 
     InputWrapper::~InputWrapper()
     {
-        if(mSDLWindow != NULL && mOwnWindow)
+        if(mSDLWindow != NULL)
             SDL_DestroyWindow(mSDLWindow);
         mSDLWindow = NULL;
     }
@@ -76,6 +72,25 @@ namespace SFO
                 case SDL_TEXTINPUT:
                     mKeyboardListener->textInput(evt.text);
                     break;
+				case SDL_JOYAXISMOTION:
+					if (mJoyListener)
+						mJoyListener->axisMoved(evt.jaxis, evt.jaxis.axis);
+					break;
+				case SDL_JOYBUTTONDOWN:
+					if (mJoyListener)
+						mJoyListener->buttonPressed(evt.jbutton, evt.jbutton.button);
+					break;
+				case SDL_JOYBUTTONUP:
+					if (mJoyListener)
+						mJoyListener->buttonReleased(evt.jbutton, evt.jbutton.button);
+					break;
+				case SDL_JOYDEVICEADDED:
+					//SDL_JoystickOpen(evt.jdevice.which);
+					//std::cout << "Detected a new joystick: " << SDL_JoystickNameForIndex(evt.jdevice.which) << std::endl;
+					break;
+				case SDL_JOYDEVICEREMOVED:
+					//std::cout << "A joystick has been removed" << std::endl;
+					break;
                 case SDL_WINDOWEVENT:
                     handleWindowEvent(evt);
                     break;
@@ -100,24 +115,61 @@ namespace SFO
                 SDL_SetWindowGrab(mSDLWindow, SDL_FALSE);
                 SDL_SetRelativeMouseMode(SDL_FALSE);
                 break;
-            case SDL_WINDOWEVENT_RESIZED:
+			case SDL_WINDOWEVENT_SIZE_CHANGED:
+				int w,h;
+				SDL_GetWindowSize(mSDLWindow, &w, &h);
+				// TODO: Fix Ogre to handle this more consistently
+#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
+				mOgreWindow->windowMovedOrResized();
+#else
+				mOgreWindow->resize(w, h);
+#endif
+				if (mWindowListener)
+					mWindowListener->windowResized(evt.window.data1, evt.window.data2);
+
+			case SDL_WINDOWEVENT_RESIZED:
+				// TODO: Fix Ogre to handle this more consistently
+				#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
+				mOgreWindow->windowMovedOrResized();
+				#else
+				mOgreWindow->resize(evt.window.data1, evt.window.data2);
+				#endif
+				if (mWindowListener)
+					mWindowListener->windowResized(evt.window.data1, evt.window.data2);
+				break;
+
             case SDL_WINDOWEVENT_FOCUS_GAINED:
+				if (mWindowListener)
+					mWindowListener->windowFocusChange(true);
+				break;
             case SDL_WINDOWEVENT_FOCUS_LOST:
+				if (mWindowListener)
+					mWindowListener->windowFocusChange(false);
+				break;
             case SDL_WINDOWEVENT_CLOSE:
                 break;
             case SDL_WINDOWEVENT_SHOWN:
                 mOgreWindow->setVisible(true);
+				if (mWindowListener)
+					mWindowListener->windowVisibilityChange(true);
                 break;
             case SDL_WINDOWEVENT_HIDDEN:
                 mOgreWindow->setVisible(false);
+				if (mWindowListener)
+					mWindowListener->windowVisibilityChange(false);
                 break;
         }
     }
 
-    bool InputWrapper::isModifierHeld(int mod)
+	bool InputWrapper::isModifierHeld(SDL_Keymod mod)
     {
         return SDL_GetModState() & mod;
     }
+
+	bool InputWrapper::isKeyDown(SDL_Scancode key)
+	{
+		return SDL_GetKeyboardState(NULL)[key];
+	}
 
     /// \brief Moves the mouse to the specified point within the viewport
     void InputWrapper::warpMouse(int x, int y)

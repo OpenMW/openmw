@@ -65,10 +65,12 @@ public:
     virtual ~WindowListener() {}
 
     /** @remarks The window's visibility changed */
-    virtual bool windowVisibilityChange( bool visible ) = 0;
+    virtual void windowVisibilityChange( bool visible ) {};
 
     /** @remarks The window got / lost input focus */
-    virtual bool windowFocusChange( bool have_focus ) = 0;
+    virtual void windowFocusChange( bool have_focus ) {}
+
+    virtual void windowResized (int x, int y) {}
 };
 
 }

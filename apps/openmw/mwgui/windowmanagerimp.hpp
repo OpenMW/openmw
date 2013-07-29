@@ -225,6 +225,8 @@ namespace MWGui
 
     virtual void processChangedSettings(const Settings::CategorySettingVector& changed);
 
+    virtual void windowResized(int x, int y);
+
     virtual void executeInConsole (const std::string& path);
 
     virtual void setLoadingProgress (const std::string& stage, int depth, int current, int total);
