@@ -33,6 +33,10 @@ namespace MWRender
         bool mFirstPersonView;
         bool mPreviewMode;
         bool mFreeLook;
+        float mNearest;
+        float mFurthest;
+        bool mIsNearest;
+        bool mIsFurthest;
 
         struct {
             bool enabled, allowed;
@@ -99,6 +103,10 @@ namespace MWRender
         void togglePlayerLooking(bool enable);
 
         bool isVanityOrPreviewModeEnabled();
+
+        bool isNearest();
+
+        bool isFurthest();
     };
 }
 

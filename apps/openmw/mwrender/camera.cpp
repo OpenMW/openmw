@@ -25,7 +25,11 @@ namespace MWRender
       mHeight(128.f),
       mCameraDistance(300.f),
       mDistanceAdjusted(false),
-      mAnimation(NULL)
+      mAnimation(NULL),
+      mNearest(30.f),
+      mFurthest(800.f),
+      mIsNearest(false),
+      mIsFurthest(false)
     {
         mVanity.enabled = false;
         mVanity.allowed = true;
@@ -232,16 +236,21 @@ namespace MWRender
         if(mFirstPersonView && !mPreviewMode && !mVanity.enabled)
             return;
 
+        mIsFurthest = false;
+        mIsNearest = false;
+
         Ogre::Vector3 v(0.f, 0.f, dist);
         if (adjust) {
             v += mCamera->getPosition();
         }
-        if (v.z > 800.f) {
-            v.z = 800.f;
-        } else if (v.z < 10.f) {
+        if (v.z >= mFurthest) {
+            v.z = mFurthest;
+            mIsFurthest = true;
+        } else if (!override && v.z < 10.f) {
             v.z = 10.f;
-        } else if (override && v.z < 50.f) {
-            v.z = 50.f;
+        } else if (override && v.z <= mNearest) {
+            v.z = mNearest;
+            mIsNearest = true;
         }
         mCamera->setPosition(v);
 
@@ -319,5 +328,15 @@ namespace MWRender
     bool Camera::isVanityOrPreviewModeEnabled()
     {
         return mPreviewMode || mVanity.enabled;
+    }
+
+    bool Camera::isNearest()
+    {
+        return mIsNearest;
+    }
+
+    bool Camera::isFurthest()
+    {
+        return mIsFurthest;
     }
 }
