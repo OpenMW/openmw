@@ -27,7 +27,9 @@ namespace MWRender
       mDistanceAdjusted(false),
       mAnimation(NULL),
       mNearest(30.f),
-      mFurthest(800.f)
+      mFurthest(800.f),
+      mIsNearest(false),
+      mIsFurthest(false)
     {
         mVanity.enabled = false;
         mVanity.allowed = true;
