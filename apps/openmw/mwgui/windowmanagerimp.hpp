@@ -204,6 +204,7 @@ namespace MWGui
     virtual void staticMessageBox(const std::string& message);
     virtual void removeStaticMessageBox();
     virtual void enterPressed ();
+    virtual void activateKeyPressed ();
     virtual int readPressedButton (); ///< returns the index of the pressed button or -1 if no button was pressed (->MessageBoxmanager->InteractiveMessageBox)
 
     virtual void onFrame (float frameDuration);

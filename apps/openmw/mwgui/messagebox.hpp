@@ -40,7 +40,7 @@ namespace MWGui
             bool removeMessageBox (MessageBox *msgbox);
             void setMessageBoxSpeed (int speed);
 
-            void enterPressed();
+            void okayPressed();
             int readPressedButton ();
 
             typedef MyGUI::delegates::CMultiDelegate1<int> EventHandle_Int;
@@ -82,7 +82,7 @@ namespace MWGui
     {
         public:
             InteractiveMessageBox (MessageBoxManager& parMessageBoxManager, const std::string& message, const std::vector<std::string>& buttons);
-            void enterPressed ();
+            void okayPressed ();
             void mousePressed (MyGUI::Widget* _widget);
             int readPressedButton ();
 
