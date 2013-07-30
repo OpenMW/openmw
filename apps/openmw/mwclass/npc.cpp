@@ -330,7 +330,7 @@ namespace MWClass
         }
 
         if(ptr.getRefData().getHandle() == "player")
-            MWBase::Environment::get().getWindowManager()->setEnemy(ptr);
+            MWBase::Environment::get().getWindowManager()->setEnemy(victim);
 
         int weapskill = ESM::Skill::HandToHand;
         if(!weapon.isEmpty())
