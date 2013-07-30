@@ -42,6 +42,11 @@
             <State name="normal" offset = "0 8 4 8"/>
         </BasisSkin>
     </Skin>
+    <Skin name = "MW_BarTrack_Yellow" size = "4 8" texture = "smallbars.png" >
+        <BasisSkin type="MainSkin" offset = "0 0 4 8" align = "ALIGN_STRETCH">
+            <State name="normal" offset = "0 32 4 8"/>
+        </BasisSkin>
+    </Skin>
 
     <!-- Main energy bar widget definitions. There's one for each color.-->
 
@@ -63,6 +68,14 @@
 
     <Skin name="MW_EnergyBar_Blue" size="64 12">
         <Property key="TrackSkin" value = "MW_BarTrack_Blue" />
+        <Property key="TrackWidth" value = "1" />
+
+        <Child type="Widget" skin="MW_BarFrame" offset="0 0 64 12" align="ALIGN_STRETCH"/>
+        <Child type="Widget" skin="BlackBG" offset = "2 2 60 8" align = "ALIGN_STRETCH" name="Client"/>
+    </Skin>
+
+    <Skin name="MW_EnergyBar_Yellow" size="64 12">
+        <Property key="TrackSkin" value = "MW_BarTrack_Yellow" />
         <Property key="TrackWidth" value = "1" />
 
         <Child type="Widget" skin="MW_BarFrame" offset="0 0 64 12" align="ALIGN_STRETCH"/>

@@ -418,6 +418,9 @@ namespace MWClass
 
         // NOTE: 'object' and/or 'attacker' may be empty.
 
+        if(!attacker.isEmpty() && attacker.getRefData().getHandle() == "player")
+            MWBase::Environment::get().getWindowManager()->setEnemy(ptr);
+
         if(!successful)
         {
             // TODO: Handle HitAttemptOnMe script function

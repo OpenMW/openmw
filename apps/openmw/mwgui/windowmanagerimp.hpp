@@ -256,6 +256,8 @@ namespace MWGui
 
     virtual void changePointer (const std::string& name);
 
+    virtual void setEnemy (const MWWorld::Ptr& enemy);
+
     virtual const Translation::Storage& getTranslationDataStorage() const;
 
     void onSoulgemDialogButtonPressed (int button);
