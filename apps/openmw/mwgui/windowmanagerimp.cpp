@@ -1306,4 +1306,9 @@ namespace MWGui
             SDL_StopTextInput();
     }
 
+    void WindowManager::setEnemy(const MWWorld::Ptr &enemy)
+    {
+        mHud->setEnemy(enemy);
+    }
+
 }

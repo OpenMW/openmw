@@ -266,6 +266,8 @@ namespace MWBase
 
             virtual void changePointer (const std::string& name) = 0;
 
+            virtual void setEnemy (const MWWorld::Ptr& enemy) = 0;
+
             virtual const Translation::Storage& getTranslationDataStorage() const = 0;
 
             virtual void setKeyFocusWidget (MyGUI::Widget* widget) = 0;
