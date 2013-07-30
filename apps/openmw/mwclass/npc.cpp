@@ -329,6 +329,9 @@ namespace MWClass
             return;
         }
 
+        if(ptr.getRefData().getHandle() == "player")
+            MWBase::Environment::get().getWindowManager()->setEnemy(ptr);
+
         int weapskill = ESM::Skill::HandToHand;
         if(!weapon.isEmpty())
             weapskill = MWWorld::Class::get(weapon).getEquipmentSkill(weapon);
@@ -417,9 +420,6 @@ namespace MWClass
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
 
         // NOTE: 'object' and/or 'attacker' may be empty.
-
-        if(!attacker.isEmpty() && attacker.getRefData().getHandle() == "player")
-            MWBase::Environment::get().getWindowManager()->setEnemy(ptr);
 
         if(!successful)
         {
