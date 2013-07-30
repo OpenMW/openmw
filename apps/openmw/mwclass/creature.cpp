@@ -89,6 +89,10 @@ namespace MWClass
                 iter!=ref->mBase->mSpells.mList.end(); ++iter)
                 data->mCreatureStats.getSpells().add (*iter);
 
+            // inventory
+            data->mContainerStore.fill(ref->mBase->mInventory, getId(ptr),
+                                       MWBase::Environment::get().getWorld()->getStore());
+
             // store
             ptr.getRefData().setCustomData (data.release());
         }

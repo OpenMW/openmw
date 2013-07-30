@@ -44,39 +44,6 @@ void MWWorld::Cells::clear()
     mIdCacheIndex = 0;
 }
 
-void MWWorld::Cells::fillContainers (Ptr::CellStore& cellStore)
-{
-    for (CellRefList<ESM::Container>::List::iterator iter (
-        cellStore.mContainers.mList.begin());
-        iter!=cellStore.mContainers.mList.end(); ++iter)
-    {
-        Ptr container (&*iter, &cellStore);
-
-        Class::get (container).getContainerStore (container).fill (
-            iter->mBase->mInventory, container.getCellRef().mOwner, mStore);
-    }
-
-    for (CellRefList<ESM::Creature>::List::iterator iter (
-        cellStore.mCreatures.mList.begin());
-        iter!=cellStore.mCreatures.mList.end(); ++iter)
-    {
-        Ptr container (&*iter, &cellStore);
-
-        Class::get (container).getContainerStore (container).fill (
-            iter->mBase->mInventory, Class::get(container).getId(container), mStore);
-    }
-
-    for (CellRefList<ESM::NPC>::List::iterator iter (
-        cellStore.mNpcs.mList.begin());
-        iter!=cellStore.mNpcs.mList.end(); ++iter)
-    {
-        Ptr container (&*iter, &cellStore);
-
-        Class::get (container).getContainerStore (container).fill (
-            iter->mBase->mInventory, Class::get(container).getId(container), mStore);
-    }
-}
-
 MWWorld::Ptr MWWorld::Cells::getPtrAndCache (const std::string& name, Ptr::CellStore& cellStore)
 {
     Ptr ptr = getPtr (name, cellStore);
@@ -129,7 +96,6 @@ MWWorld::Ptr::CellStore *MWWorld::Cells::getExterior (int x, int y)
     {
         // Multiple plugin support for landscape data is much easier than for references. The last plugin wins.
         result->second.load (mStore, mReader);
-        fillContainers (result->second);
     }
 
     return &result->second;
@@ -150,7 +116,6 @@ MWWorld::Ptr::CellStore *MWWorld::Cells::getInterior (const std::string& name)
     if (result->second.mState!=Ptr::CellStore::State_Loaded)
     {
         result->second.load (mStore, mReader);
-        fillContainers (result->second);
     }
 
     return &result->second;
@@ -168,7 +133,6 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name, Ptr::CellStore& ce
         if (std::binary_search (cell.mIds.begin(), cell.mIds.end(), lowerCase))
         {
             cell.load (mStore, mReader);
-            fillContainers (cell);
         }
         else
             return Ptr();
