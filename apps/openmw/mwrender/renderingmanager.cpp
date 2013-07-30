@@ -351,10 +351,10 @@ void RenderingManager::update (float duration, bool paused)
 
     applyFog(world->isUnderwater(player.getCell(), cam));
 
+    mCamera->update(duration, paused);
+
     if(paused)
         return;
-
-    mCamera->update(duration);
 
     mActors.update (duration);
     mObjects.update (duration);

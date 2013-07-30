@@ -53,6 +53,9 @@ namespace MWSound
         , mFootstepsVolume(1.0f)
         , mVoiceVolume(1.0f)
         , mPausedSoundTypes(0)
+        , mListenerPos(0,0,0)
+        , mListenerDir(1,0,0)
+        , mListenerUp(0,0,1)
     {
         if(!useSound)
             return;
