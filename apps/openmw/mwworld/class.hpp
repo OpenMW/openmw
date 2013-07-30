@@ -230,7 +230,10 @@ namespace MWWorld
             static const Class& get (const std::string& key);
             ///< If there is no class for this \a key, an exception is thrown.
 
-            static const Class& get (const Ptr& ptr);
+            static const Class& get (const Ptr& ptr)
+            {
+                return get (ptr.getTypeName());
+            }
             ///< If there is no class for this pointer, an exception is thrown.
 
             static void registerClass (const std::string& key,  boost::shared_ptr<Class> instance);

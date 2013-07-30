@@ -244,11 +244,6 @@ namespace MWWorld
         return *iter->second;
     }
 
-    const Class& Class::get (const Ptr& ptr)
-    {
-        return get (ptr.getTypeName());
-    }
-
     bool Class::isPersistent(const Ptr &ptr) const
     {
         throw std::runtime_error ("class does not support persistence");
