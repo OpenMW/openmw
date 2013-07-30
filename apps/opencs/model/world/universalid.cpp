@@ -12,83 +12,83 @@ namespace
             CSMWorld::UniversalId::Class mClass;
             CSMWorld::UniversalId::Type mType;
             const char *mName;
+            const char *mIcon;
     };
 
     static const TypeData sNoArg[] =
     {
-        { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, "empty" },
-        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Globals, "Global Variables" },
-        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Gmsts, "Game Settings" },
-        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Skills, "Skills" },
-        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Classes, "Classes" },
-        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Factions, "Factions" },
-        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Races, "Races" },
-        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Sounds, "Sounds" },
-        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Scripts, "Scripts" },
-        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Regions, "Regions" },
-        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Birthsigns, "Birthsigns" },
-        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Spells, "Spells" },
-        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Cells, "Cells" },
+        { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, "empty", 0 },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Globals, "Global Variables", 0 },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Gmsts, "Game Settings", 0 },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Skills, "Skills", 0 },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Classes, "Classes", 0 },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Factions, "Factions", 0 },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Races, "Races", 0 },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Sounds, "Sounds", 0 },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Scripts, "Scripts", 0 },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Regions, "Regions", 0 },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Birthsigns, "Birthsigns", 0 },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Spells, "Spells", 0 },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Cells, "Cells", 0 },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Referenceables,
-            "Referenceables" },
+            "Referenceables", 0 },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_References,
-            "References" },
+            "References", 0 },
         { CSMWorld::UniversalId::Class_NonRecord, CSMWorld::UniversalId::Type_RegionMap,
-            "Region Map" },
-        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Filters, "Filters" },
+            "Region Map", 0 },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Filters, "Filters", 0 },
 
-        { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0 } // end marker
+        { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0, 0 } // end marker
     };
 
     static const TypeData sIdArg[] =
     {
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Global, "Global Variable" },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Gmst, "Game Setting" },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Skill, "Skill" },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Class, "Class" },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Faction, "Faction" },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Race, "Race" },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Sound, "Sound" },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Script, "Script" },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Region, "Region" },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Birthsign, "Birthsign" },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Spell, "Spell" },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Cell, "Cell" },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Referenceable, "Referenceables" },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Activator, "Activator" },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Potion, "Potion" },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Apparatus, "Apparatus" },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Armor, "Armor" },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Book, "Book" },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Clothing, "Clothing" },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Container, "Container" },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Creature, "Creature" },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Door, "Door" },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Ingredient, "Ingredient" },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_CreatureLevelledList,
-            "Creature Levelled List" },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_ItemLevelledList,
-            "Item Levelled List" },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Light, "Light" },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Lockpick, "Lockpick" },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Miscellaneous,
-            "Miscellaneous" },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Npc, "NPC" },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Probe, "Probe" },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Repair, "Repair" },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Static, "Static" },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Weapon, "Weapon" },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Reference, "Reference" },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Filter, "Reference" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Global, "Global Variable", 0 },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Gmst, "Game Setting", 0 },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Skill, "Skill", 0 },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Class, "Class", 0 },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Faction, "Faction", 0 },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Race, "Race", 0 },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Sound, "Sound", 0 },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Script, "Script", 0 },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Region, "Region", 0 },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Birthsign, "Birthsign", 0 },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Spell, "Spell", 0 },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Cell, "Cell", 0 },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Referenceable, "Referenceables", 0 },
+        { CSMWorld::UniversalId::Class_RefRecord, CSMWorld::UniversalId::Type_Activator, "Activator", ":./activator.png" },
+        { CSMWorld::UniversalId::Class_RefRecord, CSMWorld::UniversalId::Type_Potion, "Potion", ":./potion.png" },
+        { CSMWorld::UniversalId::Class_RefRecord, CSMWorld::UniversalId::Type_Apparatus, "Apparatus", ":./apparatus.png" },
+        { CSMWorld::UniversalId::Class_RefRecord, CSMWorld::UniversalId::Type_Armor, "Armor", ":./armor.png" },
+        { CSMWorld::UniversalId::Class_RefRecord, CSMWorld::UniversalId::Type_Book, "Book", ":./book.png" },
+        { CSMWorld::UniversalId::Class_RefRecord, CSMWorld::UniversalId::Type_Clothing, "Clothing", ":./clothing.png" },
+        { CSMWorld::UniversalId::Class_RefRecord, CSMWorld::UniversalId::Type_Container, "Container", ":./container.png" },
+        { CSMWorld::UniversalId::Class_RefRecord, CSMWorld::UniversalId::Type_Creature, "Creature", ":./creature.png" },
+        { CSMWorld::UniversalId::Class_RefRecord, CSMWorld::UniversalId::Type_Door, "Door", ":./door.png" },
+        { CSMWorld::UniversalId::Class_RefRecord, CSMWorld::UniversalId::Type_Ingredient, "Ingredient", ":./ingredient.png" },
+        { CSMWorld::UniversalId::Class_RefRecord, CSMWorld::UniversalId::Type_CreatureLevelledList,
+            "Creature Levelled List", ":./creature.png" },
+        { CSMWorld::UniversalId::Class_RefRecord, CSMWorld::UniversalId::Type_ItemLevelledList,
+            "Item Levelled List", ":./leveled-item.png" },
+        { CSMWorld::UniversalId::Class_RefRecord, CSMWorld::UniversalId::Type_Light, "Light", ":./light.png" },
+        { CSMWorld::UniversalId::Class_RefRecord, CSMWorld::UniversalId::Type_Lockpick, "Lockpick", ":./lockpick.png" },
+        { CSMWorld::UniversalId::Class_RefRecord, CSMWorld::UniversalId::Type_Miscellaneous,
+            "Miscellaneous", ":./miscellaneous.png" },
+        { CSMWorld::UniversalId::Class_RefRecord, CSMWorld::UniversalId::Type_Npc, "NPC", ":./npc.png" },
+        { CSMWorld::UniversalId::Class_RefRecord, CSMWorld::UniversalId::Type_Probe, "Probe", ":./probe.png" },
+        { CSMWorld::UniversalId::Class_RefRecord, CSMWorld::UniversalId::Type_Repair, "Repair", ":./repair.png" },
+        { CSMWorld::UniversalId::Class_RefRecord, CSMWorld::UniversalId::Type_Static, "Static", ":./static.png" },
+        { CSMWorld::UniversalId::Class_RefRecord, CSMWorld::UniversalId::Type_Weapon, "Weapon", ":./weapon.png" },
+        { CSMWorld::UniversalId::Class_SubRecord, CSMWorld::UniversalId::Type_Reference, "Reference", 0 },
 
-        { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0 } // end marker
+        { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0, 0 } // end marker
     };
 
     static const TypeData sIndexArg[] =
     {
-        { CSMWorld::UniversalId::Class_Transient, CSMWorld::UniversalId::Type_VerificationResults, "Verification Results" },
+        { CSMWorld::UniversalId::Class_Transient, CSMWorld::UniversalId::Type_VerificationResults, "Verification Results", 0 },
 
-        { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0 } // end marker
+        { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0, 0 } // end marker
     };
 
     static const unsigned int IDARG_SIZE = sizeof (sIdArg) / sizeof (TypeData);
@@ -270,6 +270,28 @@ std::string CSMWorld::UniversalId::toString() const
     return stream.str();
 }
 
+std::string CSMWorld::UniversalId::getIcon() const
+{
+    const TypeData *typeData = mArgumentType==ArgumentType_None ? sNoArg :
+        (mArgumentType==ArgumentType_Id ? sIdArg : sIndexArg);
+
+    for (int i=0; typeData[i].mName; ++i)
+        if (typeData[i].mType==mType)
+            return typeData[i].mIcon ? typeData[i].mIcon : "";
+
+    throw std::logic_error ("failed to retrieve UniversalId type icon");
+}
+
+std::vector<CSMWorld::UniversalId::Type> CSMWorld::UniversalId::listReferenceableTypes()
+{
+    std::vector<CSMWorld::UniversalId::Type> list;
+
+    for (int i=0; sIdArg[i].mName; ++i)
+        if (sIdArg[i].mClass==Class_RefRecord)
+            list.push_back (sIdArg[i].mType);
+
+    return list;
+}
 
 std::pair<int, const char *> CSMWorld::UniversalId::getIdArgPair (unsigned int index)
 {

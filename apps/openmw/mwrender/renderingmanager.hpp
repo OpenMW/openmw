@@ -50,7 +50,7 @@ namespace MWRender
     class VideoPlayer;
     class Animation;
 
-class RenderingManager: private RenderingInterface, public Ogre::WindowEventListener, public Ogre::RenderTargetListener
+class RenderingManager: private RenderingInterface, public Ogre::RenderTargetListener, public OEngine::Render::WindowSizeListener
 {
 private:
     virtual MWRender::Objects& getObjects();
@@ -204,8 +204,7 @@ public:
     void frameStarted(float dt);
 
 protected:
-    virtual void windowResized(Ogre::RenderWindow* rw);
-    virtual void windowClosed(Ogre::RenderWindow* rw);
+    virtual void windowResized(int x, int y);
 
 private:
     sh::Factory* mFactory;

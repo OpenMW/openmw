@@ -33,6 +33,10 @@ namespace MWRender
         bool mFirstPersonView;
         bool mPreviewMode;
         bool mFreeLook;
+        float mNearest;
+        float mFurthest;
+        bool mIsNearest;
+        bool mIsFurthest;
 
         struct {
             bool enabled, allowed;
@@ -93,18 +97,16 @@ namespace MWRender
 
         void setAnimation(NpcAnimation *anim);
 
-        float getHeight();
-
-        /// Stores player and camera world positions in passed arguments
-        /// \return true if camera at the eye-place
-        bool getPosition(Ogre::Vector3 &player, Ogre::Vector3 &camera);
-        Ogre::Vector3 getPosition();
-
-        void getSightAngles(float &pitch, float &yaw);
+        /// Stores focal and camera world positions in passed arguments
+        void getPosition(Ogre::Vector3 &focal, Ogre::Vector3 &camera);
 
         void togglePlayerLooking(bool enable);
 
         bool isVanityOrPreviewModeEnabled();
+
+        bool isNearest();
+
+        bool isFurthest();
     };
 }
 

@@ -51,7 +51,8 @@ op 0x20022: AiFollow
 op 0x20023: AiFollow, explicit reference
 op 0x20024: AiFollowCell
 op 0x20025: AiFollowCell, explicit reference
-op s 0x20026-0x3ffff unused
+op 0x20026: ModRegion
+opcodes 0x20027-0x3ffff unused
 
 Segment 4:
 (not implemented yet)
@@ -338,5 +339,9 @@ op 0x200020f: GetStandingActor, explicit
 op 0x2000210: GetStartingAngle
 op 0x2000211: GetStartingAngle, explicit
 op 0x2000212: GetWindSpeed
+op 0x2000213: HitOnMe
+op 0x2000214: HitOnMe, explicit
+op 0x2000215: DisableTeleporting
+op 0x2000216: EnableTeleporting
 
-opcodes 0x2000213-0x3ffffff unused
+opcodes 0x2000217-0x3ffffff unused

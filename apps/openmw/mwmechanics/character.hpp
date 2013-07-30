@@ -5,6 +5,12 @@
 
 #include "../mwworld/ptr.hpp"
 
+namespace MWWorld
+{
+    class ContainerStoreIterator;
+    class InventoryStore;
+}
+
 namespace MWRender
 {
     class Animation;
@@ -14,6 +20,7 @@ namespace MWMechanics
 {
 
 class Movement;
+class NpcStats;
 
 enum Priority {
     Priority_Default,
@@ -95,6 +102,19 @@ enum WeaponType {
     WeapType_Spell
 };
 
+enum UpperBodyCharacterState {
+    UpperCharState_Nothing,
+    UpperCharState_EquipingWeap,
+    UpperCharState_UnEquipingWeap,
+    UpperCharState_WeapEquiped,
+    UpperCharState_StartToMinAttack,
+    UpperCharState_MinAttackToMaxAttack,
+    UpperCharState_MaxAttackToMinHit,
+    UpperCharState_MinHitToHit,
+    UpperCharState_FollowStartToFollowStop,
+    UpperCharState_CastingSpell
+};
+
 class CharacterController
 {
     MWWorld::Ptr mPtr;
@@ -113,21 +133,30 @@ class CharacterController
     CharacterState mDeathState;
     std::string mCurrentDeath;
 
-    WeaponType mWeaponType;
-    bool mSkipAnim;
+    UpperBodyCharacterState mUpperBodyState;
 
-    // Workaround for playing weapon draw animation and sound when going to new cell
-    bool mUpdateWeapon;
+    WeaponType mWeaponType;
+    std::string mCurrentWeapon;
+
+    bool mSkipAnim;
 
     // counted for skill increase
     float mSecondsOfSwimming;
     float mSecondsOfRunning;
 
+    std::string mAttackType; // slash, chop or thrust
+
     void refreshCurrentAnims(CharacterState idle, CharacterState movement, bool force=false);
 
     static void getWeaponGroup(WeaponType weaptype, std::string &group);
 
+    static MWWorld::ContainerStoreIterator getActiveWeapon(NpcStats &stats,
+                                                           MWWorld::InventoryStore &inv,
+                                                           WeaponType *weaptype);
+
     void clearAnimQueue();
+
+    bool updateNpcState();
 
 public:
     CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim);

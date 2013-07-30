@@ -117,6 +117,8 @@ namespace MWWorld
 
             int mPlayIntro;
 
+            bool mTeleportEnabled;
+
         public:
 
             World (OEngine::Render::OgreRenderer& renderer,
@@ -235,6 +237,8 @@ namespace MWWorld
 
             virtual void setMoonColour (bool red);
 
+            virtual void modRegion(const std::string &regionid, const std::vector<char> &chances);
+
             virtual float getTimeScaleFactor() const;
 
             virtual void changeToInteriorCell (const std::string& cellName,
@@ -251,6 +255,10 @@ namespace MWWorld
 
             virtual MWWorld::Ptr getFacedObject();
             ///< Return pointer to the object the player is looking at, if it is within activation range
+
+            /// Returns a pointer to the object the provided object is facing (if within the
+            /// specified distance). This will attempt to use the "Bip01 Head" node as a basis.
+            virtual MWWorld::Ptr getFacedObject(const MWWorld::Ptr &ptr, float distance);
 
             virtual void deleteObject (const Ptr& ptr);
 
@@ -421,6 +429,12 @@ namespace MWWorld
             /// Find position in interior cell near door entrance
             /// \return false if interior with given name not exists, true otherwise
             virtual bool findInteriorPosition(const std::string &name, ESM::Position &pos);
+
+            /// Enables or disables use of teleport spell effects (recall, intervention, etc).
+            virtual void enableTeleporting(bool enable);
+
+            /// Returns true if teleport spell effects are allowed.
+            virtual bool isTeleportingEnabled() const;
     };
 }
 

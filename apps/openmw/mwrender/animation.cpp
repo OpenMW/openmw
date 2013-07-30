@@ -14,6 +14,7 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwmechanics/character.hpp"
+#include "../mwmechanics/creaturestats.hpp"
 #include "../mwworld/class.hpp"
 
 namespace MWRender
@@ -53,6 +54,7 @@ Animation::Animation(const MWWorld::Ptr &ptr)
     , mNonAccumRoot(NULL)
     , mNonAccumCtrl(NULL)
     , mAccumulate(0.0f)
+    , mNullAnimationValuePtr(OGRE_NEW NullAnimationValue)
 {
     for(size_t i = 0;i < sNumGroups;i++)
         mAnimationValuePtr[i].bind(OGRE_NEW AnimationValue(this));
@@ -442,64 +444,58 @@ void Animation::updatePosition(float oldtime, float newtime, Ogre::Vector3 &posi
 
 bool Animation::reset(AnimState &state, const NifOgre::TextKeyMap &keys, const std::string &groupname, const std::string &start, const std::string &stop, float startpoint)
 {
-    std::string tag = groupname+": "+start;
-    NifOgre::TextKeyMap::const_iterator startkey(keys.begin());
-    while(startkey != keys.end() && startkey->second != tag)
+    const NifOgre::TextKeyMap::const_iterator groupstart = findGroupStart(keys, groupname);
+
+    std::string starttag = groupname+": "+start;
+    NifOgre::TextKeyMap::const_iterator startkey(groupstart);
+    while(startkey != keys.end() && startkey->second != starttag)
         startkey++;
     if(startkey == keys.end() && start == "loop start")
     {
-        tag = groupname+": start";
-        startkey = keys.begin();
-        while(startkey != keys.end() && startkey->second != tag)
+        starttag = groupname+": start";
+        startkey = groupstart;
+        while(startkey != keys.end() && startkey->second != starttag)
             startkey++;
     }
     if(startkey == keys.end())
         return false;
 
-    tag = groupname+": "+stop;
-    NifOgre::TextKeyMap::const_iterator stopkey(startkey);
-    while(stopkey != keys.end() && stopkey->second != tag)
+    const std::string stoptag = groupname+": "+stop;
+    NifOgre::TextKeyMap::const_iterator stopkey(groupstart);
+    while(stopkey != keys.end() && stopkey->second != stoptag)
         stopkey++;
     if(stopkey == keys.end())
         return false;
 
-    if(startkey == stopkey)
+    if(startkey->first > stopkey->first)
         return false;
 
-    state.mStartKey = startkey;
-    state.mLoopStartKey = startkey;
-    state.mStopKey = stopkey;
-    state.mNextKey = startkey;
+    state.mStartTime = startkey->first;
+    state.mLoopStartTime = startkey->first;
+    state.mLoopStopTime = stopkey->first;
+    state.mStopTime = stopkey->first;
 
-    state.mTime = state.mStartKey->first + ((state.mStopKey->first - state.mStartKey->first) * startpoint);
-
-    tag = groupname+": loop start";
-    while(state.mNextKey->first <= state.mTime && state.mNextKey != state.mStopKey)
+    state.mTime = state.mStartTime + ((state.mStopTime - state.mStartTime) * startpoint);
+    if(state.mTime > state.mStartTime)
     {
-        if(state.mNextKey->second == tag)
-            state.mLoopStartKey = state.mNextKey;
-        state.mNextKey++;
+        const std::string loopstarttag = groupname+": loop start";
+        const std::string loopstoptag = groupname+": loop stop";
+        NifOgre::TextKeyMap::const_iterator key(groupstart);
+        while(key->first <= state.mTime && key != stopkey)
+        {
+            if(key->second == loopstarttag)
+                state.mLoopStartTime = key->first;
+            else if(key->second == loopstoptag)
+                state.mLoopStopTime = key->first;
+            key++;
+        }
     }
 
     return true;
 }
 
-bool Animation::doLoop(AnimState &state)
-{
-    if(state.mLoopCount == 0)
-        return false;
-    state.mLoopCount--;
 
-    state.mTime = state.mLoopStartKey->first;
-    state.mNextKey = state.mLoopStartKey;
-    state.mNextKey++;
-    state.mPlaying = true;
-
-    return true;
-}
-
-
-bool Animation::handleTextKey(AnimState &state, const std::string &groupname, const NifOgre::TextKeyMap::const_iterator &key)
+void Animation::handleTextKey(AnimState &state, const std::string &groupname, const NifOgre::TextKeyMap::const_iterator &key)
 {
     float time = key->first;
     const std::string &evt = key->second;
@@ -508,7 +504,7 @@ bool Animation::handleTextKey(AnimState &state, const std::string &groupname, co
     {
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
         sndMgr->playSound3D(mPtr, evt.substr(7), 1.0f, 1.0f);
-        return true;
+        return;
     }
     if(evt.compare(0, 10, "soundgen: ") == 0)
     {
@@ -521,58 +517,40 @@ bool Animation::handleTextKey(AnimState &state, const std::string &groupname, co
                 type = MWBase::SoundManager::Play_TypeFoot;
             sndMgr->playSound3D(mPtr, sound, 1.0f, 1.0f, type);
         }
-        return true;
+        return;
     }
 
     if(evt.compare(0, groupname.size(), groupname) != 0 ||
        evt.compare(groupname.size(), 2, ": ") != 0)
     {
         // Not ours, skip it
-        return true;
+        return;
     }
     size_t off = groupname.size()+2;
     size_t len = evt.size() - off;
 
-    if(evt.compare(off, len, "start") == 0 || evt.compare(off, len, "loop start") == 0)
-    {
-        state.mLoopStartKey = key;
-        return true;
-    }
-
-    if(evt.compare(off, len, "loop stop") == 0 || evt.compare(off, len, "stop") == 0)
-    {
-        if(doLoop(state))
-        {
-            if(state.mTime >= time)
-                return false;
-        }
-        return true;
-    }
-
-    if(evt.compare(off, len, "equip attach") == 0)
-    {
+    if(evt.compare(off, len, "loop start") == 0)
+        state.mLoopStartTime = key->first;
+    else if(evt.compare(off, len, "loop stop") == 0)
+        state.mLoopStopTime = key->first;
+    else if(evt.compare(off, len, "equip attach") == 0)
         showWeapons(true);
-        return true;
-    }
-    if(evt.compare(off, len, "unequip detach") == 0)
-    {
+    else if(evt.compare(off, len, "unequip detach") == 0)
         showWeapons(false);
-        return true;
-    }
-
-    /* Nothing to do for these */
-    if(evt.compare(off, len, "equip start") == 0 || evt.compare(off, len, "equip stop") == 0 ||
-       evt.compare(off, len, "unequip start") == 0 || evt.compare(off, len, "unequip stop") == 0)
-        return true;
-
-    std::cerr<< "Unhandled animation textkey: "<<evt <<std::endl;
-    return true;
+    else if(evt.compare(off, len, "chop hit") == 0)
+        MWWorld::Class::get(mPtr).hit(mPtr, MWMechanics::CreatureStats::AT_Chop);
+    else if(evt.compare(off, len, "slash hit") == 0)
+        MWWorld::Class::get(mPtr).hit(mPtr, MWMechanics::CreatureStats::AT_Slash);
+    else if(evt.compare(off, len, "thrust hit") == 0)
+        MWWorld::Class::get(mPtr).hit(mPtr, MWMechanics::CreatureStats::AT_Thrust);
+    else if(evt.compare(off, len, "hit") == 0)
+        MWWorld::Class::get(mPtr).hit(mPtr);
 }
 
 
 void Animation::play(const std::string &groupname, int priority, int groups, bool autodisable, float speedmult, const std::string &start, const std::string &stop, float startpoint, size_t loops)
 {
-    if(!mSkelBase)
+    if(!mSkelBase || mAnimSources.size() == 0)
         return;
 
     if(groupname.empty())
@@ -604,23 +582,47 @@ void Animation::play(const std::string &groupname, int priority, int groups, boo
     AnimSourceList::reverse_iterator iter(mAnimSources.rbegin());
     for(;iter != mAnimSources.rend();iter++)
     {
+        const NifOgre::TextKeyMap &textkeys = (*iter)->mTextKeys;
         AnimState state;
-        if(reset(state, (*iter)->mTextKeys, groupname, start, stop, startpoint))
+        if(reset(state, textkeys, groupname, start, stop, startpoint))
         {
             state.mSource = *iter;
             state.mSpeedMult = speedmult;
             state.mLoopCount = loops;
-            state.mPlaying = true;
+            state.mPlaying = (state.mTime < state.mStopTime);
             state.mPriority = priority;
             state.mGroups = groups;
             state.mAutoDisable = autodisable;
             mStates[groupname] = state;
 
+            NifOgre::TextKeyMap::const_iterator textkey(textkeys.lower_bound(state.mTime));
+            while(textkey != textkeys.end() && textkey->first <= state.mTime)
+            {
+                handleTextKey(state, groupname, textkey);
+                textkey++;
+            }
+
+            if(state.mTime >= state.mLoopStopTime && state.mLoopCount > 0)
+            {
+                state.mLoopCount--;
+                state.mTime = state.mLoopStartTime;
+                state.mPlaying = true;
+                if(state.mTime >= state.mLoopStopTime)
+                    break;
+
+                textkey = textkeys.lower_bound(state.mTime);
+                while(textkey != textkeys.end() && textkey->first <= state.mTime)
+                {
+                    handleTextKey(state, groupname, textkey);
+                    textkey++;
+                }
+            }
+
             break;
         }
     }
     if(iter == mAnimSources.rend())
-        std::cerr<< "Failed to find animation "<<groupname <<std::endl;
+        std::cerr<< "Failed to find animation "<<groupname<<" for "<<mPtr.getCellRef().mRefID <<std::endl;
 
     resetActiveGroups();
 }
@@ -676,23 +678,25 @@ void Animation::resetActiveGroups()
 }
 
 
-bool Animation::getInfo(const std::string &groupname, float *complete, float *speedmult, std::string *start, std::string *stop) const
+bool Animation::getInfo(const std::string &groupname, float *complete, float *speedmult) const
 {
     AnimStateMap::const_iterator iter = mStates.find(groupname);
     if(iter == mStates.end())
     {
         if(complete) *complete = 0.0f;
         if(speedmult) *speedmult = 0.0f;
-        if(start) *start = "";
-        if(stop) *stop = "";
         return false;
     }
 
-    if(complete) *complete = (iter->second.mTime - iter->second.mStartKey->first) /
-                             (iter->second.mStopKey->first - iter->second.mStartKey->first);
+    if(complete)
+    {
+        if(iter->second.mStopTime > iter->second.mStartTime)
+            *complete = (iter->second.mTime - iter->second.mStartTime) /
+                        (iter->second.mStopTime - iter->second.mStartTime);
+        else
+            *complete = (iter->second.mPlaying ? 0.0f : 1.0f);
+    }
     if(speedmult) *speedmult = iter->second.mSpeedMult;
-    if(start) *start = iter->second.mStartKey->second.substr(groupname.size()+2);
-    if(stop) *stop = iter->second.mStopKey->second.substr(groupname.size()+2);
     return true;
 }
 
@@ -714,27 +718,52 @@ Ogre::Vector3 Animation::runAnimation(float duration)
     while(stateiter != mStates.end())
     {
         AnimState &state = stateiter->second;
+        const NifOgre::TextKeyMap &textkeys = state.mSource->mTextKeys;
+        NifOgre::TextKeyMap::const_iterator textkey(textkeys.upper_bound(state.mTime));
+
         float timepassed = duration * state.mSpeedMult;
         while(state.mPlaying)
         {
             float targetTime = state.mTime + timepassed;
-            if(state.mNextKey->first > targetTime)
+            if(textkey == textkeys.end() || textkey->first > targetTime)
             {
                 if(mNonAccumCtrl && stateiter->first == mAnimationValuePtr[0]->getAnimName())
                     updatePosition(state.mTime, targetTime, movement);
-                state.mTime = targetTime;
-                break;
+                state.mTime = std::min(targetTime, state.mStopTime);
+            }
+            else
+            {
+                if(mNonAccumCtrl && stateiter->first == mAnimationValuePtr[0]->getAnimName())
+                    updatePosition(state.mTime, textkey->first, movement);
+                state.mTime = textkey->first;
             }
 
-            NifOgre::TextKeyMap::const_iterator key(state.mNextKey++);
-            if(mNonAccumCtrl && stateiter->first == mAnimationValuePtr[0]->getAnimName())
-                updatePosition(state.mTime, key->first, movement);
-            state.mTime = key->first;
-
-            state.mPlaying = (key != state.mStopKey);
+            state.mPlaying = (state.mTime < state.mStopTime);
             timepassed = targetTime - state.mTime;
 
-            if(!handleTextKey(state, stateiter->first, key))
+            while(textkey != textkeys.end() && textkey->first <= state.mTime)
+            {
+                handleTextKey(state, stateiter->first, textkey);
+                textkey++;
+            }
+
+            if(state.mTime >= state.mLoopStopTime && state.mLoopCount > 0)
+            {
+                state.mLoopCount--;
+                state.mTime = state.mLoopStartTime;
+                state.mPlaying = true;
+                if(state.mTime >= state.mLoopStopTime)
+                    break;
+
+                textkey = textkeys.lower_bound(state.mTime);
+                while(textkey != textkeys.end() && textkey->first <= state.mTime)
+                {
+                    handleTextKey(state, stateiter->first, textkey);
+                    textkey++;
+                }
+            }
+
+            if(timepassed <= 0.0f)
                 break;
         }
 

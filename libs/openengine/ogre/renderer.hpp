@@ -74,6 +74,12 @@ namespace OEngine
 
         class Fader;
 
+        class WindowSizeListener
+        {
+        public:
+            virtual void windowResized (int x, int y) = 0;
+        };
+
         class OgreRenderer
         {
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
@@ -83,7 +89,6 @@ namespace OEngine
 #endif
             Ogre::RenderWindow *mWindow;
             SDL_Window *mSDLWindow;
-            SDL_Surface *mWindowIconSurface;
             Ogre::SceneManager *mScene;
             Ogre::Camera *mCamera;
             Ogre::Viewport *mView;
@@ -107,7 +112,7 @@ namespace OEngine
             std::vector<Ogre::ParticleAffectorFactory*> mAffectorFactories;
             bool logging;
 
-            SDL_Surface* ogreTextureToSDLSurface(const std::string& name);
+            WindowSizeListener* mWindowListener;
 
         public:
             OgreRenderer()
@@ -117,7 +122,7 @@ namespace OEngine
             , mScene(NULL)
             , mCamera(NULL)
             , mView(NULL)
-            , mWindowIconSurface(NULL)
+            , mWindowListener(NULL)
             #ifdef ENABLE_PLUGIN_CgProgramManager
             , mCgPlugin(NULL)
             #endif
@@ -140,9 +145,6 @@ namespace OEngine
 
             ~OgreRenderer() { cleanup(); }
 
-            void setWindowEventListener(Ogre::WindowEventListener* listener);
-            void removeWindowEventListener(Ogre::WindowEventListener* listener);
-
             /** Configure the renderer. This will load configuration files and
             set up the Root and logging classes. */
             void configure(
@@ -153,8 +155,6 @@ namespace OEngine
 
             /// Create a window with the given title
             void createWindow(const std::string &title, const WindowSettings& settings);
-
-            void recreateWindow (const std::string &title, const WindowSettings& settings);
 
             /// Set up the scene manager, camera and viewport
             void createScene(const std::string& camName="Camera",// Camera name
@@ -181,6 +181,8 @@ namespace OEngine
 
             float getFPS();
 
+            void windowResized(int x, int y);
+
             /// Get the Root
             Ogre::Root *getRoot() { return mRoot; }
 
@@ -201,6 +203,8 @@ namespace OEngine
 
             /// Viewport
             Ogre::Viewport *getViewport() { return mView; }
+
+            void setWindowListener(WindowSizeListener* listener) { mWindowListener = listener; }
 
             void adjustViewport();
         };

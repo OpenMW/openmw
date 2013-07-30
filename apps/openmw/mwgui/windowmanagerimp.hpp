@@ -204,6 +204,7 @@ namespace MWGui
     virtual void staticMessageBox(const std::string& message);
     virtual void removeStaticMessageBox();
     virtual void enterPressed ();
+    virtual void activateKeyPressed ();
     virtual int readPressedButton (); ///< returns the index of the pressed button or -1 if no button was pressed (->MessageBoxmanager->InteractiveMessageBox)
 
     virtual void onFrame (float frameDuration);
@@ -224,6 +225,8 @@ namespace MWGui
     virtual std::string getGameSettingString(const std::string &id, const std::string &default_);
 
     virtual void processChangedSettings(const Settings::CategorySettingVector& changed);
+
+    virtual void windowResized(int x, int y);
 
     virtual void executeInConsole (const std::string& path);
 
@@ -253,6 +256,8 @@ namespace MWGui
     virtual void showSoulgemDialog (MWWorld::Ptr item);
 
     virtual void changePointer (const std::string& name);
+
+    virtual void setEnemy (const MWWorld::Ptr& enemy);
 
     virtual const Translation::Storage& getTranslationDataStorage() const;
 

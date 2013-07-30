@@ -304,6 +304,16 @@ CSMWorld::RefIdCollection& CSMWorld::Data::getReferenceables()
     return mReferenceables;
 }
 
+const CSMWorld::RefCollection& CSMWorld::Data::getReferences() const
+{
+    return mRefs;
+}
+
+CSMWorld::RefCollection& CSMWorld::Data::getReferences()
+{
+    return mRefs;
+}
+
 QAbstractItemModel *CSMWorld::Data::getTableModel (const UniversalId& id)
 {
     std::map<UniversalId::Type, QAbstractItemModel *>::iterator iter = mModelIndex.find (id.getType());
@@ -398,4 +408,22 @@ void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base)
                 reader.skipRecord();
         }
     }
+}
+
+bool CSMWorld::Data::hasId (const std::string& id) const
+{
+    return
+        getGlobals().searchId (id)!=-1 ||
+        getGmsts().searchId (id)!=-1 ||
+        getSkills().searchId (id)!=-1 ||
+        getClasses().searchId (id)!=-1 ||
+        getFactions().searchId (id)!=-1 ||
+        getRaces().searchId (id)!=-1 ||
+        getSounds().searchId (id)!=-1 ||
+        getScripts().searchId (id)!=-1 ||
+        getRegions().searchId (id)!=-1 ||
+        getBirthsigns().searchId (id)!=-1 ||
+        getSpells().searchId (id)!=-1 ||
+        getCells().searchId (id)!=-1 ||
+        getReferenceables().searchId (id)!=-1;
 }

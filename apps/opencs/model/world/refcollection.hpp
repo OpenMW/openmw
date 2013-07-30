@@ -21,6 +21,8 @@ namespace CSMWorld
 
             void load (ESM::ESMReader& reader, int cellIndex, bool base);
             ///< Load a sequence of references.
+
+            std::string getNewId();
     };
 }
 

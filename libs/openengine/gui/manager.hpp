@@ -43,6 +43,8 @@ namespace GUI
 
         void updateWindow (Ogre::RenderWindow* wnd);
 
+        void windowResized();
+
         void setup(Ogre::RenderWindow *wnd, Ogre::SceneManager *mgr, bool logging=false, const std::string& logDir = std::string(""));
         void shutdown();
 

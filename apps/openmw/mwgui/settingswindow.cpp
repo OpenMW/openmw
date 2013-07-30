@@ -7,6 +7,8 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/math/common_factor_rt.hpp>
 
+#include <SDL_video.h>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -91,6 +93,7 @@ namespace MWGui
         WindowBase("openmw_settings_window.layout")
     {
         getWidget(mOkButton, "OkButton");
+        getWidget(mBestAttackButton, "BestAttackButton");
         getWidget(mSubtitlesButton, "SubtitlesButton");
         getWidget(mCrosshairButton, "CrosshairButton");
         getWidget(mResolutionList, "ResolutionList");
@@ -131,6 +134,7 @@ namespace MWGui
 
         mSubtitlesButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mCrosshairButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
+        mBestAttackButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mInvertYButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onOkButtonClicked);
         mShadersButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onShadersToggled);
@@ -170,16 +174,14 @@ namespace MWGui
         mResetControlsButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onResetDefaultBindings);
 
         // fill resolution list
-        Ogre::RenderSystem* rs = Ogre::Root::getSingleton().getRenderSystem();
-        Ogre::StringVector videoModes = rs->getConfigOptions()["Video Mode"].possibleValues;
+        int screen = Settings::Manager::getInt("screen", "Video");
+        int numDisplayModes = SDL_GetNumDisplayModes(screen);
         std::vector < std::pair<int, int> > resolutions;
-        for (Ogre::StringVector::const_iterator it=videoModes.begin();
-            it!=videoModes.end(); ++it)
+        for (int i = 0; i < numDisplayModes; i++)
         {
-
-            int resX, resY;
-            parseResolution (resX, resY, *it);
-            resolutions.push_back(std::make_pair(resX, resY));
+            SDL_DisplayMode mode;
+            SDL_GetDisplayMode(screen, i, &mode);
+            resolutions.push_back(std::make_pair(mode.w, mode.h));
         }
         std::sort(resolutions.begin(), resolutions.end(), sortResolutions);
         for (std::vector < std::pair<int, int> >::const_iterator it=resolutions.begin();
@@ -200,6 +202,7 @@ namespace MWGui
 
         mSubtitlesButton->setCaptionWithReplacing(Settings::Manager::getBool("subtitles", "GUI") ? "#{sOn}" : "#{sOff}");
         mCrosshairButton->setCaptionWithReplacing(Settings::Manager::getBool("crosshair", "HUD") ? "#{sOn}" : "#{sOff}");
+        mBestAttackButton->setCaptionWithReplacing(Settings::Manager::getBool("best attack", "Game") ? "#{sOn}" : "#{sOff}");
 
         float fovVal = (Settings::Manager::getFloat("field of view", "General")-sFovMin)/(sFovMax-sFovMin);
         mFOVSlider->setScrollPosition(fovVal * (mFOVSlider->getScrollRange()-1));
@@ -269,15 +272,12 @@ namespace MWGui
         if (index == MyGUI::ITEM_NONE)
             return;
 
-        /*
         ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
         dialog->open("#{sNotifyMessage67}");
         dialog->eventOkClicked.clear();
         dialog->eventOkClicked += MyGUI::newDelegate(this, &SettingsWindow::onResolutionAccept);
         dialog->eventCancelClicked.clear();
         dialog->eventCancelClicked += MyGUI::newDelegate(this, &SettingsWindow::onResolutionCancel);
-        */
-        onResolutionAccept();
     }
 
     void SettingsWindow::onResolutionAccept()
@@ -290,9 +290,6 @@ namespace MWGui
         Settings::Manager::setInt("resolution y", "Video", resY);
 
         apply();
-
-        MWBase::Environment::get().getWindowManager()->
-            messageBox("New resolution will be applied after a restart", std::vector<std::string>());
     }
 
     void SettingsWindow::onResolutionCancel()
@@ -361,8 +358,6 @@ namespace MWGui
             {
                 Settings::Manager::setBool("fullscreen", "Video", newState);
                 apply();
-                MWBase::Environment::get().getWindowManager()->
-                    messageBox("Fullscreen will be applied after a restart", std::vector<std::string>());
             }
         }
         else if (_sender == mVSyncButton)
@@ -407,6 +402,8 @@ namespace MWGui
                 Settings::Manager::setBool("crosshair", "HUD", newState);
             else if (_sender == mSubtitlesButton)
                 Settings::Manager::setBool("subtitles", "GUI", newState);
+            else if (_sender == mBestAttackButton)
+                Settings::Manager::setBool("best attack", "Game", newState);
 
             apply();
         }

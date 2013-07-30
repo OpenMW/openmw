@@ -18,6 +18,7 @@
 #include "../mwmechanics/movement.hpp"
 
 #include "../mwrender/sky.hpp"
+#include "../mwrender/animation.hpp"
 
 #include "../mwclass/door.hpp"
 
@@ -165,7 +166,7 @@ namespace MWWorld
     : mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
       mSky (true), mCells (mStore, mEsm),
       mNumFacing(0), mActivationDistanceOverride (mActivationDistanceOverride),
-      mFallback(fallbackMap), mPlayIntro(0)
+      mFallback(fallbackMap), mPlayIntro(0), mTeleportEnabled(true)
     {
         mPhysics = new PhysicsSystem(renderer);
         mPhysEngine = mPhysics->getEngine();
@@ -776,6 +777,28 @@ namespace MWWorld
         return object;
     }
 
+    MWWorld::Ptr World::getFacedObject(const MWWorld::Ptr &ptr, float distance)
+    {
+        const ESM::Position &posdata = ptr.getRefData().getPosition();
+        Ogre::Vector3 pos(posdata.pos);
+        Ogre::Quaternion rot = Ogre::Quaternion(Ogre::Radian(posdata.rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z) *
+                               Ogre::Quaternion(Ogre::Radian(posdata.rot[0]), Ogre::Vector3::UNIT_X);
+
+        MWRender::Animation *anim = mRendering->getAnimation(ptr);
+        if(anim != NULL)
+        {
+            Ogre::Node *node = anim->getNode("Head");
+            if(node != NULL)
+                pos += node->_getDerivedPosition();
+        }
+
+        std::pair<std::string,float> result = mPhysics->getFacedHandle(pos, rot, distance);
+        if(result.first.empty())
+            return MWWorld::Ptr();
+
+        return searchPtrViaHandle(result.first);
+    }
+
     void World::deleteObject (const Ptr& ptr)
     {
         if (ptr.getRefData().getCount()>0)
@@ -1351,6 +1374,11 @@ namespace MWWorld
         mWeatherManager->changeWeather(region, id);
     }
 
+    void World::modRegion(const std::string &regionid, const std::vector<char> &chances)
+    {
+        mWeatherManager->modRegion(regionid, chances);
+    }
+
     OEngine::Render::Fader* World::getFader()
     {
         return mRendering->getFader();
@@ -1821,4 +1849,15 @@ namespace MWWorld
         }
         return false;
     }
+
+    void World::enableTeleporting(bool enable)
+    {
+        mTeleportEnabled = enable;
+    }
+
+    bool World::isTeleportingEnabled() const
+    {
+        return mTeleportEnabled;
+    }
+
 }

@@ -499,18 +499,14 @@ namespace MWSound
         soundIter = regn->mSoundList.begin();
         while(soundIter != regn->mSoundList.end())
         {
-            const std::string go = soundIter->mSound.toString();
-            int chance = (int) soundIter->mChance;
-            //std::cout << "Sound: " << go.name <<" Chance:" <<  chance << "\n";
-            soundIter++;
-            if(r - pos < chance)
+            if(r - pos < soundIter->mChance)
             {
-                //play sound
-                std::cout << "Sound: " << go <<" Chance:" <<  chance << "\n";
-                playSound(go, 1.0f, 1.0f);
+                playSound(soundIter->mSound.toString(), 1.0f, 1.0f);
                 break;
             }
-            pos += chance;
+            pos += soundIter->mChance;
+
+            soundIter++;
         }
     }
 
@@ -550,6 +546,13 @@ namespace MWSound
                 mActiveSounds.erase(snditer++);
             else
             {
+                const MWWorld::Ptr &ptr = snditer->second.first;
+                if(!ptr.isEmpty())
+                {
+                    const ESM::Position &pos = ptr.getRefData().getPosition();
+                    const Ogre::Vector3 objpos(pos.pos[0], pos.pos[1], pos.pos[2]);
+                    snditer->first->setPosition(objpos);
+                }
                 snditer->first->update();
                 snditer++;
             }

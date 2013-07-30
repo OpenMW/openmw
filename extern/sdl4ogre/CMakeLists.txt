@@ -5,6 +5,7 @@ set(SDL4OGRE_LIBRARY "sdl4ogre")
 set(SDL4OGRE_SOURCE_FILES
 	sdlinputwrapper.cpp
 	sdlcursormanager.cpp
+	sdlwindowhelper.cpp
 )
 
 set(SDL4OGRE_HEADER_FILES

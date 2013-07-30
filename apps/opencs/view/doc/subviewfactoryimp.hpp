@@ -22,28 +22,20 @@ namespace CSVDoc
         return new SubViewT (id, document);
     }
 
-    template<class SubViewT>
-    class SubViewFactoryWithCreateFlag : public SubViewFactoryBase
+
+    template<class SubViewT, class CreatorFactoryT>
+    class SubViewFactoryWithCreator : public SubViewFactoryBase
     {
-        bool mCreateAndDelete;
-
         public:
-
-            SubViewFactoryWithCreateFlag (bool createAndDelete);
 
             virtual CSVDoc::SubView *makeSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document);
     };
 
-    template<class SubViewT>
-    SubViewFactoryWithCreateFlag<SubViewT>::SubViewFactoryWithCreateFlag (bool createAndDelete)
-    : mCreateAndDelete (createAndDelete)
-    {}
-
-    template<class SubViewT>
-    CSVDoc::SubView *SubViewFactoryWithCreateFlag<SubViewT>::makeSubView (const CSMWorld::UniversalId& id,
-        CSMDoc::Document& document)
+    template<class SubViewT, class CreatorFactoryT>
+    CSVDoc::SubView *SubViewFactoryWithCreator<SubViewT, CreatorFactoryT>::makeSubView (
+        const CSMWorld::UniversalId& id, CSMDoc::Document& document)
     {
-        return new SubViewT (id, document, mCreateAndDelete);
+        return new SubViewT (id, document, CreatorFactoryT());
     }
 }
 

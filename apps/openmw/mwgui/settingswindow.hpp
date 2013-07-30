@@ -32,6 +32,7 @@ namespace MWGui
             MyGUI::ScrollBar* mToolTipDelaySlider;
             MyGUI::Button* mSubtitlesButton;
             MyGUI::Button* mCrosshairButton;
+            MyGUI::Button* mBestAttackButton;
 
             // graphics
             MyGUI::ListBox* mResolutionList;

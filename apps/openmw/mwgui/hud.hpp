@@ -46,12 +46,14 @@ namespace MWGui
 
         void update();
 
+        void setEnemy(const MWWorld::Ptr& enemy);
+
     private:
-        MyGUI::ProgressPtr mHealth, mMagicka, mStamina;
+        MyGUI::ProgressBar *mHealth, *mMagicka, *mStamina, *mEnemyHealth;
         MyGUI::Widget* mHealthFrame;
         MyGUI::Widget *mWeapBox, *mSpellBox;
         MyGUI::ImageBox *mWeapImage, *mSpellImage;
-        MyGUI::ProgressPtr mWeapStatus, mSpellStatus;
+        MyGUI::ProgressBar *mWeapStatus, *mSpellStatus;
         MyGUI::Widget *mEffectBox, *mMinimapBox;
         MyGUI::Button* mMinimapButton;
         MyGUI::ScrollView* mMinimap;
@@ -88,6 +90,9 @@ namespace MWGui
         bool mWorldMouseOver;
 
         SpellIcons* mSpellIcons;
+
+        MWWorld::Ptr mEnemy;
+        float mEnemyHealthTimer;
 
         void onWorldClicked(MyGUI::Widget* _sender);
         void onWorldMouseOver(MyGUI::Widget* _sender, int x, int y);

@@ -106,10 +106,10 @@ std::string ruleString(ESM::DialInfo::SelectStruct ss)
     {
     case '0': oper_str = "=="; break;
     case '1': oper_str = "!="; break;
-    case '2': oper_str = "< "; break;
-    case '3': oper_str = "<="; break;
-    case '4': oper_str = "> "; break;
-    case '5': oper_str = ">="; break;
+    case '2': oper_str = "> "; break;
+    case '3': oper_str = ">="; break;
+    case '4': oper_str = "< "; break;
+    case '5': oper_str = "<="; break;
     }
 
     std::ostringstream stream;

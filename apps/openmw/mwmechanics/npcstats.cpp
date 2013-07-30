@@ -31,6 +31,7 @@ MWMechanics::NpcStats::NpcStats()
 , mWerewolf (false)
 , mWerewolfKills (0)
 , mProfit(0)
+, mAttackStrength(0.0f)
 {
     mSkillIncreases.resize (ESM::Attribute::Length);
     for (int i=0; i<ESM::Attribute::Length; ++i)
@@ -45,6 +46,16 @@ MWMechanics::DrawState_ MWMechanics::NpcStats::getDrawState() const
 void MWMechanics::NpcStats::setDrawState (DrawState_ state)
 {
     mDrawState = state;
+}
+
+float MWMechanics::NpcStats::getAttackStrength() const
+{
+    return mAttackStrength;
+}
+
+void MWMechanics::NpcStats::setAttackStrength(float value)
+{
+    mAttackStrength = value;
 }
 
 int MWMechanics::NpcStats::getBaseDisposition() const

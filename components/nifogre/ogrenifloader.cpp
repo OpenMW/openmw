@@ -688,6 +688,21 @@ class NIFObjectLoader
                 }
 
                 std::string::size_type nextpos = std::min(str.find('\r', pos), str.find('\n', pos));
+                if(nextpos != std::string::npos)
+                {
+                    do {
+                        nextpos--;
+                    } while(nextpos > pos && ::isspace(str[nextpos]));
+                    nextpos++;
+                }
+                else if(::isspace(*str.rbegin()))
+                {
+                    std::string::const_iterator last = str.end();
+                    do {
+                        last--;
+                    } while(last != str.begin() && ::isspace(*last));
+                    nextpos = std::distance(str.begin(), ++last);
+                }
                 std::string result = str.substr(pos, nextpos-pos);
                 textkeys.insert(std::make_pair(tk->list[i].time, Misc::StringUtils::toLower(result)));
 
@@ -743,7 +758,7 @@ class NIFObjectLoader
             e = e->extra;
         }
 
-        if(!node->controller.empty())
+        if(!node->controller.empty() && (node->parent || node->recType != Nif::RC_NiNode))
             createNodeControllers(name, node->controller, objectlist, animflags);
 
         if(node->recType == Nif::RC_NiCamera)

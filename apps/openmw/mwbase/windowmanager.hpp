@@ -215,6 +215,7 @@ namespace MWBase
             virtual void removeStaticMessageBox() = 0;
 
             virtual void enterPressed () = 0;
+            virtual void activateKeyPressed () = 0;
             virtual int readPressedButton() = 0;
             ///< returns the index of the pressed button or -1 if no button was pressed (->MessageBoxmanager->InteractiveMessageBox)
 
@@ -236,6 +237,8 @@ namespace MWBase
             virtual std::string getGameSettingString(const std::string &id, const std::string &default_) = 0;
 
             virtual void processChangedSettings(const Settings::CategorySettingVector& changed) = 0;
+
+            virtual void windowResized(int x, int y) = 0;
 
             virtual void executeInConsole (const std::string& path) = 0;
 
@@ -262,6 +265,8 @@ namespace MWBase
             virtual void frameStarted(float dt) = 0;
 
             virtual void changePointer (const std::string& name) = 0;
+
+            virtual void setEnemy (const MWWorld::Ptr& enemy) = 0;
 
             virtual const Translation::Storage& getTranslationDataStorage() const = 0;
 

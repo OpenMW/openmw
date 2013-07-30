@@ -34,6 +34,11 @@ namespace MWMechanics
         bool mAlarmed;
         bool mAttacked;
         bool mHostile;
+        bool mAttackingOrSpell;//for the player, this is true if the left mouse button is pressed, false if not.
+
+        int mAttackType;
+
+        std::string mLastHitObject; // The last object to hit this actor
 
     public:
         CreatureStats();
@@ -53,6 +58,8 @@ namespace MWMechanics
         const ActiveSpells & getActiveSpells() const;
 
         const MagicEffects & getMagicEffects() const;
+
+        const bool & getAttackingOrSpell() const;
 
         int getLevel() const;
 
@@ -82,6 +89,17 @@ namespace MWMechanics
         void setActiveSpells(const ActiveSpells &active);
 
         void setMagicEffects(const MagicEffects &effects);
+
+        void setAttackingOrSpell(const bool &attackingOrSpell);
+
+        enum AttackType
+        {
+            AT_Slash,
+            AT_Thrust,
+            AT_Chop
+        };
+        void setAttackType(int attackType) { mAttackType = attackType; }
+        int getAttackType() { return mAttackType; }
 
         void setLevel(int level);
 
@@ -139,6 +157,9 @@ namespace MWMechanics
         void setHostile (bool hostile);
 
         bool getCreatureTargetted() const;
+
+        void setLastHitObject(const std::string &objectid);
+        const std::string &getLastHitObject() const;
     };
 }
 

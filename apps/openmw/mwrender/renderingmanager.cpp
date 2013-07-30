@@ -16,6 +16,8 @@
 #include <OgreControllerManager.h>
 #include <OgreMeshManager.h>
 
+#include <SDL_video.h>
+
 #include <extern/shiny/Main/Factory.hpp>
 #include <extern/shiny/Platforms/Ogre/OgrePlatform.hpp>
 
@@ -77,9 +79,9 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
     }
 
     mRendering.createScene("PlayerCam", Settings::Manager::getFloat("field of view", "General"), 5);
-    mRendering.setWindowEventListener(this);
 
     mRendering.getWindow()->addListener(this);
+    mRendering.setWindowListener(this);
 
     mCompositors = new Compositors(mRendering.getViewport());
 
@@ -170,7 +172,7 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
 
     mOcclusionQuery = new OcclusionQuery(&mRendering, mSkyManager->getSunNode());
 
-    mVideoPlayer = new VideoPlayer(mRendering.getScene ());
+    mVideoPlayer = new VideoPlayer(mRendering.getScene (), mRendering.getWindow());
     mVideoPlayer->setResolution (Settings::Manager::getInt ("resolution x", "Video"), Settings::Manager::getInt ("resolution y", "Video"));
 
     mSun = 0;
@@ -186,7 +188,6 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
 RenderingManager::~RenderingManager ()
 {
     mRendering.getWindow()->removeListener(this);
-    mRendering.removeWindowEventListener(this);
 
     delete mPlayerAnimation;
     delete mCamera;
@@ -323,18 +324,18 @@ void RenderingManager::update (float duration, bool paused)
 
     // player position
     MWWorld::RefData &data = player.getRefData();
-    float *_playerPos = data.getPosition().pos;
-    Ogre::Vector3 playerPos(_playerPos[0], _playerPos[1], _playerPos[2]);
+    Ogre::Vector3 playerPos(data.getPosition().pos);
 
-    Ogre::Vector3 orig, dest;
-    if(!mCamera->getPosition(orig, dest))
+    mCamera->setCameraDistance();
+    if(!mCamera->isFirstPerson())
     {
-        orig.z += mCamera->getHeight() * mRootNode->getScale().z;
+        Ogre::Vector3 orig, dest;
+        mCamera->getPosition(orig, dest);
 
         btVector3 btOrig(orig.x, orig.y, orig.z);
         btVector3 btDest(dest.x, dest.y, dest.z);
-        std::pair<bool, float> test = mPhysicsEngine->sphereCast(mRendering.getCamera()->getNearClipDistance()*2.5, btOrig, btDest);
-        if (test.first)
+        std::pair<bool,float> test = mPhysicsEngine->sphereCast(mRendering.getCamera()->getNearClipDistance()*2.5, btOrig, btDest);
+        if(test.first)
             mCamera->setCameraDistance(test.second * orig.distance(dest), false, false);
     }
 
@@ -718,7 +719,7 @@ Compositors* RenderingManager::getCompositors()
 
 void RenderingManager::processChangedSettings(const Settings::CategorySettingVector& settings)
 {
-    //bool changeRes = false;
+    bool changeRes = false;
     bool rebuild = false; // rebuild static geometry (necessary after any material changes)
     for (Settings::CategorySettingVector::const_iterator it=settings.begin();
             it != settings.end(); ++it)
@@ -732,11 +733,11 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
             if (!MWBase::Environment::get().getWorld()->isCellExterior() && !MWBase::Environment::get().getWorld()->isCellQuasiExterior())
                 configureFog(*MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell());
         }
-        /*else if (it->first == "Video" && (
+        else if (it->first == "Video" && (
                 it->second == "resolution x"
                 || it->second == "resolution y"
                 || it->second == "fullscreen"))
-            changeRes = true;*/
+            changeRes = true;
         else if (it->second == "field of view" && it->first == "General")
             mRendering.setFov(Settings::Manager::getFloat("field of view", "General"));
         else if ((it->second == "texture filtering" && it->first == "General")
@@ -790,24 +791,31 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
         }
     }
 
-    /*
     if (changeRes)
     {
         unsigned int x = Settings::Manager::getInt("resolution x", "Video");
         unsigned int y = Settings::Manager::getInt("resolution y", "Video");
+        bool fullscreen = Settings::Manager::getBool("fullscreen", "Video");
 
-        SDL_SetWindowFullscreen(mRendering.getSDLWindow(), 0);
+        SDL_Window* window = mRendering.getSDLWindow();
 
-        if (x != mRendering.getWindow()->getWidth() || y != mRendering.getWindow()->getHeight())
+        SDL_SetWindowFullscreen(window, 0);
+
+        if (SDL_GetWindowFlags(window) & SDL_WINDOW_MAXIMIZED)
+            SDL_RestoreWindow(window);
+
+        if (fullscreen)
         {
-            SDL_SetWindowSize(mRendering.getSDLWindow(), x, y);
-            mRendering.getWindow()->resize(x, y);
+            SDL_DisplayMode mode;
+            SDL_GetWindowDisplayMode(window, &mode);
+            mode.w = x;
+            mode.h = y;
+            SDL_SetWindowDisplayMode(window, &mode);
+            SDL_SetWindowFullscreen(window, fullscreen);
         }
-
-        SDL_SetWindowFullscreen(mRendering.getSDLWindow(), Settings::Manager::getBool("fullscreen", "Video") ? SDL_WINDOW_FULLSCREEN : 0);
-        //mRendering.getWindow()->setFullscreen(Settings::Manager::getBool("fullscreen", "Video"), x, y);
+        else
+            SDL_SetWindowSize(window, x, y);
     }
-    */
 
     mWater->processChangedSettings(settings);
 
@@ -825,24 +833,14 @@ void RenderingManager::setMenuTransparency(float val)
     tex->getBuffer()->unlock();
 }
 
-void RenderingManager::windowResized(Ogre::RenderWindow* rw)
+void RenderingManager::windowResized(int x, int y)
 {
-    Settings::Manager::setInt("resolution x", "Video", rw->getWidth());
-    Settings::Manager::setInt("resolution y", "Video", rw->getHeight());
-
     mRendering.adjustViewport();
     mCompositors->recreate();
 
-    mVideoPlayer->setResolution (rw->getWidth(), rw->getHeight());
+    mVideoPlayer->setResolution (x, y);
 
-    const Settings::CategorySettingVector& changed = Settings::Manager::apply();
-    MWBase::Environment::get().getInputManager()->processChangedSettings(changed);
-    MWBase::Environment::get().getWindowManager()->processChangedSettings(changed);
-}
-
-void RenderingManager::windowClosed(Ogre::RenderWindow* rw)
-{
-    Ogre::Root::getSingleton ().queueEndRendering ();
+    MWBase::Environment::get().getWindowManager()->windowResized(x,y);
 }
 
 void RenderingManager::applyCompositors()
@@ -905,7 +903,15 @@ void RenderingManager::setCameraDistance(float dist, bool adjust, bool override)
 {
     if(!mCamera->isVanityOrPreviewModeEnabled() && !mCamera->isFirstPerson())
     {
-        mCamera->setCameraDistance(-dist / 120.f * 10, adjust, override);
+        if(mCamera->isNearest() && dist > 0.f)
+            mCamera->toggleViewMode();
+        else
+            mCamera->setCameraDistance(-dist / 120.f * 10, adjust, override);
+    }
+    else if(mCamera->isFirstPerson() && dist < 0.f)
+    {
+        mCamera->toggleViewMode();
+        mCamera->setCameraDistance(0.f, false, override);
     }
 }
 

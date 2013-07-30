@@ -60,15 +60,31 @@ namespace CSVWorld
 
             void editRequest (int row);
 
-        private slots:
+            void selectionSizeChanged (int size);
 
-            void createRecord();
+            void tableSizeChanged (int size, int deleted, int modified);
+            ///< \param size Number of not deleted records
+            /// \param deleted Number of deleted records
+            /// \param modified Number of added and modified records
+
+            void createRequest();
+
+        private slots:
 
             void revertRecord();
 
             void deleteRecord();
 
             void editRecord();
+
+        public slots:
+
+            void tableSizeUpdate();
+
+            void selectionSizeUpdate();
+
+            void requestFocus (const std::string& id);
+
     };
 }
 

@@ -52,6 +52,15 @@ protected:
         virtual void setValue(Ogre::Real value);
     };
 
+    class NullAnimationValue : public Ogre::ControllerValue<Ogre::Real>
+    {
+    public:
+        virtual Ogre::Real getValue() const
+        { return 0.0f; }
+        virtual void setValue(Ogre::Real value)
+        { }
+    };
+
     struct AnimSource : public Ogre::AnimationAlloc {
         NifOgre::TextKeyMap mTextKeys;
         std::vector<Ogre::Controller<Ogre::Real> > mControllers[sNumGroups];
@@ -60,10 +69,10 @@ protected:
 
     struct AnimState {
         Ogre::SharedPtr<AnimSource> mSource;
-        NifOgre::TextKeyMap::const_iterator mStartKey;
-        NifOgre::TextKeyMap::const_iterator mLoopStartKey;
-        NifOgre::TextKeyMap::const_iterator mStopKey;
-        NifOgre::TextKeyMap::const_iterator mNextKey;
+        float mStartTime;
+        float mLoopStartTime;
+        float mLoopStopTime;
+        float mStopTime;
 
         float mTime;
         float mSpeedMult;
@@ -75,7 +84,8 @@ protected:
         int mGroups;
         bool mAutoDisable;
 
-        AnimState() : mTime(0.0f), mSpeedMult(1.0f), mPlaying(false), mLoopCount(0),
+        AnimState() : mStartTime(0.0f), mLoopStartTime(0.0f), mLoopStopTime(0.0f), mStopTime(0.0f),
+                      mTime(0.0f), mSpeedMult(1.0f), mPlaying(false), mLoopCount(0),
                       mPriority(0), mGroups(0), mAutoDisable(true)
         { }
     };
@@ -98,6 +108,7 @@ protected:
     AnimStateMap mStates;
 
     Ogre::SharedPtr<AnimationValue> mAnimationValuePtr[sNumGroups];
+    Ogre::SharedPtr<NullAnimationValue> mNullAnimationValuePtr;
 
     ObjectAttachMap mAttachedObjects;
 
@@ -131,9 +142,7 @@ protected:
                const std::string &groupname, const std::string &start, const std::string &stop,
                float startpoint);
 
-    bool doLoop(AnimState &state);
-
-    bool handleTextKey(AnimState &state, const std::string &groupname, const NifOgre::TextKeyMap::const_iterator &key);
+    void handleTextKey(AnimState &state, const std::string &groupname, const NifOgre::TextKeyMap::const_iterator &key);
 
     /* Sets the root model of the object. If 'baseonly' is true, then any meshes or particle
      * systems in the model are ignored (useful for NPCs, where only the skeleton is needed for
@@ -199,11 +208,9 @@ public:
      * \param groupname Animation group to check.
      * \param complete Stores completion amount (0 = at start key, 0.5 = half way between start and stop keys), etc.
      * \param speedmult Stores the animation speed multiplier
-     * \param start Stores the start key
-     * \param stop Stores the stop key
      * \return True if the animation is active, false otherwise.
      */
-    bool getInfo(const std::string &groupname, float *complete=NULL, float *speedmult=NULL, std::string *start=NULL, std::string *stop=NULL) const;
+    bool getInfo(const std::string &groupname, float *complete=NULL, float *speedmult=NULL) const;
 
     /** Disables the specified animation group;
      * \param groupname Animation group to disable.
