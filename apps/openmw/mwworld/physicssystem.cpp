@@ -118,7 +118,8 @@ namespace MWWorld
             newPosition = trace.endpos;
 
             physicActor->setOnGround(hit && getSlope(trace.planenormal) <= sMaxSlope);
-            physicActor->enableCollisions(wasCollisionMode);
+            if (wasCollisionMode)
+                physicActor->enableCollisions(true);
 
             if (hit)
                 return newPosition+Ogre::Vector3(0,0,4);
@@ -148,6 +149,7 @@ namespace MWWorld
             float remainingTime = time;
             bool isInterior = !ptr.getCell()->isExterior();
             Ogre::Vector3 halfExtents = physicActor->getHalfExtents();// + Vector3(1,1,1);
+            bool wasCollisionMode = physicActor->getCollisionMode();
             physicActor->enableCollisions(false);
             Ogre::Quaternion orient = Ogre::Quaternion(Ogre::Radian(ptr.getRefData().getPosition().rot[2]), Ogre::Vector3::UNIT_Z);
             Ogre::Vector3 velocity;
@@ -228,7 +230,8 @@ namespace MWWorld
             }
             physicActor->setOnGround(onground);
             physicActor->setVerticalForce(!onground ? clippedVelocity.z - time*627.2f : 0.0f);
-            physicActor->enableCollisions(true);
+            if (wasCollisionMode)
+                physicActor->enableCollisions(true);
             return newPosition;
         }
     };

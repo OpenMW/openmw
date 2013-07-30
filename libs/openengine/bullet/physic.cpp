@@ -45,8 +45,8 @@ namespace Physic
     void PhysicActor::enableCollisions(bool collision)
     {
         assert(mBody);
-        if(collision && !collisionMode) mBody->translate(btVector3(0,0,-1000));
-        if(!collision && collisionMode) mBody->translate(btVector3(0,0,1000));
+        if(collision && !collisionMode) enableCollisionBody();
+        if(!collision && collisionMode) disableCollisionBody();
         collisionMode = collision;
     }
 
