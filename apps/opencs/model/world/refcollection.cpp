@@ -21,10 +21,7 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
     while (cell2.getNextRef (reader, ref))
     {
         /// \todo handle deleted and moved references
-        std::ostringstream stream;
-        stream << "ref#" << mNextId++;
-
-        ref.load (reader, cell2, stream.str());
+        ref.load (reader, cell2, getNewId());
 
         Record<CellRef> record2;
         record2.mState = base ? RecordBase::State_BaseOnly : RecordBase::State_ModifiedOnly;
@@ -34,4 +31,11 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
     }
 
     mCells.setRecord (cellIndex, cell);
+}
+
+std::string CSMWorld::RefCollection::getNewId()
+{
+    std::ostringstream stream;
+    stream << "ref#" << mNextId++;
+    return stream.str();
 }

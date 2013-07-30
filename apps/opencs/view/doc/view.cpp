@@ -78,6 +78,11 @@ void CSVDoc::View::setupViewMenu()
     QAction *newWindow = new QAction (tr ("&New View"), this);
     connect (newWindow, SIGNAL (triggered()), this, SLOT (newView()));
     view->addAction (newWindow);
+
+    mShowStatusBar = new QAction (tr ("Show Status Bar"), this);
+    mShowStatusBar->setCheckable (true);
+    connect (mShowStatusBar, SIGNAL (toggled (bool)), this, SLOT (toggleShowStatusBar (bool)));
+    view->addAction (mShowStatusBar);
 }
 
 void CSVDoc::View::setupWorldMenu()
@@ -282,6 +287,9 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id)
     /// \todo add an user setting to reuse sub views (on a per document basis or on a per top level view basis)
 
     SubView *view = mSubViewFactory.makeSubView (id, *mDocument);
+
+    view->setStatusBar (mShowStatusBar->isChecked());
+
     mSubViewWindow.addDockWidget (Qt::TopDockWidgetArea, view);
 
     connect (view, SIGNAL (focusId (const CSMWorld::UniversalId&)), this,
@@ -435,4 +443,13 @@ void CSVDoc::View::updateEditorSetting (const QString &settingName, const QStrin
 
     else if (settingName == "Height")
             resizeViewHeight (settingValue.toInt());
+}
+
+void CSVDoc::View::toggleShowStatusBar (bool show)
+{
+    foreach (QObject *view, mSubViewWindow.children())
+    {
+        if (CSVDoc::SubView *subView = dynamic_cast<CSVDoc::SubView *> (view))
+            subView->setStatusBar (show);
+    }
 }

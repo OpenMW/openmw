@@ -15,8 +15,6 @@ namespace CSMWorld
 
             IdTableProxyModel (QObject *parent = 0);
 
-            virtual void addRecord (const std::string& id);
-
             virtual QModelIndex getModelIndex (const std::string& id, int column) const;
     };
 }

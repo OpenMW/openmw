@@ -116,13 +116,13 @@ QModelIndex CSMWorld::IdTable::parent (const QModelIndex& index) const
     return QModelIndex();
 }
 
-void CSMWorld::IdTable::addRecord (const std::string& id)
+void CSMWorld::IdTable::addRecord (const std::string& id, UniversalId::Type type)
 {
     int index = mIdCollection->getAppendIndex();
 
     beginInsertRows (QModelIndex(), index, index);
 
-    mIdCollection->appendBlankRecord (id);
+    mIdCollection->appendBlankRecord (id, type);
 
     endInsertRows();
 }
