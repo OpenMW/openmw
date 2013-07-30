@@ -9,6 +9,7 @@
 #include "regionmapsubview.hpp"
 #include "genericcreator.hpp"
 #include "cellcreator.hpp"
+#include "referenceablecreator.hpp"
 
 void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
 {
@@ -29,7 +30,6 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         CSMWorld::UniversalId::Type_Regions,
         CSMWorld::UniversalId::Type_Birthsigns,
         CSMWorld::UniversalId::Type_Spells,
-        CSMWorld::UniversalId::Type_Referenceables,
         CSMWorld::UniversalId::Type_References,
 
         CSMWorld::UniversalId::Type_None // end marker
@@ -41,6 +41,9 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
 
     manager.add (CSMWorld::UniversalId::Type_Cells,
         new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<CellCreator> >);
+
+    manager.add (CSMWorld::UniversalId::Type_Referenceables,
+        new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<ReferenceableCreator> >);
 
     manager.add (CSMWorld::UniversalId::Type_Script, new CSVDoc::SubViewFactory<ScriptSubView>);
 

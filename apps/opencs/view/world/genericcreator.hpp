@@ -9,6 +9,11 @@ class QHBoxLayout;
 
 #include "../../model/world/universalid.hpp"
 
+namespace CSMWorld
+{
+    class CreateCommand;
+}
+
 namespace CSVWorld
 {
     class GenericCreator : public Creator
@@ -33,7 +38,11 @@ namespace CSVWorld
 
             void insertAtBeginning (QWidget *widget, bool stretched);
 
+            void insertBeforeButtons (QWidget *widget, bool stretched);
+
             virtual std::string getId() const;
+
+            virtual void configureCreateCommand (CSMWorld::CreateCommand& command) const;
 
         public:
 

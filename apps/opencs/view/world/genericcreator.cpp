@@ -1,6 +1,8 @@
 
 #include "genericcreator.hpp"
 
+#include <memory>
+
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <QLineEdit>
@@ -32,10 +34,17 @@ void CSVWorld::GenericCreator::insertAtBeginning (QWidget *widget, bool stretche
     mLayout->insertWidget (0, widget, stretched ? 1 : 0);
 }
 
+void CSVWorld::GenericCreator::insertBeforeButtons (QWidget *widget, bool stretched)
+{
+    mLayout->insertWidget (mLayout->count()-2, widget, stretched ? 1 : 0);
+}
+
 std::string CSVWorld::GenericCreator::getId() const
 {
     return mId->text().toUtf8().constData();
 }
+
+void CSVWorld::GenericCreator::configureCreateCommand (CSMWorld::CreateCommand& command) const {}
 
 CSVWorld::GenericCreator::GenericCreator (CSMWorld::Data& data, QUndoStack& undoStack,
     const CSMWorld::UniversalId& id)
@@ -103,8 +112,12 @@ void CSVWorld::GenericCreator::create()
     {
         std::string id = getId();
 
-        mUndoStack.push (new CSMWorld::CreateCommand (
+        std::auto_ptr<CSMWorld::CreateCommand> command (new CSMWorld::CreateCommand (
             dynamic_cast<CSMWorld::IdTable&> (*mData.getTableModel (mListId)), id));
+
+        configureCreateCommand (*command);
+
+        mUndoStack.push (command.release());
 
         emit done();
         emit requestFocus (id);

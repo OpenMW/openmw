@@ -9,6 +9,8 @@
 #include <QUndoCommand>
 #include <QModelIndex>
 
+#include "universalid.hpp"
+
 class QModelIndex;
 class QAbstractItemModel;
 
@@ -39,10 +41,13 @@ namespace CSMWorld
     {
             IdTable& mModel;
             std::string mId;
+            UniversalId::Type mType;
 
         public:
 
             CreateCommand (IdTable& model, const std::string& id, QUndoCommand *parent = 0);
+
+            void setType (UniversalId::Type type);
 
             virtual void redo();
 

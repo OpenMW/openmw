@@ -26,14 +26,19 @@ void CSMWorld::ModifyCommand::undo()
 }
 
 CSMWorld::CreateCommand::CreateCommand (IdTable& model, const std::string& id, QUndoCommand *parent)
-: QUndoCommand (parent), mModel (model), mId (id)
+: QUndoCommand (parent), mModel (model), mId (id), mType (UniversalId::Type_None)
 {
     setText (("Create record " + id).c_str());
 }
 
+void CSMWorld::CreateCommand::setType (UniversalId::Type type)
+{
+    mType = type;
+}
+
 void CSMWorld::CreateCommand::redo()
 {
-    mModel.addRecord (mId);
+    mModel.addRecord (mId, mType);
 }
 
 void CSMWorld::CreateCommand::undo()
