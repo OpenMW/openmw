@@ -31,6 +31,11 @@ CSMWorld::CreateCommand::CreateCommand (IdTable& model, const std::string& id, Q
     setText (("Create record " + id).c_str());
 }
 
+void CSMWorld::CreateCommand::addValue (int column, const QVariant& value)
+{
+    mValues[column] = value;
+}
+
 void CSMWorld::CreateCommand::setType (UniversalId::Type type)
 {
     mType = type;
@@ -39,6 +44,9 @@ void CSMWorld::CreateCommand::setType (UniversalId::Type type)
 void CSMWorld::CreateCommand::redo()
 {
     mModel.addRecord (mId, mType);
+
+    for (std::map<int, QVariant>::const_iterator iter (mValues.begin()); iter!=mValues.end(); ++iter)
+        mModel.setData (mModel.getModelIndex (mId, iter->first), iter->second);
 }
 
 void CSMWorld::CreateCommand::undo()

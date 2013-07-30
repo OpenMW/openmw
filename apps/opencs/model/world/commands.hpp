@@ -4,6 +4,7 @@
 #include "record.hpp"
 
 #include <string>
+#include <map>
 
 #include <QVariant>
 #include <QUndoCommand>
@@ -42,12 +43,15 @@ namespace CSMWorld
             IdTable& mModel;
             std::string mId;
             UniversalId::Type mType;
+            std::map<int, QVariant> mValues;
 
         public:
 
             CreateCommand (IdTable& model, const std::string& id, QUndoCommand *parent = 0);
 
             void setType (UniversalId::Type type);
+
+            void addValue (int column, const QVariant& value);
 
             virtual void redo();
 

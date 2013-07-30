@@ -112,6 +112,10 @@ namespace CSMWorld
 
             RefIdCollection& getReferenceables();
 
+            const RefCollection& getReferences() const;
+
+            RefCollection& getReferences();
+
             QAbstractItemModel *getTableModel (const UniversalId& id);
             ///< If no table model is available for \a id, an exception is thrown.
             ///

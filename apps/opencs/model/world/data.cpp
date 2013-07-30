@@ -300,6 +300,16 @@ CSMWorld::RefIdCollection& CSMWorld::Data::getReferenceables()
     return mReferenceables;
 }
 
+const CSMWorld::RefCollection& CSMWorld::Data::getReferences() const
+{
+    return mRefs;
+}
+
+CSMWorld::RefCollection& CSMWorld::Data::getReferences()
+{
+    return mRefs;
+}
+
 QAbstractItemModel *CSMWorld::Data::getTableModel (const UniversalId& id)
 {
     std::map<UniversalId::Type, QAbstractItemModel *>::iterator iter = mModelIndex.find (id.getType());

@@ -10,9 +10,12 @@
 #include "genericcreator.hpp"
 #include "cellcreator.hpp"
 #include "referenceablecreator.hpp"
+#include "referencecreator.hpp"
 
 void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
 {
+    // Regular record tables (including references which are actually sub-records, but are promoted
+    // to top-level records within the editor)
     manager.add (CSMWorld::UniversalId::Type_Gmsts,
         new CSVDoc::SubViewFactoryWithCreator<TableSubView, NullCreatorFactory>);
 
@@ -30,7 +33,6 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         CSMWorld::UniversalId::Type_Regions,
         CSMWorld::UniversalId::Type_Birthsigns,
         CSMWorld::UniversalId::Type_Spells,
-        CSMWorld::UniversalId::Type_References,
 
         CSMWorld::UniversalId::Type_None // end marker
     };
@@ -45,7 +47,12 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
     manager.add (CSMWorld::UniversalId::Type_Referenceables,
         new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<ReferenceableCreator> >);
 
+    manager.add (CSMWorld::UniversalId::Type_References,
+        new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<ReferenceCreator> >);
+
+    // Subviews for editing/viewing individual records
     manager.add (CSMWorld::UniversalId::Type_Script, new CSVDoc::SubViewFactory<ScriptSubView>);
 
+    // Other stuff (combined record tables)
     manager.add (CSMWorld::UniversalId::Type_RegionMap, new CSVDoc::SubViewFactory<RegionMapSubView>);
 }

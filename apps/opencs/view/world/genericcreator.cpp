@@ -46,6 +46,16 @@ std::string CSVWorld::GenericCreator::getId() const
 
 void CSVWorld::GenericCreator::configureCreateCommand (CSMWorld::CreateCommand& command) const {}
 
+const CSMWorld::Data& CSVWorld::GenericCreator::getData() const
+{
+    return mData;
+}
+
+CSMWorld::Data& CSVWorld::GenericCreator::getData()
+{
+    return mData;
+}
+
 CSVWorld::GenericCreator::GenericCreator (CSMWorld::Data& data, QUndoStack& undoStack,
     const CSMWorld::UniversalId& id)
 : mData (data), mUndoStack (undoStack), mListId (id), mLocked (false)

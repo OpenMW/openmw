@@ -44,6 +44,10 @@ namespace CSVWorld
 
             virtual void configureCreateCommand (CSMWorld::CreateCommand& command) const;
 
+            const CSMWorld::Data& getData() const;
+
+            CSMWorld::Data& getData();
+
         public:
 
             GenericCreator (CSMWorld::Data& data, QUndoStack& undoStack,
