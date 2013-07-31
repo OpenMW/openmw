@@ -236,7 +236,6 @@ namespace MWWorld
 
         // Rebuild player
         setupPlayer();
-        const ESM::NPC* playerNpc = mStore.get<ESM::NPC>().find("player");
         MWWorld::Ptr player = mPlayer->getPlayer();
         renderPlayer();
         mRendering->resetCamera();
@@ -246,9 +245,6 @@ namespace MWWorld
 
         // make sure to do this so that local scripts from items that were in the players inventory are removed
         mLocalScripts.clear();
-
-        MWWorld::Class::get(player).getContainerStore(player).fill(playerNpc->mInventory, "", mStore);
-        MWWorld::Class::get(player).getInventoryStore(player).autoEquip(player);
 
         MWBase::Environment::get().getWindowManager()->updatePlayer();
 
