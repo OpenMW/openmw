@@ -11,6 +11,7 @@
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
@@ -78,6 +79,8 @@ namespace MWClass
 
             data->mCreatureStats.setLevel(ref->mBase->mData.mLevel);
 
+            data->mCreatureStats.getAiSequence().fill(ref->mBase->mAiPackage);
+
             data->mCreatureStats.setAiSetting (0, ref->mBase->mAiData.mHello);
             data->mCreatureStats.setAiSetting (1, ref->mBase->mAiData.mFight);
             data->mCreatureStats.setAiSetting (2, ref->mBase->mAiData.mFlee);
@@ -87,6 +90,10 @@ namespace MWClass
             for (std::vector<std::string>::const_iterator iter (ref->mBase->mSpells.mList.begin());
                 iter!=ref->mBase->mSpells.mList.end(); ++iter)
                 data->mCreatureStats.getSpells().add (*iter);
+
+            // inventory
+            data->mContainerStore.fill(ref->mBase->mInventory, getId(ptr),
+                                       MWBase::Environment::get().getWorld()->getStore());
 
             // store
             ptr.getRefData().setCustomData (data.release());
@@ -147,6 +154,70 @@ namespace MWClass
 
         return dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mCreatureStats;
     }
+
+
+    void Creature::hit(const MWWorld::Ptr& ptr, int type) const
+    {
+    }
+
+    void Creature::onHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, bool successful) const
+    {
+        // NOTE: 'object' and/or 'attacker' may be empty.
+
+        if(!successful)
+        {
+            // TODO: Handle HitAttemptOnMe script function
+
+            // Missed
+            MWBase::Environment::get().getSoundManager()->playSound3D(ptr, "miss", 1.0f, 1.0f);
+            return;
+        }
+
+        if(!object.isEmpty())
+            getCreatureStats(ptr).setLastHitObject(MWWorld::Class::get(object).getId(object));
+
+        if(!attacker.isEmpty() && attacker.getRefData().getHandle() == "player")
+        {
+            const std::string &script = ptr.get<ESM::Creature>()->mBase->mScript;
+            /* Set the OnPCHitMe script variable. The script is responsible for clearing it. */
+            if(!script.empty())
+                ptr.getRefData().getLocals().setVarByInt(script, "onpchitme", 1);
+        }
+
+        if(ishealth)
+        {
+            if(damage > 0.0f)
+                MWBase::Environment::get().getSoundManager()->playSound3D(ptr, "Health Damage", 1.0f, 1.0f);
+            float health = getCreatureStats(ptr).getHealth().getCurrent() - damage;
+            setActorHealth(ptr, health, attacker);
+        }
+        else
+        {
+            MWMechanics::DynamicStat<float> fatigue(getCreatureStats(ptr).getFatigue());
+            fatigue.setCurrent(fatigue.getCurrent() - damage);
+            getCreatureStats(ptr).setFatigue(fatigue);
+        }
+    }
+
+    void Creature::setActorHealth(const MWWorld::Ptr& ptr, float health, const MWWorld::Ptr& attacker) const
+    {
+        MWMechanics::CreatureStats &crstats = getCreatureStats(ptr);
+        bool wasDead = crstats.isDead();
+
+        MWMechanics::DynamicStat<float> stat(crstats.getHealth());
+        stat.setCurrent(health);
+        crstats.setHealth(stat);
+
+        if(!wasDead && crstats.isDead())
+        {
+            // actor was just killed
+        }
+        else if(wasDead && !crstats.isDead())
+        {
+            // actor was just resurrected
+        }
+    }
+
 
     boost::shared_ptr<MWWorld::Action> Creature::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
@@ -291,6 +362,33 @@ namespace MWClass
         return ref->mBase->mPersistent;
     }
 
+    std::string Creature::getSoundIdFromSndGen(const MWWorld::Ptr &ptr, const std::string &name) const
+    {
+        const MWWorld::Store<ESM::SoundGenerator> &store = MWBase::Environment::get().getWorld()->getStore().get<ESM::SoundGenerator>();
+
+        int type = getSndGenTypeFromName(ptr, name);
+        if(type >= 0)
+        {
+            std::vector<const ESM::SoundGenerator*> sounds;
+            sounds.reserve(8);
+
+            std::string ptrid = Creature::getId(ptr);
+            MWWorld::Store<ESM::SoundGenerator>::iterator sound = store.begin();
+            while(sound != store.end())
+            {
+                if(type == sound->mType && sound->mCreature.size() > 0 &&
+                   Misc::StringUtils::ciEqual(ptrid.substr(0, sound->mCreature.size()),
+                                              sound->mCreature))
+                    sounds.push_back(&*sound);
+                sound++;
+            }
+            if(sounds.size() > 0)
+                return sounds[(int)(rand()/(RAND_MAX+1.0)*sounds.size())]->mSound;
+        }
+
+        return "";
+    }
+
     MWWorld::Ptr
     Creature::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
     {
@@ -298,6 +396,40 @@ namespace MWClass
             ptr.get<ESM::Creature>();
 
         return MWWorld::Ptr(&cell.mCreatures.insert(*ref), &cell);
+    }
+
+    int Creature::getSndGenTypeFromName(const MWWorld::Ptr &ptr, const std::string &name)
+    {
+        if(name == "left")
+        {
+            MWBase::World *world = MWBase::Environment::get().getWorld();
+            Ogre::Vector3 pos(ptr.getRefData().getPosition().pos);
+            if(world->isUnderwater(ptr.getCell(), pos))
+                return 2;
+            if(world->isOnGround(ptr))
+                return 0;
+            return -1;
+        }
+        if(name == "right")
+        {
+            MWBase::World *world = MWBase::Environment::get().getWorld();
+            Ogre::Vector3 pos(ptr.getRefData().getPosition().pos);
+            if(world->isUnderwater(ptr.getCell(), pos))
+                return 3;
+            if(world->isOnGround(ptr))
+                return 1;
+            return -1;
+        }
+        if(name == "moan")
+            return 4;
+        if(name == "roar")
+            return 5;
+        if(name == "scream")
+            return 6;
+        if(name == "land")
+            return 7;
+
+        throw std::runtime_error(std::string("Unexpected soundgen type: ")+name);
     }
 
     const ESM::GameSetting* Creature::fMinWalkSpeedCreature;

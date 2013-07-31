@@ -13,6 +13,8 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/dialoguemanager.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
@@ -109,6 +111,23 @@ namespace
             creatureStats.getAttribute(attribute).setBase ( std::min(creatureStats.getAttribute(attribute).getBase()
                 + static_cast<int>((level-1) * modifierSum+0.5), 100) );
         }
+
+        // initial health
+        int strength = creatureStats.getAttribute(ESM::Attribute::Strength).getBase();
+        int endurance = creatureStats.getAttribute(ESM::Attribute::Endurance).getBase();
+
+        int multiplier = 3;
+
+        if (class_->mData.mSpecialization == ESM::Class::Combat)
+            multiplier += 2;
+        else if (class_->mData.mSpecialization == ESM::Class::Stealth)
+            multiplier += 1;
+
+        if (class_->mData.mAttribute[0] == ESM::Attribute::Endurance
+            || class_->mData.mAttribute[1] == ESM::Attribute::Endurance)
+            multiplier += 1;
+
+        creatureStats.setHealth(static_cast<int> (0.5 * (strength + endurance)) + multiplier * (creatureStats.getLevel() - 1));
     }
 }
 
@@ -196,6 +215,8 @@ namespace MWClass
                 autoCalculateAttributes(ref->mBase, data->mCreatureStats);
             }
 
+            data->mCreatureStats.getAiSequence().fill(ref->mBase->mAiPackage);
+
             data->mCreatureStats.setAiSetting (0, ref->mBase->mAiData.mHello);
             data->mCreatureStats.setAiSetting (1, ref->mBase->mAiData.mFight);
             data->mCreatureStats.setAiSetting (2, ref->mBase->mAiData.mFlee);
@@ -205,6 +226,10 @@ namespace MWClass
             for (std::vector<std::string>::const_iterator iter (ref->mBase->mSpells.mList.begin());
                 iter!=ref->mBase->mSpells.mList.end(); ++iter)
                 data->mCreatureStats.getSpells().add (*iter);
+
+            // inventory
+            data->mInventoryStore.fill(ref->mBase->mInventory, getId(ptr),
+                                       MWBase::Environment::get().getWorld()->getStore());
 
             // store
             ptr.getRefData().setCustomData (data.release());
@@ -282,6 +307,243 @@ namespace MWClass
 
         return dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mNpcStats;
     }
+
+
+    void Npc::hit(const MWWorld::Ptr& ptr, int type) const
+    {
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+        const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
+
+        // Get the weapon used (if hand-to-hand, weapon = inv.end())
+        MWWorld::InventoryStore &inv = getInventoryStore(ptr);
+        MWWorld::ContainerStoreIterator weaponslot = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+        MWWorld::Ptr weapon = ((weaponslot != inv.end()) ? *weaponslot : MWWorld::Ptr());
+        if(!weapon.isEmpty() && weapon.getTypeName() != typeid(ESM::Weapon).name())
+            weapon = MWWorld::Ptr();
+
+        float dist = 100.0f * (!weapon.isEmpty() ?
+                               weapon.get<ESM::Weapon>()->mBase->mData.mReach :
+                               gmst.find("fHandToHandReach")->getFloat());
+        MWWorld::Ptr victim = world->getFacedObject(ptr, dist);
+        if(victim.isEmpty()) // Didn't hit anything
+            return;
+
+        const MWWorld::Class &othercls = MWWorld::Class::get(victim);
+        if(!othercls.isActor() || othercls.getCreatureStats(victim).isDead())
+        {
+            // Can't hit non-actors, or dead actors
+            return;
+        }
+
+        if(ptr.getRefData().getHandle() == "player")
+            MWBase::Environment::get().getWindowManager()->setEnemy(victim);
+
+        int weapskill = ESM::Skill::HandToHand;
+        if(!weapon.isEmpty())
+            weapskill = MWWorld::Class::get(weapon).getEquipmentSkill(weapon);
+
+        MWMechanics::CreatureStats &crstats = getCreatureStats(ptr);
+        MWMechanics::NpcStats &npcstats = getNpcStats(ptr);
+        const MWMechanics::MagicEffects &mageffects = crstats.getMagicEffects();
+        float hitchance = npcstats.getSkill(weapskill).getModified() +
+                          (crstats.getAttribute(ESM::Attribute::Agility).getModified() / 5.0f) +
+                          (crstats.getAttribute(ESM::Attribute::Luck).getModified() / 10.0f);
+        hitchance *= crstats.getFatigueTerm();
+        hitchance += mageffects.get(MWMechanics::EffectKey(ESM::MagicEffect::FortifyAttack)).mMagnitude -
+                     mageffects.get(MWMechanics::EffectKey(ESM::MagicEffect::Blind)).mMagnitude;
+        hitchance -= othercls.getEvasion(victim);
+
+        if((::rand()/(RAND_MAX+1.0)) > hitchance/100.0f)
+        {
+            othercls.onHit(victim, 0.0f, false, weapon, ptr, false);
+            return;
+        }
+
+        bool healthdmg;
+        float damage = 0.0f;
+        if(!weapon.isEmpty())
+        {
+            const bool weaphashealth = get(weapon).hasItemHealth(weapon);
+            const unsigned char *attack = NULL;
+            if(type == MWMechanics::CreatureStats::AT_Chop)
+                attack = weapon.get<ESM::Weapon>()->mBase->mData.mChop;
+            else if(type == MWMechanics::CreatureStats::AT_Slash)
+                attack = weapon.get<ESM::Weapon>()->mBase->mData.mSlash;
+            else if(type == MWMechanics::CreatureStats::AT_Thrust)
+                attack = weapon.get<ESM::Weapon>()->mBase->mData.mThrust;
+            if(attack)
+            {
+                damage  = attack[0] + ((attack[1]-attack[0])*npcstats.getAttackStrength());
+                damage *= 0.5f + (crstats.getAttribute(ESM::Attribute::Luck).getModified() / 100.0f);
+                if(weaphashealth)
+                {
+                    int weapmaxhealth = weapon.get<ESM::Weapon>()->mBase->mData.mHealth;
+                    if(weapon.getCellRef().mCharge == -1)
+                        weapon.getCellRef().mCharge = weapmaxhealth;
+                    damage *= float(weapon.getCellRef().mCharge) / weapmaxhealth;
+                }
+                if(!othercls.hasDetected(victim, ptr))
+                {
+                    damage *= gmst.find("fCombatCriticalStrikeMult")->getFloat();
+                    MWBase::Environment::get().getWindowManager()->messageBox("#{sTargetCriticalStrike}");
+                    MWBase::Environment::get().getSoundManager()->playSound3D(victim, "critical damage", 1.0f, 1.0f);
+                }
+                weapon.getCellRef().mCharge -= std::min(std::max(1,
+                                                                 (int)(damage * gmst.find("fWeaponDamageMult")->getFloat())),
+                                                        weapon.getCellRef().mCharge);
+            }
+            healthdmg = true;
+        }
+        else
+        {
+            // Note: MCP contains an option to include Strength in hand-to-hand damage
+            // calculations. Some mods recommend using it, so we may want to include am
+            // option for it.
+            float minstrike = gmst.find("fMinHandToHandMult")->getFloat();
+            float maxstrike = gmst.find("fMaxHandToHandMult")->getFloat();
+            damage  = npcstats.getSkill(weapskill).getModified();
+            damage *= minstrike + ((maxstrike-minstrike)*npcstats.getAttackStrength());
+            if(!othercls.hasDetected(victim, ptr))
+            {
+                damage *= gmst.find("fCombatCriticalStrikeMult")->getFloat();
+                MWBase::Environment::get().getWindowManager()->messageBox("#{sTargetCriticalStrike}");
+                MWBase::Environment::get().getSoundManager()->playSound3D(victim, "critical damage", 1.0f, 1.0f);
+            }
+
+            healthdmg = (othercls.getCreatureStats(victim).getFatigue().getCurrent() < 1.0f ||
+                         npcstats.isWerewolf());
+            if(healthdmg)
+                damage *= gmst.find("fHandtoHandHealthPer")->getFloat();
+        }
+        if(ptr.getRefData().getHandle() == "player")
+            skillUsageSucceeded(ptr, weapskill, 0);
+
+        othercls.onHit(victim, damage, healthdmg, weapon, ptr, true);
+    }
+
+    void Npc::onHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, bool successful) const
+    {
+        MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+
+        // NOTE: 'object' and/or 'attacker' may be empty.
+
+        if(!successful)
+        {
+            // TODO: Handle HitAttemptOnMe script function
+
+            // Missed
+            sndMgr->playSound3D(ptr, "miss", 1.0f, 1.0f);
+            return;
+        }
+
+        if(!object.isEmpty())
+            getCreatureStats(ptr).setLastHitObject(get(object).getId(object));
+
+        if(!attacker.isEmpty() && attacker.getRefData().getHandle() == "player")
+        {
+            const std::string &script = ptr.get<ESM::NPC>()->mBase->mScript;
+            /* Set the OnPCHitMe script variable. The script is responsible for clearing it. */
+            if(!script.empty())
+                ptr.getRefData().getLocals().setVarByInt(script, "onpchitme", 1);
+        }
+
+        if(damage > 0.0f)
+        {
+            // 'ptr' is losing health. Play a 'hit' voiced dialog entry if not already saying
+            // something, alert the character controller, scripts, etc.
+
+            MWBase::Environment::get().getDialogueManager()->say(ptr, "hit");
+
+            if(object.isEmpty())
+            {
+                if(ishealth)
+                    damage /= std::min(1.0f + getArmorRating(ptr)/std::max(1.0f, damage), 4.0f);
+                sndMgr->playSound3D(ptr, "Hand To Hand Hit", 1.0f, 1.0f);
+            }
+            else if(ishealth)
+            {
+                // Hit percentages:
+                // cuirass = 30%
+                // shield, helmet, greaves, boots, pauldrons = 10% each
+                // guantlets = 5% each
+                static const int hitslots[20] = {
+                    MWWorld::InventoryStore::Slot_Cuirass, MWWorld::InventoryStore::Slot_Cuirass,
+                    MWWorld::InventoryStore::Slot_Cuirass, MWWorld::InventoryStore::Slot_Cuirass,
+                    MWWorld::InventoryStore::Slot_Cuirass, MWWorld::InventoryStore::Slot_Cuirass,
+                    MWWorld::InventoryStore::Slot_CarriedLeft, MWWorld::InventoryStore::Slot_CarriedLeft,
+                    MWWorld::InventoryStore::Slot_Helmet, MWWorld::InventoryStore::Slot_Helmet,
+                    MWWorld::InventoryStore::Slot_Greaves, MWWorld::InventoryStore::Slot_Greaves,
+                    MWWorld::InventoryStore::Slot_Boots, MWWorld::InventoryStore::Slot_Boots,
+                    MWWorld::InventoryStore::Slot_LeftPauldron, MWWorld::InventoryStore::Slot_LeftPauldron,
+                    MWWorld::InventoryStore::Slot_RightPauldron, MWWorld::InventoryStore::Slot_RightPauldron,
+                    MWWorld::InventoryStore::Slot_LeftGauntlet, MWWorld::InventoryStore::Slot_RightGauntlet
+                };
+                int hitslot = hitslots[(int)(::rand()/(RAND_MAX+1.0)*20.0)];
+
+                float damagediff = damage;
+                damage /= std::min(1.0f + getArmorRating(ptr)/std::max(1.0f, damage), 4.0f);
+                damagediff -= damage;
+
+                MWWorld::InventoryStore &inv = getInventoryStore(ptr);
+                MWWorld::ContainerStoreIterator armorslot = inv.getSlot(hitslot);
+                MWWorld::Ptr armor = ((armorslot != inv.end()) ? *armorslot : MWWorld::Ptr());
+                if(!armor.isEmpty() && armor.getTypeName() == typeid(ESM::Armor).name())
+                {
+                    ESM::CellRef &armorref = armor.getCellRef();
+                    if(armorref.mCharge == -1)
+                        armorref.mCharge = armor.get<ESM::Armor>()->mBase->mData.mHealth;
+                    armorref.mCharge -= std::min(std::max(1, (int)damagediff),
+                                                 armorref.mCharge);
+                    switch(get(armor).getEquipmentSkill(armor))
+                    {
+                        case ESM::Skill::LightArmor:
+                            sndMgr->playSound3D(ptr, "Light Armor Hit", 1.0f, 1.0f);
+                            break;
+                        case ESM::Skill::MediumArmor:
+                            sndMgr->playSound3D(ptr, "Medium Armor Hit", 1.0f, 1.0f);
+                            break;
+                        case ESM::Skill::HeavyArmor:
+                            sndMgr->playSound3D(ptr, "Heavy Armor Hit", 1.0f, 1.0f);
+                            break;
+                    }
+                }
+            }
+        }
+
+        if(ishealth)
+        {
+            if(damage > 0.0f)
+                sndMgr->playSound3D(ptr, "Health Damage", 1.0f, 1.0f);
+            float health = getCreatureStats(ptr).getHealth().getCurrent() - damage;
+            setActorHealth(ptr, health, attacker);
+        }
+        else
+        {
+            MWMechanics::DynamicStat<float> fatigue(getCreatureStats(ptr).getFatigue());
+            fatigue.setCurrent(fatigue.getCurrent() - damage);
+            getCreatureStats(ptr).setFatigue(fatigue);
+        }
+    }
+
+    void Npc::setActorHealth(const MWWorld::Ptr& ptr, float health, const MWWorld::Ptr& attacker) const
+    {
+        MWMechanics::CreatureStats &crstats = getCreatureStats(ptr);
+        bool wasDead = crstats.isDead();
+
+        MWMechanics::DynamicStat<float> stat(crstats.getHealth());
+        stat.setCurrent(health);
+        crstats.setHealth(stat);
+
+        if(!wasDead && crstats.isDead())
+        {
+            // actor was just killed
+        }
+        else if(wasDead && !crstats.isDead())
+        {
+            // actor was just resurrected
+        }
+    }
+
 
     boost::shared_ptr<MWWorld::Action> Npc::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
@@ -587,18 +849,19 @@ namespace MWClass
 
     float Npc::getArmorRating (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::InventoryStore& invStore = MWWorld::Class::get(ptr).getInventoryStore(ptr);
-        const MWWorld::Store<ESM::GameSetting> &gmst =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+        const MWBase::World *world = MWBase::Environment::get().getWorld();
+        const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
 
-        int ratings[MWWorld::InventoryStore::Slots];
+        MWMechanics::NpcStats &stats = getNpcStats(ptr);
+        MWWorld::InventoryStore &invStore = getInventoryStore(ptr);
 
         int iBaseArmorSkill = gmst.find("iBaseArmorSkill")->getInt();
         float fUnarmoredBase1 = gmst.find("fUnarmoredBase1")->getFloat();
         float fUnarmoredBase2 = gmst.find("fUnarmoredBase2")->getFloat();
-        int unarmoredSkill = MWWorld::Class::get(ptr).getNpcStats(ptr).getSkill(ESM::Skill::Unarmored).getModified();
+        int unarmoredSkill = stats.getSkill(ESM::Skill::Unarmored).getModified();
 
-        for (int i = 0; i < MWWorld::InventoryStore::Slots; ++i)
+        int ratings[MWWorld::InventoryStore::Slots];
+        for(int i = 0;i < MWWorld::InventoryStore::Slots;i++)
         {
             MWWorld::ContainerStoreIterator it = invStore.getSlot(i);
             if (it == invStore.end() || it->getTypeName() != typeid(ESM::Armor).name())
@@ -608,28 +871,27 @@ namespace MWClass
             }
             else
             {
-                MWWorld::LiveCellRef<ESM::Armor> *ref =
-                    it->get<ESM::Armor>();
+                MWWorld::LiveCellRef<ESM::Armor> *ref = it->get<ESM::Armor>();
 
                 int armorSkillType = MWWorld::Class::get(*it).getEquipmentSkill(*it);
-                int armorSkill = MWWorld::Class::get(ptr).getNpcStats(ptr).getSkill(armorSkillType).getModified();
+                int armorSkill = stats.getSkill(armorSkillType).getModified();
 
-                if (ref->mBase->mData.mWeight == 0)
+                if(ref->mBase->mData.mWeight == 0)
                     ratings[i] = ref->mBase->mData.mArmor;
                 else
                     ratings[i] = ref->mBase->mData.mArmor * armorSkill / iBaseArmorSkill;
             }
         }
 
-        float shield = MWWorld::Class::get(ptr).getCreatureStats(ptr).getMagicEffects().get(ESM::MagicEffect::Shield).mMagnitude;
+        float shield = getCreatureStats(ptr).getMagicEffects().get(ESM::MagicEffect::Shield).mMagnitude;
 
-        return ratings[MWWorld::InventoryStore::Slot_Cuirass] * 0.3
+        return ratings[MWWorld::InventoryStore::Slot_Cuirass] * 0.3f
                 + (ratings[MWWorld::InventoryStore::Slot_CarriedLeft] + ratings[MWWorld::InventoryStore::Slot_Helmet]
                     + ratings[MWWorld::InventoryStore::Slot_Greaves] + ratings[MWWorld::InventoryStore::Slot_Boots]
                     + ratings[MWWorld::InventoryStore::Slot_LeftPauldron] + ratings[MWWorld::InventoryStore::Slot_RightPauldron]
-                    ) * 0.1
-                + (ratings[MWWorld::InventoryStore::Slot_LeftGauntlet] + MWWorld::InventoryStore::Slot_RightGauntlet)
-                    * 0.05
+                    ) * 0.1f
+                + (ratings[MWWorld::InventoryStore::Slot_LeftGauntlet] + ratings[MWWorld::InventoryStore::Slot_RightGauntlet])
+                    * 0.05f
                 + shield;
     }
 
@@ -661,6 +923,74 @@ namespace MWClass
             return ref->mBase->mAiData.mServices;
         else
             return 0;
+    }
+
+
+    std::string Npc::getSoundIdFromSndGen(const MWWorld::Ptr &ptr, const std::string &name) const
+    {
+        if(name == "left")
+        {
+            MWBase::World *world = MWBase::Environment::get().getWorld();
+            Ogre::Vector3 pos(ptr.getRefData().getPosition().pos);
+            if(world->isUnderwater(ptr.getCell(), pos))
+                return "FootWaterLeft";
+            if(world->isOnGround(ptr))
+            {
+                MWWorld::InventoryStore &inv = Npc::getInventoryStore(ptr);
+                MWWorld::ContainerStoreIterator boots = inv.getSlot(MWWorld::InventoryStore::Slot_Boots);
+                if(boots == inv.end() || boots->getTypeName() != typeid(ESM::Armor).name())
+                    return "FootBareLeft";
+
+                switch(Class::get(*boots).getEquipmentSkill(*boots))
+                {
+                    case ESM::Skill::LightArmor:
+                        return "FootLightLeft";
+                    case ESM::Skill::MediumArmor:
+                        return "FootMedLeft";
+                    case ESM::Skill::HeavyArmor:
+                        return "FootHeavyLeft";
+                }
+            }
+            return "";
+        }
+        if(name == "right")
+        {
+            MWBase::World *world = MWBase::Environment::get().getWorld();
+            Ogre::Vector3 pos(ptr.getRefData().getPosition().pos);
+            if(world->isUnderwater(ptr.getCell(), pos))
+                return "FootWaterRight";
+            if(world->isOnGround(ptr))
+            {
+                MWWorld::InventoryStore &inv = Npc::getInventoryStore(ptr);
+                MWWorld::ContainerStoreIterator boots = inv.getSlot(MWWorld::InventoryStore::Slot_Boots);
+                if(boots == inv.end() || boots->getTypeName() != typeid(ESM::Armor).name())
+                    return "FootBareRight";
+
+                switch(Class::get(*boots).getEquipmentSkill(*boots))
+                {
+                    case ESM::Skill::LightArmor:
+                        return "FootLightRight";
+                    case ESM::Skill::MediumArmor:
+                        return "FootMedRight";
+                    case ESM::Skill::HeavyArmor:
+                        return "FootHeavyRight";
+                }
+            }
+            return "";
+        }
+        // TODO: I have no idea what these are supposed to do for NPCs since they use
+        // voiced dialog for various conditions like health loss and combat taunts. Maybe
+        // only for biped creatures?
+        if(name == "moan")
+            return "";
+        if(name == "roar")
+            return "";
+        if(name == "scream")
+            return "";
+        if(name == "land")
+            return "";
+
+        throw std::runtime_error(std::string("Unexpected soundgen type: ")+name);
     }
 
     MWWorld::Ptr

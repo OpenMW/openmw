@@ -68,6 +68,12 @@ namespace MWClass
             virtual MWWorld::InventoryStore& getInventoryStore (const MWWorld::Ptr& ptr) const;
             ///< Return inventory store
 
+            virtual void hit(const MWWorld::Ptr& ptr, int type) const;
+
+            virtual void onHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, bool successful) const;
+
+            virtual void setActorHealth(const MWWorld::Ptr& ptr, float health, const MWWorld::Ptr& attacker) const;
+
             virtual boost::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
                 const MWWorld::Ptr& actor) const;
             ///< Generate action for activation
@@ -131,6 +137,8 @@ namespace MWClass
             virtual int getServices (const MWWorld::Ptr& actor) const;
             
             virtual bool isPersistent (const MWWorld::Ptr& ptr) const;
+
+            virtual std::string getSoundIdFromSndGen(const MWWorld::Ptr &ptr, const std::string &name) const;
 
             static void registerSelf();
 

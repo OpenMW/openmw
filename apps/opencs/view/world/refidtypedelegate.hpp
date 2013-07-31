@@ -13,7 +13,7 @@ namespace CSVWorld
         public:
             RefIdTypeDelegate (const ValueList &mValues, const IconList &icons, QUndoStack& undoStack, QObject *parent);
 
-            void updateEditorSetting (const QString &settingName, const QString &settingValue);
+            virtual bool updateEditorSetting (const QString &settingName, const QString &settingValue);
 
     };
 

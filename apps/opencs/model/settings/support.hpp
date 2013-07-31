@@ -14,7 +14,7 @@ namespace CSMSettings
 
     typedef QList<SettingContainer *>          SettingList;
     typedef QMap<QString, SettingContainer *>  SettingMap;
-    typedef QMap<QString, SettingMap *>         SectionMap;
+    typedef QMap<QString, SettingMap *>        SectionMap;
 
     struct QStringPair
     {

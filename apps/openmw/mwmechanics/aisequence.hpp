@@ -3,6 +3,8 @@
 
 #include <list>
 
+#include <components/esm/loadnpc.hpp>
+
 namespace MWWorld
 {
     class Ptr;
@@ -48,6 +50,8 @@ namespace MWMechanics
             void queue (const AiPackage& package);
             ///< Add \a package to the end of the sequence (executed after all other packages have been
             /// completed)
+
+            void fill (const ESM::AIPackageList& list);
     };
 }
 

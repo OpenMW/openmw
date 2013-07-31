@@ -53,7 +53,9 @@ namespace MWClass
             physics.addObject(ptr,ref->mBase->mData.mFlags & ESM::Light::Carry);
 
         if (!ref->mBase->mSound.empty())
-            MWBase::Environment::get().getSoundManager()->playSound3D(ptr, ref->mBase->mSound, 1.0, 1.0, MWBase::SoundManager::Play_Loop);
+            MWBase::Environment::get().getSoundManager()->playSound3D(ptr, ref->mBase->mSound, 1.0, 1.0,
+                                                                      MWBase::SoundManager::Play_TypeSfx,
+                                                                      MWBase::SoundManager::Play_Loop);
     }
 
     std::string Light::getModel(const MWWorld::Ptr &ptr) const

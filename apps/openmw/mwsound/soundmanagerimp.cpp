@@ -53,6 +53,9 @@ namespace MWSound
         , mFootstepsVolume(1.0f)
         , mVoiceVolume(1.0f)
         , mPausedSoundTypes(0)
+        , mListenerPos(0,0,0)
+        , mListenerDir(1,0,0)
+        , mListenerUp(0,0,1)
     {
         if(!useSound)
             return;
@@ -149,6 +152,9 @@ namespace MWSound
                 break;
             case Play_TypeVoice:
                 volume *= mVoiceVolume;
+                break;
+            case Play_TypeFoot:
+                volume *= mFootstepsVolume;
                 break;
             case Play_TypeMusic:
             case Play_TypeMovie:
@@ -314,18 +320,18 @@ namespace MWSound
     }
 
 
-    MWBase::SoundPtr SoundManager::playSound(const std::string& soundId, float volume, float pitch, PlayMode mode)
+    MWBase::SoundPtr SoundManager::playSound(const std::string& soundId, float volume, float pitch, PlayType type, PlayMode mode)
     {
         MWBase::SoundPtr sound;
         if(!mOutput->isInitialized())
             return sound;
         try
         {
-            float basevol = volumeFromType(Play_TypeSfx);
+            float basevol = volumeFromType(type);
             float min, max;
             std::string file = lookup(soundId, volume, min, max);
 
-            sound = mOutput->playSound(file, volume, basevol, pitch, mode|Play_TypeSfx);
+            sound = mOutput->playSound(file, volume, basevol, pitch, mode|type);
             mActiveSounds[sound] = std::make_pair(MWWorld::Ptr(), soundId);
         }
         catch(std::exception &e)
@@ -336,7 +342,7 @@ namespace MWSound
     }
 
     MWBase::SoundPtr SoundManager::playSound3D(const MWWorld::Ptr &ptr, const std::string& soundId,
-                                               float volume, float pitch, PlayMode mode)
+                                               float volume, float pitch, PlayType type, PlayMode mode)
     {
         MWBase::SoundPtr sound;
         if(!mOutput->isInitialized())
@@ -344,13 +350,13 @@ namespace MWSound
         try
         {
             // Look up the sound in the ESM data
-            float basevol = volumeFromType(Play_TypeSfx);
+            float basevol = volumeFromType(type);
             float min, max;
             std::string file = lookup(soundId, volume, min, max);
             const ESM::Position &pos = ptr.getRefData().getPosition();;
             const Ogre::Vector3 objpos(pos.pos[0], pos.pos[1], pos.pos[2]);
 
-            sound = mOutput->playSound3D(file, objpos, volume, basevol, pitch, min, max, mode|Play_TypeSfx);
+            sound = mOutput->playSound3D(file, objpos, volume, basevol, pitch, min, max, mode|type);
             if((mode&Play_NoTrack))
                 mActiveSounds[sound] = std::make_pair(MWWorld::Ptr(), soundId);
             else
@@ -496,18 +502,14 @@ namespace MWSound
         soundIter = regn->mSoundList.begin();
         while(soundIter != regn->mSoundList.end())
         {
-            const std::string go = soundIter->mSound.toString();
-            int chance = (int) soundIter->mChance;
-            //std::cout << "Sound: " << go.name <<" Chance:" <<  chance << "\n";
-            soundIter++;
-            if(r - pos < chance)
+            if(r - pos < soundIter->mChance)
             {
-                //play sound
-                std::cout << "Sound: " << go <<" Chance:" <<  chance << "\n";
-                playSound(go, 1.0f, 1.0f);
+                playSound(soundIter->mSound.toString(), 1.0f, 1.0f);
                 break;
             }
-            pos += chance;
+            pos += soundIter->mChance;
+
+            soundIter++;
         }
     }
 
@@ -547,6 +549,13 @@ namespace MWSound
                 mActiveSounds.erase(snditer++);
             else
             {
+                const MWWorld::Ptr &ptr = snditer->second.first;
+                if(!ptr.isEmpty())
+                {
+                    const ESM::Position &pos = ptr.getRefData().getPosition();
+                    const Ogre::Vector3 objpos(pos.pos[0], pos.pos[1], pos.pos[2]);
+                    snditer->first->setPosition(objpos);
+                }
                 snditer->first->update();
                 snditer++;
             }

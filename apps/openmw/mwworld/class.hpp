@@ -105,6 +105,28 @@ namespace MWWorld
             ///< Return item max health or throw an exception, if class does not have item health
             /// (default implementation: throw an exceoption)
 
+            virtual float getEvasion(const Ptr& ptr) const;
+            ///< Gets the chance the given object can evade an attack
+
+            virtual void hit(const Ptr& ptr, int type=-1) const;
+            ///< Execute a melee hit, using the current weapon. This will check the relevant skills
+            /// of the given attacker, and whoever is hit.
+            /// \param type - type of attack, one of the MWMechanics::CreatureStats::AttackType
+            ///               enums. ignored for creature attacks.
+            /// (default implementation: throw an exceoption)
+
+            virtual void onHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, bool successful) const;
+            ///< Alerts \a ptr that it's being hit for \a damage points to health if \a ishealth is
+            /// true (else fatigue) by \a object (sword, arrow, etc). \a attacker specifies the
+            /// actor responsible for the attack, and \a successful specifies if the hit is
+            /// successful or not.
+
+            virtual void setActorHealth(const Ptr& ptr, float health, const Ptr& attacker=Ptr()) const;
+            ///< Sets a new current health value for the actor, optionally specifying the object causing
+            /// the change. Use this instead of using CreatureStats directly as this will make sure the
+            /// correct dialog and actor states are properly handled when being hurt or healed.
+            /// (default implementation: throw an exceoption)
+
             virtual boost::shared_ptr<Action> activate (const Ptr& ptr, const Ptr& actor) const;
             ///< Generate action for activation (default implementation: return a null action).
 
@@ -220,6 +242,9 @@ namespace MWWorld
             virtual std::string getDownSoundId (const Ptr& ptr) const;
             ///< Return the down sound ID of \a ptr or throw an exception, if class does not support ID retrieval
             /// (default implementation: throw an exception)
+
+            virtual std::string getSoundIdFromSndGen(const Ptr &ptr, const std::string &type) const;
+            ///< Returns the sound ID for \a ptr of the given soundgen \a type.
 
             virtual float getArmorRating (const MWWorld::Ptr& ptr) const;
             ///< @return combined armor rating of this actor

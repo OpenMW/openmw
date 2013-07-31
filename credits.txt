@@ -42,9 +42,10 @@ Lars Söderberg (Lazaroth)
 lazydev
 Leon Saunders (emoose)
 Lukasz Gromanowski (lgro)
+Manuel Edelmann (vorenon)
 Marcin Hulist (Gohan)
 Mark Siewert (mark76)
-Manuel Edelmann (vorenon)
+Mateusz Kołaczek (PL_kolek)
 Michael Mc Donnell
 Michael Papageorgiou (werdanith)
 Michał Bień (Glorf)

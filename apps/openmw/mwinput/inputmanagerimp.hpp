@@ -94,8 +94,9 @@ namespace MWInput
         virtual bool mouseReleased( const SDL_MouseButtonEvent &arg, Uint8 id );
         virtual bool mouseMoved( const SFO::MouseMotionEvent &arg );
 
-        virtual bool windowVisibilityChange( bool visible );
-        virtual bool windowFocusChange( bool have_focus );
+        virtual void windowVisibilityChange( bool visible );
+        virtual void windowFocusChange( bool have_focus );
+        virtual void windowResized (int x, int y);
 
         virtual void channelChanged(ICS::Channel* channel, float currentValue, float previousValue);
 

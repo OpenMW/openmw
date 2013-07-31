@@ -38,6 +38,7 @@ namespace CSVDoc
             QAction *mRedo;
             QAction *mSave;
             QAction *mVerify;
+            QAction *mShowStatusBar;
             std::vector<QAction *> mEditingActions;
             Operations *mOperations;
             SubViewFactoryManager mSubViewFactory;
@@ -59,6 +60,10 @@ namespace CSVDoc
             void setupViewMenu();
 
             void setupWorldMenu();
+
+            void setupMechanicsMenu();
+
+            void setupAssetsMenu();
 
             void setupUi();
 
@@ -154,6 +159,8 @@ namespace CSVDoc
             void addRegionMapSubView();
 
             void showUserSettings();
+
+            void toggleShowStatusBar (bool show);
     };
 }
 

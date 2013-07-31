@@ -34,7 +34,7 @@ namespace CSMSettings
         bool updateItem (const QString &value);
         bool updateItem (int valueListIndex);
 
-        /// retroeve list of valid values for setting
+        /// retrieve list of valid values for setting
         inline QStringList *getValueList()                  { return mValueList; }
 
         /// write list of valid values for setting

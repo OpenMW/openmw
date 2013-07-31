@@ -15,7 +15,7 @@ namespace CSVSettings
 
         ItemBlock (QWidget* parent = 0);
 
-        /// pure virtual function not implemneted
+        /// pure virtual function not implemented
         bool updateSettings (const CSMSettings::SettingMap &settings) { return false; }
 
         CSMSettings::SettingList *getSettings ();

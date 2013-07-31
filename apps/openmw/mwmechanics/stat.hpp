@@ -98,8 +98,8 @@ namespace MWMechanics
         public:
             typedef T Type;
 
-            DynamicStat() : mCurrent (0) {}
-            DynamicStat(T current) : mCurrent (current) {}
+            DynamicStat() : mStatic (0), mCurrent (0) {}
+            DynamicStat(T base) : mStatic (base), mCurrent (base) {}
             DynamicStat(T base, T modified, T current) : mStatic(base, modified), mCurrent (current) {}
             DynamicStat(const Stat<T> &stat, T current) : mStatic(stat), mCurrent (current) {}
 

@@ -118,7 +118,8 @@ namespace MWWorld
             newPosition = trace.endpos;
 
             physicActor->setOnGround(hit && getSlope(trace.planenormal) <= sMaxSlope);
-            physicActor->enableCollisions(wasCollisionMode);
+            if (wasCollisionMode)
+                physicActor->enableCollisions(true);
 
             if (hit)
                 return newPosition+Ogre::Vector3(0,0,4);
@@ -148,6 +149,7 @@ namespace MWWorld
             float remainingTime = time;
             bool isInterior = !ptr.getCell()->isExterior();
             Ogre::Vector3 halfExtents = physicActor->getHalfExtents();// + Vector3(1,1,1);
+            bool wasCollisionMode = physicActor->getCollisionMode();
             physicActor->enableCollisions(false);
             Ogre::Quaternion orient = Ogre::Quaternion(Ogre::Radian(ptr.getRefData().getPosition().rot[2]), Ogre::Vector3::UNIT_Z);
             Ogre::Vector3 velocity;
@@ -228,7 +230,8 @@ namespace MWWorld
             }
             physicActor->setOnGround(onground);
             physicActor->setVerticalForce(!onground ? clippedVelocity.z - time*627.2f : 0.0f);
-            physicActor->enableCollisions(true);
+            if (wasCollisionMode)
+                physicActor->enableCollisions(true);
             return newPosition;
         }
     };
@@ -303,6 +306,19 @@ namespace MWWorld
             i->first *= queryDistance;
         return results;
     }
+
+    std::pair<std::string,float> PhysicsSystem::getFacedHandle(const Ogre::Vector3 &origin_, const Ogre::Quaternion &orient_, float queryDistance)
+    {
+        Ogre::Vector3 dest_ = origin_ +  orient_.yAxis()*queryDistance;
+
+        btVector3 origin(origin_.x, origin_.y, origin_.z);
+        btVector3 dest(dest_.x, dest_.y, dest_.z);
+
+        std::pair<std::string,float> result = mEngine->rayTest(origin, dest);
+        result.second *= queryDistance;
+        return result;
+    }
+
 
     void PhysicsSystem::setCurrentWater(bool hasWater, int waterHeight)
     {

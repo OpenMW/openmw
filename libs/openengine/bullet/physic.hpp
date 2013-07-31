@@ -129,9 +129,10 @@ namespace Physic
 
         bool getOnGround() const;
 
+    private:
         void disableCollisionBody();
         void enableCollisionBody();
-
+public:
 //HACK: in Visual Studio 2010 and presumably above, this structures alignment
 //		must be 16, but the built in operator new & delete don't properly
 //		perform this alignment.

@@ -599,6 +599,35 @@ namespace MWScript
                 }
         };
 
+        template <class R>
+        class OpHitOnMe : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    std::string objectID = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    MWMechanics::CreatureStats &stats = MWWorld::Class::get(ptr).getCreatureStats(ptr);
+                    runtime.push(::Misc::StringUtils::ciEqual(objectID, stats.getLastHitObject()));
+                }
+        };
+
+        template <bool Enable>
+        class OpEnableTeleporting : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWBase::World *world = MWBase::Environment::get().getWorld();
+                    world->enableTeleporting(Enable);
+                }
+        };
+
         const int opcodeXBox = 0x200000c;
         const int opcodeOnActivate = 0x200000d;
         const int opcodeActivate = 0x2000075;
@@ -650,6 +679,12 @@ namespace MWScript
 
         const int opcodePlayBink = 0x20001f7;
 
+        const int opcodeHitOnMe = 0x2000213;
+        const int opcodeHitOnMeExplicit = 0x2000214;
+
+        const int opcodeDisableTeleporting = 0x2000215;
+        const int opcodeEnableTeleporting = 0x2000216;
+
         void registerExtensions (Compiler::Extensions& extensions)
         {
             extensions.registerFunction ("xbox", 'l', "", opcodeXBox);
@@ -692,6 +727,9 @@ namespace MWScript
             extensions.registerFunction ("getstandingpc", 'l', "", opcodeGetStandingPc, opcodeGetStandingPcExplicit);
             extensions.registerFunction ("getstandingactor", 'l', "", opcodeGetStandingActor, opcodeGetStandingActorExplicit);
             extensions.registerFunction ("getwindspeed", 'f', "", opcodeGetWindSpeed);
+            extensions.registerFunction ("hitonme", 'l', "S", opcodeHitOnMe, opcodeHitOnMeExplicit);
+            extensions.registerInstruction ("disableteleporting", "", opcodeDisableTeleporting);
+            extensions.registerInstruction ("enableteleporting", "", opcodeEnableTeleporting);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -745,6 +783,10 @@ namespace MWScript
             interpreter.installSegment5 (opcodeGetStandingActor, new OpGetStandingActor<ImplicitRef>);
             interpreter.installSegment5 (opcodeGetStandingActorExplicit, new OpGetStandingActor<ExplicitRef>);
             interpreter.installSegment5 (opcodeGetWindSpeed, new OpGetWindSpeed);
+            interpreter.installSegment5 (opcodeHitOnMe, new OpHitOnMe<ImplicitRef>);
+            interpreter.installSegment5 (opcodeHitOnMeExplicit, new OpHitOnMe<ExplicitRef>);
+            interpreter.installSegment5 (opcodeDisableTeleporting, new OpEnableTeleporting<false>);
+            interpreter.installSegment5 (opcodeEnableTeleporting, new OpEnableTeleporting<true>);
         }
     }
 }

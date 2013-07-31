@@ -424,6 +424,10 @@ Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
 
     for(size_t i = 0;i < sPartListSize;i++)
     {
+        std::vector<Ogre::Controller<Ogre::Real> >::iterator ctrl(mObjectParts[i].mControllers.begin());
+        for(;ctrl != mObjectParts[i].mControllers.end();ctrl++)
+            ctrl->update();
+
         Ogre::Entity *ent = mObjectParts[i].mSkelBase;
         if(!ent) continue;
         updateSkeletonInstance(baseinst, ent->getSkeleton());
@@ -481,6 +485,19 @@ bool NpcAnimation::addOrReplaceIndividualPart(int type, int group, int priority,
         if(type == sPartList[i].type)
         {
             mObjectParts[i] = insertBoundedPart(mesh, group, sPartList[i].name);
+
+            // TODO:
+            // type == ESM::PRT_Head should get an animation source based on the current output of
+            // the actor's 'say' sound (0 = silent, 1 = loud?).
+            // type == ESM::PRT_Weapon should get an animation source based on the current offset
+            // of the weapon attack animation (from its beginning, or start marker?)
+            std::vector<Ogre::Controller<Ogre::Real> >::iterator ctrl(mObjectParts[i].mControllers.begin());
+            for(;ctrl != mObjectParts[i].mControllers.end();ctrl++)
+            {
+                if(ctrl->getSource().isNull())
+                    ctrl->setSource(mNullAnimationValuePtr);
+            }
+
             break;
         }
     }

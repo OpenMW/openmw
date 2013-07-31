@@ -76,10 +76,6 @@ namespace MWMechanics
         double magickaFactor =
             creatureStats.getMagicEffects().get (EffectKey (ESM::MagicEffect::FortifyMaximumMagicka)).mMagnitude * 0.1 + 0.5;
 
-        DynamicStat<float> health = creatureStats.getHealth();
-        health.setBase (static_cast<int> (0.5 * (strength + endurance)) + creatureStats.getLevelHealthBonus ());
-        creatureStats.setHealth (health);
-
         DynamicStat<float> magicka = creatureStats.getMagicka();
         magicka.setBase (static_cast<int> (intelligence + magickaFactor * intelligence));
         creatureStats.setMagicka (magicka);
@@ -170,6 +166,8 @@ namespace MWMechanics
         // erase previous death events since we are currently only tracking them while in an active cell
         MWWorld::Class::get(ptr).getCreatureStats(ptr).clearHasDied();
 
+        removeActor(ptr);
+
         MWRender::Animation *anim = MWBase::Environment::get().getWorld()->getAnimation(ptr);
         mActors.insert(std::make_pair(ptr, new CharacterController(ptr, anim)));
     }
@@ -223,7 +221,11 @@ namespace MWMechanics
 
             for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();iter++)
             {
-                if(!MWWorld::Class::get(iter->first).getCreatureStats(iter->first).isDead())
+                const MWWorld::Class &cls = MWWorld::Class::get(iter->first);
+                CreatureStats &stats = cls.getCreatureStats(iter->first);
+
+                stats.setLastHitObject(std::string());
+                if(!stats.isDead())
                 {
                     if(iter->second->isDead())
                         iter->second->resurrect();
@@ -232,7 +234,7 @@ namespace MWMechanics
                     if(iter->first.getTypeName() == typeid(ESM::NPC).name())
                         updateNpc(iter->first, totalDuration, paused);
 
-                    if(!MWWorld::Class::get(iter->first).getCreatureStats(iter->first).isDead())
+                    if(!stats.isDead())
                         continue;
                 }
 
@@ -240,16 +242,15 @@ namespace MWMechanics
                 // \todo remove workaround, once player death can be handled
                 if(iter->first.getRefData().getHandle()=="player")
                 {
-                    MWMechanics::DynamicStat<float> stat (
-                        MWWorld::Class::get(iter->first).getCreatureStats(iter->first).getHealth());
+                    MWMechanics::DynamicStat<float> stat(stats.getHealth());
 
-                    if (stat.getModified()<1)
+                    if(stat.getModified()<1)
                     {
-                        stat.setModified (1, 0);
-                        MWWorld::Class::get(iter->first).getCreatureStats(iter->first).setHealth(stat);
+                        stat.setModified(1, 0);
+                        stats.setHealth(stat);
                     }
 
-                    MWWorld::Class::get(iter->first).getCreatureStats(iter->first).resurrect();
+                    stats.resurrect();
                     continue;
                 }
 
@@ -258,11 +259,10 @@ namespace MWMechanics
 
                 iter->second->kill();
 
-                ++mDeathCount[MWWorld::Class::get(iter->first).getId(iter->first)];
+                ++mDeathCount[cls.getId(iter->first)];
 
-                if(MWWorld::Class::get(iter->first).isEssential(iter->first))
-                    MWBase::Environment::get().getWindowManager()->messageBox(
-                        "#{sKilledEssential}");
+                if(cls.isEssential(iter->first))
+                    MWBase::Environment::get().getWindowManager()->messageBox("#{sKilledEssential}");
             }
         }
 

@@ -13,6 +13,8 @@
 #include "containerstore.hpp"
 
 #include "../mwgui/tooltips.hpp"
+#include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/magiceffects.hpp"
 
 namespace MWWorld
 {
@@ -75,6 +77,33 @@ namespace MWWorld
     int Class::getItemMaxHealth (const Ptr& ptr) const
     {
         throw std::runtime_error ("class does not have item health");
+    }
+
+    float Class::getEvasion(const Ptr& ptr) const
+    {
+        MWMechanics::CreatureStats &crstats = getCreatureStats(ptr);
+        const MWMechanics::MagicEffects &mageffects = crstats.getMagicEffects();
+        float evasion = (crstats.getAttribute(ESM::Attribute::Agility).getModified() / 5.0f) +
+                        (crstats.getAttribute(ESM::Attribute::Luck).getModified() / 10.0f);
+        evasion *= crstats.getFatigueTerm();
+        evasion += mageffects.get(MWMechanics::EffectKey(ESM::MagicEffect::Sanctuary)).mMagnitude;
+
+        return evasion;
+    }
+
+    void Class::hit(const Ptr& ptr, int type) const
+    {
+        throw std::runtime_error("class cannot hit");
+    }
+
+    void Class::onHit(const Ptr& ptr, float damage, bool ishealth, const Ptr& object, const Ptr& attacker, bool successful) const
+    {
+        throw std::runtime_error("class cannot be hit");
+    }
+
+    void Class::setActorHealth(const Ptr& ptr, float health, const Ptr& attacker) const
+    {
+        throw std::runtime_error("class does not have actor health");
     }
 
     boost::shared_ptr<Action> Class::activate (const Ptr& ptr, const Ptr& actor) const
@@ -240,6 +269,10 @@ namespace MWWorld
         throw std::runtime_error ("class does not have an down sound");
     }
 
+    std::string Class::getSoundIdFromSndGen(const Ptr &ptr, const std::string &type) const
+    {
+        throw std::runtime_error("class does not support soundgen look up");
+    }
 
     std::string Class::getInventoryIcon (const MWWorld::Ptr& ptr) const
     {

@@ -3,6 +3,11 @@
 <MyGUI type="Layout">
     <Widget type="Widget" layer="HUD" position="0 0 300 200" name="_Main">
         <!-- Energy bars -->
+        <Widget type="Widget" skin="" position="13 131 65 12" align="Left Bottom" name="EnemyHealthFrame">
+            <Widget type="ProgressBar" skin="MW_EnergyBar_Yellow" position="0 0 65 12" align="Left Bottom" name="EnemyHealth">
+                <Property key="Visible" value="false"/>
+            </Widget>
+        </Widget>
         <Widget type="Button" skin="" position="13 146 65 12" align="Left Bottom" name="HealthFrame">
             <UserString key="ToolTipType" value="Layout"/>
             <UserString key="ToolTipLayout" value="HealthToolTip"/>

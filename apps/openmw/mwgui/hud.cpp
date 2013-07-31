@@ -9,6 +9,8 @@
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
 
+#include "../mwmechanics/creaturestats.hpp"
+
 #include "inventorywindow.hpp"
 #include "console.hpp"
 #include "spellicons.hpp"
@@ -47,6 +49,7 @@ namespace MWGui
         , mWeaponVisible(true)
         , mSpellVisible(true)
         , mWorldMouseOver(false)
+        , mEnemyHealthTimer(0)
     {
         setCoord(0,0, width, height);
 
@@ -55,6 +58,7 @@ namespace MWGui
         getWidget(mHealth, "Health");
         getWidget(mMagicka, "Magicka");
         getWidget(mStamina, "Stamina");
+        getWidget(mEnemyHealth, "EnemyHealth");
         mHealthManaStaminaBaseLeft = mHealthFrame->getLeft();
 
         MyGUI::Widget *healthFrame, *magickaFrame, *fatigueFrame;
@@ -320,6 +324,13 @@ namespace MWGui
             mCellNameBox->setVisible(false);
         if (mWeaponSpellTimer < 0)
             mWeaponSpellBox->setVisible(false);
+
+        mEnemyHealthTimer -= dt;
+        if (mEnemyHealth->getVisible() && mEnemyHealthTimer < 0)
+        {
+            mEnemyHealth->setVisible(false);
+            mWeaponSpellBox->setPosition(mWeaponSpellBox->getPosition() + MyGUI::IntPoint(0,20));
+        }
     }
 
     void HUD::onResChange(int width, int height)
@@ -535,6 +546,25 @@ namespace MWGui
     void HUD::update()
     {
         mSpellIcons->updateWidgets(mEffectBox, true);
+
+        if (!mEnemy.isEmpty() && mEnemyHealth->getVisible())
+        {
+            MWMechanics::CreatureStats& stats = MWWorld::Class::get(mEnemy).getCreatureStats(mEnemy);
+            mEnemyHealth->setProgressRange(100);
+            mEnemyHealth->setProgressPosition(stats.getHealth().getCurrent() / stats.getHealth().getModified() * 100);
+        }
+    }
+
+    void HUD::setEnemy(const MWWorld::Ptr &enemy)
+    {
+        mEnemy = enemy;
+        mEnemyHealthTimer = 5;
+        if (!mEnemyHealth->getVisible())
+            mWeaponSpellBox->setPosition(mWeaponSpellBox->getPosition() - MyGUI::IntPoint(0,20));
+        mEnemyHealth->setVisible(true);
+        MWMechanics::CreatureStats& stats = MWWorld::Class::get(mEnemy).getCreatureStats(mEnemy);
+        mEnemyHealth->setProgressRange(100);
+        mEnemyHealth->setProgressPosition(stats.getHealth().getCurrent() / stats.getHealth().getModified() * 100);
     }
 
 }

@@ -38,6 +38,8 @@ namespace MWMechanics
 
         int mAttackType;
 
+        std::string mLastHitObject; // The last object to hit this actor
+
     public:
         CreatureStats();
 
@@ -111,9 +113,13 @@ namespace MWMechanics
         float getFatigueTerm() const;
         ///< Return effective fatigue
 
-        // small hack to allow the fact that Health permanently increases by 10% of endurance on each level up
-        void increaseLevelHealthBonus(float value);
         float getLevelHealthBonus() const;
+
+        void levelUp();
+
+        void updateHealth();
+        ///< Calculate health based on endurance and strength.
+        ///  Called at character creation and at level up.
 
         bool isDead() const;
 
@@ -151,6 +157,9 @@ namespace MWMechanics
         void setHostile (bool hostile);
 
         bool getCreatureTargetted() const;
+
+        void setLastHitObject(const std::string &objectid);
+        const std::string &getLastHitObject() const;
     };
 }
 

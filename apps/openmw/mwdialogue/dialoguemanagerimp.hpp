@@ -68,6 +68,8 @@ namespace MWDialogue
 
             virtual bool checkServiceRefused ();
 
+            virtual void say(const MWWorld::Ptr &actor, const std::string &topic) const;
+
             //calbacks for the GUI
             virtual void keywordSelected (const std::string& keyword);
             virtual void goodbyeSelected();

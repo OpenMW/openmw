@@ -78,55 +78,20 @@ void CSVDoc::View::setupViewMenu()
     QAction *newWindow = new QAction (tr ("&New View"), this);
     connect (newWindow, SIGNAL (triggered()), this, SLOT (newView()));
     view->addAction (newWindow);
+
+    mShowStatusBar = new QAction (tr ("Show Status Bar"), this);
+    mShowStatusBar->setCheckable (true);
+    connect (mShowStatusBar, SIGNAL (toggled (bool)), this, SLOT (toggleShowStatusBar (bool)));
+    view->addAction (mShowStatusBar);
 }
 
 void CSVDoc::View::setupWorldMenu()
 {
     QMenu *world = menuBar()->addMenu (tr ("&World"));
 
-    QAction *globals = new QAction (tr ("Globals"), this);
-    connect (globals, SIGNAL (triggered()), this, SLOT (addGlobalsSubView()));
-    world->addAction (globals);
-
-    QAction *gmsts = new QAction (tr ("Game settings"), this);
-    connect (gmsts, SIGNAL (triggered()), this, SLOT (addGmstsSubView()));
-    world->addAction (gmsts);
-
-    QAction *skills = new QAction (tr ("Skills"), this);
-    connect (skills, SIGNAL (triggered()), this, SLOT (addSkillsSubView()));
-    world->addAction (skills);
-
-    QAction *classes = new QAction (tr ("Classes"), this);
-    connect (classes, SIGNAL (triggered()), this, SLOT (addClassesSubView()));
-    world->addAction (classes);
-
-    QAction *factions = new QAction (tr ("Factions"), this);
-    connect (factions, SIGNAL (triggered()), this, SLOT (addFactionsSubView()));
-    world->addAction (factions);
-
-    QAction *races = new QAction (tr ("Races"), this);
-    connect (races, SIGNAL (triggered()), this, SLOT (addRacesSubView()));
-    world->addAction (races);
-
-    QAction *sounds = new QAction (tr ("Sounds"), this);
-    connect (sounds, SIGNAL (triggered()), this, SLOT (addSoundsSubView()));
-    world->addAction (sounds);
-
-    QAction *scripts = new QAction (tr ("Scripts"), this);
-    connect (scripts, SIGNAL (triggered()), this, SLOT (addScriptsSubView()));
-    world->addAction (scripts);
-
     QAction *regions = new QAction (tr ("Regions"), this);
     connect (regions, SIGNAL (triggered()), this, SLOT (addRegionsSubView()));
     world->addAction (regions);
-
-    QAction *birthsigns = new QAction (tr ("Birthsigns"), this);
-    connect (birthsigns, SIGNAL (triggered()), this, SLOT (addBirthsignsSubView()));
-    world->addAction (birthsigns);
-
-    QAction *spells = new QAction (tr ("Spells"), this);
-    connect (spells, SIGNAL (triggered()), this, SLOT (addSpellsSubView()));
-    world->addAction (spells);
 
     QAction *cells = new QAction (tr ("Cells"), this);
     connect (cells, SIGNAL (triggered()), this, SLOT (addCellsSubView()));
@@ -140,9 +105,61 @@ void CSVDoc::View::setupWorldMenu()
     connect (references, SIGNAL (triggered()), this, SLOT (addReferencesSubView()));
     world->addAction (references);
 
+    world->addSeparator(); // items that don't represent single record lists follow here
+
     QAction *regionMap = new QAction (tr ("Region Map"), this);
     connect (regionMap, SIGNAL (triggered()), this, SLOT (addRegionMapSubView()));
     world->addAction (regionMap);
+}
+
+void CSVDoc::View::setupMechanicsMenu()
+{
+    QMenu *mechanics = menuBar()->addMenu (tr ("&Mechanics"));
+
+    QAction *globals = new QAction (tr ("Globals"), this);
+    connect (globals, SIGNAL (triggered()), this, SLOT (addGlobalsSubView()));
+    mechanics->addAction (globals);
+
+    QAction *gmsts = new QAction (tr ("Game settings"), this);
+    connect (gmsts, SIGNAL (triggered()), this, SLOT (addGmstsSubView()));
+    mechanics->addAction (gmsts);
+
+    QAction *skills = new QAction (tr ("Skills"), this);
+    connect (skills, SIGNAL (triggered()), this, SLOT (addSkillsSubView()));
+    mechanics->addAction (skills);
+
+    QAction *classes = new QAction (tr ("Classes"), this);
+    connect (classes, SIGNAL (triggered()), this, SLOT (addClassesSubView()));
+    mechanics->addAction (classes);
+
+    QAction *factions = new QAction (tr ("Factions"), this);
+    connect (factions, SIGNAL (triggered()), this, SLOT (addFactionsSubView()));
+    mechanics->addAction (factions);
+
+    QAction *races = new QAction (tr ("Races"), this);
+    connect (races, SIGNAL (triggered()), this, SLOT (addRacesSubView()));
+    mechanics->addAction (races);
+
+    QAction *scripts = new QAction (tr ("Scripts"), this);
+    connect (scripts, SIGNAL (triggered()), this, SLOT (addScriptsSubView()));
+    mechanics->addAction (scripts);
+
+    QAction *birthsigns = new QAction (tr ("Birthsigns"), this);
+    connect (birthsigns, SIGNAL (triggered()), this, SLOT (addBirthsignsSubView()));
+    mechanics->addAction (birthsigns);
+
+    QAction *spells = new QAction (tr ("Spells"), this);
+    connect (spells, SIGNAL (triggered()), this, SLOT (addSpellsSubView()));
+    mechanics->addAction (spells);
+}
+
+void CSVDoc::View::setupAssetsMenu()
+{
+    QMenu *assets = menuBar()->addMenu (tr ("&Assets"));
+
+    QAction *sounds = new QAction (tr ("Sounds"), this);
+    connect (sounds, SIGNAL (triggered()), this, SLOT (addSoundsSubView()));
+    assets->addAction (sounds);
 }
 
 void CSVDoc::View::setupUi()
@@ -151,6 +168,8 @@ void CSVDoc::View::setupUi()
     setupEditMenu();
     setupViewMenu();
     setupWorldMenu();
+    setupMechanicsMenu();
+    setupAssetsMenu();
 }
 
 void CSVDoc::View::updateTitle()
@@ -189,10 +208,7 @@ CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int to
     QString width = CSMSettings::UserSettings::instance().getSetting(QString("Window Size"), QString("Width"));
     QString height = CSMSettings::UserSettings::instance().getSetting(QString("Window Size"), QString("Height"));
 
-    if(width==QString() || height==QString())
-        resize(800, 600);
-    else
-        resize (width.toInt(), height.toInt());
+    resize (width.toInt(), height.toInt());
 
     mSubViewWindow.setDockOptions (QMainWindow::AllowNestedDocks);
 
@@ -271,6 +287,9 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id)
     /// \todo add an user setting to reuse sub views (on a per document basis or on a per top level view basis)
 
     SubView *view = mSubViewFactory.makeSubView (id, *mDocument);
+
+    view->setStatusBar (mShowStatusBar->isChecked());
+
     mSubViewWindow.addDockWidget (Qt::TopDockWidgetArea, view);
 
     connect (view, SIGNAL (focusId (const CSMWorld::UniversalId&)), this,
@@ -424,4 +443,13 @@ void CSVDoc::View::updateEditorSetting (const QString &settingName, const QStrin
 
     else if (settingName == "Height")
             resizeViewHeight (settingValue.toInt());
+}
+
+void CSVDoc::View::toggleShowStatusBar (bool show)
+{
+    foreach (QObject *view, mSubViewWindow.children())
+    {
+        if (CSVDoc::SubView *subView = dynamic_cast<CSVDoc::SubView *> (view))
+            subView->setStatusBar (show);
+    }
 }

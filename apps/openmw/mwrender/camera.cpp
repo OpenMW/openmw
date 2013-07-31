@@ -25,7 +25,11 @@ namespace MWRender
       mHeight(128.f),
       mCameraDistance(300.f),
       mDistanceAdjusted(false),
-      mAnimation(NULL)
+      mAnimation(NULL),
+      mNearest(30.f),
+      mFurthest(800.f),
+      mIsNearest(false),
+      mIsFurthest(false)
     {
         mVanity.enabled = false;
         mVanity.allowed = true;
@@ -82,8 +86,8 @@ namespace MWRender
             mCameraNode->getCreator()->destroySceneNode(mCameraNode);
         }
         mCameraNode = node;
-        mCamera->detachFromParent();
-        mCameraNode->attachObject(mCamera);
+        if(!mCamera->isAttached())
+            mCameraNode->attachObject(mCamera);
     }
 
     void Camera::updateListener()
@@ -95,9 +99,11 @@ namespace MWRender
         MWBase::Environment::get().getSoundManager()->setListenerPosDir(pos, dir, up);
     }
 
-    void Camera::update(float duration)
+    void Camera::update(float duration, bool paused)
     {
         updateListener();
+        if (paused)
+            return;
 
         // only show the crosshair in game mode and in first person mode.
         MWBase::WindowManager *wm = MWBase::Environment::get().getWindowManager();
@@ -232,16 +238,21 @@ namespace MWRender
         if(mFirstPersonView && !mPreviewMode && !mVanity.enabled)
             return;
 
+        mIsFurthest = false;
+        mIsNearest = false;
+
         Ogre::Vector3 v(0.f, 0.f, dist);
         if (adjust) {
             v += mCamera->getPosition();
         }
-        if (v.z > 800.f) {
-            v.z = 800.f;
-        } else if (v.z < 10.f) {
+        if (v.z >= mFurthest) {
+            v.z = mFurthest;
+            mIsFurthest = true;
+        } else if (!override && v.z < 10.f) {
             v.z = 10.f;
-        } else if (override && v.z < 50.f) {
-            v.z = 50.f;
+        } else if (override && v.z <= mNearest) {
+            v.z = mNearest;
+            mIsNearest = true;
         }
         mCamera->setPosition(v);
 
@@ -302,34 +313,13 @@ namespace MWRender
         }
     }
 
-    float Camera::getHeight()
-    {
-        if(mCamera->isParentTagPoint())
-        {
-            Ogre::TagPoint *tag = static_cast<Ogre::TagPoint*>(mCamera->getParentNode());
-            return tag->_getFullLocalTransform().getTrans().z;
-        }
-        return mCamera->getParentNode()->getPosition().z;
-    }
-
-    bool Camera::getPosition(Ogre::Vector3 &player, Ogre::Vector3 &camera)
+    void Camera::getPosition(Ogre::Vector3 &focal, Ogre::Vector3 &camera)
     {
         mCamera->getParentSceneNode()->needUpdate(true);
+
         camera = mCamera->getRealPosition();
-        player = mTrackingPtr.getRefData().getBaseNode()->getPosition();
-
-        return mFirstPersonView && !mVanity.enabled && !mPreviewMode;
-    }
-
-    Ogre::Vector3 Camera::getPosition()
-    {
-        return mTrackingPtr.getRefData().getBaseNode()->getPosition();
-    }
-
-    void Camera::getSightAngles(float &pitch, float &yaw)
-    {
-        pitch = mMainCam.pitch;
-        yaw = mMainCam.yaw;
+        focal = Ogre::Vector3((mCamera->getParentNode()->_getFullTransform() *
+                               Ogre::Vector4(0.0f, 0.0f, 0.0f, 1.0f)).ptr());
     }
 
     void Camera::togglePlayerLooking(bool enable)
@@ -340,5 +330,15 @@ namespace MWRender
     bool Camera::isVanityOrPreviewModeEnabled()
     {
         return mPreviewMode || mVanity.enabled;
+    }
+
+    bool Camera::isNearest()
+    {
+        return mIsNearest;
+    }
+
+    bool Camera::isFurthest()
+    {
+        return mIsFurthest;
     }
 }

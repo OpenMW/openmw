@@ -54,6 +54,7 @@ namespace MWMechanics
             bool mWerewolf;
             int mWerewolfKills;
             int mProfit;
+            float mAttackStrength;
 
             int mLevelProgress; // 0-10
 
@@ -70,8 +71,11 @@ namespace MWMechanics
             void modifyProfit(int diff);
 
             DrawState_ getDrawState() const;
-
             void setDrawState (DrawState_ state);
+
+            /// When attacking, stores how strong the attack should be (0 = weakest, 1 = strongest)
+            float getAttackStrength() const;
+            void setAttackStrength(float value);
 
             int getBaseDisposition() const;
 

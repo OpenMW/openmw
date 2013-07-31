@@ -3,6 +3,8 @@
 
 #include <QAbstractItemModel>
 
+#include "universalid.hpp"
+
 namespace CSMWorld
 {
     class CollectionBase;
@@ -44,7 +46,8 @@ namespace CSMWorld
 
             virtual QModelIndex parent (const QModelIndex& index) const;
 
-            void addRecord (const std::string& id);
+            void addRecord (const std::string& id, UniversalId::Type type = UniversalId::Type_None);
+            ///< \param type Will be ignored, unless the collection supports multiple record types
 
             QModelIndex getModelIndex (const std::string& id, int column) const;
 

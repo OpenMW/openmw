@@ -204,13 +204,15 @@ namespace MWInput
             case A_Activate:
                 resetIdleTime();
 
-                if (mWindows.getMode() == MWGui::GM_Container) {
-                    toggleContainer (); 
-                } else if (MWBase::Environment::get().getWindowManager()->isGuiMode()) {
-                    MWBase::Environment::get().getWindowManager()->enterPressed();
-                } else {
-                    activate();
+                if (mWindows.isGuiMode())
+                {
+                    if (mWindows.getMode() == MWGui::GM_Container)
+                        toggleContainer ();
+                    else
+                        MWBase::Environment::get().getWindowManager()->activateKeyPressed();
                 }
+                else
+                    activate();
                 break;
             case A_Journal:
                 toggleJournal ();
@@ -385,7 +387,7 @@ namespace MWInput
             if (mControlSwitch["playerviewswitch"]) {
 
                 // work around preview mode toggle when pressing Alt+Tab
-                if (actionIsActive(A_TogglePOV) && !mInputManager->isModifierHeld(KMOD_ALT)) {
+                if (actionIsActive(A_TogglePOV) && !mInputManager->isModifierHeld(SDL_Keymod(KMOD_ALT))) {
                     if (mPreviewPOVDelay <= 0.5 &&
                         (mPreviewPOVDelay += dt) > 0.5)
                     {
@@ -434,13 +436,9 @@ namespace MWInput
 
     void InputManager::processChangedSettings(const Settings::CategorySettingVector& changed)
     {
-        bool changeRes = false;
         for (Settings::CategorySettingVector::const_iterator it = changed.begin();
         it != changed.end(); ++it)
         {
-            if (it->first == "Video" && (it->second == "resolution x" || it->second == "resolution y"))
-                changeRes = true;
-
             if (it->first == "Input" && it->second == "invert y axis")
                 mInvertY = Settings::Manager::getBool("invert y axis", "Input");
 
@@ -451,9 +449,6 @@ namespace MWInput
                 mUISensitivity = Settings::Manager::getFloat("ui sensitivity", "Input");
 
         }
-
-        if (changeRes)
-            adjustMouseRegion(Settings::Manager::getInt("resolution x", "Video"), Settings::Manager::getInt("resolution y", "Video"));
     }
 
     bool InputManager::getControlSwitch (const std::string& sw)
@@ -608,21 +603,27 @@ namespace MWInput
             }
 
             if (arg.zrel)
+            {
                 MWBase::Environment::get().getWorld()->changeVanityModeScale(arg.zrel);
+                MWBase::Environment::get().getWorld()->setCameraDistance(arg.zrel, true, true);
+            }
         }
 
         return true;
     }
 
-    bool InputManager::windowFocusChange(bool have_focus)
+    void InputManager::windowFocusChange(bool have_focus)
     {
-        return true;
     }
 
-    bool InputManager::windowVisibilityChange(bool visible)
+    void InputManager::windowVisibilityChange(bool visible)
     {
             //TODO: Pause game?
-        return true;
+    }
+
+    void InputManager::windowResized(int x, int y)
+    {
+        mOgre.windowResized(x,y);
     }
 
     void InputManager::toggleMainMenu()
@@ -682,10 +683,8 @@ namespace MWInput
         if (MyGUI::InputManager::getInstance ().isModalAny())
             return;
 
-        bool gameMode = !mWindows.isGuiMode();
-
         // Toggle between game mode and inventory mode
-        if(gameMode)
+        if(!mWindows.isGuiMode())
             mWindows.pushGuiMode(MWGui::GM_Inventory);
         else
         {
@@ -702,9 +701,7 @@ namespace MWInput
         if (MyGUI::InputManager::getInstance ().isModalAny())
             return;
 
-        bool gameMode = !mWindows.isGuiMode();
-
-        if(!gameMode)
+        if(mWindows.isGuiMode())
         {
             if (mWindows.getMode() == MWGui::GM_Container)
                 mWindows.popGuiMode();
@@ -714,17 +711,14 @@ namespace MWInput
 
     }
 
-
     void InputManager::toggleConsole()
     {
         if (MyGUI::InputManager::getInstance ().isModalAny())
             return;
 
-        bool gameMode = !mWindows.isGuiMode();
-
         // Switch to console mode no matter what mode we are currently
         // in, except of course if we are already in console mode
-        if (!gameMode)
+        if (mWindows.isGuiMode())
         {
             if (mWindows.getMode() == MWGui::GM_Console)
                 mWindows.popGuiMode();
@@ -741,9 +735,7 @@ namespace MWInput
             return;
 
         // Toggle between game mode and journal mode
-        bool gameMode = !mWindows.isGuiMode();
-
-        if(gameMode && MWBase::Environment::get().getWindowManager ()->getJournalAllowed())
+        if(!mWindows.isGuiMode() && MWBase::Environment::get().getWindowManager ()->getJournalAllowed())
         {
             MWBase::Environment::get().getSoundManager()->playSound ("book open", 1.0, 1.0);
             mWindows.pushGuiMode(MWGui::GM_Journal);

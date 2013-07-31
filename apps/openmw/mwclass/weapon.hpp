@@ -12,6 +12,9 @@ namespace MWClass
 
         public:
 
+            virtual std::string getId (const MWWorld::Ptr& ptr) const;
+            ///< Return ID of \a ptr
+
             virtual void insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const;
             ///< Add reference into a cell for rendering
 

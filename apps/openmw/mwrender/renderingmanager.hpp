@@ -50,7 +50,7 @@ namespace MWRender
     class VideoPlayer;
     class Animation;
 
-class RenderingManager: private RenderingInterface, public Ogre::WindowEventListener, public Ogre::RenderTargetListener
+class RenderingManager: private RenderingInterface, public Ogre::RenderTargetListener, public OEngine::Render::WindowSizeListener
 {
 private:
     virtual MWRender::Objects& getObjects();
@@ -86,6 +86,7 @@ public:
     void resetCamera();
 
     bool vanityRotateCamera(const float *rot);
+    void setCameraDistance(float dist, bool adjust = false, bool override = true);
 
     void setupPlayer(const MWWorld::Ptr &ptr);
     void renderPlayer(const MWWorld::Ptr &ptr);
@@ -126,6 +127,9 @@ public:
     /// \param old Object reference in previous cell
     /// \param cur Object reference in new cell
     void updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur);
+
+    /// Specifies an updated Ptr object for the player (used on cell change).
+    void updatePlayerPtr(const MWWorld::Ptr &ptr);
 
     void update (float duration, bool paused);
 
@@ -200,8 +204,7 @@ public:
     void frameStarted(float dt);
 
 protected:
-    virtual void windowResized(Ogre::RenderWindow* rw);
-    virtual void windowClosed(Ogre::RenderWindow* rw);
+    virtual void windowResized(int x, int y);
 
 private:
     sh::Factory* mFactory;

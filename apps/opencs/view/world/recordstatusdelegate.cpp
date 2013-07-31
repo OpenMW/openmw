@@ -16,7 +16,7 @@ CSVWorld::CommandDelegate *CSVWorld::RecordStatusDelegateFactory::makeDelegate (
     return new RecordStatusDelegate (mValues, mIcons, undoStack, parent);
 }
 
-void CSVWorld::RecordStatusDelegate::updateEditorSetting (const QString &settingName, const QString &settingValue)
+bool CSVWorld::RecordStatusDelegate::updateEditorSetting (const QString &settingName, const QString &settingValue)
 {
     if (settingName == "Record Status Display")
     {
@@ -28,7 +28,11 @@ void CSVWorld::RecordStatusDelegate::updateEditorSetting (const QString &setting
 
         else if (settingValue == "Text Only")
             mDisplayMode = Mode_TextOnly;
+
+        return true;
     }
+
+    return false;
 }
 
 CSVWorld::RecordStatusDelegateFactory::RecordStatusDelegateFactory()

@@ -201,6 +201,8 @@ namespace MWBase
 
             virtual void setMoonColour (bool red) = 0;
 
+            virtual void modRegion(const std::string &regionid, const std::vector<char> &chances) = 0;
+
             virtual float getTimeScaleFactor() const = 0;
 
             virtual void changeToInteriorCell (const std::string& cellName,
@@ -217,6 +219,10 @@ namespace MWBase
 
             virtual MWWorld::Ptr  getFacedObject() = 0;
             ///< Return pointer to the object the player is looking at, if it is within activation range
+
+            /// Returns a pointer to the object the provided object is facing (if within the
+            /// specified distance). This will attempt to use the "Bip01 Head" node as a basis.
+            virtual MWWorld::Ptr getFacedObject(const MWWorld::Ptr &ptr, float distance) = 0;
 
             virtual void adjustPosition (const MWWorld::Ptr& ptr) = 0;
             ///< Adjust position after load to be on ground. Must be called after model load.
@@ -327,6 +333,7 @@ namespace MWBase
             virtual void togglePlayerLooking(bool enable) = 0;
             virtual void changeVanityModeScale(float factor) = 0;
             virtual bool vanityRotateCamera(float * rot) = 0;
+            virtual void setCameraDistance(float dist, bool adjust = false, bool override = true)=0;
 
             virtual void setupPlayer() = 0;
             virtual void renderPlayer() = 0;
@@ -371,6 +378,12 @@ namespace MWBase
             /// Find default position inside interior cell specified by name
             /// \return false if interior with given name not exists, true otherwise
             virtual bool findInteriorPosition(const std::string &name, ESM::Position &pos) = 0;
+
+            /// Enables or disables use of teleport spell effects (recall, intervention, etc).
+            virtual void enableTeleporting(bool enable) = 0;
+
+            /// Returns true if teleport spell effects are allowed.
+            virtual bool isTeleportingEnabled() const = 0;
     };
 }
 

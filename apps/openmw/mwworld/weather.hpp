@@ -149,6 +149,8 @@ namespace MWWorld
 
         unsigned int getWeatherID() const;
 
+        void modRegion(const std::string &regionid, const std::vector<char> &chances);
+
     private:
         float mHour;
         int mDay, mMonth;
@@ -187,6 +189,9 @@ namespace MWWorld
         void setWeather(const Ogre::String& weatherType, bool instant=false);
         Ogre::String nextWeather(const ESM::Region* region) const;
         WeatherResult mResult;
+
+        typedef std::map<std::string,std::vector<char> > RegionModMap;
+        RegionModMap mRegionMods;
 
         float mSunriseTime;
         float mSunsetTime;
