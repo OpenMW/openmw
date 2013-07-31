@@ -24,6 +24,13 @@ namespace MWMechanics
 {
     AiWander::AiWander(int distance, int duration, int timeOfDay, const std::vector<int>& idle, bool repeat):
         mDistance(distance), mDuration(duration), mTimeOfDay(timeOfDay), mIdle(idle), mRepeat(repeat)
+      , mCellX(std::numeric_limits<int>::max())
+      , mCellY(std::numeric_limits<int>::max())
+      , mXCell(0)
+      , mYCell(0)
+      , mX(0)
+      , mY(0)
+      , mZ(0)
     {
         for(unsigned short counter = 0; counter < mIdle.size(); counter++)
         {

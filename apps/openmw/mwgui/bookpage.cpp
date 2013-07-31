@@ -108,7 +108,7 @@ struct TypesetBookImpl : TypesetBook
     {
         Contents::iterator i = mContents.insert (mContents.end (), Content (text.first, text.second));
 
-        if (i->size () == 0)
+        if (i->empty())
             return Range (Utf8Point (NULL), Utf8Point (NULL));
 
         Utf8Point begin = &i->front ();
@@ -768,6 +768,11 @@ public:
     PageDisplay ()
     {
         mPage = -1;
+        mViewTop = 0;
+        mViewBottom = 0;
+        mFocusItem = NULL;
+        mItemActive = false;
+        mNode = NULL;
     }
 
     void dirtyFocusItem ()
@@ -1092,7 +1097,6 @@ class BookPageImpl : public BookPage
 {
 MYGUI_RTTI_DERIVED(BookPage)
 public:
-
 
     void showPage (TypesetBook::Ptr book, size_t page)
     {

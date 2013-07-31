@@ -165,8 +165,9 @@ namespace MWWorld
         ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap, int mActivationDistanceOverride)
     : mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
       mSky (true), mCells (mStore, mEsm),
-      mNumFacing(0), mActivationDistanceOverride (mActivationDistanceOverride),
-      mFallback(fallbackMap), mPlayIntro(0), mTeleportEnabled(true)
+      mActivationDistanceOverride (mActivationDistanceOverride),
+      mFallback(fallbackMap), mPlayIntro(0), mTeleportEnabled(true),
+      mFacedDistance(FLT_MAX)
     {
         mPhysics = new PhysicsSystem(renderer);
         mPhysEngine = mPhysics->getEngine();
@@ -1117,7 +1118,7 @@ namespace MWWorld
 
     bool World::castRay (float x1, float y1, float z1, float x2, float y2, float z2)
     {
-        Ogre::Vector3 a(x1,y1,z1);std::cout << x1 << " " << x2;
+        Ogre::Vector3 a(x1,y1,z1);
         Ogre::Vector3 b(x2,y2,z2);
         return mPhysics->castRay(a,b,false,true);
     }
@@ -1329,7 +1330,7 @@ namespace MWWorld
                 ++it;
         }
 
-        if (results.size() == 0)
+        if (results.empty())
         {
             mFacedHandle = "";
             mFacedDistance = FLT_MAX;
@@ -1717,8 +1718,6 @@ namespace MWWorld
 
     void World::getContainersOwnedBy (const MWWorld::Ptr& npc, std::vector<MWWorld::Ptr>& out)
     {
-        std::string refId = npc.getCellRef().mRefID;
-
         const Scene::CellStoreCollection& collection = mWorldScene->getActiveCells();
         for (Scene::CellStoreCollection::const_iterator cellIt = collection.begin(); cellIt != collection.end(); ++cellIt)
         {

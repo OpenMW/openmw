@@ -74,7 +74,7 @@ Animation::~Animation()
 
 void Animation::setObjectRoot(Ogre::SceneNode *node, const std::string &model, bool baseonly)
 {
-    OgreAssert(mAnimSources.size() == 0, "Setting object root while animation sources are set!");
+    OgreAssert(mAnimSources.empty(), "Setting object root while animation sources are set!");
     if(!mInsert)
         mInsert = node->createChildSceneNode();
 
@@ -126,7 +126,7 @@ void Animation::setObjectRoot(Ogre::SceneNode *node, const std::string &model, b
             else
             {
                 mSkelBase->attachObjectToBone(iter->second, iter->first);
-                iter++;
+                ++iter;
             }
         }
     }
@@ -214,7 +214,7 @@ void Animation::addAnimSource(const std::string &model)
     std::vector<Ogre::Controller<Ogre::Real> > ctrls;
     Ogre::SharedPtr<AnimSource> animsrc(OGRE_NEW AnimSource);
     NifOgre::Loader::createKfControllers(mSkelBase, kfname, animsrc->mTextKeys, ctrls);
-    if(animsrc->mTextKeys.size() == 0 || ctrls.size() == 0)
+    if(animsrc->mTextKeys.empty() || ctrls.empty())
         return;
 
     mAnimSources.push_back(animsrc);
@@ -497,7 +497,7 @@ bool Animation::reset(AnimState &state, const NifOgre::TextKeyMap &keys, const s
 
 void Animation::handleTextKey(AnimState &state, const std::string &groupname, const NifOgre::TextKeyMap::const_iterator &key)
 {
-    float time = key->first;
+    //float time = key->first;
     const std::string &evt = key->second;
 
     if(evt.compare(0, 7, "sound: ") == 0)
@@ -550,7 +550,7 @@ void Animation::handleTextKey(AnimState &state, const std::string &groupname, co
 
 void Animation::play(const std::string &groupname, int priority, int groups, bool autodisable, float speedmult, const std::string &start, const std::string &stop, float startpoint, size_t loops)
 {
-    if(!mSkelBase || mAnimSources.size() == 0)
+    if(!mSkelBase || mAnimSources.empty())
         return;
 
     if(groupname.empty())
@@ -567,7 +567,7 @@ void Animation::play(const std::string &groupname, int priority, int groups, boo
         if(stateiter->second.mPriority == priority)
             mStates.erase(stateiter++);
         else
-            stateiter++;
+            ++stateiter;
     }
 
     stateiter = mStates.find(groupname);
@@ -642,7 +642,7 @@ void Animation::resetActiveGroups()
         AnimStateMap::const_iterator active = mStates.end();
 
         AnimStateMap::const_iterator state = mStates.begin();
-        for(;state != mStates.end();state++)
+        for(;state != mStates.end();++state)
         {
             if(!(state->second.mGroups&(1<<grp)))
                 continue;
@@ -773,7 +773,7 @@ Ogre::Vector3 Animation::runAnimation(float duration)
             resetActiveGroups();
         }
         else
-            stateiter++;
+            ++stateiter;
     }
 
     for(size_t i = 0;i < mObjectRoot.mControllers.size();i++)

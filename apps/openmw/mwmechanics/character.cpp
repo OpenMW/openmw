@@ -699,7 +699,7 @@ void CharacterController::update(float duration, Movement &movement)
         if(movestate != CharState_None)
             clearAnimQueue();
 
-        if(mAnimQueue.size() == 0)
+        if(mAnimQueue.empty())
             idlestate = (inwater ? CharState_IdleSwim : (sneak ? CharState_IdleSneak : CharState_Idle));
         else if(mAnimQueue.size() > 1)
         {
@@ -765,7 +765,7 @@ void CharacterController::playGroup(const std::string &groupname, int mode, int 
     else
     {
         count = std::max(count, 1);
-        if(mode != 0 || mAnimQueue.size() == 0)
+        if(mode != 0 || mAnimQueue.empty())
         {
             clearAnimQueue();
             mAnimQueue.push_back(std::make_pair(groupname, count-1));
@@ -801,7 +801,7 @@ bool CharacterController::isAnimPlaying(const std::string &groupName)
 
 void CharacterController::clearAnimQueue()
 {
-    if(mAnimQueue.size() > 0)
+    if(!mAnimQueue.empty())
         mAnimation->disable(mAnimQueue.front().first);
     mAnimQueue.clear();
 }

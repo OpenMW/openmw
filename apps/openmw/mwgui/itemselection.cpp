@@ -9,6 +9,8 @@ namespace MWGui
 
     ItemSelectionDialog::ItemSelectionDialog(const std::string &label)
         : WindowModal("openmw_itemselection_dialog.layout")
+        , mSortModel(NULL)
+        , mModel(NULL)
     {
         getWidget(mItemView, "ItemView");
         mItemView->eventItemClicked += MyGUI::newDelegate(this, &ItemSelectionDialog::onSelectedItem);

@@ -376,13 +376,13 @@ namespace MWClass
             MWWorld::Store<ESM::SoundGenerator>::iterator sound = store.begin();
             while(sound != store.end())
             {
-                if(type == sound->mType && sound->mCreature.size() > 0 &&
+                if(type == sound->mType && !sound->mCreature.empty() &&
                    Misc::StringUtils::ciEqual(ptrid.substr(0, sound->mCreature.size()),
                                               sound->mCreature))
                     sounds.push_back(&*sound);
-                sound++;
+                ++sound;
             }
-            if(sounds.size() > 0)
+            if(!sounds.empty())
                 return sounds[(int)(rand()/(RAND_MAX+1.0)*sounds.size())]->mSound;
         }
 

@@ -237,7 +237,7 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
                     }
 
                 }
-                if (!candidates.size())
+                if (candidates.empty())
                     return;
                 std::string item = candidates[std::rand()%candidates.size()];
                 addInitialItem(item, owner, count, failChance, false);

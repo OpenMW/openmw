@@ -43,6 +43,8 @@ namespace MWRender {
         Reflection(Ogre::SceneManager* sceneManager)
             : mSceneMgr(sceneManager)
             , mIsUnderwater(false)
+            , mCamera(NULL)
+            , mParentCamera(NULL)
             {}
         virtual ~Reflection() {}
 

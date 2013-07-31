@@ -149,7 +149,6 @@ namespace MWGui
                 }
 
                 std::string type = focus->getUserString("ToolTipType");
-                std::string text = focus->getUserString("ToolTipText");
 
                 if (type == "")
                 {

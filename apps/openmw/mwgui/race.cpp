@@ -33,6 +33,7 @@ namespace MWGui
       , mHairIndex(0)
       , mCurrentAngle(0)
       , mPreviewDirty(true)
+      , mPreview(NULL)
     {
         // Centre dialog
         center();

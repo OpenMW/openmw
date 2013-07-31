@@ -18,7 +18,6 @@ namespace MWGui
 
     ReviewDialog::ReviewDialog()
         : WindowModal("openmw_chargen_review.layout")
-        , mLastPos(0)
     {
         // Centre dialog
         center();
@@ -321,9 +320,7 @@ namespace MWGui
         if (!mMiscSkills.empty())
             addSkills(mMiscSkills, "sSkillClassMisc", "Misc Skills", coord1, coord2);
 
-        mClientHeight = coord1.top;
-
-        mSkillView->setCanvasSize (mSkillView->getWidth(), std::max(mSkillView->getHeight(), mClientHeight));
+        mSkillView->setCanvasSize (mSkillView->getWidth(), std::max(mSkillView->getHeight(), coord1.top));
     }
 
     // widget controls

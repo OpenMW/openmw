@@ -31,7 +31,6 @@ namespace MWDialogue
 
             int mChoice;
             std::string mLastTopic;
-            ESM::DialInfo mLastDialogue;
             bool mIsInChoice;
 
             float mTemporaryDispositionChange;

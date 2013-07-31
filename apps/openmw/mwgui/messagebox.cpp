@@ -49,7 +49,7 @@ namespace MWGui
                         else {
                             (*it2)->update(height);
                             height += (*it2)->getHeight();
-                            it2++;
+                            ++it2;
                         }
                     }
                 }
@@ -57,7 +57,7 @@ namespace MWGui
             }
             else
             {
-                it++;
+                ++it;
             }
         }
 
@@ -226,6 +226,7 @@ namespace MWGui
         : WindowModal("openmw_interactive_messagebox.layout")
       , mMessageBoxManager(parMessageBoxManager)
       , mButtonPressed(-1)
+        , mTextButtonPadding(0)
     {
         WindowModal::open();
 

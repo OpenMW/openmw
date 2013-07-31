@@ -70,6 +70,9 @@ namespace MWGui
         , mGenerateClassStep(0)
     {
         mCreationStage = CSE_NotStarted;
+        mGenerateClassSpecializations[0] = 0;
+        mGenerateClassSpecializations[1] = 0;
+        mGenerateClassSpecializations[2] = 0;
     }
 
     void CharacterCreation::setValue (const std::string& id, const MWMechanics::Stat<int>& value)

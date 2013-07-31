@@ -11,8 +11,10 @@
 
 namespace MWMechanics
 {
-    Enchanting::Enchanting():
-    mCastStyle(ESM::Enchantment::CastOnce)
+    Enchanting::Enchanting()
+        : mCastStyle(ESM::Enchantment::CastOnce)
+        , mSelfEnchanting(false)
+        , mOldItemCount(0)
     {}
 
     void Enchanting::setOldItem(MWWorld::Ptr oldItem)

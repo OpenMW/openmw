@@ -56,14 +56,14 @@ void Pathgrid::load(ESMReader &esm)
             std::vector<int>::const_iterator rawIt = rawConnections.begin();
             int pointIndex = 0;
             mEdges.reserve(edgeCount);
-            for(PointList::const_iterator it = mPoints.begin(); it != mPoints.end(); it++, pointIndex++)
+            for(PointList::const_iterator it = mPoints.begin(); it != mPoints.end(); ++it, ++pointIndex)
             {
                 unsigned char connectionNum = (*it).mConnectionNum;
                 for (int i = 0; i < connectionNum; ++i) {
                     Edge edge;
                     edge.mV0 = pointIndex;
                     edge.mV1 = *rawIt;
-                    rawIt++;
+                    ++rawIt;
                     mEdges.push_back(edge);
                 }
             }

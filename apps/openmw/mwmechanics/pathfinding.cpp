@@ -119,7 +119,7 @@ namespace
                 boost::predecessor_map(&p[0]).distance_map(&d[0]).visitor(goalVisited(end)));
         }
 
-        catch(found_path fg)
+        catch(found_path& fg)
         {
             for(PointID v = end; ; v = p[v])
             {

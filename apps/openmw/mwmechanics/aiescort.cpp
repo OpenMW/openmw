@@ -29,6 +29,8 @@ namespace MWMechanics
 {
     AiEscort::AiEscort(const std::string &actorId, int duration, float x, float y, float z)
     : mActorId(actorId), mX(x), mY(y), mZ(z), mDuration(duration)
+    , cellX(std::numeric_limits<int>::max())
+    , cellY(std::numeric_limits<int>::max())
     {
         mMaxDist = 470;
 
@@ -46,6 +48,8 @@ namespace MWMechanics
 
     AiEscort::AiEscort(const std::string &actorId, const std::string &cellId,int duration, float x, float y, float z)
     : mActorId(actorId), mCellId(cellId), mX(x), mY(y), mZ(z), mDuration(duration)
+    , cellX(std::numeric_limits<int>::max())
+    , cellY(std::numeric_limits<int>::max())
     {
         mMaxDist = 470;
 

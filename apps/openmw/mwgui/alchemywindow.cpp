@@ -47,6 +47,8 @@ namespace MWGui
         , mIngredients (4)
         , mSortModel(NULL)
     {
+        mAlchemy.setAlchemist (MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+
         getWidget(mCreateButton, "CreateButton");
         getWidget(mCancelButton, "CancelButton");
         getWidget(mIngredients[0], "Ingredient1");
@@ -149,8 +151,6 @@ namespace MWGui
         mItemView->setModel (mSortModel);
 
         mNameEdit->setCaption("");
-
-        mAlchemy.setAlchemist (MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
 
         int index = 0;
 

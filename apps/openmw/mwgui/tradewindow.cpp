@@ -36,6 +36,9 @@ namespace MWGui
         , mBalanceButtonsState(BBS_None)
         , mBalanceChangePause(0.0)
         , mItemToSell(-1)
+        , mTradeModel(NULL)
+        , mSortModel(NULL)
+        , mCurrentMerchantOffer(0)
     {
         getWidget(mFilterAll, "AllButton");
         getWidget(mFilterWeapon, "WeaponButton");

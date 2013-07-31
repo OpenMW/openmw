@@ -54,7 +54,7 @@ void validate(boost::any &v, std::vector<std::string> const &tokens, FallbackMap
     FallbackMap *map = boost::any_cast<FallbackMap>(&v);
 
     std::map<std::string,std::string>::iterator mapIt;
-    for(std::vector<std::string>::const_iterator it=tokens.begin(); it != tokens.end(); it++)
+    for(std::vector<std::string>::const_iterator it=tokens.begin(); it != tokens.end(); ++it)
     {
         int sep = it->find(",");
         if(sep < 1 || sep == (int)it->length()-1)
@@ -204,7 +204,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
     // fallback archives
     StringsVector archives = variables["fallback-archive"].as<StringsVector>();
-    for (StringsVector::const_iterator it = archives.begin(); it != archives.end(); it++)
+    for (StringsVector::const_iterator it = archives.begin(); it != archives.end(); ++it)
     {
         engine.addArchive(*it);
     }

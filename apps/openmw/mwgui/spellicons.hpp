@@ -22,7 +22,11 @@ namespace MWGui
     // information about a single magic effect source as required for display in the tooltip
     struct MagicEffectInfo
     {
-        MagicEffectInfo() : mPermanent(false) {}
+        MagicEffectInfo()
+            : mPermanent(false)
+            , mMagnitude(0)
+        , mRemainingTime(0)
+        {}
         std::string mSource; // display name for effect source (e.g. potion name)
         MWMechanics::EffectKey mKey;
         int mMagnitude;
