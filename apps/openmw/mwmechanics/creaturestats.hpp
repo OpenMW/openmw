@@ -158,6 +158,8 @@ namespace MWMechanics
 
         bool getCreatureTargetted() const;
 
+        float getEvasion() const;
+
         void setLastHitObject(const std::string &objectid);
         const std::string &getLastHitObject() const;
     };

@@ -319,6 +319,16 @@ namespace MWMechanics
         return false;
     }
 
+    float CreatureStats::getEvasion() const
+    {
+        float evasion = (getAttribute(ESM::Attribute::Agility).getModified() / 5.0f) +
+                        (getAttribute(ESM::Attribute::Luck).getModified() / 10.0f);
+        evasion *= getFatigueTerm();
+        evasion += mMagicEffects.get(EffectKey(ESM::MagicEffect::Sanctuary)).mMagnitude;
+
+        return evasion;
+    }
+
     void CreatureStats::setLastHitObject(const std::string& objectid)
     {
         mLastHitObject = objectid;

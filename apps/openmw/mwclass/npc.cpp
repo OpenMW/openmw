@@ -331,18 +331,18 @@ namespace MWClass
             return;
 
         const MWWorld::Class &othercls = MWWorld::Class::get(victim);
-        if(!othercls.isActor() || othercls.getCreatureStats(victim).isDead())
-        {
-            // Can't hit non-actors, or dead actors
+        if(!othercls.isActor()) // Can't hit non-actors
             return;
-        }
+        MWMechanics::CreatureStats &otherstats = getCreatureStats(victim);
+        if(otherstats.isDead()) // Can't hit dead actors
+            return;
 
         if(ptr.getRefData().getHandle() == "player")
             MWBase::Environment::get().getWindowManager()->setEnemy(victim);
 
         int weapskill = ESM::Skill::HandToHand;
         if(!weapon.isEmpty())
-            weapskill = MWWorld::Class::get(weapon).getEquipmentSkill(weapon);
+            weapskill = get(weapon).getEquipmentSkill(weapon);
 
         MWMechanics::CreatureStats &crstats = getCreatureStats(ptr);
         MWMechanics::NpcStats &npcstats = getNpcStats(ptr);
@@ -353,7 +353,7 @@ namespace MWClass
         hitchance *= crstats.getFatigueTerm();
         hitchance += mageffects.get(MWMechanics::EffectKey(ESM::MagicEffect::FortifyAttack)).mMagnitude -
                      mageffects.get(MWMechanics::EffectKey(ESM::MagicEffect::Blind)).mMagnitude;
-        hitchance -= othercls.getEvasion(victim);
+        hitchance -= otherstats.getEvasion();
 
         if((::rand()/(RAND_MAX+1.0)) > hitchance/100.0f)
         {
@@ -412,8 +412,7 @@ namespace MWClass
                 MWBase::Environment::get().getSoundManager()->playSound3D(victim, "critical damage", 1.0f, 1.0f);
             }
 
-            healthdmg = (othercls.getCreatureStats(victim).getFatigue().getCurrent() < 1.0f ||
-                         npcstats.isWerewolf());
+            healthdmg = (otherstats.getFatigue().getCurrent() < 1.0f || npcstats.isWerewolf());
             if(healthdmg)
                 damage *= gmst.find("fHandtoHandHealthPer")->getFloat();
         }
