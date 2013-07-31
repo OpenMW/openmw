@@ -531,8 +531,10 @@ namespace Physic
                                             const btCollisionObjectWrapper* colObj1Wrap,int partId1,int index1)
         {
             const RigidBody* body = dynamic_cast<const RigidBody*>(colObj0Wrap->m_collisionObject);
-            if (body)
+            if (body && !(colObj0Wrap->m_collisionObject->getBroadphaseHandle()->m_collisionFilterGroup
+                          & CollisionType_Raycasting))
                 mResult.push_back(body->mName);
+
             return 0.f;
         }
 #else
@@ -540,7 +542,8 @@ namespace Physic
                                          const btCollisionObject* col1, int partId1, int index1)
         {
             const RigidBody* body = dynamic_cast<const RigidBody*>(col0);
-            if (body)
+            if (body && !(col0->getBroadphaseHandle()->m_collisionFilterGroup
+                          & CollisionType_Raycasting))
                 mResult.push_back(body->mName);
             return 0.f;
         }
