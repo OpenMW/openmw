@@ -233,6 +233,8 @@ namespace MWClass
 
             // store
             ptr.getRefData().setCustomData (data.release());
+
+            getInventoryStore(ptr).autoEquip(ptr);
         }
     }
 
