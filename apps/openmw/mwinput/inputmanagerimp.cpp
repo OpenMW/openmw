@@ -844,8 +844,8 @@ namespace MWInput
         defaultKeyBindings[A_QuickKey8] = SDLK_8;
         defaultKeyBindings[A_QuickKey9] = SDLK_9;
         defaultKeyBindings[A_QuickKey10] = SDLK_0;
-        defaultKeyBindings[A_Screenshot] = SDLK_PRINTSCREEN;
-        defaultKeyBindings[A_ToggleHUD] = SDLK_F12;
+        defaultKeyBindings[A_Screenshot] = SDLK_F12;
+        defaultKeyBindings[A_ToggleHUD] = SDLK_F11;
         defaultKeyBindings[A_AlwaysRun] = SDLK_y;
 
         std::map<int, int> defaultMouseButtonBindings;
@@ -880,11 +880,19 @@ namespace MWInput
                     mInputBinder->addMouseButtonBinding (control, defaultMouseButtonBindings[i], ICS::Control::INCREASE);
             }
         }
+
+        // Printscreen key should not be allowed because it's captured by system screenshot function
+        // We check this explicitely here to fix up pre-0.26 config files. Can be removed after a few versions
+        if (mInputBinder->getKeyBinding(mInputBinder->getControl(A_Screenshot), ICS::Control::INCREASE) == SDLK_PRINTSCREEN)
+            mInputBinder->addKeyBinding(mInputBinder->getControl(A_Screenshot), SDLK_F12, ICS::Control::INCREASE);
     }
 
     std::string InputManager::getActionDescription (int action)
     {
         std::map<int, std::string> descriptions;
+
+        if (action == A_Screenshot)
+            return "Screenshot";
 
         descriptions[A_Use] = "sUse";
         descriptions[A_Activate] = "sActivate";
@@ -958,6 +966,7 @@ namespace MWInput
         ret.push_back(A_Journal);
         ret.push_back(A_Rest);
         ret.push_back(A_Console);
+        ret.push_back(A_Screenshot);
         ret.push_back(A_QuickKeysMenu);
         ret.push_back(A_QuickKey1);
         ret.push_back(A_QuickKey2);
