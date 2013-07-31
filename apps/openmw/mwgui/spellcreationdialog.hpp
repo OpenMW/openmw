@@ -75,6 +75,7 @@ namespace MWGui
 
     protected:
         ESM::ENAMstruct mEffect;
+        ESM::ENAMstruct mOldEffect;
 
         const ESM::MagicEffect* mMagicEffect;
     };
