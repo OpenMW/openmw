@@ -32,6 +32,7 @@ namespace MWGui
 
 ItemView::ItemView()
     : mModel(NULL)
+    , mScrollView(NULL)
 {
 }
 

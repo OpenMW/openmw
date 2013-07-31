@@ -36,6 +36,7 @@ namespace MWGui
         , mPreview(MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer ())
         , mPreviewDirty(true)
         , mDragAndDrop(dragAndDrop)
+        , mSelectedItem(-1)
     {
         static_cast<MyGUI::Window*>(mMainWidget)->eventWindowChangeCoord += MyGUI::newDelegate(this, &InventoryWindow::onWindowResize);
 

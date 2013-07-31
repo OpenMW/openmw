@@ -108,12 +108,12 @@ void OgreRenderer::loadPlugins()
 void OgreRenderer::unloadPlugins()
 {
     std::vector<Ogre::ParticleEmitterFactory*>::iterator ei;
-    for(ei = mEmitterFactories.begin();ei != mEmitterFactories.end();ei++)
+    for(ei = mEmitterFactories.begin();ei != mEmitterFactories.end();++ei)
         OGRE_DELETE (*ei);
     mEmitterFactories.clear();
 
     std::vector<Ogre::ParticleAffectorFactory*>::iterator ai;
-    for(ai = mAffectorFactories.begin();ai != mAffectorFactories.end();ai++)
+    for(ai = mAffectorFactories.begin();ai != mAffectorFactories.end();++ai)
         OGRE_DELETE (*ai);
     mAffectorFactories.clear();
 

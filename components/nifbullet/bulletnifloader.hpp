@@ -50,7 +50,13 @@ namespace NifBullet
 class ManualBulletShapeLoader : public OEngine::Physic::BulletShapeLoader
 {
 public:
-    ManualBulletShapeLoader():resourceGroup("General"){}
+    ManualBulletShapeLoader()
+      : mShape(NULL)
+      , mBoundingBox(NULL)
+      , mHasShape(false)
+    {
+    }
+
     virtual ~ManualBulletShapeLoader();
 
     void warn(const std::string &msg)
@@ -94,10 +100,9 @@ private:
     */
     void handleNiTriShape(btTriangleMesh* mesh, const Nif::NiTriShape *shape, int flags, const Ogre::Matrix4 &transform, bool raycasting);
 
-    std::string resourceName;
-    std::string resourceGroup;
+    std::string mResourceName;
 
-    OEngine::Physic::BulletShape* cShape;//current shape
+    OEngine::Physic::BulletShape* mShape;//current shape
     btBoxShape *mBoundingBox;
 
     bool mHasShape;

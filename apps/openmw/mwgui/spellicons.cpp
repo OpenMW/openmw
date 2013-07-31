@@ -139,7 +139,7 @@ namespace MWGui
         if (adjustSize)
         {
             int s = effects.size() * 16+4;
-            if (!effects.size())
+            if (effects.empty())
                 s = 0;
             int diff = parent->getWidth() - s;
             parent->setSize(s, parent->getHeight());

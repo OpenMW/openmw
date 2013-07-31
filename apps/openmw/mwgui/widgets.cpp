@@ -899,6 +899,7 @@ namespace MWGui
             : mEnableRepeat(true)
             , mRepeatTriggerTime(0.5)
             , mRepeatStepTime(0.1)
+            , mIsIncreasing(true)
         {
         }
 

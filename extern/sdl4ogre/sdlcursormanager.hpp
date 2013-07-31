@@ -31,7 +31,6 @@ namespace SFO
         typedef std::map<std::string, SDL_Cursor*> CursorMap;
         CursorMap mCursorMap;
 
-        SDL_Cursor* mDebugCursor;
         std::string mCurrentCursor;
         bool mEnabled;
         bool mInitialized;

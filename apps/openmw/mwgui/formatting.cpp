@@ -78,7 +78,7 @@ namespace
         return string.getChar(0);
     }
     
-    bool is_not_empty(const std::string s) {
+    bool is_not_empty(const std::string& s) {
         std::string temp = s;
         boost::algorithm::trim(temp);
         return !temp.empty();

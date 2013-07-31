@@ -173,7 +173,7 @@ namespace MWSound
         {
             if(snditer->second.first == ptr && snditer->second.second == id)
                 return snditer->first->isPlaying();
-            snditer++;
+            ++snditer;
         }
         return false;
     }
@@ -298,7 +298,7 @@ namespace MWSound
                 mActiveSounds.erase(snditer++);
             }
             else
-                snditer++;
+                ++snditer;
         }
     }
 
@@ -380,7 +380,7 @@ namespace MWSound
                 mActiveSounds.erase(snditer++);
             }
             else
-                snditer++;
+                ++snditer;
         }
     }
 
@@ -395,7 +395,7 @@ namespace MWSound
                 mActiveSounds.erase(snditer++);
             }
             else
-                snditer++;
+                ++snditer;
         }
     }
 
@@ -411,7 +411,7 @@ namespace MWSound
                 mActiveSounds.erase(snditer++);
             }
             else
-                snditer++;
+                ++snditer;
         }
     }
 
@@ -427,7 +427,7 @@ namespace MWSound
                 mActiveSounds.erase(snditer++);
             }
             else
-                snditer++;
+                ++snditer;
         }
     }
 
@@ -504,7 +504,7 @@ namespace MWSound
             while(soundIter != regn->mSoundList.end())
             {
                 total += (int)soundIter->mChance;
-                soundIter++;
+                ++soundIter;
             }
             if(total == 0)
                 return;
@@ -523,7 +523,7 @@ namespace MWSound
             }
             pos += soundIter->mChance;
 
-            soundIter++;
+            ++soundIter;
         }
     }
 
@@ -583,7 +583,7 @@ namespace MWSound
                     snditer->first->mFadeOutTime -= soundDuration;               
                 }
                 snditer->first->update();
-                snditer++;
+                ++snditer;
             }
         }
     }
@@ -610,7 +610,7 @@ namespace MWSound
         {
             snditer->first->mBaseVolume = volumeFromType(snditer->first->getPlayType());
             snditer->first->update();
-            snditer++;
+            ++snditer;
         }
         if(mMusic)
         {

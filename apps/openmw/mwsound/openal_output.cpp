@@ -225,7 +225,7 @@ struct OpenAL_Output::StreamThread {
                 if((*iter)->process() == false)
                     iter = mStreams.erase(iter);
                 else
-                    iter++;
+                    ++iter;
             }
             mMutex.unlock();
             boost::this_thread::sleep(boost::posix_time::milliseconds(50));
@@ -809,7 +809,7 @@ ALuint OpenAL_Output::getBuffer(const std::string &fname)
             if(nameiter->second == oldbuf)
                 mBufferCache.erase(nameiter++);
             else
-                nameiter++;
+                ++nameiter;
         }
 
         bufsize = 0;
@@ -974,9 +974,9 @@ void OpenAL_Output::pauseSounds(int types)
             if(sound && sound->mSource && (sound->getPlayType()&types))
                 sources.push_back(sound->mSource);
         }
-        iter++;
+        ++iter;
     }
-    if(sources.size() > 0)
+    if(!sources.empty())
     {
         alSourcePausev(sources.size(), &sources[0]);
         throwALerror();
@@ -1001,9 +1001,9 @@ void OpenAL_Output::resumeSounds(int types)
             if(sound && sound->mSource && (sound->getPlayType()&types))
                 sources.push_back(sound->mSource);
         }
-        iter++;
+        ++iter;
     }
-    if(sources.size() > 0)
+    if(!sources.empty())
     {
         alSourcePlayv(sources.size(), &sources[0]);
         throwALerror();

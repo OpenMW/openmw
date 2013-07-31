@@ -57,7 +57,6 @@ namespace MWGui
             MyGUI::Widget* mRightPane;
 
             MyGUI::ScrollView* mSkillView;
-            int mLastPos, mClientHeight;
 
             SkillList mMajorSkills, mMinorSkills, mMiscSkills;
             std::map<int, MWMechanics::Stat<float> > mSkillValues;

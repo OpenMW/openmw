@@ -150,7 +150,7 @@ namespace Physic
     
     void PhysicActor::enableCollisionBody()
     {
-        mEngine->dynamicsWorld->addRigidBody(mBody);
+        mEngine->dynamicsWorld->addRigidBody(mBody,CollisionType_Actor,CollisionType_World|CollisionType_HeightMap);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -178,6 +178,7 @@ namespace Physic
 
     PhysicEngine::PhysicEngine(BulletShapeLoader* shapeLoader) :
         mDebugActive(0)
+      , mSceneMgr(NULL)
     {
         // Set up the collision configuration and dispatcher
         collisionConfiguration = new btDefaultCollisionConfiguration();
@@ -620,7 +621,6 @@ namespace Physic
         std::string name = "";
         float d = -1;
 
-        float d1 = 10000.;
         btCollisionWorld::ClosestRayResultCallback resultCallback1(from, to);
         if(raycastingObjectOnly)
             resultCallback1.m_collisionFilterMask = CollisionType_Raycasting;
@@ -633,8 +633,7 @@ namespace Physic
         if (resultCallback1.hasHit())
         {
             name = static_cast<const RigidBody&>(*resultCallback1.m_collisionObject).mName;
-            d1 = resultCallback1.m_closestHitFraction;
-            d = d1;
+            d = resultCallback1.m_closestHitFraction;;
         }
 
         return std::pair<std::string,float>(name,d);

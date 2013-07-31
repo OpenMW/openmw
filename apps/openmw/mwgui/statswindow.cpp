@@ -21,7 +21,6 @@ namespace MWGui
     StatsWindow::StatsWindow ()
       : WindowPinnableBase("openmw_stats_window.layout")
       , mSkillView(NULL)
-      , mClientHeight(0)
       , mMajorSkills()
       , mMinorSkills()
       , mMiscSkills()
@@ -82,7 +81,7 @@ namespace MWGui
     {
         mLeftPane->setCoord( MyGUI::IntCoord(0, 0, 0.44*window->getSize().width, window->getSize().height) );
         mRightPane->setCoord( MyGUI::IntCoord(0.44*window->getSize().width, 0, 0.56*window->getSize().width, window->getSize().height) );
-        mSkillView->setCanvasSize (mSkillView->getWidth(), std::max(mSkillView->getHeight(), mClientHeight));
+        mSkillView->setCanvasSize (mSkillView->getWidth(), mSkillView->getCanvasSize().height);
     }
 
     void StatsWindow::setBar(const std::string& name, const std::string& tname, int val, int max)
@@ -422,7 +421,6 @@ namespace MWGui
         mSkillWidgets.clear();
 
         mSkillView->setViewOffset (MyGUI::IntPoint(0,0));
-        mClientHeight = 0;
 
         const int valueSize = 40;
         MyGUI::IntCoord coord1(10, 0, mSkillView->getWidth() - (10 + valueSize) - 24, 18);
@@ -565,9 +563,7 @@ namespace MWGui
             mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("Caption_Text", "#{sCrimeHelp}");
         }
 
-        mClientHeight = coord1.top;
-
-        mSkillView->setCanvasSize (mSkillView->getWidth(), std::max(mSkillView->getHeight(), mClientHeight));
+        mSkillView->setCanvasSize (mSkillView->getWidth(), std::max(mSkillView->getHeight(), coord1.top));
     }
 
     void StatsWindow::onPinToggled()

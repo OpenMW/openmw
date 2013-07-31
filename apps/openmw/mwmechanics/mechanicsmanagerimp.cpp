@@ -416,7 +416,7 @@ namespace MWMechanics
         if (playerNpcStats.getFactionRanks().find(Misc::StringUtils::lowerCase(npcFaction)) != playerNpcStats.getFactionRanks().end())
         {
             for(std::vector<ESM::Faction::Reaction>::const_iterator it = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(Misc::StringUtils::lowerCase(npcFaction))->mReactions.begin();
-                it != MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(Misc::StringUtils::lowerCase(npcFaction))->mReactions.end(); it++)
+                it != MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(Misc::StringUtils::lowerCase(npcFaction))->mReactions.end(); ++it)
             {
                 if(Misc::StringUtils::lowerCase(it->mFaction) == Misc::StringUtils::lowerCase(npcFaction)) reaction = it->mReaction;
             }
@@ -425,7 +425,7 @@ namespace MWMechanics
         else if (npcFaction != "")
         {
             for(std::vector<ESM::Faction::Reaction>::const_iterator it = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(Misc::StringUtils::lowerCase(npcFaction))->mReactions.begin();
-                it != MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(Misc::StringUtils::lowerCase(npcFaction))->mReactions.end();it++)
+                it != MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(Misc::StringUtils::lowerCase(npcFaction))->mReactions.end();++it)
             {
                 if(playerNpcStats.getFactionRanks().find(Misc::StringUtils::lowerCase(it->mFaction)) != playerNpcStats.getFactionRanks().end() )
                 {

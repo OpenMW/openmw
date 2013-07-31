@@ -7,7 +7,7 @@
 
 namespace Interpreter{
 
-    bool Check(const std::string str, const std::string escword, unsigned int* i, unsigned int* start){
+    bool Check(const std::string& str, const std::string& escword, unsigned int* i, unsigned int* start){
         bool retval = str.find(escword) == 0;
         if(retval){
             (*i) += escword.length();
@@ -18,7 +18,7 @@ namespace Interpreter{
 
     std::vector<std::string> globals;
 
-    bool longerStr(const std::string a, const std::string b){
+    bool longerStr(const std::string& a, const std::string& b){
         return a.length() > b.length();
     }
 

@@ -36,6 +36,8 @@ namespace MWRender
 
         mPreviewCam.yaw = 0.f;
         mPreviewCam.offset = 400.f;
+        mMainCam.yaw = 0.f;
+        mMainCam.offset = 400.f;
     }
 
     Camera::~Camera()

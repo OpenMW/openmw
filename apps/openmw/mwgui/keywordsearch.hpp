@@ -101,7 +101,7 @@ public:
                     candidates.push_back(std::make_pair((j-i), candidate));
             }
 
-            if (!candidates.size())
+            if (candidates.empty())
                 continue; // didn't match enough to disambiguate, on to next character
 
             // shorter candidates will be added to the vector first. however, we want to check against longer candidates first

@@ -274,10 +274,10 @@ namespace MWClass
             ptr.get<ESM::NPC>();
         assert(ref->mBase != NULL);
 
-        std::string headID = ref->mBase->mHead;
+        //std::string headID = ref->mBase->mHead;
 
-        int end = headID.find_last_of("head_") - 4;
-        std::string bodyRaceID = headID.substr(0, end);
+        //int end = headID.find_last_of("head_") - 4;
+        //std::string bodyRaceID = headID.substr(0, end);
 
         std::string model = "meshes\\base_anim.nif";
         const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(ref->mBase->mRace);

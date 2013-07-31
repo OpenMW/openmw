@@ -75,12 +75,12 @@ btVector3 ManualBulletShapeLoader::getbtVector(Ogre::Vector3 const &v)
 
 void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
 {
-    cShape = static_cast<OEngine::Physic::BulletShape *>(resource);
-    resourceName = cShape->getName();
-    cShape->mCollide = false;
+    mShape = static_cast<OEngine::Physic::BulletShape *>(resource);
+    mResourceName = mShape->getName();
+    mShape->mCollide = false;
     mBoundingBox = NULL;
-    cShape->mBoxTranslation = Ogre::Vector3(0,0,0);
-    cShape->mBoxRotation = Ogre::Quaternion::IDENTITY;
+    mShape->mBoxTranslation = Ogre::Vector3(0,0,0);
+    mShape->mBoxRotation = Ogre::Quaternion::IDENTITY;
     mHasShape = false;
 
     btTriangleMesh* mesh1 = new btTriangleMesh();
@@ -89,7 +89,7 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
     // of the early stages of development. Right now we WANT to catch
     // every error as early and intrusively as possible, as it's most
     // likely a sign of incomplete code rather than faulty input.
-    Nif::NIFFile::ptr pnif (Nif::NIFFile::create (resourceName.substr(0, resourceName.length()-7)));
+    Nif::NIFFile::ptr pnif (Nif::NIFFile::create (mResourceName.substr(0, mResourceName.length()-7)));
     Nif::NIFFile & nif = *pnif.get ();
     if (nif.numRoots() < 1)
     {
@@ -108,29 +108,29 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
         return;
     }
 
-    cShape->mHasCollisionNode = hasRootCollisionNode(node);
+    mShape->mHasCollisionNode = hasRootCollisionNode(node);
 
     //do a first pass
     handleNode(mesh1, node,0,false,false,false);
 
     if(mBoundingBox != NULL)
     {
-       cShape->mCollisionShape = mBoundingBox;
+       mShape->mCollisionShape = mBoundingBox;
        delete mesh1;
     }
-    else if (mHasShape && cShape->mCollide)
+    else if (mHasShape && mShape->mCollide)
     {
-        cShape->mCollisionShape = new TriangleMeshShape(mesh1,true);
+        mShape->mCollisionShape = new TriangleMeshShape(mesh1,true);
     }
     else
         delete mesh1;
 
     //second pass which create a shape for raycasting.
-    resourceName = cShape->getName();
-    cShape->mCollide = false;
+    mResourceName = mShape->getName();
+    mShape->mCollide = false;
     mBoundingBox = NULL;
-    cShape->mBoxTranslation = Ogre::Vector3(0,0,0);
-    cShape->mBoxRotation = Ogre::Quaternion::IDENTITY;
+    mShape->mBoxTranslation = Ogre::Vector3(0,0,0);
+    mShape->mBoxRotation = Ogre::Quaternion::IDENTITY;
     mHasShape = false;
 
     btTriangleMesh* mesh2 = new btTriangleMesh();
@@ -139,12 +139,12 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
 
     if(mBoundingBox != NULL)
     {
-       cShape->mRaycastingShape = mBoundingBox;
+       mShape->mRaycastingShape = mBoundingBox;
        delete mesh2;
     }
     else if (mHasShape)
     {
-        cShape->mRaycastingShape = new TriangleMeshShape(mesh2,true);
+        mShape->mRaycastingShape = new TriangleMeshShape(mesh2,true);
     }
     else
         delete mesh2;
@@ -224,18 +224,18 @@ void ManualBulletShapeLoader::handleNode(btTriangleMesh* mesh, const Nif::Node *
         }
     }
 
-    if ( (isCollisionNode || (!cShape->mHasCollisionNode && !raycasting))
-            && (!isMarker || (cShape->mHasCollisionNode && !raycasting)))
+    if ( (isCollisionNode || (!mShape->mHasCollisionNode && !raycasting))
+            && (!isMarker || (mShape->mHasCollisionNode && !raycasting)))
     {
         if(node->hasBounds)
         {
-            cShape->mBoxTranslation = node->boundPos;
-            cShape->mBoxRotation = node->boundRot;
+            mShape->mBoxTranslation = node->boundPos;
+            mShape->mBoxRotation = node->boundRot;
             mBoundingBox = new btBoxShape(getbtVector(node->boundXYZ));
         }
         else if(node->recType == Nif::RC_NiTriShape)
         {
-            cShape->mCollide = !(flags&0x800);
+            mShape->mCollide = !(flags&0x800);
             handleNiTriShape(mesh, static_cast<const Nif::NiTriShape*>(node), flags, node->getWorldTransform(), raycasting);
         }
     }

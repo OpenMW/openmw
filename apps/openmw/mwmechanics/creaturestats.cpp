@@ -13,7 +13,7 @@ namespace MWMechanics
         : mLevel (0), mLevelHealthBonus(0.f), mDead (false), mDied (false), mFriendlyHits (0),
           mTalkedTo (false), mAlarmed (false),
           mAttacked (false), mHostile (false),
-          mAttackingOrSpell(false)
+          mAttackingOrSpell(false), mAttackType(AT_Chop)
     {
         for (int i=0; i<4; ++i)
             mAiSettings[i] = 0;

@@ -141,6 +141,10 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mFSStrict (false)
   , mScriptConsoleMode (false)
   , mCfgMgr(configurationManager)
+  , mEncoding(ToUTF8::WINDOWS_1252)
+  , mEncoder(NULL)
+  , mActivationDistanceOverride(-1)
+
 {
     std::srand ( std::time(NULL) );
     MWClass::registerClasses();

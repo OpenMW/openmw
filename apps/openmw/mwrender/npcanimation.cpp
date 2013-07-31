@@ -286,7 +286,7 @@ void NpcAnimation::updateParts(bool forceupdate)
     {
         typedef std::multimap<ESM::BodyPart::MeshPart,ESM::PartReferenceType> BodyPartMapType;
         static BodyPartMapType sBodyPartMap;
-        if(sBodyPartMap.size() == 0)
+        if(sBodyPartMap.empty())
         {
             sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Neck, ESM::PRT_Neck));
             sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Chest, ESM::PRT_Cuirass));
@@ -345,7 +345,7 @@ void NpcAnimation::updateParts(bool forceupdate)
                     {
                         if(!parts[bIt->second])
                             parts[bIt->second] = &*it;
-                        bIt++;
+                        ++bIt;
                     }
                 }
                 continue;
@@ -354,7 +354,7 @@ void NpcAnimation::updateParts(bool forceupdate)
             while(bIt != sBodyPartMap.end() && bIt->first == bodypart.mData.mPart)
             {
                 parts[bIt->second] = &*it;
-                bIt++;
+                ++bIt;
             }
         }
     }

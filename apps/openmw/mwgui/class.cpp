@@ -372,6 +372,8 @@ namespace MWGui
       , mAttribDialog(NULL)
       , mSkillDialog(NULL)
       , mDescDialog(NULL)
+      , mAffectedAttribute(NULL)
+      , mAffectedSkill(NULL)
     {
         // Centre dialog
         center();
@@ -718,6 +720,7 @@ namespace MWGui
 
     SelectAttributeDialog::SelectAttributeDialog()
       : WindowModal("openmw_chargen_select_attribute.layout")
+      , mAttributeId(ESM::Attribute::Strength)
     {
         // Centre dialog
         center();

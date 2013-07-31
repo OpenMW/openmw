@@ -74,7 +74,7 @@ void Store<ESM::Cell>::load(ESM::ESMReader &esm, const std::string &id)
             // copy list into new cell
             cell->mContextList = oldcell->mContextList;
             // merge lists of leased references, use newer data in case of conflict
-            for (ESM::MovedCellRefTracker::const_iterator it = cell->mMovedRefs.begin(); it != cell->mMovedRefs.end(); it++) {
+            for (ESM::MovedCellRefTracker::const_iterator it = cell->mMovedRefs.begin(); it != cell->mMovedRefs.end(); ++it) {
                 // remove reference from current leased ref tracker and add it to new cell
                 ESM::MovedCellRefTracker::iterator itold = std::find(oldcell->mMovedRefs.begin(), oldcell->mMovedRefs.end(), it->mRefnum);
                 if (itold != oldcell->mMovedRefs.end()) {

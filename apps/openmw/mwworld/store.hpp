@@ -49,7 +49,7 @@ namespace MWWorld
 
         SharedIterator operator++(int) {
             SharedIterator iter = *this;
-            mIter++;
+            ++mIter;
 
             return iter;
         }
@@ -61,7 +61,7 @@ namespace MWWorld
 
         SharedIterator operator--(int) {
             SharedIterator iter = *this;
-            mIter--;
+            --mIter;
 
             return iter;
         }

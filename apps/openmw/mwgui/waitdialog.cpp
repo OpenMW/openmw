@@ -47,6 +47,8 @@ namespace MWGui
         , mSleeping(false)
         , mHours(1)
         , mRemainingTime(0.05)
+        , mCurHour(0)
+        , mManualHours(1)
     {
         getWidget(mDateTimeText, "DateTimeText");
         getWidget(mRestText, "RestText");

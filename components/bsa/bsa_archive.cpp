@@ -130,7 +130,7 @@ public:
     {
         std::string normalizedPattern = normalize_path(pattern.begin(), pattern.end());
         StringVectorPtr ptr = StringVectorPtr(new StringVector());
-        for(index::const_iterator iter = mIndex.begin();iter != mIndex.end();iter++)
+        for(index::const_iterator iter = mIndex.begin();iter != mIndex.end();++iter)
         {
             if(Ogre::StringUtil::match(iter->first, normalizedPattern) ||
                (recursive && Ogre::StringUtil::match(iter->first, "*/"+normalizedPattern)))
@@ -169,7 +169,7 @@ public:
         }
         else
         {
-            for(index::const_iterator iter = mIndex.begin();iter != mIndex.end();iter++)
+            for(index::const_iterator iter = mIndex.begin();iter != mIndex.end();++iter)
             {
                 if(Ogre::StringUtil::match(iter->first, normalizedPattern) ||
                    (recursive && Ogre::StringUtil::match(iter->first, "*/"+normalizedPattern)))
@@ -249,7 +249,7 @@ public:
         std::string normalizedPattern = normalize_path(pattern.begin(), pattern.end());
         const Bsa::BSAFile::FileList &filelist = arc.getList();
         StringVectorPtr ptr = StringVectorPtr(new StringVector());
-        for(Bsa::BSAFile::FileList::const_iterator iter = filelist.begin();iter != filelist.end();iter++)
+        for(Bsa::BSAFile::FileList::const_iterator iter = filelist.begin();iter != filelist.end();++iter)
         {
             std::string ent = normalize_path(iter->name, iter->name+std::strlen(iter->name));
             if(Ogre::StringUtil::match(ent, normalizedPattern) ||
@@ -266,7 +266,7 @@ public:
         FileInfoListPtr ptr = FileInfoListPtr(new FileInfoList());
         const Bsa::BSAFile::FileList &filelist = arc.getList();
 
-        for(Bsa::BSAFile::FileList::const_iterator iter = filelist.begin();iter != filelist.end();iter++)
+        for(Bsa::BSAFile::FileList::const_iterator iter = filelist.begin();iter != filelist.end();++iter)
         {
             std::string ent = normalize_path(iter->name, iter->name+std::strlen(iter->name));
             if(Ogre::StringUtil::match(ent, normalizedPattern) ||

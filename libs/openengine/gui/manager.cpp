@@ -91,7 +91,11 @@ public:
         mRenderSystem(nullptr),
         mIsInitialise(false),
         mManualRender(false),
-        mCountBatch(0)
+        mCountBatch(0),
+        mVertexProgramNoTexture(NULL),
+        mFragmentProgramNoTexture(NULL),
+        mVertexProgramOneTexture(NULL),
+        mFragmentProgramOneTexture(NULL)
     {
     }
 

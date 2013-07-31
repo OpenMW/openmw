@@ -22,6 +22,8 @@ namespace MWRender
         : mCacheDir(cacheDir)
         , mMinX(0), mMaxX(0)
         , mMinY(0), mMaxY(0)
+        , mWidth(0)
+        , mHeight(0)
     {
     }
 
@@ -91,15 +93,13 @@ namespace MWRender
                             Ogre::ColourValue mountainColour(0.05, 0.05, 0.05);
                             Ogre::ColourValue hillColour(0.16, 0.12, 0.08);
 
-                            float mountainHeight = 15000.f;
-                            float hillHeight = 2500.f;
-
                             unsigned char r,g,b;
 
                             if (land)
                             {
-                                float landHeight = land->mLandData->mHeights[vertexY * ESM::Land::LAND_SIZE + vertexX];
-
+                                const float landHeight = land->mLandData->mHeights[vertexY * ESM::Land::LAND_SIZE + vertexX];
+                                const float mountainHeight = 15000.f;
+                                const float hillHeight = 2500.f;
 
                                 if (landHeight >= 0)
                                 {
