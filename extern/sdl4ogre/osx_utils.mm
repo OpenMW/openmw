@@ -2,8 +2,7 @@
 
 #import <AppKit/NSWindow.h>
 
-namespace OEngine {
-namespace Render {
+namespace SFO {
 
 unsigned long WindowContentViewHandle(SDL_SysWMinfo &info)
 {
@@ -12,5 +11,4 @@ unsigned long WindowContentViewHandle(SDL_SysWMinfo &info)
 	return (unsigned long)view;
 }
 
-}
 }
