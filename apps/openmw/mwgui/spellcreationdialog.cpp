@@ -163,7 +163,7 @@ namespace MWGui
             mDurationBox->setVisible (true);
             curY += mDurationBox->getSize().height;
         }
-        if (mEffect.mRange == ESM::RT_Target)
+        if (mEffect.mRange != ESM::RT_Self)
         {
             mAreaBox->setPosition(mAreaBox->getPosition().left, curY);
             mAreaBox->setVisible (true);
@@ -182,9 +182,6 @@ namespace MWGui
         else if (mEffect.mRange == ESM::RT_Touch)
             mRangeButton->setCaptionWithReplacing ("#{sRangeTouch}");
 
-        mAreaSlider->setVisible (mEffect.mRange != ESM::RT_Self);
-        mAreaText->setVisible (mEffect.mRange != ESM::RT_Self);
-
         // cycle through range types until we find something that's allowed
         if (mEffect.mRange == ESM::RT_Target && !(mMagicEffect->mData.mFlags & ESM::MagicEffect::CastTarget))
             onRangeButtonClicked(sender);
@@ -193,6 +190,11 @@ namespace MWGui
         if (mEffect.mRange == ESM::RT_Touch && !(mMagicEffect->mData.mFlags & ESM::MagicEffect::CastTouch))
             onRangeButtonClicked(sender);
 
+        if(mEffect.mRange == ESM::RT_Self)
+        {
+            mAreaSlider->setScrollPosition(0);
+            onAreaChanged(mAreaSlider,0);
+        }
         updateBoxes();
     }
 
