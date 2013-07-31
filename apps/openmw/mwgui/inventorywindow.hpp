@@ -5,6 +5,7 @@
 
 #include "windowpinnablebase.hpp"
 #include "widgets.hpp"
+#include "mode.hpp"
 
 namespace MWGui
 {
@@ -47,6 +48,8 @@ namespace MWGui
 
             void updatePlayer();
 
+            void setGuiMode(GuiMode mode);
+
         private:
             DragAndDrop* mDragAndDrop;
 
@@ -72,6 +75,13 @@ namespace MWGui
             MyGUI::Button* mFilterApparel;
             MyGUI::Button* mFilterMagic;
             MyGUI::Button* mFilterMisc;
+
+            MyGUI::IntCoord mPositionInventory;
+            MyGUI::IntCoord mPositionContainer;
+            MyGUI::IntCoord mPositionCompanion;
+            MyGUI::IntCoord mPositionBarter;
+
+            GuiMode mGuiMode;
 
             int mLastXSize;
             int mLastYSize;
