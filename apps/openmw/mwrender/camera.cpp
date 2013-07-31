@@ -99,9 +99,11 @@ namespace MWRender
         MWBase::Environment::get().getSoundManager()->setListenerPosDir(pos, dir, up);
     }
 
-    void Camera::update(float duration)
+    void Camera::update(float duration, bool paused)
     {
         updateListener();
+        if (paused)
+            return;
 
         // only show the crosshair in game mode and in first person mode.
         MWBase::WindowManager *wm = MWBase::Environment::get().getWindowManager();
