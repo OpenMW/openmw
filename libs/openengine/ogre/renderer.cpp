@@ -24,10 +24,6 @@
 #include <cstdlib>
 #include <stdexcept>
 
-#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-#include "osx_utils.h"
-#endif
-
 using namespace Ogre;
 using namespace OEngine::Render;
 

@@ -6,6 +6,10 @@
 #include <SDL_syswm.h>
 #include <SDL_endian.h>
 
+#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+#include "osx_utils.h"
+#endif
+
 namespace SFO
 {
 

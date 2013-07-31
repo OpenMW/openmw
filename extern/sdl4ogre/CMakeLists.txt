@@ -8,6 +8,10 @@ set(SDL4OGRE_SOURCE_FILES
 	sdlwindowhelper.cpp
 )
 
+if (APPLE)
+    set(SDL4OGRE_SOURCE_FILES ${SDL4OGRE_SOURCE_FILES} osx_utils.mm)
+endif ()
+
 set(SDL4OGRE_HEADER_FILES
 	OISCompat.h
 	cursormanager.hpp
