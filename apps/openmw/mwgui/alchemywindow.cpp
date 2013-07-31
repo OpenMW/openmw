@@ -154,6 +154,8 @@ namespace MWGui
 
         int index = 0;
 
+        mAlchemy.setAlchemist (MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+
         for (MWMechanics::Alchemy::TToolsIterator iter (mAlchemy.beginTools());
             iter!=mAlchemy.endTools() && index<static_cast<int> (mApparatus.size()); ++iter, ++index)
         {
