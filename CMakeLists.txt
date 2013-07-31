@@ -677,6 +677,7 @@ if (NOT WIN32 AND NOT DPKG_PROGRAM AND NOT APPLE)
     set(MANDIR "${DATAROOTDIR}/man" CACHE PATH "Where to install manpages")
     set(SYSCONFDIR "/etc/openmw" CACHE PATH "Set config dir")
     set(ICONDIR "${DATAROOTDIR}/pixmaps" CACHE PATH "Set icon dir")
+    set(LICDIR "${DATAROOTDIR}/licenses/openmw" CACHE PATH "Sets the openmw license directory to a non-default location.")
 
     # Install binaries
     INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/openmw" DESTINATION "${BINDIR}" )
@@ -713,4 +714,10 @@ if (NOT WIN32 AND NOT DPKG_PROGRAM AND NOT APPLE)
 
     # Install resources
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION "${DATADIR}" )
+
+    # Install licenses
+    INSTALL(FILES "DejaVu Font License.txt" DESTINATION "${LICDIR}" )
+    INSTALL(FILES "Daedric Font License.txt" DESTINATION "${LICDIR}" )
+    INSTALL(FILES "OFL.txt" DESTINATION "${LICDIR}" )
+    INSTALL(FILES "extern/shiny/License.txt" DESTINATION "${LICDIR}" RENAME "Shiny License.txt" )
 endif(NOT WIN32 AND NOT DPKG_PROGRAM AND NOT APPLE)
