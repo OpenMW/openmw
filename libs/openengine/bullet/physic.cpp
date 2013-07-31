@@ -547,6 +547,12 @@ namespace Physic
 #endif
     };
 
+
+    std::string PhysicEngine::sphereTest(float radius,btVector3& pos)
+    {
+
+    }
+
     std::vector<std::string> PhysicEngine::getCollisions(const std::string& name)
     {
         RigidBody* body = getRigidBody(name);
