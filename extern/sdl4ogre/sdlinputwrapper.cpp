@@ -119,21 +119,21 @@ namespace SFO
 				int w,h;
 				SDL_GetWindowSize(mSDLWindow, &w, &h);
 				// TODO: Fix Ogre to handle this more consistently
-#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
-				mOgreWindow->windowMovedOrResized();
-#else
+#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
 				mOgreWindow->resize(w, h);
+#else
+				mOgreWindow->windowMovedOrResized();
 #endif
 				if (mWindowListener)
 					mWindowListener->windowResized(evt.window.data1, evt.window.data2);
 
 			case SDL_WINDOWEVENT_RESIZED:
 				// TODO: Fix Ogre to handle this more consistently
-				#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
-				mOgreWindow->windowMovedOrResized();
-				#else
+#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
 				mOgreWindow->resize(evt.window.data1, evt.window.data2);
-				#endif
+#else
+				mOgreWindow->windowMovedOrResized();
+#endif
 				if (mWindowListener)
 					mWindowListener->windowResized(evt.window.data1, evt.window.data2);
 				break;
