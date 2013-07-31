@@ -3,7 +3,7 @@ OpenMW: A reimplementation of The Elder Scrolls III: Morrowind
 OpenMW is an attempt at recreating the engine for the popular role-playing game
 Morrowind by Bethesda Softworks. You need to own and install the original game for OpenMW to work.
 
-Version: 0.24.0
+Version: 0.25.0
 License: GPL (see GPL3.txt for more information)
 Website: http://www.openmw.org
 
@@ -93,6 +93,36 @@ Allowed options:
 
 
 CHANGELOG
+
+0.25.0
+
+Bug #411: Launcher crash on OS X < 10.8
+Bug #604: Terrible performance drop in the Census and Excise Office.
+Bug #676: Start Scripts fail to load
+Bug #677: OpenMW does not accept script names with -
+Bug #766: Extra space in front of topic links
+Bug #793: AIWander Isn't Being Passed The Repeat Parameter
+Bug #795: Sound playing with drawn weapon and crossing cell-border
+Bug #800: can't select weapon for enchantment
+Bug #801: Player can move while over-encumbered
+Bug #802: Dead Keys not working
+Bug #808: mouse capture
+Bug #809: ini Importer does not work without an existing cfg file
+Bug #812: Launcher will run OpenMW with no ESM or ESP selected
+Bug #813: OpenMW defaults to Morrowind.ESM with no ESM or ESP selected
+Bug #817: Dead NPCs and Creatures still have collision boxes
+Bug #820: Incorrect sorting of answers (Dialogue)
+Bug #826: mwinimport dumps core when given an unknown parameter
+Bug #833: getting stuck in door
+Bug #835: Journals/books not showing up properly.
+Feature #38: SoundGen
+Feature #105: AI Package: Wander
+Feature #230: 64-bit compatibility for OS X
+Feature #263: Hardware mouse cursors
+Feature #449: Allow mouse outside of window while paused
+Feature #736: First person animations
+Feature #750: Using mouse wheel in third person mode
+Feature #822: Autorepeat for slider buttons
 
 0.24.0
 
