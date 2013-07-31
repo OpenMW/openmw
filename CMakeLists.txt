@@ -335,7 +335,7 @@ IF(NOT WIN32 AND NOT APPLE)
     ## Debian and non debian Linux building
     # Paths
     IF (DPKG_PROGRAM)
-	## Debian specific
+        ## Debian specific
         SET(CMAKE_INSTALL_PREFIX "/usr")
         SET(SYSCONFDIR "../etc/openmw" CACHE PATH "Set config dir")
     ELSE ()
