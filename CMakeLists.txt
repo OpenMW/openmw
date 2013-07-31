@@ -361,7 +361,7 @@ if (NOT WIN32 AND NOT DPKG_PROGRAM AND NOT APPLE)
         INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/opencs" DESTINATION "${BINDIR}" )
     ENDIF(BUILD_OPENCS)
 
-    # Install icon and .desktop
+    # Install icon and desktop file
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.desktop" DESTINATION "${DATAROOTDIR}/applications")
     INSTALL(FILES "${OpenMW_SOURCE_DIR}/files/launcher/images/openmw.png" DESTINATION "${ICONDIR}")
     IF(BUILD_OPENCS)
