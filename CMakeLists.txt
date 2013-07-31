@@ -331,60 +331,104 @@ if (CMAKE_COMPILER_IS_GNUCC)
     endif("${GCC_VERSION}" VERSION_GREATER 4.6 OR "${GCC_VERSION}" VERSION_EQUAL 4.6)
 endif (CMAKE_COMPILER_IS_GNUCC)
 
-if(DPKG_PROGRAM)
-    SET(CMAKE_INSTALL_PREFIX "/usr")
+IF(NOT WIN32 AND NOT APPLE)
+    ## Debian and non debian Linux building
+    # Paths
+    IF (DPKG_PROGRAM)
+        ## Debian specific
+        SET(CMAKE_INSTALL_PREFIX "/usr")
+        SET(SYSCONFDIR "../etc/openmw" CACHE PATH "Set config dir")
+    ELSE ()
+        ## Non debian specific
+        SET(SYSCONFDIR "/etc/openmw" CACHE PATH "Set config dir")
+        SET(BINDIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH "Where to install binaries")
+        SET(LICDIR "${CMAKE_INSTALL_PREFIX}/share/licenses/openmw" CACHE PATH "Sets the openmw license directory to a non-default location.")
 
-    if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/.git")
-        exec_program("git" ${CMAKE_CURRENT_SOURCE_DIR} ARGS "describe" OUTPUT_VARIABLE GIT_VERSION )
-        STRING(REGEX REPLACE "openmw-" "" VERSION_STRING "${GIT_VERSION}")
-        exec_program("git" ARGS "config --get user.name" OUTPUT_VARIABLE GIT_NAME )
-        exec_program("git" ARGS "config --get user.email" OUTPUT_VARIABLE GIT_EMAIL)
-        set(PACKAGE_MAINTAINER "${GIT_NAME} <${GIT_EMAIL}>")
-    else()
-        set(VERSION_STRING "${OPENMW_VERSION}")
-        set(PACKAGE_MAINTAINER "unknown")
-    endif()
+        # Install binaries
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/openmw" DESTINATION "${BINDIR}" )
+        IF(BUILD_LAUNCHER)
+            INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/omwlauncher" DESTINATION "${BINDIR}" )
+        ENDIF(BUILD_LAUNCHER)
+        IF(BUILD_BSATOOL)
+            INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/bsatool" DESTINATION "${BINDIR}" )
+        ENDIF(BUILD_BSATOOL)
+        IF(BUILD_ESMTOOL)
+            INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/esmtool" DESTINATION "${BINDIR}" )
+        ENDIF(BUILD_ESMTOOL)
+        IF(BUILD_MWINIIMPORTER)
+            INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/mwiniimport" DESTINATION "${BINDIR}" )
+        ENDIF(BUILD_MWINIIMPORTER)
+        IF(BUILD_OPENCS)
+            INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/opencs" DESTINATION "${BINDIR}" )
+        ENDIF(BUILD_OPENCS)
 
-    #Install icon and desktop file
+        # Install licenses
+        INSTALL(FILES "DejaVu Font License.txt" DESTINATION "${LICDIR}" )
+        INSTALL(FILES "Daedric Font License.txt" DESTINATION "${LICDIR}" )
+        INSTALL(FILES "OFL.txt" DESTINATION "${LICDIR}" )
+        INSTALL(FILES "extern/shiny/License.txt" DESTINATION "${LICDIR}" RENAME "Shiny License.txt" )
+    ENDIF (DPKG_PROGRAM)
+
+    # Install icon and desktop file
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.desktop" DESTINATION "share/applications/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_SOURCE_DIR}/files/launcher/images/openmw.png" DESTINATION "share/pixmaps/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
+    IF(BUILD_OPENCS)
+        INSTALL(FILES "${OpenMW_BINARY_DIR}/opencs.desktop" DESTINATION "share/applications/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "opencs")
+        INSTALL(FILES "${OpenMW_SOURCE_DIR}/files/opencs/opencs.png" DESTINATION "share/pixmaps/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "opencs")
+    ENDIF(BUILD_OPENCS)
 
-    #Install global configuration files
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/settings-default.cfg" DESTINATION "../etc/openmw/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/transparency-overrides.cfg" DESTINATION "../etc/openmw/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "../etc/openmw/" RENAME "openmw.cfg" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/opencs.cfg" DESTINATION "../etc/openmw/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
+    # Install global configuration files
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/settings-default.cfg" DESTINATION "${SYSCONFDIR}" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/transparency-overrides.cfg" DESTINATION "${SYSCONFDIR}" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "${SYSCONFDIR}" RENAME "openmw.cfg" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
+    IF(BUILD_OPENCS)
+        INSTALL(FILES "${OpenMW_BINARY_DIR}/opencs.cfg" DESTINATION "${SYSCONFDIR}" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "opencs")
+    ENDIF(BUILD_OPENCS)
 
-    #Install resources
+    # Install resources
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION "share/games/openmw/" FILE_PERMISSIONS OWNER_READ GROUP_READ WORLD_READ COMPONENT "Resources")
     INSTALL(DIRECTORY DESTINATION "share/games/openmw/data/" COMPONENT "Resources")
 
-    SET(CPACK_GENERATOR "DEB")
-    SET(CPACK_PACKAGE_NAME "openmw")
-    SET(CPACK_DEBIAN_PACKAGE_HOMEPAGE "http://openmw.org")
-    SET(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
-    SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "${PACKAGE_MAINTAINER}")
-    SET(CPACK_DEBIAN_PACKAGE_DESCRIPTION "A reimplementation of The Elder Scrolls III: Morrowind
+    IF (DPKG_PROGRAM)
+        ## Debian Specific
+        IF(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/.git")
+            EXEC_PROGRAM("git" ${CMAKE_CURRENT_SOURCE_DIR} ARGS "describe" OUTPUT_VARIABLE GIT_VERSION )
+            STRING(REGEX REPLACE "openmw-" "" VERSION_STRING "${GIT_VERSION}")
+            EXEC_PROGRAM("git" ARGS "config --get user.name" OUTPUT_VARIABLE GIT_NAME )
+            EXEC_PROGRAM("git" ARGS "config --get user.email" OUTPUT_VARIABLE GIT_EMAIL)
+            SET(PACKAGE_MAINTAINER "${GIT_NAME} <${GIT_EMAIL}>")
+        ELSE()
+            SET(VERSION_STRING "${OPENMW_VERSION}")
+            SET(PACKAGE_MAINTAINER "unknown")
+        ENDIF()
+
+        SET(CPACK_GENERATOR "DEB")
+        SET(CPACK_PACKAGE_NAME "openmw")
+        SET(CPACK_DEBIAN_PACKAGE_HOMEPAGE "http://openmw.org")
+        SET(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
+        SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "${PACKAGE_MAINTAINER}")
+        SET(CPACK_DEBIAN_PACKAGE_DESCRIPTION "A reimplementation of The Elder Scrolls III: Morrowind
  OpenMW is a reimplementation of the Bethesda Game Studios game The Elder Scrolls III: Morrowind.
  Data files from the original game is required to run it.")
-    SET(CPACK_DEBIAN_PACKAGE_NAME "openmw")
-    SET(CPACK_DEBIAN_PACKAGE_VERSION "${VERSION_STRING}")
-    SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW bsatool;Bsatool esmtool;Esmtool omwlauncher;OMWLauncher mwiniimporter;MWiniImporter")
-    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.11.2), libfreetype6 (>= 2.2.1), libgcc1 (>= 1:4.1.1), libmpg123-0 (>= 1.12.1), libopenal1 (>= 1:1.12.854), libsndfile1 (>= 1.0.23), libstdc++6 (>= 4.4.5), libuuid1 (>= 2.17.2), libqtgui4 (>= 4.7.0)")
+        SET(CPACK_DEBIAN_PACKAGE_NAME "openmw")
+        SET(CPACK_DEBIAN_PACKAGE_VERSION "${VERSION_STRING}")
+        SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW bsatool;Bsatool esmtool;Esmtool omwlauncher;OMWLauncher mwiniimporter;MWiniImporter")
+        SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.11.2), libfreetype6 (>= 2.2.1), libgcc1 (>= 1:4.1.1), libmpg123-0 (>= 1.12.1), libopenal1 (>= 1:1.12.854), libsndfile1 (>= 1.0.23), libstdc++6 (>= 4.4.5), libuuid1 (>= 2.17.2), libqtgui4 (>= 4.7.0)")
 
-    SET(CPACK_DEBIAN_PACKAGE_SECTION "Games")
+        SET(CPACK_DEBIAN_PACKAGE_SECTION "Games")
 
-    string(TOLOWER "${CPACK_PACKAGE_NAME}" CPACK_PACKAGE_NAME_LOWERCASE)
-    execute_process(
-        COMMAND ${DPKG_PROGRAM} --print-architecture
-        OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-    set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME_LOWERCASE}_${CPACK_DEBIAN_PACKAGE_VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
+        STRING(TOLOWER "${CPACK_PACKAGE_NAME}" CPACK_PACKAGE_NAME_LOWERCASE)
+        EXECUTE_PROCESS(
+            COMMAND ${DPKG_PROGRAM} --print-architecture
+            OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+        SET(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME_LOWERCASE}_${CPACK_DEBIAN_PACKAGE_VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
 
 
-    include(CPack)
-endif(DPKG_PROGRAM)
+        INCLUDE(CPack)
+    ENDIF(DPKG_PROGRAM)
+ENDIF(NOT WIN32 AND NOT APPLE)
 
 if(WIN32)
     FILE(GLOB dll_files "${OpenMW_BINARY_DIR}/Release/*.dll")
@@ -667,57 +711,3 @@ if (APPLE)
         include(CPack)
 endif (APPLE)
 
-if (NOT WIN32 AND NOT DPKG_PROGRAM AND NOT APPLE)
-    ## Non Debian based Linux building
-    # paths
-    set(BINDIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH "Where to install binaries")
-    set(DATAROOTDIR "${CMAKE_INSTALL_PREFIX}/share" CACHE PATH "Sets the root of data directories to a non-default location")
-    set(DATADIR "${DATAROOTDIR}/games/openmw" CACHE PATH "Sets the openmw data directories to a non-default location")
-    set(DOCDIR "${DATAROOTDIR}/doc/openmw" CACHE PATH "Sets the doc directory to a non-default location.")
-    set(MANDIR "${DATAROOTDIR}/man" CACHE PATH "Where to install manpages")
-    set(SYSCONFDIR "/etc/openmw" CACHE PATH "Set config dir")
-    set(ICONDIR "${DATAROOTDIR}/pixmaps" CACHE PATH "Set icon dir")
-    set(LICDIR "${DATAROOTDIR}/licenses/openmw" CACHE PATH "Sets the openmw license directory to a non-default location.")
-
-    # Install binaries
-    INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/openmw" DESTINATION "${BINDIR}" )
-    IF(BUILD_LAUNCHER)
-        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/omwlauncher" DESTINATION "${BINDIR}" )
-    ENDIF(BUILD_LAUNCHER)
-        IF(BUILD_BSATOOL)
-        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/bsatool" DESTINATION "${BINDIR}" )
-            ENDIF(BUILD_BSATOOL)
-    IF(BUILD_ESMTOOL)
-        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/esmtool" DESTINATION "${BINDIR}" )
-    ENDIF(BUILD_ESMTOOL)
-    IF(BUILD_MWINIIMPORTER)
-        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/mwiniimport" DESTINATION "${BINDIR}" )
-    ENDIF(BUILD_MWINIIMPORTER)
-    IF(BUILD_OPENCS)
-        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/opencs" DESTINATION "${BINDIR}" )
-    ENDIF(BUILD_OPENCS)
-
-    # Install icon and .desktop
-    INSTALL(FILES "${OpenMW_SOURCE_DIR}/files/launcher/images/openmw.png" DESTINATION "${ICONDIR}")
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.desktop" DESTINATION "${DATAROOTDIR}/applications")
-    IF(BUILD_OPENCS)
-        INSTALL(FILES "${OpenMW_SOURCE_DIR}/files/opencs/opencs.png" DESTINATION "${ICONDIR}")
-        INSTALL(FILES "${OpenMW_BINARY_DIR}/opencs.desktop" DESTINATION "${DATAROOTDIR}/applications")
-    ENDIF(BUILD_OPENCS)
-
-    # Install global configuration files
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "${SYSCONFDIR}" RENAME "openmw.cfg" )
-    #INSTALL(FILES "${OpenMW_BINARY_DIR}/plugins.cfg" DESTINATION "${SYSCONFDIR}" )
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/settings-default.cfg" DESTINATION "${SYSCONFDIR}" )
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/transparency-overrides.cfg" DESTINATION "${SYSCONFDIR}" )
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/opencs.cfg" DESTINATION "${SYSCONFDIR}" )
-
-    # Install resources
-    INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION "${DATADIR}" )
-
-    # Install licenses
-    INSTALL(FILES "DejaVu Font License.txt" DESTINATION "${LICDIR}" )
-    INSTALL(FILES "Daedric Font License.txt" DESTINATION "${LICDIR}" )
-    INSTALL(FILES "OFL.txt" DESTINATION "${LICDIR}" )
-    INSTALL(FILES "extern/shiny/License.txt" DESTINATION "${LICDIR}" RENAME "Shiny License.txt" )
-endif(NOT WIN32 AND NOT DPKG_PROGRAM AND NOT APPLE)
