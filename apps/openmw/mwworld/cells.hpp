@@ -31,8 +31,6 @@ namespace MWWorld
 
             CellStore *getCellStore (const ESM::Cell *cell);
 
-            void fillContainers (CellStore& cellStore);
-
             Ptr getPtrAndCache (const std::string& name, CellStore& cellStore);
 
         public:

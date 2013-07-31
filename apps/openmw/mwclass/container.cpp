@@ -46,7 +46,11 @@ namespace MWClass
         {
             std::auto_ptr<CustomData> data (new CustomData);
 
-            // \todo add initial container content
+            MWWorld::LiveCellRef<ESM::Container> *ref =
+                ptr.get<ESM::Container>();
+
+            data->mContainerStore.fill(
+                ref->mBase->mInventory, ptr.getCellRef().mOwner, MWBase::Environment::get().getWorld()->getStore());
 
             // store
             ptr.getRefData().setCustomData (data.release());
