@@ -331,6 +331,60 @@ if (CMAKE_COMPILER_IS_GNUCC)
     endif("${GCC_VERSION}" VERSION_GREATER 4.6 OR "${GCC_VERSION}" VERSION_EQUAL 4.6)
 endif (CMAKE_COMPILER_IS_GNUCC)
 
+if (NOT WIN32 AND NOT DPKG_PROGRAM AND NOT APPLE)
+    ## Non Debian based Linux building
+    # paths
+    set(BINDIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH "Where to install binaries")
+    set(DATAROOTDIR "${CMAKE_INSTALL_PREFIX}/share" CACHE PATH "Sets the root of data directories to a non-default location")
+    set(DATADIR "${DATAROOTDIR}/games/openmw" CACHE PATH "Sets the openmw data directories to a non-default location")
+    set(DOCDIR "${DATAROOTDIR}/doc/openmw" CACHE PATH "Sets the doc directory to a non-default location.")
+    set(MANDIR "${DATAROOTDIR}/man" CACHE PATH "Where to install manpages")
+    set(SYSCONFDIR "/etc/openmw" CACHE PATH "Set config dir")
+    set(ICONDIR "${DATAROOTDIR}/pixmaps" CACHE PATH "Set icon dir")
+    set(LICDIR "${DATAROOTDIR}/licenses/openmw" CACHE PATH "Sets the openmw license directory to a non-default location.")
+
+    # Install binaries
+    INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/openmw" DESTINATION "${BINDIR}" )
+    IF(BUILD_LAUNCHER)
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/omwlauncher" DESTINATION "${BINDIR}" )
+    ENDIF(BUILD_LAUNCHER)
+        IF(BUILD_BSATOOL)
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/bsatool" DESTINATION "${BINDIR}" )
+            ENDIF(BUILD_BSATOOL)
+    IF(BUILD_ESMTOOL)
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/esmtool" DESTINATION "${BINDIR}" )
+    ENDIF(BUILD_ESMTOOL)
+    IF(BUILD_MWINIIMPORTER)
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/mwiniimport" DESTINATION "${BINDIR}" )
+    ENDIF(BUILD_MWINIIMPORTER)
+    IF(BUILD_OPENCS)
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/opencs" DESTINATION "${BINDIR}" )
+    ENDIF(BUILD_OPENCS)
+
+    # Install icon and .desktop
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.desktop" DESTINATION "${DATAROOTDIR}/applications")
+    INSTALL(FILES "${OpenMW_SOURCE_DIR}/files/launcher/images/openmw.png" DESTINATION "${ICONDIR}")
+    IF(BUILD_OPENCS)
+        INSTALL(FILES "${OpenMW_SOURCE_DIR}/files/opencs/opencs.png" DESTINATION "${ICONDIR}")
+        INSTALL(FILES "${OpenMW_BINARY_DIR}/opencs.desktop" DESTINATION "${DATAROOTDIR}/applications")
+    ENDIF(BUILD_OPENCS)
+
+    # Install global configuration files
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/settings-default.cfg" DESTINATION "${SYSCONFDIR}" )
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/transparency-overrides.cfg" DESTINATION "${SYSCONFDIR}" )
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "${SYSCONFDIR}" RENAME "openmw.cfg" )
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/opencs.cfg" DESTINATION "${SYSCONFDIR}" )
+
+    # Install resources
+    INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION "${DATADIR}" )
+
+    # Install licenses
+    INSTALL(FILES "DejaVu Font License.txt" DESTINATION "${LICDIR}" )
+    INSTALL(FILES "Daedric Font License.txt" DESTINATION "${LICDIR}" )
+    INSTALL(FILES "OFL.txt" DESTINATION "${LICDIR}" )
+    INSTALL(FILES "extern/shiny/License.txt" DESTINATION "${LICDIR}" RENAME "Shiny License.txt" )
+endif(NOT WIN32 AND NOT DPKG_PROGRAM AND NOT APPLE)
+
 if(DPKG_PROGRAM)
     SET(CMAKE_INSTALL_PREFIX "/usr")
 
@@ -345,17 +399,17 @@ if(DPKG_PROGRAM)
         set(PACKAGE_MAINTAINER "unknown")
     endif()
 
-    #Install icon and desktop file
+    # Install icon and desktop file
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.desktop" DESTINATION "share/applications/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_SOURCE_DIR}/files/launcher/images/openmw.png" DESTINATION "share/pixmaps/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
 
-    #Install global configuration files
+    # Install global configuration files
     INSTALL(FILES "${OpenMW_BINARY_DIR}/settings-default.cfg" DESTINATION "../etc/openmw/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/transparency-overrides.cfg" DESTINATION "../etc/openmw/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "../etc/openmw/" RENAME "openmw.cfg" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/opencs.cfg" DESTINATION "../etc/openmw/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
 
-    #Install resources
+    # Install resources
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION "share/games/openmw/" FILE_PERMISSIONS OWNER_READ GROUP_READ WORLD_READ COMPONENT "Resources")
     INSTALL(DIRECTORY DESTINATION "share/games/openmw/data/" COMPONENT "Resources")
 
@@ -667,57 +721,3 @@ if (APPLE)
         include(CPack)
 endif (APPLE)
 
-if (NOT WIN32 AND NOT DPKG_PROGRAM AND NOT APPLE)
-    ## Non Debian based Linux building
-    # paths
-    set(BINDIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH "Where to install binaries")
-    set(DATAROOTDIR "${CMAKE_INSTALL_PREFIX}/share" CACHE PATH "Sets the root of data directories to a non-default location")
-    set(DATADIR "${DATAROOTDIR}/games/openmw" CACHE PATH "Sets the openmw data directories to a non-default location")
-    set(DOCDIR "${DATAROOTDIR}/doc/openmw" CACHE PATH "Sets the doc directory to a non-default location.")
-    set(MANDIR "${DATAROOTDIR}/man" CACHE PATH "Where to install manpages")
-    set(SYSCONFDIR "/etc/openmw" CACHE PATH "Set config dir")
-    set(ICONDIR "${DATAROOTDIR}/pixmaps" CACHE PATH "Set icon dir")
-    set(LICDIR "${DATAROOTDIR}/licenses/openmw" CACHE PATH "Sets the openmw license directory to a non-default location.")
-
-    # Install binaries
-    INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/openmw" DESTINATION "${BINDIR}" )
-    IF(BUILD_LAUNCHER)
-        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/omwlauncher" DESTINATION "${BINDIR}" )
-    ENDIF(BUILD_LAUNCHER)
-        IF(BUILD_BSATOOL)
-        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/bsatool" DESTINATION "${BINDIR}" )
-            ENDIF(BUILD_BSATOOL)
-    IF(BUILD_ESMTOOL)
-        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/esmtool" DESTINATION "${BINDIR}" )
-    ENDIF(BUILD_ESMTOOL)
-    IF(BUILD_MWINIIMPORTER)
-        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/mwiniimport" DESTINATION "${BINDIR}" )
-    ENDIF(BUILD_MWINIIMPORTER)
-    IF(BUILD_OPENCS)
-        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/opencs" DESTINATION "${BINDIR}" )
-    ENDIF(BUILD_OPENCS)
-
-    # Install icon and .desktop
-    INSTALL(FILES "${OpenMW_SOURCE_DIR}/files/launcher/images/openmw.png" DESTINATION "${ICONDIR}")
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.desktop" DESTINATION "${DATAROOTDIR}/applications")
-    IF(BUILD_OPENCS)
-        INSTALL(FILES "${OpenMW_SOURCE_DIR}/files/opencs/opencs.png" DESTINATION "${ICONDIR}")
-        INSTALL(FILES "${OpenMW_BINARY_DIR}/opencs.desktop" DESTINATION "${DATAROOTDIR}/applications")
-    ENDIF(BUILD_OPENCS)
-
-    # Install global configuration files
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "${SYSCONFDIR}" RENAME "openmw.cfg" )
-    #INSTALL(FILES "${OpenMW_BINARY_DIR}/plugins.cfg" DESTINATION "${SYSCONFDIR}" )
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/settings-default.cfg" DESTINATION "${SYSCONFDIR}" )
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/transparency-overrides.cfg" DESTINATION "${SYSCONFDIR}" )
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/opencs.cfg" DESTINATION "${SYSCONFDIR}" )
-
-    # Install resources
-    INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION "${DATADIR}" )
-
-    # Install licenses
-    INSTALL(FILES "DejaVu Font License.txt" DESTINATION "${LICDIR}" )
-    INSTALL(FILES "Daedric Font License.txt" DESTINATION "${LICDIR}" )
-    INSTALL(FILES "OFL.txt" DESTINATION "${LICDIR}" )
-    INSTALL(FILES "extern/shiny/License.txt" DESTINATION "${LICDIR}" RENAME "Shiny License.txt" )
-endif(NOT WIN32 AND NOT DPKG_PROGRAM AND NOT APPLE)
