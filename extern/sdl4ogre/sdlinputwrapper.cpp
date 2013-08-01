@@ -126,6 +126,7 @@ namespace SFO
 #endif
                 if (mWindowListener)
                     mWindowListener->windowResized(evt.window.data1, evt.window.data2);
+                break;
 
             case SDL_WINDOWEVENT_RESIZED:
                 // TODO: Fix Ogre to handle this more consistently
