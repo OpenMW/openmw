@@ -21,7 +21,7 @@ SDLWindowHelper::SDLWindowHelper (SDL_Window* window, int w, int h,
 	struct SDL_SysWMinfo wmInfo;
 	SDL_VERSION(&wmInfo.version);
 
-	if (SDL_GetWindowWMInfo(mSDLWindow, &wmInfo) == -1)
+	if (SDL_GetWindowWMInfo(mSDLWindow, &wmInfo) == SDL_FALSE)
 		throw std::runtime_error("Couldn't get WM Info!");
 
 	Ogre::String winHandle;
