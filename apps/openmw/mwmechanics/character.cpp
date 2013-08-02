@@ -501,9 +501,12 @@ bool CharacterController::updateNpcState()
             if(mAttackType != "shoot")
             {
                 MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-                // NOTE: SwishL, SwishM, SwishS - large, medium, small.
-                // Based on weapon weight, speed, or attack strength?
-                sndMgr->playSound3D(mPtr, "SwishL", 1.0f, 1.0f);
+                if(complete < 0.5f)
+                    sndMgr->playSound3D(mPtr, "SwishL", 1.0f, 1.0f);
+                else if(complete < 1.0f)
+                    sndMgr->playSound3D(mPtr, "SwishM", 1.0f, 1.0f);
+                else
+                    sndMgr->playSound3D(mPtr, "SwishS", 1.0f, 1.0f);
             }
             stats.setAttackStrength(complete);
 
@@ -560,10 +563,18 @@ bool CharacterController::updateNpcState()
                                  weapSpeed, mAttackType+" follow start", mAttackType+" follow stop",
                                  0.0f, 0);
             else
+            {
+                float str = stats.getAttackStrength();
+                std::string start = mAttackType+((str < 0.5f) ? " small follow start"
+                                                              : (str < 1.0f) ? " medium follow start"
+                                                                             : " large follow start");
+                std::string stop = mAttackType+((str < 0.5f) ? " small follow stop"
+                                                             : (str < 1.0f) ? " medium follow stop"
+                                                                            : " large follow stop");
                 mAnimation->play(mCurrentWeapon, Priority_Weapon,
                                  MWRender::Animation::Group_UpperBody, true,
-                                 weapSpeed, mAttackType+" large follow start", mAttackType+" large follow stop",
-                                 0.0f, 0);
+                                 weapSpeed, start, stop, 0.0f, 0);
+            }
             mUpperBodyState = UpperCharState_FollowStartToFollowStop;
         }
     }
