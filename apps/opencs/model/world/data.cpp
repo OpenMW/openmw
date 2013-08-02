@@ -10,7 +10,7 @@
 #include <components/esm/loadglob.hpp>
 
 #include "idtable.hpp"
-#include "columns.hpp"
+#include "columnimp.hpp"
 #include "regionmap.hpp"
 
 void CSMWorld::Data::addModel (QAbstractItemModel *model, UniversalId::Type type1,

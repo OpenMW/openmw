@@ -1,5 +1,5 @@
-#ifndef CSM_WOLRD_COLUMNS_H
-#define CSM_WOLRD_COLUMNS_H
+#ifndef CSM_WOLRD_COLUMNIMP_H
+#define CSM_WOLRD_COLUMNIMP_H
 
 #include <sstream>
 
