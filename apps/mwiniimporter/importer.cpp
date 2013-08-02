@@ -690,6 +690,10 @@ MwIniImporter::multistrmap MwIniImporter::loadIniFile(const std::string& filenam
 
         std::string key(section + ":" + line.substr(0,pos));
         std::string value(line.substr(pos+1));
+        if(value.empty()) {
+            std::cout << "Warning: ignored empty value for key '" << key << "'." << std::endl;
+            continue;
+        }
 
         multistrmap::iterator it;
         if((it = map.find(key)) == map.end()) {
