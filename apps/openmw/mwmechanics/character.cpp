@@ -502,11 +502,11 @@ bool CharacterController::updateNpcState()
             {
                 MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
                 if(complete < 0.5f)
-                    sndMgr->playSound3D(mPtr, "SwishL", 1.0f, 1.0f);
+                    sndMgr->playSound3D(mPtr, "SwishM", 1.0f, 0.8f); //Weak attack
                 else if(complete < 1.0f)
-                    sndMgr->playSound3D(mPtr, "SwishM", 1.0f, 1.0f);
+                    sndMgr->playSound3D(mPtr, "SwishM", 1.0f, 1.0f); //Medium attack
                 else
-                    sndMgr->playSound3D(mPtr, "SwishS", 1.0f, 1.0f);
+                    sndMgr->playSound3D(mPtr, "SwishM", 1.0f, 1.2f); //Strong attack
             }
             stats.setAttackStrength(complete);
 
