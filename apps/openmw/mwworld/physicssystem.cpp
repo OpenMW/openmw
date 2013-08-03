@@ -328,7 +328,7 @@ namespace MWWorld
         Ogre::Vector3 a_ = Ogre::Vector3(a.x(),a.y(),a.z());
         a_ = orient_.Inverse()*a_;
         Ogre::Vector2 a_xy = Ogre::Vector2(a_.x,a_.y);
-        Ogre::Vector2 a_yz = Ogre::Vector2(a_.y,a_.z);
+        Ogre::Vector2 a_yz = Ogre::Vector2(a_xy.length(),a_.z);
         float axy = a_xy.angleBetween(Ogre::Vector2::UNIT_Y).valueDegrees();
         float az = a_yz.angleBetween(Ogre::Vector2::UNIT_X).valueDegrees();
         std::cout << axy << " " << az << "\n";
