@@ -147,7 +147,7 @@ namespace Physic
     {
         mEngine->dynamicsWorld->removeRigidBody(mBody);
     }
-    
+
     void PhysicActor::enableCollisionBody()
     {
         mEngine->dynamicsWorld->addRigidBody(mBody,CollisionType_Actor,CollisionType_World|CollisionType_HeightMap);
@@ -484,7 +484,7 @@ namespace Physic
         if (it != mCollisionObjectMap.end() )
         {
             RigidBody* body = it->second;
-            
+
             if(body != NULL)
             {
                 delete body;
@@ -583,7 +583,7 @@ namespace Physic
         btVector3 aabbMax = pos + radius*btVector3(1.0f, 1.0f, 1.0f);
 
         broadphase->aabbTest(aabbMin,aabbMax,callback);
-        for(int i=0;i<callback.hits.size();i++)
+        for(int i=0;i<static_cast<int> (callback.hits.size()); ++i)
         {
             float d = (callback.hits[i]->getWorldTransform().getOrigin()-pos).length();
             if(d<radius)
@@ -634,7 +634,7 @@ namespace Physic
         removeCharacter(name);
 
         PhysicActor* newActor = new PhysicActor(name, mesh, this, position, rotation, scale);
-        
+
 
         //dynamicsWorld->addAction( newActor->mCharacter );
         mActorMap[name] = newActor;
@@ -648,7 +648,7 @@ namespace Physic
             PhysicActor* act = it->second;
             if(act != NULL)
             {
-                
+
                 delete act;
             }
             mActorMap.erase(it);
