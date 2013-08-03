@@ -179,6 +179,7 @@ namespace MWGui
     virtual void setMinimapVisibility(bool visible);
     virtual void setWeaponVisibility(bool visible);
     virtual void setSpellVisibility(bool visible);
+    virtual void setSneakVisibility(bool visible);
 
     virtual void activateQuickKey  (int index);
 

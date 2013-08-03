@@ -21,6 +21,7 @@ namespace MWGui
         void setHmsVisible(bool visible);
         void setWeapVisible(bool visible);
         void setSpellVisible(bool visible);
+        void setSneakVisible(bool visible);
 
         void setEffectVisible(bool visible);
         void setMinimapVisible(bool visible);
@@ -51,7 +52,7 @@ namespace MWGui
     private:
         MyGUI::ProgressBar *mHealth, *mMagicka, *mStamina, *mEnemyHealth;
         MyGUI::Widget* mHealthFrame;
-        MyGUI::Widget *mWeapBox, *mSpellBox;
+        MyGUI::Widget *mWeapBox, *mSpellBox, *mSneakBox;
         MyGUI::ImageBox *mWeapImage, *mSpellImage;
         MyGUI::ProgressBar *mWeapStatus, *mSpellStatus;
         MyGUI::Widget *mEffectBox, *mMinimapBox;
@@ -70,7 +71,7 @@ namespace MWGui
         MyGUI::TextBox* mBatchCounter;
 
         // bottom left elements
-        int mHealthManaStaminaBaseLeft, mWeapBoxBaseLeft, mSpellBoxBaseLeft;
+        int mHealthManaStaminaBaseLeft, mWeapBoxBaseLeft, mSpellBoxBaseLeft, mSneakBoxBaseLeft;
         // bottom right elements
         int mMinimapBoxBaseRight, mEffectBoxBaseRight;
 

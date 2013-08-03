@@ -834,6 +834,11 @@ namespace MWGui
         mHud->setEffectVisible (visible);
     }
 
+    void WindowManager::setSneakVisibility(bool visible)
+    {
+        mHud->setSneakVisible(visible);
+    }
+
     void WindowManager::setDragDrop(bool dragDrop)
     {
         mToolTips->setEnabled(!dragDrop);
