@@ -45,7 +45,6 @@ namespace MWMechanics
         if(mDuration == 0)
             mTimeOfDay = 0;
 
-        srand(time(NULL));
         mStartTime = MWBase::Environment::get().getWorld()->getTimeStamp();
         mPlayedIdle = 0;
         mPathgrid = NULL;
@@ -189,13 +188,13 @@ namespace MWMechanics
             mPlayedIdle = 0;
             unsigned short idleRoll = 0;
 
-            for(unsigned int counter = 1; counter < mIdle.size(); counter++)
+            for(unsigned int counter = 0; counter < mIdle.size(); counter++)
             {
                 unsigned short idleChance = mIdleChanceMultiplier * mIdle[counter];
                 unsigned short randSelect = (int)(rand() / ((double)RAND_MAX + 1) * int(100 / mIdleChanceMultiplier));
                 if(randSelect < idleChance && randSelect > idleRoll)
                 {
-                    mPlayedIdle = counter;
+                    mPlayedIdle = counter+2;
                     idleRoll = randSelect;
                 }
             }
@@ -210,7 +209,7 @@ namespace MWMechanics
                 // Play idle animation and recreate vanilla (broken?) behavior of resetting start time of AIWander:
                 MWWorld::TimeStamp currentTime = MWBase::Environment::get().getWorld()->getTimeStamp();
                 mStartTime = currentTime;
-                playIdle(actor, mPlayedIdle + 1);
+                playIdle(actor, mPlayedIdle);
                 mChooseAction = false;
                 mIdleNow = true;
             }
@@ -218,7 +217,7 @@ namespace MWMechanics
 
         if(mIdleNow)
         {
-            if(!checkIdle(actor, mPlayedIdle + 1))
+            if(!checkIdle(actor, mPlayedIdle))
             {
                 mPlayedIdle = 0;
                 mIdleNow = false;
