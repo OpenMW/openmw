@@ -268,10 +268,6 @@ namespace MWInput
             case A_ToggleHUD:
                 mWindows.toggleHud();
                 break;
-            case A_Use:
-                if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
-                    mPlayer.use();
-                break;
             }
         }
     }
