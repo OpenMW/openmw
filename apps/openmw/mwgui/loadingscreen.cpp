@@ -24,6 +24,10 @@ namespace MWGui
         , mLastWallpaperChangeTime(0.f)
         , mFirstLoad(true)
         , mTotalRefsLoading(0)
+        , mCurrentCellLoading(0)
+        , mTotalCellsLoading(0)
+        , mCurrentRefLoading(0)
+        , mCurrentRefList(0)
     {
         getWidget(mLoadingText, "LoadingText");
         getWidget(mProgressBar, "ProgressBar");

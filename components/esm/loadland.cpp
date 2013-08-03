@@ -66,10 +66,11 @@ Land::Land()
     , mX(0)
     , mY(0)
     , mEsm(NULL)
-//    , hasData(false)
     , mDataTypes(0)
     , mDataLoaded(false)
     , mLandData(NULL)
+    , mPlugin(0)
+    , mHasData(false)
 {
 }
 

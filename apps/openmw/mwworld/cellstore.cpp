@@ -80,7 +80,7 @@ namespace MWWorld
     {
         assert (mCell);
 
-        if (mCell->mContextList.size() == 0)
+        if (mCell->mContextList.empty())
             return; // this is a dynamically generated cell -> skipping.
 
         // Load references from all plugins that do something with this cell.
@@ -113,7 +113,7 @@ namespace MWWorld
     {
       assert (mCell);
 
-        if (mCell->mContextList.size() == 0)
+        if (mCell->mContextList.empty())
             return; // this is a dynamically generated cell -> skipping.
 
         // Load references from all plugins that do something with this cell.
@@ -174,7 +174,7 @@ namespace MWWorld
         }
 
         // Load moved references, from separately tracked list.
-        for (ESM::CellRefTracker::const_iterator it = mCell->mLeasedRefs.begin(); it != mCell->mLeasedRefs.end(); it++)
+        for (ESM::CellRefTracker::const_iterator it = mCell->mLeasedRefs.begin(); it != mCell->mLeasedRefs.end(); ++it)
         {
             // Doesn't seem to work in one line... huh? Too sleepy to check...
             ESM::CellRef &ref = const_cast<ESM::CellRef&>(*it);

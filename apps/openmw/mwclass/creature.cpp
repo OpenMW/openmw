@@ -79,6 +79,8 @@ namespace MWClass
 
             data->mCreatureStats.setLevel(ref->mBase->mData.mLevel);
 
+            data->mCreatureStats.getAiSequence().fill(ref->mBase->mAiPackage);
+
             data->mCreatureStats.setAiSetting (0, ref->mBase->mAiData.mHello);
             data->mCreatureStats.setAiSetting (1, ref->mBase->mAiData.mFight);
             data->mCreatureStats.setAiSetting (2, ref->mBase->mAiData.mFlee);
@@ -88,6 +90,10 @@ namespace MWClass
             for (std::vector<std::string>::const_iterator iter (ref->mBase->mSpells.mList.begin());
                 iter!=ref->mBase->mSpells.mList.end(); ++iter)
                 data->mCreatureStats.getSpells().add (*iter);
+
+            // inventory
+            data->mContainerStore.fill(ref->mBase->mInventory, getId(ptr),
+                                       MWBase::Environment::get().getWorld()->getStore());
 
             // store
             ptr.getRefData().setCustomData (data.release());
@@ -370,13 +376,13 @@ namespace MWClass
             MWWorld::Store<ESM::SoundGenerator>::iterator sound = store.begin();
             while(sound != store.end())
             {
-                if(type == sound->mType && sound->mCreature.size() > 0 &&
+                if(type == sound->mType && !sound->mCreature.empty() &&
                    Misc::StringUtils::ciEqual(ptrid.substr(0, sound->mCreature.size()),
                                               sound->mCreature))
                     sounds.push_back(&*sound);
-                sound++;
+                ++sound;
             }
-            if(sounds.size() > 0)
+            if(!sounds.empty())
                 return sounds[(int)(rand()/(RAND_MAX+1.0)*sounds.size())]->mSound;
         }
 

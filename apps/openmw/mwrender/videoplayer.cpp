@@ -1042,6 +1042,8 @@ VideoPlayer::VideoPlayer(Ogre::SceneManager* sceneMgr, Ogre::RenderWindow* windo
     , mNode(NULL)
     , mAllowSkipping(false)
     , mWindow(window)
+    , mWidth(0)
+    , mHeight(0)
 {
     mVideoMaterial = Ogre::MaterialManager::getSingleton().getByName("VideoMaterial", "General");
     if (mVideoMaterial.isNull ())

@@ -22,7 +22,6 @@ namespace MWRender
 
     CharacterPreview::CharacterPreview(MWWorld::Ptr character, int sizeX, int sizeY, const std::string& name,
                                        Ogre::Vector3 position, Ogre::Vector3 lookAt)
-
         : mSceneMgr (0)
         , mPosition(position)
         , mLookAt(lookAt)
@@ -31,6 +30,10 @@ namespace MWRender
         , mName(name)
         , mSizeX(sizeX)
         , mSizeY(sizeY)
+        , mRenderTarget(NULL)
+        , mViewport(NULL)
+        , mCamera(NULL)
+        , mNode(NULL)
     {
 
     }

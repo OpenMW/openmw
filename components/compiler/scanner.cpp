@@ -509,7 +509,7 @@ namespace Compiler
     Scanner::Scanner (ErrorHandler& errorHandler, std::istream& inputStream,
         const Extensions *extensions)
     : mErrorHandler (errorHandler), mStream (inputStream), mExtensions (extensions),
-      mPutback (Putback_None)
+      mPutback (Putback_None), mPutbackCode(0), mPutbackInteger(0), mPutbackFloat(0)
     {
     }
 

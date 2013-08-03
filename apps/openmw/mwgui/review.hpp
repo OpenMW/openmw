@@ -79,7 +79,6 @@ namespace MWGui
 
         MyGUI::TextBox *mNameWidget, *mRaceWidget, *mClassWidget, *mBirthSignWidget;
         MyGUI::ScrollView* mSkillView;
-        int mLastPos, mClientHeight;
 
         Widgets::MWDynamicStatPtr mHealth, mMagicka, mFatigue;
 

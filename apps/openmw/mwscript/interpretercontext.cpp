@@ -297,7 +297,7 @@ namespace MWScript
 
         std::map<std::string, int> ranks = MWWorld::Class::get (player).getNpcStats (player).getFactionRanks();
 
-        if (ranks.size())
+        if (!ranks.empty())
         {
             std::map<std::string, int>::const_iterator it = ranks.begin();
 

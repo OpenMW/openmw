@@ -165,8 +165,9 @@ namespace MWWorld
         ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap, int mActivationDistanceOverride)
     : mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
       mSky (true), mCells (mStore, mEsm),
-      mNumFacing(0), mActivationDistanceOverride (mActivationDistanceOverride),
-      mFallback(fallbackMap), mPlayIntro(0), mTeleportEnabled(true)
+      mActivationDistanceOverride (mActivationDistanceOverride),
+      mFallback(fallbackMap), mPlayIntro(0), mTeleportEnabled(true),
+      mFacedDistance(FLT_MAX)
     {
         mPhysics = new PhysicsSystem(renderer);
         mPhysEngine = mPhysics->getEngine();
@@ -235,7 +236,6 @@ namespace MWWorld
 
         // Rebuild player
         setupPlayer();
-        const ESM::NPC* playerNpc = mStore.get<ESM::NPC>().find("player");
         MWWorld::Ptr player = mPlayer->getPlayer();
         renderPlayer();
         mRendering->resetCamera();
@@ -245,9 +245,6 @@ namespace MWWorld
 
         // make sure to do this so that local scripts from items that were in the players inventory are removed
         mLocalScripts.clear();
-
-        MWWorld::Class::get(player).getContainerStore(player).fill(playerNpc->mInventory, "", mStore);
-        MWWorld::Class::get(player).getInventoryStore(player).autoEquip(player);
 
         MWBase::Environment::get().getWindowManager()->updatePlayer();
 
@@ -1117,7 +1114,7 @@ namespace MWWorld
 
     bool World::castRay (float x1, float y1, float z1, float x2, float y2, float z2)
     {
-        Ogre::Vector3 a(x1,y1,z1);std::cout << x1 << " " << x2;
+        Ogre::Vector3 a(x1,y1,z1);
         Ogre::Vector3 b(x2,y2,z2);
         return mPhysics->castRay(a,b,false,true);
     }
@@ -1329,7 +1326,7 @@ namespace MWWorld
                 ++it;
         }
 
-        if (results.size() == 0)
+        if (results.empty())
         {
             mFacedHandle = "";
             mFacedDistance = FLT_MAX;
@@ -1717,8 +1714,6 @@ namespace MWWorld
 
     void World::getContainersOwnedBy (const MWWorld::Ptr& npc, std::vector<MWWorld::Ptr>& out)
     {
-        std::string refId = npc.getCellRef().mRefID;
-
         const Scene::CellStoreCollection& collection = mWorldScene->getActiveCells();
         for (Scene::CellStoreCollection::const_iterator cellIt = collection.begin(); cellIt != collection.end(); ++cellIt)
         {
@@ -1764,14 +1759,7 @@ namespace MWWorld
     {
         OEngine::Physic::PhysicActor *physicActor = mPhysEngine->getCharacter(actor.getRefData().getHandle());
         
-        if (enable)
-        {
-            physicActor->enableCollisionBody();
-        }
-        else
-        {
-            physicActor->disableCollisionBody();
-        }
+        physicActor->enableCollisions(enable);
     }
 
     bool World::findInteriorPosition(const std::string &name, ESM::Position &pos)

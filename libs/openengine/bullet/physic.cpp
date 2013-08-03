@@ -45,8 +45,8 @@ namespace Physic
     void PhysicActor::enableCollisions(bool collision)
     {
         assert(mBody);
-        if(collision && !collisionMode) mBody->translate(btVector3(0,0,-1000));
-        if(!collision && collisionMode) mBody->translate(btVector3(0,0,1000));
+        if(collision && !collisionMode) enableCollisionBody();
+        if(!collision && collisionMode) disableCollisionBody();
         collisionMode = collision;
     }
 
@@ -150,7 +150,7 @@ namespace Physic
     
     void PhysicActor::enableCollisionBody()
     {
-        mEngine->dynamicsWorld->addRigidBody(mBody);
+        mEngine->dynamicsWorld->addRigidBody(mBody,CollisionType_Actor,CollisionType_World|CollisionType_HeightMap);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -178,6 +178,7 @@ namespace Physic
 
     PhysicEngine::PhysicEngine(BulletShapeLoader* shapeLoader) :
         mDebugActive(0)
+      , mSceneMgr(NULL)
     {
         // Set up the collision configuration and dispatcher
         collisionConfiguration = new btDefaultCollisionConfiguration();
@@ -531,8 +532,10 @@ namespace Physic
                                             const btCollisionObjectWrapper* colObj1Wrap,int partId1,int index1)
         {
             const RigidBody* body = dynamic_cast<const RigidBody*>(colObj0Wrap->m_collisionObject);
-            if (body)
+            if (body && !(colObj0Wrap->m_collisionObject->getBroadphaseHandle()->m_collisionFilterGroup
+                          & CollisionType_Raycasting))
                 mResult.push_back(body->mName);
+
             return 0.f;
         }
 #else
@@ -540,7 +543,8 @@ namespace Physic
                                          const btCollisionObject* col1, int partId1, int index1)
         {
             const RigidBody* body = dynamic_cast<const RigidBody*>(col0);
-            if (body)
+            if (body && !(col0->getBroadphaseHandle()->m_collisionFilterGroup
+                          & CollisionType_Raycasting))
                 mResult.push_back(body->mName);
             return 0.f;
         }
@@ -617,7 +621,6 @@ namespace Physic
         std::string name = "";
         float d = -1;
 
-        float d1 = 10000.;
         btCollisionWorld::ClosestRayResultCallback resultCallback1(from, to);
         if(raycastingObjectOnly)
             resultCallback1.m_collisionFilterMask = CollisionType_Raycasting;
@@ -630,8 +633,7 @@ namespace Physic
         if (resultCallback1.hasHit())
         {
             name = static_cast<const RigidBody&>(*resultCallback1.m_collisionObject).mName;
-            d1 = resultCallback1.m_closestHitFraction;
-            d = d1;
+            d = resultCallback1.m_closestHitFraction;;
         }
 
         return std::pair<std::string,float>(name,d);

@@ -71,7 +71,12 @@ class Objects{
     ///< Remove all movable objects from \a node.
 
 public:
-    Objects(OEngine::Render::OgreRenderer& renderer, MWWorld::Fallback* fallback): mRenderer (renderer), mIsStatic(false), mFallback(fallback) {}
+    Objects(OEngine::Render::OgreRenderer& renderer, MWWorld::Fallback* fallback)
+        : mRenderer (renderer)
+        , mIsStatic(false)
+        , mFallback(fallback)
+        , mRootNode(NULL)
+    {}
     ~Objects(){}
     void insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_);
     void insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh, bool light=false);

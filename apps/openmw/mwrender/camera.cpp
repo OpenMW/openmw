@@ -36,6 +36,8 @@ namespace MWRender
 
         mPreviewCam.yaw = 0.f;
         mPreviewCam.offset = 400.f;
+        mMainCam.yaw = 0.f;
+        mMainCam.offset = 400.f;
     }
 
     Camera::~Camera()
@@ -99,9 +101,11 @@ namespace MWRender
         MWBase::Environment::get().getSoundManager()->setListenerPosDir(pos, dir, up);
     }
 
-    void Camera::update(float duration)
+    void Camera::update(float duration, bool paused)
     {
         updateListener();
+        if (paused)
+            return;
 
         // only show the crosshair in game mode and in first person mode.
         MWBase::WindowManager *wm = MWBase::Environment::get().getWindowManager();

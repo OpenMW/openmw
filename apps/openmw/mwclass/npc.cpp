@@ -215,6 +215,8 @@ namespace MWClass
                 autoCalculateAttributes(ref->mBase, data->mCreatureStats);
             }
 
+            data->mCreatureStats.getAiSequence().fill(ref->mBase->mAiPackage);
+
             data->mCreatureStats.setAiSetting (0, ref->mBase->mAiData.mHello);
             data->mCreatureStats.setAiSetting (1, ref->mBase->mAiData.mFight);
             data->mCreatureStats.setAiSetting (2, ref->mBase->mAiData.mFlee);
@@ -225,8 +227,14 @@ namespace MWClass
                 iter!=ref->mBase->mSpells.mList.end(); ++iter)
                 data->mCreatureStats.getSpells().add (*iter);
 
+            // inventory
+            data->mInventoryStore.fill(ref->mBase->mInventory, getId(ptr),
+                                       MWBase::Environment::get().getWorld()->getStore());
+
             // store
             ptr.getRefData().setCustomData (data.release());
+
+            getInventoryStore(ptr).autoEquip(ptr);
         }
     }
 
@@ -266,10 +274,10 @@ namespace MWClass
             ptr.get<ESM::NPC>();
         assert(ref->mBase != NULL);
 
-        std::string headID = ref->mBase->mHead;
+        //std::string headID = ref->mBase->mHead;
 
-        int end = headID.find_last_of("head_") - 4;
-        std::string bodyRaceID = headID.substr(0, end);
+        //int end = headID.find_last_of("head_") - 4;
+        //std::string bodyRaceID = headID.substr(0, end);
 
         std::string model = "meshes\\base_anim.nif";
         const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(ref->mBase->mRace);
@@ -323,18 +331,18 @@ namespace MWClass
             return;
 
         const MWWorld::Class &othercls = MWWorld::Class::get(victim);
-        if(!othercls.isActor() || othercls.getCreatureStats(victim).isDead())
-        {
-            // Can't hit non-actors, or dead actors
+        if(!othercls.isActor()) // Can't hit non-actors
             return;
-        }
+        MWMechanics::CreatureStats &otherstats = getCreatureStats(victim);
+        if(otherstats.isDead()) // Can't hit dead actors
+            return;
 
         if(ptr.getRefData().getHandle() == "player")
-            MWBase::Environment::get().getWindowManager()->setEnemy(ptr);
+            MWBase::Environment::get().getWindowManager()->setEnemy(victim);
 
         int weapskill = ESM::Skill::HandToHand;
         if(!weapon.isEmpty())
-            weapskill = MWWorld::Class::get(weapon).getEquipmentSkill(weapon);
+            weapskill = get(weapon).getEquipmentSkill(weapon);
 
         MWMechanics::CreatureStats &crstats = getCreatureStats(ptr);
         MWMechanics::NpcStats &npcstats = getNpcStats(ptr);
@@ -345,7 +353,7 @@ namespace MWClass
         hitchance *= crstats.getFatigueTerm();
         hitchance += mageffects.get(MWMechanics::EffectKey(ESM::MagicEffect::FortifyAttack)).mMagnitude -
                      mageffects.get(MWMechanics::EffectKey(ESM::MagicEffect::Blind)).mMagnitude;
-        hitchance -= othercls.getEvasion(victim);
+        hitchance -= otherstats.getEvasion();
 
         if((::rand()/(RAND_MAX+1.0)) > hitchance/100.0f)
         {
@@ -404,8 +412,7 @@ namespace MWClass
                 MWBase::Environment::get().getSoundManager()->playSound3D(victim, "critical damage", 1.0f, 1.0f);
             }
 
-            healthdmg = (othercls.getCreatureStats(victim).getFatigue().getCurrent() < 1.0f ||
-                         npcstats.isWerewolf());
+            healthdmg = (otherstats.getFatigue().getCurrent() < 1.0f || npcstats.isWerewolf());
             if(healthdmg)
                 damage *= gmst.find("fHandtoHandHealthPer")->getFloat();
         }

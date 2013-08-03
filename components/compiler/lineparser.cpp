@@ -52,7 +52,7 @@ namespace Compiler
         Literals& literals, std::vector<Interpreter::Type_Code>& code, bool allowExpression)
     : Parser (errorHandler, context), mLocals (locals), mLiterals (literals), mCode (code),
        mState (BeginState), mExprParser (errorHandler, context, locals, literals),
-       mAllowExpression (allowExpression)
+       mAllowExpression (allowExpression), mButtons(0), mType(0)
     {}
 
     bool LineParser::parseInt (int value, const TokenLoc& loc, Scanner& scanner)

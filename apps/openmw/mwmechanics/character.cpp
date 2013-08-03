@@ -501,9 +501,12 @@ bool CharacterController::updateNpcState()
             if(mAttackType != "shoot")
             {
                 MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-                // NOTE: SwishL, SwishM, SwishS - large, medium, small.
-                // Based on weapon weight, speed, or attack strength?
-                sndMgr->playSound3D(mPtr, "SwishL", 1.0f, 1.0f);
+                if(complete < 0.5f)
+                    sndMgr->playSound3D(mPtr, "SwishM", 1.0f, 0.8f); //Weak attack
+                else if(complete < 1.0f)
+                    sndMgr->playSound3D(mPtr, "SwishM", 1.0f, 1.0f); //Medium attack
+                else
+                    sndMgr->playSound3D(mPtr, "SwishM", 1.0f, 1.2f); //Strong attack
             }
             stats.setAttackStrength(complete);
 
@@ -560,10 +563,18 @@ bool CharacterController::updateNpcState()
                                  weapSpeed, mAttackType+" follow start", mAttackType+" follow stop",
                                  0.0f, 0);
             else
+            {
+                float str = stats.getAttackStrength();
+                std::string start = mAttackType+((str < 0.5f) ? " small follow start"
+                                                              : (str < 1.0f) ? " medium follow start"
+                                                                             : " large follow start");
+                std::string stop = mAttackType+((str < 0.5f) ? " small follow stop"
+                                                             : (str < 1.0f) ? " medium follow stop"
+                                                                            : " large follow stop");
                 mAnimation->play(mCurrentWeapon, Priority_Weapon,
                                  MWRender::Animation::Group_UpperBody, true,
-                                 weapSpeed, mAttackType+" large follow start", mAttackType+" large follow stop",
-                                 0.0f, 0);
+                                 weapSpeed, start, stop, 0.0f, 0);
+            }
             mUpperBodyState = UpperCharState_FollowStartToFollowStop;
         }
     }
@@ -699,7 +710,7 @@ void CharacterController::update(float duration, Movement &movement)
         if(movestate != CharState_None)
             clearAnimQueue();
 
-        if(mAnimQueue.size() == 0)
+        if(mAnimQueue.empty())
             idlestate = (inwater ? CharState_IdleSwim : (sneak ? CharState_IdleSneak : CharState_Idle));
         else if(mAnimQueue.size() > 1)
         {
@@ -765,7 +776,7 @@ void CharacterController::playGroup(const std::string &groupname, int mode, int 
     else
     {
         count = std::max(count, 1);
-        if(mode != 0 || mAnimQueue.size() == 0)
+        if(mode != 0 || mAnimQueue.empty())
         {
             clearAnimQueue();
             mAnimQueue.push_back(std::make_pair(groupname, count-1));
@@ -801,7 +812,7 @@ bool CharacterController::isAnimPlaying(const std::string &groupName)
 
 void CharacterController::clearAnimQueue()
 {
-    if(mAnimQueue.size() > 0)
+    if(!mAnimQueue.empty())
         mAnimation->disable(mAnimQueue.front().first);
     mAnimQueue.clear();
 }

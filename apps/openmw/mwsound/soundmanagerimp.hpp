@@ -106,13 +106,15 @@ namespace MWSound
         virtual MWBase::SoundPtr playTrack(const DecoderPtr& decoder, PlayType type);
         ///< Play a 2D audio track, using a custom decoder
 
-        virtual MWBase::SoundPtr playSound(const std::string& soundId, float volume, float pitch, PlayType type=Play_TypeSfx, PlayMode mode=Play_Normal);
+        virtual MWBase::SoundPtr playSound(const std::string& soundId, float volume, float pitch, PlayType type=Play_TypeSfx, PlayMode mode=Play_Normal, float offset=0);
         ///< Play a sound, independently of 3D-position
+        ///< @param offset value from [0,1], when to start playback. 0 is beginning, 1 is end.
 
         virtual MWBase::SoundPtr playSound3D(const MWWorld::Ptr &reference, const std::string& soundId,
                                              float volume, float pitch, PlayType type=Play_TypeSfx,
-                                             PlayMode mode=Play_Normal);
+                                             PlayMode mode=Play_Normal, float offset=0);
         ///< Play a sound from an object
+        ///< @param offset value from [0,1], when to start playback. 0 is beginning, 1 is end.
 
         virtual void stopSound3D(const MWWorld::Ptr &reference, const std::string& soundId);
         ///< Stop the given object from playing the given sound,
@@ -125,6 +127,12 @@ namespace MWSound
 
         virtual void stopSound(const std::string& soundId);
         ///< Stop a non-3d looping sound
+
+        virtual void fadeOutSound3D(const MWWorld::Ptr &reference, const std::string& soundId, float duration);
+        ///< Fade out given sound (that is already playing) of given object
+        ///< @param reference Reference to object, whose sound is faded out
+        ///< @param soundId ID of the sound to fade out.
+        ///< @param duration Time until volume reaches 0.
 
         virtual bool getSoundPlaying(const MWWorld::Ptr &reference, const std::string& soundId) const;
         ///< Is the given sound currently playing on the given object?

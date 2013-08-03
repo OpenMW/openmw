@@ -188,6 +188,7 @@ namespace MWBase
             virtual void setMinimapVisibility(bool visible) = 0;
             virtual void setWeaponVisibility(bool visible) = 0;
             virtual void setSpellVisibility(bool visible) = 0;
+            virtual void setSneakVisibility(bool visible) = 0;
 
             virtual void activateQuickKey  (int index) = 0;
 

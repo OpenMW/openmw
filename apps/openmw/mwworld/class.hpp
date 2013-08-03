@@ -105,9 +105,6 @@ namespace MWWorld
             ///< Return item max health or throw an exception, if class does not have item health
             /// (default implementation: throw an exceoption)
 
-            virtual float getEvasion(const Ptr& ptr) const;
-            ///< Gets the chance the given object can evade an attack
-
             virtual void hit(const Ptr& ptr, int type=-1) const;
             ///< Execute a melee hit, using the current weapon. This will check the relevant skills
             /// of the given attacker, and whoever is hit.
@@ -230,7 +227,10 @@ namespace MWWorld
             static const Class& get (const std::string& key);
             ///< If there is no class for this \a key, an exception is thrown.
 
-            static const Class& get (const Ptr& ptr);
+            static const Class& get (const Ptr& ptr)
+            {
+                return get (ptr.getTypeName());
+            }
             ///< If there is no class for this pointer, an exception is thrown.
 
             static void registerClass (const std::string& key,  boost::shared_ptr<Class> instance);

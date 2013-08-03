@@ -6,6 +6,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/ptr.hpp"
@@ -142,9 +143,23 @@ namespace MWClass
                 // animated door
                 boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionDoor(ptr));
                 if (MWBase::Environment::get().getWorld()->getOpenOrCloseDoor(ptr))
+                {
+                    MWBase::Environment::get().getSoundManager()->fadeOutSound3D(ptr,
+                            closeSound, 0.5);
+                    float offset = ptr.getRefData().getLocalRotation().rot[2]/ 3.14159265 * 2.0;
+                    action->setSoundOffset(offset);
                     action->setSound(openSound);
+                }
                 else
+                {
+                    MWBase::Environment::get().getSoundManager()->fadeOutSound3D(ptr,
+                                                openSound, 0.5);
+                    float offset = 1.0 - ptr.getRefData().getLocalRotation().rot[2]/ 3.14159265 * 2.0;
+                    //most if not all door have closing bang somewhere in the middle of the sound,
+                    //so we divide offset by two
+                    action->setSoundOffset(offset * 0.5);
                     action->setSound(closeSound);
+                }
 
                 return action;
             }

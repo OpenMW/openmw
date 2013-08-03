@@ -13,7 +13,7 @@ namespace MWMechanics
         : mLevel (0), mLevelHealthBonus(0.f), mDead (false), mDied (false), mFriendlyHits (0),
           mTalkedTo (false), mAlarmed (false),
           mAttacked (false), mHostile (false),
-          mAttackingOrSpell(false)
+          mAttackingOrSpell(false), mAttackType(AT_Chop)
     {
         for (int i=0; i<4; ++i)
             mAiSettings[i] = 0;
@@ -317,6 +317,16 @@ namespace MWMechanics
     bool CreatureStats::getCreatureTargetted() const
     {
         return false;
+    }
+
+    float CreatureStats::getEvasion() const
+    {
+        float evasion = (getAttribute(ESM::Attribute::Agility).getModified() / 5.0f) +
+                        (getAttribute(ESM::Attribute::Luck).getModified() / 10.0f);
+        evasion *= getFatigueTerm();
+        evasion += mMagicEffects.get(EffectKey(ESM::MagicEffect::Sanctuary)).mMagnitude;
+
+        return evasion;
     }
 
     void CreatureStats::setLastHitObject(const std::string& objectid)

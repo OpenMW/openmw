@@ -31,6 +31,7 @@ namespace MWRender
         Actors(OEngine::Render::OgreRenderer& _rend, MWRender::RenderingManager* rendering)
             : mRend(_rend)
             , mRendering(rendering)
+            , mRootNode(NULL)
         {}
         ~Actors();
 

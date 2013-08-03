@@ -172,7 +172,6 @@ namespace MWDialogue
                     win->addResponse (Interpreter::fixDefinesDialog(info->mResponse, interpreterContext));
                     executeScript (info->mResultScript);
                     mLastTopic = Misc::StringUtils::lowerCase(it->mId);
-                    mLastDialogue = *info;
                     break;
                 }
             }
@@ -293,7 +292,6 @@ namespace MWDialogue
             executeScript (info->mResultScript);
 
             mLastTopic = topic;
-            mLastDialogue = *info;
         }
         else
         {
@@ -455,7 +453,6 @@ namespace MWDialogue
                     MWBase::Environment::get().getWindowManager()->getDialogueWindow()->addResponse (Interpreter::fixDefinesDialog(text, interpreterContext));
                     MWBase::Environment::get().getJournal()->addTopic (mLastTopic, info->mId);
                     executeScript (info->mResultScript);
-                    mLastDialogue = *info;
                 }
             }
         }

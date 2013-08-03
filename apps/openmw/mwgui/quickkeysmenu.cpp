@@ -44,6 +44,7 @@ namespace MWGui
         , mAssignDialog(0)
         , mItemSelectionDialog(0)
         , mMagicSelectionDialog(0)
+        , mSelectedIndex(-1)
     {
         getWidget(mOkButton, "OKButton");
         getWidget(mInstructionLabel, "InstructionLabel");

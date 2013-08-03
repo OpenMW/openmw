@@ -21,6 +21,8 @@ namespace MWMechanics
 {
     AiTravel::AiTravel(float x, float y, float z)
     : mX(x),mY(y),mZ(z),mPathFinder()
+    , cellX(std::numeric_limits<int>::max())
+    , cellY(std::numeric_limits<int>::max())
     {
     }
 

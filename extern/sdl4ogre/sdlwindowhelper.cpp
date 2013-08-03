@@ -6,6 +6,10 @@
 #include <SDL_syswm.h>
 #include <SDL_endian.h>
 
+#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+#include "osx_utils.h"
+#endif
+
 namespace SFO
 {
 
@@ -17,7 +21,7 @@ SDLWindowHelper::SDLWindowHelper (SDL_Window* window, int w, int h,
 	struct SDL_SysWMinfo wmInfo;
 	SDL_VERSION(&wmInfo.version);
 
-	if (SDL_GetWindowWMInfo(mSDLWindow, &wmInfo) == -1)
+	if (SDL_GetWindowWMInfo(mSDLWindow, &wmInfo) == SDL_FALSE)
 		throw std::runtime_error("Couldn't get WM Info!");
 
 	Ogre::String winHandle;

@@ -217,7 +217,7 @@ namespace MWGui
             mCommandLine->setCaption(complete( mCommandLine->getCaption(), matches ));
 #if 0
             int i = 0;
-            for(std::vector<std::string>::iterator it=matches.begin(); it < matches.end(); it++,i++ )
+            for(std::vector<std::string>::iterator it=matches.begin(); it < matches.end(); ++it,++i )
             {
                 printOK( *it );
                 if( i == 50 )
@@ -237,7 +237,7 @@ namespace MWGui
 
             if(mCurrent != mCommandHistory.begin())
             {
-                mCurrent--;
+                --mCurrent;
                 mCommandLine->setCaption(*mCurrent);
             }
         }
@@ -245,7 +245,7 @@ namespace MWGui
         {
             if(mCurrent != mCommandHistory.end())
             {
-                mCurrent++;
+                --mCurrent;
 
                 if(mCurrent != mCommandHistory.end())
                     mCommandLine->setCaption(*mCurrent);
@@ -333,7 +333,7 @@ namespace MWGui
                 continue;
 
             /* Is the beginning of the string different from the input string? If yes skip it. */
-            for( std::string::iterator iter=tmp.begin(), iter2=(*it).begin(); iter < tmp.end();iter++, iter2++) {
+            for( std::string::iterator iter=tmp.begin(), iter2=(*it).begin(); iter < tmp.end();++iter, ++iter2) {
                 if( tolower(*iter) != tolower(*iter2) ) {
                     string_different=true;
                     break;
@@ -372,7 +372,7 @@ namespace MWGui
         /* Check if all matching strings match further than input. If yes complete to this match. */
         int i = tmp.length();
 
-        for(std::string::iterator iter=matches.front().begin()+tmp.length(); iter < matches.front().end(); iter++, i++) {
+        for(std::string::iterator iter=matches.front().begin()+tmp.length(); iter < matches.front().end(); ++iter, ++i) {
             for(std::vector<std::string>::iterator it=matches.begin(); it < matches.end();++it) {
                 if( tolower((*it)[i]) != tolower(*iter) ) {
                     /* Append the longest match to the end of the output string*/

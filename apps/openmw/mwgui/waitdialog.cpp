@@ -47,6 +47,8 @@ namespace MWGui
         , mSleeping(false)
         , mHours(1)
         , mRemainingTime(0.05)
+        , mCurHour(0)
+        , mManualHours(1)
     {
         getWidget(mDateTimeText, "DateTimeText");
         getWidget(mRestText, "RestText");
@@ -216,7 +218,13 @@ namespace MWGui
 
     void WaitDialog::setCanRest (bool canRest)
     {
-        mUntilHealedButton->setVisible(canRest);
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
+        bool full = (stats.getFatigue().getCurrent() >= stats.getFatigue().getModified())
+                && (stats.getHealth().getCurrent() >= stats.getHealth().getModified())
+                && (stats.getMagicka().getCurrent() >= stats.getMagicka().getModified());
+
+        mUntilHealedButton->setVisible(canRest && !full);
         mWaitButton->setCaptionWithReplacing (canRest ? "#{sRest}" : "#{sWait}");
         mRestText->setCaptionWithReplacing (canRest ? "#{sRestMenu3}" : "#{sRestIllegal}");
 

@@ -77,13 +77,6 @@ namespace MWWorld
             int mActivationDistanceOverride;
             std::string mFacedHandle;
             float mFacedDistance;
-            Ptr mFaced1;
-            Ptr mFaced2;
-            std::string mFaced1Name;
-            std::string mFaced2Name;
-            float mFaced1Distance;
-            float mFaced2Distance;
-            int mNumFacing;
 
             std::map<MWWorld::Ptr, int> mDoorStates;
             ///< only holds doors that are currently moving. 0 means closing, 1 opening

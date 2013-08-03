@@ -36,6 +36,12 @@ namespace MWGui
         , mPreview(MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer ())
         , mPreviewDirty(true)
         , mDragAndDrop(dragAndDrop)
+        , mSelectedItem(-1)
+        , mPositionInventory(0, 342, 498, 258)
+        , mPositionContainer(0, 342, 498, 258)
+        , mPositionCompanion(0, 342, 498, 258)
+        , mPositionBarter(0, 342, 498, 258)
+        , mGuiMode(GM_Inventory)
     {
         static_cast<MyGUI::Window*>(mMainWidget)->eventWindowChangeCoord += MyGUI::newDelegate(this, &InventoryWindow::onWindowResize);
 
@@ -67,7 +73,7 @@ namespace MWGui
 
         mFilterAll->setStateSelected(true);
 
-        setCoord(0, 342, 498, 258);
+        setCoord(mPositionInventory.left, mPositionInventory.top, mPositionInventory.width, mPositionInventory.height);
         onWindowResize(static_cast<MyGUI::Window*>(mMainWidget));
 
         mPreview.setup();
@@ -81,6 +87,27 @@ namespace MWGui
         mItemView->setModel(mSortModel);
         mPreview = MWRender::InventoryPreview(mPtr);
         mPreview.setup();
+    }
+
+    void InventoryWindow::setGuiMode(GuiMode mode)
+    {
+        mGuiMode = mode;
+        switch(mode) {
+            case GM_Container:
+                mMainWidget->setCoord(mPositionContainer);
+                break;
+            case GM_Companion:
+                mMainWidget->setCoord(mPositionCompanion);
+                break;
+            case GM_Barter:
+                mMainWidget->setCoord(mPositionBarter);
+                break;
+            case GM_Inventory:
+            default:
+                mMainWidget->setCoord(mPositionInventory);
+                break;
+        }
+        onWindowResize(static_cast<MyGUI::Window*>(mMainWidget));
     }
 
     TradeItemModel* InventoryWindow::getTradeModel()
@@ -209,6 +236,21 @@ namespace MWGui
                               mRightPane->getPosition().top,
                               _sender->getSize().width - 12 - (_sender->getSize().height-44) * aspect - 15,
                               _sender->getSize().height-44 );
+
+        switch(mGuiMode) {
+            case GM_Container:
+                mPositionContainer = _sender->getCoord();
+                break;
+            case GM_Companion:
+                mPositionCompanion = _sender->getCoord();
+                break;
+            case GM_Barter:
+                mPositionBarter = _sender->getCoord();
+                break;
+            case GM_Inventory:
+            default:
+                mPositionInventory = _sender->getCoord();
+        }
 
         if (mMainWidget->getSize().width != mLastXSize || mMainWidget->getSize().height != mLastYSize)
         {

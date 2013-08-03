@@ -89,9 +89,6 @@ namespace MWGui
         {
             for (int my=0; my<3; ++my)
             {
-                std::string name = "Map_" + boost::lexical_cast<std::string>(mx) + "_"
-                        + boost::lexical_cast<std::string>(my);
-
                 std::string image = mPrefix+"_"+ boost::lexical_cast<std::string>(mCurX + (mx-1)) + "_"
                         + boost::lexical_cast<std::string>(mCurY + (-1*(my-1)));
                 MyGUI::ImageBox* fog = mFogWidgets[my + 3*mx];
@@ -134,9 +131,6 @@ namespace MWGui
                 // map
                 std::string image = mPrefix+"_"+ boost::lexical_cast<std::string>(x + (mx-1)) + "_"
                         + boost::lexical_cast<std::string>(y + (-1*(my-1)));
-
-                std::string name = "Map_" + boost::lexical_cast<std::string>(mx) + "_"
-                        + boost::lexical_cast<std::string>(my);
 
                 MyGUI::ImageBox* box = mMapWidgets[my + 3*mx];
 

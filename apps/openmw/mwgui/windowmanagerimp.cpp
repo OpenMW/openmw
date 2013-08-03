@@ -441,16 +441,19 @@ namespace MWGui
                 mMap            ->setVisible(eff & GW_Map);
                 mStatsWindow    ->setVisible(eff & GW_Stats);
                 mInventoryWindow->setVisible(eff & GW_Inventory);
+                mInventoryWindow->setGuiMode(mode);
                 mSpellWindow    ->setVisible(eff & GW_Magic);
                 break;
             }
             case GM_Container:
                 mContainerWindow->setVisible(true);
                 mInventoryWindow->setVisible(true);
+                mInventoryWindow->setGuiMode(mode);
                 break;
             case GM_Companion:
                 mCompanionWindow->setVisible(true);
                 mInventoryWindow->setVisible(true);
+                mInventoryWindow->setGuiMode(mode);
                 break;
             case GM_Dialogue:
                 mDialogueWindow->setVisible(true);
@@ -458,6 +461,7 @@ namespace MWGui
             case GM_Barter:
                 mInventoryWindow->setVisible(true);
                 mInventoryWindow->setTrading(true);
+                mInventoryWindow->setGuiMode(mode);
                 mTradeWindow->setVisible(true);
                 break;
             case GM_SpellBuying:
@@ -828,6 +832,11 @@ namespace MWGui
     {
         mHud->setSpellVisible (visible);
         mHud->setEffectVisible (visible);
+    }
+
+    void WindowManager::setSneakVisibility(bool visible)
+    {
+        mHud->setSneakVisible(visible);
     }
 
     void WindowManager::setDragDrop(bool dragDrop)

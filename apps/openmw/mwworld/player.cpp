@@ -123,6 +123,9 @@ namespace MWWorld
         MWWorld::Ptr ptr = getPlayer();
 
         MWWorld::Class::get (ptr).setStance (ptr, MWWorld::Class::Sneak, sneak);
+
+        // TODO show sneak indicator only when the player is not detected by any actor
+        MWBase::Environment::get().getWindowManager()->setSneakVisibility(sneak);
     }
 
     void Player::yaw(float yaw)

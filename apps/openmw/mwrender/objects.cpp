@@ -159,7 +159,7 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh, bool
     }
 
     if(!mIsStatic || !Settings::Manager::getBool("use static geometry", "Objects") ||
-       anyTransparency || objects.mParticles.size() > 0)
+            anyTransparency || !objects.mParticles.empty())
     {
         for(size_t i = 0;i < objects.mEntities.size();i++)
         {
@@ -233,7 +233,7 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh, bool
 
             (*iter)->detachFromParent();
             mRenderer.getScene()->destroyEntity(*iter);
-            iter++;
+            ++iter;
         }
     }
 
