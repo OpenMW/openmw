@@ -15,8 +15,11 @@
 
 #include <components/nifbullet/bulletnifloader.hpp>
 
-//#include "../mwbase/world.hpp" // FIXME
+#include "../mwbase/world.hpp" // FIXME
 #include "../mwbase/environment.hpp"
+
+#include <components/esm/loadgmst.hpp>
+#include "../mwworld/esmstore.hpp"
 
 #include "ptr.hpp"
 #include "class.hpp"
@@ -268,6 +271,7 @@ namespace MWWorld
         std::pair <std::string, float> result;
         /*auto*/ result = mEngine->rayTest(origin, dest);
         result.second *= queryDistance;
+
         return std::make_pair (result.second, result.first);
     }
 
@@ -312,11 +316,23 @@ namespace MWWorld
         Ogre::Vector3 dest_ = origin_ +  orient_.yAxis()*queryDistance;
 
         btVector3 origin(origin_.x, origin_.y, origin_.z);
-        btVector3 dest(dest_.x, dest_.y, dest_.z);
 
-        std::pair<std::string,float> result = mEngine->rayTest(origin, dest);
-        result.second *= queryDistance;
-        return result;
+        std::pair<std::string,btVector3> result = mEngine->sphereTest(queryDistance,origin);
+        if(result.first == "") return std::make_pair("",0);
+        btVector3 a = result.second - origin;
+        Ogre::Vector3 a_ = Ogre::Vector3(a.x(),a.y(),a.z());
+        a_ = orient_.Inverse()*a_;
+        Ogre::Vector2 a_xy = Ogre::Vector2(a_.x,a_.y);
+        Ogre::Vector2 a_yz = Ogre::Vector2(a_xy.length(),a_.z);
+        float axy = a_xy.angleBetween(Ogre::Vector2::UNIT_Y).valueDegrees();
+        float az = a_yz.angleBetween(Ogre::Vector2::UNIT_X).valueDegrees();
+
+        float fCombatAngleXY = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fCombatAngleXY")->getFloat();
+        float fCombatAngleZ = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fCombatAngleZ")->getFloat();
+        if(abs(axy) < fCombatAngleXY && abs(az) < fCombatAngleZ)
+            return std::make_pair (result.first,result.second.length());
+        else
+            return std::make_pair("",0);
     }
 
 
