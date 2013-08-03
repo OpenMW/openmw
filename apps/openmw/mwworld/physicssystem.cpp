@@ -313,8 +313,6 @@ namespace MWWorld
 
     std::pair<std::string,float> PhysicsSystem::getFacedHandle(const Ogre::Vector3 &origin_, const Ogre::Quaternion &orient_, float queryDistance)
     {
-        Ogre::Vector3 dest_ = origin_ +  orient_.yAxis()*queryDistance;
-
         btVector3 origin(origin_.x, origin_.y, origin_.z);
 
         std::pair<std::string,btVector3> result = mEngine->sphereTest(queryDistance,origin);
