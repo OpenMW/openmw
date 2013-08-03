@@ -268,6 +268,7 @@ namespace MWWorld
         std::pair <std::string, float> result;
         /*auto*/ result = mEngine->rayTest(origin, dest);
         result.second *= queryDistance;
+
         return std::make_pair (result.second, result.first);
     }
 
@@ -316,7 +317,11 @@ namespace MWWorld
 
         std::pair<std::string,float> result = mEngine->rayTest(origin, dest);
         result.second *= queryDistance;
-        return result;
+
+        std::pair<std::string,btVector3> result2 = mEngine->sphereTest(queryDistance,origin);
+        std::cout << "physic system: getFacedHandle" << result2.first << result2.second.length();
+        return std::make_pair (result2.first,result2.second.length());
+        //return result;
     }
 
 

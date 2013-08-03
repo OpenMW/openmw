@@ -307,7 +307,7 @@ public:
         std::pair<bool, float> sphereCast (float radius, btVector3& from, btVector3& to);
         ///< @return (hit, relative distance)
 
-        std::string sphereTest(float radius,btVector3& pos);
+        std::pair<std::string,btVector3> sphereTest(float radius,btVector3& pos);
 
         std::vector<std::string> getCollisions(const std::string& name);
 
