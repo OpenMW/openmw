@@ -84,6 +84,9 @@ namespace MWGui
         mSpellBoxBaseLeft = mSpellBox->getLeft();
         mSpellBox->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onMagicClicked);
 
+        getWidget(mSneakBox, "SneakBox");
+        mSneakBoxBaseLeft = mSneakBox->getLeft();
+
         getWidget(mEffectBox, "EffectBox");
         mEffectBoxBaseRight = viewSize.width - mEffectBox->getRight();
 
@@ -503,6 +506,12 @@ namespace MWGui
         updatePositions();
     }
 
+    void HUD::setSneakVisible(bool visible)
+    {
+        mSneakBox->setVisible(visible);
+        updatePositions();
+    }
+
     void HUD::setEffectVisible(bool visible)
     {
         mEffectBox->setVisible (visible);
@@ -517,12 +526,18 @@ namespace MWGui
 
     void HUD::updatePositions()
     {
-        int weapDx = 0, spellDx = 0;
+        int weapDx = 0, spellDx = 0, sneakDx = 0;
         if (!mHealth->getVisible())
-            spellDx = weapDx = mWeapBoxBaseLeft - mHealthManaStaminaBaseLeft;
+            sneakDx = spellDx = weapDx = mWeapBoxBaseLeft - mHealthManaStaminaBaseLeft;
 
         if (!mWeapBox->getVisible())
+        {
             spellDx += mSpellBoxBaseLeft - mWeapBoxBaseLeft;
+            sneakDx = spellDx;
+        }
+
+        if (!mSpellBox->getVisible())
+            sneakDx += mSneakBoxBaseLeft - mSpellBoxBaseLeft;
 
         mWeaponVisible = mWeapBox->getVisible();
         mSpellVisible = mSpellBox->getVisible();
@@ -531,6 +546,7 @@ namespace MWGui
 
         mWeapBox->setPosition(mWeapBoxBaseLeft - weapDx, mWeapBox->getTop());
         mSpellBox->setPosition(mSpellBoxBaseLeft - spellDx, mSpellBox->getTop());
+        mSneakBox->setPosition(mSneakBoxBaseLeft - sneakDx, mSneakBox->getTop());
 
         const MyGUI::IntSize& viewSize = MyGUI::RenderManager::getInstance().getViewSize();
 
