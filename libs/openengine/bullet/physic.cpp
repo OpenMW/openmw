@@ -584,9 +584,12 @@ namespace Physic
         broadphase->aabbTest(aabbMin,aabbMax,callback);
         for(int i=0;i<callback.hits.size();i++)
         {
-            if((callback.hits[i]->getWorldTransform().getOrigin()-pos).length()<radius)
+            float d = (callback.hits[i]->getWorldTransform().getOrigin()-pos).length();
+            if(d<radius)
             {
-                return std::make_pair(callback.hits[i]->mName,callback.hits[i]->getWorldTransform().getOrigin());
+                std::pair<std::string,float> rayResult = this->rayTest(pos,callback.hits[i]->getWorldTransform().getOrigin());
+                if(rayResult.second>d || rayResult.first == callback.hits[i]->mName)
+                    return std::make_pair(callback.hits[i]->mName,callback.hits[i]->getWorldTransform().getOrigin());
             }
         }
         //ContactTestResultCallback callback;
