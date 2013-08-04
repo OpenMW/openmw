@@ -357,7 +357,7 @@ namespace MWInput
 
             mPlayer.setSneak(actionIsActive(A_Sneak));
 
-            if (actionIsActive(A_Jump) && mControlSwitch["playerjumping"])
+            if (actionIsActive(A_Jump) && mControlSwitch["playerjumping"] && !actionIsActive(A_Sneak))
             {
                 mPlayer.setUpDown (1);
                 triedToMove = true;
