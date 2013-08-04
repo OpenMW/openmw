@@ -650,7 +650,7 @@ void CharacterController::update(float duration, Movement &movement)
 
         /* FIXME: The state should be set to Jump, and X/Y movement should be disallowed except
          * for the initial thrust (which would be carried by "physics" until landing). */
-        if(!onground)
+        if(!onground || sneak)
             vec.z = 0.0f;
         else if(vec.z > 0.0f)
         {
