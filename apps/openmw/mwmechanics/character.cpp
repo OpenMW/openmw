@@ -776,7 +776,7 @@ void CharacterController::playGroup(const std::string &groupname, int mode, int 
     else
     {
         count = std::max(count, 1);
-        if(mode != 0 || mAnimQueue.empty())
+        if(mode != 0 || mAnimQueue.empty() || !isAnimPlaying(mAnimQueue.front().first))
         {
             clearAnimQueue();
             mAnimQueue.push_back(std::make_pair(groupname, count-1));
