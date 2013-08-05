@@ -1056,6 +1056,18 @@ namespace MWScript
                 }
         };
 
+        template <class R, bool set>
+        class OpSetWerewolf : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+                    MWBase::Environment::get().getWorld()->setWerewolf(ptr, set);
+                }
+        };
+
         const int numberOfAttributes = 8;
 
         const int opcodeGetAttribute = 0x2000027;
@@ -1148,6 +1160,10 @@ namespace MWScript
         const int opcodeOnDeathExplicit = 0x2000205;
         const int opcodeIsWerewolf = 0x20001fd;
         const int opcodeIsWerewolfExplicit = 0x20001fe;
+        const int opcodeBecomeWerewolf = 0x2000217;
+        const int opcodeBecomeWerewolfExplicit = 0x2000218;
+        const int opcodeUndoWerewolf = 0x2000219;
+        const int opcodeUndoWerewolfExplicit = 0x200021a;
 
         void registerExtensions (Compiler::Extensions& extensions)
         {
@@ -1266,6 +1282,9 @@ namespace MWScript
             extensions.registerFunction ("ondeath", 'l', "", opcodeOnDeath, opcodeOnDeathExplicit);
 
             extensions.registerFunction ("iswerewolf", 'l', "", opcodeIsWerewolf, opcodeIsWerewolfExplicit);
+
+            extensions.registerInstruction("becomewerewolf", "", opcodeBecomeWerewolf, opcodeBecomeWerewolfExplicit);
+            extensions.registerInstruction("undowerewolf", "", opcodeUndoWerewolf, opcodeBecomeWerewolfExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
@@ -1386,6 +1405,11 @@ namespace MWScript
 
             interpreter.installSegment5 (opcodeIsWerewolf, new OpIsWerewolf<ImplicitRef>);
             interpreter.installSegment5 (opcodeIsWerewolfExplicit, new OpIsWerewolf<ExplicitRef>);
+
+            interpreter.installSegment5 (opcodeBecomeWerewolf, new OpSetWerewolf<ImplicitRef, true>);
+            interpreter.installSegment5 (opcodeBecomeWerewolfExplicit, new OpSetWerewolf<ExplicitRef, true>);
+            interpreter.installSegment5 (opcodeUndoWerewolf, new OpSetWerewolf<ImplicitRef, false>);
+            interpreter.installSegment5 (opcodeUndoWerewolfExplicit, new OpSetWerewolf<ExplicitRef, false>);
         }
     }
 }
