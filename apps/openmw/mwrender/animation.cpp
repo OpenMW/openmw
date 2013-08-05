@@ -35,11 +35,14 @@ void Animation::AnimationValue::setValue(Ogre::Real)
 
 void Animation::destroyObjectList(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList &objects)
 {
+    for(size_t i = 0;i < objects.mLights.size();i++)
+        sceneMgr->destroyLight(objects.mLights[i]);
     for(size_t i = 0;i < objects.mParticles.size();i++)
         sceneMgr->destroyParticleSystem(objects.mParticles[i]);
     for(size_t i = 0;i < objects.mEntities.size();i++)
         sceneMgr->destroyEntity(objects.mEntities[i]);
     objects.mControllers.clear();
+    objects.mLights.clear();
     objects.mParticles.clear();
     objects.mEntities.clear();
     objects.mSkelBase = NULL;

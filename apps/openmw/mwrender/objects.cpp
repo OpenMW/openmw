@@ -159,7 +159,7 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh, bool
     }
 
     if(!mIsStatic || !Settings::Manager::getBool("use static geometry", "Objects") ||
-            anyTransparency || !objects.mParticles.empty())
+            anyTransparency || !objects.mParticles.empty() || !objects.mLights.empty())
     {
         for(size_t i = 0;i < objects.mEntities.size();i++)
         {
