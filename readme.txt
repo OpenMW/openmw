@@ -55,8 +55,7 @@ Syntax: openmw <options>
 Allowed options:
   --help                           print help message
   --version                        print version information and quit
-  --data arg (=data)               set data directories (later directories have
-                                   higher priority)
+  --data arg (=data)               set data directories (later directories have higher priority)
   --data-local arg                 set local data directory (highest priority)
   --resources arg (=resources)     set resources directory
   --start arg (=Beshara)           set initial cell
@@ -66,31 +65,20 @@ Allowed options:
   --debug [=arg(=1)] (=0)          debug mode
   --nosound [=arg(=1)] (=0)        disable all sounds
   --script-verbose [=arg(=1)] (=0) verbose script output
-  --script-all [=arg(=1)] (=0)     compile all scripts (excluding dialogue scri
-                                   pts) at startup
+  --script-all [=arg(=1)] (=0)     compile all scripts (excluding dialogue scripts) at startup
   --script-console [=arg(=1)] (=0) enable console-only script functionality
-  --script-run arg                 select a file containing a list of console
-                                   commands that is executed on startup
-
+  --script-run arg                 select a file containing a list of console commands that is executed on startup
   --new-game [=arg(=1)] (=0)       activate char gen/new game mechanics
-  --fs-strict [=arg(=1)] (=0)      strict file system handling (no case folding
-                                   )
-  --encoding arg (=win1252)        Character encoding used in OpenMW game messa
-                                   ges:
-
-                                   win1250 - Central and Eastern European such
-                                   as Polish, Czech, Slovak, Hungarian, Slovene
-                                   , Bosnian, Croatian, Serbian (Latin script),
-                                   Romanian and Albanian languages
-
-                                   win1251 - Cyrillic alphabet such as Russian,
-                                   Bulgarian, Serbian Cyrillic and other langua
-                                   ges
-
-                                   win1252 - Western European (Latin) alphabet,
-                                   used by default
+  --fs-strict [=arg(=1)] (=0)      strict file system handling (no case folding)
+  --encoding arg (=win1252)        Character encoding used in OpenMW game messages:
+                                   
+                                   win1250 - Central and Eastern European such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, Croatian, Serbian (Latin script), Romanian and Albanian languages
+                                   
+                                   win1251 - Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic and other languages
+                                   
+                                   win1252 - Western European (Latin) alphabet, used by default
+                                   
   --fallback arg                   fallback values
-
 
 CHANGELOG
 
