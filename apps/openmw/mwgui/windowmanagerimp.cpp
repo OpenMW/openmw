@@ -105,6 +105,7 @@ namespace MWGui
       , mGui(NULL)
       , mGarbageDialogs()
       , mShown(GW_ALL)
+      , mForceHidden(GW_None)
       , mAllowed(GW_ALL)
       , mRestAllowed(true)
       , mShowFPSLevel(fpsLevel)
@@ -435,7 +436,7 @@ namespace MWGui
                 // This is controlled both by what windows the
                 // user has opened/closed (the 'shown' variable) and by what
                 // windows we are allowed to show (the 'allowed' var.)
-                int eff = mShown & mAllowed;
+                int eff = mShown & mAllowed & ~mForceHidden;
 
                 // Show the windows we want
                 mMap            ->setVisible(eff & GW_Map);
@@ -1117,7 +1118,19 @@ namespace MWGui
 
     void WindowManager::toggleVisible (GuiWindow wnd)
     {
-        mShown = (mShown & wnd) ? (GuiWindow) (mShown & ~wnd) : (GuiWindow) (mShown | wnd);
+        mShown = (GuiWindow)(mShown ^ wnd);
+        updateVisible();
+    }
+
+    void WindowManager::forceHide(GuiWindow wnd)
+    {
+        mForceHidden = (GuiWindow)(mForceHidden | wnd);
+        updateVisible();
+    }
+
+    void WindowManager::unsetForceHide(GuiWindow wnd)
+    {
+        mForceHidden = (GuiWindow)(mForceHidden & ~wnd);
         updateVisible();
     }
 
