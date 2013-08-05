@@ -267,6 +267,18 @@ void NpcAnimation::updateParts(bool forceupdate)
     if(mViewMode == VM_HeadOnly)
         return;
 
+    if(mPartPriorities[ESM::PRT_Shield] < 1)
+    {
+        MWWorld::ContainerStoreIterator store = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
+        MWWorld::Ptr part;
+        if(store != inv.end() && (part=*store).getTypeName() == typeid(ESM::Light).name())
+        {
+            const ESM::Light *light = part.get<ESM::Light>()->mBase;
+            addOrReplaceIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft,
+                                       1, "meshes\\"+light->mModel);
+        }
+    }
+
     showWeapons(mShowWeapons);
 
     const int Flag_Female = 0x01;
@@ -485,6 +497,21 @@ bool NpcAnimation::addOrReplaceIndividualPart(int type, int group, int priority,
         if(type == sPartList[i].type)
         {
             mObjectParts[i] = insertBoundedPart(mesh, group, sPartList[i].name);
+            if(mObjectParts[i].mSkelBase && mObjectParts[i].mSkelBase->isParentTagPoint())
+            {
+                Ogre::Node *root = mObjectParts[i].mSkelBase->getParentNode();
+                Ogre::SkeletonInstance *skel = mObjectParts[i].mSkelBase->getSkeleton();
+                if(skel->hasBone("BoneOffset"))
+                {
+                    Ogre::Bone *offset = skel->getBone("BoneOffset");
+                    root->translate(offset->getPosition());
+                    root->rotate(offset->getOrientation());
+                    // HACK: Why an extra -90 degree rotation?
+                    root->pitch(Ogre::Degree(-90.0f));
+                    root->scale(offset->getScale());
+                    root->setInitialState();
+                }
+            }
 
             // TODO:
             // type == ESM::PRT_Head should get an animation source based on the current output of
