@@ -428,6 +428,8 @@ namespace MWWorld
 
             /// Returns true if teleport spell effects are allowed.
             virtual bool isTeleportingEnabled() const;
+
+            virtual void setWerewolf(const MWWorld::Ptr& actor, bool werewolf);
     };
 }
 
