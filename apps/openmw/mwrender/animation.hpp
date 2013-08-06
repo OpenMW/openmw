@@ -52,6 +52,7 @@ protected:
         virtual void setValue(Ogre::Real value);
     };
 
+
     class NullAnimationValue : public Ogre::ControllerValue<Ogre::Real>
     {
     public:
@@ -60,6 +61,7 @@ protected:
         virtual void setValue(Ogre::Real value)
         { }
     };
+
 
     struct AnimSource : public Ogre::AnimationAlloc {
         NifOgre::TextKeyMap mTextKeys;

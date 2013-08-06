@@ -8,6 +8,9 @@
 #include <OgreBone.h>
 #include <OgreSubMesh.h>
 #include <OgreSceneManager.h>
+#include <OgreControllerManager.h>
+
+#include <libs/openengine/ogre/lights.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -281,26 +284,18 @@ void Animation::addExtraLight(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList 
     Ogre::Light *olight = objlist.mLights.back();
     olight->setDiffuseColour(color);
 
+    Ogre::ControllerValueRealPtr src(Ogre::ControllerManager::getSingleton().getFrameTimeSource());
+    Ogre::ControllerValueRealPtr dest(OGRE_NEW OEngine::Render::LightValue(olight, color));
+    Ogre::ControllerFunctionRealPtr func(OGRE_NEW OEngine::Render::LightFunction(
+        (light->mData.mFlags&ESM::Light::Flicker) ? OEngine::Render::LT_Flicker :
+        (light->mData.mFlags&ESM::Light::FlickerSlow) ? OEngine::Render::LT_FlickerSlow :
+        (light->mData.mFlags&ESM::Light::Pulse) ? OEngine::Render::LT_Pulse :
+        (light->mData.mFlags&ESM::Light::PulseSlow) ? OEngine::Render::LT_PulseSlow :
+        OEngine::Render::LT_Normal
+    ));
+    objlist.mControllers.push_back(Ogre::Controller<Ogre::Real>(src, dest, func));
+
     bool interior = !(mPtr.isInCell() && mPtr.getCell()->mCell->isExterior());
-
-    // TODO: Create Controllers for these
-#if 0
-    // randomize lights animations
-    info.time = Ogre::Math::RangeRandom(-500, +500);
-    info.phase = Ogre::Math::RangeRandom(-500, +500);
-
-    if((light->mData.mFlags&ESM::Light::Flicker))
-        info.type = LT_Flicker;
-    else if((light->mData.mFlags&ESM::Light::FlickerSlow))
-        info.type = LT_FlickerSlow;
-    else if((light->mData.mFlags&ESM::Light::Pulse))
-        info.type = LT_Pulse;
-    else if((light->mData.mFlags&ESM::Light::PulseSlow))
-        info.type = LT_PulseSlow;
-    else
-        info.type = LT_Normal;
-#endif
-
     bool quadratic = fallback->getFallbackBool("LightAttenuation_OutQuadInLin") ?
                      !interior : fallback->getFallbackBool("LightAttenuation_UseQuadratic");
 
