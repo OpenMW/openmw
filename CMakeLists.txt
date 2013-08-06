@@ -134,9 +134,11 @@ endif()
 
 # Platform specific
 if (WIN32)
+    if(NOT MINGW)
     set(Boost_USE_STATIC_LIBS   ON)
     set(PLATFORM_INCLUDE_DIR "platform")
     add_definitions(-DBOOST_ALL_NO_LIB)
+    endif(NOT MINGW)
 
     # Suppress WinMain(), provided by SDL
     add_definitions(-DSDL_MAIN_HANDLED)
