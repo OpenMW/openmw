@@ -12,7 +12,7 @@ CreatureAnimation::~CreatureAnimation()
 }
 
 CreatureAnimation::CreatureAnimation(const MWWorld::Ptr &ptr)
-  : Animation(ptr)
+  : Animation(ptr, ptr.getRefData().getBaseNode())
 {
     MWWorld::LiveCellRef<ESM::Creature> *ref = mPtr.get<ESM::Creature>();
 
@@ -21,7 +21,7 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr &ptr)
     {
         std::string model = "meshes\\"+ref->mBase->mModel;
 
-        setObjectRoot(mPtr.getRefData().getBaseNode(), model, false);
+        setObjectRoot(model, false);
         setRenderProperties(mObjectRoot, RV_Actors, RQG_Main, RQG_Alpha);
 
         if((ref->mBase->mFlags&ESM::Creature::Biped))

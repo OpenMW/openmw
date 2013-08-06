@@ -63,7 +63,7 @@ NpcAnimation::~NpcAnimation()
 
 
 NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWorld::InventoryStore& inv, int visibilityFlags, ViewMode viewMode)
-  : Animation(ptr),
+  : Animation(ptr, node),
     mStateID(-1),
     mTimeToChange(0),
     mVisibilityFlags(visibilityFlags),
@@ -106,7 +106,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
     std::string smodel = (viewMode != VM_FirstPerson) ?
                          (!isBeast ? "meshes\\base_anim.nif"     : "meshes\\base_animkna.nif") :
                          (!isBeast ? "meshes\\base_anim.1st.nif" : "meshes\\base_animkna.1st.nif") ;
-    setObjectRoot(node, smodel, true);
+    setObjectRoot(smodel, true);
 
     if(mViewMode != VM_FirstPerson)
     {
@@ -147,7 +147,7 @@ void NpcAnimation::setViewMode(NpcAnimation::ViewMode viewMode)
     std::string smodel = (viewMode != VM_FirstPerson) ?
                          (!isBeast ? "meshes\\base_anim.nif"     : "meshes\\base_animkna.nif") :
                          (!isBeast ? "meshes\\base_anim.1st.nif" : "meshes\\base_animkna.1st.nif") ;
-    setObjectRoot(mInsert->getParentSceneNode(), smodel, true);
+    setObjectRoot(smodel, true);
 
     if(mViewMode != VM_FirstPerson)
     {

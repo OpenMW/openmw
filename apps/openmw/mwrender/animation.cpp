@@ -58,7 +58,7 @@ void Animation::destroyObjectList(Ogre::SceneManager *sceneMgr, NifOgre::ObjectL
     objects.mSkelBase = NULL;
 }
 
-Animation::Animation(const MWWorld::Ptr &ptr)
+Animation::Animation(const MWWorld::Ptr &ptr, Ogre::SceneNode *node)
     : mPtr(ptr)
     , mCamera(NULL)
     , mInsert(NULL)
@@ -71,6 +71,8 @@ Animation::Animation(const MWWorld::Ptr &ptr)
 {
     for(size_t i = 0;i < sNumGroups;i++)
         mAnimationValuePtr[i].bind(OGRE_NEW AnimationValue(this));
+    mInsert = node ? node->createChildSceneNode() :
+                     mPtr.getRefData().getBaseNode()->createChildSceneNode();
 }
 
 Animation::~Animation()
@@ -85,11 +87,9 @@ Animation::~Animation()
 }
 
 
-void Animation::setObjectRoot(Ogre::SceneNode *node, const std::string &model, bool baseonly)
+void Animation::setObjectRoot(const std::string &model, bool baseonly)
 {
     OgreAssert(mAnimSources.empty(), "Setting object root while animation sources are set!");
-    if(!mInsert)
-        mInsert = node->createChildSceneNode();
 
     std::string mdlname = Misc::StringUtils::lowerCase(model);
     std::string::size_type p = mdlname.rfind('\\');

@@ -153,7 +153,7 @@ protected:
      * Note that you must make sure all animation sources are cleared before reseting the object
      * root. All nodes previously retrieved with getNode will also become invalidated.
      */
-    void setObjectRoot(Ogre::SceneNode *node, const std::string &model, bool baseonly);
+    void setObjectRoot(const std::string &model, bool baseonly);
 
     /* Adds the keyframe controllers in the specified model as a new animation source. Note that
      * the filename portion of the provided model name will be prepended with 'x', and the .nif
@@ -170,7 +170,7 @@ protected:
     void clearAnimSources();
 
 public:
-    Animation(const MWWorld::Ptr &ptr);
+    Animation(const MWWorld::Ptr &ptr, Ogre::SceneNode *node);
     virtual ~Animation();
 
     void updatePtr(const MWWorld::Ptr &ptr);
