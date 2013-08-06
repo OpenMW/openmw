@@ -153,28 +153,44 @@ void Animation::setObjectRoot(Ogre::SceneNode *node, const std::string &model, b
     }
 }
 
-void Animation::setRenderProperties(const NifOgre::ObjectList &objlist, Ogre::uint32 visflags, Ogre::uint8 solidqueue, Ogre::uint8 transqueue)
-{
-    for(size_t i = 0;i < objlist.mEntities.size();i++)
-    {
-        Ogre::Entity *ent = objlist.mEntities[i];
-        if(visflags != 0)
-            ent->setVisibilityFlags(visflags);
 
-        for(unsigned int j = 0;j < ent->getNumSubEntities();++j)
+class VisQueueSet {
+    Ogre::uint32 mVisFlags;
+    Ogre::uint8 mSolidQueue, mTransQueue;
+
+public:
+    VisQueueSet(Ogre::uint32 visflags, Ogre::uint8 solidqueue, Ogre::uint8 transqueue)
+      : mVisFlags(visflags), mSolidQueue(solidqueue), mTransQueue(transqueue)
+    { }
+
+    void operator()(Ogre::Entity *entity) const
+    {
+        if(mVisFlags != 0)
+            entity->setVisibilityFlags(mVisFlags);
+
+        unsigned int numsubs = entity->getNumSubEntities();
+        for(unsigned int i = 0;i < numsubs;++i)
         {
-            Ogre::SubEntity* subEnt = ent->getSubEntity(j);
-            subEnt->setRenderQueueGroup(subEnt->getMaterial()->isTransparent() ? transqueue : solidqueue);
+            Ogre::SubEntity* subEnt = entity->getSubEntity(i);
+            subEnt->setRenderQueueGroup(subEnt->getMaterial()->isTransparent() ? mTransQueue : mSolidQueue);
         }
     }
-    for(size_t i = 0;i < objlist.mParticles.size();i++)
+
+    void operator()(Ogre::ParticleSystem *psys) const
     {
-        Ogre::ParticleSystem *part = objlist.mParticles[i];
-        if(visflags != 0)
-            part->setVisibilityFlags(visflags);
+        if(mVisFlags != 0)
+            psys->setVisibilityFlags(mVisFlags);
         // TODO: Check particle material for actual transparency
-        part->setRenderQueueGroup(transqueue);
+        psys->setRenderQueueGroup(mTransQueue);
     }
+};
+
+void Animation::setRenderProperties(const NifOgre::ObjectList &objlist, Ogre::uint32 visflags, Ogre::uint8 solidqueue, Ogre::uint8 transqueue)
+{
+    std::for_each(objlist.mEntities.begin(), objlist.mEntities.end(),
+                  VisQueueSet(visflags, solidqueue, transqueue));
+    std::for_each(objlist.mParticles.begin(), objlist.mParticles.end(),
+                  VisQueueSet(visflags, solidqueue, transqueue));
 }
 
 

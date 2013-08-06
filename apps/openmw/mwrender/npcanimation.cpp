@@ -389,18 +389,25 @@ void NpcAnimation::updateParts(bool forceupdate)
     }
 }
 
+class SetObjectGroup {
+    int mGroup;
+
+public:
+    SetObjectGroup(int group) : mGroup(group) { }
+
+    void operator()(Ogre::MovableObject *obj) const
+    {
+        obj->getUserObjectBindings().setUserAny(Ogre::Any(mGroup));
+    }
+};
+
 NifOgre::ObjectList NpcAnimation::insertBoundedPart(const std::string &model, int group, const std::string &bonename)
 {
     NifOgre::ObjectList objects = NifOgre::Loader::createObjects(mSkelBase, bonename, mInsert, model);
     setRenderProperties(objects, (mViewMode == VM_FirstPerson) ? RV_FirstPerson : mVisibilityFlags, RQG_Main, RQG_Alpha);
 
-    for(size_t i = 0;i < objects.mEntities.size();i++)
-    {
-        Ogre::Entity *ent = objects.mEntities[i];
-        ent->getUserObjectBindings().setUserAny(Ogre::Any(group));
-    }
-    for(size_t i = 0;i < objects.mParticles.size();i++)
-        objects.mParticles[i]->getUserObjectBindings().setUserAny(Ogre::Any(group));
+    std::for_each(objects.mEntities.begin(), objects.mEntities.end(), SetObjectGroup(group));
+    std::for_each(objects.mParticles.begin(), objects.mParticles.end(), SetObjectGroup(group));
 
     if(objects.mSkelBase)
     {
@@ -576,7 +583,8 @@ void NpcAnimation::showWeapons(bool showWeapon)
         mWeapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
         if(mWeapon != inv.end()) // special case for weapons
         {
-            std::string mesh = MWWorld::Class::get(*mWeapon).getModel(*mWeapon);
+            MWWorld::Ptr weapon = *mWeapon;
+            std::string mesh = MWWorld::Class::get(weapon).getModel(weapon);
             addOrReplaceIndividualPart(ESM::PRT_Weapon, MWWorld::InventoryStore::Slot_CarriedRight, 1, mesh);
         }
     }
