@@ -1284,7 +1284,7 @@ namespace MWScript
             extensions.registerFunction ("iswerewolf", 'l', "", opcodeIsWerewolf, opcodeIsWerewolfExplicit);
 
             extensions.registerInstruction("becomewerewolf", "", opcodeBecomeWerewolf, opcodeBecomeWerewolfExplicit);
-            extensions.registerInstruction("undowerewolf", "", opcodeUndoWerewolf, opcodeBecomeWerewolfExplicit);
+            extensions.registerInstruction("undowerewolf", "", opcodeUndoWerewolf, opcodeUndoWerewolfExplicit);
         }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
