@@ -1861,9 +1861,7 @@ namespace MWWorld
 
         MWWorld::InventoryStore& invStore = MWWorld::Class::get(actor).getInventoryStore(actor);
         if (werewolf)
-            invStore.unequipAll();
-        else
-            invStore.autoEquip(actor);
+            invStore.unequipAll(actor);
 
         if (actor.getRefData().getHandle() == "player")
         {

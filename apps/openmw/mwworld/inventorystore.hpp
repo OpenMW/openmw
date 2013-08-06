@@ -78,7 +78,7 @@ namespace MWWorld
 
             ContainerStoreIterator getSlot (int slot);
 
-            void unequipAll();
+            void unequipAll(const MWWorld::Ptr& actor);
             ///< Unequip all currently equipped items.
 
             void autoEquip (const MWWorld::Ptr& npc);
