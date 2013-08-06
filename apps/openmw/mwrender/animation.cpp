@@ -16,6 +16,7 @@
 #include "../mwmechanics/character.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/fallback.hpp"
 
 namespace MWRender
 {
@@ -36,7 +37,13 @@ void Animation::AnimationValue::setValue(Ogre::Real)
 void Animation::destroyObjectList(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList &objects)
 {
     for(size_t i = 0;i < objects.mLights.size();i++)
-        sceneMgr->destroyLight(objects.mLights[i]);
+    {
+        Ogre::Light *light = objects.mLights[i];
+        // If parent is a scene node, it was created specifically for this light. Destroy it now.
+        if(light->isAttached() && !light->isParentTagPoint())
+            sceneMgr->destroySceneNode(light->getParentSceneNode());
+        sceneMgr->destroyLight(light);
+    }
     for(size_t i = 0;i < objects.mParticles.size();i++)
         sceneMgr->destroyParticleSystem(objects.mParticles[i]);
     for(size_t i = 0;i < objects.mEntities.size();i++)
@@ -254,6 +261,83 @@ void Animation::clearAnimSources()
     mNonAccumRoot = NULL;
 
     mAnimSources.clear();
+}
+
+
+void Animation::addExtraLight(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList &objlist, const ESM::Light *light)
+{
+    const MWWorld::Fallback *fallback = MWBase::Environment::get().getWorld()->getFallback();
+
+    const int clr = light->mData.mColor;
+    Ogre::ColourValue color(((clr >> 0) & 0xFF) / 255.0f,
+                            ((clr >> 8) & 0xFF) / 255.0f,
+                            ((clr >> 16) & 0xFF) / 255.0f);
+    const float radius = float(light->mData.mRadius);
+
+    if((light->mData.mFlags&ESM::Light::Negative))
+        color *= -1;
+
+    objlist.mLights.push_back(sceneMgr->createLight());
+    Ogre::Light *olight = objlist.mLights.back();
+    olight->setDiffuseColour(color);
+
+    bool interior = !(mPtr.isInCell() && mPtr.getCell()->mCell->isExterior());
+
+    // TODO: Create Controllers for these
+#if 0
+    // randomize lights animations
+    info.time = Ogre::Math::RangeRandom(-500, +500);
+    info.phase = Ogre::Math::RangeRandom(-500, +500);
+
+    if((light->mData.mFlags&ESM::Light::Flicker))
+        info.type = LT_Flicker;
+    else if((light->mData.mFlags&ESM::Light::FlickerSlow))
+        info.type = LT_FlickerSlow;
+    else if((light->mData.mFlags&ESM::Light::Pulse))
+        info.type = LT_Pulse;
+    else if((light->mData.mFlags&ESM::Light::PulseSlow))
+        info.type = LT_PulseSlow;
+    else
+        info.type = LT_Normal;
+#endif
+
+    bool quadratic = fallback->getFallbackBool("LightAttenuation_OutQuadInLin") ?
+                     !interior : fallback->getFallbackBool("LightAttenuation_UseQuadratic");
+
+    // with the standard 1 / (c + d*l + d*d*q) equation the attenuation factor never becomes zero,
+    // so we ignore lights if their attenuation falls below this factor.
+    const float threshold = 0.03;
+
+    if (!quadratic)
+    {
+        float r = radius * fallback->getFallbackFloat("LightAttenuation_LinearRadiusMult");
+        float attenuation = fallback->getFallbackFloat("LightAttenuation_LinearValue") / r;
+        float activationRange = 1.0f / (threshold * attenuation);
+        olight->setAttenuation(activationRange, 0, attenuation, 0);
+    }
+    else
+    {
+        float r = radius * fallback->getFallbackFloat("LightAttenuation_QuadraticRadiusMult");
+        float attenuation = fallback->getFallbackFloat("LightAttenuation_QuadraticValue") / std::pow(r, 2);
+        float activationRange = std::sqrt(1.0f / (threshold * attenuation));
+        olight->setAttenuation(activationRange, 0, 0, attenuation);
+    }
+
+    // If there's an AttachLight bone, attach the light to that, otherwise put it in the center,
+    if(objlist.mSkelBase && objlist.mSkelBase->getSkeleton()->hasBone("AttachLight"))
+        objlist.mSkelBase->attachObjectToBone("AttachLight", olight);
+    else
+    {
+        Ogre::AxisAlignedBox bounds = Ogre::AxisAlignedBox::BOX_NULL;
+        for(size_t i = 0;i < objlist.mEntities.size();i++)
+        {
+            Ogre::Entity *ent = objlist.mEntities[i];
+            bounds.merge(ent->getBoundingBox());
+        }
+
+        Ogre::SceneNode *node = mInsert->createChildSceneNode(bounds.getCenter());
+        node->attachObject(olight);
+    }
 }
 
 

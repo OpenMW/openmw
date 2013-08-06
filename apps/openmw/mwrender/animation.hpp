@@ -158,6 +158,9 @@ protected:
      * extension will be replaced with .kf. */
     void addAnimSource(const std::string &model);
 
+    /** Adds an additional light to the given object list using the specified ESM record. */
+    void addExtraLight(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList &objlist, const ESM::Light *light);
+
     static void destroyObjectList(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList &objects);
 
     static void setRenderProperties(const NifOgre::ObjectList &objlist, Ogre::uint32 visflags, Ogre::uint8 solidqueue, Ogre::uint8 transqueue);

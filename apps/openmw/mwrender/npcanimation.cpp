@@ -276,6 +276,14 @@ void NpcAnimation::updateParts(bool forceupdate)
             const ESM::Light *light = part.get<ESM::Light>()->mBase;
             addOrReplaceIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft,
                                        1, "meshes\\"+light->mModel);
+            for(size_t i = 0;i < sPartListSize;i++)
+            {
+                if(ESM::PRT_Shield == sPartList[i].type)
+                {
+                    addExtraLight(mInsert->getCreator(), mObjectParts[i], light);
+                    break;
+                }
+            }
         }
     }
 
