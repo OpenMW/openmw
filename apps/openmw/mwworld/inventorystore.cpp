@@ -110,6 +110,23 @@ void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& ite
     flagAsModified();
 }
 
+void MWWorld::InventoryStore::unequipAll()
+{
+    for (int slot=0; slot < MWWorld::InventoryStore::Slots; ++slot)
+    {
+        MWWorld::ContainerStoreIterator it = getSlot(slot);
+        if (it != end())
+        {
+            equip(slot, end());
+            std::string script = MWWorld::Class::get(*it).getScript(*it);
+
+            // Unset OnPCEquip Variable on item's script, if it has a script with that variable declared
+            if(script != "")
+                (*it).mRefData->getLocals().setVarByInt(script, "onpcequip", 0);
+        }
+    }
+}
+
 MWWorld::ContainerStoreIterator MWWorld::InventoryStore::getSlot (int slot)
 {
     if (slot<0 || slot>=static_cast<int> (mSlots.size()))
