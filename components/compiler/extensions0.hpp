@@ -3,79 +3,79 @@
 
 namespace Compiler
 {
-	class Extensions;
-	
-	void registerExtensions (Extensions& extensions, bool consoleOnly);
+    class Extensions;
 
-	namespace Ai
-	{
-		 void registerExtensions (Extensions& extensions);
-	}
+    void registerExtensions (Extensions& extensions, bool consoleOnly = false);
 
-	namespace Animation
-	{
-		void registerExtensions (Extensions& extensions);
-	}
-
-	namespace Cell
-	{
-		void registerExtensions (Extensions& extensions);
-	}
-
-	namespace Console
-	{
+    namespace Ai
+    {
         void registerExtensions (Extensions& extensions);
-	}
+    }
 
-	namespace Container
-	{
+    namespace Animation
+    {
         void registerExtensions (Extensions& extensions);
-	}
+    }
 
-	namespace Control
-	{
+    namespace Cell
+    {
         void registerExtensions (Extensions& extensions);
-	}
+    }
 
-	namespace Dialogue
-	{
+    namespace Console
+    {
         void registerExtensions (Extensions& extensions);
-	}
+    }
 
-	namespace Gui
-	{
+    namespace Container
+    {
+        void registerExtensions (Extensions& extensions);
+    }
+
+    namespace Control
+    {
+        void registerExtensions (Extensions& extensions);
+    }
+
+    namespace Dialogue
+    {
+        void registerExtensions (Extensions& extensions);
+    }
+
+    namespace Gui
+    {
         void registerExtensions (Extensions& extensions);	
-	}
+    }
 
-	namespace Misc
-	{
+    namespace Misc
+    {
         void registerExtensions (Extensions& extensions);
-	}
+    }
 
-	namespace Sky
-	{
+    namespace Sky
+    {
         void registerExtensions (Extensions& extensions);
-	}
+    }
 
-	namespace Sound
-	{
+    namespace Sound
+    {
         void registerExtensions (Extensions& extensions);
-	}
+    }
 
-	namespace Stats
-	{
+    namespace Stats
+    {
         void registerExtensions (Extensions& extensions);
-	}
+    }
 
-	namespace Transformation
-	{
+    namespace Transformation
+    {
         void registerExtensions (Extensions& extensions);
-	}
+    }
 
-	namespace User
-	{
+    namespace User
+    {
         void registerExtensions (Extensions& extensions);
-	}
+    }
 }
 
 #endif

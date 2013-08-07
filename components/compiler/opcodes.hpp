@@ -53,7 +53,7 @@ namespace Compiler
 
     namespace Animation
     {
-    	const int opcodeSkipAnim = 0x2000138;
+        const int opcodeSkipAnim = 0x2000138;
         const int opcodeSkipAnimExplicit = 0x2000139;
         const int opcodePlayAnim = 0x20006;
         const int opcodePlayAnimExplicit = 0x20007;
@@ -63,7 +63,7 @@ namespace Compiler
 
     namespace Cell
     {
-    	const int opcodeCellChanged = 0x2000000;
+        const int opcodeCellChanged = 0x2000000;
         const int opcodeCOC = 0x2000026;
         const int opcodeCOE = 0x200008e;
         const int opcodeGetInterior = 0x2000131;
@@ -80,7 +80,7 @@ namespace Compiler
 
     namespace Container
     {
-    	const int opcodeAddItem = 0x2000076;
+        const int opcodeAddItem = 0x2000076;
         const int opcodeAddItemExplicit = 0x2000077;
         const int opcodeGetItemCount = 0x2000078;
         const int opcodeGetItemCountExplicit = 0x2000079;
@@ -100,11 +100,11 @@ namespace Compiler
 
     namespace Control
     {
-    	const int numberOfControls = 7;
+        const int numberOfControls = 7;
 
-    	extern const char *controls[numberOfControls];
+        extern const char *controls[numberOfControls];
 
-    	const int opcodeEnable = 0x200007e;
+        const int opcodeEnable = 0x200007e;
         const int opcodeDisable = 0x2000085;
         const int opcodeToggleCollision = 0x2000130;
         const int opcodeClearForceRun = 0x2000154;
@@ -126,7 +126,7 @@ namespace Compiler
 
     namespace Dialogue
     {
-    	const int opcodeJournal = 0x2000133;
+        const int opcodeJournal = 0x2000133;
         const int opcodeSetJournalIndex = 0x2000134;
         const int opcodeGetJournalIndex = 0x2000135;
         const int opcodeAddTopic = 0x200013a;
@@ -146,7 +146,7 @@ namespace Compiler
 
     namespace Gui
     {
-    	const int opcodeEnableBirthMenu = 0x200000e;
+        const int opcodeEnableBirthMenu = 0x200000e;
         const int opcodeEnableClassMenu = 0x200000f;
         const int opcodeEnableNameMenu = 0x2000010;
         const int opcodeEnableRaceMenu = 0x2000011;
@@ -166,7 +166,7 @@ namespace Compiler
 
     namespace Misc
     {
-    	const int opcodeXBox = 0x200000c;
+        const int opcodeXBox = 0x200000c;
         const int opcodeOnActivate = 0x200000d;
         const int opcodeActivate = 0x2000075;
         const int opcodeLock = 0x20004;
@@ -223,7 +223,7 @@ namespace Compiler
 
     namespace Sky
     {
-    	const int opcodeToggleSky = 0x2000021;
+        const int opcodeToggleSky = 0x2000021;
         const int opcodeTurnMoonWhite = 0x2000022;
         const int opcodeTurnMoonRed = 0x2000023;
         const int opcodeGetMasserPhase = 0x2000024;
@@ -235,7 +235,7 @@ namespace Compiler
 
     namespace Sound
     {
-    	const int opcodeSay = 0x2000001;
+        const int opcodeSay = 0x2000001;
         const int opcodeSayDone = 0x2000002;
         const int opcodeStreamMusic = 0x2000003;
         const int opcodePlaySound = 0x2000004;
@@ -259,11 +259,11 @@ namespace Compiler
 
     namespace Stats
     {
-    	const int numberOfAttributes = 8;
+        const int numberOfAttributes = 8;
         const int numberOfDynamics = 3;
         const int numberOfSkills = 27;
 
-    	const int opcodeGetAttribute = 0x2000027;
+        const int opcodeGetAttribute = 0x2000027;
         const int opcodeGetAttributeExplicit = 0x200002f;
         const int opcodeSetAttribute = 0x2000037;
         const int opcodeSetAttributeExplicit = 0x200003f;
@@ -353,7 +353,7 @@ namespace Compiler
 
     namespace Transformation
     {
-    	const int opcodeSetScale = 0x2000164;
+        const int opcodeSetScale = 0x2000164;
         const int opcodeSetScaleExplicit = 0x2000165;
         const int opcodeSetAngle = 0x2000166;
         const int opcodeSetAngleExplicit = 0x2000167;
@@ -395,7 +395,7 @@ namespace Compiler
 
     namespace User
     {
-    	const int opcodeUser1 = 0x200016c;
+        const int opcodeUser1 = 0x200016c;
         const int opcodeUser2 = 0x200016d;
         const int opcodeUser3 = 0x200016e;
         const int opcodeUser3Explicit = 0x200016f;

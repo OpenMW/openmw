@@ -397,8 +397,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
       mTranslationDataStorage.loadTranslationData(mFileCollections, mMaster[i]);
 
     // Create window manager - this manages all the MW-specific GUI windows
-    // before compiler reorganization the following line was "MWScript::registerExtensions (mExtensions);"
-    Compiler::registerExtensions (mExtensions, false); 
+    Compiler::registerExtensions (mExtensions); 
 
     mEnvironment.setWindowManager (new MWGui::WindowManager(
         mExtensions, mFpsLevel, mOgre, mCfgMgr.getLogPath().string() + std::string("/"),

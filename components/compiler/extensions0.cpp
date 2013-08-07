@@ -5,9 +5,9 @@
 
 namespace Compiler
 {
-	void registerExtensions (Extensions& extensions, bool consoleOnly)
+    void registerExtensions (Extensions& extensions, bool consoleOnly)
     {
-    	Ai::registerExtensions (extensions);
+        Ai::registerExtensions (extensions);
         Animation::registerExtensions (extensions);
         Cell::registerExtensions (extensions);
         Container::registerExtensions (extensions);
@@ -28,8 +28,8 @@ namespace Compiler
     }
 
     namespace Ai
-	{
-		void registerExtensions (Extensions& extensions)
+    {
+        void registerExtensions (Extensions& extensions)
         {
             extensions.registerInstruction ("aiactivate", "c/l", opcodeAIActivate,
                 opcodeAIActivateExplicit);
@@ -64,21 +64,21 @@ namespace Compiler
             extensions.registerFunction ("getflee", 'l', "", opcodeGetFlee, opcodeGetFleeExplicit);
             extensions.registerFunction ("getalarm", 'l', "", opcodeGetAlarm, opcodeGetAlarmExplicit);
         }
-	}
+    }
 
-	namespace Animation
-	{
-		void registerExtensions (Extensions& extensions)
+    namespace Animation
+    {
+        void registerExtensions (Extensions& extensions)
         {
             extensions.registerInstruction ("skipanim", "", opcodeSkipAnim, opcodeSkipAnimExplicit);
             extensions.registerInstruction ("playgroup", "c/l", opcodePlayAnim, opcodePlayAnimExplicit);
             extensions.registerInstruction ("loopgroup", "cl/l", opcodeLoopAnim, opcodeLoopAnimExplicit);
         }
-	}
+    }
 
-	namespace Cell
-	{
-		void registerExtensions (Extensions& extensions)
+    namespace Cell
+    {
+        void registerExtensions (Extensions& extensions)
         {
             extensions.registerFunction ("cellchanged", 'l', "", opcodeCellChanged);
             extensions.registerInstruction ("coc", "S", opcodeCOC);
@@ -91,19 +91,19 @@ namespace Compiler
             extensions.registerFunction ("getpccell", 'l', "c", opcodeGetPCCell);
             extensions.registerFunction ("getwaterlevel", 'f', "", opcodeGetWaterLevel);
         }
-	}
+    }
 
-	namespace Console
-	{
-		void registerExtensions (Extensions& extensions)
+    namespace Console
+    {
+        void registerExtensions (Extensions& extensions)
         {
 
         }
-	}
+    }
 
-	namespace Container
-	{
-		void registerExtensions (Extensions& extensions)
+    namespace Container
+    {
+        void registerExtensions (Extensions& extensions)
         {
             extensions.registerInstruction ("additem", "cl", opcodeAddItem, opcodeAddItemExplicit);
             extensions.registerFunction ("getitemcount", 'l', "c", opcodeGetItemCount,
@@ -116,11 +116,11 @@ namespace Compiler
             extensions.registerFunction ("hassoulgem", 'l', "c", opcodeHasSoulGem, opcodeHasSoulGemExplicit);
             extensions.registerFunction ("getweapontype", 'l', "", opcodeGetWeaponType, opcodeGetWeaponTypeExplicit);
         }
-	}
+    }
 
-	namespace Control
-	{
-		void registerExtensions (Extensions& extensions)
+    namespace Control
+    {
+        void registerExtensions (Extensions& extensions)
         {
             std::string enable ("enable");
             std::string disable ("disable");
@@ -149,11 +149,11 @@ namespace Compiler
             extensions.registerFunction ("getforcerun", 'l', "", opcodeGetForceRun, opcodeGetForceRunExplicit);
             extensions.registerFunction ("getforcesneak", 'l', "", opcodeGetForceSneak, opcodeGetForceSneakExplicit);
         }
-	}
+    }
 
-	namespace Dialogue
-	{
-		void registerExtensions (Extensions& extensions)
+    namespace Dialogue
+    {
+        void registerExtensions (Extensions& extensions)
         {
             extensions.registerInstruction ("journal", "cl", opcodeJournal);
             extensions.registerInstruction ("setjournalindex", "cl", opcodeSetJournalIndex);
@@ -173,18 +173,18 @@ namespace Compiler
             extensions.registerFunction("samefaction", 'l', "", opcodeSameFaction,
                 opcodeSameFactionExplicit);
         }
-	}
+    }
 
-	namespace Gui
-	{
-		void registerExtensions (Extensions& extensions)
+    namespace Gui
+    {
+        void registerExtensions (Extensions& extensions)
         {
             extensions.registerInstruction ("enablebirthmenu", "", opcodeEnableBirthMenu);
             extensions.registerInstruction ("enableclassmenu", "", opcodeEnableClassMenu);
             extensions.registerInstruction ("enablenamemenu", "", opcodeEnableNameMenu);
             extensions.registerInstruction ("enableracemenu", "", opcodeEnableRaceMenu);
             extensions.registerInstruction ("enablestatreviewmenu", "", 
-            	opcodeEnableStatsReviewMenu);
+                opcodeEnableStatsReviewMenu);
 
             extensions.registerInstruction ("enableinventorymenu", "", opcodeEnableInventoryMenu);
             extensions.registerInstruction ("enablemagicmenu", "", opcodeEnableMagicMenu);
@@ -207,11 +207,11 @@ namespace Compiler
             extensions.registerInstruction ("showmap", "S", opcodeShowMap);
             extensions.registerInstruction ("fillmap", "", opcodeFillMap);
         }
-	}
+    }
 
-	namespace Misc
-	{
-		void registerExtensions (Extensions& extensions)
+    namespace Misc
+    {
+        void registerExtensions (Extensions& extensions)
         {
             extensions.registerFunction ("xbox", 'l', "", opcodeXBox);
             extensions.registerFunction ("onactivate", 'l', "", opcodeOnActivate);
@@ -257,11 +257,11 @@ namespace Compiler
             extensions.registerInstruction ("disableteleporting", "", opcodeDisableTeleporting);
             extensions.registerInstruction ("enableteleporting", "", opcodeEnableTeleporting);
         }
-	}
+    }
 
-	namespace Sky
-	{
-		void registerExtensions (Extensions& extensions)
+    namespace Sky
+    {
+        void registerExtensions (Extensions& extensions)
         {
             extensions.registerInstruction ("togglesky", "", opcodeToggleSky);
             extensions.registerInstruction ("ts", "", opcodeToggleSky);
@@ -273,11 +273,11 @@ namespace Compiler
             extensions.registerFunction ("getcurrentweather", 'l', "", opcodeGetCurrentWeather);
             extensions.registerInstruction ("modregion", "S/llllllllll", opcodeModRegion);
         }
-	}
+    }
 
-	namespace Sound
-	{
-		void registerExtensions (Extensions& extensions)
+    namespace Sound
+    {
+        void registerExtensions (Extensions& extensions)
         {
             extensions.registerInstruction ("say", "SS", opcodeSay, opcodeSayExplicit);
             extensions.registerFunction ("saydone", 'l', "", opcodeSayDone, opcodeSayDoneExplicit);
@@ -297,11 +297,11 @@ namespace Compiler
             extensions.registerFunction ("getsoundplaying", 'l', "c", opcodeGetSoundPlaying,
                 opcodeGetSoundPlayingExplicit);
         }
-	}
+    }
 
-	namespace Stats
-	{
-		void registerExtensions (Extensions& extensions)
+    namespace Stats
+    {
+        void registerExtensions (Extensions& extensions)
         {
             static const char *attributes[numberOfAttributes] =
             {
@@ -419,11 +419,11 @@ namespace Compiler
 
             extensions.registerFunction ("iswerewolf", 'l', "", opcodeIsWerewolf, opcodeIsWerewolfExplicit);
         }
-	}
+    }
 
-	namespace Transformation
-	{
-		void registerExtensions (Extensions& extensions)
+    namespace Transformation
+    {
+        void registerExtensions (Extensions& extensions)
         {
             extensions.registerInstruction("setscale","f",opcodeSetScale,opcodeSetScaleExplicit);
             extensions.registerFunction("getscale",'f',"",opcodeGetScale,opcodeGetScaleExplicit);
@@ -446,16 +446,16 @@ namespace Compiler
             extensions.registerInstruction("moveworld","cf",opcodeMoveWorld,opcodeMoveWorldExplicit);
             extensions.registerFunction("getstartingangle",'f',"c",opcodeGetStartingAngle,opcodeGetStartingAngleExplicit);
         }
-	}
+    }
 
-	namespace User
-	{
-		void registerExtensions (Extensions& extensions)
+    namespace User
+    {
+        void registerExtensions (Extensions& extensions)
         {
             extensions.registerInstruction ("user1", "", opcodeUser1);
             extensions.registerInstruction ("user2", "", opcodeUser2);
             extensions.registerInstruction ("user3", "", opcodeUser3, opcodeUser3);
             extensions.registerInstruction ("user4", "", opcodeUser4, opcodeUser4);
         }
-	}
+    }
 }
