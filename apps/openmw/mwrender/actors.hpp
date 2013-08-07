@@ -27,6 +27,8 @@ namespace MWRender
         CellSceneNodeMap mCellSceneNodes;
         PtrAnimationMap mAllActors;
 
+        void insertBegin(const MWWorld::Ptr &ptr);
+
     public:
         Actors(OEngine::Render::OgreRenderer& _rend, MWRender::RenderingManager* rendering)
             : mRend(_rend)
@@ -36,7 +38,7 @@ namespace MWRender
         ~Actors();
 
         void setRootNode(Ogre::SceneNode* root);
-        void insertBegin (const MWWorld::Ptr& ptr);
+
         void insertNPC(const MWWorld::Ptr& ptr, MWWorld::InventoryStore& inv);
         void insertCreature (const MWWorld::Ptr& ptr);
         void insertActivator (const MWWorld::Ptr& ptr);
