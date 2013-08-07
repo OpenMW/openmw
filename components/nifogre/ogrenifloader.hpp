@@ -43,6 +43,7 @@ struct ObjectList {
     Ogre::Entity *mSkelBase;
     std::vector<Ogre::Entity*> mEntities;
     std::vector<Ogre::ParticleSystem*> mParticles;
+    std::vector<Ogre::Light*> mLights;
 
     std::map<int,TextKeyMap> mTextKeys;
 

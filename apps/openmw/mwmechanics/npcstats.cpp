@@ -32,6 +32,8 @@ MWMechanics::NpcStats::NpcStats()
 , mWerewolfKills (0)
 , mProfit(0)
 , mAttackStrength(0.0f)
+, mTimeToStartDrowning(20.0)
+, mLastDrowningHit(0)
 {
     mSkillIncreases.resize (ESM::Attribute::Length);
     for (int i=0; i<ESM::Attribute::Length; ++i)
@@ -381,4 +383,24 @@ int MWMechanics::NpcStats::getProfit() const
 void MWMechanics::NpcStats::modifyProfit(int diff)
 {
     mProfit += diff;
+}
+
+float MWMechanics::NpcStats::getTimeToStartDrowning()
+{
+    return mTimeToStartDrowning;
+}
+void MWMechanics::NpcStats::setTimeToStartDrowning(float time)
+{
+    assert(time>=0 && time<=20);
+    mTimeToStartDrowning=time;
+}
+
+float MWMechanics::NpcStats::getLastDrowningHitTime()
+{
+    return mLastDrowningHit;
+}
+
+void MWMechanics::NpcStats::setLastDrowningHitTime(float time)
+{
+    mLastDrowningHit=time;
 }

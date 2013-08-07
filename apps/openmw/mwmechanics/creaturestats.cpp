@@ -110,7 +110,7 @@ namespace MWMechanics
         return mMagicEffects;
     }
 
-    const bool &CreatureStats::getAttackingOrSpell() const
+    bool CreatureStats::getAttackingOrSpell() const
     {
         return mAttackingOrSpell;
     }
@@ -216,7 +216,7 @@ namespace MWMechanics
         mMagicEffects = effects;
     }
 
-    void CreatureStats::setAttackingOrSpell(const bool &attackingOrSpell)
+    void CreatureStats::setAttackingOrSpell(bool attackingOrSpell)
     {
         mAttackingOrSpell = attackingOrSpell;
     }

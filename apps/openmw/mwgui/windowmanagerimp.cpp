@@ -599,6 +599,11 @@ namespace MWGui
         mStatsWindow->setValue (id, value);
     }
 
+    void WindowManager::setDrowningTimeLeft (float time)
+    {
+        mHud->setDrowningTimeLeft(time);
+    }
+
     void WindowManager::setPlayerClass (const ESM::Class &class_)
     {
         mStatsWindow->setValue("class", class_.mName);
@@ -785,6 +790,11 @@ namespace MWGui
     {
         mMap->setPlayerDir(x,y);
         mHud->setPlayerDir(x,y);
+    }
+
+    void WindowManager::setDrowningBarVisibility(bool visible)
+    {
+        mHud->setDrowningBarVisible(visible);
     }
 
     void WindowManager::setHMSVisibility(bool visible)

@@ -59,7 +59,7 @@ namespace MWMechanics
 
         const MagicEffects & getMagicEffects() const;
 
-        const bool & getAttackingOrSpell() const;
+        bool getAttackingOrSpell() const;
 
         int getLevel() const;
 
@@ -90,7 +90,7 @@ namespace MWMechanics
 
         void setMagicEffects(const MagicEffects &effects);
 
-        void setAttackingOrSpell(const bool &attackingOrSpell);
+        void setAttackingOrSpell(bool attackingOrSpell);
 
         enum AttackType
         {
