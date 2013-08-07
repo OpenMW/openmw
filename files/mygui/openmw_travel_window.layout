@@ -15,8 +15,8 @@
         </Widget>
 
 
-        <Widget type="Widget" skin="MW_Box" position="6 31 430 225" align="ALIGN_LEFT ALIGN_STRETCH">
-            <Widget type="ScrollView" skin="MW_ScrollView" position="4 4 422 217" align="ALIGN_LEFT ALIGN_TOP ALIGN_STRETCH" name="DestinationsView">
+        <Widget type="Widget" skin="MW_Box" position="6 31 430 225" align="Left Stretch">
+            <Widget type="ScrollView" skin="MW_ScrollView" position="4 4 422 217" align="Left Top Stretch" name="DestinationsView">
                 <Property key="CanvasAlign" value="Left"/>
             </Widget>
         </Widget>
