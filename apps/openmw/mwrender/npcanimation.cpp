@@ -126,9 +126,6 @@ void NpcAnimation::updateNpcBase()
         mHairModel = "meshes\\" + store.get<ESM::BodyPart>().find("WerewolfHair")->mModel;
     }
 
-    mBodyPrefix = "b_n_" + mNpc->mRace;
-    Misc::StringUtils::toLower(mBodyPrefix);
-
     bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
     std::string smodel = (mViewMode != VM_FirstPerson) ?
                          (!isWerewolf ? !isBeast ? "meshes\\base_anim.nif"
@@ -144,7 +141,7 @@ void NpcAnimation::updateNpcBase()
         addAnimSource(smodel);
         if(!isWerewolf)
         {
-            if(mBodyPrefix.find("argonian") != std::string::npos)
+            if(Misc::StringUtils::lowerCase(mNpc->mRace).find("argonian") != std::string::npos)
                 addAnimSource("meshes\\argonian_swimkna.nif");
             else if(!mNpc->isMale() && !isBeast)
                 addAnimSource("meshes\\base_anim_female.nif");
