@@ -65,7 +65,7 @@ namespace MWMechanics
         if(boost::iequals(mSoulGemPtr.get<ESM::Miscellaneous>()->mBase->mId, "Misc_SoulGem_Azura"))
         {
             MWWorld::ManualRef azura (MWBase::Environment::get().getWorld()->getStore(), "Misc_SoulGem_Azura");
-            MWWorld::Class::get (player).getContainerStore (player).add (azura.getPtr());
+            MWWorld::Class::get (player).getContainerStore (player).add (azura.getPtr(), player);
         }
 
         if(mSelfEnchanting)
@@ -93,7 +93,7 @@ namespace MWMechanics
         MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), mOldItemId);
         ref.getPtr().getRefData().setCount (mOldItemCount-1);
 
-        MWWorld::Class::get (player).getContainerStore (player).add (ref.getPtr());
+        MWWorld::Class::get (player).getContainerStore (player).add (ref.getPtr(), player);
         if(!mSelfEnchanting)
             payForEnchantment();
 

@@ -76,7 +76,7 @@ void ContainerItemModel::copyItem (const ItemStack& item, size_t count)
     const MWWorld::Ptr& source = mItemSources[mItemSources.size()-1];
     int origCount = item.mBase.getRefData().getCount();
     item.mBase.getRefData().setCount(count);
-    MWWorld::ContainerStoreIterator it = MWWorld::Class::get(source).getContainerStore(source).add(item.mBase);
+    MWWorld::ContainerStoreIterator it = MWWorld::Class::get(source).getContainerStore(source).add(item.mBase, source);
     if (*it != item.mBase)
         item.mBase.getRefData().setCount(origCount);
     else

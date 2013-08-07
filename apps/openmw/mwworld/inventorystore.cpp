@@ -64,6 +64,22 @@ MWWorld::InventoryStore& MWWorld::InventoryStore::operator= (const InventoryStor
     return *this;
 }
 
+MWWorld::ContainerStoreIterator MWWorld::InventoryStore::add(const Ptr& itemPtr, const Ptr& actorPtr)
+{
+    const MWWorld::ContainerStoreIterator& retVal = MWWorld::ContainerStore::add(itemPtr, actorPtr);
+
+    // Auto-equip items if an armor/clothing item is added, but not for the player nor werewolves
+    if ((actorPtr.getRefData().getHandle() != "player")
+            && !(MWWorld::Class::get(actorPtr).getNpcStats(actorPtr).isWerewolf()))
+    {
+        std::string type = itemPtr.getTypeName();
+        if ((type == typeid(ESM::Armor).name()) || (type == typeid(ESM::Clothing).name()))
+            autoEquip(actorPtr);
+    }
+
+    return retVal;
+}
+
 void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& iterator)
 {
     if (slot<0 || slot>=static_cast<int> (mSlots.size()))

@@ -287,7 +287,7 @@ void MWMechanics::Alchemy::addPotion (const std::string& name)
     }
     
     MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), record->mId);
-    MWWorld::Class::get (mAlchemist).getContainerStore (mAlchemist).add (ref.getPtr());
+    MWWorld::Class::get (mAlchemist).getContainerStore (mAlchemist).add (ref.getPtr(), mAlchemist);
 }
 
 void MWMechanics::Alchemy::increaseSkill()

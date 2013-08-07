@@ -65,7 +65,7 @@ namespace MWWorld
 
             ContainerStoreIterator end();
 
-            ContainerStoreIterator add (const Ptr& ptr);
+            virtual ContainerStoreIterator add (const Ptr& itemPtr, const Ptr& actorPtr);
             ///< Add the item pointed to by \a ptr to this container. (Stacks automatically if needed)
             ///
             /// \note The item pointed to is not required to exist beyond this function call.
