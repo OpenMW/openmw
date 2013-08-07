@@ -7,6 +7,8 @@
 
 #include <MyGUI_WidgetManager.h>
 
+#include <components/compiler/registerextensions.hpp>
+
 #include <components/bsa/bsa_archive.hpp>
 #include <components/files/configurationmanager.hpp>
 #include <components/translation/translation.hpp>
@@ -395,7 +397,8 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
       mTranslationDataStorage.loadTranslationData(mFileCollections, mMaster[i]);
 
     // Create window manager - this manages all the MW-specific GUI windows
-    MWScript::registerExtensions (mExtensions);
+    // MWScript::registerExtensions (mExtensions); // WHY DOES THIS NOT HAVE THE BOOL PARAMETER?
+    Compiler::registerExtensions (mExtensions, false);
 
     mEnvironment.setWindowManager (new MWGui::WindowManager(
         mExtensions, mFpsLevel, mOgre, mCfgMgr.getLogPath().string() + std::string("/"),
@@ -478,7 +481,7 @@ void OMW::Engine::go()
     assert (!mOgre);
 
     Settings::Manager settings;
-	std::string settingspath;
+    std::string settingspath;
 
     settingspath = loadSettings (settings);
 

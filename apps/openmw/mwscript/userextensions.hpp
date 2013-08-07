@@ -16,8 +16,6 @@ namespace MWScript
     /// \brief Temporary script functionality limited to the console
     namespace User
     {
-        void registerExtensions (Compiler::Extensions& extensions);
-
         void installOpcodes (Interpreter::Interpreter& interpreter);
     }
 }

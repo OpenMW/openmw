@@ -4,6 +4,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include <components/compiler/extensions.hpp>
+#include <components/compiler/opcodes.hpp>
 
 #include <components/interpreter/interpreter.hpp>
 #include <components/interpreter/runtime.hpp>
@@ -150,90 +151,42 @@ namespace MWScript
         };
 
 
-        const int opcodeEnableBirthMenu = 0x200000e;
-        const int opcodeEnableClassMenu = 0x200000f;
-        const int opcodeEnableNameMenu = 0x2000010;
-        const int opcodeEnableRaceMenu = 0x2000011;
-        const int opcodeEnableStatsReviewMenu = 0x2000012;
-        const int opcodeEnableInventoryMenu = 0x2000013;
-        const int opcodeEnableMagicMenu = 0x2000014;
-        const int opcodeEnableMapMenu = 0x2000015;
-        const int opcodeEnableStatsMenu = 0x2000016;
-        const int opcodeEnableRest = 0x2000017;
-        const int opcodeShowRestMenu = 0x2000018;
-        const int opcodeGetButtonPressed = 0x2000137;
-        const int opcodeToggleFogOfWar = 0x2000145;
-        const int opcodeToggleFullHelp = 0x2000151;
-        const int opcodeShowMap = 0x20001a0;
-        const int opcodeFillMap = 0x20001a1;
-
-        void registerExtensions (Compiler::Extensions& extensions)
-        {
-            extensions.registerInstruction ("enablebirthmenu", "", opcodeEnableBirthMenu);
-            extensions.registerInstruction ("enableclassmenu", "", opcodeEnableClassMenu);
-            extensions.registerInstruction ("enablenamemenu", "", opcodeEnableNameMenu);
-            extensions.registerInstruction ("enableracemenu", "", opcodeEnableRaceMenu);
-            extensions.registerInstruction ("enablestatreviewmenu", "",
-opcodeEnableStatsReviewMenu);
-
-            extensions.registerInstruction ("enableinventorymenu", "", opcodeEnableInventoryMenu);
-            extensions.registerInstruction ("enablemagicmenu", "", opcodeEnableMagicMenu);
-            extensions.registerInstruction ("enablemapmenu", "", opcodeEnableMapMenu);
-            extensions.registerInstruction ("enablestatsmenu", "", opcodeEnableStatsMenu);
-
-            extensions.registerInstruction ("enablerest", "", opcodeEnableRest);
-            extensions.registerInstruction ("enablelevelupmenu", "", opcodeEnableRest);
-
-            extensions.registerInstruction ("showrestmenu", "", opcodeShowRestMenu);
-
-            extensions.registerFunction ("getbuttonpressed", 'l', "", opcodeGetButtonPressed);
-
-            extensions.registerInstruction ("togglefogofwar", "", opcodeToggleFogOfWar);
-            extensions.registerInstruction ("tfow", "", opcodeToggleFogOfWar);
-
-            extensions.registerInstruction ("togglefullhelp", "", opcodeToggleFullHelp);
-            extensions.registerInstruction ("tfh", "", opcodeToggleFullHelp);
-
-            extensions.registerInstruction ("showmap", "S", opcodeShowMap);
-            extensions.registerInstruction ("fillmap", "", opcodeFillMap);
-        }
-
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
-            interpreter.installSegment5 (opcodeEnableBirthMenu,
+            interpreter.installSegment5 (Compiler::Gui::opcodeEnableBirthMenu,
                 new OpShowDialogue (MWGui::GM_Birth));
-            interpreter.installSegment5 (opcodeEnableClassMenu,
+            interpreter.installSegment5 (Compiler::Gui::opcodeEnableClassMenu,
                 new OpShowDialogue (MWGui::GM_Class));
-            interpreter.installSegment5 (opcodeEnableNameMenu,
+            interpreter.installSegment5 (Compiler::Gui::opcodeEnableNameMenu,
                 new OpShowDialogue (MWGui::GM_Name));
-            interpreter.installSegment5 (opcodeEnableRaceMenu,
+            interpreter.installSegment5 (Compiler::Gui::opcodeEnableRaceMenu,
                 new OpShowDialogue (MWGui::GM_Race));
-            interpreter.installSegment5 (opcodeEnableStatsReviewMenu,
+            interpreter.installSegment5 (Compiler::Gui::opcodeEnableStatsReviewMenu,
                 new OpShowDialogue (MWGui::GM_Review));
 
-            interpreter.installSegment5 (opcodeEnableInventoryMenu,
+            interpreter.installSegment5 (Compiler::Gui::opcodeEnableInventoryMenu,
                 new OpEnableWindow (MWGui::GW_Inventory));
-            interpreter.installSegment5 (opcodeEnableMagicMenu,
+            interpreter.installSegment5 (Compiler::Gui::opcodeEnableMagicMenu,
                 new OpEnableWindow (MWGui::GW_Magic));
-            interpreter.installSegment5 (opcodeEnableMapMenu,
+            interpreter.installSegment5 (Compiler::Gui::opcodeEnableMapMenu,
                 new OpEnableWindow (MWGui::GW_Map));
-            interpreter.installSegment5 (opcodeEnableStatsMenu,
+            interpreter.installSegment5 (Compiler::Gui::opcodeEnableStatsMenu,
                 new OpEnableWindow (MWGui::GW_Stats));
 
-            interpreter.installSegment5 (opcodeEnableRest,
+            interpreter.installSegment5 (Compiler::Gui::opcodeEnableRest,
                 new OpEnableRest ());
 
-            interpreter.installSegment5 (opcodeShowRestMenu,
+            interpreter.installSegment5 (Compiler::Gui::opcodeShowRestMenu,
                 new OpShowDialogue (MWGui::GM_RestBed));
 
-            interpreter.installSegment5 (opcodeGetButtonPressed, new OpGetButtonPressed);
+            interpreter.installSegment5 (Compiler::Gui::opcodeGetButtonPressed, new OpGetButtonPressed);
 
-            interpreter.installSegment5 (opcodeToggleFogOfWar, new OpToggleFogOfWar);
+            interpreter.installSegment5 (Compiler::Gui::opcodeToggleFogOfWar, new OpToggleFogOfWar);
 
-            interpreter.installSegment5 (opcodeToggleFullHelp, new OpToggleFullHelp);
+            interpreter.installSegment5 (Compiler::Gui::opcodeToggleFullHelp, new OpToggleFullHelp);
 
-            interpreter.installSegment5 (opcodeShowMap, new OpShowMap);
-            interpreter.installSegment5 (opcodeFillMap, new OpFillMap);
+            interpreter.installSegment5 (Compiler::Gui::opcodeShowMap, new OpShowMap);
+            interpreter.installSegment5 (Compiler::Gui::opcodeFillMap, new OpFillMap);
         }
     }
 }

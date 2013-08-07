@@ -10,6 +10,7 @@
 #include "../mwworld/esmstore.hpp"
 
 #include <components/compiler/extensions.hpp>
+#include <components/compiler/opcodes.hpp>
 
 #include <components/interpreter/interpreter.hpp>
 #include <components/interpreter/runtime.hpp>
@@ -1056,336 +1057,125 @@ namespace MWScript
                 }
         };
 
-        const int numberOfAttributes = 8;
-
-        const int opcodeGetAttribute = 0x2000027;
-        const int opcodeGetAttributeExplicit = 0x200002f;
-        const int opcodeSetAttribute = 0x2000037;
-        const int opcodeSetAttributeExplicit = 0x200003f;
-        const int opcodeModAttribute = 0x2000047;
-        const int opcodeModAttributeExplicit = 0x200004f;
-
-        const int numberOfDynamics = 3;
-
-        const int opcodeGetDynamic = 0x2000057;
-        const int opcodeGetDynamicExplicit = 0x200005a;
-        const int opcodeSetDynamic = 0x200005d;
-        const int opcodeSetDynamicExplicit = 0x2000060;
-        const int opcodeModDynamic = 0x2000063;
-        const int opcodeModDynamicExplicit = 0x2000066;
-        const int opcodeModCurrentDynamic = 0x2000069;
-        const int opcodeModCurrentDynamicExplicit = 0x200006c;
-        const int opcodeGetDynamicGetRatio = 0x200006f;
-        const int opcodeGetDynamicGetRatioExplicit = 0x2000072;
-
-        const int numberOfSkills = 27;
-
-        const int opcodeGetSkill = 0x200008e;
-        const int opcodeGetSkillExplicit = 0x20000a9;
-        const int opcodeSetSkill = 0x20000c4;
-        const int opcodeSetSkillExplicit = 0x20000df;
-        const int opcodeModSkill = 0x20000fa;
-        const int opcodeModSkillExplicit = 0x2000115;
-
-        const int opcodeGetPCCrimeLevel = 0x20001ec;
-        const int opcodeSetPCCrimeLevel = 0x20001ed;
-        const int opcodeModPCCrimeLevel = 0x20001ee;
-
-        const int opcodeAddSpell = 0x2000147;
-        const int opcodeAddSpellExplicit = 0x2000148;
-        const int opcodeRemoveSpell = 0x2000149;
-        const int opcodeRemoveSpellExplicit = 0x200014a;
-        const int opcodeGetSpell = 0x200014b;
-        const int opcodeGetSpellExplicit = 0x200014c;
-
-        const int opcodePCRaiseRank = 0x2000b;
-        const int opcodePCLowerRank = 0x2000c;
-        const int opcodePCJoinFaction = 0x2000d;
-        const int opcodeGetPCRank = 0x2000e;
-        const int opcodeGetPCRankExplicit = 0x2000f;
-        const int opcodeModDisposition = 0x200014d;
-        const int opcodeModDispositionExplicit = 0x200014e;
-        const int opcodeSetDisposition = 0x20001a4;
-        const int opcodeSetDispositionExplicit = 0x20001a5;
-        const int opcodeGetDisposition = 0x20001a6;
-        const int opcodeGetDispositionExplicit = 0x20001a7;
-
-        const int opcodeGetLevel = 0x200018c;
-        const int opcodeGetLevelExplicit = 0x200018d;
-        const int opcodeSetLevel = 0x200018e;
-        const int opcodeSetLevelExplicit = 0x200018f;
-
-        const int opcodeGetDeadCount = 0x20001a3;
-
-        const int opcodeGetPCFacRep = 0x20012;
-        const int opcodeGetPCFacRepExplicit = 0x20013;
-        const int opcodeSetPCFacRep = 0x20014;
-        const int opcodeSetPCFacRepExplicit = 0x20015;
-        const int opcodeModPCFacRep = 0x20016;
-        const int opcodeModPCFacRepExplicit = 0x20017;
-
-        const int opcodeGetCommonDisease = 0x20001a8;
-        const int opcodeGetCommonDiseaseExplicit = 0x20001a9;
-        const int opcodeGetBlightDisease = 0x20001aa;
-        const int opcodeGetBlightDiseaseExplicit = 0x20001ab;
-
-        const int opcodeGetRace = 0x20001d9;
-        const int opcodeGetRaceExplicit = 0x20001da;
-
-        const int opcodeGetWerewolfKills = 0x20001e2;
-
-        const int opcodePcExpelled = 0x20018;
-        const int opcodePcExpelledExplicit = 0x20019;
-        const int opcodePcExpell = 0x2001a;
-        const int opcodePcExpellExplicit = 0x2001b;
-        const int opcodePcClearExpelled = 0x2001c;
-        const int opcodePcClearExpelledExplicit = 0x2001d;
-        const int opcodeRaiseRank = 0x20001e8;
-        const int opcodeRaiseRankExplicit = 0x20001e9;
-        const int opcodeLowerRank = 0x20001ea;
-        const int opcodeLowerRankExplicit = 0x20001eb;
-        const int opcodeOnDeath = 0x20001fc;
-        const int opcodeOnDeathExplicit = 0x2000205;
-        const int opcodeIsWerewolf = 0x20001fd;
-        const int opcodeIsWerewolfExplicit = 0x20001fe;
-
-        void registerExtensions (Compiler::Extensions& extensions)
-        {
-            static const char *attributes[numberOfAttributes] =
-            {
-                "strength", "intelligence", "willpower", "agility", "speed", "endurance",
-                "personality", "luck"
-            };
-
-            static const char *dynamics[numberOfDynamics] =
-            {
-                "health", "magicka", "fatigue"
-            };
-
-            static const char *skills[numberOfSkills] =
-            {
-                "block", "armorer", "mediumarmor", "heavyarmor", "bluntweapon",
-                "longblade", "axe", "spear", "athletics", "enchant", "destruction",
-                "alteration", "illusion", "conjuration", "mysticism",
-                "restoration", "alchemy", "unarmored", "security", "sneak",
-                "acrobatics", "lightarmor", "shortblade", "marksman",
-                "mercantile", "speechcraft", "handtohand"
-            };
-
-            std::string get ("get");
-            std::string set ("set");
-            std::string mod ("mod");
-            std::string modCurrent ("modcurrent");
-            std::string getRatio ("getratio");
-
-            for (int i=0; i<numberOfAttributes; ++i)
-            {
-                extensions.registerFunction (get + attributes[i], 'l', "",
-                    opcodeGetAttribute+i, opcodeGetAttributeExplicit+i);
-
-                extensions.registerInstruction (set + attributes[i], "l",
-                    opcodeSetAttribute+i, opcodeSetAttributeExplicit+i);
-
-                extensions.registerInstruction (mod + attributes[i], "l",
-                    opcodeModAttribute+i, opcodeModAttributeExplicit+i);
-            }
-
-            for (int i=0; i<numberOfDynamics; ++i)
-            {
-                extensions.registerFunction (get + dynamics[i], 'f', "",
-                    opcodeGetDynamic+i, opcodeGetDynamicExplicit+i);
-
-                extensions.registerInstruction (set + dynamics[i], "f",
-                    opcodeSetDynamic+i, opcodeSetDynamicExplicit+i);
-
-                extensions.registerInstruction (mod + dynamics[i], "f",
-                    opcodeModDynamic+i, opcodeModDynamicExplicit+i);
-
-                extensions.registerInstruction (modCurrent + dynamics[i], "f",
-                    opcodeModCurrentDynamic+i, opcodeModCurrentDynamicExplicit+i);
-
-                extensions.registerFunction (get + dynamics[i] + getRatio, 'f', "",
-                    opcodeGetDynamicGetRatio+i, opcodeGetDynamicGetRatioExplicit+i);
-            }
-
-            for (int i=0; i<numberOfSkills; ++i)
-            {
-                extensions.registerFunction (get + skills[i], 'l', "",
-                    opcodeGetSkill+i, opcodeGetSkillExplicit+i);
-
-                extensions.registerInstruction (set + skills[i], "l",
-                    opcodeSetSkill+i, opcodeSetSkillExplicit+i);
-
-                extensions.registerInstruction (mod + skills[i], "l",
-                    opcodeModSkill+i, opcodeModSkillExplicit+i);
-            }
-
-            extensions.registerFunction ("getpccrimelevel", 'f', "", opcodeGetPCCrimeLevel);
-            extensions.registerInstruction ("setpccrimelevel", "f", opcodeSetPCCrimeLevel);
-            extensions.registerInstruction ("modpccrimelevel", "f", opcodeModPCCrimeLevel);
-
-            extensions.registerInstruction ("addspell", "c", opcodeAddSpell, opcodeAddSpellExplicit);
-            extensions.registerInstruction ("removespell", "c", opcodeRemoveSpell,
-                opcodeRemoveSpellExplicit);
-            extensions.registerFunction ("getspell", 'l', "c", opcodeGetSpell, opcodeGetSpellExplicit);
-
-            extensions.registerInstruction("pcraiserank","/S",opcodePCRaiseRank);
-            extensions.registerInstruction("pclowerrank","/S",opcodePCLowerRank);
-            extensions.registerInstruction("pcjoinfaction","/S",opcodePCJoinFaction);
-            extensions.registerInstruction ("moddisposition","l",opcodeModDisposition,
-                opcodeModDispositionExplicit);
-            extensions.registerInstruction ("setdisposition","l",opcodeSetDisposition,
-                opcodeSetDispositionExplicit);
-            extensions.registerFunction ("getdisposition",'l', "",opcodeGetDisposition,
-                opcodeGetDispositionExplicit);
-            extensions.registerFunction("getpcrank",'l',"/S",opcodeGetPCRank,opcodeGetPCRankExplicit);
-
-            extensions.registerInstruction("setlevel", "l", opcodeSetLevel, opcodeSetLevelExplicit);
-            extensions.registerFunction("getlevel", 'l', "", opcodeGetLevel, opcodeGetLevelExplicit);
-
-            extensions.registerFunction ("getdeadcount", 'l', "c", opcodeGetDeadCount);
-
-            extensions.registerFunction ("getpcfacrep", 'l', "/c", opcodeGetPCFacRep, opcodeGetPCFacRepExplicit);
-            extensions.registerInstruction ("setpcfacrep", "l/c", opcodeSetPCFacRep, opcodeSetPCFacRepExplicit);
-            extensions.registerInstruction ("modpcfacrep", "l/c", opcodeModPCFacRep, opcodeModPCFacRepExplicit);
-
-            extensions.registerFunction ("getcommondisease", 'l', "", opcodeGetCommonDisease,
-                opcodeGetCommonDiseaseExplicit);
-            extensions.registerFunction ("getblightdisease", 'l', "", opcodeGetBlightDisease,
-                opcodeGetBlightDiseaseExplicit);
-
-            extensions.registerFunction ("getrace", 'l', "c", opcodeGetRace,
-                opcodeGetRaceExplicit);
-            extensions.registerFunction ("getwerewolfkills", 'f', "", opcodeGetWerewolfKills);
-            extensions.registerFunction ("pcexpelled", 'l', "/S", opcodePcExpelled, opcodePcExpelledExplicit);
-            extensions.registerInstruction ("pcexpell", "/S", opcodePcExpell, opcodePcExpellExplicit);
-            extensions.registerInstruction ("pcclearexpelled", "/S", opcodePcClearExpelled, opcodePcClearExpelledExplicit);
-            extensions.registerInstruction ("raiserank", "", opcodeRaiseRank, opcodeRaiseRankExplicit);
-            extensions.registerInstruction ("lowerrank", "", opcodeLowerRank, opcodeLowerRankExplicit);
-
-            extensions.registerFunction ("ondeath", 'l', "", opcodeOnDeath, opcodeOnDeathExplicit);
-
-            extensions.registerFunction ("iswerewolf", 'l', "", opcodeIsWerewolf, opcodeIsWerewolfExplicit);
-        }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
-            for (int i=0; i<numberOfAttributes; ++i)
+            for (int i=0; i<Compiler::Stats::numberOfAttributes; ++i)
             {
-                interpreter.installSegment5 (opcodeGetAttribute+i, new OpGetAttribute<ImplicitRef> (i));
-                interpreter.installSegment5 (opcodeGetAttributeExplicit+i,
+                interpreter.installSegment5 (Compiler::Stats::opcodeGetAttribute+i, new OpGetAttribute<ImplicitRef> (i));
+                interpreter.installSegment5 (Compiler::Stats::opcodeGetAttributeExplicit+i,
                     new OpGetAttribute<ExplicitRef> (i));
 
-                interpreter.installSegment5 (opcodeSetAttribute+i, new OpSetAttribute<ImplicitRef> (i));
-                interpreter.installSegment5 (opcodeSetAttributeExplicit+i,
+                interpreter.installSegment5 (Compiler::Stats::opcodeSetAttribute+i, new OpSetAttribute<ImplicitRef> (i));
+                interpreter.installSegment5 (Compiler::Stats::opcodeSetAttributeExplicit+i,
                     new OpSetAttribute<ExplicitRef> (i));
 
-                interpreter.installSegment5 (opcodeModAttribute+i, new OpModAttribute<ImplicitRef> (i));
-                interpreter.installSegment5 (opcodeModAttributeExplicit+i,
+                interpreter.installSegment5 (Compiler::Stats::opcodeModAttribute+i, new OpModAttribute<ImplicitRef> (i));
+                interpreter.installSegment5 (Compiler::Stats::opcodeModAttributeExplicit+i,
                     new OpModAttribute<ExplicitRef> (i));
             }
 
-            for (int i=0; i<numberOfDynamics; ++i)
+            for (int i=0; i<Compiler::Stats::numberOfDynamics; ++i)
             {
-                interpreter.installSegment5 (opcodeGetDynamic+i, new OpGetDynamic<ImplicitRef> (i));
-                interpreter.installSegment5 (opcodeGetDynamicExplicit+i,
+                interpreter.installSegment5 (Compiler::Stats::opcodeGetDynamic+i, new OpGetDynamic<ImplicitRef> (i));
+                interpreter.installSegment5 (Compiler::Stats::opcodeGetDynamicExplicit+i,
                     new OpGetDynamic<ExplicitRef> (i));
 
-                interpreter.installSegment5 (opcodeSetDynamic+i, new OpSetDynamic<ImplicitRef> (i));
-                interpreter.installSegment5 (opcodeSetDynamicExplicit+i,
+                interpreter.installSegment5 (Compiler::Stats::opcodeSetDynamic+i, new OpSetDynamic<ImplicitRef> (i));
+                interpreter.installSegment5 (Compiler::Stats::opcodeSetDynamicExplicit+i,
                     new OpSetDynamic<ExplicitRef> (i));
 
-                interpreter.installSegment5 (opcodeModDynamic+i, new OpModDynamic<ImplicitRef> (i));
-                interpreter.installSegment5 (opcodeModDynamicExplicit+i,
+                interpreter.installSegment5 (Compiler::Stats::opcodeModDynamic+i, new OpModDynamic<ImplicitRef> (i));
+                interpreter.installSegment5 (Compiler::Stats::opcodeModDynamicExplicit+i,
                     new OpModDynamic<ExplicitRef> (i));
 
-                interpreter.installSegment5 (opcodeModCurrentDynamic+i,
+                interpreter.installSegment5 (Compiler::Stats::opcodeModCurrentDynamic+i,
                     new OpModCurrentDynamic<ImplicitRef> (i));
-                interpreter.installSegment5 (opcodeModCurrentDynamicExplicit+i,
+                interpreter.installSegment5 (Compiler::Stats::opcodeModCurrentDynamicExplicit+i,
                     new OpModCurrentDynamic<ExplicitRef> (i));
 
-                interpreter.installSegment5 (opcodeGetDynamicGetRatio+i,
+                interpreter.installSegment5 (Compiler::Stats::opcodeGetDynamicGetRatio+i,
                     new OpGetDynamicGetRatio<ImplicitRef> (i));
-                interpreter.installSegment5 (opcodeGetDynamicGetRatioExplicit+i,
+                interpreter.installSegment5 (Compiler::Stats::opcodeGetDynamicGetRatioExplicit+i,
                     new OpGetDynamicGetRatio<ExplicitRef> (i));
             }
 
-            for (int i=0; i<numberOfSkills; ++i)
+            for (int i=0; i<Compiler::Stats::numberOfSkills; ++i)
             {
-                interpreter.installSegment5 (opcodeGetSkill+i, new OpGetSkill<ImplicitRef> (i));
-                interpreter.installSegment5 (opcodeGetSkillExplicit+i, new OpGetSkill<ExplicitRef> (i));
+                interpreter.installSegment5 (Compiler::Stats::opcodeGetSkill+i, new OpGetSkill<ImplicitRef> (i));
+                interpreter.installSegment5 (Compiler::Stats::opcodeGetSkillExplicit+i, new OpGetSkill<ExplicitRef> (i));
 
-                interpreter.installSegment5 (opcodeSetSkill+i, new OpSetSkill<ImplicitRef> (i));
-                interpreter.installSegment5 (opcodeSetSkillExplicit+i, new OpSetSkill<ExplicitRef> (i));
+                interpreter.installSegment5 (Compiler::Stats::opcodeSetSkill+i, new OpSetSkill<ImplicitRef> (i));
+                interpreter.installSegment5 (Compiler::Stats::opcodeSetSkillExplicit+i, new OpSetSkill<ExplicitRef> (i));
 
-                interpreter.installSegment5 (opcodeModSkill+i, new OpModSkill<ImplicitRef> (i));
-                interpreter.installSegment5 (opcodeModSkillExplicit+i, new OpModSkill<ExplicitRef> (i));
+                interpreter.installSegment5 (Compiler::Stats::opcodeModSkill+i, new OpModSkill<ImplicitRef> (i));
+                interpreter.installSegment5 (Compiler::Stats::opcodeModSkillExplicit+i, new OpModSkill<ExplicitRef> (i));
             }
 
-            interpreter.installSegment5 (opcodeGetPCCrimeLevel, new OpGetPCCrimeLevel);
-            interpreter.installSegment5 (opcodeSetPCCrimeLevel, new OpSetPCCrimeLevel);
-            interpreter.installSegment5 (opcodeModPCCrimeLevel, new OpModPCCrimeLevel);
+            interpreter.installSegment5 (Compiler::Stats::opcodeGetPCCrimeLevel, new OpGetPCCrimeLevel);
+            interpreter.installSegment5 (Compiler::Stats::opcodeSetPCCrimeLevel, new OpSetPCCrimeLevel);
+            interpreter.installSegment5 (Compiler::Stats::opcodeModPCCrimeLevel, new OpModPCCrimeLevel);
 
-            interpreter.installSegment5 (opcodeAddSpell, new OpAddSpell<ImplicitRef>);
-            interpreter.installSegment5 (opcodeAddSpellExplicit, new OpAddSpell<ExplicitRef>);
-            interpreter.installSegment5 (opcodeRemoveSpell, new OpRemoveSpell<ImplicitRef>);
-            interpreter.installSegment5 (opcodeRemoveSpellExplicit,
+            interpreter.installSegment5 (Compiler::Stats::opcodeAddSpell, new OpAddSpell<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeAddSpellExplicit, new OpAddSpell<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeRemoveSpell, new OpRemoveSpell<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeRemoveSpellExplicit,
                 new OpRemoveSpell<ExplicitRef>);
-            interpreter.installSegment5 (opcodeGetSpell, new OpGetSpell<ImplicitRef>);
-            interpreter.installSegment5 (opcodeGetSpellExplicit, new OpGetSpell<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeGetSpell, new OpGetSpell<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeGetSpellExplicit, new OpGetSpell<ExplicitRef>);
 
-            interpreter.installSegment3(opcodePCRaiseRank,new OpPCRaiseRank);
-            interpreter.installSegment3(opcodePCLowerRank,new OpPCLowerRank);
-            interpreter.installSegment3(opcodePCJoinFaction,new OpPCJoinFaction);
-            interpreter.installSegment3(opcodeGetPCRank,new OpGetPCRank<ImplicitRef>);
-            interpreter.installSegment3(opcodeGetPCRankExplicit,new OpGetPCRank<ExplicitRef>);
+            interpreter.installSegment3(Compiler::Stats::opcodePCRaiseRank,new OpPCRaiseRank);
+            interpreter.installSegment3(Compiler::Stats::opcodePCLowerRank,new OpPCLowerRank);
+            interpreter.installSegment3(Compiler::Stats::opcodePCJoinFaction,new OpPCJoinFaction);
+            interpreter.installSegment3(Compiler::Stats::opcodeGetPCRank,new OpGetPCRank<ImplicitRef>);
+            interpreter.installSegment3(Compiler::Stats::opcodeGetPCRankExplicit,new OpGetPCRank<ExplicitRef>);
 
-            interpreter.installSegment5(opcodeModDisposition,new OpModDisposition<ImplicitRef>);
-            interpreter.installSegment5(opcodeModDispositionExplicit,new OpModDisposition<ExplicitRef>);
-            interpreter.installSegment5(opcodeSetDisposition,new OpSetDisposition<ImplicitRef>);
-            interpreter.installSegment5(opcodeSetDispositionExplicit,new OpSetDisposition<ExplicitRef>);
-            interpreter.installSegment5(opcodeGetDisposition,new OpGetDisposition<ImplicitRef>);
-            interpreter.installSegment5(opcodeGetDispositionExplicit,new OpGetDisposition<ExplicitRef>);
+            interpreter.installSegment5(Compiler::Stats::opcodeModDisposition,new OpModDisposition<ImplicitRef>);
+            interpreter.installSegment5(Compiler::Stats::opcodeModDispositionExplicit,new OpModDisposition<ExplicitRef>);
+            interpreter.installSegment5(Compiler::Stats::opcodeSetDisposition,new OpSetDisposition<ImplicitRef>);
+            interpreter.installSegment5(Compiler::Stats::opcodeSetDispositionExplicit,new OpSetDisposition<ExplicitRef>);
+            interpreter.installSegment5(Compiler::Stats::opcodeGetDisposition,new OpGetDisposition<ImplicitRef>);
+            interpreter.installSegment5(Compiler::Stats::opcodeGetDispositionExplicit,new OpGetDisposition<ExplicitRef>);
 
-            interpreter.installSegment5 (opcodeGetLevel, new OpGetLevel<ImplicitRef>);
-            interpreter.installSegment5 (opcodeGetLevelExplicit, new OpGetLevel<ExplicitRef>);
-            interpreter.installSegment5 (opcodeSetLevel, new OpSetLevel<ImplicitRef>);
-            interpreter.installSegment5 (opcodeSetLevelExplicit, new OpSetLevel<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeGetLevel, new OpGetLevel<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeGetLevelExplicit, new OpGetLevel<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeSetLevel, new OpSetLevel<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeSetLevelExplicit, new OpSetLevel<ExplicitRef>);
 
-            interpreter.installSegment5 (opcodeGetDeadCount, new OpGetDeadCount);
+            interpreter.installSegment5 (Compiler::Stats::opcodeGetDeadCount, new OpGetDeadCount);
 
-            interpreter.installSegment3 (opcodeGetPCFacRep, new OpGetPCFacRep<ImplicitRef>);
-            interpreter.installSegment3 (opcodeGetPCFacRepExplicit, new OpGetPCFacRep<ExplicitRef>);
-            interpreter.installSegment3 (opcodeSetPCFacRep, new OpSetPCFacRep<ImplicitRef>);
-            interpreter.installSegment3 (opcodeSetPCFacRepExplicit, new OpSetPCFacRep<ExplicitRef>);
-            interpreter.installSegment3 (opcodeModPCFacRep, new OpModPCFacRep<ImplicitRef>);
-            interpreter.installSegment3 (opcodeModPCFacRepExplicit, new OpModPCFacRep<ExplicitRef>);
+            interpreter.installSegment3 (Compiler::Stats::opcodeGetPCFacRep, new OpGetPCFacRep<ImplicitRef>);
+            interpreter.installSegment3 (Compiler::Stats::opcodeGetPCFacRepExplicit, new OpGetPCFacRep<ExplicitRef>);
+            interpreter.installSegment3 (Compiler::Stats::opcodeSetPCFacRep, new OpSetPCFacRep<ImplicitRef>);
+            interpreter.installSegment3 (Compiler::Stats::opcodeSetPCFacRepExplicit, new OpSetPCFacRep<ExplicitRef>);
+            interpreter.installSegment3 (Compiler::Stats::opcodeModPCFacRep, new OpModPCFacRep<ImplicitRef>);
+            interpreter.installSegment3 (Compiler::Stats::opcodeModPCFacRepExplicit, new OpModPCFacRep<ExplicitRef>);
 
-            interpreter.installSegment5 (opcodeGetCommonDisease, new OpGetCommonDisease<ImplicitRef>);
-            interpreter.installSegment5 (opcodeGetCommonDiseaseExplicit, new OpGetCommonDisease<ExplicitRef>);
-            interpreter.installSegment5 (opcodeGetBlightDisease, new OpGetBlightDisease<ImplicitRef>);
-            interpreter.installSegment5 (opcodeGetBlightDiseaseExplicit, new OpGetBlightDisease<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeGetCommonDisease, new OpGetCommonDisease<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeGetCommonDiseaseExplicit, new OpGetCommonDisease<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeGetBlightDisease, new OpGetBlightDisease<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeGetBlightDiseaseExplicit, new OpGetBlightDisease<ExplicitRef>);
 
-            interpreter.installSegment5 (opcodeGetRace, new OpGetRace<ImplicitRef>);
-            interpreter.installSegment5 (opcodeGetRaceExplicit, new OpGetRace<ExplicitRef>);
-            interpreter.installSegment5 (opcodeGetWerewolfKills, new OpGetWerewolfKills);
+            interpreter.installSegment5 (Compiler::Stats::opcodeGetRace, new OpGetRace<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeGetRaceExplicit, new OpGetRace<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeGetWerewolfKills, new OpGetWerewolfKills);
 
-            interpreter.installSegment3 (opcodePcExpelled, new OpPcExpelled<ImplicitRef>);
-            interpreter.installSegment3 (opcodePcExpelledExplicit, new OpPcExpelled<ExplicitRef>);
-            interpreter.installSegment3 (opcodePcExpell, new OpPcExpell<ImplicitRef>);
-            interpreter.installSegment3 (opcodePcExpellExplicit, new OpPcExpell<ExplicitRef>);
-            interpreter.installSegment3 (opcodePcClearExpelled, new OpPcClearExpelled<ImplicitRef>);
-            interpreter.installSegment3 (opcodePcClearExpelledExplicit, new OpPcClearExpelled<ExplicitRef>);
-            interpreter.installSegment5 (opcodeRaiseRank, new OpRaiseRank<ImplicitRef>);
-            interpreter.installSegment5 (opcodeRaiseRankExplicit, new OpRaiseRank<ExplicitRef>);
-            interpreter.installSegment5 (opcodeLowerRank, new OpLowerRank<ImplicitRef>);
-            interpreter.installSegment5 (opcodeLowerRankExplicit, new OpLowerRank<ExplicitRef>);
+            interpreter.installSegment3 (Compiler::Stats::opcodePcExpelled, new OpPcExpelled<ImplicitRef>);
+            interpreter.installSegment3 (Compiler::Stats::opcodePcExpelledExplicit, new OpPcExpelled<ExplicitRef>);
+            interpreter.installSegment3 (Compiler::Stats::opcodePcExpell, new OpPcExpell<ImplicitRef>);
+            interpreter.installSegment3 (Compiler::Stats::opcodePcExpellExplicit, new OpPcExpell<ExplicitRef>);
+            interpreter.installSegment3 (Compiler::Stats::opcodePcClearExpelled, new OpPcClearExpelled<ImplicitRef>);
+            interpreter.installSegment3 (Compiler::Stats::opcodePcClearExpelledExplicit, new OpPcClearExpelled<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeRaiseRank, new OpRaiseRank<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeRaiseRankExplicit, new OpRaiseRank<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeLowerRank, new OpLowerRank<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeLowerRankExplicit, new OpLowerRank<ExplicitRef>);
 
-            interpreter.installSegment5 (opcodeOnDeath, new OpOnDeath<ImplicitRef>);
-            interpreter.installSegment5 (opcodeOnDeathExplicit, new OpOnDeath<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeOnDeath, new OpOnDeath<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeOnDeathExplicit, new OpOnDeath<ExplicitRef>);
 
-            interpreter.installSegment5 (opcodeIsWerewolf, new OpIsWerewolf<ImplicitRef>);
-            interpreter.installSegment5 (opcodeIsWerewolfExplicit, new OpIsWerewolf<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeIsWerewolf, new OpIsWerewolf<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeIsWerewolfExplicit, new OpIsWerewolf<ExplicitRef>);
         }
     }
 }

@@ -15,9 +15,7 @@ namespace MWScript
 {
     /// \brief stats-related script functionality (creatures and NPCs)
     namespace Stats
-    {
-        void registerExtensions (Compiler::Extensions& extensions);
-        
+    {        
         void installOpcodes (Interpreter::Interpreter& interpreter);
     }
 }
