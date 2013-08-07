@@ -15,6 +15,8 @@ namespace MWWorld
 
 namespace MWRender{
 
+class ObjectAnimation;
+
 /// information about light needed for rendering
 enum LightType
 {
@@ -48,15 +50,20 @@ struct LightInfo
 };
 
 class Objects{
+    typedef std::map<MWWorld::Ptr,ObjectAnimation*> PtrAnimationMap;
+
     OEngine::Render::OgreRenderer &mRenderer;
-    std::map<MWWorld::CellStore *, Ogre::SceneNode *> mCellSceneNodes;
-    std::map<MWWorld::CellStore *, Ogre::StaticGeometry*> mStaticGeometry;
-    std::map<MWWorld::CellStore *, Ogre::StaticGeometry*> mStaticGeometrySmall;
-    std::map<MWWorld::CellStore *, Ogre::AxisAlignedBox> mBounds;
-    std::vector<LightInfo> mLights;
+
+    std::map<MWWorld::CellStore*,Ogre::SceneNode*> mCellSceneNodes;
+    std::map<MWWorld::CellStore*,Ogre::StaticGeometry*> mStaticGeometry;
+    std::map<MWWorld::CellStore*,Ogre::StaticGeometry*> mStaticGeometrySmall;
+    std::map<MWWorld::CellStore*,Ogre::AxisAlignedBox> mBounds;
+    PtrAnimationMap mObjects;
+
     Ogre::SceneNode* mRootNode;
     bool mIsStatic;
     static int uniqueID;
+
     MWWorld::Fallback* mFallback;
     float lightLinearValue();
     float lightLinearRadiusMult();
@@ -79,8 +86,7 @@ public:
     {}
     ~Objects(){}
     void insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_);
-    void insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh, bool light=false);
-    void insertLight (const MWWorld::Ptr& ptr, Ogre::Entity *skelBase=0, Ogre::Vector3 fallbackCenter=Ogre::Vector3(0.0f));
+    void insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh);
 
     void enableLights();
     void disableLights();

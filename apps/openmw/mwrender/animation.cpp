@@ -9,6 +9,7 @@
 #include <OgreSubMesh.h>
 #include <OgreSceneManager.h>
 #include <OgreControllerManager.h>
+#include <OgreStaticGeometry.h>
 
 #include <libs/openengine/ogre/lights.hpp>
 
@@ -20,6 +21,8 @@
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/fallback.hpp"
+
+#include "renderconst.hpp"
 
 namespace MWRender
 {
@@ -91,6 +94,12 @@ void Animation::setObjectRoot(const std::string &model, bool baseonly)
 {
     OgreAssert(mAnimSources.empty(), "Setting object root while animation sources are set!");
 
+    mSkelBase = NULL;
+    destroyObjectList(mInsert->getCreator(), mObjectRoot);
+
+    if(model.empty())
+        return;
+
     std::string mdlname = Misc::StringUtils::lowerCase(model);
     std::string::size_type p = mdlname.rfind('\\');
     if(p == std::string::npos)
@@ -104,9 +113,6 @@ void Animation::setObjectRoot(const std::string &model, bool baseonly)
         mdlname = model;
         Misc::StringUtils::toLower(mdlname);
     }
-
-    mSkelBase = NULL;
-    destroyObjectList(mInsert->getCreator(), mObjectRoot);
 
     mObjectRoot = (!baseonly ? NifOgre::Loader::createObjects(mInsert, mdlname) :
                                NifOgre::Loader::createObjectBase(mInsert, mdlname));
@@ -157,16 +163,18 @@ void Animation::setObjectRoot(const std::string &model, bool baseonly)
 class VisQueueSet {
     Ogre::uint32 mVisFlags;
     Ogre::uint8 mSolidQueue, mTransQueue;
+    Ogre::Real mDist;
 
 public:
-    VisQueueSet(Ogre::uint32 visflags, Ogre::uint8 solidqueue, Ogre::uint8 transqueue)
-      : mVisFlags(visflags), mSolidQueue(solidqueue), mTransQueue(transqueue)
+    VisQueueSet(Ogre::uint32 visflags, Ogre::uint8 solidqueue, Ogre::uint8 transqueue, Ogre::Real dist)
+      : mVisFlags(visflags), mSolidQueue(solidqueue), mTransQueue(transqueue), mDist(dist)
     { }
 
     void operator()(Ogre::Entity *entity) const
     {
         if(mVisFlags != 0)
             entity->setVisibilityFlags(mVisFlags);
+        entity->setRenderingDistance(mDist);
 
         unsigned int numsubs = entity->getNumSubEntities();
         for(unsigned int i = 0;i < numsubs;++i)
@@ -180,17 +188,18 @@ public:
     {
         if(mVisFlags != 0)
             psys->setVisibilityFlags(mVisFlags);
+        psys->setRenderingDistance(mDist);
         // TODO: Check particle material for actual transparency
         psys->setRenderQueueGroup(mTransQueue);
     }
 };
 
-void Animation::setRenderProperties(const NifOgre::ObjectList &objlist, Ogre::uint32 visflags, Ogre::uint8 solidqueue, Ogre::uint8 transqueue)
+void Animation::setRenderProperties(const NifOgre::ObjectList &objlist, Ogre::uint32 visflags, Ogre::uint8 solidqueue, Ogre::uint8 transqueue, Ogre::Real dist)
 {
     std::for_each(objlist.mEntities.begin(), objlist.mEntities.end(),
-                  VisQueueSet(visflags, solidqueue, transqueue));
+                  VisQueueSet(visflags, solidqueue, transqueue, dist));
     std::for_each(objlist.mParticles.begin(), objlist.mParticles.end(),
-                  VisQueueSet(visflags, solidqueue, transqueue));
+                  VisQueueSet(visflags, solidqueue, transqueue, dist));
 }
 
 
@@ -903,6 +912,43 @@ void Animation::showWeapons(bool showWeapon)
 {
 }
 
+
+class ToggleLight {
+    bool mEnable;
+
+public:
+    ToggleLight(bool enable) : mEnable(enable) { }
+
+    void operator()(Ogre::Light *light) const
+    { light->setVisible(mEnable); }
+};
+
+void Animation::enableLights(bool enable)
+{
+    std::for_each(mObjectRoot.mLights.begin(), mObjectRoot.mLights.end(), ToggleLight(enable));
+}
+
+
+class MergeBounds {
+    Ogre::AxisAlignedBox *mBounds;
+
+public:
+    MergeBounds(Ogre::AxisAlignedBox *bounds) : mBounds(bounds) { }
+
+    void operator()(Ogre::MovableObject *obj)
+    {
+        mBounds->merge(obj->getWorldBoundingBox(true));
+    }
+};
+
+Ogre::AxisAlignedBox Animation::getWorldBounds()
+{
+    Ogre::AxisAlignedBox bounds = Ogre::AxisAlignedBox::BOX_NULL;
+    std::for_each(mObjectRoot.mEntities.begin(), mObjectRoot.mEntities.end(), MergeBounds(&bounds));
+    return bounds;
+}
+
+
 bool Animation::isPriorityActive(int priority) const
 {
     for (AnimStateMap::const_iterator it = mStates.begin(); it != mStates.end(); ++it)
@@ -929,6 +975,67 @@ void Animation::detachObjectFromBone(Ogre::MovableObject *obj)
     if(iter != mAttachedObjects.end())
         mAttachedObjects.erase(iter);
     mSkelBase->detachObjectFromBone(obj);
+}
+
+
+ObjectAnimation::ObjectAnimation(const MWWorld::Ptr& ptr, const std::string &model, bool isStatic)
+  : Animation(ptr, ptr.getRefData().getBaseNode())
+{
+    setObjectRoot(model, false);
+
+    Ogre::AxisAlignedBox bounds = getWorldBounds();
+
+    Ogre::Vector3 extents = bounds.getSize();
+    extents *= mInsert->getParentSceneNode()->getScale();
+    float size = std::max(std::max(extents.x, extents.y), extents.z);
+
+    bool small = (size < Settings::Manager::getInt("small object size", "Viewing distance")) &&
+                 Settings::Manager::getBool("limit small object distance", "Viewing distance");
+    // do not fade out doors. that will cause holes and look stupid
+    if(ptr.getTypeName().find("Door") != std::string::npos)
+        small = false;
+
+    float dist = small ? Settings::Manager::getInt("small object distance", "Viewing distance") : 0.0f;
+    setRenderProperties(mObjectRoot, isStatic ? (small ? RV_StaticsSmall : RV_Statics) : RV_Misc,
+                        RQG_Main, RQG_Alpha, dist);
+}
+
+void ObjectAnimation::addLight(const ESM::Light *light)
+{
+    addExtraLight(mInsert->getCreator(), mObjectRoot, light);
+}
+
+
+class FindEntityTransparency {
+public:
+    bool operator()(Ogre::Entity *ent) const
+    {
+        unsigned int numsubs = ent->getNumSubEntities();
+        for(unsigned int i = 0;i < numsubs;++i)
+        {
+            if(ent->getSubEntity(i)->getMaterial()->isTransparent())
+                return true;
+        }
+        return false;
+    }
+};
+
+bool ObjectAnimation::canBatch() const
+{
+    if(!mObjectRoot.mParticles.empty() || !mObjectRoot.mLights.empty() || !mObjectRoot.mControllers.empty())
+        return false;
+    return std::find_if(mObjectRoot.mEntities.begin(), mObjectRoot.mEntities.end(),
+                        FindEntityTransparency()) == mObjectRoot.mEntities.end();
+}
+
+void ObjectAnimation::fillBatch(Ogre::StaticGeometry *sg)
+{
+    std::vector<Ogre::Entity*>::reverse_iterator iter = mObjectRoot.mEntities.rbegin();
+    for(;iter != mObjectRoot.mEntities.rend();++iter)
+    {
+        Ogre::Node *node = (*iter)->getParentNode();
+        sg->addEntity(*iter, node->_getDerivedPosition(), node->_getDerivedOrientation(), node->_getDerivedScale());
+    }
 }
 
 }

@@ -165,7 +165,7 @@ protected:
 
     static void destroyObjectList(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList &objects);
 
-    static void setRenderProperties(const NifOgre::ObjectList &objlist, Ogre::uint32 visflags, Ogre::uint8 solidqueue, Ogre::uint8 transqueue);
+    static void setRenderProperties(const NifOgre::ObjectList &objlist, Ogre::uint32 visflags, Ogre::uint8 solidqueue, Ogre::uint8 transqueue, Ogre::Real dist=0.0f);
 
     void clearAnimSources();
 
@@ -229,6 +229,10 @@ public:
 
     virtual void showWeapons(bool showWeapon);
 
+    void enableLights(bool enable);
+
+    Ogre::AxisAlignedBox getWorldBounds();
+
     void setCamera(Camera *cam)
     { mCamera = cam; }
 
@@ -239,6 +243,16 @@ public:
     // valid until the next setObjectRoot call.
     Ogre::TagPoint *attachObjectToBone(const Ogre::String &bonename, Ogre::MovableObject *obj);
     void detachObjectFromBone(Ogre::MovableObject *obj);
+};
+
+class ObjectAnimation : public Animation {
+public:
+    ObjectAnimation(const MWWorld::Ptr& ptr, const std::string &model, bool isStatic);
+
+    void addLight(const ESM::Light *light);
+
+    bool canBatch() const;
+    void fillBatch(Ogre::StaticGeometry *sg);
 };
 
 }
