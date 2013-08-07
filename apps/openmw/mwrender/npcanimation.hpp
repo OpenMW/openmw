@@ -37,11 +37,10 @@ private:
     // Bounded Parts
     NifOgre::ObjectList mObjectParts[ESM::PRT_Count];
 
-    const ESM::NPC  *mNpc;
-    std::string     mHeadModel;
-    std::string     mHairModel;
-    std::string     mBodyPrefix;
-    ViewMode        mViewMode;
+    const ESM::NPC *mNpc;
+    std::string    mHeadModel;
+    std::string    mHairModel;
+    ViewMode       mViewMode;
     bool mShowWeapons;
 
     float mTimeToChange;
