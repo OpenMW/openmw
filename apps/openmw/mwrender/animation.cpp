@@ -74,8 +74,7 @@ Animation::Animation(const MWWorld::Ptr &ptr, Ogre::SceneNode *node)
 {
     for(size_t i = 0;i < sNumGroups;i++)
         mAnimationValuePtr[i].bind(OGRE_NEW AnimationValue(this));
-    mInsert = node ? node->createChildSceneNode() :
-                     mPtr.getRefData().getBaseNode()->createChildSceneNode();
+    mInsert = node->createChildSceneNode();
 }
 
 Animation::~Animation()
@@ -86,6 +85,8 @@ Animation::~Animation()
 
         Ogre::SceneManager *sceneMgr = mInsert->getCreator();
         destroyObjectList(sceneMgr, mObjectRoot);
+
+        sceneMgr->destroySceneNode(mInsert);
     }
 }
 
