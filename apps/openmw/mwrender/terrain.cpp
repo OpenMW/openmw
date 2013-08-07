@@ -246,9 +246,9 @@ namespace MWRender
         //cells which may lead to inconsistent results when shading between cells
         int num = MWBase::Environment::get().getWorld()->getStore().get<ESM::LandTexture>().getSize(plugin);
         std::set<uint16_t> ltexIndexes;
-        for ( int y = fromY - 1; y < fromY + size + 1; y++ )
+        for ( int y = fromY; y < fromY + size + 1; y++ )
         {
-            for ( int x = fromX - 1; x < fromX + size + 1; x++ )
+            for ( int x = fromX - 1; x < fromX + size; x++ )  // NB we wrap X from the other side because Y is reversed
             {
                 int idx = getLtexIndexAt(cellX, cellY, x, y);
                 // This is a quick hack to prevent the program from trying to fetch textures
