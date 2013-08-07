@@ -340,7 +340,6 @@ namespace MWRender
         assert( (size & (size - 1)) == 0 && "Size must be a power of 2");
 
         const int blendMapSize = terrain->getLayerBlendMapSize();
-        const int splatSize    = blendMapSize / size;
 
         //zero out every map
         std::map<uint16_t, int>::const_iterator iter;
