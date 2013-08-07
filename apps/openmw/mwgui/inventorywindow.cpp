@@ -94,16 +94,20 @@ namespace MWGui
         mGuiMode = mode;
         switch(mode) {
             case GM_Container:
+                setPinButtonVisible(false);
                 mMainWidget->setCoord(mPositionContainer);
                 break;
             case GM_Companion:
+                setPinButtonVisible(false);
                 mMainWidget->setCoord(mPositionCompanion);
                 break;
             case GM_Barter:
+                setPinButtonVisible(false);
                 mMainWidget->setCoord(mPositionBarter);
                 break;
             case GM_Inventory:
             default:
+                setPinButtonVisible(true);
                 mMainWidget->setCoord(mPositionInventory);
                 break;
         }
