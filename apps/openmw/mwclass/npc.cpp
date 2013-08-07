@@ -725,15 +725,15 @@ namespace MWClass
 
         float x = fJumpAcrobaticsBase->getFloat() +
                   std::pow(a / 15.0f, fJumpAcroMultiplier->getFloat());
-        x += 3 * b * fJumpAcroMultiplier->getFloat();
-        x += mageffects.get(MWMechanics::EffectKey(9/*jump*/)).mMagnitude * 64;
+        x += 3.0f * b * fJumpAcroMultiplier->getFloat();
+        x += mageffects.get(MWMechanics::EffectKey(ESM::MagicEffect::Jump)).mMagnitude * 64;
         x *= encumbranceTerm;
 
         if(Npc::getStance(ptr, Run, false))
             x *= fJumpRunMultiplier->getFloat();
-        x *= 1.25f;//fatigueTerm;
-        x -= -627.2/*gravity constant*/;
-        x /= 3;
+        x *= npcdata->mCreatureStats.getFatigueTerm();
+        x -= -627.2f;/*gravity constant*/
+        x /= 3.0f;
 
         return x;
     }

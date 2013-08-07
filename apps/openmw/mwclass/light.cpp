@@ -34,11 +34,10 @@ namespace MWClass
 
         MWRender::Objects& objects = renderingInterface.getObjects();
         objects.insertBegin(ptr, ptr.getRefData().isEnabled(), false);
-
-        if (!model.empty())
-            objects.insertMesh(ptr, "meshes\\" + model, true);
+        if(!model.empty())
+            objects.insertMesh(ptr, "meshes\\" + model);
         else
-            objects.insertLight(ptr);
+            objects.insertMesh(ptr, "");
     }
 
     void Light::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const

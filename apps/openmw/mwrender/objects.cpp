@@ -18,63 +18,11 @@
 #include "../mwworld/class.hpp"
 
 #include "renderconst.hpp"
+#include "animation.hpp"
 
 using namespace MWRender;
-float Objects::lightLinearValue()
-{
-    return mFallback->getFallbackFloat("LightAttenuation_LinearValue");
-}
-float Objects::lightLinearRadiusMult()
-{
-    return mFallback->getFallbackFloat("LightAttenuation_LinearRadiusMult");
-}
-float Objects::lightQuadraticValue()
-{
-    return mFallback->getFallbackFloat("LightAttenuation_QuadraticValue");
-}
-float Objects::lightQuadraticRadiusMult()
-{
-    return mFallback->getFallbackFloat("LightAttenuation_QuadraticRadiusMult");
-}
-
-bool Objects::lightOutQuadInLin()
-{
-    return mFallback->getFallbackBool("LightAttenuation_OutQuadInLin");
-}
-bool Objects::lightQuadratic()
-{
-    return mFallback->getFallbackBool("LightAttenuation_UseQuadratic");
-}
 
 int Objects::uniqueID = 0;
-
-void Objects::clearSceneNode (Ogre::SceneNode *node)
-{
-    for (int i=node->numAttachedObjects()-1; i>=0; --i)
-    {
-        Ogre::MovableObject *object = node->getAttachedObject (i);
-
-        // for entities, destroy any objects attached to bones
-        if (object->getTypeFlags () == Ogre::SceneManager::ENTITY_TYPE_MASK)
-        {
-            Ogre::Entity* ent = static_cast<Ogre::Entity*>(object);
-            Ogre::Entity::ChildObjectListIterator children = ent->getAttachedObjectIterator ();
-            while (children.hasMoreElements())
-            {
-                mRenderer.getScene ()->destroyMovableObject (children.getNext ());
-            }
-        }
-
-        node->detachObject (object);
-        mRenderer.getScene()->destroyMovableObject (object);
-    }
-
-    Ogre::Node::ChildNodeIterator it = node->getChildIterator ();
-    while (it.hasMoreElements ())
-    {
-        clearSceneNode(static_cast<Ogre::SceneNode*>(it.getNext ()));
-    }
-}
 
 void Objects::setRootNode(Ogre::SceneNode* root)
 {
@@ -124,73 +72,41 @@ void Objects::insertBegin (const MWWorld::Ptr& ptr, bool enabled, bool static_)
     mIsStatic = static_;
 }
 
-void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh, bool light)
+void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh)
 {
     Ogre::SceneNode* insert = ptr.getRefData().getBaseNode();
     assert(insert);
 
-    Ogre::AxisAlignedBox bounds = Ogre::AxisAlignedBox::BOX_NULL;
-    NifOgre::ObjectList objects = NifOgre::Loader::createObjects(insert, mesh);
-    for(size_t i = 0;i < objects.mEntities.size();i++)
-        bounds.merge(objects.mEntities[i]->getWorldBoundingBox(true));
+    std::auto_ptr<ObjectAnimation> anim(new ObjectAnimation(ptr, mesh, mIsStatic));
 
+    Ogre::AxisAlignedBox bounds = anim->getWorldBounds();
     Ogre::Vector3 extents = bounds.getSize();
     extents *= insert->getScale();
     float size = std::max(std::max(extents.x, extents.y), extents.z);
 
-    bool small = (size < Settings::Manager::getInt("small object size", "Viewing distance")) && Settings::Manager::getBool("limit small object distance", "Viewing distance");
-
+    bool small = (size < Settings::Manager::getInt("small object size", "Viewing distance")) &&
+                 Settings::Manager::getBool("limit small object distance", "Viewing distance");
     // do not fade out doors. that will cause holes and look stupid
-    if (ptr.getTypeName().find("Door") != std::string::npos)
+    if(ptr.getTypeName().find("Door") != std::string::npos)
         small = false;
 
     if (mBounds.find(ptr.getCell()) == mBounds.end())
         mBounds[ptr.getCell()] = Ogre::AxisAlignedBox::BOX_NULL;
     mBounds[ptr.getCell()].merge(bounds);
 
-    bool anyTransparency = false;
-    for(size_t i = 0;!anyTransparency && i < objects.mEntities.size();i++)
-    {
-        Ogre::Entity *ent = objects.mEntities[i];
-        for(unsigned int i=0;!anyTransparency && i < ent->getNumSubEntities(); ++i)
-        {
-            anyTransparency = ent->getSubEntity(i)->getMaterial()->isTransparent();
-        }
-    }
+    if(ptr.getTypeName() == typeid(ESM::Light).name())
+        anim->addLight(ptr.get<ESM::Light>()->mBase);
 
-    if(!mIsStatic || !Settings::Manager::getBool("use static geometry", "Objects") ||
-            anyTransparency || !objects.mParticles.empty())
-    {
-        for(size_t i = 0;i < objects.mEntities.size();i++)
-        {
-            Ogre::Entity *ent = objects.mEntities[i];
-            for(unsigned int i=0; i < ent->getNumSubEntities(); ++i)
-            {
-                Ogre::SubEntity* subEnt = ent->getSubEntity(i);
-                subEnt->setRenderQueueGroup(subEnt->getMaterial()->isTransparent() ? RQG_Alpha : RQG_Main);
-            }
-            ent->setRenderingDistance(small ? Settings::Manager::getInt("small object distance", "Viewing distance") : 0);
-            ent->setVisibilityFlags(mIsStatic ? (small ? RV_StaticsSmall : RV_Statics) : RV_Misc);
-        }
-        for(size_t i = 0;i < objects.mParticles.size();i++)
-        {
-            Ogre::ParticleSystem *part = objects.mParticles[i];
-            // TODO: Check the particle system's material for actual transparency
-            part->setRenderQueueGroup(RQG_Alpha);
-            part->setRenderingDistance(small ? Settings::Manager::getInt("small object distance", "Viewing distance") : 0);
-            part->setVisibilityFlags(mIsStatic ? (small ? RV_StaticsSmall : RV_Statics) : RV_Misc);
-        }
-    }
-    else
+    if(mIsStatic && Settings::Manager::getBool("use static geometry", "Objects") && anim->canBatch())
     {
         Ogre::StaticGeometry* sg = 0;
 
         if (small)
         {
-            if( mStaticGeometrySmall.find(ptr.getCell()) == mStaticGeometrySmall.end())
+            if(mStaticGeometrySmall.find(ptr.getCell()) == mStaticGeometrySmall.end())
             {
-                uniqueID = uniqueID +1;
-                sg = mRenderer.getScene()->createStaticGeometry( "sg" + Ogre::StringConverter::toString(uniqueID));
+                uniqueID = uniqueID+1;
+                sg = mRenderer.getScene()->createStaticGeometry("sg" + Ogre::StringConverter::toString(uniqueID));
                 mStaticGeometrySmall[ptr.getCell()] = sg;
 
                 sg->setRenderingDistance(Settings::Manager::getInt("small object distance", "Viewing distance"));
@@ -200,11 +116,10 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh, bool
         }
         else
         {
-            if( mStaticGeometry.find(ptr.getCell()) == mStaticGeometry.end())
+            if(mStaticGeometry.find(ptr.getCell()) == mStaticGeometry.end())
             {
-
-                uniqueID = uniqueID +1;
-                sg = mRenderer.getScene()->createStaticGeometry( "sg" + Ogre::StringConverter::toString(uniqueID));
+                uniqueID = uniqueID+1;
+                sg = mRenderer.getScene()->createStaticGeometry("sg" + Ogre::StringConverter::toString(uniqueID));
                 mStaticGeometry[ptr.getCell()] = sg;
             }
             else
@@ -225,155 +140,75 @@ void Objects::insertMesh (const MWWorld::Ptr& ptr, const std::string& mesh, bool
 
         sg->setRenderQueueGroup(RQG_Main);
 
-        std::vector<Ogre::Entity*>::reverse_iterator iter = objects.mEntities.rbegin();
-        while(iter != objects.mEntities.rend())
-        {
-            Ogre::Node *node = (*iter)->getParentNode();
-            sg->addEntity(*iter, node->_getDerivedPosition(), node->_getDerivedOrientation(), node->_getDerivedScale());
-
-            (*iter)->detachFromParent();
-            mRenderer.getScene()->destroyEntity(*iter);
-            ++iter;
-        }
+        anim->fillBatch(sg);
+        /* TODO: We could hold on to this and just detach it from the scene graph, so if the Ptr
+         * ever needs to modify we can reattach it and rebuild the StaticGeometry object without
+         * it. Would require associating the Ptr with the StaticGeometry. */
+        anim.reset();
     }
 
-    if (light)
-    {
-        insertLight(ptr, objects.mSkelBase, bounds.getCenter() - insert->_getDerivedPosition());
-    }
-}
-
-void Objects::insertLight (const MWWorld::Ptr& ptr, Ogre::Entity* skelBase, Ogre::Vector3 fallbackCenter)
-{
-    Ogre::SceneNode* insert = mRenderer.getScene()->getSceneNode(ptr.getRefData().getHandle());
-    assert(insert);
-
-    MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
-
-    const int color = ref->mBase->mData.mColor;
-    const float r = ((color >> 0) & 0xFF) / 255.0f;
-    const float g = ((color >> 8) & 0xFF) / 255.0f;
-    const float b = ((color >> 16) & 0xFF) / 255.0f;
-    const float radius = float (ref->mBase->mData.mRadius);
-
-    Ogre::Light *light = mRenderer.getScene()->createLight();
-    light->setDiffuseColour (r, g, b);
-
-    LightInfo info;
-    info.name = light->getName();
-    info.radius = radius;
-    info.colour = Ogre::ColourValue(r, g, b);
-
-    if (ref->mBase->mData.mFlags & ESM::Light::Negative)
-        info.colour *= -1;
-
-    info.interior = !ptr.getCell()->mCell->isExterior();
-
-    if (ref->mBase->mData.mFlags & ESM::Light::Flicker)
-        info.type = LT_Flicker;
-    else if (ref->mBase->mData.mFlags & ESM::Light::FlickerSlow)
-        info.type = LT_FlickerSlow;
-    else if (ref->mBase->mData.mFlags & ESM::Light::Pulse)
-        info.type = LT_Pulse;
-    else if (ref->mBase->mData.mFlags & ESM::Light::PulseSlow)
-        info.type = LT_PulseSlow;
-    else
-        info.type = LT_Normal;
-
-    // randomize lights animations
-    info.time = Ogre::Math::RangeRandom(-500, +500);
-    info.phase = Ogre::Math::RangeRandom(-500, +500);
-
-    bool quadratic = lightOutQuadInLin() ? !info.interior : lightQuadratic();
-
-    // with the standard 1 / (c + d*l + d*d*q) equation the attenuation factor never becomes zero,
-    // so we ignore lights if their attenuation falls below this factor.
-    const float threshold = 0.03;
-
-    if (!quadratic)
-    {
-        float r = radius * lightLinearRadiusMult();
-        float attenuation = lightLinearValue() / r;
-        float activationRange = 1 / (threshold * attenuation);
-        light->setAttenuation(activationRange, 0, attenuation, 0);
-    }
-    else
-    {
-        float r = radius * lightQuadraticRadiusMult();
-        float attenuation = lightQuadraticValue() / std::pow(r, 2);
-        float activationRange = std::sqrt(1 / (threshold * attenuation));
-        light->setAttenuation(activationRange, 0, 0, attenuation);
-    }
-
-    // If there's an AttachLight bone, attach the light to that, otherwise attach it to the base scene node
-    if (skelBase && skelBase->getSkeleton ()->hasBone ("AttachLight"))
-    {
-        skelBase->attachObjectToBone ("AttachLight", light);
-    }
-    else
-    {
-        Ogre::SceneNode* childNode = insert->createChildSceneNode (fallbackCenter);
-        childNode->attachObject(light);
-    }
-
-    mLights.push_back(info);
+    if(anim.get() != NULL)
+        mObjects.insert(std::make_pair(ptr, anim.release()));
 }
 
 bool Objects::deleteObject (const MWWorld::Ptr& ptr)
 {
-    if (Ogre::SceneNode *base = ptr.getRefData().getBaseNode())
+    if(!ptr.getRefData().getBaseNode())
+        return true;
+
+    PtrAnimationMap::iterator iter = mObjects.find(ptr);
+    if(iter != mObjects.end())
     {
-        Ogre::SceneNode *parent = base->getParentSceneNode();
+        delete iter->second;
+        mObjects.erase(iter);
 
-        for (std::map<MWWorld::Ptr::CellStore *, Ogre::SceneNode *>::const_iterator iter (
-            mCellSceneNodes.begin()); iter!=mCellSceneNodes.end(); ++iter)
-            if (iter->second==parent)
-            {
-                clearSceneNode (base);
-                base->removeAndDestroyAllChildren();
-                mRenderer.getScene()->destroySceneNode (base);
-                ptr.getRefData().setBaseNode (0);
-                return true;
-            }
-
-        return false;
+        mRenderer.getScene()->destroySceneNode(ptr.getRefData().getBaseNode());
+        ptr.getRefData().setBaseNode(0);
+        return true;
     }
 
-    return true;
+    return false;
 }
+
 
 void Objects::removeCell(MWWorld::Ptr::CellStore* store)
 {
-    if(mCellSceneNodes.find(store) != mCellSceneNodes.end())
+    for(PtrAnimationMap::iterator iter = mObjects.begin();iter != mObjects.end();)
     {
-        Ogre::SceneNode* base = mCellSceneNodes[store];
-
-        for (int i=0; i<base->numChildren(); ++i)
-            clearSceneNode (static_cast<Ogre::SceneNode *> (base->getChild (i)));
-
-        base->removeAndDestroyAllChildren();
-        mCellSceneNodes.erase(store);
-        mRenderer.getScene()->destroySceneNode(base);
-        base = 0;
+        if(iter->first.getCell() == store)
+        {
+            delete iter->second;
+            mObjects.erase(iter++);
+        }
+        else
+            ++iter;
     }
 
-    if(mStaticGeometry.find(store) != mStaticGeometry.end())
+    std::map<MWWorld::CellStore*,Ogre::StaticGeometry*>::iterator geom = mStaticGeometry.find(store);
+    if(geom != mStaticGeometry.end())
     {
-        Ogre::StaticGeometry* sg = mStaticGeometry[store];
-        mStaticGeometry.erase(store);
-        mRenderer.getScene()->destroyStaticGeometry (sg);
-        sg = 0;
+        Ogre::StaticGeometry *sg = geom->second;
+        mStaticGeometry.erase(geom);
+        mRenderer.getScene()->destroyStaticGeometry(sg);
     }
-    if(mStaticGeometrySmall.find(store) != mStaticGeometrySmall.end())
+
+    geom = mStaticGeometrySmall.find(store);
+    if(geom != mStaticGeometrySmall.end())
     {
-        Ogre::StaticGeometry* sg = mStaticGeometrySmall[store];
+        Ogre::StaticGeometry *sg = geom->second;
         mStaticGeometrySmall.erase(store);
-        mRenderer.getScene()->destroyStaticGeometry (sg);
-        sg = 0;
+        mRenderer.getScene()->destroyStaticGeometry(sg);
     }
 
-    if(mBounds.find(store) != mBounds.end())
-        mBounds.erase(store);
+    mBounds.erase(store);
+
+    std::map<MWWorld::CellStore*,Ogre::SceneNode*>::iterator cell = mCellSceneNodes.find(store);
+    if(cell != mCellSceneNodes.end())
+    {
+        cell->second->removeAndDestroyAllChildren();
+        mRenderer.getScene()->destroySceneNode(cell->second);
+        mCellSceneNodes.erase(cell);
+    }
 }
 
 void Objects::buildStaticGeometry(MWWorld::Ptr::CellStore& cell)
@@ -397,146 +232,23 @@ Ogre::AxisAlignedBox Objects::getDimensions(MWWorld::Ptr::CellStore* cell)
 
 void Objects::enableLights()
 {
-    std::vector<LightInfo>::iterator it = mLights.begin();
-    while (it != mLights.end())
-    {
-        if (mRootNode->getCreator()->hasLight(it->name))
-        {
-            mRootNode->getCreator()->getLight(it->name)->setVisible(true);
-            ++it;
-        }
-        else
-            it = mLights.erase(it);
-    }
+    PtrAnimationMap::const_iterator it = mObjects.begin();
+    for(;it != mObjects.end();it++)
+        it->second->enableLights(true);
 }
 
 void Objects::disableLights()
 {
-    std::vector<LightInfo>::iterator it = mLights.begin();
-    while (it != mLights.end())
-    {
-        if (mRootNode->getCreator()->hasLight(it->name))
-        {
-            mRootNode->getCreator()->getLight(it->name)->setVisible(false);
-            ++it;
-        }
-        else
-            it = mLights.erase(it);
-    }
-}
-
-namespace MWRender
-{
-    namespace Pulse
-    {
-        static float amplitude (float phase)
-        {
-            return sin (phase);
-        }
-    }
-
-    namespace Flicker
-    {
-        static const float fa = 0.785398f;
-        static const float fb = 1.17024f;
-
-        static const float tdo = 0.94f;
-        static const float tdm = 2.48f;
-
-        static const float f [3] = { 1.5708f,   4.18774f, 5.19934f };
-        static const float o [3] = { 0.804248f, 2.11115f, 3.46832f };
-        static const float m [3] = { 1.0f,      0.785f,   0.876f   };
-        static const float s = 0.394f;
-
-        static const float phase_wavelength = 120.0f * 3.14159265359f / fa;
-
-        static float frequency (float x)
-        {
-            return tdo + tdm * sin (fa * x);
-        }
-
-        static float amplitude (float x)
-        {
-            float v = 0.0f;
-            for (int i = 0; i < 3; ++i)
-                v += sin (fb*x*f[i] + o[1])*m[i];
-            return v * s;
-        }
-    }
+    PtrAnimationMap::const_iterator it = mObjects.begin();
+    for(;it != mObjects.end();it++)
+        it->second->enableLights(false);
 }
 
 void Objects::update(const float dt)
 {
-    std::vector<LightInfo>::iterator it = mLights.begin();
-    while (it != mLights.end())
-    {
-        if (mRootNode->getCreator()->hasLight(it->name))
-        {
-            Ogre::Light* light = mRootNode->getCreator()->getLight(it->name);
-
-            float brightness;
-            float cycle_time;
-            float time_distortion;
-
-            if ((it->type == LT_Pulse) && (it->type == LT_PulseSlow))
-            {
-                cycle_time = 2 * Ogre::Math::PI;
-                time_distortion = 20.0f;
-            }
-            else
-            {
-                cycle_time = 500.0f;
-                it->phase = fmod (it->phase + dt, Flicker::phase_wavelength);
-                time_distortion = Flicker::frequency (it->phase);
-            }
-
-            it->time += it->dir*dt*time_distortion;
-            if (it->dir > 0 && it->time > +cycle_time)
-            {
-                it->dir = -1.0f;
-                it->time = +2*cycle_time - it->time;
-            }
-            if (it->dir < 0 && it->time < -cycle_time)
-            {
-                it->dir = +1.0f;
-                it->time = -2*cycle_time - it->time;
-            }
-
-            static const float fast = 4.0f/1.0f;
-            static const float slow = 1.0f/1.0f;
-
-            // These formulas are just guesswork, but they work pretty well
-            if (it->type == LT_Normal)
-            {
-                // Less than 1/255 light modifier for a constant light:
-                brightness = (const float)(1.0 + Flicker::amplitude(it->time*slow) / 255.0 );
-            }
-            else if (it->type == LT_Flicker)
-            {
-                brightness = (const float)(0.75 + Flicker::amplitude(it->time*fast) * 0.25);
-            }
-            else if (it->type == LT_FlickerSlow)
-            {
-                brightness = (const float)(0.75 + Flicker::amplitude(it->time*slow) * 0.25);
-            }
-            else if (it->type == LT_Pulse)
-            {
-                brightness = (const float)(1.0 + Pulse::amplitude (it->time*fast) * 0.25);
-            }
-            else if (it->type == LT_PulseSlow)
-            {
-                brightness = (const float)(1.0 + Pulse::amplitude (it->time*slow) * 0.25);
-            }
-            else
-                assert(0 && "Invalid light type");
-
-            light->setDiffuseColour(it->colour * brightness);
-
-            ++it;
-        }
-        else
-            it = mLights.erase(it);
-    }
+    PtrAnimationMap::const_iterator it = mObjects.begin();
+    for(;it != mObjects.end();it++)
+        it->second->runAnimation(dt);
 }
 
 void Objects::rebuildStaticGeometry()

@@ -8,6 +8,10 @@
 #include <OgreBone.h>
 #include <OgreSubMesh.h>
 #include <OgreSceneManager.h>
+#include <OgreControllerManager.h>
+#include <OgreStaticGeometry.h>
+
+#include <libs/openengine/ogre/lights.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -16,6 +20,9 @@
 #include "../mwmechanics/character.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/fallback.hpp"
+
+#include "renderconst.hpp"
 
 namespace MWRender
 {
@@ -35,17 +42,26 @@ void Animation::AnimationValue::setValue(Ogre::Real)
 
 void Animation::destroyObjectList(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList &objects)
 {
+    for(size_t i = 0;i < objects.mLights.size();i++)
+    {
+        Ogre::Light *light = objects.mLights[i];
+        // If parent is a scene node, it was created specifically for this light. Destroy it now.
+        if(light->isAttached() && !light->isParentTagPoint())
+            sceneMgr->destroySceneNode(light->getParentSceneNode());
+        sceneMgr->destroyLight(light);
+    }
     for(size_t i = 0;i < objects.mParticles.size();i++)
         sceneMgr->destroyParticleSystem(objects.mParticles[i]);
     for(size_t i = 0;i < objects.mEntities.size();i++)
         sceneMgr->destroyEntity(objects.mEntities[i]);
     objects.mControllers.clear();
+    objects.mLights.clear();
     objects.mParticles.clear();
     objects.mEntities.clear();
     objects.mSkelBase = NULL;
 }
 
-Animation::Animation(const MWWorld::Ptr &ptr)
+Animation::Animation(const MWWorld::Ptr &ptr, Ogre::SceneNode *node)
     : mPtr(ptr)
     , mCamera(NULL)
     , mInsert(NULL)
@@ -58,6 +74,8 @@ Animation::Animation(const MWWorld::Ptr &ptr)
 {
     for(size_t i = 0;i < sNumGroups;i++)
         mAnimationValuePtr[i].bind(OGRE_NEW AnimationValue(this));
+    mInsert = node ? node->createChildSceneNode() :
+                     mPtr.getRefData().getBaseNode()->createChildSceneNode();
 }
 
 Animation::~Animation()
@@ -72,11 +90,15 @@ Animation::~Animation()
 }
 
 
-void Animation::setObjectRoot(Ogre::SceneNode *node, const std::string &model, bool baseonly)
+void Animation::setObjectRoot(const std::string &model, bool baseonly)
 {
     OgreAssert(mAnimSources.empty(), "Setting object root while animation sources are set!");
-    if(!mInsert)
-        mInsert = node->createChildSceneNode();
+
+    mSkelBase = NULL;
+    destroyObjectList(mInsert->getCreator(), mObjectRoot);
+
+    if(model.empty())
+        return;
 
     std::string mdlname = Misc::StringUtils::lowerCase(model);
     std::string::size_type p = mdlname.rfind('\\');
@@ -91,9 +113,6 @@ void Animation::setObjectRoot(Ogre::SceneNode *node, const std::string &model, b
         mdlname = model;
         Misc::StringUtils::toLower(mdlname);
     }
-
-    mSkelBase = NULL;
-    destroyObjectList(mInsert->getCreator(), mObjectRoot);
 
     mObjectRoot = (!baseonly ? NifOgre::Loader::createObjects(mInsert, mdlname) :
                                NifOgre::Loader::createObjectBase(mInsert, mdlname));
@@ -140,28 +159,47 @@ void Animation::setObjectRoot(Ogre::SceneNode *node, const std::string &model, b
     }
 }
 
-void Animation::setRenderProperties(const NifOgre::ObjectList &objlist, Ogre::uint32 visflags, Ogre::uint8 solidqueue, Ogre::uint8 transqueue)
-{
-    for(size_t i = 0;i < objlist.mEntities.size();i++)
-    {
-        Ogre::Entity *ent = objlist.mEntities[i];
-        if(visflags != 0)
-            ent->setVisibilityFlags(visflags);
 
-        for(unsigned int j = 0;j < ent->getNumSubEntities();++j)
+class VisQueueSet {
+    Ogre::uint32 mVisFlags;
+    Ogre::uint8 mSolidQueue, mTransQueue;
+    Ogre::Real mDist;
+
+public:
+    VisQueueSet(Ogre::uint32 visflags, Ogre::uint8 solidqueue, Ogre::uint8 transqueue, Ogre::Real dist)
+      : mVisFlags(visflags), mSolidQueue(solidqueue), mTransQueue(transqueue), mDist(dist)
+    { }
+
+    void operator()(Ogre::Entity *entity) const
+    {
+        if(mVisFlags != 0)
+            entity->setVisibilityFlags(mVisFlags);
+        entity->setRenderingDistance(mDist);
+
+        unsigned int numsubs = entity->getNumSubEntities();
+        for(unsigned int i = 0;i < numsubs;++i)
         {
-            Ogre::SubEntity* subEnt = ent->getSubEntity(j);
-            subEnt->setRenderQueueGroup(subEnt->getMaterial()->isTransparent() ? transqueue : solidqueue);
+            Ogre::SubEntity* subEnt = entity->getSubEntity(i);
+            subEnt->setRenderQueueGroup(subEnt->getMaterial()->isTransparent() ? mTransQueue : mSolidQueue);
         }
     }
-    for(size_t i = 0;i < objlist.mParticles.size();i++)
+
+    void operator()(Ogre::ParticleSystem *psys) const
     {
-        Ogre::ParticleSystem *part = objlist.mParticles[i];
-        if(visflags != 0)
-            part->setVisibilityFlags(visflags);
+        if(mVisFlags != 0)
+            psys->setVisibilityFlags(mVisFlags);
+        psys->setRenderingDistance(mDist);
         // TODO: Check particle material for actual transparency
-        part->setRenderQueueGroup(transqueue);
+        psys->setRenderQueueGroup(mTransQueue);
     }
+};
+
+void Animation::setRenderProperties(const NifOgre::ObjectList &objlist, Ogre::uint32 visflags, Ogre::uint8 solidqueue, Ogre::uint8 transqueue, Ogre::Real dist)
+{
+    std::for_each(objlist.mEntities.begin(), objlist.mEntities.end(),
+                  VisQueueSet(visflags, solidqueue, transqueue, dist));
+    std::for_each(objlist.mParticles.begin(), objlist.mParticles.end(),
+                  VisQueueSet(visflags, solidqueue, transqueue, dist));
 }
 
 
@@ -251,6 +289,76 @@ void Animation::clearAnimSources()
     mNonAccumRoot = NULL;
 
     mAnimSources.clear();
+}
+
+
+void Animation::addExtraLight(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList &objlist, const ESM::Light *light)
+{
+    const MWWorld::Fallback *fallback = MWBase::Environment::get().getWorld()->getFallback();
+
+    const int clr = light->mData.mColor;
+    Ogre::ColourValue color(((clr >> 0) & 0xFF) / 255.0f,
+                            ((clr >> 8) & 0xFF) / 255.0f,
+                            ((clr >> 16) & 0xFF) / 255.0f);
+    const float radius = float(light->mData.mRadius);
+
+    if((light->mData.mFlags&ESM::Light::Negative))
+        color *= -1;
+
+    objlist.mLights.push_back(sceneMgr->createLight());
+    Ogre::Light *olight = objlist.mLights.back();
+    olight->setDiffuseColour(color);
+
+    Ogre::ControllerValueRealPtr src(Ogre::ControllerManager::getSingleton().getFrameTimeSource());
+    Ogre::ControllerValueRealPtr dest(OGRE_NEW OEngine::Render::LightValue(olight, color));
+    Ogre::ControllerFunctionRealPtr func(OGRE_NEW OEngine::Render::LightFunction(
+        (light->mData.mFlags&ESM::Light::Flicker) ? OEngine::Render::LT_Flicker :
+        (light->mData.mFlags&ESM::Light::FlickerSlow) ? OEngine::Render::LT_FlickerSlow :
+        (light->mData.mFlags&ESM::Light::Pulse) ? OEngine::Render::LT_Pulse :
+        (light->mData.mFlags&ESM::Light::PulseSlow) ? OEngine::Render::LT_PulseSlow :
+        OEngine::Render::LT_Normal
+    ));
+    objlist.mControllers.push_back(Ogre::Controller<Ogre::Real>(src, dest, func));
+
+    bool interior = !(mPtr.isInCell() && mPtr.getCell()->mCell->isExterior());
+    bool quadratic = fallback->getFallbackBool("LightAttenuation_OutQuadInLin") ?
+                     !interior : fallback->getFallbackBool("LightAttenuation_UseQuadratic");
+
+    // with the standard 1 / (c + d*l + d*d*q) equation the attenuation factor never becomes zero,
+    // so we ignore lights if their attenuation falls below this factor.
+    const float threshold = 0.03;
+
+    if (!quadratic)
+    {
+        float r = radius * fallback->getFallbackFloat("LightAttenuation_LinearRadiusMult");
+        float attenuation = fallback->getFallbackFloat("LightAttenuation_LinearValue") / r;
+        float activationRange = 1.0f / (threshold * attenuation);
+        olight->setAttenuation(activationRange, 0, attenuation, 0);
+    }
+    else
+    {
+        float r = radius * fallback->getFallbackFloat("LightAttenuation_QuadraticRadiusMult");
+        float attenuation = fallback->getFallbackFloat("LightAttenuation_QuadraticValue") / std::pow(r, 2);
+        float activationRange = std::sqrt(1.0f / (threshold * attenuation));
+        olight->setAttenuation(activationRange, 0, 0, attenuation);
+    }
+
+    // If there's an AttachLight bone, attach the light to that, otherwise put it in the center,
+    if(objlist.mSkelBase && objlist.mSkelBase->getSkeleton()->hasBone("AttachLight"))
+        objlist.mSkelBase->attachObjectToBone("AttachLight", olight);
+    else
+    {
+        Ogre::AxisAlignedBox bounds = Ogre::AxisAlignedBox::BOX_NULL;
+        for(size_t i = 0;i < objlist.mEntities.size();i++)
+        {
+            Ogre::Entity *ent = objlist.mEntities[i];
+            bounds.merge(ent->getBoundingBox());
+        }
+
+        Ogre::SceneNode *node = bounds.isFinite() ? mInsert->createChildSceneNode(bounds.getCenter())
+                                                  : mInsert->createChildSceneNode();
+        node->attachObject(olight);
+    }
 }
 
 
@@ -805,6 +913,43 @@ void Animation::showWeapons(bool showWeapon)
 {
 }
 
+
+class ToggleLight {
+    bool mEnable;
+
+public:
+    ToggleLight(bool enable) : mEnable(enable) { }
+
+    void operator()(Ogre::Light *light) const
+    { light->setVisible(mEnable); }
+};
+
+void Animation::enableLights(bool enable)
+{
+    std::for_each(mObjectRoot.mLights.begin(), mObjectRoot.mLights.end(), ToggleLight(enable));
+}
+
+
+class MergeBounds {
+    Ogre::AxisAlignedBox *mBounds;
+
+public:
+    MergeBounds(Ogre::AxisAlignedBox *bounds) : mBounds(bounds) { }
+
+    void operator()(Ogre::MovableObject *obj)
+    {
+        mBounds->merge(obj->getWorldBoundingBox(true));
+    }
+};
+
+Ogre::AxisAlignedBox Animation::getWorldBounds()
+{
+    Ogre::AxisAlignedBox bounds = Ogre::AxisAlignedBox::BOX_NULL;
+    std::for_each(mObjectRoot.mEntities.begin(), mObjectRoot.mEntities.end(), MergeBounds(&bounds));
+    return bounds;
+}
+
+
 bool Animation::isPriorityActive(int priority) const
 {
     for (AnimStateMap::const_iterator it = mStates.begin(); it != mStates.end(); ++it)
@@ -831,6 +976,67 @@ void Animation::detachObjectFromBone(Ogre::MovableObject *obj)
     if(iter != mAttachedObjects.end())
         mAttachedObjects.erase(iter);
     mSkelBase->detachObjectFromBone(obj);
+}
+
+
+ObjectAnimation::ObjectAnimation(const MWWorld::Ptr& ptr, const std::string &model, bool isStatic)
+  : Animation(ptr, ptr.getRefData().getBaseNode())
+{
+    setObjectRoot(model, false);
+
+    Ogre::AxisAlignedBox bounds = getWorldBounds();
+
+    Ogre::Vector3 extents = bounds.getSize();
+    extents *= mInsert->getParentSceneNode()->getScale();
+    float size = std::max(std::max(extents.x, extents.y), extents.z);
+
+    bool small = (size < Settings::Manager::getInt("small object size", "Viewing distance")) &&
+                 Settings::Manager::getBool("limit small object distance", "Viewing distance");
+    // do not fade out doors. that will cause holes and look stupid
+    if(ptr.getTypeName().find("Door") != std::string::npos)
+        small = false;
+
+    float dist = small ? Settings::Manager::getInt("small object distance", "Viewing distance") : 0.0f;
+    setRenderProperties(mObjectRoot, isStatic ? (small ? RV_StaticsSmall : RV_Statics) : RV_Misc,
+                        RQG_Main, RQG_Alpha, dist);
+}
+
+void ObjectAnimation::addLight(const ESM::Light *light)
+{
+    addExtraLight(mInsert->getCreator(), mObjectRoot, light);
+}
+
+
+class FindEntityTransparency {
+public:
+    bool operator()(Ogre::Entity *ent) const
+    {
+        unsigned int numsubs = ent->getNumSubEntities();
+        for(unsigned int i = 0;i < numsubs;++i)
+        {
+            if(ent->getSubEntity(i)->getMaterial()->isTransparent())
+                return true;
+        }
+        return false;
+    }
+};
+
+bool ObjectAnimation::canBatch() const
+{
+    if(!mObjectRoot.mParticles.empty() || !mObjectRoot.mLights.empty() || !mObjectRoot.mControllers.empty())
+        return false;
+    return std::find_if(mObjectRoot.mEntities.begin(), mObjectRoot.mEntities.end(),
+                        FindEntityTransparency()) == mObjectRoot.mEntities.end();
+}
+
+void ObjectAnimation::fillBatch(Ogre::StaticGeometry *sg)
+{
+    std::vector<Ogre::Entity*>::reverse_iterator iter = mObjectRoot.mEntities.rbegin();
+    for(;iter != mObjectRoot.mEntities.rend();++iter)
+    {
+        Ogre::Node *node = (*iter)->getParentNode();
+        sg->addEntity(*iter, node->_getDerivedPosition(), node->_getDerivedOrientation(), node->_getDerivedScale());
+    }
 }
 
 }

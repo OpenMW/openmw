@@ -52,6 +52,7 @@ protected:
         virtual void setValue(Ogre::Real value);
     };
 
+
     class NullAnimationValue : public Ogre::ControllerValue<Ogre::Real>
     {
     public:
@@ -60,6 +61,7 @@ protected:
         virtual void setValue(Ogre::Real value)
         { }
     };
+
 
     struct AnimSource : public Ogre::AnimationAlloc {
         NifOgre::TextKeyMap mTextKeys;
@@ -151,21 +153,24 @@ protected:
      * Note that you must make sure all animation sources are cleared before reseting the object
      * root. All nodes previously retrieved with getNode will also become invalidated.
      */
-    void setObjectRoot(Ogre::SceneNode *node, const std::string &model, bool baseonly);
+    void setObjectRoot(const std::string &model, bool baseonly);
 
     /* Adds the keyframe controllers in the specified model as a new animation source. Note that
      * the filename portion of the provided model name will be prepended with 'x', and the .nif
      * extension will be replaced with .kf. */
     void addAnimSource(const std::string &model);
 
+    /** Adds an additional light to the given object list using the specified ESM record. */
+    void addExtraLight(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList &objlist, const ESM::Light *light);
+
     static void destroyObjectList(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList &objects);
 
-    static void setRenderProperties(const NifOgre::ObjectList &objlist, Ogre::uint32 visflags, Ogre::uint8 solidqueue, Ogre::uint8 transqueue);
+    static void setRenderProperties(const NifOgre::ObjectList &objlist, Ogre::uint32 visflags, Ogre::uint8 solidqueue, Ogre::uint8 transqueue, Ogre::Real dist=0.0f);
 
     void clearAnimSources();
 
 public:
-    Animation(const MWWorld::Ptr &ptr);
+    Animation(const MWWorld::Ptr &ptr, Ogre::SceneNode *node);
     virtual ~Animation();
 
     void updatePtr(const MWWorld::Ptr &ptr);
@@ -224,6 +229,10 @@ public:
 
     virtual void showWeapons(bool showWeapon);
 
+    void enableLights(bool enable);
+
+    Ogre::AxisAlignedBox getWorldBounds();
+
     void setCamera(Camera *cam)
     { mCamera = cam; }
 
@@ -234,6 +243,16 @@ public:
     // valid until the next setObjectRoot call.
     Ogre::TagPoint *attachObjectToBone(const Ogre::String &bonename, Ogre::MovableObject *obj);
     void detachObjectFromBone(Ogre::MovableObject *obj);
+};
+
+class ObjectAnimation : public Animation {
+public:
+    ObjectAnimation(const MWWorld::Ptr& ptr, const std::string &model, bool isStatic);
+
+    void addLight(const ESM::Light *light);
+
+    bool canBatch() const;
+    void fillBatch(Ogre::StaticGeometry *sg);
 };
 
 }

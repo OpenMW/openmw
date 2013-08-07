@@ -20,46 +20,50 @@
 namespace MWRender
 {
 
-const NpcAnimation::PartInfo NpcAnimation::sPartList[NpcAnimation::sPartListSize] = {
-    { ESM::PRT_Head, "Head" },
-    { ESM::PRT_Hair, "Head" },
-    { ESM::PRT_Neck, "Neck" },
-    { ESM::PRT_Cuirass, "Chest" },
-    { ESM::PRT_Groin, "Groin" },
-    { ESM::PRT_Skirt, "Groin" },
-    { ESM::PRT_RHand, "Right Hand" },
-    { ESM::PRT_LHand, "Left Hand" },
-    { ESM::PRT_RWrist, "Right Wrist" },
-    { ESM::PRT_LWrist, "Left Wrist" },
-    { ESM::PRT_Shield, "Shield Bone" },
-    { ESM::PRT_RForearm, "Right Forearm" },
-    { ESM::PRT_LForearm, "Left Forearm" },
-    { ESM::PRT_RUpperarm, "Right Upper Arm" },
-    { ESM::PRT_LUpperarm, "Left Upper Arm" },
-    { ESM::PRT_RFoot, "Right Foot" },
-    { ESM::PRT_LFoot, "Left Foot" },
-    { ESM::PRT_RAnkle, "Right Ankle" },
-    { ESM::PRT_LAnkle, "Left Ankle" },
-    { ESM::PRT_RKnee, "Right Knee" },
-    { ESM::PRT_LKnee, "Left Knee" },
-    { ESM::PRT_RLeg, "Right Upper Leg" },
-    { ESM::PRT_LLeg, "Left Upper Leg" },
-    { ESM::PRT_RPauldron, "Right Clavicle" },
-    { ESM::PRT_LPauldron, "Left Clavicle" },
-    { ESM::PRT_Weapon, "Weapon Bone" },
-    { ESM::PRT_Tail, "Tail" }
-};
+static NpcAnimation::PartBoneMap createPartListMap()
+{
+    NpcAnimation::PartBoneMap result;
+    result.insert(std::make_pair(ESM::PRT_Head, "Head"));
+    result.insert(std::make_pair(ESM::PRT_Hair, "Head"));
+    result.insert(std::make_pair(ESM::PRT_Neck, "Neck"));
+    result.insert(std::make_pair(ESM::PRT_Cuirass, "Chest"));
+    result.insert(std::make_pair(ESM::PRT_Groin, "Groin"));
+    result.insert(std::make_pair(ESM::PRT_Skirt, "Groin"));
+    result.insert(std::make_pair(ESM::PRT_RHand, "Right Hand"));
+    result.insert(std::make_pair(ESM::PRT_LHand, "Left Hand"));
+    result.insert(std::make_pair(ESM::PRT_RWrist, "Right Wrist"));
+    result.insert(std::make_pair(ESM::PRT_LWrist, "Left Wrist"));
+    result.insert(std::make_pair(ESM::PRT_Shield, "Shield Bone"));
+    result.insert(std::make_pair(ESM::PRT_RForearm, "Right Forearm"));
+    result.insert(std::make_pair(ESM::PRT_LForearm, "Left Forearm"));
+    result.insert(std::make_pair(ESM::PRT_RUpperarm, "Right Upper Arm"));
+    result.insert(std::make_pair(ESM::PRT_LUpperarm, "Left Upper Arm"));
+    result.insert(std::make_pair(ESM::PRT_RFoot, "Right Foot"));
+    result.insert(std::make_pair(ESM::PRT_LFoot, "Left Foot"));
+    result.insert(std::make_pair(ESM::PRT_RAnkle, "Right Ankle"));
+    result.insert(std::make_pair(ESM::PRT_LAnkle, "Left Ankle"));
+    result.insert(std::make_pair(ESM::PRT_RKnee, "Right Knee"));
+    result.insert(std::make_pair(ESM::PRT_LKnee, "Left Knee"));
+    result.insert(std::make_pair(ESM::PRT_RLeg, "Right Upper Leg"));
+    result.insert(std::make_pair(ESM::PRT_LLeg, "Left Upper Leg"));
+    result.insert(std::make_pair(ESM::PRT_RPauldron, "Right Clavicle"));
+    result.insert(std::make_pair(ESM::PRT_LPauldron, "Left Clavicle"));
+    result.insert(std::make_pair(ESM::PRT_Weapon, "Weapon Bone"));
+    result.insert(std::make_pair(ESM::PRT_Tail, "Tail"));
+    return result;
+}
+const NpcAnimation::PartBoneMap NpcAnimation::sPartList = createPartListMap();
 
 NpcAnimation::~NpcAnimation()
 {
     Ogre::SceneManager *sceneMgr = mInsert->getCreator();
-    for(size_t i = 0;i < sPartListSize;i++)
+    for(size_t i = 0;i < ESM::PRT_Count;i++)
         destroyObjectList(sceneMgr, mObjectParts[i]);
 }
 
 
 NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWorld::InventoryStore& inv, int visibilityFlags, ViewMode viewMode)
-  : Animation(ptr),
+  : Animation(ptr, node),
     mStateID(-1),
     mTimeToChange(0),
     mVisibilityFlags(visibilityFlags),
@@ -82,7 +86,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
 {
     mNpc = mPtr.get<ESM::NPC>()->mBase;
 
-    for(size_t i = 0;i < sPartListSize;i++)
+    for(size_t i = 0;i < ESM::PRT_Count;i++)
     {
         mPartslots[i] = -1;  //each slot is empty
         mPartPriorities[i] = 0;
@@ -102,7 +106,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
     std::string smodel = (viewMode != VM_FirstPerson) ?
                          (!isBeast ? "meshes\\base_anim.nif"     : "meshes\\base_animkna.nif") :
                          (!isBeast ? "meshes\\base_anim.1st.nif" : "meshes\\base_animkna.1st.nif") ;
-    setObjectRoot(node, smodel, true);
+    setObjectRoot(smodel, true);
 
     if(mViewMode != VM_FirstPerson)
     {
@@ -143,7 +147,7 @@ void NpcAnimation::setViewMode(NpcAnimation::ViewMode viewMode)
     std::string smodel = (viewMode != VM_FirstPerson) ?
                          (!isBeast ? "meshes\\base_anim.nif"     : "meshes\\base_animkna.nif") :
                          (!isBeast ? "meshes\\base_anim.1st.nif" : "meshes\\base_animkna.1st.nif") ;
-    setObjectRoot(mInsert->getParentSceneNode(), smodel, true);
+    setObjectRoot(smodel, true);
 
     if(mViewMode != VM_FirstPerson)
     {
@@ -168,8 +172,8 @@ void NpcAnimation::setViewMode(NpcAnimation::ViewMode viewMode)
     }
     MWBase::Environment::get().getMechanicsManager()->forceStateUpdate(mPtr);
 
-    for(size_t i = 0;i < sPartListSize;i++)
-        removeIndividualPart(i);
+    for(size_t i = 0;i < ESM::PRT_Count;i++)
+        removeIndividualPart((ESM::PartReferenceType)i);
     forceUpdate();
 }
 
@@ -266,6 +270,19 @@ void NpcAnimation::updateParts(bool forceupdate)
     }
     if(mViewMode == VM_HeadOnly)
         return;
+
+    if(mPartPriorities[ESM::PRT_Shield] < 1)
+    {
+        MWWorld::ContainerStoreIterator store = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
+        MWWorld::Ptr part;
+        if(store != inv.end() && (part=*store).getTypeName() == typeid(ESM::Light).name())
+        {
+            const ESM::Light *light = part.get<ESM::Light>()->mBase;
+            addOrReplaceIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft,
+                                       1, "meshes\\"+light->mModel);
+            addExtraLight(mInsert->getCreator(), mObjectParts[ESM::PRT_Shield], light);
+        }
+    }
 
     showWeapons(mShowWeapons);
 
@@ -366,23 +383,31 @@ void NpcAnimation::updateParts(bool forceupdate)
         {
             const ESM::BodyPart* bodypart = parts[part];
             if(bodypart)
-                addOrReplaceIndividualPart(part, -1,1, "meshes\\"+bodypart->mModel);
+                addOrReplaceIndividualPart((ESM::PartReferenceType)part, -1, 1,
+                                           "meshes\\"+bodypart->mModel);
         }
     }
 }
+
+class SetObjectGroup {
+    int mGroup;
+
+public:
+    SetObjectGroup(int group) : mGroup(group) { }
+
+    void operator()(Ogre::MovableObject *obj) const
+    {
+        obj->getUserObjectBindings().setUserAny(Ogre::Any(mGroup));
+    }
+};
 
 NifOgre::ObjectList NpcAnimation::insertBoundedPart(const std::string &model, int group, const std::string &bonename)
 {
     NifOgre::ObjectList objects = NifOgre::Loader::createObjects(mSkelBase, bonename, mInsert, model);
     setRenderProperties(objects, (mViewMode == VM_FirstPerson) ? RV_FirstPerson : mVisibilityFlags, RQG_Main, RQG_Alpha);
 
-    for(size_t i = 0;i < objects.mEntities.size();i++)
-    {
-        Ogre::Entity *ent = objects.mEntities[i];
-        ent->getUserObjectBindings().setUserAny(Ogre::Any(group));
-    }
-    for(size_t i = 0;i < objects.mParticles.size();i++)
-        objects.mParticles[i]->getUserObjectBindings().setUserAny(Ogre::Any(group));
+    std::for_each(objects.mEntities.begin(), objects.mEntities.end(), SetObjectGroup(group));
+    std::for_each(objects.mParticles.begin(), objects.mParticles.end(), SetObjectGroup(group));
 
     if(objects.mSkelBase)
     {
@@ -422,7 +447,7 @@ Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
         node->pitch(Ogre::Radian(pitch*0.75f), Ogre::Node::TS_WORLD);
     }
 
-    for(size_t i = 0;i < sPartListSize;i++)
+    for(size_t i = 0;i < ESM::PRT_Count;i++)
     {
         std::vector<Ogre::Controller<Ogre::Real> >::iterator ctrl(mObjectParts[i].mControllers.begin());
         for(;ctrl != mObjectParts[i].mControllers.end();ctrl++)
@@ -437,22 +462,15 @@ Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
     return ret;
 }
 
-void NpcAnimation::removeIndividualPart(int type)
+void NpcAnimation::removeIndividualPart(ESM::PartReferenceType type)
 {
     mPartPriorities[type] = 0;
     mPartslots[type] = -1;
 
-    for(size_t i = 0;i < sPartListSize;i++)
-    {
-        if(type == sPartList[i].type)
-        {
-            destroyObjectList(mInsert->getCreator(), mObjectParts[i]);
-            break;
-        }
-    }
+    destroyObjectList(mInsert->getCreator(), mObjectParts[type]);
 }
 
-void NpcAnimation::reserveIndividualPart(int type, int group, int priority)
+void NpcAnimation::reserveIndividualPart(ESM::PartReferenceType type, int group, int priority)
 {
     if(priority > mPartPriorities[type])
     {
@@ -464,14 +482,14 @@ void NpcAnimation::reserveIndividualPart(int type, int group, int priority)
 
 void NpcAnimation::removePartGroup(int group)
 {
-    for(int i = 0; i < 27; i++)
+    for(int i = 0; i < ESM::PRT_Count; i++)
     {
         if(mPartslots[i] == group)
-            removeIndividualPart(i);
+            removeIndividualPart((ESM::PartReferenceType)i);
     }
 }
 
-bool NpcAnimation::addOrReplaceIndividualPart(int type, int group, int priority, const std::string &mesh)
+bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int group, int priority, const std::string &mesh)
 {
     if(priority <= mPartPriorities[type])
         return false;
@@ -480,28 +498,36 @@ bool NpcAnimation::addOrReplaceIndividualPart(int type, int group, int priority,
     mPartslots[type] = group;
     mPartPriorities[type] = priority;
 
-    for(size_t i = 0;i < sPartListSize;i++)
+    mObjectParts[type] = insertBoundedPart(mesh, group, sPartList.at(type));
+    if(mObjectParts[type].mSkelBase && mObjectParts[type].mSkelBase->isParentTagPoint())
     {
-        if(type == sPartList[i].type)
+        Ogre::Node *root = mObjectParts[type].mSkelBase->getParentNode();
+        Ogre::SkeletonInstance *skel = mObjectParts[type].mSkelBase->getSkeleton();
+        if(skel->hasBone("BoneOffset"))
         {
-            mObjectParts[i] = insertBoundedPart(mesh, group, sPartList[i].name);
-
-            // TODO:
-            // type == ESM::PRT_Head should get an animation source based on the current output of
-            // the actor's 'say' sound (0 = silent, 1 = loud?).
-            // type == ESM::PRT_Weapon should get an animation source based on the current offset
-            // of the weapon attack animation (from its beginning, or start marker?)
-            std::vector<Ogre::Controller<Ogre::Real> >::iterator ctrl(mObjectParts[i].mControllers.begin());
-            for(;ctrl != mObjectParts[i].mControllers.end();ctrl++)
-            {
-                if(ctrl->getSource().isNull())
-                    ctrl->setSource(mNullAnimationValuePtr);
-            }
-
-            break;
+            Ogre::Bone *offset = skel->getBone("BoneOffset");
+            root->translate(offset->getPosition());
+            root->rotate(offset->getOrientation());
+            // HACK: Why an extra -90 degree rotation?
+            root->pitch(Ogre::Degree(-90.0f));
+            root->scale(offset->getScale());
+            root->setInitialState();
         }
     }
-    return true;
+
+    // TODO:
+    // type == ESM::PRT_Head should get an animation source based on the current output of
+    // the actor's 'say' sound (0 = silent, 1 = loud?).
+    // type == ESM::PRT_Weapon should get an animation source based on the current offset
+    // of the weapon attack animation (from its beginning, or start marker?)
+    std::vector<Ogre::Controller<Ogre::Real> >::iterator ctrl(mObjectParts[type].mControllers.begin());
+    for(;ctrl != mObjectParts[type].mControllers.end();ctrl++)
+    {
+        if(ctrl->getSource().isNull())
+            ctrl->setSource(mNullAnimationValuePtr);
+    }
+
+   return true;
 }
 
 void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::PartReference> &parts)
@@ -542,9 +568,9 @@ void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::
         }
 
         if(bodypart)
-            addOrReplaceIndividualPart(part->mPart, group, priority, "meshes\\"+bodypart->mModel);
+            addOrReplaceIndividualPart((ESM::PartReferenceType)part->mPart, group, priority, "meshes\\"+bodypart->mModel);
         else
-            reserveIndividualPart(part->mPart, group, priority);
+            reserveIndividualPart((ESM::PartReferenceType)part->mPart, group, priority);
     }
 }
 
@@ -557,7 +583,8 @@ void NpcAnimation::showWeapons(bool showWeapon)
         mWeapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
         if(mWeapon != inv.end()) // special case for weapons
         {
-            std::string mesh = MWWorld::Class::get(*mWeapon).getModel(*mWeapon);
+            MWWorld::Ptr weapon = *mWeapon;
+            std::string mesh = MWWorld::Class::get(weapon).getModel(weapon);
             addOrReplaceIndividualPart(ESM::PRT_Weapon, MWWorld::InventoryStore::Slot_CarriedRight, 1, mesh);
         }
     }
