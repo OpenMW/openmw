@@ -138,6 +138,10 @@ namespace MWBase
             virtual void setValue (const std::string& id, const std::string& value) = 0;
             virtual void setValue (const std::string& id, int value) = 0;
 
+            /// Set time left for the player to start drowning (update the drowning bar)
+            /// @param time value from [0,20]
+            virtual void setDrowningTimeLeft (float time) =0;
+
             virtual void setPlayerClass (const ESM::Class &class_) = 0;
             ///< set current class of player
 
@@ -180,6 +184,9 @@ namespace MWBase
 
             virtual void setInteriorMapTexture(const int x, const int y) = 0;
             ///< set the index of the map texture that should be used (for interiors)
+
+            /// sets the visibility of the drowning bar
+            virtual void setDrowningBarVisibility(bool visible) = 0;
 
             /// sets the visibility of the hud health/magicka/stamina bars
             virtual void setHMSVisibility(bool visible) = 0;

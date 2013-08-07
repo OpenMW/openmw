@@ -1566,6 +1566,17 @@ namespace MWWorld
         return false;
     }
 
+    bool World::isSubmerged(const MWWorld::Ptr &object) const
+    {
+        float *fpos = object.getRefData().getPosition().pos;
+        Ogre::Vector3 pos(fpos[0], fpos[1], fpos[2]);
+
+        const OEngine::Physic::PhysicActor *actor = mPhysEngine->getCharacter(object.getRefData().getHandle());
+        if(actor) pos.z += 1.85*actor->getHalfExtents().z;
+
+        return isUnderwater(object.getCell(), pos);
+    }
+
     bool
     World::isSwimming(const MWWorld::Ptr &object) const
     {

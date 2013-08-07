@@ -25,6 +25,8 @@ namespace MWGui
         , mHealth(NULL)
         , mMagicka(NULL)
         , mStamina(NULL)
+        , mDrowning(NULL)
+        , mDrowningFrame(NULL)
         , mWeapImage(NULL)
         , mSpellImage(NULL)
         , mWeapStatus(NULL)
@@ -68,6 +70,11 @@ namespace MWGui
         healthFrame->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onHMSClicked);
         magickaFrame->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onHMSClicked);
         fatigueFrame->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onHMSClicked);
+
+        //Drowning bar
+        getWidget(mDrowningFrame, "DrowningFrame");
+        getWidget(mDrowning, "Drowning");
+        mDrowning->setProgressRange(200);
 
         const MyGUI::IntSize& viewSize = MyGUI::RenderManager::getInstance().getViewSize();
 
@@ -195,6 +202,16 @@ namespace MWGui
                         break;
                 }
             }
+    }
+
+    void HUD::setDrowningTimeLeft(float time)
+    {
+        mDrowning->setProgressPosition(time/20.0*200.0);
+    }
+
+    void HUD::setDrowningBarVisible(bool visible)
+    {
+        mDrowningFrame->setVisible(visible);
     }
 
     void HUD::onWorldClicked(MyGUI::Widget* _sender)

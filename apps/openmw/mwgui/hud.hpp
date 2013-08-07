@@ -18,6 +18,11 @@ namespace MWGui
         void setTriangleCount(unsigned int count);
         void setBatchCount(unsigned int count);
 
+        /// Set time left for the player to start drowning
+        /// @param time value from [0,20]
+        void setDrowningTimeLeft(float time);
+        void setDrowningBarVisible(bool visible);
+
         void setHmsVisible(bool visible);
         void setWeapVisible(bool visible);
         void setSpellVisible(bool visible);
@@ -50,7 +55,7 @@ namespace MWGui
         void setEnemy(const MWWorld::Ptr& enemy);
 
     private:
-        MyGUI::ProgressBar *mHealth, *mMagicka, *mStamina, *mEnemyHealth;
+        MyGUI::ProgressBar *mHealth, *mMagicka, *mStamina, *mEnemyHealth, *mDrowning;
         MyGUI::Widget* mHealthFrame;
         MyGUI::Widget *mWeapBox, *mSpellBox, *mSneakBox;
         MyGUI::ImageBox *mWeapImage, *mSpellImage;
@@ -62,6 +67,7 @@ namespace MWGui
         MyGUI::ImageBox* mCrosshair;
         MyGUI::TextBox* mCellNameBox;
         MyGUI::TextBox* mWeaponSpellBox;
+        MyGUI::Widget* mDrowningFrame;
 
         MyGUI::Widget* mDummy;
 

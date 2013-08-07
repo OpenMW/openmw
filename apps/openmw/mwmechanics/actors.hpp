@@ -44,6 +44,7 @@ namespace MWMechanics
 
             void calculateRestoration (const MWWorld::Ptr& ptr, float duration);
 
+            void updateDrowning (const MWWorld::Ptr& ptr, float duration);
 
         public:
 
