@@ -33,7 +33,7 @@ namespace MWClass
         const std::string &model = ref->mBase->mModel;
 
         MWRender::Objects& objects = renderingInterface.getObjects();
-        objects.insertBegin(ptr, ptr.getRefData().isEnabled(), false);
+        objects.insertBegin(ptr);
         if(!model.empty())
             objects.insertMesh(ptr, "meshes\\" + model);
         else

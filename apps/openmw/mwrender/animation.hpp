@@ -247,7 +247,7 @@ public:
 
 class ObjectAnimation : public Animation {
 public:
-    ObjectAnimation(const MWWorld::Ptr& ptr, const std::string &model, bool isStatic);
+    ObjectAnimation(const MWWorld::Ptr& ptr, const std::string &model);
 
     void addLight(const ESM::Light *light);
 

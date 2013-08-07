@@ -16,7 +16,7 @@ namespace MWClass
         const std::string model = getModel(ptr);
         if (!model.empty()) {
             MWRender::Objects& objects = renderingInterface.getObjects();
-            objects.insertBegin(ptr, ptr.getRefData().isEnabled(), true);
+            objects.insertBegin(ptr);
             objects.insertMesh(ptr, model);
         }
     }
