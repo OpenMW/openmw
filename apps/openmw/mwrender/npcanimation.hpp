@@ -65,6 +65,8 @@ private:
     int mPartslots[ESM::PRT_Count];  //Each part slot is taken by clothing, armor, or is empty
     int mPartPriorities[ESM::PRT_Count];
 
+    void updateNpcBase();
+
     NifOgre::ObjectList insertBoundedPart(const std::string &model, int group, const std::string &bonename);
 
     void updateParts(bool forceupdate = false);
