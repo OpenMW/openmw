@@ -1,7 +1,7 @@
 #include "console.hpp"
 
 #include <components/compiler/exception.hpp>
-#include <components/compiler/registerextensions.hpp>
+#include <components/compiler/extensions0.hpp>
 
 #include "../mwscript/extensions.hpp"
 

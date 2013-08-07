@@ -1,4 +1,4 @@
-#include "registerextensions.hpp"
+#include "extensions0.hpp"
 
 #include "opcodes.hpp"
 #include "extensions.hpp"

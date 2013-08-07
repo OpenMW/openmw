@@ -100,8 +100,6 @@ namespace Compiler
 
     namespace Control
     {
-    	// not opcodes, but are required by apps/openmw and components/compiler
-    	// do they belong here?
     	const int numberOfControls = 7;
 
     	extern const char *controls[numberOfControls];
@@ -261,8 +259,6 @@ namespace Compiler
 
     namespace Stats
     {
-    	// not opcodes, but are required by apps/openmw and components/compiler
-    	// do they belong here?
     	const int numberOfAttributes = 8;
         const int numberOfDynamics = 3;
         const int numberOfSkills = 27;
