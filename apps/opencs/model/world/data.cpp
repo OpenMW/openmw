@@ -12,6 +12,7 @@
 #include "idtable.hpp"
 #include "columnimp.hpp"
 #include "regionmap.hpp"
+#include "columns.hpp"
 
 void CSMWorld::Data::addModel (QAbstractItemModel *model, UniversalId::Type type1,
     UniversalId::Type type2)
@@ -76,8 +77,8 @@ CSMWorld::Data::Data() : mRefs (mCells)
     mRaces.addColumn (new FixedRecordTypeColumn<ESM::Race> (UniversalId::Type_Race));
     mRaces.addColumn (new NameColumn<ESM::Race>);
     mRaces.addColumn (new DescriptionColumn<ESM::Race>);
-    mRaces.addColumn (new FlagColumn<ESM::Race> ("Playable", 0x1));
-    mRaces.addColumn (new FlagColumn<ESM::Race> ("Beast Race", 0x2));
+    mRaces.addColumn (new FlagColumn<ESM::Race> (Columns::ColumnId_Playable, 0x1));
+    mRaces.addColumn (new FlagColumn<ESM::Race> (Columns::ColumnId_BeastRace, 0x2));
     mRaces.addColumn (new WeightHeightColumn<ESM::Race> (true, true));
     mRaces.addColumn (new WeightHeightColumn<ESM::Race> (true, false));
     mRaces.addColumn (new WeightHeightColumn<ESM::Race> (false, true));
@@ -116,17 +117,17 @@ CSMWorld::Data::Data() : mRefs (mCells)
     mSpells.addColumn (new NameColumn<ESM::Spell>);
     mSpells.addColumn (new SpellTypeColumn<ESM::Spell>);
     mSpells.addColumn (new CostColumn<ESM::Spell>);
-    mSpells.addColumn (new FlagColumn<ESM::Spell> ("Autocalc", 0x1));
-    mSpells.addColumn (new FlagColumn<ESM::Spell> ("Starter Spell", 0x2));
-    mSpells.addColumn (new FlagColumn<ESM::Spell> ("Always Succeeds", 0x4));
+    mSpells.addColumn (new FlagColumn<ESM::Spell> (Columns::ColumnId_AutoCalc, 0x1));
+    mSpells.addColumn (new FlagColumn<ESM::Spell> (Columns::ColumnId_StarterSpell, 0x2));
+    mSpells.addColumn (new FlagColumn<ESM::Spell> (Columns::ColumnId_AlwaysSucceeds, 0x4));
 
     mCells.addColumn (new StringIdColumn<Cell>);
     mCells.addColumn (new RecordStateColumn<Cell>);
     mCells.addColumn (new FixedRecordTypeColumn<Cell> (UniversalId::Type_Cell));
     mCells.addColumn (new NameColumn<Cell>);
-    mCells.addColumn (new FlagColumn<Cell> ("Sleep forbidden", ESM::Cell::NoSleep));
-    mCells.addColumn (new FlagColumn<Cell> ("Interior Water", ESM::Cell::HasWater));
-    mCells.addColumn (new FlagColumn<Cell> ("Interior Sky", ESM::Cell::QuasiEx));
+    mCells.addColumn (new FlagColumn<Cell> (Columns::ColumnId_SleepForbidden, ESM::Cell::NoSleep));
+    mCells.addColumn (new FlagColumn<Cell> (Columns::ColumnId_InteriorWater, ESM::Cell::HasWater));
+    mCells.addColumn (new FlagColumn<Cell> (Columns::ColumnId_InteriorSky, ESM::Cell::QuasiEx));
     mCells.addColumn (new RegionColumn<Cell>);
 
     mRefs.addColumn (new StringIdColumn<CellRef> (true));

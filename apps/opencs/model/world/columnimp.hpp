@@ -8,13 +8,15 @@
 #include <QColor>
 
 #include "columnbase.hpp"
+#include "columns.hpp"
 
 namespace CSMWorld
 {
+    /// \note Shares ID with VarValueColumn. A table can not have both.
     template<typename ESXRecordT>
     struct FloatValueColumn : public Column<ESXRecordT>
     {
-        FloatValueColumn() : Column<ESXRecordT> ("Value", ColumnBase::Display_Float) {}
+        FloatValueColumn() : Column<ESXRecordT> (Columns::ColumnId_Value, ColumnBase::Display_Float) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -34,11 +36,12 @@ namespace CSMWorld
         }
     };
 
+    /// \note Shares ID with IdColumn. A table can not have both.
     template<typename ESXRecordT>
     struct StringIdColumn : public Column<ESXRecordT>
     {
         StringIdColumn (bool hidden = false)
-        : Column<ESXRecordT> ("ID", ColumnBase::Display_String,
+        : Column<ESXRecordT> (Columns::ColumnId_Id, ColumnBase::Display_String,
             hidden ? 0 : ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue)
         {}
 
@@ -56,7 +59,9 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct RecordStateColumn : public Column<ESXRecordT>
     {
-        RecordStateColumn() : Column<ESXRecordT> ("*", ColumnBase::Display_RecordState) {}
+        RecordStateColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_Modification, ColumnBase::Display_RecordState)
+        {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -88,7 +93,9 @@ namespace CSMWorld
         int mType;
 
         FixedRecordTypeColumn (int type)
-        : Column<ESXRecordT> ("Record Type", ColumnBase::Display_Integer, 0), mType (type) {}
+        : Column<ESXRecordT> (Columns::ColumnId_RecordType, ColumnBase::Display_Integer, 0),
+          mType (type)
+        {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -105,7 +112,9 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct VarTypeColumn : public Column<ESXRecordT>
     {
-        VarTypeColumn (ColumnBase::Display display) : Column<ESXRecordT> ("Type", display) {}
+        VarTypeColumn (ColumnBase::Display display)
+        : Column<ESXRecordT> (Columns::ColumnId_ValueType, display)
+        {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -125,10 +134,11 @@ namespace CSMWorld
         }
     };
 
+    /// \note Shares ID with FloatValueColumn. A table can not have both.
     template<typename ESXRecordT>
     struct VarValueColumn : public Column<ESXRecordT>
     {
-        VarValueColumn() : Column<ESXRecordT> ("Value", ColumnBase::Display_Var) {}
+        VarValueColumn() : Column<ESXRecordT> (Columns::ColumnId_Value, ColumnBase::Display_Var) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -190,7 +200,9 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct DescriptionColumn : public Column<ESXRecordT>
     {
-        DescriptionColumn() : Column<ESXRecordT> ("Description", ColumnBase::Display_String) {}
+        DescriptionColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_Description, ColumnBase::Display_String)
+        {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -215,7 +227,9 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct SpecialisationColumn : public Column<ESXRecordT>
     {
-        SpecialisationColumn() : Column<ESXRecordT> ("Specialisation", ColumnBase::Display_Specialisation) {}
+        SpecialisationColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_Specialisation, ColumnBase::Display_Specialisation)
+        {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -243,8 +257,8 @@ namespace CSMWorld
         int mIndex;
 
         UseValueColumn (int index)
-        : Column<ESXRecordT> ("Use value #" + boost::lexical_cast<std::string> (index),
-            ColumnBase::Display_Float), mIndex (index)
+        : Column<ESXRecordT> (Columns::ColumnId_UseValue1 + index - 1,  ColumnBase::Display_Float),
+          mIndex (index)
         {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
@@ -270,7 +284,9 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct AttributeColumn : public Column<ESXRecordT>
     {
-        AttributeColumn() : Column<ESXRecordT> ("Attribute", ColumnBase::Display_Attribute) {}
+        AttributeColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_Attribute, ColumnBase::Display_Attribute)
+        {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -295,7 +311,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct NameColumn : public Column<ESXRecordT>
     {
-        NameColumn() : Column<ESXRecordT> ("Name", ColumnBase::Display_String) {}
+        NameColumn() : Column<ESXRecordT> (Columns::ColumnId_Name, ColumnBase::Display_String) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -323,8 +339,9 @@ namespace CSMWorld
         int mIndex;
 
         AttributesColumn (int index)
-        : Column<ESXRecordT> ("Attribute #" + boost::lexical_cast<std::string> (index),
-            ColumnBase::Display_Attribute), mIndex (index) {}
+        : Column<ESXRecordT> (Columns::ColumnId_Attribute1 + index - 1, ColumnBase::Display_Attribute),
+          mIndex (index)
+        {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -353,8 +370,9 @@ namespace CSMWorld
         bool mMajor;
 
         SkillsColumn (int index, bool typePrefix = false, bool major = false)
-        : Column<ESXRecordT> ((typePrefix ? (major ? "Major Skill #" : "Minor Skill #") : "Skill #")+
-            boost::lexical_cast<std::string> (index), ColumnBase::Display_String),
+        : Column<ESXRecordT> ((typePrefix ? (
+            major ? Columns::ColumnId_MajorSkill1 : Columns::ColumnId_MinorSkill1) :
+            Columns::ColumnId_Skill1) + index - 1, ColumnBase::Display_String),
             mIndex (index), mMajor (major)
         {}
 
@@ -393,7 +411,8 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct PlayableColumn : public Column<ESXRecordT>
     {
-        PlayableColumn() : Column<ESXRecordT> ("Playable", ColumnBase::Display_Boolean) {}
+        PlayableColumn() : Column<ESXRecordT> (Columns::ColumnId_Playable, ColumnBase::Display_Boolean)
+        {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -418,7 +437,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct HiddenColumn : public Column<ESXRecordT>
     {
-        HiddenColumn() : Column<ESXRecordT> ("Hidden", ColumnBase::Display_Boolean) {}
+        HiddenColumn() : Column<ESXRecordT> (Columns::ColumnId_Hidden, ColumnBase::Display_Boolean) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -445,8 +464,8 @@ namespace CSMWorld
     {
         int mMask;
 
-        FlagColumn (const std::string& name, int mask)
-        : Column<ESXRecordT> (name, ColumnBase::Display_Boolean), mMask (mask)
+        FlagColumn (int columnId, int mask)
+        : Column<ESXRecordT> (columnId, ColumnBase::Display_Boolean), mMask (mask)
         {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
@@ -481,8 +500,10 @@ namespace CSMWorld
         bool mWeight;
 
         WeightHeightColumn (bool male, bool weight)
-        : Column<ESXRecordT> (male ? (weight ? "Male Weight" : "Male Height") :
-          (weight ? "Female Weight" : "Female Height"), ColumnBase::Display_Float),
+        : Column<ESXRecordT> (male ?
+          (weight ? Columns::ColumnId_MaleWeight : Columns::ColumnId_MaleHeight) :
+          (weight ? Columns::ColumnId_FemaleWeight : Columns::ColumnId_FemaleHeight),
+          ColumnBase::Display_Float),
           mMale (male), mWeight (weight)
         {}
 
@@ -525,9 +546,9 @@ namespace CSMWorld
         Type mType;
 
         SoundParamColumn (Type type)
-        : Column<ESXRecordT> (
-            type==Type_Volume ? "Volume" : (type==Type_MinRange ? "Min Range" : "Max Range"),
-            ColumnBase::Display_Integer),
+        : Column<ESXRecordT> (type==Type_Volume ? Columns::ColumnId_Volume :
+          (type==Type_MinRange ? Columns::ColumnId_MinRange : Columns::ColumnId_MaxRange),
+          ColumnBase::Display_Integer),
           mType (type)
         {}
 
@@ -575,7 +596,9 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct SoundFileColumn : public Column<ESXRecordT>
     {
-        SoundFileColumn() : Column<ESXRecordT> ("Sound File", ColumnBase::Display_String) {}
+        SoundFileColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_SoundFile, ColumnBase::Display_String)
+        {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -603,7 +626,9 @@ namespace CSMWorld
     struct MapColourColumn : public Column<ESXRecordT>
     {
         /// \todo Replace Display_Integer with something that displays the colour value more directly.
-        MapColourColumn() : Column<ESXRecordT> ("Map Colour", ColumnBase::Display_Integer) {}
+        MapColourColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_MapColour, ColumnBase::Display_Integer)
+        {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -632,7 +657,9 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct SleepListColumn : public Column<ESXRecordT>
     {
-        SleepListColumn() : Column<ESXRecordT> ("Sleep Encounter", ColumnBase::Display_String) {}
+        SleepListColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_SleepEncounter, ColumnBase::Display_String)
+        {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -657,7 +684,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct TextureColumn : public Column<ESXRecordT>
     {
-        TextureColumn() : Column<ESXRecordT> ("Texture", ColumnBase::Display_String) {}
+        TextureColumn() : Column<ESXRecordT> (Columns::ColumnId_Texture, ColumnBase::Display_String) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -682,7 +709,9 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct SpellTypeColumn : public Column<ESXRecordT>
     {
-        SpellTypeColumn() : Column<ESXRecordT> ("Type", ColumnBase::Display_SpellType) {}
+        SpellTypeColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_SpellType, ColumnBase::Display_SpellType)
+        {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -707,7 +736,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct CostColumn : public Column<ESXRecordT>
     {
-        CostColumn() : Column<ESXRecordT> ("Cost", ColumnBase::Display_Integer) {}
+        CostColumn() : Column<ESXRecordT> (Columns::ColumnId_Cost, ColumnBase::Display_Integer) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -730,7 +759,8 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct ScriptColumn : public Column<ESXRecordT>
     {
-        ScriptColumn() : Column<ESXRecordT> ("Script", ColumnBase::Display_Script, 0) {}
+        ScriptColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_ScriptText, ColumnBase::Display_Script, 0) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -755,7 +785,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct RegionColumn : public Column<ESXRecordT>
     {
-        RegionColumn() : Column<ESXRecordT> ("Region", ColumnBase::Display_String) {}
+        RegionColumn() : Column<ESXRecordT> (Columns::ColumnId_Region, ColumnBase::Display_String) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -780,7 +810,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct CellColumn : public Column<ESXRecordT>
     {
-        CellColumn() : Column<ESXRecordT> ("Cell", ColumnBase::Display_String) {}
+        CellColumn() : Column<ESXRecordT> (Columns::ColumnId_Cell, ColumnBase::Display_String) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -807,10 +837,11 @@ namespace CSMWorld
         }
     };
 
+    /// \note Shares ID with StringIdColumn. A table can not have both.
     template<typename ESXRecordT>
     struct IdColumn : public Column<ESXRecordT>
     {
-        IdColumn() : Column<ESXRecordT> ("ID", ColumnBase::Display_String) {}
+        IdColumn() : Column<ESXRecordT> (Columns::ColumnId_Id, ColumnBase::Display_String) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -835,7 +866,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct ScaleColumn : public Column<ESXRecordT>
     {
-        ScaleColumn() : Column<ESXRecordT> ("Scale", ColumnBase::Display_Float) {}
+        ScaleColumn() : Column<ESXRecordT> (Columns::ColumnId_Scale, ColumnBase::Display_Float) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -858,7 +889,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct OwnerColumn : public Column<ESXRecordT>
     {
-        OwnerColumn() : Column<ESXRecordT> ("Owner", ColumnBase::Display_String) {}
+        OwnerColumn() : Column<ESXRecordT> (Columns::ColumnId_Owner, ColumnBase::Display_String) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -883,7 +914,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct SoulColumn : public Column<ESXRecordT>
     {
-        SoulColumn() : Column<ESXRecordT> ("Soul", ColumnBase::Display_String) {}
+        SoulColumn() : Column<ESXRecordT> (Columns::ColumnId_Soul, ColumnBase::Display_String) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -908,7 +939,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct FactionColumn : public Column<ESXRecordT>
     {
-        FactionColumn() : Column<ESXRecordT> ("Faction", ColumnBase::Display_String) {}
+        FactionColumn() : Column<ESXRecordT> (Columns::ColumnId_Faction, ColumnBase::Display_String) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -933,7 +964,9 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct FactionIndexColumn : public Column<ESXRecordT>
     {
-        FactionIndexColumn() : Column<ESXRecordT> ("Faction Index", ColumnBase::Display_Integer) {}
+        FactionIndexColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_FactionIndex, ColumnBase::Display_Integer)
+        {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -956,7 +989,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct ChargesColumn : public Column<ESXRecordT>
     {
-        ChargesColumn() : Column<ESXRecordT> ("Charges", ColumnBase::Display_Integer) {}
+        ChargesColumn() : Column<ESXRecordT> (Columns::ColumnId_Charges, ColumnBase::Display_Integer) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -979,7 +1012,9 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct EnchantmentChargesColumn : public Column<ESXRecordT>
     {
-        EnchantmentChargesColumn() : Column<ESXRecordT> ("Entchantment", ColumnBase::Display_Float) {}
+        EnchantmentChargesColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_Enchantment, ColumnBase::Display_Float)
+        {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -1002,7 +1037,8 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct GoldValueColumn : public Column<ESXRecordT>
     {
-        GoldValueColumn() : Column<ESXRecordT> ("Value", ColumnBase::Display_Integer) {}
+        GoldValueColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_CoinValue, ColumnBase::Display_Integer) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -1025,7 +1061,9 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct TeleportColumn : public Column<ESXRecordT>
     {
-        TeleportColumn() : Column<ESXRecordT> ("Teleport", ColumnBase::Display_Boolean) {}
+        TeleportColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_Teleport, ColumnBase::Display_Boolean)
+        {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -1050,7 +1088,9 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct TeleportCellColumn : public Column<ESXRecordT>
     {
-        TeleportCellColumn() : Column<ESXRecordT> ("Teleport Cell", ColumnBase::Display_String) {}
+        TeleportCellColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_TeleportCell, ColumnBase::Display_String)
+        {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -1080,7 +1120,9 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct LockLevelColumn : public Column<ESXRecordT>
     {
-        LockLevelColumn() : Column<ESXRecordT> ("Lock Level", ColumnBase::Display_Integer) {}
+        LockLevelColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_LockLevel, ColumnBase::Display_Integer)
+        {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -1103,7 +1145,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct KeyColumn : public Column<ESXRecordT>
     {
-        KeyColumn() : Column<ESXRecordT> ("Key", ColumnBase::Display_String) {}
+        KeyColumn() : Column<ESXRecordT> (Columns::ColumnId_Key, ColumnBase::Display_String) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -1128,7 +1170,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct TrapColumn : public Column<ESXRecordT>
     {
-        TrapColumn() : Column<ESXRecordT> ("Trap", ColumnBase::Display_String) {}
+        TrapColumn() : Column<ESXRecordT> (Columns::ColumnId_Trap, ColumnBase::Display_String) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {

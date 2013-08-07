@@ -47,7 +47,7 @@ QVariant CSMWorld::IdTable::headerData (int section, Qt::Orientation orientation
         return QVariant();
 
     if (role==Qt::DisplayRole)
-        return tr (mIdCollection->getColumn (section).mTitle.c_str());
+        return tr (mIdCollection->getColumn (section).getTitle().c_str());
 
     if (role==ColumnBase::Role_Flags)
         return mIdCollection->getColumn (section).mFlags;

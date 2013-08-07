@@ -1,8 +1,10 @@
 
 #include "columnbase.hpp"
 
-CSMWorld::ColumnBase::ColumnBase (const std::string& title, Display displayType, int flags)
-: mTitle (title), mDisplayType (displayType), mFlags (flags)
+#include "columns.hpp"
+
+CSMWorld::ColumnBase::ColumnBase (int columnId, Display displayType, int flags)
+: mColumnId (columnId), mDisplayType (displayType), mFlags (flags)
 {}
 
 CSMWorld::ColumnBase::~ColumnBase() {}
@@ -10,4 +12,9 @@ CSMWorld::ColumnBase::~ColumnBase() {}
 bool CSMWorld::ColumnBase::isUserEditable() const
 {
     return isEditable();
+}
+
+std::string CSMWorld::ColumnBase::getTitle() const
+{
+    return Columns::getName (static_cast<Columns::ColumnId> (mColumnId));
 }
