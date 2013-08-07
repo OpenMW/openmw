@@ -21,61 +21,8 @@
 #include "animation.hpp"
 
 using namespace MWRender;
-float Objects::lightLinearValue()
-{
-    return mFallback->getFallbackFloat("LightAttenuation_LinearValue");
-}
-float Objects::lightLinearRadiusMult()
-{
-    return mFallback->getFallbackFloat("LightAttenuation_LinearRadiusMult");
-}
-float Objects::lightQuadraticValue()
-{
-    return mFallback->getFallbackFloat("LightAttenuation_QuadraticValue");
-}
-float Objects::lightQuadraticRadiusMult()
-{
-    return mFallback->getFallbackFloat("LightAttenuation_QuadraticRadiusMult");
-}
-
-bool Objects::lightOutQuadInLin()
-{
-    return mFallback->getFallbackBool("LightAttenuation_OutQuadInLin");
-}
-bool Objects::lightQuadratic()
-{
-    return mFallback->getFallbackBool("LightAttenuation_UseQuadratic");
-}
 
 int Objects::uniqueID = 0;
-
-void Objects::clearSceneNode (Ogre::SceneNode *node)
-{
-    for (int i=node->numAttachedObjects()-1; i>=0; --i)
-    {
-        Ogre::MovableObject *object = node->getAttachedObject (i);
-
-        // for entities, destroy any objects attached to bones
-        if (object->getTypeFlags () == Ogre::SceneManager::ENTITY_TYPE_MASK)
-        {
-            Ogre::Entity* ent = static_cast<Ogre::Entity*>(object);
-            Ogre::Entity::ChildObjectListIterator children = ent->getAttachedObjectIterator ();
-            while (children.hasMoreElements())
-            {
-                mRenderer.getScene ()->destroyMovableObject (children.getNext ());
-            }
-        }
-
-        node->detachObject (object);
-        mRenderer.getScene()->destroyMovableObject (object);
-    }
-
-    Ogre::Node::ChildNodeIterator it = node->getChildIterator ();
-    while (it.hasMoreElements ())
-    {
-        clearSceneNode(static_cast<Ogre::SceneNode*>(it.getNext ()));
-    }
-}
 
 void Objects::setRootNode(Ogre::SceneNode* root)
 {
