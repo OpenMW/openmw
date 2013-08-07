@@ -94,57 +94,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
         mPartPriorities[i] = 0;
     }
 
-    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-    const ESM::Race *race = store.get<ESM::Race>().find(mNpc->mRace);
-    bool isWerewolf = MWWorld::Class::get(mPtr).getNpcStats(mPtr).isWerewolf();
-
-    if(!isWerewolf)
-    {
-        mHeadModel = "meshes\\" + store.get<ESM::BodyPart>().find(mNpc->mHead)->mModel;
-        mHairModel = "meshes\\" + store.get<ESM::BodyPart>().find(mNpc->mHair)->mModel;
-    }
-    else
-    {
-        mHeadModel = "meshes\\" + store.get<ESM::BodyPart>().find("WerewolfHead")->mModel;
-        mHairModel = "meshes\\" + store.get<ESM::BodyPart>().find("WerewolfHair")->mModel;
-    }
-
-    mBodyPrefix = "b_n_" + mNpc->mRace;
-    Misc::StringUtils::toLower(mBodyPrefix);
-
-    bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
-    std::string smodel = (viewMode != VM_FirstPerson) ?
-                         (!isWerewolf ? (!isBeast ? "meshes\\base_anim.nif"
-                                                  : "meshes\\base_animkna.nif")
-                                      : "meshes\\wolf\\skin.nif") :
-                         (!isWerewolf ? (!isBeast ? "meshes\\base_anim.1st.nif"
-                                                  : "meshes\\base_animkna.1st.nif")
-                                      : "meshes\\wolf\\skin.1st.nif");
-    setObjectRoot(smodel, true);
-
-    if(mViewMode != VM_FirstPerson)
-    {
-        addAnimSource(smodel);
-        if(mBodyPrefix.find("argonian") != std::string::npos)
-            addAnimSource("meshes\\argonian_swimkna.nif");
-        else if(!mNpc->isMale() && !isBeast)
-            addAnimSource("meshes\\base_anim_female.nif");
-        if(mNpc->mModel.length() > 0)
-            addAnimSource("meshes\\"+mNpc->mModel);
-    }
-    else
-    {
-        /* A bit counter-intuitive, but unlike third-person anims, it seems
-         * beast races get both base_anim.1st.nif and base_animkna.1st.nif.
-         */
-        addAnimSource("meshes\\base_anim.1st.nif");
-        if(isBeast)
-            addAnimSource("meshes\\base_animkna.1st.nif");
-        if(!mNpc->isMale() && !isBeast)
-            addAnimSource("meshes\\base_anim_female.1st.nif");
-    }
-
-    forceUpdate();
+    updateNpcBase();
 }
 
 void NpcAnimation::setViewMode(NpcAnimation::ViewMode viewMode)
@@ -152,6 +102,13 @@ void NpcAnimation::setViewMode(NpcAnimation::ViewMode viewMode)
     assert(viewMode != VM_HeadOnly);
     mViewMode = viewMode;
 
+    updateNpcBase();
+
+    MWBase::Environment::get().getMechanicsManager()->forceStateUpdate(mPtr);
+}
+
+void NpcAnimation::updateNpcBase()
+{
     clearAnimSources();
 
     const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
@@ -173,7 +130,7 @@ void NpcAnimation::setViewMode(NpcAnimation::ViewMode viewMode)
     Misc::StringUtils::toLower(mBodyPrefix);
 
     bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
-    std::string smodel = (viewMode != VM_FirstPerson) ?
+    std::string smodel = (mViewMode != VM_FirstPerson) ?
                          (!isWerewolf ? !isBeast ? "meshes\\base_anim.nif"
                                                  : "meshes\\base_animkna.nif"
                                       : "meshes\\wolf\\skin.nif") :
@@ -211,7 +168,6 @@ void NpcAnimation::setViewMode(NpcAnimation::ViewMode viewMode)
                 addAnimSource("meshes\\base_anim_female.1st.nif");
         }
     }
-    MWBase::Environment::get().getMechanicsManager()->forceStateUpdate(mPtr);
 
     for(size_t i = 0;i < ESM::PRT_Count;i++)
         removeIndividualPart((ESM::PartReferenceType)i);
