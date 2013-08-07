@@ -36,12 +36,6 @@ namespace MWMechanics
         }
     }
 
-    void Actors::updateNpc (const MWWorld::Ptr& ptr, float duration, bool paused)
-    {
-        if (!paused && ptr.getRefData().getHandle()!="player")
-            MWWorld::Class::get (ptr).getInventoryStore (ptr).autoEquip (ptr);
-    }
-
     void Actors::adjustMagicEffects (const MWWorld::Ptr& creature)
     {
         CreatureStats& creatureStats =  MWWorld::Class::get (creature).getCreatureStats (creature);
@@ -231,8 +225,6 @@ namespace MWMechanics
                         iter->second->resurrect();
 
                     updateActor(iter->first, totalDuration);
-                    if(iter->first.getTypeName() == typeid(ESM::NPC).name())
-                        updateNpc(iter->first, totalDuration, paused);
 
                     if(!stats.isDead())
                         continue;
