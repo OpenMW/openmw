@@ -355,7 +355,8 @@ void Animation::addExtraLight(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList 
             bounds.merge(ent->getBoundingBox());
         }
 
-        Ogre::SceneNode *node = mInsert->createChildSceneNode(bounds.getCenter());
+        Ogre::SceneNode *node = bounds.isFinite() ? mInsert->createChildSceneNode(bounds.getCenter())
+                                                  : mInsert->createChildSceneNode();
         node->attachObject(olight);
     }
 }
