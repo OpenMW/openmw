@@ -8,27 +8,27 @@
 
         <!-- Borders -->
 
-        <Child type="Widget" skin="MW_Box" offset="0 0 40 40" align="ALIGN_LEFT Stretch" name="Client"/>
+        <Child type="Widget" skin="MW_Box" offset="0 0 40 40" align="Left Stretch" name="Client"/>
 
         <!-- The interior of the box -->
 
-        <Child type="Widget" skin="BlackBG" offset="2 2 36 36" align="ALIGN_STRETCH" name="Client"/>
+        <Child type="Widget" skin="BlackBG" offset="2 2 36 36" align="Stretch" name="Client"/>
 
     </Skin>
 
     <Skin name="HUD_Box_Transparent" size="40 40">
-        <Child type="Widget" skin="MW_Box" offset="0 0 40 40" align="ALIGN_LEFT Stretch" name="Client"/>
+        <Child type="Widget" skin="MW_Box" offset="0 0 40 40" align="Left Stretch" name="Client"/>
     </Skin>
 
     <Skin name="HUD_Box_NoTransp" size="40 40">
 
         <!-- Borders -->
 
-        <Child type="Widget" skin="MW_Box" offset="0 0 40 40" align="ALIGN_LEFT Stretch" name="Client"/>
+        <Child type="Widget" skin="MW_Box" offset="0 0 40 40" align="Left Stretch" name="Client"/>
 
         <!-- The interior of the box -->
 
-        <Child type="Widget" skin="DialogBG" offset="2 2 36 36" align="ALIGN_STRETCH" name="Client"/>
+        <Child type="Widget" skin="DialogBG" offset="2 2 36 36" align="Stretch" name="Client"/>
 
     </Skin>
 

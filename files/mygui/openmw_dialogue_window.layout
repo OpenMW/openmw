@@ -5,12 +5,12 @@
 
         <Widget type="Widget" skin="MW_Box" position="8 8 415 381" align="Stretch" name = "Client"/>
 
-        <Widget type="Widget" position="13 13 391 371" align="ALIGN_LEFT ALIGN_TOP ALIGN_STRETCH">
-            <Widget type="BookPage" skin="MW_BookPage" position="0 0 391 371" name="History" align="ALIGN_LEFT ALIGN_TOP ALIGN_STRETCH">
+        <Widget type="Widget" position="13 13 391 371" align="Left Top Stretch">
+            <Widget type="BookPage" skin="MW_BookPage" position="0 0 391 371" name="History" align="Left Top Stretch">
             </Widget>
         </Widget>
 
-        <Widget type="MWScrollBar" skin="MW_VScroll" position="404 13 14 371" align="ALIGN_RIGHT ALIGN_VSTRETCH" name="VScroll">
+        <Widget type="MWScrollBar" skin="MW_VScroll" position="404 13 14 371" align="Right VStretch" name="VScroll">
             <Property key="Visible" value="false"/>
         </Widget>
 

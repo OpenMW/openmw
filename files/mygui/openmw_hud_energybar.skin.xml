@@ -20,30 +20,30 @@
 
     <Skin name="MW_BarFrame" size="64 12">
         <!-- Edges -->
-        <Child type="Widget" skin="HUD_Bar_Top" offset="0 0 64 2" align="ALIGN_HSTRETCH ALIGN_TOP"/>
-        <Child type="Widget" skin="HUD_Bar_Bottom" offset="0 10 64 2" align="ALIGN_HSTRETCH ALIGN_BOTTOM"/>
-        <Child type="Widget" skin="HUD_Bar_Side" offset="0 2 2 8" align="ALIGN_VSTRETCH ALIGN_LEFT"/>
-        <Child type="Widget" skin="HUD_Bar_Side" offset="62 2 2 8" align="ALIGN_VSTRETCH ALIGN_RIGHT"/>
+        <Child type="Widget" skin="HUD_Bar_Top" offset="0 0 64 2" align="HStretch Top"/>
+        <Child type="Widget" skin="HUD_Bar_Bottom" offset="0 10 64 2" align="HStretch Bottom"/>
+        <Child type="Widget" skin="HUD_Bar_Side" offset="0 2 2 8" align="VStretch Left"/>
+        <Child type="Widget" skin="HUD_Bar_Side" offset="62 2 2 8" align="VStretch Right"/>
     </Skin>
 
     <!-- Progress bar track, various colors -->
     <Skin name = "MW_BarTrack_Red" size = "4 8" texture = "smallbars.png" >
-        <BasisSkin type="MainSkin" offset = "0 0 4 8" align = "ALIGN_STRETCH">
+        <BasisSkin type="MainSkin" offset = "0 0 4 8" align = "Stretch">
             <State name="normal" offset = "0 0 4 8"/>
         </BasisSkin>
     </Skin>
     <Skin name = "MW_BarTrack_Green" size = "4 8" texture = "smallbars.png" >
-        <BasisSkin type="MainSkin" offset = "0 0 4 8" align = "ALIGN_STRETCH">
+        <BasisSkin type="MainSkin" offset = "0 0 4 8" align = "Stretch">
             <State name="normal" offset = "0 16 4 8"/>
         </BasisSkin>
     </Skin>
     <Skin name = "MW_BarTrack_Blue" size = "4 8" texture = "smallbars.png" >
-        <BasisSkin type="MainSkin" offset = "0 0 4 8" align = "ALIGN_STRETCH">
+        <BasisSkin type="MainSkin" offset = "0 0 4 8" align = "Stretch">
             <State name="normal" offset = "0 8 4 8"/>
         </BasisSkin>
     </Skin>
     <Skin name = "MW_BarTrack_Yellow" size = "4 8" texture = "smallbars.png" >
-        <BasisSkin type="MainSkin" offset = "0 0 4 8" align = "ALIGN_STRETCH">
+        <BasisSkin type="MainSkin" offset = "0 0 4 8" align = "Stretch">
             <State name="normal" offset = "0 32 4 8"/>
         </BasisSkin>
     </Skin>
@@ -54,32 +54,32 @@
         <Property key="TrackSkin" value = "MW_BarTrack_Red" />
         <Property key="TrackWidth" value = "1" />
 
-        <Child type="Widget" skin="MW_BarFrame" offset="0 0 64 12" align="ALIGN_STRETCH"/>
-        <Child type="Widget" skin="BlackBG" offset = "2 2 60 8" align = "ALIGN_STRETCH" name="Client"/>
+        <Child type="Widget" skin="MW_BarFrame" offset="0 0 64 12" align="Stretch"/>
+        <Child type="Widget" skin="BlackBG" offset = "2 2 60 8" align = "Stretch" name="Client"/>
     </Skin>
 
     <Skin name="MW_EnergyBar_Green" size="64 12">
         <Property key="TrackSkin" value = "MW_BarTrack_Green" />
         <Property key="TrackWidth" value = "1" />
 
-        <Child type="Widget" skin="MW_BarFrame" offset="0 0 64 12" align="ALIGN_STRETCH"/>
-        <Child type="Widget" skin="BlackBG" offset="2 2 60 8" align="ALIGN_STRETCH" name="Client"/>
+        <Child type="Widget" skin="MW_BarFrame" offset="0 0 64 12" align="Stretch"/>
+        <Child type="Widget" skin="BlackBG" offset="2 2 60 8" align="Stretch" name="Client"/>
     </Skin>
 
     <Skin name="MW_EnergyBar_Blue" size="64 12">
         <Property key="TrackSkin" value = "MW_BarTrack_Blue" />
         <Property key="TrackWidth" value = "1" />
 
-        <Child type="Widget" skin="MW_BarFrame" offset="0 0 64 12" align="ALIGN_STRETCH"/>
-        <Child type="Widget" skin="BlackBG" offset = "2 2 60 8" align = "ALIGN_STRETCH" name="Client"/>
+        <Child type="Widget" skin="MW_BarFrame" offset="0 0 64 12" align="Stretch"/>
+        <Child type="Widget" skin="BlackBG" offset = "2 2 60 8" align = "Stretch" name="Client"/>
     </Skin>
 
     <Skin name="MW_EnergyBar_Yellow" size="64 12">
         <Property key="TrackSkin" value = "MW_BarTrack_Yellow" />
         <Property key="TrackWidth" value = "1" />
 
-        <Child type="Widget" skin="MW_BarFrame" offset="0 0 64 12" align="ALIGN_STRETCH"/>
-        <Child type="Widget" skin="BlackBG" offset = "2 2 60 8" align = "ALIGN_STRETCH" name="Client"/>
+        <Child type="Widget" skin="MW_BarFrame" offset="0 0 64 12" align="Stretch"/>
+        <Child type="Widget" skin="BlackBG" offset = "2 2 60 8" align = "Stretch" name="Client"/>
     </Skin>
 
 </MyGUI>

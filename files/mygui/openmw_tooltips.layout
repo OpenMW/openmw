@@ -200,7 +200,7 @@
 
             <!-- Birthsign image -->
             <Widget type="Widget" skin="MW_Box" position="18 13 263 137" align="Top HCenter">
-                <Widget type="ImageBox" skin="ImageBox" position="2 2 259 133" name="BirthSignImage" align="ALIGN_LEFT ALIGN_TOP" />
+                <Widget type="ImageBox" skin="ImageBox" position="2 2 259 133" name="BirthSignImage" align="Left Top" />
             </Widget>
 
             <Widget type="AutoSizedTextBox" skin="NormalText" position="8 154 284 138" align="Top" name="BirthSignText">
