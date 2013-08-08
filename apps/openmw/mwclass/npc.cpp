@@ -412,7 +412,14 @@ namespace MWClass
                 MWBase::Environment::get().getSoundManager()->playSound3D(victim, "critical damage", 1.0f, 1.0f);
             }
 
-            healthdmg = (otherstats.getFatigue().getCurrent() < 1.0f || npcstats.isWerewolf());
+            healthdmg = (otherstats.getFatigue().getCurrent() < 1.0f);
+            if(npcstats.isWerewolf())
+            {
+                healthdmg = true;
+                // GLOB instead of GMST because it gets updated during a quest
+                const MWWorld::Store<ESM::Global> &glob = world->getStore().get<ESM::Global>();
+                damage *= glob.find("WerewolfClawMult")->mValue.getFloat();
+            }
             if(healthdmg)
                 damage *= gmst.find("fHandtoHandHealthPer")->getFloat();
         }
