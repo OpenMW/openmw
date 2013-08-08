@@ -121,8 +121,9 @@ void ItemView::update()
         // image
         MyGUI::ImageBox* image = backgroundWidget->createWidget<MyGUI::ImageBox>("ImageBox",
             MyGUI::IntCoord(5, 5, 32, 32), MyGUI::Align::Default);
-        int pos = path.rfind(".");
-        path.erase(pos);
+        std::string::size_type pos = path.rfind(".");
+        if(pos != std::string::npos)
+            path.erase(pos);
         path.append(".dds");
         image->setImageTexture(path);
         image->setNeedMouseFocus(false);
