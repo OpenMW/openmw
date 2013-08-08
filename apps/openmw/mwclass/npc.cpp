@@ -940,6 +940,8 @@ namespace MWClass
         {
             MWBase::World *world = MWBase::Environment::get().getWorld();
             Ogre::Vector3 pos(ptr.getRefData().getPosition().pos);
+            if(world->isSwimming(ptr))
+                return "Swim Left";
             if(world->isUnderwater(ptr.getCell(), pos))
                 return "FootWaterLeft";
             if(world->isOnGround(ptr))
@@ -965,6 +967,8 @@ namespace MWClass
         {
             MWBase::World *world = MWBase::Environment::get().getWorld();
             Ogre::Vector3 pos(ptr.getRefData().getPosition().pos);
+            if(world->isSwimming(ptr))
+                return "Swim Right";
             if(world->isUnderwater(ptr.getCell(), pos))
                 return "FootWaterRight";
             if(world->isOnGround(ptr))
@@ -986,6 +990,10 @@ namespace MWClass
             }
             return "";
         }
+        if(name == "swimleft")
+            return "Swim Left";
+        if(name == "swimright")
+            return "Swim Right";
         // TODO: I have no idea what these are supposed to do for NPCs since they use
         // voiced dialog for various conditions like health loss and combat taunts. Maybe
         // only for biped creatures?

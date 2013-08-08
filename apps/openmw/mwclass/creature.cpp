@@ -420,6 +420,10 @@ namespace MWClass
                 return 1;
             return -1;
         }
+        if(name == "swimleft")
+            return 2;
+        if(name == "swimright")
+            return 3;
         if(name == "moan")
             return 4;
         if(name == "roar")
