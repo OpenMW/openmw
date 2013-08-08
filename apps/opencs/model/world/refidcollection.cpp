@@ -7,10 +7,11 @@
 
 #include "refidadapter.hpp"
 #include "refidadapterimp.hpp"
+#include "columns.hpp"
 
-CSMWorld::RefIdColumn::RefIdColumn (const std::string& title, Display displayType, int flag,
+CSMWorld::RefIdColumn::RefIdColumn (int columnId, Display displayType, int flag,
     bool editable, bool userEditable)
-: ColumnBase (title, displayType, flag), mEditable (editable), mUserEditable (userEditable)
+: ColumnBase (columnId, displayType, flag), mEditable (editable), mUserEditable (userEditable)
 {}
 
 bool CSMWorld::RefIdColumn::isEditable() const
@@ -38,157 +39,158 @@ CSMWorld::RefIdCollection::RefIdCollection()
 {
     BaseColumns baseColumns;
 
-    mColumns.push_back (RefIdColumn ("ID", ColumnBase::Display_String,
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Id, ColumnBase::Display_String,
         ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue, false, false));
     baseColumns.mId = &mColumns.back();
-    mColumns.push_back (RefIdColumn ("*", ColumnBase::Display_RecordState,
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Modification, ColumnBase::Display_RecordState,
         ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue, false, false));
     baseColumns.mModified = &mColumns.back();
-    mColumns.push_back (RefIdColumn ("Type", ColumnBase::Display_RefRecordType,
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_RecordType, ColumnBase::Display_RefRecordType,
         ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue, false, false));
     baseColumns.mType = &mColumns.back();
 
     ModelColumns modelColumns (baseColumns);
 
-    mColumns.push_back (RefIdColumn ("Model", ColumnBase::Display_String));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Model, ColumnBase::Display_String));
     modelColumns.mModel = &mColumns.back();
 
     NameColumns nameColumns (modelColumns);
 
-    mColumns.push_back (RefIdColumn ("Name", ColumnBase::Display_String));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Name, ColumnBase::Display_String));
     nameColumns.mName = &mColumns.back();
-    mColumns.push_back (RefIdColumn ("Script", ColumnBase::Display_String));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Script, ColumnBase::Display_String));
     nameColumns.mScript = &mColumns.back();
 
     InventoryColumns inventoryColumns (nameColumns);
 
-    mColumns.push_back (RefIdColumn ("Icon", ColumnBase::Display_String));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Icon, ColumnBase::Display_String));
     inventoryColumns.mIcon = &mColumns.back();
-    mColumns.push_back (RefIdColumn ("Weight", ColumnBase::Display_Float));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Weight, ColumnBase::Display_Float));
     inventoryColumns.mWeight = &mColumns.back();
-    mColumns.push_back (RefIdColumn ("Value", ColumnBase::Display_Integer));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_CoinValue, ColumnBase::Display_Integer));
     inventoryColumns.mValue = &mColumns.back();
 
     EnchantableColumns enchantableColumns (inventoryColumns);
 
-    mColumns.push_back (RefIdColumn ("Enchantment", ColumnBase::Display_String));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Enchantment, ColumnBase::Display_String));
     enchantableColumns.mEnchantment = &mColumns.back();
-    mColumns.push_back (RefIdColumn ("Enchantment Points", ColumnBase::Display_Integer));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_EnchantmentPoints, ColumnBase::Display_Integer));
     enchantableColumns.mEnchantmentPoints = &mColumns.back();
 
     ToolColumns toolsColumns (inventoryColumns);
 
-    mColumns.push_back (RefIdColumn ("Quality", ColumnBase::Display_Float));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Quality, ColumnBase::Display_Float));
     toolsColumns.mQuality = &mColumns.back();
-    mColumns.push_back (RefIdColumn ("Uses", ColumnBase::Display_Integer));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Charges, ColumnBase::Display_Integer));
     toolsColumns.mUses = &mColumns.back();
 
     ActorColumns actorsColumns (nameColumns);
 
-    mColumns.push_back (RefIdColumn ("AI", ColumnBase::Display_Boolean));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Ai, ColumnBase::Display_Boolean));
     actorsColumns.mHasAi = &mColumns.back();
-    mColumns.push_back (RefIdColumn ("AI Hello", ColumnBase::Display_Integer));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_AiHello, ColumnBase::Display_Integer));
     actorsColumns.mHello = &mColumns.back();
-    mColumns.push_back (RefIdColumn ("AI Flee", ColumnBase::Display_Integer));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_AiFlee, ColumnBase::Display_Integer));
     actorsColumns.mFlee = &mColumns.back();
-    mColumns.push_back (RefIdColumn ("AI Fight", ColumnBase::Display_Integer));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_AiFight, ColumnBase::Display_Integer));
     actorsColumns.mFight = &mColumns.back();
-    mColumns.push_back (RefIdColumn ("AI Alarm", ColumnBase::Display_Integer));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_AiAlarm, ColumnBase::Display_Integer));
     actorsColumns.mAlarm = &mColumns.back();
 
     static const struct
     {
-        const char *mName;
+        int mName;
         unsigned int mFlag;
     } sServiceTable[] =
     {
-        { "Buys Weapons", ESM::NPC::Weapon},
-        { "Buys Armor", ESM::NPC::Armor},
-        { "Buys Clothing", ESM::NPC::Clothing},
-        { "Buys Books", ESM::NPC::Books},
-        { "Buys Ingredients", ESM::NPC::Ingredients},
-        { "Buys Lockpicks", ESM::NPC::Picks},
-        { "Buys Probes", ESM::NPC::Probes},
-        { "Buys Lights", ESM::NPC::Lights},
-        { "Buys Apparati", ESM::NPC::Apparatus},
-        { "Buys Repair Items", ESM::NPC::RepairItem},
-        { "Buys Misc Items", ESM::NPC::Misc},
-        { "Buys Potions", ESM::NPC::Potions},
-        { "Buys Magic Items", ESM::NPC::MagicItems},
-        { "Sells Spells", ESM::NPC::Spells},
-        { "Trainer", ESM::NPC::Training},
-        { "Spellmaking", ESM::NPC::Spellmaking},
-        { "Enchanting Service", ESM::NPC::Enchanting},
-        { "Repair Serivce", ESM::NPC::Repair},
-        { 0, 0 }
+        { Columns::ColumnId_BuysWeapons, ESM::NPC::Weapon},
+        { Columns::ColumnId_BuysArmor, ESM::NPC::Armor},
+        { Columns::ColumnId_BuysClothing, ESM::NPC::Clothing},
+        { Columns::ColumnId_BuysBooks, ESM::NPC::Books},
+        { Columns::ColumnId_BuysIngredients, ESM::NPC::Ingredients},
+        { Columns::ColumnId_BuysLockpicks, ESM::NPC::Picks},
+        { Columns::ColumnId_BuysProbes, ESM::NPC::Probes},
+        { Columns::ColumnId_BuysLights, ESM::NPC::Lights},
+        { Columns::ColumnId_BuysApparati, ESM::NPC::Apparatus},
+        { Columns::ColumnId_BuysRepairItems, ESM::NPC::RepairItem},
+        { Columns::ColumnId_BuysMiscItems, ESM::NPC::Misc},
+        { Columns::ColumnId_BuysPotions, ESM::NPC::Potions},
+        { Columns::ColumnId_BuysMagicItems, ESM::NPC::MagicItems},
+        { Columns::ColumnId_SellsSpells, ESM::NPC::Spells},
+        { Columns::ColumnId_Trainer, ESM::NPC::Training},
+        { Columns::ColumnId_Spellmaking, ESM::NPC::Spellmaking},
+        { Columns::ColumnId_EnchantingService, ESM::NPC::Enchanting},
+        { Columns::ColumnId_RepairService, ESM::NPC::Repair},
+        { -1, 0 }
     };
 
-    for (int i=0; sServiceTable[i].mName; ++i)
+    for (int i=0; sServiceTable[i].mName!=-1; ++i)
     {
         mColumns.push_back (RefIdColumn (sServiceTable[i].mName, ColumnBase::Display_Boolean));
         actorsColumns.mServices.insert (std::make_pair (&mColumns.back(), sServiceTable[i].mFlag));
     }
 
-    mColumns.push_back (RefIdColumn ("Auto Calc", ColumnBase::Display_Boolean));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_AutoCalc, ColumnBase::Display_Boolean));
     const RefIdColumn *autoCalc = &mColumns.back();
 
-    mColumns.push_back (RefIdColumn ("Apparatus Type", ColumnBase::Display_ApparatusType));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_ApparatusType,
+        ColumnBase::Display_ApparatusType));
     const RefIdColumn *apparatusType = &mColumns.back();
 
-    mColumns.push_back (RefIdColumn ("Armor Type", ColumnBase::Display_ArmorType));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_ArmorType, ColumnBase::Display_ArmorType));
     const RefIdColumn *armorType = &mColumns.back();
 
-    mColumns.push_back (RefIdColumn ("Health", ColumnBase::Display_Integer));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Health, ColumnBase::Display_Integer));
     const RefIdColumn *health = &mColumns.back();
 
-    mColumns.push_back (RefIdColumn ("Armor Value", ColumnBase::Display_Integer));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_ArmorValue, ColumnBase::Display_Integer));
     const RefIdColumn *armor = &mColumns.back();
 
-    mColumns.push_back (RefIdColumn ("Scroll", ColumnBase::Display_Boolean));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Scroll, ColumnBase::Display_Boolean));
     const RefIdColumn *scroll = &mColumns.back();
 
-    mColumns.push_back (RefIdColumn ("Attribute", ColumnBase::Display_Attribute));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Attribute, ColumnBase::Display_Attribute));
     const RefIdColumn *attribute = &mColumns.back();
 
-    mColumns.push_back (RefIdColumn ("Clothing Type", ColumnBase::Display_ClothingType));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_ClothingType, ColumnBase::Display_ClothingType));
     const RefIdColumn *clothingType = &mColumns.back();
 
-    mColumns.push_back (RefIdColumn ("Weight Capacity", ColumnBase::Display_Float));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_WeightCapacity, ColumnBase::Display_Float));
     const RefIdColumn *weightCapacity = &mColumns.back();
 
-    mColumns.push_back (RefIdColumn ("Organic Container", ColumnBase::Display_Boolean));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_OrganicContainer, ColumnBase::Display_Boolean));
     const RefIdColumn *organic = &mColumns.back();
 
-    mColumns.push_back (RefIdColumn ("Respawn", ColumnBase::Display_Boolean));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Respawn, ColumnBase::Display_Boolean));
     const RefIdColumn *respawn = &mColumns.back();
 
     CreatureColumns creatureColumns (actorsColumns);
 
-    mColumns.push_back (RefIdColumn ("Creature Type", ColumnBase::Display_CreatureType));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_CreatureType, ColumnBase::Display_CreatureType));
     creatureColumns.mType = &mColumns.back();
-    mColumns.push_back (RefIdColumn ("Soul Points", ColumnBase::Display_Integer));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_SoulPoints, ColumnBase::Display_Integer));
     creatureColumns.mSoul = &mColumns.back();
-    mColumns.push_back (RefIdColumn ("Scale", ColumnBase::Display_Float));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Scale, ColumnBase::Display_Float));
     creatureColumns.mScale = &mColumns.back();
-    mColumns.push_back (RefIdColumn ("Original Creature", ColumnBase::Display_String));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_OriginalCreature, ColumnBase::Display_String));
     creatureColumns.mOriginal = &mColumns.back();
 
     static const struct
     {
-        const char *mName;
+        int mName;
         unsigned int mFlag;
     } sCreatureFlagTable[] =
     {
-        { "Biped", ESM::Creature::Biped },
-        { "Has Weapon", ESM::Creature::Weapon },
-        { "No Movement", ESM::Creature::None },
-        { "Swims", ESM::Creature::Swims },
-        { "Flies", ESM::Creature::Flies },
-        { "Walks", ESM::Creature::Walks },
-        { "Essential", ESM::Creature::Essential },
-        { "Skeleton Blood", ESM::Creature::Skeleton },
-        { "Metal Blood", ESM::Creature::Metal },
-        { 0, 0 }
+        { Columns::ColumnId_Biped, ESM::Creature::Biped },
+        { Columns::ColumnId_HasWeapon, ESM::Creature::Weapon },
+        { Columns::ColumnId_NoMovement, ESM::Creature::None },
+        { Columns::ColumnId_Swims, ESM::Creature::Swims },
+        { Columns::ColumnId_Flies, ESM::Creature::Flies },
+        { Columns::ColumnId_Walks, ESM::Creature::Walks },
+        { Columns::ColumnId_Essential, ESM::Creature::Essential },
+        { Columns::ColumnId_SkeletonBlood, ESM::Creature::Skeleton },
+        { Columns::ColumnId_MetalBlood, ESM::Creature::Metal },
+        { -1, 0 }
     };
 
     // for re-use in NPC records
@@ -196,7 +198,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
     const RefIdColumn *skeletonBlood = 0;
     const RefIdColumn *metalBlood = 0;
 
-    for (int i=0; sCreatureFlagTable[i].mName; ++i)
+    for (int i=0; sCreatureFlagTable[i].mName!=-1; ++i)
     {
         mColumns.push_back (RefIdColumn (sCreatureFlagTable[i].mName, ColumnBase::Display_Boolean));
         creatureColumns.mFlags.insert (std::make_pair (&mColumns.back(), sCreatureFlagTable[i].mFlag));
@@ -211,71 +213,71 @@ CSMWorld::RefIdCollection::RefIdCollection()
 
     creatureColumns.mFlags.insert (std::make_pair (respawn, ESM::Creature::Respawn));
 
-    mColumns.push_back (RefIdColumn ("Open Sound", ColumnBase::Display_String));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_OpenSound, ColumnBase::Display_String));
     const RefIdColumn *openSound = &mColumns.back();
 
-    mColumns.push_back (RefIdColumn ("Close Sound", ColumnBase::Display_String));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_CloseSound, ColumnBase::Display_String));
     const RefIdColumn *closeSound = &mColumns.back();
 
     LightColumns lightColumns (inventoryColumns);
 
-    mColumns.push_back (RefIdColumn ("Duration", ColumnBase::Display_Integer));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Duration, ColumnBase::Display_Integer));
     lightColumns.mTime = &mColumns.back();
 
-    mColumns.push_back (RefIdColumn ("Radius", ColumnBase::Display_Integer));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Radius, ColumnBase::Display_Integer));
     lightColumns.mRadius = &mColumns.back();
 
-    mColumns.push_back (RefIdColumn ("Colour", ColumnBase::Display_Integer));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Colour, ColumnBase::Display_Integer));
     lightColumns.mColor = &mColumns.back();
 
-    mColumns.push_back (RefIdColumn ("Sound", ColumnBase::Display_String));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Sound, ColumnBase::Display_String));
     lightColumns.mSound = &mColumns.back();
 
     static const struct
     {
-        const char *mName;
+        int mName;
         unsigned int mFlag;
     } sLightFlagTable[] =
     {
-        { "Dynamic", ESM::Light::Dynamic },
-        { "Portable", ESM::Light::Carry },
-        { "Negative Light", ESM::Light::Negative },
-        { "Flickering", ESM::Light::Flicker },
-        { "Slow Flickering", ESM::Light::Flicker },
-        { "Pulsing", ESM::Light::Pulse },
-        { "Slow Pulsing", ESM::Light::PulseSlow },
-        { "Fire", ESM::Light::Fire },
-        { "Off by default", ESM::Light::OffDefault },
-        { 0, 0 }
+        { Columns::ColumnId_Dynamic, ESM::Light::Dynamic },
+        { Columns::ColumnId_Portable, ESM::Light::Carry },
+        { Columns::ColumnId_NegativeLight, ESM::Light::Negative },
+        { Columns::ColumnId_Flickering, ESM::Light::Flicker },
+        { Columns::ColumnId_SlowFlickering, ESM::Light::Flicker },
+        { Columns::ColumnId_Pulsing, ESM::Light::Pulse },
+        { Columns::ColumnId_SlowPulsing, ESM::Light::PulseSlow },
+        { Columns::ColumnId_Fire, ESM::Light::Fire },
+        { Columns::ColumnId_OffByDefault, ESM::Light::OffDefault },
+        { -1, 0 }
     };
 
-    for (int i=0; sLightFlagTable[i].mName; ++i)
+    for (int i=0; sLightFlagTable[i].mName!=-1; ++i)
     {
         mColumns.push_back (RefIdColumn (sLightFlagTable[i].mName, ColumnBase::Display_Boolean));
         lightColumns.mFlags.insert (std::make_pair (&mColumns.back(), sLightFlagTable[i].mFlag));
     }
 
-    mColumns.push_back (RefIdColumn ("Key", ColumnBase::Display_Boolean));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_IsKey, ColumnBase::Display_Boolean));
     const RefIdColumn *key = &mColumns.back();
 
     NpcColumns npcColumns (actorsColumns);
 
-    mColumns.push_back (RefIdColumn ("Race", ColumnBase::Display_String));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Race, ColumnBase::Display_String));
     npcColumns.mRace = &mColumns.back();
 
-    mColumns.push_back (RefIdColumn ("Class", ColumnBase::Display_String));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Class, ColumnBase::Display_String));
     npcColumns.mClass = &mColumns.back();
 
-    mColumns.push_back (RefIdColumn ("Faction", ColumnBase::Display_String));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Faction, ColumnBase::Display_String));
     npcColumns.mFaction = &mColumns.back();
 
-    mColumns.push_back (RefIdColumn ("Hair", ColumnBase::Display_String));
+    mColumns.push_back (RefIdColumn (Columns::Columnid_Hair, ColumnBase::Display_String));
     npcColumns.mHair = &mColumns.back();
 
-    mColumns.push_back (RefIdColumn ("Head", ColumnBase::Display_String));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Head, ColumnBase::Display_String));
     npcColumns.mHead = &mColumns.back();
 
-    mColumns.push_back (RefIdColumn ("Female", ColumnBase::Display_Boolean));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Female, ColumnBase::Display_Boolean));
     npcColumns.mFlags.insert (std::make_pair (&mColumns.back(), ESM::NPC::Female));
 
     npcColumns.mFlags.insert (std::make_pair (essential, ESM::NPC::Essential));
@@ -290,43 +292,35 @@ CSMWorld::RefIdCollection::RefIdCollection()
 
     WeaponColumns weaponColumns (enchantableColumns);
 
-    mColumns.push_back (RefIdColumn ("Weapon Type", ColumnBase::Display_WeaponType));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_WeaponType, ColumnBase::Display_WeaponType));
     weaponColumns.mType = &mColumns.back();
 
     weaponColumns.mHealth = health;
 
-    mColumns.push_back (RefIdColumn ("Weapon Speed", ColumnBase::Display_Float));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_WeaponSpeed, ColumnBase::Display_Float));
     weaponColumns.mSpeed = &mColumns.back();
 
-    mColumns.push_back (RefIdColumn ("Weapon Reach", ColumnBase::Display_Float));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_WeaponReach, ColumnBase::Display_Float));
     weaponColumns.mReach = &mColumns.back();
 
-    for (int i=0; i<2; ++i)
+    for (int i=0; i<6; ++i)
     {
-        std::string suffix = i==0 ? "Min " : "Max ";
-
-        mColumns.push_back (RefIdColumn ("Chop" + suffix, ColumnBase::Display_Integer));
+        mColumns.push_back (RefIdColumn (Columns::ColumnId_MinChop + i, ColumnBase::Display_Integer));
         weaponColumns.mChop[i] = &mColumns.back();
-
-        mColumns.push_back (RefIdColumn ("Slash" + suffix, ColumnBase::Display_Integer));
-        weaponColumns.mSlash[i] = &mColumns.back();
-
-        mColumns.push_back (RefIdColumn ("Thrust" + suffix, ColumnBase::Display_Integer));
-        weaponColumns.mThrust[i] = &mColumns.back();
     }
 
     static const struct
     {
-        const char *mName;
+        int mName;
         unsigned int mFlag;
     } sWeaponFlagTable[] =
     {
-        { "Magical", ESM::Weapon::Magical },
-        { "Silver", ESM::Weapon::Silver },
-        { 0, 0 }
+        { Columns::ColumnId_Magical, ESM::Weapon::Magical },
+        { Columns::ColumnId_Silver, ESM::Weapon::Silver },
+        { -1, 0 }
     };
 
-    for (int i=0; sWeaponFlagTable[i].mName; ++i)
+    for (int i=0; sWeaponFlagTable[i].mName!=-1; ++i)
     {
         mColumns.push_back (RefIdColumn (sWeaponFlagTable[i].mName, ColumnBase::Display_Boolean));
         weaponColumns.mFlags.insert (std::make_pair (&mColumns.back(), sWeaponFlagTable[i].mFlag));

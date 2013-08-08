@@ -46,11 +46,11 @@ namespace CSMWorld
             Display_RefRecordType
         };
 
-        std::string mTitle;
+        int mColumnId;
         int mFlags;
         Display mDisplayType;
 
-        ColumnBase (const std::string& title, Display displayType, int flag);
+        ColumnBase (int columnId, Display displayType, int flag);
 
         virtual ~ColumnBase();
 
@@ -59,22 +59,22 @@ namespace CSMWorld
         virtual bool isUserEditable() const;
         ///< Can this column be edited directly by the user?
 
+        virtual std::string getTitle() const;
     };
 
     template<typename ESXRecordT>
     struct Column : public ColumnBase
     {
-        std::string mTitle;
         int mFlags;
 
-        Column (const std::string& title, Display displayType, int flags = Flag_Table | Flag_Dialogue)
-        : ColumnBase (title, displayType, flags) {}
+        Column (int columnId, Display displayType, int flags = Flag_Table | Flag_Dialogue)
+        : ColumnBase (columnId, displayType, flags) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const = 0;
 
         virtual void set (Record<ESXRecordT>& record, const QVariant& data)
         {
-            throw std::logic_error ("Column " + mTitle + " is not editable");
+            throw std::logic_error ("Column " + getTitle() + " is not editable");
         }
     };
 }

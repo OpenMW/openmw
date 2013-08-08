@@ -18,6 +18,8 @@
 #include <components/esm/loadbsgn.hpp>
 #include <components/esm/loadspel.hpp>
 
+#include "../filter/filter.hpp"
+
 #include "idcollection.hpp"
 #include "universalid.hpp"
 #include "cell.hpp"
@@ -44,6 +46,7 @@ namespace CSMWorld
             IdCollection<Cell> mCells;
             RefIdCollection mReferenceables;
             RefCollection mRefs;
+            IdCollection<CSMFilter::Filter> mFilters;
             std::vector<QAbstractItemModel *> mModels;
             std::map<UniversalId::Type, QAbstractItemModel *> mModelIndex;
 

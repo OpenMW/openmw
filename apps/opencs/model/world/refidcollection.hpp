@@ -20,7 +20,7 @@ namespace CSMWorld
 
         public:
 
-            RefIdColumn (const std::string& title, Display displayType,
+            RefIdColumn (int columnId, Display displayType,
                 int flag = Flag_Table | Flag_Dialogue, bool editable = true,
                 bool userEditable = true);
 

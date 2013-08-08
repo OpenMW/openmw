@@ -84,7 +84,9 @@ namespace CSMWorld
                 Type_Weapon,
                 Type_References,
                 Type_Reference,
-                Type_RegionMap
+                Type_RegionMap,
+                Type_Filter,
+                Type_Filters
             };
 
         private:

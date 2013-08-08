@@ -4,6 +4,7 @@
 #include <QAbstractItemModel>
 
 #include "universalid.hpp"
+#include "columns.hpp"
 
 namespace CSMWorld
 {
@@ -55,6 +56,13 @@ namespace CSMWorld
             ///< Add record or overwrite existing recrod.
 
             const RecordBase& getRecord (const std::string& id) const;
+
+            int searchColumnIndex (Columns::ColumnId id) const;
+            ///< Return index of column with the given \a id. If no such column exists, -1 is returned.
+
+            int findColumnIndex (Columns::ColumnId id) const;
+            ///< Return index of column with the given \a id. If no such column exists, an exception is
+            /// thrown.
     };
 }
 

@@ -158,6 +158,8 @@ namespace CSVDoc
 
             void addRegionMapSubView();
 
+            void addFiltersSubView();
+
             void showUserSettings();
 
             void toggleShowStatusBar (bool show);

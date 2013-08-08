@@ -44,9 +44,9 @@ namespace CSVWorld
 
             virtual void configureCreateCommand (CSMWorld::CreateCommand& command) const;
 
-            const CSMWorld::Data& getData() const;
+            CSMWorld::Data& getData() const;
 
-            CSMWorld::Data& getData();
+            const CSMWorld::UniversalId& getCollectionId() const;
 
         public:
 

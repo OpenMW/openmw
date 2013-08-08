@@ -24,11 +24,11 @@ opencs_units (model/world
 
 opencs_units_noqt (model/world
     universalid data record commands columnbase scriptcontext cell refidcollection
-    refidadapter refiddata refidadapterimp ref collectionbase refcollection
+    refidadapter refiddata refidadapterimp ref collectionbase refcollection columns
     )
 
 opencs_hdrs_noqt (model/world
-    columns idcollection collection
+    columnimp idcollection collection
     )
 
 
@@ -105,6 +105,10 @@ opencs_units (model/settings
 opencs_units_noqt (model/settings
     support
     settingsitem
+    )
+
+opencs_hdrs_noqt (model/filter
+    filter
     )
 
 set (OPENCS_US
