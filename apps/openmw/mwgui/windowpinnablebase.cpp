@@ -5,7 +5,7 @@
 namespace MWGui
 {
     WindowPinnableBase::WindowPinnableBase(const std::string& parLayout)
-      : WindowBase(parLayout), mPinned(false), mVisible(false)
+      : WindowBase(parLayout), mPinned(false)
     {
         ExposedWindow* window = static_cast<ExposedWindow*>(mMainWidget);
         mPinButton = window->getSkinWidget ("Button");
@@ -23,5 +23,10 @@ namespace MWGui
             mPinButton->changeWidgetSkin ("PinUp");
 
         onPinToggled();
+    }
+
+    void WindowPinnableBase::setPinButtonVisible(bool visible)
+    {
+        mPinButton->setVisible(visible);
     }
 }
