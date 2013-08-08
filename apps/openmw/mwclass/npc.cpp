@@ -290,9 +290,15 @@ namespace MWClass
 
     std::string Npc::getName (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::NPC> *ref =
-            ptr.get<ESM::NPC>();
+        if(getNpcStats(ptr).isWerewolf())
+        {
+            const MWBase::World *world = MWBase::Environment::get().getWorld();
+            const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
 
+            return gmst.find("sWerewolfPopup")->getString();
+        }
+
+        MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
         return ref->mBase->mName;
     }
 
@@ -795,16 +801,21 @@ namespace MWClass
 
     MWGui::ToolTipInfo Npc::getToolTipInfo (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::NPC> *ref =
-            ptr.get<ESM::NPC>();
+        MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
 
+        bool fullHelp = MWBase::Environment::get().getWindowManager()->getFullHelp();
         MWGui::ToolTipInfo info;
-        info.caption = ref->mBase->mName;
 
-        std::string text;
-        if (MWBase::Environment::get().getWindowManager()->getFullHelp())
-            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
-        info.text = text;
+        info.caption = getName(ptr);
+        if(fullHelp && getNpcStats(ptr).isWerewolf())
+        {
+            info.caption += " (";
+            info.caption += ref->mBase->mName;
+            info.caption += ")";
+        }
+
+        if(fullHelp)
+            info.text = MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
 
         return info;
     }
