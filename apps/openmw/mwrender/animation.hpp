@@ -177,9 +177,6 @@ public:
 
     bool hasAnimation(const std::string &anim);
 
-    bool isPriorityActive (int priority) const;
-    ///< Is there an animation playing with the given priority?
-
     // Specifies the axis' to accumulate on. Non-accumulated axis will just
     // move visually, but not affect the actual movement. Each x/y/z value
     // should be on the scale of 0 to 1.

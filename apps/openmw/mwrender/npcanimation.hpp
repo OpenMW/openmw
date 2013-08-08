@@ -37,11 +37,10 @@ private:
     // Bounded Parts
     NifOgre::ObjectList mObjectParts[ESM::PRT_Count];
 
-    const ESM::NPC  *mNpc;
-    std::string     mHeadModel;
-    std::string     mHairModel;
-    std::string     mBodyPrefix;
-    ViewMode        mViewMode;
+    const ESM::NPC *mNpc;
+    std::string    mHeadModel;
+    std::string    mHairModel;
+    ViewMode       mViewMode;
     bool mShowWeapons;
 
     float mTimeToChange;
@@ -64,6 +63,8 @@ private:
 
     int mPartslots[ESM::PRT_Count];  //Each part slot is taken by clothing, armor, or is empty
     int mPartPriorities[ESM::PRT_Count];
+
+    void updateNpcBase();
 
     NifOgre::ObjectList insertBoundedPart(const std::string &model, int group, const std::string &bonename);
 
