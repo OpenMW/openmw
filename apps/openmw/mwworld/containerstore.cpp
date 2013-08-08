@@ -74,9 +74,9 @@ bool MWWorld::ContainerStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
     return false;
 }
 
-MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& ptr)
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr, const Ptr& actorPtr)
 {
-    MWWorld::ContainerStoreIterator it = addImp(ptr);
+    MWWorld::ContainerStoreIterator it = addImp(itemPtr);
     MWWorld::Ptr item = *it;
 
     std::string script = MWWorld::Class::get(item).getScript(item);

@@ -10,6 +10,7 @@
 #include "../mwworld/class.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/npcstats.hpp"
 
 #include "inventorywindow.hpp"
 #include "console.hpp"
@@ -494,7 +495,14 @@ namespace MWGui
             MyGUI::Gui::getInstance().destroyWidget(mWeapImage->getChildAt(0));
         mWeapStatus->setProgressRange(100);
         mWeapStatus->setProgressPosition(0);
-        mWeapImage->setImageTexture("icons\\k\\stealth_handtohand.dds");
+
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+        MWWorld::Ptr player = world->getPlayer().getPlayer();
+        if (MWWorld::Class::get(player).getNpcStats(player).isWerewolf())
+            mWeapImage->setImageTexture("icons\\k\\tx_werewolf_hand.dds");
+        else
+            mWeapImage->setImageTexture("icons\\k\\stealth_handtohand.dds");
+
         mWeapBox->clearUserStrings();
     }
 

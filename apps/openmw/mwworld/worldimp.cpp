@@ -16,6 +16,7 @@
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/movement.hpp"
+#include "../mwmechanics/npcstats.hpp"
 
 #include "../mwrender/sky.hpp"
 #include "../mwrender/animation.hpp"
@@ -1857,6 +1858,38 @@ namespace MWWorld
     bool World::isTeleportingEnabled() const
     {
         return mTeleportEnabled;
+    }
+
+    void World::setWerewolf(const MWWorld::Ptr& actor, bool werewolf)
+    {
+        MWMechanics::NpcStats& npcStats = Class::get(actor).getNpcStats(actor);
+
+        // The actor does not have to change state
+        if (npcStats.isWerewolf() == werewolf)
+            return;
+
+        npcStats.setWerewolf(werewolf);
+
+        MWWorld::InventoryStore& invStore = MWWorld::Class::get(actor).getInventoryStore(actor);
+        if (werewolf)
+            invStore.unequipAll(actor);
+
+        if (actor.getRefData().getHandle() == "player")
+        {
+            // Update the GUI only when called on the player
+            MWBase::WindowManager* windowManager = MWBase::Environment::get().getWindowManager();
+            if (werewolf)
+            {
+                windowManager->forceHide(MWGui::GW_Inventory);
+                windowManager->forceHide(MWGui::GW_Magic);
+                windowManager->unsetSelectedWeapon();
+            }
+            else
+            {
+                windowManager->unsetForceHide(MWGui::GW_Inventory);
+                windowManager->unsetForceHide(MWGui::GW_Magic);
+            }
+        }
     }
 
 }

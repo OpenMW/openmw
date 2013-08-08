@@ -32,7 +32,7 @@ void Repair::repair(const MWWorld::Ptr &itemToRepair)
     if (mTool.getRefData().getCount() > 1 && uses == ref->mBase->mData.mUses)
     {
         MWWorld::ContainerStore& store = MWWorld::Class::get(player).getContainerStore(player);
-        MWWorld::ContainerStoreIterator it = store.add(mTool);
+        MWWorld::ContainerStoreIterator it = store.add(mTool, player);
         it->getRefData().setCount(mTool.getRefData().getCount()-1);
         it->getCellRef().mCharge = -1;
 

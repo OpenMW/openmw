@@ -333,8 +333,6 @@ namespace Compiler
         const int opcodeGetRace = 0x20001d9;
         const int opcodeGetRaceExplicit = 0x20001da;
 
-        const int opcodeGetWerewolfKills = 0x20001e2;
-
         const int opcodePcExpelled = 0x20018;
         const int opcodePcExpelledExplicit = 0x20019;
         const int opcodePcExpell = 0x2001a;
@@ -347,8 +345,15 @@ namespace Compiler
         const int opcodeLowerRankExplicit = 0x20001eb;
         const int opcodeOnDeath = 0x20001fc;
         const int opcodeOnDeathExplicit = 0x2000205;
+
+        const int opcodeBecomeWerewolf = 0x2000217;
+        const int opcodeBecomeWerewolfExplicit = 0x2000218;
+        const int opcodeUndoWerewolf = 0x2000219;
+        const int opcodeUndoWerewolfExplicit = 0x200021a;
         const int opcodeIsWerewolf = 0x20001fd;
         const int opcodeIsWerewolfExplicit = 0x20001fe;
+
+        const int opcodeGetWerewolfKills = 0x20001e2;
     }
 
     namespace Transformation

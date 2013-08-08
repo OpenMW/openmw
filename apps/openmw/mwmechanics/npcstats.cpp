@@ -13,7 +13,9 @@
 #include <components/esm/loadgmst.hpp>
 #include <components/esm/loadfact.hpp>
 
+#include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/player.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

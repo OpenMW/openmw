@@ -105,6 +105,9 @@ namespace MWBase
 
             virtual void toggleVisible (MWGui::GuiWindow wnd) = 0;
 
+            virtual void forceHide(MWGui::GuiWindow wnd) = 0;
+            virtual void unsetForceHide(MWGui::GuiWindow wnd) = 0;
+
             /// Disallow all inventory mode windows
             virtual void disallowAll() = 0;
 

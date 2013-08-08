@@ -1057,6 +1057,18 @@ namespace MWScript
                 }
         };
 
+        template <class R, bool set>
+        class OpSetWerewolf : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+                    MWBase::Environment::get().getWorld()->setWerewolf(ptr, set);
+                }
+        };
+
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
@@ -1121,6 +1133,7 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Stats::opcodeRemoveSpell, new OpRemoveSpell<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Stats::opcodeRemoveSpellExplicit,
                 new OpRemoveSpell<ExplicitRef>);
+
             interpreter.installSegment5 (Compiler::Stats::opcodeGetSpell, new OpGetSpell<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Stats::opcodeGetSpellExplicit, new OpGetSpell<ExplicitRef>);
 
@@ -1176,6 +1189,11 @@ namespace MWScript
 
             interpreter.installSegment5 (Compiler::Stats::opcodeIsWerewolf, new OpIsWerewolf<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Stats::opcodeIsWerewolfExplicit, new OpIsWerewolf<ExplicitRef>);
+
+            interpreter.installSegment5 (Compiler::Stats::opcodeBecomeWerewolf, new OpSetWerewolf<ImplicitRef, true>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeBecomeWerewolfExplicit, new OpSetWerewolf<ExplicitRef, true>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeUndoWerewolf, new OpSetWerewolf<ImplicitRef, false>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeUndoWerewolfExplicit, new OpSetWerewolf<ExplicitRef, false>);
         }
     }
 }

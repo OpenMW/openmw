@@ -34,7 +34,7 @@ namespace MWMechanics
 
         float mDuration;
 
-            void updateNpc (const MWWorld::Ptr& ptr, float duration, bool paused);
+        void updateNpc(const MWWorld::Ptr &ptr, float duration, bool paused);
 
             void adjustMagicEffects (const MWWorld::Ptr& creature);
 

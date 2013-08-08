@@ -65,6 +65,17 @@ namespace MWWorld
 
             InventoryStore& operator= (const InventoryStore& store);
 
+            virtual ContainerStoreIterator add (const Ptr& itemPtr, const Ptr& actorPtr);
+            ///< Add the item pointed to by \a ptr to this container. (Stacks automatically if needed)
+            /// Auto-equip items if specific conditions are fulfilled (see the implementation).
+            ///
+            /// \note The item pointed to is not required to exist beyond this function call.
+            ///
+            /// \attention Do not add items to an existing stack by increasing the count instead of
+            /// calling this function!
+            ///
+            /// @return if stacking happened, return iterator to the item that was stacked against, otherwise iterator to the newly inserted item.
+
             void equip (int slot, const ContainerStoreIterator& iterator);
             ///< \note \a iterator can be an end-iterator
 
@@ -77,6 +88,9 @@ namespace MWWorld
             /// \note if no item selected, return end() iterator
 
             ContainerStoreIterator getSlot (int slot);
+
+            void unequipAll(const MWWorld::Ptr& actor);
+            ///< Unequip all currently equipped items.
 
             void autoEquip (const MWWorld::Ptr& npc);
             ///< Auto equip items according to stats and item value.

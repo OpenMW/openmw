@@ -65,7 +65,7 @@ namespace MWScript
                         ref.getPtr().getRefData().setLocals(*esmscript);
                     }
 
-                    MWWorld::Class::get (ptr).getContainerStore (ptr).add (ref.getPtr());
+                    MWWorld::Class::get (ptr).getContainerStore (ptr).add (ref.getPtr(), ptr);
 
                     // Spawn a messagebox (only for items added to player's inventory and if player is talking to someone)
                     if (ptr == MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer() )

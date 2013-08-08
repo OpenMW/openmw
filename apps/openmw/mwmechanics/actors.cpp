@@ -39,10 +39,8 @@ namespace MWMechanics
 
     void Actors::updateNpc (const MWWorld::Ptr& ptr, float duration, bool paused)
     {
-        if (!paused && ptr.getRefData().getHandle()!="player")
-            MWWorld::Class::get (ptr).getInventoryStore (ptr).autoEquip (ptr);
         if(!paused)
-            updateDrowning(ptr,duration);
+            updateDrowning(ptr, duration);
     }
 
     void Actors::adjustMagicEffects (const MWWorld::Ptr& creature)

@@ -115,6 +115,9 @@ namespace MWGui
 
     virtual void toggleVisible(GuiWindow wnd);
 
+    virtual void forceHide(MWGui::GuiWindow wnd);
+    virtual void unsetForceHide(MWGui::GuiWindow wnd);
+
     // Disallow all inventory mode windows
     virtual void disallowAll();
 
@@ -341,6 +344,7 @@ namespace MWGui
     void cleanupGarbage();
 
     GuiWindow mShown; // Currently shown windows in inventory mode
+    GuiWindow mForceHidden; // Hidden windows (overrides mShown)
 
     /* Currently ALLOWED windows in inventory mode. This is used at
        the start of the game, when windows are enabled one by one

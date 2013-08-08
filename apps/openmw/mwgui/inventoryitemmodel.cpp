@@ -42,7 +42,7 @@ void InventoryItemModel::copyItem (const ItemStack& item, size_t count)
 {
     int origCount = item.mBase.getRefData().getCount();
     item.mBase.getRefData().setCount(count);
-    MWWorld::ContainerStoreIterator it = MWWorld::Class::get(mActor).getContainerStore(mActor).add(item.mBase);
+    MWWorld::ContainerStoreIterator it = MWWorld::Class::get(mActor).getContainerStore(mActor).add(item.mBase, mActor);
     if (*it != item.mBase)
         item.mBase.getRefData().setCount(origCount);
     else

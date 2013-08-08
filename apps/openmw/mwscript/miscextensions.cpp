@@ -347,7 +347,7 @@ namespace MWScript
 
                     ref.getPtr().getCellRef().mSoul = creature;
 
-                    MWWorld::Class::get (ptr).getContainerStore (ptr).add (ref.getPtr());
+                    MWWorld::Class::get (ptr).getContainerStore (ptr).add (ref.getPtr(), ptr);
 
                 }
         };
