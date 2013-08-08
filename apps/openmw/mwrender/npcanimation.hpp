@@ -21,25 +21,21 @@ namespace MWRender
 class NpcAnimation : public Animation
 {
 public:
-struct PartInfo {
-    ESM::PartReferenceType type;
-    const char name[32];
-};
+    typedef std::map<ESM::PartReferenceType,std::string> PartBoneMap;
 
-enum ViewMode {
-    VM_Normal,
-    VM_FirstPerson,
-    VM_HeadOnly
-};
+    enum ViewMode {
+        VM_Normal,
+        VM_FirstPerson,
+        VM_HeadOnly
+    };
 
 private:
-    static const size_t sPartListSize = 27;
-    static const PartInfo sPartList[sPartListSize];
+    static const PartBoneMap sPartList;
 
     int mStateID;
 
     // Bounded Parts
-    NifOgre::ObjectList mObjectParts[sPartListSize];
+    NifOgre::ObjectList mObjectParts[ESM::PRT_Count];
 
     const ESM::NPC  *mNpc;
     std::string     mHeadModel;
@@ -66,17 +62,17 @@ private:
 
     int mVisibilityFlags;
 
-    int mPartslots[sPartListSize];  //Each part slot is taken by clothing, armor, or is empty
-    int mPartPriorities[sPartListSize];
+    int mPartslots[ESM::PRT_Count];  //Each part slot is taken by clothing, armor, or is empty
+    int mPartPriorities[ESM::PRT_Count];
 
     NifOgre::ObjectList insertBoundedPart(const std::string &model, int group, const std::string &bonename);
 
     void updateParts(bool forceupdate = false);
 
-    void removeIndividualPart(int type);
-    void reserveIndividualPart(int type, int group, int priority);
+    void removeIndividualPart(ESM::PartReferenceType type);
+    void reserveIndividualPart(ESM::PartReferenceType type, int group, int priority);
 
-    bool addOrReplaceIndividualPart(int type, int group, int priority, const std::string &mesh);
+    bool addOrReplaceIndividualPart(ESM::PartReferenceType type, int group, int priority, const std::string &mesh);
     void removePartGroup(int group);
     void addPartGroup(int group, int priority, const std::vector<ESM::PartReference> &parts);
 

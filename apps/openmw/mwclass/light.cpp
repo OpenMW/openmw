@@ -26,19 +26,10 @@ namespace MWClass
 {
     void Light::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
-        MWWorld::LiveCellRef<ESM::Light> *ref =
-            ptr.get<ESM::Light>();
-        assert (ref->mBase != NULL);
-
-        const std::string &model = ref->mBase->mModel;
-
-        MWRender::Objects& objects = renderingInterface.getObjects();
-        objects.insertBegin(ptr, ptr.getRefData().isEnabled(), false);
-
-        if (!model.empty())
-            objects.insertMesh(ptr, "meshes\\" + model, true);
-        else
-            objects.insertLight(ptr);
+        const std::string model = getModel(ptr);
+        if(!model.empty()) {
+            renderingInterface.getObjects().insertModel(ptr, model);
+        }
     }
 
     void Light::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const

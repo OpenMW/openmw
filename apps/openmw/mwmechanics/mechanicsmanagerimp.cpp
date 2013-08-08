@@ -254,6 +254,20 @@ namespace MWMechanics
                 MWBase::Environment::get().getWindowManager()->setValue(dynamicNames[2], stats.getFatigue());
             }
 
+            if(npcStats.getTimeToStartDrowning() != mWatchedNpc.getTimeToStartDrowning())
+            {
+                mWatchedNpc.setTimeToStartDrowning(npcStats.getTimeToStartDrowning());
+                if(npcStats.getTimeToStartDrowning()>=20.0)
+                {
+                    MWBase::Environment::get().getWindowManager()->setDrowningBarVisibility(false);
+                }
+                else
+                {
+                    MWBase::Environment::get().getWindowManager()->setDrowningBarVisibility(true);
+                    MWBase::Environment::get().getWindowManager()->setDrowningTimeLeft(npcStats.getTimeToStartDrowning());
+                }
+            }
+
             bool update = false;
 
             //Loop over ESM::Skill::SkillEnum

@@ -74,7 +74,7 @@ namespace MWWorld
 
             bool isInCell() const
             {
-                return (mContainerStore == 0);
+                return (mContainerStore == 0) && (mCell != 0);
             }
 
             void setContainerStore (ContainerStore *store);

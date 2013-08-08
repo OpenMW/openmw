@@ -4,6 +4,7 @@
 #include "../mwworld/esmstore.hpp"
 
 #include <components/compiler/extensions.hpp>
+#include <components/compiler/opcodes.hpp>
 
 #include <components/interpreter/interpreter.hpp>
 #include <components/interpreter/runtime.hpp>
@@ -165,39 +166,17 @@ namespace MWScript
                 }
         };
 
-        const int opcodeCellChanged = 0x2000000;
-        const int opcodeCOC = 0x2000026;
-        const int opcodeCOE = 0x200008e;
-        const int opcodeGetInterior = 0x2000131;
-        const int opcodeGetPCCell = 0x2000136;
-        const int opcodeGetWaterLevel = 0x2000141;
-        const int opcodeSetWaterLevel = 0x2000142;
-        const int opcodeModWaterLevel = 0x2000143;
-
-        void registerExtensions (Compiler::Extensions& extensions)
-        {
-            extensions.registerFunction ("cellchanged", 'l', "", opcodeCellChanged);
-            extensions.registerInstruction ("coc", "S", opcodeCOC);
-            extensions.registerInstruction ("centeroncell", "S", opcodeCOC);
-            extensions.registerInstruction ("coe", "ll", opcodeCOE);
-            extensions.registerInstruction ("centeronexterior", "ll", opcodeCOE);
-            extensions.registerInstruction ("setwaterlevel", "f", opcodeSetWaterLevel);
-            extensions.registerInstruction ("modwaterlevel", "f", opcodeModWaterLevel);
-            extensions.registerFunction ("getinterior", 'l', "", opcodeGetInterior);
-            extensions.registerFunction ("getpccell", 'l', "c", opcodeGetPCCell);
-            extensions.registerFunction ("getwaterlevel", 'f', "", opcodeGetWaterLevel);
-        }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
-            interpreter.installSegment5 (opcodeCellChanged, new OpCellChanged);
-            interpreter.installSegment5 (opcodeCOC, new OpCOC);
-            interpreter.installSegment5 (opcodeCOE, new OpCOE);
-            interpreter.installSegment5 (opcodeGetInterior, new OpGetInterior);
-            interpreter.installSegment5 (opcodeGetPCCell, new OpGetPCCell);
-            interpreter.installSegment5 (opcodeGetWaterLevel, new OpGetWaterLevel);
-            interpreter.installSegment5 (opcodeSetWaterLevel, new OpSetWaterLevel);
-            interpreter.installSegment5 (opcodeModWaterLevel, new OpModWaterLevel);
+            interpreter.installSegment5 (Compiler::Cell::opcodeCellChanged, new OpCellChanged);
+            interpreter.installSegment5 (Compiler::Cell::opcodeCOC, new OpCOC);
+            interpreter.installSegment5 (Compiler::Cell::opcodeCOE, new OpCOE);
+            interpreter.installSegment5 (Compiler::Cell::opcodeGetInterior, new OpGetInterior);
+            interpreter.installSegment5 (Compiler::Cell::opcodeGetPCCell, new OpGetPCCell);
+            interpreter.installSegment5 (Compiler::Cell::opcodeGetWaterLevel, new OpGetWaterLevel);
+            interpreter.installSegment5 (Compiler::Cell::opcodeSetWaterLevel, new OpSetWaterLevel);
+            interpreter.installSegment5 (Compiler::Cell::opcodeModWaterLevel, new OpModWaterLevel);
         }
     }
 }

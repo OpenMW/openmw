@@ -2,6 +2,7 @@
 #include "dialogueextensions.hpp"
 
 #include <components/compiler/extensions.hpp>
+#include <components/compiler/opcodes.hpp>
 
 #include <components/interpreter/interpreter.hpp>
 #include <components/interpreter/runtime.hpp>
@@ -188,62 +189,25 @@ namespace MWScript
                 }
         };
 
-        const int opcodeJournal = 0x2000133;
-        const int opcodeSetJournalIndex = 0x2000134;
-        const int opcodeGetJournalIndex = 0x2000135;
-        const int opcodeAddTopic = 0x200013a;
-        const int opcodeChoice = 0x2000a;
-        const int opcodeForceGreeting = 0x200014f;
-        const int opcodeForceGreetingExplicit = 0x2000150;
-        const int opcodeGoodbye = 0x2000152;
-        const int opcodeSetReputation = 0x20001ad;
-        const int opcodeModReputation = 0x20001ae;
-        const int opcodeSetReputationExplicit = 0x20001af;
-        const int opcodeModReputationExplicit = 0x20001b0;
-        const int opcodeGetReputation = 0x20001b1;
-        const int opcodeGetReputationExplicit = 0x20001b2;
-        const int opcodeSameFaction = 0x20001b5;
-        const int opcodeSameFactionExplicit = 0x20001b6;
-
-        void registerExtensions (Compiler::Extensions& extensions)
-        {
-            extensions.registerInstruction ("journal", "cl", opcodeJournal);
-            extensions.registerInstruction ("setjournalindex", "cl", opcodeSetJournalIndex);
-            extensions.registerFunction ("getjournalindex", 'l', "c", opcodeGetJournalIndex);
-            extensions.registerInstruction ("addtopic", "S" , opcodeAddTopic);
-            extensions.registerInstruction ("choice", "/SlSlSlSlSlSlSlSlSlSlSlSlSlSlSlSl", opcodeChoice);
-            extensions.registerInstruction("forcegreeting","",opcodeForceGreeting);
-            extensions.registerInstruction("forcegreeting","",opcodeForceGreeting,
-                opcodeForceGreetingExplicit);
-            extensions.registerInstruction("goodbye", "", opcodeGoodbye);
-            extensions.registerInstruction("setreputation", "l", opcodeSetReputation,
-                opcodeSetReputationExplicit);
-            extensions.registerInstruction("modreputation", "l", opcodeModReputation,
-                opcodeModReputationExplicit);
-            extensions.registerFunction("getreputation", 'l', "", opcodeGetReputation,
-                opcodeGetReputationExplicit);
-            extensions.registerFunction("samefaction", 'l', "", opcodeSameFaction,
-                opcodeSameFactionExplicit);
-        }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
-            interpreter.installSegment5 (opcodeJournal, new OpJournal);
-            interpreter.installSegment5 (opcodeSetJournalIndex, new OpSetJournalIndex);
-            interpreter.installSegment5 (opcodeGetJournalIndex, new OpGetJournalIndex);
-            interpreter.installSegment5 (opcodeAddTopic, new OpAddTopic);
-            interpreter.installSegment3 (opcodeChoice,new OpChoice);
-            interpreter.installSegment5 (opcodeForceGreeting, new OpForceGreeting<ImplicitRef>);
-            interpreter.installSegment5 (opcodeForceGreetingExplicit, new OpForceGreeting<ExplicitRef>);
-            interpreter.installSegment5 (opcodeGoodbye, new OpGoodbye);
-            interpreter.installSegment5 (opcodeGetReputation, new OpGetReputation<ImplicitRef>);
-            interpreter.installSegment5 (opcodeSetReputation, new OpSetReputation<ImplicitRef>);
-            interpreter.installSegment5 (opcodeModReputation, new OpModReputation<ImplicitRef>);
-            interpreter.installSegment5 (opcodeSetReputationExplicit, new OpSetReputation<ExplicitRef>);
-            interpreter.installSegment5 (opcodeModReputationExplicit, new OpModReputation<ExplicitRef>);
-            interpreter.installSegment5 (opcodeGetReputationExplicit, new OpGetReputation<ExplicitRef>);
-            interpreter.installSegment5 (opcodeSameFaction, new OpSameFaction<ImplicitRef>);
-            interpreter.installSegment5 (opcodeSameFactionExplicit, new OpSameFaction<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Dialogue::opcodeJournal, new OpJournal);
+            interpreter.installSegment5 (Compiler::Dialogue::opcodeSetJournalIndex, new OpSetJournalIndex);
+            interpreter.installSegment5 (Compiler::Dialogue::opcodeGetJournalIndex, new OpGetJournalIndex);
+            interpreter.installSegment5 (Compiler::Dialogue::opcodeAddTopic, new OpAddTopic);
+            interpreter.installSegment3 (Compiler::Dialogue::opcodeChoice,new OpChoice);
+            interpreter.installSegment5 (Compiler::Dialogue::opcodeForceGreeting, new OpForceGreeting<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Dialogue::opcodeForceGreetingExplicit, new OpForceGreeting<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Dialogue::opcodeGoodbye, new OpGoodbye);
+            interpreter.installSegment5 (Compiler::Dialogue::opcodeGetReputation, new OpGetReputation<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Dialogue::opcodeSetReputation, new OpSetReputation<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Dialogue::opcodeModReputation, new OpModReputation<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Dialogue::opcodeSetReputationExplicit, new OpSetReputation<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Dialogue::opcodeModReputationExplicit, new OpModReputation<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Dialogue::opcodeGetReputationExplicit, new OpGetReputation<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Dialogue::opcodeSameFaction, new OpSameFaction<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Dialogue::opcodeSameFactionExplicit, new OpSameFaction<ExplicitRef>);
         }
     }
 

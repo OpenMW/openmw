@@ -205,7 +205,6 @@
         shUniform(float, waterLevel) @shSharedParameter(waterLevel)
 #endif
 
-
     SH_START_PROGRAM
     {
 
@@ -232,35 +231,46 @@ float previousAlpha = 1.f;
 #endif
 
         // Layer calculations 
+// rescale UV to directly map vertices to texel centers
+// TODO: parameterize texel size
+float2 blendUV = (UV - 0.5) * (8.0 / (8.0+1.0)) + 0.5;
 @shForeach(@shPropertyString(num_blendmaps))
-        float4 blendValues@shIterator = shSample(blendMap@shIterator, UV);
+        float4 blendValues@shIterator = shSample(blendMap@shIterator, blendUV);
 @shEndForeach
 
         float3 albedo = float3(0,0,0);
+
+        float2 layerUV = UV * 8;
+
 @shForeach(@shPropertyString(num_layers))
 
 
 #if IS_FIRST_PASS
         #if @shIterator == 0
         // first layer of first pass is the base layer and doesn't need a blend map
-        albedo = shSample(diffuseMap0, UV * 10).rgb;
+        albedo = shSample(diffuseMap0, layerUV).rgb;
         #else
-        albedo = shLerp(albedo, shSample(diffuseMap@shIterator, UV * 10).rgb, blendValues@shPropertyString(blendmap_component_@shIterator));
+        albedo = shLerp(albedo, shSample(diffuseMap@shIterator, layerUV).rgb, blendValues@shPropertyString(blendmap_component_@shIterator));
         #endif
 #else
         #if @shIterator == 0
-        albedo = shSample(diffuseMap@shIterator, UV * 10).rgb, blendValues@shPropertyString(blendmap_component_@shIterator);
+        albedo = shSample(diffuseMap@shIterator, layerUV).rgb, blendValues@shPropertyString(blendmap_component_@shIterator);
         #else
-        albedo = shLerp(albedo, shSample(diffuseMap@shIterator, UV * 10).rgb, blendValues@shPropertyString(blendmap_component_@shIterator));
+        albedo = shLerp(albedo, shSample(diffuseMap@shIterator, layerUV).rgb, blendValues@shPropertyString(blendmap_component_@shIterator));
         #endif
         previousAlpha *= 1.f-blendValues@shPropertyString(blendmap_component_@shIterator);
 #endif
 @shEndForeach
         
         shOutputColour(0) = float4(1,1,1,1);
+
         
 #if COLOUR_MAP
-        shOutputColour(0).rgb *= shSample(colourMap, UV).rgb;
+        // Since we're emulating vertex colors here,
+        // rescale UV to directly map vertices to texel centers. TODO: parameterize texel size
+        const float colourmapSize = 33.f;
+        float2 colourUV = (UV - 0.5) * (colourmapSize / (colourmapSize+1.f)) + 0.5;
+        shOutputColour(0).rgb *= shSample(colourMap, colourUV).rgb;
 #endif
 
         shOutputColour(0).rgb *= albedo;
@@ -347,6 +357,7 @@ float previousAlpha = 1.f;
 #else
         shOutputColour(0).a = 1.f-previousAlpha;
 #endif
+
     }
 
 #endif

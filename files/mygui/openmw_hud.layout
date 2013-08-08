@@ -32,7 +32,21 @@
                 <Property key="NeedMouse" value="false"/>
             </Widget>
         </Widget>
-
+        
+        <!-- Drowning bar -->
+        <Widget type="Widget" skin="HUD_Box" position="0 36 220 56" align="Center Top" name="DrowningFrame">
+            <Property key="Visible" value="false"/>
+            <Widget type="TextBox" skin="SandText" position="0 8 220 24" name="DrowningTitle" align="Center Top HStretch">
+                <Property key="Caption" value="#{sBreath}"/>
+                <Property key="TextAlign" value="Center"/>
+                <Property key="TextShadow" value="true"/>
+                <Property key="TextShadowColour" value="0 0 0"/>
+            </Widget>
+            <Widget type="ProgressBar" skin="MW_Progress_Loading" position="12 36 196 8" align="Center Top" name="Drowning">
+                <Property key="NeedMouse" value="false"/>
+            </Widget>
+        </Widget>
+        
         <!-- Equipped weapon/selected spell name display for a few seconds after it changes -->
         <Widget type="TextBox" skin="SandText" position="13 118 270 24" name="WeaponSpellName" align="Left Bottom HStretch">
             <Property key="Visible" value="false"/>

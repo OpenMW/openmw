@@ -16,8 +16,6 @@ namespace MWScript
     /// \brief Script functionality limited to the console
     namespace Console
     {
-        void registerExtensions (Compiler::Extensions& extensions);
-
         void installOpcodes (Interpreter::Interpreter& interpreter);
     }
 }

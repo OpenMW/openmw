@@ -57,7 +57,7 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
                                    MWWorld::Fallback* fallback)
     : mRendering(_rend)
     , mFallback(fallback)
-    , mObjects(mRendering, mFallback)
+    , mObjects(mRendering)
     , mActors(mRendering, this)
     , mPlayerAnimation(NULL)
     , mAmbientMode(0)

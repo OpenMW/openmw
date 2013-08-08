@@ -45,7 +45,7 @@ namespace MWRender
         // Setting this to 0 seems to cause glitches though. :/
         mTerrainGlobals->setMaxPixelError(1);
 
-        mTerrainGlobals->setLayerBlendMapSize(32);
+        mTerrainGlobals->setLayerBlendMapSize(ESM::Land::LAND_TEXTURE_SIZE/2 + 1);
 
         //10 (default) didn't seem to be quite enough
         mTerrainGlobals->setSkirtSize(128);
@@ -246,9 +246,9 @@ namespace MWRender
         //cells which may lead to inconsistent results when shading between cells
         int num = MWBase::Environment::get().getWorld()->getStore().get<ESM::LandTexture>().getSize(plugin);
         std::set<uint16_t> ltexIndexes;
-        for ( int y = fromY - 1; y < fromY + size + 1; y++ )
+        for ( int y = fromY; y < fromY + size + 1; y++ )
         {
-            for ( int x = fromX - 1; x < fromX + size + 1; x++ )
+            for ( int x = fromX - 1; x < fromX + size; x++ )  // NB we wrap X from the other side because Y is reversed
             {
                 int idx = getLtexIndexAt(cellX, cellY, x, y);
                 // This is a quick hack to prevent the program from trying to fetch textures
@@ -340,7 +340,6 @@ namespace MWRender
         assert( (size & (size - 1)) == 0 && "Size must be a power of 2");
 
         const int blendMapSize = terrain->getLayerBlendMapSize();
-        const int splatSize    = blendMapSize / size;
 
         //zero out every map
         std::map<uint16_t, int>::const_iterator iter;
@@ -352,9 +351,9 @@ namespace MWRender
         }
 
         //covert the ltex data into a set of blend maps
-        for ( int texY = fromY - 1; texY < fromY + size + 1; texY++ )
+        for ( int texY = fromY; texY < fromY + size + 1; texY++ )
         {
-            for ( int texX = fromX - 1; texX < fromX + size + 1; texX++ )
+            for ( int texX = fromX - 1; texX < fromX + size; texX++ ) // NB we wrap X from the other side because Y is reversed
             {
                 const uint16_t ltexIndex = getLtexIndexAt(cellX, cellY, texX, texY);
 
@@ -367,7 +366,7 @@ namespace MWRender
 
                 //while texX is the splat index relative to the entire cell,
                 //relX is relative to the current segment we are splatting
-                const int relX = texX - fromX;
+                const int relX = texX - fromX + 1;
                 const int relY = texY - fromY;
 
                 const int layerIndex = indexes.find(ltexIndex)->second;
@@ -375,35 +374,15 @@ namespace MWRender
                 float* const pBlend = terrain->getLayerBlendMap(layerIndex)
                                              ->getBlendPointer();
 
-                for ( int y = -1; y < splatSize + 1; y++ )
-                {
-                    for ( int x = -1; x < splatSize + 1; x++ )
-                    {
-
                         //Note: Y is reversed
-                        const int splatY = blendMapSize - 1 - relY * splatSize - y;
-                        const int splatX = relX * splatSize + x;
+                        const int splatY = blendMapSize - relY - 1;
+                        const int splatX = relX;
 
-                        if ( splatX >= 0 && splatX < blendMapSize &&
-                             splatY >= 0 && splatY < blendMapSize )
-                        {
-                            const int index = (splatY)*blendMapSize + splatX;
+                        assert(splatX >= 0 && splatX < blendMapSize);
+                        assert(splatY >= 0 && splatY < blendMapSize);
 
-                            if ( y >= 0 && y < splatSize &&
-                                 x >= 0 && x < splatSize )
-                            {
-                                pBlend[index] = 1;
-                            }
-                            else
-                            {
-                                //this provides a transition shading but also
-                                //rounds off the corners slightly
-                                pBlend[index] = std::min(1.0f, pBlend[index] + 0.5f);
-                            }
-                        }
-
-                    }
-                }
+                        const int index = (splatY)*blendMapSize + splatX;
+                        pBlend[index] = 1;
             }
         }
 

@@ -7,6 +7,7 @@
 #include <components/esm/loadcell.hpp>
 
 #include <components/compiler/extensions.hpp>
+#include <components/compiler/opcodes.hpp>
 
 #include <components/interpreter/interpreter.hpp>
 #include <components/interpreter/runtime.hpp>
@@ -707,108 +708,45 @@ namespace MWScript
         };
 
 
-        const int opcodeSetScale = 0x2000164;
-        const int opcodeSetScaleExplicit = 0x2000165;
-        const int opcodeSetAngle = 0x2000166;
-        const int opcodeSetAngleExplicit = 0x2000167;
-        const int opcodeGetScale = 0x2000168;
-        const int opcodeGetScaleExplicit = 0x2000169;
-        const int opcodeGetAngle = 0x200016a;
-        const int opcodeGetAngleExplicit = 0x200016b;
-        const int opcodeGetPos = 0x2000190;
-        const int opcodeGetPosExplicit = 0x2000191;
-        const int opcodeSetPos = 0x2000192;
-        const int opcodeSetPosExplicit = 0x2000193;
-        const int opcodeGetStartingPos = 0x2000194;
-        const int opcodeGetStartingPosExplicit = 0x2000195;
-        const int opcodeGetStartingAngle = 0x2000210;
-        const int opcodeGetStartingAngleExplicit = 0x2000211;
-        const int opcodePosition = 0x2000196;
-        const int opcodePositionExplicit = 0x2000197;
-        const int opcodePositionCell = 0x2000198;
-        const int opcodePositionCellExplicit = 0x2000199;
-
-        const int opcodePlaceItemCell = 0x200019a;
-        const int opcodePlaceItem = 0x200019b;
-        const int opcodePlaceAtPc = 0x200019c;  
-        const int opcodePlaceAtMe = 0x200019d;
-        const int opcodePlaceAtMeExplicit = 0x200019e;
-        const int opcodeModScale = 0x20001e3;
-        const int opcodeModScaleExplicit = 0x20001e4;
-        const int opcodeRotate = 0x20001ff;
-        const int opcodeRotateExplicit = 0x2000200;
-        const int opcodeRotateWorld = 0x2000201;
-        const int opcodeRotateWorldExplicit = 0x2000202;
-        const int opcodeSetAtStart = 0x2000203;
-        const int opcodeSetAtStartExplicit = 0x2000204;
-        const int opcodeMove = 0x2000206;
-        const int opcodeMoveExplicit = 0x2000207;
-        const int opcodeMoveWorld = 0x2000208;
-        const int opcodeMoveWorldExplicit = 0x2000209;
-
-        void registerExtensions (Compiler::Extensions& extensions)
-        {
-            extensions.registerInstruction("setscale","f",opcodeSetScale,opcodeSetScaleExplicit);
-            extensions.registerFunction("getscale",'f',"",opcodeGetScale,opcodeGetScaleExplicit);
-            extensions.registerInstruction("setangle","cf",opcodeSetAngle,opcodeSetAngleExplicit);
-            extensions.registerFunction("getangle",'f',"c",opcodeGetAngle,opcodeGetAngleExplicit);
-            extensions.registerInstruction("setpos","cf",opcodeSetPos,opcodeSetPosExplicit);
-            extensions.registerFunction("getpos",'f',"c",opcodeGetPos,opcodeGetPosExplicit);
-            extensions.registerFunction("getstartingpos",'f',"c",opcodeGetStartingPos,opcodeGetStartingPosExplicit);
-            extensions.registerInstruction("position","ffff",opcodePosition,opcodePositionExplicit);
-            extensions.registerInstruction("positioncell","ffffc",opcodePositionCell,opcodePositionCellExplicit);
-            extensions.registerInstruction("placeitemcell","ccffff",opcodePlaceItemCell);
-            extensions.registerInstruction("placeitem","cffff",opcodePlaceItem);
-            extensions.registerInstruction("placeatpc","clfl",opcodePlaceAtPc);
-            extensions.registerInstruction("placeatme","clfl",opcodePlaceAtMe,opcodePlaceAtMeExplicit);
-            extensions.registerInstruction("modscale","f",opcodeModScale,opcodeModScaleExplicit);
-            extensions.registerInstruction("rotate","cf",opcodeRotate,opcodeRotateExplicit);
-            extensions.registerInstruction("rotateworld","cf",opcodeRotateWorld,opcodeRotateWorldExplicit);
-            extensions.registerInstruction("setatstart","",opcodeSetAtStart,opcodeSetAtStartExplicit);
-            extensions.registerInstruction("move","cf",opcodeMove,opcodeMoveExplicit);
-            extensions.registerInstruction("moveworld","cf",opcodeMoveWorld,opcodeMoveWorldExplicit);
-            extensions.registerFunction("getstartingangle",'f',"c",opcodeGetStartingAngle,opcodeGetStartingAngleExplicit);
-        }
-
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
-            interpreter.installSegment5(opcodeSetScale,new OpSetScale<ImplicitRef>);
-            interpreter.installSegment5(opcodeSetScaleExplicit,new OpSetScale<ExplicitRef>);
-            interpreter.installSegment5(opcodeSetAngle,new OpSetAngle<ImplicitRef>);
-            interpreter.installSegment5(opcodeSetAngleExplicit,new OpSetAngle<ExplicitRef>);
-            interpreter.installSegment5(opcodeGetScale,new OpGetScale<ImplicitRef>);
-            interpreter.installSegment5(opcodeGetScaleExplicit,new OpGetScale<ExplicitRef>);
-            interpreter.installSegment5(opcodeGetAngle,new OpGetAngle<ImplicitRef>);
-            interpreter.installSegment5(opcodeGetAngleExplicit,new OpGetAngle<ExplicitRef>);
-            interpreter.installSegment5(opcodeGetPos,new OpGetPos<ImplicitRef>);
-            interpreter.installSegment5(opcodeGetPosExplicit,new OpGetPos<ExplicitRef>);
-            interpreter.installSegment5(opcodeSetPos,new OpSetPos<ImplicitRef>);
-            interpreter.installSegment5(opcodeSetPosExplicit,new OpSetPos<ExplicitRef>);
-            interpreter.installSegment5(opcodeGetStartingPos,new OpGetStartingPos<ImplicitRef>);
-            interpreter.installSegment5(opcodeGetStartingPosExplicit,new OpGetStartingPos<ExplicitRef>);
-            interpreter.installSegment5(opcodePosition,new OpPosition<ImplicitRef>);
-            interpreter.installSegment5(opcodePositionExplicit,new OpPosition<ExplicitRef>);
-            interpreter.installSegment5(opcodePositionCell,new OpPositionCell<ImplicitRef>);
-            interpreter.installSegment5(opcodePositionCellExplicit,new OpPositionCell<ExplicitRef>);
-            interpreter.installSegment5(opcodePlaceItemCell,new OpPlaceItemCell<ImplicitRef>);            
-            interpreter.installSegment5(opcodePlaceItem,new OpPlaceItem<ImplicitRef>);            
-            interpreter.installSegment5(opcodePlaceAtPc,new OpPlaceAtPc<ImplicitRef>);   
-            interpreter.installSegment5(opcodePlaceAtMe,new OpPlaceAtMe<ImplicitRef>);   
-            interpreter.installSegment5(opcodePlaceAtMeExplicit,new OpPlaceAtMe<ExplicitRef>);
-            interpreter.installSegment5(opcodeModScale,new OpModScale<ImplicitRef>);
-            interpreter.installSegment5(opcodeModScaleExplicit,new OpModScale<ExplicitRef>);
-            interpreter.installSegment5(opcodeRotate,new OpRotate<ImplicitRef>);
-            interpreter.installSegment5(opcodeRotateExplicit,new OpRotate<ExplicitRef>);
-            interpreter.installSegment5(opcodeRotateWorld,new OpRotateWorld<ImplicitRef>);
-            interpreter.installSegment5(opcodeRotateWorldExplicit,new OpRotateWorld<ExplicitRef>);
-            interpreter.installSegment5(opcodeSetAtStart,new OpSetAtStart<ImplicitRef>);
-            interpreter.installSegment5(opcodeSetAtStartExplicit,new OpSetAtStart<ExplicitRef>);
-            interpreter.installSegment5(opcodeMove,new OpMove<ImplicitRef>);
-            interpreter.installSegment5(opcodeMoveExplicit,new OpMove<ExplicitRef>);
-            interpreter.installSegment5(opcodeMoveWorld,new OpMoveWorld<ImplicitRef>);
-            interpreter.installSegment5(opcodeMoveWorldExplicit,new OpMoveWorld<ExplicitRef>);
-            interpreter.installSegment5(opcodeGetStartingAngle, new OpGetStartingAngle<ImplicitRef>);
-            interpreter.installSegment5(opcodeGetStartingAngleExplicit, new OpGetStartingAngle<ExplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodeSetScale,new OpSetScale<ImplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodeSetScaleExplicit,new OpSetScale<ExplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodeSetAngle,new OpSetAngle<ImplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodeSetAngleExplicit,new OpSetAngle<ExplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodeGetScale,new OpGetScale<ImplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodeGetScaleExplicit,new OpGetScale<ExplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodeGetAngle,new OpGetAngle<ImplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodeGetAngleExplicit,new OpGetAngle<ExplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodeGetPos,new OpGetPos<ImplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodeGetPosExplicit,new OpGetPos<ExplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodeSetPos,new OpSetPos<ImplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodeSetPosExplicit,new OpSetPos<ExplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodeGetStartingPos,new OpGetStartingPos<ImplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodeGetStartingPosExplicit,new OpGetStartingPos<ExplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodePosition,new OpPosition<ImplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodePositionExplicit,new OpPosition<ExplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodePositionCell,new OpPositionCell<ImplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodePositionCellExplicit,new OpPositionCell<ExplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodePlaceItemCell,new OpPlaceItemCell<ImplicitRef>);            
+            interpreter.installSegment5(Compiler::Transformation::opcodePlaceItem,new OpPlaceItem<ImplicitRef>);            
+            interpreter.installSegment5(Compiler::Transformation::opcodePlaceAtPc,new OpPlaceAtPc<ImplicitRef>);   
+            interpreter.installSegment5(Compiler::Transformation::opcodePlaceAtMe,new OpPlaceAtMe<ImplicitRef>);   
+            interpreter.installSegment5(Compiler::Transformation::opcodePlaceAtMeExplicit,new OpPlaceAtMe<ExplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodeModScale,new OpModScale<ImplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodeModScaleExplicit,new OpModScale<ExplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodeRotate,new OpRotate<ImplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodeRotateExplicit,new OpRotate<ExplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodeRotateWorld,new OpRotateWorld<ImplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodeRotateWorldExplicit,new OpRotateWorld<ExplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodeSetAtStart,new OpSetAtStart<ImplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodeSetAtStartExplicit,new OpSetAtStart<ExplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodeMove,new OpMove<ImplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodeMoveExplicit,new OpMove<ExplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodeMoveWorld,new OpMoveWorld<ImplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodeMoveWorldExplicit,new OpMoveWorld<ExplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodeGetStartingAngle, new OpGetStartingAngle<ImplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodeGetStartingAngleExplicit, new OpGetStartingAngle<ExplicitRef>);
         }
     }
 }

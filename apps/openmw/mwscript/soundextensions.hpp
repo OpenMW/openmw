@@ -15,10 +15,7 @@ namespace MWScript
 {
     namespace Sound
     {
-        // Script-extensions related to sound
-        
-        void registerExtensions (Compiler::Extensions& extensions);
-        
+        // Script-extensions related to sound        
         void installOpcodes (Interpreter::Interpreter& interpreter);
     }
 }

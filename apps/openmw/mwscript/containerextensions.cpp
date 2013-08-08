@@ -8,6 +8,7 @@
 #include <MyGUI_LanguageManager.h>
 
 #include <components/compiler/extensions.hpp>
+#include <components/compiler/opcodes.hpp>
 
 #include <components/interpreter/interpreter.hpp>
 #include <components/interpreter/runtime.hpp>
@@ -360,55 +361,25 @@ namespace MWScript
                 }
         };
 
-        const int opcodeAddItem = 0x2000076;
-        const int opcodeAddItemExplicit = 0x2000077;
-        const int opcodeGetItemCount = 0x2000078;
-        const int opcodeGetItemCountExplicit = 0x2000079;
-        const int opcodeRemoveItem = 0x200007a;
-        const int opcodeRemoveItemExplicit = 0x200007b;
-        const int opcodeEquip = 0x20001b3;
-        const int opcodeEquipExplicit = 0x20001b4;
-        const int opcodeGetArmorType = 0x20001d1;
-        const int opcodeGetArmorTypeExplicit = 0x20001d2;
-        const int opcodeHasItemEquipped = 0x20001d5;
-        const int opcodeHasItemEquippedExplicit = 0x20001d6;
-        const int opcodeHasSoulGem = 0x20001de;
-        const int opcodeHasSoulGemExplicit = 0x20001df;
-        const int opcodeGetWeaponType = 0x20001e0;
-        const int opcodeGetWeaponTypeExplicit = 0x20001e1;
-
-        void registerExtensions (Compiler::Extensions& extensions)
-        {
-            extensions.registerInstruction ("additem", "cl", opcodeAddItem, opcodeAddItemExplicit);
-            extensions.registerFunction ("getitemcount", 'l', "c", opcodeGetItemCount,
-                opcodeGetItemCountExplicit);
-            extensions.registerInstruction ("removeitem", "cl", opcodeRemoveItem,
-                opcodeRemoveItemExplicit);
-            extensions.registerInstruction ("equip", "c", opcodeEquip, opcodeEquipExplicit);
-            extensions.registerFunction ("getarmortype", 'l', "l", opcodeGetArmorType, opcodeGetArmorTypeExplicit);
-            extensions.registerFunction ("hasitemequipped", 'l', "c", opcodeHasItemEquipped, opcodeHasItemEquippedExplicit);
-            extensions.registerFunction ("hassoulgem", 'l', "c", opcodeHasSoulGem, opcodeHasSoulGemExplicit);
-            extensions.registerFunction ("getweapontype", 'l', "", opcodeGetWeaponType, opcodeGetWeaponTypeExplicit);
-        }
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
-             interpreter.installSegment5 (opcodeAddItem, new OpAddItem<ImplicitRef>);
-             interpreter.installSegment5 (opcodeAddItemExplicit, new OpAddItem<ExplicitRef>);
-             interpreter.installSegment5 (opcodeGetItemCount, new OpGetItemCount<ImplicitRef>);
-             interpreter.installSegment5 (opcodeGetItemCountExplicit, new OpGetItemCount<ExplicitRef>);
-             interpreter.installSegment5 (opcodeRemoveItem, new OpRemoveItem<ImplicitRef>);
-             interpreter.installSegment5 (opcodeRemoveItemExplicit, new OpRemoveItem<ExplicitRef>);
-             interpreter.installSegment5 (opcodeEquip, new OpEquip<ImplicitRef>);
-             interpreter.installSegment5 (opcodeEquipExplicit, new OpEquip<ExplicitRef>);
-             interpreter.installSegment5 (opcodeGetArmorType, new OpGetArmorType<ImplicitRef>);
-             interpreter.installSegment5 (opcodeGetArmorTypeExplicit, new OpGetArmorType<ExplicitRef>);
-             interpreter.installSegment5 (opcodeHasItemEquipped, new OpHasItemEquipped<ImplicitRef>);
-             interpreter.installSegment5 (opcodeHasItemEquippedExplicit, new OpHasItemEquipped<ExplicitRef>);
-             interpreter.installSegment5 (opcodeHasSoulGem, new OpHasSoulGem<ImplicitRef>);
-             interpreter.installSegment5 (opcodeHasSoulGemExplicit, new OpHasSoulGem<ExplicitRef>);
-             interpreter.installSegment5 (opcodeGetWeaponType, new OpGetWeaponType<ImplicitRef>);
-             interpreter.installSegment5 (opcodeGetWeaponTypeExplicit, new OpGetWeaponType<ExplicitRef>);
+             interpreter.installSegment5 (Compiler::Container::opcodeAddItem, new OpAddItem<ImplicitRef>);
+             interpreter.installSegment5 (Compiler::Container::opcodeAddItemExplicit, new OpAddItem<ExplicitRef>);
+             interpreter.installSegment5 (Compiler::Container::opcodeGetItemCount, new OpGetItemCount<ImplicitRef>);
+             interpreter.installSegment5 (Compiler::Container::opcodeGetItemCountExplicit, new OpGetItemCount<ExplicitRef>);
+             interpreter.installSegment5 (Compiler::Container::opcodeRemoveItem, new OpRemoveItem<ImplicitRef>);
+             interpreter.installSegment5 (Compiler::Container::opcodeRemoveItemExplicit, new OpRemoveItem<ExplicitRef>);
+             interpreter.installSegment5 (Compiler::Container::opcodeEquip, new OpEquip<ImplicitRef>);
+             interpreter.installSegment5 (Compiler::Container::opcodeEquipExplicit, new OpEquip<ExplicitRef>);
+             interpreter.installSegment5 (Compiler::Container::opcodeGetArmorType, new OpGetArmorType<ImplicitRef>);
+             interpreter.installSegment5 (Compiler::Container::opcodeGetArmorTypeExplicit, new OpGetArmorType<ExplicitRef>);
+             interpreter.installSegment5 (Compiler::Container::opcodeHasItemEquipped, new OpHasItemEquipped<ImplicitRef>);
+             interpreter.installSegment5 (Compiler::Container::opcodeHasItemEquippedExplicit, new OpHasItemEquipped<ExplicitRef>);
+             interpreter.installSegment5 (Compiler::Container::opcodeHasSoulGem, new OpHasSoulGem<ImplicitRef>);
+             interpreter.installSegment5 (Compiler::Container::opcodeHasSoulGemExplicit, new OpHasSoulGem<ExplicitRef>);
+             interpreter.installSegment5 (Compiler::Container::opcodeGetWeaponType, new OpGetWeaponType<ImplicitRef>);
+             interpreter.installSegment5 (Compiler::Container::opcodeGetWeaponTypeExplicit, new OpGetWeaponType<ExplicitRef>);
         }
     }
 }

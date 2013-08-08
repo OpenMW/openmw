@@ -268,10 +268,6 @@ namespace MWInput
             case A_ToggleHUD:
                 mWindows.toggleHud();
                 break;
-            case A_Use:
-                if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
-                    mPlayer.use();
-                break;
             }
         }
     }
@@ -643,6 +639,10 @@ namespace MWInput
     {
         if (mWindows.isGuiMode()) return;
 
+        // Not allowed before the magic window is accessible
+        if (!mWindows.isAllowed(MWGui::GW_Magic))
+            return;
+
         MWMechanics::DrawState_ state = mPlayer.getDrawState();
         if (state == MWMechanics::DrawState_Weapon || state == MWMechanics::DrawState_Nothing)
             mPlayer.setDrawState(MWMechanics::DrawState_Spell);
@@ -653,6 +653,10 @@ namespace MWInput
     void InputManager::toggleWeapon()
     {
         if (mWindows.isGuiMode()) return;
+
+        // Not allowed before the inventory window is accessible
+        if (!mWindows.isAllowed(MWGui::GW_Inventory))
+            return;
 
         MWMechanics::DrawState_ state = mPlayer.getDrawState();
         if (state == MWMechanics::DrawState_Spell || state == MWMechanics::DrawState_Nothing)

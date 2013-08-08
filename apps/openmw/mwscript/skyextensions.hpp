@@ -15,9 +15,7 @@ namespace MWScript
 {
     /// \brief sky-related script functionality
     namespace Sky
-    {
-        void registerExtensions (Compiler::Extensions& extensions);
-        
+    {        
         void installOpcodes (Interpreter::Interpreter& interpreter);
     }
 }

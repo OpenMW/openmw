@@ -24,12 +24,14 @@
 #include "movement.hpp"
 #include "npcstats.hpp"
 #include "creaturestats.hpp"
+#include "security.hpp"
 
 #include "../mwrender/animation.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
@@ -465,7 +467,36 @@ bool CharacterController::updateNpcState()
                         sndMgr->playSound3D(mPtr, schools[effect->mData.mSchool]+" cast", 1.0f, 1.0f);
                 }
             }
-            else if(mWeaponType != WeapType_PickProbe)
+            else if(mWeaponType == WeapType_PickProbe)
+            {
+                MWWorld::Ptr item = *weapon;
+                MWWorld::Ptr target = MWBase::Environment::get().getWorld()->getFacedObject();
+                std::string resultMessage, resultSound;
+
+                if(!target.isEmpty())
+                {
+                    if(item.getTypeName() == typeid(ESM::Lockpick).name())
+                        Security(mPtr).pickLock(target, item, resultMessage, resultSound);
+                    else if(item.getTypeName() == typeid(ESM::Probe).name())
+                        Security(mPtr).probeTrap(target, item, resultMessage, resultSound);
+                }
+                mAnimation->play(mCurrentWeapon, Priority_Weapon,
+                                 MWRender::Animation::Group_UpperBody, true,
+                                 1.0f, "start", "stop", 0.0, 0);
+                mUpperBodyState = UpperCharState_FollowStartToFollowStop;
+
+                if(!resultMessage.empty())
+                    MWBase::Environment::get().getWindowManager()->messageBox(resultMessage);
+                if(!resultSound.empty())
+                    MWBase::Environment::get().getSoundManager()->playSound(resultSound, 1.0f, 1.0f);
+
+                // tool used up?
+                if(!item.getRefData().getCount())
+                    MWBase::Environment::get().getWindowManager()->unsetSelectedWeapon();
+                else
+                    MWBase::Environment::get().getWindowManager()->setSelectedWeapon(item);
+            }
+            else
             {
                 if(mWeaponType == WeapType_Crossbow || mWeaponType == WeapType_BowAndArrow ||
                    mWeaponType == WeapType_ThowWeapon)

@@ -16,6 +16,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 
+#include "npcstats.hpp"
 #include "creaturestats.hpp"
 #include "movement.hpp"
 
@@ -34,6 +35,12 @@ namespace MWMechanics
             CreatureStats& creatureStats =  MWWorld::Class::get (ptr).getCreatureStats (ptr);
             creatureStats.getAiSequence().execute (ptr);
         }
+    }
+
+    void Actors::updateNpc (const MWWorld::Ptr& ptr, float duration, bool paused)
+    {
+        if(!paused)
+            updateDrowning(ptr, duration);
     }
 
     void Actors::adjustMagicEffects (const MWWorld::Ptr& creature)
@@ -153,6 +160,37 @@ namespace MWMechanics
         }
     }
 
+    void Actors::updateDrowning(const MWWorld::Ptr& ptr, float duration)
+    {
+        Ogre::Vector3 pos(ptr.getRefData().getPosition().pos);
+        CreatureStats& creatureStats=MWWorld::Class::get(ptr).getCreatureStats(ptr);
+        NpcStats& stats=MWWorld::Class::get(ptr).getNpcStats(ptr);
+        bool waterBreathing=creatureStats.getMagicEffects().get(ESM::MagicEffect::WaterBreathing).mMagnitude>0;
+        if(MWBase::Environment::get().getWorld()->isSubmerged(ptr) && !waterBreathing)
+        {
+            if(creatureStats.getFatigue().getCurrent()==0)
+                stats.setTimeToStartDrowning(0);
+            float timeLeft=stats.getTimeToStartDrowning()-duration;
+            if(timeLeft<0)
+                timeLeft=0;
+            stats.setTimeToStartDrowning(timeLeft);
+            if(timeLeft==0)
+                stats.setLastDrowningHitTime(stats.getLastDrowningHitTime()+duration);
+        }
+        else
+        {
+            stats.setTimeToStartDrowning(20);
+            stats.setLastDrowningHitTime(0);
+        }
+        //if npc is drowning and it's time to hit, then hit
+        while(stats.getTimeToStartDrowning()==0.0 && stats.getLastDrowningHitTime()>0.33)
+        {
+            stats.setLastDrowningHitTime(stats.getLastDrowningHitTime()-0.33);
+            //fixme: replace it with something different once screen hit effects are implemented (blood on screen)
+            MWWorld::Class::get(ptr).setActorHealth(ptr, creatureStats.getHealth().getCurrent()-1.0);
+        }
+    }
+
     Actors::Actors() : mDuration (0) {}
 
     void Actors::addActor (const MWWorld::Ptr& ptr)
@@ -225,6 +263,8 @@ namespace MWMechanics
                         iter->second->resurrect();
 
                     updateActor(iter->first, totalDuration);
+                    if(iter->first.getTypeName() == typeid(ESM::NPC).name())
+                        updateNpc(iter->first, totalDuration, paused);
 
                     if(!stats.isDead())
                         continue;

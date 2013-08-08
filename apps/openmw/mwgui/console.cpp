@@ -1,6 +1,7 @@
 #include "console.hpp"
 
 #include <components/compiler/exception.hpp>
+#include <components/compiler/extensions0.hpp>
 
 #include "../mwscript/extensions.hpp"
 
@@ -122,7 +123,7 @@ namespace MWGui
         mHistory->setVisibleVScroll(true);
 
         // compiler
-        MWScript::registerExtensions (mExtensions, mConsoleOnlyScripts);
+        Compiler::registerExtensions (mExtensions, mConsoleOnlyScripts);
         mCompilerContext.setExtensions (&mExtensions);
     }
 
