@@ -168,7 +168,7 @@ void NpcAnimation::updateNpcBase()
 
     for(size_t i = 0;i < ESM::PRT_Count;i++)
         removeIndividualPart((ESM::PartReferenceType)i);
-    forceUpdate();
+    updateParts(true);
 }
 
 void NpcAnimation::updateParts(bool forceupdate)

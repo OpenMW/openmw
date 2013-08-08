@@ -193,7 +193,7 @@ namespace MWRender
         else if(mAnimation->getInfo("torch"))
             mAnimation->disable("torch");
 
-        mAnimation->forceUpdate();
+        mAnimation->updateParts(true);
         mAnimation->runAnimation(0.0f);
 
         mViewport->setDimensions (0, 0, std::min(1.f, float(sizeX) / float(512)), std::min(1.f, float(sizeY) / float(1024)));
