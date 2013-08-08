@@ -22,7 +22,7 @@
 
         <Property key="FontName" value = "Default"/>
 
-        <Property key="TextAlign" value = "ALIGN_LEFT ALIGN_VCENTER" />
+        <Property key="TextAlign" value = "Left VCenter" />
 
         <Property key="TextColour" value = "0.75 0.6 0.35" />
 
@@ -31,7 +31,7 @@
 
         <!-- Borders -->
 
-        <Child type="Widget" skin="MW_Box" offset="0 0 512 20" align="ALIGN_STRETCH" name="Client"/>
+        <Child type="Widget" skin="MW_Box" offset="0 0 512 20" align="Stretch" name="Client"/>
 
     </Skin>
 
@@ -39,7 +39,7 @@
 
         <Property key="FontName" value = "Default"/>
 
-        <Property key="TextAlign" value = "ALIGN_LEFT ALIGN_TOP" />
+        <Property key="TextAlign" value = "Left Top" />
 
         <Property key="TextColour" value = "0.75 0.6 0.35" />
 

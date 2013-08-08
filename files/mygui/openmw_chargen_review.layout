@@ -106,8 +106,8 @@
         </Widget>
 
         <!-- Player skills, factions, birthsign and reputation -->
-        <Widget type="Widget" skin="MW_Box" position="258 12 244 356" align="ALIGN_LEFT ALIGN_VSTRETCH" name="Skills">
-            <Widget type="ScrollView" skin="MW_ScrollView" position="4 4 236 346" align="ALIGN_STRETCH" name="SkillView" />
+        <Widget type="Widget" skin="MW_Box" position="258 12 244 356" align="Left VStretch" name="Skills">
+            <Widget type="ScrollView" skin="MW_ScrollView" position="4 4 236 346" align="Stretch" name="SkillView" />
         </Widget>
 
         <!-- Dialog buttons -->
