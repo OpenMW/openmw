@@ -158,3 +158,24 @@ const CSMWorld::RecordBase& CSMWorld::IdTable::getRecord (const std::string& id)
 {
     return mIdCollection->getRecord (id);
 }
+
+int CSMWorld::IdTable::searchColumnIndex (Columns::ColumnId id) const
+{
+    int columns = mIdCollection->getColumns();
+
+    for (int i=0; i<columns; ++i)
+        if (mIdCollection->getColumn (i).mColumnId==id)
+            return i;
+
+    return -1;
+}
+
+int CSMWorld::IdTable::findColumnIndex (Columns::ColumnId id) const
+{
+    int index = searchColumnIndex (id);
+
+    if (index==-1)
+        throw std::logic_error ("invalid column index");
+
+    return index;
+}

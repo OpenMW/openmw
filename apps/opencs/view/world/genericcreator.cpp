@@ -46,14 +46,14 @@ std::string CSVWorld::GenericCreator::getId() const
 
 void CSVWorld::GenericCreator::configureCreateCommand (CSMWorld::CreateCommand& command) const {}
 
-const CSMWorld::Data& CSVWorld::GenericCreator::getData() const
+CSMWorld::Data& CSVWorld::GenericCreator::getData() const
 {
     return mData;
 }
 
-CSMWorld::Data& CSVWorld::GenericCreator::getData()
+const CSMWorld::UniversalId& CSVWorld::GenericCreator::getCollectionId() const
 {
-    return mData;
+    return mListId;
 }
 
 CSVWorld::GenericCreator::GenericCreator (CSMWorld::Data& data, QUndoStack& undoStack,

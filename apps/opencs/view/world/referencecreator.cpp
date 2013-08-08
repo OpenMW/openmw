@@ -6,6 +6,8 @@
 
 #include "../../model/world/data.hpp"
 #include "../../model/world/commands.hpp"
+#include "../../model/world/columns.hpp"
+#include "../../model/world/idtable.hpp"
 
 std::string CSVWorld::ReferenceCreator::getId() const
 {
@@ -14,8 +16,11 @@ std::string CSVWorld::ReferenceCreator::getId() const
 
 void CSVWorld::ReferenceCreator::configureCreateCommand (CSMWorld::CreateCommand& command) const
 {
-    /// \todo avoid using hard-coded column numbers
-    command.addValue (2, mCell->text());
+    int index =
+        dynamic_cast<CSMWorld::IdTable&> (*getData().getTableModel (getCollectionId())).
+        findColumnIndex (CSMWorld::Columns::ColumnId_Cell);
+
+    command.addValue (index, mCell->text());
 }
 
 CSVWorld::ReferenceCreator::ReferenceCreator (CSMWorld::Data& data, QUndoStack& undoStack,
