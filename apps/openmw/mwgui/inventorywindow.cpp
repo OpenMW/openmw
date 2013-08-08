@@ -356,12 +356,19 @@ namespace MWGui
         if (slot == -1)
             return MWWorld::Ptr();
 
-        MWWorld::Ptr player = mPtr;
-        MWWorld::InventoryStore& invStore = MWWorld::Class::get(player).getInventoryStore(player);
-        if (invStore.getSlot(slot) != invStore.end())
-            return *invStore.getSlot (slot);
-        else
-            return MWWorld::Ptr();
+        MWWorld::InventoryStore& invStore = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
+        if(invStore.getSlot(slot) != invStore.end())
+        {
+            MWWorld::Ptr item = *invStore.getSlot(slot);
+            // NOTE: Don't allow users to select WerewolfRobe objects in the inventory. Vanilla
+            // likely uses a hack like this since there's no other way to prevent it from being
+            // taken.
+            if(item.getCellRef().mRefID == "WerewolfRobe")
+                return MWWorld::Ptr();
+            return item;
+        }
+
+        return MWWorld::Ptr();
     }
 
     void InventoryWindow::unequipItem(const MWWorld::Ptr& item)
