@@ -91,7 +91,7 @@ MWDialogue::SelectWrapper::Function MWDialogue::SelectWrapper::decodeFunction() 
         case 66: return Function_FriendlyHit;
         case 67: case 68: case 69: case 70: return Function_AiSetting;
         case 71: return Function_ShouldAttack;
-        case 72: return Function_PCWerewolf;
+        case 72: return Function_Werewolf;
         case 73: return Function_WerewolfKills;
     }
 
@@ -226,7 +226,7 @@ MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
         Function_Alarmed, Function_Detected,
         Function_Attacked, Function_ShouldAttack,
         Function_CreatureTargetted,
-        Function_PCWerewolf,
+        Function_Werewolf,
         Function_None // end marker
     };
 
@@ -270,7 +270,7 @@ bool MWDialogue::SelectWrapper::isNpcOnly() const
         Function_PcCrimeLevel,
         Function_RankRequirement,
         Function_Reputation, Function_FactionRankDiff,
-        Function_PCWerewolf, Function_WerewolfKills,
+        Function_Werewolf, Function_WerewolfKills,
         Function_RankLow, Function_RankHigh,
         Function_None // end marker
     };

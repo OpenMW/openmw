@@ -609,8 +609,7 @@ std::string ruleFunction(int idx)
         "Alarm",
         "Flee",
         "Should Attack",
-        //Unkown but causes NPCs to growl and roar.
-        "UNKNOWN 72"
+        "Werewolf"
     };
     if (idx >= 0 && idx <= 72)
         return ruleFunctions[idx];

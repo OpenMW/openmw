@@ -42,7 +42,7 @@ namespace MWDialogue
                 Function_Reputation, Function_Alarmed, Function_FactionRankDiff, Function_Detected,
                 Function_Attacked, Function_ShouldAttack,
                 Function_CreatureTargetted,
-                Function_PCWerewolf, Function_WerewolfKills,
+                Function_Werewolf, Function_WerewolfKills,
                 Function_RankLow, Function_RankHigh
             };
 
