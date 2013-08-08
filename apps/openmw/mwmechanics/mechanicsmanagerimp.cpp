@@ -8,6 +8,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/dialoguemanager.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
@@ -287,13 +288,27 @@ namespace MWMechanics
             MWBase::Environment::get().getWindowManager()->setValue ("level", stats.getLevel());
         }
 
+        //update drowning sound
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+        MWBase::SoundManager * sndmgr = MWBase::Environment::get().getSoundManager();
+        MWWorld::Ptr playerPtr = world->getPlayer().getPlayer();
+        NpcStats& playerStats = MWWorld::Class::get(playerPtr).getNpcStats(playerPtr);
+        if(!sndmgr->getSoundPlaying(MWWorld::Ptr(), "drown") && playerStats.getTimeToStartDrowning()==0.0)
+        {
+            sndmgr->playSound("drown",1.0,1.0,MWBase::SoundManager::Play_TypeSfx,MWBase::SoundManager::Play_Loop);
+        }
+        if(playerStats.getTimeToStartDrowning()>0.0)
+        {
+            //no need to check if it's playing, stop sound does nothing in that case
+            sndmgr->stopSound("drown");
+        }
+
         if (mUpdatePlayer)
         {
             // basic player profile; should not change anymore after the creation phase is finished.
             MWBase::WindowManager *winMgr =
                 MWBase::Environment::get().getWindowManager();
 
-            MWBase::World *world = MWBase::Environment::get().getWorld();
             const ESM::NPC *player =
                 world->getPlayer().getPlayer().get<ESM::NPC>()->mBase;
 
