@@ -196,7 +196,8 @@ void NpcAnimation::updateParts(bool forceupdate)
     };
     static const size_t slotlistsize = sizeof(slotlist)/sizeof(slotlist[0]);
 
-    MWWorld::InventoryStore &inv = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
+    const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
+    MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
     for(size_t i = 0;!forceupdate && i < slotlistsize;i++)
     {
         MWWorld::ContainerStoreIterator iter = inv.getSlot(slotlist[i].mSlot);
@@ -280,18 +281,20 @@ void NpcAnimation::updateParts(bool forceupdate)
 
     showWeapons(mShowWeapons);
 
-    const int Flag_Female = 0x01;
-    const int Flag_FirstPerson = 0x02;
+    // Remember body parts so we only have to search through the store once for each race/gender/viewmode combination
+    static std::map< std::pair<std::string,int>,std::vector<const ESM::BodyPart*> > sRaceMapping;
 
-    int flags = 0;
-    if (!mNpc->isMale())
+    static const int Flag_Female      = 1<<0;
+    static const int Flag_FirstPerson = 1<<1;
+
+    bool isWerewolf = cls.getNpcStats(mPtr).isWerewolf();
+    int flags = (isWerewolf ? -1 : 0);
+    if(!mNpc->isMale())
         flags |= Flag_Female;
-    if (mViewMode == VM_FirstPerson)
+    if(mViewMode == VM_FirstPerson)
         flags |= Flag_FirstPerson;
 
-    // Remember body parts so we only have to search through the store once for each race/gender/viewmode combination
-    static std::map< std::pair<std::string, int> , std::vector<const ESM::BodyPart*> > sRaceMapping;
-    std::string race = Misc::StringUtils::lowerCase(mNpc->mRace);
+    std::string race = (isWerewolf ? "werewolf" : Misc::StringUtils::lowerCase(mNpc->mRace));
     std::pair<std::string, int> thisCombination = std::make_pair(race, flags);
     if (sRaceMapping.find(thisCombination) == sRaceMapping.end())
     {
@@ -328,6 +331,8 @@ void NpcAnimation::updateParts(bool forceupdate)
         const MWWorld::Store<ESM::BodyPart> &partStore = store.get<ESM::BodyPart>();
         for(MWWorld::Store<ESM::BodyPart>::iterator it = partStore.begin(); it != partStore.end(); ++it)
         {
+            if(isWerewolf)
+                break;
             const ESM::BodyPart& bodypart = *it;
             if (bodypart.mData.mFlags & ESM::BodyPart::BPF_NotPlayable)
                 continue;
