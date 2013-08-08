@@ -493,20 +493,25 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
     mPartPriorities[type] = priority;
 
     mObjectParts[type] = insertBoundedPart(mesh, group, sPartList.at(type));
-    if(mObjectParts[type].mSkelBase && mObjectParts[type].mSkelBase->isParentTagPoint())
+    if(mObjectParts[type].mSkelBase)
     {
-        Ogre::Node *root = mObjectParts[type].mSkelBase->getParentNode();
         Ogre::SkeletonInstance *skel = mObjectParts[type].mSkelBase->getSkeleton();
-        if(skel->hasBone("BoneOffset"))
+        if(mObjectParts[type].mSkelBase->isParentTagPoint())
         {
-            Ogre::Bone *offset = skel->getBone("BoneOffset");
-            root->translate(offset->getPosition());
-            root->rotate(offset->getOrientation());
-            // HACK: Why an extra -90 degree rotation?
-            root->pitch(Ogre::Degree(-90.0f));
-            root->scale(offset->getScale());
-            root->setInitialState();
+            Ogre::Node *root = mObjectParts[type].mSkelBase->getParentNode();
+            if(skel->hasBone("BoneOffset"))
+            {
+                Ogre::Bone *offset = skel->getBone("BoneOffset");
+                root->translate(offset->getPosition());
+                root->rotate(offset->getOrientation());
+                // HACK: Why an extra -90 degree rotation?
+                root->pitch(Ogre::Degree(-90.0f));
+                root->scale(offset->getScale());
+                root->setInitialState();
+            }
         }
+
+        updateSkeletonInstance(mSkelBase->getSkeleton(), skel);
     }
 
     // TODO:
@@ -521,7 +526,7 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
             ctrl->setSource(mNullAnimationValuePtr);
     }
 
-   return true;
+    return true;
 }
 
 void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::PartReference> &parts)
