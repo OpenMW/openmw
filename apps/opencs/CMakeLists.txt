@@ -111,6 +111,10 @@ opencs_hdrs_noqt (model/filter
     filter
     )
 
+opencs_units (view/filter
+    filtercreator
+    )
+
 set (OPENCS_US
     )
 

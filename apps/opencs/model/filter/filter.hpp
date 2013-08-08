@@ -11,15 +11,15 @@ namespace CSMFilter
     /// \brief Wrapper for Filter record
     struct Filter : public ESM::Filter
     {
-        enum scope
+        enum Scope
         {
-            Global = 0,
-            Local = 1,
-            Session = 2,
-            Content = 3
+            Scope_Global = 0, // per user
+            Scope_Project = 1, // per project
+            Scope_Session = 2, // exists only for one editing session; not saved
+            Scope_Content = 3 // embedded in the edited content file
         };
 
-        scope mScope;
+        Scope mScope;
     };
 }
 
