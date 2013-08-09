@@ -23,6 +23,7 @@
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
 #include "../mwworld/actionopen.hpp"
+#include "../mwworld/failedaction.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/customdata.hpp"
 #include "../mwworld/physicssystem.hpp"
@@ -562,12 +563,18 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Npc::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
-        if (MWWorld::Class::get (ptr).getCreatureStats (ptr).isDead())
-            return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionOpen(ptr, true));
-        else if (MWWorld::Class::get(actor).getStance(actor, MWWorld::Class::Sneak))
-            return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionOpen(ptr)); // stealing
-        else
-            return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionTalk (ptr));
+        if(get(actor).isNpc() && get(actor).getNpcStats(actor).isWerewolf())
+        {
+            boost::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
+            // FIXME: Randomize using all WolfNPC* sound records
+            action->setSound("WolfNPC1");
+            return action;
+        }
+        if(getCreatureStats(ptr).isDead())
+            return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr, true));
+        if(get(actor).getStance(actor, MWWorld::Class::Sneak))
+            return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr)); // stealing
+        return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(ptr));
     }
 
     MWWorld::ContainerStore& Npc::getContainerStore (const MWWorld::Ptr& ptr)

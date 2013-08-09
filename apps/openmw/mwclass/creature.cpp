@@ -16,6 +16,7 @@
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
 #include "../mwworld/actionopen.hpp"
+#include "../mwworld/failedaction.hpp"
 #include "../mwworld/customdata.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/physicssystem.hpp"
@@ -24,6 +25,8 @@
 #include "../mwrender/actors.hpp"
 
 #include "../mwgui/tooltips.hpp"
+
+#include "../mwmechanics/npcstats.hpp"
 
 namespace
 {
@@ -222,10 +225,17 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Creature::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
-        if (MWWorld::Class::get (ptr).getCreatureStats (ptr).isDead())
-            return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionOpen(ptr, true));
-        else
-            return boost::shared_ptr<MWWorld::Action> (new MWWorld::ActionTalk (ptr));
+        if(get(actor).isNpc() && get(actor).getNpcStats(actor).isWerewolf())
+        {
+            boost::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
+            // FIXME: Randomize using all WolfCreature* sound records
+            action->setSound("WolfCreature1");
+            return action;
+        }
+
+        if(getCreatureStats(ptr).isDead())
+            return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr, true));
+        return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(ptr));
     }
 
     MWWorld::ContainerStore& Creature::getContainerStore (const MWWorld::Ptr& ptr)

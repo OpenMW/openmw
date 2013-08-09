@@ -9,6 +9,7 @@
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actionread.hpp"
+#include "../mwworld/failedaction.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/physicssystem.hpp"
 
@@ -16,6 +17,8 @@
 #include "../mwrender/renderinginterface.hpp"
 
 #include "../mwgui/tooltips.hpp"
+
+#include "../mwmechanics/npcstats.hpp"
 
 namespace MWClass
 {
@@ -58,8 +61,15 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Book::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
-        return boost::shared_ptr<MWWorld::Action> (
-            new MWWorld::ActionRead (ptr));
+        if(get(actor).isNpc() && get(actor).getNpcStats(actor).isWerewolf())
+        {
+            boost::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
+            // FIXME: Randomize using all WolfItem* sound records
+            action->setSound("WolfItem1");
+            return action;
+        }
+
+        return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionRead(ptr));
     }
 
     std::string Book::getScript (const MWWorld::Ptr& ptr) const

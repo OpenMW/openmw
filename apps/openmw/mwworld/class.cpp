@@ -7,13 +7,20 @@
 
 #include <components/esm/defs.hpp>
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/windowmanager.hpp"
+
 #include "ptr.hpp"
 #include "refdata.hpp"
 #include "nullaction.hpp"
+#include "failedaction.hpp"
+#include "actiontake.hpp"
 #include "containerstore.hpp"
 
 #include "../mwgui/tooltips.hpp"
+
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/magiceffects.hpp"
 
 namespace MWWorld
@@ -302,6 +309,25 @@ namespace MWWorld
 
     void Class::adjustPosition(const MWWorld::Ptr& ptr) const
     {
+    }
+
+    boost::shared_ptr<Action> Class::defaultItemActivate(const Ptr &ptr, const Ptr &actor) const
+    {
+        if(!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
+            return boost::shared_ptr<Action>(new NullAction());
+
+        if(get(actor).isNpc() && get(actor).getNpcStats(actor).isWerewolf())
+        {
+            boost::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
+            // FIXME: Randomize using all WolfItem* sound records
+            action->setSound("WolfItem1");
+            return action;
+        }
+
+        boost::shared_ptr<MWWorld::Action> action(new ActionTake(ptr));
+        action->setSound(getUpSoundId(ptr));
+
+        return action;
     }
 
     MWWorld::Ptr

@@ -8,12 +8,12 @@ namespace MWWorld
 {
     class FailedAction : public Action
     {
-	    std::string message;
-	    
-            virtual void executeImp (const Ptr& actor);
+        std::string mMessage;
 
-        public:
-	     FailedAction (const std::string& message = std::string());
+        virtual void executeImp(const Ptr &actor);
+
+    public:
+        FailedAction(const std::string &message = std::string());
     };
 }
 

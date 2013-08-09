@@ -144,8 +144,11 @@ namespace MWClass
 
             virtual std::string getModel(const MWWorld::Ptr &ptr) const;
 
-            virtual bool
-            isActor() const {
+            virtual bool isActor() const {
+                return true;
+            }
+
+            virtual bool isNpc() const {
                 return true;
             }
     };

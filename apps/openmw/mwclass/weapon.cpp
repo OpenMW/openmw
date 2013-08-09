@@ -68,14 +68,7 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Weapon::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
-        if (!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
-            return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction ());
-
-        boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTake (ptr));
-
-        action->setSound(getUpSoundId(ptr));
-
-        return action;
+        return defaultItemActivate(ptr, actor);
     }
 
     bool Weapon::hasItemHealth (const MWWorld::Ptr& ptr) const

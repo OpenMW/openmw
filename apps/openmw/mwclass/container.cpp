@@ -23,6 +23,8 @@
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
 
+#include "../mwmechanics/npcstats.hpp"
+
 namespace
 {
     struct CustomData : public MWWorld::CustomData
@@ -90,6 +92,14 @@ namespace MWClass
     {
         if (!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
             return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction ());
+
+        if(get(actor).isNpc() && get(actor).getNpcStats(actor).isWerewolf())
+        {
+            boost::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
+            // FIXME: Randomize using all WolfContainer* sound records
+            action->setSound("WolfContainer1");
+            return action;
+        }
 
         const std::string lockedSound = "LockedChest";
         const std::string trapActivationSound = "Disarm Trap Fail";

@@ -7,15 +7,13 @@
 
 namespace MWWorld
 {
-    FailedAction::FailedAction (const std::string& msg) : Action (false), message(msg)
+    FailedAction::FailedAction(const std::string &msg)
+      : Action(false), mMessage(msg)
     {   }
 
-
-    void FailedAction::executeImp (const Ptr& actor)
+    void FailedAction::executeImp(const Ptr &actor)
     {
-        if ( actor.getRefData().getHandle()=="player" && !(message.empty()))
-	{
-      MWBase::Environment::get().getWindowManager() ->messageBox(message);
-	}
+        if(actor.getRefData().getHandle() == "player" && !mMessage.empty())
+            MWBase::Environment::get().getWindowManager()->messageBox(mMessage);
     }
 }

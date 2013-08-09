@@ -57,6 +57,9 @@ namespace MWWorld
 
             Class();
 
+            boost::shared_ptr<Action> defaultItemActivate(const Ptr &ptr, const Ptr &actor) const;
+            ///< Generate default action for activating inventory items
+
             virtual Ptr copyToCellImpl(const Ptr &ptr, CellStore &cell) const;
 
         public:
@@ -285,9 +288,12 @@ namespace MWWorld
 
             virtual Ptr
             copyToCell(const Ptr &ptr, CellStore &cell, const ESM::Position &pos) const;
-            
-            virtual bool
-            isActor() const {
+
+            virtual bool isActor() const {
+                return false;
+            }
+
+            virtual bool isNpc() const {
                 return false;
             }
     };
