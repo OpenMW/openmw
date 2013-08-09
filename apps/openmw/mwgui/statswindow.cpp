@@ -235,7 +235,7 @@ namespace MWGui
             return;
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-        MWMechanics::NpcStats PCstats = MWWorld::Class::get(player).getNpcStats(player);
+        const MWMechanics::NpcStats &PCstats = MWWorld::Class::get(player).getNpcStats(player);
 
         // level progress
         MyGUI::Widget* levelWidget;
@@ -467,8 +467,8 @@ namespace MWGui
                 addSeparator(coord1, coord2);
 
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-            MWMechanics::NpcStats PCstats = MWWorld::Class::get(player).getNpcStats(player);
-            std::set<std::string>& expelled = PCstats.getExpelled ();
+            const MWMechanics::NpcStats &PCstats = MWWorld::Class::get(player).getNpcStats(player);
+            const std::set<std::string> &expelled = PCstats.getExpelled();
 
             addGroup(MWBase::Environment::get().getWindowManager()->getGameSettingString("sFaction", "Faction"), coord1, coord2);
             FactionList::const_iterator end = mFactions.end();

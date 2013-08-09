@@ -101,19 +101,24 @@ MWMechanics::Stat<float>& MWMechanics::NpcStats::getSkill (int index)
     return mSkill[index];
 }
 
+const std::map<std::string, int>& MWMechanics::NpcStats::getFactionRanks() const
+{
+    return mFactionRank;
+}
+
 std::map<std::string, int>& MWMechanics::NpcStats::getFactionRanks()
 {
     return mFactionRank;
 }
 
-std::set<std::string>& MWMechanics::NpcStats::getExpelled()
+const std::set<std::string>& MWMechanics::NpcStats::getExpelled() const
 {
     return mExpelled;
 }
 
-const std::map<std::string, int>& MWMechanics::NpcStats::getFactionRanks() const
+std::set<std::string>& MWMechanics::NpcStats::getExpelled()
 {
-    return mFactionRank;
+    return mExpelled;
 }
 
 bool MWMechanics::NpcStats::isSameFaction (const NpcStats& npcStats) const

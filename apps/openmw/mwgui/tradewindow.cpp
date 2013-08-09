@@ -301,16 +301,14 @@ namespace MWGui
             float clampedDisposition = std::max<int>(0,std::min<int>(int(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr)
                 + MWBase::Environment::get().getDialogueManager()->getTemporaryDispositionChange()),100));
 
-            MWMechanics::NpcStats sellerSkill = MWWorld::Class::get(mPtr).getNpcStats(mPtr);
-            MWMechanics::CreatureStats sellerStats = MWWorld::Class::get(mPtr).getCreatureStats(mPtr);
+            const MWMechanics::NpcStats &sellerStats = MWWorld::Class::get(mPtr).getNpcStats(mPtr);
             MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-            MWMechanics::NpcStats playerSkill = MWWorld::Class::get(playerPtr).getNpcStats(playerPtr);
-            MWMechanics::CreatureStats playerStats = MWWorld::Class::get(playerPtr).getCreatureStats(playerPtr);
+            const MWMechanics::NpcStats &playerStats = MWWorld::Class::get(playerPtr).getNpcStats(playerPtr);
 
-            float a1 = std::min(playerSkill.getSkill(ESM::Skill::Mercantile).getModified(), 100.f);
+            float a1 = std::min(playerStats.getSkill(ESM::Skill::Mercantile).getModified(), 100.f);
             float b1 = std::min(0.1f * playerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10.f);
             float c1 = std::min(0.2f * playerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
-            float d1 = std::min(sellerSkill.getSkill(ESM::Skill::Mercantile).getModified(), 100.f);
+            float d1 = std::min(sellerStats.getSkill(ESM::Skill::Mercantile).getModified(), 100.f);
             float e1 = std::min(0.1f * sellerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10.f);
             float f1 = std::min(0.2f * sellerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
 

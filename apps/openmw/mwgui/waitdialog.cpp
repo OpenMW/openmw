@@ -273,7 +273,7 @@ namespace MWGui
         mWaiting = false;
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-        MWMechanics::NpcStats pcstats = MWWorld::Class::get(player).getNpcStats(player);
+        const MWMechanics::NpcStats &pcstats = MWWorld::Class::get(player).getNpcStats(player);
 
         // trigger levelup if possible
         if (mSleeping && pcstats.getLevelProgress () >= 10)

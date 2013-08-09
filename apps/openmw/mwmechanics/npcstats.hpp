@@ -95,17 +95,16 @@ namespace MWMechanics
             void setMovementFlag (Flag flag, bool state);
 
             const Stat<float>& getSkill (int index) const;
-
             Stat<float>& getSkill (int index);
 
+            const std::map<std::string, int>& getFactionRanks() const;
             std::map<std::string, int>& getFactionRanks();
 
+            const std::set<std::string>& getExpelled() const;
             std::set<std::string>& getExpelled();
 
             bool isSameFaction (const NpcStats& npcStats) const;
             ///< Do *this and \a npcStats share a faction?
-
-            const std::map<std::string, int>& getFactionRanks() const;
 
             float getSkillGain (int skillIndex, const ESM::Class& class_, int usageType = -1,
                 int level = -1) const;

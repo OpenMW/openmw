@@ -350,13 +350,12 @@ namespace MWClass
         if(!weapon.isEmpty())
             weapskill = get(weapon).getEquipmentSkill(weapon);
 
-        MWMechanics::CreatureStats &crstats = getCreatureStats(ptr);
-        MWMechanics::NpcStats &npcstats = getNpcStats(ptr);
-        const MWMechanics::MagicEffects &mageffects = crstats.getMagicEffects();
-        float hitchance = npcstats.getSkill(weapskill).getModified() +
-                          (crstats.getAttribute(ESM::Attribute::Agility).getModified() / 5.0f) +
-                          (crstats.getAttribute(ESM::Attribute::Luck).getModified() / 10.0f);
-        hitchance *= crstats.getFatigueTerm();
+        MWMechanics::NpcStats &stats = getNpcStats(ptr);
+        const MWMechanics::MagicEffects &mageffects = stats.getMagicEffects();
+        float hitchance = stats.getSkill(weapskill).getModified() +
+                          (stats.getAttribute(ESM::Attribute::Agility).getModified() / 5.0f) +
+                          (stats.getAttribute(ESM::Attribute::Luck).getModified() / 10.0f);
+        hitchance *= stats.getFatigueTerm();
         hitchance += mageffects.get(MWMechanics::EffectKey(ESM::MagicEffect::FortifyAttack)).mMagnitude -
                      mageffects.get(MWMechanics::EffectKey(ESM::MagicEffect::Blind)).mMagnitude;
         hitchance -= otherstats.getEvasion();
@@ -381,8 +380,8 @@ namespace MWClass
                 attack = weapon.get<ESM::Weapon>()->mBase->mData.mThrust;
             if(attack)
             {
-                damage  = attack[0] + ((attack[1]-attack[0])*npcstats.getAttackStrength());
-                damage *= 0.5f + (crstats.getAttribute(ESM::Attribute::Luck).getModified() / 100.0f);
+                damage  = attack[0] + ((attack[1]-attack[0])*stats.getAttackStrength());
+                damage *= 0.5f + (stats.getAttribute(ESM::Attribute::Luck).getModified() / 100.0f);
                 if(weaphashealth)
                 {
                     int weapmaxhealth = weapon.get<ESM::Weapon>()->mBase->mData.mHealth;
@@ -409,8 +408,8 @@ namespace MWClass
             // option for it.
             float minstrike = gmst.find("fMinHandToHandMult")->getFloat();
             float maxstrike = gmst.find("fMaxHandToHandMult")->getFloat();
-            damage  = npcstats.getSkill(weapskill).getModified();
-            damage *= minstrike + ((maxstrike-minstrike)*npcstats.getAttackStrength());
+            damage  = stats.getSkill(weapskill).getModified();
+            damage *= minstrike + ((maxstrike-minstrike)*stats.getAttackStrength());
             if(!othercls.hasDetected(victim, ptr))
             {
                 damage *= gmst.find("fCombatCriticalStrikeMult")->getFloat();
@@ -419,7 +418,7 @@ namespace MWClass
             }
 
             healthdmg = (otherstats.getFatigue().getCurrent() < 1.0f);
-            if(npcstats.isWerewolf())
+            if(stats.isWerewolf())
             {
                 healthdmg = true;
                 // GLOB instead of GMST because it gets updated during a quest
@@ -908,7 +907,7 @@ namespace MWClass
             }
         }
 
-        float shield = getCreatureStats(ptr).getMagicEffects().get(ESM::MagicEffect::Shield).mMagnitude;
+        float shield = stats.getMagicEffects().get(ESM::MagicEffect::Shield).mMagnitude;
 
         return ratings[MWWorld::InventoryStore::Slot_Cuirass] * 0.3f
                 + (ratings[MWWorld::InventoryStore::Slot_CarriedLeft] + ratings[MWWorld::InventoryStore::Slot_Helmet]

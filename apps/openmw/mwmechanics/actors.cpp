@@ -162,19 +162,19 @@ namespace MWMechanics
 
     void Actors::updateDrowning(const MWWorld::Ptr& ptr, float duration)
     {
-        Ogre::Vector3 pos(ptr.getRefData().getPosition().pos);
-        CreatureStats& creatureStats=MWWorld::Class::get(ptr).getCreatureStats(ptr);
-        NpcStats& stats=MWWorld::Class::get(ptr).getNpcStats(ptr);
-        bool waterBreathing=creatureStats.getMagicEffects().get(ESM::MagicEffect::WaterBreathing).mMagnitude>0;
-        if(MWBase::Environment::get().getWorld()->isSubmerged(ptr) && !waterBreathing)
+        NpcStats &stats = MWWorld::Class::get(ptr).getNpcStats(ptr);
+        if(MWBase::Environment::get().getWorld()->isSubmerged(ptr) && 
+           stats.getMagicEffects().get(ESM::MagicEffect::WaterBreathing).mMagnitude == 0)
         {
-            if(creatureStats.getFatigue().getCurrent()==0)
+            if(stats.getFatigue().getCurrent() == 0)
                 stats.setTimeToStartDrowning(0);
-            float timeLeft=stats.getTimeToStartDrowning()-duration;
-            if(timeLeft<0)
-                timeLeft=0;
+
+            float timeLeft = stats.getTimeToStartDrowning()-duration;
+            if(timeLeft < 0.0f)
+                timeLeft = 0.0f;
+
             stats.setTimeToStartDrowning(timeLeft);
-            if(timeLeft==0)
+            if(timeLeft == 0.0f)
                 stats.setLastDrowningHitTime(stats.getLastDrowningHitTime()+duration);
         }
         else
@@ -183,11 +183,11 @@ namespace MWMechanics
             stats.setLastDrowningHitTime(0);
         }
         //if npc is drowning and it's time to hit, then hit
-        while(stats.getTimeToStartDrowning()==0.0 && stats.getLastDrowningHitTime()>0.33)
+        while(stats.getTimeToStartDrowning() == 0.0f && stats.getLastDrowningHitTime() > 0.33f)
         {
-            stats.setLastDrowningHitTime(stats.getLastDrowningHitTime()-0.33);
+            stats.setLastDrowningHitTime(stats.getLastDrowningHitTime()-0.33f);
             //fixme: replace it with something different once screen hit effects are implemented (blood on screen)
-            MWWorld::Class::get(ptr).setActorHealth(ptr, creatureStats.getHealth().getCurrent()-1.0);
+            MWWorld::Class::get(ptr).setActorHealth(ptr, stats.getHealth().getCurrent()-1.0f);
         }
     }
 
