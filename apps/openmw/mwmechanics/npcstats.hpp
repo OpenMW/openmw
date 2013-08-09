@@ -9,6 +9,8 @@
 #include "stat.hpp"
 #include "drawstate.hpp"
 
+#include "creaturestats.hpp"
+
 namespace ESM
 {
     struct Class;
@@ -18,12 +20,10 @@ namespace MWMechanics
 {
     /// \brief Additional stats for NPCs
     ///
-    /// For non-NPC-specific stats, see the CreatureStats struct.
-    ///
     /// \note For technical reasons the spell list and the currently selected spell is also handled by
     /// CreatureStats, even though they are actually NPC stats.
 
-    class NpcStats
+    class NpcStats : public CreatureStats
     {
         public:
 

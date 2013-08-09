@@ -35,7 +35,7 @@ namespace
     {
         MWWorld::Ptr actor = MWBase::Environment::get().getDialogueManager()->getActor();
 
-        MWMechanics::NpcStats stats = MWWorld::Class::get (actor).getNpcStats (actor);
+        const MWMechanics::NpcStats &stats = MWWorld::Class::get (actor).getNpcStats (actor);
 
         if (stats.getFactionRanks().empty())
             throw std::runtime_error (
