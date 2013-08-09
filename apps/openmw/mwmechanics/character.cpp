@@ -676,28 +676,12 @@ void CharacterController::update(float duration, Movement &movement)
         Ogre::Vector3 rot = cls.getRotationVector(mPtr);
         mMovementSpeed = cls.getSpeed(mPtr);
 
-        // advance athletics
-        if(vec.squaredLength() > 0 && mPtr.getRefData().getHandle() == "player")
-        {
-            if(inwater)
-            {
-                mSecondsOfSwimming += duration;
-                while(mSecondsOfSwimming > 1)
-                {
-                    cls.skillUsageSucceeded(mPtr, ESM::Skill::Athletics, 1);
-                    mSecondsOfSwimming -= 1;
-                }
-            }
-            else if(isrunning)
-            {
-                mSecondsOfRunning += duration;
-                while(mSecondsOfRunning > 1)
-                {
-                    cls.skillUsageSucceeded(mPtr, ESM::Skill::Athletics, 0);
-                    mSecondsOfRunning -= 1;
-                }
-            }
-        }
+        CharacterState movestate = CharState_None;
+        CharacterState idlestate = CharState_SpecialIdle;
+        bool forcestateupdate = false;
+
+        vec.x *= mMovementSpeed;
+        vec.y *= mMovementSpeed;
 
         /* FIXME: The state should be set to Jump, and X/Y movement should be disallowed except
          * for the initial thrust (which would be carried by "physics" until landing). */
@@ -721,12 +705,30 @@ void CharacterController::update(float duration, Movement &movement)
             //decrease fatigue by fFatigueJumpBase + (1 - normalizedEncumbrance) * fFatigueJumpMult;
         }
 
-        vec.x *= mMovementSpeed;
-        vec.y *= mMovementSpeed;
+        isrunning = isrunning && std::abs(vec[0])+std::abs(vec[1]) > 0.0f;
 
-        CharacterState movestate = CharState_None;
-        CharacterState idlestate = CharState_SpecialIdle;
-        bool forcestateupdate = false;
+        // advance athletics
+        if(std::abs(vec[0])+std::abs(vec[1]) > 0.0f && mPtr.getRefData().getHandle() == "player")
+        {
+            if(inwater)
+            {
+                mSecondsOfSwimming += duration;
+                while(mSecondsOfSwimming > 1)
+                {
+                    cls.skillUsageSucceeded(mPtr, ESM::Skill::Athletics, 1);
+                    mSecondsOfSwimming -= 1;
+                }
+            }
+            else if(isrunning)
+            {
+                mSecondsOfRunning += duration;
+                while(mSecondsOfRunning > 1)
+                {
+                    cls.skillUsageSucceeded(mPtr, ESM::Skill::Athletics, 0);
+                    mSecondsOfRunning -= 1;
+                }
+            }
+        }
 
         if(std::abs(vec.x/2.0f) > std::abs(vec.y))
         {
