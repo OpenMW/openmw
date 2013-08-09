@@ -1069,6 +1069,18 @@ namespace MWScript
                 }
         };
 
+        template <class R>
+        class OpSetWerewolfAcrobatics : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    // What to do? Stats (attributes, skills) are already set and unset with
+                    // BecomeWerewolf and UndoWerewolf.
+                }
+        };
+
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
@@ -1194,6 +1206,8 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Stats::opcodeBecomeWerewolfExplicit, new OpSetWerewolf<ExplicitRef, true>);
             interpreter.installSegment5 (Compiler::Stats::opcodeUndoWerewolf, new OpSetWerewolf<ImplicitRef, false>);
             interpreter.installSegment5 (Compiler::Stats::opcodeUndoWerewolfExplicit, new OpSetWerewolf<ExplicitRef, false>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeSetWerewolfAcrobatics, new OpSetWerewolfAcrobatics<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeSetWerewolfAcrobaticsExplicit, new OpSetWerewolfAcrobatics<ExplicitRef>);
         }
     }
 }

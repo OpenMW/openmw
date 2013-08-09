@@ -421,6 +421,7 @@ namespace Compiler
 
             extensions.registerInstruction("becomewerewolf", "", opcodeBecomeWerewolf, opcodeBecomeWerewolfExplicit);
             extensions.registerInstruction("undowerewolf", "", opcodeUndoWerewolf, opcodeUndoWerewolfExplicit);
+            extensions.registerInstruction("setwerewolfacrobatics", "", opcodeSetWerewolfAcrobatics, opcodeSetWerewolfAcrobaticsExplicit);
         }
     }
 

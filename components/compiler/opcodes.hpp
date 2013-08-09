@@ -350,6 +350,8 @@ namespace Compiler
         const int opcodeBecomeWerewolfExplicit = 0x2000218;
         const int opcodeUndoWerewolf = 0x2000219;
         const int opcodeUndoWerewolfExplicit = 0x200021a;
+        const int opcodeSetWerewolfAcrobatics = 0x200021b;
+        const int opcodeSetWerewolfAcrobaticsExplicit = 0x200021c;
         const int opcodeIsWerewolf = 0x20001fd;
         const int opcodeIsWerewolfExplicit = 0x20001fe;
 
