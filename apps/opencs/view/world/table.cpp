@@ -44,7 +44,6 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
 
 std::vector<std::string> CSVWorld::Table::listRevertableSelectedIds() const
 {
-    /// \todo Do not use hardcoded column numbers
     std::vector<std::string> revertableIds;
 
     if (mProxyModel->columnCount()>0)
@@ -62,7 +61,9 @@ std::vector<std::string> CSVWorld::Table::listRevertableSelectedIds() const
 
             if (state!=CSMWorld::RecordBase::State_BaseOnly)
             {
-                std::string id = mModel->data (mModel->index (index.row(), 0)).
+                int columnIndex = mModel->findColumnIndex (CSMWorld::Columns::ColumnId_Id);
+
+                std::string id = mModel->data (mModel->index (index.row(), columnIndex)).
                     toString().toUtf8().constData();
 
                 revertableIds.push_back (id);
@@ -75,7 +76,6 @@ std::vector<std::string> CSVWorld::Table::listRevertableSelectedIds() const
 
 std::vector<std::string> CSVWorld::Table::listDeletableSelectedIds() const
 {
-    /// \todo Do not use hardcoded column numbers
     std::vector<std::string> deletableIds;
 
     if (mProxyModel->columnCount()>0)
@@ -93,7 +93,9 @@ std::vector<std::string> CSVWorld::Table::listDeletableSelectedIds() const
 
             if (state!=CSMWorld::RecordBase::State_Deleted)
             {
-                std::string id = mModel->data (mModel->index (index.row(), 0)).
+                int columnIndex = mModel->findColumnIndex (CSMWorld::Columns::ColumnId_Id);
+
+                std::string id = mModel->data (mModel->index (index.row(), columnIndex)).
                     toString().toUtf8().constData();
 
                 deletableIds.push_back (id);
@@ -263,8 +265,8 @@ void CSVWorld::Table::tableSizeUpdate()
         {
             QModelIndex index = mProxyModel->mapToSource (mProxyModel->index (i, 0));
 
-            /// \todo Do not use hardcoded column numbers
-            int state = mModel->data (mModel->index (index.row(), 1)).toInt();
+            int columnIndex = mModel->findColumnIndex (CSMWorld::Columns::ColumnId_Modification);
+            int state = mModel->data (mModel->index (index.row(), columnIndex)).toInt();
 
             switch (state)
             {

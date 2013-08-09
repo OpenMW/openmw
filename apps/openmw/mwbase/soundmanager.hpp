@@ -134,6 +134,7 @@ namespace MWBase
 
             virtual bool getSoundPlaying(const MWWorld::Ptr &reference, const std::string& soundId) const = 0;
             ///< Is the given sound currently playing on the given object?
+            ///  If you want to check if sound played with playSound is playing, use empty Ptr
 
             virtual void pauseSounds(int types=Play_TypeMask) = 0;
             ///< Pauses all currently playing sounds, including music.

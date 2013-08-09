@@ -83,6 +83,10 @@ void CSVDoc::View::setupViewMenu()
     mShowStatusBar->setCheckable (true);
     connect (mShowStatusBar, SIGNAL (toggled (bool)), this, SLOT (toggleShowStatusBar (bool)));
     view->addAction (mShowStatusBar);
+
+    QAction *filters = new QAction (tr ("Filters"), this);
+    connect (filters, SIGNAL (triggered()), this, SLOT (addFiltersSubView()));
+    view->addAction (filters);
 }
 
 void CSVDoc::View::setupWorldMenu()
@@ -388,6 +392,11 @@ void CSVDoc::View::addReferencesSubView()
 void CSVDoc::View::addRegionMapSubView()
 {
     addSubView (CSMWorld::UniversalId::Type_RegionMap);
+}
+
+void CSVDoc::View::addFiltersSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Filters);
 }
 
 void CSVDoc::View::abortOperation (int type)

@@ -547,7 +547,19 @@ namespace MWSound
 
         Environment env = Env_Normal;
         if((cell->mData.mFlags&cell->HasWater) && mListenerPos.z < cell->mWater)
+        {
             env = Env_Underwater;
+            //play underwater sound
+            //HACK: this sound is always played underwater, so set volume and pitch higher (it's then lowered)
+            //Currently not possible to play looping sound with no environment
+            if(!getSoundPlaying(MWWorld::Ptr(), "Underwater"))
+                playSound("Underwater", 1.11, 1.42 ,Play_TypeSfx, Play_Loop );
+        }
+        else
+        {
+            //no need to check if it's playing, stop sound does nothing in that case
+            stopSound("Underwater");
+        }
 
         mOutput->updateListener(
             mListenerPos,

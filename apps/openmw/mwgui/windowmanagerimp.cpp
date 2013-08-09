@@ -374,6 +374,7 @@ namespace MWGui
         {
             mMap->setVisible(mMap->pinned());
             mStatsWindow->setVisible(mStatsWindow->pinned());
+            mInventoryWindow->setGuiMode(GM_None);
             mInventoryWindow->setVisible(mInventoryWindow->pinned());
             mSpellWindow->setVisible(mSpellWindow->pinned());
 
@@ -1128,6 +1129,9 @@ namespace MWGui
 
     void WindowManager::toggleVisible (GuiWindow wnd)
     {
+        if (getMode() != GM_Inventory)
+            return;
+
         mShown = (GuiWindow)(mShown ^ wnd);
         updateVisible();
     }

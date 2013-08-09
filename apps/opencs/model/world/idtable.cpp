@@ -47,7 +47,7 @@ QVariant CSMWorld::IdTable::headerData (int section, Qt::Orientation orientation
         return QVariant();
 
     if (role==Qt::DisplayRole)
-        return tr (mIdCollection->getColumn (section).mTitle.c_str());
+        return tr (mIdCollection->getColumn (section).getTitle().c_str());
 
     if (role==ColumnBase::Role_Flags)
         return mIdCollection->getColumn (section).mFlags;
@@ -157,4 +157,25 @@ void CSMWorld::IdTable::setRecord (const std::string& id, const RecordBase& reco
 const CSMWorld::RecordBase& CSMWorld::IdTable::getRecord (const std::string& id) const
 {
     return mIdCollection->getRecord (id);
+}
+
+int CSMWorld::IdTable::searchColumnIndex (Columns::ColumnId id) const
+{
+    int columns = mIdCollection->getColumns();
+
+    for (int i=0; i<columns; ++i)
+        if (mIdCollection->getColumn (i).mColumnId==id)
+            return i;
+
+    return -1;
+}
+
+int CSMWorld::IdTable::findColumnIndex (Columns::ColumnId id) const
+{
+    int index = searchColumnIndex (id);
+
+    if (index==-1)
+        throw std::logic_error ("invalid column index");
+
+    return index;
 }
