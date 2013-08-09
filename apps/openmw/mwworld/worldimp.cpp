@@ -1645,13 +1645,15 @@ namespace MWWorld
     {
         Ptr::CellStore *currentCell = mWorldScene->getCurrentCell();
 
-        RefData &refdata = mPlayer->getPlayer().getRefData();
+        Ptr player = mPlayer->getPlayer();
+        RefData &refdata = player.getRefData();
         Ogre::Vector3 playerPos(refdata.getPosition().pos);
 
         const OEngine::Physic::PhysicActor *physactor = mPhysEngine->getCharacter(refdata.getHandle());
         if((!physactor->getOnGround()&&physactor->getCollisionMode()) || isUnderwater(currentCell, playerPos))
             return 2;
-        if((currentCell->mCell->mData.mFlags&ESM::Cell::NoSleep))
+        if((currentCell->mCell->mData.mFlags&ESM::Cell::NoSleep) ||
+           Class::get(player).getNpcStats(player).isWerewolf())
             return 1;
 
         return 0;

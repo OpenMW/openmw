@@ -223,10 +223,14 @@ namespace MWGui
         bool full = (stats.getFatigue().getCurrent() >= stats.getFatigue().getModified())
                 && (stats.getHealth().getCurrent() >= stats.getHealth().getModified())
                 && (stats.getMagicka().getCurrent() >= stats.getMagicka().getModified());
+        MWMechanics::NpcStats& npcstats = MWWorld::Class::get(player).getNpcStats(player);
+        bool werewolf = npcstats.isWerewolf();
 
         mUntilHealedButton->setVisible(canRest && !full);
         mWaitButton->setCaptionWithReplacing (canRest ? "#{sRest}" : "#{sWait}");
-        mRestText->setCaptionWithReplacing (canRest ? "#{sRestMenu3}" : "#{sRestIllegal}");
+        mRestText->setCaptionWithReplacing (canRest ? "#{sRestMenu3}"
+                                                    : (werewolf ? "#{sWerewolfRestMessage}"
+                                                                : "#{sRestIllegal}"));
 
         mSleeping = canRest;
 
