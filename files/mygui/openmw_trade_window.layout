@@ -3,6 +3,7 @@
 <MyGUI type="Layout">
     <Widget type="Window" skin="MW_Window" layer="Windows" position="0 0 600 360" name="_Main">
         <Property key="Visible" value="false"/>
+        <Property key="MinSize" value="380 245"/>
 
         <!-- Categories -->
         <Widget type="HBox" position="8 8 566 24" align="Left Top HStretch" name="Categories">

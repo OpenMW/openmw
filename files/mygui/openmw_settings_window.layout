@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <Widget type="Window" skin="MW_Window_NoCaption" layer="Windows" position="0 0 400 414" name="_Main">
+    <Widget type="Window" skin="MW_Window_NoCaption" layer="Windows" position="0 0 400 426" name="_Main">
 
-        <Property key="MinSize" value="400 414"/>
-        <Property key="MaxSize" value="400 414"/>
+        <Property key="MinSize" value="400 426"/>
+        <Property key="MaxSize" value="400 426"/>
 
         <Widget type="TabControl" skin="TabControl" position="8 8 368 340" align="Left Top" name="SettingsTab">
             <Property key="ButtonAutoWidth" value="true"/>
@@ -112,8 +112,8 @@
             <Widget type="TabItem" skin="" position="4 28 360 312">
                 <Property key="Caption" value="  #{sControls}  "/>
 
-                <Widget type="Widget" skin="MW_Box" position="8 8 344 150">
-                    <Widget type="ScrollView" skin="MW_ScrollView" name="ControlsBox" position="4 4 336 142"/>
+                <Widget type="Widget" skin="MW_Box" position="4 4 352 154">
+                    <Widget type="ScrollView" skin="MW_ScrollView" name="ControlsBox" position="4 4 344 146"/>
                 </Widget>
 
                 <Widget type="AutoSizedButton" skin="MW_Button" name="ResetControlsButton" position="4 162 100 24">
@@ -149,13 +149,13 @@
             <Widget type="TabItem" skin="" position="4 28 360 312">
                 <Property key="Caption" value="  #{sVideo}  "/>
 
-                <Widget type="TabControl" skin="TabControl" position="4 4 352 304" align="Left Top">
+                <Widget type="TabControl" skin="TabControlInner" position="4 4 352 296" align="Left Top">
                     <Property key="ButtonAutoWidth" value="true"/>
 
                     <Widget type="TabItem" skin="" position="4 28 344 272">
                         <Property key="Caption" value="  Video  "/>
 
-                        <Widget type="ListBox" skin="MW_List" position="4 4 170 170" align="Left Top" name="ResolutionList"/>
+                        <Widget type="ListBox" skin="MW_List" position="0 4 170 170" align="Left Top" name="ResolutionList"/>
 
 
                         <Widget type="HBox" position="182 4 300 24">
@@ -193,18 +193,18 @@
                             </Widget>
                         </Widget>
 
-                        <Widget type="TextBox" skin="NormalText" position="4 198 329 18" align="Left Top" name="FovText">
+                        <Widget type="TextBox" skin="NormalText" position="0 198 329 18" align="Left Top" name="FovText">
                             <Property key="Caption" value="Field of View"/>
                         </Widget>
-                        <Widget type="MWScrollBar" skin="MW_HScroll" position="4 222 329 18" align="Left Top" name="FOVSlider">
+                        <Widget type="MWScrollBar" skin="MW_HScroll" position="0 222 329 18" align="Left Top" name="FOVSlider">
                             <Property key="Range" value="10000"/>
                             <Property key="Page" value="300"/>
                         </Widget>
-                        <Widget type="TextBox" skin="SandText" position="4 246 329 18" align="Left Top">
+                        <Widget type="TextBox" skin="SandText" position="0 246 329 18" align="Left Top">
                             <Property key="Caption" value="#{sLow}"/>
                             <Property key="TextAlign" value="Left"/>
                         </Widget>
-                        <Widget type="TextBox" skin="SandText" position="4 246 329 18" align="Left Top">
+                        <Widget type="TextBox" skin="SandText" position="0 246 329 18" align="Left Top">
                             <Property key="Caption" value="#{sHigh}"/>
                             <Property key="TextAlign" value="Right"/>
                         </Widget>
@@ -350,7 +350,7 @@
             </Widget>
         </Widget>
 
-        <Widget type="AutoSizedButton" skin="MW_Button" position="317 351 60 24" name="OkButton" align="Right Bottom">
+        <Widget type="AutoSizedButton" skin="MW_Button" position="317 355 60 24" name="OkButton" align="Right Bottom">
             <Property key="ExpandDirection" value="Left"/>
             <Property key="Caption" value="#{sOK}"/>
         </Widget>
