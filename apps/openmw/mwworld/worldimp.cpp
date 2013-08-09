@@ -1919,6 +1919,8 @@ namespace MWWorld
                 windowManager->unsetForceHide(MWGui::GW_Magic);
             }
         }
+
+        mRendering->rebuildPtr(actor);
     }
 
 }

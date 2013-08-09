@@ -101,7 +101,11 @@ void NpcAnimation::setViewMode(NpcAnimation::ViewMode viewMode)
 {
     assert(viewMode != VM_HeadOnly);
     mViewMode = viewMode;
+    rebuild();
+}
 
+void NpcAnimation::rebuild()
+{
     updateNpcBase();
 
     MWBase::Environment::get().getMechanicsManager()->forceStateUpdate(mPtr);

@@ -88,6 +88,9 @@ public:
     void setViewMode(ViewMode viewMode);
 
     void updateParts(bool forceupdate = false);
+
+    /// Rebuilds the NPC, updating their root model, animation sources, and equipment.
+    void rebuild();
 };
 
 }

@@ -131,6 +131,10 @@ public:
     /// Specifies an updated Ptr object for the player (used on cell change).
     void updatePlayerPtr(const MWWorld::Ptr &ptr);
 
+    /// Currently for NPCs only. Rebuilds the NPC, updating their root model, animation sources,
+    /// and equipment.
+    void rebuildPtr(const MWWorld::Ptr &ptr);
+
     void update (float duration, bool paused);
 
     void setAmbientColour(const Ogre::ColourValue& colour);

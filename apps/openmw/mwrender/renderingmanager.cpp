@@ -312,6 +312,24 @@ void RenderingManager::updatePlayerPtr(const MWWorld::Ptr &ptr)
         mCamera->attachTo(ptr);
 }
 
+void RenderingManager::rebuildPtr(const MWWorld::Ptr &ptr)
+{
+    NpcAnimation *anim = NULL;
+    if(ptr.getRefData().getHandle() == "player")
+        anim = mPlayerAnimation;
+    else if(MWWorld::Class::get(ptr).isActor())
+        anim = dynamic_cast<NpcAnimation*>(mActors.getAnimation(ptr));
+    if(anim)
+    {
+        anim->rebuild();
+        if(mCamera->getHandle() == ptr.getRefData().getHandle())
+        {
+            mCamera->attachTo(ptr);
+            mCamera->setAnimation(anim);
+        }
+    }
+}
+
 void RenderingManager::update (float duration, bool paused)
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
