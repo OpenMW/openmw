@@ -30,7 +30,6 @@ MWMechanics::NpcStats::NpcStats()
 , mDisposition(0)
 , mVampire (0)
 , mReputation(0)
-, mWerewolf (false)
 , mWerewolfKills (0)
 , mProfit(0)
 , mAttackStrength(0.0f)
@@ -90,7 +89,7 @@ const MWMechanics::Stat<float>& MWMechanics::NpcStats::getSkill (int index) cons
     if (index<0 || index>=27)
         throw std::runtime_error ("skill index out of range");
 
-    return mSkill[index];
+    return (!mIsWerewolf ? mSkill[index] : mWerewolfSkill[index]);
 }
 
 MWMechanics::Stat<float>& MWMechanics::NpcStats::getSkill (int index)
@@ -98,7 +97,7 @@ MWMechanics::Stat<float>& MWMechanics::NpcStats::getSkill (int index)
     if (index<0 || index>=27)
         throw std::runtime_error ("skill index out of range");
 
-    return mSkill[index];
+    return (!mIsWerewolf ? mSkill[index] : mWerewolfSkill[index]);
 }
 
 const std::map<std::string, int>& MWMechanics::NpcStats::getFactionRanks() const
@@ -194,6 +193,10 @@ float MWMechanics::NpcStats::getSkillGain (int skillIndex, const ESM::Class& cla
 
 void MWMechanics::NpcStats::useSkill (int skillIndex, const ESM::Class& class_, int usageType)
 {
+    // Don't increase skills as a werewolf
+    if(mIsWerewolf)
+        return;
+
     float base = getSkill (skillIndex).getBase();
 
     int level = static_cast<int> (base);
@@ -369,12 +372,34 @@ bool MWMechanics::NpcStats::hasSkillsForRank (const std::string& factionId, int 
 
 bool MWMechanics::NpcStats::isWerewolf() const
 {
-    return mWerewolf;
+    return mIsWerewolf;
 }
 
 void MWMechanics::NpcStats::setWerewolf (bool set)
 {
-    mWerewolf = set;
+    if(set != false)
+    {
+        const MWWorld::Store<ESM::GameSetting> &gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+        for(size_t i = 0;i < ESM::Attribute::Length;i++)
+        {
+            mWerewolfAttributes[i] = getAttribute(i);
+            // Oh, Bethesda. It's "Intelligence".
+            std::string name = "fWerewolf"+((i==ESM::Attribute::Intelligence) ? std::string("Intellegence") :
+                                            ESM::Attribute::sAttributeNames[i]);
+            mWerewolfAttributes[i].setModified(int(gmst.find(name)->getFloat()), 0);
+        }
+
+        for(size_t i = 0;i < ESM::Skill::Length;i++)
+        {
+            mWerewolfSkill[i] = getSkill(i);
+            // "Mercantile"! >_<
+            std::string name = "fWerewolf"+((i==ESM::Skill::Mercantile) ? std::string("Merchantile") :
+                                            ESM::Skill::sSkillNames[i]);
+            mWerewolfSkill[i].setModified(int(gmst.find(name)->getFloat()), 0);
+        }
+    }
+    mIsWerewolf = set;
 }
 
 int MWMechanics::NpcStats::getWerewolfKills() const

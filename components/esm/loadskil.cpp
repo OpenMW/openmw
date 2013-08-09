@@ -9,6 +9,35 @@
 
 namespace ESM
 {
+    const std::string Skill::sSkillNames[Length] = {
+        "Block",
+        "Armorer",
+        "Mediumarmor",
+        "Heavyarmor",
+        "Bluntweapon",
+        "Longblade",
+        "Axe",
+        "Spear",
+        "Athletics",
+        "Enchant",
+        "Destruction",
+        "Alteration",
+        "Illusion",
+        "Conjuration",
+        "Mysticism",
+        "Restoration",
+        "Alchemy",
+        "Unarmored",
+        "Security",
+        "Sneak",
+        "Acrobatics",
+        "Lightarmor",
+        "Shortblade",
+        "Marksman",
+        "Mercantile",
+        "Speechcraft",
+        "Handtohand",
+    };
     const std::string Skill::sSkillNameIds[Length] = {
         "sSkillBlock",
         "sSkillArmorer",

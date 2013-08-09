@@ -46,12 +46,12 @@ namespace MWMechanics
             int mDisposition;
             unsigned int mMovementFlags;
             Stat<float> mSkill[27];
+            Stat<float> mWerewolfSkill[27];
             int mBounty;
             std::set<std::string> mExpelled;
             std::map<std::string, int> mFactionReputation;
             bool mVampire;
             int mReputation;
-            bool mWerewolf;
             int mWerewolfKills;
             int mProfit;
             float mAttackStrength;
@@ -143,7 +143,7 @@ namespace MWMechanics
 
             bool isWerewolf() const;
 
-            void setWerewolf (bool set);
+            void setWerewolf(bool set);
 
             int getWerewolfKills() const;
 

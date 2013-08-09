@@ -13,7 +13,8 @@ namespace MWMechanics
         : mLevel (0), mLevelHealthBonus(0.f), mDead (false), mDied (false), mFriendlyHits (0),
           mTalkedTo (false), mAlarmed (false),
           mAttacked (false), mHostile (false),
-          mAttackingOrSpell(false), mAttackType(AT_Chop)
+          mAttackingOrSpell(false), mAttackType(AT_Chop),
+          mIsWerewolf(false)
     {
         for (int i=0; i<4; ++i)
             mAiSettings[i] = 0;
@@ -77,7 +78,7 @@ namespace MWMechanics
         if (index < 0 || index > 7) {
             throw std::runtime_error("attribute index is out of range");
         }
-        return mAttributes[index];
+        return (!mIsWerewolf ? mAttributes[index] : mWerewolfAttributes[index]);
     }
 
     const DynamicStat<float> &CreatureStats::getHealth() const
@@ -131,7 +132,7 @@ namespace MWMechanics
         if (index < 0 || index > 7) {
             throw std::runtime_error("attribute index is out of range");
         }
-        return mAttributes[index];
+        return (!mIsWerewolf ? mAttributes[index] : mWerewolfAttributes[index]);
     }
 
     const DynamicStat<float> &CreatureStats::getDynamic(int index) const
@@ -167,7 +168,10 @@ namespace MWMechanics
         if (index < 0 || index > 7) {
             throw std::runtime_error("attribute index is out of range");
         }
-        mAttributes[index] = value;
+        if(!mIsWerewolf)
+            mAttributes[index] = value;
+        else
+            mWerewolfAttributes[index] = value;
     }
 
     void CreatureStats::setHealth(const DynamicStat<float> &value)

@@ -28,6 +28,7 @@ struct Attribute
     std::string mName, mDescription;
 
     static const AttributeID sAttributeIds[Length];
+    static const std::string sAttributeNames[Length];
     static const std::string sGmstAttributeIds[Length];
     static const std::string sGmstAttributeDescIds[Length];
     static const std::string sAttributeIcons[Length];

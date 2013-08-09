@@ -40,6 +40,10 @@ namespace MWMechanics
 
         std::string mLastHitObject; // The last object to hit this actor
 
+    protected:
+        bool mIsWerewolf;
+        Stat<int> mWerewolfAttributes[8];
+
     public:
         CreatureStats();
 
