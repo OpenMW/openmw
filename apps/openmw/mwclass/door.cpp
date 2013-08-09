@@ -67,16 +67,14 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Door::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
-        MWWorld::LiveCellRef<ESM::Door> *ref =
-            ptr.get<ESM::Door>();
+        MWWorld::LiveCellRef<ESM::Door> *ref = ptr.get<ESM::Door>();
 
         const std::string &openSound = ref->mBase->mOpenSound;
         const std::string &closeSound = ref->mBase->mCloseSound;
         const std::string lockedSound = "LockedDoor";
         const std::string trapActivationSound = "Disarm Trap Fail";
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayer().getPlayer();
-        MWWorld::InventoryStore& invStore = MWWorld::Class::get(player).getInventoryStore(player);
+        MWWorld::ContainerStore &invStore = get(actor).getContainerStore(actor);
 
         bool needKey = ptr.getCellRef().mLockLevel>0;
         bool hasKey = false;
@@ -92,13 +90,14 @@ namespace MWClass
             if (refId == keyId)
             {
                 hasKey = true;
-                keyName = MWWorld::Class::get(*it).getName(*it);
+                keyName = get(*it).getName(*it);
             }
         }
 
         if (needKey && hasKey)
         {
-            MWBase::Environment::get().getWindowManager ()->messageBox (keyName + " #{sKeyUsed}");
+            if(actor == MWBase::Environment::get().getWorld()->getPlayer().getPlayer())
+                MWBase::Environment::get().getWindowManager()->messageBox(keyName + " #{sKeyUsed}");
             ptr.getCellRef().mLockLevel = 0;
             // using a key disarms the trap
             ptr.getCellRef().mTrap = "";
