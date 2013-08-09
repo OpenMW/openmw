@@ -156,7 +156,7 @@ class CharacterController
 
     void clearAnimQueue();
 
-    bool updateNpcState();
+    bool updateNpcState(bool onground, bool inwater, bool isrunning, bool sneak);
 
 public:
     CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim);

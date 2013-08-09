@@ -427,6 +427,15 @@ namespace MWClass
             }
             if(healthdmg)
                 damage *= gmst.find("fHandtoHandHealthPer")->getFloat();
+
+            MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+            if(stats.isWerewolf())
+            {
+                // Randomize from WolfHit* records
+                sndMgr->playSound3D(victim, "WolfHit1", 1.0f, 1.0f);
+            }
+            else
+                sndMgr->playSound3D(victim, "Hand To Hand Hit", 1.0f, 1.0f);
         }
         if(ptr.getRefData().getHandle() == "player")
             skillUsageSucceeded(ptr, weapskill, 0);
@@ -471,7 +480,6 @@ namespace MWClass
             {
                 if(ishealth)
                     damage /= std::min(1.0f + getArmorRating(ptr)/std::max(1.0f, damage), 4.0f);
-                sndMgr->playSound3D(ptr, "Hand To Hand Hit", 1.0f, 1.0f);
             }
             else if(ishealth)
             {

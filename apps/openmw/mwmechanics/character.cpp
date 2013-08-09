@@ -368,14 +368,14 @@ void CharacterController::updatePtr(const MWWorld::Ptr &ptr)
 }
 
 
-bool CharacterController::updateNpcState()
+bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrunning, bool sneak)
 {
     const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
-    CreatureStats &crstats = cls.getCreatureStats(mPtr);
     NpcStats &stats = cls.getNpcStats(mPtr);
     WeaponType weaptype = WeapType_None;
     MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
     MWWorld::ContainerStoreIterator weapon = getActiveWeapon(stats, inv, &weaptype);
+    const bool isWerewolf = stats.isWerewolf();
 
     bool forcestateupdate = false;
     if(weaptype != mWeaponType)
@@ -399,6 +399,12 @@ bool CharacterController::updateNpcState()
                              MWRender::Animation::Group_UpperBody, true,
                              1.0f, "equip start", "equip stop", 0.0f, 0);
             mUpperBodyState = UpperCharState_EquipingWeap;
+            if(isWerewolf)
+            {
+                MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+                // TODO: Randomize from all WolfEquip* records
+                sndMgr->playSound3D(mPtr, "WolfEquip1", 1.0f, 1.0f);
+            }
         }
 
         if(weapon != inv.end() && !(weaptype == WeapType_None && mWeaponType == WeapType_Spell))
@@ -417,6 +423,18 @@ bool CharacterController::updateNpcState()
         getWeaponGroup(mWeaponType, mCurrentWeapon);
     }
 
+    if(isWerewolf)
+    {
+        MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+        if(isrunning && !inwater && mWeaponType == WeapType_None)
+        {
+            if(!sndMgr->getSoundPlaying(mPtr, "WolfRun"))
+                sndMgr->playSound3D(mPtr, "WolfRun", 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx,
+                                    MWBase::SoundManager::Play_Loop);
+        }
+        else
+            sndMgr->stopSound3D(mPtr, "WolfRun");
+    }
 
     bool isWeapon = (weapon != inv.end() && weapon->getTypeName() == typeid(ESM::Weapon).name());
     float weapSpeed = 1.0f;
@@ -425,7 +443,7 @@ bool CharacterController::updateNpcState()
 
     float complete;
     bool animPlaying;
-    if(crstats.getAttackingOrSpell())
+    if(stats.getAttackingOrSpell())
     {
         if(mUpperBodyState == UpperCharState_WeapEquiped)
         {
@@ -434,7 +452,7 @@ bool CharacterController::updateNpcState()
             {
                 const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
 
-                const std::string spellid = crstats.getSpells().getSelectedSpell();
+                const std::string spellid = stats.getSpells().getSelectedSpell();
                 if(!spellid.empty())
                 {
                     static const std::string schools[] = {
@@ -503,7 +521,7 @@ bool CharacterController::updateNpcState()
                     mAttackType = "shoot";
                 else
                 {
-                    int attackType = crstats.getAttackType();
+                    int attackType = stats.getAttackType();
                     if(isWeapon && Settings::Manager::getBool("best attack", "Game"))
                         attackType = getBestAttack(weapon->get<ESM::Weapon>()->mBase);
 
@@ -532,12 +550,14 @@ bool CharacterController::updateNpcState()
             if(mAttackType != "shoot")
             {
                 MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+                // TODO: Randomize from WolfSwing* records
+                std::string sound = (!isWerewolf ? "SwishM" : "WolfSwing");
                 if(complete < 0.5f)
-                    sndMgr->playSound3D(mPtr, "SwishM", 1.0f, 0.8f); //Weak attack
+                    sndMgr->playSound3D(mPtr, sound, 1.0f, 0.8f); //Weak attack
                 else if(complete < 1.0f)
-                    sndMgr->playSound3D(mPtr, "SwishM", 1.0f, 1.0f); //Medium attack
+                    sndMgr->playSound3D(mPtr, sound, 1.0f, 1.0f); //Medium attack
                 else
-                    sndMgr->playSound3D(mPtr, "SwishM", 1.0f, 1.2f); //Strong attack
+                    sndMgr->playSound3D(mPtr, sound, 1.0f, 1.2f); //Strong attack
             }
             stats.setAttackStrength(complete);
 
@@ -765,8 +785,8 @@ void CharacterController::update(float duration, Movement &movement)
         movement.mRotation[1] += rot.y;
         movement.mRotation[2] += rot.z;
 
-        if(mPtr.getTypeName() == typeid(ESM::NPC).name())
-            forcestateupdate = updateNpcState();
+        if(cls.isNpc())
+            forcestateupdate = updateNpcState(onground, inwater, isrunning, sneak);
 
         refreshCurrentAnims(idlestate, movestate, forcestateupdate);
     }
