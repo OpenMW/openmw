@@ -107,6 +107,10 @@ opencs_units_noqt (model/settings
     settingsitem
     )
 
+opencs_units_noqt (model/filter
+    node unarynode binarynode leafnode booleannode
+    )
+
 opencs_hdrs_noqt (model/filter
     filter
     )
