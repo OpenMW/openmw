@@ -5,9 +5,9 @@
         <Property key="Visible" value="false"/>
 
         <Widget type="EditBox" skin="MW_TextEditClient" position="8 8 284 400" name="Message" align="Left Top Stretch">
-            <Property key="FontName" value = "Default" />
+            <Property key="FontName" value="Default" />
             <Property key="TextAlign" value="Top HCenter" />
-            <Property key="TextColour" value = "0.75 0.6 0.35" />
+            <Property key="TextColour" value="0.75 0.6 0.35" />
             <Property key="Static" value="true"/>
             <Property key="WordWrap" value="true"/>
             <Property key="MultiLine" value="true" />

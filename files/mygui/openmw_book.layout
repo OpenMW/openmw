@@ -41,8 +41,8 @@
             <Property key="TextColour" value="0 0 0"/>
         </Widget>
 
-        <Widget type="Widget" skin="" position="30 22 240 300" name = "LeftPage"/>
-        <Widget type="Widget" skin="" position="300 22 240 300" name = "RightPage"/>
+        <Widget type="Widget" skin="" position="30 22 240 300" name="LeftPage"/>
+        <Widget type="Widget" skin="" position="300 22 240 300" name="RightPage"/>
     </Widget>
     </Widget>
 </Widget>
