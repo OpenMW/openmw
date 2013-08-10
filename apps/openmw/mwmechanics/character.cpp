@@ -212,6 +212,10 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
             }
         }
 
+        /* If we're playing the same animation, restart from the loop start instead of the
+         * beginning. */
+        int mode = ((movement != mCurrentMovement) ? 1 : 2);
+
         mAnimation->disable(mCurrentMovement);
         mCurrentMovement = movement;
         if(!mCurrentMovement.empty())
@@ -220,7 +224,7 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
             if(mMovementSpeed > 0.0f && (vel=mAnimation->getVelocity(mCurrentMovement)) > 1.0f)
                 speedmult = mMovementSpeed / vel;
             mAnimation->play(mCurrentMovement, Priority_Movement, movegroup, false,
-                             speedmult, "start", "stop", 0.0f, ~0ul);
+                             speedmult, ((mode==2)?"loop start":"start"), "stop", 0.0f, ~0ul);
         }
     }
 }
