@@ -841,16 +841,19 @@ namespace MWClass
 
     float Npc::getEncumbrance (const MWWorld::Ptr& ptr) const
     {
-        float weight = getContainerStore (ptr).getWeight();
+        const MWMechanics::NpcStats &stats = getNpcStats(ptr);
 
-        const MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
-
-        weight -= stats.getMagicEffects().get (MWMechanics::EffectKey (ESM::MagicEffect::Feather)).mMagnitude;
-
-        weight += stats.getMagicEffects().get (MWMechanics::EffectKey (ESM::MagicEffect::Burden)).mMagnitude;
-
-        if (weight<0)
-            weight = 0;
+        // According to UESP, inventory weight is ignored in werewolf form. Does that include
+        // feather and burden effects?
+        float weight = 0.0f;
+        if(!stats.isWerewolf())
+        {
+            weight  = getContainerStore(ptr).getWeight();
+            weight -= stats.getMagicEffects().get(MWMechanics::EffectKey(ESM::MagicEffect::Feather)).mMagnitude;
+            weight += stats.getMagicEffects().get(MWMechanics::EffectKey(ESM::MagicEffect::Burden)).mMagnitude;
+            if(weight < 0.0f)
+                weight = 0.0f;
+        }
 
         return weight;
     }
