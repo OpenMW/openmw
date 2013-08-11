@@ -2,8 +2,9 @@
 
 <MyGUI type="Layout">
     <Widget type="Window" skin="MW_Window" layer="Windows" position="0 0 588 433" name="_Main">
+        <Property key="MinSize" value="380 230"/>
 
-        <Widget type="Widget" skin="MW_Box" position="8 8 415 381" align="Stretch" name = "Client"/>
+        <Widget type="Widget" skin="MW_Box" position="8 8 415 381" align="Stretch" name="Client"/>
 
         <Widget type="Widget" position="13 13 391 371" align="Left Top Stretch">
             <Widget type="BookPage" skin="MW_BookPage" position="0 0 391 371" name="History" align="Left Top Stretch">
@@ -17,7 +18,7 @@
 		<!-- The disposition bar-->
         <Widget type="ProgressBar" skin="MW_EnergyBar_Blue" position="432 8 132 18"
             align="Right Top" name="Disposition">
-			<Widget type="EditBox" skin="MW_DispositionEdit" position_real = "0 0 1 1" align="Stretch" name = "DispositionText"/>
+			<Widget type="EditBox" skin="MW_DispositionEdit" position_real="0 0 1 1" align="Stretch" name="DispositionText"/>
 		</Widget>
         <!-- The list of topics -->
         <Widget type="MWList" skin="MW_SimpleList" position="432 31 132 328" name="TopicsList" align="Right VStretch">

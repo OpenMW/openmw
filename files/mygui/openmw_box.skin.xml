@@ -42,23 +42,23 @@ as around the sections of the stats window, or around popup info windows -->
         </BasisSkin>
     </Skin>
     <Skin name="IB_TL" size="2 2" texture="textures\menu_thin_border_top_left_corner.dds">
-        <BasisSkin type="MainSkin" offset = "0 0 2 2">
-            <State name="normal" offset = "0 0 2 2"/>
+        <BasisSkin type="MainSkin" offset="0 0 2 2">
+            <State name="normal" offset="0 0 2 2"/>
         </BasisSkin>
     </Skin>
     <Skin name="IB_TR" size="2 2" texture="textures\menu_thin_border_top_right_corner.dds">
-        <BasisSkin type="MainSkin" offset = "0 0 2 2">
-            <State name="normal" offset = "0 0 2 2"/>
+        <BasisSkin type="MainSkin" offset="0 0 2 2">
+            <State name="normal" offset="0 0 2 2"/>
         </BasisSkin>
     </Skin>
     <Skin name="IB_BL" size="2 2" texture="textures\menu_thin_border_bottom_left_corner.dds">
-        <BasisSkin type="MainSkin" offset = "0 0 2 2">
-            <State name="normal" offset = "0 0 2 2"/>
+        <BasisSkin type="MainSkin" offset="0 0 2 2">
+            <State name="normal" offset="0 0 2 2"/>
         </BasisSkin>
     </Skin>
     <Skin name="IB_BR" size="2 2" texture="textures\menu_thin_border_bottom_right_corner.dds">
-        <BasisSkin type="MainSkin" offset = "0 0 2 2">
-            <State name="normal" offset = "0 0 2 2"/>
+        <BasisSkin type="MainSkin" offset="0 0 2 2">
+            <State name="normal" offset="0 0 2 2"/>
         </BasisSkin>
     </Skin>
 

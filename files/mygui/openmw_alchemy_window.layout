@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 588 414" name="_Main">
+    <Widget type="Window" skin="MW_Window_NoCaption" layer="Windows" position="0 0 588 444" name="_Main">
+       <Property key="MinSize" value="420 360"/>
 
         <!-- Name -->
 
@@ -10,7 +11,7 @@
             <Property key="TextAlign" value="Left"/>
         </Widget>
 
-        <Widget type="EditBox" skin="MW_TextEdit" position="70 10 500 24" name="NameEdit"/>
+        <Widget type="EditBox" skin="MW_TextEdit" position="70 10 492 24" align="Top Left HStretch" name="NameEdit"/>
 
 
         <!-- Apparatus -->
@@ -71,7 +72,7 @@
 
         <!-- Available Ingredients -->
 
-        <Widget type="ItemView" skin="MW_ItemView" position="10 206 560 158" name="ItemView" align="Left Top Stretch"/>
+        <Widget type="ItemView" skin="MW_ItemView" position="10 206 552 158" name="ItemView" align="Left Top Stretch"/>
 
 
         <!-- Created Effects -->
@@ -81,14 +82,14 @@
             <Property key="TextAlign" value="Left"/>
         </Widget>
 
-        <Widget type="Widget" skin="MW_Box" position="250 66 320 130">
-            <Widget type="Widget" skin="" position="4 4 316 122" name="CreatedEffects"/>
+        <Widget type="Widget" skin="MW_Box" position="250 66 312 130" align="Top Left HStretch">
+            <Widget type="Widget" skin="" position="4 4 316 122" name="CreatedEffects" align="HStretch"/>
         </Widget>
 
 
         <!-- Buttons -->
 
-        <Widget type="HBox" skin="" position="110 372 460 24">
+        <Widget type="HBox" skin="" position="110 374 452 24" align="Bottom Right">
 
             <Widget type="Widget">
                 <UserString key="HStretch" value="true"/>

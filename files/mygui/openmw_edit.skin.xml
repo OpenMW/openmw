@@ -4,15 +4,15 @@
 
     <!-- Text edit widget -->
 
-    <Skin name = "MW_TextEditClient" size = "10 10">
+    <Skin name="MW_TextEditClient" size="10 10">
 
-        <BasisSkin type="EditText" offset = "0 0 10 10" align = "Stretch"/>
+        <BasisSkin type="EditText" offset="0 0 10 10" align="Stretch"/>
 
     </Skin>
 
-    <Skin name = "MW_TextBoxEditClient" size = "10 10">
+    <Skin name="MW_TextBoxEditClient" size="10 10">
 
-        <BasisSkin type="EditText" offset = "0 0 10 10" align = "Stretch"/>
+        <BasisSkin type="EditText" offset="0 0 10 10" align="Stretch"/>
 
     </Skin>
 
@@ -20,13 +20,13 @@
 
         <!-- Input -->
 
-        <Property key="FontName" value = "Default"/>
+        <Property key="FontName" value="Default"/>
 
-        <Property key="TextAlign" value = "Left VCenter" />
+        <Property key="TextAlign" value="Left VCenter" />
 
-        <Property key="TextColour" value = "0.75 0.6 0.35" />
+        <Property key="TextColour" value="0.75 0.6 0.35" />
 
-        <Child type="TextBox" skin="MW_TextEditClient" offset = "2 2 508 18" align = "Stretch" name = "Client"/>
+        <Child type="TextBox" skin="MW_TextEditClient" offset="2 2 508 18" align="Stretch" name="Client"/>
 
 
         <!-- Borders -->
@@ -37,15 +37,15 @@
 
     <Skin name="MW_TextBoxEdit" size="512 20">
 
-        <Property key="FontName" value = "Default"/>
+        <Property key="FontName" value="Default"/>
 
-        <Property key="TextAlign" value = "Left Top" />
+        <Property key="TextAlign" value="Left Top" />
 
-        <Property key="TextColour" value = "0.75 0.6 0.35" />
+        <Property key="TextColour" value="0.75 0.6 0.35" />
 
-        <Child type="TextBox" skin="MW_TextBoxEditClient" offset = "2 2 490 18" align = "Stretch" name = "Client"/>
+        <Child type="TextBox" skin="MW_TextBoxEditClient" offset="2 2 490 18" align="Stretch" name="Client"/>
 
-        <Child type="MWScrollBar" skin="MW_VScroll" offset = "494 3 14 14" align = "Right VStretch" name = "VScroll"/>
+        <Child type="MWScrollBar" skin="MW_VScroll" offset="494 3 14 14" align="Right VStretch" name="VScroll"/>
 
     </Skin>
 

@@ -293,14 +293,20 @@ namespace sh
 			while (i>0)
 			{
 				--i;
-				if (m->createForConfiguration (configuration, i) && mListener)
+				if (m->createForConfiguration (configuration, i))
+				{
+					if (mListener)
 					mListener->materialCreated (m, configuration, i);
+				}
 				else
 					return NULL;
 			}
 
-			if (m->createForConfiguration (configuration, lodIndex) && mListener)
-				mListener->materialCreated (m, configuration, lodIndex);
+			if (m->createForConfiguration (configuration, lodIndex))
+			{
+				if (mListener)
+					mListener->materialCreated (m, configuration, lodIndex);
+			}
 			else
 				return NULL;
 		}
