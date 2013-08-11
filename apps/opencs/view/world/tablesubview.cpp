@@ -5,6 +5,8 @@
 
 #include "../../model/doc/document.hpp"
 
+#include "../filter/filterbox.hpp"
+
 #include "table.hpp"
 #include "tablebottombox.hpp"
 #include "creator.hpp"
@@ -22,6 +24,8 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
     layout->insertWidget (0, mTable =
         new Table (id, document.getData(), document.getUndoStack(), mBottom->canCreateAndDelete()), 2);
+
+    layout->insertWidget (0, new CSVFilter::FilterBox (this));
 
     QWidget *widget = new QWidget;
 

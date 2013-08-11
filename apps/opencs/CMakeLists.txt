@@ -116,7 +116,7 @@ opencs_hdrs_noqt (model/filter
     )
 
 opencs_units (view/filter
-    filtercreator
+    filtercreator filterbox recordfilterbox
     )
 
 set (OPENCS_US
