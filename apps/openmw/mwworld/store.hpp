@@ -95,6 +95,23 @@ namespace MWWorld
         typedef std::map<std::string, T> Dynamic;
         typedef std::map<std::string, T> Static;
 
+        class GetRecords {
+            const std::string mFind;
+            std::vector<const T*> *mRecords;
+
+        public:
+            GetRecords(const std::string &str, std::vector<const T*> *records)
+              : mFind(Misc::StringUtils::lowerCase(str)), mRecords(records)
+            { }
+
+            void operator()(const T *item)
+            {
+                if(Misc::StringUtils::ciCompareLen(mFind, item->mId, mFind.size()) == 0)
+                    mRecords->push_back(item);
+            }
+        };
+
+
         friend class ESMStore;
 
     public:
@@ -132,11 +149,35 @@ namespace MWWorld
             return 0;
         }
 
+        /** Returns a random record that starts with the named ID, or NULL if not found. */
+        const T *searchRandom(const std::string &id) const
+        {
+            std::vector<const T*> results;
+            std::for_each(mShared.begin(), mShared.end(), GetRecords(id, &results));
+            if(!results.empty())
+                return results[int(std::rand()/((double)RAND_MAX+1)*results.size())];
+            return NULL;
+        }
+
         const T *find(const std::string &id) const {
             const T *ptr = search(id);
             if (ptr == 0) {
                 std::ostringstream msg;
                 msg << "Object '" << id << "' not found (const)";
+                throw std::runtime_error(msg.str());
+            }
+            return ptr;
+        }
+
+        /** Returns a random record that starts with the named ID. An exception is thrown if none
+         * are found. */
+        const T *findRandom(const std::string &id) const
+        {
+            const T *ptr = searchRandom(id);
+            if(ptr == 0)
+            {
+                std::ostringstream msg;
+                msg << "Object starting with '"<<id<<"' not found (const)";
                 throw std::runtime_error(msg.str());
             }
             return ptr;

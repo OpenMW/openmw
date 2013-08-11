@@ -431,8 +431,9 @@ namespace MWClass
             MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
             if(stats.isWerewolf())
             {
-                // Randomize from WolfHit* records
-                sndMgr->playSound3D(victim, "WolfHit1", 1.0f, 1.0f);
+                const ESM::Sound *sound = world->getStore().get<ESM::Sound>().searchRandom("WolfHit");
+                if(sound)
+                    sndMgr->playSound3D(victim, sound->mId, 1.0f, 1.0f);
             }
             else
                 sndMgr->playSound3D(victim, "Hand To Hand Hit", 1.0f, 1.0f);
@@ -571,9 +572,12 @@ namespace MWClass
     {
         if(get(actor).isNpc() && get(actor).getNpcStats(actor).isWerewolf())
         {
+            const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+            const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfNPC");
+
             boost::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
-            // FIXME: Randomize using all WolfNPC* sound records
-            action->setSound("WolfNPC1");
+            if(sound) action->setSound(sound->mId);
+
             return action;
         }
         if(getCreatureStats(ptr).isDead())

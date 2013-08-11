@@ -35,6 +35,26 @@ public:
         return true;
     }
 
+    static int ciCompareLen(const std::string &x, const std::string &y, size_t len)
+    {
+        std::string::const_iterator xit = x.begin();
+        std::string::const_iterator yit = y.begin();
+        for(;xit != x.end() && yit != y.end() && len > 0;++xit,++yit,--len)
+        {
+            int res = *xit - *yit;
+            if(res != 0 && std::tolower(*xit) != std::tolower(*yit))
+                return (res > 0) ? 1 : -1;
+        }
+        if(len > 0)
+        {
+            if(xit != x.end())
+                return 1;
+            if(yit != y.end())
+                return -1;
+        }
+        return 0;
+    }
+
     /// Transforms input string to lower case w/o copy
     static std::string &toLower(std::string &inout) {
         std::transform(

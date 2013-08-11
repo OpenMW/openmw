@@ -95,9 +95,12 @@ namespace MWClass
 
         if(get(actor).isNpc() && get(actor).getNpcStats(actor).isWerewolf())
         {
+            const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+            const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfContainer");
+
             boost::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
-            // FIXME: Randomize using all WolfContainer* sound records
-            action->setSound("WolfContainer1");
+            if(sound) action->setSound(sound->mId);
+
             return action;
         }
 

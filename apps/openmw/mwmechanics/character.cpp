@@ -405,9 +405,13 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
             mUpperBodyState = UpperCharState_EquipingWeap;
             if(isWerewolf)
             {
-                MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-                // TODO: Randomize from all WolfEquip* records
-                sndMgr->playSound3D(mPtr, "WolfEquip1", 1.0f, 1.0f);
+                const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+                const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfEquip");
+                if(sound)
+                {
+                    MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+                    sndMgr->playSound3D(mPtr, sound->mId, 1.0f, 1.0f);
+                }
             }
         }
 
@@ -554,14 +558,24 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
             if(mAttackType != "shoot")
             {
                 MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-                // TODO: Randomize from WolfSwing* records
-                std::string sound = (!isWerewolf ? "SwishM" : "WolfSwing");
-                if(complete < 0.5f)
-                    sndMgr->playSound3D(mPtr, sound, 1.0f, 0.8f); //Weak attack
-                else if(complete < 1.0f)
-                    sndMgr->playSound3D(mPtr, sound, 1.0f, 1.0f); //Medium attack
+
+                if(isWerewolf)
+                {
+                    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+                    const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfSwing");
+                    if(sound)
+                        sndMgr->playSound3D(mPtr, sound->mId, 1.0f, 1.0f);
+                }
                 else
-                    sndMgr->playSound3D(mPtr, sound, 1.0f, 1.2f); //Strong attack
+                {
+                    std::string sound = "SwishM";
+                    if(complete < 0.5f)
+                        sndMgr->playSound3D(mPtr, sound, 1.0f, 0.8f); //Weak attack
+                    else if(complete < 1.0f)
+                        sndMgr->playSound3D(mPtr, sound, 1.0f, 1.0f); //Medium attack
+                    else
+                        sndMgr->playSound3D(mPtr, sound, 1.0f, 1.2f); //Strong attack
+                }
             }
             stats.setAttackStrength(complete);
 
