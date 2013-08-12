@@ -317,11 +317,25 @@ namespace MWGui
 
     void HUD::onWeaponClicked(MyGUI::Widget* _sender)
     {
+        const MWWorld::Ptr& player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        if (MWWorld::Class::get(player).getNpcStats(player).isWerewolf())
+        {
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sWerewolfRefusal}");
+            return;
+        }
+
         MWBase::Environment::get().getWindowManager()->toggleVisible(GW_Inventory);
     }
 
     void HUD::onMagicClicked(MyGUI::Widget* _sender)
     {
+        const MWWorld::Ptr& player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        if (MWWorld::Class::get(player).getNpcStats(player).isWerewolf())
+        {
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sWerewolfRefusal}");
+            return;
+        }
+
         MWBase::Environment::get().getWindowManager()->toggleVisible(GW_Magic);
     }
 
