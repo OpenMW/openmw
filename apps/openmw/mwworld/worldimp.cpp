@@ -1477,7 +1477,7 @@ namespace MWWorld
             item.getRefData().getLocals().setVarByInt(script, "onpcdrop", 1);
     }
 
-    bool World::placeObject (const Ptr& object, float cursorX, float cursorY)
+    bool World::placeObject (const MWWorld::Ptr& object, float cursorX, float cursorY, int amount)
     {
         std::pair<bool, Ogre::Vector3> result = mPhysics->castRay(cursorX, cursorY);
 
@@ -1502,9 +1502,14 @@ namespace MWWorld
         pos.rot[0] = 0;
         pos.rot[1] = 0;
 
+        // copy the object and set its count
+        int origCount = object.getRefData().getCount();
+        object.getRefData().setCount(amount);
         Ptr dropped = copyObjectToCell(object, *cell, pos);
+        object.getRefData().setCount(origCount);
+
+        // only the player place items in the world, so no need to check actor
         PCDropped(dropped);
-        object.getRefData().setCount(0);
 
         return true;
     }
@@ -1549,7 +1554,7 @@ namespace MWWorld
         return dropped;
     }
 
-    void World::dropObjectOnGround (const Ptr& actor, const Ptr& object)
+    void World::dropObjectOnGround (const Ptr& actor, const Ptr& object, int amount)
     {
         MWWorld::Ptr::CellStore* cell = actor.getCell();
 
@@ -1570,10 +1575,14 @@ namespace MWWorld
             mPhysics->castRay(orig, dir, len);
         pos.pos[2] = hit.second.z;
 
+        // copy the object and set its count
+        int origCount = object.getRefData().getCount();
+        object.getRefData().setCount(amount);
         Ptr dropped = copyObjectToCell(object, *cell, pos);
+        object.getRefData().setCount(origCount);
+
         if(actor == mPlayer->getPlayer()) // Only call if dropped by player
             PCDropped(dropped);
-        object.getRefData().setCount(0);
     }
 
     void World::processChangedSettings(const Settings::CategorySettingVector& settings)
@@ -1955,14 +1964,7 @@ namespace MWWorld
         }
         else
         {
-            ContainerStore &store = Class::get(actor).getContainerStore(actor);
-
-            const std::string item = "WerewolfRobe";
-            for(ContainerStoreIterator iter(store.begin());iter != store.end();++iter)
-            {
-                if(Misc::StringUtils::ciEqual(iter->getCellRef().mRefID, item))
-                    iter->getRefData().setCount(0);
-            }
+            Class::get(actor).getContainerStore(actor).remove("WerewolfRobe", 1, actor);
         }
 
         if(actor.getRefData().getHandle() == "player")

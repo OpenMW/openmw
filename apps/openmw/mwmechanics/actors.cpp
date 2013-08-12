@@ -244,7 +244,7 @@ namespace MWMechanics
                         heldIter->getClass().setRemainingUsageTime(*heldIter, timeRemaining);
                     else
                     {
-                        heldIter->getRefData().setCount(0); // remove it
+                        inventoryStore.remove(*heldIter, 1, ptr); // remove it
                         return;
                     }
                 }
@@ -253,7 +253,7 @@ namespace MWMechanics
             // Both NPC and player lights extinguish in water.
             if(MWBase::Environment::get().getWorld()->isSwimming(ptr))
             {
-                heldIter->getRefData().setCount(0); // remove it
+                inventoryStore.remove(*heldIter, 1, ptr); // remove it
 
                 // ...But, only the player makes a sound.
                 if(isPlayer)

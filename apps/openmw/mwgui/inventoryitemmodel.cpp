@@ -52,18 +52,12 @@ void InventoryItemModel::copyItem (const ItemStack& item, size_t count)
 void InventoryItemModel::removeItem (const ItemStack& item, size_t count)
 {
     MWWorld::ContainerStore& store = MWWorld::Class::get(mActor).getContainerStore(mActor);
+    int removed = store.remove(item.mBase, count, mActor);
 
-    for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
-    {
-        if (*it == item.mBase)
-        {
-            if (it->getRefData().getCount() < static_cast<int>(count))
-                throw std::runtime_error("Not enough items in the stack to remove");
-            it->getRefData().setCount(it->getRefData().getCount() - count);
-            return;
-        }
-    }
-    throw std::runtime_error("Item to remove not found in container store");
+    if (removed == 0)
+        throw std::runtime_error("Item to remove not found in container store");
+    else if (removed < count)
+        throw std::runtime_error("Not enough items in the stack to remove");
 }
 
 void InventoryItemModel::update()

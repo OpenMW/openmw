@@ -94,9 +94,7 @@ void ContainerItemModel::removeItem (const ItemStack& item, size_t count)
         {
             if (stacks(*it, item.mBase))
             {
-                int refCount = it->getRefData().getCount();
-                it->getRefData().setCount(std::max(0, refCount - toRemove));
-                toRemove -= refCount;
+                toRemove -= store.remove(*it, toRemove, *source);
                 if (toRemove <= 0)
                     return;
             }
