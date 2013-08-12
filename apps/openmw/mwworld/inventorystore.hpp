@@ -108,6 +108,12 @@ namespace MWWorld
             ///< @return true if the two specified objects can stack with each other
             /// @note ptr1 is the item that is already in this container
 
+            virtual int remove(const Ptr& item, int count, const Ptr& actor);
+            ///< Remove \a count item(s) designated by \a item from this inventory.
+            ///
+            /// \todo check if the item is equipped and do stuff
+            ///
+            /// @return the number of items actually removed
     };
 }
 

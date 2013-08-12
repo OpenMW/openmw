@@ -198,6 +198,40 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImpl (const Ptr& ptr
     return it;
 }
 
+int MWWorld::ContainerStore::remove(const std::string& itemId, int count, const Ptr& actor)
+{
+    int toRemove = count;
+
+    for (ContainerStoreIterator iter(begin()); iter != end() && toRemove > 0; ++iter)
+        if (Misc::StringUtils::ciEqual(iter->getCellRef().mRefID, itemId))
+            toRemove -= remove(*iter, toRemove, actor);
+
+    // number of removed items
+    return count - toRemove;
+}
+
+int MWWorld::ContainerStore::remove(const Ptr& item, int count, const Ptr& actor)
+{
+    assert(this == item.getContainerStore());
+
+    int toRemove = count;
+    RefData& itemRef = item.getRefData();
+
+    if (itemRef.getCount() <= toRemove)
+    {
+        toRemove -= itemRef.getCount();
+        itemRef.setCount(0);
+    }
+    else
+    {
+        itemRef.setCount(itemRef.getCount() - toRemove);
+        toRemove = 0;
+    }
+
+    // number of removed items
+    return count - toRemove;
+}
+
 void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const std::string& owner, const MWWorld::ESMStore& store)
 {
     for (std::vector<ESM::ContItem>::const_iterator iter (items.mList.begin()); iter!=items.mList.end();
