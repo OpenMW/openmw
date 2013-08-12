@@ -372,11 +372,11 @@ namespace MWGui
         // If in game mode, show only the pinned windows
         if (gameMode)
         {
-            mMap->setVisible(mMap->pinned());
-            mStatsWindow->setVisible(mStatsWindow->pinned());
             mInventoryWindow->setGuiMode(GM_None);
-            mInventoryWindow->setVisible(mInventoryWindow->pinned());
-            mSpellWindow->setVisible(mSpellWindow->pinned());
+            mMap->setVisible(mMap->pinned() && !(mForceHidden & GW_Map));
+            mStatsWindow->setVisible(mStatsWindow->pinned() && !(mForceHidden & GW_Stats));
+            mInventoryWindow->setVisible(mInventoryWindow->pinned() && !(mForceHidden & GW_Inventory));
+            mSpellWindow->setVisible(mSpellWindow->pinned() && !(mForceHidden & GW_Magic));
 
             return;
         }
@@ -394,11 +394,6 @@ namespace MWGui
                 mSettingsWindow->setVisible(true);
                 break;
             case GM_Console:
-                // Show the pinned windows
-                mMap->setVisible(mMap->pinned());
-                mStatsWindow->setVisible(mStatsWindow->pinned());
-                mInventoryWindow->setVisible(mInventoryWindow->pinned());
-                mSpellWindow->setVisible(mSpellWindow->pinned());
 
                 mConsole->setVisible(true);
                 break;
@@ -496,10 +491,10 @@ namespace MWGui
                 break;
             case GM_Loading:
                 // Show the pinned windows
-                mMap->setVisible(mMap->pinned());
-                mStatsWindow->setVisible(mStatsWindow->pinned());
-                mInventoryWindow->setVisible(mInventoryWindow->pinned());
-                mSpellWindow->setVisible(mSpellWindow->pinned());
+                mMap->setVisible(mMap->pinned() && !(mForceHidden & GW_Map));
+                mStatsWindow->setVisible(mStatsWindow->pinned() && !(mForceHidden & GW_Stats));
+                mInventoryWindow->setVisible(mInventoryWindow->pinned() && !(mForceHidden & GW_Inventory));
+                mSpellWindow->setVisible(mSpellWindow->pinned() && !(mForceHidden & GW_Magic));
 
                 setCursorVisible(false);
                 break;
