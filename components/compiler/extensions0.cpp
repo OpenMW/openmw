@@ -256,6 +256,8 @@ namespace Compiler
             extensions.registerFunction ("hitonme", 'l', "S", opcodeHitOnMe, opcodeHitOnMeExplicit);
             extensions.registerInstruction ("disableteleporting", "", opcodeDisableTeleporting);
             extensions.registerInstruction ("enableteleporting", "", opcodeEnableTeleporting);
+            extensions.registerInstruction ("showvars", "", opcodeShowVars, opcodeShowVarsExplicit);
+            extensions.registerInstruction ("sv", "", opcodeShowVars, opcodeShowVarsExplicit);
         }
     }
 

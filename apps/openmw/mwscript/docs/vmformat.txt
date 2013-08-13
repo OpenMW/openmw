@@ -349,5 +349,7 @@ op 0x2000219: UndoWerewolf
 op 0x200021a: UndoWerewolfExplicit
 op 0x200021b: SetWerewolfAcrobatics
 op 0x200021c: SetWerewolfAcrobaticsExplicit
+op 0x200021d: ShowVars
+op 0x200021e: ShowVarsExplicit
 
-opcodes 0x200021d-0x3ffffff unused
+opcodes 0x200021f-0x3ffffff unused
