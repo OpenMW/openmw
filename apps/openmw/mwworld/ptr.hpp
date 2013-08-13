@@ -1,8 +1,6 @@
 #ifndef GAME_MWWORLD_PTR_H
 #define GAME_MWWORLD_PTR_H
 
-#include <boost/any.hpp>
-
 #include "cellstore.hpp"
 
 namespace MWWorld
@@ -18,7 +16,7 @@ namespace MWWorld
             typedef MWWorld::CellStore CellStore;
             ///< \deprecated
 
-            boost::any mPtr;
+            MWWorld::LiveCellRefBase *mPtr;
             ESM::CellRef *mCellRef;
             RefData *mRefData;
             CellStore *mCell;
@@ -27,17 +25,11 @@ namespace MWWorld
 
         public:
 
-            Ptr() : mCellRef (0), mRefData (0), mCell (0), mContainerStore (0) {}
+            Ptr() : mPtr (0), mCellRef (0), mRefData (0), mCell (0), mContainerStore (0) {}
 
             bool isEmpty() const
             {
-                return mPtr.empty();
-            }
-
-            const std::type_info& getType() const
-            {
-                assert (!mPtr.empty());
-                return mPtr.type();
+                return mPtr == 0;
             }
 
             const std::string& getTypeName() const
@@ -59,7 +51,15 @@ namespace MWWorld
             template<typename T>
             MWWorld::LiveCellRef<T> *get() const
             {
-                return boost::any_cast<MWWorld::LiveCellRef<T>*> (mPtr);
+                if(mPtr && mPtr->mTypeName == typeid(T).name())
+                    return static_cast<MWWorld::LiveCellRef<T>*>(mPtr);
+
+                std::stringstream str;
+                str<< "Bad LiveCellRef cast to "<<typeid(T).name()<<" from ";
+                if(mPtr != 0) str<< mPtr->mTypeName;
+                else str<< "an empty object";
+
+                throw std::runtime_error(str.str());
             }
 
             ESM::CellRef& getCellRef() const;
