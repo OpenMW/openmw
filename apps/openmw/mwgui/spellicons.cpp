@@ -129,47 +129,16 @@ namespace MWGui
                     effectInfo.mMagnitude = static_cast<int> (0.05*it->second.second / (0.1 * magicEffect->mData.mBaseCost));
                 }
 
-
                 effects[effectIt->mEffectID].push_back (effectInfo);
             }
         }
 
         int w=2;
 
-        if (adjustSize)
-        {
-            int s = effects.size() * 16+4;
-            if (effects.empty())
-                s = 0;
-            int diff = parent->getWidth() - s;
-            parent->setSize(s, parent->getHeight());
-            parent->setPosition(parent->getLeft()+diff, parent->getTop());
-        }
-
-
         for (std::map <int, std::vector<MagicEffectInfo> >::const_iterator it = effects.begin(); it != effects.end(); ++it)
         {
-            MyGUI::ImageBox* image;
-            if (mWidgetMap.find(it->first) == mWidgetMap.end())
-                image = parent->createWidget<MyGUI::ImageBox>
-                    ("ImageBox", MyGUI::IntCoord(w,2,16,16), MyGUI::Align::Default);
-            else
-                image = mWidgetMap[it->first];
-            mWidgetMap[it->first] = image;
-            image->setPosition(w,2);
-            image->setVisible(true);
-
             const ESM::MagicEffect* effect =
                 MWBase::Environment::get().getWorld ()->getStore ().get<ESM::MagicEffect>().find(it->first);
-
-            std::string icon = effect->mIcon;
-            icon[icon.size()-3] = 'd';
-            icon[icon.size()-2] = 'd';
-            icon[icon.size()-1] = 's';
-            icon = "icons\\" + icon;
-
-            image->setImageTexture(icon);
-            w += 16;
 
             float remainingDuration = 0;
 
@@ -210,20 +179,61 @@ namespace MWGui
                 }
             }
 
-            std::string name = ESM::MagicEffect::effectIdToString (it->first);
+            if (remainingDuration > 0.f)
+            {
+                MyGUI::ImageBox* image;
+                if (mWidgetMap.find(it->first) == mWidgetMap.end())
+                {
+                    image = parent->createWidget<MyGUI::ImageBox>
+                        ("ImageBox", MyGUI::IntCoord(w,2,16,16), MyGUI::Align::Default);
+                    mWidgetMap[it->first] = image;
 
-            ToolTipInfo tooltipInfo;
-            tooltipInfo.caption = "#{" + name + "}";
-            tooltipInfo.icon = effect->mIcon;
-            tooltipInfo.text = sourcesDescription;
-            tooltipInfo.imageSize = 16;
-            tooltipInfo.wordWrap = false;
+                    std::string icon = effect->mIcon;
+                    icon[icon.size()-3] = 'd';
+                    icon[icon.size()-2] = 'd';
+                    icon[icon.size()-1] = 's';
+                    icon = "icons\\" + icon;
 
-            image->setUserData(tooltipInfo);
-            image->setUserString("ToolTipType", "ToolTipInfo");
+                    image->setImageTexture(icon);
 
-            // Fade out during the last 5 seconds
-            image->setAlpha(std::min(remainingDuration/fadeTime, 1.f));
+                    std::string name = ESM::MagicEffect::effectIdToString (it->first);
+
+                    ToolTipInfo tooltipInfo;
+                    tooltipInfo.caption = "#{" + name + "}";
+                    tooltipInfo.icon = effect->mIcon;
+                    tooltipInfo.imageSize = 16;
+                    tooltipInfo.wordWrap = false;
+
+                    image->setUserData(tooltipInfo);
+                    image->setUserString("ToolTipType", "ToolTipInfo");
+                }
+                else
+                    image = mWidgetMap[it->first];
+
+                image->setPosition(w,2);
+                image->setVisible(true);
+                w += 16;
+
+                ToolTipInfo* tooltipInfo = image->getUserData<ToolTipInfo>();
+                tooltipInfo->text = sourcesDescription;
+
+                // Fade out during the last 5 seconds
+                image->setAlpha(std::min(remainingDuration/fadeTime, 1.f));
+            }
+            else if (mWidgetMap.find(it->first) != mWidgetMap.end())
+            {
+                mWidgetMap[it->first]->setVisible(false);
+            }
+        }
+
+        if (adjustSize)
+        {
+            int s = w + 2;
+            if (effects.empty())
+                s = 0;
+            int diff = parent->getWidth() - s;
+            parent->setSize(s, parent->getHeight());
+            parent->setPosition(parent->getLeft()+diff, parent->getTop());
         }
 
         // hide inactive effects
@@ -232,7 +242,6 @@ namespace MWGui
             if (effects.find(it->first) == effects.end())
                 it->second->setVisible(false);
         }
-
     }
 
 
