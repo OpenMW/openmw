@@ -13,6 +13,7 @@
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/customdata.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/actionapply.hpp"
 #include "../mwworld/actionopen.hpp"
 #include "../mwworld/physicssystem.hpp"
 #include "../mwworld/player.hpp"
@@ -148,7 +149,7 @@ namespace MWClass
             {
                 // Trap activation goes here
                 std::cout << "Activated trap: " << ptr.getCellRef().mTrap << std::endl;
-                boost::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction);
+                boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionApply(actor, ptr.getCellRef().mTrap));
                 action->setSound(trapActivationSound);
                 ptr.getCellRef().mTrap = "";
                 return action;
