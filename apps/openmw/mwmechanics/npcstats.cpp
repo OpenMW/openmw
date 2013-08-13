@@ -393,6 +393,11 @@ void MWMechanics::NpcStats::setWerewolf (bool set)
         for(size_t i = 0;i < ESM::Skill::Length;i++)
         {
             mWerewolfSkill[i] = getSkill(i);
+
+            // Acrobatics is set separately for some reason.
+            if(i == ESM::Skill::Acrobatics)
+                continue;
+
             // "Mercantile"! >_<
             std::string name = "fWerewolf"+((i==ESM::Skill::Mercantile) ? std::string("Merchantile") :
                                             ESM::Skill::sSkillNames[i]);

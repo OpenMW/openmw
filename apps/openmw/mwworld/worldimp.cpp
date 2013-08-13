@@ -1925,4 +1925,12 @@ namespace MWWorld
         mRendering->rebuildPtr(actor);
     }
 
+    void World::applyWerewolfAcrobatics(const Ptr &actor)
+    {
+        const Store<ESM::GameSetting> &gmst = getStore().get<ESM::GameSetting>();
+        MWMechanics::NpcStats &stats = Class::get(actor).getNpcStats(actor);
+
+        stats.getSkill(ESM::Skill::Acrobatics).setModified(gmst.find("fWerewolfAcrobatics")->getFloat(), 0);
+    }
+
 }
