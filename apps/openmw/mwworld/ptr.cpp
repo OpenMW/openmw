@@ -5,6 +5,8 @@
 
 #include "containerstore.hpp"
 
+const std::string MWWorld::Ptr::sEmptyString;
+
 ESM::CellRef& MWWorld::Ptr::getCellRef() const
 {
     assert (mCellRef);

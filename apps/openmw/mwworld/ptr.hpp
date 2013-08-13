@@ -11,6 +11,8 @@ namespace MWWorld
 
     class Ptr
     {
+            static const std::string sEmptyString;
+
         public:
 
             typedef MWWorld::CellStore CellStore;
@@ -20,7 +22,6 @@ namespace MWWorld
             ESM::CellRef *mCellRef;
             RefData *mRefData;
             CellStore *mCell;
-            std::string mTypeName;
             ContainerStore *mContainerStore;
 
         public:
@@ -34,7 +35,7 @@ namespace MWWorld
 
             const std::string& getTypeName() const
             {
-                return mTypeName;
+                return mPtr ? mPtr->mTypeName : sEmptyString;
             }
 
             template<typename T>
@@ -45,7 +46,6 @@ namespace MWWorld
                 mCellRef = &liveCellRef->mRef;
                 mRefData = &liveCellRef->mData;
                 mCell = cell;
-                mTypeName = typeid (T).name();
             }
 
             template<typename T>
