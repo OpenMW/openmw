@@ -76,7 +76,7 @@ namespace MWWorld
             ///
             /// @return if stacking happened, return iterator to the item that was stacked against, otherwise iterator to the newly inserted item.
 
-            void equip (int slot, const ContainerStoreIterator& iterator);
+            void equip (int slot, const ContainerStoreIterator& iterator, const Ptr& actor);
             ///< \note \a iterator can be an end-iterator
 
             void setSelectedEnchantItem(const ContainerStoreIterator& iterator);

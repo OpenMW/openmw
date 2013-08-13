@@ -81,7 +81,7 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::add(const Ptr& itemPtr,
     return retVal;
 }
 
-void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& iterator)
+void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& iterator, const Ptr& actor)
 {
     if (slot<0 || slot>=static_cast<int> (mSlots.size()))
         throw std::runtime_error ("slot number out of range");
@@ -98,19 +98,8 @@ void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& ite
             throw std::runtime_error ("invalid slot");
     }
 
-    // restack item previously in this slot (if required)
     if (mSlots[slot] != end())
-    {
-        for (MWWorld::ContainerStoreIterator iter (begin()); iter!=end(); ++iter)
-        {
-            if (stacks(*iter, *mSlots[slot]))
-            {
-                iter->getRefData().setCount( iter->getRefData().getCount() + mSlots[slot]->getRefData().getCount() );
-                mSlots[slot]->getRefData().setCount(0);
-                break;
-            }
-        }
-    }
+        unequipSlot(slot, actor);
 
     // unstack item pointed to by iterator if required
     if (iterator!=end() && !slots.second && iterator->getRefData().getCount() > 1) // if slots.second is true, item can stay stacked when equipped
@@ -214,10 +203,10 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& npc)
                 case 0:
                     continue;
                 case 2:
-                    invStore.equip(MWWorld::InventoryStore::Slot_CarriedLeft, invStore.end());
+                    invStore.unequipSlot(MWWorld::InventoryStore::Slot_CarriedLeft, npc);
                     break;
                 case 3:
-                    invStore.equip(MWWorld::InventoryStore::Slot_CarriedRight, invStore.end());
+                    invStore.unequipSlot(MWWorld::InventoryStore::Slot_CarriedRight, npc);
                     break;
             }
 
@@ -325,7 +314,7 @@ int MWWorld::InventoryStore::remove(const Ptr& item, int count, const Ptr& actor
 
         if (*mSlots[slot] == item)
         {
-            unequipSlot(slot, actorPtr);
+            unequipSlot(slot, actor);
             break;
         }
     }
@@ -338,7 +327,19 @@ void MWWorld::InventoryStore::unequipSlot(int slot, const MWWorld::Ptr& actor)
     ContainerStoreIterator it = getSlot(slot);
     if (it != end())
     {
-        equip(slot, end());
+        // restack item previously in this slot
+        for (MWWorld::ContainerStoreIterator iter (begin()); iter != end(); ++iter)
+        {
+            if (stacks(*iter, *mSlots[slot]))
+            {
+                iter->getRefData().setCount(iter->getRefData().getCount() + mSlots[slot]->getRefData().getCount());
+                mSlots[slot]->getRefData().setCount(0);
+                break;
+            }
+        }
+
+        // empty this slot
+        mSlots[slot] = end();
 
         if (actor.getRefData().getHandle() == "player")
         {

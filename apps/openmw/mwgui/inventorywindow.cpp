@@ -384,7 +384,7 @@ namespace MWGui
             MWWorld::ContainerStoreIterator it = invStore.getSlot(slot);
             if (it != invStore.end() && *it == item)
             {
-                invStore.equip(slot, invStore.end());
+                invStore.equip(slot, invStore.end(), mPtr);
                 std::string script = MWWorld::Class::get(*it).getScript(*it);
 
                 // Unset OnPCEquip Variable on item's script, if it has a script with that variable declared

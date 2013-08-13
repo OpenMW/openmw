@@ -1960,7 +1960,7 @@ namespace MWWorld
 
             // Not sure this is right
             InventoryStore &inv = Class::get(actor).getInventoryStore(actor);
-            inv.equip(InventoryStore::Slot_Robe, inv.add(ref.getPtr(), actor));
+            inv.equip(InventoryStore::Slot_Robe, inv.add(ref.getPtr(), actor), actor);
         }
         else
         {
