@@ -2,6 +2,7 @@
 #define OPENMW_ESM_MGEF_H
 
 #include <string>
+#include <map>
 
 namespace ESM
 {
@@ -42,7 +43,10 @@ struct MagicEffect
         float mSpeed, mSize, mSizeCap;
     }; // 36 bytes
 
-    static std::string effectIdToString(short effectID);
+    static const std::map<short,std::string> sNames;
+
+    static const std::string &effectIdToString(short effectID);
+    static short effectStringToId(const std::string &effect);
 
 
     MEDTstruct mData;

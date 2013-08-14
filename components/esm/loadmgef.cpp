@@ -83,7 +83,8 @@ void MagicEffect::save(ESMWriter &esm)
     esm.writeHNOString("DESC", mDescription);
 }
 
-std::string MagicEffect::effectIdToString(short effectID)
+
+static std::map<short,std::string> genNameMap()
 {
     // Map effect ID to GMST name
     // http://www.uesp.net/morrow/hints/mweffects.shtml
@@ -235,10 +236,43 @@ std::string MagicEffect::effectIdToString(short effectID)
     // tribunal
     names[137] ="sEffectSummonFabricant";
 
-    if (names.find(effectID) == names.end())
-        throw std::runtime_error( std::string("Unimplemented effect ID ") + boost::lexical_cast<std::string>(effectID));
-
-    return names[effectID];
+    return names;
 }
+const std::map<short,std::string> MagicEffect::sNames = genNameMap();
+
+const std::string &MagicEffect::effectIdToString(short effectID)
+{
+    std::map<short,std::string>::const_iterator name = sNames.find(effectID);
+    if(name == sNames.end())
+        throw std::runtime_error(std::string("Unimplemented effect ID ")+boost::lexical_cast<std::string>(effectID));
+
+    return name->second;
+}
+
+class FindSecond {
+    const std::string &mName;
+
+public:
+    FindSecond(const std::string &name) : mName(name) { }
+
+    bool operator()(const std::pair<short,std::string> &item) const
+    {
+        if(Misc::StringUtils::ciEqual(item.second, mName))
+            return true;
+        return false;
+    }
+};
+
+short MagicEffect::effectStringToId(const std::string &effect)
+{
+    std::map<short,std::string>::const_iterator name;
+
+    name = std::find_if(sNames.begin(), sNames.end(), FindSecond(effect));
+    if(name == sNames.end())
+        throw std::runtime_error(std::string("Unimplemented effect ")+effect);
+
+    return name->first;
+}
+
 
 }

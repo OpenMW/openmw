@@ -1,6 +1,8 @@
 
 #include "miscextensions.hpp"
 
+#include <cstdlib>
+
 #include <libs/openengine/ogre/fader.hpp>
 
 #include <components/compiler/extensions.hpp>
@@ -317,10 +319,15 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    int key = runtime[0].mInteger;
+                    std::string effect = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
-                    runtime.push (MWWorld::Class::get(ptr).getCreatureStats (ptr).getMagicEffects ().get (
+                    char *end;
+                    long key = strtol(effect.c_str(), &end, 10);
+                    if(key < 0 || key > 32767 || *end != '\0')
+                        key = ESM::MagicEffect::effectStringToId(effect);
+
+                    runtime.push(MWWorld::Class::get(ptr).getCreatureStats(ptr).getMagicEffects().get(
                                       MWMechanics::EffectKey(key)).mMagnitude > 0);
                 }
         };
