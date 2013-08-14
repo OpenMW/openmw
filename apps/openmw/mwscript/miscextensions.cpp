@@ -632,9 +632,9 @@ namespace MWScript
         };
         
 
-        class OpShowVarsExplicit : public Interpreter::Opcode0
+        template <class R>
+        class OpShowVars : public Interpreter::Opcode0
         {
-        protected:
             void printLocalVars(Interpreter::Runtime &runtime, const MWWorld::Ptr &ptr)
             {
                 std::stringstream str;
@@ -675,16 +675,6 @@ namespace MWScript
                 runtime.getContext().report(str.str());
             }
 
-        public:
-            virtual void execute (Interpreter::Runtime& runtime)
-            {
-                MWWorld::Ptr ptr = ExplicitRef()(runtime);
-                printLocalVars(runtime, ptr);
-            }
-        };
-
-        class OpShowVarsImplicit : public OpShowVarsExplicit
-        {
             void printGlobalVars(Interpreter::Runtime &runtime)
             {
                 std::stringstream str;
@@ -701,8 +691,6 @@ namespace MWScript
                         str<<std::endl<< "  "<<names[i]<<" = "<<world->getGlobalVariable(names[i]).mLong<<" (long)";
                     else if(type == 'f')
                         str<<std::endl<< "  "<<names[i]<<" = "<<world->getGlobalVariable(names[i]).mFloat<<" (float)";
-                    else
-                        str<<std::endl<< "  "<<names[i]<<" = "<<((void*)*(int*)&world->getGlobalVariable(names[i]).mLong)<<" (unknown)";
                 }
 
                 runtime.getContext().report(str.str());
@@ -714,7 +702,7 @@ namespace MWScript
                 // No way to tell if we have a reference before trying to get it, and it will
                 // cause an exception is there isn't one :(
                 try {
-                    MWWorld::Ptr ptr = ImplicitRef()(runtime);
+                    MWWorld::Ptr ptr = R()(runtime);
                     printLocalVars(runtime, ptr);
                 }
                 catch(std::runtime_error&) {
@@ -780,8 +768,8 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Misc::opcodeHitOnMeExplicit, new OpHitOnMe<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeDisableTeleporting, new OpEnableTeleporting<false>);
             interpreter.installSegment5 (Compiler::Misc::opcodeEnableTeleporting, new OpEnableTeleporting<true>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeShowVars, new OpShowVarsImplicit);
-            interpreter.installSegment5 (Compiler::Misc::opcodeShowVarsExplicit, new OpShowVarsExplicit);
+            interpreter.installSegment5 (Compiler::Misc::opcodeShowVars, new OpShowVars<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeShowVarsExplicit, new OpShowVars<ExplicitRef>);
         }
     }
 }
