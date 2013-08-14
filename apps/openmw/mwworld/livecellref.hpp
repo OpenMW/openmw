@@ -17,7 +17,16 @@ namespace MWWorld
     {
         std::string mTypeName;
 
-        LiveCellRefBase(std::string type) : mTypeName(type)
+        /** Information about this instance, such as 3D location and rotation
+         * and individual type-dependent data.
+         */
+        ESM::CellRef mRef;
+
+        /** runtime-data */
+        RefData mData;
+
+        LiveCellRefBase(std::string type, const ESM::CellRef &cref=ESM::CellRef())
+          : mTypeName(type), mRef(cref), mData(mRef)
         { }
     };
 
@@ -31,23 +40,15 @@ namespace MWWorld
     struct LiveCellRef : public LiveCellRefBase
     {
         LiveCellRef(const ESM::CellRef& cref, const X* b = NULL)
-            : LiveCellRefBase(typeid(X).name()), mBase(b), mRef(cref), mData(mRef)
+            : LiveCellRefBase(typeid(X).name(), cref), mBase(b)
         {}
 
         LiveCellRef(const X* b = NULL)
-            : LiveCellRefBase(typeid(X).name()), mBase(b), mData(mRef)
+            : LiveCellRefBase(typeid(X).name()), mBase(b)
         {}
 
         // The object that this instance is based on.
         const X* mBase;
-
-        /* Information about this instance, such as 3D location and
-            rotation and individual type-dependent data.
-        */
-        ESM::CellRef mRef;
-
-        /// runtime-data
-        RefData mData;
     };
 
 //    template<typename X> bool operator==(const LiveCellRef<X>& ref, int pRefnum);

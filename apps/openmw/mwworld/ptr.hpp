@@ -38,8 +38,7 @@ namespace MWWorld
                 return mPtr ? mPtr->mTypeName : sEmptyString;
             }
 
-            template<typename T>
-            Ptr (MWWorld::LiveCellRef<T> *liveCellRef, CellStore *cell)
+            Ptr (MWWorld::LiveCellRefBase *liveCellRef, CellStore *cell)
             : mContainerStore (0)
             {
                 mPtr = liveCellRef;
