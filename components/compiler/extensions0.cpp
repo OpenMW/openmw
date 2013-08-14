@@ -238,7 +238,7 @@ namespace Compiler
             extensions.registerInstruction ("wakeuppc", "", opcodeWakeUpPc);
             extensions.registerInstruction ("playbink", "Sl", opcodePlayBink);
             extensions.registerFunction ("getlocked", 'l', "", opcodeGetLocked, opcodeGetLockedExplicit);
-            extensions.registerFunction ("geteffect", 'l', "l", opcodeGetEffect, opcodeGetEffectExplicit);
+            extensions.registerFunction ("geteffect", 'l', "S", opcodeGetEffect, opcodeGetEffectExplicit);
             extensions.registerInstruction ("addsoulgem", "cc", opcodeAddSoulGem, opcodeAddSoulGemExplicit);
             extensions.registerInstruction ("removesoulgem", "c", opcodeRemoveSoulGem, opcodeRemoveSoulGemExplicit);
             extensions.registerInstruction ("drop", "cl", opcodeDrop, opcodeDropExplicit);
@@ -256,6 +256,8 @@ namespace Compiler
             extensions.registerFunction ("hitonme", 'l', "S", opcodeHitOnMe, opcodeHitOnMeExplicit);
             extensions.registerInstruction ("disableteleporting", "", opcodeDisableTeleporting);
             extensions.registerInstruction ("enableteleporting", "", opcodeEnableTeleporting);
+            extensions.registerInstruction ("showvars", "", opcodeShowVars, opcodeShowVarsExplicit);
+            extensions.registerInstruction ("sv", "", opcodeShowVars, opcodeShowVarsExplicit);
         }
     }
 

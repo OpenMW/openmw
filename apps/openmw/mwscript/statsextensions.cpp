@@ -1076,8 +1076,8 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    // What to do? Stats (attributes, skills) are already set and unset with
-                    // BecomeWerewolf and UndoWerewolf.
+                    MWWorld::Ptr ptr = R()(runtime);
+                    MWBase::Environment::get().getWorld()->applyWerewolfAcrobatics(ptr);
                 }
         };
 

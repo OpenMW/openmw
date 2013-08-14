@@ -1,10 +1,13 @@
 
 #include "miscextensions.hpp"
 
+#include <cstdlib>
+
 #include <libs/openengine/ogre/fader.hpp>
 
 #include <components/compiler/extensions.hpp>
 #include <components/compiler/opcodes.hpp>
+#include <components/compiler/locals.hpp>
 
 #include <components/interpreter/interpreter.hpp>
 #include <components/interpreter/runtime.hpp>
@@ -12,6 +15,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/scriptmanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
@@ -315,10 +319,15 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    int key = runtime[0].mInteger;
+                    std::string effect = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
-                    runtime.push (MWWorld::Class::get(ptr).getCreatureStats (ptr).getMagicEffects ().get (
+                    char *end;
+                    long key = strtol(effect.c_str(), &end, 10);
+                    if(key < 0 || key > 32767 || *end != '\0')
+                        key = ESM::MagicEffect::effectStringToId(effect);
+
+                    runtime.push(MWWorld::Class::get(ptr).getCreatureStats(ptr).getMagicEffects().get(
                                       MWMechanics::EffectKey(key)).mMagnitude > 0);
                 }
         };
@@ -630,6 +639,87 @@ namespace MWScript
         };
         
 
+        template <class R>
+        class OpShowVars : public Interpreter::Opcode0
+        {
+            void printLocalVars(Interpreter::Runtime &runtime, const MWWorld::Ptr &ptr)
+            {
+                std::stringstream str;
+
+                const std::string script = MWWorld::Class::get(ptr).getScript(ptr);
+                if(script.empty())
+                    str<< ptr.getCellRef().mRefID<<" ("<<ptr.getRefData().getHandle()<<") does not have a script.";
+                else
+                {
+                    str<< "Local variables for "<<ptr.getCellRef().mRefID<<" ("<<ptr.getRefData().getHandle()<<")";
+
+                    const Locals &locals = ptr.getRefData().getLocals();
+                    const Compiler::Locals &complocals = MWBase::Environment::get().getScriptManager()->getLocals(script);
+
+                    const std::vector<std::string> *names = &complocals.get('s');
+                    for(size_t i = 0;i < names->size();++i)
+                    {
+                        if(i >= locals.mShorts.size())
+                            break;
+                        str<<std::endl<< "  "<<(*names)[i]<<" = "<<locals.mShorts[i]<<" (short)";
+                    }
+                    names = &complocals.get('l');
+                    for(size_t i = 0;i < names->size();++i)
+                    {
+                        if(i >= locals.mLongs.size())
+                            break;
+                        str<<std::endl<< "  "<<(*names)[i]<<" = "<<locals.mLongs[i]<<" (long)";
+                    }
+                    names = &complocals.get('f');
+                    for(size_t i = 0;i < names->size();++i)
+                    {
+                        if(i >= locals.mFloats.size())
+                            break;
+                        str<<std::endl<< "  "<<(*names)[i]<<" = "<<locals.mFloats[i]<<" (float)";
+                    }
+                }
+
+                runtime.getContext().report(str.str());
+            }
+
+            void printGlobalVars(Interpreter::Runtime &runtime)
+            {
+                std::stringstream str;
+                str<< "Global variables:";
+
+                MWBase::World *world = MWBase::Environment::get().getWorld();
+                std::vector<std::string> names = world->getGlobals();
+                for(size_t i = 0;i < names.size();++i)
+                {
+                    char type = world->getGlobalVariableType(names[i]);
+                    if(type == 's')
+                        str<<std::endl<< "  "<<names[i]<<" = "<<world->getGlobalVariable(names[i]).mShort<<" (short)";
+                    else if(type == 'l')
+                        str<<std::endl<< "  "<<names[i]<<" = "<<world->getGlobalVariable(names[i]).mLong<<" (long)";
+                    else if(type == 'f')
+                        str<<std::endl<< "  "<<names[i]<<" = "<<world->getGlobalVariable(names[i]).mFloat<<" (float)";
+                }
+
+                runtime.getContext().report(str.str());
+            }
+
+        public:
+            virtual void execute(Interpreter::Runtime& runtime)
+            {
+                // No way to tell if we have a reference before trying to get it, and it will
+                // cause an exception is there isn't one :(
+                try {
+                    MWWorld::Ptr ptr = R()(runtime);
+                    printLocalVars(runtime, ptr);
+                }
+                catch(std::runtime_error&) {
+                    // No reference, no problem.
+                    printGlobalVars(runtime);
+                }
+            }
+        };
+
+
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
             interpreter.installSegment5 (Compiler::Misc::opcodeXBox, new OpXBox);
@@ -685,6 +775,8 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Misc::opcodeHitOnMeExplicit, new OpHitOnMe<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeDisableTeleporting, new OpEnableTeleporting<false>);
             interpreter.installSegment5 (Compiler::Misc::opcodeEnableTeleporting, new OpEnableTeleporting<true>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeShowVars, new OpShowVars<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeShowVarsExplicit, new OpShowVars<ExplicitRef>);
         }
     }
 }

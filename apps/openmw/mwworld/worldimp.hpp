@@ -432,6 +432,8 @@ namespace MWWorld
             virtual bool isTeleportingEnabled() const;
 
             virtual void setWerewolf(const MWWorld::Ptr& actor, bool werewolf);
+
+            virtual void applyWerewolfAcrobatics(const MWWorld::Ptr& actor);
     };
 }
 
