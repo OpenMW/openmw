@@ -465,7 +465,7 @@ namespace MWWorld
             iter!=mWorldScene->getActiveCells().end(); ++iter)
         {
             Ptr::CellStore* cellstore = *iter;
-            Ptr ptr = mCells.getPtr (name, *cellstore);
+            Ptr ptr = mCells.getPtr (name, *cellstore, true);
 
             if (!ptr.isEmpty())
                 return ptr;
@@ -1772,7 +1772,7 @@ namespace MWWorld
     void World::enableActorCollision(const MWWorld::Ptr& actor, bool enable)
     {
         OEngine::Physic::PhysicActor *physicActor = mPhysEngine->getCharacter(actor.getRefData().getHandle());
-        
+
         physicActor->enableCollisions(enable);
     }
 
