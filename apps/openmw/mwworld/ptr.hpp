@@ -46,8 +46,8 @@ namespace MWWorld
             template<typename T>
             MWWorld::LiveCellRef<T> *get() const
             {
-                if(mRef && mRef->mTypeName == typeid(T).name())
-                    return static_cast<MWWorld::LiveCellRef<T>*>(mRef);
+                MWWorld::LiveCellRef<T> *ref = dynamic_cast<MWWorld::LiveCellRef<T>*>(mRef);
+                if(ref) return ref;
 
                 std::stringstream str;
                 str<< "Bad LiveCellRef cast to "<<typeid(T).name()<<" from ";

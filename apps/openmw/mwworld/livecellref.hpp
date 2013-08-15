@@ -28,6 +28,8 @@ namespace MWWorld
         LiveCellRefBase(std::string type, const ESM::CellRef &cref=ESM::CellRef())
           : mTypeName(type), mRef(cref), mData(mRef)
         { }
+        /* Need this for the class to be recognized as polymorphic */
+        virtual ~LiveCellRefBase() { }
     };
 
     /// A reference to one object (of any type) in a cell.
