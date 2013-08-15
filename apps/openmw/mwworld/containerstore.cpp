@@ -9,6 +9,7 @@
 
 #include <components/esm/loadcont.hpp>
 #include <components/compiler/locals.hpp>
+#include <components/misc/stringops.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -85,12 +86,12 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr
         CellStore *cell;
 
         Ptr player = MWBase::Environment::get().getWorld ()->getPlayer().getPlayer();
-        
+
         if(&(MWWorld::Class::get (player).getContainerStore (player)) == this)
         {
             cell = 0; // Items in player's inventory have cell set to 0, so their scripts will never be removed
-           
-            // Set OnPCAdd special variable, if it is declared 
+
+            // Set OnPCAdd special variable, if it is declared
             item.getRefData().getLocals().setVarByInt(script, "onpcadd", 1);
         }
         else
@@ -345,6 +346,25 @@ int MWWorld::ContainerStore::getType (const Ptr& ptr)
 
     throw std::runtime_error (
         "Object of type " + ptr.getTypeName() + " can not be placed into a container");
+}
+
+MWWorld::Ptr MWWorld::ContainerStore::search (const std::string& id)
+{
+    /// \todo Since we have direct access to the CellRefList here, the performance of this function
+    /// could be improved notably by iterating directly over the CellRefLists instead of using
+    /// a ContainerStoreIterator.
+
+    std::string id2 = Misc::StringUtils::lowerCase (id);
+
+    for (ContainerStoreIterator iter (this); iter!=end(); ++iter)
+    {
+        Ptr ptr = *iter;
+
+        if (Misc::StringUtils::lowerCase (Class::get (ptr).getId (ptr))==id2)
+            return ptr;
+    }
+
+    return Ptr();
 }
 
 
