@@ -12,8 +12,6 @@ namespace MWWorld
 
     class Ptr
     {
-            static const std::string sEmptyString;
-
         public:
 
             typedef MWWorld::CellStore CellStore;
@@ -24,8 +22,10 @@ namespace MWWorld
             ContainerStore *mContainerStore;
 
         public:
-
-            Ptr() : mRef(0), mCell(0), mContainerStore(0) { }
+            Ptr(MWWorld::LiveCellRefBase *liveCellRef=0, CellStore *cell=0)
+              : mRef(liveCellRef), mCell(cell), mContainerStore(0)
+            {
+            }
 
             bool isEmpty() const
             {
@@ -34,14 +34,9 @@ namespace MWWorld
 
             const std::string& getTypeName() const
             {
-                return mRef ? mRef->mTypeName : sEmptyString;
-            }
-
-            Ptr (MWWorld::LiveCellRefBase *liveCellRef, CellStore *cell)
-            : mContainerStore (0)
-            {
-                mRef = liveCellRef;
-                mCell = cell;
+                if(mRef != 0)
+                    return mRef->mTypeName;
+                throw std::runtime_error("Can't get type name from an empty object.");
             }
 
             template<typename T>

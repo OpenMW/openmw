@@ -146,27 +146,30 @@ namespace MWGui
         for (size_t i=0; i<mSourceModel->getItemCount(); ++i)
         {
             ItemStack item = mSourceModel->getItem(i);
-            MWWorld::Ptr base = item.mBase;
-            if (!mMerchant.isEmpty() && Misc::StringUtils::ciEqual(base.getCellRef().mRefID, "gold_001"))
-                continue;
-            if (!mMerchant.isEmpty() && !MWWorld::Class::get(base).canSell(base, services))
-                continue;
-
-            // don't show equipped items
-            if (mMerchant.getTypeName() == typeid(ESM::NPC).name())
+            if(!mMerchant.isEmpty())
             {
-                bool isEquipped = false;
-                MWWorld::InventoryStore& store = MWWorld::Class::get(mMerchant).getInventoryStore(mMerchant);
-                for (int slot=0; slot<MWWorld::InventoryStore::Slots; ++slot)
-                {
-                    MWWorld::ContainerStoreIterator equipped = store.getSlot(slot);
-                    if (equipped == store.end())
-                        continue;
-                    if (*equipped == base)
-                        isEquipped = true;
-                }
-                if (isEquipped)
+                MWWorld::Ptr base = item.mBase;
+                if(Misc::StringUtils::ciEqual(base.getCellRef().mRefID, "gold_001"))
                     continue;
+                if(!MWWorld::Class::get(base).canSell(base, services))
+                    continue;
+
+                // don't show equipped items
+                if(mMerchant.getTypeName() == typeid(ESM::NPC).name())
+                {
+                    bool isEquipped = false;
+                    MWWorld::InventoryStore& store = MWWorld::Class::get(mMerchant).getInventoryStore(mMerchant);
+                    for (int slot=0; slot<MWWorld::InventoryStore::Slots; ++slot)
+                    {
+                        MWWorld::ContainerStoreIterator equipped = store.getSlot(slot);
+                        if (equipped == store.end())
+                            continue;
+                        if (*equipped == base)
+                            isEquipped = true;
+                    }
+                    if (isEquipped)
+                        continue;
+                }
             }
 
             // don't show items that we borrowed to someone else
