@@ -7,7 +7,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "action.hpp"
+#include "ptr.hpp"
 
 namespace Ogre
 {
@@ -43,6 +43,7 @@ namespace MWWorld
     class InventoryStore;
     class PhysicsSystem;
     class CellStore;
+    class Action;
 
     /// \brief Base class for referenceable esm records
     class Class
@@ -227,17 +228,6 @@ namespace MWWorld
             ///
             /// (default implementation: return false)
 
-            static const Class& get (const std::string& key);
-            ///< If there is no class for this \a key, an exception is thrown.
-
-            static const Class& get (const Ptr& ptr)
-            {
-                return get (ptr.getTypeName());
-            }
-            ///< If there is no class for this pointer, an exception is thrown.
-
-            static void registerClass (const std::string& key,  boost::shared_ptr<Class> instance);
-
             virtual std::string getUpSoundId (const Ptr& ptr) const;
             ///< Return the up sound ID of \a ptr or throw an exception, if class does not support ID retrieval
             /// (default implementation: throw an exception)
@@ -296,6 +286,17 @@ namespace MWWorld
             virtual bool isNpc() const {
                 return false;
             }
+
+            static const Class& get (const std::string& key);
+            ///< If there is no class for this \a key, an exception is thrown.
+
+            static const Class& get (const Ptr& ptr)
+            {
+                return get(ptr.getTypeName());
+            }
+            ///< If there is no class for this pointer, an exception is thrown.
+
+            static void registerClass (const std::string& key,  boost::shared_ptr<Class> instance);
     };
 }
 

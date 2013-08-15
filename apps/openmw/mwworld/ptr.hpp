@@ -2,6 +2,7 @@
 #define GAME_MWWORLD_PTR_H
 
 #include "cellstore.hpp"
+#include "livecellref.hpp"
 
 namespace MWWorld
 {
