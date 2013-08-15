@@ -106,6 +106,8 @@ namespace MWWorld
             ///< This function throws an exception, if ptr does not point to an object, that can be
             /// put into a container.
 
+            Ptr search (const std::string& id);
+
         friend class ContainerStoreIterator;
     };
 

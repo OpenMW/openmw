@@ -131,6 +131,8 @@ namespace MWWorld
         return mCell->isExterior();
     }
 
+    Ptr searchInContainer (const std::string& id);
+
   private:
 
     template<class Functor, class List>
@@ -148,6 +150,7 @@ namespace MWWorld
     void listRefs(const MWWorld::ESMStore &store, std::vector<ESM::ESMReader> &esm);
 
     void loadRefs(const MWWorld::ESMStore &store, std::vector<ESM::ESMReader> &esm);
+
   };
 }
 

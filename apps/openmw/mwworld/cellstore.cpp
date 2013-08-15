@@ -7,6 +7,29 @@
 
 #include "ptr.hpp"
 #include "esmstore.hpp"
+#include "class.hpp"
+#include "containerstore.hpp"
+
+namespace
+{
+    template<typename T>
+    MWWorld::Ptr searchInContainerList (MWWorld::CellRefList<T>& containerList, const std::string& id)
+    {
+        for (typename MWWorld::CellRefList<T>::List::iterator iter (containerList.mList.begin());
+             iter!=containerList.mList.end(); ++iter)
+        {
+            MWWorld::Ptr container (&*iter, 0);
+
+            MWWorld::Ptr ptr =
+                MWWorld::Class::get (container).getContainerStore (container).search (id);
+
+            if (!ptr.isEmpty())
+                return ptr;
+        }
+
+        return MWWorld::Ptr();
+    }
+}
 
 namespace MWWorld
 {
@@ -16,14 +39,14 @@ namespace MWWorld
     {
         // Get existing reference, in case we need to overwrite it.
         typename std::list<LiveRef>::iterator iter = std::find(mList.begin(), mList.end(), ref.mRefnum);
-        
+
         // Skip this when reference was deleted.
         // TODO: Support respawning references, in this case, we need to track it somehow.
         if (ref.mDeleted) {
             mList.erase(iter);
             return;
         }
-        
+
         // for throwing exception on unhandled record type
         const MWWorld::Store<X> &store = esmStore.get<X>();
         const X *ptr = store.search(ref.mRefID);
@@ -39,7 +62,7 @@ namespace MWWorld
             mList.push_back(LiveRef(ref, ptr));
         }
     }
-    
+
     template<typename X> bool operator==(const LiveCellRef<X>& ref, int pRefnum)
     {
         return (ref.mRef.mRefnum == pRefnum);
@@ -133,7 +156,7 @@ namespace MWWorld
                 ESM::MovedCellRefTracker::const_iterator iter = std::find(mCell->mMovedRefs.begin(), mCell->mMovedRefs.end(), ref.mRefnum);
                 if (iter != mCell->mMovedRefs.end()) {
                     continue;
-                }                    
+                }
                 int rec = store.find(ref.mRefID);
 
                 ref.mRefID = lowerCase;
@@ -186,7 +209,7 @@ namespace MWWorld
                 (int(*)(int)) std::tolower);
 
             int rec = store.find(ref.mRefID);
-            
+
             ref.mRefID = lowerCase;
 
             /* We can optimize this further by storing the pointer to the
@@ -221,7 +244,33 @@ namespace MWWorld
                 default:
                 std::cout << "WARNING: Ignoring reference '" << ref.mRefID << "' of unhandled type\n";
                 }
-            
+
         }
+    }
+
+    Ptr CellStore::searchInContainer (const std::string& id)
+    {
+        {
+            Ptr ptr = searchInContainerList (mContainers, id);
+
+            if (!ptr.isEmpty())
+                return ptr;
+        }
+
+        {
+            Ptr ptr = searchInContainerList (mCreatures, id);
+
+            if (!ptr.isEmpty())
+                return ptr;
+        }
+
+        {
+            Ptr ptr = searchInContainerList (mNpcs, id);
+
+            if (!ptr.isEmpty())
+                return ptr;
+        }
+
+        return Ptr();
     }
 }

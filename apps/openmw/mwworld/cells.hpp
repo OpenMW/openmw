@@ -45,7 +45,8 @@ namespace MWWorld
 
             CellStore *getInterior (const std::string& name);
 
-            Ptr getPtr (const std::string& name, CellStore& cellStore);
+            Ptr getPtr (const std::string& name, CellStore& cellStore, bool searchInContainers = false);
+            ///< \param searchInContainers Only affect loaded cells.
 
             Ptr getPtr (const std::string& name);
     };
