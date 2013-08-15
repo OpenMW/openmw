@@ -138,7 +138,7 @@ void MWWorld::InventoryStore::unequipAll(const MWWorld::Ptr& actor)
 
             // Unset OnPCEquip Variable on item's script, if it has a script with that variable declared
             if((actor.getRefData().getHandle() == "player") && (script != ""))
-                (*it).mRefData->getLocals().setVarByInt(script, "onpcequip", 0);
+                (*it).getRefData().getLocals().setVarByInt(script, "onpcequip", 0);
         }
     }
 }

@@ -59,16 +59,16 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::end()
 bool MWWorld::ContainerStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
 {
     /// \todo add current enchantment charge here when it is implemented
-    if (  ptr1.mCellRef->mRefID == ptr2.mCellRef->mRefID
+    if (  ptr1.getCellRef().mRefID == ptr2.getCellRef().mRefID
           && MWWorld::Class::get(ptr1).getScript(ptr1) == "" // item with a script never stacks
           && MWWorld::Class::get(ptr1).getEnchantment(ptr1) == "" // item with enchantment never stacks (we could revisit this later, but for now it makes selecting items in the spell window much easier)
-        && ptr1.mCellRef->mOwner == ptr2.mCellRef->mOwner
-        && ptr1.mCellRef->mSoul == ptr2.mCellRef->mSoul
+        && ptr1.getCellRef().mOwner == ptr2.getCellRef().mOwner
+        && ptr1.getCellRef().mSoul == ptr2.getCellRef().mSoul
           // item that is already partly used up never stacks
-          && (!MWWorld::Class::get(ptr1).hasItemHealth(ptr1) || ptr1.mCellRef->mCharge == -1
-              || MWWorld::Class::get(ptr1).getItemMaxHealth(ptr1) == ptr1.mCellRef->mCharge)
-        && (!MWWorld::Class::get(ptr2).hasItemHealth(ptr2) || ptr2.mCellRef->mCharge == -1
-            || MWWorld::Class::get(ptr2).getItemMaxHealth(ptr2) == ptr2.mCellRef->mCharge))
+          && (!MWWorld::Class::get(ptr1).hasItemHealth(ptr1) || ptr1.getCellRef().mCharge == -1
+              || MWWorld::Class::get(ptr1).getItemMaxHealth(ptr1) == ptr1.getCellRef().mCharge)
+        && (!MWWorld::Class::get(ptr2).hasItemHealth(ptr2) || ptr2.getCellRef().mCharge == -1
+            || MWWorld::Class::get(ptr2).getItemMaxHealth(ptr2) == ptr2.getCellRef().mCharge))
         return true;
 
     return false;
@@ -91,7 +91,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr
             cell = 0; // Items in player's inventory have cell set to 0, so their scripts will never be removed
            
             // Set OnPCAdd special variable, if it is declared 
-            item.mRefData->getLocals().setVarByInt(script, "onpcadd", 1);
+            item.getRefData().getLocals().setVarByInt(script, "onpcadd", 1);
         }
         else
             cell = player.getCell();

@@ -18,44 +18,40 @@ namespace MWWorld
             typedef MWWorld::CellStore CellStore;
             ///< \deprecated
 
-            MWWorld::LiveCellRefBase *mPtr;
-            ESM::CellRef *mCellRef;
-            RefData *mRefData;
+            MWWorld::LiveCellRefBase *mRef;
             CellStore *mCell;
             ContainerStore *mContainerStore;
 
         public:
 
-            Ptr() : mPtr (0), mCellRef (0), mRefData (0), mCell (0), mContainerStore (0) {}
+            Ptr() : mRef(0), mCell(0), mContainerStore(0) { }
 
             bool isEmpty() const
             {
-                return mPtr == 0;
+                return mRef == 0;
             }
 
             const std::string& getTypeName() const
             {
-                return mPtr ? mPtr->mTypeName : sEmptyString;
+                return mRef ? mRef->mTypeName : sEmptyString;
             }
 
             Ptr (MWWorld::LiveCellRefBase *liveCellRef, CellStore *cell)
             : mContainerStore (0)
             {
-                mPtr = liveCellRef;
-                mCellRef = &liveCellRef->mRef;
-                mRefData = &liveCellRef->mData;
+                mRef = liveCellRef;
                 mCell = cell;
             }
 
             template<typename T>
             MWWorld::LiveCellRef<T> *get() const
             {
-                if(mPtr && mPtr->mTypeName == typeid(T).name())
-                    return static_cast<MWWorld::LiveCellRef<T>*>(mPtr);
+                if(mRef && mRef->mTypeName == typeid(T).name())
+                    return static_cast<MWWorld::LiveCellRef<T>*>(mRef);
 
                 std::stringstream str;
                 str<< "Bad LiveCellRef cast to "<<typeid(T).name()<<" from ";
-                if(mPtr != 0) str<< mPtr->mTypeName;
+                if(mRef != 0) str<< mRef->mTypeName;
                 else str<< "an empty object";
 
                 throw std::runtime_error(str.str());
@@ -85,7 +81,7 @@ namespace MWWorld
 
     inline bool operator== (const Ptr& left, const Ptr& right)
     {
-        return left.mRefData==right.mRefData;
+        return left.mRef==right.mRef;
     }
 
     inline bool operator!= (const Ptr& left, const Ptr& right)
@@ -95,7 +91,7 @@ namespace MWWorld
 
     inline bool operator< (const Ptr& left, const Ptr& right)
     {
-        return left.mRefData<right.mRefData;
+        return left.mRef<right.mRef;
     }
 
     inline bool operator>= (const Ptr& left, const Ptr& right)

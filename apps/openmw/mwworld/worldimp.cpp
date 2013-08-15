@@ -1446,7 +1446,7 @@ namespace MWWorld
 
         // Set OnPCDrop Variable on item's script, if it has a script with that variable declared
         if(script != "")
-            item.mRefData->getLocals().setVarByInt(script, "onpcdrop", 1);
+            item.getRefData().getLocals().setVarByInt(script, "onpcdrop", 1);
     }
 
     bool World::placeObject (const Ptr& object, float cursorX, float cursorY)
@@ -1764,7 +1764,7 @@ namespace MWWorld
             (*cellIt)->forEach<ListHandlesFunctor>(functor);
 
             for (std::vector<std::string>::iterator it = functor.mHandles.begin(); it != functor.mHandles.end(); ++it)
-                if (Misc::StringUtils::ciEqual(searchPtrViaHandle(*it).mCellRef->mOwner, npc.getCellRef().mRefID))
+                if (Misc::StringUtils::ciEqual(searchPtrViaHandle(*it).getCellRef().mOwner, npc.getCellRef().mRefID))
                     out.push_back(searchPtrViaHandle(*it));
         }
     }

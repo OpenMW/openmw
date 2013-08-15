@@ -82,6 +82,6 @@ namespace MWWorld
         
         /* Set OnPCEquip Variable on item's script, if the player is equipping it, and it has a script with that variable declared */
         if(equipped && actor == MWBase::Environment::get().getWorld()->getPlayer().getPlayer() && script != "")
-            (object).mRefData->getLocals().setVarByInt(script, "onpcequip", 1);
+            object.getRefData().getLocals().setVarByInt(script, "onpcequip", 1);
     }
 }

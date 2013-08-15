@@ -389,7 +389,7 @@ namespace MWGui
 
                 // Unset OnPCEquip Variable on item's script, if it has a script with that variable declared
                 if(script != "")
-                    (*it).mRefData->getLocals().setVarByInt(script, "onpcequip", 0);
+                    (*it).getRefData().getLocals().setVarByInt(script, "onpcequip", 0);
 
                 return;
             }

@@ -9,22 +9,22 @@ const std::string MWWorld::Ptr::sEmptyString;
 
 ESM::CellRef& MWWorld::Ptr::getCellRef() const
 {
-    assert (mCellRef);
+    assert(mRef);
 
     if (mContainerStore)
         mContainerStore->flagAsModified();
 
-    return *mCellRef;
+    return mRef->mRef;
 }
 
 MWWorld::RefData& MWWorld::Ptr::getRefData() const
 {
-    assert (mRefData);
+    assert(mRef);
 
     if (mContainerStore)
         mContainerStore->flagAsModified();
 
-    return *mRefData;
+    return mRef->mData;
 }
 
 void MWWorld::Ptr::setContainerStore (ContainerStore *store)
