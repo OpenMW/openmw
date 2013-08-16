@@ -245,9 +245,10 @@ namespace MWWorld
         throw std::runtime_error ("class does not support persistence");
     }
 
-    void Class::registerClass (const std::string& key,  boost::shared_ptr<Class> instance)
+    void Class::registerClass(const std::string& key,  boost::shared_ptr<Class> instance)
     {
-        sClasses.insert (std::make_pair (key, instance));
+        instance->mTypeName = key;
+        sClasses.insert(std::make_pair(key, instance));
     }
 
     std::string Class::getUpSoundId (const Ptr& ptr) const

@@ -4,7 +4,22 @@
 #include <cassert>
 
 #include "containerstore.hpp"
+#include "class.hpp"
 
+
+/* This shouldn't really be here. */
+MWWorld::LiveCellRefBase::LiveCellRefBase(std::string type, const ESM::CellRef &cref)
+  : mClass(&Class::get(type)), mRef(cref), mData(mRef)
+{
+}
+
+
+const std::string& MWWorld::Ptr::getTypeName() const
+{
+    if(mRef != 0)
+        return mRef->mClass->getTypeName();
+    throw std::runtime_error("Can't get type name from an empty object.");
+}
 
 ESM::CellRef& MWWorld::Ptr::getCellRef() const
 {
