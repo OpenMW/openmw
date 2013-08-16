@@ -50,6 +50,8 @@ namespace MWWorld
     {
             static std::map<std::string, boost::shared_ptr<Class> > sClasses;
 
+            std::string mTypeName;
+
             // not implemented
             Class (const Class&);
             Class& operator= (const Class&);
@@ -72,6 +74,10 @@ namespace MWWorld
             };
 
             virtual ~Class();
+
+            const std::string& getTypeName() const {
+                return mTypeName;
+            }
 
             virtual std::string getId (const Ptr& ptr) const;
             ///< Return ID of \a ptr or throw an exception, if class does not support ID retrieval
@@ -292,7 +298,7 @@ namespace MWWorld
 
             static const Class& get (const Ptr& ptr)
             {
-                return get(ptr.getTypeName());
+                return ptr.getClass();
             }
             ///< If there is no class for this pointer, an exception is thrown.
 

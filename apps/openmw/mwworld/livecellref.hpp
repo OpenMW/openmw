@@ -11,11 +11,12 @@ namespace MWWorld
 {
     class Ptr;
     class ESMStore;
+    class Class;
 
     /// Used to create pointers to hold any type of LiveCellRef<> object.
     struct LiveCellRefBase
     {
-        std::string mTypeName;
+        const Class *mClass;
 
         /** Information about this instance, such as 3D location and rotation
          * and individual type-dependent data.
@@ -25,9 +26,7 @@ namespace MWWorld
         /** runtime-data */
         RefData mData;
 
-        LiveCellRefBase(std::string type, const ESM::CellRef &cref=ESM::CellRef())
-          : mTypeName(type), mRef(cref), mData(mRef)
-        { }
+        LiveCellRefBase(std::string type, const ESM::CellRef &cref=ESM::CellRef());
         /* Need this for the class to be recognized as polymorphic */
         virtual ~LiveCellRefBase() { }
     };

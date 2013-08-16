@@ -32,11 +32,13 @@ namespace MWWorld
                 return mRef == 0;
             }
 
-            const std::string& getTypeName() const
+            const std::string& getTypeName() const;
+
+            const Class& getClass() const
             {
                 if(mRef != 0)
-                    return mRef->mTypeName;
-                throw std::runtime_error("Can't get type name from an empty object.");
+                    return *(mRef->mClass);
+                throw std::runtime_error("Cannot get class of an empty object");
             }
 
             template<typename T>
@@ -47,7 +49,7 @@ namespace MWWorld
 
                 std::stringstream str;
                 str<< "Bad LiveCellRef cast to "<<typeid(T).name()<<" from ";
-                if(mRef != 0) str<< mRef->mTypeName;
+                if(mRef != 0) str<< getTypeName();
                 else str<< "an empty object";
 
                 throw std::runtime_error(str.str());
