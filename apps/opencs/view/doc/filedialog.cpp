@@ -42,7 +42,7 @@ FileDialog::FileDialog(QWidget *parent) :
     unsigned int height = checkBox.sizeHint().height() + 4;
 
     masterView->setModel(mMastersProxyModel);
-
+/*
     mastersTable->setModel(mMastersProxyModel);
     mastersTable->setObjectName("MastersTable");
     mastersTable->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -57,7 +57,7 @@ FileDialog::FileDialog(QWidget *parent) :
     mastersTable->verticalHeader()->setDefaultSectionSize(height);
     mastersTable->verticalHeader()->setResizeMode(QHeaderView::Fixed);
     mastersTable->verticalHeader()->hide();
-
+*/
     pluginsTable->setModel(mFilterProxyModel);
     pluginsTable->setObjectName("PluginsTable");
     pluginsTable->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -116,7 +116,7 @@ FileDialog::FileDialog(QWidget *parent) :
     //connect(filterLineEdit, SIGNAL(textChanged(QString)), this, SLOT(filterChanged(QString)));
 
     connect(pluginsTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckState(QModelIndex)));
-    connect(mastersTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckState(QModelIndex)));
+    //connect(mastersTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckState(QModelIndex)));
 
     connect(mCreateButton, SIGNAL(clicked()), this, SLOT(createButtonClicked()));
 
@@ -127,6 +127,7 @@ FileDialog::FileDialog(QWidget *parent) :
 void FileDialog::updateViews()
 {
     // Ensure the columns are hidden because sort() re-enables them
+    /*
     mastersTable->setColumnHidden(1, true);
     mastersTable->setColumnHidden(3, true);
     mastersTable->setColumnHidden(4, true);
@@ -135,7 +136,7 @@ void FileDialog::updateViews()
     mastersTable->setColumnHidden(7, true);
     mastersTable->setColumnHidden(8, true);
     mastersTable->resizeColumnsToContents();
-
+*/
     pluginsTable->setColumnHidden(1, true);
     pluginsTable->setColumnHidden(3, true);
     pluginsTable->setColumnHidden(4, true);

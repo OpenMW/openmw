@@ -47,7 +47,7 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
 
     QCheckBox checkBox;
     unsigned int height = checkBox.sizeHint().height() + 4;
-
+/*
     mastersTable->setModel(mMastersProxyModel);
     mastersTable->setObjectName("MastersTable");
     mastersTable->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -63,7 +63,7 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
     mastersTable->verticalHeader()->setDefaultSectionSize(height);
     mastersTable->verticalHeader()->setResizeMode(QHeaderView::Fixed);
     mastersTable->verticalHeader()->hide();
-
+*/
     pluginsTable->setModel(mFilterProxyModel);
     pluginsTable->setObjectName("PluginsTable");
     pluginsTable->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -94,10 +94,10 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
     connect(mNewProfileDialog->lineEdit(), SIGNAL(textChanged(QString)), this, SLOT(updateOkButton(QString)));
 
     connect(pluginsTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckState(QModelIndex)));
-    connect(mastersTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckState(QModelIndex)));
+    //connect(mastersTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckState(QModelIndex)));
 
     connect(pluginsTable, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
-    connect(mastersTable, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
+    //connect(mastersTable, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
 
     connect(mDataFilesModel, SIGNAL(layoutChanged()), this, SLOT(updateViews()));
 
@@ -255,6 +255,7 @@ void DataFilesPage::updateSplitter()
 void DataFilesPage::updateViews()
 {
     // Ensure the columns are hidden because sort() re-enables them
+    /*
     mastersTable->setColumnHidden(1, true);
     mastersTable->setColumnHidden(2, true);
     mastersTable->setColumnHidden(3, true);
@@ -263,7 +264,7 @@ void DataFilesPage::updateViews()
     mastersTable->setColumnHidden(6, true);
     mastersTable->setColumnHidden(7, true);
     mastersTable->setColumnHidden(8, true);
-
+*/
     pluginsTable->setColumnHidden(1, true);
     pluginsTable->setColumnHidden(2, true);
     pluginsTable->setColumnHidden(3, true);
@@ -335,8 +336,8 @@ void DataFilesPage::on_checkAction_triggered()
     if (pluginsTable->hasFocus())
         setPluginsCheckstates(Qt::Checked);
 
-    if (mastersTable->hasFocus())
-        setMastersCheckstates(Qt::Checked);
+    //if (mastersTable->hasFocus())
+    //    setMastersCheckstates(Qt::Checked);
 
 }
 
@@ -345,17 +346,17 @@ void DataFilesPage::on_uncheckAction_triggered()
     if (pluginsTable->hasFocus())
         setPluginsCheckstates(Qt::Unchecked);
 
-    if (mastersTable->hasFocus())
-        setMastersCheckstates(Qt::Unchecked);
+    //if (mastersTable->hasFocus())
+    //    setMastersCheckstates(Qt::Unchecked);
 }
 
 void DataFilesPage::setMastersCheckstates(Qt::CheckState state)
-{
-    if (!mastersTable->selectionModel()->hasSelection()) {
-        return;
-    }
+{/*
+    //if (!mastersTable->selectionModel()->hasSelection()) {
+    //    return;
+    //}
 
-    QModelIndexList indexes = mastersTable->selectionModel()->selectedIndexes();
+    //QModelIndexList indexes = mastersTable->selectionModel()->selectedIndexes();
 
     foreach (const QModelIndex &index, indexes)
     {
@@ -368,7 +369,7 @@ void DataFilesPage::setMastersCheckstates(Qt::CheckState state)
             return;
 
         mDataFilesModel->setCheckState(sourceIndex, state);
-    }
+    }*/
 }
 
 void DataFilesPage::setPluginsCheckstates(Qt::CheckState state)
@@ -519,7 +520,7 @@ void DataFilesPage::showContextMenu(const QPoint &point)
         // Show menu
         mContextMenu->exec(globalPos);
     }
-
+/*
     if (object->objectName() == QLatin1String("MastersTable")) {
         if (!mastersTable->selectionModel()->hasSelection())
             return;
@@ -548,4 +549,5 @@ void DataFilesPage::showContextMenu(const QPoint &point)
 
         mContextMenu->exec(globalPos);
     }
+    */
 }

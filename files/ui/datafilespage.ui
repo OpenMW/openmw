@@ -36,7 +36,6 @@
      <property name="childrenCollapsible">
       <bool>false</bool>
      </property>
-     <widget class="QTableView" name="mastersTable"/>
      <widget class="QTableView" name="pluginsTable"/>
     </widget>
    </item>
