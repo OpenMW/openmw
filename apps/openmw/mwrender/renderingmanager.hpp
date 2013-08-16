@@ -2,7 +2,6 @@
 #define _GAME_RENDERING_MANAGER_H
 
 #include "sky.hpp"
-#include "terrain.hpp"
 #include "debugging.hpp"
 
 #include <openengine/ogre/fader.hpp>
@@ -37,6 +36,11 @@ namespace MWWorld
 namespace sh
 {
     class Factory;
+}
+
+namespace Terrain
+{
+    class Terrain;
 }
 
 namespace MWRender
@@ -228,7 +232,7 @@ private:
 
     OcclusionQuery* mOcclusionQuery;
 
-    TerrainManager* mTerrainManager;
+    Terrain::Terrain* mTerrain;
 
     MWRender::Water *mWater;
 

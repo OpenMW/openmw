@@ -1,5 +1,7 @@
 #include "worldimp.hpp"
 
+#include <OgreSceneNode.h>
+
 #include <libs/openengine/bullet/physic.hpp>
 
 #include <components/bsa/bsa_archive.hpp>
@@ -833,7 +835,7 @@ namespace MWWorld
         bool isPlayer = ptr == mPlayer->getPlayer();
         bool haveToMove = isPlayer || mWorldScene->isCellActive(*currCell);
 
-        if (*currCell != newCell)
+        if (false ) //*currCell != newCell)
         {
             removeContainerScripts(ptr);
 
@@ -1024,7 +1026,7 @@ namespace MWWorld
             return;
         }
 
-        float terrainHeight = mRendering->getTerrainHeightAt(pos);
+        float terrainHeight = -std::numeric_limits<float>().max();// mRendering->getTerrainHeightAt(pos);
 
         if (pos.z < terrainHeight)
             pos.z = terrainHeight;

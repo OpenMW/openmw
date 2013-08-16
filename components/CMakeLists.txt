@@ -65,6 +65,10 @@ add_component_dir (interpreter
 add_component_dir (translation
     translation
     )
+    
+add_component_dir (terrain
+    quadtreenode chunk terrain storage material
+    )
 
 find_package(Qt4 COMPONENTS QtCore QtGui)
 

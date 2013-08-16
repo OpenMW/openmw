@@ -85,6 +85,7 @@ namespace MWWorld
         std::cout << "Unloading cell\n";
         ListAndResetHandles functor;
 
+        /*
         (*iter)->forEach<ListAndResetHandles>(functor);
         {
             // silence annoying g++ warning
@@ -95,6 +96,7 @@ namespace MWWorld
                 mPhysics->removeObject (node->getName());
             }
         }
+        */
 
         if ((*iter)->mCell->isExterior())
         {
@@ -148,7 +150,7 @@ namespace MWWorld
 
             // ... then references. This is important for adjustPosition to work correctly.
             /// \todo rescale depending on the state of a new GMST
-            insertCell (*cell, true);
+            //insertCell (*cell, true);
 
             mRendering.cellAdded (cell);
 

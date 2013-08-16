@@ -108,7 +108,6 @@ void Shadows::recreate()
     int visibilityMask = RV_Actors * Settings::Manager::getBool("actor shadows", "Shadows")
                             + (RV_Statics + RV_StaticsSmall) * Settings::Manager::getBool("statics shadows", "Shadows")
                             + RV_Misc * Settings::Manager::getBool("misc shadows", "Shadows");
-
     for (int i = 0; i < (split ? 3 : 1); ++i)
     {
         TexturePtr shadowTexture = mSceneMgr->getShadowTexture(i);

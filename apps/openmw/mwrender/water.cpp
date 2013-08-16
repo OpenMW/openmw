@@ -202,7 +202,10 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend) :
 
     mWaterPlane = Plane(Vector3::UNIT_Z, 0);
 
-    MeshManager::getSingleton().createPlane("water", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,  mWaterPlane, CELL_SIZE*5, CELL_SIZE * 5, 10, 10, true, 1, 3,3, Vector3::UNIT_Y);
+    int waterScale = 300;
+
+    MeshManager::getSingleton().createPlane("water", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, mWaterPlane,
+        CELL_SIZE*5*waterScale, CELL_SIZE*5*waterScale, 10, 10, true, 1, 3*waterScale,3*waterScale, Vector3::UNIT_Y);
 
     mWater = mSceneMgr->createEntity("water");
     mWater->setVisibilityFlags(RV_Water);

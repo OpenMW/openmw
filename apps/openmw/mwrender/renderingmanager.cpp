@@ -25,6 +25,8 @@
 
 #include <components/esm/loadstat.hpp>
 #include <components/settings/settings.hpp>
+#include <components/terrain/terrain.hpp>
+
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"
 
@@ -46,6 +48,7 @@
 #include "externalrendering.hpp"
 #include "globalmap.hpp"
 #include "videoplayer.hpp"
+#include "terrainstorage.hpp"
 
 using namespace MWRender;
 using namespace Ogre;
@@ -63,6 +66,7 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
     , mAmbientMode(0)
     , mSunEnabled(0)
     , mPhysicsEngine(engine)
+    , mTerrain(NULL)
 {
     // select best shader mode
     bool openGL = (Ogre::Root::getSingleton ().getRenderSystem ()->getName().find("OpenGL") != std::string::npos);
@@ -78,7 +82,7 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
         Settings::Manager::setString("shader mode", "General", openGL ? (glES ? "glsles" : "glsl") : "hlsl");
     }
 
-    mRendering.createScene("PlayerCam", Settings::Manager::getFloat("field of view", "General"), 5);
+    mRendering.createScene("PlayerCam", Settings::Manager::getFloat("field of view", "General"), 50);
 
     mRendering.getWindow()->addListener(this);
     mRendering.setWindowListener(this);
@@ -166,8 +170,6 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
 
     mShadows = new Shadows(&mRendering);
 
-    mTerrainManager = new TerrainManager(mRendering.getScene(), this);
-
     mSkyManager = new SkyManager(mRootNode, mRendering.getCamera());
 
     mOcclusionQuery = new OcclusionQuery(&mRendering, mSkyManager->getSunNode());
@@ -194,7 +196,7 @@ RenderingManager::~RenderingManager ()
     delete mSkyManager;
     delete mDebugging;
     delete mShadows;
-    delete mTerrainManager;
+    delete mTerrain;
     delete mLocalMap;
     delete mOcclusionQuery;
     delete mCompositors;
@@ -225,8 +227,6 @@ void RenderingManager::removeCell (MWWorld::Ptr::CellStore *store)
     mObjects.removeCell(store);
     mActors.removeCell(store);
     mDebugging->cellRemoved(store);
-    if (store->mCell->isExterior())
-      mTerrainManager->cellRemoved(store);
 }
 
 void RenderingManager::removeWater ()
@@ -244,8 +244,14 @@ void RenderingManager::cellAdded (MWWorld::Ptr::CellStore *store)
     mObjects.buildStaticGeometry (*store);
     sh::Factory::getInstance().unloadUnreferencedMaterials();
     mDebugging->cellAdded(store);
-    if (store->mCell->isExterior())
-        mTerrainManager->cellAdded(store);
+    if (store->isExterior())
+    {
+        if (!mTerrain)
+        {
+            mTerrain = new Terrain::Terrain(mRendering.getScene(), new MWRender::TerrainStorage(), RV_Terrain);
+            mTerrain->update(mRendering.getCamera());
+        }
+    }
     waterAdded(store);
 }
 
@@ -550,7 +556,8 @@ void RenderingManager::setAmbientMode()
 
 float RenderingManager::getTerrainHeightAt(Ogre::Vector3 worldPos)
 {
-    return mTerrainManager->getTerrainHeightAt(worldPos);
+    assert(mTerrain);
+    return mTerrain->getHeightAt(worldPos);
 }
 
 
@@ -595,7 +602,6 @@ void RenderingManager::setSunColour(const Ogre::ColourValue& colour)
     if (!mSunEnabled) return;
     mSun->setDiffuseColour(colour);
     mSun->setSpecularColour(colour);
-    mTerrainManager->setDiffuse(colour);
 }
 
 void RenderingManager::setAmbientColour(const Ogre::ColourValue& colour)
@@ -608,7 +614,6 @@ void RenderingManager::setAmbientColour(const Ogre::ColourValue& colour)
     final += Ogre::ColourValue(0.7,0.7,0.7,0) * std::min(1.f, (nightEye/100.f));
 
     mRendering.getScene()->setAmbientLight(final);
-    mTerrainManager->setAmbient(final);
 }
 
 void RenderingManager::sunEnable(bool real)
@@ -652,7 +657,12 @@ void RenderingManager::setGlare(bool glare)
 void RenderingManager::requestMap(MWWorld::Ptr::CellStore* cell)
 {
     if (cell->mCell->isExterior())
-        mLocalMap->requestMap(cell);
+    {
+        Ogre::AxisAlignedBox dims = mObjects.getDimensions(cell);
+        Ogre::Vector2 center(cell->mCell->getGridX() + 0.5, -cell->mCell->getGridY() + 1 - 0.5);
+        dims.merge(mTerrain->getWorldBoundingBox(center));
+        mLocalMap->requestMap(cell, dims.getMinimum().z, dims.getMaximum().z);
+    }
     else
         mLocalMap->requestMap(cell, mObjects.getDimensions(cell));
 }
@@ -984,6 +994,9 @@ void RenderingManager::updateWaterRippleEmitterPtr (const MWWorld::Ptr& old, con
 
 void RenderingManager::frameStarted(float dt)
 {
+    if (mTerrain)
+        mTerrain->update(mRendering.getCamera());
+
     mWater->frameStarted(dt);
 }
 

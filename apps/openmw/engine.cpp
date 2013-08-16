@@ -91,12 +91,12 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
             MWBase::Environment::get().getSoundManager()->update(frametime);
 
         // global scripts
-        MWBase::Environment::get().getScriptManager()->getGlobalScripts().run();
+        //MWBase::Environment::get().getScriptManager()->getGlobalScripts().run();
 
         bool changed = MWBase::Environment::get().getWorld()->hasCellChanged();
 
         // local scripts
-        executeLocalScripts(); // This does not handle the case where a global script causes a cell
+        //executeLocalScripts(); // This does not handle the case where a global script causes a cell
                                // change, followed by a cell change in a local script during the same
                                // frame.
 
