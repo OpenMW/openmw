@@ -41,6 +41,26 @@ namespace
 
         return sum;
     }
+
+    template<typename T>
+    MWWorld::Ptr searchId (MWWorld::CellRefList<T>& list, const std::string& id,
+        MWWorld::ContainerStore *store)
+    {
+        std::string id2 = Misc::StringUtils::lowerCase (id);
+
+        for (typename MWWorld::CellRefList<T>::List::iterator iter (list.mList.begin());
+             iter!=list.mList.end(); ++iter)
+        {
+            if (Misc::StringUtils::lowerCase (iter->mBase->mId)==id2)
+            {
+                MWWorld::Ptr ptr (&*iter, 0);
+                ptr.setContainerStore (store);
+                return ptr;
+            }
+        }
+
+        return MWWorld::Ptr();
+    }
 }
 
 MWWorld::ContainerStore::ContainerStore() : mStateId (0), mCachedWeight (0), mWeightUpToDate (false) {}
@@ -350,17 +370,75 @@ int MWWorld::ContainerStore::getType (const Ptr& ptr)
 
 MWWorld::Ptr MWWorld::ContainerStore::search (const std::string& id)
 {
-    /// \todo Since we have direct access to the CellRefList here, the performance of this function
-    /// could be improved notably by iterating directly over the CellRefLists instead of using
-    /// a ContainerStoreIterator.
-
-    std::string id2 = Misc::StringUtils::lowerCase (id);
-
-    for (ContainerStoreIterator iter (this); iter!=end(); ++iter)
     {
-        Ptr ptr = *iter;
+        Ptr ptr = searchId (potions, id, this);
+        if (!ptr.isEmpty())
+            return ptr;
+    }
 
-        if (Misc::StringUtils::lowerCase (Class::get (ptr).getId (ptr))==id2)
+    {
+        Ptr ptr = searchId (appas, id, this);
+        if (!ptr.isEmpty())
+            return ptr;
+    }
+
+    {
+        Ptr ptr = searchId (armors, id, this);
+        if (!ptr.isEmpty())
+            return ptr;
+    }
+
+    {
+        Ptr ptr = searchId (books, id, this);
+        if (!ptr.isEmpty())
+            return ptr;
+    }
+
+    {
+        Ptr ptr = searchId (clothes, id, this);
+        if (!ptr.isEmpty())
+            return ptr;
+    }
+
+    {
+        Ptr ptr = searchId (ingreds, id, this);
+        if (!ptr.isEmpty())
+            return ptr;
+    }
+
+    {
+        Ptr ptr = searchId (lights, id, this);
+        if (!ptr.isEmpty())
+            return ptr;
+    }
+
+    {
+        Ptr ptr = searchId (lockpicks, id, this);
+        if (!ptr.isEmpty())
+            return ptr;
+    }
+
+    {
+        Ptr ptr = searchId (miscItems, id, this);
+        if (!ptr.isEmpty())
+            return ptr;
+    }
+
+    {
+        Ptr ptr = searchId (probes, id, this);
+        if (!ptr.isEmpty())
+            return ptr;
+    }
+
+    {
+        Ptr ptr = searchId (repairs, id, this);
+        if (!ptr.isEmpty())
+            return ptr;
+    }
+
+    {
+        Ptr ptr = searchId (weapons, id, this);
+        if (!ptr.isEmpty())
             return ptr;
     }
 

@@ -460,6 +460,12 @@ namespace MWWorld
             return mPlayer->getPlayer();
         }
 
+        Ptr ptr = Class::get (mPlayer->getPlayer()).
+            getContainerStore (mPlayer->getPlayer()).search (name);
+
+        if (!ptr.isEmpty())
+            return ptr;
+
         // active cells
         for (Scene::CellStoreCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
             iter!=mWorldScene->getActiveCells().end(); ++iter)
