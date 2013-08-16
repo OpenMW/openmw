@@ -32,12 +32,14 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
     mDataFilesModel = new DataFilesModel(this);
 
     mMastersProxyModel = new QSortFilterProxyModel();
-    mMastersProxyModel->setFilterRegExp(QString("^.*\\.esm"));
+    mMastersProxyModel->setFilterRegExp(QString("game")); //QString("^.*\\.esm"));
+    mMastersProxyModel->setFilterRole (Qt::UserRole);
     mMastersProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
     mMastersProxyModel->setSourceModel(mDataFilesModel);
 
     mPluginsProxyModel = new PluginsProxyModel();
-    mPluginsProxyModel->setFilterRegExp(QString("^.*\\.esp"));
+    mPluginsProxyModel->setFilterRegExp(QString("addon")); //^.*\\.esp"));
+    mPluginsProxyModel->setFilterRole (Qt::UserRole);
     mPluginsProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
     mPluginsProxyModel->setSourceModel(mDataFilesModel);
 

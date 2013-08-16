@@ -202,11 +202,11 @@ QVariant DataFilesModel::headerData(int section, Qt::Orientation orientation, in
         case 7: return tr("Masters");
         case 8: return tr("Description");
         }
-    } else {
+    } /* else {
         // Show row numbers
         return ++section;
     }
-
+*/
     return QVariant();
 }
 
