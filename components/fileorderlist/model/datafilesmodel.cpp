@@ -144,6 +144,15 @@ QVariant DataFilesModel::data(const QModelIndex &index, int role) const
         return tooltip;
 
     }
+
+    case Qt::UserRole:
+    {
+        if (file->masters().size() == 0)
+            return "game";
+        else
+            return "addon";
+    }
+
     default:
         return QVariant();
     }

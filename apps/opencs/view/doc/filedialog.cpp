@@ -25,13 +25,13 @@ FileDialog::FileDialog(QWidget *parent) :
     mDataFilesModel = new DataFilesModel(this);
 
     mMastersProxyModel = new QSortFilterProxyModel();
-    mMastersProxyModel->setFilterRegExp(QString("^.*\\.esm"));
-    mMastersProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    mMastersProxyModel->setFilterRegExp("game"); //QString("^.*\\.esm"));
+    mMastersProxyModel->setFilterRole (Qt::UserRole);
     mMastersProxyModel->setSourceModel(mDataFilesModel);
 
     mPluginsProxyModel = new PluginsProxyModel();
-    mPluginsProxyModel->setFilterRegExp(QString("^.*\\.esp"));
-    mPluginsProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    mPluginsProxyModel->setFilterRegExp("addon"); //QString("^.*\\.esp"));
+    mPluginsProxyModel->setFilterRole (Qt::UserRole);
     mPluginsProxyModel->setSourceModel(mDataFilesModel);
 
     mFilterProxyModel = new QSortFilterProxyModel();
