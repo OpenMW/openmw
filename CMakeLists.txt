@@ -334,12 +334,18 @@ IF(NOT WIN32 AND NOT APPLE)
     IF (DPKG_PROGRAM)
         ## Debian specific
         SET(CMAKE_INSTALL_PREFIX "/usr")
+        SET(DATAROOTDIR "share" CACHE PATH "Sets the root of data directories to a non-default location")
+        SET(DATADIR "share/games/openmw" CACHE PATH "Sets the openmw data directories to a non-default location")
+        SET(ICONDIR "share/pixmaps" CACHE PATH "Set icon dir")
         SET(SYSCONFDIR "../etc/openmw" CACHE PATH "Set config dir")
     ELSE ()
         ## Non debian specific
         SET(SYSCONFDIR "/etc/openmw" CACHE PATH "Set config dir")
         SET(BINDIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH "Where to install binaries")
-        SET(LICDIR "${CMAKE_INSTALL_PREFIX}/share/licenses/openmw" CACHE PATH "Sets the openmw license directory to a non-default location.")
+        SET(DATAROOTDIR "${CMAKE_INSTALL_PREFIX}/share" CACHE PATH "Sets the root of data directories to a non-default location")
+        SET(DATADIR "${DATAROOTDIR}/games/openmw" CACHE PATH "Sets the openmw data directories to a non-default location")
+        SET(ICONDIR "${DATAROOTDIR}/pixmaps" CACHE PATH "Set icon dir")
+        SET(LICDIR "${DATAROOTDIR}/licenses/openmw" CACHE PATH "Sets the openmw license directory to a non-default location.")
 
         # Install binaries
         INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/openmw" DESTINATION "${BINDIR}" )
@@ -367,11 +373,11 @@ IF(NOT WIN32 AND NOT APPLE)
     ENDIF (DPKG_PROGRAM)
 
     # Install icon and desktop file
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.desktop" DESTINATION "share/applications/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
-    INSTALL(FILES "${OpenMW_SOURCE_DIR}/files/launcher/images/openmw.png" DESTINATION "share/pixmaps/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.desktop" DESTINATION "${DATAROOTDIR}/applications/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
+    INSTALL(FILES "${OpenMW_SOURCE_DIR}/files/launcher/images/openmw.png" DESTINATION "${ICONDIR}/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
     IF(BUILD_OPENCS)
-        INSTALL(FILES "${OpenMW_BINARY_DIR}/opencs.desktop" DESTINATION "share/applications/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "opencs")
-        INSTALL(FILES "${OpenMW_SOURCE_DIR}/files/opencs/opencs.png" DESTINATION "share/pixmaps/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "opencs")
+        INSTALL(FILES "${OpenMW_BINARY_DIR}/opencs.desktop" DESTINATION "${DATAROOTDIR}/applications/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "opencs")
+        INSTALL(FILES "${OpenMW_SOURCE_DIR}/files/opencs/opencs.png" DESTINATION "${ICONDIR}/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "opencs")
     ENDIF(BUILD_OPENCS)
 
     # Install global configuration files
@@ -383,8 +389,8 @@ IF(NOT WIN32 AND NOT APPLE)
     ENDIF(BUILD_OPENCS)
 
     # Install resources
-    INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION "share/games/openmw/" FILE_PERMISSIONS OWNER_READ GROUP_READ WORLD_READ COMPONENT "Resources")
-    INSTALL(DIRECTORY DESTINATION "share/games/openmw/data/" COMPONENT "Resources")
+    INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION "${DATADIR}/" FILE_PERMISSIONS OWNER_READ GROUP_READ WORLD_READ COMPONENT "Resources")
+    INSTALL(DIRECTORY DESTINATION "${DATADIR}/data/" COMPONENT "Resources")
 
     IF (DPKG_PROGRAM)
         ## Debian Specific
