@@ -1,7 +1,7 @@
 #ifndef CSM_FILTER_UNARIYNODE_H
 #define CSM_FILTER_UNARIYNODE_H
 
-#include <memory>
+#include <boost/shared_ptr.hpp>
 
 #include "node.hpp"
 
@@ -9,11 +9,11 @@ namespace CSMFilter
 {
     class UnaryNode : public Node
     {
-            std::auto_ptr<Node> mChild;
+            boost::shared_ptr<Node> mChild;
 
         public:
 
-            UnaryNode (std::auto_ptr<Node> child);
+            UnaryNode (boost::shared_ptr<Node> child);
 
             const Node& getChild() const;
 

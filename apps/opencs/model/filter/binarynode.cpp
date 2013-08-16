@@ -1,7 +1,7 @@
 
 #include "binarynode.hpp"
 
-CSMFilter::BinaryNode::BinaryNode (std::auto_ptr<Node> left, std::auto_ptr<Node> right)
+CSMFilter::BinaryNode::BinaryNode (boost::shared_ptr<Node> left, boost::shared_ptr<Node> right)
 : mLeft (left), mRight (right)
 {}
 

@@ -1,7 +1,7 @@
 #ifndef CSM_FILTER_BINARYNODE_H
 #define CSM_FILTER_BINARYNODE_H
 
-#include <memory>
+#include <boost/shared_ptr.hpp>
 
 #include "node.hpp"
 
@@ -9,12 +9,12 @@ namespace CSMFilter
 {
     class BinaryNode : public Node
     {
-            std::auto_ptr<Node> mLeft;
-            std::auto_ptr<Node> mRight;
+            boost::shared_ptr<Node> mLeft;
+            boost::shared_ptr<Node> mRight;
 
         public:
 
-            BinaryNode (std::auto_ptr<Node> left, std::auto_ptr<Node> right);
+            BinaryNode (boost::shared_ptr<Node> left, boost::shared_ptr<Node> right);
 
             const Node& getLeft() const;
 
