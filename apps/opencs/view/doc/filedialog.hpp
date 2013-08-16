@@ -51,7 +51,7 @@ private slots:
 
 private:
     QLabel *mNameLabel;
-    LineEdit *mNameLineEdit;
+    //LineEdit *mNameLineEdit;
 
     QPushButton *mCreateButton;
     QDialogButtonBox *mButtonBox;

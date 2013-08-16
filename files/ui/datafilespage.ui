@@ -14,27 +14,11 @@
    <item>
     <layout class="QHBoxLayout" name="filterLayout">
      <item>
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QLabel" name="filterLabel">
-       <property name="text">
-        <string>Filter:</string>
+      <widget class="ProfilesComboBox" name="masterView">
+       <property name="editable">
+        <bool>false</bool>
        </property>
       </widget>
-     </item>
-     <item>
-      <widget class="LineEdit" name="filterLineEdit"/>
      </item>
     </layout>
    </item>
@@ -151,11 +135,6 @@
   </action>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>LineEdit</class>
-   <extends>QLineEdit</extends>
-   <header location="global">components/fileorderlist/utils/lineedit.hpp</header>
-  </customwidget>
   <customwidget>
    <class>ProfilesComboBox</class>
    <extends>QComboBox</extends>

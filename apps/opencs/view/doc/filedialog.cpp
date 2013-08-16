@@ -41,6 +41,8 @@ FileDialog::FileDialog(QWidget *parent) :
     QCheckBox checkBox;
     unsigned int height = checkBox.sizeHint().height() + 4;
 
+    masterView->setModel(mMastersProxyModel);
+
     mastersTable->setModel(mMastersProxyModel);
     mastersTable->setObjectName("MastersTable");
     mastersTable->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -83,12 +85,12 @@ FileDialog::FileDialog(QWidget *parent) :
     mNameLabel = new QLabel(tr("File Name:"), this);
 
     QRegExpValidator *validator = new QRegExpValidator(QRegExp("^[a-zA-Z0-9\\s]*$"));
-    mNameLineEdit = new LineEdit(this);
-    mNameLineEdit->setValidator(validator);
+    //mNameLineEdit = new LineEdit(this);
+    //mNameLineEdit->setValidator(validator);
 
     nameLayout->addSpacerItem(spacer);
     nameLayout->addWidget(mNameLabel);
-    nameLayout->addWidget(mNameLineEdit);
+    //nameLayout->addWidget(mNameLineEdit);
 
     mButtonBox = new QDialogButtonBox(this);
 
@@ -109,9 +111,9 @@ FileDialog::FileDialog(QWidget *parent) :
 
     connect(mDataFilesModel, SIGNAL(layoutChanged()), this, SLOT(updateViews()));
     connect(mDataFilesModel, SIGNAL(checkedItemsChanged(QStringList)), this, SLOT(updateOpenButton(QStringList)));
-    connect(mNameLineEdit, SIGNAL(textChanged(QString)), this, SLOT(updateCreateButton(QString)));
+    //connect(mNameLineEdit, SIGNAL(textChanged(QString)), this, SLOT(updateCreateButton(QString)));
 
-    connect(filterLineEdit, SIGNAL(textChanged(QString)), this, SLOT(filterChanged(QString)));
+    //connect(filterLineEdit, SIGNAL(textChanged(QString)), this, SLOT(filterChanged(QString)));
 
     connect(pluginsTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckState(QModelIndex)));
     connect(mastersTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckState(QModelIndex)));
@@ -223,7 +225,7 @@ QStringList FileDialog::checkedItemsPaths()
 
 QString FileDialog::fileName()
 {
-    return mNameLineEdit->text();
+    //return mNameLineEdit->text();
 }
 
 void FileDialog::openFile()
@@ -231,7 +233,7 @@ void FileDialog::openFile()
     setWindowTitle(tr("Open"));
 
     mNameLabel->hide();
-    mNameLineEdit->hide();
+    //mNameLineEdit->hide();
     mCreateButton->hide();
 
     mButtonBox->removeButton(mCreateButton);
@@ -249,8 +251,8 @@ void FileDialog::newFile()
     setWindowTitle(tr("New"));
 
     mNameLabel->show();
-    mNameLineEdit->clear();
-    mNameLineEdit->show();
+    //mNameLineEdit->clear();
+    //mNameLineEdit->show();
     mCreateButton->show();
 
     mButtonBox->setStandardButtons(QDialogButtonBox::Cancel);

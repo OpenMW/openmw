@@ -2,7 +2,7 @@
 #define PROFILESCOMBOBOX_HPP
 
 #include <QComboBox>
-
+#include <QStylePainter>
 class QString;
 class QRegExpValidator;
 
@@ -25,6 +25,9 @@ private slots:
 private:
     QString mOldProfile;
     QRegExpValidator *mValidator;
+
+protected:
+    void paintEvent(QPaintEvent *);
 };
 
 #endif // PROFILESCOMBOBOX_HPP
