@@ -108,7 +108,7 @@ opencs_units_noqt (model/settings
     )
 
 opencs_units_noqt (model/filter
-    node unarynode binarynode leafnode booleannode
+    node unarynode narynode leafnode booleannode
     )
 
 opencs_hdrs_noqt (model/filter

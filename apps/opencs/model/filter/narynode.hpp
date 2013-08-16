@@ -1,5 +1,7 @@
-#ifndef CSM_FILTER_BINARYNODE_H
-#define CSM_FILTER_BINARYNODE_H
+#ifndef CSM_FILTER_NARYNODE_H
+#define CSM_FILTER_NARYNODE_H
+
+#include <vector>
 
 #include <boost/shared_ptr.hpp>
 
@@ -7,22 +9,17 @@
 
 namespace CSMFilter
 {
-    class BinaryNode : public Node
+    class NAryNode : public Node
     {
-            boost::shared_ptr<Node> mLeft;
-            boost::shared_ptr<Node> mRight;
+            std::vector<boost::shared_ptr<Node> > mNodes;
 
         public:
 
-            BinaryNode (boost::shared_ptr<Node> left, boost::shared_ptr<Node> right);
+            NAryNode (const std::vector<boost::shared_ptr<Node> >& nodes);
 
-            const Node& getLeft() const;
+            int getSize() const;
 
-            Node& getLeft();
-
-            const Node& getRight() const;
-
-            Node& getRight();
+            const Node& operator[] (int index) const;
 
             virtual std::vector<std::string> getReferencedFilters() const;
             ///< Return a list of filters that are used by this node (and must be passed as
