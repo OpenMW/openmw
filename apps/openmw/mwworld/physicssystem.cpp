@@ -87,36 +87,25 @@ namespace MWWorld
             const ESM::Position &refpos = ptr.getRefData().getPosition();
             Ogre::Vector3 position(refpos.pos);
 
-            bool hit=false;
-            bool isInterior = !ptr.getCell()->isExterior();
-
             OEngine::Physic::PhysicActor *physicActor = engine->getCharacter(ptr.getRefData().getHandle());
             if (!physicActor)
                 return position;
 
-            bool wasCollisionMode = physicActor->getCollisionMode();
-            physicActor->enableCollisions(false);
+            const int maxHeight = 64.f;
+            Ogre::Vector3 newPosition = position+Ogre::Vector3(0.0f, 0.0f, 4.0f);
 
-            Ogre::Vector3 halfExtents = physicActor->getHalfExtents();
-            halfExtents.z = 1; // we trace the feet only, so we use a very thin box
-
-            Ogre::Vector3 newPosition = position;
-
-            traceResults trace; //no initialization needed
-
-            int maxHeight = 200.f;
-            newtrace(&trace, Ogre::Quaternion::IDENTITY, newPosition, newPosition-Ogre::Vector3(0,0,maxHeight), halfExtents, isInterior, engine);
-            if(trace.fraction < 1.0f)
-                hit = true;
-            newPosition = trace.endpos;
-
-            physicActor->setOnGround(hit && getSlope(trace.planenormal) <= sMaxSlope);
-            if (wasCollisionMode)
-                physicActor->enableCollisions(true);
-
-            if(!hit)
+            traceResults trace;
+            actortrace(&trace, physicActor->getCollisionBody(), newPosition, newPosition-Ogre::Vector3(0,0,maxHeight), engine);
+            if(trace.fraction >= 1.0f)
                 return position;
-            return newPosition+Ogre::Vector3(0,0,4);
+
+            physicActor->setOnGround(getSlope(trace.planenormal) <= sMaxSlope);
+
+            newPosition = trace.endpos;
+            newPosition.z -= physicActor->getHalfExtents().z;
+            newPosition.z += 4.0f;
+
+            return newPosition;
         }
 
         static Ogre::Vector3 move(const MWWorld::Ptr &ptr, const Ogre::Vector3 &movement, float time,
