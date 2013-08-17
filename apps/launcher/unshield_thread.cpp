@@ -473,3 +473,10 @@ void UnshieldThread::run()
     extract();
     emit close();
 }
+
+UnshieldThread::UnshieldThread()
+{
+    mMorrowindDone = false;
+    mTribunalDone = false;
+    mBloodmoonDone = false;
+}

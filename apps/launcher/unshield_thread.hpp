@@ -28,6 +28,8 @@ class UnshieldThread : public QThread
 
         std::string GetMWEsmPath();
 
+        UnshieldThread();
+
     private:
 
         void extract_cab(const boost::filesystem::path& cab, const boost::filesystem::path& output_dir, bool extract_ini = false);
@@ -37,9 +39,9 @@ class UnshieldThread : public QThread
         boost::filesystem::path mTribunalPath;
         boost::filesystem::path mBloodmoonPath;
 
-        bool mMorrowindDone = false;
-        bool mTribunalDone = false;
-        bool mBloodmoonDone = false;
+        bool mMorrowindDone;
+        bool mTribunalDone;
+        bool mBloodmoonDone;
 
         boost::filesystem::path mOutputPath;
 
