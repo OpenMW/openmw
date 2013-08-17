@@ -300,7 +300,7 @@ void UnshieldThread::SetOutputPath(const std::string& path)
     mOutputPath = path;
 }
 
-void installToPath(const bfs::path& from, const bfs::path& to)
+void installToPath(const bfs::path& from, const bfs::path& to, bool copy = false)
 {
     make_sure_directory_exists(to);
 
@@ -309,16 +309,32 @@ void installToPath(const bfs::path& from, const bfs::path& to)
         if(bfs::is_directory(dir->path()))
             installToPath(dir->path(), to / dir->path().filename());
         else
-            bfs::rename(dir->path(), to / dir->path().filename());
+        {
+            if(!copy)
+                bfs::rename(dir->path(), to / dir->path().filename());
+            else
+                bfs::copy_file(dir->path(), to / dir->path().filename());
+        }
     }
 }
 
-bfs::path findFile(const bfs::path& in, std::string filename)
+bfs::path findFile(const bfs::path& in, std::string filename, bool recursive = true)
 {
-    for ( bfs::recursive_directory_iterator end, dir(in); dir != end; ++dir )
+    if(recursive)
     {
-        if(Misc::StringUtils::lowerCase(dir->path().filename().string()) == filename)
-            return dir->path();
+        for ( bfs::recursive_directory_iterator end, dir(in); dir != end; ++dir )
+        {
+            if(Misc::StringUtils::lowerCase(dir->path().filename().string()) == filename)
+                return dir->path();
+        }
+    }
+    else
+    {
+        for ( bfs::recursive_directory_iterator end, dir(in); dir != end; ++dir )
+        {
+            if(Misc::StringUtils::lowerCase(dir->path().filename().string()) == filename)
+                return dir->path();
+        }
     }
 
     return "";
@@ -350,10 +366,17 @@ bool UnshieldThread::extract()
         extract_cab(mMorrowindPath, mwExtractPath, true);
         
         bfs::path dFilesDir = findFile(mwExtractPath, "morrowind.esm").parent_path();
-
         
         installToPath(dFilesDir, outputDataFilesDir); 
         
+        // Videos are often kept uncompressed on the cd
+        bfs::path videosPath = findFile(mMorrowindPath.parent_path(), "video", false);
+        if(videosPath.string() != "")
+        {
+            emit signalGUI(QString("Installing Videos..."));
+            installToPath(videosPath, outputDataFilesDir / "Video", true);
+        }
+
         bfs::rename(findFile(mwExtractPath, "morrowind.ini"), outputDataFilesDir / "Morrowind.ini");
 
         mTribunalDone = contains(outputDataFilesDir, "tribunal.esm");
@@ -371,6 +394,11 @@ bool UnshieldThread::extract()
         bfs::path dFilesDir = findFile(tbExtractPath, "tribunal.esm").parent_path();
         
         installToPath(dFilesDir, outputDataFilesDir); 
+        
+        // Mt GOTY CD has Sounds in a seperate folder from the rest of the data files
+        bfs::path soundsPath = findFile(tbExtractPath, "sounds", false);
+        if(soundsPath.string() != "")
+            installToPath(soundsPath, outputDataFilesDir / "Sounds");
 
         mBloodmoonDone = contains(outputDataFilesDir, "bloodmoon.esm");
 
@@ -387,6 +415,12 @@ bool UnshieldThread::extract()
         bfs::path dFilesDir = findFile(bmExtractPath, "bloodmoon.esm").parent_path();
         
         installToPath(dFilesDir, outputDataFilesDir); 
+
+        // My GOTY CD contains a folder within cab files called Tribunal patch,
+        // which contains Tribunal.esm
+        bfs::path tbPatchPath = findFile(bmExtractPath, "tribunal.esm");
+        if(tbPatchPath.string() != "")
+            bfs::rename(tbPatchPath, outputDataFilesDir / "Tribunal.esm");
         
         fix_ini(outputDataFilesDir, bfs::path(mBloodmoonPath).parent_path(), false, mBloodmoonDone);
     }
