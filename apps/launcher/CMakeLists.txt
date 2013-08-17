@@ -4,6 +4,8 @@ set(LAUNCHER
     main.cpp
     maindialog.cpp
     playpage.cpp
+    unshield_thread.cpp
+    text_slot_msg_box.cpp
 
     settings/gamesettings.cpp
     settings/graphicssettings.cpp
@@ -20,6 +22,8 @@ set(LAUNCHER_HEADER
     graphicspage.hpp
     maindialog.hpp
     playpage.hpp
+    unshield_thread.hpp
+    text_slot_msg_box.hpp
 
     settings/gamesettings.hpp
     settings/graphicssettings.hpp
@@ -37,6 +41,8 @@ set(LAUNCHER_HEADER_MOC
     graphicspage.hpp
     maindialog.hpp
     playpage.hpp
+    unshield_thread.hpp
+    text_slot_msg_box.hpp
 
     utils/checkablemessagebox.hpp
     utils/textinputdialog.hpp
@@ -64,8 +70,11 @@ QT4_ADD_RESOURCES(RCC_SRCS ${CMAKE_SOURCE_DIR}/files/launcher/launcher.qrc)
 QT4_WRAP_CPP(MOC_SRCS ${LAUNCHER_HEADER_MOC})
 QT4_WRAP_UI(UI_HDRS ${LAUNCHER_UI})
 
+
+message(STATUS "hello ${LIBUNSHIELD_INCLUDE}")
+
 include(${QT_USE_FILE})
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${CMAKE_CURRENT_BINARY_DIR} ${LIBUNSHIELD_INCLUDE})
 
 # Main executable
 IF(OGRE_STATIC)
@@ -93,7 +102,10 @@ target_link_libraries(omwlauncher
     ${SDL2_LIBRARY}
     ${QT_LIBRARIES}
     components
+    libunshield
 )
+
+
 
 if(DPKG_PROGRAM)
     INSTALL(TARGETS omwlauncher RUNTIME DESTINATION games COMPONENT omwlauncher)

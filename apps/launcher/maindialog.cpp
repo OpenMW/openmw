@@ -11,6 +11,9 @@
 
 #include <QDebug>
 
+#include "unshield_thread.hpp"
+#include "text_slot_msg_box.hpp"
+
 #include "utils/checkablemessagebox.hpp"
 
 #include "playpage.hpp"
@@ -128,11 +131,16 @@ bool MainDialog::showFirstRunDialog()
         QDir dir(path);
         dir.setPath(dir.canonicalPath()); // Resolve symlinks
 
-        if (!dir.cdUp())
-            continue; // Cannot move from Data Files
-
         if (dir.exists(QString("Morrowind.ini")))
             iniPaths.append(dir.absoluteFilePath(QString("Morrowind.ini")));
+        else
+        {
+            if (!dir.cdUp())
+                continue; // Cannot move from Data Files
+
+            if (dir.exists(QString("Morrowind.ini")))
+                iniPaths.append(dir.absoluteFilePath(QString("Morrowind.ini")));
+        }
     }
 
     // Ask the user where the Morrowind.ini is
@@ -344,6 +352,76 @@ bool MainDialog::setupLauncherSettings()
     return true;
 }
 
+bool expansions(UnshieldThread& cd)
+{
+    if(cd.BloodmoonDone())
+    {
+        cd.Done();
+        return false;
+    }
+
+    QMessageBox expansionsBox;
+    expansionsBox.setText(QObject::tr("<br>Would you like to install expansions now ? (make sure you have the disc)<br> \
+                                       If you want to install both Bloodmoon and Tribunal, you have to install Tribunal first.<br>"));
+    
+    QAbstractButton* tribunalButton = NULL;
+    if(!cd.TribunalDone())
+        tribunalButton = expansionsBox.addButton(QObject::tr("&Tribunal"), QMessageBox::ActionRole);
+
+    QAbstractButton* bloodmoonButton = expansionsBox.addButton(QObject::tr("&Bloodmoon"), QMessageBox::ActionRole);
+    QAbstractButton* noneButton = expansionsBox.addButton(QObject::tr("&None"), QMessageBox::ActionRole);
+
+    expansionsBox.exec();
+
+    if(expansionsBox.clickedButton() == noneButton)
+    {
+        cd.Done();
+        return false;
+    }
+    else if(expansionsBox.clickedButton() == tribunalButton)
+    {
+
+        TextSlotMsgBox cdbox;
+        cdbox.setStandardButtons(QMessageBox::Cancel); 
+
+        QObject::connect(&cd,SIGNAL(signalGUI(const QString&)), &cdbox, SLOT(setTextSlot(const QString&)));
+        QObject::connect(&cd,SIGNAL(close()), &cdbox, SLOT(reject()));
+
+        cd.SetTribunalPath(
+            QFileDialog::getOpenFileName(
+                NULL,
+                QObject::tr("Select data1.hdr from Tribunal Installation CD (Tribunal/data1.hdr on GOTY CDs)"),
+                QDir::currentPath(),
+                QString(QObject::tr("Installshield hdr file (*.hdr)"))).toUtf8().constData());
+
+        cd.start();
+        cdbox.exec();
+    }
+    else if(expansionsBox.clickedButton() == bloodmoonButton)
+    {
+
+        TextSlotMsgBox cdbox;
+        cdbox.setStandardButtons(QMessageBox::Cancel); 
+
+        QObject::connect(&cd,SIGNAL(signalGUI(const QString&)), &cdbox, SLOT(setTextSlot(const QString&)));
+        QObject::connect(&cd,SIGNAL(close()), &cdbox, SLOT(reject()));
+
+        cd.SetBloodmoonPath(
+            QFileDialog::getOpenFileName(
+                NULL,
+                QObject::tr("Select data1.hdr from Bloodmoon Installation CD (Bloodmoon/data1.hdr on GOTY CDs)"),
+                QDir::currentPath(),
+                QString(QObject::tr("Installshield hdr file (*.hdr)"))).toUtf8().constData());
+
+        cd.start();
+        cdbox.exec();
+    }
+
+
+
+    return true;
+}
+
 bool MainDialog::setupGameSettings()
 {
     QString userPath = QString::fromStdString(mCfgMgr.getUserPath().string());
@@ -401,9 +479,13 @@ bool MainDialog::setupGameSettings()
                                    Press \"Browse...\" to specify the location manually.<br>"));
 
         QAbstractButton *dirSelectButton =
-                msgBox.addButton(QObject::tr("B&rowse..."), QMessageBox::ActionRole);
+                msgBox.addButton(QObject::tr("Browse to &Install..."), QMessageBox::ActionRole);
 
-        msgBox.exec();
+        QAbstractButton *cdSelectButton = 
+                msgBox.addButton(QObject::tr("Browse to &CD..."), QMessageBox::ActionRole);
+        
+
+         msgBox.exec();
 
         QString selectedFile;
         if (msgBox.clickedButton() == dirSelectButton) {
@@ -412,6 +494,38 @@ bool MainDialog::setupGameSettings()
                         QObject::tr("Select master file"),
                         QDir::currentPath(),
                         QString(tr("Morrowind master file (*.esm)")));
+        }
+        else if(msgBox.clickedButton() == cdSelectButton) {
+            UnshieldThread cd;
+                
+            {
+                TextSlotMsgBox cdbox;
+                cdbox.setStandardButtons(QMessageBox::Cancel); 
+
+                QObject::connect(&cd,SIGNAL(signalGUI(const QString&)), &cdbox, SLOT(setTextSlot(const QString&)));
+                QObject::connect(&cd,SIGNAL(close()), &cdbox, SLOT(reject()));
+     
+                cd.SetMorrowindPath(
+                    QFileDialog::getOpenFileName(
+                        NULL,
+                        QObject::tr("Select data1.hdr from Morrowind Installation CD"),
+                        QDir::currentPath(),
+                        QString(tr("Installshield hdr file (*.hdr)"))).toUtf8().constData());
+
+                cd.SetOutputPath(
+                    QFileDialog::getExistingDirectory(
+                        NULL,
+                        QObject::tr("Select where to extract files to"),
+                        QDir::currentPath(),
+                        QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks).toUtf8().constData());
+                
+                cd.start();
+                cdbox.exec();
+            }
+            
+            while(expansions(cd));
+
+            selectedFile = QString::fromStdString(cd.GetMWEsmPath());
         }
 
         if (selectedFile.isEmpty())

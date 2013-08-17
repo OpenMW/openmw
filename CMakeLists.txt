@@ -499,6 +499,7 @@ endif(WIN32)
 add_subdirectory (extern/shiny)
 add_subdirectory (extern/oics)
 add_subdirectory (extern/sdl4ogre)
+add_subdirectory (extern/unshield)
 
 # Components
 add_subdirectory (components)
