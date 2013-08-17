@@ -9,6 +9,11 @@
 #include "physic.hpp"
 
 
+namespace OEngine
+{
+namespace Physic
+{
+
 class ClosestNotMeConvexResultCallback : public btCollisionWorld::ClosestConvexResultCallback
 {
 public:
@@ -47,7 +52,8 @@ protected:
     const btScalar mMinSlopeDot;
 };
 
-void actortrace(traceResults *results, btCollisionObject *actor, const Ogre::Vector3 &start, const Ogre::Vector3 &end, OEngine::Physic::PhysicEngine *enginePass)
+
+void ActorTracer::doTrace(btCollisionObject *actor, const Ogre::Vector3 &start, const Ogre::Vector3 &end, const PhysicEngine *enginePass)
 {
     const btVector3 btstart(start.x, start.y, start.z);
     const btVector3 btend(end.x, end.y, end.z);
@@ -72,14 +78,17 @@ void actortrace(traceResults *results, btCollisionObject *actor, const Ogre::Vec
     if(newTraceCallback.hasHit())
     {
         const btVector3& tracehitnormal = newTraceCallback.m_hitNormalWorld;
-        results->fraction = newTraceCallback.m_closestHitFraction;
-        results->planenormal = Ogre::Vector3(tracehitnormal.x(), tracehitnormal.y(), tracehitnormal.z());
-        results->endpos = (end-start)*results->fraction + start;
+        mFraction = newTraceCallback.m_closestHitFraction;
+        mPlaneNormal = Ogre::Vector3(tracehitnormal.x(), tracehitnormal.y(), tracehitnormal.z());
+        mEndPos = (end-start)*mFraction + start;
     }
     else
     {
-        results->endpos = end;
-        results->planenormal = Ogre::Vector3(0.0f, 0.0f, 1.0f);
-        results->fraction = 1.0f;
+        mEndPos = end;
+        mPlaneNormal = Ogre::Vector3(0.0f, 0.0f, 1.0f);
+        mFraction = 1.0f;
     }
+}
+
+}
 }
