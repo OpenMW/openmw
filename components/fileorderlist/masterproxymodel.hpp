@@ -3,11 +3,13 @@
 
 #include <QSortFilterProxyModel>
 
+class QAbstractTableModel;
+
 class MasterProxyModel : public QSortFilterProxyModel
 {
     Q_OBJECT
 public:
-    explicit MasterProxyModel(QObject *parent = 0);
+    explicit MasterProxyModel(QObject *parent = 0, QAbstractTableModel *model = 0);
     virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
 
 signals:

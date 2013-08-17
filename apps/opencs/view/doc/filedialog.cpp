@@ -24,25 +24,19 @@ FileDialog::FileDialog(QWidget *parent) :
     setupUi(this);
 
     // Models
-    mDataFilesModel = new DataFilesModel(this);
+    mDataFilesModel = new DataFilesModel (this);
 
-    mMastersProxyModel = new MasterProxyModel();
-    mMastersProxyModel->setFilterRegExp("game"); //QString("^.*\\.esm"));
-    mMastersProxyModel->setFilterRole (Qt::UserRole);
-    mMastersProxyModel->setSourceModel(mDataFilesModel);
+    mMastersProxyModel = new MasterProxyModel (this, mDataFilesModel);
+    mPluginsProxyModel = new PluginsProxyModel (this, mDataFilesModel);
 
-    mPluginsProxyModel = new PluginsProxyModel();
-    mPluginsProxyModel->setFilterRegExp("addon"); //QString("^.*\\.esp"));
-    mPluginsProxyModel->setFilterRole (Qt::UserRole);
-    mPluginsProxyModel->setSourceModel(mDataFilesModel);
 
     mFilterProxyModel = new QSortFilterProxyModel();
     mFilterProxyModel->setDynamicSortFilter(true);
     mFilterProxyModel->setSourceModel(mPluginsProxyModel);
-
+/*
     QCheckBox checkBox;
     unsigned int height = checkBox.sizeHint().height() + 4;
-
+*/
     masterView->setModel(mMastersProxyModel);
 /*
     mastersTable->setModel(mMastersProxyModel);
@@ -70,10 +64,10 @@ FileDialog::FileDialog(QWidget *parent) :
     pluginsTable->setAlternatingRowColors(true);
     pluginsTable->setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
     pluginsTable->horizontalHeader()->setStretchLastSection(true);
-
+/*
     pluginsTable->verticalHeader()->setDefaultSectionSize(height);
     pluginsTable->verticalHeader()->setResizeMode(QHeaderView::Fixed);
-
+*/
     // Hide the profile elements
     profileLabel->hide();
     profilesComboBox->hide();

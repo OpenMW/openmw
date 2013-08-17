@@ -15,6 +15,7 @@
 #include <components/fileorderlist/utils/naturalsort.hpp>
 #include <components/fileorderlist/utils/profilescombobox.hpp>
 
+#include <components/fileorderlist/masterproxymodel.hpp>"a.out.h"
 #include "settings/gamesettings.hpp"
 #include "settings/launchersettings.hpp"
 
@@ -29,19 +30,11 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
     setupUi(this);
 
     // Models
-    mDataFilesModel = new DataFilesModel(this);
+    mDataFilesModel = new DataFilesModel (this);
 
-    mMastersProxyModel = new QSortFilterProxyModel();
-    mMastersProxyModel->setFilterRegExp(QString("game")); //QString("^.*\\.esm"));
-    mMastersProxyModel->setFilterRole (Qt::UserRole);
-    mMastersProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
-    mMastersProxyModel->setSourceModel(mDataFilesModel);
+    mMastersProxyModel = new MasterProxyModel (this, mDataFilesModel);
 
-    mPluginsProxyModel = new PluginsProxyModel();
-    mPluginsProxyModel->setFilterRegExp(QString("addon")); //^.*\\.esp"));
-    mPluginsProxyModel->setFilterRole (Qt::UserRole);
-    mPluginsProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
-    mPluginsProxyModel->setSourceModel(mDataFilesModel);
+    mPluginsProxyModel = new PluginsProxyModel (this, mDataFilesModel);
 
     mFilterProxyModel = new QSortFilterProxyModel();
     mFilterProxyModel->setDynamicSortFilter(true);

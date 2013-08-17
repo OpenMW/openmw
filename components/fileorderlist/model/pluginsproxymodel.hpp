@@ -4,12 +4,13 @@
 #include <QSortFilterProxyModel>
 
 class QVariant;
+class QAbstractTableModel;
 
 class PluginsProxyModel : public QSortFilterProxyModel
 {
     Q_OBJECT
 public:
-    explicit PluginsProxyModel(QObject *parent = 0);
+    explicit PluginsProxyModel(QObject *parent = 0, QAbstractTableModel *model = 0);
     ~PluginsProxyModel();
 
     virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
