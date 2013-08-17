@@ -66,22 +66,25 @@ add_component_dir (translation
     translation
     )
 
+set (ESM_UI ${CMAKE_SOURCE_DIR}/files/ui/datafilespage.ui
+    )
 find_package(Qt4 COMPONENTS QtCore QtGui)
 
 if(QT_QTGUI_LIBRARY AND QT_QTCORE_LIBRARY)
    add_component_qt_dir (fileorderlist
-        masterproxymodel
+        masterproxymodel contentselector
        model/modelitem model/datafilesmodel model/pluginsproxymodel model/esm/esmfile
        utils/profilescombobox utils/comboboxlineedit utils/lineedit utils/naturalsort
        )
 
    include(${QT_USE_FILE})
+    QT4_WRAP_UI(ESM_UI_HDR ${ESM_UI})
    QT4_WRAP_CPP(MOC_SRCS ${COMPONENT_MOC_FILES})
 endif(QT_QTGUI_LIBRARY AND QT_QTCORE_LIBRARY)
 
-include_directories(${BULLET_INCLUDE_DIRS})
+include_directories(${BULLET_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 
-add_library(components STATIC ${COMPONENT_FILES} ${MOC_SRCS})
+add_library(components STATIC ${COMPONENT_FILES} ${MOC_SRCS} ${ESM_UI_HDR})
 
 target_link_libraries(components ${Boost_LIBRARIES} ${OGRE_LIBRARIES})
 

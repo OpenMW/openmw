@@ -5,17 +5,19 @@
 
 class QAbstractTableModel;
 
-class MasterProxyModel : public QSortFilterProxyModel
+namespace FileOrderList
 {
-    Q_OBJECT
-public:
-    explicit MasterProxyModel(QObject *parent = 0, QAbstractTableModel *model = 0);
-    virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+    class MasterProxyModel : public QSortFilterProxyModel
+    {
+        Q_OBJECT
+    public:
+        explicit MasterProxyModel(QObject *parent = 0, QAbstractTableModel *model = 0);
+        virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
 
-signals:
-    
-public slots:
-    
-};
+    signals:
 
+    public slots:
+
+    };
+}
 #endif // MASTERPROXYMODEL_HPP

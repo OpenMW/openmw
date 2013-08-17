@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QModelIndex>
 
+#include "components/fileorderlist/contentselector.hpp"
 #include "ui_datafilespage.h"
 
 class QDialogButtonBox;
@@ -17,19 +18,16 @@ class QMenu;
 class DataFilesModel;
 class PluginsProxyModel;
 
-class FileDialog : public QDialog, private Ui::DataFilesPage
+class FileDialog : public FileOrderList::ContentSelector
 {
     Q_OBJECT
 public:
     explicit FileDialog(QWidget *parent = 0);
-    void addFiles(const QString &path);
-    void setEncoding(const QString &encoding);
 
     void openFile();
     void newFile();
     void accepted();
 
-    QStringList checkedItemsPaths();
     QString fileName();
 
 signals:
@@ -40,12 +38,12 @@ public slots:
     void accept();
 
 private slots:
-    void updateViews();
+    //void updateViews();
     void updateOpenButton(const QStringList &items);
     void updateCreateButton(const QString &name);
-    void setCheckState(QModelIndex index);
 
-    void filterChanged(const QString &filter);
+
+    //void filterChanged(const QString &filter);
 
     void createButtonClicked();
 

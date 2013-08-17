@@ -19,10 +19,11 @@
 #include "components/fileorderlist/masterproxymodel.hpp"
 
 FileDialog::FileDialog(QWidget *parent) :
-    QDialog(parent)
+    ContentSelector(parent)
 {
     setupUi(this);
-
+    buildModelsAndViews();
+   /*
     // Models
     mDataFilesModel = new DataFilesModel (this);
 
@@ -33,12 +34,12 @@ FileDialog::FileDialog(QWidget *parent) :
     mFilterProxyModel = new QSortFilterProxyModel();
     mFilterProxyModel->setDynamicSortFilter(true);
     mFilterProxyModel->setSourceModel(mPluginsProxyModel);
-/*
-    QCheckBox checkBox;
-    unsigned int height = checkBox.sizeHint().height() + 4;
-*/
+
+//    QCheckBox checkBox;
+//    unsigned int height = checkBox.sizeHint().height() + 4;
+
     masterView->setModel(mMastersProxyModel);
-/*
+
     mastersTable->setModel(mMastersProxyModel);
     mastersTable->setObjectName("MastersTable");
     mastersTable->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -53,7 +54,7 @@ FileDialog::FileDialog(QWidget *parent) :
     mastersTable->verticalHeader()->setDefaultSectionSize(height);
     mastersTable->verticalHeader()->setResizeMode(QHeaderView::Fixed);
     mastersTable->verticalHeader()->hide();
-*/
+
     pluginsTable->setModel(mFilterProxyModel);
     pluginsTable->setObjectName("PluginsTable");
     pluginsTable->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -64,10 +65,11 @@ FileDialog::FileDialog(QWidget *parent) :
     pluginsTable->setAlternatingRowColors(true);
     pluginsTable->setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
     pluginsTable->horizontalHeader()->setStretchLastSection(true);
-/*
-    pluginsTable->verticalHeader()->setDefaultSectionSize(height);
-    pluginsTable->verticalHeader()->setResizeMode(QHeaderView::Fixed);
-*/
+
+//    pluginsTable->verticalHeader()->setDefaultSectionSize(height);
+//    pluginsTable->verticalHeader()->setResizeMode(QHeaderView::Fixed);
+
+    */
     // Hide the profile elements
     profileLabel->hide();
     profilesComboBox->hide();
@@ -105,43 +107,19 @@ FileDialog::FileDialog(QWidget *parent) :
 
     resize(600, 400);
 
-    connect(mDataFilesModel, SIGNAL(layoutChanged()), this, SLOT(updateViews()));
-    connect(mDataFilesModel, SIGNAL(checkedItemsChanged(QStringList)), this, SLOT(updateOpenButton(QStringList)));
+  //
+  //  connect(mDataFilesModel, SIGNAL(checkedItemsChanged(QStringList)), this, SLOT(updateOpenButton(QStringList)));
     //connect(mNameLineEdit, SIGNAL(textChanged(QString)), this, SLOT(updateCreateButton(QString)));
 
     //connect(filterLineEdit, SIGNAL(textChanged(QString)), this, SLOT(filterChanged(QString)));
 
-    connect(pluginsTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckState(QModelIndex)));
+  //  connect(pluginsTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckState(QModelIndex)));
     //connect(mastersTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckState(QModelIndex)));
 
-    connect(mCreateButton, SIGNAL(clicked()), this, SLOT(createButtonClicked()));
+  //  connect(mCreateButton, SIGNAL(clicked()), this, SLOT(createButtonClicked()));
 
-    connect(mButtonBox, SIGNAL(accepted()), this, SLOT(accept()));
-    connect(mButtonBox, SIGNAL(rejected()), this, SLOT(reject()));
-}
-
-void FileDialog::updateViews()
-{
-    // Ensure the columns are hidden because sort() re-enables them
-    /*
-    mastersTable->setColumnHidden(1, true);
-    mastersTable->setColumnHidden(3, true);
-    mastersTable->setColumnHidden(4, true);
-    mastersTable->setColumnHidden(5, true);
-    mastersTable->setColumnHidden(6, true);
-    mastersTable->setColumnHidden(7, true);
-    mastersTable->setColumnHidden(8, true);
-    mastersTable->resizeColumnsToContents();
-*/
-    pluginsTable->setColumnHidden(1, true);
-    pluginsTable->setColumnHidden(3, true);
-    pluginsTable->setColumnHidden(4, true);
-    pluginsTable->setColumnHidden(5, true);
-    pluginsTable->setColumnHidden(6, true);
-    pluginsTable->setColumnHidden(7, true);
-    pluginsTable->setColumnHidden(8, true);
-    pluginsTable->resizeColumnsToContents();
-
+ //   connect(mButtonBox, SIGNAL(accepted()), this, SLOT(accept()));
+ //   connect(mButtonBox, SIGNAL(rejected()), this, SLOT(reject()));
 }
 
 void FileDialog::updateOpenButton(const QStringList &items)
@@ -161,64 +139,13 @@ void FileDialog::updateCreateButton(const QString &name)
 
     mCreateButton->setEnabled(!name.isEmpty());
 }
-
+/*
 void FileDialog::filterChanged(const QString &filter)
 {
     QRegExp filterRe(filter, Qt::CaseInsensitive, QRegExp::FixedString);
     mFilterProxyModel->setFilterRegExp(filterRe);
 }
-
-void FileDialog::addFiles(const QString &path)
-{
-    mDataFilesModel->addFiles(path);
-    mDataFilesModel->sort(3);  // Sort by date accessed
-}
-
-void FileDialog::setEncoding(const QString &encoding)
-{
-    mDataFilesModel->setEncoding(encoding);
-}
-
-void FileDialog::setCheckState(QModelIndex index)
-{
-    if (!index.isValid())
-        return;
-
-    QObject *object = QObject::sender();
-
-    // Not a signal-slot call
-    if (!object)
-        return;
-
-
-    if (object->objectName() == QLatin1String("PluginsTable")) {
-        QModelIndex sourceIndex = mPluginsProxyModel->mapToSource(
-                    mFilterProxyModel->mapToSource(index));
-
-        if (sourceIndex.isValid()) {
-            (mDataFilesModel->checkState(sourceIndex) == Qt::Checked)
-                    ? mDataFilesModel->setCheckState(sourceIndex, Qt::Unchecked)
-                    : mDataFilesModel->setCheckState(sourceIndex, Qt::Checked);
-        }
-    }
-
-    if (object->objectName() == QLatin1String("MastersTable")) {
-        QModelIndex sourceIndex = mMastersProxyModel->mapToSource(index);
-
-        if (sourceIndex.isValid()) {
-            (mDataFilesModel->checkState(sourceIndex) == Qt::Checked)
-                    ? mDataFilesModel->setCheckState(sourceIndex, Qt::Unchecked)
-                    : mDataFilesModel->setCheckState(sourceIndex, Qt::Checked);
-        }
-    }
-
-    return;
-}
-
-QStringList FileDialog::checkedItemsPaths()
-{
-    return mDataFilesModel->checkedItemsPaths();
-}
+*/
 
 QString FileDialog::fileName()
 {

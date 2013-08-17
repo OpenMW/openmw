@@ -15,7 +15,7 @@
 #include <components/fileorderlist/utils/naturalsort.hpp>
 #include <components/fileorderlist/utils/profilescombobox.hpp>
 
-#include <components/fileorderlist/masterproxymodel.hpp>"a.out.h"
+#include "components/fileorderlist/masterproxymodel.hpp"
 #include "settings/gamesettings.hpp"
 #include "settings/launchersettings.hpp"
 
@@ -25,10 +25,11 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
     : mCfgMgr(cfg)
     , mGameSettings(gameSettings)
     , mLauncherSettings(launcherSettings)
-    , QWidget(parent)
+    , ContentSelector(parent)
 {
     setupUi(this);
-
+    buildModelsAndViews();
+    /*
     // Models
     mDataFilesModel = new DataFilesModel (this);
 
@@ -41,11 +42,11 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
     mFilterProxyModel->setSourceModel(mPluginsProxyModel);
 
     masterView->setModel (mMastersProxyModel);
-/*
-    QCheckBox checkBox;
-    unsigned int height = checkBox.sizeHint().height() + 4;
-    */
-/*
+
+    //QCheckBox checkBox;
+   // unsigned int height = checkBox.sizeHint().height() + 4;
+
+
     mastersTable->setModel(mMastersProxyModel);
     mastersTable->setObjectName("MastersTable");
     mastersTable->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -61,7 +62,7 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
     mastersTable->verticalHeader()->setDefaultSectionSize(height);
     mastersTable->verticalHeader()->setResizeMode(QHeaderView::Fixed);
     mastersTable->verticalHeader()->hide();
-*/
+
     pluginsTable->setModel(mFilterProxyModel);
     pluginsTable->setObjectName("PluginsTable");
     pluginsTable->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -76,7 +77,7 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
 
     //pluginsTable->verticalHeader()->setDefaultSectionSize(height);
     //pluginsTable->verticalHeader()->setResizeMode(QHeaderView::Fixed);
-
+*/
     // Adjust the tableview widths inside the splitter
     QList<int> sizeList;
     sizeList << mLauncherSettings.value(QString("General/MastersTable/width"), QString("200")).toInt();

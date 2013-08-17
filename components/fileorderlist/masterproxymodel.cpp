@@ -1,6 +1,6 @@
 #include "masterproxymodel.hpp"
 
-MasterProxyModel::MasterProxyModel(QObject *parent, QAbstractTableModel* model) :
+FileOrderList::MasterProxyModel::MasterProxyModel(QObject *parent, QAbstractTableModel* model) :
     QSortFilterProxyModel(parent)
 {
     setFilterRegExp(QString("game"));
@@ -10,7 +10,7 @@ MasterProxyModel::MasterProxyModel(QObject *parent, QAbstractTableModel* model) 
         setSourceModel (model);
 }
 
-QVariant MasterProxyModel::data(const QModelIndex &index, int role) const
+QVariant FileOrderList::MasterProxyModel::data(const QModelIndex &index, int role) const
 {
     return QSortFilterProxyModel::data (index, role);
 }

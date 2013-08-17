@@ -5,6 +5,7 @@
 #include <QModelIndex>
 
 #include "ui_datafilespage.h"
+#include "components/fileorderlist/contentselector.hpp"
 
 class QSortFilterProxyModel;
 class QAbstractItemModel;
@@ -19,10 +20,9 @@ class PluginsProxyModel;
 
 namespace Files { struct ConfigurationManager; }
 
-class DataFilesPage : public QWidget, private Ui::DataFilesPage
+class DataFilesPage : public FileOrderList::ContentSelector
 {
     Q_OBJECT
-
 public:
     DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gameSettings, LauncherSettings &launcherSettings, QWidget *parent = 0);
 
