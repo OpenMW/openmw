@@ -117,11 +117,6 @@ QVariant DataFilesModel::data(const QModelIndex &index, int role) const
         }
     }
 
-    case Qt::CheckStateRole: {
-        if (column != 0)
-            return QVariant();
-        return mCheckStates[file->fileName()];
-    }
     case Qt::ToolTipRole:
     {
         if (column != 0)
