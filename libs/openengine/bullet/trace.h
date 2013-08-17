@@ -4,26 +4,26 @@
 #include <OgreVector3.h>
 
 
-namespace OEngine
-{
-    namespace Physic
-    {
-        class PhysicEngine;
-    }
-}
-
-
 class btCollisionObject;
 
 
-struct traceResults
+namespace OEngine
 {
-    Ogre::Vector3 endpos;
-    Ogre::Vector3 planenormal;
+namespace Physic
+{
+    class PhysicEngine;
 
-    float fraction;
-};
+    struct ActorTracer
+    {
+        Ogre::Vector3 mEndPos;
+        Ogre::Vector3 mPlaneNormal;
 
-void actortrace(traceResults *results, btCollisionObject *actor, const Ogre::Vector3& start, const Ogre::Vector3& end, OEngine::Physic::PhysicEngine *enginePass);
+        float mFraction;
+
+        void doTrace(btCollisionObject *actor, const Ogre::Vector3 &start, const Ogre::Vector3 &end,
+                     const PhysicEngine *enginePass);
+    };
+}
+}
 
 #endif
