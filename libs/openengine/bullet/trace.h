@@ -24,7 +24,6 @@ struct traceResults
     float fraction;
 };
 
-void newtrace(traceResults *results, const Ogre::Quaternion& orient, const Ogre::Vector3& start, const Ogre::Vector3& end, const Ogre::Vector3& BBHalfExtents, bool isInterior, OEngine::Physic::PhysicEngine* enginePass);
 void actortrace(traceResults *results, btCollisionObject *actor, const Ogre::Vector3& start, const Ogre::Vector3& end, OEngine::Physic::PhysicEngine *enginePass);
 
 #endif
