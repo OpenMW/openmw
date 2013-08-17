@@ -4,8 +4,9 @@
 PluginsProxyModel::PluginsProxyModel(QObject *parent, DataFilesModel *model) :
     QSortFilterProxyModel(parent), mSourceModel (model)
 {
-    setFilterRegExp(QString("addon"));
+    setFilterRegExp (QString("addon"));
     setFilterRole (Qt::UserRole);
+    setDynamicSortFilter (true);
 
     if (model)
         setSourceModel (model);

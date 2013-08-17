@@ -21,55 +21,6 @@
 FileDialog::FileDialog(QWidget *parent) :
     ContentSelector(parent)
 {
-    setupUi(this);
-    buildModelsAndViews();
-   /*
-    // Models
-    mDataFilesModel = new DataFilesModel (this);
-
-    mMastersProxyModel = new MasterProxyModel (this, mDataFilesModel);
-    mPluginsProxyModel = new PluginsProxyModel (this, mDataFilesModel);
-
-
-    mFilterProxyModel = new QSortFilterProxyModel();
-    mFilterProxyModel->setDynamicSortFilter(true);
-    mFilterProxyModel->setSourceModel(mPluginsProxyModel);
-
-//    QCheckBox checkBox;
-//    unsigned int height = checkBox.sizeHint().height() + 4;
-
-    masterView->setModel(mMastersProxyModel);
-
-    mastersTable->setModel(mMastersProxyModel);
-    mastersTable->setObjectName("MastersTable");
-    mastersTable->setContextMenuPolicy(Qt::CustomContextMenu);
-    mastersTable->setSortingEnabled(false);
-    mastersTable->setSelectionBehavior(QAbstractItemView::SelectRows);
-    mastersTable->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    mastersTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    mastersTable->setAlternatingRowColors(true);
-    mastersTable->horizontalHeader()->setStretchLastSection(true);
-
-    // Set the row height to the size of the checkboxes
-    mastersTable->verticalHeader()->setDefaultSectionSize(height);
-    mastersTable->verticalHeader()->setResizeMode(QHeaderView::Fixed);
-    mastersTable->verticalHeader()->hide();
-
-    pluginsTable->setModel(mFilterProxyModel);
-    pluginsTable->setObjectName("PluginsTable");
-    pluginsTable->setContextMenuPolicy(Qt::CustomContextMenu);
-    pluginsTable->setSortingEnabled(false);
-    pluginsTable->setSelectionBehavior(QAbstractItemView::SelectRows);
-    pluginsTable->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    pluginsTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    pluginsTable->setAlternatingRowColors(true);
-    pluginsTable->setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
-    pluginsTable->horizontalHeader()->setStretchLastSection(true);
-
-//    pluginsTable->verticalHeader()->setDefaultSectionSize(height);
-//    pluginsTable->verticalHeader()->setResizeMode(QHeaderView::Fixed);
-
-    */
     // Hide the profile elements
     profileLabel->hide();
     profilesComboBox->hide();
@@ -107,7 +58,6 @@ FileDialog::FileDialog(QWidget *parent) :
 
     resize(600, 400);
 
-  //
   //  connect(mDataFilesModel, SIGNAL(checkedItemsChanged(QStringList)), this, SLOT(updateOpenButton(QStringList)));
     //connect(mNameLineEdit, SIGNAL(textChanged(QString)), this, SLOT(updateCreateButton(QString)));
 

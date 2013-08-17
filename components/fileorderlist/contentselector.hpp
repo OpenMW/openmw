@@ -17,10 +17,11 @@ namespace FileOrderList
     {
         Q_OBJECT
 
+    protected:
+
         DataFilesModel *mDataFilesModel;
         MasterProxyModel *mMasterProxyModel;
         PluginsProxyModel *mPluginsProxyModel;
-        QSortFilterProxyModel *mFilterProxyModel;
 
     public:
         explicit ContentSelector(QWidget *parent = 0);

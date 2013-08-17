@@ -9,6 +9,8 @@
 FileOrderList::ContentSelector::ContentSelector(QWidget *parent) :
     QWidget(parent)
 {
+    setupUi(this);
+    buildModelsAndViews();
 }
 
 void FileOrderList::ContentSelector::buildModelsAndViews()
@@ -18,11 +20,6 @@ void FileOrderList::ContentSelector::buildModelsAndViews()
 
     mMasterProxyModel = new FileOrderList::MasterProxyModel (this, mDataFilesModel);
     mPluginsProxyModel = new PluginsProxyModel (this, mDataFilesModel);
-
-
-    mFilterProxyModel = new QSortFilterProxyModel();
-    mFilterProxyModel->setDynamicSortFilter(true);
-    mFilterProxyModel->setSourceModel(mPluginsProxyModel);
 
     masterView->setModel(mMasterProxyModel);
 /*
@@ -41,7 +38,7 @@ void FileOrderList::ContentSelector::buildModelsAndViews()
     mastersTable->verticalHeader()->setResizeMode(QHeaderView::Fixed);
     mastersTable->verticalHeader()->hide();
 */
-    pluginsTable->setModel(mFilterProxyModel);
+    pluginsTable->setModel(mPluginsProxyModel);
     pluginsTable->setObjectName("PluginsTable");
     pluginsTable->setContextMenuPolicy(Qt::CustomContextMenu);
     pluginsTable->setSortingEnabled(false);
@@ -79,8 +76,7 @@ void FileOrderList::ContentSelector::setCheckState(QModelIndex index)
 
 
     if (object->objectName() == QLatin1String("PluginsTable")) {
-        QModelIndex sourceIndex = mPluginsProxyModel->mapToSource(
-                    mFilterProxyModel->mapToSource(index));
+        QModelIndex sourceIndex = mPluginsProxyModel->mapToSource(index);
 
         if (sourceIndex.isValid()) {
             (mDataFilesModel->checkState(sourceIndex) == Qt::Checked)
@@ -88,7 +84,7 @@ void FileOrderList::ContentSelector::setCheckState(QModelIndex index)
                     : mDataFilesModel->setCheckState(sourceIndex, Qt::Checked);
         }
     }
-/*
+
     if (object->objectName() == QLatin1String("MastersTable")) {
         QModelIndex sourceIndex = mMasterProxyModel->mapToSource(index);
 
@@ -98,7 +94,7 @@ void FileOrderList::ContentSelector::setCheckState(QModelIndex index)
                     : mDataFilesModel->setCheckState(sourceIndex, Qt::Checked);
         }
     }
-*/
+
     return;
 }
 
@@ -110,16 +106,6 @@ QStringList FileOrderList::ContentSelector::checkedItemsPaths()
 void FileOrderList::ContentSelector::updateViews()
 {
     // Ensure the columns are hidden because sort() re-enables them
-    /*
-    mastersTable->setColumnHidden(1, true);
-    mastersTable->setColumnHidden(3, true);
-    mastersTable->setColumnHidden(4, true);
-    mastersTable->setColumnHidden(5, true);
-    mastersTable->setColumnHidden(6, true);
-    mastersTable->setColumnHidden(7, true);
-    mastersTable->setColumnHidden(8, true);
-    mastersTable->resizeColumnsToContents();
-*/
     pluginsTable->setColumnHidden(1, true);
     pluginsTable->setColumnHidden(3, true);
     pluginsTable->setColumnHidden(4, true);

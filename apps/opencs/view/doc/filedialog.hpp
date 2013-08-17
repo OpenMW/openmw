@@ -53,12 +53,6 @@ private:
 
     QPushButton *mCreateButton;
     QDialogButtonBox *mButtonBox;
-
-    DataFilesModel *mDataFilesModel;
-
-    PluginsProxyModel *mPluginsProxyModel;
-    QSortFilterProxyModel *mMastersProxyModel;
-    QSortFilterProxyModel *mFilterProxyModel;
 };
 
 #endif // FILEDIALOG_HPP

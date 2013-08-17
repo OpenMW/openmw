@@ -21,63 +21,14 @@
 
 #include "utils/textinputdialog.hpp"
 
+#include <QDebug>
+
 DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gameSettings, LauncherSettings &launcherSettings, QWidget *parent)
     : mCfgMgr(cfg)
     , mGameSettings(gameSettings)
     , mLauncherSettings(launcherSettings)
     , ContentSelector(parent)
 {
-    setupUi(this);
-    buildModelsAndViews();
-    /*
-    // Models
-    mDataFilesModel = new DataFilesModel (this);
-
-    mMastersProxyModel = new MasterProxyModel (this, mDataFilesModel);
-
-    mPluginsProxyModel = new PluginsProxyModel (this, mDataFilesModel);
-
-    mFilterProxyModel = new QSortFilterProxyModel();
-    mFilterProxyModel->setDynamicSortFilter(true);
-    mFilterProxyModel->setSourceModel(mPluginsProxyModel);
-
-    masterView->setModel (mMastersProxyModel);
-
-    //QCheckBox checkBox;
-   // unsigned int height = checkBox.sizeHint().height() + 4;
-
-
-    mastersTable->setModel(mMastersProxyModel);
-    mastersTable->setObjectName("MastersTable");
-    mastersTable->setContextMenuPolicy(Qt::CustomContextMenu);
-    mastersTable->setSortingEnabled(false);
-    mastersTable->setSelectionBehavior(QAbstractItemView::SelectRows);
-    mastersTable->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    mastersTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    mastersTable->setAlternatingRowColors(true);
-    mastersTable->horizontalHeader()->setStretchLastSection(true);
-    mastersTable->horizontalHeader()->hide();
-
-    // Set the row height to the size of the checkboxes
-    mastersTable->verticalHeader()->setDefaultSectionSize(height);
-    mastersTable->verticalHeader()->setResizeMode(QHeaderView::Fixed);
-    mastersTable->verticalHeader()->hide();
-
-    pluginsTable->setModel(mFilterProxyModel);
-    pluginsTable->setObjectName("PluginsTable");
-    pluginsTable->setContextMenuPolicy(Qt::CustomContextMenu);
-    pluginsTable->setSortingEnabled(false);
-    pluginsTable->setSelectionBehavior(QAbstractItemView::SelectRows);
-    pluginsTable->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    pluginsTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    pluginsTable->setAlternatingRowColors(true);
-    pluginsTable->setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
-    pluginsTable->horizontalHeader()->setStretchLastSection(true);
-    pluginsTable->horizontalHeader()->hide();
-
-    //pluginsTable->verticalHeader()->setDefaultSectionSize(height);
-    //pluginsTable->verticalHeader()->setResizeMode(QHeaderView::Fixed);
-*/
     // Adjust the tableview widths inside the splitter
     QList<int> sizeList;
     sizeList << mLauncherSettings.value(QString("General/MastersTable/width"), QString("200")).toInt();
@@ -97,8 +48,6 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
 
     connect(pluginsTable, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
     //connect(mastersTable, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
-
-    connect(mDataFilesModel, SIGNAL(layoutChanged()), this, SLOT(updateViews()));
 
     //connect(filterLineEdit, SIGNAL(textChanged(QString)), this, SLOT(filterChanged(QString)));
 
@@ -123,6 +72,9 @@ void DataFilesPage::createActions()
 
 void DataFilesPage::setupDataFiles()
 {
+    if (!mDataFilesModel)
+        qDebug() << "data files model undefined";
+
     // Set the encoding to the one found in openmw.cfg or the default
     mDataFilesModel->setEncoding(mGameSettings.value(QString("encoding"), QString("win1252")));
 
@@ -384,56 +336,13 @@ void DataFilesPage::setPluginsCheckstates(Qt::CheckState state)
         if (!index.isValid())
             return;
 
-        QModelIndex sourceIndex = mPluginsProxyModel->mapToSource(
-                    mFilterProxyModel->mapToSource(index));
+        QModelIndex sourceIndex = mPluginsProxyModel->mapToSource(index);
 
         if (!sourceIndex.isValid())
             return;
 
         mDataFilesModel->setCheckState(sourceIndex, state);
     }
-}
-
-void DataFilesPage::setCheckState(QModelIndex index)
-{
-    if (!index.isValid())
-        return;
-
-    QObject *object = QObject::sender();
-
-    // Not a signal-slot call
-    if (!object)
-        return;
-
-
-    if (object->objectName() == QLatin1String("PluginsTable")) {
-        QModelIndex sourceIndex = mPluginsProxyModel->mapToSource(
-                    mFilterProxyModel->mapToSource(index));
-
-        if (sourceIndex.isValid()) {
-            (mDataFilesModel->checkState(sourceIndex) == Qt::Checked)
-                    ? mDataFilesModel->setCheckState(sourceIndex, Qt::Unchecked)
-                    : mDataFilesModel->setCheckState(sourceIndex, Qt::Checked);
-        }
-    }
-
-    if (object->objectName() == QLatin1String("MastersTable")) {
-        QModelIndex sourceIndex = mMastersProxyModel->mapToSource(index);
-
-        if (sourceIndex.isValid()) {
-            (mDataFilesModel->checkState(sourceIndex) == Qt::Checked)
-                    ? mDataFilesModel->setCheckState(sourceIndex, Qt::Unchecked)
-                    : mDataFilesModel->setCheckState(sourceIndex, Qt::Checked);
-        }
-    }
-
-    return;
-}
-
-void DataFilesPage::filterChanged(const QString filter)
-{
-    QRegExp regExp(filter, Qt::CaseInsensitive, QRegExp::FixedString);
-    mFilterProxyModel->setFilterRegExp(regExp);
 }
 
 void DataFilesPage::profileChanged(const QString &previous, const QString &current)
@@ -505,8 +414,7 @@ void DataFilesPage::showContextMenu(const QPoint &point)
             if (!index.isValid())
                 return;
 
-            QModelIndex sourceIndex = mPluginsProxyModel->mapToSource(
-                        mFilterProxyModel->mapToSource(index));
+            QModelIndex sourceIndex = mPluginsProxyModel->mapToSource(index);
 
             if (!sourceIndex.isValid())
                 return;

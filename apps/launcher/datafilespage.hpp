@@ -36,10 +36,8 @@ signals:
     void profileChanged(int index);
 
 public slots:
-    void setCheckState(QModelIndex index);
     void setProfilesComboBoxIndex(int index);
 
-    void filterChanged(const QString filter);
     void showContextMenu(const QPoint &point);
     void profileChanged(const QString &previous, const QString &current);
     void profileRenamed(const QString &previous, const QString &current);
@@ -57,12 +55,6 @@ private slots:
     void slotCurrentIndexChanged(int index);
 
 private:
-    DataFilesModel *mDataFilesModel;
-
-    PluginsProxyModel *mPluginsProxyModel;
-    QSortFilterProxyModel *mMastersProxyModel;
-
-    QSortFilterProxyModel *mFilterProxyModel;
 
     QMenu *mContextMenu;
 
