@@ -47,6 +47,8 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
     mFilterProxyModel->setDynamicSortFilter(true);
     mFilterProxyModel->setSourceModel(mPluginsProxyModel);
 
+    masterView->setModel (mMastersProxyModel);
+
     QCheckBox checkBox;
     unsigned int height = checkBox.sizeHint().height() + 4;
 /*
