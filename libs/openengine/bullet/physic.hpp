@@ -67,6 +67,20 @@ namespace Physic
     };
 
     /**
+     *This class is just an extension of normal btRigidBody in order to add extra info.
+     *When bullet give back a btRigidBody, you can just do a static_cast to RigidBody,
+     *so one never should use btRigidBody directly!
+     */
+    class RigidBody: public btRigidBody
+    {
+    public:
+        RigidBody(btRigidBody::btRigidBodyConstructionInfo& CI,std::string name);
+        virtual ~RigidBody();
+        std::string mName;
+        bool mPlaceable;
+    };
+
+    /**
      * A physic actor uses a rigid body based on box shapes.
      * Pmove is used to move the physic actor around the dynamic world.
      */
@@ -129,47 +143,41 @@ namespace Physic
 
         bool getOnGround() const;
 
+        btCollisionObject *getCollisionBody() const
+        {
+            return mBody;
+        }
+
     private:
         void disableCollisionBody();
         void enableCollisionBody();
 public:
 //HACK: in Visual Studio 2010 and presumably above, this structures alignment
-//		must be 16, but the built in operator new & delete don't properly
-//		perform this alignment.
+//      must be 16, but the built in operator new & delete don't properly
+//      perform this alignment.
 #if _MSC_VER >= 1600
-		void * operator new (size_t Size) { return _aligned_malloc (Size, 16); }
-		void operator delete (void * Data) { _aligned_free (Data); }
+        void * operator new (size_t Size) { return _aligned_malloc (Size, 16); }
+        void operator delete (void * Data) { _aligned_free (Data); }
 #endif
 
 
     private:
-
         OEngine::Physic::RigidBody* mBody;
         OEngine::Physic::RigidBody* mRaycastingBody;
+
         Ogre::Vector3 mBoxScaledTranslation;
-        btQuaternion mBoxRotationInverse;
         Ogre::Quaternion mBoxRotation;
+        btQuaternion mBoxRotationInverse;
+
         float verticalForce;
         bool onGround;
         bool collisionMode;
+
         std::string mMesh;
-        PhysicEngine* mEngine;
         std::string mName;
+        PhysicEngine *mEngine;
     };
 
-    /**
-     *This class is just an extension of normal btRigidBody in order to add extra info.
-     *When bullet give back a btRigidBody, you can just do a static_cast to RigidBody,
-     *so one never should use btRigidBody directly!
-     */
-    class RigidBody: public btRigidBody
-    {
-    public:
-        RigidBody(btRigidBody::btRigidBodyConstructionInfo& CI,std::string name);
-        virtual ~RigidBody();
-        std::string mName;
-        bool mPlaceable;
-    };
 
     struct HeightField
     {
