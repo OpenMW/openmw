@@ -48,9 +48,10 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
     mFilterProxyModel->setSourceModel(mPluginsProxyModel);
 
     masterView->setModel (mMastersProxyModel);
-
+/*
     QCheckBox checkBox;
     unsigned int height = checkBox.sizeHint().height() + 4;
+    */
 /*
     mastersTable->setModel(mMastersProxyModel);
     mastersTable->setObjectName("MastersTable");
@@ -80,8 +81,8 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
     pluginsTable->horizontalHeader()->setStretchLastSection(true);
     pluginsTable->horizontalHeader()->hide();
 
-    pluginsTable->verticalHeader()->setDefaultSectionSize(height);
-    pluginsTable->verticalHeader()->setResizeMode(QHeaderView::Fixed);
+    //pluginsTable->verticalHeader()->setDefaultSectionSize(height);
+    //pluginsTable->verticalHeader()->setResizeMode(QHeaderView::Fixed);
 
     // Adjust the tableview widths inside the splitter
     QList<int> sizeList;

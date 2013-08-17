@@ -16,6 +16,8 @@
 
 #include <components/fileorderlist/utils/lineedit.hpp>
 
+#include "components/fileorderlist/masterproxymodel.hpp"
+
 FileDialog::FileDialog(QWidget *parent) :
     QDialog(parent)
 {
@@ -24,7 +26,7 @@ FileDialog::FileDialog(QWidget *parent) :
     // Models
     mDataFilesModel = new DataFilesModel(this);
 
-    mMastersProxyModel = new QSortFilterProxyModel();
+    mMastersProxyModel = new MasterProxyModel();
     mMastersProxyModel->setFilterRegExp("game"); //QString("^.*\\.esm"));
     mMastersProxyModel->setFilterRole (Qt::UserRole);
     mMastersProxyModel->setSourceModel(mDataFilesModel);

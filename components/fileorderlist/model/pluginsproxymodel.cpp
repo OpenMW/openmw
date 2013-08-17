@@ -9,9 +9,7 @@ PluginsProxyModel::~PluginsProxyModel()
 {
 }
 
-QVariant PluginsProxyModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant PluginsProxyModel::data(const QModelIndex &index, int role) const
 {
-    //if (orientation != Qt::Vertical || role != Qt::DisplayRole)
-        return QSortFilterProxyModel::headerData(section, orientation, role);
-   // return section + 1;
+    return QSortFilterProxyModel::data (index, role);
 }

@@ -12,7 +12,7 @@ public:
     explicit PluginsProxyModel(QObject *parent = 0);
     ~PluginsProxyModel();
 
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const;
+    virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
 };
 
 #endif // PLUGINSPROXYMODEL_HPP
