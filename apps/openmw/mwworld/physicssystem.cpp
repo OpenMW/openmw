@@ -41,24 +41,21 @@ namespace MWWorld
             return normal.angleBetween(Ogre::Vector3(0.0f,0.0f,1.0f)).valueDegrees();
         }
 
-        static bool stepMove(Ogre::Vector3& position, const Ogre::Quaternion& orient,
+        static bool stepMove(btCollisionObject *colobj, Ogre::Vector3 &position,
                              const Ogre::Vector3 &velocity, float &remainingTime,
-                             const Ogre::Vector3 &halfExtents, bool isInterior,
                              OEngine::Physic::PhysicEngine *engine)
         {
             traceResults trace;
-            newtrace(&trace, orient, position, position+Ogre::Vector3(0.0f,0.0f,sStepSize),
-                     halfExtents, isInterior, engine);
+            actortrace(&trace, colobj, position, position+Ogre::Vector3(0.0f,0.0f,sStepSize), engine);
             if(trace.fraction == 0.0f)
                 return false;
 
-            newtrace(&trace, orient, trace.endpos, trace.endpos + velocity*remainingTime,
-                     halfExtents, isInterior, engine);
+            actortrace(&trace, colobj, trace.endpos, trace.endpos + velocity*remainingTime, engine);
             if(trace.fraction == 0.0f || (trace.fraction != 1.0f && getSlope(trace.planenormal) > sMaxSlope))
                 return false;
             float movefrac = trace.fraction;
 
-            newtrace(&trace, orient, trace.endpos, trace.endpos-Ogre::Vector3(0.0f,0.0f,sStepSize), halfExtents, isInterior, engine);
+            actortrace(&trace, colobj, trace.endpos, trace.endpos-Ogre::Vector3(0.0f,0.0f,sStepSize), engine);
             if(getSlope(trace.planenormal) <= sMaxSlope)
             {
                 // only step down onto semi-horizontal surfaces. don't step down onto the side of a house or a wall.
@@ -100,7 +97,7 @@ namespace MWWorld
             bool wasCollisionMode = physicActor->getCollisionMode();
             physicActor->enableCollisions(false);
 
-            Ogre::Vector3 halfExtents = physicActor->getHalfExtents();// + Vector3(1,1,1);
+            Ogre::Vector3 halfExtents = physicActor->getHalfExtents();
             halfExtents.z = 1; // we trace the feet only, so we use a very thin box
 
             Ogre::Vector3 newPosition = position;
@@ -133,15 +130,15 @@ namespace MWWorld
             if(!physicActor || !physicActor->getCollisionMode())
             {
                 // FIXME: This works, but it's inconcsistent with how the rotations are applied elsewhere. Why?
-                return position + (Ogre::Quaternion(Ogre::Radian( -refpos.rot[2]), Ogre::Vector3::UNIT_Z)*
-                                   Ogre::Quaternion(Ogre::Radian( -refpos.rot[1]), Ogre::Vector3::UNIT_Y)*
-                                   Ogre::Quaternion(Ogre::Radian(  refpos.rot[0]), Ogre::Vector3::UNIT_X)) *
+                return position + (Ogre::Quaternion(Ogre::Radian(-refpos.rot[2]), Ogre::Vector3::UNIT_Z)*
+                                   Ogre::Quaternion(Ogre::Radian(-refpos.rot[1]), Ogre::Vector3::UNIT_Y)*
+                                   Ogre::Quaternion(Ogre::Radian( refpos.rot[0]), Ogre::Vector3::UNIT_X)) *
                                   movement;
             }
 
-            bool isInterior = !ptr.getCell()->isExterior();
-            Ogre::Vector3 halfExtents = physicActor->getHalfExtents();// + Vector3(1,1,1);
-            physicActor->enableCollisions(false);
+            btCollisionObject *colobj = physicActor->getCollisionBody();
+            Ogre::Vector3 halfExtents = physicActor->getHalfExtents();
+            position.z += halfExtents.z;
 
             traceResults trace;
             bool onground = false;
@@ -158,7 +155,7 @@ namespace MWWorld
             {
                 if(!(movement.z > 0.0f))
                 {
-                    newtrace(&trace, orient, position, position-Ogre::Vector3(0,0,4), halfExtents, isInterior, engine);
+                    actortrace(&trace, colobj, position, position-Ogre::Vector3(0,0,4), engine);
                     if(trace.fraction < 1.0f && getSlope(trace.planenormal) <= sMaxSlope)
                         onground = true;
                 }
@@ -178,7 +175,7 @@ namespace MWWorld
             for(int iterations = 0;iterations < sMaxIterations && remainingTime > 0.01f;++iterations)
             {
                 // trace to where character would go if there were no obstructions
-                newtrace(&trace, orient, newPosition, newPosition+velocity*remainingTime, halfExtents, isInterior, engine);
+                actortrace(&trace, colobj, newPosition, newPosition+velocity*remainingTime, engine);
 
                 // check for obstructions
                 if(trace.fraction >= 1.0f)
@@ -190,7 +187,7 @@ namespace MWWorld
 
                 //std::cout<<"angle: "<<getSlope(trace.planenormal)<<"\n";
                 // We hit something. Try to step up onto it.
-                if(stepMove(newPosition, orient, velocity, remainingTime, halfExtents, isInterior, engine))
+                if(stepMove(colobj, newPosition, velocity, remainingTime, engine))
                     onground = gravity;
                 else
                 {
@@ -209,7 +206,7 @@ namespace MWWorld
 
             if(onground)
             {
-                newtrace(&trace, orient, newPosition, newPosition-Ogre::Vector3(0,0,sStepSize+4.0f), halfExtents, isInterior, engine);
+                actortrace(&trace, colobj, newPosition, newPosition-Ogre::Vector3(0,0,sStepSize+4.0f), engine);
                 if(trace.fraction < 1.0f && getSlope(trace.planenormal) <= sMaxSlope)
                     newPosition.z = trace.endpos.z + 2.0f;
                 else
@@ -218,8 +215,8 @@ namespace MWWorld
 
             physicActor->setOnGround(onground);
             physicActor->setVerticalForce(!onground ? velocity.z - time*627.2f : 0.0f);
-            physicActor->enableCollisions(true);
 
+            newPosition.z -= halfExtents.z;
             return newPosition;
         }
     };
