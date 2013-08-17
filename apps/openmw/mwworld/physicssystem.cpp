@@ -427,8 +427,6 @@ namespace MWWorld
 
     void PhysicsSystem::removeObject (const std::string& handle)
     {
-        //TODO:check if actor???
-
         mEngine->removeCharacter(handle);
         mEngine->removeRigidBody(handle);
         mEngine->deleteRigidBody(handle);
@@ -539,5 +537,40 @@ namespace MWWorld
         max.z = btMax.z();
 
         return true;
+    }
+
+
+    void PhysicsSystem::queueObjectMovement(const Ptr &ptr, const Ogre::Vector3 &movement)
+    {
+        PtrVelocityList::iterator iter = mMovementQueue.begin();
+        for(;iter != mMovementQueue.end();iter++)
+        {
+            if(iter->first == ptr)
+            {
+                iter->second = movement;
+                return;
+            }
+        }
+
+        mMovementQueue.push_back(std::make_pair(ptr, movement));
+    }
+
+    const PtrVelocityList& PhysicsSystem::applyQueuedMovement(float dt)
+    {
+        mMovementResults.clear();
+
+        const MWBase::World *world = MWBase::Environment::get().getWorld();
+        PtrVelocityList::iterator iter = mMovementQueue.begin();
+        for(;iter != mMovementQueue.end();iter++)
+        {
+            Ogre::Vector3 newpos;
+            newpos = move(iter->first, iter->second, dt,
+                          !world->isSwimming(iter->first) && !world->isFlying(iter->first));
+            mMovementResults.push_back(std::make_pair(iter->first, newpos));
+        }
+
+        mMovementQueue.clear();
+
+        return mMovementResults;
     }
 }

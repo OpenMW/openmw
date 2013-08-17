@@ -5,6 +5,8 @@
 
 #include <btBulletCollisionCommon.h>
 
+#include "ptr.hpp"
+
 
 namespace OEngine
 {
@@ -21,7 +23,8 @@ namespace OEngine
 namespace MWWorld
 {
     class World;
-    class Ptr;
+
+    typedef std::vector<std::pair<Ptr,Ogre::Vector3> > PtrVelocityList;
 
     class PhysicsSystem
     {
@@ -80,11 +83,20 @@ namespace MWWorld
 
             bool getObjectAABB(const MWWorld::Ptr &ptr, Ogre::Vector3 &min, Ogre::Vector3 &max);
 
+            /// Queues velocity movement for a Ptr. If a Ptr is already queued, its velocity will
+            /// be overwritten. Valid until the next call to applyQueuedMovement.
+            void queueObjectMovement(const Ptr &ptr, const Ogre::Vector3 &velocity);
+
+            const PtrVelocityList& applyQueuedMovement(float dt);
+
         private:
 
             OEngine::Render::OgreRenderer &mRender;
             OEngine::Physic::PhysicEngine* mEngine;
             std::map<std::string, std::string> handleToMesh;
+
+            PtrVelocityList mMovementQueue;
+            PtrVelocityList mMovementResults;
 
             PhysicsSystem (const PhysicsSystem&);
             PhysicsSystem& operator= (const PhysicsSystem&);
