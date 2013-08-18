@@ -18,7 +18,7 @@ class QMenu;
 class DataFilesModel;
 class PluginsProxyModel;
 
-class FileDialog : public FileOrderList::ContentSelector
+class FileDialog : public EsxSelector::ContentSelector
 {
     Q_OBJECT
 public:

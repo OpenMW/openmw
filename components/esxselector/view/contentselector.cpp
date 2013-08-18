@@ -10,19 +10,19 @@
 #include <QMenu>
 #include <QContextMenuEvent>
 
-FileOrderList::ContentSelector::ContentSelector(QWidget *parent) :
+EsxSelector::ContentSelector::ContentSelector(QWidget *parent) :
     QWidget(parent)
 {
     setupUi(this);
     buildModelsAndViews();
 }
 
-void FileOrderList::ContentSelector::buildModelsAndViews()
+void EsxSelector::ContentSelector::buildModelsAndViews()
 {
     // Models
     mDataFilesModel = new DataFilesModel (this);
 
-    mMasterProxyModel = new FileOrderList::MasterProxyModel (this, mDataFilesModel);
+    mMasterProxyModel = new EsxSelector::MasterProxyModel (this, mDataFilesModel);
     mPluginsProxyModel = new PluginsProxyModel (this, mDataFilesModel);
 
     masterView->setModel(mMasterProxyModel);
@@ -35,7 +35,7 @@ void FileOrderList::ContentSelector::buildModelsAndViews()
     connect(profilesComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(slotCurrentProfileIndexChanged(int)));
 }
 
-void FileOrderList::ContentSelector::addFiles(const QString &path)
+void EsxSelector::ContentSelector::addFiles(const QString &path)
 {
     mDataFilesModel->addFiles(path);
     mDataFilesModel->sort(3);  // Sort by date accessed
@@ -43,12 +43,12 @@ void FileOrderList::ContentSelector::addFiles(const QString &path)
     mDataFilesModel->uncheckAll();
 }
 
-void FileOrderList::ContentSelector::setEncoding(const QString &encoding)
+void EsxSelector::ContentSelector::setEncoding(const QString &encoding)
 {
     mDataFilesModel->setEncoding(encoding);
 }
 
-void FileOrderList::ContentSelector::setCheckState(QModelIndex index, QSortFilterProxyModel *model)
+void EsxSelector::ContentSelector::setCheckState(QModelIndex index, QSortFilterProxyModel *model)
 {
     if (!index.isValid())
         return;
@@ -66,12 +66,12 @@ void FileOrderList::ContentSelector::setCheckState(QModelIndex index, QSortFilte
     }
 }
 
-QStringList FileOrderList::ContentSelector::checkedItemsPaths()
+QStringList EsxSelector::ContentSelector::checkedItemsPaths()
 {
     return mDataFilesModel->checkedItemsPaths();
 }
 
-void FileOrderList::ContentSelector::updateViews()
+void EsxSelector::ContentSelector::updateViews()
 {
     // Ensure the columns are hidden because sort() re-enables them
     pluginView->setColumnHidden(1, true);
@@ -85,12 +85,12 @@ void FileOrderList::ContentSelector::updateViews()
 
 }
 
-void FileOrderList::ContentSelector::slotCurrentProfileIndexChanged(int index)
+void EsxSelector::ContentSelector::slotCurrentProfileIndexChanged(int index)
 {
     emit profileChanged(index);
 }
 
-void FileOrderList::ContentSelector::slotCurrentMasterIndexChanged(int index)
+void EsxSelector::ContentSelector::slotCurrentMasterIndexChanged(int index)
 {
     QObject *object = QObject::sender();
 
@@ -101,7 +101,7 @@ void FileOrderList::ContentSelector::slotCurrentMasterIndexChanged(int index)
     setCheckState(mMasterProxyModel->index(index, 0), mMasterProxyModel);
 }
 
-void FileOrderList::ContentSelector::slotPluginTableItemClicked(const QModelIndex &index)
+void EsxSelector::ContentSelector::slotPluginTableItemClicked(const QModelIndex &index)
 {
     setCheckState(index, mPluginsProxyModel);
 }

@@ -20,7 +20,7 @@ class PluginsProxyModel;
 
 namespace Files { struct ConfigurationManager; }
 
-class DataFilesPage : public FileOrderList::ContentSelector
+class DataFilesPage : public EsxSelector::ContentSelector
 {
     Q_OBJECT
 public:

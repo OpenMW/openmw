@@ -5,7 +5,7 @@
 
 class QAbstractTableModel;
 
-namespace FileOrderList
+namespace EsxSelector
 {
     class MasterProxyModel : public QSortFilterProxyModel
     {
