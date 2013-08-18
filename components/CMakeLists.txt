@@ -71,7 +71,7 @@ set (ESM_UI ${CMAKE_SOURCE_DIR}/files/ui/datafilespage.ui
 find_package(Qt4 COMPONENTS QtCore QtGui)
 
 if(QT_QTGUI_LIBRARY AND QT_QTCORE_LIBRARY)
-   add_component_qt_dir (fileorderlist
+   add_component_qt_dir (esxselector
         masterproxymodel contentselector
        model/modelitem model/datafilesmodel model/pluginsproxymodel model/esm/esmfile
        utils/profilescombobox utils/comboboxlineedit utils/lineedit utils/naturalsort
