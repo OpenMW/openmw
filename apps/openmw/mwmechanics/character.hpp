@@ -164,7 +164,7 @@ public:
 
     void updatePtr(const MWWorld::Ptr &ptr);
 
-    void update(float duration, Movement &movement);
+    void update(float duration);
 
     void playGroup(const std::string &groupname, int mode, int count);
     void skipAnim();

@@ -106,6 +106,9 @@ namespace MWWorld
             void processDoors(float duration);
             ///< Run physics simulation and modify \a world accordingly.
 
+            void doPhysics(float duration);
+            ///< Run physics simulation and modify \a world accordingly.
+
             void ensureNeededRecords();
 
             int mPlayIntro;
@@ -276,8 +279,9 @@ namespace MWWorld
             virtual void positionToIndex (float x, float y, int &cellX, int &cellY) const;
             ///< Convert position to cell numbers
 
-            virtual void doPhysics(const PtrMovementList &actors, float duration);
-            ///< Run physics simulation and modify \a world accordingly.
+            virtual void queueMovement(const Ptr &ptr, const Ogre::Vector3 &velocity);
+            ///< Queues movement for \a ptr (in local space), to be applied in the next call to
+            /// doPhysics.
 
             virtual bool castRay (float x1, float y1, float z1, float x2, float y2, float z2);
             ///< cast a Ray and return true if there is an object in the ray path.

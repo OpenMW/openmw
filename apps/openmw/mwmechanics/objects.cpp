@@ -65,10 +65,7 @@ void Objects::update(float duration, bool paused)
     if(!paused)
     {
         for(PtrControllerMap::iterator iter(mObjects.begin());iter != mObjects.end();++iter)
-        {
-            Movement movement;
-            iter->second->update(duration, movement);
-        }
+            iter->second->update(duration);
     }
 }
 

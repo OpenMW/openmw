@@ -300,17 +300,8 @@ namespace MWMechanics
 
         if(!paused)
         {
-            mMovement.reserve(mActors.size());
-
             for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
-            {
-                Movement movement;
-                iter->second->update(duration, movement);
-                mMovement.push_back(std::make_pair(iter->first, movement));
-            }
-            MWBase::Environment::get().getWorld()->doPhysics(mMovement, duration);
-
-            mMovement.clear();
+                iter->second->update(duration);
         }
     }
 

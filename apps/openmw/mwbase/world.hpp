@@ -250,8 +250,9 @@ namespace MWBase
             virtual void positionToIndex (float x, float y, int &cellX, int &cellY) const = 0;
             ///< Convert position to cell numbers
 
-            virtual void doPhysics (const MWWorld::PtrMovementList &actors, float duration) = 0;
-            ///< Run physics simulation and modify \a world accordingly.
+            virtual void queueMovement(const MWWorld::Ptr &ptr, const Ogre::Vector3 &velocity) = 0;
+            ///< Queues movement for \a ptr (in local space), to be applied in the next call to
+            /// doPhysics.
 
             virtual bool castRay (float x1, float y1, float z1, float x2, float y2, float z2) = 0;
             ///< cast a Ray and return true if there is an object in the ray path.

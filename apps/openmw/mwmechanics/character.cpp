@@ -663,9 +663,11 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
     return forcestateupdate;
 }
 
-void CharacterController::update(float duration, Movement &movement)
+void CharacterController::update(float duration)
 {
+    MWBase::World *world = MWBase::Environment::get().getWorld();
     const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
+    Ogre::Vector3 movement(0.0f);
 
     if(!cls.isActor())
     {
@@ -684,8 +686,6 @@ void CharacterController::update(float duration, Movement &movement)
     }
     else if(!cls.getCreatureStats(mPtr).isDead())
     {
-        MWBase::World *world = MWBase::Environment::get().getWorld();
-
         bool onground = world->isOnGround(mPtr);
         bool inwater = world->isSwimming(mPtr);
         bool isrunning = cls.getStance(mPtr, MWWorld::Class::Run);
@@ -796,45 +796,41 @@ void CharacterController::update(float duration, Movement &movement)
             }
         }
 
-        vec *= duration;
-        movement.mPosition[0] += vec.x;
-        movement.mPosition[1] += vec.y;
-        movement.mPosition[2] += vec.z;
-        rot *= duration;
-        movement.mRotation[0] += rot.x;
-        movement.mRotation[1] += rot.y;
-        movement.mRotation[2] += rot.z;
-
         if(cls.isNpc())
             forcestateupdate = updateNpcState(onground, inwater, isrunning, sneak);
 
         refreshCurrentAnims(idlestate, movestate, forcestateupdate);
+
+        rot *= duration * Ogre::Math::RadiansToDegrees(1.0f);
+        world->rotateObject(mPtr, rot.x, rot.y, rot.z, true);
+
+        world->queueMovement(mPtr, vec);
+        movement = vec;
     }
     else if(cls.getCreatureStats(mPtr).isDead())
     {
         MWBase::Environment::get().getWorld()->enableActorCollision(mPtr, false);
+        world->queueMovement(mPtr, Ogre::Vector3(0.0f));
     }
 
     if(mAnimation && !mSkipAnim)
     {
-        Ogre::Vector3 moved = mAnimation->runAnimation(duration);
+        Ogre::Vector3 moved = mAnimation->runAnimation(duration) / duration;
         // Ensure we're moving in generally the right direction
         if(mMovementSpeed > 0.f)
         {
-            if((movement.mPosition[0] < 0.0f && movement.mPosition[0] < moved.x*2.0f) ||
-               (movement.mPosition[0] > 0.0f && movement.mPosition[0] > moved.x*2.0f))
-                moved.x = movement.mPosition[0];
-            if((movement.mPosition[1] < 0.0f && movement.mPosition[1] < moved.y*2.0f) ||
-               (movement.mPosition[1] > 0.0f && movement.mPosition[1] > moved.y*2.0f))
-                moved.y = movement.mPosition[1];
-            if((movement.mPosition[2] < 0.0f && movement.mPosition[2] < moved.z*2.0f) ||
-               (movement.mPosition[2] > 0.0f && movement.mPosition[2] > moved.z*2.0f))
-                moved.z = movement.mPosition[2];
+            if((movement.x < 0.0f && movement.x < moved.x*2.0f) ||
+               (movement.x > 0.0f && movement.x > moved.x*2.0f))
+                moved.x = movement.x;
+            if((movement.y < 0.0f && movement.y < moved.y*2.0f) ||
+               (movement.y > 0.0f && movement.y > moved.y*2.0f))
+                moved.y = movement.y;
+            if((movement.z < 0.0f && movement.z < moved.z*2.0f) ||
+               (movement.z > 0.0f && movement.z > moved.z*2.0f))
+                moved.z = movement.z;
         }
-
-        movement.mPosition[0] = moved.x;
-        movement.mPosition[1] = moved.y;
-        movement.mPosition[2] = moved.z;
+        if(moved.squaredLength() > 1.0f)
+            world->queueMovement(mPtr, moved);
     }
     mSkipAnim = false;
 }
