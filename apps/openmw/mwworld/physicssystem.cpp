@@ -132,8 +132,10 @@ namespace MWWorld
             position.z += halfExtents.z;
 
             OEngine::Physic::ActorTracer tracer;
-            bool onground = false;
+            bool wasOnGround = false;
+            bool isOnGround = false;
             const Ogre::Quaternion orient; // Don't rotate actor collision boxes
+            Ogre::Vector3 inertia(0.0f);
             Ogre::Vector3 velocity;
             if(!gravity)
             {
@@ -144,17 +146,19 @@ namespace MWWorld
             }
             else
             {
-                if(!(movement.z > 0.0f))
+                tracer.doTrace(colobj, position, position-Ogre::Vector3(0,0,4), engine);
+                if(tracer.mFraction < 1.0f && getSlope(tracer.mPlaneNormal) <= sMaxSlope)
                 {
-                    tracer.doTrace(colobj, position, position-Ogre::Vector3(0,0,4), engine);
-                    if(tracer.mFraction < 1.0f && getSlope(tracer.mPlaneNormal) <= sMaxSlope)
-                        onground = true;
+                    wasOnGround = true;
+                    if(!(movement.z > 0.0f))
+                        isOnGround = true;
                 }
-                velocity = Ogre::Quaternion(Ogre::Radian(-refpos.rot[2]), Ogre::Vector3::UNIT_Z) * movement;
-                velocity.z += physicActor->getVerticalForce();
+                inertia = physicActor->getInertialForce();
+                velocity  = Ogre::Quaternion(Ogre::Radian(-refpos.rot[2]), Ogre::Vector3::UNIT_Z) * movement;
+                velocity += inertia;
             }
 
-            if(onground)
+            if(isOnGround)
             {
                 // if we're on the ground, don't try to fall
                 velocity.z = std::max(0.0f, velocity.z);
@@ -179,7 +183,7 @@ namespace MWWorld
                 //std::cout<<"angle: "<<getSlope(trace.planenormal)<<"\n";
                 // We hit something. Try to step up onto it.
                 if(stepMove(colobj, newPosition, velocity, remainingTime, engine))
-                    onground = gravity;
+                    isOnGround = gravity;
                 else
                 {
                     // Can't move this way, try to find another spot along the plane
@@ -195,17 +199,25 @@ namespace MWWorld
                 }
             }
 
-            if(onground)
+            if(isOnGround)
             {
                 tracer.doTrace(colobj, newPosition, newPosition-Ogre::Vector3(0,0,sStepSize+4.0f), engine);
                 if(tracer.mFraction < 1.0f && getSlope(tracer.mPlaneNormal) <= sMaxSlope)
                     newPosition.z = tracer.mEndPos.z + 2.0f;
                 else
-                    onground = false;
+                    isOnGround = false;
             }
 
-            physicActor->setOnGround(onground);
-            physicActor->setVerticalForce(!onground ? velocity.z - time*627.2f : 0.0f);
+            physicActor->setOnGround(isOnGround);
+            if(isOnGround)
+                physicActor->setInertialForce(Ogre::Vector3(0.0f));
+            else
+            {
+                if(wasOnGround)
+                    inertia = velocity;
+                inertia.z -= time*627.2f;
+                physicActor->setInertialForce(inertia);
+            }
 
             newPosition.z -= halfExtents.z;
             return newPosition;

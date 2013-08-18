@@ -19,7 +19,8 @@ namespace Physic
 
     PhysicActor::PhysicActor(const std::string &name, const std::string &mesh, PhysicEngine *engine, const Ogre::Vector3 &position, const Ogre::Quaternion &rotation, float scale)
       : mName(name), mEngine(engine), mMesh(mesh), mBoxScaledTranslation(0,0,0), mBoxRotationInverse(0,0,0,0)
-      , mBody(0), mRaycastingBody(0), onGround(false), collisionMode(true), mBoxRotation(0,0,0,0), verticalForce(0.0f)
+      , mBody(0), mRaycastingBody(0), mOnGround(false), mCollisionMode(true), mBoxRotation(0,0,0,0)
+      , mForce(0.0f)
     {
         mBody = mEngine->createAndAdjustRigidBody(mMesh, mName, scale, position, rotation, &mBoxScaledTranslation, &mBoxRotation);
         mRaycastingBody = mEngine->createAndAdjustRigidBody(mMesh, mName, scale, position, rotation, &mBoxScaledTranslation, &mBoxRotation, true);
@@ -45,9 +46,9 @@ namespace Physic
     void PhysicActor::enableCollisions(bool collision)
     {
         assert(mBody);
-        if(collision && !collisionMode) enableCollisionBody();
-        if(!collision && collisionMode) disableCollisionBody();
-        collisionMode = collision;
+        if(collision && !mCollisionMode) enableCollisionBody();
+        if(!collision && mCollisionMode) disableCollisionBody();
+        mCollisionMode = collision;
     }
 
 
@@ -123,24 +124,14 @@ namespace Physic
         return Ogre::Vector3(0.0f);
     }
 
-    void PhysicActor::setVerticalForce(float force)
+    void PhysicActor::setInertialForce(const Ogre::Vector3 &force)
     {
-        verticalForce = force;
-    }
-
-    float PhysicActor::getVerticalForce() const
-    {
-        return verticalForce;
+        mForce = force;
     }
 
     void PhysicActor::setOnGround(bool grounded)
     {
-        onGround = grounded;
-    }
-
-    bool PhysicActor::getOnGround() const
-    {
-        return collisionMode && onGround;
+        mOnGround = grounded;
     }
 
     void PhysicActor::disableCollisionBody()

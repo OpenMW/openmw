@@ -104,7 +104,7 @@ namespace Physic
 
         bool getCollisionMode() const
         {
-            return collisionMode;
+            return mCollisionMode;
         }
 
 
@@ -130,18 +130,24 @@ namespace Physic
         Ogre::Vector3 getHalfExtents() const;
 
         /**
-         * Sets the current amount of vertical force (gravity) affecting this physic actor
+         * Sets the current amount of inertial force (incl. gravity) affecting this physic actor
          */
-        void setVerticalForce(float force);
+        void setInertialForce(const Ogre::Vector3 &force);
 
         /**
-         * Gets the current amount of vertical force (gravity) affecting this physic actor
+         * Gets the current amount of inertial force (incl. gravity) affecting this physic actor
          */
-        float getVerticalForce() const;
+        const Ogre::Vector3 &getInertialForce() const
+        {
+            return mForce;
+        }
 
         void setOnGround(bool grounded);
 
-        bool getOnGround() const;
+        bool getOnGround() const
+        {
+            return mCollisionMode && mOnGround;
+        }
 
         btCollisionObject *getCollisionBody() const
         {
@@ -169,9 +175,9 @@ public:
         Ogre::Quaternion mBoxRotation;
         btQuaternion mBoxRotationInverse;
 
-        float verticalForce;
-        bool onGround;
-        bool collisionMode;
+        Ogre::Vector3 mForce;
+        bool mOnGround;
+        bool mCollisionMode;
 
         std::string mMesh;
         std::string mName;
