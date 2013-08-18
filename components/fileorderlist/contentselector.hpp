@@ -30,8 +30,10 @@ namespace FileOrderList
 
         void addFiles(const QString &path);
         void setEncoding(const QString &encoding);
+        void setPluginCheckState();
         void setCheckState(QModelIndex index, QSortFilterProxyModel *model);
         QStringList checkedItemsPaths();
+        void on_checkAction_triggered();
 
     signals:
         void profileChanged(int index);
@@ -40,6 +42,7 @@ namespace FileOrderList
         void updateViews();
         void slotCurrentProfileIndexChanged(int index);
         void slotCurrentMasterIndexChanged(int index);
+        void slotPluginTableItemClicked(const QModelIndex &index);
     };
 }
 

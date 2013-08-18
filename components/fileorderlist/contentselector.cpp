@@ -7,6 +7,9 @@
 #include <QSortFilterProxyModel>
 
 #include <QDebug>
+#include <QMenu>
+#include <QContextMenuEvent>
+
 FileOrderList::ContentSelector::ContentSelector(QWidget *parent) :
     QWidget(parent)
 {
@@ -26,7 +29,7 @@ void FileOrderList::ContentSelector::buildModelsAndViews()
     pluginView->setModel(mPluginsProxyModel);
 
     connect(mDataFilesModel, SIGNAL(layoutChanged()), this, SLOT(updateViews()));
-    //connect(pluginView, SIGNAL())
+    connect(pluginView, SIGNAL(clicked(const QModelIndex &)), this, SLOT(slotPluginTableItemClicked(const QModelIndex &)));
     connect(masterView, SIGNAL(currentIndexChanged(int)), this, SLOT(slotCurrentMasterIndexChanged(int)));
     connect(profilesComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(slotCurrentProfileIndexChanged(int)));
 }
@@ -88,7 +91,6 @@ void FileOrderList::ContentSelector::slotCurrentProfileIndexChanged(int index)
 
 void FileOrderList::ContentSelector::slotCurrentMasterIndexChanged(int index)
 {
-    qDebug() << "index Changed: " << index;
     QObject *object = QObject::sender();
 
     // Not a signal-slot call
@@ -96,4 +98,9 @@ void FileOrderList::ContentSelector::slotCurrentMasterIndexChanged(int index)
         return;
 
     setCheckState(mMasterProxyModel->index(index, 0), mMasterProxyModel);
+}
+
+void FileOrderList::ContentSelector::slotPluginTableItemClicked(const QModelIndex &index)
+{
+    setCheckState(index, mPluginsProxyModel);
 }

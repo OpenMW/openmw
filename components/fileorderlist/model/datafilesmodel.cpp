@@ -30,7 +30,19 @@ void DataFilesModel::setEncoding(const QString &encoding)
 
 void DataFilesModel::setCheckState(const QModelIndex &index, Qt::CheckState state)
 {
-    setData(index, state, Qt::CheckStateRole);
+    if (!index.isValid())
+        return;
+
+    QString name = item(index.row())->fileName();
+    mCheckStates[name] = state;
+
+    // Force a redraw of the view since unchecking one item can affect another
+    QModelIndex firstIndex = indexFromItem(mFiles.first());
+    QModelIndex lastIndex = indexFromItem(mFiles.last());
+
+    emit dataChanged(firstIndex, lastIndex);
+    emit checkedItemsChanged(checkedItems());
+
 }
 
 Qt::CheckState DataFilesModel::checkState(const QModelIndex &index)
@@ -209,19 +221,6 @@ bool DataFilesModel::setData(const QModelIndex &index, const QVariant &value, in
 {
     if (!index.isValid())
             return false;
-
-    if (role == Qt::CheckStateRole) {
-        QString name = item(index.row())->fileName();
-        mCheckStates[name] = static_cast<Qt::CheckState>(value.toInt());
-
-        // Force a redraw of the view since unchecking one item can affect another
-        QModelIndex firstIndex = indexFromItem(mFiles.first());
-        QModelIndex lastIndex = indexFromItem(mFiles.last());
-
-        emit dataChanged(firstIndex, lastIndex);
-        emit checkedItemsChanged(checkedItems());
-        return true;
-    }
 
     return false;
 }
