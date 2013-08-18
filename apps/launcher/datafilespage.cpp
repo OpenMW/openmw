@@ -29,29 +29,14 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
     , mLauncherSettings(launcherSettings)
     , ContentSelector(parent)
 {
-    // Adjust the tableview widths inside the splitter
-    QList<int> sizeList;
-    sizeList << mLauncherSettings.value(QString("General/MastersTable/width"), QString("200")).toInt();
-    sizeList << mLauncherSettings.value(QString("General/PluginTable/width"), QString("340")).toInt();
-
-    splitter->setSizes(sizeList);
 
     // Create a dialog for the new profile name input
     mNewProfileDialog = new TextInputDialog(tr("New Profile"), tr("Profile name:"), this);
 
-    connect(profilesComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(slotCurrentIndexChanged(int)));
-
     connect(mNewProfileDialog->lineEdit(), SIGNAL(textChanged(QString)), this, SLOT(updateOkButton(QString)));
 
-    connect(pluginsTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckState(QModelIndex)));
-    //connect(mastersTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckState(QModelIndex)));
-
-    connect(pluginsTable, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
-    //connect(mastersTable, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
-
-    //connect(filterLineEdit, SIGNAL(textChanged(QString)), this, SLOT(filterChanged(QString)));
-
-    connect(splitter, SIGNAL(splitterMoved(int,int)), this, SLOT(updateSplitter()));
+    //connect(pluginView, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
+    //connect(masterView, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
 
     createActions();
     setupDataFiles();
@@ -193,47 +178,9 @@ void DataFilesPage::updateOkButton(const QString &text)
             : mNewProfileDialog->setOkButtonEnabled(false);
 }
 
-void DataFilesPage::updateSplitter()
-{
-    // Sigh, update the saved splitter size in settings only when moved
-    // Since getting mSplitter->sizes() if page is hidden returns invalid values
-    QList<int> sizes = splitter->sizes();
-
-    mLauncherSettings.setValue(QString("General/MastersTable/width"), QString::number(sizes.at(0)));
-    mLauncherSettings.setValue(QString("General/PluginsTable/width"), QString::number(sizes.at(1)));
-}
-
-void DataFilesPage::updateViews()
-{
-    // Ensure the columns are hidden because sort() re-enables them
-    /*
-    mastersTable->setColumnHidden(1, true);
-    mastersTable->setColumnHidden(2, true);
-    mastersTable->setColumnHidden(3, true);
-    mastersTable->setColumnHidden(4, true);
-    mastersTable->setColumnHidden(5, true);
-    mastersTable->setColumnHidden(6, true);
-    mastersTable->setColumnHidden(7, true);
-    mastersTable->setColumnHidden(8, true);
-*/
-    pluginsTable->setColumnHidden(1, true);
-    pluginsTable->setColumnHidden(2, true);
-    pluginsTable->setColumnHidden(3, true);
-    pluginsTable->setColumnHidden(4, true);
-    pluginsTable->setColumnHidden(5, true);
-    pluginsTable->setColumnHidden(6, true);
-    pluginsTable->setColumnHidden(7, true);
-    pluginsTable->setColumnHidden(8, true);
-}
-
 void DataFilesPage::setProfilesComboBoxIndex(int index)
 {
     profilesComboBox->setCurrentIndex(index);
-}
-
-void DataFilesPage::slotCurrentIndexChanged(int index)
-{
-    emit profileChanged(index);
 }
 
 QAbstractItemModel* DataFilesPage::profilesComboBoxModel()
@@ -282,54 +229,13 @@ void DataFilesPage::on_deleteProfileAction_triggered()
     }
 }
 
-void DataFilesPage::on_checkAction_triggered()
-{
-    if (pluginsTable->hasFocus())
-        setPluginsCheckstates(Qt::Checked);
-
-    //if (mastersTable->hasFocus())
-    //    setMastersCheckstates(Qt::Checked);
-
-}
-
-void DataFilesPage::on_uncheckAction_triggered()
-{
-    if (pluginsTable->hasFocus())
-        setPluginsCheckstates(Qt::Unchecked);
-
-    //if (mastersTable->hasFocus())
-    //    setMastersCheckstates(Qt::Unchecked);
-}
-
-void DataFilesPage::setMastersCheckstates(Qt::CheckState state)
-{/*
-    //if (!mastersTable->selectionModel()->hasSelection()) {
-    //    return;
-    //}
-
-    //QModelIndexList indexes = mastersTable->selectionModel()->selectedIndexes();
-
-    foreach (const QModelIndex &index, indexes)
-    {
-        if (!index.isValid())
-            return;
-
-        QModelIndex sourceIndex = mMastersProxyModel->mapToSource(index);
-
-        if (!sourceIndex.isValid())
-            return;
-
-        mDataFilesModel->setCheckState(sourceIndex, state);
-    }*/
-}
-
 void DataFilesPage::setPluginsCheckstates(Qt::CheckState state)
 {
-    if (!pluginsTable->selectionModel()->hasSelection()) {
+    if (!pluginView->selectionModel()->hasSelection()) {
         return;
     }
 
-    QModelIndexList indexes = pluginsTable->selectionModel()->selectedIndexes();
+    QModelIndexList indexes = pluginView->selectionModel()->selectedIndexes();
 
     foreach (const QModelIndex &index, indexes)
     {
@@ -389,7 +295,7 @@ void DataFilesPage::profileRenamed(const QString &previous, const QString &curre
     loadSettings();
 
 }
-
+/*
 void DataFilesPage::showContextMenu(const QPoint &point)
 {
     QObject *object = QObject::sender();
@@ -398,12 +304,12 @@ void DataFilesPage::showContextMenu(const QPoint &point)
     if (!object)
         return;
 
-    if (object->objectName() == QLatin1String("PluginsTable")) {
-        if (!pluginsTable->selectionModel()->hasSelection())
+    if (object->objectName() == QLatin1String("PluginView")) {
+        if (!pluginView->selectionModel()->hasSelection())
             return;
 
-        QPoint globalPos = pluginsTable->mapToGlobal(point);
-        QModelIndexList indexes = pluginsTable->selectionModel()->selectedIndexes();
+        QPoint globalPos = pluginView->mapToGlobal(point);
+        QModelIndexList indexes = pluginView->selectionModel()->selectedIndexes();
 
         // Show the check/uncheck actions depending on the state of the selected items
         uncheckAction->setEnabled(false);
@@ -427,13 +333,13 @@ void DataFilesPage::showContextMenu(const QPoint &point)
         // Show menu
         mContextMenu->exec(globalPos);
     }
-/*
-    if (object->objectName() == QLatin1String("MastersTable")) {
-        if (!mastersTable->selectionModel()->hasSelection())
+
+    if (object->objectName() == QLatin1String("MasterView")) {
+        if (!masterView->selectionModel()->hasSelection())
             return;
 
-        QPoint globalPos = mastersTable->mapToGlobal(point);
-        QModelIndexList indexes = mastersTable->selectionModel()->selectedIndexes();
+        QPoint globalPos = masterView->mapToGlobal(point);
+        QModelIndexList indexes = masterView->selectionModel()->selectedIndexes();
 
         // Show the check/uncheck actions depending on the state of the selected items
         uncheckAction->setEnabled(false);
@@ -456,5 +362,6 @@ void DataFilesPage::showContextMenu(const QPoint &point)
 
         mContextMenu->exec(globalPos);
     }
-    */
+
 }
+*/

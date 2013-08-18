@@ -11,8 +11,6 @@ class PluginsProxyModel : public QSortFilterProxyModel
 {
     Q_OBJECT
 
-    DataFilesModel *mSourceModel;
-
 public:
 
     explicit PluginsProxyModel(QObject *parent = 0, DataFilesModel *model = 0);

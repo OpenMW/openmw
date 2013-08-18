@@ -174,7 +174,7 @@ Qt::ItemFlags DataFilesModel::flags(const QModelIndex &index) const
         if (index.column() == 0) {
             return Qt::ItemIsUserCheckable | Qt::ItemIsSelectable;
         } else {
-            return Qt::NoItemFlags | Qt::ItemIsSelectable;
+            return Qt::ItemIsSelectable;
         }
     }
 
@@ -270,7 +270,7 @@ void DataFilesModel::addFiles(const QString &path)
 {
     QDir dir(path);
     QStringList filters;
-    filters << "*.esp" << "*.esm";
+    filters << "*.esp" << "*.esm" << "*.omwgame" << "*.omwaddon";
     dir.setNameFilters(filters);
 
     // Create a decoder for non-latin characters in esx metadata
@@ -319,9 +319,10 @@ void DataFilesModel::addFiles(const QString &path)
             // Put the file in the table
             if (findItem(path) == 0)
                 addFile(file);
+
         } catch(std::runtime_error &e) {
             // An error occurred while reading the .esp
-            qWarning() << "Error reading esp: " << e.what();
+            qWarning() << "Error reading addon file: " << e.what();
             continue;
         }
 
@@ -436,14 +437,10 @@ QStringList DataFilesModel::uncheckedItems()
 bool DataFilesModel::canBeChecked(EsmFile *file) const
 {
     //element can be checked if all its dependencies are
-    bool canBeChecked = true;
     foreach (const QString &master, file->masters())
     {
         if (!mCheckStates.contains(master) || mCheckStates[master] != Qt::Checked)
-        {
-            canBeChecked = false;
-            break;
-        }
+            return false;
     }
-    return canBeChecked;
+    return true;
 }

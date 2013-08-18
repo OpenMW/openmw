@@ -38,21 +38,16 @@ signals:
 public slots:
     void setProfilesComboBoxIndex(int index);
 
-    void showContextMenu(const QPoint &point);
+    //void showContextMenu(const QPoint &point);
     void profileChanged(const QString &previous, const QString &current);
     void profileRenamed(const QString &previous, const QString &current);
     void updateOkButton(const QString &text);
-    void updateSplitter();
-    void updateViews();
 
     // Action slots
     void on_newProfileAction_triggered();
     void on_deleteProfileAction_triggered();
-    void on_checkAction_triggered();
-    void on_uncheckAction_triggered();
 
 private slots:
-    void slotCurrentIndexChanged(int index);
 
 private:
 
@@ -65,7 +60,6 @@ private:
 
     TextInputDialog *mNewProfileDialog;
 
-    void setMastersCheckstates(Qt::CheckState state);
     void setPluginsCheckstates(Qt::CheckState state);
 
     void createActions();

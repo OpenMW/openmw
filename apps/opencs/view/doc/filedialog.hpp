@@ -42,9 +42,6 @@ private slots:
     void updateOpenButton(const QStringList &items);
     void updateCreateButton(const QString &name);
 
-
-    //void filterChanged(const QString &filter);
-
     void createButtonClicked();
 
 private:

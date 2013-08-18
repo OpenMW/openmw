@@ -30,11 +30,16 @@ namespace FileOrderList
 
         void addFiles(const QString &path);
         void setEncoding(const QString &encoding);
-        void setCheckState(QModelIndex index);
+        void setCheckState(QModelIndex index, QSortFilterProxyModel *model);
         QStringList checkedItemsPaths();
+
+    signals:
+        void profileChanged(int index);
 
     private slots:
         void updateViews();
+        void slotCurrentProfileIndexChanged(int index);
+        void slotCurrentMasterIndexChanged(int index);
     };
 }
 

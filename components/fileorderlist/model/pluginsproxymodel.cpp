@@ -2,7 +2,7 @@
 #include "datafilesmodel.hpp"
 
 PluginsProxyModel::PluginsProxyModel(QObject *parent, DataFilesModel *model) :
-    QSortFilterProxyModel(parent), mSourceModel (model)
+    QSortFilterProxyModel(parent)
 {
     setFilterRegExp (QString("addon"));
     setFilterRole (Qt::UserRole);
@@ -25,7 +25,7 @@ QVariant PluginsProxyModel::data(const QModelIndex &index, int role) const
         if (index.column() != 0)
                 return QVariant();
 
-            return mSourceModel->checkState(index);
+            return static_cast<DataFilesModel *>(sourceModel())->checkState(mapToSource(index));
         }
     };
 

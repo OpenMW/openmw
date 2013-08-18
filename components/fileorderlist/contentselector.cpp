@@ -6,6 +6,7 @@
 
 #include <QSortFilterProxyModel>
 
+#include <QDebug>
 FileOrderList::ContentSelector::ContentSelector(QWidget *parent) :
     QWidget(parent)
 {
@@ -22,40 +23,20 @@ void FileOrderList::ContentSelector::buildModelsAndViews()
     mPluginsProxyModel = new PluginsProxyModel (this, mDataFilesModel);
 
     masterView->setModel(mMasterProxyModel);
-/*
-    mastersTable->setModel(mMastersProxyModel);
-    mastersTable->setObjectName("MastersTable");
-    mastersTable->setContextMenuPolicy(Qt::CustomContextMenu);
-    mastersTable->setSortingEnabled(false);
-    mastersTable->setSelectionBehavior(QAbstractItemView::SelectRows);
-    mastersTable->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    mastersTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    mastersTable->setAlternatingRowColors(true);
-    mastersTable->horizontalHeader()->setStretchLastSection(true);
-
-    // Set the row height to the size of the checkboxes
-    mastersTable->verticalHeader()->setDefaultSectionSize(height);
-    mastersTable->verticalHeader()->setResizeMode(QHeaderView::Fixed);
-    mastersTable->verticalHeader()->hide();
-*/
-    pluginsTable->setModel(mPluginsProxyModel);
-    pluginsTable->setObjectName("PluginsTable");
-    pluginsTable->setContextMenuPolicy(Qt::CustomContextMenu);
-    pluginsTable->setSortingEnabled(false);
-    pluginsTable->setSelectionBehavior(QAbstractItemView::SelectRows);
-    pluginsTable->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    pluginsTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    pluginsTable->setAlternatingRowColors(true);
-    pluginsTable->setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
-    pluginsTable->horizontalHeader()->setStretchLastSection(true);
+    pluginView->setModel(mPluginsProxyModel);
 
     connect(mDataFilesModel, SIGNAL(layoutChanged()), this, SLOT(updateViews()));
+    connect(masterView, SIGNAL(currentIndexChanged(int)), this, SLOT(slotCurrentMasterIndexChanged(int)));
+
+    connect(profilesComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(slotCurrentProfileIndexChanged(int)));
 }
 
 void FileOrderList::ContentSelector::addFiles(const QString &path)
 {
     mDataFilesModel->addFiles(path);
     mDataFilesModel->sort(3);  // Sort by date accessed
+    masterView->setCurrentIndex(-1);
+    mDataFilesModel->uncheckAll();
 }
 
 void FileOrderList::ContentSelector::setEncoding(const QString &encoding)
@@ -63,39 +44,22 @@ void FileOrderList::ContentSelector::setEncoding(const QString &encoding)
     mDataFilesModel->setEncoding(encoding);
 }
 
-void FileOrderList::ContentSelector::setCheckState(QModelIndex index)
+void FileOrderList::ContentSelector::setCheckState(QModelIndex index, QSortFilterProxyModel *model)
 {
     if (!index.isValid())
         return;
 
-    QObject *object = QObject::sender();
-
-    // Not a signal-slot call
-    if (!object)
+    if (!model)
         return;
 
+    QModelIndex sourceIndex = model->mapToSource(index);
 
-    if (object->objectName() == QLatin1String("PluginsTable")) {
-        QModelIndex sourceIndex = mPluginsProxyModel->mapToSource(index);
-
-        if (sourceIndex.isValid()) {
-            (mDataFilesModel->checkState(sourceIndex) == Qt::Checked)
-                    ? mDataFilesModel->setCheckState(sourceIndex, Qt::Unchecked)
-                    : mDataFilesModel->setCheckState(sourceIndex, Qt::Checked);
-        }
+    if (sourceIndex.isValid())
+    {
+        (mDataFilesModel->checkState(sourceIndex) == Qt::Checked)
+                ? mDataFilesModel->setCheckState(sourceIndex, Qt::Unchecked)
+                : mDataFilesModel->setCheckState(sourceIndex, Qt::Checked);
     }
-
-    if (object->objectName() == QLatin1String("MastersTable")) {
-        QModelIndex sourceIndex = mMasterProxyModel->mapToSource(index);
-
-        if (sourceIndex.isValid()) {
-            (mDataFilesModel->checkState(sourceIndex) == Qt::Checked)
-                    ? mDataFilesModel->setCheckState(sourceIndex, Qt::Unchecked)
-                    : mDataFilesModel->setCheckState(sourceIndex, Qt::Checked);
-        }
-    }
-
-    return;
 }
 
 QStringList FileOrderList::ContentSelector::checkedItemsPaths()
@@ -106,13 +70,30 @@ QStringList FileOrderList::ContentSelector::checkedItemsPaths()
 void FileOrderList::ContentSelector::updateViews()
 {
     // Ensure the columns are hidden because sort() re-enables them
-    pluginsTable->setColumnHidden(1, true);
-    pluginsTable->setColumnHidden(3, true);
-    pluginsTable->setColumnHidden(4, true);
-    pluginsTable->setColumnHidden(5, true);
-    pluginsTable->setColumnHidden(6, true);
-    pluginsTable->setColumnHidden(7, true);
-    pluginsTable->setColumnHidden(8, true);
-    pluginsTable->resizeColumnsToContents();
+    pluginView->setColumnHidden(1, true);
+    pluginView->setColumnHidden(3, true);
+    pluginView->setColumnHidden(4, true);
+    pluginView->setColumnHidden(5, true);
+    pluginView->setColumnHidden(6, true);
+    pluginView->setColumnHidden(7, true);
+    pluginView->setColumnHidden(8, true);
+    pluginView->resizeColumnsToContents();
 
+}
+
+void FileOrderList::ContentSelector::slotCurrentProfileIndexChanged(int index)
+{
+    emit profileChanged(index);
+}
+
+void FileOrderList::ContentSelector::slotCurrentMasterIndexChanged(int index)
+{
+    qDebug() << "index Changed: " << index;
+    QObject *object = QObject::sender();
+
+    // Not a signal-slot call
+    if (!object)
+        return;
+
+    setCheckState(mMasterProxyModel->index(index, 0), mMasterProxyModel);
 }

@@ -49,22 +49,10 @@ FileDialog::FileDialog(QWidget *parent) :
     verticalLayout->addLayout(nameLayout);
     verticalLayout->addWidget(mButtonBox);
 
-    // Set sizes
-    QList<int> sizeList;
-    sizeList << 175;
-    sizeList << 200;
-
-    splitter->setSizes(sizeList);
-
     resize(600, 400);
 
   //  connect(mDataFilesModel, SIGNAL(checkedItemsChanged(QStringList)), this, SLOT(updateOpenButton(QStringList)));
     //connect(mNameLineEdit, SIGNAL(textChanged(QString)), this, SLOT(updateCreateButton(QString)));
-
-    //connect(filterLineEdit, SIGNAL(textChanged(QString)), this, SLOT(filterChanged(QString)));
-
-  //  connect(pluginsTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckState(QModelIndex)));
-    //connect(mastersTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckState(QModelIndex)));
 
   //  connect(mCreateButton, SIGNAL(clicked()), this, SLOT(createButtonClicked()));
 
@@ -89,13 +77,6 @@ void FileDialog::updateCreateButton(const QString &name)
 
     mCreateButton->setEnabled(!name.isEmpty());
 }
-/*
-void FileDialog::filterChanged(const QString &filter)
-{
-    QRegExp filterRe(filter, Qt::CaseInsensitive, QRegExp::FixedString);
-    mFilterProxyModel->setFilterRegExp(filterRe);
-}
-*/
 
 QString FileDialog::fileName()
 {
