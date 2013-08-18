@@ -49,7 +49,7 @@ FileDialog::FileDialog(QWidget *parent) :
     verticalLayout->addLayout(nameLayout);
     verticalLayout->addWidget(mButtonBox);
 
-    resize(600, 400);
+    resize(400, 400);
 
   //  connect(mDataFilesModel, SIGNAL(checkedItemsChanged(QStringList)), this, SLOT(updateOpenButton(QStringList)));
     //connect(mNameLineEdit, SIGNAL(textChanged(QString)), this, SLOT(updateCreateButton(QString)));

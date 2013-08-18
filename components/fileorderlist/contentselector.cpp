@@ -27,6 +27,7 @@ void FileOrderList::ContentSelector::buildModelsAndViews()
 
     masterView->setModel(mMasterProxyModel);
     pluginView->setModel(mPluginsProxyModel);
+    pluginView->
 
     connect(mDataFilesModel, SIGNAL(layoutChanged()), this, SLOT(updateViews()));
     connect(pluginView, SIGNAL(clicked(const QModelIndex &)), this, SLOT(slotPluginTableItemClicked(const QModelIndex &)));

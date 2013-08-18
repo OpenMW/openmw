@@ -30,6 +30,7 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
     , ContentSelector(parent)
 {
 
+    pluginView->hideColumn(2);
     // Create a dialog for the new profile name input
     mNewProfileDialog = new TextInputDialog(tr("New Profile"), tr("Profile name:"), this);
 
