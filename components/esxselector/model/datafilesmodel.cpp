@@ -2,33 +2,34 @@
 #include <QTextCodec>
 #include <QFileInfo>
 #include <QDir>
+#include <QtAlgorithms>
 
 #include <stdexcept>
 
 #include <components/esm/esmreader.hpp>
 
-#include "esm/esmfile.hpp"
+#include "esmfile.hpp"
 
 #include "datafilesmodel.hpp"
 
 #include <QDebug>
 
-DataFilesModel::DataFilesModel(QObject *parent) :
+EsxModel::DataFilesModel::DataFilesModel(QObject *parent) :
     QAbstractTableModel(parent)
 {
     mEncoding = QString("win1252");
 }
 
-DataFilesModel::~DataFilesModel()
+EsxModel::DataFilesModel::~DataFilesModel()
 {
 }
 
-void DataFilesModel::setEncoding(const QString &encoding)
+void EsxModel::DataFilesModel::setEncoding(const QString &encoding)
 {
     mEncoding = encoding;
 }
 
-void DataFilesModel::setCheckState(const QModelIndex &index, Qt::CheckState state)
+void EsxModel::DataFilesModel::setCheckState(const QModelIndex &index, Qt::CheckState state)
 {
     if (!index.isValid())
         return;
@@ -45,24 +46,24 @@ void DataFilesModel::setCheckState(const QModelIndex &index, Qt::CheckState stat
 
 }
 
-Qt::CheckState DataFilesModel::checkState(const QModelIndex &index)
+Qt::CheckState EsxModel::DataFilesModel::checkState(const QModelIndex &index)
 {
     EsmFile *file = item(index.row());
     return mCheckStates[file->fileName()];
 }
 
-int DataFilesModel::columnCount(const QModelIndex &parent) const
+int EsxModel::DataFilesModel::columnCount(const QModelIndex &parent) const
 {
     return parent.isValid() ? 0 : 9;
 }
 
-int DataFilesModel::rowCount(const QModelIndex &parent) const
+int EsxModel::DataFilesModel::rowCount(const QModelIndex &parent) const
 {
     return parent.isValid() ? 0 : mFiles.count();
 }
 
 
-bool DataFilesModel::moveRow(int oldrow, int row, const QModelIndex &parent)
+bool EsxModel::DataFilesModel::moveRow(int oldrow, int row, const QModelIndex &parent)
 {
     if (oldrow < 0 || row < 0 || oldrow == row)
         return false;
@@ -76,7 +77,7 @@ bool DataFilesModel::moveRow(int oldrow, int row, const QModelIndex &parent)
     return true;
 }
 
-QVariant DataFilesModel::data(const QModelIndex &index, int role) const
+QVariant EsxModel::DataFilesModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid())
         return QVariant();
@@ -166,7 +167,7 @@ QVariant DataFilesModel::data(const QModelIndex &index, int role) const
 
 }
 
-Qt::ItemFlags DataFilesModel::flags(const QModelIndex &index) const
+Qt::ItemFlags EsxModel::DataFilesModel::flags(const QModelIndex &index) const
 {
     if (!index.isValid())
         return Qt::NoItemFlags;
@@ -192,7 +193,7 @@ Qt::ItemFlags DataFilesModel::flags(const QModelIndex &index) const
 
 }
 
-QVariant DataFilesModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant EsxModel::DataFilesModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (role != Qt::DisplayRole)
         return QVariant();
@@ -217,7 +218,7 @@ QVariant DataFilesModel::headerData(int section, Qt::Orientation orientation, in
     return QVariant();
 }
 
-bool DataFilesModel::setData(const QModelIndex &index, const QVariant &value, int role)
+bool EsxModel::DataFilesModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     if (!index.isValid())
             return false;
@@ -225,7 +226,7 @@ bool DataFilesModel::setData(const QModelIndex &index, const QVariant &value, in
     return false;
 }
 
-bool lessThanEsmFile(const EsmFile *e1, const EsmFile *e2)
+bool lessThanEsmFile(const EsxModel::EsmFile *e1, const EsxModel::EsmFile *e2)
 {
     //Masters first then alphabetically
     if (e1->fileName().endsWith(".esm") && !e2->fileName().endsWith(".esm"))
@@ -236,7 +237,7 @@ bool lessThanEsmFile(const EsmFile *e1, const EsmFile *e2)
     return e1->fileName().toLower() < e2->fileName().toLower();
 }
 
-bool lessThanDate(const EsmFile *e1, const EsmFile *e2)
+bool lessThanDate(const EsxModel::EsmFile *e1, const EsxModel::EsmFile *e2)
 {
     if (e1->modified().toString(Qt::ISODate) < e2->modified().toString(Qt::ISODate)) {
         return true;
@@ -245,7 +246,7 @@ bool lessThanDate(const EsmFile *e1, const EsmFile *e2)
     }
 }
 
-void DataFilesModel::sort(int column, Qt::SortOrder order)
+void EsxModel::DataFilesModel::sort(int column, Qt::SortOrder order)
 {
     emit layoutAboutToBeChanged();
 
@@ -258,14 +259,14 @@ void DataFilesModel::sort(int column, Qt::SortOrder order)
     emit layoutChanged();
 }
 
-void DataFilesModel::addFile(EsmFile *file)
+void EsxModel::DataFilesModel::addFile(EsmFile *file)
 {
     emit beginInsertRows(QModelIndex(), mFiles.count(), mFiles.count());
     mFiles.append(file);
     emit endInsertRows();
 }
 
-void DataFilesModel::addFiles(const QString &path)
+void EsxModel::DataFilesModel::addFiles(const QString &path)
 {
     QDir dir(path);
     QStringList filters;
@@ -330,7 +331,7 @@ void DataFilesModel::addFiles(const QString &path)
     delete decoder;
 }
 
-QModelIndex DataFilesModel::indexFromItem(EsmFile *item) const
+QModelIndex EsxModel::DataFilesModel::indexFromItem(EsmFile *item) const
 {
     if (item)
         return createIndex(mFiles.indexOf(item), 0);
@@ -338,7 +339,7 @@ QModelIndex DataFilesModel::indexFromItem(EsmFile *item) const
     return QModelIndex();
 }
 
-EsmFile* DataFilesModel::findItem(const QString &name)
+EsxModel::EsmFile* EsxModel::DataFilesModel::findItem(const QString &name)
 {
     QList<EsmFile *>::ConstIterator it;
     QList<EsmFile *>::ConstIterator itEnd = mFiles.constEnd();
@@ -356,7 +357,7 @@ EsmFile* DataFilesModel::findItem(const QString &name)
     return 0;
 }
 
-EsmFile* DataFilesModel::item(int row) const
+EsxModel::EsmFile* EsxModel::DataFilesModel::item(int row) const
 {
     if (row >= 0 && row < mFiles.count())
         return mFiles.at(row);
@@ -364,7 +365,7 @@ EsmFile* DataFilesModel::item(int row) const
         return 0;
 }
 
-QStringList DataFilesModel::checkedItems()
+QStringList EsxModel::DataFilesModel::checkedItems()
 {
     QStringList list;
 
@@ -386,7 +387,7 @@ QStringList DataFilesModel::checkedItems()
     return list;
 }
 
-QStringList DataFilesModel::checkedItemsPaths()
+QStringList EsxModel::DataFilesModel::checkedItemsPaths()
 {
     QStringList list;
 
@@ -405,14 +406,14 @@ QStringList DataFilesModel::checkedItemsPaths()
     return list;
 }
 
-void DataFilesModel::uncheckAll()
+void EsxModel::DataFilesModel::uncheckAll()
 {
     emit layoutAboutToBeChanged();
     mCheckStates.clear();
     emit layoutChanged();
 }
 
-QStringList DataFilesModel::uncheckedItems()
+QStringList EsxModel::DataFilesModel::uncheckedItems()
 {
     QStringList list;
     QStringList checked = checkedItems();
@@ -433,7 +434,7 @@ QStringList DataFilesModel::uncheckedItems()
     return list;
 }
 
-bool DataFilesModel::canBeChecked(EsmFile *file) const
+bool EsxModel::DataFilesModel::canBeChecked(EsmFile *file) const
 {
     //element can be checked if all its dependencies are
     foreach (const QString &master, file->masters())

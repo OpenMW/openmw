@@ -5,18 +5,22 @@
 
 class QVariant;
 class QAbstractTableModel;
-class DataFilesModel;
 
-class PluginsProxyModel : public QSortFilterProxyModel
+namespace EsxModel
 {
-    Q_OBJECT
+    class DataFilesModel;
 
-public:
+    class PluginsProxyModel : public QSortFilterProxyModel
+    {
+        Q_OBJECT
 
-    explicit PluginsProxyModel(QObject *parent = 0, DataFilesModel *model = 0);
-    ~PluginsProxyModel();
+    public:
 
-    virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
-};
+        explicit PluginsProxyModel(QObject *parent = 0, DataFilesModel *model = 0);
+        ~PluginsProxyModel();
+
+        virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+    };
+}
 
 #endif // PLUGINSPROXYMODEL_HPP

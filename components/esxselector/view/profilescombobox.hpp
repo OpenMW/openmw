@@ -6,28 +6,31 @@
 class QString;
 class QRegExpValidator;
 
-class ProfilesComboBox : public QComboBox
+namespace EsxView
 {
-    Q_OBJECT
-public:
-    explicit ProfilesComboBox(QWidget *parent = 0);
-    void setEditEnabled(bool editable);
-    
-signals:
-    void profileChanged(const QString &previous, const QString &current);
-    void profileRenamed(const QString &oldName, const QString &newName);
-    
-private slots:
-    void slotEditingFinished();
-    void slotIndexChanged(int index);
-    void slotTextChanged(const QString &text);
+    class ProfilesComboBox : public QComboBox
+    {
+        Q_OBJECT
+    public:
+        explicit ProfilesComboBox(QWidget *parent = 0);
+        void setEditEnabled(bool editable);
 
-private:
-    QString mOldProfile;
-    QRegExpValidator *mValidator;
+    signals:
+        void profileChanged(const QString &previous, const QString &current);
+        void profileRenamed(const QString &oldName, const QString &newName);
 
-protected:
-    void paintEvent(QPaintEvent *);
-};
+    private slots:
+        void slotEditingFinished();
+        void slotIndexChanged(int index);
+        void slotTextChanged(const QString &text);
+
+    private:
+        QString mOldProfile;
+        QRegExpValidator *mValidator;
+
+    protected:
+        void paintEvent(QPaintEvent *);
+    };
+}
 
 #endif // PROFILESCOMBOBOX_HPP

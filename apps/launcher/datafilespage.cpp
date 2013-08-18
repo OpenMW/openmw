@@ -7,15 +7,15 @@
 
 #include <components/files/configurationmanager.hpp>
 
-#include <components/fileorderlist/model/datafilesmodel.hpp>
-#include <components/fileorderlist/model/pluginsproxymodel.hpp>
-#include <components/fileorderlist/model/esm/esmfile.hpp>
+#include <components/esxselector/model/datafilesmodel.hpp>
+#include <components/esxselector/model/pluginsproxymodel.hpp>
+#include <components/esxselector/model/esmfile.hpp>
 
-#include <components/fileorderlist/utils/lineedit.hpp>
-#include <components/fileorderlist/utils/naturalsort.hpp>
-#include <components/fileorderlist/utils/profilescombobox.hpp>
+#include <components/esxselector/view/lineedit.hpp>
+#include <components/esxselector/model/naturalsort.hpp>
+#include <components/esxselector/view/profilescombobox.hpp>
 
-#include "components/fileorderlist/masterproxymodel.hpp"
+#include "components/esxselector/model/masterproxymodel.hpp"
 #include "settings/gamesettings.hpp"
 #include "settings/launchersettings.hpp"
 

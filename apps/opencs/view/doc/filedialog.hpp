@@ -4,7 +4,7 @@
 #include <QDialog>
 #include <QModelIndex>
 
-#include "components/fileorderlist/contentselector.hpp"
+#include "components/esxselector/view/contentselector.hpp"
 #include "ui_datafilespage.h"
 
 class QDialogButtonBox;
@@ -18,38 +18,40 @@ class QMenu;
 class DataFilesModel;
 class PluginsProxyModel;
 
-class FileDialog : public EsxSelector::ContentSelector
+namespace CSVDoc
 {
-    Q_OBJECT
-public:
-    explicit FileDialog(QWidget *parent = 0);
+    class FileDialog : public EsxView::ContentSelector
+    {
+        Q_OBJECT
+    public:
+        explicit FileDialog(QWidget *parent = 0);
 
-    void openFile();
-    void newFile();
-    void accepted();
+        void openFile();
+        void newFile();
+        void accepted();
 
-    QString fileName();
+        QString fileName();
 
-signals:
-    void openFiles();
-    void createNewFile();
-    
-public slots:
-    void accept();
+    signals:
+        void openFiles();
+        void createNewFile();
 
-private slots:
-    //void updateViews();
-    void updateOpenButton(const QStringList &items);
-    void updateCreateButton(const QString &name);
+    public slots:
+        void accept();
 
-    void createButtonClicked();
+    private slots:
+        //void updateViews();
+        void updateOpenButton(const QStringList &items);
+        void updateCreateButton(const QString &name);
 
-private:
-    QLabel *mNameLabel;
-    //LineEdit *mNameLineEdit;
+        void createButtonClicked();
 
-    QPushButton *mCreateButton;
-    QDialogButtonBox *mButtonBox;
-};
+    private:
+        QLabel *mNameLabel;
+        //LineEdit *mNameLineEdit;
 
+        QPushButton *mCreateButton;
+        QDialogButtonBox *mButtonBox;
+    };
+}
 #endif // FILEDIALOG_HPP

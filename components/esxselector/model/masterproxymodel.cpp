@@ -1,6 +1,6 @@
 #include "masterproxymodel.hpp"
 
-EsxSelector::MasterProxyModel::MasterProxyModel(QObject *parent, QAbstractTableModel* model) :
+EsxModel::MasterProxyModel::MasterProxyModel(QObject *parent, QAbstractTableModel* model) :
     QSortFilterProxyModel(parent)
 {
     setFilterRegExp(QString("game"));
@@ -10,7 +10,7 @@ EsxSelector::MasterProxyModel::MasterProxyModel(QObject *parent, QAbstractTableM
         setSourceModel (model);
 }
 
-QVariant EsxSelector::MasterProxyModel::data(const QModelIndex &index, int role) const
+QVariant EsxModel::MasterProxyModel::data(const QModelIndex &index, int role) const
 {
     return QSortFilterProxyModel::data (index, role);
 }

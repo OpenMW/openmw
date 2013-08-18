@@ -17,7 +17,7 @@
    <item>
     <layout class="QHBoxLayout" name="filterLayout">
      <item>
-      <widget class="ProfilesComboBox" name="masterView">
+      <widget class="EsxView::ProfilesComboBox" name="masterView">
        <property name="editable">
         <bool>false</bool>
        </property>
@@ -79,7 +79,7 @@
       </widget>
      </item>
      <item>
-      <widget class="ProfilesComboBox" name="profilesComboBox">
+      <widget class="EsxView::ProfilesComboBox" name="profilesComboBox">
        <property name="enabled">
         <bool>true</bool>
        </property>
@@ -168,9 +168,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ProfilesComboBox</class>
+   <class>EsxView::ProfilesComboBox</class>
    <extends>QComboBox</extends>
-   <header location="global">components/fileorderlist/utils/profilescombobox.hpp</header>
+   <header location="global">components/esxselector/view/profilescombobox.hpp</header>
   </customwidget>
  </customwidgets>
  <resources/>

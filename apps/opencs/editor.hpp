@@ -22,7 +22,7 @@ namespace CS
             CSMDoc::DocumentManager mDocumentManager;
             CSVDoc::ViewManager mViewManager;
             CSVDoc::StartupDialogue mStartup;
-            FileDialog mFileDialog;
+            CSVDoc::FileDialog mFileDialog;
 
             Files::ConfigurationManager mCfgMgr;
             void setupDataFiles();

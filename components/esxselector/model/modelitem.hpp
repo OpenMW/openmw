@@ -4,29 +4,32 @@
 #include <QObject>
 #include <QList>
 
-class ModelItem : public QObject
+namespace EsxModel
 {
-    Q_OBJECT
+    class ModelItem : public QObject
+    {
+        Q_OBJECT
 
-public:
-    ModelItem(ModelItem *parent = 0);
-    ~ModelItem();
+    public:
+        ModelItem(ModelItem *parent = 0);
+        ~ModelItem();
 
-    ModelItem *parent();
-    int row() const;
+        ModelItem *parent();
+        int row() const;
 
-    int childCount() const;
-    int childRow(ModelItem *child) const;
-    ModelItem *child(int row);
+        int childCount() const;
+        int childRow(ModelItem *child) const;
+        ModelItem *child(int row);
 
-    void appendChild(ModelItem *child);
-    void removeChild(int row);
+        void appendChild(ModelItem *child);
+        void removeChild(int row);
 
-    //virtual bool acceptChild(ModelItem *child);
+        //virtual bool acceptChild(ModelItem *child);
 
-protected:
-    ModelItem *mParentItem;
-    QList<ModelItem*> mChildItems;
-};
+    protected:
+        ModelItem *mParentItem;
+        QList<ModelItem*> mChildItems;
+    };
+}
 
 #endif

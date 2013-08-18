@@ -3,7 +3,7 @@
 
 #include "lineedit.hpp"
 
-LineEdit::LineEdit(QWidget *parent)
+EsxView::LineEdit::LineEdit(QWidget *parent)
     : QLineEdit(parent)
 {
     mClearButton = new QToolButton(this);
@@ -24,7 +24,7 @@ LineEdit::LineEdit(QWidget *parent)
                    qMax(msz.height(), mClearButton->sizeHint().height() + frameWidth * 2 + 2));
 }
 
-void LineEdit::resizeEvent(QResizeEvent *)
+void EsxView::LineEdit::resizeEvent(QResizeEvent *)
 {
     QSize sz = mClearButton->sizeHint();
     int frameWidth = style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
@@ -32,7 +32,7 @@ void LineEdit::resizeEvent(QResizeEvent *)
                       (rect().bottom() + 1 - sz.height())/2);
 }
 
-void LineEdit::updateClearButton(const QString& text)
+void EsxView::LineEdit::updateClearButton(const QString& text)
 {
     mClearButton->setVisible(!text.isEmpty());
 }

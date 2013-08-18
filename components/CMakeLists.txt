@@ -73,7 +73,7 @@ find_package(Qt4 COMPONENTS QtCore QtGui)
 if(QT_QTGUI_LIBRARY AND QT_QTCORE_LIBRARY)
    add_component_qt_dir (esxselector
         model/masterproxymodel model/modelitem model/datafilesmodel
-        model/pluginsproxymodel model/esm/esmfile model/naturalsort
+        model/pluginsproxymodel model/esmfile model/naturalsort
         view/profilescombobox view/comboboxlineedit
         view/lineedit view/contentselector
        )

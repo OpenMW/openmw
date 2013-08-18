@@ -3,7 +3,7 @@
 
 #include "comboboxlineedit.hpp"
 
-ComboBoxLineEdit::ComboBoxLineEdit(QWidget *parent)
+EsxView::ComboBoxLineEdit::ComboBoxLineEdit(QWidget *parent)
     : QLineEdit(parent)
 {
     mClearButton = new QToolButton(this);
@@ -21,7 +21,7 @@ ComboBoxLineEdit::ComboBoxLineEdit(QWidget *parent)
     setStyleSheet(QString("ComboBoxLineEdit { background-color: transparent; padding-right: %1px; } ").arg(mClearButton->sizeHint().width() + frameWidth + 1));
 }
 
-void ComboBoxLineEdit::resizeEvent(QResizeEvent *)
+void EsxView::ComboBoxLineEdit::resizeEvent(QResizeEvent *)
 {
     QSize sz = mClearButton->sizeHint();
     int frameWidth = style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
@@ -29,7 +29,7 @@ void ComboBoxLineEdit::resizeEvent(QResizeEvent *)
                       (rect().bottom() + 1 - sz.height())/2);
 }
 
-void ComboBoxLineEdit::updateClearButton(const QString& text)
+void EsxView::ComboBoxLineEdit::updateClearButton(const QString& text)
 {
     mClearButton->setVisible(!text.isEmpty());
 }

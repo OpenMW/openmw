@@ -1,7 +1,7 @@
 #include "pluginsproxymodel.hpp"
 #include "datafilesmodel.hpp"
 
-PluginsProxyModel::PluginsProxyModel(QObject *parent, DataFilesModel *model) :
+EsxModel::PluginsProxyModel::PluginsProxyModel(QObject *parent, DataFilesModel *model) :
     QSortFilterProxyModel(parent)
 {
     setFilterRegExp (QString("addon"));
@@ -12,11 +12,11 @@ PluginsProxyModel::PluginsProxyModel(QObject *parent, DataFilesModel *model) :
         setSourceModel (model);
 }
 
-PluginsProxyModel::~PluginsProxyModel()
+EsxModel::PluginsProxyModel::~PluginsProxyModel()
 {
 }
 
-QVariant PluginsProxyModel::data(const QModelIndex &index, int role) const
+QVariant EsxModel::PluginsProxyModel::data(const QModelIndex &index, int role) const
 {
     switch (role)
     {

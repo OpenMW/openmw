@@ -14,22 +14,24 @@
 
 class QToolButton;
 
-class LineEdit : public QLineEdit
+namespace EsxView
 {
-    Q_OBJECT
+    class LineEdit : public QLineEdit
+    {
+        Q_OBJECT
 
-public:
-    LineEdit(QWidget *parent = 0);
+    public:
+        LineEdit(QWidget *parent = 0);
 
-protected:
-    void resizeEvent(QResizeEvent *);
+    protected:
+        void resizeEvent(QResizeEvent *);
 
-private slots:
-    void updateClearButton(const QString &text);
+    private slots:
+        void updateClearButton(const QString &text);
 
-private:
-    QToolButton *mClearButton;
-};
-
+    private:
+        QToolButton *mClearButton;
+    };
+}
 #endif // LIENEDIT_H
 

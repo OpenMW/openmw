@@ -5,7 +5,7 @@
 #include <QModelIndex>
 
 #include "ui_datafilespage.h"
-#include "components/fileorderlist/contentselector.hpp"
+#include "components/esxselector/view/contentselector.hpp"
 
 class QSortFilterProxyModel;
 class QAbstractItemModel;
@@ -20,7 +20,7 @@ class PluginsProxyModel;
 
 namespace Files { struct ConfigurationManager; }
 
-class DataFilesPage : public EsxSelector::ContentSelector
+class DataFilesPage : public EsxView::ContentSelector
 {
     Q_OBJECT
 public:

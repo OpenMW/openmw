@@ -7,7 +7,7 @@
 #include "profilescombobox.hpp"
 #include "comboboxlineedit.hpp"
 
-ProfilesComboBox::ProfilesComboBox(QWidget *parent) :
+EsxView::ProfilesComboBox::ProfilesComboBox(QWidget *parent) :
     QComboBox(parent)
 {
     mValidator = new QRegExpValidator(QRegExp("^[a-zA-Z0-9_]*$"), this); // Alpha-numeric + underscore
@@ -21,7 +21,7 @@ ProfilesComboBox::ProfilesComboBox(QWidget *parent) :
     setInsertPolicy(QComboBox::NoInsert);
 }
 
-void ProfilesComboBox::setEditEnabled(bool editable)
+void EsxView::ProfilesComboBox::setEditEnabled(bool editable)
 {
     if (isEditable() == editable)
         return;
@@ -47,7 +47,7 @@ void ProfilesComboBox::setEditEnabled(bool editable)
             SLOT(slotTextChanged(QString)));
 }
 
-void ProfilesComboBox::slotTextChanged(const QString &text)
+void EsxView::ProfilesComboBox::slotTextChanged(const QString &text)
 {
     QPalette *palette = new QPalette();
     palette->setColor(QPalette::Text,Qt::red);
@@ -61,7 +61,7 @@ void ProfilesComboBox::slotTextChanged(const QString &text)
     }
 }
 
-void ProfilesComboBox::slotEditingFinished()
+void EsxView::ProfilesComboBox::slotEditingFinished()
 {
     QString current = currentText();
     QString previous = itemText(currentIndex());
@@ -82,7 +82,7 @@ void ProfilesComboBox::slotEditingFinished()
     emit(profileRenamed(previous, current));
 }
 
-void ProfilesComboBox::slotIndexChanged(int index)
+void EsxView::ProfilesComboBox::slotIndexChanged(int index)
 {
     if (index == -1)
         return;
@@ -91,7 +91,7 @@ void ProfilesComboBox::slotIndexChanged(int index)
     mOldProfile = itemText(index);
 }
 
-void ProfilesComboBox::paintEvent(QPaintEvent *)
+void EsxView::ProfilesComboBox::paintEvent(QPaintEvent *)
 {
     QStylePainter painter(this);
     painter.setPen(palette().color(QPalette::Text));

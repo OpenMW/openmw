@@ -10,15 +10,15 @@
 #include <QPushButton>
 #include <QLabel>
 
-#include <components/fileorderlist/model/datafilesmodel.hpp>
-#include <components/fileorderlist/model/pluginsproxymodel.hpp>
-#include <components/fileorderlist/model/esm/esmfile.hpp>
+#include <components/esxselector/model/datafilesmodel.hpp>
+#include <components/esxselector/model/pluginsproxymodel.hpp>
+#include <components/esxselector/model/esmfile.hpp>
 
-#include <components/fileorderlist/utils/lineedit.hpp>
+#include <components/esxselector/view/lineedit.hpp>
 
-#include "components/fileorderlist/masterproxymodel.hpp"
+#include "components/esxselector/model/masterproxymodel.hpp"
 
-FileDialog::FileDialog(QWidget *parent) :
+CSVDoc::FileDialog::FileDialog(QWidget *parent) :
     ContentSelector(parent)
 {
     // Hide the profile elements
@@ -60,7 +60,7 @@ FileDialog::FileDialog(QWidget *parent) :
  //   connect(mButtonBox, SIGNAL(rejected()), this, SLOT(reject()));
 }
 
-void FileDialog::updateOpenButton(const QStringList &items)
+void CSVDoc::FileDialog::updateOpenButton(const QStringList &items)
 {
     QPushButton *openButton = mButtonBox->button(QDialogButtonBox::Open);
 
@@ -70,7 +70,7 @@ void FileDialog::updateOpenButton(const QStringList &items)
     openButton->setEnabled(!items.isEmpty());
 }
 
-void FileDialog::updateCreateButton(const QString &name)
+void CSVDoc::FileDialog::updateCreateButton(const QString &name)
 {
     if (!mCreateButton->isVisible())
         return;
@@ -78,12 +78,12 @@ void FileDialog::updateCreateButton(const QString &name)
     mCreateButton->setEnabled(!name.isEmpty());
 }
 
-QString FileDialog::fileName()
+QString CSVDoc::FileDialog::fileName()
 {
     //return mNameLineEdit->text();
 }
 
-void FileDialog::openFile()
+void CSVDoc::FileDialog::openFile()
 {
     setWindowTitle(tr("Open"));
 
@@ -101,7 +101,7 @@ void FileDialog::openFile()
     activateWindow();
 }
 
-void FileDialog::newFile()
+void CSVDoc::FileDialog::newFile()
 {
     setWindowTitle(tr("New"));
 
@@ -118,12 +118,12 @@ void FileDialog::newFile()
     activateWindow();
 }
 
-void FileDialog::accept()
+void CSVDoc::FileDialog::accept()
 {
     emit openFiles();
 }
 
-void FileDialog::createButtonClicked()
+void CSVDoc::FileDialog::createButtonClicked()
 {
     emit createNewFile();
 }

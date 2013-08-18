@@ -1,23 +1,23 @@
 #include "modelitem.hpp"
 
-ModelItem::ModelItem(ModelItem *parent)
+EsxModel::ModelItem::ModelItem(ModelItem *parent)
     : mParentItem(parent)
     , QObject(parent)
 {
 }
 
-ModelItem::~ModelItem()
+EsxModel::ModelItem::~ModelItem()
 {
     qDeleteAll(mChildItems);
 }
 
 
-ModelItem *ModelItem::parent()
+EsxModel::ModelItem *EsxModel::ModelItem::parent()
 {
     return mParentItem;
 }
 
-int ModelItem::row() const
+int EsxModel::ModelItem::row() const
 {
     if (mParentItem)
         return 1;
@@ -28,30 +28,30 @@ int ModelItem::row() const
 }
 
 
-int ModelItem::childCount() const
+int EsxModel::ModelItem::childCount() const
 {
     return mChildItems.count();
 }
 
-int ModelItem::childRow(ModelItem *child) const
+int EsxModel::ModelItem::childRow(ModelItem *child) const
 {
     Q_ASSERT(child);
 
     return mChildItems.indexOf(child);
 }
 
-ModelItem *ModelItem::child(int row)
+EsxModel::ModelItem *EsxModel::ModelItem::child(int row)
 {
     return mChildItems.value(row);
 }
 
 
-void ModelItem::appendChild(ModelItem *item)
+void EsxModel::ModelItem::appendChild(ModelItem *item)
 {
     mChildItems.append(item);
 }
 
-void ModelItem::removeChild(int row)
+void EsxModel::ModelItem::removeChild(int row)
 {
     mChildItems.removeAt(row);
 }

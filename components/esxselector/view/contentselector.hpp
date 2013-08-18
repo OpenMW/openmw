@@ -5,23 +5,26 @@
 
 #include "ui_datafilespage.h"
 
-class DataFilesModel;
-class PluginsProxyModel;
+namespace EsxModel
+{
+    class DataFilesModel;
+    class PluginsProxyModel;
+    class MasterProxyModel;
+}
+
 class QSortFilterProxyModel;
 
-namespace FileOrderList
+namespace EsxView
 {
-    class MasterProxyModel;
-
     class ContentSelector : public QWidget, protected Ui::DataFilesPage
     {
         Q_OBJECT
 
     protected:
 
-        DataFilesModel *mDataFilesModel;
-        MasterProxyModel *mMasterProxyModel;
-        PluginsProxyModel *mPluginsProxyModel;
+        EsxModel::DataFilesModel *mDataFilesModel;
+        EsxModel::MasterProxyModel *mMasterProxyModel;
+        EsxModel::PluginsProxyModel *mPluginsProxyModel;
 
     public:
         explicit ContentSelector(QWidget *parent = 0);

@@ -7,7 +7,7 @@
 #include <QValidator>
 #include <QLabel>
 
-#include <components/fileorderlist/utils/lineedit.hpp>
+#include <components/esxselector/view/lineedit.hpp>
 
 TextInputDialog::TextInputDialog(const QString& title, const QString &text, QWidget *parent) :
     QDialog(parent)
@@ -19,7 +19,7 @@ TextInputDialog::TextInputDialog(const QString& title, const QString &text, QWid
 
     // Line edit
     QValidator *validator = new QRegExpValidator(QRegExp("^[a-zA-Z0-9_]*$"), this); // Alpha-numeric + underscore
-    mLineEdit = new LineEdit(this);
+    mLineEdit = new EsxView::LineEdit(this);
     mLineEdit->setValidator(validator);
     mLineEdit->setCompleter(0);
 

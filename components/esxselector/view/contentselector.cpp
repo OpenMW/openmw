@@ -1,8 +1,8 @@
 #include "contentselector.hpp"
 
-#include "model/datafilesmodel.hpp"
-#include "masterproxymodel.hpp"
-#include "model/pluginsproxymodel.hpp"
+#include "../model/datafilesmodel.hpp"
+#include "../model/masterproxymodel.hpp"
+#include "../model/pluginsproxymodel.hpp"
 
 #include <QSortFilterProxyModel>
 
@@ -10,20 +10,20 @@
 #include <QMenu>
 #include <QContextMenuEvent>
 
-EsxSelector::ContentSelector::ContentSelector(QWidget *parent) :
+EsxView::ContentSelector::ContentSelector(QWidget *parent) :
     QWidget(parent)
 {
     setupUi(this);
     buildModelsAndViews();
 }
 
-void EsxSelector::ContentSelector::buildModelsAndViews()
+void EsxView::ContentSelector::buildModelsAndViews()
 {
     // Models
-    mDataFilesModel = new DataFilesModel (this);
+    mDataFilesModel = new EsxModel::DataFilesModel (this);
 
-    mMasterProxyModel = new EsxSelector::MasterProxyModel (this, mDataFilesModel);
-    mPluginsProxyModel = new PluginsProxyModel (this, mDataFilesModel);
+    mMasterProxyModel = new EsxModel::MasterProxyModel (this, mDataFilesModel);
+    mPluginsProxyModel = new EsxModel::PluginsProxyModel (this, mDataFilesModel);
 
     masterView->setModel(mMasterProxyModel);
     pluginView->setModel(mPluginsProxyModel);
@@ -35,7 +35,7 @@ void EsxSelector::ContentSelector::buildModelsAndViews()
     connect(profilesComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(slotCurrentProfileIndexChanged(int)));
 }
 
-void EsxSelector::ContentSelector::addFiles(const QString &path)
+void EsxView::ContentSelector::addFiles(const QString &path)
 {
     mDataFilesModel->addFiles(path);
     mDataFilesModel->sort(3);  // Sort by date accessed
@@ -43,12 +43,12 @@ void EsxSelector::ContentSelector::addFiles(const QString &path)
     mDataFilesModel->uncheckAll();
 }
 
-void EsxSelector::ContentSelector::setEncoding(const QString &encoding)
+void EsxView::ContentSelector::setEncoding(const QString &encoding)
 {
     mDataFilesModel->setEncoding(encoding);
 }
 
-void EsxSelector::ContentSelector::setCheckState(QModelIndex index, QSortFilterProxyModel *model)
+void EsxView::ContentSelector::setCheckState(QModelIndex index, QSortFilterProxyModel *model)
 {
     if (!index.isValid())
         return;
@@ -66,12 +66,12 @@ void EsxSelector::ContentSelector::setCheckState(QModelIndex index, QSortFilterP
     }
 }
 
-QStringList EsxSelector::ContentSelector::checkedItemsPaths()
+QStringList EsxView::ContentSelector::checkedItemsPaths()
 {
     return mDataFilesModel->checkedItemsPaths();
 }
 
-void EsxSelector::ContentSelector::updateViews()
+void EsxView::ContentSelector::updateViews()
 {
     // Ensure the columns are hidden because sort() re-enables them
     pluginView->setColumnHidden(1, true);
@@ -85,12 +85,12 @@ void EsxSelector::ContentSelector::updateViews()
 
 }
 
-void EsxSelector::ContentSelector::slotCurrentProfileIndexChanged(int index)
+void EsxView::ContentSelector::slotCurrentProfileIndexChanged(int index)
 {
     emit profileChanged(index);
 }
 
-void EsxSelector::ContentSelector::slotCurrentMasterIndexChanged(int index)
+void EsxView::ContentSelector::slotCurrentMasterIndexChanged(int index)
 {
     QObject *object = QObject::sender();
 
@@ -101,7 +101,7 @@ void EsxSelector::ContentSelector::slotCurrentMasterIndexChanged(int index)
     setCheckState(mMasterProxyModel->index(index, 0), mMasterProxyModel);
 }
 
-void EsxSelector::ContentSelector::slotPluginTableItemClicked(const QModelIndex &index)
+void EsxView::ContentSelector::slotPluginTableItemClicked(const QModelIndex &index)
 {
     setCheckState(index, mPluginsProxyModel);
 }

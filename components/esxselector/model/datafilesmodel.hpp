@@ -6,61 +6,62 @@
 #include <QString>
 #include <QHash>
 
-
-class EsmFile;
-
-class DataFilesModel : public QAbstractTableModel
+namespace EsxModel
 {
-    Q_OBJECT
+    class EsmFile;
 
-public:
-    explicit DataFilesModel(QObject *parent = 0);
-    virtual ~DataFilesModel();
-    virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
-    virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
+    class DataFilesModel : public QAbstractTableModel
+    {
+        Q_OBJECT
 
-    bool moveRow(int oldrow, int row, const QModelIndex &parent = QModelIndex());
+    public:
+        explicit DataFilesModel(QObject *parent = 0);
+        virtual ~DataFilesModel();
+        virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
+        virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
 
-    virtual Qt::ItemFlags flags(const QModelIndex &index) const;
+        bool moveRow(int oldrow, int row, const QModelIndex &parent = QModelIndex());
 
-    virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
-    virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+        virtual Qt::ItemFlags flags(const QModelIndex &index) const;
 
-    virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
-    void sort(int column, Qt::SortOrder order = Qt::AscendingOrder);
+        virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+        virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
 
-    inline QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const
-       { return QAbstractTableModel::index(row, column, parent); }
+        virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
+        void sort(int column, Qt::SortOrder order = Qt::AscendingOrder);
 
-    void setEncoding(const QString &encoding);
+        inline QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const
+           { return QAbstractTableModel::index(row, column, parent); }
 
-    void addFiles(const QString &path);
+        void setEncoding(const QString &encoding);
 
-    void uncheckAll();
+        void addFiles(const QString &path);
 
-    QStringList checkedItems();
-    QStringList uncheckedItems();
-    QStringList checkedItemsPaths();
+        void uncheckAll();
 
-    Qt::CheckState checkState(const QModelIndex &index);
-    void setCheckState(const QModelIndex &index, Qt::CheckState state);
+        QStringList checkedItems();
+        QStringList uncheckedItems();
+        QStringList checkedItemsPaths();
 
-    QModelIndex indexFromItem(EsmFile *item) const;
-    EsmFile* findItem(const QString &name);
-    EsmFile* item(int row) const;
+        Qt::CheckState checkState(const QModelIndex &index);
+        void setCheckState(const QModelIndex &index, Qt::CheckState state);
 
-signals:
-    void checkedItemsChanged(const QStringList &items);
-    
-private:
-    bool canBeChecked(EsmFile *file) const;
-    void addFile(EsmFile *file);
-    
-    QList<EsmFile *> mFiles;
-    QHash<QString, Qt::CheckState> mCheckStates;
+        QModelIndex indexFromItem(EsmFile *item) const;
+        EsmFile* findItem(const QString &name);
+        EsmFile* item(int row) const;
 
-    QString mEncoding;
+    signals:
+        void checkedItemsChanged(const QStringList &items);
 
-};
+    private:
+        bool canBeChecked(EsmFile *file) const;
+        void addFile(EsmFile *file);
 
+        QList<EsmFile *> mFiles;
+        QHash<QString, Qt::CheckState> mCheckStates;
+
+        QString mEncoding;
+
+    };
+}
 #endif // DATAFILESMODEL_HPP
