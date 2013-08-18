@@ -690,38 +690,17 @@ void CharacterController::update(float duration)
         bool inwater = world->isSwimming(mPtr);
         bool isrunning = cls.getStance(mPtr, MWWorld::Class::Run);
         bool sneak = cls.getStance(mPtr, MWWorld::Class::Sneak);
+        bool flying = world->isFlying(mPtr);
         Ogre::Vector3 vec = cls.getMovementVector(mPtr);
         Ogre::Vector3 rot = cls.getRotationVector(mPtr);
         mMovementSpeed = cls.getSpeed(mPtr);
 
-        CharacterState movestate = CharState_None;
-        CharacterState idlestate = CharState_SpecialIdle;
-        bool forcestateupdate = false;
-
         vec.x *= mMovementSpeed;
         vec.y *= mMovementSpeed;
 
-        /* FIXME: The state should be set to Jump, and X/Y movement should be disallowed except
-         * for the initial thrust (which would be carried by "physics" until landing). */
-        if(!onground || sneak)
-            vec.z = 0.0f;
-        else if(vec.z > 0.0f)
-        {
-            float z = cls.getJump(mPtr);
-
-            if(vec.x == 0 && vec.y == 0)
-                vec.z *= z;
-            else
-            {
-                /* FIXME: this would be more correct if we were going into a jumping state,
-                 * rather than normal walking/idle states. */
-                //Ogre::Vector3 lat = Ogre::Vector3(vec.x, vec.y, 0.0f).normalisedCopy();
-                //vec *= Ogre::Vector3(lat.x, lat.y, 1.0f) * z * 0.707f;
-                vec.z *= z * 0.707f;
-            }
-
-            //decrease fatigue by fFatigueJumpBase + (1 - normalizedEncumbrance) * fFatigueJumpMult;
-        }
+        CharacterState movestate = CharState_None;
+        CharacterState idlestate = CharState_SpecialIdle;
+        bool forcestateupdate = false;
 
         isrunning = isrunning && std::abs(vec[0])+std::abs(vec[1]) > 0.0f;
 
@@ -748,7 +727,44 @@ void CharacterController::update(float duration)
             }
         }
 
-        if(std::abs(vec.x/2.0f) > std::abs(vec.y))
+        if(sneak || inwater || flying)
+            vec.z = 0.0f;
+
+        if(!onground && !flying && !inwater)
+        {
+            const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
+
+            // This is a guess. All that seems to be known is that "While the player is in the
+            // air, fJumpMoveBase and fJumpMoveMult governs air control." Assuming Acrobatics
+            // plays a role, this makes the most sense.
+            float mult = 0.0f;
+            if(cls.isNpc())
+            {
+                const NpcStats &stats = cls.getNpcStats(mPtr);
+                mult = gmst.find("fJumpMoveBase")->getFloat() +
+                       (stats.getSkill(ESM::Skill::Acrobatics).getModified()/100.0f *
+                        gmst.find("fJumpMoveMult")->getFloat());
+            }
+
+            vec.x *= mult;
+            vec.y *= mult;
+            vec.z  = 0.0f;
+        }
+        else if(vec.z > 0.0f)
+        {
+            float z = cls.getJump(mPtr);
+
+            if(vec.x == 0 && vec.y == 0)
+                vec = Ogre::Vector3(0.0f, 0.0f, z);
+            else
+            {
+                Ogre::Vector3 lat = Ogre::Vector3(vec.x, vec.y, 0.0f).normalisedCopy();
+                vec = Ogre::Vector3(lat.x, lat.y, 1.0f) * z * 0.707f;
+            }
+
+            //decrease fatigue by fFatigueJumpBase + (1 - normalizedEncumbrance) * fFatigueJumpMult;
+        }
+        else if(std::abs(vec.x/2.0f) > std::abs(vec.y))
         {
             if(vec.x > 0.0f)
                 movestate = (inwater ? (isrunning ? CharState_SwimRunRight : CharState_SwimWalkRight)
