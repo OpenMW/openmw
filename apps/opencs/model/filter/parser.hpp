@@ -7,6 +7,8 @@
 
 namespace CSMFilter
 {
+    struct Token;
+
     class Parser
     {
         public:
@@ -14,6 +16,7 @@ namespace CSMFilter
             enum State
             {
                 State_Begin,
+                State_UnexpectedCharacter,
                 State_End
             };
 
@@ -21,6 +24,11 @@ namespace CSMFilter
 
             State mState;
             boost::shared_ptr<Node> mFilter;
+
+            Token getNextToken (const std::string& filter, int& index) const;
+
+            bool isEndState() const;
+            ///< This includes error states.
 
         public:
 

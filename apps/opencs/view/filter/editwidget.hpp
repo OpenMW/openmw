@@ -4,6 +4,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include <QLineEdit>
+#include <QPalette>
 
 #include "../../model/filter/parser.hpp"
 #include "../../model/filter/node.hpp"
@@ -15,6 +16,7 @@ namespace CSVFilter
             Q_OBJECT
 
             CSMFilter::Parser mParser;
+            QPalette mPalette;
 
         public:
 
