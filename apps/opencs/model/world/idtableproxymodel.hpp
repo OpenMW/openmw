@@ -5,6 +5,8 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include <map>
+
 #include <QSortFilterProxyModel>
 
 #include "../filter/node.hpp"
@@ -17,8 +19,11 @@ namespace CSMWorld
 
             boost::shared_ptr<CSMFilter::Node> mFilter;
             std::string mUserValue;
+            std::map<int, int> mColumnMap; // column ID, column index in this model (or -1)
 
         private:
+
+            void updateColumnMap();
 
             bool filterAcceptsRow (int sourceRow, const QModelIndex& sourceParent) const;
 
