@@ -212,13 +212,13 @@ namespace
         for ( bfs::directory_iterator end, dir(from); dir != end; ++dir )
         {
             if(bfs::is_directory(dir->path()))
-                installToPath(dir->path(), to / dir->path().filename());
+                installToPath(dir->path(), to / dir->path().filename(), copy);
             else
             {
-                if(!copy)
-                    bfs::rename(dir->path(), to / dir->path().filename());
-                else
+                if(copy)
                     bfs::copy_file(dir->path(), to / dir->path().filename());
+                else
+                    bfs::rename(dir->path(), to / dir->path().filename());
             }
         }
     }
@@ -235,7 +235,7 @@ namespace
         }
         else
         {
-            for ( bfs::recursive_directory_iterator end, dir(in); dir != end; ++dir )
+            for ( bfs::directory_iterator end, dir(in); dir != end; ++dir )
             {
                 if(Misc::StringUtils::lowerCase(dir->path().filename().string()) == filename)
                     return dir->path();
@@ -368,6 +368,14 @@ bool UnshieldThread::extract()
             installToPath(videosPath, outputDataFilesDir / "Video", true);
         }
 
+        bfs::path cdDFiles = findFile(mMorrowindPath.parent_path(), "data files", false);
+        if(cdDFiles.string() != "")
+        {
+            emit signalGUI(QString("Installing Uncompressed Data files from CD..."));
+            installToPath(cdDFiles, outputDataFilesDir, true);
+        }
+
+
         bfs::rename(findFile(mwExtractPath, "morrowind.ini"), outputDataFilesDir / "Morrowind.ini");
 
         mTribunalDone = contains(outputDataFilesDir, "tribunal.esm");
@@ -391,6 +399,13 @@ bool UnshieldThread::extract()
         if(soundsPath.string() != "")
             installToPath(soundsPath, outputDataFilesDir / "Sounds");
 
+        bfs::path cdDFiles = findFile(mTribunalPath.parent_path(), "data files", false);
+        if(cdDFiles.string() != "")
+        {
+            emit signalGUI(QString("Installing Uncompressed Data files from CD..."));
+            installToPath(cdDFiles, outputDataFilesDir, true);
+        }
+
         mBloodmoonDone = contains(outputDataFilesDir, "bloodmoon.esm");
 
         fix_ini(outputDataFilesDir, bfs::path(mTribunalPath).parent_path(), mTribunalDone, mBloodmoonDone);
@@ -412,6 +427,13 @@ bool UnshieldThread::extract()
         bfs::path tbPatchPath = findFile(bmExtractPath, "tribunal.esm");
         if(tbPatchPath.string() != "")
             bfs::rename(tbPatchPath, outputDataFilesDir / "Tribunal.esm");
+
+        bfs::path cdDFiles = findFile(mBloodmoonPath.parent_path(), "data files", false);
+        if(cdDFiles.string() != "")
+        {
+            emit signalGUI(QString("Installing Uncompressed Data files from CD..."));
+            installToPath(cdDFiles, outputDataFilesDir, true);
+        }
         
         fix_ini(outputDataFilesDir, bfs::path(mBloodmoonPath).parent_path(), false, mBloodmoonDone);
     }
