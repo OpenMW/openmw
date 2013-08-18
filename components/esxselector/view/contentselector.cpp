@@ -25,9 +25,11 @@ void EsxView::ContentSelector::buildModelsAndViews()
     mMasterProxyModel = new EsxModel::MasterProxyModel (this, mDataFilesModel);
     mPluginsProxyModel = new EsxModel::PluginsProxyModel (this, mDataFilesModel);
 
+    masterView->setPlaceholderText(QString("Select a game file..."));
     masterView->setModel(mMasterProxyModel);
     pluginView->setModel(mPluginsProxyModel);
-    pluginView->
+    profilesComboBox->setPlaceholderText(QString("Select a profile..."));
+
 
     connect(mDataFilesModel, SIGNAL(layoutChanged()), this, SLOT(updateViews()));
     connect(pluginView, SIGNAL(clicked(const QModelIndex &)), this, SLOT(slotPluginTableItemClicked(const QModelIndex &)));

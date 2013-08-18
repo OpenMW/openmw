@@ -14,6 +14,7 @@ namespace EsxView
     public:
         explicit ProfilesComboBox(QWidget *parent = 0);
         void setEditEnabled(bool editable);
+        void setPlaceholderText (const QString &text);
 
     signals:
         void profileChanged(const QString &previous, const QString &current);
@@ -26,6 +27,7 @@ namespace EsxView
 
     private:
         QString mOldProfile;
+        QString mPlaceholderText;
         QRegExpValidator *mValidator;
 
     protected:

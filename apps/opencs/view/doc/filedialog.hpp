@@ -14,9 +14,15 @@ class QPushButton;
 class QStringList;
 class QString;
 class QMenu;
+class QLabel;
 
 class DataFilesModel;
 class PluginsProxyModel;
+
+namespace EsxView
+{
+    class LineEdit;
+}
 
 namespace CSVDoc
 {
@@ -48,7 +54,7 @@ namespace CSVDoc
 
     private:
         QLabel *mNameLabel;
-        //LineEdit *mNameLineEdit;
+        EsxView::LineEdit *mNameLineEdit;
 
         QPushButton *mCreateButton;
         QDialogButtonBox *mButtonBox;

@@ -22,10 +22,7 @@ CSVDoc::FileDialog::FileDialog(QWidget *parent) :
     ContentSelector(parent)
 {
     // Hide the profile elements
-    profileLabel->hide();
-    profilesComboBox->hide();
-    newProfileButton->hide();
-    deleteProfileButton->hide();
+    profileGroupBox->hide();
 
     // Add some extra widgets
     QHBoxLayout *nameLayout = new QHBoxLayout();
@@ -34,12 +31,12 @@ CSVDoc::FileDialog::FileDialog(QWidget *parent) :
     mNameLabel = new QLabel(tr("File Name:"), this);
 
     QRegExpValidator *validator = new QRegExpValidator(QRegExp("^[a-zA-Z0-9\\s]*$"));
-    //mNameLineEdit = new LineEdit(this);
-    //mNameLineEdit->setValidator(validator);
+    mNameLineEdit = new EsxView::LineEdit(this);
+    mNameLineEdit->setValidator(validator);
 
     nameLayout->addSpacerItem(spacer);
     nameLayout->addWidget(mNameLabel);
-    //nameLayout->addWidget(mNameLineEdit);
+    nameLayout->addWidget(mNameLineEdit);
 
     mButtonBox = new QDialogButtonBox(this);
 
