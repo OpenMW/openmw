@@ -7,14 +7,6 @@ namespace bfs = boost::filesystem;
 
 namespace 
 {        
-    typedef enum
-    {
-      FORMAT_NEW,
-      FORMAT_OLD,
-      FORMAT_RAW
-    } FORMAT;
-
-
     static bool make_sure_directory_exists(bfs::path directory)
     {
 
@@ -322,19 +314,7 @@ bool UnshieldThread::extract_file(Unshield* unshield, bfs::path output_dir, cons
   
     emit signalGUI(QString("Extracting: ") + QString(filename.c_str()));
   
-    FORMAT format = FORMAT_NEW;
-    switch (format)
-    {
-        case FORMAT_NEW:
-            success = unshield_file_save(unshield, index, filename.c_str());
-            break;
-        case FORMAT_OLD:
-            success = unshield_file_save_old(unshield, index, filename.c_str());
-            break;
-        case FORMAT_RAW:
-            success = unshield_file_save_raw(unshield, index, filename.c_str());
-            break;
-    }
+    success = unshield_file_save(unshield, index, filename.c_str());
 
     if (!success)
         bfs::remove(filename);
