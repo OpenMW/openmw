@@ -3,6 +3,8 @@
 
 #include <QWidget>
 
+#include "../../model/filter/node.hpp"
+
 namespace CSVFilter
 {
     class FilterBox : public QWidget
@@ -12,6 +14,11 @@ namespace CSVFilter
         public:
 
             FilterBox (QWidget *parent = 0);
+
+        signals:
+
+            void recordFilterChanged (boost::shared_ptr<CSMFilter::Node> filter,
+                const std::string& userValue);
     };
 
 }

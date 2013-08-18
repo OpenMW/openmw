@@ -15,7 +15,13 @@ CSVFilter::RecordFilterBox::RecordFilterBox (QWidget *parent)
 
     layout->addWidget (new QLabel ("Record Filter", this));
 
-    layout->addWidget (new EditWidget (this));
+    EditWidget *editWidget = new EditWidget (this);
+
+    layout->addWidget (editWidget);
 
     setLayout (layout);
+
+    connect (
+        editWidget, SIGNAL (filterChanged (boost::shared_ptr<CSMFilter::Node>, const std::string&)),
+        this, SIGNAL (filterChanged (boost::shared_ptr<CSMFilter::Node>, const std::string&)));
 }

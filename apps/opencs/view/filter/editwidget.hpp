@@ -1,9 +1,12 @@
 #ifndef CSV_FILTER_EDITWIDGET_H
 #define CSV_FILTER_EDITWIDGET_H
 
+#include <boost/shared_ptr.hpp>
+
 #include <QLineEdit>
 
 #include "../../model/filter/parser.hpp"
+#include "../../model/filter/node.hpp"
 
 namespace CSVFilter
 {
@@ -19,7 +22,8 @@ namespace CSVFilter
 
         signals:
 
-            void filterChanged();
+            void filterChanged (boost::shared_ptr<CSMFilter::Node> filter,
+                const std::string& userValue);
 
         private slots:
 

@@ -25,7 +25,9 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
     layout->insertWidget (0, mTable =
         new Table (id, document.getData(), document.getUndoStack(), mBottom->canCreateAndDelete()), 2);
 
-    layout->insertWidget (0, new CSVFilter::FilterBox (this));
+    CSVFilter::FilterBox *filterBox = new CSVFilter::FilterBox (this);
+
+    layout->insertWidget (0, filterBox);
 
     QWidget *widget = new QWidget;
 
@@ -48,6 +50,10 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
     connect (mBottom, SIGNAL (requestFocus (const std::string&)),
         mTable, SLOT (requestFocus (const std::string&)));
+
+    connect (filterBox,
+        SIGNAL (recordFilterChanged (boost::shared_ptr<CSMFilter::Node>, const std::string&)),
+        mTable, SLOT (recordFilterChanged (boost::shared_ptr<CSMFilter::Node>, const std::string&)));
 }
 
 void CSVWorld::TableSubView::setEditLock (bool locked)

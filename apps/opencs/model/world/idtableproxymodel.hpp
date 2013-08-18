@@ -1,9 +1,13 @@
 #ifndef CSM_WOLRD_IDTABLEPROXYMODEL_H
 #define CSM_WOLRD_IDTABLEPROXYMODEL_H
 
+#include <string>
+
+#include <boost/shared_ptr.hpp>
+
 #include <QSortFilterProxyModel>
 
-#include <string>
+#include "../filter/node.hpp"
 
 namespace CSMWorld
 {
@@ -11,11 +15,21 @@ namespace CSMWorld
     {
             Q_OBJECT
 
+            boost::shared_ptr<CSMFilter::Node> mFilter;
+            std::string mUserValue;
+
+        private:
+
+            bool filterAcceptsRow (int sourceRow, const QModelIndex& sourceParent) const;
+
         public:
 
             IdTableProxyModel (QObject *parent = 0);
 
             virtual QModelIndex getModelIndex (const std::string& id, int column) const;
+
+            void setFilter (const boost::shared_ptr<CSMFilter::Node>& filter,
+                const std::string& userValue);
     };
 }
 

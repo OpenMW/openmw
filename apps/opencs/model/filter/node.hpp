@@ -5,6 +5,10 @@
 #include <map>
 #include <vector>
 
+#include <boost/shared_ptr.hpp>
+
+#include <QMetaType>
+
 namespace CSMWorld
 {
     class IdTable;
@@ -54,5 +58,7 @@ namespace CSMFilter
             /// \param numericColumns Use numeric IDs instead of string to represent columns.
     };
 }
+
+Q_DECLARE_METATYPE (boost::shared_ptr<CSMFilter::Node>)
 
 #endif
