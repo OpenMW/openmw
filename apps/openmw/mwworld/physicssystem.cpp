@@ -45,23 +45,23 @@ namespace MWWorld
                              const Ogre::Vector3 &velocity, float &remainingTime,
                              OEngine::Physic::PhysicEngine *engine)
         {
-            OEngine::Physic::ActorTracer tracer;
-            tracer.doTrace(colobj, position, position+Ogre::Vector3(0.0f,0.0f,sStepSize), engine);
-            if(tracer.mFraction == 0.0f)
+            OEngine::Physic::ActorTracer tracer, stepper;
+
+            stepper.doTrace(colobj, position, position+Ogre::Vector3(0.0f,0.0f,sStepSize), engine);
+            if(stepper.mFraction == 0.0f)
                 return false;
 
-            tracer.doTrace(colobj, tracer.mEndPos, tracer.mEndPos + velocity*remainingTime, engine);
+            tracer.doTrace(colobj, stepper.mEndPos, stepper.mEndPos + velocity*remainingTime, engine);
             if(tracer.mFraction < std::numeric_limits<float>::epsilon() ||
                (tracer.mFraction < 1.0f && getSlope(tracer.mPlaneNormal) > sMaxSlope))
                 return false;
-            float movefrac = tracer.mFraction;
 
-            tracer.doTrace(colobj, tracer.mEndPos, tracer.mEndPos-Ogre::Vector3(0.0f,0.0f,sStepSize), engine);
-            if(getSlope(tracer.mPlaneNormal) <= sMaxSlope)
+            stepper.doTrace(colobj, tracer.mEndPos, tracer.mEndPos-Ogre::Vector3(0.0f,0.0f,sStepSize), engine);
+            if(getSlope(stepper.mPlaneNormal) <= sMaxSlope)
             {
                 // only step down onto semi-horizontal surfaces. don't step down onto the side of a house or a wall.
-                position = tracer.mEndPos;
-                remainingTime *= (1.0f-movefrac);
+                position = stepper.mEndPos;
+                remainingTime *= (1.0f-tracer.mFraction);
                 return true;
             }
 
@@ -132,9 +132,7 @@ namespace MWWorld
             position.z += halfExtents.z;
 
             OEngine::Physic::ActorTracer tracer;
-            bool wasOnGround = false;
             bool isOnGround = false;
-            const Ogre::Quaternion orient; // Don't rotate actor collision boxes
             Ogre::Vector3 inertia(0.0f);
             Ogre::Vector3 velocity;
             if(!gravity)
@@ -146,11 +144,10 @@ namespace MWWorld
             }
             else
             {
-                tracer.doTrace(colobj, position, position-Ogre::Vector3(0,0,4), engine);
-                if(tracer.mFraction < 1.0f && getSlope(tracer.mPlaneNormal) <= sMaxSlope)
+                if(!(movement.z > 0.0f))
                 {
-                    wasOnGround = true;
-                    if(!(movement.z > 0.0f))
+                    tracer.doTrace(colobj, position, position-Ogre::Vector3(0,0,2), engine);
+                    if(tracer.mFraction < 1.0f && getSlope(tracer.mPlaneNormal) <= sMaxSlope)
                         isOnGround = true;
                 }
                 inertia = physicActor->getInertialForce();
@@ -164,7 +161,6 @@ namespace MWWorld
                 velocity.z = std::max(0.0f, velocity.z);
             }
 
-            const Ogre::Vector3 up(0.0f, 0.0f, 1.0f);
             Ogre::Vector3 newPosition = position;
             float remainingTime = time;
             for(int iterations = 0;iterations < sMaxIterations && remainingTime > 0.01f;++iterations)
@@ -201,23 +197,23 @@ namespace MWWorld
 
             if(isOnGround)
             {
-                tracer.doTrace(colobj, newPosition, newPosition-Ogre::Vector3(0,0,sStepSize+4.0f), engine);
+                tracer.doTrace(colobj, newPosition, newPosition-Ogre::Vector3(0,0,sStepSize+2.0f), engine);
                 if(tracer.mFraction < 1.0f && getSlope(tracer.mPlaneNormal) <= sMaxSlope)
-                    newPosition.z = tracer.mEndPos.z + 2.0f;
+                    newPosition.z = tracer.mEndPos.z + 1.0f;
                 else
                     isOnGround = false;
             }
 
-            physicActor->setOnGround(isOnGround);
             if(isOnGround)
                 physicActor->setInertialForce(Ogre::Vector3(0.0f));
             else
             {
-                if(wasOnGround)
+                if(physicActor->getOnGround())
                     inertia = velocity;
                 inertia.z -= time*627.2f;
                 physicActor->setInertialForce(inertia);
             }
+            physicActor->setOnGround(isOnGround);
 
             newPosition.z -= halfExtents.z;
             return newPosition;
