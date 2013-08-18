@@ -108,7 +108,7 @@ opencs_units_noqt (model/settings
     )
 
 opencs_units_noqt (model/filter
-    node unarynode narynode leafnode booleannode
+    node unarynode narynode leafnode booleannode parser
     )
 
 opencs_hdrs_noqt (model/filter
@@ -116,7 +116,7 @@ opencs_hdrs_noqt (model/filter
     )
 
 opencs_units (view/filter
-    filtercreator filterbox recordfilterbox
+    filtercreator filterbox recordfilterbox editwidget
     )
 
 set (OPENCS_US

@@ -2,8 +2,9 @@
 #include "recordfilterbox.hpp"
 
 #include <QHBoxLayout>
-#include <QLineEdit>
 #include <QLabel>
+
+#include "editwidget.hpp"
 
 CSVFilter::RecordFilterBox::RecordFilterBox (QWidget *parent)
 : QWidget (parent)
@@ -14,7 +15,7 @@ CSVFilter::RecordFilterBox::RecordFilterBox (QWidget *parent)
 
     layout->addWidget (new QLabel ("Record Filter", this));
 
-    layout->addWidget (new QLineEdit (this));
+    layout->addWidget (new EditWidget (this));
 
     setLayout (layout);
 }
