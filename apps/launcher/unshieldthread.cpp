@@ -5,43 +5,295 @@
    
 namespace bfs = boost::filesystem;
 
-
-typedef enum
-{
-  FORMAT_NEW,
-  FORMAT_OLD,
-  FORMAT_RAW
-} FORMAT;
-
-
-static bool make_sure_directory_exists(bfs::path directory)
-{
-
-    if(!bfs::exists(directory))
+namespace 
+{        
+    typedef enum
     {
-        bfs::create_directories(directory);
+      FORMAT_NEW,
+      FORMAT_OLD,
+      FORMAT_RAW
+    } FORMAT;
+
+
+    static bool make_sure_directory_exists(bfs::path directory)
+    {
+
+        if(!bfs::exists(directory))
+        {
+            bfs::create_directories(directory);
+        }
+
+        return bfs::exists(directory);
     }
 
-    return bfs::exists(directory);
-}
-
-void fill_path(bfs::path& path, const std::string& name)
-{
-    size_t start = 0;
-    
-    size_t i;
-    for(i = 0; i < name.length(); i++)
+    void fill_path(bfs::path& path, const std::string& name)
     {
-        switch(name[i])
+        size_t start = 0;
+        
+        size_t i;
+        for(i = 0; i < name.length(); i++)
         {
-            case '\\':
-                path /= name.substr(start, i-start);
-                start = i+1;
-                break;
+            switch(name[i])
+            {
+                case '\\':
+                    path /= name.substr(start, i-start);
+                    start = i+1;
+                    break;
+            }
+        }
+
+        path /= name.substr(start, i-start);
+    }
+
+    std::string get_setting(const std::string& category, const std::string& setting, const std::string& inx)
+    {
+        size_t start = inx.find(category);
+        start = inx.find(setting, start) + setting.length() + 3;
+
+        size_t end = inx.find("!", start);
+
+        return inx.substr(start, end-start);
+    }
+
+    std::string read_to_string(const bfs::path& path)
+    {
+        std::ifstream strstream(path.c_str(), std::ios::in | std::ios::binary);
+        std::string str;
+
+        strstream.seekg(0, std::ios::end);
+        str.resize(strstream.tellg());
+        strstream.seekg(0, std::ios::beg);
+        strstream.read(&str[0], str.size());
+        strstream.close();
+
+        return str;
+    }
+
+    void add_setting(const std::string& category, const std::string& setting, const std::string& val, std::string& ini)
+    {                                                                                       
+        size_t loc;
+        loc = ini.find("[" + category + "]");
+        
+        // If category is not found, create it 
+        if(loc == std::string::npos)
+        {
+            loc = ini.size() + 2;
+            ini += ("\r\n[" + category + "]\r\n");
+        }
+          
+        loc += category.length() +2 +2;
+        ini.insert(loc, setting + "=" + val + "\r\n");
+    }
+
+    void bloodmoon_fix_ini(std::string& ini, const bfs::path inxPath)
+    {
+        std::string inx = read_to_string(inxPath);
+
+        // Remove this one setting (the only one actually changed by bloodmoon, as opposed to just adding new ones)
+        size_t start = ini.find("[Weather Blight]");
+        start = ini.find("Ambient Loop Sound ID", start);
+        size_t end = ini.find("\r\n", start) +2;
+        ini.erase(start, end-start);
+
+        std::string category;
+        std::string setting;
+
+        category = "General";
+        {
+            setting = "Werewolf FOV"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+        }
+        category = "Moons";
+        {
+            setting = "Script Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+        }
+        category = "Weather";
+        {
+            setting = "Snow Ripples"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Snow Ripple Radius"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Snow Ripples Per Flake"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Snow Ripple Scale"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Snow Ripple Speed"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Snow Gravity Scale"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Snow High Kill"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Snow Low Kill"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+        }
+        category = "Weather Blight";
+        {
+            setting = "Ambient Loop Sound ID"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+        }
+        category = "Weather Snow";
+        {
+            setting = "Sky Sunrise Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Sky Day Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Sky Sunset Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Sky Night Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Fog Sunrise Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Fog Day Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Fog Sunset Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Fog Night Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Ambient Sunrise Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Ambient Day Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Ambient Sunset Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Ambient Night Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Sun Sunrise Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Sun Day Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Sun Sunset Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Sun Night Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Sun Disc Sunset Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Transition Delta"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Land Fog Day Depth"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Land Fog Night Depth"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Clouds Maximum Percent"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Wind Speed"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Cloud Speed"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Glare View"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Cloud Texture"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Ambient Loop Sound ID"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Snow Threshold"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Snow Diameter"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Snow Height Min"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Snow Height Max"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Snow Entrance Speed"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Max Snowflakes"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+        }
+        category = "Weather Blizzard";
+        {
+            setting = "Sky Sunrise Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Sky Day Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Sky Sunset Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Sky Night Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Fog Sunrise Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Fog Day Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Fog Sunset Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Fog Night Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Ambient Sunrise Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Ambient Day Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Ambient Sunset Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Ambient Night Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Sun Sunrise Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Sun Day Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Sun Sunset Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Sun Night Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Sun Disc Sunset Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Transition Delta"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Land Fog Day Depth"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Land Fog Night Depth"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Clouds Maximum Percent"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Wind Speed"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Cloud Speed"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Glare View"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Cloud Texture"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Ambient Loop Sound ID"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            setting = "Storm Threshold"; add_setting(category, setting, get_setting(category, setting, inx), ini);
         }
     }
 
-    path /= name.substr(start, i-start);
+
+    void fix_ini(const bfs::path& output_dir, bfs::path cdPath, bool tribunal, bool bloodmoon)
+    {
+        bfs::path ini_path = output_dir;
+        ini_path /= "Morrowind.ini";
+
+        std::string ini = read_to_string(ini_path.string());
+
+        if(tribunal)
+        {
+            add_setting("Game Files", "GameFile1", "Tribunal.esm", ini);
+            add_setting("Archives", "Archive 0", "Tribunal.bsa", ini);
+        }
+        if(bloodmoon)
+        {
+            bloodmoon_fix_ini(ini, cdPath / "setup.inx");
+            add_setting("Game Files", "GameFile2", "Bloodmoon.esm", ini);
+            add_setting("Archives", "Archive 1", "Bloodmoon.bsa", ini);
+        }
+
+        std::ofstream inistream(ini_path.c_str());
+        inistream << ini;
+        inistream.close();
+    }
+
+    void installToPath(const bfs::path& from, const bfs::path& to, bool copy = false)
+    {
+        make_sure_directory_exists(to);
+
+        for ( bfs::directory_iterator end, dir(from); dir != end; ++dir )
+        {
+            if(bfs::is_directory(dir->path()))
+                installToPath(dir->path(), to / dir->path().filename());
+            else
+            {
+                if(!copy)
+                    bfs::rename(dir->path(), to / dir->path().filename());
+                else
+                    bfs::copy_file(dir->path(), to / dir->path().filename());
+            }
+        }
+    }
+
+    bfs::path findFile(const bfs::path& in, std::string filename, bool recursive = true)
+    {
+        if(recursive)
+        {
+            for ( bfs::recursive_directory_iterator end, dir(in); dir != end; ++dir )
+            {
+                if(Misc::StringUtils::lowerCase(dir->path().filename().string()) == filename)
+                    return dir->path();
+            }
+        }
+        else
+        {
+            for ( bfs::recursive_directory_iterator end, dir(in); dir != end; ++dir )
+            {
+                if(Misc::StringUtils::lowerCase(dir->path().filename().string()) == filename)
+                    return dir->path();
+            }
+        }
+
+        return "";
+    }
+
+    bool contains(const bfs::path& in, std::string filename)
+    {
+        for(bfs::directory_iterator end, dir(in); dir != end; ++dir)
+        {
+            if(Misc::StringUtils::lowerCase(dir->path().filename().string()) == filename)
+                return true;
+        }
+
+        return false;
+    }
+
+    time_t getTime(const char* time)
+    {
+        struct tm tms;
+        memset(&tms, 0, sizeof(struct tm));
+        strptime(time, "%d %B %Y", &tms);
+        return mktime(&tms);
+    }
+}
+
+bool UnshieldThread::SetMorrowindPath(const std::string& path)
+{
+    mMorrowindPath = path;
+    return true;
+}
+
+bool UnshieldThread::SetTribunalPath(const std::string& path)
+{
+    mTribunalPath = path;
+    return true;
+}
+
+bool UnshieldThread::SetBloodmoonPath(const std::string& path)
+{
+    mBloodmoonPath = path;
+    return true;
+}
+
+void UnshieldThread::SetOutputPath(const std::string& path)
+{
+    mOutputPath = path;
 }
 
 bool UnshieldThread::extract_file(Unshield* unshield, bfs::path output_dir, const char* prefix, int index)
@@ -109,247 +361,6 @@ void UnshieldThread::extract_cab(const bfs::path& cab, const bfs::path& output_d
     unshield_close(unshield);
 }
 
-std::string get_setting(const std::string& category, const std::string& setting, const std::string& inx)
-{
-    size_t start = inx.find(category);
-    start = inx.find(setting, start) + setting.length() + 3;
-
-    size_t end = inx.find("!", start);
-
-    return inx.substr(start, end-start);
-}
-
-std::string read_to_string(const bfs::path& path)
-{
-    std::ifstream strstream(path.c_str(), std::ios::in | std::ios::binary);
-    std::string str;
-
-    strstream.seekg(0, std::ios::end);
-    str.resize(strstream.tellg());
-    strstream.seekg(0, std::ios::beg);
-    strstream.read(&str[0], str.size());
-    strstream.close();
-
-    return str;
-}
-
-void add_setting(const std::string& category, const std::string& setting, const std::string& val, std::string& ini)
-{                                                                                       
-    size_t loc;
-    loc = ini.find("[" + category + "]");
-    
-    // If category is not found, create it 
-    if(loc == std::string::npos)
-    {
-        loc = ini.size() + 2;
-        ini += ("\r\n[" + category + "]\r\n");
-    }
-      
-    loc += category.length() +2 +2;
-    ini.insert(loc, setting + "=" + val + "\r\n");
-}
-
-void bloodmoon_fix_ini(std::string& ini, const bfs::path inxPath)
-{
-    std::string inx = read_to_string(inxPath);
-
-    // Remove this one setting (the only one actually changed by bloodmoon, as opposed to just adding new ones)
-    size_t start = ini.find("[Weather Blight]");
-    start = ini.find("Ambient Loop Sound ID", start);
-    size_t end = ini.find("\r\n", start) +2;
-    ini.erase(start, end-start);
-
-    std::string category;
-    std::string setting;
-
-    category = "General";
-    {
-        setting = "Werewolf FOV"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-    }
-    category = "Moons";
-    {
-        setting = "Script Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-    }
-    category = "Weather";
-    {
-        setting = "Snow Ripples"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Snow Ripple Radius"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Snow Ripples Per Flake"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Snow Ripple Scale"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Snow Ripple Speed"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Snow Gravity Scale"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Snow High Kill"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Snow Low Kill"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-    }
-    category = "Weather Blight";
-    {
-        setting = "Ambient Loop Sound ID"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-    }
-    category = "Weather Snow";
-    {
-        setting = "Sky Sunrise Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Sky Day Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Sky Sunset Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Sky Night Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Fog Sunrise Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Fog Day Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Fog Sunset Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Fog Night Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Ambient Sunrise Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Ambient Day Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Ambient Sunset Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Ambient Night Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Sun Sunrise Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Sun Day Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Sun Sunset Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Sun Night Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Sun Disc Sunset Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Transition Delta"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Land Fog Day Depth"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Land Fog Night Depth"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Clouds Maximum Percent"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Wind Speed"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Cloud Speed"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Glare View"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Cloud Texture"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Ambient Loop Sound ID"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Snow Threshold"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Snow Diameter"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Snow Height Min"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Snow Height Max"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Snow Entrance Speed"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Max Snowflakes"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-    }
-    category = "Weather Blizzard";
-    {
-        setting = "Sky Sunrise Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Sky Day Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Sky Sunset Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Sky Night Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Fog Sunrise Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Fog Day Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Fog Sunset Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Fog Night Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Ambient Sunrise Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Ambient Day Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Ambient Sunset Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Ambient Night Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Sun Sunrise Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Sun Day Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Sun Sunset Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Sun Night Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Sun Disc Sunset Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Transition Delta"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Land Fog Day Depth"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Land Fog Night Depth"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Clouds Maximum Percent"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Wind Speed"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Cloud Speed"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Glare View"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Cloud Texture"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Ambient Loop Sound ID"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-        setting = "Storm Threshold"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-    }
-}
-
-
-void fix_ini(const bfs::path& output_dir, bfs::path cdPath, bool tribunal, bool bloodmoon)
-{
-    bfs::path ini_path = output_dir;
-    ini_path /= "Morrowind.ini";
-
-    std::string ini = read_to_string(ini_path.string());
-
-    if(tribunal)
-    {
-        add_setting("Game Files", "GameFile1", "Tribunal.esm", ini);
-        add_setting("Archives", "Archive 0", "Tribunal.bsa", ini);
-    }
-    if(bloodmoon)
-    {
-        bloodmoon_fix_ini(ini, cdPath / "setup.inx");
-        add_setting("Game Files", "GameFile2", "Bloodmoon.esm", ini);
-        add_setting("Archives", "Archive 1", "Bloodmoon.bsa", ini);
-    }
-
-    std::ofstream inistream(ini_path.c_str());
-    inistream << ini;
-    inistream.close();
-}
-
-bool UnshieldThread::SetMorrowindPath(const std::string& path)
-{
-    mMorrowindPath = path;
-    return true;
-}
-
-bool UnshieldThread::SetTribunalPath(const std::string& path)
-{
-    mTribunalPath = path;
-    return true;
-}
-
-bool UnshieldThread::SetBloodmoonPath(const std::string& path)
-{
-    mBloodmoonPath = path;
-    return true;
-}
-
-void UnshieldThread::SetOutputPath(const std::string& path)
-{
-    mOutputPath = path;
-}
-
-void installToPath(const bfs::path& from, const bfs::path& to, bool copy = false)
-{
-    make_sure_directory_exists(to);
-
-    for ( bfs::directory_iterator end, dir(from); dir != end; ++dir )
-    {
-        if(bfs::is_directory(dir->path()))
-            installToPath(dir->path(), to / dir->path().filename());
-        else
-        {
-            if(!copy)
-                bfs::rename(dir->path(), to / dir->path().filename());
-            else
-                bfs::copy_file(dir->path(), to / dir->path().filename());
-        }
-    }
-}
-
-bfs::path findFile(const bfs::path& in, std::string filename, bool recursive = true)
-{
-    if(recursive)
-    {
-        for ( bfs::recursive_directory_iterator end, dir(in); dir != end; ++dir )
-        {
-            if(Misc::StringUtils::lowerCase(dir->path().filename().string()) == filename)
-                return dir->path();
-        }
-    }
-    else
-    {
-        for ( bfs::recursive_directory_iterator end, dir(in); dir != end; ++dir )
-        {
-            if(Misc::StringUtils::lowerCase(dir->path().filename().string()) == filename)
-                return dir->path();
-        }
-    }
-
-    return "";
-}
-
-bool contains(const bfs::path& in, std::string filename)
-{
-    for(bfs::directory_iterator end, dir(in); dir != end; ++dir)
-    {
-        if(Misc::StringUtils::lowerCase(dir->path().filename().string()) == filename)
-            return true;
-    }
-
-    return false;
-}
 
 bool UnshieldThread::extract()
 {
@@ -427,14 +438,6 @@ bool UnshieldThread::extract()
 
  
     return true;
-}
-
-time_t getTime(const char* time)
-{
-    struct tm tms;
-    memset(&tms, 0, sizeof(struct tm));
-    strptime(time, "%d %B %Y", &tms);
-    return mktime(&tms);
 }
 
 void UnshieldThread::Done()
