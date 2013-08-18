@@ -26,8 +26,8 @@ void FileOrderList::ContentSelector::buildModelsAndViews()
     pluginView->setModel(mPluginsProxyModel);
 
     connect(mDataFilesModel, SIGNAL(layoutChanged()), this, SLOT(updateViews()));
+    //connect(pluginView, SIGNAL())
     connect(masterView, SIGNAL(currentIndexChanged(int)), this, SLOT(slotCurrentMasterIndexChanged(int)));
-
     connect(profilesComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(slotCurrentProfileIndexChanged(int)));
 }
 
