@@ -11,8 +11,8 @@
 
 #include <QDebug>
 
-#include "unshield_thread.hpp"
-#include "text_slot_msg_box.hpp"
+#include "unshieldthread.hpp"
+#include "textslotmsgbox.hpp"
 
 #include "utils/checkablemessagebox.hpp"
 

@@ -4,8 +4,8 @@ set(LAUNCHER
     main.cpp
     maindialog.cpp
     playpage.cpp
-    unshield_thread.cpp
-    text_slot_msg_box.cpp
+    unshieldthread.cpp
+    textslotmsgbox.cpp
 
     settings/gamesettings.cpp
     settings/graphicssettings.cpp
@@ -22,8 +22,8 @@ set(LAUNCHER_HEADER
     graphicspage.hpp
     maindialog.hpp
     playpage.hpp
-    unshield_thread.hpp
-    text_slot_msg_box.hpp
+    unshieldthread.hpp
+    textslotmsgbox.hpp
 
     settings/gamesettings.hpp
     settings/graphicssettings.hpp
@@ -41,8 +41,8 @@ set(LAUNCHER_HEADER_MOC
     graphicspage.hpp
     maindialog.hpp
     playpage.hpp
-    unshield_thread.hpp
-    text_slot_msg_box.hpp
+    unshieldthread.hpp
+    textslotmsgbox.hpp
 
     utils/checkablemessagebox.hpp
     utils/textinputdialog.hpp

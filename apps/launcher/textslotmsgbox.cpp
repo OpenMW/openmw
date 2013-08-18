@@ -1,4 +1,4 @@
-#include "text_slot_msg_box.hpp"
+#include "textslotmsgbox.hpp"
 
 void TextSlotMsgBox::setTextSlot(const QString& string)
 {
