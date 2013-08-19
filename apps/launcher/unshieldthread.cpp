@@ -325,7 +325,7 @@ bool UnshieldThread::extract_file(Unshield* unshield, bfs::path output_dir, cons
 void UnshieldThread::extract_cab(const bfs::path& cab, const bfs::path& output_dir, bool extract_ini)
 {
     Unshield * unshield;
-    unshield = unshield_open_force_version(cab.c_str(), -1);
+    unshield = unshield_open(cab.c_str());
 
     int i;
     for (i = 0; i < unshield_file_group_count(unshield); i++)
