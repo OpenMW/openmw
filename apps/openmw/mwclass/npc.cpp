@@ -1021,6 +1021,16 @@ namespace MWClass
             }
             return "";
         }
+        if(name == "land")
+        {
+            MWBase::World *world = MWBase::Environment::get().getWorld();
+            Ogre::Vector3 pos(ptr.getRefData().getPosition().pos);
+            if(world->isUnderwater(ptr.getCell(), pos))
+                return "DefaultLandWater";
+            if(world->isOnGround(ptr))
+                return "Body Fall Medium";
+            return "";
+        }
         if(name == "swimleft")
             return "Swim Left";
         if(name == "swimright")
@@ -1033,8 +1043,6 @@ namespace MWClass
         if(name == "roar")
             return "";
         if(name == "scream")
-            return "";
-        if(name == "land")
             return "";
 
         throw std::runtime_error(std::string("Unexpected soundgen type: ")+name);
