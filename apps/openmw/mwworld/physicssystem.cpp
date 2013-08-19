@@ -128,6 +128,7 @@ namespace MWWorld
             position.z += halfExtents.z;
 
             OEngine::Physic::ActorTracer tracer;
+            bool wasOnGround = false;
             bool isOnGround = false;
             Ogre::Vector3 inertia(0.0f);
             Ogre::Vector3 velocity;
@@ -140,15 +141,22 @@ namespace MWWorld
             }
             else
             {
+                velocity = Ogre::Quaternion(Ogre::Radian(-refpos.rot[2]), Ogre::Vector3::UNIT_Z) * movement;
+                if(physicActor->getOnGround())
+                    inertia = velocity;
+                else
+                {
+                    inertia = physicActor->getInertialForce();
+                    velocity += inertia;
+                }
+
                 if(!(movement.z > 0.0f))
                 {
+                    wasOnGround = physicActor->getOnGround();
                     tracer.doTrace(colobj, position, position-Ogre::Vector3(0,0,2), engine);
                     if(tracer.mFraction < 1.0f && getSlope(tracer.mPlaneNormal) <= sMaxSlope)
                         isOnGround = true;
                 }
-                inertia = physicActor->getInertialForce();
-                velocity  = Ogre::Quaternion(Ogre::Radian(-refpos.rot[2]), Ogre::Vector3::UNIT_Z) * movement;
-                velocity += inertia;
             }
 
             if(isOnGround)
@@ -172,10 +180,9 @@ namespace MWWorld
                     break;
                 }
 
-                //std::cout<<"angle: "<<getSlope(trace.planenormal)<<"\n";
                 // We hit something. Try to step up onto it.
                 if(stepMove(colobj, newPosition, velocity, remainingTime, engine))
-                    isOnGround = gravity;
+                    isOnGround = gravity; // Only on the ground if there's gravity
                 else
                 {
                     // Can't move this way, try to find another spot along the plane
@@ -191,21 +198,22 @@ namespace MWWorld
                 }
             }
 
-            if(isOnGround)
+            if(isOnGround || wasOnGround)
             {
                 tracer.doTrace(colobj, newPosition, newPosition-Ogre::Vector3(0,0,sStepSize+2.0f), engine);
                 if(tracer.mFraction < 1.0f && getSlope(tracer.mPlaneNormal) <= sMaxSlope)
+                {
                     newPosition.z = tracer.mEndPos.z + 1.0f;
+                    isOnGround = true;
+                }
                 else
                     isOnGround = false;
             }
 
-            if(isOnGround)
+            if(isOnGround || !gravity)
                 physicActor->setInertialForce(Ogre::Vector3(0.0f));
             else
             {
-                if(physicActor->getOnGround())
-                    inertia = velocity;
                 inertia.z -= time*627.2f;
                 physicActor->setInertialForce(inertia);
             }
