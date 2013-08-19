@@ -99,6 +99,8 @@ static const StateInfo sMovementList[] = {
     { CharState_SneakLeft, "sneakleft" },
     { CharState_SneakRight, "sneakright" },
 
+    { CharState_Jump, "jump" },
+
     { CharState_TurnLeft, "turnleft" },
     { CharState_TurnRight, "turnright" },
 };
@@ -214,7 +216,7 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
 
         /* If we're playing the same animation, restart from the loop start instead of the
          * beginning. */
-        int mode = ((movement != mCurrentMovement) ? 1 : 2);
+        int mode = ((movement == mCurrentMovement) ? 2 : 1);
 
         mAnimation->disable(mCurrentMovement);
         mCurrentMovement = movement;
@@ -224,7 +226,7 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
             if(mMovementSpeed > 0.0f && (vel=mAnimation->getVelocity(mCurrentMovement)) > 1.0f)
                 speedmult = mMovementSpeed / vel;
             mAnimation->play(mCurrentMovement, Priority_Movement, movegroup, false,
-                             speedmult, ((mode==2)?"loop start":"start"), "stop", 0.0f, ~0ul);
+                             speedmult, ((mode!=2)?"start":"loop start"), "stop", 0.0f, ~0ul);
         }
     }
 }
@@ -307,6 +309,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     , mMovementSpeed(0.0f)
     , mDeathState(CharState_None)
     , mUpperBodyState(UpperCharState_Nothing)
+    , mJumpState(JumpState_None)
     , mWeaponType(WeapType_None)
     , mSkipAnim(false)
     , mSecondsOfRunning(0)
@@ -734,6 +737,8 @@ void CharacterController::update(float duration)
         {
             const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
 
+            mJumpState = JumpState_Falling;
+
             // This is a guess. All that seems to be known is that "While the player is in the
             // air, fJumpMoveBase and fJumpMoveMult governs air control." Assuming Acrobatics
             // plays a role, this makes the most sense.
@@ -750,10 +755,11 @@ void CharacterController::update(float duration)
             vec.y *= mult;
             vec.z  = 0.0f;
         }
-        else if(vec.z > 0.0f)
+        else if(vec.z > 0.0f && mJumpState == JumpState_None)
         {
-            float z = cls.getJump(mPtr);
+            mJumpState = JumpState_Falling;
 
+            float z = cls.getJump(mPtr);
             if(vec.x == 0 && vec.y == 0)
                 vec = Ogre::Vector3(0.0f, 0.0f, z);
             else
@@ -764,34 +770,46 @@ void CharacterController::update(float duration)
 
             //decrease fatigue by fFatigueJumpBase + (1 - normalizedEncumbrance) * fFatigueJumpMult;
         }
-        else if(std::abs(vec.x/2.0f) > std::abs(vec.y))
+        else if(mJumpState == JumpState_Falling)
         {
-            if(vec.x > 0.0f)
-                movestate = (inwater ? (isrunning ? CharState_SwimRunRight : CharState_SwimWalkRight)
-                                     : (sneak ? CharState_SneakRight
-                                              : (isrunning ? CharState_RunRight : CharState_WalkRight)));
-            else if(vec.x < 0.0f)
-                movestate = (inwater ? (isrunning ? CharState_SwimRunLeft : CharState_SwimWalkLeft)
-                                     : (sneak ? CharState_SneakLeft
-                                              : (isrunning ? CharState_RunLeft : CharState_WalkLeft)));
+            mJumpState = JumpState_Landing;
+            vec.z = 0.0f;
         }
-        else if(vec.y != 0.0f)
+        else
         {
-            if(vec.y > 0.0f)
-                movestate = (inwater ? (isrunning ? CharState_SwimRunForward : CharState_SwimWalkForward)
-                                     : (sneak ? CharState_SneakForward
-                                              : (isrunning ? CharState_RunForward : CharState_WalkForward)));
-            else if(vec.y < 0.0f)
-                movestate = (inwater ? (isrunning ? CharState_SwimRunBack : CharState_SwimWalkBack)
-                                     : (sneak ? CharState_SneakBack
-                                              : (isrunning ? CharState_RunBack : CharState_WalkBack)));
-        }
-        else if(rot.z != 0.0f && !inwater && !sneak)
-        {
-            if(rot.z > 0.0f)
-                movestate = CharState_TurnRight;
-            else if(rot.z < 0.0f)
-                movestate = CharState_TurnLeft;
+            if(!(vec.z > 0.0f))
+                mJumpState = JumpState_None;
+            vec.z = 0.0f;
+
+            if(std::abs(vec.x/2.0f) > std::abs(vec.y))
+            {
+                if(vec.x > 0.0f)
+                    movestate = (inwater ? (isrunning ? CharState_SwimRunRight : CharState_SwimWalkRight)
+                                         : (sneak ? CharState_SneakRight
+                                                  : (isrunning ? CharState_RunRight : CharState_WalkRight)));
+                else if(vec.x < 0.0f)
+                    movestate = (inwater ? (isrunning ? CharState_SwimRunLeft : CharState_SwimWalkLeft)
+                                         : (sneak ? CharState_SneakLeft
+                                                  : (isrunning ? CharState_RunLeft : CharState_WalkLeft)));
+            }
+            else if(vec.y != 0.0f)
+            {
+                if(vec.y > 0.0f)
+                    movestate = (inwater ? (isrunning ? CharState_SwimRunForward : CharState_SwimWalkForward)
+                                         : (sneak ? CharState_SneakForward
+                                                  : (isrunning ? CharState_RunForward : CharState_WalkForward)));
+                else if(vec.y < 0.0f)
+                    movestate = (inwater ? (isrunning ? CharState_SwimRunBack : CharState_SwimWalkBack)
+                                         : (sneak ? CharState_SneakBack
+                                                  : (isrunning ? CharState_RunBack : CharState_WalkBack)));
+            }
+            else if(rot.z != 0.0f && !inwater && !sneak)
+            {
+                if(rot.z > 0.0f)
+                    movestate = CharState_TurnRight;
+                else if(rot.z < 0.0f)
+                    movestate = CharState_TurnLeft;
+            }
         }
 
         if(movestate != CharState_None)

@@ -115,6 +115,12 @@ enum UpperBodyCharacterState {
     UpperCharState_CastingSpell
 };
 
+enum JumpingState {
+    JumpState_None,
+    JumpState_Falling,
+    JumpState_Landing
+};
+
 class CharacterController
 {
     MWWorld::Ptr mPtr;
@@ -134,6 +140,8 @@ class CharacterController
     std::string mCurrentDeath;
 
     UpperBodyCharacterState mUpperBodyState;
+
+    JumpingState mJumpState;
 
     WeaponType mWeaponType;
     std::string mCurrentWeapon;
