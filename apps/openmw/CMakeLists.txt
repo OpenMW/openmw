@@ -105,7 +105,6 @@ add_definitions(${SOUND_DEFINE})
 
 target_link_libraries(openmw
     ${OGRE_LIBRARIES}
-    ${OGRE_Terrain_LIBRARY}
     ${OGRE_STATIC_PLUGINS}
     ${Boost_LIBRARIES}
     ${OPENAL_LIBRARY}
