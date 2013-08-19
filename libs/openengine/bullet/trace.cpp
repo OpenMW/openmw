@@ -65,9 +65,8 @@ void ActorTracer::doTrace(btCollisionObject *actor, const Ogre::Vector3 &start, 
     to.setOrigin(btend);
 
     ClosestNotMeConvexResultCallback newTraceCallback(actor, btstart-btend, btScalar(0.0));
-    newTraceCallback.m_collisionFilterMask = OEngine::Physic::CollisionType_World |
-                                             OEngine::Physic::CollisionType_HeightMap |
-                                             OEngine::Physic::CollisionType_Actor;
+    newTraceCallback.m_collisionFilterMask = CollisionType_World | CollisionType_HeightMap |
+                                             CollisionType_Actor;
 
     btCollisionShape *shape = actor->getCollisionShape();
     assert(shape->isConvex());
@@ -81,6 +80,43 @@ void ActorTracer::doTrace(btCollisionObject *actor, const Ogre::Vector3 &start, 
         mFraction = newTraceCallback.m_closestHitFraction;
         mPlaneNormal = Ogre::Vector3(tracehitnormal.x(), tracehitnormal.y(), tracehitnormal.z());
         mEndPos = (end-start)*mFraction + start;
+    }
+    else
+    {
+        mEndPos = end;
+        mPlaneNormal = Ogre::Vector3(0.0f, 0.0f, 1.0f);
+        mFraction = 1.0f;
+    }
+}
+
+void ActorTracer::findGround(btCollisionObject *actor, const Ogre::Vector3 &start, const Ogre::Vector3 &end, const PhysicEngine *enginePass)
+{
+    const btVector3 btstart(start.x, start.y, start.z+1.0f);
+    const btVector3 btend(end.x, end.y, end.z+1.0f);
+
+    const btTransform &trans = actor->getWorldTransform();
+    btTransform from(trans.getBasis(), btstart);
+    btTransform to(trans.getBasis(), btend);
+
+    ClosestNotMeConvexResultCallback newTraceCallback(actor, btstart-btend, btScalar(0.0));
+    newTraceCallback.m_collisionFilterMask = CollisionType_World | CollisionType_HeightMap |
+                                             CollisionType_Actor;
+
+    const btBoxShape *shape = dynamic_cast<btBoxShape*>(actor->getCollisionShape());
+    assert(shape);
+
+    btVector3 halfExtents = shape->getHalfExtentsWithMargin();
+    halfExtents[2] = 1.0f;
+    btBoxShape box(halfExtents);
+
+    enginePass->dynamicsWorld->convexSweepTest(&box, from, to, newTraceCallback);
+    if(newTraceCallback.hasHit())
+    {
+        const btVector3& tracehitnormal = newTraceCallback.m_hitNormalWorld;
+        mFraction = newTraceCallback.m_closestHitFraction;
+        mPlaneNormal = Ogre::Vector3(tracehitnormal.x(), tracehitnormal.y(), tracehitnormal.z());
+        mEndPos = (end-start)*mFraction + start;
+        mEndPos[2] -= 1.0f;
     }
     else
     {

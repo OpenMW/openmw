@@ -92,22 +92,18 @@ namespace MWWorld
             if (!physicActor)
                 return position;
 
-            const Ogre::Vector3 halfExtents = physicActor->getHalfExtents();
-            Ogre::Vector3 newPosition = position+Ogre::Vector3(0.0f, 0.0f, halfExtents.z);
-
             const int maxHeight = 200.f;
             OEngine::Physic::ActorTracer tracer;
-            tracer.doTrace(physicActor->getCollisionBody(), newPosition, newPosition-Ogre::Vector3(0,0,maxHeight), engine);
+            tracer.findGround(physicActor->getCollisionBody(), position, position-Ogre::Vector3(0,0,maxHeight), engine);
             if(tracer.mFraction >= 1.0f)
+            {
+                physicActor->setOnGround(false);
                 return position;
+            }
 
             physicActor->setOnGround(getSlope(tracer.mPlaneNormal) <= sMaxSlope);
 
-            newPosition = tracer.mEndPos;
-            newPosition.z -= halfExtents.z;
-            newPosition.z += 2.0f;
-
-            return newPosition;
+            return tracer.mEndPos;
         }
 
         static Ogre::Vector3 move(const MWWorld::Ptr &ptr, const Ogre::Vector3 &movement, float time,
