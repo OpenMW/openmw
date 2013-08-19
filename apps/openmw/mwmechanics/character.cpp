@@ -794,9 +794,6 @@ void CharacterController::update(float duration)
         }
         else if(vec.z > 0.0f && mJumpState == JumpState_None)
         {
-            forcestateupdate = true;
-            mJumpState = JumpState_Falling;
-
             float z = cls.getJump(mPtr);
             if(vec.x == 0 && vec.y == 0)
                 vec = Ogre::Vector3(0.0f, 0.0f, z);
