@@ -71,8 +71,6 @@ QT4_WRAP_CPP(MOC_SRCS ${LAUNCHER_HEADER_MOC})
 QT4_WRAP_UI(UI_HDRS ${LAUNCHER_UI})
 
 
-message(STATUS "hello ${LIBUNSHIELD_INCLUDE}")
-
 include(${QT_USE_FILE})
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${LIBUNSHIELD_INCLUDE})
 
@@ -102,7 +100,7 @@ target_link_libraries(omwlauncher
     ${SDL2_LIBRARY}
     ${QT_LIBRARIES}
     components
-    libunshield
+    ${LIBUNSHIELD_LIBRARY}
 )
 
 

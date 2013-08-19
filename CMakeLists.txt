@@ -499,7 +499,6 @@ endif(WIN32)
 add_subdirectory (extern/shiny)
 add_subdirectory (extern/oics)
 add_subdirectory (extern/sdl4ogre)
-add_subdirectory (extern/unshield)
 
 # Components
 add_subdirectory (components)
@@ -516,6 +515,13 @@ if (BUILD_ESMTOOL)
 endif()
 
 if (BUILD_LAUNCHER)
+    if(NOT WIN32)
+        find_package(LIBUNSHIELD REQUIRED)
+        if(NOT LIBUNSHIELD_FOUND)
+               message(SEND_ERROR "Failed to find libunshield")
+        endif(NOT LIBUNSHIELD_FOUND)
+    endif(NOT WIN32)
+
    add_subdirectory( apps/launcher )
 endif()
 
