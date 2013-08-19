@@ -24,6 +24,7 @@ class NpcStats;
 
 enum Priority {
     Priority_Default,
+    Priority_Jump,
     Priority_Movement,
     Priority_Weapon,
     Priority_Torch,
@@ -142,6 +143,7 @@ class CharacterController
     UpperBodyCharacterState mUpperBodyState;
 
     JumpingState mJumpState;
+    std::string mCurrentJump;
 
     WeaponType mWeaponType;
     std::string mCurrentWeapon;

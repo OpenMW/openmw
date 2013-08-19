@@ -179,6 +179,42 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
                              1.0f, "start", "stop", 0.0f, ~0ul);
     }
 
+    if(force && mJumpState != JumpState_None)
+    {
+        std::string jump;
+        MWRender::Animation::Group jumpgroup = MWRender::Animation::Group_All;
+        if(mJumpState != JumpState_None)
+        {
+            jump = "jump";
+            if(weap != sWeaponTypeListEnd)
+            {
+                jump += weap->shortgroup;
+                if(!mAnimation->hasAnimation(jump))
+                {
+                    jumpgroup = MWRender::Animation::Group_LowerBody;
+                    jump = "jump";
+                }
+            }
+        }
+
+        if(mJumpState == JumpState_Falling)
+        {
+            int mode = ((jump == mCurrentJump) ? 2 : 1);
+
+            mAnimation->disable(mCurrentJump);
+            mCurrentJump = jump;
+            mAnimation->play(mCurrentJump, Priority_Jump, jumpgroup, false,
+                             1.0f, ((mode!=2)?"start":"loop start"), "stop", 0.0f, ~0ul);
+        }
+        else
+        {
+            mAnimation->disable(mCurrentJump);
+            mCurrentJump.clear();
+            mAnimation->play(jump, Priority_Jump, jumpgroup, true,
+                             1.0f, "loop stop", "stop", 0.0f, 0);
+        }
+    }
+
     if(force || movement != mMovementState)
     {
         mMovementState = movement;
@@ -737,6 +773,7 @@ void CharacterController::update(float duration)
         {
             const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
 
+            forcestateupdate = (mJumpState != JumpState_Falling);
             mJumpState = JumpState_Falling;
 
             // This is a guess. All that seems to be known is that "While the player is in the
@@ -757,6 +794,7 @@ void CharacterController::update(float duration)
         }
         else if(vec.z > 0.0f && mJumpState == JumpState_None)
         {
+            forcestateupdate = true;
             mJumpState = JumpState_Falling;
 
             float z = cls.getJump(mPtr);
@@ -772,6 +810,7 @@ void CharacterController::update(float duration)
         }
         else if(mJumpState == JumpState_Falling)
         {
+            forcestateupdate = true;
             mJumpState = JumpState_Landing;
             vec.z = 0.0f;
         }
@@ -831,7 +870,7 @@ void CharacterController::update(float duration)
         }
 
         if(cls.isNpc())
-            forcestateupdate = updateNpcState(onground, inwater, isrunning, sneak);
+            forcestateupdate = updateNpcState(onground, inwater, isrunning, sneak) || forcestateupdate;
 
         refreshCurrentAnims(idlestate, movestate, forcestateupdate);
 
