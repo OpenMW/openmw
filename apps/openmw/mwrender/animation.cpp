@@ -833,7 +833,12 @@ Ogre::Vector3 Animation::runAnimation(float duration)
         float timepassed = duration * state.mSpeedMult;
         while(state.mPlaying)
         {
-            float targetTime = state.mTime + timepassed;
+            float targetTime;
+
+            if(state.mTime >= state.mLoopStopTime && state.mLoopCount > 0)
+                goto handle_loop;
+
+            targetTime = state.mTime + timepassed;
             if(textkey == textkeys.end() || textkey->first > targetTime)
             {
                 if(mNonAccumCtrl && stateiter->first == mAnimationValuePtr[0]->getAnimName())
@@ -858,11 +863,10 @@ Ogre::Vector3 Animation::runAnimation(float duration)
 
             if(state.mTime >= state.mLoopStopTime && state.mLoopCount > 0)
             {
+            handle_loop:
                 state.mLoopCount--;
                 state.mTime = state.mLoopStartTime;
                 state.mPlaying = true;
-                if(state.mTime >= state.mLoopStopTime)
-                    break;
 
                 textkey = textkeys.lower_bound(state.mTime);
                 while(textkey != textkeys.end() && textkey->first <= state.mTime)
@@ -870,6 +874,9 @@ Ogre::Vector3 Animation::runAnimation(float duration)
                     handleTextKey(state, stateiter->first, textkey);
                     textkey++;
                 }
+
+                if(state.mTime >= state.mLoopStopTime)
+                    break;
             }
 
             if(timepassed <= 0.0f)
