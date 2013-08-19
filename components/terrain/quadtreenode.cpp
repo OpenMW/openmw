@@ -181,6 +181,10 @@ void QuadTreeNode::initNeighbours()
 {
     for (int i=0; i<4; ++i)
         mNeighbours[i] = searchNeighbourRecursive(this, (Direction)i);
+
+    if (hasChildren())
+        for (int i=0; i<4; ++i)
+            mChildren[i]->initNeighbours();
 }
 
 void QuadTreeNode::initAabb()
