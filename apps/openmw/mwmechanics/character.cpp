@@ -885,7 +885,12 @@ void CharacterController::update(float duration)
 
     if(mAnimation && !mSkipAnim)
     {
-        Ogre::Vector3 moved = mAnimation->runAnimation(duration) / duration;
+        Ogre::Vector3 moved = mAnimation->runAnimation(duration);
+        if(duration > 0.0f)
+            moved /= duration;
+        else
+            moved = Ogre::Vector3(0.0f);
+
         // Ensure we're moving in generally the right direction
         if(mMovementSpeed > 0.f)
         {
@@ -899,6 +904,7 @@ void CharacterController::update(float duration)
                (movement.z > 0.0f && movement.z > moved.z*2.0f))
                 moved.z = movement.z;
         }
+        // Update movement
         if(moved.squaredLength() > 1.0f)
             world->queueMovement(mPtr, moved);
     }
