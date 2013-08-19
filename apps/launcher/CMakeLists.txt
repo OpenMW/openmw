@@ -4,7 +4,6 @@ set(LAUNCHER
     main.cpp
     maindialog.cpp
     playpage.cpp
-    unshieldthread.cpp
     textslotmsgbox.cpp
 
     settings/gamesettings.cpp
@@ -16,6 +15,9 @@ set(LAUNCHER
 
     ${CMAKE_SOURCE_DIR}/files/launcher/launcher.rc
 )
+if(NOT WIN32)
+    LIST(APPEND LAUNCHER unshieldthread.cpp)
+endif(NOT WIN32)
 
 set(LAUNCHER_HEADER
     datafilespage.hpp
@@ -34,6 +36,10 @@ set(LAUNCHER_HEADER
     utils/textinputdialog.hpp
 
 )
+if(NOT WIN32)
+    LIST(APPEND LAUNCHER_HEADER unshieldthread.hpp)
+endif(NOT WIN32)
+
 
 # Headers that must be pre-processed
 set(LAUNCHER_HEADER_MOC
@@ -47,6 +53,11 @@ set(LAUNCHER_HEADER_MOC
     utils/checkablemessagebox.hpp
     utils/textinputdialog.hpp
 )
+
+if(NOT WIN32)
+    LIST(APPEND LAUNCHER_HEADER_MOC unshieldthread.hpp)
+endif(NOT WIN32)
+
 
 set(LAUNCHER_UI
     ${CMAKE_SOURCE_DIR}/files/ui/datafilespage.ui
@@ -72,7 +83,10 @@ QT4_WRAP_UI(UI_HDRS ${LAUNCHER_UI})
 
 
 include(${QT_USE_FILE})
-include_directories(${CMAKE_CURRENT_BINARY_DIR} ${LIBUNSHIELD_INCLUDE})
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+if(NOT WIN32)
+    include_directories(${LIBUNSHIELD_INCLUDE})
+endif(NOT WIN32)
 
 # Main executable
 IF(OGRE_STATIC)
@@ -100,8 +114,12 @@ target_link_libraries(omwlauncher
     ${SDL2_LIBRARY}
     ${QT_LIBRARIES}
     components
-    ${LIBUNSHIELD_LIBRARY}
 )
+if(NOT WIN32)
+    target_link_libraries(omwlauncher
+        ${LIBUNSHIELD_LIBRARY}
+    )
+endif(NOT WIN32)
 
 
 

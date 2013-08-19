@@ -11,7 +11,10 @@
 
 #include <QDebug>
 
-#include "unshieldthread.hpp"
+#ifndef WIN32
+    #include "unshieldthread.hpp"
+#endif
+
 #include "textslotmsgbox.hpp"
 
 #include "utils/checkablemessagebox.hpp"
@@ -352,6 +355,7 @@ bool MainDialog::setupLauncherSettings()
     return true;
 }
 
+#ifndef WIN32
 bool expansions(UnshieldThread& cd)
 {
     if(cd.BloodmoonDone())
@@ -421,6 +425,7 @@ bool expansions(UnshieldThread& cd)
 
     return true;
 }
+#endif // WIN32
 
 bool MainDialog::setupGameSettings()
 {
@@ -480,9 +485,11 @@ bool MainDialog::setupGameSettings()
 
         QAbstractButton *dirSelectButton =
                 msgBox.addButton(QObject::tr("Browse to &Install..."), QMessageBox::ActionRole);
-
-        QAbstractButton *cdSelectButton = 
-                msgBox.addButton(QObject::tr("Browse to &CD..."), QMessageBox::ActionRole);
+        
+        #ifndef WIN32
+            QAbstractButton *cdSelectButton = 
+                    msgBox.addButton(QObject::tr("Browse to &CD..."), QMessageBox::ActionRole);
+        #endif
         
 
          msgBox.exec();
@@ -495,6 +502,7 @@ bool MainDialog::setupGameSettings()
                         QDir::currentPath(),
                         QString(tr("Morrowind master file (*.esm)")));
         }
+        #ifndef WIN32
         else if(msgBox.clickedButton() == cdSelectButton) {
             UnshieldThread cd;
                 
@@ -527,6 +535,7 @@ bool MainDialog::setupGameSettings()
 
             selectedFile = QString::fromStdString(cd.GetMWEsmPath());
         }
+        #endif // WIN32
 
         if (selectedFile.isEmpty())
             return false; // Cancel was clicked;
