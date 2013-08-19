@@ -58,8 +58,14 @@ namespace Terrain
                            std::vector<Ogre::TexturePtr>& blendmaps,
                            std::vector<std::string>& layerList);
 
+        float getHeightAt (const Ogre::Vector3& worldPos);
+
     private:
         void fixNormal (Ogre::Vector3& normal, int cellX, int cellY, int col, int row);
+        void fixColour (Ogre::ColourValue& colour, int cellX, int cellY, int col, int row);
+        void averageNormal (Ogre::Vector3& normal, int cellX, int cellY, int col, int row);
+
+        float getVertexHeight (const ESM::Land* land, int x, int y);
 
         // Since plugins can define new texture palettes, we need to know the plugin index too
         // in order to retrieve the correct texture name.

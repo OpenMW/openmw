@@ -54,6 +54,51 @@ namespace Terrain
 
     void Storage::fixNormal (Ogre::Vector3& normal, int cellX, int cellY, int col, int row)
     {
+        while (col >= ESM::Land::LAND_SIZE-1)
+        {
+            ++cellY;
+            col -= ESM::Land::LAND_SIZE-1;
+        }
+        while (row >= ESM::Land::LAND_SIZE-1)
+        {
+            ++cellX;
+            row -= ESM::Land::LAND_SIZE-1;
+        }
+        while (col < 0)
+        {
+            --cellY;
+            col += ESM::Land::LAND_SIZE-1;
+        }
+        while (row < 0)
+        {
+            --cellX;
+            row += ESM::Land::LAND_SIZE-1;
+        }
+        ESM::Land* land = getLand(cellX, cellY);
+        if (land && land->mHasData)
+        {
+            normal.x = land->mLandData->mNormals[col*ESM::Land::LAND_SIZE*3+row*3];
+            normal.y = land->mLandData->mNormals[col*ESM::Land::LAND_SIZE*3+row*3+1];
+            normal.z = land->mLandData->mNormals[col*ESM::Land::LAND_SIZE*3+row*3+2];
+            normal.normalise();
+        }
+        else
+            normal = Ogre::Vector3(0,0,1);
+    }
+
+    void Storage::averageNormal(Ogre::Vector3 &normal, int cellX, int cellY, int col, int row)
+    {
+        Ogre::Vector3 n1,n2,n3,n4;
+        fixNormal(n1, cellX, cellY, col+1, row);
+        fixNormal(n2, cellX, cellY, col-1, row);
+        fixNormal(n3, cellX, cellY, col, row+1);
+        fixNormal(n4, cellX, cellY, col, row-1);
+        normal = (n1+n2+n3+n4);
+        normal.normalise();
+    }
+
+    void Storage::fixColour (Ogre::ColourValue& color, int cellX, int cellY, int col, int row)
+    {
         if (col == ESM::Land::LAND_SIZE-1)
         {
             ++cellY;
@@ -65,12 +110,19 @@ namespace Terrain
             row = 0;
         }
         ESM::Land* land = getLand(cellX, cellY);
-        if (land && land->mHasData)
+        if (land && land->mLandData->mUsingColours)
         {
-            normal.x = land->mLandData->mNormals[col*ESM::Land::LAND_SIZE*3+row*3];
-            normal.y = land->mLandData->mNormals[col*ESM::Land::LAND_SIZE*3+row*3+1];
-            normal.z = land->mLandData->mNormals[col*ESM::Land::LAND_SIZE*3+row*3+2];
+            color.r = land->mLandData->mColours[col*ESM::Land::LAND_SIZE*3+row*3] / 255.f;
+            color.g = land->mLandData->mColours[col*ESM::Land::LAND_SIZE*3+row*3+1] / 255.f;
+            color.b = land->mLandData->mColours[col*ESM::Land::LAND_SIZE*3+row*3+2] / 255.f;
         }
+        else
+        {
+            color.r = 1;
+            color.g = 1;
+            color.b = 1;
+        }
+
     }
 
     void Storage::fillVertexBuffers (int lodLevel, float size, const Ogre::Vector2& center,
@@ -141,16 +193,20 @@ namespace Terrain
                             normal.x = land->mLandData->mNormals[col*ESM::Land::LAND_SIZE*3+row*3];
                             normal.y = land->mLandData->mNormals[col*ESM::Land::LAND_SIZE*3+row*3+1];
                             normal.z = land->mLandData->mNormals[col*ESM::Land::LAND_SIZE*3+row*3+2];
-                            // Normals don't connect seamlessly between cells - wtf?
-                            if (col == ESM::Land::LAND_SIZE-1 || row == ESM::Land::LAND_SIZE-1)
-                                fixNormal(normal, cellX, cellY, col, row);
-                            // z < 0 should never happen, but it does - I hate this data set...
-                            if (normal.z < 0)
-                                normal *= -1;
                             normal.normalise();
                         }
                         else
                             normal = Ogre::Vector3(0,0,1);
+
+                        // Normals apparently don't connect seamlessly between cells
+                        if (col == ESM::Land::LAND_SIZE-1 || row == ESM::Land::LAND_SIZE-1)
+                            fixNormal(normal, cellX, cellY, col, row);
+
+                        // some corner normals appear to be complete garbage (z < 0)
+                        if ((row == 0 || row == ESM::Land::LAND_SIZE-1) && (col == 0 || col == ESM::Land::LAND_SIZE-1))
+                            averageNormal(normal, cellX, cellY, col, row);
+
+                        assert(normal.z > 0);
 
                         normals[vertX*numVerts*3 + vertY*3] = normal.x;
                         normals[vertX*numVerts*3 + vertY*3 + 1] = normal.y;
@@ -168,6 +224,11 @@ namespace Terrain
                             color.g = 1;
                             color.b = 1;
                         }
+
+                        // Unlike normals, colors mostly connect seamlessly between cells, but not always...
+                        if (col == ESM::Land::LAND_SIZE-1 || row == ESM::Land::LAND_SIZE-1)
+                            fixColour(color, cellX, cellY, col, row);
+
                         color.a = 1;
                         Ogre::uint32 rsColor;
                         Ogre::Root::getSingleton().getRenderSystem()->convertColourValue(color, &rsColor);
@@ -193,18 +254,20 @@ namespace Terrain
     Storage::UniqueTextureId Storage::getVtexIndexAt(int cellX, int cellY,
                                            int x, int y)
     {
-        // If we're at the last row (or last column), we need to get the texture from the neighbour cell
-        // to get consistent blending at the border
-        if (x >= ESM::Land::LAND_TEXTURE_SIZE)
+        // For the first/last row/column, we need to get the texture from the neighbour cell
+        // to get consistent blending at the borders
+        --x;
+        if (x < 0)
         {
-            cellX++;
-            x -= ESM::Land::LAND_TEXTURE_SIZE;
+            --cellX;
+            x += ESM::Land::LAND_TEXTURE_SIZE;
         }
-        if (y >= ESM::Land::LAND_TEXTURE_SIZE)
+        if (y >= ESM::Land::LAND_TEXTURE_SIZE) // Y appears to be wrapped from the other side because why the hell not?
         {
-            cellY++;
+            ++cellY;
             y -= ESM::Land::LAND_TEXTURE_SIZE;
         }
+
         assert(x<ESM::Land::LAND_TEXTURE_SIZE);
         assert(y<ESM::Land::LAND_TEXTURE_SIZE);
 
@@ -226,7 +289,7 @@ namespace Terrain
     std::string Storage::getTextureName(UniqueTextureId id)
     {
         if (id.first == 0)
-            return "_land_default.dds"; // Not sure if the default texture really is hardcoded?
+            return "_land_default.dds"; // Not sure if the default texture floatly is hardcoded?
 
         // NB: All vtex ids are +1 compared to the ltex ids
         const ESM::LandTexture* ltex = getLandTexture(id.first-1, id.second);
@@ -241,6 +304,10 @@ namespace Terrain
     void Storage::getBlendmaps(float chunkSize, const Ogre::Vector2 &chunkCenter,
         bool pack, std::vector<Ogre::TexturePtr> &blendmaps, std::vector<std::string> &layerList)
     {
+        // TODO - blending isn't completely right yet; the blending radius appears to be
+        // different at a cell transition (2 vertices, not 4), so we may need to create a larger blendmap
+        // and interpolate the rest of the cell by hand? :/
+
         Ogre::Vector2 origin = chunkCenter - Ogre::Vector2(chunkSize/2.f, chunkSize/2.f);
         int cellX = origin.x;
         int cellY = origin.y;
@@ -253,7 +320,7 @@ namespace Terrain
         // To get a consistent look, we need to make sure to use the same base layer in all cells.
         // So we're always adding _land_default.dds as the base layer here, even if it's not referenced in this cell.
         textureIndices.insert(std::make_pair(0,0));
-        // NB +1 to get the last index from neighbour cell (see getVtexIndexAt)
+
         for (int y=0; y<ESM::Land::LAND_TEXTURE_SIZE+1; ++y)
             for (int x=0; x<ESM::Land::LAND_TEXTURE_SIZE+1; ++x)
             {
@@ -312,6 +379,91 @@ namespace Terrain
             map->loadRawData(stream, blendmapSize, blendmapSize, format);
             blendmaps.push_back(map);
         }
+    }
+
+    float Storage::getHeightAt(const Ogre::Vector3 &worldPos)
+    {
+        int cellX = std::floor(worldPos.x / 8192.f);
+        int cellY = std::floor(worldPos.y / 8192.f);
+
+        ESM::Land* land = getLand(cellX, cellY);
+        if (!land)
+            return -2048;
+
+        // Mostly lifted from Ogre::Terrain::getHeightAtTerrainPosition
+
+        // Normalized position in the cell
+        float nX = (worldPos.x - (cellX * 8192))/8192.f;
+        float nY = (worldPos.y - (cellY * 8192))/8192.f;
+
+        // get left / bottom points (rounded down)
+        float factor = ESM::Land::LAND_SIZE - 1.0f;
+        float invFactor = 1.0f / factor;
+
+        int startX = static_cast<int>(nX * factor);
+        int startY = static_cast<int>(nY * factor);
+        int endX = startX + 1;
+        int endY = startY + 1;
+
+        assert(endX < ESM::Land::LAND_SIZE);
+        assert(endY < ESM::Land::LAND_SIZE);
+
+        // now get points in terrain space (effectively rounding them to boundaries)
+        float startXTS = startX * invFactor;
+        float startYTS = startY * invFactor;
+        float endXTS = endX * invFactor;
+        float endYTS = endY * invFactor;
+
+        // get parametric from start coord to next point
+        float xParam = (nX - startXTS) * factor;
+        float yParam = (nY - startYTS) * factor;
+
+        /* For even / odd tri strip rows, triangles are this shape:
+        even     odd
+        3---2   3---2
+        | / |   | \ |
+        0---1   0---1
+        */
+
+        // Build all 4 positions in terrain space, using point-sampled height
+        Ogre::Vector3 v0 (startXTS, startYTS, getVertexHeight(land, startX, startY) / 8192.f);
+        Ogre::Vector3 v1 (endXTS, startYTS, getVertexHeight(land, endX, startY) / 8192.f);
+        Ogre::Vector3 v2 (endXTS, endYTS, getVertexHeight(land, endX, endY) / 8192.f);
+        Ogre::Vector3 v3 (startXTS, endYTS, getVertexHeight(land, startX, endY) / 8192.f);
+        // define this plane in terrain space
+        Ogre::Plane plane;
+        // (At the moment, all rows have the same triangle alignment)
+        if (true)
+        {
+            // odd row
+            bool secondTri = ((1.0 - yParam) > xParam);
+            if (secondTri)
+                plane.redefine(v0, v1, v3);
+            else
+                plane.redefine(v1, v2, v3);
+        }
+        else
+        {
+            // even row
+            bool secondTri = (yParam > xParam);
+            if (secondTri)
+                plane.redefine(v0, v2, v3);
+            else
+                plane.redefine(v0, v1, v2);
+        }
+
+        // Solve plane equation for z
+        return (-plane.normal.x * nX
+                -plane.normal.y * nY
+                - plane.d) / plane.normal.z * 8192;
+
+    }
+
+    float Storage::getVertexHeight(const ESM::Land *land, int x, int y)
+    {
+        assert(x < ESM::Land::LAND_SIZE);
+        assert(y < ESM::Land::LAND_SIZE);
+        return land->mLandData->mHeights[y * ESM::Land::LAND_SIZE + x];
     }
 
 

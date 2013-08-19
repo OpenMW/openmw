@@ -125,7 +125,7 @@ namespace MWGui
         getWidget(mActorShadows, "ActorShadows");
         getWidget(mStaticsShadows, "StaticsShadows");
         getWidget(mMiscShadows, "MiscShadows");
-        getWidget(mShadowsDebug, "ShadowsDebug");
+        getWidget(mTerrainShadows, "TerrainShadows");
         getWidget(mControlsBox, "ControlsBox");
         getWidget(mResetControlsButton, "ResetControlsButton");
         getWidget(mInvertYButton, "InvertYButton");
@@ -161,7 +161,7 @@ namespace MWGui
         mActorShadows->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mStaticsShadows->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
         mMiscShadows->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
-        mShadowsDebug->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
+        mTerrainShadows->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
 
         mMasterVolumeSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
         mVoiceVolumeSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
@@ -238,7 +238,7 @@ namespace MWGui
         mActorShadows->setCaptionWithReplacing(Settings::Manager::getBool("actor shadows", "Shadows") ? "#{sOn}" : "#{sOff}");
         mStaticsShadows->setCaptionWithReplacing(Settings::Manager::getBool("statics shadows", "Shadows") ? "#{sOn}" : "#{sOff}");
         mMiscShadows->setCaptionWithReplacing(Settings::Manager::getBool("misc shadows", "Shadows") ? "#{sOn}" : "#{sOff}");
-        mShadowsDebug->setCaptionWithReplacing(Settings::Manager::getBool("debug", "Shadows") ? "#{sOn}" : "#{sOff}");
+        mTerrainShadows->setCaptionWithReplacing(Settings::Manager::getBool("terrain shadows", "Shadows") ? "#{sOn}" : "#{sOff}");
 
         float cameraSens = (Settings::Manager::getFloat("camera sensitivity", "Input")-0.2)/(5.0-0.2);
         mCameraSensitivitySlider->setScrollPosition (cameraSens * (mCameraSensitivitySlider->getScrollRange()-1));
@@ -394,8 +394,8 @@ namespace MWGui
                 Settings::Manager::setBool("statics shadows", "Shadows", newState);
             else if (_sender == mMiscShadows)
                 Settings::Manager::setBool("misc shadows", "Shadows", newState);
-            else if (_sender == mShadowsDebug)
-                Settings::Manager::setBool("debug", "Shadows", newState);
+            else if (_sender == mTerrainShadows)
+                Settings::Manager::setBool("terrain shadows", "Shadows", newState);
             else if (_sender == mInvertYButton)
                 Settings::Manager::setBool("invert y axis", "Input", newState);
             else if (_sender == mCrosshairButton)

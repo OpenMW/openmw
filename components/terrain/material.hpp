@@ -18,6 +18,7 @@ namespace Terrain
         void setLayerList (const std::vector<std::string>& layerList) { mLayerList = layerList; }
         bool hasLayers() { return mLayerList.size(); }
         void setBlendmapList (const std::vector<Ogre::TexturePtr>& blendmapList) { mBlendmapList = blendmapList; }
+        const std::vector<Ogre::TexturePtr>& getBlendmapList() { return mBlendmapList; }
         void setCompositeMap (const std::string& name) { mCompositeMap = name; }
 
         /// Creates a material suitable for displaying a chunk of terrain using alpha-blending.

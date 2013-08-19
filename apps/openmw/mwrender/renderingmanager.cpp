@@ -82,7 +82,7 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
         Settings::Manager::setString("shader mode", "General", openGL ? (glES ? "glsles" : "glsl") : "hlsl");
     }
 
-    mRendering.createScene("PlayerCam", Settings::Manager::getFloat("field of view", "General"), 50);
+    mRendering.createScene("PlayerCam", Settings::Manager::getFloat("field of view", "General"), 5);
 
     mRendering.getWindow()->addListener(this);
     mRendering.setWindowListener(this);
@@ -248,8 +248,10 @@ void RenderingManager::cellAdded (MWWorld::Ptr::CellStore *store)
     {
         if (!mTerrain)
         {
-            mTerrain = new Terrain::Terrain(mRendering.getScene(), new MWRender::TerrainStorage(), RV_Terrain);
-            mTerrain->update(mRendering.getCamera());
+            mTerrain = new Terrain::Terrain(mRendering.getScene(), new MWRender::TerrainStorage(), RV_Terrain,
+                                            Settings::Manager::getBool("distant land", "Terrain"),
+                                            Settings::Manager::getBool("shader", "Terrain"));
+            mTerrain->update(mRendering.getCamera()->getRealPosition());
         }
     }
     waterAdded(store);
@@ -554,13 +556,6 @@ void RenderingManager::setAmbientMode()
     }
 }
 
-float RenderingManager::getTerrainHeightAt(Ogre::Vector3 worldPos)
-{
-    assert(mTerrain);
-    return mTerrain->getHeightAt(worldPos);
-}
-
-
 void RenderingManager::configureAmbient(MWWorld::Ptr::CellStore &mCell)
 {
     mAmbientColor.setAsABGR (mCell.mCell->mAmbi.mAmbient);
@@ -658,9 +653,14 @@ void RenderingManager::requestMap(MWWorld::Ptr::CellStore* cell)
 {
     if (cell->mCell->isExterior())
     {
+        assert(mTerrain);
+
         Ogre::AxisAlignedBox dims = mObjects.getDimensions(cell);
-        Ogre::Vector2 center(cell->mCell->getGridX() + 0.5, -cell->mCell->getGridY() + 1 - 0.5);
+        Ogre::Vector2 center(cell->mCell->getGridX() + 0.5, cell->mCell->getGridY() + 0.5);
         dims.merge(mTerrain->getWorldBoundingBox(center));
+
+        mTerrain->update(dims.getCenter());
+
         mLocalMap->requestMap(cell, dims.getMinimum().z, dims.getMaximum().z);
     }
     else
@@ -992,17 +992,24 @@ void RenderingManager::updateWaterRippleEmitterPtr (const MWWorld::Ptr& old, con
     mWater->updateEmitterPtr(old, ptr);
 }
 
-void RenderingManager::frameStarted(float dt)
+void RenderingManager::frameStarted(float dt, bool paused)
 {
     if (mTerrain)
-        mTerrain->update(mRendering.getCamera());
+        mTerrain->update(mRendering.getCamera()->getRealPosition());
 
-    mWater->frameStarted(dt);
+    if (!paused)
+        mWater->frameStarted(dt);
 }
 
 void RenderingManager::resetCamera()
 {
     mCamera->reset();
+}
+
+float RenderingManager::getTerrainHeightAt(Ogre::Vector3 worldPos)
+{
+    assert(mTerrain);
+    return mTerrain->getHeightAt(worldPos);
 }
 
 } // namespace

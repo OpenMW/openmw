@@ -835,7 +835,7 @@ namespace MWWorld
         bool isPlayer = ptr == mPlayer->getPlayer();
         bool haveToMove = isPlayer || mWorldScene->isCellActive(*currCell);
 
-        if (false ) //*currCell != newCell)
+        if (*currCell != newCell)
         {
             removeContainerScripts(ptr);
 
@@ -1026,10 +1026,13 @@ namespace MWWorld
             return;
         }
 
-        float terrainHeight = -std::numeric_limits<float>().max();// mRendering->getTerrainHeightAt(pos);
+        if (ptr.getCell()->isExterior())
+        {
+            float terrainHeight = mRendering->getTerrainHeightAt(pos);
 
-        if (pos.z < terrainHeight)
-            pos.z = terrainHeight;
+            if (pos.z < terrainHeight)
+                pos.z = terrainHeight;
+        }
 
         ptr.getRefData().getPosition().pos[2] = pos.z + 20; // place slightly above. will snap down to ground with code below
 
@@ -1074,15 +1077,8 @@ namespace MWWorld
     {
         const int cellSize = 8192;
 
-        cellX = static_cast<int> (x/cellSize);
-
-        if (x<0)
-            --cellX;
-
-        cellY = static_cast<int> (y/cellSize);
-
-        if (y<0)
-            --cellY;
+        cellX = std::floor(x/cellSize);
+        cellY = std::floor(y/cellSize);
     }
 
     void World::doPhysics(const PtrMovementList &actors, float duration)
@@ -1682,9 +1678,9 @@ namespace MWWorld
         mRendering->stopVideo();
     }
 
-    void World::frameStarted (float dt)
+    void World::frameStarted (float dt, bool paused)
     {
-        mRendering->frameStarted(dt);
+        mRendering->frameStarted(dt, paused);
     }
 
     void World::activateDoor(const MWWorld::Ptr& door)

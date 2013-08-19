@@ -160,6 +160,7 @@
         @shEndForeach
         lightResult.xyz += lightAmbient.xyz;
         lightResult.xyz *= colour.xyz;
+        directionalResult.xyz *= colour.xyz;
 
         @shPassthroughAssign(lightResult, lightResult);
         @shPassthroughAssign(directionalResult, directionalResult);

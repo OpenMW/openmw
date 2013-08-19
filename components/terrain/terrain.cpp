@@ -51,12 +51,14 @@ namespace
 namespace Terrain
 {
 
-    Terrain::Terrain(Ogre::SceneManager* sceneMgr, Storage* storage, int visibilityFlags)
+    Terrain::Terrain(Ogre::SceneManager* sceneMgr, Storage* storage, int visibilityFlags, bool distantLand, bool shaders)
         : mStorage(storage)
         , mMinBatchSize(1)
         , mMaxBatchSize(64)
         , mSceneMgr(sceneMgr)
         , mVisibilityFlags(visibilityFlags)
+        , mDistantLand(distantLand)
+        , mShaders(shaders)
     {
         mCompositeMapSceneMgr = Ogre::Root::getSingleton().createSceneManager(Ogre::ST_GENERIC);
 
@@ -81,6 +83,8 @@ namespace Terrain
 
         mRootNode = new QuadTreeNode(this, Root, size, Ogre::Vector2(center.x, center.y), NULL);
         buildQuadTree(mRootNode);
+        mRootNode->initAabb();
+        mRootNode->initNeighbours();
     }
 
     Terrain::~Terrain()
@@ -136,14 +140,19 @@ namespace Terrain
         node->markAsDummy();
     }
 
-    void Terrain::update(Ogre::Camera *camera)
+    void Terrain::update(const Ogre::Vector3& cameraPos)
     {
-        mRootNode->update(camera->getRealPosition());
+        mRootNode->update(cameraPos);
         mRootNode->updateIndexBuffers();
     }
 
     Ogre::AxisAlignedBox Terrain::getWorldBoundingBox (const Ogre::Vector2& center)
     {
+        if (center.x > mBounds.getMaximum().x
+                 || center.x < mBounds.getMinimum().x
+                || center.y > mBounds.getMaximum().y
+                || center.y < mBounds.getMinimum().y)
+            return Ogre::AxisAlignedBox::BOX_NULL;
         QuadTreeNode* node = findNode(center, mRootNode);
         Ogre::AxisAlignedBox box = node->getBoundingBox();
         box.setExtents(box.getMinimum() + Ogre::Vector3(center.x, center.y, 0) * 8192,
@@ -220,10 +229,10 @@ namespace Terrain
             for (size_t col = colStart; col < colEnd; col += increment)
             {
                 indices.push_back(ESM::Land::LAND_SIZE*col+row);
-                indices.push_back(ESM::Land::LAND_SIZE*(col+increment)+row);
+                indices.push_back(ESM::Land::LAND_SIZE*(col+increment)+row+increment);
                 indices.push_back(ESM::Land::LAND_SIZE*col+row+increment);
 
-                indices.push_back(ESM::Land::LAND_SIZE*col+row+increment);
+                indices.push_back(ESM::Land::LAND_SIZE*col+row);
                 indices.push_back(ESM::Land::LAND_SIZE*(col+increment)+row);
                 indices.push_back(ESM::Land::LAND_SIZE*(col+increment)+row+increment);
             }
@@ -242,17 +251,18 @@ namespace Terrain
             {
                 indices.push_back(ESM::Land::LAND_SIZE*col+row);
                 indices.push_back(ESM::Land::LAND_SIZE*(col+outerStep)+row);
-                // Make sure not to touch the left edge
-                if (col == 0)
-                    indices.push_back(ESM::Land::LAND_SIZE*(col+innerStep)+row+innerStep);
+                // Make sure not to touch the right edge
+                if (col+outerStep == ESM::Land::LAND_SIZE-1)
+                    indices.push_back(ESM::Land::LAND_SIZE*(col+outerStep-innerStep)+row+innerStep);
                 else
-                    indices.push_back(ESM::Land::LAND_SIZE*col+row+innerStep);
+                    indices.push_back(ESM::Land::LAND_SIZE*(col+outerStep)+row+innerStep);
+
                 for (size_t i = 0; i < outerStep; i += innerStep)
                 {
                     // Make sure not to touch the left or right edges
                     if (col+i == 0 || col+i == ESM::Land::LAND_SIZE-1-innerStep)
                         continue;
-                    indices.push_back(ESM::Land::LAND_SIZE*(col+outerStep)+row);
+                    indices.push_back(ESM::Land::LAND_SIZE*(col)+row);
                     indices.push_back(ESM::Land::LAND_SIZE*(col+i+innerStep)+row+innerStep);
                     indices.push_back(ESM::Land::LAND_SIZE*(col+i)+row+innerStep);
                 }
@@ -265,11 +275,11 @@ namespace Terrain
             {
                 indices.push_back(ESM::Land::LAND_SIZE*(col+outerStep)+row);
                 indices.push_back(ESM::Land::LAND_SIZE*col+row);
-                // Make sure not to touch the right edge
-                if (col+outerStep == ESM::Land::LAND_SIZE-1)
-                    indices.push_back(ESM::Land::LAND_SIZE*(col+outerStep-innerStep)+row-innerStep);
+                // Make sure not to touch the left edge
+                if (col == 0)
+                    indices.push_back(ESM::Land::LAND_SIZE*(col+innerStep)+row-innerStep);
                 else
-                    indices.push_back(ESM::Land::LAND_SIZE*(col+outerStep)+row-innerStep);
+                    indices.push_back(ESM::Land::LAND_SIZE*col+row-innerStep);
 
                 for (size_t i = 0; i < outerStep; i += innerStep)
                 {
@@ -278,7 +288,7 @@ namespace Terrain
                         continue;
                     indices.push_back(ESM::Land::LAND_SIZE*(col+i)+row-innerStep);
                     indices.push_back(ESM::Land::LAND_SIZE*(col+i+innerStep)+row-innerStep);
-                    indices.push_back(ESM::Land::LAND_SIZE*col+row);
+                    indices.push_back(ESM::Land::LAND_SIZE*(col+outerStep)+row);
                 }
             }
 
@@ -289,18 +299,18 @@ namespace Terrain
             {
                 indices.push_back(ESM::Land::LAND_SIZE*col+row+outerStep);
                 indices.push_back(ESM::Land::LAND_SIZE*col+row);
-                // Make sure not to touch the bottom edge
-                if (row == 0)
-                    indices.push_back(ESM::Land::LAND_SIZE*(col+innerStep)+row+innerStep);
+                // Make sure not to touch the top edge
+                if (row+outerStep == ESM::Land::LAND_SIZE-1)
+                    indices.push_back(ESM::Land::LAND_SIZE*(col+innerStep)+row+outerStep-innerStep);
                 else
-                    indices.push_back(ESM::Land::LAND_SIZE*(col+innerStep)+row);
+                    indices.push_back(ESM::Land::LAND_SIZE*(col+innerStep)+row+outerStep);
 
                 for (size_t i = 0; i < outerStep; i += innerStep)
                 {
                     // Make sure not to touch the top or bottom edges
                     if (row+i == 0 || row+i == ESM::Land::LAND_SIZE-1-innerStep)
                         continue;
-                    indices.push_back(ESM::Land::LAND_SIZE*col+row+outerStep);
+                    indices.push_back(ESM::Land::LAND_SIZE*col+row);
                     indices.push_back(ESM::Land::LAND_SIZE*(col+innerStep)+row+i);
                     indices.push_back(ESM::Land::LAND_SIZE*(col+innerStep)+row+i+innerStep);
                 }
@@ -313,18 +323,18 @@ namespace Terrain
             {
                 indices.push_back(ESM::Land::LAND_SIZE*col+row);
                 indices.push_back(ESM::Land::LAND_SIZE*col+row+outerStep);
-                // Make sure not to touch the top edge
-                if (row+outerStep == ESM::Land::LAND_SIZE-1)
-                    indices.push_back(ESM::Land::LAND_SIZE*(col-innerStep)+row+outerStep-innerStep);
+                // Make sure not to touch the bottom edge
+                if (row == 0)
+                    indices.push_back(ESM::Land::LAND_SIZE*(col-innerStep)+row+innerStep);
                 else
-                    indices.push_back(ESM::Land::LAND_SIZE*(col-innerStep)+row+outerStep);
+                    indices.push_back(ESM::Land::LAND_SIZE*(col-innerStep)+row);
 
                 for (size_t i = 0; i < outerStep; i += innerStep)
                 {
                     // Make sure not to touch the top or bottom edges
                     if (row+i == 0 || row+i == ESM::Land::LAND_SIZE-1-innerStep)
                         continue;
-                    indices.push_back(ESM::Land::LAND_SIZE*col+row);
+                    indices.push_back(ESM::Land::LAND_SIZE*col+row+outerStep);
                     indices.push_back(ESM::Land::LAND_SIZE*(col-innerStep)+row+i+innerStep);
                     indices.push_back(ESM::Land::LAND_SIZE*(col-innerStep)+row+i);
                 }
@@ -353,6 +363,11 @@ namespace Terrain
     {
         mCompositeMapSceneMgr->destroyAllManualObjects();
         mCompositeMapSceneMgr->clearScene();
+    }
+
+    float Terrain::getHeightAt(const Ogre::Vector3 &worldPos)
+    {
+        return mStorage->getHeightAt(worldPos);
     }
 
 

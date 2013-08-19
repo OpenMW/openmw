@@ -2,9 +2,6 @@
 
 #include <OgreSceneNode.h>
 #include <OgreHardwareBufferManager.h>
-#include <OgreMaterialManager.h>
-#include <OgreTechnique.h>
-#include <OgrePass.h>
 
 #include "quadtreenode.hpp"
 #include "terrain.hpp"
@@ -53,7 +50,6 @@ namespace Terrain
         mColourBuffer = mgr->createVertexBuffer(Ogre::VertexElement::getTypeSize(Ogre::VET_COLOUR),
                                                 mVertexData->vertexCount, Ogre::HardwareBuffer::HBU_STATIC);
 
-
         mNode->getTerrain()->getStorage()->fillVertexBuffers(lodLevel, mNode->getSize(), mNode->getCenter(),
                                                              mVertexBuffer, mNormalBuffer, mColourBuffer);
 
@@ -66,6 +62,8 @@ namespace Terrain
         mIndexData->indexStart = 0;
     }
 
+
+
     void Chunk::updateIndexBuffer()
     {
         // Fetch a suitable index buffer (which may be shared)
@@ -75,7 +73,7 @@ namespace Terrain
 
         for (int i=0; i<4; ++i)
         {
-            QuadTreeNode* neighbour = mNode->searchNeighbour((Direction)i);
+            QuadTreeNode* neighbour = mNode->getNeighbour((Direction)i);
 
             // If the neighbour isn't currently rendering itself,
             // go up until we find one. NOTE: We don't need to go down,

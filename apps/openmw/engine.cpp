@@ -69,8 +69,8 @@ void OMW::Engine::setAnimationVerbose(bool animverbose)
 
 bool OMW::Engine::frameStarted (const Ogre::FrameEvent& evt)
 {
-    if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
-        MWBase::Environment::get().getWorld()->frameStarted(evt.timeSinceLastFrame);
+    bool paused = MWBase::Environment::get().getWindowManager()->isGuiMode();
+    MWBase::Environment::get().getWorld()->frameStarted(evt.timeSinceLastFrame, paused);
     MWBase::Environment::get().getWindowManager ()->frameStarted(evt.timeSinceLastFrame);
     return true;
 }
@@ -91,12 +91,12 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
             MWBase::Environment::get().getSoundManager()->update(frametime);
 
         // global scripts
-        //MWBase::Environment::get().getScriptManager()->getGlobalScripts().run();
+        MWBase::Environment::get().getScriptManager()->getGlobalScripts().run();
 
         bool changed = MWBase::Environment::get().getWorld()->hasCellChanged();
 
         // local scripts
-        //executeLocalScripts(); // This does not handle the case where a global script causes a cell
+        executeLocalScripts(); // This does not handle the case where a global script causes a cell
                                // change, followed by a cell change in a local script during the same
                                // frame.
 

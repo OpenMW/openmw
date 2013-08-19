@@ -415,7 +415,7 @@ namespace MWWorld
             /// \todo this does not belong here
             virtual void playVideo(const std::string& name, bool allowSkipping);
             virtual void stopVideo();
-            virtual void frameStarted (float dt);
+            virtual void frameStarted (float dt, bool paused);
 
             /// Find center of exterior cell above land surface
             /// \return false if exterior with given name not exists, true otherwise

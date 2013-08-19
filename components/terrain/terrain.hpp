@@ -28,16 +28,25 @@ namespace Terrain
     {
     public:
         /// @note takes ownership of \a storage
-        Terrain(Ogre::SceneManager* sceneMgr, Storage* storage, int visiblityFlags);
+        /// @param sceneMgr scene manager to use
+        /// @param storage Storage instance to get terrain data from (heights, normals, colors, textures..)
+        /// @param visbilityFlags visibility flags for the created meshes
+        /// @param distantLand Whether to draw all of the terrain, or only a 3x3 grid around the camera.
+        ///         This is a temporary option until it can be streamlined.
+        /// @param shaders Whether to use splatting shader, or multi-pass fixed function splatting. Shader is usually
+        ///         faster so this is just here for compatibility.
+        Terrain(Ogre::SceneManager* sceneMgr, Storage* storage, int visiblityFlags, bool distantLand, bool shaders);
         ~Terrain();
+
+        bool getDistantLandEnabled() { return mDistantLand; }
+        bool getShadersEnabled() { return mShaders; }
+
+        float getHeightAt (const Ogre::Vector3& worldPos);
 
         /// Update chunk LODs according to this camera position
         /// @note Calling this method might lead to composite textures being rendered, so it is best
         /// not to call it when render commands are still queued, since that would cause a flush.
-        void update (Ogre::Camera* camera);
-
-        /// \todo
-        float getHeightAt (const Ogre::Vector3& worldPos) { return 0; }
+        void update (const Ogre::Vector3& cameraPos);
 
         /// Get the world bounding box of a chunk of terrain centered at \a center
         Ogre::AxisAlignedBox getWorldBoundingBox (const Ogre::Vector2& center);
@@ -63,6 +72,9 @@ namespace Terrain
         void enableSplattingShader(bool enabled);
 
     private:
+        bool mDistantLand;
+        bool mShaders;
+
         QuadTreeNode* mRootNode;
         Storage* mStorage;
 

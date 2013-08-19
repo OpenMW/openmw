@@ -106,6 +106,8 @@ namespace Terrain
                     Ogre::Pass* pass = technique->createPass();
                     pass->setLightingEnabled(false);
                     pass->setVertexColourTracking(Ogre::TVC_NONE);
+                    // TODO: How to handle fog?
+                    pass->setFog(true, Ogre::FOG_NONE);
 
                     bool first = (layer == mLayerList.begin());
 
@@ -127,9 +129,7 @@ namespace Terrain
                         tus->setTextureAddressingMode(Ogre::TextureUnitState::TAM_CLAMP);
 
                         float scale = (16/(16.f+1.f));
-                        float scroll = 1/16.f*0.5;
-                        tus->setTextureScale(scale,scale);
-                        tus->setTextureScroll(-scroll,-scroll);
+                        tus->setTextureScale(1.f/scale,1.f/scale);
                     }
 
                     // Add the actual layer texture on top of the alpha map.
@@ -150,6 +150,7 @@ namespace Terrain
                     Ogre::Pass* lightingPass = technique->createPass();
                     lightingPass->setSceneBlending(Ogre::SBT_MODULATE);
                     lightingPass->setVertexColourTracking(Ogre::TVC_AMBIENT|Ogre::TVC_DIFFUSE);
+                    lightingPass->setFog(true, Ogre::FOG_NONE);
                 }
             }
 

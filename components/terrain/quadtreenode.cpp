@@ -142,17 +142,21 @@ QuadTreeNode::QuadTreeNode(Terrain* terrain, ChildDirection dir, float size, con
     , mTerrain(terrain)
     , mChunk(NULL)
     , mMaterialGenerator(NULL)
+    , mBounds(Ogre::AxisAlignedBox::BOX_NULL)
+    , mWorldBounds(Ogre::AxisAlignedBox::BOX_NULL)
 {
     mBounds.setNull();
     for (int i=0; i<4; ++i)
         mChildren[i] = NULL;
+    for (int i=0; i<4; ++i)
+        mNeighbours[i] = NULL;
 
     mSceneNode = mTerrain->getSceneManager()->getRootSceneNode()->createChildSceneNode(
                 Ogre::Vector3(mCenter.x*8192, mCenter.y*8192, 0));
 
     mLodLevel = log2(mSize);
 
-    mMaterialGenerator = new MaterialGenerator(true);
+    mMaterialGenerator = new MaterialGenerator(mTerrain->getShadersEnabled());
 }
 
 void QuadTreeNode::createChild(ChildDirection id, float size, const Ogre::Vector2 &center)
@@ -168,38 +172,40 @@ QuadTreeNode::~QuadTreeNode()
     delete mMaterialGenerator;
 }
 
-QuadTreeNode* QuadTreeNode::searchNeighbour(Direction dir)
+QuadTreeNode* QuadTreeNode::getNeighbour(Direction dir)
 {
-    return searchNeighbourRecursive(this, dir);
+    return mNeighbours[static_cast<int>(dir)];
+}
+
+void QuadTreeNode::initNeighbours()
+{
+    for (int i=0; i<4; ++i)
+        mNeighbours[i] = searchNeighbourRecursive(this, (Direction)i);
+}
+
+void QuadTreeNode::initAabb()
+{
+    if (hasChildren())
+    {
+        for (int i=0; i<4; ++i)
+        {
+            mChildren[i]->initAabb();
+            mBounds.merge(mChildren[i]->getBoundingBox());
+        }
+        mBounds = Ogre::AxisAlignedBox (Ogre::Vector3(-mSize/2*8192, -mSize/2*8192, mBounds.getMinimum().z),
+                                        Ogre::Vector3(mSize/2*8192, mSize/2*8192, mBounds.getMaximum().z));
+    }
+    mWorldBounds = Ogre::AxisAlignedBox(mBounds.getMinimum() + Ogre::Vector3(mCenter.x*8192, mCenter.y*8192, 0),
+                                        mBounds.getMaximum() + Ogre::Vector3(mCenter.x*8192, mCenter.y*8192, 0));
+}
+
+void QuadTreeNode::setBoundingBox(const Ogre::AxisAlignedBox &box)
+{
+    mBounds = box;
 }
 
 const Ogre::AxisAlignedBox& QuadTreeNode::getBoundingBox()
 {
-    if (mIsDummy)
-        return Ogre::AxisAlignedBox::BOX_NULL;
-    if (mBounds.isNull())
-    {
-        if (hasChildren())
-        {
-            // X and Y are obvious, just need Z
-            float min = std::numeric_limits<float>().max();
-            float max = -std::numeric_limits<float>().max();
-            for (int i=0; i<4; ++i)
-            {
-                QuadTreeNode* child = getChild((ChildDirection)i);
-                float v = child->getBoundingBox().getMaximum().z;
-                if (v > max)
-                    max = v;
-                v = child->getBoundingBox().getMinimum().z;
-                if (v < min)
-                    min = v;
-            }
-            mBounds = Ogre::AxisAlignedBox (Ogre::Vector3(-mSize/2*8192, -mSize/2*8192, min),
-                                            Ogre::Vector3(mSize/2*8192, mSize/2*8192, max));
-        }
-        else
-            throw std::runtime_error("Leaf node should have bounds set!");
-    }
     return mBounds;
 }
 
@@ -209,11 +215,19 @@ void QuadTreeNode::update(const Ogre::Vector3 &cameraPos)
     if (bounds.isNull())
         return;
 
-    Ogre::AxisAlignedBox worldBounds (bounds.getMinimum() + Ogre::Vector3(mCenter.x*8192, mCenter.y*8192, 0),
-                                      bounds.getMaximum() + Ogre::Vector3(mCenter.x*8192, mCenter.y*8192, 0));
+    float dist = distance(mWorldBounds, cameraPos);
 
-    float dist = distance(worldBounds, cameraPos);
+    if (!mTerrain->getDistantLandEnabled())
+    {
+        if (dist > 8192*2)
+        {
+            destroyChunks();
+            return;
+        }
+    }
+
     /// \todo implement error metrics or some other means of not using arbitrary values
+    ///  (general quality needs to be user configurable as well)
     size_t wantedLod = 0;
     if (dist > 8192*1)
         wantedLod = 1;
@@ -230,6 +244,7 @@ void QuadTreeNode::update(const Ogre::Vector3 &cameraPos)
 
     if (mSize <= mTerrain->getMaxBatchSize() && mLodLevel <= wantedLod)
     {
+        bool hadChunk = hasChunk();
         // Wanted LOD is small enough to render this node in one chunk
         if (!mChunk)
         {
@@ -250,14 +265,32 @@ void QuadTreeNode::update(const Ogre::Vector3 &cameraPos)
             }
         }
 
+        // Additional (index buffer) LOD is currently disabled.
+        // This is due to a problem with the LOD selection when a node splits.
+        // After splitting, the distance is measured from the children's bounding boxes, which are possibly
+        // further away than the original node's bounding box, possibly causing a child to switch to a *lower* LOD
+        // than the original node.
+        // In short, we'd sometimes get a switch to a lesser detail when actually moving closer.
+        // This wouldn't be so bad, but unfortunately it also breaks LOD edge connections if a neighbour
+        // node hasn't split yet, and has a higher LOD than our node's child:
+        //  ----- ----- ------------
+        // | LOD | LOD |            |
+        // |  1  |  1  |            |
+        // |-----|-----|   LOD 0    |
+        // | LOD | LOD |            |
+        // |  0  |  0  |            |
+        //  ----- ----- ------------
+        // To prevent this, nodes of the same size need to always select the same LOD, which is basically what we're
+        // doing here.
+        // But this "solution" does increase triangle overhead, so eventually we need to find a more clever way.
+        //mChunk->setAdditionalLod(wantedLod - mLodLevel);
 
-        mChunk->setAdditionalLod(wantedLod - mLodLevel);
         mChunk->setVisible(true);
 
-        if (hasChildren())
+        if (!hadChunk && hasChildren())
         {
             for (int i=0; i<4; ++i)
-                mChildren[i]->removeChunks();
+                mChildren[i]->hideChunks();
         }
     }
     else
@@ -272,15 +305,41 @@ void QuadTreeNode::update(const Ogre::Vector3 &cameraPos)
     }
 }
 
-void QuadTreeNode::removeChunks()
+void QuadTreeNode::hideChunks()
 {
     if (mChunk)
         mChunk->setVisible(false);
-    if (hasChildren())
-    {
+    else if (hasChildren())
         for (int i=0; i<4; ++i)
-            mChildren[i]->removeChunks();
+            mChildren[i]->hideChunks();
+}
+
+void QuadTreeNode::destroyChunks()
+{
+    if (mChunk)
+    {
+        Ogre::MaterialManager::getSingleton().remove(mChunk->getMaterial()->getName());
+        mSceneNode->detachObject(mChunk);
+
+        delete mChunk;
+        mChunk = NULL;
+        // destroy blendmaps
+        if (mMaterialGenerator)
+        {
+            const std::vector<Ogre::TexturePtr>& list = mMaterialGenerator->getBlendmapList();
+            for (std::vector<Ogre::TexturePtr>::const_iterator it = list.begin(); it != list.end(); ++it)
+                Ogre::TextureManager::getSingleton().remove((*it)->getName());
+            mMaterialGenerator->setBlendmapList(std::vector<Ogre::TexturePtr>());
+            mMaterialGenerator->setLayerList(std::vector<std::string>());
+            mMaterialGenerator->setCompositeMap("");
+        }
+
+        Ogre::TextureManager::getSingleton().remove(mCompositeMap->getName());
+        mCompositeMap.setNull();
     }
+    else if (hasChildren())
+        for (int i=0; i<4; ++i)
+            mChildren[i]->destroyChunks();
 }
 
 void QuadTreeNode::updateIndexBuffers()
@@ -312,7 +371,7 @@ void QuadTreeNode::ensureLayerInfo()
 
     std::vector<Ogre::TexturePtr> blendmaps;
     std::vector<std::string> layerList;
-    mTerrain->getStorage()->getBlendmaps(mSize, mCenter, true, blendmaps, layerList);
+    mTerrain->getStorage()->getBlendmaps(mSize, mCenter, mTerrain->getShadersEnabled(), blendmaps, layerList);
 
     mMaterialGenerator->setLayerList(layerList);
     mMaterialGenerator->setBlendmapList(blendmaps);
@@ -324,7 +383,9 @@ void QuadTreeNode::prepareForCompositeMap(Ogre::TRect<float> area)
 
     if (mIsDummy)
     {
-        MaterialGenerator matGen(true);
+        // TODO - why is this completely black?
+        // TODO - store this default material somewhere instead of creating one for each empty cell
+        MaterialGenerator matGen(mTerrain->getShadersEnabled());
         std::vector<std::string> layer;
         layer.push_back("_land_default.dds");
         matGen.setLayerList(layer);
@@ -355,12 +416,6 @@ void QuadTreeNode::prepareForCompositeMap(Ogre::TRect<float> area)
         Ogre::MaterialPtr material = mMaterialGenerator->generateForCompositeMapRTT(Ogre::MaterialPtr());
         makeQuad(sceneMgr, area.left, area.top, area.right, area.bottom, material);
     }
-}
-
-
-bool QuadTreeNode::hasCompositeMap()
-{
-    return !mCompositeMap.isNull();
 }
 
 void QuadTreeNode::ensureCompositeMap()

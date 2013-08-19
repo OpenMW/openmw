@@ -49,6 +49,13 @@ namespace Terrain
         QuadTreeNode (Terrain* terrain, ChildDirection dir, float size, const Ogre::Vector2& center, QuadTreeNode* parent);
         ~QuadTreeNode();
 
+        /// Initialize neighbours - do this after the quadtree is built
+        void initNeighbours();
+        /// Initialize bounding boxes of non-leafs by merging children bounding boxes.
+        /// Do this after the quadtree is built - note that leaf bounding boxes
+        /// need to be set first via setBoundingBox!
+        void initAabb();
+
         /// @note takes ownership of \a child
         void createChild (ChildDirection id, float size, const Ogre::Vector2& center);
 
@@ -66,15 +73,15 @@ namespace Terrain
         bool hasChildren() { return mChildren[0] != 0; }
         QuadTreeNode* getChild(ChildDirection dir) { return mChildren[dir]; }
 
-        /// Search for a neighbour node in this direction
-        QuadTreeNode* searchNeighbour (Direction dir);
+        /// Get neighbour node in this direction
+        QuadTreeNode* getNeighbour (Direction dir);
 
         /// Returns our direction relative to the parent node, or Root if we are the root node.
         ChildDirection getDirection() { return mDirection; }
 
         /// Set bounding box in local coordinates. Should be done at load time for leaf nodes.
         /// Other nodes can merge AABB of child nodes.
-        void setBoundingBox (const Ogre::AxisAlignedBox& box) { mBounds = box; }
+        void setBoundingBox (const Ogre::AxisAlignedBox& box);
 
         /// Get bounding box in local coordinates
         const Ogre::AxisAlignedBox& getBoundingBox();
@@ -88,8 +95,11 @@ namespace Terrain
         /// Call after QuadTreeNode::update!
         void updateIndexBuffers();
 
-        /// Remove chunks rendered by this node and all its children
-        void removeChunks();
+        /// Hide chunks rendered by this node and all its children
+        void hideChunks();
+
+        /// Destroy chunks rendered by this node and all its children
+        void destroyChunks();
 
         /// Get the effective LOD level if this node was rendered in one chunk
         /// with ESM::Land::LAND_SIZE^2 vertices
@@ -100,8 +110,6 @@ namespace Terrain
 
         /// Is this node currently configured to render itself?
         bool hasChunk();
-
-        bool hasCompositeMap();
 
         /// Add a textured quad to a specific 2d area in the composite map scenemanager.
         /// Only nodes with size <= 1 can be rendered with alpha blending, so larger nodes will simply
@@ -118,6 +126,7 @@ namespace Terrain
         float mSize;
         size_t mLodLevel; // LOD if we were to render this node in one chunk
         Ogre::AxisAlignedBox mBounds;
+        Ogre::AxisAlignedBox mWorldBounds;
         ChildDirection mDirection;
         Ogre::Vector2 mCenter;
 
@@ -125,6 +134,7 @@ namespace Terrain
 
         QuadTreeNode* mParent;
         QuadTreeNode* mChildren[4];
+        QuadTreeNode* mNeighbours[4];
 
         Chunk* mChunk;
 
