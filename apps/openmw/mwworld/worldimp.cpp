@@ -240,11 +240,12 @@ namespace MWWorld
         // Rebuild player
         setupPlayer();
         MWWorld::Ptr player = mPlayer->getPlayer();
-        renderPlayer();
-        mRendering->resetCamera();
 
         // removes NpcStats, ContainerStore etc
         player.getRefData().setCustomData(NULL);
+
+        renderPlayer();
+        mRendering->resetCamera();
 
         // make sure to do this so that local scripts from items that were in the players inventory are removed
         mLocalScripts.clear();

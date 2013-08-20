@@ -248,6 +248,9 @@ namespace MWGui
             delete mCharGen;
             mCharGen = new CharacterCreation();
             mGuiModes.clear();
+            mHud->unsetSelectedWeapon();
+            mHud->unsetSelectedSpell();
+            unsetForceHide(GW_ALL);
         }
         else
             allow(GW_ALL);
