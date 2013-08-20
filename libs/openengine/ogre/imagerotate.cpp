@@ -56,7 +56,7 @@ void ImageRotate::rotate(const std::string& sourceImage, const std::string& dest
                     TEX_TYPE_2D,
                     width, height,
                     0,
-                    PF_FLOAT16_RGBA,
+                    PF_A8B8G8R8,
                     TU_RENDERTARGET);
 
     RenderTarget* rtt = destTextureRot->getBuffer()->getRenderTarget();
@@ -75,7 +75,7 @@ void ImageRotate::rotate(const std::string& sourceImage, const std::string& dest
             TEX_TYPE_2D,
             width, height,
             0,
-            PF_FLOAT16_RGBA,
+            PF_A8B8G8R8,
             Ogre::TU_STATIC);
 
     destTexture->getBuffer()->blit(destTextureRot->getBuffer());

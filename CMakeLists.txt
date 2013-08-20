@@ -216,7 +216,6 @@ ENDIF(WIN32)
 ENDIF(OGRE_STATIC)
 include_directories("."
     ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre ${OGRE_INCLUDE_DIR}/OGRE ${OGRE_PLUGIN_INCLUDE_DIRS}
-    ${OGRE_Terrain_INCLUDE_DIR}
     ${SDL2_INCLUDE_DIR}
     ${Boost_INCLUDE_DIR}
     ${PLATFORM_INCLUDE_DIR}
@@ -521,6 +520,13 @@ if (BUILD_ESMTOOL)
 endif()
 
 if (BUILD_LAUNCHER)
+    if(NOT WIN32)
+        find_package(LIBUNSHIELD REQUIRED)
+        if(NOT LIBUNSHIELD_FOUND)
+               message(SEND_ERROR "Failed to find libunshield")
+        endif(NOT LIBUNSHIELD_FOUND)
+    endif(NOT WIN32)
+
    add_subdirectory( apps/launcher )
 endif()
 

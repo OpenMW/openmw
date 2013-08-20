@@ -2,7 +2,6 @@
 #define _GAME_RENDERING_MANAGER_H
 
 #include "sky.hpp"
-#include "terrain.hpp"
 #include "debugging.hpp"
 
 #include <openengine/ogre/fader.hpp>
@@ -37,6 +36,11 @@ namespace MWWorld
 namespace sh
 {
     class Factory;
+}
+
+namespace Terrain
+{
+    class Terrain;
 }
 
 namespace MWRender
@@ -106,6 +110,8 @@ public:
     void cellAdded (MWWorld::CellStore *store);
     void waterAdded(MWWorld::CellStore *store);
 
+    void enableTerrain(bool enable);
+
     void removeWater();
 
     void preCellChange (MWWorld::CellStore* store);
@@ -153,14 +159,14 @@ public:
     bool occlusionQuerySupported() { return mOcclusionQuery->supported(); }
     OcclusionQuery* getOcclusionQuery() { return mOcclusionQuery; }
 
+    float getTerrainHeightAt (Ogre::Vector3 worldPos);
+
     Shadows* getShadows();
 
     void switchToInterior();
     void switchToExterior();
 
     void getTriangleBatchCount(unsigned int &triangles, unsigned int &batches);
-
-    float getTerrainHeightAt (Ogre::Vector3 worldPos);
 
     void setGlare(bool glare);
     void skyEnable ();
@@ -205,7 +211,7 @@ public:
 
     void playVideo(const std::string& name, bool allowSkipping);
     void stopVideo();
-    void frameStarted(float dt);
+    void frameStarted(float dt, bool paused);
 
 protected:
     virtual void windowResized(int x, int y);
@@ -228,7 +234,7 @@ private:
 
     OcclusionQuery* mOcclusionQuery;
 
-    TerrainManager* mTerrainManager;
+    Terrain::Terrain* mTerrain;
 
     MWRender::Water *mWater;
 

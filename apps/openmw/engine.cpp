@@ -69,8 +69,8 @@ void OMW::Engine::setAnimationVerbose(bool animverbose)
 
 bool OMW::Engine::frameStarted (const Ogre::FrameEvent& evt)
 {
-    if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
-        MWBase::Environment::get().getWorld()->frameStarted(evt.timeSinceLastFrame);
+    bool paused = MWBase::Environment::get().getWindowManager()->isGuiMode();
+    MWBase::Environment::get().getWorld()->frameStarted(evt.timeSinceLastFrame, paused);
     MWBase::Environment::get().getWindowManager ()->frameStarted(evt.timeSinceLastFrame);
     return true;
 }

@@ -2,7 +2,7 @@
 
 #define IS_FIRST_PASS (@shPropertyString(pass_index) == 0)
 
-#define FOG @shGlobalSettingBool(fog)
+#define FOG (@shGlobalSettingBool(fog) && !@shPropertyBool(render_composite_map))
 
 #define SHADOWS_PSSM @shGlobalSettingBool(shadows_pssm)
 #define SHADOWS @shGlobalSettingBool(shadows)
@@ -10,8 +10,6 @@
 #if SHADOWS || SHADOWS_PSSM
 #include "shadows.h"
 #endif
-
-#define COLOUR_MAP @shPropertyBool(colour_map)
 
 #define NUM_LAYERS @shPropertyString(num_layers)
 
@@ -23,9 +21,12 @@
 
 #define VIEWPROJ_FIX @shGlobalSettingBool(viewproj_fix)
 
-#if !IS_FIRST_PASS
-// This is not the first pass.
-#endif
+#define RENDERCMP @shPropertyBool(render_composite_map)
+
+#define LIGHTING !RENDERCMP
+
+#define COMPOSITE_MAP @shPropertyBool(display_composite_map)
+
 
 #if NEED_DEPTH
 @shAllocatePassthrough(1, depth)
@@ -34,6 +35,11 @@
 @shAllocatePassthrough(2, UV)
 
 @shAllocatePassthrough(3, worldPos)
+
+#if LIGHTING
+@shAllocatePassthrough(3, lightResult)
+@shAllocatePassthrough(3, directionalResult)
+#endif
 
 #if SHADOWS
 @shAllocatePassthrough(4, lightSpacePos0)
@@ -55,11 +61,19 @@
 #if VIEWPROJ_FIX
         shUniform(float4, vpRow2Fix) @shSharedParameter(vpRow2Fix, vpRow2Fix)
 #endif
-
-        shUniform(float2, lodMorph) @shAutoConstant(lodMorph, custom, 1001)
         
         shVertexInput(float2, uv0)
         shVertexInput(float2, uv1) // lodDelta, lodThreshold
+
+#if LIGHTING
+        shNormalInput(float4)
+        shColourInput(float4)
+
+        shUniform(float, lightCount) @shAutoConstant(lightCount, light_count)
+        shUniform(float4, lightPosition[@shGlobalSettingString(num_lights)]) @shAutoConstant(lightPosition, light_position_object_space_array, @shGlobalSettingString(num_lights))
+        shUniform(float4, lightDiffuse[@shGlobalSettingString(num_lights)]) @shAutoConstant(lightDiffuse, light_diffuse_colour_array, @shGlobalSettingString(num_lights))
+        shUniform(float4, lightAttenuation[@shGlobalSettingString(num_lights)]) @shAutoConstant(lightAttenuation, light_attenuation_array, @shGlobalSettingString(num_lights))
+        shUniform(float4, lightAmbient)                    @shAutoConstant(lightAmbient, ambient_light_colour)
         
 #if SHADOWS
         shUniform(float4x4, texViewProjMatrix0) @shAutoConstant(texViewProjMatrix0, texture_viewproj_matrix)
@@ -71,30 +85,14 @@
     @shEndForeach
 #endif
 
+#endif
+
         
         @shPassthroughVertexOutputs
 
     SH_START_PROGRAM
     {
-
-
         float4 worldPos = shMatrixMult(worldMatrix, shInputPosition);
-
-        // determine whether to apply the LOD morph to this vertex
-        // we store the deltas against all vertices so we only want to apply 
-        // the morph to the ones which would disappear. The target LOD which is
-        // being morphed to is stored in lodMorph.y, and the LOD at which 
-        // the vertex should be morphed is stored in uv.w. If we subtract
-        // the former from the latter, and arrange to only morph if the
-        // result is negative (it will only be -1 in fact, since after that
-        // the vertex will never be indexed), we will achieve our aim.
-        // sign(vertexLOD - targetLOD) == -1 is to morph
-        float toMorph = -min(0, sign(uv1.y - lodMorph.y));
-
-        // morph
-        // this assumes XY terrain alignment
-        worldPos.z += uv1.x * toMorph * lodMorph.x;
-
 
         shOutputPosition = shMatrixMult(viewProjMatrix, worldPos);
         
@@ -124,6 +122,8 @@
         
         @shPassthroughAssign(worldPos, worldPos.xyz);
 
+#if LIGHTING
+
 #if SHADOWS
         float4 lightSpacePos = shMatrixMult(texViewProjMatrix0, shMatrixMult(worldMatrix, shInputPosition));
         @shPassthroughAssign(lightSpacePos0, lightSpacePos);
@@ -138,6 +138,34 @@
     @shEndForeach
 #endif
 
+
+        // Lighting
+        float3 lightDir;
+        float d;
+        float3 lightResult = float3(0,0,0);
+        float3 directionalResult = float3(0,0,0);
+        @shForeach(@shGlobalSettingString(num_lights))
+            lightDir = lightPosition[@shIterator].xyz - (shInputPosition.xyz * lightPosition[@shIterator].w);
+            d = length(lightDir);
+            lightDir = normalize(lightDir);
+
+
+            lightResult.xyz += lightDiffuse[@shIterator].xyz
+                    * shSaturate(1.0 / ((lightAttenuation[@shIterator].y) + (lightAttenuation[@shIterator].z * d) + (lightAttenuation[@shIterator].w * d * d)))
+                    * max(dot(normal.xyz, lightDir), 0);
+
+#if @shIterator == 0
+            directionalResult = lightResult.xyz;
+#endif
+        @shEndForeach
+        lightResult.xyz += lightAmbient.xyz;
+        lightResult.xyz *= colour.xyz;
+        directionalResult.xyz *= colour.xyz;
+
+        @shPassthroughAssign(lightResult, lightResult);
+        @shPassthroughAssign(directionalResult, directionalResult);
+
+#endif
     }
 
 #else
@@ -151,12 +179,9 @@
     SH_BEGIN_PROGRAM
     
     
-#if COLOUR_MAP
-        shSampler2D(colourMap)
-#endif
-
-        shSampler2D(normalMap) // global normal map
-        
+#if COMPOSITE_MAP
+        shSampler2D(compositeMap)
+#else
 
 @shForeach(@shPropertyString(num_blendmaps))
         shSampler2D(blendMap@shIterator)
@@ -165,6 +190,8 @@
 @shForeach(@shPropertyString(num_layers))
         shSampler2D(diffuseMap@shIterator)
 @shEndForeach
+
+#endif
     
 #if FOG
         shUniform(float3, fogColour) @shAutoConstant(fogColour, fog_colour)
@@ -215,9 +242,6 @@
         float2 UV = @shPassthroughReceive(UV);
         
         float3 worldPos = @shPassthroughReceive(worldPos);
-
-        float3 normal = shSample(normalMap, UV).rgb * 2 - 1;
-        normal = normalize(normal);
         
         
 #if UNDERWATER
@@ -230,17 +254,26 @@
 float previousAlpha = 1.f;
 #endif
 
+
+shOutputColour(0) = float4(1,1,1,1);
+
+#if COMPOSITE_MAP
+        shOutputColour(0).xyz = shSample(compositeMap, UV).xyz;
+#else
+
         // Layer calculations 
-// rescale UV to directly map vertices to texel centers
+// rescale UV to directly map edge vertices to texel centers - this is
+// important to get correct blending at cell transitions
 // TODO: parameterize texel size
-float2 blendUV = (UV - 0.5) * (8.0 / (8.0+1.0)) + 0.5;
+float2 blendUV = (UV - 0.5) * (16.0 / (16.0+1.0)) + 0.5;
 @shForeach(@shPropertyString(num_blendmaps))
-        float4 blendValues@shIterator = shSample(blendMap@shIterator, blendUV);
+        float4 blendValues@shIterator = shSaturate(shSample(blendMap@shIterator, blendUV));
 @shEndForeach
+
 
         float3 albedo = float3(0,0,0);
 
-        float2 layerUV = UV * 8;
+        float2 layerUV = UV * 16;
 
 @shForeach(@shPropertyString(num_layers))
 
@@ -262,25 +295,14 @@ float2 blendUV = (UV - 0.5) * (8.0 / (8.0+1.0)) + 0.5;
 #endif
 @shEndForeach
         
-        shOutputColour(0) = float4(1,1,1,1);
-
-        
-#if COLOUR_MAP
-        // Since we're emulating vertex colors here,
-        // rescale UV to directly map vertices to texel centers. TODO: parameterize texel size
-        const float colourmapSize = 33.f;
-        float2 colourUV = (UV - 0.5) * (colourmapSize / (colourmapSize+1.f)) + 0.5;
-        shOutputColour(0).rgb *= shSample(colourMap, colourUV).rgb;
-#endif
-
         shOutputColour(0).rgb *= albedo;
         
-        
-        
-        
-        
-        
+#endif
+
+#if LIGHTING
         // Lighting 
+        float3 lightResult = @shPassthroughReceive(lightResult);
+        float3 directionalResult = @shPassthroughReceive(directionalResult);
         
         // shadows only for the first (directional) light
 #if SHADOWS
@@ -305,40 +327,9 @@ float2 blendUV = (UV - 0.5) * (8.0 / (8.0+1.0)) + 0.5;
             float shadow = 1.0;
 #endif
 
-
-
-        float3 lightDir;
-        float3 diffuse = float3(0,0,0);
-        float d;
-        
-    @shForeach(@shGlobalSettingString(terrain_num_lights))
-    
-        lightDir = lightPosObjSpace@shIterator.xyz - (worldPos.xyz * lightPosObjSpace@shIterator.w);
-        d = length(lightDir);
-       
-        
-        lightDir = normalize(lightDir);
-
-#if @shIterator == 0
-
-    #if (SHADOWS || SHADOWS_PSSM)
-        diffuse += lightDiffuse@shIterator.xyz * (1.0 / ((lightAttenuation@shIterator.y) + (lightAttenuation@shIterator.z * d) + (lightAttenuation@shIterator.w * d * d))) * max(dot(normal, lightDir), 0) * shadow;
-        
-    #else
-        diffuse += lightDiffuse@shIterator.xyz * (1.0 / ((lightAttenuation@shIterator.y) + (lightAttenuation@shIterator.z * d) + (lightAttenuation@shIterator.w * d * d))) * max(dot(normal, lightDir), 0);
-        
-    #endif
-    
-#else
-        diffuse += lightDiffuse@shIterator.xyz * (1.0 / ((lightAttenuation@shIterator.y) + (lightAttenuation@shIterator.z * d) + (lightAttenuation@shIterator.w * d * d))) * max(dot(normal, lightDir), 0);
+        shOutputColour(0).xyz *= (lightResult - directionalResult * (1.0-shadow));
 #endif
 
-    @shEndForeach
-    
-        shOutputColour(0).xyz *= (lightAmbient.xyz + diffuse);    
-    
-    
-        
 #if FOG
         float fogValue = shSaturate((depth - fogParams.y) * fogParams.w);
         
@@ -357,7 +348,6 @@ float2 blendUV = (UV - 0.5) * (8.0 / (8.0+1.0)) + 0.5;
 #else
         shOutputColour(0).a = 1.f-previousAlpha;
 #endif
-
     }
 
 #endif

@@ -335,12 +335,12 @@
                                 </Widget>
                              </Widget>
 
-                            <Widget type="HBox" position="4 172 350 24">
-                                <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="ShadowsDebug"/>
+                             <Widget type="HBox" position="4 140 350 24">
+                                <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="TerrainShadows"/>
                                 <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
-                                    <Property key="Caption" value="Debug overlay"/>
+                                    <Property key="Caption" value="Terrain shadows"/>
                                 </Widget>
-                            </Widget>
+                             </Widget>
 
                         </Widget>
 

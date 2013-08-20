@@ -15,8 +15,9 @@ source_group(game FILES ${GAME} ${GAME_HEADER})
 
 add_openmw_dir (mwrender
     renderingmanager debugging sky camera animation npcanimation creatureanimation activatoranimation
-    actors objects renderinginterface localmap occlusionquery terrain terrainmaterial water shadows
+    actors objects renderinginterface localmap occlusionquery water shadows
     compositors characterpreview externalrendering globalmap videoplayer ripplesimulation refraction
+    terrainstorage
     )
 
 add_openmw_dir (mwinput
@@ -104,7 +105,6 @@ add_definitions(${SOUND_DEFINE})
 
 target_link_libraries(openmw
     ${OGRE_LIBRARIES}
-    ${OGRE_Terrain_LIBRARY}
     ${OGRE_STATIC_PLUGINS}
     ${Boost_LIBRARIES}
     ${OPENAL_LIBRARY}

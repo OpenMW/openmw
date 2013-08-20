@@ -2,6 +2,10 @@
 
 #include <OgreMaterialManager.h>
 #include <OgreHardwarePixelBuffer.h>
+#include <OgreSceneManager.h>
+#include <OgreSceneNode.h>
+#include <OgreCamera.h>
+#include <OgreTextureManager.h>
 
 #include "../mwworld/esmstore.hpp"
 
@@ -104,7 +108,7 @@ void LocalMap::saveFogOfWar(MWWorld::Ptr::CellStore* cell)
     }
 }
 
-void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell)
+void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell, float zMin, float zMax)
 {
     mInterior = false;
 
@@ -118,7 +122,7 @@ void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell)
 
     mCameraPosNode->setPosition(Vector3(0,0,0));
 
-    render((x+0.5)*sSize, (y+0.5)*sSize, -10000, 10000, sSize, sSize, name);
+    render((x+0.5)*sSize, (y+0.5)*sSize, zMin, zMax, sSize, sSize, name);
 }
 
 void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell,
