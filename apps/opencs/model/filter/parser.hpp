@@ -11,36 +11,36 @@ namespace CSMFilter
 
     class Parser
     {
-        public:
-
-            enum State
-            {
-                State_Begin,
-                State_UnexpectedCharacter,
-                State_End
-            };
-
-        private:
-
-            State mState;
             boost::shared_ptr<Node> mFilter;
+            std::string mInput;
+            int mIndex;
+            bool mError;
 
-            Token getNextToken (const std::string& filter, int& index) const;
+            Token getStringToken();
 
-            bool isEndState() const;
-            ///< This includes error states.
+            Token getNumberToken();
+
+            Token getNextToken();
+
+            Token checkKeywords (const Token& token);
+            ///< Turn string token into keyword token, if possible.
+
+            boost::shared_ptr<Node> parseImp();
+            ///< Will return a null-pointer, if there is nothing more to parse.
+
+            void error();
 
         public:
 
             Parser();
 
-            void parse (const std::string& filter);
+            bool parse (const std::string& filter);
             ///< Discards any previous calls to parse
-
-            State getState() const;
+            ///
+            /// \return Success?
 
             boost::shared_ptr<Node> getFilter() const;
-            ///< Throws an exception if getState()!=State_End
+            ///< Throws an exception if the last call to parse did not return true.
     };
 }
 

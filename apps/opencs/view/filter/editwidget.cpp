@@ -10,9 +10,7 @@ CSVFilter::EditWidget::EditWidget (QWidget *parent)
 
 void CSVFilter::EditWidget::textChanged (const QString& text)
 {
-    mParser.parse (text.toUtf8().constData());
-
-    if (mParser.getState()==CSMFilter::Parser::State_End)
+    if (mParser.parse (text.toUtf8().constData()))
     {
         setPalette (mPalette);
         emit filterChanged (mParser.getFilter(), "");
