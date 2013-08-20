@@ -365,23 +365,21 @@ EsxModel::EsmFile* EsxModel::DataFilesModel::item(int row) const
         return 0;
 }
 
-QStringList EsxModel::DataFilesModel::checkedItems()
+EsxModel::EsmFileList EsxModel::DataFilesModel::checkedItems()
 {
-    QStringList list;
+    EsmFileList list;
 
-    QList<EsmFile *>::ConstIterator it;
-    QList<EsmFile *>::ConstIterator itEnd = mFiles.constEnd();
+    EsmFileList::ConstIterator it;
+    EsmFileList::ConstIterator itEnd = mFiles.constEnd();
 
     int i = 0;
-    for (it = mFiles.constBegin(); it != itEnd; ++it) {
-        EsmFile *file = item(i);
-        ++i;
-
-        QString name = file->fileName();
+    for (it = mFiles.constBegin(); it != itEnd; ++it)
+    {
+        EsmFile *file = *it;
 
         // Only add the items that are in the checked list and available
-        if (mCheckStates[name] == Qt::Checked && canBeChecked(file))
-            list << name;
+        if (mCheckStates[file->fileName()] == Qt::Checked && canBeChecked(file))
+            list << file;
     }
 
     return list;
@@ -413,13 +411,13 @@ void EsxModel::DataFilesModel::uncheckAll()
     emit layoutChanged();
 }
 
-QStringList EsxModel::DataFilesModel::uncheckedItems()
+EsxModel::EsmFileList EsxModel::DataFilesModel::uncheckedItems()
 {
-    QStringList list;
-    QStringList checked = checkedItems();
+    EsmFileList list;
+    EsmFileList checked = checkedItems();
 
-    QList<EsmFile *>::ConstIterator it;
-    QList<EsmFile *>::ConstIterator itEnd = mFiles.constEnd();
+    EsmFileList::ConstIterator it;
+    EsmFileList::ConstIterator itEnd = mFiles.constEnd();
 
     int i = 0;
     for (it = mFiles.constBegin(); it != itEnd; ++it) {
@@ -427,8 +425,8 @@ QStringList EsxModel::DataFilesModel::uncheckedItems()
         ++i;
 
         // Add the items that are not in the checked list
-        if (!checked.contains(file->fileName()))
-            list << file->fileName();
+        if (!checked.contains(file))
+            list << file;
     }
 
     return list;

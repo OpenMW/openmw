@@ -77,6 +77,7 @@ void EsxView::ContentSelector::updateViews()
 {
     // Ensure the columns are hidden because sort() re-enables them
     pluginView->setColumnHidden(1, true);
+    pluginView->setColumnHidden(2, true);
     pluginView->setColumnHidden(3, true);
     pluginView->setColumnHidden(4, true);
     pluginView->setColumnHidden(5, true);

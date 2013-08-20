@@ -23,6 +23,7 @@ CSVDoc::FileDialog::FileDialog(QWidget *parent) :
 {
     // Hide the profile elements
     profileGroupBox->hide();
+    pluginView->showColumn(2);
 
     // Add some extra widgets
     QHBoxLayout *nameLayout = new QHBoxLayout();
@@ -77,7 +78,7 @@ void CSVDoc::FileDialog::updateCreateButton(const QString &name)
 
 QString CSVDoc::FileDialog::fileName()
 {
-    //return mNameLineEdit->text();
+    return mNameLineEdit->text();
 }
 
 void CSVDoc::FileDialog::openFile()
@@ -85,7 +86,7 @@ void CSVDoc::FileDialog::openFile()
     setWindowTitle(tr("Open"));
 
     mNameLabel->hide();
-    //mNameLineEdit->hide();
+    mNameLineEdit->hide();
     mCreateButton->hide();
 
     mButtonBox->removeButton(mCreateButton);
@@ -103,8 +104,8 @@ void CSVDoc::FileDialog::newFile()
     setWindowTitle(tr("New"));
 
     mNameLabel->show();
-    //mNameLineEdit->clear();
-    //mNameLineEdit->show();
+    mNameLineEdit->clear();
+    mNameLineEdit->show();
     mCreateButton->show();
 
     mButtonBox->setStandardButtons(QDialogButtonBox::Cancel);

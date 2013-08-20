@@ -29,15 +29,10 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
     , mLauncherSettings(launcherSettings)
     , ContentSelector(parent)
 {
-
-    pluginView->hideColumn(2);
     // Create a dialog for the new profile name input
     mNewProfileDialog = new TextInputDialog(tr("New Profile"), tr("Profile name:"), this);
 
     connect(mNewProfileDialog->lineEdit(), SIGNAL(textChanged(QString)), this, SLOT(updateOkButton(QString)));
-
-    //connect(pluginView, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
-    //connect(masterView, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
 
     createActions();
     setupDataFiles();
@@ -49,11 +44,6 @@ void DataFilesPage::createActions()
     // Add the actions to the toolbuttons
     newProfileButton->setDefaultAction(newProfileAction);
     deleteProfileButton->setDefaultAction(deleteProfileAction);
-
-    // Context menu actions
-    mContextMenu = new QMenu(this);
-    mContextMenu->addAction(checkAction);
-    mContextMenu->addAction(uncheckAction);
 }
 
 void DataFilesPage::setupDataFiles()
@@ -150,17 +140,17 @@ void DataFilesPage::saveSettings()
     mGameSettings.remove(QString("master"));
     mGameSettings.remove(QString("plugin"));
 
-    QStringList items = mDataFilesModel->checkedItems();
+    EsxModel::EsmFileList items = mDataFilesModel->checkedItems();
 
-    foreach(const QString &item, items) {
+    foreach(const EsxModel::EsmFile *item, items) {
 
-        if (item.endsWith(QString(".esm"), Qt::CaseInsensitive)) {
-            mLauncherSettings.setMultiValue(QString("Profiles/") + profile + QString("/master"), item);
-            mGameSettings.setMultiValue(QString("master"), item);
+        if (item->masters().size() == 0) {
+            mLauncherSettings.setMultiValue(QString("Profiles/") + profile + QString("/master"), item->fileName());
+            mGameSettings.setMultiValue(QString("master"), item->fileName());
 
-        } else if (item.endsWith(QString(".esp"), Qt::CaseInsensitive)) {
-            mLauncherSettings.setMultiValue(QString("Profiles/") + profile + QString("/plugin"), item);
-            mGameSettings.setMultiValue(QString("plugin"), item);
+        } else {
+            mLauncherSettings.setMultiValue(QString("Profiles/") + profile + QString("/plugin"), item->fileName());
+            mGameSettings.setMultiValue(QString("plugin"), item->fileName());
         }
     }
 
@@ -296,73 +286,3 @@ void DataFilesPage::profileRenamed(const QString &previous, const QString &curre
     loadSettings();
 
 }
-/*
-void DataFilesPage::showContextMenu(const QPoint &point)
-{
-    QObject *object = QObject::sender();
-
-    // Not a signal-slot call
-    if (!object)
-        return;
-
-    if (object->objectName() == QLatin1String("PluginView")) {
-        if (!pluginView->selectionModel()->hasSelection())
-            return;
-
-        QPoint globalPos = pluginView->mapToGlobal(point);
-        QModelIndexList indexes = pluginView->selectionModel()->selectedIndexes();
-
-        // Show the check/uncheck actions depending on the state of the selected items
-        uncheckAction->setEnabled(false);
-        checkAction->setEnabled(false);
-
-        foreach (const QModelIndex &index, indexes)
-        {
-            if (!index.isValid())
-                return;
-
-            QModelIndex sourceIndex = mPluginsProxyModel->mapToSource(index);
-
-            if (!sourceIndex.isValid())
-                return;
-
-            (mDataFilesModel->checkState(sourceIndex) == Qt::Checked)
-                    ? uncheckAction->setEnabled(true)
-                    : checkAction->setEnabled(true);
-        }
-
-        // Show menu
-        mContextMenu->exec(globalPos);
-    }
-
-    if (object->objectName() == QLatin1String("MasterView")) {
-        if (!masterView->selectionModel()->hasSelection())
-            return;
-
-        QPoint globalPos = masterView->mapToGlobal(point);
-        QModelIndexList indexes = masterView->selectionModel()->selectedIndexes();
-
-        // Show the check/uncheck actions depending on the state of the selected items
-        uncheckAction->setEnabled(false);
-        checkAction->setEnabled(false);
-
-        foreach (const QModelIndex &index, indexes)
-        {
-            if (!index.isValid())
-                return;
-
-            QModelIndex sourceIndex = mMastersProxyModel->mapToSource(index);
-
-            if (!sourceIndex.isValid())
-                return;
-
-            (mDataFilesModel->checkState(sourceIndex) == Qt::Checked)
-                    ? uncheckAction->setEnabled(true)
-                    : checkAction->setEnabled(true);
-        }
-
-        mContextMenu->exec(globalPos);
-    }
-
-}
-*/

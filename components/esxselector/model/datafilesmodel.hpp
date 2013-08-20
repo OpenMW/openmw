@@ -10,6 +10,8 @@ namespace EsxModel
 {
     class EsmFile;
 
+    typedef QList<EsmFile *> EsmFileList;
+
     class DataFilesModel : public QAbstractTableModel
     {
         Q_OBJECT
@@ -39,8 +41,8 @@ namespace EsxModel
 
         void uncheckAll();
 
-        QStringList checkedItems();
-        QStringList uncheckedItems();
+        EsmFileList checkedItems();
+        EsmFileList uncheckedItems();
         QStringList checkedItemsPaths();
 
         Qt::CheckState checkState(const QModelIndex &index);
@@ -51,13 +53,13 @@ namespace EsxModel
         EsmFile* item(int row) const;
 
     signals:
-        void checkedItemsChanged(const QStringList &items);
+        void checkedItemsChanged(const EsmFileList &items);
 
     private:
         bool canBeChecked(EsmFile *file) const;
         void addFile(EsmFile *file);
 
-        QList<EsmFile *> mFiles;
+        EsmFileList mFiles;
         QHash<QString, Qt::CheckState> mCheckStates;
 
         QString mEncoding;
