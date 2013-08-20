@@ -29,6 +29,8 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
     , mLauncherSettings(launcherSettings)
     , ContentSelector(parent)
 {
+    QMetaObject::connectSlotsByName(this);
+
     // Create a dialog for the new profile name input
     mNewProfileDialog = new TextInputDialog(tr("New Profile"), tr("Profile name:"), this);
 
@@ -40,10 +42,13 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
 
 void DataFilesPage::createActions()
 {
-
+    qDebug () << "adding actions...";
     // Add the actions to the toolbuttons
     newProfileButton->setDefaultAction(newProfileAction);
     deleteProfileButton->setDefaultAction(deleteProfileAction);
+
+    for (int i = 0; i < newProfileButton->actions().size(); i++)
+        qDebug() << newProfileButton->actions().at(i)->objectName();
 }
 
 void DataFilesPage::setupDataFiles()
@@ -186,6 +191,7 @@ int DataFilesPage::profilesComboBoxIndex()
 
 void DataFilesPage::on_newProfileAction_triggered()
 {
+    qDebug() << "new_profile_action_triggered";
     if (mNewProfileDialog->exec() == QDialog::Accepted) {
         QString profile = mNewProfileDialog->lineEdit()->text();
         profilesComboBox->addItem(profile);
