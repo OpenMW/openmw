@@ -520,6 +520,13 @@ if (BUILD_ESMTOOL)
 endif()
 
 if (BUILD_LAUNCHER)
+    if(NOT WIN32)
+        find_package(LIBUNSHIELD REQUIRED)
+        if(NOT LIBUNSHIELD_FOUND)
+               message(SEND_ERROR "Failed to find libunshield")
+        endif(NOT LIBUNSHIELD_FOUND)
+    endif(NOT WIN32)
+
    add_subdirectory( apps/launcher )
 endif()
 
