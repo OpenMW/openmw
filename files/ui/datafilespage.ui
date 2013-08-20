@@ -14,12 +14,6 @@
    <enum>Qt::DefaultContextMenu</enum>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
-   <property name="leftMargin">
-    <number>6</number>
-   </property>
-   <property name="rightMargin">
-    <number>6</number>
-   </property>
    <item>
     <widget class="QGroupBox" name="contentGroupBox">
      <property name="title">
@@ -91,12 +85,44 @@
        </layout>
       </item>
      </layout>
-     <zorder>pluginView</zorder>
-     <zorder>masterView</zorder>
-     <zorder>pluginView</zorder>
-     <zorder>masterView</zorder>
      <zorder></zorder>
      <zorder></zorder>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="projectGroupBox">
+     <property name="title">
+      <string>Project</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="EsxView::LineEdit" name="projectNameLineEdit">
+        <property name="placeholderText">
+         <string>Enter project name...</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDialogButtonBox" name="projectButtonBox">
+        <property name="standardButtons">
+         <set>QDialogButtonBox::Cancel|QDialogButtonBox::Open</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="projectCreateButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Create</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+     <zorder>projectButtonBox</zorder>
+     <zorder>projectCreateButton</zorder>
+     <zorder>projectNameLineEdit</zorder>
     </widget>
    </item>
    <item>
@@ -105,7 +131,7 @@
       <enum>Qt::NoFocus</enum>
      </property>
      <property name="title">
-      <string>Profiles</string>
+      <string>Profile</string>
      </property>
      <property name="flat">
       <bool>false</bool>
@@ -220,6 +246,11 @@
    <class>EsxView::ProfilesComboBox</class>
    <extends>QComboBox</extends>
    <header location="global">components/esxselector/view/profilescombobox.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>EsxView::LineEdit</class>
+   <extends>QLineEdit</extends>
+   <header location="global">components/esxselector/view/lineedit.hpp</header>
   </customwidget>
  </customwidgets>
  <resources/>

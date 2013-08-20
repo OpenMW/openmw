@@ -25,42 +25,20 @@ CSVDoc::FileDialog::FileDialog(QWidget *parent) :
     profileGroupBox->hide();
     pluginView->showColumn(2);
 
-    // Add some extra widgets
-    QHBoxLayout *nameLayout = new QHBoxLayout();
-    QSpacerItem *spacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-
-    mNameLabel = new QLabel(tr("File Name:"), this);
-
-    QRegExpValidator *validator = new QRegExpValidator(QRegExp("^[a-zA-Z0-9\\s]*$"));
-    mNameLineEdit = new EsxView::LineEdit(this);
-    mNameLineEdit->setValidator(validator);
-
-    nameLayout->addSpacerItem(spacer);
-    nameLayout->addWidget(mNameLabel);
-    nameLayout->addWidget(mNameLineEdit);
-
-    mButtonBox = new QDialogButtonBox(this);
-
-    mCreateButton = new QPushButton(tr("Create"), this);
-    mCreateButton->setEnabled(false);
-
-    verticalLayout->addLayout(nameLayout);
-    verticalLayout->addWidget(mButtonBox);
-
     resize(400, 400);
 
   //  connect(mDataFilesModel, SIGNAL(checkedItemsChanged(QStringList)), this, SLOT(updateOpenButton(QStringList)));
     //connect(mNameLineEdit, SIGNAL(textChanged(QString)), this, SLOT(updateCreateButton(QString)));
 
-  //  connect(mCreateButton, SIGNAL(clicked()), this, SLOT(createButtonClicked()));
+    connect(projectCreateButton, SIGNAL(clicked()), this, SIGNAL(createNewFile()));
 
- //   connect(mButtonBox, SIGNAL(accepted()), this, SLOT(accept()));
- //   connect(mButtonBox, SIGNAL(rejected()), this, SLOT(reject()));
+    connect(mButtonBox, SIGNAL(accepted()), this, SIGNAL(openFiles());
+   // connect(mButtonBox, SIGNAL(rejected()), this, SLOT(reject()));
 }
 
 void CSVDoc::FileDialog::updateOpenButton(const QStringList &items)
 {
-    QPushButton *openButton = mButtonBox->button(QDialogButtonBox::Open);
+    QPushButton *openButton = projectButtonBox->button(QDialogButtonBox::Open);
 
     if (!openButton)
         return;
@@ -70,29 +48,25 @@ void CSVDoc::FileDialog::updateOpenButton(const QStringList &items)
 
 void CSVDoc::FileDialog::updateCreateButton(const QString &name)
 {
-    if (!mCreateButton->isVisible())
+    if (!projectCreateButton->isVisible())
         return;
 
-    mCreateButton->setEnabled(!name.isEmpty());
+    projectCreateButton->setEnabled(!name.isEmpty());
 }
 
 QString CSVDoc::FileDialog::fileName()
 {
-    return mNameLineEdit->text();
+    return projectNameLineEdit->text();
 }
 
 void CSVDoc::FileDialog::openFile()
 {
     setWindowTitle(tr("Open"));
 
-    mNameLabel->hide();
-    mNameLineEdit->hide();
-    mCreateButton->hide();
-
-    mButtonBox->removeButton(mCreateButton);
-    mButtonBox->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Open);
-    QPushButton *openButton = mButtonBox->button(QDialogButtonBox::Open);
-    openButton->setEnabled(false);
+    projectNameLineEdit->hide();
+    projectCreateButton->hide();
+    projectGroupBox->setTitle(tr(""));
+    projectButtonBox->button(QDialogButtonBox::Open)->setEnabled(false);
 
     show();
     raise();
@@ -103,25 +77,10 @@ void CSVDoc::FileDialog::newFile()
 {
     setWindowTitle(tr("New"));
 
-    mNameLabel->show();
-    mNameLineEdit->clear();
-    mNameLineEdit->show();
-    mCreateButton->show();
-
-    mButtonBox->setStandardButtons(QDialogButtonBox::Cancel);
-    mButtonBox->addButton(mCreateButton, QDialogButtonBox::ActionRole);
+    projectButtonBox->setStandardButtons(QDialogButtonBox::Cancel);
+    projectButtonBox->addButton(projectCreateButton, QDialogButtonBox::ActionRole);
 
     show();
     raise();
     activateWindow();
-}
-
-void CSVDoc::FileDialog::accept()
-{
-    emit openFiles();
-}
-
-void CSVDoc::FileDialog::createButtonClicked()
-{
-    emit createNewFile();
 }

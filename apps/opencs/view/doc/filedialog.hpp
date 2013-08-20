@@ -34,7 +34,6 @@ namespace CSVDoc
 
         void openFile();
         void newFile();
-        void accepted();
 
         QString fileName();
 
@@ -43,21 +42,11 @@ namespace CSVDoc
         void createNewFile();
 
     public slots:
-        void accept();
 
     private slots:
         //void updateViews();
         void updateOpenButton(const QStringList &items);
         void updateCreateButton(const QString &name);
-
-        void createButtonClicked();
-
-    private:
-        QLabel *mNameLabel;
-        EsxView::LineEdit *mNameLineEdit;
-
-        QPushButton *mCreateButton;
-        QDialogButtonBox *mButtonBox;
     };
 }
 #endif // FILEDIALOG_HPP

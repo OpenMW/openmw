@@ -1,5 +1,6 @@
 #include <QToolButton>
 #include <QStyle>
+#include <QStylePainter>
 
 #include "lineedit.hpp"
 

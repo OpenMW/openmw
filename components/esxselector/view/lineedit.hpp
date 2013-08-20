@@ -20,6 +20,8 @@ namespace EsxView
     {
         Q_OBJECT
 
+        QString mPlaceholderText;
+
     public:
         LineEdit(QWidget *parent = 0);
 
