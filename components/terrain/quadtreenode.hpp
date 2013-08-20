@@ -72,6 +72,8 @@ namespace Terrain
 
         QuadTreeNode* getParent() { return mParent; }
 
+        Ogre::SceneNode* getSceneNode() { return mSceneNode; }
+
         int getSize() { return mSize; }
         Ogre::Vector2 getCenter() { return mCenter; }
 
@@ -100,11 +102,8 @@ namespace Terrain
         /// Call after QuadTreeNode::update!
         void updateIndexBuffers();
 
-        /// Hide chunks rendered by this node and all its children
-        void hideChunks();
-
-        /// Destroy chunks rendered by this node and all its children
-        void destroyChunks();
+        /// Destroy chunks rendered by this node *and* its children (if param is true)
+        void destroyChunks(bool children);
 
         /// Get the effective LOD level if this node was rendered in one chunk
         /// with ESM::Land::LAND_SIZE^2 vertices
@@ -126,6 +125,10 @@ namespace Terrain
     private:
         // Stored here for convenience in case we need layer list again
         MaterialGenerator* mMaterialGenerator;
+
+        /// Is this node (or any of its child nodes) currently configured to render itself?
+        /// (only relevant when distant land is disabled, otherwise whole terrain is always rendered)
+        bool mIsActive;
 
         bool mIsDummy;
         float mSize;

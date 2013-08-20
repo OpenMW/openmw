@@ -988,7 +988,7 @@ void RenderingManager::updateWaterRippleEmitterPtr (const MWWorld::Ptr& old, con
 
 void RenderingManager::frameStarted(float dt, bool paused)
 {
-    if (mTerrain && mTerrain->getVisible())
+    if (mTerrain)
         mTerrain->update(mRendering.getCamera()->getRealPosition());
 
     if (!paused)

@@ -55,6 +55,8 @@ namespace Terrain
 
         Ogre::SceneManager* getSceneManager() { return mSceneMgr; }
 
+        Ogre::SceneNode* getRootSceneNode() { return mRootSceneNode; }
+
         Storage* getStorage() { return mStorage; }
 
         /// Show or hide the whole terrain
@@ -83,6 +85,7 @@ namespace Terrain
         bool mVisible;
 
         QuadTreeNode* mRootNode;
+        Ogre::SceneNode* mRootSceneNode;
         Storage* mStorage;
 
         int mVisibilityFlags;
