@@ -52,8 +52,7 @@ namespace MWWorld
             void scaleObject (const MWWorld::Ptr& ptr);
 
             bool toggleCollisionMode();
-            
-            Ogre::Vector3 move(const MWWorld::Ptr &ptr, const Ogre::Vector3 &movement, float time, bool gravity);
+
             std::vector<std::string> getCollisions(const MWWorld::Ptr &ptr); ///< get handles this object collides with
             Ogre::Vector3 traceDown(const MWWorld::Ptr &ptr);
 
@@ -97,6 +96,8 @@ namespace MWWorld
 
             PtrVelocityList mMovementQueue;
             PtrVelocityList mMovementResults;
+
+            float mTimeAccum;
 
             PhysicsSystem (const PhysicsSystem&);
             PhysicsSystem& operator= (const PhysicsSystem&);

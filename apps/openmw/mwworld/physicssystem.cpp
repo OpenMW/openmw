@@ -225,7 +225,7 @@ namespace MWWorld
 
 
     PhysicsSystem::PhysicsSystem(OEngine::Render::OgreRenderer &_rend) :
-        mRender(_rend), mEngine(0)
+        mRender(_rend), mEngine(0), mTimeAccum(0.0f)
     {
         // Create physics. shapeLoader is deleted by the physic engine
         NifBullet::ManualBulletShapeLoader* shapeLoader = new NifBullet::ManualBulletShapeLoader();
@@ -392,11 +392,6 @@ namespace MWWorld
     std::vector<std::string> PhysicsSystem::getCollisions(const Ptr &ptr)
     {
         return mEngine->getCollisions(ptr.getRefData().getBaseNode()->getName());
-    }
-
-    Ogre::Vector3 PhysicsSystem::move(const MWWorld::Ptr &ptr, const Ogre::Vector3 &movement, float time, bool gravity)
-    {
-        return MovementSolver::move(ptr, movement, time, gravity, mEngine);
     }
 
     Ogre::Vector3 PhysicsSystem::traceDown(const MWWorld::Ptr &ptr)
@@ -570,16 +565,22 @@ namespace MWWorld
     {
         mMovementResults.clear();
 
-        const MWBase::World *world = MWBase::Environment::get().getWorld();
-        PtrVelocityList::iterator iter = mMovementQueue.begin();
-        for(;iter != mMovementQueue.end();iter++)
+        mTimeAccum += dt;
+        if(mTimeAccum >= 1.0f/60.0f)
         {
-            Ogre::Vector3 newpos;
-            newpos = move(iter->first, iter->second, dt,
-                          !world->isSwimming(iter->first) && !world->isFlying(iter->first));
-            mMovementResults.push_back(std::make_pair(iter->first, newpos));
-        }
+            const MWBase::World *world = MWBase::Environment::get().getWorld();
+            PtrVelocityList::iterator iter = mMovementQueue.begin();
+            for(;iter != mMovementQueue.end();iter++)
+            {
+                Ogre::Vector3 newpos;
+                newpos = MovementSolver::move(iter->first, iter->second, mTimeAccum,
+                                              !world->isSwimming(iter->first) &&
+                                              !world->isFlying(iter->first), mEngine);
+                mMovementResults.push_back(std::make_pair(iter->first, newpos));
+            }
 
+            mTimeAccum = 0.0f;
+        }
         mMovementQueue.clear();
 
         return mMovementResults;
