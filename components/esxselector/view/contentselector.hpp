@@ -1,7 +1,7 @@
 #ifndef CONTENTSELECTOR_HPP
 #define CONTENTSELECTOR_HPP
 
-#include <QWidget>
+#include <QDialog>
 
 #include "ui_datafilespage.h"
 
@@ -16,7 +16,7 @@ class QSortFilterProxyModel;
 
 namespace EsxView
 {
-    class ContentSelector : public QWidget, protected Ui::DataFilesPage
+    class ContentSelector : public QDialog, protected Ui::DataFilesPage
     {
         Q_OBJECT
 

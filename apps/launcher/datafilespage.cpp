@@ -47,9 +47,6 @@ void DataFilesPage::createActions()
     // Add the actions to the toolbuttons
     newProfileButton->setDefaultAction(newProfileAction);
     deleteProfileButton->setDefaultAction(deleteProfileAction);
-
-    for (int i = 0; i < newProfileButton->actions().size(); i++)
-        qDebug() << newProfileButton->actions().at(i)->objectName();
 }
 
 void DataFilesPage::setupDataFiles()

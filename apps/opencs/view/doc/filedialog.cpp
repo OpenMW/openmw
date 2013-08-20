@@ -27,13 +27,13 @@ CSVDoc::FileDialog::FileDialog(QWidget *parent) :
 
     resize(400, 400);
 
-  //  connect(mDataFilesModel, SIGNAL(checkedItemsChanged(QStringList)), this, SLOT(updateOpenButton(QStringList)));
-    //connect(mNameLineEdit, SIGNAL(textChanged(QString)), this, SLOT(updateCreateButton(QString)));
+    connect(mDataFilesModel, SIGNAL(checkedItemsChanged(QStringList)), this, SLOT(updateOpenButton(QStringList)));
+    connect(projectNameLineEdit, SIGNAL(textChanged(QString)), this, SLOT(updateCreateButton(QString)));
 
     connect(projectCreateButton, SIGNAL(clicked()), this, SIGNAL(createNewFile()));
 
-    connect(mButtonBox, SIGNAL(accepted()), this, SIGNAL(openFiles());
-   // connect(mButtonBox, SIGNAL(rejected()), this, SLOT(reject()));
+    connect(projectButtonBox, SIGNAL(accepted()), this, SIGNAL(openFiles()));
+    connect(projectButtonBox, SIGNAL(rejected()), this, SLOT(reject()));
 }
 
 void CSVDoc::FileDialog::updateOpenButton(const QStringList &items)

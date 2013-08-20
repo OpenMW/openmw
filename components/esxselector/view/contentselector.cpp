@@ -11,7 +11,7 @@
 #include <QContextMenuEvent>
 
 EsxView::ContentSelector::ContentSelector(QWidget *parent) :
-    QWidget(parent)
+    QDialog(parent)
 {
     setupUi(this);
     buildModelsAndViews();
