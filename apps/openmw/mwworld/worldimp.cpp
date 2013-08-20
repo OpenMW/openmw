@@ -240,11 +240,12 @@ namespace MWWorld
         // Rebuild player
         setupPlayer();
         MWWorld::Ptr player = mPlayer->getPlayer();
-        renderPlayer();
-        mRendering->resetCamera();
 
         // removes NpcStats, ContainerStore etc
         player.getRefData().setCustomData(NULL);
+
+        renderPlayer();
+        mRendering->resetCamera();
 
         // make sure to do this so that local scripts from items that were in the players inventory are removed
         mLocalScripts.clear();
@@ -1026,13 +1027,10 @@ namespace MWWorld
             return;
         }
 
-        if (ptr.getCell()->isExterior())
-        {
-            float terrainHeight = mRendering->getTerrainHeightAt(pos);
+        float terrainHeight = mRendering->getTerrainHeightAt(pos);
 
-            if (pos.z < terrainHeight)
-                pos.z = terrainHeight;
-        }
+        if (pos.z < terrainHeight)
+            pos.z = terrainHeight;
 
         ptr.getRefData().getPosition().pos[2] = pos.z + 20; // place slightly above. will snap down to ground with code below
 

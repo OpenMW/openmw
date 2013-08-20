@@ -145,7 +145,6 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
 
     sh::Factory::getInstance ().setGlobalSetting ("fog", "true");
     sh::Factory::getInstance ().setGlobalSetting ("num_lights", Settings::Manager::getString ("num lights", "Objects"));
-    sh::Factory::getInstance ().setGlobalSetting ("terrain_num_lights", Settings::Manager::getString ("num lights", "Terrain"));
     sh::Factory::getInstance ().setGlobalSetting ("simple_water", Settings::Manager::getBool("shader", "Water") ? "false" : "true");
     sh::Factory::getInstance ().setGlobalSetting ("render_refraction", "false");
 
@@ -1003,7 +1002,8 @@ void RenderingManager::resetCamera()
 
 float RenderingManager::getTerrainHeightAt(Ogre::Vector3 worldPos)
 {
-    assert(mTerrain);
+    if (!mTerrain || !mTerrain->getVisible())
+        return -std::numeric_limits<float>::max();
     return mTerrain->getHeightAt(worldPos);
 }
 
