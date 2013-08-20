@@ -1003,7 +1003,8 @@ void RenderingManager::resetCamera()
 
 float RenderingManager::getTerrainHeightAt(Ogre::Vector3 worldPos)
 {
-    assert(mTerrain);
+    if (!mTerrain || !mTerrain->getVisible())
+        return -std::numeric_limits<float>::max();
     return mTerrain->getHeightAt(worldPos);
 }
 

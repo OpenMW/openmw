@@ -1027,13 +1027,10 @@ namespace MWWorld
             return;
         }
 
-        if (ptr.getCell()->isExterior())
-        {
-            float terrainHeight = mRendering->getTerrainHeightAt(pos);
+        float terrainHeight = mRendering->getTerrainHeightAt(pos);
 
-            if (pos.z < terrainHeight)
-                pos.z = terrainHeight;
-        }
+        if (pos.z < terrainHeight)
+            pos.z = terrainHeight;
 
         ptr.getRefData().getPosition().pos[2] = pos.z + 20; // place slightly above. will snap down to ground with code below
 

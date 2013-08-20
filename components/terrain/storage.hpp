@@ -14,6 +14,8 @@ namespace Terrain
     /// We keep storage of terrain data abstract here since we need different implementations for game and editor
     class Storage
     {
+    public:
+        virtual ~Storage() {}
     private:
         virtual ESM::Land* getLand (int cellX, int cellY) = 0;
         virtual const ESM::LandTexture* getLandTexture(int index, short plugin) = 0;

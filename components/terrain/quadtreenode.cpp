@@ -46,12 +46,12 @@ namespace
 
     // Algorithm described by Hanan Samet - 'Neighbour Finding in Quadtrees'
     // http://www.cs.umd.edu/~hjs/pubs/SametPRIP81.pdf
-    Terrain::QuadTreeNode* searchNeighbourRecursive (Terrain::QuadTreeNode* currentNode, Terrain::Direction dir)
+    QuadTreeNode* searchNeighbourRecursive (QuadTreeNode* currentNode, Direction dir)
     {
         if (!currentNode->getParent())
             return NULL; // Arrived at root node, the root node does not have neighbours
 
-        Terrain::QuadTreeNode* nextNode;
+        QuadTreeNode* nextNode;
         if (adjacent(currentNode->getDirection(), dir))
             nextNode = searchNeighbourRecursive(currentNode->getParent(), dir);
         else
