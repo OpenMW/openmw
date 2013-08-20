@@ -142,13 +142,12 @@ namespace MWWorld
             else
             {
                 velocity = Ogre::Quaternion(Ogre::Radian(-refpos.rot[2]), Ogre::Vector3::UNIT_Z) * movement;
-                if(physicActor->getOnGround())
-                    inertia = velocity;
-                else
+                if(!physicActor->getOnGround())
                 {
-                    inertia = physicActor->getInertialForce();
-                    velocity += inertia;
+                    // If falling, add part of the incoming velocity with the current inertia
+                    velocity = velocity*time + physicActor->getInertialForce();
                 }
+                inertia = velocity;
 
                 if(!(movement.z > 0.0f))
                 {
@@ -214,7 +213,7 @@ namespace MWWorld
                 physicActor->setInertialForce(Ogre::Vector3(0.0f));
             else
             {
-                inertia.z -= time*627.2f;
+                inertia.z += time*-627.2f;
                 physicActor->setInertialForce(inertia);
             }
             physicActor->setOnGround(isOnGround);
