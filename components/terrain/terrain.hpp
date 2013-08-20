@@ -40,6 +40,8 @@ namespace Terrain
 
         bool getDistantLandEnabled() { return mDistantLand; }
         bool getShadersEnabled() { return mShaders; }
+        bool getShadowsEnabled() { return mShadows; }
+        bool getSplitShadowsEnabled() { return mSplitShadows; }
 
         float getHeightAt (const Ogre::Vector3& worldPos);
 
@@ -56,14 +58,16 @@ namespace Terrain
         Storage* getStorage() { return mStorage; }
 
         /// Show or hide the whole terrain
+        /// @note this setting will be invalidated once you call Terrain::update, so do not call it while the terrain should be hidden
         void setVisible(bool visible);
+        bool getVisible();
 
         /// Recreate materials used by terrain chunks. This should be called whenever settings of
         /// the material factory are changed. (Relying on the factory to update those materials is not
         /// enough, since turning a feature on/off can change the number of texture units available for layer/blend
         /// textures, and to properly respond to this we may need to change the structure of the material, such as
         /// adding or removing passes. This can only be achieved by a full rebuild.)
-        void applyMaterials();
+        void applyMaterials(bool shadows, bool splitShadows);
 
         int getVisiblityFlags() { return mVisibilityFlags; }
 
@@ -74,6 +78,9 @@ namespace Terrain
     private:
         bool mDistantLand;
         bool mShaders;
+        bool mShadows;
+        bool mSplitShadows;
+        bool mVisible;
 
         QuadTreeNode* mRootNode;
         Storage* mStorage;

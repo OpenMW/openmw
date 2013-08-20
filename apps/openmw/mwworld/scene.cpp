@@ -362,6 +362,8 @@ namespace MWWorld
         const MWWorld::Store<ESM::GameSetting> &gmst =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
+        mRendering.enableTerrain(false);
+
         std::string loadingInteriorText;
         loadingInteriorText = gmst.find ("sLoadingMessage2")->getString();
 
@@ -439,6 +441,8 @@ namespace MWWorld
         int y = 0;
 
         MWBase::Environment::get().getWorld()->positionToIndex (position.pos[0], position.pos[1], x, y);
+
+        mRendering.enableTerrain(true);
 
         changeCell (x, y, position, true);
     }

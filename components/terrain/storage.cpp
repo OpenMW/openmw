@@ -425,7 +425,7 @@ namespace Terrain
         0---1   0---1
         */
 
-        // Build all 4 positions in terrain space, using point-sampled height
+        // Build all 4 positions in normalized cell space, using point-sampled height
         Ogre::Vector3 v0 (startXTS, startYTS, getVertexHeight(land, startX, startY) / 8192.f);
         Ogre::Vector3 v1 (endXTS, startYTS, getVertexHeight(land, endX, startY) / 8192.f);
         Ogre::Vector3 v2 (endXTS, endYTS, getVertexHeight(land, endX, endY) / 8192.f);

@@ -348,7 +348,6 @@ float2 blendUV = (UV - 0.5) * (16.0 / (16.0+1.0)) + 0.5;
 #else
         shOutputColour(0).a = 1.f-previousAlpha;
 #endif
-
     }
 
 #endif

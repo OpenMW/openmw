@@ -244,16 +244,6 @@ void RenderingManager::cellAdded (MWWorld::Ptr::CellStore *store)
     mObjects.buildStaticGeometry (*store);
     sh::Factory::getInstance().unloadUnreferencedMaterials();
     mDebugging->cellAdded(store);
-    if (store->isExterior())
-    {
-        if (!mTerrain)
-        {
-            mTerrain = new Terrain::Terrain(mRendering.getScene(), new MWRender::TerrainStorage(), RV_Terrain,
-                                            Settings::Manager::getBool("distant land", "Terrain"),
-                                            Settings::Manager::getBool("shader", "Terrain"));
-            mTerrain->update(mRendering.getCamera()->getRealPosition());
-        }
-    }
     waterAdded(store);
 }
 
@@ -848,7 +838,12 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
     mWater->processChangedSettings(settings);
 
     if (rebuild)
+    {
         mObjects.rebuildStaticGeometry();
+        if (mTerrain)
+            mTerrain->applyMaterials(Settings::Manager::getBool("enabled", "Shadows"),
+                                     Settings::Manager::getBool("split", "Shadows"));
+    }
 }
 
 void RenderingManager::setMenuTransparency(float val)
@@ -994,7 +989,7 @@ void RenderingManager::updateWaterRippleEmitterPtr (const MWWorld::Ptr& old, con
 
 void RenderingManager::frameStarted(float dt, bool paused)
 {
-    if (mTerrain)
+    if (mTerrain && mTerrain->getVisible())
         mTerrain->update(mRendering.getCamera()->getRealPosition());
 
     if (!paused)
@@ -1010,6 +1005,26 @@ float RenderingManager::getTerrainHeightAt(Ogre::Vector3 worldPos)
 {
     assert(mTerrain);
     return mTerrain->getHeightAt(worldPos);
+}
+
+void RenderingManager::enableTerrain(bool enable)
+{
+    if (enable)
+    {
+        if (!mTerrain)
+        {
+            mTerrain = new Terrain::Terrain(mRendering.getScene(), new MWRender::TerrainStorage(), RV_Terrain,
+                                            Settings::Manager::getBool("distant land", "Terrain"),
+                                            Settings::Manager::getBool("shader", "Terrain"));
+            mTerrain->applyMaterials(Settings::Manager::getBool("enabled", "Shadows"),
+                                     Settings::Manager::getBool("split", "Shadows"));
+            mTerrain->update(mRendering.getCamera()->getRealPosition());
+        }
+        mTerrain->setVisible(true);
+    }
+    else
+        if (mTerrain)
+            mTerrain->setVisible(false);
 }
 
 } // namespace

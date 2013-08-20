@@ -110,6 +110,8 @@ public:
     void cellAdded (MWWorld::CellStore *store);
     void waterAdded(MWWorld::CellStore *store);
 
+    void enableTerrain(bool enable);
+
     void removeWater();
 
     void preCellChange (MWWorld::CellStore* store);

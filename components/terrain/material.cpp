@@ -34,6 +34,8 @@ namespace Terrain
 
     MaterialGenerator::MaterialGenerator(bool shaders)
         : mShaders(shaders)
+        , mShadows(false)
+        , mSplitShadows(false)
     {
 
     }
@@ -45,6 +47,11 @@ namespace Terrain
 
         // first layer doesn't need blendmap
         --freeTextureUnits;
+
+        if (mSplitShadows)
+            freeTextureUnits -= 3;
+        else if (mShadows)
+            --freeTextureUnits;
 
         // each layer needs 1.25 units (1xdiffusespec, 0.25xblend)
         return static_cast<Ogre::uint8>(freeTextureUnits / (1.25f)) + 1;
@@ -158,7 +165,6 @@ namespace Terrain
         }
         else
         {
-
             sh::MaterialInstance* material = sh::Factory::getInstance().createMaterialInstance (name.str());
             material->setProperty ("allow_fixed_function", sh::makeProperty<sh::BooleanValue>(new sh::BooleanValue(false)));
 
@@ -179,12 +185,14 @@ namespace Terrain
                 tex->setProperty ("tex_address_mode", sh::makeProperty (new sh::StringValue("clamp")));
 
                 // shadow. TODO: repeated, put in function
-                for (Ogre::uint i = 0; i < 3; ++i)
+                if (mShadows)
                 {
-                    sh::MaterialInstanceTextureUnit* shadowTex = p->createTextureUnit ("shadowMap" + Ogre::StringConverter::toString(i));
-                    shadowTex->setProperty ("content_type", sh::makeProperty<sh::StringValue> (new sh::StringValue("shadow")));
+                    for (Ogre::uint i = 0; i < (mSplitShadows ? 3 : 1); ++i)
+                    {
+                        sh::MaterialInstanceTextureUnit* shadowTex = p->createTextureUnit ("shadowMap" + Ogre::StringConverter::toString(i));
+                        shadowTex->setProperty ("content_type", sh::makeProperty<sh::StringValue> (new sh::StringValue("shadow")));
+                    }
                 }
-
                 p->mShaderProperties.setProperty ("shadowtexture_offset", sh::makeProperty (new sh::StringValue(
                     Ogre::StringConverter::toString(1))));
 
@@ -272,12 +280,14 @@ namespace Terrain
                     }
 
                     // shadow
-                    for (Ogre::uint i = 0; i < 3; ++i)
+                    if (mShadows)
                     {
-                        sh::MaterialInstanceTextureUnit* shadowTex = p->createTextureUnit ("shadowMap" + Ogre::StringConverter::toString(i));
-                        shadowTex->setProperty ("content_type", sh::makeProperty<sh::StringValue> (new sh::StringValue("shadow")));
+                        for (Ogre::uint i = 0; i < (mSplitShadows ? 3 : 1); ++i)
+                        {
+                            sh::MaterialInstanceTextureUnit* shadowTex = p->createTextureUnit ("shadowMap" + Ogre::StringConverter::toString(i));
+                            shadowTex->setProperty ("content_type", sh::makeProperty<sh::StringValue> (new sh::StringValue("shadow")));
+                        }
                     }
-
                     p->mShaderProperties.setProperty ("shadowtexture_offset", sh::makeProperty (new sh::StringValue(
                         Ogre::StringConverter::toString(numBlendTextures + numLayersInThisPass))));
 

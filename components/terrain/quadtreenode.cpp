@@ -256,6 +256,10 @@ void QuadTreeNode::update(const Ogre::Vector3 &cameraPos)
             mChunk->setVisibilityFlags(mTerrain->getVisiblityFlags());
             mChunk->setCastShadows(true);
             mSceneNode->attachObject(mChunk);
+
+            mMaterialGenerator->enableShadows(mTerrain->getShadowsEnabled());
+            mMaterialGenerator->enableSplitShadows(mTerrain->getSplitShadowsEnabled());
+
             if (mSize == 1)
             {
                 ensureLayerInfo();
@@ -338,8 +342,11 @@ void QuadTreeNode::destroyChunks()
             mMaterialGenerator->setCompositeMap("");
         }
 
-        Ogre::TextureManager::getSingleton().remove(mCompositeMap->getName());
-        mCompositeMap.setNull();
+        if (!mCompositeMap.isNull())
+        {
+            Ogre::TextureManager::getSingleton().remove(mCompositeMap->getName());
+            mCompositeMap.setNull();
+        }
     }
     else if (hasChildren())
         for (int i=0; i<4; ++i)
@@ -443,4 +450,30 @@ void QuadTreeNode::ensureCompositeMap()
 
     mTerrain->clearCompositeMapSceneManager();
 
+}
+
+void QuadTreeNode::applyMaterials()
+{
+    if (mChunk)
+    {
+        mMaterialGenerator->enableShadows(mTerrain->getShadowsEnabled());
+        mMaterialGenerator->enableSplitShadows(mTerrain->getSplitShadowsEnabled());
+        if (mSize <= 1)
+            mChunk->setMaterial(mMaterialGenerator->generate(Ogre::MaterialPtr()));
+        else
+            mChunk->setMaterial(mMaterialGenerator->generateForCompositeMap(Ogre::MaterialPtr()));
+    }
+    if (hasChildren())
+        for (int i=0; i<4; ++i)
+            mChildren[i]->applyMaterials();
+}
+
+void QuadTreeNode::setVisible(bool visible)
+{
+    if (!visible && mChunk)
+        mChunk->setVisible(false);
+
+    if (hasChildren())
+        for (int i=0; i<4; ++i)
+            mChildren[i]->setVisible(visible);
 }

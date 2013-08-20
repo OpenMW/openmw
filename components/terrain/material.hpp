@@ -21,6 +21,9 @@ namespace Terrain
         const std::vector<Ogre::TexturePtr>& getBlendmapList() { return mBlendmapList; }
         void setCompositeMap (const std::string& name) { mCompositeMap = name; }
 
+        void enableShadows(bool shadows) { mShadows = shadows; }
+        void enableSplitShadows(bool splitShadows) { mSplitShadows = splitShadows; }
+
         /// Creates a material suitable for displaying a chunk of terrain using alpha-blending.
         /// @param mat Material that will be replaced by the generated material. May be empty as well, in which case
         ///            a new material is created.
@@ -48,6 +51,8 @@ namespace Terrain
         std::vector<Ogre::TexturePtr> mBlendmapList;
         std::string mCompositeMap;
         bool mShaders;
+        bool mShadows;
+        bool mSplitShadows;
     };
 
 }

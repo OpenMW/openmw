@@ -370,5 +370,23 @@ namespace Terrain
         return mStorage->getHeightAt(worldPos);
     }
 
+    void Terrain::applyMaterials(bool shadows, bool splitShadows)
+    {
+        mShadows = shadows;
+        mSplitShadows = splitShadows;
+        mRootNode->applyMaterials();
+    }
+
+    void Terrain::setVisible(bool visible)
+    {
+        mVisible = visible;
+        mRootNode->setVisible(visible);
+    }
+
+    bool Terrain::getVisible()
+    {
+        return mVisible;
+    }
+
 
 }

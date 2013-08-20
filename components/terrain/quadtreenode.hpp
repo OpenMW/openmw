@@ -49,6 +49,11 @@ namespace Terrain
         QuadTreeNode (Terrain* terrain, ChildDirection dir, float size, const Ogre::Vector2& center, QuadTreeNode* parent);
         ~QuadTreeNode();
 
+        void setVisible(bool visible);
+
+        /// Rebuild all materials
+        void applyMaterials();
+
         /// Initialize neighbours - do this after the quadtree is built
         void initNeighbours();
         /// Initialize bounding boxes of non-leafs by merging children bounding boxes.
