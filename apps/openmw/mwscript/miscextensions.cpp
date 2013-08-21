@@ -102,8 +102,6 @@ namespace MWScript
                     InterpreterContext& context =
                         static_cast<InterpreterContext&> (runtime.getContext());
 
-                    MWWorld::Ptr ptr = context.getReference();
-
                     context.executeActivation();
                 }
         };

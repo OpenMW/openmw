@@ -605,7 +605,6 @@ namespace MWGui
 
     void MagicSelectionDialog::onEnchantedItemSelected(MyGUI::Widget* _sender)
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
         MWWorld::Ptr item = *_sender->getUserData<MWWorld::Ptr>();
 
         mParent->onAssignMagicItem (item);

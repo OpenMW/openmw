@@ -67,11 +67,6 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    InterpreterContext& context =
-                        static_cast<InterpreterContext&> (runtime.getContext());
-
-                    MWWorld::Ptr ptr = context.getReference();
-
                     runtime.push (MWBase::Environment::get().getWindowManager()->readPressedButton());
                 }
         };
