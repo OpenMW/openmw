@@ -4,7 +4,7 @@
 #include <exception>
 #include <iostream>
 
-#include <QtGui/QApplication>
+#include <QApplication>
 #include <QIcon>
 
 class Application : public QApplication
