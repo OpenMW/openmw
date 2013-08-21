@@ -107,7 +107,8 @@ namespace MWWorld
         }
 
         static Ogre::Vector3 move(const MWWorld::Ptr &ptr, const Ogre::Vector3 &movement, float time,
-                                  bool isSwimming, bool isFlying, OEngine::Physic::PhysicEngine *engine)
+                                  bool isSwimming, bool isFlying, float waterlevel,
+                                  OEngine::Physic::PhysicEngine *engine)
         {
             const ESM::Position &refpos = ptr.getRefData().getPosition();
             Ogre::Vector3 position(refpos.pos);
@@ -126,6 +127,8 @@ namespace MWWorld
             btCollisionObject *colobj = physicActor->getCollisionBody();
             Ogre::Vector3 halfExtents = physicActor->getHalfExtents();
             position.z += halfExtents.z;
+
+            waterlevel -= halfExtents.z * 0.5;
 
             OEngine::Physic::ActorTracer tracer;
             bool wasOnGround = false;
@@ -168,8 +171,21 @@ namespace MWWorld
             float remainingTime = time;
             for(int iterations = 0;iterations < sMaxIterations && remainingTime > 0.01f;++iterations)
             {
+                Ogre::Vector3 nextpos = newPosition + velocity*remainingTime;
+
+                if(isSwimming && !isFlying &&
+                   nextpos.z > waterlevel && newPosition.z <= waterlevel)
+                {
+                    const Ogre::Vector3 down(0,0,-1);
+                    Ogre::Real movelen = velocity.normalise();
+                    Ogre::Vector3 reflectdir = velocity.reflect(down);
+                    reflectdir.normalise();
+                    velocity = slide(reflectdir, down)*movelen;
+                    continue;
+                }
+
                 // trace to where character would go if there were no obstructions
-                tracer.doTrace(colobj, newPosition, newPosition+velocity*remainingTime, engine);
+                tracer.doTrace(colobj, newPosition, nextpos, engine);
 
                 // check for obstructions
                 if(tracer.mFraction >= 1.0f)
@@ -567,10 +583,16 @@ namespace MWWorld
             PtrVelocityList::iterator iter = mMovementQueue.begin();
             for(;iter != mMovementQueue.end();iter++)
             {
+                float waterlevel = -std::numeric_limits<float>::max();
+                const MWWorld::CellStore *cellstore = iter->first.getCell();
+                if(cellstore->mCell->hasWater())
+                    waterlevel = cellstore->mCell->mWater;
+
                 Ogre::Vector3 newpos;
                 newpos = MovementSolver::move(iter->first, iter->second, mTimeAccum,
                                               world->isSwimming(iter->first),
-                                              world->isFlying(iter->first), mEngine);
+                                              world->isFlying(iter->first),
+                                              waterlevel, mEngine);
                 mMovementResults.push_back(std::make_pair(iter->first, newpos));
             }
 
