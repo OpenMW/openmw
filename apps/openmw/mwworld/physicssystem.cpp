@@ -107,7 +107,7 @@ namespace MWWorld
         }
 
         static Ogre::Vector3 move(const MWWorld::Ptr &ptr, const Ogre::Vector3 &movement, float time,
-                                  bool gravity, OEngine::Physic::PhysicEngine *engine)
+                                  bool isSwimming, bool isFlying, OEngine::Physic::PhysicEngine *engine)
         {
             const ESM::Position &refpos = ptr.getRefData().getPosition();
             Ogre::Vector3 position(refpos.pos);
@@ -132,7 +132,7 @@ namespace MWWorld
             bool isOnGround = false;
             Ogre::Vector3 inertia(0.0f);
             Ogre::Vector3 velocity;
-            if(!gravity)
+            if(isSwimming || isFlying)
             {
                 velocity = (Ogre::Quaternion(Ogre::Radian( -refpos.rot[2]), Ogre::Vector3::UNIT_Z)*
                             Ogre::Quaternion(Ogre::Radian( -refpos.rot[1]), Ogre::Vector3::UNIT_Y)*
@@ -181,7 +181,7 @@ namespace MWWorld
 
                 // We hit something. Try to step up onto it.
                 if(stepMove(colobj, newPosition, velocity, remainingTime, engine))
-                    isOnGround = gravity; // Only on the ground if there's gravity
+                    isOnGround = !(isSwimming || isFlying); // Only on the ground if there's gravity
                 else
                 {
                     // Can't move this way, try to find another spot along the plane
@@ -192,7 +192,7 @@ namespace MWWorld
 
                     // Do not allow sliding upward if there is gravity. Stepping will have taken
                     // care of that.
-                    if(gravity)
+                    if(!(isSwimming || isFlying))
                         velocity.z = std::min(velocity.z, 0.0f);
                 }
             }
@@ -209,7 +209,7 @@ namespace MWWorld
                     isOnGround = false;
             }
 
-            if(isOnGround || !gravity)
+            if(isOnGround || isSwimming || isFlying)
                 physicActor->setInertialForce(Ogre::Vector3(0.0f));
             else
             {
@@ -569,8 +569,8 @@ namespace MWWorld
             {
                 Ogre::Vector3 newpos;
                 newpos = MovementSolver::move(iter->first, iter->second, mTimeAccum,
-                                              !world->isSwimming(iter->first) &&
-                                              !world->isFlying(iter->first), mEngine);
+                                              world->isSwimming(iter->first),
+                                              world->isFlying(iter->first), mEngine);
                 mMovementResults.push_back(std::make_pair(iter->first, newpos));
             }
 
