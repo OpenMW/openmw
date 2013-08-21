@@ -40,29 +40,6 @@ namespace Terrain
 
     }
 
-    int MaterialGenerator::getMaxLayersPerPass ()
-    {
-        // count the texture units free
-        Ogre::uint8 freeTextureUnits = 16;
-
-        // first layer doesn't need blendmap
-        --freeTextureUnits;
-
-        if (mSplitShadows)
-            freeTextureUnits -= 3;
-        else if (mShadows)
-            --freeTextureUnits;
-
-        // each layer needs 1.25 units (1xdiffusespec, 0.25xblend)
-        return static_cast<Ogre::uint8>(freeTextureUnits / (1.25f)) + 1;
-    }
-
-    int MaterialGenerator::getRequiredPasses ()
-    {
-        int maxLayersPerPass = getMaxLayersPerPass();
-        return std::max(1.f, std::ceil(static_cast<float>(mLayerList.size()) / maxLayersPerPass));
-    }
-
     Ogre::MaterialPtr MaterialGenerator::generate(Ogre::MaterialPtr mat)
     {
         return create(mat, false, false);
@@ -201,44 +178,63 @@ namespace Terrain
             else
             {
 
-                int numPasses = getRequiredPasses();
-                assert(numPasses);
-                int maxLayersInOnePass = getMaxLayersPerPass();
+                bool shadows = mShadows && !renderCompositeMap;
 
-                for (int pass=0; pass<numPasses; ++pass)
+                int layerOffset = 0;
+                while (layerOffset < (int)mLayerList.size())
                 {
-                    int layerOffset = maxLayersInOnePass * pass;
-                    int blendmapOffset = (pass == 0) ? 1 : 0; // the first layer of the first pass is the base layer and does not need a blend map
+                    int blendmapOffset = (layerOffset == 0) ? 1 : 0; // the first layer of the first pass is the base layer and does not need a blend map
+
+                    // Check how many layers we can fit in this pass
+                    int numLayersInThisPass = 0;
+                    int numBlendTextures = 0;
+                    std::vector<std::string> blendTextures;
+                    int remainingTextureUnits = OGRE_MAX_TEXTURE_LAYERS;
+                    if (shadows)
+                        remainingTextureUnits -= (mSplitShadows ? 3 : 1);
+                    while (remainingTextureUnits && layerOffset + numLayersInThisPass < (int)mLayerList.size())
+                    {
+                        int layerIndex = numLayersInThisPass + layerOffset;
+
+                        int neededTextureUnits=0;
+                        int neededBlendTextures=0;
+
+                        if (layerIndex != 0)
+                        {
+                            std::string blendTextureName = mBlendmapList[getBlendmapIndexForLayer(layerIndex)]->getName();
+                            if (std::find(blendTextures.begin(), blendTextures.end(), blendTextureName) == blendTextures.end())
+                            {
+                                blendTextures.push_back(blendTextureName);
+                                ++neededBlendTextures;
+                                ++neededTextureUnits; // blend texture
+                            }
+                        }
+                        ++neededTextureUnits; // layer texture
+                        if (neededTextureUnits <= remainingTextureUnits)
+                        {
+                            // We can fit another!
+                            remainingTextureUnits -= neededTextureUnits;
+                            numBlendTextures += neededBlendTextures;
+                            ++numLayersInThisPass;
+                        }
+                        else
+                            break; // We're full
+                    }
+
 
                     sh::MaterialInstancePass* p = material->createPass ();
 
                     p->setProperty ("vertex_program", sh::makeProperty<sh::StringValue>(new sh::StringValue("terrain_vertex")));
                     p->setProperty ("fragment_program", sh::makeProperty<sh::StringValue>(new sh::StringValue("terrain_fragment")));
-                    if (pass != 0)
+                    if (layerOffset != 0)
                     {
                         p->setProperty ("scene_blend", sh::makeProperty(new sh::StringValue("alpha_blend")));
                         // Only write if depth is equal to the depth value written by the previous pass.
                         p->setProperty ("depth_func", sh::makeProperty(new sh::StringValue("equal")));
                     }
 
-                    p->mShaderProperties.setProperty ("is_first_pass", sh::makeProperty(new sh::BooleanValue(pass == 0)));
                     p->mShaderProperties.setProperty ("render_composite_map", sh::makeProperty(new sh::BooleanValue(renderCompositeMap)));
                     p->mShaderProperties.setProperty ("display_composite_map", sh::makeProperty(new sh::BooleanValue(displayCompositeMap)));
-
-                    Ogre::uint numLayersInThisPass = std::min(maxLayersInOnePass, (int)mLayerList.size()-layerOffset);
-
-                    // a blend map might be shared between two passes
-                    Ogre::uint numBlendTextures=0;
-                    std::vector<std::string> blendTextures;
-                    for (unsigned int layer=blendmapOffset; layer<numLayersInThisPass; ++layer)
-                    {
-                        std::string blendTextureName = mBlendmapList[getBlendmapIndexForLayer(layerOffset+layer)]->getName();
-                        if (std::find(blendTextures.begin(), blendTextures.end(), blendTextureName) == blendTextures.end())
-                        {
-                            blendTextures.push_back(blendTextureName);
-                            ++numBlendTextures;
-                        }
-                    }
 
                     p->mShaderProperties.setProperty ("num_layers", sh::makeProperty (new sh::StringValue(Ogre::StringConverter::toString(numLayersInThisPass))));
                     p->mShaderProperties.setProperty ("num_blendmaps", sh::makeProperty (new sh::StringValue(Ogre::StringConverter::toString(numBlendTextures))));
@@ -250,7 +246,7 @@ namespace Terrain
                         blendmapStart = 0;
                     else
                         blendmapStart = getBlendmapIndexForLayer(layerOffset+blendmapOffset);
-                    for (Ogre::uint i = 0; i < numBlendTextures; ++i)
+                    for (int i = 0; i < numBlendTextures; ++i)
                     {
                         sh::MaterialInstanceTextureUnit* blendTex = p->createTextureUnit ("blendMap" + Ogre::StringConverter::toString(i));
                         blendTex->setProperty ("direct_texture", sh::makeProperty (new sh::StringValue(mBlendmapList[blendmapStart+i]->getName())));
@@ -258,7 +254,7 @@ namespace Terrain
                     }
 
                     // layer maps
-                    for (Ogre::uint i = 0; i < numLayersInThisPass; ++i)
+                    for (int i = 0; i < numLayersInThisPass; ++i)
                     {
                         sh::MaterialInstanceTextureUnit* diffuseTex = p->createTextureUnit ("diffuseMap" + Ogre::StringConverter::toString(i));
                         diffuseTex->setProperty ("direct_texture", sh::makeProperty (new sh::StringValue("textures\\"+mLayerList[layerOffset+i])));
@@ -280,7 +276,7 @@ namespace Terrain
                     }
 
                     // shadow
-                    if (mShadows)
+                    if (shadows)
                     {
                         for (Ogre::uint i = 0; i < (mSplitShadows ? 3 : 1); ++i)
                         {
@@ -292,7 +288,9 @@ namespace Terrain
                         Ogre::StringConverter::toString(numBlendTextures + numLayersInThisPass))));
 
                     // Make sure the pass index is fed to the permutation handler, because blendmap components may be different
-                    p->mShaderProperties.setProperty ("pass_index", sh::makeProperty(new sh::IntValue(pass)));
+                    p->mShaderProperties.setProperty ("pass_index", sh::makeProperty(new sh::IntValue(layerOffset)));
+
+                    layerOffset += numLayersInThisPass;
                 }
             }
         }

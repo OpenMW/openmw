@@ -151,8 +151,15 @@ QuadTreeNode::QuadTreeNode(Terrain* terrain, ChildDirection dir, float size, con
     for (int i=0; i<4; ++i)
         mNeighbours[i] = NULL;
 
-    mSceneNode = mTerrain->getSceneManager()->getRootSceneNode()->createChildSceneNode(
-                Ogre::Vector3(mCenter.x*8192, mCenter.y*8192, 0));
+    if (mDirection == Root)
+        mSceneNode = mTerrain->getRootSceneNode();
+    else
+        mSceneNode = mTerrain->getSceneManager()->createSceneNode();
+    Ogre::Vector2 pos (0,0);
+    if (mParent)
+        pos = mParent->getCenter();
+    pos = mCenter - pos;
+    mSceneNode->setPosition(Ogre::Vector3(pos.x*8192, pos.y*8192, 0));
 
     mLodLevel = log2(mSize);
 
@@ -221,13 +228,12 @@ void QuadTreeNode::update(const Ogre::Vector3 &cameraPos)
 
     float dist = distance(mWorldBounds, cameraPos);
 
-    if (!mTerrain->getDistantLandEnabled())
+    bool distantLand = mTerrain->getDistantLandEnabled();
+
+    // Make sure our scene node is attached
+    if (!mSceneNode->isInSceneGraph())
     {
-        if (dist > 8192*2)
-        {
-            destroyChunks();
-            return;
-        }
+        mParent->getSceneNode()->addChild(mSceneNode);
     }
 
     /// \todo implement error metrics or some other means of not using arbitrary values
@@ -246,9 +252,22 @@ void QuadTreeNode::update(const Ogre::Vector3 &cameraPos)
     if (dist > 8192*64)
         wantedLod = 6;
 
+    bool hadChunk = hasChunk();
+
+    if (!distantLand && dist > 8192*2)
+    {
+        if (mIsActive)
+        {
+            destroyChunks(true);
+            mIsActive = false;
+        }
+        return;
+    }
+
+    mIsActive = true;
+
     if (mSize <= mTerrain->getMaxBatchSize() && mLodLevel <= wantedLod)
     {
-        bool hadChunk = hasChunk();
         // Wanted LOD is small enough to render this node in one chunk
         if (!mChunk)
         {
@@ -297,32 +316,36 @@ void QuadTreeNode::update(const Ogre::Vector3 &cameraPos)
 
         if (!hadChunk && hasChildren())
         {
-            for (int i=0; i<4; ++i)
-                mChildren[i]->hideChunks();
+            // Make sure child scene nodes are detached
+            mSceneNode->removeAllChildren();
+
+            // If distant land is enabled, keep the chunks around in case we need them again,
+            // otherwise, prefer low memory usage
+            if (!distantLand)
+                for (int i=0; i<4; ++i)
+                    mChildren[i]->destroyChunks(true);
         }
     }
     else
     {
         // Wanted LOD is too detailed to be rendered in one chunk,
         // so split it up by delegating to child nodes
-        if (mChunk)
-            mChunk->setVisible(false);
+        if (hadChunk)
+        {
+            // If distant land is enabled, keep the chunks around in case we need them again,
+            // otherwise, prefer low memory usage
+            if (!distantLand)
+                destroyChunks(false);
+            else if (mChunk)
+                mChunk->setVisible(false);
+        }
         assert(hasChildren() && "Leaf node's LOD needs to be 0");
         for (int i=0; i<4; ++i)
             mChildren[i]->update(cameraPos);
     }
 }
 
-void QuadTreeNode::hideChunks()
-{
-    if (mChunk)
-        mChunk->setVisible(false);
-    else if (hasChildren())
-        for (int i=0; i<4; ++i)
-            mChildren[i]->hideChunks();
-}
-
-void QuadTreeNode::destroyChunks()
+void QuadTreeNode::destroyChunks(bool children)
 {
     if (mChunk)
     {
@@ -348,9 +371,9 @@ void QuadTreeNode::destroyChunks()
             mCompositeMap.setNull();
         }
     }
-    else if (hasChildren())
+    else if (children && hasChildren())
         for (int i=0; i<4; ++i)
-            mChildren[i]->destroyChunks();
+            mChildren[i]->destroyChunks(true);
 }
 
 void QuadTreeNode::updateIndexBuffers()
@@ -366,7 +389,7 @@ void QuadTreeNode::updateIndexBuffers()
 
 bool QuadTreeNode::hasChunk()
 {
-    return mChunk && mChunk->getVisible();
+    return mSceneNode->isInSceneGraph() && mChunk && mChunk->getVisible();
 }
 
 size_t QuadTreeNode::getActualLodLevel()
@@ -400,7 +423,7 @@ void QuadTreeNode::prepareForCompositeMap(Ogre::TRect<float> area)
         std::vector<std::string> layer;
         layer.push_back("_land_default.dds");
         matGen.setLayerList(layer);
-        makeQuad(sceneMgr, area.left, area.top, area.right, area.bottom, matGen.generate(Ogre::MaterialPtr()));
+        makeQuad(sceneMgr, area.left, area.top, area.right, area.bottom, matGen.generateForCompositeMapRTT(Ogre::MaterialPtr()));
         return;
     }
     if (mSize > 1)

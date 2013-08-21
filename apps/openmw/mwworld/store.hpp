@@ -466,6 +466,18 @@ namespace MWWorld
             ESM::Land *ptr = new ESM::Land();
             ptr->load(esm);
 
+            // Same area defined in multiple plugins? -> last plugin wins
+            // Can't use search() because we aren't sorted yet - is there any other way to speed this up?
+            for (std::vector<ESM::Land*>::iterator it = mStatic.begin(); it != mStatic.end(); ++it)
+            {
+                if ((*it)->mX == ptr->mX && (*it)->mY == ptr->mY)
+                {
+                    delete *it;
+                    mStatic.erase(it);
+                    break;
+                }
+            }
+
             mStatic.push_back(ptr);
         }
 

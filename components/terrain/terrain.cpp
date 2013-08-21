@@ -59,6 +59,7 @@ namespace Terrain
         , mVisibilityFlags(visibilityFlags)
         , mDistantLand(distantLand)
         , mShaders(shaders)
+        , mVisible(true)
     {
         mCompositeMapSceneMgr = Ogre::Root::getSingleton().createSceneManager(Ogre::ST_GENERIC);
 
@@ -80,6 +81,8 @@ namespace Terrain
 
         // Adjust the center according to the new size
         Ogre::Vector3 center = mBounds.getCenter() + Ogre::Vector3((size-origSizeX)/2.f, (size-origSizeY)/2.f, 0);
+
+        mRootSceneNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
 
         mRootNode = new QuadTreeNode(this, Root, size, Ogre::Vector2(center.x, center.y), NULL);
         buildQuadTree(mRootNode);
@@ -142,6 +145,8 @@ namespace Terrain
 
     void Terrain::update(const Ogre::Vector3& cameraPos)
     {
+        if (!mVisible)
+            return;
         mRootNode->update(cameraPos);
         mRootNode->updateIndexBuffers();
     }
@@ -379,8 +384,12 @@ namespace Terrain
 
     void Terrain::setVisible(bool visible)
     {
+        if (visible && !mVisible)
+            mSceneMgr->getRootSceneNode()->addChild(mRootSceneNode);
+        else if (!visible && mVisible)
+            mSceneMgr->getRootSceneNode()->removeChild(mRootSceneNode);
+
         mVisible = visible;
-        mRootNode->setVisible(visible);
     }
 
     bool Terrain::getVisible()
