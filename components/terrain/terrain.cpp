@@ -214,7 +214,7 @@ namespace Terrain
 
         bool anyDeltas = (lodDeltas[North] || lodDeltas[South] || lodDeltas[West] || lodDeltas[East]);
 
-        size_t increment = std::pow(2, lodLevel);
+        size_t increment = 1 << lodLevel;
         assert((int)increment < ESM::Land::LAND_SIZE);
         std::vector<short> indices;
         indices.reserve((ESM::Land::LAND_SIZE-1)*(ESM::Land::LAND_SIZE-1)*2*3 / increment);
@@ -251,7 +251,7 @@ namespace Terrain
 
             // South
             size_t row = 0;
-            size_t outerStep = std::pow(2, lodDeltas[South] + lodLevel);
+            size_t outerStep = 1 << (lodDeltas[South] + lodLevel);
             for (size_t col = 0; col < ESM::Land::LAND_SIZE-1; col += outerStep)
             {
                 indices.push_back(ESM::Land::LAND_SIZE*col+row);
@@ -275,7 +275,7 @@ namespace Terrain
 
             // North
             row = ESM::Land::LAND_SIZE-1;
-            outerStep = std::pow(2, lodDeltas[North] + lodLevel);
+            outerStep = 1 << (lodDeltas[North] + lodLevel);
             for (size_t col = 0; col < ESM::Land::LAND_SIZE-1; col += outerStep)
             {
                 indices.push_back(ESM::Land::LAND_SIZE*(col+outerStep)+row);
@@ -299,7 +299,7 @@ namespace Terrain
 
             // West
             size_t col = 0;
-            outerStep = std::pow(2, lodDeltas[West] + lodLevel);
+            outerStep = 1 << (lodDeltas[West] + lodLevel);
             for (size_t row = 0; row < ESM::Land::LAND_SIZE-1; row += outerStep)
             {
                 indices.push_back(ESM::Land::LAND_SIZE*col+row+outerStep);
@@ -323,7 +323,7 @@ namespace Terrain
 
             // East
             col = ESM::Land::LAND_SIZE-1;
-            outerStep = std::pow(2, lodDeltas[East] + lodLevel);
+            outerStep = 1 << (lodDeltas[East] + lodLevel);
             for (size_t row = 0; row < ESM::Land::LAND_SIZE-1; row += outerStep)
             {
                 indices.push_back(ESM::Land::LAND_SIZE*col+row);

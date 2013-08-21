@@ -131,7 +131,7 @@ namespace Terrain
                             Ogre::HardwareVertexBufferSharedPtr colourBuffer)
     {
         // LOD level n means every 2^n-th vertex is kept
-        size_t increment = std::pow(2, lodLevel);
+        size_t increment = 1 << lodLevel;
 
         Ogre::Vector2 origin = center - Ogre::Vector2(size/2.f, size/2.f);
         assert(origin.x == (int) origin.x);

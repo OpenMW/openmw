@@ -20,7 +20,7 @@ namespace Terrain
 
         // Set the total number of vertices
         size_t numVertsOneSide = mNode->getSize() * (ESM::Land::LAND_SIZE-1);
-        numVertsOneSide /= std::pow(2, lodLevel);
+        numVertsOneSide /= 1 << lodLevel;
         numVertsOneSide += 1;
         assert((int)numVertsOneSide == ESM::Land::LAND_SIZE);
         mVertexData->vertexCount = numVertsOneSide * numVertsOneSide;
@@ -92,7 +92,7 @@ namespace Terrain
             // Use 4 bits for each LOD delta
             if (lod > 0)
             {
-                assert (lod - ourLod < std::pow(2,4));
+                assert (lod - ourLod < (1 << 4));
                 flags |= int(lod - ourLod) << (4*i);
             }
         }
