@@ -318,11 +318,6 @@ namespace MWWorld
     }
 
 
-    void PhysicsSystem::setCurrentWater(bool hasWater, int waterHeight)
-    {
-        // TODO: store and use
-    }
-
     btVector3 PhysicsSystem::getRayPoint(float extent)
     {
         //get a ray pointing to the center of the viewport

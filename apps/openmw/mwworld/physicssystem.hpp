@@ -78,8 +78,6 @@ namespace MWWorld
 
             OEngine::Physic::PhysicEngine* getEngine();
 
-            void setCurrentWater(bool hasWater, int waterHeight);
-
             bool getObjectAABB(const MWWorld::Ptr &ptr, Ogre::Vector3 &min, Ogre::Vector3 &max);
 
             /// Queues velocity movement for a Ptr. If a Ptr is already queued, its velocity will

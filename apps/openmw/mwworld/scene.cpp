@@ -162,9 +162,6 @@ namespace MWWorld
 
     void Scene::playerCellChange(MWWorld::CellStore *cell, const ESM::Position& pos, bool adjustPlayerPos)
     {
-        bool hasWater = cell->mCell->mData.mFlags & ESM::Cell::HasWater;
-        mPhysics->setCurrentWater(hasWater, cell->mCell->mWater);
-
         MWBase::World *world = MWBase::Environment::get().getWorld();
         world->getPlayer().setCell(cell);
 
