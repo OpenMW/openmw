@@ -423,7 +423,7 @@ void QuadTreeNode::prepareForCompositeMap(Ogre::TRect<float> area)
         std::vector<std::string> layer;
         layer.push_back("_land_default.dds");
         matGen.setLayerList(layer);
-        makeQuad(sceneMgr, area.left, area.top, area.right, area.bottom, matGen.generate(Ogre::MaterialPtr()));
+        makeQuad(sceneMgr, area.left, area.top, area.right, area.bottom, matGen.generateForCompositeMapRTT(Ogre::MaterialPtr()));
         return;
     }
     if (mSize > 1)
