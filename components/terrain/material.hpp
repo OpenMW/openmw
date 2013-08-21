@@ -43,10 +43,6 @@ namespace Terrain
     private:
         Ogre::MaterialPtr create (Ogre::MaterialPtr mat, bool renderCompositeMap, bool displayCompositeMap);
 
-        int getRequiredPasses ();
-        int getMaxLayersPerPass ();
-
-        int mNumLayers;
         std::vector<std::string> mLayerList;
         std::vector<Ogre::TexturePtr> mBlendmapList;
         std::string mCompositeMap;

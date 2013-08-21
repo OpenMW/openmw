@@ -39,7 +39,6 @@
 #if LIGHTING
 @shAllocatePassthrough(3, lightResult)
 @shAllocatePassthrough(3, directionalResult)
-#endif
 
 #if SHADOWS
 @shAllocatePassthrough(4, lightSpacePos0)
@@ -48,6 +47,7 @@
 @shForeach(3)
     @shAllocatePassthrough(4, lightSpacePos@shIterator)
 @shEndForeach
+#endif
 #endif
 
 #ifdef SH_VERTEX_SHADER
@@ -200,6 +200,7 @@
     
         @shPassthroughFragmentInputs
 
+#if LIGHTING
 #if SHADOWS
         shSampler2D(shadowMap0)
         shUniform(float2, invShadowmapSize0)   @shAutoConstant(invShadowmapSize0, inverse_texture_size, @shPropertyString(shadowtexture_offset))
@@ -214,6 +215,7 @@
 
 #if SHADOWS || SHADOWS_PSSM
         shUniform(float4, shadowFar_fadeStart) @shSharedParameter(shadowFar_fadeStart)
+#endif
 #endif
 
 #if (UNDERWATER) || (FOG)
