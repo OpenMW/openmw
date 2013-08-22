@@ -31,7 +31,8 @@ bool CSMFilter::TextNode::test (const CSMWorld::IdTable& table, int row,
     if (data.type()!=QVariant::String)
         return false;
 
-    QRegExp regExp(QString::fromUtf8 (mText.c_str())); /// \todo make pattern syntax configurable
+    /// \todo make pattern syntax configurable
+    QRegExp regExp (QString::fromUtf8 (mText.c_str()), Qt::CaseInsensitive);
 
     return regExp.exactMatch (data.toString());
 }
