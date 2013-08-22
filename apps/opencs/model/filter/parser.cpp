@@ -113,6 +113,9 @@ CSMFilter::Token CSMFilter::Parser::getStringToken()
             error();
             return Token (Token::Type_None);
         }
+
+        if (string[0]=='"')
+            string = string.substr (1, string.size()-2);
     }
 
     return checkKeywords (string);
