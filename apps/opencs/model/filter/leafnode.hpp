@@ -1,5 +1,5 @@
-#ifndef CSM_FILTER_UNARIYNODE_H
-#define CSM_FILTER_UNARIYNODE_H
+#ifndef CSM_FILTER_LEAFNODE_H
+#define CSM_FILTER_LEAFNODE_H
 
 #include <memory>
 
