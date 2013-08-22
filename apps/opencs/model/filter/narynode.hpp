@@ -2,6 +2,7 @@
 #define CSM_FILTER_NARYNODE_H
 
 #include <vector>
+#include <string>
 
 #include <boost/shared_ptr.hpp>
 
@@ -12,10 +13,11 @@ namespace CSMFilter
     class NAryNode : public Node
     {
             std::vector<boost::shared_ptr<Node> > mNodes;
+            std::string mName;
 
         public:
 
-            NAryNode (const std::vector<boost::shared_ptr<Node> >& nodes);
+            NAryNode (const std::vector<boost::shared_ptr<Node> >& nodes, const std::string& name);
 
             int getSize() const;
 
@@ -24,6 +26,11 @@ namespace CSMFilter
             virtual std::vector<int> getReferencedColumns() const;
             ///< Return a list of the IDs of the columns referenced by this node. The column mapping
             /// passed into test as columns must contain all columns listed here.
+
+            virtual std::string toString (bool numericColumns) const;
+            ///< Return a string that represents this node.
+            ///
+            /// \param numericColumns Use numeric IDs instead of string to represent columns.
 
             virtual bool isSimple() const;
             ///< \return Can this filter be displayed in simple mode.

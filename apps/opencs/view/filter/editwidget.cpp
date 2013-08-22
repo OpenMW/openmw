@@ -13,7 +13,7 @@ void CSVFilter::EditWidget::textChanged (const QString& text)
     if (mParser.parse (text.toUtf8().constData()))
     {
         setPalette (mPalette);
-        emit filterChanged (mParser.getFilter(), "");
+        emit filterChanged (mParser.getFilter());
     }
     else
     {

@@ -52,8 +52,8 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
         mTable, SLOT (requestFocus (const std::string&)));
 
     connect (filterBox,
-        SIGNAL (recordFilterChanged (boost::shared_ptr<CSMFilter::Node>, const std::string&)),
-        mTable, SLOT (recordFilterChanged (boost::shared_ptr<CSMFilter::Node>, const std::string&)));
+        SIGNAL (recordFilterChanged (boost::shared_ptr<CSMFilter::Node>)),
+        mTable, SLOT (recordFilterChanged (boost::shared_ptr<CSMFilter::Node>)));
 }
 
 void CSVWorld::TableSubView::setEditLock (bool locked)

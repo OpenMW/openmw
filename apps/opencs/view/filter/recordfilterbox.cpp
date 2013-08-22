@@ -22,6 +22,6 @@ CSVFilter::RecordFilterBox::RecordFilterBox (QWidget *parent)
     setLayout (layout);
 
     connect (
-        editWidget, SIGNAL (filterChanged (boost::shared_ptr<CSMFilter::Node>, const std::string&)),
-        this, SIGNAL (filterChanged (boost::shared_ptr<CSMFilter::Node>, const std::string&)));
+        editWidget, SIGNAL (filterChanged (boost::shared_ptr<CSMFilter::Node>)),
+        this, SIGNAL (filterChanged (boost::shared_ptr<CSMFilter::Node>)));
 }

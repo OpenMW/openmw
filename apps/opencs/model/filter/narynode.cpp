@@ -1,8 +1,11 @@
 
 #include "narynode.hpp"
 
-CSMFilter::NAryNode::NAryNode (const std::vector<boost::shared_ptr<Node> >& nodes)
-: mNodes (nodes)
+#include <sstream>
+
+CSMFilter::NAryNode::NAryNode (const std::vector<boost::shared_ptr<Node> >& nodes,
+    const std::string& name)
+: mNodes (nodes), mName (name)
 {}
 
 int CSMFilter::NAryNode::getSize() const
@@ -28,6 +31,30 @@ std::vector<int> CSMFilter::NAryNode::getReferencedColumns() const
     }
 
     return columns;
+}
+
+std::string CSMFilter::NAryNode::toString (bool numericColumns) const
+{
+    std::ostringstream stream;
+
+    stream << mName << " (";
+
+    bool first = true;
+    int size = getSize();
+
+    for (int i=0; i<size; ++i)
+    {
+        if (first)
+            first = false;
+        else
+            stream << ", ";
+
+        stream << (*this)[i].toString (numericColumns);
+    }
+
+    stream << ")";
+
+    return stream.str();
 }
 
 bool CSMFilter::NAryNode::isSimple() const

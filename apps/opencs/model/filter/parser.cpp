@@ -8,6 +8,8 @@
 #include <components/misc/stringops.hpp>
 
 #include "booleannode.hpp"
+#include "ornode.hpp"
+#include "andnode.hpp"
 
 namespace CSMFilter
 {
@@ -209,10 +211,87 @@ CSMFilter::Token CSMFilter::Parser::getNextToken()
 
 boost::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseImp()
 {
+    if (Token token = getNextToken())
+    {
+        switch (token.mType)
+        {
+            case Token::Type_Keyword_True:
 
+                return boost::shared_ptr<CSMFilter::Node> (new BooleanNode (true));
 
+            case Token::Type_Keyword_False:
+
+                return boost::shared_ptr<CSMFilter::Node> (new BooleanNode (false));
+
+            case Token::Type_Keyword_And:
+            case Token::Type_Keyword_Or:
+
+                return parseNAry (token);
+
+            case Token::Type_EOS:
+
+                return boost::shared_ptr<Node>();
+
+            default:
+
+                error();
+        }
+    }
 
     return boost::shared_ptr<Node>();
+}
+
+boost::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseNAry (const Token& keyword)
+{
+    std::vector<boost::shared_ptr<Node> > nodes;
+
+    Token token = getNextToken();
+
+    if (!token || token.mType!=Token::Type_Open)
+    {
+        error();
+        return boost::shared_ptr<Node>();
+    }
+
+    for (;;)
+    {
+        boost::shared_ptr<Node> node = parseImp();
+
+        if (mError)
+            return boost::shared_ptr<Node>();
+
+        if (!node.get())
+        {
+            error();
+            return boost::shared_ptr<Node>();
+        }
+
+        nodes.push_back (node);
+
+        Token token = getNextToken();
+
+        if (!token || (token.mType!=Token::Type_Close && token.mType!=Token::Type_Comma))
+        {
+            error();
+            return boost::shared_ptr<Node>();
+        }
+
+        if (token.mType==Token::Type_Close)
+            break;
+    }
+
+    if (nodes.empty())
+    {
+        error();
+        return boost::shared_ptr<Node>();
+    }
+
+    switch (keyword.mType)
+    {
+        case Token::Type_Keyword_And: return boost::shared_ptr<CSMFilter::Node> (new AndNode (nodes));
+        case Token::Type_Keyword_Or: return boost::shared_ptr<CSMFilter::Node> (new OrNode (nodes));
+        default: error(); return boost::shared_ptr<Node>();
+    }
 }
 
 void CSMFilter::Parser::error()
@@ -233,6 +312,9 @@ bool CSMFilter::Parser::parse (const std::string& filter)
     boost::shared_ptr<Node> node = parseImp();
 
     if (mError)
+        return false;
+
+    if (getNextToken()!=Token (Token::Type_EOS))
         return false;
 
     if (node)

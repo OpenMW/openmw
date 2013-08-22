@@ -28,6 +28,8 @@ namespace CSMFilter
             boost::shared_ptr<Node> parseImp();
             ///< Will return a null-pointer, if there is nothing more to parse.
 
+            boost::shared_ptr<Node> parseNAry (const Token& keyword);
+
             void error();
 
         public:
