@@ -87,8 +87,7 @@ namespace CSVWorld
 
             void requestFocus (const std::string& id);
 
-            void recordFilterChanged (boost::shared_ptr<CSMFilter::Node> filter,
-                const std::string& userValue);
+            void recordFilterChanged (boost::shared_ptr<CSMFilter::Node> filter);
     };
 }
 

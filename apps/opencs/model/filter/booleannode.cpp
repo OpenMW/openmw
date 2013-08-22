@@ -4,9 +4,7 @@
 CSMFilter::BooleanNode::BooleanNode (bool true_) : mTrue (true_) {}
 
 bool CSMFilter::BooleanNode::test (const CSMWorld::IdTable& table, int row,
-    const std::map<std::string, const Node *>& otherFilters,
-    const std::map<int, int>& columns,
-    const std::string& userValue) const
+    const std::map<int, int>& columns) const
 {
     return mTrue;
 }

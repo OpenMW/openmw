@@ -15,21 +15,6 @@ const CSMFilter::Node& CSMFilter::NAryNode::operator[] (int index) const
     return *mNodes.at (index);
 }
 
-std::vector<std::string> CSMFilter::NAryNode::getReferencedFilters() const
-{
-    std::vector<std::string> filters;
-
-    for (std::vector<boost::shared_ptr<Node> >::const_iterator iter (mNodes.begin());
-         iter!=mNodes.end(); ++iter)
-    {
-        std::vector<std::string> filters2 = (*iter)->getReferencedFilters();
-
-        filters.insert (filters.end(), filters2.begin(), filters2.end());
-    }
-
-    return filters;
-}
-
 std::vector<int> CSMFilter::NAryNode::getReferencedColumns() const
 {
     std::vector<int> columns;
@@ -50,12 +35,3 @@ bool CSMFilter::NAryNode::isSimple() const
     return false;
 }
 
-bool CSMFilter::NAryNode::hasUserValue() const
-{
-    for (std::vector<boost::shared_ptr<Node> >::const_iterator iter (mNodes.begin());
-         iter!=mNodes.end(); ++iter)
-         if ((*iter)->hasUserValue())
-             return true;
-
-    return false;
-}

@@ -294,8 +294,7 @@ void CSVWorld::Table::requestFocus (const std::string& id)
         scrollTo (index, QAbstractItemView::PositionAtTop);
 }
 
-void CSVWorld::Table::recordFilterChanged (boost::shared_ptr<CSMFilter::Node> filter,
-    const std::string& userValue)
+void CSVWorld::Table::recordFilterChanged (boost::shared_ptr<CSMFilter::Node> filter)
 {
-    mProxyModel->setFilter (filter, userValue);
+    mProxyModel->setFilter (filter);
 }

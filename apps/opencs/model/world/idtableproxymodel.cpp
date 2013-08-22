@@ -27,10 +27,8 @@ bool CSMWorld::IdTableProxyModel::filterAcceptsRow (int sourceRow, const QModelI
     if (!mFilter)
         return true;
 
-    std::map<std::string, const CSMFilter::Node *> otherFilters; /// \todo get other filters;
-
     return mFilter->test (
-        dynamic_cast<IdTable&> (*sourceModel()), sourceRow, otherFilters, mColumnMap, mUserValue);
+        dynamic_cast<IdTable&> (*sourceModel()), sourceRow, mColumnMap);
 }
 
 CSMWorld::IdTableProxyModel::IdTableProxyModel (QObject *parent)
@@ -42,11 +40,9 @@ QModelIndex CSMWorld::IdTableProxyModel::getModelIndex (const std::string& id, i
     return mapFromSource (dynamic_cast<IdTable&> (*sourceModel()).getModelIndex (id, column));
 }
 
-void CSMWorld::IdTableProxyModel::setFilter (const boost::shared_ptr<CSMFilter::Node>& filter,
-    const std::string& userValue)
+void CSMWorld::IdTableProxyModel::setFilter (const boost::shared_ptr<CSMFilter::Node>& filter)
 {
     mFilter = filter;
-    mUserValue = userValue;
     updateColumnMap();
     invalidateFilter();
 }

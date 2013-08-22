@@ -33,15 +33,9 @@ namespace CSMFilter
             virtual ~Node();
 
             virtual bool test (const CSMWorld::IdTable& table, int row,
-                const std::map<std::string, const Node *>& otherFilters,
-                const std::map<int, int>& columns,
-                const std::string& userValue) const = 0;
+                const std::map<int, int>& columns) const = 0;
             ///< \return Can the specified table row pass through to filter?
             /// \param columns column ID to column index mapping
-
-            virtual std::vector<std::string> getReferencedFilters() const = 0;
-            ///< Return a list of filters that are used by this node (and must be passed as
-            /// otherFilters when calling test).
 
             virtual std::vector<int> getReferencedColumns() const = 0;
             ///< Return a list of the IDs of the columns referenced by this node. The column mapping
@@ -49,8 +43,6 @@ namespace CSMFilter
 
             virtual bool isSimple() const = 0;
             ///< \return Can this filter be displayed in simple mode.
-
-            virtual bool hasUserValue() const = 0;
 
             virtual std::string toString (bool numericColumns) const = 0;
             ///< Return a string that represents this node.
