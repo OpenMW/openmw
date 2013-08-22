@@ -339,7 +339,7 @@ namespace MWClass
         const MWWorld::Class &othercls = MWWorld::Class::get(victim);
         if(!othercls.isActor()) // Can't hit non-actors
             return;
-        MWMechanics::CreatureStats &otherstats = getCreatureStats(victim);
+        MWMechanics::CreatureStats &otherstats = victim.getClass().getCreatureStats(victim);
         if(otherstats.isDead()) // Can't hit dead actors
             return;
 
