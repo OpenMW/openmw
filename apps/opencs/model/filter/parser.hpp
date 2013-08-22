@@ -30,6 +30,8 @@ namespace CSMFilter
 
             boost::shared_ptr<Node> parseNAry (const Token& keyword);
 
+            boost::shared_ptr<Node> parseText();
+
             void error();
 
         public:

@@ -7,10 +7,13 @@
 
 #include <components/misc/stringops.hpp>
 
+#include "../world/columns.hpp"
+
 #include "booleannode.hpp"
 #include "ornode.hpp"
 #include "andnode.hpp"
 #include "notnode.hpp"
+#include "textnode.hpp"
 
 namespace CSMFilter
 {
@@ -31,7 +34,8 @@ namespace CSMFilter
             Type_Keyword_False,
             Type_Keyword_And,
             Type_Keyword_Or,
-            Type_Keyword_Not
+            Type_Keyword_Not,
+            Type_Keyword_Text
         };
 
         Type mType;
@@ -162,6 +166,7 @@ CSMFilter::Token CSMFilter::Parser::checkKeywords (const Token& token)
     {
         "true", "false",
         "and", "or", "not",
+        "text",
         0
     };
 
@@ -239,6 +244,10 @@ boost::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseImp (bool allowEmpty)
                 return boost::shared_ptr<CSMFilter::Node> (new NotNode (node));
             }
 
+            case Token::Type_Keyword_Text:
+
+                return parseText();
+
             case Token::Type_EOS:
 
                 if (!allowEmpty)
@@ -261,7 +270,7 @@ boost::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseNAry (const Token& ke
 
     Token token = getNextToken();
 
-    if (!token || token.mType!=Token::Type_Open)
+    if (token.mType!=Token::Type_Open)
     {
         error();
         return boost::shared_ptr<Node>();
@@ -300,6 +309,70 @@ boost::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseNAry (const Token& ke
         case Token::Type_Keyword_Or: return boost::shared_ptr<CSMFilter::Node> (new OrNode (nodes));
         default: error(); return boost::shared_ptr<Node>();
     }
+}
+
+boost::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseText()
+{
+    Token token = getNextToken();
+
+    if (token.mType!=Token::Type_Open)
+    {
+        error();
+        return boost::shared_ptr<Node>();
+    }
+
+    token = getNextToken();
+
+    if (!token)
+        return boost::shared_ptr<Node>();
+
+    // parse column ID
+    int columnId = -1;
+
+    if (token.mType==Token::Type_Number)
+    {
+        if (static_cast<int> (token.mNumber)==token.mNumber)
+            columnId = static_cast<int> (token.mNumber);
+    }
+    else if (token.mType==Token::Type_String)
+    {
+        columnId = CSMWorld::Columns::getId (token.mString);
+    }
+
+    if (columnId<0)
+    {
+        error();
+        return boost::shared_ptr<Node>();
+    }
+
+    token = getNextToken();
+
+    if (token.mType!=Token::Type_Comma)
+    {
+        error();
+        return boost::shared_ptr<Node>();
+    }
+
+    // parse text pattern
+    token = getNextToken();
+
+    if (token.mType!=Token::Type_String)
+    {
+        error();
+        return boost::shared_ptr<Node>();
+    }
+
+    std::string text = token.mString;
+
+    token = getNextToken();
+
+    if (token.mType!=Token::Type_Close)
+    {
+        error();
+        return boost::shared_ptr<Node>();
+    }
+
+    return boost::shared_ptr<Node> (new TextNode (columnId, text));
 }
 
 void CSMFilter::Parser::error()
