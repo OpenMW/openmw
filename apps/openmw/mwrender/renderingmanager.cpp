@@ -547,7 +547,8 @@ void RenderingManager::setAmbientMode()
 
 void RenderingManager::configureAmbient(MWWorld::Ptr::CellStore &mCell)
 {
-    mAmbientColor.setAsABGR (mCell.mCell->mAmbi.mAmbient);
+    if (mCell.mCell->mData.mFlags & ESM::Cell::Interior)
+        mAmbientColor.setAsABGR (mCell.mCell->mAmbi.mAmbient);
     setAmbientMode();
 
     // Create a "sun" that shines light downwards. It doesn't look
@@ -555,12 +556,15 @@ void RenderingManager::configureAmbient(MWWorld::Ptr::CellStore &mCell)
     if(!mSun)
     {
         mSun = mRendering.getScene()->createLight();
+        mSun->setType(Ogre::Light::LT_DIRECTIONAL);
     }
-    Ogre::ColourValue colour;
-    colour.setAsABGR (mCell.mCell->mAmbi.mSunlight);
-    mSun->setDiffuseColour (colour);
-    mSun->setType(Ogre::Light::LT_DIRECTIONAL);
-    mSun->setDirection(0,-1,0);
+    if (mCell.mCell->mData.mFlags & ESM::Cell::Interior)
+    {
+        Ogre::ColourValue colour;
+        colour.setAsABGR (mCell.mCell->mAmbi.mSunlight);
+        mSun->setDiffuseColour (colour);
+        mSun->setDirection(0,-1,0);
+    }
 }
 // Switch through lighting modes.
 
