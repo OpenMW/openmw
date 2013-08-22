@@ -10,6 +10,7 @@
 #include "booleannode.hpp"
 #include "ornode.hpp"
 #include "andnode.hpp"
+#include "notnode.hpp"
 
 namespace CSMFilter
 {
@@ -209,7 +210,7 @@ CSMFilter::Token CSMFilter::Parser::getNextToken()
     return Token (Token::Type_None);
 }
 
-boost::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseImp()
+boost::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseImp (bool allowEmpty)
 {
     if (Token token = getNextToken())
     {
@@ -228,7 +229,20 @@ boost::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseImp()
 
                 return parseNAry (token);
 
+            case Token::Type_Keyword_Not:
+            {
+                boost::shared_ptr<CSMFilter::Node> node = parseImp();
+
+                if (mError)
+                    return boost::shared_ptr<Node>();
+
+                return boost::shared_ptr<CSMFilter::Node> (new NotNode (node));
+            }
+
             case Token::Type_EOS:
+
+                if (!allowEmpty)
+                    error();
 
                 return boost::shared_ptr<Node>();
 
@@ -259,12 +273,6 @@ boost::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseNAry (const Token& ke
 
         if (mError)
             return boost::shared_ptr<Node>();
-
-        if (!node.get())
-        {
-            error();
-            return boost::shared_ptr<Node>();
-        }
 
         nodes.push_back (node);
 
@@ -309,7 +317,7 @@ bool CSMFilter::Parser::parse (const std::string& filter)
     mInput = filter;
     mIndex = 0;
 
-    boost::shared_ptr<Node> node = parseImp();
+    boost::shared_ptr<Node> node = parseImp (true);
 
     if (mError)
         return false;

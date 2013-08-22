@@ -1,7 +1,9 @@
 
 #include "unarynode.hpp"
 
-CSMFilter::UnaryNode::UnaryNode (boost::shared_ptr<Node> child) : mChild (child) {}
+CSMFilter::UnaryNode::UnaryNode (boost::shared_ptr<Node> child, const std::string& name)
+: mChild (child), mName (name)
+{}
 
 const CSMFilter::Node& CSMFilter::UnaryNode::getChild() const
 {
@@ -23,3 +25,7 @@ bool CSMFilter::UnaryNode::isSimple() const
     return false;
 }
 
+std::string CSMFilter::UnaryNode::toString (bool numericColumns) const
+{
+    return mName + " " + mChild->toString (numericColumns);
+}

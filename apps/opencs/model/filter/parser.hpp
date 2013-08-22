@@ -25,7 +25,7 @@ namespace CSMFilter
             Token checkKeywords (const Token& token);
             ///< Turn string token into keyword token, if possible.
 
-            boost::shared_ptr<Node> parseImp();
+            boost::shared_ptr<Node> parseImp (bool allowEmpty = false);
             ///< Will return a null-pointer, if there is nothing more to parse.
 
             boost::shared_ptr<Node> parseNAry (const Token& keyword);
