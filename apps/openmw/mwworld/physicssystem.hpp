@@ -57,9 +57,10 @@ namespace MWWorld
             Ogre::Vector3 traceDown(const MWWorld::Ptr &ptr);
 
             std::pair<float, std::string> getFacedHandle (MWWorld::World& world, float queryDistance);
-            std::pair<std::string,float> getFacedHandle(const Ogre::Vector3 &origin,
-                                                        const Ogre::Quaternion &orientation,
-                                                        float queryDistance);
+            std::pair<std::string,Ogre::Vector3> getHitContact(const std::string &name,
+                                                               const Ogre::Vector3 &origin,
+                                                               const Ogre::Quaternion &orientation,
+                                                               float queryDistance);
             std::vector < std::pair <float, std::string> > getFacedHandles (float queryDistance);
             std::vector < std::pair <float, std::string> > getFacedHandles (float mouseX, float mouseY, float queryDistance);
 

@@ -311,7 +311,10 @@ namespace MWWorld
         return results;
     }
 
-    std::pair<std::string,float> PhysicsSystem::getFacedHandle(const Ogre::Vector3 &origin_, const Ogre::Quaternion &orient_, float queryDistance)
+    std::pair<std::string,Ogre::Vector3> PhysicsSystem::getHitContact(const std::string &name,
+                                                                      const Ogre::Vector3 &origin_,
+                                                                      const Ogre::Quaternion &orient_,
+                                                                      float queryDistance)
     {
         btVector3 origin(origin_.x, origin_.y, origin_.z);
 

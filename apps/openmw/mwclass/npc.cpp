@@ -332,7 +332,8 @@ namespace MWClass
         float dist = 100.0f * (!weapon.isEmpty() ?
                                weapon.get<ESM::Weapon>()->mBase->mData.mReach :
                                gmst.find("fHandToHandReach")->getFloat());
-        MWWorld::Ptr victim = world->getFacedObject(ptr, dist);
+        // TODO: Use second to work out the hit angle and where to spawn the blood effect
+        MWWorld::Ptr victim = world->getHitContact(ptr, dist).first;
         if(victim.isEmpty()) // Didn't hit anything
             return;
 
