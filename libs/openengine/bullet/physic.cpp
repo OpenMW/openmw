@@ -543,61 +543,63 @@ namespace Physic
 #endif
     };
 
-    struct AabbResultCallback : public btBroadphaseAabbCallback {
-        std::vector<RigidBody*> hits;
-        //AabbResultCallback(){}
-        virtual bool process(const btBroadphaseProxy* proxy) {
-            RigidBody* collisionObject = static_cast<RigidBody*>(proxy->m_clientObject);
-            if(proxy->m_collisionFilterGroup == CollisionType_Actor && (collisionObject->mName != "player"))
-                this->hits.push_back(collisionObject);
-            return true;
+    class DeepestNotMeContactTestResultCallback : public btCollisionWorld::ContactResultCallback
+    {
+        const std::string &mFilter;
+        // Store the real origin, since the shape's origin is its center
+        btVector3 mOrigin;
+
+    public:
+        const RigidBody *mObject;
+        btVector3 mContactPoint;
+        btScalar mLeastDistSqr;
+
+        DeepestNotMeContactTestResultCallback(const std::string &filter, const btVector3 &origin)
+          : mFilter(filter), mOrigin(origin), mObject(0), mContactPoint(0,0,0),
+            mLeastDistSqr(std::numeric_limits<float>::max())
+        { }
+
+#if defined(BT_COLLISION_OBJECT_WRAPPER_H)
+        virtual btScalar addSingleResult(btManifoldPoint& cp,
+                                         const btCollisionObjectWrapper* col0Wrap,int partId0,int index0,
+                                         const btCollisionObjectWrapper* col1Wrap,int partId1,int index1)
+        {
+            const RigidBody* body = dynamic_cast<const RigidBody*>(col1Wrap->m_collisionObject);
+            if(body && body->mName != mFilter)
+            {
+                btScalar distsqr = mOrigin.distance2(cp.getPositionWorldOnA());
+                if(!mObject || distsqr < mLeastDistSqr)
+                {
+                    mObject = body;
+                    mLeastDistSqr = distsqr;
+                    mContactPoint = cp.getPositionWorldOnA();
+                }
+            }
+
+            return 0.f;
         }
+#else
+        virtual btScalar addSingleResult(btManifoldPoint& cp,
+                                         const btCollisionObject* col0, int partId0, int index0,
+                                         const btCollisionObject* col1, int partId1, int index1)
+        {
+            const RigidBody* body = dynamic_cast<const RigidBody*>(col1);
+            if(body && body->mName != mFilter)
+            {
+                btScalar distsqr = mOrigin.distance2(cp.getPositionWorldOnA());
+                if(!mObject || distsqr < mLeastDistSqr)
+                {
+                    mObject = body;
+                    mLeastDistSqr = distsqr;
+                    mContactPoint = cp.getPositionWorldOnA();
+                }
+            }
+
+            return 0.f;
+        }
+#endif
     };
 
-
-    std::pair<std::string,btVector3> PhysicEngine::sphereTest(float radius,btVector3& pos)
-    {
-        AabbResultCallback callback;
-        /*btDefaultMotionState* newMotionState =
-            new btDefaultMotionState(btTransform(btQuaternion(0,0,0,1),pos));
-        btCollisionShape * shape = new btSphereShape(radius);
-        btRigidBody::btRigidBodyConstructionInfo CI = btRigidBody::btRigidBodyConstructionInfo
-                (0,newMotionState, shape);
-        RigidBody* body = new RigidBody(CI,"hitDetectionShpere__");
-        btTransform tr = body->getWorldTransform();
-        tr.setOrigin(pos);
-        body->setWorldTransform(tr);
-        dynamicsWorld->addRigidBody(body,CollisionType_Actor,CollisionType_World|CollisionType_World);
-        body->setWorldTransform(tr);*/
-
-        btVector3 aabbMin = pos - radius*btVector3(1.0f, 1.0f, 1.0f);
-        btVector3 aabbMax = pos + radius*btVector3(1.0f, 1.0f, 1.0f);
-
-        broadphase->aabbTest(aabbMin,aabbMax,callback);
-        for(int i=0;i<static_cast<int> (callback.hits.size()); ++i)
-        {
-            float d = (callback.hits[i]->getWorldTransform().getOrigin()-pos).length();
-            if(d<radius)
-            {
-                std::pair<std::string,float> rayResult = this->rayTest(pos,callback.hits[i]->getWorldTransform().getOrigin());
-                if(rayResult.second>d || rayResult.first == callback.hits[i]->mName)
-                    return std::make_pair(callback.hits[i]->mName,callback.hits[i]->getWorldTransform().getOrigin());
-            }
-        }
-        //ContactTestResultCallback callback;
-        //dynamicsWorld->contactTest(body, callback);
-        //dynamicsWorld->removeRigidBody(body);
-        //delete body;
-        //delete shape;
-        //if(callback.mResultName.empty()) return std::make_pair(std::string(""),btVector3(0,0,0));
-        /*for(int i=0;i<callback.mResultName.size();i++)
-        {
-            //TODO: raycasting
-            if(callback.mResultName[i] != "hitDetectionShpere__")
-                return std::pair<std::string,btVector3>(callback.mResultName[i],callback.mResultContact[i]);
-        */
-        return std::make_pair(std::string(""),btVector3(0,0,0));
-    }
 
     std::vector<std::string> PhysicEngine::getCollisions(const std::string& name)
     {
@@ -606,6 +608,17 @@ namespace Physic
         dynamicsWorld->contactTest(body, callback);
         return callback.mResult;
     }
+
+
+    std::pair<const RigidBody*,btVector3> PhysicEngine::getFilteredContact(const std::string &filter,
+                                                                           const btVector3 &origin,
+                                                                           btCollisionObject *object)
+    {
+        DeepestNotMeContactTestResultCallback callback(filter, origin);
+        dynamicsWorld->contactTest(object, callback);
+        return std::make_pair(callback.mObject, callback.mContactPoint);
+    }
+
 
     void PhysicEngine::stepSimulation(double deltaT)
     {

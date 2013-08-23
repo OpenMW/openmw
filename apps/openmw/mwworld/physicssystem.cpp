@@ -312,28 +312,31 @@ namespace MWWorld
     }
 
     std::pair<std::string,Ogre::Vector3> PhysicsSystem::getHitContact(const std::string &name,
-                                                                      const Ogre::Vector3 &origin_,
-                                                                      const Ogre::Quaternion &orient_,
+                                                                      const Ogre::Vector3 &origin,
+                                                                      const Ogre::Quaternion &orient,
                                                                       float queryDistance)
     {
-        btVector3 origin(origin_.x, origin_.y, origin_.z);
+        const MWWorld::Store<ESM::GameSetting> &store = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-        std::pair<std::string,btVector3> result = mEngine->sphereTest(queryDistance,origin);
-        if(result.first == "") return std::make_pair("",0);
-        btVector3 a = result.second - origin;
-        Ogre::Vector3 a_ = Ogre::Vector3(a.x(),a.y(),a.z());
-        a_ = orient_.Inverse()*a_;
-        Ogre::Vector2 a_xy = Ogre::Vector2(a_.x,a_.y);
-        Ogre::Vector2 a_yz = Ogre::Vector2(a_xy.length(),a_.z);
-        float axy = a_xy.angleBetween(Ogre::Vector2::UNIT_Y).valueDegrees();
-        float az = a_yz.angleBetween(Ogre::Vector2::UNIT_X).valueDegrees();
+        btConeShape shape(Ogre::Degree(store.find("fCombatAngleXY")->getFloat()/2.0f).valueRadians(),
+                          queryDistance);
+        shape.setLocalScaling(btVector3(1, 1, Ogre::Degree(store.find("fCombatAngleZ")->getFloat()/2.0f).valueRadians() /
+                                              shape.getRadius()));
 
-        float fCombatAngleXY = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fCombatAngleXY")->getFloat();
-        float fCombatAngleZ = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fCombatAngleZ")->getFloat();
-        if(abs(axy) < fCombatAngleXY && abs(az) < fCombatAngleZ)
-            return std::make_pair (result.first,result.second.length());
-        else
-            return std::make_pair("",0);
+        // The shape origin is its center, so we have to move it forward by half the length. The
+        // real origin will be provided to getFilteredContact to find the closest.
+        Ogre::Vector3 center = origin + (orient * Ogre::Vector3(0.0f, queryDistance*0.5f, 0.0f));
+
+        btCollisionObject object;
+        object.setCollisionShape(&shape);
+        object.setWorldTransform(btTransform(btQuaternion(orient.x, orient.y, orient.z, orient.w),
+                                             btVector3(center.x, center.y, center.z)));
+
+        std::pair<const OEngine::Physic::RigidBody*,btVector3> result = mEngine->getFilteredContact(
+                name, btVector3(origin.x, origin.y, origin.z), &object);
+        if(!result.first)
+            return std::make_pair(std::string(), Ogre::Vector3(&result.second[0]));
+        return std::make_pair(result.first->mName, Ogre::Vector3(&result.second[0]));
     }
 
 
