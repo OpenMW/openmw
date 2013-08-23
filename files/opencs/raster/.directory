@@ -1,5 +1,8 @@
 [Dolphin]
+GroupedSorting=true
 PreviewsShown=true
-Timestamp=2013,3,31,10,12,5
+SortFoldersFirst=false
+Timestamp=2013,8,23,12,44,33
 Version=3
-ViewMode=1
+ViewMode=2
+VisibleRoles=Compact_text,Compact_size
