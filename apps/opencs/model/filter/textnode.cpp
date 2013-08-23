@@ -19,7 +19,7 @@ bool CSMFilter::TextNode::test (const CSMWorld::IdTable& table, int row,
     const std::map<int, int>::const_iterator iter = columns.find (mColumnId);
 
     if (iter==columns.end())
-        throw std::logic_error ("invalid column in test node test");
+        throw std::logic_error ("invalid column in text node test");
 
     if (iter->second==-1)
         return true;
