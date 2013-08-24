@@ -32,6 +32,8 @@ namespace CSMFilter
 
             boost::shared_ptr<Node> parseText();
 
+            boost::shared_ptr<Node> parseValue();
+
             void error();
 
         public:
