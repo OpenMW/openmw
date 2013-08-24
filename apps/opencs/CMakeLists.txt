@@ -107,8 +107,16 @@ opencs_units_noqt (model/settings
     settingsitem
     )
 
+opencs_units_noqt (model/filter
+    node unarynode narynode leafnode booleannode parser andnode ornode notnode textnode valuenode
+    )
+
 opencs_hdrs_noqt (model/filter
     filter
+    )
+
+opencs_units (view/filter
+    filtercreator filterbox recordfilterbox editwidget
     )
 
 set (OPENCS_US

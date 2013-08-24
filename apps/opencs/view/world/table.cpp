@@ -257,9 +257,9 @@ void CSVWorld::Table::tableSizeUpdate()
     int deleted = 0;
     int modified = 0;
 
-    if (mModel->columnCount()>0)
+    if (mProxyModel->columnCount()>0)
     {
-        int rows = mModel->rowCount();
+        int rows = mProxyModel->rowCount();
 
         for (int i=0; i<rows; ++i)
         {
@@ -292,4 +292,9 @@ void CSVWorld::Table::requestFocus (const std::string& id)
 
     if (index.isValid())
         scrollTo (index, QAbstractItemView::PositionAtTop);
+}
+
+void CSVWorld::Table::recordFilterChanged (boost::shared_ptr<CSMFilter::Node> filter)
+{
+    mProxyModel->setFilter (filter);
 }

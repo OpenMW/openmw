@@ -3,6 +3,8 @@
 
 #include "../doc/subviewfactoryimp.hpp"
 
+#include "../filter/filtercreator.hpp"
+
 #include "tablesubview.hpp"
 #include "dialoguesubview.hpp"
 #include "scriptsubview.hpp"
@@ -33,7 +35,6 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         CSMWorld::UniversalId::Type_Regions,
         CSMWorld::UniversalId::Type_Birthsigns,
         CSMWorld::UniversalId::Type_Spells,
-        CSMWorld::UniversalId::Type_Filters,
 
         CSMWorld::UniversalId::Type_None // end marker
     };
@@ -56,4 +57,9 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
 
     // Other stuff (combined record tables)
     manager.add (CSMWorld::UniversalId::Type_RegionMap, new CSVDoc::SubViewFactory<RegionMapSubView>);
+
+    manager.add (CSMWorld::UniversalId::Type_Filters,
+        new CSVDoc::SubViewFactoryWithCreator<TableSubView,
+        CreatorFactory<CSVFilter::FilterCreator> >);
+
 }
