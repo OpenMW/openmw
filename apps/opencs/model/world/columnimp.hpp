@@ -257,7 +257,7 @@ namespace CSMWorld
         int mIndex;
 
         UseValueColumn (int index)
-        : Column<ESXRecordT> (Columns::ColumnId_UseValue1 + index - 1,  ColumnBase::Display_Float),
+        : Column<ESXRecordT> (Columns::ColumnId_UseValue1 + index,  ColumnBase::Display_Float),
           mIndex (index)
         {}
 
@@ -339,7 +339,7 @@ namespace CSMWorld
         int mIndex;
 
         AttributesColumn (int index)
-        : Column<ESXRecordT> (Columns::ColumnId_Attribute1 + index - 1, ColumnBase::Display_Attribute),
+        : Column<ESXRecordT> (Columns::ColumnId_Attribute1 + index, ColumnBase::Display_Attribute),
           mIndex (index)
         {}
 
@@ -372,7 +372,7 @@ namespace CSMWorld
         SkillsColumn (int index, bool typePrefix = false, bool major = false)
         : Column<ESXRecordT> ((typePrefix ? (
             major ? Columns::ColumnId_MajorSkill1 : Columns::ColumnId_MinorSkill1) :
-            Columns::ColumnId_Skill1) + index - 1, ColumnBase::Display_String),
+            Columns::ColumnId_Skill1) + index, ColumnBase::Display_String),
             mIndex (index), mMajor (major)
         {}
 

@@ -166,10 +166,11 @@ namespace CSMWorld
             { ColumnId_MinorSkill5, "Minor Skill 5" },
 
             { ColumnId_Skill1, "Skill 1" },
-            { ColumnId_Skill1, "Skill 2" },
-            { ColumnId_Skill1, "Skill 3" },
-            { ColumnId_Skill1, "Skill 4" },
-            { ColumnId_Skill1, "Skill 5" },
+            { ColumnId_Skill2, "Skill 2" },
+            { ColumnId_Skill3, "Skill 3" },
+            { ColumnId_Skill4, "Skill 4" },
+            { ColumnId_Skill5, "Skill 5" },
+            { ColumnId_Skill6, "Skill 6" },
 
             { -1, 0 } // end marker
         };
