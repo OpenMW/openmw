@@ -5,6 +5,11 @@
 
 #include "node.hpp"
 
+namespace CSMWorld
+{
+    class Data;
+}
+
 namespace CSMFilter
 {
     struct Token;
@@ -15,6 +20,7 @@ namespace CSMFilter
             std::string mInput;
             int mIndex;
             bool mError;
+            const CSMWorld::Data& mData;
 
             Token getStringToken();
 
@@ -38,7 +44,7 @@ namespace CSMFilter
 
         public:
 
-            Parser();
+            Parser (const CSMWorld::Data& data);
 
             bool parse (const std::string& filter);
             ///< Discards any previous calls to parse

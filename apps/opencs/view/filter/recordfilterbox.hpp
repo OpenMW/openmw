@@ -9,6 +9,11 @@
 
 #include "../../model/filter/node.hpp"
 
+namespace CSMWorld
+{
+    class Data;
+}
+
 namespace CSVFilter
 {
     class RecordFilterBox : public QWidget
@@ -17,7 +22,7 @@ namespace CSVFilter
 
         public:
 
-            RecordFilterBox (QWidget *parent = 0);
+            RecordFilterBox (const CSMWorld::Data& data, QWidget *parent = 0);
 
         signals:
 

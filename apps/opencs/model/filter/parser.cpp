@@ -506,7 +506,8 @@ void CSMFilter::Parser::error()
     mError = true;
 }
 
-CSMFilter::Parser::Parser() : mIndex (0), mError (false) {}
+CSMFilter::Parser::Parser (const CSMWorld::Data& data)
+: mIndex (0), mError (false), mData (data) {}
 
 bool CSMFilter::Parser::parse (const std::string& filter)
 {

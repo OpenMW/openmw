@@ -1,8 +1,8 @@
 
 #include "editwidget.hpp"
 
-CSVFilter::EditWidget::EditWidget (QWidget *parent)
-: QLineEdit (parent)
+CSVFilter::EditWidget::EditWidget (const CSMWorld::Data& data, QWidget *parent)
+: QLineEdit (parent), mParser (data)
 {
     mPalette = palette();
     connect (this, SIGNAL (textChanged (const QString&)), this, SLOT (textChanged (const QString&)));

@@ -9,6 +9,11 @@
 #include "../../model/filter/parser.hpp"
 #include "../../model/filter/node.hpp"
 
+namespace CSMWorld
+{
+    class Data;
+}
+
 namespace CSVFilter
 {
     class EditWidget : public QLineEdit
@@ -20,7 +25,7 @@ namespace CSVFilter
 
         public:
 
-            EditWidget (QWidget *parent = 0);
+            EditWidget (const CSMWorld::Data& data, QWidget *parent = 0);
 
         signals:
 
