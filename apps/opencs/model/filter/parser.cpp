@@ -92,7 +92,7 @@ CSMFilter::Token CSMFilter::Parser::getStringToken()
     {
         char c = mInput[mIndex];
 
-        if (std::isalpha (c) || c=='_' || (!string.empty() && std::isdigit (c)) || c=='"' ||
+        if (std::isalpha (c) || c==':' || c=='_' || (!string.empty() && std::isdigit (c)) || c=='"' ||
             (!string.empty() && string[0]=='"'))
             string += c;
         else
@@ -214,7 +214,7 @@ CSMFilter::Token CSMFilter::Parser::getNextToken()
         case '?': ++mIndex; return Token (Token::Type_OneShot);
     }
 
-    if (c=='"' || c=='_' || std::isalpha (c))
+    if (c=='"' || c=='_' || std::isalpha (c) || c==':')
         return getStringToken();
 
     if (c=='-' || c=='.' || std::isdigit (c))
