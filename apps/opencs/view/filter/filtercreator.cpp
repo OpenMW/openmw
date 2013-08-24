@@ -10,7 +10,6 @@ std::string CSVFilter::FilterCreator::getNamespace() const
 {
     switch (mScope->currentIndex())
     {
-        case CSMFilter::Filter::Scope_Global: return "global::";
         case CSMFilter::Filter::Scope_Project: return "project::";
         case CSMFilter::Filter::Scope_Session: return "session::";
     }
@@ -38,7 +37,6 @@ CSVFilter::FilterCreator::FilterCreator (CSMWorld::Data& data, QUndoStack& undoS
 
     mScope = new QComboBox (this);
 
-    mScope->addItem ("Global");
     mScope->addItem ("Project");
     mScope->addItem ("Session");
     /// \ŧodo re-enable for OpenMW 1.1
@@ -51,7 +49,7 @@ CSVFilter::FilterCreator::FilterCreator (CSMWorld::Data& data, QUndoStack& undoS
     QLabel *label = new QLabel ("Scope", this);
     insertAtBeginning (label, false);
 
-    mScope->setCurrentIndex (2);
+    mScope->setCurrentIndex (1);
 }
 
 void CSVFilter::FilterCreator::reset()

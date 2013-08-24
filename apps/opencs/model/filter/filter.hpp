@@ -13,10 +13,9 @@ namespace CSMFilter
     {
         enum Scope
         {
-            Scope_Global = 0, // per user
-            Scope_Project = 1, // per project
-            Scope_Session = 2, // exists only for one editing session; not saved
-            Scope_Content = 3 // embedded in the edited content file
+            Scope_Project = 0, // per project
+            Scope_Session = 1, // exists only for one editing session; not saved
+            Scope_Content = 2 // embedded in the edited content file
         };
 
         Scope mScope;
