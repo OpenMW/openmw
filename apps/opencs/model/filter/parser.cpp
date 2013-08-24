@@ -8,6 +8,8 @@
 #include <components/misc/stringops.hpp>
 
 #include "../world/columns.hpp"
+#include "../world/data.hpp"
+#include "../world/idcollection.hpp"
 
 #include "booleannode.hpp"
 #include "ornode.hpp"
@@ -31,6 +33,7 @@ namespace CSMFilter
             Type_OpenSquare,
             Type_CloseSquare,
             Type_Comma,
+            Type_OneShot,
             Type_Keyword_True, ///< \attention Keyword enums must be arranged continuously.
             Type_Keyword_False,
             Type_Keyword_And,
@@ -208,6 +211,7 @@ CSMFilter::Token CSMFilter::Parser::getNextToken()
         case '[': ++mIndex; return Token (Token::Type_OpenSquare);
         case ']': ++mIndex; return Token (Token::Type_CloseSquare);
         case ',': ++mIndex; return Token (Token::Type_Comma);
+        case '?': ++mIndex; return Token (Token::Type_OneShot);
     }
 
     if (c=='"' || c=='_' || std::isalpha (c))
@@ -509,7 +513,7 @@ void CSMFilter::Parser::error()
 CSMFilter::Parser::Parser (const CSMWorld::Data& data)
 : mIndex (0), mError (false), mData (data) {}
 
-bool CSMFilter::Parser::parse (const std::string& filter)
+bool CSMFilter::Parser::parse (const std::string& filter, bool allowPredefined)
 {
     // reset
     mFilter.reset();
@@ -517,23 +521,62 @@ bool CSMFilter::Parser::parse (const std::string& filter)
     mInput = filter;
     mIndex = 0;
 
-    boost::shared_ptr<Node> node = parseImp (true);
+    Token token = getNextToken();
 
-    if (mError)
-        return false;
+    if (token==Token (Token::Type_OneShot))
+    {
+        boost::shared_ptr<Node> node = parseImp (true);
 
-    if (getNextToken()!=Token (Token::Type_EOS))
-        return false;
+        if (mError)
+            return false;
 
-    if (node)
-        mFilter = node;
+        if (getNextToken()!=Token (Token::Type_EOS))
+        {
+            error();
+            return false;
+        }
+
+        if (node)
+            mFilter = node;
+        else
+        {
+            // Empty filter string equals to filter "true".
+            mFilter.reset (new BooleanNode (true));
+        }
+
+        return true;
+    }
+    else if (token.mType==Token::Type_String && allowPredefined)
+    {
+        if (getNextToken()!=Token (Token::Type_EOS))
+        {
+            error();
+            return false;
+        }
+
+        int index = mData.getFilters().searchId (token.mString);
+
+        if (index==-1)
+        {
+            error();
+            return false;
+        }
+
+        const CSMWorld::Record<CSMFilter::Filter>& record = mData.getFilters().getRecord (index);
+
+        if (record.isDeleted())
+        {
+            error();
+            return false;
+        }
+
+        return parse (record.get().mFilter, false);
+    }
     else
     {
-        // Empty filter string equals to filter "true".
-        mFilter.reset (new BooleanNode (true));
+        error();
+        return false;
     }
-
-    return true;
 }
 
 boost::shared_ptr<CSMFilter::Node> CSMFilter::Parser::getFilter() const

@@ -46,7 +46,7 @@ namespace CSMFilter
 
             Parser (const CSMWorld::Data& data);
 
-            bool parse (const std::string& filter);
+            bool parse (const std::string& filter, bool allowPredefined = true);
             ///< Discards any previous calls to parse
             ///
             /// \return Success?

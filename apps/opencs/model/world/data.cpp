@@ -316,6 +316,16 @@ CSMWorld::RefCollection& CSMWorld::Data::getReferences()
     return mRefs;
 }
 
+const CSMWorld::IdCollection<CSMFilter::Filter>& CSMWorld::Data::getFilters() const
+{
+    return mFilters;
+}
+
+CSMWorld::IdCollection<CSMFilter::Filter>& CSMWorld::Data::getFilters()
+{
+    return mFilters;
+}
+
 QAbstractItemModel *CSMWorld::Data::getTableModel (const UniversalId& id)
 {
     std::map<UniversalId::Type, QAbstractItemModel *>::iterator iter = mModelIndex.find (id.getType());
