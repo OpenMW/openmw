@@ -41,9 +41,6 @@ namespace CSMFilter
             ///< Return a list of the IDs of the columns referenced by this node. The column mapping
             /// passed into test as columns must contain all columns listed here.
 
-            virtual bool isSimple() const = 0;
-            ///< \return Can this filter be displayed in simple mode.
-
             virtual std::string toString (bool numericColumns) const = 0;
             ///< Return a string that represents this node.
             ///

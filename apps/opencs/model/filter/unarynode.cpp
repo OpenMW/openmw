@@ -20,11 +20,6 @@ std::vector<int> CSMFilter::UnaryNode::getReferencedColumns() const
     return mChild->getReferencedColumns();
 }
 
-bool CSMFilter::UnaryNode::isSimple() const
-{
-    return false;
-}
-
 std::string CSMFilter::UnaryNode::toString (bool numericColumns) const
 {
     return mName + " " + mChild->toString (numericColumns);

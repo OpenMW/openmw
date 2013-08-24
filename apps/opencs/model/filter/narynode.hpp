@@ -31,10 +31,6 @@ namespace CSMFilter
             ///< Return a string that represents this node.
             ///
             /// \param numericColumns Use numeric IDs instead of string to represent columns.
-
-            virtual bool isSimple() const;
-            ///< \return Can this filter be displayed in simple mode.
-
     };
 }
 

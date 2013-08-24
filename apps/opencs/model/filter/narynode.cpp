@@ -57,8 +57,4 @@ std::string CSMFilter::NAryNode::toString (bool numericColumns) const
     return stream.str();
 }
 
-bool CSMFilter::NAryNode::isSimple() const
-{
-    return false;
-}
 
