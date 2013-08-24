@@ -1,7 +1,7 @@
 
 #include "editor.hpp"
 
-#include <QtGui/QApplication>
+#include <QApplication>
 
 #include "model/doc/document.hpp"
 #include "model/world/data.hpp"
