@@ -321,9 +321,13 @@ public:
         std::pair<bool, float> sphereCast (float radius, btVector3& from, btVector3& to);
         ///< @return (hit, relative distance)
 
-        std::pair<std::string,btVector3> sphereTest(float radius,btVector3& pos);
-
         std::vector<std::string> getCollisions(const std::string& name);
+
+        // Get the nearest object that's inside the given object, filtering out objects of the
+        // provided name
+        std::pair<const RigidBody*,btVector3> getFilteredContact(const std::string &filter,
+                                                                 const btVector3 &origin,
+                                                                 btCollisionObject *object);
 
         //event list of non player object
         std::list<PhysicEvent> NPEventList;

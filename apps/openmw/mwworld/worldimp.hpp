@@ -252,9 +252,10 @@ namespace MWWorld
             virtual MWWorld::Ptr getFacedObject();
             ///< Return pointer to the object the player is looking at, if it is within activation range
 
-            /// Returns a pointer to the object the provided object is facing (if within the
-            /// specified distance). This will attempt to use the "Bip01 Head" node as a basis.
-            virtual MWWorld::Ptr getFacedObject(const MWWorld::Ptr &ptr, float distance);
+            /// Returns a pointer to the object the provided object would hit (if within the
+            /// specified distance), and the point where the hit occurs. This will attempt to
+            /// use the "Head" node as a basis.
+            virtual std::pair<MWWorld::Ptr,Ogre::Vector3> getHitContact(const MWWorld::Ptr &ptr, float distance);
 
             virtual void deleteObject (const Ptr& ptr);
 

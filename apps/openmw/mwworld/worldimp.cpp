@@ -784,7 +784,7 @@ namespace MWWorld
         return object;
     }
 
-    MWWorld::Ptr World::getFacedObject(const MWWorld::Ptr &ptr, float distance)
+    std::pair<MWWorld::Ptr,Ogre::Vector3> World::getHitContact(const MWWorld::Ptr &ptr, float distance)
     {
         const ESM::Position &posdata = ptr.getRefData().getPosition();
         Ogre::Vector3 pos(posdata.pos);
@@ -799,11 +799,12 @@ namespace MWWorld
                 pos += node->_getDerivedPosition();
         }
 
-        std::pair<std::string,float> result = mPhysics->getFacedHandle(pos, rot, distance);
+        std::pair<std::string,Ogre::Vector3> result = mPhysics->getHitContact(ptr.getRefData().getHandle(),
+                                                                              pos, rot, distance);
         if(result.first.empty())
-            return MWWorld::Ptr();
+            return std::make_pair(MWWorld::Ptr(), Ogre::Vector3(0.0f));
 
-        return searchPtrViaHandle(result.first);
+        return std::make_pair(searchPtrViaHandle(result.first), result.second);
     }
 
     void World::deleteObject (const Ptr& ptr)

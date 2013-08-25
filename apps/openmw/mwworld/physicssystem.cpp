@@ -107,8 +107,7 @@ namespace MWWorld
         }
 
         static Ogre::Vector3 move(const MWWorld::Ptr &ptr, const Ogre::Vector3 &movement, float time,
-                                  bool isSwimming, bool isFlying, float waterlevel,
-                                  OEngine::Physic::PhysicEngine *engine)
+                                  bool isFlying, float waterlevel, OEngine::Physic::PhysicEngine *engine)
         {
             const ESM::Position &refpos = ptr.getRefData().getPosition();
             Ogre::Vector3 position(refpos.pos);
@@ -135,11 +134,11 @@ namespace MWWorld
             bool isOnGround = false;
             Ogre::Vector3 inertia(0.0f);
             Ogre::Vector3 velocity;
-            if(isSwimming || isFlying)
+            if(position.z < waterlevel || isFlying)
             {
-                velocity = (Ogre::Quaternion(Ogre::Radian( -refpos.rot[2]), Ogre::Vector3::UNIT_Z)*
-                            Ogre::Quaternion(Ogre::Radian( -refpos.rot[1]), Ogre::Vector3::UNIT_Y)*
-                            Ogre::Quaternion(Ogre::Radian(  refpos.rot[0]), Ogre::Vector3::UNIT_X)) *
+                velocity = (Ogre::Quaternion(Ogre::Radian(-refpos.rot[2]), Ogre::Vector3::UNIT_Z)*
+                            Ogre::Quaternion(Ogre::Radian(-refpos.rot[1]), Ogre::Vector3::UNIT_Y)*
+                            Ogre::Quaternion(Ogre::Radian( refpos.rot[0]), Ogre::Vector3::UNIT_X)) *
                            movement;
             }
             else
@@ -173,7 +172,7 @@ namespace MWWorld
             {
                 Ogre::Vector3 nextpos = newPosition + velocity*remainingTime;
 
-                if(isSwimming && !isFlying &&
+                if(newPosition.z < waterlevel && !isFlying &&
                    nextpos.z > waterlevel && newPosition.z <= waterlevel)
                 {
                     const Ogre::Vector3 down(0,0,-1);
@@ -197,7 +196,7 @@ namespace MWWorld
 
                 // We hit something. Try to step up onto it.
                 if(stepMove(colobj, newPosition, velocity, remainingTime, engine))
-                    isOnGround = !(isSwimming || isFlying); // Only on the ground if there's gravity
+                    isOnGround = !(newPosition.z < waterlevel || isFlying); // Only on the ground if there's gravity
                 else
                 {
                     // Can't move this way, try to find another spot along the plane
@@ -208,7 +207,7 @@ namespace MWWorld
 
                     // Do not allow sliding upward if there is gravity. Stepping will have taken
                     // care of that.
-                    if(!(isSwimming || isFlying))
+                    if(!(newPosition.z < waterlevel || isFlying))
                         velocity.z = std::min(velocity.z, 0.0f);
                 }
             }
@@ -225,7 +224,7 @@ namespace MWWorld
                     isOnGround = false;
             }
 
-            if(isOnGround || isSwimming || isFlying)
+            if(isOnGround || newPosition.z < waterlevel || isFlying)
                 physicActor->setInertialForce(Ogre::Vector3(0.0f));
             else
             {
@@ -311,26 +310,32 @@ namespace MWWorld
         return results;
     }
 
-    std::pair<std::string,float> PhysicsSystem::getFacedHandle(const Ogre::Vector3 &origin_, const Ogre::Quaternion &orient_, float queryDistance)
+    std::pair<std::string,Ogre::Vector3> PhysicsSystem::getHitContact(const std::string &name,
+                                                                      const Ogre::Vector3 &origin,
+                                                                      const Ogre::Quaternion &orient,
+                                                                      float queryDistance)
     {
-        btVector3 origin(origin_.x, origin_.y, origin_.z);
+        const MWWorld::Store<ESM::GameSetting> &store = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-        std::pair<std::string,btVector3> result = mEngine->sphereTest(queryDistance,origin);
-        if(result.first == "") return std::make_pair("",0);
-        btVector3 a = result.second - origin;
-        Ogre::Vector3 a_ = Ogre::Vector3(a.x(),a.y(),a.z());
-        a_ = orient_.Inverse()*a_;
-        Ogre::Vector2 a_xy = Ogre::Vector2(a_.x,a_.y);
-        Ogre::Vector2 a_yz = Ogre::Vector2(a_xy.length(),a_.z);
-        float axy = a_xy.angleBetween(Ogre::Vector2::UNIT_Y).valueDegrees();
-        float az = a_yz.angleBetween(Ogre::Vector2::UNIT_X).valueDegrees();
+        btConeShape shape(Ogre::Degree(store.find("fCombatAngleXY")->getFloat()/2.0f).valueRadians(),
+                          queryDistance);
+        shape.setLocalScaling(btVector3(1, 1, Ogre::Degree(store.find("fCombatAngleZ")->getFloat()/2.0f).valueRadians() /
+                                              shape.getRadius()));
 
-        float fCombatAngleXY = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fCombatAngleXY")->getFloat();
-        float fCombatAngleZ = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fCombatAngleZ")->getFloat();
-        if(abs(axy) < fCombatAngleXY && abs(az) < fCombatAngleZ)
-            return std::make_pair (result.first,result.second.length());
-        else
-            return std::make_pair("",0);
+        // The shape origin is its center, so we have to move it forward by half the length. The
+        // real origin will be provided to getFilteredContact to find the closest.
+        Ogre::Vector3 center = origin + (orient * Ogre::Vector3(0.0f, queryDistance*0.5f, 0.0f));
+
+        btCollisionObject object;
+        object.setCollisionShape(&shape);
+        object.setWorldTransform(btTransform(btQuaternion(orient.x, orient.y, orient.z, orient.w),
+                                             btVector3(center.x, center.y, center.z)));
+
+        std::pair<const OEngine::Physic::RigidBody*,btVector3> result = mEngine->getFilteredContact(
+                name, btVector3(origin.x, origin.y, origin.z), &object);
+        if(!result.first)
+            return std::make_pair(std::string(), Ogre::Vector3(&result.second[0]));
+        return std::make_pair(result.first->mName, Ogre::Vector3(&result.second[0]));
     }
 
 
@@ -584,15 +589,13 @@ namespace MWWorld
             for(;iter != mMovementQueue.end();iter++)
             {
                 float waterlevel = -std::numeric_limits<float>::max();
-                const MWWorld::CellStore *cellstore = iter->first.getCell();
-                if(cellstore->mCell->hasWater())
-                    waterlevel = cellstore->mCell->mWater;
+                const ESM::Cell *cell = iter->first.getCell()->mCell;
+                if(cell->hasWater())
+                    waterlevel = cell->mWater;
 
-                Ogre::Vector3 newpos;
-                newpos = MovementSolver::move(iter->first, iter->second, mTimeAccum,
-                                              world->isSwimming(iter->first),
-                                              world->isFlying(iter->first),
-                                              waterlevel, mEngine);
+                Ogre::Vector3 newpos = MovementSolver::move(iter->first, iter->second, mTimeAccum,
+                                                            world->isFlying(iter->first),
+                                                            waterlevel, mEngine);
                 mMovementResults.push_back(std::make_pair(iter->first, newpos));
             }
 

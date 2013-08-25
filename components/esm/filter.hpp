@@ -12,6 +12,8 @@ namespace ESM
     {
         std::string mId;
 
+        std::string mDescription;
+
         std::string mFilter;
 
         void load (ESMReader& esm);

@@ -171,7 +171,8 @@ namespace CSMWorld
             ColumnId_Skill2 = 0x50001,
             ColumnId_Skill3 = 0x50002,
             ColumnId_Skill4 = 0x50003,
-            ColumnId_Skill5 = 0x50004
+            ColumnId_Skill5 = 0x50004,
+            ColumnId_Skill6 = 0x50005
         };
 
         std::string getName (ColumnId column);

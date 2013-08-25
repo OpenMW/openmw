@@ -5,6 +5,8 @@
 
 #include "../../model/doc/document.hpp"
 
+#include "../filter/filterbox.hpp"
+
 #include "table.hpp"
 #include "tablebottombox.hpp"
 #include "creator.hpp"
@@ -22,6 +24,10 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
     layout->insertWidget (0, mTable =
         new Table (id, document.getData(), document.getUndoStack(), mBottom->canCreateAndDelete()), 2);
+
+    CSVFilter::FilterBox *filterBox = new CSVFilter::FilterBox (this);
+
+    layout->insertWidget (0, filterBox);
 
     QWidget *widget = new QWidget;
 
@@ -44,6 +50,10 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
     connect (mBottom, SIGNAL (requestFocus (const std::string&)),
         mTable, SLOT (requestFocus (const std::string&)));
+
+    connect (filterBox,
+        SIGNAL (recordFilterChanged (boost::shared_ptr<CSMFilter::Node>)),
+        mTable, SLOT (recordFilterChanged (boost::shared_ptr<CSMFilter::Node>)));
 }
 
 void CSVWorld::TableSubView::setEditLock (bool locked)
