@@ -62,7 +62,7 @@
     <!-- Button widget -->
     <Skin name="MW_Button" size="136 24">
         <Property key="FontName" value="Default"/>
-        <Property key="TextAlign" value="Center" />
+        <Property key="TextAlign" value="Center"/>
 
         <Child type="Widget" skin="BTN_Left" offset="0 4 4 16" align="VStretch Left"/>
         <Child type="Widget" skin="BTN_Right" offset="132 4 4 16" align="VStretch Right"/>

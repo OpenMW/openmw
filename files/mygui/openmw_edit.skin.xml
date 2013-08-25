@@ -21,12 +21,10 @@
         <!-- Input -->
 
         <Property key="FontName" value="Default"/>
+        <Property key="TextAlign" value="Left VCenter"/>
+        <Property key="TextColour" value="0.75 0.6 0.35"/>
 
-        <Property key="TextAlign" value="Left VCenter" />
-
-        <Property key="TextColour" value="0.75 0.6 0.35" />
-
-        <Child type="TextBox" skin="MW_TextEditClient" offset="2 2 508 18" align="Stretch" name="Client"/>
+        <Child type="TextBox" skin="MW_TextEditClient" offset="4 1 502 18" align="Stretch" name="Client"/>
 
 
         <!-- Borders -->
@@ -39,9 +37,9 @@
 
         <Property key="FontName" value="Default"/>
 
-        <Property key="TextAlign" value="Left Top" />
+        <Property key="TextAlign" value="Left Top"/>
 
-        <Property key="TextColour" value="0.75 0.6 0.35" />
+        <Property key="TextColour" value="0.75 0.6 0.35"/>
 
         <Child type="TextBox" skin="MW_TextBoxEditClient" offset="2 2 490 18" align="Stretch" name="Client"/>
 

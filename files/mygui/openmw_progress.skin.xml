@@ -17,7 +17,7 @@
             <State name="normal" offset="0 28 2 14"/>
         </BasisSkin>
     </Skin>
-	<Skin name="MW_BigTrack_Progress_Blue_Small" size="2 6" texture="smallbars.png" >
+    <Skin name="MW_BigTrack_Progress_Blue_Small" size="2 6" texture="smallbars.png" >
         <BasisSkin type="MainSkin" offset="0 0 2 6" align="Stretch">
             <State name="normal" offset="0 26 2 6"/>
         </BasisSkin>
@@ -25,41 +25,41 @@
 
     <Skin name="ProgressText" size="16 16">
         <Property key="FontName" value="Default"/>
-        <Property key="TextAlign" value="Center" />
-        <Property key="TextColour" value="0.75 0.6 0.35" />
+        <Property key="TextAlign" value="Center"/>
+        <Property key="TextColour" value="0.75 0.6 0.35"/>
 
-        <BasisSkin type="SimpleText" offset="0 0 16 16"  align="Stretch"/>
+        <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch"/>
     </Skin>
 
     <!-- Main energy bar widget definitions. There's one for each color.-->
 
     <Skin name="MW_Progress_Red" size="64 12">
-        <Property key="TrackSkin" value="MW_BigTrack_Red" />
-        <Property key="TrackWidth" value="1" />
+        <Property key="TrackSkin" value="MW_BigTrack_Red"/>
+        <Property key="TrackWidth" value="1"/>
 
         <Child type="Widget" skin="MW_Box" offset="0 0 64 12" align="Stretch"/>
         <Child type="Widget" skin="BlackBG" offset="2 2 60 8" align="Stretch" name="Client"/>
     </Skin>
 
     <Skin name="MW_Progress_Green" size="64 12">
-        <Property key="TrackSkin" value="MW_BigTrack_Green" />
-        <Property key="TrackWidth" value="1" />
+        <Property key="TrackSkin" value="MW_BigTrack_Green"/>
+        <Property key="TrackWidth" value="1"/>
 
         <Child type="Widget" skin="MW_Box" offset="0 0 64 12" align="Stretch"/>
         <Child type="Widget" skin="BlackBG" offset="2 2 60 8" align="Stretch" name="Client"/>
     </Skin>
 
     <Skin name="MW_Progress_Blue" size="64 12">
-        <Property key="TrackSkin" value="MW_BigTrack_Blue" />
-        <Property key="TrackWidth" value="1" />
+        <Property key="TrackSkin" value="MW_BigTrack_Blue"/>
+        <Property key="TrackWidth" value="1"/>
 
         <Child type="Widget" skin="MW_Box" offset="0 0 64 12" align="Stretch"/>
         <Child type="Widget" skin="BlackBG" offset="2 2 60 8" align="Stretch" name="Client"/>
     </Skin>
 
-	<Skin name="MW_Progress_Loading" size="64 6">
-        <Property key="TrackSkin" value="MW_BigTrack_Progress_Blue_Small" />
-        <Property key="TrackWidth" value="1" />
+    <Skin name="MW_Progress_Loading" size="64 6">
+        <Property key="TrackSkin" value="MW_BigTrack_Progress_Blue_Small"/>
+        <Property key="TrackWidth" value="1"/>
 
         <Child type="Widget" skin="MW_Box" offset="0 0 64 6" align="Stretch"/>
         <Child type="Widget" skin="BlackBG" offset="2 2 60 2" align="Stretch" name="Client"/>
