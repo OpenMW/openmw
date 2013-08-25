@@ -761,7 +761,7 @@ namespace MWWorld
         std::pair<float, std::string> result;
 
         if (!mRendering->occlusionQuerySupported())
-            result = mPhysics->getFacedHandle (*this, getMaxActivationDistance ());
+            result = mPhysics->getFacedHandle (getMaxActivationDistance ());
         else
             result = std::make_pair (mFacedDistance, mFacedHandle);
 
