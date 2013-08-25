@@ -1081,7 +1081,6 @@ namespace MWScript
                 }
         };
 
-
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
             for (int i=0; i<Compiler::Stats::numberOfAttributes; ++i)
@@ -1207,7 +1206,7 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Stats::opcodeUndoWerewolf, new OpSetWerewolf<ImplicitRef, false>);
             interpreter.installSegment5 (Compiler::Stats::opcodeUndoWerewolfExplicit, new OpSetWerewolf<ExplicitRef, false>);
             interpreter.installSegment5 (Compiler::Stats::opcodeSetWerewolfAcrobatics, new OpSetWerewolfAcrobatics<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Stats::opcodeSetWerewolfAcrobaticsExplicit, new OpSetWerewolfAcrobatics<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Stats::opcodeSetWerewolfAcrobaticsExplicit, new OpSetWerewolfAcrobatics<ExplicitRef>);           
         }
     }
 }

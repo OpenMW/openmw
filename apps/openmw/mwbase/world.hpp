@@ -394,6 +394,9 @@ namespace MWBase
             /// Sets the NPC's Acrobatics skill to match the fWerewolfAcrobatics GMST.
             /// It only applies to the current form the NPC is in.
             virtual void applyWerewolfAcrobatics(const MWWorld::Ptr& actor) = 0;
+
+            // Dummy Implementation
+            virtual bool toggleGodMode() = 0;
     };
 }
 

@@ -438,6 +438,8 @@ namespace MWWorld
             virtual void setWerewolf(const MWWorld::Ptr& actor, bool werewolf);
 
             virtual void applyWerewolfAcrobatics(const MWWorld::Ptr& actor);
+
+            virtual bool toggleGodMode();
     };
 }
 

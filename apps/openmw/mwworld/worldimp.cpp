@@ -1154,7 +1154,7 @@ namespace MWWorld
 
     bool World::toggleCollisionMode()
     {
-        return mPhysics->toggleCollisionMode();;
+        return mPhysics->toggleCollisionMode();
     }
 
     bool World::toggleRenderMode (RenderMode mode)
@@ -1940,6 +1940,11 @@ namespace MWWorld
         MWMechanics::NpcStats &stats = Class::get(actor).getNpcStats(actor);
 
         stats.getSkill(ESM::Skill::Acrobatics).setModified(gmst.find("fWerewolfAcrobatics")->getFloat(), 0);
+    }
+
+    bool World::toggleGodMode()
+    {
+        return false;
     }
 
 }
