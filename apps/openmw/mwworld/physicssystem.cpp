@@ -29,7 +29,7 @@ namespace MWWorld
 {
 
     static const float sMaxSlope = 60.0f;
-    static const float sStepSize = 30.0f;
+    static const float sStepSize = 32.0f;
     // Arbitrary number. To prevent infinite loops. They shouldn't happen but it's good to be prepared.
     static const int sMaxIterations = 8;
 
@@ -48,16 +48,15 @@ namespace MWWorld
             OEngine::Physic::ActorTracer tracer, stepper;
 
             stepper.doTrace(colobj, position, position+Ogre::Vector3(0.0f,0.0f,sStepSize), engine);
-            if(stepper.mFraction == 0.0f)
+            if(stepper.mFraction < std::numeric_limits<float>::epsilon())
                 return false;
 
             tracer.doTrace(colobj, stepper.mEndPos, stepper.mEndPos + velocity*remainingTime, engine);
-            if(tracer.mFraction < std::numeric_limits<float>::epsilon() ||
-               (tracer.mFraction < 1.0f && getSlope(tracer.mPlaneNormal) > sMaxSlope))
+            if(tracer.mFraction < std::numeric_limits<float>::epsilon())
                 return false;
 
             stepper.doTrace(colobj, tracer.mEndPos, tracer.mEndPos-Ogre::Vector3(0.0f,0.0f,sStepSize), engine);
-            if(getSlope(stepper.mPlaneNormal) <= sMaxSlope)
+            if(stepper.mFraction < 1.0f && getSlope(stepper.mPlaneNormal) <= sMaxSlope)
             {
                 // only step down onto semi-horizontal surfaces. don't step down onto the side of a house or a wall.
                 position = stepper.mEndPos;
