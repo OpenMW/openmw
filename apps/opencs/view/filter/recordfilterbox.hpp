@@ -22,7 +22,7 @@ namespace CSVFilter
 
         public:
 
-            RecordFilterBox (const CSMWorld::Data& data, QWidget *parent = 0);
+            RecordFilterBox (CSMWorld::Data& data, QWidget *parent = 0);
 
         signals:
 

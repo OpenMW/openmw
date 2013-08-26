@@ -6,7 +6,7 @@
 
 #include "editwidget.hpp"
 
-CSVFilter::RecordFilterBox::RecordFilterBox (const CSMWorld::Data& data, QWidget *parent)
+CSVFilter::RecordFilterBox::RecordFilterBox (CSMWorld::Data& data, QWidget *parent)
 : QWidget (parent)
 {
     QHBoxLayout *layout = new QHBoxLayout (this);

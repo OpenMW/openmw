@@ -18,7 +18,7 @@ namespace CSVFilter
 
         public:
 
-            FilterBox (const CSMWorld::Data& data, QWidget *parent = 0);
+            FilterBox (CSMWorld::Data& data, QWidget *parent = 0);
 
         signals:
 

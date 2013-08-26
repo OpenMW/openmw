@@ -5,7 +5,7 @@
 
 #include "recordfilterbox.hpp"
 
-CSVFilter::FilterBox::FilterBox (const CSMWorld::Data& data, QWidget *parent)
+CSVFilter::FilterBox::FilterBox (CSMWorld::Data& data, QWidget *parent)
 : QWidget (parent)
 {
     QHBoxLayout *layout = new QHBoxLayout (this);
