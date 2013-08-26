@@ -47,7 +47,7 @@ namespace CSMFilter
         std::string mString;
         double mNumber;
 
-        Token (Type type);
+        Token (Type type = Type_None);
 
         Token (const std::string& string);
 
@@ -521,9 +521,12 @@ bool CSMFilter::Parser::parse (const std::string& filter, bool allowPredefined)
     mInput = filter;
     mIndex = 0;
 
-    Token token = getNextToken();
+    Token token;
 
-    if (token==Token (Token::Type_OneShot))
+    if (allowPredefined)
+        token = getNextToken();
+
+    if (!allowPredefined || token==Token (Token::Type_OneShot))
     {
         boost::shared_ptr<Node> node = parseImp (true);
 
