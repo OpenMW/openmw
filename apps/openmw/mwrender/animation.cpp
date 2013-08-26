@@ -64,7 +64,7 @@ void Animation::destroyObjectList(Ogre::SceneManager *sceneMgr, NifOgre::ObjectL
 Animation::Animation(const MWWorld::Ptr &ptr, Ogre::SceneNode *node)
     : mPtr(ptr)
     , mCamera(NULL)
-    , mInsert(NULL)
+    , mInsert(node)
     , mSkelBase(NULL)
     , mAccumRoot(NULL)
     , mNonAccumRoot(NULL)
@@ -74,20 +74,14 @@ Animation::Animation(const MWWorld::Ptr &ptr, Ogre::SceneNode *node)
 {
     for(size_t i = 0;i < sNumGroups;i++)
         mAnimationValuePtr[i].bind(OGRE_NEW AnimationValue(this));
-    mInsert = node->createChildSceneNode();
 }
 
 Animation::~Animation()
 {
-    if(mInsert)
-    {
-        mAnimSources.clear();
+    mAnimSources.clear();
 
-        Ogre::SceneManager *sceneMgr = mInsert->getCreator();
-        destroyObjectList(sceneMgr, mObjectRoot);
-
-        sceneMgr->destroySceneNode(mInsert);
-    }
+    Ogre::SceneManager *sceneMgr = mInsert->getCreator();
+    destroyObjectList(sceneMgr, mObjectRoot);
 }
 
 
@@ -268,8 +262,13 @@ void Animation::addAnimSource(const std::string &model)
 
         if(!mAccumRoot && grp == 0)
         {
-            mAccumRoot = mInsert;
             mNonAccumRoot = dstval->getNode();
+            mAccumRoot = mNonAccumRoot->getParent();
+            if(!mAccumRoot)
+            {
+                std::cerr<< "Non-Accum root for "<<mPtr.getCellRef().mRefID<<" is skeleton root??" <<std::endl;
+                mNonAccumRoot = NULL;
+            }
         }
 
         ctrls[i].setSource(mAnimationValuePtr[grp]);
@@ -984,10 +983,7 @@ ObjectAnimation::ObjectAnimation(const MWWorld::Ptr& ptr, const std::string &mod
 {
     setObjectRoot(model, false);
 
-    Ogre::AxisAlignedBox bounds = getWorldBounds();
-
-    Ogre::Vector3 extents = bounds.getSize();
-    extents *= mInsert->getParentSceneNode()->getScale();
+    Ogre::Vector3 extents = getWorldBounds().getSize();
     float size = std::max(std::max(extents.x, extents.y), extents.z);
 
     bool small = (size < Settings::Manager::getInt("small object size", "Viewing distance")) &&

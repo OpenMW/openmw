@@ -56,17 +56,13 @@ namespace MWWorld
             std::vector<std::string> getCollisions(const MWWorld::Ptr &ptr); ///< get handles this object collides with
             Ogre::Vector3 traceDown(const MWWorld::Ptr &ptr);
 
-            std::pair<float, std::string> getFacedHandle (MWWorld::World& world, float queryDistance);
+            std::pair<float, std::string> getFacedHandle(float queryDistance);
             std::pair<std::string,Ogre::Vector3> getHitContact(const std::string &name,
                                                                const Ogre::Vector3 &origin,
                                                                const Ogre::Quaternion &orientation,
                                                                float queryDistance);
             std::vector < std::pair <float, std::string> > getFacedHandles (float queryDistance);
             std::vector < std::pair <float, std::string> > getFacedHandles (float mouseX, float mouseY, float queryDistance);
-
-            btVector3 getRayPoint(float extent);
-            btVector3 getRayPoint(float extent, float mouseX, float mouseY);
-
 
             // cast ray, return true if it hit something. if raycasringObjectOnlt is set to false, it ignores NPCs and objects with no collisions.
             bool castRay(const Ogre::Vector3& from, const Ogre::Vector3& to, bool raycastingObjectOnly = true,bool ignoreHeightMap = false);

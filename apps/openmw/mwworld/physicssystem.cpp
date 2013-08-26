@@ -29,7 +29,7 @@ namespace MWWorld
 {
 
     static const float sMaxSlope = 60.0f;
-    static const float sStepSize = 30.0f;
+    static const float sStepSize = 32.0f;
     // Arbitrary number. To prevent infinite loops. They shouldn't happen but it's good to be prepared.
     static const int sMaxIterations = 8;
 
@@ -48,16 +48,15 @@ namespace MWWorld
             OEngine::Physic::ActorTracer tracer, stepper;
 
             stepper.doTrace(colobj, position, position+Ogre::Vector3(0.0f,0.0f,sStepSize), engine);
-            if(stepper.mFraction == 0.0f)
+            if(stepper.mFraction < std::numeric_limits<float>::epsilon())
                 return false;
 
             tracer.doTrace(colobj, stepper.mEndPos, stepper.mEndPos + velocity*remainingTime, engine);
-            if(tracer.mFraction < std::numeric_limits<float>::epsilon() ||
-               (tracer.mFraction < 1.0f && getSlope(tracer.mPlaneNormal) > sMaxSlope))
+            if(tracer.mFraction < std::numeric_limits<float>::epsilon())
                 return false;
 
             stepper.doTrace(colobj, tracer.mEndPos, tracer.mEndPos-Ogre::Vector3(0.0f,0.0f,sStepSize), engine);
-            if(getSlope(stepper.mPlaneNormal) <= sMaxSlope)
+            if(stepper.mFraction < 1.0f && getSlope(stepper.mPlaneNormal) <= sMaxSlope)
             {
                 // only step down onto semi-horizontal surfaces. don't step down onto the side of a house or a wall.
                 position = stepper.mEndPos;
@@ -257,7 +256,7 @@ namespace MWWorld
         return mEngine;
     }
 
-    std::pair<float, std::string> PhysicsSystem::getFacedHandle (MWWorld::World& world, float queryDistance)
+    std::pair<float, std::string> PhysicsSystem::getFacedHandle(float queryDistance)
     {
         Ray ray = mRender.getCamera()->getCameraToViewportRay(0.5, 0.5);
 
@@ -267,8 +266,7 @@ namespace MWWorld
         btVector3 dir(dir_.x, dir_.y, dir_.z);
 
         btVector3 dest = origin + dir * queryDistance;
-        std::pair <std::string, float> result;
-        /*auto*/ result = mEngine->rayTest(origin, dest);
+        std::pair <std::string, float> result = mEngine->rayTest(origin, dest);
         result.second *= queryDistance;
 
         return std::make_pair (result.second, result.first);
@@ -338,24 +336,6 @@ namespace MWWorld
         return std::make_pair(result.first->mName, Ogre::Vector3(&result.second[0]));
     }
 
-
-    btVector3 PhysicsSystem::getRayPoint(float extent)
-    {
-        //get a ray pointing to the center of the viewport
-        Ray centerRay = mRender.getCamera()->getCameraToViewportRay(
-        mRender.getViewport()->getWidth()/2,
-        mRender.getViewport()->getHeight()/2);
-        btVector3 result(centerRay.getPoint(extent).x,centerRay.getPoint(extent).y,centerRay.getPoint(extent).z);
-        return result;
-    }
-
-    btVector3 PhysicsSystem::getRayPoint(float extent, float mouseX, float mouseY)
-    {
-        //get a ray pointing to the center of the viewport
-        Ray centerRay = mRender.getCamera()->getCameraToViewportRay(mouseX, mouseY);
-        btVector3 result(centerRay.getPoint(extent).x,centerRay.getPoint(extent).y,centerRay.getPoint(extent).z);
-        return result;
-    }
 
     bool PhysicsSystem::castRay(const Vector3& from, const Vector3& to, bool raycastingObjectOnly,bool ignoreHeightMap)
     {
