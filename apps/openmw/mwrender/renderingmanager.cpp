@@ -652,7 +652,8 @@ void RenderingManager::requestMap(MWWorld::Ptr::CellStore* cell)
         Ogre::Vector2 center(cell->mCell->getGridX() + 0.5, cell->mCell->getGridY() + 0.5);
         dims.merge(mTerrain->getWorldBoundingBox(center));
 
-        mTerrain->update(dims.getCenter());
+        if (dims.isFinite())
+            mTerrain->update(dims.getCenter());
 
         mLocalMap->requestMap(cell, dims.getMinimum().z, dims.getMaximum().z);
     }

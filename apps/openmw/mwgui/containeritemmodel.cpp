@@ -74,13 +74,12 @@ ItemModel::ModelIndex ContainerItemModel::getIndex (ItemStack item)
 void ContainerItemModel::copyItem (const ItemStack& item, size_t count)
 {
     const MWWorld::Ptr& source = mItemSources[mItemSources.size()-1];
+    if (item.mBase.getContainerStore() == &source.getClass().getContainerStore(source))
+        throw std::runtime_error("Item to copy needs to be from a different container!");
     int origCount = item.mBase.getRefData().getCount();
     item.mBase.getRefData().setCount(count);
-    MWWorld::ContainerStoreIterator it = MWWorld::Class::get(source).getContainerStore(source).add(item.mBase, source);
-    if (*it != item.mBase)
-        item.mBase.getRefData().setCount(origCount);
-    else
-        item.mBase.getRefData().setCount(origCount + count); // item copied onto itself
+    source.getClass().getContainerStore(source).add(item.mBase, source);
+    item.mBase.getRefData().setCount(origCount);
 }
 
 void ContainerItemModel::removeItem (const ItemStack& item, size_t count)

@@ -88,8 +88,13 @@ namespace MWGui
 
         mDragAndDropWidget->setVisible(false);
 
-        targetModel->copyItem(mItem, mDraggedCount);
-        mSourceModel->removeItem(mItem, mDraggedCount);
+        // If item is dropped where it was taken from, we don't need to do anything -
+        // otherwise, do the transfer
+        if (targetModel != mSourceModel)
+        {
+            targetModel->copyItem(mItem, mDraggedCount);
+            mSourceModel->removeItem(mItem, mDraggedCount);
+        }
 
         mSourceModel->update();
 
