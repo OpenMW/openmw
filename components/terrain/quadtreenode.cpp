@@ -13,6 +13,13 @@ using namespace Terrain;
 
 namespace
 {
+    int Log2( int n )
+    {
+        assert(n > 0);
+        int targetlevel = 0;
+        while (n >>= 1) ++targetlevel;
+        return targetlevel;
+    }
 
     // Utility functions for neighbour finding algorithm
     ChildDirection reflect(ChildDirection dir, Direction dir2)
@@ -161,7 +168,7 @@ QuadTreeNode::QuadTreeNode(World* terrain, ChildDirection dir, float size, const
     pos = mCenter - pos;
     mSceneNode->setPosition(Ogre::Vector3(pos.x*8192, pos.y*8192, 0));
 
-    mLodLevel = log2(mSize);
+    mLodLevel = Log2(mSize);
 
     mMaterialGenerator = new MaterialGenerator(mTerrain->getShadersEnabled());
 }
