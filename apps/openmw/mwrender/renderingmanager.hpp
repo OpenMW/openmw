@@ -40,7 +40,7 @@ namespace sh
 
 namespace Terrain
 {
-    class Terrain;
+    class World;
 }
 
 namespace MWRender
@@ -234,7 +234,7 @@ private:
 
     OcclusionQuery* mOcclusionQuery;
 
-    Terrain::Terrain* mTerrain;
+    Terrain::World* mTerrain;
 
     MWRender::Water *mWater;
 

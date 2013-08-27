@@ -67,7 +67,7 @@ add_component_dir (translation
     )
     
 add_component_dir (terrain
-    quadtreenode chunk terrain storage material
+    quadtreenode chunk world storage material
     )
     
 add_component_dir (loadinglistener

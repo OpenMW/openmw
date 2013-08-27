@@ -3,7 +3,7 @@
 #include <OgreSceneManager.h>
 #include <OgreManualObject.h>
 
-#include "terrain.hpp"
+#include "world.hpp"
 #include "chunk.hpp"
 #include "storage.hpp"
 
@@ -132,7 +132,7 @@ namespace
     }
 }
 
-QuadTreeNode::QuadTreeNode(Terrain* terrain, ChildDirection dir, float size, const Ogre::Vector2 &center, QuadTreeNode* parent)
+QuadTreeNode::QuadTreeNode(World* terrain, ChildDirection dir, float size, const Ogre::Vector2 &center, QuadTreeNode* parent)
     : mSize(size)
     , mCenter(center)
     , mParent(parent)

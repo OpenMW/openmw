@@ -14,7 +14,7 @@ namespace Ogre
 
 namespace Terrain
 {
-    class Terrain;
+    class World;
     class Chunk;
     class MaterialGenerator;
 
@@ -48,7 +48,7 @@ namespace Terrain
         /// @param size size (in *cell* units!)
         /// @param center center (in *cell* units!)
         /// @param parent parent node
-        QuadTreeNode (Terrain* terrain, ChildDirection dir, float size, const Ogre::Vector2& center, QuadTreeNode* parent);
+        QuadTreeNode (World* terrain, ChildDirection dir, float size, const Ogre::Vector2& center, QuadTreeNode* parent);
         ~QuadTreeNode();
 
         void setVisible(bool visible);
@@ -95,7 +95,7 @@ namespace Terrain
         /// Get bounding box in local coordinates
         const Ogre::AxisAlignedBox& getBoundingBox();
 
-        Terrain* getTerrain() { return mTerrain; }
+        World* getTerrain() { return mTerrain; }
 
         /// Adjust LODs for the given camera position, possibly splitting up chunks or merging them.
         void update (const Ogre::Vector3& cameraPos, Loading::Listener* loadingListener);
@@ -148,7 +148,7 @@ namespace Terrain
 
         Chunk* mChunk;
 
-        Terrain* mTerrain;
+        World* mTerrain;
 
         Ogre::TexturePtr mCompositeMap;
 

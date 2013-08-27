@@ -25,7 +25,7 @@
 
 #include <components/esm/loadstat.hpp>
 #include <components/settings/settings.hpp>
-#include <components/terrain/terrain.hpp>
+#include <components/terrain/world.hpp>
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"
@@ -1020,7 +1020,7 @@ void RenderingManager::enableTerrain(bool enable)
         {
             Loading::Listener* listener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
             Loading::ScopedLoad load(listener);
-            mTerrain = new Terrain::Terrain(listener, mRendering.getScene(), new MWRender::TerrainStorage(), RV_Terrain,
+            mTerrain = new Terrain::World(listener, mRendering.getScene(), new MWRender::TerrainStorage(), RV_Terrain,
                                             Settings::Manager::getBool("distant land", "Terrain"),
                                             Settings::Manager::getBool("shader", "Terrain"));
             mTerrain->applyMaterials(Settings::Manager::getBool("enabled", "Shadows"),

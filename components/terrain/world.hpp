@@ -29,7 +29,7 @@ namespace Terrain
      *        Cracks at LOD transitions are avoided using stitching.
      * @note  Multiple cameras are not supported yet
      */
-    class Terrain
+    class World
     {
     public:
         /// @note takes ownership of \a storage
@@ -41,9 +41,9 @@ namespace Terrain
         ///         This is a temporary option until it can be streamlined.
         /// @param shaders Whether to use splatting shader, or multi-pass fixed function splatting. Shader is usually
         ///         faster so this is just here for compatibility.
-        Terrain(Loading::Listener* loadingListener, Ogre::SceneManager* sceneMgr,
+        World(Loading::Listener* loadingListener, Ogre::SceneManager* sceneMgr,
                 Storage* storage, int visiblityFlags, bool distantLand, bool shaders);
-        ~Terrain();
+        ~World();
 
         void setLoadingListener(Loading::Listener* loadingListener) { mLoadingListener = loadingListener; }
 
