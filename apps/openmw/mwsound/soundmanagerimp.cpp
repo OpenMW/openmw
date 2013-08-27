@@ -4,11 +4,10 @@
 #include <algorithm>
 #include <map>
 
-#include "../mwworld/esmstore.hpp"
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwworld/esmstore.hpp"
 #include "../mwworld/player.hpp"
 
 #include "sound_output.hpp"
@@ -475,27 +474,32 @@ namespace MWSound
 
     void SoundManager::updateRegionSound(float duration)
     {
-        MWWorld::Ptr::CellStore *current = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell();
+        static float sTimeToNextEnvSound = 0.0f;
         static int total = 0;
         static std::string regionName = "";
-        static float timePassed = 0.0;
+        static float sTimePassed = 0.0;
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+        const MWWorld::Ptr player = world->getPlayer().getPlayer();
+        const ESM::Cell *cell = player.getCell()->mCell;
 
-        //If the region has changed
-        timePassed += duration;
-        if(!current->mCell->isExterior() || timePassed < 10)
+        sTimePassed += duration;
+        if(!cell->isExterior() || sTimePassed < sTimeToNextEnvSound)
             return;
-        timePassed = 0;
 
-        if(regionName != current->mCell->mRegion)
+        float a = std::rand() / (double)RAND_MAX;
+        // NOTE: We should use the "Minimum Time Between Environmental Sounds" and
+        // "Maximum Time Between Environmental Sounds" fallback settings here.
+        sTimeToNextEnvSound = 5.0f*a + 15.0f*(1.0f-a);
+        sTimePassed = 0;
+
+        if(regionName != cell->mRegion)
         {
-            regionName = current->mCell->mRegion;
+            regionName = cell->mRegion;
             total = 0;
         }
 
-        const ESM::Region *regn =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Region>().search(regionName);
-
-        if (regn == NULL)
+        const ESM::Region *regn = world->getStore().get<ESM::Region>().search(regionName);
+        if(regn == NULL)
             return;
 
         std::vector<ESM::Region::SoundRef>::const_iterator soundIter;
