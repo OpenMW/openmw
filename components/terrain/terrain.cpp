@@ -7,6 +7,7 @@
 #include <OgreRoot.h>
 
 #include <components/esm/loadland.hpp>
+#include <components/loadinglistener/loadinglistener.hpp>
 
 #include "storage.hpp"
 #include "quadtreenode.hpp"
@@ -51,7 +52,8 @@ namespace
 namespace Terrain
 {
 
-    Terrain::Terrain(Ogre::SceneManager* sceneMgr, Storage* storage, int visibilityFlags, bool distantLand, bool shaders)
+    Terrain::Terrain(Loading::Listener* loadingListener, Ogre::SceneManager* sceneMgr,
+                     Storage* storage, int visibilityFlags, bool distantLand, bool shaders)
         : mStorage(storage)
         , mMinBatchSize(1)
         , mMaxBatchSize(64)
@@ -60,7 +62,10 @@ namespace Terrain
         , mDistantLand(distantLand)
         , mShaders(shaders)
         , mVisible(true)
+        , mLoadingListener(loadingListener)
     {
+        loadingListener->setLabel("Creating terrain");
+
         mCompositeMapSceneMgr = Ogre::Root::getSingleton().createSceneManager(Ogre::ST_GENERIC);
 
         Ogre::Camera* compositeMapCam = mCompositeMapSceneMgr->createCamera("a");
@@ -86,8 +91,11 @@ namespace Terrain
 
         mRootNode = new QuadTreeNode(this, Root, size, Ogre::Vector2(center.x, center.y), NULL);
         buildQuadTree(mRootNode);
+        loadingListener->indicateProgress();
         mRootNode->initAabb();
+        loadingListener->indicateProgress();
         mRootNode->initNeighbours();
+        loadingListener->indicateProgress();
     }
 
     Terrain::~Terrain()
@@ -147,7 +155,7 @@ namespace Terrain
     {
         if (!mVisible)
             return;
-        mRootNode->update(cameraPos);
+        mRootNode->update(cameraPos, mLoadingListener);
         mRootNode->updateIndexBuffers();
     }
 

@@ -25,13 +25,12 @@ namespace
 
     template<typename T>
     void insertCellRefList(MWRender::RenderingManager& rendering,
-        T& cellRefList, MWWorld::CellStore &cell, MWWorld::PhysicsSystem& physics, bool rescale)
+        T& cellRefList, MWWorld::CellStore &cell, MWWorld::PhysicsSystem& physics, bool rescale, Loading::Listener* loadingListener)
     {
         if (!cellRefList.mList.empty())
         {
             const MWWorld::Class& class_ =
                 MWWorld::Class::get (MWWorld::Ptr (&*cellRefList.mList.begin(), &cell));
-            int current = 0;
             for (typename T::List::iterator it = cellRefList.mList.begin();
                 it != cellRefList.mList.end(); it++)
             {
@@ -42,8 +41,6 @@ namespace
                     else if (it->mRef.mScale>2)
                         it->mRef.mScale = 2;
                 }
-
-                ++current;
 
                 if (it->mData.getCount() && it->mData.isEnabled())
                 {
@@ -68,6 +65,8 @@ namespace
                         std::cerr << error + e.what() << std::endl;
                     }
                 }
+
+                loadingListener->increaseProgress(1);
             }
         }
     }
@@ -117,7 +116,7 @@ namespace MWWorld
         mActiveCells.erase(*iter);
     }
 
-    void Scene::loadCell (Ptr::CellStore *cell)
+    void Scene::loadCell (Ptr::CellStore *cell, Loading::Listener* loadingListener)
     {
         // register local scripts
         MWBase::Environment::get().getWorld()->getLocalScripts().addCell (cell);
@@ -150,7 +149,7 @@ namespace MWWorld
 
             // ... then references. This is important for adjustPosition to work correctly.
             /// \todo rescale depending on the state of a new GMST
-            insertCell (*cell, true);
+            insertCell (*cell, true, loadingListener);
 
             mRendering.cellAdded (cell);
 
@@ -200,17 +199,15 @@ namespace MWWorld
     void Scene::changeCell (int X, int Y, const ESM::Position& position, bool adjustPlayerPos)
     {
         Nif::NIFFile::CacheLock cachelock;
-        const MWWorld::Store<ESM::GameSetting> &gmst =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-        mRendering.preCellChange(mCurrentCell);
+        Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
+        Loading::ScopedLoad load(loadingListener);
 
         // remove active
         MWBase::Environment::get().getMechanicsManager()->remove(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
 
-        std::string loadingExteriorText;
-
-        loadingExteriorText = gmst.find ("sLoadingMessage3")->getString();
+        std::string loadingExteriorText = "#{sLoadingMessage3}";
+        loadingListener->setLabel(loadingExteriorText);
 
         CellStoreCollection::iterator active = mActiveCells.begin();
 
@@ -232,7 +229,6 @@ namespace MWWorld
             ++numUnload;
         }
 
-        int current = 0;
         active = mActiveCells.begin();
         while (active!=mActiveCells.end())
         {
@@ -247,11 +243,10 @@ namespace MWWorld
                 }
             }
             unloadCell (active++);
-            ++current;
         }
 
-        int numLoad = 0;
-        // get the number of cells to load
+        int refsToLoad = 0;
+        // get the number of refs to load
         for (int x=X-1; x<=X+1; ++x)
             for (int y=Y-1; y<=Y+1; ++y)
             {
@@ -269,11 +264,12 @@ namespace MWWorld
                 }
 
                 if (iter==mActiveCells.end())
-                    ++numLoad;
+                    refsToLoad += countRefs(*MWBase::Environment::get().getWorld()->getExterior(x, y));
             }
 
+        loadingListener->setProgressRange(refsToLoad);
+
         // Load cells
-        current = 0;
         for (int x=X-1; x<=X+1; ++x)
             for (int y=Y-1; y<=Y+1; ++y)
             {
@@ -294,11 +290,7 @@ namespace MWWorld
                 {
                     CellStore *cell = MWBase::Environment::get().getWorld()->getExterior(x, y);
 
-                    //Loading Exterior loading text
-                    MWBase::Environment::get().getWindowManager ()->setLoadingProgress (loadingExteriorText, 0, current, numLoad);
-
-                    loadCell (cell);
-                    ++current;
+                    loadCell (cell, loadingListener);
                 }
             }
 
@@ -330,7 +322,7 @@ namespace MWWorld
 
         mCellChanged = true;
 
-        MWBase::Environment::get().getWindowManager ()->loadingDone ();
+        loadingListener->removeWallpaper();
     }
 
     //We need the ogre renderer and a scene node.
@@ -356,13 +348,14 @@ namespace MWWorld
     void Scene::changeToInteriorCell (const std::string& cellName, const ESM::Position& position)
     {
         MWBase::Environment::get().getWorld ()->getFader ()->fadeOut(0.5);
-        const MWWorld::Store<ESM::GameSetting> &gmst =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
         mRendering.enableTerrain(false);
 
-        std::string loadingInteriorText;
-        loadingInteriorText = gmst.find ("sLoadingMessage2")->getString();
+        Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
+        Loading::ScopedLoad load(loadingListener);
+
+        std::string loadingInteriorText = "#{sLoadingMessage2}";
+        loadingListener->setLabel(loadingInteriorText);
 
         CellStore *cell = MWBase::Environment::get().getWorld()->getInterior(cellName);
         bool loadcell = (mCurrentCell == NULL);
@@ -406,13 +399,15 @@ namespace MWWorld
             ++current;
         }
 
+        int refsToLoad = countRefs(*cell);
+        loadingListener->setProgressRange(refsToLoad);
+
         // Load cell.
         std::cout << "cellName: " << cell->mCell->mName << std::endl;
 
         //Loading Interior loading text
-        MWBase::Environment::get().getWindowManager ()->setLoadingProgress (loadingInteriorText, 0, 0, 1);
 
-        loadCell (cell);
+        loadCell (cell, loadingListener);
 
         mCurrentCell = cell;
 
@@ -429,7 +424,7 @@ namespace MWWorld
         mCellChanged = true;
         MWBase::Environment::get().getWorld ()->getFader ()->fadeIn(0.5);
 
-        MWBase::Environment::get().getWindowManager ()->loadingDone ();
+        loadingListener->removeWallpaper();
     }
 
     void Scene::changeToExteriorCell (const ESM::Position& position)
@@ -454,30 +449,54 @@ namespace MWWorld
         mCellChanged = false;
     }
 
-    void Scene::insertCell (Ptr::CellStore &cell, bool rescale)
+    int Scene::countRefs (const Ptr::CellStore& cell)
+    {
+        return cell.mActivators.mList.size()
+                + cell.mPotions.mList.size()
+                + cell.mAppas.mList.size()
+                + cell.mArmors.mList.size()
+                + cell.mBooks.mList.size()
+                + cell.mClothes.mList.size()
+                + cell.mContainers.mList.size()
+                + cell.mDoors.mList.size()
+                + cell.mIngreds.mList.size()
+                + cell.mCreatureLists.mList.size()
+                + cell.mItemLists.mList.size()
+                + cell.mLights.mList.size()
+                + cell.mLockpicks.mList.size()
+                + cell.mMiscItems.mList.size()
+                + cell.mProbes.mList.size()
+                + cell.mRepairs.mList.size()
+                + cell.mStatics.mList.size()
+                + cell.mWeapons.mList.size()
+                + cell.mCreatures.mList.size()
+                + cell.mNpcs.mList.size();
+    }
+
+    void Scene::insertCell (Ptr::CellStore &cell, bool rescale, Loading::Listener* loadingListener)
     {
         // Loop through all references in the cell
-        insertCellRefList(mRendering, cell.mActivators, cell, *mPhysics, rescale);
-        insertCellRefList(mRendering, cell.mPotions, cell, *mPhysics, rescale);
-        insertCellRefList(mRendering, cell.mAppas, cell, *mPhysics, rescale);
-        insertCellRefList(mRendering, cell.mArmors, cell, *mPhysics, rescale);
-        insertCellRefList(mRendering, cell.mBooks, cell, *mPhysics, rescale);
-        insertCellRefList(mRendering, cell.mClothes, cell, *mPhysics, rescale);
-        insertCellRefList(mRendering, cell.mContainers, cell, *mPhysics, rescale);
-        insertCellRefList(mRendering, cell.mDoors, cell, *mPhysics, rescale);
-        insertCellRefList(mRendering, cell.mIngreds, cell, *mPhysics, rescale);
-        insertCellRefList(mRendering, cell.mCreatureLists, cell, *mPhysics, rescale);
-        insertCellRefList(mRendering, cell.mItemLists, cell, *mPhysics, rescale);
-        insertCellRefList(mRendering, cell.mLights, cell, *mPhysics, rescale);
-        insertCellRefList(mRendering, cell.mLockpicks, cell, *mPhysics, rescale);
-        insertCellRefList(mRendering, cell.mMiscItems, cell, *mPhysics, rescale);
-        insertCellRefList(mRendering, cell.mProbes, cell, *mPhysics, rescale);
-        insertCellRefList(mRendering, cell.mRepairs, cell, *mPhysics, rescale);
-        insertCellRefList(mRendering, cell.mStatics, cell, *mPhysics, rescale);
-        insertCellRefList(mRendering, cell.mWeapons, cell, *mPhysics, rescale);
+        insertCellRefList(mRendering, cell.mActivators, cell, *mPhysics, rescale, loadingListener);
+        insertCellRefList(mRendering, cell.mPotions, cell, *mPhysics, rescale, loadingListener);
+        insertCellRefList(mRendering, cell.mAppas, cell, *mPhysics, rescale, loadingListener);
+        insertCellRefList(mRendering, cell.mArmors, cell, *mPhysics, rescale, loadingListener);
+        insertCellRefList(mRendering, cell.mBooks, cell, *mPhysics, rescale, loadingListener);
+        insertCellRefList(mRendering, cell.mClothes, cell, *mPhysics, rescale, loadingListener);
+        insertCellRefList(mRendering, cell.mContainers, cell, *mPhysics, rescale, loadingListener);
+        insertCellRefList(mRendering, cell.mDoors, cell, *mPhysics, rescale, loadingListener);
+        insertCellRefList(mRendering, cell.mIngreds, cell, *mPhysics, rescale, loadingListener);
+        insertCellRefList(mRendering, cell.mCreatureLists, cell, *mPhysics, rescale, loadingListener);
+        insertCellRefList(mRendering, cell.mItemLists, cell, *mPhysics, rescale, loadingListener);
+        insertCellRefList(mRendering, cell.mLights, cell, *mPhysics, rescale, loadingListener);
+        insertCellRefList(mRendering, cell.mLockpicks, cell, *mPhysics, rescale, loadingListener);
+        insertCellRefList(mRendering, cell.mMiscItems, cell, *mPhysics, rescale, loadingListener);
+        insertCellRefList(mRendering, cell.mProbes, cell, *mPhysics, rescale, loadingListener);
+        insertCellRefList(mRendering, cell.mRepairs, cell, *mPhysics, rescale, loadingListener);
+        insertCellRefList(mRendering, cell.mStatics, cell, *mPhysics, rescale, loadingListener);
+        insertCellRefList(mRendering, cell.mWeapons, cell, *mPhysics, rescale, loadingListener);
         // Load NPCs and creatures _after_ everything else (important for adjustPosition to work correctly)
-        insertCellRefList(mRendering, cell.mCreatures, cell, *mPhysics, rescale);
-        insertCellRefList(mRendering, cell.mNpcs, cell, *mPhysics, rescale);
+        insertCellRefList(mRendering, cell.mCreatures, cell, *mPhysics, rescale, loadingListener);
+        insertCellRefList(mRendering, cell.mNpcs, cell, *mPhysics, rescale, loadingListener);
     }
 
     void Scene::addObjectToScene (const Ptr& ptr)

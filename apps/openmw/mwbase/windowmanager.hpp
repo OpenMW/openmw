@@ -9,6 +9,8 @@
 
 #include <components/translation/translation.hpp>
 
+#include <components/loadinglistener/loadinglistener.hpp>
+
 #include "../mwmechanics/stat.hpp"
 
 #include "../mwgui/mode.hpp"
@@ -253,9 +255,6 @@ namespace MWBase
 
             virtual void executeInConsole (const std::string& path) = 0;
 
-            virtual void setLoadingProgress (const std::string& stage, int depth, int current, int total) = 0;
-            virtual void loadingDone() = 0;
-
             virtual void enableRest() = 0;
             virtual bool getRestEnabled() = 0;
             virtual bool getJournalAllowed() = 0; 
@@ -282,6 +281,8 @@ namespace MWBase
             virtual const Translation::Storage& getTranslationDataStorage() const = 0;
 
             virtual void setKeyFocusWidget (MyGUI::Widget* widget) = 0;
+
+            virtual Loading::Listener* getLoadingScreen() = 0;
     };
 }
 

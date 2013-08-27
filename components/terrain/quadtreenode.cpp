@@ -220,7 +220,7 @@ const Ogre::AxisAlignedBox& QuadTreeNode::getBoundingBox()
     return mBounds;
 }
 
-void QuadTreeNode::update(const Ogre::Vector3 &cameraPos)
+void QuadTreeNode::update(const Ogre::Vector3 &cameraPos, Loading::Listener* loadingListener)
 {
     const Ogre::AxisAlignedBox& bounds = getBoundingBox();
     if (bounds.isNull())
@@ -253,6 +253,9 @@ void QuadTreeNode::update(const Ogre::Vector3 &cameraPos)
         wantedLod = 6;
 
     bool hadChunk = hasChunk();
+
+    if (loadingListener)
+        loadingListener->indicateProgress();
 
     if (!distantLand && dist > 8192*2)
     {
@@ -341,7 +344,7 @@ void QuadTreeNode::update(const Ogre::Vector3 &cameraPos)
         }
         assert(hasChildren() && "Leaf node's LOD needs to be 0");
         for (int i=0; i<4; ++i)
-            mChildren[i]->update(cameraPos);
+            mChildren[i]->update(cameraPos, loadingListener);
     }
 }
 

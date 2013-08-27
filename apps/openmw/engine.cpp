@@ -123,6 +123,7 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
         MWBase::Environment::get().getWindowManager()->wmUpdateFps(window->getLastFPS(), tri, batch);
 
         MWBase::Environment::get().getWindowManager()->onFrame(frametime);
+        MWBase::Environment::get().getWindowManager()->update();
     }
     catch (const std::exception& e)
     {
@@ -385,25 +386,38 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     loadBSA();
 
+
+    // Create input and UI first to set up a bootstrapping environment for
+    // showing a loading screen and keeping the window responsive while doing so
+
+    std::string keybinderUser = (mCfgMgr.getUserPath() / "input.xml").string();
+    bool keybinderUserExists = boost::filesystem::exists(keybinderUser);
+    MWInput::InputManager* input = new MWInput::InputManager (*mOgre, *this, keybinderUser, keybinderUserExists);
+    mEnvironment.setInputManager (input);
+
+    MWGui::WindowManager* window = new MWGui::WindowManager(
+                mExtensions, mFpsLevel, mOgre, mCfgMgr.getLogPath().string() + std::string("/"),
+                mCfgMgr.getCachePath ().string(), mScriptConsoleMode, mTranslationDataStorage, mEncoding);
+    mEnvironment.setWindowManager (window);
+    if (mNewGame)
+        mEnvironment.getWindowManager()->setNewGame(true);
+
     // Create the world
     mEnvironment.setWorld( new MWWorld::World (*mOgre, mFileCollections, mMaster, mPlugins,
         mResDir, mCfgMgr.getCachePath(), mEncoder, mFallbackMap,
         mActivationDistanceOverride));
     MWBase::Environment::get().getWorld()->setupPlayer();
+    input->setPlayer(&mEnvironment.getWorld()->getPlayer());
+
+    window->initUI();
+    window->renderWorldMap();
 
     //Load translation data
     mTranslationDataStorage.setEncoder(mEncoder);
     for (size_t i = 0; i < mMaster.size(); i++)
       mTranslationDataStorage.loadTranslationData(mFileCollections, mMaster[i]);
 
-    // Create window manager - this manages all the MW-specific GUI windows
     Compiler::registerExtensions (mExtensions); 
-
-    mEnvironment.setWindowManager (new MWGui::WindowManager(
-        mExtensions, mFpsLevel, mOgre, mCfgMgr.getLogPath().string() + std::string("/"),
-        mCfgMgr.getCachePath ().string(), mScriptConsoleMode, mTranslationDataStorage, mEncoding));
-    if (mNewGame)
-        mEnvironment.getWindowManager()->setNewGame(true);
 
     // Create sound system
     mEnvironment.setSoundManager (new MWSound::SoundManager(mUseSound));
@@ -421,16 +435,6 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     // Create dialog system
     mEnvironment.setJournal (new MWDialogue::Journal);
     mEnvironment.setDialogueManager (new MWDialogue::DialogueManager (mExtensions, mVerboseScripts, mTranslationDataStorage));
-
-    // Sets up the input system
-
-    // Get the path for the keybinder xml file
-    std::string keybinderUser = (mCfgMgr.getUserPath() / "input.xml").string();
-    bool keybinderUserExists = boost::filesystem::exists(keybinderUser);
-
-    mEnvironment.setInputManager (new MWInput::InputManager (*mOgre,
-        MWBase::Environment::get().getWorld()->getPlayer(),
-         *MWBase::Environment::get().getWindowManager(), *this, keybinderUser, keybinderUserExists));
 
     mEnvironment.getWorld()->renderPlayer();
 

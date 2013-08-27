@@ -5,6 +5,8 @@
 #include <OgreVector2.h>
 #include <OgreTexture.h>
 
+#include <components/loadinglistener/loadinglistener.hpp>
+
 namespace Ogre
 {
     class Rectangle2D;
@@ -96,7 +98,7 @@ namespace Terrain
         Terrain* getTerrain() { return mTerrain; }
 
         /// Adjust LODs for the given camera position, possibly splitting up chunks or merging them.
-        void update (const Ogre::Vector3& cameraPos);
+        void update (const Ogre::Vector3& cameraPos, Loading::Listener* loadingListener);
 
         /// Adjust index buffers of chunks to stitch together chunks of different LOD, so that cracks are avoided.
         /// Call after QuadTreeNode::update!

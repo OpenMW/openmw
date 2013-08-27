@@ -157,7 +157,7 @@ namespace OEngine
             void createWindow(const std::string &title, const WindowSettings& settings);
 
             /// Set up the scene manager, camera and viewport
-            void createScene(const std::string& camName="Camera",// Camera name
+            void adjustCamera(
                 float fov=55,                      // Field of view angle
                 float nearClip=5                   // Near clip distance
             );

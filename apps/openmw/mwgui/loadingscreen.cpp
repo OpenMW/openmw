@@ -19,20 +19,16 @@ namespace MWGui
         : mSceneMgr(sceneMgr)
         , mWindow(rw)
         , WindowBase("openmw_loading_screen.layout")
-        , mLoadingOn(false)
         , mLastRenderTime(0.f)
         , mLastWallpaperChangeTime(0.f)
         , mFirstLoad(true)
-        , mTotalRefsLoading(0)
-        , mCurrentCellLoading(0)
-        , mTotalCellsLoading(0)
-        , mCurrentRefLoading(0)
-        , mCurrentRefList(0)
+        , mProgress(0)
     {
         getWidget(mLoadingText, "LoadingText");
         getWidget(mProgressBar, "ProgressBar");
         getWidget(mBackgroundImage, "BackgroundImage");
 
+        mProgressBar->setScrollViewPage(1);
 
         mBackgroundMaterial = Ogre::MaterialManager::getSingleton().create("BackgroundMaterial", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
         mBackgroundMaterial->getTechnique(0)->getPass(0)->setLightingEnabled(false);
@@ -54,6 +50,11 @@ namespace MWGui
         mRectangle->setVisible(false);
     }
 
+    void LoadingScreen::setLabel(const std::string &label)
+    {
+        mLoadingText->setCaptionWithReplacing(label);
+    }
+
     LoadingScreen::~LoadingScreen()
     {
         delete mRectangle;
@@ -64,149 +65,25 @@ namespace MWGui
         setCoord(0,0,w,h);
     }
 
-    void LoadingScreen::setLoadingProgress (const std::string& stage, int depth, int current, int total)
-    {
-        if (!mLoadingOn)
-            loadingOn();
-
-        const int numRefLists = 20;
-
-        if (depth == 0)
-        {
-            mCurrentCellLoading = current;
-            mTotalCellsLoading = total;
-
-            mCurrentRefLoading = 0;
-            mCurrentRefList = 0;
-        }
-        else if (depth == 1)
-        {
-            mCurrentRefLoading = current;
-            mTotalRefsLoading = total;
-        }
-
-        assert (mTotalCellsLoading != 0);
-
-        float refProgress;
-        if (mTotalRefsLoading <= 1)
-            refProgress = 1;
-        else
-            refProgress = float(mCurrentRefLoading) / float(mTotalRefsLoading-1);
-        refProgress += mCurrentRefList;
-        refProgress /= numRefLists;
-
-        assert(refProgress <= 1 && refProgress >= 0);
-
-        if (depth == 1 && mCurrentRefLoading == mTotalRefsLoading-1)
-            ++mCurrentRefList;
-
-        float progress = (float(mCurrentCellLoading)+refProgress) / float(mTotalCellsLoading);
-        assert(progress <= 1 && progress >= 0);
-
-        mLoadingText->setCaption(stage);
-        mProgressBar->setProgressPosition (static_cast<size_t>(progress * 1000));
-
-        static float loadingScreenFps = 30.f;
-
-        if (mTimer.getMilliseconds () > mLastRenderTime + (1.f/loadingScreenFps) * 1000.f)
-        {
-            float dt = mTimer.getMilliseconds () - mLastRenderTime;
-            mLastRenderTime = mTimer.getMilliseconds ();
-
-            if (mFirstLoad && mTimer.getMilliseconds () > mLastWallpaperChangeTime + 3000*1)
-            {
-                mLastWallpaperChangeTime = mTimer.getMilliseconds ();
-                changeWallpaper();
-            }
-
-            // Turn off rendering except the GUI
-            mSceneMgr->clearSpecialCaseRenderQueues();
-            // SCRQM_INCLUDE with RENDER_QUEUE_OVERLAY does not work.
-            for (int i = 0; i < Ogre::RENDER_QUEUE_MAX; ++i)
-            {
-                if (i > 0 && i < 96)
-                    mSceneMgr->addSpecialCaseRenderQueue(i);
-            }
-            mSceneMgr->setSpecialCaseRenderQueueMode(Ogre::SceneManager::SCRQM_EXCLUDE);
-
-            // always update input before rendering something, otherwise mygui goes crazy when something was entered in the frame before
-            // (e.g. when using "coc" console command, it would enter an infinite loop and crash due to overflow)
-            MWBase::Environment::get().getInputManager()->update(0, true);
-
-            Ogre::CompositorChain* chain = Ogre::CompositorManager::getSingleton().getCompositorChain(mWindow->getViewport(0));
-
-            bool hasCompositor = chain->getCompositor ("gbufferFinalizer");
-
-
-            if (!hasCompositor)
-            {
-                mWindow->getViewport(0)->setClearEveryFrame(false);
-            }
-            else
-            {
-                if (!mFirstLoad)
-                {
-                    mBackgroundMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName(chain->getCompositor ("gbufferFinalizer")->getTextureInstance ("no_mrt_output", 0)->getName());
-                    mRectangle->setVisible(true);
-                }
-
-                for (unsigned int i = 0; i<chain->getNumCompositors(); ++i)
-                {
-                    Ogre::CompositorManager::getSingleton().setCompositorEnabled(mWindow->getViewport(0), chain->getCompositor(i)->getCompositor()->getName(), false);
-                }
-            }
-
-            MWBase::Environment::get().getWorld ()->getFader ()->update (dt);
-
-            mWindow->update();
-
-            if (!hasCompositor)
-                mWindow->getViewport(0)->setClearEveryFrame(true);
-            else
-            {
-                for (unsigned int i = 0; i<chain->getNumCompositors(); ++i)
-                {
-                    Ogre::CompositorManager::getSingleton().setCompositorEnabled(mWindow->getViewport(0), chain->getCompositor(i)->getCompositor()->getName(), true);
-                }
-            }
-
-            mRectangle->setVisible(false);
-
-            // resume 3d rendering
-            mSceneMgr->clearSpecialCaseRenderQueues();
-            mSceneMgr->setSpecialCaseRenderQueueMode(Ogre::SceneManager::SCRQM_EXCLUDE);
-        }
-    }
-
-    void LoadingScreen::loadingDone()
-    {
-        loadingOff();
-    }
-
     void LoadingScreen::loadingOn()
     {
         setVisible(true);
-        mLoadingOn = true;
 
         if (mFirstLoad)
         {
             changeWallpaper();
-
-            MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_LoadingWallpaper);
         }
         else
         {
             mBackgroundImage->setImageTexture("");
-            MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Loading);
         }
-    }
 
+        MWBase::Environment::get().getWindowManager()->pushGuiMode(mFirstLoad ? GM_LoadingWallpaper : GM_Loading);
+    }
 
     void LoadingScreen::loadingOff()
     {
         setVisible(false);
-        mLoadingOn = false;
-        mFirstLoad = false;
 
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Loading);
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_LoadingWallpaper);
@@ -234,5 +111,125 @@ namespace MWGui
         }
         else
             std::cerr << "No loading screens found!" << std::endl;
+    }
+
+    void LoadingScreen::setProgressRange (size_t range)
+    {
+        mProgressBar->setScrollRange(range+1);
+        mProgressBar->setScrollPosition(0);
+        mProgressBar->setTrackSize(0);
+        mProgress = 0;
+    }
+
+    void LoadingScreen::setProgress (size_t value)
+    {
+        assert(value < mProgressBar->getScrollRange());
+        if (value - mProgress < mProgressBar->getScrollRange()/100.f)
+            return;
+        mProgress = value;
+        mProgressBar->setScrollPosition(0);
+        mProgressBar->setTrackSize(value / (float)(mProgressBar->getScrollRange()) * mProgressBar->getLineSize());
+        draw();
+    }
+
+    void LoadingScreen::increaseProgress (size_t increase)
+    {
+        mProgressBar->setScrollPosition(0);
+        size_t value = mProgress + increase;
+        mProgress = value;
+        assert(mProgress < mProgressBar->getScrollRange());
+        mProgressBar->setTrackSize(value / (float)(mProgressBar->getScrollRange()) * mProgressBar->getLineSize());
+        draw();
+    }
+
+    void LoadingScreen::indicateProgress()
+    {
+        float time = (mTimer.getMilliseconds() % 2001) / 1000.f;
+        if (time > 1)
+            time = (time-2)*-1;
+
+        mProgressBar->setTrackSize(50);
+        mProgressBar->setScrollPosition(time * (mProgressBar->getScrollRange()-1));
+        draw();
+    }
+
+    void LoadingScreen::removeWallpaper()
+    {
+        mFirstLoad = false;
+    }
+
+    void LoadingScreen::draw()
+    {
+        const float loadingScreenFps = 20.f;
+
+        if (mTimer.getMilliseconds () > mLastRenderTime + (1.f/loadingScreenFps) * 1000.f)
+        {
+            mLastRenderTime = mTimer.getMilliseconds ();
+
+            if (mFirstLoad && mTimer.getMilliseconds () > mLastWallpaperChangeTime + 5000*1)
+            {
+                mLastWallpaperChangeTime = mTimer.getMilliseconds ();
+                changeWallpaper();
+            }
+
+            // Turn off rendering except the GUI
+            mSceneMgr->clearSpecialCaseRenderQueues();
+            // SCRQM_INCLUDE with RENDER_QUEUE_OVERLAY does not work.
+            for (int i = 0; i < Ogre::RENDER_QUEUE_MAX; ++i)
+            {
+                if (i > 0 && i < 96)
+                    mSceneMgr->addSpecialCaseRenderQueue(i);
+            }
+            mSceneMgr->setSpecialCaseRenderQueueMode(Ogre::SceneManager::SCRQM_EXCLUDE);
+
+            MWBase::Environment::get().getInputManager()->update(0, true);
+
+            Ogre::CompositorChain* chain = Ogre::CompositorManager::getSingleton().getCompositorChain(mWindow->getViewport(0));
+
+            bool hasCompositor = chain->getCompositor ("gbufferFinalizer");
+
+
+            if (!hasCompositor)
+            {
+                mWindow->getViewport(0)->setClearEveryFrame(false);
+            }
+            else
+            {
+                if (!mFirstLoad)
+                {
+                    mBackgroundMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName(chain->getCompositor ("gbufferFinalizer")->getTextureInstance ("no_mrt_output", 0)->getName());
+                    mRectangle->setVisible(true);
+                }
+
+                for (unsigned int i = 0; i<chain->getNumCompositors(); ++i)
+                {
+                    Ogre::CompositorManager::getSingleton().setCompositorEnabled(mWindow->getViewport(0), chain->getCompositor(i)->getCompositor()->getName(), false);
+                }
+            }
+
+            // First, swap buffers from last draw, then, queue an update of the
+            // window contents, but don't swap buffers (which would have
+            // caused a sync / flush and would be expensive).
+            // We're doing this so we can do some actual loading while the GPU is busy with the render.
+            // This means the render is lagging a frame behind, but this is hardly noticable.
+            mWindow->swapBuffers(false); // never Vsync, makes no sense here
+            mWindow->update(false);
+
+            if (!hasCompositor)
+                mWindow->getViewport(0)->setClearEveryFrame(true);
+            else
+            {
+                for (unsigned int i = 0; i<chain->getNumCompositors(); ++i)
+                {
+                    Ogre::CompositorManager::getSingleton().setCompositorEnabled(mWindow->getViewport(0), chain->getCompositor(i)->getCompositor()->getName(), true);
+                }
+            }
+
+            mRectangle->setVisible(false);
+
+            // resume 3d rendering
+            mSceneMgr->clearSpecialCaseRenderQueues();
+            mSceneMgr->setSpecialCaseRenderQueueMode(Ogre::SceneManager::SCRQM_EXCLUDE);
+        }
     }
 }
