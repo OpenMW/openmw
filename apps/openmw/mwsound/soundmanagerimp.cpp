@@ -103,6 +103,7 @@ namespace MWSound
 
     SoundManager::~SoundManager()
     {
+        mUnderwaterSound.reset();
         mActiveSounds.clear();
         mMusic.reset();
         mOutput.reset();
@@ -550,13 +551,13 @@ namespace MWSound
         {
             env = Env_Underwater;
             //play underwater sound
-            if(!getSoundPlaying(MWWorld::Ptr(), "Underwater"))
-                playSound("Underwater", 1.0f, 1.0f, Play_TypeSfx, Play_LoopNoEnv);
+            if(!(mUnderwaterSound && mUnderwaterSound->isPlaying()))
+                mUnderwaterSound = playSound("Underwater", 1.0f, 1.0f, Play_TypeSfx, Play_LoopNoEnv);
         }
-        else
+        else if(mUnderwaterSound)
         {
-            //no need to check if it's playing, stop sound does nothing in that case
-            stopSound("Underwater");
+            mUnderwaterSound->stop();
+            mUnderwaterSound.reset();
         }
 
         mOutput->updateListener(
