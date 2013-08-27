@@ -550,10 +550,8 @@ namespace MWSound
         {
             env = Env_Underwater;
             //play underwater sound
-            //HACK: this sound is always played underwater, so set volume and pitch higher (it's then lowered)
-            //Currently not possible to play looping sound with no environment
             if(!getSoundPlaying(MWWorld::Ptr(), "Underwater"))
-                playSound("Underwater", 1.11, 1.42 ,Play_TypeSfx, Play_Loop );
+                playSound("Underwater", 1.0f, 1.0f, Play_TypeSfx, Play_LoopNoEnv);
         }
         else
         {
