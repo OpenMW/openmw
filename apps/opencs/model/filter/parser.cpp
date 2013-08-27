@@ -174,14 +174,14 @@ CSMFilter::Token CSMFilter::Parser::checkKeywords (const Token& token)
     {
         "true", "false",
         "and", "or", "not",
-        "text", "value",
+        "string", "value",
         0
     };
 
     std::string string = Misc::StringUtils::lowerCase (token.mString);
 
     for (int i=0; sKeywords[i]; ++i)
-        if (sKeywords[i]==string)
+        if (sKeywords[i]==string || (string.size()==1 && sKeywords[i][0]==string[0]))
             return Token (static_cast<Token::Type> (i+Token::Type_Keyword_True));
 
     return token;
@@ -211,7 +211,7 @@ CSMFilter::Token CSMFilter::Parser::getNextToken()
         case '[': ++mIndex; return Token (Token::Type_OpenSquare);
         case ']': ++mIndex; return Token (Token::Type_CloseSquare);
         case ',': ++mIndex; return Token (Token::Type_Comma);
-        case '?': ++mIndex; return Token (Token::Type_OneShot);
+        case '!': ++mIndex; return Token (Token::Type_OneShot);
     }
 
     if (c=='"' || c=='_' || std::isalpha (c) || c==':')
@@ -224,54 +224,58 @@ CSMFilter::Token CSMFilter::Parser::getNextToken()
     return Token (Token::Type_None);
 }
 
-boost::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseImp (bool allowEmpty)
+boost::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseImp (bool allowEmpty, bool ignoreOneShot)
 {
     if (Token token = getNextToken())
     {
-        switch (token.mType)
-        {
-            case Token::Type_Keyword_True:
+        if (token==Token (Token::Type_OneShot))
+            token = getNextToken();
 
-                return boost::shared_ptr<CSMFilter::Node> (new BooleanNode (true));
-
-            case Token::Type_Keyword_False:
-
-                return boost::shared_ptr<CSMFilter::Node> (new BooleanNode (false));
-
-            case Token::Type_Keyword_And:
-            case Token::Type_Keyword_Or:
-
-                return parseNAry (token);
-
-            case Token::Type_Keyword_Not:
+        if (token)
+            switch (token.mType)
             {
-                boost::shared_ptr<CSMFilter::Node> node = parseImp();
+                case Token::Type_Keyword_True:
 
-                if (mError)
+                    return boost::shared_ptr<CSMFilter::Node> (new BooleanNode (true));
+
+                case Token::Type_Keyword_False:
+
+                    return boost::shared_ptr<CSMFilter::Node> (new BooleanNode (false));
+
+                case Token::Type_Keyword_And:
+                case Token::Type_Keyword_Or:
+
+                    return parseNAry (token);
+
+                case Token::Type_Keyword_Not:
+                {
+                    boost::shared_ptr<CSMFilter::Node> node = parseImp();
+
+                    if (mError)
+                        return boost::shared_ptr<Node>();
+
+                    return boost::shared_ptr<CSMFilter::Node> (new NotNode (node));
+                }
+
+                case Token::Type_Keyword_Text:
+
+                    return parseText();
+
+                case Token::Type_Keyword_Value:
+
+                    return parseValue();
+
+                case Token::Type_EOS:
+
+                    if (!allowEmpty)
+                        error();
+
                     return boost::shared_ptr<Node>();
 
-                return boost::shared_ptr<CSMFilter::Node> (new NotNode (node));
-            }
+                default:
 
-            case Token::Type_Keyword_Text:
-
-                return parseText();
-
-            case Token::Type_Keyword_Value:
-
-                return parseValue();
-
-            case Token::Type_EOS:
-
-                if (!allowEmpty)
                     error();
-
-                return boost::shared_ptr<Node>();
-
-            default:
-
-                error();
-        }
+            }
     }
 
     return boost::shared_ptr<Node>();
@@ -528,7 +532,7 @@ bool CSMFilter::Parser::parse (const std::string& filter, bool allowPredefined)
 
     if (!allowPredefined || token==Token (Token::Type_OneShot))
     {
-        boost::shared_ptr<Node> node = parseImp (true);
+        boost::shared_ptr<Node> node = parseImp (true, token!=Token (Token::Type_OneShot));
 
         if (mError)
             return false;
