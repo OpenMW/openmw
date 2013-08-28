@@ -11,10 +11,12 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
+#include "../mwworld/player.hpp"
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "npcstats.hpp"
 #include "creaturestats.hpp"
@@ -162,33 +164,37 @@ namespace MWMechanics
 
     void Actors::updateDrowning(const MWWorld::Ptr& ptr, float duration)
     {
-        NpcStats &stats = MWWorld::Class::get(ptr).getNpcStats(ptr);
-        if(MWBase::Environment::get().getWorld()->isSubmerged(ptr) && 
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+        NpcStats &stats = ptr.getClass().getNpcStats(ptr);
+        if(world->isSubmerged(ptr) &&
            stats.getMagicEffects().get(ESM::MagicEffect::WaterBreathing).mMagnitude == 0)
         {
+            float timeLeft = 0.0f;
             if(stats.getFatigue().getCurrent() == 0)
                 stats.setTimeToStartDrowning(0);
-
-            float timeLeft = stats.getTimeToStartDrowning()-duration;
-            if(timeLeft < 0.0f)
-                timeLeft = 0.0f;
-
-            stats.setTimeToStartDrowning(timeLeft);
+            else
+            {
+                timeLeft = stats.getTimeToStartDrowning() - duration;
+                if(timeLeft < 0.0f)
+                    timeLeft = 0.0f;
+                stats.setTimeToStartDrowning(timeLeft);
+            }
             if(timeLeft == 0.0f)
-                stats.setLastDrowningHitTime(stats.getLastDrowningHitTime()+duration);
+            {
+                // If drowning, apply 3 points of damage per second
+                ptr.getClass().setActorHealth(ptr, stats.getHealth().getCurrent() - 3.0f*duration);
+
+                // Play a drowning sound as necessary for the player
+                if(ptr == world->getPlayer().getPlayer())
+                {
+                    MWBase::SoundManager *sndmgr = MWBase::Environment::get().getSoundManager();
+                    if(!sndmgr->getSoundPlaying(MWWorld::Ptr(), "drown"))
+                        sndmgr->playSound("drown", 1.0f, 1.0f);
+                }
+            }
         }
         else
-        {
             stats.setTimeToStartDrowning(20);
-            stats.setLastDrowningHitTime(0);
-        }
-        //if npc is drowning and it's time to hit, then hit
-        while(stats.getTimeToStartDrowning() == 0.0f && stats.getLastDrowningHitTime() > 0.33f)
-        {
-            stats.setLastDrowningHitTime(stats.getLastDrowningHitTime()-0.33f);
-            //fixme: replace it with something different once screen hit effects are implemented (blood on screen)
-            MWWorld::Class::get(ptr).setActorHealth(ptr, stats.getHealth().getCurrent()-1.0f);
-        }
     }
 
     Actors::Actors() : mDuration (0) {}
