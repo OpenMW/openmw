@@ -6,19 +6,26 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld//cellstore.hpp"
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/physicssystem.hpp"
+#include "../mwworld/action.hpp"
+#include "../mwworld/failedaction.hpp"
+#include "../mwworld/nullaction.hpp"
 
 #include "../mwrender/actors.hpp"
 #include "../mwrender/renderinginterface.hpp"
 
 #include "../mwgui/tooltips.hpp"
 
+#include "../mwmechanics/npcstats.hpp"
+
+
 namespace MWClass
 {
-   void Activator::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
+    void Activator::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
         const std::string model = getModel(ptr);
         if (!model.empty()) {
@@ -94,7 +101,23 @@ namespace MWClass
 
         return info;
     }
-    
+
+    boost::shared_ptr<MWWorld::Action> Activator::activate(const MWWorld::Ptr &ptr, const MWWorld::Ptr &actor) const
+    {
+        if(get(actor).isNpc() && get(actor).getNpcStats(actor).isWerewolf())
+        {
+            const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+            const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfActivator");
+
+            boost::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
+            if(sound) action->setSound(sound->mId);
+
+            return action;
+        }
+        return boost::shared_ptr<MWWorld::Action>(new MWWorld::NullAction);
+    }
+
+
     MWWorld::Ptr
     Activator::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
     {
