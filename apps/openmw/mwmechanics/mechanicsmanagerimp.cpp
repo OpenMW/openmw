@@ -215,79 +215,74 @@ namespace MWMechanics
 
     void MechanicsManager::update(float duration, bool paused)
     {
-        if (!mWatched.isEmpty())
+        if(!mWatched.isEmpty())
         {
-            MWMechanics::CreatureStats& stats =
-                MWWorld::Class::get (mWatched).getCreatureStats (mWatched);
-
-            MWMechanics::NpcStats& npcStats =
-                MWWorld::Class::get (mWatched).getNpcStats (mWatched);
-
-            static const char *attributeNames[8] =
+            static const char attributeNames[8][12] =
             {
                 "AttribVal1", "AttribVal2", "AttribVal3", "AttribVal4", "AttribVal5",
                 "AttribVal6", "AttribVal7", "AttribVal8"
             };
-
-            static const char *dynamicNames[3] =
+            static const char dynamicNames[3][5] =
             {
                 "HBar", "MBar", "FBar"
             };
 
-            for (int i=0; i<8; ++i)
+            MWBase::WindowManager *winMgr = MWBase::Environment::get().getWindowManager();
+            const MWMechanics::NpcStats &stats = mWatched.getClass().getNpcStats(mWatched);
+            for(int i = 0;i < ESM::Attribute::Length;++i)
             {
-                if (stats.getAttribute(i)!=mWatchedCreature.getAttribute(i))
+                if(stats.getAttribute(i) != mWatchedStats.getAttribute(i))
                 {
-                    mWatchedCreature.setAttribute(i, stats.getAttribute(i));
-
-                    MWBase::Environment::get().getWindowManager()->setValue (attributeNames[i], stats.getAttribute(i));
+                    mWatchedStats.setAttribute(i, stats.getAttribute(i));
+                    winMgr->setValue(attributeNames[i], stats.getAttribute(i));
                 }
             }
 
-            if (stats.getHealth() != mWatchedCreature.getHealth()) {
-                mWatchedCreature.setHealth(stats.getHealth());
-                MWBase::Environment::get().getWindowManager()->setValue(dynamicNames[0], stats.getHealth());
+            if(stats.getHealth() != mWatchedStats.getHealth())
+            {
+                mWatchedStats.setHealth(stats.getHealth());
+                winMgr->setValue(dynamicNames[0], stats.getHealth());
             }
-            if (stats.getMagicka() != mWatchedCreature.getMagicka()) {
-                mWatchedCreature.setMagicka(stats.getMagicka());
-                MWBase::Environment::get().getWindowManager()->setValue(dynamicNames[1], stats.getMagicka());
+            if(stats.getMagicka() != mWatchedStats.getMagicka())
+            {
+                mWatchedStats.setMagicka(stats.getMagicka());
+                winMgr->setValue(dynamicNames[1], stats.getMagicka());
             }
-            if (stats.getFatigue() != mWatchedCreature.getFatigue()) {
-                mWatchedCreature.setFatigue(stats.getFatigue());
-                MWBase::Environment::get().getWindowManager()->setValue(dynamicNames[2], stats.getFatigue());
+            if(stats.getFatigue() != mWatchedStats.getFatigue())
+            {
+                mWatchedStats.setFatigue(stats.getFatigue());
+                winMgr->setValue(dynamicNames[2], stats.getFatigue());
             }
 
-            if(npcStats.getTimeToStartDrowning() != mWatchedNpc.getTimeToStartDrowning())
+            if(stats.getTimeToStartDrowning() != mWatchedStats.getTimeToStartDrowning())
             {
-                mWatchedNpc.setTimeToStartDrowning(npcStats.getTimeToStartDrowning());
-                if(npcStats.getTimeToStartDrowning()>=20.0)
-                {
-                    MWBase::Environment::get().getWindowManager()->setDrowningBarVisibility(false);
-                }
+                mWatchedStats.setTimeToStartDrowning(stats.getTimeToStartDrowning());
+                if(stats.getTimeToStartDrowning() >= 20.0f)
+                    winMgr->setDrowningBarVisibility(false);
                 else
                 {
-                    MWBase::Environment::get().getWindowManager()->setDrowningBarVisibility(true);
-                    MWBase::Environment::get().getWindowManager()->setDrowningTimeLeft(npcStats.getTimeToStartDrowning());
+                    winMgr->setDrowningBarVisibility(true);
+                    winMgr->setDrowningTimeLeft(stats.getTimeToStartDrowning());
                 }
             }
 
             bool update = false;
 
             //Loop over ESM::Skill::SkillEnum
-            for(int i = 0; i < 27; ++i)
+            for(int i = 0; i < ESM::Skill::Length; ++i)
             {
-                if(npcStats.getSkill (i) != mWatchedNpc.getSkill (i))
+                if(stats.getSkill(i) != mWatchedStats.getSkill(i))
                 {
                     update = true;
-                    mWatchedNpc.getSkill (i) = npcStats.getSkill (i);
-                    MWBase::Environment::get().getWindowManager()->setValue((ESM::Skill::SkillEnum)i, npcStats.getSkill (i));
+                    mWatchedStats.getSkill(i) = stats.getSkill(i);
+                    winMgr->setValue((ESM::Skill::SkillEnum)i, stats.getSkill(i));
                 }
             }
 
-            if (update)
-                MWBase::Environment::get().getWindowManager()->updateSkillArea();
+            if(update)
+                winMgr->updateSkillArea();
 
-            MWBase::Environment::get().getWindowManager()->setValue ("level", stats.getLevel());
+            winMgr->setValue("level", stats.getLevel());
         }
 
         if (mUpdatePlayer)
