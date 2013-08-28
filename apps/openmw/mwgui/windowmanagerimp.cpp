@@ -929,6 +929,10 @@ namespace MWGui
 
     void WindowManager::windowResized(int x, int y)
     {
+        mGuiManager->windowResized();
+        mLoadingScreen->onResChange (x,y);
+        if (!mHud)
+            return; // UI not initialized yet
         mHud->onResChange(x, y);
         mConsole->onResChange(x, y);
         mMenu->onResChange(x, y);
@@ -938,10 +942,8 @@ namespace MWGui
         mBookWindow->center();
         mQuickKeysMenu->center();
         mSpellBuyingWindow->center();
-        mLoadingScreen->onResChange (x,y);
         mDragAndDrop->mDragAndDropWidget->setSize(MyGUI::IntSize(x, y));
         mInputBlocker->setSize(MyGUI::IntSize(x,y));
-        mGuiManager->windowResized();
     }
 
     void WindowManager::pushGuiMode(GuiMode mode)
