@@ -217,41 +217,37 @@ namespace MWMechanics
     {
         if(!mWatched.isEmpty())
         {
-            static const char attributeNames[8][12] =
-            {
-                "AttribVal1", "AttribVal2", "AttribVal3", "AttribVal4", "AttribVal5",
-                "AttribVal6", "AttribVal7", "AttribVal8"
-            };
-            static const char dynamicNames[3][5] =
-            {
-                "HBar", "MBar", "FBar"
-            };
-
             MWBase::WindowManager *winMgr = MWBase::Environment::get().getWindowManager();
             const MWMechanics::NpcStats &stats = mWatched.getClass().getNpcStats(mWatched);
             for(int i = 0;i < ESM::Attribute::Length;++i)
             {
                 if(stats.getAttribute(i) != mWatchedStats.getAttribute(i))
                 {
+                    std::stringstream attrname;
+                    attrname << "AttribVal"<<(i+1);
+
                     mWatchedStats.setAttribute(i, stats.getAttribute(i));
-                    winMgr->setValue(attributeNames[i], stats.getAttribute(i));
+                    winMgr->setValue(attrname.str(), stats.getAttribute(i));
                 }
             }
 
             if(stats.getHealth() != mWatchedStats.getHealth())
             {
+                static const std::string hbar("HBar");
                 mWatchedStats.setHealth(stats.getHealth());
-                winMgr->setValue(dynamicNames[0], stats.getHealth());
+                winMgr->setValue(hbar, stats.getHealth());
             }
             if(stats.getMagicka() != mWatchedStats.getMagicka())
             {
+                static const std::string mbar("MBar");
                 mWatchedStats.setMagicka(stats.getMagicka());
-                winMgr->setValue(dynamicNames[1], stats.getMagicka());
+                winMgr->setValue(mbar, stats.getMagicka());
             }
             if(stats.getFatigue() != mWatchedStats.getFatigue())
             {
+                static const std::string fbar("FBar");
                 mWatchedStats.setFatigue(stats.getFatigue());
-                winMgr->setValue(dynamicNames[2], stats.getFatigue());
+                winMgr->setValue(fbar, stats.getFatigue());
             }
 
             if(stats.getTimeToStartDrowning() != mWatchedStats.getTimeToStartDrowning())
