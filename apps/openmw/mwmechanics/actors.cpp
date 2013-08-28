@@ -135,30 +135,27 @@ namespace MWMechanics
 
     void Actors::calculateCreatureStatModifiers (const MWWorld::Ptr& ptr)
     {
-        CreatureStats& creatureStats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
+        CreatureStats &creatureStats = MWWorld::Class::get(ptr).getCreatureStats(ptr);
+        const MagicEffects &effects = creatureStats.getMagicEffects();
 
         // attributes
-        for (int i=0; i<8; ++i)
+        for(int i = 0;i < ESM::Attribute::Length;++i)
         {
-            int modifier =
-                creatureStats.getMagicEffects().get (EffectKey (ESM::MagicEffect::FortifyAttribute, i)).mMagnitude;
+            Stat<int> stat = creatureStats.getAttribute(i);
+            stat.setModifier(effects.get(EffectKey(ESM::MagicEffect::FortifyAttribute, i)).mMagnitude -
+                             effects.get(EffectKey(ESM::MagicEffect::DrainAttribute, i)).mMagnitude);
 
-            modifier -= creatureStats.getMagicEffects().get (EffectKey (ESM::MagicEffect::DrainAttribute, i)).mMagnitude;
-
-            creatureStats.getAttribute(i).setModifier (modifier);
+            creatureStats.setAttribute(i, stat);
         }
 
         // dynamic stats
-        MagicEffects effects = creatureStats.getMagicEffects();
-
-        for (int i=0; i<3; ++i)
+        for(int i = 0;i < 3;++i)
         {
-            DynamicStat<float> stat = creatureStats.getDynamic (i);
+            DynamicStat<float> stat = creatureStats.getDynamic(i);
+            stat.setModifier(effects.get(EffectKey(80+i)).mMagnitude -
+                             effects.get(EffectKey(18+i)).mMagnitude);
 
-            stat.setModifier (
-                effects.get (EffectKey(80+i)).mMagnitude - effects.get (EffectKey(18+i)).mMagnitude);
-
-            creatureStats.setDynamic (i, stat);
+            creatureStats.setDynamic(i, stat);
         }
     }
 
