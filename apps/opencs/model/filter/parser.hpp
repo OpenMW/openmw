@@ -5,6 +5,11 @@
 
 #include "node.hpp"
 
+namespace CSMWorld
+{
+    class Data;
+}
+
 namespace CSMFilter
 {
     struct Token;
@@ -15,6 +20,7 @@ namespace CSMFilter
             std::string mInput;
             int mIndex;
             bool mError;
+            const CSMWorld::Data& mData;
 
             Token getStringToken();
 
@@ -25,7 +31,7 @@ namespace CSMFilter
             Token checkKeywords (const Token& token);
             ///< Turn string token into keyword token, if possible.
 
-            boost::shared_ptr<Node> parseImp (bool allowEmpty = false);
+            boost::shared_ptr<Node> parseImp (bool allowEmpty = false, bool ignoreOneShot = false);
             ///< Will return a null-pointer, if there is nothing more to parse.
 
             boost::shared_ptr<Node> parseNAry (const Token& keyword);
@@ -38,9 +44,9 @@ namespace CSMFilter
 
         public:
 
-            Parser();
+            Parser (const CSMWorld::Data& data);
 
-            bool parse (const std::string& filter);
+            bool parse (const std::string& filter, bool allowPredefined = true);
             ///< Discards any previous calls to parse
             ///
             /// \return Success?

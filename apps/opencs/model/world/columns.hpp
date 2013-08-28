@@ -138,6 +138,7 @@ namespace CSMWorld
             ColumnId_MaxThrust = 106,
             ColumnId_Magical = 107,
             ColumnId_Silver = 108,
+            ColumnId_Filter = 109,
 
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.

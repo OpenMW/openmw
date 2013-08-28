@@ -25,7 +25,7 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
     layout->insertWidget (0, mTable =
         new Table (id, document.getData(), document.getUndoStack(), mBottom->canCreateAndDelete()), 2);
 
-    CSVFilter::FilterBox *filterBox = new CSVFilter::FilterBox (this);
+    CSVFilter::FilterBox *filterBox = new CSVFilter::FilterBox (document.getData(), this);
 
     layout->insertWidget (0, filterBox);
 

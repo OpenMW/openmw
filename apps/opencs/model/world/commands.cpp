@@ -69,7 +69,9 @@ CSMWorld::RevertCommand::~RevertCommand()
 
 void CSMWorld::RevertCommand::redo()
 {
-    QModelIndex index = mModel.getModelIndex (mId, 1);
+    int column = mModel.findColumnIndex (Columns::ColumnId_Modification);
+
+    QModelIndex index = mModel.getModelIndex (mId, column);
     RecordBase::State state = static_cast<RecordBase::State> (mModel.data (index).toInt());
 
     if (state==RecordBase::State_ModifiedOnly)
@@ -102,7 +104,9 @@ CSMWorld::DeleteCommand::~DeleteCommand()
 
 void CSMWorld::DeleteCommand::redo()
 {
-    QModelIndex index = mModel.getModelIndex (mId, 1);
+    int column = mModel.findColumnIndex (Columns::ColumnId_Modification);
+
+    QModelIndex index = mModel.getModelIndex (mId, column);
     RecordBase::State state = static_cast<RecordBase::State> (mModel.data (index).toInt());
 
     if (state==RecordBase::State_ModifiedOnly)
