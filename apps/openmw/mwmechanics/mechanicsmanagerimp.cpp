@@ -188,6 +188,9 @@ namespace MWMechanics
 
     void MechanicsManager::updateCell(const MWWorld::Ptr &old, const MWWorld::Ptr &ptr)
     {
+        if(old == mWatched)
+            mWatched = ptr;
+
         if(MWWorld::Class::get(ptr).isActor())
             mActors.updateActor(old, ptr);
         else
