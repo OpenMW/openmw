@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 484 316" name="_Main">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 478 316" name="_Main">
+
         <!-- Class list -->
         <Widget type="ListBox" skin="MW_List" position="8 8 181 138" name="ClassList"/>
 
@@ -20,6 +21,7 @@
                 <UserString key="ToolTipLayout" value="TextToolTip"/>
                 <UserString key="Caption_Text" value="#{sCreateClassMenuHelp1}"/>
             </Widget>
+
             <Widget type="TextBox" skin="SandText" position="0 18 162 18" name="SpecializationName" align="Left Top">
                 <Property key="TextAlign" value="Left Top"/>
             </Widget>
@@ -32,6 +34,7 @@
                 <UserString key="ToolTipLayout" value="TextToolTip"/>
                 <UserString key="Caption_Text" value="#{sCreateClassMenuHelp2}"/>
             </Widget>
+
             <Widget type="MWAttribute" skin="MW_StatName" position="0 59 162 18" name="FavoriteAttribute0" align="Left Top"/>
             <Widget type="MWAttribute" skin="MW_StatName" position="0 77 162 18" name="FavoriteAttribute1" align="Left Top"/>
 
@@ -40,6 +43,7 @@
                 <Property key="TextAlign" value="Left Top"/>
                 <Property key="Caption" value="#{sChooseClassMenu3}"/>
             </Widget>
+
             <Widget type="MWSkill" skin="MW_StatName" position="162 18 162 18" name="MajorSkill0" align="Left Top"/>
             <Widget type="MWSkill" skin="MW_StatName" position="162 36 162 18" name="MajorSkill1" align="Left Top"/>
             <Widget type="MWSkill" skin="MW_StatName" position="162 54 162 18" name="MajorSkill2" align="Left Top"/>
@@ -51,6 +55,7 @@
                 <Property key="Caption" value="#{sChooseClassMenu4}"/>
                 <Property key="TextAlign" value="Left Top"/>
             </Widget>
+
             <Widget type="MWSkill" skin="MW_StatName" position="325 18 162 18" name="MinorSkill0" align="Left Top"/>
             <Widget type="MWSkill" skin="MW_StatName" position="325 36 162 18" name="MinorSkill1" align="Left Top"/>
             <Widget type="MWSkill" skin="MW_StatName" position="325 54 162 18" name="MinorSkill2" align="Left Top"/>
@@ -60,7 +65,7 @@
         </Widget>
 
         <!-- Dialog buttons -->
-        <Widget type="HBox" position="0 276 468 24">
+        <Widget type="HBox" position="0 276 462 24">
             <Widget type="Widget">
                 <UserString key="HStretch" value="true"/>
             </Widget>
@@ -71,5 +76,6 @@
                 <Property key="Caption" value="#{sOK}"/>
             </Widget>
         </Widget>
+
     </Widget>
 </MyGUI>

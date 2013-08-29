@@ -17,6 +17,6 @@
             <Property key="ExpandDirection" value="Left"/>
             <Property key="Caption" value="Enter"/>
         </Widget>
-        
+
     </Widget>
 </MyGUI>
