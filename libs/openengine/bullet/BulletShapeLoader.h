@@ -48,6 +48,8 @@ public:
 /**
 *
 */
+
+#if (OGRE_VERSION < ((1 << 16) | (9 << 8) | 0))
 class BulletShapePtr : public Ogre::SharedPtr<BulletShape>
 {
 public:
@@ -91,9 +93,9 @@ public:
         return *this;
     }
 };
-
-
-
+#else
+typedef Ogre::SharedPtr<BulletShape> BulletShapePtr;
+#endif
 
 /**
 *Hold any BulletShape that was created by the ManualBulletShapeLoader.
@@ -136,6 +138,19 @@ public:
 
     BulletShapeManager();
     virtual ~BulletShapeManager();
+
+
+#if (OGRE_VERSION >= ((1 << 16) | (9 << 8) | 0))
+    /// Get a resource by name
+    /// @see ResourceManager::getByName
+    BulletShapePtr getByName(const Ogre::String& name, const Ogre::String& groupName = Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME);
+
+    /// Create a new shape
+    /// @see ResourceManager::createResource
+    BulletShapePtr create (const Ogre::String& name, const Ogre::String& group,
+                        bool isManual = false, Ogre::ManualResourceLoader* loader = 0,
+                        const Ogre::NameValuePairList* createParams = 0);
+#endif
 
     virtual BulletShapePtr load(const Ogre::String &name, const Ogre::String &group);
 

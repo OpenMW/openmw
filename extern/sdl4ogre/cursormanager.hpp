@@ -4,10 +4,7 @@
 #include <SDL_types.h>
 #include <string>
 
-namespace Ogre
-{
-    class TexturePtr;
-}
+#include <OgreTexture.h>
 
 namespace SFO
 {
