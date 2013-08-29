@@ -120,6 +120,7 @@ namespace MWWorld
     {
     public:
         WeatherManager(MWRender::RenderingManager*,MWWorld::Fallback* fallback);
+        ~WeatherManager();
 
         /**
          * Change the weather in the specified region

@@ -167,6 +167,11 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering,MWWorld::Fa
     setFallbackWeather(blizzard,"blizzard");
 }
 
+WeatherManager::~WeatherManager()
+{
+    stopSounds(true);
+}
+
 void WeatherManager::setWeather(const String& weather, bool instant)
 {
     if (weather == mCurrentWeather && mNextWeather == "")
