@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 518 410" name="_Main">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 520 428" name="_Main">
 
-        <!-- Player name, race, class and birth sign-->
+        <!-- Player Name, Race, Class and Birthsign -->
         <Widget type="Widget" skin="MW_Box" position="8 8 244 126">
             <Widget type="Button" skin="MW_Button" position="8 8 64 23" name="NameButton">
                 <Property key="Caption" value="#{sName}"/>
@@ -17,27 +17,27 @@
             <Widget type="Button" skin="MW_Button" position="8 95 54 23" name="SignButton">
                 <Property key="Caption" value="#{sBirthSign}"/>
             </Widget>
-            <Widget type="TextBox" skin="SandTextRight" position="100 10 140 18" name="NameText"/>
-            <Widget type="TextBox" skin="SandTextRight" position="100 39 140 18" name="RaceText"/>
-            <Widget type="TextBox" skin="SandTextRight" position="100 68 140 18" name="ClassText"/>
-            <Widget type="TextBox" skin="SandTextRight" position="100 97 140 18" name="SignText"/>
+            <Widget type="TextBox" skin="SandTextRight" position="97 10 140 18" name="NameText"/>
+            <Widget type="TextBox" skin="SandTextRight" position="97 39 140 18" name="RaceText"/>
+            <Widget type="TextBox" skin="SandTextRight" position="97 68 140 18" name="ClassText"/>
+            <Widget type="TextBox" skin="SandTextRight" position="97 97 140 18" name="SignText"/>
         </Widget>
 
-        <!-- Player health, magicka and fatigue -->
-        <Widget type="Widget" skin="MW_Box" position="8 136 244 64">
-            <Widget type="MWDynamicStat" skin="MW_DynamicStat_Red" position="4 4 236 18" name="Health">
+        <!-- Player Health, Magicka and Fatigue -->
+        <Widget type="Widget" skin="MW_Box" position="8 144 244 72">
+            <Widget type="MWDynamicStat" skin="MW_DynamicStat_Red" position="8 8 228 18" name="Health">
                 <UserString key="ToolTipType" value="Layout"/>
                 <UserString key="ToolTipLayout" value="HealthToolTip"/>
                 <UserString key="ImageTexture_HealthImage" value="icons\k\health.dds"/>
                 <Property key="Caption" value="#{sHealth}"/>
             </Widget>
-            <Widget type="MWDynamicStat" skin="MW_DynamicStat_Blue" position="4 22 236 18" name="Magicka">
+            <Widget type="MWDynamicStat" skin="MW_DynamicStat_Blue" position="8 27 228 18" name="Magicka">
                 <UserString key="ToolTipType" value="Layout"/>
                 <UserString key="ToolTipLayout" value="HealthToolTip"/>
                 <UserString key="ImageTexture_HealthImage" value="icons\k\magicka.dds"/>
                 <Property key="Caption" value="#{sMagic}"/>
             </Widget>
-            <Widget type="MWDynamicStat" skin="MW_DynamicStat_Green" position="4 40 236 18" name="Fatigue">
+            <Widget type="MWDynamicStat" skin="MW_DynamicStat_Green" position="8 46 228 18" name="Fatigue">
                 <UserString key="ToolTipType" value="Layout"/>
                 <UserString key="ToolTipLayout" value="HealthToolTip"/>
                 <UserString key="ImageTexture_HealthImage" value="icons\k\fatigue.dds"/>
@@ -46,57 +46,57 @@
         </Widget>
 
         <!-- Player attributes -->
-        <Widget type="Widget" skin="MW_Box" position="8 208 244 154">
-            <Widget type="MWAttribute" skin="MW_StatNameValue" position="4 4 236 18" name="Attribute0">
+        <Widget type="Widget" skin="MW_Box" position="8 224 244 156">
+            <Widget type="MWAttribute" skin="MW_StatNameValue" position="8 4 229 18" name="Attribute0">
                 <UserString key="ToolTipType" value="Layout"/>
                 <UserString key="ToolTipLayout" value="AttributeToolTip"/>
                 <UserString key="Caption_AttributeName" value="#{sAttributeStrength}"/>
                 <UserString key="Caption_AttributeDescription" value="#{sStrDesc}"/>
                 <UserString key="ImageTexture_AttributeImage" value="icons\k\attribute_strength.dds"/>
             </Widget>
-            <Widget type="MWAttribute" skin="MW_StatNameValue" position="4 22 236 18" name="Attribute1">
+            <Widget type="MWAttribute" skin="MW_StatNameValue" position="8 22 229 18" name="Attribute1">
                 <UserString key="ToolTipType" value="Layout"/>
                 <UserString key="ToolTipLayout" value="AttributeToolTip"/>
                 <UserString key="Caption_AttributeName" value="#{sAttributeIntelligence}"/>
                 <UserString key="Caption_AttributeDescription" value="#{sIntDesc}"/>
                 <UserString key="ImageTexture_AttributeImage" value="icons\k\attribute_int.dds"/>
             </Widget>
-            <Widget type="MWAttribute" skin="MW_StatNameValue" position="4 40 236 18" name="Attribute2">
+            <Widget type="MWAttribute" skin="MW_StatNameValue" position="8 40 229 18" name="Attribute2">
                 <UserString key="ToolTipType" value="Layout"/>
                 <UserString key="ToolTipLayout" value="AttributeToolTip"/>
                 <UserString key="Caption_AttributeName" value="#{sAttributeWillpower}"/>
                 <UserString key="Caption_AttributeDescription" value="#{sWilDesc}"/>
                 <UserString key="ImageTexture_AttributeImage" value="icons\k\attribute_wilpower.dds"/>
             </Widget>
-            <Widget type="MWAttribute" skin="MW_StatNameValue" position="4 58 236 18" name="Attribute3">
+            <Widget type="MWAttribute" skin="MW_StatNameValue" position="8 58 229 18" name="Attribute3">
                 <UserString key="ToolTipType" value="Layout"/>
                 <UserString key="ToolTipLayout" value="AttributeToolTip"/>
                 <UserString key="Caption_AttributeName" value="#{sAttributeAgility}"/>
                 <UserString key="Caption_AttributeDescription" value="#{sAgiDesc}"/>
                 <UserString key="ImageTexture_AttributeImage" value="icons\k\attribute_agility.dds"/>
             </Widget>
-            <Widget type="MWAttribute" skin="MW_StatNameValue" position="4 76 236 18" name="Attribute4">
+            <Widget type="MWAttribute" skin="MW_StatNameValue" position="8 76 229 18" name="Attribute4">
                 <UserString key="ToolTipType" value="Layout"/>
                 <UserString key="ToolTipLayout" value="AttributeToolTip"/>
                 <UserString key="Caption_AttributeName" value="#{sAttributeSpeed}"/>
                 <UserString key="Caption_AttributeDescription" value="#{sSpdDesc}"/>
                 <UserString key="ImageTexture_AttributeImage" value="icons\k\attribute_speed.dds"/>
             </Widget>
-            <Widget type="MWAttribute" skin="MW_StatNameValue" position="4 94 236 18" name="Attribute5">
+            <Widget type="MWAttribute" skin="MW_StatNameValue" position="8 94 229 18" name="Attribute5">
                 <UserString key="ToolTipType" value="Layout"/>
                 <UserString key="ToolTipLayout" value="AttributeToolTip"/>
                 <UserString key="Caption_AttributeName" value="#{sAttributeEndurance}"/>
                 <UserString key="Caption_AttributeDescription" value="#{sEndDesc}"/>
                 <UserString key="ImageTexture_AttributeImage" value="icons\k\attribute_endurance.dds"/>
             </Widget>
-            <Widget type="MWAttribute" skin="MW_StatNameValue" position="4 112 236 18" name="Attribute6">
+            <Widget type="MWAttribute" skin="MW_StatNameValue" position="8 112 229 18" name="Attribute6">
                 <UserString key="ToolTipType" value="Layout"/>
                 <UserString key="ToolTipLayout" value="AttributeToolTip"/>
                 <UserString key="Caption_AttributeName" value="#{sAttributePersonality}"/>
                 <UserString key="Caption_AttributeDescription" value="#{sPerDesc}"/>
                 <UserString key="ImageTexture_AttributeImage" value="icons\k\attribute_personality.dds"/>
             </Widget>
-            <Widget type="MWAttribute" skin="MW_StatNameValue" position="4 130 236 18" name="Attribute7">
+            <Widget type="MWAttribute" skin="MW_StatNameValue" position="8 130 229 18" name="Attribute7">
                 <UserString key="ToolTipType" value="Layout"/>
                 <UserString key="ToolTipLayout" value="AttributeToolTip"/>
                 <UserString key="Caption_AttributeName" value="#{sAttributeLuck}"/>
@@ -105,13 +105,13 @@
             </Widget>
         </Widget>
 
-        <!-- Player skills, factions, birthsign and reputation -->
-        <Widget type="Widget" skin="MW_Box" position="258 8 244 354" align="Left VStretch" name="Skills">
-            <Widget type="ScrollView" skin="MW_ScrollView" position="4 4 236 346" align="Stretch" name="SkillView"/>
+        <!-- Player Skills -->
+        <Widget type="Widget" skin="MW_Box" position="260 7 244 372" align="Left VStretch" name="Skills">
+            <Widget type="ScrollView" skin="MW_ScrollView" position="8 6 232 362" align="Stretch" name="SkillView"/>
         </Widget>
 
-        <!-- Dialog buttons -->
-        <Widget type="HBox" position="0 370 502 24">
+        <!-- Dialogue Buttons -->
+        <Widget type="HBox" position="0 388 504 24">
             <Widget type="Widget">
                 <UserString key="HStretch" value="true"/>
             </Widget>
