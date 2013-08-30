@@ -1,4 +1,3 @@
-//FileFinderT
 #include <gtest/gtest.h>
 #include <fstream>
 #include "components/file_finder/file_finder.hpp"
@@ -50,3 +49,18 @@ TEST_F(FileFinderTest, FileFinder_does_not_have_file)
   ASSERT_TRUE(fileFinder.lookup(mTestFileNotFound).empty());
 }
 
+TEST_F(FileFinderTest, FileFinderStrict_has_file)
+{
+  FileFinder::FileFinderStrict fileFinder(mTestDir);
+  ASSERT_TRUE(fileFinder.has(mTestFile));
+  ASSERT_FALSE(fileFinder.has(mTestFileUppercase));
+  ASSERT_TRUE(fileFinder.lookup(mTestFile) == std::string(mTestDir + mTestFile));
+  ASSERT_FALSE(fileFinder.lookup(mTestFileUppercase) == std::string(mTestDir + mTestFile));
+}
+
+TEST_F(FileFinderTest, FileFinderStrict_does_not_have_file)
+{
+  FileFinder::FileFinderStrict fileFinder(mTestDir);
+  ASSERT_FALSE(fileFinder.has(mTestFileNotFound));
+  ASSERT_TRUE(fileFinder.lookup(mTestFileNotFound).empty());
+}
