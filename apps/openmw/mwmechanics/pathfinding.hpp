@@ -12,15 +12,18 @@ namespace MWMechanics
             PathFinder();
 
             void clearPath();
-            void buildPath(ESM::Pathgrid::Point startPoint, ESM::Pathgrid::Point endPoint,
-                const ESM::Pathgrid* pathGrid, float xCell = 0, float yCell = 0, bool allowShortcuts = 1);
+            void buildPath(const ESM::Pathgrid::Point &startPoint, const ESM::Pathgrid::Point &endPoint,
+                           const ESM::Pathgrid* pathGrid, float xCell = 0, float yCell = 0,
+                           bool allowShortcuts = true);
 
             bool checkPathCompleted(float x, float y, float z);
             ///< \Returns true if the last point of the path has been reached.
-            float getZAngleToNext(float x, float y);
+            float getZAngleToNext(float x, float y) const;
 
-            std::list<ESM::Pathgrid::Point> getPath();
-            bool isPathConstructed();
+            bool isPathConstructed() const
+            {
+                return mIsPathConstructed;
+            }
 
         private:
             std::list<ESM::Pathgrid::Point> mPath;
