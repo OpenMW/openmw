@@ -238,15 +238,7 @@ namespace MWMechanics
             world->rotateObject(actor, 0, 0, zAngle, false);
             MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 1;
 
-            // Unclog path nodes by allowing the NPC to be a small distance away from the center. This way two NPCs can be
-            // at the same path node at the same time and both will complete instead of endlessly walking into eachother:
-            Ogre::Vector3 destNodePos(mCurrentNode.mX, mCurrentNode.mY, mCurrentNode.mZ);
-            Ogre::Vector3 actorPos(actor.getRefData().getPosition().pos);
-            actorPos[0] = actorPos[0] - mXCell;
-            actorPos[1] = actorPos[1] - mYCell;
-            float distance = actorPos.squaredDistance(destNodePos);
-
-            if(distance < 32*32 || mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], pos.pos[2]))
+            if(mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], pos.pos[2]))
             {
                 stopWalking(actor);
                 mMoveNow = false;

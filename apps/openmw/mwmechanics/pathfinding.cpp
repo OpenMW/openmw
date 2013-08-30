@@ -205,7 +205,7 @@ namespace MWMechanics
             return true;
 
         ESM::Pathgrid::Point nextPoint = *mPath.begin();
-        if(distanceZCorrected(nextPoint, x, y, z) < 40)
+        if(distanceZCorrected(nextPoint, x, y, z) < 64)
         {
             mPath.pop_front();
             if(mPath.empty())
