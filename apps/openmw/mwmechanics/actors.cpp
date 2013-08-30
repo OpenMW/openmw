@@ -11,10 +11,12 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
+#include "../mwworld/player.hpp"
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "npcstats.hpp"
 #include "creaturestats.hpp"
@@ -68,22 +70,24 @@ namespace MWMechanics
     {
         CreatureStats& creatureStats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
 
-        int strength        = creatureStats.getAttribute(0).getBase();
-        int intelligence    = creatureStats.getAttribute(1).getBase();
-        int willpower       = creatureStats.getAttribute(2).getBase();
-        int agility         = creatureStats.getAttribute(3).getBase();
-        int endurance       = creatureStats.getAttribute(5).getBase();
+        int strength     = creatureStats.getAttribute(ESM::Attribute::Strength).getBase();
+        int intelligence = creatureStats.getAttribute(ESM::Attribute::Intelligence).getBase();
+        int willpower    = creatureStats.getAttribute(ESM::Attribute::Willpower).getBase();
+        int agility      = creatureStats.getAttribute(ESM::Attribute::Agility).getBase();
+        int endurance    = creatureStats.getAttribute(ESM::Attribute::Endurance).getBase();
 
         double magickaFactor =
             creatureStats.getMagicEffects().get (EffectKey (ESM::MagicEffect::FortifyMaximumMagicka)).mMagnitude * 0.1 + 0.5;
 
         DynamicStat<float> magicka = creatureStats.getMagicka();
-        magicka.setBase (static_cast<int> (intelligence + magickaFactor * intelligence));
-        creatureStats.setMagicka (magicka);
+        float diff = (static_cast<int>(intelligence + magickaFactor*intelligence)) - magicka.getBase();
+        magicka.modify(diff);
+        creatureStats.setMagicka(magicka);
 
         DynamicStat<float> fatigue = creatureStats.getFatigue();
-        fatigue.setBase (strength+willpower+agility+endurance);
-        creatureStats.setFatigue (fatigue);
+        diff = (strength+willpower+agility+endurance) - fatigue.getBase();
+        fatigue.modify(diff);
+        creatureStats.setFatigue(fatigue);
     }
 
     void Actors::calculateRestoration (const MWWorld::Ptr& ptr, float duration)
@@ -133,62 +137,63 @@ namespace MWMechanics
 
     void Actors::calculateCreatureStatModifiers (const MWWorld::Ptr& ptr)
     {
-        CreatureStats& creatureStats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
+        CreatureStats &creatureStats = MWWorld::Class::get(ptr).getCreatureStats(ptr);
+        const MagicEffects &effects = creatureStats.getMagicEffects();
 
         // attributes
-        for (int i=0; i<8; ++i)
+        for(int i = 0;i < ESM::Attribute::Length;++i)
         {
-            int modifier =
-                creatureStats.getMagicEffects().get (EffectKey (ESM::MagicEffect::FortifyAttribute, i)).mMagnitude;
+            Stat<int> stat = creatureStats.getAttribute(i);
+            stat.setModifier(effects.get(EffectKey(ESM::MagicEffect::FortifyAttribute, i)).mMagnitude -
+                             effects.get(EffectKey(ESM::MagicEffect::DrainAttribute, i)).mMagnitude);
 
-            modifier -= creatureStats.getMagicEffects().get (EffectKey (ESM::MagicEffect::DrainAttribute, i)).mMagnitude;
-
-            creatureStats.getAttribute(i).setModifier (modifier);
+            creatureStats.setAttribute(i, stat);
         }
 
         // dynamic stats
-        MagicEffects effects = creatureStats.getMagicEffects();
-
-        for (int i=0; i<3; ++i)
+        for(int i = 0;i < 3;++i)
         {
-            DynamicStat<float> stat = creatureStats.getDynamic (i);
+            DynamicStat<float> stat = creatureStats.getDynamic(i);
+            stat.setModifier(effects.get(EffectKey(80+i)).mMagnitude -
+                             effects.get(EffectKey(18+i)).mMagnitude);
 
-            stat.setModifier (
-                effects.get (EffectKey(80+i)).mMagnitude - effects.get (EffectKey(18+i)).mMagnitude);
-
-            creatureStats.setDynamic (i, stat);
+            creatureStats.setDynamic(i, stat);
         }
     }
 
     void Actors::updateDrowning(const MWWorld::Ptr& ptr, float duration)
     {
-        NpcStats &stats = MWWorld::Class::get(ptr).getNpcStats(ptr);
-        if(MWBase::Environment::get().getWorld()->isSubmerged(ptr) && 
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+        NpcStats &stats = ptr.getClass().getNpcStats(ptr);
+        if(world->isSubmerged(ptr) &&
            stats.getMagicEffects().get(ESM::MagicEffect::WaterBreathing).mMagnitude == 0)
         {
+            float timeLeft = 0.0f;
             if(stats.getFatigue().getCurrent() == 0)
                 stats.setTimeToStartDrowning(0);
-
-            float timeLeft = stats.getTimeToStartDrowning()-duration;
-            if(timeLeft < 0.0f)
-                timeLeft = 0.0f;
-
-            stats.setTimeToStartDrowning(timeLeft);
+            else
+            {
+                timeLeft = stats.getTimeToStartDrowning() - duration;
+                if(timeLeft < 0.0f)
+                    timeLeft = 0.0f;
+                stats.setTimeToStartDrowning(timeLeft);
+            }
             if(timeLeft == 0.0f)
-                stats.setLastDrowningHitTime(stats.getLastDrowningHitTime()+duration);
+            {
+                // If drowning, apply 3 points of damage per second
+                ptr.getClass().setActorHealth(ptr, stats.getHealth().getCurrent() - 3.0f*duration);
+
+                // Play a drowning sound as necessary for the player
+                if(ptr == world->getPlayer().getPlayer())
+                {
+                    MWBase::SoundManager *sndmgr = MWBase::Environment::get().getSoundManager();
+                    if(!sndmgr->getSoundPlaying(MWWorld::Ptr(), "drown"))
+                        sndmgr->playSound("drown", 1.0f, 1.0f);
+                }
+            }
         }
         else
-        {
             stats.setTimeToStartDrowning(20);
-            stats.setLastDrowningHitTime(0);
-        }
-        //if npc is drowning and it's time to hit, then hit
-        while(stats.getTimeToStartDrowning() == 0.0f && stats.getLastDrowningHitTime() > 0.33f)
-        {
-            stats.setLastDrowningHitTime(stats.getLastDrowningHitTime()-0.33f);
-            //fixme: replace it with something different once screen hit effects are implemented (blood on screen)
-            MWWorld::Class::get(ptr).setActorHealth(ptr, stats.getHealth().getCurrent()-1.0f);
-        }
     }
 
     Actors::Actors() : mDuration (0) {}

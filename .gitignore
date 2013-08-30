@@ -21,3 +21,4 @@ CMakeLists.txt.user
 .cproject
 .project
 .settings/
+.directory

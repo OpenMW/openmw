@@ -236,14 +236,15 @@ namespace CSMWorld
                 if (iter->second>=index+count)
                 {
                     iter->second -= count;
+                    ++iter;
                 }
                 else
                 {
                     mIndex.erase (iter++);
                 }
             }
-
-            ++iter;
+            else
+                ++iter;
         }
     }
 

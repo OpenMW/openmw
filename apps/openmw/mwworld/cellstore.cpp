@@ -43,7 +43,8 @@ namespace MWWorld
         // Skip this when reference was deleted.
         // TODO: Support respawning references, in this case, we need to track it somehow.
         if (ref.mDeleted) {
-            mList.erase(iter);
+            if (iter != mList.end())
+                mList.erase(iter);
             return;
         }
 

@@ -6,6 +6,11 @@
 #include <components/esm/records.hpp>
 #include "store.hpp"
 
+namespace Loading
+{
+    class Listener;
+}
+
 namespace MWWorld
 {
     class ESMStore
@@ -158,7 +163,7 @@ namespace MWWorld
             mNpcs.insert(mPlayerTemplate);
         }
 
-        void load(ESM::ESMReader &esm);
+        void load(ESM::ESMReader &esm, Loading::Listener* listener);
 
         template <class T>
         const Store<T> &get() const {

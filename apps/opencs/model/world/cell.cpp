@@ -7,7 +7,7 @@ void CSMWorld::Cell::load (ESM::ESMReader &esm)
 {
     mName = mId;
 
-    ESM::Cell::load (esm, true); /// \todo set this to false, once the bug in ESM::Cell::load is fixed
+    ESM::Cell::load (esm, false);
 
     if (!(mData.mFlags & Interior))
     {

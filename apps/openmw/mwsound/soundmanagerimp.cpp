@@ -4,11 +4,10 @@
 #include <algorithm>
 #include <map>
 
-#include "../mwworld/esmstore.hpp"
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwworld/esmstore.hpp"
 #include "../mwworld/player.hpp"
 
 #include "sound_output.hpp"
@@ -103,6 +102,7 @@ namespace MWSound
 
     SoundManager::~SoundManager()
     {
+        mUnderwaterSound.reset();
         mActiveSounds.clear();
         mMusic.reset();
         mOutput.reset();
@@ -474,27 +474,32 @@ namespace MWSound
 
     void SoundManager::updateRegionSound(float duration)
     {
-        MWWorld::Ptr::CellStore *current = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell();
+        static float sTimeToNextEnvSound = 0.0f;
         static int total = 0;
         static std::string regionName = "";
-        static float timePassed = 0.0;
+        static float sTimePassed = 0.0;
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+        const MWWorld::Ptr player = world->getPlayer().getPlayer();
+        const ESM::Cell *cell = player.getCell()->mCell;
 
-        //If the region has changed
-        timePassed += duration;
-        if(!current->mCell->isExterior() || timePassed < 10)
+        sTimePassed += duration;
+        if(!cell->isExterior() || sTimePassed < sTimeToNextEnvSound)
             return;
-        timePassed = 0;
 
-        if(regionName != current->mCell->mRegion)
+        float a = std::rand() / (double)RAND_MAX;
+        // NOTE: We should use the "Minimum Time Between Environmental Sounds" and
+        // "Maximum Time Between Environmental Sounds" fallback settings here.
+        sTimeToNextEnvSound = 5.0f*a + 15.0f*(1.0f-a);
+        sTimePassed = 0;
+
+        if(regionName != cell->mRegion)
         {
-            regionName = current->mCell->mRegion;
+            regionName = cell->mRegion;
             total = 0;
         }
 
-        const ESM::Region *regn =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Region>().search(regionName);
-
-        if (regn == NULL)
+        const ESM::Region *regn = world->getStore().get<ESM::Region>().search(regionName);
+        if(regn == NULL)
             return;
 
         std::vector<ESM::Region::SoundRef>::const_iterator soundIter;
@@ -550,15 +555,13 @@ namespace MWSound
         {
             env = Env_Underwater;
             //play underwater sound
-            //HACK: this sound is always played underwater, so set volume and pitch higher (it's then lowered)
-            //Currently not possible to play looping sound with no environment
-            if(!getSoundPlaying(MWWorld::Ptr(), "Underwater"))
-                playSound("Underwater", 1.11, 1.42 ,Play_TypeSfx, Play_Loop );
+            if(!(mUnderwaterSound && mUnderwaterSound->isPlaying()))
+                mUnderwaterSound = playSound("Underwater", 1.0f, 1.0f, Play_TypeSfx, Play_LoopNoEnv);
         }
-        else
+        else if(mUnderwaterSound)
         {
-            //no need to check if it's playing, stop sound does nothing in that case
-            stopSound("Underwater");
+            mUnderwaterSound->stop();
+            mUnderwaterSound.reset();
         }
 
         mOutput->updateListener(

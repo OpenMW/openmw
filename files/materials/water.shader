@@ -3,9 +3,10 @@
 
 #define SIMPLE_WATER @shGlobalSettingBool(simple_water)
 
-
 #if SIMPLE_WATER
     // --------------------------------------- SIMPLE WATER ---------------------------------------------------   
+
+#define FOG @shGlobalSettingBool(fog)
 
 #ifdef SH_VERTEX_SHADER
 
@@ -13,13 +14,17 @@
         shUniform(float4x4, wvp) @shAutoConstant(wvp, worldviewproj_matrix)
         shVertexInput(float2, uv0)
         shOutput(float2, UV)
-        shOutput(float, depth)
 
+#if FOG
+        shOutput(float, depth)
+#endif
     SH_START_PROGRAM
     {
 	    shOutputPosition = shMatrixMult(wvp, shInputPosition);
 	    UV = uv0;
+#if FOG
 	    depth = shOutputPosition.z;
+#endif
     }
 
 #else
@@ -38,8 +43,10 @@
         shOutputColour(0).xyz = shSample(animatedTexture, UV * 15).xyz * float3(1.0, 1.0, 1.0);
         shOutputColour(0).w = 0.7;
         
+#if FOG
         float fogValue = shSaturate((depth - fogParams.y) * fogParams.w);
         shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, fogColor, fogValue);
+#endif
     }
 
 #endif

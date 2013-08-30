@@ -2,7 +2,7 @@
 <MyGUI type="Layout">
   <Widget type="Window" skin="MW_Window" position="0 0 400 400" layer="Console" name="_Main">
     <Property key="Caption" value="#{sConsoleTitle}"/>
-    <Property key="MinSize" value="405 245"/>
+    <Property key="MinSize" value="400 245"/>
     <Property key="MaxSize" value="2000 2000"/>
     <Property key="Visible" value="false"/>
 
@@ -12,7 +12,7 @@
     </Widget>
 
     <!-- Command line -->
-    <Widget type="EditBox" skin="MW_ConsoleCommand" position="2 335 380 28" align="HStretch Bottom" name="edit_Command"/>
+    <Widget type="EditBox" skin="MW_ConsoleCommand" position="0 338 384 28" align="HStretch Bottom" name="edit_Command"/>
 
   </Widget>
 </MyGUI>

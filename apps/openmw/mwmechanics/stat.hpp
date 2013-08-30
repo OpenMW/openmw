@@ -42,6 +42,18 @@ namespace MWMechanics
                 mBase = mModified = value;
             }
 
+            void modify(const T& diff)
+            {
+                mBase += diff;
+                if(mBase >= static_cast<T>(0))
+                    mModified += diff;
+                else
+                {
+                    mModified += diff - mBase;
+                    mBase = static_cast<T>(0);
+                }
+            }
+
             /// Set base and adjust modified accordingly.
             void setBase (const T& value)
             {

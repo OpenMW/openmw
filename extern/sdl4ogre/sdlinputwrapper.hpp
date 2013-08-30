@@ -24,7 +24,7 @@ namespace SFO
         void setWindowEventCallback(WindowListener* listen) { mWindowListener = listen; }
 		void setJoyEventCallback(JoyListener* listen) { mJoyListener = listen; }
 
-        void capture();
+        void capture(bool windowEventsOnly);
 		bool isModifierHeld(SDL_Keymod mod);
 		bool isKeyDown(SDL_Scancode key);
 

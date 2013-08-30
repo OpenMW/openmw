@@ -44,6 +44,8 @@ namespace MWSound
         typedef std::map<MWBase::SoundPtr,PtrIDPair> SoundMap;
         SoundMap mActiveSounds;
 
+        MWBase::SoundPtr mUnderwaterSound;
+
         Ogre::Vector3 mListenerPos;
         Ogre::Vector3 mListenerDir;
         Ogre::Vector3 mListenerUp;

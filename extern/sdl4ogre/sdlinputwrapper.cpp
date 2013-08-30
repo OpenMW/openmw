@@ -35,9 +35,20 @@ namespace SFO
         mSDLWindow = NULL;
     }
 
-    void InputWrapper::capture()
+    void InputWrapper::capture(bool windowEventsOnly)
     {
+        SDL_PumpEvents();
+
         SDL_Event evt;
+
+        if (windowEventsOnly)
+        {
+            // During loading, just handle window events, and keep others for later
+            while (SDL_PeepEvents(&evt, 1, SDL_GETEVENT, SDL_WINDOWEVENT, SDL_WINDOWEVENT))
+                handleWindowEvent(evt);
+            return;
+        }
+
         while(SDL_PollEvent(&evt))
         {
             switch(evt.type)

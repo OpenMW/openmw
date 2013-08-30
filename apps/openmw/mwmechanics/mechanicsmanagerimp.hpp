@@ -25,8 +25,7 @@ namespace MWMechanics
     class MechanicsManager : public MWBase::MechanicsManager
     {
             MWWorld::Ptr mWatched;
-            CreatureStats mWatchedCreature;
-            NpcStats mWatchedNpc;
+            NpcStats mWatchedStats;
             bool mUpdatePlayer;
             bool mClassSelected;
             bool mRaceSelected;

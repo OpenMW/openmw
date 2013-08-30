@@ -6,6 +6,11 @@
 #include <OgreAxisAlignedBox.h>
 #include <OgreTexture.h>
 
+namespace Loading
+{
+    class Listener;
+}
+
 namespace Ogre
 {
     class Camera;
@@ -24,10 +29,11 @@ namespace Terrain
      *        Cracks at LOD transitions are avoided using stitching.
      * @note  Multiple cameras are not supported yet
      */
-    class Terrain
+    class World
     {
     public:
         /// @note takes ownership of \a storage
+        /// @param loadingListener Listener to update with progress
         /// @param sceneMgr scene manager to use
         /// @param storage Storage instance to get terrain data from (heights, normals, colors, textures..)
         /// @param visbilityFlags visibility flags for the created meshes
@@ -35,8 +41,11 @@ namespace Terrain
         ///         This is a temporary option until it can be streamlined.
         /// @param shaders Whether to use splatting shader, or multi-pass fixed function splatting. Shader is usually
         ///         faster so this is just here for compatibility.
-        Terrain(Ogre::SceneManager* sceneMgr, Storage* storage, int visiblityFlags, bool distantLand, bool shaders);
-        ~Terrain();
+        World(Loading::Listener* loadingListener, Ogre::SceneManager* sceneMgr,
+                Storage* storage, int visiblityFlags, bool distantLand, bool shaders);
+        ~World();
+
+        void setLoadingListener(Loading::Listener* loadingListener) { mLoadingListener = loadingListener; }
 
         bool getDistantLandEnabled() { return mDistantLand; }
         bool getShadersEnabled() { return mShaders; }
@@ -83,6 +92,8 @@ namespace Terrain
         bool mShadows;
         bool mSplitShadows;
         bool mVisible;
+
+        Loading::Listener* mLoadingListener;
 
         QuadTreeNode* mRootNode;
         Ogre::SceneNode* mRootSceneNode;

@@ -279,27 +279,23 @@ void OgreRenderer::createWindow(const std::string &title, const WindowSettings& 
                     0,
                     Ogre::PF_A8R8G8B8,
                     Ogre::TU_WRITE_ONLY);
-}
 
-void OgreRenderer::createScene(const std::string& camName, float fov, float nearClip)
-{
-    assert(mRoot);
-    assert(mWindow);
-    // Get the SceneManager, in this case a generic one
     mScene = mRoot->createSceneManager(ST_GENERIC);
 
-    // Create the camera
-    mCamera = mScene->createCamera(camName);
-    mCamera->setNearClipDistance(nearClip);
-    mCamera->setFOVy(Degree(fov));
+    mFader = new Fader(mScene);
+
+    mCamera = mScene->createCamera("cam");
 
     // Create one viewport, entire window
     mView = mWindow->addViewport(mCamera);
-
     // Alter the camera aspect ratio to match the viewport
     mCamera->setAspectRatio(Real(mView->getActualWidth()) / Real(mView->getActualHeight()));
+}
 
-    mFader = new Fader(mScene);
+void OgreRenderer::adjustCamera(float fov, float nearClip)
+{
+    mCamera->setNearClipDistance(nearClip);
+    mCamera->setFOVy(Degree(fov));
 }
 
 void OgreRenderer::adjustViewport()

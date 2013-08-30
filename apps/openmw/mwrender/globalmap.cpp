@@ -10,6 +10,8 @@
 #include <OgreRoot.h>
 #include <OgreHardwarePixelBuffer.h>
 
+#include <components/loadinglistener/loadinglistener.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
@@ -28,7 +30,7 @@ namespace MWRender
     }
 
 
-    void GlobalMap::render ()
+    void GlobalMap::render (Loading::Listener* loadingListener)
     {
         Ogre::TexturePtr tex;
 
@@ -52,6 +54,11 @@ namespace MWRender
         int cellSize = 24;
         mWidth = cellSize*(mMaxX-mMinX+1);
         mHeight = cellSize*(mMaxY-mMinY+1);
+
+        loadingListener->loadingOn();
+        loadingListener->setLabel("Creating map");
+        loadingListener->setProgressRange((mMaxX-mMinX+1) * (mMaxY-mMinY+1));
+        loadingListener->setProgress(0);
 
         mExploredBuffer.resize((mMaxX-mMinX+1) * (mMaxY-mMinY+1) * 4);
 
@@ -147,6 +154,7 @@ namespace MWRender
                             data[texelY * mWidth * 3 + texelX * 3+2] = b;
                         }
                     }
+                    loadingListener->increaseProgress(1);
                 }
             }
 
@@ -177,6 +185,8 @@ namespace MWRender
 
         memcpy(mOverlayTexture->getBuffer()->lock(Ogre::HardwareBuffer::HBL_DISCARD), &buffer[0], mWidth*mHeight*4);
         mOverlayTexture->getBuffer()->unlock();
+
+        loadingListener->loadingOff();
     }
 
     void GlobalMap::worldPosToImageSpace(float x, float z, float& imageX, float& imageY)

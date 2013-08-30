@@ -422,7 +422,7 @@ void MWMechanics::NpcStats::modifyProfit(int diff)
     mProfit += diff;
 }
 
-float MWMechanics::NpcStats::getTimeToStartDrowning()
+float MWMechanics::NpcStats::getTimeToStartDrowning() const
 {
     return mTimeToStartDrowning;
 }
@@ -430,14 +430,4 @@ void MWMechanics::NpcStats::setTimeToStartDrowning(float time)
 {
     assert(time>=0 && time<=20);
     mTimeToStartDrowning=time;
-}
-
-float MWMechanics::NpcStats::getLastDrowningHitTime()
-{
-    return mLastDrowningHit;
-}
-
-void MWMechanics::NpcStats::setLastDrowningHitTime(float time)
-{
-    mLastDrowningHit=time;
 }

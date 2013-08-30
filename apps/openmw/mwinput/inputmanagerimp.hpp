@@ -60,14 +60,14 @@ namespace MWInput
     {
     public:
         InputManager(OEngine::Render::OgreRenderer &_ogre,
-            MWWorld::Player&_player,
-            MWBase::WindowManager &_windows,
             OMW::Engine& engine,
             const std::string& userFile, bool userFileExists);
 
         virtual ~InputManager();
 
         virtual void update(float dt, bool loading);
+
+        void setPlayer (MWWorld::Player* player) { mPlayer = player; }
 
         virtual void changeInputMode(bool guiMode);
 
@@ -125,8 +125,7 @@ namespace MWInput
 
     private:
         OEngine::Render::OgreRenderer &mOgre;
-        MWWorld::Player& mPlayer;
-        MWBase::WindowManager &mWindows;
+        MWWorld::Player* mPlayer;
         OMW::Engine& mEngine;
 
         ICS::InputControlSystem* mInputBinder;
