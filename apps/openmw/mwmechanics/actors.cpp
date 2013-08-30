@@ -272,7 +272,7 @@ namespace MWMechanics
 
                 // workaround: always keep player alive for now
                 // \todo remove workaround, once player death can be handled
-                if(iter->first.getRefData().getHandle()=="player")
+                if(iter->first.getRefData().getHandle()=="player" && false)
                 {
                     MWMechanics::DynamicStat<float> stat(stats.getHealth());
 

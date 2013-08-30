@@ -726,8 +726,7 @@ namespace MWScript
 
                     bool enabled = MWBase::Environment::get().getWorld()->toggleGodMode();
 
-                    // context.report (enabled ? "God Mode -> On" : "God Mode -> Off");
-                    context.report("Unimplemented");
+                    context.report (enabled ? "God Mode -> On" : "God Mode -> Off");
                 }
         };
 

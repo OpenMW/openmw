@@ -170,7 +170,7 @@ namespace MWWorld
       mSky (true), mCells (mStore, mEsm),
       mActivationDistanceOverride (mActivationDistanceOverride),
       mFallback(fallbackMap), mPlayIntro(0), mTeleportEnabled(true),
-      mFacedDistance(FLT_MAX)
+      mFacedDistance(FLT_MAX), mGodMode(false)
     {
         mPhysics = new PhysicsSystem(renderer);
         mPhysEngine = mPhysics->getEngine();
@@ -1945,7 +1945,12 @@ namespace MWWorld
 
     bool World::toggleGodMode()
     {
-        return false;
+        if (mGodMode)
+            mGodMode = false;
+        else
+            mGodMode = true;
+
+        return mGodMode;
     }
 
 }

@@ -68,6 +68,8 @@ namespace MWWorld
 
             OEngine::Physic::PhysicEngine* mPhysEngine;
 
+            bool mGodMode;
+
             // not implemented
             World (const World&);
             World& operator= (const World&);
