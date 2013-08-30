@@ -8,7 +8,7 @@ struct SearchTest : public ::testing::Test
 {
   protected:
     SearchTest()
-      : mTestDir("./test_dir/")
+      : mTestDir("./search_test_dir/")
     {
     }
 
