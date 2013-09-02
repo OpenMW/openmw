@@ -5,6 +5,7 @@
 #include <string>
 
 #include <OgreTexture.h>
+#include <OgrePrerequisites.h>
 
 namespace SFO
 {
