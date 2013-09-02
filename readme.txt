@@ -3,7 +3,7 @@ OpenMW: A reimplementation of The Elder Scrolls III: Morrowind
 OpenMW is an attempt at recreating the engine for the popular role-playing game
 Morrowind by Bethesda Softworks. You need to own and install the original game for OpenMW to work.
 
-Version: 0.25.0
+Version: 0.26.0
 License: GPL (see GPL3.txt for more information)
 Website: http://www.openmw.org
 
@@ -71,13 +71,13 @@ Allowed options:
   --new-game [=arg(=1)] (=0)       activate char gen/new game mechanics
   --fs-strict [=arg(=1)] (=0)      strict file system handling (no case folding)
   --encoding arg (=win1252)        Character encoding used in OpenMW game messages:
-                                   
+
                                    win1250 - Central and Eastern European such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, Croatian, Serbian (Latin script), Romanian and Albanian languages
-                                   
+
                                    win1251 - Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic and other languages
-                                   
+
                                    win1252 - Western European (Latin) alphabet, used by default
-                                   
+
   --fallback arg                   fallback values
 
 CHANGELOG
