@@ -1037,7 +1037,6 @@ public:
 VideoPlayer::VideoPlayer(Ogre::SceneManager* sceneMgr, Ogre::RenderWindow* window)
     : mState(NULL)
     , mSceneMgr(sceneMgr)
-    , mVideoMaterial(NULL)
     , mRectangle(NULL)
     , mNode(NULL)
     , mAllowSkipping(false)

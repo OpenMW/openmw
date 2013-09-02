@@ -147,13 +147,13 @@ namespace MWMechanics
         mIsPathConstructed = false;
     }
 
-    void PathFinder::buildPath(ESM::Pathgrid::Point startPoint, ESM::Pathgrid::Point endPoint,
-        const ESM::Pathgrid* pathGrid, float xCell, float yCell, bool allowShortcuts)
+    void PathFinder::buildPath(const ESM::Pathgrid::Point &startPoint, const ESM::Pathgrid::Point &endPoint,
+                               const ESM::Pathgrid *pathGrid, float xCell, float yCell, bool allowShortcuts)
     {
         if(allowShortcuts)
         {
-            if(MWBase::Environment::get().getWorld()->castRay(startPoint.mX, startPoint.mY, startPoint.mZ, endPoint.mX, endPoint.mY,
-                endPoint.mZ))
+            if(MWBase::Environment::get().getWorld()->castRay(startPoint.mX, startPoint.mY, startPoint.mZ,
+                                                              endPoint.mX, endPoint.mY, endPoint.mZ))
                 allowShortcuts = false;
         }
 
@@ -184,14 +184,14 @@ namespace MWMechanics
             mIsPathConstructed = false;
     }
 
-    float PathFinder::getZAngleToNext(float x, float y)
+    float PathFinder::getZAngleToNext(float x, float y) const
     {
         // This should never happen (programmers should have an if statement checking mIsPathConstructed that prevents this call
         // if otherwise).
         if(mPath.empty())
             return 0;
 
-        ESM::Pathgrid::Point nextPoint = *mPath.begin();
+        const ESM::Pathgrid::Point &nextPoint = *mPath.begin();
         float directionX = nextPoint.mX - x;
         float directionY = nextPoint.mY - y;
         float directionResult = sqrt(directionX * directionX + directionY * directionY);
@@ -205,7 +205,7 @@ namespace MWMechanics
             return true;
 
         ESM::Pathgrid::Point nextPoint = *mPath.begin();
-        if(distanceZCorrected(nextPoint, x, y, z) < 40)
+        if(distanceZCorrected(nextPoint, x, y, z) < 64)
         {
             mPath.pop_front();
             if(mPath.empty())
@@ -216,16 +216,6 @@ namespace MWMechanics
         }
 
         return false;
-    }
-
-    std::list<ESM::Pathgrid::Point> PathFinder::getPath()
-    {
-        return mPath;
-    }
-
-    bool PathFinder::isPathConstructed()
-    {
-        return mIsPathConstructed;
     }
 }
 
