@@ -10,7 +10,7 @@
 
 CS::Editor::Editor() : mViewManager (mDocumentManager)
 {
-	mIpcServerName = "IPCServer";
+	mIpcServerName = "org.openmw.OpenCS";
 
     connect (&mViewManager, SIGNAL (newDocumentRequest ()), this, SLOT (createDocument ()));
     connect (&mViewManager, SIGNAL (loadDocumentRequest ()), this, SLOT (loadDocument ()));
