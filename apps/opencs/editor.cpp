@@ -2,12 +2,16 @@
 #include "editor.hpp"
 
 #include <QApplication>
+#include <QLocalServer>
+#include <QLocalSocket>
 
 #include "model/doc/document.hpp"
 #include "model/world/data.hpp"
 
 CS::Editor::Editor() : mViewManager (mDocumentManager)
 {
+	mIpcServerName = "org.openmw.OpenCS";
+
     connect (&mViewManager, SIGNAL (newDocumentRequest ()), this, SLOT (createDocument ()));
     connect (&mViewManager, SIGNAL (loadDocumentRequest ()), this, SLOT (loadDocument ()));
 
@@ -112,6 +116,35 @@ void CS::Editor::createNewFile()
 
     mViewManager.addView (document);
     mFileDialog.hide();
+}
+
+void CS::Editor::showStartup()
+{
+	if(mStartup.isHidden())
+		mStartup.show();
+	mStartup.raise();
+	mStartup.activateWindow();
+}
+
+bool CS::Editor::makeIPCServer()
+{
+	mServer = new QLocalServer(this);
+
+	if(mServer->listen(mIpcServerName))
+	{
+		connect(mServer, SIGNAL(newConnection()), this, SLOT(showStartup()));
+		return true;
+	}
+
+	mServer->close();
+	return false;
+}
+
+void CS::Editor::connectToIPCServer()
+{
+	mClientSocket = new QLocalSocket(this);
+	mClientSocket->connectToServer(mIpcServerName);
+	mClientSocket->close();
 }
 
 int CS::Editor::run()
