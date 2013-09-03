@@ -1,10 +1,31 @@
 #include "refidtypedelegate.hpp"
+
 #include "../../model/world/universalid.hpp"
 
 CSVWorld::RefIdTypeDelegate::RefIdTypeDelegate
     (const ValueList &values, const IconList &icons, QUndoStack& undoStack, QObject *parent)
     : DataDisplayDelegate (values, icons, undoStack, parent)
 {}
+
+bool CSVWorld::RefIdTypeDelegate::updateEditorSetting (const QString &settingName, const QString &settingValue)
+{
+    if (settingName == "Referenceable ID Type Display")
+    {
+        if (settingValue == "Icon and Text")
+            mDisplayMode = Mode_IconAndText;
+
+        else if (settingValue == "Icon Only")
+            mDisplayMode = Mode_IconOnly;
+
+        else if (settingValue == "Text Only")
+            mDisplayMode = Mode_TextOnly;
+
+        return true;
+    }
+
+    return false;
+}
+
 
 CSVWorld::RefIdTypeDelegateFactory::RefIdTypeDelegateFactory()
 {
@@ -38,23 +59,4 @@ CSVWorld::RefIdTypeDelegateFactory::UidTypeList CSVWorld::RefIdTypeDelegateFacto
     }
 
     return list;
-}
-
-bool CSVWorld::RefIdTypeDelegate::updateEditorSetting (const QString &settingName, const QString &settingValue)
-{
-    if (settingName == "Referenceable ID Type Display")
-    {
-        if (settingValue == "Icon and Text")
-            mDisplayMode = Mode_IconAndText;
-
-        else if (settingValue == "Icon Only")
-            mDisplayMode = Mode_IconOnly;
-
-        else if (settingValue == "Text Only")
-            mDisplayMode = Mode_TextOnly;
-
-        return true;
-    }
-
-    return false;
 }

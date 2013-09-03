@@ -134,9 +134,6 @@ namespace CSMWorld
             ///< Will return an empty string, if no icon is available.
 
             static std::vector<Type> listReferenceableTypes();
-
-            static std::pair<int, const char *> getIdArgPair (unsigned int index);
-            static unsigned int getIdArgSize ();
     };
 
     bool operator== (const UniversalId& left, const UniversalId& right);
