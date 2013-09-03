@@ -41,6 +41,7 @@ int main(int argc, char *argv[])
 
     if(!editor.makeIPCServer())
     {
+    	editor.connectToIPCServer();
     	return 0;
     }
 
