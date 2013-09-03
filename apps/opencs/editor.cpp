@@ -2,6 +2,8 @@
 #include "editor.hpp"
 
 #include <QApplication>
+#include <QLocalServer>
+#include <QLocalSocket>
 
 #include "model/doc/document.hpp"
 #include "model/world/data.hpp"
@@ -112,6 +114,15 @@ void CS::Editor::createNewFile()
 
     mViewManager.addView (document);
     mFileDialog.hide();
+}
+
+bool CS::Editor::makeIPCServer()
+{
+	server = new QLocalServer(this);
+	if(server->listen("IPCServer"))
+		return true;
+	server->close();
+	return false;
 }
 
 int CS::Editor::run()
