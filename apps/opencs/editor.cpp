@@ -10,7 +10,7 @@
 
 CS::Editor::Editor() : mViewManager (mDocumentManager)
 {
-	ipcServerName = "IPCServer";
+	mIpcServerName = "IPCServer";
 
     connect (&mViewManager, SIGNAL (newDocumentRequest ()), this, SLOT (createDocument ()));
     connect (&mViewManager, SIGNAL (loadDocumentRequest ()), this, SLOT (loadDocument ()));
@@ -128,23 +128,23 @@ void CS::Editor::showStartup()
 
 bool CS::Editor::makeIPCServer()
 {
-	server = new QLocalServer(this);
+	mServer = new QLocalServer(this);
 
-	if(server->listen(ipcServerName))
+	if(mServer->listen(mIpcServerName))
 	{
-		connect(server, SIGNAL(newConnection()), this, SLOT(showStartup()));
+		connect(mServer, SIGNAL(newConnection()), this, SLOT(showStartup()));
 		return true;
 	}
 
-	server->close();
+	mServer->close();
 	return false;
 }
 
 void CS::Editor::connectToIPCServer()
 {
-	clientToServerSocket = new QLocalSocket(this);
-	clientToServerSocket->connectToServer(ipcServerName);
-	clientToServerSocket->close();
+	mClientSocket = new QLocalSocket(this);
+	mClientSocket->connectToServer(mIpcServerName);
+	mClientSocket->close();
 }
 
 int CS::Editor::run()

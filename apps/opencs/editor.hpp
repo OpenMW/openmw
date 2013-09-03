@@ -57,9 +57,9 @@ namespace CS
 
         private:
 
-            QString ipcServerName;
-            QLocalServer *server;
-            QLocalSocket *clientToServerSocket;
+            QString mIpcServerName;
+            QLocalServer *mServer;
+            QLocalSocket *mClientSocket;
     };
 }
 
