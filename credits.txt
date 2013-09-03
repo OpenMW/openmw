@@ -43,6 +43,7 @@ lazydev
 Leon Saunders (emoose)
 Lukasz Gromanowski (lgro)
 Manuel Edelmann (vorenon)
+Marc Bouvier (CramitDeFrog)
 Marcin Hulist (Gohan)
 Mark Siewert (mark76)
 Mateusz Kołaczek (PL_kolek)
