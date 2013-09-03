@@ -245,6 +245,11 @@ namespace
         "Bolt", 0
     };
 
+    static const char *sModificationEnums[] =
+    {
+        "Base", "Modified", "Added", "Deleted", "Deleted", 0
+    };
+
     const char **getEnumNames (CSMWorld::Columns::ColumnId column)
     {
         switch (column)
@@ -257,6 +262,7 @@ namespace
             case CSMWorld::Columns::ColumnId_ClothingType: return sClothingTypes;
             case CSMWorld::Columns::ColumnId_CreatureType: return sCreatureTypes;
             case CSMWorld::Columns::ColumnId_WeaponType: return sWeaponTypes;
+            case CSMWorld::Columns::ColumnId_Modification: return sModificationEnums;
 
             default: return 0;
         }
