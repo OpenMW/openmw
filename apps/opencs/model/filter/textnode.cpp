@@ -45,6 +45,10 @@ bool CSMFilter::TextNode::test (const CSMWorld::IdTable& table, int row,
         if (value>=0 && value<static_cast<int> (enums.size()))
             string = QString::fromUtf8 (enums[value].c_str());
     }
+    else if (data.type()==QVariant::Bool)
+    {
+        string = data.toBool() ? "true" : " false";
+    }
     else
         return false;
 

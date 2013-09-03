@@ -120,7 +120,7 @@ CSMFilter::Token CSMFilter::Parser::getStringToken()
         }
 
         if (string[0]=='"')
-            string = string.substr (1, string.size()-2);
+            return string.substr (1, string.size()-2);
     }
 
     return checkKeywords (string);
