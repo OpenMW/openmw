@@ -6,9 +6,11 @@
 #include "ref.hpp"
 #include "cell.hpp"
 
+/*
 CSMWorld::RefCollection::RefCollection (Collection<Cell>& cells)
 : mCells (cells), mNextId (0)
 {}
+*/
 
 void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool base)
 {

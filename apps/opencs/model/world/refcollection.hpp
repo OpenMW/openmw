@@ -17,7 +17,9 @@ namespace CSMWorld
 
         public:
 
-            RefCollection (Collection<Cell>& cells);
+            RefCollection (Collection<Cell>& cells)
+              : mCells (cells), mNextId (0)
+            {}
 
             void load (ESM::ESMReader& reader, int cellIndex, bool base);
             ///< Load a sequence of references.
