@@ -3,6 +3,8 @@
 
 #include <components/misc/stringops.hpp>
 
+#include "universalid.hpp"
+
 namespace CSMWorld
 {
     namespace Columns
@@ -271,7 +273,7 @@ namespace
 
 bool CSMWorld::Columns::hasEnums (ColumnId column)
 {
-    return getEnumNames (column)!=0;
+    return getEnumNames (column)!=0 || column==ColumnId_RecordType;
 }
 
 std::vector<std::string> CSMWorld::Columns::getEnums (ColumnId column)
@@ -281,6 +283,13 @@ std::vector<std::string> CSMWorld::Columns::getEnums (ColumnId column)
     if (const char **table = getEnumNames (column))
         for (int i=0; table[i]; ++i)
             enums.push_back (table[i]);
+    else if (column==ColumnId_RecordType)
+    {
+        enums.push_back (""); // none
+
+        for (int i=UniversalId::Type_None+1; i<UniversalId::NumberOfTypes; ++i)
+            enums.push_back (UniversalId (static_cast<UniversalId::Type> (i)).getTypeName());
+    }
 
     return enums;
 }
