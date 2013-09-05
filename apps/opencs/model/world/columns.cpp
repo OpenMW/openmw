@@ -252,6 +252,11 @@ namespace
         "Base", "Modified", "Added", "Deleted", "Deleted", 0
     };
 
+    static const char *sVarTypeEnums[] =
+    {
+        "unknown", "none", "short", "integer", "long", "float", "string", 0
+    };
+
     const char **getEnumNames (CSMWorld::Columns::ColumnId column)
     {
         switch (column)
@@ -265,6 +270,7 @@ namespace
             case CSMWorld::Columns::ColumnId_CreatureType: return sCreatureTypes;
             case CSMWorld::Columns::ColumnId_WeaponType: return sWeaponTypes;
             case CSMWorld::Columns::ColumnId_Modification: return sModificationEnums;
+            case CSMWorld::Columns::ColumnId_ValueType: return sVarTypeEnums;
 
             default: return 0;
         }
