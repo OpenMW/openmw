@@ -80,7 +80,7 @@ namespace
         { CSMWorld::UniversalId::Class_RefRecord, CSMWorld::UniversalId::Type_Static, "Static", ":./static.png" },
         { CSMWorld::UniversalId::Class_RefRecord, CSMWorld::UniversalId::Type_Weapon, "Weapon", ":./weapon.png" },
         { CSMWorld::UniversalId::Class_SubRecord, CSMWorld::UniversalId::Type_Reference, "Reference", 0 },
-
+        { CSMWorld::UniversalId::Class_SubRecord, CSMWorld::UniversalId::Type_Filter, "Filter", 0 },
         { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0, 0 } // end marker
     };
 
@@ -146,6 +146,22 @@ CSMWorld::UniversalId::UniversalId (Type type) : mArgumentType (ArgumentType_Non
         if (type==sNoArg[i].mType)
         {
             mClass = sNoArg[i].mClass;
+            return;
+        }
+
+    for (int i=0; sIdArg[i].mName; ++i)
+        if (type==sIdArg[i].mType)
+        {
+            mArgumentType = ArgumentType_Id;
+            mClass = sIdArg[i].mClass;
+            return;
+        }
+
+    for (int i=0; sIndexArg[i].mName; ++i)
+        if (type==sIndexArg[i].mType)
+        {
+            mArgumentType = ArgumentType_Index;
+            mClass = sIndexArg[i].mClass;
             return;
         }
 
