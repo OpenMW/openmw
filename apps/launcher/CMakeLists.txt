@@ -24,7 +24,6 @@ set(LAUNCHER_HEADER
     graphicspage.hpp
     maindialog.hpp
     playpage.hpp
-    unshieldthread.hpp
     textslotmsgbox.hpp
 
     settings/gamesettings.hpp
@@ -47,7 +46,6 @@ set(LAUNCHER_HEADER_MOC
     graphicspage.hpp
     maindialog.hpp
     playpage.hpp
-    unshieldthread.hpp
     textslotmsgbox.hpp
 
     utils/checkablemessagebox.hpp

@@ -31,6 +31,7 @@ namespace Render {
         static Ogre::Real flickerFrequency(Ogre::Real phase);
 
     public:
+        // MSVC needs the constructor for a class inheriting a template to be defined in header
         LightFunction(LightType type)
           : ControllerFunction<Ogre::Real>(true)
           , mType(type)
@@ -47,6 +48,7 @@ namespace Render {
         Ogre::ColourValue mColor;
 
     public:
+        // MSVC needs the constructor for a class inheriting a template to be defined in header
         LightValue(Ogre::Light *light, const Ogre::ColourValue &color)
           : mTarget(light)
           , mColor(color)

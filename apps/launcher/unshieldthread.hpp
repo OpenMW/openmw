@@ -5,9 +5,7 @@
 
 #include <boost/filesystem.hpp>
 
-#ifndef _WIN32
 #include <libunshield.h>
-#endif
 
 class UnshieldThread : public QThread
 {
@@ -34,9 +32,7 @@ class UnshieldThread : public QThread
     private:
 
         void extract_cab(const boost::filesystem::path& cab, const boost::filesystem::path& output_dir, bool extract_ini = false);
-#ifndef _WIN32
         bool extract_file(Unshield* unshield, boost::filesystem::path output_dir, const char* prefix, int index);
-#endif
         
         boost::filesystem::path mMorrowindPath;
         boost::filesystem::path mTribunalPath;
