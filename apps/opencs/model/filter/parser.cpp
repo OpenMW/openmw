@@ -437,22 +437,22 @@ boost::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseValue()
     // parse value
     double lower = 0;
     double upper = 0;
-    bool min = false;
-    bool max = false;
+    ValueNode::Type lowerType = ValueNode::Type_Open;
+    ValueNode::Type upperType = ValueNode::Type_Open;
 
     token = getNextToken();
 
     if (token.mType==Token::Type_Number)
     {
         // single value
-        min = max = true;
         lower = upper = token.mNumber;
+        lowerType = upperType = ValueNode::Type_Closed;
     }
     else
     {
         // interval
         if (token.mType==Token::Type_OpenSquare)
-            min = true;
+            lowerType = ValueNode::Type_Closed;
         else if (token.mType!=Token::Type_CloseSquare && token.mType!=Token::Type_Open)
         {
             error();
@@ -490,7 +490,7 @@ boost::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseValue()
         token = getNextToken();
 
         if (token.mType==Token::Type_CloseSquare)
-            max = true;
+            upperType = ValueNode::Type_Closed;
         else if (token.mType!=Token::Type_OpenSquare && token.mType!=Token::Type_Close)
         {
             error();
@@ -506,7 +506,7 @@ boost::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseValue()
         return boost::shared_ptr<Node>();
     }
 
-    return boost::shared_ptr<Node> (new ValueNode (columnId, lower, upper, min, max));
+    return boost::shared_ptr<Node> (new ValueNode (columnId, lowerType, upperType, lower, upper));
 }
 
 void CSMFilter::Parser::error()

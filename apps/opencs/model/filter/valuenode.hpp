@@ -7,16 +7,25 @@ namespace CSMFilter
 {
     class ValueNode : public LeafNode
     {
+        public:
+
+            enum Type
+            {
+                Type_Closed, Type_Open, Type_Infinite
+            };
+
+        private:
+
             int mColumnId;
             std::string mText;
             double mLower;
             double mUpper;
-            bool mMin;
-            bool mMax;
+            Type mLowerType;
+            Type mUpperType;
 
         public:
 
-            ValueNode (int columnId, double lower, double upper, bool min, bool max);
+            ValueNode (int columnId, Type lowerType, Type upperType, double lower, double upper);
 
             virtual bool test (const CSMWorld::IdTable& table, int row,
                 const std::map<int, int>& columns) const;
