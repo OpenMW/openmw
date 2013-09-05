@@ -461,36 +461,44 @@ boost::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseValue()
 
         token = getNextToken();
 
-        if (token.mType!=Token::Type_Number)
+        if (token.mType==Token::Type_Number)
+        {
+            lower = token.mNumber;
+
+            token = getNextToken();
+
+            if (token.mType!=Token::Type_Comma)
+            {
+                error();
+                return boost::shared_ptr<Node>();
+            }
+        }
+        else if (token.mType==Token::Type_Comma)
+        {
+            lowerType = ValueNode::Type_Infinite;
+        }
+        else
         {
             error();
             return boost::shared_ptr<Node>();
         }
 
-        lower = token.mNumber;
-
         token = getNextToken();
 
-        if (token.mType!=Token::Type_Comma)
+        if (token.mType==Token::Type_Number)
         {
-            error();
-            return boost::shared_ptr<Node>();
+            upper = token.mNumber;
+
+            token = getNextToken();
         }
-
-        token = getNextToken();
-
-        if (token.mType!=Token::Type_Number)
-        {
-            error();
-            return boost::shared_ptr<Node>();
-        }
-
-        upper = token.mNumber;
-
-        token = getNextToken();
+        else
+            upperType = ValueNode::Type_Infinite;
 
         if (token.mType==Token::Type_CloseSquare)
-            upperType = ValueNode::Type_Closed;
+        {
+            if (upperType!=ValueNode::Type_Infinite)
+                upperType = ValueNode::Type_Closed;
+        }
         else if (token.mType!=Token::Type_OpenSquare && token.mType!=Token::Type_Close)
         {
             error();
