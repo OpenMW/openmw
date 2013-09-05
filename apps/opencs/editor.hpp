@@ -2,6 +2,10 @@
 #define CS_EDITOR_H
 
 #include <QObject>
+#include <QString>
+#include <QLocalServer>
+#include <QLocalSocket>
+
 #ifndef Q_MOC_RUN
 #include <components/files/configurationmanager.hpp>
 #endif
@@ -35,6 +39,9 @@ namespace CS
 
             Editor();
 
+            bool makeIPCServer();
+            void connectToIPCServer();
+
             int run();
             ///< \return error status
 
@@ -45,6 +52,14 @@ namespace CS
             void loadDocument();
             void openFiles();
             void createNewFile();
+
+            void showStartup();
+
+        private:
+
+            QString mIpcServerName;
+            QLocalServer *mServer;
+            QLocalSocket *mClientSocket;
     };
 }
 
