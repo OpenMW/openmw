@@ -10,7 +10,7 @@
 
 CS::Editor::Editor() : mViewManager (mDocumentManager)
 {
-	mIpcServerName = "org.openmw.OpenCS";
+    mIpcServerName = "org.openmw.OpenCS";
 
     connect (&mViewManager, SIGNAL (newDocumentRequest ()), this, SLOT (createDocument ()));
     connect (&mViewManager, SIGNAL (loadDocumentRequest ()), this, SLOT (loadDocument ()));
@@ -120,31 +120,31 @@ void CS::Editor::createNewFile()
 
 void CS::Editor::showStartup()
 {
-	if(mStartup.isHidden())
-		mStartup.show();
-	mStartup.raise();
-	mStartup.activateWindow();
+    if(mStartup.isHidden())
+        mStartup.show();
+    mStartup.raise();
+    mStartup.activateWindow();
 }
 
 bool CS::Editor::makeIPCServer()
 {
-	mServer = new QLocalServer(this);
+    mServer = new QLocalServer(this);
 
-	if(mServer->listen(mIpcServerName))
-	{
-		connect(mServer, SIGNAL(newConnection()), this, SLOT(showStartup()));
-		return true;
-	}
+    if(mServer->listen(mIpcServerName))
+    {
+        connect(mServer, SIGNAL(newConnection()), this, SLOT(showStartup()));
+        return true;
+    }
 
-	mServer->close();
-	return false;
+    mServer->close();
+    return false;
 }
 
 void CS::Editor::connectToIPCServer()
 {
-	mClientSocket = new QLocalSocket(this);
-	mClientSocket->connectToServer(mIpcServerName);
-	mClientSocket->close();
+    mClientSocket = new QLocalSocket(this);
+    mClientSocket->connectToServer(mIpcServerName);
+    mClientSocket->close();
 }
 
 int CS::Editor::run()
