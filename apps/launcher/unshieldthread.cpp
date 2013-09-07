@@ -486,6 +486,7 @@ void UnshieldThread::run()
 
 UnshieldThread::UnshieldThread()
 {
+    unshield_set_log_level(0);
     mMorrowindDone = false;
     mTribunalDone = false;
     mBloodmoonDone = false;
