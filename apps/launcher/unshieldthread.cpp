@@ -216,7 +216,12 @@ namespace
             else
             {
                 if(copy)
-                    bfs::copy_file(dir->path(), to / dir->path().filename());
+                {
+                    bfs::path dest = to / dir->path().filename();
+                    if(bfs::exists(dest))
+                        bfs::remove_all(dest);
+                    bfs::copy_file(dir->path(), dest);
+                }
                 else
                     bfs::rename(dir->path(), to / dir->path().filename());
             }
