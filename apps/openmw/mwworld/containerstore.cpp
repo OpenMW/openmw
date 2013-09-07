@@ -80,7 +80,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::end()
 bool MWWorld::ContainerStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
 {
     /// \todo add current enchantment charge here when it is implemented
-    if (  ptr1.getCellRef().mRefID == ptr2.getCellRef().mRefID
+    if (  Misc::StringUtils::ciEqual(ptr1.getCellRef().mRefID, ptr2.getCellRef().mRefID)
           && MWWorld::Class::get(ptr1).getScript(ptr1) == "" // item with a script never stacks
           && MWWorld::Class::get(ptr1).getEnchantment(ptr1) == "" // item with enchantment never stacks (we could revisit this later, but for now it makes selecting items in the spell window much easier)
         && ptr1.getCellRef().mOwner == ptr2.getCellRef().mOwner
