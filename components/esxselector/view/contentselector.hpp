@@ -7,6 +7,7 @@
 
 namespace EsxModel
 {
+    class ContentModel;
     class DataFilesModel;
     class PluginsProxyModel;
     class MasterProxyModel;
@@ -23,6 +24,7 @@ namespace EsxView
     protected:
 
         EsxModel::DataFilesModel *mDataFilesModel;
+        EsxModel::ContentModel *mContentModel;
         EsxModel::MasterProxyModel *mMasterProxyModel;
         EsxModel::PluginsProxyModel *mPluginsProxyModel;
 
@@ -37,6 +39,7 @@ namespace EsxView
         void setCheckState(QModelIndex index, QSortFilterProxyModel *model);
         QStringList checkedItemsPaths();
         void on_checkAction_triggered();
+        void buildDragDropModelView();
 
     signals:
         void profileChanged(int index);

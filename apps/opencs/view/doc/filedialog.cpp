@@ -27,7 +27,7 @@ CSVDoc::FileDialog::FileDialog(QWidget *parent) :
 
     resize(400, 400);
 
-    connect(mDataFilesModel, SIGNAL(checkedItemsChanged(QStringList)), this, SLOT(updateOpenButton(QStringList)));
+   // connect(mDataFilesModel, SIGNAL(checkedItemsChanged(QStringList)), this, SLOT(updateOpenButton(QStringList)));
     connect(projectNameLineEdit, SIGNAL(textChanged(QString)), this, SLOT(updateCreateButton(QString)));
 
     connect(projectCreateButton, SIGNAL(clicked()), this, SIGNAL(createNewFile()));

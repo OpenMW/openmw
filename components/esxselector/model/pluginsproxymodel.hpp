@@ -8,7 +8,7 @@ class QAbstractTableModel;
 
 namespace EsxModel
 {
-    class DataFilesModel;
+    class ContentModel;
 
     class PluginsProxyModel : public QSortFilterProxyModel
     {
@@ -16,10 +16,12 @@ namespace EsxModel
 
     public:
 
-        explicit PluginsProxyModel(QObject *parent = 0, DataFilesModel *model = 0);
+        explicit PluginsProxyModel(QObject *parent = 0, ContentModel *model = 0);
         ~PluginsProxyModel();
 
         virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+
+        bool removeRows(int row, int count, const QModelIndex &parent);
     };
 }
 

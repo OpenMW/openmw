@@ -1,13 +1,17 @@
 #include "esmfile.hpp"
 
 EsxModel::EsmFile::EsmFile(QString fileName, ModelItem *parent)
-    : ModelItem(parent)
-{
-     mFileName = fileName;
-     mSize = 0;
-     mVersion = 0.0f;
-}
+    : ModelItem(parent), mFileName(fileName), mSize(0), mVersion(0.0f)
+{}
+/*
+EsxModel::EsmFile::EsmFile(const EsmFile &file)
+    : ModelItem(file.parent()), mFileName(file.mFileName), mSize(file.mSize),
+      mVersion(file.mVersion), mAuthor(file.mAuthor), mModified(file.mModified),
+      mAccessed(file.mAccessed), mPath(file.mPath), mMasters(file.mMasters),
+      mDescription(file.mDescription)
+{}
 
+*/
 void EsxModel::EsmFile::setFileName(const QString &fileName)
 {
     mFileName = fileName;

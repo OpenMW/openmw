@@ -1,5 +1,5 @@
 project (Components)
-
+set (CMAKE_BUILD_TYPE DEBUG)
 # source files
 
 add_component_dir (settings
@@ -74,6 +74,7 @@ if(QT_QTGUI_LIBRARY AND QT_QTCORE_LIBRARY)
    add_component_qt_dir (esxselector
         model/masterproxymodel model/modelitem model/datafilesmodel
         model/pluginsproxymodel model/esmfile model/naturalsort
+        model/contentmodel
         view/profilescombobox view/comboboxlineedit
         view/lineedit view/contentselector
        )

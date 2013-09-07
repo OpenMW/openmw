@@ -1,20 +1,22 @@
 #ifndef MODELITEM_HPP
 #define MODELITEM_HPP
 
-#include <QObject>
+#include <QMimeData>
 #include <QList>
 
 namespace EsxModel
 {
-    class ModelItem : public QObject
+    class ModelItem : public QMimeData
     {
         Q_OBJECT
 
     public:
         ModelItem(ModelItem *parent = 0);
+        //ModelItem(const ModelItem *parent = 0);
+
         ~ModelItem();
 
-        ModelItem *parent();
+        ModelItem *parent() const;
         int row() const;
 
         int childCount() const;
@@ -23,6 +25,8 @@ namespace EsxModel
 
         void appendChild(ModelItem *child);
         void removeChild(int row);
+
+        bool hasFormat(const QString &mimetype) const;
 
         //virtual bool acceptChild(ModelItem *child);
 

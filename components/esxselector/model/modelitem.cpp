@@ -2,9 +2,14 @@
 
 EsxModel::ModelItem::ModelItem(ModelItem *parent)
     : mParentItem(parent)
-    , QObject(parent)
 {
 }
+/*
+EsxModel::ModelItem::ModelItem(const ModelItem *parent)
+   // : mParentItem(parent)
+{
+}
+*/
 
 EsxModel::ModelItem::~ModelItem()
 {
@@ -12,11 +17,18 @@ EsxModel::ModelItem::~ModelItem()
 }
 
 
-EsxModel::ModelItem *EsxModel::ModelItem::parent()
+EsxModel::ModelItem *EsxModel::ModelItem::parent() const
 {
     return mParentItem;
 }
 
+bool EsxModel::ModelItem::hasFormat(const QString &mimetype) const
+{
+    if (mimetype == "application/omwcontent")
+        return true;
+
+    return QMimeData::hasFormat(mimetype);
+}
 int EsxModel::ModelItem::row() const
 {
     if (mParentItem)

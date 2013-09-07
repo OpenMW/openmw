@@ -14,7 +14,9 @@ namespace EsxModel
         Q_PROPERTY(QString filename READ fileName)
 
     public:
+
         EsmFile(QString fileName = QString(), ModelItem *parent = 0);
+     //   EsmFile(const EsmFile &);
 
         ~EsmFile()
         {}
@@ -38,6 +40,7 @@ namespace EsxModel
         inline QStringList masters() const { return mMasters; }
         inline QString description() const { return mDescription; }
 
+        //inline ModelItem *parent() const { return ModelItem::parent(); this->}
 
     private:
         QString mFileName;
@@ -52,5 +55,7 @@ namespace EsxModel
 
     };
 }
+
+Q_DECLARE_METATYPE (EsxModel::EsmFile *)
 
 #endif

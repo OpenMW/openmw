@@ -10,7 +10,7 @@ namespace EsxModel
 {
     class EsmFile;
 
-    typedef QList<EsmFile *> EsmFileList;
+    typedef QList<const EsmFile *> EsmFileList;
 
     class DataFilesModel : public QAbstractTableModel
     {
@@ -21,6 +21,8 @@ namespace EsxModel
         virtual ~DataFilesModel();
         virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
         virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
+        bool removeRows(int row, int count, const QModelIndex &parent);
+        bool insertRows(int row, int count, const QModelIndex &parent);
 
         bool moveRow(int oldrow, int row, const QModelIndex &parent = QModelIndex());
 
@@ -33,13 +35,21 @@ namespace EsxModel
         void sort(int column, Qt::SortOrder order = Qt::AscendingOrder);
 
         inline QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const
-           { return QAbstractTableModel::index(row, column, parent); }
+           {
+            QModelIndex idx = QAbstractTableModel::index(row, 0, parent);
+            return idx;
+        }
 
         void setEncoding(const QString &encoding);
 
         void addFiles(const QString &path);
 
         void uncheckAll();
+
+        Qt::DropActions supportedDropActions() const;
+        QStringList mimeTypes() const;
+        QMimeData *mimeData(const QModelIndexList &indexes) const;
+        bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent);
 
         EsmFileList checkedItems();
         EsmFileList uncheckedItems();
@@ -48,16 +58,17 @@ namespace EsxModel
         Qt::CheckState checkState(const QModelIndex &index);
         void setCheckState(const QModelIndex &index, Qt::CheckState state);
 
-        QModelIndex indexFromItem(EsmFile *item) const;
-        EsmFile* findItem(const QString &name);
-        EsmFile* item(int row) const;
+        QModelIndex indexFromItem(const EsmFile *item) const;
+        const EsmFile* findItem(const QString &name);
+        const EsmFile* item(int row) const;
 
     signals:
         void checkedItemsChanged(const EsmFileList &items);
 
     private:
-        bool canBeChecked(EsmFile *file) const;
-        void addFile(EsmFile *file);
+
+        bool canBeChecked(const EsmFile *file) const;
+        void addFile(const EsmFile *file);
 
         EsmFileList mFiles;
         QHash<QString, Qt::CheckState> mCheckStates;

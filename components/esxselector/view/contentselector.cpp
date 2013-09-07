@@ -3,6 +3,8 @@
 #include "../model/datafilesmodel.hpp"
 #include "../model/masterproxymodel.hpp"
 #include "../model/pluginsproxymodel.hpp"
+#include "../model/contentmodel.hpp"
+#include "../model/esmfile.hpp"
 
 #include <QSortFilterProxyModel>
 
@@ -14,7 +16,33 @@ EsxView::ContentSelector::ContentSelector(QWidget *parent) :
     QDialog(parent)
 {
     setupUi(this);
-    buildModelsAndViews();
+   // buildModelsAndViews();
+    buildDragDropModelView();
+}
+void EsxView::ContentSelector::buildDragDropModelView()
+{
+    mContentModel = new EsxModel::ContentModel();
+
+    //mContentModel->addFiles("/home/joel/Projects/OpenMW/Data_Files");
+    mMasterProxyModel = new EsxModel::MasterProxyModel(this, mContentModel);
+    mPluginsProxyModel = new EsxModel::PluginsProxyModel(this, mContentModel);
+
+    tableView->setModel (mPluginsProxyModel);
+
+    masterView->setPlaceholderText(QString("Select a game file..."));
+    masterView->setModel(mMasterProxyModel);
+    pluginView->setModel(mPluginsProxyModel);
+
+    profilesComboBox->setPlaceholderText(QString("Select a profile..."));
+
+    updateViews();
+    connect(pluginView, SIGNAL(clicked(const QModelIndex &)), this, SLOT(slotPluginTableItemClicked(const QModelIndex &)));
+    connect(masterView, SIGNAL(currentIndexChanged(int)), this, SLOT(slotCurrentMasterIndexChanged(int)));
+    connect(profilesComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(slotCurrentProfileIndexChanged(int)));
+
+
+    connect(mContentModel, SIGNAL(layoutChanged()), this, SLOT(updateViews()));
+    connect(tableView, SIGNAL(clicked(const QModelIndex &)), this, SLOT(slotPluginTableItemClicked(const QModelIndex &)));
 }
 
 void EsxView::ContentSelector::buildModelsAndViews()
@@ -22,15 +50,15 @@ void EsxView::ContentSelector::buildModelsAndViews()
     // Models
     mDataFilesModel = new EsxModel::DataFilesModel (this);
 
-    mMasterProxyModel = new EsxModel::MasterProxyModel (this, mDataFilesModel);
-    mPluginsProxyModel = new EsxModel::PluginsProxyModel (this, mDataFilesModel);
+   // mMasterProxyModel = new EsxModel::MasterProxyModel (this, mDataFilesModel);
+   // mPluginsProxyModel = new EsxModel::PluginsProxyModel (this, mDataFilesModel);
 
     masterView->setPlaceholderText(QString("Select a game file..."));
     masterView->setModel(mMasterProxyModel);
     pluginView->setModel(mPluginsProxyModel);
     profilesComboBox->setPlaceholderText(QString("Select a profile..."));
 
-
+    updateViews();
     connect(mDataFilesModel, SIGNAL(layoutChanged()), this, SLOT(updateViews()));
     connect(pluginView, SIGNAL(clicked(const QModelIndex &)), this, SLOT(slotPluginTableItemClicked(const QModelIndex &)));
     connect(masterView, SIGNAL(currentIndexChanged(int)), this, SLOT(slotCurrentMasterIndexChanged(int)));
@@ -39,15 +67,15 @@ void EsxView::ContentSelector::buildModelsAndViews()
 
 void EsxView::ContentSelector::addFiles(const QString &path)
 {
-    mDataFilesModel->addFiles(path);
-    mDataFilesModel->sort(3);  // Sort by date accessed
+    mContentModel->addFiles(path);
+    mContentModel->sort(3);  // Sort by date accessed
     masterView->setCurrentIndex(-1);
-    mDataFilesModel->uncheckAll();
+    mContentModel->uncheckAll();
 }
 
 void EsxView::ContentSelector::setEncoding(const QString &encoding)
 {
-    mDataFilesModel->setEncoding(encoding);
+    mContentModel->setEncoding(encoding);
 }
 
 void EsxView::ContentSelector::setCheckState(QModelIndex index, QSortFilterProxyModel *model)
@@ -62,15 +90,20 @@ void EsxView::ContentSelector::setCheckState(QModelIndex index, QSortFilterProxy
 
     if (sourceIndex.isValid())
     {
-        (mDataFilesModel->checkState(sourceIndex) == Qt::Checked)
-                ? mDataFilesModel->setCheckState(sourceIndex, Qt::Unchecked)
-                : mDataFilesModel->setCheckState(sourceIndex, Qt::Checked);
+        (mContentModel->checkState(sourceIndex) == Qt::Checked)
+                ? mContentModel->setCheckState(sourceIndex, Qt::Unchecked)
+                : mContentModel->setCheckState(sourceIndex, Qt::Checked);
     }
 }
 
 QStringList EsxView::ContentSelector::checkedItemsPaths()
 {
-    return mDataFilesModel->checkedItemsPaths();
+    QStringList itemPaths;
+
+    foreach( const EsxModel::EsmFile *file, mContentModel->checkedItems())
+        itemPaths << file->path();
+
+    return itemPaths;
 }
 
 void EsxView::ContentSelector::updateViews()
@@ -106,5 +139,6 @@ void EsxView::ContentSelector::slotCurrentMasterIndexChanged(int index)
 
 void EsxView::ContentSelector::slotPluginTableItemClicked(const QModelIndex &index)
 {
+    qDebug() << "setting checkstate in plugin...";
     setCheckState(index, mPluginsProxyModel);
 }

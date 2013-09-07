@@ -1,7 +1,8 @@
 #include "pluginsproxymodel.hpp"
-#include "datafilesmodel.hpp"
+#include "contentmodel.hpp"
+#include <QDebug>
 
-EsxModel::PluginsProxyModel::PluginsProxyModel(QObject *parent, DataFilesModel *model) :
+EsxModel::PluginsProxyModel::PluginsProxyModel(QObject *parent, ContentModel *model) :
     QSortFilterProxyModel(parent)
 {
     setFilterRegExp (QString("addon"));
@@ -22,12 +23,18 @@ QVariant EsxModel::PluginsProxyModel::data(const QModelIndex &index, int role) c
     {
         case Qt::CheckStateRole:
         {
-        if (index.column() != 0)
+            if (index.column() != 0)
                 return QVariant();
 
-            return static_cast<DataFilesModel *>(sourceModel())->checkState(mapToSource(index));
+            return static_cast<ContentModel *>(sourceModel())->checkState(mapToSource(index));
         }
-    };
+    }
+    return QSortFilterProxyModel::data(index, role);
+}
 
-    return QSortFilterProxyModel::data (index, role);
+bool EsxModel::PluginsProxyModel::removeRows(int position, int rows, const QModelIndex &parent)
+{
+    bool success = QSortFilterProxyModel::removeRows(position, rows, parent);
+
+    return success;
 }
