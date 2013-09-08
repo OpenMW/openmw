@@ -61,6 +61,8 @@ namespace CSVDoc
 
             void closeMessageBox();
 
+            void editSettingsRequest();
+
         public slots:
 
             void exitApplication (CSVDoc::View *view);

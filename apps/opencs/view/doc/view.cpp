@@ -67,7 +67,7 @@ void CSVDoc::View::setupEditMenu()
     edit->addAction (mRedo);
 
     QAction *userSettings = new QAction (tr ("&Preferences"), this);
-    connect (userSettings, SIGNAL (triggered()), this, SLOT (showUserSettings()));
+    connect (userSettings, SIGNAL (triggered()), this, SIGNAL (editSettingsRequest()));
     edit->addAction (userSettings);
 }
 
@@ -413,13 +413,6 @@ CSVDoc::Operations *CSVDoc::View::getOperations() const
 void CSVDoc::View::exit()
 {
     emit exitApplicationRequest (this);
-}
-
-void CSVDoc::View::showUserSettings()
-{
-    CSVSettings::UserSettingsDialog *settingsDialog = new CSVSettings::UserSettingsDialog(this);
-
-    settingsDialog->show();
 }
 
 void CSVDoc::View::resizeViewWidth (int width)

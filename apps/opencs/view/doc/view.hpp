@@ -112,6 +112,8 @@ namespace CSVDoc
 
             void exitApplicationRequest (CSVDoc::View *view);
 
+            void editSettingsRequest();
+
         public slots:
 
             void addSubView (const CSMWorld::UniversalId& id);
@@ -159,8 +161,6 @@ namespace CSVDoc
             void addRegionMapSubView();
 
             void addFiltersSubView();
-
-            void showUserSettings();
 
             void toggleShowStatusBar (bool show);
     };

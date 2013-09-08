@@ -14,6 +14,7 @@ CS::Editor::Editor() : mViewManager (mDocumentManager)
 
     connect (&mViewManager, SIGNAL (newDocumentRequest ()), this, SLOT (createDocument ()));
     connect (&mViewManager, SIGNAL (loadDocumentRequest ()), this, SLOT (loadDocument ()));
+    connect (&mViewManager, SIGNAL (editSettingsRequest()), this, SLOT (showSettings ()));
 
     connect (&mStartup, SIGNAL (createGame()), this, SLOT (createDocument ())); /// \todo split
     connect (&mStartup, SIGNAL (createAddon()), this, SLOT (createDocument ()));
