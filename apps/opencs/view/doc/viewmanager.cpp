@@ -107,12 +107,12 @@ CSVDoc::View *CSVDoc::ViewManager::addView (CSMDoc::Document *document)
 
     View *view = new View (*this, document, countViews (document)+1);
 
-
     mViews.push_back (view);
 
     view->show();
 
-    connect (view, SIGNAL (newDocumentRequest ()), this, SIGNAL (newDocumentRequest()));
+    connect (view, SIGNAL (newGameRequest ()), this, SIGNAL (newGameRequest()));
+    connect (view, SIGNAL (newAddonRequest ()), this, SIGNAL (newAddonRequest()));
     connect (view, SIGNAL (loadDocumentRequest ()), this, SIGNAL (loadDocumentRequest()));
     connect (view, SIGNAL (editSettingsRequest()), this, SIGNAL (editSettingsRequest()));
 

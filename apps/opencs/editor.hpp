@@ -16,6 +16,7 @@
 #include "view/doc/viewmanager.hpp"
 #include "view/doc/startup.hpp"
 #include "view/doc/filedialog.hpp"
+#include "view/doc/newgame.hpp"
 
 #include "view/settings/usersettingsdialog.hpp"
 
@@ -29,6 +30,7 @@ namespace CS
             CSMDoc::DocumentManager mDocumentManager;
             CSVDoc::ViewManager mViewManager;
             CSVDoc::StartupDialogue mStartup;
+            CSVDoc::NewGameDialogue mNewGame;
             CSVSettings::UserSettingsDialog mSettings;
             FileDialog mFileDialog;
 
@@ -51,7 +53,8 @@ namespace CS
 
         private slots:
 
-            void createDocument();
+            void createGame();
+            void createAddon();
 
             void loadDocument();
             void openFiles();

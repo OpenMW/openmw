@@ -27,9 +27,13 @@ void CSVDoc::View::setupFileMenu()
 {
     QMenu *file = menuBar()->addMenu (tr ("&File"));
 
-    QAction *new_ = new QAction (tr ("New"), this);
-    connect (new_, SIGNAL (triggered()), this, SIGNAL (newDocumentRequest()));
-    file->addAction (new_);
+    QAction *newGame = new QAction (tr ("New Game"), this);
+    connect (newGame, SIGNAL (triggered()), this, SIGNAL (newGameRequest()));
+    file->addAction (newGame);
+
+    QAction *newAddon = new QAction (tr ("New Addon"), this);
+    connect (newAddon, SIGNAL (triggered()), this, SIGNAL (newAddonRequest()));
+    file->addAction (newAddon);
 
     QAction *open = new QAction (tr ("&Open"), this);
     connect (open, SIGNAL (triggered()), this, SIGNAL (loadDocumentRequest()));

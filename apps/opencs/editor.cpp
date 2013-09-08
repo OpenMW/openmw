@@ -12,12 +12,13 @@ CS::Editor::Editor() : mViewManager (mDocumentManager)
 {
     mIpcServerName = "org.openmw.OpenCS";
 
-    connect (&mViewManager, SIGNAL (newDocumentRequest ()), this, SLOT (createDocument ()));
+    connect (&mViewManager, SIGNAL (newGameRequest ()), this, SLOT (createGame ()));
+    connect (&mViewManager, SIGNAL (newAddonRequest ()), this, SLOT (createAddon ()));
     connect (&mViewManager, SIGNAL (loadDocumentRequest ()), this, SLOT (loadDocument ()));
     connect (&mViewManager, SIGNAL (editSettingsRequest()), this, SLOT (showSettings ()));
 
-    connect (&mStartup, SIGNAL (createGame()), this, SLOT (createDocument ())); /// \todo split
-    connect (&mStartup, SIGNAL (createAddon()), this, SLOT (createDocument ()));
+    connect (&mStartup, SIGNAL (createGame()), this, SLOT (createGame ()));
+    connect (&mStartup, SIGNAL (createAddon()), this, SLOT (createAddon ()));
     connect (&mStartup, SIGNAL (loadDocument()), this, SLOT (loadDocument ()));
     connect (&mStartup, SIGNAL (editConfig()), this, SLOT (showSettings ()));
 
@@ -75,7 +76,18 @@ void CS::Editor::setupDataFiles()
 
 }
 
-void CS::Editor::createDocument()
+void CS::Editor::createGame()
+{
+    mStartup.hide();
+
+    if (mNewGame.isHidden())
+        mNewGame.show();
+
+    mNewGame.raise();
+    mNewGame.activateWindow();
+}
+
+void CS::Editor::createAddon()
 {
     mStartup.hide();
 
