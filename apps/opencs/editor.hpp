@@ -35,6 +35,8 @@ namespace CS
             FileDialog mFileDialog;
 
             Files::ConfigurationManager mCfgMgr;
+            boost::filesystem::path mLocal;
+
             void setupDataFiles();
 
             // not implemented
@@ -59,6 +61,7 @@ namespace CS
             void loadDocument();
             void openFiles();
             void createNewFile();
+            void createNewGame (const QString& file);
 
             void showStartup();
 
