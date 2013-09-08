@@ -13,7 +13,7 @@
 
 QPushButton *CSVDoc::StartupDialogue::addButton (const QString& label, const QIcon& icon)
 {
-    int column = mColumn++;
+    int column = mColumn--;
 
     QPushButton *button = new QPushButton (this);
 
@@ -41,14 +41,14 @@ QWidget *CSVDoc::StartupDialogue::createButtons()
     mLayout = new QGridLayout (widget);
 
     /// \todo add icons
-    QPushButton *createGame = addButton ("Create A New Game", QIcon (""));
-    connect (createGame, SIGNAL (clicked()), this, SIGNAL (createGame()));
+    QPushButton *loadDocument = addButton ("Edit A Content File", QIcon (""));
+    connect (loadDocument, SIGNAL (clicked()), this, SIGNAL (loadDocument()));
 
     QPushButton *createAddon = addButton ("Create A New Addon", QIcon (""));
     connect (createAddon, SIGNAL (clicked()), this, SIGNAL (createAddon()));
 
-    QPushButton *loadDocument = addButton ("Edit A Content File", QIcon (""));
-    connect (loadDocument, SIGNAL (clicked()), this, SIGNAL (loadDocument()));
+    QPushButton *createGame = addButton ("Create A New Game", QIcon (""));
+    connect (createGame, SIGNAL (clicked()), this, SIGNAL (createGame()));
 
     for (int i=0; i<3; ++i)
         mLayout->setColumnMinimumWidth (i, mWidth);
@@ -94,7 +94,7 @@ QWidget *CSVDoc::StartupDialogue::createTools()
     return widget;
 }
 
-CSVDoc::StartupDialogue::StartupDialogue() : mWidth (0), mColumn (0)
+CSVDoc::StartupDialogue::StartupDialogue() : mWidth (0), mColumn (2)
 {
     setWindowTitle ("Open CS");
 
