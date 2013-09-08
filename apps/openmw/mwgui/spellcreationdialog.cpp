@@ -4,22 +4,14 @@
 
 #include "../mwbase/windowmanager.hpp"
 
-#include "../mwbase/world.hpp"
-#include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
-#include "../mwworld/esmstore.hpp"
 #include "../mwworld/player.hpp"
-#include "../mwworld/class.hpp"
 
-#include "../mwmechanics/spells.hpp"
-#include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/spellsuccess.hpp"
 
-
 #include "tooltips.hpp"
-#include "widgets.hpp"
 #include "class.hpp"
 #include "inventorywindow.hpp"
 #include "tradewindow.hpp"
@@ -40,8 +32,8 @@ namespace
 namespace MWGui
 {
 
-    EditEffectDialog::EditEffectDialog(MWBase::WindowManager &parWindowManager)
-        : WindowModal("openmw_edit_effect.layout", parWindowManager)
+    EditEffectDialog::EditEffectDialog()
+        : WindowModal("openmw_edit_effect.layout")
         , mEditing(false)
     {
         getWidget(mCancelButton, "CancelButton");
@@ -72,6 +64,7 @@ namespace MWGui
         mMagnitudeMaxSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &EditEffectDialog::onMagnitudeMaxChanged);
         mDurationSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &EditEffectDialog::onDurationChanged);
         mAreaSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &EditEffectDialog::onAreaChanged);
+        constantEffect=false;
     }
 
     void EditEffectDialog::open()
@@ -88,6 +81,15 @@ namespace MWGui
         mDeleteButton->setVisible (false);
 
         mEffect.mRange = ESM::RT_Self;
+        if (!(mMagicEffect->mData.mFlags & ESM::MagicEffect::CastSelf))
+            mEffect.mRange = ESM::RT_Touch;
+        if (!(mMagicEffect->mData.mFlags & ESM::MagicEffect::CastTouch))
+            mEffect.mRange = ESM::RT_Target;
+        mEffect.mMagnMin = 1;
+        mEffect.mMagnMax = 1;
+        mEffect.mDuration = 1;
+        mEffect.mArea = 0;
+        eventEffectAdded(mEffect);
 
         onRangeButtonClicked(mRangeButton);
 
@@ -100,11 +102,6 @@ namespace MWGui
         mMagnitudeMinValue->setCaption("1");
         mMagnitudeMaxValue->setCaption("- 1");
         mAreaValue->setCaption("0");
-
-        mEffect.mMagnMin = 1;
-        mEffect.mMagnMax = 1;
-        mEffect.mDuration = 1;
-        mEffect.mArea = 0;
     }
 
     void EditEffectDialog::editEffect (ESM::ENAMstruct effect)
@@ -113,7 +110,7 @@ namespace MWGui
             MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effect.mEffectID);
 
         setMagicEffect(magicEffect);
-
+        mOldEffect = effect;
         mEffect = effect;
         mEditing = true;
 
@@ -128,6 +125,7 @@ namespace MWGui
         onMagnitudeMaxChanged (mMagnitudeMinSlider, effect.mMagnMax-1);
         onAreaChanged (mAreaSlider, effect.mArea);
         onDurationChanged (mDurationSlider, effect.mDuration-1);
+        eventEffectModified(mEffect);
     }
 
     void EditEffectDialog::setMagicEffect (const ESM::MagicEffect *effect)
@@ -164,13 +162,13 @@ namespace MWGui
             mMagnitudeBox->setVisible (true);
             curY += mMagnitudeBox->getSize().height;
         }
-        if (!(mMagicEffect->mData.mFlags & ESM::MagicEffect::NoDuration))
+        if (!(mMagicEffect->mData.mFlags & ESM::MagicEffect::NoDuration)&&constantEffect==false)
         {
             mDurationBox->setPosition(mDurationBox->getPosition().left, curY);
             mDurationBox->setVisible (true);
             curY += mDurationBox->getSize().height;
         }
-        if (mEffect.mRange == ESM::RT_Target)
+        if (mEffect.mRange != ESM::RT_Self)
         {
             mAreaBox->setPosition(mAreaBox->getPosition().left, curY);
             mAreaBox->setVisible (true);
@@ -189,9 +187,6 @@ namespace MWGui
         else if (mEffect.mRange == ESM::RT_Touch)
             mRangeButton->setCaptionWithReplacing ("#{sRangeTouch}");
 
-        mAreaSlider->setVisible (mEffect.mRange != ESM::RT_Self);
-        mAreaText->setVisible (mEffect.mRange != ESM::RT_Self);
-
         // cycle through range types until we find something that's allowed
         if (mEffect.mRange == ESM::RT_Target && !(mMagicEffect->mData.mFlags & ESM::MagicEffect::CastTarget))
             onRangeButtonClicked(sender);
@@ -200,7 +195,13 @@ namespace MWGui
         if (mEffect.mRange == ESM::RT_Touch && !(mMagicEffect->mData.mFlags & ESM::MagicEffect::CastTouch))
             onRangeButtonClicked(sender);
 
+        if(mEffect.mRange == ESM::RT_Self)
+        {
+            mAreaSlider->setScrollPosition(0);
+            onAreaChanged(mAreaSlider,0);
+        }
         updateBoxes();
+        eventEffectModified(mEffect);
     }
 
     void EditEffectDialog::onDeleteButtonClicked (MyGUI::Widget* sender)
@@ -213,26 +214,27 @@ namespace MWGui
     void EditEffectDialog::onOkButtonClicked (MyGUI::Widget* sender)
     {
         setVisible(false);
-
-        if (mEditing)
-            eventEffectModified(mEffect);
-        else
-            eventEffectAdded(mEffect);
     }
 
     void EditEffectDialog::onCancelButtonClicked (MyGUI::Widget* sender)
     {
         setVisible(false);
+        if(mEditing)
+            eventEffectModified(mOldEffect);
+        else
+            eventEffectRemoved(mEffect);
     }
 
     void EditEffectDialog::setSkill (int skill)
     {
         mEffect.mSkill = skill;
+        eventEffectModified(mEffect);
     }
 
     void EditEffectDialog::setAttribute (int attribute)
     {
         mEffect.mAttribute = attribute;
+        eventEffectModified(mEffect);
     }
 
     void EditEffectDialog::onMagnitudeMinChanged (MyGUI::ScrollBar* sender, size_t pos)
@@ -242,6 +244,7 @@ namespace MWGui
 
         // trigger the check again (see below)
         onMagnitudeMaxChanged(mMagnitudeMaxSlider, mMagnitudeMaxSlider->getScrollPosition ());
+        eventEffectModified(mEffect);
     }
 
     void EditEffectDialog::onMagnitudeMaxChanged (MyGUI::ScrollBar* sender, size_t pos)
@@ -257,25 +260,29 @@ namespace MWGui
         mEffect.mMagnMax = pos+1;
 
         mMagnitudeMaxValue->setCaption("- " + boost::lexical_cast<std::string>(pos+1));
+
+        eventEffectModified(mEffect);
     }
 
     void EditEffectDialog::onDurationChanged (MyGUI::ScrollBar* sender, size_t pos)
     {
         mDurationValue->setCaption(boost::lexical_cast<std::string>(pos+1));
         mEffect.mDuration = pos+1;
+        eventEffectModified(mEffect);
     }
 
     void EditEffectDialog::onAreaChanged (MyGUI::ScrollBar* sender, size_t pos)
     {
         mAreaValue->setCaption(boost::lexical_cast<std::string>(pos));
         mEffect.mArea = pos;
+        eventEffectModified(mEffect);
     }
 
     // ------------------------------------------------------------------------------------------------
 
-    SpellCreationDialog::SpellCreationDialog(MWBase::WindowManager &parWindowManager)
-        : WindowBase("openmw_spellcreation_dialog.layout", parWindowManager)
-        , EffectEditorBase(parWindowManager)
+    SpellCreationDialog::SpellCreationDialog()
+        : WindowBase("openmw_spellcreation_dialog.layout")
+        , EffectEditorBase()
     {
         getWidget(mNameEdit, "NameEdit");
         getWidget(mMagickaCost, "MagickaCost");
@@ -302,38 +309,38 @@ namespace MWGui
 
     void SpellCreationDialog::onCancelButtonClicked (MyGUI::Widget* sender)
     {
-        mWindowManager.removeGuiMode (MWGui::GM_SpellCreation);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (MWGui::GM_SpellCreation);
     }
 
     void SpellCreationDialog::onBuyButtonClicked (MyGUI::Widget* sender)
     {
         if (mEffects.size() <= 0)
         {
-            mWindowManager.messageBox ("#{sNotifyMessage30}", std::vector<std::string>());
+            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage30}");
             return;
         }
 
         if (mNameEdit->getCaption () == "")
         {
-            mWindowManager.messageBox ("#{sNotifyMessage10}", std::vector<std::string>());
+            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage10}");
             return;
         }
 
         if (mMagickaCost->getCaption() == "0")
         {
-            mWindowManager.messageBox ("#{sEnchantmentMenu8}", std::vector<std::string>());
+            MWBase::Environment::get().getWindowManager()->messageBox ("#{sEnchantmentMenu8}");
             return;
         }
 
-        if (boost::lexical_cast<int>(mPriceLabel->getCaption()) > mWindowManager.getInventoryWindow()->getPlayerGold())
+        if (boost::lexical_cast<int>(mPriceLabel->getCaption()) > MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getPlayerGold())
         {
-            mWindowManager.messageBox ("#{sNotifyMessage18}", std::vector<std::string>());
+            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage18}");
             return;
         }
 
         mSpell.mName = mNameEdit->getCaption();
 
-        mWindowManager.getTradeWindow()->addOrRemoveGold(-boost::lexical_cast<int>(mPriceLabel->getCaption()));
+        MWBase::Environment::get().getWindowManager()->getTradeWindow()->addOrRemoveGold(-boost::lexical_cast<int>(mPriceLabel->getCaption()));
 
         MWBase::Environment::get().getSoundManager()->playSound ("Item Gold Up", 1.0, 1.0);
 
@@ -346,7 +353,7 @@ namespace MWGui
 
         MWBase::Environment::get().getSoundManager()->playSound ("Item Gold Up", 1.0, 1.0);
 
-        mWindowManager.removeGuiMode (GM_SpellCreation);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_SpellCreation);
     }
 
     void SpellCreationDialog::open()
@@ -356,8 +363,8 @@ namespace MWGui
 
     void SpellCreationDialog::onReferenceUnavailable ()
     {
-        mWindowManager.removeGuiMode (GM_Dialogue);
-        mWindowManager.removeGuiMode (GM_SpellCreation);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Dialogue);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_SpellCreation);
     }
 
     void SpellCreationDialog::notifyEffectsChanged ()
@@ -411,8 +418,8 @@ namespace MWGui
     // ------------------------------------------------------------------------------------------------
 
 
-    EffectEditorBase::EffectEditorBase(MWBase::WindowManager& parWindowManager)
-        : mAddEffectDialog(parWindowManager)
+    EffectEditorBase::EffectEditorBase()
+        : mAddEffectDialog()
         , mSelectAttributeDialog(NULL)
         , mSelectSkillDialog(NULL)
     {
@@ -421,6 +428,10 @@ namespace MWGui
         mAddEffectDialog.eventEffectRemoved += MyGUI::newDelegate(this, &EffectEditorBase::onEffectRemoved);
 
         mAddEffectDialog.setVisible (false);
+    }
+
+    EffectEditorBase::~EffectEditorBase()
+    {
     }
 
     void EffectEditorBase::startEditing ()
@@ -516,7 +527,7 @@ namespace MWGui
     {
         if (mEffects.size() >= 8)
         {
-            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage28}", std::vector<std::string>());
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage28}");
             return;
         }
 
@@ -527,7 +538,7 @@ namespace MWGui
         {
             if (it->mEffectID == effectId)
             {
-                MWBase::Environment::get().getWindowManager()->messageBox ("#{sOnetypeEffectMessage}", std::vector<std::string>());
+                MWBase::Environment::get().getWindowManager()->messageBox ("#{sOnetypeEffectMessage}");
                 return;
             }
         }
@@ -540,7 +551,7 @@ namespace MWGui
         if (effect->mData.mFlags & ESM::MagicEffect::TargetSkill)
         {
             delete mSelectSkillDialog;
-            mSelectSkillDialog = new SelectSkillDialog(*MWBase::Environment::get().getWindowManager ());
+            mSelectSkillDialog = new SelectSkillDialog();
             mSelectSkillDialog->eventCancel += MyGUI::newDelegate(this, &SpellCreationDialog::onAttributeOrSkillCancel);
             mSelectSkillDialog->eventItemSelected += MyGUI::newDelegate(this, &SpellCreationDialog::onSelectSkill);
             mSelectSkillDialog->setVisible (true);
@@ -548,7 +559,7 @@ namespace MWGui
         else if (effect->mData.mFlags & ESM::MagicEffect::TargetAttribute)
         {
             delete mSelectAttributeDialog;
-            mSelectAttributeDialog = new SelectAttributeDialog(*MWBase::Environment::get().getWindowManager ());
+            mSelectAttributeDialog = new SelectAttributeDialog();
             mSelectAttributeDialog->eventCancel += MyGUI::newDelegate(this, &SpellCreationDialog::onAttributeOrSkillCancel);
             mSelectAttributeDialog->eventItemSelected += MyGUI::newDelegate(this, &SpellCreationDialog::onSelectAttribute);
             mSelectAttributeDialog->setVisible (true);
@@ -600,7 +611,6 @@ namespace MWGui
             Widgets::MWSpellEffectPtr effect = button->createWidget<Widgets::MWSpellEffect>("MW_EffectImage", MyGUI::IntCoord(0,0,0,24), MyGUI::Align::Default);
 
             effect->setNeedMouseFocus (false);
-            effect->setWindowManager (MWBase::Environment::get().getWindowManager ());
             effect->setSpellEffect (params);
 
             effect->setSize(effect->getRequestedWidth (), 24);
@@ -619,6 +629,7 @@ namespace MWGui
     void EffectEditorBase::onEffectAdded (ESM::ENAMstruct effect)
     {
         mEffects.push_back(effect);
+        mSelectedEffect=mEffects.size()-1;
 
         updateEffectsView();
     }

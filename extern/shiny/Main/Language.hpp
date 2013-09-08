@@ -8,6 +8,7 @@ namespace sh
 		Language_CG,
 		Language_HLSL,
 		Language_GLSL,
+		Language_GLSLES,
 		Language_Count,
 		Language_None
 	};

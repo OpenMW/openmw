@@ -21,28 +21,6 @@
 
 namespace MWScript
 {
-    void registerExtensions (Compiler::Extensions& extensions, bool consoleOnly)
-    {
-        Cell::registerExtensions (extensions);
-        Misc::registerExtensions (extensions);
-        Gui::registerExtensions (extensions);
-        Sound::registerExtensions (extensions);
-        Sky::registerExtensions (extensions);
-        Stats::registerExtensions (extensions);
-        Container::registerExtensions (extensions);
-        Ai::registerExtensions (extensions);
-        Control::registerExtensions (extensions);
-        Dialogue::registerExtensions (extensions);
-        Animation::registerExtensions (extensions);
-        Transformation::registerExtensions (extensions);
-
-        if (consoleOnly)
-        {
-            Console::registerExtensions (extensions);
-            User::registerExtensions (extensions);
-        }
-    }
-
     void installOpcodes (Interpreter::Interpreter& interpreter, bool consoleOnly)
     {
         Interpreter::installOpcodes (interpreter);

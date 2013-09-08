@@ -12,6 +12,7 @@ namespace MWWorld
     {
             std::string mSoundId;
             bool mKeepSound;
+            float mSoundOffset;
             Ptr mTarget;
 
             // not implemented
@@ -34,6 +35,7 @@ namespace MWWorld
             void execute (const Ptr& actor);
 
             void setSound (const std::string& id);
+            void setSoundOffset(float offset);
     };
 }
 

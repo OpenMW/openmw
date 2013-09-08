@@ -6,10 +6,11 @@
 
 namespace sh
 {
-	OgreTextureUnitState::OgreTextureUnitState (OgrePass* parent)
+	OgreTextureUnitState::OgreTextureUnitState (OgrePass* parent, const std::string& name)
 		: TextureUnitState()
 	{
 		mTextureUnitState = parent->getOgrePass()->createTextureUnitState("");
+		mTextureUnitState->setName(name);
 	}
 
 	bool OgreTextureUnitState::setPropertyOverride (const std::string &name, PropertyValuePtr& value, PropertySetGet* context)

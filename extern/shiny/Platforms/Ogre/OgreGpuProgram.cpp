@@ -28,9 +28,8 @@ namespace sh
 			t = Ogre::GPT_FRAGMENT_PROGRAM;
 
 		mProgram = mgr.createProgram(name, resourceGroup, lang, t);
-		if (lang != "glsl")
+		if (lang != "glsl" && lang != "glsles")
 			mProgram->setParameter("entry_point", "main");
-
 		if (lang == "hlsl")
 			mProgram->setParameter("target", profile);
 		else if (lang == "cg")

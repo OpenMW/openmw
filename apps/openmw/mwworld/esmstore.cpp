@@ -5,6 +5,8 @@
 
 #include <boost/filesystem/operations.hpp>
 
+#include <components/loadinglistener/loadinglistener.hpp>
+
 namespace MWWorld
 {
 
@@ -21,20 +23,23 @@ static bool isCacheableRecord(int id)
     return false;
 }
 
-void ESMStore::load(ESM::ESMReader &esm)
+void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
 {
+    listener->setProgressRange(1000);
+
     std::set<std::string> missing;
 
     ESM::Dialogue *dialogue = 0;
 
+    /// \todo Move this to somewhere else. ESMReader?
     // Cache parent esX files by tracking their indices in the global list of
     //  all files/readers used by the engine. This will greaty accelerate
     //  refnumber mangling, as required for handling moved references.
     int index = ~0;
-    const ESM::ESMReader::MasterList &masters = esm.getMasters();
+    const std::vector<ESM::Header::MasterData> &masters = esm.getMasters();
     std::vector<ESM::ESMReader> *allPlugins = esm.getGlobalReaderList();
     for (size_t j = 0; j < masters.size(); j++) {
-        ESM::MasterData &mast = const_cast<ESM::MasterData&>(masters[j]);
+        ESM::Header::MasterData &mast = const_cast<ESM::Header::MasterData&>(masters[j]);
         std::string fname = mast.name;
         for (int i = 0; i < esm.getIndex(); i++) {
             const std::string &candidate = allPlugins->at(i).getContext().filename;
@@ -108,6 +113,7 @@ void ESMStore::load(ESM::ESMReader &esm)
                 mIds[id] = n.val;
             }
         }
+        listener->setProgress(esm.getFileOffset() / (float)esm.getFileSize() * 1000);
     }
 
   /* This information isn't needed on screen. But keep the code around
@@ -133,15 +139,6 @@ void ESMStore::setUp()
     mSkills.setUp();
     mMagicEffects.setUp();
     mAttributes.setUp();
-
-    ESM::NPC item;
-    item.mId = "player";
-
-    const ESM::NPC *pIt = mNpcs.find("player");
-    assert(pIt != NULL);
-
-    mNpcs.insert(*pIt);
-    mNpcs.eraseStatic(pIt->mId);
 }
 
 } // end namespace

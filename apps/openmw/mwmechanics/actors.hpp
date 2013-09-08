@@ -7,6 +7,7 @@
 #include <map>
 
 #include "character.hpp"
+#include "movement.hpp"
 #include "../mwbase/world.hpp"
 
 namespace Ogre
@@ -24,16 +25,14 @@ namespace MWMechanics
 {
     class Actors
     {
-        typedef std::map<MWWorld::Ptr,CharacterController> PtrControllerMap;
+        typedef std::map<MWWorld::Ptr,CharacterController*> PtrControllerMap;
         PtrControllerMap mActors;
-
-        MWWorld::PtrMovementList mMovement;
 
         std::map<std::string, int> mDeathCount;
 
         float mDuration;
 
-            void updateNpc (const MWWorld::Ptr& ptr, float duration, bool paused);
+        void updateNpc(const MWWorld::Ptr &ptr, float duration, bool paused);
 
             void adjustMagicEffects (const MWWorld::Ptr& creature);
 
@@ -43,6 +42,7 @@ namespace MWMechanics
 
             void calculateRestoration (const MWWorld::Ptr& ptr, float duration);
 
+            void updateDrowning (const MWWorld::Ptr& ptr, float duration);
 
         public:
 
@@ -77,8 +77,11 @@ namespace MWMechanics
             int countDeaths (const std::string& id) const;
             ///< Return the number of deaths for actors with the given ID.
 
+        void forceStateUpdate(const MWWorld::Ptr &ptr);
+
         void playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number);
         void skipAnimation(const MWWorld::Ptr& ptr);
+        bool checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string& groupName);
     };
 }
 

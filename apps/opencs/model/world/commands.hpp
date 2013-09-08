@@ -4,17 +4,20 @@
 #include "record.hpp"
 
 #include <string>
+#include <map>
 
 #include <QVariant>
 #include <QUndoCommand>
 #include <QModelIndex>
+
+#include "universalid.hpp"
 
 class QModelIndex;
 class QAbstractItemModel;
 
 namespace CSMWorld
 {
-    class IdTableProxyModel;
+    class IdTable;
     class IdTable;
     class RecordBase;
 
@@ -37,12 +40,18 @@ namespace CSMWorld
 
     class CreateCommand : public QUndoCommand
     {
-            IdTableProxyModel& mModel;
+            IdTable& mModel;
             std::string mId;
+            UniversalId::Type mType;
+            std::map<int, QVariant> mValues;
 
         public:
 
-            CreateCommand (IdTableProxyModel& model, const std::string& id, QUndoCommand *parent = 0);
+            CreateCommand (IdTable& model, const std::string& id, QUndoCommand *parent = 0);
+
+            void setType (UniversalId::Type type);
+
+            void addValue (int column, const QVariant& value);
 
             virtual void redo();
 

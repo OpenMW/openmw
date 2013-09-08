@@ -6,12 +6,15 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/nullaction.hpp"
 #include "../mwworld/failedaction.hpp"
+#include "../mwworld/actionapply.hpp"
 #include "../mwworld/actionteleport.hpp"
+#include "../mwworld/actiondoor.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/physicssystem.hpp"
 #include "../mwworld/inventorystore.hpp"
@@ -27,9 +30,7 @@ namespace MWClass
     {
         const std::string model = getModel(ptr);
         if (!model.empty()) {
-            MWRender::Objects& objects = renderingInterface.getObjects();
-            objects.insertBegin(ptr, ptr.getRefData().isEnabled(), false);
-            objects.insertMesh(ptr, model);
+            renderingInterface.getObjects().insertModel(ptr, model);
         }
     }
 
@@ -67,16 +68,14 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Door::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
-        MWWorld::LiveCellRef<ESM::Door> *ref =
-            ptr.get<ESM::Door>();
+        MWWorld::LiveCellRef<ESM::Door> *ref = ptr.get<ESM::Door>();
 
         const std::string &openSound = ref->mBase->mOpenSound;
-        //const std::string &closeSound = ref->mBase->closeSound;
+        const std::string &closeSound = ref->mBase->mCloseSound;
         const std::string lockedSound = "LockedDoor";
         const std::string trapActivationSound = "Disarm Trap Fail";
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayer().getPlayer();
-        MWWorld::InventoryStore& invStore = MWWorld::Class::get(player).getInventoryStore(player);
+        MWWorld::ContainerStore &invStore = get(actor).getContainerStore(actor);
 
         bool needKey = ptr.getCellRef().mLockLevel>0;
         bool hasKey = false;
@@ -92,13 +91,14 @@ namespace MWClass
             if (refId == keyId)
             {
                 hasKey = true;
-                keyName = MWWorld::Class::get(*it).getName(*it);
+                keyName = get(*it).getName(*it);
             }
         }
 
         if (needKey && hasKey)
         {
-            MWBase::Environment::get().getWindowManager ()->messageBox (keyName + " #{sKeyUsed}", std::vector<std::string>());
+            if(actor == MWBase::Environment::get().getWorld()->getPlayer().getPlayer())
+                MWBase::Environment::get().getWindowManager()->messageBox(keyName + " #{sKeyUsed}");
             ptr.getCellRef().mLockLevel = 0;
             // using a key disarms the trap
             ptr.getCellRef().mTrap = "";
@@ -111,7 +111,7 @@ namespace MWClass
                 // Trap activation
                 std::cout << "Activated trap: " << ptr.getCellRef().mTrap << std::endl;
 
-                boost::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction);
+                boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionApply(actor, ptr.getCellRef().mTrap));
                 action->setSound(trapActivationSound);
                 ptr.getCellRef().mTrap = "";
 
@@ -139,12 +139,25 @@ namespace MWClass
             else
             {
                 // animated door
-                // TODO return action for rotating the door
-
-                // This is a little pointless, but helps with testing
-                boost::shared_ptr<MWWorld::Action> action(new MWWorld::NullAction);
-
-                action->setSound(openSound);
+                boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionDoor(ptr));
+                if (MWBase::Environment::get().getWorld()->getOpenOrCloseDoor(ptr))
+                {
+                    MWBase::Environment::get().getSoundManager()->fadeOutSound3D(ptr,
+                            closeSound, 0.5);
+                    float offset = ptr.getRefData().getLocalRotation().rot[2]/ 3.14159265 * 2.0;
+                    action->setSoundOffset(offset);
+                    action->setSound(openSound);
+                }
+                else
+                {
+                    MWBase::Environment::get().getSoundManager()->fadeOutSound3D(ptr,
+                                                openSound, 0.5);
+                    float offset = 1.0 - ptr.getRefData().getLocalRotation().rot[2]/ 3.14159265 * 2.0;
+                    //most if not all door have closing bang somewhere in the middle of the sound,
+                    //so we divide offset by two
+                    action->setSoundOffset(offset * 0.5);
+                    action->setSound(closeSound);
+                }
 
                 return action;
             }

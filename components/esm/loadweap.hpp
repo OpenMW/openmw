@@ -48,7 +48,7 @@ struct Weapon
         short mType;
         short mHealth;
         float mSpeed, mReach;
-        short mEnchant; // Enchantment points
+        short mEnchant; // Enchantment points. The real value is mEnchant/10.f
         unsigned char mChop[2], mSlash[2], mThrust[2]; // Min and max
         int mFlags;
     }; // 32 bytes
@@ -60,6 +60,9 @@ struct Weapon
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
+
+    void blank();
+    ///< Set record to default state (does not touch the ID).
 };
 }
 #endif

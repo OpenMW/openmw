@@ -13,8 +13,8 @@ namespace ESM
 
 namespace MWWorld
 {
-    /// List all (Ogre-)handles.
-    struct ListHandles
+    /// List all (Ogre-)handles, then reset RefData::mBaseNode to 0.
+    struct ListAndResetHandles
     {
         std::vector<Ogre::SceneNode*> mHandles;
 
@@ -23,6 +23,8 @@ namespace MWWorld
             Ogre::SceneNode* handle = data.getBaseNode();
             if (handle)
                 mHandles.push_back (handle);
+
+            data.setBaseNode(0);
             return true;
         }
     };

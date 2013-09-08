@@ -9,6 +9,8 @@
 #include "stat.hpp"
 #include "drawstate.hpp"
 
+#include "creaturestats.hpp"
+
 namespace ESM
 {
     struct Class;
@@ -18,12 +20,10 @@ namespace MWMechanics
 {
     /// \brief Additional stats for NPCs
     ///
-    /// For non-NPC-specific stats, see the CreatureStats struct.
-    ///
     /// \note For technical reasons the spell list and the currently selected spell is also handled by
     /// CreatureStats, even though they are actually NPC stats.
 
-    class NpcStats
+    class NpcStats : public CreatureStats
     {
         public:
 
@@ -46,13 +46,15 @@ namespace MWMechanics
             int mDisposition;
             unsigned int mMovementFlags;
             Stat<float> mSkill[27];
+            Stat<float> mWerewolfSkill[27];
             int mBounty;
             std::set<std::string> mExpelled;
             std::map<std::string, int> mFactionReputation;
             bool mVampire;
             int mReputation;
-            bool mWerewolf;
             int mWerewolfKills;
+            int mProfit;
+            float mAttackStrength;
 
             int mLevelProgress; // 0-10
 
@@ -60,13 +62,25 @@ namespace MWMechanics
 
             std::set<std::string> mUsedIds;
 
+            /// Countdown to getting damage while underwater
+            float mTimeToStartDrowning;
+            /// time since last hit from drowning
+            float mLastDrowningHit;
+
         public:
 
             NpcStats();
 
-            DrawState_ getDrawState() const;
+            /// for mercenary companions. starts out as 0, and changes when items are added or removed through the UI.
+            int getProfit() const;
+            void modifyProfit(int diff);
 
+            DrawState_ getDrawState() const;
             void setDrawState (DrawState_ state);
+
+            /// When attacking, stores how strong the attack should be (0 = weakest, 1 = strongest)
+            float getAttackStrength() const;
+            void setAttackStrength(float value);
 
             int getBaseDisposition() const;
 
@@ -81,17 +95,16 @@ namespace MWMechanics
             void setMovementFlag (Flag flag, bool state);
 
             const Stat<float>& getSkill (int index) const;
-
             Stat<float>& getSkill (int index);
 
+            const std::map<std::string, int>& getFactionRanks() const;
             std::map<std::string, int>& getFactionRanks();
 
+            const std::set<std::string>& getExpelled() const;
             std::set<std::string>& getExpelled();
 
             bool isSameFaction (const NpcStats& npcStats) const;
             ///< Do *this and \a npcStats share a faction?
-
-            const std::map<std::string, int>& getFactionRanks() const;
 
             float getSkillGain (int skillIndex, const ESM::Class& class_, int usageType = -1,
                 int level = -1) const;
@@ -130,9 +143,14 @@ namespace MWMechanics
 
             bool isWerewolf() const;
 
-            void setWerewolf (bool set);
+            void setWerewolf(bool set);
 
             int getWerewolfKills() const;
+
+            float getTimeToStartDrowning() const;
+            /// Sets time left for the creature to drown if it stays underwater.
+            /// @param time value from [0,20]
+            void setTimeToStartDrowning(float time);
     };
 }
 

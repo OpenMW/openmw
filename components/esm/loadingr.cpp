@@ -24,7 +24,7 @@ void Ingredient::load(ESMReader &esm)
         {
             mData.mAttributes[i] = -1;
         }
-        
+
         // is this relevant in cycle from 0 to 4?
         if (mData.mEffectID[i] != 89 &&
             mData.mEffectID[i] != 26 &&
@@ -46,4 +46,20 @@ void Ingredient::save(ESMWriter &esm)
     esm.writeHNOCString("ITEX", mIcon);
 }
 
+    void Ingredient::blank()
+    {
+        mData.mWeight = 0;
+        mData.mValue = 0;
+        for (int i=0; i<4; ++i)
+        {
+            mData.mEffectID[i] = 0;
+            mData.mSkills[i] = 0;
+            mData.mAttributes[i] = 0;
+        }
+
+        mName.clear();
+        mModel.clear();
+        mIcon.clear();
+        mScript.clear();
+    }
 }

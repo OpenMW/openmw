@@ -14,9 +14,10 @@ set(GAME_HEADER
 source_group(game FILES ${GAME} ${GAME_HEADER})
 
 add_openmw_dir (mwrender
-    renderingmanager debugging sky player animation npcanimation creatureanimation activatoranimation
-    actors objects renderinginterface localmap occlusionquery terrain terrainmaterial water shadows
+    renderingmanager debugging sky camera animation npcanimation creatureanimation activatoranimation
+    actors objects renderinginterface localmap occlusionquery water shadows
     compositors characterpreview externalrendering globalmap videoplayer ripplesimulation refraction
+    terrainstorage
     )
 
 add_openmw_dir (mwinput
@@ -24,13 +25,16 @@ add_openmw_dir (mwinput
     )
 
 add_openmw_dir (mwgui
-    text_input widgets race class birth review windowmanagerimp console dialogue
-    dialogue_history window_base stats_window messagebox journalwindow charactercreation
-    map_window window_pinnable_base tooltips scrollwindow bookwindow list
+    textinput widgets race class birth review windowmanagerimp console dialogue
+    windowbase statswindow messagebox journalwindow charactercreation
+    mapwindow windowpinnablebase tooltips scrollwindow bookwindow list
     formatting inventorywindow container hud countdialog tradewindow settingswindow
     confirmationdialog alchemywindow referenceinterface spellwindow mainmenu quickkeysmenu
     itemselection spellbuyingwindow loadingscreen levelupdialog waitdialog spellcreationdialog
     enchantingdialog trainingwindow travelwindow imagebutton exposedwindow cursor spellicons
+    merchantrepair repair soulgemdialog companionwindow bookpage journalviewmodel journalbooks
+    keywordsearch itemmodel containeritemmodel inventoryitemmodel sortfilteritemmodel itemview
+    tradeitemmodel companionitemmodel pickpocketitemmodel fontloader controllers
     )
 
 add_openmw_dir (mwdialogue
@@ -53,7 +57,7 @@ add_openmw_dir (mwworld
     containerstore actiontalk actiontake manualref player cellfunctors failedaction
     cells localscripts customdata weather inventorystore ptr actionopen actionread
     actionequip timestamp actionalchemy cellstore actionapply actioneat
-    esmstore store recordcmp
+    esmstore store recordcmp fallback actionrepair actionsoulgem livecellref actiondoor
     )
 
 add_openmw_dir (mwclass
@@ -62,9 +66,9 @@ add_openmw_dir (mwclass
     )
 
 add_openmw_dir (mwmechanics
-    mechanicsmanagerimp stat character creaturestats magiceffects movement actors activators
+    mechanicsmanagerimp stat character creaturestats magiceffects movement actors objects
     drawstate spells activespells npcstats aipackage aisequence alchemy aiwander aitravel aifollow
-    aiescort aiactivate
+    aiescort aiactivate repair enchanting pathfinding security
     )
 
 add_openmw_dir (mwbase
@@ -101,31 +105,39 @@ add_definitions(${SOUND_DEFINE})
 
 target_link_libraries(openmw
     ${OGRE_LIBRARIES}
-    ${OGRE_Terrain_LIBRARY}
     ${OGRE_STATIC_PLUGINS}
-    ${OIS_LIBRARIES}
     ${Boost_LIBRARIES}
     ${OPENAL_LIBRARY}
     ${SOUND_INPUT_LIBRARY}
     ${BULLET_LIBRARIES}
     ${MYGUI_LIBRARIES}
+    ${SDL2_LIBRARY}
     ${MYGUI_PLATFORM_LIBRARIES}
-    "shiny"
-    "shiny.OgrePlatform"
+    ${SHINY_LIBRARIES}
     "oics"
+    "sdl4ogre"
     components
 )
+
+if (NOT UNIX)
+target_link_libraries(openmw ${SDL2MAIN_LIBRARY})
+endif()
 
 # Fix for not visible pthreads functions for linker with glibc 2.15
 if (UNIX AND NOT APPLE)
 target_link_libraries(openmw ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
+# Workaround for binutil => 2.23 problem when linking, should be fixed eventually upstream
+if (UNIX AND NOT APPLE)
+target_link_libraries(openmw dl Xt)
+endif()
+
+
 if(APPLE)
-    find_library(CARBON_FRAMEWORK Carbon)
     find_library(COCOA_FRAMEWORK Cocoa)
     find_library(IOKIT_FRAMEWORK IOKit)
-    target_link_libraries(openmw ${CARBON_FRAMEWORK} ${COCOA_FRAMEWORK} ${IOKIT_FRAMEWORK})
+    target_link_libraries(openmw ${COCOA_FRAMEWORK} ${IOKIT_FRAMEWORK})
 
     if (FFMPEG_FOUND)
         find_library(COREVIDEO_FRAMEWORK CoreVideo)

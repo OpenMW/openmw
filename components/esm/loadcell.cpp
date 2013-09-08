@@ -8,13 +8,10 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
-#include <apps/openmw/mwworld/store.hpp>
-#include <apps/openmw/mwworld/cellstore.hpp>
-
 namespace ESM
 {
 
-/// Some overloaded copare operators.
+/// Some overloaded compare operators.
 bool operator==(const MovedCellRef& ref, int pRefnum)
 {
   return (ref.mRefnum == pRefnum);
@@ -25,59 +22,6 @@ bool operator==(const CellRef& ref, int pRefnum)
   return (ref.mRefnum == pRefnum);
 }
 
-void CellRef::save(ESMWriter &esm)
-{
-    esm.writeHNT("FRMR", mRefnum);
-    esm.writeHNCString("NAME", mRefID);
-
-    if (mScale != 1.0) {
-        esm.writeHNT("XSCL", mScale);
-    }
-
-    esm.writeHNOCString("ANAM", mOwner);
-    esm.writeHNOCString("BNAM", mGlob);
-    esm.writeHNOCString("XSOL", mSoul);
-
-    esm.writeHNOCString("CNAM", mFaction);
-    if (mFactIndex != -2) {
-        esm.writeHNT("INDX", mFactIndex);
-    }
-
-    if (mCharge != -1.0) {
-        esm.writeHNT("XCHG", mCharge);
-    }
-
-    if (mIntv != -1) {
-        esm.writeHNT("INTV", mIntv);
-    }
-    if (mNam9 != 0) {
-        esm.writeHNT("NAM9", mNam9);
-    }
-
-    if (mTeleport)
-    {
-        esm.writeHNT("DODT", mDoorDest);
-        esm.writeHNOCString("DNAM", mDestCell);
-    }
-
-    if (mLockLevel != -1) {
-        esm.writeHNT("FLTV", mLockLevel);
-    }
-    esm.writeHNOCString("KNAM", mKey);
-    esm.writeHNOCString("TNAM", mTrap);
-
-    if (mUnam != -1) {
-        esm.writeHNT("UNAM", mUnam);
-    }
-    if (mFltv != 0) {
-        esm.writeHNT("FLTV", mFltv);
-    }
-
-    esm.writeHNT("DATA", mPos, 24);
-    if (mNam0 != 0) {
-        esm.writeHNT("NAM0", mNam0);
-    }
-}
 
 void Cell::load(ESMReader &esm, bool saveContext)
 {
@@ -133,38 +77,13 @@ void Cell::load(ESMReader &esm, bool saveContext)
     }
 }
 
-void Cell::load(ESMReader &esm, MWWorld::ESMStore &store)
+void Cell::preLoad(ESMReader &esm) //Can't be "load" because it conflicts with function in esmtool
 {
     this->load(esm, false);
+}
 
-    // preload moved references
-    while (esm.isNextSub("MVRF")) {
-        CellRef ref;
-        MovedCellRef cMRef;
-        getNextMVRF(esm, cMRef);
-
-        MWWorld::Store<ESM::Cell> &cStore = const_cast<MWWorld::Store<ESM::Cell>&>(store.get<ESM::Cell>());
-        ESM::Cell *cellAlt = const_cast<ESM::Cell*>(cStore.searchOrCreate(cMRef.mTarget[0], cMRef.mTarget[1]));
-
-        // Get regular moved reference data. Adapted from CellStore::loadRefs. Maybe we can optimize the following
-        //  implementation when the oher implementation works as well.
-        getNextRef(esm, ref);
-        std::string lowerCase;
-
-        std::transform (ref.mRefID.begin(), ref.mRefID.end(), std::back_inserter (lowerCase),
-            (int(*)(int)) std::tolower);
-
-        // Add data required to make reference appear in the correct cell.
-        // We should not need to test for duplicates, as this part of the code is pre-cell merge.
-        mMovedRefs.push_back(cMRef);
-        // But there may be duplicates here!
-        ESM::CellRefTracker::iterator iter = std::find(cellAlt->mLeasedRefs.begin(), cellAlt->mLeasedRefs.end(), ref.mRefnum);
-        if (iter == cellAlt->mLeasedRefs.end())
-          cellAlt->mLeasedRefs.push_back(ref);
-        else
-          *iter = ref;
-    }
-
+void Cell::postLoad(ESMReader &esm)
+{
     // Save position of the cell references and move on
     mContextList.push_back(esm.getContext());
     esm.skipRecord();
@@ -203,7 +122,7 @@ void Cell::save(ESMWriter &esm)
 
 void Cell::restore(ESMReader &esm, int iCtx) const
 {
-    esm.restoreContext(mContextList[iCtx]);
+    esm.restoreContext(mContextList.at (iCtx));
 }
 
 std::string Cell::getDescription() const
@@ -234,6 +153,14 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
         // That should be it, I haven't seen any other fields yet.
     }
 
+    // NAM0 sometimes appears here, sometimes further on
+    ref.mNam0 = 0;
+    if (esm.isNextSub("NAM0"))
+    {
+        esm.getHT(ref.mNam0);
+        //esm.getHNOT(NAM0, "NAM0");
+    }
+
     esm.getHNT(ref.mRefnum, "FRMR");
     ref.mRefID = esm.getHNString("NAME");
 
@@ -245,7 +172,7 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
         // If the most significant 8 bits are used, then this reference already exists.
         // In this case, do not spawn a new reference, but overwrite the old one.
         ref.mRefnum &= 0x00ffffff; // delete old plugin ID
-        const ESM::ESMReader::MasterList &masters = esm.getMasters();
+        const std::vector<Header::MasterData> &masters = esm.getMasters();
         global = masters[local-1].index + 1;
         ref.mRefnum |= global << 24; // insert global plugin ID
     }
@@ -285,13 +212,15 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
     ref.mFactIndex = -2;
     esm.getHNOT(ref.mFactIndex, "INDX");
 
-    ref.mCharge = -1.0;
-    esm.getHNOT(ref.mCharge, "XCHG");
+    ref.mGoldValue = 1;
+    ref.mCharge = -1;
+    ref.mEnchantmentCharge = -1;
 
-    ref.mIntv = -1;
-    ref.mNam9 = 0;
-    esm.getHNOT(ref.mIntv, "INTV");
-    esm.getHNOT(ref.mNam9, "NAM9");
+    esm.getHNOT(ref.mEnchantmentCharge, "XCHG");
+
+    esm.getHNOT(ref.mCharge, "INTV");
+
+    esm.getHNOT(ref.mGoldValue, "NAM9");
 
     // Present for doors that teleport you to another cell.
     if (esm.isNextSub("DODT"))
@@ -309,9 +238,9 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
     ref.mKey = esm.getHNOString("KNAM");
     ref.mTrap = esm.getHNOString("TNAM");
 
-    ref.mUnam = -1;
+    ref.mReferenceBlocked = -1;
     ref.mFltv = 0;
-    esm.getHNOT(ref.mUnam, "UNAM");
+    esm.getHNOT(ref.mReferenceBlocked, "UNAM");
     esm.getHNOT(ref.mFltv, "FLTV");
 
     esm.getHNOT(ref.mPos, "DATA", 24);
@@ -322,7 +251,6 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
     // Update: Well, maybe not completely useless. This might actually be
     //  number_of_references + number_of_references_moved_here_Across_boundaries,
     //  and could be helpful for collecting these weird moved references.
-    ref.mNam0 = 0;
     if (esm.isNextSub("NAM0"))
     {
         esm.getHT(ref.mNam0);
@@ -348,11 +276,29 @@ bool Cell::getNextMVRF(ESMReader &esm, MovedCellRef &mref)
     int local = (mref.mRefnum & 0xff000000) >> 24;
     size_t global = esm.getIndex() + 1;
     mref.mRefnum &= 0x00ffffff; // delete old plugin ID
-    const ESM::ESMReader::MasterList &masters = esm.getMasters();
+    const std::vector<Header::MasterData> &masters = esm.getMasters();
     global = masters[local-1].index + 1;
     mref.mRefnum |= global << 24; // insert global plugin ID
 
     return true;
 }
 
+    void Cell::blank()
+    {
+        mName.clear();
+        mRegion.clear();
+        mWater = 0;
+        mWaterInt = false;
+        mMapColor = 0;
+        mNAM0 = 0;
+
+        mData.mFlags = 0;
+        mData.mX = 0;
+        mData.mY = 0;
+
+        mAmbi.mAmbient = 0;
+        mAmbi.mSunlight = 0;
+        mAmbi.mFog = 0;
+        mAmbi.mFogDensity = 0;
+    }
 }

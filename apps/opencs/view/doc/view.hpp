@@ -38,10 +38,12 @@ namespace CSVDoc
             QAction *mRedo;
             QAction *mSave;
             QAction *mVerify;
+            QAction *mShowStatusBar;
             std::vector<QAction *> mEditingActions;
             Operations *mOperations;
             SubViewFactoryManager mSubViewFactory;
-            QMainWindow* mSubViewWindow;
+            QMainWindow mSubViewWindow;
+
 
             // not implemented
             View (const View&);
@@ -59,15 +61,30 @@ namespace CSVDoc
 
             void setupWorldMenu();
 
+            void setupMechanicsMenu();
+
+            void setupAssetsMenu();
+
             void setupUi();
 
             void updateTitle();
 
             void updateActions();
 
+            void exitApplication();
+
+            void loadUserSettings();
+
+            /// User preference function
+            void resizeViewWidth (int width);
+
+            /// User preference function
+            void resizeViewHeight (int height);
+
         public:
 
-            View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews, QMainWindow *viewParent);
+            View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews);
+
             ///< The ownership of \a document is not transferred to *this.
 
             virtual ~View();
@@ -82,7 +99,10 @@ namespace CSVDoc
 
             void updateProgress (int current, int max, int type, int threads);
 
-            QDockWidget *getOperations() const;
+            Operations *getOperations() const;
+
+            /// Function called by view manager when user preferences are updated
+            void updateEditorSetting (const QString &, const QString &);
 
         signals:
 
@@ -90,9 +110,15 @@ namespace CSVDoc
 
             void loadDocumentRequest();
 
+            void exitApplicationRequest (CSVDoc::View *view);
+
+            void editSettingsRequest();
+
         public slots:
 
             void addSubView (const CSMWorld::UniversalId& id);
+
+            void abortOperation (int type);
 
         private slots:
 
@@ -100,13 +126,43 @@ namespace CSVDoc
 
             void save();
 
+            void exit();
+
             void verify();
 
             void addGlobalsSubView();
 
             void addGmstsSubView();
 
-            void abortOperation (int type);
+            void addSkillsSubView();
+
+            void addClassesSubView();
+
+            void addFactionsSubView();
+
+            void addRacesSubView();
+
+            void addSoundsSubView();
+
+            void addScriptsSubView();
+
+            void addRegionsSubView();
+
+            void addBirthsignsSubView();
+
+            void addSpellsSubView();
+
+            void addCellsSubView();
+
+            void addReferenceablesSubView();
+
+            void addReferencesSubView();
+
+            void addRegionMapSubView();
+
+            void addFiltersSubView();
+
+            void toggleShowStatusBar (bool show);
     };
 }
 

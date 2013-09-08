@@ -1,15 +1,20 @@
 #ifndef GAME_MWWORLD_PLAYER_H
 #define GAME_MWWORLD_PLAYER_H
 
-#include "../mwworld/cellstore.hpp"
 #include "../mwworld/refdata.hpp"
-#include "../mwworld/ptr.hpp"
+#include "../mwworld/livecellref.hpp"
 
 #include "../mwmechanics/drawstate.hpp"
+
+namespace ESM
+{
+    struct NPC;
+}
 
 namespace MWBase
 {
     class World;
+    class Ptr;
 }
 
 namespace MWWorld
@@ -30,31 +35,19 @@ namespace MWWorld
 
         Player(const ESM::NPC *player, const MWBase::World& world);
 
-        void setCell (MWWorld::CellStore *cellStore)
-        {
-            mCellStore = cellStore;
-        }
+        void set (const ESM::NPC *player);
 
-        MWWorld::Ptr getPlayer()
-        {
-            MWWorld::Ptr ptr (&mPlayer, mCellStore);
-            return ptr;
-        }
+        void setCell (MWWorld::CellStore *cellStore);
 
-        void setBirthSign(const std::string &sign) {
-            mSign = sign;
-        }
+        MWWorld::Ptr getPlayer();
 
-        const std::string &getBirthSign() const {
-            return mSign;
-        }
+        void setBirthSign(const std::string &sign);
+
+        const std::string &getBirthSign() const;
 
         void setDrawState (MWMechanics::DrawState_ state);
 
-        bool getAutoMove() const
-        {
-            return mAutoMove;
-        }
+        bool getAutoMove() const;
 
         MWMechanics::DrawState_ getDrawState(); /// \todo constness
 
@@ -66,8 +59,11 @@ namespace MWWorld
         void setUpDown(int value);
 
         void setRunState(bool run);
-        void toggleRunning();
         void setSneak(bool sneak);
+
+        void yaw(float yaw);
+        void pitch(float pitch);
+        void roll(float roll);
     };
 }
 #endif

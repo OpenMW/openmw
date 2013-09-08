@@ -2,7 +2,6 @@
 #define _GAME_RENDERING_MANAGER_H
 
 #include "sky.hpp"
-#include "terrain.hpp"
 #include "debugging.hpp"
 
 #include <openengine/ogre/fader.hpp>
@@ -17,7 +16,7 @@
 
 #include "objects.hpp"
 #include "actors.hpp"
-#include "player.hpp"
+#include "camera.hpp"
 #include "occlusionquery.hpp"
 
 namespace Ogre
@@ -39,6 +38,11 @@ namespace sh
     class Factory;
 }
 
+namespace Terrain
+{
+    class World;
+}
+
 namespace MWRender
 {
     class Shadows;
@@ -50,47 +54,45 @@ namespace MWRender
     class VideoPlayer;
     class Animation;
 
-class RenderingManager: private RenderingInterface, public Ogre::WindowEventListener, public Ogre::RenderTargetListener {
-
-  private:
-
-
+class RenderingManager: private RenderingInterface, public Ogre::RenderTargetListener, public OEngine::Render::WindowSizeListener
+{
+private:
     virtual MWRender::Objects& getObjects();
     virtual MWRender::Actors& getActors();
 
-  public:
+public:
     RenderingManager(OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir,
-                     const boost::filesystem::path& cacheDir, OEngine::Physic::PhysicEngine* engine);
+                     const boost::filesystem::path& cacheDir, OEngine::Physic::PhysicEngine* engine,
+                     MWWorld::Fallback* fallback);
     virtual ~RenderingManager();
 
-    void togglePOV() {
-        mPlayer->toggleViewMode();
+    void togglePOV()
+    { mCamera->toggleViewMode(); }
+
+    void togglePreviewMode(bool enable)
+    { mCamera->togglePreviewMode(enable); }
+
+    bool toggleVanityMode(bool enable)
+    { return mCamera->toggleVanityMode(enable); }
+
+    void allowVanityMode(bool allow)
+    { mCamera->allowVanityMode(allow); }
+
+    void togglePlayerLooking(bool enable)
+    { mCamera->togglePlayerLooking(enable); }
+
+    void changeVanityModeScale(float factor)
+    {
+        if(mCamera->isVanityOrPreviewModeEnabled())
+            mCamera->setCameraDistance(-factor/120.f*10, true, true);
     }
 
-    void togglePreviewMode(bool enable) {
-        mPlayer->togglePreviewMode(enable);
-    }
+    void resetCamera();
 
-    bool toggleVanityMode(bool enable, bool force) {
-        return mPlayer->toggleVanityMode(enable, force);
-    }
+    bool vanityRotateCamera(const float *rot);
+    void setCameraDistance(float dist, bool adjust = false, bool override = true);
 
-    void allowVanityMode(bool allow) {
-        mPlayer->allowVanityMode(allow);
-    }
-
-    void togglePlayerLooking(bool enable) {
-        mPlayer->togglePlayerLooking(enable);
-    }
-
-    void changeVanityModeScale(float factor) {
-        if (mPlayer->isVanityOrPreviewModeEnabled())
-        mPlayer->setCameraDistance(-factor/120.f*10, true, true);
-    }
-
-    void getPlayerData(Ogre::Vector3 &eyepos, float &pitch, float &yaw);
-
-    void attachCameraTo(const MWWorld::Ptr &ptr);
+    void setupPlayer(const MWWorld::Ptr &ptr);
     void renderPlayer(const MWWorld::Ptr &ptr);
 
     SkyManager* getSkyManager();
@@ -108,6 +110,8 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     void cellAdded (MWWorld::CellStore *store);
     void waterAdded(MWWorld::CellStore *store);
 
+    void enableTerrain(bool enable);
+
     void removeWater();
 
     void preCellChange (MWWorld::CellStore* store);
@@ -119,11 +123,8 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     void moveObject (const MWWorld::Ptr& ptr, const Ogre::Vector3& position);
     void scaleObject (const MWWorld::Ptr& ptr, const Ogre::Vector3& scale);
 
-    /// Rotates object accordingly to its type
-    /// \param rot euler angles in radians
-    /// \param adjust indicates should rotation be set or adjusted
-    /// \return true if object needs to be rotated physically
-    bool rotateObject (const MWWorld::Ptr& ptr, Ogre::Vector3 &rot, bool adjust = false);
+    /// Updates an object's rotation
+    void rotateObject (const MWWorld::Ptr& ptr);
 
     void setWaterHeight(const float height);
     void toggleWater();
@@ -132,6 +133,13 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
     /// \param old Object reference in previous cell
     /// \param cur Object reference in new cell
     void updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur);
+
+    /// Specifies an updated Ptr object for the player (used on cell change).
+    void updatePlayerPtr(const MWWorld::Ptr &ptr);
+
+    /// Currently for NPCs only. Rebuilds the NPC, updating their root model, animation sources,
+    /// and equipment.
+    void rebuildPtr(const MWWorld::Ptr &ptr);
 
     void update (float duration, bool paused);
 
@@ -150,6 +158,8 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
 
     bool occlusionQuerySupported() { return mOcclusionQuery->supported(); }
     OcclusionQuery* getOcclusionQuery() { return mOcclusionQuery; }
+
+    float getTerrainHeightAt (Ogre::Vector3 worldPos);
 
     Shadows* getShadows();
 
@@ -201,14 +211,12 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
 
     void playVideo(const std::string& name, bool allowSkipping);
     void stopVideo();
-    void frameStarted(float dt);
+    void frameStarted(float dt, bool paused);
 
-  protected:
-	virtual void windowResized(Ogre::RenderWindow* rw);
-    virtual void windowClosed(Ogre::RenderWindow* rw);
+protected:
+    virtual void windowResized(int x, int y);
 
-  private:
-
+private:
     sh::Factory* mFactory;
 
     void setAmbientMode();
@@ -220,11 +228,13 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
 
     bool mSunEnabled;
 
+    MWWorld::Fallback* mFallback;
+
     SkyManager* mSkyManager;
 
     OcclusionQuery* mOcclusionQuery;
 
-    TerrainManager* mTerrainManager;
+    Terrain::World* mTerrain;
 
     MWRender::Water *mWater;
 
@@ -234,6 +244,8 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
 
     MWRender::Objects mObjects;
     MWRender::Actors mActors;
+
+    MWRender::NpcAnimation *mPlayerAnimation;
 
     // 0 normal, 1 more bright, 2 max
     int mAmbientMode;
@@ -249,7 +261,7 @@ class RenderingManager: private RenderingInterface, public Ogre::WindowEventList
 
     OEngine::Physic::PhysicEngine* mPhysicsEngine;
 
-    MWRender::Player *mPlayer;
+    MWRender::Camera *mCamera;
 
     MWRender::Debugging *mDebugging;
 

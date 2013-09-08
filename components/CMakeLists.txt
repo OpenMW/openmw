@@ -19,7 +19,7 @@ add_component_dir (nif
     )
 
 add_component_dir (nifogre
-    ogrenifloader
+    ogrenifloader skeleton material mesh
     )
 
 add_component_dir (nifbullet
@@ -37,9 +37,9 @@ add_component_dir (file_finder
 add_component_dir (esm
     attr defs esmcommon esmreader esmwriter loadacti loadalch loadappa loadarmo loadbody loadbook loadbsgn loadcell
     loadclas loadclot loadcont loadcrea loadcrec loaddial loaddoor loadench loadfact loadglob loadgmst
-    loadinfo loadingr loadland loadlevlist loadligh loadlocks loadltex loadmgef loadmisc loadnpcc
+    loadinfo loadingr loadland loadlevlist loadligh loadlock loadprob loadrepa loadltex loadmgef loadmisc loadnpcc
     loadnpc loadpgrd loadrace loadregn loadscpt loadskil loadsndg loadsoun loadspel loadsscr loadstat
-    loadweap records aipackage effectlist spelllist variant variantimp
+    loadweap records aipackage effectlist spelllist variant variantimp loadtes3 cellref filter
     )
 
 add_component_dir (misc
@@ -54,7 +54,7 @@ add_component_dir (files
 add_component_dir (compiler
     context controlparser errorhandler exception exprparser extensions fileparser generator
     lineparser literals locals output parser scanner scriptparser skipparser streamerrorhandler
-    stringparser tokenloc
+    stringparser tokenloc nullerrorhandler opcodes extensions0
     )
 
 add_component_dir (interpreter
@@ -64,6 +64,14 @@ add_component_dir (interpreter
 
 add_component_dir (translation
     translation
+    )
+    
+add_component_dir (terrain
+    quadtreenode chunk world storage material
+    )
+    
+add_component_dir (loadinglistener
+    loadinglistener
     )
 
 find_package(Qt4 COMPONENTS QtCore QtGui)

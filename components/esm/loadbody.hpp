@@ -27,13 +27,15 @@ struct BodyPart
         MP_Knee = 11,
         MP_Upperleg = 12,
         MP_Clavicle = 13,
-        MP_Tail = 14
+        MP_Tail = 14,
+
+        MP_Count = 15
     };
 
     enum Flags
     {
         BPF_Female = 1,
-        BPF_Playable = 2
+        BPF_NotPlayable = 2
     };
 
     enum MeshType
@@ -52,7 +54,7 @@ struct BodyPart
     };
 
     BYDTstruct mData;
-    std::string mId, mModel, mName;
+    std::string mId, mModel, mRace;
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm);

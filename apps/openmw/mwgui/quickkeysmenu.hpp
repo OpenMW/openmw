@@ -1,10 +1,9 @@
 #ifndef MWGUI_QUICKKEYS_H
 #define MWGUI_QUICKKEYS_H
 
-
 #include "../mwworld/ptr.hpp"
 
-#include "window_base.hpp"
+#include "windowbase.hpp"
 
 namespace MWGui
 {
@@ -16,7 +15,7 @@ namespace MWGui
     class QuickKeysMenu : public WindowBase
     {
     public:
-        QuickKeysMenu(MWBase::WindowManager& parWindowManager);
+        QuickKeysMenu();
         ~QuickKeysMenu();
 
 
@@ -64,7 +63,7 @@ namespace MWGui
     class QuickKeysMenuAssign : public WindowModal
     {
     public:
-        QuickKeysMenuAssign(MWBase::WindowManager& parWindowManager, QuickKeysMenu* parent);
+        QuickKeysMenuAssign(QuickKeysMenu* parent);
 
     private:
         MyGUI::TextBox* mLabel;
@@ -79,7 +78,7 @@ namespace MWGui
     class MagicSelectionDialog : public WindowModal
     {
     public:
-        MagicSelectionDialog(MWBase::WindowManager& parWindowManager, QuickKeysMenu* parent);
+        MagicSelectionDialog(QuickKeysMenu* parent);
 
         virtual void open();
 

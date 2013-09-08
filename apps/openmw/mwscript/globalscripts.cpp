@@ -15,12 +15,18 @@ namespace MWScript
     GlobalScripts::GlobalScripts (const MWWorld::ESMStore& store)
     : mStore (store)
     {
+        reset();
+    }
+
+    void GlobalScripts::reset()
+    {
+        mScripts.clear();
         addScript ("Main");
 
         MWWorld::Store<ESM::StartScript>::iterator iter =
-            store.get<ESM::StartScript>().begin();
+            mStore.get<ESM::StartScript>().begin();
 
-        for (; iter != store.get<ESM::StartScript>().end(); ++iter) {
+        for (; iter != mStore.get<ESM::StartScript>().end(); ++iter) {
             addScript (iter->mScript);
         }
     }

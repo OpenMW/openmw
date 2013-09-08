@@ -7,12 +7,22 @@
 
 #include <components/esm/defs.hpp>
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/windowmanager.hpp"
+#include "../mwbase/world.hpp"
+
 #include "ptr.hpp"
 #include "refdata.hpp"
 #include "nullaction.hpp"
+#include "failedaction.hpp"
+#include "actiontake.hpp"
 #include "containerstore.hpp"
 
 #include "../mwgui/tooltips.hpp"
+
+#include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/magiceffects.hpp"
 
 namespace MWWorld
 {
@@ -47,6 +57,16 @@ namespace MWWorld
         throw std::runtime_error ("class does not represent an actor");
     }
 
+    bool Class::canSell (const MWWorld::Ptr& item, int npcServices) const
+    {
+        return false;
+    }
+
+    int Class::getServices(const Ptr &actor) const
+    {
+        throw std::runtime_error ("class does not have services");
+    }
+
     MWMechanics::CreatureStats& Class::getCreatureStats (const Ptr& ptr) const
     {
         throw std::runtime_error ("class does not have creature stats");
@@ -65,6 +85,21 @@ namespace MWWorld
     int Class::getItemMaxHealth (const Ptr& ptr) const
     {
         throw std::runtime_error ("class does not have item health");
+    }
+
+    void Class::hit(const Ptr& ptr, int type) const
+    {
+        throw std::runtime_error("class cannot hit");
+    }
+
+    void Class::onHit(const Ptr& ptr, float damage, bool ishealth, const Ptr& object, const Ptr& attacker, bool successful) const
+    {
+        throw std::runtime_error("class cannot be hit");
+    }
+
+    void Class::setActorHealth(const Ptr& ptr, float health, const Ptr& attacker) const
+    {
+        throw std::runtime_error("class does not have actor health");
     }
 
     boost::shared_ptr<Action> Class::activate (const Ptr& ptr, const Ptr& actor) const
@@ -127,12 +162,22 @@ namespace MWWorld
         return 0;
     }
 
+    float Class::getEnchantmentPoints (const MWWorld::Ptr& ptr) const
+    {
+        throw std::runtime_error ("class does not support enchanting");
+    }
+
     MWMechanics::Movement& Class::getMovementSettings (const Ptr& ptr) const
     {
         throw std::runtime_error ("movement settings not supported by class");
     }
 
     Ogre::Vector3 Class::getMovementVector (const Ptr& ptr) const
+    {
+        return Ogre::Vector3 (0, 0, 0);
+    }
+
+    Ogre::Vector3 Class::getRotationVector (const Ptr& ptr) const
     {
         return Ogre::Vector3 (0, 0, 0);
     }
@@ -157,6 +202,11 @@ namespace MWWorld
         throw std::runtime_error ("capacity not supported by this class");
     }
 
+    float Class::getWeight(const Ptr &ptr) const
+    {
+        throw std::runtime_error ("weight not supported by this class");
+    }
+
     float Class::getEncumbrance (const MWWorld::Ptr& ptr) const
     {
         throw std::runtime_error ("encumbrance not supported by class");
@@ -167,29 +217,38 @@ namespace MWWorld
         return false;
     }
 
-     bool Class::hasDetected (const MWWorld::Ptr& ptr, const MWWorld::Ptr& ptr2) const
+    bool Class::hasDetected (const MWWorld::Ptr& ptr, const MWWorld::Ptr& ptr2) const
     {
-        return false;
+        return true;
+    }
+
+    float Class::getArmorRating (const MWWorld::Ptr& ptr) const
+    {
+        throw std::runtime_error("Class does not support armor rating");
     }
 
     const Class& Class::get (const std::string& key)
     {
+        if (key.empty())
+            throw std::logic_error ("Class::get(): attempting to get an empty key");
+
         std::map<std::string, boost::shared_ptr<Class> >::const_iterator iter = sClasses.find (key);
 
         if (iter==sClasses.end())
-            throw std::logic_error ("unknown class key: " + key);
+            throw std::logic_error ("Class::get(): unknown class key: " + key);
 
         return *iter->second;
     }
 
-    const Class& Class::get (const Ptr& ptr)
+    bool Class::isPersistent(const Ptr &ptr) const
     {
-        return get (ptr.getTypeName());
+        throw std::runtime_error ("class does not support persistence");
     }
 
-    void Class::registerClass (const std::string& key,  boost::shared_ptr<Class> instance)
+    void Class::registerClass(const std::string& key,  boost::shared_ptr<Class> instance)
     {
-        sClasses.insert (std::make_pair (key, instance));
+        instance->mTypeName = key;
+        sClasses.insert(std::make_pair(key, instance));
     }
 
     std::string Class::getUpSoundId (const Ptr& ptr) const
@@ -202,6 +261,10 @@ namespace MWWorld
         throw std::runtime_error ("class does not have an down sound");
     }
 
+    std::string Class::getSoundIdFromSndGen(const Ptr &ptr, const std::string &type) const
+    {
+        throw std::runtime_error("class does not support soundgen look up");
+    }
 
     std::string Class::getInventoryIcon (const MWWorld::Ptr& ptr) const
     {
@@ -234,6 +297,42 @@ namespace MWWorld
     std::string Class::getModel(const MWWorld::Ptr &ptr) const
     {
         return "";
+    }
+
+    void Class::applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
+    {
+        throw std::runtime_error ("class can't be enchanted");
+    }
+
+    std::pair<int, std::string> Class::canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const
+    {
+        return std::make_pair (1, "");
+    }
+
+    void Class::adjustPosition(const MWWorld::Ptr& ptr) const
+    {
+    }
+
+    boost::shared_ptr<Action> Class::defaultItemActivate(const Ptr &ptr, const Ptr &actor) const
+    {
+        if(!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
+            return boost::shared_ptr<Action>(new NullAction());
+
+        if(get(actor).isNpc() && get(actor).getNpcStats(actor).isWerewolf())
+        {
+            const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+            const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfItem");
+
+            boost::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
+            if(sound) action->setSound(sound->mId);
+
+            return action;
+        }
+
+        boost::shared_ptr<MWWorld::Action> action(new ActionTake(ptr));
+        action->setSound(getUpSoundId(ptr));
+
+        return action;
     }
 
     MWWorld::Ptr

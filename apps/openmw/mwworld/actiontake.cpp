@@ -17,7 +17,7 @@ namespace MWWorld
         // insert into player's inventory
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPtr ("player", true);
 
-        MWWorld::Class::get (player).getContainerStore (player).add (getTarget());
+        MWWorld::Class::get (player).getContainerStore (player).add (getTarget(), player);
 
         MWBase::Environment::get().getWorld()->deleteObject (getTarget());
     }

@@ -165,23 +165,28 @@ public:
 class NiAutoNormalParticlesData : public ShapeData
 {
 public:
+    int numParticles;
+
+    float particleRadius;
+
     int activeCount;
+
+    std::vector<float> sizes;
 
     void read(NIFStream *nif)
     {
         ShapeData::read(nif);
 
         // Should always match the number of vertices
-        activeCount = nif->getUShort();
+        numParticles = nif->getUShort();
 
-        // Skip all the info, we don't support particles yet
-        nif->getFloat();  // Active radius ?
-        nif->getUShort(); // Number of valid entries in the following arrays ?
+        particleRadius = nif->getFloat();
+        activeCount = nif->getUShort();
 
         if(nif->getInt())
         {
             // Particle sizes
-            nif->skip(activeCount * sizeof(float));
+            nif->getFloats(sizes, vertices.size());
         }
     }
 };
@@ -189,16 +194,16 @@ public:
 class NiRotatingParticlesData : public NiAutoNormalParticlesData
 {
 public:
+    std::vector<Ogre::Quaternion> rotations;
+
     void read(NIFStream *nif)
     {
         NiAutoNormalParticlesData::read(nif);
 
         if(nif->getInt())
         {
-            // Rotation quaternions. I THINK activeCount is correct here,
-            // but verts (vertex number) might also be correct, if there is
-            // any case where the two don't match.
-            nif->skip(activeCount * 4*sizeof(float));
+            // Rotation quaternions.
+            nif->getQuaternions(rotations, vertices.size());
         }
     }
 };
@@ -294,13 +299,17 @@ public:
         float time;
         char isSet;
     };
+    std::vector<VisData> mVis;
 
     void read(NIFStream *nif)
     {
         int count = nif->getInt();
-
-        /* Skip VisData */
-        nif->skip(count*5);
+        mVis.resize(count);
+        for(size_t i = 0;i < mVis.size();i++)
+        {
+            mVis[i].time = nif->getFloat();
+            mVis[i].isSet = nif->getChar();
+        }
     }
 };
 
@@ -389,16 +398,13 @@ struct NiMorphData : public Record
     {
         int morphCount = nif->getInt();
         int vertCount  = nif->getInt();
-        nif->getChar();
+        /*relative targets?*/nif->getChar();
 
         mMorphs.resize(morphCount);
         for(int i = 0;i < morphCount;i++)
         {
             mMorphs[i].mData.read(nif, true);
-
-            mMorphs[i].mVertices.resize(vertCount);
-            for(int j = 0;j < vertCount;j++)
-                mMorphs[i].mVertices[j] = nif->getVector3();
+            nif->getVector3s(mMorphs[i].mVertices, vertCount);
         }
     }
 };

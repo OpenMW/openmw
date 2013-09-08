@@ -14,6 +14,7 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/physicssystem.hpp"
 #include "../mwworld/nullaction.hpp"
+#include "../mwworld/player.hpp"
 
 #include "../mwgui/tooltips.hpp"
 
@@ -26,9 +27,7 @@ namespace MWClass
     {
         const std::string model = getModel(ptr);
         if (!model.empty()) {
-            MWRender::Objects& objects = renderingInterface.getObjects();
-            objects.insertBegin(ptr, ptr.getRefData().isEnabled(), false);
-            objects.insertMesh(ptr, model);
+            renderingInterface.getObjects().insertModel(ptr, model);
         }
     }
 
@@ -36,7 +35,7 @@ namespace MWClass
     {
         const std::string model = getModel(ptr);
         if(!model.empty())
-            physics.addObject(ptr);
+            physics.addObject(ptr,true);
     }
 
     std::string Clothing::getModel(const MWWorld::Ptr &ptr) const
@@ -61,16 +60,9 @@ namespace MWClass
     }
 
     boost::shared_ptr<MWWorld::Action> Clothing::activate (const MWWorld::Ptr& ptr,
-    		const MWWorld::Ptr& actor) const
+            const MWWorld::Ptr& actor) const
     {
-        if (!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
-            return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction ());
-
-    	boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTake (ptr));
-
-    	action->setSound(getUpSoundId(ptr));
-
-    	return action;
+        return defaultItemActivate(ptr, actor);
     }
 
     std::string Clothing::getScript (const MWWorld::Ptr& ptr) const
@@ -207,6 +199,8 @@ namespace MWClass
         }
 
         info.enchant = ref->mBase->mEnchant;
+        if (!info.enchant.empty())
+            info.remainingEnchantCharge = ptr.getCellRef().mEnchantmentCharge;
 
         info.text = text;
 
@@ -219,6 +213,59 @@ namespace MWClass
             ptr.get<ESM::Clothing>();
 
         return ref->mBase->mEnchant;
+    }
+
+    void Clothing::applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
+    {
+        MWWorld::LiveCellRef<ESM::Clothing> *ref =
+            ptr.get<ESM::Clothing>();
+
+        ESM::Clothing newItem = *ref->mBase;
+        newItem.mId="";
+        newItem.mName=newName;
+        newItem.mData.mEnchant=enchCharge;
+        newItem.mEnchant=enchId;
+        const ESM::Clothing *record = MWBase::Environment::get().getWorld()->createRecord (newItem);
+        ref->mBase = record;
+    }
+
+    std::pair<int, std::string> Clothing::canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const
+    {
+        // slots that this item can be equipped in
+        std::pair<std::vector<int>, bool> slots = MWWorld::Class::get(ptr).getEquipmentSlots(ptr);
+
+        std::string npcRace = npc.get<ESM::NPC>()->mBase->mRace;
+
+        for (std::vector<int>::const_iterator slot=slots.first.begin();
+            slot!=slots.first.end(); ++slot)
+        {
+
+            // Beast races cannot equip shoes / boots, or full helms (head part vs hair part)
+            const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npcRace);
+            if(race->mData.mFlags & ESM::Race::Beast)
+            {
+                std::vector<ESM::PartReference> parts = ptr.get<ESM::Clothing>()->mBase->mParts.mParts;
+
+                if(*slot == MWWorld::InventoryStore::Slot_Helmet)
+                {
+                    for(std::vector<ESM::PartReference>::iterator itr = parts.begin(); itr != parts.end(); ++itr)
+                    {
+                        if((*itr).mPart == ESM::PRT_Head)
+                            return std::make_pair(0, "#{sNotifyMessage13}");
+                    }
+                }
+
+                if (*slot == MWWorld::InventoryStore::Slot_Boots)
+                {
+                    for(std::vector<ESM::PartReference>::iterator itr = parts.begin(); itr != parts.end(); ++itr)
+                    {
+                        if((*itr).mPart == ESM::PRT_LFoot || (*itr).mPart == ESM::PRT_RFoot)
+                            return std::make_pair(0, "#{sNotifyMessage15}");
+                    }
+                }
+            }
+        }
+        return std::make_pair (1, "");
     }
 
     boost::shared_ptr<MWWorld::Action> Clothing::use (const MWWorld::Ptr& ptr) const
@@ -237,5 +284,25 @@ namespace MWClass
             ptr.get<ESM::Clothing>();
 
         return MWWorld::Ptr(&cell.mClothes.insert(*ref), &cell);
+    }
+
+    float Clothing::getEnchantmentPoints (const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Clothing> *ref =
+                ptr.get<ESM::Clothing>();
+
+        return ref->mBase->mData.mEnchant/10.f;
+    }
+
+    bool Clothing::canSell (const MWWorld::Ptr& item, int npcServices) const
+    {
+        return npcServices & ESM::NPC::Clothing;
+    }
+
+    float Clothing::getWeight(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Clothing> *ref =
+            ptr.get<ESM::Clothing>();
+        return ref->mBase->mData.mWeight;
     }
 }

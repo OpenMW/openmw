@@ -4,6 +4,11 @@
 #include <OgreString.h>
 #include <OgreColourValue.h>
 
+namespace ESM
+{
+    struct Region;
+}
+
 namespace MWRender
 {
     class RenderingManager;
@@ -11,6 +16,8 @@ namespace MWRender
 
 namespace MWWorld
 {
+    class Fallback;
+
     /// Defines the actual weather that results from weather setting (see below), time of day and weather transition
     struct WeatherResult
     {
@@ -112,7 +119,8 @@ namespace MWWorld
     class WeatherManager
     {
     public:
-        WeatherManager(MWRender::RenderingManager*,const std::map<std::string,std::string>& fallbackMap);
+        WeatherManager(MWRender::RenderingManager*,MWWorld::Fallback* fallback);
+        ~WeatherManager();
 
         /**
          * Change the weather in the specified region
@@ -127,7 +135,11 @@ namespace MWWorld
          */
         void update(float duration);
 
+        void stopSounds(bool stopAll);
+
         void setHour(const float hour);
+
+        float getWindSpeed() const;
 
         void setDate(const int day, const int month);
 
@@ -138,14 +150,13 @@ namespace MWWorld
 
         unsigned int getWeatherID() const;
 
+        void modRegion(const std::string &regionid, const std::vector<char> &chances);
+
     private:
         float mHour;
         int mDay, mMonth;
-        std::map<std::string,std::string> mFallback;
-        std::string getFallback (const std::string& key) const;
-        std::string getFallbackString(const std::string& fall) const;
-        float getFallbackFloat(const std::string& fall) const;
-        Ogre::ColourValue getFallbackColour(const std::string& fall) const;
+        float mWindSpeed;
+        MWWorld::Fallback* mFallback;
         void setFallbackWeather(Weather& weather,const std::string& name);
         MWRender::RenderingManager* mRendering;
 
@@ -170,10 +181,19 @@ namespace MWWorld
 
         double mTimePassed; // time passed since last update
 
-        WeatherResult transition(const float factor);
-        WeatherResult getResult(const Ogre::String& weather);
+        void transition(const float factor);
+        void setResult(const Ogre::String& weatherType);
 
-        void setWeather(const Ogre::String& weather, bool instant=false);
+        float calculateHourFade (const std::string& moonName) const;
+        float calculateAngleFade (const std::string& moonName, float angle) const;
+
+        void setWeather(const Ogre::String& weatherType, bool instant=false);
+        Ogre::String nextWeather(const ESM::Region* region) const;
+        WeatherResult mResult;
+
+        typedef std::map<std::string,std::vector<char> > RegionModMap;
+        RegionModMap mRegionMods;
+
         float mSunriseTime;
         float mSunsetTime;
         float mSunriseDuration;
@@ -183,6 +203,10 @@ namespace MWWorld
         float mThunderFrequency;
         float mThunderThreshold;
         float mThunderSoundDelay;
+        float mNightStart;
+        float mNightEnd;
+        float mDayStart;
+        float mDayEnd;
         std::string mThunderSoundID0;
         std::string mThunderSoundID1;
         std::string mThunderSoundID2;

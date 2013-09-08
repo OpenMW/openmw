@@ -136,9 +136,6 @@ void PlaneReflection::preRenderTargetUpdate(const Ogre::RenderTargetEvent& evt)
     mCamera->setFOVy(mParentCamera->getFOVy());
     mRenderActive = true;
 
-    Vector3 pos = mParentCamera->getRealPosition();
-    pos.y = (mWaterPlane).d*2 - pos.y;
-    mSky->setSkyPosition(pos);
     mCamera->enableReflection(mWaterPlane);
 
     // for depth calculation, we want the original viewproj matrix _without_ the custom near clip plane.
@@ -153,7 +150,6 @@ void PlaneReflection::preRenderTargetUpdate(const Ogre::RenderTargetEvent& evt)
 
 void PlaneReflection::postRenderTargetUpdate(const Ogre::RenderTargetEvent& evt)
 {
-    mSky->resetSkyPosition();
     mCamera->disableReflection();
     mCamera->disableCustomNearClipPlane();
     mRenderActive = false;
@@ -206,7 +202,10 @@ Water::Water (Ogre::Camera *camera, RenderingManager* rend) :
 
     mWaterPlane = Plane(Vector3::UNIT_Z, 0);
 
-    MeshManager::getSingleton().createPlane("water", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,  mWaterPlane, CELL_SIZE*5, CELL_SIZE * 5, 10, 10, true, 1, 3,3, Vector3::UNIT_Y);
+    int waterScale = 300;
+
+    MeshManager::getSingleton().createPlane("water", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, mWaterPlane,
+        CELL_SIZE*5*waterScale, CELL_SIZE*5*waterScale, 10, 10, true, 1, 3*waterScale,3*waterScale, Vector3::UNIT_Y);
 
     mWater = mSceneMgr->createEntity("water");
     mWater->setVisibilityFlags(RV_Water);

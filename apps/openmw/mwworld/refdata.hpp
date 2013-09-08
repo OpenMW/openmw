@@ -18,6 +18,10 @@ namespace ESM
 
 namespace MWWorld
 {
+    struct LocalRotation{
+        float rot[3];
+    };
+
     class CustomData;
 
     class RefData
@@ -33,6 +37,8 @@ namespace MWWorld
             int mCount; // 0: deleted
 
             ESM::Position mPosition;
+
+            LocalRotation mLocalRotation;
 
             CustomData *mCustomData;
 
@@ -54,7 +60,7 @@ namespace MWWorld
             RefData& operator= (const RefData& refData);
 
             /// Return OGRE handle (may be empty).
-            std::string getHandle();
+            const std::string &getHandle();
 
             /// Return OGRE base node (can be a null pointer).
             Ogre::SceneNode* getBaseNode();
@@ -77,6 +83,8 @@ namespace MWWorld
             void disable();
 
             ESM::Position& getPosition();
+
+            LocalRotation& getLocalRotation();
 
             void setCustomData (CustomData *data);
             ///< Set custom data (potentially replacing old custom data). The ownership of \æ data is

@@ -13,6 +13,17 @@ const Attribute::AttributeID Attribute::sAttributeIds[Attribute::Length] = {
     Attribute::Luck
 };
 
+const std::string Attribute::sAttributeNames[Attribute::Length] = {
+    "Strength",
+    "Intelligence",
+    "Willpower",
+    "Agility",
+    "Speed",
+    "Endurance",
+    "Personality",
+    "Luck"
+};
+
 const std::string Attribute::sGmstAttributeIds[Attribute::Length] = {
     "sAttributeStrength",
     "sAttributeIntelligence",

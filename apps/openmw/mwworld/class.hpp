@@ -7,7 +7,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "action.hpp"
+#include "ptr.hpp"
 
 namespace Ogre
 {
@@ -43,11 +43,14 @@ namespace MWWorld
     class InventoryStore;
     class PhysicsSystem;
     class CellStore;
+    class Action;
 
     /// \brief Base class for referenceable esm records
     class Class
     {
             static std::map<std::string, boost::shared_ptr<Class> > sClasses;
+
+            std::string mTypeName;
 
             // not implemented
             Class (const Class&);
@@ -56,6 +59,9 @@ namespace MWWorld
         protected:
 
             Class();
+
+            boost::shared_ptr<Action> defaultItemActivate(const Ptr &ptr, const Ptr &actor) const;
+            ///< Generate default action for activating inventory items
 
             virtual Ptr copyToCellImpl(const Ptr &ptr, CellStore &cell) const;
 
@@ -69,6 +75,10 @@ namespace MWWorld
 
             virtual ~Class();
 
+            const std::string& getTypeName() const {
+                return mTypeName;
+            }
+
             virtual std::string getId (const Ptr& ptr) const;
             ///< Return ID of \a ptr or throw an exception, if class does not support ID retrieval
             /// (default implementation: throw an exception)
@@ -80,6 +90,9 @@ namespace MWWorld
             virtual std::string getName (const Ptr& ptr) const = 0;
             ///< \return name (the one that is to be presented to the user; not the internal one);
             /// can return an empty string.
+
+            virtual void adjustPosition(const MWWorld::Ptr& ptr) const;
+            ///< Adjust position to stand on ground. Must be called post model load
 
             virtual MWMechanics::CreatureStats& getCreatureStats (const Ptr& ptr) const;
             ///< Return creature stats or throw an exception, if class does not have creature stats
@@ -100,6 +113,25 @@ namespace MWWorld
 
             virtual int getItemMaxHealth (const Ptr& ptr) const;
             ///< Return item max health or throw an exception, if class does not have item health
+            /// (default implementation: throw an exceoption)
+
+            virtual void hit(const Ptr& ptr, int type=-1) const;
+            ///< Execute a melee hit, using the current weapon. This will check the relevant skills
+            /// of the given attacker, and whoever is hit.
+            /// \param type - type of attack, one of the MWMechanics::CreatureStats::AttackType
+            ///               enums. ignored for creature attacks.
+            /// (default implementation: throw an exceoption)
+
+            virtual void onHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, bool successful) const;
+            ///< Alerts \a ptr that it's being hit for \a damage points to health if \a ishealth is
+            /// true (else fatigue) by \a object (sword, arrow, etc). \a attacker specifies the
+            /// actor responsible for the attack, and \a successful specifies if the hit is
+            /// successful or not.
+
+            virtual void setActorHealth(const Ptr& ptr, float health, const Ptr& attacker=Ptr()) const;
+            ///< Sets a new current health value for the actor, optionally specifying the object causing
+            /// the change. Use this instead of using CreatureStats directly as this will make sure the
+            /// correct dialog and actor states are properly handled when being hurt or healed.
             /// (default implementation: throw an exceoption)
 
             virtual boost::shared_ptr<Action> activate (const Ptr& ptr, const Ptr& actor) const;
@@ -150,6 +182,9 @@ namespace MWWorld
             ///< Return desired movement vector (determined based on movement settings,
             /// stance and stats).
 
+            virtual Ogre::Vector3 getRotationVector (const Ptr& ptr) const;
+            ///< Return desired rotations, as euler angles.
+
             virtual std::pair<std::vector<int>, bool> getEquipmentSlots (const Ptr& ptr) const;
             ///< \return first: Return IDs of the slot this object can be equipped in; second: can object
             /// stay stacked when equipped?
@@ -199,14 +234,6 @@ namespace MWWorld
             ///
             /// (default implementation: return false)
 
-            static const Class& get (const std::string& key);
-            ///< If there is no class for this \a key, an exception is thrown.
-
-            static const Class& get (const Ptr& ptr);
-            ///< If there is no class for this pointer, an exception is thrown.
-
-            static void registerClass (const std::string& key,  boost::shared_ptr<Class> instance);
-
             virtual std::string getUpSoundId (const Ptr& ptr) const;
             ///< Return the up sound ID of \a ptr or throw an exception, if class does not support ID retrieval
             /// (default implementation: throw an exception)
@@ -215,6 +242,12 @@ namespace MWWorld
             ///< Return the down sound ID of \a ptr or throw an exception, if class does not support ID retrieval
             /// (default implementation: throw an exception)
 
+            virtual std::string getSoundIdFromSndGen(const Ptr &ptr, const std::string &type) const;
+            ///< Returns the sound ID for \a ptr of the given soundgen \a type.
+
+            virtual float getArmorRating (const MWWorld::Ptr& ptr) const;
+            ///< @return combined armor rating of this actor
+
             virtual std::string getInventoryIcon (const MWWorld::Ptr& ptr) const;
             ///< Return name of inventory icon.
 
@@ -222,22 +255,54 @@ namespace MWWorld
             ///< @return the enchantment ID if the object is enchanted, otherwise an empty string
             /// (default implementation: return empty string)
 
+            virtual float getEnchantmentPoints (const MWWorld::Ptr& ptr) const;
+            ///< @return the number of enchantment points available for possible enchanting
+
             virtual void adjustScale(const MWWorld::Ptr& ptr,float& scale) const;
 
             virtual void adjustRotation(const MWWorld::Ptr& ptr,float& x,float& y,float& z) const;
 
+            virtual bool canSell (const MWWorld::Ptr& item, int npcServices) const;
+            ///< Determine whether or not \a item can be sold to an npc with the given \a npcServices
+
+            virtual int getServices (const MWWorld::Ptr& actor) const;
+
             virtual std::string getModel(const MWWorld::Ptr &ptr) const;
+
+            virtual void applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const;
+
+            virtual std::pair<int, std::string> canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const;
+            ///< Return 0 if player cannot equip item. 1 if can equip. 2 if it's twohanded weapon. 3 if twohanded weapon conflicts with that.
+            ///  Second item in the pair specifies the error message
+
+            virtual float getWeight (const MWWorld::Ptr& ptr) const;
+
+            virtual bool isPersistent (const MWWorld::Ptr& ptr) const;
 
             virtual Ptr
             copyToCell(const Ptr &ptr, CellStore &cell) const;
 
             virtual Ptr
             copyToCell(const Ptr &ptr, CellStore &cell, const ESM::Position &pos) const;
-            
-            virtual bool
-            isActor() const {
+
+            virtual bool isActor() const {
                 return false;
             }
+
+            virtual bool isNpc() const {
+                return false;
+            }
+
+            static const Class& get (const std::string& key);
+            ///< If there is no class for this \a key, an exception is thrown.
+
+            static const Class& get (const Ptr& ptr)
+            {
+                return ptr.getClass();
+            }
+            ///< If there is no class for this pointer, an exception is thrown.
+
+            static void registerClass (const std::string& key,  boost::shared_ptr<Class> instance);
     };
 }
 

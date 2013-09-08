@@ -64,6 +64,22 @@ MWWorld::InventoryStore& MWWorld::InventoryStore::operator= (const InventoryStor
     return *this;
 }
 
+MWWorld::ContainerStoreIterator MWWorld::InventoryStore::add(const Ptr& itemPtr, const Ptr& actorPtr)
+{
+    const MWWorld::ContainerStoreIterator& retVal = MWWorld::ContainerStore::add(itemPtr, actorPtr);
+
+    // Auto-equip items if an armor/clothing item is added, but not for the player nor werewolves
+    if ((actorPtr.getRefData().getHandle() != "player")
+            && !(MWWorld::Class::get(actorPtr).getNpcStats(actorPtr).isWerewolf()))
+    {
+        std::string type = itemPtr.getTypeName();
+        if ((type == typeid(ESM::Armor).name()) || (type == typeid(ESM::Clothing).name()))
+            autoEquip(actorPtr);
+    }
+
+    return retVal;
+}
+
 void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& iterator)
 {
     if (slot<0 || slot>=static_cast<int> (mSlots.size()))
@@ -110,6 +126,23 @@ void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& ite
     flagAsModified();
 }
 
+void MWWorld::InventoryStore::unequipAll(const MWWorld::Ptr& actor)
+{
+    for (int slot=0; slot < MWWorld::InventoryStore::Slots; ++slot)
+    {
+        MWWorld::ContainerStoreIterator it = getSlot(slot);
+        if (it != end())
+        {
+            equip(slot, end());
+            std::string script = MWWorld::Class::get(*it).getScript(*it);
+
+            // Unset OnPCEquip Variable on item's script, if it has a script with that variable declared
+            if((actor.getRefData().getHandle() == "player") && (script != ""))
+                (*it).getRefData().getLocals().setVarByInt(script, "onpcequip", 0);
+        }
+    }
+}
+
 MWWorld::ContainerStoreIterator MWWorld::InventoryStore::getSlot (int slot)
 {
     if (slot<0 || slot>=static_cast<int> (mSlots.size()))
@@ -128,8 +161,11 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::getSlot (int slot)
     return mSlots[slot];
 }
 
-void MWWorld::InventoryStore::autoEquip (const MWMechanics::NpcStats& stats)
+void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& npc)
 {
+    const MWMechanics::NpcStats& stats = MWWorld::Class::get(npc).getNpcStats(npc);
+    MWWorld::InventoryStore& invStore = MWWorld::Class::get(npc).getInventoryStore(npc);
+
     TSlots slots;
     initSlots (slots);
 
@@ -181,6 +217,18 @@ void MWWorld::InventoryStore::autoEquip (const MWMechanics::NpcStats& stats)
 
                     use = true;
                 }
+            }
+
+            switch(MWWorld::Class::get (test).canBeEquipped (test, npc).first)
+            {
+                case 0:
+                    continue;
+                case 2:
+                    invStore.equip(MWWorld::InventoryStore::Slot_CarriedLeft, invStore.end());
+                    break;
+                case 3:
+                    invStore.equip(MWWorld::InventoryStore::Slot_CarriedRight, invStore.end());
+                    break;
             }
 
             if (!itemsSlots.second) // if itemsSlots.second is true, item can stay stacked when equipped
@@ -260,6 +308,8 @@ bool MWWorld::InventoryStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
         iter!=mSlots.end(); ++iter)
     {
         if (*iter != end() && ptr1 == **iter)
+            return false;
+        if (*iter != end() && ptr2 == **iter)
             return false;
     }
 

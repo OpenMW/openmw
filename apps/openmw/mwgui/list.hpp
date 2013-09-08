@@ -1,7 +1,6 @@
 #ifndef MWGUI_LIST_HPP
 #define MWGUI_LIST_HPP
 
-#include <MyGUI_Widget.h>
 #include <MyGUI_ScrollView.h>
 
 namespace MWGui

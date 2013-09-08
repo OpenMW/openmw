@@ -52,6 +52,8 @@ namespace CSMDoc
 
             void createBase();
 
+            void addGmsts();
+
             void addOptionalGmsts();
 
             void addOptionalGlobals();
@@ -63,6 +65,7 @@ namespace CSMDoc
         public:
 
             Document (const std::vector<boost::filesystem::path>& files, bool new_);
+            ~Document();
 
             QUndoStack& getUndoStack();
 

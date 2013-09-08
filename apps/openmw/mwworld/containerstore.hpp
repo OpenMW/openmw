@@ -44,7 +44,7 @@ namespace MWWorld
             MWWorld::CellRefList<ESM::Clothing>          clothes;
             MWWorld::CellRefList<ESM::Ingredient>        ingreds;
             MWWorld::CellRefList<ESM::Light>             lights;
-            MWWorld::CellRefList<ESM::Tool>              lockpicks;
+            MWWorld::CellRefList<ESM::Lockpick>              lockpicks;
             MWWorld::CellRefList<ESM::Miscellaneous>     miscItems;
             MWWorld::CellRefList<ESM::Probe>             probes;
             MWWorld::CellRefList<ESM::Repair>            repairs;
@@ -53,6 +53,7 @@ namespace MWWorld
             mutable float mCachedWeight;
             mutable bool mWeightUpToDate;
             ContainerStoreIterator addImp (const Ptr& ptr);
+            void addInitialItem (const std::string& id, const std::string& owner, int count, unsigned char failChance=0, bool topLevel=true);
 
         public:
 
@@ -64,7 +65,7 @@ namespace MWWorld
 
             ContainerStoreIterator end();
 
-            ContainerStoreIterator add (const Ptr& ptr);
+            virtual ContainerStoreIterator add (const Ptr& itemPtr, const Ptr& actorPtr);
             ///< Add the item pointed to by \a ptr to this container. (Stacks automatically if needed)
             ///
             /// \note The item pointed to is not required to exist beyond this function call.
@@ -78,13 +79,12 @@ namespace MWWorld
             ContainerStoreIterator addImpl (const Ptr& ptr);
             ///< Add the item to this container (no stacking)
 
-            virtual bool stacks (const Ptr& ptr1, const Ptr& ptr2);
-            ///< @return true if the two specified objects can stack with each other
-            /// @note ptr1 is the item that is already in this container
-
         public:
 
-            void fill (const ESM::InventoryList& items, const MWWorld::ESMStore& store);
+            virtual bool stacks (const Ptr& ptr1, const Ptr& ptr2);
+            ///< @return true if the two specified objects can stack with each other
+
+            void fill (const ESM::InventoryList& items, const std::string& owner, const MWWorld::ESMStore& store);
             ///< Insert items into *this.
 
             void clear();
@@ -105,6 +105,8 @@ namespace MWWorld
             static int getType (const Ptr& ptr);
             ///< This function throws an exception, if ptr does not point to an object, that can be
             /// put into a container.
+
+            Ptr search (const std::string& id);
 
         friend class ContainerStoreIterator;
     };
@@ -127,7 +129,7 @@ namespace MWWorld
             MWWorld::CellRefList<ESM::Clothing>::List::iterator mClothing;
             MWWorld::CellRefList<ESM::Ingredient>::List::iterator mIngredient;
             MWWorld::CellRefList<ESM::Light>::List::iterator mLight;
-            MWWorld::CellRefList<ESM::Tool>::List::iterator mLockpick;
+            MWWorld::CellRefList<ESM::Lockpick>::List::iterator mLockpick;
             MWWorld::CellRefList<ESM::Miscellaneous>::List::iterator mMiscellaneous;
             MWWorld::CellRefList<ESM::Probe>::List::iterator mProbe;
             MWWorld::CellRefList<ESM::Repair>::List::iterator mRepair;
@@ -149,7 +151,7 @@ namespace MWWorld
             ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Clothing>::List::iterator);
             ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Ingredient>::List::iterator);
             ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Light>::List::iterator);
-            ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Tool>::List::iterator);
+            ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Lockpick>::List::iterator);
             ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Miscellaneous>::List::iterator);
             ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Probe>::List::iterator);
             ContainerStoreIterator (ContainerStore *container, MWWorld::CellRefList<ESM::Repair>::List::iterator);

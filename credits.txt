@@ -12,14 +12,17 @@ Marc Zinnschlag (Zini) - Lead Programmer/Project Manager
 
 Adam Hogan (aurix)
 Aleksandar Jovanov
+Alex McKibben (WeirdSexy)
 Alexander Nadeau (wareya)
 Alexander Olofsson (Ace)
 Artem Kotsynyak (greye)
 athile
+Britt Mathis (galdor557)
 BrotherBrick
 Chris Robinson (KittyCat)
 Cory F. Cohen (cfcohen)
 Cris Mihalache (Mirceam)
+darkf
 Douglas Diniz (Dgdiniz)
 Douglas Mencken (dougmencken)
 Edmondo Tommasina (edmondo)
@@ -31,6 +34,7 @@ Jacob Essex (Yacoby)
 Jannik Heller (scrawl)
 Jason Hooks (jhooks)
 Joel Graff (graffy)
+John Blomberg (fstp)
 Jordan Milne
 Julien Voisin (jvoisin/ap0)
 Karl-Felix Glatzer (k1ll)
@@ -38,9 +42,11 @@ Lars Söderberg (Lazaroth)
 lazydev
 Leon Saunders (emoose)
 Lukasz Gromanowski (lgro)
+Manuel Edelmann (vorenon)
+Marc Bouvier (CramitDeFrog)
 Marcin Hulist (Gohan)
 Mark Siewert (mark76)
-Manuel Edelmann (vorenon)
+Mateusz Kołaczek (PL_kolek)
 Michael Mc Donnell
 Michael Papageorgiou (werdanith)
 Michał Bień (Glorf)
@@ -51,12 +57,13 @@ Paul McElroy (Greendogo)
 Pieter van der Kloet (pvdk)
 Radu-Marius Popovici (rpopovici)
 Roman Melnik (Kromgart)
+Roman Proskuryakov (humbug)
 Sandy Carter (bwrsandman)
 Sebastian Wick (swick)
 Sergey Shambir
 Sylvain Thesnieres (Garvek)
 Tom Mason (wheybags)
-
+Torben Leif Carrington (TorbenC)
 
 Packagers:
 Alexander Olofsson (Ace) - Windows
@@ -75,7 +82,7 @@ Julien Voisin (jvoisin/ap0) - French News Writer
 Mickey Lyle (raevol) - Release Manager
 Pithorn - Chinese News Writer
 sir_herrbatka - English/Polish News Writer
-WeirdSexy - Podcaster
+Alex McKibben (WeirdSexy) - Podcaster
 
 
 Website:

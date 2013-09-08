@@ -24,6 +24,10 @@ namespace sh
 	}
 
 	ScriptLoader::ScriptLoader(const std::string& fileEnding)
+		: mLoadOrder(0)
+		, mToken(TOKEN_NewLine)
+		, mLastToken(TOKEN_NewLine)
+
 	{
 		mFileEnding = fileEnding;
 	}
@@ -36,7 +40,7 @@ namespace sh
 	void ScriptLoader::clearScriptList()
 	{
 		std::map <std::string, ScriptNode *>::iterator i;
-		for (i = m_scriptList.begin(); i != m_scriptList.end(); i++)
+		for (i = m_scriptList.begin(); i != m_scriptList.end(); ++i)
 		{
 			delete i->second;
 		}
@@ -293,7 +297,7 @@ namespace sh
 	{
 		//Delete all children
 		std::vector<ScriptNode*>::iterator i;
-		for (i = mChildren.begin(); i != mChildren.end(); i++)
+		for (i = mChildren.begin(); i != mChildren.end(); ++i)
 		{
 			ScriptNode *node = *i;
 			node->mRemoveSelf = false;
@@ -323,15 +327,24 @@ namespace sh
 
 	ScriptNode *ScriptNode::findChild(const std::string &name, bool recursive)
 	{
-		int indx, prevC, nextC;
+		int indx;
 		int childCount = (int)mChildren.size();
 
 		if (mLastChildFound != -1)
 		{
 			//If possible, try checking the nodes neighboring the last successful search
 			//(often nodes searched for in sequence, so this will boost search speeds).
-			prevC = mLastChildFound-1; if (prevC < 0) prevC = 0; else if (prevC >= childCount) prevC = childCount-1;
-			nextC = mLastChildFound+1; if (nextC < 0) nextC = 0; else if (nextC >= childCount) nextC = childCount-1;
+			int prevC = mLastChildFound-1;
+			if (prevC < 0)
+				prevC = 0;
+			else if (prevC >= childCount)
+				prevC = childCount-1;
+			int nextC = mLastChildFound+1;
+			if (nextC < 0)
+				nextC = 0;
+			else if (nextC >= childCount)
+				nextC = childCount-1;
+
 			for (indx = prevC; indx <= nextC; ++indx)
 			{
 				ScriptNode *node = mChildren[indx];

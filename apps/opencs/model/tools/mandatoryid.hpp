@@ -10,7 +10,7 @@
 
 namespace CSMWorld
 {
-    class IdCollectionBase;
+    class CollectionBase;
 }
 
 namespace CSMTools
@@ -18,13 +18,13 @@ namespace CSMTools
     /// \brief Verify stage: make sure that records with specific IDs exist.
     class MandatoryIdStage : public Stage
     {
-            const CSMWorld::IdCollectionBase& mIdCollection;
+            const CSMWorld::CollectionBase& mIdCollection;
             CSMWorld::UniversalId mCollectionId;
             std::vector<std::string> mIds;
 
         public:
 
-            MandatoryIdStage (const CSMWorld::IdCollectionBase& idCollection, const CSMWorld::UniversalId& collectionId,
+            MandatoryIdStage (const CSMWorld::CollectionBase& idCollection, const CSMWorld::UniversalId& collectionId,
                 const std::vector<std::string>& ids);
 
             virtual int setup();

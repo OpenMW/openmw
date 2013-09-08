@@ -29,6 +29,8 @@ namespace Render
         void fadeOut(const float time);
         void fadeTo(const int percent, const float time);
 
+        void setFactor (float factor) { mFactor = factor; }
+
     private:
         enum FadingMode
         {
@@ -48,6 +50,8 @@ namespace Render
         float mTargetAlpha;
         float mCurrentAlpha;
         float mStartAlpha;
+
+        float mFactor;
 
         Ogre::SceneManager* mSceneMgr;
     };

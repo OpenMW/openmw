@@ -70,7 +70,7 @@ struct Land
     };
 #pragma pack(pop)
 
-    typedef uint8_t VNML[LAND_NUM_VERTS * 3];
+    typedef signed char VNML[LAND_NUM_VERTS * 3];
 
     struct LandData
     {

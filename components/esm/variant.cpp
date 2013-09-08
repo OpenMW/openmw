@@ -186,7 +186,7 @@ void ESM::Variant::write (std::ostream& stream) const
 
         case VT_String:
 
-            stream << "variant string: \"" << mData->getString() << "\2";
+            stream << "variant string: \"" << mData->getString() << "\"";
             break;
     }
 }

@@ -33,6 +33,8 @@ namespace MWBase
 
             Journal() {}
 
+            virtual void clear() = 0;
+
             virtual ~Journal() {}
 
             virtual void addEntry (const std::string& id, int index) = 0;

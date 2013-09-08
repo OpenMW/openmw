@@ -1,8 +1,7 @@
 #ifndef MWGUI_REVIEW_H
 #define MWGUI_REVIEW_H
 
-#include "window_base.hpp"
-#include "../mwmechanics/stat.hpp"
+#include "windowbase.hpp"
 #include "widgets.hpp"
 
 namespace MWGui
@@ -28,7 +27,7 @@ namespace MWGui
         };
         typedef std::vector<int> SkillList;
 
-        ReviewDialog(MWBase::WindowManager& parWindowManager);
+        ReviewDialog();
 
         void setPlayerName(const std::string &name);
         void setRace(const std::string &raceId);
@@ -80,7 +79,6 @@ namespace MWGui
 
         MyGUI::TextBox *mNameWidget, *mRaceWidget, *mClassWidget, *mBirthSignWidget;
         MyGUI::ScrollView* mSkillView;
-        int mLastPos, mClientHeight;
 
         Widgets::MWDynamicStatPtr mHealth, mMagicka, mFatigue;
 

@@ -2,6 +2,7 @@
 #include "skyextensions.hpp"
 
 #include <components/compiler/extensions.hpp>
+#include <components/compiler/opcodes.hpp>
 
 #include <components/interpreter/interpreter.hpp>
 #include <components/interpreter/runtime.hpp>
@@ -96,35 +97,39 @@ namespace MWScript
                 }
         };
 
-        const int opcodeToggleSky = 0x2000021;
-        const int opcodeTurnMoonWhite = 0x2000022;
-        const int opcodeTurnMoonRed = 0x2000023;
-        const int opcodeGetMasserPhase = 0x2000024;
-        const int opcodeGetSecundaPhase = 0x2000025;
-        const int opcodeGetCurrentWeather = 0x200013f;
-        const int opcodeChangeWeather = 0x2000140;
-
-        void registerExtensions (Compiler::Extensions& extensions)
+        class OpModRegion : public Interpreter::Opcode1
         {
-            extensions.registerInstruction ("togglesky", "", opcodeToggleSky);
-            extensions.registerInstruction ("ts", "", opcodeToggleSky);
-            extensions.registerInstruction ("turnmoonwhite", "", opcodeTurnMoonWhite);
-            extensions.registerInstruction ("turnmoonred", "", opcodeTurnMoonRed);
-            extensions.registerInstruction ("changeweather", "Sl", opcodeChangeWeather);
-            extensions.registerFunction ("getmasserphase", 'l', "", opcodeGetMasserPhase);
-            extensions.registerFunction ("getsecundaphase", 'l', "", opcodeGetSecundaPhase);
-            extensions.registerFunction ("getcurrentweather", 'l', "", opcodeGetCurrentWeather);
-        }
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
+                {
+                    std::string region = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    std::vector<char> chances;
+                    chances.reserve(10);
+                    while(arg0 > 0)
+                    {
+                        chances.push_back(std::max(0, std::min(127, runtime[0].mInteger)));
+                        runtime.pop();
+                        arg0--;
+                    }
+
+                    MWBase::Environment::get().getWorld()->modRegion(region, chances);
+                }
+        };
+
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
-            interpreter.installSegment5 (opcodeToggleSky, new OpToggleSky);
-            interpreter.installSegment5 (opcodeTurnMoonWhite, new OpTurnMoonWhite);
-            interpreter.installSegment5 (opcodeTurnMoonRed, new OpTurnMoonRed);
-            interpreter.installSegment5 (opcodeGetMasserPhase, new OpGetMasserPhase);
-            interpreter.installSegment5 (opcodeGetSecundaPhase, new OpGetSecundaPhase);
-            interpreter.installSegment5 (opcodeGetCurrentWeather, new OpGetCurrentWeather);
-            interpreter.installSegment5 (opcodeChangeWeather, new OpChangeWeather);
+            interpreter.installSegment5 (Compiler::Sky::opcodeToggleSky, new OpToggleSky);
+            interpreter.installSegment5 (Compiler::Sky::opcodeTurnMoonWhite, new OpTurnMoonWhite);
+            interpreter.installSegment5 (Compiler::Sky::opcodeTurnMoonRed, new OpTurnMoonRed);
+            interpreter.installSegment5 (Compiler::Sky::opcodeGetMasserPhase, new OpGetMasserPhase);
+            interpreter.installSegment5 (Compiler::Sky::opcodeGetSecundaPhase, new OpGetSecundaPhase);
+            interpreter.installSegment5 (Compiler::Sky::opcodeGetCurrentWeather, new OpGetCurrentWeather);
+            interpreter.installSegment5 (Compiler::Sky::opcodeChangeWeather, new OpChangeWeather);
+            interpreter.installSegment3 (Compiler::Sky::opcodeModRegion, new OpModRegion);
         }
     }
 }

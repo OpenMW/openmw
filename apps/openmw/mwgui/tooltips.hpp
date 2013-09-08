@@ -17,6 +17,7 @@ namespace MWGui
             : isPotion(false)
             , imageSize(32)
             , wordWrap(true)
+            , remainingEnchantCharge(-1)
         {}
 
         std::string caption;
@@ -26,6 +27,7 @@ namespace MWGui
 
         // enchantment (for cloth, armor, weapons)
         std::string enchant;
+        int remainingEnchantCharge;
 
         // effects (for potions, ingredients)
         Widgets::SpellEffectList effects;
@@ -37,12 +39,9 @@ namespace MWGui
     class ToolTips : public OEngine::GUI::Layout
     {
     public:
-        ToolTips(MWBase::WindowManager* windowManager);
+        ToolTips();
 
         void onFrame(float frameDuration);
-
-        void enterGameMode();
-        void enterGuiMode();
 
         void setEnabled(bool enabled);
 
@@ -80,8 +79,6 @@ namespace MWGui
     private:
         MyGUI::Widget* mDynamicToolTipBox;
 
-        MWBase::WindowManager* mWindowManager;
-
         MWWorld::Ptr mFocusObject;
 
         void findImageExtension(std::string& image);
@@ -94,17 +91,18 @@ namespace MWGui
 
         float mFocusToolTipX;
         float mFocusToolTipY;
-	
+
+        /// Adjust position for a tooltip so that it doesn't leave the screen and does not obscure the mouse cursor
+        void position(MyGUI::IntPoint& position, MyGUI::IntSize size, MyGUI::IntSize viewportSize);
+
 	int mHorizontalScrollIndex;
-	
+
 
         float mDelay;
         float mRemainingDelay; // remaining time until tooltip will show
 
         int mLastMouseX;
         int mLastMouseY;
-
-        bool mGameMode;
 
         bool mEnabled;
 

@@ -6,6 +6,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/functional/hash.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/filesystem.hpp>
 
 #include "Factory.hpp"
 
@@ -26,10 +27,22 @@ namespace sh
 		std::ifstream stream(sourceFile.c_str(), std::ifstream::in);
 		std::stringstream buffer;
 
+		boost::filesystem::path p (sourceFile);
+		p = p.branch_path();
+		mBasePath = p.string();
+
 		buffer << stream.rdbuf();
 		stream.close();
 		mSource = buffer.str();
 		parse();
+	}
+
+	ShaderSet::~ShaderSet()
+	{
+		for (ShaderInstanceMap::iterator it = mInstances.begin(); it != mInstances.end(); ++it)
+		{
+			sh::Factory::getInstance().getPlatform()->destroyGpuProgram(it->second.getName());
+		}
 	}
 
 	void ShaderSet::parse()
@@ -51,6 +64,12 @@ namespace sh
 						assert ((currentToken.find('(') != std::string::npos) && (currentToken.find(')') != std::string::npos));
 						size_t start = currentToken.find('(')+1;
 						mGlobalSettings.push_back(currentToken.substr(start, currentToken.find(')')-start));
+					}
+					else if (boost::starts_with(currentToken, "@shPropertyHasValue"))
+					{
+						assert ((currentToken.find('(') != std::string::npos) && (currentToken.find(')') != std::string::npos));
+						size_t start = currentToken.find('(')+1;
+						mPropertiesToExist.push_back(currentToken.substr(start, currentToken.find(')')-start));
 					}
 					else if (boost::starts_with(currentToken, "@shPropertyEqual"))
 					{
@@ -134,6 +153,11 @@ namespace sh
 		for (std::vector <std::string>::iterator it = mGlobalSettings.begin(); it != mGlobalSettings.end(); ++it)
 		{
 			boost::hash_combine(seed, retrieveValue<StringValue>(currentGlobalSettings->getProperty(*it), NULL).get());
+		}
+		for (std::vector<std::string>::iterator it = mPropertiesToExist.begin(); it != mPropertiesToExist.end(); ++it)
+		{
+			std::string v = retrieveValue<StringValue>(properties->getProperty(*it), properties->getContext()).get();
+			boost::hash_combine(seed, static_cast<bool>(v != ""));
 		}
 		boost::hash_combine(seed, static_cast<int>(Factory::getInstance().getCurrentLanguage()));
 		return seed;

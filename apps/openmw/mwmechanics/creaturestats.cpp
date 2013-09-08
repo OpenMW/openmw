@@ -10,21 +10,43 @@
 namespace MWMechanics
 {
     CreatureStats::CreatureStats()
-        : mLevel (0), mLevelHealthBonus(0.f), mDead (false), mFriendlyHits (0), mTalkedTo (false), mAlarmed (false),
-          mAttacked (false), mHostile (false)
+        : mLevel (0), mLevelHealthBonus(0.f), mDead (false), mDied (false), mFriendlyHits (0),
+          mTalkedTo (false), mAlarmed (false),
+          mAttacked (false), mHostile (false),
+          mAttackingOrSpell(false), mAttackType(AT_Chop),
+          mIsWerewolf(false)
     {
         for (int i=0; i<4; ++i)
             mAiSettings[i] = 0;
     }
 
-    void CreatureStats::increaseLevelHealthBonus (float value)
-    {
-        mLevelHealthBonus += value;
-    }
-
     float CreatureStats::getLevelHealthBonus () const
     {
         return mLevelHealthBonus;
+    }
+
+    void CreatureStats::levelUp()
+    {
+        const MWWorld::Store<ESM::GameSetting> &gmst =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+        const int endurance = getAttribute(ESM::Attribute::Endurance).getBase();
+
+        // "When you gain a level, in addition to increasing three primary attributes, your Health
+        // will automatically increase by 10% of your Endurance attribute. If you increased Endurance this level,
+        // the Health increase is calculated from the increased Endurance"
+        mLevelHealthBonus += endurance * gmst.find("fLevelUpHealthEndMult")->getFloat();
+        updateHealth();
+
+        mLevel++;
+    }
+
+    void CreatureStats::updateHealth()
+    {
+        const int endurance = getAttribute(ESM::Attribute::Endurance).getBase();
+        const int strength = getAttribute(ESM::Attribute::Strength).getBase();
+
+        setHealth(static_cast<int> (0.5 * (strength + endurance)) + mLevelHealthBonus);
     }
 
     const AiSequence& CreatureStats::getAiSequence() const
@@ -56,7 +78,7 @@ namespace MWMechanics
         if (index < 0 || index > 7) {
             throw std::runtime_error("attribute index is out of range");
         }
-        return mAttributes[index];
+        return (!mIsWerewolf ? mAttributes[index] : mWerewolfAttributes[index]);
     }
 
     const DynamicStat<float> &CreatureStats::getHealth() const
@@ -89,6 +111,11 @@ namespace MWMechanics
         return mMagicEffects;
     }
 
+    bool CreatureStats::getAttackingOrSpell() const
+    {
+        return mAttackingOrSpell;
+    }
+
     int CreatureStats::getLevel() const
     {
         return mLevel;
@@ -105,7 +132,7 @@ namespace MWMechanics
         if (index < 0 || index > 7) {
             throw std::runtime_error("attribute index is out of range");
         }
-        return mAttributes[index];
+        return (!mIsWerewolf ? mAttributes[index] : mWerewolfAttributes[index]);
     }
 
     const DynamicStat<float> &CreatureStats::getDynamic(int index) const
@@ -141,7 +168,10 @@ namespace MWMechanics
         if (index < 0 || index > 7) {
             throw std::runtime_error("attribute index is out of range");
         }
-        mAttributes[index] = value;
+        if(!mIsWerewolf)
+            mAttributes[index] = value;
+        else
+            mWerewolfAttributes[index] = value;
     }
 
     void CreatureStats::setHealth(const DynamicStat<float> &value)
@@ -167,7 +197,12 @@ namespace MWMechanics
         mDynamic[index] = value;
 
         if (index==0 && mDynamic[index].getCurrent()<1)
+        {
+            if (!mDead)
+                mDied = true;
+
             mDead = true;
+        }
     }
 
     void CreatureStats::setLevel(int level)
@@ -185,6 +220,11 @@ namespace MWMechanics
         mMagicEffects = effects;
     }
 
+    void CreatureStats::setAttackingOrSpell(bool attackingOrSpell)
+    {
+        mAttackingOrSpell = attackingOrSpell;
+    }
+
     void CreatureStats::setAiSetting (int index, int value)
     {
         assert (index>=0 && index<4);
@@ -194,6 +234,16 @@ namespace MWMechanics
     bool CreatureStats::isDead() const
     {
         return mDead;
+    }
+
+    bool CreatureStats::hasDied() const
+    {
+        return mDied;
+    }
+
+    void CreatureStats::clearHasDied()
+    {
+        mDied = false;
     }
 
     void CreatureStats::resurrect()
@@ -271,5 +321,25 @@ namespace MWMechanics
     bool CreatureStats::getCreatureTargetted() const
     {
         return false;
+    }
+
+    float CreatureStats::getEvasion() const
+    {
+        float evasion = (getAttribute(ESM::Attribute::Agility).getModified() / 5.0f) +
+                        (getAttribute(ESM::Attribute::Luck).getModified() / 10.0f);
+        evasion *= getFatigueTerm();
+        evasion += mMagicEffects.get(EffectKey(ESM::MagicEffect::Sanctuary)).mMagnitude;
+
+        return evasion;
+    }
+
+    void CreatureStats::setLastHitObject(const std::string& objectid)
+    {
+        mLastHitObject = objectid;
+    }
+
+    const std::string &CreatureStats::getLastHitObject() const
+    {
+        return mLastHitObject;
     }
 }

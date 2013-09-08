@@ -66,12 +66,14 @@ typedef Named NiSequenceStreamHelper;
 class NiParticleGrowFade : public Controlled
 {
 public:
+    float growTime;
+    float fadeTime;
+
     void read(NIFStream *nif)
     {
         Controlled::read(nif);
-
-        // Two floats.
-        nif->skip(8);
+        growTime = nif->getFloat();
+        fadeTime = nif->getFloat();
     }
 };
 
@@ -96,12 +98,23 @@ public:
 class NiGravity : public Controlled
 {
 public:
+    float mForce;
+    /* 0 - Wind (fixed direction)
+     * 1 - Point (fixed origin)
+     */
+    int mType;
+    Ogre::Vector3 mPosition;
+    Ogre::Vector3 mDirection;
+
     void read(NIFStream *nif)
     {
         Controlled::read(nif);
 
-        // two floats, one int, six floats
-        nif->skip(9*4);
+        /*unknown*/nif->getFloat();
+        mForce = nif->getFloat();
+        mType = nif->getUInt();
+        mPosition = nif->getVector3();
+        mDirection = nif->getVector3();
     }
 };
 

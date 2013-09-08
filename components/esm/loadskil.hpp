@@ -19,6 +19,8 @@ class ESMWriter;
 
 struct Skill
 {
+    std::string mId;
+
   struct SKDTstruct
   {
     int mAttribute;     // see defs.hpp
@@ -67,12 +69,18 @@ struct Skill
         HandToHand = 26,
         Length
     };
+  static const std::string sSkillNames[Length];
   static const std::string sSkillNameIds[Length];
   static const std::string sIconNames[Length];
   static const boost::array<SkillEnum, Length> sSkillIds;
 
   void load(ESMReader &esm);
   void save(ESMWriter &esm);
+
+    void blank();
+     ///< Set record to default state (does not touch the ID/index).
+
+    static std::string indexToId (int index);
 };
 }
 #endif

@@ -225,7 +225,7 @@ struct OpenAL_Output::StreamThread {
                 if((*iter)->process() == false)
                     iter = mStreams.erase(iter);
                 else
-                    iter++;
+                    ++iter;
             }
             mMutex.unlock();
             boost::this_thread::sleep(boost::posix_time::milliseconds(50));
@@ -491,6 +491,7 @@ public:
     virtual void stop();
     virtual bool isPlaying();
     virtual double getTimeOffset();
+    virtual double getLength();
     virtual void update();
 };
 
@@ -554,6 +555,17 @@ double OpenAL_Sound::getTimeOffset()
     return t;
 }
 
+double OpenAL_Sound::getLength()
+{
+    ALint bufferSize, frequency, channels, bitsPerSample;
+    alGetBufferi(mBuffer, AL_SIZE, &bufferSize);
+    alGetBufferi(mBuffer, AL_FREQUENCY, &frequency);
+    alGetBufferi(mBuffer, AL_CHANNELS, &channels);
+    alGetBufferi(mBuffer, AL_BITS, &bitsPerSample);
+
+    return (8.0*bufferSize)/(frequency*channels*bitsPerSample);
+}
+
 void OpenAL_Sound::updateAll(bool local)
 {
     alSourcef(mSource, AL_REFERENCE_DISTANCE, mMinDistance);
@@ -586,7 +598,7 @@ void OpenAL_Sound::update()
 
     alSourcef(mSource, AL_GAIN, gain);
     alSourcef(mSource, AL_PITCH, pitch);
-    alSource3f(mSource, AL_POSITION, mPos[0], mPos[2], -mPos[1]);
+    alSource3f(mSource, AL_POSITION, mPos[0], mPos[1], mPos[2]);
     alSource3f(mSource, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
     alSource3f(mSource, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
     throwALerror();
@@ -606,7 +618,7 @@ void OpenAL_Sound3D::update()
 
     alSourcef(mSource, AL_GAIN, gain);
     alSourcef(mSource, AL_PITCH, pitch);
-    alSource3f(mSource, AL_POSITION, mPos[0], mPos[2], -mPos[1]);
+    alSource3f(mSource, AL_POSITION, mPos[0], mPos[1], mPos[2]);
     alSource3f(mSource, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
     alSource3f(mSource, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
     throwALerror();
@@ -797,7 +809,7 @@ ALuint OpenAL_Output::getBuffer(const std::string &fname)
             if(nameiter->second == oldbuf)
                 mBufferCache.erase(nameiter++);
             else
-                nameiter++;
+                ++nameiter;
         }
 
         bufsize = 0;
@@ -817,8 +829,7 @@ void OpenAL_Output::bufferFinished(ALuint buf)
     }
 }
 
-
-MWBase::SoundPtr OpenAL_Output::playSound(const std::string &fname, float vol, float basevol, float pitch, int flags)
+MWBase::SoundPtr OpenAL_Output::playSound(const std::string &fname, float vol, float basevol, float pitch, int flags,float offset)
 {
     boost::shared_ptr<OpenAL_Sound> sound;
     ALuint src=0, buf=0;
@@ -843,8 +854,13 @@ MWBase::SoundPtr OpenAL_Output::playSound(const std::string &fname, float vol, f
     }
 
     sound->updateAll(true);
+    if(offset<0)
+        offset=0;
+    if(offset>1)
+        offset=1;
 
     alSourcei(src, AL_BUFFER, buf);
+    alSourcef(src, AL_SEC_OFFSET, sound->getLength()*offset/pitch);
     alSourcePlay(src);
     throwALerror();
 
@@ -852,7 +868,7 @@ MWBase::SoundPtr OpenAL_Output::playSound(const std::string &fname, float vol, f
 }
 
 MWBase::SoundPtr OpenAL_Output::playSound3D(const std::string &fname, const Ogre::Vector3 &pos, float vol, float basevol, float pitch,
-                                            float min, float max, int flags)
+                                            float min, float max, int flags, float offset)
 {
     boost::shared_ptr<OpenAL_Sound> sound;
     ALuint src=0, buf=0;
@@ -878,7 +894,14 @@ MWBase::SoundPtr OpenAL_Output::playSound3D(const std::string &fname, const Ogre
 
     sound->updateAll(false);
 
+    if(offset<0)
+        offset=0;
+    if(offset>1)
+        offset=1;
+
     alSourcei(src, AL_BUFFER, buf);
+    alSourcef(src, AL_SEC_OFFSET, sound->getLength()*offset/pitch);
+
     alSourcePlay(src);
     throwALerror();
 
@@ -923,10 +946,10 @@ void OpenAL_Output::updateListener(const Ogre::Vector3 &pos, const Ogre::Vector3
     if(mContext)
     {
         ALfloat orient[6] = {
-            atdir.x, atdir.z, -atdir.y,
-            updir.x, updir.z, -updir.y
+            atdir.x, atdir.y, atdir.z,
+            updir.x, updir.y, updir.z
         };
-        alListener3f(AL_POSITION, mPos.x, mPos.z, -mPos.y);
+        alListener3f(AL_POSITION, mPos.x, mPos.y, mPos.z);
         alListenerfv(AL_ORIENTATION, orient);
         throwALerror();
     }
@@ -951,9 +974,9 @@ void OpenAL_Output::pauseSounds(int types)
             if(sound && sound->mSource && (sound->getPlayType()&types))
                 sources.push_back(sound->mSource);
         }
-        iter++;
+        ++iter;
     }
-    if(sources.size() > 0)
+    if(!sources.empty())
     {
         alSourcePausev(sources.size(), &sources[0]);
         throwALerror();
@@ -978,9 +1001,9 @@ void OpenAL_Output::resumeSounds(int types)
             if(sound && sound->mSource && (sound->getPlayType()&types))
                 sources.push_back(sound->mSource);
         }
-        iter++;
+        ++iter;
     }
-    if(sources.size() > 0)
+    if(!sources.empty())
     {
         alSourcePlayv(sources.size(), &sources[0]);
         throwALerror();

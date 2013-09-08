@@ -53,6 +53,7 @@ namespace MWRender
         MWWorld::Ptr mCharacter;
 
         MWRender::NpcAnimation* mAnimation;
+        std::string mCurrentAnimGroup;
 
         std::string mName;
 
@@ -71,8 +72,6 @@ namespace MWRender
         void update(int sizeX, int sizeY);
 
         int getSlotSelected(int posX, int posY);
-
-        void setNpcAnimation (NpcAnimation* anim);
 
     private:
 
@@ -94,6 +93,7 @@ namespace MWRender
         RaceSelectionPreview();
 
         virtual void onSetup();
+        void render();
 
         void update(float angle);
 

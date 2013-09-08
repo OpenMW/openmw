@@ -59,7 +59,7 @@ namespace MWScript
             store.get<ESM::CreatureLevList>().search (name) ||
             store.get<ESM::ItemLevList>().search (name) ||
             store.get<ESM::Light>().search (name) ||
-            store.get<ESM::Tool>().search (name) ||
+            store.get<ESM::Lockpick>().search (name) ||
             store.get<ESM::Miscellaneous>().search (name) ||
             store.get<ESM::NPC>().search (name) ||
             store.get<ESM::Probe>().search (name) ||

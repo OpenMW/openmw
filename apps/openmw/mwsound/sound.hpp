@@ -22,6 +22,7 @@ namespace MWSound
         float mMinDistance;
         float mMaxDistance;
         int mFlags;
+        float mFadeOutTime;
 
     public:
         virtual void stop() = 0;
@@ -29,7 +30,7 @@ namespace MWSound
         virtual double getTimeOffset() = 0;
         void setPosition(const Ogre::Vector3 &pos) { mPos = pos; }
         void setVolume(float volume) { mVolume = volume; }
-
+        void setFadeout(float duration) { mFadeOutTime=duration; }
         MWBase::SoundManager::PlayType getPlayType() const
         { return (MWBase::SoundManager::PlayType)(mFlags&MWBase::SoundManager::Play_TypeMask); }
 
@@ -42,6 +43,7 @@ namespace MWSound
           , mMinDistance(mindist)
           , mMaxDistance(maxdist)
           , mFlags(flags)
+          , mFadeOutTime(0)
         { }
         virtual ~Sound() { }
 

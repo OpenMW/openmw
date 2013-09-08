@@ -5,6 +5,12 @@
 
 #include "../mwworld/ptr.hpp"
 
+namespace MWWorld
+{
+    class ContainerStoreIterator;
+    class InventoryStore;
+}
+
 namespace MWRender
 {
     class Animation;
@@ -13,7 +19,24 @@ namespace MWRender
 namespace MWMechanics
 {
 
+class Movement;
+class NpcStats;
+
+enum Priority {
+    Priority_Default,
+    Priority_Jump,
+    Priority_Movement,
+    Priority_Weapon,
+    Priority_Torch,
+
+    Priority_Death,
+
+    Num_Priorities
+};
+
 enum CharacterState {
+    CharState_None,
+
     CharState_SpecialIdle,
     CharState_Idle,
     CharState_Idle2,
@@ -52,14 +75,51 @@ enum CharacterState {
     CharState_SneakLeft,
     CharState_SneakRight,
 
+    CharState_TurnLeft,
+    CharState_TurnRight,
+
     CharState_Jump,
 
-    /* Death states must be last! */
     CharState_Death1,
     CharState_Death2,
     CharState_Death3,
     CharState_Death4,
-    CharState_Death5
+    CharState_Death5,
+    CharState_SwimDeath
+};
+
+enum WeaponType {
+    WeapType_None,
+
+    WeapType_HandToHand,
+    WeapType_OneHand,
+    WeapType_TwoHand,
+    WeapType_TwoWide,
+    WeapType_BowAndArrow,
+    WeapType_Crossbow,
+    WeapType_ThowWeapon,
+    WeapType_PickProbe,
+
+    WeapType_Spell
+};
+
+enum UpperBodyCharacterState {
+    UpperCharState_Nothing,
+    UpperCharState_EquipingWeap,
+    UpperCharState_UnEquipingWeap,
+    UpperCharState_WeapEquiped,
+    UpperCharState_StartToMinAttack,
+    UpperCharState_MinAttackToMaxAttack,
+    UpperCharState_MaxAttackToMinHit,
+    UpperCharState_MinHitToHit,
+    UpperCharState_FollowStartToFollowStop,
+    UpperCharState_CastingSpell
+};
+
+enum JumpingState {
+    JumpState_None,
+    JumpState_Falling,
+    JumpState_Landing
 };
 
 class CharacterController
@@ -67,34 +127,65 @@ class CharacterController
     MWWorld::Ptr mPtr;
     MWRender::Animation *mAnimation;
 
-    typedef std::deque<std::string> AnimationQueue;
+    typedef std::deque<std::pair<std::string,size_t> > AnimationQueue;
     AnimationQueue mAnimQueue;
 
-    std::string mCurrentGroup;
-    CharacterState mState;
+    CharacterState mIdleState;
+    std::string mCurrentIdle;
+
+    CharacterState mMovementState;
+    std::string mCurrentMovement;
+    float mMovementSpeed;
+
+    CharacterState mDeathState;
+    std::string mCurrentDeath;
+
+    UpperBodyCharacterState mUpperBodyState;
+
+    JumpingState mJumpState;
+    std::string mCurrentJump;
+
+    WeaponType mWeaponType;
+    std::string mCurrentWeapon;
+
     bool mSkipAnim;
 
-protected:
-    /* Called by the animation whenever a new text key is reached. */
-    void markerEvent(float time, const std::string &evt);
+    // counted for skill increase
+    float mSecondsOfSwimming;
+    float mSecondsOfRunning;
 
-    friend class MWRender::Animation;
+    std::string mAttackType; // slash, chop or thrust
+
+    void refreshCurrentAnims(CharacterState idle, CharacterState movement, bool force=false);
+
+    static void getWeaponGroup(WeaponType weaptype, std::string &group);
+
+    static MWWorld::ContainerStoreIterator getActiveWeapon(NpcStats &stats,
+                                                           MWWorld::InventoryStore &inv,
+                                                           WeaponType *weaptype);
+
+    void clearAnimQueue();
+
+    bool updateNpcState(bool onground, bool inwater, bool isrunning, bool sneak);
 
 public:
-    CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim, CharacterState state, bool loop);
-    CharacterController(const CharacterController &rhs);
+    CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim);
     virtual ~CharacterController();
 
     void updatePtr(const MWWorld::Ptr &ptr);
 
-    Ogre::Vector3 update(float duration);
+    void update(float duration);
 
     void playGroup(const std::string &groupname, int mode, int count);
     void skipAnim();
+    bool isAnimPlaying(const std::string &groupName);
 
-    void setState(CharacterState state, bool loop);
-    CharacterState getState() const
-    { return mState; }
+    void kill();
+    void resurrect();
+    bool isDead() const
+    { return mDeathState != CharState_None; }
+
+    void forceStateUpdate();
 };
 
 }

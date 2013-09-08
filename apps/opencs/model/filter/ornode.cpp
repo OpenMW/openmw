@@ -1,0 +1,20 @@
+
+#include "ornode.hpp"
+
+#include <sstream>
+
+CSMFilter::OrNode::OrNode (const std::vector<boost::shared_ptr<Node> >& nodes)
+: NAryNode (nodes, "or")
+{}
+
+bool CSMFilter::OrNode::test (const CSMWorld::IdTable& table, int row,
+    const std::map<int, int>& columns) const
+{
+    int size = getSize();
+
+    for (int i=0; i<size; ++i)
+        if ((*this)[i].test (table, row, columns))
+            return true;
+
+    return false;
+}

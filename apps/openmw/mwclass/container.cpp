@@ -13,6 +13,7 @@
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/customdata.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/actionapply.hpp"
 #include "../mwworld/actionopen.hpp"
 #include "../mwworld/physicssystem.hpp"
 #include "../mwworld/player.hpp"
@@ -22,6 +23,8 @@
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
+
+#include "../mwmechanics/npcstats.hpp"
 
 namespace
 {
@@ -46,7 +49,11 @@ namespace MWClass
         {
             std::auto_ptr<CustomData> data (new CustomData);
 
-            // \todo add initial container content
+            MWWorld::LiveCellRef<ESM::Container> *ref =
+                ptr.get<ESM::Container>();
+
+            data->mContainerStore.fill(
+                ref->mBase->mInventory, ptr.getCellRef().mOwner, MWBase::Environment::get().getWorld()->getStore());
 
             // store
             ptr.getRefData().setCustomData (data.release());
@@ -57,9 +64,7 @@ namespace MWClass
     {
         const std::string model = getModel(ptr);
         if (!model.empty()) {
-            MWRender::Objects& objects = renderingInterface.getObjects();
-            objects.insertBegin(ptr, ptr.getRefData().isEnabled(), false);
-            objects.insertMesh(ptr, model);
+            renderingInterface.getObjects().insertModel(ptr, model);
         }
     }
 
@@ -89,6 +94,17 @@ namespace MWClass
         if (!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
             return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction ());
 
+        if(get(actor).isNpc() && get(actor).getNpcStats(actor).isWerewolf())
+        {
+            const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+            const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfContainer");
+
+            boost::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction("#{sWerewolfRefusal}"));
+            if(sound) action->setSound(sound->mId);
+
+            return action;
+        }
+
         const std::string lockedSound = "LockedChest";
         const std::string trapActivationSound = "Disarm Trap Fail";
 
@@ -115,7 +131,7 @@ namespace MWClass
 
         if (needKey && hasKey)
         {
-            MWBase::Environment::get().getWindowManager ()->messageBox (keyName + " #{sKeyUsed}", std::vector<std::string>());
+            MWBase::Environment::get().getWindowManager ()->messageBox (keyName + " #{sKeyUsed}");
             ptr.getCellRef().mLockLevel = 0;
             // using a key disarms the trap
             ptr.getCellRef().mTrap = "";
@@ -133,7 +149,7 @@ namespace MWClass
             {
                 // Trap activation goes here
                 std::cout << "Activated trap: " << ptr.getCellRef().mTrap << std::endl;
-                boost::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction);
+                boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionApply(actor, ptr.getCellRef().mTrap));
                 action->setSound(trapActivationSound);
                 ptr.getCellRef().mTrap = "";
                 return action;

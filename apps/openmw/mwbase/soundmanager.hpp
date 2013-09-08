@@ -39,16 +39,19 @@ namespace MWBase
                 Play_Normal  = 0, /* tracked, non-looping, multi-instance, environment */
                 Play_Loop    = 1<<0, /* Sound will continually loop until explicitly stopped */
                 Play_NoEnv   = 1<<1, /* Do not apply environment effects (eg, underwater filters) */
-                Play_NoTrack = 1<<2  /* (3D only) Play the sound at the given object's position
+                Play_NoTrack = 1<<2, /* (3D only) Play the sound at the given object's position
                                       * but do not keep it updated (the sound will not move with
                                       * the object and will not stop when the object is deleted. */
+
+                Play_LoopNoEnv = Play_Loop | Play_NoEnv
             };
             enum PlayType {
                 Play_TypeSfx   = 1<<3, /* Normal SFX sound */
                 Play_TypeVoice = 1<<4, /* Voice sound */
-                Play_TypeMusic = 1<<5, /* Music track */
-                Play_TypeMovie = 1<<6, /* Movie audio track */
-                Play_TypeMask  = Play_TypeSfx|Play_TypeVoice|Play_TypeMusic|Play_TypeMovie
+                Play_TypeFoot  = 1<<5, /* Footstep sound */
+                Play_TypeMusic = 1<<6, /* Music track */
+                Play_TypeMovie = 1<<7, /* Movie audio track */
+                Play_TypeMask  = Play_TypeSfx|Play_TypeVoice|Play_TypeFoot|Play_TypeMusic|Play_TypeMovie
             };
 
         private:
@@ -102,12 +105,16 @@ namespace MWBase
             ///< Play a 2D audio track, using a custom decoder
 
             virtual SoundPtr playSound(const std::string& soundId, float volume, float pitch,
-                                       PlayMode mode=Play_Normal) = 0;
+                                       PlayType type=Play_TypeSfx, PlayMode mode=Play_Normal,
+                                       float offset=0) = 0;
             ///< Play a sound, independently of 3D-position
+            ///< @param offset Value from [0,1] meaning from which fraction the sound the playback starts.
 
             virtual SoundPtr playSound3D(const MWWorld::Ptr &reference, const std::string& soundId,
-                                         float volume, float pitch, PlayMode mode=Play_Normal) = 0;
+                                         float volume, float pitch, PlayType type=Play_TypeSfx,
+                                         PlayMode mode=Play_Normal, float offset=0) = 0;
             ///< Play a sound from an object
+            ///< @param offset Value from [0,1] meaning from which fraction the sound the playback starts.
 
             virtual void stopSound3D(const MWWorld::Ptr &reference, const std::string& soundId) = 0;
             ///< Stop the given object from playing the given sound,
@@ -121,8 +128,15 @@ namespace MWBase
             virtual void stopSound(const std::string& soundId) = 0;
             ///< Stop a non-3d looping sound
 
+            virtual void fadeOutSound3D(const MWWorld::Ptr &reference, const std::string& soundId, float duration) = 0;
+            ///< Fade out given sound (that is already playing) of given object
+            ///< @param reference Reference to object, whose sound is faded out
+            ///< @param soundId ID of the sound to fade out.
+            ///< @param duration Time until volume reaches 0.
+
             virtual bool getSoundPlaying(const MWWorld::Ptr &reference, const std::string& soundId) const = 0;
             ///< Is the given sound currently playing on the given object?
+            ///  If you want to check if sound played with playSound is playing, use empty Ptr
 
             virtual void pauseSounds(int types=Play_TypeMask) = 0;
             ///< Pauses all currently playing sounds, including music.

@@ -13,7 +13,9 @@
 #include <components/esm/loadgmst.hpp>
 #include <components/esm/loadfact.hpp>
 
+#include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/player.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -21,8 +23,18 @@
 #include "../mwbase/soundmanager.hpp"
 
 MWMechanics::NpcStats::NpcStats()
-: mMovementFlags (0), mDrawState (DrawState_Nothing), mBounty (0)
-, mLevelProgress(0), mDisposition(0), mVampire (0), mReputation(0), mWerewolf (false), mWerewolfKills (0)
+: mMovementFlags (0)
+, mDrawState (DrawState_Nothing)
+, mBounty (0)
+, mLevelProgress(0)
+, mDisposition(0)
+, mVampire (0)
+, mReputation(0)
+, mWerewolfKills (0)
+, mProfit(0)
+, mAttackStrength(0.0f)
+, mTimeToStartDrowning(20.0)
+, mLastDrowningHit(0)
 {
     mSkillIncreases.resize (ESM::Attribute::Length);
     for (int i=0; i<ESM::Attribute::Length; ++i)
@@ -37,6 +49,16 @@ MWMechanics::DrawState_ MWMechanics::NpcStats::getDrawState() const
 void MWMechanics::NpcStats::setDrawState (DrawState_ state)
 {
     mDrawState = state;
+}
+
+float MWMechanics::NpcStats::getAttackStrength() const
+{
+    return mAttackStrength;
+}
+
+void MWMechanics::NpcStats::setAttackStrength(float value)
+{
+    mAttackStrength = value;
 }
 
 int MWMechanics::NpcStats::getBaseDisposition() const
@@ -67,7 +89,7 @@ const MWMechanics::Stat<float>& MWMechanics::NpcStats::getSkill (int index) cons
     if (index<0 || index>=27)
         throw std::runtime_error ("skill index out of range");
 
-    return mSkill[index];
+    return (!mIsWerewolf ? mSkill[index] : mWerewolfSkill[index]);
 }
 
 MWMechanics::Stat<float>& MWMechanics::NpcStats::getSkill (int index)
@@ -75,7 +97,12 @@ MWMechanics::Stat<float>& MWMechanics::NpcStats::getSkill (int index)
     if (index<0 || index>=27)
         throw std::runtime_error ("skill index out of range");
 
-    return mSkill[index];
+    return (!mIsWerewolf ? mSkill[index] : mWerewolfSkill[index]);
+}
+
+const std::map<std::string, int>& MWMechanics::NpcStats::getFactionRanks() const
+{
+    return mFactionRank;
 }
 
 std::map<std::string, int>& MWMechanics::NpcStats::getFactionRanks()
@@ -83,14 +110,14 @@ std::map<std::string, int>& MWMechanics::NpcStats::getFactionRanks()
     return mFactionRank;
 }
 
-std::set<std::string>& MWMechanics::NpcStats::getExpelled()
+const std::set<std::string>& MWMechanics::NpcStats::getExpelled() const
 {
     return mExpelled;
 }
 
-const std::map<std::string, int>& MWMechanics::NpcStats::getFactionRanks() const
+std::set<std::string>& MWMechanics::NpcStats::getExpelled()
 {
-    return mFactionRank;
+    return mExpelled;
 }
 
 bool MWMechanics::NpcStats::isSameFaction (const NpcStats& npcStats) const
@@ -161,12 +188,15 @@ float MWMechanics::NpcStats::getSkillGain (int skillIndex, const ESM::Class& cla
         if (specialisationFactor<=0)
             throw std::runtime_error ("invalid skill specialisation factor");
     }
-
-    return 1.0 / (level +1) * (1.0 / (skillFactor)) * typeFactor * specialisationFactor;
+    return 1.0 / ((level+1) * (1.0/skillFactor) * typeFactor * specialisationFactor);
 }
 
 void MWMechanics::NpcStats::useSkill (int skillIndex, const ESM::Class& class_, int usageType)
 {
+    // Don't increase skills as a werewolf
+    if(mIsWerewolf)
+        return;
+
     float base = getSkill (skillIndex).getBase();
 
     int level = static_cast<int> (base);
@@ -221,12 +251,12 @@ void MWMechanics::NpcStats::increaseSkill(int skillIndex, const ESM::Class &clas
     message << boost::format(MWBase::Environment::get().getWindowManager ()->getGameSettingString ("sNotifyMessage39", ""))
                % std::string("#{" + ESM::Skill::sSkillNameIds[skillIndex] + "}")
                % static_cast<int> (base);
-    MWBase::Environment::get().getWindowManager ()->messageBox(message.str(), std::vector<std::string>());
+    MWBase::Environment::get().getWindowManager ()->messageBox(message.str());
 
     if (mLevelProgress >= 10)
     {
         // levelup is possible now
-        MWBase::Environment::get().getWindowManager ()->messageBox ("#{sLevelUpMsg}", std::vector<std::string>());
+        MWBase::Environment::get().getWindowManager ()->messageBox ("#{sLevelUpMsg}");
     }
 
     getSkill (skillIndex).setBase (base);
@@ -326,7 +356,7 @@ bool MWMechanics::NpcStats::hasSkillsForRank (const std::string& factionId, int 
     std::vector<int> skills;
 
     for (int i=0; i<6; ++i)
-        skills.push_back (static_cast<int> (getSkill (faction.mData.mSkillID[i]).getModified()));
+        skills.push_back (static_cast<int> (getSkill (faction.mData.mSkills[i]).getModified()));
 
     std::sort (skills.begin(), skills.end());
 
@@ -342,15 +372,62 @@ bool MWMechanics::NpcStats::hasSkillsForRank (const std::string& factionId, int 
 
 bool MWMechanics::NpcStats::isWerewolf() const
 {
-    return mWerewolf;
+    return mIsWerewolf;
 }
 
 void MWMechanics::NpcStats::setWerewolf (bool set)
 {
-    mWerewolf = set;
+    if(set != false)
+    {
+        const MWWorld::Store<ESM::GameSetting> &gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+        for(size_t i = 0;i < ESM::Attribute::Length;i++)
+        {
+            mWerewolfAttributes[i] = getAttribute(i);
+            // Oh, Bethesda. It's "Intelligence".
+            std::string name = "fWerewolf"+((i==ESM::Attribute::Intelligence) ? std::string("Intellegence") :
+                                            ESM::Attribute::sAttributeNames[i]);
+            mWerewolfAttributes[i].setModified(int(gmst.find(name)->getFloat()), 0);
+        }
+
+        for(size_t i = 0;i < ESM::Skill::Length;i++)
+        {
+            mWerewolfSkill[i] = getSkill(i);
+
+            // Acrobatics is set separately for some reason.
+            if(i == ESM::Skill::Acrobatics)
+                continue;
+
+            // "Mercantile"! >_<
+            std::string name = "fWerewolf"+((i==ESM::Skill::Mercantile) ? std::string("Merchantile") :
+                                            ESM::Skill::sSkillNames[i]);
+            mWerewolfSkill[i].setModified(int(gmst.find(name)->getFloat()), 0);
+        }
+    }
+    mIsWerewolf = set;
 }
 
 int MWMechanics::NpcStats::getWerewolfKills() const
 {
     return mWerewolfKills;
+}
+
+int MWMechanics::NpcStats::getProfit() const
+{
+    return mProfit;
+}
+
+void MWMechanics::NpcStats::modifyProfit(int diff)
+{
+    mProfit += diff;
+}
+
+float MWMechanics::NpcStats::getTimeToStartDrowning() const
+{
+    return mTimeToStartDrowning;
+}
+void MWMechanics::NpcStats::setTimeToStartDrowning(float time)
+{
+    assert(time>=0 && time<=20);
+    mTimeToStartDrowning=time;
 }

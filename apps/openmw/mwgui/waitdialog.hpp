@@ -1,7 +1,8 @@
 #ifndef MWGUI_WAIT_DIALOG_H
 #define MWGUI_WAIT_DIALOG_H
 
-#include "window_base.hpp"
+#include "windowbase.hpp"
+#include "widgets.hpp"
 
 namespace MWGui
 {
@@ -9,7 +10,7 @@ namespace MWGui
     class WaitDialogProgressBar : public WindowBase
     {
     public:
-        WaitDialogProgressBar(MWBase::WindowManager& parWindowManager);
+        WaitDialogProgressBar();
 
         virtual void open();
 
@@ -23,7 +24,7 @@ namespace MWGui
     class WaitDialog : public WindowBase
     {
     public:
-        WaitDialog(MWBase::WindowManager& parWindowManager);
+        WaitDialog();
 
         virtual void open();
 
@@ -38,10 +39,10 @@ namespace MWGui
         MyGUI::TextBox* mDateTimeText;
         MyGUI::TextBox* mRestText;
         MyGUI::TextBox* mHourText;
-        MyGUI::ScrollBar* mHourSlider;
         MyGUI::Button* mUntilHealedButton;
         MyGUI::Button* mWaitButton;
         MyGUI::Button* mCancelButton;
+        MWGui::Widgets::MWScrollBar* mHourSlider;
 
         bool mWaiting;
         bool mSleeping;

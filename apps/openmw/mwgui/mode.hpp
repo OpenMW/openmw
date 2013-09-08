@@ -5,9 +5,11 @@ namespace MWGui
 {
   enum GuiMode
     {
+      GM_None,
       GM_Settings,      // Settings window
       GM_Inventory,     // Inventory mode
       GM_Container,
+      GM_Companion,
       GM_MainMenu,      // Main menu mode
 
       GM_Console,       // Console mode
@@ -16,6 +18,7 @@ namespace MWGui
       GM_Scroll,        // Read scroll
       GM_Book,          // Read book
       GM_Alchemy,       // Make potions
+      GM_Repair,
 
       GM_Dialogue,      // NPC interaction
       GM_Barter,
@@ -26,6 +29,7 @@ namespace MWGui
       GM_SpellCreation,
       GM_Enchanting,
       GM_Training,
+      GM_MerchantRepair,
 
       GM_Levelup,
 
@@ -39,9 +43,6 @@ namespace MWGui
       GM_ClassCreate,
       GM_Review,
       
-      // interactive MessageBox
-      GM_InterMessageBox,
-
       GM_Loading,
       GM_LoadingWallpaper,
 

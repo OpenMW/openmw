@@ -1,8 +1,8 @@
-
 set (OPENCS_SRC main.cpp)
 
 opencs_units (. editor)
 
+set (CMAKE_BUILD_TYPE DEBUG)
 
 opencs_units (model/doc
     document
@@ -18,16 +18,17 @@ opencs_hdrs_noqt (model/doc
 
 
 opencs_units (model/world
-    idtable idtableproxymodel
+    idtable idtableproxymodel regionmap
     )
 
 
 opencs_units_noqt (model/world
-    universalid data record idcollection commands columnbase
+    universalid data record commands columnbase scriptcontext cell refidcollection
+    refidadapter refiddata refidadapterimp ref collectionbase refcollection columns
     )
 
 opencs_hdrs_noqt (model/world
-    columns
+    columnimp idcollection collection
     )
 
 
@@ -36,7 +37,8 @@ opencs_units (model/tools
     )
 
 opencs_units_noqt (model/tools
-    stage verifier mandatoryid
+    stage verifier mandatoryid skillcheck classcheck factioncheck racecheck soundcheck regioncheck
+    birthsigncheck spellcheck
     )
 
 
@@ -55,11 +57,14 @@ opencs_hdrs_noqt (view/doc
 
 
 opencs_units (view/world
-    table tablesubview
+    table tablesubview scriptsubview util regionmapsubview tablebottombox creator genericcreator
+    cellcreator referenceablecreator referencecreator
     )
 
 opencs_units_noqt (view/world
-    dialoguesubview util subviews enumdelegate vartypedelegate
+    dialoguesubview subviews
+    enumdelegate vartypedelegate recordstatusdelegate refidtypedelegate datadisplaydelegate
+    scripthighlighter idvalidator
     )
 
 
@@ -71,6 +76,48 @@ opencs_units_noqt (view/tools
     subviews
     )
 
+opencs_units (view/settings
+    abstractblock
+    proxyblock
+    abstractwidget
+    usersettingsdialog
+    datadisplayformatpage
+    windowpage
+    )
+
+opencs_units_noqt (view/settings
+    abstractpage
+    blankpage
+    groupblock
+    customblock
+    groupbox
+    itemblock
+    settingwidget
+    toggleblock
+    support
+    )
+
+opencs_units (model/settings
+    usersettings
+    settingcontainer
+    )
+
+opencs_units_noqt (model/settings
+    support
+    settingsitem
+    )
+
+opencs_units_noqt (model/filter
+    node unarynode narynode leafnode booleannode parser andnode ornode notnode textnode valuenode
+    )
+
+opencs_hdrs_noqt (model/filter
+    filter
+    )
+
+opencs_units (view/filter
+    filtercreator filterbox recordfilterbox editwidget
+    )
 
 set (OPENCS_US
     )
@@ -88,7 +135,7 @@ if(WIN32)
     set(QT_USE_QTMAIN TRUE)
 endif(WIN32)
 
-find_package(Qt4 COMPONENTS QtCore QtGui QtXml QtXmlPatterns REQUIRED)
+find_package(Qt4 COMPONENTS QtCore QtGui QtNetwork QtXml QtXmlPatterns REQUIRED)
 include(${QT_USE_FILE})
 
 qt4_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})

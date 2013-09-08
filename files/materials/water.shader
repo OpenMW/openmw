@@ -3,9 +3,10 @@
 
 #define SIMPLE_WATER @shGlobalSettingBool(simple_water)
 
-
 #if SIMPLE_WATER
     // --------------------------------------- SIMPLE WATER ---------------------------------------------------   
+
+#define FOG @shGlobalSettingBool(fog)
 
 #ifdef SH_VERTEX_SHADER
 
@@ -13,13 +14,17 @@
         shUniform(float4x4, wvp) @shAutoConstant(wvp, worldviewproj_matrix)
         shVertexInput(float2, uv0)
         shOutput(float2, UV)
-        shOutput(float, depth)
 
+#if FOG
+        shOutput(float, depth)
+#endif
     SH_START_PROGRAM
     {
 	    shOutputPosition = shMatrixMult(wvp, shInputPosition);
 	    UV = uv0;
+#if FOG
 	    depth = shOutputPosition.z;
+#endif
     }
 
 #else
@@ -38,8 +43,10 @@
         shOutputColour(0).xyz = shSample(animatedTexture, UV * 15).xyz * float3(1.0, 1.0, 1.0);
         shOutputColour(0).w = 0.7;
         
+#if FOG
         float fogValue = shSaturate((depth - fogParams.y) * fogParams.w);
         shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, fogColor, fogValue);
+#endif
     }
 
 #endif
@@ -49,6 +56,13 @@
 
 
 // Inspired by Blender GLSL Water by martinsh ( http://devlog-martinsh.blogspot.de/2012/07/waterundewater-shader-wip.html )
+
+#define SHADOWS_PSSM @shGlobalSettingBool(shadows_pssm)
+#define SHADOWS @shGlobalSettingBool(shadows)
+
+#if SHADOWS || SHADOWS_PSSM
+    #include "shadows.h"
+#endif
 
 #define RIPPLES 1
 #define REFRACTION @shGlobalSettingBool(refraction)
@@ -63,6 +77,23 @@
         shOutput(float3, screenCoordsPassthrough)
         shOutput(float4, position)
         shOutput(float, depthPassthrough)
+
+
+#if SHADOWS
+        shOutput(float4, lightSpacePos0)
+        shUniform(float4x4, texViewProjMatrix0) @shAutoConstant(texViewProjMatrix0, texture_viewproj_matrix)
+#endif
+
+#if SHADOWS_PSSM
+    @shForeach(3)
+        shOutput(float4, lightSpacePos@shIterator)
+        shUniform(float4x4, texViewProjMatrix@shIterator) @shAutoConstant(texViewProjMatrix@shIterator, texture_viewproj_matrix, @shIterator)
+    @shEndForeach
+#endif
+
+#if SHADOWS || SHADOWS_PSSM
+    shUniform(float4x4, worldMatrix) @shAutoConstant(worldMatrix, world_matrix)
+#endif
 
     SH_START_PROGRAM
     {
@@ -88,6 +119,17 @@
         position = shInputPosition;
         
         depthPassthrough = shOutputPosition.z;
+
+
+#if SHADOWS
+        lightSpacePos0 = shMatrixMult(texViewProjMatrix0, shMatrixMult(worldMatrix, shInputPosition));
+#endif
+#if SHADOWS_PSSM
+        float4 wPos = shMatrixMult(worldMatrix, shInputPosition);
+    @shForeach(3)
+        lightSpacePos@shIterator = shMatrixMult(texViewProjMatrix@shIterator, wPos);
+    @shEndForeach
+#endif
     }
 
 #else
@@ -186,10 +228,47 @@
         shUniform(float4, fogParams) @shAutoConstant(fogParams, fog_params)
         
         shUniform(float4, cameraPos) @shAutoConstant(cameraPos, camera_position_object_space)
+
+
+#if SHADOWS
+        shInput(float4, lightSpacePos0)
+        shSampler2D(shadowMap0)
+        shUniform(float2, invShadowmapSize0)   @shAutoConstant(invShadowmapSize0, inverse_texture_size, 1)
+#endif
+#if SHADOWS_PSSM
+    @shForeach(3)
+        shInput(float4, lightSpacePos@shIterator)
+        shSampler2D(shadowMap@shIterator)
+        shUniform(float2, invShadowmapSize@shIterator)  @shAutoConstant(invShadowmapSize@shIterator, inverse_texture_size, @shIterator(1))
+    @shEndForeach
+    shUniform(float3, pssmSplitPoints)  @shSharedParameter(pssmSplitPoints)
+#endif
+
+#if SHADOWS || SHADOWS_PSSM
+        shUniform(float4, shadowFar_fadeStart) @shSharedParameter(shadowFar_fadeStart)
+#endif
 		
 
     SH_START_PROGRAM
     {
+#if SHADOWS
+            float shadow = depthShadowPCF (shadowMap0, lightSpacePos0, invShadowmapSize0);
+#endif
+#if SHADOWS_PSSM
+            float shadow = pssmDepthShadow (lightSpacePos0, invShadowmapSize0, shadowMap0, lightSpacePos1, invShadowmapSize1, shadowMap1, lightSpacePos2, invShadowmapSize2, shadowMap2, depthPassthrough, pssmSplitPoints);
+#endif
+
+#if SHADOWS || SHADOWS_PSSM
+            float fadeRange = shadowFar_fadeStart.x - shadowFar_fadeStart.y;
+            float fade = 1-((depthPassthrough - shadowFar_fadeStart.y) / fadeRange);
+            shadow = (depthPassthrough > shadowFar_fadeStart.x) ? 1.0 : ((depthPassthrough > shadowFar_fadeStart.y) ? 1.0-((1.0-shadow)*fade) : shadow);
+#endif
+
+#if !SHADOWS && !SHADOWS_PSSM
+            float shadow = 1.0;
+#endif
+
+
         float2 screenCoords = screenCoordsPassthrough.xy / screenCoordsPassthrough.z;
         screenCoords.y = (1-shSaturate(renderTargetFlipping))+renderTargetFlipping*screenCoords.y;
 
@@ -244,7 +323,7 @@
         float3 llR = reflect(lVec, pNormal);
         
         float s = shSaturate(dot(lR, vVec)*2.0-1.2);
-        float lightScatter = shSaturate(dot(-lVec,lNormal)*0.7+0.3) * s * SCATTER_AMOUNT * waterSunFade_sunHeight.x * shSaturate(1.0-exp(-waterSunFade_sunHeight.y));
+        float lightScatter = shadow * shSaturate(dot(-lVec,lNormal)*0.7+0.3) * s * SCATTER_AMOUNT * waterSunFade_sunHeight.x * shSaturate(1.0-exp(-waterSunFade_sunHeight.y));
         float3 scatterColour = shLerp(float3(SCATTER_COLOUR)*float3(1.0,0.4,0.0), SCATTER_COLOUR, shSaturate(1.0-exp(-waterSunFade_sunHeight.y*SUN_EXT)));
 
         // fresnel
@@ -267,7 +346,7 @@
 #endif
 
 		// specular
-        float specular = pow(max(dot(R, lVec), 0.0),SPEC_HARDNESS);
+        float specular = pow(max(dot(R, lVec), 0.0),SPEC_HARDNESS) * shadow;
 
 #if REFRACTION
         shOutputColour(0).xyz = shLerp(  shLerp(refraction, scatterColour, lightScatter), reflection, fresnel) + specular * sunSpecular.xyz;

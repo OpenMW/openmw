@@ -19,8 +19,8 @@ Ogre::Resource(creator, name, handle, group, isManual, loader)
     */
     mCollisionShape = NULL;
     mRaycastingShape = NULL;
+    mHasCollisionNode = false;
     mCollide = true;
-    mIgnore = false;
     createParamDictionary("BulletShape");
 }
 
@@ -103,6 +103,20 @@ BulletShapeManager::~BulletShapeManager()
 
     sThis = 0;
 }
+
+#if (OGRE_VERSION >= ((1 << 16) | (9 << 8) | 0))
+BulletShapePtr BulletShapeManager::getByName(const Ogre::String& name, const Ogre::String& groupName)
+{
+    return getResourceByName(name, groupName).staticCast<BulletShape>();
+}
+
+BulletShapePtr BulletShapeManager::create (const Ogre::String& name, const Ogre::String& group,
+                                bool isManual, Ogre::ManualResourceLoader* loader,
+                                const Ogre::NameValuePairList* createParams)
+{
+    return createResource(name,group,isManual,loader,createParams).staticCast<BulletShape>();
+}
+#endif
 
 BulletShapePtr BulletShapeManager::load(const Ogre::String &name, const Ogre::String &group)
 {

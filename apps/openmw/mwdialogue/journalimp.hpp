@@ -21,6 +21,8 @@ namespace MWDialogue
 
             Journal();
 
+            virtual void clear();
+
             virtual void addEntry (const std::string& id, int index);
             ///< Add a journal entry.
 

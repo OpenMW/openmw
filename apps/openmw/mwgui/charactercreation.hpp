@@ -1,12 +1,8 @@
 #ifndef CHARACTER_CREATION_HPP
 #define CHARACTER_CREATION_HPP
 
-#include "../mwworld/esmstore.hpp"
-
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
-
-#include "../mwmechanics/stat.hpp"
 
 namespace MWGui
 {
@@ -29,7 +25,7 @@ namespace MWGui
     public:
     typedef std::vector<int> SkillList;
 
-    CharacterCreation(MWBase::WindowManager* _wm);
+    CharacterCreation();
     ~CharacterCreation();
 
     //Show a dialog
@@ -45,6 +41,7 @@ namespace MWGui
     void setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value);
     void setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::Stat<float>& value);
     void configureSkills (const SkillList& major, const SkillList& minor);
+    void doRenderUpdate();
 
     private:
     //Dialogs
@@ -57,8 +54,6 @@ namespace MWGui
     CreateClassDialog* mCreateClassDialog;
     BirthDialog* mBirthSignDialog;
     ReviewDialog* mReviewDialog;
-
-    MWBase::WindowManager* mWM;
 
     //Player data
     std::string mPlayerName;

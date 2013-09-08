@@ -53,4 +53,13 @@ void Container::save(ESMWriter &esm)
     mInventory.save(esm);
 }
 
+    void Container::blank()
+    {
+        mName.clear();
+        mModel.clear();
+        mScript.clear();
+        mWeight = 0;
+        mFlags = 0;
+        mInventory.mList.clear();
+    }
 }
