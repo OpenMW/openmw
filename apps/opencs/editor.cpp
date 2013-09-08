@@ -15,7 +15,8 @@ CS::Editor::Editor() : mViewManager (mDocumentManager)
     connect (&mViewManager, SIGNAL (newDocumentRequest ()), this, SLOT (createDocument ()));
     connect (&mViewManager, SIGNAL (loadDocumentRequest ()), this, SLOT (loadDocument ()));
 
-    connect (&mStartup, SIGNAL (createDocument()), this, SLOT (createDocument ()));
+    connect (&mStartup, SIGNAL (createGame()), this, SLOT (createDocument ())); /// \todo split
+    connect (&mStartup, SIGNAL (createAddon()), this, SLOT (createDocument ()));
     connect (&mStartup, SIGNAL (loadDocument()), this, SLOT (loadDocument ()));
 
     connect (&mFileDialog, SIGNAL(openFiles()), this, SLOT(openFiles()));
@@ -69,7 +70,7 @@ void CS::Editor::setupDataFiles()
     //load the settings into the userSettings instance.
     const QString settingFileName = "opencs.cfg";
     CSMSettings::UserSettings::instance().loadSettings(settingFileName);
-    
+
 }
 
 void CS::Editor::createDocument()
