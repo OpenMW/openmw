@@ -18,6 +18,7 @@ CS::Editor::Editor() : mViewManager (mDocumentManager)
     connect (&mStartup, SIGNAL (createGame()), this, SLOT (createDocument ())); /// \todo split
     connect (&mStartup, SIGNAL (createAddon()), this, SLOT (createDocument ()));
     connect (&mStartup, SIGNAL (loadDocument()), this, SLOT (loadDocument ()));
+    connect (&mStartup, SIGNAL (editConfig()), this, SLOT (showSettings ()));
 
     connect (&mFileDialog, SIGNAL(openFiles()), this, SLOT(openFiles()));
     connect (&mFileDialog, SIGNAL(createNewFile()), this, SLOT(createNewFile()));
@@ -125,6 +126,15 @@ void CS::Editor::showStartup()
         mStartup.show();
     mStartup.raise();
     mStartup.activateWindow();
+}
+
+void CS::Editor::showSettings()
+{
+    if (mSettings.isHidden())
+        mSettings.show();
+
+    mSettings.raise();
+    mSettings.activateWindow();
 }
 
 bool CS::Editor::makeIPCServer()
