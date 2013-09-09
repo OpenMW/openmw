@@ -41,13 +41,13 @@ QWidget *CSVDoc::StartupDialogue::createButtons()
     mLayout = new QGridLayout (widget);
 
     /// \todo add icons
-    QPushButton *loadDocument = addButton ("Edit A Content File", QIcon (""));
+    QPushButton *loadDocument = addButton ("Edit A Content File", QIcon (":startup/edit-content"));
     connect (loadDocument, SIGNAL (clicked()), this, SIGNAL (loadDocument()));
 
-    QPushButton *createAddon = addButton ("Create A New Addon", QIcon (""));
+    QPushButton *createAddon = addButton ("Create A New Addon", QIcon (":startup/create-addon"));
     connect (createAddon, SIGNAL (clicked()), this, SIGNAL (createAddon()));
 
-    QPushButton *createGame = addButton ("Create A New Game", QIcon (""));
+    QPushButton *createGame = addButton ("Create A New Game", QIcon (":startup/create-game"));
     connect (createGame, SIGNAL (clicked()), this, SIGNAL (createGame()));
 
     for (int i=0; i<3; ++i)
@@ -69,7 +69,6 @@ QWidget *CSVDoc::StartupDialogue::createButtons()
     return widget;
 }
 
-#include <QStyle>
 QWidget *CSVDoc::StartupDialogue::createTools()
 {
     QWidget *widget = new QWidget (this);
@@ -81,11 +80,11 @@ QWidget *CSVDoc::StartupDialogue::createTools()
     QPushButton *config = new QPushButton (widget);
 
     config->setSizePolicy (QSizePolicy (QSizePolicy::Fixed, QSizePolicy::Fixed));
-    config->setIcon (style()->standardIcon (QStyle::SP_FileDialogStart)); /// \todo replace icon
+    config->setIcon (QIcon (":startup/configure"));
 
     layout->addWidget (config);
 
-    layout->addWidget (new QWidget, 1); // dummy icon; stops buttons from taking all the space
+    layout->addWidget (new QWidget, 1); // dummy widget; stops buttons from taking all the space
 
     widget->setLayout (layout);
 
