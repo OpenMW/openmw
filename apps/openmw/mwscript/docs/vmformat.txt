@@ -351,5 +351,7 @@ op 0x200021b: SetWerewolfAcrobatics
 op 0x200021c: SetWerewolfAcrobaticsExplicit
 op 0x200021d: ShowVars
 op 0x200021e: ShowVarsExplicit
+op 0x200021f: GetLineOfSight
+op 0x200022a: GetLineOfSightExplicit
 
 opcodes 0x200021f-0x3ffffff unused

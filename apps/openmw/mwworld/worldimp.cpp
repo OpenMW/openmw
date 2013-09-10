@@ -1779,6 +1779,11 @@ namespace MWWorld
         }
     }
 
+    bool World::getLOS(const MWWorld::Ptr& npc,const MWWorld::Ptr& targetNpc)
+    {
+        return false;
+    }
+
     void World::enableActorCollision(const MWWorld::Ptr& actor, bool enable)
     {
         OEngine::Physic::PhysicActor *physicActor = mPhysEngine->getCharacter(actor.getRefData().getHandle());
