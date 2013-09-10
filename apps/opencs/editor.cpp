@@ -9,9 +9,14 @@
 #include "model/doc/document.hpp"
 #include "model/world/data.hpp"
 
+
 CS::Editor::Editor() : mViewManager (mDocumentManager)
 {
     mIpcServerName = "org.openmw.OpenCS";
+
+    setupDataFiles();
+
+    mNewGame.setLocalData (mLocal);
 
     connect (&mViewManager, SIGNAL (newGameRequest ()), this, SLOT (createGame ()));
     connect (&mViewManager, SIGNAL (newAddonRequest ()), this, SLOT (createAddon ()));
@@ -26,10 +31,8 @@ CS::Editor::Editor() : mViewManager (mDocumentManager)
     connect (&mFileDialog, SIGNAL(openFiles()), this, SLOT(openFiles()));
     connect (&mFileDialog, SIGNAL(createNewFile()), this, SLOT(createNewFile()));
 
-    connect (&mNewGame, SIGNAL (createRequest (const QString&)),
-        this, SLOT (createNewGame (const QString&)));
-
-    setupDataFiles();
+    connect (&mNewGame, SIGNAL (createRequest (const boost::filesystem::path&)),
+        this, SLOT (createNewGame (const boost::filesystem::path&)));
 }
 
 void CS::Editor::setupDataFiles()
@@ -126,7 +129,9 @@ void CS::Editor::openFiles()
         files.push_back(path.toStdString());
     }
 
-    CSMDoc::Document *document = mDocumentManager.addDocument(files, false);
+    /// \todo Get the save path from the file dialogue
+
+    CSMDoc::Document *document = mDocumentManager.addDocument (files, *files.rbegin(), false);
 
     mViewManager.addView (document);
     mFileDialog.hide();
@@ -143,23 +148,21 @@ void CS::Editor::createNewFile()
 
     files.push_back(mFileDialog.fileName().toStdString());
 
-    CSMDoc::Document *document = mDocumentManager.addDocument (files, true);
+    /// \todo Get the save path from the file dialogue.
+
+    CSMDoc::Document *document = mDocumentManager.addDocument (files, *files.rbegin(), true);
 
     mViewManager.addView (document);
     mFileDialog.hide();
 }
 
-void CS::Editor::createNewGame (const QString& file)
+void CS::Editor::createNewGame (const boost::filesystem::path& file)
 {
-    boost::filesystem::path path (mLocal);
-
-    path /= file.toUtf8().data();
-
     std::vector<boost::filesystem::path> files;
 
-    files.push_back (path);
+    files.push_back (file);
 
-    CSMDoc::Document *document = mDocumentManager.addDocument (files, true);
+    CSMDoc::Document *document = mDocumentManager.addDocument (files, file, true);
 
     mViewManager.addView (document);
 

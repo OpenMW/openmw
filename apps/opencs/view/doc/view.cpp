@@ -184,7 +184,7 @@ void CSVDoc::View::updateTitle()
 {
     std::ostringstream stream;
 
-    stream << mDocument->getName();
+    stream << mDocument->getSavePath().filename().string();
 
     if (mDocument->getState() & CSMDoc::State_Modified)
             stream << " *";

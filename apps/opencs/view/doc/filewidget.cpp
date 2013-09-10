@@ -49,6 +49,5 @@ QString CSVDoc::FileWidget::getName() const
 
 void CSVDoc::FileWidget::textChanged (const QString& text)
 {
-    emit stateChanged (!text.isEmpty());
-    emit nameChanged (getName());
+    emit nameChanged (getName(), mAddon);
 }

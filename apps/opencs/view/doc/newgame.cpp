@@ -8,6 +8,7 @@
 #include <QPushButton>
 
 #include "filewidget.hpp"
+#include "adjusterwidget.hpp"
 
 CSVDoc::NewGameDialogue::NewGameDialogue()
 {
@@ -19,6 +20,10 @@ CSVDoc::NewGameDialogue::NewGameDialogue()
     mFileWidget->setType (false);
 
     layout->addWidget (mFileWidget, 1);
+
+    mAdjusterWidget = new AdjusterWidget (this);
+
+    layout->addWidget (mAdjusterWidget, 1);
 
     QDialogButtonBox *buttons = new QDialogButtonBox (this);
 
@@ -36,13 +41,20 @@ CSVDoc::NewGameDialogue::NewGameDialogue()
 
     setLayout (layout);
 
-    connect (mFileWidget, SIGNAL (stateChanged (bool)), this, SLOT (stateChanged (bool)));
+    connect (mAdjusterWidget, SIGNAL (stateChanged (bool)), this, SLOT (stateChanged (bool)));
     connect (mCreate, SIGNAL (clicked()), this, SLOT (create()));
     connect (cancel, SIGNAL (clicked()), this, SLOT (reject()));
+    connect (mFileWidget, SIGNAL (nameChanged (const QString&, bool)),
+        mAdjusterWidget, SLOT (setName (const QString&, bool)));
 
     QRect scr = QApplication::desktop()->screenGeometry();
     QRect rect = geometry();
     move (scr.center().x() - rect.center().x(), scr.center().y() - rect.center().y());
+}
+
+void CSVDoc::NewGameDialogue::setLocalData (const boost::filesystem::path& localData)
+{
+    mAdjusterWidget->setLocalData (localData);
 }
 
 void CSVDoc::NewGameDialogue::stateChanged (bool valid)
@@ -52,5 +64,5 @@ void CSVDoc::NewGameDialogue::stateChanged (bool valid)
 
 void CSVDoc::NewGameDialogue::create()
 {
-    emit createRequest (mFileWidget->getName());
+    emit createRequest (mAdjusterWidget->getPath());
 }

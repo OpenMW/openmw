@@ -33,9 +33,7 @@ namespace CSVDoc
 
         signals:
 
-            void stateChanged (bool valid);
-
-            void nameChanged (const QString& file);
+            void nameChanged (const QString& file, bool addon);
     };
 }
 
