@@ -1,4 +1,4 @@
-#include "terrain.hpp"
+#include "world.hpp"
 
 #include <OgreAxisAlignedBox.h>
 #include <OgreCamera.h>
@@ -7,6 +7,7 @@
 #include <OgreRoot.h>
 
 #include <components/esm/loadland.hpp>
+#include <components/loadinglistener/loadinglistener.hpp>
 
 #include "storage.hpp"
 #include "quadtreenode.hpp"
@@ -51,7 +52,8 @@ namespace
 namespace Terrain
 {
 
-    Terrain::Terrain(Ogre::SceneManager* sceneMgr, Storage* storage, int visibilityFlags, bool distantLand, bool shaders)
+    World::World(Loading::Listener* loadingListener, Ogre::SceneManager* sceneMgr,
+                     Storage* storage, int visibilityFlags, bool distantLand, bool shaders)
         : mStorage(storage)
         , mMinBatchSize(1)
         , mMaxBatchSize(64)
@@ -60,7 +62,11 @@ namespace Terrain
         , mDistantLand(distantLand)
         , mShaders(shaders)
         , mVisible(true)
+        , mLoadingListener(loadingListener)
     {
+        loadingListener->setLabel("Creating terrain");
+        loadingListener->indicateProgress();
+
         mCompositeMapSceneMgr = Ogre::Root::getSingleton().createSceneManager(Ogre::ST_GENERIC);
 
         Ogre::Camera* compositeMapCam = mCompositeMapSceneMgr->createCamera("a");
@@ -86,17 +92,20 @@ namespace Terrain
 
         mRootNode = new QuadTreeNode(this, Root, size, Ogre::Vector2(center.x, center.y), NULL);
         buildQuadTree(mRootNode);
+        loadingListener->indicateProgress();
         mRootNode->initAabb();
+        loadingListener->indicateProgress();
         mRootNode->initNeighbours();
+        loadingListener->indicateProgress();
     }
 
-    Terrain::~Terrain()
+    World::~World()
     {
         delete mRootNode;
         delete mStorage;
     }
 
-    void Terrain::buildQuadTree(QuadTreeNode *node)
+    void World::buildQuadTree(QuadTreeNode *node)
     {
         float halfSize = node->getSize()/2.f;
 
@@ -143,15 +152,15 @@ namespace Terrain
         node->markAsDummy();
     }
 
-    void Terrain::update(const Ogre::Vector3& cameraPos)
+    void World::update(const Ogre::Vector3& cameraPos)
     {
         if (!mVisible)
             return;
-        mRootNode->update(cameraPos);
+        mRootNode->update(cameraPos, mLoadingListener);
         mRootNode->updateIndexBuffers();
     }
 
-    Ogre::AxisAlignedBox Terrain::getWorldBoundingBox (const Ogre::Vector2& center)
+    Ogre::AxisAlignedBox World::getWorldBoundingBox (const Ogre::Vector2& center)
     {
         if (center.x > mBounds.getMaximum().x
                  || center.x < mBounds.getMinimum().x
@@ -165,7 +174,7 @@ namespace Terrain
         return box;
     }
 
-    Ogre::HardwareVertexBufferSharedPtr Terrain::getVertexBuffer(int numVertsOneSide)
+    Ogre::HardwareVertexBufferSharedPtr World::getVertexBuffer(int numVertsOneSide)
     {
         if (mUvBufferMap.find(numVertsOneSide) != mUvBufferMap.end())
         {
@@ -197,7 +206,7 @@ namespace Terrain
         return buffer;
     }
 
-    Ogre::HardwareIndexBufferSharedPtr Terrain::getIndexBuffer(int flags, size_t& numIndices)
+    Ogre::HardwareIndexBufferSharedPtr World::getIndexBuffer(int flags, size_t& numIndices)
     {
         if (mIndexBufferMap.find(flags) != mIndexBufferMap.end())
         {
@@ -358,31 +367,31 @@ namespace Terrain
         return buffer;
     }
 
-    void Terrain::renderCompositeMap(Ogre::TexturePtr target)
+    void World::renderCompositeMap(Ogre::TexturePtr target)
     {
         mCompositeMapRenderTarget->update();
         target->getBuffer()->blit(mCompositeMapRenderTexture->getBuffer());
     }
 
-    void Terrain::clearCompositeMapSceneManager()
+    void World::clearCompositeMapSceneManager()
     {
         mCompositeMapSceneMgr->destroyAllManualObjects();
         mCompositeMapSceneMgr->clearScene();
     }
 
-    float Terrain::getHeightAt(const Ogre::Vector3 &worldPos)
+    float World::getHeightAt(const Ogre::Vector3 &worldPos)
     {
         return mStorage->getHeightAt(worldPos);
     }
 
-    void Terrain::applyMaterials(bool shadows, bool splitShadows)
+    void World::applyMaterials(bool shadows, bool splitShadows)
     {
         mShadows = shadows;
         mSplitShadows = splitShadows;
         mRootNode->applyMaterials();
     }
 
-    void Terrain::setVisible(bool visible)
+    void World::setVisible(bool visible)
     {
         if (visible && !mVisible)
             mSceneMgr->getRootSceneNode()->addChild(mRootSceneNode);
@@ -392,7 +401,7 @@ namespace Terrain
         mVisible = visible;
     }
 
-    bool Terrain::getVisible()
+    bool World::getVisible()
     {
         return mVisible;
     }

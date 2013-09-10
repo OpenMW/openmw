@@ -184,11 +184,14 @@ namespace MWWorld
         int idx = 0;
         // NOTE: We might need to reserve one more for the running game / save.
         mEsm.resize(master.size() + plugins.size());
+        Loading::Listener* listener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
+        listener->loadingOn();
         for (std::vector<std::string>::size_type i = 0; i < master.size(); i++, idx++)
         {
             boost::filesystem::path masterPath (fileCollections.getCollection (".esm").getPath (master[i]));
 
             std::cout << "Loading ESM " << masterPath.string() << "\n";
+            listener->setLabel(masterPath.filename().string());
 
             // This parses the ESM file
             ESM::ESMReader lEsm;
@@ -197,7 +200,7 @@ namespace MWWorld
             lEsm.setGlobalReaderList(&mEsm);
             lEsm.open (masterPath.string());
             mEsm[idx] = lEsm;
-            mStore.load (mEsm[idx]);
+            mStore.load (mEsm[idx], listener);
         }
 
         for (std::vector<std::string>::size_type i = 0; i < plugins.size(); i++, idx++)
@@ -205,6 +208,7 @@ namespace MWWorld
             boost::filesystem::path pluginPath (fileCollections.getCollection (".esp").getPath (plugins[i]));
 
             std::cout << "Loading ESP " << pluginPath.string() << "\n";
+            listener->setLabel(pluginPath.filename().string());
 
             // This parses the ESP file
             ESM::ESMReader lEsm;
@@ -213,8 +217,9 @@ namespace MWWorld
             lEsm.setGlobalReaderList(&mEsm);
             lEsm.open (pluginPath.string());
             mEsm[idx] = lEsm;
-            mStore.load (mEsm[idx]);
+            mStore.load (mEsm[idx], listener);
         }
+        listener->loadingOff();
 
         // insert records that may not be present in all versions of MW
         if (mEsm[0].getFormat() == 0)

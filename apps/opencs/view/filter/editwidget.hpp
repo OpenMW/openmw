@@ -9,6 +9,13 @@
 #include "../../model/filter/parser.hpp"
 #include "../../model/filter/node.hpp"
 
+class QModelIndex;
+
+namespace CSMWorld
+{
+    class Data;
+}
+
 namespace CSVFilter
 {
     class EditWidget : public QLineEdit
@@ -20,7 +27,7 @@ namespace CSVFilter
 
         public:
 
-            EditWidget (QWidget *parent = 0);
+            EditWidget (CSMWorld::Data& data, QWidget *parent = 0);
 
         signals:
 
@@ -29,6 +36,12 @@ namespace CSVFilter
         private slots:
 
             void textChanged (const QString& text);
+
+            void filterDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
+
+            void filterRowsRemoved (const QModelIndex& parent, int start, int end);
+
+            void filterRowsInserted (const QModelIndex& parent, int start, int end);
     };
 }
 

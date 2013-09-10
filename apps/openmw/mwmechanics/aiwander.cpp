@@ -65,10 +65,11 @@ namespace MWMechanics
 
     bool AiWander::execute (const MWWorld::Ptr& actor)
     {
+        MWBase::World *world = MWBase::Environment::get().getWorld();
         if(mDuration)
         {
             // End package if duration is complete or mid-night hits:
-            MWWorld::TimeStamp currentTime = MWBase::Environment::get().getWorld()->getTimeStamp();
+            MWWorld::TimeStamp currentTime = world->getTimeStamp();
             if(currentTime.getHour() >= mStartTime.getHour() + mDuration)
             {
                 if(!mRepeat)
@@ -96,8 +97,7 @@ namespace MWMechanics
         if(!mStoredAvailableNodes)
         {
             mStoredAvailableNodes = true;
-            mPathgrid =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*actor.getCell()->mCell);
+            mPathgrid = world->getStore().get<ESM::Pathgrid>().search(*actor.getCell()->mCell);
 
             mCellX = actor.getCell()->mCell->mData.mX;
             mCellY = actor.getCell()->mCell->mData.mY;
@@ -150,37 +150,8 @@ namespace MWMechanics
             }
         }
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-        bool cellChange = actor.getCell()->mCell->mData.mX != mCellX || actor.getCell()->mCell->mData.mY != mCellY;
-
-        if(actor.getCell()->mCell->mData.mX != player.getCell()->mCell->mData.mX)
-        {
-            int sideX = sgn(actor.getCell()->mCell->mData.mX - player.getCell()->mCell->mData.mX);
-            // Check if actor is near the border of an inactive cell. If so, disable AiWander.
-            // FIXME: This *should* pause the AiWander package instead of terminating it.
-            if(sideX * (pos.pos[0] - actor.getCell()->mCell->mData.mX * ESM::Land::REAL_SIZE) > sideX * (ESM::Land::REAL_SIZE /
-                2.0 - 200)) 
-            {
-                stopWalking(actor);
-                return true;
-            }
-        }
-
-        if(actor.getCell()->mCell->mData.mY != player.getCell()->mCell->mData.mY)
-        {
-            int sideY = sgn(actor.getCell()->mCell->mData.mY - player.getCell()->mCell->mData.mY);
-            // Check if actor is near the border of an inactive cell. If so, disable AiWander.
-            // FIXME: This *should* pause the AiWander package instead of terminating it.
-            if(sideY * (pos.pos[1] - actor.getCell()->mCell->mData.mY * ESM::Land::REAL_SIZE) > sideY * (ESM::Land::REAL_SIZE /
-                2.0 - 200)) 
-            {
-                stopWalking(actor);
-                return true;
-            }
-        }
-
         // Don't try to move if you are in a new cell (ie: positioncell command called) but still play idles.
-        if(mDistance && (cellChange || (mCellX != actor.getCell()->mCell->mData.mX || mCellY != actor.getCell()->mCell->mData.mY)))
+        if(mDistance && (mCellX != actor.getCell()->mCell->mData.mX || mCellY != actor.getCell()->mCell->mData.mY))
             mDistance = 0;
 
         if(mChooseAction)
@@ -207,7 +178,7 @@ namespace MWMechanics
             else
             {
                 // Play idle animation and recreate vanilla (broken?) behavior of resetting start time of AIWander:
-                MWWorld::TimeStamp currentTime = MWBase::Environment::get().getWorld()->getTimeStamp();
+                MWWorld::TimeStamp currentTime = world->getTimeStamp();
                 mStartTime = currentTime;
                 playIdle(actor, mPlayedIdle);
                 mChooseAction = false;
@@ -264,18 +235,10 @@ namespace MWMechanics
         if(mWalking)
         {
             float zAngle = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
-            MWBase::Environment::get().getWorld()->rotateObject(actor, 0, 0, zAngle,false);
+            world->rotateObject(actor, 0, 0, zAngle, false);
             MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 1;
 
-            // Unclog path nodes by allowing the NPC to be a small distance away from the center. This way two NPCs can be
-            // at the same path node at the same time and both will complete instead of endlessly walking into eachother:
-            Ogre::Vector3 destNodePos(mCurrentNode.mX, mCurrentNode.mY, mCurrentNode.mZ);
-            Ogre::Vector3 actorPos(actor.getRefData().getPosition().pos);
-            actorPos[0] = actorPos[0] - mXCell;
-            actorPos[1] = actorPos[1] - mYCell;
-            float distance = actorPos.squaredDistance(destNodePos);
-
-            if(distance < 1200 || mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], pos.pos[2]))
+            if(mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], pos.pos[2]))
             {
                 stopWalking(actor);
                 mMoveNow = false;

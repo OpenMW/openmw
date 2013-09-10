@@ -2,17 +2,24 @@
 #include "editor.hpp"
 
 #include <QApplication>
+#include <QLocalServer>
+#include <QLocalSocket>
 
 #include "model/doc/document.hpp"
 #include "model/world/data.hpp"
 
 CS::Editor::Editor() : mViewManager (mDocumentManager)
 {
+    mIpcServerName = "org.openmw.OpenCS";
+
     connect (&mViewManager, SIGNAL (newDocumentRequest ()), this, SLOT (createDocument ()));
     connect (&mViewManager, SIGNAL (loadDocumentRequest ()), this, SLOT (loadDocument ()));
+    connect (&mViewManager, SIGNAL (editSettingsRequest()), this, SLOT (showSettings ()));
 
-    connect (&mStartup, SIGNAL (createDocument()), this, SLOT (createDocument ()));
+    connect (&mStartup, SIGNAL (createGame()), this, SLOT (createDocument ())); /// \todo split
+    connect (&mStartup, SIGNAL (createAddon()), this, SLOT (createDocument ()));
     connect (&mStartup, SIGNAL (loadDocument()), this, SLOT (loadDocument ()));
+    connect (&mStartup, SIGNAL (editConfig()), this, SLOT (showSettings ()));
 
     connect (&mFileDialog, SIGNAL(openFiles()), this, SLOT(openFiles()));
     connect (&mFileDialog, SIGNAL(createNewFile()), this, SLOT(createNewFile()));
@@ -65,7 +72,7 @@ void CS::Editor::setupDataFiles()
     //load the settings into the userSettings instance.
     const QString settingFileName = "opencs.cfg";
     CSMSettings::UserSettings::instance().loadSettings(settingFileName);
-    
+
 }
 
 void CS::Editor::createDocument()
@@ -112,6 +119,44 @@ void CS::Editor::createNewFile()
 
     mViewManager.addView (document);
     mFileDialog.hide();
+}
+
+void CS::Editor::showStartup()
+{
+    if(mStartup.isHidden())
+        mStartup.show();
+    mStartup.raise();
+    mStartup.activateWindow();
+}
+
+void CS::Editor::showSettings()
+{
+    if (mSettings.isHidden())
+        mSettings.show();
+
+    mSettings.raise();
+    mSettings.activateWindow();
+}
+
+bool CS::Editor::makeIPCServer()
+{
+    mServer = new QLocalServer(this);
+
+    if(mServer->listen(mIpcServerName))
+    {
+        connect(mServer, SIGNAL(newConnection()), this, SLOT(showStartup()));
+        return true;
+    }
+
+    mServer->close();
+    return false;
+}
+
+void CS::Editor::connectToIPCServer()
+{
+    mClientSocket = new QLocalSocket(this);
+    mClientSocket->connectToServer(mIpcServerName);
+    mClientSocket->close();
 }
 
 int CS::Editor::run()

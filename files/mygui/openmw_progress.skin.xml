@@ -58,10 +58,23 @@
     </Skin>
 
     <Skin name="MW_Progress_Loading" size="64 6">
-        <Property key="TrackSkin" value="MW_BigTrack_Progress_Blue_Small"/>
+    <Property key="TrackSkin" value="MW_BigTrack_Progress_Blue_Small"/>
         <Property key="TrackWidth" value="1"/>
 
         <Child type="Widget" skin="MW_Box" offset="0 0 64 6" align="Stretch"/>
         <Child type="Widget" skin="BlackBG" offset="2 2 60 2" align="Stretch" name="Client"/>
+    </Skin>
+
+    <Skin name="MW_ProgressScroll_Loading" size="64 6">
+        <Property key="TrackWidth" value="1"/>
+        <Property key="TrackRangeMargins" value="0 0"/>
+        <Property key="MinTrackSize" value="1"/>
+        <Property key="VerticalAlignment" value="false"/>
+        <Property key="MoveToClick" value="false"/>
+
+        <Child type="Widget" skin="BlackBG" offset="2 2 60 2" align="Stretch" name="Client"/>
+        <Child type="Button" skin="MW_BigTrack_Progress_Blue_Small" offset="0 0 1 6" align="Left VStretch" name="Track"/>
+
+        <Child type="Widget" skin="MW_Box" offset="0 0 64 6" align="Stretch"/>
     </Skin>
 </MyGUI>

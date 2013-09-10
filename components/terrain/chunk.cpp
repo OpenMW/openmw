@@ -4,7 +4,7 @@
 #include <OgreHardwareBufferManager.h>
 
 #include "quadtreenode.hpp"
-#include "terrain.hpp"
+#include "world.hpp"
 #include "storage.hpp"
 
 namespace Terrain

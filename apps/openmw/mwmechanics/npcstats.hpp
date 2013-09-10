@@ -147,15 +147,10 @@ namespace MWMechanics
 
             int getWerewolfKills() const;
 
-            float getTimeToStartDrowning();
+            float getTimeToStartDrowning() const;
             /// Sets time left for the creature to drown if it stays underwater.
             /// @param time value from [0,20]
             void setTimeToStartDrowning(float time);
-
-            float getLastDrowningHitTime();
-            /// Sets time since last hit caused by drowning.
-            /// @param time value from [0,0.33]
-            void setLastDrowningHitTime(float time);
     };
 }
 

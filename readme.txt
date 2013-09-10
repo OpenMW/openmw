@@ -3,7 +3,7 @@ OpenMW: A reimplementation of The Elder Scrolls III: Morrowind
 OpenMW is an attempt at recreating the engine for the popular role-playing game
 Morrowind by Bethesda Softworks. You need to own and install the original game for OpenMW to work.
 
-Version: 0.25.0
+Version: 0.26.0
 License: GPL (see GPL3.txt for more information)
 Website: http://www.openmw.org
 
@@ -71,16 +71,60 @@ Allowed options:
   --new-game [=arg(=1)] (=0)       activate char gen/new game mechanics
   --fs-strict [=arg(=1)] (=0)      strict file system handling (no case folding)
   --encoding arg (=win1252)        Character encoding used in OpenMW game messages:
-                                   
+
                                    win1250 - Central and Eastern European such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, Croatian, Serbian (Latin script), Romanian and Albanian languages
-                                   
+
                                    win1251 - Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic and other languages
-                                   
+
                                    win1252 - Western European (Latin) alphabet, used by default
-                                   
+
   --fallback arg                   fallback values
 
 CHANGELOG
+
+0.26.0
+
+Bug #274: Inconsistencies in the terrain
+Bug #557: Already-dead NPCs do not equip clothing/items.
+Bug #592: Window resizing
+Bug #612: [Tamriel Rebuilt] Missing terrain (South of Tel Oren)
+Bug #664: Heart of lorkhan acts like a dead body (container)
+Bug #767: Wonky ramp physics & water
+Bug #780: Swimming out of water
+Bug #792: Wrong ground alignment on actors when no clipping
+Bug #796: Opening and closing door sound issue
+Bug #797: No clipping hinders opening and closing of doors
+Bug #799: sliders in enchanting window
+Bug #838: Pressing key during startup procedure freezes the game
+Bug #839: Combat/magic stances during character creation
+Bug #843: [Tribunal] Dark Brotherhood assassin appears without equipment
+Bug #844: Resting "until healed" option given even with full stats
+Bug #846: Equipped torches are invisible.
+Bug #847: Incorrect formula for autocalculated NPC initial health
+Bug #850: Shealt weapon sound plays when leaving magic-ready stance
+Bug #852: Some boots do not produce footstep sounds
+Bug #860: FPS bar misalignment
+Bug #861: Unable to print screen
+Bug #863: No sneaking and jumping at the same time
+Bug #866: Empty variables in [Movies] section of Morrowind.ini gets imported into OpenMW.cfg as blank fallback option and crashes game on start.
+Bug #867: Dancing girls in "Suran, Desele's House of Earthly Delights" don't dance.
+Bug #868: Idle animations are repeated
+Bug #874: Underwater swimming close to the ground is jerky
+Bug #875: Animation problem while swimming on the surface and looking up
+Bug #876: Always a starting upper case letter in the inventory
+Bug #878: Active spell effects don't update the layout properly when ended
+Bug #891: Cell 24,-12 (Tamriel Rebuilt) crashes on load
+Bug #896: New game sound issue
+Feature #49: Melee Combat
+Feature #71: Lycanthropy
+Feature #393: Initialise MWMechanics::AiSequence from ESM::AIPackageList
+Feature #622: Multiple positions for inventory window
+Feature #627: Drowning
+Feature #786: Allow the 'Activate' key to close the countdialog window
+Feature #798: Morrowind installation via Launcher (Linux/Max OS only)
+Feature #851: First/Third person transitions with mouse wheel
+Task #689: change PhysicActor::enableCollisions
+Task #707: Reorganise Compiler
 
 0.25.0
 

@@ -260,11 +260,9 @@ namespace MWGui
     MapWindow::MapWindow(const std::string& cacheDir)
         : MWGui::WindowPinnableBase("openmw_map_window.layout")
         , mGlobal(false)
+        , mGlobalMap(0)
     {
         setCoord(500,0,320,300);
-
-        mGlobalMapRender = new MWRender::GlobalMap(cacheDir);
-        mGlobalMapRender->render();
 
         getWidget(mLocalMap, "LocalMap");
         getWidget(mGlobalMap, "GlobalMap");
@@ -272,9 +270,6 @@ namespace MWGui
         getWidget(mGlobalMapOverlay, "GlobalMapOverlay");
         getWidget(mPlayerArrowLocal, "CompassLocal");
         getWidget(mPlayerArrowGlobal, "CompassGlobal");
-
-        mGlobalMapImage->setImageTexture("GlobalMap.png");
-        mGlobalMapOverlay->setImageTexture("GlobalMapOverlay");
 
         mGlobalMap->setVisible (false);
 
@@ -290,6 +285,14 @@ namespace MWGui
         mEventBoxLocal->eventMouseButtonPressed += MyGUI::newDelegate(this, &MapWindow::onDragStart);
 
         LocalMapBase::init(mLocalMap, mPlayerArrowLocal, this);
+    }
+
+    void MapWindow::renderGlobalMap(Loading::Listener* loadingListener)
+    {
+        mGlobalMapRender = new MWRender::GlobalMap("");
+        mGlobalMapRender->render(loadingListener);
+        mGlobalMapImage->setImageTexture("GlobalMap.png");
+        mGlobalMapOverlay->setImageTexture("GlobalMapOverlay");
     }
 
     MapWindow::~MapWindow()

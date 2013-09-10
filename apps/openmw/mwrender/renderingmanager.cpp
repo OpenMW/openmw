@@ -25,7 +25,7 @@
 
 #include <components/esm/loadstat.hpp>
 #include <components/settings/settings.hpp>
-#include <components/terrain/terrain.hpp>
+#include <components/terrain/world.hpp>
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"
@@ -82,7 +82,7 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
         Settings::Manager::setString("shader mode", "General", openGL ? (glES ? "glsles" : "glsl") : "hlsl");
     }
 
-    mRendering.createScene("PlayerCam", Settings::Manager::getFloat("field of view", "General"), 5);
+    mRendering.adjustCamera(Settings::Manager::getFloat("field of view", "General"), 5);
 
     mRendering.getWindow()->addListener(this);
     mRendering.setWindowListener(this);
@@ -1018,12 +1018,15 @@ void RenderingManager::enableTerrain(bool enable)
     {
         if (!mTerrain)
         {
-            mTerrain = new Terrain::Terrain(mRendering.getScene(), new MWRender::TerrainStorage(), RV_Terrain,
+            Loading::Listener* listener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
+            Loading::ScopedLoad load(listener);
+            mTerrain = new Terrain::World(listener, mRendering.getScene(), new MWRender::TerrainStorage(), RV_Terrain,
                                             Settings::Manager::getBool("distant land", "Terrain"),
                                             Settings::Manager::getBool("shader", "Terrain"));
             mTerrain->applyMaterials(Settings::Manager::getBool("enabled", "Shadows"),
                                      Settings::Manager::getBool("split", "Shadows"));
             mTerrain->update(mRendering.getCamera()->getRealPosition());
+            mTerrain->setLoadingListener(NULL);
         }
         mTerrain->setVisible(true);
     }

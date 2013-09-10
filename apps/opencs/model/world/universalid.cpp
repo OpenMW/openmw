@@ -80,7 +80,7 @@ namespace
         { CSMWorld::UniversalId::Class_RefRecord, CSMWorld::UniversalId::Type_Static, "Static", ":./static.png" },
         { CSMWorld::UniversalId::Class_RefRecord, CSMWorld::UniversalId::Type_Weapon, "Weapon", ":./weapon.png" },
         { CSMWorld::UniversalId::Class_SubRecord, CSMWorld::UniversalId::Type_Reference, "Reference", 0 },
-
+        { CSMWorld::UniversalId::Class_SubRecord, CSMWorld::UniversalId::Type_Filter, "Filter", 0 },
         { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0, 0 } // end marker
     };
 
@@ -90,8 +90,6 @@ namespace
 
         { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0, 0 } // end marker
     };
-
-    static const unsigned int IDARG_SIZE = sizeof (sIdArg) / sizeof (TypeData);
 }
 
 CSMWorld::UniversalId::UniversalId (const std::string& universalId)
@@ -148,6 +146,22 @@ CSMWorld::UniversalId::UniversalId (Type type) : mArgumentType (ArgumentType_Non
         if (type==sNoArg[i].mType)
         {
             mClass = sNoArg[i].mClass;
+            return;
+        }
+
+    for (int i=0; sIdArg[i].mName; ++i)
+        if (type==sIdArg[i].mType)
+        {
+            mArgumentType = ArgumentType_Id;
+            mClass = sIdArg[i].mClass;
+            return;
+        }
+
+    for (int i=0; sIndexArg[i].mName; ++i)
+        if (type==sIndexArg[i].mType)
+        {
+            mArgumentType = ArgumentType_Index;
+            mClass = sIndexArg[i].mClass;
             return;
         }
 
@@ -292,25 +306,6 @@ std::vector<CSMWorld::UniversalId::Type> CSMWorld::UniversalId::listReferenceabl
 
     return list;
 }
-
-std::pair<int, const char *> CSMWorld::UniversalId::getIdArgPair (unsigned int index)
-{
-    std::pair<int, const char *> retPair;
-
-    if ( index < IDARG_SIZE )
-    {
-        retPair.first = sIdArg[index].mType;
-        retPair.second = sIdArg[index].mName;
-    }
-
-    return retPair;
-}
-
-unsigned int CSMWorld::UniversalId::getIdArgSize()
-{
-   return IDARG_SIZE;
-}
-
 
 bool CSMWorld::operator== (const CSMWorld::UniversalId& left, const CSMWorld::UniversalId& right)
 {

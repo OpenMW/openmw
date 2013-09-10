@@ -34,7 +34,7 @@ namespace CSMWorld
 
             enum Type
             {
-                Type_None,
+                Type_None = 0,
                 Type_Globals,
                 Type_Global,
                 Type_VerificationResults,
@@ -89,6 +89,8 @@ namespace CSMWorld
                 Type_Filters
             };
 
+            enum { NumberOfTypes = Type_Filters+1 };
+
         private:
 
             Class mClass;
@@ -102,7 +104,6 @@ namespace CSMWorld
             UniversalId (const std::string& universalId);
 
             UniversalId (Type type = Type_None);
-            ///< Using a type for a non-argument-less UniversalId will throw an exception.
 
             UniversalId (Type type, const std::string& id);
             ///< Using a type for a non-ID-argument UniversalId will throw an exception.
@@ -134,9 +135,6 @@ namespace CSMWorld
             ///< Will return an empty string, if no icon is available.
 
             static std::vector<Type> listReferenceableTypes();
-
-            static std::pair<int, const char *> getIdArgPair (unsigned int index);
-            static unsigned int getIdArgSize ();
     };
 
     bool operator== (const UniversalId& left, const UniversalId& right);

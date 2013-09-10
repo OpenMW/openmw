@@ -3,7 +3,7 @@
 #include <OgreSceneManager.h>
 #include <OgreManualObject.h>
 
-#include "terrain.hpp"
+#include "world.hpp"
 #include "chunk.hpp"
 #include "storage.hpp"
 
@@ -13,6 +13,13 @@ using namespace Terrain;
 
 namespace
 {
+    int Log2( int n )
+    {
+        assert(n > 0);
+        int targetlevel = 0;
+        while (n >>= 1) ++targetlevel;
+        return targetlevel;
+    }
 
     // Utility functions for neighbour finding algorithm
     ChildDirection reflect(ChildDirection dir, Direction dir2)
@@ -132,7 +139,7 @@ namespace
     }
 }
 
-QuadTreeNode::QuadTreeNode(Terrain* terrain, ChildDirection dir, float size, const Ogre::Vector2 &center, QuadTreeNode* parent)
+QuadTreeNode::QuadTreeNode(World* terrain, ChildDirection dir, float size, const Ogre::Vector2 &center, QuadTreeNode* parent)
     : mSize(size)
     , mCenter(center)
     , mParent(parent)
@@ -161,7 +168,7 @@ QuadTreeNode::QuadTreeNode(Terrain* terrain, ChildDirection dir, float size, con
     pos = mCenter - pos;
     mSceneNode->setPosition(Ogre::Vector3(pos.x*8192, pos.y*8192, 0));
 
-    mLodLevel = log2(mSize);
+    mLodLevel = Log2(mSize);
 
     mMaterialGenerator = new MaterialGenerator(mTerrain->getShadersEnabled());
 }
@@ -220,7 +227,7 @@ const Ogre::AxisAlignedBox& QuadTreeNode::getBoundingBox()
     return mBounds;
 }
 
-void QuadTreeNode::update(const Ogre::Vector3 &cameraPos)
+void QuadTreeNode::update(const Ogre::Vector3 &cameraPos, Loading::Listener* loadingListener)
 {
     const Ogre::AxisAlignedBox& bounds = getBoundingBox();
     if (bounds.isNull())
@@ -253,6 +260,9 @@ void QuadTreeNode::update(const Ogre::Vector3 &cameraPos)
         wantedLod = 6;
 
     bool hadChunk = hasChunk();
+
+    if (loadingListener)
+        loadingListener->indicateProgress();
 
     if (!distantLand && dist > 8192*2)
     {
@@ -341,7 +351,7 @@ void QuadTreeNode::update(const Ogre::Vector3 &cameraPos)
         }
         assert(hasChildren() && "Leaf node's LOD needs to be 0");
         for (int i=0; i<4; ++i)
-            mChildren[i]->update(cameraPos);
+            mChildren[i]->update(cameraPos, loadingListener);
     }
 }
 

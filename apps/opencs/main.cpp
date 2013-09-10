@@ -39,5 +39,11 @@ int main(int argc, char *argv[])
 
     CS::Editor editor;
 
+    if(!editor.makeIPCServer())
+    {
+    	editor.connectToIPCServer();
+    	return 0;
+    }
+
     return editor.run();
 }

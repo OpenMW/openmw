@@ -7,7 +7,6 @@
 
 #include <libunshield.h>
 
-
 class UnshieldThread : public QThread
 {
    Q_OBJECT

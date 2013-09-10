@@ -5,6 +5,11 @@
 
 #include "../../model/filter/node.hpp"
 
+namespace CSMWorld
+{
+    class Data;
+}
+
 namespace CSVFilter
 {
     class FilterBox : public QWidget
@@ -13,7 +18,7 @@ namespace CSVFilter
 
         public:
 
-            FilterBox (QWidget *parent = 0);
+            FilterBox (CSMWorld::Data& data, QWidget *parent = 0);
 
         signals:
 

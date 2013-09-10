@@ -5,6 +5,8 @@
 
 #include <boost/filesystem/operations.hpp>
 
+#include <components/loadinglistener/loadinglistener.hpp>
+
 namespace MWWorld
 {
 
@@ -21,8 +23,10 @@ static bool isCacheableRecord(int id)
     return false;
 }
 
-void ESMStore::load(ESM::ESMReader &esm)
+void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
 {
+    listener->setProgressRange(1000);
+
     std::set<std::string> missing;
 
     ESM::Dialogue *dialogue = 0;
@@ -109,6 +113,7 @@ void ESMStore::load(ESM::ESMReader &esm)
                 mIds[id] = n.val;
             }
         }
+        listener->setProgress(esm.getFileOffset() / (float)esm.getFileSize() * 1000);
     }
 
   /* This information isn't needed on screen. But keep the code around

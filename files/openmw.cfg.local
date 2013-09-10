@@ -1,2 +1,5 @@
+data="?global?data"
+data="?mw?Data Files"
 data=./data
+data-local="?user?data"
 resources=./resources

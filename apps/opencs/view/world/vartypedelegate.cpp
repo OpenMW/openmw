@@ -4,6 +4,7 @@
 #include <QUndoStack>
 
 #include "../../model/world/commands.hpp"
+#include "../../model/world/columns.hpp"
 
 void CSVWorld::VarTypeDelegate::addCommands (QAbstractItemModel *model, const QModelIndex& index, int type)
     const
@@ -75,29 +76,11 @@ CSVWorld::CommandDelegate *CSVWorld::VarTypeDelegateFactory::makeDelegate (QUndo
 
 void CSVWorld::VarTypeDelegateFactory::add (ESM::VarType type)
 {
-    struct Name
-    {
-        ESM::VarType mType;
-        const char *mName;
-    };
+    std::vector<std::string> enums =
+        CSMWorld::Columns::getEnums (CSMWorld::Columns::ColumnId_ValueType);
 
-    static const Name sNames[] =
-    {
-        { ESM::VT_None, "empty" },
-        { ESM::VT_Short, "short" },
-        { ESM::VT_Int, "integer" },
-        { ESM::VT_Long, "long" },
-        { ESM::VT_Float, "float" },
-        { ESM::VT_String, "string" },
-        { ESM::VT_Unknown, 0 } // end marker
-    };
+    if (type<0 && type>=enums.size())
+        throw std::logic_error ("Unsupported variable type");
 
-    for (int i=0; sNames[i].mName; ++i)
-        if (sNames[i].mType==type)
-        {
-            mValues.push_back (std::make_pair (type, sNames[i].mName));
-            return;
-        }
-
-    throw std::logic_error ("Unsupported variable type");
+    mValues.push_back (std::make_pair (type, QString::fromUtf8 (enums[type].c_str())));
 }

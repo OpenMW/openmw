@@ -2,6 +2,7 @@
 #define CSM_WOLRD_COLUMNS_H
 
 #include <string>
+#include <vector>
 
 namespace CSMWorld
 {
@@ -138,6 +139,7 @@ namespace CSMWorld
             ColumnId_MaxThrust = 106,
             ColumnId_Magical = 107,
             ColumnId_Silver = 108,
+            ColumnId_Filter = 109,
 
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.
@@ -179,6 +181,11 @@ namespace CSMWorld
 
         int getId (const std::string& name);
         ///< Will return -1 for an invalid name.
+
+        bool hasEnums (ColumnId column);
+
+        std::vector<std::string> getEnums (ColumnId column);
+        ///< Returns an empty vector, if \æ column isn't an enum type column.
     }
 }
 
