@@ -2,6 +2,7 @@
 #include "adjusterwidget.hpp"
 
 #include <stdexcept>
+#include <string>
 
 #include <boost/filesystem.hpp>
 
