@@ -28,13 +28,34 @@ bool CSMFilter::TextNode::test (const CSMWorld::IdTable& table, int row,
 
     QVariant data = table.data (index);
 
-    if (data.type()!=QVariant::String)
+    QString string;
+
+    if (data.type()==QVariant::String)
+    {
+        string = data.toString();
+    }
+    else if (data.type()==QVariant::Int || data.type()==QVariant::UInt ||
+        CSMWorld::Columns::hasEnums (static_cast<CSMWorld::Columns::ColumnId> (mColumnId)))
+    {
+        int value = data.toInt();
+
+        std::vector<std::string> enums =
+            CSMWorld::Columns::getEnums (static_cast<CSMWorld::Columns::ColumnId> (mColumnId));
+
+        if (value>=0 && value<static_cast<int> (enums.size()))
+            string = QString::fromUtf8 (enums[value].c_str());
+    }
+    else if (data.type()==QVariant::Bool)
+    {
+        string = data.toBool() ? "true" : " false";
+    }
+    else
         return false;
 
     /// \todo make pattern syntax configurable
     QRegExp regExp (QString::fromUtf8 (mText.c_str()), Qt::CaseInsensitive);
 
-    return regExp.exactMatch (data.toString());
+    return regExp.exactMatch (string);
 }
 
 std::vector<int> CSMFilter::TextNode::getReferencedColumns() const

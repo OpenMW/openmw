@@ -8,6 +8,7 @@
 
 #include "../../model/doc/documentmanager.hpp"
 #include "../../model/doc/document.hpp"
+#include "../../model/world/columns.hpp"
 
 #include "../world/util.hpp"
 #include "../world/enumdelegate.hpp"
@@ -43,51 +44,6 @@ void CSVDoc::ViewManager::updateIndices()
 CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
     : mDocumentManager (documentManager), mExitOnSaveStateChange(false), mUserWarned(false)
 {
-    static const char *sSpecialisations[] =
-    {
-        "Combat", "Magic", "Stealth", 0
-    };
-
-    static const char *sAttributes[] =
-    {
-        "Strength", "Intelligence", "Willpower", "Agility", "Speed", "Endurance", "Personality",
-        "Luck", 0
-    };
-
-    static const char *sSpellTypes[] =
-    {
-        "Spell", "Ability", "Blight", "Disease", "Curse", "Power", 0
-    };
-
-    static const char *sApparatusTypes[] =
-    {
-        "Mortar & Pestle", "Albemic", "Calcinator", "Retort", 0
-    };
-
-    static const char *sArmorTypes[] =
-    {
-        "Helmet", "Cuirass", "Left Pauldron", "Right Pauldron", "Greaves", "Boots", "Left Gauntlet",
-        "Right Gauntlet", "Shield", "Left Bracer", "Right Bracer", 0
-    };
-
-    static const char *sClothingTypes[] =
-    {
-        "Pants", "Shoes", "Shirt", "Belt", "Robe", "Right Glove", "Left Glove", "Skirt", "Ring",
-        "Amulet", 0
-    };
-
-    static const char *sCreatureTypes[] =
-    {
-        "Creature", "Deadra", "Undead", "Humanoid", 0
-    };
-
-    static const char *sWeaponTypes[] =
-    {
-        "Short Blade 1H", "Long Blade 1H", "Long Blade 2H", "Blunt 1H", "Blunt 2H Close",
-        "Blunt 2H Wide", "Spear 2H", "Axe 1H", "Axe 2H", "Bow", "Crossbow", "Thrown", "Arrow",
-        "Bolt", 0
-    };
-
     mDelegateFactories = new CSVWorld::CommandDelegateFactoryCollection;
 
     mDelegateFactories->add (CSMWorld::ColumnBase::Display_GmstVarType,
@@ -96,38 +52,37 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
     mDelegateFactories->add (CSMWorld::ColumnBase::Display_GlobalVarType,
         new CSVWorld::VarTypeDelegateFactory (ESM::VT_Short, ESM::VT_Long, ESM::VT_Float));
 
-    mDelegateFactories->add (CSMWorld::ColumnBase::Display_Specialisation,
-        new CSVWorld::EnumDelegateFactory (sSpecialisations));
-
-    mDelegateFactories->add (CSMWorld::ColumnBase::Display_Attribute,
-        new CSVWorld::EnumDelegateFactory (sAttributes, true));
-
-    mDelegateFactories->add (CSMWorld::ColumnBase::Display_SpellType,
-        new CSVWorld::EnumDelegateFactory (sSpellTypes));
-
-    mDelegateFactories->add (CSMWorld::ColumnBase::Display_ApparatusType,
-        new CSVWorld::EnumDelegateFactory (sApparatusTypes));
-
-    mDelegateFactories->add (CSMWorld::ColumnBase::Display_ArmorType,
-        new CSVWorld::EnumDelegateFactory (sArmorTypes));
-
-    mDelegateFactories->add (CSMWorld::ColumnBase::Display_ClothingType,
-        new CSVWorld::EnumDelegateFactory (sClothingTypes));
-
-    mDelegateFactories->add (CSMWorld::ColumnBase::Display_CreatureType,
-        new CSVWorld::EnumDelegateFactory (sCreatureTypes));
-
-    mDelegateFactories->add (CSMWorld::ColumnBase::Display_WeaponType,
-        new CSVWorld::EnumDelegateFactory (sWeaponTypes));
-
     mDelegateFactories->add (CSMWorld::ColumnBase::Display_RecordState,
-        new CSVWorld::RecordStatusDelegateFactory() );
+        new CSVWorld::RecordStatusDelegateFactory());
 
     mDelegateFactories->add (CSMWorld::ColumnBase::Display_RefRecordType,
-        new CSVWorld::RefIdTypeDelegateFactory() );
+        new CSVWorld::RefIdTypeDelegateFactory());
+
+    struct Mapping
+    {
+        CSMWorld::ColumnBase::Display mDisplay;
+        CSMWorld::Columns::ColumnId mColumnId;
+        bool mAllowNone;
+    };
+
+    static const Mapping sMapping[] =
+    {
+        { CSMWorld::ColumnBase::Display_Specialisation, CSMWorld::Columns::ColumnId_Specialisation, false },
+        { CSMWorld::ColumnBase::Display_Attribute, CSMWorld::Columns::ColumnId_Attribute, true },
+        { CSMWorld::ColumnBase::Display_SpellType, CSMWorld::Columns::ColumnId_SpellType, false },
+        { CSMWorld::ColumnBase::Display_ApparatusType, CSMWorld::Columns::ColumnId_ApparatusType, false },
+        { CSMWorld::ColumnBase::Display_ArmorType, CSMWorld::Columns::ColumnId_ArmorType, false },
+        { CSMWorld::ColumnBase::Display_ClothingType, CSMWorld::Columns::ColumnId_ClothingType, false },
+        { CSMWorld::ColumnBase::Display_CreatureType, CSMWorld::Columns::ColumnId_CreatureType, false },
+        { CSMWorld::ColumnBase::Display_WeaponType, CSMWorld::Columns::ColumnId_WeaponType, false }
+    };
+
+    for (std::size_t i=0; i<sizeof (sMapping)/sizeof (Mapping); ++i)
+        mDelegateFactories->add (sMapping[i].mDisplay, new CSVWorld::EnumDelegateFactory (
+            CSMWorld::Columns::getEnums (sMapping[i].mColumnId), sMapping[i].mAllowNone));
 
     connect (&CSMSettings::UserSettings::instance(), SIGNAL (signalUpdateEditorSetting (const QString &, const QString &)),
-             this, SLOT (slotUpdateEditorSetting (const QString &, const QString &)));
+        this, SLOT (slotUpdateEditorSetting (const QString &, const QString &)));
 }
 
 CSVDoc::ViewManager::~ViewManager()
@@ -152,13 +107,14 @@ CSVDoc::View *CSVDoc::ViewManager::addView (CSMDoc::Document *document)
 
     View *view = new View (*this, document, countViews (document)+1);
 
-
     mViews.push_back (view);
 
     view->show();
 
-    connect (view, SIGNAL (newDocumentRequest ()), this, SIGNAL (newDocumentRequest()));
+    connect (view, SIGNAL (newGameRequest ()), this, SIGNAL (newGameRequest()));
+    connect (view, SIGNAL (newAddonRequest ()), this, SIGNAL (newAddonRequest()));
     connect (view, SIGNAL (loadDocumentRequest ()), this, SIGNAL (loadDocumentRequest()));
+    connect (view, SIGNAL (editSettingsRequest()), this, SIGNAL (editSettingsRequest()));
 
     updateIndices();
 

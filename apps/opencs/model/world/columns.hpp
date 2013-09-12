@@ -2,6 +2,7 @@
 #define CSM_WOLRD_COLUMNS_H
 
 #include <string>
+#include <vector>
 
 namespace CSMWorld
 {
@@ -180,6 +181,11 @@ namespace CSMWorld
 
         int getId (const std::string& name);
         ///< Will return -1 for an invalid name.
+
+        bool hasEnums (ColumnId column);
+
+        std::vector<std::string> getEnums (ColumnId column);
+        ///< Returns an empty vector, if \æ column isn't an enum type column.
     }
 }
 

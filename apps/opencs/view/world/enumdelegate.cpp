@@ -109,6 +109,18 @@ CSVWorld::EnumDelegateFactory::EnumDelegateFactory (const char **names, bool all
         add (i, names[i]);
 }
 
+CSVWorld::EnumDelegateFactory::EnumDelegateFactory (const std::vector<std::string>& names,
+    bool allowNone)
+{
+    if (allowNone)
+        add (-1, "");
+
+    int size = static_cast<int> (names.size());
+
+    for (int i=0; i<size; ++i)
+        add (i, names[i].c_str());
+}
+
 CSVWorld::CommandDelegate *CSVWorld::EnumDelegateFactory::makeDelegate (QUndoStack& undoStack,
     QObject *parent) const
 {

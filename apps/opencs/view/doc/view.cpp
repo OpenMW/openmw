@@ -27,9 +27,13 @@ void CSVDoc::View::setupFileMenu()
 {
     QMenu *file = menuBar()->addMenu (tr ("&File"));
 
-    QAction *new_ = new QAction (tr ("New"), this);
-    connect (new_, SIGNAL (triggered()), this, SIGNAL (newDocumentRequest()));
-    file->addAction (new_);
+    QAction *newGame = new QAction (tr ("New Game"), this);
+    connect (newGame, SIGNAL (triggered()), this, SIGNAL (newGameRequest()));
+    file->addAction (newGame);
+
+    QAction *newAddon = new QAction (tr ("New Addon"), this);
+    connect (newAddon, SIGNAL (triggered()), this, SIGNAL (newAddonRequest()));
+    file->addAction (newAddon);
 
     QAction *open = new QAction (tr ("&Open"), this);
     connect (open, SIGNAL (triggered()), this, SIGNAL (loadDocumentRequest()));
@@ -67,7 +71,7 @@ void CSVDoc::View::setupEditMenu()
     edit->addAction (mRedo);
 
     QAction *userSettings = new QAction (tr ("&Preferences"), this);
-    connect (userSettings, SIGNAL (triggered()), this, SLOT (showUserSettings()));
+    connect (userSettings, SIGNAL (triggered()), this, SIGNAL (editSettingsRequest()));
     edit->addAction (userSettings);
 }
 
@@ -180,7 +184,7 @@ void CSVDoc::View::updateTitle()
 {
     std::ostringstream stream;
 
-    stream << mDocument->getName();
+    stream << mDocument->getSavePath().filename().string();
 
     if (mDocument->getState() & CSMDoc::State_Modified)
             stream << " *";
@@ -413,13 +417,6 @@ CSVDoc::Operations *CSVDoc::View::getOperations() const
 void CSVDoc::View::exit()
 {
     emit exitApplicationRequest (this);
-}
-
-void CSVDoc::View::showUserSettings()
-{
-    CSVSettings::UserSettingsDialog *settingsDialog = new CSVSettings::UserSettingsDialog(this);
-
-    settingsDialog->show();
 }
 
 void CSVDoc::View::resizeViewWidth (int width)

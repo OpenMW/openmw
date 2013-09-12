@@ -3,6 +3,8 @@
 
 #include <components/misc/stringops.hpp>
 
+#include "universalid.hpp"
+
 namespace CSMWorld
 {
     namespace Columns
@@ -196,4 +198,104 @@ int CSMWorld::Columns::getId (const std::string& name)
             return sNames[i].mId;
 
     return -1;
+}
+
+namespace
+{
+    static const char *sSpecialisations[] =
+    {
+        "Combat", "Magic", "Stealth", 0
+    };
+
+    static const char *sAttributes[] =
+    {
+        "Strength", "Intelligence", "Willpower", "Agility", "Speed", "Endurance", "Personality",
+        "Luck", 0
+    };
+
+    static const char *sSpellTypes[] =
+    {
+        "Spell", "Ability", "Blight", "Disease", "Curse", "Power", 0
+    };
+
+    static const char *sApparatusTypes[] =
+    {
+        "Mortar & Pestle", "Albemic", "Calcinator", "Retort", 0
+    };
+
+    static const char *sArmorTypes[] =
+    {
+        "Helmet", "Cuirass", "Left Pauldron", "Right Pauldron", "Greaves", "Boots", "Left Gauntlet",
+        "Right Gauntlet", "Shield", "Left Bracer", "Right Bracer", 0
+    };
+
+    static const char *sClothingTypes[] =
+    {
+        "Pants", "Shoes", "Shirt", "Belt", "Robe", "Right Glove", "Left Glove", "Skirt", "Ring",
+        "Amulet", 0
+    };
+
+    static const char *sCreatureTypes[] =
+    {
+        "Creature", "Deadra", "Undead", "Humanoid", 0
+    };
+
+    static const char *sWeaponTypes[] =
+    {
+        "Short Blade 1H", "Long Blade 1H", "Long Blade 2H", "Blunt 1H", "Blunt 2H Close",
+        "Blunt 2H Wide", "Spear 2H", "Axe 1H", "Axe 2H", "Bow", "Crossbow", "Thrown", "Arrow",
+        "Bolt", 0
+    };
+
+    static const char *sModificationEnums[] =
+    {
+        "Base", "Modified", "Added", "Deleted", "Deleted", 0
+    };
+
+    static const char *sVarTypeEnums[] =
+    {
+        "unknown", "none", "short", "integer", "long", "float", "string", 0
+    };
+
+    const char **getEnumNames (CSMWorld::Columns::ColumnId column)
+    {
+        switch (column)
+        {
+            case CSMWorld::Columns::ColumnId_Specialisation: return sSpecialisations;
+            case CSMWorld::Columns::ColumnId_Attribute: return sAttributes;
+            case CSMWorld::Columns::ColumnId_SpellType: return sSpellTypes;
+            case CSMWorld::Columns::ColumnId_ApparatusType: return sApparatusTypes;
+            case CSMWorld::Columns::ColumnId_ArmorType: return sArmorTypes;
+            case CSMWorld::Columns::ColumnId_ClothingType: return sClothingTypes;
+            case CSMWorld::Columns::ColumnId_CreatureType: return sCreatureTypes;
+            case CSMWorld::Columns::ColumnId_WeaponType: return sWeaponTypes;
+            case CSMWorld::Columns::ColumnId_Modification: return sModificationEnums;
+            case CSMWorld::Columns::ColumnId_ValueType: return sVarTypeEnums;
+
+            default: return 0;
+        }
+    }
+}
+
+bool CSMWorld::Columns::hasEnums (ColumnId column)
+{
+    return getEnumNames (column)!=0 || column==ColumnId_RecordType;
+}
+
+std::vector<std::string> CSMWorld::Columns::getEnums (ColumnId column)
+{
+    std::vector<std::string> enums;
+
+    if (const char **table = getEnumNames (column))
+        for (int i=0; table[i]; ++i)
+            enums.push_back (table[i]);
+    else if (column==ColumnId_RecordType)
+    {
+        enums.push_back (""); // none
+
+        for (int i=UniversalId::Type_None+1; i<UniversalId::NumberOfTypes; ++i)
+            enums.push_back (UniversalId (static_cast<UniversalId::Type> (i)).getTypeName());
+    }
+
+    return enums;
 }

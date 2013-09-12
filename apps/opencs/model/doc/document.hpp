@@ -31,7 +31,7 @@ namespace CSMDoc
 
         private:
 
-            std::string mName; ///< \todo replace name with ESX list
+            boost::filesystem::path mSavePath;
             CSMWorld::Data mData;
             CSMTools::Tools mTools;
 
@@ -64,15 +64,16 @@ namespace CSMDoc
 
         public:
 
-            Document (const std::vector<boost::filesystem::path>& files, bool new_);
+            Document (const std::vector<boost::filesystem::path>& files,
+                const boost::filesystem::path& savePath, bool new_);
+
             ~Document();
 
             QUndoStack& getUndoStack();
 
             int getState() const;
 
-            const std::string& getName() const;
-            ///< \todo replace with ESX list
+            const boost::filesystem::path& getSavePath() const;
 
             void save();
 

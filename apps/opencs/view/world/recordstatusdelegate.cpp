@@ -1,8 +1,11 @@
 #include "recordstatusdelegate.hpp"
+
 #include <QPainter>
 #include <QApplication>
 #include <QUndoStack>
+
 #include "../../model/settings/usersettings.hpp"
+#include "../../model/world/columns.hpp"
 
 CSVWorld::RecordStatusDelegate::RecordStatusDelegate(const ValueList& values,
                                                      const IconList & icons,
@@ -37,9 +40,14 @@ bool CSVWorld::RecordStatusDelegate::updateEditorSetting (const QString &setting
 
 CSVWorld::RecordStatusDelegateFactory::RecordStatusDelegateFactory()
 {
-    DataDisplayDelegateFactory::add ( CSMWorld::RecordBase::State_BaseOnly,     "Base",     ":./base.png");
-    DataDisplayDelegateFactory::add ( CSMWorld::RecordBase::State_Deleted,      "Deleted",  ":./removed.png");
-    DataDisplayDelegateFactory::add ( CSMWorld::RecordBase::State_Erased,       "Deleted",  ":./removed.png");
-    DataDisplayDelegateFactory::add ( CSMWorld::RecordBase::State_Modified,     "Modified", ":./modified.png");
-    DataDisplayDelegateFactory::add ( CSMWorld::RecordBase::State_ModifiedOnly, "Added",    ":./added.png");
+    std::vector<std::string> enums =
+        CSMWorld::Columns::getEnums (CSMWorld::Columns::ColumnId_Modification);
+
+    static const char *sIcons[] =
+    {
+        ":./base.png", ":./modified.png", ":./added.png", ":./removed.png", ":./removed.png", 0
+    };
+
+    for (int i=0; sIcons[i]; ++i)
+        add (i, enums.at (i).c_str(), sIcons[i]);
 }
