@@ -275,9 +275,7 @@ namespace MWMechanics
                         continue;
                 }
 
-                // workaround: always keep player alive for now
-                // \todo remove workaround, once player death can be handled
-                if(iter->first.getRefData().getHandle()=="player" && false)
+                if(iter->first.getRefData().getHandle()=="player" && MWBase::Environment::get().getWorld()->getGodModeState())
                 {
                     MWMechanics::DynamicStat<float> stat(stats.getHealth());
 

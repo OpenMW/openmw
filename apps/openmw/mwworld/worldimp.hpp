@@ -442,6 +442,8 @@ namespace MWWorld
 
             virtual void applyWerewolfAcrobatics(const MWWorld::Ptr& actor);
 
+            virtual bool getGodModeState();
+
             virtual bool toggleGodMode();
     };
 }

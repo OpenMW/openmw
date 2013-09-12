@@ -1948,12 +1948,14 @@ namespace MWWorld
         stats.getSkill(ESM::Skill::Acrobatics).setModified(gmst.find("fWerewolfAcrobatics")->getFloat(), 0);
     }
 
+    bool World::getGodModeState()
+    {
+        return mGodMode;
+    }
+
     bool World::toggleGodMode()
     {
-        if (mGodMode)
-            mGodMode = false;
-        else
-            mGodMode = true;
+        mGodMode ? mGodMode = false : mGodMode = true;
 
         return mGodMode;
     }
