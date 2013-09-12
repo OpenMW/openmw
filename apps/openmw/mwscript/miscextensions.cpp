@@ -717,6 +717,20 @@ namespace MWScript
             }
         };
 
+        class OpToggleGodMode : public Interpreter::Opcode0
+        {
+            public:
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    InterpreterContext& context = static_cast<InterpreterContext&> (runtime.getContext());
+
+                    bool enabled = MWBase::Environment::get().getWorld()->toggleGodMode();
+
+                    // context.report (enabled ? "God Mode -> On" : "God Mode -> Off");
+                    context.report("Unimplemented");
+                }
+        };
+
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
@@ -775,6 +789,7 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Misc::opcodeEnableTeleporting, new OpEnableTeleporting<true>);
             interpreter.installSegment5 (Compiler::Misc::opcodeShowVars, new OpShowVars<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeShowVarsExplicit, new OpShowVars<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeToggleGodMode, new OpToggleGodMode);
         }
     }
 }
