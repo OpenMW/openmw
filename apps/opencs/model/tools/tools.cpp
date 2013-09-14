@@ -21,7 +21,7 @@
 #include "birthsigncheck.hpp"
 #include "spellcheck.hpp"
 
-CSMTools::Operation *CSMTools::Tools::get (int type)
+CSMDoc::Operation *CSMTools::Tools::get (int type)
 {
     switch (type)
     {
@@ -31,7 +31,7 @@ CSMTools::Operation *CSMTools::Tools::get (int type)
     return 0;
 }
 
-const CSMTools::Operation *CSMTools::Tools::get (int type) const
+const CSMDoc::Operation *CSMTools::Tools::get (int type) const
 {
     return const_cast<Tools *> (this)->get (type);
 }
@@ -103,7 +103,7 @@ CSMWorld::UniversalId CSMTools::Tools::runVerifier()
 
 void CSMTools::Tools::abortOperation (int type)
 {
-    if (Operation *operation = get (type))
+    if (CSMDoc::Operation *operation = get (type))
         operation->abort();
 }
 
@@ -118,7 +118,7 @@ int CSMTools::Tools::getRunningOperations() const
     int result = 0;
 
     for (int i=0; sOperations[i]!=-1; ++i)
-        if (const Operation *operation = get (sOperations[i]))
+        if (const CSMDoc::Operation *operation = get (sOperations[i]))
             if (operation->isRunning())
                 result |= sOperations[i];
 

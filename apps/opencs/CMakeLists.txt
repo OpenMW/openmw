@@ -5,11 +5,11 @@ opencs_units (. editor)
 set (CMAKE_BUILD_TYPE DEBUG)
 
 opencs_units (model/doc
-    document
+    document operation
     )
 
 opencs_units_noqt (model/doc
-    documentmanager
+    documentmanager stage
     )
 
 opencs_hdrs_noqt (model/doc
@@ -33,11 +33,11 @@ opencs_hdrs_noqt (model/world
 
 
 opencs_units (model/tools
-    tools operation reportmodel
+    tools reportmodel
     )
 
 opencs_units_noqt (model/tools
-    stage verifier mandatoryid skillcheck classcheck factioncheck racecheck soundcheck regioncheck
+    verifier mandatoryid skillcheck classcheck factioncheck racecheck soundcheck regioncheck
     birthsigncheck spellcheck
     )
 

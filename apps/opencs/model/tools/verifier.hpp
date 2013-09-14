@@ -1,11 +1,11 @@
 #ifndef CSM_TOOLS_VERIFIER_H
 #define CSM_TOOLS_VERIFIER_H
 
-#include "operation.hpp"
+#include "../doc/operation.hpp"
 
 namespace CSMTools
 {
-    class Verifier : public Operation
+    class Verifier : public CSMDoc::Operation
     {
         public:
 

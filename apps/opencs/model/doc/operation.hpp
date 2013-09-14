@@ -1,11 +1,11 @@
-#ifndef CSM_TOOLS_OPERATION_H
-#define CSM_TOOLS_OPERATION_H
+#ifndef CSM_DOC_OPERATION_H
+#define CSM_DOC_OPERATION_H
 
 #include <vector>
 
 #include <QThread>
 
-namespace CSMTools
+namespace CSMDoc
 {
     class Stage;
 

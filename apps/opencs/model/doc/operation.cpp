@@ -6,11 +6,10 @@
 
 #include <QTimer>
 
-#include "../doc/state.hpp"
-
+#include "state.hpp"
 #include "stage.hpp"
 
-void CSMTools::Operation::prepareStages()
+void CSMDoc::Operation::prepareStages()
 {
     mCurrentStage = mStages.begin();
     mCurrentStep = 0;
@@ -24,15 +23,15 @@ void CSMTools::Operation::prepareStages()
     }
 }
 
-CSMTools::Operation::Operation (int type) : mType (type) {}
+CSMDoc::Operation::Operation (int type) : mType (type) {}
 
-CSMTools::Operation::~Operation()
+CSMDoc::Operation::~Operation()
 {
     for (std::vector<std::pair<Stage *, int> >::iterator iter (mStages.begin()); iter!=mStages.end(); ++iter)
         delete iter->first;
 }
 
-void CSMTools::Operation::run()
+void CSMDoc::Operation::run()
 {
     prepareStages();
 
@@ -45,17 +44,17 @@ void CSMTools::Operation::run()
     exec();
 }
 
-void CSMTools::Operation::appendStage (Stage *stage)
+void CSMDoc::Operation::appendStage (Stage *stage)
 {
     mStages.push_back (std::make_pair (stage, 0));
 }
 
-void CSMTools::Operation::abort()
+void CSMDoc::Operation::abort()
 {
     exit();
 }
 
-void CSMTools::Operation::verify()
+void CSMDoc::Operation::verify()
 {
     std::vector<std::string> messages;
 

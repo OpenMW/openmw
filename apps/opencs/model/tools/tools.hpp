@@ -11,10 +11,14 @@ namespace CSMWorld
     class UniversalId;
 }
 
+namespace CSMDoc
+{
+    class Operation;
+}
+
 namespace CSMTools
 {
     class Verifier;
-    class Operation;
     class ReportModel;
 
     class Tools : public QObject
@@ -33,10 +37,10 @@ namespace CSMTools
 
             Verifier *getVerifier();
 
-            Operation *get (int type);
+            CSMDoc::Operation *get (int type);
             ///< Returns a 0-pointer, if operation hasn't been used yet.
 
-            const Operation *get (int type) const;
+            const CSMDoc::Operation *get (int type) const;
             ///< Returns a 0-pointer, if operation hasn't been used yet.
 
         public:
