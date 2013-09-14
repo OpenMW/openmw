@@ -19,12 +19,14 @@ namespace CSMDoc
             int mCurrentStep;
             int mCurrentStepTotal;
             int mTotalSteps;
+            int mOrdered;
 
             void prepareStages();
 
         public:
 
-            Operation (int type);
+            Operation (int type, bool ordered);
+            ///< \param parallel Stages must be executed in the given order.
 
             virtual ~Operation();
 

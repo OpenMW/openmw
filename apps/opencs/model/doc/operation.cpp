@@ -23,7 +23,7 @@ void CSMDoc::Operation::prepareStages()
     }
 }
 
-CSMDoc::Operation::Operation (int type) : mType (type) {}
+CSMDoc::Operation::Operation (int type, bool ordered) : mType (type), mOrdered (ordered) {}
 
 CSMDoc::Operation::~Operation()
 {

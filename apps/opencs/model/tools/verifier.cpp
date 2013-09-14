@@ -3,5 +3,5 @@
 
 #include "../doc/state.hpp"
 
-CSMTools::Verifier::Verifier() : Operation (CSMDoc::State_Verifying)
+CSMTools::Verifier::Verifier() : Operation (CSMDoc::State_Verifying, false)
 {}
