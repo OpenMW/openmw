@@ -37,7 +37,7 @@ opencs_units (model/tools
     )
 
 opencs_units_noqt (model/tools
-    verifier mandatoryid skillcheck classcheck factioncheck racecheck soundcheck regioncheck
+    mandatoryid skillcheck classcheck factioncheck racecheck soundcheck regioncheck
     birthsigncheck spellcheck
     )
 

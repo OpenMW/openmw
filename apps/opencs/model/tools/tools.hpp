@@ -18,7 +18,6 @@ namespace CSMDoc
 
 namespace CSMTools
 {
-    class Verifier;
     class ReportModel;
 
     class Tools : public QObject
@@ -26,7 +25,7 @@ namespace CSMTools
             Q_OBJECT
 
             CSMWorld::Data& mData;
-            Verifier *mVerifier;
+            CSMDoc::Operation *mVerifier;
             std::map<int, ReportModel *> mReports;
             int mNextReportNumber;
             std::map<int, int> mActiveReports; // type, report number
@@ -35,7 +34,7 @@ namespace CSMTools
             Tools (const Tools&);
             Tools& operator= (const Tools&);
 
-            Verifier *getVerifier();
+            CSMDoc::Operation *getVerifier();
 
             CSMDoc::Operation *get (int type);
             ///< Returns a 0-pointer, if operation hasn't been used yet.

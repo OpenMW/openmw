@@ -3,9 +3,8 @@
 
 #include <QThreadPool>
 
-#include "verifier.hpp"
-
 #include "../doc/state.hpp"
+#include "../doc/operation.hpp"
 
 #include "../world/data.hpp"
 #include "../world/universalid.hpp"
@@ -36,11 +35,11 @@ const CSMDoc::Operation *CSMTools::Tools::get (int type) const
     return const_cast<Tools *> (this)->get (type);
 }
 
-CSMTools::Verifier *CSMTools::Tools::getVerifier()
+CSMDoc::Operation *CSMTools::Tools::getVerifier()
 {
     if (!mVerifier)
     {
-        mVerifier = new Verifier;
+        mVerifier = new CSMDoc::Operation (CSMDoc::State_Verifying, false);
 
         connect (mVerifier, SIGNAL (progress (int, int, int)), this, SIGNAL (progress (int, int, int)));
         connect (mVerifier, SIGNAL (finished()), this, SLOT (verifierDone()));
