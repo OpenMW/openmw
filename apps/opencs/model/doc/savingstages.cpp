@@ -69,7 +69,9 @@ void CSMDoc::FinalSavingStage::perform (int stage, std::vector<std::string>& mes
     }
     else
     {
-        boost::filesystem::remove (mState.getPath());
+        if (boost::filesystem::exists (mState.getPath()))
+            boost::filesystem::remove (mState.getPath());
+
         boost::filesystem::rename (mState.getTmpPath(), mState.getPath());
 
         mDocument.getUndoStack().setClean();
