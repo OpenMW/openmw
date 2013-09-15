@@ -1955,7 +1955,7 @@ namespace MWWorld
 
     bool World::toggleGodMode()
     {
-        mGodMode ? mGodMode = false : mGodMode = true;
+        mGodMode = !mGodMode;
 
         return mGodMode;
     }
