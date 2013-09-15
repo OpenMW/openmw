@@ -37,7 +37,7 @@ void CSMDoc::Operation::run()
 
     QTimer timer;
 
-    timer.connect (&timer, SIGNAL (timeout()), this, SLOT (verify()));
+    timer.connect (&timer, SIGNAL (timeout()), this, SLOT (executeStage()));
 
     timer.start (0);
 
@@ -54,7 +54,7 @@ void CSMDoc::Operation::abort()
     exit();
 }
 
-void CSMDoc::Operation::verify()
+void CSMDoc::Operation::executeStage()
 {
     std::vector<std::string> messages;
 

@@ -49,7 +49,7 @@ namespace CSMDoc
 
         private slots:
 
-            void verify();
+            void executeStage();
     };
 }
 
