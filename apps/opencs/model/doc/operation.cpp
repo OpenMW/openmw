@@ -15,6 +15,7 @@ void CSMDoc::Operation::prepareStages()
     mCurrentStep = 0;
     mCurrentStepTotal = 0;
     mTotalSteps = 0;
+    mError = false;
 
     for (std::vector<std::pair<Stage *, int> >::iterator iter (mStages.begin()); iter!=mStages.end(); ++iter)
     {
@@ -23,7 +24,8 @@ void CSMDoc::Operation::prepareStages()
     }
 }
 
-CSMDoc::Operation::Operation (int type, bool ordered) : mType (type), mOrdered (ordered)
+CSMDoc::Operation::Operation (int type, bool ordered, bool finalAlways)
+: mType (type), mOrdered (ordered), mFinalAlways (finalAlways)
 {
     connect (this, SIGNAL (finished()), this, SLOT (operationDone()));
 }
@@ -52,9 +54,28 @@ void CSMDoc::Operation::appendStage (Stage *stage)
     mStages.push_back (std::make_pair (stage, 0));
 }
 
+bool CSMDoc::Operation::hasError() const
+{
+    return mError;
+}
+
 void CSMDoc::Operation::abort()
 {
-    exit();
+    if (!isRunning())
+        return;
+
+    mError = true;
+
+    if (mFinalAlways)
+    {
+        if (mStages.begin()!=mStages.end() && mCurrentStage!=--mStages.end())
+        {
+            mCurrentStep = 0;
+            mCurrentStage = --mStages.end();
+        }
+    }
+    else
+        mCurrentStage = mStages.end();
 }
 
 void CSMDoc::Operation::executeStage()
@@ -70,7 +91,15 @@ void CSMDoc::Operation::executeStage()
         }
         else
         {
-            mCurrentStage->first->perform (mCurrentStep++, messages);
+            try
+            {
+                mCurrentStage->first->perform (mCurrentStep++, messages);
+            }
+            catch (const std::exception&)
+            {
+                abort();
+            }
+
             ++mCurrentStepTotal;
             break;
         }

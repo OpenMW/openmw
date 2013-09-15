@@ -20,13 +20,16 @@ namespace CSMDoc
             int mCurrentStepTotal;
             int mTotalSteps;
             int mOrdered;
+            bool mFinalAlways;
+            bool mError;
 
             void prepareStages();
 
         public:
 
-            Operation (int type, bool ordered);
-            ///< \param parallel Stages must be executed in the given order.
+            Operation (int type, bool ordered, bool finalAlways = false);
+            ///< \param ordered Stages must be executed in the given order.
+            /// \param finalAlways Execute last stage even if an error occurred during earlier stages.
 
             virtual ~Operation();
 
@@ -36,6 +39,8 @@ namespace CSMDoc
             ///< The ownership of \a stage is transferred to *this.
             ///
             /// \attention Do no call this function while this Operation is running.
+
+            bool hasError() const;
 
         signals:
 
