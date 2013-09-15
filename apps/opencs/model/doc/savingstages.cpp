@@ -1,10 +1,52 @@
 
 #include "savingstages.hpp"
 
+#include <fstream>
+
+#include <boost/filesystem.hpp>
+
 #include <QUndoStack>
 
 #include "document.hpp"
 #include "savingstate.hpp"
+
+CSMDoc::OpenSaveStage::OpenSaveStage (Document& document, SavingState& state)
+: mDocument (document), mState (state)
+{}
+
+int CSMDoc::OpenSaveStage::setup()
+{
+    return 1;
+}
+
+void CSMDoc::OpenSaveStage::perform (int stage, std::vector<std::string>& messages)
+{
+    mState.start (mDocument);
+
+    mState.getStream().open (mState.getTmpPath().string().c_str());
+
+    if (!mState.getStream().is_open())
+        throw std::runtime_error ("failed to open stream for saving");
+}
+
+
+CSMDoc::CloseSaveStage::CloseSaveStage (SavingState& state)
+: mState (state)
+{}
+
+int CSMDoc::CloseSaveStage::setup()
+{
+    return 1;
+}
+
+void CSMDoc::CloseSaveStage::perform (int stage, std::vector<std::string>& messages)
+{
+    mState.getStream().close();
+
+    if (!mState.getStream())
+        throw std::runtime_error ("saving failed");
+}
+
 
 CSMDoc::FinalSavingStage::FinalSavingStage (Document& document, SavingState& state)
 : mDocument (document), mState (state)
@@ -19,12 +61,17 @@ void CSMDoc::FinalSavingStage::perform (int stage, std::vector<std::string>& mes
 {
     if (mState.hasError())
     {
-        /// \todo close stream
-        /// \todo delete tmp file
+        mState.getWriter().close();
+        mState.getStream().close();
+
+        if (boost::filesystem::exists (mState.getTmpPath()))
+            boost::filesystem::remove (mState.getTmpPath());
     }
     else
     {
-        /// \todo delete file, rename tmp file
+        boost::filesystem::remove (mState.getPath());
+        boost::filesystem::rename (mState.getTmpPath(), mState.getPath());
+
         mDocument.getUndoStack().setClean();
     }
 }
