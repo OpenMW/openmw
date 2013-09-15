@@ -30,6 +30,32 @@ void CSMDoc::OpenSaveStage::perform (int stage, std::vector<std::string>& messag
 }
 
 
+CSMDoc::WriteHeaderStage::WriteHeaderStage (Document& document, SavingState& state)
+: mDocument (document), mState (state)
+{}
+
+int CSMDoc::WriteHeaderStage::setup()
+{
+    return 1;
+}
+
+void CSMDoc::WriteHeaderStage::perform (int stage, std::vector<std::string>& messages)
+{
+    mState.getWriter().setVersion();
+
+    mState.getWriter().setFormat (0);
+
+    /// \todo fill in missing header information
+    mState.getWriter().setAuthor ("");
+    mState.getWriter().setDescription ("");
+    mState.getWriter().setRecordCount (0);
+
+    /// \todo fill in dependency list
+
+    mState.getWriter().save (mState.getStream());
+}
+
+
 CSMDoc::CloseSaveStage::CloseSaveStage (SavingState& state)
 : mState (state)
 {}

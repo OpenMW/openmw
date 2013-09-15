@@ -10,6 +10,9 @@ CSMDoc::Saving::Saving (Document& document)
 {
     appendStage (new OpenSaveStage (mDocument, mState));
 
+    appendStage (new WriteHeaderStage (mDocument, mState));
+
+
 
     appendStage (new CloseSaveStage (mState));
 
