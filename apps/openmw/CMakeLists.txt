@@ -119,6 +119,10 @@ target_link_libraries(openmw
     components
 )
 
+if (USE_SYSTEM_TINYXML)
+    target_link_libraries(openmw ${TINYXML_LIBRARIES})
+endif()
+
 if (NOT UNIX)
 target_link_libraries(openmw ${SDL2MAIN_LIBRARY})
 endif()
