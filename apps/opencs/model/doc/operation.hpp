@@ -43,6 +43,8 @@ namespace CSMDoc
 
             void reportMessage (const QString& message, int type);
 
+            void done (int type);
+
         public slots:
 
             void abort();
@@ -50,6 +52,8 @@ namespace CSMDoc
         private slots:
 
             void executeStage();
+
+            void operationDone();
     };
 }
 

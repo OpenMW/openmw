@@ -61,8 +61,6 @@ namespace CSMTools
 
         private slots:
 
-            void verifierDone();
-
             void verifierMessage (const QString& message, int type);
 
         signals:

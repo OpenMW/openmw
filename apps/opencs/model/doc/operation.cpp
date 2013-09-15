@@ -23,7 +23,10 @@ void CSMDoc::Operation::prepareStages()
     }
 }
 
-CSMDoc::Operation::Operation (int type, bool ordered) : mType (type), mOrdered (ordered) {}
+CSMDoc::Operation::Operation (int type, bool ordered) : mType (type), mOrdered (ordered)
+{
+    connect (this, SIGNAL (finished()), this, SLOT (operationDone()));
+}
 
 CSMDoc::Operation::~Operation()
 {
@@ -80,4 +83,9 @@ void CSMDoc::Operation::executeStage()
 
     if (mCurrentStage==mStages.end())
         exit();
+}
+
+void CSMDoc::Operation::operationDone()
+{
+    emit done (mType);
 }

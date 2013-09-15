@@ -42,7 +42,7 @@ CSMDoc::Operation *CSMTools::Tools::getVerifier()
         mVerifier = new CSMDoc::Operation (CSMDoc::State_Verifying, false);
 
         connect (mVerifier, SIGNAL (progress (int, int, int)), this, SIGNAL (progress (int, int, int)));
-        connect (mVerifier, SIGNAL (finished()), this, SLOT (verifierDone()));
+        connect (mVerifier, SIGNAL (done (int)), this, SIGNAL (done (int)));
         connect (mVerifier, SIGNAL (reportMessage (const QString&, int)),
             this, SLOT (verifierMessage (const QString&, int)));
 
@@ -130,11 +130,6 @@ CSMTools::ReportModel *CSMTools::Tools::getReport (const CSMWorld::UniversalId& 
         throw std::logic_error ("invalid request for report model: " + id.toString());
 
     return mReports.at (id.getIndex());
-}
-
-void CSMTools::Tools::verifierDone()
-{
-    emit done (CSMDoc::State_Verifying);
 }
 
 void CSMTools::Tools::verifierMessage (const QString& message, int type)
