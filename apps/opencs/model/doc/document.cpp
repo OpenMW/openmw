@@ -2141,7 +2141,7 @@ void CSMDoc::Document::createBase()
 
 CSMDoc::Document::Document (const std::vector<boost::filesystem::path>& files,
     const boost::filesystem::path& savePath, bool new_)
-: mSavePath (savePath), mTools (mData)
+: mSavePath (savePath), mTools (mData), mSaving (*this)
 {
     if (files.empty())
         throw std::runtime_error ("Empty content file sequence");
@@ -2166,9 +2166,8 @@ CSMDoc::Document::Document (const std::vector<boost::filesystem::path>& files,
     connect (&mTools, SIGNAL (progress (int, int, int)), this, SLOT (progress (int, int, int)));
     connect (&mTools, SIGNAL (done (int)), this, SLOT (operationDone (int)));
 
-    // dummy implementation -> remove when proper save is implemented.
-    mSaveCount = 0;
-    connect (&mSaveTimer, SIGNAL(timeout()), this, SLOT (saving()));
+    connect (&mSaving, SIGNAL (progress (int, int, int)), this, SLOT (progress (int, int, int)));
+    connect (&mSaving, SIGNAL (done (int)), this, SLOT (operationDone (int)));
 }
 
 CSMDoc::Document::~Document()
@@ -2187,7 +2186,7 @@ int CSMDoc::Document::getState() const
     if (!mUndoStack.isClean())
         state |= State_Modified;
 
-    if (mSaveCount)
+    if (mSaving.isRunning())
         state |= State_Locked | State_Saving | State_Operation;
 
     if (int operations = mTools.getRunningOperations())
@@ -2203,10 +2202,13 @@ const boost::filesystem::path& CSMDoc::Document::getSavePath() const
 
 void CSMDoc::Document::save()
 {
-    mSaveCount = 1;
-    mSaveTimer.start (500);
+    if (mSaving.isRunning())
+        throw std::logic_error (
+            "Failed to initiate save, because a save operation is already running.");
+
+    mSaving.start();
+
     emit stateChanged (getState(), this);
-    emit progress (1, 16, State_Saving, 1, this);
 }
 
 CSMWorld::UniversalId CSMDoc::Document::verify()
@@ -2218,16 +2220,11 @@ CSMWorld::UniversalId CSMDoc::Document::verify()
 
 void CSMDoc::Document::abortOperation (int type)
 {
-    mTools.abortOperation (type);
-
     if (type==State_Saving)
-    {
-        mSaveCount=0;
-        mSaveTimer.stop();
-        emit stateChanged (getState(), this);
-    }
+        mSaving.abort();
+    else
+        mTools.abortOperation (type);
 }
-
 
 void CSMDoc::Document::modificationStateChanged (bool clean)
 {
@@ -2238,24 +2235,6 @@ void CSMDoc::Document::modificationStateChanged (bool clean)
 void CSMDoc::Document::operationDone (int type)
 {
     emit stateChanged (getState(), this);
-}
-
-void CSMDoc::Document::saving()
-{
-    ++mSaveCount;
-
-    emit progress (mSaveCount, 16, State_Saving, 1, this);
-
-    if (mSaveCount>15)
-    {
-        //clear the stack before resetting the save state
-        //to avoid emitting incorrect states
-        mUndoStack.setClean();
-
-        mSaveCount = 0;
-        mSaveTimer.stop();
-        emit stateChanged (getState(), this);
-    }
 }
 
 const CSMWorld::Data& CSMDoc::Document::getData() const

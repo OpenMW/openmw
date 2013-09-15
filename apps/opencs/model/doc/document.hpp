@@ -14,6 +14,7 @@
 #include "../tools/tools.hpp"
 
 #include "state.hpp"
+#include "saving.hpp"
 
 class QAbstractItemModel;
 
@@ -34,13 +35,11 @@ namespace CSMDoc
             boost::filesystem::path mSavePath;
             CSMWorld::Data mData;
             CSMTools::Tools mTools;
+            Saving mSaving;
 
             // It is important that the undo stack is declared last, because on desctruction it fires a signal, that is connected to a slot, that is
             // using other member variables.  Unfortunately this connection is cut only in the QObject destructor, which is way too late.
             QUndoStack mUndoStack;
-
-            int mSaveCount; ///< dummy implementation -> remove when proper save is implemented.
-            QTimer mSaveTimer; ///< dummy implementation -> remove when proper save is implemented.
 
             // not implemented
             Document (const Document&);
@@ -99,9 +98,6 @@ namespace CSMDoc
             void modificationStateChanged (bool clean);
 
             void operationDone (int type);
-
-            void saving();
-            ///< dummy implementation -> remove when proper save is implemented.
 
         public slots:
 

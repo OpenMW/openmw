@@ -5,11 +5,11 @@ opencs_units (. editor)
 set (CMAKE_BUILD_TYPE DEBUG)
 
 opencs_units (model/doc
-    document operation
+    document operation saving
     )
 
 opencs_units_noqt (model/doc
-    documentmanager stage
+    documentmanager stage savingstate savingstages
     )
 
 opencs_hdrs_noqt (model/doc
