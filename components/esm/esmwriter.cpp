@@ -6,7 +6,7 @@
 
 namespace ESM
 {
-    ESMWriter::ESMWriter() : mRecordCount (0), mCounting (false) {}
+    ESMWriter::ESMWriter() : mRecordCount (0), mCounting (true) {}
 
     unsigned int ESMWriter::getVersion() const
     {
@@ -56,6 +56,7 @@ namespace ESM
     {
         mRecordCount = 0;
         mRecords.clear();
+        mCounting = true;
         mStream = &file;
 
         startRecord("TES3", 0);
