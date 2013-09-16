@@ -92,6 +92,7 @@ namespace CSMDoc
                 type += reinterpret_cast<const char *> (&mRecordType)[i];
 
             mState.getWriter().startRecord (type);
+            mState.getWriter().writeHNCString ("NAME", mCollection.getId (stage));
             mCollection.getRecord (stage).mModified.save (mState.getWriter());
             mState.getWriter().endRecord (type);
         }
