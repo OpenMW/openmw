@@ -27,18 +27,4 @@ CSVSettings::AbstractPage::AbstractPage(const QString &pageName, QWidget *parent
 }
 
 CSVSettings::AbstractPage::~AbstractPage()
-{
-}
-
-CSMSettings::SettingList *CSVSettings::AbstractPage::getSettings()
-{
-    CSMSettings::SettingList *settings = new CSMSettings::SettingList();
-
-    foreach (AbstractBlock *block, mAbstractBlocks)
-    {
-        CSMSettings::SettingList *groupSettings = block->getSettings();
-        settings->append (*groupSettings);
-    }
-
-    return settings;
-}
+{}

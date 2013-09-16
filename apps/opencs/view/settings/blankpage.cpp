@@ -15,16 +15,15 @@
 
 #include "../../model/settings/usersettings.hpp"
 #include "groupblock.hpp"
-#include "toggleblock.hpp"
 
 CSVSettings::BlankPage::BlankPage(QWidget *parent):
-    AbstractPage("Blank", parent)
+    AbstractPage("Blank", parent), mLayout(0)
 {
-
+    setupUi();
 }
 
 CSVSettings::BlankPage::BlankPage(const QString &title, QWidget *parent):
-    AbstractPage(title, parent)
+    AbstractPage(title, parent), mLayout(0)
 {
     // Hacks to get the stylesheet look properly
 #ifdef Q_OS_MAC
@@ -39,12 +38,6 @@ void CSVSettings::BlankPage::setupUi()
 {
     QGroupBox *pageBox = new QGroupBox(this);
     layout()->addWidget(pageBox);
-}
-
-void CSVSettings::BlankPage::initializeWidgets (const CSMSettings::SettingMap &settings)
-{
-    //iterate each item in each blocks in this section
-    //validate the corresponding setting against the defined valuelist if any.
-    foreach (AbstractBlock *block, mAbstractBlocks)
-        block->updateSettings (settings);
+    mLayout = new QVBoxLayout(pageBox);
+    pageBox->setLayout(mLayout);
 }

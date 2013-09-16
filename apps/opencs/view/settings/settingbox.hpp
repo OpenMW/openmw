@@ -1,19 +1,19 @@
-#ifndef GROUPBOX_HPP
-#define GROUPBOX_HPP
+#ifndef SETTINGBOX_HPP
+#define SETTINGBOX_HPP
 
 #include <QGroupBox>
+#include "support.hpp"
 
 namespace CSVSettings
 {
     /// Custom implementation of QGroupBox to be used with block classes
-    class GroupBox : public QGroupBox
+    class SettingBox : public QGroupBox
     {
         static const QString INVISIBLE_BOX_STYLE;
-        QString VISIBLE_BOX_STYLE;                  //not a const...
+        QString mVisibleBoxStyle;
 
     public:
-        explicit GroupBox (QWidget *parent = 0);
-        explicit GroupBox (bool isVisible, QWidget *parent = 0);
+        explicit SettingBox (Orientation layoutOrientation, bool isVisible, QWidget *parent = 0);
 
         void setTitle (const QString &title);
         void setBorderVisibility (bool value);
@@ -21,8 +21,7 @@ namespace CSVSettings
 
     private:
         void setMinimumWidth();
-        void initBox(bool isVisible = true);
     };
 }
 
-#endif // GROUPBOX_HPP
+#endif // SETTINGBOX_HPP

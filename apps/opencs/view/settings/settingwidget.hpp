@@ -16,7 +16,6 @@
 
 namespace CSVSettings
 {
-
     /// Generic template for radiobuttons / checkboxes
     template <typename T1>
     class SettingWidget : public AbstractWidget
@@ -26,25 +25,15 @@ namespace CSVSettings
 
     public:
 
-        explicit SettingWidget (WidgetDef &def, QLayout *layout, QWidget* parent = 0)
-            : AbstractWidget (layout, parent), mWidget (new T1 (parent))
+        explicit SettingWidget (const QString &name, QSortFilterProxyModel *model,
+                                QLayout *layout,  QWidget* parent = 0)
+            : AbstractWidget (name, model, layout, parent), mWidget (new T1 (parent))
         {
-            mWidget->setText(def.caption);
-            build (mWidget, def, true);
-            mWidget->setChecked(def.isDefault);
+            setWidget (mWidget);
 
-            connect (mWidget, SIGNAL (toggled (bool)),
-                     this, SLOT (slotUpdateItem (bool)));
-        }
-
-        QWidget *widget()   { return mWidget; }
-
-    private:
-
-        void updateWidget (const QString &value)
-        {
-            if ( value == mWidget->objectName() && !mWidget->isChecked() )
-                mWidget->setChecked (true);
+            mWidget->setText(name);
+            //build (orient, align, "");
+            //mWidget->setChecked(isDefault);
         }
     };
 
@@ -57,39 +46,18 @@ namespace CSVSettings
 
     public:
 
-        SettingWidget (WidgetDef &def, QLayout *layout, QWidget *parent = 0)
-            : AbstractWidget (layout, parent), mWidget (new QSpinBox (parent))
+        explicit SettingWidget (const QString &name, QSortFilterProxyModel *model,
+                                QLayout *layout,  QWidget* parent = 0)
+            : AbstractWidget (name, model, layout, parent), mWidget (new QSpinBox (parent))
         {
-            def.caption += tr(" (%1 to %2)").arg(def.minMax->left).arg(def.minMax->right);
+            //NEEDS TO BE MOVED TO INSTANCING CODE
+//            def.caption += tr(" (%1 to %2)").arg(def.minMax->left).arg(def.minMax->right);
 
-            mWidget->setMaximum     (def.minMax->right.toInt());
-            mWidget->setMinimum     (def.minMax->left.toInt());
-            mWidget->setValue       (def.value.toInt());
+            setWidget (mWidget);
+            //build (orient, align, caption);
 
-            build (mWidget, def);
-
-            connect (mWidget, SIGNAL (valueChanged (int)),
-                     this, SLOT (slotUpdateItem (int)));
-
-            mWidget->setAlignment (getAlignment(def.valueAlignment));
-
-
+            //mWidget->setAlignment (getAlignment(align));
         }
-
-        QWidget *widget()   { return mWidget; }
-
-    private:
-
-        void updateWidget (const QString &value)
-        {
-            int intVal = value.toInt();
-
-            if (intVal >= mWidget->minimum() && intVal <= mWidget->maximum() && intVal != mWidget->value())
-                mWidget->setValue (intVal);
-        }
-
-    signals:
-
     };
 
     /// combo box template
@@ -102,47 +70,21 @@ namespace CSVSettings
 
     public:
 
-        explicit SettingWidget(WidgetDef &def, QLayout *layout, QWidget *parent = 0)
-            : AbstractWidget (layout, parent), mWidget (new QComboBox (parent))
+        explicit SettingWidget (const QString &name, QSortFilterProxyModel *model,
+                                QLayout *layout,  QWidget* parent = 0)
+            : AbstractWidget (name, model, layout, parent), mWidget (new QComboBox (parent))
         {
-            int i = 0;
-
-            foreach (QString item, *(def.valueList))
-            {
-                mWidget->addItem (item);
-
-                if (item == def.value)
-                    mWidget->setCurrentIndex(i);
-
-                i++;
-            }
-
-            build (mWidget, def);
-
-            connect (mWidget, SIGNAL (currentIndexChanged (const QString &)),
-                     this, SLOT (slotUpdateItem (const QString &)));
+            setWidget (mWidget);
+            //build (orient, align, caption);
 
             //center the combo box items
             mWidget->setEditable (true);
             mWidget->lineEdit()->setReadOnly (true);
-            mWidget->lineEdit()->setAlignment (getAlignment(def.valueAlignment));
-
-            QFlags<Qt::AlignmentFlag> alignment = mWidget->lineEdit()->alignment();
-
-            for (int j = 0; j < mWidget->count(); j++)
-                mWidget->setItemData (j, QVariant(alignment), Qt::TextAlignmentRole);
+            //mWidget->lineEdit()->setAlignment (getAlignment(align));
+            //mWidget->setModel(model);
         }
 
-        QWidget *widget()   { return mWidget; }
-
-    private:
-
-        void updateWidget (const QString &value)
-        {
-            if (mWidget->currentText() != value)
-                mWidget->setCurrentIndex(mWidget->findText(value));
-        }
-
+        bool isMultiSelect() { return true; }
     };
 
     /// line edit template
@@ -154,29 +96,20 @@ namespace CSVSettings
 
     public:
 
-        explicit SettingWidget(WidgetDef &def, QLayout *layout, QWidget *parent = 0)
-            : AbstractWidget (layout, parent), mWidget (new QLineEdit (parent))
+        explicit SettingWidget (const QString &name, QSortFilterProxyModel *model,
+                                QLayout *layout,  QWidget* parent = 0)
+            : AbstractWidget (name, model, layout, parent), mWidget (new QLineEdit (parent))
         {
-            if (!def.inputMask.isEmpty())
-                mWidget->setInputMask (def.inputMask);
+            int column = 2;
 
-            mWidget->setText (def.value);
+            setWidget(mWidget, column);
+            //build (orient, align, caption);
 
-            build (mWidget, def);
-
-            connect (mWidget, SIGNAL (textChanged (const QString &)),
-                     this, SLOT (slotUpdateItem (const QString &)));
-
-            mWidget->setAlignment (getAlignment(def.valueAlignment));
+           // mWidget->setAlignment (getAlignment(align));
         }
 
-        QWidget *widget()   { return mWidget; }
-
-        void updateWidget (const QString &value)
-        {
-            if (mWidget->text() != value)
-            mWidget->setText(value);
-        }
+        void setInputMask (const QString &mask)
+        { mWidget->setInputMask (mask); }
     };
 
     /// list widget template
@@ -189,25 +122,15 @@ namespace CSVSettings
 
     public:
 
-        explicit SettingWidget(WidgetDef &def, QLayout *layout, QWidget *parent = 0 )
-            : AbstractWidget (layout, parent), mWidget (new QListWidget (parent))
+        explicit SettingWidget (const QString &name, QSortFilterProxyModel *model,
+                                QLayout *layout,  QWidget* parent = 0)
+            : AbstractWidget (name, model, layout, parent), mWidget (new QListWidget (parent))
         {
-            int i = 0;
-
-            foreach (QString item, *(def.valueList))
-            {
-                mWidget->addItem (item);
-
-                if (item == def.value) {}
-                i++;
-            }
-            build (mWidget, def);
+            setWidget (mWidget);
+            //build (orient, align, caption);
         }
 
-        QWidget *widget()   { return mWidget; }
-
-    private:
-        void updateWidget (const QString &value) {}
+        bool isMultiSelect() { return true; }
     };
 
 }

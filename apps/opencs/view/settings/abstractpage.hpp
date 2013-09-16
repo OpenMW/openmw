@@ -35,13 +35,6 @@ namespace CSVSettings {
 
         virtual void setupUi() = 0;
 
-        /// triggers widgiet initialization at the page level.  All widgets updated to
-        /// current setting values
-        virtual void initializeWidgets (const CSMSettings::SettingMap &settings) = 0;
-
-        /// retrieve the list of settings local to the page.
-        CSMSettings::SettingList *getSettings();
-
         void setObjectName();
 
     protected:

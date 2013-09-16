@@ -7,6 +7,8 @@
 #include <QApplication>
 #include <QIcon>
 
+#include <QDebug>
+
 class Application : public QApplication
 {
     private:
@@ -38,12 +40,12 @@ int main(int argc, char *argv[])
     mApplication.setWindowIcon (QIcon (":./opencs.png"));
 
     CS::Editor editor;
-
+/*
     if(!editor.makeIPCServer())
     {
     	editor.connectToIPCServer();
-    	return 0;
+        return 0;
     }
-
+*/
     return editor.run();
 }

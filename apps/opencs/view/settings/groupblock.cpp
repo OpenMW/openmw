@@ -8,7 +8,7 @@ CSVSettings::GroupBlock::GroupBlock (QWidget* parent)
 CSVSettings::GroupBlock::GroupBlock (bool isVisible, QWidget *parent)
     : AbstractBlock (isVisible, parent)
 {}
-
+/*
 int CSVSettings::GroupBlock::build (GroupBlockDef *def)
 {
 
@@ -19,7 +19,7 @@ int CSVSettings::GroupBlock::build (GroupBlockDef *def)
 
     setVisible (def->isVisible);
 
-    mBox->setLayout(createLayout (def->widgetOrientation, def->isZeroMargin));
+    mBox->setLayout(createLayout (def->widgetOrientation));
 
     setObjectName (def->title);
     mBox->setTitle (def->title);
@@ -36,27 +36,9 @@ int CSVSettings::GroupBlock::build (GroupBlockDef *def)
 
         mItemBlockList << block;
         mBox->layout()->addWidget (block->getGroupBox());
-
-        connect (block, SIGNAL (signalUpdateSetting (const QString &, const QString &)),
-                 this, SLOT (slotUpdateSetting (const QString &, const QString &) ));
     }
 
     return retVal;
-}
-
-CSMSettings::SettingList *CSVSettings::GroupBlock::getSettings()
-{
-    CSMSettings::SettingList *settings = 0;
-
-    foreach (ItemBlock *block, mItemBlockList)
-    {
-        if (!settings)
-            settings = new CSMSettings::SettingList();
-
-        settings->append(*(block->getSettings ()));
-    }
-
-    return settings;
 }
 
 CSVSettings::ItemBlock *CSVSettings::GroupBlock::getItemBlock (const QString &name, ItemBlockList *blockList)
@@ -87,22 +69,4 @@ CSVSettings::ItemBlock *CSVSettings::GroupBlock::getItemBlock (int index)
 
     return retBlock;
 }
-
-bool CSVSettings::GroupBlock::updateSettings (const CSMSettings::SettingMap &settings)
-{
-    bool success = true;
-
-    //update all non-proxy settings
-    foreach (ItemBlock *block, mItemBlockList)
-    {
-        CSMSettings::SettingContainer *setting = settings[block->objectName()];
-
-        if (setting)
-        {
-            bool success2 = block->update (setting->getValue());
-            success = success && success2;
-        }
-    }
-
-    return success;
-}
+*/

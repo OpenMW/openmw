@@ -2,11 +2,13 @@
 
 #include <QFontMetrics>
 
+#include <QDebug>
+
 CSVSettings::ItemBlock::ItemBlock (QWidget* parent)
-    : mSetting (0), AbstractBlock (false, parent)
+    : AbstractBlock (false, parent)
 {
 }
-
+/*
 int CSVSettings::ItemBlock::build(SettingsItemDef &iDef)
 {
     buildItemBlock (iDef);
@@ -61,55 +63,5 @@ void CSVSettings::ItemBlock::buildItemBlock (SettingsItemDef &iDef)
     QString defaultValue = iDef.defaultValue;
 
     setObjectName(iDef.name);
-
-    mSetting = new CSMSettings::SettingsItem (objectName(),
-                                 iDef.hasMultipleValues, iDef.defaultValue,
-                                 parent());
-
-    if (iDef.valueList)
-        mSetting->setValueList(iDef.valueList);
-
-    if (!iDef.minMax.isEmpty())
-        mSetting->setValuePair(iDef.minMax);
 }
-
-
-bool CSVSettings::ItemBlock::update (const QString &value)
-{
-    bool success = updateItem (value);
-
-    if (success)
-        signalUpdateWidget (value);
-
-    return success;
-}
-
-
-bool CSVSettings::ItemBlock::updateItem (const QString &value)
-{
-    return mSetting->updateItem(value);
-}
-
-
-bool CSVSettings::ItemBlock::updateBySignal(const QString &name, const QString &value, bool &doEmit)
-{
-    bool success = (mSetting->getValue() != value);
-
-    if (success)
-        success = updateItem(value);
-
-    return success;
-}
-
-CSMSettings::SettingList *CSVSettings::ItemBlock::getSettings ()
-{
-    CSMSettings::SettingList *list = new CSMSettings::SettingList();
-    list->push_back(mSetting);
-
-    return list;
-}
-
-QString CSVSettings::ItemBlock::getValue() const
-{
-    return mSetting->getValue();
-}
+*/

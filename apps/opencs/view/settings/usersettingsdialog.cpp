@@ -18,13 +18,20 @@
 #include "../../model/settings/support.hpp"
 #include <boost/filesystem/path.hpp>
 #include "settingwidget.hpp"
+#include "blankpage.hpp"
+#include "../../model/settings/usersettings.hpp"
+
+#include <QDataWidgetMapper>
+#include <QSortFilterProxyModel>
+#include <QStandardItemModel>
 
 CSVSettings::UserSettingsDialog::UserSettingsDialog(QMainWindow *parent) :
     QMainWindow (parent), mStackedWidget (0)
 {
     setWindowTitle(QString::fromUtf8 ("User Settings"));
     buildPages();
-    setWidgetStates ();
+
+    createSettingModelWidget ();
 
     connect (mListWidget,
              SIGNAL (currentItemChanged(QListWidgetItem*, QListWidgetItem*)),
@@ -36,26 +43,14 @@ CSVSettings::UserSettingsDialog::~UserSettingsDialog()
 {
 }
 
-void CSVSettings::UserSettingsDialog::closeEvent (QCloseEvent *event)
+void CSVSettings::UserSettingsDialog::createSettingModelWidget()
 {
-    writeSettings();
+
 }
 
-void CSVSettings::UserSettingsDialog::setWidgetStates ()
+void CSVSettings::UserSettingsDialog::closeEvent (QCloseEvent *event)
 {
-    CSMSettings::UserSettings::instance().loadSettings("opencs.cfg");
-
-    //iterate the tabWidget's pages (sections)
-    for (int i = 0; i < mStackedWidget->count(); i++)
-    {
-        //get the settings defined for the entire section
-        //and update widget
-        QString pageName = mStackedWidget->widget(i)->objectName();
-
-        const CSMSettings::SettingMap *settings = CSMSettings::UserSettings::instance().getSettings(pageName);
-        AbstractPage &page = getAbstractPage (i);
-        page.initializeWidgets(*settings);
-    }
+    CSMSettings::UserSettings::instance().writeSettings();
 }
 
 void CSVSettings::UserSettingsDialog::buildPages()
@@ -83,19 +78,8 @@ void CSVSettings::UserSettingsDialog::buildPages()
 
     createPage<WindowPage>();
     createPage<DataDisplayFormatPage>();
+    createPage<BlankPage>();
 
-}
-
-void CSVSettings::UserSettingsDialog::writeSettings()
-{
-    QMap<QString, CSMSettings::SettingList *> settings;
-
-    for (int i = 0; i < mStackedWidget->count(); ++i)
-    {
-        AbstractPage &page = getAbstractPage (i);
-        settings [page.objectName()] = page.getSettings();
-    }
-    CSMSettings::UserSettings::instance().writeSettings(settings);
 }
 
 CSVSettings::AbstractPage &CSVSettings::UserSettingsDialog::getAbstractPage (int index)

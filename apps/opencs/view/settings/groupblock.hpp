@@ -12,23 +12,17 @@ namespace CSVSettings
     /// Derived block classes should use CustomBlock
     class GroupBlock : public AbstractBlock
     {
-        ItemBlockList mItemBlockList;
+        //ItemBlockList mItemBlockList;
 
     public:
         GroupBlock (QWidget* parent = 0);
         GroupBlock (bool isVisible, QWidget *parent = 0);
 
         /// build the gorup block based on passed definition
-        int build (GroupBlockDef *def);
-
-        /// update settings local to the group block
-        bool updateSettings (const CSMSettings::SettingMap &settings);
-
-        /// retrieve setting list local to the group block
-        CSMSettings::SettingList *getSettings();
+       // int build (GroupBlockDef *def);
 
         /// retrieve item block by name from the passed list or local list
-        ItemBlock *getItemBlock (const QString &name, ItemBlockList *blockList = 0);
+       // ItemBlock *getItemBlock (const QString &name, ItemBlockList *blockList = 0);
 
         /// retrieve the item block by index from the local list
         ItemBlock *getItemBlock (int index);
@@ -36,7 +30,7 @@ namespace CSVSettings
     protected:
 
         /// create block layout based on passed definition
-        int buildLayout (GroupBlockDef &def);
+      //  int buildLayout (GroupBlockDef &def);
 
     };
 }

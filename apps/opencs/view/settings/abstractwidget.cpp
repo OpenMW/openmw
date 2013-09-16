@@ -1,46 +1,67 @@
-#include "abstractwidget.hpp"
-
 #include <QLayout>
 #include <QLabel>
+#include <QSortFilterProxyModel>
+#include <QDataWidgetMapper>
 
-void CSVSettings::AbstractWidget::build(QWidget *widget, WidgetDef &def, bool noLabel)
+#include "abstractwidget.hpp"
+#include "../../model/settings/setting.hpp"
+
+#include <QDebug>
+
+CSVSettings::AbstractWidget::AbstractWidget (const QString &name, QSortFilterProxyModel *model, QLayout *layout, QWidget *parent)
+    : QObject (parent), mLayout (layout), mWidget (0), mFilterProxy (0), mDataAdapter (0)
 {
-    if (!mLayout)
-        createLayout(def.orientation, true);
+    setObjectName (name);
 
-    buildLabelAndWidget (widget, def, noLabel);
+    if (model)
+    {
+        mDataAdapter = new QDataWidgetMapper (parent);
+        mFilterProxy = new QSortFilterProxyModel (parent);
 
+        mFilterProxy->setSourceModel (model);
+        mFilterProxy->setFilterKeyColumn (0);
+        mFilterProxy->setFilterFixedString (name);
+        mFilterProxy->setDynamicSortFilter (true);
+
+        qDebug() << "building widget based on section: " << name << "; records: " << mFilterProxy->rowCount();
+
+        qDebug() << "record value: " << mFilterProxy->data(mFilterProxy->index(0,2,QModelIndex()), Qt::DisplayRole).toString();
+        mDataAdapter->setModel (mFilterProxy);
+    }
 }
 
-void CSVSettings::AbstractWidget::buildLabelAndWidget (QWidget *widget, WidgetDef &def, bool noLabel)
+void CSVSettings::AbstractWidget::setWidget(QWidget *widget, int column)
 {
-    if (def.widgetWidth > -1)
-        widget->setFixedWidth (def.widgetWidth);
+    mWidget = widget;
 
-    if (!(def.caption.isEmpty() || noLabel) )
+    if (mDataAdapter)
     {
-        QLabel *label = new QLabel (def.caption, &dynamic_cast<QWidget &>( *parent()));
-        label->setBuddy (widget);
-        mLayout->addWidget (label);
+        mDataAdapter->addMapping (mWidget, column);
+        mDataAdapter->toFirst();
+    }
+}
 
-        if (def.labelWidth > -1)
-            label->setFixedWidth(def.labelWidth);
+void CSVSettings::AbstractWidget::build
+        (Orientation orient, Alignment align, const QString &caption)
+{
+    if (!caption.isEmpty())
+    {
+        QLabel *label = new QLabel (caption, &dynamic_cast<QWidget &>( *parent()));
+        label->setBuddy (mWidget);
+        mLayout->addWidget (label);
     }
 
-    mLayout->addWidget (widget);
-    mLayout->setAlignment (widget, getAlignment (def.widgetAlignment));
+    mLayout->setContentsMargins(0, 0, 0, 0);
+    mLayout->addWidget (mWidget);
+    mLayout->setAlignment (mWidget, getAlignment (align));
 }
 
-void CSVSettings::AbstractWidget::createLayout
-        (Orientation direction, bool isZeroMargin)
+void CSVSettings::AbstractWidget::createLayout (Orientation direction)
 {
     if (direction == Orient_Vertical)
         mLayout = new QVBoxLayout ();
     else
         mLayout = new QHBoxLayout ();
-
-    if (isZeroMargin)
-        mLayout->setContentsMargins(0, 0, 0, 0);
 }
 
 QFlags<Qt::AlignmentFlag> CSVSettings::AbstractWidget::getAlignment (CSVSettings::Alignment flag)
@@ -48,31 +69,15 @@ QFlags<Qt::AlignmentFlag> CSVSettings::AbstractWidget::getAlignment (CSVSettings
     return QFlags<Qt::AlignmentFlag>(static_cast<int>(flag));
 }
 
-QLayout *CSVSettings::AbstractWidget::getLayout()
+CSMSettings::Setting *CSVSettings::AbstractWidget::buildSetting (QSortFilterProxyModel *settingModel)
 {
-    return mLayout;
-}
+    CSMSettings::Setting *setting = new CSMSettings::Setting (objectName(), "", "", this);
 
-void CSVSettings::AbstractWidget::slotUpdateWidget (const QString &value)
-{
-    updateWidget (value);
-}
+    for (int i = 0; i < settingModel->columnCount(); ++i)
+    {
+        QModelIndex index = settingModel->index(0,i, QModelIndex());
+        setting->setItem (i, settingModel->data(index));
+    }
 
-void CSVSettings::AbstractWidget::slotUpdateItem(const QString &value)
-{
-    emit signalUpdateItem (value);
+    return setting;
 }
-
-void CSVSettings::AbstractWidget::slotUpdateItem(bool value)
-{
-    if (value)
-        emit signalUpdateItem (widget()->objectName());
-}
-
-void CSVSettings::AbstractWidget::slotUpdateItem(int value)
-{
-    emit signalUpdateItem (QString::number(value));
-}
-
-void CSVSettings::AbstractWidget::slotUpdateItem (QListWidgetItem* current, QListWidgetItem* previous)
-{}

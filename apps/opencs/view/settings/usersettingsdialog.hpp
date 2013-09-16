@@ -13,6 +13,9 @@ class QHBoxLayout;
 class AbstractWidget;
 class QStackedWidget;
 class QListWidget;
+class QDataWidgetMapper;
+
+namespace CSMSettings { class SettingModel; }
 
 namespace CSVSettings {
 
@@ -25,6 +28,7 @@ namespace CSVSettings {
         QListWidget *mListWidget;
         QStackedWidget *mStackedWidget;
 
+        QDataWidgetMapper *mMapper;
     public:
         UserSettingsDialog(QMainWindow *parent = 0);
         ~UserSettingsDialog();
@@ -37,9 +41,10 @@ namespace CSVSettings {
         /// return the setting page by name
         /// performs dynamic cast to AbstractPage *
         AbstractPage &getAbstractPage (int index);
-        void setWidgetStates ();
+
         void buildPages();
-        void writeSettings();
+
+        void createSettingModelWidget();
 
         /// Templated function to create a custom user preference page
         template <typename T>

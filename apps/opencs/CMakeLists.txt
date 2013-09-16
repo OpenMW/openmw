@@ -78,7 +78,6 @@ opencs_units_noqt (view/tools
 
 opencs_units (view/settings
     abstractblock
-    proxyblock
     abstractwidget
     usersettingsdialog
     datadisplayformatpage
@@ -89,22 +88,22 @@ opencs_units_noqt (view/settings
     abstractpage
     blankpage
     groupblock
-    customblock
-    groupbox
+    settingbox
     itemblock
+    settingpage
+    settingview
     settingwidget
-    toggleblock
     support
     )
 
 opencs_units (model/settings
     usersettings
-    settingcontainer
+    settingmodel
+    setting
     )
 
 opencs_units_noqt (model/settings
     support
-    settingsitem
     )
 
 opencs_units_noqt (model/filter

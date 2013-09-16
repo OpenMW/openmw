@@ -1,10 +1,17 @@
 #ifndef ABSTRACTWIDGET_HPP
 #define ABSTRACTWIDGET_HPP
 
-#include <QWidget>
+#include <QDebug>
 #include "support.hpp"
 
 class QLayout;
+class QAbstractTableModel;
+
+namespace CSMSettings { class Setting; }
+
+class QSortFilterProxyModel;
+class QDataWidgetMapper;
+class QWidget;
 
 namespace CSVSettings
 {
@@ -14,56 +21,44 @@ namespace CSVSettings
         Q_OBJECT
 
         QLayout *mLayout;
+        QDataWidgetMapper *mDataAdapter;
+        QSortFilterProxyModel *mFilterProxy;
+        QWidget *mWidget;
 
     public:
 
         /// Passed layout is assigned the constructed widget.
-        /// if no layout is passed, one is created.
-        explicit AbstractWidget (QLayout *layout = 0, QWidget* parent = 0)
-            : QObject (parent), mLayout (layout)
-        {}
+        explicit AbstractWidget (const QString &name, QSortFilterProxyModel *model, QLayout *layout, QWidget* parent);
 
         /// retrieve layout for insertion into itemblock
-        QLayout *getLayout();
+        QLayout *layout() { return mLayout; }
 
         /// create the derived widget instance
-        void build (QWidget* widget, WidgetDef &def, bool noLabel = false);
+        void build (Orientation orient, Alignment align, const QString &caption = "");
+
+        /// Virtual function to determine wheter or not a setting widget
+        /// can / should handle multiple selections
+        virtual bool isMultiSelect() { return false; }
 
         /// reference to the derived widget instance
-        virtual QWidget *widget() = 0;
+        virtual QWidget *widget() { return mWidget; }
 
     protected:
-
-        /// Callback called by receiving slot for widget udpates
-        virtual void updateWidget (const QString &value) = 0;
 
         /// Converts user-defined enum to Qt equivalents
         QFlags<Qt::AlignmentFlag> getAlignment (Alignment flag);
 
+        /// Assigns the widget created in the template class and finishes
+        /// connecting the data adapter
+        void setWidget (QWidget *widget, int column = 0);
+
     private:
 
         /// Creates layout and assigns label and widget as appropriate
-        void createLayout (Orientation direction, bool isZeroMargin);
+        void createLayout (Orientation direction);
 
-        /// Creates label and widget according to passed definition
-        void buildLabelAndWidget (QWidget *widget, WidgetDef &def, bool noLabel);
-
-
-    signals:
-
-        /// outbound update signal
-        void signalUpdateItem (const QString &value);
-
-    public slots:
-
-        /// receives inbound updates
-        void slotUpdateWidget (const QString &value);
-
-        /// Overloads for outbound updates from derived widget signal
-        void slotUpdateItem  (const QString &value);
-        void slotUpdateItem  (bool value);
-        void slotUpdateItem  (int value);
-        void slotUpdateItem (QListWidgetItem* current, QListWidgetItem* previous);
+        /// Reconstructs the setting object for a model item
+        CSMSettings::Setting *buildSetting (QSortFilterProxyModel *settingModel);
     };
 }
 #endif // ABSTRACTWIDGET_HPP

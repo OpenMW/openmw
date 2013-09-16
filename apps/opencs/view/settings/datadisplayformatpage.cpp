@@ -7,7 +7,7 @@ CSVSettings::DataDisplayFormatPage::DataDisplayFormatPage(QWidget* parent) :
 {
     setupUi();
 }
-
+/*
 CSVSettings::GroupBlockDef *CSVSettings::DataDisplayFormatPage::setupDataDisplay( const QString &title)
 {
     GroupBlockDef *statusBlock = new GroupBlockDef(QString(title));
@@ -21,8 +21,6 @@ CSVSettings::GroupBlockDef *CSVSettings::DataDisplayFormatPage::setupDataDisplay
     statusItem->widget = statusWidget;
 
     statusBlock->settingItems << statusItem;
-
-    statusBlock->isZeroMargin = false;
 
     return statusBlock;
 }
@@ -46,12 +44,4 @@ void CSVSettings::DataDisplayFormatPage::setupUi()
                SIGNAL ( signalUpdateEditorSetting (const QString &, const QString &)));
 
 }
-
-void CSVSettings::DataDisplayFormatPage::initializeWidgets (const CSMSettings::SettingMap &settings)
-{
-    //iterate each item in each blocks in this section
-    //validate the corresponding setting against the defined valuelist if any.
-    for (AbstractBlockList::Iterator it_block = mAbstractBlocks.begin();
-                                     it_block != mAbstractBlocks.end(); ++it_block)
-        (*it_block)->updateSettings (settings);
-}
+*/

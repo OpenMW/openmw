@@ -1,15 +1,14 @@
 #include "abstractblock.hpp"
 
 CSVSettings::AbstractBlock::AbstractBlock(QWidget* parent)
-    : QObject (parent), mBox ( new GroupBox (parent) ), mWidgetParent (parent)
+    : QObject (parent) //, mBox ( new GroupBox (parent) ), mWidgetParent (parent)
 {}
 
 CSVSettings::AbstractBlock::AbstractBlock(bool isVisible, QWidget* parent)
-    : QObject (parent), mBox ( new GroupBox (isVisible, parent)), mWidgetParent (parent)
+    : QObject (parent) //, mBox ( new GroupBox (isVisible, parent)), mWidgetParent (parent)
 {}
-
-QLayout *CSVSettings::AbstractBlock::createLayout (Orientation direction,
-                                                   bool isZeroMargin, QWidget* parent)
+/*
+QLayout *CSVSettings::AbstractBlock::createLayout (Orientation direction, QWidget* parent)
 {
     QLayout *layout = 0;
 
@@ -18,8 +17,7 @@ QLayout *CSVSettings::AbstractBlock::createLayout (Orientation direction,
     else
         layout = new QHBoxLayout (parent);
 
-    if (isZeroMargin)
-        layout->setContentsMargins(0, 0, 0, 0);
+    layout->setContentsMargins(0, 0, 0, 0);
 
     return layout;
 }
@@ -38,27 +36,44 @@ CSVSettings::AbstractWidget *CSVSettings::AbstractBlock::buildWidget (const QStr
     {
 
     case Widget_RadioButton:
-        widg = new SettingWidget<QRadioButton> (def, layout, mBox);
+        widg = new SettingWidget<QRadioButton> (layout,
+               def.orientation, def.widgetAlignment,
+               def.isDefault, 0, def.caption, mBox);
         break;
 
     case Widget_SpinBox:
-        widg =  new SettingWidget<QSpinBox> (def, layout, mBox);
+        widg =  new SettingWidget<QSpinBox> (layout,
+                 def.orientation, def.widgetAlignment,
+                 def.isDefault, 0, def.caption, mBox);
+
         break;
 
     case Widget_CheckBox:
-        widg = new SettingWidget<QCheckBox> (def, layout, mBox);
+        widg = new SettingWidget<QCheckBox> (layout,
+                 def.orientation, def.widgetAlignment,
+                 def.isDefault, 0, def.caption, mBox);
+
         break;
 
     case Widget_LineEdit:
-        widg = new SettingWidget<QLineEdit> (def, layout, mBox);
+        widg = new SettingWidget<QLineEdit> (layout,
+                 def.orientation, def.widgetAlignment,
+                 def.isDefault, 0, def.caption, mBox);
+
         break;
 
     case Widget_ListBox:
-        widg = new SettingWidget<QListWidget> (def, layout, mBox);
+        widg = new SettingWidget<QListWidget> (layout,
+               def.orientation, def.widgetAlignment,
+               def.isDefault,  0, def.caption, mBox);
+
         break;
 
     case Widget_ComboBox:
-        widg = new SettingWidget<QComboBox> (def, layout, mBox);
+        widg = new SettingWidget<QComboBox> (layout,
+             def.orientation, def.widgetAlignment,
+             def.isDefault, 0, def.caption, mBox);
+
         break;
 
     default:
@@ -69,10 +84,6 @@ CSVSettings::AbstractWidget *CSVSettings::AbstractBlock::buildWidget (const QStr
         mBox->setLayout(widg->getLayout());
 
     widg->widget()->setObjectName(widgetName);
-
-    if (isConnected)
-        connect (widg, SIGNAL (signalUpdateItem (const QString &)), this, SLOT (slotUpdate (const QString &)));
-        connect (this, SIGNAL (signalUpdateWidget (const QString &)), widg, SLOT (slotUpdateWidget (const QString &) ));
 
     return widg;
 }
@@ -92,21 +103,8 @@ QWidget *CSVSettings::AbstractBlock::getParent() const
     return mWidgetParent;
 }
 
-void CSVSettings::AbstractBlock::slotUpdate (const QString &value)
-{
-    slotUpdateSetting (objectName(), value);
-}
-
 void CSVSettings::AbstractBlock::slotSetEnabled(bool value)
 {
-    mBox->setEnabled(value);
+    return;
 }
-
-void CSVSettings::AbstractBlock::slotUpdateSetting (const QString &settingName, const QString &settingValue)
-{
-    bool doEmit = true;
-    updateBySignal (settingName, settingValue, doEmit);
-
-    if (doEmit)
-        emit signalUpdateSetting (settingName, settingValue);
-}
+*/

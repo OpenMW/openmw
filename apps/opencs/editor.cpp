@@ -69,7 +69,6 @@ void CS::Editor::setupDataFiles()
     //load the settings into the userSettings instance.
     const QString settingFileName = "opencs.cfg";
     CSMSettings::UserSettings::instance().loadSettings(settingFileName);
-    
 }
 
 void CS::Editor::createDocument()

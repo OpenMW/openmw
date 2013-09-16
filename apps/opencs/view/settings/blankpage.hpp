@@ -14,6 +14,7 @@ namespace CSVSettings {
     /// Reference use only.
     class BlankPage : public AbstractPage
     {
+        QLayout *mLayout;
 
     public:
 
@@ -21,7 +22,9 @@ namespace CSVSettings {
         BlankPage (const QString &title, QWidget *parent);
 
         void setupUi();
-        void initializeWidgets (const CSMSettings::SettingMap &settings);
+
+        //void initializeWidgets (const CSMSettings::SettingMap &settings);
+        QLayout *getGroupBoxLayout() const { return mLayout; }
     };
 }
 

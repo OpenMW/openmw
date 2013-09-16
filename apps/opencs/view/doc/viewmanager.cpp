@@ -80,9 +80,9 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
     for (std::size_t i=0; i<sizeof (sMapping)/sizeof (Mapping); ++i)
         mDelegateFactories->add (sMapping[i].mDisplay, new CSVWorld::EnumDelegateFactory (
             CSMWorld::Columns::getEnums (sMapping[i].mColumnId), sMapping[i].mAllowNone));
-
+/*
     connect (&CSMSettings::UserSettings::instance(), SIGNAL (signalUpdateEditorSetting (const QString &, const QString &)),
-        this, SLOT (slotUpdateEditorSetting (const QString &, const QString &)));
+        this, SLOT (slotUpdateEditorSetting (const QString &, const QString &)));*/
 }
 
 CSVDoc::ViewManager::~ViewManager()
@@ -311,7 +311,7 @@ void CSVDoc::ViewManager::exitApplication (CSVDoc::View *view)
 }
 
 void CSVDoc::ViewManager::slotUpdateEditorSetting (const QString &settingName, const QString &settingValue)
-{
+{/*
     foreach (CSVDoc::View *view, mViews)
-        view->updateEditorSetting (settingName, settingValue);
+        view->updateEditorSetting (settingName, settingValue);*/
 }

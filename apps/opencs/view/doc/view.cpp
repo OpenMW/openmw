@@ -208,12 +208,13 @@ void CSVDoc::View::updateActions()
 CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews)
     : mViewManager (viewManager), mDocument (document), mViewIndex (totalViews-1),
       mViewTotal (totalViews)
-{
+{/*
     QString width = CSMSettings::UserSettings::instance().getSetting(QString("Window Size"), QString("Width"));
     QString height = CSMSettings::UserSettings::instance().getSetting(QString("Window Size"), QString("Height"));
+*/
+    //resize (width.toInt(), height.toInt());
 
-    resize (width.toInt(), height.toInt());
-
+    resize (640, 480);
     mSubViewWindow.setDockOptions (QMainWindow::AllowNestedDocks);
 
     setCentralWidget (&mSubViewWindow);
@@ -299,7 +300,7 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id)
     connect (view, SIGNAL (focusId (const CSMWorld::UniversalId&)), this,
         SLOT (addSubView (const CSMWorld::UniversalId&)));
 
-    CSMSettings::UserSettings::instance().updateSettings("Display Format");
+    //CSMSettings::UserSettings::instance().updateSettings("Display Format");
 
     view->show();
 }
@@ -435,7 +436,7 @@ void CSVDoc::View::resizeViewHeight (int height)
 }
 
 void CSVDoc::View::updateEditorSetting (const QString &settingName, const QString &settingValue)
-{
+{/*
     if ( (settingName == "Record Status Display") || (settingName == "Referenceable ID Type Display") )
     {
         foreach (QObject *view, mSubViewWindow.children())
@@ -451,7 +452,7 @@ void CSVDoc::View::updateEditorSetting (const QString &settingName, const QStrin
             resizeViewWidth (settingValue.toInt());
 
     else if (settingName == "Height")
-            resizeViewHeight (settingValue.toInt());
+            resizeViewHeight (settingValue.toInt());*/
 }
 
 void CSVDoc::View::toggleShowStatusBar (bool show)
