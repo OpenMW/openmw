@@ -2058,9 +2058,9 @@ void CSMDoc::Document::addOptionalGlobals()
 {
     static const char *sGlobals[] =
     {
-        "dayspassed",
-        "pcwerewolf",
-        "pcyear",
+        "DaysPassed",
+        "PCWerewolf",
+        "PCYear",
         0
     };
 
