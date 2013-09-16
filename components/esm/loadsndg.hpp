@@ -33,7 +33,7 @@ struct SoundGenerator
     std::string mId, mCreature, mSound;
 
     void load(ESMReader &esm);
-    void save(ESMWriter &esm);
+    void save(ESMWriter &esm) const;
 };
 }
 #endif

@@ -15,7 +15,7 @@ void Door::load(ESMReader &esm)
     mCloseSound = esm.getHNOString("ANAM");
 }
 
-void Door::save(ESMWriter &esm)
+void Door::save(ESMWriter &esm) const
 {
     esm.writeHNCString("MODL", mModel);
     esm.writeHNOCString("FNAM", mName);

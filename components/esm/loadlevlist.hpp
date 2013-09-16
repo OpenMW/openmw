@@ -51,7 +51,7 @@ struct LeveledListBase
     std::vector<LevelItem> mList;
 
     void load(ESMReader &esm);
-    void save(ESMWriter &esm);
+    void save(ESMWriter &esm) const;
 
     void blank();
     ///< Set record to default state (does not touch the ID).

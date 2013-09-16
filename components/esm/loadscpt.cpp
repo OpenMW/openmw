@@ -50,11 +50,11 @@ void Script::load(ESMReader &esm)
     // Script text
     mScriptText = esm.getHNOString("SCTX");
 }
-void Script::save(ESMWriter &esm)
+void Script::save(ESMWriter &esm) const
 {
     std::string varNameString;
     if (!mVarNames.empty())
-        for (std::vector<std::string>::iterator it = mVarNames.begin(); it != mVarNames.end(); ++it)
+        for (std::vector<std::string>::const_iterator it = mVarNames.begin(); it != mVarNames.end(); ++it)
             varNameString.append(*it);
 
     SCHD data;
@@ -68,7 +68,7 @@ void Script::save(ESMWriter &esm)
     if (!mVarNames.empty())
     {
         esm.startSubRecord("SCVR");
-        for (std::vector<std::string>::iterator it = mVarNames.begin(); it != mVarNames.end(); ++it)
+        for (std::vector<std::string>::const_iterator it = mVarNames.begin(); it != mVarNames.end(); ++it)
         {
             esm.writeHCString(*it);
         }

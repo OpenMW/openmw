@@ -17,7 +17,7 @@ void Probe::load(ESMReader &esm)
     mIcon = esm.getHNOString("ITEX");
 }
 
-void Probe::save(ESMWriter &esm)
+void Probe::save(ESMWriter &esm) const
 {
     esm.writeHNCString("MODL", mModel);
     esm.writeHNCString("FNAM", mName);

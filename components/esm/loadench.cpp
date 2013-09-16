@@ -12,7 +12,7 @@ void Enchantment::load(ESMReader &esm)
     mEffects.load(esm);
 }
 
-void Enchantment::save(ESMWriter &esm)
+void Enchantment::save(ESMWriter &esm) const
 {
     esm.writeHNT("ENDT", mData, 16);
     mEffects.save(esm);

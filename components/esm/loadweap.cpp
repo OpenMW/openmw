@@ -15,7 +15,7 @@ void Weapon::load(ESMReader &esm)
     mIcon = esm.getHNOString("ITEX");
     mEnchant = esm.getHNOString("ENAM");
 }
-void Weapon::save(ESMWriter &esm)
+void Weapon::save(ESMWriter &esm) const
 {
     esm.writeHNCString("MODL", mModel);
     esm.writeHNOCString("FNAM", mName);

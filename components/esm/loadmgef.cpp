@@ -58,15 +58,11 @@ void MagicEffect::load(ESMReader &esm)
 
   mDescription = esm.getHNOString("DESC");
 }
-void MagicEffect::save(ESMWriter &esm)
+void MagicEffect::save(ESMWriter &esm) const
 {
     esm.writeHNT("INDX", mIndex);
 
-    mData.mFlags &= 0xe00;
     esm.writeHNT("MEDT", mData, 36);
-    if (mIndex>=0 && mIndex<NumberOfHardcodedFlags) {
-        mData.mFlags |= HardcodedFlags[mIndex];
-    }
 
     esm.writeHNOCString("ITEX", mIcon);
     esm.writeHNOCString("PTEX", mParticle);
@@ -74,12 +70,12 @@ void MagicEffect::save(ESMWriter &esm)
     esm.writeHNOCString("CSND", mCastSound);
     esm.writeHNOCString("HSND", mHitSound);
     esm.writeHNOCString("ASND", mAreaSound);
-    
+
     esm.writeHNOCString("CVFX", mCasting);
     esm.writeHNOCString("BVFX", mBolt);
     esm.writeHNOCString("HVFX", mHit);
     esm.writeHNOCString("AVFX", mArea);
-    
+
     esm.writeHNOString("DESC", mDescription);
 }
 

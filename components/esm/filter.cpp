@@ -10,7 +10,7 @@ void ESM::Filter::load (ESMReader& esm)
     mDescription = esm.getHNString ("DESC");
 }
 
-void ESM::Filter::save (ESMWriter& esm)
+void ESM::Filter::save (ESMWriter& esm) const
 {
     esm.writeHNCString ("FILT", mFilter);
     esm.writeHNCString ("DESC", mDescription);

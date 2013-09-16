@@ -25,7 +25,7 @@ void Dialogue::load(ESMReader &esm)
         esm.fail("Unknown sub record size");
 }
 
-void Dialogue::save(ESMWriter &esm)
+void Dialogue::save(ESMWriter &esm) const
 {
     if (mType != Deleted)
         esm.writeHNT("DATA", mType);

@@ -17,7 +17,7 @@ namespace ESM
         std::vector<std::string> mList;
 
         void load(ESMReader &esm);
-        void save(ESMWriter &esm);
+        void save(ESMWriter &esm) const;
     };
 }
 

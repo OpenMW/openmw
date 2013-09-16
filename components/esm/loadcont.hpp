@@ -27,7 +27,7 @@ struct InventoryList
     std::vector<ContItem> mList;
 
     void load(ESMReader &esm);
-    void save(ESMWriter &esm);
+    void save(ESMWriter &esm) const;
 };
 
 struct Container
@@ -46,7 +46,7 @@ struct Container
     InventoryList mInventory;
 
     void load(ESMReader &esm);
-    void save(ESMWriter &esm);
+    void save(ESMWriter &esm) const;
 
     void blank();
     ///< Set record to default state (does not touch the ID).

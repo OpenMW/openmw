@@ -16,7 +16,7 @@ void Light::load(ESMReader &esm)
     mScript = esm.getHNOString("SCRI");
     mSound = esm.getHNOString("SNAM");
 }
-void Light::save(ESMWriter &esm)
+void Light::save(ESMWriter &esm) const
 {
     esm.writeHNCString("MODL", mModel);
     esm.writeHNOCString("FNAM", mName);

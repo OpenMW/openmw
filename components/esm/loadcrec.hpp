@@ -24,7 +24,7 @@ struct LoadCREC
       esm.skipRecord();
     }
 
-    void save(ESMWriter &esm)
+    void save(ESMWriter &esm) const
     {
     }
 };
@@ -39,7 +39,7 @@ struct LoadCNTC
       esm.skipRecord();
     }
 
-    void save(ESMWriter &esm)
+    void save(ESMWriter &esm) const
     {
     }
 };

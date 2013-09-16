@@ -35,7 +35,7 @@ void Creature::load(ESMReader &esm)
     esm.skipRecord();
 }
 
-void Creature::save(ESMWriter &esm)
+void Creature::save(ESMWriter &esm) const
 {
     esm.writeHNCString("MODL", mModel);
     esm.writeHNOCString("CNAM", mOriginal);

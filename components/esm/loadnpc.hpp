@@ -117,7 +117,7 @@ struct NPC
     std::string mHair, mHead;
 
     void load(ESMReader &esm);
-    void save(ESMWriter &esm);
+    void save(ESMWriter &esm) const;
 
     bool isMale() const;
 

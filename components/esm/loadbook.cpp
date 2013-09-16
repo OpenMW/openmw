@@ -16,7 +16,7 @@ void Book::load(ESMReader &esm)
     mText = esm.getHNOString("TEXT");
     mEnchant = esm.getHNOString("ENAM");
 }
-void Book::save(ESMWriter &esm)
+void Book::save(ESMWriter &esm) const
 {
     esm.writeHNCString("MODL", mModel);
     esm.writeHNOCString("FNAM", mName);

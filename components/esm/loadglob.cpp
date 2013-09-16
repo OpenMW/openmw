@@ -7,7 +7,7 @@ namespace ESM
         mValue.read (esm, ESM::Variant::Format_Global);
     }
 
-    void Global::save (ESMWriter &esm)
+    void Global::save (ESMWriter &esm) const
     {
         mValue.write (esm, ESM::Variant::Format_Global);
     }

@@ -22,7 +22,7 @@ void Race::load(ESMReader &esm)
     mPowers.load(esm);
     mDescription = esm.getHNOString("DESC");
 }
-void Race::save(ESMWriter &esm)
+void Race::save(ESMWriter &esm) const
 {
     esm.writeHNCString("FNAM", mName);
     esm.writeHNT("RADT", mData, 140);

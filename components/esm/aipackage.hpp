@@ -93,7 +93,7 @@ namespace ESM
         /// it needs to use retSubName() if needed. But, hey, there
         /// is only one field left (XSCL) and only two records uses AI
         void load(ESMReader &esm);
-        void save(ESMWriter &esm);
+        void save(ESMWriter &esm) const;
     };
 }
 

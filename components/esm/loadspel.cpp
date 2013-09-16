@@ -13,7 +13,7 @@ void Spell::load(ESMReader &esm)
     mEffects.load(esm);
 }
 
-void Spell::save(ESMWriter &esm)
+void Spell::save(ESMWriter &esm) const
 {
     esm.writeHNOCString("FNAM", mName);
     esm.writeHNT("SPDT", mData, 12);

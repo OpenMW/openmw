@@ -28,7 +28,7 @@ void Apparatus::load(ESMReader &esm)
     }
 }
 
-void Apparatus::save(ESMWriter &esm)
+void Apparatus::save(ESMWriter &esm) const
 {
     esm.writeHNCString("MODL", mModel);
     esm.writeHNCString("FNAM", mName);

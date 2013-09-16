@@ -16,14 +16,14 @@ void Land::LandData::save(ESMWriter &esm)
         offsets.mHeightOffset = mHeights[0] / HEIGHT_SCALE;
         offsets.mUnk1 = mUnk1;
         offsets.mUnk2 = mUnk2;
-    
+
         float prevY = mHeights[0], prevX;
         int number = 0; // avoid multiplication
         for (int i = 0; i < LAND_SIZE; ++i) {
             float diff = (mHeights[number] - prevY) / HEIGHT_SCALE;
             offsets.mHeightData[number] =
                 (diff >= 0) ? (int8_t) (diff + 0.5) : (int8_t) (diff - 0.5);
-        
+
             prevX = prevY = mHeights[number];
             ++number;
 
@@ -132,7 +132,7 @@ void Land::load(ESMReader &esm)
     mLandData = NULL;
 }
 
-void Land::save(ESMWriter &esm)
+void Land::save(ESMWriter &esm) const
 {
     esm.startSubRecord("INTV");
     esm.writeT(mX);
@@ -140,18 +140,6 @@ void Land::save(ESMWriter &esm)
     esm.endRecord("INTV");
 
     esm.writeHNT("DATA", mFlags);
-
-    // TODO: Land!
-    bool wasLoaded = mDataLoaded;
-    if (mDataTypes) {
-        // Try to load all available data before saving
-        loadData(mDataTypes);
-    }
-    if (mDataLoaded)
-        mLandData->save(esm);
-
-    if (!wasLoaded)
-        unloadData(); // Don't need to keep the data loaded if it wasn't already
 }
 
 /// \todo remove memory allocation when only defaults needed

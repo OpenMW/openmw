@@ -120,7 +120,7 @@ void DialInfo::load(ESMReader &esm)
         esm.skipRecord();
 }
 
-void DialInfo::save(ESMWriter &esm)
+void DialInfo::save(ESMWriter &esm) const
 {
     esm.writeHNCString("INAM", mId);
     esm.writeHNCString("PNAM", mPrev);
@@ -135,7 +135,7 @@ void DialInfo::save(ESMWriter &esm)
     esm.writeHNOCString("SNAM", mSound);
     esm.writeHNOString("NAME", mResponse);
 
-    for (std::vector<SelectStruct>::iterator it = mSelects.begin(); it != mSelects.end(); ++it)
+    for (std::vector<SelectStruct>::const_iterator it = mSelects.begin(); it != mSelects.end(); ++it)
     {
         esm.writeHNString("SCVR", it->mSelectRule);
         it->mValue.write (esm, Variant::Format_Info);

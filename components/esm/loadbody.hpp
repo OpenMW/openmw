@@ -57,7 +57,7 @@ struct BodyPart
     std::string mId, mModel, mRace;
 
     void load(ESMReader &esm);
-    void save(ESMWriter &esm);
+    void save(ESMWriter &esm) const;
 };
 }
 #endif

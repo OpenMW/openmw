@@ -14,7 +14,7 @@ void Miscellaneous::load(ESMReader &esm)
     mScript = esm.getHNOString("SCRI");
     mIcon = esm.getHNOString("ITEX");
 }
-void Miscellaneous::save(ESMWriter &esm)
+void Miscellaneous::save(ESMWriter &esm) const
 {
     esm.writeHNCString("MODL", mModel);
     esm.writeHNOCString("FNAM", mName);

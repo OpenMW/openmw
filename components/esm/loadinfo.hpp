@@ -99,7 +99,7 @@ struct DialInfo
     };
 
     void load(ESMReader &esm);
-    void save(ESMWriter &esm);
+    void save(ESMWriter &esm) const;
 };
 
 }

@@ -69,7 +69,7 @@ struct MagicEffect
     int mIndex;
 
     void load(ESMReader &esm);
-    void save(ESMWriter &esm);
+    void save(ESMWriter &esm) const;
 
 
     enum Effects

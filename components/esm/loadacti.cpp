@@ -11,7 +11,7 @@ void Activator::load(ESMReader &esm)
     mName = esm.getHNString("FNAM");
     mScript = esm.getHNOString("SCRI");
 }
-void Activator::save(ESMWriter &esm)
+void Activator::save(ESMWriter &esm) const
 {
     esm.writeHNCString("MODL", mModel);
     esm.writeHNCString("FNAM", mName);

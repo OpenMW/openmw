@@ -137,7 +137,7 @@ void Skill::load(ESMReader &esm)
     mId = indexToId (mIndex);
 }
 
-void Skill::save(ESMWriter &esm)
+void Skill::save(ESMWriter &esm) const
 {
     esm.writeHNT("INDX", mIndex);
     esm.writeHNT("SKDT", mData, 24);

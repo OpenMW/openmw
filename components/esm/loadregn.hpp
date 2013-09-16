@@ -47,7 +47,7 @@ struct Region
     std::vector<SoundRef> mSoundList;
 
     void load(ESMReader &esm);
-    void save(ESMWriter &esm);
+    void save(ESMWriter &esm) const;
 
     void blank();
     ///< Set record to default state (does not touch the ID/index).

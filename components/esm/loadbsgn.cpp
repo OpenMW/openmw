@@ -15,7 +15,7 @@ void BirthSign::load(ESMReader &esm)
     mPowers.load(esm);
 }
 
-void BirthSign::save(ESMWriter &esm)
+void BirthSign::save(ESMWriter &esm) const
 {
     esm.writeHNCString("FNAM", mName);
     esm.writeHNOCString("TNAM", mTexture);

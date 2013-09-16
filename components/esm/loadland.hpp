@@ -94,7 +94,7 @@ struct Land
     LandData *mLandData;
 
     void load(ESMReader &esm);
-    void save(ESMWriter &esm);
+    void save(ESMWriter &esm) const;
 
     /**
      * Actually loads data

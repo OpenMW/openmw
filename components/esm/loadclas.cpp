@@ -47,7 +47,7 @@ void Class::load(ESMReader &esm)
 
     mDescription = esm.getHNOString("DESC");
 }
-void Class::save(ESMWriter &esm)
+void Class::save(ESMWriter &esm) const
 {
     esm.writeHNCString("FNAM", mName);
     esm.writeHNT("CLDT", mData, 60);

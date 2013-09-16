@@ -17,7 +17,7 @@ void Repair::load(ESMReader &esm)
     mIcon = esm.getHNOString("ITEX");
 }
 
-void Repair::save(ESMWriter &esm)
+void Repair::save(ESMWriter &esm) const
 {
     esm.writeHNCString("MODL", mModel);
     esm.writeHNCString("FNAM", mName);

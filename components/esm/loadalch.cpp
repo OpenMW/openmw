@@ -14,7 +14,7 @@ void Potion::load(ESMReader &esm)
     esm.getHNT(mData, "ALDT", 12);
     mEffects.load(esm);
 }
-void Potion::save(ESMWriter &esm)
+void Potion::save(ESMWriter &esm) const
 {
     esm.writeHNCString("MODL", mModel);
     esm.writeHNOCString("TEXT", mIcon);

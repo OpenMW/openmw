@@ -11,7 +11,7 @@ void LandTexture::load(ESMReader &esm)
     esm.getHNT(mIndex, "INTV");
     mTexture = esm.getHNString("DATA");
 }
-void LandTexture::save(ESMWriter &esm)
+void LandTexture::save(ESMWriter &esm) const
 {
     esm.writeHNT("INTV", mIndex);
     esm.writeHNCString("DATA", mTexture);

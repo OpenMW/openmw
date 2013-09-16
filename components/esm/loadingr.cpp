@@ -37,7 +37,7 @@ void Ingredient::load(ESMReader &esm)
     }
 }
 
-void Ingredient::save(ESMWriter &esm)
+void Ingredient::save(ESMWriter &esm) const
 {
     esm.writeHNCString("MODL", mModel);
     esm.writeHNCString("FNAM", mName);

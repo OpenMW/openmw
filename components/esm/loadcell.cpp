@@ -89,7 +89,7 @@ void Cell::postLoad(ESMReader &esm)
     esm.skipRecord();
 }
 
-void Cell::save(ESMWriter &esm)
+void Cell::save(ESMWriter &esm) const
 {
     esm.writeHNT("DATA", mData, 12);
     if (mData.mFlags & Interior)

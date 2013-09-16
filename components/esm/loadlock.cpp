@@ -17,7 +17,7 @@ void Lockpick::load(ESMReader &esm)
     mIcon = esm.getHNOString("ITEX");
 }
 
-void Lockpick::save(ESMWriter &esm)
+void Lockpick::save(ESMWriter &esm) const
 {
     esm.writeHNCString("MODL", mModel);
     esm.writeHNCString("FNAM", mName);
