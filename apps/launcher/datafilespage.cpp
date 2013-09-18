@@ -7,7 +7,6 @@
 
 #include <components/files/configurationmanager.hpp>
 
-#include <components/esxselector/model/datafilesmodel.hpp>
 #include <components/esxselector/model/pluginsproxymodel.hpp>
 #include <components/esxselector/model/esmfile.hpp>
 
@@ -20,6 +19,7 @@
 #include "settings/launchersettings.hpp"
 
 #include "utils/textinputdialog.hpp"
+#include "components/esxselector/view/contentselector.hpp"
 
 #include <QDebug>
 
@@ -27,8 +27,8 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
     : mCfgMgr(cfg)
     , mGameSettings(gameSettings)
     , mLauncherSettings(launcherSettings)
-    , ContentSelector(parent)
 {
+    mContentSelector.setParent(parent);
     QMetaObject::connectSlotsByName(this);
 
     projectGroupBox->hide();
@@ -51,24 +51,21 @@ void DataFilesPage::createActions()
 
 void DataFilesPage::setupDataFiles()
 {
-    if (!mDataFilesModel)
-        qDebug() << "data files model undefined";
-
     // Set the encoding to the one found in openmw.cfg or the default
-    mDataFilesModel->setEncoding(mGameSettings.value(QString("encoding"), QString("win1252")));
+    mContentSelector.setEncoding(mGameSettings.value(QString("encoding"), QString("win1252")));
 
     QStringList paths = mGameSettings.getDataDirs();
 
     foreach (const QString &path, paths) {
-        mDataFilesModel->addFiles(path);
+        mContentSelector.addFiles(path);
     }
 
     QString dataLocal = mGameSettings.getDataLocal();
     if (!dataLocal.isEmpty())
-        mDataFilesModel->addFiles(dataLocal);
+        mContentSelector.addFiles(dataLocal);
 
     // Sort by date accessed for now
-    mDataFilesModel->sort(3);
+    //mContentSelector->sort(3);
 
     QStringList profiles = mLauncherSettings.subKeys(QString("Profiles/"));
     QString profile = mLauncherSettings.value(QString("Profiles/currentprofile"));
@@ -107,11 +104,11 @@ void DataFilesPage::loadSettings()
     if (profile.isEmpty())
         return;
 
-    mDataFilesModel->uncheckAll();
+  //  mContentSelector.uncheckAll();
 
     QStringList masters = mLauncherSettings.values(QString("Profiles/") + profile + QString("/master"), Qt::MatchExactly);
     QStringList plugins = mLauncherSettings.values(QString("Profiles/") + profile + QString("/plugin"), Qt::MatchExactly);
-
+/*
     foreach (const QString &master, masters) {
         QModelIndex index = mDataFilesModel->indexFromItem(mDataFilesModel->findItem(master));
         if (index.isValid())
@@ -123,12 +120,13 @@ void DataFilesPage::loadSettings()
         if (index.isValid())
             mDataFilesModel->setCheckState(index, Qt::Checked);
     }
+    */
 }
 
 void DataFilesPage::saveSettings()
 {
-    if (mDataFilesModel->rowCount() < 1)
-        return;
+//    if (mDataFilesModel->rowCount() < 1)
+//        return;
 
     QString profile = mLauncherSettings.value(QString("Profiles/currentprofile"));
 
@@ -143,8 +141,8 @@ void DataFilesPage::saveSettings()
     mGameSettings.remove(QString("master"));
     mGameSettings.remove(QString("plugin"));
 
-    EsxModel::EsmFileList items = mDataFilesModel->checkedItems();
-
+ //   EsxModel::EsmFileList items = mDataFilesModel->checkedItems();
+/*
     foreach(const EsxModel::EsmFile *item, items) {
 
         if (item->masters().size() == 0) {
@@ -156,7 +154,7 @@ void DataFilesPage::saveSettings()
             mGameSettings.setMultiValue(QString("plugin"), item->fileName());
         }
     }
-
+*/
 }
 
 void DataFilesPage::updateOkButton(const QString &text)
@@ -241,7 +239,7 @@ void DataFilesPage::setPluginsCheckstates(Qt::CheckState state)
         if (!sourceIndex.isValid())
             return;
 
-        mDataFilesModel->setCheckState(sourceIndex, state);
+        //mDataFilesModel->setCheckState(sourceIndex, state);
     }
 }
 

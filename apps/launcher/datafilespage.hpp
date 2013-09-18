@@ -52,6 +52,7 @@ private slots:
 private:
 
     QMenu *mContextMenu;
+    ContentSelector mContentSelector;
 
     Files::ConfigurationManager &mCfgMgr;
 

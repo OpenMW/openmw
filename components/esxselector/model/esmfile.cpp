@@ -1,7 +1,12 @@
 #include "esmfile.hpp"
 
+#include <QMimeData>
+#include <QDataStream>
+
+int EsxModel::EsmFile::sPropertyCount = 7;
+
 EsxModel::EsmFile::EsmFile(QString fileName, ModelItem *parent)
-    : ModelItem(parent), mFileName(fileName), mSize(0), mVersion(0.0f)
+    : ModelItem(parent), mFileName(fileName), mVersion(0.0f)
 {}
 /*
 EsxModel::EsmFile::EsmFile(const EsmFile &file)
@@ -22,15 +27,9 @@ void EsxModel::EsmFile::setAuthor(const QString &author)
     mAuthor = author;
 }
 
-void EsxModel::EsmFile::setSize(const int size)
-{
-    mSize = size;
-}
-
-void EsxModel::EsmFile::setDates(const QDateTime &modified, const QDateTime &accessed)
+void EsxModel::EsmFile::setDate(const QDateTime &modified)
 {
     mModified = modified;
-    mAccessed = accessed;
 }
 
 void EsxModel::EsmFile::setVersion(float version)
@@ -51,4 +50,53 @@ void EsxModel::EsmFile::setMasters(const QStringList &masters)
 void EsxModel::EsmFile::setDescription(const QString &description)
 {
     mDescription = description;
+}
+
+QByteArray EsxModel::EsmFile::encodedData() const
+{
+    QByteArray encodedData;
+    QDataStream stream(&encodedData, QIODevice::WriteOnly);
+
+    stream << mFileName << mAuthor << QString::number(mVersion)
+           << mModified.toString() << mPath << mDescription
+           << mMasters;
+
+    return encodedData;
+}
+
+void EsxModel::EsmFile::setProperty (const EsmFileProperty prop, const QString &value)
+{
+    switch (prop)
+    {
+    case Property_FileName:
+        mFileName = value;
+        break;
+
+    case Property_Author:
+        mAuthor = value;
+        break;
+
+    case Property_Version:
+        mVersion = value.toFloat();
+        break;
+
+    case Property_DateModified:
+        mModified = QDateTime::fromString(value);
+        break;
+
+    case Property_Path:
+        mPath = value;
+        break;
+
+    case Property_Description:
+        mDescription = value;
+        break;
+
+    case Property_Master:
+        mMasters << value;
+        break;
+
+    default:
+        break;
+    }
 }

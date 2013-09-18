@@ -9,8 +9,6 @@ namespace EsxModel
 {
     class ContentModel;
     class DataFilesModel;
-    class PluginsProxyModel;
-    class MasterProxyModel;
 }
 
 class QSortFilterProxyModel;
@@ -25,8 +23,8 @@ namespace EsxView
 
         EsxModel::DataFilesModel *mDataFilesModel;
         EsxModel::ContentModel *mContentModel;
-        EsxModel::MasterProxyModel *mMasterProxyModel;
-        EsxModel::PluginsProxyModel *mPluginsProxyModel;
+        QSortFilterProxyModel *mMasterProxyModel;
+        QSortFilterProxyModel *mPluginsProxyModel;
 
     public:
         explicit ContentSelector(QWidget *parent = 0);
@@ -39,7 +37,12 @@ namespace EsxView
         void setCheckState(QModelIndex index, QSortFilterProxyModel *model);
         QStringList checkedItemsPaths();
         void on_checkAction_triggered();
-        void buildDragDropModelView();
+
+   private:
+        void buildSourceModel();
+        void buildMasterView();
+        void buildPluginsView();
+        void buildProfilesView();
 
     signals:
         void profileChanged(int index);

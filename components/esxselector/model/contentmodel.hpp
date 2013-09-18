@@ -37,14 +37,11 @@ namespace EsxModel
         QModelIndex indexFromItem(EsmFile *item) const;
         EsxModel::EsmFile *findItem(const QString &name);
 
-        Qt::CheckState checkState(const QModelIndex &index);
-        void setCheckState(const QModelIndex &index, Qt::CheckState state);
+        bool isChecked(const QString &name) const;
+        void setCheckState(const QString &name, bool isChecked);
         ContentFileList checkedItems() const;
         void uncheckAll();
-/*
-        QModelIndex index(int row, int column, const QModelIndex &parent) const;
-        QModelIndex parent(const QModelIndex &child) const;
-*/
+
     private:
 
         void addFile(EsmFile *file);

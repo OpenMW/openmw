@@ -21,26 +21,60 @@ int EsxModel::ContentModel::columnCount(const QModelIndex &parent) const
 
     return 1;
 }
-/*
-QModelIndex EsxModel::ContentModel::parent(const QModelIndex &child) const
-{
-    if(!child.isValid())
-        return 0;
 
-    return child.parent();
-}
-
-QModelIndex EsxModel::ContentModel::index(int row, int column, const QModelIndex &parent) const
-{
-
-}
-*/
 int EsxModel::ContentModel::rowCount(const QModelIndex &parent) const
 {
     if(parent.isValid())
         return 0;
 
     return mFiles.size();
+}
+
+EsxModel::EsmFile* EsxModel::ContentModel::item(int row) const
+{
+    if (row >= 0 && row < mFiles.count())
+        return mFiles.at(row);
+
+    return 0;
+}
+
+EsxModel::EsmFile* EsxModel::ContentModel::findItem(const QString &name)
+{
+    for (int i = 0; i < mFiles.size(); ++i)
+    {
+        if (name == item(i)->fileName())
+            return item(i);
+    }
+
+    return 0;
+}
+
+QModelIndex EsxModel::ContentModel::indexFromItem(EsmFile *item) const
+{
+    if (item)
+        return index(mFiles.indexOf(item),0);
+
+    return QModelIndex();
+}
+
+Qt::ItemFlags EsxModel::ContentModel::flags(const QModelIndex &index) const
+{
+    if (!index.isValid())
+        return Qt::NoItemFlags;
+
+    EsmFile *file = item(index.row());
+
+    if (!file)
+        return Qt::NoItemFlags;
+
+    Qt::ItemFlags dragDropFlags = Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled;
+    Qt::ItemFlags checkFlags = Qt::ItemIsUserCheckable;
+    Qt::ItemFlags defaultFlags = Qt::ItemIsDropEnabled | Qt::ItemIsSelectable;
+
+    if (canBeChecked(file))
+        return Qt::ItemIsEnabled | dragDropFlags | checkFlags | defaultFlags;
+    else
+        return defaultFlags;
 }
 
 QVariant EsxModel::ContentModel::data(const QModelIndex &index, int role) const
@@ -70,18 +104,14 @@ QVariant EsxModel::ContentModel::data(const QModelIndex &index, int role) const
         case 1:
             return file->author();
         case 2:
-            return QString("%1 kB").arg(int((file->size() + 1023) / 1024));
-        case 3:
             return file->modified().toString(Qt::ISODate);
-        case 4:
-            return file->accessed().toString(Qt::TextDate);
-        case 5:
+        case 3:
             return file->version();
-        case 6:
+        case 4:
             return file->path();
-        case 7:
+        case 5:
             return file->masters().join(", ");
-        case 8:
+        case 6:
             return file->description();
         }
 
@@ -97,8 +127,6 @@ QVariant EsxModel::ContentModel::data(const QModelIndex &index, int role) const
             return Qt::AlignLeft + Qt::AlignVCenter;
         case 2:
         case 3:
-        case 4:
-        case 5:
             return Qt::AlignRight + Qt::AlignVCenter;
         default:
             return Qt::AlignLeft + Qt::AlignVCenter;
@@ -124,47 +152,88 @@ QVariant EsxModel::ContentModel::data(const QModelIndex &index, int role) const
                         .arg(file->masters().join(", "));
     }
 
+    case Qt::CheckStateRole:
+        if (!file->isMaster())
+            return isChecked(file->fileName());
+        break;
+
     case Qt::UserRole:
     {
-        if (file->masters().size() == 0)
+        if (file->isMaster())
             return "game";
         else
             return "addon";
     }
 
-    default:
-        return QVariant();
+    case Qt::UserRole + 1:
+        return isChecked(file->fileName());
+        break;
     }
-}
-
-Qt::ItemFlags EsxModel::ContentModel::flags(const QModelIndex &index) const
-{
-    if (!index.isValid())
-        return Qt::NoItemFlags;
-
-    EsmFile *file = item(index.row());
-
-    if (!file)
-        return Qt::NoItemFlags;
-
-    Qt::ItemFlags dragDropFlags = Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled;
-    Qt::ItemFlags checkFlags = Qt::ItemIsUserCheckable;
-    Qt::ItemFlags defaultFlags = Qt::ItemIsDropEnabled | Qt::ItemIsSelectable;
-
-    if (canBeChecked(file))
-        return Qt::ItemIsEnabled | dragDropFlags | checkFlags | defaultFlags;
-    else
-        return defaultFlags;
+    return QVariant();
 }
 
 bool EsxModel::ContentModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    if (index.isValid() && role == Qt::EditRole)
+    if(!index.isValid())
+        return false;
+
+    EsmFile *file = item(index.row());
+    QString fileName = file->fileName();
+
+    switch(role)
     {
-        QString fname = value.value<QString>();
-        mFiles.replace(index.row(), findItem(fname));
-        emit dataChanged(index, index);
-        return true;
+        case Qt::EditRole:
+            {
+                QStringList list = value.toStringList();
+
+                //iterate the string list, assigning values to proeprties
+                //index-enum correspondence 1:1
+                for (int i = 0; i < EsxModel::Property_Master; i++)
+                    file->setProperty(static_cast<EsmFileProperty>(i), list.at(i));
+
+                //iterate the remainder of the string list, assifning everything
+                // as
+                for (int i = EsxModel::Property_Master; i < list.size(); i++)
+                    file->setProperty (EsxModel::Property_Master, list.at(i));
+
+                //emit data changed for the item itself
+                emit dataChanged(index, index);
+
+                return true;
+            }
+            break;
+
+        case Qt::UserRole+1:
+            {
+                setCheckState(fileName, value.toBool());
+
+                emit dataChanged(index, index);
+
+                for(int i = 0; i < mFiles.size(); i++)
+                {
+
+                    if (mFiles.at(i)->masters().contains(fileName))
+                    {
+                        QModelIndex idx = QAbstractTableModel::index(i, 0);
+                        emit dataChanged(idx, idx);
+                    }
+                }
+
+                return true;
+            }
+            break;
+
+        case Qt::CheckStateRole:
+            {
+                bool checked = ((value.toInt() == Qt::Checked) && !isChecked(fileName));
+
+                setCheckState(fileName, checked);
+
+                emit dataChanged(index, index);
+
+                return true;
+            }
+            break;
     }
 
     return false;
@@ -172,24 +241,31 @@ bool EsxModel::ContentModel::setData(const QModelIndex &index, const QVariant &v
 
 bool EsxModel::ContentModel::insertRows(int position, int rows, const QModelIndex &parent)
 {
+    if (parent.isValid())
+        return false;
+
     beginInsertRows(parent, position, position+rows-1);
+    {
+        for (int row = 0; row < rows; ++row)
+            mFiles.insert(position, new EsmFile);
 
-    for (int row = 0; row < rows; ++row)
-        mFiles.insert(position, new EsmFile);
+    } endInsertRows();
 
-    endInsertRows();
     return true;
 }
 
 bool EsxModel::ContentModel::removeRows(int position, int rows, const QModelIndex &parent)
 {
+    if (parent.isValid())
+        return false;
+
     beginRemoveRows(parent, position, position+rows-1);
+    {
+        for (int row = 0; row < rows; ++row)
+            delete mFiles.takeAt(position);
 
-    for (int row = 0; row < rows; ++row)
-        mFiles.removeAt(position);
+    } endRemoveRows();
 
-    endRemoveRows();
-    emit dataChanged(index(0,0,parent), index(rowCount()-1, 0, parent));
     return true;
 }
 
@@ -201,27 +277,30 @@ Qt::DropActions EsxModel::ContentModel::supportedDropActions() const
 QStringList EsxModel::ContentModel::mimeTypes() const
 {
     QStringList types;
+
     types << "application/omwcontent";
+
     return types;
 }
 
 QMimeData *EsxModel::ContentModel::mimeData(const QModelIndexList &indexes) const
 {
-    QMimeData *mimeData = new QMimeData();
     QByteArray encodedData;
-
-    QDataStream stream(&encodedData, QIODevice::WriteOnly);
 
     foreach (const QModelIndex &index, indexes)
     {
-        if (index.isValid())
-        {
-            QString text = data(index, Qt::DisplayRole).toString();
-            stream << text;
-        }
+        if (!index.isValid())
+            continue;
+
+        QByteArray fileData = item(index.row())->encodedData();
+
+        foreach (const char c, fileData)
+            encodedData.append(c);
     }
 
+    QMimeData *mimeData = new QMimeData();
     mimeData->setData("application/omwcontent", encodedData);
+
     return mimeData;
 }
 
@@ -240,31 +319,66 @@ bool EsxModel::ContentModel::dropMimeData(const QMimeData *data, Qt::DropAction 
 
     if (row != -1)
         beginRow = row;
+
     else if (parent.isValid())
         beginRow = parent.row();
+
     else
         beginRow = rowCount();
 
     QByteArray encodedData = data->data("application/omwcontent");
     QDataStream stream(&encodedData, QIODevice::ReadOnly);
-    QStringList newItems;
-    int rows = 0;
 
     while (!stream.atEnd())
     {
-        QString text;
-        stream >> text;
-        newItems << text;
-        ++rows;
+        QStringList values;
+
+        for (int i = 0; i < EsmFile::sPropertyCount; ++i)
+            stream >> values;
+
+        insertRows(beginRow, 1);
+
+        QModelIndex idx = index(beginRow++, 0, QModelIndex());
+        setData(idx, values, Qt::EditRole);
     }
 
-    insertRows(beginRow, rows, QModelIndex());
+    return true;
+}
 
-    foreach (const QString &text, newItems)
+bool EsxModel::ContentModel::canBeChecked(const EsmFile *file) const
+{
+    //element can be checked if all its dependencies are
+    foreach (const QString &master, file->masters())
     {
-        QModelIndex idx = index(beginRow, 0, QModelIndex());
-        setData(idx, text);
-        beginRow++;
+        {// if the master is not found in checkstates
+         // or it is not specifically checked, return false
+            if (!mCheckStates.contains(master))
+                return false;
+
+            if (!isChecked(master))
+                return false;
+        }
+
+        bool found = false;
+
+        //iterate each file, if it is not a master and
+        //does not have a master that is currently checked,
+        //return false.
+        foreach(const EsmFile *file, mFiles)
+        {
+            QString filename = file->fileName();
+
+            found = (filename == master);
+
+            if (found)
+            {
+                if (!isChecked(filename))
+                    return false;
+            }
+        }
+
+        if (!found)
+            return false;
     }
 
     return true;
@@ -272,9 +386,10 @@ bool EsxModel::ContentModel::dropMimeData(const QMimeData *data, Qt::DropAction 
 
 void EsxModel::ContentModel::addFile(EsmFile *file)
 {
-    emit beginInsertRows(QModelIndex(), mFiles.count(), mFiles.count());
-    mFiles.append(file);
-    emit endInsertRows();
+    beginInsertRows(QModelIndex(), mFiles.count(), mFiles.count());
+    {
+        mFiles.append(file);
+    } endInsertRows();
 }
 
 void EsxModel::ContentModel::addFiles(const QString &path)
@@ -319,9 +434,9 @@ void EsxModel::ContentModel::addFiles(const QString &path)
             }
 
             file->setAuthor(decoder->toUnicode(fileReader.getAuthor().c_str()));
-            file->setSize(info.size());
-            file->setDates(info.lastModified(), info.lastRead());
-            file->setVersion(fileReader.getFVer());
+            //file->setSize(info.size());
+            file->setDate(info.lastModified());
+            file->setVersion(0.0f);
             file->setPath(info.absoluteFilePath());
             file->setMasters(masters);
             file->setDescription(decoder->toUnicode(fileReader.getDesc().c_str()));
@@ -342,66 +457,22 @@ void EsxModel::ContentModel::addFiles(const QString &path)
     delete decoder;
 }
 
-EsxModel::EsmFile* EsxModel::ContentModel::findItem(const QString &name)
+bool EsxModel::ContentModel::isChecked(const QString& name) const
 {
-    for (int i = 0; i < mFiles.size(); ++i)
-    {
-        if (name == item(i)->fileName())
-            return item(i);
-    }
-
-    // Not found
-    return 0;
+    return (mCheckStates[name] == Qt::Checked);
 }
 
-EsxModel::EsmFile* EsxModel::ContentModel::item(int row) const
+void EsxModel::ContentModel::setCheckState(const QString &name, bool isChecked)
 {
-    if (row >= 0 && row < mFiles.count())
-        return mFiles.at(row);
-
-    return 0;
-}
-
-QModelIndex EsxModel::ContentModel::indexFromItem(EsmFile *item) const
-{
-    if (item)
-        //return createIndex(mFiles.indexOf(item), 0);
-        return index(mFiles.indexOf(item),0);
-
-    return QModelIndex();
-}
-
-Qt::CheckState EsxModel::ContentModel::checkState(const QModelIndex &index)
-{
-    return mCheckStates[item(index.row())->fileName()];
-}
-
-void EsxModel::ContentModel::setCheckState(const QModelIndex &index, Qt::CheckState state)
-{
-    if (!index.isValid())
+    if (name.isEmpty())
         return;
 
-    QString name = item(index.row())->fileName();
+    Qt::CheckState state = Qt::Unchecked;
+
+    if (isChecked)
+        state = Qt::Checked;
+
     mCheckStates[name] = state;
-
-    // Force a redraw of the view since unchecking one item can affect another
-    QModelIndex firstIndex = indexFromItem(mFiles.first());
-    QModelIndex lastIndex = indexFromItem(mFiles.last());
-
-    emit dataChanged(firstIndex, lastIndex);
-    //emit checkedItemsChanged(checkedItems());
-
-}
-
-bool EsxModel::ContentModel::canBeChecked(const EsmFile *file) const
-{
-    //element can be checked if all its dependencies are
-    foreach (const QString &master, file->masters())
-    {
-        if (!mCheckStates.contains(master) || mCheckStates[master] != Qt::Checked)
-            return false;
-    }
-    return true;
 }
 
 EsxModel::ContentFileList EsxModel::ContentModel::checkedItems() const
