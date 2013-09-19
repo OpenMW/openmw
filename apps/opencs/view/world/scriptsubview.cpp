@@ -58,7 +58,7 @@ CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc:
     connect (mModel, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
         this, SLOT (rowsAboutToBeRemoved (const QModelIndex&, int, int)));
 
-    new ScriptHighlighter (mEditor->document());
+    new ScriptHighlighter (document.getData(), mEditor->document());
 }
 
 void CSVWorld::ScriptSubView::setEditLock (bool locked)

@@ -24,7 +24,8 @@ namespace CSVWorld
                 Type_Name,
                 Type_Keyword,
                 Type_Special,
-                Type_Comment
+                Type_Comment,
+                Type_Id
             };
 
         private:
@@ -73,7 +74,7 @@ namespace CSVWorld
 
         public:
 
-            ScriptHighlighter (QTextDocument *parent);
+            ScriptHighlighter (const CSMWorld::Data& data, QTextDocument *parent);
 
             virtual void highlightBlock (const QString& text);
     };
