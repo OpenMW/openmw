@@ -534,3 +534,8 @@ int CSMWorld::RefIdCollection::getAppendIndex (UniversalId::Type type) const
 {
     return mData.getAppendIndex (type);
 }
+
+std::vector<std::string> CSMWorld::RefIdCollection::getIds() const
+{
+    return mData.getIds();
+}

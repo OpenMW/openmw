@@ -2,6 +2,7 @@
 #include "data.hpp"
 
 #include <stdexcept>
+#include <algorithm>
 
 #include <QAbstractItemModel>
 
@@ -15,13 +16,30 @@
 #include "columns.hpp"
 
 void CSMWorld::Data::addModel (QAbstractItemModel *model, UniversalId::Type type1,
-    UniversalId::Type type2)
+    UniversalId::Type type2, bool update)
 {
     mModels.push_back (model);
     mModelIndex.insert (std::make_pair (type1, model));
 
     if (type2!=UniversalId::Type_None)
         mModelIndex.insert (std::make_pair (type2, model));
+
+    if (update)
+    {
+        connect (model, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
+            this, SLOT (dataChanged (const QModelIndex&, const QModelIndex&)));
+        connect (model, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
+            this, SLOT (rowsChanged (const QModelIndex&, int, int)));
+        connect (model, SIGNAL (rowsRemoved (const QModelIndex&, int, int)),
+            this, SLOT (rowsChanged (const QModelIndex&, int, int)));
+    }
+}
+
+void CSMWorld::Data::appendIds (std::vector<std::string>& ids, const CollectionBase& collection)
+{
+    std::vector<std::string> ids2 = collection.getIds();
+
+    ids.insert (ids.end(), ids2.begin(), ids2.end());
 }
 
 CSMWorld::Data::Data() : mRefs (mCells)
@@ -155,7 +173,7 @@ CSMWorld::Data::Data() : mRefs (mCells)
 
     addModel (new IdTable (&mGlobals), UniversalId::Type_Globals, UniversalId::Type_Global);
     addModel (new IdTable (&mGmsts), UniversalId::Type_Gmsts, UniversalId::Type_Gmst);
-    addModel (new IdTable (&mSkills), UniversalId::Type_Skills, UniversalId::Type_Skill);
+    addModel (new IdTable (&mSkills), UniversalId::Type_Skills, UniversalId::Type_Skill, false);
     addModel (new IdTable (&mClasses), UniversalId::Type_Classes, UniversalId::Type_Class);
     addModel (new IdTable (&mFactions), UniversalId::Type_Factions, UniversalId::Type_Faction);
     addModel (new IdTable (&mRaces), UniversalId::Type_Races, UniversalId::Type_Race);
@@ -167,8 +185,8 @@ CSMWorld::Data::Data() : mRefs (mCells)
     addModel (new IdTable (&mCells), UniversalId::Type_Cells, UniversalId::Type_Cell);
     addModel (new IdTable (&mReferenceables), UniversalId::Type_Referenceables,
         UniversalId::Type_Referenceable);
-    addModel (new IdTable (&mRefs), UniversalId::Type_References, UniversalId::Type_Reference);
-    addModel (new IdTable (&mFilters), UniversalId::Type_Filters, UniversalId::Type_Filter);
+    addModel (new IdTable (&mRefs), UniversalId::Type_References, UniversalId::Type_Reference, false);
+    addModel (new IdTable (&mFilters), UniversalId::Type_Filters, UniversalId::Type_Filter, false);
 }
 
 CSMWorld::Data::~Data()
@@ -341,7 +359,7 @@ QAbstractItemModel *CSMWorld::Data::getTableModel (const UniversalId& id)
         {
             RegionMap *table = 0;
             addModel (table = new RegionMap (*this), UniversalId::Type_RegionMap,
-                UniversalId::Type_None);
+                UniversalId::Type_None, false);
             return table;
         }
         throw std::logic_error ("No table model available for " + id.toString());
@@ -439,4 +457,38 @@ bool CSMWorld::Data::hasId (const std::string& id) const
         getSpells().searchId (id)!=-1 ||
         getCells().searchId (id)!=-1 ||
         getReferenceables().searchId (id)!=-1;
+}
+
+std::vector<std::string> CSMWorld::Data::getIds() const
+{
+    std::vector<std::string> ids;
+
+    appendIds (ids, mGlobals);
+    appendIds (ids, mGmsts);
+    appendIds (ids, mClasses);
+    appendIds (ids, mFactions);
+    appendIds (ids, mRaces);
+    appendIds (ids, mSounds);
+    appendIds (ids, mScripts);
+    appendIds (ids, mRegions);
+    appendIds (ids, mBirthsigns);
+    appendIds (ids, mSpells);
+    appendIds (ids, mCells);
+    appendIds (ids, mReferenceables);
+
+    std::sort (ids.begin(), ids.end());
+
+    return ids;
+}
+
+void CSMWorld::Data::dataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight)
+{
+    // Note: The performance of of ID list change updates could be improved only emit the signal, if
+    // the state of the record is changed.
+    emit idListChanged();
+}
+
+void CSMWorld::Data::rowsChanged (const QModelIndex& parent, int start, int end)
+{
+    emit idListChanged();
 }
