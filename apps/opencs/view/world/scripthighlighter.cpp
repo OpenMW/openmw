@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include <components/compiler/scanner.hpp>
+#include <components/compiler/extensions0.hpp>
 
 bool CSVWorld::ScriptHighlighter::parseInt (int value, const Compiler::TokenLoc& loc,
     Compiler::Scanner& scanner)
@@ -101,6 +102,10 @@ CSVWorld::ScriptHighlighter::ScriptHighlighter (QTextDocument *parent)
         format.setForeground (Qt::green);
         mScheme.insert (std::make_pair (Type_Comment, format));
     }
+
+    // configure compiler
+    Compiler::registerExtensions (mExtensions);
+    mContext.setExtensions (&mExtensions);
 }
 
 void CSVWorld::ScriptHighlighter::highlightBlock (const QString& text)

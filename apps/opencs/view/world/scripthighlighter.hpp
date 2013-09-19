@@ -7,6 +7,7 @@
 
 #include <components/compiler/nullerrorhandler.hpp>
 #include <components/compiler/parser.hpp>
+#include <components/compiler/extensions.hpp>
 
 #include "../../model/world/scriptcontext.hpp"
 
@@ -29,6 +30,7 @@ namespace CSVWorld
         private:
 
             Compiler::NullErrorHandler mErrorHandler;
+            Compiler::Extensions mExtensions;
             CSMWorld::ScriptContext mContext;
             std::map<Type, QTextCharFormat> mScheme;
 
