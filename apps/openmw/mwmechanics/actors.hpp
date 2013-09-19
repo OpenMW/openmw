@@ -28,8 +28,6 @@ namespace MWMechanics
         typedef std::map<MWWorld::Ptr,CharacterController*> PtrControllerMap;
         PtrControllerMap mActors;
 
-        MWWorld::PtrMovementList mMovement;
-
         std::map<std::string, int> mDeathCount;
 
         float mDuration;

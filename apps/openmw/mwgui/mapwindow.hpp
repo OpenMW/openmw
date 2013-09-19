@@ -8,6 +8,11 @@ namespace MWRender
     class GlobalMap;
 }
 
+namespace Loading
+{
+    class Listener;
+}
+
 namespace MWGui
 {
     class LocalMapBase
@@ -70,6 +75,8 @@ namespace MWGui
         virtual ~MapWindow();
 
         void setCellName(const std::string& cellName);
+
+        void renderGlobalMap(Loading::Listener* loadingListener);
 
         void addVisitedLocation(const std::string& name, int x, int y); // adds the marker to the global map
         void cellExplored(int x, int y);

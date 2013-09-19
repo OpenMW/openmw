@@ -6,6 +6,8 @@
 
 #include <QTableView>
 
+#include "../../model/filter/node.hpp"
+
 class QUndoStack;
 class QAction;
 
@@ -85,6 +87,7 @@ namespace CSVWorld
 
             void requestFocus (const std::string& id);
 
+            void recordFilterChanged (boost::shared_ptr<CSMFilter::Node> filter);
     };
 }
 

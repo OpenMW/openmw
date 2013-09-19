@@ -150,6 +150,8 @@ CSMWorld::Data::Data() : mRefs (mCells)
 
     mFilters.addColumn (new StringIdColumn<CSMFilter::Filter>);
     mFilters.addColumn (new RecordStateColumn<CSMFilter::Filter>);
+    mFilters.addColumn (new FilterColumn<CSMFilter::Filter>);
+    mFilters.addColumn (new DescriptionColumn<CSMFilter::Filter>);
 
     addModel (new IdTable (&mGlobals), UniversalId::Type_Globals, UniversalId::Type_Global);
     addModel (new IdTable (&mGmsts), UniversalId::Type_Gmsts, UniversalId::Type_Gmst);
@@ -313,6 +315,16 @@ const CSMWorld::RefCollection& CSMWorld::Data::getReferences() const
 CSMWorld::RefCollection& CSMWorld::Data::getReferences()
 {
     return mRefs;
+}
+
+const CSMWorld::IdCollection<CSMFilter::Filter>& CSMWorld::Data::getFilters() const
+{
+    return mFilters;
+}
+
+CSMWorld::IdCollection<CSMFilter::Filter>& CSMWorld::Data::getFilters()
+{
+    return mFilters;
 }
 
 QAbstractItemModel *CSMWorld::Data::getTableModel (const UniversalId& id)

@@ -25,5 +25,9 @@
         <file>repair.png</file>
         <file>static.png</file>
         <file>weapon.png</file>
+        <file alias="startup/create-addon">raster/startup/big/create-addon.png</file>
+        <file alias="startup/create-game">raster/startup/big/new-game.png</file>
+        <file alias="startup/edit-content">raster/startup/big/edit-content.png</file>
+        <file alias="startup/configure">raster/startup/small/configure.png</file>
     </qresource>
 </RCC>

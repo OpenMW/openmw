@@ -119,6 +119,10 @@ namespace CSMWorld
 
             RefCollection& getReferences();
 
+            const IdCollection<CSMFilter::Filter>& getFilters() const;
+
+            IdCollection<CSMFilter::Filter>& getFilters();
+
             QAbstractItemModel *getTableModel (const UniversalId& id);
             ///< If no table model is available for \a id, an exception is thrown.
             ///

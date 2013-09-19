@@ -62,6 +62,7 @@ namespace MWGui
             const std::string& logpath, const std::string& cacheDir, bool consoleOnlyScripts,
             Translation::Storage& translationDataStorage, ToUTF8::FromType encoding)
       : mGuiManager(NULL)
+      , mConsoleOnlyScripts(consoleOnlyScripts)
       , mRendering(ogre)
       , mHud(NULL)
       , mMap(NULL)
@@ -156,7 +157,28 @@ namespace MWGui
         MyGUI::LanguageManager::getInstance().eventRequestTag = MyGUI::newDelegate(this, &WindowManager::onRetrieveTag);
 
         // Get size info from the Gui object
-        assert(mGui);
+        int w = MyGUI::RenderManager::getInstance().getViewSize().width;
+        int h = MyGUI::RenderManager::getInstance().getViewSize().height;
+
+        mLoadingScreen = new LoadingScreen(mRendering->getScene (), mRendering->getWindow ());
+        mLoadingScreen->onResChange (w,h);
+
+        //set up the hardware cursor manager
+        mSoftwareCursor = new Cursor();
+        mCursorManager = new SFO::SDLCursorManager();
+
+        MyGUI::PointerManager::getInstance().eventChangeMousePointer += MyGUI::newDelegate(this, &WindowManager::onCursorChange);
+
+        MyGUI::InputManager::getInstance().eventChangeKeyFocus += MyGUI::newDelegate(this, &WindowManager::onKeyFocusChanged);
+
+        setUseHardwareCursors(mUseHardwareCursors);
+        onCursorChange(MyGUI::PointerManager::getInstance().getDefaultPointer());
+        mCursorManager->cursorVisibilityChange(false);
+    }
+
+    void WindowManager::initUI()
+    {
+        // Get size info from the Gui object
         int w = MyGUI::RenderManager::getInstance().getViewSize().width;
         int h = MyGUI::RenderManager::getInstance().getViewSize().height;
 
@@ -169,9 +191,9 @@ namespace MWGui
         mDragAndDrop->mDragAndDropWidget = dragAndDropWidget;
 
         mMenu = new MainMenu(w,h);
-        mMap = new MapWindow(cacheDir);
+        mMap = new MapWindow("");
         mStatsWindow = new StatsWindow();
-        mConsole = new Console(w,h, consoleOnlyScripts);
+        mConsole = new Console(w,h, mConsoleOnlyScripts);
         mJournal = JournalWindow::create(JournalViewModel::create ());
         mMessageBoxManager = new MessageBoxManager();
         mInventoryWindow = new InventoryWindow(mDragAndDrop);
@@ -200,12 +222,7 @@ namespace MWGui
         mSoulgemDialog = new SoulgemDialog(mMessageBoxManager);
         mCompanionWindow = new CompanionWindow(mDragAndDrop, mMessageBoxManager);
 
-        mLoadingScreen = new LoadingScreen(mRendering->getScene (), mRendering->getWindow ());
-        mLoadingScreen->onResChange (w,h);
-
         mInputBlocker = mGui->createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Default,"Windows","");
-
-        mSoftwareCursor = new Cursor();
 
         mHud->setVisible(mHudEnabled);
 
@@ -225,19 +242,15 @@ namespace MWGui
         unsetSelectedSpell();
         unsetSelectedWeapon();
 
-        //set up the hardware cursor manager
-        mCursorManager = new SFO::SDLCursorManager();
-
-        MyGUI::PointerManager::getInstance().eventChangeMousePointer += MyGUI::newDelegate(this, &WindowManager::onCursorChange);
-
-        MyGUI::InputManager::getInstance().eventChangeKeyFocus += MyGUI::newDelegate(this, &WindowManager::onKeyFocusChanged);
-
-        setUseHardwareCursors(mUseHardwareCursors);
-        onCursorChange(MyGUI::PointerManager::getInstance().getDefaultPointer());
-        mCursorManager->cursorVisibilityChange(false);
-
         // Set up visibility
         updateVisible();
+
+        MWBase::Environment::get().getInputManager()->changeInputMode(false);
+    }
+
+    void WindowManager::renderWorldMap()
+    {
+        mMap->renderGlobalMap(mLoadingScreen);
     }
 
     void WindowManager::setNewGame(bool newgame)
@@ -248,6 +261,9 @@ namespace MWGui
             delete mCharGen;
             mCharGen = new CharacterCreation();
             mGuiModes.clear();
+            mHud->unsetSelectedWeapon();
+            mHud->unsetSelectedSpell();
+            unsetForceHide(GW_ALL);
         }
         else
             allow(GW_ALL);
@@ -326,6 +342,8 @@ namespace MWGui
 
     void WindowManager::updateVisible()
     {
+        if (!mMap)
+            return; // UI not created yet
         // Start out by hiding everything except the HUD
         mMap->setVisible(false);
         mMenu->setVisible(false);
@@ -911,6 +929,10 @@ namespace MWGui
 
     void WindowManager::windowResized(int x, int y)
     {
+        mGuiManager->windowResized();
+        mLoadingScreen->onResChange (x,y);
+        if (!mHud)
+            return; // UI not initialized yet
         mHud->onResChange(x, y);
         mConsole->onResChange(x, y);
         mMenu->onResChange(x, y);
@@ -920,10 +942,8 @@ namespace MWGui
         mBookWindow->center();
         mQuickKeysMenu->center();
         mSpellBuyingWindow->center();
-        mLoadingScreen->onResChange (x,y);
         mDragAndDrop->mDragAndDropWidget->setSize(MyGUI::IntSize(x, y));
         mInputBlocker->setSize(MyGUI::IntSize(x,y));
-        mGuiManager->windowResized();
     }
 
     void WindowManager::pushGuiMode(GuiMode mode)
@@ -1145,7 +1165,7 @@ namespace MWGui
 
     bool WindowManager::isGuiMode() const
     {
-        return !mGuiModes.empty() || mMessageBoxManager->isInteractiveMessageBox();
+        return !mGuiModes.empty() || (mMessageBoxManager && mMessageBoxManager->isInteractiveMessageBox());
     }
 
     bool WindowManager::isConsoleMode() const
@@ -1208,7 +1228,8 @@ namespace MWGui
 
     void WindowManager::showCrosshair (bool show)
     {
-        mHud->setCrosshairVisible (show && mCrosshairEnabled);
+        if (mHud)
+            mHud->setCrosshairVisible (show && mCrosshairEnabled);
     }
 
     void WindowManager::activateQuickKey (int index)
@@ -1227,15 +1248,6 @@ namespace MWGui
         mHud->setVisible (mHudEnabled);
     }
 
-    void WindowManager::setLoadingProgress (const std::string& stage, int depth, int current, int total)
-    {
-        mLoadingScreen->setLoadingProgress (stage, depth, current, total);
-    }
-
-    void WindowManager::loadingDone ()
-    {
-        mLoadingScreen->loadingDone ();
-    }
     bool WindowManager::getRestEnabled()
     {
         //Enable rest dialogue if character creation finished
@@ -1340,6 +1352,11 @@ namespace MWGui
     void WindowManager::setEnemy(const MWWorld::Ptr &enemy)
     {
         mHud->setEnemy(enemy);
+    }
+
+    Loading::Listener* WindowManager::getLoadingScreen()
+    {
+        return mLoadingScreen;
     }
 
 }

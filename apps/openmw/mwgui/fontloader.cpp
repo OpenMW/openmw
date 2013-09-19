@@ -9,6 +9,7 @@
 #include <MyGUI_XmlDocument.h>
 #include <MyGUI_FactoryManager.h>
 
+
 #include <components/misc/stringops.hpp>
 
 namespace
@@ -62,6 +63,58 @@ namespace
 
         return unicode;
     }
+
+    std::string getUtf8 (unsigned char c, ToUTF8::Utf8Encoder& encoder, ToUTF8::FromType encoding)
+    {
+        if (encoding == ToUTF8::WINDOWS_1250)
+        {
+            unsigned char win1250;
+            std::map<unsigned char, unsigned char> conv;
+            conv[0x80] = 0xc6;
+            conv[0x81] = 0x9c;
+            conv[0x82] = 0xe6;
+            conv[0x83] = 0xb3;
+            conv[0x84] = 0xf1;
+            conv[0x85] = 0xb9;
+            conv[0x86] = 0xbf;
+            conv[0x87] = 0x9f;
+            conv[0x88] = 0xea;
+            conv[0x89] = 0xea;
+            conv[0x8a] = 0x0; // not contained in win1250
+            conv[0x8b] = 0x0; // not contained in win1250
+            conv[0x8c] = 0x8f;
+            conv[0x8d] = 0xaf;
+            conv[0x8e] = 0xa5;
+            conv[0x8f] = 0x8c;
+            conv[0x90] = 0xca;
+            conv[0x93] = 0xa3;
+            conv[0x94] = 0xf6;
+            conv[0x95] = 0xf3;
+            conv[0x96] = 0xaf;
+            conv[0x97] = 0x8f;
+            conv[0x99] = 0xd3;
+            conv[0x9a] = 0xd1;
+            conv[0x9c] = 0x0; // not contained in win1250
+            conv[0xa0] = 0xb9;
+            conv[0xa1] = 0xaf;
+            conv[0xa2] = 0xf3;
+            conv[0xa3] = 0xbf;
+            conv[0xa4] = 0x0; // not contained in win1250
+            conv[0xe1] = 0x8c;
+            conv[0xe1] = 0x8c;
+            conv[0xe3] = 0x0; // not contained in win1250
+            conv[0xf5] = 0x0; // not contained in win1250
+
+            if (conv.find(c) != conv.end())
+                win1250 = conv[c];
+            else
+                win1250 = c;
+            return encoder.getUtf8(std::string(1, win1250));
+        }
+        else
+            return encoder.getUtf8(std::string(1, c));
+    }
+
 }
 
 namespace MWGui
@@ -184,7 +237,7 @@ namespace MWGui
             int h  = data[i].bottom_left.y*height - y1;
 
             ToUTF8::Utf8Encoder encoder(mEncoding);
-            unsigned long unicodeVal = utf8ToUnicode(encoder.getUtf8(std::string(1, (unsigned char)(i))));
+            unsigned long unicodeVal = utf8ToUnicode(getUtf8(i, encoder, mEncoding));
 
             MyGUI::xml::ElementPtr code = codes->createChild("Code");
             code->addAttribute("index", unicodeVal);

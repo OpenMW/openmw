@@ -119,6 +119,11 @@ struct Cell
       return mData.mY;
   }
 
+  bool hasWater() const
+  {
+      return (mData.mFlags&HasWater);
+  }
+
   // Restore the given reader to the stored position. Will try to open
   // the file matching the stored file name. If you want to read from
   // somewhere other than the file system, you need to pre-open the

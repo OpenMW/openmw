@@ -1,19 +1,10 @@
 #include "lights.hpp"
 
 #include <OgreLight.h>
-#include <OgreMath.h>
+
 
 namespace OEngine {
 namespace Render {
-
-
-LightFunction::LightFunction(LightType type)
-  : ControllerFunction<Ogre::Real>(true)
-  , mType(type)
-  , mPhase(Ogre::Math::RangeRandom(-500.0f, +500.0f))
-  , mDirection(1.0f)
-{
-}
 
 Ogre::Real LightFunction::pulseAmplitude(Ogre::Real time)
 {
@@ -95,13 +86,6 @@ Ogre::Real LightFunction::calculate(Ogre::Real value)
         brightness = 1.0 + pulseAmplitude(mDeltaCount*slow)*0.25;
 
     return brightness;
-}
-
-
-LightValue::LightValue(Ogre::Light *light, const Ogre::ColourValue &color)
-  : mTarget(light)
-  , mColor(color)
-{
 }
 
 Ogre::Real LightValue::getValue() const

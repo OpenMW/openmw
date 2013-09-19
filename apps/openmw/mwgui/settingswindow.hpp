@@ -59,7 +59,7 @@ namespace MWGui
             MyGUI::Button* mActorShadows;
             MyGUI::Button* mStaticsShadows;
             MyGUI::Button* mMiscShadows;
-            MyGUI::Button* mShadowsDebug;
+            MyGUI::Button* mTerrainShadows;
 
             // audio
             MyGUI::ScrollBar* mMasterVolumeSlider;

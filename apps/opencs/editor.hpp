@@ -2,15 +2,23 @@
 #define CS_EDITOR_H
 
 #include <QObject>
+#include <QString>
+#include <QLocalServer>
+#include <QLocalSocket>
+
 #ifndef Q_MOC_RUN
 #include <components/files/configurationmanager.hpp>
 #endif
+
+#include "model/settings/usersettings.hpp"
 #include "model/doc/documentmanager.hpp"
 
 #include "view/doc/viewmanager.hpp"
 #include "view/doc/startup.hpp"
 #include "view/doc/filedialog.hpp"
-#include "model/settings/usersettings.hpp"
+#include "view/doc/newgame.hpp"
+
+#include "view/settings/usersettingsdialog.hpp"
 
 namespace CS
 {
@@ -22,9 +30,13 @@ namespace CS
             CSMDoc::DocumentManager mDocumentManager;
             CSVDoc::ViewManager mViewManager;
             CSVDoc::StartupDialogue mStartup;
+            CSVDoc::NewGameDialogue mNewGame;
+            CSVSettings::UserSettingsDialog mSettings;
             CSVDoc::FileDialog mFileDialog;
 
             Files::ConfigurationManager mCfgMgr;
+            boost::filesystem::path mLocal;
+
             void setupDataFiles();
 
             // not implemented
@@ -35,16 +47,31 @@ namespace CS
 
             Editor();
 
+            bool makeIPCServer();
+            void connectToIPCServer();
+
             int run();
             ///< \return error status
 
         private slots:
 
-            void createDocument();
+            void createGame();
+            void createAddon();
 
             void loadDocument();
             void openFiles();
             void createNewFile();
+            void createNewGame (const boost::filesystem::path& file);
+
+            void showStartup();
+
+            void showSettings();
+
+        private:
+
+            QString mIpcServerName;
+            QLocalServer *mServer;
+            QLocalSocket *mClientSocket;
     };
 }
 

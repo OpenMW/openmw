@@ -65,6 +65,14 @@ add_component_dir (interpreter
 add_component_dir (translation
     translation
     )
+    
+add_component_dir (terrain
+    quadtreenode chunk world storage material
+    )
+    
+add_component_dir (loadinglistener
+    loadinglistener
+    )
 
 set (ESM_UI ${CMAKE_SOURCE_DIR}/files/ui/datafilespage.ui
     )

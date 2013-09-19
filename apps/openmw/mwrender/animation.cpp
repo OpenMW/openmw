@@ -64,7 +64,7 @@ void Animation::destroyObjectList(Ogre::SceneManager *sceneMgr, NifOgre::ObjectL
 Animation::Animation(const MWWorld::Ptr &ptr, Ogre::SceneNode *node)
     : mPtr(ptr)
     , mCamera(NULL)
-    , mInsert(NULL)
+    , mInsert(node)
     , mSkelBase(NULL)
     , mAccumRoot(NULL)
     , mNonAccumRoot(NULL)
@@ -74,20 +74,14 @@ Animation::Animation(const MWWorld::Ptr &ptr, Ogre::SceneNode *node)
 {
     for(size_t i = 0;i < sNumGroups;i++)
         mAnimationValuePtr[i].bind(OGRE_NEW AnimationValue(this));
-    mInsert = node->createChildSceneNode();
 }
 
 Animation::~Animation()
 {
-    if(mInsert)
-    {
-        mAnimSources.clear();
+    mAnimSources.clear();
 
-        Ogre::SceneManager *sceneMgr = mInsert->getCreator();
-        destroyObjectList(sceneMgr, mObjectRoot);
-
-        sceneMgr->destroySceneNode(mInsert);
-    }
+    Ogre::SceneManager *sceneMgr = mInsert->getCreator();
+    destroyObjectList(sceneMgr, mObjectRoot);
 }
 
 
@@ -268,8 +262,13 @@ void Animation::addAnimSource(const std::string &model)
 
         if(!mAccumRoot && grp == 0)
         {
-            mAccumRoot = mInsert;
             mNonAccumRoot = dstval->getNode();
+            mAccumRoot = mNonAccumRoot->getParent();
+            if(!mAccumRoot)
+            {
+                std::cerr<< "Non-Accum root for "<<mPtr.getCellRef().mRefID<<" is skeleton root??" <<std::endl;
+                mNonAccumRoot = NULL;
+            }
         }
 
         ctrls[i].setSource(mAnimationValuePtr[grp]);
@@ -833,7 +832,12 @@ Ogre::Vector3 Animation::runAnimation(float duration)
         float timepassed = duration * state.mSpeedMult;
         while(state.mPlaying)
         {
-            float targetTime = state.mTime + timepassed;
+            float targetTime;
+
+            if(state.mTime >= state.mLoopStopTime && state.mLoopCount > 0)
+                goto handle_loop;
+
+            targetTime = state.mTime + timepassed;
             if(textkey == textkeys.end() || textkey->first > targetTime)
             {
                 if(mNonAccumCtrl && stateiter->first == mAnimationValuePtr[0]->getAnimName())
@@ -858,11 +862,10 @@ Ogre::Vector3 Animation::runAnimation(float duration)
 
             if(state.mTime >= state.mLoopStopTime && state.mLoopCount > 0)
             {
+            handle_loop:
                 state.mLoopCount--;
                 state.mTime = state.mLoopStartTime;
                 state.mPlaying = true;
-                if(state.mTime >= state.mLoopStopTime)
-                    break;
 
                 textkey = textkeys.lower_bound(state.mTime);
                 while(textkey != textkeys.end() && textkey->first <= state.mTime)
@@ -870,6 +873,9 @@ Ogre::Vector3 Animation::runAnimation(float duration)
                     handleTextKey(state, stateiter->first, textkey);
                     textkey++;
                 }
+
+                if(state.mTime >= state.mLoopStopTime)
+                    break;
             }
 
             if(timepassed <= 0.0f)
@@ -977,10 +983,7 @@ ObjectAnimation::ObjectAnimation(const MWWorld::Ptr& ptr, const std::string &mod
 {
     setObjectRoot(model, false);
 
-    Ogre::AxisAlignedBox bounds = getWorldBounds();
-
-    Ogre::Vector3 extents = bounds.getSize();
-    extents *= mInsert->getParentSceneNode()->getScale();
+    Ogre::Vector3 extents = getWorldBounds().getSize();
     float size = std::max(std::max(extents.x, extents.y), extents.z);
 
     bool small = (size < Settings::Manager::getInt("small object size", "Viewing distance")) &&

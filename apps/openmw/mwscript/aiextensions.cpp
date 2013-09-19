@@ -352,7 +352,6 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
-                    MWWorld::Ptr ptr = R()(runtime);
 
                     std::string actorID = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();

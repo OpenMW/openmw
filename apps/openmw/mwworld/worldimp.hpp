@@ -106,6 +106,9 @@ namespace MWWorld
             void processDoors(float duration);
             ///< Run physics simulation and modify \a world accordingly.
 
+            void doPhysics(float duration);
+            ///< Run physics simulation and modify \a world accordingly.
+
             void ensureNeededRecords();
 
             int mPlayIntro;
@@ -249,9 +252,10 @@ namespace MWWorld
             virtual MWWorld::Ptr getFacedObject();
             ///< Return pointer to the object the player is looking at, if it is within activation range
 
-            /// Returns a pointer to the object the provided object is facing (if within the
-            /// specified distance). This will attempt to use the "Bip01 Head" node as a basis.
-            virtual MWWorld::Ptr getFacedObject(const MWWorld::Ptr &ptr, float distance);
+            /// Returns a pointer to the object the provided object would hit (if within the
+            /// specified distance), and the point where the hit occurs. This will attempt to
+            /// use the "Head" node as a basis.
+            virtual std::pair<MWWorld::Ptr,Ogre::Vector3> getHitContact(const MWWorld::Ptr &ptr, float distance);
 
             virtual void deleteObject (const Ptr& ptr);
 
@@ -276,8 +280,9 @@ namespace MWWorld
             virtual void positionToIndex (float x, float y, int &cellX, int &cellY) const;
             ///< Convert position to cell numbers
 
-            virtual void doPhysics(const PtrMovementList &actors, float duration);
-            ///< Run physics simulation and modify \a world accordingly.
+            virtual void queueMovement(const Ptr &ptr, const Ogre::Vector3 &velocity);
+            ///< Queues movement for \a ptr (in local space), to be applied in the next call to
+            /// doPhysics.
 
             virtual bool castRay (float x1, float y1, float z1, float x2, float y2, float z2);
             ///< cast a Ray and return true if there is an object in the ray path.
@@ -415,7 +420,7 @@ namespace MWWorld
             /// \todo this does not belong here
             virtual void playVideo(const std::string& name, bool allowSkipping);
             virtual void stopVideo();
-            virtual void frameStarted (float dt);
+            virtual void frameStarted (float dt, bool paused);
 
             /// Find center of exterior cell above land surface
             /// \return false if exterior with given name not exists, true otherwise
@@ -434,6 +439,8 @@ namespace MWWorld
             virtual void setWerewolf(const MWWorld::Ptr& actor, bool werewolf);
 
             virtual void applyWerewolfAcrobatics(const MWWorld::Ptr& actor);
+
+            virtual bool toggleGodMode();
     };
 }
 

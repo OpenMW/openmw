@@ -28,16 +28,18 @@ namespace MWRender
          * Request the local map for an exterior cell.
          * @remarks It will either be loaded from a disk cache,
          * or rendered if it is not already cached.
-         * @param exterior cell
+         * @param cell exterior cell
+         * @param zMin min height of objects or terrain in cell
+         * @param zMax max height of objects or terrain in cell
          */
-        void requestMap (MWWorld::CellStore* cell);
+        void requestMap (MWWorld::CellStore* cell, float zMin, float zMax);
 
         /**
          * Request the local map for an interior cell.
          * @remarks It will either be loaded from a disk cache,
          * or rendered if it is not already cached.
-         * @param interior cell
-         * @param bounding box of the cell
+         * @param cell interior cell
+         * @param bounds bounding box of the cell
          */
         void requestMap (MWWorld::CellStore* cell,
                         Ogre::AxisAlignedBox bounds);

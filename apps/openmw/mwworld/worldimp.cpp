@@ -1,5 +1,7 @@
 #include "worldimp.hpp"
 
+#include <OgreSceneNode.h>
+
 #include <libs/openengine/bullet/physic.hpp>
 
 #include <components/bsa/bsa_archive.hpp>
@@ -182,11 +184,14 @@ namespace MWWorld
         int idx = 0;
         // NOTE: We might need to reserve one more for the running game / save.
         mEsm.resize(master.size() + plugins.size());
+        Loading::Listener* listener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
+        listener->loadingOn();
         for (std::vector<std::string>::size_type i = 0; i < master.size(); i++, idx++)
         {
             boost::filesystem::path masterPath (fileCollections.getCollection (".esm").getPath (master[i]));
 
             std::cout << "Loading ESM " << masterPath.string() << "\n";
+            listener->setLabel(masterPath.filename().string());
 
             // This parses the ESM file
             ESM::ESMReader lEsm;
@@ -195,7 +200,7 @@ namespace MWWorld
             lEsm.setGlobalReaderList(&mEsm);
             lEsm.open (masterPath.string());
             mEsm[idx] = lEsm;
-            mStore.load (mEsm[idx]);
+            mStore.load (mEsm[idx], listener);
         }
 
         for (std::vector<std::string>::size_type i = 0; i < plugins.size(); i++, idx++)
@@ -203,6 +208,7 @@ namespace MWWorld
             boost::filesystem::path pluginPath (fileCollections.getCollection (".esp").getPath (plugins[i]));
 
             std::cout << "Loading ESP " << pluginPath.string() << "\n";
+            listener->setLabel(pluginPath.filename().string());
 
             // This parses the ESP file
             ESM::ESMReader lEsm;
@@ -211,8 +217,9 @@ namespace MWWorld
             lEsm.setGlobalReaderList(&mEsm);
             lEsm.open (pluginPath.string());
             mEsm[idx] = lEsm;
-            mStore.load (mEsm[idx]);
+            mStore.load (mEsm[idx], listener);
         }
+        listener->loadingOff();
 
         // insert records that may not be present in all versions of MW
         if (mEsm[0].getFormat() == 0)
@@ -238,11 +245,12 @@ namespace MWWorld
         // Rebuild player
         setupPlayer();
         MWWorld::Ptr player = mPlayer->getPlayer();
-        renderPlayer();
-        mRendering->resetCamera();
 
         // removes NpcStats, ContainerStore etc
         player.getRefData().setCustomData(NULL);
+
+        renderPlayer();
+        mRendering->resetCamera();
 
         // make sure to do this so that local scripts from items that were in the players inventory are removed
         mLocalScripts.clear();
@@ -758,7 +766,7 @@ namespace MWWorld
         std::pair<float, std::string> result;
 
         if (!mRendering->occlusionQuerySupported())
-            result = mPhysics->getFacedHandle (*this, getMaxActivationDistance ());
+            result = mPhysics->getFacedHandle (getMaxActivationDistance ());
         else
             result = std::make_pair (mFacedDistance, mFacedHandle);
 
@@ -781,7 +789,7 @@ namespace MWWorld
         return object;
     }
 
-    MWWorld::Ptr World::getFacedObject(const MWWorld::Ptr &ptr, float distance)
+    std::pair<MWWorld::Ptr,Ogre::Vector3> World::getHitContact(const MWWorld::Ptr &ptr, float distance)
     {
         const ESM::Position &posdata = ptr.getRefData().getPosition();
         Ogre::Vector3 pos(posdata.pos);
@@ -796,11 +804,12 @@ namespace MWWorld
                 pos += node->_getDerivedPosition();
         }
 
-        std::pair<std::string,float> result = mPhysics->getFacedHandle(pos, rot, distance);
+        std::pair<std::string,Ogre::Vector3> result = mPhysics->getHitContact(ptr.getRefData().getHandle(),
+                                                                              pos, rot, distance);
         if(result.first.empty())
-            return MWWorld::Ptr();
+            return std::make_pair(MWWorld::Ptr(), Ogre::Vector3(0.0f));
 
-        return searchPtrViaHandle(result.first);
+        return std::make_pair(searchPtrViaHandle(result.first), result.second);
     }
 
     void World::deleteObject (const Ptr& ptr)
@@ -1072,18 +1081,16 @@ namespace MWWorld
     {
         const int cellSize = 8192;
 
-        cellX = static_cast<int> (x/cellSize);
-
-        if (x<0)
-            --cellX;
-
-        cellY = static_cast<int> (y/cellSize);
-
-        if (y<0)
-            --cellY;
+        cellX = std::floor(x/cellSize);
+        cellY = std::floor(y/cellSize);
     }
 
-    void World::doPhysics(const PtrMovementList &actors, float duration)
+    void World::queueMovement(const Ptr &ptr, const Vector3 &velocity)
+    {
+        mPhysics->queueObjectMovement(ptr, velocity);
+    }
+
+    void World::doPhysics(float duration)
     {
         /* No duration? Shouldn't be any movement, then. */
         if(duration <= 0.0f)
@@ -1091,8 +1098,9 @@ namespace MWWorld
 
         processDoors(duration);
 
-        PtrMovementList::const_iterator player(actors.end());
-        for(PtrMovementList::const_iterator iter(actors.begin());iter != actors.end();iter++)
+        const PtrVelocityList &results = mPhysics->applyQueuedMovement(duration);
+        PtrVelocityList::const_iterator player(results.end());
+        for(PtrVelocityList::const_iterator iter(results.begin());iter != results.end();iter++)
         {
             if(iter->first.getRefData().getHandle() == "player")
             {
@@ -1100,23 +1108,12 @@ namespace MWWorld
                 player = iter;
                 continue;
             }
-
-            rotateObjectImp(iter->first, Ogre::Vector3(iter->second.mRotation), true);
-
-            Ogre::Vector3 vec = mPhysics->move(iter->first, Ogre::Vector3(iter->second.mPosition), duration,
-                                               !isSwimming(iter->first) && !isFlying(iter->first));
-            moveObjectImp(iter->first, vec.x, vec.y, vec.z);
+            moveObjectImp(iter->first, iter->second.x, iter->second.y, iter->second.z);
         }
-        if(player != actors.end())
-        {
-            rotateObjectImp(player->first, Ogre::Vector3(player->second.mRotation), true);
+        if(player != results.end())
+            moveObjectImp(player->first, player->second.x, player->second.y, player->second.z);
 
-            Ogre::Vector3 vec = mPhysics->move(player->first, Ogre::Vector3(player->second.mPosition), duration,
-                                               !isSwimming(player->first) && !isFlying(player->first));
-            moveObjectImp(player->first, vec.x, vec.y, vec.z);
-        }
-
-        mPhysEngine->stepSimulation (duration);
+        mPhysEngine->stepSimulation(duration);
     }
 
     bool World::castRay (float x1, float y1, float z1, float x2, float y2, float z2)
@@ -1163,7 +1160,7 @@ namespace MWWorld
 
     bool World::toggleCollisionMode()
     {
-        return mPhysics->toggleCollisionMode();;
+        return mPhysics->toggleCollisionMode();
     }
 
     bool World::toggleRenderMode (RenderMode mode)
@@ -1260,6 +1257,8 @@ namespace MWWorld
         mWeatherManager->update (duration);
 
         mWorldScene->update (duration, paused);
+
+        doPhysics (duration);
 
         performUpdateSceneQueries ();
 
@@ -1567,9 +1566,19 @@ namespace MWWorld
     bool
     World::isFlying(const MWWorld::Ptr &ptr) const
     {
-        const MWWorld::Class &cls = MWWorld::Class::get(ptr);
-        if(cls.isActor() && cls.getCreatureStats(ptr).getMagicEffects().get(MWMechanics::EffectKey(ESM::MagicEffect::Levitate)).mMagnitude > 0)
+        if(!ptr.getClass().isActor())
+            return false;
+
+        const MWMechanics::CreatureStats &stats = ptr.getClass().getCreatureStats(ptr);
+        if(stats.getMagicEffects().get(MWMechanics::EffectKey(ESM::MagicEffect::Levitate)).mMagnitude > 0)
             return true;
+
+        // TODO: Check if flying creature
+
+        const OEngine::Physic::PhysicActor *actor = mPhysEngine->getCharacter(ptr.getRefData().getHandle());
+        if(!actor || !actor->getCollisionMode())
+            return true;
+
         return false;
     }
 
@@ -1680,9 +1689,9 @@ namespace MWWorld
         mRendering->stopVideo();
     }
 
-    void World::frameStarted (float dt)
+    void World::frameStarted (float dt, bool paused)
     {
-        mRendering->frameStarted(dt);
+        mRendering->frameStarted(dt, paused);
     }
 
     void World::activateDoor(const MWWorld::Ptr& door)
@@ -1937,6 +1946,11 @@ namespace MWWorld
         MWMechanics::NpcStats &stats = Class::get(actor).getNpcStats(actor);
 
         stats.getSkill(ESM::Skill::Acrobatics).setModified(gmst.find("fWerewolfAcrobatics")->getFloat(), 0);
+    }
+
+    bool World::toggleGodMode()
+    {
+        return false;
     }
 
 }

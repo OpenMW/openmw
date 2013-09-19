@@ -99,6 +99,8 @@ static const StateInfo sMovementList[] = {
     { CharState_SneakLeft, "sneakleft" },
     { CharState_SneakRight, "sneakright" },
 
+    { CharState_Jump, "jump" },
+
     { CharState_TurnLeft, "turnleft" },
     { CharState_TurnRight, "turnright" },
 };
@@ -177,6 +179,42 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
                              1.0f, "start", "stop", 0.0f, ~0ul);
     }
 
+    if(force && mJumpState != JumpState_None)
+    {
+        std::string jump;
+        MWRender::Animation::Group jumpgroup = MWRender::Animation::Group_All;
+        if(mJumpState != JumpState_None)
+        {
+            jump = "jump";
+            if(weap != sWeaponTypeListEnd)
+            {
+                jump += weap->shortgroup;
+                if(!mAnimation->hasAnimation(jump))
+                {
+                    jumpgroup = MWRender::Animation::Group_LowerBody;
+                    jump = "jump";
+                }
+            }
+        }
+
+        if(mJumpState == JumpState_Falling)
+        {
+            int mode = ((jump == mCurrentJump) ? 2 : 1);
+
+            mAnimation->disable(mCurrentJump);
+            mCurrentJump = jump;
+            mAnimation->play(mCurrentJump, Priority_Jump, jumpgroup, false,
+                             1.0f, ((mode!=2)?"start":"loop start"), "stop", 0.0f, ~0ul);
+        }
+        else
+        {
+            mAnimation->disable(mCurrentJump);
+            mCurrentJump.clear();
+            mAnimation->play(jump, Priority_Jump, jumpgroup, true,
+                             1.0f, "loop stop", "stop", 0.0f, 0);
+        }
+    }
+
     if(force || movement != mMovementState)
     {
         mMovementState = movement;
@@ -214,7 +252,7 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
 
         /* If we're playing the same animation, restart from the loop start instead of the
          * beginning. */
-        int mode = ((movement != mCurrentMovement) ? 1 : 2);
+        int mode = ((movement == mCurrentMovement) ? 2 : 1);
 
         mAnimation->disable(mCurrentMovement);
         mCurrentMovement = movement;
@@ -224,7 +262,7 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
             if(mMovementSpeed > 0.0f && (vel=mAnimation->getVelocity(mCurrentMovement)) > 1.0f)
                 speedmult = mMovementSpeed / vel;
             mAnimation->play(mCurrentMovement, Priority_Movement, movegroup, false,
-                             speedmult, ((mode==2)?"loop start":"start"), "stop", 0.0f, ~0ul);
+                             speedmult, ((mode!=2)?"start":"loop start"), "stop", 0.0f, ~0ul);
         }
     }
 }
@@ -307,6 +345,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     , mMovementSpeed(0.0f)
     , mDeathState(CharState_None)
     , mUpperBodyState(UpperCharState_Nothing)
+    , mJumpState(JumpState_None)
     , mWeaponType(WeapType_None)
     , mSkipAnim(false)
     , mSecondsOfRunning(0)
@@ -663,9 +702,11 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
     return forcestateupdate;
 }
 
-void CharacterController::update(float duration, Movement &movement)
+void CharacterController::update(float duration)
 {
+    MWBase::World *world = MWBase::Environment::get().getWorld();
     const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
+    Ogre::Vector3 movement(0.0f);
 
     if(!cls.isActor())
     {
@@ -684,44 +725,21 @@ void CharacterController::update(float duration, Movement &movement)
     }
     else if(!cls.getCreatureStats(mPtr).isDead())
     {
-        MWBase::World *world = MWBase::Environment::get().getWorld();
-
         bool onground = world->isOnGround(mPtr);
         bool inwater = world->isSwimming(mPtr);
         bool isrunning = cls.getStance(mPtr, MWWorld::Class::Run);
         bool sneak = cls.getStance(mPtr, MWWorld::Class::Sneak);
+        bool flying = world->isFlying(mPtr);
         Ogre::Vector3 vec = cls.getMovementVector(mPtr);
         Ogre::Vector3 rot = cls.getRotationVector(mPtr);
         mMovementSpeed = cls.getSpeed(mPtr);
 
-        CharacterState movestate = CharState_None;
-        CharacterState idlestate = CharState_SpecialIdle;
-        bool forcestateupdate = false;
-
         vec.x *= mMovementSpeed;
         vec.y *= mMovementSpeed;
 
-        /* FIXME: The state should be set to Jump, and X/Y movement should be disallowed except
-         * for the initial thrust (which would be carried by "physics" until landing). */
-        if(!onground || sneak)
-            vec.z = 0.0f;
-        else if(vec.z > 0.0f)
-        {
-            float z = cls.getJump(mPtr);
-
-            if(vec.x == 0 && vec.y == 0)
-                vec.z *= z;
-            else
-            {
-                /* FIXME: this would be more correct if we were going into a jumping state,
-                 * rather than normal walking/idle states. */
-                //Ogre::Vector3 lat = Ogre::Vector3(vec.x, vec.y, 0.0f).normalisedCopy();
-                //vec *= Ogre::Vector3(lat.x, lat.y, 1.0f) * z * 0.707f;
-                vec.z *= z * 0.707f;
-            }
-
-            //decrease fatigue by fFatigueJumpBase + (1 - normalizedEncumbrance) * fFatigueJumpMult;
-        }
+        CharacterState movestate = CharState_None;
+        CharacterState idlestate = CharState_SpecialIdle;
+        bool forcestateupdate = false;
 
         isrunning = isrunning && std::abs(vec[0])+std::abs(vec[1]) > 0.0f;
 
@@ -748,34 +766,86 @@ void CharacterController::update(float duration, Movement &movement)
             }
         }
 
-        if(std::abs(vec.x/2.0f) > std::abs(vec.y))
+        if(sneak || inwater || flying)
+            vec.z = 0.0f;
+
+        if(!onground && !flying && !inwater)
         {
-            if(vec.x > 0.0f)
-                movestate = (inwater ? (isrunning ? CharState_SwimRunRight : CharState_SwimWalkRight)
-                                     : (sneak ? CharState_SneakRight
-                                              : (isrunning ? CharState_RunRight : CharState_WalkRight)));
-            else if(vec.x < 0.0f)
-                movestate = (inwater ? (isrunning ? CharState_SwimRunLeft : CharState_SwimWalkLeft)
-                                     : (sneak ? CharState_SneakLeft
-                                              : (isrunning ? CharState_RunLeft : CharState_WalkLeft)));
+            const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
+
+            forcestateupdate = (mJumpState != JumpState_Falling);
+            mJumpState = JumpState_Falling;
+
+            // This is a guess. All that seems to be known is that "While the player is in the
+            // air, fJumpMoveBase and fJumpMoveMult governs air control." Assuming Acrobatics
+            // plays a role, this makes the most sense.
+            float mult = 0.0f;
+            if(cls.isNpc())
+            {
+                const NpcStats &stats = cls.getNpcStats(mPtr);
+                mult = gmst.find("fJumpMoveBase")->getFloat() +
+                       (stats.getSkill(ESM::Skill::Acrobatics).getModified()/100.0f *
+                        gmst.find("fJumpMoveMult")->getFloat());
+            }
+
+            vec.x *= mult;
+            vec.y *= mult;
+            vec.z  = 0.0f;
         }
-        else if(vec.y != 0.0f)
+        else if(vec.z > 0.0f && mJumpState == JumpState_None)
         {
-            if(vec.y > 0.0f)
-                movestate = (inwater ? (isrunning ? CharState_SwimRunForward : CharState_SwimWalkForward)
-                                     : (sneak ? CharState_SneakForward
-                                              : (isrunning ? CharState_RunForward : CharState_WalkForward)));
-            else if(vec.y < 0.0f)
-                movestate = (inwater ? (isrunning ? CharState_SwimRunBack : CharState_SwimWalkBack)
-                                     : (sneak ? CharState_SneakBack
-                                              : (isrunning ? CharState_RunBack : CharState_WalkBack)));
+            float z = cls.getJump(mPtr);
+            if(vec.x == 0 && vec.y == 0)
+                vec = Ogre::Vector3(0.0f, 0.0f, z);
+            else
+            {
+                Ogre::Vector3 lat = Ogre::Vector3(vec.x, vec.y, 0.0f).normalisedCopy();
+                vec = Ogre::Vector3(lat.x, lat.y, 1.0f) * z * 0.707f;
+            }
+
+            //decrease fatigue by fFatigueJumpBase + (1 - normalizedEncumbrance) * fFatigueJumpMult;
         }
-        else if(rot.z != 0.0f && !inwater && !sneak)
+        else if(mJumpState == JumpState_Falling)
         {
-            if(rot.z > 0.0f)
-                movestate = CharState_TurnRight;
-            else if(rot.z < 0.0f)
-                movestate = CharState_TurnLeft;
+            forcestateupdate = true;
+            mJumpState = JumpState_Landing;
+            vec.z = 0.0f;
+        }
+        else
+        {
+            if(!(vec.z > 0.0f))
+                mJumpState = JumpState_None;
+            vec.z = 0.0f;
+
+            if(std::abs(vec.x/2.0f) > std::abs(vec.y))
+            {
+                if(vec.x > 0.0f)
+                    movestate = (inwater ? (isrunning ? CharState_SwimRunRight : CharState_SwimWalkRight)
+                                         : (sneak ? CharState_SneakRight
+                                                  : (isrunning ? CharState_RunRight : CharState_WalkRight)));
+                else if(vec.x < 0.0f)
+                    movestate = (inwater ? (isrunning ? CharState_SwimRunLeft : CharState_SwimWalkLeft)
+                                         : (sneak ? CharState_SneakLeft
+                                                  : (isrunning ? CharState_RunLeft : CharState_WalkLeft)));
+            }
+            else if(vec.y != 0.0f)
+            {
+                if(vec.y > 0.0f)
+                    movestate = (inwater ? (isrunning ? CharState_SwimRunForward : CharState_SwimWalkForward)
+                                         : (sneak ? CharState_SneakForward
+                                                  : (isrunning ? CharState_RunForward : CharState_WalkForward)));
+                else if(vec.y < 0.0f)
+                    movestate = (inwater ? (isrunning ? CharState_SwimRunBack : CharState_SwimWalkBack)
+                                         : (sneak ? CharState_SneakBack
+                                                  : (isrunning ? CharState_RunBack : CharState_WalkBack)));
+            }
+            else if(rot.z != 0.0f && !inwater && !sneak)
+            {
+                if(rot.z > 0.0f)
+                    movestate = CharState_TurnRight;
+                else if(rot.z < 0.0f)
+                    movestate = CharState_TurnLeft;
+            }
         }
 
         if(movestate != CharState_None)
@@ -796,45 +866,47 @@ void CharacterController::update(float duration, Movement &movement)
             }
         }
 
-        vec *= duration;
-        movement.mPosition[0] += vec.x;
-        movement.mPosition[1] += vec.y;
-        movement.mPosition[2] += vec.z;
-        rot *= duration;
-        movement.mRotation[0] += rot.x;
-        movement.mRotation[1] += rot.y;
-        movement.mRotation[2] += rot.z;
-
         if(cls.isNpc())
-            forcestateupdate = updateNpcState(onground, inwater, isrunning, sneak);
+            forcestateupdate = updateNpcState(onground, inwater, isrunning, sneak) || forcestateupdate;
 
         refreshCurrentAnims(idlestate, movestate, forcestateupdate);
+
+        rot *= duration * Ogre::Math::RadiansToDegrees(1.0f);
+        world->rotateObject(mPtr, rot.x, rot.y, rot.z, true);
+
+        world->queueMovement(mPtr, vec);
+        movement = vec;
     }
     else if(cls.getCreatureStats(mPtr).isDead())
     {
         MWBase::Environment::get().getWorld()->enableActorCollision(mPtr, false);
+        world->queueMovement(mPtr, Ogre::Vector3(0.0f));
     }
 
     if(mAnimation && !mSkipAnim)
     {
         Ogre::Vector3 moved = mAnimation->runAnimation(duration);
+        if(duration > 0.0f)
+            moved /= duration;
+        else
+            moved = Ogre::Vector3(0.0f);
+
         // Ensure we're moving in generally the right direction
         if(mMovementSpeed > 0.f)
         {
-            if((movement.mPosition[0] < 0.0f && movement.mPosition[0] < moved.x*2.0f) ||
-               (movement.mPosition[0] > 0.0f && movement.mPosition[0] > moved.x*2.0f))
-                moved.x = movement.mPosition[0];
-            if((movement.mPosition[1] < 0.0f && movement.mPosition[1] < moved.y*2.0f) ||
-               (movement.mPosition[1] > 0.0f && movement.mPosition[1] > moved.y*2.0f))
-                moved.y = movement.mPosition[1];
-            if((movement.mPosition[2] < 0.0f && movement.mPosition[2] < moved.z*2.0f) ||
-               (movement.mPosition[2] > 0.0f && movement.mPosition[2] > moved.z*2.0f))
-                moved.z = movement.mPosition[2];
+            if((movement.x < 0.0f && movement.x < moved.x*2.0f) ||
+               (movement.x > 0.0f && movement.x > moved.x*2.0f))
+                moved.x = movement.x;
+            if((movement.y < 0.0f && movement.y < moved.y*2.0f) ||
+               (movement.y > 0.0f && movement.y > moved.y*2.0f))
+                moved.y = movement.y;
+            if((movement.z < 0.0f && movement.z < moved.z*2.0f) ||
+               (movement.z > 0.0f && movement.z > moved.z*2.0f))
+                moved.z = movement.z;
         }
-
-        movement.mPosition[0] = moved.x;
-        movement.mPosition[1] = moved.y;
-        movement.mPosition[2] = moved.z;
+        // Update movement
+        if(moved.squaredLength() > 1.0f)
+            world->queueMovement(mPtr, moved);
     }
     mSkipAnim = false;
 }

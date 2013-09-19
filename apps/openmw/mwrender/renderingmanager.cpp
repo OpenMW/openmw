@@ -25,6 +25,8 @@
 
 #include <components/esm/loadstat.hpp>
 #include <components/settings/settings.hpp>
+#include <components/terrain/world.hpp>
+
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"
 
@@ -46,6 +48,7 @@
 #include "externalrendering.hpp"
 #include "globalmap.hpp"
 #include "videoplayer.hpp"
+#include "terrainstorage.hpp"
 
 using namespace MWRender;
 using namespace Ogre;
@@ -63,6 +66,7 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
     , mAmbientMode(0)
     , mSunEnabled(0)
     , mPhysicsEngine(engine)
+    , mTerrain(NULL)
 {
     // select best shader mode
     bool openGL = (Ogre::Root::getSingleton ().getRenderSystem ()->getName().find("OpenGL") != std::string::npos);
@@ -78,7 +82,7 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
         Settings::Manager::setString("shader mode", "General", openGL ? (glES ? "glsles" : "glsl") : "hlsl");
     }
 
-    mRendering.createScene("PlayerCam", Settings::Manager::getFloat("field of view", "General"), 5);
+    mRendering.adjustCamera(Settings::Manager::getFloat("field of view", "General"), 5);
 
     mRendering.getWindow()->addListener(this);
     mRendering.setWindowListener(this);
@@ -141,7 +145,6 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
 
     sh::Factory::getInstance ().setGlobalSetting ("fog", "true");
     sh::Factory::getInstance ().setGlobalSetting ("num_lights", Settings::Manager::getString ("num lights", "Objects"));
-    sh::Factory::getInstance ().setGlobalSetting ("terrain_num_lights", Settings::Manager::getString ("num lights", "Terrain"));
     sh::Factory::getInstance ().setGlobalSetting ("simple_water", Settings::Manager::getBool("shader", "Water") ? "false" : "true");
     sh::Factory::getInstance ().setGlobalSetting ("render_refraction", "false");
 
@@ -165,8 +168,6 @@ RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const b
     mCamera = new MWRender::Camera(mRendering.getCamera());
 
     mShadows = new Shadows(&mRendering);
-
-    mTerrainManager = new TerrainManager(mRendering.getScene(), this);
 
     mSkyManager = new SkyManager(mRootNode, mRendering.getCamera());
 
@@ -194,7 +195,7 @@ RenderingManager::~RenderingManager ()
     delete mSkyManager;
     delete mDebugging;
     delete mShadows;
-    delete mTerrainManager;
+    delete mTerrain;
     delete mLocalMap;
     delete mOcclusionQuery;
     delete mCompositors;
@@ -225,8 +226,6 @@ void RenderingManager::removeCell (MWWorld::Ptr::CellStore *store)
     mObjects.removeCell(store);
     mActors.removeCell(store);
     mDebugging->cellRemoved(store);
-    if (store->mCell->isExterior())
-      mTerrainManager->cellRemoved(store);
 }
 
 void RenderingManager::removeWater ()
@@ -244,8 +243,6 @@ void RenderingManager::cellAdded (MWWorld::Ptr::CellStore *store)
     mObjects.buildStaticGeometry (*store);
     sh::Factory::getInstance().unloadUnreferencedMaterials();
     mDebugging->cellAdded(store);
-    if (store->mCell->isExterior())
-        mTerrainManager->cellAdded(store);
     waterAdded(store);
 }
 
@@ -548,15 +545,10 @@ void RenderingManager::setAmbientMode()
     }
 }
 
-float RenderingManager::getTerrainHeightAt(Ogre::Vector3 worldPos)
-{
-    return mTerrainManager->getTerrainHeightAt(worldPos);
-}
-
-
 void RenderingManager::configureAmbient(MWWorld::Ptr::CellStore &mCell)
 {
-    mAmbientColor.setAsABGR (mCell.mCell->mAmbi.mAmbient);
+    if (mCell.mCell->mData.mFlags & ESM::Cell::Interior)
+        mAmbientColor.setAsABGR (mCell.mCell->mAmbi.mAmbient);
     setAmbientMode();
 
     // Create a "sun" that shines light downwards. It doesn't look
@@ -564,12 +556,15 @@ void RenderingManager::configureAmbient(MWWorld::Ptr::CellStore &mCell)
     if(!mSun)
     {
         mSun = mRendering.getScene()->createLight();
+        mSun->setType(Ogre::Light::LT_DIRECTIONAL);
     }
-    Ogre::ColourValue colour;
-    colour.setAsABGR (mCell.mCell->mAmbi.mSunlight);
-    mSun->setDiffuseColour (colour);
-    mSun->setType(Ogre::Light::LT_DIRECTIONAL);
-    mSun->setDirection(0,-1,0);
+    if (mCell.mCell->mData.mFlags & ESM::Cell::Interior)
+    {
+        Ogre::ColourValue colour;
+        colour.setAsABGR (mCell.mCell->mAmbi.mSunlight);
+        mSun->setDiffuseColour (colour);
+        mSun->setDirection(0,-1,0);
+    }
 }
 // Switch through lighting modes.
 
@@ -595,7 +590,6 @@ void RenderingManager::setSunColour(const Ogre::ColourValue& colour)
     if (!mSunEnabled) return;
     mSun->setDiffuseColour(colour);
     mSun->setSpecularColour(colour);
-    mTerrainManager->setDiffuse(colour);
 }
 
 void RenderingManager::setAmbientColour(const Ogre::ColourValue& colour)
@@ -608,7 +602,6 @@ void RenderingManager::setAmbientColour(const Ogre::ColourValue& colour)
     final += Ogre::ColourValue(0.7,0.7,0.7,0) * std::min(1.f, (nightEye/100.f));
 
     mRendering.getScene()->setAmbientLight(final);
-    mTerrainManager->setAmbient(final);
 }
 
 void RenderingManager::sunEnable(bool real)
@@ -652,7 +645,18 @@ void RenderingManager::setGlare(bool glare)
 void RenderingManager::requestMap(MWWorld::Ptr::CellStore* cell)
 {
     if (cell->mCell->isExterior())
-        mLocalMap->requestMap(cell);
+    {
+        assert(mTerrain);
+
+        Ogre::AxisAlignedBox dims = mObjects.getDimensions(cell);
+        Ogre::Vector2 center(cell->mCell->getGridX() + 0.5, cell->mCell->getGridY() + 0.5);
+        dims.merge(mTerrain->getWorldBoundingBox(center));
+
+        if (dims.isFinite())
+            mTerrain->update(dims.getCenter());
+
+        mLocalMap->requestMap(cell, dims.getMinimum().z, dims.getMaximum().z);
+    }
     else
         mLocalMap->requestMap(cell, mObjects.getDimensions(cell));
 }
@@ -838,7 +842,12 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
     mWater->processChangedSettings(settings);
 
     if (rebuild)
+    {
         mObjects.rebuildStaticGeometry();
+        if (mTerrain)
+            mTerrain->applyMaterials(Settings::Manager::getBool("enabled", "Shadows"),
+                                     Settings::Manager::getBool("split", "Shadows"));
+    }
 }
 
 void RenderingManager::setMenuTransparency(float val)
@@ -982,14 +991,48 @@ void RenderingManager::updateWaterRippleEmitterPtr (const MWWorld::Ptr& old, con
     mWater->updateEmitterPtr(old, ptr);
 }
 
-void RenderingManager::frameStarted(float dt)
+void RenderingManager::frameStarted(float dt, bool paused)
 {
-    mWater->frameStarted(dt);
+    if (mTerrain)
+        mTerrain->update(mRendering.getCamera()->getRealPosition());
+
+    if (!paused)
+        mWater->frameStarted(dt);
 }
 
 void RenderingManager::resetCamera()
 {
     mCamera->reset();
+}
+
+float RenderingManager::getTerrainHeightAt(Ogre::Vector3 worldPos)
+{
+    if (!mTerrain || !mTerrain->getVisible())
+        return -std::numeric_limits<float>::max();
+    return mTerrain->getHeightAt(worldPos);
+}
+
+void RenderingManager::enableTerrain(bool enable)
+{
+    if (enable)
+    {
+        if (!mTerrain)
+        {
+            Loading::Listener* listener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
+            Loading::ScopedLoad load(listener);
+            mTerrain = new Terrain::World(listener, mRendering.getScene(), new MWRender::TerrainStorage(), RV_Terrain,
+                                            Settings::Manager::getBool("distant land", "Terrain"),
+                                            Settings::Manager::getBool("shader", "Terrain"));
+            mTerrain->applyMaterials(Settings::Manager::getBool("enabled", "Shadows"),
+                                     Settings::Manager::getBool("split", "Shadows"));
+            mTerrain->update(mRendering.getCamera()->getRealPosition());
+            mTerrain->setLoadingListener(NULL);
+        }
+        mTerrain->setVisible(true);
+    }
+    else
+        if (mTerrain)
+            mTerrain->setVisible(false);
 }
 
 } // namespace

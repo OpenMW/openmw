@@ -97,26 +97,26 @@
         <BasisSkin type="MainSkin" offset="0 0 19 19">
             <State name="normal" offset="0 0 19 19"/>
         </BasisSkin>
-        <Child type="Widget" skin="PU_B"  offset="2 17 15 2" align="Stretch"/>
+        <Child type="Widget" skin="PU_B" offset="2 17 15 2" align="Stretch"/>
         <Child type="Widget" skin="PU_BR" offset="17 17 2 2" align="Stretch"/>
-				<Child type="Widget" skin="PU_R"  offset="17 2 2 15" align="Stretch"/>
+        <Child type="Widget" skin="PU_R" offset="17 2 2 15" align="Stretch"/>
         <Child type="Widget" skin="PU_TR" offset="17 0 2 2" align="Stretch"/>
-        <Child type="Widget" skin="PU_T"  offset="2 0 15 2" align="Stretch"/>
+        <Child type="Widget" skin="PU_T" offset="2 0 15 2" align="Stretch"/>
         <Child type="Widget" skin="PU_TL" offset="0 0 2 2" align="Stretch"/>
-        <Child type="Widget" skin="PU_L"  offset="0 2 2 15" align="Stretch"/>
+        <Child type="Widget" skin="PU_L" offset="0 2 2 15" align="Stretch"/>
         <Child type="Widget" skin="PU_BL" offset="0 17 2 2" align="Stretch"/>
     </Skin>
     <Skin name="PinDown" size="19 19" texture="textures\menu_rightbuttondown_center.dds">
         <BasisSkin type="MainSkin" offset="0 0 19 19">
             <State name="normal" offset="0 0 19 19"/>
         </BasisSkin>
-        <Child type="Widget" skin="PD_B"  offset="2 17 15 2" align="Stretch"/>
+        <Child type="Widget" skin="PD_B" offset="2 17 15 2" align="Stretch"/>
         <Child type="Widget" skin="PD_BR" offset="17 17 2 2" align="Stretch"/>
-				<Child type="Widget" skin="PD_R"  offset="17 2 2 15" align="Stretch"/>
+        <Child type="Widget" skin="PD_R" offset="17 2 2 15" align="Stretch"/>
         <Child type="Widget" skin="PD_TR" offset="17 0 2 2" align="Stretch"/>
-        <Child type="Widget" skin="PD_T"  offset="2 0 15 2" align="Stretch"/>
+        <Child type="Widget" skin="PD_T" offset="2 0 15 2" align="Stretch"/>
         <Child type="Widget" skin="PD_TL" offset="0 0 2 2" align="Stretch"/>
-        <Child type="Widget" skin="PD_L"  offset="0 2 2 15" align="Stretch"/>
+        <Child type="Widget" skin="PD_L" offset="0 2 2 15" align="Stretch"/>
         <Child type="Widget" skin="PD_BL" offset="0 17 2 2" align="Stretch"/>
     </Skin>
 
@@ -167,7 +167,7 @@
         </BasisSkin>
     </Skin>
     <Skin name="DB_BL" size="4 4" texture="textures\menu_thick_border_bottom_left_corner.dds">
-        <Property key="Pointer" value="dresize2" />
+        <Property key="Pointer" value="dresize2"/>
         <BasisSkin type="MainSkin" offset="0 0 4 4">
             <State name="normal" offset="0 0 4 4"/>
         </BasisSkin>
@@ -185,7 +185,7 @@
 
     <!-- These define the window borders -->
     <Skin name="TB_B" size="512 4" texture="textures\menu_thick_border_bottom.dds">
-        <Property key="Pointer" value="vresize" />
+        <Property key="Pointer" value="vresize"/>
         <BasisSkin type="TileRect" offset="0 0 512 4" align="Stretch">
             <State name="normal" offset="0 0 512 4">
                 <Property key="TileSize" value="512 4"/>
@@ -196,7 +196,7 @@
     </Skin>
 
     <Skin name="TB_R" size="4 512" texture="textures\menu_thick_border_right.dds">
-        <Property key="Pointer" value="hresize" />
+        <Property key="Pointer" value="hresize"/>
         <BasisSkin type="TileRect" offset="0 0 4 512" align="Stretch">
             <State name="normal" offset="0 0 4 512">
                 <Property key="TileSize" value="4 512"/>
@@ -207,7 +207,7 @@
     </Skin>
 
     <Skin name="TB_T" size="512 4" texture="textures\menu_thick_border_top.dds">
-        <Property key="Pointer" value="vresize" />
+        <Property key="Pointer" value="vresize"/>
         <BasisSkin type="TileRect" offset="0 0 512 4" align="Stretch">
             <State name="normal" offset="0 0 512 4">
                 <Property key="TileSize" value="512 4"/>
@@ -218,7 +218,7 @@
     </Skin>
 
     <Skin name="TB_L" size="4 512" texture="textures\menu_thick_border_left.dds">
-        <Property key="Pointer" value="hresize" />
+        <Property key="Pointer" value="hresize"/>
         <BasisSkin type="TileRect" offset="0 0 4 512" align="Stretch">
             <State name="normal" offset="0 0 4 512">
                 <Property key="TileSize" value="4 512"/>
@@ -230,25 +230,25 @@
 
     <!-- Window border corners -->
     <Skin name="TB_BR" size="4 4" texture="textures\menu_thick_border_bottom_right_corner.dds">
-        <Property key="Pointer" value="dresize" />
+        <Property key="Pointer" value="dresize"/>
         <BasisSkin type="MainSkin" offset="0 0 4 4">
             <State name="normal" offset="0 0 4 4"/>
         </BasisSkin>
     </Skin>
     <Skin name="TB_BL" size="4 4" texture="textures\menu_thick_border_bottom_left_corner.dds">
-        <Property key="Pointer" value="dresize2" />
+        <Property key="Pointer" value="dresize2"/>
         <BasisSkin type="MainSkin" offset="0 0 4 4">
             <State name="normal" offset="0 0 4 4"/>
         </BasisSkin>
     </Skin>
     <Skin name="TB_TR" size="4 4" texture="textures\menu_thick_border_top_right_corner.dds">
-        <Property key="Pointer" value="dresize2" />
+        <Property key="Pointer" value="dresize2"/>
         <BasisSkin type="MainSkin" offset="0 0 4 4">
             <State name="normal" offset="0 0 4 4"/>
         </BasisSkin>
     </Skin>
     <Skin name="TB_TL" size="4 4" texture="textures\menu_thick_border_top_left_corner.dds">
-        <Property key="Pointer" value="dresize" />
+        <Property key="Pointer" value="dresize"/>
         <BasisSkin type="MainSkin" offset="0 0 4 4">
             <State name="normal" offset="0 0 4 4"/>
         </BasisSkin>
@@ -256,56 +256,56 @@
 
     <!-- Expanded border corners, to get larger diagonal corner pointer area -->
     <Skin name="TB_TL_T" size="10 4" texture="textures\menu_thick_border_top.dds">
-        <Property key="Pointer" value="dresize" />
+        <Property key="Pointer" value="dresize"/>
         <BasisSkin type="MainSkin" offset="0 0 10 4">
             <State name="normal" offset="0 0 10 4"/>
         </BasisSkin>
     </Skin>
 
     <Skin name="TB_TL_B" size="4 10" texture="textures\menu_thick_border_left.dds">
-        <Property key="Pointer" value="dresize" />
+        <Property key="Pointer" value="dresize"/>
         <BasisSkin type="MainSkin" offset="0 0 4 10">
             <State name="normal" offset="0 0 4 10"/>
         </BasisSkin>
     </Skin>
 
     <Skin name="TB_TR_T" size="10 4" texture="textures\menu_thick_border_top.dds">
-        <Property key="Pointer" value="dresize2" />
+        <Property key="Pointer" value="dresize2"/>
         <BasisSkin type="MainSkin" offset="0 0 10 4">
             <State name="normal" offset="0 0 10 4"/>
         </BasisSkin>
     </Skin>
 
     <Skin name="TB_TR_B" size="4 10" texture="textures\menu_thick_border_right.dds">
-        <Property key="Pointer" value="dresize2" />
+        <Property key="Pointer" value="dresize2"/>
         <BasisSkin type="MainSkin" offset="0 0 4 10">
             <State name="normal" offset="0 0 4 10"/>
         </BasisSkin>
     </Skin>
 
     <Skin name="TB_BL_T" size="4 10" texture="textures\menu_thick_border_left.dds">
-        <Property key="Pointer" value="dresize2" />
+        <Property key="Pointer" value="dresize2"/>
         <BasisSkin type="MainSkin" offset="0 0 4 10">
             <State name="normal" offset="0 0 4 10"/>
         </BasisSkin>
     </Skin>
 
     <Skin name="TB_BL_B" size="10 4" texture="textures\menu_thick_border_bottom.dds">
-        <Property key="Pointer" value="dresize2" />
+        <Property key="Pointer" value="dresize2"/>
         <BasisSkin type="MainSkin" offset="0 0 10 4">
             <State name="normal" offset="0 0 10 4"/>
         </BasisSkin>
     </Skin>
 
     <Skin name="TB_BR_T" size="4 10" texture="textures\menu_thick_border_right.dds">
-        <Property key="Pointer" value="dresize" />
+        <Property key="Pointer" value="dresize"/>
         <BasisSkin type="MainSkin" offset="0 0 4 10">
             <State name="normal" offset="0 0 4 10"/>
         </BasisSkin>
     </Skin>
 
     <Skin name="TB_BR_B" size="10 4" texture="textures\menu_thick_border_bottom.dds">
-        <Property key="Pointer" value="dresize" />
+        <Property key="Pointer" value="dresize"/>
         <BasisSkin type="MainSkin" offset="0 0 10 4">
             <State name="normal" offset="0 0 10 4"/>
         </BasisSkin>
@@ -390,9 +390,9 @@
     <!-- The actual caption. It contains the edges of the blocks on
          its sides as well -->
     <Skin name="MW_Caption" size="88 20" texture="black.png" >
-        <Property key="FontName" value="Default" />
-        <Property key="TextAlign" value="Center" />
-        <Property key="TextColour" value="0.75 0.62 0.36" />
+        <Property key="FontName" value="Default"/>
+        <Property key="TextAlign" value="Center"/>
+        <Property key="TextColour" value="0.75 0.62 0.36"/>
 
         <BasisSkin type="SubSkin" offset="0 0 88 20" align="Stretch">
             <State name="normal" offset="0 0 8 8"/>
@@ -415,10 +415,10 @@
 ------------------------------------------------------ -->
 
     <Skin name="MW_Window" size="256 256">
-        <Property key="FontName" value="Default" />
-        <Property key="TextAlign" value="Center" />
-        <Property key="TextColour" value="0.8 0.8 0.8" />
-        <Property key="Snap" value="true" />
+        <Property key="FontName" value="Default"/>
+        <Property key="TextAlign" value="Center"/>
+        <Property key="TextColour" value="0.8 0.8 0.8"/>
+        <Property key="Snap" value="true"/>
         <Property key="MinSize" value="64 64"/>
 
         <Child type="Widget" skin="BlackBG" offset="8 28 240 220" align="Stretch" name="Client"/>
@@ -555,10 +555,10 @@
     </Skin>
 
     <Skin name="MW_Window_NoCaption" size="256 256">
-        <Property key="FontName" value="Default" />
-        <Property key="TextAlign" value="Center" />
-        <Property key="TextColour" value="0.8 0.8 0.8" />
-        <Property key="Snap" value="true" />
+        <Property key="FontName" value="Default"/>
+        <Property key="TextAlign" value="Center"/>
+        <Property key="TextColour" value="0.8 0.8 0.8"/>
+        <Property key="Snap" value="true"/>
         <Property key="MinSize" value="64 64"/>
 
         <Child type="Widget" skin="BlackBG" offset="8 28 240 220" align="Stretch" name="Client"/>
@@ -692,10 +692,10 @@
     </Skin>
 
     <Skin name="MW_Window_Pinnable" size="256 256">
-        <Property key="FontName" value="Default" />
-        <Property key="TextAlign" value="Center" />
-        <Property key="TextColour" value="0.8 0.8 0.8" />
-        <Property key="Snap" value="true" />
+        <Property key="FontName" value="Default"/>
+        <Property key="TextAlign" value="Center"/>
+        <Property key="TextColour" value="0.8 0.8 0.8"/>
+        <Property key="Snap" value="true"/>
         <Property key="MinSize" value="64 64"/>
 
         <Child type="Widget" skin="BlackBG" offset="8 28 240 220" align="Stretch" name="Client"/>
@@ -835,9 +835,9 @@
     </Skin>
 
     <Skin name="MW_Dialog" size="256 54">
-        <Property key="FontName" value="Default" />
-        <Property key="TextAlign" value="Center" />
-        <Property key="TextColour" value="0.8 0.8 0.8" />
+        <Property key="FontName" value="Default"/>
+        <Property key="TextAlign" value="Center"/>
+        <Property key="TextColour" value="0.8 0.8 0.8"/>
 
         <Child type="Widget" skin="BlackBG" offset="4 4 248 46" align="Stretch" name="Client"/>
 

@@ -100,8 +100,6 @@ namespace MWGui
         mPtr = actor;
         clearDestinations();
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-
         for(unsigned int i = 0;i<mPtr.get<ESM::NPC>()->mBase->mTransport.size();i++)
         {
             std::string cellname = mPtr.get<ESM::NPC>()->mBase->mTransport[i].mCellName;

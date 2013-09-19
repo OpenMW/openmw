@@ -43,32 +43,32 @@
     <!-- Main energy bar widget definitions. There's one for each color.-->
 
     <Skin name="MW_EnergyBar_Red" size="64 12">
-        <Property key="TrackSkin" value="MW_BarTrack_Red" />
-        <Property key="TrackWidth" value="1" />
+        <Property key="TrackSkin" value="MW_BarTrack_Red"/>
+        <Property key="TrackWidth" value="1"/>
 
         <Child type="Widget" skin="MW_Box" offset="0 0 64 12" align="Stretch"/>
         <Child type="Widget" skin="BlackBG" offset="2 2 60 8" align="Stretch" name="Client"/>
     </Skin>
 
     <Skin name="MW_EnergyBar_Green" size="64 12">
-        <Property key="TrackSkin" value="MW_BarTrack_Green" />
-        <Property key="TrackWidth" value="1" />
+        <Property key="TrackSkin" value="MW_BarTrack_Green"/>
+        <Property key="TrackWidth" value="1"/>
 
         <Child type="Widget" skin="MW_Box" offset="0 0 64 12" align="Stretch"/>
         <Child type="Widget" skin="BlackBG" offset="2 2 60 8" align="Stretch" name="Client"/>
     </Skin>
 
     <Skin name="MW_EnergyBar_Blue" size="64 12">
-        <Property key="TrackSkin" value="MW_BarTrack_Blue" />
-        <Property key="TrackWidth" value="1" />
+        <Property key="TrackSkin" value="MW_BarTrack_Blue"/>
+        <Property key="TrackWidth" value="1"/>
 
         <Child type="Widget" skin="MW_Box" offset="0 0 64 12" align="Stretch"/>
         <Child type="Widget" skin="BlackBG" offset="2 2 60 8" align="Stretch" name="Client"/>
     </Skin>
 
     <Skin name="MW_EnergyBar_Yellow" size="64 12">
-        <Property key="TrackSkin" value="MW_BarTrack_Yellow" />
-        <Property key="TrackWidth" value="1" />
+        <Property key="TrackSkin" value="MW_BarTrack_Yellow"/>
+        <Property key="TrackWidth" value="1"/>
 
         <Child type="Widget" skin="MW_Box" offset="0 0 64 12" align="Stretch"/>
         <Child type="Widget" skin="BlackBG" offset="2 2 60 8" align="Stretch" name="Client"/>

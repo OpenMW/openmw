@@ -257,7 +257,7 @@ namespace CSMWorld
         int mIndex;
 
         UseValueColumn (int index)
-        : Column<ESXRecordT> (Columns::ColumnId_UseValue1 + index - 1,  ColumnBase::Display_Float),
+        : Column<ESXRecordT> (Columns::ColumnId_UseValue1 + index,  ColumnBase::Display_Float),
           mIndex (index)
         {}
 
@@ -339,7 +339,7 @@ namespace CSMWorld
         int mIndex;
 
         AttributesColumn (int index)
-        : Column<ESXRecordT> (Columns::ColumnId_Attribute1 + index - 1, ColumnBase::Display_Attribute),
+        : Column<ESXRecordT> (Columns::ColumnId_Attribute1 + index, ColumnBase::Display_Attribute),
           mIndex (index)
         {}
 
@@ -372,7 +372,7 @@ namespace CSMWorld
         SkillsColumn (int index, bool typePrefix = false, bool major = false)
         : Column<ESXRecordT> ((typePrefix ? (
             major ? Columns::ColumnId_MajorSkill1 : Columns::ColumnId_MinorSkill1) :
-            Columns::ColumnId_Skill1) + index - 1, ColumnBase::Display_String),
+            Columns::ColumnId_Skill1) + index, ColumnBase::Display_String),
             mIndex (index), mMajor (major)
         {}
 
@@ -1182,6 +1182,31 @@ namespace CSMWorld
             ESXRecordT record2 = record.get();
 
             record2.mTrap = data.toString().toUtf8().constData();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct FilterColumn : public Column<ESXRecordT>
+    {
+        FilterColumn() : Column<ESXRecordT> (Columns::ColumnId_Filter, ColumnBase::Display_String) {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return QString::fromUtf8 (record.get().mFilter.c_str());
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            record2.mFilter = data.toString().toUtf8().constData();
 
             record.setModified (record2);
         }

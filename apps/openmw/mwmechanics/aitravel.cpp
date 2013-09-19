@@ -33,46 +33,48 @@ namespace MWMechanics
 
     bool AiTravel::execute (const MWWorld::Ptr& actor)
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWBase::World *world = MWBase::Environment::get().getWorld();
         ESM::Position pos = actor.getRefData().getPosition();
-        bool cellChange = actor.getCell()->mCell->mData.mX != cellX || actor.getCell()->mCell->mData.mY != cellY;
-        const ESM::Pathgrid *pathgrid =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*actor.getCell()->mCell);
+        Movement &movement = actor.getClass().getMovementSettings(actor);
+        const ESM::Cell *cell = actor.getCell()->mCell;
 
-        if(actor.getCell()->mCell->mData.mX != player.getCell()->mCell->mData.mX)
+        MWWorld::Ptr player = world->getPlayer().getPlayer();
+        if(cell->mData.mX != player.getCell()->mCell->mData.mX)
         {
-            int sideX = sgn(actor.getCell()->mCell->mData.mX - player.getCell()->mCell->mData.mX);
-            //check if actor is near the border of an inactive cell. If so, disable aitravel.
-            if(sideX * (pos.pos[0] - actor.getCell()->mCell->mData.mX * ESM::Land::REAL_SIZE) > sideX * (ESM::Land::REAL_SIZE /
-                2.0 - 200)) 
+            int sideX = sgn(cell->mData.mX - player.getCell()->mCell->mData.mX);
+            //check if actor is near the border of an inactive cell. If so, stop walking.
+            if(sideX * (pos.pos[0] - cell->mData.mX*ESM::Land::REAL_SIZE) >
+               sideX * (ESM::Land::REAL_SIZE/2.0f - 200.0f))
             {
-                MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 0;
-                return true;
+                movement.mPosition[1] = 0;
+                return false;
             }
         }
-        if(actor.getCell()->mCell->mData.mY != player.getCell()->mCell->mData.mY)
+        if(cell->mData.mY != player.getCell()->mCell->mData.mY)
         {
-            int sideY = sgn(actor.getCell()->mCell->mData.mY - player.getCell()->mCell->mData.mY);
-            //check if actor is near the border of an inactive cell. If so, disable aitravel.
-            if(sideY * (pos.pos[1] - actor.getCell()->mCell->mData.mY * ESM::Land::REAL_SIZE) > sideY * (ESM::Land::REAL_SIZE /
-                2.0 - 200)) 
+            int sideY = sgn(cell->mData.mY - player.getCell()->mCell->mData.mY);
+            //check if actor is near the border of an inactive cell. If so, stop walking.
+            if(sideY * (pos.pos[1] - cell->mData.mY*ESM::Land::REAL_SIZE) >
+               sideY * (ESM::Land::REAL_SIZE/2.0f - 200.0f))
             {
-                MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 0;
-                return true;
+                movement.mPosition[1] = 0;
+                return false;
             }
         }
 
+        const ESM::Pathgrid *pathgrid = world->getStore().get<ESM::Pathgrid>().search(*cell);
+        bool cellChange = cell->mData.mX != cellX || cell->mData.mY != cellY;
         if(!mPathFinder.isPathConstructed() || cellChange)
         {
-            cellX = actor.getCell()->mCell->mData.mX;
-            cellY = actor.getCell()->mCell->mData.mY;
+            cellX = cell->mData.mX;
+            cellY = cell->mData.mY;
             float xCell = 0;
             float yCell = 0;
 
-            if (actor.getCell()->mCell->isExterior())
+            if(cell->isExterior())
             {
-                xCell = actor.getCell()->mCell->mData.mX * ESM::Land::REAL_SIZE;
-                yCell = actor.getCell()->mCell->mData.mY * ESM::Land::REAL_SIZE;
+                xCell = cell->mData.mX * ESM::Land::REAL_SIZE;
+                yCell = cell->mData.mY * ESM::Land::REAL_SIZE;
             }
 
             ESM::Pathgrid::Point dest;
@@ -90,13 +92,13 @@ namespace MWMechanics
 
         if(mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], pos.pos[2]))
         {
-            MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 0;
+            movement.mPosition[1] = 0;
             return true;
         }
 
         float zAngle = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
-        MWBase::Environment::get().getWorld()->rotateObject(actor, 0, 0, zAngle, false);
-        MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 1;
+        world->rotateObject(actor, 0, 0, zAngle, false);
+        movement.mPosition[1] = 1;
 
         return false;
     }

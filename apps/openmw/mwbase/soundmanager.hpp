@@ -39,9 +39,11 @@ namespace MWBase
                 Play_Normal  = 0, /* tracked, non-looping, multi-instance, environment */
                 Play_Loop    = 1<<0, /* Sound will continually loop until explicitly stopped */
                 Play_NoEnv   = 1<<1, /* Do not apply environment effects (eg, underwater filters) */
-                Play_NoTrack = 1<<2  /* (3D only) Play the sound at the given object's position
+                Play_NoTrack = 1<<2, /* (3D only) Play the sound at the given object's position
                                       * but do not keep it updated (the sound will not move with
                                       * the object and will not stop when the object is deleted. */
+
+                Play_LoopNoEnv = Play_Loop | Play_NoEnv
             };
             enum PlayType {
                 Play_TypeSfx   = 1<<3, /* Normal SFX sound */

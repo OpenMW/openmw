@@ -130,7 +130,10 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh)
         //  - the culling will be more inefficient
         // If it is set too low:
         //  - there will be too many batches.
-        sg->setRegionDimensions(Ogre::Vector3(2500,2500,2500));
+        if(ptr.getCell()->isExterior())
+            sg->setRegionDimensions(Ogre::Vector3(2048,2048,2048));
+        else
+            sg->setRegionDimensions(Ogre::Vector3(1024,1024,1024));
 
         sg->setVisibilityFlags(small ? RV_StaticsSmall : RV_Statics);
 

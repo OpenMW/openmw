@@ -63,12 +63,15 @@ CSVWorld::TableBottomBox::TableBottomBox (const CreatorFactoryBase& creatorFacto
 
     mCreator = creatorFactory.makeCreator (data, undoStack, id);
 
-    mLayout->addWidget (mCreator);
+    if (mCreator)
+    {
+        mLayout->addWidget (mCreator);
 
-    connect (mCreator, SIGNAL (done()), this, SLOT (createRequestDone()));
+        connect (mCreator, SIGNAL (done()), this, SLOT (createRequestDone()));
 
-    connect (mCreator, SIGNAL (requestFocus (const std::string&)),
-        this, SIGNAL (requestFocus (const std::string&)));
+        connect (mCreator, SIGNAL (requestFocus (const std::string&)),
+            this, SIGNAL (requestFocus (const std::string&)));
+    }
 }
 
 void CSVWorld::TableBottomBox::setEditLock (bool locked)

@@ -67,6 +67,20 @@ namespace Physic
     };
 
     /**
+     *This class is just an extension of normal btRigidBody in order to add extra info.
+     *When bullet give back a btRigidBody, you can just do a static_cast to RigidBody,
+     *so one never should use btRigidBody directly!
+     */
+    class RigidBody: public btRigidBody
+    {
+    public:
+        RigidBody(btRigidBody::btRigidBodyConstructionInfo& CI,std::string name);
+        virtual ~RigidBody();
+        std::string mName;
+        bool mPlaceable;
+    };
+
+    /**
      * A physic actor uses a rigid body based on box shapes.
      * Pmove is used to move the physic actor around the dynamic world.
      */
@@ -90,7 +104,7 @@ namespace Physic
 
         bool getCollisionMode() const
         {
-            return collisionMode;
+            return mCollisionMode;
         }
 
 
@@ -116,60 +130,60 @@ namespace Physic
         Ogre::Vector3 getHalfExtents() const;
 
         /**
-         * Sets the current amount of vertical force (gravity) affecting this physic actor
+         * Sets the current amount of inertial force (incl. gravity) affecting this physic actor
          */
-        void setVerticalForce(float force);
+        void setInertialForce(const Ogre::Vector3 &force);
 
         /**
-         * Gets the current amount of vertical force (gravity) affecting this physic actor
+         * Gets the current amount of inertial force (incl. gravity) affecting this physic actor
          */
-        float getVerticalForce() const;
+        const Ogre::Vector3 &getInertialForce() const
+        {
+            return mForce;
+        }
 
         void setOnGround(bool grounded);
 
-        bool getOnGround() const;
+        bool getOnGround() const
+        {
+            return mCollisionMode && mOnGround;
+        }
+
+        btCollisionObject *getCollisionBody() const
+        {
+            return mBody;
+        }
 
     private:
         void disableCollisionBody();
         void enableCollisionBody();
 public:
 //HACK: in Visual Studio 2010 and presumably above, this structures alignment
-//		must be 16, but the built in operator new & delete don't properly
-//		perform this alignment.
+//      must be 16, but the built in operator new & delete don't properly
+//      perform this alignment.
 #if _MSC_VER >= 1600
-		void * operator new (size_t Size) { return _aligned_malloc (Size, 16); }
-		void operator delete (void * Data) { _aligned_free (Data); }
+        void * operator new (size_t Size) { return _aligned_malloc (Size, 16); }
+        void operator delete (void * Data) { _aligned_free (Data); }
 #endif
 
 
     private:
-
         OEngine::Physic::RigidBody* mBody;
         OEngine::Physic::RigidBody* mRaycastingBody;
+
         Ogre::Vector3 mBoxScaledTranslation;
-        btQuaternion mBoxRotationInverse;
         Ogre::Quaternion mBoxRotation;
-        float verticalForce;
-        bool onGround;
-        bool collisionMode;
+        btQuaternion mBoxRotationInverse;
+
+        Ogre::Vector3 mForce;
+        bool mOnGround;
+        bool mCollisionMode;
+
         std::string mMesh;
-        PhysicEngine* mEngine;
         std::string mName;
+        PhysicEngine *mEngine;
     };
 
-    /**
-     *This class is just an extension of normal btRigidBody in order to add extra info.
-     *When bullet give back a btRigidBody, you can just do a static_cast to RigidBody,
-     *so one never should use btRigidBody directly!
-     */
-    class RigidBody: public btRigidBody
-    {
-    public:
-        RigidBody(btRigidBody::btRigidBodyConstructionInfo& CI,std::string name);
-        virtual ~RigidBody();
-        std::string mName;
-        bool mPlaceable;
-    };
 
     struct HeightField
     {
@@ -307,9 +321,13 @@ public:
         std::pair<bool, float> sphereCast (float radius, btVector3& from, btVector3& to);
         ///< @return (hit, relative distance)
 
-        std::pair<std::string,btVector3> sphereTest(float radius,btVector3& pos);
-
         std::vector<std::string> getCollisions(const std::string& name);
+
+        // Get the nearest object that's inside the given object, filtering out objects of the
+        // provided name
+        std::pair<const RigidBody*,btVector3> getFilteredContact(const std::string &filter,
+                                                                 const btVector3 &origin,
+                                                                 btCollisionObject *object);
 
         //event list of non player object
         std::list<PhysicEvent> NPEventList;

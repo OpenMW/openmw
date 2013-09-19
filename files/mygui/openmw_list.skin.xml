@@ -5,8 +5,8 @@
     <!-- Horizontal Scrollbar -->
 
     <Skin name="MW_HScroll" size="90 14">
-        <Property key="TrackRangeMargins" value="14 14" />
-        <Property key="MinTrackSize" value="14" />
+        <Property key="TrackRangeMargins" value="14 14"/>
+        <Property key="MinTrackSize" value="14"/>
         <Property key="VerticalAlignment" value="false"/>
         <Property key="MoveToClick" value="true"/>
 
@@ -43,8 +43,8 @@
     <!-- Vertical Scrollbar -->
 
     <Skin name="MW_VScroll" size="14 90">
-        <Property key="TrackRangeMargins" value="14 14" />
-        <Property key="MinTrackSize" value="14" />
+        <Property key="TrackRangeMargins" value="14 14"/>
+        <Property key="MinTrackSize" value="14"/>
         <Property key="MoveToClick" value="true"/>
 
         <!-- Background widget trick that must go first to be placed behind Track and FirstPart/SecondPart widgets, provides the bar texture -->
@@ -89,17 +89,17 @@
 
     <Skin name="HeaderText" size="16 16">
         <Property key="FontName" value="Default"/>
-        <Property key="TextAlign" value="Center" />
-        <Property key="TextColour" value="0.82 0.74 0.58" />
+        <Property key="TextAlign" value="Center"/>
+        <Property key="TextColour" value="0.82 0.74 0.58"/>
 
-        <BasisSkin type="SimpleText" offset="0 0 16 16"  align="Stretch"/>
+        <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch"/>
     </Skin>
 
     <!-- list and multilist skins -->
 
     <Skin name="MW_ListLine" size="5 5">
-        <Property key="FontName" value="Default" />
-        <Property key="TextAlign" value="Left VCenter" />
+        <Property key="FontName" value="Default"/>
+        <Property key="TextAlign" value="Left VCenter"/>
 
         <BasisSkin type="SimpleText" offset="2 0 1 5" align="Stretch">
             <State name="disabled" colour="0.70 0.57 0.33" shift="0"/>
@@ -114,9 +114,9 @@
     </Skin>
 
     <Skin name="MW_List" size="516 516" align="Left Top">
-        <Property key="NeedKey" value="true" />
-        <Property key="SkinLine" value="MW_ListLine" />
-        <Property key="HeightLine" value="20" />
+        <Property key="NeedKey" value="true"/>
+        <Property key="SkinLine" value="MW_ListLine"/>
+        <Property key="HeightLine" value="20"/>
 
         <Child type="Widget" skin="MW_Box" offset="0 0 516 516" align="Stretch"/>
 
@@ -144,9 +144,9 @@
     </Skin>
 
     <Skin name="MW_MultiSubList" size="516 516" align="Left Top">
-        <Property key="NeedKey" value="true" />
-        <Property key="SkinLine" value="MW_ListLine" />
-        <Property key="HeightLine" value="20" />
+        <Property key="NeedKey" value="true"/>
+        <Property key="SkinLine" value="MW_ListLine"/>
+        <Property key="HeightLine" value="20"/>
 
         <Child type="Widget" skin="MW_Box" offset="0 0 516 516" align="Stretch"/>
 
@@ -157,12 +157,12 @@
     </Skin>
 
     <Skin name="MW_MultiList" size="516 516" align="Left Top">
-        <Property key="NeedKey" value="true" />
-        <Property key="SkinButton" value="ButtonSmall" />
-        <Property key="_SkinButtonEmpty" value="EditBox" />
-        <Property key="HeightButton" value="20" />
+        <Property key="NeedKey" value="true"/>
+        <Property key="SkinButton" value="ButtonSmall"/>
+        <Property key="_SkinButtonEmpty" value="EditBox"/>
+        <Property key="HeightButton" value="20"/>
 
-        <Property key="SkinList" value="MW_MultiSubList" />
+        <Property key="SkinList" value="MW_MultiSubList"/>
 
         <Child type="Widget" skin="MW_Box" offset="0 0 516 516" align="Stretch"/>
 
@@ -171,7 +171,7 @@
 
     <!-- Horizontal line -->
 
-    <Skin name="MW_HLine" size="512 10"  texture="textures\menu_thin_border_top.dds">
+    <Skin name="MW_HLine" size="512 10" texture="textures\menu_thin_border_top.dds">
         <BasisSkin type="SubSkin" offset="0 0 512 2" align="Bottom HStretch">
             <State name="normal" offset="0 0 512 2"/>
         </BasisSkin>

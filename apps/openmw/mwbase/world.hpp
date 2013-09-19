@@ -220,9 +220,10 @@ namespace MWBase
             virtual MWWorld::Ptr  getFacedObject() = 0;
             ///< Return pointer to the object the player is looking at, if it is within activation range
 
-            /// Returns a pointer to the object the provided object is facing (if within the
-            /// specified distance). This will attempt to use the "Bip01 Head" node as a basis.
-            virtual MWWorld::Ptr getFacedObject(const MWWorld::Ptr &ptr, float distance) = 0;
+            /// Returns a pointer to the object the provided object would hit (if within the
+            /// specified distance), and the point where the hit occurs. This will attempt to
+            /// use the "Head" node as a basis.
+            virtual std::pair<MWWorld::Ptr,Ogre::Vector3> getHitContact(const MWWorld::Ptr &ptr, float distance) = 0;
 
             virtual void adjustPosition (const MWWorld::Ptr& ptr) = 0;
             ///< Adjust position after load to be on ground. Must be called after model load.
@@ -250,8 +251,9 @@ namespace MWBase
             virtual void positionToIndex (float x, float y, int &cellX, int &cellY) const = 0;
             ///< Convert position to cell numbers
 
-            virtual void doPhysics (const MWWorld::PtrMovementList &actors, float duration) = 0;
-            ///< Run physics simulation and modify \a world accordingly.
+            virtual void queueMovement(const MWWorld::Ptr &ptr, const Ogre::Vector3 &velocity) = 0;
+            ///< Queues movement for \a ptr (in local space), to be applied in the next call to
+            /// doPhysics.
 
             virtual bool castRay (float x1, float y1, float z1, float x2, float y2, float z2) = 0;
             ///< cast a Ray and return true if there is an object in the ray path.
@@ -371,7 +373,7 @@ namespace MWBase
             /// \todo this does not belong here
             virtual void playVideo(const std::string& name, bool allowSkipping) = 0;
             virtual void stopVideo() = 0;
-            virtual void frameStarted (float dt) = 0;
+            virtual void frameStarted (float dt, bool paused) = 0;
 
             /// Find default position inside exterior cell specified by name
             /// \return false if exterior with given name not exists, true otherwise
@@ -393,6 +395,8 @@ namespace MWBase
             /// Sets the NPC's Acrobatics skill to match the fWerewolfAcrobatics GMST.
             /// It only applies to the current form the NPC is in.
             virtual void applyWerewolfAcrobatics(const MWWorld::Ptr& actor) = 0;
+
+            virtual bool toggleGodMode() = 0;
     };
 }
 

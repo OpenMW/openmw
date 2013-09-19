@@ -24,6 +24,7 @@ class NpcStats;
 
 enum Priority {
     Priority_Default,
+    Priority_Jump,
     Priority_Movement,
     Priority_Weapon,
     Priority_Torch,
@@ -115,6 +116,12 @@ enum UpperBodyCharacterState {
     UpperCharState_CastingSpell
 };
 
+enum JumpingState {
+    JumpState_None,
+    JumpState_Falling,
+    JumpState_Landing
+};
+
 class CharacterController
 {
     MWWorld::Ptr mPtr;
@@ -134,6 +141,9 @@ class CharacterController
     std::string mCurrentDeath;
 
     UpperBodyCharacterState mUpperBodyState;
+
+    JumpingState mJumpState;
+    std::string mCurrentJump;
 
     WeaponType mWeaponType;
     std::string mCurrentWeapon;
@@ -164,7 +174,7 @@ public:
 
     void updatePtr(const MWWorld::Ptr &ptr);
 
-    void update(float duration, Movement &movement);
+    void update(float duration);
 
     void playGroup(const std::string &groupname, int mode, int count);
     void skipAnim();

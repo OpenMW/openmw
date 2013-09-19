@@ -153,6 +153,14 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
         // That should be it, I haven't seen any other fields yet.
     }
 
+    // NAM0 sometimes appears here, sometimes further on
+    ref.mNam0 = 0;
+    if (esm.isNextSub("NAM0"))
+    {
+        esm.getHT(ref.mNam0);
+        //esm.getHNOT(NAM0, "NAM0");
+    }
+
     esm.getHNT(ref.mRefnum, "FRMR");
     ref.mRefID = esm.getHNString("NAME");
 
@@ -243,7 +251,6 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
     // Update: Well, maybe not completely useless. This might actually be
     //  number_of_references + number_of_references_moved_here_Across_boundaries,
     //  and could be helpful for collecting these weird moved references.
-    ref.mNam0 = 0;
     if (esm.isNextSub("NAM0"))
     {
         esm.getHT(ref.mNam0);

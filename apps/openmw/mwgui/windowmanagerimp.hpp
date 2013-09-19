@@ -91,6 +91,11 @@ namespace MWGui
                   Translation::Storage& translationDataStorage, ToUTF8::FromType encoding);
     virtual ~WindowManager();
 
+    void initUI();
+    void renderWorldMap();
+
+    virtual Loading::Listener* getLoadingScreen();
+
     /**
      * Should be called each frame to update windows/gui elements.
      * This could mean updating sizes of gui elements or opening
@@ -241,9 +246,6 @@ namespace MWGui
 
     virtual void executeInConsole (const std::string& path);
 
-    virtual void setLoadingProgress (const std::string& stage, int depth, int current, int total);
-    virtual void loadingDone();
-
     virtual void enableRest() { mRestAllowed = true; }
     virtual bool getRestEnabled();
 
@@ -275,6 +277,8 @@ namespace MWGui
     void onSoulgemDialogButtonPressed (int button);
 
   private:
+    bool mConsoleOnlyScripts;
+
     OEngine::GUI::MyGUIManager *mGuiManager;
     OEngine::Render::OgreRenderer *mRendering;
     HUD *mHud;

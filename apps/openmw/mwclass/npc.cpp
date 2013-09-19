@@ -332,14 +332,15 @@ namespace MWClass
         float dist = 100.0f * (!weapon.isEmpty() ?
                                weapon.get<ESM::Weapon>()->mBase->mData.mReach :
                                gmst.find("fHandToHandReach")->getFloat());
-        MWWorld::Ptr victim = world->getFacedObject(ptr, dist);
+        // TODO: Use second to work out the hit angle and where to spawn the blood effect
+        MWWorld::Ptr victim = world->getHitContact(ptr, dist).first;
         if(victim.isEmpty()) // Didn't hit anything
             return;
 
         const MWWorld::Class &othercls = MWWorld::Class::get(victim);
         if(!othercls.isActor()) // Can't hit non-actors
             return;
-        MWMechanics::CreatureStats &otherstats = getCreatureStats(victim);
+        MWMechanics::CreatureStats &otherstats = victim.getClass().getCreatureStats(victim);
         if(otherstats.isDead()) // Can't hit dead actors
             return;
 
@@ -1021,6 +1022,16 @@ namespace MWClass
             }
             return "";
         }
+        if(name == "land")
+        {
+            MWBase::World *world = MWBase::Environment::get().getWorld();
+            Ogre::Vector3 pos(ptr.getRefData().getPosition().pos);
+            if(world->isUnderwater(ptr.getCell(), pos))
+                return "DefaultLandWater";
+            if(world->isOnGround(ptr))
+                return "Body Fall Medium";
+            return "";
+        }
         if(name == "swimleft")
             return "Swim Left";
         if(name == "swimright")
@@ -1033,8 +1044,6 @@ namespace MWClass
         if(name == "roar")
             return "";
         if(name == "scream")
-            return "";
-        if(name == "land")
             return "";
 
         throw std::runtime_error(std::string("Unexpected soundgen type: ")+name);
