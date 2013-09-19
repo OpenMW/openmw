@@ -125,5 +125,9 @@ void CSVWorld::ScriptHighlighter::highlightBlock (const QString& text)
         scanner.scan (*this);
     }
     catch (...) {} // ignore syntax errors
+}
 
+void CSVWorld::ScriptHighlighter::invalidateIds()
+{
+    mContext.invalidateIds();
 }

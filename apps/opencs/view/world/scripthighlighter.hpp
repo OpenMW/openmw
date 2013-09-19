@@ -77,6 +77,8 @@ namespace CSVWorld
             ScriptHighlighter (const CSMWorld::Data& data, QTextDocument *parent);
 
             virtual void highlightBlock (const QString& text);
+
+            void invalidateIds();
     };
 }
 
