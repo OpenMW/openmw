@@ -4,19 +4,15 @@
 #include <QDataStream>
 
 int EsxModel::EsmFile::sPropertyCount = 7;
+QString EsxModel::EsmFile::sToolTip = QString("<b>Author:</b> %1<br/> \
+                                              <b>Version:</b> %2<br/> \
+                                              <br/><b>Description:</b><br/>%3<br/> \
+                                              <br/><b>Dependencies: </b>%4<br/>");
+
 
 EsxModel::EsmFile::EsmFile(QString fileName, ModelItem *parent)
     : ModelItem(parent), mFileName(fileName), mVersion(0.0f)
 {}
-/*
-EsxModel::EsmFile::EsmFile(const EsmFile &file)
-    : ModelItem(file.parent()), mFileName(file.mFileName), mSize(file.mSize),
-      mVersion(file.mVersion), mAuthor(file.mAuthor), mModified(file.mModified),
-      mAccessed(file.mAccessed), mPath(file.mPath), mMasters(file.mMasters),
-      mDescription(file.mDescription)
-{}
-
-*/
 void EsxModel::EsmFile::setFileName(const QString &fileName)
 {
     mFileName = fileName;
@@ -64,35 +60,72 @@ QByteArray EsxModel::EsmFile::encodedData() const
     return encodedData;
 }
 
-void EsxModel::EsmFile::setProperty (const EsmFileProperty prop, const QString &value)
+QVariant EsxModel::EsmFile::fileProperty(const FileProperty prop) const
 {
     switch (prop)
     {
-    case Property_FileName:
+    case FileProperty_FileName:
+        return mFileName;
+        break;
+
+    case FileProperty_Author:
+        return mAuthor;
+        break;
+
+    case FileProperty_Version:
+        return mVersion;
+        break;
+
+    case FileProperty_DateModified:
+        return mModified.toString(Qt::ISODate);
+        break;
+
+    case FileProperty_Path:
+        return mPath;
+        break;
+
+    case FileProperty_Description:
+        return mDescription;
+        break;
+
+    case FileProperty_Master:
+        return mMasters;
+        break;
+
+    default:
+        break;
+    }
+    return QVariant();
+}
+void EsxModel::EsmFile::setFileProperty (const FileProperty prop, const QString &value)
+{
+    switch (prop)
+    {
+    case FileProperty_FileName:
         mFileName = value;
         break;
 
-    case Property_Author:
+    case FileProperty_Author:
         mAuthor = value;
         break;
 
-    case Property_Version:
+    case FileProperty_Version:
         mVersion = value.toFloat();
         break;
 
-    case Property_DateModified:
+    case FileProperty_DateModified:
         mModified = QDateTime::fromString(value);
         break;
 
-    case Property_Path:
+    case FileProperty_Path:
         mPath = value;
         break;
 
-    case Property_Description:
+    case FileProperty_Description:
         mDescription = value;
         break;
 
-    case Property_Master:
+    case FileProperty_Master:
         mMasters << value;
         break;
 

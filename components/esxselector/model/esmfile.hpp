@@ -10,17 +10,6 @@ class QMimeData;
 
 namespace EsxModel
 {
-    enum EsmFileProperty
-    {
-        Property_FileName       = 0,
-        Property_Author         = 1,
-        Property_Version        = 2,
-        Property_DateModified   = 3,
-        Property_Path           = 4,
-        Property_Description    = 5,
-        Property_Master         = 6
-    };
-
     class EsmFile : public ModelItem
     {
         Q_OBJECT
@@ -28,13 +17,24 @@ namespace EsxModel
 
     public:
 
+        enum FileProperty
+        {
+            FileProperty_FileName       = 0,
+            FileProperty_Author         = 1,
+            FileProperty_Version        = 2,
+            FileProperty_DateModified   = 3,
+            FileProperty_Path           = 4,
+            FileProperty_Description    = 5,
+            FileProperty_Master         = 6
+        };
+
         EsmFile(QString fileName = QString(), ModelItem *parent = 0);
      //   EsmFile(const EsmFile &);
 
         ~EsmFile()
         {}
 
-        void setProperty (const EsmFileProperty prop, const QString &value);
+        void setFileProperty (const FileProperty prop, const QString &value);
 
         void setFileName(const QString &fileName);
         void setAuthor(const QString &author);
@@ -45,19 +45,28 @@ namespace EsxModel
         void setMasters(const QStringList &masters);
         void setDescription(const QString &description);
 
-        inline QString fileName() const { return mFileName; }
-        inline QString author() const { return mAuthor; }
-        inline QDateTime modified() const { return mModified; }
-        inline float version() const { return mVersion; }
-        inline QString path() const { return mPath; }
-        inline QStringList masters() const { return mMasters; }
-        inline QString description() const { return mDescription; }
+        inline void addMaster (const QString &name) {mMasters.append(name); }
+        QVariant fileProperty (const FileProperty prop) const;
 
-        inline bool isMaster() const { return (mMasters.size() == 0); }
+        inline QString fileName() const     { return mFileName; }
+        inline QString author() const       { return mAuthor; }
+        inline QDateTime modified() const   { return mModified; }
+        inline float version() const        { return mVersion; }
+        inline QString path() const         { return mPath; }
+        inline const QStringList &masters() const { return mMasters; }
+        inline QString description() const  { return mDescription; }
+        inline QString toolTip() const      { return sToolTip.arg(mAuthor)
+                                                             .arg(mVersion)
+                                                             .arg(mDescription)
+                                                             .arg(mMasters.join(", "));
+                                            }
+
+        inline bool isMaster() const        { return (mMasters.size() == 0); }
         QByteArray encodedData() const;
 
     public:
         static int sPropertyCount;
+        static QString sToolTip;
 
     private:
 
@@ -68,6 +77,7 @@ namespace EsxModel
         QString mPath;
         QStringList mMasters;
         QString mDescription;
+        QString mToolTip;
 
     };
 }

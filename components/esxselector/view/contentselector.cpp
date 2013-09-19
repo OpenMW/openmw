@@ -54,11 +54,9 @@ void EsxView::ContentSelector::buildPluginsView()
     mPluginsProxyModel->setDynamicSortFilter (true);
     mPluginsProxyModel->setSourceModel (mContentModel);
 
-    tableView->setModel (mPluginsProxyModel);
     pluginView->setModel(mPluginsProxyModel);
 
     connect(pluginView, SIGNAL(clicked(const QModelIndex &)), this, SLOT(slotPluginTableItemClicked(const QModelIndex &)));
-    connect(tableView, SIGNAL(clicked(const QModelIndex &)), this, SLOT(slotPluginTableItemClicked(const QModelIndex &)));
 }
 
 void EsxView::ContentSelector::buildProfilesView()
@@ -120,10 +118,12 @@ void EsxView::ContentSelector::slotCurrentMasterIndexChanged(int index)
         proxy->setDynamicSortFilter(false);
 
     if (oldIndex > -1)
+        qDebug() << "clearing old master check state";
         model->setData(model->index(oldIndex, 0), false, Qt::UserRole + 1);
 
     oldIndex = index;
 
+    qDebug() << "setting new master check state";
     model->setData(model->index(index, 0), true, Qt::UserRole + 1);
 
     if (proxy)
@@ -132,8 +132,6 @@ void EsxView::ContentSelector::slotCurrentMasterIndexChanged(int index)
 
 void EsxView::ContentSelector::slotPluginTableItemClicked(const QModelIndex &index)
 {
-    qDebug() << "setting checkstate in plugin...";
-
     QAbstractItemModel *const model = pluginView->model();
     QSortFilterProxyModel *proxy  = dynamic_cast<QSortFilterProxyModel *>(model);
 

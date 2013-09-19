@@ -2,7 +2,7 @@
 #define CONTENTMODEL_HPP
 
 #include <QAbstractTableModel>
-
+#include <QStringList>
 namespace EsxModel
 {
     class EsmFile;
@@ -35,7 +35,7 @@ namespace EsxModel
         void addFiles(const QString &path);
 
         QModelIndex indexFromItem(EsmFile *item) const;
-        EsxModel::EsmFile *findItem(const QString &name);
+        const EsxModel::EsmFile *findItem(const QString &name) const;
 
         bool isChecked(const QString &name) const;
         void setCheckState(const QString &name, bool isChecked);
@@ -45,16 +45,21 @@ namespace EsxModel
     private:
 
         void addFile(EsmFile *file);
-        EsmFile* item(int row) const;
+        const EsmFile *item(int row) const;
+        EsmFile *item(int row);
         bool canBeChecked(const EsmFile *file) const;
 
         ContentFileList mFiles;
         QHash<QString, Qt::CheckState> mCheckStates;
-        QString mEncoding;
+        QTextCodec *mCodec;
 
-    signals:
-
-    public slots:
+    public:
+        QString mMimeType;
+        QStringList mMimeTypes;
+        int mColumnCount;
+        Qt::ItemFlags mDragDropFlags;
+        Qt::ItemFlags mDefaultFlags;
+        Qt::DropActions mDropActions;
 
     };
 }
