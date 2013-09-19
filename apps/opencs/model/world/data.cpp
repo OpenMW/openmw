@@ -35,9 +35,10 @@ void CSMWorld::Data::addModel (QAbstractItemModel *model, UniversalId::Type type
     }
 }
 
-void CSMWorld::Data::appendIds (std::vector<std::string>& ids, const CollectionBase& collection)
+void CSMWorld::Data::appendIds (std::vector<std::string>& ids, const CollectionBase& collection,
+    bool listDeleted)
 {
-    std::vector<std::string> ids2 = collection.getIds();
+    std::vector<std::string> ids2 = collection.getIds (listDeleted);
 
     ids.insert (ids.end(), ids2.begin(), ids2.end());
 }
@@ -459,22 +460,22 @@ bool CSMWorld::Data::hasId (const std::string& id) const
         getReferenceables().searchId (id)!=-1;
 }
 
-std::vector<std::string> CSMWorld::Data::getIds() const
+std::vector<std::string> CSMWorld::Data::getIds (bool listDeleted) const
 {
     std::vector<std::string> ids;
 
-    appendIds (ids, mGlobals);
-    appendIds (ids, mGmsts);
-    appendIds (ids, mClasses);
-    appendIds (ids, mFactions);
-    appendIds (ids, mRaces);
-    appendIds (ids, mSounds);
-    appendIds (ids, mScripts);
-    appendIds (ids, mRegions);
-    appendIds (ids, mBirthsigns);
-    appendIds (ids, mSpells);
-    appendIds (ids, mCells);
-    appendIds (ids, mReferenceables);
+    appendIds (ids, mGlobals, listDeleted);
+    appendIds (ids, mGmsts, listDeleted);
+    appendIds (ids, mClasses, listDeleted);
+    appendIds (ids, mFactions, listDeleted);
+    appendIds (ids, mRaces, listDeleted);
+    appendIds (ids, mSounds, listDeleted);
+    appendIds (ids, mScripts, listDeleted);
+    appendIds (ids, mRegions, listDeleted);
+    appendIds (ids, mBirthsigns, listDeleted);
+    appendIds (ids, mSpells, listDeleted);
+    appendIds (ids, mCells, listDeleted);
+    appendIds (ids, mReferenceables, listDeleted);
 
     std::sort (ids.begin(), ids.end());
 
@@ -483,9 +484,8 @@ std::vector<std::string> CSMWorld::Data::getIds() const
 
 void CSMWorld::Data::dataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight)
 {
-    // Note: The performance of of ID list change updates could be improved only emit the signal, if
-    // the state of the record is changed.
-    emit idListChanged();
+    if (topLeft.column()<=0)
+        emit idListChanged();
 }
 
 void CSMWorld::Data::rowsChanged (const QModelIndex& parent, int start, int end)

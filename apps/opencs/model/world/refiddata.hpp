@@ -183,10 +183,10 @@ namespace CSMWorld
 
             int getSize() const;
 
-            std::vector<std::string> getIds() const;
+            std::vector<std::string> getIds (bool listDeleted = true) const;
             ///< Return a sorted collection of all IDs
             ///
-            /// \note Deleted records are not listed.
+            /// \param listDeleted include deleted record in the list
     };
 }
 
