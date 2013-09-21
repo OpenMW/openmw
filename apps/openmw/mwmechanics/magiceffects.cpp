@@ -151,8 +151,7 @@ namespace MWMechanics
         for (Collection::const_iterator iter (prev.begin()); iter!=prev.end(); ++iter)
         {
             Collection::const_iterator other = now.mCollection.find (iter->first);
-
-            if (other==prev.end())
+			if (other==now.end())
             {
                 result.add (iter->first, EffectParam() - iter->second);
             }

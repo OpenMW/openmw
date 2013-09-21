@@ -585,7 +585,7 @@ namespace MWInput
                 mPlayer->pitch(-y/scale);
             }
 
-            if (arg.zrel)
+            if (arg.zrel && mControlSwitch["playerviewswitch"]) //Check to make sure you are allowed to zoomout and there is a change
             {
                 MWBase::Environment::get().getWorld()->changeVanityModeScale(arg.zrel);
                 MWBase::Environment::get().getWorld()->setCameraDistance(arg.zrel, true, true);
