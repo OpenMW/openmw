@@ -47,6 +47,7 @@ Marc Bouvier (CramitDeFrog)
 Marcin Hulist (Gohan)
 Mark Siewert (mark76)
 Mateusz Kołaczek (PL_kolek)
+Michael Hogan (Xethik)
 Michael Mc Donnell
 Michael Papageorgiou (werdanith)
 Michał Bień (Glorf)

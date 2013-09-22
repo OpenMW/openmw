@@ -196,3 +196,25 @@ int CSMWorld::RefIdData::getSize() const
 {
     return mIndex.size();
 }
+
+std::vector<std::string> CSMWorld::RefIdData::getIds (bool listDeleted) const
+{
+    std::vector<std::string> ids;
+
+    for (std::map<std::string, LocalIndex>::const_iterator iter (mIndex.begin()); iter!=mIndex.end();
+         ++iter)
+    {
+        if (listDeleted || !getRecord (iter->second).isDeleted())
+        {
+            std::map<UniversalId::Type, RefIdDataContainerBase *>::const_iterator container =
+                mRecordContainers.find (iter->second.second);
+
+            if (container==mRecordContainers.end())
+                throw std::logic_error ("Invalid referenceable ID type");
+
+            ids.push_back (container->second->getId (iter->second.first));
+        }
+    }
+
+    return ids;
+}
