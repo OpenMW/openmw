@@ -9,6 +9,7 @@ CSVWorld::IdTypeDelegate::IdTypeDelegate
 
 bool CSVWorld::IdTypeDelegate::updateEditorSetting (const QString &settingName, const QString &settingValue)
 {
+    /// \todo make the setting key a member variable, that is initialised from a constructor argument
     if (settingName == "Referenceable ID Type Display")
     {
         if (settingValue == "Icon and Text")
