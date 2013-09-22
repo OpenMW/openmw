@@ -4,7 +4,7 @@
 #include <QDialog>
 #include <QModelIndex>
 
-#include "components/esxselector/view/contentselector.hpp"
+#include "components/contentselector/view/contentselector.hpp"
 #include "ui_datafilespage.h"
 
 class QDialogButtonBox;
@@ -19,14 +19,14 @@ class QLabel;
 class DataFilesModel;
 class PluginsProxyModel;
 
-namespace EsxView
+namespace ContentSelectorView
 {
     class LineEdit;
 }
 
 namespace CSVDoc
 {
-    class FileDialog : public EsxView::ContentSelector
+    class FileDialog : public ContentSelectorView::ContentSelector
     {
         Q_OBJECT
     public:

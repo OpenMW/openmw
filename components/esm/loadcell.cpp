@@ -172,7 +172,7 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref)
         // If the most significant 8 bits are used, then this reference already exists.
         // In this case, do not spawn a new reference, but overwrite the old one.
         ref.mRefnum &= 0x00ffffff; // delete old plugin ID
-        const std::vector<Header::MasterData> &masters = esm.getMasters();
+        const std::vector<Header::MasterData> &masters = esm.getGameFiles();
         global = masters[local-1].index + 1;
         ref.mRefnum |= global << 24; // insert global plugin ID
     }
@@ -276,7 +276,7 @@ bool Cell::getNextMVRF(ESMReader &esm, MovedCellRef &mref)
     int local = (mref.mRefnum & 0xff000000) >> 24;
     size_t global = esm.getIndex() + 1;
     mref.mRefnum &= 0x00ffffff; // delete old plugin ID
-    const std::vector<Header::MasterData> &masters = esm.getMasters();
+    const std::vector<Header::MasterData> &masters = esm.getGameFiles();
     global = masters[local-1].index + 1;
     mref.mRefnum |= global << 24; // insert global plugin ID
 

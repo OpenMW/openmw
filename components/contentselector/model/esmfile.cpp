@@ -3,64 +3,65 @@
 #include <QMimeData>
 #include <QDataStream>
 
-int EsxModel::EsmFile::sPropertyCount = 7;
-QString EsxModel::EsmFile::sToolTip = QString("<b>Author:</b> %1<br/> \
+int ContentSelectorModel::EsmFile::sPropertyCount = 7;
+QString ContentSelectorModel::EsmFile::sToolTip = QString("<b>Author:</b> %1<br/> \
                                               <b>Version:</b> %2<br/> \
                                               <br/><b>Description:</b><br/>%3<br/> \
                                               <br/><b>Dependencies: </b>%4<br/>");
 
 
-EsxModel::EsmFile::EsmFile(QString fileName, ModelItem *parent)
-    : ModelItem(parent), mFileName(fileName), mVersion(0.0f)
+ContentSelectorModel::EsmFile::EsmFile(QString fileName, ModelItem *parent)
+                : ModelItem(parent), mFileName(fileName), mFormat(0)
 {}
-void EsxModel::EsmFile::setFileName(const QString &fileName)
+
+void ContentSelectorModel::EsmFile::setFileName(const QString &fileName)
 {
     mFileName = fileName;
 }
 
-void EsxModel::EsmFile::setAuthor(const QString &author)
+void ContentSelectorModel::EsmFile::setAuthor(const QString &author)
 {
     mAuthor = author;
 }
 
-void EsxModel::EsmFile::setDate(const QDateTime &modified)
+void ContentSelectorModel::EsmFile::setDate(const QDateTime &modified)
 {
     mModified = modified;
 }
 
-void EsxModel::EsmFile::setVersion(float version)
+void ContentSelectorModel::EsmFile::setFormat(int format)
 {
-    mVersion = version;
+    mFormat = format;
 }
 
-void EsxModel::EsmFile::setPath(const QString &path)
+void ContentSelectorModel::EsmFile::setPath(const QString &path)
 {
     mPath = path;
 }
 
-void EsxModel::EsmFile::setMasters(const QStringList &masters)
+void ContentSelectorModel::EsmFile::setGameFiles(const QStringList &gamefiles)
 {
-    mMasters = masters;
+    mGameFiles = gamefiles;
 }
 
-void EsxModel::EsmFile::setDescription(const QString &description)
+void ContentSelectorModel::EsmFile::setDescription(const QString &description)
 {
     mDescription = description;
 }
 
-QByteArray EsxModel::EsmFile::encodedData() const
+QByteArray ContentSelectorModel::EsmFile::encodedData() const
 {
     QByteArray encodedData;
     QDataStream stream(&encodedData, QIODevice::WriteOnly);
 
-    stream << mFileName << mAuthor << QString::number(mVersion)
+    stream << mFileName << mAuthor << QString::number(mFormat)
            << mModified.toString() << mPath << mDescription
-           << mMasters;
+           << mGameFiles;
 
     return encodedData;
 }
 
-QVariant EsxModel::EsmFile::fileProperty(const FileProperty prop) const
+QVariant ContentSelectorModel::EsmFile::fileProperty(const FileProperty prop) const
 {
     switch (prop)
     {
@@ -72,8 +73,8 @@ QVariant EsxModel::EsmFile::fileProperty(const FileProperty prop) const
         return mAuthor;
         break;
 
-    case FileProperty_Version:
-        return mVersion;
+    case FileProperty_Format:
+        return mFormat;
         break;
 
     case FileProperty_DateModified:
@@ -88,8 +89,8 @@ QVariant EsxModel::EsmFile::fileProperty(const FileProperty prop) const
         return mDescription;
         break;
 
-    case FileProperty_Master:
-        return mMasters;
+    case FileProperty_GameFile:
+        return mGameFiles;
         break;
 
     default:
@@ -97,7 +98,7 @@ QVariant EsxModel::EsmFile::fileProperty(const FileProperty prop) const
     }
     return QVariant();
 }
-void EsxModel::EsmFile::setFileProperty (const FileProperty prop, const QString &value)
+void ContentSelectorModel::EsmFile::setFileProperty (const FileProperty prop, const QString &value)
 {
     switch (prop)
     {
@@ -109,8 +110,8 @@ void EsxModel::EsmFile::setFileProperty (const FileProperty prop, const QString 
         mAuthor = value;
         break;
 
-    case FileProperty_Version:
-        mVersion = value.toFloat();
+    case FileProperty_Format:
+        mFormat = value.toInt();
         break;
 
     case FileProperty_DateModified:
@@ -125,8 +126,8 @@ void EsxModel::EsmFile::setFileProperty (const FileProperty prop, const QString 
         mDescription = value;
         break;
 
-    case FileProperty_Master:
-        mMasters << value;
+    case FileProperty_GameFile:
+        mGameFiles << value;
         break;
 
     default:

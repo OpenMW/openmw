@@ -10,24 +10,18 @@
 #include <QPushButton>
 #include <QLabel>
 
-#include <components/esxselector/model/datafilesmodel.hpp>
-#include <components/esxselector/model/pluginsproxymodel.hpp>
-#include <components/esxselector/model/esmfile.hpp>
-
-#include <components/esxselector/view/lineedit.hpp>
-
-#include "components/esxselector/model/masterproxymodel.hpp"
+#include <components/contentselector/model/esmfile.hpp>
+#include <components/contentselector/view/lineedit.hpp>
 
 CSVDoc::FileDialog::FileDialog(QWidget *parent) :
     ContentSelector(parent)
 {
     // Hide the profile elements
     profileGroupBox->hide();
-    pluginView->showColumn(2);
+    addonView->showColumn(2);
 
     resize(400, 400);
 
-   // connect(mDataFilesModel, SIGNAL(checkedItemsChanged(QStringList)), this, SLOT(updateOpenButton(QStringList)));
     connect(projectNameLineEdit, SIGNAL(textChanged(QString)), this, SLOT(updateCreateButton(QString)));
 
     connect(projectCreateButton, SIGNAL(clicked()), this, SIGNAL(createNewFile()));

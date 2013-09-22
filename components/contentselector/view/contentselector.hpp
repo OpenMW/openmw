@@ -5,15 +5,11 @@
 
 #include "ui_datafilespage.h"
 
-namespace EsxModel
-{
-    class ContentModel;
-    class DataFilesModel;
-}
+namespace ContentSelectorModel { class ContentModel; }
 
 class QSortFilterProxyModel;
 
-namespace EsxView
+namespace ContentSelectorView
 {
     class ContentSelector : public QDialog, protected Ui::DataFilesPage
     {
@@ -21,27 +17,25 @@ namespace EsxView
 
     protected:
 
-        EsxModel::DataFilesModel *mDataFilesModel;
-        EsxModel::ContentModel *mContentModel;
-        QSortFilterProxyModel *mMasterProxyModel;
-        QSortFilterProxyModel *mPluginsProxyModel;
+        ContentSelectorModel::ContentModel *mContentModel;
+        QSortFilterProxyModel *mGameFileProxyModel;
+        QSortFilterProxyModel *mAddonProxyModel;
 
     public:
+
         explicit ContentSelector(QWidget *parent = 0);
 
-        void buildModelsAndViews();
+        static ContentSelector &cast(QWidget *subject);      //static constructor function for singleton performance.
 
         void addFiles(const QString &path);
-        void setEncoding(const QString &encoding);
-        void setPluginCheckState();
         void setCheckState(QModelIndex index, QSortFilterProxyModel *model);
         QStringList checkedItemsPaths();
-        void on_checkAction_triggered();
 
    private:
-        void buildSourceModel();
-        void buildMasterView();
-        void buildPluginsView();
+
+        void buildContentModel();
+        void buildGameFileView();
+        void buildAddonView();
         void buildProfilesView();
 
     signals:
@@ -50,8 +44,8 @@ namespace EsxView
     private slots:
         void updateViews();
         void slotCurrentProfileIndexChanged(int index);
-        void slotCurrentMasterIndexChanged(int index);
-        void slotPluginTableItemClicked(const QModelIndex &index);
+        void slotCurrentGameFileIndexChanged(int index);
+        void slotAddonTableItemClicked(const QModelIndex &index);
     };
 }
 

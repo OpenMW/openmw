@@ -4,7 +4,7 @@
 #include <QMimeData>
 #include <QList>
 
-namespace EsxModel
+namespace ContentSelectorModel
 {
     class ModelItem : public QMimeData
     {

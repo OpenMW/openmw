@@ -23,7 +23,7 @@
       <item>
        <layout class="QHBoxLayout" name="filterLayout">
         <item>
-         <widget class="EsxView::ProfilesComboBox" name="masterView">
+         <widget class="ContentSelectorView::ProfilesComboBox" name="gameFileView">
           <property name="editable">
            <bool>false</bool>
           </property>
@@ -34,7 +34,7 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
-         <widget class="QTableView" name="pluginView">
+         <widget class="QTableView" name="addonView">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
             <horstretch>0</horstretch>
@@ -102,7 +102,7 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="EsxView::LineEdit" name="projectNameLineEdit">
+       <widget class="ContentSelectorView::LineEdit" name="projectNameLineEdit">
         <property name="placeholderText">
          <string>Enter project name...</string>
         </property>
@@ -159,7 +159,7 @@
        <number>6</number>
       </property>
       <item>
-       <widget class="EsxView::ProfilesComboBox" name="profilesComboBox">
+       <widget class="ContentSelectorView::ProfilesComboBox" name="profilesComboBox">
         <property name="enabled">
          <bool>true</bool>
         </property>
@@ -251,12 +251,12 @@
   <customwidget>
    <class>EsxView::ProfilesComboBox</class>
    <extends>QComboBox</extends>
-   <header location="global">components/esxselector/view/profilescombobox.hpp</header>
+   <header location="global">components/contentselector/view/profilescombobox.hpp</header>
   </customwidget>
   <customwidget>
    <class>EsxView::LineEdit</class>
    <extends>QLineEdit</extends>
-   <header location="global">components/esxselector/view/lineedit.hpp</header>
+   <header location="global">components/contentselector/view/lineedit.hpp</header>
   </customwidget>
  </customwidgets>
  <resources/>

@@ -17,7 +17,7 @@
 #include <components/files/configurationmanager.hpp>
 #include <components/files/ogreplugin.hpp>
 
-#include <components/esxselector/model/naturalsort.hpp>
+#include <components/contentselector/model/naturalsort.hpp>
 
 #include "settings/graphicssettings.hpp"
 

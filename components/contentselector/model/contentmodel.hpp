@@ -3,11 +3,18 @@
 
 #include <QAbstractTableModel>
 #include <QStringList>
-namespace EsxModel
+
+namespace ContentSelectorModel
 {
     class EsmFile;
 
     typedef QList<EsmFile *> ContentFileList;
+
+    enum ContentType
+    {
+        ContentType_GameFile,
+        ContentType_Addon
+    };
 
     class ContentModel : public QAbstractTableModel
     {
@@ -15,7 +22,7 @@ namespace EsxModel
     public:
         explicit ContentModel(QObject *parent = 0);
 
-        void setEncoding(const QString &encoding);
+        //void setEncoding(const QString &encoding);
 
         int rowCount(const QModelIndex &parent = QModelIndex()) const;
         int columnCount(const QModelIndex &parent = QModelIndex()) const;
@@ -34,8 +41,8 @@ namespace EsxModel
 
         void addFiles(const QString &path);
 
-        QModelIndex indexFromItem(EsmFile *item) const;
-        const EsxModel::EsmFile *findItem(const QString &name) const;
+        QModelIndex indexFromItem(const EsmFile *item) const;
+        const EsmFile *findItem(const QString &name) const;
 
         bool isChecked(const QString &name) const;
         void setCheckState(const QString &name, bool isChecked);

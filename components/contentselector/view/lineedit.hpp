@@ -14,14 +14,16 @@
 
 class QToolButton;
 
-namespace EsxView
+namespace ContentSelectorView
 {
-    class ComboBoxLineEdit : public QLineEdit
+    class LineEdit : public QLineEdit
     {
         Q_OBJECT
 
+        QString mPlaceholderText;
+
     public:
-        ComboBoxLineEdit(QWidget *parent = 0);
+        LineEdit(QWidget *parent = 0);
 
     protected:
         void resizeEvent(QResizeEvent *);

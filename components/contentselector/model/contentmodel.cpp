@@ -6,7 +6,7 @@
 #include <components/esm/esmreader.hpp>
 #include <QDebug>
 
-EsxModel::ContentModel::ContentModel(QObject *parent) :
+ContentSelectorModel::ContentModel::ContentModel(QObject *parent) :
     QAbstractTableModel(parent),
     mMimeType ("application/omwcontent"),
     mMimeTypes (QStringList() << mMimeType),
@@ -15,11 +15,11 @@ EsxModel::ContentModel::ContentModel(QObject *parent) :
     mDefaultFlags (Qt::ItemIsDropEnabled | Qt::ItemIsSelectable),
     mDropActions (Qt::CopyAction | Qt::MoveAction)
 {
-    setEncoding ("win1252");
+  //  setEncoding ("win1252");
     uncheckAll();
 }
-
-void EsxModel::ContentModel::setEncoding(const QString &encoding)
+/*
+void ContentSelectorModel::ContentModel::setEncoding(const QString &encoding)
 {
     if (encoding == QLatin1String("win1252"))
         mCodec = QTextCodec::codecForName("windows-1252");
@@ -33,8 +33,8 @@ void EsxModel::ContentModel::setEncoding(const QString &encoding)
     else
         return; // This should never happen;
 }
-
-int EsxModel::ContentModel::columnCount(const QModelIndex &parent) const
+*/
+int ContentSelectorModel::ContentModel::columnCount(const QModelIndex &parent) const
 {
     if (parent.isValid())
         return 0;
@@ -42,7 +42,7 @@ int EsxModel::ContentModel::columnCount(const QModelIndex &parent) const
     return mColumnCount;
 }
 
-int EsxModel::ContentModel::rowCount(const QModelIndex &parent) const
+int ContentSelectorModel::ContentModel::rowCount(const QModelIndex &parent) const
 {
     if(parent.isValid())
         return 0;
@@ -50,7 +50,7 @@ int EsxModel::ContentModel::rowCount(const QModelIndex &parent) const
     return mFiles.size();
 }
 
-const EsxModel::EsmFile* EsxModel::ContentModel::item(int row) const
+const ContentSelectorModel::EsmFile *ContentSelectorModel::ContentModel::item(int row) const
 {
     if (row >= 0 && row < mFiles.size())
         return mFiles.at(row);
@@ -58,14 +58,14 @@ const EsxModel::EsmFile* EsxModel::ContentModel::item(int row) const
     return 0;
 }
 
-EsxModel::EsmFile *EsxModel::ContentModel::item(int row)
+ContentSelectorModel::EsmFile *ContentSelectorModel::ContentModel::item(int row)
 {
     if (row >= 0 && row < mFiles.count())
         return mFiles.at(row);
 
     return 0;
 }
-const EsxModel::EsmFile *EsxModel::ContentModel::findItem(const QString &name) const
+const ContentSelectorModel::EsmFile *ContentSelectorModel::ContentModel::findItem(const QString &name) const
 {
     foreach (const EsmFile *file, mFiles)
     {
@@ -75,15 +75,18 @@ const EsxModel::EsmFile *EsxModel::ContentModel::findItem(const QString &name) c
     return 0;
 }
 
-QModelIndex EsxModel::ContentModel::indexFromItem(EsmFile *item) const
+QModelIndex ContentSelectorModel::ContentModel::indexFromItem(const EsmFile *item) const
 {
+    //workaround: non-const pointer cast for calls from outside contentmodel/contentselector
+    EsmFile *non_const_file_ptr = const_cast<EsmFile *>(item);
+
     if (item)
-        return index(mFiles.indexOf(item),0);
+        return index(mFiles.indexOf(non_const_file_ptr),0);
 
     return QModelIndex();
 }
 
-Qt::ItemFlags EsxModel::ContentModel::flags(const QModelIndex &index) const
+Qt::ItemFlags ContentSelectorModel::ContentModel::flags(const QModelIndex &index) const
 {
     if (!index.isValid())
         return Qt::NoItemFlags;
@@ -99,7 +102,7 @@ Qt::ItemFlags EsxModel::ContentModel::flags(const QModelIndex &index) const
     return mDefaultFlags;
 }
 
-QVariant EsxModel::ContentModel::data(const QModelIndex &index, int role) const
+QVariant ContentSelectorModel::ContentModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid())
         return QVariant();
@@ -119,7 +122,7 @@ QVariant EsxModel::ContentModel::data(const QModelIndex &index, int role) const
     case Qt::EditRole:
     case Qt::DisplayRole:
     {
-        if (column >=0 && column <=EsmFile::FileProperty_Master)
+        if (column >=0 && column <=EsmFile::FileProperty_GameFile)
             return file->fileProperty(static_cast<const EsmFile::FileProperty>(column));
 
         return QVariant();
@@ -154,17 +157,20 @@ QVariant EsxModel::ContentModel::data(const QModelIndex &index, int role) const
 
     case Qt::CheckStateRole:
     {
-        if (!file->isMaster())
+        if (!file->isGameFile())
             return isChecked(file->fileName());
         break;
     }
 
     case Qt::UserRole:
     {
-        if (file->isMaster())
-            return "game";
+        if (file->isGameFile())
+            return ContentType_GameFile;
         else
-            return "addon";
+            if (flags(index) & Qt::ItemIsEnabled)
+                return ContentType_Addon;
+
+        break;
     }
 
     case Qt::UserRole + 1:
@@ -174,7 +180,7 @@ QVariant EsxModel::ContentModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-bool EsxModel::ContentModel::setData(const QModelIndex &index, const QVariant &value, int role)
+bool ContentSelectorModel::ContentModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     if(!index.isValid())
         return false;
@@ -189,11 +195,11 @@ bool EsxModel::ContentModel::setData(const QModelIndex &index, const QVariant &v
         {
             QStringList list = value.toStringList();
 
-            for (int i = 0; i < EsmFile::FileProperty_Master; i++)
+            for (int i = 0; i < EsmFile::FileProperty_GameFile; i++)
                 file->setFileProperty(static_cast<EsmFile::FileProperty>(i), list.at(i));
 
-            for (int i = EsmFile::FileProperty_Master; i < list.size(); i++)
-                file->setFileProperty (EsmFile::FileProperty_Master, list.at(i));
+            for (int i = EsmFile::FileProperty_GameFile; i < list.size(); i++)
+                file->setFileProperty (EsmFile::FileProperty_GameFile, list.at(i));
 
             emit dataChanged(index, index);
 
@@ -209,7 +215,7 @@ bool EsxModel::ContentModel::setData(const QModelIndex &index, const QVariant &v
 
             foreach (EsmFile *file, mFiles)
             {
-                if (file->masters().contains(fileName))
+                if (file->gameFiles().contains(fileName))
                 {
                     QModelIndex idx = indexFromItem(file);
                     emit dataChanged(idx, idx);
@@ -222,15 +228,36 @@ bool EsxModel::ContentModel::setData(const QModelIndex &index, const QVariant &v
         case Qt::CheckStateRole:
         {
             int checkValue = value.toInt();
-
+            bool success = false;
+            bool setState = false;
             if ((checkValue==Qt::Checked) && !isChecked(fileName))
-                setCheckState(fileName, true);
+            {
+                setState = true;
+                success = true;
+            }
             else if ((checkValue == Qt::Checked) && isChecked (fileName))
-                setCheckState(fileName, false);
+                setState = true;
             else if (checkValue == Qt::Unchecked)
-                setCheckState(fileName, false);
+                setState = true;
 
-            emit dataChanged(index, index);
+            if (setState)
+            {
+                setCheckState(fileName, success);
+                emit dataChanged(index, index);
+
+            }
+            else
+                return success;
+
+
+            foreach (EsmFile *file, mFiles)
+            {
+                if (file->gameFiles().contains(fileName))
+                {
+                    QModelIndex idx = indexFromItem(file);
+                    emit dataChanged(idx, idx);
+                }
+            }
 
             success =  true;
         }
@@ -240,7 +267,7 @@ bool EsxModel::ContentModel::setData(const QModelIndex &index, const QVariant &v
     return success;
 }
 
-bool EsxModel::ContentModel::insertRows(int position, int rows, const QModelIndex &parent)
+bool ContentSelectorModel::ContentModel::insertRows(int position, int rows, const QModelIndex &parent)
 {
     if (parent.isValid())
         return false;
@@ -255,7 +282,7 @@ bool EsxModel::ContentModel::insertRows(int position, int rows, const QModelInde
     return true;
 }
 
-bool EsxModel::ContentModel::removeRows(int position, int rows, const QModelIndex &parent)
+bool ContentSelectorModel::ContentModel::removeRows(int position, int rows, const QModelIndex &parent)
 {
     if (parent.isValid())
         return false;
@@ -270,17 +297,17 @@ bool EsxModel::ContentModel::removeRows(int position, int rows, const QModelInde
     return true;
 }
 
-Qt::DropActions EsxModel::ContentModel::supportedDropActions() const
+Qt::DropActions ContentSelectorModel::ContentModel::supportedDropActions() const
 {
     return mDropActions;
 }
 
-QStringList EsxModel::ContentModel::mimeTypes() const
+QStringList ContentSelectorModel::ContentModel::mimeTypes() const
 {
     return mMimeTypes;
 }
 
-QMimeData *EsxModel::ContentModel::mimeData(const QModelIndexList &indexes) const
+QMimeData *ContentSelectorModel::ContentModel::mimeData(const QModelIndexList &indexes) const
 {
     QByteArray encodedData;
 
@@ -298,7 +325,7 @@ QMimeData *EsxModel::ContentModel::mimeData(const QModelIndexList &indexes) cons
     return mimeData;
 }
 
-bool EsxModel::ContentModel::dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent)
+bool ContentSelectorModel::ContentModel::dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent)
 {
     if (action == Qt::IgnoreAction)
         return true;
@@ -325,51 +352,53 @@ bool EsxModel::ContentModel::dropMimeData(const QMimeData *data, Qt::DropAction 
 
         QString value;
         QStringList values;
-        QStringList masters;
+        QStringList gamefiles;
 
-        for (int i = 0; i < EsmFile::FileProperty_Master; ++i)
+        for (int i = 0; i < EsmFile::FileProperty_GameFile; ++i)
         {
             stream >> value;
             values << value;
         }
 
-        stream >> masters;
+        stream >> gamefiles;
 
         insertRows(beginRow, 1);
 
         QModelIndex idx = index(beginRow++, 0, QModelIndex());
-        setData(idx, QStringList() << values << masters, Qt::EditRole);
+        setData(idx, QStringList() << values << gamefiles, Qt::EditRole);
     }
 
     return true;
 }
 
-bool EsxModel::ContentModel::canBeChecked(const EsmFile *file) const
+bool ContentSelectorModel::ContentModel::canBeChecked(const EsmFile *file) const
 {
     //element can be checked if all its dependencies are
-    foreach (const QString &master, file->masters())
-        if (!isChecked(master))
+    foreach (const QString &gamefile, file->gameFiles())
+        if (!isChecked(gamefile))
             return false;
 
     return true;
 }
 
-void EsxModel::ContentModel::addFile(EsmFile *file)
+void ContentSelectorModel::ContentModel::addFile(EsmFile *file)
 {
     beginInsertRows(QModelIndex(), mFiles.count(), mFiles.count());
         mFiles.append(file);
     endInsertRows();
 }
 
-void EsxModel::ContentModel::addFiles(const QString &path)
+void ContentSelectorModel::ContentModel::addFiles(const QString &path)
 {
     QDir dir(path);
     QStringList filters;
     filters << "*.esp" << "*.esm" << "*.omwgame" << "*.omwaddon";
     dir.setNameFilters(filters);
 
+    QTextCodec *codec = QTextCodec::codecForName("UTF8");
+
     // Create a decoder for non-latin characters in esx metadata
-    QTextDecoder *decoder = mCodec->makeDecoder();
+    QTextDecoder *decoder = codec->makeDecoder();
 
     foreach (const QString &path, dir.entryList())
     {
@@ -378,16 +407,16 @@ void EsxModel::ContentModel::addFiles(const QString &path)
 
         try {
             ESM::ESMReader fileReader;
-            ToUTF8::Utf8Encoder encoder(ToUTF8::calculateEncoding(QString(mCodec->name()).toStdString()));
-            fileReader.setEncoder(&encoder);
+            ToUTF8::Utf8Encoder encoder(); //ToUTF8::calculateEncoding(QString(mCodec->name()).toStdString()));
+            //fileReader.setEncoder(&encoder);
             fileReader.open(dir.absoluteFilePath(path).toStdString());
 
-            foreach (const ESM::Header::MasterData &item, fileReader.getMasters())
-                file->addMaster(QString::fromStdString(item.name));
+            foreach (const ESM::Header::MasterData &item, fileReader.getGameFiles())
+                file->addGameFile(QString::fromStdString(item.name));
 
             file->setAuthor     (decoder->toUnicode(fileReader.getAuthor().c_str()));
             file->setDate       (info.lastModified());
-            file->setVersion    (fileReader.getFVer());
+            file->setFormat     (fileReader.getFormat());
             file->setPath       (info.absoluteFilePath());
             file->setDescription(decoder->toUnicode(fileReader.getDesc().c_str()));
 
@@ -407,7 +436,7 @@ void EsxModel::ContentModel::addFiles(const QString &path)
     delete decoder;
 }
 
-bool EsxModel::ContentModel::isChecked(const QString& name) const
+bool ContentSelectorModel::ContentModel::isChecked(const QString& name) const
 {
     if (mCheckStates.contains(name))
         return (mCheckStates[name] == Qt::Checked);
@@ -415,7 +444,7 @@ bool EsxModel::ContentModel::isChecked(const QString& name) const
     return false;
 }
 
-void EsxModel::ContentModel::setCheckState(const QString &name, bool isChecked)
+void ContentSelectorModel::ContentModel::setCheckState(const QString &name, bool isChecked)
 {
     if (name.isEmpty())
         return;
@@ -428,7 +457,7 @@ void EsxModel::ContentModel::setCheckState(const QString &name, bool isChecked)
     mCheckStates[name] = state;
 }
 
-EsxModel::ContentFileList EsxModel::ContentModel::checkedItems() const
+ContentSelectorModel::ContentFileList ContentSelectorModel::ContentModel::checkedItems() const
 {
     ContentFileList list;
 
@@ -441,7 +470,7 @@ EsxModel::ContentFileList EsxModel::ContentModel::checkedItems() const
     return list;
 }
 
-void EsxModel::ContentModel::uncheckAll()
+void ContentSelectorModel::ContentModel::uncheckAll()
 {
     emit layoutAboutToBeChanged();
     mCheckStates.clear();

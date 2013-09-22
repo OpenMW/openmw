@@ -8,7 +8,7 @@
 
 class QMimeData;
 
-namespace EsxModel
+namespace ContentSelectorModel
 {
     class EsmFile : public ModelItem
     {
@@ -21,11 +21,11 @@ namespace EsxModel
         {
             FileProperty_FileName       = 0,
             FileProperty_Author         = 1,
-            FileProperty_Version        = 2,
+            FileProperty_Format         = 2,
             FileProperty_DateModified   = 3,
             FileProperty_Path           = 4,
             FileProperty_Description    = 5,
-            FileProperty_Master         = 6
+            FileProperty_GameFile       = 6
         };
 
         EsmFile(QString fileName = QString(), ModelItem *parent = 0);
@@ -40,28 +40,28 @@ namespace EsxModel
         void setAuthor(const QString &author);
         void setSize(const int size);
         void setDate(const QDateTime &modified);
-        void setVersion(const float version);
+        void setFormat(const int format);
         void setPath(const QString &path);
-        void setMasters(const QStringList &masters);
+        void setGameFiles(const QStringList &gameFiles);
         void setDescription(const QString &description);
 
-        inline void addMaster (const QString &name) {mMasters.append(name); }
+        inline void addGameFile (const QString &name) {mGameFiles.append(name); }
         QVariant fileProperty (const FileProperty prop) const;
 
-        inline QString fileName() const     { return mFileName; }
-        inline QString author() const       { return mAuthor; }
-        inline QDateTime modified() const   { return mModified; }
-        inline float version() const        { return mVersion; }
-        inline QString path() const         { return mPath; }
-        inline const QStringList &masters() const { return mMasters; }
-        inline QString description() const  { return mDescription; }
-        inline QString toolTip() const      { return sToolTip.arg(mAuthor)
-                                                             .arg(mVersion)
+        inline QString fileName() const             { return mFileName; }
+        inline QString author() const               { return mAuthor; }
+        inline QDateTime modified() const           { return mModified; }
+        inline float format() const                 { return mFormat; }
+        inline QString path() const                 { return mPath; }
+        inline const QStringList &gameFiles() const { return mGameFiles; }
+        inline QString description() const          { return mDescription; }
+        inline QString toolTip() const              { return sToolTip.arg(mAuthor)
+                                                             .arg(mFormat)
                                                              .arg(mDescription)
-                                                             .arg(mMasters.join(", "));
-                                            }
+                                                             .arg(mGameFiles.join(", "));
+                                                    }
 
-        inline bool isMaster() const        { return (mMasters.size() == 0); }
+        inline bool isGameFile() const              { return (mGameFiles.size() == 0); }
         QByteArray encodedData() const;
 
     public:
@@ -73,15 +73,13 @@ namespace EsxModel
         QString mFileName;
         QString mAuthor;
         QDateTime mModified;
-        float mVersion;
+        int mFormat;
         QString mPath;
-        QStringList mMasters;
+        QStringList mGameFiles;
         QString mDescription;
         QString mToolTip;
 
     };
 }
-
-Q_DECLARE_METATYPE (EsxModel::EsmFile *)
 
 #endif

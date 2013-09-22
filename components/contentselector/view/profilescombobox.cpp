@@ -7,7 +7,7 @@
 #include "profilescombobox.hpp"
 #include "comboboxlineedit.hpp"
 
-EsxView::ProfilesComboBox::ProfilesComboBox(QWidget *parent) :
+ContentSelectorView::ProfilesComboBox::ProfilesComboBox(QWidget *parent) :
     QComboBox(parent)
 {
     mValidator = new QRegExpValidator(QRegExp("^[a-zA-Z0-9_]*$"), this); // Alpha-numeric + underscore
@@ -21,7 +21,7 @@ EsxView::ProfilesComboBox::ProfilesComboBox(QWidget *parent) :
     setInsertPolicy(QComboBox::NoInsert);
 }
 
-void EsxView::ProfilesComboBox::setEditEnabled(bool editable)
+void ContentSelectorView::ProfilesComboBox::setEditEnabled(bool editable)
 {
     if (isEditable() == editable)
         return;
@@ -47,7 +47,7 @@ void EsxView::ProfilesComboBox::setEditEnabled(bool editable)
             SLOT(slotTextChanged(QString)));
 }
 
-void EsxView::ProfilesComboBox::slotTextChanged(const QString &text)
+void ContentSelectorView::ProfilesComboBox::slotTextChanged(const QString &text)
 {
     QPalette *palette = new QPalette();
     palette->setColor(QPalette::Text,Qt::red);
@@ -61,7 +61,7 @@ void EsxView::ProfilesComboBox::slotTextChanged(const QString &text)
     }
 }
 
-void EsxView::ProfilesComboBox::slotEditingFinished()
+void ContentSelectorView::ProfilesComboBox::slotEditingFinished()
 {
     QString current = currentText();
     QString previous = itemText(currentIndex());
@@ -82,7 +82,7 @@ void EsxView::ProfilesComboBox::slotEditingFinished()
     emit(profileRenamed(previous, current));
 }
 
-void EsxView::ProfilesComboBox::slotIndexChanged(int index)
+void ContentSelectorView::ProfilesComboBox::slotIndexChanged(int index)
 {
     if (index == -1)
         return;
@@ -91,7 +91,7 @@ void EsxView::ProfilesComboBox::slotIndexChanged(int index)
     mOldProfile = itemText(index);
 }
 
-void EsxView::ProfilesComboBox::paintEvent(QPaintEvent *)
+void ContentSelectorView::ProfilesComboBox::paintEvent(QPaintEvent *)
 {
     QStylePainter painter(this);
     painter.setPen(palette().color(QPalette::Text));
@@ -107,7 +107,7 @@ void EsxView::ProfilesComboBox::paintEvent(QPaintEvent *)
         painter.drawControl(QStyle::CE_ComboBoxLabel, opt);
 }
 
-void EsxView::ProfilesComboBox::setPlaceholderText(const QString &text)
+void ContentSelectorView::ProfilesComboBox::setPlaceholderText(const QString &text)
 {
     mPlaceholderText = text;
 }

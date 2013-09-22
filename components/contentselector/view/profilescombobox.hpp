@@ -6,7 +6,7 @@
 class QString;
 class QRegExpValidator;
 
-namespace EsxView
+namespace ContentSelectorView
 {
     class ProfilesComboBox : public QComboBox
     {
