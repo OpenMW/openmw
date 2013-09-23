@@ -2,16 +2,31 @@
 #define MWGUI_LOADINGSCREEN_H
 
 #include <OgreSceneManager.h>
-#include <OgreResourceGroupManager.h>
 
-#include "window_base.hpp"
+#include "windowbase.hpp"
+
+#include <components/loadinglistener/loadinglistener.hpp>
 
 namespace MWGui
 {
-    class LoadingScreen : public WindowBase
+    class LoadingScreen : public WindowBase, public Loading::Listener
     {
     public:
-        LoadingScreen(Ogre::SceneManager* sceneMgr, Ogre::RenderWindow* rw, MWBase::WindowManager& parWindowManager);
+        virtual void setLabel (const std::string& label);
+
+        /// Indicate that some progress has been made, without specifying how much
+        virtual void indicateProgress ();
+
+        virtual void loadingOn();
+        virtual void loadingOff();
+
+        virtual void setProgressRange (size_t range);
+        virtual void setProgress (size_t value);
+        virtual void increaseProgress (size_t increase);
+
+        virtual void removeWallpaper();
+
+        LoadingScreen(Ogre::SceneManager* sceneMgr, Ogre::RenderWindow* rw);
         virtual ~LoadingScreen();
 
         void setLoadingProgress (const std::string& stage, int depth, int current, int total);
@@ -31,27 +46,20 @@ namespace MWGui
         unsigned long mLastRenderTime;
         Ogre::Timer mTimer;
 
-        MyGUI::TextBox* mLoadingText;
-        MyGUI::ProgressBar* mProgressBar;
-        MyGUI::ImageBox* mBackgroundImage;
+        size_t mProgress;
 
-        int mCurrentCellLoading;
-        int mTotalCellsLoading;
-        int mCurrentRefLoading;
-        int mTotalRefsLoading;
-        int mCurrentRefList;
+        MyGUI::TextBox* mLoadingText;
+        MyGUI::ScrollBar* mProgressBar;
+        MyGUI::ImageBox* mBackgroundImage;
 
         Ogre::Rectangle2D* mRectangle;
         Ogre::MaterialPtr mBackgroundMaterial;
 
-        Ogre::StringVectorPtr mResources;
-
-        bool mLoadingOn;
-
-        void loadingOn();
-        void loadingOff();
+        Ogre::StringVector mResources;
 
         void changeWallpaper();
+
+        void draw();
     };
 
 }

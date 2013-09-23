@@ -11,7 +11,7 @@ namespace ESM
 
     enum VarType
     {
-        VT_Unknown,
+        VT_Unknown = 0,
         VT_None,
         VT_Short, // stored as a float, kinda
         VT_Int,

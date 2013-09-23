@@ -1,7 +1,7 @@
 #ifndef MWGUI_SPELLCREATION_H
 #define MWGUI_SPELLCREATION_H
 
-#include "window_base.hpp"
+#include "windowbase.hpp"
 #include "referenceinterface.hpp"
 #include "list.hpp"
 #include "widgets.hpp"
@@ -15,7 +15,7 @@ namespace MWGui
     class EditEffectDialog : public WindowModal
     {
     public:
-        EditEffectDialog(MWBase::WindowManager& parWindowManager);
+        EditEffectDialog();
 
         virtual void open();
 
@@ -24,7 +24,7 @@ namespace MWGui
 
         void newEffect (const ESM::MagicEffect* effect);
         void editEffect (ESM::ENAMstruct effect);
-
+        bool constantEffect;
         typedef MyGUI::delegates::CMultiDelegate1<ESM::ENAMstruct> EventHandle_Effect;
 
         EventHandle_Effect eventEffectAdded;
@@ -69,13 +69,13 @@ namespace MWGui
         void onMagnitudeMaxChanged (MyGUI::ScrollBar* sender, size_t pos);
         void onDurationChanged (MyGUI::ScrollBar* sender, size_t pos);
         void onAreaChanged (MyGUI::ScrollBar* sender, size_t pos);
-
         void setMagicEffect(const ESM::MagicEffect* effect);
 
         void updateBoxes();
 
     protected:
         ESM::ENAMstruct mEffect;
+        ESM::ENAMstruct mOldEffect;
 
         const ESM::MagicEffect* mMagicEffect;
     };
@@ -84,8 +84,8 @@ namespace MWGui
     class EffectEditorBase
     {
     public:
-        EffectEditorBase(MWBase::WindowManager& parWindowManager);
-
+        EffectEditorBase();
+        virtual ~EffectEditorBase();
 
     protected:
         std::map<int, short> mButtonMapping; // maps button ID to effect ID
@@ -124,7 +124,7 @@ namespace MWGui
     class SpellCreationDialog : public WindowBase, public ReferenceInterface, public EffectEditorBase
     {
     public:
-        SpellCreationDialog(MWBase::WindowManager& parWindowManager);
+        SpellCreationDialog();
 
         virtual void open();
 

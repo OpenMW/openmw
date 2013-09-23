@@ -21,25 +21,27 @@ namespace MWRender
 class NpcAnimation : public Animation
 {
 public:
-struct PartInfo {
-    ESM::PartReferenceType type;
-    const char name[32];
-};
+    typedef std::map<ESM::PartReferenceType,std::string> PartBoneMap;
+
+    enum ViewMode {
+        VM_Normal,
+        VM_FirstPerson,
+        VM_HeadOnly
+    };
 
 private:
-    static const size_t sPartListSize = 27;
-    static const PartInfo sPartList[sPartListSize];
+    static const PartBoneMap sPartList;
 
     int mStateID;
 
     // Bounded Parts
-    NifOgre::EntityList mEntityParts[sPartListSize];
+    NifOgre::ObjectList mObjectParts[ESM::PRT_Count];
 
-    const ESM::NPC  *mNpc;
-    std::string     mHeadModel;
-    std::string     mHairModel;
-    std::string     mBodyPrefix;
-    bool            mHeadOnly;
+    const ESM::NPC *mNpc;
+    std::string    mHeadModel;
+    std::string    mHairModel;
+    ViewMode       mViewMode;
+    bool mShowWeapons;
 
     float mTimeToChange;
     MWWorld::ContainerStoreIterator mRobe;
@@ -54,35 +56,41 @@ private:
     MWWorld::ContainerStoreIterator mGloveL;
     MWWorld::ContainerStoreIterator mGloveR;
     MWWorld::ContainerStoreIterator mSkirtIter;
+    MWWorld::ContainerStoreIterator mWeapon;
+    MWWorld::ContainerStoreIterator mShield;
 
     int mVisibilityFlags;
 
-    int mPartslots[sPartListSize];  //Each part slot is taken by clothing, armor, or is empty
-    int mPartPriorities[sPartListSize];
+    int mPartslots[ESM::PRT_Count];  //Each part slot is taken by clothing, armor, or is empty
+    int mPartPriorities[ESM::PRT_Count];
 
-    NifOgre::EntityList insertBoundedPart(const std::string &mesh, int group, const std::string &bonename);
+    void updateNpcBase();
 
-    void updateParts(bool forceupdate = false);
+    NifOgre::ObjectList insertBoundedPart(const std::string &model, int group, const std::string &bonename);
 
-    void removeEntities(NifOgre::EntityList &entities);
-    void removeIndividualPart(int type);
-    void reserveIndividualPart(int type, int group, int priority);
+    void removeIndividualPart(ESM::PartReferenceType type);
+    void reserveIndividualPart(ESM::PartReferenceType type, int group, int priority);
 
-    bool addOrReplaceIndividualPart(int type, int group, int priority, const std::string &mesh);
+    bool addOrReplaceIndividualPart(ESM::PartReferenceType type, int group, int priority, const std::string &mesh);
     void removePartGroup(int group);
     void addPartGroup(int group, int priority, const std::vector<ESM::PartReference> &parts);
 
 public:
     NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node,
-                 MWWorld::InventoryStore& inv, int visibilityFlags, bool headOnly=false);
+                 MWWorld::InventoryStore& inv, int visibilityFlags,
+                 ViewMode viewMode=VM_Normal);
     virtual ~NpcAnimation();
 
     virtual Ogre::Vector3 runAnimation(float timepassed);
 
-    Ogre::Node* getHeadNode();
+    virtual void showWeapons(bool showWeapon);
 
-    void forceUpdate()
-    { updateParts(true); }
+    void setViewMode(ViewMode viewMode);
+
+    void updateParts(bool forceupdate = false);
+
+    /// Rebuilds the NPC, updating their root model, animation sources, and equipment.
+    void rebuild();
 };
 
 }

@@ -5,6 +5,11 @@
 
 #include <OgreTexture.h>
 
+namespace Loading
+{
+    class Listener;
+}
+
 namespace MWRender
 {
 
@@ -13,7 +18,7 @@ namespace MWRender
     public:
         GlobalMap(const std::string& cacheDir);
 
-        void render();
+        void render(Loading::Listener* loadingListener);
 
         int getWidth() { return mWidth; }
         int getHeight() { return mHeight; }

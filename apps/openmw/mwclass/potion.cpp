@@ -28,9 +28,7 @@ namespace MWClass
     {
         const std::string model = getModel(ptr);
         if (!model.empty()) {
-            MWRender::Objects& objects = renderingInterface.getObjects();
-            objects.insertBegin(ptr, ptr.getRefData().isEnabled(), false);
-            objects.insertMesh(ptr, model);
+            renderingInterface.getObjects().insertModel(ptr, model);
         }
     }
 
@@ -38,7 +36,7 @@ namespace MWClass
     {
         const std::string model = getModel(ptr);
         if(!model.empty())
-            physics.addObject(ptr);
+            physics.addObject(ptr,true);
     }
 
     std::string Potion::getModel(const MWWorld::Ptr &ptr) const
@@ -65,15 +63,7 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Potion::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
-        if (!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
-            return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction ());
-
-    	boost::shared_ptr<MWWorld::Action> action(
-    	            new MWWorld::ActionTake (ptr));
-
-    	action->setSound (getUpSoundId(ptr));
-
-        return action;
+        return defaultItemActivate(ptr, actor);
     }
 
     std::string Potion::getScript (const MWWorld::Ptr& ptr) const
@@ -193,5 +183,17 @@ namespace MWClass
             ptr.get<ESM::Potion>();
 
         return MWWorld::Ptr(&cell.mPotions.insert(*ref), &cell);
+    }
+
+    bool Potion::canSell (const MWWorld::Ptr& item, int npcServices) const
+    {
+        return npcServices & ESM::NPC::Potions;
+    }
+
+    float Potion::getWeight(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Potion> *ref =
+            ptr.get<ESM::Potion>();
+        return ref->mBase->mData.mWeight;
     }
 }

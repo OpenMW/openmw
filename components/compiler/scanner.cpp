@@ -1,6 +1,7 @@
 
 #include "scanner.hpp"
 
+#include <cassert>
 #include <cctype>
 #include <sstream>
 #include <algorithm>
@@ -88,6 +89,10 @@ namespace Compiler
         }
         else if (c==';')
         {
+            std::string comment;
+
+            comment += c;
+
             while (get (c))
             {
                 if (c=='\n')
@@ -95,14 +100,23 @@ namespace Compiler
                     putback (c);
                     break;
                 }
+                else
+                    comment += c;
             }
 
+            TokenLoc loc (mLoc);
             mLoc.mLiteral.clear();
 
-            return true;
+            return parser.parseComment (comment, loc, *this);
         }
         else if (isWhitespace (c))
         {
+            mLoc.mLiteral.clear();
+            return true;
+        }
+        else if (c==':')
+        {
+            // treat : as a whitespace :(
             mLoc.mLiteral.clear();
             return true;
         }
@@ -150,10 +164,9 @@ namespace Compiler
 
     bool Scanner::scanInt (char c, Parser& parser, bool& cont)
     {
+        assert(c != '\0');
         std::string value;
-
         value += c;
-        bool empty = false;
 
         bool error = false;
 
@@ -162,7 +175,6 @@ namespace Compiler
             if (std::isdigit (c))
             {
                 value += c;
-                empty = false;
             }
             else if (std::isalpha (c) || c=='_')
                 error = true;
@@ -177,7 +189,7 @@ namespace Compiler
             }
         }
 
-        if (empty || error)
+        if (error)
             return false;
 
         TokenLoc loc (mLoc);
@@ -331,7 +343,11 @@ namespace Compiler
             }
             else if (!(c=='"' && name.empty()))
             {
-                if (!(std::isalpha (c) || std::isdigit (c) || c=='_'))
+                if (!(std::isalpha (c) || std::isdigit (c) || c=='_' || c=='`' ||
+                    /// \todo add an option to disable the following hack. Also, find out who is
+                    /// responsible for allowing it in the first place and meet up with that person in
+                    /// a dark alley.
+                    (c=='-' && !name.empty() && std::isalpha (mStream.peek()))))
                 {
                     putback (c);
                     break;
@@ -359,7 +375,18 @@ namespace Compiler
         else if (c==')')
             special = S_close;
         else if (c=='.')
+        {
+            // check, if this starts a float literal
+            if (get (c))
+            {
+                putback (c);
+
+                if (std::isdigit (c))
+                    return scanFloat ("", parser, cont);
+            }
+
             special = S_member;
+        }
         else if (c=='=')
         {
             if (get (c))
@@ -415,7 +442,12 @@ namespace Compiler
             if (get (c))
             {
                 if (c=='=')
+                {
                     special = S_cmpLE;
+
+                    if (get (c) && c!='=') // <== is a allowed as an alternative to <=  :(
+                        putback (c);
+                }
                 else
                 {
                     putback (c);
@@ -430,7 +462,12 @@ namespace Compiler
             if (get (c))
             {
                 if (c=='=')
+                {
                     special = S_cmpGE;
+
+                    if (get (c) && c!='=') // >== is a allowed as an alternative to >=  :(
+                        putback (c);
+                }
                 else
                 {
                     putback (c);
@@ -472,7 +509,7 @@ namespace Compiler
     Scanner::Scanner (ErrorHandler& errorHandler, std::istream& inputStream,
         const Extensions *extensions)
     : mErrorHandler (errorHandler), mStream (inputStream), mExtensions (extensions),
-      mPutback (Putback_None)
+      mPutback (Putback_None), mPutbackCode(0), mPutbackInteger(0), mPutbackFloat(0)
     {
     }
 

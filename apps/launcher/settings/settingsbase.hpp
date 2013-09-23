@@ -7,14 +7,12 @@
 #include <QRegExp>
 #include <QMap>
 
-#include <QDebug>
-
 template <class Map>
 class SettingsBase
 {
 
 public:
-    SettingsBase() {}
+    SettingsBase() { mMultiValue = false; }
     ~SettingsBase() {}
 
     inline QString value(const QString &key, const QString &defaultValue = QString())
@@ -36,6 +34,11 @@ public:
             mSettings.insertMulti(key, value);
     }
 
+    inline void setMultiValueEnabled(bool enable)
+    {
+        mMultiValue = enable;
+    }
+
     inline void remove(const QString &key)
     {
         mSettings.remove(key);
@@ -48,11 +51,12 @@ public:
         mCache.clear();
 
         QString sectionPrefix;
+
         QRegExp sectionRe("^\\[([^]]+)\\]");
         QRegExp keyRe("^([^=]+)\\s*=\\s*(.+)$");
 
         while (!stream.atEnd()) {
-            QString line = stream.readLine().simplified();
+            QString line = stream.readLine();
 
             if (line.isEmpty() || line.startsWith("#"))
                 continue;
@@ -65,8 +69,8 @@ public:
 
             if (keyRe.indexIn(line) != -1) {
 
-                QString key = keyRe.cap(1).simplified();
-                QString value = keyRe.cap(2).simplified();
+                QString key = keyRe.cap(1).trimmed();
+                QString value = keyRe.cap(2).trimmed();
 
                 if (!sectionPrefix.isEmpty())
                     key.prepend(sectionPrefix);
@@ -74,8 +78,13 @@ public:
                 mSettings.remove(key);
 
                 QStringList values = mCache.values(key);
+
                 if (!values.contains(value)) {
-                    mCache.insertMulti(key, value);
+                    if (mMultiValue) {
+                        mCache.insertMulti(key, value);
+                    } else {
+                        mCache.insert(key, value);
+                    }
                 }
             }
         }
@@ -93,6 +102,8 @@ public:
 private:
     Map mSettings;
     Map mCache;
+
+    bool mMultiValue;
 };
 
 #endif // SETTINGSBASE_HPP

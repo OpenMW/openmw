@@ -4,6 +4,12 @@
 #include <QMessageBox>
 #include <QDir>
 
+#ifdef __APPLE__
+// We need to do this because of Qt: https://bugreports.qt-project.org/browse/QTBUG-22154
+#define MAC_OS_X_VERSION_MIN_REQUIRED __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
+#endif
+#include <SDL.h>
+
 #include <cstdlib>
 
 #include <boost/math/common_factor.hpp>
@@ -35,13 +41,14 @@ GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, GraphicsSettings &g
     setupUi(this);
 
     // Set the maximum res we can set in windowed mode
-    QRect res = QApplication::desktop()->screenGeometry();
+    QRect res = getMaximumResolution();
     customWidthSpinBox->setMaximum(res.width());
     customHeightSpinBox->setMaximum(res.height());
 
     connect(rendererComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(rendererChanged(const QString&)));
     connect(fullScreenCheckBox, SIGNAL(stateChanged(int)), this, SLOT(slotFullScreenChanged(int)));
     connect(standardRadioButton, SIGNAL(toggled(bool)), this, SLOT(slotStandardToggled(bool)));
+    connect(screenComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(screenChanged(int)));
 
 }
 
@@ -144,17 +151,41 @@ bool GraphicsPage::setupOgre()
     }
 
     antiAliasingComboBox->clear();
-    resolutionComboBox->clear();
     antiAliasingComboBox->addItems(getAvailableOptions(QString("FSAA"), mSelectedRenderSystem));
-    resolutionComboBox->addItems(getAvailableResolutions(mSelectedRenderSystem));
 
-    // Load the rest of the values
-    loadSettings();
     return true;
 }
 
-void GraphicsPage::loadSettings()
+bool GraphicsPage::setupSDL()
 {
+    int displays = SDL_GetNumVideoDisplays();
+
+    if (displays < 0)
+    {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle(tr("Error receiving number of screens"));
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setText(tr("<br><b>SDL_GetNumDisplayModes failed:</b><br><br>") + QString::fromStdString(SDL_GetError()) + "<br>");
+        msgBox.exec();
+        return false;
+    }
+
+    for (int i = 0; i < displays; i++)
+    {
+        screenComboBox->addItem(QString(tr("Screen ")) + QString::number(i + 1));
+    }
+
+    return true;
+}
+
+bool GraphicsPage::loadSettings()
+{
+    if (!setupSDL())
+        return false;
+    if (!setupOgre())
+        return false;
+
     if (mGraphicsSettings.value(QString("Video/vsync")) == QLatin1String("true"))
         vSyncCheckBox->setCheckState(Qt::Checked);
 
@@ -168,6 +199,9 @@ void GraphicsPage::loadSettings()
     QString width = mGraphicsSettings.value(QString("Video/resolution x"));
     QString height = mGraphicsSettings.value(QString("Video/resolution y"));
     QString resolution = width + QString(" x ") + height;
+    QString screen = mGraphicsSettings.value(QString("Video/screen"));
+
+    screenComboBox->setCurrentIndex(screen.toInt());
 
     int resIndex = resolutionComboBox->findText(resolution, Qt::MatchStartsWith);
 
@@ -180,6 +214,8 @@ void GraphicsPage::loadSettings()
         customHeightSpinBox->setValue(height.toInt());
 
     }
+
+    return true;
 }
 
 void GraphicsPage::saveSettings()
@@ -205,6 +241,8 @@ void GraphicsPage::saveSettings()
         mGraphicsSettings.setValue(QString("Video/resolution x"), QString::number(customWidthSpinBox->value()));
         mGraphicsSettings.setValue(QString("Video/resolution y"), QString::number(customHeightSpinBox->value()));
     }
+
+    mGraphicsSettings.setValue(QString("Video/screen"), QString::number(screenComboBox->currentIndex()));
 }
 
 QStringList GraphicsPage::getAvailableOptions(const QString &key, Ogre::RenderSystem *renderer)
@@ -240,53 +278,66 @@ QStringList GraphicsPage::getAvailableOptions(const QString &key, Ogre::RenderSy
     return result;
 }
 
-QStringList GraphicsPage::getAvailableResolutions(Ogre::RenderSystem *renderer)
+QStringList GraphicsPage::getAvailableResolutions(int screen)
 {
-    QString key("Video Mode");
     QStringList result;
+    SDL_DisplayMode mode;
+    int modeIndex, modes = SDL_GetNumDisplayModes(screen);
 
-    uint row = 0;
-    Ogre::ConfigOptionMap options = renderer->getConfigOptions();
-
-    for (Ogre::ConfigOptionMap::iterator i = options.begin (); i != options.end (); i++, row++)
+    if (modes < 0)
     {
-        if (key.toStdString() != i->first)
-            continue;
-
-        Ogre::StringVector::iterator opt_it;
-        uint idx = 0;
-
-        for (opt_it = i->second.possibleValues.begin ();
-             opt_it != i->second.possibleValues.end (); opt_it++, idx++)
-        {
-            QRegExp resolutionRe(QString("(\\d+) x (\\d+).*"));
-            QString resolution = QString::fromStdString(*opt_it).simplified();
-
-            if (resolutionRe.exactMatch(resolution)) {
-
-                int width = resolutionRe.cap(1).toInt();
-                int height = resolutionRe.cap(2).toInt();
-
-                QString aspect = getAspect(width, height);
-                QString cleanRes = resolutionRe.cap(1) + QString(" x ") + resolutionRe.cap(2);
-
-                if (aspect == QLatin1String("16:9") || aspect == QLatin1String("16:10")) {
-                    cleanRes.append(tr("\t(Wide ") + aspect + ")");
-
-                } else if (aspect == QLatin1String("4:3")) {
-                    cleanRes.append(tr("\t(Standard 4:3)"));
-                }
-                // do not add duplicate resolutions
-                if (!result.contains(cleanRes))
-                    result.append(cleanRes);
-            }
-        }
+        QMessageBox msgBox;
+        msgBox.setWindowTitle(tr("Error receiving resolutions"));
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setText(tr("<br><b>SDL_GetNumDisplayModes failed:</b><br><br>") + QString::fromStdString(SDL_GetError()) + "<br>");
+        msgBox.exec();
+        return result;
     }
 
-    // Sort the resolutions in descending order
-    qSort(result.begin(), result.end(), naturalSortGreaterThanCI);
+    for (modeIndex = 0; modeIndex < modes; modeIndex++)
+    {
+        if (SDL_GetDisplayMode(screen, modeIndex, &mode) < 0)
+        {
+            QMessageBox msgBox;
+            msgBox.setWindowTitle(tr("Error receiving resolutions"));
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setText(tr("<br><b>SDL_GetDisplayMode failed:</b><br><br>") + QString::fromStdString(SDL_GetError()) + "<br>");
+            msgBox.exec();
+            return result;
+        }
 
+        QString aspect = getAspect(mode.w, mode.h);
+        QString resolution = QString::number(mode.w) + QString(" x ") + QString::number(mode.h);
+
+        if (aspect == QLatin1String("16:9") || aspect == QLatin1String("16:10")) {
+            resolution.append(tr("\t(Wide ") + aspect + ")");
+
+        } else if (aspect == QLatin1String("4:3")) {
+            resolution.append(tr("\t(Standard 4:3)"));
+        }
+
+        result.append(resolution);
+    }
+
+    result.removeDuplicates();
     return result;
+}
+
+QRect GraphicsPage::getMaximumResolution()
+{
+    QRect max;
+    int screens = QApplication::desktop()->screenCount();
+    for (int i = 0; i < screens; ++i)
+    {
+        QRect res = QApplication::desktop()->screenGeometry(i);
+        if (res.width() > max.width())
+            max.setWidth(res.width());
+        if (res.height() > max.height())
+            max.setHeight(res.height());
+    }
+    return max;
 }
 
 void GraphicsPage::rendererChanged(const QString &renderer)
@@ -294,10 +345,16 @@ void GraphicsPage::rendererChanged(const QString &renderer)
     mSelectedRenderSystem = mOgre->getRenderSystemByName(renderer.toStdString());
 
     antiAliasingComboBox->clear();
-    resolutionComboBox->clear();
 
     antiAliasingComboBox->addItems(getAvailableOptions(QString("FSAA"), mSelectedRenderSystem));
-    resolutionComboBox->addItems(getAvailableResolutions(mSelectedRenderSystem));
+}
+
+void GraphicsPage::screenChanged(int screen)
+{
+    if (screen >= 0) {
+        resolutionComboBox->clear();
+        resolutionComboBox->addItems(getAvailableResolutions(screen));
+    }
 }
 
 void GraphicsPage::slotFullScreenChanged(int state)

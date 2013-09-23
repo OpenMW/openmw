@@ -5,18 +5,18 @@
         <Property key="Visible" value="false"/>
 
 
-        <Widget type="TextBox" skin="SandText" position="8 10 24 24" name="Select" align="Right Top">
-            <Property key="TextAlign" value="Right"/>
+        <Widget type="TextBox" skin="SandText" position="8 10 450 18" align="Right Top">
+            <Property key="TextAlign" value="Left"/>
             <Property key="Caption" value="#{sSpellServiceTitle}"/>
         </Widget>
-        <Widget type="TextBox" skin="SandText" position="0 0 24 24" name="Spells" align="Right Top">
-            <Property key="TextAlign" value="Right"/>
-            <Property key="Caption" value="#D8C09A#{sSpells}"/>
+        <Widget type="TextBox" skin="NormalText" position="0 0 450 18" align="Right Top">
+            <Property key="TextAlign" value="Center"/>
+            <Property key="Caption" value="#{sSpells}"/>
         </Widget>
 
 
-        <Widget type="Widget" skin="MW_Box" position="6 31 430 225" align="ALIGN_LEFT ALIGN_STRETCH">
-            <Widget type="ScrollView" skin="MW_ScrollView" position="4 4 422 217" align="ALIGN_LEFT ALIGN_TOP ALIGN_STRETCH" name="SpellsView">
+        <Widget type="Widget" skin="MW_Box" position="6 31 430 225" align="Left Stretch">
+            <Widget type="ScrollView" skin="MW_ScrollView" position="4 4 422 217" align="Left Top Stretch" name="SpellsView">
                 <Property key="CanvasAlign" value="Left"/>
             </Widget>
         </Widget>

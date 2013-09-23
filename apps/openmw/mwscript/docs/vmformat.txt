@@ -51,7 +51,8 @@ op 0x20022: AiFollow
 op 0x20023: AiFollow, explicit reference
 op 0x20024: AiFollowCell
 op 0x20025: AiFollowCell, explicit reference
-op s 0x20026-0x3ffff unused
+op 0x20026: ModRegion
+opcodes 0x20027-0x3ffff unused
 
 Segment 4:
 (not implemented yet)
@@ -315,5 +316,41 @@ op 0x20001f8: Drop
 op 0x20001f9: Drop, explicit reference
 op 0x20001fa: DropSoulGem
 op 0x20001fb: DropSoulGem, explicit reference
+op 0x20001fc: OnDeath
+op 0x20001fd: IsWerewolf
+op 0x20001fe: IsWerewolf, explicit reference
+op 0x20001ff: Rotate
+op 0x2000200: Rotate, explicit reference
+op 0x2000201: RotateWorld
+op 0x2000202: RotateWorld, explicit reference
+op 0x2000203: SetAtStart
+op 0x2000204: SetAtStart, explicit
+op 0x2000205: OnDeath, explicit
+op 0x2000206: Move
+op 0x2000207: Move, explicit
+op 0x2000208: MoveWorld
+op 0x2000209: MoveWorld, explicit
+op 0x200020a: Fall
+op 0x200020b: Fall, explicit
+op 0x200020c: GetStandingPC
+op 0x200020d: GetStandingPC, explicit
+op 0x200020e: GetStandingActor
+op 0x200020f: GetStandingActor, explicit
+op 0x2000210: GetStartingAngle
+op 0x2000211: GetStartingAngle, explicit
+op 0x2000212: GetWindSpeed
+op 0x2000213: HitOnMe
+op 0x2000214: HitOnMe, explicit
+op 0x2000215: DisableTeleporting
+op 0x2000216: EnableTeleporting
+op 0x2000217: BecomeWerewolf
+op 0x2000218: BecomeWerewolfExplicit
+op 0x2000219: UndoWerewolf
+op 0x200021a: UndoWerewolfExplicit
+op 0x200021b: SetWerewolfAcrobatics
+op 0x200021c: SetWerewolfAcrobaticsExplicit
+op 0x200021d: ShowVars
+op 0x200021e: ShowVarsExplicit
+op 0x200021f: ToggleGodMode
 
-opcodes 0x20001fa-0x3ffffff unused
+opcodes 0x2000220-0x3ffffff unused

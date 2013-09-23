@@ -1,12 +1,13 @@
 #ifndef OPENMW_ESM_WRITER_H
 #define OPENMW_ESM_WRITER_H
 
-#include <iostream>
+#include <iosfwd>
 #include <list>
-#include <assert.h>
+
+#include <components/to_utf8/to_utf8.hpp>
 
 #include "esmcommon.hpp"
-#include <components/to_utf8/to_utf8.hpp>
+#include "loadtes3.hpp"
 
 namespace ESM {
 
@@ -22,11 +23,11 @@ class ESMWriter
 public:
     int getVersion();
     void setVersion(int ver);
-    int getType();
-    void setType(int type);
     void setEncoder(ToUTF8::Utf8Encoder *encoding); // Write strings as UTF-8?
     void setAuthor(const std::string& author);
     void setDescription(const std::string& desc);
+    void setRecordCount (int count);
+    void setFormat (int format);
 
     void addMaster(const std::string& name, uint64_t size);
 
@@ -80,7 +81,7 @@ public:
     {
         write((char*)&data, size);
     }
-    
+
     void startRecord(const std::string& name, uint32_t flags);
     void startSubRecord(const std::string& name);
     void endRecord(const std::string& name);
@@ -90,14 +91,13 @@ public:
     void write(const char* data, size_t size);
 
 private:
-    std::list<MasterData> m_masters;
     std::list<RecordData> m_records;
     std::ostream* m_stream;
     std::streampos m_headerPos;
     ToUTF8::Utf8Encoder* m_encoder;
     int m_recordCount;
 
-    HEDRstruct m_header;
+    Header mHeader;
 };
 
 }

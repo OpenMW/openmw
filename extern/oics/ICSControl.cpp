@@ -30,7 +30,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace ICS
 {
-	Control::Control(const std::string name, bool autoChangeDirectionOnLimitsAfterStop, bool autoReverseToInitialValue
+    Control::Control(const std::string& name, bool autoChangeDirectionOnLimitsAfterStop, bool autoReverseToInitialValue
 		, float initialValue, float stepSize, float stepsPerSeconds, bool axisBindable)
 	: mName(name)
 	 , mValue(initialValue)

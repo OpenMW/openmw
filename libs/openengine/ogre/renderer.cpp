@@ -1,5 +1,8 @@
 #include "renderer.hpp"
 #include "fader.hpp"
+#include "particles.hpp"
+
+#include <SDL.h>
 
 #include "OgreRoot.h"
 #include "OgreRenderWindow.h"
@@ -8,23 +11,24 @@
 #include "OgreTextureManager.h"
 #include "OgreTexture.h"
 #include "OgreHardwarePixelBuffer.h"
+#include <OgreParticleSystemManager.h>
+#include "OgreParticleAffectorFactory.h"
 
 #include <boost/filesystem.hpp>
 
 #include <components/files/ogreplugin.hpp>
 
+#include <extern/sdl4ogre/sdlwindowhelper.hpp>
+
 #include <cassert>
 #include <cstdlib>
 #include <stdexcept>
 
-#if defined(__APPLE__) && !defined(__LP64__)
-#include <Carbon/Carbon.h>
-#endif
-
 using namespace Ogre;
 using namespace OEngine::Render;
 
-#if defined(__APPLE__) && !defined(__LP64__)
+
+#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
 
 CustomRoot::CustomRoot(const Ogre::String& pluginFileName, 
                     const Ogre::String& configFileName, 
@@ -47,29 +51,22 @@ void OgreRenderer::cleanup()
     delete mRoot;
     mRoot = NULL;
 
+    // If we don't do this, the desktop resolution is not restored on exit
+    SDL_SetWindowFullscreen(mSDLWindow, 0);
+
+    SDL_DestroyWindow(mSDLWindow);
+    mSDLWindow = NULL;
+
     unloadPlugins();
 }
 
 void OgreRenderer::start()
 {
-#if defined(__APPLE__) && !defined(__LP64__)
-    // OSX Carbon Message Pump
+#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+    // we need this custom main loop because otherwise Ogre's Carbon message pump will
+    // steal input events even from our Cocoa window
+    // There's no way to disable Ogre's message pump other that comment pump code in Ogre's source
     do {
-        EventRef event = NULL;
-        EventTargetRef targetWindow;
-        targetWindow = GetEventDispatcherTarget();
-
-        // If we are unable to get the target then we no longer care about events.
-        if (!targetWindow) return;
-
-        // Grab the next event while possible
-        while (ReceiveNextEvent(0, NULL, kEventDurationNoWait, true, &event) == noErr)
-        {
-            // Dispatch the event
-            SendEventToEventTarget(event, targetWindow);
-            ReleaseEvent(event);
-        }
-
         if (!mRoot->renderOneFrame()) {
             break;
         }
@@ -106,6 +103,16 @@ void OgreRenderer::loadPlugins()
 
 void OgreRenderer::unloadPlugins()
 {
+    std::vector<Ogre::ParticleEmitterFactory*>::iterator ei;
+    for(ei = mEmitterFactories.begin();ei != mEmitterFactories.end();++ei)
+        OGRE_DELETE (*ei);
+    mEmitterFactories.clear();
+
+    std::vector<Ogre::ParticleAffectorFactory*>::iterator ai;
+    for(ai = mAffectorFactories.begin();ai != mAffectorFactories.end();++ai)
+        OGRE_DELETE (*ai);
+    mAffectorFactories.clear();
+
     #ifdef ENABLE_PLUGIN_GL
     delete mGLPlugin;
     mGLPlugin = NULL;
@@ -160,7 +167,7 @@ void OgreRenderer::configure(const std::string &logPath,
         // Disable logging
         log->setDebugOutputEnabled(false);
 
-#if defined(__APPLE__) && !defined(__LP64__)
+#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
     mRoot = new CustomRoot("", "", "");
 #else
     mRoot = new Root("", "", "");
@@ -192,9 +199,28 @@ void OgreRenderer::configure(const std::string &logPath,
     pluginDir = absPluginPath.string();
 
     Files::loadOgrePlugin(pluginDir, "RenderSystem_GL", *mRoot);
+    Files::loadOgrePlugin(pluginDir, "RenderSystem_GLES2", *mRoot);
     Files::loadOgrePlugin(pluginDir, "RenderSystem_GL3Plus", *mRoot);
     Files::loadOgrePlugin(pluginDir, "RenderSystem_Direct3D9", *mRoot);
     Files::loadOgrePlugin(pluginDir, "Plugin_CgProgramManager", *mRoot);
+    Files::loadOgrePlugin(pluginDir, "Plugin_ParticleFX", *mRoot);
+
+
+    Ogre::ParticleEmitterFactory *emitter;
+    emitter = OGRE_NEW NifEmitterFactory();
+    Ogre::ParticleSystemManager::getSingleton().addEmitterFactory(emitter);
+    mEmitterFactories.push_back(emitter);
+
+
+    Ogre::ParticleAffectorFactory *affector;
+    affector = OGRE_NEW GrowFadeAffectorFactory();
+    Ogre::ParticleSystemManager::getSingleton().addAffectorFactory(affector);
+    mAffectorFactories.push_back(affector);
+
+    affector = OGRE_NEW GravityAffectorFactory();
+    Ogre::ParticleSystemManager::getSingleton().addAffectorFactory(affector);
+    mAffectorFactories.push_back(affector);
+
 
     RenderSystem* rs = mRoot->getRenderSystemByName(renderSystem);
     if (rs == 0)
@@ -203,25 +229,6 @@ void OgreRenderer::configure(const std::string &logPath,
 
     if (rs->getName().find("OpenGL") != std::string::npos)
         rs->setConfigOption ("RTT Preferred Mode", rttMode);
-}
-
-void OgreRenderer::recreateWindow(const std::string &title, const WindowSettings &settings)
-{
-    Ogre::ColourValue viewportBG = mView->getBackgroundColour();
-
-    mRoot->destroyRenderTarget(mWindow);
-    NameValuePairList params;
-    params.insert(std::make_pair("title", title));
-    params.insert(std::make_pair("FSAA", settings.fsaa));
-    params.insert(std::make_pair("vsync", settings.vsync ? "true" : "false"));
-
-    mWindow = mRoot->createRenderWindow(title, settings.window_x, settings.window_y, settings.fullscreen, &params);
-
-    // Create one viewport, entire window
-    mView = mWindow->addViewport(mCamera);
-    mView->setBackgroundColour(viewportBG);
-
-    adjustViewport();
 }
 
 void OgreRenderer::createWindow(const std::string &title, const WindowSettings& settings)
@@ -234,8 +241,32 @@ void OgreRenderer::createWindow(const std::string &title, const WindowSettings& 
     params.insert(std::make_pair("FSAA", settings.fsaa));
     params.insert(std::make_pair("vsync", settings.vsync ? "true" : "false"));
 
+    int pos_x = SDL_WINDOWPOS_CENTERED_DISPLAY(settings.screen),
+        pos_y = SDL_WINDOWPOS_CENTERED_DISPLAY(settings.screen);
 
-    mWindow = mRoot->createRenderWindow(title, settings.window_x, settings.window_y, settings.fullscreen, &params);
+    if(settings.fullscreen)
+    {
+        pos_x = SDL_WINDOWPOS_UNDEFINED_DISPLAY(settings.screen);
+        pos_y = SDL_WINDOWPOS_UNDEFINED_DISPLAY(settings.screen);
+    }
+
+
+    // Create an application window with the following settings:
+    mSDLWindow = SDL_CreateWindow(
+      "OpenMW",          // window title
+      pos_x,             // initial x position
+      pos_y,             // initial y position
+      settings.window_x, // width, in pixels
+      settings.window_y, // height, in pixels
+      SDL_WINDOW_SHOWN
+        | (settings.fullscreen ? SDL_WINDOW_FULLSCREEN : 0) | SDL_WINDOW_RESIZABLE
+    );
+
+    SFO::SDLWindowHelper helper(mSDLWindow, settings.window_x, settings.window_y, title, settings.fullscreen, params);
+    if (settings.icon != "")
+        helper.setWindowIcon(settings.icon);
+    mWindow = helper.getWindow();
+
 
     // create the semi-transparent black background texture used by the GUI.
     // has to be created in code with TU_DYNAMIC_WRITE_ONLY param
@@ -248,46 +279,41 @@ void OgreRenderer::createWindow(const std::string &title, const WindowSettings& 
                     0,
                     Ogre::PF_A8R8G8B8,
                     Ogre::TU_WRITE_ONLY);
-}
 
-void OgreRenderer::createScene(const std::string& camName, float fov, float nearClip)
-{
-    assert(mRoot);
-    assert(mWindow);
-    // Get the SceneManager, in this case a generic one
     mScene = mRoot->createSceneManager(ST_GENERIC);
 
-    // Create the camera
-    mCamera = mScene->createCamera(camName);
-    mCamera->setNearClipDistance(nearClip);
-    mCamera->setFOVy(Degree(fov));
+    mFader = new Fader(mScene);
+
+    mCamera = mScene->createCamera("cam");
 
     // Create one viewport, entire window
     mView = mWindow->addViewport(mCamera);
-
     // Alter the camera aspect ratio to match the viewport
     mCamera->setAspectRatio(Real(mView->getActualWidth()) / Real(mView->getActualHeight()));
+}
 
-    mFader = new Fader(mScene);
+void OgreRenderer::adjustCamera(float fov, float nearClip)
+{
+    mCamera->setNearClipDistance(nearClip);
+    mCamera->setFOVy(Degree(fov));
 }
 
 void OgreRenderer::adjustViewport()
 {
     // Alter the camera aspect ratio to match the viewport
-    mCamera->setAspectRatio(Real(mView->getActualWidth()) / Real(mView->getActualHeight()));
-}
-
-void OgreRenderer::setWindowEventListener(Ogre::WindowEventListener* listener)
-{
-    Ogre::WindowEventUtilities::addWindowEventListener(mWindow, listener);
-}
-
-void OgreRenderer::removeWindowEventListener(Ogre::WindowEventListener* listener)
-{
-    Ogre::WindowEventUtilities::removeWindowEventListener(mWindow, listener);
+    if(mCamera != NULL)
+    {
+        mView->setDimensions(0, 0, 1, 1);
+        mCamera->setAspectRatio(Real(mView->getActualWidth()) / Real(mView->getActualHeight()));
+    }
 }
 
 void OgreRenderer::setFov(float fov)
 {
     mCamera->setFOVy(Degree(fov));
+}
+
+void OgreRenderer::windowResized(int x, int y)
+{
+    mWindowListener->windowResized(x,y);
 }

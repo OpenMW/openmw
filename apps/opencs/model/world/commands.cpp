@@ -1,9 +1,9 @@
 
 #include "commands.hpp"
 
-#include <QAbstractTableModel>
+#include <QAbstractItemModel>
 
-#include "idtableproxymodel.hpp"
+#include "idtable.hpp"
 #include "idtable.hpp"
 
 CSMWorld::ModifyCommand::ModifyCommand (QAbstractItemModel& model, const QModelIndex& index,
@@ -25,15 +25,28 @@ void CSMWorld::ModifyCommand::undo()
     mModel.setData (mIndex, mOld);
 }
 
-CSMWorld::CreateCommand::CreateCommand (IdTableProxyModel& model, const std::string& id, QUndoCommand *parent)
-: QUndoCommand (parent), mModel (model), mId (id)
+CSMWorld::CreateCommand::CreateCommand (IdTable& model, const std::string& id, QUndoCommand *parent)
+: QUndoCommand (parent), mModel (model), mId (id), mType (UniversalId::Type_None)
 {
     setText (("Create record " + id).c_str());
 }
 
+void CSMWorld::CreateCommand::addValue (int column, const QVariant& value)
+{
+    mValues[column] = value;
+}
+
+void CSMWorld::CreateCommand::setType (UniversalId::Type type)
+{
+    mType = type;
+}
+
 void CSMWorld::CreateCommand::redo()
 {
-    mModel.addRecord (mId);
+    mModel.addRecord (mId, mType);
+
+    for (std::map<int, QVariant>::const_iterator iter (mValues.begin()); iter!=mValues.end(); ++iter)
+        mModel.setData (mModel.getModelIndex (mId, iter->first), iter->second);
 }
 
 void CSMWorld::CreateCommand::undo()
@@ -56,7 +69,9 @@ CSMWorld::RevertCommand::~RevertCommand()
 
 void CSMWorld::RevertCommand::redo()
 {
-    QModelIndex index = mModel.getModelIndex (mId, 1);
+    int column = mModel.findColumnIndex (Columns::ColumnId_Modification);
+
+    QModelIndex index = mModel.getModelIndex (mId, column);
     RecordBase::State state = static_cast<RecordBase::State> (mModel.data (index).toInt());
 
     if (state==RecordBase::State_ModifiedOnly)
@@ -71,7 +86,7 @@ void CSMWorld::RevertCommand::redo()
 
 void CSMWorld::RevertCommand::undo()
 {
-    mModel.setRecord (*mOld);
+    mModel.setRecord (mId, *mOld);
 }
 
 CSMWorld::DeleteCommand::DeleteCommand (IdTable& model, const std::string& id, QUndoCommand *parent)
@@ -89,7 +104,9 @@ CSMWorld::DeleteCommand::~DeleteCommand()
 
 void CSMWorld::DeleteCommand::redo()
 {
-    QModelIndex index = mModel.getModelIndex (mId, 1);
+    int column = mModel.findColumnIndex (Columns::ColumnId_Modification);
+
+    QModelIndex index = mModel.getModelIndex (mId, column);
     RecordBase::State state = static_cast<RecordBase::State> (mModel.data (index).toInt());
 
     if (state==RecordBase::State_ModifiedOnly)
@@ -104,5 +121,5 @@ void CSMWorld::DeleteCommand::redo()
 
 void CSMWorld::DeleteCommand::undo()
 {
-    mModel.setRecord (*mOld);
+    mModel.setRecord (mId, *mOld);
 }

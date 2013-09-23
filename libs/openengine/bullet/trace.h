@@ -4,23 +4,28 @@
 #include <OgreVector3.h>
 
 
+class btCollisionObject;
+
+
 namespace OEngine
 {
-    namespace Physic
-    {
-        class PhysicEngine;
-    }
-}
-
-
-struct traceResults
+namespace Physic
 {
-    Ogre::Vector3 endpos;
-    Ogre::Vector3 planenormal;
+    class PhysicEngine;
 
-    float fraction;
-};
+    struct ActorTracer
+    {
+        Ogre::Vector3 mEndPos;
+        Ogre::Vector3 mPlaneNormal;
 
-void newtrace(traceResults *results, const Ogre::Vector3& start, const Ogre::Vector3& end, const Ogre::Vector3& BBHalfExtents, bool isInterior, OEngine::Physic::PhysicEngine* enginePass);
+        float mFraction;
+
+        void doTrace(btCollisionObject *actor, const Ogre::Vector3 &start, const Ogre::Vector3 &end,
+                     const PhysicEngine *enginePass);
+        void findGround(btCollisionObject *actor, const Ogre::Vector3 &start, const Ogre::Vector3 &end,
+                        const PhysicEngine *enginePass);
+    };
+}
+}
 
 #endif

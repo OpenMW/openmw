@@ -1,9 +1,10 @@
 
 #include "idtable.hpp"
 
-#include "idcollection.hpp"
+#include "collectionbase.hpp"
+#include "columnbase.hpp"
 
-CSMWorld::IdTable::IdTable (IdCollectionBase *idCollection) : mIdCollection (idCollection)
+CSMWorld::IdTable::IdTable (CollectionBase *idCollection) : mIdCollection (idCollection)
 {
 
 }
@@ -46,7 +47,7 @@ QVariant CSMWorld::IdTable::headerData (int section, Qt::Orientation orientation
         return QVariant();
 
     if (role==Qt::DisplayRole)
-        return tr (mIdCollection->getColumn (section).mTitle.c_str());
+        return tr (mIdCollection->getColumn (section).getTitle().c_str());
 
     if (role==ColumnBase::Role_Flags)
         return mIdCollection->getColumn (section).mFlags;
@@ -96,13 +97,32 @@ bool CSMWorld::IdTable::removeRows (int row, int count, const QModelIndex& paren
     return true;
 }
 
-void CSMWorld::IdTable::addRecord (const std::string& id)
+QModelIndex CSMWorld::IdTable::index (int row, int column, const QModelIndex& parent) const
 {
-    int index = mIdCollection->getSize();
+    if (parent.isValid())
+        return QModelIndex();
+
+    if (row<0 || row>=mIdCollection->getSize())
+        return QModelIndex();
+
+    if (column<0 || column>=mIdCollection->getColumns())
+        return QModelIndex();
+
+    return createIndex (row, column);
+}
+
+QModelIndex CSMWorld::IdTable::parent (const QModelIndex& index) const
+{
+    return QModelIndex();
+}
+
+void CSMWorld::IdTable::addRecord (const std::string& id, UniversalId::Type type)
+{
+    int index = mIdCollection->getAppendIndex();
 
     beginInsertRows (QModelIndex(), index, index);
 
-    mIdCollection->appendBlankRecord (id);
+    mIdCollection->appendBlankRecord (id, type);
 
     endInsertRows();
 }
@@ -112,13 +132,13 @@ QModelIndex CSMWorld::IdTable::getModelIndex (const std::string& id, int column)
     return index (mIdCollection->getIndex (id), column);
 }
 
-void CSMWorld::IdTable::setRecord (const RecordBase& record)
+void CSMWorld::IdTable::setRecord (const std::string& id, const RecordBase& record)
 {
-    int index = mIdCollection->searchId (mIdCollection->getId (record));
+    int index = mIdCollection->searchId (id);
 
     if (index==-1)
     {
-        int index = mIdCollection->getSize();
+        int index = mIdCollection->getAppendIndex();
 
         beginInsertRows (QModelIndex(), index, index);
 
@@ -137,4 +157,25 @@ void CSMWorld::IdTable::setRecord (const RecordBase& record)
 const CSMWorld::RecordBase& CSMWorld::IdTable::getRecord (const std::string& id) const
 {
     return mIdCollection->getRecord (id);
+}
+
+int CSMWorld::IdTable::searchColumnIndex (Columns::ColumnId id) const
+{
+    int columns = mIdCollection->getColumns();
+
+    for (int i=0; i<columns; ++i)
+        if (mIdCollection->getColumn (i).mColumnId==id)
+            return i;
+
+    return -1;
+}
+
+int CSMWorld::IdTable::findColumnIndex (Columns::ColumnId id) const
+{
+    int index = searchColumnIndex (id);
+
+    if (index==-1)
+        throw std::logic_error ("invalid column index");
+
+    return index;
 }

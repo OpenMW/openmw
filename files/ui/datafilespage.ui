@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>520</width>
-    <height>256</height>
+    <width>518</width>
+    <height>304</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -112,7 +112,9 @@
   </layout>
   <action name="newProfileAction">
    <property name="icon">
-    <iconset theme="document-new"/>
+    <iconset theme="document-new">
+     <normaloff/>
+    </iconset>
    </property>
    <property name="text">
     <string>New Profile</string>
@@ -126,7 +128,9 @@
   </action>
   <action name="deleteProfileAction">
    <property name="icon">
-    <iconset theme="edit-delete"/>
+    <iconset theme="edit-delete">
+     <normaloff/>
+    </iconset>
    </property>
    <property name="text">
     <string>Delete Profile</string>

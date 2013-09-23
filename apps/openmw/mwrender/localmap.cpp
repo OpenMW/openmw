@@ -2,6 +2,10 @@
 
 #include <OgreMaterialManager.h>
 #include <OgreHardwarePixelBuffer.h>
+#include <OgreSceneManager.h>
+#include <OgreSceneNode.h>
+#include <OgreCamera.h>
+#include <OgreTextureManager.h>
 
 #include "../mwworld/esmstore.hpp"
 
@@ -104,7 +108,7 @@ void LocalMap::saveFogOfWar(MWWorld::Ptr::CellStore* cell)
     }
 }
 
-void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell)
+void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell, float zMin, float zMax)
 {
     mInterior = false;
 
@@ -118,7 +122,7 @@ void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell)
 
     mCameraPosNode->setPosition(Vector3(0,0,0));
 
-    render((x+0.5)*sSize, (y+0.5)*sSize, -10000, 10000, sSize, sSize, name);
+    render((x+0.5)*sSize, (y+0.5)*sSize, zMin, zMax, sSize, sSize, name);
 }
 
 void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell,
@@ -197,11 +201,11 @@ void LocalMap::render(const float x, const float y,
                     const float zlow, const float zhigh,
                     const float xw, const float yw, const std::string& texture)
 {
-    //mCellCamera->setFarClipDistance( (zhigh-zlow) * 1.1 );
-    mCellCamera->setFarClipDistance(0); // infinite
+    mCellCamera->setFarClipDistance( (zhigh-zlow) + 2000 );
+    mCellCamera->setNearClipDistance(50);
 
     mCellCamera->setOrthoWindow(xw, yw);
-    mCameraNode->setPosition(Vector3(x, y, zhigh+100000));
+    mCameraNode->setPosition(Vector3(x, y, zhigh+1000));
 
     // disable fog (only necessary for fixed function, the shader based
     // materials already do this through local_map material configuration)
@@ -366,8 +370,8 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaterni
     MWBase::Environment::get().getWindowManager()->setPlayerDir(playerdirection.x, playerdirection.y);
 
     // explore radius (squared)
-    const float sqrExploreRadius = (mInterior ? 0.01 : 0.09) * sFogOfWarResolution*sFogOfWarResolution;
-    const float exploreRadius = (mInterior ? 0.1 : 0.3) * sFogOfWarResolution; // explore radius from 0 to sFogOfWarResolution
+    const float exploreRadius = (mInterior ? 0.1 : 0.3) * (sFogOfWarResolution-1); // explore radius from 0 to sFogOfWarResolution-1
+    const float sqrExploreRadius = Math::Sqr(exploreRadius);
     const float exploreRadiusUV = exploreRadius / sFogOfWarResolution; // explore radius from 0 to 1 (UV space)
 
     // change the affected fog of war textures (in a 3x3 grid around the player)
@@ -402,11 +406,8 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaterni
                 {
                     for (int texU = 0; texU<sFogOfWarResolution; ++texU)
                     {
-                        // fix into range of 0 ... sFogOfWarResolution
-                        int _texU = texU * (float(sFogOfWarResolution+1) / float(sFogOfWarResolution));
-                        int _texV = texV * (float(sFogOfWarResolution+1) / float(sFogOfWarResolution));
-
-                        float sqrDist = Math::Sqr((_texU + mx*sFogOfWarResolution) - u*sFogOfWarResolution) + Math::Sqr((_texV + my*sFogOfWarResolution) - v*sFogOfWarResolution);
+                        float sqrDist = Math::Sqr((texU + mx*(sFogOfWarResolution-1)) - u*(sFogOfWarResolution-1))
+                                + Math::Sqr((texV + my*(sFogOfWarResolution-1)) - v*(sFogOfWarResolution-1));
                         uint32 clr = mBuffers[texName][i];
                         uint8 alpha = (clr >> 24);
                         alpha = std::min( alpha, (uint8) (std::max(0.f, std::min(1.f, (sqrDist/sqrExploreRadius)))*255) );

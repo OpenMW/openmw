@@ -35,11 +35,11 @@ struct NPC
       Apparatus     = 0x00100,
       RepairItem    = 0x00200,
       Misc          = 0x00400,
+      Potions       = 0x02000,
 
       // Other services
       Spells        = 0x00800,
       MagicItems    = 0x01000,
-      Potions       = 0x02000,
       Training      = 0x04000, // What skills?
       Spellmaking   = 0x08000,
       Enchanting    = 0x10000,
@@ -62,7 +62,7 @@ struct NPC
     struct NPDTstruct52
     {
         short mLevel;
-        char mStrength,
+        unsigned char mStrength,
              mIntelligence,
              mWillpower,
              mAgility,
@@ -100,6 +100,8 @@ struct NPC
 
     int mFlags;
 
+    bool mPersistent;
+
     InventoryList mInventory;
     SpellList mSpells;
 
@@ -114,20 +116,15 @@ struct NPC
     // body parts
     std::string mHair, mHead;
 
-    // Implementation moved to load_impl.cpp
     void load(ESMReader &esm);
     void save(ESMWriter &esm);
 
-    bool isMale() const {
-        return (mFlags & Female) == 0;
-    }
+    bool isMale() const;
 
-    void setIsMale(bool value) {
-        mFlags |= Female;
-        if (value) {
-            mFlags ^= Female;
-        }
-    }
+    void setIsMale(bool value);
+
+    void blank();
+    ///< Set record to default state (does not touch the ID).
 };
 }
 #endif

@@ -54,5 +54,24 @@ material Water
             scale 0.1 0.1
             alpha_op_ex source1 src_manual src_current 0.7
         }
+
+        texture_unit shadowMap0
+        {
+            content_type shadow
+            tex_address_mode clamp
+            filtering none
+        }
+        texture_unit shadowMap1
+        {
+            content_type shadow
+            tex_address_mode clamp
+            filtering none
+        }
+        texture_unit shadowMap2
+        {
+            content_type shadow
+            tex_address_mode clamp
+            filtering none
+        }
     }
 }

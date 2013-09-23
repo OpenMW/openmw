@@ -31,11 +31,11 @@ namespace MWWorld
 
             CellStore *getCellStore (const ESM::Cell *cell);
 
-            void fillContainers (CellStore& cellStore);
-
             Ptr getPtrAndCache (const std::string& name, CellStore& cellStore);
 
         public:
+
+            void clear();
 
             Cells (const MWWorld::ESMStore& store, std::vector<ESM::ESMReader>& reader);
             ///< \todo pass the dynamic part of the ESMStore isntead (once it is written) of the whole
@@ -45,7 +45,8 @@ namespace MWWorld
 
             CellStore *getInterior (const std::string& name);
 
-            Ptr getPtr (const std::string& name, CellStore& cellStore);
+            Ptr getPtr (const std::string& name, CellStore& cellStore, bool searchInContainers = false);
+            ///< \param searchInContainers Only affect loaded cells.
 
             Ptr getPtr (const std::string& name);
     };

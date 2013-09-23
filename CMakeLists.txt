@@ -4,6 +4,10 @@ if (APPLE)
     set(APP_BUNDLE_NAME "${CMAKE_PROJECT_NAME}.app")
 
     set(APP_BUNDLE_DIR "${OpenMW_BINARY_DIR}/${APP_BUNDLE_NAME}")
+
+    set(CMAKE_EXE_LINKER_FLAGS "-F /Library/Frameworks")
+    set(CMAKE_SHARED_LINKER_FLAGS "-F /Library/Frameworks")
+    set(CMAKE_MODULE_LINKER_FLAGS "-F /Library/Frameworks")
 endif (APPLE)
 
 # Macros
@@ -15,7 +19,7 @@ include (OpenMWMacros)
 # Version
 
 set (OPENMW_VERSION_MAJOR 0)
-set (OPENMW_VERSION_MINOR 22)
+set (OPENMW_VERSION_MINOR 26)
 set (OPENMW_VERSION_RELEASE 0)
 
 set (OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
@@ -27,6 +31,7 @@ configure_file ("${OpenMW_SOURCE_DIR}/Docs/mainpage.hpp.cmake" "${OpenMW_SOURCE_
 option(MYGUI_STATIC "Link static build of Mygui into the binaries" FALSE)
 option(OGRE_STATIC  "Link static build of Ogre and Ogre Plugins into the binaries" FALSE)
 option(BOOST_STATIC "Link static build of Boost into the binaries" FALSE)
+option(SDL2_STATIC "Link static build of SDL into the binaries" FALSE)
 
 # Apps and tools
 option(BUILD_BSATOOL "build BSA extractor" OFF)
@@ -48,18 +53,16 @@ option(OPENMW_OSX_DEPLOYMENT OFF)
 find_program(DPKG_PROGRAM dpkg DOC "dpkg program of Debian-based systems")
 
 # Location of morrowind data files
-if(DPKG_PROGRAM)
+if (APPLE)
+    set(MORROWIND_DATA_FILES "./data" CACHE PATH "location of Morrowind data files")
+    set(MORROWIND_RESOURCE_FILES "./resources" CACHE PATH "location of OpenMW resources files")
+elseif(UNIX)
     set(MORROWIND_DATA_FILES "/usr/share/games/openmw/data/" CACHE PATH "location of Morrowind data files")
     set(MORROWIND_RESOURCE_FILES "/usr/share/games/openmw/resources/" CACHE PATH "location of OpenMW resources files")
 else()
-    if (APPLE)
-        set(MORROWIND_DATA_FILES "./data" CACHE PATH "location of Morrowind data files")
-        set(MORROWIND_RESOURCE_FILES "./resources" CACHE PATH "location of OpenMW resources files")
-    else()
-        set(MORROWIND_DATA_FILES "data" CACHE PATH "location of Morrowind data files")
-        set(MORROWIND_RESOURCE_FILES "resources" CACHE PATH "location of OpenMW resources files")
-    endif(APPLE)
-endif(DPKG_PROGRAM)
+    set(MORROWIND_DATA_FILES "data" CACHE PATH "location of Morrowind data files")
+    set(MORROWIND_RESOURCE_FILES "resources" CACHE PATH "location of OpenMW resources files")
+endif(APPLE)
 
 if (WIN32)
     option(USE_DEBUG_CONSOLE "whether a debug console should be enabled for debug builds, if false debug output is redirected to Visual Studio output" ON)
@@ -75,8 +78,12 @@ set(LIBDIR ${CMAKE_SOURCE_DIR}/libs)
 set(OENGINE_OGRE
   ${LIBDIR}/openengine/ogre/renderer.cpp
   ${LIBDIR}/openengine/ogre/fader.cpp
+  ${LIBDIR}/openengine/ogre/lights.cpp
+  ${LIBDIR}/openengine/ogre/particles.cpp
   ${LIBDIR}/openengine/ogre/selectionbuffer.cpp
+  ${LIBDIR}/openengine/ogre/imagerotate.cpp
 )
+
 set(OENGINE_GUI
   ${LIBDIR}/openengine/gui/manager.cpp
 )
@@ -154,6 +161,20 @@ if (NOT FFMPEG_FOUND)
     message(WARNING "--------------------")
 endif (NOT FFMPEG_FOUND)
 
+# TinyXML
+option(USE_SYSTEM_TINYXML "Use system TinyXML library instead of internal." OFF)
+if(USE_SYSTEM_TINYXML)
+    find_library(TINYXML_LIBRARIES tinyxml)
+    find_path(TINYXML_INCLUDE_DIR tinyxml.h)
+    message(STATUS "Found TinyXML: ${TINYXML_LIBRARIES} ${TINYXML_INCLUDE_DIR}")
+    add_definitions (-DTIXML_USE_STL)
+    if(TINYXML_LIBRARIES AND TINYXML_INCLUDE_DIR)
+        include_directories(${TINYXML_INCLUDE_DIR})
+        message(STATUS "Using system TinyXML library.")
+    else()
+        message(FATAL_ERROR "Detection of system TinyXML incomplete.")
+    endif()
+endif()
 
 # Platform specific
 if (WIN32)
@@ -180,15 +201,14 @@ if (UNIX AND NOT APPLE)
     find_package (Threads)
 endif()
 
-# find boost without components so we can use Boost_VERSION
-find_package(Boost REQUIRED)
+include (CheckIncludeFileCXX)
+check_include_file_cxx(unordered_map HAVE_UNORDERED_MAP)
+if (HAVE_UNORDERED_MAP)
+    add_definitions(-DHAVE_UNORDERED_MAP)
+endif ()
 
-set(BOOST_COMPONENTS system filesystem program_options thread date_time)
 
-if (Boost_VERSION LESS 104900)
-    set(SHINY_USE_WAVE_SYSTEM_INSTALL "TRUE")
-    set(BOOST_COMPONENTS ${BOOST_COMPONENTS} wave)
-endif()
+set(BOOST_COMPONENTS system filesystem program_options thread date_time wave)
 
 IF(BOOST_STATIC)
     set(Boost_USE_STATIC_LIBS   ON)
@@ -197,7 +217,7 @@ endif()
 find_package(OGRE REQUIRED)
 find_package(MyGUI REQUIRED)
 find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
-find_package(OIS REQUIRED)
+find_package(SDL2 REQUIRED)
 find_package(OpenAL REQUIRED)
 find_package(Bullet REQUIRED)
 IF(OGRE_STATIC)
@@ -210,8 +230,8 @@ ENDIF(WIN32)
 ENDIF(OGRE_STATIC)
 include_directories("."
     ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre ${OGRE_INCLUDE_DIR}/OGRE ${OGRE_PLUGIN_INCLUDE_DIRS}
-    ${OGRE_Terrain_INCLUDE_DIR}
-    ${OIS_INCLUDE_DIRS} ${Boost_INCLUDE_DIR}
+    ${SDL2_INCLUDE_DIR}
+    ${Boost_INCLUDE_DIR}
     ${PLATFORM_INCLUDE_DIR}
     ${MYGUI_INCLUDE_DIRS}
     ${MYGUI_PLATFORM_INCLUDE_DIRS}
@@ -220,7 +240,7 @@ include_directories("."
     ${LIBDIR}
 )
 
-link_directories(${Boost_LIBRARY_DIRS} ${OGRE_LIB_DIR} ${MYGUI_LIB_DIR})
+link_directories(${SDL2_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS} ${OGRE_LIB_DIR} ${MYGUI_LIB_DIR})
 
 if (APPLE)
     # List used Ogre plugins
@@ -293,9 +313,12 @@ configure_file(${OpenMW_SOURCE_DIR}/files/transparency-overrides.cfg
 
 configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
     "${OpenMW_BINARY_DIR}/openmw.cfg")
+
 configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
     "${OpenMW_BINARY_DIR}/openmw.cfg.install")
 
+configure_file(${OpenMW_SOURCE_DIR}/files/opencs.cfg
+    "${OpenMW_BINARY_DIR}/opencs.cfg")
 
 if (NOT WIN32 AND NOT APPLE)
     configure_file(${OpenMW_SOURCE_DIR}/files/openmw.desktop
@@ -306,71 +329,122 @@ endif()
 
 # Compiler settings
 if (CMAKE_COMPILER_IS_GNUCC)
-    add_definitions (-Wall -Wextra -Wno-unused-parameter -Wno-reorder -std=c++98 -pedantic -Wno-long-long)
+    SET(CMAKE_CXX_FLAGS "-Wall -Wextra -Wno-unused-parameter -Wno-reorder -std=c++98 -pedantic -Wno-long-long ${CMAKE_CXX_FLAGS}")
 
     # Silence warnings in OGRE headers. Remove once OGRE got fixed!
-    add_definitions (-Wno-ignored-qualifiers)
+    SET(CMAKE_CXX_FLAGS "-Wno-ignored-qualifiers ${CMAKE_CXX_FLAGS}")
 
     execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpversion
                 OUTPUT_VARIABLE GCC_VERSION)
     if ("${GCC_VERSION}" VERSION_GREATER 4.6 OR "${GCC_VERSION}" VERSION_EQUAL 4.6)
-        add_definitions (-Wno-unused-but-set-parameter)
+        SET(CMAKE_CXX_FLAGS "-Wno-unused-but-set-parameter ${CMAKE_CXX_FLAGS}")
     endif("${GCC_VERSION}" VERSION_GREATER 4.6 OR "${GCC_VERSION}" VERSION_EQUAL 4.6)
 endif (CMAKE_COMPILER_IS_GNUCC)
 
-if(DPKG_PROGRAM)
-    SET(CMAKE_INSTALL_PREFIX "/usr")
+IF(NOT WIN32 AND NOT APPLE)
+    ## Debian and non debian Linux building
+    # Paths
+    IF (DPKG_PROGRAM)
+        ## Debian specific
+        SET(CMAKE_INSTALL_PREFIX "/usr")
+        SET(DATAROOTDIR "share" CACHE PATH "Sets the root of data directories to a non-default location")
+        SET(DATADIR "share/games/openmw" CACHE PATH "Sets the openmw data directories to a non-default location")
+        SET(ICONDIR "share/pixmaps" CACHE PATH "Set icon dir")
+        SET(SYSCONFDIR "../etc/openmw" CACHE PATH "Set config dir")
+    ELSE ()
+        ## Non debian specific
+        SET(BINDIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH "Where to install binaries")
+        SET(DATAROOTDIR "${CMAKE_INSTALL_PREFIX}/share" CACHE PATH "Sets the root of data directories to a non-default location")
+        SET(DATADIR "${DATAROOTDIR}/games/openmw" CACHE PATH "Sets the openmw data directories to a non-default location")
+        SET(ICONDIR "${DATAROOTDIR}/pixmaps" CACHE PATH "Set icon dir")
+        SET(LICDIR "${DATAROOTDIR}/licenses/openmw" CACHE PATH "Sets the openmw license directory to a non-default location.")
+        SET(SYSCONFDIR "/etc/openmw" CACHE PATH "Set config dir")
 
-    if(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/.git")
-        exec_program("git" ${CMAKE_CURRENT_SOURCE_DIR} ARGS "describe" OUTPUT_VARIABLE GIT_VERSION )
-        STRING(REGEX REPLACE "openmw-" "" VERSION_STRING "${GIT_VERSION}")
-        exec_program("git" ARGS "config --get user.name" OUTPUT_VARIABLE GIT_NAME )
-        exec_program("git" ARGS "config --get user.email" OUTPUT_VARIABLE GIT_EMAIL)
-        set(PACKAGE_MAINTAINER "${GIT_NAME} <${GIT_EMAIL}>")
-    else()
-        set(VERSION_STRING "${OPENMW_VERSION}")
-        set(PACKAGE_MAINTAINER "unknown")
-    endif()
+        # Install binaries
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/openmw" DESTINATION "${BINDIR}" )
+        IF(BUILD_LAUNCHER)
+            INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/omwlauncher" DESTINATION "${BINDIR}" )
+        ENDIF(BUILD_LAUNCHER)
+        IF(BUILD_BSATOOL)
+            INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/bsatool" DESTINATION "${BINDIR}" )
+        ENDIF(BUILD_BSATOOL)
+        IF(BUILD_ESMTOOL)
+            INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/esmtool" DESTINATION "${BINDIR}" )
+        ENDIF(BUILD_ESMTOOL)
+        IF(BUILD_MWINIIMPORTER)
+            INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/mwiniimport" DESTINATION "${BINDIR}" )
+        ENDIF(BUILD_MWINIIMPORTER)
+        IF(BUILD_OPENCS)
+            INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/opencs" DESTINATION "${BINDIR}" )
+        ENDIF(BUILD_OPENCS)
 
-    #Install icon and desktop file
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.desktop" DESTINATION "share/applications/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
-    INSTALL(FILES "${OpenMW_SOURCE_DIR}/files/launcher/images/openmw.png" DESTINATION "share/pixmaps/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
+        # Install licenses
+        INSTALL(FILES "DejaVu Font License.txt" DESTINATION "${LICDIR}" )
+        INSTALL(FILES "Daedric Font License.txt" DESTINATION "${LICDIR}" )
+        INSTALL(FILES "OFL.txt" DESTINATION "${LICDIR}" )
+        INSTALL(FILES "extern/shiny/License.txt" DESTINATION "${LICDIR}" RENAME "Shiny License.txt" )
+    ENDIF (DPKG_PROGRAM)
 
-    #Install global configuration files
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/settings-default.cfg" DESTINATION "../etc/openmw/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/transparency-overrides.cfg" DESTINATION "../etc/openmw/" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "../etc/openmw/" RENAME "openmw.cfg" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
+    # Install icon and desktop file
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.desktop" DESTINATION "${DATAROOTDIR}/applications" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
+    INSTALL(FILES "${OpenMW_SOURCE_DIR}/files/launcher/images/openmw.png" DESTINATION "${ICONDIR}" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
+    IF(BUILD_OPENCS)
+        INSTALL(FILES "${OpenMW_BINARY_DIR}/opencs.desktop" DESTINATION "${DATAROOTDIR}/applications" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "opencs")
+        INSTALL(FILES "${OpenMW_SOURCE_DIR}/files/opencs/opencs.png" DESTINATION "${ICONDIR}" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "opencs")
+    ENDIF(BUILD_OPENCS)
 
-    #Install resources
-    INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION "share/games/openmw/" FILE_PERMISSIONS OWNER_READ GROUP_READ WORLD_READ COMPONENT "Resources")
-    INSTALL(DIRECTORY DESTINATION "share/games/openmw/data/" COMPONENT "Resources")
+    # Install global configuration files
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/settings-default.cfg" DESTINATION "${SYSCONFDIR}" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/transparency-overrides.cfg" DESTINATION "${SYSCONFDIR}" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "${SYSCONFDIR}" RENAME "openmw.cfg" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "openmw")
+    IF(BUILD_OPENCS)
+        INSTALL(FILES "${OpenMW_BINARY_DIR}/opencs.cfg" DESTINATION "${SYSCONFDIR}" PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ COMPONENT "opencs")
+    ENDIF(BUILD_OPENCS)
 
-    SET(CPACK_GENERATOR "DEB")
-    SET(CPACK_PACKAGE_NAME "openmw")
-    SET(CPACK_DEBIAN_PACKAGE_HOMEPAGE "http://openmw.org")
-    SET(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
-    SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "${PACKAGE_MAINTAINER}")
-    SET(CPACK_DEBIAN_PACKAGE_DESCRIPTION "A reimplementation of The Elder Scrolls III: Morrowind
+    # Install resources
+    INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION "${DATADIR}" FILE_PERMISSIONS OWNER_READ GROUP_READ WORLD_READ COMPONENT "Resources")
+    INSTALL(DIRECTORY DESTINATION "${DATADIR}/data" COMPONENT "Resources")
+
+    IF (DPKG_PROGRAM)
+        ## Debian Specific
+        IF(IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/.git")
+            EXEC_PROGRAM("git" ${CMAKE_CURRENT_SOURCE_DIR} ARGS "describe" OUTPUT_VARIABLE GIT_VERSION )
+            STRING(REGEX REPLACE "openmw-" "" VERSION_STRING "${GIT_VERSION}")
+            EXEC_PROGRAM("git" ARGS "config --get user.name" OUTPUT_VARIABLE GIT_NAME )
+            EXEC_PROGRAM("git" ARGS "config --get user.email" OUTPUT_VARIABLE GIT_EMAIL)
+            SET(PACKAGE_MAINTAINER "${GIT_NAME} <${GIT_EMAIL}>")
+        ELSE()
+            SET(VERSION_STRING "${OPENMW_VERSION}")
+            SET(PACKAGE_MAINTAINER "unknown")
+        ENDIF()
+
+        SET(CPACK_GENERATOR "DEB")
+        SET(CPACK_PACKAGE_NAME "openmw")
+        SET(CPACK_DEBIAN_PACKAGE_HOMEPAGE "http://openmw.org")
+        SET(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
+        SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "${PACKAGE_MAINTAINER}")
+        SET(CPACK_DEBIAN_PACKAGE_DESCRIPTION "A reimplementation of The Elder Scrolls III: Morrowind
  OpenMW is a reimplementation of the Bethesda Game Studios game The Elder Scrolls III: Morrowind.
  Data files from the original game is required to run it.")
-    SET(CPACK_DEBIAN_PACKAGE_NAME "openmw")
-    SET(CPACK_DEBIAN_PACKAGE_VERSION "${VERSION_STRING}")
+        SET(CPACK_DEBIAN_PACKAGE_NAME "openmw")
+        SET(CPACK_DEBIAN_PACKAGE_VERSION "${VERSION_STRING}")
         SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW bsatool;Bsatool esmtool;Esmtool omwlauncher;OMWLauncher mwiniimporter;MWiniImporter")
-    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.11.2), libfreetype6 (>= 2.2.1), libgcc1 (>= 1:4.1.1), libmpg123-0 (>= 1.12.1), libois-1.3.0 (>= 1.3.0), libopenal1 (>= 1:1.12.854), libsndfile1 (>= 1.0.23), libstdc++6 (>= 4.4.5), libuuid1 (>= 2.17.2), libqtgui4 (>= 4.7.0)")
+        SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.11.2), libfreetype6 (>= 2.2.1), libgcc1 (>= 1:4.1.1), libmpg123-0 (>= 1.12.1), libopenal1 (>= 1:1.12.854), libsndfile1 (>= 1.0.23), libstdc++6 (>= 4.4.5), libuuid1 (>= 2.17.2), libqtgui4 (>= 4.7.0)")
 
-    SET(CPACK_DEBIAN_PACKAGE_SECTION "Games")
+        SET(CPACK_DEBIAN_PACKAGE_SECTION "Games")
 
-    string(TOLOWER "${CPACK_PACKAGE_NAME}" CPACK_PACKAGE_NAME_LOWERCASE)
-    execute_process(
-        COMMAND ${DPKG_PROGRAM} --print-architecture
-        OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-    set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME_LOWERCASE}_${CPACK_DEBIAN_PACKAGE_VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
+        STRING(TOLOWER "${CPACK_PACKAGE_NAME}" CPACK_PACKAGE_NAME_LOWERCASE)
+        EXECUTE_PROCESS(
+            COMMAND ${DPKG_PROGRAM} --print-architecture
+            OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+        SET(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME_LOWERCASE}_${CPACK_DEBIAN_PACKAGE_VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
 
 
-    include(CPack)
-endif(DPKG_PROGRAM)
+        INCLUDE(CPack)
+    ENDIF(DPKG_PROGRAM)
+ENDIF(NOT WIN32 AND NOT APPLE)
 
 if(WIN32)
     FILE(GLOB dll_files "${OpenMW_BINARY_DIR}/Release/*.dll")
@@ -443,6 +517,7 @@ endif(WIN32)
 # Extern
 add_subdirectory (extern/shiny)
 add_subdirectory (extern/oics)
+add_subdirectory (extern/sdl4ogre)
 
 # Components
 add_subdirectory (components)
@@ -459,6 +534,13 @@ if (BUILD_ESMTOOL)
 endif()
 
 if (BUILD_LAUNCHER)
+    if(NOT WIN32)
+        find_package(LIBUNSHIELD REQUIRED)
+        if(NOT LIBUNSHIELD_FOUND)
+               message(SEND_ERROR "Failed to find libunshield")
+        endif(NOT LIBUNSHIELD_FOUND)
+    endif(NOT WIN32)
+
    add_subdirectory( apps/launcher )
 endif()
 
@@ -578,6 +660,7 @@ if (APPLE)
     install(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" RENAME "openmw.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
     install(FILES "${OpenMW_BINARY_DIR}/settings-default.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
     install(FILES "${OpenMW_BINARY_DIR}/transparency-overrides.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
+    install(FILES "${OpenMW_BINARY_DIR}/opencs.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
 
     set(CPACK_GENERATOR "DragNDrop")
     set(CPACK_PACKAGE_VERSION ${OPENMW_VERSION})
@@ -651,45 +734,3 @@ if (APPLE)
         include(CPack)
 endif (APPLE)
 
-if (NOT WIN32 AND NOT DPKG_PROGRAM AND NOT APPLE)
-    ## Non Debian based Linux building
-    # paths
-    set(BINDIR "${CMAKE_INSTALL_PREFIX}/usr/bin" CACHE PATH "Where to install binaries")
-    set(DATAROOTDIR "${CMAKE_INSTALL_PREFIX}/share" CACHE PATH "Sets the root of data directories to a non-default location")
-    set(DATADIR "${DATAROOTDIR}/openmw" CACHE PATH "Sets the openmw data directories to a non-default location")
-    set(DOCDIR "${DATAROOTDIR}/doc/openmw" CACHE PATH "Sets the doc directory to a non-default location.")
-    set(MANDIR "${DATAROOTDIR}/man" CACHE PATH "Where to install manpages")
-    set(SYSCONFDIR "${CMAKE_INSTALL_PREFIX}/etc/openmw" CACHE PATH "Set config dir")
-    set(ICONDIR "${DATAROOTDIR}/pixmaps" CACHE PATH "Set icon dir")
-
-    # Install binaries
-    INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/openmw" DESTINATION "${BINDIR}" )
-    IF(BUILD_LAUNCHER)
-        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/omwlauncher" DESTINATION "${BINDIR}" )
-    ENDIF(BUILD_LAUNCHER)
-        IF(BUILD_BSATOOL)
-        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/bsatool" DESTINATION "${BINDIR}" )
-            ENDIF(BUILD_BSATOOL)
-    IF(BUILD_ESMTOOL)
-        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/esmtool" DESTINATION "${BINDIR}" )
-    ENDIF(BUILD_ESMTOOL)
-    IF(BUILD_MWINIIMPORTER)
-        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/mwiniimport" DESTINATION "${BINDIR}" )
-    ENDIF(BUILD_MWINIIMPORTER)
-    IF(BUILD_OPENCS)
-        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/opencs" DESTINATION "${BINDIR}" )
-    ENDIF(BUILD_OPENCS)
-
-    # Install icon and .desktop
-    INSTALL(FILES "${OpenMW_SOURCE_DIR}/files/launcher/images/openmw.png" DESTINATION "${ICONDIR}")
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.desktop" DESTINATION "${DATAROOTDIR}/applications")
-
-    # Install global configuration files
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "${SYSCONFDIR}" RENAME "openmw.cfg" )
-    #INSTALL(FILES "${OpenMW_BINARY_DIR}/plugins.cfg" DESTINATION "${SYSCONFDIR}" )
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/settings-default.cfg" DESTINATION "${SYSCONFDIR}" )
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/transparency-overrides.cfg" DESTINATION "${SYSCONFDIR}" )
-
-    # Install resources
-    INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION "${DATADIR}" )
-endif(NOT WIN32 AND NOT DPKG_PROGRAM AND NOT APPLE)

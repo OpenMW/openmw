@@ -91,7 +91,7 @@ MWDialogue::SelectWrapper::Function MWDialogue::SelectWrapper::decodeFunction() 
         case 66: return Function_FriendlyHit;
         case 67: case 68: case 69: case 70: return Function_AiSetting;
         case 71: return Function_ShouldAttack;
-        case 72: return Function_PCWerewolf;
+        case 72: return Function_Werewolf;
         case 73: return Function_WerewolfKills;
     }
 
@@ -112,12 +112,12 @@ MWDialogue::SelectWrapper::Function MWDialogue::SelectWrapper::getFunction() con
         case '4': return Function_Journal;
         case '5': return Function_Item;
         case '6': return Function_Dead;
-        case '7': return Function_Id;
-        case '8': return Function_Faction;
-        case '9': return Function_Class;
-        case 'A': return Function_Race;
-        case 'B': return Function_Cell;
-        case 'C': return Function_Local;
+        case '7': return Function_NotId;
+        case '8': return Function_NotFaction;
+        case '9': return Function_NotClass;
+        case 'A': return Function_NotRace;
+        case 'B': return Function_NotCell;
+        case 'C': return Function_NotLocal;
     }
 
     return Function_None;
@@ -219,7 +219,6 @@ MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
     static const Function booleanFunctions[] =
     {
         Function_False,
-        Function_Id, Function_Faction, Function_Class, Function_Race, Function_Cell,
         Function_SameGender, Function_SameRace, Function_SameFaction,
         Function_PcCommonDisease, Function_PcBlightDisease, Function_PcCorprus,
         Function_PcExpelled,
@@ -227,7 +226,14 @@ MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
         Function_Alarmed, Function_Detected,
         Function_Attacked, Function_ShouldAttack,
         Function_CreatureTargetted,
-        Function_PCWerewolf,
+        Function_Werewolf,
+        Function_None // end marker
+    };
+
+    static const Function invertedBooleanFunctions[] =
+    {
+        Function_NotId, Function_NotFaction, Function_NotClass,
+        Function_NotRace, Function_NotCell, Function_NotLocal,
         Function_None // end marker
     };
 
@@ -245,21 +251,18 @@ MWDialogue::SelectWrapper::Type MWDialogue::SelectWrapper::getType() const
         if (booleanFunctions[i]==function)
             return Type_Boolean;
 
+    for (int i=0; invertedBooleanFunctions[i]!=Function_None; ++i)
+        if (invertedBooleanFunctions[i]==function)
+            return Type_Inverted;
+
     return Type_None;
-}
-
-bool MWDialogue::SelectWrapper::isInverted() const
-{
-    char type = mSelect.mSelectRule[1];
-
-    return type=='7' || type=='8' || type=='9' || type=='A' || type=='B' || type=='C';
 }
 
 bool MWDialogue::SelectWrapper::isNpcOnly() const
 {
     static const Function functions[] =
     {
-        Function_Faction, SelectWrapper::Function_Class, SelectWrapper::Function_Race,
+        Function_NotFaction, Function_NotClass, Function_NotRace,
         Function_SameGender, Function_SameRace, Function_SameFaction,
         Function_PcSkill,
         Function_PcExpelled,
@@ -267,7 +270,7 @@ bool MWDialogue::SelectWrapper::isNpcOnly() const
         Function_PcCrimeLevel,
         Function_RankRequirement,
         Function_Reputation, Function_FactionRankDiff,
-        Function_PCWerewolf, Function_WerewolfKills,
+        Function_Werewolf, Function_WerewolfKills,
         Function_RankLow, Function_RankHigh,
         Function_None // end marker
     };
@@ -283,17 +286,17 @@ bool MWDialogue::SelectWrapper::isNpcOnly() const
 
 bool MWDialogue::SelectWrapper::selectCompare (int value) const
 {
-    return selectCompareImp (mSelect, value)!=isInverted(); // logic XOR
+    return selectCompareImp (mSelect, value);
 }
 
 bool MWDialogue::SelectWrapper::selectCompare (float value) const
 {
-    return selectCompareImp (mSelect, value)!=isInverted(); // logic XOR
+    return selectCompareImp (mSelect, value);
 }
 
 bool MWDialogue::SelectWrapper::selectCompare (bool value) const
 {
-    return selectCompareImp (mSelect, static_cast<int> (value))!=isInverted(); // logic XOR
+    return selectCompareImp (mSelect, static_cast<int> (value));
 }
 
 std::string MWDialogue::SelectWrapper::getName() const

@@ -26,19 +26,10 @@ namespace MWClass
 {
     void Light::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
-        MWWorld::LiveCellRef<ESM::Light> *ref =
-            ptr.get<ESM::Light>();
-        assert (ref->mBase != NULL);
-
-        const std::string &model = ref->mBase->mModel;
-
-        MWRender::Objects& objects = renderingInterface.getObjects();
-        objects.insertBegin(ptr, ptr.getRefData().isEnabled(), false);
-
-        if (!model.empty())
-            objects.insertMesh(ptr, "meshes\\" + model, true);
-        else
-            objects.insertLight(ptr);
+        const std::string model = getModel(ptr);
+        if(!model.empty()) {
+            renderingInterface.getObjects().insertModel(ptr, model);
+        }
     }
 
     void Light::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
@@ -50,10 +41,12 @@ namespace MWClass
         const std::string &model = ref->mBase->mModel;
 
         if(!model.empty())
-            physics.addObject(ptr);
+            physics.addObject(ptr,ref->mBase->mData.mFlags & ESM::Light::Carry);
 
         if (!ref->mBase->mSound.empty())
-            MWBase::Environment::get().getSoundManager()->playSound3D(ptr, ref->mBase->mSound, 1.0, 1.0, MWBase::SoundManager::Play_Loop);
+            MWBase::Environment::get().getSoundManager()->playSound3D(ptr, ref->mBase->mSound, 1.0, 1.0,
+                                                                      MWBase::SoundManager::Play_TypeSfx,
+                                                                      MWBase::SoundManager::Play_Loop);
     }
 
     std::string Light::getModel(const MWWorld::Ptr &ptr) const
@@ -83,20 +76,14 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Light::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
-        if (!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
-            return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction ());
+        if(!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
+            return boost::shared_ptr<MWWorld::Action>(new MWWorld::NullAction());
 
-        MWWorld::LiveCellRef<ESM::Light> *ref =
-            ptr.get<ESM::Light>();
+        MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
+        if(!(ref->mBase->mData.mFlags&ESM::Light::Carry))
+            return boost::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction());
 
-        if (!(ref->mBase->mData.mFlags & ESM::Light::Carry))
-            return boost::shared_ptr<MWWorld::Action> (new MWWorld::FailedAction);
-
-        boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTake (ptr));
-
-        action->setSound(getUpSoundId(ptr));
-
-        return action;
+        return defaultItemActivate(ptr, actor);
     }
 
     std::string Light::getScript (const MWWorld::Ptr& ptr) const
@@ -202,5 +189,40 @@ namespace MWClass
             ptr.get<ESM::Light>();
 
         return MWWorld::Ptr(&cell.mLights.insert(*ref), &cell);
+    }
+
+    bool Light::canSell (const MWWorld::Ptr& item, int npcServices) const
+    {
+        return npcServices & ESM::NPC::Lights;
+    }
+
+    float Light::getWeight(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Light> *ref =
+            ptr.get<ESM::Light>();
+        return ref->mBase->mData.mWeight;
+    }
+
+    std::pair<int, std::string> Light::canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const
+    {
+        MWWorld::InventoryStore& invStore = MWWorld::Class::get(npc).getInventoryStore(npc);
+        MWWorld::ContainerStoreIterator weapon = invStore.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+
+        if(weapon == invStore.end())
+            return std::make_pair(1,"");
+
+        /// \todo the 2h check is repeated many times; put it in a function
+        if(weapon->getTypeName() == typeid(ESM::Weapon).name() &&
+                (weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::LongBladeTwoHand ||
+        weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::BluntTwoClose ||
+        weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::BluntTwoWide ||
+        weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::SpearTwoWide ||
+        weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::AxeTwoHand ||
+        weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanBow ||
+        weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanCrossbow))
+        {
+            return std::make_pair(3,"");
+        }
+        return std::make_pair(1,"");
     }
 }

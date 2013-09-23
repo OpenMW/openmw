@@ -1,7 +1,7 @@
 #ifndef MWGUI_SETTINGS_H
 #define MWGUI_SETTINGS_H
 
-#include "window_base.hpp"
+#include "windowbase.hpp"
 
 namespace MWGui
 {
@@ -13,7 +13,7 @@ namespace MWGui
     class SettingsWindow : public WindowBase
     {
         public:
-            SettingsWindow(MWBase::WindowManager& parWindowManager);
+            SettingsWindow();
 
             virtual void open();
 
@@ -32,6 +32,7 @@ namespace MWGui
             MyGUI::ScrollBar* mToolTipDelaySlider;
             MyGUI::Button* mSubtitlesButton;
             MyGUI::Button* mCrosshairButton;
+            MyGUI::Button* mBestAttackButton;
 
             // graphics
             MyGUI::ListBox* mResolutionList;
@@ -58,7 +59,7 @@ namespace MWGui
             MyGUI::Button* mActorShadows;
             MyGUI::Button* mStaticsShadows;
             MyGUI::Button* mMiscShadows;
-            MyGUI::Button* mShadowsDebug;
+            MyGUI::Button* mTerrainShadows;
 
             // audio
             MyGUI::ScrollBar* mMasterVolumeSlider;
@@ -71,7 +72,6 @@ namespace MWGui
             MyGUI::ScrollView* mControlsBox;
             MyGUI::Button* mResetControlsButton;
             MyGUI::Button* mInvertYButton;
-            MyGUI::ScrollBar* mUISensitivitySlider;
             MyGUI::ScrollBar* mCameraSensitivitySlider;
 
             void onOkButtonClicked(MyGUI::Widget* _sender);

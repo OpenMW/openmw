@@ -1,18 +1,21 @@
 #ifndef CSM_WOLRD_IDTABLE_H
 #define CSM_WOLRD_IDTABLE_H
 
-#include <QAbstractTableModel>
+#include <QAbstractItemModel>
+
+#include "universalid.hpp"
+#include "columns.hpp"
 
 namespace CSMWorld
 {
-    class IdCollectionBase;
+    class CollectionBase;
     class RecordBase;
 
-    class IdTable : public QAbstractTableModel
+    class IdTable : public QAbstractItemModel
     {
             Q_OBJECT
 
-            IdCollectionBase *mIdCollection;
+            CollectionBase *mIdCollection;
 
             // not implemented
             IdTable (const IdTable&);
@@ -20,7 +23,7 @@ namespace CSMWorld
 
         public:
 
-            IdTable (IdCollectionBase *idCollection);
+            IdTable (CollectionBase *idCollection);
             ///< The ownership of \a idCollection is not transferred.
 
             virtual ~IdTable();
@@ -39,14 +42,27 @@ namespace CSMWorld
 
             virtual bool removeRows (int row, int count, const QModelIndex& parent = QModelIndex());
 
-            void addRecord (const std::string& id);
+            virtual QModelIndex index (int row, int column, const QModelIndex& parent = QModelIndex())
+                const;
+
+            virtual QModelIndex parent (const QModelIndex& index) const;
+
+            void addRecord (const std::string& id, UniversalId::Type type = UniversalId::Type_None);
+            ///< \param type Will be ignored, unless the collection supports multiple record types
 
             QModelIndex getModelIndex (const std::string& id, int column) const;
 
-            void setRecord (const RecordBase& record);
+            void setRecord (const std::string& id, const RecordBase& record);
             ///< Add record or overwrite existing recrod.
 
             const RecordBase& getRecord (const std::string& id) const;
+
+            int searchColumnIndex (Columns::ColumnId id) const;
+            ///< Return index of column with the given \a id. If no such column exists, -1 is returned.
+
+            int findColumnIndex (Columns::ColumnId id) const;
+            ///< Return index of column with the given \a id. If no such column exists, an exception is
+            /// thrown.
     };
 }
 

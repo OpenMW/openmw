@@ -21,6 +21,7 @@ namespace MWWorld
         virtual void load(ESM::ESMReader &esm, const std::string &id) = 0;
 
         virtual bool eraseStatic(const std::string &id) {return false;}
+        virtual void clearDynamic() {}
     };
 
     template <class T>
@@ -48,7 +49,7 @@ namespace MWWorld
 
         SharedIterator operator++(int) {
             SharedIterator iter = *this;
-            mIter++;
+            ++mIter;
 
             return iter;
         }
@@ -60,7 +61,7 @@ namespace MWWorld
 
         SharedIterator operator--(int) {
             SharedIterator iter = *this;
-            mIter--;
+            --mIter;
 
             return iter;
         }
@@ -92,6 +93,24 @@ namespace MWWorld
         std::map<std::string, T> mDynamic;
 
         typedef std::map<std::string, T> Dynamic;
+        typedef std::map<std::string, T> Static;
+
+        class GetRecords {
+            const std::string mFind;
+            std::vector<const T*> *mRecords;
+
+        public:
+            GetRecords(const std::string &str, std::vector<const T*> *records)
+              : mFind(Misc::StringUtils::lowerCase(str)), mRecords(records)
+            { }
+
+            void operator()(const T *item)
+            {
+                if(Misc::StringUtils::ciCompareLen(mFind, item->mId, mFind.size()) == 0)
+                    mRecords->push_back(item);
+            }
+        };
+
 
         friend class ESMStore;
 
@@ -104,6 +123,13 @@ namespace MWWorld
         {}
 
         typedef SharedIterator<T> iterator;
+
+        // setUp needs to be called again after
+        virtual void clearDynamic()
+        {
+            mDynamic.clear();
+            mShared.clear();
+        }
 
         const T *search(const std::string &id) const {
             T item;
@@ -123,11 +149,35 @@ namespace MWWorld
             return 0;
         }
 
+        /** Returns a random record that starts with the named ID, or NULL if not found. */
+        const T *searchRandom(const std::string &id) const
+        {
+            std::vector<const T*> results;
+            std::for_each(mShared.begin(), mShared.end(), GetRecords(id, &results));
+            if(!results.empty())
+                return results[int(std::rand()/((double)RAND_MAX+1)*results.size())];
+            return NULL;
+        }
+
         const T *find(const std::string &id) const {
             const T *ptr = search(id);
             if (ptr == 0) {
                 std::ostringstream msg;
                 msg << "Object '" << id << "' not found (const)";
+                throw std::runtime_error(msg.str());
+            }
+            return ptr;
+        }
+
+        /** Returns a random record that starts with the named ID. An exception is thrown if none
+         * are found. */
+        const T *findRandom(const std::string &id) const
+        {
+            const T *ptr = searchRandom(id);
+            if(ptr == 0)
+            {
+                std::ostringstream msg;
+                msg << "Object starting with '"<<id<<"' not found (const)";
                 throw std::runtime_error(msg.str());
             }
             return ptr;
@@ -182,6 +232,20 @@ namespace MWWorld
             }
             return ptr;
         }
+
+        T *insertStatic(const T &item) {
+            std::string id = Misc::StringUtils::lowerCase(item.mId);
+            std::pair<typename Static::iterator, bool> result =
+                mStatic.insert(std::pair<std::string, T>(id, item));
+            T *ptr = &result.first->second;
+            if (result.second) {
+                mShared.push_back(ptr);
+            } else {
+                *ptr = item;
+            }
+            return ptr;
+        }
+
 
         bool eraseStatic(const std::string &id) {
             T item;
@@ -248,6 +312,14 @@ namespace MWWorld
         scpt.load(esm);
         Misc::StringUtils::toLower(scpt.mId);
         mStatic[scpt.mId] = scpt;
+    }
+
+    template <>
+    inline void Store<ESM::StartScript>::load(ESM::ESMReader &esm, const std::string &id) {
+        ESM::StartScript s;
+        s.load(esm);
+        s.mId = Misc::StringUtils::toLower(s.mScript);
+        mStatic[s.mId] = s;
     }
 
     template <>
@@ -394,6 +466,18 @@ namespace MWWorld
             ESM::Land *ptr = new ESM::Land();
             ptr->load(esm);
 
+            // Same area defined in multiple plugins? -> last plugin wins
+            // Can't use search() because we aren't sorted yet - is there any other way to speed this up?
+            for (std::vector<ESM::Land*>::iterator it = mStatic.begin(); it != mStatic.end(); ++it)
+            {
+                if ((*it)->mX == ptr->mX && (*it)->mY == ptr->mY)
+                {
+                    delete *it;
+                    mStatic.erase(it);
+                    break;
+                }
+            }
+
             mStatic.push_back(ptr);
         }
 
@@ -415,8 +499,18 @@ namespace MWWorld
             }
         };
 
-        typedef std::map<std::string, ESM::Cell>            DynamicInt;
-        typedef std::map<std::pair<int, int>, ESM::Cell>    DynamicExt;
+        struct DynamicExtCmp
+        {
+            bool operator()(const std::pair<int, int> &left, const std::pair<int, int> &right) const {
+                if (left.first == right.first) {
+                    return left.second < right.second;
+                }
+                return left.first < right.first;
+            }
+        };
+
+        typedef std::map<std::string, ESM::Cell>                           DynamicInt;
+        typedef std::map<std::pair<int, int>, ESM::Cell, DynamicExtCmp>    DynamicExt;
 
         DynamicInt      mInt;
         DynamicExt      mExt;
@@ -465,7 +559,7 @@ namespace MWWorld
             cell.mData.mX = x, cell.mData.mY = y;
 
             std::pair<int, int> key(x, y);
-            std::map<std::pair<int, int>, ESM::Cell>::const_iterator it = mExt.find(key);
+            DynamicExt::const_iterator it = mExt.find(key);
             if (it != mExt.end()) {
                 return &(it->second);
             }
@@ -483,7 +577,7 @@ namespace MWWorld
             cell.mData.mX = x, cell.mData.mY = y;
 
             std::pair<int, int> key(x, y);
-            std::map<std::pair<int, int>, ESM::Cell>::const_iterator it = mExt.find(key);
+            DynamicExt::const_iterator it = mExt.find(key);
             if (it != mExt.end()) {
                 return &(it->second);
             }
@@ -524,7 +618,7 @@ namespace MWWorld
 
         void setUp() {
             //typedef std::vector<ESM::Cell>::iterator Iterator;
-            typedef std::map<std::pair<int, int>, ESM::Cell>::iterator ExtIterator;
+            typedef DynamicExt::iterator ExtIterator;
             typedef std::map<std::string, ESM::Cell>::iterator IntIterator;
 
             //std::sort(mInt.begin(), mInt.end(), RecordCmp());
@@ -862,7 +956,28 @@ namespace MWWorld
         }
 
         void setUp() {
-            std::sort(mStatic.begin(), mStatic.end(), Compare());
+            /// \note This method sorts indexed values for further
+            /// searches. Every loaded item is present in storage, but
+            /// latest loaded shadows any previous while searching.
+            /// If memory cost will be too high, it is possible to remove
+            /// unused values.
+
+            Compare cmp;
+
+            std::stable_sort(mStatic.begin(), mStatic.end(), cmp);
+
+            typename std::vector<T>::iterator first, next;
+            next = first = mStatic.begin();
+
+            while (first != mStatic.end() && ++next != mStatic.end()) {
+                while (next != mStatic.end() && !cmp(*first, *next)) {
+                    ++next;
+                }
+                if (first != --next) {
+                    std::swap(*first, *next);
+                }
+                first = ++next;
+            }
         }
 
         const T *search(int index) const {

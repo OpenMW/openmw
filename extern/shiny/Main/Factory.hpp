@@ -3,6 +3,7 @@
 
 #include <map>
 #include <string>
+#include <sstream>
 
 #include "MaterialInstance.hpp"
 #include "ShaderSet.hpp"
@@ -12,9 +13,21 @@ namespace sh
 {
 	class Platform;
 
+	class Configuration : public PropertySetGet
+	{
+	public:
+		void setSourceFile (const std::string& file) { mSourceFile = file ; }
+		std::string getSourceFile () { return mSourceFile; }
+
+		void save(const std::string& name, std::ofstream &stream);
+
+	private:
+		std::string mSourceFile;
+	};
+
 	typedef std::map<std::string, MaterialInstance> MaterialMap;
 	typedef std::map<std::string, ShaderSet> ShaderSetMap;
-	typedef std::map<std::string, PropertySetGet> ConfigurationMap;
+	typedef std::map<std::string, Configuration> ConfigurationMap;
 	typedef std::map<int, PropertySetGet> LodConfigurationMap;
 	typedef std::map<std::string, int> LastModifiedMap;
 
@@ -81,8 +94,8 @@ namespace sh
 		/// Get a MaterialInstance by name
 		MaterialInstance* getMaterialInstance (const std::string& name);
 
-		/// Register a configuration, which can then be used by switching the active material scheme
-		void registerConfiguration (const std::string& name, PropertySetGet configuration);
+		/// Create a configuration, which can then be altered by using Factory::getConfiguration
+		void createConfiguration (const std::string& name);
 
 		/// Register a lod configuration, which can then be used by setting up lod distance values for the material \n
 		/// 0 refers to highest lod, so use 1 or higher as index parameter
@@ -125,8 +138,48 @@ namespace sh
 		/// \note The default is off (no cache reading)
 		void setReadMicrocodeCache(bool read) { mReadMicrocodeCache = read; }
 
-		/// Saves all the materials that were initially loaded from the file with this name
-		void saveMaterials (const std::string& filename);
+		/// Lists all materials currently registered with the factory. Whether they are
+		/// loaded or not does not matter.
+		void listMaterials (std::vector<std::string>& out);
+
+		/// Lists current name & value of all global settings.
+		void listGlobalSettings (std::map<std::string, std::string>& out);
+
+		/// Lists configuration names.
+		void listConfigurationNames (std::vector<std::string>& out);
+
+		/// Lists current name & value of settings for a given configuration.
+		void listConfigurationSettings (const std::string& name, std::map<std::string, std::string>& out);
+
+		/// Lists shader sets.
+		void listShaderSets (std::vector<std::string>& out);
+
+		/// \note This only works if microcode caching is disabled, as there is currently no way to remove the cache
+		/// through the Ogre API. Luckily, this is already fixed in Ogre 1.9.
+		bool reloadShaders();
+
+		/// Calls reloadShaders() if shader files have been modified since the last reload.
+		/// \note This only works if microcode caching is disabled, as there is currently no way to remove the cache
+		/// through the Ogre API. Luckily, this is already fixed in Ogre 1.9.
+		void doMonitorShaderFiles();
+
+		/// Unloads all materials that are currently not referenced. This will not unload the textures themselves,
+		/// but it will let go of the SharedPtr's to the textures, so that you may unload them if you so desire. \n
+		/// A good time to call this would be after a new level has been loaded, but just calling it occasionally after a period
+		/// of time should work just fine too.
+		void unloadUnreferencedMaterials();
+
+		void destroyConfiguration (const std::string& name);
+
+		void notifyConfigurationChanged();
+
+		/// Saves all materials and configurations, by default to the file they were loaded from.
+		/// If you wish to save them elsewhere, use setSourceFile first.
+		void saveAll ();
+
+		/// Returns the error log as a string, then clears it.
+		/// Note: Errors are also written to the standard error output, or thrown if they are fatal.
+		std::string getErrorLog ();
 
 		static Factory& getInstance();
 		///< Return instance of this class.
@@ -137,11 +190,13 @@ namespace sh
 		/// You will probably never have to use this.
 		void _ensureMaterial(const std::string& name, const std::string& configuration);
 
+
+		Configuration* getConfiguration (const std::string& name);
+
 	private:
 
 		MaterialInstance* requestMaterial (const std::string& name, const std::string& configuration, unsigned short lodIndex);
 		ShaderSet* getShaderSet (const std::string& name);
-		PropertySetGet* getConfiguration (const std::string& name);
 		Platform* getPlatform ();
 
 		PropertySetGet* getCurrentGlobalSettings();
@@ -163,6 +218,8 @@ namespace sh
 
 		std::map<TextureUnitState*, std::string> mTextureAliasInstances;
 
+		void logError (const std::string& msg);
+
 		friend class Platform;
 		friend class MaterialInstance;
 		friend class ShaderInstance;
@@ -179,6 +236,7 @@ namespace sh
 		bool mWriteMicrocodeCache;
 		bool mReadSourceCache;
 		bool mWriteSourceCache;
+		std::stringstream mErrorLog;
 
 		MaterialMap mMaterials;
 		ShaderSetMap mShaderSets;

@@ -28,11 +28,21 @@ namespace MWMechanics
         AiSequence mAiSequence;
         float mLevelHealthBonus;
         bool mDead;
+        bool mDied;
         int mFriendlyHits;
         bool mTalkedTo;
         bool mAlarmed;
         bool mAttacked;
         bool mHostile;
+        bool mAttackingOrSpell;//for the player, this is true if the left mouse button is pressed, false if not.
+
+        int mAttackType;
+
+        std::string mLastHitObject; // The last object to hit this actor
+
+    protected:
+        bool mIsWerewolf;
+        Stat<int> mWerewolfAttributes[8];
 
     public:
         CreatureStats();
@@ -52,6 +62,8 @@ namespace MWMechanics
         const ActiveSpells & getActiveSpells() const;
 
         const MagicEffects & getMagicEffects() const;
+
+        bool getAttackingOrSpell() const;
 
         int getLevel() const;
 
@@ -82,6 +94,17 @@ namespace MWMechanics
 
         void setMagicEffects(const MagicEffects &effects);
 
+        void setAttackingOrSpell(bool attackingOrSpell);
+
+        enum AttackType
+        {
+            AT_Slash,
+            AT_Thrust,
+            AT_Chop
+        };
+        void setAttackType(int attackType) { mAttackType = attackType; }
+        int getAttackType() { return mAttackType; }
+
         void setLevel(int level);
 
         void setAiSetting (int index, int value);
@@ -94,11 +117,19 @@ namespace MWMechanics
         float getFatigueTerm() const;
         ///< Return effective fatigue
 
-        // small hack to allow the fact that Health permanently increases by 10% of endurance on each level up
-        void increaseLevelHealthBonus(float value);
         float getLevelHealthBonus() const;
 
+        void levelUp();
+
+        void updateHealth();
+        ///< Calculate health based on endurance and strength.
+        ///  Called at character creation and at level up.
+
         bool isDead() const;
+
+        bool hasDied() const;
+
+        void clearHasDied();
 
         void resurrect();
 
@@ -130,6 +161,11 @@ namespace MWMechanics
         void setHostile (bool hostile);
 
         bool getCreatureTargetted() const;
+
+        float getEvasion() const;
+
+        void setLastHitObject(const std::string &objectid);
+        const std::string &getLastHitObject() const;
     };
 }
 

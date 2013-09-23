@@ -22,13 +22,18 @@
 
 namespace MWClass
 {
+    std::string Weapon::getId (const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Weapon> *ref = ptr.get<ESM::Weapon>();
+
+        return ref->mBase->mId;
+    }
+
     void Weapon::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
         const std::string model = getModel(ptr);
         if (!model.empty()) {
-            MWRender::Objects& objects = renderingInterface.getObjects();
-            objects.insertBegin(ptr, ptr.getRefData().isEnabled(), false);
-            objects.insertMesh(ptr, model);
+            renderingInterface.getObjects().insertModel(ptr, model);
         }
     }
 
@@ -36,7 +41,7 @@ namespace MWClass
     {
         const std::string model = getModel(ptr);
         if(!model.empty())
-            physics.addObject(ptr);
+            physics.addObject(ptr,true);
     }
 
     std::string Weapon::getModel(const MWWorld::Ptr &ptr) const
@@ -63,19 +68,15 @@ namespace MWClass
     boost::shared_ptr<MWWorld::Action> Weapon::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
-        if (!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
-            return boost::shared_ptr<MWWorld::Action> (new MWWorld::NullAction ());
-
-        boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTake (ptr));
-
-        action->setSound(getUpSoundId(ptr));
-
-        return action;
+        return defaultItemActivate(ptr, actor);
     }
 
     bool Weapon::hasItemHealth (const MWWorld::Ptr& ptr) const
     {
-        return true;
+        MWWorld::LiveCellRef<ESM::Weapon> *ref =
+            ptr.get<ESM::Weapon>();
+
+        return (ref->mBase->mData.mType < 11); // thrown weapons and arrows/bolts don't have health, only quantity
     }
 
     int Weapon::getItemMaxHealth (const MWWorld::Ptr& ptr) const
@@ -334,14 +335,20 @@ namespace MWClass
             }
         }
 
-        /// \todo store the current weapon health somewhere
         if (ref->mBase->mData.mType < 11) // thrown weapons and arrows/bolts don't have health, only quantity
-            text += "\n#{sCondition}: " + MWGui::ToolTips::toString(ref->mBase->mData.mHealth);
+        {
+            int remainingHealth = (ptr.getCellRef().mCharge != -1) ? ptr.getCellRef().mCharge : ref->mBase->mData.mHealth;
+            text += "\n#{sCondition}: " + MWGui::ToolTips::toString(remainingHealth) + "/"
+                    + MWGui::ToolTips::toString(ref->mBase->mData.mHealth);
+        }
 
         text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight);
         text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");
 
         info.enchant = ref->mBase->mEnchant;
+
+        if (!info.enchant.empty())
+            info.remainingEnchantCharge = ptr.getCellRef().mEnchantmentCharge;
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
             text += MWGui::ToolTips::getMiscString(ref->mRef.mOwner, "Owner");
@@ -361,6 +368,46 @@ namespace MWClass
         return ref->mBase->mEnchant;
     }
 
+    void Weapon::applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
+    {
+            MWWorld::LiveCellRef<ESM::Weapon> *ref =
+            ptr.get<ESM::Weapon>();
+
+            ESM::Weapon newItem = *ref->mBase;
+            newItem.mId="";
+            newItem.mName=newName;
+            newItem.mData.mEnchant=enchCharge;
+            newItem.mEnchant=enchId;
+            const ESM::Weapon *record = MWBase::Environment::get().getWorld()->createRecord (newItem);
+            ref->mBase = record;
+    }
+
+    std::pair<int, std::string> Weapon::canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const
+    {
+        std::pair<std::vector<int>, bool> slots = MWWorld::Class::get(ptr).getEquipmentSlots(ptr);
+
+        // equip the item in the first free slot
+        for (std::vector<int>::const_iterator slot=slots.first.begin();
+            slot!=slots.first.end(); ++slot)
+        {
+            if(*slot == MWWorld::InventoryStore::Slot_CarriedRight)
+            {
+                if(ptr.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::LongBladeTwoHand ||
+                ptr.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::BluntTwoClose || 
+                ptr.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::BluntTwoWide || 
+                ptr.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::SpearTwoWide ||
+                ptr.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::AxeTwoHand || 
+                ptr.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanBow || 
+                ptr.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanCrossbow)
+                {
+                    return std::make_pair (2, "");
+                }
+            }
+            return std::make_pair(1, "");
+        }
+        return std::make_pair (0, "");
+    }
+
     boost::shared_ptr<MWWorld::Action> Weapon::use (const MWWorld::Ptr& ptr) const
     {
         boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionEquip(ptr));
@@ -377,5 +424,25 @@ namespace MWClass
             ptr.get<ESM::Weapon>();
 
         return MWWorld::Ptr(&cell.mWeapons.insert(*ref), &cell);
+    }
+
+    float Weapon::getEnchantmentPoints (const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Weapon> *ref =
+                ptr.get<ESM::Weapon>();
+
+        return ref->mBase->mData.mEnchant/10.f;
+    }
+
+    bool Weapon::canSell (const MWWorld::Ptr& item, int npcServices) const
+    {
+        return npcServices & ESM::NPC::Weapon;
+    }
+
+    float Weapon::getWeight(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Weapon> *ref =
+            ptr.get<ESM::Weapon>();
+        return ref->mBase->mData.mWeight;
     }
 }

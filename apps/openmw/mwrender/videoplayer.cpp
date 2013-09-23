@@ -8,6 +8,7 @@
 
 #include <OgreRoot.h>
 #include <OgreHardwarePixelBuffer.h>
+#include <OgreRenderWindow.h>
 
 #include <boost/thread.hpp>
 
@@ -16,6 +17,7 @@
 #include "../mwbase/soundmanager.hpp"
 #include "../mwsound/sound_decoder.hpp"
 #include "../mwsound/sound.hpp"
+#include "../mwbase/inputmanager.hpp"
 
 #include "renderconst.hpp"
 
@@ -32,9 +34,24 @@ namespace MWRender
 
 extern "C"
 {
-#include <libavcodec/avcodec.h>
-#include <libavformat/avformat.h>
-#include <libswscale/swscale.h>
+    #include <libavcodec/avcodec.h>
+    #include <libavformat/avformat.h>
+    #include <libswscale/swscale.h>
+
+    // From libavformat version 55.0.100 and onward the declaration of av_gettime() is removed from libavformat/avformat.h and moved
+    // to libavutil/time.h
+    // https://github.com/FFmpeg/FFmpeg/commit/06a83505992d5f49846c18507a6c3eb8a47c650e
+    #if AV_VERSION_INT(55, 0, 100) <= AV_VERSION_INT(LIBAVFORMAT_VERSION_MAJOR, LIBAVFORMAT_VERSION_MINOR, LIBAVFORMAT_VERSION_MICRO)
+        #include <libavutil/time.h>
+    #endif
+
+    // From libavutil version 52.2.0 and onward the declaration of
+    // AV_CH_LAYOUT_* is removed from libavcodec/avcodec.h and moved to
+    // libavutil/channel_layout.h
+    #if AV_VERSION_INT(52, 2, 0) <= AV_VERSION_INT(LIBAVUTIL_VERSION_MAJOR, \
+        LIBAVUTIL_VERSION_MINOR, LIBAVUTIL_VERSION_MICRO)
+        #include <libavutil/channel_layout.h>
+    #endif
 }
 
 #define MAX_AUDIOQ_SIZE (5 * 16 * 1024)
@@ -788,8 +805,8 @@ void VideoState::decode_thread_loop(VideoState *self)
         // main decode loop
         while(!self->quit)
         {
-            if((self->audio_st >= 0 && self->audioq.size > MAX_AUDIOQ_SIZE) ||
-               (self->video_st >= 0 && self->videoq.size > MAX_VIDEOQ_SIZE))
+            if((self->audio_st && self->audioq.size > MAX_AUDIOQ_SIZE) ||
+               (self->video_st && self->videoq.size > MAX_VIDEOQ_SIZE))
             {
                 boost::this_thread::sleep(boost::posix_time::milliseconds(10));
                 continue;
@@ -1017,13 +1034,15 @@ public:
 #endif // defined OPENMW_USE_FFMPEG
 
 
-VideoPlayer::VideoPlayer(Ogre::SceneManager* sceneMgr)
+VideoPlayer::VideoPlayer(Ogre::SceneManager* sceneMgr, Ogre::RenderWindow* window)
     : mState(NULL)
     , mSceneMgr(sceneMgr)
-    , mVideoMaterial(NULL)
     , mRectangle(NULL)
     , mNode(NULL)
     , mAllowSkipping(false)
+    , mWindow(window)
+    , mWidth(0)
+    , mHeight(0)
 {
     mVideoMaterial = Ogre::MaterialManager::getSingleton().getByName("VideoMaterial", "General");
     if (mVideoMaterial.isNull ())
@@ -1114,6 +1133,14 @@ void VideoPlayer::playVideo(const std::string &resourceName, bool allowSkipping)
     try {
         mState = new VideoState;
         mState->init(resourceName);
+
+        while (isPlaying())
+        {
+            MWBase::Environment::get().getInputManager()->update(0, false);
+            update();
+            mWindow->update();
+        }
+
     }
     catch(std::exception& e) {
         std::cerr<< "Failed to play video: "<<e.what() <<std::endl;

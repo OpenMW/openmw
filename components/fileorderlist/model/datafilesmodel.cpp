@@ -1,4 +1,3 @@
-#include <QDebug>
 #include <QTextDecoder>
 #include <QTextCodec>
 #include <QFileInfo>
@@ -11,6 +10,8 @@
 #include "esm/esmfile.hpp"
 
 #include "datafilesmodel.hpp"
+
+#include <QDebug>
 
 DataFilesModel::DataFilesModel(QObject *parent) :
     QAbstractTableModel(parent)
@@ -293,8 +294,8 @@ void DataFilesModel::addFiles(const QString &path)
             fileReader.setEncoder(&encoder);
             fileReader.open(dir.absoluteFilePath(path).toStdString());
 
+            std::vector<ESM::Header::MasterData> mlist = fileReader.getMasters();
 
-            ESM::ESMReader::MasterList mlist = fileReader.getMasters();
             QStringList masters;
 
             for (unsigned int i = 0; i < mlist.size(); ++i) {

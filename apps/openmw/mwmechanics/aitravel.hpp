@@ -3,6 +3,8 @@
 
 #include "aipackage.hpp"
 
+#include "pathfinding.hpp"
+
 namespace MWMechanics
 {
     class AiTravel : public AiPackage
@@ -21,6 +23,10 @@ namespace MWMechanics
             float mY;
             float mZ;
 
+            int cellX;
+            int cellY;
+
+            PathFinder mPathFinder;
     };
 }
 

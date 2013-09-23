@@ -52,7 +52,7 @@ namespace Compiler
         Literals& literals, std::vector<Interpreter::Type_Code>& code, bool allowExpression)
     : Parser (errorHandler, context), mLocals (locals), mLiterals (literals), mCode (code),
        mState (BeginState), mExprParser (errorHandler, context, locals, literals),
-       mAllowExpression (allowExpression)
+       mAllowExpression (allowExpression), mButtons(0), mType(0)
     {}
 
     bool LineParser::parseInt (int value, const TokenLoc& loc, Scanner& scanner)
@@ -98,10 +98,12 @@ namespace Compiler
 
             if (type!=' ')
             {
-                getErrorHandler().error ("catoLowern't re-declare local variable", loc);
+                /// \todo add option to make re-declared local variables an error
+                getErrorHandler().warning ("can't re-declare local variable", loc);
                 SkipParser skip (getErrorHandler(), getContext());
                 scanner.scan (skip);
-                return false;
+                mState = EndState;
+                return true;
             }
 
             mLocals.declare (mState==ShortState ? 's' : (mState==LongState ? 'l' : 'f'),
@@ -139,7 +141,7 @@ namespace Compiler
 
         if (mState==SetMemberVarState)
         {
-            mMemberName = Misc::StringUtils::lowerCase (name);
+            mMemberName = name;
             char type = getContext().getMemberType (mMemberName, mName);
 
             if (type!=' ')

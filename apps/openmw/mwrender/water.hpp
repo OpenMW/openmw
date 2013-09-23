@@ -41,7 +41,11 @@ namespace MWRender {
     {
     public:
         Reflection(Ogre::SceneManager* sceneManager)
-            :   mSceneMgr(sceneManager) {}
+            : mSceneMgr(sceneManager)
+            , mIsUnderwater(false)
+            , mCamera(NULL)
+            , mParentCamera(NULL)
+            {}
         virtual ~Reflection() {}
 
         virtual void setHeight (float height) {}

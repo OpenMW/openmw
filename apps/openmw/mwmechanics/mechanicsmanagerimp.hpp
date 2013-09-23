@@ -7,7 +7,7 @@
 
 #include "creaturestats.hpp"
 #include "npcstats.hpp"
-#include "activators.hpp"
+#include "objects.hpp"
 #include "actors.hpp"
 
 namespace Ogre
@@ -25,13 +25,12 @@ namespace MWMechanics
     class MechanicsManager : public MWBase::MechanicsManager
     {
             MWWorld::Ptr mWatched;
-            CreatureStats mWatchedCreature;
-            NpcStats mWatchedNpc;
+            NpcStats mWatchedStats;
             bool mUpdatePlayer;
             bool mClassSelected;
             bool mRaceSelected;
 
-            Activators mActivators;
+            Objects mObjects;
             Actors mActors;
 
             void buildPlayer();
@@ -96,8 +95,11 @@ namespace MWMechanics
             void toLower(std::string npcFaction);
             ///< Perform a persuasion action on NPC
 
+        virtual void forceStateUpdate(const MWWorld::Ptr &ptr);
+
         virtual void playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number);
         virtual void skipAnimation(const MWWorld::Ptr& ptr);
+        virtual bool checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string &groupName);
     };
 }
 

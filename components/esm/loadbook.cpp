@@ -27,4 +27,18 @@ void Book::save(ESMWriter &esm)
     esm.writeHNOCString("ENAM", mEnchant);
 }
 
+    void Book::blank()
+    {
+        mData.mWeight = 0;
+        mData.mValue = 0;
+        mData.mIsScroll = 0;
+        mData.mSkillID = 0;
+        mData.mEnchant = 0;
+        mName.clear();
+        mModel.clear();
+        mIcon.clear();
+        mScript.clear();
+        mEnchant.clear();
+        mText.clear();
+    }
 }

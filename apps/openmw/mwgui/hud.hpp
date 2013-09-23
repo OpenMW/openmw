@@ -1,6 +1,4 @@
-#include "map_window.hpp"
-
-#include <openengine/gui/layout.hpp>
+#include "mapwindow.hpp"
 
 #include "../mwmechanics/stat.hpp"
 #include "../mwworld/ptr.hpp"
@@ -20,9 +18,15 @@ namespace MWGui
         void setTriangleCount(unsigned int count);
         void setBatchCount(unsigned int count);
 
+        /// Set time left for the player to start drowning
+        /// @param time value from [0,20]
+        void setDrowningTimeLeft(float time);
+        void setDrowningBarVisible(bool visible);
+
         void setHmsVisible(bool visible);
         void setWeapVisible(bool visible);
         void setSpellVisible(bool visible);
+        void setSneakVisible(bool visible);
 
         void setEffectVisible(bool visible);
         void setMinimapVisible(bool visible);
@@ -48,12 +52,14 @@ namespace MWGui
 
         void update();
 
+        void setEnemy(const MWWorld::Ptr& enemy);
+
     private:
-        MyGUI::ProgressPtr mHealth, mMagicka, mStamina;
+        MyGUI::ProgressBar *mHealth, *mMagicka, *mStamina, *mEnemyHealth, *mDrowning;
         MyGUI::Widget* mHealthFrame;
-        MyGUI::Widget *mWeapBox, *mSpellBox;
+        MyGUI::Widget *mWeapBox, *mSpellBox, *mSneakBox;
         MyGUI::ImageBox *mWeapImage, *mSpellImage;
-        MyGUI::ProgressPtr mWeapStatus, mSpellStatus;
+        MyGUI::ProgressBar *mWeapStatus, *mSpellStatus;
         MyGUI::Widget *mEffectBox, *mMinimapBox;
         MyGUI::Button* mMinimapButton;
         MyGUI::ScrollView* mMinimap;
@@ -61,6 +67,7 @@ namespace MWGui
         MyGUI::ImageBox* mCrosshair;
         MyGUI::TextBox* mCellNameBox;
         MyGUI::TextBox* mWeaponSpellBox;
+        MyGUI::Widget* mDrowningFrame;
 
         MyGUI::Widget* mDummy;
 
@@ -70,7 +77,7 @@ namespace MWGui
         MyGUI::TextBox* mBatchCounter;
 
         // bottom left elements
-        int mHealthManaStaminaBaseLeft, mWeapBoxBaseLeft, mSpellBoxBaseLeft;
+        int mHealthManaStaminaBaseLeft, mWeapBoxBaseLeft, mSpellBoxBaseLeft, mSneakBoxBaseLeft;
         // bottom right elements
         int mMinimapBoxBaseRight, mEffectBoxBaseRight;
 
@@ -90,6 +97,9 @@ namespace MWGui
         bool mWorldMouseOver;
 
         SpellIcons* mSpellIcons;
+
+        MWWorld::Ptr mEnemy;
+        float mEnemyHealthTimer;
 
         void onWorldClicked(MyGUI::Widget* _sender);
         void onWorldMouseOver(MyGUI::Widget* _sender, int x, int y);

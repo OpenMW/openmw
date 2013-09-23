@@ -2,6 +2,7 @@
 
 #include <components/files/configurationmanager.hpp>
 
+#include <SDL_main.h>
 #include "engine.hpp"
 
 #if defined(_WIN32) && !defined(_CONSOLE)
@@ -53,7 +54,7 @@ void validate(boost::any &v, std::vector<std::string> const &tokens, FallbackMap
     FallbackMap *map = boost::any_cast<FallbackMap>(&v);
 
     std::map<std::string,std::string>::iterator mapIt;
-    for(std::vector<std::string>::const_iterator it=tokens.begin(); it != tokens.end(); it++)
+    for(std::vector<std::string>::const_iterator it=tokens.begin(); it != tokens.end(); ++it)
     {
         int sep = it->find(",");
         if(sep < 1 || sep == (int)it->length()-1)
@@ -117,9 +118,6 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
         ("anim-verbose", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "output animation indices files")
-
-        ("debug", bpo::value<bool>()->implicit_value(true)
-            ->default_value(false), "debug mode")
 
         ("nosound", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "disable all sounds")
@@ -206,7 +204,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
     // fallback archives
     StringsVector archives = variables["fallback-archive"].as<StringsVector>();
-    for (StringsVector::const_iterator it = archives.begin(); it != archives.end(); it++)
+    for (StringsVector::const_iterator it = archives.begin(); it != archives.end(); ++it)
     {
         engine.addArchive(*it);
     }
@@ -217,8 +215,8 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     StringsVector master = variables["master"].as<StringsVector>();
     if (master.empty())
     {
-        std::cout << "No master file given. Assuming Morrowind.esm" << std::endl;
-        master.push_back("Morrowind");
+        std::cout << "No master file given. Aborting...\n";
+        return false;
     }
 
     StringsVector plugin = variables["plugin"].as<StringsVector>();
@@ -243,7 +241,6 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setNewGame(variables["new-game"].as<bool>());
 
     // other settings
-    engine.setDebugMode(variables["debug"].as<bool>());
     engine.setSoundUsage(!variables["nosound"].as<bool>());
     engine.setScriptsVerbosity(variables["script-verbose"].as<bool>());
     engine.setCompileAll(variables["script-all"].as<bool>());

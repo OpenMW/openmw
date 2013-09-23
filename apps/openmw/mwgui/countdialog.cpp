@@ -3,12 +3,12 @@
 #include <boost/lexical_cast.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 namespace MWGui
 {
-    CountDialog::CountDialog(MWBase::WindowManager& parWindowManager) :
-        WindowModal("openmw_count_window.layout", parWindowManager)
+    CountDialog::CountDialog() :
+        WindowModal("openmw_count_window.layout")
     {
         getWidget(mSlider, "CountSlider");
         getWidget(mItemEdit, "ItemEdit");
@@ -21,6 +21,8 @@ namespace MWGui
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &CountDialog::onOkButtonClicked);
         mItemEdit->eventEditTextChange += MyGUI::newDelegate(this, &CountDialog::onEditTextChange);
         mSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &CountDialog::onSliderMoved);
+        // make sure we read the enter key being pressed to accept multiple items
+        mItemEdit->eventEditSelectAccept += MyGUI::newDelegate(this, &CountDialog::onEnterKeyPressed);
     }
 
     void CountDialog::open(const std::string& item, const std::string& message, const int maxCount)
@@ -40,15 +42,21 @@ namespace MWGui
                 width,
                 mMainWidget->getHeight());
 
-        MyGUI::InputManager::getInstance().setKeyFocusWidget(mItemEdit);
+        // by default, the text edit field has the focus of the keyboard
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mItemEdit);
 
         mSlider->setScrollPosition(maxCount-1);
         mItemEdit->setCaption(boost::lexical_cast<std::string>(maxCount));
     }
 
-    void CountDialog::onCancelButtonClicked(MyGUI::Widget* _sender)
+    void CountDialog::cancel()
     {
         setVisible(false);
+    }
+
+    void CountDialog::onCancelButtonClicked(MyGUI::Widget* _sender)
+    {
+        cancel();
     }
 
     void CountDialog::onOkButtonClicked(MyGUI::Widget* _sender)
@@ -57,7 +65,16 @@ namespace MWGui
 
         setVisible(false);
     }
-
+    
+    // essentially duplicating what the OK button does if user presses
+    // Enter key
+    void CountDialog::onEnterKeyPressed(MyGUI::EditBox* _sender)
+    {
+        eventOkClicked(NULL, mSlider->getScrollPosition()+1);
+	
+        setVisible(false);
+    }
+    
     void CountDialog::onEditTextChange(MyGUI::EditBox* _sender)
     {
         if (_sender->getCaption() == "")

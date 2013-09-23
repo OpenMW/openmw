@@ -42,6 +42,18 @@ namespace MWMechanics
                 mBase = mModified = value;
             }
 
+            void modify(const T& diff)
+            {
+                mBase += diff;
+                if(mBase >= static_cast<T>(0))
+                    mModified += diff;
+                else
+                {
+                    mModified += diff - mBase;
+                    mBase = static_cast<T>(0);
+                }
+            }
+
             /// Set base and adjust modified accordingly.
             void setBase (const T& value)
             {
@@ -98,8 +110,8 @@ namespace MWMechanics
         public:
             typedef T Type;
 
-            DynamicStat() : mCurrent (0) {}
-            DynamicStat(T current) : mCurrent (current) {}
+            DynamicStat() : mStatic (0), mCurrent (0) {}
+            DynamicStat(T base) : mStatic (base), mCurrent (base) {}
             DynamicStat(T base, T modified, T current) : mStatic(base, modified), mCurrent (current) {}
             DynamicStat(const Stat<T> &stat, T current) : mStatic(stat), mCurrent (current) {}
 

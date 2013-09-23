@@ -603,8 +603,8 @@ namespace Compiler
 
             switch (code)
             {
-                case Scanner::S_plus: pushBinaryOperator ('+'); return true;
-                case Scanner::S_minus: pushBinaryOperator ('-'); return true;
+                case Scanner::S_plus: c = '+'; break;
+                case Scanner::S_minus: c = '-'; break;
                 case Scanner::S_mult: pushBinaryOperator ('*'); return true;
                 case Scanner::S_div: pushBinaryOperator ('/'); return true;
                 case Scanner::S_cmpEQ: c = 'e'; break;

@@ -21,9 +21,10 @@ namespace EsmTool
         std::string mId;
         int mFlags;
         ESM::NAME mType;
+        bool mPrintPlain;
 
     public:
-        RecordBase () {}
+        RecordBase () { mPrintPlain = false; }
         virtual ~RecordBase() {}
 
         const std::string &getId() const {
@@ -44,6 +45,14 @@ namespace EsmTool
 
         ESM::NAME getType() const {
             return mType;
+        }
+
+        bool getPrintPlain() const {
+        	return mPrintPlain;
+        }
+
+        void setPrintPlain(bool plain) {
+        	mPrintPlain = plain;
         }
 
         virtual void load(ESM::ESMReader &esm) = 0;
@@ -104,7 +113,7 @@ namespace EsmTool
     template<> void Record<ESM::CreatureLevList>::print();
     template<> void Record<ESM::ItemLevList>::print();
     template<> void Record<ESM::Light>::print();
-    template<> void Record<ESM::Tool>::print();
+    template<> void Record<ESM::Lockpick>::print();
     template<> void Record<ESM::Probe>::print();
     template<> void Record<ESM::Repair>::print();
     template<> void Record<ESM::LandTexture>::print();

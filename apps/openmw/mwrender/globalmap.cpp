@@ -10,6 +10,8 @@
 #include <OgreRoot.h>
 #include <OgreHardwarePixelBuffer.h>
 
+#include <components/loadinglistener/loadinglistener.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
@@ -22,11 +24,13 @@ namespace MWRender
         : mCacheDir(cacheDir)
         , mMinX(0), mMaxX(0)
         , mMinY(0), mMaxY(0)
+        , mWidth(0)
+        , mHeight(0)
     {
     }
 
 
-    void GlobalMap::render ()
+    void GlobalMap::render (Loading::Listener* loadingListener)
     {
         Ogre::TexturePtr tex;
 
@@ -51,13 +55,16 @@ namespace MWRender
         mWidth = cellSize*(mMaxX-mMinX+1);
         mHeight = cellSize*(mMaxY-mMinY+1);
 
+        loadingListener->loadingOn();
+        loadingListener->setLabel("Creating map");
+        loadingListener->setProgressRange((mMaxX-mMinX+1) * (mMaxY-mMinY+1));
+        loadingListener->setProgress(0);
+
         mExploredBuffer.resize((mMaxX-mMinX+1) * (mMaxY-mMinY+1) * 4);
 
         //if (!boost::filesystem::exists(mCacheDir + "/GlobalMap.png"))
         if (1)
         {
-            Ogre::Image image;
-
             std::vector<Ogre::uchar> data (mWidth * mHeight * 3);
 
             for (int x = mMinX; x <= mMaxX; ++x)
@@ -91,15 +98,13 @@ namespace MWRender
                             Ogre::ColourValue mountainColour(0.05, 0.05, 0.05);
                             Ogre::ColourValue hillColour(0.16, 0.12, 0.08);
 
-                            float mountainHeight = 15000.f;
-                            float hillHeight = 2500.f;
-
                             unsigned char r,g,b;
 
                             if (land)
                             {
-                                float landHeight = land->mLandData->mHeights[vertexY * ESM::Land::LAND_SIZE + vertexX];
-
+                                const float landHeight = land->mLandData->mHeights[vertexY * ESM::Land::LAND_SIZE + vertexX];
+                                const float mountainHeight = 15000.f;
+                                const float hillHeight = 2500.f;
 
                                 if (landHeight >= 0)
                                 {
@@ -144,24 +149,20 @@ namespace MWRender
                                 b = waterDeepColour.b * 255;
                             }
 
-                            // uncomment this line to outline cell borders
-                            //if (cellX == 0 || cellX == cellSize-1 || cellY == 0|| cellY == cellSize-1) r = 255;
-
                             data[texelY * mWidth * 3 + texelX * 3] = r;
                             data[texelY * mWidth * 3 + texelX * 3+1] = g;
                             data[texelY * mWidth * 3 + texelX * 3+2] = b;
                         }
                     }
+                    loadingListener->increaseProgress(1);
                 }
             }
 
-            image.loadDynamicImage (&data[0], mWidth, mHeight, Ogre::PF_B8G8R8);
-
-            //image.save (mCacheDir + "/GlobalMap.png");
+            Ogre::DataStreamPtr stream(new Ogre::MemoryDataStream(&data[0], data.size()));
 
             tex = Ogre::TextureManager::getSingleton ().createManual ("GlobalMap.png", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
                 Ogre::TEX_TYPE_2D, mWidth, mHeight, 0, Ogre::PF_B8G8R8, Ogre::TU_STATIC);
-            tex->loadImage(image);
+            tex->loadRawData(stream, mWidth, mHeight, Ogre::PF_B8G8R8);
         }
         else
             tex = Ogre::TextureManager::getSingleton ().getByName ("GlobalMap.png");
@@ -184,6 +185,8 @@ namespace MWRender
 
         memcpy(mOverlayTexture->getBuffer()->lock(Ogre::HardwareBuffer::HBL_DISCARD), &buffer[0], mWidth*mHeight*4);
         mOverlayTexture->getBuffer()->unlock();
+
+        loadingListener->loadingOff();
     }
 
     void GlobalMap::worldPosToImageSpace(float x, float z, float& imageX, float& imageY)

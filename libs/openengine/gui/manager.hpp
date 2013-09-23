@@ -9,6 +9,7 @@ namespace MyGUI
   class LogManager;
   class OgreDataManager;
   class OgreRenderManager;
+  class ShaderBasedRenderManager;
 }
 
 namespace Ogre
@@ -26,11 +27,11 @@ namespace GUI
         MyGUI::LogManager* mLogManager;
         MyGUI::OgreDataManager* mDataManager;
         MyGUI::OgreRenderManager* mRenderManager;
+        MyGUI::ShaderBasedRenderManager* mShaderRenderManager;
         Ogre::SceneManager* mSceneMgr;
 
 
     public:
-        MyGUIManager() : mLogManager(NULL), mDataManager(NULL), mRenderManager(NULL),  mGui(NULL) {}
         MyGUIManager(Ogre::RenderWindow *wnd, Ogre::SceneManager *mgr, bool logging=false, const std::string& logDir = std::string(""))
         {
             setup(wnd,mgr,logging, logDir);
@@ -41,6 +42,8 @@ namespace GUI
         }
 
         void updateWindow (Ogre::RenderWindow* wnd);
+
+        void windowResized();
 
         void setup(Ogre::RenderWindow *wnd, Ogre::SceneManager *mgr, bool logging=false, const std::string& logDir = std::string(""));
         void shutdown();

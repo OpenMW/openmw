@@ -56,7 +56,7 @@ void CSVDoc::Operations::quitOperation (int type)
 
             mLayout->removeItem ((*iter)->getLayout());
 
-            delete *iter;
+            (*iter)->deleteLater();
             mOperations.erase (iter);
 
             if (oldCount > 1)

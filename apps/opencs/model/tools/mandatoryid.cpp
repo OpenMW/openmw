@@ -1,9 +1,11 @@
 
 #include "mandatoryid.hpp"
 
-#include "../world/idcollection.hpp"
+#include "../world/collectionbase.hpp"
 
-CSMTools::MandatoryIdStage::MandatoryIdStage (const CSMWorld::IdCollectionBase& idCollection,
+#include "../world/record.hpp"
+
+CSMTools::MandatoryIdStage::MandatoryIdStage (const CSMWorld::CollectionBase& idCollection,
     const CSMWorld::UniversalId& collectionId, const std::vector<std::string>& ids)
 : mIdCollection (idCollection), mCollectionId (collectionId), mIds (ids)
 {}

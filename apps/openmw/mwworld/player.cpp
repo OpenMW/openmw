@@ -1,14 +1,17 @@
 
 #include "player.hpp"
 
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/windowmanager.hpp"
+#include "../mwbase/soundmanager.hpp"
+
+#include "../mwworld/ptr.hpp"
+#include "../mwworld/inventorystore.hpp"
 
 #include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/npcstats.hpp"
 
-#include "esmstore.hpp"
 #include "class.hpp"
 
 namespace MWWorld
@@ -25,10 +28,44 @@ namespace MWWorld
         playerPos[0] = playerPos[1] = playerPos[2] = 0;
     }
 
+    void Player::set(const ESM::NPC *player)
+    {
+        mPlayer.mBase = player;
+
+        float* playerPos = mPlayer.mData.getPosition().pos;
+        playerPos[0] = playerPos[1] = playerPos[2] = 0;
+    }
+
+    void Player::setCell (MWWorld::CellStore *cellStore)
+    {
+        mCellStore = cellStore;
+    }
+
+    MWWorld::Ptr Player::getPlayer()
+    {
+        MWWorld::Ptr ptr (&mPlayer, mCellStore);
+        return ptr;
+    }
+
+    void Player::setBirthSign (const std::string &sign)
+    {
+        mSign = sign;
+    }
+
+    const std::string& Player::getBirthSign() const
+    {
+        return mSign;
+    }
+
     void Player::setDrawState (MWMechanics::DrawState_ state)
     {
          MWWorld::Ptr ptr = getPlayer();
          MWWorld::Class::get(ptr).getNpcStats(ptr).setDrawState (state);
+    }
+
+    bool Player::getAutoMove() const
+    {
+        return mAutoMove;
     }
 
     void Player::setAutoMove (bool enable)
@@ -42,14 +79,14 @@ namespace MWWorld
         if (mAutoMove)
             value = 1;
 
-        MWWorld::Class::get (ptr).getMovementSettings (ptr).mForwardBackward = value;
+        MWWorld::Class::get (ptr).getMovementSettings (ptr).mPosition[1] = value;
     }
 
     void Player::setLeftRight (int value)
     {
         MWWorld::Ptr ptr = getPlayer();
 
-        MWWorld::Class::get (ptr).getMovementSettings (ptr).mLeftRight = value;
+        MWWorld::Class::get (ptr).getMovementSettings (ptr).mPosition[0] = value;
     }
 
     void Player::setForwardBackward (int value)
@@ -61,14 +98,14 @@ namespace MWWorld
         if (mAutoMove)
             value = 1;
 
-        MWWorld::Class::get (ptr).getMovementSettings (ptr).mForwardBackward = value;
+        MWWorld::Class::get (ptr).getMovementSettings (ptr).mPosition[1] = value;
     }
 
     void Player::setUpDown(int value)
     {
         MWWorld::Ptr ptr = getPlayer();
 
-        MWWorld::Class::get (ptr).getMovementSettings (ptr).mUpDown = value;
+        MWWorld::Class::get (ptr).getMovementSettings (ptr).mPosition[2] = value;
     }
 
     void Player::setRunState(bool run)
@@ -77,20 +114,30 @@ namespace MWWorld
         MWWorld::Class::get(ptr).setStance(ptr, MWWorld::Class::Run, run);
     }
 
-    void Player::toggleRunning()
-    {
-        MWWorld::Ptr ptr = getPlayer();
-
-        bool running = MWWorld::Class::get (ptr).getStance (ptr, MWWorld::Class::Run, true);
-
-        MWWorld::Class::get (ptr).setStance (ptr, MWWorld::Class::Run, !running);
-    }
-
     void Player::setSneak(bool sneak)
     {
         MWWorld::Ptr ptr = getPlayer();
 
         MWWorld::Class::get (ptr).setStance (ptr, MWWorld::Class::Sneak, sneak);
+
+        // TODO show sneak indicator only when the player is not detected by any actor
+        MWBase::Environment::get().getWindowManager()->setSneakVisibility(sneak);
+    }
+
+    void Player::yaw(float yaw)
+    {
+        MWWorld::Ptr ptr = getPlayer();
+        MWWorld::Class::get(ptr).getMovementSettings(ptr).mRotation[2] += yaw;
+    }
+    void Player::pitch(float pitch)
+    {
+        MWWorld::Ptr ptr = getPlayer();
+        MWWorld::Class::get(ptr).getMovementSettings(ptr).mRotation[0] += pitch;
+    }
+    void Player::roll(float roll)
+    {
+        MWWorld::Ptr ptr = getPlayer();
+        MWWorld::Class::get(ptr).getMovementSettings(ptr).mRotation[1] += roll;
     }
 
     MWMechanics::DrawState_ Player::getDrawState()
