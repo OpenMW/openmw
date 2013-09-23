@@ -67,7 +67,6 @@ void CSVDoc::FileDialog::slotEnableCreateButton(bool enable, int widgetNumber)
     if (widgetNumber == 2)
         mEnable_2 = enable;
 
-    qDebug() << "update enabled" << mEnable_1 << mEnable_2 << enable;
     projectCreateButton->setEnabled(mEnable_1 && mEnable_2);
 }
 
@@ -113,5 +112,5 @@ void CSVDoc::FileDialog::slotAdjusterChanged(bool value)
 
 void CSVDoc::FileDialog::slotGameFileSelected(int value)
 {
-        emit signalUpdateCreateButton(value > -1, 1);
+    emit signalUpdateCreateButton(value > -1, 1);
 }

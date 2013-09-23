@@ -42,7 +42,7 @@ namespace ContentSelectorModel
         void addFiles(const QString &path);
 
         QModelIndex indexFromItem(const EsmFile *item) const;
-        const EsmFile *findItem(const QString &name) const;
+        const EsmFile *item(const QString &name) const;
 
         bool isChecked(const QString &name) const;
         void setCheckState(const QString &name, bool isChecked);
@@ -54,6 +54,7 @@ namespace ContentSelectorModel
         void addFile(EsmFile *file);
         const EsmFile *item(int row) const;
         EsmFile *item(int row);
+
         bool canBeChecked(const EsmFile *file) const;
 
         ContentFileList mFiles;

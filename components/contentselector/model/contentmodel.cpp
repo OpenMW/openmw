@@ -65,7 +65,7 @@ ContentSelectorModel::EsmFile *ContentSelectorModel::ContentModel::item(int row)
 
     return 0;
 }
-const ContentSelectorModel::EsmFile *ContentSelectorModel::ContentModel::findItem(const QString &name) const
+const ContentSelectorModel::EsmFile *ContentSelectorModel::ContentModel::item(const QString &name) const
 {
     foreach (const EsmFile *file, mFiles)
     {
@@ -99,7 +99,7 @@ Qt::ItemFlags ContentSelectorModel::ContentModel::flags(const QModelIndex &index
     if (canBeChecked(file))
         return Qt::ItemIsEnabled | mDragDropFlags | mDefaultFlags;
 
-    return mDefaultFlags;
+    return Qt::NoItemFlags;
 }
 
 QVariant ContentSelectorModel::ContentModel::data(const QModelIndex &index, int role) const
@@ -167,7 +167,7 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex &index, int 
         if (file->isGameFile())
             return ContentType_GameFile;
         else
-            if (flags(index) & Qt::ItemIsEnabled)
+            if (flags(index) & mDefaultFlags)
                 return ContentType_Addon;
 
         break;
@@ -373,12 +373,26 @@ bool ContentSelectorModel::ContentModel::dropMimeData(const QMimeData *data, Qt:
 
 bool ContentSelectorModel::ContentModel::canBeChecked(const EsmFile *file) const
 {
-    //element can be checked if all its dependencies are
-    foreach (const QString &gamefile, file->gameFiles())
-        if (!isChecked(gamefile))
-            return false;
+    //game files can always be checked
+    if (file->isGameFile())
+        return true;
 
-    return true;
+    //addon can be checked if its gamefile is
+    foreach (const QString &fileName, file->gameFiles())
+    {
+        const EsmFile *dependency = item(fileName);
+
+        if (!dependency)
+            continue;
+
+        if (dependency->isGameFile())
+        {
+            if (isChecked(fileName))
+                return true;
+        }
+    }
+
+    return false;
 }
 
 void ContentSelectorModel::ContentModel::addFile(EsmFile *file)
@@ -422,7 +436,7 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
 
 
             // Put the file in the table
-            if (findItem(path) == 0)
+            if (item(path) == 0)
                 addFile(file);
 
         } catch(std::runtime_error &e) {

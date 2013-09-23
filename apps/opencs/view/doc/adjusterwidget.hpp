@@ -25,7 +25,6 @@ namespace CSVDoc
 
             void setLocalData (const boost::filesystem::path& localData);
 
-            QString getText() const;
             bool isValid() const;
 
             boost::filesystem::path getPath() const;
