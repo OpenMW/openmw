@@ -619,12 +619,12 @@ namespace MWInput
         else if (MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu))
         {
             MWBase::Environment::get().getWindowManager()->popGuiMode();
-            MWBase::Environment::get().getSoundManager()->resumeSounds(8);
+            MWBase::Environment::get().getSoundManager()->resumeSounds(MWBase::Environment::get().getSoundManager()->Play_TypeSfx);
         }
         else
         {
             MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
-            MWBase::Environment::get().getSoundManager()->pauseSounds(8);
+            MWBase::Environment::get().getSoundManager()->pauseSounds(MWBase::Environment::get().getSoundManager()->Play_TypeSfx);
         }
     }
 
