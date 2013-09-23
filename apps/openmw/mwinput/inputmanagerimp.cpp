@@ -577,8 +577,8 @@ namespace MWInput
             rot[0] = -y;
             rot[1] = 0.0f;
             rot[2] = x;
-            
-            // Only actually turn player when we're not in vanity mode 
+
+            // Only actually turn player when we're not in vanity mode
             if(!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot))
             {
                 mPlayer->yaw(x/scale);
@@ -619,12 +619,12 @@ namespace MWInput
         else if (MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu))
         {
             MWBase::Environment::get().getWindowManager()->popGuiMode();
-            MWBase::Environment::get().getSoundManager()->resumeSounds(MWBase::Environment::get().getSoundManager()->Play_TypeSfx);
+            MWBase::Environment::get().getSoundManager()->resumeSounds (MWBase::SoundManager::Play_TypeSfx);
         }
         else
         {
             MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
-            MWBase::Environment::get().getSoundManager()->pauseSounds(MWBase::Environment::get().getSoundManager()->Play_TypeSfx);
+            MWBase::Environment::get().getSoundManager()->pauseSounds (MWBase::SoundManager::Play_TypeSfx);
         }
     }
 
