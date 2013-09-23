@@ -35,7 +35,7 @@ CSVDoc::FileDialog::FileDialog(QWidget *parent) :
     mFileWidget->setType(true);
     mFileWidget->extensionLabelIsVisible(false);
 
-    connect(projectCreateButton, SIGNAL(clicked()), this, SIGNAL(createNewFile()));
+    connect(projectCreateButton, SIGNAL(clicked()), this, SLOT(createNewFile()));
 
     connect(projectButtonBox, SIGNAL(accepted()), this, SIGNAL(openFiles()));
     connect(projectButtonBox, SIGNAL(rejected()), this, SLOT(reject()));
@@ -118,5 +118,10 @@ void CSVDoc::FileDialog::slotAdjusterChanged(bool value)
 
 void CSVDoc::FileDialog::slotGameFileSelected(int value)
 {
-        emit signalUpdateCreateButton(value > -1, 1);
+    emit signalUpdateCreateButton(value > -1, 1);
+}
+
+void CSVDoc::FileDialog::createNewFile()
+{
+    emit createNewFile (mAdjusterWidget->getPath());
 }

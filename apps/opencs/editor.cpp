@@ -30,7 +30,8 @@ CS::Editor::Editor() : mViewManager (mDocumentManager)
     connect (&mStartup, SIGNAL (editConfig()), this, SLOT (showSettings ()));
 
     connect (&mFileDialog, SIGNAL(openFiles()), this, SLOT(openFiles()));
-    connect (&mFileDialog, SIGNAL(createNewFile()), this, SLOT(createNewFile()));
+    connect (&mFileDialog, SIGNAL(createNewFile (const boost::filesystem::path&)),
+        this, SLOT(createNewFile (const boost::filesystem::path&)));
 
     connect (&mNewGame, SIGNAL (createRequest (const boost::filesystem::path&)),
         this, SLOT (createNewGame (const boost::filesystem::path&)));
@@ -138,7 +139,7 @@ void CS::Editor::openFiles()
     mFileDialog.hide();
 }
 
-void CS::Editor::createNewFile()
+void CS::Editor::createNewFile (const boost::filesystem::path& savePath)
 {
     std::vector<boost::filesystem::path> files;
     QStringList paths = mFileDialog.checkedItemsPaths();
@@ -149,9 +150,7 @@ void CS::Editor::createNewFile()
 
     files.push_back(mFileDialog.fileName().toStdString());
 
-    /// \todo Get the save path from the file dialogue.
-
-    CSMDoc::Document *document = mDocumentManager.addDocument (files, *files.rbegin(), true);
+    CSMDoc::Document *document = mDocumentManager.addDocument (files, savePath, true);
 
     mViewManager.addView (document);
     mFileDialog.hide();

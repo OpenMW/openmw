@@ -58,7 +58,7 @@ namespace CSVDoc
 
     signals:
         void openFiles();
-        void createNewFile();
+        void createNewFile (const boost::filesystem::path& savePath);
 
         void signalUpdateCreateButton (bool, int);
         void signalUpdateCreateButtonFlags(int);
@@ -71,6 +71,7 @@ namespace CSVDoc
         void slotEnableCreateButton(bool enable, int widgetNumber);
         void slotAdjusterChanged(bool value);
         void slotGameFileSelected(int value);
+        void createNewFile();
     };
 }
 #endif // FILEDIALOG_HPP
