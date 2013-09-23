@@ -9,12 +9,22 @@
 #include <QSpacerItem>
 #include <QPushButton>
 #include <QLabel>
+#include <QGroupBox>
 
 #include <components/contentselector/model/esmfile.hpp>
 #include <components/contentselector/view/lineedit.hpp>
 
+#include "filewidget.hpp"
+#include "adjusterwidget.hpp"
+
+#include <QDebug>
+
 CSVDoc::FileDialog::FileDialog(QWidget *parent) :
-    ContentSelector(parent)
+    ContentSelector(parent),
+    mFileWidget (new FileWidget (this)),
+    mAdjusterWidget (new AdjusterWidget (this)),
+    mEnable_1(false),
+    mEnable_2(false)
 {
     // Hide the profile elements
     profileGroupBox->hide();
@@ -22,12 +32,20 @@ CSVDoc::FileDialog::FileDialog(QWidget *parent) :
 
     resize(400, 400);
 
-    connect(projectNameLineEdit, SIGNAL(textChanged(QString)), this, SLOT(updateCreateButton(QString)));
+    mFileWidget->setType(true);
+    mFileWidget->extensionLabelIsVisible(false);
 
     connect(projectCreateButton, SIGNAL(clicked()), this, SIGNAL(createNewFile()));
 
     connect(projectButtonBox, SIGNAL(accepted()), this, SIGNAL(openFiles()));
     connect(projectButtonBox, SIGNAL(rejected()), this, SLOT(reject()));
+
+    connect (mFileWidget, SIGNAL (nameChanged (const QString&, bool)),
+        mAdjusterWidget, SLOT (setName (const QString&, bool)));
+
+    connect (mAdjusterWidget, SIGNAL (stateChanged (bool)), this, SLOT (slotAdjusterChanged(bool)));
+    connect (this, SIGNAL (signalGameFileChanged(int)), this, SLOT (slotGameFileSelected(int)));
+    connect (this, SIGNAL (signalUpdateCreateButton(bool, int)), this, SLOT (slotEnableCreateButton(bool, int)));
 }
 
 void CSVDoc::FileDialog::updateOpenButton(const QStringList &items)
@@ -40,24 +58,30 @@ void CSVDoc::FileDialog::updateOpenButton(const QStringList &items)
     openButton->setEnabled(!items.isEmpty());
 }
 
-void CSVDoc::FileDialog::updateCreateButton(const QString &name)
+void CSVDoc::FileDialog::slotEnableCreateButton(bool enable, int widgetNumber)
 {
-    if (!projectCreateButton->isVisible())
-        return;
 
-    projectCreateButton->setEnabled(!name.isEmpty());
+    if (widgetNumber == 1)
+        mEnable_1 = enable;
+
+    if (widgetNumber == 2)
+        mEnable_2 = enable;
+
+    qDebug() << "update enabled" << mEnable_1 << mEnable_2 << enable;
+    projectCreateButton->setEnabled(mEnable_1 && mEnable_2);
 }
 
 QString CSVDoc::FileDialog::fileName()
 {
-    return projectNameLineEdit->text();
+    return mFileWidget->getName();
 }
 
 void CSVDoc::FileDialog::openFile()
 {
     setWindowTitle(tr("Open"));
 
-    projectNameLineEdit->hide();
+    mFileWidget->hide();
+    adjusterWidgetFrame->hide();
     projectCreateButton->hide();
     projectGroupBox->setTitle(tr(""));
     projectButtonBox->button(QDialogButtonBox::Open)->setEnabled(false);
@@ -71,10 +95,23 @@ void CSVDoc::FileDialog::newFile()
 {
     setWindowTitle(tr("New"));
 
+    fileWidgetFrame->layout()->addWidget(mFileWidget);
+    adjusterWidgetFrame->layout()->addWidget(mAdjusterWidget);
+
     projectButtonBox->setStandardButtons(QDialogButtonBox::Cancel);
     projectButtonBox->addButton(projectCreateButton, QDialogButtonBox::ActionRole);
 
     show();
     raise();
     activateWindow();
+}
+
+void CSVDoc::FileDialog::slotAdjusterChanged(bool value)
+{
+    emit signalUpdateCreateButton(mAdjusterWidget->isValid(), 2);
+}
+
+void CSVDoc::FileDialog::slotGameFileSelected(int value)
+{
+        emit signalUpdateCreateButton(value > -1, 1);
 }

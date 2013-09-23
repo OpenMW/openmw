@@ -306,7 +306,7 @@ void DataFilesPage::setPluginsCheckstates(Qt::CheckState state)
         if (!sourceIndex.isValid())
             return;
 
-        bool isChecked = ( state == Qt::Checked );
+        //bool isChecked = ( state == Qt::Checked );
 
         mContentModel->setData(sourceIndex, state, Qt::CheckStateRole);
     }
@@ -397,7 +397,7 @@ void DataFilesPage::slotCurrentGameFileIndexChanged(int index)
 void DataFilesPage::slotAddonTableItemClicked(const QModelIndex &index)
 {
     QAbstractItemModel *const model = addonView->model();
-    QSortFilterProxyModel *proxy  = dynamic_cast<QSortFilterProxyModel *>(model);
+    //QSortFilterProxyModel *proxy  = dynamic_cast<QSortFilterProxyModel *>(model);
 
     if (model->data(index, Qt::CheckStateRole).toInt() == Qt::Unchecked)
         model->setData(index, Qt::Checked, Qt::CheckStateRole);

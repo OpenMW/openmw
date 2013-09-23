@@ -26,9 +26,19 @@ namespace ContentSelectorView
 
 namespace CSVDoc
 {
+    class FileWidget;
+    class AdjusterWidget;
+
     class FileDialog : public ContentSelectorView::ContentSelector
     {
         Q_OBJECT
+
+        FileWidget *mFileWidget;
+        AdjusterWidget *mAdjusterWidget;
+
+        bool mEnable_1;
+        bool mEnable_2;
+
     public:
         explicit FileDialog(QWidget *parent = 0);
 
@@ -41,12 +51,17 @@ namespace CSVDoc
         void openFiles();
         void createNewFile();
 
+        void signalUpdateCreateButton (bool, int);
+        void signalUpdateCreateButtonFlags(int);
+
     public slots:
 
     private slots:
         //void updateViews();
         void updateOpenButton(const QStringList &items);
-        void updateCreateButton(const QString &name);
+        void slotEnableCreateButton(bool enable, int widgetNumber);
+        void slotAdjusterChanged(bool value);
+        void slotGameFileSelected(int value);
     };
 }
 #endif // FILEDIALOG_HPP

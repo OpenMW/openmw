@@ -40,6 +40,7 @@ namespace ContentSelectorView
 
     signals:
         void profileChanged(int index);
+        void signalGameFileChanged(int value);
 
     private slots:
         void updateViews();
