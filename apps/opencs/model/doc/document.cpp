@@ -2141,7 +2141,7 @@ void CSMDoc::Document::createBase()
 
 CSMDoc::Document::Document (const std::vector<boost::filesystem::path>& files,
     const boost::filesystem::path& savePath, bool new_)
-: mSavePath (savePath), mTools (mData), mSaving (*this)
+: mSavePath (savePath), mContentFiles (files), mTools (mData), mSaving (*this)
 {
     if (files.empty())
         throw std::runtime_error ("Empty content file sequence");
@@ -2198,6 +2198,11 @@ int CSMDoc::Document::getState() const
 const boost::filesystem::path& CSMDoc::Document::getSavePath() const
 {
     return mSavePath;
+}
+
+const std::vector<boost::filesystem::path>& CSMDoc::Document::getContentFiles() const
+{
+    return mContentFiles;
 }
 
 void CSMDoc::Document::save()

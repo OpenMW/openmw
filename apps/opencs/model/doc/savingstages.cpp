@@ -50,7 +50,18 @@ void CSMDoc::WriteHeaderStage::perform (int stage, std::vector<std::string>& mes
     mState.getWriter().setDescription ("");
     mState.getWriter().setRecordCount (0);
 
-    /// \todo fill in dependency list
+    /// \todo refine dependency list (at least remove redundant dependencies)
+    std::vector<boost::filesystem::path> dependencies = mDocument.getContentFiles();
+    std::vector<boost::filesystem::path>::const_iterator end (--dependencies.end());
+
+    for (std::vector<boost::filesystem::path>::const_iterator iter (dependencies.begin());
+        iter!=end; ++iter)
+    {
+        std::string name = iter->filename().string();
+        uint64_t size = boost::filesystem::file_size (*iter);
+
+        mState.getWriter().addMaster (name, size);
+    }
 
     mState.getWriter().save (mState.getStream());
 }

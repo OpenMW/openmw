@@ -33,6 +33,7 @@ namespace CSMDoc
         private:
 
             boost::filesystem::path mSavePath;
+            std::vector<boost::filesystem::path> mContentFiles;
             CSMWorld::Data mData;
             CSMTools::Tools mTools;
             Saving mSaving;
@@ -73,6 +74,10 @@ namespace CSMDoc
             int getState() const;
 
             const boost::filesystem::path& getSavePath() const;
+
+            const std::vector<boost::filesystem::path>& getContentFiles() const;
+            ///< \attention The last element in this collection is the file that is being edited,
+            /// but with its original path instead of the save path.
 
             void save();
 
