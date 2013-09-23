@@ -617,15 +617,15 @@ namespace MWInput
         if (MWBase::Environment::get().getWindowManager()->isGuiMode () && MWBase::Environment::get().getWindowManager()->getMode () == MWGui::GM_Video)
             MWBase::Environment::get().getWorld ()->stopVideo ();
         else if (MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu))
-	{
+        {
             MWBase::Environment::get().getWindowManager()->popGuiMode();
             MWBase::Environment::get().getSoundManager()->resumeSounds(8);
-	}
+        }
         else
-	{
+        {
             MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
             MWBase::Environment::get().getSoundManager()->pauseSounds(8);
-	}
+        }
     }
 
     void InputManager::toggleSpell()
