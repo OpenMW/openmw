@@ -17,6 +17,7 @@ CS::Editor::Editor() : mViewManager (mDocumentManager)
     setupDataFiles();
 
     mNewGame.setLocalData (mLocal);
+    mFileDialog.setLocalData (mLocal);
 
     connect (&mViewManager, SIGNAL (newGameRequest ()), this, SLOT (createGame ()));
     connect (&mViewManager, SIGNAL (newAddonRequest ()), this, SLOT (createAddon ()));

@@ -4,8 +4,15 @@
 #include <QDialog>
 #include <QModelIndex>
 
+#include <boost/filesystem/path.hpp>
+
 #include "components/contentselector/view/contentselector.hpp"
 #include "ui_datafilespage.h"
+
+#ifndef CS_QT_BOOST_FILESYSTEM_PATH_DECLARED
+#define CS_QT_BOOST_FILESYSTEM_PATH_DECLARED
+Q_DECLARE_METATYPE (boost::filesystem::path)
+#endif
 
 class QDialogButtonBox;
 class QSortFilterProxyModel;
@@ -41,6 +48,8 @@ namespace CSVDoc
 
     public:
         explicit FileDialog(QWidget *parent = 0);
+
+        void setLocalData (const boost::filesystem::path& localData);
 
         void openFile();
         void newFile();

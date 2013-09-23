@@ -48,6 +48,11 @@ CSVDoc::FileDialog::FileDialog(QWidget *parent) :
     connect (this, SIGNAL (signalUpdateCreateButton(bool, int)), this, SLOT (slotEnableCreateButton(bool, int)));
 }
 
+void CSVDoc::FileDialog::setLocalData (const boost::filesystem::path& localData)
+{
+    mAdjusterWidget->setLocalData (localData);
+}
+
 void CSVDoc::FileDialog::updateOpenButton(const QStringList &items)
 {
     QPushButton *openButton = projectButtonBox->button(QDialogButtonBox::Open);
