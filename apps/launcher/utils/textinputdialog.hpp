@@ -2,20 +2,23 @@
 #define TEXTINPUTDIALOG_HPP
 
 #include <QDialog>
-//#include "lineedit.hpp"
 
 class QDialogButtonBox;
-class LineEdit;
+
+namespace ContentSelectorView {
+    class LineEdit;
+}
+
 
 class TextInputDialog : public QDialog
 {
     Q_OBJECT
 public:
     explicit TextInputDialog(const QString& title, const QString &text, QWidget *parent = 0);
-    inline LineEdit *lineEdit() { return mLineEdit; }
+    inline ContentSelectorView::LineEdit *lineEdit() { return mLineEdit; }
     void setOkButtonEnabled(bool enabled);
 
-    LineEdit *mLineEdit;
+    ContentSelectorView::LineEdit *mLineEdit;
 
     int exec();
 

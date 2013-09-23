@@ -58,7 +58,13 @@ CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc:
     connect (mModel, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
         this, SLOT (rowsAboutToBeRemoved (const QModelIndex&, int, int)));
 
-    new ScriptHighlighter (mEditor->document());
+    connect (&document.getData(), SIGNAL (idListChanged()), this, SLOT (idListChanged()));
+
+    mHighlighter = new ScriptHighlighter (document.getData(), mEditor->document());
+
+    connect (&mUpdateTimer, SIGNAL (timeout()), this, SLOT (updateHighlighting()));
+
+    mUpdateTimer.setSingleShot (true);
 }
 
 void CSVWorld::ScriptSubView::setEditLock (bool locked)
@@ -66,8 +72,19 @@ void CSVWorld::ScriptSubView::setEditLock (bool locked)
     mEditor->setReadOnly (locked);
 }
 
+void CSVWorld::ScriptSubView::idListChanged()
+{
+    mHighlighter->invalidateIds();
+
+    if (!mUpdateTimer.isActive())
+        mUpdateTimer.start (0);
+}
+
 void CSVWorld::ScriptSubView::textChanged()
 {
+    if (mChangeLocked)
+        return;
+
     ChangeLock lock (*this);
 
     mDocument.getUndoStack().push (new CSMWorld::ModifyCommand (*mModel,
@@ -78,6 +95,8 @@ void CSVWorld::ScriptSubView::dataChanged (const QModelIndex& topLeft, const QMo
 {
     if (mChangeLocked)
         return;
+
+    ChangeLock lock (*this);
 
     QModelIndex index = mModel->getModelIndex (getUniversalId().getId(), mColumn);
 
@@ -96,4 +115,14 @@ void CSVWorld::ScriptSubView::rowsAboutToBeRemoved (const QModelIndex& parent, i
 
     if (!parent.isValid() && index.row()>=start && index.row()<=end)
         deleteLater();
+}
+
+void CSVWorld::ScriptSubView::updateHighlighting()
+{
+    if (mChangeLocked)
+        return;
+
+    ChangeLock lock (*this);
+
+    mHighlighter->rehighlight();
 }

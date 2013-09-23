@@ -1,9 +1,10 @@
 #include <QToolButton>
 #include <QStyle>
+#include <QStylePainter>
 
-#include "comboboxlineedit.hpp"
+#include "lineedit.hpp"
 
-ComboBoxLineEdit::ComboBoxLineEdit(QWidget *parent)
+ContentSelectorView::LineEdit::LineEdit(QWidget *parent)
     : QLineEdit(parent)
 {
     mClearButton = new QToolButton(this);
@@ -17,11 +18,14 @@ ComboBoxLineEdit::ComboBoxLineEdit(QWidget *parent)
     connect(this, SIGNAL(textChanged(const QString&)), this, SLOT(updateClearButton(const QString&)));
     int frameWidth = style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
 
-    setObjectName(QString("ComboBoxLineEdit"));
-    setStyleSheet(QString("ComboBoxLineEdit { background-color: transparent; padding-right: %1px; } ").arg(mClearButton->sizeHint().width() + frameWidth + 1));
+    setObjectName(QString("LineEdit"));
+    setStyleSheet(QString("LineEdit { padding-right: %1px; } ").arg(mClearButton->sizeHint().width() + frameWidth + 1));
+    QSize msz = minimumSizeHint();
+    setMinimumSize(qMax(msz.width(), mClearButton->sizeHint().height() + frameWidth * 2 + 2),
+                   qMax(msz.height(), mClearButton->sizeHint().height() + frameWidth * 2 + 2));
 }
 
-void ComboBoxLineEdit::resizeEvent(QResizeEvent *)
+void ContentSelectorView::LineEdit::resizeEvent(QResizeEvent *)
 {
     QSize sz = mClearButton->sizeHint();
     int frameWidth = style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
@@ -29,7 +33,7 @@ void ComboBoxLineEdit::resizeEvent(QResizeEvent *)
                       (rect().bottom() + 1 - sz.height())/2);
 }
 
-void ComboBoxLineEdit::updateClearButton(const QString& text)
+void ContentSelectorView::LineEdit::updateClearButton(const QString& text)
 {
     mClearButton->setVisible(!text.isEmpty());
 }

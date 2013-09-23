@@ -4,141 +4,146 @@
 #include <QMessageBox>
 #include <QCheckBox>
 #include <QMenu>
+#include <QSortFilterProxyModel>
 
 #include <components/files/configurationmanager.hpp>
 
-#include <components/fileorderlist/model/datafilesmodel.hpp>
-#include <components/fileorderlist/model/pluginsproxymodel.hpp>
-#include <components/fileorderlist/model/esm/esmfile.hpp>
+#include <components/contentselector/model/esmfile.hpp>
 
-#include <components/fileorderlist/utils/lineedit.hpp>
-#include <components/fileorderlist/utils/naturalsort.hpp>
-#include <components/fileorderlist/utils/profilescombobox.hpp>
+#include <components/contentselector/view/lineedit.hpp>
+#include <components/contentselector/model/naturalsort.hpp>
+#include <components/contentselector/view/profilescombobox.hpp>
 
 #include "settings/gamesettings.hpp"
 #include "settings/launchersettings.hpp"
 
 #include "utils/textinputdialog.hpp"
+#include "components/contentselector/view/contentselector.hpp"
+#include "components/contentselector/model/contentmodel.hpp"
+
+#include <QDebug>
 
 DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gameSettings, LauncherSettings &launcherSettings, QWidget *parent)
     : mCfgMgr(cfg)
     , mGameSettings(gameSettings)
     , mLauncherSettings(launcherSettings)
-    , QWidget(parent)
 {
     setupUi(this);
+   // mContentSelector.setParent(parent);
 
-    // Models
-    mDataFilesModel = new DataFilesModel(this);
+   // QMetaObject::connectSlotsByName(this);
 
-    mMastersProxyModel = new QSortFilterProxyModel();
-    mMastersProxyModel->setFilterRegExp(QString("^.*\\.esm"));
-    mMastersProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
-    mMastersProxyModel->setSourceModel(mDataFilesModel);
-
-    mPluginsProxyModel = new PluginsProxyModel();
-    mPluginsProxyModel->setFilterRegExp(QString("^.*\\.esp"));
-    mPluginsProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
-    mPluginsProxyModel->setSourceModel(mDataFilesModel);
-
-    mFilterProxyModel = new QSortFilterProxyModel();
-    mFilterProxyModel->setDynamicSortFilter(true);
-    mFilterProxyModel->setSourceModel(mPluginsProxyModel);
-
-    QCheckBox checkBox;
-    unsigned int height = checkBox.sizeHint().height() + 4;
-
-    mastersTable->setModel(mMastersProxyModel);
-    mastersTable->setObjectName("MastersTable");
-    mastersTable->setContextMenuPolicy(Qt::CustomContextMenu);
-    mastersTable->setSortingEnabled(false);
-    mastersTable->setSelectionBehavior(QAbstractItemView::SelectRows);
-    mastersTable->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    mastersTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    mastersTable->setAlternatingRowColors(true);
-    mastersTable->horizontalHeader()->setStretchLastSection(true);
-    mastersTable->horizontalHeader()->hide();
-
-    // Set the row height to the size of the checkboxes
-    mastersTable->verticalHeader()->setDefaultSectionSize(height);
-    mastersTable->verticalHeader()->setResizeMode(QHeaderView::Fixed);
-    mastersTable->verticalHeader()->hide();
-
-    pluginsTable->setModel(mFilterProxyModel);
-    pluginsTable->setObjectName("PluginsTable");
-    pluginsTable->setContextMenuPolicy(Qt::CustomContextMenu);
-    pluginsTable->setSortingEnabled(false);
-    pluginsTable->setSelectionBehavior(QAbstractItemView::SelectRows);
-    pluginsTable->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    pluginsTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    pluginsTable->setAlternatingRowColors(true);
-    pluginsTable->setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
-    pluginsTable->horizontalHeader()->setStretchLastSection(true);
-    pluginsTable->horizontalHeader()->hide();
-
-    pluginsTable->verticalHeader()->setDefaultSectionSize(height);
-    pluginsTable->verticalHeader()->setResizeMode(QHeaderView::Fixed);
-
-    // Adjust the tableview widths inside the splitter
-    QList<int> sizeList;
-    sizeList << mLauncherSettings.value(QString("General/MastersTable/width"), QString("200")).toInt();
-    sizeList << mLauncherSettings.value(QString("General/PluginTable/width"), QString("340")).toInt();
-
-    splitter->setSizes(sizeList);
+    projectGroupBox->hide();
 
     // Create a dialog for the new profile name input
     mNewProfileDialog = new TextInputDialog(tr("New Profile"), tr("Profile name:"), this);
 
-    connect(profilesComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(slotCurrentIndexChanged(int)));
-
     connect(mNewProfileDialog->lineEdit(), SIGNAL(textChanged(QString)), this, SLOT(updateOkButton(QString)));
 
-    connect(pluginsTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckState(QModelIndex)));
-    connect(mastersTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckState(QModelIndex)));
 
-    connect(pluginsTable, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
-    connect(mastersTable, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
 
-    connect(mDataFilesModel, SIGNAL(layoutChanged()), this, SLOT(updateViews()));
+    buildContentModel();
+    buildGameFileView();
+    buildAddonView();
+    buildProfilesView();
 
-    connect(filterLineEdit, SIGNAL(textChanged(QString)), this, SLOT(filterChanged(QString)));
-
-    connect(splitter, SIGNAL(splitterMoved(int,int)), this, SLOT(updateSplitter()));
 
     createActions();
     setupDataFiles();
+
+
+    updateViews();
+}
+
+void DataFilesPage::buildContentModel()
+{
+    mContentModel = new ContentSelectorModel::ContentModel();
+    connect(mContentModel, SIGNAL(layoutChanged()), this, SLOT(updateViews()));
+}
+
+void DataFilesPage::buildGameFileView()
+{
+    mGameFileProxyModel = new QSortFilterProxyModel(this);
+    mGameFileProxyModel->setFilterRegExp(QString::number((int)ContentSelectorModel::ContentType_GameFile));
+    mGameFileProxyModel->setFilterRole (Qt::UserRole);
+    mGameFileProxyModel->setSourceModel (mContentModel);
+
+    gameFileView->setPlaceholderText(QString("Select a game file..."));
+    gameFileView->setModel(mGameFileProxyModel);
+
+    connect(gameFileView, SIGNAL(currentIndexChanged(int)), this, SLOT(slotCurrentGameFileIndexChanged(int)));
+
+    gameFileView->setCurrentIndex(-1);
+    gameFileView->setCurrentIndex(0);
+}
+
+void DataFilesPage::buildAddonView()
+{
+    mAddonProxyModel = new QSortFilterProxyModel(this);
+    mAddonProxyModel->setFilterRegExp (QString::number((int)ContentSelectorModel::ContentType_Addon));
+    mAddonProxyModel->setFilterRole (Qt::UserRole);
+    mAddonProxyModel->setDynamicSortFilter (true);
+    mAddonProxyModel->setSourceModel (mContentModel);
+
+    addonView->setModel(mAddonProxyModel);
+
+    connect(addonView, SIGNAL(clicked(const QModelIndex &)), this, SLOT(slotAddonTableItemClicked(const QModelIndex &)));
+}
+
+void DataFilesPage::buildProfilesView()
+{
+    profilesComboBox->setPlaceholderText(QString("Select a profile..."));
+    connect(profilesComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(slotCurrentProfileIndexChanged(int)));
+}
+
+void DataFilesPage::updateViews()
+{
+    // Ensure the columns are hidden because sort() re-enables them
+    addonView->setColumnHidden(1, true);
+    addonView->setColumnHidden(2, true);
+    addonView->setColumnHidden(3, true);
+    addonView->setColumnHidden(4, true);
+    addonView->setColumnHidden(5, true);
+    addonView->setColumnHidden(6, true);
+    addonView->setColumnHidden(7, true);
+    addonView->setColumnHidden(8, true);
+    addonView->resizeColumnsToContents();
+}
+
+void ContentSelectorView::ContentSelector::addFiles(const QString &path)
+{
+    mContentModel->addFiles(path);
+    //mContentModel->sort(3);  // Sort by date accessed
+    gameFileView->setCurrentIndex(-1);
+    mContentModel->uncheckAll();
 }
 
 void DataFilesPage::createActions()
 {
-
     // Add the actions to the toolbuttons
     newProfileButton->setDefaultAction(newProfileAction);
     deleteProfileButton->setDefaultAction(deleteProfileAction);
-
-    // Context menu actions
-    mContextMenu = new QMenu(this);
-    mContextMenu->addAction(checkAction);
-    mContextMenu->addAction(uncheckAction);
 }
 
 void DataFilesPage::setupDataFiles()
 {
     // Set the encoding to the one found in openmw.cfg or the default
-    mDataFilesModel->setEncoding(mGameSettings.value(QString("encoding"), QString("win1252")));
+    //mContentSelector.setEncoding(mGameSettings.value(QString("encoding"), QString("win1252")));
 
     QStringList paths = mGameSettings.getDataDirs();
 
     foreach (const QString &path, paths) {
-        mDataFilesModel->addFiles(path);
+        //mContentSelector.
+        mContentModel->addFiles(path);
     }
 
     QString dataLocal = mGameSettings.getDataLocal();
     if (!dataLocal.isEmpty())
-        mDataFilesModel->addFiles(dataLocal);
+        //mContentSelector.
+        mContentModel->addFiles(dataLocal);
 
     // Sort by date accessed for now
-    mDataFilesModel->sort(3);
+    //mContentSelector->sort(3);
 
     QStringList profiles = mLauncherSettings.subKeys(QString("Profiles/"));
     QString profile = mLauncherSettings.value(QString("Profiles/currentprofile"));
@@ -168,6 +173,7 @@ void DataFilesPage::setupDataFiles()
 
     loadSettings();
 
+    gameFileView->setCurrentIndex(-1);
 }
 
 void DataFilesPage::loadSettings()
@@ -177,27 +183,16 @@ void DataFilesPage::loadSettings()
     if (profile.isEmpty())
         return;
 
-    mDataFilesModel->uncheckAll();
+  //  mContentSelector.
+    mContentModel->uncheckAll();
 
-    QStringList masters = mLauncherSettings.values(QString("Profiles/") + profile + QString("/master"), Qt::MatchExactly);
-    QStringList plugins = mLauncherSettings.values(QString("Profiles/") + profile + QString("/plugin"), Qt::MatchExactly);
-
-    foreach (const QString &master, masters) {
-        QModelIndex index = mDataFilesModel->indexFromItem(mDataFilesModel->findItem(master));
-        if (index.isValid())
-            mDataFilesModel->setCheckState(index, Qt::Checked);
-    }
-
-    foreach (const QString &plugin, plugins) {
-        QModelIndex index = mDataFilesModel->indexFromItem(mDataFilesModel->findItem(plugin));
-        if (index.isValid())
-            mDataFilesModel->setCheckState(index, Qt::Checked);
-    }
+    QStringList gameFiles = mLauncherSettings.values(QString("Profiles/") + profile + QString("/master"), Qt::MatchExactly);
+    QStringList addons = mLauncherSettings.values(QString("Profiles/") + profile + QString("/plugin"), Qt::MatchExactly);
 }
 
 void DataFilesPage::saveSettings()
 {
-    if (mDataFilesModel->rowCount() < 1)
+    if (mContentModel->rowCount() < 1)
         return;
 
     QString profile = mLauncherSettings.value(QString("Profiles/currentprofile"));
@@ -213,17 +208,17 @@ void DataFilesPage::saveSettings()
     mGameSettings.remove(QString("master"));
     mGameSettings.remove(QString("plugin"));
 
-    QStringList items = mDataFilesModel->checkedItems();
+   ContentSelectorModel::ContentFileList items = mContentModel->checkedItems();
 
-    foreach(const QString &item, items) {
+    foreach(const ContentSelectorModel::EsmFile *item, items) {
 
-        if (item.endsWith(QString(".esm"), Qt::CaseInsensitive)) {
-            mLauncherSettings.setMultiValue(QString("Profiles/") + profile + QString("/master"), item);
-            mGameSettings.setMultiValue(QString("master"), item);
+        if (item->gameFiles().size() == 0) {
+            mLauncherSettings.setMultiValue(QString("Profiles/") + profile + QString("/master"), item->fileName());
+            mGameSettings.setMultiValue(QString("master"), item->fileName());
 
-        } else if (item.endsWith(QString(".esp"), Qt::CaseInsensitive)) {
-            mLauncherSettings.setMultiValue(QString("Profiles/") + profile + QString("/plugin"), item);
-            mGameSettings.setMultiValue(QString("plugin"), item);
+        } else {
+            mLauncherSettings.setMultiValue(QString("Profiles/") + profile + QString("/plugin"), item->fileName());
+            mGameSettings.setMultiValue(QString("plugin"), item->fileName());
         }
     }
 
@@ -242,46 +237,9 @@ void DataFilesPage::updateOkButton(const QString &text)
             : mNewProfileDialog->setOkButtonEnabled(false);
 }
 
-void DataFilesPage::updateSplitter()
-{
-    // Sigh, update the saved splitter size in settings only when moved
-    // Since getting mSplitter->sizes() if page is hidden returns invalid values
-    QList<int> sizes = splitter->sizes();
-
-    mLauncherSettings.setValue(QString("General/MastersTable/width"), QString::number(sizes.at(0)));
-    mLauncherSettings.setValue(QString("General/PluginsTable/width"), QString::number(sizes.at(1)));
-}
-
-void DataFilesPage::updateViews()
-{
-    // Ensure the columns are hidden because sort() re-enables them
-    mastersTable->setColumnHidden(1, true);
-    mastersTable->setColumnHidden(2, true);
-    mastersTable->setColumnHidden(3, true);
-    mastersTable->setColumnHidden(4, true);
-    mastersTable->setColumnHidden(5, true);
-    mastersTable->setColumnHidden(6, true);
-    mastersTable->setColumnHidden(7, true);
-    mastersTable->setColumnHidden(8, true);
-
-    pluginsTable->setColumnHidden(1, true);
-    pluginsTable->setColumnHidden(2, true);
-    pluginsTable->setColumnHidden(3, true);
-    pluginsTable->setColumnHidden(4, true);
-    pluginsTable->setColumnHidden(5, true);
-    pluginsTable->setColumnHidden(6, true);
-    pluginsTable->setColumnHidden(7, true);
-    pluginsTable->setColumnHidden(8, true);
-}
-
 void DataFilesPage::setProfilesComboBoxIndex(int index)
 {
     profilesComboBox->setCurrentIndex(index);
-}
-
-void DataFilesPage::slotCurrentIndexChanged(int index)
-{
-    emit profileChanged(index);
 }
 
 QAbstractItemModel* DataFilesPage::profilesComboBoxModel()
@@ -330,110 +288,28 @@ void DataFilesPage::on_deleteProfileAction_triggered()
     }
 }
 
-void DataFilesPage::on_checkAction_triggered()
-{
-    if (pluginsTable->hasFocus())
-        setPluginsCheckstates(Qt::Checked);
-
-    if (mastersTable->hasFocus())
-        setMastersCheckstates(Qt::Checked);
-
-}
-
-void DataFilesPage::on_uncheckAction_triggered()
-{
-    if (pluginsTable->hasFocus())
-        setPluginsCheckstates(Qt::Unchecked);
-
-    if (mastersTable->hasFocus())
-        setMastersCheckstates(Qt::Unchecked);
-}
-
-void DataFilesPage::setMastersCheckstates(Qt::CheckState state)
-{
-    if (!mastersTable->selectionModel()->hasSelection()) {
-        return;
-    }
-
-    QModelIndexList indexes = mastersTable->selectionModel()->selectedIndexes();
-
-    foreach (const QModelIndex &index, indexes)
-    {
-        if (!index.isValid())
-            return;
-
-        QModelIndex sourceIndex = mMastersProxyModel->mapToSource(index);
-
-        if (!sourceIndex.isValid())
-            return;
-
-        mDataFilesModel->setCheckState(sourceIndex, state);
-    }
-}
-
 void DataFilesPage::setPluginsCheckstates(Qt::CheckState state)
 {
-    if (!pluginsTable->selectionModel()->hasSelection()) {
+    if (!addonView->selectionModel()->hasSelection()) {
         return;
     }
 
-    QModelIndexList indexes = pluginsTable->selectionModel()->selectedIndexes();
+    QModelIndexList indexes = addonView->selectionModel()->selectedIndexes();
 
     foreach (const QModelIndex &index, indexes)
     {
         if (!index.isValid())
             return;
 
-        QModelIndex sourceIndex = mPluginsProxyModel->mapToSource(
-                    mFilterProxyModel->mapToSource(index));
+        QModelIndex sourceIndex = mAddonProxyModel->mapToSource(index);
 
         if (!sourceIndex.isValid())
             return;
 
-        mDataFilesModel->setCheckState(sourceIndex, state);
+        //bool isChecked = ( state == Qt::Checked );
+
+        mContentModel->setData(sourceIndex, state, Qt::CheckStateRole);
     }
-}
-
-void DataFilesPage::setCheckState(QModelIndex index)
-{
-    if (!index.isValid())
-        return;
-
-    QObject *object = QObject::sender();
-
-    // Not a signal-slot call
-    if (!object)
-        return;
-
-
-    if (object->objectName() == QLatin1String("PluginsTable")) {
-        QModelIndex sourceIndex = mPluginsProxyModel->mapToSource(
-                    mFilterProxyModel->mapToSource(index));
-
-        if (sourceIndex.isValid()) {
-            (mDataFilesModel->checkState(sourceIndex) == Qt::Checked)
-                    ? mDataFilesModel->setCheckState(sourceIndex, Qt::Unchecked)
-                    : mDataFilesModel->setCheckState(sourceIndex, Qt::Checked);
-        }
-    }
-
-    if (object->objectName() == QLatin1String("MastersTable")) {
-        QModelIndex sourceIndex = mMastersProxyModel->mapToSource(index);
-
-        if (sourceIndex.isValid()) {
-            (mDataFilesModel->checkState(sourceIndex) == Qt::Checked)
-                    ? mDataFilesModel->setCheckState(sourceIndex, Qt::Unchecked)
-                    : mDataFilesModel->setCheckState(sourceIndex, Qt::Checked);
-        }
-    }
-
-    return;
-}
-
-void DataFilesPage::filterChanged(const QString filter)
-{
-    QRegExp regExp(filter, Qt::CaseInsensitive, QRegExp::FixedString);
-    mFilterProxyModel->setFilterRegExp(regExp);
 }
 
 void DataFilesPage::profileChanged(const QString &previous, const QString &current)
@@ -480,72 +356,51 @@ void DataFilesPage::profileRenamed(const QString &previous, const QString &curre
     loadSettings();
 
 }
+////////////////////////////
 
-void DataFilesPage::showContextMenu(const QPoint &point)
+QStringList DataFilesPage::checkedItemsPaths()
 {
-    QObject *object = QObject::sender();
+    QStringList itemPaths;
 
-    // Not a signal-slot call
-    if (!object)
-        return;
+    foreach( const ContentSelectorModel::EsmFile *file, mContentModel->checkedItems())
+        itemPaths << file->path();
 
-    if (object->objectName() == QLatin1String("PluginsTable")) {
-        if (!pluginsTable->selectionModel()->hasSelection())
-            return;
+    return itemPaths;
+}
 
-        QPoint globalPos = pluginsTable->mapToGlobal(point);
-        QModelIndexList indexes = pluginsTable->selectionModel()->selectedIndexes();
+void DataFilesPage::slotCurrentProfileIndexChanged(int index)
+{
+    emit profileChanged(index);
+}
 
-        // Show the check/uncheck actions depending on the state of the selected items
-        uncheckAction->setEnabled(false);
-        checkAction->setEnabled(false);
+void DataFilesPage::slotCurrentGameFileIndexChanged(int index)
+{
+    static int oldIndex = -1;
 
-        foreach (const QModelIndex &index, indexes)
-        {
-            if (!index.isValid())
-                return;
+    QAbstractItemModel *const model = gameFileView->model();
+    QSortFilterProxyModel *proxy = dynamic_cast<QSortFilterProxyModel *>(model);
 
-            QModelIndex sourceIndex = mPluginsProxyModel->mapToSource(
-                        mFilterProxyModel->mapToSource(index));
+    if (proxy)
+        proxy->setDynamicSortFilter(false);
 
-            if (!sourceIndex.isValid())
-                return;
+    if (oldIndex > -1)
+        model->setData(model->index(oldIndex, 0), false, Qt::UserRole + 1);
 
-            (mDataFilesModel->checkState(sourceIndex) == Qt::Checked)
-                    ? uncheckAction->setEnabled(true)
-                    : checkAction->setEnabled(true);
-        }
+    oldIndex = index;
 
-        // Show menu
-        mContextMenu->exec(globalPos);
-    }
+    model->setData(model->index(index, 0), true, Qt::UserRole + 1);
 
-    if (object->objectName() == QLatin1String("MastersTable")) {
-        if (!mastersTable->selectionModel()->hasSelection())
-            return;
+    if (proxy)
+        proxy->setDynamicSortFilter(true);
+}
 
-        QPoint globalPos = mastersTable->mapToGlobal(point);
-        QModelIndexList indexes = mastersTable->selectionModel()->selectedIndexes();
+void DataFilesPage::slotAddonTableItemClicked(const QModelIndex &index)
+{
+    QAbstractItemModel *const model = addonView->model();
+    //QSortFilterProxyModel *proxy  = dynamic_cast<QSortFilterProxyModel *>(model);
 
-        // Show the check/uncheck actions depending on the state of the selected items
-        uncheckAction->setEnabled(false);
-        checkAction->setEnabled(false);
-
-        foreach (const QModelIndex &index, indexes)
-        {
-            if (!index.isValid())
-                return;
-
-            QModelIndex sourceIndex = mMastersProxyModel->mapToSource(index);
-
-            if (!sourceIndex.isValid())
-                return;
-
-            (mDataFilesModel->checkState(sourceIndex) == Qt::Checked)
-                    ? uncheckAction->setEnabled(true)
-                    : checkAction->setEnabled(true);
-        }
-
-        mContextMenu->exec(globalPos);
-    }
+    if (model->data(index, Qt::CheckStateRole).toInt() == Qt::Unchecked)
+        model->setData(index, Qt::Checked, Qt::CheckStateRole);
+    else
+        model->setData(index, Qt::Unchecked, Qt::CheckStateRole);
 }

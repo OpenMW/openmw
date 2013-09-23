@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QModelIndex>
 
+#include "components/contentselector/view/contentselector.hpp"
 #include "ui_datafilespage.h"
 
 class QDialogButtonBox;
@@ -13,54 +14,54 @@ class QPushButton;
 class QStringList;
 class QString;
 class QMenu;
+class QLabel;
 
 class DataFilesModel;
 class PluginsProxyModel;
 
-class FileDialog : public QDialog, private Ui::DataFilesPage
+namespace ContentSelectorView
 {
-    Q_OBJECT
-public:
-    explicit FileDialog(QWidget *parent = 0);
-    void addFiles(const QString &path);
-    void setEncoding(const QString &encoding);
+    class LineEdit;
+}
 
-    void openFile();
-    void newFile();
-    void accepted();
+namespace CSVDoc
+{
+    class FileWidget;
+    class AdjusterWidget;
 
-    QStringList checkedItemsPaths();
-    QString fileName();
+    class FileDialog : public ContentSelectorView::ContentSelector
+    {
+        Q_OBJECT
 
-signals:
-    void openFiles();
-    void createNewFile();
-    
-public slots:
-    void accept();
+        FileWidget *mFileWidget;
+        AdjusterWidget *mAdjusterWidget;
 
-private slots:
-    void updateViews();
-    void updateOpenButton(const QStringList &items);
-    void updateCreateButton(const QString &name);
-    void setCheckState(QModelIndex index);
+        bool mEnable_1;
+        bool mEnable_2;
 
-    void filterChanged(const QString &filter);
+    public:
+        explicit FileDialog(QWidget *parent = 0);
 
-    void createButtonClicked();
+        void openFile();
+        void newFile();
 
-private:
-    QLabel *mNameLabel;
-    LineEdit *mNameLineEdit;
+        QString fileName();
 
-    QPushButton *mCreateButton;
-    QDialogButtonBox *mButtonBox;
+    signals:
+        void openFiles();
+        void createNewFile();
 
-    DataFilesModel *mDataFilesModel;
+        void signalUpdateCreateButton (bool, int);
+        void signalUpdateCreateButtonFlags(int);
 
-    PluginsProxyModel *mPluginsProxyModel;
-    QSortFilterProxyModel *mMastersProxyModel;
-    QSortFilterProxyModel *mFilterProxyModel;
-};
+    public slots:
 
+    private slots:
+        //void updateViews();
+        void updateOpenButton(const QStringList &items);
+        void slotEnableCreateButton(bool enable, int widgetNumber);
+        void slotAdjusterChanged(bool value);
+        void slotGameFileSelected(int value);
+    };
+}
 #endif // FILEDIALOG_HPP

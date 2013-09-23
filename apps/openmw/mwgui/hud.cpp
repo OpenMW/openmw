@@ -250,6 +250,7 @@ namespace MWGui
             // remove object from the container it was coming from
             mDragAndDrop->mSourceModel->removeItem(mDragAndDrop->mItem, mDragAndDrop->mDraggedCount);
             mDragAndDrop->finish();
+            mDragAndDrop->mSourceModel->update();
         }
         else
         {

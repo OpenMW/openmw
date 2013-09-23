@@ -9,145 +9,48 @@
 #include <QSpacerItem>
 #include <QPushButton>
 #include <QLabel>
+#include <QGroupBox>
 
-#include <components/fileorderlist/model/datafilesmodel.hpp>
-#include <components/fileorderlist/model/pluginsproxymodel.hpp>
-#include <components/fileorderlist/model/esm/esmfile.hpp>
+#include <components/contentselector/model/esmfile.hpp>
+#include <components/contentselector/view/lineedit.hpp>
 
-#include <components/fileorderlist/utils/lineedit.hpp>
+#include "filewidget.hpp"
+#include "adjusterwidget.hpp"
 
-FileDialog::FileDialog(QWidget *parent) :
-    QDialog(parent)
+#include <QDebug>
+
+CSVDoc::FileDialog::FileDialog(QWidget *parent) :
+    ContentSelector(parent),
+    mFileWidget (new FileWidget (this)),
+    mAdjusterWidget (new AdjusterWidget (this)),
+    mEnable_1(false),
+    mEnable_2(false)
 {
-    setupUi(this);
-
-    // Models
-    mDataFilesModel = new DataFilesModel(this);
-
-    mMastersProxyModel = new QSortFilterProxyModel();
-    mMastersProxyModel->setFilterRegExp(QString("^.*\\.esm"));
-    mMastersProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
-    mMastersProxyModel->setSourceModel(mDataFilesModel);
-
-    mPluginsProxyModel = new PluginsProxyModel();
-    mPluginsProxyModel->setFilterRegExp(QString("^.*\\.esp"));
-    mPluginsProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
-    mPluginsProxyModel->setSourceModel(mDataFilesModel);
-
-    mFilterProxyModel = new QSortFilterProxyModel();
-    mFilterProxyModel->setDynamicSortFilter(true);
-    mFilterProxyModel->setSourceModel(mPluginsProxyModel);
-
-    QCheckBox checkBox;
-    unsigned int height = checkBox.sizeHint().height() + 4;
-
-    mastersTable->setModel(mMastersProxyModel);
-    mastersTable->setObjectName("MastersTable");
-    mastersTable->setContextMenuPolicy(Qt::CustomContextMenu);
-    mastersTable->setSortingEnabled(false);
-    mastersTable->setSelectionBehavior(QAbstractItemView::SelectRows);
-    mastersTable->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    mastersTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    mastersTable->setAlternatingRowColors(true);
-    mastersTable->horizontalHeader()->setStretchLastSection(true);
-
-    // Set the row height to the size of the checkboxes
-    mastersTable->verticalHeader()->setDefaultSectionSize(height);
-    mastersTable->verticalHeader()->setResizeMode(QHeaderView::Fixed);
-    mastersTable->verticalHeader()->hide();
-
-    pluginsTable->setModel(mFilterProxyModel);
-    pluginsTable->setObjectName("PluginsTable");
-    pluginsTable->setContextMenuPolicy(Qt::CustomContextMenu);
-    pluginsTable->setSortingEnabled(false);
-    pluginsTable->setSelectionBehavior(QAbstractItemView::SelectRows);
-    pluginsTable->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    pluginsTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    pluginsTable->setAlternatingRowColors(true);
-    pluginsTable->setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
-    pluginsTable->horizontalHeader()->setStretchLastSection(true);
-
-    pluginsTable->verticalHeader()->setDefaultSectionSize(height);
-    pluginsTable->verticalHeader()->setResizeMode(QHeaderView::Fixed);
-
     // Hide the profile elements
-    profileLabel->hide();
-    profilesComboBox->hide();
-    newProfileButton->hide();
-    deleteProfileButton->hide();
+    profileGroupBox->hide();
+    addonView->showColumn(2);
 
-    // Add some extra widgets
-    QHBoxLayout *nameLayout = new QHBoxLayout();
-    QSpacerItem *spacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+    resize(400, 400);
 
-    mNameLabel = new QLabel(tr("File Name:"), this);
+    mFileWidget->setType(true);
+    mFileWidget->extensionLabelIsVisible(false);
 
-    QRegExpValidator *validator = new QRegExpValidator(QRegExp("^[a-zA-Z0-9\\s]*$"));
-    mNameLineEdit = new LineEdit(this);
-    mNameLineEdit->setValidator(validator);
+    connect(projectCreateButton, SIGNAL(clicked()), this, SIGNAL(createNewFile()));
 
-    nameLayout->addSpacerItem(spacer);
-    nameLayout->addWidget(mNameLabel);
-    nameLayout->addWidget(mNameLineEdit);
+    connect(projectButtonBox, SIGNAL(accepted()), this, SIGNAL(openFiles()));
+    connect(projectButtonBox, SIGNAL(rejected()), this, SLOT(reject()));
 
-    mButtonBox = new QDialogButtonBox(this);
+    connect (mFileWidget, SIGNAL (nameChanged (const QString&, bool)),
+        mAdjusterWidget, SLOT (setName (const QString&, bool)));
 
-    mCreateButton = new QPushButton(tr("Create"), this);
-    mCreateButton->setEnabled(false);
-
-    verticalLayout->addLayout(nameLayout);
-    verticalLayout->addWidget(mButtonBox);
-
-    // Set sizes
-    QList<int> sizeList;
-    sizeList << 175;
-    sizeList << 200;
-
-    splitter->setSizes(sizeList);
-
-    resize(600, 400);
-
-    connect(mDataFilesModel, SIGNAL(layoutChanged()), this, SLOT(updateViews()));
-    connect(mDataFilesModel, SIGNAL(checkedItemsChanged(QStringList)), this, SLOT(updateOpenButton(QStringList)));
-    connect(mNameLineEdit, SIGNAL(textChanged(QString)), this, SLOT(updateCreateButton(QString)));
-
-    connect(filterLineEdit, SIGNAL(textChanged(QString)), this, SLOT(filterChanged(QString)));
-
-    connect(pluginsTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckState(QModelIndex)));
-    connect(mastersTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(setCheckState(QModelIndex)));
-
-    connect(mCreateButton, SIGNAL(clicked()), this, SLOT(createButtonClicked()));
-
-    connect(mButtonBox, SIGNAL(accepted()), this, SLOT(accept()));
-    connect(mButtonBox, SIGNAL(rejected()), this, SLOT(reject()));
+    connect (mAdjusterWidget, SIGNAL (stateChanged (bool)), this, SLOT (slotAdjusterChanged(bool)));
+    connect (this, SIGNAL (signalGameFileChanged(int)), this, SLOT (slotGameFileSelected(int)));
+    connect (this, SIGNAL (signalUpdateCreateButton(bool, int)), this, SLOT (slotEnableCreateButton(bool, int)));
 }
 
-void FileDialog::updateViews()
+void CSVDoc::FileDialog::updateOpenButton(const QStringList &items)
 {
-    // Ensure the columns are hidden because sort() re-enables them
-    mastersTable->setColumnHidden(1, true);
-    mastersTable->setColumnHidden(3, true);
-    mastersTable->setColumnHidden(4, true);
-    mastersTable->setColumnHidden(5, true);
-    mastersTable->setColumnHidden(6, true);
-    mastersTable->setColumnHidden(7, true);
-    mastersTable->setColumnHidden(8, true);
-    mastersTable->resizeColumnsToContents();
-
-    pluginsTable->setColumnHidden(1, true);
-    pluginsTable->setColumnHidden(3, true);
-    pluginsTable->setColumnHidden(4, true);
-    pluginsTable->setColumnHidden(5, true);
-    pluginsTable->setColumnHidden(6, true);
-    pluginsTable->setColumnHidden(7, true);
-    pluginsTable->setColumnHidden(8, true);
-    pluginsTable->resizeColumnsToContents();
-
-}
-
-void FileDialog::updateOpenButton(const QStringList &items)
-{
-    QPushButton *openButton = mButtonBox->button(QDialogButtonBox::Open);
+    QPushButton *openButton = projectButtonBox->button(QDialogButtonBox::Open);
 
     if (!openButton)
         return;
@@ -155,118 +58,60 @@ void FileDialog::updateOpenButton(const QStringList &items)
     openButton->setEnabled(!items.isEmpty());
 }
 
-void FileDialog::updateCreateButton(const QString &name)
+void CSVDoc::FileDialog::slotEnableCreateButton(bool enable, int widgetNumber)
 {
-    if (!mCreateButton->isVisible())
-        return;
 
-    mCreateButton->setEnabled(!name.isEmpty());
+    if (widgetNumber == 1)
+        mEnable_1 = enable;
+
+    if (widgetNumber == 2)
+        mEnable_2 = enable;
+
+    qDebug() << "update enabled" << mEnable_1 << mEnable_2 << enable;
+    projectCreateButton->setEnabled(mEnable_1 && mEnable_2);
 }
 
-void FileDialog::filterChanged(const QString &filter)
+QString CSVDoc::FileDialog::fileName()
 {
-    QRegExp filterRe(filter, Qt::CaseInsensitive, QRegExp::FixedString);
-    mFilterProxyModel->setFilterRegExp(filterRe);
+    return mFileWidget->getName();
 }
 
-void FileDialog::addFiles(const QString &path)
-{
-    mDataFilesModel->addFiles(path);
-    mDataFilesModel->sort(3);  // Sort by date accessed
-}
-
-void FileDialog::setEncoding(const QString &encoding)
-{
-    mDataFilesModel->setEncoding(encoding);
-}
-
-void FileDialog::setCheckState(QModelIndex index)
-{
-    if (!index.isValid())
-        return;
-
-    QObject *object = QObject::sender();
-
-    // Not a signal-slot call
-    if (!object)
-        return;
-
-
-    if (object->objectName() == QLatin1String("PluginsTable")) {
-        QModelIndex sourceIndex = mPluginsProxyModel->mapToSource(
-                    mFilterProxyModel->mapToSource(index));
-
-        if (sourceIndex.isValid()) {
-            (mDataFilesModel->checkState(sourceIndex) == Qt::Checked)
-                    ? mDataFilesModel->setCheckState(sourceIndex, Qt::Unchecked)
-                    : mDataFilesModel->setCheckState(sourceIndex, Qt::Checked);
-        }
-    }
-
-    if (object->objectName() == QLatin1String("MastersTable")) {
-        QModelIndex sourceIndex = mMastersProxyModel->mapToSource(index);
-
-        if (sourceIndex.isValid()) {
-            (mDataFilesModel->checkState(sourceIndex) == Qt::Checked)
-                    ? mDataFilesModel->setCheckState(sourceIndex, Qt::Unchecked)
-                    : mDataFilesModel->setCheckState(sourceIndex, Qt::Checked);
-        }
-    }
-
-    return;
-}
-
-QStringList FileDialog::checkedItemsPaths()
-{
-    return mDataFilesModel->checkedItemsPaths();
-}
-
-QString FileDialog::fileName()
-{
-    return mNameLineEdit->text();
-}
-
-void FileDialog::openFile()
+void CSVDoc::FileDialog::openFile()
 {
     setWindowTitle(tr("Open"));
 
-    mNameLabel->hide();
-    mNameLineEdit->hide();
-    mCreateButton->hide();
-
-    mButtonBox->removeButton(mCreateButton);
-    mButtonBox->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Open);
-    QPushButton *openButton = mButtonBox->button(QDialogButtonBox::Open);
-    openButton->setEnabled(false);
+    mFileWidget->hide();
+    adjusterWidgetFrame->hide();
+    projectCreateButton->hide();
+    projectGroupBox->setTitle(tr(""));
+    projectButtonBox->button(QDialogButtonBox::Open)->setEnabled(false);
 
     show();
     raise();
     activateWindow();
 }
 
-void FileDialog::newFile()
+void CSVDoc::FileDialog::newFile()
 {
     setWindowTitle(tr("New"));
 
-    mNameLabel->show();
-    mNameLineEdit->clear();
-    mNameLineEdit->show();
-    mCreateButton->show();
+    fileWidgetFrame->layout()->addWidget(mFileWidget);
+    adjusterWidgetFrame->layout()->addWidget(mAdjusterWidget);
 
-    mButtonBox->setStandardButtons(QDialogButtonBox::Cancel);
-    mButtonBox->addButton(mCreateButton, QDialogButtonBox::ActionRole);
+    projectButtonBox->setStandardButtons(QDialogButtonBox::Cancel);
+    projectButtonBox->addButton(projectCreateButton, QDialogButtonBox::ActionRole);
 
     show();
     raise();
     activateWindow();
 }
 
-void FileDialog::accept()
+void CSVDoc::FileDialog::slotAdjusterChanged(bool value)
 {
-    emit openFiles();
+    emit signalUpdateCreateButton(mAdjusterWidget->isValid(), 2);
 }
 
-void FileDialog::createButtonClicked()
+void CSVDoc::FileDialog::slotGameFileSelected(int value)
 {
-    emit createNewFile();
+        emit signalUpdateCreateButton(value > -1, 1);
 }

@@ -14,22 +14,26 @@
 
 class QToolButton;
 
-class ComboBoxLineEdit : public QLineEdit
+namespace ContentSelectorView
 {
-    Q_OBJECT
+    class LineEdit : public QLineEdit
+    {
+        Q_OBJECT
 
-public:
-    ComboBoxLineEdit(QWidget *parent = 0);
+        QString mPlaceholderText;
 
-protected:
-    void resizeEvent(QResizeEvent *);
+    public:
+        LineEdit(QWidget *parent = 0);
 
-private slots:
-    void updateClearButton(const QString &text);
+    protected:
+        void resizeEvent(QResizeEvent *);
 
-private:
-    QToolButton *mClearButton;
-};
+    private slots:
+        void updateClearButton(const QString &text);
 
+    private:
+        QToolButton *mClearButton;
+    };
+}
 #endif // LIENEDIT_H
 

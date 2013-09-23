@@ -43,6 +43,10 @@ boost::filesystem::path CSVDoc::AdjusterWidget::getPath() const
     return mResultPath;
 }
 
+bool CSVDoc::AdjusterWidget::isValid() const
+{
+    return mValid;
+}
 void CSVDoc::AdjusterWidget::setName (const QString& name, bool addon)
 {
     QString message;

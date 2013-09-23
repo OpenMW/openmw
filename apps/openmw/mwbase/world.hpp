@@ -396,6 +396,8 @@ namespace MWBase
             /// It only applies to the current form the NPC is in.
             virtual void applyWerewolfAcrobatics(const MWWorld::Ptr& actor) = 0;
 
+            virtual bool getGodModeState() = 0;
+
             virtual bool toggleGodMode() = 0;
     };
 }
