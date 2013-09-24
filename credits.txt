@@ -62,6 +62,7 @@ Roman Proskuryakov (humbug)
 Sandy Carter (bwrsandman)
 Sebastian Wick (swick)
 Sergey Shambir
+sir_herrbatka
 Sylvain Thesnieres (Garvek)
 Tom Mason (wheybags)
 Torben Leif Carrington (TorbenC)
