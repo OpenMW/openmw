@@ -14,7 +14,7 @@
 #include "../world/enumdelegate.hpp"
 #include "../world/vartypedelegate.hpp"
 #include "../world/recordstatusdelegate.hpp"
-#include "../world/refidtypedelegate.hpp"
+#include "../world/idtypedelegate.hpp"
 #include "../settings/usersettingsdialog.hpp"
 
 #include "view.hpp"
@@ -56,7 +56,7 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
         new CSVWorld::RecordStatusDelegateFactory());
 
     mDelegateFactories->add (CSMWorld::ColumnBase::Display_RefRecordType,
-        new CSVWorld::RefIdTypeDelegateFactory());
+        new CSVWorld::IdTypeDelegateFactory());
 
     struct Mapping
     {

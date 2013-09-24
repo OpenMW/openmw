@@ -9,6 +9,7 @@
 #include <components/esm/esmreader.hpp>
 #include <components/esm/defs.hpp>
 #include <components/esm/loadglob.hpp>
+#include <components/esm/cellref.hpp>
 
 #include "idtable.hpp"
 #include "columnimp.hpp"
@@ -153,6 +154,12 @@ CSMWorld::Data::Data() : mRefs (mCells)
     mRefs.addColumn (new RecordStateColumn<CellRef>);
     mRefs.addColumn (new CellColumn<CellRef>);
     mRefs.addColumn (new IdColumn<CellRef>);
+    mRefs.addColumn (new PosColumn<CellRef> (&CellRef::mPos, 0, false));
+    mRefs.addColumn (new PosColumn<CellRef> (&CellRef::mPos, 1, false));
+    mRefs.addColumn (new PosColumn<CellRef> (&CellRef::mPos, 2, false));
+    mRefs.addColumn (new RotColumn<CellRef> (&CellRef::mPos, 0, false));
+    mRefs.addColumn (new RotColumn<CellRef> (&CellRef::mPos, 1, false));
+    mRefs.addColumn (new RotColumn<CellRef> (&CellRef::mPos, 2, false));
     mRefs.addColumn (new ScaleColumn<CellRef>);
     mRefs.addColumn (new OwnerColumn<CellRef>);
     mRefs.addColumn (new SoulColumn<CellRef>);
@@ -163,6 +170,12 @@ CSMWorld::Data::Data() : mRefs (mCells)
     mRefs.addColumn (new GoldValueColumn<CellRef>);
     mRefs.addColumn (new TeleportColumn<CellRef>);
     mRefs.addColumn (new TeleportCellColumn<CellRef>);
+    mRefs.addColumn (new PosColumn<CellRef> (&CellRef::mDoorDest, 0, true));
+    mRefs.addColumn (new PosColumn<CellRef> (&CellRef::mDoorDest, 1, true));
+    mRefs.addColumn (new PosColumn<CellRef> (&CellRef::mDoorDest, 2, true));
+    mRefs.addColumn (new RotColumn<CellRef> (&CellRef::mDoorDest, 0, true));
+    mRefs.addColumn (new RotColumn<CellRef> (&CellRef::mDoorDest, 1, true));
+    mRefs.addColumn (new RotColumn<CellRef> (&CellRef::mDoorDest, 2, true));
     mRefs.addColumn (new LockLevelColumn<CellRef>);
     mRefs.addColumn (new KeyColumn<CellRef>);
     mRefs.addColumn (new TrapColumn<CellRef>);
