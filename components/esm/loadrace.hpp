@@ -17,6 +17,8 @@ class ESMWriter;
 
 struct Race
 {
+    static unsigned int sRecordId;
+
     struct SkillBonus
     {
         int mSkill; // SkillEnum

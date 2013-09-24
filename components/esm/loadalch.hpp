@@ -17,6 +17,8 @@ class ESMWriter;
 
 struct Potion
 {
+    static unsigned int sRecordId;
+
     struct ALDTstruct
     {
         float mWeight;

@@ -20,6 +20,8 @@ class ESMWriter;
 
 struct DialInfo
 {
+    static unsigned int sRecordId;
+
     enum Gender
     {
         Male = 0,

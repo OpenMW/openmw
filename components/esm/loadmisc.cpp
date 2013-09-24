@@ -2,9 +2,11 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int Miscellaneous::sRecordId = REC_MISC;
 
 void Miscellaneous::load(ESMReader &esm)
 {

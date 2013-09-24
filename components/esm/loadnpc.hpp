@@ -20,6 +20,8 @@ class ESMWriter;
 
 struct NPC
 {
+    static unsigned int sRecordId;
+
   // Services
   enum Services
     {

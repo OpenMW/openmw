@@ -15,6 +15,8 @@ class ESMWriter;
  */
 struct Pathgrid
 {
+    static unsigned int sRecordId;
+
     struct DATAstruct
     {
         int mX, mY; // Grid location, matches cell for exterior cells

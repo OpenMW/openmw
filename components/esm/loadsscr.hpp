@@ -19,6 +19,8 @@ class ESMWriter;
 
 struct StartScript
 {
+    static unsigned int sRecordId;
+
     std::string mData;
     std::string mId, mScript;
 

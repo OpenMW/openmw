@@ -2,9 +2,11 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int Light::sRecordId = REC_LIGH;
 
 void Light::load(ESMReader &esm)
 {

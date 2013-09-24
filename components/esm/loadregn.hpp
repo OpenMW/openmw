@@ -18,6 +18,8 @@ class ESMWriter;
 
 struct Region
 {
+    static unsigned int sRecordId;
+
 #pragma pack(push)
 #pragma pack(1)
     struct WEATstruct

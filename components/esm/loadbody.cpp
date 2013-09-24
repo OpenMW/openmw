@@ -2,9 +2,12 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int BodyPart::sRecordId = REC_BODY;
+
 
 void BodyPart::load(ESMReader &esm)
 {

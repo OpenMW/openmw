@@ -15,6 +15,8 @@ class ESMWriter;
 
 struct Weapon
 {
+    static unsigned int sRecordId;
+
     enum Type
     {
         ShortBladeOneHand = 0,

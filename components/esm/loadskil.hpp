@@ -19,6 +19,8 @@ class ESMWriter;
 
 struct Skill
 {
+    static unsigned int sRecordId;
+
     std::string mId;
 
   struct SKDTstruct

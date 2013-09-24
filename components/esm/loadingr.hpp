@@ -15,6 +15,8 @@ class ESMWriter;
 
 struct Ingredient
 {
+    static unsigned int sRecordId;
+
     struct IRDTstruct
     {
         float mWeight;

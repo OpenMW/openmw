@@ -11,6 +11,8 @@ class ESMWriter;
 
 struct Probe
 {
+    static unsigned int sRecordId;
+
     struct Data
     {
         float mWeight;

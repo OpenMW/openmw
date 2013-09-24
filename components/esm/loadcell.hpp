@@ -16,7 +16,6 @@ namespace MWWorld
 
 namespace ESM
 {
-
 class ESMReader;
 class ESMWriter;
 
@@ -55,6 +54,8 @@ typedef std::list<CellRef> CellRefTracker;
  */
 struct Cell
 {
+    static unsigned int sRecordId;
+
   enum Flags
     {
       Interior  = 0x01, // Interior cell

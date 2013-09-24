@@ -1,7 +1,11 @@
 #include "loadglob.hpp"
 
+#include "defs.hpp"
+
 namespace ESM
 {
+    unsigned int Global::sRecordId = REC_GLOB;
+
     void Global::load (ESMReader &esm)
     {
         mValue.read (esm, ESM::Variant::Format_Global);

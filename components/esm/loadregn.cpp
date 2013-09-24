@@ -2,9 +2,11 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int Region::sRecordId = REC_REGN;
 
 void Region::load(ESMReader &esm)
 {

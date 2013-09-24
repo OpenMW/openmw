@@ -2,9 +2,11 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int Pathgrid::sRecordId = REC_PGRD;
 
 void Pathgrid::load(ESMReader &esm)
 {

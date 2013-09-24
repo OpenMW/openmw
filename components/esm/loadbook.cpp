@@ -2,9 +2,11 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int Book::sRecordId = REC_BOOK;
 
 void Book::load(ESMReader &esm)
 {

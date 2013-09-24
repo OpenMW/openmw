@@ -2,9 +2,11 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int Clothing::sRecordId = REC_CLOT;
 
 void Clothing::load(ESMReader &esm)
 {

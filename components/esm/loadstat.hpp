@@ -22,6 +22,8 @@ class ESMWriter;
 
 struct Static
 {
+    static unsigned int sRecordId;
+
   std::string mId, mModel;
 
   void load(ESMReader &esm);

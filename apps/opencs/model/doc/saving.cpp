@@ -1,8 +1,6 @@
 
 #include "saving.hpp"
 
-#include <components/esm/defs.hpp>
-
 #include "../world/data.hpp"
 #include "../world/idcollection.hpp"
 
@@ -18,37 +16,37 @@ CSMDoc::Saving::Saving (Document& document)
     appendStage (new WriteHeaderStage (mDocument, mState));
 
     appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::Global> >
-        (mDocument.getData().getGlobals(), mState, ESM::REC_GLOB));
+        (mDocument.getData().getGlobals(), mState));
 
     appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::GameSetting> >
-        (mDocument.getData().getGmsts(), mState, ESM::REC_GMST));
+        (mDocument.getData().getGmsts(), mState));
 
     appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::Skill> >
-        (mDocument.getData().getSkills(), mState, ESM::REC_SKIL));
+        (mDocument.getData().getSkills(), mState));
 
     appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::Class> >
-        (mDocument.getData().getClasses(), mState, ESM::REC_CLAS));
+        (mDocument.getData().getClasses(), mState));
 
     appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::Faction> >
-        (mDocument.getData().getFactions(), mState, ESM::REC_FACT));
+        (mDocument.getData().getFactions(), mState));
 
     appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::Race> >
-        (mDocument.getData().getRaces(), mState, ESM::REC_RACE));
+        (mDocument.getData().getRaces(), mState));
 
     appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::Sound> >
-        (mDocument.getData().getSounds(), mState, ESM::REC_SOUN));
+        (mDocument.getData().getSounds(), mState));
 
     appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::Script> >
-        (mDocument.getData().getScripts(), mState, ESM::REC_SCPT));
+        (mDocument.getData().getScripts(), mState));
 
     appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::Region> >
-        (mDocument.getData().getRegions(), mState, ESM::REC_REGN));
+        (mDocument.getData().getRegions(), mState));
 
     appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::BirthSign> >
-        (mDocument.getData().getBirthsigns(), mState, ESM::REC_BSGN));
+        (mDocument.getData().getBirthsigns(), mState));
 
     appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::Spell> >
-        (mDocument.getData().getSpells(), mState, ESM::REC_SPEL));
+        (mDocument.getData().getSpells(), mState));
 
 
     appendStage (new CloseSaveStage (mState));

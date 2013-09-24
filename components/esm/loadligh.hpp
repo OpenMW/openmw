@@ -16,6 +16,8 @@ class ESMWriter;
 
 struct Light
 {
+    static unsigned int sRecordId;
+
     enum Flags
     {
         Dynamic     = 0x001,

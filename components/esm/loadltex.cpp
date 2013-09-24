@@ -2,9 +2,11 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int LandTexture::sRecordId = REC_LTEX;
 
 void LandTexture::load(ESMReader &esm)
 {

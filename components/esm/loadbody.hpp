@@ -11,6 +11,8 @@ class ESMWriter;
 
 struct BodyPart
 {
+    static unsigned int sRecordId;
+
     enum MeshPart
     {
         MP_Head = 0,

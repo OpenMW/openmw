@@ -15,6 +15,8 @@ class ESMWriter;
 
 struct Apparatus
 {
+    static unsigned int sRecordId;
+
     enum AppaType
     {
         MortarPestle = 0,

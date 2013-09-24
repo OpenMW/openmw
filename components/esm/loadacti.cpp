@@ -2,9 +2,12 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int Activator::sRecordId = REC_ACTI;
+
 void Activator::load(ESMReader &esm)
 {
     mModel = esm.getHNString("MODL");

@@ -17,6 +17,8 @@ class ESMWriter;
 
 struct Enchantment
 {
+    static unsigned int sRecordId;
+
     enum Type
     {
         CastOnce = 0,

@@ -11,6 +11,8 @@ class ESMWriter;
 
 struct Activator
 {
+    static unsigned int sRecordId;
+
     std::string mId, mName, mScript, mModel;
 
     void load(ESMReader &esm);

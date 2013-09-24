@@ -2,9 +2,12 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int Potion::sRecordId = REC_ALCH;
+
 void Potion::load(ESMReader &esm)
 {
     mModel = esm.getHNString("MODL");

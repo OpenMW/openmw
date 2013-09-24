@@ -2,9 +2,11 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int Land::sRecordId = REC_LAND;
 
 void Land::LandData::save(ESMWriter &esm)
 {

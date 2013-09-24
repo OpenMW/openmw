@@ -14,6 +14,8 @@ class ESMWriter;
 
 struct Book
 {
+    static unsigned int sRecordId;
+
     struct BKDTstruct
     {
         float mWeight;

@@ -13,6 +13,8 @@ class ESMWriter;
 
 struct Spell
 {
+    static unsigned int sRecordId;
+
     enum SpellType
     {
         ST_Spell = 0,   // Normal spell, must be cast and costs mana

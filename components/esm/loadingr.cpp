@@ -2,9 +2,11 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int Ingredient::sRecordId = REC_INGR;
 
 void Ingredient::load(ESMReader &esm)
 {

@@ -61,6 +61,8 @@ struct PartReferenceList
 
 struct Armor
 {
+    static unsigned int sRecordId;
+
     enum Type
     {
         Helmet = 0,

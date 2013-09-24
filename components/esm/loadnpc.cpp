@@ -2,9 +2,11 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int NPC::sRecordId = REC_NPC_;
 
 void NPC::load(ESMReader &esm)
 {

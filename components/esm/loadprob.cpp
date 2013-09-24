@@ -2,9 +2,11 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int Probe::sRecordId = REC_PROB;
 
 void Probe::load(ESMReader &esm)
 {

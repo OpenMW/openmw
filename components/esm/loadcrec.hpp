@@ -17,6 +17,8 @@ class ESMWriter;
 /// Changes a creature
 struct LoadCREC
 {
+    static unsigned int sRecordId;
+
     std::string mId;
 
     void load(ESMReader &esm)

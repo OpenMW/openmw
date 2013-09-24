@@ -15,6 +15,8 @@ class ESMWriter;
 
 struct SoundGenerator
 {
+    static unsigned int sRecordId;
+
     enum Type
     {
         LeftFoot = 0,

@@ -11,6 +11,8 @@ class ESMWriter;
 
 struct Repair
 {
+    static unsigned int sRecordId;
+
     struct Data
     {
         float mWeight;

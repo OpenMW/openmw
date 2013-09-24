@@ -2,8 +2,11 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM {
+
+    unsigned int Creature::sRecordId = REC_CREA;
 
 void Creature::load(ESMReader &esm)
 {

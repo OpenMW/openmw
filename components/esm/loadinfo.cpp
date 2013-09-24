@@ -2,9 +2,11 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int DialInfo::sRecordId = REC_INFO;
 
 void DialInfo::load(ESMReader &esm)
 {

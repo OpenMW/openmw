@@ -6,6 +6,7 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace
 {
@@ -34,6 +35,7 @@ namespace
 
 namespace ESM
 {
+    unsigned int MagicEffect::sRecordId = REC_MGEF;
 
 void MagicEffect::load(ESMReader &esm)
 {

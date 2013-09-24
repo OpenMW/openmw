@@ -2,9 +2,11 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int Enchantment::sRecordId = REC_ENCH;
 
 void Enchantment::load(ESMReader &esm)
 {

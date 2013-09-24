@@ -27,6 +27,8 @@ class ESMWriter;
 
 struct LandTexture
 {
+    static unsigned int sRecordId;
+
     std::string mId, mTexture;
     int mIndex;
 

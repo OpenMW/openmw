@@ -2,9 +2,11 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int Door::sRecordId = REC_DOOR;
 
 void Door::load(ESMReader &esm)
 {

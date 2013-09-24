@@ -59,6 +59,8 @@ struct LeveledListBase
 
 struct CreatureLevList: LeveledListBase
 {
+    static unsigned int sRecordId;
+
     CreatureLevList()
     {
         mRecName = "CNAM";
@@ -67,6 +69,8 @@ struct CreatureLevList: LeveledListBase
 
 struct ItemLevList: LeveledListBase
 {
+    static unsigned int sRecordId;
+
     ItemLevList()
     {
         mRecName = "INAM";

@@ -2,9 +2,11 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int Spell::sRecordId = REC_SPEL;
 
 void Spell::load(ESMReader &esm)
 {

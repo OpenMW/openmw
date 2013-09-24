@@ -19,6 +19,8 @@ class ESMWriter;
 class Script
 {
 public:
+    static unsigned int sRecordId;
+
     struct SCHDstruct
     {
         /* Script name.

@@ -2,9 +2,11 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int Lockpick::sRecordId = REC_LOCK;
 
 void Lockpick::load(ESMReader &esm)
 {

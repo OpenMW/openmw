@@ -16,6 +16,8 @@ class ESMWriter;
 
 struct Miscellaneous
 {
+    static unsigned int sRecordId;
+
     struct MCDTstruct
     {
         float mWeight;

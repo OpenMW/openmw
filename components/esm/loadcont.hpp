@@ -32,6 +32,8 @@ struct InventoryList
 
 struct Container
 {
+    static unsigned int sRecordId;
+
     enum Flags
     {
         Organic = 1, // Objects cannot be placed in this container

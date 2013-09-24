@@ -2,9 +2,11 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int Weapon::sRecordId = REC_WEAP;
 
 void Weapon::load(ESMReader &esm)
 {

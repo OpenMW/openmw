@@ -17,6 +17,8 @@ class ESMWriter;
 // class
 struct Class
 {
+    static unsigned int sRecordId;
+
     enum AutoCalc
     {
         Weapon = 0x00001,

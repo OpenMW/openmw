@@ -20,6 +20,8 @@ class ESMWriter;
 
 struct Creature
 {
+    static unsigned int sRecordId;
+
     // Default is 0x48?
     enum Flags
     {

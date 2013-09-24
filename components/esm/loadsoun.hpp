@@ -16,6 +16,8 @@ struct SOUNstruct
 
 struct Sound
 {
+    static unsigned int sRecordId;
+
     SOUNstruct mData;
     std::string mId, mSound;
 

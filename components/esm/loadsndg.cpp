@@ -2,9 +2,11 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int SoundGenerator::sRecordId = REC_SNDG;
 
 void SoundGenerator::load(ESMReader &esm)
 {

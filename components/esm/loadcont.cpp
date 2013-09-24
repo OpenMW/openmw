@@ -2,6 +2,7 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
@@ -23,6 +24,8 @@ void InventoryList::save(ESMWriter &esm) const
         esm.writeHNT("NPCO", *it, 36);
     }
 }
+
+    unsigned int Container::sRecordId = REC_CONT;
 
 void Container::load(ESMReader &esm)
 {

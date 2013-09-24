@@ -1,8 +1,6 @@
 #ifndef CSM_DOC_SAVINGSTAGES_H
 #define CSM_DOC_SAVINGSTAGES_H
 
-#include <components/esm/defs.hpp>
-
 #include "stage.hpp"
 
 #include "savingstate.hpp"
@@ -52,12 +50,10 @@ namespace CSMDoc
     {
             const CollectionT& mCollection;
             SavingState& mState;
-            ESM::RecNameInts mRecordType;
 
         public:
 
-            WriteCollectionStage (const CollectionT& collection, SavingState& state,
-                ESM::RecNameInts recordType);
+            WriteCollectionStage (const CollectionT& collection, SavingState& state);
 
             virtual int setup();
             ///< \return number of steps
@@ -68,8 +64,8 @@ namespace CSMDoc
 
     template<class CollectionT>
     WriteCollectionStage<CollectionT>::WriteCollectionStage (const CollectionT& collection,
-        SavingState& state, ESM::RecNameInts recordType)
-    : mCollection (collection), mState (state), mRecordType (recordType)
+        SavingState& state)
+    : mCollection (collection), mState (state)
     {}
 
     template<class CollectionT>
@@ -89,7 +85,7 @@ namespace CSMDoc
             std::string type;
             for (int i=0; i<4; ++i)
                 /// \todo make endianess agnostic (change ESMWriter interface?)
-                type += reinterpret_cast<const char *> (&mRecordType)[i];
+                type += reinterpret_cast<const char *> (&mCollection.getRecord (stage).mModified.sRecordId)[i];
 
             mState.getWriter().startRecord (type);
             mState.getWriter().writeHNCString ("NAME", mCollection.getId (stage));

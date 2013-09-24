@@ -2,9 +2,11 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int BirthSign::sRecordId = REC_BSGN;
 
 void BirthSign::load(ESMReader &esm)
 {

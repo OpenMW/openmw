@@ -29,6 +29,8 @@ struct RankData
 
 struct Faction
 {
+    static unsigned int sRecordId;
+
     std::string mId, mName;
 
     struct FADTstruct

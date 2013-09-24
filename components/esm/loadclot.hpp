@@ -17,6 +17,8 @@ class ESMWriter;
 
 struct Clothing
 {
+    static unsigned int sRecordId;
+
     enum Type
     {
         Pants = 0,

@@ -6,6 +6,7 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
@@ -125,6 +126,8 @@ namespace ESM
         Speechcraft,
         HandToHand
     }};
+
+    unsigned int Skill::sRecordId = REC_SKIL;
 
 void Skill::load(ESMReader &esm)
 {

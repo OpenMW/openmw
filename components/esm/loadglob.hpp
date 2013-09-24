@@ -17,6 +17,8 @@ class ESMWriter;
 
 struct Global
 {
+    static unsigned int sRecordId;
+
     std::string mId;
     Variant mValue;
 

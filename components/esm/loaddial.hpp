@@ -19,6 +19,8 @@ class ESMWriter;
 
 struct Dialogue
 {
+    static unsigned int sRecordId;
+
     enum Type
     {
         Topic = 0,

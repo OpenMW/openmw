@@ -4,9 +4,12 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int Faction::sRecordId = REC_FACT;
+
     int& Faction::FADTstruct::getSkill (int index, bool ignored)
     {
         if (index<0 || index>=6)

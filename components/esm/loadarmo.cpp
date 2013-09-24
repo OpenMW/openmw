@@ -2,6 +2,7 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
@@ -27,6 +28,8 @@ void PartReferenceList::save(ESMWriter &esm) const
         esm.writeHNOString("CNAM", it->mFemale);
     }
 }
+
+unsigned int Armor::sRecordId = REC_ARMO;
 
 void Armor::load(ESMReader &esm)
 {

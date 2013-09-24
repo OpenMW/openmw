@@ -11,6 +11,8 @@ class ESMWriter;
 
 struct Door
 {
+    static unsigned int sRecordId;
+
     std::string mId, mName, mModel, mScript, mOpenSound, mCloseSound;
 
     void load(ESMReader &esm);

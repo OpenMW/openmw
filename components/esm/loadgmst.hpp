@@ -18,6 +18,8 @@ class ESMWriter;
 
 struct GameSetting
 {
+    static unsigned int sRecordId;
+
     std::string mId;
 
     Variant mValue;

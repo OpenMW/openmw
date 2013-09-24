@@ -2,6 +2,7 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
@@ -52,4 +53,8 @@ void LeveledListBase::save(ESMWriter &esm) const
         mChanceNone = 0;
         mList.clear();
     }
+
+    unsigned int CreatureLevList::sRecordId = REC_LEVC;
+
+    unsigned int ItemLevList::sRecordId = REC_LEVI;
 }

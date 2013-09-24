@@ -17,6 +17,8 @@ class ESMWriter;
 
 struct Land
 {
+    static unsigned int sRecordId;
+
     Land();
     ~Land();
 

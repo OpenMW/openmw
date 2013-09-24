@@ -11,6 +11,8 @@ class ESMWriter;
 
 struct Lockpick
 {
+    static unsigned int sRecordId;
+
     struct Data
     {
         float mWeight;

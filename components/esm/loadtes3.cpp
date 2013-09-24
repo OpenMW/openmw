@@ -4,6 +4,7 @@
 #include "esmcommon.hpp"
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 void ESM::Header::blank()
 {
