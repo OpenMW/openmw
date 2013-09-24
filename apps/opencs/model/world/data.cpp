@@ -43,6 +43,17 @@ void CSMWorld::Data::appendIds (std::vector<std::string>& ids, const CollectionB
     ids.insert (ids.end(), ids2.begin(), ids2.end());
 }
 
+int CSMWorld::Data::count (RecordBase::State state, const CollectionBase& collection)
+{
+    int number = 0;
+
+    for (int i=0; i<collection.getSize(); ++i)
+        if (collection.getRecord (i).mState==state)
+            ++number;
+
+    return number;
+}
+
 CSMWorld::Data::Data() : mRefs (mCells)
 {
     mGlobals.addColumn (new StringIdColumn<ESM::Global>);
@@ -458,6 +469,24 @@ bool CSMWorld::Data::hasId (const std::string& id) const
         getSpells().searchId (id)!=-1 ||
         getCells().searchId (id)!=-1 ||
         getReferenceables().searchId (id)!=-1;
+}
+
+int CSMWorld::Data::count (RecordBase::State state) const
+{
+    return
+        count (state, mGlobals) +
+        count (state, mGmsts) +
+        count (state, mSkills) +
+        count (state, mClasses) +
+        count (state, mFactions) +
+        count (state, mRaces) +
+        count (state, mSounds) +
+        count (state, mScripts) +
+        count (state, mRegions) +
+        count (state, mBirthsigns) +
+        count (state, mSpells) +
+        count (state, mCells) +
+        count (state, mReferenceables);
 }
 
 std::vector<std::string> CSMWorld::Data::getIds (bool listDeleted) const

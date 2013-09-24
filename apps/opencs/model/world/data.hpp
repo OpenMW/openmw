@@ -66,6 +66,8 @@ namespace CSMWorld
                 bool listDeleted);
             ///< Append all IDs from collection to \a ids.
 
+            static int count (RecordBase::State state, const CollectionBase& collection);
+
         public:
 
             Data();
@@ -150,6 +152,9 @@ namespace CSMWorld
             ///< Return a sorted collection of all IDs that are not internal to the editor.
             ///
             /// \param listDeleted include deleted record in the list
+
+            int count (RecordBase::State state) const;
+            ///< Return number of top-level records with the given \a state.
 
         signals:
 

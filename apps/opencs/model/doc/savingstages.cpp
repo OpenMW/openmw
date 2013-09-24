@@ -48,7 +48,10 @@ void CSMDoc::WriteHeaderStage::perform (int stage, std::vector<std::string>& mes
     /// \todo fill in missing header information
     mState.getWriter().setAuthor ("");
     mState.getWriter().setDescription ("");
-    mState.getWriter().setRecordCount (0);
+    mState.getWriter().setRecordCount (
+        mDocument.getData().count (CSMWorld::RecordBase::State_Modified) +
+        mDocument.getData().count (CSMWorld::RecordBase::State_ModifiedOnly) +
+        mDocument.getData().count (CSMWorld::RecordBase::State_Deleted));
 
     /// \todo refine dependency list (at least remove redundant dependencies)
     std::vector<boost::filesystem::path> dependencies = mDocument.getContentFiles();
