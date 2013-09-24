@@ -395,6 +395,9 @@ void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base)
 
     reader.open (path.string());
 
+    mAuthor = reader.getAuthor();
+    mDescription = reader.getDesc();
+
     // Note: We do not need to send update signals here, because at this point the model is not connected
     // to any view.
     while (reader.hasMoreRecs())
@@ -487,6 +490,26 @@ int CSMWorld::Data::count (RecordBase::State state) const
         count (state, mSpells) +
         count (state, mCells) +
         count (state, mReferenceables);
+}
+
+void CSMWorld::Data::setDescription (const std::string& description)
+{
+    mDescription = description;
+}
+
+std::string CSMWorld::Data::getDescription() const
+{
+    return mDescription;
+}
+
+void CSMWorld::Data::setAuthor (const std::string& author)
+{
+    mAuthor = author;
+}
+
+std::string CSMWorld::Data::getAuthor() const
+{
+    return mAuthor;
 }
 
 std::vector<std::string> CSMWorld::Data::getIds (bool listDeleted) const

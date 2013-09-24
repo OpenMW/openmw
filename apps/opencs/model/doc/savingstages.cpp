@@ -45,9 +45,8 @@ void CSMDoc::WriteHeaderStage::perform (int stage, std::vector<std::string>& mes
 
     mState.getWriter().setFormat (0);
 
-    /// \todo fill in missing header information
-    mState.getWriter().setAuthor ("");
-    mState.getWriter().setDescription ("");
+    mState.getWriter().setAuthor (mDocument.getData().getAuthor());
+    mState.getWriter().setDescription (mDocument.getData().getDescription());
     mState.getWriter().setRecordCount (
         mDocument.getData().count (CSMWorld::RecordBase::State_Modified) +
         mDocument.getData().count (CSMWorld::RecordBase::State_ModifiedOnly) +

@@ -54,6 +54,8 @@ namespace CSMWorld
             IdCollection<CSMFilter::Filter> mFilters;
             std::vector<QAbstractItemModel *> mModels;
             std::map<UniversalId::Type, QAbstractItemModel *> mModelIndex;
+            std::string mAuthor;
+            std::string mDescription;
 
             // not implemented
             Data (const Data&);
@@ -155,6 +157,14 @@ namespace CSMWorld
 
             int count (RecordBase::State state) const;
             ///< Return number of top-level records with the given \a state.
+
+            void setDescription (const std::string& description);
+
+            std::string getDescription() const;
+
+            void setAuthor (const std::string& author);
+
+            std::string getAuthor() const;
 
         signals:
 

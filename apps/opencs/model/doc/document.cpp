@@ -2158,6 +2158,12 @@ CSMDoc::Document::Document (const std::vector<boost::filesystem::path>& files,
         load (files.begin(), end, !new_);
     }
 
+    if (new_)
+    {
+        mData.setDescription ("");
+        mData.setAuthor ("");
+    }
+
     addOptionalGmsts();
     addOptionalGlobals();
 
