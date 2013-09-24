@@ -67,6 +67,21 @@ void CSMDoc::WriteHeaderStage::perform (int stage, std::vector<std::string>& mes
 }
 
 
+CSMDoc::WriteRefIdCollectionStage::WriteRefIdCollectionStage (Document& document, SavingState& state)
+: mDocument (document), mState (state)
+{}
+
+int CSMDoc::WriteRefIdCollectionStage::setup()
+{
+    return mDocument.getData().getReferenceables().getSize();
+}
+
+void CSMDoc::WriteRefIdCollectionStage::perform (int stage, std::vector<std::string>& messages)
+{
+    mDocument.getData().getReferenceables().save (stage, mState.getWriter());
+}
+
+
 CSMDoc::CloseSaveStage::CloseSaveStage (SavingState& state)
 : mState (state)
 {}

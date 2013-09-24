@@ -48,6 +48,8 @@ CSMDoc::Saving::Saving (Document& document)
     appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::Spell> >
         (mDocument.getData().getSpells(), mState));
 
+    appendStage (new WriteRefIdCollectionStage (mDocument, mState));
+
 
     appendStage (new CloseSaveStage (mState));
 
