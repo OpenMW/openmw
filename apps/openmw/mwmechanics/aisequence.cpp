@@ -8,6 +8,7 @@
 #include "aitravel.hpp"
 #include "aifollow.hpp"
 #include "aiactivate.hpp"
+#include "aicombat.hpp"
 
 #include "..\mwworld\class.hpp"
 #include "creaturestats.hpp"
@@ -21,9 +22,11 @@ void MWMechanics::AiSequence::copy (const AiSequence& sequence)
     for (std::list<AiPackage *>::const_iterator iter (sequence.mPackages.begin());
         iter!=sequence.mPackages.end(); ++iter)
         mPackages.push_back ((*iter)->clone());
+    mCombat = sequence.mCombat;
+    mCombatPackage = sequence.mCombatPackage;
 }
 
-MWMechanics::AiSequence::AiSequence() : mDone (false) {}
+MWMechanics::AiSequence::AiSequence() : mDone (false), mCombat (false), mCombatPackage (0) {}
 
 MWMechanics::AiSequence::AiSequence (const AiSequence& sequence) : mDone (false)
 {
@@ -61,16 +64,27 @@ bool MWMechanics::AiSequence::isPackageDone() const
 
 void MWMechanics::AiSequence::execute (const MWWorld::Ptr& actor)
 {
-    /*if(actor != MWBase::Environment::get().getWorld()->getPlayer().getPlayer())
+    if(actor != MWBase::Environment::get().getWorld()->getPlayer().getPlayer())
     {
-        MWMechanics::DrawState_ state = MWWorld::Class::get(actor).getNpcStats(actor).getDrawState();
-        if (state == MWMechanics::DrawState_Spell || state == MWMechanics::DrawState_Nothing)
-            MWWorld::Class::get(actor).getNpcStats(actor).setDrawState(MWMechanics::DrawState_Weapon);    
-        MWWorld::Class::get(actor).getCreatureStats(actor).setAttackingOrSpell(true);
+        if(mCombat)
+        {
+            //mCombatPackage->execute(actor);
+        }
+        else
+        {
+            //mCombat = true;
+            //mCombatPackage = new AiCombat("player");
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-        ESM::Position pos = actor.getRefData().getPosition();
-        const ESM::Pathgrid *pathgrid =
+            /*if(actor != MWBase::Environment::get().getWorld()->getPlayer().getPlayer())
+            {
+            MWMechanics::DrawState_ state = MWWorld::Class::get(actor).getNpcStats(actor).getDrawState();
+            if (state == MWMechanics::DrawState_Spell || state == MWMechanics::DrawState_Nothing)
+            MWWorld::Class::get(actor).getNpcStats(actor).setDrawState(MWMechanics::DrawState_Weapon);    
+            MWWorld::Class::get(actor).getCreatureStats(actor).setAttackingOrSpell(true);
+
+            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+            ESM::Position pos = actor.getRefData().getPosition();
+            const ESM::Pathgrid *pathgrid =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*actor.getCell()->mCell);
 
             int cellX = actor.getCell()->mCell->mData.mX;
@@ -80,8 +94,8 @@ void MWMechanics::AiSequence::execute (const MWWorld::Ptr& actor)
 
             if (actor.getCell()->mCell->isExterior())
             {
-                xCell = actor.getCell()->mCell->mData.mX * ESM::Land::REAL_SIZE;
-                yCell = actor.getCell()->mCell->mData.mY * ESM::Land::REAL_SIZE;
+            xCell = actor.getCell()->mCell->mData.mX * ESM::Land::REAL_SIZE;
+            yCell = actor.getCell()->mCell->mData.mY * ESM::Land::REAL_SIZE;
             }
 
             ESM::Pathgrid::Point dest;
@@ -96,24 +110,26 @@ void MWMechanics::AiSequence::execute (const MWWorld::Ptr& actor)
 
             PathFinder mPathFinder;
             mPathFinder.buildPath(start, dest, pathgrid, xCell, yCell, true);
-        float zAngle = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
-        MWBase::Environment::get().getWorld()->rotateObject(actor, 0, 0, zAngle, false);
-        MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 1;
+            float zAngle = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
+            MWBase::Environment::get().getWorld()->rotateObject(actor, 0, 0, zAngle, false);
+            MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 1;
 
-        if(dest.mX - start.mX < 100)
-        {
+            if(dest.mX - start.mX < 100)
+            {
             MWWorld::Class::get(actor).getCreatureStats(actor).setAttackingOrSpell(false);
+            }
+            }*/
+            if (!mPackages.empty())
+            {
+                if (mPackages.front()->execute (actor))
+                {
+                    mPackages.erase (mPackages.begin());
+                    mDone = true;
+                }
+                else
+                    mDone = false;    
+            }
         }
-    }*/
-    if (!mPackages.empty())
-    {
-        if (mPackages.front()->execute (actor))
-        {
-            mPackages.erase (mPackages.begin());
-            mDone = true;
-        }
-        else
-            mDone = false;    
     }
 }
 
@@ -121,7 +137,8 @@ void MWMechanics::AiSequence::clear()
 {
     for (std::list<AiPackage *>::const_iterator iter (mPackages.begin()); iter!=mPackages.end(); ++iter)
         delete *iter;
-
+    
+    if(mCombatPackage) delete mCombatPackage;
     mPackages.clear();
 }
 

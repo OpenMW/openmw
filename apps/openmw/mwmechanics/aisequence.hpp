@@ -18,6 +18,9 @@ namespace MWMechanics
     class AiSequence
     {
             std::list<AiPackage *> mPackages;
+            AiPackage* mCombatPackage;
+            bool mCombat;
+
             bool mDone;
 
             void copy (const AiSequence& sequence);
