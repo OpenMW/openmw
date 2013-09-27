@@ -65,7 +65,10 @@ namespace CSMDoc
         public:
 
             Document (const std::vector<boost::filesystem::path>& files,
-                const boost::filesystem::path& savePath, bool new_);
+                const boost::filesystem::path& savePath, bool new_,
+                const boost::filesystem::path& projectPath);
+            ///< \param projectPath Location of file that can be used to store additional data for
+            /// this project.
 
             ~Document();
 

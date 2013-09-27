@@ -10,8 +10,8 @@
 #include "document.hpp"
 #include "savingstate.hpp"
 
-CSMDoc::OpenSaveStage::OpenSaveStage (Document& document, SavingState& state)
-: mDocument (document), mState (state)
+CSMDoc::OpenSaveStage::OpenSaveStage (Document& document, SavingState& state, bool projectFile)
+: mDocument (document), mState (state), mProjectFile (projectFile)
 {}
 
 int CSMDoc::OpenSaveStage::setup()
@@ -21,17 +21,17 @@ int CSMDoc::OpenSaveStage::setup()
 
 void CSMDoc::OpenSaveStage::perform (int stage, std::vector<std::string>& messages)
 {
-    mState.start (mDocument);
+    mState.start (mDocument, mProjectFile);
 
-    mState.getStream().open (mState.getTmpPath().string().c_str());
+    mState.getStream().open ((mProjectFile ? mState.getPath() : mState.getTmpPath()).string().c_str());
 
     if (!mState.getStream().is_open())
         throw std::runtime_error ("failed to open stream for saving");
 }
 
 
-CSMDoc::WriteHeaderStage::WriteHeaderStage (Document& document, SavingState& state)
-: mDocument (document), mState (state)
+CSMDoc::WriteHeaderStage::WriteHeaderStage (Document& document, SavingState& state, bool simple)
+: mDocument (document), mState (state), mSimple (simple)
 {}
 
 int CSMDoc::WriteHeaderStage::setup()
@@ -43,26 +43,38 @@ void CSMDoc::WriteHeaderStage::perform (int stage, std::vector<std::string>& mes
 {
     mState.getWriter().setVersion();
 
+    mState.getWriter().clearMaster();
+
     mState.getWriter().setFormat (0);
 
-    mState.getWriter().setAuthor (mDocument.getData().getAuthor());
-    mState.getWriter().setDescription (mDocument.getData().getDescription());
-    mState.getWriter().setRecordCount (
-        mDocument.getData().count (CSMWorld::RecordBase::State_Modified) +
-        mDocument.getData().count (CSMWorld::RecordBase::State_ModifiedOnly) +
-        mDocument.getData().count (CSMWorld::RecordBase::State_Deleted));
-
-    /// \todo refine dependency list (at least remove redundant dependencies)
-    std::vector<boost::filesystem::path> dependencies = mDocument.getContentFiles();
-    std::vector<boost::filesystem::path>::const_iterator end (--dependencies.end());
-
-    for (std::vector<boost::filesystem::path>::const_iterator iter (dependencies.begin());
-        iter!=end; ++iter)
+    if (mSimple)
     {
-        std::string name = iter->filename().string();
-        uint64_t size = boost::filesystem::file_size (*iter);
+        mState.getWriter().setAuthor ("");
+        mState.getWriter().setDescription ("");
+        mState.getWriter().setRecordCount (0);
 
-        mState.getWriter().addMaster (name, size);
+    }
+    else
+    {
+        mState.getWriter().setAuthor (mDocument.getData().getAuthor());
+        mState.getWriter().setDescription (mDocument.getData().getDescription());
+        mState.getWriter().setRecordCount (
+            mDocument.getData().count (CSMWorld::RecordBase::State_Modified) +
+            mDocument.getData().count (CSMWorld::RecordBase::State_ModifiedOnly) +
+            mDocument.getData().count (CSMWorld::RecordBase::State_Deleted));
+
+        /// \todo refine dependency list (at least remove redundant dependencies)
+        std::vector<boost::filesystem::path> dependencies = mDocument.getContentFiles();
+        std::vector<boost::filesystem::path>::const_iterator end (--dependencies.end());
+
+        for (std::vector<boost::filesystem::path>::const_iterator iter (dependencies.begin());
+            iter!=end; ++iter)
+        {
+            std::string name = iter->filename().string();
+            uint64_t size = boost::filesystem::file_size (*iter);
+
+            mState.getWriter().addMaster (name, size);
+        }
     }
 
     mState.getWriter().save (mState.getStream());
@@ -121,7 +133,7 @@ void CSMDoc::FinalSavingStage::perform (int stage, std::vector<std::string>& mes
         if (boost::filesystem::exists (mState.getTmpPath()))
             boost::filesystem::remove (mState.getTmpPath());
     }
-    else
+    else if (!mState.isProjectFile())
     {
         if (boost::filesystem::exists (mState.getPath()))
             boost::filesystem::remove (mState.getPath());

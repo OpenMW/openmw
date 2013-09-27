@@ -38,6 +38,11 @@ namespace ESM
         mHeader.mFormat = format;
     }
 
+    void ESMWriter::clearMaster()
+    {
+        mHeader.mMaster.clear();
+    }
+
     void ESMWriter::addMaster(const std::string& name, uint64_t size)
     {
         Header::MasterData d;

@@ -8,12 +8,20 @@
 #include "savingstages.hpp"
 #include "document.hpp"
 
-CSMDoc::Saving::Saving (Document& document)
-: Operation (State_Saving, true, true), mDocument (document), mState (*this)
+CSMDoc::Saving::Saving (Document& document, const boost::filesystem::path& projectPath)
+: Operation (State_Saving, true, true), mDocument (document), mState (*this, projectPath)
 {
-    appendStage (new OpenSaveStage (mDocument, mState));
+    // save project file
+    appendStage (new OpenSaveStage (mDocument, mState, true));
 
-    appendStage (new WriteHeaderStage (mDocument, mState));
+    appendStage (new WriteHeaderStage (mDocument, mState, true));
+
+    appendStage (new CloseSaveStage (mState));
+
+    // save content file
+    appendStage (new OpenSaveStage (mDocument, mState, false));
+
+    appendStage (new WriteHeaderStage (mDocument, mState, false));
 
     appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::Global> >
         (mDocument.getData().getGlobals(), mState));

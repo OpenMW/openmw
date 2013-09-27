@@ -10,7 +10,8 @@
 #include "model/world/data.hpp"
 
 
-CS::Editor::Editor() : mViewManager (mDocumentManager)
+CS::Editor::Editor()
+: mDocumentManager (mCfgMgr.getUserPath() / "projects"), mViewManager (mDocumentManager)
 {
     mIpcServerName = "org.openmw.OpenCS";
 

@@ -20,14 +20,17 @@ namespace CSMDoc
             ToUTF8::Utf8Encoder mEncoder;
             std::ofstream mStream;
             ESM::ESMWriter mWriter;
+            boost::filesystem::path mProjectPath;
+            bool mProjectFile;
 
         public:
 
-            SavingState (Operation& operation);
+            SavingState (Operation& operation, const boost::filesystem::path& projectPath);
 
             bool hasError() const;
 
-            void start (Document& document);
+            void start (Document& document, bool project);
+            ///< \param project Save project file instead of content file.
 
             const boost::filesystem::path& getPath() const;
 
@@ -36,6 +39,9 @@ namespace CSMDoc
             std::ofstream& getStream();
 
             ESM::ESMWriter& getWriter();
+
+            bool isProjectFile() const;
+            ///< Currently saving project file? (instead of content file)
     };
 
 

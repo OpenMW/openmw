@@ -32,6 +32,8 @@ class ESMWriter
         void setRecordCount (int count);
         void setFormat (int format);
 
+        void clearMaster();
+
         void addMaster(const std::string& name, uint64_t size);
 
         void save(const std::string& file);

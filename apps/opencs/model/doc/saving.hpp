@@ -1,6 +1,8 @@
 #ifndef CSM_DOC_SAVING_H
 #define CSM_DOC_SAVING_H
 
+#include <boost/filesystem/path.hpp>
+
 #include "operation.hpp"
 #include "savingstate.hpp"
 
@@ -17,7 +19,7 @@ namespace CSMDoc
 
         public:
 
-            Saving (Document& document);
+            Saving (Document& document, const boost::filesystem::path& projectPath);
 
     };
 }

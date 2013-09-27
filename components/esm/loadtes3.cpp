@@ -14,6 +14,7 @@ void ESM::Header::blank()
     mData.desc.assign ("");
     mData.records = 0;
     mFormat = CurrentFormat;
+    mMaster.clear();
 }
 
 void ESM::Header::load (ESMReader &esm)

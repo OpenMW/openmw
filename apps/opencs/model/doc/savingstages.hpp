@@ -16,10 +16,12 @@ namespace CSMDoc
     {
             Document& mDocument;
             SavingState& mState;
+            bool mProjectFile;
 
         public:
 
-            OpenSaveStage (Document& document, SavingState& state);
+            OpenSaveStage (Document& document, SavingState& state, bool projectFile);
+            ///< \param projectFile Saving the project file instead of the content file.
 
             virtual int setup();
             ///< \return number of steps
@@ -32,10 +34,12 @@ namespace CSMDoc
     {
             Document& mDocument;
             SavingState& mState;
+            bool mSimple;
 
         public:
 
-            WriteHeaderStage (Document& document, SavingState& state);
+            WriteHeaderStage (Document& document, SavingState& state, bool simple);
+            ///< \param simple Simplified header (used for project files).
 
             virtual int setup();
             ///< \return number of steps

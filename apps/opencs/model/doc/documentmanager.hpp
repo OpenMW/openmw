@@ -13,13 +13,15 @@ namespace CSMDoc
     class DocumentManager
     {
             std::vector<Document *> mDocuments;
+            boost::filesystem::path mProjectPath;
 
             DocumentManager (const DocumentManager&);
             DocumentManager& operator= (const DocumentManager&);
 
         public:
 
-            DocumentManager();
+            DocumentManager (const boost::filesystem::path& projectPath);
+            ///< \param projectPath Directory where additional per-project data will be stored.
 
             ~DocumentManager();
 
