@@ -16,6 +16,8 @@ CSMDoc::Saving::Saving (Document& document, const boost::filesystem::path& proje
 
     appendStage (new WriteHeaderStage (mDocument, mState, true));
 
+    appendStage (new WriteFilterStage (mDocument, mState, CSMFilter::Filter::Scope_Project));
+
     appendStage (new CloseSaveStage (mState));
 
     // save content file

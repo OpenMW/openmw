@@ -10,6 +10,8 @@ namespace ESM
 
     struct Filter
     {
+        static unsigned int sRecordId;
+
         std::string mId;
 
         std::string mDescription;

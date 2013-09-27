@@ -36,6 +36,7 @@ struct Position
 
 enum RecNameInts
 {
+    // format 0 / legacy
     REC_ACTI = 0x49544341,
     REC_ALCH = 0x48434c41,
     REC_APPA = 0x41505041,
@@ -80,7 +81,10 @@ enum RecNameInts
     REC_SPEL = 0x4c455053,
     REC_SSCR = 0x52435353,
     REC_STAT = 0x54415453,
-    REC_WEAP = 0x50414557
+    REC_WEAP = 0x50414557,
+
+    // format 1
+    REC_FILT = 0x544C4946
 };
 
 }

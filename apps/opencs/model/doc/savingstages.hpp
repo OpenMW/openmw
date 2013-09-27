@@ -6,6 +6,9 @@
 #include "savingstate.hpp"
 
 #include "../world/record.hpp"
+#include "../world/idcollection.hpp"
+
+#include "../filter/filter.hpp"
 
 namespace CSMDoc
 {
@@ -114,6 +117,20 @@ namespace CSMDoc
 
             virtual int setup();
             ///< \return number of steps
+
+            virtual void perform (int stage, std::vector<std::string>& messages);
+            ///< Messages resulting from this stage will be appended to \a messages.
+    };
+
+
+    class WriteFilterStage : public WriteCollectionStage<CSMWorld::IdCollection<CSMFilter::Filter> >
+    {
+            Document& mDocument;
+            CSMFilter::Filter::Scope mScope;
+
+        public:
+
+            WriteFilterStage (Document& document, SavingState& state, CSMFilter::Filter::Scope scope);
 
             virtual void perform (int stage, std::vector<std::string>& messages);
             ///< Messages resulting from this stage will be appended to \a messages.

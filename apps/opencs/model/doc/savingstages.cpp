@@ -52,7 +52,6 @@ void CSMDoc::WriteHeaderStage::perform (int stage, std::vector<std::string>& mes
         mState.getWriter().setAuthor ("");
         mState.getWriter().setDescription ("");
         mState.getWriter().setRecordCount (0);
-
     }
     else
     {
@@ -93,6 +92,23 @@ int CSMDoc::WriteRefIdCollectionStage::setup()
 void CSMDoc::WriteRefIdCollectionStage::perform (int stage, std::vector<std::string>& messages)
 {
     mDocument.getData().getReferenceables().save (stage, mState.getWriter());
+}
+
+
+CSMDoc::WriteFilterStage::WriteFilterStage (Document& document, SavingState& state,
+    CSMFilter::Filter::Scope scope)
+: WriteCollectionStage<CSMWorld::IdCollection<CSMFilter::Filter> > (document.getData().getFilters(),
+  state),
+  mDocument (document), mScope (scope)
+{}
+
+void CSMDoc::WriteFilterStage::perform (int stage, std::vector<std::string>& messages)
+{
+    const CSMWorld::Record<CSMFilter::Filter>& record =
+        mDocument.getData().getFilters().getRecord (stage);
+
+    if (record.get().mScope==mScope)
+        WriteCollectionStage<CSMWorld::IdCollection<CSMFilter::Filter> >::perform (stage, messages);
 }
 
 
