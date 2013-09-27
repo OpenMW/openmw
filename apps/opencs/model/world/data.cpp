@@ -182,6 +182,7 @@ CSMWorld::Data::Data() : mRefs (mCells)
     mFilters.addColumn (new RecordStateColumn<CSMFilter::Filter>);
     mFilters.addColumn (new FilterColumn<CSMFilter::Filter>);
     mFilters.addColumn (new DescriptionColumn<CSMFilter::Filter>);
+    mFilters.addColumn (new ScopeColumn<CSMFilter::Filter>);
 
     addModel (new IdTable (&mGlobals), UniversalId::Type_Globals, UniversalId::Type_Global);
     addModel (new IdTable (&mGmsts), UniversalId::Type_Gmsts, UniversalId::Type_Gmst);
