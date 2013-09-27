@@ -20,7 +20,12 @@ int CSMTools::ClassCheckStage::setup()
 
 void CSMTools::ClassCheckStage::perform (int stage, std::vector<std::string>& messages)
 {
-    const ESM::Class& class_= mClasses.getRecord (stage).get();
+    const CSMWorld::Record<ESM::Class>& record = mClasses.getRecord (stage);
+
+    if (record.isDeleted())
+        return;
+
+    const ESM::Class& class_ = record.get();
 
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Class, class_.mId);
 

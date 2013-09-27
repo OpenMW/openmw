@@ -20,7 +20,12 @@ int CSMTools::FactionCheckStage::setup()
 
 void CSMTools::FactionCheckStage::perform (int stage, std::vector<std::string>& messages)
 {
-    const ESM::Faction& faction = mFactions.getRecord (stage).get();
+    const CSMWorld::Record<ESM::Faction>& record = mFactions.getRecord (stage);
+
+    if (record.isDeleted())
+        return;
+
+    const ESM::Faction& faction = record.get();
 
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Faction, faction.mId);
 
