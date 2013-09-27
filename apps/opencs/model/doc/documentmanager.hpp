@@ -6,6 +6,11 @@
 
 #include <boost/filesystem/path.hpp>
 
+namespace Files
+{
+    class ConfigurationManager;
+}
+
 namespace CSMDoc
 {
     class Document;
@@ -13,15 +18,14 @@ namespace CSMDoc
     class DocumentManager
     {
             std::vector<Document *> mDocuments;
-            boost::filesystem::path mProjectPath;
+            const Files::ConfigurationManager& mConfiguration;
 
             DocumentManager (const DocumentManager&);
             DocumentManager& operator= (const DocumentManager&);
 
         public:
 
-            DocumentManager (const boost::filesystem::path& projectPath);
-            ///< \param projectPath Directory where additional per-project data will be stored.
+            DocumentManager (const Files::ConfigurationManager& configuration);
 
             ~DocumentManager();
 

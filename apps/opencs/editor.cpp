@@ -11,7 +11,7 @@
 
 
 CS::Editor::Editor()
-: mDocumentManager (mCfgMgr.getUserPath() / "projects"), mViewManager (mDocumentManager)
+: mDocumentManager (mCfgMgr), mViewManager (mDocumentManager)
 {
     mIpcServerName = "org.openmw.OpenCS";
 

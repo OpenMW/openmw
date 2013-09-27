@@ -4,6 +4,10 @@
 
 #include <boost/filesystem.hpp>
 
+#ifndef Q_MOC_RUN
+#include <components/files/configurationmanager.hpp>
+#endif
+
 void CSMDoc::Document::load (const std::vector<boost::filesystem::path>::const_iterator& begin,
     const std::vector<boost::filesystem::path>::const_iterator& end, bool lastAsModified)
 {
@@ -2142,10 +2146,13 @@ void CSMDoc::Document::createBase()
     }
 }
 
-CSMDoc::Document::Document (const std::vector<boost::filesystem::path>& files,
-    const boost::filesystem::path& savePath, bool new_,
-    const boost::filesystem::path& projectPath)
-: mSavePath (savePath), mContentFiles (files), mTools (mData), mSaving (*this, projectPath)
+CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
+    const std::vector<boost::filesystem::path>& files,
+    const boost::filesystem::path& savePath, bool new_)
+: mSavePath (savePath), mContentFiles (files), mTools (mData),
+  mProjectPath ((configuration.getUserPath() / "projects") /
+  (savePath.filename().string() + ".project")),
+  mSaving (*this, mProjectPath)
 {
     if (files.empty())
         throw std::runtime_error ("Empty content file sequence");
@@ -2170,9 +2177,9 @@ CSMDoc::Document::Document (const std::vector<boost::filesystem::path>& files,
 /// \todo un-outcomment the else, once loading an existing content file works properly again.
 //    else
     {
-        if (boost::filesystem::exists (projectPath))
+        if (boost::filesystem::exists (mProjectPath))
         {
-            getData().loadFile (projectPath, false, true);
+            getData().loadFile (mProjectPath, false, true);
         }
         else
         {

@@ -24,6 +24,11 @@ namespace ESM
     struct Global;
 }
 
+namespace Files
+{
+    class ConfigurationManager;
+}
+
 namespace CSMDoc
 {
     class Document : public QObject
@@ -36,6 +41,7 @@ namespace CSMDoc
             std::vector<boost::filesystem::path> mContentFiles;
             CSMWorld::Data mData;
             CSMTools::Tools mTools;
+            boost::filesystem::path mProjectPath;
             Saving mSaving;
 
             // It is important that the undo stack is declared last, because on desctruction it fires a signal, that is connected to a slot, that is
@@ -64,11 +70,9 @@ namespace CSMDoc
 
         public:
 
-            Document (const std::vector<boost::filesystem::path>& files,
-                const boost::filesystem::path& savePath, bool new_,
-                const boost::filesystem::path& projectPath);
-            ///< \param projectPath Location of file that can be used to store additional data for
-            /// this project.
+            Document (const Files::ConfigurationManager& configuration,
+                const std::vector<boost::filesystem::path>& files,
+                const boost::filesystem::path& savePath, bool new_);
 
             ~Document();
 
