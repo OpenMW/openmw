@@ -140,6 +140,7 @@ namespace CSMWorld
             ColumnId_Magical = 107,
             ColumnId_Silver = 108,
             ColumnId_Filter = 109,
+            ColumnId_Scope = 110,
 
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.

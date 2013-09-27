@@ -147,6 +147,7 @@ namespace CSMWorld
             { ColumnId_Magical, "Magical" },
             { ColumnId_Silver, "Silver" },
             { ColumnId_Filter, "Filter" },
+            { ColumnId_Scope, "Scope", },
 
             { ColumnId_UseValue1, "Use value 1" },
             { ColumnId_UseValue2, "Use value 2" },
