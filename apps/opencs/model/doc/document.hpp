@@ -105,6 +105,8 @@ namespace CSMDoc
 
             void modificationStateChanged (bool clean);
 
+            void reportMessage (const QString& message, int type);
+
             void operationDone (int type);
 
         public slots:

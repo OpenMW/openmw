@@ -95,8 +95,9 @@ void CSMDoc::Operation::executeStage()
             {
                 mCurrentStage->first->perform (mCurrentStep++, messages);
             }
-            catch (const std::exception&)
+            catch (const std::exception& e)
             {
+                emit reportMessage (e.what(), mType);
                 abort();
             }
 

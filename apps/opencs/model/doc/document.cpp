@@ -2175,6 +2175,8 @@ CSMDoc::Document::Document (const std::vector<boost::filesystem::path>& files,
 
     connect (&mSaving, SIGNAL (progress (int, int, int)), this, SLOT (progress (int, int, int)));
     connect (&mSaving, SIGNAL (done (int)), this, SLOT (operationDone (int)));
+    connect (&mSaving, SIGNAL (reportMessage (const QString&, int)),
+        this, SLOT (reportMessage (const QString&, int)));
 }
 
 CSMDoc::Document::~Document()
@@ -2243,6 +2245,11 @@ void CSMDoc::Document::modificationStateChanged (bool clean)
     emit stateChanged (getState(), this);
 }
 
+void CSMDoc::Document::reportMessage (const QString& message, int type)
+{
+    /// \todo find a better way to get these messages to the user.
+    std::cout << message.toUtf8().constData() << std::endl;
+}
 
 void CSMDoc::Document::operationDone (int type)
 {
