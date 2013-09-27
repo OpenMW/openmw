@@ -1,5 +1,8 @@
 #include "document.hpp"
+
 #include <cassert>
+
+#include <boost/filesystem.hpp>
 
 void CSMDoc::Document::load (const std::vector<boost::filesystem::path>::const_iterator& begin,
     const std::vector<boost::filesystem::path>::const_iterator& end, bool lastAsModified)
@@ -12,10 +15,10 @@ void CSMDoc::Document::load (const std::vector<boost::filesystem::path>::const_i
         --end2;
 
     for (std::vector<boost::filesystem::path>::const_iterator iter (begin); iter!=end2; ++iter)
-        getData().loadFile (*iter, true);
+        getData().loadFile (*iter, true, false);
 
     if (lastAsModified)
-        getData().loadFile (*end2, false);
+        getData().loadFile (*end2, false, false);
 }
 
 void CSMDoc::Document::addGmsts()
@@ -2163,6 +2166,18 @@ CSMDoc::Document::Document (const std::vector<boost::filesystem::path>& files,
     {
         mData.setDescription ("");
         mData.setAuthor ("");
+    }
+/// \todo un-outcomment the else, once loading an existing content file works properly again.
+//    else
+    {
+        if (boost::filesystem::exists (projectPath))
+        {
+            getData().loadFile (projectPath, false, true);
+        }
+        else
+        {
+            /// \todo create new project file with default filters
+        }
     }
 
     addOptionalGmsts();

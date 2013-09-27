@@ -145,8 +145,10 @@ namespace CSMWorld
             void merge();
             ///< Merge modified into base.
 
-            void loadFile (const boost::filesystem::path& path, bool base);
+            void loadFile (const boost::filesystem::path& path, bool base, bool project);
             ///< Merging content of a file into base or modified.
+            ///
+            /// \param project load project file instead of content file
 
             bool hasId (const std::string& id) const;
 

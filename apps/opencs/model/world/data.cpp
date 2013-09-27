@@ -386,7 +386,7 @@ void CSMWorld::Data::merge()
     mGlobals.merge();
 }
 
-void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base)
+void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base, bool project)
 {
     ESM::ESMReader reader;
 
@@ -448,6 +448,19 @@ void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base)
             case ESM::REC_REPA: mReferenceables.load (reader, base, UniversalId::Type_Repair); break;
             case ESM::REC_STAT: mReferenceables.load (reader, base, UniversalId::Type_Static); break;
             case ESM::REC_WEAP: mReferenceables.load (reader, base, UniversalId::Type_Weapon); break;
+
+            case ESM::REC_FILT:
+
+                if (project)
+                {
+                    mFilters.load (reader, base);
+                    mFilters.setData (mFilters.getSize()-1,
+                        mFilters.findColumnIndex (CSMWorld::Columns::ColumnId_Scope),
+                        static_cast<int> (CSMFilter::Filter::Scope_Project));
+                    break;
+                }
+
+                // fall through (filter record in a content file is an error with format 0)
 
             default:
 
