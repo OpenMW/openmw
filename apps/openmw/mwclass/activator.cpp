@@ -3,33 +3,54 @@
 
 #include <components/esm/loadacti.hpp>
 
-#include <components/esm_store/cell_store.hpp>
+#include "../mwbase/environment.hpp"
+#include "../mwbase/windowmanager.hpp"
 
+#include "../mwworld//cellstore.hpp"
 #include "../mwworld/ptr.hpp"
+#include "../mwworld/physicssystem.hpp"
 
-#include "../mwrender/cellimp.hpp"
+#include "../mwrender/objects.hpp"
+#include "../mwrender/renderinginterface.hpp"
+
+#include "../mwgui/tooltips.hpp"
 
 namespace MWClass
 {
-    void Activator::insertObj (const MWWorld::Ptr& ptr, MWRender::CellRenderImp& cellRender,
-        MWWorld::Environment& environment) const
+   void Activator::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
-        ESMS::LiveCellRef<ESM::Activator, MWWorld::RefData> *ref =
-            ptr.get<ESM::Activator>();
-
-        assert (ref->base != NULL);
-        const std::string &model = ref->base->model;
-        if (!model.empty())
-        {
-            MWRender::Rendering rendering (cellRender, ref->ref);
-            cellRender.insertMesh ("meshes\\" + model);
-            ref->mData.setHandle (rendering.end (ref->mData.isEnabled()));
+        const std::string model = getModel(ptr);
+        if (!model.empty()) {
+            MWRender::Objects& objects = renderingInterface.getObjects();
+            objects.insertBegin(ptr, ptr.getRefData().isEnabled(), false);
+            objects.insertMesh(ptr, model);
         }
+    }
+
+    void Activator::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
+    {
+        const std::string model = getModel(ptr);
+        if(!model.empty()) {
+            physics.insertObjectPhysics(ptr, model);
+        }
+    }
+
+    std::string Activator::getModel(const MWWorld::Ptr &ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Activator> *ref =
+            ptr.get<ESM::Activator>();
+        assert(ref->base != NULL);
+
+        const std::string &model = ref->base->model;
+        if (!model.empty()) {
+            return "meshes\\" + model;
+        }
+        return "";
     }
 
     std::string Activator::getName (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Activator, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Activator> *ref =
             ptr.get<ESM::Activator>();
 
         return ref->base->name;
@@ -37,7 +58,7 @@ namespace MWClass
 
     std::string Activator::getScript (const MWWorld::Ptr& ptr) const
     {
-        ESMS::LiveCellRef<ESM::Activator, MWWorld::RefData> *ref =
+        MWWorld::LiveCellRef<ESM::Activator> *ref =
             ptr.get<ESM::Activator>();
 
         return ref->base->script;
@@ -48,5 +69,38 @@ namespace MWClass
         boost::shared_ptr<Class> instance (new Activator);
 
         registerClass (typeid (ESM::Activator).name(), instance);
+    }
+
+    bool Activator::hasToolTip (const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Activator> *ref =
+            ptr.get<ESM::Activator>();
+
+        return (ref->base->name != "");
+    }
+
+    MWGui::ToolTipInfo Activator::getToolTipInfo (const MWWorld::Ptr& ptr) const
+    {
+        MWWorld::LiveCellRef<ESM::Activator> *ref =
+            ptr.get<ESM::Activator>();
+
+        MWGui::ToolTipInfo info;
+        info.caption = ref->base->name + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
+
+        std::string text;
+        if (MWBase::Environment::get().getWindowManager()->getFullHelp())
+            text += MWGui::ToolTips::getMiscString(ref->base->script, "Script");
+        info.text = text;
+
+        return info;
+    }
+
+    MWWorld::Ptr
+    Activator::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    {
+        MWWorld::LiveCellRef<ESM::Activator> *ref =
+            ptr.get<ESM::Activator>();
+
+        return MWWorld::Ptr(&cell.activators.insert(*ref), &cell);
     }
 }

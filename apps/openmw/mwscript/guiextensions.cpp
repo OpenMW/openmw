@@ -7,49 +7,79 @@
 #include <components/interpreter/runtime.hpp>
 #include <components/interpreter/opcodes.hpp>
 
-#include "../mwgui/window_manager.hpp"
+#include "../mwbase/environment.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "interpretercontext.hpp"
 
 namespace MWScript
 {
     namespace Gui
-    {    
+    {
         class OpEnableWindow : public Interpreter::Opcode0
         {
                 MWGui::GuiWindow mWindow;
-                
+
             public:
-            
+
                 OpEnableWindow (MWGui::GuiWindow window) : mWindow (window) {}
-            
+
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    InterpreterContext& context =
-                        static_cast<InterpreterContext&> (runtime.getContext());
-                    
-                    context.getWindowManager().allow (mWindow);
-                } 
-        };    
-    
+                    MWBase::Environment::get().getWindowManager()->allow (mWindow);
+                }
+        };
+
         class OpShowDialogue : public Interpreter::Opcode0
         {
                 MWGui::GuiMode mDialogue;
-                
+
             public:
-            
+
                 OpShowDialogue (MWGui::GuiMode dialogue)
                 : mDialogue (dialogue)
                 {}
-            
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWBase::Environment::get().getWindowManager()->pushGuiMode(mDialogue);
+                }
+        };
+
+        class OpGetButtonPressed : public Interpreter::Opcode0
+        {
+            public:
+
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     InterpreterContext& context =
                         static_cast<InterpreterContext&> (runtime.getContext());
-                    
-                    context.getWindowManager().setMode(mDialogue);
-                } 
-        };  
+
+                    MWWorld::Ptr ptr = context.getReference();
+
+                    runtime.push (MWBase::Environment::get().getWindowManager()->readPressedButton());
+                }
+        };
+
+        class OpToggleFogOfWar : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWBase::Environment::get().getWindowManager()->toggleFogOfWar();
+                }
+        };
+
+        class OpToggleFullHelp : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWBase::Environment::get().getWindowManager()->toggleFullHelp();
+                }
+        };
 
         const int opcodeEnableBirthMenu = 0x200000e;
         const int opcodeEnableClassMenu = 0x200000f;
@@ -62,15 +92,18 @@ namespace MWScript
         const int opcodeEnableStatsMenu = 0x2000016;
         const int opcodeEnableRest = 0x2000017;
         const int opcodeShowRestMenu = 0x2000018;
-    
+        const int opcodeGetButtonPressed = 0x2000137;
+        const int opcodeToggleFogOfWar = 0x2000145;
+        const int opcodeToggleFullHelp = 0x2000151;
+
         void registerExtensions (Compiler::Extensions& extensions)
         {
             extensions.registerInstruction ("enablebirthmenu", "", opcodeEnableBirthMenu);
             extensions.registerInstruction ("enableclassmenu", "", opcodeEnableClassMenu);
             extensions.registerInstruction ("enablenamemenu", "", opcodeEnableNameMenu);
             extensions.registerInstruction ("enableracemenu", "", opcodeEnableRaceMenu);
-            extensions.registerInstruction ("enablestatsreviewmenu", "",
-                opcodeEnableStatsReviewMenu);
+            extensions.registerInstruction ("enablestatreviewmenu", "",
+opcodeEnableStatsReviewMenu);
 
             extensions.registerInstruction ("enableinventorymenu", "", opcodeEnableInventoryMenu);
             extensions.registerInstruction ("enablemagicmenu", "", opcodeEnableMagicMenu);
@@ -79,10 +112,18 @@ namespace MWScript
 
             extensions.registerInstruction ("enablerestmenu", "", opcodeEnableRest);
             extensions.registerInstruction ("enablelevelupmenu", "", opcodeEnableRest);
-            
+
             extensions.registerInstruction ("showrestmenu", "", opcodeShowRestMenu);
+
+            extensions.registerFunction ("getbuttonpressed", 'l', "", opcodeGetButtonPressed);
+
+            extensions.registerInstruction ("togglefogofwar", "", opcodeToggleFogOfWar);
+            extensions.registerInstruction ("tfow", "", opcodeToggleFogOfWar);
+
+            extensions.registerInstruction ("togglefullhelp", "", opcodeToggleFullHelp);
+            extensions.registerInstruction ("tfh", "", opcodeToggleFullHelp);
         }
-        
+
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
             interpreter.installSegment5 (opcodeEnableBirthMenu,
@@ -114,6 +155,12 @@ namespace MWScript
 
             interpreter.installSegment5 (opcodeShowRestMenu,
                 new OpShowDialogue (MWGui::GM_Rest));
+
+            interpreter.installSegment5 (opcodeGetButtonPressed, new OpGetButtonPressed);
+
+            interpreter.installSegment5 (opcodeToggleFogOfWar, new OpToggleFogOfWar);
+
+            interpreter.installSegment5 (opcodeToggleFullHelp, new OpToggleFullHelp);
         }
     }
 }

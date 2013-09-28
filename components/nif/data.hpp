@@ -26,474 +26,398 @@
 
 #include "controlled.hpp"
 
+#include <OgreQuaternion.h>
+#include <OgreVector3.h>
+
 namespace Nif
 {
 
 class NiSourceTexture : public Named
 {
 public:
+    // Is this an external (references a separate texture file) or
+    // internal (data is inside the nif itself) texture?
+    bool external;
 
-  // Is this an external (references a separate texture file) or
-  // internal (data is inside the nif itself) texture?
-  bool external;
+    std::string filename; // In case of external textures
+    NiPixelDataPtr data;  // In case of internal textures
 
-  SString filename;    // In case of external textures
-  NiPixelDataPtr data; // In case of internal textures
+    /* Pixel layout
+        0 - Palettised
+        1 - High color 16
+        2 - True color 32
+        3 - Compressed
+        4 - Bumpmap
+        5 - Default */
+    int pixel;
 
-  /* Pixel layout
-     0 - Palettised
-     1 - High color 16
-     2 - True color 32
-     3 - Compressed
-     4 - Bumpmap
-     5 - Default */
-  int pixel;
+    /* Mipmap format
+        0 - no
+        1 - yes
+        2 - default */
+    int mipmap;
 
-  /* Mipmap format
-     0 - no
-     1 - yes
-     2 - default */
-  int mipmap;
+    /* Alpha
+        0 - none
+        1 - binary
+        2 - smooth
+        3 - default (use material alpha, or multiply material with texture if present)
+    */
+    int alpha;
 
-  /* Alpha
-     0 - none
-     1 - binary
-     2 - smooth
-     3 - default (use material alpha, or multiply material with texture if present)
-  */
-  int alpha;
+    void read(NIFFile *nif)
+    {
+        Named::read(nif);
 
-  void read(NIFFile *nif)
-  {
-    Named::read(nif);
+        external = !!nif->getChar();
+        if(external)
+            filename = nif->getString();
+        else
+        {
+            nif->getChar(); // always 1
+            data.read(nif);
+        }
 
-    external = !!nif->getByte();
+        pixel = nif->getInt();
+        mipmap = nif->getInt();
+        alpha = nif->getInt();
 
-    if(external) filename = nif->getString();
-    else
-      {
-        nif->getByte(); // always 1
-        data.read(nif);
-      }
+        nif->getChar(); // always 1
+    }
 
-    pixel = nif->getInt();
-    mipmap = nif->getInt();
-    alpha = nif->getInt();
-
-    nif->getByte(); // always 1
-  }
+    void post(NIFFile *nif)
+    {
+        Named::post(nif);
+        data.post(nif);
+    }
 };
 
 // Common ancestor for several data classes
 class ShapeData : public Record
 {
 public:
-  FloatArray vertices, normals, colors, uvlist;
-  const Vector *center;
-  float radius;
+    std::vector<Ogre::Vector3> vertices, normals;
+    std::vector<Ogre::Vector4> colors;
+    std::vector< std::vector<Ogre::Vector2> > uvlist;
+    Ogre::Vector3 center;
+    float radius;
 
-  void read(NIFFile *nif)
-  {
-    int verts = nif->getShort();
+    void read(NIFFile *nif)
+    {
+        int verts = nif->getUShort();
 
-    if(nif->getInt())
-      vertices = nif->getFloatLen(verts*3);
+        if(nif->getInt())
+            nif->getVector3s(vertices, verts);
 
-    if(nif->getInt())
-      normals = nif->getFloatLen(verts*3);
+        if(nif->getInt())
+            nif->getVector3s(normals, verts);
 
-    center = nif->getVector();
-    radius = nif->getFloat();
+        center = nif->getVector3();
+        radius = nif->getFloat();
 
-    if(nif->getInt())
-      colors = nif->getFloatLen(verts*4);
+        if(nif->getInt())
+            nif->getVector4s(colors, verts);
 
-    int uvs = nif->getShort();
+        // Only the first 6 bits are used as a count. I think the rest are
+        // flags of some sort.
+        int uvs = nif->getUShort();
+        uvs &= 0x3f;
 
-    // Only the first 6 bits are used as a count. I think the rest are
-    // flags of some sort.
-    uvs &= 0x3f;
-
-    if(nif->getInt())
-      uvlist = nif->getFloatLen(uvs*verts*2);
-  }
+        if(nif->getInt())
+        {
+            uvlist.resize(uvs);
+            for(int i = 0;i < uvs;i++)
+                nif->getVector2s(uvlist[i], verts);
+        }
+    }
 };
 
 class NiTriShapeData : public ShapeData
 {
 public:
-  // Triangles, three vertex indices per triangle
-  SliceArray<short> triangles;
+    // Triangles, three vertex indices per triangle
+    std::vector<short> triangles;
 
-  void read(NIFFile *nif)
-  {
-    ShapeData::read(nif);
+    void read(NIFFile *nif)
+    {
+        ShapeData::read(nif);
 
-    int tris = nif->getShort();
-    if(tris)
-      {
-        // We have three times as many vertices as triangles, so this
-        // is always equal to tris*3.
-        int cnt = nif->getInt();
-        triangles = nif->getArrayLen<short>(cnt);
-      }
+        int tris = nif->getUShort();
+        if(tris)
+        {
+            // We have three times as many vertices as triangles, so this
+            // is always equal to tris*3.
+            int cnt = nif->getInt();
+            nif->getShorts(triangles, cnt);
+        }
 
-    // Read the match list, which lists the vertices that are equal to
-    // vertices. We don't actually need need this for anything, so
-    // just skip it.
-    int verts = nif->getShort();
-    if(verts)
-      {
+        // Read the match list, which lists the vertices that are equal to
+        // vertices. We don't actually need need this for anything, so
+        // just skip it.
+        int verts = nif->getUShort();
         for(int i=0;i<verts;i++)
-          {
+        {
             // Number of vertices matching vertex 'i'
-            short num = nif->getShort();
-            nif->skip(num*sizeof(short));
-          }
-      }
-  }
+            int num = nif->getUShort();
+            nif->skip(num * sizeof(short));
+        }
+    }
 };
 
 class NiAutoNormalParticlesData : public ShapeData
 {
 public:
-  int activeCount;
+    int activeCount;
 
-  void read(NIFFile *nif)
-  {
-    ShapeData::read(nif);
+    void read(NIFFile *nif)
+    {
+        ShapeData::read(nif);
 
-    // Should always match the number of vertices
-    activeCount = nif->getShort();
+        // Should always match the number of vertices
+        activeCount = nif->getUShort();
 
-    // Skip all the info, we don't support particles yet
-    nif->getFloat();  // Active radius ?
-    nif->getShort(); // Number of valid entries in the following arrays ?
+        // Skip all the info, we don't support particles yet
+        nif->getFloat();  // Active radius ?
+        nif->getUShort(); // Number of valid entries in the following arrays ?
 
-    if(nif->getInt())
-      // Particle sizes
-      nif->getFloatLen(activeCount);
-  }
+        if(nif->getInt())
+        {
+            // Particle sizes
+            nif->skip(activeCount * sizeof(float));
+        }
+    }
 };
 
 class NiRotatingParticlesData : public NiAutoNormalParticlesData
 {
 public:
-  void read(NIFFile *nif)
-  {
-    NiAutoNormalParticlesData::read(nif);
+    void read(NIFFile *nif)
+    {
+        NiAutoNormalParticlesData::read(nif);
 
-    if(nif->getInt())
-      // Rotation quaternions. I THINK activeCount is correct here,
-      // but verts (vertex number) might also be correct, if there is
-      // any case where the two don't match.
-      nif->getArrayLen<Vector4>(activeCount);
-  }
+        if(nif->getInt())
+        {
+            // Rotation quaternions. I THINK activeCount is correct here,
+            // but verts (vertex number) might also be correct, if there is
+            // any case where the two don't match.
+            nif->skip(activeCount * 4*sizeof(float));
+        }
+    }
 };
 
 class NiPosData : public Record
 {
 public:
-  void read(NIFFile *nif)
-  {
-    int count = nif->getInt();
-    int type = nif->getInt();
-    if(type != 1 && type != 2)
-      nif->fail("Cannot handle NiPosData type");
+    Vector3KeyList mKeyList;
 
-    // TODO: Could make structs of these. Seems to be identical to
-    // translation in NiKeyframeData.
-    for(int i=0; i<count; i++)
-      {
-        /*float time =*/ nif->getFloat();
-        nif->getVector(); // This isn't really shared between type 1
-                          // and type 2, most likely
-        if(type == 2)
-          {
-            nif->getVector();
-            nif->getVector();
-          }
-      }
-  }
+    void read(NIFFile *nif)
+    {
+        mKeyList.read(nif);
+    }
 };
 
 class NiUVData : public Record
 {
 public:
-  void read(NIFFile *nif)
-  {
-    // TODO: This is claimed to be a "float animation key", which is
-    // also used in FloatData and KeyframeData. We could probably
-    // reuse and refactor a lot of this if we actually use it at some
-    // point.
+    FloatKeyList mKeyList[4];
 
-    for(int i=0; i<2; i++)
-      {
-        int count = nif->getInt();
-
-        if(count)
-          {
-            nif->getInt(); // always 2
-            nif->getArrayLen<Vector4>(count); // Really one time float + one vector
-          }
-      }
-    // Always 0
-    nif->getInt();
-    nif->getInt();
-  }
+    void read(NIFFile *nif)
+    {
+        for(int i = 0;i < 4;i++)
+            mKeyList[i].read(nif);
+    }
 };
 
 class NiFloatData : public Record
 {
 public:
-  void read(NIFFile *nif)
-  {
-    int count = nif->getInt();
-    nif->getInt(); // always 2
-    nif->getArrayLen<Vector4>(count); // Really one time float + one vector
-  }
+    FloatKeyList mKeyList;
+
+    void read(NIFFile *nif)
+    {
+        mKeyList.read(nif);
+    }
 };
 
 class NiPixelData : public Record
 {
 public:
-  unsigned int rmask, gmask, bmask, amask;
-  int bpp, mips;
+    unsigned int rmask, gmask, bmask, amask;
+    int bpp, mips;
 
-  void read(NIFFile *nif)
-  {
-    nif->getInt(); // always 0 or 1
+    void read(NIFFile *nif)
+    {
+        nif->getInt(); // always 0 or 1
 
-    rmask = nif->getInt(); // usually 0xff
-    gmask = nif->getInt(); // usually 0xff00
-    bmask = nif->getInt(); // usually 0xff0000
-    amask = nif->getInt(); // usually 0xff000000 or zero
+        rmask = nif->getInt(); // usually 0xff
+        gmask = nif->getInt(); // usually 0xff00
+        bmask = nif->getInt(); // usually 0xff0000
+        amask = nif->getInt(); // usually 0xff000000 or zero
 
-    bpp = nif->getInt();
+        bpp = nif->getInt();
 
-    // Unknown
-    nif->skip(12);
+        // Unknown
+        nif->skip(12);
 
-    mips = nif->getInt();
+        mips = nif->getInt();
 
-    // Bytes per pixel, should be bpp * 8
-    /*int bytes =*/ nif->getInt();
+        // Bytes per pixel, should be bpp * 8
+        /*int bytes =*/ nif->getInt();
 
-    for(int i=0; i<mips; i++)
-      {
-        // Image size and offset in the following data field
-        /*int x =*/ nif->getInt();
-        /*int y =*/ nif->getInt();
-        /*int offset =*/ nif->getInt();
-      }
+        for(int i=0; i<mips; i++)
+        {
+            // Image size and offset in the following data field
+            /*int x =*/ nif->getInt();
+            /*int y =*/ nif->getInt();
+            /*int offset =*/ nif->getInt();
+        }
 
-    // Skip the data
-    unsigned int dataSize = nif->getInt();
-    nif->skip(dataSize);
-  }
+        // Skip the data
+        unsigned int dataSize = nif->getInt();
+        nif->skip(dataSize);
+    }
 };
 
 class NiColorData : public Record
 {
 public:
-  struct ColorData
-  {
-    float time;
-    Vector4 rgba;
-  };
+    Vector4KeyList mKeyList;
 
-  void read(NIFFile *nif)
-  {
-    int count = nif->getInt();
-    nif->getInt(); // always 1
-
-    // Skip the data
-    assert(sizeof(ColorData) == 4*5);
-    nif->skip(sizeof(ColorData) * count);
-  }
+    void read(NIFFile *nif)
+    {
+        mKeyList.read(nif);
+    }
 };
 
 class NiVisData : public Record
 {
 public:
-  void read(NIFFile *nif)
-  {
-    int count = nif->getInt();
-    /*
-      Each VisData consists of:
+    struct VisData {
         float time;
-        byte isSet;
+        char isSet;
+    };
 
-      If you implement this, make sure you use a packed struct
-      (sizeof==5), or read each element individually.
-     */
-    nif->skip(count*5);
-  }
+    void read(NIFFile *nif)
+    {
+        int count = nif->getInt();
+
+        /* Skip VisData */
+        nif->skip(count*5);
+    }
 };
 
 class NiSkinInstance : public Record
 {
 public:
-  NiSkinDataPtr data;
-  NodePtr root;
-  NodeList bones;
+    NiSkinDataPtr data;
+    NodePtr root;
+    NodeList bones;
 
-  void read(NIFFile *nif)
-  {
-    data.read(nif);
-    root.read(nif);
-    bones.read(nif);
+    void read(NIFFile *nif)
+    {
+        data.read(nif);
+        root.read(nif);
+        bones.read(nif);
+    }
 
-    if(data.empty() || root.empty())
-      nif->fail("NiSkinInstance missing root or data");
-  }
-
-  void post(NIFFile *nif);
+    void post(NIFFile *nif);
 };
 
 class NiSkinData : public Record
 {
 public:
-  // This is to make sure the structs are packed, ie. that the
-  // compiler doesn't mess them up with extra alignment bytes.
-#pragma pack(push)
-#pragma pack(1)
+    struct BoneTrafo
+    {
+        Ogre::Matrix3 rotation; // Rotation offset from bone?
+        Ogre::Vector3 trans;    // Translation
+        float scale;            // Probably scale (always 1)
+    };
 
-  struct BoneTrafo
-  {
-    Matrix rotation; // Rotation offset from bone?
-    Vector trans;    // Translation
-    float scale;     // Probably scale (always 1)
-  };
+    struct VertWeight
+    {
+        short vertex;
+        float weight;
+    };
 
-  struct VertWeight
-  {
-    short vertex;
-    float weight;
-  };
-#pragma pack(pop)
+    struct BoneInfo
+    {
+        BoneTrafo trafo;
+        Ogre::Vector4 unknown;
+        std::vector<VertWeight> weights;
+    };
 
-  struct BoneInfo
-  {
-    const BoneTrafo *trafo;
-    const Vector4 *unknown;
-    SliceArray<VertWeight> weights;
-  };
+    BoneTrafo trafo;
+    std::vector<BoneInfo> bones;
 
-  const BoneTrafo *trafo;
-  std::vector<BoneInfo> bones;
+    void read(NIFFile *nif)
+    {
+        trafo.rotation = nif->getMatrix3();
+        trafo.trans = nif->getVector3();
+        trafo.scale = nif->getFloat();
 
-  void read(NIFFile *nif)
-  {
-    assert(sizeof(BoneTrafo) == 4*(9+3+1));
-    assert(sizeof(VertWeight) == 6);
+        int boneNum = nif->getInt();
+        nif->getInt(); // -1
 
-    trafo = nif->getPtr<BoneTrafo>();
+        bones.resize(boneNum);
+        for(int i=0;i<boneNum;i++)
+        {
+            BoneInfo &bi = bones[i];
 
-    int boneNum = nif->getInt();
-    nif->getInt(); // -1
+            bi.trafo.rotation = nif->getMatrix3();
+            bi.trafo.trans = nif->getVector3();
+            bi.trafo.scale = nif->getFloat();
+            bi.unknown = nif->getVector4();
 
-    bones.resize(boneNum);
-
-    for(int i=0;i<boneNum;i++)
-      {
-        BoneInfo &bi = bones[i];
-
-        bi.trafo = nif->getPtr<BoneTrafo>();
-        bi.unknown = nif->getVector4();
-
-        // Number of vertex weights
-        int count = nif->getShort();
-        bi.weights = nif->getArrayLen<VertWeight>(count);
-      }
-  }
+            // Number of vertex weights
+            bi.weights.resize(nif->getUShort());
+            for(size_t j = 0;j < bi.weights.size();j++)
+            {
+                bi.weights[j].vertex = nif->getUShort();
+                bi.weights[j].weight = nif->getFloat();
+            }
+        }
+    }
 };
 
-class NiMorphData : public Record
+struct NiMorphData : public Record
 {
-public:
-  void read(NIFFile *nif)
-  {
-    int morphCount = nif->getInt();
-    int vertCount  = nif->getInt();
-    nif->getByte();
+    struct MorphData {
+        FloatKeyList mData;
+        std::vector<Ogre::Vector3> mVertices;
+    };
+    std::vector<MorphData> mMorphs;
 
-    for(int i=0; i<morphCount; i++)
-      {
-        int magic = nif->getInt();
-        nif->getInt();
-        if(magic)
-          // Time, data, forward, backward tangents
-          nif->getFloatLen(4*magic);
+    void read(NIFFile *nif)
+    {
+        int morphCount = nif->getInt();
+        int vertCount  = nif->getInt();
+        nif->getChar();
 
-        nif->getFloatLen(vertCount*3);
-      }
-  }
+        mMorphs.resize(morphCount);
+        for(int i = 0;i < morphCount;i++)
+        {
+            mMorphs[i].mData.read(nif, true);
+
+            mMorphs[i].mVertices.resize(vertCount);
+            for(int j = 0;j < vertCount;j++)
+                mMorphs[i].mVertices[j] = nif->getVector3();
+        }
+    }
 };
 
-class NiKeyframeData : public Record
+
+struct NiKeyframeData : public Record
 {
-public:
-  void read(NIFFile *nif)
-  {
-    // Rotations first
-    int count = nif->getInt();
-    if(count)
-      {
-        int type = nif->getInt();
+    QuaternionKeyList mRotations;
+    Vector3KeyList mTranslations;
+    FloatKeyList mScales;
 
-        if(type == 1)
-          nif->skip(count*4*5); // time + quaternion
-        else if(type == 3)
-          nif->skip(count*4*8); // rot1 + tension+bias+continuity
-        else if(type == 4)
-          {
-            for(int j=0;j<count;j++)
-              {
-                nif->getFloat(); // time
-                for(int i=0; i<3; i++)
-                  {
-                    int cnt = nif->getInt();
-                    int type = nif->getInt();
-                    if(type == 1)
-                      nif->skip(cnt*4*2); // time + unknown
-                    else if(type == 2)
-                      nif->skip(cnt*4*4); // time + unknown vector
-                    else nif->fail("Unknown sub-rotation type");
-                  }
-              }
-          }
-        else nif->fail("Unknown rotation type in NiKeyframeData");
-      }
-
-    // Then translation
-    count = nif->getInt();
-    if(count)
-      {
-        int type = nif->getInt();
-
-        if(type == 1) nif->getFloatLen(count*4); // time + translation
-        else if(type == 2)
-          nif->getFloatLen(count*10); // trans1 + forward + backward
-        else if(type == 3)
-          nif->getFloatLen(count*7); // trans1 + tension,bias,continuity
-        else nif->fail("Unknown translation type");
-      }
-
-    // Finally, scalings
-    count = nif->getInt();
-    if(count)
-      {
-        int type = nif->getInt();
-
-        int size = 0;
-        if(type == 1) size = 2; // time+scale
-        else if(type == 2) size = 4; // 1 + forward + backward (floats)
-        else if(type == 3) size = 5; // 1 + tbc
-        else nif->fail("Unknown scaling type");
-        nif->getFloatLen(count*size);
-      }
-  }
+    void read(NIFFile *nif)
+    {
+        mRotations.read(nif);
+        mTranslations.read(nif);
+        mScales.read(nif);
+    }
 };
 
 } // Namespace

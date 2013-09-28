@@ -1,0 +1,35 @@
+material quad
+{
+    depth_write on
+    
+    pass
+    {
+        vertex_program quad_vertex
+        fragment_program quad_fragment
+        
+        depth_write $depth_write
+        
+        texture_unit SceneBuffer
+        {
+        }
+    }
+}
+
+material quad_noDepthWrite
+{
+    parent quad
+    depth_write off
+}
+
+material openmw_viewport_init
+{
+    pass
+    {
+        vertex_program viewport_init_vertex
+        fragment_program viewport_init_fragment
+        
+        depth_write off
+        depth_check off
+        scene_blend add
+    }
+}

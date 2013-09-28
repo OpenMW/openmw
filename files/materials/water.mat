@@ -1,0 +1,55 @@
+material Water
+{
+    pass
+    {
+        emissive 0.6 0.7 1.0
+        ambient 0 0 0
+        diffuse 0 0 0 1
+        specular 0 0 0 32
+
+        vertex_program water_vertex
+        fragment_program water_fragment
+        
+        cull_hardware none
+        
+        texture_unit reflectionMap
+        {
+            texture_alias WaterReflection
+            tex_address_mode clamp
+        }
+        
+        texture_unit refractionMap
+        {
+            texture_alias WaterRefraction
+            tex_address_mode clamp
+        }
+        
+        texture_unit depthMap
+        {
+            texture_alias SceneDepth
+            tex_address_mode clamp
+        }
+        
+        texture_unit normalMap
+        {
+            direct_texture water_nm.png
+        }
+        
+        
+        // for simple_water
+        texture_unit animatedTexture
+        {
+            create_in_ffp true
+            scale 0.1 0.1
+            alpha_op_ex source1 src_manual src_current 0.7
+        }
+    }
+}
+
+
+material Underwater_Dome
+{
+    parent openmw_objects_base
+    
+    depth_write off
+}

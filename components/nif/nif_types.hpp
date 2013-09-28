@@ -24,43 +24,28 @@
 #ifndef _NIF_TYPES_H_
 #define _NIF_TYPES_H_
 
+#include <OgreVector3.h>
+#include <OgreMatrix3.h>
+
 // Common types used in NIF files
 
 namespace Nif
 {
 
-/* These packing #pragmas aren't really necessary on 32 bit
-   machines. I haven't tested on 64 bit yet. In any case it doesn't
-   hurt to include them. We can't allow any compiler-generated padding
-   in any of these structs, since they are used to interface directly
-   with raw data from the NIF files.
-*/
-#pragma pack(push)
-#pragma pack(1)
-
-struct Vector
-{
-  float array[3];
-};
-
-struct Vector4
-{
-  float array[4];
-};
-
-struct Matrix
-{
-  Vector v[3];
-};
-
 struct Transformation
 {
-  Vector pos;
-  Matrix rotation;
-  float scale;
-  Vector velocity;
+    Ogre::Vector3 pos;
+    Ogre::Matrix3 rotation;
+    float scale;
+
+    static const Transformation& getIdentity()
+    {
+        static const Transformation identity = {
+            Ogre::Vector3::ZERO, Ogre::Matrix3::IDENTITY, 1.0f
+        };
+        return identity;
+    }
 };
-#pragma pack(pop)
 
 } // Namespace
 #endif

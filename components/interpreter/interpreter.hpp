@@ -21,23 +21,23 @@ namespace Interpreter
             std::map<int, Opcode1 *> mSegment3;
             std::map<int, Opcode2 *> mSegment4;
             std::map<int, Opcode0 *> mSegment5;
-            
+
             // not implemented
             Interpreter (const Interpreter&);
             Interpreter& operator= (const Interpreter&);
-            
+
             void execute (Type_Code code);
-            
+
             void abortUnknownCode (int segment, int opcode);
-            
+
             void abortUnknownSegment (Type_Code code);
-            
+
         public:
-        
-            Interpreter (Context& context);
-            
+
+            Interpreter();
+
             ~Interpreter();
-            
+
             void installSegment0 (int code, Opcode1 *opcode);
             ///< ownership of \a opcode is transferred to *this.
 
@@ -55,10 +55,9 @@ namespace Interpreter
 
             void installSegment5 (int code, Opcode0 *opcode);
             ///< ownership of \a opcode is transferred to *this.
-            
-            void run (const Type_Code *code, int codeSize);
+
+            void run (const Type_Code *code, int codeSize, Context& context);
     };
 }
 
 #endif
-

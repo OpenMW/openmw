@@ -34,136 +34,187 @@ namespace Nif
 class Controller : public Record
 {
 public:
-  ControllerPtr next;
-  int flags;
-  float frequency, phase;
-  float timeStart, timeStop;
-  ControlledPtr target;
+    ControllerPtr next;
+    int flags;
+    float frequency, phase;
+    float timeStart, timeStop;
+    ControlledPtr target;
 
-  void read(NIFFile *nif)
-  {
-    next.read(nif);
+    void read(NIFFile *nif)
+    {
+        next.read(nif);
 
-    flags = nif->getShort();
+        flags = nif->getUShort();
 
-    frequency = nif->getFloat();
-    phase = nif->getFloat();
-    timeStart = nif->getFloat();
-    timeStop = nif->getFloat();
+        frequency = nif->getFloat();
+        phase = nif->getFloat();
+        timeStart = nif->getFloat();
+        timeStop = nif->getFloat();
 
-    target.read(nif);
-  }
+        target.read(nif);
+    }
+
+    void post(NIFFile *nif)
+    {
+        Record::post(nif);
+        next.post(nif);
+        target.post(nif);
+    }
 };
 
 class NiBSPArrayController : public Controller
 {
 public:
-  void read(NIFFile *nif)
-  {
-    Controller::read(nif);
+    void read(NIFFile *nif)
+    {
+        Controller::read(nif);
 
-    // At the moment, just skip it all
-    nif->skip(111);
-    int s = nif->getShort();
-    nif->skip(15 + s*40);
-  }
+        // At the moment, just skip it all
+        nif->skip(111);
+        int s = nif->getUShort();
+        nif->skip(15 + s*40);
+    }
 };
 typedef NiBSPArrayController NiParticleSystemController;
 
 class NiMaterialColorController : public Controller
 {
 public:
-  NiPosDataPtr data;
+    NiPosDataPtr data;
 
-  void read(NIFFile *nif)
-  {
-    Controller::read(nif);
-    data.read(nif);
-  }
+    void read(NIFFile *nif)
+    {
+        Controller::read(nif);
+        data.read(nif);
+    }
+
+    void post(NIFFile *nif)
+    {
+        Controller::post(nif);
+        data.post(nif);
+    }
 };
 
 class NiPathController : public Controller
 {
 public:
-  NiPosDataPtr posData;
-  NiFloatDataPtr floatData;
+    NiPosDataPtr posData;
+    NiFloatDataPtr floatData;
 
-  void read(NIFFile *nif)
-  {
-    Controller::read(nif);
+    void read(NIFFile *nif)
+    {
+        Controller::read(nif);
 
-    /*
-      int = 1
-      2xfloat
-      short = 0 or 1
-     */
-    nif->skip(14);
-    posData.read(nif);
-    floatData.read(nif);
-  }
+        /*
+           int = 1
+           2xfloat
+           short = 0 or 1
+        */
+        nif->skip(14);
+        posData.read(nif);
+        floatData.read(nif);
+    }
+
+    void post(NIFFile *nif)
+    {
+        Controller::post(nif);
+
+        posData.post(nif);
+        floatData.post(nif);
+    }
 };
 
 class NiUVController : public Controller
 {
 public:
-  NiUVDataPtr data;
+    NiUVDataPtr data;
 
-  void read(NIFFile *nif)
-  {
-    Controller::read(nif);
+    void read(NIFFile *nif)
+    {
+        Controller::read(nif);
 
-    nif->getShort(); // always 0
-    data.read(nif);
-  }
+        nif->getUShort(); // always 0
+        data.read(nif);
+    }
+
+    void post(NIFFile *nif)
+    {
+        Controller::post(nif);
+        data.post(nif);
+    }
 };
 
 class NiKeyframeController : public Controller
 {
 public:
-  NiKeyframeDataPtr data;
+    NiKeyframeDataPtr data;
 
-  void read(NIFFile *nif)
-  {
-    Controller::read(nif);
-    data.read(nif);
-  }
+    void read(NIFFile *nif)
+    {
+        Controller::read(nif);
+        data.read(nif);
+    }
+
+    void post(NIFFile *nif)
+    {
+        Controller::post(nif);
+        data.post(nif);
+    }
 };
 
 class NiAlphaController : public Controller
 {
 public:
-  NiFloatDataPtr data;
+    NiFloatDataPtr data;
 
-  void read(NIFFile *nif)
-  {
-    Controller::read(nif);
-    data.read(nif);
-  }
+    void read(NIFFile *nif)
+    {
+        Controller::read(nif);
+        data.read(nif);
+    }
+
+    void post(NIFFile *nif)
+    {
+        Controller::post(nif);
+        data.post(nif);
+    }
 };
 
 class NiGeomMorpherController : public Controller
 {
 public:
-  NiMorphDataPtr data;
+    NiMorphDataPtr data;
 
-  void read(NIFFile *nif)
-  {
-    Controller::read(nif);
-    data.read(nif);
-    nif->getByte(); // always 0
-  }
+    void read(NIFFile *nif)
+    {
+        Controller::read(nif);
+        data.read(nif);
+        nif->getChar(); // always 0
+    }
+
+    void post(NIFFile *nif)
+    {
+        Controller::post(nif);
+        data.post(nif);
+    }
 };
 
 class NiVisController : public Controller
 {
 public:
-  NiVisDataPtr data;
+    NiVisDataPtr data;
 
-  void read(NIFFile *nif)
-  {
-    Controller::read(nif);
-    data.read(nif);
-  }
+    void read(NIFFile *nif)
+    {
+        Controller::read(nif);
+        data.read(nif);
+    }
+
+    void post(NIFFile *nif)
+    {
+        Controller::post(nif);
+        data.post(nif);
+    }
 };
 
 } // Namespace

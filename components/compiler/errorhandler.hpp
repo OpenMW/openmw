@@ -37,10 +37,10 @@ namespace Compiler
         public:
 
             ErrorHandler();
-		    ///< constructor
+            ///< constructor
 
             virtual ~ErrorHandler();
-		    ///< destructor
+            ///< destructor
 
             bool isGood() const;
             ///< Was compiling successful?

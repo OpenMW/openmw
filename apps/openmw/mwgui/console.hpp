@@ -11,20 +11,25 @@
 #include <components/compiler/scanner.hpp>
 #include <components/compiler/locals.hpp>
 #include <components/compiler/output.hpp>
+#include <components/compiler/extensions.hpp>
 #include <components/interpreter/interpreter.hpp>
 
 #include "../mwscript/compilercontext.hpp"
 #include "../mwscript/interpretercontext.hpp"
 
+#include "referenceinterface.hpp"
+
 namespace MWGui
 {
-  class Console : private OEngine::GUI::Layout, private Compiler::ErrorHandler
+  class Console : private OEngine::GUI::Layout, private Compiler::ErrorHandler, public ReferenceInterface
   {
     private:
-    
+
+        Compiler::Extensions mExtensions;
         MWScript::CompilerContext mCompilerContext;
-        MWWorld::Environment& mEnvironment;
-        
+        std::vector<std::string> mNames;
+        bool mConsoleOnlyScripts;
+
         bool compile (const std::string& cmd, Compiler::Output& output);
 
         /// Report error to the user.
@@ -32,8 +37,24 @@ namespace MWGui
 
         /// Report a file related error
         virtual void report (const std::string& message, Type type);
-                    
-  public:
+
+        void listNames();
+        ///< Write all valid identifiers and keywords into mNames and sort them.
+        /// \note If mNames is not empty, this function is a no-op.
+        /// \note The list may contain duplicates (if a name is a keyword and an identifier at the same
+        /// time).
+
+    public:
+
+        void setSelectedObject(const MWWorld::Ptr& object);
+        ///< Set the implicit object for script execution
+
+    protected:
+
+        virtual void onReferenceUnavailable();
+
+
+    public:
     MyGUI::EditPtr command;
     MyGUI::EditPtr history;
 
@@ -44,13 +65,15 @@ namespace MWGui
     StringList::iterator current;
     std::string editString;
 
-    Console(int w, int h, MWWorld::Environment& environment, const Compiler::Extensions& extensions);
+    Console(int w, int h, bool consoleOnlyScripts);
 
     void enable();
 
     void disable();
 
     void setFont(const std::string &fntName);
+
+    void onResChange(int width, int height);
 
     void clearHistory();
 
@@ -66,6 +89,10 @@ namespace MWGui
     /// Error message
     void printError(const std::string &msg);
 
+    void execute (const std::string& command);
+
+    void executeFile (const std::string& command);
+
   private:
 
     void keyPress(MyGUI::WidgetPtr _sender,
@@ -73,6 +100,8 @@ namespace MWGui
                   MyGUI::Char _char);
 
     void acceptCommand(MyGUI::EditPtr _sender);
+
+    std::string complete( std::string input, std::vector<std::string> &matches );
   };
 }
 #endif

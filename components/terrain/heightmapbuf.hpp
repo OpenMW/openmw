@@ -8,7 +8,7 @@
 #include "heightmap.hpp"
 #include "land_factory.hpp"
 #include <vector>
-#include <assert.h>
+#include <cassert>
 
 namespace Terrain
 {

@@ -19,7 +19,19 @@ op 0x20002: AiEscort
 op 0x20003: AiEscort, explicit reference
 op 0x20004: Lock
 op 0x20005: Lock, explicit reference
-opcodes 0x20006-0x3ffff unused
+op 0x20006: PlayAnim
+op 0x20007: PlayAnim, explicit reference
+op 0x20008: LoopAnim
+op 0x20009: LoopAnim, explicit reference
+op 0x2000a: Choice
+op 0x2000b: PCRaiseRank
+op 0x2000c: PCLowerRank
+op 0x2000d: PCJoinFaction
+op 0x2000e: PCGetRank implicit
+op 0x2000f: PCGetRank explicit
+op 0x20010: AiWander
+op 0x20011: AiWander, explicit reference
+opcodes 0x20012-0x3ffff unused
 
 Segment 4:
 (not implemented yet)
@@ -95,4 +107,79 @@ op 0x2000085-0x200008b: Disable Controls
 op 0x200008c: Unlock
 op 0x200008d: Unlock, explicit reference
 op 0x200008e: COE
-opcodes 0x200008f-0x3ffffff unused
+op 0x200008e-0x20000a8: GetSkill
+op 0x20000a9-0x20000c3: GetSkill, explicit reference
+op 0x20000c4-0x20000de: SetSkill
+op 0x20000df-0x20000f9: SetSkill, explicit reference
+op 0x20000fa-0x2000114: ModSkill
+op 0x2000115-0x200012f: ModSKill, explicit reference
+op 0x2000130: ToggleCollision
+op 0x2000131: GetInterior
+op 0x2000132: ToggleCollsionDebug
+op 0x2000133: Journal
+op 0x2000134: SetJournalIndex
+op 0x2000135: GetJournalIndex
+op 0x2000136: GetPCCell
+op 0x2000137: GetButtonPressed
+op 0x2000138: SkipAnim
+op 0x2000139: SkipAnim, expplicit reference
+op 0x200013a: AddTopic
+op 0x200013b: twf
+op 0x200013c: FadeIn
+op 0x200013d: FadeOut
+op 0x200013e: FadeTo
+op 0x200013f: GetCurrentWeather
+op 0x2000140: ChangeWeather
+op 0x2000141: GetWaterLevel
+op 0x2000142: SetWaterLevel
+op 0x2000143: ModWaterLevel
+op 0x2000144: ToggleWater, twa
+op 0x2000145: ToggleFogOfWar (tfow)
+op 0x2000146: TogglePathgrid
+op 0x2000147: AddSpell
+op 0x2000148: AddSpell, explicit reference
+op 0x2000149: RemoveSpell
+op 0x200014a: RemoveSpell, explicit reference
+op 0x200014b: GetSpell
+op 0x200014c: GetSpell, explicit reference
+op 0x200014d: ModDisposition
+op 0x200014e: ModDisposition, explicit reference
+op 0x200014f: ForceGreeting
+op 0x2000150: ForceGreeting, explicit reference
+op 0x2000151: ToggleFullHelp
+op 0x2000152: Goodbye
+op 0x2000153: DontSaveObject (left unimplemented)
+op 0x2000154: ClearForceRun
+op 0x2000155: ClearForceRun, explicit reference
+op 0x2000156: ForceRun
+op 0x2000157: ForceRun, explicit reference
+op 0x2000158: ClearForceSneak
+op 0x2000159: ClearForceSneak, explicit reference
+op 0x200015a: ForceSneak
+op 0x200015b: ForceSneak, explicit reference
+op 0x200015c: SetHello
+op 0x200015d: SetHello, explicit reference
+op 0x200015e: SetFight
+op 0x200015f: SetFight, explicit reference
+op 0x2000160: SetFlee
+op 0x2000161: SetFlee, explicit reference
+op 0x2000162: SetAlarm
+op 0x2000163: SetAlarm, explicit reference
+op 0x2000164: SetScale
+op 0x2000165: SetScale, explicit reference
+op 0x2000166: SetAngle
+op 0x2000167: SetAngle, explicit reference
+op 0x2000168: GetScale
+op 0x2000169: GetScale, explicit reference
+op 0x200016a: GetAngle
+op 0x200016b: GetAngle, explicit reference
+op 0x200016c: user1 (console only, requires --script-console switch)
+op 0x200016d: user2 (console only, requires --script-console switch)
+op 0x200016e: user3, explicit reference (console only, requires --script-console switch)
+op 0x200016f: user3 (implicit reference, console only, requires --script-console switch)
+op 0x2000170: user4, explicit reference (console only, requires --script-console switch)
+op 0x2000171: user4 (implicit reference, console only, requires --script-console switch)
+op 0x2000172: GetStartingAngle
+op 0x2000173: GetStartingAngle, explicit reference
+op 0x2000174: ToggleVanityMode
+opcodes 0x2000175-0x3ffffff unused

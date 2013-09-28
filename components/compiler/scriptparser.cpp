@@ -24,7 +24,7 @@ namespace Compiler
         mLineParser.reset();
         if (mLineParser.parseName (name, loc, scanner))
             scanner.scan (mLineParser);
-        
+
         return true;
     }
 
@@ -34,22 +34,22 @@ namespace Compiler
         {
             mControlParser.reset();
             if (mControlParser.parseKeyword (keyword, loc, scanner))
-                scanner.scan (mControlParser);   
-        
+                scanner.scan (mControlParser);
+
             mControlParser.appendCode (mOutput.getCode());
-        
+
             return true;
         }
-    
+
         if (keyword==Scanner::K_end && mEnd)
         {
             return false;
         }
-    
+
         mLineParser.reset();
         if (mLineParser.parseKeyword (keyword, loc, scanner))
             scanner.scan (mLineParser);
-            
+
         return true;
     }
 
@@ -57,11 +57,11 @@ namespace Compiler
     {
         if (code==Scanner::S_newline) // empty line
             return true;
-            
+
         mLineParser.reset();
         if (mLineParser.parseSpecial (code, loc, scanner))
             scanner.scan (mLineParser);
-            
+
         return true;
     }
 
@@ -77,4 +77,3 @@ namespace Compiler
         mOutput.clear();
     }
 }
-

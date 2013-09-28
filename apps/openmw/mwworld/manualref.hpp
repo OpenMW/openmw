@@ -3,10 +3,10 @@
 
 #include <boost/any.hpp>
 
-#include <components/esm_store/cell_store.hpp>
 #include <components/esm_store/store.hpp>
 
 #include "ptr.hpp"
+#include "cellstore.hpp"
 
 namespace MWWorld
 {
@@ -24,11 +24,11 @@ namespace MWWorld
             {
                 if (const T *instance = list.search (name))
                 {
-                    ESMS::LiveCellRef<T, RefData> ref;
+                    LiveCellRef<T> ref;
                     ref.base = instance;
 
                     mRef = ref;
-                    mPtr = Ptr (&boost::any_cast<ESMS::LiveCellRef<T, RefData>&> (mRef), 0);
+                    mPtr = Ptr (&boost::any_cast<LiveCellRef<T>&> (mRef), 0);
 
                     return true;
                 }
@@ -41,11 +41,11 @@ namespace MWWorld
             {
                 if (const T *instance = list.search (name))
                 {
-                    ESMS::LiveCellRef<T, RefData> ref;
+                    LiveCellRef<T> ref;
                     ref.base = instance;
 
                     mRef = ref;
-                    mPtr = Ptr (&boost::any_cast<ESMS::LiveCellRef<T, RefData>&> (mRef), 0);
+                    mPtr = Ptr (&boost::any_cast<LiveCellRef<T>&> (mRef), 0);
 
                     return true;
                 }
@@ -82,6 +82,7 @@ namespace MWWorld
 
                 // initialise
                 ESM::CellRef& cellRef = mPtr.getCellRef();
+                cellRef.refID = name;
                 cellRef.refnum = -1;
                 cellRef.scale = 1;
                 cellRef.factIndex = 0;

@@ -30,7 +30,7 @@ namespace ESMS
 
     // Each individual list
     RecListT<Activator>         activators;
-    RecListT<Potion>            potions;
+    RecListWithIDT<Potion>      potions;
     RecListT<Apparatus>         appas;
     RecListT<Armor>             armors;
     RecListT<BodyPart>          bodyParts;
@@ -40,20 +40,20 @@ namespace ESMS
     RecListT<Clothing>          clothes;
     RecListT<LoadCNTC>          contChange;
     RecListT<Container>         containers;
-    RecListWithIDT<Creature>          creatures;
+    RecListWithIDT<Creature>    creatures;
     RecListT<LoadCREC>          creaChange;
-    RecListT<Dialogue>          dialogs;
+    RecListCaseT<Dialogue>      dialogs;
     RecListT<Door>              doors;
     RecListT<Enchantment>       enchants;
     RecListT<Faction>           factions;
     RecListT<Global>            globals;
-    RecListT<Ingredient>        ingreds;
+    RecListWithIDT<Ingredient>  ingreds;
     RecListT<CreatureLevList>   creatureLists;
     RecListT<ItemLevList>       itemLists;
     RecListT<Light>             lights;
     RecListT<Tool>              lockpicks;
-    RecListT<Misc>              miscItems;
-    RecListWithIDT<NPC>               npcs;
+    RecListT<Miscellaneous>     miscItems;
+    RecListWithIDT<NPC>         npcs;
     RecListT<LoadNPCC>          npcChange;
     RecListT<Probe>             probes;
     RecListT<Race>              races;
@@ -72,9 +72,13 @@ namespace ESMS
     LandList                    lands;
     LTexList                    landTexts;
     ScriptListT<Script>         scripts;
-    //RecListT<MagicEffect> magicEffects;
-    //RecListT<Skill>       skills;
-    //RecListT<PathGrid>    pathgrids;
+    IndexListT<MagicEffect>     magicEffects;
+    IndexListT<Skill>           skills;
+    //RecListT<Pathgrid>          pathgrids;
+    PathgridList                pathgrids;
+
+    // Special entry which is hardcoded and not loaded from an ESM
+    IndexListT<Attribute>       attributes;
 
     // Lookup of all IDs. Makes looking up references faster. Just
     // maps the id name to the record type.
@@ -118,17 +122,15 @@ namespace ESMS
       recLists[REC_LIGH] = &lights;
       recLists[REC_LOCK] = &lockpicks;
       recLists[REC_LTEX] = &landTexts;
-      //recLists[REC_MGEF] = &magicEffects;
       recLists[REC_MISC] = &miscItems;
       recLists[REC_NPC_] = &npcs;
       recLists[REC_NPCC] = &npcChange;
-      //recLists[REC_PGRD] = &pathgrids;
+      recLists[REC_PGRD] = &pathgrids;
       recLists[REC_PROB] = &probes;
       recLists[REC_RACE] = &races;
       recLists[REC_REGN] = &regions;
       recLists[REC_REPA] = &repairs;
       recLists[REC_SCPT] = &scripts;
-      //recLists[REC_SKIL] = &skills;
       recLists[REC_SNDG] = &soundGens;
       recLists[REC_SOUN] = &sounds;
       recLists[REC_SPEL] = &spells;

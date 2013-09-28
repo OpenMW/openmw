@@ -21,10 +21,7 @@ struct Static
 {
   std::string model;
 
-  void load(ESMReader &esm)
-  {
-    model = esm.getHNString("MODL");
-  }
+  void load(ESMReader &esm);
 };
 }
 #endif

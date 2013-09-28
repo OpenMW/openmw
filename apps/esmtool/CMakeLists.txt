@@ -1,6 +1,4 @@
 set(ESMTOOL
-  esmtool_cmd.c
-  esmtool_cmd.h
   esmtool.cpp
 )
 source_group(apps\\esmtool FILES ${ESMTOOL})
@@ -8,13 +6,11 @@ source_group(apps\\esmtool FILES ${ESMTOOL})
 # Main executable
 add_executable(esmtool
   ${ESMTOOL}
-  ${MISC} ${MISC_HEADER}
-  ${TO_UTF8}
-  ${ESM}
 )
 
 target_link_libraries(esmtool
   ${Boost_LIBRARIES}
+  components
 )
 
 #if (APPLE)

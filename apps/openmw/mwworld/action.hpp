@@ -1,24 +1,34 @@
 #ifndef GAME_MWWORLD_ACTION_H
 #define GAME_MWWORLD_ACTION_H
 
+#include <string>
+
 namespace MWWorld
 {
-    class Environment;
+    class Ptr;
 
     /// \brief Abstract base for actions
     class Action
     {
+            std::string mSoundId;
+            bool mTeleport;
+
             // not implemented
             Action (const Action& action);
             Action& operator= (const Action& action);
 
-        public:
+            virtual void executeImp (const Ptr& actor) = 0;
 
-            Action() {}
+    public:
 
-            virtual ~Action() {}
+            Action (bool teleport = false);
+            ///< \param teleport action will teleport the actor
 
-            virtual void execute (Environment& environment) = 0;
+            virtual ~Action();
+
+            void execute (const Ptr& actor);
+
+            void setSound (const std::string& id);
     };
 }
 

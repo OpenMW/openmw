@@ -3,7 +3,8 @@
 
 #include "esm_reader.hpp"
 
-namespace ESM {
+namespace ESM
+{
 
 /*
  * Texture used for texturing landscape.
@@ -23,14 +24,10 @@ namespace ESM {
 
 struct LandTexture
 {
-  std::string id, texture;
-  int index;
+    std::string id, texture;
+    int index;
 
-  void load(ESMReader &esm)
-  {
-    esm.getHNT(index, "INTV");
-    texture = esm.getHNString("DATA");
-  }
+    void load(ESMReader &esm);
 };
 }
 #endif

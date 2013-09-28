@@ -36,6 +36,7 @@
 #include <iostream>
 using namespace std;
 using namespace Nif;
+using namespace Misc;
 
 /* This file implements functions from the NIFFile class. It is also
    where we stash all the functions we couldn't add as inline
@@ -45,8 +46,8 @@ using namespace Nif;
 void NIFFile::parse()
 {
   // Check the header string
-  const char* head = getString(40);
-  if(!begins(head, "NetImmerse File Format"))
+  std::string head = getString(40);
+  if(head.compare(0, 22, "NetImmerse File Format") != 0)
     fail("Invalid NIF header");
 
   // Get BCD version
@@ -69,7 +70,7 @@ void NIFFile::parse()
 
   for(int i=0;i<recNum;i++)
     {
-      SString rec = getString();
+      std::string rec = getString();
       //cout << i << ": " << rec.toString() << endl;
 
       Record *r = NULL;
@@ -83,7 +84,6 @@ void NIFFile::parse()
 
       // NiNodes
       if(rec == "NiNode" || rec == "AvoidNode" ||
-         rec == "RootCollisionNode" ||
          rec == "NiBSParticleNode" ||
          rec == "NiBSAnimationNode" ||
          rec == "NiBillboardNode") { r = new NiNode; r->recType = RC_NiNode; }
@@ -93,6 +93,8 @@ void NIFFile::parse()
       else if(rec == "NiRotatingParticles") { r = new NiRotatingParticles; r->recType = RC_NiRotatingParticles; }
       else if(rec == "NiAutoNormalParticles") { r = new NiAutoNormalParticles; r->recType = RC_NiAutoNormalParticles; }
       else if(rec == "NiCamera") { r = new NiCamera; r->recType = RC_NiCamera; }
+        else if(rec == "RootCollisionNode"){ r = new NiNode; r->recType = RC_RootCollisionNode; }// a root collision node is exactly like a node
+                                                                                                 //that's why there is no need to create a new type
 
       // Properties
       else if(rec == "NiTexturingProperty") { r = new NiTexturingProperty; r->recType = RC_NiTexturingProperty; }
@@ -153,13 +155,22 @@ void NIFFile::parse()
 
       // Failure
       else
-        fail("Unknown record type " + rec.toString());
+        fail("Unknown record type " + rec);
 
       assert(r != NULL);
       assert(r->recType != RC_MISSING);
       r->recName = rec;
       records[i] = r;
       r->read(this);
+
+      // Discard tranformations for the root node, otherwise some meshes
+      // occasionally get wrong orientation. Only for NiNode-s for now, but
+      // can be expanded if needed.
+      // This should be rewritten when the method is cleaned up.
+      if (0 == i && rec == "NiNode")
+      {
+          static_cast<Nif::Node*>(r)->trafo = Nif::Transformation::getIdentity();
+      }
     }
 
   /* After the data, the nif contains an int N and then a list of N
@@ -175,19 +186,41 @@ void NIFFile::parse()
     records[i]->post(this);
 }
 
+/// \todo move to the write cpp file
+
 void NiSkinInstance::post(NIFFile *nif)
 {
-  int bnum = bones.length();
-  if(bnum != static_cast<int> (data->bones.size()))
-    nif->fail("Mismatch in NiSkinData bone count");
+    data.post(nif);
+    root.post(nif);
+    bones.post(nif);
 
-  root->makeRootBone(data->trafo);
+    if(data.empty() || root.empty())
+        nif->fail("NiSkinInstance missing root or data");
 
-  for(int i=0; i<bnum; i++)
+    size_t bnum = bones.length();
+    if(bnum != data->bones.size())
+        nif->fail("Mismatch in NiSkinData bone count");
+
+    root->makeRootBone(&data->trafo);
+
+    for(size_t i=0; i<bnum; i++)
     {
-      if(!bones.has(i))
-        nif->fail("Oops: Missing bone! Don't know how to handle this.");
-
-      bones[i].makeBone(i, data->bones[i]);
+        if(bones[i].empty())
+            nif->fail("Oops: Missing bone! Don't know how to handle this.");
+        bones[i]->makeBone(i, data->bones[i]);
     }
+}
+
+Ogre::Matrix4 Node::getLocalTransform()
+{
+    Ogre::Matrix4 mat4(Ogre::Matrix4::IDENTITY);
+    mat4.makeTransform(trafo.pos, Ogre::Vector3(trafo.scale), Ogre::Quaternion(trafo.rotation));
+    return mat4;
+}
+
+Ogre::Matrix4 Node::getWorldTransform()
+{
+    if(parent != NULL)
+        return parent->getWorldTransform() * getLocalTransform();
+    return getLocalTransform();
 }

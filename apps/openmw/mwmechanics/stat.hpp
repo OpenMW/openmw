@@ -1,6 +1,9 @@
 #ifndef GAME_MWMECHANICS_STAT_H
 #define GAME_MWMECHANICS_STAT_H
 
+#undef min
+#undef max
+
 #include <limits>
 
 namespace MWMechanics
@@ -12,8 +15,11 @@ namespace MWMechanics
             T mModified;
 
         public:
+            typedef T Type;
 
             Stat() : mBase (0), mModified (0) {}
+            Stat(T base) : mBase (base), mModified (base) {}
+            Stat(T base, T modified) : mBase (base), mModified (modified) {}
 
             const T& getBase() const
             {
@@ -23,6 +29,11 @@ namespace MWMechanics
             const T& getModified() const
             {
                 return mModified;
+            }
+
+            T getModifier() const
+            {
+                return mModified-mBase;
             }
 
             /// Set base and modified to \a value.
@@ -59,10 +70,9 @@ namespace MWMechanics
                 mBase += diff;
             }
 
-            /// Change modified relatively.
-            void modify (const T& diff)
+            void setModifier (const T& modifier)
             {
-                mModified += diff;
+                mModified = mBase + modifier;
             }
     };
 
@@ -86,8 +96,12 @@ namespace MWMechanics
             T mCurrent;
 
         public:
+            typedef T Type;
 
             DynamicStat() : mCurrent (0) {}
+            DynamicStat(T current) : mCurrent (current) {}
+            DynamicStat(T base, T modified, T current) : mStatic(base, modified), mCurrent (current) {}
+            DynamicStat(const Stat<T> &stat, T current) : mStatic(stat), mCurrent (current) {}
 
             const T& getBase() const
             {
@@ -133,7 +147,7 @@ namespace MWMechanics
             void modify (const T& diff)
             {
                 mStatic.modify (diff);
-                modifyCurrent (diff);
+                setCurrent (getCurrent()+diff);
             }
 
             void setCurrent (const T& value)
@@ -144,6 +158,13 @@ namespace MWMechanics
                     mCurrent = 0;
                 else if (mCurrent>getModified())
                     mCurrent = getModified();
+            }
+
+            void setModifier (const T& modifier)
+            {
+                T diff =  modifier - mStatic.getModifier();
+                mStatic.setModifier (modifier);
+                setCurrent (getCurrent()+diff);
             }
     };
 

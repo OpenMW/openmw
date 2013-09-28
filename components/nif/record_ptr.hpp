@@ -37,61 +37,55 @@ namespace Nif
 template <class X>
 class RecordPtrT
 {
-  int index;
-  X* ptr;
-  NIFFile *nif;
+    union {
+        intptr_t index;
+        X* ptr;
+    };
 
- public:
+public:
+    RecordPtrT() : index(-2) {}
 
-  RecordPtrT() : index(-2), ptr(NULL) {}
+    /// Read the index from the nif
+    void read(NIFFile *nif)
+    {
+        // Can only read the index once
+        assert(index == -2);
 
-  /// Read the index from the nif
-  void read(NIFFile *_nif)
-  {
-    // Can only read the index once
-    assert(index == -2);
+        // Store the index for later
+        index = nif->getInt();
+        assert(index >= -1);
+    }
 
-    // Store the NIFFile pointer for later
-    nif = _nif;
+    /// Resolve index to pointer
+    void post(NIFFile *nif)
+    {
+        if(index < 0)
+            ptr = NULL;
+        else
+        {
+            Record *r = nif->getRecord(index);
+            // And cast it
+            ptr = dynamic_cast<X*>(r);
+            assert(ptr != NULL);
+        }
+    }
 
-    // And the index, of course
-    index = nif->getInt();
-  }
-
-  /** Set the pointer explicitly. May be used when you are pointing to
-      records in another file, eg. when you have a .nif / .kf pair.
-  */
-  void set(X *p)
-  {
-    ptr = p;
-    index = -1;
-  }
-
-  /// Look up the actual object from the index
-  X* getPtr()
-  {
-    // Have we found the pointer already?
-    if(ptr == NULL)
-      {
-        // Get the record
-        assert(index >= 0);
-        Record *r = nif->getRecord(index);
-
-        // And cast it
-        ptr = dynamic_cast<X*>(r);
+    /// Look up the actual object from the index
+    X* getPtr() const
+    {
         assert(ptr != NULL);
-      }
-    return ptr;
-  }
+        return ptr;
+    }
+    X& get() const
+    { return *getPtr(); }
 
-  /// Syntactic sugar
-  X* operator->() { return getPtr(); }
-  X& get() { return *getPtr(); }
+    /// Syntactic sugar
+    X* operator->() const
+    { return getPtr(); }
 
-  /// Pointers are allowed to be empty
-  bool empty() { return index == -1 && ptr == NULL; }
-
-  int getIndex() { return index; }
+    /// Pointers are allowed to be empty
+    bool empty() const
+    { return ptr == NULL; }
 };
 
 /** A list of references to other records. These are read as a list,
@@ -101,40 +95,30 @@ class RecordPtrT
 template <class X>
 class RecordListT
 {
-  typedef RecordPtrT<X> Ptr;
-  std::vector<Ptr> list;
+    typedef RecordPtrT<X> Ptr;
+    std::vector<Ptr> list;
 
- public:
-
-  void read(NIFFile *nif)
-  {
-    int len = nif->getInt();
-    list.resize(len);
-
-    assert(len >= 0 && len < 1000);
-    for(int i=0;i<len;i++)
-      list[i].read(nif);
-  }
-
-  X& operator[](int index)
+public:
+    void read(NIFFile *nif)
     {
-      assert(index >= 0 && index < static_cast<int> (list.size()));
-      return list[index].get();
+        int len = nif->getInt();
+        list.resize(len);
+
+        for(size_t i=0;i < list.size();i++)
+            list[i].read(nif);
     }
 
-  bool has(int index)
-  {
-    assert(index >= 0 && index < static_cast<int> (list.size()));
-    return !list[index].empty();
-  }
-
-  int getIndex(int index)
+    void post(NIFFile *nif)
     {
-      if(has(index)) return list[index].getIndex();
-      else return -1;
+        for(size_t i=0;i < list.size();i++)
+            list[i].post(nif);
     }
 
-  int length() { return list.size(); }
+    const Ptr& operator[](size_t index) const
+    { return list.at(index); }
+
+    size_t length() const
+    { return list.size(); }
 };
 
 

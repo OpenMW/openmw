@@ -1,27 +1,29 @@
 #ifndef GAME_MWWORLD_REFDATA_H
 #define GAME_MWWORLD_REFDATA_H
 
-#include <string>
-
-#include <boost/shared_ptr.hpp>
+#include <components/esm/defs.hpp>
 
 #include "../mwscript/locals.hpp"
 
-#include "../mwmechanics/creaturestats.hpp"
-#include "../mwmechanics/npcstats.hpp"
-
-#include "containerstore.hpp"
+namespace Ogre
+{
+    class SceneNode;
+}
 
 namespace ESM
 {
     class Script;
+    class CellRef;
 }
 
 namespace MWWorld
 {
+    class CustomData;
+
     class RefData
     {
-            std::string mHandle;
+            Ogre::SceneNode* mBaseNode;
+
 
             MWScript::Locals mLocals; // if we find the overhead of heaving a locals
                                       // object in the refdata of refs without a script,
@@ -30,82 +32,58 @@ namespace MWWorld
             bool mEnabled;
             int mCount; // 0: deleted
 
-            // we are using shared pointer here to avoid having to create custom copy-constructor,
-            // assignment operator and destructor. As a consequence though copying a RefData object
-            // manually will probably give unexcepted results. This is not a problem since RefData
-            // are never copied outside of container operations.
-            boost::shared_ptr<MWMechanics::CreatureStats> mCreatureStats;
-            boost::shared_ptr<MWMechanics::NpcStats> mNpcStats;
+            ESM::Position mPosition;
 
-            boost::shared_ptr<ContainerStore<RefData> > mContainerStore;
+            CustomData *mCustomData;
+
+            void copy (const RefData& refData);
+
+            void cleanup();
 
         public:
 
-            RefData() : mHasLocals (false), mEnabled (true), mCount (1) {}
+            /// @param cellRef Used to copy constant data such as position into this class where it can
+            /// be altered without effecting the original data. This makes it possible
+            /// to reset the position as the orignal data is still held in the CellRef
+            RefData (const ESM::CellRef& cellRef);
 
-            std::string getHandle()
-            {
-                return mHandle;
-            }
+            RefData (const RefData& refData);
 
-            int getCount() const
-            {
-                return mCount;
-            }
+            ~RefData();
 
-            void setLocals (const ESM::Script& script)
-            {
-                if (!mHasLocals)
-                {
-                    mLocals.configure (script);
-                    mHasLocals = true;
-                }
-            }
+            RefData& operator= (const RefData& refData);
 
-            void setHandle (const std::string& handle)
-            {
-                mHandle = handle;
-            }
+            /// Return OGRE handle (may be empty).
+            std::string getHandle();
 
-            void setCount (int count)
-            {
-                mCount = count;
-            }
+            /// Return OGRE base node (can be a null pointer).
+            Ogre::SceneNode* getBaseNode();
 
-            MWScript::Locals& getLocals()
-            {
-                return mLocals;
-            }
+            /// Set OGRE base node (can be a null pointer).
+            void setBaseNode (Ogre::SceneNode* base);
 
-            bool isEnabled() const
-            {
-                return mEnabled;
-            }
+            int getCount() const;
 
-            void enable()
-            {
-                mEnabled = true;
-            }
+            void setLocals (const ESM::Script& script);
 
-            void disable()
-            {
-                mEnabled = true;
-            }
+            void setCount (int count);
 
-            boost::shared_ptr<MWMechanics::CreatureStats>& getCreatureStats()
-            {
-                return mCreatureStats;
-            }
+            MWScript::Locals& getLocals();
 
-            boost::shared_ptr<MWMechanics::NpcStats>& getNpcStats()
-            {
-                return mNpcStats;
-            }
+            bool isEnabled() const;
 
-            boost::shared_ptr<ContainerStore<RefData> >& getContainerStore()
-            {
-                return mContainerStore;
-            }
+            void enable();
+
+            void disable();
+
+            ESM::Position& getPosition();
+
+            void setCustomData (CustomData *data);
+            ///< Set custom data (potentially replacing old custom data). The ownership of \æ data is
+            /// transferred to this.
+
+            CustomData *getCustomData();
+            ///< May return a 0-pointer. The ownership of the return data object is not transferred.
     };
 }
 

@@ -1,18 +1,19 @@
 // This program generates the file tables_gen.hpp
 
 #include <iostream>
-#include <iomanip>
 using namespace std;
 
 #include <iconv.h>
-#include <assert.h>
+#include <cassert>
 
 void tab() { cout << "   "; }
 
 // write one number with a space in front of it and a comma after it
-void num(unsigned char i, bool last)
+void num(char i, bool last)
 {
-  cout << " 0x" << (unsigned)i;
+  // Convert i to its integer value, i.e. -128 to 127. Printing it directly
+  // would result in non-printable characters in the source code, which is bad.
+  cout << " " << static_cast<int>(i);
   if(!last) cout << ",";
 }
 
@@ -74,13 +75,42 @@ int write_table(const std::string &charset, const std::string &tableName)
 
   // Finish table
   cout << "};\n";
+
+  return 0;
 }
 
 int main()
 {
-  cout << hex;
+  // Write header guard
+  cout << "#ifndef COMPONENTS_TOUTF8_TABLE_GEN_H\n#define COMPONENTS_TOUTF8_TABLE_GEN_H\n\n";
+
+  // Write namespace
+  cout << "namespace ToUTF8\n{\n\n";
+
+  // Central European and Eastern European languages that use Latin script, such as
+  // Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, Croatian, Serbian (Latin script), Romanian and Albanian.
+  cout << "\n/// Central European and Eastern European languages that use Latin script,"
+          "\n/// such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, Croatian,"
+          "\n/// Serbian (Latin script), Romanian and Albanian."
+          "\n";
+  write_table("WINDOWS-1250", "windows_1250");
+
+  // Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic and other languages
+  cout << "\n/// Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic"
+          "\n/// and other languages"
+          "\n";
+  write_table("WINDOWS-1251", "windows_1251");
 
   // English
+  cout << "\n/// Latin alphabet used by English and some other Western languages"
+          "\n";
   write_table("WINDOWS-1252", "windows_1252");
+
+  // Close namespace
+  cout << "\n}\n\n";
+
+  // Close header guard
+  cout << "#endif\n\n";
+
   return 0;
 }

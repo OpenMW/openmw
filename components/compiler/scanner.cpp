@@ -230,27 +230,27 @@ namespace Compiler
         return true;
     }
 
+    static const char *keywords[] =
+    {
+        "begin", "end",
+        "short", "long", "float",
+        "if", "endif", "else", "elseif",
+        "while", "endwhile",
+        "return",
+        "messagebox",
+        "set", "to",
+        "getsquareroot",
+        "menumode",
+        "random",
+        "startscript", "stopscript", "scriptrunning",
+        "getdistance",
+        "getsecondspassed",
+        "enable", "disable", "getdisabled",
+        0
+    };
+
     bool Scanner::scanName (char c, Parser& parser, bool& cont)
     {
-        static const char *keywords[] =
-        {
-            "begin", "end",
-            "short", "long", "float",
-            "if", "endif", "else", "elseif",
-            "while", "endwhile",
-            "return",
-            "messagebox",
-            "set", "to",
-            "getsquareroot",
-            "menumode",
-            "random",
-            "startscript", "stopscript", "scriptrunning",
-            "getdistance",
-            "getsecondspassed",
-            "enable", "disable", "getdisabled",
-            0
-        };
-
         std::string name;
 
         if (!scanName (c, name))
@@ -360,6 +360,8 @@ namespace Compiler
             special = S_open;
         else if (c==')')
             special = S_close;
+        else if (c=='.')
+            special = S_member;
         else if (c=='=')
         {
             if (get (c))
@@ -368,8 +370,10 @@ namespace Compiler
                     special = S_cmpEQ;
                 else
                 {
+                    special = S_cmpEQ;
                     putback (c);
-                    return false;
+//                    return false;
+// Allow = as synonym for ==. \todo optionally disable for post-1.0 scripting improvements.
                 }
             }
             else
@@ -512,5 +516,14 @@ namespace Compiler
         mPutback = Putback_Keyword;
         mPutbackCode = keyword;
         mPutbackLoc = loc;
+    }
+
+    void Scanner::listKeywords (std::vector<std::string>& keywords)
+    {
+        for (int i=0; Compiler::keywords[i]; ++i)
+            keywords.push_back (Compiler::keywords[i]);
+
+        if (mExtensions)
+            mExtensions->listKeywords (keywords);
     }
 }
