@@ -5,6 +5,7 @@
 
 namespace CSVWorld
 {
+    ///< \brief Tool base class
     class SceneTool : public QPushButton
     {
             Q_OBJECT

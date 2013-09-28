@@ -12,7 +12,7 @@
 #include "tablebottombox.hpp"
 #include "creator.hpp"
 #include "scenetoolbar.hpp"
-#include "scenetool.hpp"
+#include "scenetoolmode.hpp"
 
 CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
 : SubView (id)
@@ -30,10 +30,10 @@ CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::D
     layout2->setContentsMargins (QMargins (0, 0, 0, 0));
 
     SceneToolbar *toolbar = new SceneToolbar (this);
-toolbar->addTool (new SceneTool (this)); // test
-toolbar->addTool (new SceneTool (this));
-toolbar->addTool (new SceneTool (this));
-toolbar->addTool (new SceneTool (this));
+toolbar->addTool (new SceneToolMode (this)); // test
+toolbar->addTool (new SceneToolMode (this));
+toolbar->addTool (new SceneToolMode (this));
+toolbar->addTool (new SceneToolMode (this));
     layout2->addWidget (toolbar, 0);
 
     /// \todo replace with rendering widget
