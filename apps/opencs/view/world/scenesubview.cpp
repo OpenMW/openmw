@@ -30,7 +30,12 @@ CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::D
     layout2->setContentsMargins (QMargins (0, 0, 0, 0));
 
     SceneToolbar *toolbar = new SceneToolbar (this);
-toolbar->addTool (new SceneToolMode (this)); // test
+// test
+SceneToolMode *tool = new SceneToolMode (this);
+tool->addButton (":door.png", "a");
+tool->addButton (":GMST.png", "b");
+tool->addButton (":Info.png", "c");
+toolbar->addTool (tool);
 toolbar->addTool (new SceneToolMode (this));
 toolbar->addTool (new SceneToolMode (this));
 toolbar->addTool (new SceneToolMode (this));

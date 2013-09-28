@@ -14,6 +14,15 @@ namespace CSVWorld
 
             SceneTool (QWidget *parent = 0);
 
+            virtual void showPanel (const QPoint& position) = 0;
+
+        protected slots:
+
+            void updateIcon (const QIcon& icon);
+
+        private slots:
+
+            void openRequest();
     };
 }
 

@@ -3,6 +3,10 @@
 
 #include "scenetool.hpp"
 
+#include <map>
+
+class QHBoxLayout;
+
 namespace CSVWorld
 {
     ///< \brief Mode selector tool
@@ -10,9 +14,25 @@ namespace CSVWorld
     {
             Q_OBJECT
 
+            QWidget *mPanel;
+            QHBoxLayout *mLayout;
+            std::map<QPushButton *, std::string> mButtons; // widget, id
+
         public:
 
             SceneToolMode (QWidget *parent = 0);
+
+            virtual void showPanel (const QPoint& position);
+
+            void addButton (const std::string& icon, const std::string& id);
+
+        signals:
+
+            void modeChanged (const std::string& id);
+
+        private slots:
+
+            void selected();
     };
 }
 
