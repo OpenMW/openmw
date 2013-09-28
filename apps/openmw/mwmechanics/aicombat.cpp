@@ -22,55 +22,59 @@ namespace MWMechanics
     {
         const MWWorld::Ptr target = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();//MWBase::Environment::get().getWorld()->getPtr(mTargetId, false);
 
-        MWMechanics::DrawState_ state = MWWorld::Class::get(actor).getNpcStats(actor).getDrawState();
-        if (state == MWMechanics::DrawState_Spell || state == MWMechanics::DrawState_Nothing)
-            MWWorld::Class::get(actor).getNpcStats(actor).setDrawState(MWMechanics::DrawState_Weapon);    
-        MWWorld::Class::get(actor).getCreatureStats(actor).setAttackingOrSpell(true);
-
-        ESM::Position pos = actor.getRefData().getPosition();
-        const ESM::Pathgrid *pathgrid =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*actor.getCell()->mCell);
-
-        int cellX = actor.getCell()->mCell->mData.mX;
-        int cellY = actor.getCell()->mCell->mData.mY;
-        float xCell = 0;
-        float yCell = 0;
-
-        if (actor.getCell()->mCell->isExterior())
+        if(actor.getTypeName() == typeid(ESM::NPC).name())
         {
-            xCell = actor.getCell()->mCell->mData.mX * ESM::Land::REAL_SIZE;
-            yCell = actor.getCell()->mCell->mData.mY * ESM::Land::REAL_SIZE;
+
+            MWMechanics::DrawState_ state = MWWorld::Class::get(actor).getNpcStats(actor).getDrawState();
+            if (state == MWMechanics::DrawState_Spell || state == MWMechanics::DrawState_Nothing)
+                MWWorld::Class::get(actor).getNpcStats(actor).setDrawState(MWMechanics::DrawState_Weapon);    
+            MWWorld::Class::get(actor).getCreatureStats(actor).setAttackingOrSpell(true);
+
+            ESM::Position pos = actor.getRefData().getPosition();
+            const ESM::Pathgrid *pathgrid =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*actor.getCell()->mCell);
+
+            int cellX = actor.getCell()->mCell->mData.mX;
+            int cellY = actor.getCell()->mCell->mData.mY;
+            float xCell = 0;
+            float yCell = 0;
+
+            if (actor.getCell()->mCell->isExterior())
+            {
+                xCell = actor.getCell()->mCell->mData.mX * ESM::Land::REAL_SIZE;
+                yCell = actor.getCell()->mCell->mData.mY * ESM::Land::REAL_SIZE;
+            }
+
+            ESM::Pathgrid::Point dest;
+            dest.mX = target.getRefData().getPosition().pos[0];
+            dest.mY = target.getRefData().getPosition().pos[1];
+            dest.mZ = target.getRefData().getPosition().pos[2];
+
+            ESM::Pathgrid::Point start;
+            start.mX = pos.pos[0];
+            start.mY = pos.pos[1];
+            start.mZ = pos.pos[2];
+
+            std::cout << start.mX << " " << dest.mX << "\n";
+
+            mPathFinder.buildPath(start, dest, pathgrid, xCell, yCell, true);
+
+            mPathFinder.checkPathCompleted(pos.pos[0],pos.pos[1],pos.pos[2])
+
+            float zAngle = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
+            std::cout << zAngle;
+            MWBase::Environment::get().getWorld()->rotateObject(actor, 0, 0, zAngle, false);
+            MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 1;
+            
+            float range = 100;
+
+            if((dest.mX - start.mX)*(dest.mX - start.mX)+(dest.mY - start.mY)*(dest.mY - start.mY)+(dest.mZ - start.mZ)*(dest.mZ - start.mZ)
+                < range*range)
+            {
+                MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 0;
+                //MWWorld::Class::get(actor).getCreatureStats(actor).setAttackingOrSpell(!MWWorld::Class::get(actor).getCreatureStats(actor).getAttackingOrSpell());
+            }
         }
-
-        ESM::Pathgrid::Point dest;
-        dest.mX = target.getRefData().getPosition().pos[0];
-        dest.mY = target.getRefData().getPosition().pos[1];
-        dest.mZ = target.getRefData().getPosition().pos[2];
-
-        ESM::Pathgrid::Point start;
-        start.mX = pos.pos[0];
-        start.mY = pos.pos[1];
-        start.mZ = pos.pos[2];
-
-        std::cout << start.mX << " " << dest.mX << "\n";
-
-        mPathFinder.buildPath(start, dest, pathgrid, xCell, yCell, true);
-
-        if(mPathFinder.checkPathCompleted(pos.pos[0],pos.pos[1],pos.pos[2]))
-        {
-            MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 0;
-        }
-
-        float zAngle = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
-        std::cout << zAngle;
-        MWBase::Environment::get().getWorld()->rotateObject(actor, 0, 0, zAngle, false);
-        MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 1;
-
-        if(dest.mX - start.mX < 100)
-        {
-            //MWWorld::Class::get(actor).getCreatureStats(actor).setAttackingOrSpell(false);
-        }
-
         return false;
     }
 
