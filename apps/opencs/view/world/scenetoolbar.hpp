@@ -3,17 +3,23 @@
 
 #include <QWidget>
 
+class QVBoxLayout;
+
 namespace CSVWorld
 {
+    class SceneTool;
+
     class SceneToolbar : public QWidget
     {
             Q_OBJECT
+
+            QVBoxLayout *mLayout;
 
         public:
 
             SceneToolbar (QWidget *parent);
 
-
+            void addTool (SceneTool *tool);
     };
 }
 
