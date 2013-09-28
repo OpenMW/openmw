@@ -14,7 +14,7 @@ namespace MWMechanics
 {
 
     AiCombat::AiCombat(const std::string &targetId)
-        :mTargetId(targetId)
+        :mTargetId(targetId),mStartingSecond(0)
     {
     }
 
@@ -28,7 +28,7 @@ namespace MWMechanics
             MWMechanics::DrawState_ state = MWWorld::Class::get(actor).getNpcStats(actor).getDrawState();
             if (state == MWMechanics::DrawState_Spell || state == MWMechanics::DrawState_Nothing)
                 MWWorld::Class::get(actor).getNpcStats(actor).setDrawState(MWMechanics::DrawState_Weapon);    
-            MWWorld::Class::get(actor).getCreatureStats(actor).setAttackingOrSpell(true);
+            //MWWorld::Class::get(actor).getCreatureStats(actor).setAttackingOrSpell(true);
 
             ESM::Position pos = actor.getRefData().getPosition();
             const ESM::Pathgrid *pathgrid =
@@ -59,7 +59,7 @@ namespace MWMechanics
 
             mPathFinder.buildPath(start, dest, pathgrid, xCell, yCell, true);
 
-            mPathFinder.checkPathCompleted(pos.pos[0],pos.pos[1],pos.pos[2])
+            mPathFinder.checkPathCompleted(pos.pos[0],pos.pos[1],pos.pos[2]);
 
             float zAngle = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
             std::cout << zAngle;
@@ -71,6 +71,17 @@ namespace MWMechanics
             if((dest.mX - start.mX)*(dest.mX - start.mX)+(dest.mY - start.mY)*(dest.mY - start.mY)+(dest.mZ - start.mZ)*(dest.mZ - start.mZ)
                 < range*range)
             {
+                 MWWorld::TimeStamp time = MWBase::Environment::get().getWorld()->getTimeStamp();
+                if(mStartingSecond == 0)
+                {
+                    MWWorld::Class::get(actor).getCreatureStats(actor).setAttackingOrSpell(false);
+                    mStartingSecond = ((time.getHour() - int(time.getHour())) * 100);
+                }
+                else if( ((time.getHour() - int(time.getHour())) * 100) - mStartingSecond > 1)
+                {
+                    MWWorld::Class::get(actor).getCreatureStats(actor).setAttackingOrSpell(true);
+                    mStartingSecond = 0;
+                }
                 MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 0;
                 //MWWorld::Class::get(actor).getCreatureStats(actor).setAttackingOrSpell(!MWWorld::Class::get(actor).getCreatureStats(actor).getAttackingOrSpell());
             }
