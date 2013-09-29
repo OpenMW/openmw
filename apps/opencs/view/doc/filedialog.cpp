@@ -10,107 +10,76 @@
 #include <QPushButton>
 #include <QLabel>
 #include <QGroupBox>
+#include <QGridLayout>
 
 #include <components/contentselector/model/esmfile.hpp>
 #include <components/contentselector/view/lineedit.hpp>
-
-#include "filewidget.hpp"
-#include "adjusterwidget.hpp"
+#include "components/contentselector/view/contentselector.hpp"
 
 #include <QDebug>
 
 CSVDoc::FileDialog::FileDialog(QWidget *parent) :
-    ContentSelector(parent),
-    mFileWidget (new FileWidget (this)),
-    mAdjusterWidget (new AdjusterWidget (this)),
-    mEnable_1(false),
-    mEnable_2(false)
-{
-    // Hide the profile elements
-    profileGroupBox->hide();
-    addonView->showColumn(2);
+    QDialog(parent),
+    mOpenFileFlags (ContentSelectorView::Flag_Content | ContentSelectorView::Flag_LoadAddon),
+    mNewFileFlags (ContentSelectorView::Flag_Content | ContentSelectorView::Flag_NewAddon)
 
+{
     resize(400, 400);
-
-    mFileWidget->setType(true);
-    mFileWidget->extensionLabelIsVisible(false);
-
-    connect(projectCreateButton, SIGNAL(clicked()), this, SIGNAL(createNewFile()));
-
-    connect(projectButtonBox, SIGNAL(accepted()), this, SIGNAL(openFiles()));
-    connect(projectButtonBox, SIGNAL(rejected()), this, SLOT(reject()));
-
-    connect (mFileWidget, SIGNAL (nameChanged (const QString&, bool)),
-        mAdjusterWidget, SLOT (setName (const QString&, bool)));
-
-    connect (mAdjusterWidget, SIGNAL (stateChanged (bool)), this, SLOT (slotAdjusterChanged(bool)));
-    connect (this, SIGNAL (signalGameFileChanged(int)), this, SLOT (slotGameFileSelected(int)));
-    connect (this, SIGNAL (signalUpdateCreateButton(bool, int)), this, SLOT (slotEnableCreateButton(bool, int)));
 }
 
-void CSVDoc::FileDialog::updateOpenButton(const QStringList &items)
+void CSVDoc::FileDialog::addFiles(const QString &path)
 {
-    QPushButton *openButton = projectButtonBox->button(QDialogButtonBox::Open);
-
-    if (!openButton)
-        return;
-
-    openButton->setEnabled(!items.isEmpty());
+    ContentSelectorView::ContentSelector::addFiles(path);
 }
 
-void CSVDoc::FileDialog::slotEnableCreateButton(bool enable, int widgetNumber)
+QString CSVDoc::FileDialog::filename()
 {
-
-    if (widgetNumber == 1)
-        mEnable_1 = enable;
-
-    if (widgetNumber == 2)
-        mEnable_2 = enable;
-
-    projectCreateButton->setEnabled(mEnable_1 && mEnable_2);
+    return ContentSelectorView::ContentSelector::instance().filename();
 }
 
-QString CSVDoc::FileDialog::fileName()
+QStringList CSVDoc::FileDialog::selectedFilepaths()
 {
-    return mFileWidget->getName();
+    return ContentSelectorView::ContentSelector::instance().selectedFiles();
+}
+
+void CSVDoc::FileDialog::showDialog()
+{
+    show();
+    raise();
+    activateWindow();
 }
 
 void CSVDoc::FileDialog::openFile()
 {
     setWindowTitle(tr("Open"));
 
-    mFileWidget->hide();
-    adjusterWidgetFrame->hide();
-    projectCreateButton->hide();
-    projectGroupBox->setTitle(tr(""));
-    projectButtonBox->button(QDialogButtonBox::Open)->setEnabled(false);
+    ContentSelectorView::ContentSelector::configure(this, mOpenFileFlags);
 
-    show();
-    raise();
-    activateWindow();
+    connect (&ContentSelectorView::ContentSelector::instance(),
+            SIGNAL (accepted()), this, SIGNAL (openFiles()));
+
+    connect (&ContentSelectorView::ContentSelector::instance(),
+            SIGNAL (rejected()), this, SLOT (slotRejected()));
+
+    showDialog();
 }
 
 void CSVDoc::FileDialog::newFile()
 {
     setWindowTitle(tr("New"));
 
-    fileWidgetFrame->layout()->addWidget(mFileWidget);
-    adjusterWidgetFrame->layout()->addWidget(mAdjusterWidget);
+    ContentSelectorView::ContentSelector::configure(this, mNewFileFlags);
 
-    projectButtonBox->setStandardButtons(QDialogButtonBox::Cancel);
-    projectButtonBox->addButton(projectCreateButton, QDialogButtonBox::ActionRole);
+    connect (&ContentSelectorView::ContentSelector::instance(),
+            SIGNAL (accepted()), this, SIGNAL (createNewFile()));
 
-    show();
-    raise();
-    activateWindow();
+    connect (&ContentSelectorView::ContentSelector::instance(),
+            SIGNAL (rejected()), this, SLOT (slotRejected()));
+
+    showDialog();
 }
 
-void CSVDoc::FileDialog::slotAdjusterChanged(bool value)
+void CSVDoc::FileDialog::slotRejected()
 {
-    emit signalUpdateCreateButton(mAdjusterWidget->isValid(), 2);
-}
-
-void CSVDoc::FileDialog::slotGameFileSelected(int value)
-{
-    emit signalUpdateCreateButton(value > -1, 1);
+    close();
 }

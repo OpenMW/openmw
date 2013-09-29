@@ -29,8 +29,7 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
     , mLauncherSettings(launcherSettings)
 {
     setupUi(this);
-   // mContentSelector.setParent(parent);
-
+/*
    // QMetaObject::connectSlotsByName(this);
 
     projectGroupBox->hide();
@@ -52,7 +51,7 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
     setupDataFiles();
 
 
-    updateViews();
+    updateViews();*/
 }
 
 void DataFilesPage::buildContentModel()
@@ -112,10 +111,10 @@ void DataFilesPage::updateViews()
 
 void ContentSelectorView::ContentSelector::addFiles(const QString &path)
 {
-    mContentModel->addFiles(path);
+  //  mContentModel->addFiles(path);
     //mContentModel->sort(3);  // Sort by date accessed
-    gameFileView->setCurrentIndex(-1);
-    mContentModel->uncheckAll();
+ //   ui.gameFileView->setCurrentIndex(-1);
+ //   mContentModel->uncheckAll();
 }
 
 void DataFilesPage::createActions()

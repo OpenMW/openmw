@@ -123,37 +123,34 @@ void CS::Editor::loadDocument()
 void CS::Editor::openFiles()
 {
     std::vector<boost::filesystem::path> files;
-    QStringList paths = mFileDialog.checkedItemsPaths();
 
-    foreach (const QString &path, paths) {
+    foreach (const QString &path, mFileDialog.selectedFilepaths()) {
         files.push_back(path.toStdString());
     }
 
     /// \todo Get the save path from the file dialogue
-
     CSMDoc::Document *document = mDocumentManager.addDocument (files, *files.rbegin(), false);
 
     mViewManager.addView (document);
-    mFileDialog.hide();
+    mFileDialog.close();
 }
 
 void CS::Editor::createNewFile()
 {
     std::vector<boost::filesystem::path> files;
-    QStringList paths = mFileDialog.checkedItemsPaths();
 
-    foreach (const QString &path, paths) {
+    foreach (const QString &path, mFileDialog.selectedFilepaths()) {
         files.push_back(path.toStdString());
     }
 
-    files.push_back(mFileDialog.fileName().toStdString());
+    files.push_back(mFileDialog.filename().toStdString());
 
     /// \todo Get the save path from the file dialogue.
 
     CSMDoc::Document *document = mDocumentManager.addDocument (files, *files.rbegin(), true);
 
     mViewManager.addView (document);
-    mFileDialog.hide();
+    mFileDialog.close();
 }
 
 void CS::Editor::createNewGame (const boost::filesystem::path& file)
