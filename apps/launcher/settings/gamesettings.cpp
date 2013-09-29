@@ -163,12 +163,12 @@ bool GameSettings::writeFile(QTextStream &stream)
 
     QStringList masters = mSettings.values(QString("master"));
     for (int i = masters.count(); i--;) {
-        stream << "master=" << masters.at(i) << "\n";
+        stream << "content=" << masters.at(i) << "\n";
     }
 
     QStringList plugins = mSettings.values(QString("plugin"));
     for (int i = plugins.count(); i--;) {
-        stream << "plugin=" << plugins.at(i) << "\n";
+        stream << "content=" << plugins.at(i) << "\n";
     }
 
     return true;

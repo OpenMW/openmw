@@ -206,19 +206,20 @@ void DataFilesPage::saveSettings()
     mLauncherSettings.remove(QString("Profiles/") + profile + QString("/plugin"));
 
     mGameSettings.remove(QString("master"));
-    mGameSettings.remove(QString("plugin"));
+    mGameSettings.remove(QString("plugins"));
+    mGameSettings.remove(QString("content"));
 
-   ContentSelectorModel::ContentFileList items = mContentModel->checkedItems();
+    ContentSelectorModel::ContentFileList items = mContentModel->checkedItems();
 
     foreach(const ContentSelectorModel::EsmFile *item, items) {
 
         if (item->gameFiles().size() == 0) {
             mLauncherSettings.setMultiValue(QString("Profiles/") + profile + QString("/master"), item->fileName());
-            mGameSettings.setMultiValue(QString("master"), item->fileName());
+            mGameSettings.setMultiValue(QString("content"), item->fileName());
 
         } else {
             mLauncherSettings.setMultiValue(QString("Profiles/") + profile + QString("/plugin"), item->fileName());
-            mGameSettings.setMultiValue(QString("plugin"), item->fileName());
+            mGameSettings.setMultiValue(QString("content"), item->fileName());
         }
     }
 
