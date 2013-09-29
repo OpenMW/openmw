@@ -268,6 +268,27 @@ namespace
         strptime(time, "%d %B %Y", &tms);
         return mktime(&tms);
     }
+    
+    // Some cds have cab files which have the Data Files subfolders outside the Data Files folder
+    void install_dfiles_outside(const bfs::path& from, const bfs::path& dFiles)
+    {
+        bfs::path fonts = findFile(from, "fonts", false);
+        if(fonts.string() != "")
+            installToPath(fonts, dFiles / "Fonts"); 
+
+        bfs::path music = findFile(from, "music", false);
+        if(music.string() != "")
+            installToPath(music, dFiles / "Music"); 
+
+        bfs::path sound = findFile(from, "sound", false);
+        if(sound.string() != "")
+            installToPath(sound, dFiles / "Sound"); 
+    
+        bfs::path splash = findFile(from, "splash", false);
+        if(splash.string() != "")
+            installToPath(splash, dFiles / "Splash"); 
+    }
+
 }
 
 bool UnshieldThread::SetMorrowindPath(const std::string& path)
@@ -365,6 +386,8 @@ bool UnshieldThread::extract()
         
         installToPath(dFilesDir, outputDataFilesDir); 
         
+        install_dfiles_outside(mwExtractPath, outputDataFilesDir);
+        
         // Videos are often kept uncompressed on the cd
         bfs::path videosPath = findFile(mMorrowindPath.parent_path(), "video", false);
         if(videosPath.string() != "")
@@ -399,6 +422,8 @@ bool UnshieldThread::extract()
         
         installToPath(dFilesDir, outputDataFilesDir); 
         
+        install_dfiles_outside(tbExtractPath, outputDataFilesDir);
+        
         // Mt GOTY CD has Sounds in a seperate folder from the rest of the data files
         bfs::path soundsPath = findFile(tbExtractPath, "sounds", false);
         if(soundsPath.string() != "")
@@ -426,6 +451,8 @@ bool UnshieldThread::extract()
         bfs::path dFilesDir = findFile(bmExtractPath, "bloodmoon.esm").parent_path();
         
         installToPath(dFilesDir, outputDataFilesDir); 
+        
+        install_dfiles_outside(bmExtractPath, outputDataFilesDir);
 
         // My GOTY CD contains a folder within cab files called Tribunal patch,
         // which contains Tribunal.esm
