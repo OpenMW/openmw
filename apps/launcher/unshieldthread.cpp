@@ -77,6 +77,8 @@ namespace
         ini.insert(loc, setting + "=" + val + "\r\n");
     }
 
+    #define FIX(setting) add_setting(category, setting, get_setting(category, setting, inx), ini)
+
     void bloodmoon_fix_ini(std::string& ini, const bfs::path inxPath)
     {
         std::string inx = read_to_string(inxPath);
@@ -88,95 +90,94 @@ namespace
         ini.erase(start, end-start);
 
         std::string category;
-        std::string setting;
 
         category = "General";
         {
-            setting = "Werewolf FOV"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            FIX("Werewolf FOV");
         }
         category = "Moons";
         {
-            setting = "Script Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            FIX("Script Color");
         }
         category = "Weather";
         {
-            setting = "Snow Ripples"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Snow Ripple Radius"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Snow Ripples Per Flake"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Snow Ripple Scale"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Snow Ripple Speed"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Snow Gravity Scale"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Snow High Kill"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Snow Low Kill"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            FIX("Snow Ripples");
+            FIX("Snow Ripple Radius");
+            FIX("Snow Ripples Per Flake");
+            FIX("Snow Ripple Scale");
+            FIX("Snow Ripple Speed");
+            FIX("Snow Gravity Scale");
+            FIX("Snow High Kill");
+            FIX("Snow Low Kill");
         }
         category = "Weather Blight";
         {
-            setting = "Ambient Loop Sound ID"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            FIX("Ambient Loop Sound ID");
         }
         category = "Weather Snow";
         {
-            setting = "Sky Sunrise Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Sky Day Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Sky Sunset Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Sky Night Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Fog Sunrise Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Fog Day Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Fog Sunset Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Fog Night Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Ambient Sunrise Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Ambient Day Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Ambient Sunset Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Ambient Night Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Sun Sunrise Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Sun Day Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Sun Sunset Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Sun Night Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Sun Disc Sunset Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Transition Delta"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Land Fog Day Depth"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Land Fog Night Depth"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Clouds Maximum Percent"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Wind Speed"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Cloud Speed"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Glare View"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Cloud Texture"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Ambient Loop Sound ID"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Snow Threshold"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Snow Diameter"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Snow Height Min"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Snow Height Max"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Snow Entrance Speed"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Max Snowflakes"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            FIX("Sky Sunrise Color");
+            FIX("Sky Day Color");
+            FIX("Sky Sunset Color");
+            FIX("Sky Night Color");
+            FIX("Fog Sunrise Color");
+            FIX("Fog Day Color");
+            FIX("Fog Sunset Color");
+            FIX("Fog Night Color");
+            FIX("Ambient Sunrise Color");
+            FIX("Ambient Day Color");
+            FIX("Ambient Sunset Color");
+            FIX("Ambient Night Color");
+            FIX("Sun Sunrise Color");
+            FIX("Sun Day Color");
+            FIX("Sun Sunset Color");
+            FIX("Sun Night Color");
+            FIX("Sun Disc Sunset Color");
+            FIX("Transition Delta");
+            FIX("Land Fog Day Depth");
+            FIX("Land Fog Night Depth");
+            FIX("Clouds Maximum Percent");
+            FIX("Wind Speed");
+            FIX("Cloud Speed");
+            FIX("Glare View");
+            FIX("Cloud Texture");
+            FIX("Ambient Loop Sound ID");
+            FIX("Snow Threshold");
+            FIX("Snow Diameter");
+            FIX("Snow Height Min");
+            FIX("Snow Height Max");
+            FIX("Snow Entrance Speed");
+            FIX("Max Snowflakes");
         }
         category = "Weather Blizzard";
         {
-            setting = "Sky Sunrise Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Sky Day Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Sky Sunset Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Sky Night Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Fog Sunrise Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Fog Day Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Fog Sunset Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Fog Night Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Ambient Sunrise Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Ambient Day Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Ambient Sunset Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Ambient Night Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Sun Sunrise Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Sun Day Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Sun Sunset Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Sun Night Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Sun Disc Sunset Color"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Transition Delta"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Land Fog Day Depth"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Land Fog Night Depth"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Clouds Maximum Percent"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Wind Speed"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Cloud Speed"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Glare View"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Cloud Texture"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Ambient Loop Sound ID"; add_setting(category, setting, get_setting(category, setting, inx), ini);
-            setting = "Storm Threshold"; add_setting(category, setting, get_setting(category, setting, inx), ini);
+            FIX("Sky Sunrise Color");
+            FIX("Sky Day Color");
+            FIX("Sky Sunset Color");
+            FIX("Sky Night Color");
+            FIX("Fog Sunrise Color");
+            FIX("Fog Day Color");
+            FIX("Fog Sunset Color");
+            FIX("Fog Night Color");
+            FIX("Ambient Sunrise Color");
+            FIX("Ambient Day Color");
+            FIX("Ambient Sunset Color");
+            FIX("Ambient Night Color");
+            FIX("Sun Sunrise Color");
+            FIX("Sun Day Color");
+            FIX("Sun Sunset Color");
+            FIX("Sun Night Color");
+            FIX("Sun Disc Sunset Color");
+            FIX("Transition Delta");
+            FIX("Land Fog Day Depth");
+            FIX("Land Fog Night Depth");
+            FIX("Clouds Maximum Percent");
+            FIX("Wind Speed");
+            FIX("Cloud Speed");
+            FIX("Glare View");
+            FIX("Cloud Texture");
+            FIX("Ambient Loop Sound ID");
+            FIX("Storm Threshold");
         }
     }
 
