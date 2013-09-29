@@ -14,6 +14,8 @@
 
 #include "../mwbase/world.hpp"
 
+#include "contentloader.hpp"
+
 namespace Ogre
 {
     class Vector3;
@@ -40,6 +42,8 @@ namespace MWRender
     class CellRender;
     class Animation;
 }
+
+struct ContentLoader;
 
 namespace MWWorld
 {
@@ -113,6 +117,15 @@ namespace MWWorld
 
             void ensureNeededRecords();
 
+            /**
+             * @brief loadContentFiles - Loads content files (esm,esp,omwgame,omwaddon)
+             * @param fileCollections- Container which holds content file names and their paths
+             * @param content - Container which holds content file names
+             * @param contentLoader -
+             */
+            void loadContentFiles(const Files::Collections& fileCollections,
+                const std::vector<std::string>& content, ContentLoader& contentLoader);
+
             int mPlayIntro;
 
             bool mTeleportEnabled;
@@ -121,7 +134,7 @@ namespace MWWorld
 
             World (OEngine::Render::OgreRenderer& renderer,
                 const Files::Collections& fileCollections,
-                const std::vector<std::string>& master, const std::vector<std::string>& plugins,
+                const std::vector<std::string>& contentFiles,
                 const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir,
                 ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap, int mActivationDistanceOverride);
 

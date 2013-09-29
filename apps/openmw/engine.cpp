@@ -261,34 +261,14 @@ void OMW::Engine::setCell (const std::string& cellName)
     mCellName = cellName;
 }
 
-// Set master file (esm)
-// - If the given name does not have an extension, ".esm" is added automatically
-
-void OMW::Engine::addMaster (const std::string& master)
+void OMW::Engine::addContentFile(const std::string& file)
 {
-    mMaster.push_back(master);
-    std::string &str = mMaster.back();
+  if (file.find_last_of(".") == std::string::npos)
+  {
+    throw std::runtime_error("Missing extension in content file!");
+  }
 
-    // Append .esm if not already there
-    std::string::size_type sep = str.find_last_of (".");
-    if (sep == std::string::npos)
-    {
-        str += ".esm";
-    }
-}
-
-// Add plugin file (esp)
-void OMW::Engine::addPlugin (const std::string& plugin)
-{
-    mPlugins.push_back(plugin);
-    std::string &str = mPlugins.back();
-
-    // Append .esp if not already there
-    std::string::size_type sep = str.find_last_of (".");
-    if (sep == std::string::npos)
-    {
-        str += ".esp";
-    }
+  mContentFiles.push_back(file);
 }
 
 void OMW::Engine::setScriptsVerbosity(bool scriptsVerbosity)
@@ -403,7 +383,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
         mEnvironment.getWindowManager()->setNewGame(true);
 
     // Create the world
-    mEnvironment.setWorld( new MWWorld::World (*mOgre, mFileCollections, mMaster, mPlugins,
+    mEnvironment.setWorld( new MWWorld::World (*mOgre, mFileCollections, mContentFiles,
         mResDir, mCfgMgr.getCachePath(), mEncoder, mFallbackMap,
         mActivationDistanceOverride));
     MWBase::Environment::get().getWorld()->setupPlayer();
@@ -414,8 +394,8 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     //Load translation data
     mTranslationDataStorage.setEncoder(mEncoder);
-    for (size_t i = 0; i < mMaster.size(); i++)
-      mTranslationDataStorage.loadTranslationData(mFileCollections, mMaster[i]);
+    for (size_t i = 0; i < mContentFiles.size(); i++)
+      mTranslationDataStorage.loadTranslationData(mFileCollections, mContentFiles[i]);
 
     Compiler::registerExtensions (mExtensions); 
 
@@ -480,7 +460,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 void OMW::Engine::go()
 {
     assert (!mCellName.empty());
-    assert (!mMaster.empty());
+    assert (!mContentFiles.empty());
     assert (!mOgre);
 
     Settings::Manager settings;
