@@ -62,3 +62,19 @@ int main(int argc, char *argv[])
     return returnValue;
 }
 
+
+#include <stdlib.h>
+#include <windows.h>
+
+#ifdef __GNUC__
+#define _stdcall  __attribute__((stdcall))
+#endif
+
+int _stdcall
+WinMain (struct HINSTANCE__ *hInstance,
+         struct HINSTANCE__ *hPrevInstance,
+         char               *lpszCmdLine,
+         int                 nCmdShow)
+{
+  return main (__argc, __argv);
+}
