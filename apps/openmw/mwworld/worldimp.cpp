@@ -225,8 +225,8 @@ namespace MWWorld
         if (mEsm[0].getFormat() == 0)
             ensureNeededRecords();
 
-        mStore.movePlayerRecord();
         mStore.setUp();
+        mStore.movePlayerRecord();
 
         mGlobalVariables = new Globals (mStore);
 
