@@ -399,8 +399,6 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
                 mExtensions, mFpsLevel, mOgre, mCfgMgr.getLogPath().string() + std::string("/"),
                 mCfgMgr.getCachePath ().string(), mScriptConsoleMode, mTranslationDataStorage, mEncoding);
     mEnvironment.setWindowManager (window);
-    if (mNewGame)
-        mEnvironment.getWindowManager()->setNewGame(true);
 
     // Create the world
     mEnvironment.setWorld( new MWWorld::World (*mOgre, mFileCollections, mMaster, mPlugins,
@@ -410,6 +408,10 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     input->setPlayer(&mEnvironment.getWorld()->getPlayer());
 
     window->initUI();
+    if (mNewGame)
+        // still redundant work here: recreate CharacterCreation(),
+        // double update visibility etc.
+        window->setNewGame(true);
     window->renderWorldMap();
 
     //Load translation data
