@@ -443,11 +443,31 @@ Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
     Ogre::Vector3 ret = Animation::runAnimation(timepassed);
 
     Ogre::SkeletonInstance *baseinst = mSkelBase->getSkeleton();
+
+    // We have to make a few adjustments to the first person animation, since the armature
+    // is partly driven by code.
     if(mViewMode == VM_FirstPerson && mCamera)
     {
+        // Bend his neck and shoulders so his eyes don't go into his torso.
         float pitch = mCamera->getPitch();
         Ogre::Node *node = baseinst->getBone("Bip01 Neck");
         node->pitch(Ogre::Radian(pitch*0.75f), Ogre::Node::TS_WORLD);
+
+        // If NPC is sneaking, his head and shoulders must lower to adjust his camera.
+        const MWWorld::Class *npcClass = &MWWorld::Class::get(mPtr);
+        const MWBase::World *world = MWBase::Environment::get().getWorld();
+
+        bool isSneaking = npcClass->getStance(mPtr, MWWorld::Class::Sneak);
+        bool isInAir = !world->isOnGround(mPtr);
+        bool isSwimming = world->isSwimming(mPtr);
+
+        if(isSneaking && !(isSwimming || isInAir))
+        {
+            Ogre::Node *headNode = baseinst->getBone("Bip01 Neck");
+            Ogre::Vector3 position = headNode->getPosition();
+            position.x -= 9.5f;
+            headNode->setPosition(position);
+        }
     }
 
     for(size_t i = 0;i < ESM::PRT_Count;i++)
