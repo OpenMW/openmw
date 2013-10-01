@@ -154,6 +154,9 @@ class CharacterController
     float mSecondsOfSwimming;
     float mSecondsOfRunning;
 
+    // used for acrobatics progress and fall damages
+    float mFallHeight;
+
     std::string mAttackType; // slash, chop or thrust
 
     void refreshCurrentAnims(CharacterState idle, CharacterState movement, bool force=false);
