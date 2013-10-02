@@ -776,7 +776,15 @@ void CharacterController::update(float duration)
         {
             // The player is in the air (either getting up —ascending part of jump— or falling).
 
-            mFallHeight = std::max(mFallHeight, mPtr.getRefData().getPosition().pos[2]);
+            if (world->isSlowFalling(mPtr))
+            {
+                // SlowFalling spell effect is active, do not keep previous fall height
+                mFallHeight = mPtr.getRefData().getPosition().pos[2];
+            }
+            else
+            {
+                mFallHeight = std::max(mFallHeight, mPtr.getRefData().getPosition().pos[2]);
+            }
 
             const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
 

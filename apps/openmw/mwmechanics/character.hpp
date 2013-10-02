@@ -3,6 +3,8 @@
 
 #include <OgreVector3.h>
 
+#include <components/esm/loadmgef.hpp>
+
 #include "../mwworld/ptr.hpp"
 
 namespace MWWorld
