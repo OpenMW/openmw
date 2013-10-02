@@ -769,7 +769,7 @@ void CharacterController::update(float duration)
         if(sneak || inwater || flying)
         {
             vec.z = 0.0f;
-            mFallHeight = 0.0f;
+            mFallHeight = mPtr.getRefData().getPosition().pos[2];
         }
 
         if(!onground && !flying && !inwater)
@@ -854,7 +854,7 @@ void CharacterController::update(float duration)
                 }
             }
 
-            mFallHeight = 0;
+            mFallHeight = mPtr.getRefData().getPosition().pos[2];
         }
         else
         {
