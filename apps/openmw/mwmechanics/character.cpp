@@ -836,9 +836,11 @@ void CharacterController::update(float duration)
             float healthLost = cls.getFallDamage(mPtr, mFallHeight - mPtr.getRefData().getPosition().pos[2]);
             if (healthLost > 0.0f)
             {
+                const float fatigueTerm = cls.getCreatureStats(mPtr).getFatigueTerm();
+
                 // inflict fall damages
                 DynamicStat<float> health = cls.getCreatureStats(mPtr).getHealth();
-                int realHealthLost = healthLost * (1.0f - 0.25 * 1.25f /* * fatigueTerm */);
+                int realHealthLost = healthLost * (1.0f - 0.25 * fatigueTerm);
                 health.setCurrent(health.getCurrent() - realHealthLost);
                 cls.getCreatureStats(mPtr).setHealth(health);
 
@@ -846,7 +848,7 @@ void CharacterController::update(float duration)
                 cls.skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, 1);
 
                 const float acrobaticsSkill = cls.getNpcStats(mPtr).getSkill(ESM::Skill::Acrobatics).getModified();
-                if (healthLost > (acrobaticsSkill * 1.25f /* * fatigueTerm */))
+                if (healthLost > (acrobaticsSkill * fatigueTerm))
                 {
                     //TODO: actor falls over
                 }
