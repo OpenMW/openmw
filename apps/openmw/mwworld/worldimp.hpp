@@ -355,6 +355,7 @@ namespace MWWorld
             virtual void processChangedSettings(const Settings::CategorySettingVector& settings);
 
             virtual bool isFlying(const MWWorld::Ptr &ptr) const;
+            virtual bool isSlowFalling(const MWWorld::Ptr &ptr) const;
             ///Is the head of the creature underwater?
             virtual bool isSubmerged(const MWWorld::Ptr &object) const;
             virtual bool isSwimming(const MWWorld::Ptr &object) const;

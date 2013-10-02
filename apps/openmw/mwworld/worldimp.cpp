@@ -1582,6 +1582,19 @@ namespace MWWorld
         return false;
     }
 
+    bool
+    World::isSlowFalling(const MWWorld::Ptr &ptr) const
+    {
+        if(!ptr.getClass().isActor())
+            return false;
+
+        const MWMechanics::CreatureStats &stats = ptr.getClass().getCreatureStats(ptr);
+        if(stats.getMagicEffects().get(MWMechanics::EffectKey(ESM::MagicEffect::SlowFall)).mMagnitude > 0)
+            return true;
+
+        return false;
+    }
+
     bool World::isSubmerged(const MWWorld::Ptr &object) const
     {
         float *fpos = object.getRefData().getPosition().pos;
