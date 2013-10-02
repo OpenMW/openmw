@@ -822,7 +822,6 @@ void CharacterController::update(float duration)
             const float normalizedEncumbrance = cls.getEncumbrance(mPtr) / cls.getCapacity(mPtr);
             const int fatigueDecrease = fatigueJumpBase + (1 - normalizedEncumbrance) * fatigueJumpMult;
             DynamicStat<float> fatigue = cls.getCreatureStats(mPtr).getFatigue();
-            fatigue.setModified(fatigue.getModified() - fatigueDecrease, 0);
             fatigue.setCurrent(fatigue.getCurrent() - fatigueDecrease);
             cls.getCreatureStats(mPtr).setFatigue(fatigue);
         }
@@ -840,7 +839,6 @@ void CharacterController::update(float duration)
                 // inflict fall damages
                 DynamicStat<float> health = cls.getCreatureStats(mPtr).getHealth();
                 int realHealthLost = healthLost * (1.0f - 0.25 * 1.25f /* * fatigueTerm */);
-                health.setModified(health.getModified() - realHealthLost, 0);
                 health.setCurrent(health.getCurrent() - realHealthLost);
                 cls.getCreatureStats(mPtr).setHealth(health);
 
