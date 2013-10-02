@@ -45,6 +45,9 @@ void ContentSelectorView::ProfilesComboBox::setEditEnabled(bool editable)
 
     connect(lineEdit(), SIGNAL(textChanged(QString)), this,
             SLOT(slotTextChanged(QString)));
+
+    connect (lineEdit(), SIGNAL(textChanged(QString)), this,
+             SIGNAL (signalProfileTextChanged (QString)));
 }
 
 void ContentSelectorView::ProfilesComboBox::slotTextChanged(const QString &text)

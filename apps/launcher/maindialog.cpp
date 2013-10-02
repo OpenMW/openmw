@@ -106,10 +106,10 @@ void MainDialog::createPages()
     mPlayPage = new PlayPage(this);
     mGraphicsPage = new GraphicsPage(mCfgMgr, mGraphicsSettings, this);
     mDataFilesPage = new DataFilesPage(mCfgMgr, mGameSettings, mLauncherSettings, this);
-
+/// reimplement datafilespage functions to provide access
     // Set the combobox of the play page to imitate the combobox on the datafilespage
-    mPlayPage->setProfilesComboBoxModel(mDataFilesPage->profilesComboBoxModel());
-    mPlayPage->setProfilesComboBoxIndex(mDataFilesPage->profilesComboBoxIndex());
+    // mPlayPage->setProfilesComboBoxModel(mDataFilesPage->profilesComboBoxModel());
+    // mPlayPage->setProfilesComboBoxIndex(mDataFilesPage->profilesComboBoxIndex());
 
     // Add the pages to the stacked widget
     pagesWidget->addWidget(mPlayPage);

@@ -84,6 +84,7 @@ if(QT_QTGUI_LIBRARY AND QT_QTCORE_LIBRARY)
         model/naturalsort model/contentmodel
         view/profilescombobox view/comboboxlineedit
         view/lineedit view/contentselector
+        view/filewidget view/adjusterwidget
        )
 
    include(${QT_USE_FILE})

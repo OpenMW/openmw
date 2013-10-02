@@ -17,10 +17,12 @@ namespace ContentSelectorView
         void setPlaceholderText (const QString &text);
 
     signals:
+        void signalProfileTextChanged (const QString &item);
         void profileChanged(const QString &previous, const QString &current);
         void profileRenamed(const QString &oldName, const QString &newName);
 
     private slots:
+
         void slotEditingFinished();
         void slotIndexChanged(int index);
         void slotTextChanged(const QString &text);

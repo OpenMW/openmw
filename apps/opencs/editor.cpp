@@ -124,7 +124,7 @@ void CS::Editor::openFiles()
 {
     std::vector<boost::filesystem::path> files;
 
-    foreach (const QString &path, mFileDialog.selectedFilepaths()) {
+    foreach (const QString &path, mFileDialog.selectedFilePaths()) {
         files.push_back(path.toStdString());
     }
 
@@ -139,7 +139,7 @@ void CS::Editor::createNewFile()
 {
     std::vector<boost::filesystem::path> files;
 
-    foreach (const QString &path, mFileDialog.selectedFilepaths()) {
+    foreach (const QString &path, mFileDialog.selectedFilePaths()) {
         files.push_back(path.toStdString());
     }
 

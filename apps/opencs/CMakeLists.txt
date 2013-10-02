@@ -43,8 +43,7 @@ opencs_units_noqt (model/tools
 
 
 opencs_units (view/doc
-    viewmanager view operations operation subview startup filedialog newgame filewidget
-    adjusterwidget
+    viewmanager view operations operation subview startup filedialog newgame
     )
 
 

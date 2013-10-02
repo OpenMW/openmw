@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>518</width>
-    <height>313</height>
+    <height>424</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -26,6 +26,9 @@
       <string>Content</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
+      <property name="bottomMargin">
+       <number>3</number>
+      </property>
       <item>
        <layout class="QHBoxLayout" name="filterLayout">
         <item>
@@ -116,6 +119,18 @@
       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="leftMargin">
+       <number>3</number>
+      </property>
+      <property name="topMargin">
+       <number>6</number>
+      </property>
+      <property name="rightMargin">
+       <number>6</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
       <item>
        <widget class="QFrame" name="fileWidgetFrame">
         <property name="sizePolicy">
@@ -144,16 +159,15 @@
        </widget>
       </item>
       <item>
-       <widget class="QDialogButtonBox" name="projectButtonBox">
-        <property name="standardButtons">
-         <set>QDialogButtonBox::Cancel|QDialogButtonBox::Open</set>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QPushButton" name="projectCreateButton">
         <property name="enabled">
          <bool>false</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
         </property>
         <property name="text">
          <string>Create</string>
@@ -209,7 +223,7 @@
        <number>3</number>
       </property>
       <property name="topMargin">
-       <number>9</number>
+       <number>6</number>
       </property>
       <property name="rightMargin">
        <number>0</number>
@@ -220,7 +234,7 @@
       <item>
        <widget class="ContentSelectorView::ProfilesComboBox" name="profilesComboBox">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -228,6 +242,11 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <item>
+         <property name="text">
+          <string>Default</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>
@@ -262,6 +281,13 @@
      </layout>
     </widget>
    </item>
+   <item>
+    <widget class="QDialogButtonBox" name="projectButtonBox">
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Open</set>
+     </property>
+    </widget>
+   </item>
   </layout>
   <action name="newProfileAction">
    <property name="icon">
@@ -280,6 +306,9 @@
    </property>
   </action>
   <action name="deleteProfileAction">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset theme="edit-delete">
      <normaloff/>

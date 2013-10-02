@@ -4,10 +4,10 @@
 #include <QDialog>
 
 #include "ui_datafilespage.h"
-
-namespace ContentSelectorModel { class ContentModel; }
+#include "../model/contentmodel.hpp"
 
 class QSortFilterProxyModel;
+class TextInputDialog;
 
 namespace CSVDoc
 {
@@ -36,6 +36,8 @@ namespace ContentSelectorView
         CSVDoc::FileWidget *mFileWidget;
         CSVDoc::AdjusterWidget *mAdjusterWidget;
 
+        TextInputDialog *mNewDialog;
+
     protected:
 
         ContentSelectorModel::ContentModel *mContentModel;
@@ -43,19 +45,28 @@ namespace ContentSelectorView
         QSortFilterProxyModel *mAddonProxyModel;
 
     public:
+        explicit ContentSelector(QWidget *parent = 0, unsigned char flags = Flag_Content);
 
         static void configure(QWidget *subject, unsigned char flags = Flag_Content);
         static ContentSelector &instance();
         static void addFiles(const QString &path);
 
-        void setCheckState(QModelIndex index, QSortFilterProxyModel *model);
+        void setCheckStates (const QStringList &list);
         QStringList checkedItemsPaths();
+        ContentSelectorModel::ContentFileList *CheckedItems();
+
         QString filename() const;
-        QStringList selectedFiles() const;
+        ContentSelectorModel::ContentFileList selectedFiles() const;
+        QStringList selectedFilePaths() const;
+
+        void addProfile (const QString &item, bool setAsCurrent = false);
+        void removeProfile (const QString &item);
+        int getProfileIndex (const QString &item) const;
+        void setProfileIndex (int index);
+        QString getProfileText() const;
 
    private:
 
-        explicit ContentSelector(QWidget *parent = 0, unsigned char flags = Flag_Content);
         Ui::DataFilesPage ui;
 
         void buildContentModel();
@@ -66,6 +77,8 @@ namespace ContentSelectorView
         void buildLoadAddonView();
 
         bool isFlagged(SelectorFlags flag) const;
+        QString getNewProfileName();
+        void enableProfilesComboBox();
 
     signals:
         void accepted();
@@ -76,14 +89,24 @@ namespace ContentSelectorView
 
         void signalCreateButtonClicked();
 
+        void signalProfileRenamed(QString,QString);
+        void signalProfileChanged(QString,QString);
+        void signalProfileDeleted(QString);
+        void signalProfileAdded();
+
     private slots:
 
+        void slotProfileTextChanged (const QString &text);
         void slotCurrentProfileIndexChanged(int index);
         void slotCurrentGameFileIndexChanged(int index);
         void slotAddonTableItemClicked(const QModelIndex &index);
 
         void slotUpdateCreateButton (bool);
-        void slotUpdateOpenButton(const QStringList &items);
+       // void slotUpdateOpenButton(const QStringList &items);
+
+        // Action slots
+        void on_newProfileAction_triggered();
+        void on_deleteProfileAction_triggered();
     };
 }
 

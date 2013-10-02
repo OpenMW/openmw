@@ -37,9 +37,16 @@ QString CSVDoc::FileDialog::filename()
     return ContentSelectorView::ContentSelector::instance().filename();
 }
 
-QStringList CSVDoc::FileDialog::selectedFilepaths()
+QStringList CSVDoc::FileDialog::selectedFilePaths()
 {
-    return ContentSelectorView::ContentSelector::instance().selectedFiles();
+    QStringList filePaths;
+
+    foreach (ContentSelectorModel::EsmFile *file, ContentSelectorView::ContentSelector::
+                                instance().selectedFiles() )
+    {
+        filePaths.append(file->fileName());
+    }
+    return filePaths;
 }
 
 void CSVDoc::FileDialog::showDialog()
