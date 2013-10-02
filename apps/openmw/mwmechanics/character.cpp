@@ -813,17 +813,18 @@ void CharacterController::update(float duration)
             }
 
             // advance acrobatics
-            MWWorld::Class::get(mPtr).skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, 0);
+            cls.skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, 0);
 
             // decrease fatigue
-            const float fatigueJumpBase = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fFatigueJumpBase")->getFloat();
-            const float fatigueJumpMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fFatigueJumpMult")->getFloat();
+            const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
+            const float fatigueJumpBase = gmst.find("fFatigueJumpBase")->getFloat();
+            const float fatigueJumpMult = gmst.find("fFatigueJumpMult")->getFloat();
             const float normalizedEncumbrance = cls.getEncumbrance(mPtr) / cls.getCapacity(mPtr);
             const int fatigueDecrease = fatigueJumpBase + (1 - normalizedEncumbrance) * fatigueJumpMult;
-            DynamicStat<float> fatigue = cls.getCreatureStats(mPtr).getDynamic(2);
+            DynamicStat<float> fatigue = cls.getCreatureStats(mPtr).getFatigue();
             fatigue.setModified(fatigue.getModified() - fatigueDecrease, 0);
             fatigue.setCurrent(fatigue.getCurrent() - fatigueDecrease);
-            cls.getCreatureStats(mPtr).setDynamic(2, fatigue);
+            cls.getCreatureStats(mPtr).setFatigue(fatigue);
         }
         else if(mJumpState == JumpState_Falling)
         {
@@ -838,10 +839,9 @@ void CharacterController::update(float duration)
             {
                 // inflict fall damages
                 DynamicStat<float> health = cls.getCreatureStats(mPtr).getHealth();
-                int current = health.getCurrent();
                 int realHealthLost = healthLost * (1.0f - 0.25 * 1.25f /* * fatigueTerm */);
                 health.setModified(health.getModified() - realHealthLost, 0);
-                health.setCurrent(current - realHealthLost);
+                health.setCurrent(health.getCurrent() - realHealthLost);
                 cls.getCreatureStats(mPtr).setHealth(health);
 
                 // report acrobatics progression

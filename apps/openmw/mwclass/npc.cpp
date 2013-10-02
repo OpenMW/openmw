@@ -7,6 +7,7 @@
 
 #include <OgreSceneNode.h>
 
+#include <components/esm/loadmgef.hpp>
 #include <components/esm/loadnpc.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -771,17 +772,20 @@ namespace MWClass
 
     float Npc::getFallDamage(const MWWorld::Ptr &ptr, float fallHeight) const
     {
-        const float fallDistanceMin = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fFallDamageDistanceMin")->getFloat();
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+        const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
 
-        if (fallHeight>=fallDistanceMin)
+        const float fallDistanceMin = gmst.find("fFallDamageDistanceMin")->getFloat();
+
+        if (fallHeight >= fallDistanceMin)
         {
             const float acrobaticsSkill = MWWorld::Class::get(ptr).getNpcStats (ptr).getSkill(ESM::Skill::Acrobatics).getModified();
             const CustomData *npcdata = static_cast<const CustomData*>(ptr.getRefData().getCustomData());
-            const float jumpSpellBonus = npcdata->mNpcStats.getMagicEffects().get(MWMechanics::EffectKey(9/*jump*/)).mMagnitude;
-            const float fallAcroBase = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fFallAcroBase")->getFloat();
-            const float fallAcroMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fFallAcroMult")->getFloat();
-            const float fallDistanceBase = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fFallDistanceBase")->getFloat();
-            const float fallDistanceMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fFallDistanceMult")->getFloat();
+            const float jumpSpellBonus = npcdata->mNpcStats.getMagicEffects().get(MWMechanics::EffectKey(ESM::MagicEffect::Jump)).mMagnitude;
+            const float fallAcroBase = gmst.find("fFallAcroBase")->getFloat();
+            const float fallAcroMult = gmst.find("fFallAcroMult")->getFloat();
+            const float fallDistanceBase = gmst.find("fFallDistanceBase")->getFloat();
+            const float fallDistanceMult = gmst.find("fFallDistanceMult")->getFloat();
 
             float x = fallHeight - fallDistanceMin;
             x -= (1.5 * acrobaticsSkill) + jumpSpellBonus;
