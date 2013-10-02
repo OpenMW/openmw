@@ -129,10 +129,7 @@ void ContentSelectorView::ContentSelector::buildAddonView()
 void ContentSelectorView::ContentSelector::buildProfilesView()
 {
     if (!isFlagged (Flag_Profile))
-    {
-        ui.profileGroupBox->setVisible(false);
         return;
-    }
 
     // Add the actions to the toolbuttons
     ui.newProfileButton->setDefaultAction (ui.newProfileAction);
@@ -145,6 +142,8 @@ void ContentSelectorView::ContentSelector::buildProfilesView()
     connect (ui.profilesComboBox, SIGNAL (profileRenamed(QString,QString)), this, SIGNAL(signalProfileRenamed(QString,QString)));
     connect (ui.profilesComboBox, SIGNAL (profileChanged(QString,QString)), this, SIGNAL(signalProfileChanged(QString,QString)));
     connect (ui.profilesComboBox, SIGNAL (signalProfileTextChanged(QString)), this, SLOT (slotProfileTextChanged (QString)));
+
+    ui.profileGroupBox->setVisible (true);
 }
 
 void ContentSelectorView::ContentSelector::buildLoadAddonView()

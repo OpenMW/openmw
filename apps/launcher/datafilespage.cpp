@@ -65,7 +65,7 @@ void DataFilesPage::loadSettings()
     foreach (const QString &file, addons)
         files.append(file);
 
-    //ContentSelectorView::ContentSelector::instance().setCheckStates(files);
+    ContentSelectorView::ContentSelector::instance().setCheckStates(files);
 }
 
 void DataFilesPage::saveSettings()
