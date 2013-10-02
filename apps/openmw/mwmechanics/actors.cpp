@@ -276,7 +276,8 @@ namespace MWMechanics
                 }
 
                 // If it's the player and God Mode is turned on, keep it alive
-                if(iter->first.getRefData().getHandle()=="player" && MWBase::Environment::get().getWorld()->getGodModeState())
+                if(iter->first.getRefData().getHandle()=="player" && 
+                    MWBase::Environment::get().getWorld()->getGodModeState())
                 {
                     MWMechanics::DynamicStat<float> stat(stats.getHealth());
 
