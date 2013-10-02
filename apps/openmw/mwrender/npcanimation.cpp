@@ -457,7 +457,7 @@ Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
 
         // This has to be done before this function ends;
         // updateSkeletonInstance, below, touches the hands.
-        node->translate(mFirstPersonOffset);
+        node->translate(mFirstPersonOffset, Ogre::Node::TS_WORLD);
     }
     mFirstPersonOffset = 0.f; // reset the X, Y, Z offset for the next frame.
 
