@@ -635,7 +635,18 @@ namespace MWScript
                     world->enableTeleporting(Enable);
                 }
         };
-        
+
+        template <bool Enable>
+        class OpEnableLevitation : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWBase::World *world = MWBase::Environment::get().getWorld();
+                    world->enableLevitation(Enable);
+                }
+        };
 
         template <class R>
         class OpShowVars : public Interpreter::Opcode0
@@ -789,6 +800,8 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Misc::opcodeShowVars, new OpShowVars<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeShowVarsExplicit, new OpShowVars<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeToggleGodMode, new OpToggleGodMode);
+            interpreter.installSegment5 (Compiler::Misc::opcodeDisableLevitation, new OpEnableLevitation<false>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeEnableLevitation, new OpEnableLevitation<true>);
         }
     }
 }

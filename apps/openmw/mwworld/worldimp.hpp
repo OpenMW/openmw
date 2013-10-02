@@ -116,6 +116,7 @@ namespace MWWorld
             int mPlayIntro;
 
             bool mTeleportEnabled;
+            bool mLevitationEnabled;
 
         public:
 
@@ -437,6 +438,12 @@ namespace MWWorld
 
             /// Returns true if teleport spell effects are allowed.
             virtual bool isTeleportingEnabled() const;
+
+            /// Enables or disables use of levitation spell effect.
+            virtual void enableLevitation(bool enable);
+
+            /// Returns true if levitation spell effect is allowed.
+            virtual bool isLevitationEnabled() const;
 
             virtual void setWerewolf(const MWWorld::Ptr& actor, bool werewolf);
 
