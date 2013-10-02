@@ -19,7 +19,12 @@ int CSMTools::BirthsignCheckStage::setup()
 
 void CSMTools::BirthsignCheckStage::perform (int stage, std::vector<std::string>& messages)
 {
-    const ESM::BirthSign& birthsign = mBirthsigns.getRecord (stage).get();
+    const CSMWorld::Record<ESM::BirthSign>& record = mBirthsigns.getRecord (stage);
+
+    if (record.isDeleted())
+        return;
+
+    const ESM::BirthSign& birthsign = record.get();
 
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Birthsign, birthsign.mId);
 

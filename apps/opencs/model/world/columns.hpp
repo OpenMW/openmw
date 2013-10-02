@@ -140,6 +140,18 @@ namespace CSMWorld
             ColumnId_Magical = 107,
             ColumnId_Silver = 108,
             ColumnId_Filter = 109,
+            ColumnId_PositionXPos = 110,
+            ColumnId_PositionYPos = 111,
+            ColumnId_PositionZPos = 112,
+            ColumnId_PositionXRot = 113,
+            ColumnId_PositionYRot = 114,
+            ColumnId_PositionZRot = 115,
+            ColumnId_DoorPositionXPos = 116,
+            ColumnId_DoorPositionYPos = 117,
+            ColumnId_DoorPositionZPos = 118,
+            ColumnId_DoorPositionXRot = 119,
+            ColumnId_DoorPositionYRot = 120,
+            ColumnId_DoorPositionZRot = 121,
 
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.

@@ -47,6 +47,7 @@ Marc Bouvier (CramitDeFrog)
 Marcin Hulist (Gohan)
 Mark Siewert (mark76)
 Mateusz Kołaczek (PL_kolek)
+Michael Hogan (Xethik)
 Michael Mc Donnell
 Michael Papageorgiou (werdanith)
 Michał Bień (Glorf)
@@ -61,6 +62,7 @@ Roman Proskuryakov (humbug)
 Sandy Carter (bwrsandman)
 Sebastian Wick (swick)
 Sergey Shambir
+sir_herrbatka
 Sylvain Thesnieres (Garvek)
 Tom Mason (wheybags)
 Torben Leif Carrington (TorbenC)

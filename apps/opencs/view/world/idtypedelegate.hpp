@@ -1,5 +1,5 @@
-#ifndef REFIDTYPEDELEGATE_HPP
-#define REFIDTYPEDELEGATE_HPP
+#ifndef IDTYPEDELEGATE_HPP
+#define IDTYPEDELEGATE_HPP
 
 #include "enumdelegate.hpp"
 #include "util.hpp"
@@ -8,29 +8,23 @@
 
 namespace CSVWorld
 {
-    class RefIdTypeDelegate : public DataDisplayDelegate
+    class IdTypeDelegate : public DataDisplayDelegate
     {
         public:
-            RefIdTypeDelegate (const ValueList &mValues, const IconList &icons, QUndoStack& undoStack, QObject *parent);
+            IdTypeDelegate (const ValueList &mValues, const IconList &icons, QUndoStack& undoStack, QObject *parent);
 
             virtual bool updateEditorSetting (const QString &settingName, const QString &settingValue);
 
     };
 
-    class RefIdTypeDelegateFactory : public DataDisplayDelegateFactory
+    class IdTypeDelegateFactory : public DataDisplayDelegateFactory
     {
-
-        typedef std::vector < std::pair <CSMWorld::UniversalId::Type, QString> > UidTypeList;
-
         public:
-            RefIdTypeDelegateFactory();
+
+            IdTypeDelegateFactory();
 
             virtual CommandDelegate *makeDelegate (QUndoStack& undoStack, QObject *parent) const;
             ///< The ownership of the returned CommandDelegate is transferred to the caller.
-
-    private:
-            UidTypeList buildUidTypeList () const;
-
     };
 }
 
