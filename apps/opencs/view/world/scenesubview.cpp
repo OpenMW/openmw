@@ -29,16 +29,16 @@ CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
     layout2->setContentsMargins (QMargins (0, 0, 0, 0));
 
-    SceneToolbar *toolbar = new SceneToolbar (this);
+    SceneToolbar *toolbar = new SceneToolbar (48, this);
 // test
-SceneToolMode *tool = new SceneToolMode (this);
+SceneToolMode *tool = new SceneToolMode (toolbar);
 tool->addButton (":door.png", "a");
 tool->addButton (":GMST.png", "b");
 tool->addButton (":Info.png", "c");
 toolbar->addTool (tool);
-toolbar->addTool (new SceneToolMode (this));
-toolbar->addTool (new SceneToolMode (this));
-toolbar->addTool (new SceneToolMode (this));
+toolbar->addTool (new SceneToolMode (toolbar));
+toolbar->addTool (new SceneToolMode (toolbar));
+toolbar->addTool (new SceneToolMode (toolbar));
     layout2->addWidget (toolbar, 0);
 
     /// \todo replace with rendering widget

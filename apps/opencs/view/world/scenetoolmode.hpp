@@ -9,6 +9,8 @@ class QHBoxLayout;
 
 namespace CSVWorld
 {
+    class SceneToolbar;
+
     ///< \brief Mode selector tool
     class SceneToolMode : public SceneTool
     {
@@ -17,10 +19,11 @@ namespace CSVWorld
             QWidget *mPanel;
             QHBoxLayout *mLayout;
             std::map<QPushButton *, std::string> mButtons; // widget, id
+            int mButtonSize;
 
         public:
 
-            SceneToolMode (QWidget *parent = 0);
+            SceneToolMode (SceneToolbar *parent);
 
             virtual void showPanel (const QPoint& position);
 

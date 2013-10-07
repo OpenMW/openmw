@@ -5,8 +5,10 @@
 #include <QFrame>
 #include <QSignalMapper>
 
-CSVWorld::SceneToolMode::SceneToolMode (QWidget *parent)
-: SceneTool (parent)
+#include "scenetoolbar.hpp"
+
+CSVWorld::SceneToolMode::SceneToolMode (SceneToolbar *parent)
+: SceneTool (parent), mButtonSize (parent->getButtonSize())
 {
     mPanel = new QFrame (this, Qt::Popup);
 
@@ -27,7 +29,7 @@ void CSVWorld::SceneToolMode::addButton (const std::string& icon, const std::str
 {
     QPushButton *button = new QPushButton (QIcon (QPixmap (icon.c_str())), "", mPanel);
     button->setSizePolicy (QSizePolicy (QSizePolicy::Fixed, QSizePolicy::Fixed));
-    button->setFixedSize (48, 48);
+    button->setFixedSize (mButtonSize, mButtonSize);
 
     mLayout->addWidget (button);
 

@@ -14,12 +14,15 @@ namespace CSVWorld
             Q_OBJECT
 
             QVBoxLayout *mLayout;
+            int mButtonSize;
 
         public:
 
-            SceneToolbar (QWidget *parent);
+            SceneToolbar (int buttonSize, QWidget *parent = 0);
 
             void addTool (SceneTool *tool);
+
+            int getButtonSize() const;
     };
 }
 

@@ -5,6 +5,8 @@
 
 namespace CSVWorld
 {
+    class SceneToolbar;
+
     ///< \brief Tool base class
     class SceneTool : public QPushButton
     {
@@ -12,7 +14,7 @@ namespace CSVWorld
 
         public:
 
-            SceneTool (QWidget *parent = 0);
+            SceneTool (SceneToolbar *parent);
 
             virtual void showPanel (const QPoint& position) = 0;
 
