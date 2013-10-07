@@ -23,7 +23,7 @@ void MWMechanics::AiSequence::copy (const AiSequence& sequence)
         iter!=sequence.mPackages.end(); ++iter)
         mPackages.push_back ((*iter)->clone());
     mCombat = sequence.mCombat;
-    mCombatPackage = sequence.mCombatPackage;
+    mCombatPackage = sequence.mCombatPackage->clone();
 }
 
 MWMechanics::AiSequence::AiSequence() : mDone (false), mCombat (false), mCombatPackage (0) {}
@@ -93,7 +93,11 @@ void MWMechanics::AiSequence::clear()
     for (std::list<AiPackage *>::const_iterator iter (mPackages.begin()); iter!=mPackages.end(); ++iter)
         delete *iter;
     
-    if(mCombatPackage) delete mCombatPackage;
+    if(mCombatPackage) 
+    {
+        delete mCombatPackage;
+        mCombatPackage = 0;
+    }
     mPackages.clear();
 }
 
