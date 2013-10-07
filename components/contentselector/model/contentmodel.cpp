@@ -15,10 +15,10 @@ ContentSelectorModel::ContentModel::ContentModel(QObject *parent) :
     mDefaultFlags (Qt::ItemIsDropEnabled | Qt::ItemIsSelectable),
     mDropActions (Qt::CopyAction | Qt::MoveAction)
 {
-  //  setEncoding ("win1252");
+    setEncoding ("win1252");
     uncheckAll();
 }
-/*
+
 void ContentSelectorModel::ContentModel::setEncoding(const QString &encoding)
 {
     if (encoding == QLatin1String("win1252"))
@@ -33,7 +33,7 @@ void ContentSelectorModel::ContentModel::setEncoding(const QString &encoding)
     else
         return; // This should never happen;
 }
-*/
+
 int ContentSelectorModel::ContentModel::columnCount(const QModelIndex &parent) const
 {
     if (parent.isValid())
@@ -420,8 +420,9 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
 
         try {
             ESM::ESMReader fileReader;
-            ToUTF8::Utf8Encoder encoder(); //ToUTF8::calculateEncoding(QString(mCodec->name()).toStdString()));
-            //fileReader.setEncoder(&encoder);
+            ToUTF8::Utf8Encoder encoder =
+            ToUTF8::calculateEncoding(QString(mCodec->name()).toStdString());
+            fileReader.setEncoder(&encoder);
             fileReader.open(dir.absoluteFilePath(path).toStdString());
 
             foreach (const ESM::Header::MasterData &item, fileReader.getGameFiles())

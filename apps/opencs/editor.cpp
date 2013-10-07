@@ -128,6 +128,9 @@ void CS::Editor::openFiles()
         files.push_back(path.toStdString());
     }
 
+    foreach (const boost::filesystem::path fp, files)
+        qDebug() << "loading files: " << fp.c_str();
+
     /// \todo Get the save path from the file dialogue
     CSMDoc::Document *document = mDocumentManager.addDocument (files, *files.rbegin(), false);
 

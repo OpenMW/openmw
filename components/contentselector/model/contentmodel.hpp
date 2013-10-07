@@ -22,7 +22,7 @@ namespace ContentSelectorModel
     public:
         explicit ContentModel(QObject *parent = 0);
 
-        //void setEncoding(const QString &encoding);
+        void setEncoding(const QString &encoding);
 
         int rowCount(const QModelIndex &parent = QModelIndex()) const;
         int columnCount(const QModelIndex &parent = QModelIndex()) const;
