@@ -30,7 +30,9 @@ struct ConfigurationManager
 
     void readConfiguration(boost::program_options::variables_map& variables,
         boost::program_options::options_description& description);
-    void processPaths(Files::PathContainer& dataDirs);
+
+    void processPaths(Files::PathContainer& dataDirs, bool create = false);
+    ///< \param create Try creating the directory, if it does not exist.
 
     /**< Fixed paths */
     const boost::filesystem::path& getGlobalPath() const;

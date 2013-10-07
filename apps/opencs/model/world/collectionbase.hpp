@@ -78,8 +78,12 @@ namespace CSMWorld
 
             virtual int getAppendIndex (UniversalId::Type type = UniversalId::Type_None) const = 0;
             ///< \param type Will be ignored, unless the collection supports multiple record types
-    };
 
+            virtual std::vector<std::string> getIds (bool listDeleted = true) const = 0;
+            ///< Return a sorted collection of all IDs
+            ///
+            /// \param listDeleted include deleted record in the list
+    };
 }
 
 #endif

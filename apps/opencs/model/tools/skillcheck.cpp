@@ -18,7 +18,12 @@ int CSMTools::SkillCheckStage::setup()
 
 void CSMTools::SkillCheckStage::perform (int stage, std::vector<std::string>& messages)
 {
-    const ESM::Skill& skill = mSkills.getRecord (stage).get();
+    const CSMWorld::Record<ESM::Skill>& record = mSkills.getRecord (stage);
+
+    if (record.isDeleted())
+        return;
+
+    const ESM::Skill& skill = record.get();
 
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Skill, skill.mId);
 

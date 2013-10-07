@@ -106,11 +106,15 @@ namespace CSVDoc
 
         signals:
 
-            void newDocumentRequest();
+            void newGameRequest();
+
+            void newAddonRequest();
 
             void loadDocumentRequest();
 
             void exitApplicationRequest (CSVDoc::View *view);
+
+            void editSettingsRequest();
 
         public slots:
 
@@ -159,8 +163,6 @@ namespace CSVDoc
             void addRegionMapSubView();
 
             void addFiltersSubView();
-
-            void showUserSettings();
 
             void toggleShowStatusBar (bool show);
     };

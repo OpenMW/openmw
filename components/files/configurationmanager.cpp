@@ -56,7 +56,7 @@ void ConfigurationManager::readConfiguration(boost::program_options::variables_m
 
 }
 
-void ConfigurationManager::processPaths(Files::PathContainer& dataDirs)
+void ConfigurationManager::processPaths(Files::PathContainer& dataDirs, bool create)
 {
     std::string path;
     for (Files::PathContainer::iterator it = dataDirs.begin(); it != dataDirs.end(); ++it)
@@ -94,6 +94,18 @@ void ConfigurationManager::processPaths(Files::PathContainer& dataDirs)
 
         if (!boost::filesystem::is_directory(*it))
         {
+            if (create)
+            {
+                try
+                {
+                    boost::filesystem::create_directories (*it);
+                }
+                catch (...) {}
+
+                if (boost::filesystem::is_directory(*it))
+                    continue;
+            }
+
             (*it).clear();
         }
     }

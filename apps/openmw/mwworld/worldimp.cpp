@@ -170,7 +170,7 @@ namespace MWWorld
       mSky (true), mCells (mStore, mEsm),
       mActivationDistanceOverride (mActivationDistanceOverride),
       mFallback(fallbackMap), mPlayIntro(0), mTeleportEnabled(true),
-      mFacedDistance(FLT_MAX)
+      mFacedDistance(FLT_MAX), mGodMode(false)
     {
         mPhysics = new PhysicsSystem(renderer);
         mPhysEngine = mPhysics->getEngine();
@@ -1160,7 +1160,7 @@ namespace MWWorld
 
     bool World::toggleCollisionMode()
     {
-        return mPhysics->toggleCollisionMode();;
+        return mPhysics->toggleCollisionMode();
     }
 
     bool World::toggleRenderMode (RenderMode mode)
@@ -1946,6 +1946,18 @@ namespace MWWorld
         MWMechanics::NpcStats &stats = Class::get(actor).getNpcStats(actor);
 
         stats.getSkill(ESM::Skill::Acrobatics).setModified(gmst.find("fWerewolfAcrobatics")->getFloat(), 0);
+    }
+
+    bool World::getGodModeState()
+    {
+        return mGodMode;
+    }
+
+    bool World::toggleGodMode()
+    {
+        mGodMode = !mGodMode;
+
+        return mGodMode;
     }
 
 }

@@ -1216,6 +1216,74 @@ namespace CSMWorld
             return true;
         }
     };
+
+    template<typename ESXRecordT>
+    struct PosColumn : public Column<ESXRecordT>
+    {
+        ESM::Position ESXRecordT::* mPosition;
+        int mIndex;
+
+        PosColumn (ESM::Position ESXRecordT::* position, int index, bool door)
+        : Column<ESXRecordT> (
+          (door ? Columns::ColumnId_DoorPositionXPos : Columns::ColumnId_PositionXPos)+index,
+          ColumnBase::Display_Float), mPosition (position), mIndex (index) {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            const ESM::Position& position = record.get().*mPosition;
+            return position.pos[mIndex];
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            ESM::Position& position = record.get().*mPosition;
+
+            position.pos[mIndex] = data.toFloat();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct RotColumn : public Column<ESXRecordT>
+    {
+        ESM::Position ESXRecordT::* mPosition;
+        int mIndex;
+
+        RotColumn (ESM::Position ESXRecordT::* position, int index, bool door)
+        : Column<ESXRecordT> (
+          (door ? Columns::ColumnId_DoorPositionXRot : Columns::ColumnId_PositionXRot)+index,
+          ColumnBase::Display_Float), mPosition (position), mIndex (index) {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            const ESM::Position& position = record.get().*mPosition;
+            return position.rot[mIndex];
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            ESM::Position& position = record.get().*mPosition;
+
+            position.rot[mIndex] = data.toFloat();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
 }
 
 #endif

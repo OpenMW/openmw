@@ -1,5 +1,7 @@
 #include "usersettingsdialog.hpp"
 
+#include <boost/filesystem/path.hpp>
+
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QWidget>
@@ -9,14 +11,14 @@
 #include <QFile>
 #include <QPushButton>
 #include <QDockWidget>
-
 #include <QGridLayout>
+#include <QApplication>
+#include <QDesktopWidget>
+
+#include "../../model/settings/support.hpp"
 
 #include "datadisplayformatpage.hpp"
 #include "windowpage.hpp"
-
-#include "../../model/settings/support.hpp"
-#include <boost/filesystem/path.hpp>
 #include "settingwidget.hpp"
 #include "blankpage.hpp"
 #include "../../model/settings/usersettings.hpp"
@@ -36,7 +38,11 @@ CSVSettings::UserSettingsDialog::UserSettingsDialog(QMainWindow *parent) :
     connect (mListWidget,
              SIGNAL (currentItemChanged(QListWidgetItem*, QListWidgetItem*)),
              this,
-             SLOT (slotChangePage (QListWidgetItem*, QListWidgetItem*)));    
+             SLOT (slotChangePage (QListWidgetItem*, QListWidgetItem*)));
+
+    QRect scr = QApplication::desktop()->screenGeometry();
+    QRect rect = geometry();
+    move (scr.center().x() - rect.center().x(), scr.center().y() - rect.center().y());
 }
 
 CSVSettings::UserSettingsDialog::~UserSettingsDialog()

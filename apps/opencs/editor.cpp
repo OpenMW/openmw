@@ -4,24 +4,35 @@
 #include <QApplication>
 #include <QLocalServer>
 #include <QLocalSocket>
+#include <QMessageBox>
 
 #include "model/doc/document.hpp"
 #include "model/world/data.hpp"
+
 
 CS::Editor::Editor() : mViewManager (mDocumentManager)
 {
     mIpcServerName = "org.openmw.OpenCS";
 
-    connect (&mViewManager, SIGNAL (newDocumentRequest ()), this, SLOT (createDocument ()));
-    connect (&mViewManager, SIGNAL (loadDocumentRequest ()), this, SLOT (loadDocument ()));
+    setupDataFiles();
 
-    connect (&mStartup, SIGNAL (createDocument()), this, SLOT (createDocument ()));
+    mNewGame.setLocalData (mLocal);
+
+    connect (&mViewManager, SIGNAL (newGameRequest ()), this, SLOT (createGame ()));
+    connect (&mViewManager, SIGNAL (newAddonRequest ()), this, SLOT (createAddon ()));
+    connect (&mViewManager, SIGNAL (loadDocumentRequest ()), this, SLOT (loadDocument ()));
+    connect (&mViewManager, SIGNAL (editSettingsRequest()), this, SLOT (showSettings ()));
+
+    connect (&mStartup, SIGNAL (createGame()), this, SLOT (createGame ()));
+    connect (&mStartup, SIGNAL (createAddon()), this, SLOT (createAddon ()));
     connect (&mStartup, SIGNAL (loadDocument()), this, SLOT (loadDocument ()));
+    connect (&mStartup, SIGNAL (editConfig()), this, SLOT (showSettings ()));
 
     connect (&mFileDialog, SIGNAL(openFiles()), this, SLOT(openFiles()));
     connect (&mFileDialog, SIGNAL(createNewFile()), this, SLOT(createNewFile()));
 
-    setupDataFiles();
+    connect (&mNewGame, SIGNAL (createRequest (const boost::filesystem::path&)),
+        this, SLOT (createNewGame (const boost::filesystem::path&)));
 }
 
 void CS::Editor::setupDataFiles()
@@ -39,26 +50,39 @@ void CS::Editor::setupDataFiles()
 
     mCfgMgr.readConfiguration(variables, desc);
 
-    Files::PathContainer mDataDirs, mDataLocal;
+    Files::PathContainer dataDirs, dataLocal;
     if (!variables["data"].empty()) {
-        mDataDirs = Files::PathContainer(variables["data"].as<Files::PathContainer>());
+        dataDirs = Files::PathContainer(variables["data"].as<Files::PathContainer>());
     }
 
     std::string local = variables["data-local"].as<std::string>();
     if (!local.empty()) {
-        mDataLocal.push_back(Files::PathContainer::value_type(local));
+        dataLocal.push_back(Files::PathContainer::value_type(local));
     }
 
-    mCfgMgr.processPaths(mDataDirs);
-    mCfgMgr.processPaths(mDataLocal);
+    mCfgMgr.processPaths (dataDirs);
+    mCfgMgr.processPaths (dataLocal, true);
+
+    if (!dataLocal.empty())
+        mLocal = dataLocal[0];
+    else
+    {
+        QMessageBox messageBox;
+        messageBox.setWindowTitle (tr ("No local data path available"));
+        messageBox.setIcon (QMessageBox::Critical);
+        messageBox.setStandardButtons (QMessageBox::Ok);
+        messageBox.setText(tr("<br><b>OpenCS is unable to access the local data directory. This may indicate a faulty configuration or a broken install.</b>"));
+        messageBox.exec();
+
+        QApplication::exit (1);
+        return;
+    }
 
     // Set the charset for reading the esm/esp files
     QString encoding = QString::fromStdString(variables["encoding"].as<std::string>());
     mFileDialog.setEncoding(encoding);
 
-    Files::PathContainer dataDirs;
-    dataDirs.insert(dataDirs.end(), mDataDirs.begin(), mDataDirs.end());
-    dataDirs.insert(dataDirs.end(), mDataLocal.begin(), mDataLocal.end());
+    dataDirs.insert (dataDirs.end(), dataLocal.begin(), dataLocal.end());
 
     for (Files::PathContainer::const_iterator iter = dataDirs.begin(); iter != dataDirs.end(); ++iter)
     {
@@ -71,7 +95,18 @@ void CS::Editor::setupDataFiles()
     CSMSettings::UserSettings::instance().loadSettings(settingFileName);
 }
 
-void CS::Editor::createDocument()
+void CS::Editor::createGame()
+{
+    mStartup.hide();
+
+    if (mNewGame.isHidden())
+        mNewGame.show();
+
+    mNewGame.raise();
+    mNewGame.activateWindow();
+}
+
+void CS::Editor::createAddon()
 {
     mStartup.hide();
 
@@ -94,7 +129,9 @@ void CS::Editor::openFiles()
         files.push_back(path.toStdString());
     }
 
-    CSMDoc::Document *document = mDocumentManager.addDocument(files, false);
+    /// \todo Get the save path from the file dialogue
+
+    CSMDoc::Document *document = mDocumentManager.addDocument (files, *files.rbegin(), false);
 
     mViewManager.addView (document);
     mFileDialog.hide();
@@ -111,10 +148,25 @@ void CS::Editor::createNewFile()
 
     files.push_back(mFileDialog.fileName().toStdString());
 
-    CSMDoc::Document *document = mDocumentManager.addDocument (files, true);
+    /// \todo Get the save path from the file dialogue.
+
+    CSMDoc::Document *document = mDocumentManager.addDocument (files, *files.rbegin(), true);
 
     mViewManager.addView (document);
     mFileDialog.hide();
+}
+
+void CS::Editor::createNewGame (const boost::filesystem::path& file)
+{
+    std::vector<boost::filesystem::path> files;
+
+    files.push_back (file);
+
+    CSMDoc::Document *document = mDocumentManager.addDocument (files, file, true);
+
+    mViewManager.addView (document);
+
+    mNewGame.hide();
 }
 
 void CS::Editor::showStartup()
@@ -123,6 +175,15 @@ void CS::Editor::showStartup()
         mStartup.show();
     mStartup.raise();
     mStartup.activateWindow();
+}
+
+void CS::Editor::showSettings()
+{
+    if (mSettings.isHidden())
+        mSettings.show();
+
+    mSettings.raise();
+    mSettings.activateWindow();
 }
 
 bool CS::Editor::makeIPCServer()
@@ -148,6 +209,9 @@ void CS::Editor::connectToIPCServer()
 
 int CS::Editor::run()
 {
+    if (mLocal.empty())
+        return 1;
+
     mStartup.show();
 
     QApplication::setQuitOnLastWindowClosed (true);

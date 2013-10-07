@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include <components/compiler/scanner.hpp>
+#include <components/compiler/extensions0.hpp>
 
 bool CSVWorld::ScriptHighlighter::parseInt (int value, const Compiler::TokenLoc& loc,
     Compiler::Scanner& scanner)
@@ -22,7 +23,7 @@ bool CSVWorld::ScriptHighlighter::parseFloat (float value, const Compiler::Token
 bool CSVWorld::ScriptHighlighter::parseName (const std::string& name, const Compiler::TokenLoc& loc,
     Compiler::Scanner& scanner)
 {
-    highlight (loc, Type_Name);
+    highlight (loc, mContext.isId (name) ? Type_Id : Type_Name);
     return true;
 }
 
@@ -62,10 +63,10 @@ void CSVWorld::ScriptHighlighter::highlight (const Compiler::TokenLoc& loc, Type
     setFormat (index, length, mScheme[type]);
 }
 
-CSVWorld::ScriptHighlighter::ScriptHighlighter (QTextDocument *parent)
-: QSyntaxHighlighter (parent), Compiler::Parser (mErrorHandler, mContext)
+CSVWorld::ScriptHighlighter::ScriptHighlighter (const CSMWorld::Data& data, QTextDocument *parent)
+: QSyntaxHighlighter (parent), Compiler::Parser (mErrorHandler, mContext), mContext (data)
 {
-    /// \ŧodo replace this with user settings
+    /// \todo replace this with user settings
     {
         QTextCharFormat format;
         format.setForeground (Qt::darkMagenta);
@@ -101,6 +102,16 @@ CSVWorld::ScriptHighlighter::ScriptHighlighter (QTextDocument *parent)
         format.setForeground (Qt::green);
         mScheme.insert (std::make_pair (Type_Comment, format));
     }
+
+    {
+        QTextCharFormat format;
+        format.setForeground (Qt::blue);
+        mScheme.insert (std::make_pair (Type_Id, format));
+    }
+
+    // configure compiler
+    Compiler::registerExtensions (mExtensions);
+    mContext.setExtensions (&mExtensions);
 }
 
 void CSVWorld::ScriptHighlighter::highlightBlock (const QString& text)
@@ -114,5 +125,9 @@ void CSVWorld::ScriptHighlighter::highlightBlock (const QString& text)
         scanner.scan (*this);
     }
     catch (...) {} // ignore syntax errors
+}
 
+void CSVWorld::ScriptHighlighter::invalidateIds()
+{
+    mContext.invalidateIds();
 }

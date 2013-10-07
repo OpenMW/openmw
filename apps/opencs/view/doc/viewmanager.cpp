@@ -14,7 +14,7 @@
 #include "../world/enumdelegate.hpp"
 #include "../world/vartypedelegate.hpp"
 #include "../world/recordstatusdelegate.hpp"
-#include "../world/refidtypedelegate.hpp"
+#include "../world/idtypedelegate.hpp"
 #include "../settings/usersettingsdialog.hpp"
 
 #include "view.hpp"
@@ -56,7 +56,7 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
         new CSVWorld::RecordStatusDelegateFactory());
 
     mDelegateFactories->add (CSMWorld::ColumnBase::Display_RefRecordType,
-        new CSVWorld::RefIdTypeDelegateFactory());
+        new CSVWorld::IdTypeDelegateFactory());
 
     struct Mapping
     {
@@ -107,13 +107,14 @@ CSVDoc::View *CSVDoc::ViewManager::addView (CSMDoc::Document *document)
 
     View *view = new View (*this, document, countViews (document)+1);
 
-
     mViews.push_back (view);
 
     view->show();
 
-    connect (view, SIGNAL (newDocumentRequest ()), this, SIGNAL (newDocumentRequest()));
+    connect (view, SIGNAL (newGameRequest ()), this, SIGNAL (newGameRequest()));
+    connect (view, SIGNAL (newAddonRequest ()), this, SIGNAL (newAddonRequest()));
     connect (view, SIGNAL (loadDocumentRequest ()), this, SIGNAL (loadDocumentRequest()));
+    connect (view, SIGNAL (editSettingsRequest()), this, SIGNAL (editSettingsRequest()));
 
     updateIndices();
 
