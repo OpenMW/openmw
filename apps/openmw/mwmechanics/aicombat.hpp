@@ -33,6 +33,7 @@ namespace MWMechanics
             std::string mTargetId;
 
             PathFinder mPathFinder;
+            PathFinder mPathFinder2;
             unsigned int mStartingSecond;
     };
 }

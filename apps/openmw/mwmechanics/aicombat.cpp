@@ -55,14 +55,20 @@ namespace MWMechanics
             start.mY = pos.pos[1];
             start.mZ = pos.pos[2];
 
-            std::cout << start.mX << " " << dest.mX << "\n";
-
-            mPathFinder.buildPath(start, dest, pathgrid, xCell, yCell, true);
-
+            if(!mPathFinder.isPathConstructed())
+                mPathFinder.buildPath(start, dest, pathgrid, xCell, yCell, true);
+            else
+            {
+                mPathFinder2.buildPath(start, dest, pathgrid, xCell, yCell, true);
+                ESM::Pathgrid::Point lastPt = mPathFinder.getPath().back();
+                if(mPathFinder2.getPathSize() < mPathFinder.getPathSize() ||
+                   (dest.mX - lastPt.mX)*(dest.mX - lastPt.mX)+(dest.mY - lastPt.mY)*(dest.mY - lastPt.mY)+(dest.mZ - lastPt.mZ)*(dest.mZ - lastPt.mZ) > 200*200)
+                    mPathFinder = mPathFinder2;
+            }
+            
             mPathFinder.checkPathCompleted(pos.pos[0],pos.pos[1],pos.pos[2]);
 
             float zAngle = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
-            std::cout << zAngle;
             MWBase::Environment::get().getWorld()->rotateObject(actor, 0, 0, zAngle, false);
             MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 1;
             
@@ -71,7 +77,9 @@ namespace MWMechanics
             if((dest.mX - start.mX)*(dest.mX - start.mX)+(dest.mY - start.mY)*(dest.mY - start.mY)+(dest.mZ - start.mZ)*(dest.mZ - start.mZ)
                 < range*range)
             {
-                 MWWorld::TimeStamp time = MWBase::Environment::get().getWorld()->getTimeStamp();
+                mPathFinder.clearPath();
+
+                MWWorld::TimeStamp time = MWBase::Environment::get().getWorld()->getTimeStamp();
                 if(mStartingSecond == 0)
                 {
                     MWWorld::Class::get(actor).getCreatureStats(actor).setAttackingOrSpell(false);
