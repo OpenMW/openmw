@@ -405,6 +405,7 @@ namespace MWGui
 
             std::string pt =  MWBase::Environment::get().getWindowManager()->getGameSettingString("spoint", "");
             std::string pts =  MWBase::Environment::get().getWindowManager()->getGameSettingString("spoints", "");
+            std::string pct =  MWBase::Environment::get().getWindowManager()->getGameSettingString("spercent", "");
             std::string to =  " " + MWBase::Environment::get().getWindowManager()->getGameSettingString("sTo", "") + " ";
             std::string sec =  " " + MWBase::Environment::get().getWindowManager()->getGameSettingString("ssecond", "");
             std::string secs =  " " + MWBase::Environment::get().getWindowManager()->getGameSettingString("sseconds", "");
@@ -423,11 +424,33 @@ namespace MWGui
 
             if ((mEffectParams.mMagnMin >= 0 || mEffectParams.mMagnMax >= 0) && !(magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude))
             {
-                if (mEffectParams.mMagnMin == mEffectParams.mMagnMax)
-                    spellLine += " " + boost::lexical_cast<std::string>(mEffectParams.mMagnMin) + " " + ((mEffectParams.mMagnMin == 1) ? pt : pts);
+                // Fortify Maximum Magicka display rules:
+                if ( mEffectParams.mEffectID == 84 )
+                {
+                    std::string timesInt =  MWBase::Environment::get().getWindowManager()->getGameSettingString("sXTimesINT", "");
+                    std::string times =  MWBase::Environment::get().getWindowManager()->getGameSettingString("sXTimes", "");
+                    if (mEffectParams.mMagnMin == mEffectParams.mMagnMax)
+                        spellLine += " " + boost::lexical_cast<std::string>(mEffectParams.mMagnMin / 10.0f) + timesInt;
+                    else
+                    {
+                        spellLine += " " + boost::lexical_cast<std::string>(mEffectParams.mMagnMin / 10.0f) + times + " " + to + boost::lexical_cast<std::string>(mEffectParams.mMagnMax / 10.0f) + timesInt;
+                    }
+                }
                 else
                 {
-                    spellLine += " " + boost::lexical_cast<std::string>(mEffectParams.mMagnMin) + to + boost::lexical_cast<std::string>(mEffectParams.mMagnMax) + " " + pts;
+                    const bool usePct = (
+                        (mEffectParams.mEffectID >= 28 && mEffectParams.mEffectID <= 36) || // Weakness effects
+                        (mEffectParams.mEffectID >= 90 && mEffectParams.mEffectID <= 99) ); // Resistance effects
+                    if (mEffectParams.mMagnMin == mEffectParams.mMagnMax)
+                        spellLine += " " + boost::lexical_cast<std::string>(mEffectParams.mMagnMin) + " ";
+                    else
+                    {
+                        spellLine += " " + boost::lexical_cast<std::string>(mEffectParams.mMagnMin) + to + boost::lexical_cast<std::string>(mEffectParams.mMagnMax) + " ";
+                    }
+                    if ( usePct )
+                        spellLine += pct;
+                    else
+                        spellLine += ((mEffectParams.mMagnMin == 1 && mEffectParams.mMagnMax == 1) ? pt : pts );
                 }
             }
 
