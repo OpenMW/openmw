@@ -447,15 +447,15 @@ namespace MWGui
                         (mEffectParams.mEffectID >= 28 && mEffectParams.mEffectID <= 36) || // Weakness effects
                         (mEffectParams.mEffectID >= 90 && mEffectParams.mEffectID <= 99) ); // Resistance effects
                     if (mEffectParams.mMagnMin == mEffectParams.mMagnMax)
-                        spellLine += " " + boost::lexical_cast<std::string>(mEffectParams.mMagnMin) + " ";
+                        spellLine += " " + boost::lexical_cast<std::string>(mEffectParams.mMagnMin);
                     else
                     {
-                        spellLine += " " + boost::lexical_cast<std::string>(mEffectParams.mMagnMin) + to + boost::lexical_cast<std::string>(mEffectParams.mMagnMax) + " ";
+                        spellLine += " " + boost::lexical_cast<std::string>(mEffectParams.mMagnMin) + to + boost::lexical_cast<std::string>(mEffectParams.mMagnMax);
                     }
                     if ( usePct )
                         spellLine += pct;
                     else
-                        spellLine += ((mEffectParams.mMagnMin == 1 && mEffectParams.mMagnMax == 1) ? pt : pts );
+                        spellLine += " " + ((mEffectParams.mMagnMin == 1 && mEffectParams.mMagnMax == 1) ? pt : pts );
                 }
             }
 

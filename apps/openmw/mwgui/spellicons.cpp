@@ -190,11 +190,11 @@ namespace MWGui
                             (it->first >= 28 && it->first <= 36) || // Weakness effects
                             (it->first >= 90 && it->first <= 99) ); // Resistance effects
 
-                        sourcesDescription += ": " + boost::lexical_cast<std::string>(effectIt->mMagnitude) + " ";
+                        sourcesDescription += ": " + boost::lexical_cast<std::string>(effectIt->mMagnitude);
                         if ( usePct )
                             sourcesDescription += pct;
                         else
-                            sourcesDescription += ((effectIt->mMagnitude > 1) ? pts : pt);
+                            sourcesDescription += " " + ((effectIt->mMagnitude > 1) ? pts : pt);
                     }
                 }
             }
