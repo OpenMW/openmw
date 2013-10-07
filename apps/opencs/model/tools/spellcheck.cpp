@@ -19,7 +19,12 @@ int CSMTools::SpellCheckStage::setup()
 
 void CSMTools::SpellCheckStage::perform (int stage, std::vector<std::string>& messages)
 {
-    const ESM::Spell& spell = mSpells.getRecord (stage).get();
+    const CSMWorld::Record<ESM::Spell>& record = mSpells.getRecord (stage);
+
+    if (record.isDeleted())
+        return;
+
+    const ESM::Spell& spell = record.get();
 
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Spell, spell.mId);
 
