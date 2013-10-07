@@ -2,6 +2,9 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <sstream>
+#include <iomanip>
+
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -174,7 +177,9 @@ namespace MWGui
                     if (it->first == 84) // special handling for fortify maximum magicka
                     {
                         std::string timesInt =  MWBase::Environment::get().getWindowManager()->getGameSettingString("sXTimesINT", "");
-                        sourcesDescription += " " + boost::lexical_cast<std::string>(effectIt->mMagnitude / 10.0f) + timesInt;
+                        std::stringstream formatter;
+                        formatter << std::fixed << std::setprecision(1) << " " << (effectIt->mMagnitude / 10.0f) << timesInt;
+                        sourcesDescription += formatter.str();
                     }
                     else
                     {

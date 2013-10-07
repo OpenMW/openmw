@@ -2,6 +2,9 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <sstream>
+#include <iomanip>
+
 #include <MyGUI_ProgressBar.h>
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_ControllerManager.h>
@@ -429,12 +432,14 @@ namespace MWGui
                 {
                     std::string timesInt =  MWBase::Environment::get().getWindowManager()->getGameSettingString("sXTimesINT", "");
                     std::string times =  MWBase::Environment::get().getWindowManager()->getGameSettingString("sXTimes", "");
-                    if (mEffectParams.mMagnMin == mEffectParams.mMagnMax)
-                        spellLine += " " + boost::lexical_cast<std::string>(mEffectParams.mMagnMin / 10.0f) + timesInt;
-                    else
-                    {
-                        spellLine += " " + boost::lexical_cast<std::string>(mEffectParams.mMagnMin / 10.0f) + times + " " + to + boost::lexical_cast<std::string>(mEffectParams.mMagnMax / 10.0f) + timesInt;
-                    }
+                    std::stringstream formatter;
+
+                    formatter << std::fixed << std::setprecision(1) << " " << (mEffectParams.mMagnMin / 10.0f);
+                    if (mEffectParams.mMagnMin != mEffectParams.mMagnMax)
+                        formatter << times << " " << to << " " << (mEffectParams.mMagnMax / 10.0f);
+                    formatter << timesInt;
+
+                    spellLine += formatter.str();
                 }
                 else
                 {
