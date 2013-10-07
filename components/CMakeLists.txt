@@ -85,6 +85,8 @@ if(QT_QTGUI_LIBRARY AND QT_QTCORE_LIBRARY)
         view/profilescombobox view/comboboxlineedit
         view/lineedit view/contentselector
         view/filewidget view/adjusterwidget
+        view/textinputdialog
+
        )
 
    include(${QT_USE_FILE})

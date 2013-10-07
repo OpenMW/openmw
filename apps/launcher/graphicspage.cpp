@@ -38,6 +38,7 @@ GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, GraphicsSettings &g
     , mGraphicsSettings(graphicsSetting)
     , QWidget(parent)
 {
+    setObjectName ("GraphicsPage");
     setupUi(this);
 
     // Set the maximum res we can set in windowed mode

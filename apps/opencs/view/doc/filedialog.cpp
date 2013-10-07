@@ -34,7 +34,7 @@ void CSVDoc::FileDialog::addFiles(const QString &path)
 
 QString CSVDoc::FileDialog::filename()
 {
-    return ContentSelectorView::ContentSelector::instance().filename();
+    return ContentSelectorView::ContentSelector::instance().projectFilename();
 }
 
 QStringList CSVDoc::FileDialog::selectedFilePaths()

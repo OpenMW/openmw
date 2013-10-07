@@ -13,18 +13,19 @@ namespace ContentSelectorView {
 class TextInputDialog : public QDialog
 {
     Q_OBJECT
-public:
-    explicit TextInputDialog(const QString& title, const QString &text, QWidget *parent = 0);
-    inline ContentSelectorView::LineEdit *lineEdit() { return mLineEdit; }
-    void setOkButtonEnabled(bool enabled);
 
     ContentSelectorView::LineEdit *mLineEdit;
+    QDialogButtonBox *mButtonBox;
+
+public:
+
+    explicit TextInputDialog(const QString& title, const QString &text, QWidget *parent = 0);
+    QString getText() const;
 
     int exec();
 
-private:
-    QDialogButtonBox *mButtonBox;
-
+private slots:
+    void slotUpdateOkButton(QString text);
     
 };
 

@@ -8,6 +8,7 @@
 
 PlayPage::PlayPage(QWidget *parent) : QWidget(parent)
 {
+    setObjectName ("PlayPage");
     setupUi(this);
 
     // Hacks to get the stylesheet look properly
@@ -17,24 +18,19 @@ PlayPage::PlayPage(QWidget *parent) : QWidget(parent)
 #endif
     profilesComboBox->setView(new QListView());
 
-    connect(profilesComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(slotCurrentIndexChanged(int)));
+    connect(profilesComboBox, SIGNAL(activated(int)), this, SIGNAL (signalProfileChanged(int)));
     connect(playButton, SIGNAL(clicked()), this, SLOT(slotPlayClicked()));
 
 }
 
-void PlayPage::setProfilesComboBoxModel(QAbstractItemModel *model)
+void PlayPage::setProfilesModel(QAbstractItemModel *model)
 {
     profilesComboBox->setModel(model);
 }
 
-void PlayPage::setProfilesComboBoxIndex(int index)
+void PlayPage::setProfilesIndex(int index)
 {
     profilesComboBox->setCurrentIndex(index);
-}
-
-void PlayPage::slotCurrentIndexChanged(int index)
-{
-    emit profileChanged(index);
 }
 
 void PlayPage::slotPlayClicked()

@@ -14,17 +14,19 @@ namespace ContentSelectorView
     public:
         explicit ProfilesComboBox(QWidget *parent = 0);
         void setEditEnabled(bool editable);
-        void setPlaceholderText (const QString &text);
+        void setPlaceholderText(const QString &text);
+      //  void indexChanged(int index);
 
     signals:
-        void signalProfileTextChanged (const QString &item);
-        void profileChanged(const QString &previous, const QString &current);
+        void signalProfileTextChanged(const QString &item);
+        void signalProfileChanged(const QString &previous, const QString &current);
+        void signalProfileChanged(int index);
         void profileRenamed(const QString &oldName, const QString &newName);
 
     private slots:
 
         void slotEditingFinished();
-        void slotIndexChanged(int index);
+        void slotIndexChangedByUser(int index);
         void slotTextChanged(const QString &text);
 
     private:

@@ -16,6 +16,7 @@ TextInputDialog::TextInputDialog(const QString& title, const QString &text, QWid
     mButtonBox = new QDialogButtonBox(this);
     mButtonBox->addButton(QDialogButtonBox::Ok);
     mButtonBox->addButton(QDialogButtonBox::Cancel);
+    mButtonBox->button(QDialogButtonBox::Ok)->setEnabled (false);
 
     // Line edit
     QValidator *validator = new QRegExpValidator(QRegExp("^[a-zA-Z0-9_]*$"), this); // Alpha-numeric + underscore
@@ -38,11 +39,11 @@ TextInputDialog::TextInputDialog(const QString& title, const QString &text, QWid
     Q_UNUSED(title);
 #endif
 
-    setOkButtonEnabled(false);
     setModal(true);
 
     connect(mButtonBox, SIGNAL(accepted()), this, SLOT(accept()));
     connect(mButtonBox, SIGNAL(rejected()), this, SLOT(reject()));
+    connect(mLineEdit, SIGNAL(textChanged(QString)), this, SLOT(slotUpdateOkButton(QString)));
 
 }
 
@@ -53,19 +54,23 @@ int TextInputDialog::exec()
     return QDialog::exec();
 }
 
-void TextInputDialog::setOkButtonEnabled(bool enabled)
+QString TextInputDialog::getText() const
 {
-    QPushButton *okButton = mButtonBox->button(QDialogButtonBox::Ok);
-    okButton->setEnabled(enabled);
+    return mLineEdit->text();
+}
 
-    QPalette *palette = new QPalette();
-    palette->setColor(QPalette::Text,Qt::red);
+void TextInputDialog::slotUpdateOkButton(QString text)
+{
+    bool enabled = !(text.isEmpty());
+    mButtonBox->button(QDialogButtonBox::Ok)->setEnabled(enabled);
 
-    if (enabled) {
+    if (enabled)
         mLineEdit->setPalette(QApplication::palette());
-    } else {
+    else
+    {
         // Existing profile name, make the text red
+        QPalette *palette = new QPalette();
+        palette->setColor(QPalette::Text,Qt::red);
         mLineEdit->setPalette(*palette);
     }
-
 }

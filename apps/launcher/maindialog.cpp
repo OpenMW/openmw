@@ -106,10 +106,10 @@ void MainDialog::createPages()
     mPlayPage = new PlayPage(this);
     mGraphicsPage = new GraphicsPage(mCfgMgr, mGraphicsSettings, this);
     mDataFilesPage = new DataFilesPage(mCfgMgr, mGameSettings, mLauncherSettings, this);
-/// reimplement datafilespage functions to provide access
+
     // Set the combobox of the play page to imitate the combobox on the datafilespage
-    // mPlayPage->setProfilesComboBoxModel(mDataFilesPage->profilesComboBoxModel());
-    // mPlayPage->setProfilesComboBoxIndex(mDataFilesPage->profilesComboBoxIndex());
+    mPlayPage->setProfilesModel(mDataFilesPage->profilesModel());
+    mPlayPage->setProfilesIndex(mDataFilesPage->profilesIndex());
 
     // Add the pages to the stacked widget
     pagesWidget->addWidget(mPlayPage);
@@ -121,8 +121,8 @@ void MainDialog::createPages()
 
     connect(mPlayPage, SIGNAL(playButtonClicked()), this, SLOT(play()));
 
-    connect(mPlayPage, SIGNAL(profileChanged(int)), mDataFilesPage, SLOT(setProfilesComboBoxIndex(int)));
-    connect(mDataFilesPage, SIGNAL(profileChanged(int)), mPlayPage, SLOT(setProfilesComboBoxIndex(int)));
+    connect(mPlayPage, SIGNAL(signalProfileChanged(int)), mDataFilesPage, SLOT(slotProfileChanged(int)));
+    connect(mDataFilesPage, SIGNAL(signalProfileChanged(int)), mPlayPage, SLOT(setProfilesIndex(int)));
 
 }
 
@@ -316,7 +316,25 @@ void MainDialog::changePage(QListWidgetItem *current, QListWidgetItem *previous)
     if (!current)
         current = previous;
 
-    pagesWidget->setCurrentIndex(iconWidget->row(current));
+    int currentIndex = iconWidget->row(current);
+    int previousIndex = iconWidget->row(previous);
+
+    pagesWidget->setCurrentIndex(currentIndex);
+
+    DataFilesPage *previousPage = dynamic_cast<DataFilesPage *>(pagesWidget->widget(previousIndex));
+    DataFilesPage *currentPage = dynamic_cast<DataFilesPage *>(pagesWidget->widget(currentIndex));
+
+    //special call to update/save data files page list view when it's displayed/hidden.
+    if (previousPage)
+    {
+        if (previousPage->objectName() == "DataFilesPage")
+            previousPage->saveSettings();
+    }
+    else if (currentPage)
+    {
+        if (currentPage->objectName() == "DataFilesPage")
+            currentPage->loadSettings();
+    }
 }
 
 bool MainDialog::setupLauncherSettings()

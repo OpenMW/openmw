@@ -15,8 +15,8 @@ ContentSelectorView::ProfilesComboBox::ProfilesComboBox(QWidget *parent) :
     setValidator(mValidator);
     setCompleter(0);
 
-    connect(this, SIGNAL(currentIndexChanged(int)), this,
-            SLOT(slotIndexChanged(int)));
+    connect(this, SIGNAL(activated(int)), this,
+            SLOT(slotIndexChangedByUser(int)));
 
     setInsertPolicy(QComboBox::NoInsert);
 }
@@ -85,13 +85,13 @@ void ContentSelectorView::ProfilesComboBox::slotEditingFinished()
     emit(profileRenamed(previous, current));
 }
 
-void ContentSelectorView::ProfilesComboBox::slotIndexChanged(int index)
+void ContentSelectorView::ProfilesComboBox::slotIndexChangedByUser(int index)
 {
     if (index == -1)
         return;
 
-    emit(profileChanged(mOldProfile, currentText()));
-    mOldProfile = itemText(index);
+    emit (signalProfileChanged(mOldProfile, currentText()));
+    mOldProfile = currentText();
 }
 
 void ContentSelectorView::ProfilesComboBox::paintEvent(QPaintEvent *)

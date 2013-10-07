@@ -15,22 +15,26 @@ class LauncherSettings;
 
 
 namespace Files { struct ConfigurationManager; }
+namespace ContentSelectorView { class ContentSelector; }
 
 class DataFilesPage : public QWidget
 {
     Q_OBJECT
 
+    ContentSelectorView::ContentSelector *mSelector;
+
 public:
     DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gameSettings, LauncherSettings &launcherSettings, QWidget *parent = 0);
 
-    QAbstractItemModel* profilesComboBoxModel();
-    int profilesComboBoxIndex();
+    QAbstractItemModel* profilesModel() const;
+    int profilesIndex() const;
 
     void writeConfig(QString profile = QString());
-    void saveSettings();
+    void saveSettings(const QString &profile = "");
+    void loadSettings();
 
 signals:
-    void profileChanged(int index);
+    void signalProfileChanged(int index);
 
 public slots:
      //void showContextMenu(const QPoint &point);
@@ -38,11 +42,11 @@ public slots:
 
 private slots:
 
-    void slotProfileAdded();
-    void slotProfileChanged(const QString &previous, const QString &current);
+    void slotAddNewProfile(const QString &profile);
+    void slotProfileChangedByUser(const QString &previous, const QString &current);
+    void slotProfileChanged(int);
     void slotProfileRenamed(const QString &previous, const QString &current);
     void slotProfileDeleted(const QString &item);
-    void setProfilesComboBoxIndex(int index);
 
 private:
 
@@ -58,8 +62,8 @@ private:
     void setupDataFiles();
     void setupConfig();
     void readConfig();
-
-    void loadSettings();
+    void removeProfile (const QString &profile);
+    void changeProfiles(const QString &previous, const QString &current, bool savePrevious = true);
 };
 
 #endif

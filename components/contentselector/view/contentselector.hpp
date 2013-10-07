@@ -7,7 +7,6 @@
 #include "../model/contentmodel.hpp"
 
 class QSortFilterProxyModel;
-class TextInputDialog;
 
 namespace CSVDoc
 {
@@ -29,14 +28,13 @@ namespace ContentSelectorView
         Q_OBJECT
 
         unsigned char mFlags;
+        bool mIgnoreProfileSignal;
 
         static ContentSelector *mInstance;
         static QStringList mFilePaths;
 
         CSVDoc::FileWidget *mFileWidget;
         CSVDoc::AdjusterWidget *mAdjusterWidget;
-
-        TextInputDialog *mNewDialog;
 
     protected:
 
@@ -45,25 +43,27 @@ namespace ContentSelectorView
         QSortFilterProxyModel *mAddonProxyModel;
 
     public:
+
         explicit ContentSelector(QWidget *parent = 0, unsigned char flags = Flag_Content);
 
         static void configure(QWidget *subject, unsigned char flags = Flag_Content);
         static ContentSelector &instance();
         static void addFiles(const QString &path);
 
+        void clearCheckStates();
         void setCheckStates (const QStringList &list);
-        QStringList checkedItemsPaths();
         ContentSelectorModel::ContentFileList *CheckedItems();
 
-        QString filename() const;
+        QString projectFilename() const;
         ContentSelectorModel::ContentFileList selectedFiles() const;
-        QStringList selectedFilePaths() const;
 
+        QAbstractItemModel *profilesModel() const;
+        void setGameFile (const QString &filename = "");
         void addProfile (const QString &item, bool setAsCurrent = false);
-        void removeProfile (const QString &item);
+        void setProfile (int index);
         int getProfileIndex (const QString &item) const;
-        void setProfileIndex (int index);
         QString getProfileText() const;
+
 
    private:
 
@@ -77,22 +77,18 @@ namespace ContentSelectorView
         void buildLoadAddonView();
 
         bool isFlagged(SelectorFlags flag) const;
-        QString getNewProfileName();
-        void enableProfilesComboBox();
 
     signals:
+
         void accepted();
         void rejected();
-
-        void signalProfileChanged(int index);
-        void signalGameFileChanged(int value);
 
         void signalCreateButtonClicked();
 
         void signalProfileRenamed(QString,QString);
-        void signalProfileChanged(QString,QString);
+        void signalProfileChangedByUser(QString,QString);
         void signalProfileDeleted(QString);
-        void signalProfileAdded();
+        void signalAddNewProfile(QString);
 
     private slots:
 
@@ -102,7 +98,6 @@ namespace ContentSelectorView
         void slotAddonTableItemClicked(const QModelIndex &index);
 
         void slotUpdateCreateButton (bool);
-       // void slotUpdateOpenButton(const QStringList &items);
 
         // Action slots
         void on_newProfileAction_triggered();

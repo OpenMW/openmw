@@ -11,7 +11,6 @@ set(LAUNCHER
     settings/launchersettings.cpp
 
     utils/checkablemessagebox.cpp
-    utils/textinputdialog.cpp
 
     ${CMAKE_SOURCE_DIR}/files/launcher/launcher.rc
 )
@@ -32,8 +31,6 @@ set(LAUNCHER_HEADER
     settings/settingsbase.hpp
 
     utils/checkablemessagebox.hpp
-    utils/textinputdialog.hpp
-
 )
 if(NOT WIN32)
     LIST(APPEND LAUNCHER_HEADER unshieldthread.hpp)
@@ -49,7 +46,6 @@ set(LAUNCHER_HEADER_MOC
     textslotmsgbox.hpp
 
     utils/checkablemessagebox.hpp
-    utils/textinputdialog.hpp
 )
 
 if(NOT WIN32)

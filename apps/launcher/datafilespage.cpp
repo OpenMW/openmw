@@ -17,112 +17,131 @@
 #include "settings/gamesettings.hpp"
 #include "settings/launchersettings.hpp"
 
-#include "utils/textinputdialog.hpp"
 #include "components/contentselector/view/contentselector.hpp"
-
-#include <QDebug>
 
 DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gameSettings, LauncherSettings &launcherSettings, QWidget *parent)
     : mCfgMgr(cfg)
     , mGameSettings(gameSettings)
     , mLauncherSettings(launcherSettings)
+    , QWidget(parent)
 {
-   unsigned char flags;
+    setObjectName ("DataFilesPage");
 
-   flags = ContentSelectorView::Flag_Content | ContentSelectorView::Flag_Profile;
+    unsigned char flags;
 
-   ContentSelectorView::ContentSelector::configure(this, flags);
+    flags = ContentSelectorView::Flag_Content | ContentSelectorView::Flag_Profile;
+
+    ContentSelectorView::ContentSelector::configure(this, flags);
+    mSelector = &ContentSelectorView::ContentSelector::instance();
 
     setupDataFiles();
 
-    ContentSelectorView::ContentSelector &cSelector =
-            ContentSelectorView::ContentSelector::instance();
 
-    connect (&cSelector, SIGNAL (signalProfileRenamed (QString, QString)),
+    connect (mSelector, SIGNAL (signalProfileRenamed (QString, QString)),
                                 this, SLOT (slotProfileRenamed (QString, QString)));
 
-    connect (&cSelector, SIGNAL (signalProfileChanged (QString, QString)),
-                                this, SLOT (slotProfileChanged (QString, QString)));
+    connect (mSelector, SIGNAL (signalProfileChangedByUser (QString, QString)),
+                                this, SLOT (slotProfileChangedByUser (QString, QString)));
 
-    connect (&cSelector, SIGNAL (signalProfileDeleted (QString)),
+    connect (mSelector, SIGNAL (signalProfileDeleted (QString)),
                                 this, SLOT (slotProfileDeleted (QString)));
 
-    connect (&cSelector, SIGNAL (signalProfileAdded ()),
-                                this, SLOT (slotProfileAdded ()));
+    connect (mSelector, SIGNAL (signalAddNewProfile (QString)),
+                                this, SLOT (slotAddNewProfile (QString)));
 }
 
 void DataFilesPage::loadSettings()
 {
+    QString profileName = mSelector->getProfileText();
 
-    QString profile = mLauncherSettings.value(QString("Profiles/currentprofile"));
+    QStringList files = mLauncherSettings.values(QString("Profiles/") + profileName + QString("/game"), Qt::MatchExactly);
+    QStringList addons = mLauncherSettings.values(QString("Profiles/") + profileName + QString("/addon"), Qt::MatchExactly);
 
-    if (profile.isEmpty())
-        return;
+    mSelector->clearCheckStates();
 
-    QStringList files = mLauncherSettings.values(QString("Profiles/") + profile + QString("/master"), Qt::MatchExactly);
-    QStringList addons = mLauncherSettings.values(QString("Profiles/") + profile + QString("/plugin"), Qt::MatchExactly);
+    if (files.size() > 0)
+        mSelector->setGameFile(files.at(0));
+    else
+        mSelector->setGameFile();
 
-    foreach (const QString &file, addons)
-        files.append(file);
-
-    ContentSelectorView::ContentSelector::instance().setCheckStates(files);
+    mSelector->setCheckStates(addons);
 }
 
-void DataFilesPage::saveSettings()
+void DataFilesPage::saveSettings(const QString &profile)
 {
-   ContentSelectorModel::ContentFileList items =
-           ContentSelectorView::ContentSelector::instance().selectedFiles();
+   QString profileName = profile;
 
-   if (items.size() == 0)
-       return;
+   if (profileName.isEmpty())
+        profileName = mSelector->getProfileText();
 
-    QString profile = mLauncherSettings.value(QString("Profiles/currentprofile"));
+   //retrieve the files selected for the profile
+   ContentSelectorModel::ContentFileList items = mSelector->selectedFiles();
 
-    if (profile.isEmpty()) {
-        profile = ContentSelectorView::ContentSelector::instance().getProfileText();
-        mLauncherSettings.setValue(QString("Profiles/currentprofile"), profile);
-    }
+   removeProfile (profileName);
 
-    mLauncherSettings.remove(QString("Profiles/") + profile + QString("/master"));
-    mLauncherSettings.remove(QString("Profiles/") + profile + QString("/plugin"));
+    mGameSettings.remove(QString("game"));
+    mGameSettings.remove(QString("addon"));
 
-    mGameSettings.remove(QString("master"));
-    mGameSettings.remove(QString("plugin"));
+    //set the value of the current profile (not necessarily the profile being saved!)
+    mLauncherSettings.setValue(QString("Profiles/currentprofile"), mSelector->getProfileText());
 
     foreach(const ContentSelectorModel::EsmFile *item, items) {
 
         if (item->gameFiles().size() == 0) {
-            mLauncherSettings.setMultiValue(QString("Profiles/") + profile + QString("/master"), item->fileName());
-            mGameSettings.setMultiValue(QString("master"), item->fileName());
-
+            mLauncherSettings.setMultiValue(QString("Profiles/") + profileName + QString("/game"), item->fileName());
+            mGameSettings.setMultiValue(QString("game"), item->fileName());
         } else {
-            mLauncherSettings.setMultiValue(QString("Profiles/") + profile + QString("/plugin"), item->fileName());
-            mGameSettings.setMultiValue(QString("plugin"), item->fileName());
+            mLauncherSettings.setMultiValue(QString("Profiles/") + profileName + QString("/addon"), item->fileName());
+            mGameSettings.setMultiValue(QString("addon"), item->fileName());
         }
     }
 
 }
 
-void DataFilesPage::slotProfileDeleted (const QString &item)
+void DataFilesPage::removeProfile(const QString &profile)
 {
-    mLauncherSettings.remove(QString("Profiles/") + item + QString("/master"));
-    mLauncherSettings.remove(QString("Profiles/") + item + QString("/plugin"));
+    mLauncherSettings.remove(QString("Profiles/") + profile + QString("/game"));
+    mLauncherSettings.remove(QString("Profiles/") + profile + QString("/addon"));
 }
 
-void DataFilesPage::slotProfileChanged(const QString &previous, const QString &current)
+void DataFilesPage::changeProfiles(const QString &previous, const QString &current, bool savePrevious)
 {
-    if (previous.isEmpty())
+    //abort if no change (typically a duplicate signal)
+    if (previous == current)
         return;
 
-    if (ContentSelectorView::ContentSelector::instance().getProfileIndex (previous) == -1)
-        return; // Profile was deleted
+    int index = -1;
 
-    // Store the previous profile
-    mLauncherSettings.setValue(QString("Profiles/currentprofile"), previous);
-    saveSettings();
-    mLauncherSettings.setValue(QString("Profiles/currentprofile"), current);
+    if (!previous.isEmpty())
+        index = mSelector->getProfileIndex(previous);
+
+    // Store the previous profile if it exists
+    if ( (index != -1) && savePrevious)
+        saveSettings(previous);
 
     loadSettings();
+}
+
+void DataFilesPage::slotAddNewProfile(const QString &profile)
+{
+    saveSettings();
+    mSelector->clearCheckStates();
+    mSelector->addProfile(profile, true);
+    mSelector->setGameFile();
+    saveSettings();
+
+    emit signalProfileChanged(mSelector->getProfileIndex(profile));
+}
+
+void DataFilesPage::slotProfileDeleted (const QString &item)
+{
+    removeProfile (item);
+}
+
+void DataFilesPage::slotProfileChangedByUser(const QString &previous, const QString &current)
+{
+    changeProfiles(previous, current);
+    emit signalProfileChanged(mSelector->getProfileIndex(current));
 }
 
 void DataFilesPage::slotProfileRenamed(const QString &previous, const QString &current)
@@ -131,63 +150,49 @@ void DataFilesPage::slotProfileRenamed(const QString &previous, const QString &c
         return;
 
     // Save the new profile name
-    mLauncherSettings.setValue(QString("Profiles/currentprofile"), current);
     saveSettings();
 
     // Remove the old one
-    mLauncherSettings.remove(QString("Profiles/") + previous + QString("/master"));
-    mLauncherSettings.remove(QString("Profiles/") + previous + QString("/plugin"));
-
-    // Remove the profile from the combobox
-    ContentSelectorView::ContentSelector::instance().removeProfile (previous);
+    removeProfile (previous);
 
     loadSettings();
 }
 
-void DataFilesPage::slotProfileAdded()
+void DataFilesPage::slotProfileChanged(int index)
 {
-    TextInputDialog newDialog (tr("New Profile"), tr("Profile name:"), this);
-
-     //   connect(mNewDialog->lineEdit(), SIGNAL(textChanged(QString)),
-     //           this, SLOT(updateOkButton(QString)));
-
-    if (newDialog.exec() == QDialog::Accepted)
-    {
-        QString profile = newDialog.lineEdit()->text();
-
-        ContentSelectorView::ContentSelector
-                ::instance().addProfile(profile, true);
-    }
-}
-
-void DataFilesPage::setProfilesComboBoxIndex(int index)
-{
-    ContentSelectorView::ContentSelector::instance().setProfileIndex(index);
+    mSelector->setProfile(index);
 }
 
 void DataFilesPage::setupDataFiles()
 {
-    ContentSelectorView::ContentSelector &cSelector =
-            ContentSelectorView::ContentSelector::instance();
-
     QStringList paths = mGameSettings.getDataDirs();
 
     foreach (const QString &path, paths)
-        cSelector.addFiles(path);
+        mSelector->addFiles(path);
 
     QString dataLocal = mGameSettings.getDataLocal();
 
     if (!dataLocal.isEmpty())
-        cSelector.addFiles(dataLocal);
+        mSelector->addFiles(dataLocal);
 
     QStringList profiles = mLauncherSettings.subKeys(QString("Profiles/"));
     QString profile = mLauncherSettings.value(QString("Profiles/currentprofile"));
 
 
     foreach (const QString &item, profiles)
-        cSelector.addProfile (item);
+        mSelector->addProfile (item);
 
-    cSelector.addProfile (profile, true);
+    mSelector->addProfile (profile, true);
 
     loadSettings();
+}
+
+QAbstractItemModel *DataFilesPage::profilesModel() const
+{
+    return mSelector->profilesModel();
+}
+
+int DataFilesPage::profilesIndex() const
+{
+    return mSelector->getProfileIndex(mSelector->getProfileText());
 }

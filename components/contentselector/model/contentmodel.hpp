@@ -56,19 +56,20 @@ namespace ContentSelectorModel
         EsmFile *item(int row);
 
         bool canBeChecked(const EsmFile *file) const;
+        void sortFiles();
 
         ContentFileList mFiles;
         QHash<QString, Qt::CheckState> mCheckStates;
         QTextCodec *mCodec;
 
     public:
+
         QString mMimeType;
         QStringList mMimeTypes;
         int mColumnCount;
         Qt::ItemFlags mDragDropFlags;
         Qt::ItemFlags mDefaultFlags;
         Qt::DropActions mDropActions;
-
     };
 }
 #endif // CONTENTMODEL_HPP

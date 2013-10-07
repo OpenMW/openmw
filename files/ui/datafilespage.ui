@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>518</width>
-    <height>424</height>
+    <height>436</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -242,11 +242,6 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <item>
-         <property name="text">
-          <string>Default</string>
-         </property>
-        </item>
        </widget>
       </item>
       <item>

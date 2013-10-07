@@ -15,17 +15,16 @@ class PlayPage : public QWidget, private Ui::PlayPage
 
 public:
     PlayPage(QWidget *parent = 0);
-    void setProfilesComboBoxModel(QAbstractItemModel *model);
+    void setProfilesModel(QAbstractItemModel *model);
 
 signals:
-    void profileChanged(int index);
+    void signalProfileChanged(int index);
     void playButtonClicked();
 
 public slots:
-    void setProfilesComboBoxIndex(int index);
+    void setProfilesIndex(int index);
 
 private slots:
-    void slotCurrentIndexChanged(int index);
     void slotPlayClicked();
 
 

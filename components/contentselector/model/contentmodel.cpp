@@ -391,7 +391,6 @@ bool ContentSelectorModel::ContentModel::canBeChecked(const EsmFile *file) const
                 return true;
         }
     }
-
     return false;
 }
 
@@ -448,6 +447,39 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
     }
 
     delete decoder;
+
+    sortFiles();
+}
+
+void ContentSelectorModel::ContentModel::sortFiles()
+{
+    //first, sort the model such that all dependencies are ordered upstream (gamefile) first.
+    bool movedFiles = true;
+    int fileCount = mFiles.size();
+
+    //Dependency sort
+    //iterate until no sorting of files occurs
+    while (movedFiles)
+    {
+        movedFiles = false;
+        //iterate each file, obtaining a reference to it's gamefiles list
+        for (int i = 0; i < fileCount; i++)
+        {
+            const QStringList &gamefiles = mFiles.at(i)->gameFiles();
+            //iterate each file after the current file, verifying that none of it's
+            //dependencies appear.
+            for (int j = i + 1; j < fileCount; j++)
+            {
+                if (gamefiles.contains(mFiles.at(j)->fileName()))
+                {
+                        mFiles.move(j, i);
+                        movedFiles = true;
+                }
+            }
+            if (movedFiles)
+                break;
+        }
+    }
 }
 
 bool ContentSelectorModel::ContentModel::isChecked(const QString& name) const
@@ -460,6 +492,7 @@ bool ContentSelectorModel::ContentModel::isChecked(const QString& name) const
 
 void ContentSelectorModel::ContentModel::setCheckState(const QString &name, bool checkState)
 {
+
     if (name.isEmpty())
         return;
 
@@ -469,9 +502,14 @@ void ContentSelectorModel::ContentModel::setCheckState(const QString &name, bool
         state = Qt::Checked;
 
     mCheckStates[name] = state;
+    emit dataChanged(indexFromItem(item(name)), indexFromItem(item(name)));
 
     const EsmFile *file = item(name);
 
+    if (file->isGameFile())
+        emit dataChanged (index(0,0), index(rowCount()-1,0));
+
+    //if we're checking an item, ensure all "upstream" files (dependencies) are checked as well.
     if (state == Qt::Checked)
     {
         foreach (const QString &upstreamName, file->gameFiles())
@@ -482,24 +520,23 @@ void ContentSelectorModel::ContentModel::setCheckState(const QString &name, bool
                 continue;
 
             if (!isChecked(upstreamName))
-            {
                 mCheckStates[upstreamName] = Qt::Checked;
-                emit dataChanged(indexFromItem(upstreamFile), indexFromItem(upstreamFile));
-            }
+
+            emit dataChanged(indexFromItem(upstreamFile), indexFromItem(upstreamFile));
 
         }
     }
-    else if (state == Qt::Unchecked)
+    //otherwise, if we're unchecking an item (or the file is a game file) ensure all downstream files are unchecked.
+    if (state == Qt::Unchecked)
     {
         foreach (const EsmFile *downstreamFile, mFiles)
         {
             if (downstreamFile->gameFiles().contains(name))
             {
                 if (mCheckStates.contains(downstreamFile->fileName()))
-                {
                     mCheckStates[downstreamFile->fileName()] = Qt::Unchecked;
-                    emit dataChanged(indexFromItem(downstreamFile), indexFromItem(downstreamFile));
-                }
+
+                emit dataChanged(indexFromItem(downstreamFile), indexFromItem(downstreamFile));
             }
         }
     }
