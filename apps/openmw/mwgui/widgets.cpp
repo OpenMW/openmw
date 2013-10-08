@@ -436,7 +436,7 @@ namespace MWGui
 
                     formatter << std::fixed << std::setprecision(1) << " " << (mEffectParams.mMagnMin / 10.0f);
                     if (mEffectParams.mMagnMin != mEffectParams.mMagnMax)
-                        formatter << times << " " << to << " " << (mEffectParams.mMagnMax / 10.0f);
+                        formatter << times << to << (mEffectParams.mMagnMax / 10.0f);
                     formatter << timesInt;
 
                     spellLine += formatter.str();
