@@ -425,11 +425,9 @@ namespace MWGui
                 spellLine += " " + MWBase::Environment::get().getWindowManager()->getGameSettingString(ESM::Attribute::sGmstAttributeIds[mEffectParams.mAttribute], "");
             }
 
-            if ((mEffectParams.mMagnMin >= 0 || mEffectParams.mMagnMax >= 0) && !(magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude))
-            {
-                // Fortify Maximum Magicka display rules:
-                if ( mEffectParams.mEffectID == 84 )
-                {
+            if (mEffectParams.mMagnMin >= 0 || mEffectParams.mMagnMax >= 0) {
+                int displayType = magicEffect->getMagnitudeDisplayType();
+                if ( displayType == ESM::MagicEffect::MDT_TimesInt ) {
                     std::string timesInt =  MWBase::Environment::get().getWindowManager()->getGameSettingString("sXTimesINT", "");
                     std::string times =  MWBase::Environment::get().getWindowManager()->getGameSettingString("sXTimes", "");
                     std::stringstream formatter;
@@ -441,20 +439,14 @@ namespace MWGui
 
                     spellLine += formatter.str();
                 }
-                else
-                {
-                    const bool usePct = (
-                        (mEffectParams.mEffectID >= 28 && mEffectParams.mEffectID <= 36) || // Weakness effects
-                        (mEffectParams.mEffectID >= 90 && mEffectParams.mEffectID <= 99) ); // Resistance effects
-                    if (mEffectParams.mMagnMin == mEffectParams.mMagnMax)
-                        spellLine += " " + boost::lexical_cast<std::string>(mEffectParams.mMagnMin);
-                    else
-                    {
-                        spellLine += " " + boost::lexical_cast<std::string>(mEffectParams.mMagnMin) + to + boost::lexical_cast<std::string>(mEffectParams.mMagnMax);
-                    }
-                    if ( usePct )
+                else if ( displayType != ESM::MagicEffect::MDT_None ) {
+                    spellLine += " " + boost::lexical_cast<std::string>(mEffectParams.mMagnMin);
+                    if (mEffectParams.mMagnMin != mEffectParams.mMagnMax)
+                        spellLine += to + boost::lexical_cast<std::string>(mEffectParams.mMagnMax);
+
+                    if ( displayType == ESM::MagicEffect::MDT_Percentage )
                         spellLine += pct;
-                    else
+                    else  // ESM::MagicEffect::MDT_Points
                         spellLine += " " + ((mEffectParams.mMagnMin == 1 && mEffectParams.mMagnMax == 1) ? pt : pts );
                 }
             }

@@ -172,30 +172,25 @@ namespace MWGui
                             MWBase::Environment::get().getWindowManager()->getGameSettingString(
                                 ESM::Attribute::sGmstAttributeIds[effectIt->mKey.mArg], "") + ")";
 
-                if (!(effect->mData.mFlags & ESM::MagicEffect::NoMagnitude))
+                int displayType = effect->getMagnitudeDisplayType();
+                if (displayType == ESM::MagicEffect::MDT_TimesInt)
                 {
-                    if (it->first == 84) // special handling for fortify maximum magicka
-                    {
-                        std::string timesInt =  MWBase::Environment::get().getWindowManager()->getGameSettingString("sXTimesINT", "");
-                        std::stringstream formatter;
-                        formatter << std::fixed << std::setprecision(1) << " " << (effectIt->mMagnitude / 10.0f) << timesInt;
-                        sourcesDescription += formatter.str();
-                    }
-                    else
-                    {
-                        std::string pt =  MWBase::Environment::get().getWindowManager()->getGameSettingString("spoint", "");
-                        std::string pts =  MWBase::Environment::get().getWindowManager()->getGameSettingString("spoints", "");
-                        std::string pct =  MWBase::Environment::get().getWindowManager()->getGameSettingString("spercent", "");
-                        const bool usePct = (
-                            (it->first >= 28 && it->first <= 36) || // Weakness effects
-                            (it->first >= 90 && it->first <= 99) ); // Resistance effects
+                    std::string timesInt =  MWBase::Environment::get().getWindowManager()->getGameSettingString("sXTimesINT", "");
+                    std::stringstream formatter;
+                    formatter << std::fixed << std::setprecision(1) << " " << (effectIt->mMagnitude / 10.0f) << timesInt;
+                    sourcesDescription += formatter.str();
+                }
+                else if ( displayType != ESM::MagicEffect::MDT_None )
+                {
+                    std::string pt  =  MWBase::Environment::get().getWindowManager()->getGameSettingString("spoint", "");
+                    std::string pts =  MWBase::Environment::get().getWindowManager()->getGameSettingString("spoints", "");
+                    std::string pct =  MWBase::Environment::get().getWindowManager()->getGameSettingString("spercent", "");
 
-                        sourcesDescription += ": " + boost::lexical_cast<std::string>(effectIt->mMagnitude);
-                        if ( usePct )
-                            sourcesDescription += pct;
-                        else
-                            sourcesDescription += " " + ((effectIt->mMagnitude > 1) ? pts : pt);
-                    }
+                    sourcesDescription += ": " + boost::lexical_cast<std::string>(effectIt->mMagnitude);
+                    if ( displayType == ESM::MagicEffect::MDT_Percentage )
+                        sourcesDescription += pct;
+                    else // ESM::MagicEffect::MDT_Points
+                        sourcesDescription += " " + ((effectIt->mMagnitude > 1) ? pts : pt);
                 }
             }
 

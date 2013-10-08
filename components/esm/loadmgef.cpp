@@ -274,5 +274,16 @@ short MagicEffect::effectStringToId(const std::string &effect)
     return name->first;
 }
 
+MagicEffect::MagnitudeDisplayType MagicEffect::getMagnitudeDisplayType() const {
+    if ( mData.mFlags & NoMagnitude )
+        return MDT_None;
+    if ( mIndex == 84 )
+        return MDT_TimesInt;
+    if (   ( mIndex >= 28 && mIndex <= 36 )
+        || ( mIndex >= 90 && mIndex <= 99 ) )
+        return MDT_Percentage;
+
+    return MDT_Points;
+}
 
 }
