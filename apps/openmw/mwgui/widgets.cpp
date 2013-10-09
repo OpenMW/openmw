@@ -409,6 +409,9 @@ namespace MWGui
             std::string pt =  MWBase::Environment::get().getWindowManager()->getGameSettingString("spoint", "");
             std::string pts =  MWBase::Environment::get().getWindowManager()->getGameSettingString("spoints", "");
             std::string pct =  MWBase::Environment::get().getWindowManager()->getGameSettingString("spercent", "");
+            std::string ft =  MWBase::Environment::get().getWindowManager()->getGameSettingString("sfeet", "");
+            std::string lvl =  MWBase::Environment::get().getWindowManager()->getGameSettingString("sLevel", "");
+            std::string lvls =  MWBase::Environment::get().getWindowManager()->getGameSettingString("sLevels", "");
             std::string to =  " " + MWBase::Environment::get().getWindowManager()->getGameSettingString("sTo", "") + " ";
             std::string sec =  " " + MWBase::Environment::get().getWindowManager()->getGameSettingString("ssecond", "");
             std::string secs =  " " + MWBase::Environment::get().getWindowManager()->getGameSettingString("sseconds", "");
@@ -426,15 +429,14 @@ namespace MWGui
             }
 
             if (mEffectParams.mMagnMin >= 0 || mEffectParams.mMagnMax >= 0) {
-                int displayType = magicEffect->getMagnitudeDisplayType();
+                ESM::MagicEffect::MagnitudeDisplayType displayType = magicEffect->getMagnitudeDisplayType();
                 if ( displayType == ESM::MagicEffect::MDT_TimesInt ) {
                     std::string timesInt =  MWBase::Environment::get().getWindowManager()->getGameSettingString("sXTimesINT", "");
-                    std::string times =  MWBase::Environment::get().getWindowManager()->getGameSettingString("sXTimes", "");
                     std::stringstream formatter;
 
                     formatter << std::fixed << std::setprecision(1) << " " << (mEffectParams.mMagnMin / 10.0f);
                     if (mEffectParams.mMagnMin != mEffectParams.mMagnMax)
-                        formatter << times << to << (mEffectParams.mMagnMax / 10.0f);
+                        formatter << to << (mEffectParams.mMagnMax / 10.0f);
                     formatter << timesInt;
 
                     spellLine += formatter.str();
@@ -446,6 +448,10 @@ namespace MWGui
 
                     if ( displayType == ESM::MagicEffect::MDT_Percentage )
                         spellLine += pct;
+                    else if ( displayType == ESM::MagicEffect::MDT_Feet )
+                        spellLine += " " + ft;
+                    else if ( displayType == ESM::MagicEffect::MDT_Level )
+                        spellLine += " " + ((mEffectParams.mMagnMin == 1 && mEffectParams.mMagnMax == 1) ? lvl : lvls );
                     else  // ESM::MagicEffect::MDT_Points
                         spellLine += " " + ((mEffectParams.mMagnMin == 1 && mEffectParams.mMagnMax == 1) ? pt : pts );
                 }

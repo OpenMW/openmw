@@ -172,7 +172,7 @@ namespace MWGui
                             MWBase::Environment::get().getWindowManager()->getGameSettingString(
                                 ESM::Attribute::sGmstAttributeIds[effectIt->mKey.mArg], "") + ")";
 
-                int displayType = effect->getMagnitudeDisplayType();
+                ESM::MagicEffect::MagnitudeDisplayType displayType = effect->getMagnitudeDisplayType();
                 if (displayType == ESM::MagicEffect::MDT_TimesInt)
                 {
                     std::string timesInt =  MWBase::Environment::get().getWindowManager()->getGameSettingString("sXTimesINT", "");
@@ -182,15 +182,24 @@ namespace MWGui
                 }
                 else if ( displayType != ESM::MagicEffect::MDT_None )
                 {
-                    std::string pt  =  MWBase::Environment::get().getWindowManager()->getGameSettingString("spoint", "");
-                    std::string pts =  MWBase::Environment::get().getWindowManager()->getGameSettingString("spoints", "");
-                    std::string pct =  MWBase::Environment::get().getWindowManager()->getGameSettingString("spercent", "");
-
                     sourcesDescription += ": " + boost::lexical_cast<std::string>(effectIt->mMagnitude);
+
                     if ( displayType == ESM::MagicEffect::MDT_Percentage )
-                        sourcesDescription += pct;
+                        sourcesDescription += MWBase::Environment::get().getWindowManager()->getGameSettingString("spercent", "");
+                    else if ( displayType == ESM::MagicEffect::MDT_Feet )
+                        sourcesDescription += " " + MWBase::Environment::get().getWindowManager()->getGameSettingString("sfeet", "");
+                    else if ( displayType == ESM::MagicEffect::MDT_Level )
+                    {
+                        sourcesDescription += " " + ((effectIt->mMagnitude > 1) ?
+                            MWBase::Environment::get().getWindowManager()->getGameSettingString("sLevels", "") :
+                            MWBase::Environment::get().getWindowManager()->getGameSettingString("sLevel", "") );
+                    }
                     else // ESM::MagicEffect::MDT_Points
-                        sourcesDescription += " " + ((effectIt->mMagnitude > 1) ? pts : pt);
+                    {
+                        sourcesDescription += " " + ((effectIt->mMagnitude > 1) ?
+                            MWBase::Environment::get().getWindowManager()->getGameSettingString("spoints", "") :
+                            MWBase::Environment::get().getWindowManager()->getGameSettingString("spoint", "") );
+                    }
                 }
             }
 
