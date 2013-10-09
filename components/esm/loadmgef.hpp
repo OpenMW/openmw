@@ -35,8 +35,10 @@ struct MagicEffect
     enum MagnitudeDisplayType
     {
         MDT_None,
-        MDT_Points,
+        MDT_Feet,
+        MDT_Level,
         MDT_Percentage,
+        MDT_Points,
         MDT_TimesInt
     };
 
