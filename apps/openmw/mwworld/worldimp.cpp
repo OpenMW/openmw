@@ -1890,6 +1890,16 @@ namespace MWWorld
         return mTeleportEnabled;
     }
 
+    void World::enableLevitation(bool enable)
+    {
+        mLevitationEnabled = enable;
+    }
+
+    bool World::isLevitationEnabled() const
+    {
+        return mLevitationEnabled;
+    }
+
     void World::setWerewolf(const MWWorld::Ptr& actor, bool werewolf)
     {
         MWMechanics::NpcStats& npcStats = Class::get(actor).getNpcStats(actor);

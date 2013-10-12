@@ -352,5 +352,7 @@ op 0x200021c: SetWerewolfAcrobaticsExplicit
 op 0x200021d: ShowVars
 op 0x200021e: ShowVarsExplicit
 op 0x200021f: ToggleGodMode
+op 0x2000220: DisableLevitation
+op 0x2000221: EnableLevitation
 
-opcodes 0x2000220-0x3ffffff unused
+opcodes 0x2000222-0x3ffffff unused

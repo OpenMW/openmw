@@ -390,6 +390,12 @@ namespace MWBase
             /// Returns true if teleport spell effects are allowed.
             virtual bool isTeleportingEnabled() const = 0;
 
+            /// Enables or disables use of levitation spell effect.
+            virtual void enableLevitation(bool enable) = 0;
+
+            /// Returns true if levitation spell effect is allowed.
+            virtual bool isLevitationEnabled() const = 0;
+
             /// Turn actor into werewolf or normal form.
             virtual void setWerewolf(const MWWorld::Ptr& actor, bool werewolf) = 0;
 
