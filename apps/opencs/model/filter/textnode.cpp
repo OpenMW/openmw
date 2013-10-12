@@ -34,7 +34,7 @@ bool CSMFilter::TextNode::test (const CSMWorld::IdTable& table, int row,
     {
         string = data.toString();
     }
-    else if (data.type()==QVariant::Int || data.type()==QVariant::UInt ||
+    else if ((data.type()==QVariant::Int || data.type()==QVariant::UInt) &&
         CSMWorld::Columns::hasEnums (static_cast<CSMWorld::Columns::ColumnId> (mColumnId)))
     {
         int value = data.toInt();
