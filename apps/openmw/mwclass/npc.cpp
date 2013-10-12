@@ -7,6 +7,7 @@
 
 #include <OgreSceneNode.h>
 
+#include <components/esm/loadmgef.hpp>
 #include <components/esm/loadnpc.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -767,6 +768,37 @@ namespace MWClass
         x /= 3.0f;
 
         return x;
+    }
+
+    float Npc::getFallDamage(const MWWorld::Ptr &ptr, float fallHeight) const
+    {
+        MWBase::World *world = MWBase::Environment::get().getWorld();
+        const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
+
+        const float fallDistanceMin = gmst.find("fFallDamageDistanceMin")->getFloat();
+
+        if (fallHeight >= fallDistanceMin)
+        {
+            const float acrobaticsSkill = MWWorld::Class::get(ptr).getNpcStats (ptr).getSkill(ESM::Skill::Acrobatics).getModified();
+            const CustomData *npcdata = static_cast<const CustomData*>(ptr.getRefData().getCustomData());
+            const float jumpSpellBonus = npcdata->mNpcStats.getMagicEffects().get(MWMechanics::EffectKey(ESM::MagicEffect::Jump)).mMagnitude;
+            const float fallAcroBase = gmst.find("fFallAcroBase")->getFloat();
+            const float fallAcroMult = gmst.find("fFallAcroMult")->getFloat();
+            const float fallDistanceBase = gmst.find("fFallDistanceBase")->getFloat();
+            const float fallDistanceMult = gmst.find("fFallDistanceMult")->getFloat();
+
+            float x = fallHeight - fallDistanceMin;
+            x -= (1.5 * acrobaticsSkill) + jumpSpellBonus;
+            x = std::max(0.0f, x);
+
+            float a = fallAcroBase + fallAcroMult * (100 - acrobaticsSkill);
+            x = fallDistanceBase + fallDistanceMult * x;
+            x *= a;
+
+            return x;
+        }
+
+        return 0;
     }
 
     MWMechanics::Movement& Npc::getMovementSettings (const MWWorld::Ptr& ptr) const

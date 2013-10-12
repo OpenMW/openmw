@@ -167,6 +167,11 @@ namespace MWWorld
         throw std::runtime_error ("class does not support enchanting");
     }
 
+    float Class::getFallDamage(const MWWorld::Ptr &ptr, float fallHeight) const
+    {
+        return 0;
+    }
+
     MWMechanics::Movement& Class::getMovementSettings (const Ptr& ptr) const
     {
         throw std::runtime_error ("movement settings not supported by class");

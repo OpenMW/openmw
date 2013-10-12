@@ -3,6 +3,8 @@
 
 #include <OgreVector3.h>
 
+#include <components/esm/loadmgef.hpp>
+
 #include "../mwworld/ptr.hpp"
 
 namespace MWWorld
@@ -153,6 +155,9 @@ class CharacterController
     // counted for skill increase
     float mSecondsOfSwimming;
     float mSecondsOfRunning;
+
+    // used for acrobatics progress and fall damages
+    float mFallHeight;
 
     std::string mAttackType; // slash, chop or thrust
 
