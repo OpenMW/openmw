@@ -397,9 +397,10 @@ namespace MWClass
                     MWBase::Environment::get().getWindowManager()->messageBox("#{sTargetCriticalStrike}");
                     MWBase::Environment::get().getSoundManager()->playSound3D(victim, "critical damage", 1.0f, 1.0f);
                 }
-                weapon.getCellRef().mCharge -= std::min(std::max(1,
-                                                                 (int)(damage * gmst.find("fWeaponDamageMult")->getFloat())),
-                                                        weapon.getCellRef().mCharge);
+                
+                if (!MWBase::Environment::get().getWorld()->getGodModeState())
+                    weapon.getCellRef().mCharge -= std::min(std::max(1,
+                        (int)(damage * gmst.find("fWeaponDamageMult")->getFloat())), weapon.getCellRef().mCharge);
             }
             healthdmg = true;
         }
