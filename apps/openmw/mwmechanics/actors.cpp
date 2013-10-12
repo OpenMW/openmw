@@ -31,11 +31,14 @@ namespace MWMechanics
         calculateDynamicStats (ptr);
         calculateCreatureStatModifiers (ptr);
 
-        // AI
         if(!MWBase::Environment::get().getWindowManager()->isGuiMode())
         {
+            // AI
             CreatureStats& creatureStats =  MWWorld::Class::get (ptr).getCreatureStats (ptr);
             creatureStats.getAiSequence().execute (ptr);
+
+            // fatigue restoration
+            calculateRestoration(ptr, duration);
         }
     }
 
@@ -93,39 +96,29 @@ namespace MWMechanics
     void Actors::calculateRestoration (const MWWorld::Ptr& ptr, float duration)
     {
         CreatureStats& stats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
+        const MWWorld::Store<ESM::GameSetting>& settings = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+        int endurance = stats.getAttribute (ESM::Attribute::Endurance).getModified ();
+
+        float capacity = MWWorld::Class::get(ptr).getCapacity(ptr);
+        float encumbrance = MWWorld::Class::get(ptr).getEncumbrance(ptr);
+        float normalizedEncumbrance = (capacity == 0 ? 1 : encumbrance/capacity);
+        if (normalizedEncumbrance > 1)
+            normalizedEncumbrance = 1;
 
         if (duration == 3600)
         {
-            bool stunted = stats.getMagicEffects ().get(MWMechanics::EffectKey(ESM::MagicEffect::StuntedMagicka)).mMagnitude > 0;
+            // the actor is sleeping, restore health and magicka
 
-            int endurance = stats.getAttribute (ESM::Attribute::Endurance).getModified ();
+            bool stunted = stats.getMagicEffects ().get(MWMechanics::EffectKey(ESM::MagicEffect::StuntedMagicka)).mMagnitude > 0;
 
             DynamicStat<float> health = stats.getHealth();
             health.setCurrent (health.getCurrent() + 0.1 * endurance);
             stats.setHealth (health);
 
-            const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-
-            float fFatigueReturnBase = store.get<ESM::GameSetting>().find("fFatigueReturnBase")->getFloat ();
-            float fFatigueReturnMult = store.get<ESM::GameSetting>().find("fFatigueReturnMult")->getFloat ();
-            float fEndFatigueMult = store.get<ESM::GameSetting>().find("fEndFatigueMult")->getFloat ();
-
-            float capacity = MWWorld::Class::get(ptr).getCapacity(ptr);
-            float encumbrance = MWWorld::Class::get(ptr).getEncumbrance(ptr);
-            float normalizedEncumbrance = (capacity == 0 ? 1 : encumbrance/capacity);
-            if (normalizedEncumbrance > 1)
-                normalizedEncumbrance = 1;
-
-            float x = fFatigueReturnBase + fFatigueReturnMult * (1 - normalizedEncumbrance);
-            x *= fEndFatigueMult * endurance;
-
-            DynamicStat<float> fatigue = stats.getFatigue();
-            fatigue.setCurrent (fatigue.getCurrent() + 3600 * x);
-            stats.setFatigue (fatigue);
-
             if (!stunted)
             {
-                float fRestMagicMult = store.get<ESM::GameSetting>().find("fRestMagicMult")->getFloat ();
+                float fRestMagicMult = settings.find("fRestMagicMult")->getFloat ();
 
                 DynamicStat<float> magicka = stats.getMagicka();
                 magicka.setCurrent (magicka.getCurrent()
@@ -133,6 +126,19 @@ namespace MWMechanics
                 stats.setMagicka (magicka);
             }
         }
+
+        // restore fatigue
+
+        float fFatigueReturnBase = settings.find("fFatigueReturnBase")->getFloat ();
+        float fFatigueReturnMult = settings.find("fFatigueReturnMult")->getFloat ();
+        float fEndFatigueMult = settings.find("fEndFatigueMult")->getFloat ();
+
+        float x = fFatigueReturnBase + fFatigueReturnMult * (1 - normalizedEncumbrance);
+        x *= fEndFatigueMult * endurance;
+
+        DynamicStat<float> fatigue = stats.getFatigue();
+        fatigue.setCurrent (fatigue.getCurrent() + duration * x);
+        stats.setFatigue (fatigue);
     }
 
     void Actors::calculateCreatureStatModifiers (const MWWorld::Ptr& ptr)
