@@ -354,6 +354,15 @@ void RenderingManager::update (float duration, bool paused)
             mCamera->setCameraDistance(test.second * orig.distance(dest), false, false);
     }
 
+    // Sink the camera while sneaking
+    bool isSneaking = MWWorld::Class::get(player).getStance(player, MWWorld::Class::Sneak);
+    bool isInAir = !world->isOnGround(player);
+    bool isSwimming = world->isSwimming(player);
+
+    if(isSneaking && !(isSwimming || isInAir))
+        mCamera->setSneakOffset();
+
+
     mOcclusionQuery->update(duration);
 
     mVideoPlayer->update ();
