@@ -47,7 +47,7 @@ bool CSMFilter::TextNode::test (const CSMWorld::IdTable& table, int row,
     }
     else if (data.type()==QVariant::Bool)
     {
-        string = data.toBool() ? "true" : " false";
+        string = data.toBool() ? "true" : "false";
     }
     else
         return false;
