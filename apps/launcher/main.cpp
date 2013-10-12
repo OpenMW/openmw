@@ -62,14 +62,3 @@ int main(int argc, char *argv[])
     return returnValue;
 }
 
-#ifdef _WINDOWS
-// If the system compiles for main(), then main will be used.
-// If it wants WinMain, this will call main anyways.
-int _stdcall WinMain(struct HINSTANCE__ *hInstance,
-                     struct HINSTANCE__ *hPrevInstance,
-                     char               *lpszCmdLine,
-                     int                 nCmdShow)
-{
-    return main(__argc, __argv);
-}
-#endif
