@@ -769,6 +769,13 @@ void RenderingManager::processChangedSettings(const Settings::CategorySettingVec
                 || it->second == "resolution y"
                 || it->second == "fullscreen"))
             changeRes = true;
+        else if (it->first == "Video" && it->second == "vsync")
+        {
+            // setVSyncEnabled is bugged in 1.8
+#if OGRE_VERSION >= (1 << 16 | 9 << 8 | 0)
+            mRendering.getWindow()->setVSyncEnabled(Settings::Manager::getBool("vsync", "Video"));
+#endif
+        }
         else if (it->second == "field of view" && it->first == "General")
             mRendering.setFov(Settings::Manager::getFloat("field of view", "General"));
         else if ((it->second == "texture filtering" && it->first == "General")
