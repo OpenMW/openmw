@@ -36,6 +36,9 @@ void CSVWorld::SceneToolMode::addButton (const std::string& icon, const std::str
     mButtons.insert (std::make_pair (button, id));
 
     connect (button, SIGNAL (clicked()), this, SLOT (selected()));
+
+    if (mButtons.size()==1)
+        setIcon (button->icon());
 }
 
 void CSVWorld::SceneToolMode::selected()
@@ -47,7 +50,7 @@ void CSVWorld::SceneToolMode::selected()
     {
         mPanel->hide();
 
-        emit updateIcon (iter->first->icon());
+        setIcon (iter->first->icon());
         emit modeChanged (iter->second);
     }
 }

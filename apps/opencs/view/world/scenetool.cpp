@@ -11,11 +11,6 @@ CSVWorld::SceneTool::SceneTool (SceneToolbar *parent) : QPushButton (parent)
     connect (this, SIGNAL (clicked()), this, SLOT (openRequest()));
 }
 
-void CSVWorld::SceneTool::updateIcon (const QIcon& icon)
-{
-    setIcon (icon);
-}
-
 void CSVWorld::SceneTool::openRequest()
 {
     showPanel (parentWidget()->mapToGlobal (pos()));
