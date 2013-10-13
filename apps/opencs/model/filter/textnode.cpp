@@ -49,6 +49,8 @@ bool CSMFilter::TextNode::test (const CSMWorld::IdTable& table, int row,
     {
         string = data.toBool() ? "true" : "false";
     }
+    else if (mText.empty() && !data.isValid())
+        return true;
     else
         return false;
 
