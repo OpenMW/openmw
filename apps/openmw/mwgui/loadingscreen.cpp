@@ -227,12 +227,8 @@ namespace MWGui
             // caused a sync / flush and would be expensive).
             // We're doing this so we can do some actual loading while the GPU is busy with the render.
             // This means the render is lagging a frame behind, but this is hardly noticable.
-#if OGRE_VERSION >= (1 << 16 | 9 << 8 | 0)
             mWindow->swapBuffers();
-#else
-            // In Ogre 1.8, the swapBuffers argument is useless and setVSyncEnabled is bugged when using GLX. Not much we can do :/
-            mWindow->swapBuffers(false);
-#endif
+
             mWindow->update(false);
 
             if (!hasCompositor)
