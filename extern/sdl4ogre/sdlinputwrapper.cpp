@@ -30,9 +30,6 @@ namespace SFO
 
     InputWrapper::~InputWrapper()
     {
-        if(mSDLWindow != NULL)
-            SDL_DestroyWindow(mSDLWindow);
-        mSDLWindow = NULL;
     }
 
     void InputWrapper::capture(bool windowEventsOnly)
