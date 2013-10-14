@@ -68,7 +68,7 @@ std::string CSMFilter::ValueNode::toString (bool numericColumns) const
             << CSMWorld::Columns::getName (static_cast<CSMWorld::Columns::ColumnId> (mColumnId))
             << "\"";
 
-    stream << ", \"";
+    stream << ", ";
 
     if (mLower==mUpper && mLowerType!=Type_Infinite && mUpperType!=Type_Infinite)
         stream << mLower;
