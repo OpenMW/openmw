@@ -23,6 +23,7 @@ namespace MWGui
         , mLastWallpaperChangeTime(0.f)
         , mFirstLoad(true)
         , mProgress(0)
+        , mVSyncWasEnabled(false)
     {
         getWidget(mLoadingText, "LoadingText");
         getWidget(mProgressBar, "ProgressBar");
@@ -67,6 +68,14 @@ namespace MWGui
 
     void LoadingScreen::loadingOn()
     {
+        // Temporarily turn off VSync, we want to do actual loading rather than waiting for the screen to sync.
+        // Threaded loading would be even better, of course - especially because some drivers force VSync to on and we can't change it.
+        // In Ogre 1.8, the swapBuffers argument is useless and setVSyncEnabled is bugged with GLX, nothing we can do :/
+        mVSyncWasEnabled = mWindow->isVSyncEnabled();
+        #if OGRE_VERSION >= (1 << 16 | 9 << 8 | 0)
+        mWindow->setVSyncEnabled(false);
+        #endif
+
         setVisible(true);
 
         if (mFirstLoad)
@@ -83,6 +92,12 @@ namespace MWGui
 
     void LoadingScreen::loadingOff()
     {
+        // Re-enable vsync now.
+        // In Ogre 1.8, the swapBuffers argument is useless and setVSyncEnabled is bugged with GLX, nothing we can do :/
+        #if OGRE_VERSION >= (1 << 16 | 9 << 8 | 0)
+        mWindow->setVSyncEnabled(mVSyncWasEnabled);
+        #endif
+
         setVisible(false);
 
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Loading);
@@ -212,7 +227,8 @@ namespace MWGui
             // caused a sync / flush and would be expensive).
             // We're doing this so we can do some actual loading while the GPU is busy with the render.
             // This means the render is lagging a frame behind, but this is hardly noticable.
-            mWindow->swapBuffers(false); // never Vsync, makes no sense here
+            mWindow->swapBuffers();
+
             mWindow->update(false);
 
             if (!hasCompositor)

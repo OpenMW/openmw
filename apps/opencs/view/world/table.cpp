@@ -12,8 +12,8 @@
 #include "../../model/world/idtableproxymodel.hpp"
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/record.hpp"
+
 #include "recordstatusdelegate.hpp"
-#include "refidtypedelegate.hpp"
 #include "util.hpp"
 
 void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)

@@ -56,6 +56,7 @@ namespace MWGui
             MessageBox* mStaticMessageBox;
             std::vector<MessageBoxManagerTimer> mTimers;
             float mMessageBoxSpeed;
+            int mLastButtonPressed;
     };
 
     class MessageBox : public OEngine::GUI::Layout

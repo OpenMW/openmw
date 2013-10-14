@@ -68,6 +68,8 @@ namespace MWWorld
 
             OEngine::Physic::PhysicEngine* mPhysEngine;
 
+            bool mGodMode;
+
             // not implemented
             World (const World&);
             World& operator= (const World&);
@@ -114,6 +116,7 @@ namespace MWWorld
             int mPlayIntro;
 
             bool mTeleportEnabled;
+            bool mLevitationEnabled;
 
         public:
 
@@ -353,6 +356,7 @@ namespace MWWorld
             virtual void processChangedSettings(const Settings::CategorySettingVector& settings);
 
             virtual bool isFlying(const MWWorld::Ptr &ptr) const;
+            virtual bool isSlowFalling(const MWWorld::Ptr &ptr) const;
             ///Is the head of the creature underwater?
             virtual bool isSubmerged(const MWWorld::Ptr &object) const;
             virtual bool isSwimming(const MWWorld::Ptr &object) const;
@@ -436,9 +440,17 @@ namespace MWWorld
             /// Returns true if teleport spell effects are allowed.
             virtual bool isTeleportingEnabled() const;
 
+            /// Enables or disables use of levitation spell effect.
+            virtual void enableLevitation(bool enable);
+
+            /// Returns true if levitation spell effect is allowed.
+            virtual bool isLevitationEnabled() const;
+
             virtual void setWerewolf(const MWWorld::Ptr& actor, bool werewolf);
 
             virtual void applyWerewolfAcrobatics(const MWWorld::Ptr& actor);
+
+            virtual bool getGodModeState();
 
             virtual bool toggleGodMode();
     };

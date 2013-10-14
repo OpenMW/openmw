@@ -170,7 +170,7 @@ namespace MWWorld
       mSky (true), mCells (mStore, mEsm),
       mActivationDistanceOverride (mActivationDistanceOverride),
       mFallback(fallbackMap), mPlayIntro(0), mTeleportEnabled(true),
-      mFacedDistance(FLT_MAX)
+      mFacedDistance(FLT_MAX), mGodMode(false)
     {
         mPhysics = new PhysicsSystem(renderer);
         mPhysEngine = mPhysics->getEngine();
@@ -225,8 +225,8 @@ namespace MWWorld
         if (mEsm[0].getFormat() == 0)
             ensureNeededRecords();
 
-        mStore.movePlayerRecord();
         mStore.setUp();
+        mStore.movePlayerRecord();
 
         mGlobalVariables = new Globals (mStore);
 
@@ -1582,6 +1582,19 @@ namespace MWWorld
         return false;
     }
 
+    bool
+    World::isSlowFalling(const MWWorld::Ptr &ptr) const
+    {
+        if(!ptr.getClass().isActor())
+            return false;
+
+        const MWMechanics::CreatureStats &stats = ptr.getClass().getCreatureStats(ptr);
+        if(stats.getMagicEffects().get(MWMechanics::EffectKey(ESM::MagicEffect::SlowFall)).mMagnitude > 0)
+            return true;
+
+        return false;
+    }
+
     bool World::isSubmerged(const MWWorld::Ptr &object) const
     {
         float *fpos = object.getRefData().getPosition().pos;
@@ -1877,6 +1890,16 @@ namespace MWWorld
         return mTeleportEnabled;
     }
 
+    void World::enableLevitation(bool enable)
+    {
+        mLevitationEnabled = enable;
+    }
+
+    bool World::isLevitationEnabled() const
+    {
+        return mLevitationEnabled;
+    }
+
     void World::setWerewolf(const MWWorld::Ptr& actor, bool werewolf)
     {
         MWMechanics::NpcStats& npcStats = Class::get(actor).getNpcStats(actor);
@@ -1948,9 +1971,16 @@ namespace MWWorld
         stats.getSkill(ESM::Skill::Acrobatics).setModified(gmst.find("fWerewolfAcrobatics")->getFloat(), 0);
     }
 
+    bool World::getGodModeState()
+    {
+        return mGodMode;
+    }
+
     bool World::toggleGodMode()
     {
-        return false;
+        mGodMode = !mGodMode;
+
+        return mGodMode;
     }
 
 }

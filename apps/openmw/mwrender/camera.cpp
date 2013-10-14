@@ -187,6 +187,12 @@ namespace MWRender
         rotateCamera(Ogre::Vector3(getPitch(), 0.f, getYaw()), false);
     }
 
+    void Camera::setSneakOffset()
+    {
+        if(mAnimation)
+            mAnimation->addFirstPersonOffset(Ogre::Vector3(0.f, 0.f, -9.8f));
+    }
+
     float Camera::getYaw()
     {
         if(mVanity.enabled || mPreviewMode)

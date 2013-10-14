@@ -182,6 +182,11 @@ namespace CSMWorld
             void load (const LocalIndex& index, ESM::ESMReader& reader, bool base);
 
             int getSize() const;
+
+            std::vector<std::string> getIds (bool listDeleted = true) const;
+            ///< Return a sorted collection of all IDs
+            ///
+            /// \param listDeleted include deleted record in the list
     };
 }
 
