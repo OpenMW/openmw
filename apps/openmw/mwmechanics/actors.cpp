@@ -42,7 +42,13 @@ namespace MWMechanics
     void Actors::updateNpc (const MWWorld::Ptr& ptr, float duration, bool paused)
     {
         if(!paused)
+        {
             updateDrowning(ptr, duration);
+
+            // Only update the light of the player.
+            if(ptr.getRefData().getHandle()=="player")
+                updateEquippedLight(ptr, duration);
+        }
     }
 
     void Actors::adjustMagicEffects (const MWWorld::Ptr& creature)
@@ -194,6 +200,32 @@ namespace MWMechanics
         }
         else
             stats.setTimeToStartDrowning(20);
+    }
+
+    void Actors::updateEquippedLight (const MWWorld::Ptr& ptr, float duration)
+    {
+        //If holding a light...
+        MWWorld::InventoryStore &inventoryStore = MWWorld::Class::get(ptr).getInventoryStore(ptr);
+        MWWorld::ContainerStoreIterator heldIter =
+                inventoryStore.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
+
+        if(heldIter.getType() == MWWorld::ContainerStore::Type_Light)
+        {
+            // ... then use some "fuel" from the timer
+            float timeRemaining = heldIter->getClass().getRemainingUsageTime(*heldIter);
+
+            // If it's already -1, then it should be an infinite light.
+            // TODO see what happens for other negative values.
+            if(timeRemaining >= 0.0f)
+            {
+                timeRemaining -= duration;
+
+                if(timeRemaining > 0.0f)
+                    heldIter->getClass().setRemainingUsageTime(*heldIter, timeRemaining);
+                else
+                    heldIter->getRefData().setCount(0); // remove it
+            }
+        }
     }
 
     Actors::Actors() : mDuration (0) {}

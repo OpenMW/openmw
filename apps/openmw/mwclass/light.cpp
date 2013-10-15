@@ -16,11 +16,26 @@
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/physicssystem.hpp"
+#include "../mwworld/customdata.hpp"
 
 #include "../mwgui/tooltips.hpp"
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
+
+namespace
+{
+    struct CustomData : public MWWorld::CustomData
+    {
+        float mTime;
+        ///< Time remaining
+
+        virtual MWWorld::CustomData *clone() const
+        {
+            return new CustomData (*this);
+        }
+    };
+}
 
 namespace MWClass
 {
@@ -182,6 +197,24 @@ namespace MWClass
         return action;
     }
 
+    void Light::setRemainingUsageTime (const MWWorld::Ptr& ptr, float duration) const
+    {
+        ensureCustomData(ptr);
+
+        float &timeCharge = dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mTime;
+
+        // TODO time it in vanilla, see if 1 second is really one unit.
+        timeCharge = duration;
+    }
+
+    float Light::getRemainingUsageTime (const MWWorld::Ptr& ptr) const
+    {
+        ensureCustomData(ptr);
+
+        ESM::CellRef &ref = ptr.getCellRef();
+        return dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mTime;
+    }
+
     MWWorld::Ptr
     Light::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
     {
@@ -189,6 +222,20 @@ namespace MWClass
             ptr.get<ESM::Light>();
 
         return MWWorld::Ptr(&cell.mLights.insert(*ref), &cell);
+    }
+
+    void Light::ensureCustomData (const MWWorld::Ptr& ptr) const
+    {
+        if (!ptr.getRefData().getCustomData())
+        {
+            MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
+
+            CustomData *data = new CustomData;
+
+            data->mTime = ref->mBase->mData.mTime;
+
+            ptr.getRefData().setCustomData(data);
+        }
     }
 
     bool Light::canSell (const MWWorld::Ptr& item, int npcServices) const
