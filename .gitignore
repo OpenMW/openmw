@@ -1,29 +1,43 @@
-build
-*~
-Doxygen
-prebuilt
-apps/openmw/config.hpp
-Docs/mainpage.hpp
+## make
 CMakeFiles
 */CMakeFiles
 CMakeCache.txt
-moc_*.cxx
 cmake_install.cmake
-*.[ao]
+CMakeLists.txt.user
 Makefile
 makefile
-data
+build
+prebuilt
+
+## doxygen
+Doxygen
+
+## ides/editors
+*~
 *.kdev4
-CMakeLists.txt.user
 *.swp
 *.swo
 *.kate-swp
 .cproject
 .project
-.settings/
+.settings
 .directory
-*.install
-*.desktop
+
+## resources
+data
+resources
+
+## binaries
+esmtool
+mwiniimport
+omwlauncher
+openmw
+opencs
+
+## generated objects
+apps/openmw/config.hpp
+Docs/mainpage.hpp
+moc_*.cxx
 *.cfg
 *.cxx_parameters
 *qrc_launcher.cxx
@@ -33,9 +47,7 @@ CMakeLists.txt.user
 *ui_graphicspage.h
 *ui_mainwindow.h
 *ui_playpage.h
-resources
-esmtool
-mwiniimport
-omwlauncher
-openmw
-opencs
+*.install
+*.desktop
+*.[ao]
+*.so
