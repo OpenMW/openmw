@@ -216,7 +216,6 @@ namespace MWClass
     {
         ensureCustomData(ptr);
 
-        ESM::CellRef &ref = ptr.getCellRef();
         return dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mTime;
     }
 
