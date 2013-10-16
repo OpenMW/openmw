@@ -837,12 +837,13 @@ namespace MWWorld
 
     void World::deleteObject (const Ptr& ptr)
     {
-        if (ptr.getRefData().getCount()>0)
+        if (ptr.getRefData().getCount() > 0)
         {
-            ptr.getRefData().setCount (0);
+            ptr.getRefData().setCount(0);
 
-            if (mWorldScene->getActiveCells().find (ptr.getCell())!=mWorldScene->getActiveCells().end() &&
-                ptr.getRefData().isEnabled())
+            if (ptr.isInCell()
+                && mWorldScene->getActiveCells().find(ptr.getCell()) != mWorldScene->getActiveCells().end()
+                && ptr.getRefData().isEnabled())
             {
                 mWorldScene->removeObjectFromScene (ptr);
                 mLocalScripts.remove (ptr);

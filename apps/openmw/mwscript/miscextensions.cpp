@@ -512,18 +512,7 @@ namespace MWScript
                     runtime.pop();
 
                     if (parameter == 1)
-                    {
-                        if (ptr.isInCell())
-                            MWBase::Environment::get().getWorld()->deleteObject (ptr);
-                        else
-                        {
-                            MWWorld::ContainerStore* store = ptr.getContainerStore();
-                            if (store != NULL)
-                                store->remove(ptr, ptr.getRefData().getCount(), ptr);
-                            else
-                                ptr.getRefData().setCount(0);
-                        }
-                    }
+                        MWBase::Environment::get().getWorld()->deleteObject(ptr);
                 }
         };
 
