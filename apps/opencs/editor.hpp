@@ -50,7 +50,7 @@ namespace CS
             bool makeIPCServer();
             void connectToIPCServer();
 
-            int run();
+            int run(int argc, char** argv);
             ///< \return error status
 
         private slots:
@@ -66,12 +66,15 @@ namespace CS
             void showStartup();
 
             void showSettings();
+	    bool parseOptions (int argc, char** argv);
+	    void setResourceDir (const boost::filesystem::path& parResDir);
 
         private:
 
             QString mIpcServerName;
             QLocalServer *mServer;
             QLocalSocket *mClientSocket;
+	    boost::filesystem::path mResDir;
     };
 }
 

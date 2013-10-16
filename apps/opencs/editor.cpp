@@ -6,6 +6,8 @@
 #include <QLocalSocket>
 #include <QMessageBox>
 
+#include <boost/iostreams/concepts.hpp>
+
 #include "model/doc/document.hpp"
 #include "model/world/data.hpp"
 
@@ -208,8 +210,13 @@ void CS::Editor::connectToIPCServer()
     mClientSocket->close();
 }
 
-int CS::Editor::run()
+int CS::Editor::run(int argc, char** argv)
 {
+    if (!parseOptions(argc, argv) )
+    {
+      return 0;
+    }
+    
     if (mLocal.empty())
         return 1;
 
@@ -218,4 +225,49 @@ int CS::Editor::run()
     QApplication::setQuitOnLastWindowClosed (true);
 
     return QApplication::exec();
+}
+
+bool CS::Editor::parseOptions (int argc, char** argv)
+{
+    // Create a local alias for brevity
+    namespace bpo = boost::program_options;
+    typedef std::vector<std::string> StringsVector;
+
+    bpo::options_description desc("Syntax: openmw <options>\nAllowed options");
+
+    desc.add_options()
+        ("help", "print help message")
+
+        ("resources", bpo::value<std::string>()->default_value("resources"), "set resources directory");
+
+    bpo::parsed_options valid_opts = bpo::command_line_parser(argc, argv).options(desc).allow_unregistered().run();
+
+    bpo::variables_map variables;
+
+    // Runtime options override settings from all configs
+    bpo::store(valid_opts, variables);
+    bpo::notify(variables);
+
+//     cfgMgr.readConfiguration(variables, desc);
+
+    bool run = true;
+
+    if (variables.count ("help"))
+    {
+        std::cout << desc << std::endl;
+        run = false;
+    }
+
+    if (!run)
+        return false;
+
+    setResourceDir(variables["resources"].as<std::string>());
+
+    return true;
+}
+
+// Set resource dir
+void CS::Editor::setResourceDir (const boost::filesystem::path& parResDir)
+{
+    mResDir = boost::filesystem::system_complete(parResDir);
 }
