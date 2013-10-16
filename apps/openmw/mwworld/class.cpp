@@ -132,6 +132,16 @@ namespace MWWorld
         throw std::runtime_error ("class does not support unlocking");
     }
 
+    void Class::setRemainingUsageTime (const Ptr& ptr, float duration) const
+    {
+        throw std::runtime_error ("class does not support time-based uses");
+    }
+
+    float Class::getRemainingUsageTime (const Ptr& ptr) const
+    {
+        throw std::runtime_error ("class does not support time-based uses");
+    }
+
     std::string Class::getScript (const Ptr& ptr) const
     {
         return "";

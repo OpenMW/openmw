@@ -45,7 +45,10 @@ namespace MWMechanics
     void Actors::updateNpc (const MWWorld::Ptr& ptr, float duration, bool paused)
     {
         if(!paused)
+        {
             updateDrowning(ptr, duration);
+            updateEquippedLight(ptr, duration);
+        }
     }
 
     void Actors::adjustMagicEffects (const MWWorld::Ptr& creature)
@@ -200,6 +203,49 @@ namespace MWMechanics
         }
         else
             stats.setTimeToStartDrowning(20);
+    }
+
+    void Actors::updateEquippedLight (const MWWorld::Ptr& ptr, float duration)
+    {
+        //If holding a light...
+        MWWorld::InventoryStore &inventoryStore = MWWorld::Class::get(ptr).getInventoryStore(ptr);
+        MWWorld::ContainerStoreIterator heldIter =
+                inventoryStore.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
+
+        if(heldIter.getType() == MWWorld::ContainerStore::Type_Light)
+        {
+            // Use time from the player's light
+            bool isPlayer = ptr.getRefData().getHandle()=="player";
+            if(isPlayer)
+            {
+                float timeRemaining = heldIter->getClass().getRemainingUsageTime(*heldIter);
+
+                // -1 is infinite light source. Other negative values are treated as 0.
+                if(timeRemaining != -1.0f)
+                {
+                    timeRemaining -= duration;
+
+                    if(timeRemaining > 0.0f)
+                        heldIter->getClass().setRemainingUsageTime(*heldIter, timeRemaining);
+                    else
+                    {
+                        heldIter->getRefData().setCount(0); // remove it
+                        return;
+                    }
+                }
+            }
+
+            // Both NPC and player lights extinguish in water.
+            if(MWBase::Environment::get().getWorld()->isSwimming(ptr))
+            {
+                heldIter->getRefData().setCount(0); // remove it
+
+                // ...But, only the player makes a sound.
+                if(isPlayer)
+                    MWBase::Environment::get().getSoundManager()->playSound("torch out",
+                            1.0, 1.0, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_NoEnv);
+            }
+        }
     }
 
     Actors::Actors() : mDuration (0) {}
