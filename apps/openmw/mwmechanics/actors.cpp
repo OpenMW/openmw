@@ -44,10 +44,7 @@ namespace MWMechanics
         if(!paused)
         {
             updateDrowning(ptr, duration);
-
-            // Only update the light of the player.
-            if(ptr.getRefData().getHandle()=="player")
-                updateEquippedLight(ptr, duration);
+            updateEquippedLight(ptr, duration);
         }
     }
 
@@ -211,19 +208,36 @@ namespace MWMechanics
 
         if(heldIter.getType() == MWWorld::ContainerStore::Type_Light)
         {
-            // ... then use some "fuel" from the timer
-            float timeRemaining = heldIter->getClass().getRemainingUsageTime(*heldIter);
-
-            // If it's already -1, then it should be an infinite light.
-            // TODO see what happens for other negative values.
-            if(timeRemaining >= 0.0f)
+            // Use time from the player's light
+            bool isPlayer = ptr.getRefData().getHandle()=="player";
+            if(isPlayer)
             {
-                timeRemaining -= duration;
+                float timeRemaining = heldIter->getClass().getRemainingUsageTime(*heldIter);
 
-                if(timeRemaining > 0.0f)
-                    heldIter->getClass().setRemainingUsageTime(*heldIter, timeRemaining);
-                else
-                    heldIter->getRefData().setCount(0); // remove it
+                // -1 is infinite light source. Other negative values are treated as 0.
+                if(timeRemaining != -1.0f)
+                {
+                    timeRemaining -= duration;
+
+                    if(timeRemaining > 0.0f)
+                        heldIter->getClass().setRemainingUsageTime(*heldIter, timeRemaining);
+                    else
+                    {
+                        heldIter->getRefData().setCount(0); // remove it
+                        return;
+                    }
+                }
+            }
+
+            // Both NPC and player lights extinguish in water.
+            if(MWBase::Environment::get().getWorld()->isSwimming(ptr))
+            {
+                heldIter->getRefData().setCount(0); // remove it
+
+                // ...But, only the player makes a sound.
+                if(isPlayer)
+                    MWBase::Environment::get().getSoundManager()->playSound("torch out",
+                            1.0, 1.0, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_NoEnv);
             }
         }
     }

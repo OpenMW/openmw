@@ -201,10 +201,8 @@ namespace MWClass
     {
         ensureCustomData(ptr);
 
-        float &timeCharge = dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mTime;
-
-        // TODO time it in vanilla, see if 1 second is really one unit.
-        timeCharge = duration;
+        float &timeRemaining = dynamic_cast<CustomData&> (*ptr.getRefData().getCustomData()).mTime;
+        timeRemaining = duration;
     }
 
     float Light::getRemainingUsageTime (const MWWorld::Ptr& ptr) const
