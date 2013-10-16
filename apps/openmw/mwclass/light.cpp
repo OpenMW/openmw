@@ -30,6 +30,13 @@ namespace
         float mTime;
         ///< Time remaining
 
+        CustomData(MWWorld::Ptr ptr)
+        {
+            MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
+            mTime = ref->mBase->mData.mTime;
+        }
+        ///< Constructs this CustomData from the base values for Ptr.
+
         virtual MWWorld::CustomData *clone() const
         {
             return new CustomData (*this);
@@ -225,15 +232,7 @@ namespace MWClass
     void Light::ensureCustomData (const MWWorld::Ptr& ptr) const
     {
         if (!ptr.getRefData().getCustomData())
-        {
-            MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
-
-            CustomData *data = new CustomData;
-
-            data->mTime = ref->mBase->mData.mTime;
-
-            ptr.getRefData().setCustomData(data);
-        }
+            ptr.getRefData().setCustomData(new CustomData(ptr));
     }
 
     bool Light::canSell (const MWWorld::Ptr& item, int npcServices) const
