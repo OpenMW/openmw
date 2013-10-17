@@ -468,6 +468,41 @@ namespace MWInput
 
     bool InputManager::keyPressed( const SDL_KeyboardEvent &arg )
     {
+        // Cut, copy & paste
+        MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
+        if (focus)
+        {
+            MyGUI::EditBox* edit = focus->castType<MyGUI::EditBox>(false);
+            if (edit && !edit->getEditReadOnly())
+            {
+                if (arg.keysym.sym == SDLK_v && (arg.keysym.mod & SDL_Keymod(KMOD_CTRL)))
+                {
+                    char* text = SDL_GetClipboardText();
+
+                    if (text)
+                    {
+                        edit->addText(MyGUI::UString(text));
+                        SDL_free(text);
+                    }
+                }
+                if (arg.keysym.sym == SDLK_x && (arg.keysym.mod & SDL_Keymod(KMOD_CTRL)))
+                {
+                    std::string text = edit->getTextSelection();
+                    if (text.length())
+                    {
+                        SDL_SetClipboardText(text.c_str());
+                        edit->deleteTextSelection();
+                    }
+                }
+                if (arg.keysym.sym == SDLK_c && (arg.keysym.mod & SDL_Keymod(KMOD_CTRL)))
+                {
+                    std::string text = edit->getTextSelection();
+                    if (text.length())
+                        SDL_SetClipboardText(text.c_str());
+                }
+            }
+        }
+
         mInputBinder->keyPressed (arg);
 
         if(arg.keysym.sym == SDLK_RETURN
