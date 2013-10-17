@@ -1,0 +1,19 @@
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: OpenMW
+Upstream-Contact: Marc Zinnschlag <marc@zpages.de>
+Source: http://www.openmw.org
+
+Files: *
+Copyright: 2007-2013 Marc Zinnschlag <marc@zpages.de>
+License: GPL-3
+ This program is free software: you can redistribute it and/or modify it under
+ the terms of the GNU General Public License as published by the Free Software
+ Foundation, version 3 of the License.
+ .
+ This program is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ details.
+ .
+ On a Debian system a full copy of the GPL version 3 is available in
+ /usr/share/common-licenses/GPL-3.

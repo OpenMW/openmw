@@ -1,0 +1,37 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+# Sample debian/rules that uses debhelper.
+#
+# This file was originally written by Joey Hess and Craig Small.
+# As a special exception, when this file is copied by dh-make into a
+# dh-make output file, you may use that output file without restriction.
+# This special exception was added by Craig Small in version 0.37 of dh-make.
+#
+# Modified to make a template file for a multi-binary package with separated
+# build-arch and build-indep targets  by Bill Allombert 2001
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+# This has to be exported to make some magic below work.
+export DH_OPTIONS
+
+override_dh_auto_configure:
+	cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE="Release" -DCMAKE_VERBOSE_MAKEFILE="FALSE" -DBUILD_ESMTOOL="FALSE" .
+
+override_dh_auto_clean:
+	dh_auto_clean
+
+	find . -name CMakeFiles -type d -exec rm -rf {} \; || /bin/true
+	find . -name Makefile -type f -exec rm -f {} \; || /bin/true
+	find . -name cmake_install.cmake -type f -exec rm -f {} \; || /bin/true
+	find . -name openmw -type f -exec rm -f {} \; || /bin/true
+	find . -name mwiniimport -type f -exec rm -f {} \; || /bin/true
+	find . -name omwlauncher -type f -exec rm -f {} \; || /bin/true
+	find . -name libcomponents.a -type f -exec rm -f {} \; || /bin/true
+
+	rm -rf resources || /bin/true
+	rm -f CMakeCache.txt install_manifest.txt CPackConfig.cmake CPackSourceConfig.cmake plugins.cfg launcher.cfg  openmw.cfg.install openmw.cfg openmw.desktop settings-default.cfg transparency-overrides.cfg apps/launcher/resources.qrc.depends apps/openmw/config.hpp Docs/mainpage.hpp
+
+%:
+	dh $@ --parallel

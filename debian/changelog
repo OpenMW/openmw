@@ -1,0 +1,371 @@
+openmw (0.26.0-openmw1~saucy2) saucy; urgency=low
+
+  * Adding libunshield
+
+ -- Bret Curtis <psi29a@gmail.com>  Tue, 10 Sep 2013 08:13:09 +0200
+
+openmw (0.26.0-openmw1~saucy1) saucy; urgency=low
+
+  * Release of openmw 0.26.0
+
+ -- Bret Curtis <psi29a@gmail.com>  Tue, 10 Sep 2013 08:12:09 +0200
+
+openmw (0.25.0-openmw1~saucy3) saucy; urgency=low
+
+  * Release of openmw 0.25.0
+
+ -- Bret Curtis <psi29a@gmail.com>  Mon, 29 Jul 2013 08:12:09 +0200
+
+openmw (0.25.0-openmw1~raring1) raring; urgency=low
+
+  * Release of openmw 0.25.0
+
+ -- Bret Curtis <psi29a@gmail.com>  Mon, 29 Jul 2013 08:09:09 +0200
+
+openmw (0.24.0-openmw1~saucy1) saucy; urgency=low
+
+  * Release of openmw 0.24.0
+
+ -- Bret Curtis <psi29a@gmail.com>  Wed, 19 Jun 2013 08:08:09 +0200
+
+openmw (0.24.0-openmw1~quantal1) quantal; urgency=low
+
+  * Release of openmw 0.24.0
+
+ -- Bret Curtis <psi29a@gmail.com>  Wed, 12 Jun 2013 08:05:09 +0200
+
+openmw (0.24.0-openmw1~precise1) precise; urgency=low
+
+  * Release of openmw 0.24.0
+
+ -- Bret Curtis <psi29a@gmail.com>  Wed, 12 Jun 2013 08:03:09 +0200
+
+openmw (0.23.0-openmw1~precise1) precise; urgency=low
+
+  * Release of openmw 0.23.0
+
+ -- Bret Curtis <psi29a@gmail.com>  Thu, 25 Apr 2013 08:03:09 +0200
+
+openmw (0.23.0-openmw1~quantal1) quantal; urgency=low
+
+  * Release of openmw 0.23.0
+
+ -- Bret Curtis <psi29a@gmail.com>  Thu, 25 Apr 2013 08:02:09 +0200
+
+openmw (0.23.0-openmw1~raring1) raring; urgency=low
+
+  * Release of openmw 0.23.0
+
+ -- Bret Curtis <psi29a@gmail.com>  Thu, 25 Apr 2013 08:01:09 +0200
+
+openmw (0.22.0-openmw1~raring4) raring; urgency=low
+
+  * Removing old files no longer used
+
+ -- Bret Curtis <psi29a@gmail.com>  Wed, 17 Apr 2013 08:32:09 +0200
+
+openmw (0.22.0-openmw1~raring3) raring; urgency=low
+
+  * Patched for mwiniimporter
+
+ -- Bret Curtis <psi29a@gmail.com>  Tue, 16 Apr 2013 08:34:09 +0200
+
+openmw (0.22.0-openmw1~raring2) raring; urgency=low
+
+  * Updated for additional linking deps
+
+ -- Bret Curtis <psi29a@gmail.com>  Tue, 16 Apr 2013 08:33:09 +0200
+
+openmw (0.22.0-openmw1~quantal2) quantal; urgency=low
+
+  * Updated to remove gbuffer
+
+ -- Bret Curtis <psi29a@gmail.com>  Fri, 22 Mar 2013 08:33:09 +0200
+
+openmw (0.22.0-openmw1~quantal1) quantal; urgency=low
+
+  * Release of openmw 0.22.0
+
+ -- Bret Curtis <psi29a@gmail.com>  Fri, 22 Mar 2013 08:32:09 +0200
+
+openmw (0.21.0-openmw1~quantal1) quantal; urgency=low
+
+  * Release of openmw 0.21.0, removed nvidia-cg-toolkit as dependancy.
+
+ -- Bret Curtis <psi29a@gmail.com>  Mon, 18 Feb 2013 08:32:09 +0200
+
+openmw (0.20.0-openmw1~quantal1) quantal; urgency=low
+
+  * Release of openmw 0.20.0
+
+ -- Bret Curtis <psi29a@gmail.com>  Fri, 14 Dec 2012 08:42:09 +0200
+
+openmw (0.19.0-openmw1~quantal2) quantal; urgency=low
+
+  * Release of openmw 0.19.0
+
+ -- Bret Curtis <psi29a@gmail.com>  Thu, 08 Sep 2012 08:42:09 +0200
+
+openmw (0.19.0-openmw1~precise1) precise; urgency=low
+
+  * Release of openmw 0.19.0
+
+ -- Bret Curtis <psi29a@gmail.com>  Thu, 08 Sep 2012 08:40:09 +0200
+
+openmw (0.18.0-openmw1~precise1) precise; urgency=low
+
+  * Release of openmw 0.18.0
+
+ -- Bret Curtis <psi29a@gmail.com>  Wed, 26 Sep 2012 08:40:09 +0200
+
+openmw (0.17.0-openmw1~precise5) precise; urgency=low
+
+  * Removed resources/shadows from openmw-data.install and added resources/materials instead
+
+ -- Karl-Felix Glatzer <karl.glatzer@gmx.de>  Sun, 26 Aug 2012 21:34:16 +0200
+
+openmw (0.17.0-openmw1~precise4) precise; urgency=low
+
+  * Fixed static build problem caused by constness of the load plugins method
+
+ -- Karl-Felix Glatzer <karl.glatzer@gmx.de>  Sun, 26 Aug 2012 12:40:03 +0200
+
+openmw (0.17.0-openmw1~precise3) precise; urgency=low
+
+  * Shiny is now included as patch
+
+ -- Bret Curtis <psi29a@gmail.com>  Sat, 25 Aug 2012 09:32:09 +0200
+
+openmw (0.17.0-openmw1~precise2) precise; urgency=low
+
+  * Fix dep problem with boost_wave
+
+ -- Bret Curtis <psi29a@gmail.com>  Fri, 24 Aug 2012 15:32:09 +0200
+
+openmw (0.17.0-openmw1~precise1) precise; urgency=low
+
+  * Release of openmw 0.17.0
+
+ -- Bret Curtis <psi29a@gmail.com>  Thu, 23 Aug 2012 15:32:09 +0200
+
+openmw (0.16.0-openmw1~precise1) precise; urgency=low
+
+  * Release of openmw 0.16.0
+
+ -- Karl-Felix Glatzer <karl.glatzer@gmx.de>  Fri, 29 Jun 2012 23:32:09 +0200
+
+openmw (0.16.0-openmw1~oneiric1) oneiric; urgency=low
+
+  * Release of openmw 0.16.0
+
+ -- Karl-Felix Glatzer <karl.glatzer@gmx.de>  Fri, 29 Jun 2012 23:31:48 +0200
+
+openmw (0.16.0-openmw1~natty1) natty; urgency=low
+
+  * Release of openmw 0.16.0
+
+ -- Karl-Felix Glatzer <karl.glatzer@gmx.de>  Fri, 29 Jun 2012 23:31:17 +0200
+
+openmw (0.16.0-openmw1~maverick1) maverick; urgency=low
+
+  * Release of openmw 0.16.0
+
+ -- Karl-Felix Glatzer <karl.glatzer@gmx.de>  Fri, 29 Jun 2012 23:30:28 +0200
+
+openmw (0.16.0-openmw1~lucid1) lucid; urgency=low
+
+  * Release of openmw 0.16.0
+
+ -- Karl-Felix Glatzer <karl.glatzer@gmx.de>  Fri, 29 Jun 2012 23:23:16 +0200
+
+openmw (0.15.0-openmw1~precise1) precise; urgency=low
+
+  * Release of openmw 0.15.0
+
+ -- Karl-Felix Glatzer <karl.glatzer@gmx.de>  Thu, 24 May 2012 20:38:31 +0200
+
+openmw (0.15.0-openmw1~oneiric1) oneiric; urgency=low
+
+  * Release of openmw 0.15.0
+
+ -- Karl-Felix Glatzer <karl.glatzer@gmx.de>  Thu, 24 May 2012 20:38:20 +0200
+
+openmw (0.15.0-openmw1~natty1) natty; urgency=low
+
+  * Release of openmw 0.15.0
+
+ -- Karl-Felix Glatzer <karl.glatzer@gmx.de>  Thu, 24 May 2012 20:38:09 +0200
+
+openmw (0.15.0-openmw1~maverick1) maverick; urgency=low
+
+  * Release of openmw 0.15.0
+
+ -- Karl-Felix Glatzer <karl.glatzer@gmx.de>  Thu, 24 May 2012 20:37:36 +0200
+
+openmw (0.15.0-openmw1~lucid1) lucid; urgency=low
+
+  * Release of openmw 0.15.0
+
+ -- Karl-Felix Glatzer <karl.glatzer@gmx.de>  Thu, 24 May 2012 20:27:38 +0200
+
+openmw (0.14.0-openmw1~precise1) precise; urgency=low
+
+  * Release of openmw 0.14.0
+
+ -- Karl-Felix Glatzer <karl.glatzer@gmx.de>  Thu, 26 Apr 2012 13:28:05 +0200
+
+openmw (0.14.0-openmw1~oneiric1) oneiric; urgency=low
+
+  * Release of openmw 0.14.0
+
+ -- Karl-Felix Glatzer <karl.glatzer@gmx.de>  Thu, 26 Apr 2012 13:27:53 +0200
+
+openmw (0.14.0-openmw1~natty1) natty; urgency=low
+
+  * Release of openmw 0.14.0
+
+ -- Karl-Felix Glatzer <karl.glatzer@gmx.de>  Thu, 26 Apr 2012 13:27:42 +0200
+
+openmw (0.14.0-openmw1~maverick1) maverick; urgency=low
+
+  * Release of openmw 0.14.0
+
+ -- Karl-Felix Glatzer <karl.glatzer@gmx.de>  Thu, 26 Apr 2012 13:26:20 +0200
+
+openmw (0.14.0-openmw1~lucid1) lucid; urgency=low
+
+  * Release of openmw 0.14.0
+
+ -- Karl-Felix Glatzer <karl.glatzer@gmx.de>  Thu, 26 Apr 2012 13:26:04 +0200
+
+openmw (0.13.0-openmw1~precise2) precise; urgency=low
+
+  * Add dependency fix from the lucid package.
+
+ -- Karl-Felix Glatzer <karl.glatzer@gmx.de>  Sun, 01 Apr 2012 11:03:24 +0200
+
+openmw (0.13.0-openmw1~oneiric2) oneiric; urgency=low
+
+  * Add dependency fix from the lucid package.
+
+ -- Karl-Felix Glatzer <karl.glatzer@gmx.de>  Sun, 01 Apr 2012 11:02:56 +0200
+
+openmw (0.13.0-openmw1~natty2) natty; urgency=low
+
+  * Add dependency fix from the lucid package.
+
+ -- Karl-Felix Glatzer <karl.glatzer@gmx.de>  Sun, 01 Apr 2012 11:00:46 +0200
+
+openmw (0.13.0-openmw1~maverick2) maverick; urgency=low
+
+  * Add dependency fix from the lucid package.
+
+ -- Karl-Felix Glatzer <karl.glatzer@gmx.de>  Sun, 01 Apr 2012 10:59:57 +0200
+
+openmw (0.13.0-openmw1~lucid2) lucid; urgency=low
+
+  * Add missing nvidia-cg-toolkit dependency. I thought this would be included automatically.
+
+ -- Karl-Felix Glatzer <karl.glatzer@gmx.de>  Sun, 01 Apr 2012 10:57:28 +0200
+
+openmw (0.13.0-openmw1~precise1) precise; urgency=low
+
+  * Release of openmw 0.13.0
+
+ -- Karl-Felix Glatzer <karl.glatzer@gmx.de>  Tue, 27 Mar 2012 00:33:48 +0200
+
+openmw (0.13.0-openmw1~oneiric1) oneiric; urgency=low
+
+  * Release of openmw 0.13.0
+
+ -- Karl-Felix Glatzer <karl.glatzer@gmx.de>  Tue, 27 Mar 2012 00:33:15 +0200
+
+openmw (0.13.0-openmw1~natty1) natty; urgency=low
+
+  * Release of openmw 0.13.0
+
+ -- Karl-Felix Glatzer <karl.glatzer@gmx.de>  Tue, 27 Mar 2012 00:31:55 +0200
+
+openmw (0.13.0-openmw1~maverick1) maverick; urgency=low
+
+  * Release of openmw 0.13.0
+
+ -- Karl-Felix Glatzer <karl.glatzer@gmx.de>  Tue, 27 Mar 2012 00:30:55 +0200
+
+openmw (0.13.0-openmw1~lucid1) lucid; urgency=low
+
+  * Release of openmw 0.13.0
+
+ -- Karl-Felix Glatzer <karl.glatzer@gmx.de>  Tue, 27 Mar 2012 00:28:18 +0200
+
+openmw (0.12.0-openmw1~precise1) precise; urgency=low
+
+  * Starting new precise series
+
+ -- Karl-Felix Glatzer <karl.glatzer@gmx.de>  Thu, 15 Mar 2012 14:12:30 +0100
+
+openmw (0.12.0-openmw1~oneiric2) oneiric; urgency=low
+
+  * Recommend launcher instead of suggesting it
+
+ -- Karl-Felix Glatzer <karl.glatzer@gmx.de>  Wed, 14 Mar 2012 15:15:12 +0100
+
+openmw (0.12.0-openmw1~natty4) natty; urgency=low
+
+  * Recommend launcher instead of suggesting it
+
+ -- Karl-Felix Glatzer <karl.glatzer@gmx.de>  Wed, 14 Mar 2012 15:14:10 +0100
+
+openmw (0.12.0-openmw1~oneiric1) oneiric; urgency=low
+
+  * Starting new oneiric series
+
+ -- Karl-Felix Glatzer <karl.glatzer@gmx.de>  Mon, 12 Mar 2012 16:59:24 +0100
+
+openmw (0.12.0-openmw1~natty3) natty; urgency=low
+
+  * Added the launcher fix from lucid
+
+ -- Karl-Felix Glatzer <karl.glatzer@gmx.de>  Mon, 12 Mar 2012 16:58:11 +0100
+
+openmw (0.12.0-openmw1~maverick1) maverick; urgency=low
+
+  * Starting new maverick series
+
+ -- Karl-Felix Glatzer <karl.glatzer@gmx.de>  Mon, 12 Mar 2012 16:55:03 +0100
+
+openmw (0.12.0-openmw1~lucid3) lucid; urgency=low
+
+  * Added patch for the launcher to fix issues with boost versions under 1.43
+
+ -- Karl-Felix Glatzer <karl.glatzer@gmx.de>  Mon, 12 Mar 2012 15:57:09 +0100
+
+openmw (0.12.0-openmw1~natty2) natty; urgency=low
+
+  * Fixed boost dependencies. Now the systems default version will be used.
+
+ -- Karl-Felix Glatzer <karl.glatzer@gmx.de>  Sun, 11 Mar 2012 23:35:14 +0100
+
+openmw (0.12.0-openmw1~natty1) natty; urgency=low
+
+  * Starting new natty series
+
+ -- Karl-Felix Glatzer <karl.glatzer@gmx.de>  Sun, 11 Mar 2012 19:28:59 +0100
+
+openmw (0.12.0-openmw1~lucid2) lucid; urgency=low
+
+  * Fixed typo
+
+ -- Karl-Felix Glatzer <karl.glatzer@gmx.de>  Sun, 11 Mar 2012 17:07:00 +0100
+
+openmw (0.12.0-openmw1~lucid1) lucid; urgency=low
+
+  * Starting new lucid series
+
+ -- Karl-Felix Glatzer <karl.glatzer@gmx.de>  Sun, 11 Mar 2012 16:26:48 +0100
+
+openmw (0.12.0-1~openmw1) lucid; urgency=low
+
+  * Initial release
+
+ -- Karl-Felix Glatzer <karl.glatzer@gmx.de>  Sat, 03 Mar 2012 14:53:00 +0100
