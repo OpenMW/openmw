@@ -67,14 +67,12 @@ namespace CS
 
             void showSettings();
 	    bool parseOptions (int argc, char** argv);
-	    void setResourceDir (const boost::filesystem::path& parResDir);
 
         private:
 
             QString mIpcServerName;
             QLocalServer *mServer;
             QLocalSocket *mClientSocket;
-	    boost::filesystem::path mResDir;
     };
 }
 

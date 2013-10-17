@@ -6,8 +6,6 @@
 #include <QLocalSocket>
 #include <QMessageBox>
 
-#include <boost/iostreams/concepts.hpp>
-
 #include "model/doc/document.hpp"
 #include "model/world/data.hpp"
 
@@ -59,7 +57,7 @@ void CS::Editor::setupDataFiles()
     if (!variables["data"].empty()) {
         dataDirs = Files::PathContainer(variables["data"].as<Files::PathContainer>());
     }
-
+    
     std::string local = variables["data-local"].as<std::string>();
     if (!local.empty()) {
         dataLocal.push_back(Files::PathContainer::value_type(local));
@@ -231,9 +229,8 @@ bool CS::Editor::parseOptions (int argc, char** argv)
 {
     // Create a local alias for brevity
     namespace bpo = boost::program_options;
-    typedef std::vector<std::string> StringsVector;
 
-    bpo::options_description desc("Syntax: openmw <options>\nAllowed options");
+    bpo::options_description desc("Syntax: opencs <options>\nAllowed options");
 
     desc.add_options()
         ("help", "print help message")
@@ -248,7 +245,7 @@ bool CS::Editor::parseOptions (int argc, char** argv)
     bpo::store(valid_opts, variables);
     bpo::notify(variables);
 
-//     cfgMgr.readConfiguration(variables, desc);
+    mCfgMgr.readConfiguration(variables, desc);
 
     bool run = true;
 
@@ -261,13 +258,7 @@ bool CS::Editor::parseOptions (int argc, char** argv)
     if (!run)
         return false;
 
-    setResourceDir(variables["resources"].as<std::string>());
+     mDocumentManager.setResourceDir(variables["resources"].as<std::string>());
 
     return true;
-}
-
-// Set resource dir
-void CS::Editor::setResourceDir (const boost::filesystem::path& parResDir)
-{
-    mResDir = boost::filesystem::system_complete(parResDir);
 }
