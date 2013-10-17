@@ -9,13 +9,9 @@
 #include "../../model/settings/usersettings.hpp"
 #include "../../model/settings/support.hpp"
 
-class QHBoxLayout;
-class AbstractWidget;
 class QStackedWidget;
 class QListWidget;
 class QDataWidgetMapper;
-
-namespace CSMSettings { class SettingModel; }
 
 namespace CSVSettings {
 
@@ -27,11 +23,10 @@ namespace CSVSettings {
 
         QListWidget *mListWidget;
         QStackedWidget *mStackedWidget;
-
         QDataWidgetMapper *mMapper;
+
     public:
-        UserSettingsDialog(QMainWindow *parent = 0);
-        ~UserSettingsDialog();
+        explicit UserSettingsDialog(QMainWindow *parent = 0);
 
     private:
 
@@ -42,29 +37,8 @@ namespace CSVSettings {
         /// performs dynamic cast to AbstractPage *
         AbstractPage &getAbstractPage (int index);
 
-        void buildPages();
-
-        void createSettingModelWidget();
-
-        /// Templated function to create a custom user preference page
-        template <typename T>
-        void createPage ()
-        {
-            T *page = new T(mStackedWidget);
-
-            mStackedWidget->addWidget (&dynamic_cast<QWidget &>(*page));
-
-            new QListWidgetItem (page->objectName(), mListWidget);
-
-            //finishing touches
-            QFontMetrics fm (QApplication::font());
-            int textWidth = fm.width(page->objectName());
-
-            if ((textWidth + 50) > mListWidget->minimumWidth())
-                mListWidget->setMinimumWidth(textWidth + 50);
-
-            resize (mStackedWidget->sizeHint());
-        }
+        void setupStack();
+        void createPage (const QString &pageName);
 
     public slots:
 

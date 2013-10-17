@@ -22,8 +22,7 @@ namespace CSVSettings
         Widget_ListBox,
         Widget_RadioButton,
         Widget_SpinBox,
-        Widget_ToggleButton,
-        Widget_Undefined
+        Widget_ToggleButton
     };
 
     enum Alignment

@@ -5,51 +5,47 @@
 #include "settingpage.hpp"
 #include "../../model/settings/settingmodel.hpp"
 #include "settingbox.hpp"
+#include "settingview.hpp"
+#include "../../model/settings/setting.hpp"
 
-CSVSettings::SettingPage::SettingPage(const QString &pageName, const CSMSettings::SettingModel *model, QWidget *parent) :
-    QWidget(parent)
+CSVSettings::SettingPage::SettingPage(const QString &pageName, CSMSettings::SettingModel *model,
+                                      bool isHorizontal, QWidget *parent) :
+    QWidget(parent), mBox (new SettingBox (Orient_Horizontal, false, this))
 {
-    mSectionFilter = new QSortFilterProxyModel (this);
-    mSectionFilter->setFilterFixedString (pageName);
-    mSectionFilter->setFilterKeyColumn (1);
-    mSectionFilter->setDynamicSortFilter (true);
+    setObjectName(pageName);
 
-    mBox = new SettingBox (Orient_Horizontal, false, this);
+    mSectionFilter = new CSMSettings::SectionFilter (this);
+    mSectionFilter->setDynamicSortFilter (true);
+    mSectionFilter->setSourceModel(model);
+    mSectionFilter->setFilterRegExp(pageName);
+    mSectionFilter->setFilterKeyColumn (1);
+
+    CSVSettings::Orientation orientation = Orient_Horizontal;
+
+    if (!isHorizontal)
+        orientation = Orient_Vertical;
+
+    mBox = new SettingBox (orientation, false, this);
+
+    for (int i = 0; i < mSectionFilter->rowCount(); ++i)
+    {
+        const CSMSettings::Setting *setting = mSectionFilter->getSetting (i);
+        addView (setting->widgetType(), setting->name(), setting->isHorizontal());
+    }
 }
 
-void CSVSettings::SettingPage::addView (WidgetType widgType, const QString &viewName)
+void CSVSettings::SettingPage::addView (WidgetType widgetType, const QString &viewName, bool isHorizontal)
 {
     SettingView *view = 0;
 
-    switch (widgType)
-    {
-    case Widget_CheckBox:
-        view = CreateView<QCheckBox> (viewName);
-        break;
-    case Widget_ComboBox:
-        view = CreateView<QComboBox> (viewName);
-        break;
-    case Widget_LineEdit:
-        view = createView<QLineEdit> (viewName);
-        break;
-    case Widget_ListBox:
-        view = createView<QListView> (viewName);
-        break;
-    case Widget_RadioButton:
-        view = createView<QRadioButton> (viewName);
-        break;
-    case Widget_SpinBox:
-        view = createView<QSpinBox> (viewName);
-        break;
-    case Widget_ToggleButton:
-        view = createView<QToggleButton> (viewName);
-        break;
+    QWidget *parentWidget = static_cast<QWidget *>(parent());
 
-    default:
-        break;
-    }
+    view = new SettingView(viewName, widgetType, isHorizontal, parentWidget);
 
+    if (!view)
+        return;
+
+    view->setModel (mSectionFilter);
     mViews.append (view);
-    mBox->layout()->addWiget (view);
-    new SettingView (widgType, viewName, mSectionFilter, this);
+    mBox->layout()->addWidget (view);
 }

@@ -12,28 +12,23 @@
 #include <QPushButton>
 #include <QDockWidget>
 #include <QGridLayout>
-#include <QApplication>
-#include <QDesktopWidget>
-
-#include "../../model/settings/support.hpp"
-
-#include "datadisplayformatpage.hpp"
-#include "windowpage.hpp"
-#include "settingwidget.hpp"
-#include "blankpage.hpp"
-#include "../../model/settings/usersettings.hpp"
-
 #include <QDataWidgetMapper>
 #include <QSortFilterProxyModel>
 #include <QStandardItemModel>
+
+#include "../../model/settings/support.hpp"
+
+#include "../../model/settings/usersettings.hpp"
+#include "settingpage.hpp"
+
 
 CSVSettings::UserSettingsDialog::UserSettingsDialog(QMainWindow *parent) :
     QMainWindow (parent), mStackedWidget (0)
 {
     setWindowTitle(QString::fromUtf8 ("User Settings"));
-    buildPages();
-
-    createSettingModelWidget ();
+    setupStack();
+    createPage ("Display Format");
+    createPage ("Window Size");
 
     connect (mListWidget,
              SIGNAL (currentItemChanged(QListWidgetItem*, QListWidgetItem*)),
@@ -45,23 +40,9 @@ CSVSettings::UserSettingsDialog::UserSettingsDialog(QMainWindow *parent) :
     move (scr.center().x() - rect.center().x(), scr.center().y() - rect.center().y());
 }
 
-CSVSettings::UserSettingsDialog::~UserSettingsDialog()
+void CSVSettings::UserSettingsDialog::setupStack()
 {
-}
-
-void CSVSettings::UserSettingsDialog::createSettingModelWidget()
-{
-
-}
-
-void CSVSettings::UserSettingsDialog::closeEvent (QCloseEvent *event)
-{
-    CSMSettings::UserSettings::instance().writeSettings();
-}
-
-void CSVSettings::UserSettingsDialog::buildPages()
-{
-    //craete central widget with it's layout and immediate children
+    //create central widget with it's layout and immediate children
     QWidget *centralWidget = new QWidget (this);
 
     mListWidget = new QListWidget (centralWidget);
@@ -81,16 +62,35 @@ void CSVSettings::UserSettingsDialog::buildPages()
 
     setCentralWidget (centralWidget);
     setDockOptions (QMainWindow::AllowNestedDocks);
+}
 
-    createPage<WindowPage>();
-    createPage<DataDisplayFormatPage>();
-    createPage<BlankPage>();
+void CSVSettings::UserSettingsDialog::createPage (const QString &pageName)
+{
 
+    SettingPage *page = new SettingPage (pageName, CSMSettings::UserSettings::instance().settingModel(), false, this);
+
+    mStackedWidget->addWidget (&dynamic_cast<QWidget &>(*(page->pageFrame())));
+
+    new QListWidgetItem (page->objectName(), mListWidget);
+
+    //finishing touches
+    QFontMetrics fm (QApplication::font());
+    int textWidth = fm.width(page->objectName());
+
+    if ((textWidth + 50) > mListWidget->minimumWidth())
+        mListWidget->setMinimumWidth(textWidth + 50);
+
+    resize (mStackedWidget->sizeHint());
+}
+
+void CSVSettings::UserSettingsDialog::closeEvent (QCloseEvent *event)
+{
+    CSMSettings::UserSettings::instance().writeSettings();
 }
 
 CSVSettings::AbstractPage &CSVSettings::UserSettingsDialog::getAbstractPage (int index)
 {
-    return dynamic_cast<AbstractPage &> (*(mStackedWidget->widget (index)));
+    //return dynamic_cast<AbstractPage &> (*(mStackedWidget->widget (index)));
 }
 
 void CSVSettings::UserSettingsDialog::slotChangePage(QListWidgetItem *current, QListWidgetItem *previous)

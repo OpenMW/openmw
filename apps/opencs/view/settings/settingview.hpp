@@ -1,15 +1,20 @@
 #ifndef SETTINGVIEW_HPP
 #define SETTINGVIEW_HPP
 
-#include <QObject>
+#include <QGroupBox>
+#include <QSortFilterProxyModel>
 
 #include "support.hpp"
 #include "../../model/settings/setting.hpp"
+#include "abstractwidget.hpp"
+#include "widgetfactory.hpp"
+
+#include <QDebug>
 
 //--------------------------
 //  TODO
 //
-//  SettingView manages the view of the setting model data.
+//  SettingView manages the view of the setting model data, representing only one setting in the model.
 //  It takes a reference to the setting model, as well as the section name and setting name
 //  that it represents.  From here, it creates two FilterProxyModels which filter the view
 //  first by section, then by setting.
@@ -22,52 +27,39 @@
 //  However, only one value would be selectable, and the setting view would manage this interaction.
 //
 //  another example: A checkbox/toggle button widget with a multi-valued setting would represent a series of bit flags...
-//
-//  a section view would also be a possible class, managing a base filterproxymodel that filters the setting model on the section.
-//  The section view might also manage the arrangement of the settingsviews, (horizontal / vertical) and would represent a page.
 
 class QSortFilterProxyModel;
 
 namespace CSVSettings
 {
-    class SettingBox;
 
-    template <typename T1>
-    class SettingView : public QObject
+    class SettingView : public QGroupBox
     {
         Q_OBJECT
 
         QSortFilterProxyModel *mSettingFilter;
-        SettingBox *mBox;
+        QList<QModelIndex> mSettingIndices;
+        static const QString INVISIBLE_BOX_STYLE;
+        QString mVisibleBoxStyle;
+        WidgetFactory *mWidgetFactory;
+        QList <ViewWidget *> mViewWidgets;
 
     public:
-       explicit SettingView (const QString &viewName, QSortFilterProxyModel *settingModel, QObject *parent = 0) :
-            QObject(parent),
-            mBox (new SettingBox (Orient_Vertical, false, this)),
-            mSettingFilter (buildFilter (viewName, settingModel))
-        {
-            QStringList valueList = settingModel->data (settingModel->index(0, 4, QModelIndex()), Qt::DisplayRole);
 
-            if (valueList.size() > 0)
-            {
-                AbstractWidget *widget = new SettingWidget<T1>(valueList.at(0), mSettingFilter, mBox->layout(), this);
+        explicit SettingView (const QString &name, WidgetType widgetType, bool ishorizontal, QWidget *parent);
 
-                if (widget->isMultiSelect())
-                {
-                    foreach (const QString &listItem, valueList)
-                        new SettingWidget<T1> (listItem, mSettingFilter, mBox->layout(), this);
+        void setModel (QSortFilterProxyModel *settingModel);
 
-                    return;
-                }
-            }
-
-            // pass-through to create widgets that are either multi-select or single-select with no value list
-            SettingWidget *widget = new SettingWidget<T1> (viewName, mSettingFilter, mBox->layout(), this);
-        }
+        void setTitle (const QString &title);
+        void setBorderVisibility (bool value);
+        bool borderVisibile() const;
 
     private:
 
-        void buildFilter (const QString &viewName, QSortFilterProxyModel *settingModel);
+        void setupView(bool isHorizontal = false);
+        void setMinimumWidth();
+        void buildWidgets();
+        void makeFactory(WidgetType widgetType);
     };
 }
 #endif // SETTINGVIEW_HPP

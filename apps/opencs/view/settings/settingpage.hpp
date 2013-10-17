@@ -4,8 +4,16 @@
 #include <QWidget>
 
 #include "settingview.hpp"
+#include "support.hpp"
+#include "settingbox.hpp"
 
 class QSortFilterProxyModel;
+
+namespace CSMSettings
+{
+    class SettingModel;
+    class SectionFilter;
+}
 
 namespace CSVSettings
 {
@@ -16,19 +24,15 @@ namespace CSVSettings
         Q_OBJECT
 
         QList<SettingView *> mViews;
-        QSortFilterProxyModel *mSectionFilter;
+        CSMSettings::SectionFilter *mSectionFilter;
         SettingBox *mBox;
 
     public:
-        explicit SettingPage(const QString &pageName, QWidget *parent = 0);
+        explicit SettingPage(const QString &pageName, CSMSettings::SettingModel *model,
+                             bool isHoriztonal, QWidget *parent = 0);
 
-        void addView (WidgetType widgType, const QString &viewName);
-
-        template <typename T>
-        SettingView *createView (const QString &viewName)
-        {
-            return new SettingView<T> (viewName, mSectionFilter, this);
-        }
+        void addView (WidgetType widgetType, const QString &viewName, bool isHorizontal);
+        QGroupBox *pageFrame() { return mBox; }
     };
 }
 #endif // SETTINGPAGE_HPP

@@ -63,12 +63,22 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         Setting *preDefined = mSettingModel->createSetting ("Pre-Defined", section, "1024 x 768");
 
         preDefined->valueList() << "640 x 480" << "800 x 600" << "1024 x 768" << "1440 x 900";
-        preDefined->proxyList() << "Width" << "Height";
 
         // value lists for width / height are used to validate interaction with pre-defined setting
         // lists are ignored for independent changes to width / height settings (line edit widget is not list-style)
-        width->valueList() << "640" << "800" << "1024" << "1440";
-        height->valueList() << "480" << "600" << "768" << "900";
+        QStringList widthValues;
+        QStringList heightValues;
+
+        widthValues << "640" << "800" << "1024" << "1440";
+        heightValues << "480" << "600" << "768" << "900";
+
+        preDefined->proxyMap().insert("Width", widthValues);
+        preDefined->proxyMap().insert("Height", heightValues);
+
+        preDefined->setWidgetType (CSVSettings::Widget_ComboBox);
+
+        width->setWidgetType (CSVSettings::Widget_LineEdit);
+        height->setWidgetType (CSVSettings::Widget_LineEdit);
     }
 
     section = "Display Format";
@@ -82,6 +92,10 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
 
         recordStatusDisplay->setValueList(values);
         refIdDisplay->setValueList(values);
+
+        recordStatusDisplay->setWidgetType (CSVSettings::Widget_RadioButton);
+        refIdDisplay->setWidgetType (CSVSettings::Widget_RadioButton);
+
     }
 }
 
@@ -207,7 +221,6 @@ bool CSMSettings::UserSettings::loadSettingsFromFile (const QString &filePath)
         // parse setting definition, assuming valid section
         if ( (keyRe.indexIn(line) != -1) && (section != "none"))
         {
-            qDebug() << "parsing line: " << line;
             QString settingName = keyRe.cap(1).simplified();
             QString settingValue = keyRe.cap(2).simplified();
 

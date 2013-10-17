@@ -28,20 +28,26 @@ namespace CSVSettings
     public:
 
         /// Passed layout is assigned the constructed widget.
-        explicit AbstractWidget (const QString &name, QSortFilterProxyModel *model, QLayout *layout, QWidget* parent);
+        explicit AbstractWidget (const QString &name, QLayout *layout, QWidget* parent);
 
         /// retrieve layout for insertion into itemblock
         QLayout *layout() { return mLayout; }
 
         /// create the derived widget instance
-        void build (Orientation orient, Alignment align, const QString &caption = "");
+        void build (const QString &caption = "");
 
         /// Virtual function to determine wheter or not a setting widget
         /// can / should handle multiple selections
-        virtual bool isMultiSelect() { return false; }
+        //virtual bool isListWidget() { return false; }
 
         /// reference to the derived widget instance
         virtual QWidget *widget() { return mWidget; }
+
+        /// pass an input mask (line-edit-based widgets only)
+        virtual void setInputMask (const QString &mask) {}
+
+        /// set the QSortFilterProxyModel that describes the setting
+        void setModel (QSortFilterProxyModel *model);
 
     protected:
 

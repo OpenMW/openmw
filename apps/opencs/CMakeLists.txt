@@ -81,8 +81,9 @@ opencs_units (view/settings
     abstractblock
     abstractwidget
     usersettingsdialog
-    datadisplayformatpage
     windowpage
+    settingpage
+    settingview
     )
 
 opencs_units_noqt (view/settings
@@ -91,8 +92,7 @@ opencs_units_noqt (view/settings
     groupblock
     settingbox
     itemblock
-    settingpage
-    settingview
+    widgetfactory
     settingwidget
     support
     )

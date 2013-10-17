@@ -8,26 +8,29 @@
 
 #include <QDebug>
 
-CSVSettings::AbstractWidget::AbstractWidget (const QString &name, QSortFilterProxyModel *model, QLayout *layout, QWidget *parent)
+CSVSettings::AbstractWidget::AbstractWidget (const QString &name, QLayout *layout, QWidget *parent)
     : QObject (parent), mLayout (layout), mWidget (0), mFilterProxy (0), mDataAdapter (0)
 {
     setObjectName (name);
+}
 
-    if (model)
-    {
-        mDataAdapter = new QDataWidgetMapper (parent);
-        mFilterProxy = new QSortFilterProxyModel (parent);
+void CSVSettings::AbstractWidget::setModel (QSortFilterProxyModel *model)
+{
+    if (!model)
+        return;
 
-        mFilterProxy->setSourceModel (model);
-        mFilterProxy->setFilterKeyColumn (0);
-        mFilterProxy->setFilterFixedString (name);
-        mFilterProxy->setDynamicSortFilter (true);
+    mDataAdapter = new QDataWidgetMapper (parent());
+    mFilterProxy = new QSortFilterProxyModel (parent());
 
-        qDebug() << "building widget based on section: " << name << "; records: " << mFilterProxy->rowCount();
+    mFilterProxy->setSourceModel (model);
+    mFilterProxy->setFilterKeyColumn (0);
+    mFilterProxy->setFilterFixedString (objectName());
+    mFilterProxy->setDynamicSortFilter (true);
 
-        qDebug() << "record value: " << mFilterProxy->data(mFilterProxy->index(0,2,QModelIndex()), Qt::DisplayRole).toString();
-        mDataAdapter->setModel (mFilterProxy);
-    }
+    qDebug() << "building widget based on section: " << objectName() << "; records: " << mFilterProxy->rowCount();
+
+    qDebug() << "record value: " << mFilterProxy->data(mFilterProxy->index(0,2,QModelIndex()), Qt::DisplayRole).toString();
+    mDataAdapter->setModel (mFilterProxy);
 }
 
 void CSVSettings::AbstractWidget::setWidget(QWidget *widget, int column)
@@ -41,19 +44,18 @@ void CSVSettings::AbstractWidget::setWidget(QWidget *widget, int column)
     }
 }
 
-void CSVSettings::AbstractWidget::build
-        (Orientation orient, Alignment align, const QString &caption)
+void CSVSettings::AbstractWidget::build (const QString &caption)
 {
     if (!caption.isEmpty())
     {
-        QLabel *label = new QLabel (caption, &dynamic_cast<QWidget &>( *parent()));
+        QLabel *label = new QLabel (caption + "_cap", &dynamic_cast<QWidget &>( *parent()));
         label->setBuddy (mWidget);
         mLayout->addWidget (label);
     }
 
     mLayout->setContentsMargins(0, 0, 0, 0);
     mLayout->addWidget (mWidget);
-    mLayout->setAlignment (mWidget, getAlignment (align));
+    //mLayout->setAlignment (mWidget, getAlignment (align));
 }
 
 void CSVSettings::AbstractWidget::createLayout (Orientation direction)

@@ -25,14 +25,13 @@ namespace CSVSettings
 
     public:
 
-        explicit SettingWidget (const QString &name, QSortFilterProxyModel *model,
-                                QLayout *layout,  QWidget* parent = 0)
-            : AbstractWidget (name, model, layout, parent), mWidget (new T1 (parent))
+        explicit SettingWidget (const QString &name, QLayout *layout,  QWidget* parent = 0)
+            : AbstractWidget (name, layout, parent), mWidget (new T1 (parent))
         {
             setWidget (mWidget);
 
             mWidget->setText(name);
-            //build (orient, align, "");
+            build ("");
             //mWidget->setChecked(isDefault);
         }
     };
@@ -46,15 +45,14 @@ namespace CSVSettings
 
     public:
 
-        explicit SettingWidget (const QString &name, QSortFilterProxyModel *model,
-                                QLayout *layout,  QWidget* parent = 0)
-            : AbstractWidget (name, model, layout, parent), mWidget (new QSpinBox (parent))
+        explicit SettingWidget (const QString &name, QLayout *layout,  QWidget* parent = 0)
+            : AbstractWidget (name, layout, parent), mWidget (new QSpinBox (parent))
         {
             //NEEDS TO BE MOVED TO INSTANCING CODE
 //            def.caption += tr(" (%1 to %2)").arg(def.minMax->left).arg(def.minMax->right);
 
             setWidget (mWidget);
-            //build (orient, align, caption);
+            build (name);
 
             //mWidget->setAlignment (getAlignment(align));
         }
@@ -70,12 +68,11 @@ namespace CSVSettings
 
     public:
 
-        explicit SettingWidget (const QString &name, QSortFilterProxyModel *model,
-                                QLayout *layout,  QWidget* parent = 0)
-            : AbstractWidget (name, model, layout, parent), mWidget (new QComboBox (parent))
+        explicit SettingWidget (const QString &name, QLayout *layout,  QWidget* parent = 0)
+            : AbstractWidget (name, layout, parent), mWidget (new QComboBox (parent))
         {
             setWidget (mWidget);
-            //build (orient, align, caption);
+            build (name);
 
             //center the combo box items
             mWidget->setEditable (true);
@@ -84,7 +81,7 @@ namespace CSVSettings
             //mWidget->setModel(model);
         }
 
-        bool isMultiSelect() { return true; }
+        bool isListWidget() { return true; }
     };
 
     /// line edit template
@@ -96,14 +93,13 @@ namespace CSVSettings
 
     public:
 
-        explicit SettingWidget (const QString &name, QSortFilterProxyModel *model,
-                                QLayout *layout,  QWidget* parent = 0)
-            : AbstractWidget (name, model, layout, parent), mWidget (new QLineEdit (parent))
+        explicit SettingWidget (const QString &name, QLayout *layout,  QWidget* parent = 0)
+            : AbstractWidget (name, layout, parent), mWidget (new QLineEdit (parent))
         {
             int column = 2;
 
             setWidget(mWidget, column);
-            //build (orient, align, caption);
+            build (name);
 
            // mWidget->setAlignment (getAlignment(align));
         }
@@ -122,15 +118,14 @@ namespace CSVSettings
 
     public:
 
-        explicit SettingWidget (const QString &name, QSortFilterProxyModel *model,
-                                QLayout *layout,  QWidget* parent = 0)
-            : AbstractWidget (name, model, layout, parent), mWidget (new QListWidget (parent))
+        explicit SettingWidget (const QString &name, QLayout *layout,  QWidget* parent = 0)
+            : AbstractWidget (name, layout, parent), mWidget (new QListWidget (parent))
         {
             setWidget (mWidget);
-            //build (orient, align, caption);
+            build (name);
         }
 
-        bool isMultiSelect() { return true; }
+        static bool isListWidget() { return true; }
     };
 
 }

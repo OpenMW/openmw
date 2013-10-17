@@ -1,7 +1,6 @@
 #include "settingmodel.hpp"
 
 #include <QDebug>
-int CSMSettings::SettingModel::sColumnCount = 7;
 
 CSMSettings::SettingModel::SettingModel(QObject *parent) :
     QAbstractItemModel(parent)
@@ -19,7 +18,7 @@ CSMSettings::SettingModel::~SettingModel()
 
 int CSMSettings::SettingModel::columnCount(const QModelIndex &parent) const
 {
-    return sColumnCount;
+    return Setting::columnCount();
 }
 
 int CSMSettings::SettingModel::rowCount(const QModelIndex &parent) const
@@ -45,7 +44,7 @@ QVariant CSMSettings::SettingModel::data(const QModelIndex &index, int role) con
 
     case Qt::UserRole:
 
-        return Setting::sColumnNames.at(index.column());
+        return Setting::columnNames().at(index.column());
 
     default:
 

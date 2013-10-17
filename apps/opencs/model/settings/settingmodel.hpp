@@ -2,6 +2,7 @@
 #define SETTINGMODEL_HPP
 
 #include <QAbstractItemModel>
+#include <QSortFilterProxyModel>
 #include <QList>
 
 #include "setting.hpp"
@@ -13,7 +14,7 @@ namespace CSMSettings
 
         Q_OBJECT
 
-        static int sColumnCount;
+        QList<Setting *> mSettings;
 
     public:
 
@@ -38,14 +39,25 @@ namespace CSMSettings
         Setting *createSetting (const QString &name, const QString &section = "", const QString &defaultValue = "");
         const Setting *getSetting (int row) const;
 
-    private:
-
-        QList<Setting *> mSettings;
-
     signals:
 
     public slots:
 
+    };
+
+    class SectionFilter : public QSortFilterProxyModel
+    {
+        Q_OBJECT
+
+    public:
+        explicit SectionFilter (QObject *parent) : QSortFilterProxyModel (parent)
+        {}
+
+        const Setting *getSetting (int row) const
+        {
+            QModelIndex sourceIndex = mapToSource(index(row, 0, QModelIndex()));
+            return static_cast<SettingModel *>(sourceModel())->getSetting(sourceIndex.row());
+        }
     };
 }
 #endif // SETTINGMODEL_HPP

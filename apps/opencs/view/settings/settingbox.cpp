@@ -15,7 +15,7 @@ CSVSettings::SettingBox::SettingBox (Orientation layoutOrientation, bool isVisib
     if (!isVisible)
         setStyleSheet (INVISIBLE_BOX_STYLE);
 
-    if (layoutOrientation = Orient_Horizontal)
+    if (layoutOrientation == Orient_Horizontal)
         setLayout (new QHBoxLayout);
     else
         setLayout (new QVBoxLayout);
