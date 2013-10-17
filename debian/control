@@ -2,7 +2,15 @@ Source: openmw
 Section: games
 Priority: optional
 Maintainer: Bret Curtis <psi29a@gmail.com>
-Build-Depends: debhelper (>= 7.0.50~), cmake, libbullet-dev, libboost-filesystem-dev, libboost-program-options-dev, libboost-system-dev, libboost-thread-dev, libboost-wave-dev, libfreeimage-dev, libfreetype6-dev, libgl1-mesa-dev | libgl-dev, libglu1-mesa-dev | libglu-dev, libice-dev, libmpg123-dev, libopenal-dev, libsm-dev, libsndfile1-dev, uuid-dev, libqt4-dev, libx11-dev, libxaw7-dev, libxrandr-dev, libxt-dev, libzzip-dev, libz-dev, libpng12-dev, libavcodec-dev, libavformat-dev, libavdevice-dev, libavutil-dev, libswscale-dev, libpostproc-dev, ffmpeg, libsdl2-dev, libogre-1.8-dev, libmygui-dev, libunshield-dev
+Build-Depends: debhelper (>= 7.0.50~), cmake, libbullet-dev,
+ libboost-filesystem-dev, libboost-program-options-dev, libboost-system-dev,
+ libboost-thread-dev, libboost-wave-dev, libfreeimage-dev, libfreetype6-dev,
+ libgl1-mesa-dev | libgl-dev, libglu1-mesa-dev | libglu-dev, libice-dev,
+ libmpg123-dev, libopenal-dev, libsm-dev, libsndfile1-dev, uuid-dev, libqt4-dev,
+ libx11-dev, libxaw7-dev, libxrandr-dev, libxt-dev, libzzip-dev, libz-dev,
+ libpng12-dev, libavcodec-dev, libavformat-dev, libavdevice-dev, libavutil-dev,
+ libswscale-dev, libpostproc-dev, ffmpeg, libsdl2-dev, libogre-1.8-dev,
+ libmygui-dev, libunshield-dev
 Standards-Version: 3.9.4
 Homepage: http://openmw.org
 Vcs-Git: git://github.com/zinnschlag/openmw.git
