@@ -9,8 +9,8 @@ Build-Depends: debhelper (>= 7.0.50~), cmake, libbullet-dev,
  libmpg123-dev, libopenal-dev, libsm-dev, libsndfile1-dev, uuid-dev, libqt4-dev,
  libx11-dev, libxaw7-dev, libxrandr-dev, libxt-dev, libzzip-dev, libz-dev,
  libpng12-dev, libavcodec-dev, libavformat-dev, libavdevice-dev, libavutil-dev,
- libswscale-dev, libpostproc-dev, ffmpeg, libsdl2-dev, libogre-1.8-dev,
- libmygui-dev, libunshield-dev
+ libswscale-dev, libpostproc-dev, libsdl2-dev, libogre-1.8-dev,  libmygui-dev,
+ libunshield-dev
 Standards-Version: 3.9.4
 Homepage: http://openmw.org
 Vcs-Git: git://github.com/zinnschlag/openmw.git
@@ -27,7 +27,7 @@ Description: A reimplementation of The Elder Scrolls III: Morrowind
 Package: openmw-data
 Architecture: all
 Recommends: openmw
-Depends: ${misc:Depends}
+Depends: ${misc:Depends}, fonts-ebgaramond-extra, fonts-dejavu-core
 Description: A reimplementation of The Elder Scrolls III: Morrowind
  OpenMW is a reimplementation of the Bethesda Game Studios game The Elder Scrolls III: Morrowind.
  Data files from the original game is required to run it.
