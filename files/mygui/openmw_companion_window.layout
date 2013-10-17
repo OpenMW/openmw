@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+    <Widget type="Window" skin="MW_Window" layer="Windows" position="0 0 600 300" name="_Main">
+        <Property key="MinSize" value="245 145"/>
+
+        <!-- Items -->
+        <Widget type="ItemView" skin="MW_ItemView" position="5 5 575 225" name="ItemView" align="Left Top Stretch">
+        </Widget>
+
+        <Widget type="HBox" position="5 235 575 24" align="Bottom HStretch">
+            <Widget type="MWDynamicStat" skin="MW_ChargeBar_Blue" position="8 8 212 24" name="EncumbranceBar" align="Left Top HStretch">
+                <UserString key="HStretch" value="true"/>
+            </Widget>
+            <Widget type="AutoSizedTextBox" skin="SandText" name="ProfitLabel">
+            </Widget>
+            <Widget type="AutoSizedButton" skin="MW_Button" name="CloseButton">
+                <Property key="Caption" value="#{sClose}"/>
+            </Widget>
+        </Widget>
+
+    </Widget>
+</MyGUI>

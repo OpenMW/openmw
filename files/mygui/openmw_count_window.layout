@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+    <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 600 125" name="_Main">
+        <Property key="Visible" value="false"/>
+
+        <Widget type="TextBox" skin="SandText" position="4 0 592 24" name="LabelText" align="Left Top HStretch">
+            <Property key="TextAlign" value="Center"/>
+        </Widget>
+
+        <Widget type="TextBox" skin="SandText" position="4 30 532 24" name="ItemText" align="Left Top HStretch">
+            <Property key="TextAlign" value="Right"/>
+        </Widget>
+
+        <Widget type="EditBox" skin="MW_TextEdit" position="540 30 32 24" name="ItemEdit" align="Right Top">
+            <Property key="TextAlign" value="Center"/>
+        </Widget>
+
+        <Widget type="MWScrollBar" skin="MW_HScroll" position="28 60 544 18" name="CountSlider" align="Left Top HStretch">
+            <Property key="MoveToClick" value="true"/>
+        </Widget>
+
+
+        <Widget type="HBox" position="0 90 572 24" align="Right Bottom">
+            <Widget type="Widget">
+                <UserString key="HStretch" value="true"/>
+            </Widget>
+            <Widget type="AutoSizedButton" skin="MW_Button" position="417 90 60 24" name="CancelButton" align="Right Top">
+                <Property key="Caption" value="#{sCancel}"/>
+            </Widget>
+            <Widget type="AutoSizedButton" skin="MW_Button" position="512 90 60 24" name="OkButton" align="Right Top">
+                <Property key="Caption" value="#{sOk}"/>
+            </Widget>
+        </Widget>
+
+    </Widget>
+</MyGUI>

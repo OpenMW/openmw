@@ -1,0 +1,200 @@
+
+#include "controlextensions.hpp"
+
+#include <components/compiler/extensions.hpp>
+#include <components/compiler/opcodes.hpp>
+
+#include <components/interpreter/interpreter.hpp>
+#include <components/interpreter/runtime.hpp>
+#include <components/interpreter/opcodes.hpp>
+
+#include "../mwbase/environment.hpp"
+#include "../mwbase/inputmanager.hpp"
+
+#include "../mwworld/player.hpp"
+#include "../mwworld/class.hpp"
+#include "../mwworld/ptr.hpp"
+
+#include "../mwmechanics/npcstats.hpp"
+
+#include "interpretercontext.hpp"
+#include "ref.hpp"
+
+namespace MWScript
+{
+    namespace Control
+    {
+        class OpSetControl : public Interpreter::Opcode0
+        {
+                std::string mControl;
+                bool mEnable;
+
+            public:
+
+                OpSetControl (const std::string& control, bool enable)
+                : mControl (control), mEnable (enable)
+                {}
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWBase::Environment::get()
+                        .getInputManager()
+                        ->toggleControlSwitch(mControl, mEnable);
+                }
+        };
+
+        class OpGetDisabled : public Interpreter::Opcode0
+        {
+                std::string mControl;
+
+            public:
+
+                OpGetDisabled (const std::string& control)
+                : mControl (control)
+                {}
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    runtime.push(!MWBase::Environment::get().getInputManager()->getControlSwitch (mControl));
+                }
+        };
+
+        class OpToggleCollision : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    InterpreterContext& context
+                        = static_cast<InterpreterContext&> (runtime.getContext());
+
+                    bool enabled = MWBase::Environment::get().getWorld()->toggleCollisionMode();
+
+                    context.report (enabled ? "Collision -> On" : "Collision -> Off");
+                }
+        };
+
+        template<class R>
+        class OpClearMovementFlag : public Interpreter::Opcode0
+        {
+                MWMechanics::NpcStats::Flag mFlag;
+
+            public:
+
+                OpClearMovementFlag (MWMechanics::NpcStats::Flag flag) : mFlag (flag) {}
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    MWWorld::Class::get (ptr).getNpcStats (ptr).setMovementFlag (mFlag, false);
+                }
+        };
+
+        template<class R>
+        class OpSetMovementFlag : public Interpreter::Opcode0
+        {
+                MWMechanics::NpcStats::Flag mFlag;
+
+            public:
+
+                OpSetMovementFlag (MWMechanics::NpcStats::Flag flag) : mFlag (flag) {}
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    MWWorld::Class::get (ptr).getNpcStats (ptr).setMovementFlag (mFlag, true);
+                }
+        };
+
+        template <class R>
+        class OpGetForceRun : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    MWMechanics::NpcStats& npcStats = MWWorld::Class::get(ptr).getNpcStats (ptr);
+
+                    runtime.push (npcStats.getMovementFlag (MWMechanics::NpcStats::Flag_ForceRun));
+                }
+        };
+
+        template <class R>
+        class OpGetForceSneak : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+
+                    MWMechanics::NpcStats& npcStats = MWWorld::Class::get(ptr).getNpcStats (ptr);
+
+                    runtime.push (npcStats.getMovementFlag (MWMechanics::NpcStats::Flag_ForceSneak));
+                }
+        };
+
+        class OpGetPcRunning : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer();
+                    runtime.push (MWWorld::Class::get(ptr).getStance (ptr, MWWorld::Class::Run));
+                }
+        };
+
+        class OpGetPcSneaking : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer();
+                    runtime.push (MWWorld::Class::get(ptr).getStance (ptr, MWWorld::Class::Sneak));
+                }
+        };
+
+
+        void installOpcodes (Interpreter::Interpreter& interpreter)
+        {
+            for (int i=0; i<Compiler::Control::numberOfControls; ++i)
+            {
+                interpreter.installSegment5 (Compiler::Control::opcodeEnable+i, new OpSetControl (Compiler::Control::controls[i], true));
+                interpreter.installSegment5 (Compiler::Control::opcodeDisable+i, new OpSetControl (Compiler::Control::controls[i], false));
+                interpreter.installSegment5 (Compiler::Control::opcodeGetDisabled+i, new OpGetDisabled (Compiler::Control::controls[i]));
+            }
+
+            interpreter.installSegment5 (Compiler::Control::opcodeToggleCollision, new OpToggleCollision);
+
+            interpreter.installSegment5 (Compiler::Control::opcodeClearForceRun,
+                new OpClearMovementFlag<ImplicitRef> (MWMechanics::NpcStats::Flag_ForceRun));
+            interpreter.installSegment5 (Compiler::Control::opcodeForceRun,
+                new OpSetMovementFlag<ImplicitRef> (MWMechanics::NpcStats::Flag_ForceRun));
+            interpreter.installSegment5 (Compiler::Control::opcodeClearForceSneak,
+                new OpClearMovementFlag<ImplicitRef> (MWMechanics::NpcStats::Flag_ForceSneak));
+            interpreter.installSegment5 (Compiler::Control::opcodeForceSneak,
+                new OpSetMovementFlag<ImplicitRef> (MWMechanics::NpcStats::Flag_ForceSneak));
+
+            interpreter.installSegment5 (Compiler::Control::opcodeClearForceRunExplicit,
+                new OpClearMovementFlag<ExplicitRef> (MWMechanics::NpcStats::Flag_ForceRun));
+            interpreter.installSegment5 (Compiler::Control::opcodeForceRunExplicit,
+                new OpSetMovementFlag<ExplicitRef> (MWMechanics::NpcStats::Flag_ForceRun));
+            interpreter.installSegment5 (Compiler::Control::opcodeClearForceSneakExplicit,
+                new OpClearMovementFlag<ExplicitRef> (MWMechanics::NpcStats::Flag_ForceSneak));
+            interpreter.installSegment5 (Compiler::Control::opcodeForceSneakExplicit,
+                new OpSetMovementFlag<ExplicitRef> (MWMechanics::NpcStats::Flag_ForceSneak));
+            interpreter.installSegment5 (Compiler::Control::opcodeGetPcRunning, new OpGetPcRunning);
+            interpreter.installSegment5 (Compiler::Control::opcodeGetPcSneaking, new OpGetPcSneaking);
+            interpreter.installSegment5 (Compiler::Control::opcodeGetForceRun, new OpGetForceRun<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Control::opcodeGetForceRunExplicit, new OpGetForceRun<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Control::opcodeGetForceSneak, new OpGetForceSneak<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Control::opcodeGetForceSneakExplicit, new OpGetForceSneak<ExplicitRef>);
+        }
+    }
+}

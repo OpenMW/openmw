@@ -1,0 +1,140 @@
+material QueryTotalPixels
+{
+    allow_fixed_function false
+    pass
+    {
+        vertex_program sun_vertex
+        fragment_program sun_fragment
+        cull_hardware none
+        polygon_mode_overrideable off
+        depth_check off
+        depth_write off
+        colour_write off
+    }
+}
+
+material QueryVisiblePixels
+{
+    allow_fixed_function false
+    pass
+    {
+        vertex_program sun_vertex
+        fragment_program sun_fragment
+        cull_hardware none
+        cull_software none
+        polygon_mode_overrideable off
+        depth_check on
+        depth_write off
+        colour_write off
+    }
+}
+
+material openmw_moon
+{
+    allow_fixed_function false
+    pass
+    {
+        vertex_program moon_vertex
+        fragment_program moon_fragment
+        cull_hardware none
+
+        polygon_mode_overrideable off
+        depth_write off
+        depth_check off
+        scene_blend alpha_blend
+        
+        texture_unit diffuseMap
+        {
+            texture_alias $texture
+        }
+        
+        texture_unit alphaMap
+        {
+            direct_texture textures\tx_secunda_full.dds
+        }
+    }
+}
+
+material openmw_clouds
+{
+    allow_fixed_function false
+    pass
+    {
+        vertex_program clouds_vertex
+        fragment_program clouds_fragment
+        
+        polygon_mode_overrideable off
+
+        scene_blend alpha_blend
+        depth_write off
+
+        // second diffuse map is used for weather transitions
+        texture_unit diffuseMap1
+        {
+            texture_alias cloud_texture_1
+        }
+        
+        texture_unit diffuseMap2
+        {
+            texture_alias cloud_texture_2
+        }
+    }
+}
+
+material openmw_atmosphere
+{
+    allow_fixed_function false
+    pass
+    {
+        vertex_program atmosphere_vertex
+        fragment_program atmosphere_fragment
+        
+        polygon_mode_overrideable off
+        
+        depth_write off
+    }
+}
+
+material openmw_stars
+{
+    allow_fixed_function false
+    pass
+    {
+        vertex_program stars_vertex
+        fragment_program stars_fragment
+        
+        polygon_mode_overrideable off
+        
+        depth_check off
+        depth_write off
+        scene_blend alpha_blend
+
+        texture_unit diffuseMap
+        {
+            direct_texture $texture
+        }
+    }
+}
+
+// used for both sun and sun glare
+material openmw_sun
+{
+    allow_fixed_function false
+    pass
+    {
+        vertex_program sun_vertex
+        fragment_program sun_fragment
+        cull_hardware none
+
+        polygon_mode_overrideable off
+        
+        depth_check off
+        depth_write off
+        scene_blend alpha_blend
+        
+        texture_unit diffuseMap
+        {
+            direct_texture $texture
+        }
+    }
+}

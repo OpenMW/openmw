@@ -1,0 +1,17 @@
+Reading Morrowind.bsa
+First 10 files in archive:
+  meshes\m\probe_journeyman_01.nif (6276 bytes @126646052)
+  textures\menu_rightbuttonup_top.dds (256 bytes @218530052)
+  textures\menu_rightbuttonup_right.dds (256 bytes @218529796)
+  textures\menu_rightbuttonup_left.dds (256 bytes @218529540)
+  textures\menu_rightbuttondown_top.dds (256 bytes @218528196)
+  meshes\b\b_n_redguard_f_skins.nif (41766 bytes @17809778)
+  meshes\b\b_n_redguard_m_skins.nif (41950 bytes @18103107)
+  meshes\b\b_n_redguard_f_wrist.nif (2355 bytes @17858132)
+  meshes\b\b_n_redguard_m_foot.nif (4141 bytes @17862081)
+  meshes\b\b_n_redguard_m_knee.nif (2085 bytes @18098101)
+Does file 'meshes\r\xnetch_betty.nif' exist?
+  Yes.
+  53714 bytes
+Does file 'humdrum' exist?
+  No.

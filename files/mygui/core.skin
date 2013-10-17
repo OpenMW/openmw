@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Skin">
+    <Skin name = "TextBox" size = "16 16">
+        <Property key="FontHeight" value = "16" />
+        <Property key="TextAlign" value = "ALIGN_DEFAULT" />
+        <Property key="TextColour" value = "0.7 0.7 0.7" />
+
+        <BasisSkin type="SimpleText" offset = "0 0 16 16"  align = "ALIGN_STRETCH"/>
+    </Skin>
+
+    <Skin name = "ImageBox" size = "16 16">
+        <BasisSkin type="MainSkin" offset = "0 0 16 16"/>
+    </Skin>
+
+    <Skin name = "RotatingSkin" size = "16 16">
+        <BasisSkin type="RotatingSkin" offset="0 0 16 16" align="Stretch"/>
+    </Skin>
+</MyGUI>
