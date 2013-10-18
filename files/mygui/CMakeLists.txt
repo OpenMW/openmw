@@ -8,7 +8,6 @@ set(MYGUI_FILES
     black.png
     core.skin
     core.xml
-    EBGaramond-Regular.ttf
     Obliviontt.zip
     openmw_alchemy_window.layout
     openmw_book.layout
@@ -82,7 +81,6 @@ set(MYGUI_FILES
     openmw_repair.layout
     openmw_companion_window.layout
     smallbars.png
-    DejaVuLGCSansMono.ttf
     markers.png
     ../launcher/images/openmw.png
 )

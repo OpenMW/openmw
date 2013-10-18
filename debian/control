@@ -6,7 +6,7 @@ Build-Depends: debhelper (>= 9~), cmake, libbullet-dev,
  libboost-filesystem-dev, libboost-program-options-dev, libboost-system-dev,
  libboost-thread-dev, libboost-wave-dev, libfreeimage-dev, libfreetype6-dev,
  libgl1-mesa-dev | libgl-dev, libglu1-mesa-dev | libglu-dev, libice-dev,
- libmpg123-dev, libopenal-dev, libsm-dev, libsndfile1-dev, uuid-dev, libqt4-dev,
+ libopenal-dev, libsm-dev, uuid-dev, libqt4-dev,
  libx11-dev, libxaw7-dev, libxrandr-dev, libxt-dev, libzzip-dev, libz-dev,
  libpng12-dev, libavcodec-dev, libavformat-dev, libavdevice-dev, libavutil-dev,
  libswscale-dev, libpostproc-dev, libsdl2-dev, libogre-1.8-dev,  libmygui-dev,
@@ -20,7 +20,7 @@ Package: openmw
 Architecture: any
 Recommends: openmw-launcher
 Depends: ${shlibs:Depends}, ${misc:Depends}, openmw-data (= ${source:Version})
-Description: A reimplementation of The Elder Scrolls III: Morrowind
+Description: Reimplementation of The Elder Scrolls III: Morrowind
  OpenMW is a reimplementation of the Bethesda Game Studios game The Elder Scrolls III: Morrowind.
  The Morrowind "Data Files" from the original game are required to play.
 
@@ -28,17 +28,12 @@ Package: openmw-data
 Architecture: all
 Recommends: openmw
 Depends: ${misc:Depends}, fonts-ebgaramond-extra, fonts-dejavu-core
-Description: A reimplementation of The Elder Scrolls III: Morrowind
- OpenMW is a reimplementation of the Bethesda Game Studios game The Elder Scrolls III: Morrowind.
- Data files from the original game is required to run it.
- .
- This package contains resources for the OpenMW engine.
+Description: Resources for the OpenMW engine.
 
 Package: openmw-launcher
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, openmw (>= ${source:Version})
 Description: Launcher for OpenMW using the Qt-Gui-Toolkit.
- Launcher for OpenMW using the Qt-Gui-Toolkit.
 
 #Package: esmtool
 #Section: utils
