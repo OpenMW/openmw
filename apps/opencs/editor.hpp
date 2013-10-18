@@ -50,7 +50,7 @@ namespace CS
             bool makeIPCServer();
             void connectToIPCServer();
 
-            int run(int argc, char** argv);
+            int run();
             ///< \return error status
 
         private slots:
@@ -66,7 +66,6 @@ namespace CS
             void showStartup();
 
             void showSettings();
-	    bool parseOptions (int argc, char** argv);
 
         private:
 

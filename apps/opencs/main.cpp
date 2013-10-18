@@ -45,5 +45,5 @@ int main(int argc, char *argv[])
        // return 0;
     }
 
-    return editor.run(argc, argv);
+    return editor.run();
 }

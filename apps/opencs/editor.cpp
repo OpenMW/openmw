@@ -41,13 +41,14 @@ CS::Editor::Editor()
 void CS::Editor::setupDataFiles()
 {
     boost::program_options::variables_map variables;
-    boost::program_options::options_description desc;
-
+    boost::program_options::options_description desc("Syntax: opencs <options>\nAllowed options");
+    
     desc.add_options()
     ("data", boost::program_options::value<Files::PathContainer>()->default_value(Files::PathContainer(), "data")->multitoken())
     ("data-local", boost::program_options::value<std::string>()->default_value(""))
     ("fs-strict", boost::program_options::value<bool>()->implicit_value(true)->default_value(false))
-    ("encoding", boost::program_options::value<std::string>()->default_value("win1252"));
+    ("encoding", boost::program_options::value<std::string>()->default_value("win1252"))
+    ("resources", boost::program_options::value<std::string>()->default_value("resources"), "set resources directory");
 
     boost::program_options::notify(variables);
 
@@ -86,6 +87,9 @@ void CS::Editor::setupDataFiles()
     //mFileDialog.setEncoding(encoding);
 
     dataDirs.insert (dataDirs.end(), dataLocal.begin(), dataLocal.end());
+    
+//     Setting Resources directory.
+    mDocumentManager.setResourceDir(variables["resources"].as<std::string>());
 
     for (Files::PathContainer::const_iterator iter = dataDirs.begin(); iter != dataDirs.end(); ++iter)
     {
@@ -208,13 +212,8 @@ void CS::Editor::connectToIPCServer()
     mClientSocket->close();
 }
 
-int CS::Editor::run(int argc, char** argv)
+int CS::Editor::run()
 {
-    if (!parseOptions(argc, argv) )
-    {
-      return 0;
-    }
-    
     if (mLocal.empty())
         return 1;
 
@@ -223,42 +222,4 @@ int CS::Editor::run(int argc, char** argv)
     QApplication::setQuitOnLastWindowClosed (true);
 
     return QApplication::exec();
-}
-
-bool CS::Editor::parseOptions (int argc, char** argv)
-{
-    // Create a local alias for brevity
-    namespace bpo = boost::program_options;
-
-    bpo::options_description desc("Syntax: opencs <options>\nAllowed options");
-
-    desc.add_options()
-        ("help", "print help message")
-
-        ("resources", bpo::value<std::string>()->default_value("resources"), "set resources directory");
-
-    bpo::parsed_options valid_opts = bpo::command_line_parser(argc, argv).options(desc).allow_unregistered().run();
-
-    bpo::variables_map variables;
-
-    // Runtime options override settings from all configs
-    bpo::store(valid_opts, variables);
-    bpo::notify(variables);
-
-    mCfgMgr.readConfiguration(variables, desc);
-
-    bool run = true;
-
-    if (variables.count ("help"))
-    {
-        std::cout << desc << std::endl;
-        run = false;
-    }
-
-    if (!run)
-        return false;
-
-     mDocumentManager.setResourceDir(variables["resources"].as<std::string>());
-
-    return true;
 }
