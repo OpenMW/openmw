@@ -1,5 +1,5 @@
-openmw (0.26.0-debian1~sid1) saucy; urgency=low
+openmw (0.26.0-1) UNRELEASED; urgency=low
 
-  * Initial debian release
+  * First release to Debian. (Closes #XXXXXXX)
 
- -- Bret Curtis <psi29a@gmail.com>  Fri, 18 Oct 2013 08:13:09 +0200
+ -- Bret Curtis <psi29a@gmail.com>  Tue, 10 Sep 2013 08:13:09 +0200
