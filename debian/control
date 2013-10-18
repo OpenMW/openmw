@@ -38,7 +38,7 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, openmw (>= ${source:Version})
 Description: Launcher for OpenMW using the Qt-Gui-Toolkit
  Additional launcher for handling expansions, mods and configuration 
-details of OpenMW.
+ details of OpenMW.
 
 #Package: esmtool
 #Section: utils
