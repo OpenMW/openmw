@@ -30,18 +30,19 @@ Package: openmw-data
 Architecture: all
 Recommends: openmw
 Depends: ${misc:Depends}, fonts-ebgaramond-extra, fonts-dejavu-core
-Description: Resources for the OpenMW engine.
+Description: Resources for the OpenMW engine
  All the shaders, models and extra assets necessary for running OpenMW.
 
 Package: openmw-launcher
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, openmw (>= ${source:Version})
-Description: Launcher for OpenMW using the Qt-Gui-Toolkit.
- Additional launcher for OpenMW for handling expansions and mods.
+Description: Launcher for OpenMW using the Qt-Gui-Toolkit
+ Additional launcher for handling expansions, mods and configuration 
+details of OpenMW.
 
 #Package: esmtool
 #Section: utils
 #Architecture: any
 #Depends: ${shlibs:Depends}, ${misc:Depends}
-#Description: Command-Line tool which can extract ESM-Files.
+#Description: Command-Line tool which can extract ESM-Files
 # Command-Line tool which can extract ESM-Files.
