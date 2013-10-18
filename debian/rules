@@ -17,7 +17,7 @@
 export DH_OPTIONS
 
 override_dh_auto_configure:
-	cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE="Release" -DCMAKE_VERBOSE_MAKEFILE="FALSE" -DBUILD_ESMTOOL="FALSE" .
+	cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE="Release" -DUSE_SYSTEM_TINYXML="TRUE" -DCMAKE_VERBOSE_MAKEFILE="FALSE" -DBUILD_ESMTOOL="FALSE"  .
 
 override_dh_auto_clean:
 	dh_auto_clean
