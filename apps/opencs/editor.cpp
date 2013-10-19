@@ -8,10 +8,11 @@
 
 #include "model/doc/document.hpp"
 #include "model/world/data.hpp"
+#include <iostream>
 
 
 CS::Editor::Editor()
-: mDocumentManager (mCfgMgr), mViewManager (mDocumentManager)
+    : mDocumentManager (mCfgMgr), mViewManager (mDocumentManager)
 {
     mIpcServerName = "org.openmw.OpenCS";
 
@@ -32,23 +33,23 @@ CS::Editor::Editor()
 
     connect (&mFileDialog, SIGNAL(openFiles()), this, SLOT(openFiles()));
     connect (&mFileDialog, SIGNAL(createNewFile (const boost::filesystem::path&)),
-        this, SLOT(createNewFile (const boost::filesystem::path&)));
+             this, SLOT(createNewFile (const boost::filesystem::path&)));
 
     connect (&mNewGame, SIGNAL (createRequest (const boost::filesystem::path&)),
-        this, SLOT (createNewGame (const boost::filesystem::path&)));
+             this, SLOT (createNewGame (const boost::filesystem::path&)));
 }
 
 void CS::Editor::setupDataFiles()
 {
     boost::program_options::variables_map variables;
     boost::program_options::options_description desc("Syntax: opencs <options>\nAllowed options");
-    
+
     desc.add_options()
     ("data", boost::program_options::value<Files::PathContainer>()->default_value(Files::PathContainer(), "data")->multitoken())
     ("data-local", boost::program_options::value<std::string>()->default_value(""))
     ("fs-strict", boost::program_options::value<bool>()->implicit_value(true)->default_value(false))
     ("encoding", boost::program_options::value<std::string>()->default_value("win1252"))
-    ("resources", boost::program_options::value<std::string>()->default_value("resources"), "set resources directory");
+    ("resources", boost::program_options::value<std::string>()->default_value("resources"));
 
     boost::program_options::notify(variables);
 
@@ -58,7 +59,7 @@ void CS::Editor::setupDataFiles()
     if (!variables["data"].empty()) {
         dataDirs = Files::PathContainer(variables["data"].as<Files::PathContainer>());
     }
-    
+
     std::string local = variables["data-local"].as<std::string>();
     if (!local.empty()) {
         dataLocal.push_back(Files::PathContainer::value_type(local));
@@ -83,12 +84,12 @@ void CS::Editor::setupDataFiles()
     }
 
     // Set the charset for reading the esm/esp files
-   // QString encoding = QString::fromStdString(variables["encoding"].as<std::string>());
+    // QString encoding = QString::fromStdString(variables["encoding"].as<std::string>());
     //mFileDialog.setEncoding(encoding);
 
     dataDirs.insert (dataDirs.end(), dataLocal.begin(), dataLocal.end());
-    
-//     Setting Resources directory.
+
+//     Adding Resources directory. First check if there is a file defaultfilters in the user path.
     mDocumentManager.setResourceDir(variables["resources"].as<std::string>());
 
     for (Files::PathContainer::const_iterator iter = dataDirs.begin(); iter != dataDirs.end(); ++iter)

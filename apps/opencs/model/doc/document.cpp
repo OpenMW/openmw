@@ -9,7 +9,7 @@
 #endif
 
 void CSMDoc::Document::load (const std::vector<boost::filesystem::path>::const_iterator& begin,
-    const std::vector<boost::filesystem::path>::const_iterator& end, bool lastAsModified)
+                             const std::vector<boost::filesystem::path>::const_iterator& end, bool lastAsModified)
 {
     assert (begin!=end);
 
@@ -2147,10 +2147,10 @@ void CSMDoc::Document::createBase()
 }
 
 CSMDoc::Document::Document (const Files::ConfigurationManager& configuration, const std::vector< boost::filesystem::path >& files, const boost::filesystem::path& savePath, const boost::filesystem::path& resDir, bool new_)
-: mSavePath (savePath), mContentFiles (files), mTools (mData), mResDir(resDir),
-  mProjectPath ((configuration.getUserPath() / "projects") /
-  (savePath.filename().string() + ".project")),
-  mSaving (*this, mProjectPath)
+    : mSavePath (savePath), mContentFiles (files), mTools (mData), mResDir(resDir),
+      mProjectPath ((configuration.getUserPath() / "projects") /
+                    (savePath.filename().string() + ".project")),
+      mSaving (*this, mProjectPath)
 {
     if (files.empty())
         throw std::runtime_error ("Empty content file sequence");
@@ -2181,9 +2181,17 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration, co
         }
         else
         {
-	  boost::filesystem::path filters = mResDir;
-	  filters /= "defaultfilters.omwaddon.project";
- 	  boost::filesystem::copy_file(mResDir, mProjectPath);
+            boost::filesystem::path locCustomFiltersPath (configuration.getUserPath());
+            locCustomFiltersPath /= "defaultfilters.omwaddon.project";
+            if (boost::filesystem::exists(locCustomFiltersPath))
+            {
+                boost::filesystem::copy(locCustomFiltersPath, mProjectPath);
+            } else {
+                boost::filesystem::path filters(mResDir);
+                filters /= "defaultfilters.omwaddon.project";
+                boost::filesystem::copy_file(filters, mProjectPath);
+            }
+            getData().loadFile (mProjectPath, false, true);
         }
     }
 
@@ -2198,7 +2206,7 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration, co
     connect (&mSaving, SIGNAL (progress (int, int, int)), this, SLOT (progress (int, int, int)));
     connect (&mSaving, SIGNAL (done (int)), this, SLOT (operationDone (int)));
     connect (&mSaving, SIGNAL (reportMessage (const QString&, int)),
-        this, SLOT (reportMessage (const QString&, int)));
+             this, SLOT (reportMessage (const QString&, int)));
 }
 
 CSMDoc::Document::~Document()
