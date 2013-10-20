@@ -321,7 +321,7 @@ configure_file(${OpenMW_SOURCE_DIR}/files/opencs.cfg
     "${OpenMW_BINARY_DIR}/opencs.cfg")
     
 configure_file(${OpenMW_SOURCE_DIR}/files/opencs/defaultfilters.omwaddon.project
-    "${OpenMW_BINARY_DIR}/resources/defaultfilters.omwaddon.project")
+    "${OpenMW_BINARY_DIR}/resources/defaultfilters.omwaddon.project" COPYONLY)
 
 if (NOT WIN32 AND NOT APPLE)
     configure_file(${OpenMW_SOURCE_DIR}/files/openmw.desktop
