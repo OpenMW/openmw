@@ -2182,13 +2182,13 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration, co
         else
         {
             boost::filesystem::path locCustomFiltersPath (configuration.getUserPath());
-            locCustomFiltersPath /= "defaultfilters.omwaddon.project";
+            locCustomFiltersPath /= "customfilters.omwaddon.project";
             if (boost::filesystem::exists(locCustomFiltersPath))
             {
                 boost::filesystem::copy(locCustomFiltersPath, mProjectPath);
             } else {
                 boost::filesystem::path filters(mResDir);
-                filters /= "defaultfilters.omwaddon.project";
+                filters /= "defaultfilters";
                 boost::filesystem::copy_file(filters, mProjectPath);
             }
             getData().loadFile (mProjectPath, false, true);
