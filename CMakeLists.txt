@@ -320,7 +320,7 @@ configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
 configure_file(${OpenMW_SOURCE_DIR}/files/opencs.cfg
     "${OpenMW_BINARY_DIR}/opencs.cfg")
     
-configure_file(${OpenMW_SOURCE_DIR}/files/opencs/defaultfilters.omwaddon.project
+configure_file(${OpenMW_SOURCE_DIR}/files/opencs/defaultfilters
     "${OpenMW_BINARY_DIR}/resources/defaultfilters" COPYONLY)
 
 if (NOT WIN32 AND NOT APPLE)
