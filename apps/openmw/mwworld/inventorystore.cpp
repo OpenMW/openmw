@@ -107,7 +107,7 @@ void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& ite
         // add the item again with a count of count-1, then set the count of the original (that will be equipped) to 1
         int count = iterator->getRefData().getCount();
         iterator->getRefData().setCount(count-1);
-        addImpl(*iterator);
+        addNewStack(*iterator);
         iterator->getRefData().setCount(1);
     }
 
@@ -218,7 +218,7 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& npc)
                     // add the item again with a count of count-1, then set the count of the original (that will be equipped) to 1
                     int count = iter->getRefData().getCount();
                     iter->getRefData().setCount(count-1);
-                    addImpl(*iter);
+                    addNewStack(*iter);
                     iter->getRefData().setCount(1);
                 }
             }

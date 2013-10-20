@@ -141,19 +141,19 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr)
         || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_100"))
     {
         int count = MWWorld::Class::get(ptr).getValue(ptr) * ptr.getRefData().getCount();
-        MWWorld::ManualRef ref(esmStore, "Gold_001", count);
 
         for (MWWorld::ContainerStoreIterator iter (begin(type)); iter!=end(); ++iter)
         {
             if (Misc::StringUtils::ciEqual((*iter).get<ESM::Miscellaneous>()->mRef.mRefID, "gold_001"))
             {
-                (*iter).getRefData().setCount( (*iter).getRefData().getCount() + count);
+                iter->getRefData().setCount(iter->getRefData().getCount() + count);
                 flagAsModified();
                 return iter;
             }
         }
 
-        return addImpl(ref.getPtr());
+        MWWorld::ManualRef ref(esmStore, "Gold_001", count);
+        return addNewStack(ref.getPtr());
     }
 
     // determine whether to stack or not
@@ -169,10 +169,10 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr)
         }
     }
     // if we got here, this means no stacking
-    return addImpl(ptr);
+    return addNewStack(ptr);
 }
 
-MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImpl (const Ptr& ptr)
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addNewStack (const Ptr& ptr)
 {
     ContainerStoreIterator it = begin();
 

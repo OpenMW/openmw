@@ -86,8 +86,8 @@ namespace MWWorld
             /// @return the number of items actually removed
 
         protected:
-            ContainerStoreIterator addImpl (const Ptr& ptr);
-            ///< Add the item to this container (no stacking)
+            ContainerStoreIterator addNewStack (const Ptr& ptr);
+            ///< Add the item to this container (do not try to stack it onto existing items)
 
         public:
 
