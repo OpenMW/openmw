@@ -14,14 +14,11 @@ namespace CSMWorld
     {
         public:
 
-            void load (ESM::ESMReader& reader, bool base,
-                UniversalId::Type type = UniversalId::Type_None);
-            ///< \param type Will be ignored, unless the collection supports multiple record types
+            void load (ESM::ESMReader& reader, bool base);
     };
 
     template<typename ESXRecordT, typename IdAccessorT>
-    void IdCollection<ESXRecordT, IdAccessorT>::load (ESM::ESMReader& reader, bool base,
-        UniversalId::Type type)
+    void IdCollection<ESXRecordT, IdAccessorT>::load (ESM::ESMReader& reader, bool base)
     {
         std::string id = reader.getHNOString ("NAME");
 
