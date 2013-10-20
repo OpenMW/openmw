@@ -348,9 +348,7 @@ namespace MWScript
                     const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
                     store.get<ESM::Creature>().find(creature); // This line throws an exception if it can't find the creature
 
-                    MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), gem);
-
-                    ref.getPtr().getRefData().setCount (1);
+                    MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), gem, 1);
 
                     ref.getPtr().getCellRef().mSoul = creature;
 

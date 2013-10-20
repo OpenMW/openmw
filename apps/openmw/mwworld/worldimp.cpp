@@ -1949,7 +1949,6 @@ namespace MWWorld
         if(werewolf)
         {
             ManualRef ref(getStore(), "WerewolfRobe");
-            ref.getPtr().getRefData().setCount(1);
 
             // Configure item's script variables
             std::string script = Class::get(ref.getPtr()).getScript(ref.getPtr());

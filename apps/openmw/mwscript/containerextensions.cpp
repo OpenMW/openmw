@@ -53,10 +53,8 @@ namespace MWScript
                     if (count == 0)
                         return;
 
-                    MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), item);
+                    MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), item, count);
 
-                    ref.getPtr().getRefData().setCount (count);
-                    
                     // Configure item's script variables
                     std::string script = MWWorld::Class::get(ref.getPtr()).getScript(ref.getPtr());
                     if (script != "")

@@ -496,9 +496,8 @@ namespace MWScript
 
                     // create item
                     MWWorld::CellStore* store = actor.getCell();
-                    MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(),itemID);
+                    MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), itemID, count);
                     ref.getPtr().getCellRef().mPos = ipos;
-                    ref.getPtr().getRefData().setCount(count);
 
                     MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),*store,ipos);
                 }

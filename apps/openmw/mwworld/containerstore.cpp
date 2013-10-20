@@ -140,11 +140,9 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr)
         || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_025")
         || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_100"))
     {
-        MWWorld::ManualRef ref(esmStore, "Gold_001");
-
         int count = MWWorld::Class::get(ptr).getValue(ptr) * ptr.getRefData().getCount();
+        MWWorld::ManualRef ref(esmStore, "Gold_001", count);
 
-        ref.getPtr().getRefData().setCount(count);
         for (MWWorld::ContainerStoreIterator iter (begin(type)); iter!=end(); ++iter)
         {
             if (Misc::StringUtils::ciEqual((*iter).get<ESM::Miscellaneous>()->mRef.mRefID, "gold_001"))
@@ -250,7 +248,7 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
 
     try
     {
-        ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), id);
+        ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), id, count);
 
         if (ref.getPtr().getTypeName()==typeid (ESM::ItemLevList).name())
         {
@@ -300,7 +298,6 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
         }
         else
         {
-            ref.getPtr().getRefData().setCount (count);
             ref.getPtr().getCellRef().mOwner = owner;
             addImp (ref.getPtr());
         }

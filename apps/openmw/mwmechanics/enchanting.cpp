@@ -84,9 +84,8 @@ namespace MWMechanics
         enchantment.mEffects = mEffectList;
 
         // Create a new item
-        MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), mOldItemId);
+        MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), mOldItemId, 1);
         const MWWorld::Ptr& newItemPtr = ref.getPtr();
-        newItemPtr.getRefData().setCount(1);
 
         // Apply the enchantment
         const ESM::Enchantment *enchantmentPtr = MWBase::Environment::get().getWorld()->createRecord (enchantment);
