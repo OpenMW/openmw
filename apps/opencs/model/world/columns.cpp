@@ -159,6 +159,7 @@ namespace CSMWorld
             { ColumnId_DoorPositionXRot, "Teleport Rot X" },
             { ColumnId_DoorPositionYRot, "Teleport Rot Y" },
             { ColumnId_DoorPositionZRot, "Teleport Rot Z" },
+            { ColumnId_DialogueType, "Dialogue Type" },
 
             { ColumnId_UseValue1, "Use value 1" },
             { ColumnId_UseValue2, "Use value 2" },
@@ -269,6 +270,11 @@ namespace
         "unknown", "none", "short", "integer", "long", "float", "string", 0
     };
 
+    static const char *sDialogueTypeEnums[] =
+    {
+        "Topic", "Voice", "Greeting", "Persuasion", 0
+    };
+
     const char **getEnumNames (CSMWorld::Columns::ColumnId column)
     {
         switch (column)
@@ -283,6 +289,7 @@ namespace
             case CSMWorld::Columns::ColumnId_WeaponType: return sWeaponTypes;
             case CSMWorld::Columns::ColumnId_Modification: return sModificationEnums;
             case CSMWorld::Columns::ColumnId_ValueType: return sVarTypeEnums;
+            case CSMWorld::Columns::ColumnId_DialogueType: return sDialogueTypeEnums;
 
             default: return 0;
         }

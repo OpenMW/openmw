@@ -1284,6 +1284,33 @@ namespace CSMWorld
             return true;
         }
     };
+
+    template<typename ESXRecordT>
+    struct DialogueTypeColumn : public Column<ESXRecordT>
+    {
+        DialogueTypeColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_DialogueType, ColumnBase::Display_DialogueType)
+        {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return static_cast<int> (record.get().mType);
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            record2.mType = data.toInt();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return false;
+        }
+    };
 }
 
 #endif
