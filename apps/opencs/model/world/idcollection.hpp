@@ -15,6 +15,8 @@ namespace CSMWorld
         public:
 
             void load (ESM::ESMReader& reader, bool base);
+
+            void load (const ESXRecordT& record, bool base);
     };
 
     template<typename ESXRecordT, typename IdAccessorT>
@@ -53,29 +55,35 @@ namespace CSMWorld
             IdAccessorT().getId (record) = id;
             record.load (reader);
 
-            int index = this->searchId (IdAccessorT().getId (record));
+            load (record, base);
+        }
+    }
 
-            if (index==-1)
-            {
-                // new record
-                Record<ESXRecordT> record2;
-                record2.mState = base ? RecordBase::State_BaseOnly : RecordBase::State_ModifiedOnly;
-                (base ? record2.mBase : record2.mModified) = record;
+    template<typename ESXRecordT, typename IdAccessorT>
+    void IdCollection<ESXRecordT, IdAccessorT>::load (const ESXRecordT& record, bool base)
+    {
+        int index = this->searchId (IdAccessorT().getId (record));
 
-                this->appendRecord (record2);
-            }
+        if (index==-1)
+        {
+            // new record
+            Record<ESXRecordT> record2;
+            record2.mState = base ? RecordBase::State_BaseOnly : RecordBase::State_ModifiedOnly;
+            (base ? record2.mBase : record2.mModified) = record;
+
+            this->appendRecord (record2);
+        }
+        else
+        {
+            // old record
+            Record<ESXRecordT> record2 = Collection<ESXRecordT, IdAccessorT>::getRecord (index);
+
+            if (base)
+                record2.mBase = record;
             else
-            {
-                // old record
-                Record<ESXRecordT> record2 = Collection<ESXRecordT, IdAccessorT>::getRecord (index);
+                record2.setModified (record);
 
-                if (base)
-                    record2.mBase = record;
-                else
-                    record2.setModified (record);
-
-                this->setRecord (index, record2);
-            }
+            this->setRecord (index, record2);
         }
     }
 }

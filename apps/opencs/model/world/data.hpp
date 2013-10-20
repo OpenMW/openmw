@@ -20,6 +20,7 @@
 #include <components/esm/loadregn.hpp>
 #include <components/esm/loadbsgn.hpp>
 #include <components/esm/loadspel.hpp>
+#include <components/esm/loaddial.hpp>
 
 #include "../filter/filter.hpp"
 
@@ -48,6 +49,8 @@ namespace CSMWorld
             IdCollection<ESM::Region> mRegions;
             IdCollection<ESM::BirthSign> mBirthsigns;
             IdCollection<ESM::Spell> mSpells;
+            IdCollection<ESM::Dialogue> mTopics;
+            IdCollection<ESM::Dialogue> mJournals;
             IdCollection<Cell> mCells;
             RefIdCollection mReferenceables;
             RefCollection mRefs;
@@ -115,6 +118,14 @@ namespace CSMWorld
             const IdCollection<ESM::Spell>& getSpells() const;
 
             IdCollection<ESM::Spell>& getSpells();
+
+            const IdCollection<ESM::Dialogue>& getTopcis() const;
+
+            IdCollection<ESM::Dialogue>& getTopcis();
+
+            const IdCollection<ESM::Dialogue>& getJournals() const;
+
+            IdCollection<ESM::Dialogue>& getJournals();
 
             const IdCollection<Cell>& getCells() const;
 

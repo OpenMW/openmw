@@ -36,4 +36,9 @@ void Dialogue::save(ESMWriter &esm)
     }
 }
 
+    void Dialogue::blank()
+    {
+        mInfo.clear();
+    }
+
 }

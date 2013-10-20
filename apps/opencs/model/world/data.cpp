@@ -141,6 +141,12 @@ CSMWorld::Data::Data() : mRefs (mCells)
     mSpells.addColumn (new FlagColumn<ESM::Spell> (Columns::ColumnId_StarterSpell, 0x2));
     mSpells.addColumn (new FlagColumn<ESM::Spell> (Columns::ColumnId_AlwaysSucceeds, 0x4));
 
+    mTopics.addColumn (new StringIdColumn<ESM::Dialogue>);
+    mTopics.addColumn (new RecordStateColumn<ESM::Dialogue>);
+
+    mJournals.addColumn (new StringIdColumn<ESM::Dialogue>);
+    mJournals.addColumn (new RecordStateColumn<ESM::Dialogue>);
+
     mCells.addColumn (new StringIdColumn<Cell>);
     mCells.addColumn (new RecordStateColumn<Cell>);
     mCells.addColumn (new FixedRecordTypeColumn<Cell> (UniversalId::Type_Cell));
@@ -196,6 +202,8 @@ CSMWorld::Data::Data() : mRefs (mCells)
     addModel (new IdTable (&mRegions), UniversalId::Type_Regions, UniversalId::Type_Region);
     addModel (new IdTable (&mBirthsigns), UniversalId::Type_Birthsigns, UniversalId::Type_Birthsign);
     addModel (new IdTable (&mSpells), UniversalId::Type_Spells, UniversalId::Type_Spell);
+    addModel (new IdTable (&mTopics), UniversalId::Type_Topics, UniversalId::Type_Topic);
+    addModel (new IdTable (&mJournals), UniversalId::Type_Journals, UniversalId::Type_Journal);
     addModel (new IdTable (&mCells), UniversalId::Type_Cells, UniversalId::Type_Cell);
     addModel (new IdTable (&mReferenceables), UniversalId::Type_Referenceables,
         UniversalId::Type_Referenceable);
@@ -318,6 +326,28 @@ CSMWorld::IdCollection<ESM::Spell>& CSMWorld::Data::getSpells()
 {
     return mSpells;
 }
+
+
+const CSMWorld::IdCollection<ESM::Dialogue>& CSMWorld::Data::getTopcis() const
+{
+    return mTopics;
+}
+
+CSMWorld::IdCollection<ESM::Dialogue>& CSMWorld::Data::getTopcis()
+{
+    return mTopics;
+}
+
+const CSMWorld::IdCollection<ESM::Dialogue>& CSMWorld::Data::getJournals() const
+{
+    return mJournals;
+}
+
+CSMWorld::IdCollection<ESM::Dialogue>& CSMWorld::Data::getJournals()
+{
+    return mJournals;
+}
+
 
 const CSMWorld::IdCollection<CSMWorld::Cell>& CSMWorld::Data::getCells() const
 {
@@ -447,6 +477,30 @@ void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base)
             case ESM::REC_STAT: mReferenceables.load (reader, base, UniversalId::Type_Static); break;
             case ESM::REC_WEAP: mReferenceables.load (reader, base, UniversalId::Type_Weapon); break;
 
+            case ESM::REC_DIAL:
+            {
+                std::string id = reader.getHNOString ("NAME");
+
+                ESM::Dialogue record;
+                record.mId = id;
+                record.load (reader);
+
+                if (record.mType==ESM::Dialogue::Journal)
+                {
+                    mJournals.load (record, base);
+                }
+                else if (record.mType==ESM::Dialogue::Deleted)
+                {
+                    /// \todo handle deleted records
+                }
+                else
+                {
+                    mTopics.load (record, base);
+                }
+
+                break;
+            }
+
             default:
 
                 /// \todo throw an exception instead, once all records are implemented
@@ -469,6 +523,8 @@ bool CSMWorld::Data::hasId (const std::string& id) const
         getRegions().searchId (id)!=-1 ||
         getBirthsigns().searchId (id)!=-1 ||
         getSpells().searchId (id)!=-1 ||
+        getTopcis().searchId (id)!=-1 ||
+        getJournals().searchId (id)!=-1 ||
         getCells().searchId (id)!=-1 ||
         getReferenceables().searchId (id)!=-1;
 }
@@ -487,6 +543,8 @@ std::vector<std::string> CSMWorld::Data::getIds (bool listDeleted) const
     appendIds (ids, mRegions, listDeleted);
     appendIds (ids, mBirthsigns, listDeleted);
     appendIds (ids, mSpells, listDeleted);
+    appendIds (ids, mTopics, listDeleted);
+    appendIds (ids, mJournals, listDeleted);
     appendIds (ids, mCells, listDeleted);
     appendIds (ids, mReferenceables, listDeleted);
 

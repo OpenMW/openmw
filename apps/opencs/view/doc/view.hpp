@@ -166,6 +166,10 @@ namespace CSVDoc
 
             void addSceneSubView();
 
+            void addTopicsSubView();
+
+            void addJournalsSubView();
+
             void toggleShowStatusBar (bool show);
     };
 }
