@@ -89,8 +89,7 @@ void CS::Editor::setupDataFiles()
 
     dataDirs.insert (dataDirs.end(), dataLocal.begin(), dataLocal.end());
 
-//     Adding Resources directory. First check if there is a file defaultfilters in the user path.
-    mDocumentManager.setResourceDir(variables["resources"].as<std::string>());
+    mDocumentManager.setResourceDir(mCfgMgr.getGlobalDataPath());
 
     for (Files::PathContainer::const_iterator iter = dataDirs.begin(); iter != dataDirs.end(); ++iter)
     {
