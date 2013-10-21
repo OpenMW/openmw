@@ -63,6 +63,8 @@ namespace CSVDoc
 
             void setupMechanicsMenu();
 
+            void setupCharacterMenu();
+
             void setupAssetsMenu();
 
             void setupUi();
