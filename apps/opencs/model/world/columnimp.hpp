@@ -1288,8 +1288,9 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct DialogueTypeColumn : public Column<ESXRecordT>
     {
-        DialogueTypeColumn()
-        : Column<ESXRecordT> (Columns::ColumnId_DialogueType, ColumnBase::Display_DialogueType)
+        DialogueTypeColumn (bool hidden = false)
+        : Column<ESXRecordT> (Columns::ColumnId_DialogueType, ColumnBase::Display_DialogueType,
+            hidden ? 0 : ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue)
         {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
@@ -1307,6 +1308,11 @@ namespace CSMWorld
         }
 
         virtual bool isEditable() const
+        {
+            return true;
+        }
+
+        virtual bool isUserEditable() const
         {
             return false;
         }

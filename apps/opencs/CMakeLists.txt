@@ -66,7 +66,7 @@ opencs_units (view/world
 opencs_units_noqt (view/world
     dialoguesubview subviews
     enumdelegate vartypedelegate recordstatusdelegate idtypedelegate datadisplaydelegate
-    scripthighlighter idvalidator
+    scripthighlighter idvalidator dialoguecreator
     )
 
 

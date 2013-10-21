@@ -147,6 +147,7 @@ CSMWorld::Data::Data() : mRefs (mCells)
 
     mJournals.addColumn (new StringIdColumn<ESM::Dialogue>);
     mJournals.addColumn (new RecordStateColumn<ESM::Dialogue>);
+    mJournals.addColumn (new DialogueTypeColumn<ESM::Dialogue> (true));
 
     mCells.addColumn (new StringIdColumn<Cell>);
     mCells.addColumn (new RecordStateColumn<Cell>);
