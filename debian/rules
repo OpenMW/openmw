@@ -13,8 +13,12 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-# This has to be exported to make some magic below work.
-export DH_OPTIONS
+#CMake silently ignores CPPFLAGS. Below will properly set CFLAGS/CXXFLAGS
+#https://wiki.debian.org/Hardening#Notes_for_packages_using_CMake
+CPPFLAGS:=$(shell dpkg-buildflags --get CPPFLAGS)
+CFLAGS:=$(shell dpkg-buildflags --get CFLAGS) $(CPPFLAGS)
+CXXFLAGS:=$(shell dpkg-buildflags --get CXXFLAGS) $(CPPFLAGS)
+LDFLAGS:=$(shell dpkg-buildflags --get LDFLAGS)
 
 override_dh_auto_configure:
 	cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE="Release" -DUSE_SYSTEM_TINYXML="TRUE" -DCMAKE_VERBOSE_MAKEFILE="FALSE" -DBUILD_ESMTOOL="FALSE"  .
