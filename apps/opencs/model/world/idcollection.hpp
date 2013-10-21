@@ -7,7 +7,6 @@
 
 namespace CSMWorld
 {
-
     /// \brief Single type collection of top level records
     template<typename ESXRecordT, typename IdAccessorT = IdAccessor<ESXRecordT> >
     class IdCollection : public Collection<ESXRecordT, IdAccessorT>
@@ -17,6 +16,11 @@ namespace CSMWorld
             void load (ESM::ESMReader& reader, bool base);
 
             void load (const ESXRecordT& record, bool base);
+
+            bool tryDelete (const std::string& id);
+            ///< Try deleting \a id. If the id does not exist or can't be deleted the call is ignored.
+            ///
+            /// \return Has the ID been deleted?
     };
 
     template<typename ESXRecordT, typename IdAccessorT>
@@ -85,6 +89,32 @@ namespace CSMWorld
 
             this->setRecord (index, record2);
         }
+    }
+
+    template<typename ESXRecordT, typename IdAccessorT>
+    bool IdCollection<ESXRecordT, IdAccessorT>::tryDelete (const std::string& id)
+    {
+        int index = this->searchId (id);
+
+        if (index==-1)
+            return false;
+
+        Record<ESXRecordT> record = Collection<ESXRecordT, IdAccessorT>::getRecord (index);
+
+        if (record.isDeleted())
+            return false;
+
+        if (record.mState==RecordBase::State_ModifiedOnly)
+        {
+            Collection<ESXRecordT, IdAccessorT>::removeRows (index, 1);
+        }
+        else
+        {
+            record.mState = RecordBase::State_Deleted;
+            setRecord (index, record);
+        }
+
+        return true;
     }
 }
 

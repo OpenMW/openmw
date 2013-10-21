@@ -493,7 +493,18 @@ void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base)
                 }
                 else if (record.mType==ESM::Dialogue::Deleted)
                 {
-                    /// \todo handle deleted records
+                    if (mJournals.tryDelete (id))
+                    {
+                        /// \todo handle info records
+                    }
+                    else if (mTopics.tryDelete (id))
+                    {
+                        /// \todo handle info records
+                    }
+                    else
+                    {
+                        /// \todo report deletion of non-existing record
+                    }
                 }
                 else
                 {
