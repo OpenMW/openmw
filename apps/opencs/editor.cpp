@@ -89,7 +89,7 @@ void CS::Editor::setupDataFiles()
 
     dataDirs.insert (dataDirs.end(), dataLocal.begin(), dataLocal.end());
 
-    mDocumentManager.setResourceDir(mCfgMgr.getGlobalDataPath());
+    mDocumentManager.setResourceDir (variables["resources"].as<std::string>());
 
     for (Files::PathContainer::const_iterator iter = dataDirs.begin(); iter != dataDirs.end(); ++iter)
     {

@@ -2258,7 +2258,7 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration, co
             locCustomFiltersPath /= "defaultfilters";
             if (boost::filesystem::exists(locCustomFiltersPath))
             {
-                boost::filesystem::copy(locCustomFiltersPath, mProjectPath);
+                boost::filesystem::copy_file (locCustomFiltersPath, mProjectPath);
             } else {
                 boost::filesystem::path filters(mResDir);
                 filters /= "defaultfilters";
