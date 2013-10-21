@@ -1,5 +1,7 @@
-diff --git a/files/opencs.desktop b/files/opencs.desktop
-index f6aad5b..80afa26 100644
+Description: Add addition keywords
+Author: Bret Curtis <psi29a@gmail.com>
+Index: openmw/files/files/opencs.desktop
+===================================================================
 --- a/files/opencs.desktop
 +++ b/files/opencs.desktop
 @@ -3,6 +3,7 @@ Type=Application
@@ -10,8 +12,8 @@ index f6aad5b..80afa26 100644
  TryExec=opencs
  Exec=opencs
  Icon=opencs
-diff --git a/files/openmw.desktop b/files/openmw.desktop
-index 118cd3b..3e26018 100644
+Index: openmw/files/openmw.desktop
+===================================================================
 --- a/files/openmw.desktop
 +++ b/files/openmw.desktop
 @@ -3,6 +3,7 @@ Type=Application
