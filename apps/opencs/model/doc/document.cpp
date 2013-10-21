@@ -2182,7 +2182,7 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration, co
         else
         {
             boost::filesystem::path locCustomFiltersPath (configuration.getUserPath());
-            locCustomFiltersPath /= "customfilters.omwaddon.project";
+            locCustomFiltersPath /= "defaultfilters";
             if (boost::filesystem::exists(locCustomFiltersPath))
             {
                 boost::filesystem::copy(locCustomFiltersPath, mProjectPath);

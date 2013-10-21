@@ -50,7 +50,7 @@ namespace CSMDoc
             QUndoStack mUndoStack;
 
             // not implemented
-            Document (const Files::ConfigurationManager& configuration, const std::vector< boost::filesystem::path >& files, const boost::filesystem::path& savePath, bool new_);
+            Document (const Document&);
             Document& operator= (const Document&);
 
             void load (const std::vector<boost::filesystem::path>::const_iterator& begin,
