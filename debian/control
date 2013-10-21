@@ -31,14 +31,20 @@ Architecture: all
 Recommends: openmw
 Depends: ${misc:Depends}, fonts-ebgaramond-extra, fonts-dejavu-core
 Description: Resources for the OpenMW engine
- All the shaders, models and extra assets necessary for running OpenMW.
+ All the shaders, models, mygui xml files and extra assets necessary 
+ for running OpenMW. 
+ .
+ Without this, OpenMW will complain about running Morrowind.
 
 Package: openmw-launcher
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, openmw (>= ${source:Version})
 Description: Launcher for OpenMW using the Qt-Gui-Toolkit
- Additional launcher for handling expansions, mods and configuration 
- details of OpenMW.
+ Additional launcher for handling installation of Morrowind and its 
+ expansions, mods and configuration details of OpenMW.
+ .
+ While not necessary, it automates the setup of OpenMW to play
+ Morrowind.
 
 #Package: esmtool
 #Section: utils
