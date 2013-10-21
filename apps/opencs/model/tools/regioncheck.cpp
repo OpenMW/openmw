@@ -19,7 +19,12 @@ int CSMTools::RegionCheckStage::setup()
 
 void CSMTools::RegionCheckStage::perform (int stage, std::vector<std::string>& messages)
 {
-    const ESM::Region& region = mRegions.getRecord (stage).get();
+    const CSMWorld::Record<ESM::Region>& record = mRegions.getRecord (stage);
+
+    if (record.isDeleted())
+        return;
+
+    const ESM::Region& region = record.get();
 
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Region, region.mId);
 

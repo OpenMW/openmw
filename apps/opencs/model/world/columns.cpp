@@ -51,7 +51,7 @@ namespace CSMWorld
             { ColumnId_FactionIndex, "Faction Index" },
             { ColumnId_Charges, "Charges" },
             { ColumnId_Enchantment, "Enchantment" },
-            { ColumnId_Value, "Coin Value" },
+            { ColumnId_CoinValue, "Coin Value" },
             { ColumnId_Teleport, "Teleport" },
             { ColumnId_TeleportCell, "Teleport Cell" },
             { ColumnId_LockLevel, "Lock Level" },
@@ -147,6 +147,19 @@ namespace CSMWorld
             { ColumnId_Magical, "Magical" },
             { ColumnId_Silver, "Silver" },
             { ColumnId_Filter, "Filter" },
+            { ColumnId_PositionXPos, "Pos X" },
+            { ColumnId_PositionYPos, "Pos Y" },
+            { ColumnId_PositionZPos, "Pos Z" },
+            { ColumnId_PositionXRot, "Rot X" },
+            { ColumnId_PositionYRot, "Rot Y" },
+            { ColumnId_PositionZRot, "Rot Z" },
+            { ColumnId_DoorPositionXPos, "Teleport Pos X" },
+            { ColumnId_DoorPositionYPos, "Teleport Pos Y" },
+            { ColumnId_DoorPositionZPos, "Teleport Pos Z" },
+            { ColumnId_DoorPositionXRot, "Teleport Rot X" },
+            { ColumnId_DoorPositionYRot, "Teleport Rot Y" },
+            { ColumnId_DoorPositionZRot, "Teleport Rot Z" },
+            { ColumnId_DialogueType, "Dialogue Type" },
             { ColumnId_Scope, "Scope", },
 
             { ColumnId_UseValue1, "Use value 1" },
@@ -258,6 +271,11 @@ namespace
         "unknown", "none", "short", "integer", "long", "float", "string", 0
     };
 
+    static const char *sDialogueTypeEnums[] =
+    {
+        "Topic", "Voice", "Greeting", "Persuasion", 0
+    };
+
     const char **getEnumNames (CSMWorld::Columns::ColumnId column)
     {
         switch (column)
@@ -272,6 +290,7 @@ namespace
             case CSMWorld::Columns::ColumnId_WeaponType: return sWeaponTypes;
             case CSMWorld::Columns::ColumnId_Modification: return sModificationEnums;
             case CSMWorld::Columns::ColumnId_ValueType: return sVarTypeEnums;
+            case CSMWorld::Columns::ColumnId_DialogueType: return sDialogueTypeEnums;
 
             default: return 0;
         }

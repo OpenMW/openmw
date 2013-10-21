@@ -10,6 +10,8 @@ namespace MWClass
             virtual MWWorld::Ptr
             copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const;
 
+            void ensureCustomData (const MWWorld::Ptr& ptr) const;
+
         public:
 
              virtual void insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const;
@@ -55,6 +57,12 @@ namespace MWClass
             virtual boost::shared_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr)
                 const;
             ///< Generate action for using via inventory menu
+
+            virtual void setRemainingUsageTime (const MWWorld::Ptr& ptr, float duration) const;
+            ///< Sets the remaining duration of the object.
+
+            virtual float getRemainingUsageTime (const MWWorld::Ptr& ptr) const;
+            ///< Returns the remaining duration of the object.
 
             virtual std::string getModel(const MWWorld::Ptr &ptr) const;
 

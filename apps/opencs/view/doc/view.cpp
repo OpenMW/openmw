@@ -115,6 +115,10 @@ void CSVDoc::View::setupWorldMenu()
 
     world->addSeparator(); // items that don't represent single record lists follow here
 
+    QAction *scene = new QAction (tr ("Scene"), this);
+    connect (scene, SIGNAL (triggered()), this, SLOT (addSceneSubView()));
+    world->addAction (scene);
+
     QAction *regionMap = new QAction (tr ("Region Map"), this);
     connect (regionMap, SIGNAL (triggered()), this, SLOT (addRegionMapSubView()));
     world->addAction (regionMap);
@@ -159,6 +163,14 @@ void CSVDoc::View::setupMechanicsMenu()
     QAction *spells = new QAction (tr ("Spells"), this);
     connect (spells, SIGNAL (triggered()), this, SLOT (addSpellsSubView()));
     mechanics->addAction (spells);
+
+    QAction *topics = new QAction (tr ("Topics"), this);
+    connect (topics, SIGNAL (triggered()), this, SLOT (addTopicsSubView()));
+    mechanics->addAction (topics);
+
+    QAction *journals = new QAction (tr ("Journals"), this);
+    connect (journals, SIGNAL (triggered()), this, SLOT (addJournalsSubView()));
+    mechanics->addAction (journals);
 }
 
 void CSVDoc::View::setupAssetsMenu()
@@ -401,6 +413,21 @@ void CSVDoc::View::addRegionMapSubView()
 void CSVDoc::View::addFiltersSubView()
 {
     addSubView (CSMWorld::UniversalId::Type_Filters);
+}
+
+void CSVDoc::View::addSceneSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Scene);
+}
+
+void CSVDoc::View::addTopicsSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Topics);
+}
+
+void CSVDoc::View::addJournalsSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Journals);
 }
 
 void CSVDoc::View::abortOperation (int type)

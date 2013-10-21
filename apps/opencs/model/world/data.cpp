@@ -9,6 +9,7 @@
 #include <components/esm/esmreader.hpp>
 #include <components/esm/defs.hpp>
 #include <components/esm/loadglob.hpp>
+#include <components/esm/cellref.hpp>
 
 #include "idtable.hpp"
 #include "columnimp.hpp"
@@ -151,6 +152,14 @@ CSMWorld::Data::Data() : mRefs (mCells)
     mSpells.addColumn (new FlagColumn<ESM::Spell> (Columns::ColumnId_StarterSpell, 0x2));
     mSpells.addColumn (new FlagColumn<ESM::Spell> (Columns::ColumnId_AlwaysSucceeds, 0x4));
 
+    mTopics.addColumn (new StringIdColumn<ESM::Dialogue>);
+    mTopics.addColumn (new RecordStateColumn<ESM::Dialogue>);
+    mTopics.addColumn (new DialogueTypeColumn<ESM::Dialogue>);
+
+    mJournals.addColumn (new StringIdColumn<ESM::Dialogue>);
+    mJournals.addColumn (new RecordStateColumn<ESM::Dialogue>);
+    mJournals.addColumn (new DialogueTypeColumn<ESM::Dialogue> (true));
+
     mCells.addColumn (new StringIdColumn<Cell>);
     mCells.addColumn (new RecordStateColumn<Cell>);
     mCells.addColumn (new FixedRecordTypeColumn<Cell> (UniversalId::Type_Cell));
@@ -164,6 +173,12 @@ CSMWorld::Data::Data() : mRefs (mCells)
     mRefs.addColumn (new RecordStateColumn<CellRef>);
     mRefs.addColumn (new CellColumn<CellRef>);
     mRefs.addColumn (new IdColumn<CellRef>);
+    mRefs.addColumn (new PosColumn<CellRef> (&CellRef::mPos, 0, false));
+    mRefs.addColumn (new PosColumn<CellRef> (&CellRef::mPos, 1, false));
+    mRefs.addColumn (new PosColumn<CellRef> (&CellRef::mPos, 2, false));
+    mRefs.addColumn (new RotColumn<CellRef> (&CellRef::mPos, 0, false));
+    mRefs.addColumn (new RotColumn<CellRef> (&CellRef::mPos, 1, false));
+    mRefs.addColumn (new RotColumn<CellRef> (&CellRef::mPos, 2, false));
     mRefs.addColumn (new ScaleColumn<CellRef>);
     mRefs.addColumn (new OwnerColumn<CellRef>);
     mRefs.addColumn (new SoulColumn<CellRef>);
@@ -174,6 +189,12 @@ CSMWorld::Data::Data() : mRefs (mCells)
     mRefs.addColumn (new GoldValueColumn<CellRef>);
     mRefs.addColumn (new TeleportColumn<CellRef>);
     mRefs.addColumn (new TeleportCellColumn<CellRef>);
+    mRefs.addColumn (new PosColumn<CellRef> (&CellRef::mDoorDest, 0, true));
+    mRefs.addColumn (new PosColumn<CellRef> (&CellRef::mDoorDest, 1, true));
+    mRefs.addColumn (new PosColumn<CellRef> (&CellRef::mDoorDest, 2, true));
+    mRefs.addColumn (new RotColumn<CellRef> (&CellRef::mDoorDest, 0, true));
+    mRefs.addColumn (new RotColumn<CellRef> (&CellRef::mDoorDest, 1, true));
+    mRefs.addColumn (new RotColumn<CellRef> (&CellRef::mDoorDest, 2, true));
     mRefs.addColumn (new LockLevelColumn<CellRef>);
     mRefs.addColumn (new KeyColumn<CellRef>);
     mRefs.addColumn (new TrapColumn<CellRef>);
@@ -195,6 +216,8 @@ CSMWorld::Data::Data() : mRefs (mCells)
     addModel (new IdTable (&mRegions), UniversalId::Type_Regions, UniversalId::Type_Region);
     addModel (new IdTable (&mBirthsigns), UniversalId::Type_Birthsigns, UniversalId::Type_Birthsign);
     addModel (new IdTable (&mSpells), UniversalId::Type_Spells, UniversalId::Type_Spell);
+    addModel (new IdTable (&mTopics), UniversalId::Type_Topics, UniversalId::Type_Topic);
+    addModel (new IdTable (&mJournals), UniversalId::Type_Journals, UniversalId::Type_Journal);
     addModel (new IdTable (&mCells), UniversalId::Type_Cells, UniversalId::Type_Cell);
     addModel (new IdTable (&mReferenceables), UniversalId::Type_Referenceables,
         UniversalId::Type_Referenceable);
@@ -317,6 +340,28 @@ CSMWorld::IdCollection<ESM::Spell>& CSMWorld::Data::getSpells()
 {
     return mSpells;
 }
+
+
+const CSMWorld::IdCollection<ESM::Dialogue>& CSMWorld::Data::getTopics() const
+{
+    return mTopics;
+}
+
+CSMWorld::IdCollection<ESM::Dialogue>& CSMWorld::Data::getTopics()
+{
+    return mTopics;
+}
+
+const CSMWorld::IdCollection<ESM::Dialogue>& CSMWorld::Data::getJournals() const
+{
+    return mJournals;
+}
+
+CSMWorld::IdCollection<ESM::Dialogue>& CSMWorld::Data::getJournals()
+{
+    return mJournals;
+}
+
 
 const CSMWorld::IdCollection<CSMWorld::Cell>& CSMWorld::Data::getCells() const
 {
@@ -449,6 +494,41 @@ void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base, b
             case ESM::REC_STAT: mReferenceables.load (reader, base, UniversalId::Type_Static); break;
             case ESM::REC_WEAP: mReferenceables.load (reader, base, UniversalId::Type_Weapon); break;
 
+            case ESM::REC_DIAL:
+            {
+                std::string id = reader.getHNOString ("NAME");
+
+                ESM::Dialogue record;
+                record.mId = id;
+                record.load (reader);
+
+                if (record.mType==ESM::Dialogue::Journal)
+                {
+                    mJournals.load (record, base);
+                }
+                else if (record.mType==ESM::Dialogue::Deleted)
+                {
+                    if (mJournals.tryDelete (id))
+                    {
+                        /// \todo handle info records
+                    }
+                    else if (mTopics.tryDelete (id))
+                    {
+                        /// \todo handle info records
+                    }
+                    else
+                    {
+                        /// \todo report deletion of non-existing record
+                    }
+                }
+                else
+                {
+                    mTopics.load (record, base);
+                }
+
+                break;
+            }
+
             case ESM::REC_FILT:
 
                 if (project)
@@ -484,6 +564,8 @@ bool CSMWorld::Data::hasId (const std::string& id) const
         getRegions().searchId (id)!=-1 ||
         getBirthsigns().searchId (id)!=-1 ||
         getSpells().searchId (id)!=-1 ||
+        getTopics().searchId (id)!=-1 ||
+        getJournals().searchId (id)!=-1 ||
         getCells().searchId (id)!=-1 ||
         getReferenceables().searchId (id)!=-1;
 }
@@ -540,6 +622,8 @@ std::vector<std::string> CSMWorld::Data::getIds (bool listDeleted) const
     appendIds (ids, mRegions, listDeleted);
     appendIds (ids, mBirthsigns, listDeleted);
     appendIds (ids, mSpells, listDeleted);
+    appendIds (ids, mTopics, listDeleted);
+    appendIds (ids, mJournals, listDeleted);
     appendIds (ids, mCells, listDeleted);
     appendIds (ids, mReferenceables, listDeleted);
 

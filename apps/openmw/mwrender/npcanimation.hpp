@@ -64,6 +64,8 @@ private:
     int mPartslots[ESM::PRT_Count];  //Each part slot is taken by clothing, armor, or is empty
     int mPartPriorities[ESM::PRT_Count];
 
+    Ogre::Vector3 mFirstPersonOffset;
+
     void updateNpcBase();
 
     NifOgre::ObjectList insertBoundedPart(const std::string &model, int group, const std::string &bonename);
@@ -88,6 +90,11 @@ public:
     void setViewMode(ViewMode viewMode);
 
     void updateParts(bool forceupdate = false);
+
+    /// \brief Applies a translation to the arms and hands.
+    /// This may be called multiple times before the animation
+    /// is updated to add additional offsets.
+    void addFirstPersonOffset(const Ogre::Vector3 &offset);
 
     /// Rebuilds the NPC, updating their root model, animation sources, and equipment.
     void rebuild();

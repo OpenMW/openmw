@@ -57,6 +57,8 @@ namespace MWGui
 
         Ogre::StringVector mResources;
 
+        bool mVSyncWasEnabled;
+
         void changeWallpaper();
 
         void draw();

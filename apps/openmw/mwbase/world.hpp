@@ -324,6 +324,7 @@ namespace MWBase
             virtual void processChangedSettings (const Settings::CategorySettingVector& settings) = 0;
 
             virtual bool isFlying(const MWWorld::Ptr &ptr) const = 0;
+            virtual bool isSlowFalling(const MWWorld::Ptr &ptr) const = 0;
             virtual bool isSwimming(const MWWorld::Ptr &object) const = 0;
             ///Is the head of the creature underwater?
             virtual bool isSubmerged(const MWWorld::Ptr &object) const = 0;
@@ -388,6 +389,12 @@ namespace MWBase
 
             /// Returns true if teleport spell effects are allowed.
             virtual bool isTeleportingEnabled() const = 0;
+
+            /// Enables or disables use of levitation spell effect.
+            virtual void enableLevitation(bool enable) = 0;
+
+            /// Returns true if levitation spell effect is allowed.
+            virtual bool isLevitationEnabled() const = 0;
 
             /// Turn actor into werewolf or normal form.
             virtual void setWerewolf(const MWWorld::Ptr& actor, bool werewolf) = 0;

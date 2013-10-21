@@ -2144,6 +2144,79 @@ void CSMDoc::Document::createBase()
 
         getData().getSkills().add (record);
     }
+
+    static const char *sVoice[] =
+    {
+        "Intruder",
+        "Attack",
+        "Hello",
+        "Thief",
+        "Alarm",
+        "Idle",
+        "Flee",
+        "Hit",
+        0
+    };
+
+    for (int i=0; sVoice[i]; ++i)
+    {
+        ESM::Dialogue record;
+        record.mId = sVoice[i];
+        record.mType = ESM::Dialogue::Voice;
+        record.blank();
+
+        getData().getTopics().add (record);
+    }
+
+    static const char *sGreetings[] =
+    {
+        "Greeting 0",
+        "Greeting 1",
+        "Greeting 2",
+        "Greeting 3",
+        "Greeting 4",
+        "Greeting 5",
+        "Greeting 6",
+        "Greeting 7",
+        "Greeting 8",
+        "Greeting 9",
+        0
+    };
+
+    for (int i=0; sGreetings[i]; ++i)
+    {
+        ESM::Dialogue record;
+        record.mId = sGreetings[i];
+        record.mType = ESM::Dialogue::Greeting;
+        record.blank();
+
+        getData().getTopics().add (record);
+    }
+
+    static const char *sPersuasion[] =
+    {
+        "Intimidate Success",
+        "Intimidate Fail",
+        "Service Refusal",
+        "Admire Success",
+        "Taunt Success",
+        "Bribe Success",
+        "Info Refusal",
+        "Admire Fail",
+        "Taunt Fail",
+        "Bribe Fail",
+        0
+    };
+
+    for (int i=0; sPersuasion[i]; ++i)
+    {
+        ESM::Dialogue record;
+        record.mId = sPersuasion[i];
+        record.mType = ESM::Dialogue::Persuasion;
+        record.blank();
+
+        getData().getTopics().add (record);
+    }
 }
 
 CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,

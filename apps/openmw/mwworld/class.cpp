@@ -132,6 +132,16 @@ namespace MWWorld
         throw std::runtime_error ("class does not support unlocking");
     }
 
+    void Class::setRemainingUsageTime (const Ptr& ptr, float duration) const
+    {
+        throw std::runtime_error ("class does not support time-based uses");
+    }
+
+    float Class::getRemainingUsageTime (const Ptr& ptr) const
+    {
+        throw std::runtime_error ("class does not support time-based uses");
+    }
+
     std::string Class::getScript (const Ptr& ptr) const
     {
         return "";
@@ -165,6 +175,11 @@ namespace MWWorld
     float Class::getEnchantmentPoints (const MWWorld::Ptr& ptr) const
     {
         throw std::runtime_error ("class does not support enchanting");
+    }
+
+    float Class::getFallDamage(const MWWorld::Ptr &ptr, float fallHeight) const
+    {
+        return 0;
     }
 
     MWMechanics::Movement& Class::getMovementSettings (const Ptr& ptr) const

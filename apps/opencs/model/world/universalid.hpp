@@ -86,10 +86,15 @@ namespace CSMWorld
                 Type_Reference,
                 Type_RegionMap,
                 Type_Filter,
-                Type_Filters
+                Type_Filters,
+                Type_Topics,
+                Type_Topic,
+                Type_Journals,
+                Type_Journal,
+                Type_Scene
             };
 
-            enum { NumberOfTypes = Type_Filters+1 };
+            enum { NumberOfTypes = Type_Scene+1 };
 
         private:
 
