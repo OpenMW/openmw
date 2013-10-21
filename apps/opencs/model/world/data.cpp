@@ -330,12 +330,12 @@ CSMWorld::IdCollection<ESM::Spell>& CSMWorld::Data::getSpells()
 }
 
 
-const CSMWorld::IdCollection<ESM::Dialogue>& CSMWorld::Data::getTopcis() const
+const CSMWorld::IdCollection<ESM::Dialogue>& CSMWorld::Data::getTopics() const
 {
     return mTopics;
 }
 
-CSMWorld::IdCollection<ESM::Dialogue>& CSMWorld::Data::getTopcis()
+CSMWorld::IdCollection<ESM::Dialogue>& CSMWorld::Data::getTopics()
 {
     return mTopics;
 }
@@ -525,7 +525,7 @@ bool CSMWorld::Data::hasId (const std::string& id) const
         getRegions().searchId (id)!=-1 ||
         getBirthsigns().searchId (id)!=-1 ||
         getSpells().searchId (id)!=-1 ||
-        getTopcis().searchId (id)!=-1 ||
+        getTopics().searchId (id)!=-1 ||
         getJournals().searchId (id)!=-1 ||
         getCells().searchId (id)!=-1 ||
         getReferenceables().searchId (id)!=-1;

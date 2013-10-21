@@ -119,9 +119,9 @@ namespace CSMWorld
 
             IdCollection<ESM::Spell>& getSpells();
 
-            const IdCollection<ESM::Dialogue>& getTopcis() const;
+            const IdCollection<ESM::Dialogue>& getTopics() const;
 
-            IdCollection<ESM::Dialogue>& getTopcis();
+            IdCollection<ESM::Dialogue>& getTopics();
 
             const IdCollection<ESM::Dialogue>& getJournals() const;
 
