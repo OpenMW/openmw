@@ -30,7 +30,7 @@ CSMDoc::DocumentManager::~DocumentManager()
 CSMDoc::Document *CSMDoc::DocumentManager::addDocument (const std::vector<boost::filesystem::path>& files, const boost::filesystem::path& savePath,
     bool new_)
 {
-    Document *document = new Document (mConfiguration, files, savePath, new_);
+    Document *document = new Document (mConfiguration, files, savePath, mResDir, new_);
 
     mDocuments.push_back (document);
 
@@ -48,4 +48,9 @@ bool CSMDoc::DocumentManager::removeDocument (Document *document)
     delete document;
 
     return mDocuments.empty();
+}
+
+void CSMDoc::DocumentManager::setResourceDir (const boost::filesystem::path& parResDir)
+{
+    mResDir = boost::filesystem::system_complete(parResDir);
 }
