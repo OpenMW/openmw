@@ -43,7 +43,7 @@ namespace CSMDoc
             CSMTools::Tools mTools;
             boost::filesystem::path mProjectPath;
             Saving mSaving;
-	    boost::filesystem::path mResDir;
+            boost::filesystem::path mResDir;
 
             // It is important that the undo stack is declared last, because on desctruction it fires a signal, that is connected to a slot, that is
             // using other member variables.  Unfortunately this connection is cut only in the QObject destructor, which is way too late.
@@ -119,3 +119,4 @@ namespace CSMDoc
 }
 
 #endif
+
