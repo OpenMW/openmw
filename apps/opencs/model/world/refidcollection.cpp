@@ -530,7 +530,7 @@ void CSMWorld::RefIdCollection::load (ESM::ESMReader& reader, bool base, Univers
     }
 }
 
-int CSMWorld::RefIdCollection::getAppendIndex (UniversalId::Type type) const
+int CSMWorld::RefIdCollection::getAppendIndex (const std::string& id, UniversalId::Type type) const
 {
     return mData.getAppendIndex (type);
 }

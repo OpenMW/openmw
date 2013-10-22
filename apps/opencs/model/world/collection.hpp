@@ -104,7 +104,8 @@ namespace CSMWorld
 
             virtual const Record<ESXRecordT>& getRecord (int index) const;
 
-            virtual int getAppendIndex (UniversalId::Type type = UniversalId::Type_None) const;
+            virtual int getAppendIndex (const std::string& id,
+                UniversalId::Type type = UniversalId::Type_None) const;
             ///< \param type Will be ignored, unless the collection supports multiple record types
 
             virtual std::vector<std::string> getIds (bool listDeleted = true) const;
@@ -293,7 +294,8 @@ namespace CSMWorld
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
-    int Collection<ESXRecordT, IdAccessorT>::getAppendIndex (UniversalId::Type type) const
+    int Collection<ESXRecordT, IdAccessorT>::getAppendIndex (const std::string& id,
+        UniversalId::Type type) const
     {
         return static_cast<int> (mRecords.size());
     }

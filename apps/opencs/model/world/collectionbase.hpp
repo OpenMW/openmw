@@ -76,7 +76,8 @@ namespace CSMWorld
 
             virtual const RecordBase& getRecord (int index) const = 0;
 
-            virtual int getAppendIndex (UniversalId::Type type = UniversalId::Type_None) const = 0;
+            virtual int getAppendIndex (const std::string& id,
+                UniversalId::Type type = UniversalId::Type_None) const = 0;
             ///< \param type Will be ignored, unless the collection supports multiple record types
 
             virtual std::vector<std::string> getIds (bool listDeleted = true) const = 0;

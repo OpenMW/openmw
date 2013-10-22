@@ -87,7 +87,7 @@ namespace CSMWorld
 
             void load (ESM::ESMReader& reader, bool base, UniversalId::Type type);
 
-            virtual int getAppendIndex (UniversalId::Type type) const;
+            virtual int getAppendIndex (const std::string& id, UniversalId::Type type) const;
             ///< \param type Will be ignored, unless the collection supports multiple record types
 
             virtual std::vector<std::string> getIds (bool listDeleted) const;
