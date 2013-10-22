@@ -20,7 +20,7 @@ QValidator::State CSVWorld::IdValidator::validate (QString& input, int& pos) con
 {
     if (mRelaxed)
     {
-        if (input.indexOf ('"')!=-1 || input.indexOf ("::")!=-1)
+        if (input.indexOf ('"')!=-1 || input.indexOf ("::")!=-1 || input.indexOf ("#")!=-1)
             return QValidator::Invalid;
     }
     else
