@@ -21,14 +21,12 @@ ContentSelectorView::ContentSelector::ContentSelector(QWidget *parent) :
     buildContentModel();
     buildGameFileView();
     buildAddonView();
-
-    updateViews();
 }
 
 void ContentSelectorView::ContentSelector::buildContentModel()
 {
     mContentModel = new ContentSelectorModel::ContentModel();
-    connect(mContentModel, SIGNAL(layoutChanged()), this, SLOT(updateViews()));
+    //connect(mContentModel, SIGNAL(layoutChanged()), this, SLOT(updateViews()));
 }
 
 void ContentSelectorView::ContentSelector::buildGameFileView()
@@ -40,8 +38,8 @@ void ContentSelectorView::ContentSelector::buildGameFileView()
     mGameFileProxyModel->setFilterRole (Qt::UserRole);
     mGameFileProxyModel->setSourceModel (mContentModel);
 
-    gameFileView->setPlaceholderText(QString("Select a game file..."));
-    gameFileView->setModel(mGameFileProxyModel);
+    ui.gameFileView->setPlaceholderText(QString("Select a game file..."));
+    ui.gameFileView->setModel(mGameFileProxyModel);
 
     connect (ui.gameFileView, SIGNAL(currentIndexChanged(int)),
              this, SLOT (slotCurrentGameFileIndexChanged(int)));
@@ -49,8 +47,8 @@ void ContentSelectorView::ContentSelector::buildGameFileView()
     connect (ui.gameFileView, SIGNAL (currentIndexChanged (int)),
              this, SIGNAL (signalCurrentGamefileIndexChanged (int)));
 
-    gameFileView->setCurrentIndex(-1);
-    gameFileView->setCurrentIndex(0);
+    ui.gameFileView->setCurrentIndex(-1);
+    ui.gameFileView->setCurrentIndex(0);
 }
 
 void ContentSelectorView::ContentSelector::buildAddonView()
@@ -63,7 +61,7 @@ void ContentSelectorView::ContentSelector::buildAddonView()
     mAddonProxyModel->setDynamicSortFilter (true);
     mAddonProxyModel->setSourceModel (mContentModel);
 
-    addonView->setModel(mAddonProxyModel);
+    ui.addonView->setModel(mAddonProxyModel);
 
     connect(ui.addonView, SIGNAL(clicked(const QModelIndex &)), this, SLOT(slotAddonTableItemClicked(const QModelIndex &)));
 
@@ -121,7 +119,7 @@ void ContentSelectorView::ContentSelector::slotCurrentGameFileIndexChanged(int i
 {
     static int oldIndex = -1;
 
-    QAbstractItemModel *const model = gameFileView->model();
+    QAbstractItemModel *const model = ui.gameFileView->model();
     QSortFilterProxyModel *proxy = dynamic_cast<QSortFilterProxyModel *>(model);
 
     if (proxy)
@@ -140,7 +138,7 @@ void ContentSelectorView::ContentSelector::slotCurrentGameFileIndexChanged(int i
 
 void ContentSelectorView::ContentSelector::slotAddonTableItemClicked(const QModelIndex &index)
 {
-    QAbstractItemModel *const model = addonView->model();
+    QAbstractItemModel *const model = ui.addonView->model();
     //QSortFilterProxyModel *proxy  = dynamic_cast<QSortFilterProxyModel *>(model);
 
     if (model->data(index, Qt::CheckStateRole).toInt() == Qt::Unchecked)

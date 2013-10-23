@@ -53,18 +53,18 @@ namespace CSVDoc
         void buildOpenFileView();
 
     signals:
+
         void openFiles();
         void createNewFile();
 
         void signalUpdateCreateButton (bool, int);
         void signalUpdateCreateButtonFlags(int);
 
-    public slots:
-
     private slots:
 
         void slotUpdateCreateButton (int);
         void slotUpdateCreateButton (const QString &, bool);
+        void slotRejected();
     };
 }
 #endif // FILEDIALOG_HPP

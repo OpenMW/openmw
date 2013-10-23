@@ -121,7 +121,6 @@ void CS::Editor::loadDocument()
 void CS::Editor::openFiles()
 {
     std::vector<boost::filesystem::path> files;
-    QStringList paths = mFileDialog.checkedItemsPaths();
 
     foreach (const QString &path, mFileDialog.selectedFilePaths()) {
         files.push_back(path.toStdString());
@@ -141,13 +140,12 @@ void CS::Editor::openFiles()
 void CS::Editor::createNewFile()
 {
     std::vector<boost::filesystem::path> files;
-    QStringList paths = mFileDialog.checkedItemsPaths();
 
     foreach (const QString &path, mFileDialog.selectedFilePaths()) {
         files.push_back(path.toStdString());
     }
 
-    files.push_back(mFileDialog.fileName().toStdString());
+    files.push_back(mFileDialog.filename().toStdString());
 
     /// \todo Get the save path from the file dialogue.
 

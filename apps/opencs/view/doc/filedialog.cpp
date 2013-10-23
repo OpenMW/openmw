@@ -88,7 +88,6 @@ void CSVDoc::FileDialog::buildNewFileView()
              this, SLOT (slotUpdateCreateButton (int)));
 
     connect (ui.projectButtonBox, SIGNAL (accepted()), this, SIGNAL (createNewFile()));
-
     connect (ui.projectButtonBox, SIGNAL (rejected()), this, SLOT (slotRejected()));
 }
 
@@ -98,12 +97,7 @@ void CSVDoc::FileDialog::buildOpenFileView()
     ui.projectGroupBox->setTitle (QString(""));
 
     connect (ui.projectButtonBox, SIGNAL (accepted()), this, SIGNAL (openFiles()));
-    connect (ui.projectButtonBox, SIGNAL (rejected()), this , SIGNAL (rejected()));
-}
-
-void CSVDoc::FileDialog::slotGameFileSelected(int value)
-{
-    emit signalUpdateCreateButton(value > -1, 1);
+    connect (ui.projectButtonBox, SIGNAL (rejected()), this, SLOT (slotRejected()));
 }
 
 void CSVDoc::FileDialog::slotUpdateCreateButton (int)
@@ -129,3 +123,8 @@ QString CSVDoc::FileDialog::filename() const
     return QString ("");
 }
 
+void CSVDoc::FileDialog::slotRejected()
+{
+    emit rejected();
+    close();
+}
