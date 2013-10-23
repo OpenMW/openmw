@@ -2,12 +2,41 @@
 \subsection{Introduction}
 Filters are the key element of OpenCS use cases by allowing rapid and easy access to the seeked records presented in all tables. Therefore: in order to use this application fully effective you should make sure that all concepts and instructions written in the this section of the manual are perfectly clear to you.\\
 Don't be afraid though, filters are fairly intuitive and easy to use.
+
 \subsection{Used Terms}
+
 \begin{description}
  \item[Filter] is generally speaking a tool able to ``Filter'' (that is: select some elements, while discarding others) according to the some criteria. In case of OpenCS: records are being filtred according to the criteria of user choice. Criteria are written down in language with simple syntax.
  \item[Criteria] describes condition under with any any record is being select by the filter.
  \item[Syntax] as you may noticed computers (in general) are rather strict, and expect only strictly formulated orders -- that is: written with correct syntax. Our syntax is simple and described in the {B}asics subsection.
  \item[Expression] is a criteria, only written with OpenCS filter syntax.
+ \item[Tokken] is any part of the expression, responsible for checking for the criteria in specified column.
+ \item[Node] is any part of the expression, responsible for performing logical operations on tokkens. That is: group two (or more) tokkens together in order to create a expression that will check for criteria placed in two (again: or more) columns (logical ``or'', ``and''); create any expression that will show only records that does not met criteria of specific tokken(logical ``not'').
 \end{description}
+
 \subsection{Basics}
-\subsection{Advanced Usage}
+To summarize and lay the very fundaments of this chapter: if you want to display filters of your choice (and you really do, because that's the use case on which opencs is designed) you have to know exactly what do you want to get in order to translate this into the tokkens and nodes. Finally, you will have to write this as legal expression -- that is: using correct syntax. As a result table will show only desired rows.
+
+\subsection{Interface}
+
+\subsection{Using predefined filters}
+
+\subsection{Filter scopes}
+
+\subsubsection{Tokkens}
+Each tokken is used in similar manner. First off: you have to write it's name (for instance: ``string'') and secondly: condition that will be checked inside brackets (for instance string(something, something)). If conditions of your expression will be meet by a record (technical speaking: evaluated true) the record will show up in the table.
+\linebreak
+It is clear that you need to know what are you checking, that's is: what column of the table contains information that you are interested in and what should be inside specific cell inside this column to meet your requirements. In most cases first word inside brackets sets column you want to see, while the second one sets desired value inside of the cell. To separate column from the value use comma.  
+
+\paragraph{String -- string(``column'', ``value'')}
+String in programmers language is often just a word for anything composed of characters. In case of OpenCS this is in fact every value inside the column that is not composed of the pure numbers. Even columns containing only ``true`` and ``false`` values can be targeted by the string tokken.\footnote{There is no Boolean (''true'' or ``false'') value in the OpenCS. You should use string tokken for those.} String evaluates to true, when record contains in the specified column exactly the same value as specified.\footnote{This is not completely valid, however at this point this approach can be useful.}
+\linebreak
+Since majority of the columns contain string values, string tokken is among the most often used. Examples:
+\begin{itemize}
+ \item string(``Record Type'', ``Weapon'') -- will evaluate to true for all records containing ``Weapon'' in the ``Record Type'' column cell. This group contains every weapon (including arrows and bolts) found in the game.
+ \item string(``Portable'', ``true'') -- will evaluate to true for all records containing word true inside ``Portable'' column cell. This group contains every portable light sources (lanterns, torches etc.).
+\end{itemize}
+String tokken can also use regular expressions (regexps) as it's value. This will be described in the ``Advanced'' section.
+
+\paragraph{Value -- value(``value'', (``open'', ``close''))}
+While string tokken covers vast group of columns containing string values, there are in fact columns with just numerical values like ``weight``
