@@ -104,9 +104,9 @@ namespace MWWorld
             ///< \attention This function is internal to the world model and should not be called from
             /// outside.
 
-            virtual bool stacks (const Ptr& ptr1, const Ptr& ptr2);
+            virtual bool stacks (const Ptr& stack, const Ptr& item);
             ///< @return true if the two specified objects can stack with each other
-            /// @note ptr1 is the item that is already in this container
+            /// @note stack is the item that is already in this container (it may be equipped)
 
             virtual int remove(const Ptr& item, int count, const Ptr& actor);
             ///< Remove \a count item(s) designated by \a item from this inventory.

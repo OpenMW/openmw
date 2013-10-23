@@ -276,20 +276,22 @@ void MWWorld::InventoryStore::flagAsModified()
     mMagicEffectsUpToDate = false;
 }
 
-bool MWWorld::InventoryStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
+bool MWWorld::InventoryStore::stacks(const Ptr& stack, const Ptr& item)
 {
-    bool canStack = MWWorld::ContainerStore::stacks(ptr1, ptr2);
+    bool canStack = MWWorld::ContainerStore::stacks(stack, item);
     if (!canStack)
         return false;
 
-    // don't stack if the item being checked against is currently equipped.
+    // don't stack if 'stack' (the item being checked against) is currently equipped.
     for (TSlots::const_iterator iter (mSlots.begin());
         iter!=mSlots.end(); ++iter)
     {
-        if (*iter != end() && ptr1 == **iter)
-            return false;
-        if (*iter != end() && ptr2 == **iter)
-            return false;
+        if (*iter != end() && stack == **iter)
+        {
+            bool stackWhenEquipped = MWWorld::Class::get(**iter).getEquipmentSlots(**iter).second;
+            if (!stackWhenEquipped)
+                return false;
+        }
     }
 
     return true;
