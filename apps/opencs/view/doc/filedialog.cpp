@@ -10,10 +10,10 @@
 #include <QPushButton>
 #include <QLabel>
 #include <QGroupBox>
-#include <QGridLayout>
 
 #include "components/contentselector/model/esmfile.hpp"
 #include "components/contentselector/view/contentselector.hpp"
+
 #include "filewidget.hpp"
 #include "adjusterwidget.hpp"
 
@@ -101,9 +101,9 @@ void CSVDoc::FileDialog::buildOpenFileView()
     connect (ui.projectButtonBox, SIGNAL (rejected()), this , SIGNAL (rejected()));
 }
 
-void CSVDoc::FileDialog::slotRejected()
+void CSVDoc::FileDialog::slotGameFileSelected(int value)
 {
-    close();
+    emit signalUpdateCreateButton(value > -1, 1);
 }
 
 void CSVDoc::FileDialog::slotUpdateCreateButton (int)

@@ -10,7 +10,6 @@ class QSortFilterProxyModel;
 
 namespace ContentSelectorView
 {
-
     class ContentSelector : public QObject
     {
         Q_OBJECT

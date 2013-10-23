@@ -6,6 +6,7 @@
 
 #include <QMenu>
 #include <QContextMenuEvent>
+
 #include <QGridLayout>
 #include <QMessageBox>
 #include <assert.h>
@@ -21,26 +22,13 @@ ContentSelectorView::ContentSelector::ContentSelector(QWidget *parent) :
     buildGameFileView();
     buildAddonView();
 
-    /*
-    //mContentModel->sort(3);  // Sort by date accessed
-
-*/
+    updateViews();
 }
 
 void ContentSelectorView::ContentSelector::buildContentModel()
 {
     mContentModel = new ContentSelectorModel::ContentModel();
-
-    if (mFilePaths.size()>0)
-    {
-        foreach (const QString &path, mFilePaths)
-            mContentModel->addFiles(path);
-
-        mFilePaths.clear();
-    }
-
-    ui.gameFileView->setCurrentIndex(-1);
-    mContentModel->uncheckAll();
+    connect(mContentModel, SIGNAL(layoutChanged()), this, SLOT(updateViews()));
 }
 
 void ContentSelectorView::ContentSelector::buildGameFileView()
@@ -52,8 +40,8 @@ void ContentSelectorView::ContentSelector::buildGameFileView()
     mGameFileProxyModel->setFilterRole (Qt::UserRole);
     mGameFileProxyModel->setSourceModel (mContentModel);
 
-    ui.gameFileView->setPlaceholderText(QString("Select a game file..."));
-    ui.gameFileView->setModel(mGameFileProxyModel);
+    gameFileView->setPlaceholderText(QString("Select a game file..."));
+    gameFileView->setModel(mGameFileProxyModel);
 
     connect (ui.gameFileView, SIGNAL(currentIndexChanged(int)),
              this, SLOT (slotCurrentGameFileIndexChanged(int)));
@@ -61,7 +49,8 @@ void ContentSelectorView::ContentSelector::buildGameFileView()
     connect (ui.gameFileView, SIGNAL (currentIndexChanged (int)),
              this, SIGNAL (signalCurrentGamefileIndexChanged (int)));
 
-    ui.gameFileView->setCurrentIndex(-1);
+    gameFileView->setCurrentIndex(-1);
+    gameFileView->setCurrentIndex(0);
 }
 
 void ContentSelectorView::ContentSelector::buildAddonView()
@@ -74,7 +63,7 @@ void ContentSelectorView::ContentSelector::buildAddonView()
     mAddonProxyModel->setDynamicSortFilter (true);
     mAddonProxyModel->setSourceModel (mContentModel);
 
-    ui.addonView->setModel(mAddonProxyModel);
+    addonView->setModel(mAddonProxyModel);
 
     connect(ui.addonView, SIGNAL(clicked(const QModelIndex &)), this, SLOT(slotAddonTableItemClicked(const QModelIndex &)));
 
@@ -120,7 +109,6 @@ ContentSelectorModel::ContentFileList
     return mContentModel->checkedItems();
 }
 
-
 void ContentSelectorView::ContentSelector::addFiles(const QString &path)
 {
     mContentModel->addFiles(path);
@@ -133,7 +121,7 @@ void ContentSelectorView::ContentSelector::slotCurrentGameFileIndexChanged(int i
 {
     static int oldIndex = -1;
 
-    QAbstractItemModel *const model = ui.gameFileView->model();
+    QAbstractItemModel *const model = gameFileView->model();
     QSortFilterProxyModel *proxy = dynamic_cast<QSortFilterProxyModel *>(model);
 
     if (proxy)
@@ -152,7 +140,8 @@ void ContentSelectorView::ContentSelector::slotCurrentGameFileIndexChanged(int i
 
 void ContentSelectorView::ContentSelector::slotAddonTableItemClicked(const QModelIndex &index)
 {
-    QAbstractItemModel *const model = ui.addonView->model();
+    QAbstractItemModel *const model = addonView->model();
+    //QSortFilterProxyModel *proxy  = dynamic_cast<QSortFilterProxyModel *>(model);
 
     if (model->data(index, Qt::CheckStateRole).toInt() == Qt::Unchecked)
         model->setData(index, Qt::Checked, Qt::CheckStateRole);
