@@ -18,10 +18,38 @@ Don't be afraid though, filters are fairly intuitive and easy to use.
 To summarize and lay the very fundaments of this chapter: if you want to display filters of your choice (and you really do, because that's the use case on which opencs is designed) you have to know exactly what do you want to get in order to translate this into the tokkens and nodes. Finally, you will have to write this as legal expression -- that is: using correct syntax. As a result table will show only desired rows.
 
 \subsection{Interface}
+Above each table there is a field that is used to enter filter: either predefined by the OpenMW developers or made by you, the user. You probabbly noticed it before. However there is alo completely new element, although using familiar table layout. Go to the application menu view, and click filters. You should see set of default filters, made by the OpenMW team in the table with the following columns: filter, description and modyfied.
 
+\begin{description}
+ \item[Filter] column containing expression of the filter.
+ \item[Description] contains the short description of the filter function.
+ \item[Name] constains the name of the filter.
+ \item[Modyfied] just like in all other tables you have seen so far modyfied indicates if a filter was added, modyfied or removed.
+\end{description}
+
+So let's learn how to actually use those to speed up your work.
 \subsection{Using predefined filters}
+Using those filters is quite easy and involves typing inside the filter field above the table. For instance, try to open referencables table and type in the filters field the following: ``project::weapons''. As soon as you complete the text table will magicly alters and will show only the weapons. As you could noticed project::weapons is nothing else than a name of one of the predefined filters. That's it: in order to use the filter inside the table you simply type it's name inside the filter field.
+\linebreak
+To make life easier filter names follow simple convention. 
+
+\begin{itemize}
+ \item Filter name filtring a specific record type contains usually the name of specific group. For instance project::weapons filter contains the word weapons (did you noticed?). Plural form is always used.
+ \item When filtering specific subgroup the name starts just like in the case of general filter. For instance project::weaponssilver will filter only silver weapons (new mechanic introduced by the Bloodmoon, silver weapons deal double damage against werewolfs) and project::weaponsmagical will filter only magical weapons (able to hurt ghosts and other supernatural creatures).
+ \item There are few exceptions from the above. For instance there is a project::added, project::removed, project::modyfied, project::base. You could probabbly except something more like ``project::statusadded'' but in this case typing this few extra characters would only help to break your keyboard faster.
+\end{itemize}
+
+I strongly recommend to take a look at the filters table right now to see what you can filter with that. And try using it! It is very simple.
 
 \subsection{Filter scopes}
+Back to the manual? Good. Now let's explain the cryptic project:: at the begining of every predefined filter. It is a scope. Scope determinates if the filter will be stored along with your project or if it will be forgotten as soon as OpenCS quits.
+\begin{description}
+ \item[project::] scope indicates that filter is stored inside the project file.
+ \item[session::] scope indicates that filter is not stored inside the project file, and once you will quit OpenCS (close session) the filter will be gone. Forever! Untill then it can be found inside the filters table.
+\end{description}
+In addition to this two scopes, there is a third one; called one-shot. One-shot filters are not stored anywhere and as the name implies they are supposed to be created when needed just once. Good thing about the one-shot filters is that you don't need to open filters table in order to create it. Instead you type it directly inside the filter field, starting with ``!''.
+\linebreak
+Still, you may wonder how you are supposed to write expressions, what and nodes tokkens are avaible, and what syntax looks like.
 
 \subsubsection{Tokkens}
 Each tokken is used in similar manner. First off: you have to write it's name (for instance: ``string'') and secondly: condition that will be checked inside brackets (for instance string(something, something)). If conditions of your expression will be meet by a record (technical speaking: evaluated true) the record will show up in the table.
