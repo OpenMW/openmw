@@ -399,6 +399,10 @@ void ContentSelectorModel::ContentModel::addFile(EsmFile *file)
     beginInsertRows(QModelIndex(), mFiles.count(), mFiles.count());
         mFiles.append(file);
     endInsertRows();
+
+    QModelIndex idx = index (mFiles.size() - 2, 0, QModelIndex());
+
+    emit dataChanged (idx, idx);
 }
 
 void ContentSelectorModel::ContentModel::addFiles(const QString &path)
@@ -466,6 +470,7 @@ void ContentSelectorModel::ContentModel::sortFiles()
         //iterate each file, obtaining a reference to it's gamefiles list
         for (int i = 0; i < fileCount; i++)
         {
+            QModelIndex idx1 = index (i, 0, QModelIndex());
             const QStringList &gamefiles = mFiles.at(i)->gameFiles();
             //iterate each file after the current file, verifying that none of it's
             //dependencies appear.
@@ -474,6 +479,11 @@ void ContentSelectorModel::ContentModel::sortFiles()
                 if (gamefiles.contains(mFiles.at(j)->fileName()))
                 {
                         mFiles.move(j, i);
+
+                        QModelIndex idx2 = index (j, 0, QModelIndex());
+
+                        emit dataChanged (idx1, idx2);
+
                         movedFiles = true;
                 }
             }

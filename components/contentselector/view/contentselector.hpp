@@ -3,38 +3,19 @@
 
 #include <QDialog>
 
-#include "ui_datafilespage.h"
+#include "ui_contentselector.h"
 #include "../model/contentmodel.hpp"
 
 class QSortFilterProxyModel;
 
-namespace CSVDoc
-{
-    class FileWidget;
-    class AdjusterWidget;
-}
 namespace ContentSelectorView
 {
-    enum SelectorFlags
-    {
-        Flag_Content    = 0x01,     // gamefile combobox & addon list view
-        Flag_NewAddon   = 0x02,     // enable project button box (Create/Cancel) and file/adjuster widgets
-        Flag_LoadAddon  = 0x04,     // enable project button box (Open/Cancel)
-        Flag_Profile    = 0x08      // enable profile combo box
-    };
 
-    class ContentSelector : public QWidget
+    class ContentSelector : public QObject
     {
         Q_OBJECT
 
-        unsigned char mFlags;
-        bool mIgnoreProfileSignal;
-
-        static ContentSelector *mInstance;
-        static QStringList mFilePaths;
-
-        CSVDoc::FileWidget *mFileWidget;
-        CSVDoc::AdjusterWidget *mAdjusterWidget;
+        QStringList mFilePaths;
 
     protected:
 
@@ -44,64 +25,39 @@ namespace ContentSelectorView
 
     public:
 
-        explicit ContentSelector(QWidget *parent = 0, unsigned char flags = Flag_Content);
+        explicit ContentSelector(QWidget *parent = 0);
 
-        static void configure(QWidget *subject, unsigned char flags = Flag_Content);
-        static ContentSelector &instance();
-        static void addFiles(const QString &path);
+        void addFiles(const QString &path);
 
         void clearCheckStates();
         void setCheckStates (const QStringList &list);
-        ContentSelectorModel::ContentFileList *CheckedItems();
 
-        QString projectFilename() const;
         ContentSelectorModel::ContentFileList selectedFiles() const;
 
-        QAbstractItemModel *profilesModel() const;
-        void setGameFile (const QString &filename = "");
-        void addProfile (const QString &item, bool setAsCurrent = false);
-        void setProfile (int index);
-        int getProfileIndex (const QString &item) const;
-        QString getProfileText() const;
+        void setGameFile (const QString &filename = QString(""));
+
+        bool isGamefileSelected() const
+            { return ui.gameFileView->currentIndex() != -1; }
+
+        QWidget *uiWidget() const
+            { return ui.contentGroupBox; }
 
 
    private:
 
-        Ui::DataFilesPage ui;
+        Ui::ContentSelector ui;
 
         void buildContentModel();
         void buildGameFileView();
         void buildAddonView();
-        void buildProfilesView();
-        void buildNewAddonView();
-        void buildLoadAddonView();
-
-        bool isFlagged(SelectorFlags flag) const;
 
     signals:
-
-        void accepted();
-        void rejected();
-
-        void signalCreateButtonClicked();
-
-        void signalProfileRenamed(QString,QString);
-        void signalProfileChangedByUser(QString,QString);
-        void signalProfileDeleted(QString);
-        void signalAddNewProfile(QString);
+        void signalCurrentGamefileIndexChanged (int);
 
     private slots:
 
-        void slotProfileTextChanged (const QString &text);
-        void slotCurrentProfileIndexChanged(int index);
         void slotCurrentGameFileIndexChanged(int index);
         void slotAddonTableItemClicked(const QModelIndex &index);
-
-        void slotUpdateCreateButton (bool);
-
-        // Action slots
-        void on_newProfileAction_triggered();
-        void on_deleteProfileAction_triggered();
     };
 }
 

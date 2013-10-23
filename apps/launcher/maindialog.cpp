@@ -485,7 +485,7 @@ bool MainDialog::setupGameSettings()
     foreach (const QString path, mGameSettings.getDataDirs()) {
         QDir dir(path);
         QStringList filters;
-        filters << "*.esp" << "*.esm";
+        filters << "*.esp" << "*.esm" << "*.omwgame" << "*.omwaddon";
 
         if (!dir.entryList(filters).isEmpty())
             dataDirs.append(path);

@@ -1,11 +1,12 @@
-#include <QToolButton>
-#include <QStyle>
-#include <QStylePainter>
-
 #include "lineedit.hpp"
 
-ContentSelectorView::LineEdit::LineEdit(QWidget *parent)
+LineEdit::LineEdit(QWidget *parent)
     : QLineEdit(parent)
+{
+    setupClearButton();
+}
+
+void LineEdit::setupClearButton()
 {
     mClearButton = new QToolButton(this);
     QPixmap pixmap(":images/clear.png");
@@ -16,16 +17,9 @@ ContentSelectorView::LineEdit::LineEdit(QWidget *parent)
     mClearButton->hide();
     connect(mClearButton, SIGNAL(clicked()), this, SLOT(clear()));
     connect(this, SIGNAL(textChanged(const QString&)), this, SLOT(updateClearButton(const QString&)));
-    int frameWidth = style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
-
-    setObjectName(QString("LineEdit"));
-    setStyleSheet(QString("LineEdit { padding-right: %1px; } ").arg(mClearButton->sizeHint().width() + frameWidth + 1));
-    QSize msz = minimumSizeHint();
-    setMinimumSize(qMax(msz.width(), mClearButton->sizeHint().height() + frameWidth * 2 + 2),
-                   qMax(msz.height(), mClearButton->sizeHint().height() + frameWidth * 2 + 2));
 }
 
-void ContentSelectorView::LineEdit::resizeEvent(QResizeEvent *)
+void LineEdit::resizeEvent(QResizeEvent *)
 {
     QSize sz = mClearButton->sizeHint();
     int frameWidth = style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
@@ -33,7 +27,7 @@ void ContentSelectorView::LineEdit::resizeEvent(QResizeEvent *)
                       (rect().bottom() + 1 - sz.height())/2);
 }
 
-void ContentSelectorView::LineEdit::updateClearButton(const QString& text)
+void LineEdit::updateClearButton(const QString& text)
 {
     mClearButton->setVisible(!text.isEmpty());
 }

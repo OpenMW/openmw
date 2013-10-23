@@ -3,49 +3,54 @@
 
 #include <QDialog>
 #include <QModelIndex>
-#include "../../../../components/contentselector/view/contentselector.hpp"
 
-class QDialogButtonBox;
-class QSortFilterProxyModel;
-class QAbstractItemModel;
-class QPushButton;
-class QStringList;
-class QString;
-class QMenu;
-class QLabel;
+#include "ui_filedialog.h"
 
 class DataFilesModel;
 class PluginsProxyModel;
 
-
-
 namespace ContentSelectorView
 {
-    class LineEdit;
+    class ContentSelector;
 }
 
 namespace CSVDoc
 {
+    class FileWidget;
+
     class FileDialog : public QDialog
     {
         Q_OBJECT
 
-        unsigned char mOpenFileFlags;
-        unsigned char mNewFileFlags;
+    public:
+
+        enum DialogType
+        {
+            DialogType_New,
+            DialogType_Open
+        };
+
+    private:
+
+        ContentSelectorView::ContentSelector *mSelector;
+        Ui::FileDialog ui;
+        DialogType mDialogType;
+        FileWidget *mFileWidget;
 
     public:
-        explicit FileDialog(QWidget *parent = 0);
 
-        void openFile();
-        void newFile();
+        explicit FileDialog(QWidget *parent = 0);
+        void showDialog (DialogType dialogType);
+
         void addFiles (const QString &path);
 
-        QString filename();
+        QString filename() const;
         QStringList selectedFilePaths();
 
     private:
 
-        void showDialog();
+        void buildNewFileView();
+        void buildOpenFileView();
 
     signals:
 
@@ -57,6 +62,9 @@ namespace CSVDoc
         void slotRejected();
 
     private slots:
+
+        void slotUpdateCreateButton (int);
+        void slotUpdateCreateButton (const QString &, bool);
 
     };
 }

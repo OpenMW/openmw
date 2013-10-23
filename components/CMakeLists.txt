@@ -74,7 +74,7 @@ add_component_dir (loadinglistener
     loadinglistener
     )
 
-set (ESM_UI ${CMAKE_SOURCE_DIR}/files/ui/datafilespage.ui
+set (ESM_UI ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
     )
 find_package(Qt4 COMPONENTS QtCore QtGui)
 
@@ -82,11 +82,7 @@ if(QT_QTGUI_LIBRARY AND QT_QTCORE_LIBRARY)
    add_component_qt_dir (contentselector
         model/modelitem model/esmfile
         model/naturalsort model/contentmodel
-        view/profilescombobox view/comboboxlineedit
-        view/lineedit view/contentselector
-        view/filewidget view/adjusterwidget
-        view/textinputdialog
-
+        view/combobox view/contentselector
        )
 
    include(${QT_USE_FILE})

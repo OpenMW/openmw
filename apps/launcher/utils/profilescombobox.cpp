@@ -5,23 +5,17 @@
 #include <QKeyEvent>
 
 #include "profilescombobox.hpp"
-#include "comboboxlineedit.hpp"
 
-ContentSelectorView::ProfilesComboBox::ProfilesComboBox(QWidget *parent) :
-    QComboBox(parent)
+ProfilesComboBox::ProfilesComboBox(QWidget *parent) :
+    ContentSelectorView::ComboBox(parent)
 {
-    mValidator = new QRegExpValidator(QRegExp("^[a-zA-Z0-9_]*$"), this); // Alpha-numeric + underscore
-    setEditEnabled(true);
-    setValidator(mValidator);
-    setCompleter(0);
-
     connect(this, SIGNAL(activated(int)), this,
             SLOT(slotIndexChangedByUser(int)));
 
     setInsertPolicy(QComboBox::NoInsert);
 }
 
-void ContentSelectorView::ProfilesComboBox::setEditEnabled(bool editable)
+void ProfilesComboBox::setEditEnabled(bool editable)
 {
     if (isEditable() == editable)
         return;
@@ -37,6 +31,7 @@ void ContentSelectorView::ProfilesComboBox::setEditEnabled(bool editable)
     setValidator(mValidator);
 
     ComboBoxLineEdit *edit = new ComboBoxLineEdit(this);
+
     setLineEdit(edit);
     setCompleter(0);
 
@@ -50,7 +45,7 @@ void ContentSelectorView::ProfilesComboBox::setEditEnabled(bool editable)
              SIGNAL (signalProfileTextChanged (QString)));
 }
 
-void ContentSelectorView::ProfilesComboBox::slotTextChanged(const QString &text)
+void ProfilesComboBox::slotTextChanged(const QString &text)
 {
     QPalette *palette = new QPalette();
     palette->setColor(QPalette::Text,Qt::red);
@@ -64,7 +59,7 @@ void ContentSelectorView::ProfilesComboBox::slotTextChanged(const QString &text)
     }
 }
 
-void ContentSelectorView::ProfilesComboBox::slotEditingFinished()
+void ProfilesComboBox::slotEditingFinished()
 {
     QString current = currentText();
     QString previous = itemText(currentIndex());
@@ -85,7 +80,7 @@ void ContentSelectorView::ProfilesComboBox::slotEditingFinished()
     emit(profileRenamed(previous, current));
 }
 
-void ContentSelectorView::ProfilesComboBox::slotIndexChangedByUser(int index)
+void ProfilesComboBox::slotIndexChangedByUser(int index)
 {
     if (index == -1)
         return;
@@ -94,23 +89,11 @@ void ContentSelectorView::ProfilesComboBox::slotIndexChangedByUser(int index)
     mOldProfile = currentText();
 }
 
-void ContentSelectorView::ProfilesComboBox::paintEvent(QPaintEvent *)
+ProfilesComboBox::ComboBoxLineEdit::ComboBoxLineEdit (QWidget *parent)
+    : LineEdit (parent)
 {
-    QStylePainter painter(this);
-    painter.setPen(palette().color(QPalette::Text));
+    int frameWidth = style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
 
-    // draw the combobox frame, focusrect and selected etc.
-    QStyleOptionComboBox opt;
-    initStyleOption(&opt);
-    painter.drawComplexControl(QStyle::CC_ComboBox, opt);
-
-    // draw the icon and text
-    if (!opt.editable && currentIndex() == -1) // <<< we adjust the text displayed when nothing is selected
-        opt.currentText = mPlaceholderText;
-        painter.drawControl(QStyle::CE_ComboBoxLabel, opt);
-}
-
-void ContentSelectorView::ProfilesComboBox::setPlaceholderText(const QString &text)
-{
-    mPlaceholderText = text;
+    setObjectName(QString("ComboBoxLineEdit"));
+    setStyleSheet(QString("ComboBoxLineEdit { background-color: transparent; padding-right: %1px; } ").arg(mClearButton->sizeHint().width() + frameWidth + 1));
 }

@@ -7,8 +7,8 @@
 #include <QDialogButtonBox>
 #include <QPushButton>
 
-#include "components/contentselector/view/filewidget.hpp"
-#include "components/contentselector/view/adjusterwidget.hpp"
+#include "filewidget.hpp"
+#include "adjusterwidget.hpp"
 
 CSVDoc::NewGameDialogue::NewGameDialogue()
 {

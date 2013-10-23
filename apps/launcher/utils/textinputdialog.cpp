@@ -7,8 +7,6 @@
 #include <QValidator>
 #include <QLabel>
 
-#include <components/contentselector/view/lineedit.hpp>
-
 TextInputDialog::TextInputDialog(const QString& title, const QString &text, QWidget *parent) :
     QDialog(parent)
 {
@@ -20,7 +18,7 @@ TextInputDialog::TextInputDialog(const QString& title, const QString &text, QWid
 
     // Line edit
     QValidator *validator = new QRegExpValidator(QRegExp("^[a-zA-Z0-9_]*$"), this); // Alpha-numeric + underscore
-    mLineEdit = new ContentSelectorView::LineEdit(this);
+    mLineEdit = new DialogLineEdit(this);
     mLineEdit->setValidator(validator);
     mLineEdit->setCompleter(0);
 
@@ -73,4 +71,17 @@ void TextInputDialog::slotUpdateOkButton(QString text)
         palette->setColor(QPalette::Text,Qt::red);
         mLineEdit->setPalette(*palette);
     }
+}
+
+TextInputDialog::DialogLineEdit::DialogLineEdit (QWidget *parent) :
+    LineEdit (parent)
+{
+    int frameWidth = style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
+
+    setObjectName(QString("LineEdit"));
+    setStyleSheet(QString("LineEdit { padding-right: %1px; } ").arg(mClearButton->sizeHint().width() + frameWidth + 1));
+    QSize msz = minimumSizeHint();
+    setMinimumSize(qMax(msz.width(), mClearButton->sizeHint().height() + frameWidth * 2 + 2),
+                   qMax(msz.height(), mClearButton->sizeHint().height() + frameWidth * 2 + 2));
+
 }

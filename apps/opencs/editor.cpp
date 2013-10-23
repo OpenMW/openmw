@@ -109,15 +109,13 @@ void CS::Editor::createGame()
 void CS::Editor::createAddon()
 {
     mStartup.hide();
-
-    mFileDialog.newFile();
+    mFileDialog.showDialog (CSVDoc::FileDialog::DialogType_New);
 }
 
 void CS::Editor::loadDocument()
 {
     mStartup.hide();
-
-    mFileDialog.openFile();
+    mFileDialog.showDialog (CSVDoc::FileDialog::DialogType_Open);
 }
 
 void CS::Editor::openFiles()

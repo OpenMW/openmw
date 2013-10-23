@@ -3,23 +3,30 @@
 
 #include <QDialog>
 
+#include "lineedit.hpp"
+
 class QDialogButtonBox;
 
-namespace ContentSelectorView {
-    class LineEdit;
-}
-
+class LineEdit;
 
 class TextInputDialog : public QDialog
 {
     Q_OBJECT
 
-    ContentSelectorView::LineEdit *mLineEdit;
+    class DialogLineEdit : public LineEdit
+    {
+    public:
+        explicit DialogLineEdit (QWidget *parent = 0);
+    };
+
+    DialogLineEdit *mLineEdit;
     QDialogButtonBox *mButtonBox;
 
 public:
 
     explicit TextInputDialog(const QString& title, const QString &text, QWidget *parent = 0);
+    ~TextInputDialog () {}
+
     QString getText() const;
 
     int exec();
