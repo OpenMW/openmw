@@ -57,14 +57,18 @@ Each token is used in similar manner. First off: you have to write it's name (fo
 It is clear that you need to know what are you checking, that's is: what column of the table contains information that you are interested in and what should be inside specific cell inside this column to meet your requirements. In most cases first word inside brackets sets column you want to see, while the second one sets desired value inside of the cell. To separate column from the value use comma.  
 
 \paragraph{String -- string(``column'', ``value'')}
-String in programmers language is often just a word for anything composed of characters. In case of OpenCS this is in fact true for every value inside the column that is not composed of the pure numbers. Even columns containing only ``true`` and ``false`` values can be targeted by the string token.\footnote{There is no Boolean (''true'' or ``false'') value in the OpenCS. You should use string token for those.} String evaluates to true, when record contains in the specified column exactly the same value as specified.\footnote{This is not completely valid, however at this point this approach can be useful.}
-\linebreak
+String in programmers language is often\footnote{Often, not always. There are different programming languages using slightly different terms.} just a word for anything composed of characters. In case of OpenCS this is in fact true for every value inside the column that is not composed of the pure numbers. Even columns containing only ``true`` and ``false`` values can be targeted by the string token.\footnote{There is no Boolean (''true'' or ``false'') value in the OpenCS. You should use string token for those.} String evaluates to true, when record contains in the specified column exactly the same value as specified.
+\\
 Since majority of the columns contain string values, string token is among the most often used. Examples:
 \begin{itemize}
  \item string(``Record Type'', ``Weapon'') -- will evaluate to true for all records containing ``Weapon'' in the ``Record Type'' column cell. This group contains every weapon (including arrows and bolts) found in the game.
  \item string(``Portable'', ``true'') -- will evaluate to true for all records containing word true inside ``Portable'' column cell. This group contains every portable light sources (lanterns, torches etc.).
 \end{itemize}
-String token can also use regular expressions (regexps) as it's value. This will be described in the ``Advanced'' section.
+This is probably enough to create around 90\% string filters you would need. However, this token is even more powerfull -- it accepts regular expressions (also called regexps). Regular expressions is a way to create string criteria that will be matched by one than just one specific value in the column. For instance, you can display both left and right gauntlets with the following expression: ``string("armor type", ".* gauntlet"))`` because ''.*'' in regexps means just: ``anything''. This filter says: please, show me ``any'' gauntlet. There are left and right gauntlets in the morrowind so this will evaluate to true for both. Simple, isn't it?
+\\
+Creating regexps can be a difficult and annoying -- especially when you need complex criteria. On the other hand, We are under impression that in reality complex expressions are needed only in sporadic cases. In fact, the truth is that mostly the mentioned ``.*'' is needed and therefore the following description of regexps can be skipped by vast majority of readers.
+
+%TO-DO: write the regexps essentials.
 
 \paragraph{Value -- value(``value'', (``open'', ``close''))}
 While string token covers vast group of columns containing string values, there are in fact columns with just numerical values like ``weight``. To filter those we need a value token. This one works in similar manner to the string filter: first token name and criteria inside brackets. Clearly, conditions should hold column to test in. However in this case wanted value is specified as a range.
