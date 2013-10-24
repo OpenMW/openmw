@@ -1,70 +1,70 @@
 \section{Filters}
 \subsection{Introduction}
-Filters are the key element of OpenCS use cases by allowing rapid and easy access to the seeked records presented in all tables. Therefore: in order to use this application fully effective you should make sure that all concepts and instructions written in the this section of the manual are perfectly clear to you.\\
+Filters are the key element of OpenCS use cases by allowing rapid and easy access to the searched records presented in all tables. Therefore: in order to use this application fully effective you should make sure that all concepts and instructions written in the this section of the manual are perfectly clear to you.\\
 Don't be afraid though, filters are fairly intuitive and easy to use.
 
 \subsection{Used Terms}
 
 \begin{description}
- \item[Filter] is generally speaking a tool able to ``Filter'' (that is: select some elements, while discarding others) according to the some criteria. In case of OpenCS: records are being filtred according to the criteria of user choice. Criteria are written down in language with simple syntax.
+ \item[Filter] is generally speaking a tool able to ``Filter'' (that is: select some elements, while discarding others) according to the some criteria. In case of OpenCS: records are being filtered according to the criteria of user choice. Criteria are written down in language with simple syntax.
  \item[Criteria] describes condition under with any any record is being select by the filter.
  \item[Syntax] as you may noticed computers (in general) are rather strict, and expect only strictly formulated orders -- that is: written with correct syntax. Our syntax is simple and described in the {B}asics subsection.
  \item[Expression] is a criteria, only written with OpenCS filter syntax.
- \item[Tokken] is any part of the expression, responsible for checking for the criteria in specified column.
- \item[Node] is any part of the expression, responsible for performing logical operations on tokkens. That is: group two (or more) tokkens together in order to create a expression that will check for criteria placed in two (again: or more) columns (logical ``or'', ``and''); create any expression that will show only records that does not met criteria of specific tokken(logical ``not'').
+ \item[Token] is any part of the expression, responsible for checking for the criteria in specified column.
+ \item[Node] is any part of the expression, responsible for performing logical operations on tokens. That is: group two (or more) tokens together in order to create a expression that will check for criteria placed in two (again: or more) columns (logical ``or'', ``and''); create any expression that will show only records that does not met criteria of specific token(logical ``not'').
 \end{description}
 
 \subsection{Basics}
-To summarize and lay the very fundaments of this chapter: if you want to display filters of your choice (and you really do, because that's the use case on which opencs is designed) you have to know exactly what do you want to get in order to translate this into the tokkens and nodes. Finally, you will have to write this as legal expression -- that is: using correct syntax. As a result table will show only desired rows.
+In fact you don't need to learn everything about filters in order to use them. In fact all you need to know to achieve decent productivity with OpenCS is inside basics section.
 
 \subsection{Interface}
-Above each table there is a field that is used to enter filter: either predefined by the OpenMW developers or made by you, the user. You probabbly noticed it before. However there is alo completely new element, although using familiar table layout. Go to the application menu view, and click filters. You should see set of default filters, made by the OpenMW team in the table with the following columns: filter, description and modyfied.
+Above each table there is a field that is used to enter filter: either predefined by the OpenMW developers or made by you, the user. You probably noticed it before. However there is also completely new element, although using familiar table layout. Go to the application menu view, and click filters. You should see set of default filters, made by the OpenMW team in the table with the following columns: filter, description and modified.
 
 \begin{description}
+ \item[ID] contains the name of the filter.
+ \item[Modified] just like in all other tables you have seen so far modified indicates if a filter was added, modified or removed.
  \item[Filter] column containing expression of the filter.
  \item[Description] contains the short description of the filter function.
- \item[Name] constains the name of the filter.
- \item[Modyfied] just like in all other tables you have seen so far modyfied indicates if a filter was added, modyfied or removed.
 \end{description}
 
 So let's learn how to actually use those to speed up your work.
 \subsection{Using predefined filters}
-Using those filters is quite easy and involves typing inside the filter field above the table. For instance, try to open referencables table and type in the filters field the following: ``project::weapons''. As soon as you complete the text table will magicly alters and will show only the weapons. As you could noticed project::weapons is nothing else than a name of one of the predefined filters. That's it: in order to use the filter inside the table you simply type it's name inside the filter field.
-\linebreak
+Using those filters is quite easy and involves typing inside the filter field above the table. For instance, try to open referencables table and type in the filters field the following: ``project::weapons''. As soon as you complete the text table will magicly alters and will show only the weapons. As you could noticed project::weapons is nothing else than a name of one of the predefined filters. That's it: in order to use the filter inside the table you simply type it's name inside the filter field.\\
 To make life easier filter names follow simple convention. 
 
 \begin{itemize}
- \item Filter name filtring a specific record type contains usually the name of specific group. For instance project::weapons filter contains the word weapons (did you noticed?). Plural form is always used.
+ \item Filter name filtering a specific record type contains usually the name of specific group. For instance project::weapons filter contains the word weapons (did you noticed?). Plural form is always used.
  \item When filtering specific subgroup the name starts just like in the case of general filter. For instance project::weaponssilver will filter only silver weapons (new mechanic introduced by the Bloodmoon, silver weapons deal double damage against werewolfs) and project::weaponsmagical will filter only magical weapons (able to hurt ghosts and other supernatural creatures).
- \item There are few exceptions from the above. For instance there is a project::added, project::removed, project::modyfied, project::base. You could probabbly except something more like ``project::statusadded'' but in this case typing this few extra characters would only help to break your keyboard faster.
+ \item There are few exceptions from the above. For instance there is a project::added, project::removed, project::modyfied, project::base. You would probably except something more like ``project::statusadded'' but in this case typing this few extra characters would only help to break your keyboard faster.
 \end{itemize}
 
-I strongly recommend to take a look at the filters table right now to see what you can filter with that. And try using it! It is very simple.
+We strongly recommend to take a look at the filters table right now to see what you can filter with that. And try using it! It is very simple.
 
-\subsection{Filter scopes}
-Back to the manual? Good. Now let's explain the cryptic project:: at the begining of every predefined filter. It is a scope. Scope determinates if the filter will be stored along with your project or if it will be forgotten as soon as OpenCS quits.
+\subsection{Advanced}
+If you want to create your own filter you have to know exactly what do you want to get in order to translate this into the tokens and nodes. Finally, you will have to write this as legal expression -- that is: using correct syntax. As a result table will show only desired rows.\\
+Advance subsection covers everything that you need to know in order to create any filter you may want to.
+\subsection{Namespaces}
+It is a ``namespace``, a term borrowed from the C++ language. In case of OpenCS namespace determinate if the filter will be stored along with your project or if it will be forgotten as soon as OpenCS quits.
 \begin{description}
- \item[project::] scope indicates that filter is stored inside the project file.
- \item[session::] scope indicates that filter is not stored inside the project file, and once you will quit OpenCS (close session) the filter will be gone. Forever! Untill then it can be found inside the filters table.
+ \item[project::] namespace indicates that filter is stored inside the project file.
+ \item[session::] namespace indicates that filter is not stored inside the project file, and once you will quit OpenCS (close session) the filter will be gone. Forever! Until then it can be found inside the filters table.
 \end{description}
-In addition to this two scopes, there is a third one; called one-shot. One-shot filters are not stored anywhere and as the name implies they are supposed to be created when needed just once. Good thing about the one-shot filters is that you don't need to open filters table in order to create it. Instead you type it directly inside the filter field, starting with ``!''.
-\linebreak
-Still, you may wonder how you are supposed to write expressions, what and nodes tokkens are avaible, and what syntax looks like.
+In addition to this two scopes, there is a third one; called one-shot. One-shot filters are not stored anywhere and as the name implies they are supposed to be created when needed only once. Good thing about the one-shot filters is that you don't need to open filters table in order to create it. Instead you just type it directly inside the filter field, starting with ``!''.\\
+Still, you may wonder how you are supposed to write expressions, what and nodes tokens are avaible, and what syntax looks like.
 
-\subsubsection{Tokkens}
-Each tokken is used in similar manner. First off: you have to write it's name (for instance: ``string'') and secondly: condition that will be checked inside brackets (for instance string(something, something)). If conditions of your expression will be meet by a record (technical speaking: evaluated true) the record will show up in the table.
-\linebreak
+\subsubsection{Tokens}
+Each token is used in similar manner. First off: you have to write it's name (for instance: ``string'') and secondly: condition that will be checked inside brackets (for instance string(something, something)). If conditions of your expression will be meet by a record (technical speaking: evaluated true) the record will show up in the table.\\
 It is clear that you need to know what are you checking, that's is: what column of the table contains information that you are interested in and what should be inside specific cell inside this column to meet your requirements. In most cases first word inside brackets sets column you want to see, while the second one sets desired value inside of the cell. To separate column from the value use comma.  
 
 \paragraph{String -- string(``column'', ``value'')}
-String in programmers language is often just a word for anything composed of characters. In case of OpenCS this is in fact every value inside the column that is not composed of the pure numbers. Even columns containing only ``true`` and ``false`` values can be targeted by the string tokken.\footnote{There is no Boolean (''true'' or ``false'') value in the OpenCS. You should use string tokken for those.} String evaluates to true, when record contains in the specified column exactly the same value as specified.\footnote{This is not completely valid, however at this point this approach can be useful.}
+String in programmers language is often just a word for anything composed of characters. In case of OpenCS this is in fact true for every value inside the column that is not composed of the pure numbers. Even columns containing only ``true`` and ``false`` values can be targeted by the string token.\footnote{There is no Boolean (''true'' or ``false'') value in the OpenCS. You should use string token for those.} String evaluates to true, when record contains in the specified column exactly the same value as specified.\footnote{This is not completely valid, however at this point this approach can be useful.}
 \linebreak
-Since majority of the columns contain string values, string tokken is among the most often used. Examples:
+Since majority of the columns contain string values, string token is among the most often used. Examples:
 \begin{itemize}
  \item string(``Record Type'', ``Weapon'') -- will evaluate to true for all records containing ``Weapon'' in the ``Record Type'' column cell. This group contains every weapon (including arrows and bolts) found in the game.
  \item string(``Portable'', ``true'') -- will evaluate to true for all records containing word true inside ``Portable'' column cell. This group contains every portable light sources (lanterns, torches etc.).
 \end{itemize}
-String tokken can also use regular expressions (regexps) as it's value. This will be described in the ``Advanced'' section.
+String token can also use regular expressions (regexps) as it's value. This will be described in the ``Advanced'' section.
 
 \paragraph{Value -- value(``value'', (``open'', ``close''))}
-While string tokken covers vast group of columns containing string values, there are in fact columns with just numerical values like ``weight``
+While string token covers vast group of columns containing string values, there are in fact columns with just numerical values like ``weight``. To filter those we need a value token. This one works in similar manner to the string filter: first token name and criteria inside brackets. Clearly, conditions should hold column to test in. However in this case wanted value is specified as a range.
