@@ -100,6 +100,9 @@ namespace MWGui
 
         finish();
         targetView->update();
+
+        // We need to update the view since an other item could be auto-equipped.
+        mSourceView->update();
     }
 
     void DragAndDrop::finish()
