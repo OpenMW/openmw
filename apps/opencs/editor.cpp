@@ -126,12 +126,9 @@ void CS::Editor::openFiles()
         files.push_back(path.toStdString());
     }
 
-    foreach (const boost::filesystem::path fp, files)
-        qDebug() << "loading files: " << fp.c_str();
+    boost::filesystem::path savePath = mFileDialog.filename().toStdString();
 
-    /// \todo Get the save path from the file dialogue
-
-    CSMDoc::Document *document = mDocumentManager.addDocument (files, *files.rbegin(), false);
+    CSMDoc::Document *document = mDocumentManager.addDocument (files, savePath, false);
 
     mViewManager.addView (document);
     mFileDialog.hide();
@@ -147,9 +144,9 @@ void CS::Editor::createNewFile()
 
     files.push_back(mFileDialog.filename().toStdString());
 
-    /// \todo Get the save path from the file dialogue.
+    boost::filesystem::path savePath = mFileDialog.filename().toStdString();
 
-    CSMDoc::Document *document = mDocumentManager.addDocument (files, *files.rbegin(), true);
+    CSMDoc::Document *document = mDocumentManager.addDocument (files, savePath, true);
 
     mViewManager.addView (document);
     mFileDialog.hide();

@@ -120,7 +120,7 @@ QString CSVDoc::FileDialog::filename() const
     if (mDialogType == DialogType_New)
         return mFileWidget->getName();
 
-    return QString ("");
+    return mSelector->currentFile();
 }
 
 void CSVDoc::FileDialog::slotRejected()

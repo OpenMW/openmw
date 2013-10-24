@@ -26,6 +26,8 @@ namespace ContentSelectorView
 
         explicit ContentSelector(QWidget *parent = 0);
 
+        QString currentFile() const;
+
         void addFiles(const QString &path);
 
         void clearCheckStates();

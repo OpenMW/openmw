@@ -503,7 +503,6 @@ bool ContentSelectorModel::ContentModel::isChecked(const QString& name) const
 
 void ContentSelectorModel::ContentModel::setCheckState(const QString &name, bool checkState)
 {
-
     if (name.isEmpty())
         return;
 
