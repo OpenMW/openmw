@@ -2135,4 +2135,9 @@ namespace MWWorld
             // TODO: RT_Range, RT_Touch
         }
     }
+
+    void World::updateAnimParts(const Ptr& actor)
+    {
+        mRendering->updateAnimParts(actor);
+    }
 }

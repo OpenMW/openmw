@@ -41,6 +41,7 @@ void MWWorld::InventoryStore::initSlots (TSlots& slots)
 
 MWWorld::InventoryStore::InventoryStore() : mMagicEffectsUpToDate (false)
  , mSelectedEnchantItem(end())
+ , mActorModelUpdateEnabled (true)
 {
     initSlots (mSlots);
 }
@@ -114,6 +115,8 @@ void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& ite
     mSlots[slot] = iterator;
 
     flagAsModified();
+
+    updateActorModel(actor);
 }
 
 void MWWorld::InventoryStore::unequipAll(const MWWorld::Ptr& actor)
@@ -147,6 +150,9 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& npc)
 
     TSlots slots;
     initSlots (slots);
+
+    // Disable model update during auto-equip
+    mActorModelUpdateEnabled = false;
 
     for (ContainerStoreIterator iter (begin()); iter!=end(); ++iter)
     {
@@ -236,9 +242,12 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& npc)
             changed = true;
         }
 
+    mActorModelUpdateEnabled = true;
+
     if (changed)
     {
         mSlots.swap (slots);
+        updateActorModel(npc);
         flagAsModified();
     }
 }
@@ -379,7 +388,7 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipSlot(int slot, c
             }
         }
 
-        /// \todo update actor model
+        updateActorModel(actor);
 
         return retval;
     }
@@ -397,4 +406,10 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipItem(const MWWor
     }
 
     throw std::runtime_error ("attempt to unequip an item that is not currently equipped");
+}
+
+void MWWorld::InventoryStore::updateActorModel(const MWWorld::Ptr& actor)
+{
+    if (mActorModelUpdateEnabled)
+        MWBase::Environment::get().getWorld()->updateAnimParts(actor);
 }

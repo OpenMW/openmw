@@ -473,6 +473,8 @@ namespace MWWorld
             virtual bool toggleGodMode();
 
             virtual void castSpell (const MWWorld::Ptr& actor);
+
+            virtual void updateAnimParts(const MWWorld::Ptr& ptr);
     };
 }
 

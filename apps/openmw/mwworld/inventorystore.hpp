@@ -45,6 +45,7 @@ namespace MWWorld
 
             mutable MWMechanics::MagicEffects mMagicEffects;
             mutable bool mMagicEffectsUpToDate;
+            bool mActorModelUpdateEnabled;
 
             typedef std::vector<ContainerStoreIterator> TSlots;
 
@@ -56,6 +57,8 @@ namespace MWWorld
             void copySlots (const InventoryStore& store);
 
             void initSlots (TSlots& slots);
+
+            void updateActorModel (const Ptr& actor);
 
         public:
 

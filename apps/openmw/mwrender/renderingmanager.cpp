@@ -327,6 +327,19 @@ void RenderingManager::rebuildPtr(const MWWorld::Ptr &ptr)
     }
 }
 
+void RenderingManager::updateAnimParts(const MWWorld::Ptr& ptr)
+{
+    NpcAnimation *anim = NULL;
+
+    if(ptr.getRefData().getHandle() == "player")
+        anim = mPlayerAnimation;
+    else if(MWWorld::Class::get(ptr).isActor())
+        anim = dynamic_cast<NpcAnimation*>(mActors.getAnimation(ptr));
+
+    if(anim)
+        anim->updateParts();
+}
+
 void RenderingManager::update (float duration, bool paused)
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
