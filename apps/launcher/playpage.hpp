@@ -15,22 +15,6 @@ namespace Launcher
     {
         Q_OBJECT
 
-<<<<<<< Updated upstream
-public:
-    PlayPage(QWidget *parent = 0);
-    void setProfilesComboBoxModel(QAbstractItemModel *model);
-
-signals:
-    void profileChanged(int index);
-    void playButtonClicked();
-
-public slots:
-    void setProfilesComboBoxIndex(int index);
-
-private slots:
-    void slotCurrentIndexChanged(int index);
-    void slotPlayClicked();
-=======
     public:
         PlayPage(QWidget *parent = 0);
         void setProfilesModel(QAbstractItemModel *model);
@@ -44,10 +28,6 @@ private slots:
 
     private slots:
         void slotPlayClicked();
->>>>>>> Stashed changes
-
-
-
     };
 }
 #endif

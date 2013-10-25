@@ -7,13 +7,7 @@
 #include <QValidator>
 #include <QLabel>
 
-<<<<<<< Updated upstream
-#include <components/fileorderlist/utils/lineedit.hpp>
-
-TextInputDialog::TextInputDialog(const QString& title, const QString &text, QWidget *parent) :
-=======
 Launcher::TextInputDialog::TextInputDialog(const QString& title, const QString &text, QWidget *parent) :
->>>>>>> Stashed changes
     QDialog(parent)
 {
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
@@ -57,24 +51,17 @@ int Launcher::TextInputDialog::exec()
     return QDialog::exec();
 }
 
-<<<<<<< Updated upstream
-void TextInputDialog::setOkButtonEnabled(bool enabled)
-=======
+
 QString Launcher::TextInputDialog::getText() const
->>>>>>> Stashed changes
 {
     QPushButton *okButton = mButtonBox->button(QDialogButtonBox::Ok);
     okButton->setEnabled(enabled);
+}
 
-<<<<<<< Updated upstream
-    QPalette *palette = new QPalette();
-    palette->setColor(QPalette::Text,Qt::red);
-=======
 void Launcher::TextInputDialog::slotUpdateOkButton(QString text)
 {
     bool enabled = !(text.isEmpty());
     mButtonBox->button(QDialogButtonBox::Ok)->setEnabled(enabled);
->>>>>>> Stashed changes
 
     if (enabled) {
         mLineEdit->setPalette(QApplication::palette());
@@ -82,8 +69,6 @@ void Launcher::TextInputDialog::slotUpdateOkButton(QString text)
         // Existing profile name, make the text red
         mLineEdit->setPalette(*palette);
     }
-<<<<<<< Updated upstream
-=======
 }
 
 Launcher::TextInputDialog::DialogLineEdit::DialogLineEdit (QWidget *parent) :
@@ -96,6 +81,4 @@ Launcher::TextInputDialog::DialogLineEdit::DialogLineEdit (QWidget *parent) :
     QSize msz = minimumSizeHint();
     setMinimumSize(qMax(msz.width(), mClearButton->sizeHint().height() + frameWidth * 2 + 2),
                    qMax(msz.height(), mClearButton->sizeHint().height() + frameWidth * 2 + 2));
->>>>>>> Stashed changes
-
 }

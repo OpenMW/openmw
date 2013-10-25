@@ -5,19 +5,6 @@
 //#include "lineedit.hpp"
 
 class QDialogButtonBox;
-<<<<<<< Updated upstream
-class LineEdit;
-
-class TextInputDialog : public QDialog
-{
-    Q_OBJECT
-public:
-    explicit TextInputDialog(const QString& title, const QString &text, QWidget *parent = 0);
-    inline LineEdit *lineEdit() { return mLineEdit; }
-    void setOkButtonEnabled(bool enabled);
-
-    LineEdit *mLineEdit;
-=======
 
 namespace Launcher
 {
@@ -40,22 +27,13 @@ namespace Launcher
         ~TextInputDialog () {}
 
         QString getText() const;
->>>>>>> Stashed changes
 
         int exec();
 
-<<<<<<< Updated upstream
-private:
-    QDialogButtonBox *mButtonBox;
-
-    
-};
-=======
     private slots:
         void slotUpdateOkButton(QString text);
 
     };
 }
->>>>>>> Stashed changes
 
 #endif // TEXTINPUTDIALOG_HPP
