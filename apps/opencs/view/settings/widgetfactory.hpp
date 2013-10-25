@@ -20,11 +20,12 @@ namespace CSVSettings {
 
     public:
 
-        explicit SettingWidget (QWidget *widget, QSortFilterProxyModel *model, QWidget *parent = 0);
+        explicit SettingWidget (QWidget *widget, QSortFilterProxyModel *model,
+                                const QString &caption, QWidget *parent = 0);
 
     private:
 
-        void buildWidgetView();
+        void buildWidgetView (const QString &caption);
         void buildWidgetModel (QSortFilterProxyModel *model);
 
     };
@@ -36,11 +37,12 @@ namespace CSVSettings {
         QWidget *mParent;
         QLayout *mLayout;
         QSortFilterProxyModel *mSourceModel;
-        QDataWidgetMapper *mDataAdapter;
 
     public:
+        explicit WidgetFactory (QLayout *layout, QSortFilterProxyModel *model, QWidget *parent);
+
         virtual ~WidgetFactory() {}
-        virtual QWidget *createWidget (const QString &name);
+        virtual QWidget *createWidget (const QString &name, QWidget *widget);
 
     };
 
@@ -49,7 +51,7 @@ namespace CSVSettings {
     {
 
     public:
-        explicit CheckBoxFactory (QLayout *layout, QWidget *parent = 0);
+        explicit CheckBoxFactory (QLayout *layout, QSortFilterProxyModel *model, QWidget *parent = 0);
 
         QWidget *createWidget (const QString &name);
     };
@@ -58,7 +60,7 @@ namespace CSVSettings {
     {
 
     public:
-        explicit ComboBoxFactory (QLayout *layout, QWidget *parent = 0);
+        explicit ComboBoxFactory (QLayout *layout, QSortFilterProxyModel *model, QWidget *parent = 0);
 
         QWidget *createWidget(const QString &name);
     };
@@ -67,7 +69,7 @@ namespace CSVSettings {
     {
 
     public:
-        explicit ListBoxFactory (QLayout *layout, QWidget *parent = 0);
+        explicit ListBoxFactory (QLayout *layout, QSortFilterProxyModel *model, QWidget *parent = 0);
 
         QWidget *createWidget(const QString &name);
     };
@@ -76,7 +78,7 @@ namespace CSVSettings {
     {
 
     public:
-        explicit SpinBoxFactory (QLayout *layout, QWidget *parent = 0);
+        explicit SpinBoxFactory (QLayout *layout, QSortFilterProxyModel *model, QWidget *parent = 0);
 
         QWidget *createWidget(const QString &name);
     };
@@ -85,7 +87,7 @@ namespace CSVSettings {
     {
 
     public:
-        explicit RadioButtonFactory (QLayout *layout, QWidget *parent = 0);
+        explicit RadioButtonFactory (QLayout *layout, QSortFilterProxyModel *model, QWidget *parent = 0);
 
         QWidget *createWidget(const QString &name);
     };
@@ -94,7 +96,7 @@ namespace CSVSettings {
     {
 
     public:
-        explicit ToggleButtonFactory (QLayout *layout, QWidget *parent = 0);
+        explicit ToggleButtonFactory (QLayout *layout, QSortFilterProxyModel *model, QWidget *parent = 0);
 
         QWidget *createWidget(const QString &name) {}
     };
@@ -103,7 +105,7 @@ namespace CSVSettings {
     {
 
     public:
-        explicit LineEditFactory (QLayout *layout, QWidget *parent = 0);
+        explicit LineEditFactory (QLayout *layout, QSortFilterProxyModel *model, QWidget *parent = 0);
 
         QWidget *createWidget(const QString &name);
     };

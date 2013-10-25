@@ -1,25 +1,28 @@
-#include <QSortFilterProxyModel>
 #include <QCheckBox>
 #include <QComboBox>
-#include <QRadioButton>
-#include <QListWidget>
-#include <QSpinBox>
-#include <QLineEdit>
-#include <QLabel>
-
+#include <QDataWidgetMapper>
 #include <QHBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QListWidget>
+#include <QRadioButton>
+#include <QSortFilterProxyModel>
+#include <QSpinBox>
 #include <QVBoxLayout>
 
 #include "widgetfactory.hpp"
+
+#include <QDebug>
+
 
 CSVSettings::WidgetFactory::WidgetFactory (QLayout *layout,
                                                      QSortFilterProxyModel *model, QWidget *parent)
     : mLayout (layout), mParent (parent), mSourceModel (model)
 {}
 
-CSVSettings::SettingWidget *CSVSettings::WidgetFactory::createWidget(const QString &caption, QWidget *widget)
+QWidget *CSVSettings::WidgetFactory::createWidget(const QString &caption, QWidget *widget)
 {
-    SettingWidget *setting_widget = new SettingWidget (widget, mSourceModel, mParent);
+    SettingWidget *setting_widget = new SettingWidget (widget, mSourceModel, caption, mParent);
 
 
     //mLayout->setAlignment (mWidget, getAlignment (align));
@@ -27,7 +30,8 @@ CSVSettings::SettingWidget *CSVSettings::WidgetFactory::createWidget(const QStri
 
 }
 
-CSVSettings::SettingWidget::SettingWidget(QWidget *widget, QSortFilterProxyModel *model, QWidget *parent)
+CSVSettings::SettingWidget::SettingWidget(QWidget *widget, QSortFilterProxyModel *model,
+                                          const QString &caption, QWidget *parent)
     : mWidget (widget), mFilterProxy (new QSortFilterProxyModel (parent)), mAdapter (0), QWidget (parent)
 {
 
@@ -56,22 +60,22 @@ void CSVSettings::SettingWidget::buildWidgetView(const QString &caption)
 
 void CSVSettings::SettingWidget::buildWidgetModel(QSortFilterProxyModel *model)
 {
-    mFilterProxy = new QSortFilterProxyModel (parent);
+    mFilterProxy = new QSortFilterProxyModel (parent());
 
     //filters the model using the widget name (name of the setting or setting value)
     mFilterProxy->setSourceModel (model);
     mFilterProxy->setFilterKeyColumn (0);
-    mFilterProxy->setFilterFixedString (widget->objectName());
+    mFilterProxy->setFilterFixedString (mWidget->objectName());
     mFilterProxy->setDynamicSortFilter (true);
 
     mAdapter = new QDataWidgetMapper(this);
     mAdapter->setModel (mFilterProxy);
-    mAdapter->addMapping(mWidgetFactory->createWidget(name), 2);
+    mAdapter->addMapping(mWidget, 2);
     mAdapter->toFirst();
 }
 
-CSVSettings::CheckBoxFactory::CheckBoxFactory (QLayout *layout, QWidget *parent = 0)
-    : TypedWidgetFactory (layout, parent)
+CSVSettings::CheckBoxFactory::CheckBoxFactory (QLayout *layout, QWidget *parent)
+    : WidgetFactory (layout, model, parent)
 {}
 
 QWidget *CSVSettings::CheckBoxFactory::createWidget(const QString &name)
@@ -79,8 +83,8 @@ QWidget *CSVSettings::CheckBoxFactory::createWidget(const QString &name)
     setupWidget (name, new QCheckBox(name, mParent));
 }
 
-CSVSettings::ComboBoxFactory::ComboBoxFactory (QLayout *layout, QWidget *parent = 0)
-    : TypedWidgetFactory (layout, parent)
+CSVSettings::ComboBoxFactory::ComboBoxFactory (QLayout *layout, QWidget *parent)
+    : WidgetFactory (layout, model, parent)
 {}
 
 QWidget *CSVSettings::ComboBoxFactory::createWidget(const QString &name)
@@ -88,8 +92,8 @@ QWidget *CSVSettings::ComboBoxFactory::createWidget(const QString &name)
     setupWidget (name, new QComboBox(name, mParent));
 }
 
-CSVSettings::SpinBoxFactory::SpinBoxFactory (QLayout *layout, QWidget *parent = 0)
-    : TypedWidgetFactory (layout, parent)
+CSVSettings::SpinBoxFactory::SpinBoxFactory (QLayout *layout, QWidget *parent)
+    : WidgetFactory (layout, model, parent)
 {}
 
 QWidget *CSVSettings::SpinBoxFactory::createWidget(const QString &name)
@@ -97,8 +101,8 @@ QWidget *CSVSettings::SpinBoxFactory::createWidget(const QString &name)
     setupWidget (name, new QSpinBox(name, mParent));
 }
 
-CSVSettings::ListBoxFactory::ListBoxFactory (QLayout *layout, QWidget *parent = 0)
-    : TypedWidgetFactory (layout, parent)
+CSVSettings::ListBoxFactory::ListBoxFactory (QLayout *layout, QWidget *parent)
+    : WidgetFactory (layout, model, parent)
 {}
 
 QWidget *CSVSettings::ListBoxFactory::createWidget(const QString &name)
@@ -106,8 +110,8 @@ QWidget *CSVSettings::ListBoxFactory::createWidget(const QString &name)
     setupWidget (name, new QListBox(name, mParent));
 }
 
-CSVSettings::RadioButtonFactory::RadioButtonFactory (QLayout *layout, QWidget *parent = 0)
-    : TypedWidgetFactory (layout, parent)
+CSVSettings::RadioButtonFactory::RadioButtonFactory (QLayout *layout, QWidget *parent)
+    : WidgetFactory (layout, model, parent)
 {}
 
 QWidget *CSVSettings::RadioButtonFactory::createWidget(const QString &name)
@@ -115,8 +119,8 @@ QWidget *CSVSettings::RadioButtonFactory::createWidget(const QString &name)
     setupWidget (name, new QRadioButton(name, mParent));
 }
 
-CSVSettings::LineEditFactory::LineEditFactory (QLayout *layout, QWidget *parent = 0)
-    : TypedWidgetFactory (layout, parent)
+CSVSettings::LineEditFactory::LineEditFactory (QLayout *layout, QWidget *parent)
+    : WidgetFactory (layout, model, parent)
 {}
 
 QWidget *CSVSettings::LineEditFactory::createWidget(const QString &name)
@@ -124,8 +128,8 @@ QWidget *CSVSettings::LineEditFactory::createWidget(const QString &name)
     setupWidget (name, new QLineEdit(name, mParent));
 }
 
-CSVSettings::ToggleButtonFactory::ToggleButtonFactory (QLayout *layout, QWidget *parent = 0)
-    : TypedWidgetFactory (layout, parent)
+CSVSettings::ToggleButtonFactory::ToggleButtonFactory (QLayout *layout, QWidget *parent)
+    : WidgetFactory (layout, model, parent)
 {}
 
 QWidget *CSVSettings::ToggleButtonFactory::createWidget(const QString &name)

@@ -28,7 +28,7 @@ class QDataWidgetMapper;
 
 namespace CSVSettings
 {
-    class IWidgetFactory;
+    class WidgetFactory;
 
     class SettingView : public QGroupBox
     {
@@ -37,7 +37,7 @@ namespace CSVSettings
         QSortFilterProxyModel *mSettingFilter;
         static const QString INVISIBLE_BOX_STYLE;
         QString mVisibleBoxStyle;
-        IWidgetFactory *mWidgetFactory;
+        WidgetFactory *mWidgetFactory;
         QList <QWidget *> mViewWidgets;
         QDataWidgetMapper *mDataAdapter;
 

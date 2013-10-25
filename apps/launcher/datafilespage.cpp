@@ -35,61 +35,6 @@ Launcher::DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSet
     setupDataFiles();
 }
 
-void Launcher::DataFilesPage::createActions()
-{
-    // Add the actions to the toolbuttons
-    newProfileButton->setDefaultAction(newProfileAction);
-    deleteProfileButton->setDefaultAction(deleteProfileAction);
-}
-
-void Launcher::DataFilesPage::setupDataFiles()
-{
-    // Set the encoding to the one found in openmw.cfg or the default
-    mDataFilesModel->setEncoding(mGameSettings.value(QString("encoding"), QString("win1252")));
-
-    QStringList paths = mGameSettings.getDataDirs();
-
-    foreach (const QString &path, paths) {
-        mDataFilesModel->addFiles(path);
-    }
-
-    QString dataLocal = mGameSettings.getDataLocal();
-    if (!dataLocal.isEmpty())
-        mDataFilesModel->addFiles(dataLocal);
-
-    // Sort by date accessed for now
-    mDataFilesModel->sort(3);
-
-    QStringList profiles = mLauncherSettings.subKeys(QString("Profiles/"));
-    QString profile = mLauncherSettings.value(QString("Profiles/currentprofile"));
-
-    if (!profiles.isEmpty())
-        ui.profilesComboBox->addItems(profiles);
-
-    // Add the current profile if empty
-    if (ui.profilesComboBox->findText(profile) == -1 && !profile.isEmpty())
-        ui.profilesComboBox->addItem(profile);
-
-    if (ui.profilesComboBox->findText(QString("Default")) == -1)
-        ui.profilesComboBox->addItem(QString("Default"));
-
-    if (profile.isEmpty() || profile == QLatin1String("Default")) {
-        deleteProfileAction->setEnabled(false);
-        ui.profilesComboBox->setEditEnabled(false);
-        ui.profilesComboBox->setCurrentIndex(profilesComboBox->findText(QString("Default")));
-    } else {
-        ui.profilesComboBox->setEditEnabled(true);
-        ui.profilesComboBox->setCurrentIndex(profilesComboBox->findText(profile));
-    }
-
-    // We do this here to prevent deletion of profiles when initializing the combobox
-    connect(ui.profilesComboBox, SIGNAL(profileRenamed(QString,QString)), this, SLOT(profileRenamed(QString,QString)));
-    connect(ui.profilesComboBox, SIGNAL(profileChanged(QString,QString)), this, SLOT(profileChanged(QString,QString)));
-
-    loadSettings();
-
-}
-
 void Launcher::DataFilesPage::loadSettings()
 {
     QString profileName = ui.profilesComboBox->currentText();
@@ -175,11 +120,6 @@ void Launcher::DataFilesPage::removeProfile(const QString &profile)
 QAbstractItemModel *Launcher::DataFilesPage::profilesModel() const
 {
     return ui.profilesComboBox->model();
-}
-
-int Launcher::DataFilesPage::profilesIndex() const
-{
-    return ui.profilesComboBox->currentIndex();
 }
 
 int Launcher::DataFilesPage::profilesIndex() const

@@ -3,10 +3,11 @@
 #include <QHBoxLayout>
 
 #include "settingview.hpp"
-#include "settingwidget.hpp"
 #include "widgetfactory.hpp"
 #include "apps/opencs/model/settings/setting.hpp"
 #include "support.hpp"
+
+#include <QDebug>
 
 CSVSettings::SettingView::SettingView (const QString &viewName, WidgetType widgetType, bool isHorizontal, QWidget *parent) :
     QGroupBox(parent), mWidgetFactory (0), mSettingFilter (0), mDataAdapter (0)
@@ -30,10 +31,6 @@ void CSVSettings::SettingView::setModel (QSortFilterProxyModel *settingModel)
     mSettingFilter->setFilterKeyColumn (0);
     mSettingFilter->setSourceModel(settingModel);
     mSettingFilter->setDynamicSortFilter (true);
-
-    //create setting indices
-    for (int i = 0; i < CSMSettings::Setting::columnCount(); ++i)
-        mSettingIndices.append(mSettingFilter->index(0, i, QModelIndex()));
 
     qDebug() << "building widget based on section: " << objectName() << "; records: " << mSettingFilter->rowCount();
     qDebug() << "record value: " << mSettingFilter->data(mSettingFilter->index(0,2,QModelIndex()), Qt::DisplayRole).toString();
