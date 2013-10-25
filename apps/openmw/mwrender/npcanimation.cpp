@@ -84,7 +84,8 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
     mWeapon(inv.end()),
     mShield(inv.end()),
     mViewMode(viewMode),
-    mShowWeapons(false)
+    mShowWeapons(false),
+    mFirstPersonOffset(0.f, 0.f, 0.f)
 {
     mNpc = mPtr.get<ESM::NPC>()->mBase;
 
@@ -392,6 +393,11 @@ void NpcAnimation::updateParts(bool forceupdate)
     }
 }
 
+void NpcAnimation::addFirstPersonOffset(const Ogre::Vector3 &offset)
+{
+    mFirstPersonOffset += offset;
+}
+
 class SetObjectGroup {
     int mGroup;
 
@@ -448,7 +454,12 @@ Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
         float pitch = mCamera->getPitch();
         Ogre::Node *node = baseinst->getBone("Bip01 Neck");
         node->pitch(Ogre::Radian(pitch*0.75f), Ogre::Node::TS_WORLD);
+
+        // This has to be done before this function ends;
+        // updateSkeletonInstance, below, touches the hands.
+        node->translate(mFirstPersonOffset, Ogre::Node::TS_WORLD);
     }
+    mFirstPersonOffset = 0.f; // reset the X, Y, Z offset for the next frame.
 
     for(size_t i = 0;i < ESM::PRT_Count;i++)
     {

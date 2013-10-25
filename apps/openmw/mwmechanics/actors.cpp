@@ -31,18 +31,24 @@ namespace MWMechanics
         calculateDynamicStats (ptr);
         calculateCreatureStatModifiers (ptr);
 
-        // AI
         if(!MWBase::Environment::get().getWindowManager()->isGuiMode())
         {
+            // AI
             CreatureStats& creatureStats =  MWWorld::Class::get (ptr).getCreatureStats (ptr);
             creatureStats.getAiSequence().execute (ptr);
+
+            // fatigue restoration
+            calculateRestoration(ptr, duration);
         }
     }
 
     void Actors::updateNpc (const MWWorld::Ptr& ptr, float duration, bool paused)
     {
         if(!paused)
+        {
             updateDrowning(ptr, duration);
+            updateEquippedLight(ptr, duration);
+        }
     }
 
     void Actors::adjustMagicEffects (const MWWorld::Ptr& creature)
@@ -93,39 +99,29 @@ namespace MWMechanics
     void Actors::calculateRestoration (const MWWorld::Ptr& ptr, float duration)
     {
         CreatureStats& stats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
+        const MWWorld::Store<ESM::GameSetting>& settings = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+
+        int endurance = stats.getAttribute (ESM::Attribute::Endurance).getModified ();
+
+        float capacity = MWWorld::Class::get(ptr).getCapacity(ptr);
+        float encumbrance = MWWorld::Class::get(ptr).getEncumbrance(ptr);
+        float normalizedEncumbrance = (capacity == 0 ? 1 : encumbrance/capacity);
+        if (normalizedEncumbrance > 1)
+            normalizedEncumbrance = 1;
 
         if (duration == 3600)
         {
-            bool stunted = stats.getMagicEffects ().get(MWMechanics::EffectKey(ESM::MagicEffect::StuntedMagicka)).mMagnitude > 0;
+            // the actor is sleeping, restore health and magicka
 
-            int endurance = stats.getAttribute (ESM::Attribute::Endurance).getModified ();
+            bool stunted = stats.getMagicEffects ().get(MWMechanics::EffectKey(ESM::MagicEffect::StuntedMagicka)).mMagnitude > 0;
 
             DynamicStat<float> health = stats.getHealth();
             health.setCurrent (health.getCurrent() + 0.1 * endurance);
             stats.setHealth (health);
 
-            const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-
-            float fFatigueReturnBase = store.get<ESM::GameSetting>().find("fFatigueReturnBase")->getFloat ();
-            float fFatigueReturnMult = store.get<ESM::GameSetting>().find("fFatigueReturnMult")->getFloat ();
-            float fEndFatigueMult = store.get<ESM::GameSetting>().find("fEndFatigueMult")->getFloat ();
-
-            float capacity = MWWorld::Class::get(ptr).getCapacity(ptr);
-            float encumbrance = MWWorld::Class::get(ptr).getEncumbrance(ptr);
-            float normalizedEncumbrance = (capacity == 0 ? 1 : encumbrance/capacity);
-            if (normalizedEncumbrance > 1)
-                normalizedEncumbrance = 1;
-
-            float x = fFatigueReturnBase + fFatigueReturnMult * (1 - normalizedEncumbrance);
-            x *= fEndFatigueMult * endurance;
-
-            DynamicStat<float> fatigue = stats.getFatigue();
-            fatigue.setCurrent (fatigue.getCurrent() + 3600 * x);
-            stats.setFatigue (fatigue);
-
             if (!stunted)
             {
-                float fRestMagicMult = store.get<ESM::GameSetting>().find("fRestMagicMult")->getFloat ();
+                float fRestMagicMult = settings.find("fRestMagicMult")->getFloat ();
 
                 DynamicStat<float> magicka = stats.getMagicka();
                 magicka.setCurrent (magicka.getCurrent()
@@ -133,6 +129,19 @@ namespace MWMechanics
                 stats.setMagicka (magicka);
             }
         }
+
+        // restore fatigue
+
+        float fFatigueReturnBase = settings.find("fFatigueReturnBase")->getFloat ();
+        float fFatigueReturnMult = settings.find("fFatigueReturnMult")->getFloat ();
+        float fEndFatigueMult = settings.find("fEndFatigueMult")->getFloat ();
+
+        float x = fFatigueReturnBase + fFatigueReturnMult * (1 - normalizedEncumbrance);
+        x *= fEndFatigueMult * endurance;
+
+        DynamicStat<float> fatigue = stats.getFatigue();
+        fatigue.setCurrent (fatigue.getCurrent() + duration * x);
+        stats.setFatigue (fatigue);
     }
 
     void Actors::calculateCreatureStatModifiers (const MWWorld::Ptr& ptr)
@@ -194,6 +203,49 @@ namespace MWMechanics
         }
         else
             stats.setTimeToStartDrowning(20);
+    }
+
+    void Actors::updateEquippedLight (const MWWorld::Ptr& ptr, float duration)
+    {
+        //If holding a light...
+        MWWorld::InventoryStore &inventoryStore = MWWorld::Class::get(ptr).getInventoryStore(ptr);
+        MWWorld::ContainerStoreIterator heldIter =
+                inventoryStore.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
+
+        if(heldIter.getType() == MWWorld::ContainerStore::Type_Light)
+        {
+            // Use time from the player's light
+            bool isPlayer = ptr.getRefData().getHandle()=="player";
+            if(isPlayer)
+            {
+                float timeRemaining = heldIter->getClass().getRemainingUsageTime(*heldIter);
+
+                // -1 is infinite light source. Other negative values are treated as 0.
+                if(timeRemaining != -1.0f)
+                {
+                    timeRemaining -= duration;
+
+                    if(timeRemaining > 0.0f)
+                        heldIter->getClass().setRemainingUsageTime(*heldIter, timeRemaining);
+                    else
+                    {
+                        heldIter->getRefData().setCount(0); // remove it
+                        return;
+                    }
+                }
+            }
+
+            // Both NPC and player lights extinguish in water.
+            if(MWBase::Environment::get().getWorld()->isSwimming(ptr))
+            {
+                heldIter->getRefData().setCount(0); // remove it
+
+                // ...But, only the player makes a sound.
+                if(isPlayer)
+                    MWBase::Environment::get().getSoundManager()->playSound("torch out",
+                            1.0, 1.0, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_NoEnv);
+            }
+        }
     }
 
     Actors::Actors() : mDuration (0) {}
@@ -276,7 +328,8 @@ namespace MWMechanics
                 }
 
                 // If it's the player and God Mode is turned on, keep it alive
-                if(iter->first.getRefData().getHandle()=="player" && MWBase::Environment::get().getWorld()->getGodModeState())
+                if(iter->first.getRefData().getHandle()=="player" && 
+                    MWBase::Environment::get().getWorld()->getGodModeState())
                 {
                     MWMechanics::DynamicStat<float> stat(stats.getHealth());
 

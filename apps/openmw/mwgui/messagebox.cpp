@@ -14,6 +14,7 @@ namespace MWGui
         mMessageBoxSpeed = 0.1;
         mInterMessageBoxe = NULL;
         mStaticMessageBox = NULL;
+        mLastButtonPressed = -1;
     }
 
     void MessageBoxManager::onFrame (float frameDuration)
@@ -62,6 +63,7 @@ namespace MWGui
         }
 
         if(mInterMessageBoxe != NULL && mInterMessageBoxe->mMarkedToDelete) {
+            mLastButtonPressed = mInterMessageBoxe->readPressedButton();
             delete mInterMessageBoxe;
             mInterMessageBoxe = NULL;
             MWBase::Environment::get().getInputManager()->changeInputMode(
@@ -107,6 +109,7 @@ namespace MWGui
         }
 
         mInterMessageBoxe = new InteractiveMessageBox(*this, message, buttons);
+        mLastButtonPressed = -1;
 
         return true;
     }
@@ -154,11 +157,9 @@ namespace MWGui
 
     int MessageBoxManager::readPressedButton ()
     {
-        if(mInterMessageBoxe != NULL)
-        {
-            return mInterMessageBoxe->readPressedButton();
-        }
-        return -1;
+        int pressed = mLastButtonPressed;
+        mLastButtonPressed = -1;
+        return pressed;
     }
 
 
@@ -421,9 +422,7 @@ namespace MWGui
 
     int InteractiveMessageBox::readPressedButton ()
     {
-        int pressed = mButtonPressed;
-        mButtonPressed = -1;
-        return pressed;
+        return mButtonPressed;
     }
 
 }

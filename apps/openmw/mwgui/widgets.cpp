@@ -2,6 +2,9 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <sstream>
+#include <iomanip>
+
 #include <MyGUI_ProgressBar.h>
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_ControllerManager.h>
@@ -405,6 +408,10 @@ namespace MWGui
 
             std::string pt =  MWBase::Environment::get().getWindowManager()->getGameSettingString("spoint", "");
             std::string pts =  MWBase::Environment::get().getWindowManager()->getGameSettingString("spoints", "");
+            std::string pct =  MWBase::Environment::get().getWindowManager()->getGameSettingString("spercent", "");
+            std::string ft =  MWBase::Environment::get().getWindowManager()->getGameSettingString("sfeet", "");
+            std::string lvl =  MWBase::Environment::get().getWindowManager()->getGameSettingString("sLevel", "");
+            std::string lvls =  MWBase::Environment::get().getWindowManager()->getGameSettingString("sLevels", "");
             std::string to =  " " + MWBase::Environment::get().getWindowManager()->getGameSettingString("sTo", "") + " ";
             std::string sec =  " " + MWBase::Environment::get().getWindowManager()->getGameSettingString("ssecond", "");
             std::string secs =  " " + MWBase::Environment::get().getWindowManager()->getGameSettingString("sseconds", "");
@@ -421,13 +428,32 @@ namespace MWGui
                 spellLine += " " + MWBase::Environment::get().getWindowManager()->getGameSettingString(ESM::Attribute::sGmstAttributeIds[mEffectParams.mAttribute], "");
             }
 
-            if ((mEffectParams.mMagnMin >= 0 || mEffectParams.mMagnMax >= 0) && !(magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude))
-            {
-                if (mEffectParams.mMagnMin == mEffectParams.mMagnMax)
-                    spellLine += " " + boost::lexical_cast<std::string>(mEffectParams.mMagnMin) + " " + ((mEffectParams.mMagnMin == 1) ? pt : pts);
-                else
-                {
-                    spellLine += " " + boost::lexical_cast<std::string>(mEffectParams.mMagnMin) + to + boost::lexical_cast<std::string>(mEffectParams.mMagnMax) + " " + pts;
+            if (mEffectParams.mMagnMin >= 0 || mEffectParams.mMagnMax >= 0) {
+                ESM::MagicEffect::MagnitudeDisplayType displayType = magicEffect->getMagnitudeDisplayType();
+                if ( displayType == ESM::MagicEffect::MDT_TimesInt ) {
+                    std::string timesInt =  MWBase::Environment::get().getWindowManager()->getGameSettingString("sXTimesINT", "");
+                    std::stringstream formatter;
+
+                    formatter << std::fixed << std::setprecision(1) << " " << (mEffectParams.mMagnMin / 10.0f);
+                    if (mEffectParams.mMagnMin != mEffectParams.mMagnMax)
+                        formatter << to << (mEffectParams.mMagnMax / 10.0f);
+                    formatter << timesInt;
+
+                    spellLine += formatter.str();
+                }
+                else if ( displayType != ESM::MagicEffect::MDT_None ) {
+                    spellLine += " " + boost::lexical_cast<std::string>(mEffectParams.mMagnMin);
+                    if (mEffectParams.mMagnMin != mEffectParams.mMagnMax)
+                        spellLine += to + boost::lexical_cast<std::string>(mEffectParams.mMagnMax);
+
+                    if ( displayType == ESM::MagicEffect::MDT_Percentage )
+                        spellLine += pct;
+                    else if ( displayType == ESM::MagicEffect::MDT_Feet )
+                        spellLine += " " + ft;
+                    else if ( displayType == ESM::MagicEffect::MDT_Level )
+                        spellLine += " " + ((mEffectParams.mMagnMin == 1 && mEffectParams.mMagnMax == 1) ? lvl : lvls );
+                    else  // ESM::MagicEffect::MDT_Points
+                        spellLine += " " + ((mEffectParams.mMagnMin == 1 && mEffectParams.mMagnMax == 1) ? pt : pts );
                 }
             }
 

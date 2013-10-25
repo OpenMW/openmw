@@ -17,7 +17,7 @@ bool CSMFilter::ValueNode::test (const CSMWorld::IdTable& table, int row,
     const std::map<int, int>::const_iterator iter = columns.find (mColumnId);
 
     if (iter==columns.end())
-        throw std::logic_error ("invalid column in test value test");
+        throw std::logic_error ("invalid column in value node test");
 
     if (iter->second==-1)
         return true;
@@ -27,7 +27,7 @@ bool CSMFilter::ValueNode::test (const CSMWorld::IdTable& table, int row,
     QVariant data = table.data (index);
 
     if (data.type()!=QVariant::Double && data.type()!=QVariant::Bool && data.type()!=QVariant::Int &&
-        data.type()!=QVariant::UInt)
+        data.type()!=QVariant::UInt && data.type()!=static_cast<QVariant::Type> (QMetaType::Float))
         return false;
 
     double value = data.toDouble();
@@ -68,7 +68,7 @@ std::string CSMFilter::ValueNode::toString (bool numericColumns) const
             << CSMWorld::Columns::getName (static_cast<CSMWorld::Columns::ColumnId> (mColumnId))
             << "\"";
 
-    stream << ", \"";
+    stream << ", ";
 
     if (mLower==mUpper && mLowerType!=Type_Infinite && mUpperType!=Type_Infinite)
         stream << mLower;

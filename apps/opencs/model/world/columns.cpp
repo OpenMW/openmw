@@ -51,7 +51,7 @@ namespace CSMWorld
             { ColumnId_FactionIndex, "Faction Index" },
             { ColumnId_Charges, "Charges" },
             { ColumnId_Enchantment, "Enchantment" },
-            { ColumnId_Value, "Coin Value" },
+            { ColumnId_CoinValue, "Coin Value" },
             { ColumnId_Teleport, "Teleport" },
             { ColumnId_TeleportCell, "Teleport Cell" },
             { ColumnId_LockLevel, "Lock Level" },

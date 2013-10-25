@@ -12,6 +12,7 @@ Marc Zinnschlag (Zini) - Lead Programmer/Project Manager
 
 Adam Hogan (aurix)
 Aleksandar Jovanov
+Alex Haddad (rainChu)
 Alex McKibben (WeirdSexy)
 Alexander Nadeau (wareya)
 Alexander Olofsson (Ace)
