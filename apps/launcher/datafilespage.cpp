@@ -35,20 +35,14 @@ Launcher::DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSet
     setupDataFiles();
 }
 
-void DataFilesPage::createActions()
+void Launcher::DataFilesPage::createActions()
 {
-
     // Add the actions to the toolbuttons
     newProfileButton->setDefaultAction(newProfileAction);
     deleteProfileButton->setDefaultAction(deleteProfileAction);
-
-    // Context menu actions
-    mContextMenu = new QMenu(this);
-    mContextMenu->addAction(checkAction);
-    mContextMenu->addAction(uncheckAction);
 }
 
-void DataFilesPage::setupDataFiles()
+void Launcher::DataFilesPage::setupDataFiles()
 {
     // Set the encoding to the one found in openmw.cfg or the default
     mDataFilesModel->setEncoding(mGameSettings.value(QString("encoding"), QString("win1252")));
@@ -70,27 +64,27 @@ void DataFilesPage::setupDataFiles()
     QString profile = mLauncherSettings.value(QString("Profiles/currentprofile"));
 
     if (!profiles.isEmpty())
-        profilesComboBox->addItems(profiles);
+        ui.profilesComboBox->addItems(profiles);
 
     // Add the current profile if empty
-    if (profilesComboBox->findText(profile) == -1 && !profile.isEmpty())
-        profilesComboBox->addItem(profile);
+    if (ui.profilesComboBox->findText(profile) == -1 && !profile.isEmpty())
+        ui.profilesComboBox->addItem(profile);
 
-    if (profilesComboBox->findText(QString("Default")) == -1)
-        profilesComboBox->addItem(QString("Default"));
+    if (ui.profilesComboBox->findText(QString("Default")) == -1)
+        ui.profilesComboBox->addItem(QString("Default"));
 
     if (profile.isEmpty() || profile == QLatin1String("Default")) {
         deleteProfileAction->setEnabled(false);
-        profilesComboBox->setEditEnabled(false);
-        profilesComboBox->setCurrentIndex(profilesComboBox->findText(QString("Default")));
+        ui.profilesComboBox->setEditEnabled(false);
+        ui.profilesComboBox->setCurrentIndex(profilesComboBox->findText(QString("Default")));
     } else {
-        profilesComboBox->setEditEnabled(true);
-        profilesComboBox->setCurrentIndex(profilesComboBox->findText(profile));
+        ui.profilesComboBox->setEditEnabled(true);
+        ui.profilesComboBox->setCurrentIndex(profilesComboBox->findText(profile));
     }
 
     // We do this here to prevent deletion of profiles when initializing the combobox
-    connect(profilesComboBox, SIGNAL(profileRenamed(QString,QString)), this, SLOT(profileRenamed(QString,QString)));
-    connect(profilesComboBox, SIGNAL(profileChanged(QString,QString)), this, SLOT(profileChanged(QString,QString)));
+    connect(ui.profilesComboBox, SIGNAL(profileRenamed(QString,QString)), this, SLOT(profileRenamed(QString,QString)));
+    connect(ui.profilesComboBox, SIGNAL(profileChanged(QString,QString)), this, SLOT(profileChanged(QString,QString)));
 
     loadSettings();
 
