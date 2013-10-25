@@ -7,7 +7,7 @@
 #include <QValidator>
 #include <QLabel>
 
-TextInputDialog::TextInputDialog(const QString& title, const QString &text, QWidget *parent) :
+Launcher::TextInputDialog::TextInputDialog(const QString& title, const QString &text, QWidget *parent) :
     QDialog(parent)
 {
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
@@ -45,19 +45,19 @@ TextInputDialog::TextInputDialog(const QString& title, const QString &text, QWid
 
 }
 
-int TextInputDialog::exec()
+int Launcher::TextInputDialog::exec()
 {
     mLineEdit->clear();
     mLineEdit->setFocus();
     return QDialog::exec();
 }
 
-QString TextInputDialog::getText() const
+QString Launcher::TextInputDialog::getText() const
 {
     return mLineEdit->text();
 }
 
-void TextInputDialog::slotUpdateOkButton(QString text)
+void Launcher::TextInputDialog::slotUpdateOkButton(QString text)
 {
     bool enabled = !(text.isEmpty());
     mButtonBox->button(QDialogButtonBox::Ok)->setEnabled(enabled);
@@ -73,7 +73,7 @@ void TextInputDialog::slotUpdateOkButton(QString text)
     }
 }
 
-TextInputDialog::DialogLineEdit::DialogLineEdit (QWidget *parent) :
+Launcher::TextInputDialog::DialogLineEdit::DialogLineEdit (QWidget *parent) :
     LineEdit (parent)
 {
     int frameWidth = style()->pixelMetric(QStyle::PM_DefaultFrameWidth);

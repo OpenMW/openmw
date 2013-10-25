@@ -6,7 +6,7 @@
 #include <QPlastiqueStyle>
 #endif
 
-PlayPage::PlayPage(QWidget *parent) : QWidget(parent)
+Launcher::PlayPage::PlayPage(QWidget *parent) : QWidget(parent)
 {
     setObjectName ("PlayPage");
     setupUi(this);
@@ -23,17 +23,17 @@ PlayPage::PlayPage(QWidget *parent) : QWidget(parent)
 
 }
 
-void PlayPage::setProfilesModel(QAbstractItemModel *model)
+void Launcher::PlayPage::setProfilesModel(QAbstractItemModel *model)
 {
     profilesComboBox->setModel(model);
 }
 
-void PlayPage::setProfilesIndex(int index)
+void Launcher::PlayPage::setProfilesIndex(int index)
 {
     profilesComboBox->setCurrentIndex(index);
 }
 
-void PlayPage::slotPlayClicked()
+void Launcher::PlayPage::slotPlayClicked()
 {
     emit playButtonClicked();
 }

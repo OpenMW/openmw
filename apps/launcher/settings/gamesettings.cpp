@@ -26,16 +26,16 @@ namespace boost
 #endif /* (BOOST_VERSION <= 104600) */
 
 
-GameSettings::GameSettings(Files::ConfigurationManager &cfg)
+Launcher::GameSettings::GameSettings(Files::ConfigurationManager &cfg)
     : mCfgMgr(cfg)
 {
 }
 
-GameSettings::~GameSettings()
+Launcher::GameSettings::~GameSettings()
 {
 }
 
-void GameSettings::validatePaths()
+void Launcher::GameSettings::validatePaths()
 {
     if (mSettings.isEmpty() || !mDataDirs.isEmpty())
         return; // Don't re-validate paths if they are already parsed
@@ -81,14 +81,14 @@ void GameSettings::validatePaths()
     }
 }
 
-QStringList GameSettings::values(const QString &key, const QStringList &defaultValues)
+QStringList Launcher::GameSettings::values(const QString &key, const QStringList &defaultValues)
 {
     if (!mSettings.values(key).isEmpty())
         return mSettings.values(key);
     return defaultValues;
 }
 
-bool GameSettings::readFile(QTextStream &stream)
+bool Launcher::GameSettings::readFile(QTextStream &stream)
 {
     QMap<QString, QString> cache;
     QRegExp keyRe("^([^=]+)\\s*=\\s*(.+)$");
@@ -130,7 +130,7 @@ bool GameSettings::readFile(QTextStream &stream)
     return true;
 }
 
-bool GameSettings::writeFile(QTextStream &stream)
+bool Launcher::GameSettings::writeFile(QTextStream &stream)
 {
     // Iterate in reverse order to preserve insertion order
     QMapIterator<QString, QString> i(mSettings);

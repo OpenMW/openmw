@@ -3,78 +3,76 @@
 
 #include "ui_datafilespage.h"
 #include <QWidget>
-#include <QModelIndex>
 
 class QSortFilterProxyModel;
 class QAbstractItemModel;
-class QAction;
 class QMenu;
-
-class TextInputDialog;
-class GameSettings;
-class LauncherSettings;
-class ProfilesComboBox;
 
 namespace Files { struct ConfigurationManager; }
 namespace ContentSelectorView { class ContentSelector; }
 
-class DataFilesPage : public QWidget
+namespace Launcher
 {
-    Q_OBJECT
+    class TextInputDialog;
+    class GameSettings;
+    class LauncherSettings;
+    class ProfilesComboBox;
 
-    ContentSelectorView::ContentSelector *mSelector;
-    Ui::DataFilesPage ui;
+    class DataFilesPage : public QWidget
+    {
+        Q_OBJECT
 
-public:
-    explicit DataFilesPage (Files::ConfigurationManager &cfg, GameSettings &gameSettings,
-                            LauncherSettings &launcherSettings, QWidget *parent = 0);
+        ContentSelectorView::ContentSelector *mSelector;
+        Ui::DataFilesPage ui;
 
-    QAbstractItemModel* profilesModel() const
-        { return ui.profilesComboBox->model(); }
+    public:
+        explicit DataFilesPage (Files::ConfigurationManager &cfg, GameSettings &gameSettings,
+                                LauncherSettings &launcherSettings, QWidget *parent = 0);
 
-    int profilesIndex() const
-        { return ui.profilesComboBox->currentIndex(); }
+        QAbstractItemModel* profilesModel() const;
 
-    //void writeConfig(QString profile = QString());
-    void saveSettings(const QString &profile = "");
-    void loadSettings();
+        int profilesIndex() const;
 
-signals:
-    void signalProfileChanged (int index);
+        //void writeConfig(QString profile = QString());
+        void saveSettings(const QString &profile = "");
+        void loadSettings();
 
-public slots:
-    void slotProfileChanged (int index);
+    signals:
+        void signalProfileChanged (int index);
 
-private slots:
+    public slots:
+        void slotProfileChanged (int index);
 
-    void slotProfileChangedByUser(const QString &previous, const QString &current);
-    void slotProfileRenamed(const QString &previous, const QString &current);
-    void slotProfileDeleted(const QString &item);
+    private slots:
 
-    void on_newProfileAction_triggered();
-    void on_deleteProfileAction_triggered();
+        void slotProfileChangedByUser(const QString &previous, const QString &current);
+        void slotProfileRenamed(const QString &previous, const QString &current);
+        void slotProfileDeleted(const QString &item);
 
-private:
+        void on_newProfileAction_triggered();
+        void on_deleteProfileAction_triggered();
 
-    QMenu *mContextMenu;
+    private:
 
-    Files::ConfigurationManager &mCfgMgr;
+        QMenu *mContextMenu;
 
-    GameSettings &mGameSettings;
-    LauncherSettings &mLauncherSettings;
+        Files::ConfigurationManager &mCfgMgr;
 
-    void setPluginsCheckstates(Qt::CheckState state);
+        GameSettings &mGameSettings;
+        LauncherSettings &mLauncherSettings;
 
-    void buildView();
-    void setupDataFiles();
-    void setupConfig();
-    void readConfig();
-    void setProfile (int index, bool savePrevious);
-    void setProfile (const QString &previous, const QString &current, bool savePrevious);
-    void removeProfile (const QString &profile);
-    bool showDeleteMessageBox (const QString &text);
-    void addProfile (const QString &profile, bool setAsCurrent);
-    void checkForDefaultProfile();
-};
+        void setPluginsCheckstates(Qt::CheckState state);
 
+        void buildView();
+        void setupDataFiles();
+        void setupConfig();
+        void readConfig();
+        void setProfile (int index, bool savePrevious);
+        void setProfile (const QString &previous, const QString &current, bool savePrevious);
+        void removeProfile (const QString &profile);
+        bool showDeleteMessageBox (const QString &text);
+        void addProfile (const QString &profile, bool setAsCurrent);
+        void checkForDefaultProfile();
+    };
+}
 #endif
