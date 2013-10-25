@@ -79,8 +79,8 @@ void CS::Editor::setupDataFiles()
     }
 
     // Set the charset for reading the esm/esp files
-    QString encoding = QString::fromStdString(variables["encoding"].as<std::string>());
-    mFileDialog.setEncoding(encoding);
+   // QString encoding = QString::fromStdString(variables["encoding"].as<std::string>());
+    //mFileDialog.setEncoding(encoding);
 
     dataDirs.insert (dataDirs.end(), dataLocal.begin(), dataLocal.end());
 
@@ -109,29 +109,26 @@ void CS::Editor::createGame()
 void CS::Editor::createAddon()
 {
     mStartup.hide();
-
-    mFileDialog.newFile();
+    mFileDialog.showDialog (CSVDoc::FileDialog::DialogType_New);
 }
 
 void CS::Editor::loadDocument()
 {
     mStartup.hide();
-
-    mFileDialog.openFile();
+    mFileDialog.showDialog (CSVDoc::FileDialog::DialogType_Open);
 }
 
 void CS::Editor::openFiles()
 {
     std::vector<boost::filesystem::path> files;
-    QStringList paths = mFileDialog.checkedItemsPaths();
 
-    foreach (const QString &path, paths) {
+    foreach (const QString &path, mFileDialog.selectedFilePaths()) {
         files.push_back(path.toStdString());
     }
 
-    /// \todo Get the save path from the file dialogue
+    boost::filesystem::path savePath = mFileDialog.filename().toStdString();
 
-    CSMDoc::Document *document = mDocumentManager.addDocument (files, *files.rbegin(), false);
+    CSMDoc::Document *document = mDocumentManager.addDocument (files, savePath, false);
 
     mViewManager.addView (document);
     mFileDialog.hide();
@@ -140,17 +137,16 @@ void CS::Editor::openFiles()
 void CS::Editor::createNewFile()
 {
     std::vector<boost::filesystem::path> files;
-    QStringList paths = mFileDialog.checkedItemsPaths();
 
-    foreach (const QString &path, paths) {
+    foreach (const QString &path, mFileDialog.selectedFilePaths()) {
         files.push_back(path.toStdString());
     }
 
-    files.push_back(mFileDialog.fileName().toStdString());
+    files.push_back(mFileDialog.filename().toStdString());
 
-    /// \todo Get the save path from the file dialogue.
+    boost::filesystem::path savePath = mFileDialog.filename().toStdString();
 
-    CSMDoc::Document *document = mDocumentManager.addDocument (files, *files.rbegin(), true);
+    CSMDoc::Document *document = mDocumentManager.addDocument (files, savePath, true);
 
     mViewManager.addView (document);
     mFileDialog.hide();

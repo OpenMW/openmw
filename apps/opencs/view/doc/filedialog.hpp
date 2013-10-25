@@ -4,63 +4,67 @@
 #include <QDialog>
 #include <QModelIndex>
 
-#include "ui_datafilespage.h"
-
-class QDialogButtonBox;
-class QSortFilterProxyModel;
-class QAbstractItemModel;
-class QPushButton;
-class QStringList;
-class QString;
-class QMenu;
+#include "ui_filedialog.h"
 
 class DataFilesModel;
 class PluginsProxyModel;
 
-class FileDialog : public QDialog, private Ui::DataFilesPage
+namespace ContentSelectorView
 {
-    Q_OBJECT
-public:
-    explicit FileDialog(QWidget *parent = 0);
-    void addFiles(const QString &path);
-    void setEncoding(const QString &encoding);
+    class ContentSelector;
+}
 
-    void openFile();
-    void newFile();
-    void accepted();
+namespace CSVDoc
+{
+    class FileWidget;
 
-    QStringList checkedItemsPaths();
-    QString fileName();
+    class FileDialog : public QDialog
+    {
+        Q_OBJECT
 
-signals:
-    void openFiles();
-    void createNewFile();
-    
-public slots:
-    void accept();
+    public:
 
-private slots:
-    void updateViews();
-    void updateOpenButton(const QStringList &items);
-    void updateCreateButton(const QString &name);
-    void setCheckState(QModelIndex index);
+        enum DialogType
+        {
+            DialogType_New,
+            DialogType_Open
+        };
 
-    void filterChanged(const QString &filter);
+    private:
 
-    void createButtonClicked();
+        ContentSelectorView::ContentSelector *mSelector;
+        Ui::FileDialog ui;
+        DialogType mDialogType;
+        FileWidget *mFileWidget;
 
-private:
-    QLabel *mNameLabel;
-    LineEdit *mNameLineEdit;
+    public:
 
-    QPushButton *mCreateButton;
-    QDialogButtonBox *mButtonBox;
+        explicit FileDialog(QWidget *parent = 0);
+        void showDialog (DialogType dialogType);
 
-    DataFilesModel *mDataFilesModel;
+        void addFiles (const QString &path);
 
-    PluginsProxyModel *mPluginsProxyModel;
-    QSortFilterProxyModel *mMastersProxyModel;
-    QSortFilterProxyModel *mFilterProxyModel;
-};
+        QString filename() const;
+        QStringList selectedFilePaths();
 
+    private:
+
+        void buildNewFileView();
+        void buildOpenFileView();
+
+    signals:
+
+        void openFiles();
+        void createNewFile();
+
+        void signalUpdateCreateButton (bool, int);
+        void signalUpdateCreateButtonFlags(int);
+
+    private slots:
+
+        void slotUpdateCreateButton (int);
+        void slotUpdateCreateButton (const QString &, bool);
+        void slotRejected();
+    };
+}
 #endif // FILEDIALOG_HPP

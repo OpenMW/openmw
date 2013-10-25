@@ -25,6 +25,8 @@ namespace CSVDoc
 
             void setLocalData (const boost::filesystem::path& localData);
 
+            bool isValid() const;
+
             boost::filesystem::path getPath() const;
             ///< This function must not be called if there is no valid path.
 

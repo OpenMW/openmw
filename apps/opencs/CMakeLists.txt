@@ -43,8 +43,8 @@ opencs_units_noqt (model/tools
 
 
 opencs_units (view/doc
-    viewmanager view operations operation subview startup filedialog newgame filewidget
-    adjusterwidget
+    viewmanager view operations operation subview startup filedialog newgame
+    filewidget adjusterwidget
     )
 
 
@@ -123,11 +123,13 @@ opencs_units (view/filter
 set (OPENCS_US
     )
 
-set (OPENCS_RES ../../files/opencs/resources.qrc
-                ../../files/launcher/launcher.qrc
+set (OPENCS_RES ${CMAKE_SOURCE_DIR}/files/opencs/resources.qrc
+                ${CMAKE_SOURCE_DIR}/files/launcher/launcher.qrc
     )
 
-set (OPENCS_UI ../../files/ui/datafilespage.ui
+set (OPENCS_UI
+    ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
+    ${CMAKE_SOURCE_DIR}/files/ui/filedialog.ui
     )
 
 source_group (opencs FILES ${OPENCS_SRC} ${OPENCS_HDR})

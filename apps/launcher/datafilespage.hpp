@@ -1,15 +1,15 @@
 #ifndef DATAFILESPAGE_H
 #define DATAFILESPAGE_H
 
-#include <QWidget>
-
 #include "ui_datafilespage.h"
+#include <QWidget>
 
 class QSortFilterProxyModel;
 class QAbstractItemModel;
 class QMenu;
 
 namespace Files { struct ConfigurationManager; }
+namespace ContentSelectorView { class ContentSelector; }
 
 namespace Launcher
 {
@@ -54,14 +54,13 @@ namespace Launcher
 
     private:
 
-        QMenu *mContextMenu;
-
         Files::ConfigurationManager &mCfgMgr;
 
         GameSettings &mGameSettings;
         LauncherSettings &mLauncherSettings;
 
         void setPluginsCheckstates(Qt::CheckState state);
+
         void buildView();
         void setupDataFiles();
         void setupConfig();

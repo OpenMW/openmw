@@ -8,6 +8,7 @@
 
 Launcher::PlayPage::PlayPage(QWidget *parent) : QWidget(parent)
 {
+    setObjectName ("PlayPage");
     setupUi(this);
 
     // Hacks to get the stylesheet look properly
@@ -17,7 +18,7 @@ Launcher::PlayPage::PlayPage(QWidget *parent) : QWidget(parent)
 #endif
     profilesComboBox->setView(new QListView());
 
-    connect(profilesComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(slotCurrentIndexChanged(int)));
+    connect(profilesComboBox, SIGNAL(activated(int)), this, SIGNAL (signalProfileChanged(int)));
     connect(playButton, SIGNAL(clicked()), this, SLOT(slotPlayClicked()));
 
 }

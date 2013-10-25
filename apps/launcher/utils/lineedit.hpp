@@ -11,12 +11,17 @@
 #define LINEEDIT_H
 
 #include <QLineEdit>
+#include <QStyle>
+#include <QStylePainter>
+#include <QToolButton>
 
 class QToolButton;
 
 class LineEdit : public QLineEdit
 {
     Q_OBJECT
+
+    QString mPlaceholderText;
 
 public:
     LineEdit(QWidget *parent = 0);
@@ -27,8 +32,10 @@ protected:
 private slots:
     void updateClearButton(const QString &text);
 
-private:
+protected:
     QToolButton *mClearButton;
+
+    void setupClearButton();
 };
 
 #endif // LIENEDIT_H

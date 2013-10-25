@@ -32,7 +32,7 @@ namespace CS
             CSVDoc::StartupDialogue mStartup;
             CSVDoc::NewGameDialogue mNewGame;
             CSVSettings::UserSettingsDialog mSettings;
-            FileDialog mFileDialog;
+            CSVDoc::FileDialog mFileDialog;
 
             Files::ConfigurationManager mCfgMgr;
             boost::filesystem::path mLocal;

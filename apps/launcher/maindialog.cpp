@@ -109,8 +109,8 @@ void Launcher::MainDialog::createPages()
     mDataFilesPage = new DataFilesPage(mCfgMgr, mGameSettings, mLauncherSettings, this);
 
     // Set the combobox of the play page to imitate the combobox on the datafilespage
-    mPlayPage->setProfilesComboBoxModel(mDataFilesPage->profilesComboBoxModel());
-    mPlayPage->setProfilesComboBoxIndex(mDataFilesPage->profilesComboBoxIndex());
+    mPlayPage->setProfilesModel(mDataFilesPage->profilesModel());
+    mPlayPage->setProfilesIndex(mDataFilesPage->profilesIndex());
 
     // Add the pages to the stacked widget
     pagesWidget->addWidget(mPlayPage);
@@ -122,8 +122,8 @@ void Launcher::MainDialog::createPages()
 
     connect(mPlayPage, SIGNAL(playButtonClicked()), this, SLOT(play()));
 
-    connect(mPlayPage, SIGNAL(profileChanged(int)), mDataFilesPage, SLOT(setProfilesComboBoxIndex(int)));
-    connect(mDataFilesPage, SIGNAL(profileChanged(int)), mPlayPage, SLOT(setProfilesComboBoxIndex(int)));
+    connect(mPlayPage, SIGNAL(signalProfileChanged(int)), mDataFilesPage, SLOT(slotProfileChanged(int)));
+    connect(mDataFilesPage, SIGNAL(signalProfileChanged(int)), mPlayPage, SLOT(setProfilesIndex(int)));
 
 }
 
@@ -317,7 +317,25 @@ void Launcher::MainDialog::changePage(QListWidgetItem *current, QListWidgetItem 
     if (!current)
         current = previous;
 
-    pagesWidget->setCurrentIndex(iconWidget->row(current));
+    int currentIndex = iconWidget->row(current);
+    int previousIndex = iconWidget->row(previous);
+
+    pagesWidget->setCurrentIndex(currentIndex);
+
+    DataFilesPage *previousPage = dynamic_cast<DataFilesPage *>(pagesWidget->widget(previousIndex));
+    DataFilesPage *currentPage = dynamic_cast<DataFilesPage *>(pagesWidget->widget(currentIndex));
+
+    //special call to update/save data files page list view when it's displayed/hidden.
+    if (previousPage)
+    {
+        if (previousPage->objectName() == "DataFilesPage")
+            previousPage->saveSettings();
+    }
+    else if (currentPage)
+    {
+        if (currentPage->objectName() == "DataFilesPage")
+            currentPage->loadSettings();
+    }
 }
 
 bool Launcher::MainDialog::setupLauncherSettings()
@@ -468,7 +486,7 @@ bool Launcher::MainDialog::setupGameSettings()
     foreach (const QString path, mGameSettings.getDataDirs()) {
         QDir dir(path);
         QStringList filters;
-        filters << "*.esp" << "*.esm";
+        filters << "*.esp" << "*.esm" << "*.omwgame" << "*.omwaddon";
 
         if (!dir.entryList(filters).isEmpty())
             dataDirs.append(path);

@@ -17,7 +17,7 @@
 #include <components/files/configurationmanager.hpp>
 #include <components/files/ogreplugin.hpp>
 
-#include <components/fileorderlist/utils/naturalsort.hpp>
+#include <components/contentselector/model/naturalsort.hpp>
 
 #include "settings/graphicssettings.hpp"
 
@@ -38,6 +38,7 @@ Launcher::GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, GraphicsS
     , mGraphicsSettings(graphicsSetting)
     , QWidget(parent)
 {
+    setObjectName ("GraphicsPage");
     setupUi(this);
 
     // Set the maximum res we can set in windowed mode

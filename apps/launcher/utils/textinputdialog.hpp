@@ -2,7 +2,8 @@
 #define TEXTINPUTDIALOG_HPP
 
 #include <QDialog>
-//#include "lineedit.hpp"
+
+#include "lineedit.hpp"
 
 class QDialogButtonBox;
 
