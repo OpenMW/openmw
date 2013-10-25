@@ -133,7 +133,7 @@ bool GraphicsPage::setupOgre()
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(tr("<br><b>Could not select a valid render system</b><br><br> \
-                          Please make sure the plugins.cfg file exists and contains a valid rendering plugin.<br>"));
+                          Please make sure Ogre plugins were installed correctly.<br>"));
         msgBox.exec();
         return false;
     }
