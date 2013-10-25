@@ -20,7 +20,7 @@
 
 #include "utils/textinputdialog.hpp"
 
-DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gameSettings, LauncherSettings &launcherSettings, QWidget *parent)
+Launcher::DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gameSettings, LauncherSettings &launcherSettings, QWidget *parent)
     : mCfgMgr(cfg)
     , mGameSettings(gameSettings)
     , mLauncherSettings(launcherSettings)
@@ -109,6 +109,7 @@ DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gam
     setupDataFiles();
 }
 
+<<<<<<< Updated upstream
 void DataFilesPage::createActions()
 {
 
@@ -171,6 +172,9 @@ void DataFilesPage::setupDataFiles()
 }
 
 void DataFilesPage::loadSettings()
+=======
+void Launcher::DataFilesPage::loadSettings()
+>>>>>>> Stashed changes
 {
     QString profile = mLauncherSettings.value(QString("Profiles/currentprofile"));
 
@@ -195,7 +199,11 @@ void DataFilesPage::loadSettings()
     }
 }
 
+<<<<<<< Updated upstream
 void DataFilesPage::saveSettings()
+=======
+void Launcher::DataFilesPage::saveSettings(const QString &profile)
+>>>>>>> Stashed changes
 {
     if (mDataFilesModel->rowCount() < 1)
         return;
@@ -229,7 +237,11 @@ void DataFilesPage::saveSettings()
 
 }
 
+<<<<<<< Updated upstream
 void DataFilesPage::updateOkButton(const QString &text)
+=======
+void Launcher::DataFilesPage::buildView()
+>>>>>>> Stashed changes
 {
     // We do this here because we need the profiles combobox text
     if (text.isEmpty()) {
@@ -284,12 +296,30 @@ void DataFilesPage::slotCurrentIndexChanged(int index)
     emit profileChanged(index);
 }
 
+<<<<<<< Updated upstream
 QAbstractItemModel* DataFilesPage::profilesComboBoxModel()
+=======
+void Launcher::DataFilesPage::removeProfile(const QString &profile)
+>>>>>>> Stashed changes
 {
     return profilesComboBox->model();
 }
 
+<<<<<<< Updated upstream
 int DataFilesPage::profilesComboBoxIndex()
+=======
+QAbstractItemModel *Launcher::DataFilesPage::profilesModel() const
+{
+    return ui.profilesComboBox->model();
+}
+
+int Launcher::DataFilesPage::profilesIndex() const
+{
+    return ui.profilesComboBox->currentIndex();
+}
+
+void Launcher::DataFilesPage::setProfile(int index, bool savePrevious)
+>>>>>>> Stashed changes
 {
     return profilesComboBox->currentIndex();
 }
@@ -303,7 +333,11 @@ void DataFilesPage::on_newProfileAction_triggered()
     }
 }
 
+<<<<<<< Updated upstream
 void DataFilesPage::on_deleteProfileAction_triggered()
+=======
+void Launcher::DataFilesPage::setProfile (const QString &previous, const QString &current, bool savePrevious)
+>>>>>>> Stashed changes
 {
     QString profile = profilesComboBox->currentText();
 
@@ -330,7 +364,11 @@ void DataFilesPage::on_deleteProfileAction_triggered()
     }
 }
 
+<<<<<<< Updated upstream
 void DataFilesPage::on_checkAction_triggered()
+=======
+void Launcher::DataFilesPage::slotProfileDeleted (const QString &item)
+>>>>>>> Stashed changes
 {
     if (pluginsTable->hasFocus())
         setPluginsCheckstates(Qt::Checked);
@@ -340,7 +378,11 @@ void DataFilesPage::on_checkAction_triggered()
 
 }
 
+<<<<<<< Updated upstream
 void DataFilesPage::on_uncheckAction_triggered()
+=======
+void Launcher::DataFilesPage::slotProfileChangedByUser(const QString &previous, const QString &current)
+>>>>>>> Stashed changes
 {
     if (pluginsTable->hasFocus())
         setPluginsCheckstates(Qt::Unchecked);
@@ -349,7 +391,11 @@ void DataFilesPage::on_uncheckAction_triggered()
         setMastersCheckstates(Qt::Unchecked);
 }
 
+<<<<<<< Updated upstream
 void DataFilesPage::setMastersCheckstates(Qt::CheckState state)
+=======
+void Launcher::DataFilesPage::slotProfileRenamed(const QString &previous, const QString &current)
+>>>>>>> Stashed changes
 {
     if (!mastersTable->selectionModel()->hasSelection()) {
         return;
@@ -364,6 +410,7 @@ void DataFilesPage::setMastersCheckstates(Qt::CheckState state)
 
         QModelIndex sourceIndex = mMastersProxyModel->mapToSource(index);
 
+<<<<<<< Updated upstream
         if (!sourceIndex.isValid())
             return;
 
@@ -372,6 +419,14 @@ void DataFilesPage::setMastersCheckstates(Qt::CheckState state)
 }
 
 void DataFilesPage::setPluginsCheckstates(Qt::CheckState state)
+=======
+void Launcher::DataFilesPage::slotProfileChanged(int index)
+{
+    setProfile (index, true);
+}
+
+void Launcher::DataFilesPage::setupDataFiles()
+>>>>>>> Stashed changes
 {
     if (!pluginsTable->selectionModel()->hasSelection()) {
         return;
@@ -394,7 +449,11 @@ void DataFilesPage::setPluginsCheckstates(Qt::CheckState state)
     }
 }
 
+<<<<<<< Updated upstream
 void DataFilesPage::setCheckState(QModelIndex index)
+=======
+void Launcher::DataFilesPage::on_newProfileAction_triggered()
+>>>>>>> Stashed changes
 {
     if (!index.isValid())
         return;
@@ -430,7 +489,11 @@ void DataFilesPage::setCheckState(QModelIndex index)
     return;
 }
 
+<<<<<<< Updated upstream
 void DataFilesPage::filterChanged(const QString filter)
+=======
+void Launcher::DataFilesPage::addProfile (const QString &profile, bool setAsCurrent)
+>>>>>>> Stashed changes
 {
     QRegExp regExp(filter, Qt::CaseInsensitive, QRegExp::FixedString);
     mFilterProxyModel->setFilterRegExp(regExp);
@@ -461,7 +524,11 @@ void DataFilesPage::profileChanged(const QString &previous, const QString &curre
     loadSettings();
 }
 
+<<<<<<< Updated upstream
 void DataFilesPage::profileRenamed(const QString &previous, const QString &current)
+=======
+void Launcher::DataFilesPage::on_deleteProfileAction_triggered()
+>>>>>>> Stashed changes
 {
     if (previous.isEmpty())
         return;
@@ -481,7 +548,11 @@ void DataFilesPage::profileRenamed(const QString &previous, const QString &curre
 
 }
 
+<<<<<<< Updated upstream
 void DataFilesPage::showContextMenu(const QPoint &point)
+=======
+void Launcher::DataFilesPage::checkForDefaultProfile()
+>>>>>>> Stashed changes
 {
     QObject *object = QObject::sender();
 
@@ -489,9 +560,19 @@ void DataFilesPage::showContextMenu(const QPoint &point)
     if (!object)
         return;
 
+<<<<<<< Updated upstream
     if (object->objectName() == QLatin1String("PluginsTable")) {
         if (!pluginsTable->selectionModel()->hasSelection())
             return;
+=======
+bool Launcher::DataFilesPage::showDeleteMessageBox (const QString &text)
+{
+    QMessageBox msgBox(this);
+    msgBox.setWindowTitle(tr("Delete Profile"));
+    msgBox.setIcon(QMessageBox::Warning);
+    msgBox.setStandardButtons(QMessageBox::Cancel);
+    msgBox.setText(tr("Are you sure you want to delete <b>%0</b>?").arg(text));
+>>>>>>> Stashed changes
 
         QPoint globalPos = pluginsTable->mapToGlobal(point);
         QModelIndexList indexes = pluginsTable->selectionModel()->selectedIndexes();

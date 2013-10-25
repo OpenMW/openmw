@@ -2,27 +2,36 @@
 #define DATAFILESPAGE_H
 
 #include <QWidget>
-#include <QModelIndex>
 
 #include "ui_datafilespage.h"
 
 class QSortFilterProxyModel;
 class QAbstractItemModel;
-class QAction;
 class QMenu;
 
+<<<<<<< Updated upstream
 class DataFilesModel;
 class TextInputDialog;
 class GameSettings;
 class LauncherSettings;
 class PluginsProxyModel;
 
+=======
+>>>>>>> Stashed changes
 namespace Files { struct ConfigurationManager; }
 
+<<<<<<< Updated upstream
 class DataFilesPage : public QWidget, private Ui::DataFilesPage
+=======
+namespace Launcher
+>>>>>>> Stashed changes
 {
-    Q_OBJECT
+    class TextInputDialog;
+    class GameSettings;
+    class LauncherSettings;
+    class ProfilesComboBox;
 
+<<<<<<< Updated upstream
 public:
     DataFilesPage(Files::ConfigurationManager &cfg, GameSettings &gameSettings, LauncherSettings &launcherSettings, QWidget *parent = 0);
 
@@ -63,14 +72,49 @@ private:
     QSortFilterProxyModel *mMastersProxyModel;
 
     QSortFilterProxyModel *mFilterProxyModel;
+=======
+    class DataFilesPage : public QWidget
+    {
+        Q_OBJECT
 
-    QMenu *mContextMenu;
+        ContentSelectorView::ContentSelector *mSelector;
+        Ui::DataFilesPage ui;
 
-    Files::ConfigurationManager &mCfgMgr;
+    public:
+        explicit DataFilesPage (Files::ConfigurationManager &cfg, GameSettings &gameSettings,
+                                LauncherSettings &launcherSettings, QWidget *parent = 0);
 
-    GameSettings &mGameSettings;
-    LauncherSettings &mLauncherSettings;
+        QAbstractItemModel* profilesModel() const;
 
+        int profilesIndex() const;
+
+        //void writeConfig(QString profile = QString());
+        void saveSettings(const QString &profile = "");
+        void loadSettings();
+
+    signals:
+        void signalProfileChanged (int index);
+
+    public slots:
+        void slotProfileChanged (int index);
+
+    private slots:
+
+        void slotProfileChangedByUser(const QString &previous, const QString &current);
+        void slotProfileRenamed(const QString &previous, const QString &current);
+        void slotProfileDeleted(const QString &item);
+
+        void on_newProfileAction_triggered();
+        void on_deleteProfileAction_triggered();
+>>>>>>> Stashed changes
+
+    private:
+
+        QMenu *mContextMenu;
+
+        Files::ConfigurationManager &mCfgMgr;
+
+<<<<<<< Updated upstream
     TextInputDialog *mNewProfileDialog;
 
     void setMastersCheckstates(Qt::CheckState state);
@@ -84,5 +128,23 @@ private:
     void loadSettings();
 
 };
+=======
+        GameSettings &mGameSettings;
+        LauncherSettings &mLauncherSettings;
 
+        void setPluginsCheckstates(Qt::CheckState state);
+>>>>>>> Stashed changes
+
+        void buildView();
+        void setupDataFiles();
+        void setupConfig();
+        void readConfig();
+        void setProfile (int index, bool savePrevious);
+        void setProfile (const QString &previous, const QString &current, bool savePrevious);
+        void removeProfile (const QString &profile);
+        bool showDeleteMessageBox (const QString &text);
+        void addProfile (const QString &profile, bool setAsCurrent);
+        void checkForDefaultProfile();
+    };
+}
 #endif

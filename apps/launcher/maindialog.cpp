@@ -1,5 +1,6 @@
 #include "maindialog.hpp"
 
+#include <QPushButton>
 #include <QFontDatabase>
 #include <QInputDialog>
 #include <QFileDialog>
@@ -23,8 +24,8 @@
 #include "graphicspage.hpp"
 #include "datafilespage.hpp"
 
-MainDialog::MainDialog()
-    : mGameSettings(mCfgMgr)
+Launcher::MainDialog::MainDialog(QWidget *parent)
+    : mGameSettings(mCfgMgr), QMainWindow (parent)
 {
     // Install the stylesheet font
     QFile file;
@@ -69,7 +70,7 @@ MainDialog::MainDialog()
     createIcons();
 }
 
-void MainDialog::createIcons()
+void Launcher::MainDialog::createIcons()
 {
     if (!QIcon::hasThemeIcon("document-new"))
         QIcon::setThemeName("tango");
@@ -101,7 +102,7 @@ void MainDialog::createIcons()
 
 }
 
-void MainDialog::createPages()
+void Launcher::MainDialog::createPages()
 {
     mPlayPage = new PlayPage(this);
     mGraphicsPage = new GraphicsPage(mCfgMgr, mGraphicsSettings, this);
@@ -126,7 +127,7 @@ void MainDialog::createPages()
 
 }
 
-bool MainDialog::showFirstRunDialog()
+bool Launcher::MainDialog::showFirstRunDialog()
 {
     QStringList iniPaths;
 
@@ -282,7 +283,7 @@ bool MainDialog::showFirstRunDialog()
     return true;
 }
 
-bool MainDialog::setup()
+bool Launcher::MainDialog::setup()
 {
     if (!setupLauncherSettings())
         return false;
@@ -311,7 +312,7 @@ bool MainDialog::setup()
     return true;
 }
 
-void MainDialog::changePage(QListWidgetItem *current, QListWidgetItem *previous)
+void Launcher::MainDialog::changePage(QListWidgetItem *current, QListWidgetItem *previous)
 {
     if (!current)
         current = previous;
@@ -319,7 +320,7 @@ void MainDialog::changePage(QListWidgetItem *current, QListWidgetItem *previous)
     pagesWidget->setCurrentIndex(iconWidget->row(current));
 }
 
-bool MainDialog::setupLauncherSettings()
+bool Launcher::MainDialog::setupLauncherSettings()
 {
     mLauncherSettings.setMultiValueEnabled(true);
 
@@ -356,7 +357,7 @@ bool MainDialog::setupLauncherSettings()
 }
 
 #ifndef WIN32
-bool expansions(UnshieldThread& cd)
+bool Launcher::expansions(Launcher::UnshieldThread& cd)
 {
     if(cd.BloodmoonDone())
     {
@@ -367,7 +368,7 @@ bool expansions(UnshieldThread& cd)
     QMessageBox expansionsBox;
     expansionsBox.setText(QObject::tr("<br>Would you like to install expansions now ? (make sure you have the disc)<br> \
                                        If you want to install both Bloodmoon and Tribunal, you have to install Tribunal first.<br>"));
-    
+
     QAbstractButton* tribunalButton = NULL;
     if(!cd.TribunalDone())
         tribunalButton = expansionsBox.addButton(QObject::tr("&Tribunal"), QMessageBox::ActionRole);
@@ -386,7 +387,7 @@ bool expansions(UnshieldThread& cd)
     {
 
         TextSlotMsgBox cdbox;
-        cdbox.setStandardButtons(QMessageBox::Cancel); 
+        cdbox.setStandardButtons(QMessageBox::Cancel);
 
         QObject::connect(&cd,SIGNAL(signalGUI(const QString&)), &cdbox, SLOT(setTextSlot(const QString&)));
         QObject::connect(&cd,SIGNAL(close()), &cdbox, SLOT(reject()));
@@ -405,7 +406,7 @@ bool expansions(UnshieldThread& cd)
     {
 
         TextSlotMsgBox cdbox;
-        cdbox.setStandardButtons(QMessageBox::Cancel); 
+        cdbox.setStandardButtons(QMessageBox::Cancel);
 
         QObject::connect(&cd,SIGNAL(signalGUI(const QString&)), &cdbox, SLOT(setTextSlot(const QString&)));
         QObject::connect(&cd,SIGNAL(close()), &cdbox, SLOT(reject()));
@@ -427,7 +428,7 @@ bool expansions(UnshieldThread& cd)
 }
 #endif // WIN32
 
-bool MainDialog::setupGameSettings()
+bool Launcher::MainDialog::setupGameSettings()
 {
     QString userPath = QString::fromStdString(mCfgMgr.getUserPath().string());
     QString globalPath = QString::fromStdString(mCfgMgr.getGlobalPath().string());
@@ -550,7 +551,7 @@ bool MainDialog::setupGameSettings()
     return true;
 }
 
-bool MainDialog::setupGraphicsSettings()
+bool Launcher::MainDialog::setupGraphicsSettings()
 {
     mGraphicsSettings.setMultiValueEnabled(false);
 
@@ -604,7 +605,7 @@ bool MainDialog::setupGraphicsSettings()
     return true;
 }
 
-void MainDialog::loadSettings()
+void Launcher::MainDialog::loadSettings()
 {
     int width = mLauncherSettings.value(QString("General/MainWindow/width")).toInt();
     int height = mLauncherSettings.value(QString("General/MainWindow/height")).toInt();
@@ -616,7 +617,7 @@ void MainDialog::loadSettings()
     move(posX, posY);
 }
 
-void MainDialog::saveSettings()
+void Launcher::MainDialog::saveSettings()
 {
     QString width = QString::number(this->width());
     QString height = QString::number(this->height());
@@ -634,7 +635,7 @@ void MainDialog::saveSettings()
 
 }
 
-bool MainDialog::writeSettings()
+bool Launcher::MainDialog::writeSettings()
 {
     // Now write all config files
     saveSettings();
@@ -727,13 +728,13 @@ bool MainDialog::writeSettings()
     return true;
 }
 
-void MainDialog::closeEvent(QCloseEvent *event)
+void Launcher::MainDialog::closeEvent(QCloseEvent *event)
 {
     writeSettings();
     event->accept();
 }
 
-void MainDialog::play()
+void Launcher::MainDialog::play()
 {
     if (!writeSettings()) {
         qApp->quit();
@@ -756,7 +757,7 @@ void MainDialog::play()
     qApp->quit();
 }
 
-bool MainDialog::startProgram(const QString &name, const QStringList &arguments, bool detached)
+bool Launcher::MainDialog::startProgram(const QString &name, const QStringList &arguments, bool detached)
 {
     QString path = name;
 #ifdef Q_OS_WIN

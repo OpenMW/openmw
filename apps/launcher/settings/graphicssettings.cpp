@@ -5,15 +5,15 @@
 #include <QRegExp>
 #include <QMap>
 
-GraphicsSettings::GraphicsSettings()
+Launcher::GraphicsSettings::GraphicsSettings()
 {
 }
 
-GraphicsSettings::~GraphicsSettings()
+Launcher::GraphicsSettings::~GraphicsSettings()
 {
 }
 
-bool GraphicsSettings::writeFile(QTextStream &stream)
+bool Launcher::GraphicsSettings::writeFile(QTextStream &stream)
 {
     QString sectionPrefix;
     QRegExp sectionRe("([^/]+)/(.+)$");

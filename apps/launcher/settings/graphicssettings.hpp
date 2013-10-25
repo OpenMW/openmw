@@ -3,14 +3,16 @@
 
 #include "settingsbase.hpp"
 
-class GraphicsSettings : public SettingsBase<QMap<QString, QString> >
+namespace Launcher
 {
-public:
-    GraphicsSettings();
-    ~GraphicsSettings();
+    class GraphicsSettings : public SettingsBase<QMap<QString, QString> >
+    {
+    public:
+        GraphicsSettings();
+        ~GraphicsSettings();
 
-    bool writeFile(QTextStream &stream);
+        bool writeFile(QTextStream &stream);
 
-};
-
+    };
+}
 #endif // GRAPHICSSETTINGS_HPP

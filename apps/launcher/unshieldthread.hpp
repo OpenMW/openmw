@@ -7,50 +7,52 @@
 
 #include <libunshield.h>
 
-class UnshieldThread : public QThread
+namespace Launcher
 {
-   Q_OBJECT
+    class UnshieldThread : public QThread
+    {
+       Q_OBJECT
 
-    public:
-        bool SetMorrowindPath(const std::string& path);
-        bool SetTribunalPath(const std::string& path);
-        bool SetBloodmoonPath(const std::string& path);
+        public:
+            bool SetMorrowindPath(const std::string& path);
+            bool SetTribunalPath(const std::string& path);
+            bool SetBloodmoonPath(const std::string& path);
 
-        void SetOutputPath(const std::string& path);
-        
-        bool extract(); 
+            void SetOutputPath(const std::string& path);
 
-        bool TribunalDone();
-        bool BloodmoonDone();
+            bool extract();
 
-        void Done();
+            bool TribunalDone();
+            bool BloodmoonDone();
 
-        std::string GetMWEsmPath();
+            void Done();
 
-        UnshieldThread();
+            std::string GetMWEsmPath();
 
-    private:
+            UnshieldThread();
 
-        void extract_cab(const boost::filesystem::path& cab, const boost::filesystem::path& output_dir, bool extract_ini = false);
-        bool extract_file(Unshield* unshield, boost::filesystem::path output_dir, const char* prefix, int index);
-        
-        boost::filesystem::path mMorrowindPath;
-        boost::filesystem::path mTribunalPath;
-        boost::filesystem::path mBloodmoonPath;
+        private:
 
-        bool mMorrowindDone;
-        bool mTribunalDone;
-        bool mBloodmoonDone;
+            void extract_cab(const boost::filesystem::path& cab, const boost::filesystem::path& output_dir, bool extract_ini = false);
+            bool extract_file(Unshield* unshield, boost::filesystem::path output_dir, const char* prefix, int index);
 
-        boost::filesystem::path mOutputPath;
+            boost::filesystem::path mMorrowindPath;
+            boost::filesystem::path mTribunalPath;
+            boost::filesystem::path mBloodmoonPath;
+
+            bool mMorrowindDone;
+            bool mTribunalDone;
+            bool mBloodmoonDone;
+
+            boost::filesystem::path mOutputPath;
 
 
-    protected:
-        virtual void run();
+        protected:
+            virtual void run();
 
-    signals:
-        void signalGUI(QString);
-        void close();
-};
-
+        signals:
+            void signalGUI(QString);
+            void close();
+    };
+}
 #endif

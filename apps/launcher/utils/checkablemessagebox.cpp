@@ -54,72 +54,61 @@
     Emulates the QMessageBox API with
     static conveniences. The message label can open external URLs.
 */
-
-class CheckableMessageBoxPrivate
-{
-public:
-    CheckableMessageBoxPrivate(QDialog *q)
+Launcher::CheckableMessageBoxPrivate::CheckableMessageBoxPrivate(QDialog *q)
         : clickedButton(0)
-    {
-        QSizePolicy sizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
+{
+    QSizePolicy sizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
 
-        pixmapLabel = new QLabel(q);
-        sizePolicy.setHorizontalStretch(0);
-        sizePolicy.setVerticalStretch(0);
-        sizePolicy.setHeightForWidth(pixmapLabel->sizePolicy().hasHeightForWidth());
-        pixmapLabel->setSizePolicy(sizePolicy);
-        pixmapLabel->setVisible(false);
+    pixmapLabel = new QLabel(q);
+    sizePolicy.setHorizontalStretch(0);
+    sizePolicy.setVerticalStretch(0);
+    sizePolicy.setHeightForWidth(pixmapLabel->sizePolicy().hasHeightForWidth());
+    pixmapLabel->setSizePolicy(sizePolicy);
+    pixmapLabel->setVisible(false);
 
-        QSpacerItem *pixmapSpacer =
-                new QSpacerItem(0, 5, QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
+    QSpacerItem *pixmapSpacer =
+            new QSpacerItem(0, 5, QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
 
-        messageLabel = new QLabel(q);
-        messageLabel->setMinimumSize(QSize(300, 0));
-        messageLabel->setWordWrap(true);
-        messageLabel->setOpenExternalLinks(true);
-        messageLabel->setTextInteractionFlags(Qt::LinksAccessibleByKeyboard|Qt::LinksAccessibleByMouse);
+    messageLabel = new QLabel(q);
+    messageLabel->setMinimumSize(QSize(300, 0));
+    messageLabel->setWordWrap(true);
+    messageLabel->setOpenExternalLinks(true);
+    messageLabel->setTextInteractionFlags(Qt::LinksAccessibleByKeyboard|Qt::LinksAccessibleByMouse);
 
-        QSpacerItem *checkBoxRightSpacer =
-                new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Minimum);
-        QSpacerItem *buttonSpacer =
-                new QSpacerItem(0, 1, QSizePolicy::Minimum, QSizePolicy::Minimum);
+    QSpacerItem *checkBoxRightSpacer =
+            new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Minimum);
+    QSpacerItem *buttonSpacer =
+            new QSpacerItem(0, 1, QSizePolicy::Minimum, QSizePolicy::Minimum);
 
-        checkBox = new QCheckBox(q);
-        checkBox->setText(CheckableMessageBox::tr("Do not ask again"));
+    checkBox = new QCheckBox(q);
+    checkBox->setText(Launcher::CheckableMessageBox::tr("Do not ask again"));
 
-        buttonBox = new QDialogButtonBox(q);
-        buttonBox->setOrientation(Qt::Horizontal);
-        buttonBox->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
+    buttonBox = new QDialogButtonBox(q);
+    buttonBox->setOrientation(Qt::Horizontal);
+    buttonBox->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
 
-        QVBoxLayout *verticalLayout = new QVBoxLayout();
-        verticalLayout->addWidget(pixmapLabel);
-        verticalLayout->addItem(pixmapSpacer);
+    QVBoxLayout *verticalLayout = new QVBoxLayout();
+    verticalLayout->addWidget(pixmapLabel);
+    verticalLayout->addItem(pixmapSpacer);
 
-        QHBoxLayout *horizontalLayout_2 = new QHBoxLayout();
-        horizontalLayout_2->addLayout(verticalLayout);
-        horizontalLayout_2->addWidget(messageLabel);
+    QHBoxLayout *horizontalLayout_2 = new QHBoxLayout();
+    horizontalLayout_2->addLayout(verticalLayout);
+    horizontalLayout_2->addWidget(messageLabel);
 
-        QHBoxLayout *horizontalLayout = new QHBoxLayout();
-        horizontalLayout->addWidget(checkBox);
-        horizontalLayout->addItem(checkBoxRightSpacer);
+    QHBoxLayout *horizontalLayout = new QHBoxLayout();
+    horizontalLayout->addWidget(checkBox);
+    horizontalLayout->addItem(checkBoxRightSpacer);
 
-        QVBoxLayout *verticalLayout_2 = new QVBoxLayout(q);
-        verticalLayout_2->addLayout(horizontalLayout_2);
-        verticalLayout_2->addLayout(horizontalLayout);
-        verticalLayout_2->addItem(buttonSpacer);
-        verticalLayout_2->addWidget(buttonBox);
-    }
+    QVBoxLayout *verticalLayout_2 = new QVBoxLayout(q);
+    verticalLayout_2->addLayout(horizontalLayout_2);
+    verticalLayout_2->addLayout(horizontalLayout);
+    verticalLayout_2->addItem(buttonSpacer);
+    verticalLayout_2->addWidget(buttonBox);
+}
 
-    QLabel *pixmapLabel;
-    QLabel *messageLabel;
-    QCheckBox *checkBox;
-    QDialogButtonBox *buttonBox;
-    QAbstractButton *clickedButton;
-};
-
-CheckableMessageBox::CheckableMessageBox(QWidget *parent) :
+Launcher::CheckableMessageBox::CheckableMessageBox(QWidget *parent) :
     QDialog(parent),
-    d(new CheckableMessageBoxPrivate(this))
+    d(new Launcher::CheckableMessageBoxPrivate(this))
 {
     setModal(true);
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
@@ -129,102 +118,102 @@ CheckableMessageBox::CheckableMessageBox(QWidget *parent) :
             SLOT(slotClicked(QAbstractButton*)));
 }
 
-CheckableMessageBox::~CheckableMessageBox()
+Launcher::CheckableMessageBox::~CheckableMessageBox()
 {
     delete d;
 }
 
-void CheckableMessageBox::slotClicked(QAbstractButton *b)
+void Launcher::CheckableMessageBox::slotClicked(QAbstractButton *b)
 {
     d->clickedButton = b;
 }
 
-QAbstractButton *CheckableMessageBox::clickedButton() const
+QAbstractButton *Launcher::CheckableMessageBox::clickedButton() const
 {
     return d->clickedButton;
 }
 
-QDialogButtonBox::StandardButton CheckableMessageBox::clickedStandardButton() const
+QDialogButtonBox::StandardButton Launcher::CheckableMessageBox::clickedStandardButton() const
 {
     if (d->clickedButton)
         return d->buttonBox->standardButton(d->clickedButton);
     return QDialogButtonBox::NoButton;
 }
 
-QString CheckableMessageBox::text() const
+QString Launcher::CheckableMessageBox::text() const
 {
     return d->messageLabel->text();
 }
 
-void CheckableMessageBox::setText(const QString &t)
+void Launcher::CheckableMessageBox::setText(const QString &t)
 {
     d->messageLabel->setText(t);
 }
 
-QPixmap CheckableMessageBox::iconPixmap() const
+QPixmap Launcher::CheckableMessageBox::iconPixmap() const
 {
     if (const QPixmap *p = d->pixmapLabel->pixmap())
         return QPixmap(*p);
     return QPixmap();
 }
 
-void CheckableMessageBox::setIconPixmap(const QPixmap &p)
+void Launcher::CheckableMessageBox::setIconPixmap(const QPixmap &p)
 {
     d->pixmapLabel->setPixmap(p);
     d->pixmapLabel->setVisible(!p.isNull());
 }
 
-bool CheckableMessageBox::isChecked() const
+bool Launcher::CheckableMessageBox::isChecked() const
 {
     return d->checkBox->isChecked();
 }
 
-void CheckableMessageBox::setChecked(bool s)
+void Launcher::CheckableMessageBox::setChecked(bool s)
 {
     d->checkBox->setChecked(s);
 }
 
-QString CheckableMessageBox::checkBoxText() const
+QString Launcher::CheckableMessageBox::checkBoxText() const
 {
     return d->checkBox->text();
 }
 
-void CheckableMessageBox::setCheckBoxText(const QString &t)
+void Launcher::CheckableMessageBox::setCheckBoxText(const QString &t)
 {
     d->checkBox->setText(t);
 }
 
-bool CheckableMessageBox::isCheckBoxVisible() const
+bool Launcher::CheckableMessageBox::isCheckBoxVisible() const
 {
     return d->checkBox->isVisible();
 }
 
-void CheckableMessageBox::setCheckBoxVisible(bool v)
+void Launcher::CheckableMessageBox::setCheckBoxVisible(bool v)
 {
     d->checkBox->setVisible(v);
 }
 
-QDialogButtonBox::StandardButtons CheckableMessageBox::standardButtons() const
+QDialogButtonBox::StandardButtons Launcher::CheckableMessageBox::standardButtons() const
 {
     return d->buttonBox->standardButtons();
 }
 
-void CheckableMessageBox::setStandardButtons(QDialogButtonBox::StandardButtons s)
+void Launcher::CheckableMessageBox::setStandardButtons(QDialogButtonBox::StandardButtons s)
 {
     d->buttonBox->setStandardButtons(s);
 }
 
-QPushButton *CheckableMessageBox::button(QDialogButtonBox::StandardButton b) const
+QPushButton *Launcher::CheckableMessageBox::button(QDialogButtonBox::StandardButton b) const
 {
     return d->buttonBox->button(b);
 }
 
-QPushButton *CheckableMessageBox::addButton(const QString &text, QDialogButtonBox::ButtonRole role)
+QPushButton *Launcher::CheckableMessageBox::addButton(const QString &text, QDialogButtonBox::ButtonRole role)
 {
     return d->buttonBox->addButton(text, role);
 }
 
-QDialogButtonBox::StandardButton CheckableMessageBox::defaultButton() const
+QDialogButtonBox::StandardButton Launcher::CheckableMessageBox::defaultButton() const
 {
     foreach (QAbstractButton *b, d->buttonBox->buttons())
         if (QPushButton *pb = qobject_cast<QPushButton *>(b))
@@ -233,7 +222,7 @@ QDialogButtonBox::StandardButton CheckableMessageBox::defaultButton() const
     return QDialogButtonBox::NoButton;
 }
 
-void CheckableMessageBox::setDefaultButton(QDialogButtonBox::StandardButton s)
+void Launcher::CheckableMessageBox::setDefaultButton(QDialogButtonBox::StandardButton s)
 {
     if (QPushButton *b = d->buttonBox->button(s)) {
         b->setDefault(true);
@@ -242,7 +231,7 @@ void CheckableMessageBox::setDefaultButton(QDialogButtonBox::StandardButton s)
 }
 
 QDialogButtonBox::StandardButton
-CheckableMessageBox::question(QWidget *parent,
+Launcher::CheckableMessageBox::question(QWidget *parent,
                               const QString &title,
                               const QString &question,
                               const QString &checkBoxText,
@@ -263,7 +252,7 @@ CheckableMessageBox::question(QWidget *parent,
     return mb.clickedStandardButton();
 }
 
-QMessageBox::StandardButton CheckableMessageBox::dialogButtonBoxToMessageBoxButton(QDialogButtonBox::StandardButton db)
+QMessageBox::StandardButton Launcher::CheckableMessageBox::dialogButtonBoxToMessageBoxButton(QDialogButtonBox::StandardButton db)
 {
     return static_cast<QMessageBox::StandardButton>(int(db));
 }
