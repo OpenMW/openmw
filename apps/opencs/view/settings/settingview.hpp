@@ -2,14 +2,9 @@
 #define SETTINGVIEW_HPP
 
 #include <QGroupBox>
-#include <QSortFilterProxyModel>
 
 #include "support.hpp"
 #include "../../model/settings/setting.hpp"
-#include "abstractwidget.hpp"
-#include "widgetfactory.hpp"
-
-#include <QDebug>
 
 //--------------------------
 //  TODO
@@ -29,20 +24,22 @@
 //  another example: A checkbox/toggle button widget with a multi-valued setting would represent a series of bit flags...
 
 class QSortFilterProxyModel;
+class QDataWidgetMapper;
 
 namespace CSVSettings
 {
+    class IWidgetFactory;
 
     class SettingView : public QGroupBox
     {
         Q_OBJECT
 
         QSortFilterProxyModel *mSettingFilter;
-        QList<QModelIndex> mSettingIndices;
         static const QString INVISIBLE_BOX_STYLE;
         QString mVisibleBoxStyle;
-        WidgetFactory *mWidgetFactory;
-        QList <ViewWidget *> mViewWidgets;
+        IWidgetFactory *mWidgetFactory;
+        QList <QWidget *> mViewWidgets;
+        QDataWidgetMapper *mDataAdapter;
 
     public:
 
