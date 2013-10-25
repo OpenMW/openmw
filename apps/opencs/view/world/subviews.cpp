@@ -13,6 +13,7 @@
 #include "cellcreator.hpp"
 #include "referenceablecreator.hpp"
 #include "referencecreator.hpp"
+#include "scenesubview.hpp"
 
 void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
 {
@@ -62,4 +63,5 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         new CSVDoc::SubViewFactoryWithCreator<TableSubView,
         CreatorFactory<CSVFilter::FilterCreator> >);
 
+    manager.add (CSMWorld::UniversalId::Type_Scene, new CSVDoc::SubViewFactory<SceneSubView>);
 }

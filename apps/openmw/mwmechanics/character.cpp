@@ -767,10 +767,25 @@ void CharacterController::update(float duration)
         }
 
         if(sneak || inwater || flying)
+        {
             vec.z = 0.0f;
+            mFallHeight = mPtr.getRefData().getPosition().pos[2];
+        }
 
         if(!onground && !flying && !inwater)
         {
+            // The player is in the air (either getting up —ascending part of jump— or falling).
+
+            if (world->isSlowFalling(mPtr))
+            {
+                // SlowFalling spell effect is active, do not keep previous fall height
+                mFallHeight = mPtr.getRefData().getPosition().pos[2];
+            }
+            else
+            {
+                mFallHeight = std::max(mFallHeight, mPtr.getRefData().getPosition().pos[2]);
+            }
+
             const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
 
             forcestateupdate = (mJumpState != JumpState_Falling);
@@ -794,6 +809,8 @@ void CharacterController::update(float duration)
         }
         else if(vec.z > 0.0f && mJumpState == JumpState_None)
         {
+            // The player has started a jump.
+
             float z = cls.getJump(mPtr);
             if(vec.x == 0 && vec.y == 0)
                 vec = Ogre::Vector3(0.0f, 0.0f, z);
@@ -803,13 +820,49 @@ void CharacterController::update(float duration)
                 vec = Ogre::Vector3(lat.x, lat.y, 1.0f) * z * 0.707f;
             }
 
-            //decrease fatigue by fFatigueJumpBase + (1 - normalizedEncumbrance) * fFatigueJumpMult;
+            // advance acrobatics
+            cls.skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, 0);
+
+            // decrease fatigue
+            const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
+            const float fatigueJumpBase = gmst.find("fFatigueJumpBase")->getFloat();
+            const float fatigueJumpMult = gmst.find("fFatigueJumpMult")->getFloat();
+            const float normalizedEncumbrance = cls.getEncumbrance(mPtr) / cls.getCapacity(mPtr);
+            const int fatigueDecrease = fatigueJumpBase + (1 - normalizedEncumbrance) * fatigueJumpMult;
+            DynamicStat<float> fatigue = cls.getCreatureStats(mPtr).getFatigue();
+            fatigue.setCurrent(fatigue.getCurrent() - fatigueDecrease);
+            cls.getCreatureStats(mPtr).setFatigue(fatigue);
         }
         else if(mJumpState == JumpState_Falling)
         {
+            // The player is landing.
+
             forcestateupdate = true;
             mJumpState = JumpState_Landing;
             vec.z = 0.0f;
+
+            float healthLost = cls.getFallDamage(mPtr, mFallHeight - mPtr.getRefData().getPosition().pos[2]);
+            if (healthLost > 0.0f)
+            {
+                const float fatigueTerm = cls.getCreatureStats(mPtr).getFatigueTerm();
+
+                // inflict fall damages
+                DynamicStat<float> health = cls.getCreatureStats(mPtr).getHealth();
+                int realHealthLost = healthLost * (1.0f - 0.25 * fatigueTerm);
+                health.setCurrent(health.getCurrent() - realHealthLost);
+                cls.getCreatureStats(mPtr).setHealth(health);
+
+                // report acrobatics progression
+                cls.skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, 1);
+
+                const float acrobaticsSkill = cls.getNpcStats(mPtr).getSkill(ESM::Skill::Acrobatics).getModified();
+                if (healthLost > (acrobaticsSkill * fatigueTerm))
+                {
+                    //TODO: actor falls over
+                }
+            }
+
+            mFallHeight = mPtr.getRefData().getPosition().pos[2];
         }
         else
         {

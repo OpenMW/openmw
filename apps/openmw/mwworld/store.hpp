@@ -656,26 +656,38 @@ namespace MWWorld
             return iterator(mSharedExt.end());
         }
 
-        /// \todo implement appropriate index
+        // Return the northernmost cell in the easternmost column.
         const ESM::Cell *searchExtByName(const std::string &id) const {
+            ESM::Cell *cell = 0;
             std::vector<ESM::Cell *>::const_iterator it = mSharedExt.begin();
             for (; it != mSharedExt.end(); ++it) {
                 if (Misc::StringUtils::ciEqual((*it)->mName, id)) {
-                    return *it;
+                    if ( cell == 0 ||
+                        ( (*it)->mData.mX > cell->mData.mX ) ||
+                        ( (*it)->mData.mX == cell->mData.mX && (*it)->mData.mY > cell->mData.mY ) )
+                    {
+                        cell = *it;
+                    }
                 }
             }
-            return 0;
+            return cell;
         }
 
-        /// \todo implement appropriate index
+        // Return the northernmost cell in the easternmost column.
         const ESM::Cell *searchExtByRegion(const std::string &id) const {
+            ESM::Cell *cell = 0;
             std::vector<ESM::Cell *>::const_iterator it = mSharedExt.begin();
             for (; it != mSharedExt.end(); ++it) {
                 if (Misc::StringUtils::ciEqual((*it)->mRegion, id)) {
-                    return *it;
+                    if ( cell == 0 ||
+                        ( (*it)->mData.mX > cell->mData.mX ) ||
+                        ( (*it)->mData.mX == cell->mData.mX && (*it)->mData.mY > cell->mData.mY ) )
+                    {
+                        cell = *it;
+                    }
                 }
             }
-            return 0;
+            return cell;
         }
 
         size_t getSize() const {

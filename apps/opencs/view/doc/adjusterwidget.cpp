@@ -65,7 +65,7 @@ void CSVDoc::AdjusterWidget::setName (const QString& name, bool addon)
         if (path.parent_path().string()==mLocalData.string())
         {
             // path already points to the local data directory
-            message = QString::fromUtf8 (("Will be saved as: " + path.native()).c_str());
+            message = QString::fromUtf8 (("Will be saved as: " + path.string()).c_str());
             mResultPath = path;
             mValid = true;
         }
@@ -74,7 +74,7 @@ void CSVDoc::AdjusterWidget::setName (const QString& name, bool addon)
             // path points somewhere else or is a leaf name.
             path = mLocalData / path.filename();
 
-            message = QString::fromUtf8 (("Will be saved as: " + path.native()).c_str());
+            message = QString::fromUtf8 (("Will be saved as: " + path.string()).c_str());
             mResultPath = path;
             mValid = true;
 

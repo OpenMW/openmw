@@ -32,6 +32,15 @@ struct MagicEffect
         Negative = 0x0800 // A harmful effect. Will determine whether
                           // eg. NPCs regard this spell as an attack. (same as 0x10?)
     };
+    enum MagnitudeDisplayType
+    {
+        MDT_None,
+        MDT_Feet,
+        MDT_Level,
+        MDT_Percentage,
+        MDT_Points,
+        MDT_TimesInt
+    };
 
     struct MEDTstruct
     {
@@ -47,6 +56,7 @@ struct MagicEffect
 
     static const std::string &effectIdToString(short effectID);
     static short effectStringToId(const std::string &effect);
+    MagnitudeDisplayType getMagnitudeDisplayType() const;
 
 
     MEDTstruct mData;
