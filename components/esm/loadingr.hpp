@@ -15,6 +15,8 @@ class ESMWriter;
 
 struct Ingredient
 {
+    static unsigned int sRecordId;
+
     struct IRDTstruct
     {
         float mWeight;
@@ -28,7 +30,7 @@ struct Ingredient
     std::string mId, mName, mModel, mIcon, mScript;
 
     void load(ESMReader &esm);
-    void save(ESMWriter &esm);
+    void save(ESMWriter &esm) const;
 
     void blank();
     ///< Set record to default state (does not touch the ID).

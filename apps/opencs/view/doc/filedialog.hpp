@@ -55,7 +55,7 @@ namespace CSVDoc
     signals:
 
         void openFiles();
-        void createNewFile();
+        void createNewFile (const boost::filesystem::path& savePath);
 
         void signalUpdateCreateButton (bool, int);
         void signalUpdateCreateButtonFlags(int);

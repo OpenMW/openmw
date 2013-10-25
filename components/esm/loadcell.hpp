@@ -16,7 +16,6 @@ namespace MWWorld
 
 namespace ESM
 {
-
 class ESMReader;
 class ESMWriter;
 
@@ -55,6 +54,8 @@ typedef std::list<CellRef> CellRefTracker;
  */
 struct Cell
 {
+    static unsigned int sRecordId;
+
   enum Flags
     {
       Interior  = 0x01, // Interior cell
@@ -102,7 +103,7 @@ struct Cell
   // This method is left in for compatibility with esmtool. Parsing moved references currently requires
   //  passing ESMStore, bit it does not know about this parameter, so we do it this way.
   void load(ESMReader &esm, bool saveContext = true);
-  void save(ESMWriter &esm);
+  void save(ESMWriter &esm) const;
 
   bool isExterior() const
   {

@@ -6,6 +6,7 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
@@ -126,6 +127,8 @@ namespace ESM
         HandToHand
     }};
 
+    unsigned int Skill::sRecordId = REC_SKIL;
+
 void Skill::load(ESMReader &esm)
 {
     esm.getHNT(mIndex, "INDX");
@@ -137,7 +140,7 @@ void Skill::load(ESMReader &esm)
     mId = indexToId (mIndex);
 }
 
-void Skill::save(ESMWriter &esm)
+void Skill::save(ESMWriter &esm) const
 {
     esm.writeHNT("INDX", mIndex);
     esm.writeHNT("SKDT", mData, 24);

@@ -2,9 +2,11 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int Ingredient::sRecordId = REC_INGR;
 
 void Ingredient::load(ESMReader &esm)
 {
@@ -37,7 +39,7 @@ void Ingredient::load(ESMReader &esm)
     }
 }
 
-void Ingredient::save(ESMWriter &esm)
+void Ingredient::save(ESMWriter &esm) const
 {
     esm.writeHNCString("MODL", mModel);
     esm.writeHNCString("FNAM", mName);

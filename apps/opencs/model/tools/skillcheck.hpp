@@ -5,12 +5,12 @@
 
 #include "../world/idcollection.hpp"
 
-#include "stage.hpp"
+#include "../doc/stage.hpp"
 
 namespace CSMTools
 {
     /// \brief VerifyStage: make sure that skill records are internally consistent
-    class SkillCheckStage : public Stage
+    class SkillCheckStage : public CSMDoc::Stage
     {
             const CSMWorld::IdCollection<ESM::Skill>& mSkills;
 

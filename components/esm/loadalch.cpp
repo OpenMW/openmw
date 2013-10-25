@@ -2,9 +2,12 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int Potion::sRecordId = REC_ALCH;
+
 void Potion::load(ESMReader &esm)
 {
     mModel = esm.getHNString("MODL");
@@ -14,7 +17,7 @@ void Potion::load(ESMReader &esm)
     esm.getHNT(mData, "ALDT", 12);
     mEffects.load(esm);
 }
-void Potion::save(ESMWriter &esm)
+void Potion::save(ESMWriter &esm) const
 {
     esm.writeHNCString("MODL", mModel);
     esm.writeHNOCString("TEXT", mIcon);

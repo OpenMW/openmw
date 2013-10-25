@@ -7,9 +7,11 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int Cell::sRecordId = REC_CELL;
 
 /// Some overloaded compare operators.
 bool operator==(const MovedCellRef& ref, int pRefnum)
@@ -89,7 +91,7 @@ void Cell::postLoad(ESMReader &esm)
     esm.skipRecord();
 }
 
-void Cell::save(ESMWriter &esm)
+void Cell::save(ESMWriter &esm) const
 {
     esm.writeHNT("DATA", mData, 12);
     if (mData.mFlags & Interior)

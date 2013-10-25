@@ -2,9 +2,11 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int Spell::sRecordId = REC_SPEL;
 
 void Spell::load(ESMReader &esm)
 {
@@ -13,7 +15,7 @@ void Spell::load(ESMReader &esm)
     mEffects.load(esm);
 }
 
-void Spell::save(ESMWriter &esm)
+void Spell::save(ESMWriter &esm) const
 {
     esm.writeHNOCString("FNAM", mName);
     esm.writeHNT("SPDT", mData, 12);
