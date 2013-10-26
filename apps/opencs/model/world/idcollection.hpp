@@ -111,7 +111,7 @@ namespace CSMWorld
         else
         {
             record.mState = RecordBase::State_Deleted;
-            setRecord (index, record);
+            this->setRecord (index, record);
         }
 
         return true;

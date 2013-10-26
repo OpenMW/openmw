@@ -17,8 +17,6 @@
 #include "filewidget.hpp"
 #include "adjusterwidget.hpp"
 
-#include <QDebug>
-
 CSVDoc::FileDialog::FileDialog(QWidget *parent) :
     QDialog(parent), mSelector (0)
 {
@@ -61,6 +59,13 @@ void CSVDoc::FileDialog::showDialog(DialogType dialogType)
         break;
     }
 
+    //connections common to both dialog view flavors
+    connect (mSelector, SIGNAL (signalCurrentGamefileIndexChanged (int)),
+             this, SLOT (slotUpdateAcceptButton (int)));
+
+    connect (ui.projectButtonBox, SIGNAL (accepted()), this, SIGNAL (createNewFile()));
+    connect (ui.projectButtonBox, SIGNAL (rejected()), this, SLOT (slotRejected()));
+
     show();
     raise();
     activateWindow();
@@ -82,13 +87,7 @@ void CSVDoc::FileDialog::buildNewFileView()
     ui.projectGroupBoxLayout->insertWidget (0, mFileWidget);
 
     connect (mFileWidget, SIGNAL (nameChanged(const QString &, bool)),
-            this, SLOT (slotUpdateCreateButton(const QString &, bool)));
-
-    connect (mSelector, SIGNAL (signalCurrentGamefileIndexChanged (int)),
-             this, SLOT (slotUpdateCreateButton (int)));
-
-    connect (ui.projectButtonBox, SIGNAL (accepted()), this, SIGNAL (createNewFile()));
-    connect (ui.projectButtonBox, SIGNAL (rejected()), this, SLOT (slotRejected()));
+            this, SLOT (slotUpdateAcceptButton(const QString &, bool)));
 }
 
 void CSVDoc::FileDialog::buildOpenFileView()
@@ -96,21 +95,25 @@ void CSVDoc::FileDialog::buildOpenFileView()
     setWindowTitle(tr("Open"));
     ui.projectGroupBox->setTitle (QString(""));
 
-    connect (ui.projectButtonBox, SIGNAL (accepted()), this, SIGNAL (openFiles()));
-    connect (ui.projectButtonBox, SIGNAL (rejected()), this, SLOT (slotRejected()));
+    ui.projectButtonBox->button(QDialogButtonBox::Ok)->setEnabled (false);
 }
 
-void CSVDoc::FileDialog::slotUpdateCreateButton (int)
+void CSVDoc::FileDialog::slotUpdateAcceptButton (int)
 {
-    slotUpdateCreateButton (mFileWidget->getName(), true);
+    QString name = "";
+
+    if (mDialogType == DialogType_New)
+        name = mFileWidget->getName();
+
+    slotUpdateAcceptButton (name, true);
 }
 
-void CSVDoc::FileDialog::slotUpdateCreateButton(const QString &name, bool)
+void CSVDoc::FileDialog::slotUpdateAcceptButton(const QString &name, bool)
 {
-    if (!(mDialogType == DialogType_New))
-        return;
+    bool success = (mSelector->selectedFiles().size() > 0);
 
-    bool success = (!name.isEmpty() && mSelector->selectedFiles().size() > 0);
+    if (mDialogType == DialogType_New)
+        success = success && !(name.isEmpty());
 
     ui.projectButtonBox->button (QDialogButtonBox::Ok)->setEnabled (success);
 }

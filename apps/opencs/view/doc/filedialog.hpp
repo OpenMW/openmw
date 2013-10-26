@@ -5,6 +5,7 @@
 #include <QModelIndex>
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 #include "ui_filedialog.h"
 =======
 #include <boost/filesystem/path.hpp>
@@ -26,6 +27,9 @@ class QString;
 class QMenu;
 class QLabel;
 >>>>>>> 3146af34d642a28b15b55f7eb9999d8ac50168a0
+=======
+#include "ui_filedialog.h"
+>>>>>>> esxSelector
 
 class DataFilesModel;
 class PluginsProxyModel;
@@ -78,13 +82,13 @@ namespace CSVDoc
         void openFiles();
         void createNewFile ();
 
-        void signalUpdateCreateButton (bool, int);
-        void signalUpdateCreateButtonFlags(int);
+        void signalUpdateAcceptButton (bool, int);
 
     private slots:
 
-        void slotUpdateCreateButton (int);
-        void slotUpdateCreateButton (const QString &, bool);
+        void slotUpdateAcceptButton (int);
+        void slotUpdateAcceptButton (const QString &, bool);
+
         void slotRejected();
     };
 }
