@@ -1,139 +1,102 @@
-#include <QCheckBox>
-#include <QComboBox>
 #include <QDataWidgetMapper>
 #include <QHBoxLayout>
 #include <QLabel>
-#include <QLineEdit>
-#include <QListWidget>
-#include <QRadioButton>
 #include <QSortFilterProxyModel>
-#include <QSpinBox>
 #include <QVBoxLayout>
 
-#include "widgetfactory.hpp"
+#ifdef Q_OS_MAC
+#include <QPlastiqueStyle>
+#endif
 
 #include <QDebug>
 
+#include "widgetfactory.hpp"
 
-CSVSettings::WidgetFactory::WidgetFactory (QLayout *layout,
-                                                     QSortFilterProxyModel *model, QWidget *parent)
-    : mLayout (layout), mParent (parent), mSourceModel (model)
+
+CSVSettings::WidgetFactory::WidgetFactory (QSortFilterProxyModel *model, QWidget *parent)
+    : mParent (parent), mSourceModel (model)
 {}
 
-QWidget *CSVSettings::WidgetFactory::createWidget(const QString &caption, QWidget *widget)
+QLayout *CSVSettings::WidgetFactory::build (QWidget *widget, const QString &name, Orientation orientation)
 {
-    SettingWidget *setting_widget = new SettingWidget (widget, mSourceModel, caption, mParent);
+    //OSX styling
+#ifdef Q_OS_MAC
+    widget->setStyle(new PlastiqueStyle);
+#endif
 
+    widget->setObjectName (name);
 
-    //mLayout->setAlignment (mWidget, getAlignment (align));
+    buildMapper (widget, buildModel (widget));
+    return buildLayout(widget, name, orientation);
+/*
+    qDebug() << "building widget based on section: " << objectName() << "; records: " << mFilterProxy->rowCount();
 
-
+    qDebug() << "record value: " << mFilterProxy->data(mFilterProxy->index(0,2,QModelIndex()), Qt::DisplayRole).toString();
+  */
 }
 
-CSVSettings::SettingWidget::SettingWidget(QWidget *widget, QSortFilterProxyModel *model,
-                                          const QString &caption, QWidget *parent)
-    : mWidget (widget), mFilterProxy (new QSortFilterProxyModel (parent)), mAdapter (0), QWidget (parent)
+QSortFilterProxyModel *CSVSettings::WidgetFactory::buildModel(QWidget *widget)
 {
+    QSortFilterProxyModel *filter = 0;
 
-    buildWidgetModel (model);
-    buildWidgetView (caption);
-
-    qDebug() << "building widget based on section: " << mWidget->objectName() << "; records: " << mFilterProxy->rowCount();
-
-    qDebug() << "record value: " << mFilterProxy->data(mFilterProxy->index (0, 2, QModelIndex()), Qt::DisplayRole).toString();
-}
-
-void CSVSettings::SettingWidget::buildWidgetView(const QString &caption)
-{
-    setLayout (new QHBoxLayout());
-
-    if (!caption.isEmpty())
+    if (widget->property("isChecked").isValid())
     {
-        QLabel *label = new QLabel (caption, this);
-        label->setBuddy (mWidget);
-        layout()->addWidget (label);
+        //create custom filter here for binary widgets
+    }
+    else
+        filter = new QSortFilterProxyModel (mParent);
+
+    filter->setSourceModel (mSourceModel);
+    filter->setFilterKeyColumn (0);
+    filter->setFilterFixedString (widget->objectName());
+    filter->setDynamicSortFilter (true);
+}
+
+void CSVSettings::WidgetFactory::buildMapper (QWidget *widget, QSortFilterProxyModel *filter)
+{
+    QDataWidgetMapper mapper = new QDataWidgetMapper (mParent);
+    mapper->setModel (filter);
+    mapper->addMapping (widget, 2);
+    mapper->toFirst();
+}
+
+QLayout *CSVSettings::WidgetFactory::buildLayout (QWidget *widget, Orientation orientation)
+{
+    QLayout *layout = 0;
+
+    if (orientation == Orient_Horizontal)
+        layout = new QHBoxLayout();
+    else
+        layout = new QVBoxLayout();
+
+    layout->setContentsMargins (0, 0, 0, 0);
+
+    QString name = widget->objectName();
+
+    if (!name.isEmpty())
+    {
+        QLabel *label = new QLabel (name, parent);
+        label->setBuddy (widget);
+        layout->addWidget (label);
     }
 
-    layout()->setContentsMargins(0, 0, 0, 0);
-    layout()->addWidget (mWidget);
+    layout->addWidget (widget);
+
+    return layout;
 }
 
-void CSVSettings::SettingWidget::buildWidgetModel(QSortFilterProxyModel *model)
+//setting construction...  goes where?
+/*
+CSMSettings::Setting *CSVSettings::AbstractWidget::buildSetting (QSortFilterProxyModel *settingModel)
 {
-    mFilterProxy = new QSortFilterProxyModel (parent());
+    CSMSettings::Setting *setting = new CSMSettings::Setting (objectName(), "", "", this);
 
-    //filters the model using the widget name (name of the setting or setting value)
-    mFilterProxy->setSourceModel (model);
-    mFilterProxy->setFilterKeyColumn (0);
-    mFilterProxy->setFilterFixedString (mWidget->objectName());
-    mFilterProxy->setDynamicSortFilter (true);
+    for (int i = 0; i < settingModel->columnCount(); ++i)
+    {
+        QModelIndex index = settingModel->index(0,i, QModelIndex());
+        setting->setItem (i, settingModel->data(index));
+    }
 
-    mAdapter = new QDataWidgetMapper(this);
-    mAdapter->setModel (mFilterProxy);
-    mAdapter->addMapping(mWidget, 2);
-    mAdapter->toFirst();
+    return setting;
 }
-
-CSVSettings::CheckBoxFactory::CheckBoxFactory (QLayout *layout, QWidget *parent)
-    : WidgetFactory (layout, model, parent)
-{}
-
-QWidget *CSVSettings::CheckBoxFactory::createWidget(const QString &name)
-{
-    setupWidget (name, new QCheckBox(name, mParent));
-}
-
-CSVSettings::ComboBoxFactory::ComboBoxFactory (QLayout *layout, QWidget *parent)
-    : WidgetFactory (layout, model, parent)
-{}
-
-QWidget *CSVSettings::ComboBoxFactory::createWidget(const QString &name)
-{
-    setupWidget (name, new QComboBox(name, mParent));
-}
-
-CSVSettings::SpinBoxFactory::SpinBoxFactory (QLayout *layout, QWidget *parent)
-    : WidgetFactory (layout, model, parent)
-{}
-
-QWidget *CSVSettings::SpinBoxFactory::createWidget(const QString &name)
-{
-    setupWidget (name, new QSpinBox(name, mParent));
-}
-
-CSVSettings::ListBoxFactory::ListBoxFactory (QLayout *layout, QWidget *parent)
-    : WidgetFactory (layout, model, parent)
-{}
-
-QWidget *CSVSettings::ListBoxFactory::createWidget(const QString &name)
-{
-    setupWidget (name, new QListBox(name, mParent));
-}
-
-CSVSettings::RadioButtonFactory::RadioButtonFactory (QLayout *layout, QWidget *parent)
-    : WidgetFactory (layout, model, parent)
-{}
-
-QWidget *CSVSettings::RadioButtonFactory::createWidget(const QString &name)
-{
-    setupWidget (name, new QRadioButton(name, mParent));
-}
-
-CSVSettings::LineEditFactory::LineEditFactory (QLayout *layout, QWidget *parent)
-    : WidgetFactory (layout, model, parent)
-{}
-
-QWidget *CSVSettings::LineEditFactory::createWidget(const QString &name)
-{
-    setupWidget (name, new QLineEdit(name, mParent));
-}
-
-CSVSettings::ToggleButtonFactory::ToggleButtonFactory (QLayout *layout, QWidget *parent)
-    : WidgetFactory (layout, model, parent)
-{}
-
-QWidget *CSVSettings::ToggleButtonFactory::createWidget(const QString &name)
-{
-    //ToggleButton *widget = new ToggleButton (name, mParent);
-    //setupWidget (name, widget);
-}
+*/

@@ -80,7 +80,6 @@ opencs_units_noqt (view/tools
 
 opencs_units (view/settings
     abstractblock
-    abstractwidget
     usersettingsdialog
     windowpage
     settingpage
@@ -89,12 +88,10 @@ opencs_units (view/settings
 
 opencs_units_noqt (view/settings
     abstractpage
-    blankpage
     groupblock
     settingbox
     itemblock
     widgetfactory
-    settingwidget
     support
     )
 

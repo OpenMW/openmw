@@ -1,114 +1,53 @@
 #ifndef CSVSETTINGS_WIDGETFACTORY_HPP
 #define CSVSETTINGS_WIDGETFACTORY_HPP
 
-#include "settingbox.hpp"
+#include "support.hpp"
 
+class QWidget;
 class QSortFilterProxyModel;
 class QDataWidgetMapper;
+class QLayout;
+class QString;
 
 namespace CSVSettings {
 
-
-    /// Helper class that manages the data mapping for the widget
-    class SettingWidget : public QWidget
-    {
-        Q_OBJECT
-
-        QDataWidgetMapper *mAdapter;
-        QSortFilterProxyModel *mFilterProxy;
-        QWidget *mWidget;
-
-    public:
-
-        explicit SettingWidget (QWidget *widget, QSortFilterProxyModel *model,
-                                const QString &caption, QWidget *parent = 0);
-
-    private:
-
-        void buildWidgetView (const QString &caption);
-        void buildWidgetModel (QSortFilterProxyModel *model);
-
-    };
-
-    /// Base factory inherited by all typed widget factory classes
     class WidgetFactory
     {
 
         QWidget *mParent;
-        QLayout *mLayout;
         QSortFilterProxyModel *mSourceModel;
 
     public:
-        explicit WidgetFactory (QLayout *layout, QSortFilterProxyModel *model, QWidget *parent);
 
-        virtual ~WidgetFactory() {}
-        virtual QWidget *createWidget (const QString &name, QWidget *widget);
+        explicit WidgetFactory (QSortFilterProxyModel *model, QWidget *parent)
+            : mParent (parent), mSourceModel (model)
+        {}
 
-    };
+        template <typename T>
+        QLayout *createWidget (const QString &name, Orientation = Orient_Horizontal)
+        {
+            //type-check the template parameter to ensure it is of type QWidget
+            //compile-time fail if not
+            (void)static_cast<QWidget *>((T*)0);
 
-    /// Typed Factories
-    class CheckBoxFactory : public WidgetFactory
-    {
+            T *widget  = new T (mParent);
 
-    public:
-        explicit CheckBoxFactory (QLayout *layout, QSortFilterProxyModel *model, QWidget *parent = 0);
+            return build(widget, name, orientation);
+        }
 
-        QWidget *createWidget (const QString &name);
-    };
+    private:
 
-    class ComboBoxFactory : public WidgetFactory
-    {
+        QLayout *build (QWidget *widget, const QString &name, Orientation orientation);
 
-    public:
-        explicit ComboBoxFactory (QLayout *layout, QSortFilterProxyModel *model, QWidget *parent = 0);
+        void buildMapper (QWidget *widget, QSortFilterProxyModel *filter);
+        QSortFilterProxyModel *buildModel(QWidget *widget);
+        QLayout *buildLayout (QWidget *widget, Orientation orientation);
 
-        QWidget *createWidget(const QString &name);
-    };
-
-    class ListBoxFactory : public WidgetFactory
-    {
-
-    public:
-        explicit ListBoxFactory (QLayout *layout, QSortFilterProxyModel *model, QWidget *parent = 0);
-
-        QWidget *createWidget(const QString &name);
-    };
-
-    class SpinBoxFactory : public WidgetFactory
-    {
-
-    public:
-        explicit SpinBoxFactory (QLayout *layout, QSortFilterProxyModel *model, QWidget *parent = 0);
-
-        QWidget *createWidget(const QString &name);
-    };
-
-    class RadioButtonFactory : public WidgetFactory
-    {
-
-    public:
-        explicit RadioButtonFactory (QLayout *layout, QSortFilterProxyModel *model, QWidget *parent = 0);
-
-        QWidget *createWidget(const QString &name);
-    };
-
-    class ToggleButtonFactory : public WidgetFactory
-    {
-
-    public:
-        explicit ToggleButtonFactory (QLayout *layout, QSortFilterProxyModel *model, QWidget *parent = 0);
-
-        QWidget *createWidget(const QString &name) {}
-    };
-
-    class LineEditFactory : public WidgetFactory
-    {
-
-    public:
-        explicit LineEditFactory (QLayout *layout, QSortFilterProxyModel *model, QWidget *parent = 0);
-
-        QWidget *createWidget(const QString &name);
+        // need support functions for:
+        //
+        // setInputMask
+        // alignment
+        // creating setting class
     };
 }
-
 #endif // CSVSETTINGS_WIDGETFACTORY_HPP

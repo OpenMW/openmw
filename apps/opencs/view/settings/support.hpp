@@ -1,9 +1,6 @@
 #ifndef VIEW_SUPPORT_HPP
 #define VIEW_SUPPORT_HPP
 
-#include <QList>
-#include <QStringList>
-
 #include "../../model/settings/support.hpp"
 
 namespace CSVSettings
