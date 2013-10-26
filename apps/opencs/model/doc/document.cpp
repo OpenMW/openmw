@@ -2246,7 +2246,7 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration, co
         mData.setAuthor ("");
     }
 /// \todo un-outcomment the else, once loading an existing content file works properly again.
-//    else
+    else
     {
         if (boost::filesystem::exists (mProjectPath))
         {

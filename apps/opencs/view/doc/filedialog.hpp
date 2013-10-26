@@ -55,15 +55,14 @@ namespace CSVDoc
     signals:
 
         void openFiles();
-        void createNewFile (const boost::filesystem::path& savePath);
+        void createNewFile ();
 
-        void signalUpdateCreateButton (bool, int);
-        void signalUpdateCreateButtonFlags(int);
+        void signalUpdateAcceptButton (bool, int);
 
     private slots:
 
-        void slotUpdateCreateButton (int);
-        void slotUpdateCreateButton (const QString &, bool);
+        void slotUpdateAcceptButton (int);
+        void slotUpdateAcceptButton (const QString &, bool);
         void slotRejected();
     };
 }

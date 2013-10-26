@@ -10,6 +10,7 @@
 #include "model/world/data.hpp"
 #include <iostream>
 
+#include <QDebug>
 
 CS::Editor::Editor()
     : mDocumentManager (mCfgMgr), mViewManager (mDocumentManager)
@@ -19,7 +20,6 @@ CS::Editor::Editor()
     setupDataFiles();
 
     mNewGame.setLocalData (mLocal);
-    mFileDialog.setLocalData (mLocal);
 
     connect (&mViewManager, SIGNAL (newGameRequest ()), this, SLOT (createGame ()));
     connect (&mViewManager, SIGNAL (newAddonRequest ()), this, SLOT (createAddon ()));
@@ -32,8 +32,8 @@ CS::Editor::Editor()
     connect (&mStartup, SIGNAL (editConfig()), this, SLOT (showSettings ()));
 
     connect (&mFileDialog, SIGNAL(openFiles()), this, SLOT(openFiles()));
-    connect (&mFileDialog, SIGNAL(createNewFile (const boost::filesystem::path&)),
-             this, SLOT(createNewFile (const boost::filesystem::path&)));
+    connect (&mFileDialog, SIGNAL(createNewFile ()),
+             this, SLOT(createNewFile ()));
 
     connect (&mNewGame, SIGNAL (createRequest (const boost::filesystem::path&)),
              this, SLOT (createNewGame (const boost::filesystem::path&)));
@@ -141,7 +141,7 @@ void CS::Editor::openFiles()
     mFileDialog.hide();
 }
 
-void CS::Editor::createNewFile (const boost::filesystem::path& savePath)
+void CS::Editor::createNewFile ()
 {
     std::vector<boost::filesystem::path> files;
 

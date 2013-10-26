@@ -161,42 +161,8 @@ void Launcher::DataFilesPage::slotProfileDeleted (const QString &item)
 
 void Launcher::DataFilesPage::slotProfileChangedByUser(const QString &previous, const QString &current)
 {
-<<<<<<< HEAD
     setProfile(previous, current, true);
     emit signalProfileChanged (ui.profilesComboBox->findText(current));
-=======
-    if (mContentModel->rowCount() < 1)
-        return;
-
-    QString profile = mLauncherSettings.value(QString("Profiles/currentprofile"));
-
-    if (profile.isEmpty()) {
-        profile = profilesComboBox->currentText();
-        mLauncherSettings.setValue(QString("Profiles/currentprofile"), profile);
-    }
-
-    mLauncherSettings.remove(QString("Profiles/") + profile + QString("/master"));
-    mLauncherSettings.remove(QString("Profiles/") + profile + QString("/plugin"));
-
-    mGameSettings.remove(QString("master"));
-    mGameSettings.remove(QString("plugins"));
-    mGameSettings.remove(QString("content"));
-
-    ContentSelectorModel::ContentFileList items = mContentModel->checkedItems();
-
-    foreach(const ContentSelectorModel::EsmFile *item, items) {
-
-        if (item->gameFiles().size() == 0) {
-            mLauncherSettings.setMultiValue(QString("Profiles/") + profile + QString("/master"), item->fileName());
-            mGameSettings.setMultiValue(QString("content"), item->fileName());
-
-        } else {
-            mLauncherSettings.setMultiValue(QString("Profiles/") + profile + QString("/plugin"), item->fileName());
-            mGameSettings.setMultiValue(QString("content"), item->fileName());
-        }
-    }
-
->>>>>>> 3146af34d642a28b15b55f7eb9999d8ac50168a0
 }
 
 void Launcher::DataFilesPage::slotProfileRenamed(const QString &previous, const QString &current)

@@ -60,7 +60,7 @@ namespace CS
 
             void loadDocument();
             void openFiles();
-            void createNewFile (const boost::filesystem::path& savePath);
+            void createNewFile ();
             void createNewGame (const boost::filesystem::path& file);
 
             void showStartup();
