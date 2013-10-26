@@ -27,11 +27,13 @@ struct InventoryList
     std::vector<ContItem> mList;
 
     void load(ESMReader &esm);
-    void save(ESMWriter &esm);
+    void save(ESMWriter &esm) const;
 };
 
 struct Container
 {
+    static unsigned int sRecordId;
+
     enum Flags
     {
         Organic = 1, // Objects cannot be placed in this container
@@ -46,7 +48,7 @@ struct Container
     InventoryList mInventory;
 
     void load(ESMReader &esm);
-    void save(ESMWriter &esm);
+    void save(ESMWriter &esm) const;
 
     void blank();
     ///< Set record to default state (does not touch the ID).

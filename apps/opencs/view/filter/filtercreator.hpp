@@ -25,6 +25,8 @@ namespace CSVFilter
 
             virtual std::string getId() const;
 
+            virtual void configureCreateCommand (CSMWorld::CreateCommand& command) const;
+
         public:
 
             FilterCreator (CSMWorld::Data& data, QUndoStack& undoStack,

@@ -4,7 +4,28 @@
 #include <QDialog>
 #include <QModelIndex>
 
+<<<<<<< HEAD
 #include "ui_filedialog.h"
+=======
+#include <boost/filesystem/path.hpp>
+
+#include "components/contentselector/view/contentselector.hpp"
+#include "ui_datafilespage.h"
+
+#ifndef CS_QT_BOOST_FILESYSTEM_PATH_DECLARED
+#define CS_QT_BOOST_FILESYSTEM_PATH_DECLARED
+Q_DECLARE_METATYPE (boost::filesystem::path)
+#endif
+
+class QDialogButtonBox;
+class QSortFilterProxyModel;
+class QAbstractItemModel;
+class QPushButton;
+class QStringList;
+class QString;
+class QMenu;
+class QLabel;
+>>>>>>> 3146af34d642a28b15b55f7eb9999d8ac50168a0
 
 class DataFilesModel;
 class PluginsProxyModel;
@@ -55,7 +76,7 @@ namespace CSVDoc
     signals:
 
         void openFiles();
-        void createNewFile();
+        void createNewFile ();
 
         void signalUpdateCreateButton (bool, int);
         void signalUpdateCreateButtonFlags(int);

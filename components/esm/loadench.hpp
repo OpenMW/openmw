@@ -17,6 +17,8 @@ class ESMWriter;
 
 struct Enchantment
 {
+    static unsigned int sRecordId;
+
     enum Type
     {
         CastOnce = 0,
@@ -39,7 +41,7 @@ struct Enchantment
     EffectList mEffects;
 
     void load(ESMReader &esm);
-    void save(ESMWriter &esm);
+    void save(ESMWriter &esm) const;
 };
 }
 #endif

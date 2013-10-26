@@ -2,9 +2,11 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int Repair::sRecordId = REC_REPA;
 
 void Repair::load(ESMReader &esm)
 {
@@ -17,7 +19,7 @@ void Repair::load(ESMReader &esm)
     mIcon = esm.getHNOString("ITEX");
 }
 
-void Repair::save(ESMWriter &esm)
+void Repair::save(ESMWriter &esm) const
 {
     esm.writeHNCString("MODL", mModel);
     esm.writeHNCString("FNAM", mName);

@@ -218,3 +218,16 @@ std::vector<std::string> CSMWorld::RefIdData::getIds (bool listDeleted) const
 
     return ids;
 }
+
+void CSMWorld::RefIdData::save (int index, ESM::ESMWriter& writer) const
+{
+    LocalIndex localIndex = globalToLocalIndex (index);
+
+    std::map<UniversalId::Type, RefIdDataContainerBase *>::const_iterator iter =
+        mRecordContainers.find (localIndex.second);
+
+    if (iter==mRecordContainers.end())
+        throw std::logic_error ("invalid local index type");
+
+    iter->second->save (localIndex.first, writer);
+}

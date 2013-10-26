@@ -14,9 +14,9 @@ void EffectList::load(ESMReader &esm)
     }
 }
 
-void EffectList::save(ESMWriter &esm)
+void EffectList::save(ESMWriter &esm) const
 {
-    for (std::vector<ENAMstruct>::iterator it = mList.begin(); it != mList.end(); ++it) {
+    for (std::vector<ENAMstruct>::const_iterator it = mList.begin(); it != mList.end(); ++it) {
         esm.writeHNT<ENAMstruct>("ENAM", *it, 24);
     }
 }

@@ -128,3 +128,8 @@ void CSVDoc::FileDialog::slotRejected()
     emit rejected();
     close();
 }
+
+void CSVDoc::FileDialog::createNewFile()
+{
+    emit createNewFile (mAdjusterWidget->getPath());
+}

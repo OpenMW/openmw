@@ -17,6 +17,8 @@ class ESMWriter;
 // class
 struct Class
 {
+    static unsigned int sRecordId;
+
     enum AutoCalc
     {
         Weapon = 0x00001,
@@ -70,7 +72,7 @@ struct Class
     CLDTstruct mData;
 
     void load(ESMReader &esm);
-    void save(ESMWriter &esm);
+    void save(ESMWriter &esm) const;
 
     void blank();
      ///< Set record to default state (does not touch the ID/index).

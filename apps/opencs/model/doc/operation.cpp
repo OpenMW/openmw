@@ -6,16 +6,16 @@
 
 #include <QTimer>
 
-#include "../doc/state.hpp"
-
+#include "state.hpp"
 #include "stage.hpp"
 
-void CSMTools::Operation::prepareStages()
+void CSMDoc::Operation::prepareStages()
 {
     mCurrentStage = mStages.begin();
     mCurrentStep = 0;
     mCurrentStepTotal = 0;
     mTotalSteps = 0;
+    mError = false;
 
     for (std::vector<std::pair<Stage *, int> >::iterator iter (mStages.begin()); iter!=mStages.end(); ++iter)
     {
@@ -24,38 +24,61 @@ void CSMTools::Operation::prepareStages()
     }
 }
 
-CSMTools::Operation::Operation (int type) : mType (type) {}
+CSMDoc::Operation::Operation (int type, bool ordered, bool finalAlways)
+: mType (type), mOrdered (ordered), mFinalAlways (finalAlways)
+{
+    connect (this, SIGNAL (finished()), this, SLOT (operationDone()));
+}
 
-CSMTools::Operation::~Operation()
+CSMDoc::Operation::~Operation()
 {
     for (std::vector<std::pair<Stage *, int> >::iterator iter (mStages.begin()); iter!=mStages.end(); ++iter)
         delete iter->first;
 }
 
-void CSMTools::Operation::run()
+void CSMDoc::Operation::run()
 {
     prepareStages();
 
     QTimer timer;
 
-    timer.connect (&timer, SIGNAL (timeout()), this, SLOT (verify()));
+    timer.connect (&timer, SIGNAL (timeout()), this, SLOT (executeStage()));
 
     timer.start (0);
 
     exec();
 }
 
-void CSMTools::Operation::appendStage (Stage *stage)
+void CSMDoc::Operation::appendStage (Stage *stage)
 {
     mStages.push_back (std::make_pair (stage, 0));
 }
 
-void CSMTools::Operation::abort()
+bool CSMDoc::Operation::hasError() const
 {
-    exit();
+    return mError;
 }
 
-void CSMTools::Operation::verify()
+void CSMDoc::Operation::abort()
+{
+    if (!isRunning())
+        return;
+
+    mError = true;
+
+    if (mFinalAlways)
+    {
+        if (mStages.begin()!=mStages.end() && mCurrentStage!=--mStages.end())
+        {
+            mCurrentStep = 0;
+            mCurrentStage = --mStages.end();
+        }
+    }
+    else
+        mCurrentStage = mStages.end();
+}
+
+void CSMDoc::Operation::executeStage()
 {
     std::vector<std::string> messages;
 
@@ -68,7 +91,16 @@ void CSMTools::Operation::verify()
         }
         else
         {
-            mCurrentStage->first->perform (mCurrentStep++, messages);
+            try
+            {
+                mCurrentStage->first->perform (mCurrentStep++, messages);
+            }
+            catch (const std::exception& e)
+            {
+                emit reportMessage (e.what(), mType);
+                abort();
+            }
+
             ++mCurrentStepTotal;
             break;
         }
@@ -81,4 +113,9 @@ void CSMTools::Operation::verify()
 
     if (mCurrentStage==mStages.end())
         exit();
+}
+
+void CSMDoc::Operation::operationDone()
+{
+    emit done (mType);
 }

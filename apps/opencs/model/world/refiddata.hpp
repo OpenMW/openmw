@@ -23,6 +23,7 @@
 #include <components/esm/loadweap.hpp>
 #include <components/esm/loadnpc.hpp>
 #include <components/esm/loadmisc.hpp>
+#include <components/esm/esmwriter.hpp>
 
 #include "record.hpp"
 #include "universalid.hpp"
@@ -51,6 +52,8 @@ namespace CSMWorld
         virtual void erase (int index, int count) = 0;
 
         virtual std::string getId (int index) const = 0;
+
+        virtual void save (int index, ESM::ESMWriter& writer) const = 0;
     };
 
     template<typename RecordT>
@@ -71,6 +74,8 @@ namespace CSMWorld
         virtual void erase (int index, int count);
 
         virtual std::string getId (int index) const;
+
+        virtual void save (int index, ESM::ESMWriter& writer) const;
     };
 
     template<typename RecordT>
@@ -122,6 +127,31 @@ namespace CSMWorld
     {
         return mContainer.at (index).get().mId;
     }
+
+    template<typename RecordT>
+    void RefIdDataContainer<RecordT>::save (int index, ESM::ESMWriter& writer) const
+    {
+        CSMWorld::RecordBase::State state = mContainer.at (index).mState;
+
+        if (state==CSMWorld::RecordBase::State_Modified ||
+            state==CSMWorld::RecordBase::State_ModifiedOnly)
+        {
+            std::string type;
+            for (int i=0; i<4; ++i)
+                /// \todo make endianess agnostic (change ESMWriter interface?)
+                type += reinterpret_cast<const char *> (&mContainer.at (index).mModified.sRecordId)[i];
+
+            writer.startRecord (type);
+            writer.writeHNCString ("NAME", getId (index));
+            mContainer.at (index).mModified.save (writer);
+            writer.endRecord (type);
+        }
+        else if (state==CSMWorld::RecordBase::State_Deleted)
+        {
+            /// \todo write record with delete flag
+        }
+    }
+
 
     class RefIdData
     {
@@ -187,6 +217,8 @@ namespace CSMWorld
             ///< Return a sorted collection of all IDs
             ///
             /// \param listDeleted include deleted record in the list
+
+            void save (int index, ESM::ESMWriter& writer) const;
     };
 }
 

@@ -26,6 +26,7 @@ namespace CS
     {
             Q_OBJECT
 
+            Files::ConfigurationManager mCfgMgr;
             CSMSettings::UserSettings mUserSettings;
             CSMDoc::DocumentManager mDocumentManager;
             CSVDoc::ViewManager mViewManager;
@@ -34,7 +35,6 @@ namespace CS
             CSVSettings::UserSettingsDialog mSettings;
             CSVDoc::FileDialog mFileDialog;
 
-            Files::ConfigurationManager mCfgMgr;
             boost::filesystem::path mLocal;
 
             void setupDataFiles();
@@ -60,7 +60,7 @@ namespace CS
 
             void loadDocument();
             void openFiles();
-            void createNewFile();
+            void createNewFile (const boost::filesystem::path& savePath);
             void createNewGame (const boost::filesystem::path& file);
 
             void showStartup();

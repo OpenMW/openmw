@@ -20,6 +20,8 @@ class ESMWriter;
 
 struct NPC
 {
+    static unsigned int sRecordId;
+
   // Services
   enum Services
     {
@@ -117,7 +119,7 @@ struct NPC
     std::string mHair, mHead;
 
     void load(ESMReader &esm);
-    void save(ESMWriter &esm);
+    void save(ESMWriter &esm) const;
 
     bool isMale() const;
 
