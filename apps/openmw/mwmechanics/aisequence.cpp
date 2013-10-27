@@ -73,8 +73,11 @@ void MWMechanics::AiSequence::execute (const MWWorld::Ptr& actor)
         }
         else
         {
-            mCombat = true;
-            mCombatPackage = new AiCombat("player");
+            if(actor.getClass().getCreatureStats(actor).getAiSetting(1)> 80)
+            {
+                mCombat = true;
+                mCombatPackage = new AiCombat("player");
+            }
             if (!mPackages.empty())
             {
                 if (mPackages.front()->execute (actor))
