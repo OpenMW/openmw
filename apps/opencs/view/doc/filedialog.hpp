@@ -4,6 +4,13 @@
 #include <QDialog>
 #include <QModelIndex>
 
+#include <boost/filesystem/path.hpp>
+
+#ifndef CS_QT_BOOST_FILESYSTEM_PATH_DECLARED
+#define CS_QT_BOOST_FILESYSTEM_PATH_DECLARED
+Q_DECLARE_METATYPE (boost::filesystem::path)
+#endif
+
 #include "ui_filedialog.h"
 
 class DataFilesModel;
@@ -17,6 +24,7 @@ namespace ContentSelectorView
 namespace CSVDoc
 {
     class FileWidget;
+    class AdjusterWidget;
 
     class FileDialog : public QDialog
     {
@@ -36,6 +44,7 @@ namespace CSVDoc
         Ui::FileDialog ui;
         DialogType mDialogType;
         FileWidget *mFileWidget;
+        AdjusterWidget *mAdjusterWidget;
 
     public:
 
@@ -47,6 +56,8 @@ namespace CSVDoc
         QString filename() const;
         QStringList selectedFilePaths();
 
+        void setLocalData (const boost::filesystem::path& localData);
+
     private:
 
         void buildNewFileView();
@@ -54,13 +65,15 @@ namespace CSVDoc
 
     signals:
 
-        void openFiles();
-        void createNewFile ();
+        void signalOpenFiles (const boost::filesystem::path &path);
+        void signalCreateNewFile (const boost::filesystem::path &path);
 
         void signalUpdateAcceptButton (bool, int);
 
     private slots:
 
+        void slotNewFile();
+        void slotOpenFile();
         void slotUpdateAcceptButton (int);
         void slotUpdateAcceptButton (const QString &, bool);
         void slotRejected();

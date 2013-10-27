@@ -59,8 +59,8 @@ namespace CS
             void createAddon();
 
             void loadDocument();
-            void openFiles();
-            void createNewFile ();
+            void openFiles (const boost::filesystem::path &path);
+            void createNewFile (const boost::filesystem::path& path);
             void createNewGame (const boost::filesystem::path& file);
 
             void showStartup();

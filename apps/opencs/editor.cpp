@@ -20,6 +20,7 @@ CS::Editor::Editor()
     setupDataFiles();
 
     mNewGame.setLocalData (mLocal);
+    mFileDialog.setLocalData (mLocal);
 
     connect (&mViewManager, SIGNAL (newGameRequest ()), this, SLOT (createGame ()));
     connect (&mViewManager, SIGNAL (newAddonRequest ()), this, SLOT (createAddon ()));
@@ -31,9 +32,11 @@ CS::Editor::Editor()
     connect (&mStartup, SIGNAL (loadDocument()), this, SLOT (loadDocument ()));
     connect (&mStartup, SIGNAL (editConfig()), this, SLOT (showSettings ()));
 
-    connect (&mFileDialog, SIGNAL(openFiles()), this, SLOT(openFiles()));
-    connect (&mFileDialog, SIGNAL(createNewFile ()),
-             this, SLOT(createNewFile ()));
+    connect (&mFileDialog, SIGNAL(signalOpenFiles (const boost::filesystem::path&)),
+             this, SLOT(openFiles (const boost::filesystem::path&)));
+
+    connect (&mFileDialog, SIGNAL(signalCreateNewFile (const boost::filesystem::path&)),
+             this, SLOT(createNewFile (const boost::filesystem::path&)));
 
     connect (&mNewGame, SIGNAL (createRequest (const boost::filesystem::path&)),
              this, SLOT (createNewGame (const boost::filesystem::path&)));
@@ -125,15 +128,12 @@ void CS::Editor::loadDocument()
     mFileDialog.showDialog (CSVDoc::FileDialog::DialogType_Open);
 }
 
-void CS::Editor::openFiles()
+void CS::Editor::openFiles (const boost::filesystem::path &savePath)
 {
     std::vector<boost::filesystem::path> files;
 
-    foreach (const QString &path, mFileDialog.selectedFilePaths()) {
+    foreach (const QString &path, mFileDialog.selectedFilePaths())
         files.push_back(path.toStdString());
-    }
-
-    boost::filesystem::path savePath = mFileDialog.filename().toStdString();
 
     CSMDoc::Document *document = mDocumentManager.addDocument (files, savePath, false);
 
@@ -141,7 +141,7 @@ void CS::Editor::openFiles()
     mFileDialog.hide();
 }
 
-void CS::Editor::createNewFile ()
+void CS::Editor::createNewFile (const boost::filesystem::path &savePath)
 {
     std::vector<boost::filesystem::path> files;
 
@@ -150,8 +150,6 @@ void CS::Editor::createNewFile ()
     }
 
     files.push_back(mFileDialog.filename().toStdString());
-
-    boost::filesystem::path savePath = mFileDialog.filename().toStdString();
 
     CSMDoc::Document *document = mDocumentManager.addDocument (files, savePath, true);
 
