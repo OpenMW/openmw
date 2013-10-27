@@ -135,6 +135,7 @@ void CS::Editor::openFiles (const boost::filesystem::path &savePath)
     foreach (const QString &path, mFileDialog.selectedFilePaths())
         files.push_back(path.toStdString());
 
+    qDebug() << "save file path: " << savePath.c_str();
     CSMDoc::Document *document = mDocumentManager.addDocument (files, savePath, false);
 
     mViewManager.addView (document);
