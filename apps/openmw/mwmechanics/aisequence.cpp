@@ -23,7 +23,8 @@ void MWMechanics::AiSequence::copy (const AiSequence& sequence)
         iter!=sequence.mPackages.end(); ++iter)
         mPackages.push_back ((*iter)->clone());
     mCombat = sequence.mCombat;
-    mCombatPackage = sequence.mCombatPackage->clone();
+    mCombatPackage = 0;
+    if(sequence.mCombat) mCombatPackage = sequence.mCombatPackage->clone();
 }
 
 MWMechanics::AiSequence::AiSequence() : mDone (false), mCombat (false), mCombatPackage (0) {}
