@@ -67,7 +67,7 @@ namespace MWGui
         MyGUI::ImageBox* mCrosshair;
         MyGUI::TextBox* mCellNameBox;
         MyGUI::TextBox* mWeaponSpellBox;
-        MyGUI::Widget* mDrowningFrame;
+        MyGUI::Widget *mDrowningFrame, *mDrowningFlash;
 
         MyGUI::Widget* mDummy;
 
@@ -100,6 +100,9 @@ namespace MWGui
 
         MWWorld::Ptr mEnemy;
         float mEnemyHealthTimer;
+
+        bool  mIsDrowning;
+        float mDrowningFlashTheta;
 
         void onWorldClicked(MyGUI::Widget* _sender);
         void onWorldMouseOver(MyGUI::Widget* _sender, int x, int y);
