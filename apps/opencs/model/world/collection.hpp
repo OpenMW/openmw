@@ -152,8 +152,7 @@ namespace CSMWorld
             record2.mState = Record<ESXRecordT>::State_ModifiedOnly;
             record2.mModified = record;
 
-            mRecords.push_back (record2);
-            mIndex.insert (std::make_pair (Misc::StringUtils::lowerCase (id), mRecords.size()-1));
+            insertRecord (record2, mRecords.size());
         }
         else
         {
@@ -270,7 +269,12 @@ namespace CSMWorld
         ESXRecordT record;
         IdAccessorT().getId (record) = id;
         record.blank();
-        add (record);
+
+        Record<ESXRecordT> record2;
+        record2.mState = Record<ESXRecordT>::State_ModifiedOnly;
+        record2.mModified = record;
+
+        insertRecord (record2, mRecords.size(), type);
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
