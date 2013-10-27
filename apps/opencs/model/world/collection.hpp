@@ -113,6 +113,15 @@ namespace CSMWorld
             ///
             /// \param listDeleted include deleted record in the list
 
+            virtual void insertRecord (const RecordBase& record, int index,
+                UniversalId::Type type = UniversalId::Type_None);
+            ///< Insert record before index.
+            ///
+            /// If the record type does not match, an exception is thrown.
+            ///
+            /// If the index is invalid either generally (by being out of range) or for the particular
+            /// record, an exception is thrown.
+
             void addColumn (Column<ESXRecordT> *column);
 
             void setRecord (int index, const Record<ESXRecordT>& record);
@@ -287,10 +296,7 @@ namespace CSMWorld
     void Collection<ESXRecordT, IdAccessorT>::appendRecord (const RecordBase& record,
         UniversalId::Type type)
     {
-        mRecords.push_back (dynamic_cast<const Record<ESXRecordT>&> (record));
-        mIndex.insert (std::make_pair (Misc::StringUtils::lowerCase (IdAccessorT().getId (
-            dynamic_cast<const Record<ESXRecordT>&> (record).get())),
-            mRecords.size()-1));
+        insertRecord (record, mRecords.size(), type);
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
@@ -326,6 +332,29 @@ namespace CSMWorld
     const Record<ESXRecordT>& Collection<ESXRecordT, IdAccessorT>::getRecord (int index) const
     {
         return mRecords.at (index);
+    }
+
+    template<typename ESXRecordT, typename IdAccessorT>
+    void Collection<ESXRecordT, IdAccessorT>::insertRecord (const RecordBase& record, int index,
+        UniversalId::Type type)
+    {
+        if (index<0 || index>static_cast<int> (mRecords.size()))
+            throw std::runtime_error ("index out of range");
+
+        const Record<ESXRecordT>& record2 = dynamic_cast<const Record<ESXRecordT>&> (record);
+
+        mRecords.insert (mRecords.begin()+index, record2);
+
+        if (index<static_cast<int> (mRecords.size())-1)
+        {
+            for (std::map<std::string, int>::iterator iter (mIndex.begin()); iter!=mIndex.end();
+                ++iter)
+                 if (iter->second>=index)
+                     ++(iter->second);
+        }
+
+        mIndex.insert (std::make_pair (Misc::StringUtils::lowerCase (IdAccessorT().getId (
+            record2.get())), index));
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
