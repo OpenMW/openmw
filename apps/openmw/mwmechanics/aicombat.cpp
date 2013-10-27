@@ -9,6 +9,17 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
+#include "OgreMath.h"
+
+namespace
+{
+    static float sgn(float a)
+    {
+        if(a > 0)
+            return 1.0;
+        return -1.0;
+    }
+}
 
 namespace MWMechanics
 {
@@ -71,12 +82,20 @@ namespace MWMechanics
             float zAngle = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
             MWBase::Environment::get().getWorld()->rotateObject(actor, 0, 0, zAngle, false);
             MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 1;
+
             
             float range = 100;
-
+            MWWorld::Class::get(actor).getCreatureStats(actor).setAttackingOrSpell(false);
             if((dest.mX - start.mX)*(dest.mX - start.mX)+(dest.mY - start.mY)*(dest.mY - start.mY)+(dest.mZ - start.mZ)*(dest.mZ - start.mZ)
                 < range*range)
             {
+                float directionX = dest.mX - start.mX;
+                float directionY = dest.mY - start.mY;
+                float directionResult = sqrt(directionX * directionX + directionY * directionY);
+
+                zAngle = Ogre::Radian( acos(directionY / directionResult) * sgn(asin(directionX / directionResult)) ).valueDegrees();
+                MWBase::Environment::get().getWorld()->rotateObject(actor, 0, 0, zAngle, false);
+
                 mPathFinder.clearPath();
 
                 MWWorld::TimeStamp time = MWBase::Environment::get().getWorld()->getTimeStamp();
