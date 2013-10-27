@@ -461,9 +461,17 @@ ContentSelectorModel::ContentFileList ContentSelectorModel::ContentModel::checke
 {
     ContentFileList list;
 
+    // First search for game files and next addons,
+    // so we get more or less correct game files vs addons order.
     foreach (EsmFile *file, mFiles)
     {
-        if (isChecked(file->fileName()))
+        if (isChecked(file->fileName()) && file->isGameFile())
+            list << file;
+    }
+
+    foreach (EsmFile *file, mFiles)
+    {
+        if (isChecked(file->fileName()) && !file->isGameFile())
             list << file;
     }
 
