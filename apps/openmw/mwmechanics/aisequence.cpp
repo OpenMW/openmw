@@ -17,6 +17,8 @@
 #include "..\mwbase\world.hpp"
 #include "..\mwworld\player.hpp"
 
+#include "..\mwbase\mechanicsmanager.hpp"
+
 void MWMechanics::AiSequence::copy (const AiSequence& sequence)
 {
     for (std::list<AiPackage *>::const_iterator iter (sequence.mPackages.begin());
@@ -73,7 +75,23 @@ void MWMechanics::AiSequence::execute (const MWWorld::Ptr& actor)
         }
         else
         {
-            if(actor.getClass().getCreatureStats(actor).getAiSetting(1)> 80)
+            ESM::Position playerpos = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getRefData().getPosition();
+            ESM::Position actorpos = actor.getRefData().getPosition();
+            float d = sqrt((actorpos.pos[0] - playerpos.pos[0])*(actorpos.pos[0] - playerpos.pos[0])
+                +(actorpos.pos[1] - playerpos.pos[1])*(actorpos.pos[1] - playerpos.pos[1])
+                +(actorpos.pos[2] - playerpos.pos[2])*(actorpos.pos[2] - playerpos.pos[2]));
+            float fight = actor.getClass().getCreatureStats(actor).getAiSetting(1);
+            float disp = MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(actor);
+            if(fight == 100
+                || (fight >= 95 && d <= 3000)
+                || (fight >= 90 && d <= 2000)
+                || (fight >= 80 && d <= 1000)
+                || (fight >= 80 && disp <= 40) 
+                || (fight >= 70 && disp <= 35 && d <= 1000) 
+                || (fight >= 60 && disp <= 30 && d <= 1000) 
+                || (fight >= 50 && disp == 0) 
+                || (fight >= 40 && disp <= 10 && d <= 500) 
+                )
             {
                 mCombat = true;
                 mCombatPackage = new AiCombat("player");
