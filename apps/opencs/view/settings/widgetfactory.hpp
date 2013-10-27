@@ -37,17 +37,15 @@ namespace CSVSettings {
 
     private:
 
-        QLayout *build (QWidget *widget, const QString &name, Orientation orientation);
-
-        void buildMapper (QWidget *widget, QSortFilterProxyModel *filter);
-        QSortFilterProxyModel *buildModel(QWidget *widget);
-        QLayout *buildLayout (QWidget *widget, Orientation orientation);
+        QLayout *build                      (QWidget *widget, const QString &name, Orientation orientation);
+        void buildMapper                    (QWidget *widget, QSortFilterProxyModel *filter);
+        QSortFilterProxyModel *buildModel   (QWidget *widget);
+        QLayout *buildLayout                (QWidget *widget, Orientation orientation);
 
         // need support functions for:
         //
         // setInputMask
         // alignment
-        // creating setting class
     };
 }
 #endif // CSVSETTINGS_WIDGETFACTORY_HPP

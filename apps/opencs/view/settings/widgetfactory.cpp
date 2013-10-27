@@ -11,23 +11,28 @@
 #include <QDebug>
 
 #include "widgetfactory.hpp"
-
+#include "../../model/settings/setting.hpp"
+#include "../../model/settings/settingmodel.hpp"
 
 CSVSettings::WidgetFactory::WidgetFactory (QSortFilterProxyModel *model, QWidget *parent)
     : mParent (parent), mSourceModel (model)
 {}
 
-QLayout *CSVSettings::WidgetFactory::build (QWidget *widget, const QString &name, Orientation orientation)
+QLayout *CSVSettings::WidgetFactory::build (QWidget *widget, CSMSettings::Setting *setting)
 {
-    //OSX styling
-#ifdef Q_OS_MAC
-    widget->setStyle(new PlastiqueStyle);
-#endif
+    QSortFilterProxyModel *filter = buildModel (widget, name);
+    int row = filter->mapToSource(filter->index (0, 0, QModelIndex())).row();
+    CSMSettings::Setting *setting = static_cast<CSMSettings::SettingModel *>(filter->sourceModel())->getSetting (row);
 
-    widget->setObjectName (name);
+    if (!setting)
+    {
+        QWarning() << "Unable to find setting for widget creation";
+        return;
+    }
 
-    buildMapper (widget, buildModel (widget));
-    return buildLayout(widget, name, orientation);
+    buildWidget (widget, setting);
+    buildMapper (widget, filter);
+    return buildLayout(widget, setting);
 /*
     qDebug() << "building widget based on section: " << objectName() << "; records: " << mFilterProxy->rowCount();
 
@@ -35,7 +40,16 @@ QLayout *CSVSettings::WidgetFactory::build (QWidget *widget, const QString &name
   */
 }
 
-QSortFilterProxyModel *CSVSettings::WidgetFactory::buildModel(QWidget *widget)
+void buildWidget (QWidget *widget, CSMSettings::Setting *setting)
+{
+    if (widget->property ("setInputMask").isValid())
+        widget->setProperty ("setInputMask", setting->inputMask());
+
+    widget->
+
+}
+
+QSortFilterProxyModel *CSVSettings::WidgetFactory::buildModel(QWidget *widget, const QString &name)
 {
     QSortFilterProxyModel *filter = 0;
 
@@ -48,8 +62,10 @@ QSortFilterProxyModel *CSVSettings::WidgetFactory::buildModel(QWidget *widget)
 
     filter->setSourceModel (mSourceModel);
     filter->setFilterKeyColumn (0);
-    filter->setFilterFixedString (widget->objectName());
+    filter->setFilterFixedString (name);
     filter->setDynamicSortFilter (true);
+
+    return filter;
 }
 
 void CSVSettings::WidgetFactory::buildMapper (QWidget *widget, QSortFilterProxyModel *filter)
@@ -85,18 +101,3 @@ QLayout *CSVSettings::WidgetFactory::buildLayout (QWidget *widget, Orientation o
     return layout;
 }
 
-//setting construction...  goes where?
-/*
-CSMSettings::Setting *CSVSettings::AbstractWidget::buildSetting (QSortFilterProxyModel *settingModel)
-{
-    CSMSettings::Setting *setting = new CSMSettings::Setting (objectName(), "", "", this);
-
-    for (int i = 0; i < settingModel->columnCount(); ++i)
-    {
-        QModelIndex index = settingModel->index(0,i, QModelIndex());
-        setting->setItem (i, settingModel->data(index));
-    }
-
-    return setting;
-}
-*/
