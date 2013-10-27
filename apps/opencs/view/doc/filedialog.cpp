@@ -112,6 +112,8 @@ void CSVDoc::FileDialog::buildOpenFileView()
     ui.projectGroupBox->setTitle (QString(""));
     ui.projectGroupBox->layout()->addWidget (mAdjusterWidget);
 
+    mAdjusterWidget->setVisible (false);
+
     ui.projectButtonBox->button(QDialogButtonBox::Ok)->setEnabled (false);
 
     connect (ui.projectButtonBox, SIGNAL (accepted()), this, SLOT (slotOpenFile()));
