@@ -33,6 +33,8 @@ namespace MWMechanics
     {
         const MWWorld::Ptr target = MWBase::Environment::get().getWorld()->getPtr(mTargetId, false);
 
+        if(MWWorld::Class::get(actor).getCreatureStats(actor).getHealth().getCurrent() <= 0) return true;
+
         if(actor.getTypeName() == typeid(ESM::NPC).name())
         {
             MWWorld::Class::get(actor).setStance(actor, MWWorld::Class::Run,true);
@@ -45,8 +47,6 @@ namespace MWMechanics
             const ESM::Pathgrid *pathgrid =
                 MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*actor.getCell()->mCell);
 
-            int cellX = actor.getCell()->mCell->mData.mX;
-            int cellY = actor.getCell()->mCell->mData.mY;
             float xCell = 0;
             float yCell = 0;
 
