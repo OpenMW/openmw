@@ -31,7 +31,7 @@ namespace MWMechanics
 
     bool AiCombat::execute (const MWWorld::Ptr& actor)
     {
-        const MWWorld::Ptr target = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();//MWBase::Environment::get().getWorld()->getPtr(mTargetId, false);
+        const MWWorld::Ptr target = MWBase::Environment::get().getWorld()->getPtr(mTargetId, false);
 
         if(actor.getTypeName() == typeid(ESM::NPC).name())
         {
