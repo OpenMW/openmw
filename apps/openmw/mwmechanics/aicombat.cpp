@@ -35,7 +35,7 @@ namespace MWMechanics
 
         if(actor.getTypeName() == typeid(ESM::NPC).name())
         {
-
+            MWWorld::Class::get(actor).setStance(actor, MWWorld::Class::Run,true);
             MWMechanics::DrawState_ state = MWWorld::Class::get(actor).getNpcStats(actor).getDrawState();
             if (state == MWMechanics::DrawState_Spell || state == MWMechanics::DrawState_Nothing)
                 MWWorld::Class::get(actor).getNpcStats(actor).setDrawState(MWMechanics::DrawState_Weapon);    
