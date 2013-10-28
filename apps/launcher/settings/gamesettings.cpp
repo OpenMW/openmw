@@ -139,13 +139,13 @@ bool GameSettings::writeFile(QTextStream &stream)
     while (i.hasPrevious()) {
         i.previous();
 
-        if (i.key() == QLatin1String("master") || i.key() == QLatin1String("plugin"))
+        if (i.key() == QLatin1String("content"))
             continue;
 
         // Quote paths with spaces
         if (i.key() == QLatin1String("data")
-                || i.key() == QLatin1String("data-local")
-                || i.key() == QLatin1String("resources"))
+            || i.key() == QLatin1String("data-local")
+            || i.key() == QLatin1String("resources"))
         {
             if (i.value().contains(QChar(' ')))
             {
@@ -161,15 +161,24 @@ bool GameSettings::writeFile(QTextStream &stream)
 
     }
 
-    QStringList masters = mSettings.values(QString("master"));
-    for (int i = masters.count(); i--;) {
-        stream << "content=" << masters.at(i) << "\n";
-    }
-
-    QStringList plugins = mSettings.values(QString("plugin"));
-    for (int i = plugins.count(); i--;) {
-        stream << "content=" << plugins.at(i) << "\n";
+    QStringList content = mSettings.values(QString("content"));
+    for (int i = content.count(); i--;) {
+        stream << "content=" << content.at(i) << "\n";
     }
 
     return true;
+}
+
+bool GameSettings::hasMaster()
+{
+  bool result = false;
+  QStringList content = mSettings.values(QString("content"));
+  for (int i = 0; i < content.count(); ++i) {
+    if (content.at(i).contains(".omwgame") || content.at(i).contains(".esm")) {
+        result = true;
+        break;
+    }
+  }
+
+  return result;
 }

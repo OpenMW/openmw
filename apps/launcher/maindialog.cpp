@@ -261,19 +261,11 @@ bool MainDialog::showFirstRunDialog()
         // Add a new profile
         if (msgBox.isChecked()) {
             mLauncherSettings.setValue(QString("Profiles/currentprofile"), QString("Imported"));
+            mLauncherSettings.remove(QString("Profiles/Imported/content"));
 
-            mLauncherSettings.remove(QString("Profiles/Imported/master"));
-            mLauncherSettings.remove(QString("Profiles/Imported/plugin"));
-
-            QStringList masters = mGameSettings.values(QString("master"));
-            QStringList plugins = mGameSettings.values(QString("plugin"));
-
-            foreach (const QString &master, masters) {
-                mLauncherSettings.setMultiValue(QString("Profiles/Imported/master"), master);
-            }
-
-            foreach (const QString &plugin, plugins) {
-                mLauncherSettings.setMultiValue(QString("Profiles/Imported/plugin"), plugin);
+            QStringList contents = mGameSettings.values(QString("content"));
+            foreach (const QString &content, contents) {
+                mLauncherSettings.setMultiValue(QString("Profiles/Imported/content"), content);
             }
         }
 

@@ -185,9 +185,6 @@ void DataFilesPage::loadSettings()
 
   //  mContentSelector.
     mContentModel->uncheckAll();
-
-    QStringList gameFiles = mLauncherSettings.values(QString("Profiles/") + profile + QString("/master"), Qt::MatchExactly);
-    QStringList addons = mLauncherSettings.values(QString("Profiles/") + profile + QString("/plugin"), Qt::MatchExactly);
 }
 
 void DataFilesPage::saveSettings()
@@ -202,27 +199,14 @@ void DataFilesPage::saveSettings()
         mLauncherSettings.setValue(QString("Profiles/currentprofile"), profile);
     }
 
-    mLauncherSettings.remove(QString("Profiles/") + profile + QString("/master"));
-    mLauncherSettings.remove(QString("Profiles/") + profile + QString("/plugin"));
-
-    mGameSettings.remove(QString("master"));
-    mGameSettings.remove(QString("plugins"));
+    mLauncherSettings.remove(QString("Profiles/") + profile + QString("/content"));
     mGameSettings.remove(QString("content"));
 
     ContentSelectorModel::ContentFileList items = mContentModel->checkedItems();
-
     foreach(const ContentSelectorModel::EsmFile *item, items) {
-
-        if (item->gameFiles().size() == 0) {
-            mLauncherSettings.setMultiValue(QString("Profiles/") + profile + QString("/master"), item->fileName());
-            mGameSettings.setMultiValue(QString("content"), item->fileName());
-
-        } else {
-            mLauncherSettings.setMultiValue(QString("Profiles/") + profile + QString("/plugin"), item->fileName());
-            mGameSettings.setMultiValue(QString("content"), item->fileName());
-        }
+        mLauncherSettings.setMultiValue(QString("Profiles/") + profile + QString("/content"), item->fileName());
+        mGameSettings.setMultiValue(QString("content"), item->fileName());
     }
-
 }
 
 void DataFilesPage::updateOkButton(const QString &text)
@@ -281,8 +265,7 @@ void DataFilesPage::on_deleteProfileAction_triggered()
     msgBox.exec();
 
     if (msgBox.clickedButton() == deleteButton) {
-        mLauncherSettings.remove(QString("Profiles/") + profile + QString("/master"));
-        mLauncherSettings.remove(QString("Profiles/") + profile + QString("/plugin"));
+        mLauncherSettings.remove(QString("Profiles/") + profile + QString("/content"));
 
         // Remove the profile from the combobox
         profilesComboBox->removeItem(profilesComboBox->findText(profile));
@@ -348,8 +331,7 @@ void DataFilesPage::profileRenamed(const QString &previous, const QString &curre
     saveSettings();
 
     // Remove the old one
-    mLauncherSettings.remove(QString("Profiles/") + previous + QString("/master"));
-    mLauncherSettings.remove(QString("Profiles/") + previous + QString("/plugin"));
+    mLauncherSettings.remove(QString("Profiles/") + previous + QString("/content"));
 
     // Remove the profile from the combobox
     profilesComboBox->removeItem(profilesComboBox->findText(previous));
