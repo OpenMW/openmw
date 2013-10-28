@@ -1786,6 +1786,16 @@ namespace MWWorld
 
     bool World::getLOS(const MWWorld::Ptr& npc,const MWWorld::Ptr& targetNpc)
     {
+        Ogre::Vector3 halfExt1 = mPhysEngine->getCharacter(npc.getRefData().getHandle())->getHalfExtents();
+        float* pos1 = npc.getRefData().getPosition().pos;
+        Ogre::Vector3 halfExt2 = mPhysEngine->getCharacter(targetNpc.getRefData().getHandle())->getHalfExtents();
+        float* pos2 = targetNpc.getRefData().getPosition().pos;
+
+        btVector3 from(pos1[0],pos1[1],pos1[2]+halfExt1.z);
+        btVector3 to(pos2[0],pos2[1],pos2[2]+halfExt2.z);
+
+        std::pair<std::string, float> result = mPhysEngine->rayTest(from, to,false);
+        if(result.first == "") return true;
         return false;
     }
 

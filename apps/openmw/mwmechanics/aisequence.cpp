@@ -82,7 +82,8 @@ void MWMechanics::AiSequence::execute (const MWWorld::Ptr& actor)
                 +(actorpos.pos[2] - playerpos.pos[2])*(actorpos.pos[2] - playerpos.pos[2]));
             float fight = actor.getClass().getCreatureStats(actor).getAiSetting(1);
             float disp = MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(actor);
-            if(fight == 100
+            bool LOS = MWBase::Environment::get().getWorld()->getLOS(actor,MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+            if(  ( (fight == 100 ) 
                 || (fight >= 95 && d <= 3000)
                 || (fight >= 90 && d <= 2000)
                 || (fight >= 80 && d <= 1000)
@@ -90,7 +91,8 @@ void MWMechanics::AiSequence::execute (const MWWorld::Ptr& actor)
                 || (fight >= 70 && disp <= 35 && d <= 1000) 
                 || (fight >= 60 && disp <= 30 && d <= 1000) 
                 || (fight >= 50 && disp == 0) 
-                || (fight >= 40 && disp <= 10 && d <= 500) 
+                || (fight >= 40 && disp <= 10 && d <= 500) )
+                && LOS
                 )
             {
                 mCombat = true;
