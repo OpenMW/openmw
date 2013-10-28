@@ -53,17 +53,19 @@ void CSVDoc::FileDialog::setLocalData (const boost::filesystem::path& localData)
     mAdjusterWidget->setLocalData (localData);
 }
 
-void CSVDoc::FileDialog::showDialog(DialogType dialogType)
+void CSVDoc::FileDialog::showDialog (ContentAction action)
 {
-    mDialogType = dialogType;
+    mAction = action;
 
-    switch (mDialogType)
+    ui.projectGroupBoxLayout->insertWidget (0, mAdjusterWidget);
+
+    switch (mAction)
     {
-    case DialogType_New:
+    case ContentAction_New:
         buildNewFileView();
         break;
 
-    case DialogType_Open:
+    case ContentAction_Edit:
         buildOpenFileView();
         break;
     default:
@@ -95,7 +97,6 @@ void CSVDoc::FileDialog::buildNewFileView()
     mFileWidget->extensionLabelIsVisible(true);
 
     ui.projectGroupBoxLayout->insertWidget (0, mFileWidget);
-    ui.projectGroupBoxLayout->insertWidget (1, mAdjusterWidget);
 
     connect (mFileWidget, SIGNAL (nameChanged (const QString&, bool)),
         mAdjusterWidget, SLOT (setName (const QString&, bool)));
@@ -110,11 +111,11 @@ void CSVDoc::FileDialog::buildOpenFileView()
 {
     setWindowTitle(tr("Open"));
     ui.projectGroupBox->setTitle (QString(""));
-    ui.projectGroupBox->layout()->addWidget (mAdjusterWidget);
-
-    mAdjusterWidget->setVisible (false);
 
     ui.projectButtonBox->button(QDialogButtonBox::Ok)->setEnabled (false);
+
+    connect (mSelector, SIGNAL (signalAddonFileSelected (int)), this, SLOT (slotUpdateAcceptButton (int)));
+    connect (mSelector, SIGNAL (signalAddonFileUnselected (int)), this, SLOT (slotUpdateAcceptButton (int)));
 
     connect (ui.projectButtonBox, SIGNAL (accepted()), this, SLOT (slotOpenFile()));
 }
@@ -135,6 +136,11 @@ void CSVDoc::FileDialog::slotUpdateAcceptButton(const QString &name, bool)
 
     if (mDialogType == DialogType_New)
         success = success && !(name.isEmpty());
+    else
+    {
+        ContentSelectorModel::EsmFile *file = mSelector->selectedFiles().back();
+        mAdjusterWidget->setName (file->fileName(), !file->isGameFile());
+    }
 
     ui.projectButtonBox->button (QDialogButtonBox::Ok)->setEnabled (success);
 }

@@ -151,8 +151,16 @@ void ContentSelectorView::ContentSelector::slotAddonTableItemClicked(const QMode
 {
     QAbstractItemModel *const model = ui.addonView->model();
 
+    Qt::CheckState checkState = Qt::Unchecked;
+
     if (model->data(index, Qt::CheckStateRole).toInt() == Qt::Unchecked)
-        model->setData(index, Qt::Checked, Qt::CheckStateRole);
+        checkState = Qt::Checked;
+
+    model->setData(index, checkState, Qt::CheckStateRole);
+
+    if (checkState == Qt::Checked)
+        emit signalAddonFileSelected (index.row());
     else
-        model->setData(index, Qt::Unchecked, Qt::CheckStateRole);
+        emit signalAddonFileUnselected (index.row());
+
 }

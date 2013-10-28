@@ -5,6 +5,7 @@
 #include <QModelIndex>
 
 #include <boost/filesystem/path.hpp>
+#include "adjusterwidget.hpp"
 
 #ifndef CS_QT_BOOST_FILESYSTEM_PATH_DECLARED
 #define CS_QT_BOOST_FILESYSTEM_PATH_DECLARED
@@ -24,32 +25,23 @@ namespace ContentSelectorView
 namespace CSVDoc
 {
     class FileWidget;
-    class AdjusterWidget;
 
     class FileDialog : public QDialog
     {
         Q_OBJECT
 
-    public:
-
-        enum DialogType
-        {
-            DialogType_New,
-            DialogType_Open
-        };
-
     private:
 
         ContentSelectorView::ContentSelector *mSelector;
         Ui::FileDialog ui;
-        DialogType mDialogType;
+        ContentAction mAction;
         FileWidget *mFileWidget;
         AdjusterWidget *mAdjusterWidget;
 
     public:
 
         explicit FileDialog(QWidget *parent = 0);
-        void showDialog (DialogType dialogType);
+        void showDialog (ContentAction action);
 
         void addFiles (const QString &path);
 

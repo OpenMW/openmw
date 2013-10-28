@@ -11,7 +11,7 @@
 #include <QStyle>
 
 CSVDoc::AdjusterWidget::AdjusterWidget (QWidget *parent)
-: QWidget (parent), mValid (false)
+    : QWidget (parent), mValid (false), mAction (ContentAction_Undefined)
 {
     QHBoxLayout *layout = new QHBoxLayout (this);
 
@@ -28,6 +28,11 @@ CSVDoc::AdjusterWidget::AdjusterWidget (QWidget *parent)
     setName ("", false);
 
     setLayout (layout);
+}
+
+void CSVDoc::AdjusterWidget::setAction (ContentAction action)
+{
+    mAction = action;
 }
 
 void CSVDoc::AdjusterWidget::setLocalData (const boost::filesystem::path& localData)
@@ -50,6 +55,12 @@ bool CSVDoc::AdjusterWidget::isValid() const
 void CSVDoc::AdjusterWidget::setName (const QString& name, bool addon)
 {
     QString message;
+
+    if (mAction == ContentAction_Undefined)
+    {
+        throw std::runtime_error("ContentAction_Undefined when AdjusterWidget::setName() called.");
+        return;
+    }
 
     if (name.isEmpty())
     {

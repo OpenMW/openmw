@@ -9,21 +9,32 @@ class QLabel;
 
 namespace CSVDoc
 {
+    enum ContentAction
+    {
+        ContentAction_New,
+        ContentAction_Edit,
+        ContentAction_Undefined
+    };
+
     class AdjusterWidget : public QWidget
     {
             Q_OBJECT
+
+        public:
 
             boost::filesystem::path mLocalData;
             QLabel *mMessage;
             QLabel *mIcon;
             bool mValid;
             boost::filesystem::path mResultPath;
+            ContentAction mAction;
 
         public:
 
             AdjusterWidget (QWidget *parent = 0);
 
             void setLocalData (const boost::filesystem::path& localData);
+            void setAction (ContentAction action);
 
             bool isValid() const;
 

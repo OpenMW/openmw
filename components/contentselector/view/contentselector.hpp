@@ -54,6 +54,8 @@ namespace ContentSelectorView
 
     signals:
         void signalCurrentGamefileIndexChanged (int);
+        void signalAddonFileSelected (int);
+        void signalAddonFileUnselected (int);
 
     private slots:
 
