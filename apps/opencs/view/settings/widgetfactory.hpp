@@ -2,50 +2,63 @@
 #define CSVSETTINGS_WIDGETFACTORY_HPP
 
 #include "support.hpp"
-
+z
 class QWidget;
 class QSortFilterProxyModel;
 class QDataWidgetMapper;
 class QLayout;
 class QString;
 
-namespace CSVSettings {
+namespace CSMSettings { class Setting; }
 
-    class WidgetFactory
+namespace CSVSettings
+{
+    class WidgetFactory : public QObject
     {
 
         QWidget *mParent;
-        QSortFilterProxyModel *mSourceModel;
 
     public:
 
-        explicit WidgetFactory (QSortFilterProxyModel *model, QWidget *parent)
-            : mParent (parent), mSourceModel (model)
+        explicit WidgetFactory (QWidget *parent  = 0)
+            : mHasLabel (false), mIsBinary (false), QObject (parent)
         {}
 
-        template <typename T>
-        QLayout *createWidget (const QString &name, Orientation = Orient_Horizontal)
-        {
-            //type-check the template parameter to ensure it is of type QWidget
-            //compile-time fail if not
-            (void)static_cast<QWidget *>((T*)0);
-
-            T *widget  = new T (mParent);
-
-            return build(widget, name, orientation);
-        }
+        QLayout *createLayout (QSortFilterProxyModel *model);
 
     private:
 
-        QLayout *build                      (QWidget *widget, const QString &name, Orientation orientation);
+        const CSMSettings::Setting *getSetting(model) const;
+        SettingWidget *createWidget (const QString &name, CSVSettings::WidgetType widgetType);
+
+        QSortFilterProxyModel *buildModelConnections (QSortFilterProxyModel *model, SettingWidget *widget);
+
         void buildMapper                    (QWidget *widget, QSortFilterProxyModel *filter);
         QSortFilterProxyModel *buildModel   (QWidget *widget);
-        QLayout *buildLayout                (QWidget *widget, Orientation orientation);
+        QLayout *buildLayout                (bool isHorizontal);
 
         // need support functions for:
         //
         // setInputMask
         // alignment
+
+    //Private Classes
+    private:
+
+        template <typename T>
+        class SettingWidget : public QWidget
+        {
+            bool mHasLabel;
+            bool mIsBinary;
+            T *mWidget;
+
+        public:
+            explicit SettingWidget (const QString &name, QWidget *parent = 0);
+
+            inline bool hasLabel() const { return mHasLabel; }
+            inline bool isBinary() const { return mIsBinary; }
+
+        };
     };
 }
 #endif // CSVSETTINGS_WIDGETFACTORY_HPP

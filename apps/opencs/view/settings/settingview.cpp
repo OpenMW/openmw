@@ -38,43 +38,6 @@ void CSVSettings::SettingView::setModel (QSortFilterProxyModel *settingModel)
     buildWidgets();
 }
 
-void CSVSettings::SettingView::makeFactory (WidgetType widgetType)
-{
-    switch (widgetType)
-    {
-    case Widget_CheckBox:
-        mWidgetFactory = new CheckBoxFactory (layout(), this);
-        break;
-
-    case Widget_ComboBox:
-        mWidgetFactory = new ComboBoxFactory (layout(), this);
-        break;
-
-    case Widget_SpinBox:
-        mWidgetFactory = new SpinBoxFactory (layout(), this);
-        break;
-
-    case Widget_LineEdit:
-        mWidgetFactory = new LineEditFactory (layout(), this);
-        break;
-
-    case Widget_ListBox:
-        mWidgetFactory = new ListBoxFactory (layout(), this);
-        break;
-
-    case Widget_RadioButton:
-        mWidgetFactory = new RadioButtonFactory (layout(), this);
-        break;
-
-    case Widget_ToggleButton:
-      //  mWidgetFactory = new ToggleButtonFactory (layout(), this);
-        break;
-
-    default:
-        break;
-    }
-}
-
 //view layout code
 
 
