@@ -152,7 +152,7 @@ namespace CSMWorld
             record2.mState = Record<ESXRecordT>::State_ModifiedOnly;
             record2.mModified = record;
 
-            insertRecord (record2, mRecords.size());
+            insertRecord (record2, getAppendIndex (id));
         }
         else
         {
@@ -274,7 +274,7 @@ namespace CSMWorld
         record2.mState = Record<ESXRecordT>::State_ModifiedOnly;
         record2.mModified = record;
 
-        insertRecord (record2, mRecords.size(), type);
+        insertRecord (record2, getAppendIndex (id, type), type);
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
@@ -300,7 +300,9 @@ namespace CSMWorld
     void Collection<ESXRecordT, IdAccessorT>::appendRecord (const RecordBase& record,
         UniversalId::Type type)
     {
-        insertRecord (record, mRecords.size(), type);
+        insertRecord (record,
+            getAppendIndex (IdAccessorT().getId (
+            dynamic_cast<const Record<ESXRecordT>&> (record).get()), type), type);
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
