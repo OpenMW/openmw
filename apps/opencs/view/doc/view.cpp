@@ -176,6 +176,14 @@ void CSVDoc::View::setupCharacterMenu()
     QAction *journals = new QAction (tr ("Journals"), this);
     connect (journals, SIGNAL (triggered()), this, SLOT (addJournalsSubView()));
     characters->addAction (journals);
+
+    QAction *topicInfos = new QAction (tr ("Topic Infos"), this);
+    connect (topicInfos, SIGNAL (triggered()), this, SLOT (addTopicInfosSubView()));
+    characters->addAction (topicInfos);
+
+    QAction *journalInfos = new QAction (tr ("Journal Infos"), this);
+    connect (journalInfos, SIGNAL (triggered()), this, SLOT (addJournalInfosSubView()));
+    characters->addAction (journalInfos);
 }
 
 void CSVDoc::View::setupAssetsMenu()
@@ -434,6 +442,16 @@ void CSVDoc::View::addTopicsSubView()
 void CSVDoc::View::addJournalsSubView()
 {
     addSubView (CSMWorld::UniversalId::Type_Journals);
+}
+
+void CSVDoc::View::addTopicInfosSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_TopicInfos);
+}
+
+void CSVDoc::View::addJournalInfosSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_JournalInfos);
 }
 
 void CSVDoc::View::abortOperation (int type)

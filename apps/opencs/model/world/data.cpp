@@ -149,6 +149,12 @@ CSMWorld::Data::Data() : mRefs (mCells)
     mJournals.addColumn (new RecordStateColumn<ESM::Dialogue>);
     mJournals.addColumn (new DialogueTypeColumn<ESM::Dialogue> (true));
 
+    mTopicInfos.addColumn (new StringIdColumn<ESM::DialInfo>);
+    mTopicInfos.addColumn (new RecordStateColumn<ESM::DialInfo>);
+
+    mJournalInfos.addColumn (new StringIdColumn<ESM::DialInfo>);
+    mJournalInfos.addColumn (new RecordStateColumn<ESM::DialInfo>);
+
     mCells.addColumn (new StringIdColumn<Cell>);
     mCells.addColumn (new RecordStateColumn<Cell>);
     mCells.addColumn (new FixedRecordTypeColumn<Cell> (UniversalId::Type_Cell));
@@ -206,6 +212,8 @@ CSMWorld::Data::Data() : mRefs (mCells)
     addModel (new IdTable (&mSpells), UniversalId::Type_Spells, UniversalId::Type_Spell);
     addModel (new IdTable (&mTopics), UniversalId::Type_Topics, UniversalId::Type_Topic);
     addModel (new IdTable (&mJournals), UniversalId::Type_Journals, UniversalId::Type_Journal);
+    addModel (new IdTable (&mTopicInfos), UniversalId::Type_TopicInfos, UniversalId::Type_TopicInfo);
+    addModel (new IdTable (&mJournalInfos), UniversalId::Type_JournalInfos, UniversalId::Type_JournalInfo);
     addModel (new IdTable (&mCells), UniversalId::Type_Cells, UniversalId::Type_Cell);
     addModel (new IdTable (&mReferenceables), UniversalId::Type_Referenceables,
         UniversalId::Type_Referenceable);
@@ -350,6 +358,25 @@ CSMWorld::IdCollection<ESM::Dialogue>& CSMWorld::Data::getJournals()
     return mJournals;
 }
 
+const CSMWorld::InfoCollection& CSMWorld::Data::getTopicInfos() const
+{
+    return mTopicInfos;
+}
+
+CSMWorld::InfoCollection& CSMWorld::Data::getTopicInfos()
+{
+    return mTopicInfos;
+}
+
+const CSMWorld::InfoCollection& CSMWorld::Data::getJournalInfos() const
+{
+    return mJournalInfos;
+}
+
+CSMWorld::InfoCollection& CSMWorld::Data::getJournalInfos()
+{
+    return mJournalInfos;
+}
 
 const CSMWorld::IdCollection<CSMWorld::Cell>& CSMWorld::Data::getCells() const
 {
@@ -511,6 +538,13 @@ void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base)
                     mTopics.load (record, base);
                 }
 
+                break;
+            }
+
+            case ESM::REC_INFO:
+            {
+                /// \todo associate info record with last loaded dialogue record
+                mJournalInfos.load (reader, base);
                 break;
             }
 
