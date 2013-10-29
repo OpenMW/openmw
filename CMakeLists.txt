@@ -458,10 +458,20 @@ if(WIN32)
         "${OpenMW_SOURCE_DIR}/Daedric Font License.txt"
         "${OpenMW_BINARY_DIR}/settings-default.cfg"
         "${OpenMW_BINARY_DIR}/transparency-overrides.cfg"
-        "${OpenMW_BINARY_DIR}/Release/mwiniimport.exe"
-        "${OpenMW_BINARY_DIR}/Release/omwlauncher.exe"
         "${OpenMW_BINARY_DIR}/Release/openmw.exe"
         DESTINATION ".")
+
+    IF(BUILD_LAUNCHER)
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/Release/omwlauncher.exe" DESTINATION ".")
+    ENDIF(BUILD_LAUNCHER)
+    IF(BUILD_MWINIIMPORTER)
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/Release/mwiniimport.exe" DESTINATION ".")
+    ENDIF(BUILD_MWINIIMPORTER)
+    IF(BUILD_OPENCS)
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/Release/opencs.exe" DESTINATION ".")
+        INSTALL(FILES "${OpenMW_BINARY_DIR}/opencs.cfg" DESTINATION ".")
+    ENDIF(BUILD_OPENCS)
+
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION ".")
 
     SET(CPACK_GENERATOR "NSIS")
@@ -471,7 +481,13 @@ if(WIN32)
     SET(CPACK_PACKAGE_VERSION_MAJOR ${OPENMW_VERSION_MAJOR})
     SET(CPACK_PACKAGE_VERSION_MINOR ${OPENMW_VERSION_MINOR})
     SET(CPACK_PACKAGE_VERSION_PATCH ${OPENMW_VERSION_RELEASE})
-    SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW;omwlauncher;OpenMW Launcher")
+    SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW")
+    IF(BUILD_LAUNCHER)
+        SET(CPACK_PACKAGE_EXECUTABLES "${CPACK_PACKAGE_EXECUTABLES};omwlauncher;OpenMW Launcher")
+    ENDIF(BUILD_LAUNCHER)
+    IF(BUILD_OPENCS)
+        SET(CPACK_PACKAGE_EXECUTABLES "${CPACK_PACKAGE_EXECUTABLES};opencs;OpenMW Construction Set")
+    ENDIF(BUILD_OPENCS)
     SET(CPACK_NSIS_CREATE_ICONS_EXTRA "CreateShortCut '\$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\Readme.lnk' '\$INSTDIR\\\\readme.txt'")
     SET(CPACK_NSIS_DELETE_ICONS_EXTRA "
         !insertmacro MUI_STARTMENU_GETFOLDER Application $MUI_TEMP
