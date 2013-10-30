@@ -27,18 +27,13 @@
 #include "OgreTexture.h"
 #include <OgreWindowEventUtilities.h>
 
-#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-#include <OgreRoot.h>
-#endif
 
 struct SDL_Window;
 struct SDL_Surface;
 
 namespace Ogre
 {
-#if OGRE_PLATFORM != OGRE_PLATFORM_APPLE
     class Root;
-#endif
     class RenderWindow;
     class SceneManager;
     class Camera;
@@ -61,17 +56,6 @@ namespace OEngine
             std::string icon;
         };
 
-#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-        class CustomRoot : public Ogre::Root {
-        public:
-            bool isQueuedEnd() const;
-
-            CustomRoot(const Ogre::String& pluginFileName = "plugins.cfg", 
-                    const Ogre::String& configFileName = "ogre.cfg", 
-                    const Ogre::String& logFileName = "Ogre.log");
-        };
-#endif
-
         class Fader;
 
         class WindowSizeListener
@@ -82,11 +66,7 @@ namespace OEngine
 
         class OgreRenderer
         {
-#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-            CustomRoot *mRoot;
-#else
             Ogre::Root *mRoot;
-#endif
             Ogre::RenderWindow *mWindow;
             SDL_Window *mSDLWindow;
             Ogre::SceneManager *mScene;
@@ -110,7 +90,6 @@ namespace OEngine
             Fader* mFader;
             std::vector<Ogre::ParticleEmitterFactory*> mEmitterFactories;
             std::vector<Ogre::ParticleAffectorFactory*> mAffectorFactories;
-            bool logging;
 
             WindowSizeListener* mWindowListener;
 
@@ -139,7 +118,6 @@ namespace OEngine
             , mD3D9Plugin(NULL)
             #endif
             , mFader(NULL)
-            , logging(false)
             {
             }
 
@@ -166,9 +144,6 @@ namespace OEngine
 
             /// Kill the renderer.
             void cleanup();
-
-            /// Start the main rendering loop
-            void start();
 
             void loadPlugins();
 

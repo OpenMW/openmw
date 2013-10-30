@@ -503,7 +503,8 @@ void OMW::Engine::go()
         MWBase::Environment::get().getWindowManager()->executeInConsole (mStartupScript);
 
     // Start the main rendering loop
-    mOgre->start();
+    while (!mEnvironment.getRequestExit())
+        Ogre::Root::getSingleton().renderOneFrame();
 
     // Save user settings
     settings.saveUser(settingspath);

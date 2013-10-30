@@ -77,7 +77,7 @@ namespace MWGui
         else if (sender == mButtons["options"])
             MWBase::Environment::get().getWindowManager ()->pushGuiMode (GM_Settings);
         else if (sender == mButtons["exitgame"])
-            Ogre::Root::getSingleton ().queueEndRendering ();
+            MWBase::Environment::get().setRequestExit();
         else if (sender == mButtons["newgame"])
         {
             MWBase::Environment::get().getWorld()->startNewGame();

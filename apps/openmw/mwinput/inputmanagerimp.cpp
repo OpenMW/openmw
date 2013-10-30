@@ -182,9 +182,6 @@ namespace MWInput
             case A_GameMenu:
                 toggleMainMenu ();
                 break;
-            case A_Quit:
-                exitNow();
-                break;
             case A_Screenshot:
                 screenshot();
                 break;
@@ -812,13 +809,6 @@ namespace MWInput
     {
         if (MWBase::Environment::get().getWindowManager()->isGuiMode()) return;
         mAlwaysRunActive = !mAlwaysRunActive;
-    }
-
-    // Exit program now button (which is disabled in GUI mode)
-    void InputManager::exitNow()
-    {
-        if(!MWBase::Environment::get().getWindowManager()->isGuiMode())
-            Ogre::Root::getSingleton().queueEndRendering ();
     }
 
     void InputManager::resetIdleTime()
