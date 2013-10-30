@@ -65,13 +65,13 @@ bool MWMechanics::AiSequence::isPackageDone() const
     return mDone;
 }
 
-void MWMechanics::AiSequence::execute (const MWWorld::Ptr& actor)
+void MWMechanics::AiSequence::execute (const MWWorld::Ptr& actor,float duration)
 {
     if(actor != MWBase::Environment::get().getWorld()->getPlayer().getPlayer())
     {
         if(mCombat)
         {
-            mCombatPackage->execute(actor);
+            mCombatPackage->execute(actor,duration);
         }
         else
         {
@@ -103,7 +103,7 @@ void MWMechanics::AiSequence::execute (const MWWorld::Ptr& actor)
             }
             if (!mPackages.empty())
             {
-                if (mPackages.front()->execute (actor))
+                if (mPackages.front()->execute (actor,duration))
                 {
                     mPackages.erase (mPackages.begin());
                     mDone = true;

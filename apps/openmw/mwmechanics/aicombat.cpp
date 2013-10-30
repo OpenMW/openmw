@@ -25,11 +25,11 @@ namespace MWMechanics
 {
 
     AiCombat::AiCombat(const std::string &targetId)
-        :mTargetId(targetId),mStartingSecond(0)
+        :mTargetId(targetId),mTimer(0)
     {
     }
 
-    bool AiCombat::execute (const MWWorld::Ptr& actor)
+    bool AiCombat::execute (const MWWorld::Ptr& actor,float duration)
     {
         const MWWorld::Ptr target = MWBase::Environment::get().getWorld()->getPtr(mTargetId, false);
 
@@ -97,18 +97,22 @@ namespace MWMechanics
                 MWBase::Environment::get().getWorld()->rotateObject(actor, 0, 0, zAngle, false);
 
                 mPathFinder.clearPath();
-
-                MWWorld::TimeStamp time = MWBase::Environment::get().getWorld()->getTimeStamp();
-                if(mStartingSecond == 0)
+                
+                if(mTimer == 0)
                 {
                     MWWorld::Class::get(actor).getCreatureStats(actor).setAttackingOrSpell(false);
-                    mStartingSecond = ((time.getHour() - int(time.getHour())) * 100);
+                    //mTimer = mTimer + duration;
                 }
-                else if( ((time.getHour() - int(time.getHour())) * 100) - mStartingSecond > 1)
+                if( mTimer > 1)
                 {
                     MWWorld::Class::get(actor).getCreatureStats(actor).setAttackingOrSpell(true);
-                    mStartingSecond = 0;
+                    mTimer = 0;
                 }
+                else
+                {
+                    mTimer = mTimer + duration;
+                }
+
                 MWWorld::Class::get(actor).getMovementSettings(actor).mPosition[1] = 0;
                 //MWWorld::Class::get(actor).getCreatureStats(actor).setAttackingOrSpell(!MWWorld::Class::get(actor).getCreatureStats(actor).getAttackingOrSpell());
             }

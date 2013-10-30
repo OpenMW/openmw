@@ -24,7 +24,7 @@ namespace MWMechanics
 
             virtual AiCombat *clone() const;
 
-            virtual bool execute (const MWWorld::Ptr& actor);
+            virtual bool execute (const MWWorld::Ptr& actor,float duration);
             ///< \return Package completed?
 
             virtual int getTypeId() const;
@@ -34,7 +34,7 @@ namespace MWMechanics
 
             PathFinder mPathFinder;
             PathFinder mPathFinder2;
-            unsigned int mStartingSecond;
+            float mTimer;
     };
 }
 

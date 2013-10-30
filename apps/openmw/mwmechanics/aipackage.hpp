@@ -17,7 +17,7 @@ namespace MWMechanics
       
             virtual AiPackage *clone() const = 0;
             
-            virtual bool execute (const MWWorld::Ptr& actor) = 0;
+            virtual bool execute (const MWWorld::Ptr& actor,float duration) = 0;
             ///< \return Package completed?
             
             virtual int getTypeId() const = 0;

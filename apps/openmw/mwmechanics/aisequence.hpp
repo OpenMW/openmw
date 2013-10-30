@@ -41,7 +41,7 @@ namespace MWMechanics
             bool isPackageDone() const;
             ///< Has a package been completed during the last update?
             
-            void execute (const MWWorld::Ptr& actor);
+            void execute (const MWWorld::Ptr& actor,float duration);
             ///< Execute package.
             
             void clear();

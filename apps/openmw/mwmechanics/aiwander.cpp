@@ -63,7 +63,7 @@ namespace MWMechanics
         return new AiWander(*this);
     }
 
-    bool AiWander::execute (const MWWorld::Ptr& actor)
+    bool AiWander::execute (const MWWorld::Ptr& actor,float duration)
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();
         if(mDuration)
