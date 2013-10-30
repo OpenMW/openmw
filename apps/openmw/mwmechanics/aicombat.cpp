@@ -25,7 +25,7 @@ namespace MWMechanics
 {
 
     AiCombat::AiCombat(const std::string &targetId)
-        :mTargetId(targetId),mTimer(0)
+        :mTargetId(targetId),mTimer(0),mTimer2(0)
     {
     }
 
@@ -66,15 +66,20 @@ namespace MWMechanics
             start.mY = pos.pos[1];
             start.mZ = pos.pos[2];
 
+            mTimer2 = mTimer2 + duration;
+
             if(!mPathFinder.isPathConstructed())
                 mPathFinder.buildPath(start, dest, pathgrid, xCell, yCell, true);
             else
             {
                 mPathFinder2.buildPath(start, dest, pathgrid, xCell, yCell, true);
                 ESM::Pathgrid::Point lastPt = mPathFinder.getPath().back();
-                if(mPathFinder2.getPathSize() < mPathFinder.getPathSize() ||
-                   (dest.mX - lastPt.mX)*(dest.mX - lastPt.mX)+(dest.mY - lastPt.mY)*(dest.mY - lastPt.mY)+(dest.mZ - lastPt.mZ)*(dest.mZ - lastPt.mZ) > 200*200)
+                if((mTimer2 > 0.25)&&(mPathFinder2.getPathSize() < mPathFinder.getPathSize() ||
+                   (dest.mX - lastPt.mX)*(dest.mX - lastPt.mX)+(dest.mY - lastPt.mY)*(dest.mY - lastPt.mY)+(dest.mZ - lastPt.mZ)*(dest.mZ - lastPt.mZ) > 200*200))
+                {
+                    mTimer2 = 0;
                     mPathFinder = mPathFinder2;
+                }
             }
             
             mPathFinder.checkPathCompleted(pos.pos[0],pos.pos[1],pos.pos[2]);

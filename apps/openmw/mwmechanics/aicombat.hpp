@@ -35,6 +35,7 @@ namespace MWMechanics
             PathFinder mPathFinder;
             PathFinder mPathFinder2;
             float mTimer;
+            float mTimer2;
     };
 }
 
