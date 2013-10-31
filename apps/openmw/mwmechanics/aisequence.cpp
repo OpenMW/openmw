@@ -10,14 +10,14 @@
 #include "aiactivate.hpp"
 #include "aicombat.hpp"
 
-#include "..\mwworld\class.hpp"
+#include "../mwworld/class.hpp"
 #include "creaturestats.hpp"
 #include "npcstats.hpp"
-#include "..\mwbase\environment.hpp"
-#include "..\mwbase\world.hpp"
-#include "..\mwworld\player.hpp"
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+#include "../mwworld/player.hpp"
 
-#include "..\mwbase\mechanicsmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 void MWMechanics::AiSequence::copy (const AiSequence& sequence)
 {

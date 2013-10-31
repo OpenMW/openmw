@@ -2,12 +2,12 @@
 
 #include "movement.hpp"
 
-#include "..\mwworld\class.hpp"
-#include "..\mwworld\player.hpp"
-#include "..\mwworld\timestamp.hpp"
-#include "..\mwbase\world.hpp"
-#include "..\mwbase\environment.hpp"
-#include "..\mwbase\mechanicsmanager.hpp"
+#include "../mwworld/class.hpp"
+#include "../mwworld/player.hpp"
+#include "../mwworld/timestamp.hpp"
+#include "../mwbase/world.hpp"
+#include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "OgreMath.h"
 
