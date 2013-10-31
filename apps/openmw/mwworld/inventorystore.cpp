@@ -8,6 +8,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 
@@ -339,6 +340,26 @@ void MWWorld::InventoryStore::unequipSlot(int slot, const MWWorld::Ptr& actor)
     {
         equip(slot, end());
 
+        if (actor.getRefData().getHandle() == "player")
+        {
+            // Unset OnPCEquip Variable on item's script, if it has a script with that variable declared
+            const std::string& script = Class::get(*it).getScript(*it);
+            if (script != "")
+                (*it).getRefData().getLocals().setVarByInt(script, "onpcequip", 0);
+
+            // Update HUD icon when removing player weapon or selected enchanted item.
+            // We have to check for both as the weapon could also be the enchanted item.
+            if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
+            {
+                // weapon
+                MWBase::Environment::get().getWindowManager()->unsetSelectedWeapon();
+            }
+            if ((mSelectedEnchantItem != end()) && (mSelectedEnchantItem == it))
+            {
+                // enchanted item
+                MWBase::Environment::get().getWindowManager()->unsetSelectedSpell();
+            }
+        }
 
         /// \todo update actor model
     }
