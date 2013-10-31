@@ -68,10 +68,9 @@ Since majority of the columns contain string values, string is among the most of
 \end{itemize}
 This is probably enough to create around 90\% string filters you will eventually need. However, this expression is even more powerful -- it accepts regular expressions (also called regexps). Regular expressions is a way to create string criteria that will be matched by one than just one specific value in the column. For instance, you can display both left and right gauntlets with the following expression: ``string("armor type", ".* gauntlet"))`` because ''.*'' in regexps means just: ``anything''. This filter says: please, show me ``any'' gauntlet. There are left and right gauntlets in the morrowind so this will evaluate to true for both. Simple, isn't it?
 \\
-Creating regexps can be a difficult and annoying -- especially when you need complex criteria. On the other hand, We are under impression that in reality complex expressions are needed only in sporadic cases. In fact, the truth is: that most of the time only already mentioned ``.*'' is needed and therefore the following description of regexps can be skipped by vast majority of readers.
+Creating regexps can be a difficult and annoying -- especially when you need complex criteria. On the other hand, We are under impression that in reality complex expressions are needed only in sporadic cases. In fact, the truth is: that most of the time only already mentioned ``.*'' is needed and therefore the following description of regexps can be skipped by vast majority of readers.\\
 
 %TO-DO: write the regexps essentials.
-\\
 Regular expressions are not the main topic of this manual. If you wish to learn more on this subject please, read the documentation on Qt regular expressions syntax, or TRE regexp syntax (it is almost like in Qt).
 
 \paragraph{Value -- value(``value'', (``open'', ``close''))}
