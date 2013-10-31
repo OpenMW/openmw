@@ -48,10 +48,10 @@ struct DialInfo
     // Journal quest indices (introduced with the quest system in Tribunal)
     enum QuestStatus
     {
-        QS_None,
-        QS_Name,
-        QS_Finished,
-        QS_Restart,
+        QS_None = 0,
+        QS_Name = 1,
+        QS_Finished = 2,
+        QS_Restart = 3,
         QS_Deleted
     };
 

@@ -160,6 +160,9 @@ namespace CSMWorld
             { ColumnId_DoorPositionYRot, "Teleport Rot Y" },
             { ColumnId_DoorPositionZRot, "Teleport Rot Z" },
             { ColumnId_DialogueType, "Dialogue Type" },
+            { ColumnId_QuestIndex, "Quest Index" },
+            { ColumnId_QuestStatusType, "Quest Status" },
+            { ColumnId_QuestDescription, "Quest Description" },
 
             { ColumnId_UseValue1, "Use value 1" },
             { ColumnId_UseValue2, "Use value 2" },
@@ -275,6 +278,11 @@ namespace
         "Topic", "Voice", "Greeting", "Persuasion", 0
     };
 
+    static const char *sQuestStatusTypes[] =
+    {
+        "None", "Name", "Finished", "Restart", 0
+    };
+
     const char **getEnumNames (CSMWorld::Columns::ColumnId column)
     {
         switch (column)
@@ -290,6 +298,7 @@ namespace
             case CSMWorld::Columns::ColumnId_Modification: return sModificationEnums;
             case CSMWorld::Columns::ColumnId_ValueType: return sVarTypeEnums;
             case CSMWorld::Columns::ColumnId_DialogueType: return sDialogueTypeEnums;
+            case CSMWorld::Columns::ColumnId_QuestStatusType: return sQuestStatusTypes;
 
             default: return 0;
         }

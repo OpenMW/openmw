@@ -154,6 +154,9 @@ CSMWorld::Data::Data() : mRefs (mCells)
 
     mJournalInfos.addColumn (new StringIdColumn<ESM::DialInfo>);
     mJournalInfos.addColumn (new RecordStateColumn<ESM::DialInfo>);
+    mJournalInfos.addColumn (new QuestStatusTypeColumn<ESM::DialInfo>);
+    mJournalInfos.addColumn (new QuestIndexColumn<ESM::DialInfo>);
+    mJournalInfos.addColumn (new QuestDescriptionColumn<ESM::DialInfo>);
 
     mCells.addColumn (new StringIdColumn<Cell>);
     mCells.addColumn (new RecordStateColumn<Cell>);
