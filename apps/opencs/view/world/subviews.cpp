@@ -37,8 +37,6 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         CSMWorld::UniversalId::Type_Regions,
         CSMWorld::UniversalId::Type_Birthsigns,
         CSMWorld::UniversalId::Type_Spells,
-        CSMWorld::UniversalId::Type_TopicInfos,
-        CSMWorld::UniversalId::Type_JournalInfos,
 
         CSMWorld::UniversalId::Type_None // end marker
     };
@@ -61,6 +59,12 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
 
     manager.add (CSMWorld::UniversalId::Type_Journal,
         new CSVDoc::SubViewFactoryWithCreator<TableSubView, JournalCreatorFactory>);
+
+    manager.add (CSMWorld::UniversalId::Type_TopicInfos,
+        new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<GenericCreator> > (false));
+
+    manager.add (CSMWorld::UniversalId::Type_JournalInfos,
+        new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<GenericCreator> > (false));
 
     // Subviews for editing/viewing individual records
     manager.add (CSMWorld::UniversalId::Type_Script, new CSVDoc::SubViewFactory<ScriptSubView>);

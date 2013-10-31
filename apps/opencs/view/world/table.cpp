@@ -121,7 +121,7 @@ std::vector<std::string> CSVWorld::Table::listDeletableSelectedIds() const
 }
 
 CSVWorld::Table::Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, QUndoStack& undoStack,
-    bool createAndDelete)
+    bool createAndDelete, bool sorting)
     : mUndoStack (undoStack), mCreateAction (0), mEditLock (false), mRecordStatusDisplay (0)
 {
     mModel = &dynamic_cast<CSMWorld::IdTable&> (*data.getTableModel (id));
@@ -132,7 +132,7 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, Q
     setModel (mProxyModel);
     horizontalHeader()->setResizeMode (QHeaderView::Interactive);
     verticalHeader()->hide();
-    setSortingEnabled (true);
+    setSortingEnabled (sorting);
     setSelectionBehavior (QAbstractItemView::SelectRows);
     setSelectionMode (QAbstractItemView::ExtendedSelection);
 

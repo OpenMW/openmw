@@ -49,8 +49,9 @@ namespace CSVWorld
 
         public:
 
-            Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, QUndoStack& undoStack, bool createAndDelete);
+            Table (const CSMWorld::UniversalId& id, CSMWorld::Data& data, QUndoStack& undoStack, bool createAndDelete, bool sorting);
             ///< \param createAndDelete Allow creation and deletion of records.
+            /// \param sorting Allow changing order of rows in the view via column headers.
 
             void setEditLock (bool locked);
 
