@@ -106,7 +106,9 @@ namespace CSVDoc
 
         signals:
 
-            void newDocumentRequest();
+            void newGameRequest();
+
+            void newAddonRequest();
 
             void loadDocumentRequest();
 
@@ -161,6 +163,8 @@ namespace CSVDoc
             void addRegionMapSubView();
 
             void addFiltersSubView();
+
+            void addSceneSubView();
 
             void toggleShowStatusBar (bool show);
     };

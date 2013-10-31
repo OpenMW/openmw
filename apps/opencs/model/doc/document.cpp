@@ -2139,17 +2139,12 @@ void CSMDoc::Document::createBase()
     }
 }
 
-CSMDoc::Document::Document (const std::vector<boost::filesystem::path>& files, bool new_)
-: mTools (mData)
+CSMDoc::Document::Document (const std::vector<boost::filesystem::path>& files,
+    const boost::filesystem::path& savePath, bool new_)
+: mSavePath (savePath), mTools (mData)
 {
     if (files.empty())
         throw std::runtime_error ("Empty content file sequence");
-
-    /// \todo adjust last file name:
-    /// \li make sure it is located in the data-local directory (adjust path if necessary)
-    /// \li make sure the extension matches the new scheme (change it if necesarry)
-
-    mName = files.back().filename().string();
 
     if (new_ && files.size()==1)
         createBase();
@@ -2201,9 +2196,9 @@ int CSMDoc::Document::getState() const
     return state;
 }
 
-const std::string& CSMDoc::Document::getName() const
+const boost::filesystem::path& CSMDoc::Document::getSavePath() const
 {
-    return mName;
+    return mSavePath;
 }
 
 void CSMDoc::Document::save()

@@ -107,6 +107,11 @@ namespace CSMWorld
             virtual int getAppendIndex (UniversalId::Type type = UniversalId::Type_None) const;
             ///< \param type Will be ignored, unless the collection supports multiple record types
 
+            virtual std::vector<std::string> getIds (bool listDeleted = true) const;
+            ///< Return a sorted collection of all IDs
+            ///
+            /// \param listDeleted include deleted record in the list
+
             void addColumn (Column<ESXRecordT> *column);
 
             void setRecord (int index, const Record<ESXRecordT>& record);
@@ -291,6 +296,21 @@ namespace CSMWorld
     int Collection<ESXRecordT, IdAccessorT>::getAppendIndex (UniversalId::Type type) const
     {
         return static_cast<int> (mRecords.size());
+    }
+
+    template<typename ESXRecordT, typename IdAccessorT>
+    std::vector<std::string> Collection<ESXRecordT, IdAccessorT>::getIds (bool listDeleted) const
+    {
+        std::vector<std::string> ids;
+
+        for (typename std::map<std::string, int>::const_iterator iter = mIndex.begin();
+            iter!=mIndex.end(); ++iter)
+        {
+            if (listDeleted || !mRecords[iter->second].isDeleted())
+                ids.push_back (IdAccessorT().getId (mRecords[iter->second].get()));
+        }
+
+        return ids;
     }
 
     template<typename ESXRecordT, typename IdAccessorT>

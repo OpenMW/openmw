@@ -27,9 +27,13 @@ void CSVDoc::View::setupFileMenu()
 {
     QMenu *file = menuBar()->addMenu (tr ("&File"));
 
-    QAction *new_ = new QAction (tr ("New"), this);
-    connect (new_, SIGNAL (triggered()), this, SIGNAL (newDocumentRequest()));
-    file->addAction (new_);
+    QAction *newGame = new QAction (tr ("New Game"), this);
+    connect (newGame, SIGNAL (triggered()), this, SIGNAL (newGameRequest()));
+    file->addAction (newGame);
+
+    QAction *newAddon = new QAction (tr ("New Addon"), this);
+    connect (newAddon, SIGNAL (triggered()), this, SIGNAL (newAddonRequest()));
+    file->addAction (newAddon);
 
     QAction *open = new QAction (tr ("&Open"), this);
     connect (open, SIGNAL (triggered()), this, SIGNAL (loadDocumentRequest()));
@@ -111,6 +115,10 @@ void CSVDoc::View::setupWorldMenu()
 
     world->addSeparator(); // items that don't represent single record lists follow here
 
+    QAction *scene = new QAction (tr ("Scene"), this);
+    connect (scene, SIGNAL (triggered()), this, SLOT (addSceneSubView()));
+    world->addAction (scene);
+
     QAction *regionMap = new QAction (tr ("Region Map"), this);
     connect (regionMap, SIGNAL (triggered()), this, SLOT (addRegionMapSubView()));
     world->addAction (regionMap);
@@ -180,7 +188,7 @@ void CSVDoc::View::updateTitle()
 {
     std::ostringstream stream;
 
-    stream << mDocument->getName();
+    stream << mDocument->getSavePath().filename().string();
 
     if (mDocument->getState() & CSMDoc::State_Modified)
             stream << " *";
@@ -397,6 +405,11 @@ void CSVDoc::View::addRegionMapSubView()
 void CSVDoc::View::addFiltersSubView()
 {
     addSubView (CSMWorld::UniversalId::Type_Filters);
+}
+
+void CSVDoc::View::addSceneSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Scene);
 }
 
 void CSVDoc::View::abortOperation (int type)

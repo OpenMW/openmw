@@ -55,7 +55,9 @@ namespace CSVDoc
 
         signals:
 
-            void newDocumentRequest();
+            void newGameRequest();
+
+            void newAddonRequest();
 
             void loadDocumentRequest();
 

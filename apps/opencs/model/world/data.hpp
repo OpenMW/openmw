@@ -6,6 +6,9 @@
 
 #include <boost/filesystem/path.hpp>
 
+#include <QObject>
+#include <QModelIndex>
+
 #include <components/esm/loadglob.hpp>
 #include <components/esm/loadgmst.hpp>
 #include <components/esm/loadskil.hpp>
@@ -30,8 +33,10 @@ class QAbstractItemModel;
 
 namespace CSMWorld
 {
-    class Data
+    class Data : public QObject
     {
+            Q_OBJECT
+
             IdCollection<ESM::Global> mGlobals;
             IdCollection<ESM::GameSetting> mGmsts;
             IdCollection<ESM::Skill> mSkills;
@@ -55,13 +60,17 @@ namespace CSMWorld
             Data& operator= (const Data&);
 
             void addModel (QAbstractItemModel *model, UniversalId::Type type1,
-                UniversalId::Type type2 = UniversalId::Type_None);
+                UniversalId::Type type2 = UniversalId::Type_None, bool update = true);
+
+            static void appendIds (std::vector<std::string>& ids, const CollectionBase& collection,
+                bool listDeleted);
+            ///< Append all IDs from collection to \a ids.
 
         public:
 
             Data();
 
-            ~Data();
+            virtual ~Data();
 
             const IdCollection<ESM::Global>& getGlobals() const;
 
@@ -136,6 +145,21 @@ namespace CSMWorld
             ///< Merging content of a file into base or modified.
 
             bool hasId (const std::string& id) const;
+
+            std::vector<std::string> getIds (bool listDeleted = true) const;
+            ///< Return a sorted collection of all IDs that are not internal to the editor.
+            ///
+            /// \param listDeleted include deleted record in the list
+
+        signals:
+
+            void idListChanged();
+
+        private slots:
+
+            void dataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
+
+            void rowsChanged (const QModelIndex& parent, int start, int end);
     };
 }
 

@@ -182,9 +182,6 @@ namespace MWInput
             case A_GameMenu:
                 toggleMainMenu ();
                 break;
-            case A_Quit:
-                exitNow();
-                break;
             case A_Screenshot:
                 screenshot();
                 break;
@@ -468,6 +465,41 @@ namespace MWInput
 
     bool InputManager::keyPressed( const SDL_KeyboardEvent &arg )
     {
+        // Cut, copy & paste
+        MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
+        if (focus)
+        {
+            MyGUI::EditBox* edit = focus->castType<MyGUI::EditBox>(false);
+            if (edit && !edit->getEditReadOnly())
+            {
+                if (arg.keysym.sym == SDLK_v && (arg.keysym.mod & SDL_Keymod(KMOD_CTRL)))
+                {
+                    char* text = SDL_GetClipboardText();
+
+                    if (text)
+                    {
+                        edit->addText(MyGUI::UString(text));
+                        SDL_free(text);
+                    }
+                }
+                if (arg.keysym.sym == SDLK_x && (arg.keysym.mod & SDL_Keymod(KMOD_CTRL)))
+                {
+                    std::string text = edit->getTextSelection();
+                    if (text.length())
+                    {
+                        SDL_SetClipboardText(text.c_str());
+                        edit->deleteTextSelection();
+                    }
+                }
+                if (arg.keysym.sym == SDLK_c && (arg.keysym.mod & SDL_Keymod(KMOD_CTRL)))
+                {
+                    std::string text = edit->getTextSelection();
+                    if (text.length())
+                        SDL_SetClipboardText(text.c_str());
+                }
+            }
+        }
+
         mInputBinder->keyPressed (arg);
 
         if(arg.keysym.sym == SDLK_RETURN
@@ -577,15 +609,15 @@ namespace MWInput
             rot[0] = -y;
             rot[1] = 0.0f;
             rot[2] = x;
-            
-            // Only actually turn player when we're not in vanity mode 
+
+            // Only actually turn player when we're not in vanity mode
             if(!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot))
             {
                 mPlayer->yaw(x/scale);
                 mPlayer->pitch(-y/scale);
             }
 
-            if (arg.zrel)
+            if (arg.zrel && mControlSwitch["playerviewswitch"]) //Check to make sure you are allowed to zoomout and there is a change
             {
                 MWBase::Environment::get().getWorld()->changeVanityModeScale(arg.zrel);
                 MWBase::Environment::get().getWorld()->setCameraDistance(arg.zrel, true, true);
@@ -617,9 +649,15 @@ namespace MWInput
         if (MWBase::Environment::get().getWindowManager()->isGuiMode () && MWBase::Environment::get().getWindowManager()->getMode () == MWGui::GM_Video)
             MWBase::Environment::get().getWorld ()->stopVideo ();
         else if (MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu))
+        {
             MWBase::Environment::get().getWindowManager()->popGuiMode();
+            MWBase::Environment::get().getSoundManager()->resumeSounds (MWBase::SoundManager::Play_TypeSfx);
+        }
         else
+        {
             MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
+            MWBase::Environment::get().getSoundManager()->pauseSounds (MWBase::SoundManager::Play_TypeSfx);
+        }
     }
 
     void InputManager::toggleSpell()
@@ -771,13 +809,6 @@ namespace MWInput
     {
         if (MWBase::Environment::get().getWindowManager()->isGuiMode()) return;
         mAlwaysRunActive = !mAlwaysRunActive;
-    }
-
-    // Exit program now button (which is disabled in GUI mode)
-    void InputManager::exitNow()
-    {
-        if(!MWBase::Environment::get().getWindowManager()->isGuiMode())
-            Ogre::Root::getSingleton().queueEndRendering ();
     }
 
     void InputManager::resetIdleTime()

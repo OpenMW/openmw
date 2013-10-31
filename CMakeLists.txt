@@ -79,7 +79,6 @@ set(OENGINE_OGRE
   ${LIBDIR}/openengine/ogre/renderer.cpp
   ${LIBDIR}/openengine/ogre/fader.cpp
   ${LIBDIR}/openengine/ogre/lights.cpp
-  ${LIBDIR}/openengine/ogre/particles.cpp
   ${LIBDIR}/openengine/ogre/selectionbuffer.cpp
   ${LIBDIR}/openengine/ogre/imagerotate.cpp
 )
@@ -161,6 +160,20 @@ if (NOT FFMPEG_FOUND)
     message(WARNING "--------------------")
 endif (NOT FFMPEG_FOUND)
 
+# TinyXML
+option(USE_SYSTEM_TINYXML "Use system TinyXML library instead of internal." OFF)
+if(USE_SYSTEM_TINYXML)
+    find_library(TINYXML_LIBRARIES tinyxml)
+    find_path(TINYXML_INCLUDE_DIR tinyxml.h)
+    message(STATUS "Found TinyXML: ${TINYXML_LIBRARIES} ${TINYXML_INCLUDE_DIR}")
+    add_definitions (-DTIXML_USE_STL)
+    if(TINYXML_LIBRARIES AND TINYXML_INCLUDE_DIR)
+        include_directories(${TINYXML_INCLUDE_DIR})
+        message(STATUS "Using system TinyXML library.")
+    else()
+        message(FATAL_ERROR "Detection of system TinyXML incomplete.")
+    endif()
+endif()
 
 # Platform specific
 if (WIN32)

@@ -49,8 +49,8 @@ namespace Compiler
         const int opcodeGetFleeExplicit = 0x20001c4;
         const int opcodeGetAlarm = 0x20001c5;
         const int opcodeGetAlarmExplicit = 0x20001c6;
-        const int opcodeGetLineOfSight = 0x200021f;
-        const int opcodeGetLineOfSightExplicit = 0x200022a;
+        const int opcodeGetLineOfSight = 0x2000222;
+        const int opcodeGetLineOfSightExplicit = 0x2000223;
     }
 
     namespace Animation
@@ -223,6 +223,9 @@ namespace Compiler
         const int opcodeEnableTeleporting = 0x2000216;
         const int opcodeShowVars = 0x200021d;
         const int opcodeShowVarsExplicit = 0x200021e;
+        const int opcodeToggleGodMode = 0x200021f;
+        const int opcodeDisableLevitation = 0x2000220;
+        const int opcodeEnableLevitation = 0x2000221;
     }
 
     namespace Sky
