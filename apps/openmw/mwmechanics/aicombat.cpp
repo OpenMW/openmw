@@ -9,6 +9,9 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
+#include "creaturestats.hpp"
+#include "npcstats.hpp"
+
 #include "OgreMath.h"
 
 namespace
