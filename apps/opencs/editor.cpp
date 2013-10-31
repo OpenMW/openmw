@@ -10,8 +10,6 @@
 #include "model/world/data.hpp"
 #include <iostream>
 
-#include <QDebug>
-
 CS::Editor::Editor()
     : mDocumentManager (mCfgMgr), mViewManager (mDocumentManager)
 {
@@ -119,13 +117,13 @@ void CS::Editor::createGame()
 void CS::Editor::createAddon()
 {
     mStartup.hide();
-    mFileDialog.showDialog (CSVDoc::FileDialog::DialogType_New);
+    mFileDialog.showDialog (CSVDoc::ContentAction_New);
 }
 
 void CS::Editor::loadDocument()
 {
     mStartup.hide();
-    mFileDialog.showDialog (CSVDoc::FileDialog::DialogType_Open);
+    mFileDialog.showDialog (CSVDoc::ContentAction_Edit);
 }
 
 void CS::Editor::openFiles (const boost::filesystem::path &savePath)
@@ -135,7 +133,6 @@ void CS::Editor::openFiles (const boost::filesystem::path &savePath)
     foreach (const QString &path, mFileDialog.selectedFilePaths())
         files.push_back(path.toStdString());
 
-    qDebug() << "save file path: " << savePath.c_str();
     CSMDoc::Document *document = mDocumentManager.addDocument (files, savePath, false);
 
     mViewManager.addView (document);

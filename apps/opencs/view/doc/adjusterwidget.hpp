@@ -28,6 +28,7 @@ namespace CSVDoc
             bool mValid;
             boost::filesystem::path mResultPath;
             ContentAction mAction;
+            bool mDoFilenameCheck;
 
         public:
 
@@ -36,6 +37,7 @@ namespace CSVDoc
             void setLocalData (const boost::filesystem::path& localData);
             void setAction (ContentAction action);
 
+            void setFilenameCheck (bool doCheck);
             bool isValid() const;
 
             boost::filesystem::path getPath() const;

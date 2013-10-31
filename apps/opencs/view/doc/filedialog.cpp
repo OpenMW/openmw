@@ -17,8 +17,6 @@
 #include "filewidget.hpp"
 #include "adjusterwidget.hpp"
 
-#include <QDebug>
-
 CSVDoc::FileDialog::FileDialog(QWidget *parent) :
     QDialog(parent), mSelector (0), mFileWidget (0), mAdjusterWidget (0)
 {
@@ -47,9 +45,6 @@ QStringList CSVDoc::FileDialog::selectedFilePaths()
 
 void CSVDoc::FileDialog::setLocalData (const boost::filesystem::path& localData)
 {
-    if (mDialogType != DialogType_New)
-        return;
-
     mAdjusterWidget->setLocalData (localData);
 }
 
@@ -68,9 +63,12 @@ void CSVDoc::FileDialog::showDialog (ContentAction action)
     case ContentAction_Edit:
         buildOpenFileView();
         break;
+
     default:
         break;
     }
+
+    mAdjusterWidget->setFilenameCheck (mAction == ContentAction_New);
 
     //connections common to both dialog view flavors
     connect (mSelector, SIGNAL (signalCurrentGamefileIndexChanged (int)),
@@ -124,7 +122,7 @@ void CSVDoc::FileDialog::slotUpdateAcceptButton (int)
 {
     QString name = "";
 
-    if (mDialogType == DialogType_New)
+    if (mAction == ContentAction_New)
         name = mFileWidget->getName();
 
     slotUpdateAcceptButton (name, true);
@@ -134,11 +132,13 @@ void CSVDoc::FileDialog::slotUpdateAcceptButton(const QString &name, bool)
 {
     bool success = (mSelector->selectedFiles().size() > 0);
 
-    if (mDialogType == DialogType_New)
+    bool isNew = (mAction == ContentAction_New);
+
+    if (isNew)
         success = success && !(name.isEmpty());
     else
     {
-        ContentSelectorModel::EsmFile *file = mSelector->selectedFiles().back();
+        ContentSelectorModel::EsmFile *file = mSelector->selectedFiles().back();;
         mAdjusterWidget->setName (file->fileName(), !file->isGameFile());
     }
 
@@ -147,7 +147,7 @@ void CSVDoc::FileDialog::slotUpdateAcceptButton(const QString &name, bool)
 
 QString CSVDoc::FileDialog::filename() const
 {
-    if (mDialogType == DialogType_New)
+    if (mAction == ContentAction_New)
         return "";
 
     return mSelector->currentFile();
