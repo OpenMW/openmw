@@ -386,3 +386,15 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipSlot(int slot, c
 
     return it;
 }
+
+MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipItem(const MWWorld::Ptr& item, const MWWorld::Ptr& actor)
+{
+    for (int slot=0; slot<MWWorld::InventoryStore::Slots; ++slot)
+    {
+        MWWorld::ContainerStoreIterator equipped = getSlot(slot);
+        if (equipped != end() && *equipped == item)
+            return unequipSlot(slot, actor);
+    }
+
+    throw std::runtime_error ("attempt to unequip an item that is not currently equipped");
+}

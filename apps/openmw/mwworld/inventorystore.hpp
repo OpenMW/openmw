@@ -119,6 +119,14 @@ namespace MWWorld
             /// @return an iterator to the item that was previously in the slot
             /// (it can be re-stacked so its count may be different than when it
             /// was equipped).
+
+            ContainerStoreIterator unequipItem(const Ptr& item, const Ptr& actor);
+            ///< Unequip an item identified by its Ptr. An exception is thrown
+            /// if the item is not currently equipped.
+            ///
+            /// @return an iterator to the item that was previously in the slot
+            /// (it can be re-stacked so its count may be different than when it
+            /// was equipped).
     };
 }
 
