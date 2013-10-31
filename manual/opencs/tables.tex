@@ -3,8 +3,6 @@
 \subsection{Introduction}
 If you have launched OpenCS already and played around with it for a bit, you have probably gotten the impression that it contains lots of tables. You'd be spot on: OpenCS is built around using tables. This doesn't mean it works just like Excel or Calc, though. Due to the vast amounts of information involved with Morrowind, tables just made the most sense. You have to be able to spot information quickly and be able to change them on the fly. Let's browse through the various screens and see what all these tables show.
 
-
-
 \subsection{Used Terms}
 
 \subsubsection{Glossary}
@@ -20,18 +18,13 @@ If you have launched OpenCS already and played around with it for a bit, you hav
 Some columns are recurring throughout OpenCS. They show up in (nearly) every table in OpenCS.
 
 \begin{description}
- \item[ID]: Each item, location, sound, etc. gets the same unique identifier in both OpenCS and Morrowind. This is usually a very self-explanatory name. For example, the ID for the (unique) black pants of Caius Cosades is "Caius_pants". This allows you to manipulate the game in many ways. For example, you could add these pants to your inventory by simply opening the console and write: player->addItem Caius_pants. Either way, in both Morrowind and OpenCS, the ID is the primary way to identify all these different parts of the game.
-
- \item[Modified]: This column shows what has happened (if something has happened) to this record. There are four possible states in which it can exist. 
- \begin{description}
-  \item[Base] means that this record is part of the base game and is in its original state. Usually, if you create a mod, the base game is Morrowind with optionally the Bloodmoon and Tribunal expansions.
-  \item[Added] means that this record was not in the base game and has been added by a modder.
-  \item[Modified] means that the record is part of the base game, but has been changed in some way.
-  \item[Deleted] means that this record used to be part of the base game, but has been removed as an entry. This does not mean, however, that the occurrences in the game itself have been removed! For example, if you remove the CharGen_Bed entry from morrowind.esm, it doesn't mean the bedroll in the basement of the Census and Excise Office in Seyda Neen is gone. You're going to have to delete that reference yourself or make sure that that object is replaced by something that still exists otherwise you'll get crashes in the worst case scenario.
+\item[ID] Each item, location, sound, etc. gets the same unique identifier in both OpenCS and Morrowind. This is usually a very self-explanatory name. For example, the ID for the (unique) black pants of Caius Cosades is ``Caius\_pants''. This allows you to manipulate the game in many ways. For example, you could add these pants to your inventory by simply opening the console and write: ``player->addItem Caius\_pants''. Either way, in both Morrowind and OpenCS, the ID is the primary way to identify all these different parts of the game. %Wrong! Cells do not have ID, only name.
+\item[Modified] This column shows what has happened (if something has happened) to this record. There are four possible states in which it can exist. 
+\item[Base] means that this record is part of the base game and is in its original state. Usually, if you create a mod, the base game is Morrowind with optionally the Bloodmoon and Tribunal expansions.
+\item[Added] means that this record was not in the base game and has been added by a modder.
+\item[Modified] means that the record is part of the base game, but has been changed in some way.
+\item[Deleted] means that this record used to be part of the base game, but has been removed as an entry. This does not mean, however, that the occurrences in the game itself have been removed! For example, if you remove the CharGen\_Bed entry from morrowind.esm, it doesn't mean the bedroll in the basement of the Census and Excise Office in Seyda Neen is gone. You're going to have to delete that reference yourself or make sure that that object is replaced by something that still exists otherwise you'll get crashes in the worst case scenario.
  \end{description}
-\end{description}
-
-
 
 \subsection{World Screens}
 
@@ -78,5 +71,4 @@ Let's go through all Record Types and discuss what you can tell OpenCS about the
 
 \begin{description}
  \item[Activator:] This is an item that, when activated, starts a script or even just shows a tooltip.
-  \end{description}
 \end{description}
