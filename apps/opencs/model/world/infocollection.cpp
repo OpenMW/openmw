@@ -30,7 +30,7 @@ void CSMWorld::InfoCollection::load (const ESM::DialInfo& record, bool base)
     }
 }
 
-void CSMWorld::InfoCollection::load (ESM::ESMReader& reader, bool base)
+void CSMWorld::InfoCollection::load (ESM::ESMReader& reader, bool base, const ESM::Dialogue& dialogue)
 {
     /// \todo put records into proper order
     /// \todo adjust ID

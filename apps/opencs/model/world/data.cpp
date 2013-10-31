@@ -456,6 +456,8 @@ void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base)
 
     reader.open (path.string());
 
+    const ESM::Dialogue *dialogue = 0;
+
     // Note: We do not need to send update signals here, because at this point the model is not connected
     // to any view.
     while (reader.hasMoreRecs())
@@ -516,10 +518,15 @@ void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base)
 
                 if (record.mType==ESM::Dialogue::Journal)
                 {
+                    int index = mJournals.getAppendIndex (id);
                     mJournals.load (record, base);
+                    dialogue = &mJournals.getRecord (index).get();
                 }
                 else if (record.mType==ESM::Dialogue::Deleted)
                 {
+                    dialogue = 0; // record vector can be shuffled around which would make pointer
+                                  // to record invalid
+
                     if (mJournals.tryDelete (id))
                     {
                         /// \todo handle info records
@@ -535,7 +542,9 @@ void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base)
                 }
                 else
                 {
+                    int index = mTopics.getAppendIndex (id);
                     mTopics.load (record, base);
+                    dialogue = &mTopics.getRecord (index).get();
                 }
 
                 break;
@@ -543,14 +552,25 @@ void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base)
 
             case ESM::REC_INFO:
             {
-                /// \todo associate info record with last loaded dialogue record
-                mJournalInfos.load (reader, base);
+                if (!dialogue)
+                {
+                    /// \todo INFO record without matching DIAL record -> report to user
+                    reader.skipRecord();
+                    break;
+                }
+
+                if (dialogue->mType==ESM::Dialogue::Journal)
+                    mJournalInfos.load (reader, base, *dialogue);
+                else
+                    mTopicInfos.load (reader, base, *dialogue);
+
                 break;
             }
 
             default:
 
                 /// \todo throw an exception instead, once all records are implemented
+                /// or maybe report error and continue?
                 reader.skipRecord();
         }
     }

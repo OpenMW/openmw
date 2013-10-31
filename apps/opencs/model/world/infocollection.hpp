@@ -5,6 +5,11 @@
 
 #include "collection.hpp"
 
+namespace ESM
+{
+    class Dialogue;
+}
+
 namespace CSMWorld
 {
     class InfoCollection : public Collection<ESM::DialInfo, IdAccessor<ESM::DialInfo> >
@@ -13,7 +18,7 @@ namespace CSMWorld
 
         public:
 
-            void load (ESM::ESMReader& reader, bool base);
+            void load (ESM::ESMReader& reader, bool base, const ESM::Dialogue& dialogue);
     };
 }
 
