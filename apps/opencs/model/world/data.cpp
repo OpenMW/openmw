@@ -521,9 +521,8 @@ void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base)
 
                 if (record.mType==ESM::Dialogue::Journal)
                 {
-                    int index = mJournals.getAppendIndex (id);
                     mJournals.load (record, base);
-                    dialogue = &mJournals.getRecord (index).get();
+                    dialogue = &mJournals.getRecord (id).get();
                 }
                 else if (record.mType==ESM::Dialogue::Deleted)
                 {
@@ -545,9 +544,8 @@ void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base)
                 }
                 else
                 {
-                    int index = mTopics.getAppendIndex (id);
                     mTopics.load (record, base);
-                    dialogue = &mTopics.getRecord (index).get();
+                    dialogue = &mTopics.getRecord (id).get();
                 }
 
                 break;
