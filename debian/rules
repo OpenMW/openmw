@@ -40,5 +40,9 @@ override_dh_auto_clean:
 override_dh_installchangelogs:
 	dh_installchangelogs readme.txt
 
+copyright_check:
+	${MAKE} -f /usr/share/cdbs/1/rules/utils.mk debian/stamp-copyright-check
+	rm debian/stamp-copyright-check
+
 %:
 	dh $@ --parallel
