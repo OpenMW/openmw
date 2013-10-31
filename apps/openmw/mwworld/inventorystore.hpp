@@ -111,9 +111,9 @@ namespace MWWorld
             virtual int remove(const Ptr& item, int count, const Ptr& actor);
             ///< Remove \a count item(s) designated by \a item from this inventory.
             ///
-            /// \todo check if the item is equipped and do stuff
-            ///
             /// @return the number of items actually removed
+
+            void unequipSlot(int slot, const Ptr& actor);
     };
 }
 

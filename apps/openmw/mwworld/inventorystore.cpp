@@ -129,18 +129,7 @@ void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& ite
 void MWWorld::InventoryStore::unequipAll(const MWWorld::Ptr& actor)
 {
     for (int slot=0; slot < MWWorld::InventoryStore::Slots; ++slot)
-    {
-        MWWorld::ContainerStoreIterator it = getSlot(slot);
-        if (it != end())
-        {
-            equip(slot, end());
-            std::string script = MWWorld::Class::get(*it).getScript(*it);
-
-            // Unset OnPCEquip Variable on item's script, if it has a script with that variable declared
-            if((actor.getRefData().getHandle() == "player") && (script != ""))
-                (*it).getRefData().getLocals().setVarByInt(script, "onpcequip", 0);
-        }
-    }
+        unequipSlot(slot, actor);
 }
 
 MWWorld::ContainerStoreIterator MWWorld::InventoryStore::getSlot (int slot)
@@ -328,5 +317,29 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::getSelectedEnchantItem(
 
 int MWWorld::InventoryStore::remove(const Ptr& item, int count, const Ptr& actor)
 {
+    for (int slot=0; slot < MWWorld::InventoryStore::Slots; ++slot)
+    {
+        if (mSlots[slot] == end())
+            continue;
+
+        if (*mSlots[slot] == item)
+        {
+            unequipSlot(slot, actorPtr);
+            break;
+        }
+    }
+
     return ContainerStore::remove(item, count, actor);
+}
+
+void MWWorld::InventoryStore::unequipSlot(int slot, const MWWorld::Ptr& actor)
+{
+    ContainerStoreIterator it = getSlot(slot);
+    if (it != end())
+    {
+        equip(slot, end());
+
+
+        /// \todo update actor model
+    }
 }
