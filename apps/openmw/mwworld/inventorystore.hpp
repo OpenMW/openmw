@@ -113,7 +113,12 @@ namespace MWWorld
             ///
             /// @return the number of items actually removed
 
-            void unequipSlot(int slot, const Ptr& actor);
+            ContainerStoreIterator unequipSlot(int slot, const Ptr& actor);
+            ///< Unequip \a slot.
+            ///
+            /// @return an iterator to the item that was previously in the slot
+            /// (it can be re-stacked so its count may be different than when it
+            /// was equipped).
     };
 }
 

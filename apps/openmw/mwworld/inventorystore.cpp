@@ -336,18 +336,21 @@ int MWWorld::InventoryStore::remove(const Ptr& item, int count, const Ptr& actor
     return retCount;
 }
 
-void MWWorld::InventoryStore::unequipSlot(int slot, const MWWorld::Ptr& actor)
+MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipSlot(int slot, const MWWorld::Ptr& actor)
 {
     ContainerStoreIterator it = getSlot(slot);
+
     if (it != end())
     {
         // restack item previously in this slot
+        ContainerStoreIterator retval = it;
         for (MWWorld::ContainerStoreIterator iter (begin()); iter != end(); ++iter)
         {
-            if (stacks(*iter, *mSlots[slot]))
+            if (stacks(*iter, *it))
             {
-                iter->getRefData().setCount(iter->getRefData().getCount() + mSlots[slot]->getRefData().getCount());
-                mSlots[slot]->getRefData().setCount(0);
+                iter->getRefData().setCount(iter->getRefData().getCount() + it->getRefData().getCount());
+                it->getRefData().setCount(0);
+                retval = iter;
                 break;
             }
         }
@@ -377,5 +380,9 @@ void MWWorld::InventoryStore::unequipSlot(int slot, const MWWorld::Ptr& actor)
         }
 
         /// \todo update actor model
+
+        return retval;
     }
+
+    return it;
 }
