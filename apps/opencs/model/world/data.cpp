@@ -149,14 +149,14 @@ CSMWorld::Data::Data() : mRefs (mCells)
     mJournals.addColumn (new RecordStateColumn<ESM::Dialogue>);
     mJournals.addColumn (new DialogueTypeColumn<ESM::Dialogue> (true));
 
-    mTopicInfos.addColumn (new StringIdColumn<ESM::DialInfo>);
-    mTopicInfos.addColumn (new RecordStateColumn<ESM::DialInfo>);
+    mTopicInfos.addColumn (new StringIdColumn<Info>);
+    mTopicInfos.addColumn (new RecordStateColumn<Info>);
 
-    mJournalInfos.addColumn (new StringIdColumn<ESM::DialInfo>);
-    mJournalInfos.addColumn (new RecordStateColumn<ESM::DialInfo>);
-    mJournalInfos.addColumn (new QuestStatusTypeColumn<ESM::DialInfo>);
-    mJournalInfos.addColumn (new QuestIndexColumn<ESM::DialInfo>);
-    mJournalInfos.addColumn (new QuestDescriptionColumn<ESM::DialInfo>);
+    mJournalInfos.addColumn (new StringIdColumn<Info>);
+    mJournalInfos.addColumn (new RecordStateColumn<Info>);
+    mJournalInfos.addColumn (new QuestStatusTypeColumn<Info>);
+    mJournalInfos.addColumn (new QuestIndexColumn<Info>);
+    mJournalInfos.addColumn (new QuestDescriptionColumn<Info>);
 
     mCells.addColumn (new StringIdColumn<Cell>);
     mCells.addColumn (new RecordStateColumn<Cell>);

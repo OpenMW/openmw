@@ -28,7 +28,7 @@ opencs_units_noqt (model/world
     )
 
 opencs_hdrs_noqt (model/world
-    columnimp idcollection collection
+    columnimp idcollection collection info
     )
 
 

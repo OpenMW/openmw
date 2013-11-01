@@ -9,6 +9,7 @@
 
 #include "columnbase.hpp"
 #include "columns.hpp"
+#include "info.hpp"
 
 namespace CSMWorld
 {
@@ -1334,7 +1335,7 @@ namespace CSMWorld
         {
             ESXRecordT record2 = record.get();
 
-            record2.mQuestStatus = static_cast<ESM::DialInfo::QuestStatus> (data.toInt());
+            record2.mQuestStatus = static_cast<Info::QuestStatus> (data.toInt());
 
             record.setModified (record2);
         }

@@ -2,15 +2,16 @@
 #include "infocollection.hpp"
 
 #include <components/esm/esmreader.hpp>
+#include <components/esm/loaddial.hpp>
 
-void CSMWorld::InfoCollection::load (const ESM::DialInfo& record, bool base)
+void CSMWorld::InfoCollection::load (const Info& record, bool base)
 {
     int index = searchId (record.mId);
 
     if (index==-1)
     {
         // new record
-        Record<ESM::DialInfo> record2;
+        Record<Info> record2;
         record2.mState = base ? RecordBase::State_BaseOnly : RecordBase::State_ModifiedOnly;
         (base ? record2.mBase : record2.mModified) = record;
 
@@ -19,7 +20,7 @@ void CSMWorld::InfoCollection::load (const ESM::DialInfo& record, bool base)
     else
     {
         // old record
-        Record<ESM::DialInfo> record2 = getRecord (index);
+        Record<Info> record2 = getRecord (index);
 
         if (base)
             record2.mBase = record;
@@ -56,14 +57,15 @@ void CSMWorld::InfoCollection::load (ESM::ESMReader& reader, bool base, const ES
         }
         else
         {
-            Record<ESM::DialInfo> record = getRecord (index);
+            Record<Info> record = getRecord (index);
             record.mState = RecordBase::State_Deleted;
             setRecord (index, record);
         }
     }
     else
     {
-        ESM::DialInfo record;
+        Info record;
+        record.mTopicId = dialogue.mId;
         record.mId = id;
         record.load (reader);
 

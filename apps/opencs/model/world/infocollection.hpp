@@ -1,9 +1,8 @@
 #ifndef CSM_WOLRD_INFOCOLLECTION_H
 #define CSM_WOLRD_INFOCOLLECTION_H
 
-#include <components/esm/loadinfo.hpp>
-
 #include "collection.hpp"
+#include "info.hpp"
 
 namespace ESM
 {
@@ -12,9 +11,9 @@ namespace ESM
 
 namespace CSMWorld
 {
-    class InfoCollection : public Collection<ESM::DialInfo, IdAccessor<ESM::DialInfo> >
+    class InfoCollection : public Collection<Info, IdAccessor<Info> >
     {
-            void load (const ESM::DialInfo& record, bool base);
+            void load (const Info& record, bool base);
 
         public:
 
