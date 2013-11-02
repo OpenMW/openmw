@@ -8,8 +8,11 @@
 
 #include <boost/filesystem/path.hpp>
 
-namespace Files { typedef std::vector<boost::filesystem::path> PathContainer;
-                  struct ConfigurationManager;}
+namespace Files
+{
+  typedef std::vector<boost::filesystem::path> PathContainer;
+  struct ConfigurationManager;
+}
 
 namespace Launcher
 {
@@ -41,6 +44,12 @@ namespace Launcher
         {
             mSettings.remove(key);
         }
+
+        inline QStringList getDataDirs() { return mDataDirs; }
+        inline void addDataDir(const QString &dir) { if(!dir.isEmpty()) mDataDirs.append(dir); }
+        inline QString getDataLocal() {return mDataLocal; }
+
+        bool hasMaster();
 
         inline QStringList getDataDirs() { return mDataDirs; }
         inline void addDataDir(const QString &dir) { if(!dir.isEmpty()) mDataDirs.append(dir); }
