@@ -69,7 +69,7 @@ const ContentSelectorModel::EsmFile *ContentSelectorModel::ContentModel::item(co
 {
     foreach (const EsmFile *file, mFiles)
     {
-        if (name == file->fileName())
+        if (name == file->filePath())
             return file;
     }
     return 0;
@@ -158,7 +158,7 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex &index, int 
     case Qt::CheckStateRole:
     {
         if (!file->isGameFile())
-            return isChecked(file->fileName());
+            return isChecked(file->filePath());
         break;
     }
 
@@ -174,7 +174,7 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex &index, int 
     }
 
     case Qt::UserRole + 1:
-        return isChecked(file->fileName());
+        return isChecked(file->filePath());
         break;
     }
     return QVariant();
@@ -186,7 +186,7 @@ bool ContentSelectorModel::ContentModel::setData(const QModelIndex &index, const
         return false;
 
     EsmFile *file = item(index.row());
-    QString fileName = file->fileName();
+    QString fileName = file->filePath();
     bool success = false;
 
     switch(role)
@@ -396,6 +396,7 @@ bool ContentSelectorModel::ContentModel::canBeChecked(const EsmFile *file) const
 
 void ContentSelectorModel::ContentModel::addFile(EsmFile *file)
 {
+    qDebug() << "adding file: " << file->filePath();
     beginInsertRows(QModelIndex(), mFiles.count(), mFiles.count());
         mFiles.append(file);
     endInsertRows();
@@ -417,6 +418,8 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
     // Create a decoder for non-latin characters in esx metadata
     QTextDecoder *decoder = codec->makeDecoder();
 
+    qDebug() << "searching path: " << path << " files found: " << dir.entryList().size();
+
     foreach (const QString &path, dir.entryList())
     {
         QFileInfo info(dir.absoluteFilePath(path));
@@ -430,18 +433,24 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
             fileReader.open(dir.absoluteFilePath(path).toStdString());
 
             foreach (const ESM::Header::MasterData &item, fileReader.getGameFiles())
+            {
+                qDebug() << "adding gamefile: " << item.name.c_str();
                 file->addGameFile(QString::fromStdString(item.name));
+            }
 
             file->setAuthor     (decoder->toUnicode(fileReader.getAuthor().c_str()));
             file->setDate       (info.lastModified());
             file->setFormat     (fileReader.getFormat());
-            file->setPath       (info.absoluteFilePath());
+            file->setFilePath       (info.absoluteFilePath());
             file->setDescription(decoder->toUnicode(fileReader.getDesc().c_str()));
 
 
             // Put the file in the table
-            if (item(path) == 0)
+            if (item(file->filePath()) == 0)
+            {
+                qDebug () << "adding file " << file->filePath();
                 addFile(file);
+            }
 
         } catch(std::runtime_error &e) {
             // An error occurred while reading the .esp
@@ -543,8 +552,8 @@ void ContentSelectorModel::ContentModel::setCheckState(const QString &name, bool
         {
             if (downstreamFile->gameFiles().contains(name))
             {
-                if (mCheckStates.contains(downstreamFile->fileName()))
-                    mCheckStates[downstreamFile->fileName()] = Qt::Unchecked;
+                if (mCheckStates.contains(downstreamFile->filePath()))
+                    mCheckStates[downstreamFile->filePath()] = Qt::Unchecked;
 
                 emit dataChanged(indexFromItem(downstreamFile), indexFromItem(downstreamFile));
             }
@@ -558,7 +567,7 @@ ContentSelectorModel::ContentFileList ContentSelectorModel::ContentModel::checke
 
     foreach (EsmFile *file, mFiles)
     {
-        if (isChecked(file->fileName()))
+        if (isChecked(file->filePath()))
             list << file;
     }
 

@@ -42,9 +42,6 @@ void ContentSelectorView::ContentSelector::buildGameFileView()
     connect (ui.gameFileView, SIGNAL (currentIndexChanged(int)),
              this, SLOT (slotCurrentGameFileIndexChanged(int)));
 
-    connect (ui.gameFileView, SIGNAL (currentIndexChanged (int)),
-             this, SIGNAL (signalCurrentGamefileIndexChanged (int)));
-
     ui.gameFileView->setCurrentIndex(-1);
     ui.gameFileView->setCurrentIndex(0);
 }
@@ -145,6 +142,8 @@ void ContentSelectorView::ContentSelector::slotCurrentGameFileIndexChanged(int i
 
     if (proxy)
         proxy->setDynamicSortFilter(true);
+
+    emit signalCurrentGamefileIndexChanged (index);
 }
 
 void ContentSelectorView::ContentSelector::slotAddonTableItemClicked(const QModelIndex &index)

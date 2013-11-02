@@ -17,6 +17,8 @@
 #include "filewidget.hpp"
 #include "adjusterwidget.hpp"
 
+#include <QDebug>
+
 CSVDoc::FileDialog::FileDialog(QWidget *parent) :
     QDialog(parent), mSelector (0), mFileWidget (0), mAdjusterWidget (0)
 {
@@ -38,7 +40,7 @@ QStringList CSVDoc::FileDialog::selectedFilePaths()
     QStringList filePaths;
 
     foreach (ContentSelectorModel::EsmFile *file, mSelector->selectedFiles() )
-        filePaths.append(file->path());
+        filePaths.append(file->filePath());
 
     return filePaths;
 }
@@ -139,7 +141,8 @@ void CSVDoc::FileDialog::slotUpdateAcceptButton(const QString &name, bool)
     else
     {
         ContentSelectorModel::EsmFile *file = mSelector->selectedFiles().back();;
-        mAdjusterWidget->setName (file->fileName(), !file->isGameFile());
+        mAdjusterWidget->setName (file->filePath(), !file->isGameFile());
+        qDebug() << "setting filepath " << file->filePath();
     }
 
     ui.projectButtonBox->button (QDialogButtonBox::Ok)->setEnabled (success);
@@ -168,7 +171,7 @@ void CSVDoc::FileDialog::slotOpenFile()
 {
     ContentSelectorModel::EsmFile *file = mSelector->selectedFiles().back();
 
-    mAdjusterWidget->setName (file->fileName(), !file->isGameFile());
+    mAdjusterWidget->setName (file->filePath(), !file->isGameFile());
 
     emit signalOpenFiles (mAdjusterWidget->getPath());
 }

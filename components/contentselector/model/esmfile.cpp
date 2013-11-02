@@ -34,7 +34,7 @@ void ContentSelectorModel::EsmFile::setFormat(int format)
     mFormat = format;
 }
 
-void ContentSelectorModel::EsmFile::setPath(const QString &path)
+void ContentSelectorModel::EsmFile::setFilePath(const QString &path)
 {
     mPath = path;
 }
@@ -81,7 +81,7 @@ QVariant ContentSelectorModel::EsmFile::fileProperty(const FileProperty prop) co
         return mModified.toString(Qt::ISODate);
         break;
 
-    case FileProperty_Path:
+    case FileProperty_FilePath:
         return mPath;
         break;
 
@@ -118,7 +118,7 @@ void ContentSelectorModel::EsmFile::setFileProperty (const FileProperty prop, co
         mModified = QDateTime::fromString(value);
         break;
 
-    case FileProperty_Path:
+    case FileProperty_FilePath:
         mPath = value;
         break;
 
