@@ -126,7 +126,7 @@ namespace SFO
             case SDL_WINDOWEVENT_SIZE_CHANGED:
                 int w,h;
                 SDL_GetWindowSize(mSDLWindow, &w, &h);
-                // TODO: Fix Ogre to handle this more consistently
+                // TODO: Fix Ogre to handle this more consistently (fixed in 1.9)
 #if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
                 mOgreWindow->resize(w, h);
 #else
@@ -137,7 +137,7 @@ namespace SFO
                 break;
 
             case SDL_WINDOWEVENT_RESIZED:
-                // TODO: Fix Ogre to handle this more consistently
+                // TODO: Fix Ogre to handle this more consistently (fixed in 1.9)
 #if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
                 mOgreWindow->resize(evt.window.data1, evt.window.data2);
 #else
