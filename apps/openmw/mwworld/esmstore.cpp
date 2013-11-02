@@ -100,11 +100,7 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
             it->second->load(esm, id);
 
             if (n.val==ESM::REC_DIAL) {
-                // dirty hack, but it is better than non-const search()
-                // or friends
-                //dialogue = &mDialogs.mStatic.back();
                 dialogue = const_cast<ESM::Dialogue*>(mDialogs.find(id));
-                assert (dialogue->mId == id);
             } else {
                 dialogue = 0;
             }
