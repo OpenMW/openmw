@@ -67,10 +67,15 @@ void ContentSelectorView::ContentSelector::setGameFile(const QString &filename)
 
     if (!filename.isEmpty())
     {
-        index = ui.gameFileView->findText(filename);
+        const ContentSelectorModel::EsmFile *file = mContentModel->item (filename);
+        index = ui.gameFileView->findText (file->fileName());
 
         //verify that the current index is also checked in the model
-        mContentModel->setCheckState(filename, true);
+        if (!mContentModel->setCheckState(filename, true))
+        {
+            //throw error in case file not found?
+            return;
+        }
     }
 
     ui.gameFileView->setCurrentIndex(index);
@@ -86,8 +91,7 @@ void ContentSelectorView::ContentSelector::setCheckStates(const QStringList &lis
     if (list.isEmpty())
         return;
 
-    foreach (const QString &file, list)
-        mContentModel->setCheckState(file, Qt::Checked);
+    mContentModel->setCheckStates (list, true);
 }
 
 ContentSelectorModel::ContentFileList

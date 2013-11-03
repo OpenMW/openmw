@@ -169,7 +169,7 @@ bool Launcher::GameSettings::writeFile(QTextStream &stream)
     return true;
 }
 
-bool GameSettings::hasMaster()
+bool Launcher::GameSettings::hasMaster()
 {
   bool result = false;
   QStringList content = mSettings.values(QString("content"));

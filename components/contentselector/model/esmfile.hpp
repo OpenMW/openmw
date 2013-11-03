@@ -57,6 +57,7 @@ namespace ContentSelectorModel
         inline QString description() const          { return mDescription; }
         inline QString toolTip() const              { return sToolTip.arg(mAuthor)
                                                              .arg(mFormat)
+                                                             .arg(mPath)
                                                              .arg(mDescription)
                                                              .arg(mGameFiles.join(", "));
                                                     }

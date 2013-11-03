@@ -5,7 +5,6 @@
 #include <QCheckBox>
 #include <QMenu>
 #include <QSortFilterProxyModel>
-#include <QDebug>
 
 #include <components/files/configurationmanager.hpp>
 
@@ -37,6 +36,10 @@ Launcher::DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSet
 
 void Launcher::DataFilesPage::loadSettings()
 {
+    QStringList paths = mGameSettings.getDataDirs();
+    paths.insert (0, mDataLocal);
+    PathIterator pathIterator (paths);
+
     QString profileName = ui.profilesComboBox->currentText();
 
     QStringList files = mLauncherSettings.values(QString("Profiles/") + profileName + QString("/game"), Qt::MatchExactly);
@@ -47,10 +50,37 @@ void Launcher::DataFilesPage::loadSettings()
     QString gameFile ("");
 
     if (files.size()>0)
-        gameFile = files.at (0);
+    {
+        gameFile = pathIterator.findFirstPath (files.at(0));
 
-    mSelector->setGameFile(gameFile);
-    mSelector->setCheckStates(addons);
+        if (!gameFile.isEmpty())
+            mSelector->setGameFile (gameFile);
+/*        else
+        {
+            //throw gamefile error here.
+        }*/
+    }
+
+    QStringList missingFiles;
+    QStringList foundFiles;
+
+    foreach (const QString &addon, addons)
+    {
+        QString filePath = pathIterator.findFirstPath (addon);
+
+        if (filePath.isEmpty())
+            missingFiles << addon;
+        else
+            foundFiles << filePath;
+    }
+/*
+    if (missingFiles.size() > 0)
+    {
+        //throw addons error here.
+    }
+*/
+    if (foundFiles.size() > 0)
+        mSelector->setCheckStates (foundFiles);
 }
 
 void Launcher::DataFilesPage::saveSettings(const QString &profile)
@@ -191,10 +221,10 @@ void Launcher::DataFilesPage::setupDataFiles()
     foreach (const QString &path, paths)
         mSelector->addFiles(path);
 
-    QString dataLocal = mGameSettings.getDataLocal();
+    mDataLocal = mGameSettings.getDataLocal();
 
-    if (!dataLocal.isEmpty())
-        mSelector->addFiles(dataLocal);
+    if (!mDataLocal.isEmpty())
+        mSelector->addFiles(mDataLocal);
 
     QStringList profiles = mLauncherSettings.subKeys(QString("Profiles/"));
     QString profile = mLauncherSettings.value(QString("Profiles/currentprofile"));

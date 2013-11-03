@@ -45,7 +45,8 @@ namespace ContentSelectorModel
         const EsmFile *item(const QString &name) const;
 
         bool isChecked(const QString &name) const;
-        void setCheckState(const QString &name, bool isChecked);
+        bool setCheckState(const QString &name, bool isChecked);
+        void setCheckStates (const QStringList &fileList, bool isChecked);
         ContentFileList checkedItems() const;
         void uncheckAll();
 

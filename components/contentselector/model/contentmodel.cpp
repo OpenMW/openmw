@@ -3,8 +3,10 @@
 
 #include <QDir>
 #include <QTextCodec>
-#include <components/esm/esmreader.hpp>
+#include <QMessageBox>
 #include <QDebug>
+
+#include "components/esm/esmreader.hpp"
 
 ContentSelectorModel::ContentModel::ContentModel(QObject *parent) :
     QAbstractTableModel(parent),
@@ -380,15 +382,18 @@ bool ContentSelectorModel::ContentModel::canBeChecked(const EsmFile *file) const
     //addon can be checked if its gamefile is
     foreach (const QString &fileName, file->gameFiles())
     {
-        const EsmFile *dependency = item(fileName);
-
-        if (!dependency)
-            continue;
-
-        if (dependency->isGameFile())
+        foreach (EsmFile *dependency, mFiles)
         {
-            if (isChecked(fileName))
-                return true;
+            //compare filenames only.  Multiple instances
+            //of the filename (with different paths) is not relevant here.
+            if (!(dependency->fileName() == fileName))
+                continue;
+
+            if (dependency->isGameFile())
+            {
+                if (isChecked(dependency->filePath()))
+                    return true;
+            }
         }
     }
     return false;
@@ -396,7 +401,6 @@ bool ContentSelectorModel::ContentModel::canBeChecked(const EsmFile *file) const
 
 void ContentSelectorModel::ContentModel::addFile(EsmFile *file)
 {
-    qDebug() << "adding file: " << file->filePath();
     beginInsertRows(QModelIndex(), mFiles.count(), mFiles.count());
         mFiles.append(file);
     endInsertRows();
@@ -418,8 +422,6 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
     // Create a decoder for non-latin characters in esx metadata
     QTextDecoder *decoder = codec->makeDecoder();
 
-    qDebug() << "searching path: " << path << " files found: " << dir.entryList().size();
-
     foreach (const QString &path, dir.entryList())
     {
         QFileInfo info(dir.absoluteFilePath(path));
@@ -433,10 +435,7 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
             fileReader.open(dir.absoluteFilePath(path).toStdString());
 
             foreach (const ESM::Header::MasterData &item, fileReader.getGameFiles())
-            {
-                qDebug() << "adding gamefile: " << item.name.c_str();
                 file->addGameFile(QString::fromStdString(item.name));
-            }
 
             file->setAuthor     (decoder->toUnicode(fileReader.getAuthor().c_str()));
             file->setDate       (info.lastModified());
@@ -447,10 +446,7 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
 
             // Put the file in the table
             if (item(file->filePath()) == 0)
-            {
-                qDebug () << "adding file " << file->filePath();
                 addFile(file);
-            }
 
         } catch(std::runtime_error &e) {
             // An error occurred while reading the .esp
@@ -510,10 +506,23 @@ bool ContentSelectorModel::ContentModel::isChecked(const QString& name) const
     return false;
 }
 
-void ContentSelectorModel::ContentModel::setCheckState(const QString &name, bool checkState)
+void ContentSelectorModel::ContentModel::setCheckStates (const QStringList &fileList, bool isChecked)
+{
+    foreach (const QString &file, fileList)
+    {
+        setCheckState (file, isChecked);
+    }
+}
+
+bool ContentSelectorModel::ContentModel::setCheckState(const QString &name, bool checkState)
 {
     if (name.isEmpty())
-        return;
+        return false;
+
+    const EsmFile *file = item(name);
+
+    if (!file)
+        return false;
 
     Qt::CheckState state = Qt::Unchecked;
 
@@ -522,8 +531,6 @@ void ContentSelectorModel::ContentModel::setCheckState(const QString &name, bool
 
     mCheckStates[name] = state;
     emit dataChanged(indexFromItem(item(name)), indexFromItem(item(name)));
-
-    const EsmFile *file = item(name);
 
     if (file->isGameFile())
         emit dataChanged (index(0,0), index(rowCount()-1,0));
@@ -559,29 +566,20 @@ void ContentSelectorModel::ContentModel::setCheckState(const QString &name, bool
             }
         }
     }
+
+    return true;
 }
 
 ContentSelectorModel::ContentFileList ContentSelectorModel::ContentModel::checkedItems() const
 {
     ContentFileList list;
 
+    // TODO:
     // First search for game files and next addons,
     // so we get more or less correct game files vs addons order.
     foreach (EsmFile *file, mFiles)
-    {
-<<<<<<< HEAD
         if (isChecked(file->filePath()))
-=======
-        if (isChecked(file->fileName()) && file->isGameFile())
             list << file;
-    }
-
-    foreach (EsmFile *file, mFiles)
-    {
-        if (isChecked(file->fileName()) && !file->isGameFile())
->>>>>>> f5fbe7361fad698e8dd3330e9820a157800be8ae
-            list << file;
-    }
 
     return list;
 }

@@ -10,9 +10,6 @@
 #include <QLabel>
 #include <QStyle>
 
-#include <QDebug>
-
-
 CSVDoc::AdjusterWidget::AdjusterWidget (QWidget *parent)
     : QWidget (parent), mValid (false), mAction (ContentAction_Undefined)
 {
@@ -79,8 +76,7 @@ void CSVDoc::AdjusterWidget::setName (const QString& name, bool addon)
                              path.extension() == ".esp");
 
         bool isFilePathChanged = (path.parent_path().string() != mLocalData.string());
-        qDebug() << "current path: " << path.parent_path().c_str();
-        qDebug() << "data-local: " << mLocalData.c_str();
+
         if (isLegacyPath)
             path.replace_extension (addon ? ".omwaddon" : ".omwgame");
 

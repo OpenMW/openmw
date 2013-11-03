@@ -4,6 +4,10 @@
 #include "ui_datafilespage.h"
 #include <QWidget>
 
+
+#include <QDir>
+#include <QFile>
+
 class QSortFilterProxyModel;
 class QAbstractItemModel;
 class QMenu;
@@ -61,6 +65,8 @@ namespace Launcher
         GameSettings &mGameSettings;
         LauncherSettings &mLauncherSettings;
 
+        QString mDataLocal;
+
         void setPluginsCheckstates(Qt::CheckState state);
 
         void buildView();
@@ -73,6 +79,58 @@ namespace Launcher
         bool showDeleteMessageBox (const QString &text);
         void addProfile (const QString &profile, bool setAsCurrent);
         void checkForDefaultProfile();
+
+        class PathIterator
+        {
+            QStringList::ConstIterator mCitEnd;
+            QStringList::ConstIterator mCitCurrent;
+            QStringList::ConstIterator mCitBegin;
+            QString mFile;
+            QString mFilePath;
+
+        public:
+            PathIterator (const QStringList &list)
+            {
+                mCitBegin = list.constBegin();
+                mCitCurrent = mCitBegin;
+                mCitEnd = list.constEnd();
+            }
+
+            QString findFirstPath (const QString &file)
+            {
+                mCitCurrent = mCitBegin;
+                mFile = file;
+                return path();
+            }
+
+            QString findNextPath () { return path(); }
+
+        private:
+
+            QString path ()
+            {
+                bool success = false;
+                QDir dir;
+                QFileInfo file;
+
+                while (!success)
+                {
+                    if (mCitCurrent == mCitEnd)
+                        break;
+
+                    dir.setPath (*(mCitCurrent++));
+                    file.setFile (dir.absoluteFilePath (mFile));
+
+                    success = file.exists();
+                }
+
+                if (success)
+                    return file.absoluteFilePath();
+
+                return "";
+            }
+
+        };
     };
 }
 #endif

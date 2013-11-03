@@ -6,8 +6,9 @@
 int ContentSelectorModel::EsmFile::sPropertyCount = 7;
 QString ContentSelectorModel::EsmFile::sToolTip = QString("<b>Author:</b> %1<br/> \
                                               <b>Version:</b> %2<br/> \
-                                              <br/><b>Description:</b><br/>%3<br/> \
-                                              <br/><b>Dependencies: </b>%4<br/>");
+                                              <b>Path:</b><br/>%3<br/> \
+                                              <br/><b>Description:</b><br/>%4<br/> \
+                                              <br/><b>Dependencies: </b>%5<br/>");
 
 
 ContentSelectorModel::EsmFile::EsmFile(QString fileName, ModelItem *parent)
