@@ -79,8 +79,7 @@ void Launcher::DataFilesPage::loadSettings()
         //throw addons error here.
     }
 */
-    if (foundFiles.size() > 0)
-        mSelector->setCheckStates (foundFiles);
+    mSelector->setCheckStates (foundFiles);
 }
 
 void Launcher::DataFilesPage::saveSettings(const QString &profile)
@@ -177,7 +176,7 @@ void Launcher::DataFilesPage::setProfile (const QString &previous, const QString
     if (!previous.isEmpty() && savePrevious)
         saveSettings (previous);
 
-    ui.profilesComboBox->setCurrentIndex (ui.profilesComboBox->findText (current));
+    ui.profilesComboBox->setCurrentProfile (ui.profilesComboBox->findText (current));
 
     loadSettings();
 
@@ -232,7 +231,7 @@ void Launcher::DataFilesPage::setupDataFiles()
     foreach (const QString &item, profiles)
         addProfile (item, false);
 
-    addProfile (profile, true);
+    setProfile (ui.profilesComboBox->findText(profile), false);
 
     loadSettings();
 }
@@ -288,6 +287,10 @@ void Launcher::DataFilesPage::on_deleteProfileAction_triggered()
 
     // Remove the profile from the combobox
     ui.profilesComboBox->removeItem (ui.profilesComboBox->findText (profile));
+
+    removeProfile(profile);
+
+    saveSettings();
 
     loadSettings();
 

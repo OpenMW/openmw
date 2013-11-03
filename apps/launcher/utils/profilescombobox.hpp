@@ -4,6 +4,8 @@
 #include "components/contentselector/view/combobox.hpp"
 #include "lineedit.hpp"
 
+#include <QDebug>
+
 class QString;
 
 class ProfilesComboBox : public ContentSelectorView::ComboBox
@@ -21,6 +23,11 @@ public:
 
     explicit ProfilesComboBox(QWidget *parent = 0);
     void setEditEnabled(bool editable);
+    void setCurrentProfile(int index)
+    {
+        ComboBox::setCurrentIndex(index);
+        mOldProfile = currentText();
+    }
 
 signals:
     void signalProfileTextChanged(const QString &item);

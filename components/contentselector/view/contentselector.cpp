@@ -12,6 +12,8 @@
 #include <QModelIndex>
 #include <assert.h>
 
+#include <QDebug>
+
 ContentSelectorView::ContentSelector::ContentSelector(QWidget *parent) :
     QObject(parent)
 {
@@ -89,9 +91,12 @@ void ContentSelectorView::ContentSelector::clearCheckStates()
 void ContentSelectorView::ContentSelector::setCheckStates(const QStringList &list)
 {
     if (list.isEmpty())
-        return;
-
-    mContentModel->setCheckStates (list, true);
+    {
+        qDebug() << "refreshing model";
+        slotCurrentGameFileIndexChanged (ui.gameFileView->currentIndex());
+    }
+    else
+        mContentModel->setCheckStates (list, true);
 }
 
 ContentSelectorModel::ContentFileList
@@ -152,14 +157,17 @@ void ContentSelectorView::ContentSelector::slotCurrentGameFileIndexChanged(int i
 
 void ContentSelectorView::ContentSelector::slotAddonTableItemClicked(const QModelIndex &index)
 {
-    QAbstractItemModel *const model = ui.addonView->model();
+    QModelIndex sourceIndex = mAddonProxyModel->mapToSource (index);
+
+    if (!mContentModel->isEnabled (sourceIndex))
+        return;
 
     Qt::CheckState checkState = Qt::Unchecked;
 
-    if (model->data(index, Qt::CheckStateRole).toInt() == Qt::Unchecked)
+    if (mContentModel->data(sourceIndex, Qt::CheckStateRole).toInt() == Qt::Unchecked)
         checkState = Qt::Checked;
 
-    model->setData(index, checkState, Qt::CheckStateRole);
+    mContentModel->setData(sourceIndex, checkState, Qt::CheckStateRole);
 
     if (checkState == Qt::Checked)
         emit signalAddonFileSelected (index.row());
