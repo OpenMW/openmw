@@ -94,6 +94,7 @@ void CS::Editor::setupDataFiles()
 
     for (Files::PathContainer::const_iterator iter = dataDirs.begin(); iter != dataDirs.end(); ++iter)
     {
+
         QString path = QString::fromStdString(iter->string());
         mFileDialog.addFiles(path);
     }

@@ -104,10 +104,10 @@ void Launcher::DataFilesPage::saveSettings(const QString &profile)
 
         if (item->gameFiles().size() == 0) {
             mLauncherSettings.setMultiValue(QString("Profiles/") + profileName + QString("/game"), item->fileName());
-            mGameSettings.setMultiValue(QString("game"), item->fileName());
+            mGameSettings.setMultiValue(QString("content"), item->fileName());
         } else {
             mLauncherSettings.setMultiValue(QString("Profiles/") + profileName + QString("/addon"), item->fileName());
-            mGameSettings.setMultiValue(QString("addon"), item->fileName());
+            mGameSettings.setMultiValue(QString("content"), item->fileName());
         }
     }
 
