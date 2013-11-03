@@ -3,7 +3,6 @@
 
 #include <QDir>
 #include <QTextCodec>
-#include <QMessageBox>
 #include <QDebug>
 
 #include "components/esm/esmreader.hpp"
@@ -69,9 +68,14 @@ ContentSelectorModel::EsmFile *ContentSelectorModel::ContentModel::item(int row)
 }
 const ContentSelectorModel::EsmFile *ContentSelectorModel::ContentModel::item(const QString &name) const
 {
+    EsmFile::FileProperty fp = EsmFile::FileProperty_FileName;
+
+    if (name.contains ('/'))
+        fp = EsmFile::FileProperty_FilePath;
+
     foreach (const EsmFile *file, mFiles)
     {
-        if (name == file->filePath())
+        if (name == file->fileProperty (fp).toString())
             return file;
     }
     return 0;
@@ -538,15 +542,15 @@ bool ContentSelectorModel::ContentModel::setCheckState(const QString &name, bool
     //if we're checking an item, ensure all "upstream" files (dependencies) are checked as well.
     if (state == Qt::Checked)
     {
-        foreach (const QString &upstreamName, file->gameFiles())
+        foreach (QString upstreamName, file->gameFiles())
         {
             const EsmFile *upstreamFile = item(upstreamName);
 
             if (!upstreamFile)
                 continue;
 
-            if (!isChecked(upstreamName))
-                mCheckStates[upstreamName] = Qt::Checked;
+            if (!isChecked(upstreamFile->filePath()))
+                mCheckStates[upstreamFile->filePath()] = Qt::Checked;
 
             emit dataChanged(indexFromItem(upstreamFile), indexFromItem(upstreamFile));
 

@@ -138,7 +138,7 @@ void CSVDoc::FileDialog::slotUpdateAcceptButton(const QString &name, bool)
         success = success && !(name.isEmpty());
     else
     {
-        ContentSelectorModel::EsmFile *file = mSelector->selectedFiles().back();;
+        ContentSelectorModel::EsmFile *file = mSelector->selectedFiles().back();
         mAdjusterWidget->setName (file->filePath(), !file->isGameFile());
     }
 
