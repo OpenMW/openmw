@@ -156,6 +156,8 @@ namespace CSMWorld
             ColumnId_QuestIndex = 143,
             ColumnId_QuestStatusType = 144,
             ColumnId_QuestDescription = 145,
+            ColumnId_Topic = 146,
+            ColumnId_Journal = 147,
 
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.

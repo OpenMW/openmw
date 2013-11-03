@@ -151,9 +151,11 @@ CSMWorld::Data::Data() : mRefs (mCells)
 
     mTopicInfos.addColumn (new StringIdColumn<Info>);
     mTopicInfos.addColumn (new RecordStateColumn<Info>);
+    mTopicInfos.addColumn (new TopicColumn<Info> (false));
 
     mJournalInfos.addColumn (new StringIdColumn<Info>);
     mJournalInfos.addColumn (new RecordStateColumn<Info>);
+    mJournalInfos.addColumn (new TopicColumn<Info> (true));
     mJournalInfos.addColumn (new QuestStatusTypeColumn<Info>);
     mJournalInfos.addColumn (new QuestIndexColumn<Info>);
     mJournalInfos.addColumn (new QuestDescriptionColumn<Info>);

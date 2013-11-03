@@ -163,6 +163,8 @@ namespace CSMWorld
             { ColumnId_QuestIndex, "Quest Index" },
             { ColumnId_QuestStatusType, "Quest Status" },
             { ColumnId_QuestDescription, "Quest Description" },
+            { ColumnId_Topic, "Topic" },
+            { ColumnId_Journal, "Journal", },
 
             { ColumnId_UseValue1, "Use value 1" },
             { ColumnId_UseValue2, "Use value 2" },

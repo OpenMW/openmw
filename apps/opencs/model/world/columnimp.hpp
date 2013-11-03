@@ -1395,6 +1395,36 @@ namespace CSMWorld
             return true;
         }
     };
+
+    template<typename ESXRecordT>
+    struct TopicColumn : public Column<ESXRecordT>
+    {
+        TopicColumn (bool journal) : Column<ESXRecordT> (journal ? Columns::ColumnId_Journal : Columns::ColumnId_Topic, ColumnBase::Display_String) {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return QString::fromUtf8 (record.get().mTopicId.c_str());
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            record2.mTopicId = data.toString().toUtf8().constData();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+
+        virtual bool isUserEditable() const
+        {
+            return false;
+        }
+    };
 }
 
 #endif
