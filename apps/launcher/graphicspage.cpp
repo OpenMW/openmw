@@ -10,12 +10,9 @@
 #endif
 #include <SDL.h>
 
-#include <cstdlib>
-
 #include <boost/math/common_factor.hpp>
 
 #include <components/files/configurationmanager.hpp>
-#include <components/files/ogreplugin.hpp>
 
 #include <components/contentselector/model/naturalsort.hpp>
 
@@ -55,13 +52,9 @@ Launcher::GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, GraphicsS
 
 bool Launcher::GraphicsPage::setupOgre()
 {
-    // Create a log manager so we can surpress debug text to stdout/stderr
-    Ogre::LogManager* logMgr = OGRE_NEW Ogre::LogManager;
-    logMgr->createLog((mCfgMgr.getLogPath().string() + "/launcherOgre.log"), true, false, false);
-
     try
     {
-        mOgre = new Ogre::Root("", "", "./launcherOgre.log");
+        mOgre = mOgreInit.init(mCfgMgr.getLogPath().string() + "/launcherOgre.log");
     }
     catch(Ogre::Exception &ex)
     {
@@ -78,40 +71,6 @@ bool Launcher::GraphicsPage::setupOgre()
         qCritical("Error creating Ogre::Root, the error reported was:\n %s", qPrintable(ogreError));
         return false;
     }
-
-
-    std::string pluginDir;
-    const char* pluginEnv = getenv("OPENMW_OGRE_PLUGIN_DIR");
-    if (pluginEnv)
-        pluginDir = pluginEnv;
-    else
-    {
-#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
-        pluginDir = ".\\";
-#endif
-#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-        pluginDir = OGRE_PLUGIN_DIR;
-#endif
-#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
-        pluginDir = OGRE_PLUGIN_DIR_REL;
-#endif
-    }
-
-    QDir dir(QString::fromStdString(pluginDir));
-    pluginDir = dir.absolutePath().toStdString();
-
-    Files::loadOgrePlugin(pluginDir, "RenderSystem_GL", *mOgre);
-    Files::loadOgrePlugin(pluginDir, "RenderSystem_GL3Plus", *mOgre);
-    Files::loadOgrePlugin(pluginDir, "RenderSystem_Direct3D9", *mOgre);
-
-#ifdef ENABLE_PLUGIN_GL
-    mGLPlugin = new Ogre::GLPlugin();
-    mOgre->installPlugin(mGLPlugin);
-#endif
-#ifdef ENABLE_PLUGIN_Direct3D9
-    mD3D9Plugin = new Ogre::D3D9Plugin();
-    mOgre->installPlugin(mD3D9Plugin);
-#endif
 
     // Get the available renderers and put them in the combobox
     const Ogre::RenderSystemList &renderers = mOgre->getAvailableRenderers();
@@ -134,7 +93,7 @@ bool Launcher::GraphicsPage::setupOgre()
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(tr("<br><b>Could not select a valid render system</b><br><br> \
-                          Please make sure the plugins.cfg file exists and contains a valid rendering plugin.<br>"));
+                          Please make sure Ogre plugins were installed correctly.<br>"));
         msgBox.exec();
         return false;
     }

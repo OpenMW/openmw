@@ -23,7 +23,7 @@ namespace ContentSelectorModel
             FileProperty_Author         = 1,
             FileProperty_Format         = 2,
             FileProperty_DateModified   = 3,
-            FileProperty_Path           = 4,
+            FileProperty_FilePath       = 4,
             FileProperty_Description    = 5,
             FileProperty_GameFile       = 6
         };
@@ -41,7 +41,7 @@ namespace ContentSelectorModel
         void setSize(const int size);
         void setDate(const QDateTime &modified);
         void setFormat(const int format);
-        void setPath(const QString &path);
+        void setFilePath(const QString &path);
         void setGameFiles(const QStringList &gameFiles);
         void setDescription(const QString &description);
 
@@ -52,11 +52,12 @@ namespace ContentSelectorModel
         inline QString author() const               { return mAuthor; }
         inline QDateTime modified() const           { return mModified; }
         inline float format() const                 { return mFormat; }
-        inline QString path() const                 { return mPath; }
+        inline QString filePath() const                 { return mPath; }
         inline const QStringList &gameFiles() const { return mGameFiles; }
         inline QString description() const          { return mDescription; }
         inline QString toolTip() const              { return sToolTip.arg(mAuthor)
                                                              .arg(mFormat)
+                                                             .arg(mPath)
                                                              .arg(mDescription)
                                                              .arg(mGameFiles.join(", "));
                                                     }

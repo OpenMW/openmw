@@ -6,8 +6,9 @@
 int ContentSelectorModel::EsmFile::sPropertyCount = 7;
 QString ContentSelectorModel::EsmFile::sToolTip = QString("<b>Author:</b> %1<br/> \
                                               <b>Version:</b> %2<br/> \
-                                              <br/><b>Description:</b><br/>%3<br/> \
-                                              <br/><b>Dependencies: </b>%4<br/>");
+                                              <b>Path:</b><br/>%3<br/> \
+                                              <br/><b>Description:</b><br/>%4<br/> \
+                                              <br/><b>Dependencies: </b>%5<br/>");
 
 
 ContentSelectorModel::EsmFile::EsmFile(QString fileName, ModelItem *parent)
@@ -34,7 +35,7 @@ void ContentSelectorModel::EsmFile::setFormat(int format)
     mFormat = format;
 }
 
-void ContentSelectorModel::EsmFile::setPath(const QString &path)
+void ContentSelectorModel::EsmFile::setFilePath(const QString &path)
 {
     mPath = path;
 }
@@ -81,7 +82,7 @@ QVariant ContentSelectorModel::EsmFile::fileProperty(const FileProperty prop) co
         return mModified.toString(Qt::ISODate);
         break;
 
-    case FileProperty_Path:
+    case FileProperty_FilePath:
         return mPath;
         break;
 
@@ -118,7 +119,7 @@ void ContentSelectorModel::EsmFile::setFileProperty (const FileProperty prop, co
         mModified = QDateTime::fromString(value);
         break;
 
-    case FileProperty_Path:
+    case FileProperty_FilePath:
         mPath = value;
         break;
 

@@ -5,7 +5,6 @@
 #include <QCheckBox>
 #include <QMenu>
 #include <QSortFilterProxyModel>
-#include <QDebug>
 
 #include <components/files/configurationmanager.hpp>
 
@@ -37,20 +36,25 @@ Launcher::DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, GameSet
 
 void Launcher::DataFilesPage::loadSettings()
 {
+    QStringList paths = mGameSettings.getDataDirs();
+    paths.insert (0, mDataLocal);
+    PathIterator pathIterator (paths);
+
     QString profileName = ui.profilesComboBox->currentText();
 
-    QStringList files = mLauncherSettings.values(QString("Profiles/") + profileName + QString("/game"), Qt::MatchExactly);
-    QStringList addons = mLauncherSettings.values(QString("Profiles/") + profileName + QString("/addon"), Qt::MatchExactly);
+    QStringList files = mLauncherSettings.values(QString("Profiles/") + profileName, Qt::MatchExactly);
 
-    mSelector->clearCheckStates();
+    QStringList filepaths;
 
-    QString gameFile ("");
+    foreach (const QString &file, files)
+    {
+        QString filepath = pathIterator.findFirstPath (file);
 
-    if (files.size()>0)
-        gameFile = files.at (0);
+        if (!filepath.isEmpty())
+            filepaths << filepath;
+    }
 
-    mSelector->setGameFile(gameFile);
-    mSelector->setCheckStates(addons);
+    mSelector->setProfileContent (filepaths);
 }
 
 void Launcher::DataFilesPage::saveSettings(const QString &profile)
@@ -65,8 +69,7 @@ void Launcher::DataFilesPage::saveSettings(const QString &profile)
 
    removeProfile (profileName);
 
-    mGameSettings.remove(QString("game"));
-    mGameSettings.remove(QString("addon"));
+    mGameSettings.remove(QString("content"));
 
     //set the value of the current profile (not necessarily the profile being saved!)
     mLauncherSettings.setValue(QString("Profiles/currentprofile"), ui.profilesComboBox->currentText());
@@ -74,11 +77,11 @@ void Launcher::DataFilesPage::saveSettings(const QString &profile)
     foreach(const ContentSelectorModel::EsmFile *item, items) {
 
         if (item->gameFiles().size() == 0) {
-            mLauncherSettings.setMultiValue(QString("Profiles/") + profileName + QString("/game"), item->fileName());
-            mGameSettings.setMultiValue(QString("game"), item->fileName());
+            mLauncherSettings.setMultiValue(QString("Profiles/") + profileName, item->fileName());
+            mGameSettings.setMultiValue(QString("content"), item->fileName());
         } else {
-            mLauncherSettings.setMultiValue(QString("Profiles/") + profileName + QString("/addon"), item->fileName());
-            mGameSettings.setMultiValue(QString("addon"), item->fileName());
+            mLauncherSettings.setMultiValue(QString("Profiles/") + profileName, item->fileName());
+            mGameSettings.setMultiValue(QString("content"), item->fileName());
         }
     }
 
@@ -147,7 +150,7 @@ void Launcher::DataFilesPage::setProfile (const QString &previous, const QString
     if (!previous.isEmpty() && savePrevious)
         saveSettings (previous);
 
-    ui.profilesComboBox->setCurrentIndex (ui.profilesComboBox->findText (current));
+    ui.profilesComboBox->setCurrentProfile (ui.profilesComboBox->findText (current));
 
     loadSettings();
 
@@ -191,18 +194,31 @@ void Launcher::DataFilesPage::setupDataFiles()
     foreach (const QString &path, paths)
         mSelector->addFiles(path);
 
-    QString dataLocal = mGameSettings.getDataLocal();
+    mDataLocal = mGameSettings.getDataLocal();
 
-    if (!dataLocal.isEmpty())
-        mSelector->addFiles(dataLocal);
+    if (!mDataLocal.isEmpty())
+        mSelector->addFiles(mDataLocal);
 
-    QStringList profiles = mLauncherSettings.subKeys(QString("Profiles/"));
-    QString profile = mLauncherSettings.value(QString("Profiles/currentprofile"));
+    QStringList profiles;
+    QString currentProfile = mLauncherSettings.getSettings().value("Profiles/currentprofile");
+
+    foreach (QString key, mLauncherSettings.getSettings().keys())
+    {
+        if (key.contains("Profiles/"))
+        {
+            QString profile = key.mid (9);
+            if (profile != "currentprofile")
+            {
+                if (!profiles.contains(profile))
+                    profiles << profile;
+            }
+        }
+    }
 
     foreach (const QString &item, profiles)
         addProfile (item, false);
 
-    addProfile (profile, true);
+    setProfile (ui.profilesComboBox->findText(currentProfile), false);
 
     loadSettings();
 }
@@ -258,6 +274,10 @@ void Launcher::DataFilesPage::on_deleteProfileAction_triggered()
 
     // Remove the profile from the combobox
     ui.profilesComboBox->removeItem (ui.profilesComboBox->findText (profile));
+
+    removeProfile(profile);
+
+    saveSettings();
 
     loadSettings();
 

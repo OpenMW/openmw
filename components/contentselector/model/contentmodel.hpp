@@ -44,10 +44,14 @@ namespace ContentSelectorModel
         QModelIndex indexFromItem(const EsmFile *item) const;
         const EsmFile *item(const QString &name) const;
 
+        bool isEnabled (QModelIndex index) const;
         bool isChecked(const QString &name) const;
-        void setCheckState(const QString &name, bool isChecked);
+        bool setCheckState(const QString &name, bool isChecked);
+        void setCheckStates (const QStringList &fileList, bool isChecked);
         ContentFileList checkedItems() const;
         void uncheckAll();
+
+        void refreshModel();
 
     private:
 
@@ -55,7 +59,6 @@ namespace ContentSelectorModel
         const EsmFile *item(int row) const;
         EsmFile *item(int row);
 
-        bool canBeChecked(const EsmFile *file) const;
         void sortFiles();
 
         ContentFileList mFiles;
@@ -68,7 +71,6 @@ namespace ContentSelectorModel
         QStringList mMimeTypes;
         int mColumnCount;
         Qt::ItemFlags mDragDropFlags;
-        Qt::ItemFlags mDefaultFlags;
         Qt::DropActions mDropActions;
     };
 }

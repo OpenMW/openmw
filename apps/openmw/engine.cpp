@@ -337,8 +337,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     mOgre->configure(
         mCfgMgr.getLogPath().string(),
         renderSystem,
-        Settings::Manager::getString("opengl rtt mode", "Video"),
-        false);
+        Settings::Manager::getString("opengl rtt mode", "Video"));
 
     // This has to be added BEFORE MyGUI is initialized, as it needs
     // to find core.xml here.
@@ -483,7 +482,8 @@ void OMW::Engine::go()
         MWBase::Environment::get().getWindowManager()->executeInConsole (mStartupScript);
 
     // Start the main rendering loop
-    mOgre->start();
+    while (!mEnvironment.getRequestExit())
+        Ogre::Root::getSingleton().renderOneFrame();
 
     // Save user settings
     settings.saveUser(settingspath);

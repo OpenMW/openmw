@@ -9,6 +9,7 @@
 #include <components/files/configurationmanager.hpp>
 
 #include <boost/version.hpp>
+
 /**
  * Workaround for problems with whitespaces in paths in older versions of Boost library
  */
@@ -169,7 +170,7 @@ bool Launcher::GameSettings::writeFile(QTextStream &stream)
     return true;
 }
 
-bool GameSettings::hasMaster()
+bool Launcher::GameSettings::hasMaster()
 {
   bool result = false;
   QStringList content = mSettings.values(QString("content"));

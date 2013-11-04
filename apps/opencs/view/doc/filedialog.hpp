@@ -4,32 +4,18 @@
 #include <QDialog>
 #include <QModelIndex>
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-#include "ui_filedialog.h"
-=======
 #include <boost/filesystem/path.hpp>
-
-#include "components/contentselector/view/contentselector.hpp"
-#include "ui_datafilespage.h"
+#include "adjusterwidget.hpp"
 
 #ifndef CS_QT_BOOST_FILESYSTEM_PATH_DECLARED
 #define CS_QT_BOOST_FILESYSTEM_PATH_DECLARED
 Q_DECLARE_METATYPE (boost::filesystem::path)
 #endif
 
-class QDialogButtonBox;
-class QSortFilterProxyModel;
-class QAbstractItemModel;
-class QPushButton;
-class QStringList;
-class QString;
-class QMenu;
-class QLabel;
->>>>>>> 3146af34d642a28b15b55f7eb9999d8ac50168a0
-=======
 #include "ui_filedialog.h"
->>>>>>> esxSelector
+
+#include "components/contentselector/view/contentselector.hpp"
+#include "ui_datafilespage.h"
 
 class DataFilesModel;
 class PluginsProxyModel;
@@ -47,30 +33,25 @@ namespace CSVDoc
     {
         Q_OBJECT
 
-    public:
-
-        enum DialogType
-        {
-            DialogType_New,
-            DialogType_Open
-        };
-
     private:
 
         ContentSelectorView::ContentSelector *mSelector;
         Ui::FileDialog ui;
-        DialogType mDialogType;
+        ContentAction mAction;
         FileWidget *mFileWidget;
+        AdjusterWidget *mAdjusterWidget;
 
     public:
 
         explicit FileDialog(QWidget *parent = 0);
-        void showDialog (DialogType dialogType);
+        void showDialog (ContentAction action);
 
         void addFiles (const QString &path);
 
         QString filename() const;
         QStringList selectedFilePaths();
+
+        void setLocalData (const boost::filesystem::path& localData);
 
     private:
 
@@ -79,13 +60,15 @@ namespace CSVDoc
 
     signals:
 
-        void openFiles();
-        void createNewFile ();
+        void signalOpenFiles (const boost::filesystem::path &path);
+        void signalCreateNewFile (const boost::filesystem::path &path);
 
         void signalUpdateAcceptButton (bool, int);
 
     private slots:
 
+        void slotNewFile();
+        void slotOpenFile();
         void slotUpdateAcceptButton (int);
         void slotUpdateAcceptButton (const QString &, bool);
 

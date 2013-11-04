@@ -7,38 +7,17 @@
 
 #include <string>
 
-// Static plugin headers
-#ifdef ENABLE_PLUGIN_CgProgramManager
-# include "OgreCgPlugin.h"
-#endif
-#ifdef ENABLE_PLUGIN_OctreeSceneManager
-# include "OgreOctreePlugin.h"
-#endif
-#ifdef ENABLE_PLUGIN_ParticleFX
-# include "OgreParticleFXPlugin.h"
-#endif
-#ifdef ENABLE_PLUGIN_GL
-# include "OgreGLPlugin.h"
-#endif
-#ifdef ENABLE_PLUGIN_Direct3D9
-# include "OgreD3D9Plugin.h"
-#endif
+#include <OgreTexture.h>
 
-#include "OgreTexture.h"
-#include <OgreWindowEventUtilities.h>
+#include <components/ogreinit/ogreinit.hpp>
 
-#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-#include <OgreRoot.h>
-#endif
 
 struct SDL_Window;
 struct SDL_Surface;
 
 namespace Ogre
 {
-#if OGRE_PLATFORM != OGRE_PLATFORM_APPLE
     class Root;
-#endif
     class RenderWindow;
     class SceneManager;
     class Camera;
@@ -61,17 +40,6 @@ namespace OEngine
             std::string icon;
         };
 
-#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-        class CustomRoot : public Ogre::Root {
-        public:
-            bool isQueuedEnd() const;
-
-            CustomRoot(const Ogre::String& pluginFileName = "plugins.cfg", 
-                    const Ogre::String& configFileName = "ogre.cfg", 
-                    const Ogre::String& logFileName = "Ogre.log");
-        };
-#endif
-
         class Fader;
 
         class WindowSizeListener
@@ -82,35 +50,16 @@ namespace OEngine
 
         class OgreRenderer
         {
-#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-            CustomRoot *mRoot;
-#else
             Ogre::Root *mRoot;
-#endif
             Ogre::RenderWindow *mWindow;
             SDL_Window *mSDLWindow;
             Ogre::SceneManager *mScene;
             Ogre::Camera *mCamera;
             Ogre::Viewport *mView;
-            #ifdef ENABLE_PLUGIN_CgProgramManager
-            Ogre::CgPlugin* mCgPlugin;
-            #endif
-            #ifdef ENABLE_PLUGIN_OctreeSceneManager
-            Ogre::OctreePlugin* mOctreePlugin;
-            #endif
-            #ifdef ENABLE_PLUGIN_ParticleFX
-            Ogre::ParticleFXPlugin* mParticleFXPlugin;
-            #endif
-            #ifdef ENABLE_PLUGIN_GL
-            Ogre::GLPlugin* mGLPlugin;
-            #endif
-            #ifdef ENABLE_PLUGIN_Direct3D9
-            Ogre::D3D9Plugin* mD3D9Plugin;
-            #endif
+
+            OgreInit::OgreInit mOgreInit;
+
             Fader* mFader;
-            std::vector<Ogre::ParticleEmitterFactory*> mEmitterFactories;
-            std::vector<Ogre::ParticleAffectorFactory*> mAffectorFactories;
-            bool logging;
 
             WindowSizeListener* mWindowListener;
 
@@ -123,23 +72,7 @@ namespace OEngine
             , mCamera(NULL)
             , mView(NULL)
             , mWindowListener(NULL)
-            #ifdef ENABLE_PLUGIN_CgProgramManager
-            , mCgPlugin(NULL)
-            #endif
-            #ifdef ENABLE_PLUGIN_OctreeSceneManager
-            , mOctreePlugin(NULL)
-            #endif
-            #ifdef ENABLE_PLUGIN_ParticleFX
-            , mParticleFXPlugin(NULL)
-            #endif
-            #ifdef ENABLE_PLUGIN_GL
-            , mGLPlugin(NULL)
-            #endif
-            #ifdef ENABLE_PLUGIN_Direct3D9
-            , mD3D9Plugin(NULL)
-            #endif
             , mFader(NULL)
-            , logging(false)
             {
             }
 
@@ -150,8 +83,7 @@ namespace OEngine
             void configure(
                 const std::string &logPath, // Path to directory where to store log files
                 const std::string &renderSystem,
-                const std::string &rttMode,
-                bool _logging);      // Enable or disable logging
+                const std::string &rttMode);      // Enable or disable logging
 
             /// Create a window with the given title
             void createWindow(const std::string &title, const WindowSettings& settings);
@@ -166,13 +98,6 @@ namespace OEngine
 
             /// Kill the renderer.
             void cleanup();
-
-            /// Start the main rendering loop
-            void start();
-
-            void loadPlugins();
-
-            void unloadPlugins();
 
             void update(float dt);
 

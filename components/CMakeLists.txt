@@ -19,7 +19,7 @@ add_component_dir (nif
     )
 
 add_component_dir (nifogre
-    ogrenifloader skeleton material mesh
+    ogrenifloader skeleton material mesh particles
     )
 
 add_component_dir (nifbullet
@@ -48,7 +48,7 @@ add_component_dir (misc
 
 add_component_dir (files
     linuxpath windowspath macospath fixedpath multidircollection collections fileops configurationmanager
-    filelibrary ogreplugin constrainedfiledatastream lowlevelfile
+    filelibrary constrainedfiledatastream lowlevelfile
     )
 
 add_component_dir (compiler

@@ -2,6 +2,7 @@
 #define CONTENTLOADER_HPP
 
 #include <iosfwd>
+#include <iostream>
 #include <boost/filesystem/path.hpp>
 
 #include "components/loadinglistener/loadinglistener.hpp"

@@ -5,6 +5,8 @@
 #include <QRegExp>
 #include <QMap>
 
+#include <QDebug>
+
 Launcher::LauncherSettings::LauncherSettings()
 {
 }
@@ -44,12 +46,9 @@ QStringList Launcher::LauncherSettings::subKeys(const QString &key)
     QStringList result;
 
     foreach (const QString &currentKey, keys) {
-
         if (keyRe.indexIn(currentKey) != -1) {
-
             QString prefixedKey = keyRe.cap(1);
             if(prefixedKey.startsWith(key)) {
-
                 QString subKey = prefixedKey.remove(key);
                 if (!subKey.isEmpty())
                     result.append(subKey);

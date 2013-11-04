@@ -5,16 +5,9 @@
 
 #include <OgreRoot.h>
 #include <OgreRenderSystem.h>
-//#include <OgreConfigFile.h>
-//#include <OgreConfigDialog.h>
 
-// Static plugin headers
-#ifdef ENABLE_PLUGIN_GL
-# include "OgreGLPlugin.h"
-#endif
-#ifdef ENABLE_PLUGIN_Direct3D9
-# include "OgreD3D9Plugin.h"
-#endif
+#include <components/ogreinit/ogreinit.hpp>
+
 
 #include "ui_graphicspage.h"
 
@@ -66,4 +59,5 @@ namespace Launcher
         bool setupSDL();
     };
 }
+>>>>>>> 468e8e3635d6532fb334d17cabd5b7bf52a5ecc1
 #endif

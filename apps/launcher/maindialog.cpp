@@ -496,12 +496,12 @@ bool Launcher::MainDialog::setupGameSettings()
 
         QAbstractButton *dirSelectButton =
                 msgBox.addButton(QObject::tr("Browse to &Install..."), QMessageBox::ActionRole);
-        
+
         #ifndef WIN32
-            QAbstractButton *cdSelectButton = 
+            QAbstractButton *cdSelectButton =
                     msgBox.addButton(QObject::tr("Browse to &CD..."), QMessageBox::ActionRole);
         #endif
-        
+
 
          msgBox.exec();
 
@@ -516,14 +516,14 @@ bool Launcher::MainDialog::setupGameSettings()
         #ifndef WIN32
         else if(msgBox.clickedButton() == cdSelectButton) {
             UnshieldThread cd;
-                
+
             {
                 TextSlotMsgBox cdbox;
-                cdbox.setStandardButtons(QMessageBox::Cancel); 
+                cdbox.setStandardButtons(QMessageBox::Cancel);
 
                 QObject::connect(&cd,SIGNAL(signalGUI(const QString&)), &cdbox, SLOT(setTextSlot(const QString&)));
                 QObject::connect(&cd,SIGNAL(close()), &cdbox, SLOT(reject()));
-     
+
                 cd.SetMorrowindPath(
                     QFileDialog::getOpenFileName(
                         NULL,
@@ -537,11 +537,11 @@ bool Launcher::MainDialog::setupGameSettings()
                         QObject::tr("Select where to extract files to"),
                         QDir::currentPath(),
                         QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks).toUtf8().constData());
-                
+
                 cd.start();
                 cdbox.exec();
             }
-            
+
             while(expansions(cd));
 
             selectedFile = QString::fromStdString(cd.GetMWEsmPath());
@@ -753,11 +753,11 @@ void Launcher::MainDialog::play()
 
     if(!mGameSettings.hasMaster()) {
             QMessageBox msgBox;
-            msgBox.setWindowTitle(tr("No master file selected"));
+            msgBox.setWindowTitle(tr("No game file selected"));
             msgBox.setIcon(QMessageBox::Warning);
             msgBox.setStandardButtons(QMessageBox::Ok);
-            msgBox.setText(tr("<br><b>You do not have any master files selected.</b><br><br> \
-                              OpenMW will not start without a master file selected.<br>"));
+            msgBox.setText(tr("<br><b>You do not have no game file selected.</b><br><br> \
+                              OpenMW will not start without a game file selected.<br>"));
             msgBox.exec();
             return;
     }

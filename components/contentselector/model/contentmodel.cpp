@@ -3,8 +3,9 @@
 
 #include <QDir>
 #include <QTextCodec>
-#include <components/esm/esmreader.hpp>
 #include <QDebug>
+
+#include "components/esm/esmreader.hpp"
 
 ContentSelectorModel::ContentModel::ContentModel(QObject *parent) :
     QAbstractTableModel(parent),
@@ -12,7 +13,6 @@ ContentSelectorModel::ContentModel::ContentModel(QObject *parent) :
     mMimeTypes (QStringList() << mMimeType),
     mColumnCount (1),
     mDragDropFlags (Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled),
-    mDefaultFlags (Qt::ItemIsDropEnabled | Qt::ItemIsSelectable),
     mDropActions (Qt::CopyAction | Qt::MoveAction)
 {
     setEncoding ("win1252");
@@ -67,9 +67,14 @@ ContentSelectorModel::EsmFile *ContentSelectorModel::ContentModel::item(int row)
 }
 const ContentSelectorModel::EsmFile *ContentSelectorModel::ContentModel::item(const QString &name) const
 {
+    EsmFile::FileProperty fp = EsmFile::FileProperty_FileName;
+
+    if (name.contains ('/'))
+        fp = EsmFile::FileProperty_FilePath;
+
     foreach (const EsmFile *file, mFiles)
     {
-        if (name == file->fileName())
+        if (name == file->fileProperty (fp).toString())
             return file;
     }
     return 0;
@@ -96,10 +101,53 @@ Qt::ItemFlags ContentSelectorModel::ContentModel::flags(const QModelIndex &index
     if (!file)
         return Qt::NoItemFlags;
 
-    if (canBeChecked(file))
-        return Qt::ItemIsEnabled | mDragDropFlags | mDefaultFlags;
+    //game files can always be checked
+    if (file->isGameFile())
+        return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 
-    return Qt::NoItemFlags;
+    Qt::ItemFlags returnFlags;
+    bool allDependenciesFound = true;
+    bool gamefileChecked = false;
+
+    //addon can be checked if its gamefile is and all other dependencies exist
+    foreach (const QString &fileName, file->gameFiles())
+    {
+        bool depFound = false;
+        foreach (EsmFile *dependency, mFiles)
+        {
+            //compare filenames only.  Multiple instances
+            //of the filename (with different paths) is not relevant here.
+            depFound = (dependency->fileName() == fileName);
+
+            if (!depFound)
+                continue;
+
+            if (!gamefileChecked)
+            {
+                if (isChecked (dependency->filePath()))
+                    gamefileChecked = (dependency->isGameFile());
+            }
+
+            // force it to iterate all files in cases where the current
+            // dependency is a game file to ensure that a later duplicate
+            // game file is / is not checked.
+            // (i.e., break only if it's not a gamefile or the game file has been checked previously)
+            if (gamefileChecked || !(dependency->isGameFile()))
+                break;
+        }
+
+        allDependenciesFound = allDependenciesFound && depFound;
+    }
+
+    if (gamefileChecked)
+    {
+        if (allDependenciesFound)
+            returnFlags = returnFlags | Qt::ItemIsEnabled | Qt::ItemIsSelectable | mDragDropFlags;
+        else
+            returnFlags = Qt::ItemIsSelectable;
+    }
+
+    return returnFlags;
 }
 
 QVariant ContentSelectorModel::ContentModel::data(const QModelIndex &index, int role) const
@@ -158,7 +206,7 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex &index, int 
     case Qt::CheckStateRole:
     {
         if (!file->isGameFile())
-            return isChecked(file->fileName());
+            return isChecked(file->filePath());
         break;
     }
 
@@ -167,14 +215,14 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex &index, int 
         if (file->isGameFile())
             return ContentType_GameFile;
         else
-            if (flags(index) & mDefaultFlags)
+            if (flags(index))
                 return ContentType_Addon;
 
         break;
     }
 
     case Qt::UserRole + 1:
-        return isChecked(file->fileName());
+        return isChecked(file->filePath());
         break;
     }
     return QVariant();
@@ -186,7 +234,7 @@ bool ContentSelectorModel::ContentModel::setData(const QModelIndex &index, const
         return false;
 
     EsmFile *file = item(index.row());
-    QString fileName = file->fileName();
+    QString fileName = file->filePath();
     bool success = false;
 
     switch(role)
@@ -209,19 +257,13 @@ bool ContentSelectorModel::ContentModel::setData(const QModelIndex &index, const
 
         case Qt::UserRole+1:
         {
-            setCheckState(fileName, value.toBool());
+            success = (flags (index) & Qt::ItemIsEnabled);
 
-            emit dataChanged(index, index);
-
-            foreach (EsmFile *file, mFiles)
+            if (success)
             {
-                if (file->gameFiles().contains(fileName))
-                {
-                    QModelIndex idx = indexFromItem(file);
-                    emit dataChanged(idx, idx);
-                }
+                success = setCheckState(fileName, value.toBool());
+                emit dataChanged(index, index);
             }
-            success = true;
         }
         break;
 
@@ -371,29 +413,6 @@ bool ContentSelectorModel::ContentModel::dropMimeData(const QMimeData *data, Qt:
     return true;
 }
 
-bool ContentSelectorModel::ContentModel::canBeChecked(const EsmFile *file) const
-{
-    //game files can always be checked
-    if (file->isGameFile())
-        return true;
-
-    //addon can be checked if its gamefile is
-    foreach (const QString &fileName, file->gameFiles())
-    {
-        const EsmFile *dependency = item(fileName);
-
-        if (!dependency)
-            continue;
-
-        if (dependency->isGameFile())
-        {
-            if (isChecked(fileName))
-                return true;
-        }
-    }
-    return false;
-}
-
 void ContentSelectorModel::ContentModel::addFile(EsmFile *file)
 {
     beginInsertRows(QModelIndex(), mFiles.count(), mFiles.count());
@@ -435,12 +454,12 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
             file->setAuthor     (decoder->toUnicode(fileReader.getAuthor().c_str()));
             file->setDate       (info.lastModified());
             file->setFormat     (fileReader.getFormat());
-            file->setPath       (info.absoluteFilePath());
+            file->setFilePath       (info.absoluteFilePath());
             file->setDescription(decoder->toUnicode(fileReader.getDesc().c_str()));
 
 
             // Put the file in the table
-            if (item(path) == 0)
+            if (item(file->filePath()) == 0)
                 addFile(file);
 
         } catch(std::runtime_error &e) {
@@ -501,10 +520,33 @@ bool ContentSelectorModel::ContentModel::isChecked(const QString& name) const
     return false;
 }
 
-void ContentSelectorModel::ContentModel::setCheckState(const QString &name, bool checkState)
+bool ContentSelectorModel::ContentModel::isEnabled (QModelIndex index) const
+{
+    return (flags(index) & Qt::ItemIsEnabled);
+}
+
+void ContentSelectorModel::ContentModel::setCheckStates (const QStringList &fileList, bool isChecked)
+{
+    foreach (const QString &file, fileList)
+    {
+        setCheckState (file, isChecked);
+    }
+}
+
+void ContentSelectorModel::ContentModel::refreshModel()
+{
+    emit dataChanged (index(0,0), index(rowCount()-1,0));
+}
+
+bool ContentSelectorModel::ContentModel::setCheckState(const QString &name, bool checkState)
 {
     if (name.isEmpty())
-        return;
+        return false;
+
+    const EsmFile *file = item(name);
+
+    if (!file)
+        return false;
 
     Qt::CheckState state = Qt::Unchecked;
 
@@ -514,23 +556,21 @@ void ContentSelectorModel::ContentModel::setCheckState(const QString &name, bool
     mCheckStates[name] = state;
     emit dataChanged(indexFromItem(item(name)), indexFromItem(item(name)));
 
-    const EsmFile *file = item(name);
-
     if (file->isGameFile())
-        emit dataChanged (index(0,0), index(rowCount()-1,0));
+        refreshModel();
 
     //if we're checking an item, ensure all "upstream" files (dependencies) are checked as well.
     if (state == Qt::Checked)
     {
-        foreach (const QString &upstreamName, file->gameFiles())
+        foreach (QString upstreamName, file->gameFiles())
         {
             const EsmFile *upstreamFile = item(upstreamName);
 
             if (!upstreamFile)
                 continue;
 
-            if (!isChecked(upstreamName))
-                mCheckStates[upstreamName] = Qt::Checked;
+            if (!isChecked(upstreamFile->filePath()))
+                mCheckStates[upstreamFile->filePath()] = Qt::Checked;
 
             emit dataChanged(indexFromItem(upstreamFile), indexFromItem(upstreamFile));
 
@@ -543,32 +583,27 @@ void ContentSelectorModel::ContentModel::setCheckState(const QString &name, bool
         {
             if (downstreamFile->gameFiles().contains(name))
             {
-                if (mCheckStates.contains(downstreamFile->fileName()))
-                    mCheckStates[downstreamFile->fileName()] = Qt::Unchecked;
+                if (mCheckStates.contains(downstreamFile->filePath()))
+                    mCheckStates[downstreamFile->filePath()] = Qt::Unchecked;
 
                 emit dataChanged(indexFromItem(downstreamFile), indexFromItem(downstreamFile));
             }
         }
     }
+
+    return true;
 }
 
 ContentSelectorModel::ContentFileList ContentSelectorModel::ContentModel::checkedItems() const
 {
     ContentFileList list;
 
+    // TODO:
     // First search for game files and next addons,
     // so we get more or less correct game files vs addons order.
     foreach (EsmFile *file, mFiles)
-    {
-        if (isChecked(file->fileName()) && file->isGameFile())
+        if (isChecked(file->filePath()))
             list << file;
-    }
-
-    foreach (EsmFile *file, mFiles)
-    {
-        if (isChecked(file->fileName()) && !file->isGameFile())
-            list << file;
-    }
 
     return list;
 }

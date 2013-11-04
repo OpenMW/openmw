@@ -177,7 +177,6 @@ namespace MWInput
         void activate();
         void toggleWalking();
         void toggleAutoMove();
-        void exitNow();
         void rest();
 
         void quickKey (int index);
@@ -194,7 +193,7 @@ namespace MWInput
 
             A_GameMenu,
 
-            A_Quit,           // Exit the program
+            A_Unused,
 
             A_Screenshot,     // Take a screenshot
 
