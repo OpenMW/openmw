@@ -9,6 +9,7 @@
 #include <components/files/configurationmanager.hpp>
 
 #include <boost/version.hpp>
+
 /**
  * Workaround for problems with whitespaces in paths in older versions of Boost library
  */

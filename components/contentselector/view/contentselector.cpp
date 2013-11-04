@@ -12,8 +12,6 @@
 #include <QModelIndex>
 #include <assert.h>
 
-#include <QDebug>
-
 ContentSelectorView::ContentSelector::ContentSelector(QWidget *parent) :
     QObject(parent)
 {
@@ -63,6 +61,35 @@ void ContentSelectorView::ContentSelector::buildAddonView()
     connect(ui.addonView, SIGNAL(clicked(const QModelIndex &)), this, SLOT(slotAddonTableItemClicked(const QModelIndex &)));
 }
 
+void ContentSelectorView::ContentSelector::setProfileContent(const QStringList &fileList)
+{
+    clearCheckStates();
+    bool foundGamefile = false;
+
+    foreach (const QString &filepath, fileList)
+    {
+        if (!foundGamefile)
+        {
+            const ContentSelectorModel::EsmFile *file = mContentModel->item(filepath);
+
+            foundGamefile = (file->isGameFile());
+
+            if (foundGamefile)
+            {
+                setGameFile (filepath);
+                break;
+            }
+        }
+    }
+
+/*        if (!foundGameFile)
+        {
+            //throw gamefile error here.
+        }*/
+
+    setCheckStates (fileList);
+}
+
 void ContentSelectorView::ContentSelector::setGameFile(const QString &filename)
 {
     int index = -1;
@@ -92,7 +119,6 @@ void ContentSelectorView::ContentSelector::setCheckStates(const QStringList &lis
 {
     if (list.isEmpty())
     {
-        qDebug() << "refreshing model";
         slotCurrentGameFileIndexChanged (ui.gameFileView->currentIndex());
     }
     else
