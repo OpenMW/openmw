@@ -49,9 +49,9 @@ License:
  warranty, liability or support of any kind.
  
 Files: cmake/COPYING-CMAKE-SCRIPTS
-cmake/FindFFmpeg.cmake
-cmake/FindBullet.cmake
-cmake/FindMyGUI.cmake
+ cmake/FindFFmpeg.cmake
+ cmake/FindBullet.cmake
+ cmake/FindMyGUI.cmake
 Copyright: *No copyright*
 License: BSD-3-clause
 
