@@ -14,6 +14,7 @@
 #include "../tools/tools.hpp"
 
 #include "state.hpp"
+#include "saving.hpp"
 
 class QAbstractItemModel;
 
@@ -21,6 +22,11 @@ namespace ESM
 {
     struct GameSetting;
     struct Global;
+}
+
+namespace Files
+{
+    class ConfigurationManager;
 }
 
 namespace CSMDoc
@@ -32,15 +38,16 @@ namespace CSMDoc
         private:
 
             boost::filesystem::path mSavePath;
+            std::vector<boost::filesystem::path> mContentFiles;
             CSMWorld::Data mData;
             CSMTools::Tools mTools;
+            boost::filesystem::path mProjectPath;
+            Saving mSaving;
+            boost::filesystem::path mResDir;
 
             // It is important that the undo stack is declared last, because on desctruction it fires a signal, that is connected to a slot, that is
             // using other member variables.  Unfortunately this connection is cut only in the QObject destructor, which is way too late.
             QUndoStack mUndoStack;
-
-            int mSaveCount; ///< dummy implementation -> remove when proper save is implemented.
-            QTimer mSaveTimer; ///< dummy implementation -> remove when proper save is implemented.
 
             // not implemented
             Document (const Document&);
@@ -64,8 +71,7 @@ namespace CSMDoc
 
         public:
 
-            Document (const std::vector<boost::filesystem::path>& files,
-                const boost::filesystem::path& savePath, bool new_);
+            Document (const Files::ConfigurationManager& configuration, const std::vector< boost::filesystem::path >& files, const boost::filesystem::path& savePath, const boost::filesystem::path& resDir, bool new_);
 
             ~Document();
 
@@ -74,6 +80,10 @@ namespace CSMDoc
             int getState() const;
 
             const boost::filesystem::path& getSavePath() const;
+
+            const std::vector<boost::filesystem::path>& getContentFiles() const;
+            ///< \attention The last element in this collection is the file that is being edited,
+            /// but with its original path instead of the save path.
 
             void save();
 
@@ -98,10 +108,9 @@ namespace CSMDoc
 
             void modificationStateChanged (bool clean);
 
-            void operationDone (int type);
+            void reportMessage (const QString& message, int type);
 
-            void saving();
-            ///< dummy implementation -> remove when proper save is implemented.
+            void operationDone (int type);
 
         public slots:
 
@@ -110,3 +119,4 @@ namespace CSMDoc
 }
 
 #endif
+

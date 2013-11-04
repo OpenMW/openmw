@@ -1,10 +1,10 @@
-#ifndef CSM_TOOLS_STAGE_H
-#define CSM_TOOLS_STAGE_H
+#ifndef CSM_DOC_STAGE_H
+#define CSM_DOC_STAGE_H
 
 #include <vector>
 #include <string>
 
-namespace CSMTools
+namespace CSMDoc
 {
     class Stage
     {
@@ -16,7 +16,7 @@ namespace CSMTools
             ///< \return number of steps
 
             virtual void perform (int stage, std::vector<std::string>& messages) = 0;
-            ///< Messages resulting from this tage will be appended to \a messages.
+            ///< Messages resulting from this stage will be appended to \a messages.
     };
 }
 

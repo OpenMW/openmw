@@ -87,19 +87,33 @@ std::vector<std::string> CSVWorld::Table::listDeletableSelectedIds() const
         {
             QModelIndex index = mProxyModel->mapToSource (mProxyModel->index (iter->row(), 0));
 
+            // check record state
             CSMWorld::RecordBase::State state =
                 static_cast<CSMWorld::RecordBase::State> (
                 mModel->data (mModel->index (index.row(), 1)).toInt());
 
-            if (state!=CSMWorld::RecordBase::State_Deleted)
+            if (state==CSMWorld::RecordBase::State_Deleted)
+                continue;
+
+            // check other columns (only relevant for a subset of the tables)
+            int dialogueTypeIndex =
+                mModel->searchColumnIndex (CSMWorld::Columns::ColumnId_DialogueType);
+
+            if (dialogueTypeIndex!=-1)
             {
-                int columnIndex = mModel->findColumnIndex (CSMWorld::Columns::ColumnId_Id);
+                int type = mModel->data (mModel->index (index.row(), dialogueTypeIndex)).toInt();
 
-                std::string id = mModel->data (mModel->index (index.row(), columnIndex)).
-                    toString().toUtf8().constData();
-
-                deletableIds.push_back (id);
+                if (type!=ESM::Dialogue::Topic && type!=ESM::Dialogue::Journal)
+                    continue;
             }
+
+            // add the id to the collection
+            int columnIndex = mModel->findColumnIndex (CSMWorld::Columns::ColumnId_Id);
+
+            std::string id = mModel->data (mModel->index (index.row(), columnIndex)).
+                toString().toUtf8().constData();
+
+            deletableIds.push_back (id);
         }
     }
 

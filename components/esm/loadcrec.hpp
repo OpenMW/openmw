@@ -17,6 +17,8 @@ class ESMWriter;
 /// Changes a creature
 struct LoadCREC
 {
+    static unsigned int sRecordId;
+
     std::string mId;
 
     void load(ESMReader &esm)
@@ -24,7 +26,7 @@ struct LoadCREC
       esm.skipRecord();
     }
 
-    void save(ESMWriter &esm)
+    void save(ESMWriter &esm) const
     {
     }
 };
@@ -39,7 +41,7 @@ struct LoadCNTC
       esm.skipRecord();
     }
 
-    void save(ESMWriter &esm)
+    void save(ESMWriter &esm) const
     {
     }
 };

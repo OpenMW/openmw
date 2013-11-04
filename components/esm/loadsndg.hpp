@@ -15,6 +15,8 @@ class ESMWriter;
 
 struct SoundGenerator
 {
+    static unsigned int sRecordId;
+
     enum Type
     {
         LeftFoot = 0,
@@ -33,7 +35,7 @@ struct SoundGenerator
     std::string mId, mCreature, mSound;
 
     void load(ESMReader &esm);
-    void save(ESMWriter &esm);
+    void save(ESMWriter &esm) const;
 };
 }
 #endif

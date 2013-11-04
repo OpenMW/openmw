@@ -1,11 +1,11 @@
-#ifndef CSM_TOOLS_OPERATION_H
-#define CSM_TOOLS_OPERATION_H
+#ifndef CSM_DOC_OPERATION_H
+#define CSM_DOC_OPERATION_H
 
 #include <vector>
 
 #include <QThread>
 
-namespace CSMTools
+namespace CSMDoc
 {
     class Stage;
 
@@ -19,12 +19,17 @@ namespace CSMTools
             int mCurrentStep;
             int mCurrentStepTotal;
             int mTotalSteps;
+            int mOrdered;
+            bool mFinalAlways;
+            bool mError;
 
             void prepareStages();
 
         public:
 
-            Operation (int type);
+            Operation (int type, bool ordered, bool finalAlways = false);
+            ///< \param ordered Stages must be executed in the given order.
+            /// \param finalAlways Execute last stage even if an error occurred during earlier stages.
 
             virtual ~Operation();
 
@@ -35,11 +40,15 @@ namespace CSMTools
             ///
             /// \attention Do no call this function while this Operation is running.
 
+            bool hasError() const;
+
         signals:
 
             void progress (int current, int max, int type);
 
             void reportMessage (const QString& message, int type);
+
+            void done (int type);
 
         public slots:
 
@@ -47,7 +56,9 @@ namespace CSMTools
 
         private slots:
 
-            void verify();
+            void executeStage();
+
+            void operationDone();
     };
 }
 

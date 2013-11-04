@@ -27,11 +27,13 @@ class ESMWriter;
 
 struct LandTexture
 {
+    static unsigned int sRecordId;
+
     std::string mId, mTexture;
     int mIndex;
 
     void load(ESMReader &esm);
-    void save(ESMWriter &esm);
+    void save(ESMWriter &esm) const;
 };
 }
 #endif

@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
     // Support non-latin characters
     QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
 
-    MainDialog mainWin;
+    Launcher::MainDialog mainWin;
 
     if (mainWin.setup()) {
         mainWin.show();
@@ -59,4 +59,3 @@ int main(int argc, char *argv[])
     SDL_Quit();
     return returnValue;
 }
-

@@ -11,6 +11,8 @@ class ESMWriter;
 
 struct Probe
 {
+    static unsigned int sRecordId;
+
     struct Data
     {
         float mWeight;
@@ -24,7 +26,7 @@ struct Probe
     std::string mId, mName, mModel, mIcon, mScript;
 
     void load(ESMReader &esm);
-    void save(ESMWriter &esm);
+    void save(ESMWriter &esm) const;
 
     void blank();
     ///< Set record to default state (does not touch the ID).

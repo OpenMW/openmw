@@ -14,7 +14,7 @@
 
 #include <components/files/configurationmanager.hpp>
 
-#include <components/fileorderlist/utils/naturalsort.hpp>
+#include <components/contentselector/model/naturalsort.hpp>
 
 #include "settings/graphicssettings.hpp"
 
@@ -30,11 +30,12 @@ QString getAspect(int x, int y)
     return QString(QString::number(xaspect) + ":" + QString::number(yaspect));
 }
 
-GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, GraphicsSettings &graphicsSetting, QWidget *parent)
+Launcher::GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, GraphicsSettings &graphicsSetting, QWidget *parent)
     : mCfgMgr(cfg)
     , mGraphicsSettings(graphicsSetting)
     , QWidget(parent)
 {
+    setObjectName ("GraphicsPage");
     setupUi(this);
 
     // Set the maximum res we can set in windowed mode
@@ -49,7 +50,7 @@ GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, GraphicsSettings &g
 
 }
 
-bool GraphicsPage::setupOgre()
+bool Launcher::GraphicsPage::setupOgre()
 {
     try
     {
@@ -115,7 +116,7 @@ bool GraphicsPage::setupOgre()
     return true;
 }
 
-bool GraphicsPage::setupSDL()
+bool Launcher::GraphicsPage::setupSDL()
 {
     int displays = SDL_GetNumVideoDisplays();
 
@@ -138,7 +139,7 @@ bool GraphicsPage::setupSDL()
     return true;
 }
 
-bool GraphicsPage::loadSettings()
+bool Launcher::GraphicsPage::loadSettings()
 {
     if (!setupSDL())
         return false;
@@ -177,7 +178,7 @@ bool GraphicsPage::loadSettings()
     return true;
 }
 
-void GraphicsPage::saveSettings()
+void Launcher::GraphicsPage::saveSettings()
 {
     vSyncCheckBox->checkState() ? mGraphicsSettings.setValue(QString("Video/vsync"), QString("true"))
                                  : mGraphicsSettings.setValue(QString("Video/vsync"), QString("false"));
@@ -204,7 +205,7 @@ void GraphicsPage::saveSettings()
     mGraphicsSettings.setValue(QString("Video/screen"), QString::number(screenComboBox->currentIndex()));
 }
 
-QStringList GraphicsPage::getAvailableOptions(const QString &key, Ogre::RenderSystem *renderer)
+QStringList Launcher::GraphicsPage::getAvailableOptions(const QString &key, Ogre::RenderSystem *renderer)
 {
     QStringList result;
 
@@ -237,7 +238,7 @@ QStringList GraphicsPage::getAvailableOptions(const QString &key, Ogre::RenderSy
     return result;
 }
 
-QStringList GraphicsPage::getAvailableResolutions(int screen)
+QStringList Launcher::GraphicsPage::getAvailableResolutions(int screen)
 {
     QStringList result;
     SDL_DisplayMode mode;
@@ -284,7 +285,7 @@ QStringList GraphicsPage::getAvailableResolutions(int screen)
     return result;
 }
 
-QRect GraphicsPage::getMaximumResolution()
+QRect Launcher::GraphicsPage::getMaximumResolution()
 {
     QRect max;
     int screens = QApplication::desktop()->screenCount();
@@ -299,7 +300,7 @@ QRect GraphicsPage::getMaximumResolution()
     return max;
 }
 
-void GraphicsPage::rendererChanged(const QString &renderer)
+void Launcher::GraphicsPage::rendererChanged(const QString &renderer)
 {
     mSelectedRenderSystem = mOgre->getRenderSystemByName(renderer.toStdString());
 
@@ -308,7 +309,7 @@ void GraphicsPage::rendererChanged(const QString &renderer)
     antiAliasingComboBox->addItems(getAvailableOptions(QString("FSAA"), mSelectedRenderSystem));
 }
 
-void GraphicsPage::screenChanged(int screen)
+void Launcher::GraphicsPage::screenChanged(int screen)
 {
     if (screen >= 0) {
         resolutionComboBox->clear();
@@ -316,7 +317,7 @@ void GraphicsPage::screenChanged(int screen)
     }
 }
 
-void GraphicsPage::slotFullScreenChanged(int state)
+void Launcher::GraphicsPage::slotFullScreenChanged(int state)
 {
     if (state == Qt::Checked) {
         standardRadioButton->toggle();
@@ -330,7 +331,7 @@ void GraphicsPage::slotFullScreenChanged(int state)
     }
 }
 
-void GraphicsPage::slotStandardToggled(bool checked)
+void Launcher::GraphicsPage::slotStandardToggled(bool checked)
 {
     if (checked) {
         resolutionComboBox->setEnabled(true);

@@ -11,46 +11,53 @@
 
 #include "ui_graphicspage.h"
 
-class GraphicsSettings;
 
 namespace Files { struct ConfigurationManager; }
 
-class GraphicsPage : public QWidget, private Ui::GraphicsPage
+namespace Launcher
 {
-    Q_OBJECT
+    class GraphicsSettings;
 
-public:
-    GraphicsPage(Files::ConfigurationManager &cfg, GraphicsSettings &graphicsSettings, QWidget *parent = 0);
+    class GraphicsPage : public QWidget, private Ui::GraphicsPage
+    {
+        Q_OBJECT
 
-    void saveSettings();
-    bool loadSettings();
+    public:
+        GraphicsPage(Files::ConfigurationManager &cfg, GraphicsSettings &graphicsSettings, QWidget *parent = 0);
 
-public slots:
-    void rendererChanged(const QString &renderer);
-    void screenChanged(int screen);
+        void saveSettings();
+        bool loadSettings();
 
-private slots:
-    void slotFullScreenChanged(int state);
-    void slotStandardToggled(bool checked);
+    public slots:
+        void rendererChanged(const QString &renderer);
+        void screenChanged(int screen);
 
-private:
-    OgreInit::OgreInit mOgreInit;
+    private slots:
+        void slotFullScreenChanged(int state);
+        void slotStandardToggled(bool checked);
 
-    Ogre::Root *mOgre;
-    Ogre::RenderSystem *mSelectedRenderSystem;
-    Ogre::RenderSystem *mOpenGLRenderSystem;
-    Ogre::RenderSystem *mDirect3DRenderSystem;
+    private:
+        Ogre::Root *mOgre;
+        Ogre::RenderSystem *mSelectedRenderSystem;
+        Ogre::RenderSystem *mOpenGLRenderSystem;
+        Ogre::RenderSystem *mDirect3DRenderSystem;
+        #ifdef ENABLE_PLUGIN_GL
+        Ogre::GLPlugin* mGLPlugin;
+        #endif
+        #ifdef ENABLE_PLUGIN_Direct3D9
+        Ogre::D3D9Plugin* mD3D9Plugin;
+        #endif
 
+        Files::ConfigurationManager &mCfgMgr;
+        GraphicsSettings &mGraphicsSettings;
 
-    Files::ConfigurationManager &mCfgMgr;
-    GraphicsSettings &mGraphicsSettings;
+        QStringList getAvailableOptions(const QString &key, Ogre::RenderSystem *renderer);
+        QStringList getAvailableResolutions(int screen);
+        QRect getMaximumResolution();
 
-    QStringList getAvailableOptions(const QString &key, Ogre::RenderSystem *renderer);
-    QStringList getAvailableResolutions(int screen);
-    QRect getMaximumResolution();
-
-    bool setupOgre();
-    bool setupSDL();
-};
-
+        bool setupOgre();
+        bool setupSDL();
+    };
+}
+>>>>>>> 468e8e3635d6532fb334d17cabd5b7bf52a5ecc1
 #endif

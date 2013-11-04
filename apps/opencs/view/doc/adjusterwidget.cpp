@@ -11,7 +11,7 @@
 #include <QStyle>
 
 CSVDoc::AdjusterWidget::AdjusterWidget (QWidget *parent)
-: QWidget (parent), mValid (false)
+    : QWidget (parent), mValid (false), mAction (ContentAction_Undefined)
 {
     QHBoxLayout *layout = new QHBoxLayout (this);
 
@@ -30,6 +30,11 @@ CSVDoc::AdjusterWidget::AdjusterWidget (QWidget *parent)
     setLayout (layout);
 }
 
+void CSVDoc::AdjusterWidget::setAction (ContentAction action)
+{
+    mAction = action;
+}
+
 void CSVDoc::AdjusterWidget::setLocalData (const boost::filesystem::path& localData)
 {
     mLocalData = localData;
@@ -43,41 +48,60 @@ boost::filesystem::path CSVDoc::AdjusterWidget::getPath() const
     return mResultPath;
 }
 
+bool CSVDoc::AdjusterWidget::isValid() const
+{
+    return mValid;
+}
+
+void CSVDoc::AdjusterWidget::setFilenameCheck (bool doCheck)
+{
+    mDoFilenameCheck = doCheck;
+}
+
 void CSVDoc::AdjusterWidget::setName (const QString& name, bool addon)
 {
     QString message;
 
-    if (name.isEmpty())
+    mValid = (!name.isEmpty());
+
+    if (!mValid)
     {
-        mValid = false;
         message = "No name.";
     }
     else
     {
         boost::filesystem::path path (name.toUtf8().data());
 
-        path.replace_extension (addon ? ".omwaddon" : ".omwgame");
+        bool isLegacyPath = (path.extension() == ".esm" ||
+                             path.extension() == ".esp");
 
-        if (path.parent_path().string()==mLocalData.string())
+        bool isFilePathChanged = (path.parent_path().string() != mLocalData.string());
+
+        if (isLegacyPath)
+            path.replace_extension (addon ? ".omwaddon" : ".omwgame");
+
+        //if the file came from data-local and is not a legacy file to be converted,
+        //don't worry about doing a file check.
+        if (!isFilePathChanged && !isLegacyPath)
         {
             // path already points to the local data directory
             message = QString::fromUtf8 (("Will be saved as: " + path.string()).c_str());
             mResultPath = path;
-            mValid = true;
         }
+        //in all other cases, ensure the path points to data-local and do an existing file check
         else
         {
             // path points somewhere else or is a leaf name.
-            path = mLocalData / path.filename();
+            if (isFilePathChanged)
+                path = mLocalData / path.filename();
 
             message = QString::fromUtf8 (("Will be saved as: " + path.string()).c_str());
             mResultPath = path;
-            mValid = true;
 
             if (boost::filesystem::exists (path))
             {
                 /// \todo add an user setting to make this an error.
-                message += "<p>But a file with the same name already exists. If you continue, it will be overwritten.";
+                message += "<p>A file with the same name already exists. If you continue, it will be overwritten.";
             }
         }
     }

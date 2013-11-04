@@ -43,7 +43,8 @@ namespace CSMWorld
             Display_CreatureType,
             Display_WeaponType,
             Display_RecordState,
-            Display_RefRecordType
+            Display_RefRecordType,
+            Display_DialogueType
         };
 
         int mColumnId;

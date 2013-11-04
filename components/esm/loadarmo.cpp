@@ -2,6 +2,7 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
@@ -18,15 +19,17 @@ void PartReferenceList::load(ESMReader &esm)
     }
 }
 
-void PartReferenceList::save(ESMWriter &esm)
+void PartReferenceList::save(ESMWriter &esm) const
 {
-    for (std::vector<PartReference>::iterator it = mParts.begin(); it != mParts.end(); ++it)
+    for (std::vector<PartReference>::const_iterator it = mParts.begin(); it != mParts.end(); ++it)
     {
         esm.writeHNT("INDX", it->mPart);
         esm.writeHNOString("BNAM", it->mMale);
         esm.writeHNOString("CNAM", it->mFemale);
     }
 }
+
+unsigned int Armor::sRecordId = REC_ARMO;
 
 void Armor::load(ESMReader &esm)
 {
@@ -39,7 +42,7 @@ void Armor::load(ESMReader &esm)
     mEnchant = esm.getHNOString("ENAM");
 }
 
-void Armor::save(ESMWriter &esm)
+void Armor::save(ESMWriter &esm) const
 {
     esm.writeHNCString("MODL", mModel);
     esm.writeHNCString("FNAM", mName);

@@ -9,27 +9,28 @@ class QComboBox;
 class QPushButton;
 class QAbstractItemModel;
 
-class PlayPage : public QWidget, private Ui::PlayPage
+namespace Launcher
 {
-    Q_OBJECT
+    class PlayPage : public QWidget, private Ui::PlayPage
+    {
+        Q_OBJECT
 
-public:
-    PlayPage(QWidget *parent = 0);
-    void setProfilesComboBoxModel(QAbstractItemModel *model);
+    public:
+        PlayPage(QWidget *parent = 0);
+        void setProfilesModel(QAbstractItemModel *model);
 
-signals:
-    void profileChanged(int index);
-    void playButtonClicked();
+    signals:
+        void signalProfileChanged(int index);
+        void playButtonClicked();
 
-public slots:
-    void setProfilesComboBoxIndex(int index);
+    public slots:
+        void setProfilesIndex(int index);
 
-private slots:
-    void slotCurrentIndexChanged(int index);
-    void slotPlayClicked();
-
+    private slots:
+        void slotPlayClicked();
 
 
-};
 
+    };
+}
 #endif
