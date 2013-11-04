@@ -2,9 +2,12 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int Apparatus::sRecordId = REC_APPA;
+
 void Apparatus::load(ESMReader &esm)
 {
     // we will not treat duplicated subrecords as errors here
@@ -28,7 +31,7 @@ void Apparatus::load(ESMReader &esm)
     }
 }
 
-void Apparatus::save(ESMWriter &esm)
+void Apparatus::save(ESMWriter &esm) const
 {
     esm.writeHNCString("MODL", mModel);
     esm.writeHNCString("FNAM", mName);

@@ -6,7 +6,10 @@
 #include <QDialog>
 #include <QMetaType>
 
+#ifndef CS_QT_BOOST_FILESYSTEM_PATH_DECLARED
+#define CS_QT_BOOST_FILESYSTEM_PATH_DECLARED
 Q_DECLARE_METATYPE (boost::filesystem::path)
+#endif
 
 class QPushButton;
 

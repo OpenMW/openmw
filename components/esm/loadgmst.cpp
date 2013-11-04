@@ -1,13 +1,17 @@
 #include "loadgmst.hpp"
 
+#include "defs.hpp"
+
 namespace ESM
 {
+    unsigned int GameSetting::sRecordId = REC_GMST;
+
     void GameSetting::load (ESMReader &esm)
     {
         mValue.read (esm, ESM::Variant::Format_Gmst);
     }
 
-    void GameSetting::save (ESMWriter &esm)
+    void GameSetting::save (ESMWriter &esm) const
     {
         mValue.write (esm, ESM::Variant::Format_Gmst);
     }

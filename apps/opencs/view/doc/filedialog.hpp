@@ -4,63 +4,71 @@
 #include <QDialog>
 #include <QModelIndex>
 
-#include "ui_datafilespage.h"
+#include <boost/filesystem/path.hpp>
+#include "adjusterwidget.hpp"
 
-class QDialogButtonBox;
-class QSortFilterProxyModel;
-class QAbstractItemModel;
-class QPushButton;
-class QStringList;
-class QString;
-class QMenu;
+#ifndef CS_QT_BOOST_FILESYSTEM_PATH_DECLARED
+#define CS_QT_BOOST_FILESYSTEM_PATH_DECLARED
+Q_DECLARE_METATYPE (boost::filesystem::path)
+#endif
+
+#include "ui_filedialog.h"
 
 class DataFilesModel;
 class PluginsProxyModel;
 
-class FileDialog : public QDialog, private Ui::DataFilesPage
+namespace ContentSelectorView
 {
-    Q_OBJECT
-public:
-    explicit FileDialog(QWidget *parent = 0);
-    void addFiles(const QString &path);
-    void setEncoding(const QString &encoding);
+    class ContentSelector;
+}
 
-    void openFile();
-    void newFile();
-    void accepted();
+namespace CSVDoc
+{
+    class FileWidget;
 
-    QStringList checkedItemsPaths();
-    QString fileName();
+    class FileDialog : public QDialog
+    {
+        Q_OBJECT
 
-signals:
-    void openFiles();
-    void createNewFile();
-    
-public slots:
-    void accept();
+    private:
 
-private slots:
-    void updateViews();
-    void updateOpenButton(const QStringList &items);
-    void updateCreateButton(const QString &name);
-    void setCheckState(QModelIndex index);
+        ContentSelectorView::ContentSelector *mSelector;
+        Ui::FileDialog ui;
+        ContentAction mAction;
+        FileWidget *mFileWidget;
+        AdjusterWidget *mAdjusterWidget;
 
-    void filterChanged(const QString &filter);
+    public:
 
-    void createButtonClicked();
+        explicit FileDialog(QWidget *parent = 0);
+        void showDialog (ContentAction action);
 
-private:
-    QLabel *mNameLabel;
-    LineEdit *mNameLineEdit;
+        void addFiles (const QString &path);
 
-    QPushButton *mCreateButton;
-    QDialogButtonBox *mButtonBox;
+        QString filename() const;
+        QStringList selectedFilePaths();
 
-    DataFilesModel *mDataFilesModel;
+        void setLocalData (const boost::filesystem::path& localData);
 
-    PluginsProxyModel *mPluginsProxyModel;
-    QSortFilterProxyModel *mMastersProxyModel;
-    QSortFilterProxyModel *mFilterProxyModel;
-};
+    private:
 
+        void buildNewFileView();
+        void buildOpenFileView();
+
+    signals:
+
+        void signalOpenFiles (const boost::filesystem::path &path);
+        void signalCreateNewFile (const boost::filesystem::path &path);
+
+        void signalUpdateAcceptButton (bool, int);
+
+    private slots:
+
+        void slotNewFile();
+        void slotOpenFile();
+        void slotUpdateAcceptButton (int);
+        void slotUpdateAcceptButton (const QString &, bool);
+        void slotRejected();
+    };
+}
 #endif // FILEDIALOG_HPP

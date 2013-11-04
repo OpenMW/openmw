@@ -3,7 +3,7 @@
 
 #include "esmwriter.hpp"
 
-void ESM::CellRef::save(ESMWriter &esm)
+void ESM::CellRef::save(ESMWriter &esm) const
 {
     esm.writeHNT("FRMR", mRefnum);
     esm.writeHNCString("NAME", mRefID);

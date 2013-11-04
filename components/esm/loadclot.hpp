@@ -17,6 +17,8 @@ class ESMWriter;
 
 struct Clothing
 {
+    static unsigned int sRecordId;
+
     enum Type
     {
         Pants = 0,
@@ -45,7 +47,7 @@ struct Clothing
     std::string mId, mName, mModel, mIcon, mEnchant, mScript;
 
     void load(ESMReader &esm);
-    void save(ESMWriter &esm);
+    void save(ESMWriter &esm) const;
 
     void blank();
     ///< Set record to default state (does not touch the ID).

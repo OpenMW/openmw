@@ -34,67 +34,83 @@
 #include <QMessageBox>
 #include <QDialog>
 
-class CheckableMessageBoxPrivate;
+class QCheckBox;
 
-class CheckableMessageBox : public QDialog
+namespace Launcher
 {
-    Q_OBJECT
-    Q_PROPERTY(QString text READ text WRITE setText)
-    Q_PROPERTY(QPixmap iconPixmap READ iconPixmap WRITE setIconPixmap)
-    Q_PROPERTY(bool isChecked READ isChecked WRITE setChecked)
-    Q_PROPERTY(QString checkBoxText READ checkBoxText WRITE setCheckBoxText)
-    Q_PROPERTY(QDialogButtonBox::StandardButtons buttons READ standardButtons WRITE setStandardButtons)
-    Q_PROPERTY(QDialogButtonBox::StandardButton defaultButton READ defaultButton WRITE setDefaultButton)
+    class CheckableMessageBoxPrivate
+    {
+    public:
 
-public:
-    explicit CheckableMessageBox(QWidget *parent);
-    virtual ~CheckableMessageBox();
+        QLabel *pixmapLabel;
+        QLabel *messageLabel;
+        QCheckBox *checkBox;
+        QDialogButtonBox *buttonBox;
+        QAbstractButton *clickedButton;
 
-    static QDialogButtonBox::StandardButton
-        question(QWidget *parent,
-                 const QString &title,
-                 const QString &question,
-                 const QString &checkBoxText,
-                 bool *checkBoxSetting,
-                 QDialogButtonBox::StandardButtons buttons = QDialogButtonBox::Yes|QDialogButtonBox::No,
-                 QDialogButtonBox::StandardButton defaultButton = QDialogButtonBox::No);
+    public:
+        CheckableMessageBoxPrivate(QDialog *q);
+    };
 
-    QString text() const;
-    void setText(const QString &);
+    class CheckableMessageBox : public QDialog
+    {
+        Q_OBJECT
+        Q_PROPERTY(QString text READ text WRITE setText)
+        Q_PROPERTY(QPixmap iconPixmap READ iconPixmap WRITE setIconPixmap)
+        Q_PROPERTY(bool isChecked READ isChecked WRITE setChecked)
+        Q_PROPERTY(QString checkBoxText READ checkBoxText WRITE setCheckBoxText)
+        Q_PROPERTY(QDialogButtonBox::StandardButtons buttons READ standardButtons WRITE setStandardButtons)
+        Q_PROPERTY(QDialogButtonBox::StandardButton defaultButton READ defaultButton WRITE setDefaultButton)
 
-    bool isChecked() const;
-    void setChecked(bool s);
+    public:
+        explicit CheckableMessageBox(QWidget *parent);
+        virtual ~CheckableMessageBox();
 
-    QString checkBoxText() const;
-    void setCheckBoxText(const QString &);
+        static QDialogButtonBox::StandardButton
+            question(QWidget *parent,
+                     const QString &title,
+                     const QString &question,
+                     const QString &checkBoxText,
+                     bool *checkBoxSetting,
+                     QDialogButtonBox::StandardButtons buttons = QDialogButtonBox::Yes|QDialogButtonBox::No,
+                     QDialogButtonBox::StandardButton defaultButton = QDialogButtonBox::No);
 
-    bool isCheckBoxVisible() const;
-    void setCheckBoxVisible(bool);
+        QString text() const;
+        void setText(const QString &);
 
-    QDialogButtonBox::StandardButtons standardButtons() const;
-    void setStandardButtons(QDialogButtonBox::StandardButtons s);
-    QPushButton *button(QDialogButtonBox::StandardButton b) const;
-    QPushButton *addButton(const QString &text, QDialogButtonBox::ButtonRole role);
+        bool isChecked() const;
+        void setChecked(bool s);
 
-    QDialogButtonBox::StandardButton defaultButton() const;
-    void setDefaultButton(QDialogButtonBox::StandardButton s);
+        QString checkBoxText() const;
+        void setCheckBoxText(const QString &);
 
-    // See static QMessageBox::standardPixmap()
-    QPixmap iconPixmap() const;
-    void setIconPixmap (const QPixmap &p);
+        bool isCheckBoxVisible() const;
+        void setCheckBoxVisible(bool);
 
-    // Query the result
-    QAbstractButton *clickedButton() const;
-    QDialogButtonBox::StandardButton clickedStandardButton() const;
+        QDialogButtonBox::StandardButtons standardButtons() const;
+        void setStandardButtons(QDialogButtonBox::StandardButtons s);
+        QPushButton *button(QDialogButtonBox::StandardButton b) const;
+        QPushButton *addButton(const QString &text, QDialogButtonBox::ButtonRole role);
 
-    // Conversion convenience
-    static QMessageBox::StandardButton dialogButtonBoxToMessageBoxButton(QDialogButtonBox::StandardButton);
+        QDialogButtonBox::StandardButton defaultButton() const;
+        void setDefaultButton(QDialogButtonBox::StandardButton s);
 
-private slots:
-    void slotClicked(QAbstractButton *b);
+        // See static QMessageBox::standardPixmap()
+        QPixmap iconPixmap() const;
+        void setIconPixmap (const QPixmap &p);
 
-private:
-    CheckableMessageBoxPrivate *d;
-};
+        // Query the result
+        QAbstractButton *clickedButton() const;
+        QDialogButtonBox::StandardButton clickedStandardButton() const;
 
+        // Conversion convenience
+        static QMessageBox::StandardButton dialogButtonBoxToMessageBoxButton(QDialogButtonBox::StandardButton);
+
+    private slots:
+        void slotClicked(QAbstractButton *b);
+
+    private:
+        CheckableMessageBoxPrivate *d;
+    };
+}
 #endif // CHECKABLEMESSAGEBOX_HPP

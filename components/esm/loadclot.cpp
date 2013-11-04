@@ -2,9 +2,11 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int Clothing::sRecordId = REC_CLOT;
 
 void Clothing::load(ESMReader &esm)
 {
@@ -20,7 +22,7 @@ void Clothing::load(ESMReader &esm)
 
     mEnchant = esm.getHNOString("ENAM");
 }
-void Clothing::save(ESMWriter &esm)
+void Clothing::save(ESMWriter &esm) const
 {
     esm.writeHNCString("MODL", mModel);
     esm.writeHNOCString("FNAM", mName);
