@@ -90,6 +90,7 @@ Bug #840: First-person sneaking camera height
 Bug #887: Ambient sounds playing while paused
 Bug #902: Problems with Polish character encoding
 Bug #907: Entering third person using the mousewheel is possible even if it's impossible using the key
+Bug #910: Some CDs not working correctly with Unshield installer
 Bug #917: Quick character creation plugin does not work
 Bug #918: Fatigue does not refill
 Bug #919: The PC falls dead in Beshara - OpenMW nightly Win64 (708CDE2)
