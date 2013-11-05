@@ -59,5 +59,4 @@ namespace Launcher
         bool setupSDL();
     };
 }
->>>>>>> 468e8e3635d6532fb334d17cabd5b7bf52a5ecc1
 #endif
