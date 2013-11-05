@@ -36,7 +36,7 @@ override_dh_auto_clean:
 	find . -name libcomponents.a -type f -exec rm -f {} \; || /bin/true
 
 	rm -rf resources || /bin/true
-	rm -f CMakeCache.txt install_manifest.txt CPackConfig.cmake CPackSourceConfig.cmake plugins.cfg launcher.cfg  openmw.cfg.install openmw.cfg openmw.desktop settings-default.cfg transparency-overrides.cfg apps/launcher/resources.qrc.depends apps/openmw/config.hpp Docs/mainpage.hpp
+	rm -f CMakeCache.txt install_manifest.txt CPackConfig.cmake CPackSourceConfig.cmake plugins.cfg launcher.cfg  openmw.cfg.install openmw.cfg opencs.cfg openmw.desktop settings-default.cfg transparency-overrides.cfg apps/launcher/resources.qrc.depends apps/openmw/config.hpp Docs/mainpage.hpp
 
 override_dh_installchangelogs:
 	dh_installchangelogs readme.txt
