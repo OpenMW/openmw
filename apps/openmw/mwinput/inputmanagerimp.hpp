@@ -97,6 +97,7 @@ namespace MWInput
         virtual void windowVisibilityChange( bool visible );
         virtual void windowFocusChange( bool have_focus );
         virtual void windowResized (int x, int y);
+        virtual void windowClosed ();
 
         virtual void channelChanged(ICS::Channel* channel, float currentValue, float previousValue);
 
