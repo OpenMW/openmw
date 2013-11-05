@@ -34,8 +34,7 @@ void CSMWorld::InfoCollection::load (const Info& record, bool base)
 void CSMWorld::InfoCollection::load (ESM::ESMReader& reader, bool base, const ESM::Dialogue& dialogue)
 {
     /// \todo put records into proper order
-    /// \todo adjust ID
-    std::string id = reader.getHNOString ("INAM");
+    std::string id = dialogue.mId + "#" + reader.getHNOString ("INAM");
 
     if (reader.isNextSub ("DELE"))
     {
