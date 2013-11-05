@@ -152,6 +152,18 @@ CSMWorld::Data::Data() : mRefs (mCells)
     mTopicInfos.addColumn (new StringIdColumn<Info>);
     mTopicInfos.addColumn (new RecordStateColumn<Info>);
     mTopicInfos.addColumn (new TopicColumn<Info> (false));
+    mTopicInfos.addColumn (new ActorColumn<Info>);
+    mTopicInfos.addColumn (new RaceColumn<Info>);
+    mTopicInfos.addColumn (new ClassColumn<Info>);
+    mTopicInfos.addColumn (new FactionColumn<Info>);
+    mTopicInfos.addColumn (new CellColumn<Info>);
+    mTopicInfos.addColumn (new DispositionColumn<Info>);
+    mTopicInfos.addColumn (new RankColumn<Info>);
+    mTopicInfos.addColumn (new GenderColumn<Info>);
+    mTopicInfos.addColumn (new PcFactionColumn<Info>);
+    mTopicInfos.addColumn (new PcRankColumn<Info>);
+    mTopicInfos.addColumn (new SoundFileColumn<Info>);
+    mTopicInfos.addColumn (new ResponseColumn<Info>);
 
     mJournalInfos.addColumn (new StringIdColumn<Info>);
     mJournalInfos.addColumn (new RecordStateColumn<Info>);

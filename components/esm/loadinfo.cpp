@@ -48,8 +48,8 @@ void DialInfo::load(ESMReader &esm)
     mFactionLess = false;
     if (subName.val == REC_FNAM)
     {
-        mNpcFaction = esm.getHString();
-        if (mNpcFaction == "FFFF")
+        mFaction = esm.getHString();
+        if (mFaction == "FFFF")
             mFactionLess = true;
         if (esm.isEmptyOrGetName())
             return;
@@ -129,7 +129,7 @@ void DialInfo::save(ESMWriter &esm)
     esm.writeHNOCString("ONAM", mActor);
     esm.writeHNOCString("RNAM", mRace);
     esm.writeHNOCString("CNAM", mClass);
-    esm.writeHNOCString("FNAM", mNpcFaction);
+    esm.writeHNOCString("FNAM", mFaction);
     esm.writeHNOCString("ANAM", mCell);
     esm.writeHNOCString("DNAM", mPcFaction);
     esm.writeHNOCString("SNAM", mSound);
@@ -168,7 +168,7 @@ void DialInfo::save(ESMWriter &esm)
         mActor.clear();
         mRace.clear();
         mClass.clear();
-        mNpcFaction.clear();
+        mFaction.clear();
         mPcFaction.clear();
         mCell.clear();
         mSound.clear();

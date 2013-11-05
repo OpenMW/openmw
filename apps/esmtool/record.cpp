@@ -740,8 +740,8 @@ void Record<ESM::DialInfo>::print()
     if (mData.mClass != "")
         std::cout << "  Class: " << mData.mClass << std::endl;
     std::cout << "  Factionless: " << mData.mFactionLess << std::endl;
-    if (mData.mNpcFaction != "")
-        std::cout << "  NPC Faction: " << mData.mNpcFaction << std::endl;
+    if (mData.mFaction != "")
+        std::cout << "  NPC Faction: " << mData.mFaction << std::endl;
     if (mData.mData.mRank != -1)
         std::cout << "  NPC Rank: " << (int)mData.mData.mRank << std::endl;
     if (mData.mPcFaction != "")

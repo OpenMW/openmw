@@ -63,7 +63,7 @@ struct DialInfo
     std::string mId, mPrev, mNext;
 
     // Various references used in determining when to select this item.
-    std::string mActor, mRace, mClass, mNpcFaction, mPcFaction, mCell;
+    std::string mActor, mRace, mClass, mFaction, mPcFaction, mCell;
 
     // Sound and text associated with this item
     std::string mSound, mResponse;

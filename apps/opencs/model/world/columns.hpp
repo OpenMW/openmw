@@ -158,6 +158,13 @@ namespace CSMWorld
             ColumnId_QuestDescription = 145,
             ColumnId_Topic = 146,
             ColumnId_Journal = 147,
+            ColumnId_Actor = 148,
+            ColumnId_PcFaction = 149,
+            ColumnId_Response = 150,
+            ColumnId_Disposition = 151,
+            ColumnId_Rank = 152,
+            ColumnId_Gender = 153,
+            ColumnId_PcRank = 154,
 
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.
