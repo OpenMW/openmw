@@ -35,7 +35,7 @@ void CSMWorld::InfoCollection::load (ESM::ESMReader& reader, bool base, const ES
 {
     /// \todo put records into proper order
     /// \todo adjust ID
-    std::string id = reader.getHNOString ("NAME");
+    std::string id = reader.getHNOString ("INAM");
 
     if (reader.isNextSub ("DELE"))
     {

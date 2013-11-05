@@ -8,7 +8,6 @@ namespace ESM
 
 void DialInfo::load(ESMReader &esm)
 {
-    mId = esm.getHNString("INAM");
     mPrev = esm.getHNString("PNAM");
     mNext = esm.getHNString("NNAM");
 

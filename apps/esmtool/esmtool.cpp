@@ -339,6 +339,8 @@ int load(Arguments& info)
             }
 
             std::string id = esm.getHNOString("NAME");
+            if (id.empty())
+                id = esm.getHNOString("INAM");
 
             if(!quiet && interested)
                 std::cout << "\nRecord: " << n.toString()
