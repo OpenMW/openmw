@@ -26,7 +26,7 @@ Description: Reimplementation of The Elder Scrolls III: Morrowind
  .
  The Morrowind "Data Files" from the original game are required to play.
 
-Package: opencs
+Package: openmw-cs
 Architecture: any
 Recommends: openmw
 Depends: ${shlibs:Depends}, ${misc:Depends}
