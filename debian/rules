@@ -30,6 +30,7 @@ override_dh_auto_clean:
 	find . -name Makefile -type f -exec rm -f {} \; || /bin/true
 	find . -name cmake_install.cmake -type f -exec rm -f {} \; || /bin/true
 	find . -name openmw -type f -exec rm -f {} \; || /bin/true
+	find . -name opencs -type f -exec rm -f {} \; || /bin/true
 	find . -name mwiniimport -type f -exec rm -f {} \; || /bin/true
 	find . -name omwlauncher -type f -exec rm -f {} \; || /bin/true
 	find . -name libcomponents.a -type f -exec rm -f {} \; || /bin/true

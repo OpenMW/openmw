@@ -26,6 +26,18 @@ Description: Reimplementation of The Elder Scrolls III: Morrowind
  .
  The Morrowind "Data Files" from the original game are required to play.
 
+Package: opencs
+Architecture: any
+Recommends: openmw
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Reimplementation of The Elder Scrolls Construction Set
+ OpenCS is a reimplementation of the Bethesda Game Studios Elder 
+ Scrolls Construction Set which gives full control of the game's
+ content.
+ .
+ While initialy to be used with Morrowind assets, it can be used to 
+ create TC and other content not depending on Morrowind.
+
 Package: openmw-data
 Architecture: all
 Recommends: openmw
