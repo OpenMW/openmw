@@ -216,7 +216,11 @@
                         <Widget type="TextBox" skin="NormalText" position="4 4 300 24" align="Left Top">
                             <Property key="Caption" value="Texture filtering"/>
                         </Widget>
-                        <Widget type="AutoSizedButton" skin="MW_Button" position="18 28 140 24" align="Left Top" name="TextureFilteringButton"/>
+                        <Widget type="ComboBox" skin="MW_ComboBox" position="14 28 110 24" align="Left Top" name="TextureFilteringButton">
+                            <Property key="AddItem" value="Bilinear"/>
+                            <Property key="AddItem" value="Trilinear"/>
+                            <Property key="AddItem" value="Anisotropic"/>
+                        </Widget>
 
                         <Widget type="Widget" skin="" position="184 4 300 50" align="Left Top" name="AnisotropyBox">
                             <Widget type="TextBox" skin="SandText" position="0 0 300 24" align="Left Top" name="AnisotropyLabel">
@@ -308,9 +312,9 @@
                             </Widget>
 
                             <Widget type="HBox" position="4 28 350 24">
-                                <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="ShadowsTextureSize"/>
+                                <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="TerrainShadows"/>
                                 <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
-                                    <Property key="Caption" value="Texture size"/>
+                                    <Property key="Caption" value="Terrain shadows"/>
                                 </Widget>
                             </Widget>
 
@@ -336,9 +340,14 @@
                              </Widget>
 
                              <Widget type="HBox" position="4 140 350 24">
-                                <Widget type="AutoSizedButton" skin="MW_Button" align="Left Top" name="TerrainShadows"/>
+                                <Widget type="ComboBox" skin="MW_ComboBox" align="Left Top" name="ShadowsTextureSize" position="0 0 60 24">
+                                    <Property key="AddItem" value="512"/>
+                                    <Property key="AddItem" value="1024"/>
+                                    <Property key="AddItem" value="2048"/>
+                                    <Property key="AddItem" value="4096"/>
+                                </Widget>
                                 <Widget type="AutoSizedTextBox" skin="SandText" align="Left Top">
-                                    <Property key="Caption" value="Terrain shadows"/>
+                                    <Property key="Caption" value="Texture size"/>
                                 </Widget>
                              </Widget>
 

@@ -34,7 +34,7 @@ add_openmw_dir (mwgui
     enchantingdialog trainingwindow travelwindow imagebutton exposedwindow cursor spellicons
     merchantrepair repair soulgemdialog companionwindow bookpage journalviewmodel journalbooks
     keywordsearch itemmodel containeritemmodel inventoryitemmodel sortfilteritemmodel itemview
-    tradeitemmodel companionitemmodel pickpocketitemmodel fontloader controllers
+    tradeitemmodel companionitemmodel pickpocketitemmodel fontloader controllers savegamedialog
     )
 
 add_openmw_dir (mwdialogue

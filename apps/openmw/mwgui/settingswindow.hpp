@@ -42,7 +42,7 @@ namespace MWGui
             MyGUI::ScrollBar* mViewDistanceSlider;
             MyGUI::ScrollBar* mFOVSlider;
             MyGUI::ScrollBar* mAnisotropySlider;
-            MyGUI::Button* mTextureFilteringButton;
+            MyGUI::ComboBox* mTextureFilteringButton;
             MyGUI::TextBox* mAnisotropyLabel;
             MyGUI::Widget* mAnisotropyBox;
             MyGUI::Button* mWaterShaderButton;
@@ -55,7 +55,7 @@ namespace MWGui
 
             MyGUI::Button* mShadowsEnabledButton;
             MyGUI::Button* mShadowsLargeDistance;
-            MyGUI::Button* mShadowsTextureSize;
+            MyGUI::ComboBox* mShadowsTextureSize;
             MyGUI::Button* mActorShadows;
             MyGUI::Button* mStaticsShadows;
             MyGUI::Button* mMiscShadows;
@@ -76,7 +76,7 @@ namespace MWGui
 
             void onOkButtonClicked(MyGUI::Widget* _sender);
             void onFpsToggled(MyGUI::Widget* _sender);
-            void onTextureFilteringToggled(MyGUI::Widget* _sender);
+            void onTextureFilteringChanged(MyGUI::ComboBox* _sender, size_t pos);
             void onSliderChangePosition(MyGUI::ScrollBar* scroller, size_t pos);
             void onButtonToggled(MyGUI::Widget* _sender);
             void onResolutionSelected(MyGUI::ListBox* _sender, size_t index);
@@ -85,7 +85,7 @@ namespace MWGui
 
             void onShadersToggled(MyGUI::Widget* _sender);
             void onShaderModeToggled(MyGUI::Widget* _sender);
-            void onShadowTextureSize(MyGUI::Widget* _sender);
+            void onShadowTextureSizeChanged(MyGUI::ComboBox* _sender, size_t pos);
 
             void onRebindAction(MyGUI::Widget* _sender);
             void onInputTabMouseWheel(MyGUI::Widget* _sender, int _rel);

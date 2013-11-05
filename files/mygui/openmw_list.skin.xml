@@ -126,6 +126,19 @@
 
     </Skin>
 
+    <Skin name="MW_PopupList" size="516 516" align="Left Top">
+        <Property key="NeedKey" value="true"/>
+        <Property key="SkinLine" value="MW_ListLine"/>
+        <Property key="HeightLine" value="20"/>
+
+        <Child type="Widget" skin="BlackBG" offset="0 0 516 516" align="Stretch"/>
+        <Child type="Widget" skin="MW_Box" offset="0 0 516 516" align="Stretch"/>
+
+        <Child type="MWScrollBar" skin="MW_VScroll" offset="498 3 14 509" align="Right VStretch" name="VScroll"/>
+
+        <Child type="Widget" skin="" offset="3 3 493 509" align="Stretch" name="Client"/>
+    </Skin>
+
     <Skin name="MW_ItemView" size="516 516" align="Left Top">
         <Child type="Widget" skin="MW_Box" offset="0 0 516 516" align="Stretch"/>
 
