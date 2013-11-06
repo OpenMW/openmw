@@ -1,10 +1,12 @@
-#include <QToolButton>
-#include <QStyle>
+#include "lineedit.hpp"
 
-#include "comboboxlineedit.hpp"
-
-ComboBoxLineEdit::ComboBoxLineEdit(QWidget *parent)
+LineEdit::LineEdit(QWidget *parent)
     : QLineEdit(parent)
+{
+    setupClearButton();
+}
+
+void LineEdit::setupClearButton()
 {
     mClearButton = new QToolButton(this);
     QPixmap pixmap(":images/clear.png");
@@ -15,13 +17,9 @@ ComboBoxLineEdit::ComboBoxLineEdit(QWidget *parent)
     mClearButton->hide();
     connect(mClearButton, SIGNAL(clicked()), this, SLOT(clear()));
     connect(this, SIGNAL(textChanged(const QString&)), this, SLOT(updateClearButton(const QString&)));
-    int frameWidth = style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
-
-    setObjectName(QString("ComboBoxLineEdit"));
-    setStyleSheet(QString("ComboBoxLineEdit { background-color: transparent; padding-right: %1px; } ").arg(mClearButton->sizeHint().width() + frameWidth + 1));
 }
 
-void ComboBoxLineEdit::resizeEvent(QResizeEvent *)
+void LineEdit::resizeEvent(QResizeEvent *)
 {
     QSize sz = mClearButton->sizeHint();
     int frameWidth = style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
@@ -29,7 +27,7 @@ void ComboBoxLineEdit::resizeEvent(QResizeEvent *)
                       (rect().bottom() + 1 - sz.height())/2);
 }
 
-void ComboBoxLineEdit::updateClearButton(const QString& text)
+void LineEdit::updateClearButton(const QString& text)
 {
     mClearButton->setVisible(!text.isEmpty());
 }

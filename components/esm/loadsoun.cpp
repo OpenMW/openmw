@@ -2,9 +2,11 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int Sound::sRecordId = REC_SOUN;
 
 void Sound::load(ESMReader &esm)
 {
@@ -17,7 +19,7 @@ void Sound::load(ESMReader &esm)
      << endl;
      */
 }
-void Sound::save(ESMWriter &esm)
+void Sound::save(ESMWriter &esm) const
 {
     esm.writeHNCString("FNAM", mSound);
     esm.writeHNT("DATA", mData, 3);

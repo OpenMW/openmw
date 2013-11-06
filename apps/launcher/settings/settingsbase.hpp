@@ -7,103 +7,105 @@
 #include <QRegExp>
 #include <QMap>
 
-template <class Map>
-class SettingsBase
+namespace Launcher
 {
-
-public:
-    SettingsBase() { mMultiValue = false; }
-    ~SettingsBase() {}
-
-    inline QString value(const QString &key, const QString &defaultValue = QString())
+    template <class Map>
+    class SettingsBase
     {
-        return mSettings.value(key).isEmpty() ? defaultValue : mSettings.value(key);
-    }
 
-    inline void setValue(const QString &key, const QString &value)
-    {
-        QStringList values = mSettings.values(key);
-        if (!values.contains(value))
-            mSettings.insert(key, value);
-    }
+    public:
+        SettingsBase() { mMultiValue = false; }
+        ~SettingsBase() {}
 
-    inline void setMultiValue(const QString &key, const QString &value)
-    {
-        QStringList values = mSettings.values(key);
-        if (!values.contains(value))
-            mSettings.insertMulti(key, value);
-    }
+        inline QString value(const QString &key, const QString &defaultValue = QString())
+        {
+            return mSettings.value(key).isEmpty() ? defaultValue : mSettings.value(key);
+        }
 
-    inline void setMultiValueEnabled(bool enable)
-    {
-        mMultiValue = enable;
-    }
+        inline void setValue(const QString &key, const QString &value)
+        {
+            QStringList values = mSettings.values(key);
+            if (!values.contains(value))
+                mSettings.insert(key, value);
+        }
 
-    inline void remove(const QString &key)
-    {
-        mSettings.remove(key);
-    }
+        inline void setMultiValue(const QString &key, const QString &value)
+        {
+            QStringList values = mSettings.values(key);
+            if (!values.contains(value))
+                mSettings.insertMulti(key, value);
+        }
 
-    Map getSettings() {return mSettings;}
+        inline void setMultiValueEnabled(bool enable)
+        {
+            mMultiValue = enable;
+        }
 
-    bool readFile(QTextStream &stream)
-    {
-        mCache.clear();
+        inline void remove(const QString &key)
+        {
+            mSettings.remove(key);
+        }
 
-        QString sectionPrefix;
+        Map getSettings() {return mSettings;}
 
-        QRegExp sectionRe("^\\[([^]]+)\\]");
-        QRegExp keyRe("^([^=]+)\\s*=\\s*(.+)$");
+        bool readFile(QTextStream &stream)
+        {
+            mCache.clear();
 
-        while (!stream.atEnd()) {
-            QString line = stream.readLine();
+            QString sectionPrefix;
 
-            if (line.isEmpty() || line.startsWith("#"))
-                continue;
+            QRegExp sectionRe("^\\[([^]]+)\\]");
+            QRegExp keyRe("^([^=]+)\\s*=\\s*(.+)$");
 
-            if (sectionRe.exactMatch(line)) {
-                sectionPrefix = sectionRe.cap(1);
-                sectionPrefix.append("/");
-                continue;
-            }
+            while (!stream.atEnd()) {
+                QString line = stream.readLine();
 
-            if (keyRe.indexIn(line) != -1) {
+                if (line.isEmpty() || line.startsWith("#"))
+                    continue;
 
-                QString key = keyRe.cap(1).trimmed();
-                QString value = keyRe.cap(2).trimmed();
+                if (sectionRe.exactMatch(line)) {
+                    sectionPrefix = sectionRe.cap(1);
+                    sectionPrefix.append("/");
+                    continue;
+                }
 
-                if (!sectionPrefix.isEmpty())
-                    key.prepend(sectionPrefix);
+                if (keyRe.indexIn(line) != -1) {
 
-                mSettings.remove(key);
+                    QString key = keyRe.cap(1).trimmed();
+                    QString value = keyRe.cap(2).trimmed();
 
-                QStringList values = mCache.values(key);
+                    if (!sectionPrefix.isEmpty())
+                        key.prepend(sectionPrefix);
 
-                if (!values.contains(value)) {
-                    if (mMultiValue) {
-                        mCache.insertMulti(key, value);
-                    } else {
-                        mCache.insert(key, value);
+                    mSettings.remove(key);
+
+                    QStringList values = mCache.values(key);
+
+                    if (!values.contains(value)) {
+                        if (mMultiValue) {
+                            mCache.insertMulti(key, value);
+                        } else {
+                            mCache.insert(key, value);
+                        }
                     }
                 }
             }
-        }
 
-        if (mSettings.isEmpty()) {
-            mSettings = mCache; // This is the first time we read a file
+            if (mSettings.isEmpty()) {
+                mSettings = mCache; // This is the first time we read a file
+                return true;
+            }
+
+            // Merge the changed keys with those which didn't
+            mSettings.unite(mCache);
             return true;
         }
 
-        // Merge the changed keys with those which didn't
-        mSettings.unite(mCache);
-        return true;
-    }
+    private:
+        Map mSettings;
+        Map mCache;
 
-private:
-    Map mSettings;
-    Map mCache;
-
-    bool mMultiValue;
-};
-
+        bool mMultiValue;
+    };
+}
 #endif // SETTINGSBASE_HPP

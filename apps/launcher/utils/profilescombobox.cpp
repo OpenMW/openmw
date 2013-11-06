@@ -5,18 +5,12 @@
 #include <QKeyEvent>
 
 #include "profilescombobox.hpp"
-#include "comboboxlineedit.hpp"
 
 ProfilesComboBox::ProfilesComboBox(QWidget *parent) :
-    QComboBox(parent)
+    ContentSelectorView::ComboBox(parent)
 {
-    mValidator = new QRegExpValidator(QRegExp("^[a-zA-Z0-9_]*$"), this); // Alpha-numeric + underscore
-    setEditEnabled(true);
-    setValidator(mValidator);
-    setCompleter(0);
-
-    connect(this, SIGNAL(currentIndexChanged(int)), this,
-            SLOT(slotIndexChanged(int)));
+    connect(this, SIGNAL(activated(int)), this,
+            SLOT(slotIndexChangedByUser(int)));
 
     setInsertPolicy(QComboBox::NoInsert);
 }
@@ -37,6 +31,7 @@ void ProfilesComboBox::setEditEnabled(bool editable)
     setValidator(mValidator);
 
     ComboBoxLineEdit *edit = new ComboBoxLineEdit(this);
+
     setLineEdit(edit);
     setCompleter(0);
 
@@ -45,6 +40,9 @@ void ProfilesComboBox::setEditEnabled(bool editable)
 
     connect(lineEdit(), SIGNAL(textChanged(QString)), this,
             SLOT(slotTextChanged(QString)));
+
+    connect (lineEdit(), SIGNAL(textChanged(QString)), this,
+             SIGNAL (signalProfileTextChanged (QString)));
 }
 
 void ProfilesComboBox::slotTextChanged(const QString &text)
@@ -82,11 +80,20 @@ void ProfilesComboBox::slotEditingFinished()
     emit(profileRenamed(previous, current));
 }
 
-void ProfilesComboBox::slotIndexChanged(int index)
+void ProfilesComboBox::slotIndexChangedByUser(int index)
 {
     if (index == -1)
         return;
 
-    emit(profileChanged(mOldProfile, currentText()));
-    mOldProfile = itemText(index);
+    emit (signalProfileChanged(mOldProfile, currentText()));
+    mOldProfile = currentText();
+}
+
+ProfilesComboBox::ComboBoxLineEdit::ComboBoxLineEdit (QWidget *parent)
+    : LineEdit (parent)
+{
+    int frameWidth = style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
+
+    setObjectName(QString("ComboBoxLineEdit"));
+    setStyleSheet(QString("ComboBoxLineEdit { background-color: transparent; padding-right: %1px; } ").arg(mClearButton->sizeHint().width() + frameWidth + 1));
 }

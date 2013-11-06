@@ -11,7 +11,9 @@ set(LAUNCHER
     settings/launchersettings.cpp
 
     utils/checkablemessagebox.cpp
+    utils/profilescombobox.cpp
     utils/textinputdialog.cpp
+    utils/lineedit.cpp
 
     ${CMAKE_SOURCE_DIR}/files/launcher/launcher.rc
 )
@@ -32,8 +34,9 @@ set(LAUNCHER_HEADER
     settings/settingsbase.hpp
 
     utils/checkablemessagebox.hpp
+    utils/profilescombobox.hpp
     utils/textinputdialog.hpp
-
+    utils/lineedit.hpp
 )
 if(NOT WIN32)
     LIST(APPEND LAUNCHER_HEADER unshieldthread.hpp)
@@ -48,8 +51,11 @@ set(LAUNCHER_HEADER_MOC
     playpage.hpp
     textslotmsgbox.hpp
 
-    utils/checkablemessagebox.hpp
     utils/textinputdialog.hpp
+    utils/checkablemessagebox.hpp
+    utils/profilescombobox.hpp
+    utils/lineedit.hpp
+
 )
 
 if(NOT WIN32)
@@ -62,6 +68,7 @@ set(LAUNCHER_UI
     ${CMAKE_SOURCE_DIR}/files/ui/graphicspage.ui
     ${CMAKE_SOURCE_DIR}/files/ui/mainwindow.ui
     ${CMAKE_SOURCE_DIR}/files/ui/playpage.ui
+    ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
 )
 
 source_group(launcher FILES ${LAUNCHER} ${LAUNCHER_HEADER})

@@ -17,11 +17,13 @@ class ESMWriter;
 
 struct Global
 {
+    static unsigned int sRecordId;
+
     std::string mId;
     Variant mValue;
 
     void load(ESMReader &esm);
-    void save(ESMWriter &esm);
+    void save(ESMWriter &esm) const;
 
     void blank();
     ///< Set record to default state (does not touch the ID).

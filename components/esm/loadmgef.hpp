@@ -12,6 +12,8 @@ class ESMWriter;
 
 struct MagicEffect
 {
+    static unsigned int sRecordId;
+
     enum Flags
     {
         TargetSkill = 0x1, // Affects a specific skill, which is specified elsewhere in the effect structure.
@@ -79,7 +81,7 @@ struct MagicEffect
     int mIndex;
 
     void load(ESMReader &esm);
-    void save(ESMWriter &esm);
+    void save(ESMWriter &esm) const;
 
 
     enum Effects

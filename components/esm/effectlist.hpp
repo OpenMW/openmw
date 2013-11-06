@@ -35,9 +35,9 @@ namespace ESM
         std::vector<ENAMstruct> mList;
 
         void load(ESMReader &esm);
-        void save(ESMWriter &esm);
+        void save(ESMWriter &esm) const;
     };
-    
+
 }
 
 #endif

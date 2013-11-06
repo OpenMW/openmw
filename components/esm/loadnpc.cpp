@@ -2,9 +2,11 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int NPC::sRecordId = REC_NPC_;
 
 void NPC::load(ESMReader &esm)
 {
@@ -63,7 +65,7 @@ void NPC::load(ESMReader &esm)
     mAiPackage.load(esm);
     esm.skipRecord();
 }
-void NPC::save(ESMWriter &esm)
+void NPC::save(ESMWriter &esm) const
 {
     esm.writeHNOCString("MODL", mModel);
     esm.writeHNOCString("FNAM", mName);
@@ -87,7 +89,7 @@ void NPC::save(ESMWriter &esm)
         esm.writeHNT("AIDT", mAiData, sizeof(mAiData));
     }
 
-    typedef std::vector<Dest>::iterator DestIter;
+    typedef std::vector<Dest>::const_iterator DestIter;
     for (DestIter it = mTransport.begin(); it != mTransport.end(); ++it) {
         esm.writeHNT("DODT", it->mPos, sizeof(it->mPos));
         esm.writeHNOCString("DNAM", it->mCellName);
