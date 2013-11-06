@@ -332,24 +332,22 @@ namespace MWGui
             mPickClassDialog = 0;
         }
 
+        updatePlayerHealth();
+
         //TODO This bit gets repeated a few times; wrap it in a function
+        MWBase::Environment::get().getWindowManager()->popGuiMode();
         if (mCreationStage == CSE_ReviewNext)
         {
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
             MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Review);
         }
         else if (mCreationStage >= CSE_ClassChosen)
         {
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
             MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Birth);
         }
         else
         {
             mCreationStage = CSE_ClassChosen;
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
         }
-
-        updatePlayerHealth();
     }
 
     void CharacterCreation::onPickClassDialogBack()
@@ -403,20 +401,18 @@ namespace MWGui
             mNameDialog = 0;
         }
 
+        MWBase::Environment::get().getWindowManager()->popGuiMode();
         if (mCreationStage == CSE_ReviewNext)
         {
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
             MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Review);
         }
         else if (mCreationStage >= CSE_NameChosen)
         {
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
             MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Race);
         }
         else
         {
             mCreationStage = CSE_NameChosen;
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
         }
     }
 
@@ -462,23 +458,21 @@ namespace MWGui
             mRaceDialog = 0;
         }
 
+        updatePlayerHealth();
+
+        MWBase::Environment::get().getWindowManager()->popGuiMode();
         if (mCreationStage == CSE_ReviewNext)
         {
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
             MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Review);
         }
         else if (mCreationStage >= CSE_RaceChosen)
         {
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
             MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Class);
         }
         else
         {
             mCreationStage = CSE_RaceChosen;
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
         }
-
-        updatePlayerHealth();
     }
 
     void CharacterCreation::onBirthSignDialogDone(WindowBase* parWindow)
@@ -492,18 +486,17 @@ namespace MWGui
             mBirthSignDialog = 0;
         }
 
+        updatePlayerHealth();
+
+        MWBase::Environment::get().getWindowManager()->popGuiMode();
         if (mCreationStage >= CSE_BirthSignChosen)
         {
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
             MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Review);
         }
         else
         {
             mCreationStage = CSE_BirthSignChosen;
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
         }
-
-        updatePlayerHealth();
     }
 
     void CharacterCreation::onBirthSignDialogBack()
@@ -552,23 +545,21 @@ namespace MWGui
             mCreateClassDialog = 0;
         }
 
+        updatePlayerHealth();
+
+        MWBase::Environment::get().getWindowManager()->popGuiMode();
         if (mCreationStage == CSE_ReviewNext)
         {
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
             MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Review);
         }
         else if (mCreationStage >= CSE_ClassChosen)
         {
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
             MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Birth);
         }
         else
         {
             mCreationStage = CSE_ClassChosen;
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
         }
-
-        updatePlayerHealth();
     }
 
     void CharacterCreation::onCreateClassDialogBack()
@@ -722,23 +713,21 @@ namespace MWGui
         mPlayerClass = *klass;
         MWBase::Environment::get().getWindowManager()->setPlayerClass(mPlayerClass);
 
+        updatePlayerHealth();
+
+        MWBase::Environment::get().getWindowManager()->popGuiMode();
         if (mCreationStage == CSE_ReviewNext)
         {
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
             MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Review);
         }
         else if (mCreationStage >= CSE_ClassChosen)
         {
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
             MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Birth);
         }
         else
         {
             mCreationStage = CSE_ClassChosen;
-            MWBase::Environment::get().getWindowManager()->popGuiMode();
         }
-
-        updatePlayerHealth();
     }
 
     CharacterCreation::~CharacterCreation()
