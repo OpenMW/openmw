@@ -219,9 +219,14 @@ namespace MWGui
                 mReviewDialog->setClass(mPlayerClass);
                 mReviewDialog->setBirthSign(mPlayerBirthSignId);
 
-                mReviewDialog->setHealth(mPlayerHealth);
-                mReviewDialog->setMagicka(mPlayerMagicka);
-                mReviewDialog->setFatigue(mPlayerFatigue);
+                {
+                    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+                    MWMechanics::CreatureStats stats = MWWorld::Class::get(player).getCreatureStats(player);
+
+                    mReviewDialog->setHealth ( stats.getHealth()  );
+                    mReviewDialog->setMagicka( stats.getMagicka() );
+                    mReviewDialog->setFatigue( stats.getFatigue() );
+                }
 
                 {
                     std::map<int, MWMechanics::Stat<int> > attributes = MWBase::Environment::get().getWindowManager()->getPlayerAttributeValues();
@@ -256,21 +261,6 @@ namespace MWGui
     {
         if (mRaceDialog)
             mRaceDialog->doRenderUpdate();
-    }
-
-    void CharacterCreation::setPlayerHealth (const MWMechanics::DynamicStat<float>& value)
-    {
-        mPlayerHealth = value;
-    }
-
-    void CharacterCreation::setPlayerMagicka (const MWMechanics::DynamicStat<float>& value)
-    {
-        mPlayerMagicka = value;
-    }
-
-    void CharacterCreation::setPlayerFatigue (const MWMechanics::DynamicStat<float>& value)
-    {
-        mPlayerFatigue = value;
     }
 
     void CharacterCreation::onReviewDialogDone(WindowBase* parWindow)
