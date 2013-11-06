@@ -103,7 +103,8 @@ namespace SFO
                     handleWindowEvent(evt);
                     break;
                 case SDL_QUIT:
-                    Ogre::Root::getSingleton().queueEndRendering();
+                    if (mWindowListener)
+                        mWindowListener->windowClosed();
                     break;
                 default:
                     std::cerr << "Unhandled SDL event of type " << evt.type << std::endl;

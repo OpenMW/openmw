@@ -641,6 +641,11 @@ namespace MWInput
         mOgre.windowResized(x,y);
     }
 
+    void InputManager::windowClosed()
+    {
+        MWBase::Environment::setRequestExit();
+    }
+
     void InputManager::toggleMainMenu()
     {
         if (MyGUI::InputManager::getInstance ().isModalAny())
