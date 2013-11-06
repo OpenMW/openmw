@@ -104,6 +104,7 @@ namespace MWGui
         CSE_RaceChosen,
         CSE_ClassChosen,
         CSE_BirthSignChosen,
+        CSE_ReviewBack,
         CSE_ReviewNext
     };
 

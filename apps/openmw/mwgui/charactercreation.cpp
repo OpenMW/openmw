@@ -285,7 +285,9 @@ namespace MWGui
     {
         MWBase::Environment::get().getWindowManager()->removeDialog(mReviewDialog);
         mReviewDialog = 0;
+        mCreationStage = CSE_ReviewBack;
 
+        MWBase::Environment::get().getWindowManager()->popGuiMode();
         MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Birth);
     }
 
