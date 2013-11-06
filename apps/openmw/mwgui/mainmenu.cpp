@@ -9,6 +9,8 @@
 #include "../mwbase/journal.hpp"
 #include "../mwbase/dialoguemanager.hpp"
 
+#include "savegamedialog.hpp"
+
 namespace MWGui
 {
 
@@ -84,6 +86,19 @@ namespace MWGui
             MWBase::Environment::get().getWindowManager()->setNewGame(true);
             MWBase::Environment::get().getDialogueManager()->clear();
             MWBase::Environment::get().getJournal()->clear();
+        }
+
+        else if (sender == mButtons["loadgame"])
+        {
+            MWGui::SaveGameDialog* dialog = new MWGui::SaveGameDialog();
+            dialog->setLoadOrSave(true);
+            dialog->setVisible(true);
+        }
+        else if (sender == mButtons["savegame"])
+        {
+            MWGui::SaveGameDialog* dialog = new MWGui::SaveGameDialog();
+            dialog->setLoadOrSave(false);
+            dialog->setVisible(true);
         }
     }
 

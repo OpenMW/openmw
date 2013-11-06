@@ -14,7 +14,7 @@ namespace MWGui
         MYGUI_RTTI_DERIVED(ImageButton)
 
     public:
-        MyGUI::IntSize getRequestedSize();
+        MyGUI::IntSize getRequestedSize(bool logError = true);
 
     protected:
         virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
