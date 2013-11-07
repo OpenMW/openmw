@@ -160,3 +160,8 @@ target_link_libraries(opencs
     ${QT_LIBRARIES}
     components
 )
+
+if(DPKG_PROGRAM)
+    INSTALL(TARGETS opencs RUNTIME DESTINATION games COMPONENT opencs)
+endif()
+
