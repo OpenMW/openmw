@@ -350,7 +350,6 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     addResourcesDirectory(mResDir / "mygui");
     addResourcesDirectory(mResDir / "water");
     addResourcesDirectory(mResDir / "shadows");
-    addZipResource(mResDir / "mygui" / "Obliviontt.zip");
 
     OEngine::Render::WindowSettings windowSettings;
     windowSettings.fullscreen = settings.getBool("fullscreen", "Video");
