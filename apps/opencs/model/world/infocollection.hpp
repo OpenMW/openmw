@@ -23,6 +23,10 @@ namespace CSMWorld
 
         public:
 
+            virtual int getAppendIndex (const std::string& id,
+                UniversalId::Type type = UniversalId::Type_None) const;
+            ///< \param type Will be ignored, unless the collection supports multiple record types
+
             void load (ESM::ESMReader& reader, bool base, const ESM::Dialogue& dialogue);
 
             std::pair<MapConstIterator, MapConstIterator> getTopicRange (const std::string& topic)

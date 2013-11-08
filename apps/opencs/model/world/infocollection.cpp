@@ -1,6 +1,8 @@
 
 #include "infocollection.hpp"
 
+#include <stdexcept>
+
 #include <components/esm/esmreader.hpp>
 #include <components/esm/loaddial.hpp>
 
@@ -17,7 +19,7 @@ void CSMWorld::InfoCollection::load (const Info& record, bool base)
         record2.mState = base ? RecordBase::State_BaseOnly : RecordBase::State_ModifiedOnly;
         (base ? record2.mBase : record2.mModified) = record;
 
-        appendRecord (record2);
+        insertRecord (record2, getIdMap().size());
     }
     else
     {
@@ -31,6 +33,27 @@ void CSMWorld::InfoCollection::load (const Info& record, bool base)
 
         setRecord (index, record2);
     }
+}
+
+int CSMWorld::InfoCollection::getAppendIndex (const std::string& id, UniversalId::Type type) const
+{
+    std::string::size_type separator = id.find_last_of ('#');
+
+    if (separator==std::string::npos)
+        throw std::runtime_error ("invalid info ID: " + id);
+
+    std::pair<MapConstIterator, MapConstIterator> range = getTopicRange (id.substr (0, separator));
+
+    if (range.first==range.second)
+        return Collection<Info, IdAccessor<Info> >::getAppendIndex (id, type);
+
+    int index = 0;
+
+    for (; range.first!=range.second; ++range.first)
+        if (range.first->second>index)
+            index = range.first->second;
+
+    return index+1;
 }
 
 void CSMWorld::InfoCollection::load (ESM::ESMReader& reader, bool base, const ESM::Dialogue& dialogue)
@@ -85,14 +108,14 @@ std::pair<CSMWorld::InfoCollection::MapConstIterator, CSMWorld::InfoCollection::
     // Skip invalid records: The beginning of a topic string could be identical to another topic
     // string.
     for (; begin!=getIdMap().end(); ++begin)
-        if (getRecord (begin->second).get().mTopicId==topic)
+        if (Misc::StringUtils::lowerCase (getRecord (begin->second).get().mTopicId)==topic2)
             break;
 
     // Find end
     MapConstIterator end = begin;
 
     for (; end!=getIdMap().end(); ++end)
-        if (getRecord (end->second).get().mTopicId!=topic)
+        if (Misc::StringUtils::lowerCase (getRecord (end->second).get().mTopicId)!=topic2)
             break;
 
     return std::make_pair (begin, end);
