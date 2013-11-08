@@ -383,7 +383,6 @@ IF(NOT WIN32 AND NOT APPLE)
 
         # Install licenses
         INSTALL(FILES "DejaVu Font License.txt" DESTINATION "${LICDIR}" )
-        INSTALL(FILES "Daedric Font License.txt" DESTINATION "${LICDIR}" )
         INSTALL(FILES "OFL.txt" DESTINATION "${LICDIR}" )
         INSTALL(FILES "extern/shiny/License.txt" DESTINATION "${LICDIR}" RENAME "Shiny License.txt" )
     ENDIF (DPKG_PROGRAM)
@@ -458,7 +457,6 @@ if(WIN32)
         "${OpenMW_SOURCE_DIR}/GPL3.txt"
         "${OpenMW_SOURCE_DIR}/OFL.txt"
         "${OpenMW_SOURCE_DIR}/DejaVu Font License.txt"
-        "${OpenMW_SOURCE_DIR}/Daedric Font License.txt"
         "${OpenMW_BINARY_DIR}/settings-default.cfg"
         "${OpenMW_BINARY_DIR}/transparency-overrides.cfg"
         "${OpenMW_BINARY_DIR}/Release/openmw.exe"
