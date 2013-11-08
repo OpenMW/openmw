@@ -51,6 +51,10 @@ namespace CSMWorld
             Collection (const Collection&);
             Collection& operator= (const Collection&);
 
+        protected:
+
+            const std::map<std::string, int>& getIdMap() const;
+
         public:
 
             Collection();
@@ -127,6 +131,12 @@ namespace CSMWorld
             void setRecord (int index, const Record<ESXRecordT>& record);
             ///< \attention This function must not change the ID.
     };
+
+    template<typename ESXRecordT, typename IdAccessorT>
+    const std::map<std::string, int>& Collection<ESXRecordT, IdAccessorT>::getIdMap() const
+    {
+        return mIndex;
+    }
 
     template<typename ESXRecordT, typename IdAccessorT>
     Collection<ESXRecordT, IdAccessorT>::Collection()

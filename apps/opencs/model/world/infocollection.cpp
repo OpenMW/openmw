@@ -4,6 +4,8 @@
 #include <components/esm/esmreader.hpp>
 #include <components/esm/loaddial.hpp>
 
+#include <components/misc/stringops.hpp>
+
 void CSMWorld::InfoCollection::load (const Info& record, bool base)
 {
     int index = searchId (record.mId);
@@ -34,7 +36,8 @@ void CSMWorld::InfoCollection::load (const Info& record, bool base)
 void CSMWorld::InfoCollection::load (ESM::ESMReader& reader, bool base, const ESM::Dialogue& dialogue)
 {
     /// \todo put records into proper order
-    std::string id = dialogue.mId + "#" + reader.getHNOString ("INAM");
+    std::string id = Misc::StringUtils::lowerCase (dialogue.mId) + "#" +
+        reader.getHNOString ("INAM");
 
     if (reader.isNextSub ("DELE"))
     {
@@ -70,4 +73,27 @@ void CSMWorld::InfoCollection::load (ESM::ESMReader& reader, bool base, const ES
 
         load (record, base);
     }
+}
+
+std::pair<CSMWorld::InfoCollection::MapConstIterator, CSMWorld::InfoCollection::MapConstIterator>
+    CSMWorld::InfoCollection::getTopicRange (const std::string& topic) const
+{
+    std::string topic2 = Misc::StringUtils::lowerCase (topic);
+
+    MapConstIterator begin = getIdMap().lower_bound (topic2);
+
+    // Skip invalid records: The beginning of a topic string could be identical to another topic
+    // string.
+    for (; begin!=getIdMap().end(); ++begin)
+        if (getRecord (begin->second).get().mTopicId==topic)
+            break;
+
+    // Find end
+    MapConstIterator end = begin;
+
+    for (; end!=getIdMap().end(); ++end)
+        if (getRecord (end->second).get().mTopicId!=topic)
+            break;
+
+    return std::make_pair (begin, end);
 }
