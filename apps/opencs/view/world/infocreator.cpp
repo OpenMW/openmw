@@ -7,6 +7,8 @@
 #include <QLineEdit>
 #include <QUuid>
 
+#include <components/misc/stringops.hpp>
+
 #include "../../model/world/data.hpp"
 #include "../../model/world/commands.hpp"
 #include "../../model/world/columns.hpp"
@@ -14,7 +16,7 @@
 
 std::string CSVWorld::InfoCreator::getId() const
 {
-    std::string id = mTopic->text().toUtf8().constData();
+    std::string id = Misc::StringUtils::lowerCase (mTopic->text().toUtf8().constData());
 
     std::string unique = QUuid::createUuid().toByteArray().data();
 
