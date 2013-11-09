@@ -120,7 +120,10 @@ namespace MWGui
                     MWBase::Environment::get().getWorld ()->getStore ().get<ESM::MagicEffect>().find(effectIt->mEffectID);
 
                 MagicEffectInfo effectInfo;
-                effectInfo.mSource = it->second.mName;
+                if (it->second.mName != "")
+                    effectInfo.mSource = it->second.mName;
+                else
+                    effectInfo.mSource = getSpellDisplayName(it->first);
                 effectInfo.mKey = MWMechanics::EffectKey (effectIt->mEffectID);
                 if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetSkill)
                     effectInfo.mKey.mArg = effectIt->mSkill;
