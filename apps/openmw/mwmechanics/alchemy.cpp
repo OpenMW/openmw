@@ -273,7 +273,7 @@ void MWMechanics::Alchemy::addPotion (const std::string& name)
         
         newRecord.mName = name;
 
-        int index = static_cast<int> (std::rand()/static_cast<double> (RAND_MAX)*6);
+        int index = static_cast<int> (std::rand()/static_cast<double> (RAND_MAX+1)*6);
         assert (index>=0 && index<6);
         
         static const char *name[] = { "standard", "bargain", "cheap", "fresh", "exclusive", "quality" };

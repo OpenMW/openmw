@@ -466,6 +466,8 @@ namespace MWWorld
             virtual bool getGodModeState();
 
             virtual bool toggleGodMode();
+
+            virtual void castSpell (const MWWorld::Ptr& actor);
     };
 }
 

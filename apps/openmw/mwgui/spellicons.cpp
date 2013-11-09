@@ -97,6 +97,8 @@ namespace MWGui
         }
 
         // add lasting effect spells/potions etc
+
+        // TODO: Move this to ActiveSpells
         const MWMechanics::ActiveSpells::TContainer& activeSpells = stats.getActiveSpells().getActiveSpells();
         for (MWMechanics::ActiveSpells::TContainer::const_iterator it = activeSpells.begin();
              it != activeSpells.end(); ++it)
@@ -105,31 +107,36 @@ namespace MWGui
 
             float timeScale = MWBase::Environment::get().getWorld()->getTimeScaleFactor();
 
+            int i=0;
             for (std::vector<ESM::ENAMstruct>::const_iterator effectIt = list.mList.begin();
-                 effectIt != list.mList.end(); ++effectIt)
+                 effectIt != list.mList.end(); ++effectIt, ++i)
             {
+                if (effectIt->mRange != it->second.mRange)
+                    continue;
+
+                float randomFactor = it->second.mRandom[i];
+
                 const ESM::MagicEffect* magicEffect =
                     MWBase::Environment::get().getWorld ()->getStore ().get<ESM::MagicEffect>().find(effectIt->mEffectID);
 
                 MagicEffectInfo effectInfo;
-                effectInfo.mSource = getSpellDisplayName (it->first);
+                effectInfo.mSource = it->second.mName;
                 effectInfo.mKey = MWMechanics::EffectKey (effectIt->mEffectID);
                 if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetSkill)
                     effectInfo.mKey.mArg = effectIt->mSkill;
                 else if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetAttribute)
                     effectInfo.mKey.mArg = effectIt->mAttribute;
-                effectInfo.mMagnitude = effectIt->mMagnMin + (effectIt->mMagnMax-effectIt->mMagnMin) * it->second.second;
+                effectInfo.mMagnitude = effectIt->mMagnMin + (effectIt->mMagnMax-effectIt->mMagnMin) * randomFactor;
                 effectInfo.mRemainingTime = effectIt->mDuration +
-                        (it->second.first - MWBase::Environment::get().getWorld()->getTimeStamp())*3600/timeScale;
+                        (it->second.mTimeStamp - MWBase::Environment::get().getWorld()->getTimeStamp())*3600/timeScale;
 
                 // ingredients need special casing for their magnitude / duration
-                /// \todo duplicated from ActiveSpells, helper function?
                 if (MWBase::Environment::get().getWorld()->getStore().get<ESM::Ingredient>().search (it->first))
                 {
-                    effectInfo.mRemainingTime = effectIt->mDuration * it->second.second +
-                            (it->second.first - MWBase::Environment::get().getWorld()->getTimeStamp())*3600/timeScale;
+                    effectInfo.mRemainingTime = effectIt->mDuration * randomFactor +
+                            (it->second.mTimeStamp - MWBase::Environment::get().getWorld()->getTimeStamp())*3600/timeScale;
 
-                    effectInfo.mMagnitude = static_cast<int> (0.05*it->second.second / (0.1 * magicEffect->mData.mBaseCost));
+                    effectInfo.mMagnitude = static_cast<int> (0.05*randomFactor / (0.1 * magicEffect->mData.mBaseCost));
                 }
 
                 effects[effectIt->mEffectID].push_back (effectInfo);
@@ -288,6 +295,10 @@ namespace MWGui
 
     ESM::EffectList SpellIcons::getSpellEffectList (const std::string& id)
     {
+        if (const ESM::Enchantment* enchantment =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search (id))
+            return enchantment->mEffects;
+
         if (const ESM::Spell *spell =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search (id))
             return spell->mEffects;

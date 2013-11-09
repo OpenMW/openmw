@@ -26,6 +26,8 @@
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/spellsuccess.hpp"
+
 
 #include "../mwrender/sky.hpp"
 #include "../mwrender/animation.hpp"
@@ -2017,6 +2019,117 @@ namespace MWWorld
             {
                 contentLoader.load(col.getPath(*it), idx);
             }
+        }
+    }
+
+    void World::castSpell(const Ptr &actor)
+    {
+        MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
+        stats.setAttackingOrSpell(false);
+
+        std::string selectedSpell = stats.getSpells().getSelectedSpell();
+        if (!selectedSpell.empty())
+        {
+            const ESM::Spell* spell = getStore().get<ESM::Spell>().search(selectedSpell);
+
+            // Check mana
+            bool fail = false;
+            MWMechanics::DynamicStat<float> magicka = stats.getMagicka();
+            if (magicka.getCurrent() < spell->mData.mCost)
+            {
+                MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicInsufficientSP}");
+                fail = true;
+            }
+
+            // Reduce mana
+            if (!fail)
+            {
+                magicka.setCurrent(magicka.getCurrent() - spell->mData.mCost);
+                stats.setMagicka(magicka);
+            }
+
+            // Check success
+            int successChance = MWMechanics::getSpellSuccessChance(selectedSpell, actor);
+            int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+            if (!fail && roll >= successChance)
+            {
+                MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicSkillFail}");
+                fail = true;
+            }
+
+            if (fail)
+            {
+                // Failure sound
+                for (std::vector<ESM::ENAMstruct>::const_iterator iter (spell->mEffects.mList.begin());
+                    iter!=spell->mEffects.mList.end(); ++iter)
+                {
+                    const ESM::MagicEffect *magicEffect = getStore().get<ESM::MagicEffect>().find (
+                        iter->mEffectID);
+
+                    static const std::string schools[] = {
+                        "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
+                    };
+
+                    MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+                    sndMgr->playSound3D(actor, "Spell Failure " + schools[magicEffect->mData.mSchool], 1.0f, 1.0f);
+                    break;
+                }
+                return;
+            }
+
+
+            actor.getClass().getCreatureStats(actor).getActiveSpells().addSpell(selectedSpell, actor, ESM::RT_Self);
+            // TODO: RT_Range, RT_Touch
+            return;
+        }
+
+        InventoryStore& inv = actor.getClass().getInventoryStore(actor);
+        if (inv.getSelectedEnchantItem() != inv.end())
+        {
+            MWWorld::Ptr item = *inv.getSelectedEnchantItem();
+            std::string id = item.getClass().getEnchantment(item);
+            const ESM::Enchantment* enchantment = getStore().get<ESM::Enchantment>().search (id);
+
+
+            if (enchantment->mData.mType == ESM::Enchantment::WhenUsed)
+            {
+                // Check if there's enough charge left
+                const float enchantCost = enchantment->mData.mCost;
+                MWMechanics::NpcStats &stats = MWWorld::Class::get(actor).getNpcStats(actor);
+                int eSkill = stats.getSkill(ESM::Skill::Enchant).getModified();
+                const float castCost = enchantCost - (enchantCost / 100) * (eSkill - 10);
+
+                if (item.getCellRef().mEnchantmentCharge == -1)
+                    item.getCellRef().mEnchantmentCharge = enchantment->mData.mCharge;
+
+                if (item.getCellRef().mEnchantmentCharge < castCost)
+                {
+                    MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicInsufficientCharge}");
+                    return;
+                }
+
+                // Reduce charge
+                item.getCellRef().mEnchantmentCharge -= castCost;
+            }
+            if (enchantment->mData.mType == ESM::Enchantment::CastOnce)
+            {
+                item.getRefData().setCount(item.getRefData().getCount()-1);
+            }
+
+            std::string itemName = item.getClass().getName(item);
+            actor.getClass().getCreatureStats(actor).getActiveSpells().addSpell(id, actor, ESM::RT_Self, itemName);
+
+            if (!item.getRefData().getCount())
+            {
+                // Item was used up
+                MWBase::Environment::get().getWindowManager()->unsetSelectedSpell();
+                inv.setSelectedEnchantItem(inv.end());
+            }
+            else
+                MWBase::Environment::get().getWindowManager()->setSelectedEnchantItem(item); // Set again to show the modified charge
+
+
+            // TODO: RT_Range, RT_Touch
         }
     }
 }

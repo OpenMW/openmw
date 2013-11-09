@@ -15,6 +15,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwworld/class.hpp"
 
@@ -64,15 +65,19 @@ namespace MWMechanics
         {
             std::pair<ESM::EffectList, std::pair<bool, bool> > effects = getEffectList (iter->first);
 
-            const MWWorld::TimeStamp& start = iter->second.first;
-            float magnitude = iter->second.second;
+            const MWWorld::TimeStamp& start = iter->second.mTimeStamp;
 
-            for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.first.mList.begin());
-                iter!=effects.first.mList.end(); ++iter)
+            int i = 0;
+            for (std::vector<ESM::ENAMstruct>::const_iterator effectIter (effects.first.mList.begin());
+                effectIter!=effects.first.mList.end(); ++effectIter, ++i)
             {
-                if (iter->mDuration)
+                float magnitude = iter->second.mRandom[i];
+                if (effectIter->mRange != iter->second.mRange)
+                    continue;
+
+                if (effectIter->mDuration)
                 {
-                    int duration = iter->mDuration;
+                    int duration = effectIter->mDuration;
                     
                     if (effects.second.first)
                         duration *= magnitude;
@@ -89,9 +94,9 @@ namespace MWMechanics
                         {
                             const ESM::MagicEffect *magicEffect =
                                 MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
-                                iter->mEffectID);                            
+                                effectIter->mEffectID);
                                 
-                            if (iter->mDuration==0)
+                            if (effectIter->mDuration==0)
                             {
                                 param.mMagnitude =
                                     static_cast<int> (magnitude / (0.1 * magicEffect->mData.mBaseCost));
@@ -104,9 +109,9 @@ namespace MWMechanics
                         }
                         else
                             param.mMagnitude = static_cast<int> (
-                                (iter->mMagnMax-iter->mMagnMin)*magnitude + iter->mMagnMin);
+                                (effectIter->mMagnMax-effectIter->mMagnMin)*magnitude + effectIter->mMagnMin);
                                 
-                        mEffects.add (*iter, param);
+                        mEffects.add (*effectIter, param);
                     }
                 }
             }
@@ -115,6 +120,10 @@ namespace MWMechanics
 
     std::pair<ESM::EffectList, std::pair<bool, bool> > ActiveSpells::getEffectList (const std::string& id) const
     {
+        if (const ESM::Enchantment* enchantment =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search (id))
+            return std::make_pair (enchantment->mEffects, std::make_pair(false, false));
+
         if (const ESM::Spell *spell =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search (id))
             return std::make_pair (spell->mEffects, std::make_pair(false, false));
@@ -156,7 +165,7 @@ namespace MWMechanics
     : mSpellsChanged (false), mLastUpdate (MWBase::Environment::get().getWorld()->getTimeStamp())
     {}
 
-    bool ActiveSpells::addSpell (const std::string& id, const MWWorld::Ptr& actor)
+    bool ActiveSpells::addSpell (const std::string& id, const MWWorld::Ptr& actor, ESM::RangeType range, const std::string& name)
     {
         std::pair<ESM::EffectList, std::pair<bool, bool> > effects = getEffectList (id);
         bool stacks = effects.second.second;
@@ -196,11 +205,41 @@ namespace MWMechanics
             random *= 0.25 * x;
         }
 
+        ActiveSpellParams params;
+        for (unsigned int i=0; i<effects.first.mList.size(); ++i)
+            params.mRandom.push_back(static_cast<float> (std::rand()) / RAND_MAX);
+        params.mRange = range;
+        params.mTimeStamp = MWBase::Environment::get().getWorld()->getTimeStamp();
+        params.mName = name;
+
         if (iter==mSpells.end() || stacks)
-            mSpells.insert (std::make_pair (id,
-                std::make_pair (MWBase::Environment::get().getWorld()->getTimeStamp(), random)));
+            mSpells.insert (std::make_pair (id, params));
         else
-            iter->second = std::make_pair (MWBase::Environment::get().getWorld()->getTimeStamp(), random);
+            iter->second = params;
+
+        // Play sounds
+        for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.first.mList.begin());
+            iter!=effects.first.mList.end(); ++iter)
+        {
+            if (iter->mRange != range)
+                continue;
+
+            const ESM::MagicEffect *magicEffect =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
+                iter->mEffectID);
+
+            static const std::string schools[] = {
+                "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
+            };
+
+            MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+            if(!magicEffect->mHitSound.empty())
+                sndMgr->playSound3D(actor, magicEffect->mHitSound, 1.0f, 1.0f);
+            else
+                sndMgr->playSound3D(actor, schools[magicEffect->mData.mSchool]+" hit", 1.0f, 1.0f);
+
+            break;
+        }
 
         mSpellsChanged = true;
 
@@ -249,13 +288,14 @@ namespace MWMechanics
                 duration = iter->mDuration;
         }
 
-        if (effects.second.first)
-            duration *= iterator->second.second;
+        // Scale duration by magnitude if needed
+        if (effects.second.first && iterator->second.mRandom.size())
+            duration *= iterator->second.mRandom.front();
 
         double scaledDuration = duration *
               MWBase::Environment::get().getWorld()->getTimeScaleFactor()/(60*60);
 
-        double usedUp = MWBase::Environment::get().getWorld()->getTimeStamp()-iterator->second.first;
+        double usedUp = MWBase::Environment::get().getWorld()->getTimeStamp()-iterator->second.mTimeStamp;
 
         if (usedUp>=scaledDuration)
             return 0;

@@ -653,6 +653,9 @@ void Animation::handleTextKey(AnimState &state, const std::string &groupname, co
         MWWorld::Class::get(mPtr).hit(mPtr, MWMechanics::CreatureStats::AT_Thrust);
     else if(evt.compare(off, len, "hit") == 0)
         MWWorld::Class::get(mPtr).hit(mPtr);
+
+    else if (groupname == "spellcast" && evt.substr(evt.size()-7, 7) == "release")
+        MWBase::Environment::get().getWorld()->castSpell(mPtr);
 }
 
 

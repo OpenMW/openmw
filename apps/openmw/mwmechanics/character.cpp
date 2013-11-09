@@ -531,6 +531,11 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
                     else
                         sndMgr->playSound3D(mPtr, schools[effect->mData.mSchool]+" cast", 1.0f, 1.0f);
                 }
+                if (inv.getSelectedEnchantItem() != inv.end())
+                {
+                    // Enchanted items cast immediately (no animation)
+                    MWBase::Environment::get().getWorld()->castSpell(mPtr);
+                }
             }
             else if(mWeaponType == WeapType_PickProbe)
             {
