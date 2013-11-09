@@ -1996,24 +1996,47 @@ namespace MWWorld
             const ESM::Spell* spell = getStore().get<ESM::Spell>().search(selectedSpell);
 
             // Check mana
+            bool fail = false;
             MWMechanics::DynamicStat<float> magicka = stats.getMagicka();
             if (magicka.getCurrent() < spell->mData.mCost)
             {
                 MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicInsufficientSP}");
-                return;
+                fail = true;
             }
 
             // Reduce mana
-            magicka.setCurrent(magicka.getCurrent() - spell->mData.mCost);
-            stats.setMagicka(magicka);
+            if (!fail)
+            {
+                magicka.setCurrent(magicka.getCurrent() - spell->mData.mCost);
+                stats.setMagicka(magicka);
+            }
 
             // Check success
             int successChance = MWMechanics::getSpellSuccessChance(selectedSpell, actor);
             int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
-            if (roll >= successChance)
+            if (!fail && roll >= successChance)
             {
                 MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicSkillFail}");
-                // TODO sound: "Spell Failure <School>"
+                fail = true;
+            }
+
+            if (fail)
+            {
+                // Failure sound
+                for (std::vector<ESM::ENAMstruct>::const_iterator iter (spell->mEffects.mList.begin());
+                    iter!=spell->mEffects.mList.end(); ++iter)
+                {
+                    const ESM::MagicEffect *magicEffect = getStore().get<ESM::MagicEffect>().find (
+                        iter->mEffectID);
+
+                    static const std::string schools[] = {
+                        "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
+                    };
+
+                    MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+                    sndMgr->playSound3D(actor, "Spell Failure " + schools[magicEffect->mData.mSchool], 1.0f, 1.0f);
+                    break;
+                }
                 return;
             }
 
