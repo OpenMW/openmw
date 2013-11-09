@@ -2,6 +2,7 @@
 #include "infocollection.hpp"
 
 #include <stdexcept>
+#include <iterator>
 
 #include <components/esm/esmreader.hpp>
 #include <components/esm/loaddial.hpp>
@@ -19,7 +20,27 @@ void CSMWorld::InfoCollection::load (const Info& record, bool base)
         record2.mState = base ? RecordBase::State_BaseOnly : RecordBase::State_ModifiedOnly;
         (base ? record2.mBase : record2.mModified) = record;
 
-        insertRecord (record2, getIdMap().size());
+        int index = -1;
+
+        std::string topic = Misc::StringUtils::lowerCase (record2.get().mTopicId);
+
+        if (!record2.get().mPrev.empty())
+        {
+            index = getIndex (record2.get().mPrev, topic);
+
+            if (index!=-1)
+                ++index;
+        }
+
+        if (index==-1 && !record2.get().mNext.empty())
+        {
+            index = getIndex (record2.get().mNext, topic);
+        }
+
+        if (index==-1)
+            index = getIdMap().size();
+
+        insertRecord (record2, index);
     }
     else
     {
@@ -33,6 +54,19 @@ void CSMWorld::InfoCollection::load (const Info& record, bool base)
 
         setRecord (index, record2);
     }
+}
+
+int CSMWorld::InfoCollection::getIndex (const std::string& id, const std::string& topic) const
+{
+    std::string fullId = Misc::StringUtils::lowerCase (topic) + "#" +  id;
+
+    std::pair<MapConstIterator, MapConstIterator> range = getTopicRange (topic);
+
+    for (; range.first!=range.second; ++range.first)
+        if (range.first->first==fullId)
+            return std::distance (getIdMap().begin(), range.first);
+
+    return -1;
 }
 
 int CSMWorld::InfoCollection::getAppendIndex (const std::string& id, UniversalId::Type type) const
@@ -58,7 +92,6 @@ int CSMWorld::InfoCollection::getAppendIndex (const std::string& id, UniversalId
 
 void CSMWorld::InfoCollection::load (ESM::ESMReader& reader, bool base, const ESM::Dialogue& dialogue)
 {
-    /// \todo put records into proper order
     std::string id = Misc::StringUtils::lowerCase (dialogue.mId) + "#" +
         reader.getHNOString ("INAM");
 
