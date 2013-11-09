@@ -34,11 +34,14 @@ namespace MWMechanics
 
         void updateNpc(const MWWorld::Ptr &ptr, float duration, bool paused);
 
+
+
             void adjustMagicEffects (const MWWorld::Ptr& creature);
 
             void calculateDynamicStats (const MWWorld::Ptr& ptr);
 
             void calculateCreatureStatModifiers (const MWWorld::Ptr& ptr);
+            void calculateNpcStatModifiers (const MWWorld::Ptr& ptr);
 
             void calculateRestoration (const MWWorld::Ptr& ptr, float duration);
 

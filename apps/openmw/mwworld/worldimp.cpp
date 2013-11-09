@@ -2077,6 +2077,7 @@ namespace MWWorld
                 return;
             }
 
+            actor.getClass().skillUsageSucceeded(actor, MWMechanics::spellSchoolToSkill(MWMechanics::getSpellSchool(selectedSpell, actor)), 0);
 
             actor.getClass().getCreatureStats(actor).getActiveSpells().addSpell(selectedSpell, actor, ESM::RT_Self);
             // TODO: RT_Range, RT_Touch
