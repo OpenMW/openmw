@@ -2053,26 +2053,43 @@ namespace MWWorld
             std::string id = item.getClass().getEnchantment(item);
             const ESM::Enchantment* enchantment = getStore().get<ESM::Enchantment>().search (id);
 
-            // Check if there's enough charge left
-            const float enchantCost = enchantment->mData.mCost;
-            MWMechanics::NpcStats &stats = MWWorld::Class::get(actor).getNpcStats(actor);
-            int eSkill = stats.getSkill(ESM::Skill::Enchant).getModified();
-            const float castCost = enchantCost - (enchantCost / 100) * (eSkill - 10);
 
-            if (item.getCellRef().mEnchantmentCharge == -1)
-                item.getCellRef().mEnchantmentCharge = enchantment->mData.mCharge;
-
-            if (item.getCellRef().mEnchantmentCharge < castCost)
+            if (enchantment->mData.mType == ESM::Enchantment::WhenUsed)
             {
-                MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicInsufficientCharge}");
-                return;
-            }
+                // Check if there's enough charge left
+                const float enchantCost = enchantment->mData.mCost;
+                MWMechanics::NpcStats &stats = MWWorld::Class::get(actor).getNpcStats(actor);
+                int eSkill = stats.getSkill(ESM::Skill::Enchant).getModified();
+                const float castCost = enchantCost - (enchantCost / 100) * (eSkill - 10);
 
-            // Reduce charge
-            item.getCellRef().mEnchantmentCharge -= castCost;
+                if (item.getCellRef().mEnchantmentCharge == -1)
+                    item.getCellRef().mEnchantmentCharge = enchantment->mData.mCharge;
+
+                if (item.getCellRef().mEnchantmentCharge < castCost)
+                {
+                    MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicInsufficientCharge}");
+                    return;
+                }
+
+                // Reduce charge
+                item.getCellRef().mEnchantmentCharge -= castCost;
+            }
+            if (enchantment->mData.mType == ESM::Enchantment::CastOnce)
+            {
+                item.getRefData().setCount(item.getRefData().getCount()-1);
+            }
 
             std::string itemName = item.getClass().getName(item);
             actor.getClass().getCreatureStats(actor).getActiveSpells().addSpell(id, actor, ESM::RT_Self, itemName);
+
+            if (!item.getRefData().getCount())
+            {
+                // Item was used up
+                MWBase::Environment::get().getWindowManager()->unsetSelectedSpell();
+                inv.setSelectedEnchantItem(inv.end());
+            }
+            else
+                MWBase::Environment::get().getWindowManager()->setSelectedEnchantItem(item); // Set again to show the modified charge
 
 
             // TODO: RT_Range, RT_Touch
