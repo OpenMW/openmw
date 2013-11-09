@@ -19,6 +19,8 @@
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/spellsuccess.hpp"
+
 
 #include "../mwrender/sky.hpp"
 #include "../mwrender/animation.hpp"
@@ -1981,6 +1983,77 @@ namespace MWWorld
         mGodMode = !mGodMode;
 
         return mGodMode;
+    }
+
+    void World::castSpell(const Ptr &actor)
+    {
+        MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
+        stats.setAttackingOrSpell(false);
+
+        std::string selectedSpell = stats.getSpells().getSelectedSpell();
+        if (!selectedSpell.empty())
+        {
+            const ESM::Spell* spell = getStore().get<ESM::Spell>().search(selectedSpell);
+
+            // Check mana
+            MWMechanics::DynamicStat<float> magicka = stats.getMagicka();
+            if (magicka.getCurrent() < spell->mData.mCost)
+            {
+                MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicInsufficientSP}");
+                return;
+            }
+
+            // Reduce mana
+            magicka.setCurrent(magicka.getCurrent() - spell->mData.mCost);
+            stats.setMagicka(magicka);
+
+            // Check success
+            int successChance = MWMechanics::getSpellSuccessChance(selectedSpell, actor);
+            int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+            if (roll >= successChance)
+            {
+                MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicSkillFail}");
+                // TODO sound: "Spell Failure <School>"
+                return;
+            }
+
+
+            actor.getClass().getCreatureStats(actor).getActiveSpells().addSpell(selectedSpell, actor, ESM::RT_Self);
+            // TODO: RT_Range, RT_Touch
+            return;
+        }
+
+        InventoryStore& inv = actor.getClass().getInventoryStore(actor);
+        if (inv.getSelectedEnchantItem() != inv.end())
+        {
+            MWWorld::Ptr item = *inv.getSelectedEnchantItem();
+            std::string id = item.getClass().getEnchantment(item);
+            const ESM::Enchantment* enchantment = getStore().get<ESM::Enchantment>().search (id);
+
+            // Check if there's enough charge left
+            const float enchantCost = enchantment->mData.mCost;
+            MWMechanics::NpcStats &stats = MWWorld::Class::get(actor).getNpcStats(actor);
+            int eSkill = stats.getSkill(ESM::Skill::Enchant).getModified();
+            const float castCost = enchantCost - (enchantCost / 100) * (eSkill - 10);
+
+            if (item.getCellRef().mEnchantmentCharge == -1)
+                item.getCellRef().mEnchantmentCharge = enchantment->mData.mCharge;
+
+            if (item.getCellRef().mEnchantmentCharge < castCost)
+            {
+                MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicInsufficientCharge}");
+                return;
+            }
+
+            // Reduce charge
+            item.getCellRef().mEnchantmentCharge -= castCost;
+
+            std::string itemName = item.getClass().getName(item);
+            actor.getClass().getCreatureStats(actor).getActiveSpells().addSpell(id, actor, ESM::RT_Self, itemName);
+
+
+            // TODO: RT_Range, RT_Touch
+        }
     }
 
 }

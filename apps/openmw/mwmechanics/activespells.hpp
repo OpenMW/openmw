@@ -9,6 +9,8 @@
 
 #include "magiceffects.hpp"
 
+#include <components/esm/defs.hpp>
+
 namespace ESM
 {
     struct Spell;
@@ -22,6 +24,22 @@ namespace MWWorld
 
 namespace MWMechanics
 {
+    struct ActiveSpellParams
+    {
+        // Only apply effects of this range type
+        ESM::RangeType mRange;
+
+        // When the spell was added
+        MWWorld::TimeStamp mTimeStamp;
+
+        // Random factor for each effect
+        std::vector<float> mRandom;
+
+        // Display name, we need this for enchantments, which don't have a name - so you need to supply the
+        // name of the item with the enchantment to addSpell
+        std::string mName;
+    };
+
     /// \brief Lasting spell effects
     ///
     /// \note The name of this class is slightly misleading, since it also handels lasting potion
@@ -30,7 +48,7 @@ namespace MWMechanics
     {
         public:
 
-            typedef std::multimap<std::string, std::pair<MWWorld::TimeStamp, float> > TContainer;
+            typedef std::multimap<std::string, ActiveSpellParams > TContainer;
             typedef TContainer::const_iterator TIterator;
 
         private:
@@ -51,9 +69,13 @@ namespace MWMechanics
 
             ActiveSpells();
 
-            bool addSpell (const std::string& id, const MWWorld::Ptr& actor);
+            bool addSpell (const std::string& id, const MWWorld::Ptr& actor, ESM::RangeType range = ESM::RT_Self, const std::string& name = "");
             ///< Overwrites an existing spell with the same ID. If the spell does not have any
             /// non-instant effects, it is ignored.
+            /// @param id
+            /// @param actor
+            /// @param range Only effects with range type \a range will be applied
+            /// @param name Display name for enchantments, since they don't have a name in their record
             ///
             /// \return Has the spell been added?
 
