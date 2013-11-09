@@ -47,6 +47,7 @@ namespace MWMechanics
         if(!paused)
         {
             updateDrowning(ptr, duration);
+            calculateNpcStatModifiers(ptr);
             updateEquippedLight(ptr, duration);
         }
     }
@@ -167,6 +168,20 @@ namespace MWMechanics
                              effects.get(EffectKey(18+i)).mMagnitude);
 
             creatureStats.setDynamic(i, stat);
+        }
+    }
+
+    void Actors::calculateNpcStatModifiers (const MWWorld::Ptr& ptr)
+    {
+        NpcStats &npcStats = MWWorld::Class::get(ptr).getNpcStats(ptr);
+        const MagicEffects &effects = npcStats.getMagicEffects();
+
+        // skills
+        for(int i = 0;i < ESM::Skill::Length;++i)
+        {
+            Stat<float>& skill = npcStats.getSkill(i);
+            skill.setModifier(effects.get(EffectKey(ESM::MagicEffect::FortifySkill, i)).mMagnitude -
+                             effects.get(EffectKey(ESM::MagicEffect::DrainSkill, i)).mMagnitude);
         }
     }
 
