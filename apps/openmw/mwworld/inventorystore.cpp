@@ -325,7 +325,8 @@ int MWWorld::InventoryStore::remove(const Ptr& item, int count, const Ptr& actor
 
         if (*mSlots[slot] == item)
         {
-            unequipSlot(slot, actor);
+            // restacking is disabled cause it may break removal
+            unequipSlot(slot, actor, false);
             break;
         }
     }
@@ -345,22 +346,25 @@ int MWWorld::InventoryStore::remove(const Ptr& item, int count, const Ptr& actor
     return retCount;
 }
 
-MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipSlot(int slot, const MWWorld::Ptr& actor)
+MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipSlot(int slot, const MWWorld::Ptr& actor, bool restack)
 {
     ContainerStoreIterator it = getSlot(slot);
 
     if (it != end())
     {
-        // restack item previously in this slot
         ContainerStoreIterator retval = it;
-        for (MWWorld::ContainerStoreIterator iter (begin()); iter != end(); ++iter)
-        {
-            if (stacks(*iter, *it))
+
+        if (restack) {
+            // restack item previously in this slot
+            for (MWWorld::ContainerStoreIterator iter (begin()); iter != end(); ++iter)
             {
-                iter->getRefData().setCount(iter->getRefData().getCount() + it->getRefData().getCount());
-                it->getRefData().setCount(0);
-                retval = iter;
-                break;
+                if (stacks(*iter, *it))
+                {
+                    iter->getRefData().setCount(iter->getRefData().getCount() + it->getRefData().getCount());
+                    it->getRefData().setCount(0);
+                    retval = iter;
+                    break;
+                }
             }
         }
 
