@@ -11,6 +11,7 @@
 #include "../mwworld/actiontake.hpp"
 #include "../mwworld/actionapply.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/containerstore.hpp"
 #include "../mwworld/physicssystem.hpp"
 #include "../mwworld/player.hpp"
 #include "../mwworld/nullaction.hpp"
@@ -164,9 +165,10 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Potion> *ref =
             ptr.get<ESM::Potion>();
 
-        ptr.getRefData().setCount (ptr.getRefData().getCount()-1);
-
         MWWorld::Ptr actor = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+
+        // remove used potion (assume it is present in inventory)
+        ptr.getContainerStore()->remove(ptr, 1, actor);
 
         boost::shared_ptr<MWWorld::Action> action (
             new MWWorld::ActionApply (actor, ref->mBase->mId));

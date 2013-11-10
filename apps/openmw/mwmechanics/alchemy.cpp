@@ -240,7 +240,8 @@ void MWMechanics::Alchemy::removeIngredients()
     for (TIngredientsContainer::iterator iter (mIngredients.begin()); iter!=mIngredients.end(); ++iter)
         if (!iter->isEmpty())
         {
-            iter->getRefData().setCount (iter->getRefData().getCount()-1);
+            iter->getContainerStore()->remove(*iter, 1, mAlchemist);
+
             if (iter->getRefData().getCount()<1)
             {
                 needsUpdate = true;

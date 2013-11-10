@@ -202,30 +202,17 @@ namespace MWGui
 
     void TradeWindow::addOrRemoveGold(int amount)
     {
-        bool goldFound = false;
-        MWWorld::Ptr gold;
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
         MWWorld::ContainerStore& playerStore = MWWorld::Class::get(player).getContainerStore(player);
 
-        for (MWWorld::ContainerStoreIterator it = playerStore.begin();
-                it != playerStore.end(); ++it)
+        if (amount > 0)
         {
-            if (Misc::StringUtils::ciEqual(it->getCellRef().mRefID, "gold_001"))
-            {
-                goldFound = true;
-                gold = *it;
-            }
-        }
-        if (goldFound)
-        {
-            gold.getRefData().setCount(gold.getRefData().getCount() + amount);
+            MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), "Gold_001", amount);
+            playerStore.add(ref.getPtr(), player);
         }
         else
         {
-            assert(amount > 0);
-            MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), "Gold_001");
-            ref.getPtr().getRefData().setCount(amount);
-            playerStore.add(ref.getPtr(), player);
+            playerStore.remove("gold_001", - amount, player);
         }
     }
 

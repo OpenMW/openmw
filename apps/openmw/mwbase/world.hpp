@@ -309,14 +309,19 @@ namespace MWBase
 
             virtual void update (float duration, bool paused) = 0;
 
-            virtual bool placeObject(const MWWorld::Ptr& object, float cursorX, float cursorY) = 0;
-            ///< place an object into the gameworld at the specified cursor position
+            virtual bool placeObject (const MWWorld::Ptr& object, float cursorX, float cursorY, int amount) = 0;
+            ///< copy and place an object into the gameworld at the specified cursor position
             /// @param object
             /// @param cursor X (relative 0-1)
             /// @param cursor Y (relative 0-1)
+            /// @param number of objects to place
             /// @return true if the object was placed, or false if it was rejected because the position is too far away
 
-            virtual void dropObjectOnGround (const MWWorld::Ptr& actor, const MWWorld::Ptr& object) = 0;
+            virtual void dropObjectOnGround (const MWWorld::Ptr& actor, const MWWorld::Ptr& object, int amount) = 0;
+            ///< copy and place an object into the gameworld at the given actor's position
+            /// @param actor giving the dropped object position
+            /// @param object
+            /// @param number of objects to place
 
             virtual bool canPlaceObject (float cursorX, float cursorY) = 0;
             ///< @return true if it is possible to place on object at specified cursor location
@@ -408,6 +413,8 @@ namespace MWBase
             virtual bool toggleGodMode() = 0;
 
             virtual void castSpell (const MWWorld::Ptr& actor) = 0;
+
+            virtual void updateAnimParts(const MWWorld::Ptr& ptr) = 0;
     };
 }
 
