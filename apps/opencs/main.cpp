@@ -8,8 +8,8 @@
 #include <QIcon>
 
 // for Ogre::macBundlePath
-#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-#include <OSX/macUtils.h>
+#ifdef Q_OS_MAC
+#include <QDir>
 #endif
 
 class Application : public QApplication
@@ -37,14 +37,27 @@ class Application : public QApplication
 
 int main(int argc, char *argv[])
 {
-#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-    // set current dir to bundle path
-    boost::filesystem::path bundlePath = boost::filesystem::path(Ogre::macBundlePath()).parent_path();
-    boost::filesystem::current_path(bundlePath);
-#endif
-
     Q_INIT_RESOURCE (resources);
     Application mApplication (argc, argv);
+
+#ifdef Q_OS_MAC
+    QDir dir(QCoreApplication::applicationDirPath());
+    if (dir.dirName() == "MacOS") {
+        dir.cdUp();
+        dir.cdUp();
+        dir.cdUp();
+    }
+    QDir::setCurrent(dir.absolutePath());
+
+    // force Qt to load only LOCAL plugins, don't touch system Qt installation
+    QDir pluginsPath(QCoreApplication::applicationDirPath());
+    pluginsPath.cdUp();
+    pluginsPath.cd("Plugins");
+
+    QStringList libraryPaths;
+    libraryPaths << pluginsPath.path() << QCoreApplication::applicationDirPath();
+    mApplication.setLibraryPaths(libraryPaths);
+#endif
 
     mApplication.setWindowIcon (QIcon (":./opencs.png"));
 
