@@ -219,7 +219,6 @@ namespace MWClass
             MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
                 newRef.getPtr().get<ESM::Miscellaneous>();
             newPtr = MWWorld::Ptr(&cell.mMiscItems.insert(*ref), &cell);
-            newPtr.getRefData ().setCount(1);
             newPtr.getCellRef().mGoldValue = goldAmount;
         } else {
             MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =

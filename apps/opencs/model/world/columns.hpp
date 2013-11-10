@@ -152,6 +152,8 @@ namespace CSMWorld
             ColumnId_DoorPositionXRot = 139,
             ColumnId_DoorPositionYRot = 140,
             ColumnId_DoorPositionZRot = 141,
+            ColumnId_DialogueType = 142,
+            ColumnId_Scope = 143,
 
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.

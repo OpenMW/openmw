@@ -34,7 +34,7 @@ public:
   float getFVer() const { if(mHeader.mData.version == VER_12) return 1.2; else return 1.3; }
   const std::string getAuthor() const { return mHeader.mData.author.toString(); }
   const std::string getDesc() const { return mHeader.mData.desc.toString(); }
-  const std::vector<Header::MasterData> &getMasters() const { return mHeader.mMaster; }
+  const std::vector<Header::MasterData> &getGameFiles() const { return mHeader.mMaster; }
   int getFormat() const;
   const NAME &retSubName() const { return mCtx.subName; }
   uint32_t getSubSize() const { return mCtx.leftSub; }

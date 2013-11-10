@@ -6,17 +6,21 @@
 #include <QLocalSocket>
 #include <QMessageBox>
 
+#include <OgreRoot.h>
+#include <OgreRenderWindow.h>
+
 #include "model/doc/document.hpp"
 #include "model/world/data.hpp"
 
-
-CS::Editor::Editor() : mViewManager (mDocumentManager)
+CS::Editor::Editor()
+    : mDocumentManager (mCfgMgr), mViewManager (mDocumentManager)
 {
     mIpcServerName = "org.openmw.OpenCS";
 
     setupDataFiles();
 
     mNewGame.setLocalData (mLocal);
+    mFileDialog.setLocalData (mLocal);
 
     connect (&mViewManager, SIGNAL (newGameRequest ()), this, SLOT (createGame ()));
     connect (&mViewManager, SIGNAL (newAddonRequest ()), this, SLOT (createAddon ()));
@@ -28,23 +32,27 @@ CS::Editor::Editor() : mViewManager (mDocumentManager)
     connect (&mStartup, SIGNAL (loadDocument()), this, SLOT (loadDocument ()));
     connect (&mStartup, SIGNAL (editConfig()), this, SLOT (showSettings ()));
 
-    connect (&mFileDialog, SIGNAL(openFiles()), this, SLOT(openFiles()));
-    connect (&mFileDialog, SIGNAL(createNewFile()), this, SLOT(createNewFile()));
+    connect (&mFileDialog, SIGNAL(signalOpenFiles (const boost::filesystem::path&)),
+             this, SLOT(openFiles (const boost::filesystem::path&)));
+
+    connect (&mFileDialog, SIGNAL(signalCreateNewFile (const boost::filesystem::path&)),
+             this, SLOT(createNewFile (const boost::filesystem::path&)));
 
     connect (&mNewGame, SIGNAL (createRequest (const boost::filesystem::path&)),
-        this, SLOT (createNewGame (const boost::filesystem::path&)));
+             this, SLOT (createNewGame (const boost::filesystem::path&)));
 }
 
 void CS::Editor::setupDataFiles()
 {
     boost::program_options::variables_map variables;
-    boost::program_options::options_description desc;
+    boost::program_options::options_description desc("Syntax: opencs <options>\nAllowed options");
 
     desc.add_options()
     ("data", boost::program_options::value<Files::PathContainer>()->default_value(Files::PathContainer(), "data")->multitoken())
     ("data-local", boost::program_options::value<std::string>()->default_value(""))
     ("fs-strict", boost::program_options::value<bool>()->implicit_value(true)->default_value(false))
-    ("encoding", boost::program_options::value<std::string>()->default_value("win1252"));
+    ("encoding", boost::program_options::value<std::string>()->default_value("win1252"))
+    ("resources", boost::program_options::value<std::string>()->default_value("resources"));
 
     boost::program_options::notify(variables);
 
@@ -79,13 +87,16 @@ void CS::Editor::setupDataFiles()
     }
 
     // Set the charset for reading the esm/esp files
-    QString encoding = QString::fromStdString(variables["encoding"].as<std::string>());
-    mFileDialog.setEncoding(encoding);
+    // QString encoding = QString::fromStdString(variables["encoding"].as<std::string>());
+    //mFileDialog.setEncoding(encoding);
 
     dataDirs.insert (dataDirs.end(), dataLocal.begin(), dataLocal.end());
 
+    mDocumentManager.setResourceDir (variables["resources"].as<std::string>());
+
     for (Files::PathContainer::const_iterator iter = dataDirs.begin(); iter != dataDirs.end(); ++iter)
     {
+
         QString path = QString::fromStdString(iter->string());
         mFileDialog.addFiles(path);
     }
@@ -109,48 +120,39 @@ void CS::Editor::createGame()
 void CS::Editor::createAddon()
 {
     mStartup.hide();
-
-    mFileDialog.newFile();
+    mFileDialog.showDialog (CSVDoc::ContentAction_New);
 }
 
 void CS::Editor::loadDocument()
 {
     mStartup.hide();
-
-    mFileDialog.openFile();
+    mFileDialog.showDialog (CSVDoc::ContentAction_Edit);
 }
 
-void CS::Editor::openFiles()
+void CS::Editor::openFiles (const boost::filesystem::path &savePath)
 {
     std::vector<boost::filesystem::path> files;
-    QStringList paths = mFileDialog.checkedItemsPaths();
 
-    foreach (const QString &path, paths) {
+    foreach (const QString &path, mFileDialog.selectedFilePaths())
         files.push_back(path.toStdString());
-    }
 
-    /// \todo Get the save path from the file dialogue
-
-    CSMDoc::Document *document = mDocumentManager.addDocument (files, *files.rbegin(), false);
+    CSMDoc::Document *document = mDocumentManager.addDocument (files, savePath, false);
 
     mViewManager.addView (document);
     mFileDialog.hide();
 }
 
-void CS::Editor::createNewFile()
+void CS::Editor::createNewFile (const boost::filesystem::path &savePath)
 {
     std::vector<boost::filesystem::path> files;
-    QStringList paths = mFileDialog.checkedItemsPaths();
 
-    foreach (const QString &path, paths) {
+    foreach (const QString &path, mFileDialog.selectedFilePaths()) {
         files.push_back(path.toStdString());
     }
 
-    files.push_back(mFileDialog.fileName().toStdString());
+    files.push_back(mFileDialog.filename().toStdString());
 
-    /// \todo Get the save path from the file dialogue.
-
-    CSMDoc::Document *document = mDocumentManager.addDocument (files, *files.rbegin(), true);
+    CSMDoc::Document *document = mDocumentManager.addDocument (files, savePath, true);
 
     mViewManager.addView (document);
     mFileDialog.hide();
@@ -211,6 +213,20 @@ int CS::Editor::run()
 {
     if (mLocal.empty())
         return 1;
+
+    // TODO: setting
+    Ogre::Root::getSingleton().setRenderSystem(Ogre::Root::getSingleton().getRenderSystemByName("OpenGL Rendering Subsystem"));
+
+    Ogre::Root::getSingleton().initialise(false);
+
+    // Create a hidden background window to keep resources
+    Ogre::NameValuePairList params;
+    params.insert(std::make_pair("title", ""));
+    params.insert(std::make_pair("FSAA", "0"));
+    params.insert(std::make_pair("vsync", "false"));
+    params.insert(std::make_pair("hidden", "true"));
+    Ogre::RenderWindow* hiddenWindow = Ogre::Root::getSingleton().createRenderWindow("InactiveHidden", 1, 1, false, &params);
+    hiddenWindow->setActive(false);
 
     mStartup.show();
 

@@ -85,7 +85,10 @@ void Repair::repair(const MWWorld::Ptr &itemToRepair)
     // tool used up?
     if (mTool.getCellRef().mCharge == 0)
     {
-        mTool.getRefData().setCount(0);
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::ContainerStore& store = MWWorld::Class::get(player).getContainerStore(player);
+
+        store.remove(mTool, 1, player);
 
         std::string message = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
                 .find("sNotifyMessage51")->getString();
@@ -93,8 +96,6 @@ void Repair::repair(const MWWorld::Ptr &itemToRepair)
         MWBase::Environment::get().getWindowManager()->messageBox((boost::format(message) % MWWorld::Class::get(mTool).getName(mTool)).str());
 
         // try to find a new tool of the same ID
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
-        MWWorld::ContainerStore& store = MWWorld::Class::get(player).getContainerStore(player);
         for (MWWorld::ContainerStoreIterator iter (store.begin());
              iter!=store.end(); ++iter)
         {

@@ -14,6 +14,8 @@
 
 #include "../mwbase/world.hpp"
 
+#include "contentloader.hpp"
+
 namespace Ogre
 {
     class Vector3;
@@ -40,6 +42,8 @@ namespace MWRender
     class CellRender;
     class Animation;
 }
+
+struct ContentLoader;
 
 namespace MWWorld
 {
@@ -113,6 +117,15 @@ namespace MWWorld
 
             void ensureNeededRecords();
 
+            /**
+             * @brief loadContentFiles - Loads content files (esm,esp,omwgame,omwaddon)
+             * @param fileCollections- Container which holds content file names and their paths
+             * @param content - Container which holds content file names
+             * @param contentLoader -
+             */
+            void loadContentFiles(const Files::Collections& fileCollections,
+                const std::vector<std::string>& content, ContentLoader& contentLoader);
+
             int mPlayIntro;
 
             bool mTeleportEnabled;
@@ -122,7 +135,7 @@ namespace MWWorld
 
             World (OEngine::Render::OgreRenderer& renderer,
                 const Files::Collections& fileCollections,
-                const std::vector<std::string>& master, const std::vector<std::string>& plugins,
+                const std::vector<std::string>& contentFiles,
                 const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir,
                 ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap, int mActivationDistanceOverride);
 
@@ -341,14 +354,19 @@ namespace MWWorld
 
             virtual void update (float duration, bool paused);
 
-            virtual bool placeObject (const Ptr& object, float cursorX, float cursorY);
-            ///< place an object into the gameworld at the specified cursor position
+            virtual bool placeObject (const MWWorld::Ptr& object, float cursorX, float cursorY, int amount);
+            ///< copy and place an object into the gameworld at the specified cursor position
             /// @param object
             /// @param cursor X (relative 0-1)
             /// @param cursor Y (relative 0-1)
+            /// @param number of objects to place
             /// @return true if the object was placed, or false if it was rejected because the position is too far away
 
-            virtual void dropObjectOnGround (const Ptr& actor, const Ptr& object);
+            virtual void dropObjectOnGround (const MWWorld::Ptr& actor, const MWWorld::Ptr& object, int amount);
+            ///< copy and place an object into the gameworld at the given actor's position
+            /// @param actor giving the dropped object position
+            /// @param object
+            /// @param number of objects to place
 
             virtual bool canPlaceObject(float cursorX, float cursorY);
             ///< @return true if it is possible to place on object at specified cursor location
@@ -455,6 +473,8 @@ namespace MWWorld
             virtual bool toggleGodMode();
 
             virtual void castSpell (const MWWorld::Ptr& actor);
+
+            virtual void updateAnimParts(const MWWorld::Ptr& ptr);
     };
 }
 

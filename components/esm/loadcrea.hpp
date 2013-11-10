@@ -20,6 +20,8 @@ class ESMWriter;
 
 struct Creature
 {
+    static unsigned int sRecordId;
+
     // Default is 0x48?
     enum Flags
     {
@@ -86,7 +88,7 @@ struct Creature
     AIPackageList mAiPackage;
 
     void load(ESMReader &esm);
-    void save(ESMWriter &esm);
+    void save(ESMWriter &esm) const;
 
     void blank();
     ///< Set record to default state (does not touch the ID).

@@ -13,6 +13,8 @@ class ESMWriter;
 
 struct Spell
 {
+    static unsigned int sRecordId;
+
     enum SpellType
     {
         ST_Spell = 0,   // Normal spell, must be cast and costs mana
@@ -42,7 +44,7 @@ struct Spell
     EffectList mEffects;
 
     void load(ESMReader &esm);
-    void save(ESMWriter &esm);
+    void save(ESMWriter &esm) const;
 
     void blank();
     ///< Set record to default state (does not touch the ID/index).

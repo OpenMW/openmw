@@ -45,6 +45,7 @@ namespace MWWorld
 
             mutable MWMechanics::MagicEffects mMagicEffects;
             mutable bool mMagicEffectsUpToDate;
+            bool mActorModelUpdateEnabled;
 
             typedef std::vector<ContainerStoreIterator> TSlots;
 
@@ -56,6 +57,8 @@ namespace MWWorld
             void copySlots (const InventoryStore& store);
 
             void initSlots (TSlots& slots);
+
+            void updateActorModel (const Ptr& actor);
 
         public:
 
@@ -76,7 +79,7 @@ namespace MWWorld
             ///
             /// @return if stacking happened, return iterator to the item that was stacked against, otherwise iterator to the newly inserted item.
 
-            void equip (int slot, const ContainerStoreIterator& iterator);
+            void equip (int slot, const ContainerStoreIterator& iterator, const Ptr& actor);
             ///< \note \a iterator can be an end-iterator
 
             void setSelectedEnchantItem(const ContainerStoreIterator& iterator);
@@ -104,10 +107,29 @@ namespace MWWorld
             ///< \attention This function is internal to the world model and should not be called from
             /// outside.
 
-            virtual bool stacks (const Ptr& ptr1, const Ptr& ptr2);
+            virtual bool stacks (const Ptr& stack, const Ptr& item);
             ///< @return true if the two specified objects can stack with each other
-            /// @note ptr1 is the item that is already in this container
+            /// @note stack is the item that is already in this container (it may be equipped)
 
+            virtual int remove(const Ptr& item, int count, const Ptr& actor);
+            ///< Remove \a count item(s) designated by \a item from this inventory.
+            ///
+            /// @return the number of items actually removed
+
+            ContainerStoreIterator unequipSlot(int slot, const Ptr& actor, bool restack = true);
+            ///< Unequip \a slot.
+            ///
+            /// @return an iterator to the item that was previously in the slot
+            /// (if \a restack is true, the item can be re-stacked so its count
+            /// may differ from when it was equipped).
+
+            ContainerStoreIterator unequipItem(const Ptr& item, const Ptr& actor);
+            ///< Unequip an item identified by its Ptr. An exception is thrown
+            /// if the item is not currently equipped.
+            ///
+            /// @return an iterator to the item that was previously in the slot
+            /// (it can be re-stacked so its count may be different than when it
+            /// was equipped).
     };
 }
 

@@ -2,6 +2,7 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
@@ -33,13 +34,13 @@ void LeveledListBase::load(ESMReader &esm)
         esm.getHNT(li.mLevel, "INTV");
     }
 }
-void LeveledListBase::save(ESMWriter &esm)
+void LeveledListBase::save(ESMWriter &esm) const
 {
     esm.writeHNT("DATA", mFlags);
     esm.writeHNT("NNAM", mChanceNone);
     esm.writeHNT<int>("INDX", mList.size());
 
-    for (std::vector<LevelItem>::iterator it = mList.begin(); it != mList.end(); ++it)
+    for (std::vector<LevelItem>::const_iterator it = mList.begin(); it != mList.end(); ++it)
     {
         esm.writeHNCString(mRecName, it->mId);
         esm.writeHNT("INTV", it->mLevel);
@@ -52,4 +53,8 @@ void LeveledListBase::save(ESMWriter &esm)
         mChanceNone = 0;
         mList.clear();
     }
+
+    unsigned int CreatureLevList::sRecordId = REC_LEVC;
+
+    unsigned int ItemLevList::sRecordId = REC_LEVI;
 }

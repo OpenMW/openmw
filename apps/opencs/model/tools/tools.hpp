@@ -11,10 +11,13 @@ namespace CSMWorld
     class UniversalId;
 }
 
+namespace CSMDoc
+{
+    class Operation;
+}
+
 namespace CSMTools
 {
-    class Verifier;
-    class Operation;
     class ReportModel;
 
     class Tools : public QObject
@@ -22,7 +25,7 @@ namespace CSMTools
             Q_OBJECT
 
             CSMWorld::Data& mData;
-            Verifier *mVerifier;
+            CSMDoc::Operation *mVerifier;
             std::map<int, ReportModel *> mReports;
             int mNextReportNumber;
             std::map<int, int> mActiveReports; // type, report number
@@ -31,12 +34,12 @@ namespace CSMTools
             Tools (const Tools&);
             Tools& operator= (const Tools&);
 
-            Verifier *getVerifier();
+            CSMDoc::Operation *getVerifier();
 
-            Operation *get (int type);
+            CSMDoc::Operation *get (int type);
             ///< Returns a 0-pointer, if operation hasn't been used yet.
 
-            const Operation *get (int type) const;
+            const CSMDoc::Operation *get (int type) const;
             ///< Returns a 0-pointer, if operation hasn't been used yet.
 
         public:
@@ -57,8 +60,6 @@ namespace CSMTools
             ///< The ownership of the returned report is not transferred.
 
         private slots:
-
-            void verifierDone();
 
             void verifierMessage (const QString& message, int type);
 

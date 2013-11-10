@@ -4,9 +4,12 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int Faction::sRecordId = REC_FACT;
+
     int& Faction::FADTstruct::getSkill (int index, bool ignored)
     {
         if (index<0 || index>=6)
@@ -47,7 +50,7 @@ void Faction::load(ESMReader &esm)
         mReactions.push_back(r);
     }
 }
-void Faction::save(ESMWriter &esm)
+void Faction::save(ESMWriter &esm) const
 {
     esm.writeHNCString("FNAM", mName);
 
@@ -61,7 +64,7 @@ void Faction::save(ESMWriter &esm)
 
     esm.writeHNT("FADT", mData, 240);
 
-    for (std::vector<Reaction>::iterator it = mReactions.begin(); it != mReactions.end(); ++it)
+    for (std::vector<Reaction>::const_iterator it = mReactions.begin(); it != mReactions.end(); ++it)
     {
         esm.writeHNString("ANAM", it->mFaction);
         esm.writeHNT("INTV", it->mReaction);

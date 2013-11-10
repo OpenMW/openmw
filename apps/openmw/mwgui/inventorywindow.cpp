@@ -145,10 +145,38 @@ namespace MWGui
 
         const ItemStack& item = mTradeModel->getItem(index);
 
-        unequipItem(item.mBase);
-
         MWWorld::Ptr object = item.mBase;
         int count = item.mCount;
+
+        if (item.mType == ItemStack::Type_Equipped)
+        {
+            MWWorld::InventoryStore& invStore = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
+            MWWorld::Ptr newStack = *invStore.unequipItem(item.mBase, mPtr);
+
+            // The unequipped item was re-stacked. We have to update the index
+            // since the item pointed does not exist anymore.
+            if (item.mBase != newStack)
+            {
+                // newIndex will store the index of the ItemStack the item was stacked on
+                int newIndex = -1;
+                for (size_t i=0; i < mTradeModel->getItemCount(); ++i)
+                {
+                    if (mTradeModel->getItem(i).mBase == newStack)
+                    {
+                        newIndex = i;
+                        break;
+                    }
+                }
+
+                if (newIndex == -1)
+                    throw std::runtime_error("Can't find restacked item");
+
+                index = newIndex;
+                object = mTradeModel->getItem(index).mBase;
+            }
+
+        }
+
         bool shift = MyGUI::InputManager::getInstance().isShiftPressed();
         if (MyGUI::InputManager::getInstance().isControlPressed())
             count = 1;
@@ -373,27 +401,6 @@ namespace MWGui
         }
 
         return MWWorld::Ptr();
-    }
-
-    void InventoryWindow::unequipItem(const MWWorld::Ptr& item)
-    {
-        MWWorld::InventoryStore& invStore = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
-
-        for (int slot=0; slot < MWWorld::InventoryStore::Slots; ++slot)
-        {
-            MWWorld::ContainerStoreIterator it = invStore.getSlot(slot);
-            if (it != invStore.end() && *it == item)
-            {
-                invStore.equip(slot, invStore.end());
-                std::string script = MWWorld::Class::get(*it).getScript(*it);
-
-                // Unset OnPCEquip Variable on item's script, if it has a script with that variable declared
-                if(script != "")
-                    (*it).getRefData().getLocals().setVarByInt(script, "onpcequip", 0);
-
-                return;
-            }
-        }
     }
 
     void InventoryWindow::updateEncumbranceBar()

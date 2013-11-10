@@ -1,4 +1,11 @@
 #include "worldimp.hpp"
+#ifdef _WIN32
+#include <boost/tr1/tr1/unordered_map>
+#elif defined HAVE_UNORDERED_MAP
+#include <unordered_map>
+#else
+#include <tr1/unordered_map>
+#endif
 
 #include <OgreSceneNode.h>
 
@@ -32,6 +39,10 @@
 #include "cellfunctors.hpp"
 #include "containerstore.hpp"
 #include "inventorystore.hpp"
+
+#include "contentloader.hpp"
+#include "esmloader.hpp"
+#include "omwloader.hpp"
 
 using namespace Ogre;
 
@@ -82,6 +93,38 @@ namespace
 
 namespace MWWorld
 {
+    struct GameContentLoader : public ContentLoader
+    {
+        GameContentLoader(Loading::Listener& listener)
+          : ContentLoader(listener)
+        {
+        }
+
+        bool addLoader(const std::string& extension, ContentLoader* loader)
+        {
+            return mLoaders.insert(std::make_pair(extension, loader)).second;
+        }
+
+        void load(const boost::filesystem::path& filepath, int& index)
+        {
+            LoadersContainer::iterator it(mLoaders.find(filepath.extension().string()));
+            if (it != mLoaders.end())
+            {
+                it->second->load(filepath, index);
+            }
+            else
+            {
+              std::string msg("Cannot load file: ");
+              msg += filepath.string();
+              throw std::runtime_error(msg.c_str());
+            }
+        }
+
+        private:
+          typedef std::tr1::unordered_map<std::string, ContentLoader*> LoadersContainer;
+          LoadersContainer mLoaders;
+    };
+
     Ptr World::getPtrViaHandle (const std::string& handle, Ptr::CellStore& cell)
     {
         if (MWWorld::LiveCellRef<ESM::Activator> *ref =
@@ -165,7 +208,7 @@ namespace MWWorld
 
     World::World (OEngine::Render::OgreRenderer& renderer,
         const Files::Collections& fileCollections,
-        const std::vector<std::string>& master, const std::vector<std::string>& plugins,
+        const std::vector<std::string>& contentFiles,
         const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir,
         ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap, int mActivationDistanceOverride)
     : mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
@@ -183,44 +226,22 @@ namespace MWWorld
 
         mWeatherManager = new MWWorld::WeatherManager(mRendering,&mFallback);
 
-        int idx = 0;
         // NOTE: We might need to reserve one more for the running game / save.
-        mEsm.resize(master.size() + plugins.size());
+        mEsm.resize(contentFiles.size());
         Loading::Listener* listener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         listener->loadingOn();
-        for (std::vector<std::string>::size_type i = 0; i < master.size(); i++, idx++)
-        {
-            boost::filesystem::path masterPath (fileCollections.getCollection (".esm").getPath (master[i]));
 
-            std::cout << "Loading ESM " << masterPath.string() << "\n";
-            listener->setLabel(masterPath.filename().string());
+        GameContentLoader gameContentLoader(*listener);
+        EsmLoader esmLoader(mStore, mEsm, encoder, *listener);
+        OmwLoader omwLoader(*listener);
 
-            // This parses the ESM file
-            ESM::ESMReader lEsm;
-            lEsm.setEncoder(encoder);
-            lEsm.setIndex(idx);
-            lEsm.setGlobalReaderList(&mEsm);
-            lEsm.open (masterPath.string());
-            mEsm[idx] = lEsm;
-            mStore.load (mEsm[idx], listener);
-        }
+        gameContentLoader.addLoader(".esm", &esmLoader);
+        gameContentLoader.addLoader(".esp", &esmLoader);
+        gameContentLoader.addLoader(".omwgame", &omwLoader);
+        gameContentLoader.addLoader(".omwaddon", &omwLoader);
 
-        for (std::vector<std::string>::size_type i = 0; i < plugins.size(); i++, idx++)
-        {
-            boost::filesystem::path pluginPath (fileCollections.getCollection (".esp").getPath (plugins[i]));
+        loadContentFiles(fileCollections, contentFiles, gameContentLoader);
 
-            std::cout << "Loading ESP " << pluginPath.string() << "\n";
-            listener->setLabel(pluginPath.filename().string());
-
-            // This parses the ESP file
-            ESM::ESMReader lEsm;
-            lEsm.setEncoder(encoder);
-            lEsm.setIndex(idx);
-            lEsm.setGlobalReaderList(&mEsm);
-            lEsm.open (pluginPath.string());
-            mEsm[idx] = lEsm;
-            mStore.load (mEsm[idx], listener);
-        }
         listener->loadingOff();
 
         // insert records that may not be present in all versions of MW
@@ -816,12 +837,13 @@ namespace MWWorld
 
     void World::deleteObject (const Ptr& ptr)
     {
-        if (ptr.getRefData().getCount()>0)
+        if (ptr.getRefData().getCount() > 0)
         {
-            ptr.getRefData().setCount (0);
+            ptr.getRefData().setCount(0);
 
-            if (mWorldScene->getActiveCells().find (ptr.getCell())!=mWorldScene->getActiveCells().end() &&
-                ptr.getRefData().isEnabled())
+            if (ptr.isInCell()
+                && mWorldScene->getActiveCells().find(ptr.getCell()) != mWorldScene->getActiveCells().end()
+                && ptr.getRefData().isEnabled())
             {
                 mWorldScene->removeObjectFromScene (ptr);
                 mLocalScripts.remove (ptr);
@@ -1456,7 +1478,7 @@ namespace MWWorld
             item.getRefData().getLocals().setVarByInt(script, "onpcdrop", 1);
     }
 
-    bool World::placeObject (const Ptr& object, float cursorX, float cursorY)
+    bool World::placeObject (const MWWorld::Ptr& object, float cursorX, float cursorY, int amount)
     {
         std::pair<bool, Ogre::Vector3> result = mPhysics->castRay(cursorX, cursorY);
 
@@ -1481,9 +1503,14 @@ namespace MWWorld
         pos.rot[0] = 0;
         pos.rot[1] = 0;
 
+        // copy the object and set its count
+        int origCount = object.getRefData().getCount();
+        object.getRefData().setCount(amount);
         Ptr dropped = copyObjectToCell(object, *cell, pos);
+        object.getRefData().setCount(origCount);
+
+        // only the player place items in the world, so no need to check actor
         PCDropped(dropped);
-        object.getRefData().setCount(0);
 
         return true;
     }
@@ -1528,7 +1555,7 @@ namespace MWWorld
         return dropped;
     }
 
-    void World::dropObjectOnGround (const Ptr& actor, const Ptr& object)
+    void World::dropObjectOnGround (const Ptr& actor, const Ptr& object, int amount)
     {
         MWWorld::Ptr::CellStore* cell = actor.getCell();
 
@@ -1549,10 +1576,14 @@ namespace MWWorld
             mPhysics->castRay(orig, dir, len);
         pos.pos[2] = hit.second.z;
 
+        // copy the object and set its count
+        int origCount = object.getRefData().getCount();
+        object.getRefData().setCount(amount);
         Ptr dropped = copyObjectToCell(object, *cell, pos);
+        object.getRefData().setCount(origCount);
+
         if(actor == mPlayer->getPlayer()) // Only call if dropped by player
             PCDropped(dropped);
-        object.getRefData().setCount(0);
     }
 
     void World::processChangedSettings(const Settings::CategorySettingVector& settings)
@@ -1918,7 +1949,6 @@ namespace MWWorld
         if(werewolf)
         {
             ManualRef ref(getStore(), "WerewolfRobe");
-            ref.getPtr().getRefData().setCount(1);
 
             // Configure item's script variables
             std::string script = Class::get(ref.getPtr()).getScript(ref.getPtr());
@@ -1930,18 +1960,11 @@ namespace MWWorld
 
             // Not sure this is right
             InventoryStore &inv = Class::get(actor).getInventoryStore(actor);
-            inv.equip(InventoryStore::Slot_Robe, inv.add(ref.getPtr(), actor));
+            inv.equip(InventoryStore::Slot_Robe, inv.add(ref.getPtr(), actor), actor);
         }
         else
         {
-            ContainerStore &store = Class::get(actor).getContainerStore(actor);
-
-            const std::string item = "WerewolfRobe";
-            for(ContainerStoreIterator iter(store.begin());iter != store.end();++iter)
-            {
-                if(Misc::StringUtils::ciEqual(iter->getCellRef().mRefID, item))
-                    iter->getRefData().setCount(0);
-            }
+            Class::get(actor).getContainerStore(actor).remove("WerewolfRobe", 1, actor);
         }
 
         if(actor.getRefData().getHandle() == "player")
@@ -1983,6 +2006,22 @@ namespace MWWorld
         mGodMode = !mGodMode;
 
         return mGodMode;
+    }
+
+    void World::loadContentFiles(const Files::Collections& fileCollections,
+        const std::vector<std::string>& content, ContentLoader& contentLoader)
+    {
+        std::vector<std::string>::const_iterator it(content.begin());
+        std::vector<std::string>::const_iterator end(content.end());
+        for (int idx = 0; it != end; ++it, ++idx)
+        {
+            boost::filesystem::path filename(*it);
+            const Files::MultiDirCollection& col = fileCollections.getCollection(filename.extension().string());
+            if (col.doesExist(*it))
+            {
+                contentLoader.load(col.getPath(*it), idx);
+            }
+        }
     }
 
     void World::castSpell(const Ptr &actor)
@@ -2122,4 +2161,8 @@ namespace MWWorld
         // TODO: Launch projectile if there's a Target portion
     }
 
+    void World::updateAnimParts(const Ptr& actor)
+    {
+        mRendering->updateAnimParts(actor);
+    }
 }

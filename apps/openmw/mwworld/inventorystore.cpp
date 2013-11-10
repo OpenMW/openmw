@@ -8,6 +8,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 
@@ -40,6 +41,7 @@ void MWWorld::InventoryStore::initSlots (TSlots& slots)
 
 MWWorld::InventoryStore::InventoryStore() : mMagicEffectsUpToDate (false)
  , mSelectedEnchantItem(end())
+ , mActorModelUpdateEnabled (true)
 {
     initSlots (mSlots);
 }
@@ -80,7 +82,7 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::add(const Ptr& itemPtr,
     return retVal;
 }
 
-void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& iterator)
+void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& iterator, const Ptr& actor)
 {
     if (slot<0 || slot>=static_cast<int> (mSlots.size()))
         throw std::runtime_error ("slot number out of range");
@@ -97,19 +99,8 @@ void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& ite
             throw std::runtime_error ("invalid slot");
     }
 
-    // restack item previously in this slot (if required)
     if (mSlots[slot] != end())
-    {
-        for (MWWorld::ContainerStoreIterator iter (begin()); iter!=end(); ++iter)
-        {
-            if (stacks(*iter, *mSlots[slot]))
-            {
-                iter->getRefData().setCount( iter->getRefData().getCount() + mSlots[slot]->getRefData().getCount() );
-                mSlots[slot]->getRefData().setCount(0);
-                break;
-            }
-        }
-    }
+        unequipSlot(slot, actor);
 
     // unstack item pointed to by iterator if required
     if (iterator!=end() && !slots.second && iterator->getRefData().getCount() > 1) // if slots.second is true, item can stay stacked when equipped
@@ -117,30 +108,21 @@ void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& ite
         // add the item again with a count of count-1, then set the count of the original (that will be equipped) to 1
         int count = iterator->getRefData().getCount();
         iterator->getRefData().setCount(count-1);
-        addImpl(*iterator);
+        addNewStack(*iterator);
         iterator->getRefData().setCount(1);
     }
 
     mSlots[slot] = iterator;
 
     flagAsModified();
+
+    updateActorModel(actor);
 }
 
 void MWWorld::InventoryStore::unequipAll(const MWWorld::Ptr& actor)
 {
     for (int slot=0; slot < MWWorld::InventoryStore::Slots; ++slot)
-    {
-        MWWorld::ContainerStoreIterator it = getSlot(slot);
-        if (it != end())
-        {
-            equip(slot, end());
-            std::string script = MWWorld::Class::get(*it).getScript(*it);
-
-            // Unset OnPCEquip Variable on item's script, if it has a script with that variable declared
-            if((actor.getRefData().getHandle() == "player") && (script != ""))
-                (*it).getRefData().getLocals().setVarByInt(script, "onpcequip", 0);
-        }
-    }
+        unequipSlot(slot, actor);
 }
 
 MWWorld::ContainerStoreIterator MWWorld::InventoryStore::getSlot (int slot)
@@ -168,6 +150,9 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& npc)
 
     TSlots slots;
     initSlots (slots);
+
+    // Disable model update during auto-equip
+    mActorModelUpdateEnabled = false;
 
     for (ContainerStoreIterator iter (begin()); iter!=end(); ++iter)
     {
@@ -224,10 +209,10 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& npc)
                 case 0:
                     continue;
                 case 2:
-                    invStore.equip(MWWorld::InventoryStore::Slot_CarriedLeft, invStore.end());
+                    invStore.unequipSlot(MWWorld::InventoryStore::Slot_CarriedLeft, npc);
                     break;
                 case 3:
-                    invStore.equip(MWWorld::InventoryStore::Slot_CarriedRight, invStore.end());
+                    invStore.unequipSlot(MWWorld::InventoryStore::Slot_CarriedRight, npc);
                     break;
             }
 
@@ -239,7 +224,7 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& npc)
                     // add the item again with a count of count-1, then set the count of the original (that will be equipped) to 1
                     int count = iter->getRefData().getCount();
                     iter->getRefData().setCount(count-1);
-                    addImpl(*iter);
+                    addNewStack(*iter);
                     iter->getRefData().setCount(1);
                 }
             }
@@ -257,9 +242,12 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& npc)
             changed = true;
         }
 
+    mActorModelUpdateEnabled = true;
+
     if (changed)
     {
         mSlots.swap (slots);
+        updateActorModel(npc);
         flagAsModified();
     }
 }
@@ -297,20 +285,22 @@ void MWWorld::InventoryStore::flagAsModified()
     mMagicEffectsUpToDate = false;
 }
 
-bool MWWorld::InventoryStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
+bool MWWorld::InventoryStore::stacks(const Ptr& stack, const Ptr& item)
 {
-    bool canStack = MWWorld::ContainerStore::stacks(ptr1, ptr2);
+    bool canStack = MWWorld::ContainerStore::stacks(stack, item);
     if (!canStack)
         return false;
 
-    // don't stack if the item being checked against is currently equipped.
+    // don't stack if 'stack' (the item being checked against) is currently equipped.
     for (TSlots::const_iterator iter (mSlots.begin());
         iter!=mSlots.end(); ++iter)
     {
-        if (*iter != end() && ptr1 == **iter)
-            return false;
-        if (*iter != end() && ptr2 == **iter)
-            return false;
+        if (*iter != end() && stack == **iter)
+        {
+            bool stackWhenEquipped = MWWorld::Class::get(**iter).getEquipmentSlots(**iter).second;
+            if (!stackWhenEquipped)
+                return false;
+        }
     }
 
     return true;
@@ -324,4 +314,106 @@ void MWWorld::InventoryStore::setSelectedEnchantItem(const ContainerStoreIterato
 MWWorld::ContainerStoreIterator MWWorld::InventoryStore::getSelectedEnchantItem()
 {
     return mSelectedEnchantItem;
+}
+
+int MWWorld::InventoryStore::remove(const Ptr& item, int count, const Ptr& actor)
+{
+    for (int slot=0; slot < MWWorld::InventoryStore::Slots; ++slot)
+    {
+        if (mSlots[slot] == end())
+            continue;
+
+        if (*mSlots[slot] == item)
+        {
+            // restacking is disabled cause it may break removal
+            unequipSlot(slot, actor, false);
+            break;
+        }
+    }
+
+    int retCount = ContainerStore::remove(item, count, actor);
+
+    // If an armor/clothing item is removed, try to find a replacement,
+    // but not for the player nor werewolves.
+    if ((actor.getRefData().getHandle() != "player")
+            && !(MWWorld::Class::get(actor).getNpcStats(actor).isWerewolf()))
+    {
+        std::string type = item.getTypeName();
+        if ((type == typeid(ESM::Armor).name()) || (type == typeid(ESM::Clothing).name()))
+            autoEquip(actor);
+    }
+
+    return retCount;
+}
+
+MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipSlot(int slot, const MWWorld::Ptr& actor, bool restack)
+{
+    ContainerStoreIterator it = getSlot(slot);
+
+    if (it != end())
+    {
+        ContainerStoreIterator retval = it;
+
+        if (restack) {
+            // restack item previously in this slot
+            for (MWWorld::ContainerStoreIterator iter (begin()); iter != end(); ++iter)
+            {
+                if (stacks(*iter, *it))
+                {
+                    iter->getRefData().setCount(iter->getRefData().getCount() + it->getRefData().getCount());
+                    it->getRefData().setCount(0);
+                    retval = iter;
+                    break;
+                }
+            }
+        }
+
+        // empty this slot
+        mSlots[slot] = end();
+
+        if (actor.getRefData().getHandle() == "player")
+        {
+            // Unset OnPCEquip Variable on item's script, if it has a script with that variable declared
+            const std::string& script = Class::get(*it).getScript(*it);
+            if (script != "")
+                (*it).getRefData().getLocals().setVarByInt(script, "onpcequip", 0);
+
+            // Update HUD icon when removing player weapon or selected enchanted item.
+            // We have to check for both as the weapon could also be the enchanted item.
+            if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
+            {
+                // weapon
+                MWBase::Environment::get().getWindowManager()->unsetSelectedWeapon();
+            }
+            if ((mSelectedEnchantItem != end()) && (mSelectedEnchantItem == it))
+            {
+                // enchanted item
+                MWBase::Environment::get().getWindowManager()->unsetSelectedSpell();
+            }
+        }
+
+        updateActorModel(actor);
+
+        return retval;
+    }
+
+    return it;
+}
+
+MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipItem(const MWWorld::Ptr& item, const MWWorld::Ptr& actor)
+{
+    for (int slot=0; slot<MWWorld::InventoryStore::Slots; ++slot)
+    {
+        MWWorld::ContainerStoreIterator equipped = getSlot(slot);
+        if (equipped != end() && *equipped == item)
+            return unequipSlot(slot, actor);
+    }
+
+    throw std::runtime_error ("attempt to unequip an item that is not currently equipped");
+}
+
+void MWWorld::InventoryStore::updateActorModel(const MWWorld::Ptr& actor)
+{
+    if (mActorModelUpdateEnabled)
+        MWBase::Environment::get().getWorld()->updateAnimParts(actor);
 }

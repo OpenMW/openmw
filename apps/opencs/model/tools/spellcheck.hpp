@@ -5,12 +5,12 @@
 
 #include "../world/idcollection.hpp"
 
-#include "stage.hpp"
+#include "../doc/stage.hpp"
 
 namespace CSMTools
 {
     /// \brief VerifyStage: make sure that spell records are internally consistent
-    class SpellCheckStage : public Stage
+    class SpellCheckStage : public CSMDoc::Stage
     {
             const CSMWorld::IdCollection<ESM::Spell>& mSpells;
 

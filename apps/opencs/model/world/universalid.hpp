@@ -87,6 +87,10 @@ namespace CSMWorld
                 Type_RegionMap,
                 Type_Filter,
                 Type_Filters,
+                Type_Topics,
+                Type_Topic,
+                Type_Journals,
+                Type_Journal,
                 Type_Scene
             };
 

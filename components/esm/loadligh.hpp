@@ -16,6 +16,8 @@ class ESMWriter;
 
 struct Light
 {
+    static unsigned int sRecordId;
+
     enum Flags
     {
         Dynamic     = 0x001,
@@ -44,7 +46,7 @@ struct Light
     std::string mSound, mScript, mModel, mIcon, mName, mId;
 
     void load(ESMReader &esm);
-    void save(ESMWriter &esm);
+    void save(ESMWriter &esm) const;
 
     void blank();
     ///< Set record to default state (does not touch the ID).
