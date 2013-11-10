@@ -7,7 +7,6 @@
 #include <QApplication>
 #include <QIcon>
 
-// for Ogre::macBundlePath
 #ifdef Q_OS_MAC
 #include <QDir>
 #endif
