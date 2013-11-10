@@ -9,6 +9,8 @@
 
 #include "../filter/filterbox.hpp"
 
+#include "../render/scenewidget.hpp"
+
 #include "tablebottombox.hpp"
 #include "creator.hpp"
 #include "scenetoolbar.hpp"
@@ -41,15 +43,10 @@ toolbar->addTool (new SceneToolMode (toolbar));
 toolbar->addTool (new SceneToolMode (toolbar));
     layout2->addWidget (toolbar, 0);
 
-    /// \todo replace with rendering widget
-    QPalette palette2 (palette());
-    palette2.setColor (QPalette::Background, Qt::white);
-    QLabel *placeholder = new QLabel ("Here goes the 3D scene", this);
-    placeholder->setAutoFillBackground (true);
-    placeholder->setPalette (palette2);
-    placeholder->setAlignment (Qt::AlignHCenter);
 
-    layout2->addWidget (placeholder, 1);
+    CSVRender::SceneWidget* sceneWidget = new CSVRender::SceneWidget(this);
+
+    layout2->addWidget (sceneWidget, 1);
 
     layout->insertLayout (0, layout2, 1);
 

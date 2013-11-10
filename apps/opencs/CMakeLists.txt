@@ -63,6 +63,10 @@ opencs_units (view/world
     scenetoolmode
     )
 
+opencs_units (view/render
+	scenewidget
+	)
+
 opencs_units_noqt (view/world
     dialoguesubview subviews
     enumdelegate vartypedelegate recordstatusdelegate idtypedelegate datadisplaydelegate
