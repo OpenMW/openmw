@@ -77,22 +77,31 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::end()
     return ContainerStoreIterator (this);
 }
 
-bool MWWorld::ContainerStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
+bool MWWorld::ContainerStore::stacks(const Ptr& stack, const Ptr& item)
 {
-    /// \todo add current enchantment charge here when it is implemented
-    if (  Misc::StringUtils::ciEqual(ptr1.getCellRef().mRefID, ptr2.getCellRef().mRefID)
-          && MWWorld::Class::get(ptr1).getScript(ptr1) == "" // item with a script never stacks
-          && MWWorld::Class::get(ptr1).getEnchantment(ptr1) == "" // item with enchantment never stacks (we could revisit this later, but for now it makes selecting items in the spell window much easier)
-        && ptr1.getCellRef().mOwner == ptr2.getCellRef().mOwner
-        && ptr1.getCellRef().mSoul == ptr2.getCellRef().mSoul
-          // item that is already partly used up never stacks
-          && (!MWWorld::Class::get(ptr1).hasItemHealth(ptr1) || ptr1.getCellRef().mCharge == -1
-              || MWWorld::Class::get(ptr1).getItemMaxHealth(ptr1) == ptr1.getCellRef().mCharge)
-        && (!MWWorld::Class::get(ptr2).hasItemHealth(ptr2) || ptr2.getCellRef().mCharge == -1
-            || MWWorld::Class::get(ptr2).getItemMaxHealth(ptr2) == ptr2.getCellRef().mCharge))
-        return true;
+    const MWWorld::Class& cls1 = MWWorld::Class::get(stack);
+    const MWWorld::Class& cls2 = MWWorld::Class::get(item);
 
-    return false;
+    /// \todo add current enchantment charge here when it is implemented
+    return stack != item // an item never stacks onto itself
+        && Misc::StringUtils::ciEqual(stack.getCellRef().mRefID, item.getCellRef().mRefID)
+        && stack.getCellRef().mOwner == item.getCellRef().mOwner
+        && stack.getCellRef().mSoul == item.getCellRef().mSoul
+
+        // item with a script never stacks
+        && cls1.getScript(stack) == ""
+        && cls2.getScript(item) == ""
+
+        // item with enchantment never stacks (we could revisit this later,
+        // but for now it makes selecting items in the spell window much easier)
+        && cls1.getEnchantment(stack) == ""
+        && cls2.getEnchantment(item) == ""
+
+        // item that is already partly used up never stacks
+        && (!cls1.hasItemHealth(stack) || stack.getCellRef().mCharge == -1
+            || cls1.getItemMaxHealth(stack) == stack.getCellRef().mCharge)
+        && (!cls2.hasItemHealth(item) || item.getCellRef().mCharge == -1
+            || cls2.getItemMaxHealth(item) == item.getCellRef().mCharge);
 }
 
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr, const Ptr& actorPtr)
@@ -140,22 +149,20 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr)
         || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_025")
         || Misc::StringUtils::ciEqual(ptr.getCellRef().mRefID, "gold_100"))
     {
-        MWWorld::ManualRef ref(esmStore, "Gold_001");
-
         int count = MWWorld::Class::get(ptr).getValue(ptr) * ptr.getRefData().getCount();
 
-        ref.getPtr().getRefData().setCount(count);
         for (MWWorld::ContainerStoreIterator iter (begin(type)); iter!=end(); ++iter)
         {
             if (Misc::StringUtils::ciEqual((*iter).get<ESM::Miscellaneous>()->mRef.mRefID, "gold_001"))
             {
-                (*iter).getRefData().setCount( (*iter).getRefData().getCount() + count);
+                iter->getRefData().setCount(iter->getRefData().getCount() + count);
                 flagAsModified();
                 return iter;
             }
         }
 
-        return addImpl(ref.getPtr());
+        MWWorld::ManualRef ref(esmStore, "Gold_001", count);
+        return addNewStack(ref.getPtr());
     }
 
     // determine whether to stack or not
@@ -171,10 +178,10 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr)
         }
     }
     // if we got here, this means no stacking
-    return addImpl(ptr);
+    return addNewStack(ptr);
 }
 
-MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImpl (const Ptr& ptr)
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addNewStack (const Ptr& ptr)
 {
     ContainerStoreIterator it = begin();
 
@@ -198,6 +205,40 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImpl (const Ptr& ptr
     return it;
 }
 
+int MWWorld::ContainerStore::remove(const std::string& itemId, int count, const Ptr& actor)
+{
+    int toRemove = count;
+
+    for (ContainerStoreIterator iter(begin()); iter != end() && toRemove > 0; ++iter)
+        if (Misc::StringUtils::ciEqual(iter->getCellRef().mRefID, itemId))
+            toRemove -= remove(*iter, toRemove, actor);
+
+    // number of removed items
+    return count - toRemove;
+}
+
+int MWWorld::ContainerStore::remove(const Ptr& item, int count, const Ptr& actor)
+{
+    assert(this == item.getContainerStore());
+
+    int toRemove = count;
+    RefData& itemRef = item.getRefData();
+
+    if (itemRef.getCount() <= toRemove)
+    {
+        toRemove -= itemRef.getCount();
+        itemRef.setCount(0);
+    }
+    else
+    {
+        itemRef.setCount(itemRef.getCount() - toRemove);
+        toRemove = 0;
+    }
+
+    // number of removed items
+    return count - toRemove;
+}
+
 void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const std::string& owner, const MWWorld::ESMStore& store)
 {
     for (std::vector<ESM::ContItem>::const_iterator iter (items.mList.begin()); iter!=items.mList.end();
@@ -216,7 +257,7 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
 
     try
     {
-        ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), id);
+        ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), id, count);
 
         if (ref.getPtr().getTypeName()==typeid (ESM::ItemLevList).name())
         {
@@ -266,7 +307,6 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
         }
         else
         {
-            ref.getPtr().getRefData().setCount (count);
             ref.getPtr().getCellRef().mOwner = owner;
             addImp (ref.getPtr());
         }

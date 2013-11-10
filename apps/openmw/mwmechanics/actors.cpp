@@ -47,6 +47,7 @@ namespace MWMechanics
         if(!paused)
         {
             updateDrowning(ptr, duration);
+            calculateNpcStatModifiers(ptr);
             updateEquippedLight(ptr, duration);
         }
     }
@@ -170,6 +171,20 @@ namespace MWMechanics
         }
     }
 
+    void Actors::calculateNpcStatModifiers (const MWWorld::Ptr& ptr)
+    {
+        NpcStats &npcStats = MWWorld::Class::get(ptr).getNpcStats(ptr);
+        const MagicEffects &effects = npcStats.getMagicEffects();
+
+        // skills
+        for(int i = 0;i < ESM::Skill::Length;++i)
+        {
+            Stat<float>& skill = npcStats.getSkill(i);
+            skill.setModifier(effects.get(EffectKey(ESM::MagicEffect::FortifySkill, i)).mMagnitude -
+                             effects.get(EffectKey(ESM::MagicEffect::DrainSkill, i)).mMagnitude);
+        }
+    }
+
     void Actors::updateDrowning(const MWWorld::Ptr& ptr, float duration)
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();
@@ -229,7 +244,7 @@ namespace MWMechanics
                         heldIter->getClass().setRemainingUsageTime(*heldIter, timeRemaining);
                     else
                     {
-                        heldIter->getRefData().setCount(0); // remove it
+                        inventoryStore.remove(*heldIter, 1, ptr); // remove it
                         return;
                     }
                 }
@@ -238,7 +253,7 @@ namespace MWMechanics
             // Both NPC and player lights extinguish in water.
             if(MWBase::Environment::get().getWorld()->isSwimming(ptr))
             {
-                heldIter->getRefData().setCount(0); // remove it
+                inventoryStore.remove(*heldIter, 1, ptr); // remove it
 
                 // ...But, only the player makes a sound.
                 if(isPlayer)

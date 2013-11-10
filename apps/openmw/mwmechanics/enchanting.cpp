@@ -14,7 +14,6 @@ namespace MWMechanics
     Enchanting::Enchanting()
         : mCastStyle(ESM::Enchantment::CastOnce)
         , mSelfEnchanting(false)
-        , mOldItemCount(0)
     {}
 
     void Enchanting::setOldItem(MWWorld::Ptr oldItem)
@@ -24,7 +23,6 @@ namespace MWMechanics
         {
             mObjectType = mOldItemPtr.getTypeName();
             mOldItemId = mOldItemPtr.getCellRef().mRefID;
-            mOldItemCount = mOldItemPtr.getRefData().getCount();
         }
         else
         {
@@ -55,17 +53,18 @@ namespace MWMechanics
 
     bool Enchanting::create()
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        const MWWorld::Ptr& player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        MWWorld::ContainerStore& store = MWWorld::Class::get(player).getContainerStore(player);
         ESM::Enchantment enchantment;
         enchantment.mData.mCharge = getGemCharge();
 
-        mSoulGemPtr.getRefData().setCount (mSoulGemPtr.getRefData().getCount()-1);
+        store.remove(mSoulGemPtr, 1, player);
 
         //Exception for Azura Star, new one will be added after enchanting
         if(boost::iequals(mSoulGemPtr.get<ESM::Miscellaneous>()->mBase->mId, "Misc_SoulGem_Azura"))
         {
             MWWorld::ManualRef azura (MWBase::Environment::get().getWorld()->getStore(), "Misc_SoulGem_Azura");
-            MWWorld::Class::get (player).getContainerStore (player).add (azura.getPtr(), player);
+            store.add(azura.getPtr(), player);
         }
 
         if(mSelfEnchanting)
@@ -84,16 +83,18 @@ namespace MWMechanics
         enchantment.mData.mCost = getEnchantPoints();
         enchantment.mEffects = mEffectList;
 
+        // Create a new item
+        MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), mOldItemId, 1);
+        const MWWorld::Ptr& newItemPtr = ref.getPtr();
+
+        // Apply the enchantment
         const ESM::Enchantment *enchantmentPtr = MWBase::Environment::get().getWorld()->createRecord (enchantment);
+        MWWorld::Class::get(newItemPtr).applyEnchantment(newItemPtr, enchantmentPtr->mId, getGemCharge(), mNewItemName);
 
-        MWWorld::Class::get(mOldItemPtr).applyEnchantment(mOldItemPtr, enchantmentPtr->mId, getGemCharge(), mNewItemName);
+        // Add the new item to player inventory and remove the old one
+        store.add(newItemPtr, player);
+        store.remove(mOldItemPtr, 1, player);
 
-        mOldItemPtr.getRefData().setCount(1);
-
-        MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), mOldItemId);
-        ref.getPtr().getRefData().setCount (mOldItemCount-1);
-
-        MWWorld::Class::get (player).getContainerStore (player).add (ref.getPtr(), player);
         if(!mSelfEnchanting)
             payForEnchantment();
 
@@ -299,20 +300,9 @@ namespace MWMechanics
 
     void Enchanting::payForEnchantment() const
     {
-        MWWorld::Ptr gold;
-
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        const MWWorld::Ptr& player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
         MWWorld::ContainerStore& store = MWWorld::Class::get(player).getContainerStore(player);
 
-        for (MWWorld::ContainerStoreIterator it = store.begin();
-                it != store.end(); ++it)
-        {
-            if (Misc::StringUtils::ciEqual(it->getCellRef().mRefID, "gold_001"))
-            {
-                gold = *it;
-            }
-        }
-
-        gold.getRefData().setCount(gold.getRefData().getCount() - getEnchantPrice());
+        store.remove("gold_001", getEnchantPrice(), player);
     }
 }

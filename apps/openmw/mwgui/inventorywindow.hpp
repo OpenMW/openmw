@@ -103,7 +103,6 @@ namespace MWGui
             void onAvatarClicked(MyGUI::Widget* _sender);
             void onPinToggled();
 
-            void unequipItem(const MWWorld::Ptr& item);
             void updateEncumbranceBar();
             void notifyContentChanged();
     };

@@ -450,62 +450,16 @@ namespace MWScript
                 }
         };
 
-        template<class R>
-        class OpPlaceAtPc : public Interpreter::Opcode0
+        template<class R, bool pc>
+        class OpPlaceAt : public Interpreter::Opcode0
         {
             public:
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    std::string itemID = runtime.getStringLiteral (runtime[0].mInteger);
-                    runtime.pop();
-
-                    Interpreter::Type_Integer count = runtime[0].mInteger;
-                    runtime.pop();
-                    Interpreter::Type_Float distance = runtime[0].mFloat;
-                    runtime.pop();
-                    Interpreter::Type_Integer direction = runtime[0].mInteger;
-                    runtime.pop();
-
-                    if (count<0)
-                        throw std::runtime_error ("count must be non-negative");
-
-                    // no-op
-                    if (count == 0)
-                        return;
-
-                    ESM::Position ipos = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getRefData().getPosition();
-                    Ogre::Vector3 pos(ipos.pos[0],ipos.pos[1],ipos.pos[2]);
-                    Ogre::Quaternion rot(Ogre::Radian(-ipos.rot[2]), Ogre::Vector3::UNIT_Z);
-                    if(direction == 0) pos = pos + distance*rot.yAxis();
-                    else if(direction == 1) pos = pos - distance*rot.yAxis();
-                    else if(direction == 2) pos = pos - distance*rot.xAxis();
-                    else if(direction == 3) pos = pos + distance*rot.xAxis();
-                    else throw std::runtime_error ("direction must be 0,1,2 or 3");
-
-                    ipos.pos[0] = pos.x;
-                    ipos.pos[1] = pos.y;
-                    ipos.pos[2] = pos.z;
-                    ipos.rot[0] = 0;
-                    ipos.rot[1] = 0;
-                    ipos.rot[2] = 0;
-
-                    MWWorld::CellStore* store = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell();                    
-                    MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(),itemID);
-                    ref.getPtr().getCellRef().mPos = ipos;
-                    ref.getPtr().getRefData().setCount(count);
-                    MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),*store,ipos);
-                }
-        };
-
-        template<class R>
-        class OpPlaceAtMe : public Interpreter::Opcode0
-        {
-            public:
-
-                virtual void execute (Interpreter::Runtime& runtime)
-                {
-                    MWWorld::Ptr me = R()(runtime);
+                    MWWorld::Ptr actor = pc
+                        ? MWBase::Environment::get().getWorld()->getPlayer().getPlayer()
+                        : R()(runtime);
 
                     std::string itemID = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
@@ -524,7 +478,7 @@ namespace MWScript
                     if (count == 0)
                         return;
 
-                    ESM::Position ipos = me.getRefData().getPosition();
+                    ESM::Position ipos = actor.getRefData().getPosition();
                     Ogre::Vector3 pos(ipos.pos[0],ipos.pos[1],ipos.pos[2]);
                     Ogre::Quaternion rot(Ogre::Radian(-ipos.rot[2]), Ogre::Vector3::UNIT_Z);
                     if(direction == 0) pos = pos + distance*rot.yAxis();
@@ -540,12 +494,12 @@ namespace MWScript
                     ipos.rot[1] = 0;
                     ipos.rot[2] = 0;
 
-                    MWWorld::CellStore* store = me.getCell();                    
-                    MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(),itemID);
+                    // create item
+                    MWWorld::CellStore* store = actor.getCell();
+                    MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), itemID, count);
                     ref.getPtr().getCellRef().mPos = ipos;
-                    ref.getPtr().getRefData().setCount(count);
-                    MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),*store,ipos);
 
+                    MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),*store,ipos);
                 }
         };
 
@@ -730,9 +684,9 @@ namespace MWScript
             interpreter.installSegment5(Compiler::Transformation::opcodePositionCellExplicit,new OpPositionCell<ExplicitRef>);
             interpreter.installSegment5(Compiler::Transformation::opcodePlaceItemCell,new OpPlaceItemCell<ImplicitRef>);            
             interpreter.installSegment5(Compiler::Transformation::opcodePlaceItem,new OpPlaceItem<ImplicitRef>);            
-            interpreter.installSegment5(Compiler::Transformation::opcodePlaceAtPc,new OpPlaceAtPc<ImplicitRef>);   
-            interpreter.installSegment5(Compiler::Transformation::opcodePlaceAtMe,new OpPlaceAtMe<ImplicitRef>);   
-            interpreter.installSegment5(Compiler::Transformation::opcodePlaceAtMeExplicit,new OpPlaceAtMe<ExplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodePlaceAtPc,new OpPlaceAt<ImplicitRef, true>);
+            interpreter.installSegment5(Compiler::Transformation::opcodePlaceAtMe,new OpPlaceAt<ImplicitRef, false>);
+            interpreter.installSegment5(Compiler::Transformation::opcodePlaceAtMeExplicit,new OpPlaceAt<ExplicitRef, false>);
             interpreter.installSegment5(Compiler::Transformation::opcodeModScale,new OpModScale<ImplicitRef>);
             interpreter.installSegment5(Compiler::Transformation::opcodeModScaleExplicit,new OpModScale<ExplicitRef>);
             interpreter.installSegment5(Compiler::Transformation::opcodeRotate,new OpRotate<ImplicitRef>);

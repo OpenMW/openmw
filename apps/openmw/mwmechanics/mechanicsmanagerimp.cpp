@@ -159,7 +159,7 @@ namespace MWMechanics
         // auto-equip again. we need this for when the race is changed to a beast race
         MWWorld::InventoryStore& invStore = MWWorld::Class::get(ptr).getInventoryStore(ptr);
         for (int i=0; i<MWWorld::InventoryStore::Slots; ++i)
-            invStore.equip(i, invStore.end());
+            invStore.equip(i, invStore.end(), ptr);
         invStore.autoEquip(ptr);
     }
 

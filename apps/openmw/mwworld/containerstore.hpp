@@ -75,14 +75,25 @@ namespace MWWorld
             ///
             /// @return if stacking happened, return iterator to the item that was stacked against, otherwise iterator to the newly inserted item.
 
+            int remove(const std::string& itemId, int count, const Ptr& actor);
+            ///< Remove \a count item(s) designated by \a itemId from this container.
+            ///
+            /// @return the number of items actually removed
+
+            virtual int remove(const Ptr& item, int count, const Ptr& actor);
+            ///< Remove \a count item(s) designated by \a item from this inventory.
+            ///
+            /// @return the number of items actually removed
+
         protected:
-            ContainerStoreIterator addImpl (const Ptr& ptr);
-            ///< Add the item to this container (no stacking)
+            ContainerStoreIterator addNewStack (const Ptr& ptr);
+            ///< Add the item to this container (do not try to stack it onto existing items)
 
         public:
 
-            virtual bool stacks (const Ptr& ptr1, const Ptr& ptr2);
+            virtual bool stacks (const Ptr& stack, const Ptr& item);
             ///< @return true if the two specified objects can stack with each other
+            /// @note stack is the item that is already in this container
 
             void fill (const ESM::InventoryList& items, const std::string& owner, const MWWorld::ESMStore& store);
             ///< Insert items into *this.

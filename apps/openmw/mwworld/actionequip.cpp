@@ -32,10 +32,10 @@ namespace MWWorld
             case 0:
                 return;
             case 2:
-                invStore.equip(MWWorld::InventoryStore::Slot_CarriedLeft, invStore.end());
+                invStore.unequipSlot(MWWorld::InventoryStore::Slot_CarriedLeft, actor);
                 break;
             case 3:
-                invStore.equip(MWWorld::InventoryStore::Slot_CarriedRight, invStore.end());
+                invStore.unequipSlot(MWWorld::InventoryStore::Slot_CarriedRight, actor);
                 break;
         }
 
@@ -64,7 +64,7 @@ namespace MWWorld
             // if all slots are occupied, replace the last slot
             if (slot == --slots.first.end())
             {
-                invStore.equip(*slot, it);
+                invStore.equip(*slot, it, actor);
                 equipped = true;
                 break;
             }
@@ -72,7 +72,7 @@ namespace MWWorld
             if (invStore.getSlot(*slot) == invStore.end())
             {
                 // slot is not occupied
-                invStore.equip(*slot, it);
+                invStore.equip(*slot, it, actor);
                 equipped = true;
                 break;
             }

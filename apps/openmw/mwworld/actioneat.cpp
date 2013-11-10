@@ -11,6 +11,8 @@
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
 
+#include "../mwworld/containerstore.hpp"
+
 #include "esmstore.hpp"
 #include "class.hpp"
 
@@ -18,8 +20,8 @@ namespace MWWorld
 {
     void ActionEat::executeImp (const Ptr& actor)
     {
-        // remove used item
-        getTarget().getRefData().setCount (getTarget().getRefData().getCount()-1);
+        // remove used item (assume the item is present in inventory)
+        getTarget().getContainerStore()->remove(getTarget(), 1, actor);
 
         // check for success
         const MWMechanics::CreatureStats& creatureStats = MWWorld::Class::get (actor).getCreatureStats (actor);

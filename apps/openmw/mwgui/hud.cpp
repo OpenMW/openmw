@@ -243,20 +243,15 @@ namespace MWGui
             float mouseX = cursorPosition.left / float(viewSize.width);
             float mouseY = cursorPosition.top / float(viewSize.height);
 
-            int origCount = object.getRefData().getCount();
-            object.getRefData().setCount(mDragAndDrop->mDraggedCount);
-
             if (world->canPlaceObject(mouseX, mouseY))
-                world->placeObject(object, mouseX, mouseY);
+                world->placeObject(object, mouseX, mouseY, mDragAndDrop->mDraggedCount);
             else
-                world->dropObjectOnGround(world->getPlayer().getPlayer(), object);
+                world->dropObjectOnGround(world->getPlayer().getPlayer(), object, mDragAndDrop->mDraggedCount);
 
             MWBase::Environment::get().getWindowManager()->changePointer("arrow");
 
             std::string sound = MWWorld::Class::get(object).getDownSoundId(object);
             MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
-
-            object.getRefData().setCount(origCount);
 
             // remove object from the container it was coming from
             mDragAndDrop->mSourceModel->removeItem(mDragAndDrop->mItem, mDragAndDrop->mDraggedCount);

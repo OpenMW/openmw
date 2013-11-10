@@ -53,10 +53,8 @@ namespace MWScript
                     if (count == 0)
                         return;
 
-                    MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), item);
+                    MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), item, count);
 
-                    ref.getPtr().getRefData().setCount (count);
-                    
                     // Configure item's script variables
                     std::string script = MWWorld::Class::get(ref.getPtr()).getScript(ref.getPtr());
                     if (script != "")
@@ -136,41 +134,18 @@ namespace MWScript
                         return;
 
                     MWWorld::ContainerStore& store = MWWorld::Class::get (ptr).getContainerStore (ptr);
-                    
+
                     std::string itemName = "";
 
-                    // originalCount holds the total number of items to remove, count holds the remaining number of items to remove
-                    Interpreter::Type_Integer originalCount = count;
+                    int numRemoved = store.remove(item, count, ptr);
 
-                    for (MWWorld::ContainerStoreIterator iter (store.begin()); iter!=store.end() && count;
-                        ++iter)
-                    {
-                        if (Misc::StringUtils::ciEqual(iter->getCellRef().mRefID, item))
-                        {
-                            itemName = MWWorld::Class::get(*iter).getName(*iter);
-                            
-                            if (iter->getRefData().getCount()<=count)
-                            {
-                                count -= iter->getRefData().getCount();
-                                iter->getRefData().setCount (0);
-                            }
-                            else
-                            {
-                                iter->getRefData().setCount (iter->getRefData().getCount()-count);
-                                count = 0;
-                            }
-                        }
-                    }
-                  
                     // Spawn a messagebox (only for items removed from player's inventory)
-                    if (ptr == MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer())
+                    if ((numRemoved > 0)
+                        && (ptr == MWBase::Environment::get().getWorld()->getPlayer().getPlayer()))
                     {
                         // The two GMST entries below expand to strings informing the player of what, and how many of it has been removed from their inventory
                         std::string msgBox;
-                        int numRemoved = (originalCount - count);
-                        if (numRemoved == 0)
-                            return;
-                        
+
                         if(numRemoved > 1)
                         {
                             msgBox = MyGUI::LanguageManager::getInstance().replaceTags("#{sNotifyMessage63}");

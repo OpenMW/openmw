@@ -26,6 +26,8 @@
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/spellsuccess.hpp"
+
 
 #include "../mwrender/sky.hpp"
 #include "../mwrender/animation.hpp"
@@ -835,12 +837,13 @@ namespace MWWorld
 
     void World::deleteObject (const Ptr& ptr)
     {
-        if (ptr.getRefData().getCount()>0)
+        if (ptr.getRefData().getCount() > 0)
         {
-            ptr.getRefData().setCount (0);
+            ptr.getRefData().setCount(0);
 
-            if (mWorldScene->getActiveCells().find (ptr.getCell())!=mWorldScene->getActiveCells().end() &&
-                ptr.getRefData().isEnabled())
+            if (ptr.isInCell()
+                && mWorldScene->getActiveCells().find(ptr.getCell()) != mWorldScene->getActiveCells().end()
+                && ptr.getRefData().isEnabled())
             {
                 mWorldScene->removeObjectFromScene (ptr);
                 mLocalScripts.remove (ptr);
@@ -1475,7 +1478,7 @@ namespace MWWorld
             item.getRefData().getLocals().setVarByInt(script, "onpcdrop", 1);
     }
 
-    bool World::placeObject (const Ptr& object, float cursorX, float cursorY)
+    bool World::placeObject (const MWWorld::Ptr& object, float cursorX, float cursorY, int amount)
     {
         std::pair<bool, Ogre::Vector3> result = mPhysics->castRay(cursorX, cursorY);
 
@@ -1500,9 +1503,14 @@ namespace MWWorld
         pos.rot[0] = 0;
         pos.rot[1] = 0;
 
+        // copy the object and set its count
+        int origCount = object.getRefData().getCount();
+        object.getRefData().setCount(amount);
         Ptr dropped = copyObjectToCell(object, *cell, pos);
+        object.getRefData().setCount(origCount);
+
+        // only the player place items in the world, so no need to check actor
         PCDropped(dropped);
-        object.getRefData().setCount(0);
 
         return true;
     }
@@ -1547,7 +1555,7 @@ namespace MWWorld
         return dropped;
     }
 
-    void World::dropObjectOnGround (const Ptr& actor, const Ptr& object)
+    void World::dropObjectOnGround (const Ptr& actor, const Ptr& object, int amount)
     {
         MWWorld::Ptr::CellStore* cell = actor.getCell();
 
@@ -1568,10 +1576,14 @@ namespace MWWorld
             mPhysics->castRay(orig, dir, len);
         pos.pos[2] = hit.second.z;
 
+        // copy the object and set its count
+        int origCount = object.getRefData().getCount();
+        object.getRefData().setCount(amount);
         Ptr dropped = copyObjectToCell(object, *cell, pos);
+        object.getRefData().setCount(origCount);
+
         if(actor == mPlayer->getPlayer()) // Only call if dropped by player
             PCDropped(dropped);
-        object.getRefData().setCount(0);
     }
 
     void World::processChangedSettings(const Settings::CategorySettingVector& settings)
@@ -1937,7 +1949,6 @@ namespace MWWorld
         if(werewolf)
         {
             ManualRef ref(getStore(), "WerewolfRobe");
-            ref.getPtr().getRefData().setCount(1);
 
             // Configure item's script variables
             std::string script = Class::get(ref.getPtr()).getScript(ref.getPtr());
@@ -1949,18 +1960,11 @@ namespace MWWorld
 
             // Not sure this is right
             InventoryStore &inv = Class::get(actor).getInventoryStore(actor);
-            inv.equip(InventoryStore::Slot_Robe, inv.add(ref.getPtr(), actor));
+            inv.equip(InventoryStore::Slot_Robe, inv.add(ref.getPtr(), actor), actor);
         }
         else
         {
-            ContainerStore &store = Class::get(actor).getContainerStore(actor);
-
-            const std::string item = "WerewolfRobe";
-            for(ContainerStoreIterator iter(store.begin());iter != store.end();++iter)
-            {
-                if(Misc::StringUtils::ciEqual(iter->getCellRef().mRefID, item))
-                    iter->getRefData().setCount(0);
-            }
+            Class::get(actor).getContainerStore(actor).remove("WerewolfRobe", 1, actor);
         }
 
         if(actor.getRefData().getHandle() == "player")
@@ -2018,5 +2022,122 @@ namespace MWWorld
                 contentLoader.load(col.getPath(*it), idx);
             }
         }
+    }
+
+    void World::castSpell(const Ptr &actor)
+    {
+        MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
+        stats.setAttackingOrSpell(false);
+
+        std::string selectedSpell = stats.getSpells().getSelectedSpell();
+        if (!selectedSpell.empty())
+        {
+            const ESM::Spell* spell = getStore().get<ESM::Spell>().search(selectedSpell);
+
+            // Check mana
+            bool fail = false;
+            MWMechanics::DynamicStat<float> magicka = stats.getMagicka();
+            if (magicka.getCurrent() < spell->mData.mCost)
+            {
+                MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicInsufficientSP}");
+                fail = true;
+            }
+
+            // Reduce mana
+            if (!fail)
+            {
+                magicka.setCurrent(magicka.getCurrent() - spell->mData.mCost);
+                stats.setMagicka(magicka);
+            }
+
+            // Check success
+            int successChance = MWMechanics::getSpellSuccessChance(selectedSpell, actor);
+            int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+            if (!fail && roll >= successChance)
+            {
+                MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicSkillFail}");
+                fail = true;
+            }
+
+            if (fail)
+            {
+                // Failure sound
+                for (std::vector<ESM::ENAMstruct>::const_iterator iter (spell->mEffects.mList.begin());
+                    iter!=spell->mEffects.mList.end(); ++iter)
+                {
+                    const ESM::MagicEffect *magicEffect = getStore().get<ESM::MagicEffect>().find (
+                        iter->mEffectID);
+
+                    static const std::string schools[] = {
+                        "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
+                    };
+
+                    MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+                    sndMgr->playSound3D(actor, "Spell Failure " + schools[magicEffect->mData.mSchool], 1.0f, 1.0f);
+                    break;
+                }
+                return;
+            }
+
+            actor.getClass().skillUsageSucceeded(actor, MWMechanics::spellSchoolToSkill(MWMechanics::getSpellSchool(selectedSpell, actor)), 0);
+
+            actor.getClass().getCreatureStats(actor).getActiveSpells().addSpell(selectedSpell, actor, ESM::RT_Self);
+            // TODO: RT_Range, RT_Touch
+            return;
+        }
+
+        InventoryStore& inv = actor.getClass().getInventoryStore(actor);
+        if (inv.getSelectedEnchantItem() != inv.end())
+        {
+            MWWorld::Ptr item = *inv.getSelectedEnchantItem();
+            std::string id = item.getClass().getEnchantment(item);
+            const ESM::Enchantment* enchantment = getStore().get<ESM::Enchantment>().search (id);
+
+
+            if (enchantment->mData.mType == ESM::Enchantment::WhenUsed)
+            {
+                // Check if there's enough charge left
+                const float enchantCost = enchantment->mData.mCost;
+                MWMechanics::NpcStats &stats = MWWorld::Class::get(actor).getNpcStats(actor);
+                int eSkill = stats.getSkill(ESM::Skill::Enchant).getModified();
+                const float castCost = enchantCost - (enchantCost / 100) * (eSkill - 10);
+
+                if (item.getCellRef().mEnchantmentCharge == -1)
+                    item.getCellRef().mEnchantmentCharge = enchantment->mData.mCharge;
+
+                if (item.getCellRef().mEnchantmentCharge < castCost)
+                {
+                    MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicInsufficientCharge}");
+                    return;
+                }
+
+                // Reduce charge
+                item.getCellRef().mEnchantmentCharge -= castCost;
+            }
+            if (enchantment->mData.mType == ESM::Enchantment::CastOnce)
+            {
+                item.getRefData().setCount(item.getRefData().getCount()-1);
+            }
+
+            std::string itemName = item.getClass().getName(item);
+            actor.getClass().getCreatureStats(actor).getActiveSpells().addSpell(id, actor, ESM::RT_Self, itemName);
+
+            if (!item.getRefData().getCount())
+            {
+                // Item was used up
+                MWBase::Environment::get().getWindowManager()->unsetSelectedSpell();
+                inv.setSelectedEnchantItem(inv.end());
+            }
+            else
+                MWBase::Environment::get().getWindowManager()->setSelectedEnchantItem(item); // Set again to show the modified charge
+
+
+            // TODO: RT_Range, RT_Touch
+        }
+    }
+
+    void World::updateAnimParts(const Ptr& actor)
+    {
+        mRendering->updateAnimParts(actor);
     }
 }
