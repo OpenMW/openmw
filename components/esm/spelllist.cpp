@@ -12,9 +12,9 @@ void SpellList::load(ESMReader &esm)
     }
 }
 
-void SpellList::save(ESMWriter &esm)
+void SpellList::save(ESMWriter &esm) const
 {
-    for (std::vector<std::string>::iterator it = mList.begin(); it != mList.end(); ++it) {
+    for (std::vector<std::string>::const_iterator it = mList.begin(); it != mList.end(); ++it) {
         esm.writeHNString("NPCS", *it, 32);
     }
 }

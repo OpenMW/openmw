@@ -1,4 +1,11 @@
 #include "worldimp.hpp"
+#ifdef _WIN32
+#include <boost/tr1/tr1/unordered_map>
+#elif defined HAVE_UNORDERED_MAP
+#include <unordered_map>
+#else
+#include <tr1/unordered_map>
+#endif
 
 #include <OgreSceneNode.h>
 
@@ -19,6 +26,8 @@
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/spellsuccess.hpp"
+
 
 #include "../mwrender/sky.hpp"
 #include "../mwrender/animation.hpp"
@@ -30,6 +39,10 @@
 #include "cellfunctors.hpp"
 #include "containerstore.hpp"
 #include "inventorystore.hpp"
+
+#include "contentloader.hpp"
+#include "esmloader.hpp"
+#include "omwloader.hpp"
 
 using namespace Ogre;
 
@@ -80,6 +93,38 @@ namespace
 
 namespace MWWorld
 {
+    struct GameContentLoader : public ContentLoader
+    {
+        GameContentLoader(Loading::Listener& listener)
+          : ContentLoader(listener)
+        {
+        }
+
+        bool addLoader(const std::string& extension, ContentLoader* loader)
+        {
+            return mLoaders.insert(std::make_pair(extension, loader)).second;
+        }
+
+        void load(const boost::filesystem::path& filepath, int& index)
+        {
+            LoadersContainer::iterator it(mLoaders.find(filepath.extension().string()));
+            if (it != mLoaders.end())
+            {
+                it->second->load(filepath, index);
+            }
+            else
+            {
+              std::string msg("Cannot load file: ");
+              msg += filepath.string();
+              throw std::runtime_error(msg.c_str());
+            }
+        }
+
+        private:
+          typedef std::tr1::unordered_map<std::string, ContentLoader*> LoadersContainer;
+          LoadersContainer mLoaders;
+    };
+
     Ptr World::getPtrViaHandle (const std::string& handle, Ptr::CellStore& cell)
     {
         if (MWWorld::LiveCellRef<ESM::Activator> *ref =
@@ -163,7 +208,7 @@ namespace MWWorld
 
     World::World (OEngine::Render::OgreRenderer& renderer,
         const Files::Collections& fileCollections,
-        const std::vector<std::string>& master, const std::vector<std::string>& plugins,
+        const std::vector<std::string>& contentFiles,
         const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir,
         ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap, int mActivationDistanceOverride)
     : mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
@@ -181,44 +226,22 @@ namespace MWWorld
 
         mWeatherManager = new MWWorld::WeatherManager(mRendering,&mFallback);
 
-        int idx = 0;
         // NOTE: We might need to reserve one more for the running game / save.
-        mEsm.resize(master.size() + plugins.size());
+        mEsm.resize(contentFiles.size());
         Loading::Listener* listener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         listener->loadingOn();
-        for (std::vector<std::string>::size_type i = 0; i < master.size(); i++, idx++)
-        {
-            boost::filesystem::path masterPath (fileCollections.getCollection (".esm").getPath (master[i]));
 
-            std::cout << "Loading ESM " << masterPath.string() << "\n";
-            listener->setLabel(masterPath.filename().string());
+        GameContentLoader gameContentLoader(*listener);
+        EsmLoader esmLoader(mStore, mEsm, encoder, *listener);
+        OmwLoader omwLoader(*listener);
 
-            // This parses the ESM file
-            ESM::ESMReader lEsm;
-            lEsm.setEncoder(encoder);
-            lEsm.setIndex(idx);
-            lEsm.setGlobalReaderList(&mEsm);
-            lEsm.open (masterPath.string());
-            mEsm[idx] = lEsm;
-            mStore.load (mEsm[idx], listener);
-        }
+        gameContentLoader.addLoader(".esm", &esmLoader);
+        gameContentLoader.addLoader(".esp", &esmLoader);
+        gameContentLoader.addLoader(".omwgame", &omwLoader);
+        gameContentLoader.addLoader(".omwaddon", &omwLoader);
 
-        for (std::vector<std::string>::size_type i = 0; i < plugins.size(); i++, idx++)
-        {
-            boost::filesystem::path pluginPath (fileCollections.getCollection (".esp").getPath (plugins[i]));
+        loadContentFiles(fileCollections, contentFiles, gameContentLoader);
 
-            std::cout << "Loading ESP " << pluginPath.string() << "\n";
-            listener->setLabel(pluginPath.filename().string());
-
-            // This parses the ESP file
-            ESM::ESMReader lEsm;
-            lEsm.setEncoder(encoder);
-            lEsm.setIndex(idx);
-            lEsm.setGlobalReaderList(&mEsm);
-            lEsm.open (pluginPath.string());
-            mEsm[idx] = lEsm;
-            mStore.load (mEsm[idx], listener);
-        }
         listener->loadingOff();
 
         // insert records that may not be present in all versions of MW
@@ -1983,4 +2006,131 @@ namespace MWWorld
         return mGodMode;
     }
 
+    void World::loadContentFiles(const Files::Collections& fileCollections,
+        const std::vector<std::string>& content, ContentLoader& contentLoader)
+    {
+        std::vector<std::string>::const_iterator it(content.begin());
+        std::vector<std::string>::const_iterator end(content.end());
+        for (int idx = 0; it != end; ++it, ++idx)
+        {
+            boost::filesystem::path filename(*it);
+            const Files::MultiDirCollection& col = fileCollections.getCollection(filename.extension().string());
+            if (col.doesExist(*it))
+            {
+                contentLoader.load(col.getPath(*it), idx);
+            }
+        }
+    }
+
+    void World::castSpell(const Ptr &actor)
+    {
+        MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
+        stats.setAttackingOrSpell(false);
+
+        std::string selectedSpell = stats.getSpells().getSelectedSpell();
+        if (!selectedSpell.empty())
+        {
+            const ESM::Spell* spell = getStore().get<ESM::Spell>().search(selectedSpell);
+
+            // Check mana
+            bool fail = false;
+            MWMechanics::DynamicStat<float> magicka = stats.getMagicka();
+            if (magicka.getCurrent() < spell->mData.mCost)
+            {
+                MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicInsufficientSP}");
+                fail = true;
+            }
+
+            // Reduce mana
+            if (!fail)
+            {
+                magicka.setCurrent(magicka.getCurrent() - spell->mData.mCost);
+                stats.setMagicka(magicka);
+            }
+
+            // Check success
+            int successChance = MWMechanics::getSpellSuccessChance(selectedSpell, actor);
+            int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+            if (!fail && roll >= successChance)
+            {
+                MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicSkillFail}");
+                fail = true;
+            }
+
+            if (fail)
+            {
+                // Failure sound
+                for (std::vector<ESM::ENAMstruct>::const_iterator iter (spell->mEffects.mList.begin());
+                    iter!=spell->mEffects.mList.end(); ++iter)
+                {
+                    const ESM::MagicEffect *magicEffect = getStore().get<ESM::MagicEffect>().find (
+                        iter->mEffectID);
+
+                    static const std::string schools[] = {
+                        "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
+                    };
+
+                    MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+                    sndMgr->playSound3D(actor, "Spell Failure " + schools[magicEffect->mData.mSchool], 1.0f, 1.0f);
+                    break;
+                }
+                return;
+            }
+
+            actor.getClass().skillUsageSucceeded(actor, MWMechanics::spellSchoolToSkill(MWMechanics::getSpellSchool(selectedSpell, actor)), 0);
+
+            actor.getClass().getCreatureStats(actor).getActiveSpells().addSpell(selectedSpell, actor, ESM::RT_Self);
+            // TODO: RT_Range, RT_Touch
+            return;
+        }
+
+        InventoryStore& inv = actor.getClass().getInventoryStore(actor);
+        if (inv.getSelectedEnchantItem() != inv.end())
+        {
+            MWWorld::Ptr item = *inv.getSelectedEnchantItem();
+            std::string id = item.getClass().getEnchantment(item);
+            const ESM::Enchantment* enchantment = getStore().get<ESM::Enchantment>().search (id);
+
+
+            if (enchantment->mData.mType == ESM::Enchantment::WhenUsed)
+            {
+                // Check if there's enough charge left
+                const float enchantCost = enchantment->mData.mCost;
+                MWMechanics::NpcStats &stats = MWWorld::Class::get(actor).getNpcStats(actor);
+                int eSkill = stats.getSkill(ESM::Skill::Enchant).getModified();
+                const float castCost = enchantCost - (enchantCost / 100) * (eSkill - 10);
+
+                if (item.getCellRef().mEnchantmentCharge == -1)
+                    item.getCellRef().mEnchantmentCharge = enchantment->mData.mCharge;
+
+                if (item.getCellRef().mEnchantmentCharge < castCost)
+                {
+                    MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicInsufficientCharge}");
+                    return;
+                }
+
+                // Reduce charge
+                item.getCellRef().mEnchantmentCharge -= castCost;
+            }
+            if (enchantment->mData.mType == ESM::Enchantment::CastOnce)
+            {
+                item.getRefData().setCount(item.getRefData().getCount()-1);
+            }
+
+            std::string itemName = item.getClass().getName(item);
+            actor.getClass().getCreatureStats(actor).getActiveSpells().addSpell(id, actor, ESM::RT_Self, itemName);
+
+            if (!item.getRefData().getCount())
+            {
+                // Item was used up
+                MWBase::Environment::get().getWindowManager()->unsetSelectedSpell();
+                inv.setSelectedEnchantItem(inv.end());
+            }
+            else
+                MWBase::Environment::get().getWindowManager()->setSelectedEnchantItem(item); // Set again to show the modified charge
+
+
+            // TODO: RT_Range, RT_Touch
+        }
+    }
 }

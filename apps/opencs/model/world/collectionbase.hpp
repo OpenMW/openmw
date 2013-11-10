@@ -4,6 +4,7 @@
 #include <string>
 
 #include "universalid.hpp"
+#include "columns.hpp"
 
 class QVariant;
 
@@ -84,6 +85,13 @@ namespace CSMWorld
             ///< Return a sorted collection of all IDs
             ///
             /// \param listDeleted include deleted record in the list
+
+            int searchColumnIndex (Columns::ColumnId id) const;
+            ///< Return index of column with the given \a id. If no such column exists, -1 is returned.
+
+            int findColumnIndex (Columns::ColumnId id) const;
+            ///< Return index of column with the given \a id. If no such column exists, an exception is
+            /// thrown.
     };
 }
 

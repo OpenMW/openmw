@@ -9,6 +9,11 @@
 #include "collectionbase.hpp"
 #include "refiddata.hpp"
 
+namespace ESM
+{
+    class ESMWriter;
+}
+
 namespace CSMWorld
 {
     class RefIdAdapter;
@@ -94,6 +99,8 @@ namespace CSMWorld
             ///< Return a sorted collection of all IDs
             ///
             /// \param listDeleted include deleted record in the list
+
+            void save (int index, ESM::ESMWriter& writer) const;
     };
 }
 

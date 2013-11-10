@@ -44,6 +44,17 @@ void CSMWorld::Data::appendIds (std::vector<std::string>& ids, const CollectionB
     ids.insert (ids.end(), ids2.begin(), ids2.end());
 }
 
+int CSMWorld::Data::count (RecordBase::State state, const CollectionBase& collection)
+{
+    int number = 0;
+
+    for (int i=0; i<collection.getSize(); ++i)
+        if (collection.getRecord (i).mState==state)
+            ++number;
+
+    return number;
+}
+
 CSMWorld::Data::Data() : mRefs (mCells)
 {
     mGlobals.addColumn (new StringIdColumn<ESM::Global>);
@@ -215,6 +226,7 @@ CSMWorld::Data::Data() : mRefs (mCells)
     mFilters.addColumn (new RecordStateColumn<CSMFilter::Filter>);
     mFilters.addColumn (new FilterColumn<CSMFilter::Filter>);
     mFilters.addColumn (new DescriptionColumn<CSMFilter::Filter>);
+    mFilters.addColumn (new ScopeColumn<CSMFilter::Filter>);
 
     addModel (new IdTable (&mGlobals), UniversalId::Type_Globals, UniversalId::Type_Global);
     addModel (new IdTable (&mGmsts), UniversalId::Type_Gmsts, UniversalId::Type_Gmst);
@@ -463,7 +475,7 @@ void CSMWorld::Data::merge()
     mGlobals.merge();
 }
 
-void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base)
+void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base, bool project)
 {
     ESM::ESMReader reader;
 
@@ -474,6 +486,9 @@ void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base)
     reader.open (path.string());
 
     const ESM::Dialogue *dialogue = 0;
+
+    mAuthor = reader.getAuthor();
+    mDescription = reader.getDesc();
 
     // Note: We do not need to send update signals here, because at this point the model is not connected
     // to any view.
@@ -582,6 +597,19 @@ void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base)
                 break;
             }
 
+            case ESM::REC_FILT:
+
+                if (project)
+                {
+                    mFilters.load (reader, base);
+                    mFilters.setData (mFilters.getSize()-1,
+                        mFilters.findColumnIndex (CSMWorld::Columns::ColumnId_Scope),
+                        static_cast<int> (CSMFilter::Filter::Scope_Project));
+                    break;
+                }
+
+                // fall through (filter record in a content file is an error with format 0)
+
             default:
 
                 /// \todo throw an exception instead, once all records are implemented
@@ -609,6 +637,44 @@ bool CSMWorld::Data::hasId (const std::string& id) const
         getJournals().searchId (id)!=-1 ||
         getCells().searchId (id)!=-1 ||
         getReferenceables().searchId (id)!=-1;
+}
+
+int CSMWorld::Data::count (RecordBase::State state) const
+{
+    return
+        count (state, mGlobals) +
+        count (state, mGmsts) +
+        count (state, mSkills) +
+        count (state, mClasses) +
+        count (state, mFactions) +
+        count (state, mRaces) +
+        count (state, mSounds) +
+        count (state, mScripts) +
+        count (state, mRegions) +
+        count (state, mBirthsigns) +
+        count (state, mSpells) +
+        count (state, mCells) +
+        count (state, mReferenceables);
+}
+
+void CSMWorld::Data::setDescription (const std::string& description)
+{
+    mDescription = description;
+}
+
+std::string CSMWorld::Data::getDescription() const
+{
+    return mDescription;
+}
+
+void CSMWorld::Data::setAuthor (const std::string& author)
+{
+    mAuthor = author;
+}
+
+std::string CSMWorld::Data::getAuthor() const
+{
+    return mAuthor;
 }
 
 std::vector<std::string> CSMWorld::Data::getIds (bool listDeleted) const

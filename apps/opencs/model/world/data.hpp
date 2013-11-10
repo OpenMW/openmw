@@ -60,6 +60,8 @@ namespace CSMWorld
             IdCollection<CSMFilter::Filter> mFilters;
             std::vector<QAbstractItemModel *> mModels;
             std::map<UniversalId::Type, QAbstractItemModel *> mModelIndex;
+            std::string mAuthor;
+            std::string mDescription;
 
             // not implemented
             Data (const Data&);
@@ -71,6 +73,8 @@ namespace CSMWorld
             static void appendIds (std::vector<std::string>& ids, const CollectionBase& collection,
                 bool listDeleted);
             ///< Append all IDs from collection to \a ids.
+
+            static int count (RecordBase::State state, const CollectionBase& collection);
 
         public:
 
@@ -163,8 +167,10 @@ namespace CSMWorld
             void merge();
             ///< Merge modified into base.
 
-            void loadFile (const boost::filesystem::path& path, bool base);
+            void loadFile (const boost::filesystem::path& path, bool base, bool project);
             ///< Merging content of a file into base or modified.
+            ///
+            /// \param project load project file instead of content file
 
             bool hasId (const std::string& id) const;
 
@@ -172,6 +178,17 @@ namespace CSMWorld
             ///< Return a sorted collection of all IDs that are not internal to the editor.
             ///
             /// \param listDeleted include deleted record in the list
+
+            int count (RecordBase::State state) const;
+            ///< Return number of top-level records with the given \a state.
+
+            void setDescription (const std::string& description);
+
+            std::string getDescription() const;
+
+            void setAuthor (const std::string& author);
+
+            std::string getAuthor() const;
 
         signals:
 

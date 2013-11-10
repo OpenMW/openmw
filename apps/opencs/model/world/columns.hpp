@@ -165,6 +165,7 @@ namespace CSMWorld
             ColumnId_Rank = 152,
             ColumnId_Gender = 153,
             ColumnId_PcRank = 154,
+            ColumnId_Scope = 155,
 
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.

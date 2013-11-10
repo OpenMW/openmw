@@ -2,8 +2,11 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM {
+
+    unsigned int Creature::sRecordId = REC_CREA;
 
 void Creature::load(ESMReader &esm)
 {
@@ -35,7 +38,7 @@ void Creature::load(ESMReader &esm)
     esm.skipRecord();
 }
 
-void Creature::save(ESMWriter &esm)
+void Creature::save(ESMWriter &esm) const
 {
     esm.writeHNCString("MODL", mModel);
     esm.writeHNOCString("CNAM", mOriginal);

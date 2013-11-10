@@ -28,6 +28,7 @@ namespace MWGui
         , mStamina(NULL)
         , mDrowning(NULL)
         , mDrowningFrame(NULL)
+        , mDrowningFlash(NULL)
         , mWeapImage(NULL)
         , mSpellImage(NULL)
         , mWeapStatus(NULL)
@@ -53,6 +54,7 @@ namespace MWGui
         , mSpellVisible(true)
         , mWorldMouseOver(false)
         , mEnemyHealthTimer(0)
+        , mIsDrowning(false)
     {
         setCoord(0,0, width, height);
 
@@ -75,6 +77,7 @@ namespace MWGui
         //Drowning bar
         getWidget(mDrowningFrame, "DrowningFrame");
         getWidget(mDrowning, "Drowning");
+        getWidget(mDrowningFlash, "Flash");
         mDrowning->setProgressRange(200);
 
         const MyGUI::IntSize& viewSize = MyGUI::RenderManager::getInstance().getViewSize();
@@ -207,7 +210,15 @@ namespace MWGui
 
     void HUD::setDrowningTimeLeft(float time)
     {
-        mDrowning->setProgressPosition(time/20.0*200.0);
+        size_t progress = time/20.0*200.0;
+        mDrowning->setProgressPosition(progress);
+
+        bool isDrowning = (progress == 0);
+        if (isDrowning && !mIsDrowning) // Just started drowning
+            mDrowningFlashTheta = 0.0f; // Start out on bright red every time.
+
+        mDrowningFlash->setVisible(isDrowning);
+        mIsDrowning = isDrowning;
     }
 
     void HUD::setDrowningBarVisible(bool visible)
@@ -367,6 +378,9 @@ namespace MWGui
             mEnemyHealth->setVisible(false);
             mWeaponSpellBox->setPosition(mWeaponSpellBox->getPosition() + MyGUI::IntPoint(0,20));
         }
+
+        if (mIsDrowning)
+            mDrowningFlashTheta += dt * Ogre::Math::TWO_PI;
     }
 
     void HUD::onResChange(int width, int height)
@@ -608,6 +622,12 @@ namespace MWGui
             MWMechanics::CreatureStats& stats = MWWorld::Class::get(mEnemy).getCreatureStats(mEnemy);
             mEnemyHealth->setProgressRange(100);
             mEnemyHealth->setProgressPosition(stats.getHealth().getCurrent() / stats.getHealth().getModified() * 100);
+        }
+
+        if (mIsDrowning)
+        {
+            float intensity = (cos(mDrowningFlashTheta) + 1.0f) / 2.0f;
+            mDrowningFlash->setColour(MyGUI::Colour(intensity, intensity, intensity));
         }
     }
 

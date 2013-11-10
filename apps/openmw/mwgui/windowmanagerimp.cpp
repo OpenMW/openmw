@@ -581,17 +581,14 @@ namespace MWGui
         if (id == "HBar")
         {
             mPlayerHealth = value;
-            mCharGen->setPlayerHealth (value);
         }
         else if (id == "MBar")
         {
             mPlayerMagicka = value;
-            mCharGen->setPlayerMagicka (value);
         }
         else if (id == "FBar")
         {
             mPlayerFatigue = value;
-            mCharGen->setPlayerFatigue (value);
         }
     }
 
@@ -599,7 +596,7 @@ namespace MWGui
     MWMechanics::DynamicStat<int> WindowManager::getValue(const std::string& id)
     {
         if(id == "HBar")
-            return layerHealth;
+            return mPlayerHealth;
         else if (id == "MBar")
             return mPlayerMagicka;
         else if (id == "FBar")

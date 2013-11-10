@@ -467,7 +467,7 @@ namespace MWGui
                 }
                 Widgets::MWDynamicStatPtr chargeWidget = enchantArea->createWidget<Widgets::MWDynamicStat>
                     ("MW_ChargeBar", chargeCoord, MyGUI::Align::Default, "ToolTipEnchantCharge");
-                chargeWidget->setValue(charge, charge);
+                chargeWidget->setValue(charge, maxCharge);
                 totalSize.height += 24;
             }
         }

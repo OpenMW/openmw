@@ -19,12 +19,14 @@ class ESMWriter;
 
 struct StartScript
 {
+    static unsigned int sRecordId;
+
     std::string mData;
     std::string mId, mScript;
 
     // Load a record and add it to the list
     void load(ESMReader &esm);
-    void save(ESMWriter &esm);
+    void save(ESMWriter &esm) const;
 };
 
 }

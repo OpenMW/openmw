@@ -20,6 +20,8 @@ class ESMWriter;
 
 struct DialInfo
 {
+    static unsigned int sRecordId;
+
     enum Gender
     {
         Male = 0,
@@ -99,7 +101,7 @@ struct DialInfo
     };
 
     void load(ESMReader &esm);
-    void save(ESMWriter &esm);
+    void save(ESMWriter &esm) const;
 
     void blank();
     ///< Set record to default state (does not touch the ID).
