@@ -39,20 +39,9 @@ void CSMWorld::InfoCollection::load (const Info& record, bool base)
 
         if (index==-1)
         {
-            std::pair<MapConstIterator, MapConstIterator> range = getTopicRange (topic);
+            Range range = getTopicRange (topic);
 
-            if (range.first==range.second)
-                index = getIdMap().size();
-            else
-            {
-                for (; range.first!=range.second; ++range.first)
-                {
-                    if (range.first->second>index)
-                        index = range.first->second;
-                }
-
-                ++index;
-            }
+            index = std::distance (getRecords().begin(), range.second);
         }
 
         insertRecord (record2, index);
@@ -75,11 +64,11 @@ int CSMWorld::InfoCollection::getIndex (const std::string& id, const std::string
 {
     std::string fullId = Misc::StringUtils::lowerCase (topic) + "#" +  id;
 
-    std::pair<MapConstIterator, MapConstIterator> range = getTopicRange (topic);
+    std::pair<RecordConstIterator, RecordConstIterator> range = getTopicRange (topic);
 
     for (; range.first!=range.second; ++range.first)
-        if (range.first->first==fullId)
-            return std::distance (getIdMap().begin(), range.first);
+        if (Misc::StringUtils::lowerCase (range.first->get().mId)==fullId)
+            return std::distance (getRecords().begin(), range.first);
 
     return -1;
 }
@@ -91,18 +80,12 @@ int CSMWorld::InfoCollection::getAppendIndex (const std::string& id, UniversalId
     if (separator==std::string::npos)
         throw std::runtime_error ("invalid info ID: " + id);
 
-    std::pair<MapConstIterator, MapConstIterator> range = getTopicRange (id.substr (0, separator));
+    std::pair<RecordConstIterator, RecordConstIterator> range = getTopicRange (id.substr (0, separator));
 
     if (range.first==range.second)
         return Collection<Info, IdAccessor<Info> >::getAppendIndex (id, type);
 
-    int index = 0;
-
-    for (; range.first!=range.second; ++range.first)
-        if (range.first->second>index)
-            index = range.first->second;
-
-    return index+1;
+    return std::distance (getRecords().begin(), range.second);
 }
 
 void CSMWorld::InfoCollection::load (ESM::ESMReader& reader, bool base, const ESM::Dialogue& dialogue)
@@ -146,25 +129,40 @@ void CSMWorld::InfoCollection::load (ESM::ESMReader& reader, bool base, const ES
     }
 }
 
-std::pair<CSMWorld::InfoCollection::MapConstIterator, CSMWorld::InfoCollection::MapConstIterator>
-    CSMWorld::InfoCollection::getTopicRange (const std::string& topic) const
+CSMWorld::InfoCollection::Range CSMWorld::InfoCollection::getTopicRange (const std::string& topic)
+    const
 {
     std::string topic2 = Misc::StringUtils::lowerCase (topic);
 
-    MapConstIterator begin = getIdMap().lower_bound (topic2);
+    std::map<std::string, int>::const_iterator iter = getIdMap().lower_bound (topic2);
 
     // Skip invalid records: The beginning of a topic string could be identical to another topic
     // string.
-    for (; begin!=getIdMap().end(); ++begin)
-        if (Misc::StringUtils::lowerCase (getRecord (begin->second).get().mTopicId)==topic2)
+    for (; iter!=getIdMap().end(); ++iter)
+    {
+        std::string testTopicId =
+            Misc::StringUtils::lowerCase (getRecord (iter->second).get().mTopicId);
+
+        if (testTopicId==topic2)
             break;
+
+        std::size_t size = topic2.size();
+
+        if (testTopicId.size()<size || testTopicId.substr (0, size)!=topic2)
+            return Range (getRecords().end(), getRecords().end());
+    }
+
+    if (iter==getIdMap().end())
+        return Range (getRecords().end(), getRecords().end());
+
+    RecordConstIterator begin = getRecords().begin()+iter->second;
 
     // Find end
-    MapConstIterator end = begin;
+    RecordConstIterator end = begin;
 
-    for (; end!=getIdMap().end(); ++end)
-        if (Misc::StringUtils::lowerCase (getRecord (end->second).get().mTopicId)!=topic2)
+    for (; end!=getRecords().end(); ++end)
+        if (Misc::StringUtils::lowerCase (end->get().mTopicId)!=topic2)
             break;
 
-    return std::make_pair (begin, end);
+    return Range (begin, end);
 }

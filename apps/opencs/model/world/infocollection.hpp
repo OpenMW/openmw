@@ -15,7 +15,8 @@ namespace CSMWorld
     {
         public:
 
-            typedef std::map<std::string, int>::const_iterator MapConstIterator;
+            typedef std::vector<Record<Info> >::const_iterator RecordConstIterator;
+            typedef std::pair<RecordConstIterator, RecordConstIterator> Range;
 
         private:
 
@@ -34,8 +35,7 @@ namespace CSMWorld
 
             void load (ESM::ESMReader& reader, bool base, const ESM::Dialogue& dialogue);
 
-            std::pair<MapConstIterator, MapConstIterator> getTopicRange (const std::string& topic)
-                const;
+            Range getTopicRange (const std::string& topic) const;
             ///< Return iterators that point to the beginning and past the end of the range for
             /// the given topic.
     };

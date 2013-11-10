@@ -55,6 +55,8 @@ namespace CSMWorld
 
             const std::map<std::string, int>& getIdMap() const;
 
+            const std::vector<Record<ESXRecordT> >& getRecords() const;
+
         public:
 
             Collection();
@@ -136,6 +138,12 @@ namespace CSMWorld
     const std::map<std::string, int>& Collection<ESXRecordT, IdAccessorT>::getIdMap() const
     {
         return mIndex;
+    }
+
+    template<typename ESXRecordT, typename IdAccessorT>
+    const std::vector<Record<ESXRecordT> >& Collection<ESXRecordT, IdAccessorT>::getRecords() const
+    {
+        return mRecords;
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
