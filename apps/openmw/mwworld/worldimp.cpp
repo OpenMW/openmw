@@ -2030,7 +2030,7 @@ namespace MWWorld
         stats.setAttackingOrSpell(false);
 
         std::string selectedSpell = stats.getSpells().getSelectedSpell();
-        std::string sourceName = "";
+        std::string sourceName;
         if (!selectedSpell.empty())
         {
             const ESM::Spell* spell = getStore().get<ESM::Spell>().search(selectedSpell);

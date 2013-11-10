@@ -120,7 +120,7 @@ namespace MWGui
                     MWBase::Environment::get().getWorld ()->getStore ().get<ESM::MagicEffect>().find(effectIt->mEffectID);
 
                 MagicEffectInfo effectInfo;
-                if (it->second.mName != "")
+                if (!it->second.mName.empty())
                     effectInfo.mSource = it->second.mName;
                 else
                     effectInfo.mSource = getSpellDisplayName(it->first);

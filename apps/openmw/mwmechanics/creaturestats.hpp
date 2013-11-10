@@ -49,7 +49,7 @@ namespace MWMechanics
     public:
         CreatureStats();
 
-        bool canUsePower (const std::string& power);
+        bool canUsePower (const std::string& power) const;
         void usePower (const std::string& power);
 
         const Stat<int> & getAttribute(int index) const;
