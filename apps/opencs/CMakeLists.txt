@@ -149,11 +149,16 @@ qt4_add_resources(OPENCS_RES_SRC ${OPENCS_RES})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable(opencs
+    MACOSX_BUNDLE
     ${OPENCS_SRC}
     ${OPENCS_UI_HDR}
     ${OPENCS_MOC_SRC}
     ${OPENCS_RES_SRC}
 )
+
+if(APPLE)
+    set_target_properties(opencs PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OpenMW_BINARY_DIR}")
+endif(APPLE)
 
 target_link_libraries(opencs
     ${Boost_LIBRARIES}
