@@ -148,16 +148,34 @@ qt4_add_resources(OPENCS_RES_SRC ${OPENCS_RES})
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
+if(APPLE)
+    set (OPENCS_MAC_ICON ${CMAKE_SOURCE_DIR}/files/mac/opencs.icns)
+else()
+    set (OPENCS_MAC_ICON "")
+endif(APPLE)
+
 add_executable(opencs
     MACOSX_BUNDLE
     ${OPENCS_SRC}
     ${OPENCS_UI_HDR}
     ${OPENCS_MOC_SRC}
     ${OPENCS_RES_SRC}
+    ${OPENCS_MAC_ICON}
 )
 
 if(APPLE)
-    set_target_properties(opencs PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OpenMW_BINARY_DIR}")
+    set_target_properties(opencs PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${OpenMW_BINARY_DIR}"
+        OUTPUT_NAME "OpenCS"
+        MACOSX_BUNDLE_ICON_FILE "opencs.icns"
+        MACOSX_BUNDLE_BUNDLE_NAME "OpenCS"
+        MACOSX_BUNDLE_GUI_IDENTIFIER "org.openmw.opencs"
+        MACOSX_BUNDLE_SHORT_VERSION_STRING ${OPENMW_VERSION}
+        MACOSX_BUNDLE_BUNDLE_VERSION ${OPENMW_VERSION}
+        )
+
+    set_source_files_properties(${OPENCS_MAC_ICON} PROPERTIES
+        MACOSX_PACKAGE_LOCATION Resources)
 endif(APPLE)
 
 target_link_libraries(opencs
