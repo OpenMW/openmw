@@ -164,11 +164,13 @@ namespace MWMechanics
         for(int i = 0;i < 3;++i)
         {
             DynamicStat<float> stat = creatureStats.getDynamic(i);
-            stat.setModifier(effects.get(EffectKey(80+i)).mMagnitude -
-                             effects.get(EffectKey(18+i)).mMagnitude);
+            stat.setModifier(effects.get(EffectKey(ESM::MagicEffect::FortifyHealth+i)).mMagnitude -
+                             effects.get(EffectKey(ESM::MagicEffect::DrainHealth+i)).mMagnitude);
 
             creatureStats.setDynamic(i, stat);
         }
+
+
     }
 
     void Actors::calculateNpcStatModifiers (const MWWorld::Ptr& ptr)
