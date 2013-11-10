@@ -1991,6 +1991,7 @@ namespace MWWorld
         stats.setAttackingOrSpell(false);
 
         std::string selectedSpell = stats.getSpells().getSelectedSpell();
+        std::string sourceName = "";
         if (!selectedSpell.empty())
         {
             const ESM::Spell* spell = getStore().get<ESM::Spell>().search(selectedSpell);
@@ -2009,6 +2010,18 @@ namespace MWWorld
             {
                 magicka.setCurrent(magicka.getCurrent() - spell->mData.mCost);
                 stats.setMagicka(magicka);
+            }
+
+            // If this is a power, check if it was already used in last 24h
+            if (!fail && spell->mData.mType & ESM::Spell::ST_Power)
+            {
+                if (stats.canUsePower(selectedSpell))
+                    stats.usePower(selectedSpell);
+                else
+                {
+                    MWBase::Environment::get().getWindowManager()->messageBox("#{sPowerAlreadyUsed}");
+                    fail = true;
+                }
             }
 
             // Check success
@@ -2042,18 +2055,13 @@ namespace MWWorld
 
             actor.getClass().skillUsageSucceeded(actor, MWMechanics::spellSchoolToSkill(MWMechanics::getSpellSchool(selectedSpell, actor)), 0);
 
-            actor.getClass().getCreatureStats(actor).getActiveSpells().addSpell(selectedSpell, actor, ESM::RT_Self);
-            // TODO: RT_Range, RT_Touch
-            return;
         }
-
         InventoryStore& inv = actor.getClass().getInventoryStore(actor);
-        if (inv.getSelectedEnchantItem() != inv.end())
+        if (selectedSpell.empty() && inv.getSelectedEnchantItem() != inv.end())
         {
             MWWorld::Ptr item = *inv.getSelectedEnchantItem();
-            std::string id = item.getClass().getEnchantment(item);
-            const ESM::Enchantment* enchantment = getStore().get<ESM::Enchantment>().search (id);
-
+            selectedSpell = item.getClass().getEnchantment(item);
+            const ESM::Enchantment* enchantment = getStore().get<ESM::Enchantment>().search (selectedSpell);
 
             if (enchantment->mData.mType == ESM::Enchantment::WhenUsed)
             {
@@ -2080,8 +2088,7 @@ namespace MWWorld
                 item.getRefData().setCount(item.getRefData().getCount()-1);
             }
 
-            std::string itemName = item.getClass().getName(item);
-            actor.getClass().getCreatureStats(actor).getActiveSpells().addSpell(id, actor, ESM::RT_Self, itemName);
+            sourceName = item.getClass().getName(item);
 
             if (!item.getRefData().getCount())
             {
@@ -2091,10 +2098,28 @@ namespace MWWorld
             }
             else
                 MWBase::Environment::get().getWindowManager()->setSelectedEnchantItem(item); // Set again to show the modified charge
-
-
-            // TODO: RT_Range, RT_Touch
         }
+
+        // Now apply the spell!
+
+        // Apply Self portion
+        actor.getClass().getCreatureStats(actor).getActiveSpells().addSpell(selectedSpell, actor, ESM::RT_Self, sourceName);
+
+        // Apply Touch portion
+        // TODO: Distance is probably incorrect, and should it be hardcoded?
+        std::pair<MWWorld::Ptr, Ogre::Vector3> contact = getHitContact(actor, 100);
+        if (!contact.first.isEmpty())
+        {
+            if (contact.first.getClass().isActor())
+                contact.first.getClass().getCreatureStats(contact.first).getActiveSpells().addSpell(selectedSpell, contact.first, ESM::RT_Touch, sourceName);
+            else
+            {
+                // We hit a non-actor, e.g. a door. Only instant effects are relevant.
+                //  inflictSpellOnNonActor(contact.first, selectedSpell, ESM::RT_Touch);
+            }
+        }
+
+        // TODO: Launch projectile if there's a Target portion
     }
 
 }

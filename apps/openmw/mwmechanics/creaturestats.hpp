@@ -40,12 +40,17 @@ namespace MWMechanics
 
         std::string mLastHitObject; // The last object to hit this actor
 
+        std::map<std::string, MWWorld::TimeStamp> mUsedPowers;
+
     protected:
         bool mIsWerewolf;
         Stat<int> mWerewolfAttributes[8];
 
     public:
         CreatureStats();
+
+        bool canUsePower (const std::string& power);
+        void usePower (const std::string& power);
 
         const Stat<int> & getAttribute(int index) const;
 
