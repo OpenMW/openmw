@@ -4,10 +4,12 @@
 #include <QMessageBox>
 #include <QDir>
 
-#ifdef __APPLE__
+#ifdef MAC_OS_X_VERSION_MIN_REQUIRED
+#undef MAC_OS_X_VERSION_MIN_REQUIRED
 // We need to do this because of Qt: https://bugreports.qt-project.org/browse/QTBUG-22154
 #define MAC_OS_X_VERSION_MIN_REQUIRED __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
-#endif
+#endif // MAC_OS_X_VERSION_MIN_REQUIRED
+
 #include <SDL.h>
 
 #include <cstdlib>
