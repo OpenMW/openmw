@@ -1,6 +1,8 @@
 #include "contentmodel.hpp"
 #include "esmfile.hpp"
 
+#include <stdexcept>
+
 #include <QDir>
 #include <QTextCodec>
 #include <QDebug>
