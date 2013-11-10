@@ -38,7 +38,22 @@ void CSMWorld::InfoCollection::load (const Info& record, bool base)
         }
 
         if (index==-1)
-            index = getIdMap().size();
+        {
+            std::pair<MapConstIterator, MapConstIterator> range = getTopicRange (topic);
+
+            if (range.first==range.second)
+                index = getIdMap().size();
+            else
+            {
+                for (; range.first!=range.second; ++range.first)
+                {
+                    if (range.first->second>index)
+                        index = range.first->second;
+                }
+
+                ++index;
+            }
+        }
 
         insertRecord (record2, index);
     }
