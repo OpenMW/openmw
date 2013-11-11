@@ -2029,6 +2029,8 @@ namespace MWWorld
         MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
         stats.setAttackingOrSpell(false);
 
+        ESM::EffectList effects;
+
         std::string selectedSpell = stats.getSpells().getSelectedSpell();
         std::string sourceName;
         if (!selectedSpell.empty())
@@ -2094,6 +2096,7 @@ namespace MWWorld
 
             actor.getClass().skillUsageSucceeded(actor, MWMechanics::spellSchoolToSkill(MWMechanics::getSpellSchool(selectedSpell, actor)), 0);
 
+            effects = spell->mEffects;
         }
         InventoryStore& inv = actor.getClass().getInventoryStore(actor);
         if (selectedSpell.empty() && inv.getSelectedEnchantItem() != inv.end())
@@ -2137,6 +2140,8 @@ namespace MWWorld
             }
             else
                 MWBase::Environment::get().getWindowManager()->setSelectedEnchantItem(item); // Set again to show the modified charge
+
+            effects = enchantment->mEffects;
         }
 
         // Now apply the spell!
@@ -2158,7 +2163,6 @@ namespace MWWorld
             }
         }
 
-        // TODO: Launch projectile if there's a Target portion
     }
 
     void World::updateAnimParts(const Ptr& actor)

@@ -64,8 +64,8 @@ struct MagicEffect
     MEDTstruct mData;
 
     std::string mIcon, mParticle; // Textures
-    std::string mCasting, mHit, mArea; // Statics
-    std::string mBolt; // Weapon
+    std::string mCasting, mHit, mArea; // ESM::Static
+    std::string mBolt; // ESM::Weapon
     std::string mCastSound, mBoltSound, mHitSound, mAreaSound; // Sounds
     std::string mDescription;
 

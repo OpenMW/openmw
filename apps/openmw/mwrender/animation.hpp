@@ -3,6 +3,7 @@
 
 #include <OgreController.h>
 #include <OgreVector3.h>
+#include <OgreTimer.h>
 
 #include <components/nifogre/ogrenifloader.hpp>
 
@@ -52,6 +53,19 @@ protected:
         virtual void setValue(Ogre::Real value);
     };
 
+    class EffectAnimationValue : public Ogre::ControllerValue<Ogre::Real>
+    {
+    private:
+        float mTime;
+    public:
+        EffectAnimationValue() : mTime(0) {  }
+        void addTime(float time) { mTime += time; }
+
+        virtual Ogre::Real getValue() const;
+        virtual void setValue(Ogre::Real value);
+    };
+
+
 
     class NullAnimationValue : public Ogre::ControllerValue<Ogre::Real>
     {
@@ -95,6 +109,8 @@ protected:
 
     typedef std::map<Ogre::MovableObject*,std::string> ObjectAttachMap;
 
+    std::vector<NifOgre::ObjectList> mEffects;
+
     MWWorld::Ptr mPtr;
     Camera *mCamera;
 
@@ -113,6 +129,7 @@ protected:
     Ogre::SharedPtr<NullAnimationValue> mNullAnimationValuePtr;
 
     ObjectAttachMap mAttachedObjects;
+
 
     /* Sets the appropriate animations on the bone groups based on priority.
      */
@@ -172,6 +189,8 @@ protected:
 public:
     Animation(const MWWorld::Ptr &ptr, Ogre::SceneNode *node);
     virtual ~Animation();
+
+    void addEffect (const std::string& model, const std::string& bonename = "");
 
     void updatePtr(const MWWorld::Ptr &ptr);
 

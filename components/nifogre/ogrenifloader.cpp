@@ -54,6 +54,7 @@ private:
     float mFrequency;
     float mPhase;
     float mStartTime;
+public:
     float mStopTime;
 
 public:
@@ -468,7 +469,10 @@ class NIFObjectLoader
                                                     Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
                                                     Ogre::ControllerValueRealPtr());
                 Ogre::ControllerValueRealPtr dstval(OGRE_NEW UVController::Value(material, uv->data.getPtr()));
-                Ogre::ControllerFunctionRealPtr func(OGRE_NEW UVController::Function(uv, (animflags&Nif::NiNode::AnimFlag_AutoPlay)));
+
+                UVController::Function* function = OGRE_NEW UVController::Function(uv, (animflags&Nif::NiNode::AnimFlag_AutoPlay));
+                objectlist.mMaxControllerLength = std::max(function->mStopTime, objectlist.mMaxControllerLength);
+                Ogre::ControllerFunctionRealPtr func(function);
 
                 objectlist.mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
             }
@@ -481,7 +485,10 @@ class NIFObjectLoader
                                                     Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
                                                     Ogre::ControllerValueRealPtr());
                 Ogre::ControllerValueRealPtr dstval(OGRE_NEW GeomMorpherController::Value(subent, geom->data.getPtr()));
-                Ogre::ControllerFunctionRealPtr func(OGRE_NEW GeomMorpherController::Function(geom, (animflags&Nif::NiNode::AnimFlag_AutoPlay)));
+
+                GeomMorpherController::Function* function = OGRE_NEW GeomMorpherController::Function(geom, (animflags&Nif::NiNode::AnimFlag_AutoPlay));
+                objectlist.mMaxControllerLength = std::max(function->mStopTime, objectlist.mMaxControllerLength);
+                Ogre::ControllerFunctionRealPtr func(function);
 
                 objectlist.mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
             }
@@ -616,7 +623,11 @@ class NIFObjectLoader
                                                     Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
                                                     Ogre::ControllerValueRealPtr());
                 Ogre::ControllerValueRealPtr dstval(OGRE_NEW ParticleSystemController::Value(partsys, partctrl));
-                Ogre::ControllerFunctionRealPtr func(OGRE_NEW ParticleSystemController::Function(partctrl, (partflags&Nif::NiNode::ParticleFlag_AutoPlay)));
+
+                ParticleSystemController::Function* function =
+                        OGRE_NEW ParticleSystemController::Function(partctrl, (partflags&Nif::NiNode::ParticleFlag_AutoPlay));
+                objectlist.mMaxControllerLength = std::max(function->mStopTime, objectlist.mMaxControllerLength);
+                Ogre::ControllerFunctionRealPtr func(function);
 
                 objectlist.mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
             }
@@ -648,7 +659,10 @@ class NIFObjectLoader
                                                     Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
                                                     Ogre::ControllerValueRealPtr());
                 Ogre::ControllerValueRealPtr dstval(OGRE_NEW VisController::Value(trgtbone, vis->data.getPtr()));
-                Ogre::ControllerFunctionRealPtr func(OGRE_NEW VisController::Function(vis, (animflags&Nif::NiNode::AnimFlag_AutoPlay)));
+
+                VisController::Function* function = OGRE_NEW VisController::Function(vis, (animflags&Nif::NiNode::AnimFlag_AutoPlay));
+                objectlist.mMaxControllerLength = std::max(function->mStopTime, objectlist.mMaxControllerLength);
+                Ogre::ControllerFunctionRealPtr func(function);
 
                 objectlist.mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
             }
@@ -663,7 +677,9 @@ class NIFObjectLoader
                                                         Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
                                                         Ogre::ControllerValueRealPtr());
                     Ogre::ControllerValueRealPtr dstval(OGRE_NEW KeyframeController::Value(trgtbone, key->data.getPtr()));
-                    Ogre::ControllerFunctionRealPtr func(OGRE_NEW KeyframeController::Function(key, (animflags&Nif::NiNode::AnimFlag_AutoPlay)));
+                    KeyframeController::Function* function = OGRE_NEW KeyframeController::Function(key, (animflags&Nif::NiNode::AnimFlag_AutoPlay));
+                    objectlist.mMaxControllerLength = std::max(function->mStopTime, objectlist.mMaxControllerLength);
+                    Ogre::ControllerFunctionRealPtr func(function);
 
                     objectlist.mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
                 }

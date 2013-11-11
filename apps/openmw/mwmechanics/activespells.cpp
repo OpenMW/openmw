@@ -17,6 +17,8 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
 
+#include "../mwrender/animation.hpp"
+
 #include "../mwworld/class.hpp"
 
 #include "creaturestats.hpp"
@@ -217,7 +219,8 @@ namespace MWMechanics
         else
             iter->second = params;
 
-        // Play sounds
+        // Play sounds & particles
+        bool first=true;
         for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.first.mList.begin());
             iter!=effects.first.mList.end(); ++iter)
         {
@@ -228,17 +231,24 @@ namespace MWMechanics
                 MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
                 iter->mEffectID);
 
-            static const std::string schools[] = {
-                "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
-            };
+            // Only the sound of the first effect plays
+            if (first)
+            {
+                static const std::string schools[] = {
+                    "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
+                };
 
-            MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-            if(!magicEffect->mHitSound.empty())
-                sndMgr->playSound3D(actor, magicEffect->mHitSound, 1.0f, 1.0f);
-            else
-                sndMgr->playSound3D(actor, schools[magicEffect->mData.mSchool]+" hit", 1.0f, 1.0f);
+                MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+                if(!magicEffect->mHitSound.empty())
+                    sndMgr->playSound3D(actor, magicEffect->mHitSound, 1.0f, 1.0f);
+                else
+                    sndMgr->playSound3D(actor, schools[magicEffect->mData.mSchool]+" hit", 1.0f, 1.0f);
+            }
 
-            break;
+            const ESM::Static* castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find (magicEffect->mHit);
+            MWBase::Environment::get().getWorld()->getAnimation(actor)->addEffect("meshes\\" + castStatic->mModel, "");
+
+            first = false;
         }
 
         mSpellsChanged = true;

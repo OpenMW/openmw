@@ -45,11 +45,14 @@ struct ObjectList {
     std::vector<Ogre::ParticleSystem*> mParticles;
     std::vector<Ogre::Light*> mLights;
 
+    // The maximum length on any of the controllers. For animations with controllers, but no text keys, consider this the animation length.
+    float mMaxControllerLength;
+
     std::map<int,TextKeyMap> mTextKeys;
 
     std::vector<Ogre::Controller<Ogre::Real> > mControllers;
 
-    ObjectList() : mSkelBase(0)
+    ObjectList() : mSkelBase(0), mMaxControllerLength(0)
     { }
 };
 
