@@ -123,7 +123,6 @@ void DialInfo::load(ESMReader &esm)
 
 void DialInfo::save(ESMWriter &esm) const
 {
-    esm.writeHNCString("INAM", mId);
     esm.writeHNCString("PNAM", mPrev);
     esm.writeHNCString("NNAM", mNext);
     esm.writeHNT("DATA", mData, 12);
