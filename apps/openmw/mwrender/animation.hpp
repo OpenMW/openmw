@@ -3,7 +3,6 @@
 
 #include <OgreController.h>
 #include <OgreVector3.h>
-#include <OgreTimer.h>
 
 #include <components/nifogre/ogrenifloader.hpp>
 

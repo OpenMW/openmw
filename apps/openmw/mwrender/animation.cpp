@@ -87,6 +87,9 @@ Animation::Animation(const MWWorld::Ptr &ptr, Ogre::SceneNode *node)
 
 Animation::~Animation()
 {
+    for (std::vector<NifOgre::ObjectList>::iterator it = mEffects.begin(); it != mEffects.end(); ++it)
+        destroyObjectList(mInsert->getCreator(), *it);
+
     mAnimSources.clear();
 
     Ogre::SceneManager *sceneMgr = mInsert->getCreator();

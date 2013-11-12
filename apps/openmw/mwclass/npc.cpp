@@ -445,7 +445,7 @@ namespace MWClass
             skillUsageSucceeded(ptr, weapskill, 0);
 
         // Apply "On hit" enchanted weapons
-        std::string enchantmentName = weapon.getClass().getEnchantment(weapon);
+        std::string enchantmentName = !weapon.isEmpty() ? weapon.getClass().getEnchantment(weapon) : "";
         if (!enchantmentName.empty())
         {
             const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(
