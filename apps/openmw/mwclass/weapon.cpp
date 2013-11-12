@@ -100,23 +100,23 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Weapon> *ref =
             ptr.get<ESM::Weapon>();
 
-        std::vector<int> slots;
+        std::vector<int> slots_;
         bool stack = false;
 
         if (ref->mBase->mData.mType==ESM::Weapon::Arrow || ref->mBase->mData.mType==ESM::Weapon::Bolt)
         {
-            slots.push_back (int (MWWorld::InventoryStore::Slot_Ammunition));
+            slots_.push_back (int (MWWorld::InventoryStore::Slot_Ammunition));
             stack = true;
         }
         else if (ref->mBase->mData.mType==ESM::Weapon::MarksmanThrown)
         {
-            slots.push_back (int (MWWorld::InventoryStore::Slot_CarriedRight));
+            slots_.push_back (int (MWWorld::InventoryStore::Slot_CarriedRight));
             stack = true;
         }
         else
-            slots.push_back (int (MWWorld::InventoryStore::Slot_CarriedRight));
+            slots_.push_back (int (MWWorld::InventoryStore::Slot_CarriedRight));
 
-        return std::make_pair (slots, stack);
+        return std::make_pair (slots_, stack);
     }
 
     int Weapon::getEquipmentSkill (const MWWorld::Ptr& ptr) const
@@ -384,11 +384,11 @@ namespace MWClass
 
     std::pair<int, std::string> Weapon::canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const
     {
-        std::pair<std::vector<int>, bool> slots = MWWorld::Class::get(ptr).getEquipmentSlots(ptr);
+        std::pair<std::vector<int>, bool> slots_ = MWWorld::Class::get(ptr).getEquipmentSlots(ptr);
 
         // equip the item in the first free slot
-        for (std::vector<int>::const_iterator slot=slots.first.begin();
-            slot!=slots.first.end(); ++slot)
+        for (std::vector<int>::const_iterator slot=slots_.first.begin();
+            slot!=slots_.first.end(); ++slot)
         {
             if(*slot == MWWorld::InventoryStore::Slot_CarriedRight)
             {

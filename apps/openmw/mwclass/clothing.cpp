@@ -78,12 +78,12 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Clothing> *ref =
             ptr.get<ESM::Clothing>();
 
-        std::vector<int> slots;
+        std::vector<int> slots_;
 
         if (ref->mBase->mData.mType==ESM::Clothing::Ring)
         {
-            slots.push_back (int (MWWorld::InventoryStore::Slot_LeftRing));
-            slots.push_back (int (MWWorld::InventoryStore::Slot_RightRing));
+            slots_.push_back (int (MWWorld::InventoryStore::Slot_LeftRing));
+            slots_.push_back (int (MWWorld::InventoryStore::Slot_RightRing));
         }
         else
         {
@@ -105,12 +105,12 @@ namespace MWClass
             for (int i=0; i<size; ++i)
                 if (sMapping[i][0]==ref->mBase->mData.mType)
                 {
-                    slots.push_back (int (sMapping[i][1]));
+                    slots_.push_back (int (sMapping[i][1]));
                     break;
                 }
         }
 
-        return std::make_pair (slots, false);
+        return std::make_pair (slots_, false);
     }
 
     int Clothing::getEquipmentSkill (const MWWorld::Ptr& ptr) const
@@ -232,12 +232,12 @@ namespace MWClass
     std::pair<int, std::string> Clothing::canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const
     {
         // slots that this item can be equipped in
-        std::pair<std::vector<int>, bool> slots = MWWorld::Class::get(ptr).getEquipmentSlots(ptr);
+        std::pair<std::vector<int>, bool> slots_ = MWWorld::Class::get(ptr).getEquipmentSlots(ptr);
 
         std::string npcRace = npc.get<ESM::NPC>()->mBase->mRace;
 
-        for (std::vector<int>::const_iterator slot=slots.first.begin();
-            slot!=slots.first.end(); ++slot)
+        for (std::vector<int>::const_iterator slot=slots_.first.begin();
+            slot!=slots_.first.end(); ++slot)
         {
 
             // Beast races cannot equip shoes / boots, or full helms (head part vs hair part)

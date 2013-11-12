@@ -33,10 +33,10 @@ void MWWorld::InventoryStore::copySlots (const InventoryStore& store)
     }
 }
 
-void MWWorld::InventoryStore::initSlots (TSlots& slots)
+void MWWorld::InventoryStore::initSlots (TSlots& slots_)
 {
     for (int i=0; i<Slots; ++i)
-        slots.push_back (end());
+        slots_.push_back (end());
 }
 
 MWWorld::InventoryStore::InventoryStore() : mMagicEffectsUpToDate (false)
@@ -90,12 +90,12 @@ void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& ite
     if (iterator.getContainerStore()!=this)
         throw std::runtime_error ("attempt to equip an item that is not in the inventory");
 
-    std::pair<std::vector<int>, bool> slots;
+    std::pair<std::vector<int>, bool> slots_;
     if (iterator!=end())
     {
-        slots = Class::get (*iterator).getEquipmentSlots (*iterator);
+        slots_ = Class::get (*iterator).getEquipmentSlots (*iterator);
 
-        if (std::find (slots.first.begin(), slots.first.end(), slot)==slots.first.end())
+        if (std::find (slots_.first.begin(), slots_.first.end(), slot)==slots_.first.end())
             throw std::runtime_error ("invalid slot");
     }
 
@@ -103,7 +103,7 @@ void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& ite
         unequipSlot(slot, actor);
 
     // unstack item pointed to by iterator if required
-    if (iterator!=end() && !slots.second && iterator->getRefData().getCount() > 1) // if slots.second is true, item can stay stacked when equipped
+    if (iterator!=end() && !slots_.second && iterator->getRefData().getCount() > 1) // if slots.second is true, item can stay stacked when equipped
     {
         // add the item again with a count of count-1, then set the count of the original (that will be equipped) to 1
         int count = iterator->getRefData().getCount();
@@ -148,8 +148,8 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& npc)
     const MWMechanics::NpcStats& stats = MWWorld::Class::get(npc).getNpcStats(npc);
     MWWorld::InventoryStore& invStore = MWWorld::Class::get(npc).getInventoryStore(npc);
 
-    TSlots slots;
-    initSlots (slots);
+    TSlots slots_;
+    initSlots (slots_);
 
     // Disable model update during auto-equip
     mActorModelUpdateEnabled = false;
@@ -167,11 +167,11 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& npc)
         {
             bool use = false;
 
-            if (slots.at (*iter2)==end())
+            if (slots_.at (*iter2)==end())
                 use = true; // slot was empty before -> skip all further checks
             else
             {
-                Ptr old = *slots.at (*iter2);
+                Ptr old = *slots_.at (*iter2);
 
                 if (!use)
                 {
@@ -229,15 +229,15 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& npc)
                 }
             }
 
-            slots[*iter2] = iter;
+            slots_[*iter2] = iter;
             break;
         }
     }
 
     bool changed = false;
 
-    for (std::size_t i=0; i<slots.size(); ++i)
-        if (slots[i]!=mSlots[i])
+    for (std::size_t i=0; i<slots_.size(); ++i)
+        if (slots_[i]!=mSlots[i])
         {
             changed = true;
         }
@@ -246,7 +246,7 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& npc)
 
     if (changed)
     {
-        mSlots.swap (slots);
+        mSlots.swap (slots_);
         updateActorModel(npc);
         flagAsModified();
     }

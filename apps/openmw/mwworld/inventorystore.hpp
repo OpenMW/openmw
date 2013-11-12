@@ -56,7 +56,7 @@ namespace MWWorld
 
             void copySlots (const InventoryStore& store);
 
-            void initSlots (TSlots& slots);
+            void initSlots (TSlots& slots_);
 
             void updateActorModel (const Ptr& actor);
 

@@ -73,11 +73,11 @@ namespace MWClass
 
     std::pair<std::vector<int>, bool> Probe::getEquipmentSlots (const MWWorld::Ptr& ptr) const
     {
-        std::vector<int> slots;
+        std::vector<int> slots_;
 
-        slots.push_back (int (MWWorld::InventoryStore::Slot_CarriedRight));
+        slots_.push_back (int (MWWorld::InventoryStore::Slot_CarriedRight));
 
-        return std::make_pair (slots, false);
+        return std::make_pair (slots_, false);
     }
 
     int Probe::getValue (const MWWorld::Ptr& ptr) const

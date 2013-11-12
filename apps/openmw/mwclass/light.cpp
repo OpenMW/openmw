@@ -121,12 +121,12 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Light> *ref =
             ptr.get<ESM::Light>();
 
-        std::vector<int> slots;
+        std::vector<int> slots_;
 
         if (ref->mBase->mData.mFlags & ESM::Light::Carry)
-            slots.push_back (int (MWWorld::InventoryStore::Slot_CarriedLeft));
+            slots_.push_back (int (MWWorld::InventoryStore::Slot_CarriedLeft));
 
-        return std::make_pair (slots, false);
+        return std::make_pair (slots_, false);
     }
 
     int Light::getValue (const MWWorld::Ptr& ptr) const

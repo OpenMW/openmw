@@ -40,7 +40,7 @@ namespace MWWorld
         }
 
         // slots that this item can be equipped in
-        std::pair<std::vector<int>, bool> slots = MWWorld::Class::get(getTarget()).getEquipmentSlots(getTarget());
+        std::pair<std::vector<int>, bool> slots_ = MWWorld::Class::get(getTarget()).getEquipmentSlots(getTarget());
 
         // retrieve ContainerStoreIterator to the item
         MWWorld::ContainerStoreIterator it = invStore.begin();
@@ -57,12 +57,12 @@ namespace MWWorld
         bool equipped = false;
 
         // equip the item in the first free slot
-        for (std::vector<int>::const_iterator slot=slots.first.begin();
-            slot!=slots.first.end(); ++slot)
+        for (std::vector<int>::const_iterator slot=slots_.first.begin();
+            slot!=slots_.first.end(); ++slot)
         {
 
             // if all slots are occupied, replace the last slot
-            if (slot == --slots.first.end())
+            if (slot == --slots_.first.end())
             {
                 invStore.equip(*slot, it, actor);
                 equipped = true;
