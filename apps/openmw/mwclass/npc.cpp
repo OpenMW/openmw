@@ -444,6 +444,36 @@ namespace MWClass
         if(ptr.getRefData().getHandle() == "player")
             skillUsageSucceeded(ptr, weapskill, 0);
 
+        // Apply "On hit" enchanted weapons
+        std::string enchantmentName = weapon.getClass().getEnchantment(weapon);
+        if (!enchantmentName.empty())
+        {
+            const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(
+                        enchantmentName);
+            if (enchantment->mData.mType == ESM::Enchantment::WhenStrikes)
+            {
+                // Check if we have enough charges
+                const float enchantCost = enchantment->mData.mCost;
+                int eSkill = stats.getSkill(ESM::Skill::Enchant).getModified();
+                const float castCost = enchantCost - (enchantCost / 100) * (eSkill - 10);
+
+                if (weapon.getCellRef().mEnchantmentCharge == -1)
+                    weapon.getCellRef().mEnchantmentCharge = enchantment->mData.mCharge;
+                if (weapon.getCellRef().mEnchantmentCharge < castCost)
+                {
+                    if (ptr.getRefData().getHandle() == "player")
+                        MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicInsufficientCharge}");
+                }
+                else
+                {
+                    weapon.getCellRef().mEnchantmentCharge -= castCost;
+                    othercls.getCreatureStats(victim).getActiveSpells().addSpell(enchantmentName, victim, ESM::RT_Touch, weapon.getClass().getName(weapon));
+                    getCreatureStats(ptr).getActiveSpells().addSpell(enchantmentName, ptr, ESM::RT_Self, weapon.getClass().getName(weapon));
+                    // TODO: RT_Target
+                }
+            }
+        }
+
         othercls.onHit(victim, damage, healthdmg, weapon, ptr, true);
     }
 

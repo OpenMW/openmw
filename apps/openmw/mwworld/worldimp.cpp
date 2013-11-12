@@ -2094,7 +2094,9 @@ namespace MWWorld
                 return;
             }
 
-            actor.getClass().skillUsageSucceeded(actor, MWMechanics::spellSchoolToSkill(MWMechanics::getSpellSchool(selectedSpell, actor)), 0);
+            if (actor == getPlayer().getPlayer())
+                actor.getClass().skillUsageSucceeded(actor,
+                    MWMechanics::spellSchoolToSkill(MWMechanics::getSpellSchool(selectedSpell, actor)), 0);
 
             effects = spell->mEffects;
         }

@@ -245,8 +245,11 @@ namespace MWMechanics
                     sndMgr->playSound3D(actor, schools[magicEffect->mData.mSchool]+" hit", 1.0f, 1.0f);
             }
 
-            const ESM::Static* castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find (magicEffect->mHit);
-            MWBase::Environment::get().getWorld()->getAnimation(actor)->addEffect("meshes\\" + castStatic->mModel, "");
+            if (!magicEffect->mHit.empty())
+            {
+                const ESM::Static* castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find (magicEffect->mHit);
+                MWBase::Environment::get().getWorld()->getAnimation(actor)->addEffect("meshes\\" + castStatic->mModel, "");
+            }
 
             first = false;
         }
