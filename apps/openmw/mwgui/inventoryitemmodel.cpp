@@ -56,7 +56,7 @@ void InventoryItemModel::removeItem (const ItemStack& item, size_t count)
 
     if (removed == 0)
         throw std::runtime_error("Item to remove not found in container store");
-    else if (removed < count)
+    else if (removed < static_cast<int>(count))
         throw std::runtime_error("Not enough items in the stack to remove");
 }
 

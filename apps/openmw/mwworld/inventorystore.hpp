@@ -109,7 +109,6 @@ namespace MWWorld
 
             virtual bool stacks (const Ptr& stack, const Ptr& item);
             ///< @return true if the two specified objects can stack with each other
-            /// @note stack is the item that is already in this container (it may be equipped)
 
             virtual int remove(const Ptr& item, int count, const Ptr& actor);
             ///< Remove \a count item(s) designated by \a item from this inventory.

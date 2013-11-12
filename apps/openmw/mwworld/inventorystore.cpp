@@ -295,7 +295,7 @@ bool MWWorld::InventoryStore::stacks(const Ptr& stack, const Ptr& item)
     for (TSlots::const_iterator iter (mSlots.begin());
         iter!=mSlots.end(); ++iter)
     {
-        if (*iter != end() && stack == **iter)
+        if (*iter != end() && (stack == **iter || item == **iter))
         {
             bool stackWhenEquipped = MWWorld::Class::get(**iter).getEquipmentSlots(**iter).second;
             if (!stackWhenEquipped)

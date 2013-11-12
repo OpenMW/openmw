@@ -93,7 +93,6 @@ namespace MWWorld
 
             virtual bool stacks (const Ptr& stack, const Ptr& item);
             ///< @return true if the two specified objects can stack with each other
-            /// @note stack is the item that is already in this container
 
             void fill (const ESM::InventoryList& items, const std::string& owner, const MWWorld::ESMStore& store);
             ///< Insert items into *this.
