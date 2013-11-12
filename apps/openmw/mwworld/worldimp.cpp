@@ -2127,19 +2127,17 @@ namespace MWWorld
             }
             if (enchantment->mData.mType == ESM::Enchantment::CastOnce)
             {
-                item.getRefData().setCount(item.getRefData().getCount()-1);
-            }
-
-            sourceName = item.getClass().getName(item);
-
-            if (!item.getRefData().getCount())
-            {
-                // Item was used up
-                MWBase::Environment::get().getWindowManager()->unsetSelectedSpell();
-                inv.setSelectedEnchantItem(inv.end());
+                if (!item.getContainerStore()->remove(item, 1, actor))
+                {
+                    // Item was used up
+                    MWBase::Environment::get().getWindowManager()->unsetSelectedSpell();
+                    inv.setSelectedEnchantItem(inv.end());
+                }
             }
             else
                 MWBase::Environment::get().getWindowManager()->setSelectedEnchantItem(item); // Set again to show the modified charge
+
+            sourceName = item.getClass().getName(item);
 
             effects = enchantment->mEffects;
         }
