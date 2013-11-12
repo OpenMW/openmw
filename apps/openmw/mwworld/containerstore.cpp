@@ -213,6 +213,8 @@ int MWWorld::ContainerStore::remove(const std::string& itemId, int count, const 
         if (Misc::StringUtils::ciEqual(iter->getCellRef().mRefID, itemId))
             toRemove -= remove(*iter, toRemove, actor);
 
+    flagAsModified();
+
     // number of removed items
     return count - toRemove;
 }
@@ -234,6 +236,8 @@ int MWWorld::ContainerStore::remove(const Ptr& item, int count, const Ptr& actor
         itemRef.setCount(itemRef.getCount() - toRemove);
         toRemove = 0;
     }
+
+    flagAsModified();
 
     // number of removed items
     return count - toRemove;
