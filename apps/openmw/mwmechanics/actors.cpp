@@ -378,7 +378,6 @@ namespace MWMechanics
                 iter->second->update(duration);
         }
     }
-
     void Actors::restoreDynamicStats()
     {
         for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)

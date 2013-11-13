@@ -928,37 +928,7 @@ Ogre::Vector3 Animation::runAnimation(float duration)
         mSkelBase->getAllAnimationStates()->_notifyDirty();
     }
 
-
-    for (std::vector<EffectParams>::iterator it = mEffects.begin(); it != mEffects.end(); )
-    {
-        NifOgre::ObjectList& objects = it->mObjects;
-        for(size_t i = 0; i < objects.mControllers.size() ;i++)
-        {
-            static_cast<EffectAnimationValue*> (objects.mControllers[i].getSource().get())->addTime(duration);
-
-            objects.mControllers[i].update();
-        }
-
-        if (objects.mControllers[0].getSource()->getValue() >= objects.mMaxControllerLength)
-        {
-            if (it->mLoop)
-            {
-                // Start from the beginning again; carry over the remainder
-                float remainder = objects.mControllers[0].getSource()->getValue() - objects.mMaxControllerLength;
-                for(size_t i = 0; i < objects.mControllers.size() ;i++)
-                {
-                    static_cast<EffectAnimationValue*> (objects.mControllers[i].getSource().get())->resetTime(remainder);
-                }
-            }
-            else
-            {
-                destroyObjectList(mInsert->getCreator(), it->mObjects);
-                it = mEffects.erase(it);
-                continue;
-            }
-        }
-         ++it;
-    }
+    updateEffects(duration);
 
     return movement;
 }
@@ -1024,7 +994,7 @@ void Animation::detachObjectFromBone(Ogre::MovableObject *obj)
     mSkelBase->detachObjectFromBone(obj);
 }
 
-void Animation::addEffect(const std::string &model, bool loop, const std::string &bonename)
+void Animation::addEffect(const std::string &model, int effectId, bool loop, const std::string &bonename)
 {
     // Early out if we already have this effect
     for (std::vector<EffectParams>::iterator it = mEffects.begin(); it != mEffects.end(); ++it)
@@ -1035,6 +1005,7 @@ void Animation::addEffect(const std::string &model, bool loop, const std::string
     params.mModelName = model;
     params.mObjects = NifOgre::Loader::createObjects(mInsert, model);
     params.mLoop = loop;
+    params.mEffectId = effectId;
 
     for(size_t i = 0;i < params.mObjects.mControllers.size();i++)
     {
@@ -1044,16 +1015,59 @@ void Animation::addEffect(const std::string &model, bool loop, const std::string
     mEffects.push_back(params);
 }
 
-void Animation::removeEffect(const std::string &model)
+void Animation::removeEffect(int effectId)
 {
     for (std::vector<EffectParams>::iterator it = mEffects.begin(); it != mEffects.end(); ++it)
     {
-        if (it->mModelName == model)
+        if (it->mEffectId == effectId)
         {
             destroyObjectList(mInsert->getCreator(), it->mObjects);
             mEffects.erase(it);
             return;
         }
+    }
+}
+
+void Animation::getLoopingEffects(std::vector<int> &out)
+{
+    for (std::vector<EffectParams>::iterator it = mEffects.begin(); it != mEffects.end(); ++it)
+    {
+        if (it->mLoop)
+            out.push_back(it->mEffectId);
+    }
+}
+
+void Animation::updateEffects(float duration)
+{
+    for (std::vector<EffectParams>::iterator it = mEffects.begin(); it != mEffects.end(); )
+    {
+        NifOgre::ObjectList& objects = it->mObjects;
+        for(size_t i = 0; i < objects.mControllers.size() ;i++)
+        {
+            static_cast<EffectAnimationValue*> (objects.mControllers[i].getSource().get())->addTime(duration);
+
+            objects.mControllers[i].update();
+        }
+
+        if (objects.mControllers[0].getSource()->getValue() >= objects.mMaxControllerLength)
+        {
+            if (it->mLoop)
+            {
+                // Start from the beginning again; carry over the remainder
+                float remainder = objects.mControllers[0].getSource()->getValue() - objects.mMaxControllerLength;
+                for(size_t i = 0; i < objects.mControllers.size() ;i++)
+                {
+                    static_cast<EffectAnimationValue*> (objects.mControllers[i].getSource().get())->resetTime(remainder);
+                }
+            }
+            else
+            {
+                destroyObjectList(mInsert->getCreator(), it->mObjects);
+                it = mEffects.erase(it);
+                continue;
+            }
+        }
+         ++it;
     }
 }
 

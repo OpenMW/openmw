@@ -4,6 +4,8 @@
 #include <map>
 #include <string>
 
+#include "../mwworld/ptr.hpp"
+
 namespace ESM
 {
     struct Spell;

@@ -23,6 +23,8 @@ namespace MWGui
 
     void SpellIcons::updateWidgets(MyGUI::Widget *parent, bool adjustSize)
     {
+        // TODO: Tracking add/remove/expire would be better than force updating every frame
+
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
         const MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
 

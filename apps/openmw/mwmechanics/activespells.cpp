@@ -252,7 +252,7 @@ namespace MWMechanics
             {
                 const ESM::Static* castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find (magicEffect->mHit);
                 bool loop = magicEffect->mData.mFlags & ESM::MagicEffect::ContinuousVfx;
-                MWBase::Environment::get().getWorld()->getAnimation(actor)->addEffect("meshes\\" + castStatic->mModel, loop, "");
+                MWBase::Environment::get().getWorld()->getAnimation(actor)->addEffect("meshes\\" + castStatic->mModel, magicEffect->mIndex, loop, "");
             }
 
             first = false;

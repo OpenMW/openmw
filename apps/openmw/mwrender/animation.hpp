@@ -113,6 +113,7 @@ protected:
     {
         std::string mModelName; // Just here so we don't add the same effect twice
         NifOgre::ObjectList mObjects;
+        int mEffectId;
         bool mLoop;
     };
 
@@ -200,15 +201,20 @@ public:
     /**
      * @brief Add an effect mesh attached to a bone or the insert scene node
      * @param model
+     * @param effectId An ID for this effect. Note that adding the same ID again won't add another effect.
      * @param loop Loop the effect. If false, it is removed automatically after it finishes playing. If true,
      *              you need to remove it manually using removeEffect when the effect should end.
      * @param bonename Bone to attach to, or empty string to use the scene node instead
      * @note Will not add an effect twice.
      */
-    void addEffect (const std::string& model, bool loop = false, const std::string& bonename = "");
+    void addEffect (const std::string& model, int effectId, bool loop = false, const std::string& bonename = "");
+    void removeEffect (int effectId);
+    void getLoopingEffects (std::vector<int>& out);
+private:
+    void updateEffects(float duration);
 
-    void removeEffect (const std::string& model);
 
+public:
     void updatePtr(const MWWorld::Ptr &ptr);
 
     bool hasAnimation(const std::string &anim);

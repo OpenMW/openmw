@@ -513,7 +513,7 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
                     effect = store.get<ESM::MagicEffect>().find(effectentry.mEffectID);
 
                     const ESM::Static* castStatic = store.get<ESM::Static>().find (effect->mCasting);
-                    mAnimation->addEffect("meshes\\" + castStatic->mModel);
+                    mAnimation->addEffect("meshes\\" + castStatic->mModel, effect->mIndex);
 
                     switch(effectentry.mRange)
                     {
@@ -715,6 +715,8 @@ void CharacterController::update(float duration)
     MWBase::World *world = MWBase::Environment::get().getWorld();
     const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
     Ogre::Vector3 movement(0.0f);
+
+    updateContinuousVfx();
 
     if(!cls.isActor())
     {
@@ -1101,6 +1103,22 @@ void CharacterController::resurrect()
         mAnimation->disable(mCurrentDeath);
     mCurrentDeath.empty();
     mDeathState = CharState_None;
+}
+
+void CharacterController::updateContinuousVfx()
+{
+    // Keeping track of when to stop a continuous VFX seems to be very difficult to do inside the spells code,
+    // as it's extremely spread out (ActiveSpells, Spells, InventoryStore effects, etc...) so we do it here.
+
+    // Stop any effects that are no longer active
+    std::vector<int> effects;
+    mAnimation->getLoopingEffects(effects);
+
+    for (std::vector<int>::iterator it = effects.begin(); it != effects.end(); ++it)
+    {
+        if (mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(MWMechanics::EffectKey(*it)).mMagnitude <= 0)
+            mAnimation->removeEffect(*it);
+    }
 }
 
 }

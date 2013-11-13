@@ -232,7 +232,9 @@ struct MagicEffect
         SummonBear = 139,
         SummonBonewolf = 140,
         SummonCreature04 = 141,
-        SummonCreature05 = 142
+        SummonCreature05 = 142,
+
+        Length
     };
 };
 }
