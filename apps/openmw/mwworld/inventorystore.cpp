@@ -254,6 +254,7 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& npc)
 
 const MWMechanics::MagicEffects& MWWorld::InventoryStore::getMagicEffects()
 {
+    // TODO: Add VFX; update when needed instead of update on request
     if (!mMagicEffectsUpToDate)
     {
         mMagicEffects = MWMechanics::MagicEffects();

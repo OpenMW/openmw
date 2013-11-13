@@ -513,7 +513,7 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
                     effect = store.get<ESM::MagicEffect>().find(effectentry.mEffectID);
 
                     const ESM::Static* castStatic = store.get<ESM::Static>().find (effect->mCasting);
-                    mAnimation->addEffect("meshes\\" + castStatic->mModel, "");
+                    mAnimation->addEffect("meshes\\" + castStatic->mModel);
 
                     switch(effectentry.mRange)
                     {

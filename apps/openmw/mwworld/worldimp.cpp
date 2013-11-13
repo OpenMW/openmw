@@ -1122,6 +1122,8 @@ namespace MWWorld
 
         processDoors(duration);
 
+        moveProjectiles(duration);
+
         const PtrVelocityList &results = mPhysics->applyQueuedMovement(duration);
         PtrVelocityList::const_iterator player(results.end());
         for(PtrVelocityList::const_iterator iter(results.begin());iter != results.end();iter++)
@@ -2163,7 +2165,77 @@ namespace MWWorld
             }
         }
 
+        launchProjectile(selectedSpell, effects, actor, sourceName);
+
     }
+
+    void World::launchProjectile (const std::string& id, const ESM::EffectList& effects,
+                                   const MWWorld::Ptr& actor, const std::string& sourceName)
+    {
+        std::string projectileModel;
+        std::string sound;
+        for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.mList.begin());
+            iter!=effects.mList.end(); ++iter)
+        {
+            if (iter->mRange != ESM::RT_Target)
+                continue;
+
+            const ESM::MagicEffect *magicEffect = getStore().get<ESM::MagicEffect>().find (
+                iter->mEffectID);
+
+            projectileModel = magicEffect->mBolt;
+
+            static const std::string schools[] = {
+                "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
+            };
+
+            if (!magicEffect->mBoltSound.empty())
+                sound = magicEffect->mBoltSound;
+            else
+                sound = schools[magicEffect->mData.mSchool] + " bolt";
+
+            break;
+        }
+        if (projectileModel.empty())
+            return;
+
+        MWWorld::ManualRef ref(getStore(), projectileModel);
+        ESM::Position pos;
+        pos.pos[0] = actor.getRefData().getPosition().pos[0];
+        pos.pos[1] = actor.getRefData().getPosition().pos[1];
+        pos.pos[2] = actor.getRefData().getPosition().pos[2];
+        pos.rot[0] = actor.getRefData().getPosition().rot[0];
+        pos.rot[1] = actor.getRefData().getPosition().rot[1];
+        pos.rot[2] = actor.getRefData().getPosition().rot[2];
+        ref.getPtr().getCellRef().mPos = pos;
+        MWWorld::Ptr ptr = copyObjectToCell(ref.getPtr(), *actor.getCell(), pos);
+
+        ProjectileState state;
+        state.mSourceName = sourceName;
+        state.mId = id;
+        state.mActorHandle = actor.getRefData().getHandle();
+
+        MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+        sndMgr->playSound3D(ptr, sound, 1.0f, 1.0f);
+
+        mProjectiles[ptr] = state;
+    }
+
+    void World::moveProjectiles(float duration)
+    {
+        for (std::map<MWWorld::Ptr, ProjectileState>::iterator it = mProjectiles.begin(); it != mProjectiles.end();)
+        {
+            if (!mWorldScene->isCellActive(*it->first.getCell()))
+            {
+                mProjectiles.erase(it++);
+                continue;
+            }
+            // TODO: Move
+            //moveObject(it->first, newPos.x, newPos.y, newPos.z);
+            ++it;
+        }
+    }
+
 
     void World::updateAnimParts(const Ptr& actor)
     {

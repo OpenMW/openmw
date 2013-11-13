@@ -39,6 +39,7 @@ namespace MWMechanics
                 if (!timeToExpire (iter))
                 {
                     mSpells.erase (iter++);
+                    //onSpellExpired
                     rebuild = true;
                 }
                 else
@@ -227,6 +228,8 @@ namespace MWMechanics
             if (iter->mRange != range)
                 continue;
 
+            // TODO: For Area effects, launch a growing particle effect that applies the effect to more actors as it hits them. Best managed in World.
+
             const ESM::MagicEffect *magicEffect =
                 MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
                 iter->mEffectID);
@@ -248,7 +251,8 @@ namespace MWMechanics
             if (!magicEffect->mHit.empty())
             {
                 const ESM::Static* castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find (magicEffect->mHit);
-                MWBase::Environment::get().getWorld()->getAnimation(actor)->addEffect("meshes\\" + castStatic->mModel, "");
+                bool loop = magicEffect->mData.mFlags & ESM::MagicEffect::ContinuousVfx;
+                MWBase::Environment::get().getWorld()->getAnimation(actor)->addEffect("meshes\\" + castStatic->mModel, loop, "");
             }
 
             first = false;

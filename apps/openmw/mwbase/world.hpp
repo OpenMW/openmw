@@ -415,6 +415,9 @@ namespace MWBase
             virtual void castSpell (const MWWorld::Ptr& actor) = 0;
 
             virtual void updateAnimParts(const MWWorld::Ptr& ptr) = 0;
+
+            virtual void launchProjectile (const std::string& id, const ESM::EffectList& effects,
+                                           const MWWorld::Ptr& actor, const std::string& sourceName) = 0;
     };
 }
 

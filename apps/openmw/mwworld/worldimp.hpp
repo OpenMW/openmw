@@ -87,6 +87,20 @@ namespace MWWorld
             std::map<MWWorld::Ptr, int> mDoorStates;
             ///< only holds doors that are currently moving. 0 means closing, 1 opening
 
+            struct ProjectileState
+            {
+                // Id of spell or enchantment to apply when it hits
+                std::string mId;
+
+                // Actor who casted this projectile
+                std::string mActorHandle;
+
+                // Name of item to display as effect source in magic menu (in case we casted an enchantment)
+                std::string mSourceName;
+            };
+
+            std::map<MWWorld::Ptr, ProjectileState> mProjectiles;
+
             int getDaysPerMonth (int month) const;
 
             void rotateObjectImp (const Ptr& ptr, Ogre::Vector3 rot, bool adjust);
@@ -111,6 +125,8 @@ namespace MWWorld
 
             void processDoors(float duration);
             ///< Run physics simulation and modify \a world accordingly.
+
+            void moveProjectiles(float duration);
 
             void doPhysics(float duration);
             ///< Run physics simulation and modify \a world accordingly.
@@ -475,6 +491,9 @@ namespace MWWorld
             virtual void castSpell (const MWWorld::Ptr& actor);
 
             virtual void updateAnimParts(const MWWorld::Ptr& ptr);
+
+            virtual void launchProjectile (const std::string& id, const ESM::EffectList& effects,
+                                           const MWWorld::Ptr& actor, const std::string& sourceName);
     };
 }
 

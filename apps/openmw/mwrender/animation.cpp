@@ -87,8 +87,8 @@ Animation::Animation(const MWWorld::Ptr &ptr, Ogre::SceneNode *node)
 
 Animation::~Animation()
 {
-    for (std::vector<NifOgre::ObjectList>::iterator it = mEffects.begin(); it != mEffects.end(); ++it)
-        destroyObjectList(mInsert->getCreator(), *it);
+    for (std::vector<EffectParams>::iterator it = mEffects.begin(); it != mEffects.end(); ++it)
+        destroyObjectList(mInsert->getCreator(), it->mObjects);
 
     mAnimSources.clear();
 
@@ -929,22 +929,35 @@ Ogre::Vector3 Animation::runAnimation(float duration)
     }
 
 
-    for (std::vector<NifOgre::ObjectList>::iterator it = mEffects.begin(); it != mEffects.end(); )
+    for (std::vector<EffectParams>::iterator it = mEffects.begin(); it != mEffects.end(); )
     {
-        for(size_t i = 0; i < it->mControllers.size() ;i++)
+        NifOgre::ObjectList& objects = it->mObjects;
+        for(size_t i = 0; i < objects.mControllers.size() ;i++)
         {
-            static_cast<EffectAnimationValue*> (it->mControllers[i].getSource().get())->addTime(duration);
+            static_cast<EffectAnimationValue*> (objects.mControllers[i].getSource().get())->addTime(duration);
 
-            it->mControllers[i].update();
+            objects.mControllers[i].update();
         }
 
-        if (it->mControllers[0].getSource()->getValue() >= it->mMaxControllerLength)
+        if (objects.mControllers[0].getSource()->getValue() >= objects.mMaxControllerLength)
         {
-            destroyObjectList(mInsert->getCreator(), *it);
-            it = mEffects.erase(it);
+            if (it->mLoop)
+            {
+                // Start from the beginning again; carry over the remainder
+                float remainder = objects.mControllers[0].getSource()->getValue() - objects.mMaxControllerLength;
+                for(size_t i = 0; i < objects.mControllers.size() ;i++)
+                {
+                    static_cast<EffectAnimationValue*> (objects.mControllers[i].getSource().get())->resetTime(remainder);
+                }
+            }
+            else
+            {
+                destroyObjectList(mInsert->getCreator(), it->mObjects);
+                it = mEffects.erase(it);
+                continue;
+            }
         }
-        else
-            ++it;
+         ++it;
     }
 
     return movement;
@@ -1011,15 +1024,37 @@ void Animation::detachObjectFromBone(Ogre::MovableObject *obj)
     mSkelBase->detachObjectFromBone(obj);
 }
 
-void Animation::addEffect(const std::string &model, const std::string &bonename)
+void Animation::addEffect(const std::string &model, bool loop, const std::string &bonename)
 {
-    NifOgre::ObjectList list = NifOgre::Loader::createObjects(mInsert, model);
-    for(size_t i = 0;i < list.mControllers.size();i++)
+    // Early out if we already have this effect
+    for (std::vector<EffectParams>::iterator it = mEffects.begin(); it != mEffects.end(); ++it)
+        if (it->mModelName == model)
+            return;
+
+    EffectParams params;
+    params.mModelName = model;
+    params.mObjects = NifOgre::Loader::createObjects(mInsert, model);
+    params.mLoop = loop;
+
+    for(size_t i = 0;i < params.mObjects.mControllers.size();i++)
     {
-        if(list.mControllers[i].getSource().isNull())
-            list.mControllers[i].setSource(Ogre::SharedPtr<EffectAnimationValue> (new EffectAnimationValue()));
+        if(params.mObjects.mControllers[i].getSource().isNull())
+            params.mObjects.mControllers[i].setSource(Ogre::SharedPtr<EffectAnimationValue> (new EffectAnimationValue()));
     }
-    mEffects.push_back(list);
+    mEffects.push_back(params);
+}
+
+void Animation::removeEffect(const std::string &model)
+{
+    for (std::vector<EffectParams>::iterator it = mEffects.begin(); it != mEffects.end(); ++it)
+    {
+        if (it->mModelName == model)
+        {
+            destroyObjectList(mInsert->getCreator(), it->mObjects);
+            mEffects.erase(it);
+            return;
+        }
+    }
 }
 
 

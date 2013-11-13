@@ -467,9 +467,12 @@ namespace MWClass
                 else
                 {
                     weapon.getCellRef().mEnchantmentCharge -= castCost;
+                    // Touch
                     othercls.getCreatureStats(victim).getActiveSpells().addSpell(enchantmentName, victim, ESM::RT_Touch, weapon.getClass().getName(weapon));
+                    // Self
                     getCreatureStats(ptr).getActiveSpells().addSpell(enchantmentName, ptr, ESM::RT_Self, weapon.getClass().getName(weapon));
-                    // TODO: RT_Target
+                    // Target
+                    MWBase::Environment::get().getWorld()->launchProjectile(enchantmentName, enchantment->mEffects, ptr, weapon.getClass().getName(weapon));
                 }
             }
         }
