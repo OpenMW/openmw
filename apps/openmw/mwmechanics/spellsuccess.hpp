@@ -88,7 +88,7 @@ namespace MWMechanics
         NpcStats& stats = MWWorld::Class::get(actor).getNpcStats(actor);
         CreatureStats& creatureStats = MWWorld::Class::get(actor).getCreatureStats(actor);
 
-        int skillLevel = stats.getSkill (getSpellSchool(spell, actor)).getModified();
+        int skillLevel = stats.getSkill (spellSchoolToSkill(getSpellSchool(spell, actor))).getModified();
 
         // Sound magic effect (reduces spell casting chance)
         int soundMagnitude = creatureStats.getMagicEffects().get (MWMechanics::EffectKey (48)).mMagnitude;
