@@ -2245,33 +2245,39 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration, co
         mData.setDescription ("");
         mData.setAuthor ("");
     }
+
+    bool filtersFound = false;
+
     if (boost::filesystem::exists (mProjectPath))
     {
-        std::cout<<"Loading file."<<std::endl;
-        getData().loadFile (mProjectPath, false, true);
+        filtersFound = true;
     }
     else
     {
-        std::cout<<"Attemp to use filters file as template."<<std::endl;
         boost::filesystem::path locCustomFiltersPath (configuration.getUserPath());
         locCustomFiltersPath /= "defaultfilters";
+
         if (boost::filesystem::exists(locCustomFiltersPath))
         {
-            std::cout<<"Found custom filters file ("<<locCustomFiltersPath<<")."<<std::endl;
             boost::filesystem::copy_file (locCustomFiltersPath, mProjectPath);
-        } else {
+            filtersFound = true;
+        }
+        else
+        {
             boost::filesystem::path filters(mResDir);
             filters /= "defaultfilters";
-            std::cout<<"Attempt to read defaultfilters from: "<<filters<<std::endl;
+
             if (boost::filesystem::exists(filters))
             {
                 boost::filesystem::copy_file(filters, mProjectPath);
-            } else {
-                std::cout<<filters<<" could not be found!"<<std::endl;
+                filtersFound = true;
             }
-            getData().loadFile (mProjectPath, false, true);
         }
     }
+
+    if (filtersFound)
+        getData().loadFile (mProjectPath, false, true);
+
     addOptionalGmsts();
     addOptionalGlobals();
 
