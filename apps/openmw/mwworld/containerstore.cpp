@@ -333,13 +333,7 @@ void MWWorld::ContainerStore::clear()
 
 void MWWorld::ContainerStore::flagAsModified()
 {
-    ++mStateId;
     mWeightUpToDate = false;
-}
-
-int MWWorld::ContainerStore::getStateId() const
-{
-    return mStateId;
 }
 
 float MWWorld::ContainerStore::getWeight() const

@@ -27,7 +27,15 @@ namespace MWMechanics
     void Spells::add (const std::string& spellId)
     {
         if (mSpells.find (spellId)==mSpells.end())
-            mSpells.insert (std::make_pair (spellId, static_cast<float> (std::rand()) / RAND_MAX));
+        {
+            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
+
+            std::vector<float> random;
+            random.resize(spell->mEffects.mList.size());
+            for (int i=0; i<random.size();++i)
+                random[i] = static_cast<float> (std::rand()) / RAND_MAX;
+            mSpells.insert (std::make_pair (spellId, random));
+        }
     }
 
     void Spells::remove (const std::string& spellId)
@@ -52,7 +60,14 @@ namespace MWMechanics
 
             if (spell->mData.mType==ESM::Spell::ST_Ability || spell->mData.mType==ESM::Spell::ST_Blight ||
                 spell->mData.mType==ESM::Spell::ST_Disease || spell->mData.mType==ESM::Spell::ST_Curse)
-                effects.add (spell->mEffects, iter->second);
+            {
+                int i=0;
+                for (std::vector<ESM::ENAMstruct>::const_iterator it = spell->mEffects.mList.begin(); it != spell->mEffects.mList.end(); ++it)
+                {
+                    effects.add (*it, iter->second[i]);
+                    ++i;
+                }
+            }
         }
 
         return effects;

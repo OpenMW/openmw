@@ -23,7 +23,7 @@ namespace MWMechanics
     {
         public:
 
-            typedef std::map<std::string, float> TContainer; // ID, normalised magnitude
+            typedef std::map<std::string, std::vector<float> > TContainer; // ID, normalised magnitudes
             typedef TContainer::const_iterator TIterator;
 
         private:
