@@ -998,7 +998,7 @@ void Animation::addEffect(const std::string &model, int effectId, bool loop, con
 {
     // Early out if we already have this effect
     for (std::vector<EffectParams>::iterator it = mEffects.begin(); it != mEffects.end(); ++it)
-        if (it->mModelName == model)
+        if (it->mEffectId == effectId)
             return;
 
     EffectParams params;
