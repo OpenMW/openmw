@@ -5,12 +5,12 @@
 
 #include "../world/idcollection.hpp"
 
-#include "stage.hpp"
+#include "../doc/stage.hpp"
 
 namespace CSMTools
 {
     /// \brief VerifyStage: make sure that birthsign records are internally consistent
-    class BirthsignCheckStage : public Stage
+    class BirthsignCheckStage : public CSMDoc::Stage
     {
             const CSMWorld::IdCollection<ESM::BirthSign>& mBirthsigns;
 

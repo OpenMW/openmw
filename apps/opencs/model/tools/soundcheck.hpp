@@ -5,12 +5,12 @@
 
 #include "../world/idcollection.hpp"
 
-#include "stage.hpp"
+#include "../doc/stage.hpp"
 
 namespace CSMTools
 {
     /// \brief VerifyStage: make sure that sound records are internally consistent
-    class SoundCheckStage : public Stage
+    class SoundCheckStage : public CSMDoc::Stage
     {
             const CSMWorld::IdCollection<ESM::Sound>& mSounds;
 

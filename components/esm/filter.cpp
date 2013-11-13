@@ -3,6 +3,9 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
+
+unsigned int ESM::Filter::sRecordId = REC_FILT;
 
 void ESM::Filter::load (ESMReader& esm)
 {
@@ -10,7 +13,7 @@ void ESM::Filter::load (ESMReader& esm)
     mDescription = esm.getHNString ("DESC");
 }
 
-void ESM::Filter::save (ESMWriter& esm)
+void ESM::Filter::save (ESMWriter& esm) const
 {
     esm.writeHNCString ("FILT", mFilter);
     esm.writeHNCString ("DESC", mDescription);

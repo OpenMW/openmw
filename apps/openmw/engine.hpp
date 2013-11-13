@@ -68,8 +68,7 @@ namespace OMW
             boost::filesystem::path mResDir;
             OEngine::Render::OgreRenderer *mOgre;
             std::string mCellName;
-            std::vector<std::string> mMaster;
-            std::vector<std::string> mPlugins;
+            std::vector<std::string> mContentFiles;
             int mFpsLevel;
             bool mVerboseScripts;
             bool mNewGame;
@@ -135,13 +134,11 @@ namespace OMW
             /// Set start cell name (only interiors for now)
             void setCell(const std::string& cellName);
 
-            /// Set master file (esm)
-            /// - If the given name does not have an extension, ".esm" is added automatically
-            void addMaster(const std::string& master);
-
-            /// Same as "addMaster", but for plugin files (esp)
-            /// - If the given name does not have an extension, ".esp" is added automatically
-            void addPlugin(const std::string& plugin);
+            /**
+             * @brief addContentFile - Adds content file (ie. esm/esp, or omwgame/omwaddon) to the content files container.
+             * @param file - filename (extension is required)
+             */
+            void addContentFile(const std::string& file);
 
             /// Enable fps counter
             void showFPS(int level);

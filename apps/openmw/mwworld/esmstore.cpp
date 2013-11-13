@@ -36,7 +36,7 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
     //  all files/readers used by the engine. This will greaty accelerate
     //  refnumber mangling, as required for handling moved references.
     int index = ~0;
-    const std::vector<ESM::Header::MasterData> &masters = esm.getMasters();
+    const std::vector<ESM::Header::MasterData> &masters = esm.getGameFiles();
     std::vector<ESM::ESMReader> *allPlugins = esm.getGlobalReaderList();
     for (size_t j = 0; j < masters.size(); j++) {
         ESM::Header::MasterData &mast = const_cast<ESM::Header::MasterData&>(masters[j]);
@@ -100,11 +100,7 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
             it->second->load(esm, id);
 
             if (n.val==ESM::REC_DIAL) {
-                // dirty hack, but it is better than non-const search()
-                // or friends
-                //dialogue = &mDialogs.mStatic.back();
                 dialogue = const_cast<ESM::Dialogue*>(mDialogs.find(id));
-                assert (dialogue->mId == id);
             } else {
                 dialogue = 0;
             }

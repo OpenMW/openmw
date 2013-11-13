@@ -15,6 +15,8 @@ class ESMWriter;
 
 struct Weapon
 {
+    static unsigned int sRecordId;
+
     enum Type
     {
         ShortBladeOneHand = 0,
@@ -59,7 +61,7 @@ struct Weapon
     std::string mId, mName, mModel, mIcon, mEnchant, mScript;
 
     void load(ESMReader &esm);
-    void save(ESMWriter &esm);
+    void save(ESMWriter &esm) const;
 
     void blank();
     ///< Set record to default state (does not touch the ID).

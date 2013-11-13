@@ -110,11 +110,8 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("start", bpo::value<std::string>()->default_value("Beshara"),
             "set initial cell")
 
-        ("master", bpo::value<StringsVector>()->default_value(StringsVector(), "")
-            ->multitoken(), "master file(s)")
-
-        ("plugin", bpo::value<StringsVector>()->default_value(StringsVector(), "")
-            ->multitoken(), "plugin file(s)")
+        ("content", bpo::value<StringsVector>()->default_value(StringsVector(), "")
+            ->multitoken(), "content file(s): esm/esp, or omwgame/omwaddon")
 
         ("anim-verbose", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "output animation indices files")
@@ -151,8 +148,6 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
             ->multitoken()->composing(), "fallback values")
 
         ("activate-dist", bpo::value <int> ()->default_value (-1), "activation distance override");
-
-        ;
 
     bpo::parsed_options valid_opts = bpo::command_line_parser(argc, argv)
         .options(desc).allow_unregistered().run();
@@ -211,29 +206,18 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
     engine.setResourceDir(variables["resources"].as<std::string>());
 
-    // master and plugin
-    StringsVector master = variables["master"].as<StringsVector>();
-    if (master.empty())
+    StringsVector content = variables["content"].as<StringsVector>();
+    if (content.empty())
     {
-        std::cout << "No master file given. Aborting...\n";
-        return false;
+      std::cout << "No content file given (esm/esp, nor omwgame/omwaddon). Aborting..." << std::endl;
+      return false;
     }
 
-    StringsVector plugin = variables["plugin"].as<StringsVector>();
-    // Removed check for 255 files, which would be the hard-coded limit in Morrowind.
-    //  I'll keep the following variable in, maybe we can use it for something different.
-    //  Say, a feedback like "loading file x/cnt".
-    // Commenting this out for now to silence compiler warning.
-    //int cnt = master.size() + plugin.size();
-
-    // Prepare loading master/plugin files (i.e. send filenames to engine)
-    for (std::vector<std::string>::size_type i = 0; i < master.size(); i++)
+    StringsVector::const_iterator it(content.begin());
+    StringsVector::const_iterator end(content.end());
+    for (; it != end; ++it)
     {
-        engine.addMaster(master[i]);
-    }
-    for (std::vector<std::string>::size_type i = 0; i < plugin.size(); i++)
-    {
-        engine.addPlugin(plugin[i]);
+      engine.addContentFile(*it);
     }
 
     // startup-settings

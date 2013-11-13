@@ -83,7 +83,7 @@ namespace ESM
             // Position and rotation of this object within the cell
             Position mPos;
 
-            void save(ESMWriter &esm);
+            void save(ESMWriter &esm) const;
 
             void blank();
     };

@@ -3,7 +3,7 @@ OpenMW: A reimplementation of The Elder Scrolls III: Morrowind
 OpenMW is an attempt at recreating the engine for the popular role-playing game
 Morrowind by Bethesda Softworks. You need to own and install the original game for OpenMW to work.
 
-Version: 0.26.0
+Version: 0.27.0
 License: GPL (see GPL3.txt for more information)
 Website: http://www.openmw.org
 
@@ -81,6 +81,32 @@ Allowed options:
   --fallback arg                   fallback values
 
 CHANGELOG
+
+0.27.0
+
+Bug #597: Assertion `dialogue->mId == id' failed in esmstore.cpp
+Bug #794: incorrect display of decimal numbers
+Bug #840: First-person sneaking camera height
+Bug #887: Ambient sounds playing while paused
+Bug #902: Problems with Polish character encoding
+Bug #907: Entering third person using the mousewheel is possible even if it's impossible using the key
+Bug #910: Some CDs not working correctly with Unshield installer
+Bug #917: Quick character creation plugin does not work
+Bug #918: Fatigue does not refill
+Bug #919: The PC falls dead in Beshara - OpenMW nightly Win64 (708CDE2)
+Feature #57: Acrobatics Skill
+Feature #462: Editor: Start Dialogue
+Feature #546: Modify ESX selector to handle new content file scheme
+Feature #588: Editor: Adjust name/path of edited content files
+Feature #644: Editor: Save
+Feature #710: Editor: Configure script compiler context
+Feature #790: God Mode
+Feature #881: Editor: Allow only one instance of OpenCS
+Feature #889: Editor: Record filtering
+Feature #895: Extinguish torches
+Feature #898: Breath meter enhancements
+Feature #901: Editor: Default record filter
+Feature #913: Merge --master and --plugin switches
 
 0.26.0
 

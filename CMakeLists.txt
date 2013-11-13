@@ -19,7 +19,7 @@ include (OpenMWMacros)
 # Version
 
 set (OPENMW_VERSION_MAJOR 0)
-set (OPENMW_VERSION_MINOR 26)
+set (OPENMW_VERSION_MINOR 27)
 set (OPENMW_VERSION_RELEASE 0)
 
 set (OPENMW_VERSION "${OPENMW_VERSION_MAJOR}.${OPENMW_VERSION_MINOR}.${OPENMW_VERSION_RELEASE}")
@@ -319,6 +319,9 @@ configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
 
 configure_file(${OpenMW_SOURCE_DIR}/files/opencs.cfg
     "${OpenMW_BINARY_DIR}/opencs.cfg")
+    
+configure_file(${OpenMW_SOURCE_DIR}/files/opencs/defaultfilters
+    "${OpenMW_BINARY_DIR}/resources/defaultfilters" COPYONLY)
 
 if (NOT WIN32 AND NOT APPLE)
     configure_file(${OpenMW_SOURCE_DIR}/files/openmw.desktop
@@ -380,7 +383,6 @@ IF(NOT WIN32 AND NOT APPLE)
 
         # Install licenses
         INSTALL(FILES "DejaVu Font License.txt" DESTINATION "${LICDIR}" )
-        INSTALL(FILES "Daedric Font License.txt" DESTINATION "${LICDIR}" )
         INSTALL(FILES "OFL.txt" DESTINATION "${LICDIR}" )
         INSTALL(FILES "extern/shiny/License.txt" DESTINATION "${LICDIR}" RENAME "Shiny License.txt" )
     ENDIF (DPKG_PROGRAM)
@@ -428,7 +430,7 @@ IF(NOT WIN32 AND NOT APPLE)
  Data files from the original game is required to run it.")
         SET(CPACK_DEBIAN_PACKAGE_NAME "openmw")
         SET(CPACK_DEBIAN_PACKAGE_VERSION "${VERSION_STRING}")
-        SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW bsatool;Bsatool esmtool;Esmtool omwlauncher;OMWLauncher mwiniimporter;MWiniImporter")
+        SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW opencs;OpenCS bsatool;Bsatool esmtool;Esmtool omwlauncher;OMWLauncher mwiniimporter;MWiniImporter")
         SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.11.2), libfreetype6 (>= 2.2.1), libgcc1 (>= 1:4.1.1), libmpg123-0 (>= 1.12.1), libopenal1 (>= 1:1.12.854), libsndfile1 (>= 1.0.23), libstdc++6 (>= 4.4.5), libuuid1 (>= 2.17.2), libqtgui4 (>= 4.7.0)")
 
         SET(CPACK_DEBIAN_PACKAGE_SECTION "Games")
@@ -455,13 +457,22 @@ if(WIN32)
         "${OpenMW_SOURCE_DIR}/GPL3.txt"
         "${OpenMW_SOURCE_DIR}/OFL.txt"
         "${OpenMW_SOURCE_DIR}/DejaVu Font License.txt"
-        "${OpenMW_SOURCE_DIR}/Daedric Font License.txt"
         "${OpenMW_BINARY_DIR}/settings-default.cfg"
         "${OpenMW_BINARY_DIR}/transparency-overrides.cfg"
-        "${OpenMW_BINARY_DIR}/Release/mwiniimport.exe"
-        "${OpenMW_BINARY_DIR}/Release/omwlauncher.exe"
         "${OpenMW_BINARY_DIR}/Release/openmw.exe"
         DESTINATION ".")
+
+    IF(BUILD_LAUNCHER)
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/Release/omwlauncher.exe" DESTINATION ".")
+    ENDIF(BUILD_LAUNCHER)
+    IF(BUILD_MWINIIMPORTER)
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/Release/mwiniimport.exe" DESTINATION ".")
+    ENDIF(BUILD_MWINIIMPORTER)
+    IF(BUILD_OPENCS)
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/Release/opencs.exe" DESTINATION ".")
+        INSTALL(FILES "${OpenMW_BINARY_DIR}/opencs.cfg" DESTINATION ".")
+    ENDIF(BUILD_OPENCS)
+
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION ".")
 
     SET(CPACK_GENERATOR "NSIS")
@@ -471,7 +482,13 @@ if(WIN32)
     SET(CPACK_PACKAGE_VERSION_MAJOR ${OPENMW_VERSION_MAJOR})
     SET(CPACK_PACKAGE_VERSION_MINOR ${OPENMW_VERSION_MINOR})
     SET(CPACK_PACKAGE_VERSION_PATCH ${OPENMW_VERSION_RELEASE})
-    SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW;omwlauncher;OpenMW Launcher")
+    SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW")
+    IF(BUILD_LAUNCHER)
+        SET(CPACK_PACKAGE_EXECUTABLES "${CPACK_PACKAGE_EXECUTABLES};omwlauncher;OpenMW Launcher")
+    ENDIF(BUILD_LAUNCHER)
+    IF(BUILD_OPENCS)
+        SET(CPACK_PACKAGE_EXECUTABLES "${CPACK_PACKAGE_EXECUTABLES};opencs;OpenMW Construction Set")
+    ENDIF(BUILD_OPENCS)
     SET(CPACK_NSIS_CREATE_ICONS_EXTRA "CreateShortCut '\$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\Readme.lnk' '\$INSTDIR\\\\readme.txt'")
     SET(CPACK_NSIS_DELETE_ICONS_EXTRA "
         !insertmacro MUI_STARTMENU_GETFOLDER Application $MUI_TEMP
@@ -668,7 +685,10 @@ if (APPLE)
     set(CPACK_PACKAGE_VERSION_MINOR ${OPENMW_VERSION_MINO})
     set(CPACK_PACKAGE_VERSION_PATCH ${OPENMW_VERSION_RELEASE})
 
-    set(APPS "\${CMAKE_INSTALL_PREFIX}/${INSTALL_SUBDIR}/${APP_BUNDLE_NAME}")
+    set(OPENMW_APP "\${CMAKE_INSTALL_PREFIX}/${INSTALL_SUBDIR}/${APP_BUNDLE_NAME}")
+
+    set(OPENCS_APP "\${CMAKE_INSTALL_PREFIX}/${INSTALL_SUBDIR}/OpenCS.app")
+
     set(PLUGINS "")
     set(ABSOLUTE_PLUGINS "")
 
@@ -729,7 +749,8 @@ if (APPLE)
         cmake_policy(SET CMP0009 OLD)
         set(BU_CHMOD_BUNDLE_ITEMS ON)
         include(BundleUtilities)
-        fixup_bundle(\"${APPS}\" \"${PLUGINS}\" \"${DIRS}\")
+        fixup_bundle(\"${OPENMW_APP}\" \"${PLUGINS}\" \"${DIRS}\")
+        fixup_bundle(\"${OPENCS_APP}\" \"\" \"${DIRS}\")
         " COMPONENT Runtime)
         include(CPack)
 endif (APPLE)

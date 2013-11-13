@@ -27,6 +27,8 @@ namespace CSVDoc
 
             QString getName() const;
 
+            void extensionLabelIsVisible(bool visible);
+
         private slots:
 
             void textChanged (const QString& text);

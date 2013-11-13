@@ -14,6 +14,8 @@ class ESMWriter;
 
 struct Book
 {
+    static unsigned int sRecordId;
+
     struct BKDTstruct
     {
         float mWeight;
@@ -25,7 +27,7 @@ struct Book
     std::string mId;
 
     void load(ESMReader &esm);
-    void save(ESMWriter &esm);
+    void save(ESMWriter &esm) const;
 
     void blank();
     ///< Set record to default state (does not touch the ID).

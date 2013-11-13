@@ -104,6 +104,17 @@ CSVDoc::StartupDialogue::StartupDialogue() : mWidth (0), mColumn (2)
     layout->addWidget (createButtons());
     layout->addWidget (createTools());
 
+    /// \todo remove this label once loading and saving are fully implemented
+    QLabel *warning = new QLabel ("<font color=Red>WARNING:<p>OpenCS is in alpha stage.<br>The code for loading and saving is incomplete.<br>This version of OpenCS is only a preview.<br>Do NOT use it for real editing!<br>You will lose records both on loading and on saving.<p>Please note:<br>If you lose data and come to the OpenMW forum to complain,<br>we will mock you.</font color>");
+
+    QFont font;
+    font.setPointSize (12);
+    font.setBold (true);
+
+    warning->setFont (font);
+
+    layout->addWidget (warning, 1);
+
     setLayout (layout);
 
     QRect scr = QApplication::desktop()->screenGeometry();

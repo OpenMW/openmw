@@ -44,9 +44,9 @@ namespace ESM
         }
     }
 
-    void AIPackageList::save(ESMWriter &esm)
+    void AIPackageList::save(ESMWriter &esm) const
     {
-        typedef std::vector<AIPackage>::iterator PackageIter;
+        typedef std::vector<AIPackage>::const_iterator PackageIter;
         for (PackageIter it = mList.begin(); it != mList.end(); ++it) {
             switch (it->mType) {
             case AI_Wander:

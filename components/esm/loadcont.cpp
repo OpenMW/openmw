@@ -2,6 +2,7 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
@@ -16,13 +17,15 @@ void InventoryList::load(ESMReader &esm)
     }
 }
 
-void InventoryList::save(ESMWriter &esm)
+void InventoryList::save(ESMWriter &esm) const
 {
-    for (std::vector<ContItem>::iterator it = mList.begin(); it != mList.end(); ++it)
+    for (std::vector<ContItem>::const_iterator it = mList.begin(); it != mList.end(); ++it)
     {
         esm.writeHNT("NPCO", *it, 36);
     }
 }
+
+    unsigned int Container::sRecordId = REC_CONT;
 
 void Container::load(ESMReader &esm)
 {
@@ -41,7 +44,7 @@ void Container::load(ESMReader &esm)
     mInventory.load(esm);
 }
 
-void Container::save(ESMWriter &esm)
+void Container::save(ESMWriter &esm) const
 {
     esm.writeHNCString("MODL", mModel);
     esm.writeHNOCString("FNAM", mName);
