@@ -443,6 +443,9 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipSlot(int slot, c
     {
         ContainerStoreIterator retval = it;
 
+        // empty this slot
+        mSlots[slot] = end();
+
         if (restack) {
             // restack item previously in this slot
             for (MWWorld::ContainerStoreIterator iter (begin()); iter != end(); ++iter)
@@ -456,9 +459,6 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipSlot(int slot, c
                 }
             }
         }
-
-        // empty this slot
-        mSlots[slot] = end();
 
         if (actor.getRefData().getHandle() == "player")
         {
