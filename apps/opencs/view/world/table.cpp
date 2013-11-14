@@ -33,8 +33,11 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
         if (mCreateAction)
             menu.addAction (mCreateAction);
 
-        if (listRevertableSelectedIds().size()>0)
-            menu.addAction (mRevertAction);
+        /// \todo Reverting temporarily disabled on tables that support reordering, because
+        /// revert logic currently can not handle reordering.
+        if (mModel->getReordering()==CSMWorld::IdTable::Reordering_None)
+            if (listRevertableSelectedIds().size()>0)
+                menu.addAction (mRevertAction);
 
         if (listDeletableSelectedIds().size()>0)
             menu.addAction (mDeleteAction);
