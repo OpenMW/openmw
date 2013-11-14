@@ -1,4 +1,4 @@
-\section{Filters}
+\section{Record filters}
 \subsection{Introduction}
 Filters are the key element of OpenCS use cases by allowing rapid and easy access to the searched records presented in all tables. Therefore: in order to use this application fully effective you should make sure that all concepts and instructions written in the this section of the manual are perfectly clear to you.\\
 Don't be afraid though, filters are fairly intuitive and easy to use.
@@ -10,7 +10,7 @@ Don't be afraid though, filters are fairly intuitive and easy to use.
  \item[Criteria] describes condition under with any any record is being select by the filter.
  \item[Syntax] as you may noticed computers (in general) are rather strict, and expect only strictly formulated orders -- that is: written with correct syntax.
  \item[Expression] is way we are actually performing filtering. Filter can be treated as ``functions'': accepts arguments, and evaluates either to the true or false for every column record at the time.
- \item[N-ary] is any expression that expects two or more expressions as arguments. It is useful for grouping two (or more) other expressions together in order to create filter that will check for criteria placed in two (again: or more) columns (logical ``or'', ``and'').
+ \item[N-ary] is any expression that expects one or more expressions as arguments. It is useful for grouping two (or more) other expressions together in order to create filter that will check for criteria placed in two (again: or more) columns (logical ``or'', ``and'').
  \item[unary] is any expression that expects one other expression. The example is ``not'' expression. In fact ``not'' is the only useful unary expression in OpenCS record filters.
  \item[nullary] is expression that does not accepts other expressions. It accepts arguments specified later.
 \end{description}
@@ -44,14 +44,14 @@ We strongly recommend to take a look at the filters table right now to see what 
 \subsection{Advanced}
 Back to the manual? Great.\\
 If you want to create your own filter you have to know exactly what do you want to get in order to translate this into the expressions. Finally, you will have to write this with correct syntax. As a result table will show only desired rows.\\
-Advance subsection covers everything that you need to know in order to create any filter you may want to.
+Advance subsection covers everything that you need to know in order to create any filter you may want to %TODO the filter part is actually wrong
 \subsubsection{Namespaces}
-Did you noticed that every default filter has ``project::`` prefix? It is a ``namespace``, a term borrowed from the C++ language. In case of OpenCS namespace of the filter determinate if the filter will be stored along with your project file or if it will be forgotten as soon as OpenCS quits.
+Did you noticed that every default filter has ``project::`` prefix? It is a ``namespace``, a term borrowed from the C++ language. In case of OpenCS namespace always means scope of the said object\footnote{You are not supposed to understand this at the moment.}. But what does it mean in case of filters? Well, short explanation is actually simple.
 \begin{description}
- \item[project::] namespace indicates that filter is stored inside the project file.
- \item[session::] namespace indicates that filter is not stored inside the project file, and once you will quit OpenCS (close session) the filter will be gone. Forever! Until then it can be found inside the filters table.
+ \item[project::] namespace indicates that filter is used with the project, in multiple sessions. You can restart Open{CS} and filter is still there.
+ \item[session::] namespace indicates that filter is not stored trough multiple sessions and once you will quit Open{CS} (close session) the filter will be gone. Forever! Until then it can be found inside the filters table.
 \end{description}
-In addition to this two scopes, there is a third one; called one-shot. One-shot filters are not stored anywhere and as the name implies they are supposed to be created when needed only once. Good thing about the one-shot filters is that you don't need to open filters table in order to create it. Instead you just type it directly inside the filter field, starting with ``!''.\\
+In addition to this two scopes, there is a third one; called one-shot. One-shot filters are not stored (even during single session) anywhere and as the name implies they are supposed to be created when needed only once. Good thing about the one-shot filters is that you don't need to open filters table in order to create it. Instead you just type it directly inside the filter field, starting with ``!''.\\
 Still, you may wonder how you are supposed to write expressions, what expressions you should use, and what syntax looks like. Let's start with nullary expressions that will allow you to create a basic filter.
 
 \subsubsection{Nullary expressions}
@@ -70,8 +70,15 @@ This is probably enough to create around 90\% string filters you will eventually
 \\
 Creating regexps can be a difficult and annoying -- especially when you need complex criteria. On the other hand, We are under impression that in reality complex expressions are needed only in sporadic cases. In fact, the truth is: that most of the time only already mentioned ``.*'' is needed and therefore the following description of regexps can be skipped by vast majority of readers.\\
 
-%TO-DO: write the regexps essentials.
-Regular expressions are not the main topic of this manual. If you wish to learn more on this subject please, read the documentation on Qt regular expressions syntax, or TRE regexp syntax (it is almost like in Qt).
+Before working with Regular Expressions, you should understand what actually are regular expressions. Essentially, the idea is simple: when you are writing any word, you are using strictly defined letters -- that is: letters create a word. What you want to do with regular expression is to use set of rules that will match to many words. It is not that difficult to see what it's needed to do so: first, you will clearly need way to determinate what letters you want to match (word is composed by letters).\\
+
+Before introducing other ways to choose between characters, I want explain anchors. Anchors allows you to decide where to ``look'' in the string. You surely should know about ``\^'' anchor and ``\textdollar''. Putting ``\^`` will tell to Open{CS} to look on the beginning of string, while ''\textdollar`` is used to mark the end of it. For instance, pattern ''\^Pink.* elephant.\textdollar`` Will match any sentence Beginning with the word ''Pink`` and ending with '' elephant.``. Pink fat elephant. Pink cute elephant. It does not matter what is in between, because ''.*`` is used.\\
+
+You have already seen the power of the simple ``.*''. But what if you want to chose between only two (or more) letters? Well, this is when ``[|]'' comes in handy. If you write something like: ``\^[a|k].*'' you are simply telling Open{CS} to filter anything that starts with either ``a'' or ``k''. Using ``\^[a|k|l].*'' will work in the same manner, but it will also cover strings starting with ``l''.\\
+
+And What if you want to match more than just one latter? Just use ``(|)``. it is pretty similar to the above one letter as you see, but it is used to fit more than just one character. For instance: ''\^(Pink|Green).* (elephant|crocodile).\textdollar`` will be true for all sentences starting with ''Pink`` or ''Green`` and ending with either ''elephant.`` or ''crocodile.``.\\
+
+Regular expressions are not the main topic of this manual. If you wish to learn more on this subject please, read the documentation on Qt regular expressions syntax, or TRE regexp syntax (it is almost like in Qt). Above is just enough to use Open{CS} effectively to be sure.\\
 
 \paragraph{Value -- value(``value'', (``open'', ``close''))}
 While string expression covers vast group of columns containing string values, there are in fact columns with just numerical values like ``weight``. To filter those we need a value expression. This one works in similar manner to the string filter: first token name and criteria inside brackets. Clearly, conditions should hold column to test in. However in this case wanted value is specified as a range.\\
@@ -81,6 +88,9 @@ As you would imagine the range can be specified as including a border value, or 
  \item To exclude value use () brackets. For value equal 5, expression value(something, (5, 10)) will evaluate to false.
  \item Mixing brackets is completely legal. For value equal 10, expression value(something, [5, 10) will evaluate to true. The same expression will evaluate to false for value equal 10.
 \end{itemize}
+
+\paragraph{''true`` and ''false``}
+Nullary ''true`` and ''false`` do not accept any arguments, and always evaluates to true (in case of ''true``) and false (in case of ''false``) no matter what. The main usage of this expressions is the give users ability to quickly disable some part of the filter that makes heavy use of the logical expressions. 
 
 \subsubsection{Logical expressions}
 This subsection takes care of two remaining groups of expressions: binary and unary. The only unary expression present in the OpenCS is logical not, while the remaining binary expressions are: or, and. This clearly makes them (from the user point of view) belonging to the same group of logical expressions.
