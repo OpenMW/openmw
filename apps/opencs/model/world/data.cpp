@@ -160,7 +160,7 @@ CSMWorld::Data::Data() : mRefs (mCells)
     mJournals.addColumn (new RecordStateColumn<ESM::Dialogue>);
     mJournals.addColumn (new DialogueTypeColumn<ESM::Dialogue> (true));
 
-    mTopicInfos.addColumn (new StringIdColumn<Info>);
+    mTopicInfos.addColumn (new StringIdColumn<Info> (true));
     mTopicInfos.addColumn (new RecordStateColumn<Info>);
     mTopicInfos.addColumn (new TopicColumn<Info> (false));
     mTopicInfos.addColumn (new ActorColumn<Info>);
@@ -176,7 +176,7 @@ CSMWorld::Data::Data() : mRefs (mCells)
     mTopicInfos.addColumn (new SoundFileColumn<Info>);
     mTopicInfos.addColumn (new ResponseColumn<Info>);
 
-    mJournalInfos.addColumn (new StringIdColumn<Info>);
+    mJournalInfos.addColumn (new StringIdColumn<Info> (true));
     mJournalInfos.addColumn (new RecordStateColumn<Info>);
     mJournalInfos.addColumn (new TopicColumn<Info> (true));
     mJournalInfos.addColumn (new QuestStatusTypeColumn<Info>);
