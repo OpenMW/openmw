@@ -33,11 +33,11 @@ namespace MWMechanics
             Objects mObjects;
             Actors mActors;
 
+        public:
+
             void buildPlayer();
             ///< build player according to stored class/race/birthsign information. Will
             /// default to the values of the ESM::NPC object, if no explicit information is given.
-
-        public:
 
             MechanicsManager();
 

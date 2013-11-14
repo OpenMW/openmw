@@ -63,8 +63,6 @@ namespace MWGui
         mItemView->eventItemClicked += MyGUI::newDelegate(this, &InventoryWindow::onItemSelected);
         mItemView->eventBackgroundClicked += MyGUI::newDelegate(this, &InventoryWindow::onBackgroundSelected);
 
-        updatePlayer();
-
         mFilterAll->eventMouseButtonClick += MyGUI::newDelegate(this, &InventoryWindow::onFilterChanged);
         mFilterWeapon->eventMouseButtonClick += MyGUI::newDelegate(this, &InventoryWindow::onFilterChanged);
         mFilterApparel->eventMouseButtonClick += MyGUI::newDelegate(this, &InventoryWindow::onFilterChanged);
@@ -75,8 +73,6 @@ namespace MWGui
 
         setCoord(mPositionInventory.left, mPositionInventory.top, mPositionInventory.width, mPositionInventory.height);
         onWindowResize(static_cast<MyGUI::Window*>(mMainWidget));
-
-        mPreview.setup();
     }
 
     void InventoryWindow::updatePlayer()

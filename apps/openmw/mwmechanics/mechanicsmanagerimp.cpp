@@ -167,7 +167,7 @@ namespace MWMechanics
     : mUpdatePlayer (true), mClassSelected (false),
       mRaceSelected (false)
     {
-        buildPlayer();
+        //buildPlayer no longer here, needs to be done explicitely after all subsystems are up and running
     }
 
     void MechanicsManager::add(const MWWorld::Ptr& ptr)

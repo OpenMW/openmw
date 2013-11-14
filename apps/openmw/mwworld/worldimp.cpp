@@ -2239,7 +2239,6 @@ namespace MWWorld
 
     void World::updateAnimParts(const Ptr& actor)
     {
-        if (actor.mCell && actor.mCell == mWorldScene->getCurrentCell())
-            mRendering->updateAnimParts(actor);
+        mRendering->updateAnimParts(actor);
     }
 }

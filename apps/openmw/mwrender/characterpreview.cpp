@@ -70,8 +70,9 @@ namespace MWRender
 
         mNode = renderRoot->createChildSceneNode();
 
-        mAnimation = new NpcAnimation(mCharacter, mNode, MWWorld::Class::get(mCharacter).getInventoryStore(mCharacter),
+        mAnimation = new NpcAnimation(mCharacter, mNode,
                                       0, (renderHeadOnly() ? NpcAnimation::VM_HeadOnly : NpcAnimation::VM_Normal));
+        mAnimation->updateParts();
 
         Ogre::Vector3 scale = mNode->getScale();
         mCamera->setPosition(mPosition * scale);
@@ -112,10 +113,9 @@ namespace MWRender
     {
         assert(mAnimation);
         delete mAnimation;
-        mAnimation = 0;
-
-        mAnimation = new NpcAnimation(mCharacter, mNode, MWWorld::Class::get(mCharacter).getInventoryStore(mCharacter),
+        mAnimation = new NpcAnimation(mCharacter, mNode,
                                       0, (renderHeadOnly() ? NpcAnimation::VM_HeadOnly : NpcAnimation::VM_Normal));
+        mAnimation->updateParts();
 
         float scale=1.f;
         MWWorld::Class::get(mCharacter).adjustScale(mCharacter, scale);
@@ -193,7 +193,7 @@ namespace MWRender
         else if(mAnimation->getInfo("torch"))
             mAnimation->disable("torch");
 
-        mAnimation->updateParts(true);
+        mAnimation->updateParts();
         mAnimation->runAnimation(0.0f);
 
         mViewport->setDimensions (0, 0, std::min(1.f, float(sizeX) / float(512)), std::min(1.f, float(sizeY) / float(1024)));

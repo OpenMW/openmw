@@ -49,6 +49,8 @@ namespace MWWorld
             // This is disabled during autoequip to avoid excessive updates
             bool mUpdatesEnabled;
 
+            bool mFirstAutoEquip;
+
             // Vanilla allows permanent effects with a random magnitude, so it needs to be stored here.
             // We also need this to only play sounds and particle effects when the item is equipped, rather than on every update.
             typedef std::map<std::string, std::vector<float> > TEffectMagnitudes;

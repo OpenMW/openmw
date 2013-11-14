@@ -410,13 +410,16 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
         mVerboseScripts, *mScriptContext));
 
     // Create game mechanics system
-    mEnvironment.setMechanicsManager (new MWMechanics::MechanicsManager);
+    MWMechanics::MechanicsManager* mechanics = new MWMechanics::MechanicsManager;
+    mEnvironment.setMechanicsManager (mechanics);
 
     // Create dialog system
     mEnvironment.setJournal (new MWDialogue::Journal);
     mEnvironment.setDialogueManager (new MWDialogue::DialogueManager (mExtensions, mVerboseScripts, mTranslationDataStorage));
 
     mEnvironment.getWorld()->renderPlayer();
+    mechanics->buildPlayer();
+    window->updatePlayer();
 
     if (!mNewGame)
     {

@@ -246,9 +246,6 @@ namespace MWGui
             mPlayerSkillValues.insert(std::make_pair(ESM::Skill::sSkillIds[i], MWMechanics::Stat<float>()));
         }
 
-        unsetSelectedSpell();
-        unsetSelectedWeapon();
-
         // Set up visibility
         updateVisible();
 
@@ -1333,6 +1330,9 @@ namespace MWGui
 
     void WindowManager::updatePlayer()
     {
+        unsetSelectedSpell();
+        unsetSelectedWeapon();
+
         mInventoryWindow->updatePlayer();
     }
 

@@ -43,22 +43,6 @@ private:
     ViewMode       mViewMode;
     bool mShowWeapons;
 
-    float mTimeToChange;
-    MWWorld::ContainerStoreIterator mRobe;
-    MWWorld::ContainerStoreIterator mHelmet;
-    MWWorld::ContainerStoreIterator mShirt;
-    MWWorld::ContainerStoreIterator mCuirass;
-    MWWorld::ContainerStoreIterator mGreaves;
-    MWWorld::ContainerStoreIterator mPauldronL;
-    MWWorld::ContainerStoreIterator mPauldronR;
-    MWWorld::ContainerStoreIterator mBoots;
-    MWWorld::ContainerStoreIterator mPants;
-    MWWorld::ContainerStoreIterator mGloveL;
-    MWWorld::ContainerStoreIterator mGloveR;
-    MWWorld::ContainerStoreIterator mSkirtIter;
-    MWWorld::ContainerStoreIterator mWeapon;
-    MWWorld::ContainerStoreIterator mShield;
-
     int mVisibilityFlags;
 
     int mPartslots[ESM::PRT_Count];  //Each part slot is taken by clothing, armor, or is empty
@@ -78,8 +62,7 @@ private:
     void addPartGroup(int group, int priority, const std::vector<ESM::PartReference> &parts);
 
 public:
-    NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node,
-                 MWWorld::InventoryStore& inv, int visibilityFlags,
+    NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int visibilityFlags,
                  ViewMode viewMode=VM_Normal);
     virtual ~NpcAnimation();
 
@@ -89,7 +72,7 @@ public:
 
     void setViewMode(ViewMode viewMode);
 
-    void updateParts(bool forceupdate = false);
+    void updateParts();
 
     /// \brief Applies a translation to the arms and hands.
     /// This may be called multiple times before the animation

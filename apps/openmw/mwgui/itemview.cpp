@@ -45,7 +45,6 @@ void ItemView::setModel(ItemModel *model)
 {
     delete mModel;
     mModel = model;
-    update();
 }
 
 void ItemView::initialiseOverride()

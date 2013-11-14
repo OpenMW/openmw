@@ -336,6 +336,7 @@ void RenderingManager::updateAnimParts(const MWWorld::Ptr& ptr)
     else if(MWWorld::Class::get(ptr).isActor())
         anim = dynamic_cast<NpcAnimation*>(mActors.getAnimation(ptr));
 
+    assert(anim);
     if(anim)
         anim->updateParts();
 }
@@ -926,18 +927,17 @@ void RenderingManager::renderPlayer(const MWWorld::Ptr &ptr)
 {
     if(!mPlayerAnimation)
     {
-        mPlayerAnimation = new NpcAnimation(ptr, ptr.getRefData().getBaseNode(),
-                                            MWWorld::Class::get(ptr).getInventoryStore(ptr),
-                                            RV_Actors);
+        mPlayerAnimation = new NpcAnimation(ptr, ptr.getRefData().getBaseNode(), RV_Actors);
     }
     else
     {
         // Reconstruct the NpcAnimation in-place
         mPlayerAnimation->~NpcAnimation();
-        new(mPlayerAnimation) NpcAnimation(ptr, ptr.getRefData().getBaseNode(),
-                                           MWWorld::Class::get(ptr).getInventoryStore(ptr),
-                                           RV_Actors);
+        new(mPlayerAnimation) NpcAnimation(ptr, ptr.getRefData().getBaseNode(), RV_Actors);
     }
+    // Ensure CustomData -> autoEquip -> animation update
+    ptr.getClass().getInventoryStore(ptr);
+
     mCamera->setAnimation(mPlayerAnimation);
     mWater->removeEmitter(ptr);
     mWater->addEmitter(ptr);

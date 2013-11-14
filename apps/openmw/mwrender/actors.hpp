@@ -39,7 +39,7 @@ namespace MWRender
 
         void setRootNode(Ogre::SceneNode* root);
 
-        void insertNPC(const MWWorld::Ptr& ptr, MWWorld::InventoryStore& inv);
+        void insertNPC(const MWWorld::Ptr& ptr);
         void insertCreature (const MWWorld::Ptr& ptr);
         void insertActivator (const MWWorld::Ptr& ptr);
          bool deleteObject (const MWWorld::Ptr& ptr);

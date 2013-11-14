@@ -45,6 +45,7 @@ void MWWorld::InventoryStore::initSlots (TSlots& slots_)
 MWWorld::InventoryStore::InventoryStore()
  : mSelectedEnchantItem(end())
  , mUpdatesEnabled (true)
+ , mFirstAutoEquip(true)
 {
     initSlots (mSlots);
 }
@@ -54,6 +55,7 @@ MWWorld::InventoryStore::InventoryStore (const InventoryStore& store)
  , mSelectedEnchantItem(end())
 {
     mMagicEffects = store.mMagicEffects;
+    mFirstAutoEquip = store.mFirstAutoEquip;
     mSelectedEnchantItem = store.mSelectedEnchantItem;
     mPermanentMagicEffectMagnitudes = store.mPermanentMagicEffectMagnitudes;
     copySlots (store);
@@ -62,6 +64,7 @@ MWWorld::InventoryStore::InventoryStore (const InventoryStore& store)
 MWWorld::InventoryStore& MWWorld::InventoryStore::operator= (const InventoryStore& store)
 {
     mMagicEffects = store.mMagicEffects;
+    mFirstAutoEquip = store.mFirstAutoEquip;
     mPermanentMagicEffectMagnitudes = store.mPermanentMagicEffectMagnitudes;
     ContainerStore::operator= (store);
     mSlots.clear();
@@ -256,6 +259,7 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& npc)
         updateMagicEffects(npc);
         flagAsModified();
     }
+    mFirstAutoEquip = false;
 }
 
 const MWMechanics::MagicEffects& MWWorld::InventoryStore::getMagicEffects() const
@@ -308,8 +312,10 @@ void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
                     // so it doesn't really matter if both items will get the same magnitude. *Extreme* edge case.
                     mPermanentMagicEffectMagnitudes[(**iter).getCellRef().mRefID] = random;
 
-                    // TODO: What do we do if no animation yet?
-                    if (MWBase::Environment::get().getWorld()->getAnimation(actor))
+                    // During first auto equip, we don't play any sounds.
+                    // Basically we don't want sounds when the actor is first loaded,
+                    // the items should appear as if they'd always been equipped.
+                    if (!mFirstAutoEquip)
                     {
                         // Only the sound of the first effect plays
                         if (effectIt == enchantment.mEffects.mList.begin())
@@ -324,13 +330,15 @@ void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
                             else
                                 sndMgr->playSound3D(actor, schools[magicEffect->mData.mSchool]+" hit", 1.0f, 1.0f);
                         }
+                    }
 
-                        if (!magicEffect->mHit.empty())
-                        {
-                            const ESM::Static* castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find (magicEffect->mHit);
-                            bool loop = magicEffect->mData.mFlags & ESM::MagicEffect::ContinuousVfx;
+                    if (!magicEffect->mHit.empty())
+                    {
+                        const ESM::Static* castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find (magicEffect->mHit);
+                        bool loop = magicEffect->mData.mFlags & ESM::MagicEffect::ContinuousVfx;
+                        // Similar as above, we don't want particles during first autoequip either, unless they're continuous.
+                        if (!mFirstAutoEquip || loop)
                             MWBase::Environment::get().getWorld()->getAnimation(actor)->addEffect("meshes\\" + castStatic->mModel, magicEffect->mIndex, loop, "");
-                        }
                     }
                 }
 

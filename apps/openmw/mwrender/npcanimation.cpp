@@ -64,25 +64,11 @@ NpcAnimation::~NpcAnimation()
 }
 
 
-NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWorld::InventoryStore& inv, int visibilityFlags, ViewMode viewMode)
+NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int visibilityFlags, ViewMode viewMode)
   : Animation(ptr, node),
     mStateID(-1),
-    mTimeToChange(0),
     mVisibilityFlags(visibilityFlags),
-    mRobe(inv.end()),
-    mHelmet(inv.end()),
-    mShirt(inv.end()),
-    mCuirass(inv.end()),
-    mGreaves(inv.end()),
-    mPauldronL(inv.end()),
-    mPauldronR(inv.end()),
-    mBoots(inv.end()),
-    mPants(inv.end()),
-    mGloveL(inv.end()),
-    mGloveR(inv.end()),
-    mSkirtIter(inv.end()),
-    mWeapon(inv.end()),
-    mShield(inv.end()),
+
     mViewMode(viewMode),
     mShowWeapons(false),
     mFirstPersonOffset(0.f, 0.f, 0.f)
@@ -94,8 +80,6 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, MWWor
         mPartslots[i] = -1;  //each slot is empty
         mPartPriorities[i] = 0;
     }
-
-    updateNpcBase();
 }
 
 void NpcAnimation::setViewMode(NpcAnimation::ViewMode viewMode)
@@ -173,56 +157,50 @@ void NpcAnimation::updateNpcBase()
 
     for(size_t i = 0;i < ESM::PRT_Count;i++)
         removeIndividualPart((ESM::PartReferenceType)i);
-    updateParts(true);
+    updateParts();
 }
 
-void NpcAnimation::updateParts(bool forceupdate)
+void NpcAnimation::updateParts()
 {
+    if (!mSkelBase)
+    {
+        // First update?
+        updateNpcBase();
+        return;
+    }
+
+    const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
+    MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
+
     static const struct {
-        MWWorld::ContainerStoreIterator NpcAnimation::*mPart;
         int mSlot;
         int mBasePriority;
     } slotlist[] = {
         // FIXME: Priority is based on the number of reserved slots. There should be a better way.
-        { &NpcAnimation::mRobe,      MWWorld::InventoryStore::Slot_Robe,         12 },
-        { &NpcAnimation::mSkirtIter, MWWorld::InventoryStore::Slot_Skirt,         3 },
-        { &NpcAnimation::mHelmet,    MWWorld::InventoryStore::Slot_Helmet,        0 },
-        { &NpcAnimation::mCuirass,   MWWorld::InventoryStore::Slot_Cuirass,       0 },
-        { &NpcAnimation::mGreaves,   MWWorld::InventoryStore::Slot_Greaves,       0 },
-        { &NpcAnimation::mPauldronL, MWWorld::InventoryStore::Slot_LeftPauldron,  0 },
-        { &NpcAnimation::mPauldronR, MWWorld::InventoryStore::Slot_RightPauldron, 0 },
-        { &NpcAnimation::mBoots,     MWWorld::InventoryStore::Slot_Boots,         0 },
-        { &NpcAnimation::mGloveL,    MWWorld::InventoryStore::Slot_LeftGauntlet,  0 },
-        { &NpcAnimation::mGloveR,    MWWorld::InventoryStore::Slot_RightGauntlet, 0 },
-        { &NpcAnimation::mShirt,     MWWorld::InventoryStore::Slot_Shirt,         0 },
-        { &NpcAnimation::mPants,     MWWorld::InventoryStore::Slot_Pants,         0 },
-        { &NpcAnimation::mShield,    MWWorld::InventoryStore::Slot_CarriedLeft,   0 },
-        { &NpcAnimation::mWeapon,    MWWorld::InventoryStore::Slot_CarriedRight,  0 }
+        { MWWorld::InventoryStore::Slot_Robe,         12 },
+        { MWWorld::InventoryStore::Slot_Skirt,         3 },
+        { MWWorld::InventoryStore::Slot_Helmet,        0 },
+        { MWWorld::InventoryStore::Slot_Cuirass,       0 },
+        { MWWorld::InventoryStore::Slot_Greaves,       0 },
+        { MWWorld::InventoryStore::Slot_LeftPauldron,  0 },
+        { MWWorld::InventoryStore::Slot_RightPauldron, 0 },
+        { MWWorld::InventoryStore::Slot_Boots,         0 },
+        { MWWorld::InventoryStore::Slot_LeftGauntlet,  0 },
+        { MWWorld::InventoryStore::Slot_RightGauntlet, 0 },
+        { MWWorld::InventoryStore::Slot_Shirt,         0 },
+        { MWWorld::InventoryStore::Slot_Pants,         0 },
+        { MWWorld::InventoryStore::Slot_CarriedLeft,   0 },
+        { MWWorld::InventoryStore::Slot_CarriedRight,  0 }
     };
     static const size_t slotlistsize = sizeof(slotlist)/sizeof(slotlist[0]);
-
-    const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
-    MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
-    for(size_t i = 0;!forceupdate && i < slotlistsize;i++)
-    {
-        MWWorld::ContainerStoreIterator iter = inv.getSlot(slotlist[i].mSlot);
-        if(this->*slotlist[i].mPart != iter)
-        {
-            forceupdate = true;
-            break;
-        }
-    }
-    if(!forceupdate)
-        return;
 
     for(size_t i = 0;i < slotlistsize && mViewMode != VM_HeadOnly;i++)
     {
         MWWorld::ContainerStoreIterator store = inv.getSlot(slotlist[i].mSlot);
 
-        this->*slotlist[i].mPart = store;
         removePartGroup(slotlist[i].mSlot);
 
-        if(this->*slotlist[i].mPart == inv.end())
+        if(store == inv.end())
             continue;
 
         if(slotlist[i].mSlot == MWWorld::InventoryStore::Slot_Helmet)
@@ -439,13 +417,6 @@ NifOgre::ObjectList NpcAnimation::insertBoundedPart(const std::string &model, in
 
 Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
 {
-    if(mTimeToChange <= 0.0f)
-    {
-        mTimeToChange = 0.2f;
-        updateParts();
-    }
-    mTimeToChange -= timepassed;
-
     Ogre::Vector3 ret = Animation::runAnimation(timepassed);
 
     Ogre::SkeletonInstance *baseinst = mSkelBase->getSkeleton();
@@ -599,11 +570,10 @@ void NpcAnimation::showWeapons(bool showWeapon)
     if(showWeapon)
     {
         MWWorld::InventoryStore &inv = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
-        mWeapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-        if(mWeapon != inv.end()) // special case for weapons
+        MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+        if(weapon != inv.end()) // special case for weapons
         {
-            MWWorld::Ptr weapon = *mWeapon;
-            std::string mesh = MWWorld::Class::get(weapon).getModel(weapon);
+            std::string mesh = MWWorld::Class::get(*weapon).getModel(*weapon);
             addOrReplaceIndividualPart(ESM::PRT_Weapon, MWWorld::InventoryStore::Slot_CarriedRight, 1, mesh);
         }
     }

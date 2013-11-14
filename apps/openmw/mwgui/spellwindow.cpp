@@ -51,8 +51,6 @@ namespace MWGui
 
         setCoord(498, 300, 302, 300);
 
-        updateSpells();
-
         mMainWidget->castType<MyGUI::Window>()->eventWindowChangeCoord += MyGUI::newDelegate(this, &SpellWindow::onWindowResize);
     }
 

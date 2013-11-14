@@ -254,7 +254,7 @@ namespace MWClass
 
     void Npc::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
     {
-        renderingInterface.getActors().insertNPC(ptr, getInventoryStore(ptr));
+        renderingInterface.getActors().insertNPC(ptr);
     }
 
     void Npc::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const

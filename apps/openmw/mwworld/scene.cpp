@@ -118,8 +118,6 @@ namespace MWWorld
 
     void Scene::loadCell (Ptr::CellStore *cell, Loading::Listener* loadingListener)
     {
-        // register local scripts
-        MWBase::Environment::get().getWorld()->getLocalScripts().addCell (cell);
         std::pair<CellStoreCollection::iterator, bool> result = mActiveCells.insert(cell);
 
         if(result.second)
@@ -157,6 +155,10 @@ namespace MWWorld
             mRendering.requestMap(cell);
             mRendering.configureAmbient(*cell);
         }
+
+        // register local scripts
+        // ??? Should this go into the above if block ???
+        MWBase::Environment::get().getWorld()->getLocalScripts().addCell (cell);
     }
 
     void Scene::playerCellChange(MWWorld::CellStore *cell, const ESM::Position& pos, bool adjustPlayerPos)
