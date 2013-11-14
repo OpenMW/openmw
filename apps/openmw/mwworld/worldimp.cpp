@@ -2105,8 +2105,7 @@ namespace MWWorld
                 return;
             }
 
-            // Note: F_Always spells don't contribute to skill progress
-            if (actor == getPlayer().getPlayer() && !(spell->mData.mFlags & ESM::Spell::F_Always))
+            if (actor == getPlayer().getPlayer() && spell->mData.mType == ESM::Spell::ST_Spell)
                 actor.getClass().skillUsageSucceeded(actor,
                     MWMechanics::spellSchoolToSkill(MWMechanics::getSpellSchool(selectedSpell, actor)), 0);
 
