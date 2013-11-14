@@ -2039,6 +2039,15 @@ namespace MWWorld
         {
             const ESM::Spell* spell = getStore().get<ESM::Spell>().search(selectedSpell);
 
+            // Reduce fatigue (note that in the vanilla game, both GMSTs are 0, and there's no fatigue loss)
+            static const float fFatigueSpellBase = getStore().get<ESM::GameSetting>().find("fFatigueSpellBase")->getFloat();
+            static const float fFatigueSpellMult = getStore().get<ESM::GameSetting>().find("fFatigueSpellMult")->getFloat();
+            MWMechanics::DynamicStat<float> fatigue = stats.getFatigue();
+            const float normalizedEncumbrance = actor.getClass().getEncumbrance(actor) / actor.getClass().getCapacity(actor);
+            float fatigueLoss = spell->mData.mCost * (fFatigueSpellBase + normalizedEncumbrance * fFatigueSpellMult);
+            fatigue.setCurrent(std::max(0.f, fatigue.getCurrent() - fatigueLoss));
+            stats.setFatigue(fatigue);
+
             // Check mana
             bool fail = false;
             MWMechanics::DynamicStat<float> magicka = stats.getMagicka();
@@ -2096,7 +2105,8 @@ namespace MWWorld
                 return;
             }
 
-            if (actor == getPlayer().getPlayer())
+            // Note: F_Always spells don't contribute to skill progress
+            if (actor == getPlayer().getPlayer() && !(spell->mData.mFlags & ESM::Spell::F_Always))
                 actor.getClass().skillUsageSucceeded(actor,
                     MWMechanics::spellSchoolToSkill(MWMechanics::getSpellSchool(selectedSpell, actor)), 0);
 
