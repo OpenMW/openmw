@@ -176,7 +176,10 @@ namespace CSMWorld
             std::vector<Record<ESXRecordT> > buffer (size);
 
             for (int i=0; i<size; ++i)
+            {
                 buffer[newOrder[i]] = mRecords [baseIndex+i];
+                buffer[newOrder[i]].setModified (buffer[newOrder[i]].get());
+            }
 
             std::copy (buffer.begin(), buffer.end(), mRecords.begin()+baseIndex);
 
