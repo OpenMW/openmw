@@ -1114,7 +1114,8 @@ void CharacterController::updateContinuousVfx()
 
     for (std::vector<int>::iterator it = effects.begin(); it != effects.end(); ++it)
     {
-        if (mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(MWMechanics::EffectKey(*it)).mMagnitude <= 0)
+        if (mPtr.getClass().getCreatureStats(mPtr).isDead()
+            || mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(MWMechanics::EffectKey(*it)).mMagnitude <= 0)
             mAnimation->removeEffect(*it);
     }
 }
