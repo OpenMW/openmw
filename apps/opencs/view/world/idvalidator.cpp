@@ -12,15 +12,25 @@ bool CSVWorld::IdValidator::isValid (const QChar& c, bool first) const
     return false;
 }
 
-CSVWorld::IdValidator::IdValidator (QObject *parent) : QValidator (parent) {}
+CSVWorld::IdValidator::IdValidator (bool relaxed, QObject *parent)
+: QValidator (parent), mRelaxed (relaxed)
+{}
 
 QValidator::State CSVWorld::IdValidator::validate (QString& input, int& pos) const
 {
-    bool first = true;
-
-    for (QString::const_iterator iter (input.begin()); iter!=input.end(); ++iter, first = false)
-        if (!isValid (*iter, first))
+    if (mRelaxed)
+    {
+        if (input.indexOf ('"')!=-1 || input.indexOf ("::")!=-1 || input.indexOf ("#")!=-1)
             return QValidator::Invalid;
+    }
+    else
+    {
+        bool first = true;
+
+        for (QString::const_iterator iter (input.begin()); iter!=input.end(); ++iter, first = false)
+            if (!isValid (*iter, first))
+                return QValidator::Invalid;
+    }
 
     return QValidator::Acceptable;
 }

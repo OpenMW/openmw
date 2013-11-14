@@ -160,6 +160,29 @@ CSMWorld::Data::Data() : mRefs (mCells)
     mJournals.addColumn (new RecordStateColumn<ESM::Dialogue>);
     mJournals.addColumn (new DialogueTypeColumn<ESM::Dialogue> (true));
 
+    mTopicInfos.addColumn (new StringIdColumn<Info>);
+    mTopicInfos.addColumn (new RecordStateColumn<Info>);
+    mTopicInfos.addColumn (new TopicColumn<Info> (false));
+    mTopicInfos.addColumn (new ActorColumn<Info>);
+    mTopicInfos.addColumn (new RaceColumn<Info>);
+    mTopicInfos.addColumn (new ClassColumn<Info>);
+    mTopicInfos.addColumn (new FactionColumn<Info>);
+    mTopicInfos.addColumn (new CellColumn<Info>);
+    mTopicInfos.addColumn (new DispositionColumn<Info>);
+    mTopicInfos.addColumn (new RankColumn<Info>);
+    mTopicInfos.addColumn (new GenderColumn<Info>);
+    mTopicInfos.addColumn (new PcFactionColumn<Info>);
+    mTopicInfos.addColumn (new PcRankColumn<Info>);
+    mTopicInfos.addColumn (new SoundFileColumn<Info>);
+    mTopicInfos.addColumn (new ResponseColumn<Info>);
+
+    mJournalInfos.addColumn (new StringIdColumn<Info>);
+    mJournalInfos.addColumn (new RecordStateColumn<Info>);
+    mJournalInfos.addColumn (new TopicColumn<Info> (true));
+    mJournalInfos.addColumn (new QuestStatusTypeColumn<Info>);
+    mJournalInfos.addColumn (new QuestIndexColumn<Info>);
+    mJournalInfos.addColumn (new QuestDescriptionColumn<Info>);
+
     mCells.addColumn (new StringIdColumn<Cell>);
     mCells.addColumn (new RecordStateColumn<Cell>);
     mCells.addColumn (new FixedRecordTypeColumn<Cell> (UniversalId::Type_Cell));
@@ -218,6 +241,8 @@ CSMWorld::Data::Data() : mRefs (mCells)
     addModel (new IdTable (&mSpells), UniversalId::Type_Spells, UniversalId::Type_Spell);
     addModel (new IdTable (&mTopics), UniversalId::Type_Topics, UniversalId::Type_Topic);
     addModel (new IdTable (&mJournals), UniversalId::Type_Journals, UniversalId::Type_Journal);
+    addModel (new IdTable (&mTopicInfos), UniversalId::Type_TopicInfos, UniversalId::Type_TopicInfo);
+    addModel (new IdTable (&mJournalInfos), UniversalId::Type_JournalInfos, UniversalId::Type_JournalInfo);
     addModel (new IdTable (&mCells), UniversalId::Type_Cells, UniversalId::Type_Cell);
     addModel (new IdTable (&mReferenceables), UniversalId::Type_Referenceables,
         UniversalId::Type_Referenceable);
@@ -362,6 +387,25 @@ CSMWorld::IdCollection<ESM::Dialogue>& CSMWorld::Data::getJournals()
     return mJournals;
 }
 
+const CSMWorld::InfoCollection& CSMWorld::Data::getTopicInfos() const
+{
+    return mTopicInfos;
+}
+
+CSMWorld::InfoCollection& CSMWorld::Data::getTopicInfos()
+{
+    return mTopicInfos;
+}
+
+const CSMWorld::InfoCollection& CSMWorld::Data::getJournalInfos() const
+{
+    return mJournalInfos;
+}
+
+CSMWorld::InfoCollection& CSMWorld::Data::getJournalInfos()
+{
+    return mJournalInfos;
+}
 
 const CSMWorld::IdCollection<CSMWorld::Cell>& CSMWorld::Data::getCells() const
 {
@@ -441,6 +485,8 @@ void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base, b
 
     reader.open (path.string());
 
+    const ESM::Dialogue *dialogue = 0;
+
     mAuthor = reader.getAuthor();
     mDescription = reader.getDesc();
 
@@ -505,9 +551,13 @@ void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base, b
                 if (record.mType==ESM::Dialogue::Journal)
                 {
                     mJournals.load (record, base);
+                    dialogue = &mJournals.getRecord (id).get();
                 }
                 else if (record.mType==ESM::Dialogue::Deleted)
                 {
+                    dialogue = 0; // record vector can be shuffled around which would make pointer
+                                  // to record invalid
+
                     if (mJournals.tryDelete (id))
                     {
                         /// \todo handle info records
@@ -524,7 +574,25 @@ void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base, b
                 else
                 {
                     mTopics.load (record, base);
+                    dialogue = &mTopics.getRecord (id).get();
                 }
+
+                break;
+            }
+
+            case ESM::REC_INFO:
+            {
+                if (!dialogue)
+                {
+                    /// \todo INFO record without matching DIAL record -> report to user
+                    reader.skipRecord();
+                    break;
+                }
+
+                if (dialogue->mType==ESM::Dialogue::Journal)
+                    mJournalInfos.load (reader, base, *dialogue);
+                else
+                    mTopicInfos.load (reader, base, *dialogue);
 
                 break;
             }
@@ -545,6 +613,7 @@ void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base, b
             default:
 
                 /// \todo throw an exception instead, once all records are implemented
+                /// or maybe report error and continue?
                 reader.skipRecord();
         }
     }

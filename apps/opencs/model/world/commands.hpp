@@ -5,6 +5,7 @@
 
 #include <string>
 #include <map>
+#include <vector>
 
 #include <QVariant>
 #include <QUndoCommand>
@@ -94,6 +95,21 @@ namespace CSMWorld
             DeleteCommand (IdTable& model, const std::string& id, QUndoCommand *parent = 0);
 
             virtual ~DeleteCommand();
+
+            virtual void redo();
+
+            virtual void undo();
+    };
+
+    class ReorderRowsCommand : public QUndoCommand
+    {
+            IdTable& mModel;
+            int mBaseIndex;
+            std::vector<int> mNewOrder;
+
+        public:
+
+            ReorderRowsCommand (IdTable& model, int baseIndex, const std::vector<int>& newOrder);
 
             virtual void redo();
 
