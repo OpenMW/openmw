@@ -417,6 +417,9 @@ NifOgre::ObjectList NpcAnimation::insertBoundedPart(const std::string &model, in
 
 Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
 {
+    if (!mSkelBase)
+        updateNpcBase();
+
     Ogre::Vector3 ret = Animation::runAnimation(timepassed);
 
     Ogre::SkeletonInstance *baseinst = mSkelBase->getSkeleton();
