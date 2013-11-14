@@ -91,6 +91,10 @@ namespace CSMWorld
                 Type_Topic,
                 Type_Journals,
                 Type_Journal,
+                Type_TopicInfos,
+                Type_TopicInfo,
+                Type_JournalInfos,
+                Type_JournalInfo,
                 Type_Scene
             };
 

@@ -57,14 +57,14 @@ const CSMWorld::UniversalId& CSVWorld::GenericCreator::getCollectionId() const
 }
 
 CSVWorld::GenericCreator::GenericCreator (CSMWorld::Data& data, QUndoStack& undoStack,
-    const CSMWorld::UniversalId& id)
+    const CSMWorld::UniversalId& id, bool relaxedIdRules)
 : mData (data), mUndoStack (undoStack), mListId (id), mLocked (false)
 {
     mLayout = new QHBoxLayout;
     mLayout->setContentsMargins (0, 0, 0, 0);
 
     mId = new QLineEdit;
-    mId->setValidator (new IdValidator (this));
+    mId->setValidator (new IdValidator (relaxedIdRules, this));
     mLayout->addWidget (mId, 1);
 
     mCreate = new QPushButton ("Create");

@@ -3,12 +3,22 @@
 
 #include "stage.hpp"
 
-#include "savingstate.hpp"
-
 #include "../world/record.hpp"
 #include "../world/idcollection.hpp"
 
 #include "../filter/filter.hpp"
+
+#include "savingstate.hpp"
+
+namespace ESM
+{
+    struct Dialogue;
+}
+
+namespace CSMWorld
+{
+    class InfoCollection;
+}
 
 namespace CSMDoc
 {
@@ -104,6 +114,25 @@ namespace CSMDoc
             /// \todo write record with delete flag
         }
     }
+
+
+    class WriteDialogueCollectionStage : public Stage
+    {
+            Document& mDocument;
+            SavingState& mState;
+            const CSMWorld::IdCollection<ESM::Dialogue>& mTopics;
+            CSMWorld::InfoCollection& mInfos;
+
+        public:
+
+            WriteDialogueCollectionStage (Document& document, SavingState& state, bool journal);
+
+            virtual int setup();
+            ///< \return number of steps
+
+            virtual void perform (int stage, std::vector<std::string>& messages);
+            ///< Messages resulting from this stage will be appended to \a messages.
+    };
 
 
     class WriteRefIdCollectionStage : public Stage

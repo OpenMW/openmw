@@ -58,13 +58,13 @@ bool MWDialogue::Filter::testActor (const ESM::DialInfo& info) const
     }
 
     // NPC faction
-    if (!info.mNpcFaction.empty())
+    if (!info.mFaction.empty())
     {
         if (isCreature)
             return false;
 
         MWMechanics::NpcStats& stats = MWWorld::Class::get (mActor).getNpcStats (mActor);
-        std::map<std::string, int>::iterator iter = stats.getFactionRanks().find ( Misc::StringUtils::lowerCase (info.mNpcFaction));
+        std::map<std::string, int>::iterator iter = stats.getFactionRanks().find ( Misc::StringUtils::lowerCase (info.mFaction));
 
         if (iter==stats.getFactionRanks().end())
             return false;

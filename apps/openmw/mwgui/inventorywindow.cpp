@@ -253,6 +253,8 @@ namespace MWGui
 
     void InventoryWindow::open()
     {
+        mPtr = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+
         updateEncumbranceBar();
 
         mItemView->update();

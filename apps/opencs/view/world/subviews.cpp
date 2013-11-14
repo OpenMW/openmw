@@ -15,6 +15,7 @@
 #include "referencecreator.hpp"
 #include "scenesubview.hpp"
 #include "dialoguecreator.hpp"
+#include "infocreator.hpp"
 
 void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
 {
@@ -59,6 +60,12 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
 
     manager.add (CSMWorld::UniversalId::Type_Journal,
         new CSVDoc::SubViewFactoryWithCreator<TableSubView, JournalCreatorFactory>);
+
+    manager.add (CSMWorld::UniversalId::Type_TopicInfos,
+        new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<InfoCreator> > (false));
+
+    manager.add (CSMWorld::UniversalId::Type_JournalInfos,
+        new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<InfoCreator> > (false));
 
     // Subviews for editing/viewing individual records
     manager.add (CSMWorld::UniversalId::Type_Script, new CSVDoc::SubViewFactory<ScriptSubView>);

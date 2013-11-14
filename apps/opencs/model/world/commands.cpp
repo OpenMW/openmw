@@ -123,3 +123,25 @@ void CSMWorld::DeleteCommand::undo()
 {
     mModel.setRecord (mId, *mOld);
 }
+
+
+CSMWorld::ReorderRowsCommand::ReorderRowsCommand (IdTable& model, int baseIndex,
+    const std::vector<int>& newOrder)
+: mModel (model), mBaseIndex (baseIndex), mNewOrder (newOrder)
+{}
+
+void CSMWorld::ReorderRowsCommand::redo()
+{
+    mModel.reorderRows (mBaseIndex, mNewOrder);
+}
+
+void CSMWorld::ReorderRowsCommand::undo()
+{
+    int size = static_cast<int> (mNewOrder.size());
+    std::vector<int> reverse (size);
+
+    for (int i=0; i<size; ++i)
+        reverse.at (mNewOrder[i]) = i;
+
+    mModel.reorderRows (mBaseIndex, reverse);
+}
