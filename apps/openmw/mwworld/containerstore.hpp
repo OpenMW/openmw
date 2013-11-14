@@ -85,6 +85,9 @@ namespace MWWorld
             ///
             /// @return the number of items actually removed
 
+            void unstack (const Ptr& ptr, const Ptr& container);
+            ///< Unstack an item in this container. The item's count will be set to 1, then a new stack will be added with (origCount-1).
+
         protected:
             ContainerStoreIterator addNewStack (const Ptr& ptr);
             ///< Add the item to this container (do not try to stack it onto existing items)

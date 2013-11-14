@@ -77,25 +77,39 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::end()
     return ContainerStoreIterator (this);
 }
 
+void MWWorld::ContainerStore::unstack(const Ptr &ptr, const Ptr& container)
+{
+    if (ptr.getRefData().getCount() <= 1)
+        return;
+    addNewStack(ptr)->getRefData().setCount(ptr.getRefData().getCount()-1);
+    remove(ptr, ptr.getRefData().getCount()-1, container);
+}
+
 bool MWWorld::ContainerStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
 {
     const MWWorld::Class& cls1 = MWWorld::Class::get(ptr1);
     const MWWorld::Class& cls2 = MWWorld::Class::get(ptr2);
 
-    /// \todo add current enchantment charge here when it is implemented
+    if (!Misc::StringUtils::ciEqual(ptr1.getCellRef().mRefID, ptr2.getCellRef().mRefID))
+        return false;
+
+    // If it has an enchantment, don't stack when some of the charge is already used
+    if (!ptr1.getClass().getEnchantment(ptr1).empty())
+    {
+        const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(
+                    ptr1.getClass().getEnchantment(ptr1));
+        float maxCharge = enchantment->mData.mCharge;
+        float enchantCharge1 = ptr1.getCellRef().mEnchantmentCharge == -1 ? maxCharge : ptr1.getCellRef().mEnchantmentCharge;
+        float enchantCharge2 = ptr2.getCellRef().mEnchantmentCharge == -1 ? maxCharge : ptr2.getCellRef().mEnchantmentCharge;
+        if (enchantCharge1 != maxCharge || enchantCharge2 != maxCharge)
+            return false;
+    }
+
     return ptr1 != ptr2 // an item never stacks onto itself
-        && Misc::StringUtils::ciEqual(ptr1.getCellRef().mRefID, ptr2.getCellRef().mRefID)
         && ptr1.getCellRef().mOwner == ptr2.getCellRef().mOwner
         && ptr1.getCellRef().mSoul == ptr2.getCellRef().mSoul
 
-        // item with a script never stacks
-        && cls1.getScript(ptr1) == ""
-        && cls2.getScript(ptr2) == ""
-
-        // item with enchantment never stacks (we could revisit this later,
-        // but for now it makes selecting items in the spell window much easier)
-        && cls1.getEnchantment(ptr1) == ""
-        && cls2.getEnchantment(ptr2) == ""
+        && cls1.getScript(ptr1) == cls2.getScript(ptr2)
 
         // item that is already partly used up never stacks
         && (!cls1.hasItemHealth(ptr1) || ptr1.getCellRef().mCharge == -1
