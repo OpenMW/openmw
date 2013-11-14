@@ -374,6 +374,13 @@ namespace MWMechanics
 
         if(!paused)
         {
+            // Note: we need to do this before any of the animations are updated.
+            // Reaching the text keys may trigger Hit / Spellcast (and as such, particles),
+            // so updating VFX immediately after that would just remove the particle effects instantly.
+            // There needs to be a magic effect update in between.
+            for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
+                iter->second->updateContinuousVfx();
+
             for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
                 iter->second->update(duration);
         }

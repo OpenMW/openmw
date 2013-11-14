@@ -716,8 +716,6 @@ void CharacterController::update(float duration)
     const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
     Ogre::Vector3 movement(0.0f);
 
-    updateContinuousVfx();
-
     if(!cls.isActor())
     {
         if(mAnimQueue.size() > 1)

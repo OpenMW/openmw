@@ -115,6 +115,7 @@ protected:
         NifOgre::ObjectList mObjects;
         int mEffectId;
         bool mLoop;
+        std::string mBoneName;
     };
 
     std::vector<EffectParams> mEffects;

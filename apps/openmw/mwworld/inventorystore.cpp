@@ -308,25 +308,29 @@ void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
                     // so it doesn't really matter if both items will get the same magnitude. *Extreme* edge case.
                     mPermanentMagicEffectMagnitudes[(**iter).getCellRef().mRefID] = random;
 
-                    // Only the sound of the first effect plays
-                    if (effectIt == enchantment.mEffects.mList.begin())
+                    // TODO: What do we do if no animation yet?
+                    if (MWBase::Environment::get().getWorld()->getAnimation(actor))
                     {
-                        static const std::string schools[] = {
-                            "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
-                        };
+                        // Only the sound of the first effect plays
+                        if (effectIt == enchantment.mEffects.mList.begin())
+                        {
+                            static const std::string schools[] = {
+                                "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
+                            };
 
-                        MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-                        if(!magicEffect->mHitSound.empty())
-                            sndMgr->playSound3D(actor, magicEffect->mHitSound, 1.0f, 1.0f);
-                        else
-                            sndMgr->playSound3D(actor, schools[magicEffect->mData.mSchool]+" hit", 1.0f, 1.0f);
-                    }
+                            MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+                            if(!magicEffect->mHitSound.empty())
+                                sndMgr->playSound3D(actor, magicEffect->mHitSound, 1.0f, 1.0f);
+                            else
+                                sndMgr->playSound3D(actor, schools[magicEffect->mData.mSchool]+" hit", 1.0f, 1.0f);
+                        }
 
-                    if (!magicEffect->mHit.empty())
-                    {
-                        const ESM::Static* castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find (magicEffect->mHit);
-                        bool loop = magicEffect->mData.mFlags & ESM::MagicEffect::ContinuousVfx;
-                        MWBase::Environment::get().getWorld()->getAnimation(actor)->addEffect("meshes\\" + castStatic->mModel, magicEffect->mIndex, loop, "");
+                        if (!magicEffect->mHit.empty())
+                        {
+                            const ESM::Static* castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find (magicEffect->mHit);
+                            bool loop = magicEffect->mData.mFlags & ESM::MagicEffect::ContinuousVfx;
+                            MWBase::Environment::get().getWorld()->getAnimation(actor)->addEffect("meshes\\" + castStatic->mModel, magicEffect->mIndex, loop, "");
+                        }
                     }
                 }
 

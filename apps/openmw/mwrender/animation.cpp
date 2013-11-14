@@ -998,7 +998,7 @@ void Animation::addEffect(const std::string &model, int effectId, bool loop, con
 {
     // Early out if we already have this effect
     for (std::vector<EffectParams>::iterator it = mEffects.begin(); it != mEffects.end(); ++it)
-        if (it->mEffectId == effectId)
+        if (it->mLoop && loop && it->mEffectId == effectId && it->mBoneName == bonename)
             return;
 
     EffectParams params;
@@ -1006,6 +1006,7 @@ void Animation::addEffect(const std::string &model, int effectId, bool loop, con
     params.mObjects = NifOgre::Loader::createObjects(mInsert, model);
     params.mLoop = loop;
     params.mEffectId = effectId;
+    params.mBoneName = bonename;
 
     for(size_t i = 0;i < params.mObjects.mControllers.size();i++)
     {

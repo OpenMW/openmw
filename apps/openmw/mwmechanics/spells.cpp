@@ -32,7 +32,7 @@ namespace MWMechanics
 
             std::vector<float> random;
             random.resize(spell->mEffects.mList.size());
-            for (int i=0; i<random.size();++i)
+            for (unsigned int i=0; i<random.size();++i)
                 random[i] = static_cast<float> (std::rand()) / RAND_MAX;
             mSpells.insert (std::make_pair (spellId, random));
         }
@@ -51,6 +51,8 @@ namespace MWMechanics
 
     MagicEffects Spells::getMagicEffects() const
     {
+        // TODO: These are recalculated every frame, no need to do that
+
         MagicEffects effects;
 
         for (TIterator iter = mSpells.begin(); iter!=mSpells.end(); ++iter)
