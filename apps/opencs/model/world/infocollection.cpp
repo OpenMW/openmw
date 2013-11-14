@@ -88,6 +88,22 @@ int CSMWorld::InfoCollection::getAppendIndex (const std::string& id, UniversalId
     return std::distance (getRecords().begin(), range.second);
 }
 
+bool CSMWorld::InfoCollection::reorderRows (int baseIndex, const std::vector<int>& newOrder)
+{
+    // check if the range is valid
+    int lastIndex = baseIndex + newOrder.size() -1;
+
+    if (lastIndex>=getSize())
+        return false;
+
+    // Check that topics match
+    if (getRecord (baseIndex).get().mTopicId!=getRecord (lastIndex).get().mTopicId)
+        return false;
+
+    // reorder
+    return reorderRowsImp (baseIndex, newOrder);
+}
+
 void CSMWorld::InfoCollection::load (ESM::ESMReader& reader, bool base, const ESM::Dialogue& dialogue)
 {
     std::string id = Misc::StringUtils::lowerCase (dialogue.mId) + "#" +

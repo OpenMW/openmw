@@ -33,6 +33,12 @@ namespace CSMWorld
                 UniversalId::Type type = UniversalId::Type_None) const;
             ///< \param type Will be ignored, unless the collection supports multiple record types
 
+            virtual bool reorderRows (int baseIndex, const std::vector<int>& newOrder);
+            ///< Reorder the rows [baseIndex, baseIndex+newOrder.size()) according to the indices
+            /// given in \a newOrder (baseIndex+newOrder[0] specifies the new index of row baseIndex).
+            ///
+            /// \return Success?
+
             void load (ESM::ESMReader& reader, bool base, const ESM::Dialogue& dialogue);
 
             Range getTopicRange (const std::string& topic) const;

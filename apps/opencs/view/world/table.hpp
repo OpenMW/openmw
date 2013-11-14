@@ -34,6 +34,8 @@ namespace CSVWorld
             QAction *mCreateAction;
             QAction *mRevertAction;
             QAction *mDeleteAction;
+            QAction *mMoveUpAction;
+            QAction *mMoveDownAction;
             CSMWorld::IdTableProxyModel *mProxyModel;
             CSMWorld::IdTable *mModel;
             bool mEditLock;
@@ -79,6 +81,10 @@ namespace CSVWorld
             void deleteRecord();
 
             void editRecord();
+
+            void moveUpRecord();
+
+            void moveDownRecord();
 
         public slots:
 

@@ -540,6 +540,11 @@ std::vector<std::string> CSMWorld::RefIdCollection::getIds (bool listDeleted) co
     return mData.getIds (listDeleted);
 }
 
+bool CSMWorld::RefIdCollection::reorderRows (int baseIndex, const std::vector<int>& newOrder)
+{
+    return false;
+}
+
 void CSMWorld::RefIdCollection::save (int index, ESM::ESMWriter& writer) const
 {
     mData.save (index, writer);

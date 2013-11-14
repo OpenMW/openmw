@@ -2,6 +2,7 @@
 #define CSM_WOLRD_COLLECTIONBASE_H
 
 #include <string>
+#include <vector>
 
 #include "universalid.hpp"
 #include "columns.hpp"
@@ -85,6 +86,12 @@ namespace CSMWorld
             ///< Return a sorted collection of all IDs
             ///
             /// \param listDeleted include deleted record in the list
+
+            virtual bool reorderRows (int baseIndex, const std::vector<int>& newOrder) = 0;
+            ///< Reorder the rows [baseIndex, baseIndex+newOrder.size()) according to the indices
+            /// given in \a newOrder (baseIndex+newOrder[0] specifies the new index of row baseIndex).
+            ///
+            /// \return Success?
 
             int searchColumnIndex (Columns::ColumnId id) const;
             ///< Return index of column with the given \a id. If no such column exists, -1 is returned.

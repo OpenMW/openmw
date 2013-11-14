@@ -57,6 +57,12 @@ namespace CSMWorld
 
             const std::vector<Record<ESXRecordT> >& getRecords() const;
 
+            bool reorderRowsImp (int baseIndex, const std::vector<int>& newOrder);
+            ///< Reorder the rows [baseIndex, baseIndex+newOrder.size()) according to the indices
+            /// given in \a newOrder (baseIndex+newOrder[0] specifies the new index of row baseIndex).
+            ///
+            /// \return Success?
+
         public:
 
             Collection();
@@ -128,6 +134,12 @@ namespace CSMWorld
             /// If the index is invalid either generally (by being out of range) or for the particular
             /// record, an exception is thrown.
 
+            virtual bool reorderRows (int baseIndex, const std::vector<int>& newOrder);
+            ///< Reorder the rows [baseIndex, baseIndex+newOrder.size()) according to the indices
+            /// given in \a newOrder (baseIndex+newOrder[0] specifies the new index of row baseIndex).
+            ///
+            /// \return Success?
+
             void addColumn (Column<ESXRecordT> *column);
 
             void setRecord (int index, const Record<ESXRecordT>& record);
@@ -144,6 +156,38 @@ namespace CSMWorld
     const std::vector<Record<ESXRecordT> >& Collection<ESXRecordT, IdAccessorT>::getRecords() const
     {
         return mRecords;
+    }
+
+    template<typename ESXRecordT, typename IdAccessorT>
+    bool Collection<ESXRecordT, IdAccessorT>::reorderRowsImp (int baseIndex,
+        const std::vector<int>& newOrder)
+    {
+        if (!newOrder.empty())
+        {
+            int size = static_cast<int> (newOrder.size());
+
+            // check that all indices are present
+            std::vector<int> test (newOrder);
+            std::sort (test.begin(), test.end());
+            if (*test.begin()!=0 || *--test.end()!=size-1)
+                return false;
+
+            // reorder records
+            std::vector<Record<ESXRecordT> > buffer (size);
+
+            for (int i=0; i<size; ++i)
+                buffer[newOrder[i]] = mRecords [baseIndex+i];
+
+            std::copy (buffer.begin(), buffer.end(), mRecords.begin()+baseIndex);
+
+            // adjust index
+            for (std::map<std::string, int>::iterator iter (mIndex.begin()); iter!=mIndex.end();
+                 ++iter)
+                if (iter->second>=baseIndex && iter->second<baseIndex+size)
+                    iter->second = newOrder.at (iter->second-baseIndex)+baseIndex;
+        }
+
+        return true;
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
@@ -388,6 +432,12 @@ namespace CSMWorld
             throw std::runtime_error ("attempt to change the ID of a record");
 
         mRecords.at (index) = record;
+    }
+
+    template<typename ESXRecordT, typename IdAccessorT>
+    bool Collection<ESXRecordT, IdAccessorT>::reorderRows (int baseIndex, const std::vector<int>& newOrder)
+    {
+        return false;
     }
 }
 

@@ -4,15 +4,12 @@
 #include "collectionbase.hpp"
 #include "columnbase.hpp"
 
-CSMWorld::IdTable::IdTable (CollectionBase *idCollection) : mIdCollection (idCollection)
-{
-
-}
+CSMWorld::IdTable::IdTable (CollectionBase *idCollection, Reordering reordering)
+: mIdCollection (idCollection), mReordering (reordering)
+{}
 
 CSMWorld::IdTable::~IdTable()
-{
-
-}
+{}
 
 int CSMWorld::IdTable::rowCount (const QModelIndex & parent) const
 {
@@ -167,4 +164,17 @@ int CSMWorld::IdTable::searchColumnIndex (Columns::ColumnId id) const
 int CSMWorld::IdTable::findColumnIndex (Columns::ColumnId id) const
 {
     return mIdCollection->findColumnIndex (id);
+}
+
+void CSMWorld::IdTable::reorderRows (int baseIndex, const std::vector<int>& newOrder)
+{
+    if (!newOrder.empty())
+        if (mIdCollection->reorderRows (baseIndex, newOrder))
+            emit dataChanged (index (baseIndex, 0),
+                index (baseIndex+newOrder.size()-1, mIdCollection->getColumns()-1));
+}
+
+CSMWorld::IdTable::Reordering CSMWorld::IdTable::getReordering() const
+{
+    return mReordering;
 }
