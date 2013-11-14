@@ -2199,6 +2199,8 @@ namespace MWWorld
         if (projectileModel.empty())
             return;
 
+        return;
+
         MWWorld::ManualRef ref(getStore(), projectileModel);
         ESM::Position pos;
         pos.pos[0] = actor.getRefData().getPosition().pos[0];
