@@ -14,6 +14,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "renderconst.hpp"
 #include "camera.hpp"
@@ -58,17 +59,19 @@ const NpcAnimation::PartBoneMap NpcAnimation::sPartList = createPartListMap();
 
 NpcAnimation::~NpcAnimation()
 {
+    if (!mListenerDisabled)
+        mPtr.getClass().getInventoryStore(mPtr).setListener(NULL);
+
     Ogre::SceneManager *sceneMgr = mInsert->getCreator();
     for(size_t i = 0;i < ESM::PRT_Count;i++)
         destroyObjectList(sceneMgr, mObjectParts[i]);
 }
 
 
-NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int visibilityFlags, ViewMode viewMode)
+NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int visibilityFlags, bool disableListener, ViewMode viewMode)
   : Animation(ptr, node),
-    mStateID(-1),
     mVisibilityFlags(visibilityFlags),
-
+    mListenerDisabled(disableListener),
     mViewMode(viewMode),
     mShowWeapons(false),
     mFirstPersonOffset(0.f, 0.f, 0.f)
@@ -80,6 +83,11 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int v
         mPartslots[i] = -1;  //each slot is empty
         mPartPriorities[i] = 0;
     }
+
+    if (!disableListener)
+        mPtr.getClass().getInventoryStore(mPtr).setListener(this);
+
+    updateNpcBase();
 }
 
 void NpcAnimation::setViewMode(NpcAnimation::ViewMode viewMode)
@@ -162,13 +170,6 @@ void NpcAnimation::updateNpcBase()
 
 void NpcAnimation::updateParts()
 {
-    if (!mSkelBase)
-    {
-        // First update?
-        updateNpcBase();
-        return;
-    }
-
     const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
     MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
 
@@ -417,9 +418,6 @@ NifOgre::ObjectList NpcAnimation::insertBoundedPart(const std::string &model, in
 
 Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
 {
-    if (!mSkelBase)
-        updateNpcBase();
-
     Ogre::Vector3 ret = Animation::runAnimation(timepassed);
 
     Ogre::SkeletonInstance *baseinst = mSkelBase->getSkeleton();
@@ -583,6 +581,34 @@ void NpcAnimation::showWeapons(bool showWeapon)
     else
     {
         removeIndividualPart(ESM::PRT_Weapon);
+    }
+}
+
+void NpcAnimation::permanentEffectAdded(const ESM::MagicEffect *magicEffect, bool isNew, bool playSound)
+{
+    // During first auto equip, we don't play any sounds.
+    // Basically we don't want sounds when the actor is first loaded,
+    // the items should appear as if they'd always been equipped.
+    if (playSound)
+    {
+        static const std::string schools[] = {
+            "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
+        };
+
+        MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+        if(!magicEffect->mHitSound.empty())
+            sndMgr->playSound3D(mPtr, magicEffect->mHitSound, 1.0f, 1.0f);
+        else
+            sndMgr->playSound3D(mPtr, schools[magicEffect->mData.mSchool]+" hit", 1.0f, 1.0f);
+    }
+
+    if (!magicEffect->mHit.empty())
+    {
+        const ESM::Static* castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find (magicEffect->mHit);
+        bool loop = magicEffect->mData.mFlags & ESM::MagicEffect::ContinuousVfx;
+        // Don't play particle VFX unless the effect is new or it should be looping.
+        if (isNew || loop)
+            addEffect("meshes\\" + castStatic->mModel, magicEffect->mIndex, loop, "");
     }
 }
 

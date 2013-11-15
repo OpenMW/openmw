@@ -3,23 +3,22 @@
 
 #include "animation.hpp"
 
-#include "../mwworld/containerstore.hpp"
+#include "../mwworld/inventorystore.hpp"
 
 namespace ESM
 {
     struct NPC;
 }
 
-namespace MWWorld
-{
-    class InventoryStore;
-}
-
 namespace MWRender
 {
 
-class NpcAnimation : public Animation
+class NpcAnimation : public Animation, public MWWorld::InventoryStoreListener
 {
+public:
+    virtual void equipmentChanged() { updateParts(); }
+    virtual void permanentEffectAdded(const ESM::MagicEffect *magicEffect, bool isNew, bool playSound);
+
 public:
     typedef std::map<ESM::PartReferenceType,std::string> PartBoneMap;
 
@@ -32,7 +31,7 @@ public:
 private:
     static const PartBoneMap sPartList;
 
-    int mStateID;
+    bool mListenerDisabled;
 
     // Bounded Parts
     NifOgre::ObjectList mObjectParts[ESM::PRT_Count];
@@ -62,7 +61,17 @@ private:
     void addPartGroup(int group, int priority, const std::vector<ESM::PartReference> &parts);
 
 public:
-    NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int visibilityFlags,
+    /**
+     * @param ptr
+     * @param node
+     * @param visibilityFlags
+     * @param disableListener  Don't listen for equipment changes and magic effects. InventoryStore only supports
+     *                         one listener at a time, so you shouldn't do this if creating several NpcAnimations
+     *                         for the same Ptr, eg preview dolls for the player.
+     *                         Those need to be manually rendered anyway.
+     * @param viewMode
+     */
+    NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int visibilityFlags, bool disableListener = false,
                  ViewMode viewMode=VM_Normal);
     virtual ~NpcAnimation();
 

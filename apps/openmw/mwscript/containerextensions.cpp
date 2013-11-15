@@ -135,7 +135,10 @@ namespace MWScript
 
                     MWWorld::ContainerStore& store = MWWorld::Class::get (ptr).getContainerStore (ptr);
 
-                    std::string itemName = "";
+                    std::string itemName;
+                    for (MWWorld::ContainerStoreIterator iter(store.begin()); iter != store.end(); ++iter)
+                        if (Misc::StringUtils::ciEqual(iter->getCellRef().mRefID, item))
+                            itemName = iter->getClass().getName(*iter);
 
                     int numRemoved = store.remove(item, count, ptr);
 

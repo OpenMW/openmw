@@ -9,9 +9,6 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
-#include "../mwbase/soundmanager.hpp"
-
-#include "../mwrender/animation.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 
@@ -46,6 +43,7 @@ MWWorld::InventoryStore::InventoryStore()
  : mSelectedEnchantItem(end())
  , mUpdatesEnabled (true)
  , mFirstAutoEquip(true)
+ , mListener(NULL)
 {
     initSlots (mSlots);
 }
@@ -53,6 +51,8 @@ MWWorld::InventoryStore::InventoryStore()
 MWWorld::InventoryStore::InventoryStore (const InventoryStore& store)
 : ContainerStore (store)
  , mSelectedEnchantItem(end())
+ , mListener(NULL)
+ , mUpdatesEnabled(true)
 {
     mMagicEffects = store.mMagicEffects;
     mFirstAutoEquip = store.mFirstAutoEquip;
@@ -122,9 +122,8 @@ void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& ite
 
     flagAsModified();
 
-    updateActorModel(actor);
-
-    updateMagicEffects(actor);
+    fireEquipmentChangedEvent();
+    updateMagicEffects();
 }
 
 void MWWorld::InventoryStore::unequipAll(const MWWorld::Ptr& actor)
@@ -255,11 +254,10 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& npc)
     if (changed)
     {
         mSlots.swap (slots_);
-        updateActorModel(npc);
-        updateMagicEffects(npc);
+        fireEquipmentChangedEvent();
+        updateMagicEffects();
         flagAsModified();
     }
-    mFirstAutoEquip = false;
 }
 
 const MWMechanics::MagicEffects& MWWorld::InventoryStore::getMagicEffects() const
@@ -267,10 +265,14 @@ const MWMechanics::MagicEffects& MWWorld::InventoryStore::getMagicEffects() cons
     return mMagicEffects;
 }
 
-void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
+void MWWorld::InventoryStore::updateMagicEffects()
 {
     // To avoid excessive updates during auto-equip
     if (!mUpdatesEnabled)
+        return;
+
+    // Delay update until the listener is set up
+    if (!mListener)
         return;
 
     mMagicEffects = MWMechanics::MagicEffects();
@@ -296,6 +298,16 @@ void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
             for (unsigned int i=0; i<random.size();++i)
                 random[i] = static_cast<float> (std::rand()) / RAND_MAX;
 
+            bool existed = (mPermanentMagicEffectMagnitudes.find((**iter).getCellRef().mRefID) != mPermanentMagicEffectMagnitudes.end());
+            if (!existed)
+            {
+                // Note that using the RefID as a key here is not entirely correct.
+                // Consider equipping the same item twice (e.g. a ring)
+                // However, permanent enchantments with a random magnitude are kind of an exploit anyway,
+                // so it doesn't really matter if both items will get the same magnitude. *Extreme* edge case.
+                mPermanentMagicEffectMagnitudes[(**iter).getCellRef().mRefID] = random;
+            }
+
             int i=0;
             for (std::vector<ESM::ENAMstruct>::const_iterator effectIt (enchantment.mEffects.mList.begin());
                 effectIt!=enchantment.mEffects.mList.end(); ++effectIt)
@@ -304,42 +316,13 @@ void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
                     MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
                     effectIt->mEffectID);
 
-                if (mPermanentMagicEffectMagnitudes.find((**iter).getCellRef().mRefID) == mPermanentMagicEffectMagnitudes.end())
+                if (!existed)
                 {
-                    // Note that using the RefID as a key here is not entirely correct.
-                    // Consider equipping the same item twice (e.g. a ring)
-                    // However, permanent enchantments with a random magnitude are kind of an exploit anyway,
-                    // so it doesn't really matter if both items will get the same magnitude. *Extreme* edge case.
-                    mPermanentMagicEffectMagnitudes[(**iter).getCellRef().mRefID] = random;
-
                     // During first auto equip, we don't play any sounds.
                     // Basically we don't want sounds when the actor is first loaded,
                     // the items should appear as if they'd always been equipped.
-                    if (!mFirstAutoEquip)
-                    {
-                        // Only the sound of the first effect plays
-                        if (effectIt == enchantment.mEffects.mList.begin())
-                        {
-                            static const std::string schools[] = {
-                                "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
-                            };
-
-                            MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-                            if(!magicEffect->mHitSound.empty())
-                                sndMgr->playSound3D(actor, magicEffect->mHitSound, 1.0f, 1.0f);
-                            else
-                                sndMgr->playSound3D(actor, schools[magicEffect->mData.mSchool]+" hit", 1.0f, 1.0f);
-                        }
-                    }
-
-                    if (!magicEffect->mHit.empty())
-                    {
-                        const ESM::Static* castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find (magicEffect->mHit);
-                        bool loop = magicEffect->mData.mFlags & ESM::MagicEffect::ContinuousVfx;
-                        // Similar as above, we don't want particles during first autoequip either, unless they're continuous.
-                        if (!mFirstAutoEquip || loop)
-                            MWBase::Environment::get().getWorld()->getAnimation(actor)->addEffect("meshes\\" + castStatic->mModel, magicEffect->mIndex, loop, "");
-                    }
+                    mListener->permanentEffectAdded(magicEffect, !mFirstAutoEquip,
+                                                        !mFirstAutoEquip && effectIt == enchantment.mEffects.mList.begin());
                 }
 
                 mMagicEffects.add (*effectIt, random[i]);
@@ -367,6 +350,8 @@ void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
         else
             ++it;
     }
+
+    mFirstAutoEquip = false;
 }
 
 void MWWorld::InventoryStore::flagAsModified()
@@ -380,7 +365,7 @@ bool MWWorld::InventoryStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
     if (!canStack)
         return false;
 
-    // don't stack if 'stack' (the item being checked against) is currently equipped.
+    // don't stack if either item is currently equipped
     for (TSlots::const_iterator iter (mSlots.begin());
         iter!=mSlots.end(); ++iter)
     {
@@ -481,8 +466,8 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipSlot(int slot, c
             }
         }
 
-        updateActorModel(actor);
-        updateMagicEffects(actor);
+        fireEquipmentChangedEvent();
+        updateMagicEffects();
 
         return retval;
     }
@@ -502,8 +487,16 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipItem(const MWWor
     throw std::runtime_error ("attempt to unequip an item that is not currently equipped");
 }
 
-void MWWorld::InventoryStore::updateActorModel(const MWWorld::Ptr& actor)
+void MWWorld::InventoryStore::setListener(InventoryStoreListener *listener)
 {
-    if (mUpdatesEnabled)
-        MWBase::Environment::get().getWorld()->updateAnimParts(actor);
+    mListener = listener;
+    updateMagicEffects();
+}
+
+void MWWorld::InventoryStore::fireEquipmentChangedEvent()
+{
+    if (!mUpdatesEnabled)
+        return;
+    if (mListener)
+        mListener->equipmentChanged();
 }

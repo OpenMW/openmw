@@ -71,7 +71,7 @@ namespace MWRender
         mNode = renderRoot->createChildSceneNode();
 
         mAnimation = new NpcAnimation(mCharacter, mNode,
-                                      0, (renderHeadOnly() ? NpcAnimation::VM_HeadOnly : NpcAnimation::VM_Normal));
+                                      0, true, (renderHeadOnly() ? NpcAnimation::VM_HeadOnly : NpcAnimation::VM_Normal));
         mAnimation->updateParts();
 
         Ogre::Vector3 scale = mNode->getScale();
@@ -102,7 +102,6 @@ namespace MWRender
     {
         if (mSceneMgr)
         {
-            //Ogre::TextureManager::getSingleton().remove(mName);
             mSceneMgr->destroyAllCameras();
             delete mAnimation;
             Ogre::Root::getSingleton().destroySceneManager(mSceneMgr);
@@ -114,7 +113,7 @@ namespace MWRender
         assert(mAnimation);
         delete mAnimation;
         mAnimation = new NpcAnimation(mCharacter, mNode,
-                                      0, (renderHeadOnly() ? NpcAnimation::VM_HeadOnly : NpcAnimation::VM_Normal));
+                                      0, true, (renderHeadOnly() ? NpcAnimation::VM_HeadOnly : NpcAnimation::VM_Normal));
         mAnimation->updateParts();
 
         float scale=1.f;

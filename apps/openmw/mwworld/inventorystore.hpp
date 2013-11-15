@@ -12,6 +12,25 @@ namespace MWMechanics
 
 namespace MWWorld
 {
+    class InventoryStoreListener
+    {
+    public:
+        /**
+         * Fired when items are equipped or unequipped
+         */
+        virtual void equipmentChanged () {}
+
+        /**
+         * @param effect
+         * @param isNew Is this effect new (e.g. the item for it was just now manually equipped)
+         *              or was it loaded from a savegame / initial game state? \n
+         *              If it isn't new, non-looping VFX should not be played.
+         * @param playSound Play effect sound?
+         */
+        virtual void permanentEffectAdded (const ESM::MagicEffect *magicEffect, bool isNew, bool playSound) {}
+
+    };
+
     ///< \brief Variant of the ContainerStore for NPCs
     class InventoryStore : public ContainerStore
     {
@@ -45,6 +64,8 @@ namespace MWWorld
 
             MWMechanics::MagicEffects mMagicEffects;
 
+            InventoryStoreListener* mListener;
+
             // Enables updates of magic effects and actor model whenever items are equipped or unequipped.
             // This is disabled during autoequip to avoid excessive updates
             bool mUpdatesEnabled;
@@ -67,9 +88,9 @@ namespace MWWorld
 
             void initSlots (TSlots& slots_);
 
-            void updateActorModel (const Ptr& actor);
+            void updateMagicEffects();
 
-            void updateMagicEffects(const Ptr& actor);
+            void fireEquipmentChangedEvent();
 
         public:
 
@@ -138,6 +159,9 @@ namespace MWWorld
             /// @return an iterator to the item that was previously in the slot
             /// (it can be re-stacked so its count may be different than when it
             /// was equipped).
+
+            void setListener (InventoryStoreListener* listener);
+            ///< Set a listener for various events, see \a InventoryStoreListener
     };
 }
 
