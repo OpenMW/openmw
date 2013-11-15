@@ -2,9 +2,12 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int BodyPart::sRecordId = REC_BODY;
+
 
 void BodyPart::load(ESMReader &esm)
 {
@@ -12,7 +15,7 @@ void BodyPart::load(ESMReader &esm)
     mRace = esm.getHNString("FNAM");
     esm.getHNT(mData, "BYDT", 4);
 }
-void BodyPart::save(ESMWriter &esm)
+void BodyPart::save(ESMWriter &esm) const
 {
     esm.writeHNCString("MODL", mModel);
     esm.writeHNCString("FNAM", mRace);

@@ -156,6 +156,14 @@ namespace MWWorld
             virtual void unlock (const Ptr& ptr) const;
             ///< Unlock object (default implementation: throw an exception)
 
+            virtual void setRemainingUsageTime (const Ptr& ptr, float duration) const;
+            ///< Sets the remaining duration of the object, such as an equippable light
+            /// source. (default implementation: throw an exception)
+
+            virtual float getRemainingUsageTime (const Ptr& ptr) const;
+            ///< Returns the remaining duration of the object, such as an equippable light
+            /// source. (default implementation: throw an exception)
+
             virtual std::string getScript (const Ptr& ptr) const;
             ///< Return name of the script attached to ptr (default implementation: return an empty
             /// string).
@@ -174,6 +182,9 @@ namespace MWWorld
 
             virtual float getJump(const MWWorld::Ptr &ptr) const;
             ///< Return jump velocity (not accounting for movement)
+
+            virtual float getFallDamage(const MWWorld::Ptr &ptr, float fallHeight) const;
+            ///< Return amount of health points lost when falling
 
             virtual MWMechanics::Movement& getMovementSettings (const Ptr& ptr) const;
             ///< Return desired movement.

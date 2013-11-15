@@ -5,12 +5,12 @@
 
 #include "../world/idcollection.hpp"
 
-#include "stage.hpp"
+#include "../doc/stage.hpp"
 
 namespace CSMTools
 {
     /// \brief VerifyStage: make sure that class records are internally consistent
-    class ClassCheckStage : public Stage
+    class ClassCheckStage : public CSMDoc::Stage
     {
             const CSMWorld::IdCollection<ESM::Class>& mClasses;
 

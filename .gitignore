@@ -1,1 +1,57 @@
+<<<<<<< HEAD
 .pc
+=======
+## make
+CMakeFiles
+*/CMakeFiles
+CMakeCache.txt
+cmake_install.cmake
+CMakeLists.txt.user
+Makefile
+makefile
+build
+prebuilt
+
+## doxygen
+Doxygen
+
+## ides/editors
+*~
+*.kdev4
+*.swp
+*.swo
+*.kate-swp
+.cproject
+.project
+.settings
+.directory
+
+## resources
+data
+resources
+/*.cfg
+/*.desktop
+/*.install
+
+## binaries
+/esmtool
+/mwiniimport
+/omwlauncher
+/openmw
+/opencs
+
+## generated objects
+apps/openmw/config.hpp
+Docs/mainpage.hpp
+moc_*.cxx
+*.cxx_parameters
+*qrc_launcher.cxx
+*qrc_resources.cxx
+*__*
+*ui_datafilespage.h
+*ui_graphicspage.h
+*ui_mainwindow.h
+*ui_playpage.h
+*.[ao]
+*.so
+>>>>>>> upstream/0.27.0

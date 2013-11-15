@@ -29,6 +29,8 @@ namespace
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Regions, "Regions", 0 },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Birthsigns, "Birthsigns", 0 },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Spells, "Spells", 0 },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Topics, "Topics", 0 },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Journals, "Journals", 0 },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Cells, "Cells", 0 },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Referenceables,
             "Referenceables", 0 },
@@ -43,18 +45,20 @@ namespace
 
     static const TypeData sIdArg[] =
     {
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Global, "Global Variable", 0 },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Gmst, "Game Setting", 0 },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Skill, "Skill", 0 },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Class, "Class", 0 },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Faction, "Faction", 0 },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Race, "Race", 0 },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Sound, "Sound", 0 },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Script, "Script", 0 },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Region, "Region", 0 },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Birthsign, "Birthsign", 0 },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Spell, "Spell", 0 },
-        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Cell, "Cell", 0 },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Global, "Global Variable", ":./globvar.png" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Gmst, "Game Setting", ":./GMST.png" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Skill, "Skill", ":./skill.png" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Class, "Class", ":./class.png" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Faction, "Faction", ":./faction.png" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Race, "Race", ":./race.png" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Sound, "Sound", ":./sound.png" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Script, "Script", ":./script.png" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Region, "Region", ":./land.png" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Birthsign, "Birthsign", ":./birthsign.png" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Spell, "Spell", ":./spell.png" },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Topic, "Topic", 0 },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Journal, "Journal", 0 },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Cell, "Cell", ":./cell.png" },
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Referenceable, "Referenceables", 0 },
         { CSMWorld::UniversalId::Class_RefRecord, CSMWorld::UniversalId::Type_Activator, "Activator", ":./activator.png" },
         { CSMWorld::UniversalId::Class_RefRecord, CSMWorld::UniversalId::Type_Potion, "Potion", ":./potion.png" },
@@ -80,18 +84,17 @@ namespace
         { CSMWorld::UniversalId::Class_RefRecord, CSMWorld::UniversalId::Type_Static, "Static", ":./static.png" },
         { CSMWorld::UniversalId::Class_RefRecord, CSMWorld::UniversalId::Type_Weapon, "Weapon", ":./weapon.png" },
         { CSMWorld::UniversalId::Class_SubRecord, CSMWorld::UniversalId::Type_Reference, "Reference", 0 },
-
+        { CSMWorld::UniversalId::Class_SubRecord, CSMWorld::UniversalId::Type_Filter, "Filter", ":./filter.png" },
         { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0, 0 } // end marker
     };
 
     static const TypeData sIndexArg[] =
     {
         { CSMWorld::UniversalId::Class_Transient, CSMWorld::UniversalId::Type_VerificationResults, "Verification Results", 0 },
+        { CSMWorld::UniversalId::Class_Collection, CSMWorld::UniversalId::Type_Scene, "Scene", 0 },
 
         { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0, 0 } // end marker
     };
-
-    static const unsigned int IDARG_SIZE = sizeof (sIdArg) / sizeof (TypeData);
 }
 
 CSMWorld::UniversalId::UniversalId (const std::string& universalId)
@@ -148,6 +151,22 @@ CSMWorld::UniversalId::UniversalId (Type type) : mArgumentType (ArgumentType_Non
         if (type==sNoArg[i].mType)
         {
             mClass = sNoArg[i].mClass;
+            return;
+        }
+
+    for (int i=0; sIdArg[i].mName; ++i)
+        if (type==sIdArg[i].mType)
+        {
+            mArgumentType = ArgumentType_Id;
+            mClass = sIdArg[i].mClass;
+            return;
+        }
+
+    for (int i=0; sIndexArg[i].mName; ++i)
+        if (type==sIndexArg[i].mType)
+        {
+            mArgumentType = ArgumentType_Index;
+            mClass = sIndexArg[i].mClass;
             return;
         }
 
@@ -292,25 +311,6 @@ std::vector<CSMWorld::UniversalId::Type> CSMWorld::UniversalId::listReferenceabl
 
     return list;
 }
-
-std::pair<int, const char *> CSMWorld::UniversalId::getIdArgPair (unsigned int index)
-{
-    std::pair<int, const char *> retPair;
-
-    if ( index < IDARG_SIZE )
-    {
-        retPair.first = sIdArg[index].mType;
-        retPair.second = sIdArg[index].mName;
-    }
-
-    return retPair;
-}
-
-unsigned int CSMWorld::UniversalId::getIdArgSize()
-{
-   return IDARG_SIZE;
-}
-
 
 bool CSMWorld::operator== (const CSMWorld::UniversalId& left, const CSMWorld::UniversalId& right)
 {

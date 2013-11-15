@@ -24,7 +24,7 @@ namespace ESM
                 versions are 1.2 and 1.3. These correspond to:
                 1.2 = 0x3f99999a and 1.3 = 0x3fa66666
             */
-            int version;
+            unsigned int version;
             int type;           // 0=esp, 1=esm, 32=ess (unused)
             NAME32 author;      // Author's name
             NAME256 desc;       // File description

@@ -2,12 +2,14 @@
 #include "data.hpp"
 
 #include <stdexcept>
+#include <algorithm>
 
 #include <QAbstractItemModel>
 
 #include <components/esm/esmreader.hpp>
 #include <components/esm/defs.hpp>
 #include <components/esm/loadglob.hpp>
+#include <components/esm/cellref.hpp>
 
 #include "idtable.hpp"
 #include "columnimp.hpp"
@@ -15,13 +17,42 @@
 #include "columns.hpp"
 
 void CSMWorld::Data::addModel (QAbstractItemModel *model, UniversalId::Type type1,
-    UniversalId::Type type2)
+    UniversalId::Type type2, bool update)
 {
     mModels.push_back (model);
     mModelIndex.insert (std::make_pair (type1, model));
 
     if (type2!=UniversalId::Type_None)
         mModelIndex.insert (std::make_pair (type2, model));
+
+    if (update)
+    {
+        connect (model, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
+            this, SLOT (dataChanged (const QModelIndex&, const QModelIndex&)));
+        connect (model, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
+            this, SLOT (rowsChanged (const QModelIndex&, int, int)));
+        connect (model, SIGNAL (rowsRemoved (const QModelIndex&, int, int)),
+            this, SLOT (rowsChanged (const QModelIndex&, int, int)));
+    }
+}
+
+void CSMWorld::Data::appendIds (std::vector<std::string>& ids, const CollectionBase& collection,
+    bool listDeleted)
+{
+    std::vector<std::string> ids2 = collection.getIds (listDeleted);
+
+    ids.insert (ids.end(), ids2.begin(), ids2.end());
+}
+
+int CSMWorld::Data::count (RecordBase::State state, const CollectionBase& collection)
+{
+    int number = 0;
+
+    for (int i=0; i<collection.getSize(); ++i)
+        if (collection.getRecord (i).mState==state)
+            ++number;
+
+    return number;
 }
 
 CSMWorld::Data::Data() : mRefs (mCells)
@@ -121,6 +152,14 @@ CSMWorld::Data::Data() : mRefs (mCells)
     mSpells.addColumn (new FlagColumn<ESM::Spell> (Columns::ColumnId_StarterSpell, 0x2));
     mSpells.addColumn (new FlagColumn<ESM::Spell> (Columns::ColumnId_AlwaysSucceeds, 0x4));
 
+    mTopics.addColumn (new StringIdColumn<ESM::Dialogue>);
+    mTopics.addColumn (new RecordStateColumn<ESM::Dialogue>);
+    mTopics.addColumn (new DialogueTypeColumn<ESM::Dialogue>);
+
+    mJournals.addColumn (new StringIdColumn<ESM::Dialogue>);
+    mJournals.addColumn (new RecordStateColumn<ESM::Dialogue>);
+    mJournals.addColumn (new DialogueTypeColumn<ESM::Dialogue> (true));
+
     mCells.addColumn (new StringIdColumn<Cell>);
     mCells.addColumn (new RecordStateColumn<Cell>);
     mCells.addColumn (new FixedRecordTypeColumn<Cell> (UniversalId::Type_Cell));
@@ -134,6 +173,12 @@ CSMWorld::Data::Data() : mRefs (mCells)
     mRefs.addColumn (new RecordStateColumn<CellRef>);
     mRefs.addColumn (new CellColumn<CellRef>);
     mRefs.addColumn (new IdColumn<CellRef>);
+    mRefs.addColumn (new PosColumn<CellRef> (&CellRef::mPos, 0, false));
+    mRefs.addColumn (new PosColumn<CellRef> (&CellRef::mPos, 1, false));
+    mRefs.addColumn (new PosColumn<CellRef> (&CellRef::mPos, 2, false));
+    mRefs.addColumn (new RotColumn<CellRef> (&CellRef::mPos, 0, false));
+    mRefs.addColumn (new RotColumn<CellRef> (&CellRef::mPos, 1, false));
+    mRefs.addColumn (new RotColumn<CellRef> (&CellRef::mPos, 2, false));
     mRefs.addColumn (new ScaleColumn<CellRef>);
     mRefs.addColumn (new OwnerColumn<CellRef>);
     mRefs.addColumn (new SoulColumn<CellRef>);
@@ -144,6 +189,12 @@ CSMWorld::Data::Data() : mRefs (mCells)
     mRefs.addColumn (new GoldValueColumn<CellRef>);
     mRefs.addColumn (new TeleportColumn<CellRef>);
     mRefs.addColumn (new TeleportCellColumn<CellRef>);
+    mRefs.addColumn (new PosColumn<CellRef> (&CellRef::mDoorDest, 0, true));
+    mRefs.addColumn (new PosColumn<CellRef> (&CellRef::mDoorDest, 1, true));
+    mRefs.addColumn (new PosColumn<CellRef> (&CellRef::mDoorDest, 2, true));
+    mRefs.addColumn (new RotColumn<CellRef> (&CellRef::mDoorDest, 0, true));
+    mRefs.addColumn (new RotColumn<CellRef> (&CellRef::mDoorDest, 1, true));
+    mRefs.addColumn (new RotColumn<CellRef> (&CellRef::mDoorDest, 2, true));
     mRefs.addColumn (new LockLevelColumn<CellRef>);
     mRefs.addColumn (new KeyColumn<CellRef>);
     mRefs.addColumn (new TrapColumn<CellRef>);
@@ -152,10 +203,11 @@ CSMWorld::Data::Data() : mRefs (mCells)
     mFilters.addColumn (new RecordStateColumn<CSMFilter::Filter>);
     mFilters.addColumn (new FilterColumn<CSMFilter::Filter>);
     mFilters.addColumn (new DescriptionColumn<CSMFilter::Filter>);
+    mFilters.addColumn (new ScopeColumn<CSMFilter::Filter>);
 
     addModel (new IdTable (&mGlobals), UniversalId::Type_Globals, UniversalId::Type_Global);
     addModel (new IdTable (&mGmsts), UniversalId::Type_Gmsts, UniversalId::Type_Gmst);
-    addModel (new IdTable (&mSkills), UniversalId::Type_Skills, UniversalId::Type_Skill);
+    addModel (new IdTable (&mSkills), UniversalId::Type_Skills, UniversalId::Type_Skill, false);
     addModel (new IdTable (&mClasses), UniversalId::Type_Classes, UniversalId::Type_Class);
     addModel (new IdTable (&mFactions), UniversalId::Type_Factions, UniversalId::Type_Faction);
     addModel (new IdTable (&mRaces), UniversalId::Type_Races, UniversalId::Type_Race);
@@ -164,11 +216,13 @@ CSMWorld::Data::Data() : mRefs (mCells)
     addModel (new IdTable (&mRegions), UniversalId::Type_Regions, UniversalId::Type_Region);
     addModel (new IdTable (&mBirthsigns), UniversalId::Type_Birthsigns, UniversalId::Type_Birthsign);
     addModel (new IdTable (&mSpells), UniversalId::Type_Spells, UniversalId::Type_Spell);
+    addModel (new IdTable (&mTopics), UniversalId::Type_Topics, UniversalId::Type_Topic);
+    addModel (new IdTable (&mJournals), UniversalId::Type_Journals, UniversalId::Type_Journal);
     addModel (new IdTable (&mCells), UniversalId::Type_Cells, UniversalId::Type_Cell);
     addModel (new IdTable (&mReferenceables), UniversalId::Type_Referenceables,
         UniversalId::Type_Referenceable);
-    addModel (new IdTable (&mRefs), UniversalId::Type_References, UniversalId::Type_Reference);
-    addModel (new IdTable (&mFilters), UniversalId::Type_Filters, UniversalId::Type_Filter);
+    addModel (new IdTable (&mRefs), UniversalId::Type_References, UniversalId::Type_Reference, false);
+    addModel (new IdTable (&mFilters), UniversalId::Type_Filters, UniversalId::Type_Filter, false);
 }
 
 CSMWorld::Data::~Data()
@@ -287,6 +341,28 @@ CSMWorld::IdCollection<ESM::Spell>& CSMWorld::Data::getSpells()
     return mSpells;
 }
 
+
+const CSMWorld::IdCollection<ESM::Dialogue>& CSMWorld::Data::getTopics() const
+{
+    return mTopics;
+}
+
+CSMWorld::IdCollection<ESM::Dialogue>& CSMWorld::Data::getTopics()
+{
+    return mTopics;
+}
+
+const CSMWorld::IdCollection<ESM::Dialogue>& CSMWorld::Data::getJournals() const
+{
+    return mJournals;
+}
+
+CSMWorld::IdCollection<ESM::Dialogue>& CSMWorld::Data::getJournals()
+{
+    return mJournals;
+}
+
+
 const CSMWorld::IdCollection<CSMWorld::Cell>& CSMWorld::Data::getCells() const
 {
     return mCells;
@@ -341,7 +417,7 @@ QAbstractItemModel *CSMWorld::Data::getTableModel (const UniversalId& id)
         {
             RegionMap *table = 0;
             addModel (table = new RegionMap (*this), UniversalId::Type_RegionMap,
-                UniversalId::Type_None);
+                UniversalId::Type_None, false);
             return table;
         }
         throw std::logic_error ("No table model available for " + id.toString());
@@ -355,7 +431,7 @@ void CSMWorld::Data::merge()
     mGlobals.merge();
 }
 
-void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base)
+void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base, bool project)
 {
     ESM::ESMReader reader;
 
@@ -364,6 +440,9 @@ void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base)
     reader.setEncoder (&encoder);
 
     reader.open (path.string());
+
+    mAuthor = reader.getAuthor();
+    mDescription = reader.getDesc();
 
     // Note: We do not need to send update signals here, because at this point the model is not connected
     // to any view.
@@ -415,6 +494,54 @@ void CSMWorld::Data::loadFile (const boost::filesystem::path& path, bool base)
             case ESM::REC_STAT: mReferenceables.load (reader, base, UniversalId::Type_Static); break;
             case ESM::REC_WEAP: mReferenceables.load (reader, base, UniversalId::Type_Weapon); break;
 
+            case ESM::REC_DIAL:
+            {
+                std::string id = reader.getHNOString ("NAME");
+
+                ESM::Dialogue record;
+                record.mId = id;
+                record.load (reader);
+
+                if (record.mType==ESM::Dialogue::Journal)
+                {
+                    mJournals.load (record, base);
+                }
+                else if (record.mType==ESM::Dialogue::Deleted)
+                {
+                    if (mJournals.tryDelete (id))
+                    {
+                        /// \todo handle info records
+                    }
+                    else if (mTopics.tryDelete (id))
+                    {
+                        /// \todo handle info records
+                    }
+                    else
+                    {
+                        /// \todo report deletion of non-existing record
+                    }
+                }
+                else
+                {
+                    mTopics.load (record, base);
+                }
+
+                break;
+            }
+
+            case ESM::REC_FILT:
+
+                if (project)
+                {
+                    mFilters.load (reader, base);
+                    mFilters.setData (mFilters.getSize()-1,
+                        mFilters.findColumnIndex (CSMWorld::Columns::ColumnId_Scope),
+                        static_cast<int> (CSMFilter::Filter::Scope_Project));
+                    break;
+                }
+
+                // fall through (filter record in a content file is an error with format 0)
+
             default:
 
                 /// \todo throw an exception instead, once all records are implemented
@@ -437,6 +564,81 @@ bool CSMWorld::Data::hasId (const std::string& id) const
         getRegions().searchId (id)!=-1 ||
         getBirthsigns().searchId (id)!=-1 ||
         getSpells().searchId (id)!=-1 ||
+        getTopics().searchId (id)!=-1 ||
+        getJournals().searchId (id)!=-1 ||
         getCells().searchId (id)!=-1 ||
         getReferenceables().searchId (id)!=-1;
+}
+
+int CSMWorld::Data::count (RecordBase::State state) const
+{
+    return
+        count (state, mGlobals) +
+        count (state, mGmsts) +
+        count (state, mSkills) +
+        count (state, mClasses) +
+        count (state, mFactions) +
+        count (state, mRaces) +
+        count (state, mSounds) +
+        count (state, mScripts) +
+        count (state, mRegions) +
+        count (state, mBirthsigns) +
+        count (state, mSpells) +
+        count (state, mCells) +
+        count (state, mReferenceables);
+}
+
+void CSMWorld::Data::setDescription (const std::string& description)
+{
+    mDescription = description;
+}
+
+std::string CSMWorld::Data::getDescription() const
+{
+    return mDescription;
+}
+
+void CSMWorld::Data::setAuthor (const std::string& author)
+{
+    mAuthor = author;
+}
+
+std::string CSMWorld::Data::getAuthor() const
+{
+    return mAuthor;
+}
+
+std::vector<std::string> CSMWorld::Data::getIds (bool listDeleted) const
+{
+    std::vector<std::string> ids;
+
+    appendIds (ids, mGlobals, listDeleted);
+    appendIds (ids, mGmsts, listDeleted);
+    appendIds (ids, mClasses, listDeleted);
+    appendIds (ids, mFactions, listDeleted);
+    appendIds (ids, mRaces, listDeleted);
+    appendIds (ids, mSounds, listDeleted);
+    appendIds (ids, mScripts, listDeleted);
+    appendIds (ids, mRegions, listDeleted);
+    appendIds (ids, mBirthsigns, listDeleted);
+    appendIds (ids, mSpells, listDeleted);
+    appendIds (ids, mTopics, listDeleted);
+    appendIds (ids, mJournals, listDeleted);
+    appendIds (ids, mCells, listDeleted);
+    appendIds (ids, mReferenceables, listDeleted);
+
+    std::sort (ids.begin(), ids.end());
+
+    return ids;
+}
+
+void CSMWorld::Data::dataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight)
+{
+    if (topLeft.column()<=0)
+        emit idListChanged();
+}
+
+void CSMWorld::Data::rowsChanged (const QModelIndex& parent, int start, int end)
+{
+    emit idListChanged();
 }

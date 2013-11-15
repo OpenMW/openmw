@@ -813,8 +813,7 @@ void MwIniImporter::importArchives(multistrmap &cfg, const multistrmap &ini) con
 }
 
 void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini) const {
-    std::vector<std::string> esmFiles;
-    std::vector<std::string> espFiles;
+    std::vector<std::string> contentFiles;
     std::string baseGameFile("Game Files:GameFile");
     std::string gameFile("");
 
@@ -832,29 +831,19 @@ void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini) co
             std::string filetype(entry->substr(entry->length()-3));
             Misc::StringUtils::toLower(filetype);
 
-            if(filetype.compare("esm") == 0) {
-                esmFiles.push_back(*entry);
-            }
-            else if(filetype.compare("esp") == 0) {
-                espFiles.push_back(*entry);
+            if(filetype.compare("esm") == 0 || filetype.compare("esp") == 0) {
+                contentFiles.push_back(*entry);
             }
         }
 
         gameFile = "";
     }
 
-    cfg.erase("master");
-    cfg.insert( std::make_pair<std::string, std::vector<std::string> > ("master", std::vector<std::string>() ) );
+    cfg.erase("content");
+    cfg.insert( std::make_pair("content", std::vector<std::string>() ) );
 
-    for(std::vector<std::string>::const_iterator it=esmFiles.begin(); it!=esmFiles.end(); ++it) {
-        cfg["master"].push_back(*it);
-    }
-
-    cfg.erase("plugin");
-    cfg.insert( std::make_pair<std::string, std::vector<std::string> > ("plugin", std::vector<std::string>() ) );
-
-    for(std::vector<std::string>::const_iterator it=espFiles.begin(); it!=espFiles.end(); ++it) {
-        cfg["plugin"].push_back(*it);
+    for(std::vector<std::string>::const_iterator it=contentFiles.begin(); it!=contentFiles.end(); ++it) {
+        cfg["content"].push_back(*it);
     }
 }
 

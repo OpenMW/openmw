@@ -534,3 +534,13 @@ int CSMWorld::RefIdCollection::getAppendIndex (UniversalId::Type type) const
 {
     return mData.getAppendIndex (type);
 }
+
+std::vector<std::string> CSMWorld::RefIdCollection::getIds (bool listDeleted) const
+{
+    return mData.getIds (listDeleted);
+}
+
+void CSMWorld::RefIdCollection::save (int index, ESM::ESMWriter& writer) const
+{
+    mData.save (index, writer);
+}

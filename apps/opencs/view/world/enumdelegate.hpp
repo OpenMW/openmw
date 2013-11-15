@@ -54,6 +54,9 @@ namespace CSVWorld
             ///< \param names Array of char pointer with a 0-pointer as end mark
             /// \param allowNone Use value of -1 for "none selected" (empty string)
 
+            EnumDelegateFactory (const std::vector<std::string>& names, bool allowNone = false);
+            /// \param allowNone Use value of -1 for "none selected" (empty string)
+
             virtual CommandDelegate *makeDelegate (QUndoStack& undoStack, QObject *parent) const;
             ///< The ownership of the returned CommandDelegate is transferred to the caller.
 

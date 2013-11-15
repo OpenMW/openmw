@@ -12,6 +12,7 @@ Marc Zinnschlag (Zini) - Lead Programmer/Project Manager
 
 Adam Hogan (aurix)
 Aleksandar Jovanov
+Alex Haddad (rainChu)
 Alex McKibben (WeirdSexy)
 Alexander Nadeau (wareya)
 Alexander Olofsson (Ace)
@@ -47,6 +48,7 @@ Marc Bouvier (CramitDeFrog)
 Marcin Hulist (Gohan)
 Mark Siewert (mark76)
 Mateusz Kołaczek (PL_kolek)
+Michael Hogan (Xethik)
 Michael Mc Donnell
 Michael Papageorgiou (werdanith)
 Michał Bień (Glorf)
@@ -61,6 +63,7 @@ Roman Proskuryakov (humbug)
 Sandy Carter (bwrsandman)
 Sebastian Wick (swick)
 Sergey Shambir
+sir_herrbatka
 Sylvain Thesnieres (Garvek)
 Tom Mason (wheybags)
 Torben Leif Carrington (TorbenC)

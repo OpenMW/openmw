@@ -14,6 +14,8 @@
 
 #include "../mwbase/world.hpp"
 
+#include "contentloader.hpp"
+
 namespace Ogre
 {
     class Vector3;
@@ -41,6 +43,8 @@ namespace MWRender
     class Animation;
 }
 
+struct ContentLoader;
+
 namespace MWWorld
 {
     class WeatherManager;
@@ -67,6 +71,8 @@ namespace MWWorld
             Cells mCells;
 
             OEngine::Physic::PhysicEngine* mPhysEngine;
+
+            bool mGodMode;
 
             // not implemented
             World (const World&);
@@ -111,15 +117,25 @@ namespace MWWorld
 
             void ensureNeededRecords();
 
+            /**
+             * @brief loadContentFiles - Loads content files (esm,esp,omwgame,omwaddon)
+             * @param fileCollections- Container which holds content file names and their paths
+             * @param content - Container which holds content file names
+             * @param contentLoader -
+             */
+            void loadContentFiles(const Files::Collections& fileCollections,
+                const std::vector<std::string>& content, ContentLoader& contentLoader);
+
             int mPlayIntro;
 
             bool mTeleportEnabled;
+            bool mLevitationEnabled;
 
         public:
 
             World (OEngine::Render::OgreRenderer& renderer,
                 const Files::Collections& fileCollections,
-                const std::vector<std::string>& master, const std::vector<std::string>& plugins,
+                const std::vector<std::string>& contentFiles,
                 const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir,
                 ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap, int mActivationDistanceOverride);
 
@@ -353,6 +369,7 @@ namespace MWWorld
             virtual void processChangedSettings(const Settings::CategorySettingVector& settings);
 
             virtual bool isFlying(const MWWorld::Ptr &ptr) const;
+            virtual bool isSlowFalling(const MWWorld::Ptr &ptr) const;
             ///Is the head of the creature underwater?
             virtual bool isSubmerged(const MWWorld::Ptr &object) const;
             virtual bool isSwimming(const MWWorld::Ptr &object) const;
@@ -436,9 +453,19 @@ namespace MWWorld
             /// Returns true if teleport spell effects are allowed.
             virtual bool isTeleportingEnabled() const;
 
+            /// Enables or disables use of levitation spell effect.
+            virtual void enableLevitation(bool enable);
+
+            /// Returns true if levitation spell effect is allowed.
+            virtual bool isLevitationEnabled() const;
+
             virtual void setWerewolf(const MWWorld::Ptr& actor, bool werewolf);
 
             virtual void applyWerewolfAcrobatics(const MWWorld::Ptr& actor);
+
+            virtual bool getGodModeState();
+
+            virtual bool toggleGodMode();
     };
 }
 

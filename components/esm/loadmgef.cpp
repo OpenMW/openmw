@@ -6,6 +6,7 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace
 {
@@ -34,6 +35,7 @@ namespace
 
 namespace ESM
 {
+    unsigned int MagicEffect::sRecordId = REC_MGEF;
 
 void MagicEffect::load(ESMReader &esm)
 {
@@ -58,15 +60,11 @@ void MagicEffect::load(ESMReader &esm)
 
   mDescription = esm.getHNOString("DESC");
 }
-void MagicEffect::save(ESMWriter &esm)
+void MagicEffect::save(ESMWriter &esm) const
 {
     esm.writeHNT("INDX", mIndex);
 
-    mData.mFlags &= 0xe00;
     esm.writeHNT("MEDT", mData, 36);
-    if (mIndex>=0 && mIndex<NumberOfHardcodedFlags) {
-        mData.mFlags |= HardcodedFlags[mIndex];
-    }
 
     esm.writeHNOCString("ITEX", mIcon);
     esm.writeHNOCString("PTEX", mParticle);
@@ -74,12 +72,12 @@ void MagicEffect::save(ESMWriter &esm)
     esm.writeHNOCString("CSND", mCastSound);
     esm.writeHNOCString("HSND", mHitSound);
     esm.writeHNOCString("ASND", mAreaSound);
-    
+
     esm.writeHNOCString("CVFX", mCasting);
     esm.writeHNOCString("BVFX", mBolt);
     esm.writeHNOCString("HVFX", mHit);
     esm.writeHNOCString("AVFX", mArea);
-    
+
     esm.writeHNOString("DESC", mDescription);
 }
 
@@ -274,5 +272,23 @@ short MagicEffect::effectStringToId(const std::string &effect)
     return name->first;
 }
 
+MagicEffect::MagnitudeDisplayType MagicEffect::getMagnitudeDisplayType() const {
+    if ( mData.mFlags & NoMagnitude )
+        return MDT_None;
+    if ( mIndex == 84 )
+        return MDT_TimesInt;
+    if ( mIndex == 59 ||
+        ( mIndex >= 64 && mIndex <= 66) )
+        return MDT_Feet;
+    if ( mIndex == 118 || mIndex == 119 )
+        return MDT_Level;
+    if (   ( mIndex >= 28 && mIndex <= 36 )
+        || ( mIndex >= 90 && mIndex <= 99 )
+        ||   mIndex == 40 || mIndex == 47
+        ||   mIndex == 57 || mIndex == 68 )
+        return MDT_Percentage;
+
+    return MDT_Points;
+}
 
 }

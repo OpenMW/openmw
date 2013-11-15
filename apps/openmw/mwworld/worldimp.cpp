@@ -1,4 +1,11 @@
 #include "worldimp.hpp"
+#ifdef _WIN32
+#include <boost/tr1/tr1/unordered_map>
+#elif defined HAVE_UNORDERED_MAP
+#include <unordered_map>
+#else
+#include <tr1/unordered_map>
+#endif
 
 #include <OgreSceneNode.h>
 
@@ -30,6 +37,10 @@
 #include "cellfunctors.hpp"
 #include "containerstore.hpp"
 #include "inventorystore.hpp"
+
+#include "contentloader.hpp"
+#include "esmloader.hpp"
+#include "omwloader.hpp"
 
 using namespace Ogre;
 
@@ -80,6 +91,38 @@ namespace
 
 namespace MWWorld
 {
+    struct GameContentLoader : public ContentLoader
+    {
+        GameContentLoader(Loading::Listener& listener)
+          : ContentLoader(listener)
+        {
+        }
+
+        bool addLoader(const std::string& extension, ContentLoader* loader)
+        {
+            return mLoaders.insert(std::make_pair(extension, loader)).second;
+        }
+
+        void load(const boost::filesystem::path& filepath, int& index)
+        {
+            LoadersContainer::iterator it(mLoaders.find(filepath.extension().string()));
+            if (it != mLoaders.end())
+            {
+                it->second->load(filepath, index);
+            }
+            else
+            {
+              std::string msg("Cannot load file: ");
+              msg += filepath.string();
+              throw std::runtime_error(msg.c_str());
+            }
+        }
+
+        private:
+          typedef std::tr1::unordered_map<std::string, ContentLoader*> LoadersContainer;
+          LoadersContainer mLoaders;
+    };
+
     Ptr World::getPtrViaHandle (const std::string& handle, Ptr::CellStore& cell)
     {
         if (MWWorld::LiveCellRef<ESM::Activator> *ref =
@@ -163,14 +206,14 @@ namespace MWWorld
 
     World::World (OEngine::Render::OgreRenderer& renderer,
         const Files::Collections& fileCollections,
-        const std::vector<std::string>& master, const std::vector<std::string>& plugins,
+        const std::vector<std::string>& contentFiles,
         const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir,
         ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap, int mActivationDistanceOverride)
     : mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
       mSky (true), mCells (mStore, mEsm),
       mActivationDistanceOverride (mActivationDistanceOverride),
       mFallback(fallbackMap), mPlayIntro(0), mTeleportEnabled(true),
-      mFacedDistance(FLT_MAX)
+      mFacedDistance(FLT_MAX), mGodMode(false)
     {
         mPhysics = new PhysicsSystem(renderer);
         mPhysEngine = mPhysics->getEngine();
@@ -181,52 +224,30 @@ namespace MWWorld
 
         mWeatherManager = new MWWorld::WeatherManager(mRendering,&mFallback);
 
-        int idx = 0;
         // NOTE: We might need to reserve one more for the running game / save.
-        mEsm.resize(master.size() + plugins.size());
+        mEsm.resize(contentFiles.size());
         Loading::Listener* listener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         listener->loadingOn();
-        for (std::vector<std::string>::size_type i = 0; i < master.size(); i++, idx++)
-        {
-            boost::filesystem::path masterPath (fileCollections.getCollection (".esm").getPath (master[i]));
 
-            std::cout << "Loading ESM " << masterPath.string() << "\n";
-            listener->setLabel(masterPath.filename().string());
+        GameContentLoader gameContentLoader(*listener);
+        EsmLoader esmLoader(mStore, mEsm, encoder, *listener);
+        OmwLoader omwLoader(*listener);
 
-            // This parses the ESM file
-            ESM::ESMReader lEsm;
-            lEsm.setEncoder(encoder);
-            lEsm.setIndex(idx);
-            lEsm.setGlobalReaderList(&mEsm);
-            lEsm.open (masterPath.string());
-            mEsm[idx] = lEsm;
-            mStore.load (mEsm[idx], listener);
-        }
+        gameContentLoader.addLoader(".esm", &esmLoader);
+        gameContentLoader.addLoader(".esp", &esmLoader);
+        gameContentLoader.addLoader(".omwgame", &omwLoader);
+        gameContentLoader.addLoader(".omwaddon", &omwLoader);
 
-        for (std::vector<std::string>::size_type i = 0; i < plugins.size(); i++, idx++)
-        {
-            boost::filesystem::path pluginPath (fileCollections.getCollection (".esp").getPath (plugins[i]));
+        loadContentFiles(fileCollections, contentFiles, gameContentLoader);
 
-            std::cout << "Loading ESP " << pluginPath.string() << "\n";
-            listener->setLabel(pluginPath.filename().string());
-
-            // This parses the ESP file
-            ESM::ESMReader lEsm;
-            lEsm.setEncoder(encoder);
-            lEsm.setIndex(idx);
-            lEsm.setGlobalReaderList(&mEsm);
-            lEsm.open (pluginPath.string());
-            mEsm[idx] = lEsm;
-            mStore.load (mEsm[idx], listener);
-        }
         listener->loadingOff();
 
         // insert records that may not be present in all versions of MW
         if (mEsm[0].getFormat() == 0)
             ensureNeededRecords();
 
-        mStore.movePlayerRecord();
         mStore.setUp();
+        mStore.movePlayerRecord();
 
         mGlobalVariables = new Globals (mStore);
 
@@ -1160,7 +1181,7 @@ namespace MWWorld
 
     bool World::toggleCollisionMode()
     {
-        return mPhysics->toggleCollisionMode();;
+        return mPhysics->toggleCollisionMode();
     }
 
     bool World::toggleRenderMode (RenderMode mode)
@@ -1582,6 +1603,19 @@ namespace MWWorld
         return false;
     }
 
+    bool
+    World::isSlowFalling(const MWWorld::Ptr &ptr) const
+    {
+        if(!ptr.getClass().isActor())
+            return false;
+
+        const MWMechanics::CreatureStats &stats = ptr.getClass().getCreatureStats(ptr);
+        if(stats.getMagicEffects().get(MWMechanics::EffectKey(ESM::MagicEffect::SlowFall)).mMagnitude > 0)
+            return true;
+
+        return false;
+    }
+
     bool World::isSubmerged(const MWWorld::Ptr &object) const
     {
         float *fpos = object.getRefData().getPosition().pos;
@@ -1877,6 +1911,16 @@ namespace MWWorld
         return mTeleportEnabled;
     }
 
+    void World::enableLevitation(bool enable)
+    {
+        mLevitationEnabled = enable;
+    }
+
+    bool World::isLevitationEnabled() const
+    {
+        return mLevitationEnabled;
+    }
+
     void World::setWerewolf(const MWWorld::Ptr& actor, bool werewolf)
     {
         MWMechanics::NpcStats& npcStats = Class::get(actor).getNpcStats(actor);
@@ -1948,4 +1992,31 @@ namespace MWWorld
         stats.getSkill(ESM::Skill::Acrobatics).setModified(gmst.find("fWerewolfAcrobatics")->getFloat(), 0);
     }
 
+    bool World::getGodModeState()
+    {
+        return mGodMode;
+    }
+
+    bool World::toggleGodMode()
+    {
+        mGodMode = !mGodMode;
+
+        return mGodMode;
+    }
+
+    void World::loadContentFiles(const Files::Collections& fileCollections,
+        const std::vector<std::string>& content, ContentLoader& contentLoader)
+    {
+        std::vector<std::string>::const_iterator it(content.begin());
+        std::vector<std::string>::const_iterator end(content.end());
+        for (int idx = 0; it != end; ++it, ++idx)
+        {
+            boost::filesystem::path filename(*it);
+            const Files::MultiDirCollection& col = fileCollections.getCollection(filename.extension().string());
+            if (col.doesExist(*it))
+            {
+                contentLoader.load(col.getPath(*it), idx);
+            }
+        }
+    }
 }

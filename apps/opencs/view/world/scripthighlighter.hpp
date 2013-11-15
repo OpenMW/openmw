@@ -7,6 +7,7 @@
 
 #include <components/compiler/nullerrorhandler.hpp>
 #include <components/compiler/parser.hpp>
+#include <components/compiler/extensions.hpp>
 
 #include "../../model/world/scriptcontext.hpp"
 
@@ -23,12 +24,14 @@ namespace CSVWorld
                 Type_Name,
                 Type_Keyword,
                 Type_Special,
-                Type_Comment
+                Type_Comment,
+                Type_Id
             };
 
         private:
 
             Compiler::NullErrorHandler mErrorHandler;
+            Compiler::Extensions mExtensions;
             CSMWorld::ScriptContext mContext;
             std::map<Type, QTextCharFormat> mScheme;
 
@@ -71,9 +74,11 @@ namespace CSVWorld
 
         public:
 
-            ScriptHighlighter (QTextDocument *parent);
+            ScriptHighlighter (const CSMWorld::Data& data, QTextDocument *parent);
 
             virtual void highlightBlock (const QString& text);
+
+            void invalidateIds();
     };
 }
 

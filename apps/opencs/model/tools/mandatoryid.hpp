@@ -6,7 +6,7 @@
 
 #include "../world/universalid.hpp"
 
-#include "stage.hpp"
+#include "../doc/stage.hpp"
 
 namespace CSMWorld
 {
@@ -16,7 +16,7 @@ namespace CSMWorld
 namespace CSMTools
 {
     /// \brief Verify stage: make sure that records with specific IDs exist.
-    class MandatoryIdStage : public Stage
+    class MandatoryIdStage : public CSMDoc::Stage
     {
             const CSMWorld::CollectionBase& mIdCollection;
             CSMWorld::UniversalId mCollectionId;
