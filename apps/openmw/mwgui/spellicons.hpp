@@ -2,6 +2,7 @@
 #define MWGUI_SPELLICONS_H
 
 #include <string>
+#include <vector>
 
 #include "../mwmechanics/magiceffects.hpp"
 
@@ -34,14 +35,23 @@ namespace MWGui
         bool mPermanent; // the effect is permanent
     };
 
+    class EffectSourceVisitor : public MWMechanics::EffectSourceVisitor
+    {
+    public:
+        bool mIsPermanent;
+
+        std::map <int, std::vector<MagicEffectInfo> > mEffectSources;
+
+        virtual void visit (const ESM::ENAMstruct& enam,
+                                 const std::string& sourceName, float magnitude, float remainingTime = -1);
+    };
+
     class SpellIcons
     {
     public:
         void updateWidgets(MyGUI::Widget* parent, bool adjustSize);
 
     private:
-        std::string getSpellDisplayName (const std::string& id);
-        ESM::EffectList getSpellEffectList (const std::string& id);
 
         std::map<int, MyGUI::ImageBox*> mWidgetMap;
     };

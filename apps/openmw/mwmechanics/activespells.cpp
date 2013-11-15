@@ -164,12 +164,31 @@ namespace MWMechanics
         throw std::runtime_error ("ID " + id + " can not produce lasting effects");
     }
 
+    std::string ActiveSpells::getSpellDisplayName (const std::string& id) const
+    {
+        if (const ESM::Spell *spell =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search (id))
+            return spell->mName;
+
+        if (const ESM::Potion *potion =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Potion>().search (id))
+            return potion->mName;
+
+        if (const ESM::Ingredient *ingredient =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Ingredient>().search (id))
+            return ingredient->mName;
+
+        throw std::runtime_error ("ID " + id + " has no display name");
+    }
+
     ActiveSpells::ActiveSpells()
     : mSpellsChanged (false), mLastUpdate (MWBase::Environment::get().getWorld()->getTimeStamp())
     {}
 
-    bool ActiveSpells::addSpell (const std::string& id, const MWWorld::Ptr& actor, ESM::RangeType range, const std::string& name)
+    bool ActiveSpells::addSpell (const std::string& id, const MWWorld::Ptr& actor, ESM::RangeType range, const std::string& name, int effectIndex)
     {
+        const CreatureStats& creatureStats = MWWorld::Class::get (actor).getCreatureStats (actor);
+
         std::pair<ESM::EffectList, std::pair<bool, bool> > effects = getEffectList (id);
         bool stacks = effects.second.second;
 
@@ -195,7 +214,6 @@ namespace MWMechanics
         if (effects.second.first)
         {
             // ingredient -> special treatment required.
-            const CreatureStats& creatureStats = MWWorld::Class::get (actor).getCreatureStats (actor);
             const NpcStats& npcStats = MWWorld::Class::get (actor).getNpcStats (actor);
         
             float x =
@@ -219,6 +237,26 @@ namespace MWMechanics
             mSpells.insert (std::make_pair (id, params));
         else
             iter->second = params;
+
+
+
+        /*
+        for (int i=0; i<effects.first.mList.size(); ++i)
+        {
+            if (iter->mRange != range)
+            {
+                params.mDisabled.push_back(true);
+                continue;
+            }
+
+            bool disabled = false;
+
+            int reflect = creatureStats.getMagicEffects().get(ESM::MagicEffect::Reflect).mMagnitude;
+            int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+            if (roll < reflect)
+                disabled = true;
+        }
+        */
 
         // Play sounds & particles
         bool first=true;
@@ -337,5 +375,48 @@ namespace MWMechanics
     const ActiveSpells::TContainer& ActiveSpells::getActiveSpells() const
     {
         return mSpells;
+    }
+
+    void ActiveSpells::visitEffectSources(EffectSourceVisitor &visitor) const
+    {
+        for (TContainer::const_iterator it = begin(); it != end(); ++it)
+        {
+            const ESM::EffectList& list = getEffectList(it->first).first;
+
+            float timeScale = MWBase::Environment::get().getWorld()->getTimeScaleFactor();
+
+            int i=0;
+            for (std::vector<ESM::ENAMstruct>::const_iterator effectIt = list.mList.begin();
+                 effectIt != list.mList.end(); ++effectIt, ++i)
+            {
+                if (effectIt->mRange != it->second.mRange)
+                    continue;
+
+                std::string name;
+                if (it->second.mName.empty())
+                    name = getSpellDisplayName(it->first);
+                else
+                    name = it->second.mName;
+
+                float remainingTime = effectIt->mDuration +
+                        (it->second.mTimeStamp - MWBase::Environment::get().getWorld()->getTimeStamp())*3600/timeScale;
+                float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * it->second.mRandom[i];
+
+                // hack for ingredients
+                if (MWBase::Environment::get().getWorld()->getStore().get<ESM::Ingredient>().search (it->first))
+                {
+                    const ESM::MagicEffect *magicEffect =
+                        MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
+                        effectIt->mEffectID);
+
+                    remainingTime = effectIt->mDuration * it->second.mRandom[i] +
+                            (it->second.mTimeStamp - MWBase::Environment::get().getWorld()->getTimeStamp())*3600/timeScale;
+
+                    magnitude = static_cast<int> (0.05*it->second.mRandom[i] / (0.1 * magicEffect->mData.mBaseCost));
+                }
+
+                visitor.visit(*effectIt, name, magnitude, remainingTime);
+            }
+        }
     }
 }

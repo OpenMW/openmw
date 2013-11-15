@@ -6,6 +6,8 @@
 
 #include "../mwworld/ptr.hpp"
 
+#include "magiceffects.hpp"
+
 namespace ESM
 {
     struct Spell;
@@ -59,6 +61,8 @@ namespace MWMechanics
             bool hasCommonDisease() const;
 
             bool hasBlightDisease() const;
+
+            void visitEffectSources (MWMechanics::EffectSourceVisitor& visitor) const;
     };
 }
 

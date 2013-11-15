@@ -35,6 +35,10 @@ namespace MWMechanics
         // Random factor for each effect
         std::vector<float> mRandom;
 
+        // Effect magnitude multiplier. Use 0 to completely disable the effect
+        // (if it was resisted, reflected or absorbed). Use (0,1) for partially resisted.
+        std::vector<bool> mMultiplier;
+
         // Display name, we need this for enchantments, which don't have a name - so you need to supply the
         // name of the item with the enchantment to addSpell
         std::string mName;
@@ -65,17 +69,30 @@ namespace MWMechanics
             std::pair<ESM::EffectList, std::pair<bool, bool> > getEffectList (const std::string& id) const;
             ///< @return (EffectList, (isIngredient, stacks))
 
+            double timeToExpire (const TIterator& iterator) const;
+            ///< Returns time (in in-game hours) until the spell pointed to by \a iterator
+            /// expires.
+
+            const TContainer& getActiveSpells() const;
+
+            TIterator begin() const;
+
+            TIterator end() const;
+
+            std::string getSpellDisplayName (const std::string& id) const;
+
         public:
 
             ActiveSpells();
 
-            bool addSpell (const std::string& id, const MWWorld::Ptr& actor, ESM::RangeType range = ESM::RT_Self, const std::string& name = "");
+            bool addSpell (const std::string& id, const MWWorld::Ptr& actor, ESM::RangeType range = ESM::RT_Self, const std::string& name = "", int effectIndex = -1);
             ///< Overwrites an existing spell with the same ID. If the spell does not have any
             /// non-instant effects, it is ignored.
             /// @param id
             /// @param actor
             /// @param range Only effects with range type \a range will be applied
             /// @param name Display name for enchantments, since they don't have a name in their record
+            /// @param effectIndex Only apply one specific effect - useful for reflecting spells, since each effect is reflected individually
             ///
             /// \return Has the spell been added?
 
@@ -86,15 +103,8 @@ namespace MWMechanics
 
             const MagicEffects& getMagicEffects() const;
 
-            const TContainer& getActiveSpells() const;
+            void visitEffectSources (MWMechanics::EffectSourceVisitor& visitor) const;
 
-            TIterator begin() const;
-
-            TIterator end() const;
-
-            double timeToExpire (const TIterator& iterator) const;
-            ///< Returns time (in in-game hours) until the spell pointed to by \a iterator
-            /// expires.
     };
 }
 

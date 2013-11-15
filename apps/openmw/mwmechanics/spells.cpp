@@ -117,4 +117,27 @@ namespace MWMechanics
 
         return false;
     }
+
+    void Spells::visitEffectSources(EffectSourceVisitor &visitor) const
+    {
+        for (TIterator it = begin(); it != end(); ++it)
+        {
+            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(it->first);
+
+            // these are the spell types that are permanently in effect
+            if (!(spell->mData.mType == ESM::Spell::ST_Ability)
+                    && !(spell->mData.mType == ESM::Spell::ST_Disease)
+                    && !(spell->mData.mType == ESM::Spell::ST_Curse)
+                    && !(spell->mData.mType == ESM::Spell::ST_Blight))
+                continue;
+            const ESM::EffectList& list = spell->mEffects;
+            int i=0;
+            for (std::vector<ESM::ENAMstruct>::const_iterator effectIt = list.mList.begin();
+                 effectIt != list.mList.end(); ++effectIt, ++i)
+            {
+                float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * it->second[i];
+                visitor.visit(*effectIt, spell->mName, magnitude);
+            }
+        }
+    }
 }
