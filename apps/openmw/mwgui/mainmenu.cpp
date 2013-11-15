@@ -35,8 +35,8 @@ namespace MWGui
         std::vector<std::string> buttons;
         buttons.push_back("return");
         buttons.push_back("newgame");
-        //buttons.push_back("loadgame");
-        //buttons.push_back("savegame");
+        buttons.push_back("loadgame");
+        buttons.push_back("savegame");
         buttons.push_back("options");
         //buttons.push_back("credits");
         buttons.push_back("exitgame");
