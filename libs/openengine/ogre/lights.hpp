@@ -3,6 +3,7 @@
 
 #include <OgreController.h>
 #include <OgreColourValue.h>
+#include <OgreMath.h>
 
 /*
  * Controller classes to handle pulsing and flicker lights
@@ -30,7 +31,14 @@ namespace Render {
         static Ogre::Real flickerFrequency(Ogre::Real phase);
 
     public:
-        LightFunction(LightType type);
+        // MSVC needs the constructor for a class inheriting a template to be defined in header
+        LightFunction(LightType type)
+          : ControllerFunction<Ogre::Real>(true)
+          , mType(type)
+          , mPhase(Ogre::Math::RangeRandom(-500.0f, +500.0f))
+          , mDirection(1.0f)
+        {
+        }
         virtual Ogre::Real calculate(Ogre::Real value);
     };
 
@@ -40,7 +48,12 @@ namespace Render {
         Ogre::ColourValue mColor;
 
     public:
-        LightValue(Ogre::Light *light, const Ogre::ColourValue &color);
+        // MSVC needs the constructor for a class inheriting a template to be defined in header
+        LightValue(Ogre::Light *light, const Ogre::ColourValue &color)
+          : mTarget(light)
+          , mColor(color)
+        {
+        }
 
         virtual Ogre::Real getValue() const;
         virtual void setValue(Ogre::Real value);

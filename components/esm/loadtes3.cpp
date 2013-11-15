@@ -4,6 +4,7 @@
 #include "esmcommon.hpp"
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 void ESM::Header::blank()
 {
@@ -13,6 +14,7 @@ void ESM::Header::blank()
     mData.desc.assign ("");
     mData.records = 0;
     mFormat = CurrentFormat;
+    mMaster.clear();
 }
 
 void ESM::Header::load (ESMReader &esm)

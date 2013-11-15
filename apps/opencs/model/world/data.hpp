@@ -6,6 +6,9 @@
 
 #include <boost/filesystem/path.hpp>
 
+#include <QObject>
+#include <QModelIndex>
+
 #include <components/esm/loadglob.hpp>
 #include <components/esm/loadgmst.hpp>
 #include <components/esm/loadskil.hpp>
@@ -17,6 +20,7 @@
 #include <components/esm/loadregn.hpp>
 #include <components/esm/loadbsgn.hpp>
 #include <components/esm/loadspel.hpp>
+#include <components/esm/loaddial.hpp>
 
 #include "../filter/filter.hpp"
 
@@ -30,8 +34,10 @@ class QAbstractItemModel;
 
 namespace CSMWorld
 {
-    class Data
+    class Data : public QObject
     {
+            Q_OBJECT
+
             IdCollection<ESM::Global> mGlobals;
             IdCollection<ESM::GameSetting> mGmsts;
             IdCollection<ESM::Skill> mSkills;
@@ -43,25 +49,35 @@ namespace CSMWorld
             IdCollection<ESM::Region> mRegions;
             IdCollection<ESM::BirthSign> mBirthsigns;
             IdCollection<ESM::Spell> mSpells;
+            IdCollection<ESM::Dialogue> mTopics;
+            IdCollection<ESM::Dialogue> mJournals;
             IdCollection<Cell> mCells;
             RefIdCollection mReferenceables;
             RefCollection mRefs;
             IdCollection<CSMFilter::Filter> mFilters;
             std::vector<QAbstractItemModel *> mModels;
             std::map<UniversalId::Type, QAbstractItemModel *> mModelIndex;
+            std::string mAuthor;
+            std::string mDescription;
 
             // not implemented
             Data (const Data&);
             Data& operator= (const Data&);
 
             void addModel (QAbstractItemModel *model, UniversalId::Type type1,
-                UniversalId::Type type2 = UniversalId::Type_None);
+                UniversalId::Type type2 = UniversalId::Type_None, bool update = true);
+
+            static void appendIds (std::vector<std::string>& ids, const CollectionBase& collection,
+                bool listDeleted);
+            ///< Append all IDs from collection to \a ids.
+
+            static int count (RecordBase::State state, const CollectionBase& collection);
 
         public:
 
             Data();
 
-            ~Data();
+            virtual ~Data();
 
             const IdCollection<ESM::Global>& getGlobals() const;
 
@@ -107,6 +123,14 @@ namespace CSMWorld
 
             IdCollection<ESM::Spell>& getSpells();
 
+            const IdCollection<ESM::Dialogue>& getTopics() const;
+
+            IdCollection<ESM::Dialogue>& getTopics();
+
+            const IdCollection<ESM::Dialogue>& getJournals() const;
+
+            IdCollection<ESM::Dialogue>& getJournals();
+
             const IdCollection<Cell>& getCells() const;
 
             IdCollection<Cell>& getCells();
@@ -132,10 +156,38 @@ namespace CSMWorld
             void merge();
             ///< Merge modified into base.
 
-            void loadFile (const boost::filesystem::path& path, bool base);
+            void loadFile (const boost::filesystem::path& path, bool base, bool project);
             ///< Merging content of a file into base or modified.
+            ///
+            /// \param project load project file instead of content file
 
             bool hasId (const std::string& id) const;
+
+            std::vector<std::string> getIds (bool listDeleted = true) const;
+            ///< Return a sorted collection of all IDs that are not internal to the editor.
+            ///
+            /// \param listDeleted include deleted record in the list
+
+            int count (RecordBase::State state) const;
+            ///< Return number of top-level records with the given \a state.
+
+            void setDescription (const std::string& description);
+
+            std::string getDescription() const;
+
+            void setAuthor (const std::string& author);
+
+            std::string getAuthor() const;
+
+        signals:
+
+            void idListChanged();
+
+        private slots:
+
+            void dataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
+
+            void rowsChanged (const QModelIndex& parent, int start, int end);
     };
 }
 

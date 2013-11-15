@@ -18,7 +18,12 @@ int CSMTools::SoundCheckStage::setup()
 
 void CSMTools::SoundCheckStage::perform (int stage, std::vector<std::string>& messages)
 {
-    const ESM::Sound& sound = mSounds.getRecord (stage).get();
+    const CSMWorld::Record<ESM::Sound>& record = mSounds.getRecord (stage);
+
+    if (record.isDeleted())
+        return;
+
+    const ESM::Sound& sound = record.get();
 
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Sound, sound.mId);
 

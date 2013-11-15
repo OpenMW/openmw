@@ -9,7 +9,12 @@
 
 void CSMTools::RaceCheckStage::performPerRecord (int stage, std::vector<std::string>& messages)
 {
-    const ESM::Race& race = mRaces.getRecord (stage).get();
+    const CSMWorld::Record<ESM::Race>& record = mRaces.getRecord (stage);
+
+    if (record.isDeleted())
+        return;
+
+    const ESM::Race& race = record.get();
 
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Race, race.mId);
 

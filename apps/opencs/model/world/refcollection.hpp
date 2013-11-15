@@ -16,8 +16,10 @@ namespace CSMWorld
             int mNextId;
 
         public:
-
-            RefCollection (Collection<Cell>& cells);
+            // MSVC needs the constructor for a class inheriting a template to be defined in header
+            RefCollection (Collection<Cell>& cells)
+              : mCells (cells), mNextId (0)
+            {}
 
             void load (ESM::ESMReader& reader, int cellIndex, bool base);
             ///< Load a sequence of references.

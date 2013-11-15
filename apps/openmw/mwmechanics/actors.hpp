@@ -44,6 +44,8 @@ namespace MWMechanics
 
             void updateDrowning (const MWWorld::Ptr& ptr, float duration);
 
+            void updateEquippedLight (const MWWorld::Ptr& ptr, float duration);
+
         public:
 
             Actors();

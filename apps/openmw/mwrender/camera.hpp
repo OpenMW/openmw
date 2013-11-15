@@ -79,6 +79,12 @@ namespace MWRender
 
         void togglePreviewMode(bool enable);
 
+        /// \brief Lowers the camera for sneak.
+        /// As animation is tied to the camera, this needs
+        /// to be set each frame after the animation is
+        /// applied.
+        void setSneakOffset();
+
         bool isFirstPerson() const
         { return !(mVanity.enabled || mPreviewMode || !mFirstPersonView); }
 

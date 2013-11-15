@@ -7,10 +7,9 @@
 #include "../world/columns.hpp"
 #include "../world/idtable.hpp"
 
-CSMFilter::ValueNode::ValueNode (int columnId,
-    double lower, double upper, bool min, bool max)
-: mColumnId (columnId), mLower (lower), mUpper (upper), mMin (min), mMax (max)
-{}
+CSMFilter::ValueNode::ValueNode (int columnId, Type lowerType, Type upperType,
+    double lower, double upper)
+: mColumnId (columnId), mLowerType (lowerType), mUpperType (upperType), mLower (lower), mUpper (upper){}
 
 bool CSMFilter::ValueNode::test (const CSMWorld::IdTable& table, int row,
     const std::map<int, int>& columns) const
@@ -18,7 +17,7 @@ bool CSMFilter::ValueNode::test (const CSMWorld::IdTable& table, int row,
     const std::map<int, int>::const_iterator iter = columns.find (mColumnId);
 
     if (iter==columns.end())
-        throw std::logic_error ("invalid column in test value test");
+        throw std::logic_error ("invalid column in value node test");
 
     if (iter->second==-1)
         return true;
@@ -28,15 +27,26 @@ bool CSMFilter::ValueNode::test (const CSMWorld::IdTable& table, int row,
     QVariant data = table.data (index);
 
     if (data.type()!=QVariant::Double && data.type()!=QVariant::Bool && data.type()!=QVariant::Int &&
-        data.type()!=QVariant::UInt)
+        data.type()!=QVariant::UInt && data.type()!=static_cast<QVariant::Type> (QMetaType::Float))
         return false;
 
     double value = data.toDouble();
 
-    if (mLower==mUpper && mMin && mMax)
-        return value==mLower;
+    switch (mLowerType)
+    {
+        case Type_Closed: if (value<mLower) return false; break;
+        case Type_Open: if (value<=mLower) return false; break;
+        case Type_Infinite: break;
+    }
 
-    return (mMin ? value>=mLower : value>mLower) && (mMax ? value<=mUpper : value<mUpper);
+    switch (mUpperType)
+    {
+        case Type_Closed: if (value>mUpper) return false; break;
+        case Type_Open: if (value>=mUpper) return false; break;
+        case Type_Infinite: break;
+    }
+
+    return true;
 }
 
 std::vector<int> CSMFilter::ValueNode::getReferencedColumns() const
@@ -58,12 +68,28 @@ std::string CSMFilter::ValueNode::toString (bool numericColumns) const
             << CSMWorld::Columns::getName (static_cast<CSMWorld::Columns::ColumnId> (mColumnId))
             << "\"";
 
-    stream << ", \"";
+    stream << ", ";
 
-    if (mLower==mUpper && mMin && mMax)
+    if (mLower==mUpper && mLowerType!=Type_Infinite && mUpperType!=Type_Infinite)
         stream << mLower;
     else
-        stream << (mMin ? "[" : "(") << mLower << ", " << mUpper << (mMax ? "]" : ")");
+    {
+        switch (mLowerType)
+        {
+            case Type_Closed: stream << "[" << mLower; break;
+            case Type_Open: stream << "(" << mLower; break;
+            case Type_Infinite: stream << "("; break;
+        }
+
+        stream << ", ";
+
+        switch (mUpperType)
+        {
+            case Type_Closed: stream << mUpper << "]"; break;
+            case Type_Open: stream << mUpper << ")"; break;
+            case Type_Infinite: stream << ")"; break;
+        }
+    }
 
     stream << ")";
 

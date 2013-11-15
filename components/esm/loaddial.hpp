@@ -19,6 +19,8 @@ class ESMWriter;
 
 struct Dialogue
 {
+    static unsigned int sRecordId;
+
     enum Type
     {
         Topic = 0,
@@ -34,7 +36,10 @@ struct Dialogue
     std::vector<DialInfo> mInfo;
 
     void load(ESMReader &esm);
-    void save(ESMWriter &esm);
+    void save(ESMWriter &esm) const;
+
+    void blank();
+    ///< Set record to default state (does not touch the ID and does not change the type).
 };
 }
 #endif

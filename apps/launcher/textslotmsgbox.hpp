@@ -3,11 +3,13 @@
 
 #include <QMessageBox>
 
-class TextSlotMsgBox : public QMessageBox
+namespace Launcher
 {
-Q_OBJECT
-    public slots:
-        void setTextSlot(const QString& string);
-};
-
+    class TextSlotMsgBox : public QMessageBox
+    {
+    Q_OBJECT
+        public slots:
+            void setTextSlot(const QString& string);
+    };
+}
 #endif

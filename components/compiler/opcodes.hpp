@@ -221,6 +221,9 @@ namespace Compiler
         const int opcodeEnableTeleporting = 0x2000216;
         const int opcodeShowVars = 0x200021d;
         const int opcodeShowVarsExplicit = 0x200021e;
+        const int opcodeToggleGodMode = 0x200021f;
+        const int opcodeDisableLevitation = 0x2000220;
+        const int opcodeEnableLevitation = 0x2000221;
     }
 
     namespace Sky

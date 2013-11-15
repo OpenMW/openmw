@@ -6,6 +6,11 @@
 
 #include "../../model/filter/filter.hpp"
 
+#include "../../model/world/data.hpp"
+#include "../../model/world/commands.hpp"
+#include "../../model/world/columns.hpp"
+#include "../../model/world/idtable.hpp"
+
 std::string CSVFilter::FilterCreator::getNamespace() const
 {
     switch (mScope->currentIndex())
@@ -28,6 +33,15 @@ std::string CSVFilter::FilterCreator::getId() const
     return getNamespace() + GenericCreator::getId();
 }
 
+void CSVFilter::FilterCreator::configureCreateCommand (CSMWorld::CreateCommand& command) const
+{
+    int index =
+        dynamic_cast<CSMWorld::IdTable&> (*getData().getTableModel (getCollectionId())).
+        findColumnIndex (CSMWorld::Columns::ColumnId_Scope);
+
+    command.addValue (index, mScope->currentIndex());
+}
+
 CSVFilter::FilterCreator::FilterCreator (CSMWorld::Data& data, QUndoStack& undoStack,
     const CSMWorld::UniversalId& id)
 : GenericCreator (data, undoStack, id)
@@ -39,7 +53,7 @@ CSVFilter::FilterCreator::FilterCreator (CSMWorld::Data& data, QUndoStack& undoS
 
     mScope->addItem ("Project");
     mScope->addItem ("Session");
-    /// \ŧodo re-enable for OpenMW 1.1
+    /// \todo re-enable for OpenMW 1.1
     // mScope->addItem ("Content");
 
     connect (mScope, SIGNAL (currentIndexChanged (int)), this, SLOT (setScope (int)));

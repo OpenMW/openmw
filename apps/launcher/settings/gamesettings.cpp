@@ -9,6 +9,7 @@
 #include <components/files/configurationmanager.hpp>
 
 #include <boost/version.hpp>
+
 /**
  * Workaround for problems with whitespaces in paths in older versions of Boost library
  */
@@ -26,16 +27,16 @@ namespace boost
 #endif /* (BOOST_VERSION <= 104600) */
 
 
-GameSettings::GameSettings(Files::ConfigurationManager &cfg)
+Launcher::GameSettings::GameSettings(Files::ConfigurationManager &cfg)
     : mCfgMgr(cfg)
 {
 }
 
-GameSettings::~GameSettings()
+Launcher::GameSettings::~GameSettings()
 {
 }
 
-void GameSettings::validatePaths()
+void Launcher::GameSettings::validatePaths()
 {
     if (mSettings.isEmpty() || !mDataDirs.isEmpty())
         return; // Don't re-validate paths if they are already parsed
@@ -81,14 +82,14 @@ void GameSettings::validatePaths()
     }
 }
 
-QStringList GameSettings::values(const QString &key, const QStringList &defaultValues)
+QStringList Launcher::GameSettings::values(const QString &key, const QStringList &defaultValues)
 {
     if (!mSettings.values(key).isEmpty())
         return mSettings.values(key);
     return defaultValues;
 }
 
-bool GameSettings::readFile(QTextStream &stream)
+bool Launcher::GameSettings::readFile(QTextStream &stream)
 {
     QMap<QString, QString> cache;
     QRegExp keyRe("^([^=]+)\\s*=\\s*(.+)$");
@@ -130,7 +131,7 @@ bool GameSettings::readFile(QTextStream &stream)
     return true;
 }
 
-bool GameSettings::writeFile(QTextStream &stream)
+bool Launcher::GameSettings::writeFile(QTextStream &stream)
 {
     // Iterate in reverse order to preserve insertion order
     QMapIterator<QString, QString> i(mSettings);
@@ -139,13 +140,13 @@ bool GameSettings::writeFile(QTextStream &stream)
     while (i.hasPrevious()) {
         i.previous();
 
-        if (i.key() == QLatin1String("master") || i.key() == QLatin1String("plugin"))
+        if (i.key() == QLatin1String("content"))
             continue;
 
         // Quote paths with spaces
         if (i.key() == QLatin1String("data")
-                || i.key() == QLatin1String("data-local")
-                || i.key() == QLatin1String("resources"))
+            || i.key() == QLatin1String("data-local")
+            || i.key() == QLatin1String("resources"))
         {
             if (i.value().contains(QChar(' ')))
             {
@@ -161,15 +162,24 @@ bool GameSettings::writeFile(QTextStream &stream)
 
     }
 
-    QStringList masters = mSettings.values(QString("master"));
-    for (int i = masters.count(); i--;) {
-        stream << "master=" << masters.at(i) << "\n";
-    }
-
-    QStringList plugins = mSettings.values(QString("plugin"));
-    for (int i = plugins.count(); i--;) {
-        stream << "plugin=" << plugins.at(i) << "\n";
+    QStringList content = mSettings.values(QString("content"));
+    for (int i = content.count(); i--;) {
+        stream << "content=" << content.at(i) << "\n";
     }
 
     return true;
+}
+
+bool Launcher::GameSettings::hasMaster()
+{
+  bool result = false;
+  QStringList content = mSettings.values(QString("content"));
+  for (int i = 0; i < content.count(); ++i) {
+    if (content.at(i).contains(".omwgame") || content.at(i).contains(".esm")) {
+        result = true;
+        break;
+    }
+  }
+
+  return result;
 }

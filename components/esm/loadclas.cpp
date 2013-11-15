@@ -4,9 +4,11 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int Class::sRecordId = REC_CLAS;
 
 const Class::Specialization Class::sSpecializationIds[3] = {
   Class::Combat,
@@ -47,7 +49,7 @@ void Class::load(ESMReader &esm)
 
     mDescription = esm.getHNOString("DESC");
 }
-void Class::save(ESMWriter &esm)
+void Class::save(ESMWriter &esm) const
 {
     esm.writeHNCString("FNAM", mName);
     esm.writeHNT("CLDT", mData, 60);

@@ -2,9 +2,11 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int SoundGenerator::sRecordId = REC_SNDG;
 
 void SoundGenerator::load(ESMReader &esm)
 {
@@ -13,7 +15,7 @@ void SoundGenerator::load(ESMReader &esm)
   mCreature = esm.getHNOString("CNAM");
   mSound = esm.getHNOString("SNAM");
 }
-void SoundGenerator::save(ESMWriter &esm)
+void SoundGenerator::save(ESMWriter &esm) const
 {
     esm.writeHNT("DATA", mType, 4);
     esm.writeHNOCString("CNAM", mCreature);

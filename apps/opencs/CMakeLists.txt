@@ -5,11 +5,11 @@ opencs_units (. editor)
 set (CMAKE_BUILD_TYPE DEBUG)
 
 opencs_units (model/doc
-    document
+    document operation saving
     )
 
 opencs_units_noqt (model/doc
-    documentmanager
+    documentmanager stage savingstate savingstages
     )
 
 opencs_hdrs_noqt (model/doc
@@ -18,12 +18,12 @@ opencs_hdrs_noqt (model/doc
 
 
 opencs_units (model/world
-    idtable idtableproxymodel regionmap
+    idtable idtableproxymodel regionmap data
     )
 
 
 opencs_units_noqt (model/world
-    universalid data record commands columnbase scriptcontext cell refidcollection
+    universalid record commands columnbase scriptcontext cell refidcollection
     refidadapter refiddata refidadapterimp ref collectionbase refcollection columns
     )
 
@@ -33,17 +33,18 @@ opencs_hdrs_noqt (model/world
 
 
 opencs_units (model/tools
-    tools operation reportmodel
+    tools reportmodel
     )
 
 opencs_units_noqt (model/tools
-    stage verifier mandatoryid skillcheck classcheck factioncheck racecheck soundcheck regioncheck
+    mandatoryid skillcheck classcheck factioncheck racecheck soundcheck regioncheck
     birthsigncheck spellcheck
     )
 
 
 opencs_units (view/doc
-    viewmanager view operations operation subview startup filedialog
+    viewmanager view operations operation subview startup filedialog newgame
+    filewidget adjusterwidget
     )
 
 
@@ -58,13 +59,14 @@ opencs_hdrs_noqt (view/doc
 
 opencs_units (view/world
     table tablesubview scriptsubview util regionmapsubview tablebottombox creator genericcreator
-    cellcreator referenceablecreator referencecreator
+    cellcreator referenceablecreator referencecreator scenesubview scenetoolbar scenetool
+    scenetoolmode
     )
 
 opencs_units_noqt (view/world
     dialoguesubview subviews
-    enumdelegate vartypedelegate recordstatusdelegate refidtypedelegate datadisplaydelegate
-    scripthighlighter idvalidator
+    enumdelegate vartypedelegate recordstatusdelegate idtypedelegate datadisplaydelegate
+    scripthighlighter idvalidator dialoguecreator
     )
 
 
@@ -122,11 +124,13 @@ opencs_units (view/filter
 set (OPENCS_US
     )
 
-set (OPENCS_RES ../../files/opencs/resources.qrc
-                ../../files/launcher/launcher.qrc
+set (OPENCS_RES ${CMAKE_SOURCE_DIR}/files/opencs/resources.qrc
+                ${CMAKE_SOURCE_DIR}/files/launcher/launcher.qrc
     )
 
-set (OPENCS_UI ../../files/ui/datafilespage.ui
+set (OPENCS_UI
+    ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
+    ${CMAKE_SOURCE_DIR}/files/ui/filedialog.ui
     )
 
 source_group (opencs FILES ${OPENCS_SRC} ${OPENCS_HDR})
@@ -144,15 +148,46 @@ qt4_add_resources(OPENCS_RES_SRC ${OPENCS_RES})
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
+if(APPLE)
+    set (OPENCS_MAC_ICON ${CMAKE_SOURCE_DIR}/files/mac/opencs.icns)
+else()
+    set (OPENCS_MAC_ICON "")
+endif(APPLE)
+
 add_executable(opencs
+    MACOSX_BUNDLE
     ${OPENCS_SRC}
     ${OPENCS_UI_HDR}
     ${OPENCS_MOC_SRC}
     ${OPENCS_RES_SRC}
+    ${OPENCS_MAC_ICON}
 )
+
+if(APPLE)
+    set_target_properties(opencs PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${OpenMW_BINARY_DIR}"
+        OUTPUT_NAME "OpenCS"
+        MACOSX_BUNDLE_ICON_FILE "opencs.icns"
+        MACOSX_BUNDLE_BUNDLE_NAME "OpenCS"
+        MACOSX_BUNDLE_GUI_IDENTIFIER "org.openmw.opencs"
+        MACOSX_BUNDLE_SHORT_VERSION_STRING ${OPENMW_VERSION}
+        MACOSX_BUNDLE_BUNDLE_VERSION ${OPENMW_VERSION}
+        )
+
+    set_source_files_properties(${OPENCS_MAC_ICON} PROPERTIES
+        MACOSX_PACKAGE_LOCATION Resources)
+endif(APPLE)
 
 target_link_libraries(opencs
     ${Boost_LIBRARIES}
     ${QT_LIBRARIES}
     components
 )
+
+if(DPKG_PROGRAM)
+    INSTALL(TARGETS opencs RUNTIME DESTINATION games COMPONENT opencs)
+endif()
+
+if(APPLE)
+    INSTALL(TARGETS opencs BUNDLE DESTINATION OpenMW COMPONENT BUNDLE)
+endif()

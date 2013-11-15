@@ -2,9 +2,11 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "defs.hpp"
 
 namespace ESM
 {
+    unsigned int Weapon::sRecordId = REC_WEAP;
 
 void Weapon::load(ESMReader &esm)
 {
@@ -15,7 +17,7 @@ void Weapon::load(ESMReader &esm)
     mIcon = esm.getHNOString("ITEX");
     mEnchant = esm.getHNOString("ENAM");
 }
-void Weapon::save(ESMWriter &esm)
+void Weapon::save(ESMWriter &esm) const
 {
     esm.writeHNCString("MODL", mModel);
     esm.writeHNOCString("FNAM", mName);

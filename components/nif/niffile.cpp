@@ -425,7 +425,7 @@ void Node::getProperties(const Nif::NiTexturingProperty *&texprop,
 
 Ogre::Matrix4 Node::getLocalTransform() const
 {
-    Ogre::Matrix4 mat4(Ogre::Matrix4::IDENTITY);
+    Ogre::Matrix4 mat4 = Ogre::Matrix4(Ogre::Matrix4::IDENTITY);
     mat4.makeTransform(trafo.pos, Ogre::Vector3(trafo.scale), Ogre::Quaternion(trafo.rotation));
     return mat4;
 }

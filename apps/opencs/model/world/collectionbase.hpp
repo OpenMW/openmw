@@ -4,6 +4,7 @@
 #include <string>
 
 #include "universalid.hpp"
+#include "columns.hpp"
 
 class QVariant;
 
@@ -78,8 +79,19 @@ namespace CSMWorld
 
             virtual int getAppendIndex (UniversalId::Type type = UniversalId::Type_None) const = 0;
             ///< \param type Will be ignored, unless the collection supports multiple record types
-    };
 
+            virtual std::vector<std::string> getIds (bool listDeleted = true) const = 0;
+            ///< Return a sorted collection of all IDs
+            ///
+            /// \param listDeleted include deleted record in the list
+
+            int searchColumnIndex (Columns::ColumnId id) const;
+            ///< Return index of column with the given \a id. If no such column exists, -1 is returned.
+
+            int findColumnIndex (Columns::ColumnId id) const;
+            ///< Return index of column with the given \a id. If no such column exists, an exception is
+            /// thrown.
+    };
 }
 
 #endif
