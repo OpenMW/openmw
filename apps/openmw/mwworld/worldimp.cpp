@@ -2246,10 +2246,4 @@ namespace MWWorld
             ++it;
         }
     }
-
-
-    void World::updateAnimParts(const Ptr& actor)
-    {
-        mRendering->updateAnimParts(actor);
-    }
 }

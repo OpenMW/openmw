@@ -490,8 +490,6 @@ namespace MWWorld
 
             virtual void castSpell (const MWWorld::Ptr& actor);
 
-            virtual void updateAnimParts(const MWWorld::Ptr& ptr);
-
             virtual void launchProjectile (const std::string& id, const ESM::EffectList& effects,
                                            const MWWorld::Ptr& actor, const std::string& sourceName);
     };

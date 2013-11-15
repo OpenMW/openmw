@@ -141,9 +141,6 @@ public:
     /// and equipment.
     void rebuildPtr(const MWWorld::Ptr &ptr);
 
-    /// Update actor model parts.
-    void updateAnimParts(const MWWorld::Ptr &ptr);
-
     void update (float duration, bool paused);
 
     void setAmbientColour(const Ogre::ColourValue& colour);
