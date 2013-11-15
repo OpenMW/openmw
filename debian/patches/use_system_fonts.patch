@@ -4,15 +4,15 @@ Index: openmw/files/mygui/CMakeLists.txt
 ===================================================================
 --- openmw.orig/files/mygui/CMakeLists.txt	2013-10-17 13:07:53.803213991 -0400
 +++ openmw/files/mygui/CMakeLists.txt	2013-10-17 14:51:09.667361244 -0400
-@@ -8,7 +8,6 @@
+@@ -8,7 +8,6 @@ set(MYGUI_FILES
      black.png
      core.skin
      core.xml
 -    EBGaramond-Regular.ttf
-     Obliviontt.zip
      openmw_alchemy_window.layout
      openmw_book.layout
-@@ -82,7 +81,6 @@
+     openmw_box.skin.xml
+@@ -81,7 +80,6 @@ set(MYGUI_FILES
      openmw_repair.layout
      openmw_companion_window.layout
      smallbars.png
