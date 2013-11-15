@@ -274,7 +274,8 @@ namespace MWInput
         if (!loading)
             mInputBinder->update(dt);
 
-        bool main_menu = MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu);
+        bool grab = !MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu)
+             && MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Console;
 
         bool was_relative = mInputManager->getMouseRelative();
         bool is_relative = !MWBase::Environment::get().getWindowManager()->isGuiMode();
@@ -284,7 +285,7 @@ namespace MWInput
         mInputManager->setMouseRelative(is_relative);
 
         //we let the mouse escape in the main menu
-        mInputManager->setGrabPointer(!main_menu);
+        mInputManager->setGrabPointer(grab);
 
         //we switched to non-relative mode, move our cursor to where the in-game
         //cursor is
