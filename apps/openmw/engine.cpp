@@ -139,6 +139,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mFpsLevel(0)
   , mVerboseScripts (false)
   , mNewGame (false)
+  , mSkipMenu (false)
   , mUseSound (true)
   , mCompileAll (false)
   , mScriptContext (0)
@@ -280,6 +281,11 @@ void OMW::Engine::setScriptsVerbosity(bool scriptsVerbosity)
 void OMW::Engine::setNewGame(bool newGame)
 {
     mNewGame = newGame;
+}
+
+void OMW::Engine::setSkipMenu (bool skipMenu)
+{
+    mSkipMenu = skipMenu;
 }
 
 std::string OMW::Engine::loadSettings (Settings::Manager & settings)
@@ -485,6 +491,10 @@ void OMW::Engine::go()
 
     if (!mStartupScript.empty())
         MWBase::Environment::get().getWindowManager()->executeInConsole (mStartupScript);
+
+    // start in main menu
+    if (!mSkipMenu)
+        MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
 
     // Start the main rendering loop
     while (!mEnvironment.get().getStateManager()->hasQuitRequest())

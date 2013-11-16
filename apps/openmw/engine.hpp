@@ -72,6 +72,7 @@ namespace OMW
             int mFpsLevel;
             bool mVerboseScripts;
             bool mNewGame;
+            bool mSkipMenu;
             bool mUseSound;
             bool mCompileAll;
             std::string mFocusName;
@@ -151,6 +152,8 @@ namespace OMW
 
             /// Start as a new game.
             void setNewGame(bool newGame);
+
+            void setSkipMenu (bool skipMenu);
 
             /// Initialise and enter main loop.
             void go();
