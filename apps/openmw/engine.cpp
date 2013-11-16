@@ -138,7 +138,6 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   : mOgre (0)
   , mFpsLevel(0)
   , mVerboseScripts (false)
-  , mNewGame (false)
   , mSkipMenu (false)
   , mUseSound (true)
   , mCompileAll (false)
@@ -278,11 +277,6 @@ void OMW::Engine::setScriptsVerbosity(bool scriptsVerbosity)
     mVerboseScripts = scriptsVerbosity;
 }
 
-void OMW::Engine::setNewGame(bool newGame)
-{
-    mNewGame = newGame;
-}
-
 void OMW::Engine::setSkipMenu (bool skipMenu)
 {
     mSkipMenu = skipMenu;
@@ -395,10 +389,6 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     input->setPlayer(&mEnvironment.getWorld()->getPlayer());
 
     window->initUI();
-    if (mNewGame)
-        // still redundant work here: recreate CharacterCreation(),
-        // double update visibility etc.
-        window->setNewGame(true);
     window->renderWorldMap();
 
     //Load translation data
@@ -430,22 +420,17 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     mechanics->buildPlayer();
     window->updatePlayer();
 
-    if (!mNewGame)
-    {
-        // load cell
-        ESM::Position pos;
-        MWBase::World *world = MWBase::Environment::get().getWorld();
+    // load cell
+    ESM::Position pos;
+    MWBase::World *world = MWBase::Environment::get().getWorld();
 
-        if (world->findExteriorPosition(mCellName, pos)) {
-            world->changeToExteriorCell (pos);
-        }
-        else {
-            world->findInteriorPosition(mCellName, pos);
-            world->changeToInteriorCell (mCellName, pos);
-        }
+    if (world->findExteriorPosition(mCellName, pos)) {
+        world->changeToExteriorCell (pos);
     }
-    else
-        mEnvironment.getWorld()->startNewGame();
+    else {
+        world->findInteriorPosition(mCellName, pos);
+        world->changeToInteriorCell (mCellName, pos);
+    }
 
     Ogre::FrameEvent event;
     event.timeSinceLastEvent = 0;
