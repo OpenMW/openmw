@@ -26,7 +26,7 @@
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/npcstats.hpp"
-#include "../mwmechanics/spellsuccess.hpp"
+#include "../mwmechanics/spellcasting.hpp"
 
 
 #include "../mwrender/sky.hpp"
@@ -2158,7 +2158,7 @@ namespace MWWorld
         // Now apply the spell!
 
         // Apply Self portion
-        actor.getClass().getCreatureStats(actor).getActiveSpells().addSpell(selectedSpell, actor, ESM::RT_Self, sourceName);
+        actor.getClass().getCreatureStats(actor).getActiveSpells().addSpell(selectedSpell, actor, actor, ESM::RT_Self, sourceName);
 
         // Apply Touch portion
         // TODO: Distance is probably incorrect, and should it be hardcoded?
@@ -2166,7 +2166,7 @@ namespace MWWorld
         if (!contact.first.isEmpty())
         {
             if (contact.first.getClass().isActor())
-                contact.first.getClass().getCreatureStats(contact.first).getActiveSpells().addSpell(selectedSpell, contact.first, ESM::RT_Touch, sourceName);
+                contact.first.getClass().getCreatureStats(contact.first).getActiveSpells().addSpell(selectedSpell, contact.first, actor, ESM::RT_Touch, sourceName);
             else
             {
                 // We hit a non-actor, e.g. a door. Only instant effects are relevant.

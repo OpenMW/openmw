@@ -468,9 +468,9 @@ namespace MWClass
                 {
                     weapon.getCellRef().mEnchantmentCharge -= castCost;
                     // Touch
-                    othercls.getCreatureStats(victim).getActiveSpells().addSpell(enchantmentName, victim, ESM::RT_Touch, weapon.getClass().getName(weapon));
+                    othercls.getCreatureStats(victim).getActiveSpells().addSpell(enchantmentName, victim, ptr, ESM::RT_Touch, weapon.getClass().getName(weapon));
                     // Self
-                    getCreatureStats(ptr).getActiveSpells().addSpell(enchantmentName, ptr, ESM::RT_Self, weapon.getClass().getName(weapon));
+                    getCreatureStats(ptr).getActiveSpells().addSpell(enchantmentName, ptr, ptr, ESM::RT_Self, weapon.getClass().getName(weapon));
                     // Target
                     MWBase::Environment::get().getWorld()->launchProjectile(enchantmentName, enchantment->mEffects, ptr, weapon.getClass().getName(weapon));
                 }
@@ -936,7 +936,7 @@ namespace MWClass
 
         /// \todo consider instant effects
 
-        return stats.getActiveSpells().addSpell (id, actor);
+        return stats.getActiveSpells().addSpell (id, actor, actor);
     }
 
     void Npc::skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType) const

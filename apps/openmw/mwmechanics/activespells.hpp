@@ -37,7 +37,7 @@ namespace MWMechanics
 
         // Effect magnitude multiplier. Use 0 to completely disable the effect
         // (if it was resisted, reflected or absorbed). Use (0,1) for partially resisted.
-        std::vector<bool> mMultiplier;
+        std::vector<float> mMultiplier;
 
         // Display name, we need this for enchantments, which don't have a name - so you need to supply the
         // name of the item with the enchantment to addSpell
@@ -85,11 +85,12 @@ namespace MWMechanics
 
             ActiveSpells();
 
-            bool addSpell (const std::string& id, const MWWorld::Ptr& actor, ESM::RangeType range = ESM::RT_Self, const std::string& name = "", int effectIndex = -1);
+            bool addSpell (const std::string& id, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster, ESM::RangeType range = ESM::RT_Self, const std::string& name = "", int effectIndex = -1);
             ///< Overwrites an existing spell with the same ID. If the spell does not have any
             /// non-instant effects, it is ignored.
             /// @param id
-            /// @param actor
+            /// @param actor actor to add the spell to
+            /// @param caster actor who casted the spell
             /// @param range Only effects with range type \a range will be applied
             /// @param name Display name for enchantments, since they don't have a name in their record
             /// @param effectIndex Only apply one specific effect - useful for reflecting spells, since each effect is reflected individually

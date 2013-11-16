@@ -11,6 +11,8 @@
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/spellcasting.hpp"
+
 
 #include "esmstore.hpp"
 #include "class.hpp"
@@ -292,36 +294,24 @@ void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
             if (enchantment.mData.mType != ESM::Enchantment::ConstantEffect)
                 continue;
 
-            // Roll some dice, one for each effect
             std::vector<EffectParams> params;
-            params.resize(enchantment.mEffects.mList.size());
-            for (unsigned int i=0; i<params.size();++i)
-                params[i].mRandom = static_cast<float> (std::rand()) / RAND_MAX;
 
             bool existed = (mPermanentMagicEffectMagnitudes.find((**iter).getCellRef().mRefID) != mPermanentMagicEffectMagnitudes.end());
             if (!existed)
             {
+                // Roll some dice, one for each effect
+                params.resize(enchantment.mEffects.mList.size());
+                for (unsigned int i=0; i<params.size();++i)
+                    params[i].mRandom = static_cast<float> (std::rand()) / RAND_MAX;
+
                 // Try resisting each effect
                 int i=0;
                 for (std::vector<ESM::ENAMstruct>::const_iterator effectIt (enchantment.mEffects.mList.begin());
                     effectIt!=enchantment.mEffects.mList.end(); ++effectIt)
                 {
-                    const ESM::MagicEffect *magicEffect =
-                        MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
-                        effectIt->mEffectID);
-
-                    //const MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
-
-                    float resisted = 0;
-                    if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful)
-                    {
-
-                    }
-                    params[i].mMultiplier = (100.f - resisted) / 100.f;
-
+                    params[i].mMultiplier = MWMechanics::getEffectMultiplier(effectIt->mEffectID, actor, actor);
                     ++i;
                 }
-
 
                 // Note that using the RefID as a key here is not entirely correct.
                 // Consider equipping the same item twice (e.g. a ring)
@@ -329,10 +319,12 @@ void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
                 // so it doesn't really matter if both items will get the same magnitude. *Extreme* edge case.
                 mPermanentMagicEffectMagnitudes[(**iter).getCellRef().mRefID] = params;
             }
+            else
+                params = mPermanentMagicEffectMagnitudes[(**iter).getCellRef().mRefID];
 
             int i=0;
             for (std::vector<ESM::ENAMstruct>::const_iterator effectIt (enchantment.mEffects.mList.begin());
-                effectIt!=enchantment.mEffects.mList.end(); ++effectIt)
+                effectIt!=enchantment.mEffects.mList.end(); ++effectIt, ++i)
             {
                 const ESM::MagicEffect *magicEffect =
                     MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
@@ -355,7 +347,6 @@ void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
                 magnitude *= params[i].mMultiplier;
                 if (magnitude)
                     mMagicEffects.add (*effectIt, magnitude);
-                ++i;
             }
         }
     }
@@ -554,8 +545,9 @@ void MWWorld::InventoryStore::visitEffectSources(MWMechanics::EffectSourceVisito
         for (std::vector<ESM::ENAMstruct>::const_iterator effectIt (enchantment.mEffects.mList.begin());
             effectIt!=enchantment.mEffects.mList.end(); ++effectIt)
         {
-            float random = mPermanentMagicEffectMagnitudes[(**iter).getCellRef().mRefID][i].mRandom;
-            float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * random;
+            const EffectParams& params = mPermanentMagicEffectMagnitudes[(**iter).getCellRef().mRefID][i];
+            float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * params.mRandom;
+            magnitude *= params.mMultiplier;
             visitor.visit(*effectIt, (**iter).getClass().getName(**iter), magnitude);
 
             ++i;

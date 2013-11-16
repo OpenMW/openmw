@@ -16,7 +16,7 @@ namespace MWWorld
         // TODO: Apply RT_Self effects on the door / container that triggered the trap. Not terribly useful, but you could
         // make it lock itself when activated for example.
 
-        actor.getClass().getCreatureStats(actor).getActiveSpells().addSpell(mSpellId, actor, ESM::RT_Touch);
+        actor.getClass().getCreatureStats(actor).getActiveSpells().addSpell(mSpellId, actor, actor, ESM::RT_Touch);
 
         const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(mSpellId);
 
