@@ -488,6 +488,8 @@ void OMW::Engine::go()
     // start in main menu
     if (!mSkipMenu)
         MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
+    else
+        MWBase::Environment::get().getStateManager()->newGame (true);
 
     // Start the main rendering loop
     while (!mEnvironment.get().getStateManager()->hasQuitRequest())

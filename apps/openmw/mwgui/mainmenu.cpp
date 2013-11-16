@@ -81,10 +81,7 @@ namespace MWGui
             MWBase::Environment::get().getStateManager()->requestQuit();
         else if (sender == mButtons["newgame"])
         {
-            MWBase::Environment::get().getWorld()->startNewGame();
-            MWBase::Environment::get().getWindowManager()->setNewGame(true);
-            MWBase::Environment::get().getDialogueManager()->clear();
-            MWBase::Environment::get().getJournal()->clear();
+            MWBase::Environment::get().getStateManager()->newGame();
         }
 
         else if (sender == mButtons["loadgame"])

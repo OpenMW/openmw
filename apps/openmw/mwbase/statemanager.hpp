@@ -23,6 +23,13 @@ namespace MWBase
             virtual void requestQuit() = 0;
 
             virtual bool hasQuitRequest() const = 0;
+
+            virtual bool isGameRunning() const = 0;
+
+            virtual void newGame (bool bypass = false) = 0;
+            ///< Start a new game.
+            ///
+            /// \param bypass Skip new game mechanics.
     };
 }
 
