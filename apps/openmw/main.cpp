@@ -16,6 +16,13 @@
 
 #endif
 
+
+#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX || OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+#include <csignal>
+extern int cc_install_handlers(int argc, char **argv, int num_signals, int *sigs, const char *logfile, int (*user_info)(char*, char*));
+extern int is_debugger_attached(void);
+#endif
+
 // for Ogre::macBundlePath
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
 #include <OSX/macUtils.h>
@@ -239,6 +246,18 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
 int main(int argc, char**argv)
 {
+#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX || OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+    // Unix crash catcher
+    if (!is_debugger_attached())
+    {
+        int s[5] = { SIGSEGV, SIGILL, SIGFPE, SIGBUS, SIGABRT };
+        cc_install_handlers(argc, argv, 5, s, "crash.log", NULL);
+        std::cout << "Installing crash catcher" << std::endl;
+    }
+    else
+        std::cout << "Running in a debugger, not installing crash catcher" << std::endl;
+#endif
+
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
     // set current dir to bundle path
     boost::filesystem::path bundlePath = boost::filesystem::path(Ogre::macBundlePath()).parent_path();

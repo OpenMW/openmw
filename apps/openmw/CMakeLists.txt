@@ -6,6 +6,7 @@ configure_file ("${CMAKE_CURRENT_SOURCE_DIR}/config.hpp.cmake" "${CMAKE_CURRENT_
 set(GAME
     main.cpp
     engine.cpp
+    crashcatcher.cpp
 )
 set(GAME_HEADER
     engine.hpp
