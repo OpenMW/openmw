@@ -269,6 +269,14 @@ namespace MWMechanics
             if (effectIt->mRange != range)
                 continue;
 
+            const ESM::MagicEffect *magicEffect =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
+                effectIt->mEffectID);
+
+            if (caster.getRefData().getHandle() == "player" && actor != caster
+                    && magicEffect->mData.mFlags & ESM::MagicEffect::Harmful)
+                MWBase::Environment::get().getWindowManager()->setEnemy(actor);
+
             // Try resisting effect in case its harmful
             const ESM::Spell *spell =
                         MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search (id);
@@ -286,10 +294,6 @@ namespace MWMechanics
                 continue;
 
             // TODO: For Area effects, launch a growing particle effect that applies the effect to more actors as it hits them. Best managed in World.
-
-            const ESM::MagicEffect *magicEffect =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
-                effectIt->mEffectID);
 
             // Only the sound of the first effect plays
             if (first)

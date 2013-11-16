@@ -40,7 +40,7 @@ namespace MWMechanics
 
             void calculateDynamicStats (const MWWorld::Ptr& ptr);
 
-            void calculateCreatureStatModifiers (const MWWorld::Ptr& ptr);
+            void calculateCreatureStatModifiers (const MWWorld::Ptr& ptr, float duration);
             void calculateNpcStatModifiers (const MWWorld::Ptr& ptr);
 
             void calculateRestoration (const MWWorld::Ptr& ptr, float duration);
