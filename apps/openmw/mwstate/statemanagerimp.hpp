@@ -7,10 +7,15 @@ namespace MWState
 {
     class StateManager : public MWBase::StateManager
     {
+            bool mQuitRequest;
+
         public:
 
             StateManager();
 
+            virtual void requestQuit();
+
+            virtual bool hasQuitRequest() const;
     };
 }
 

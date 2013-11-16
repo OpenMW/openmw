@@ -19,6 +19,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/statemanager.hpp"
 #include "../mwgui/bookwindow.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 
@@ -644,7 +645,7 @@ namespace MWInput
 
     void InputManager::windowClosed()
     {
-        MWBase::Environment::setRequestExit();
+        MWBase::Environment::get().getStateManager()->requestQuit();
     }
 
     void InputManager::toggleMainMenu()

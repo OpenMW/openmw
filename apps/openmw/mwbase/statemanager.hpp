@@ -19,6 +19,10 @@ namespace MWBase
             StateManager() {}
 
             virtual ~StateManager() {}
+
+            virtual void requestQuit() = 0;
+
+            virtual bool hasQuitRequest() const = 0;
     };
 }
 

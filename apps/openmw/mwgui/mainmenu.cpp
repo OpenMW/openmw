@@ -1,13 +1,12 @@
 #include "mainmenu.hpp"
 
-#include <OgreRoot.h>
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/journal.hpp"
 #include "../mwbase/dialoguemanager.hpp"
+#include "../mwbase/statemanager.hpp"
 
 #include "savegamedialog.hpp"
 
@@ -79,7 +78,7 @@ namespace MWGui
         else if (sender == mButtons["options"])
             MWBase::Environment::get().getWindowManager ()->pushGuiMode (GM_Settings);
         else if (sender == mButtons["exitgame"])
-            MWBase::Environment::get().setRequestExit();
+            MWBase::Environment::get().getStateManager()->requestQuit();
         else if (sender == mButtons["newgame"])
         {
             MWBase::Environment::get().getWorld()->startNewGame();

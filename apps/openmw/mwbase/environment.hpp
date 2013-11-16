@@ -34,8 +34,6 @@ namespace MWBase
             StateManager *mStateManager;
             float mFrameDuration;
 
-            static bool sExit;
-
             Environment (const Environment&);
             ///< not implemented
 
@@ -47,9 +45,6 @@ namespace MWBase
             Environment();
 
             ~Environment();
-
-            static void setRequestExit () { sExit = true; }
-            static bool getRequestExit () { return sExit; }
 
             void setWorld (World *world);
 
