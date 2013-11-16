@@ -72,6 +72,10 @@ add_openmw_dir (mwmechanics
     aiescort aiactivate repair enchanting pathfinding security spellsuccess
     )
 
+add_openmw_dir (mwstate
+    statemanagerimp
+    )
+
 add_openmw_dir (mwbase
     environment world scriptmanager dialoguemanager journal soundmanager mechanicsmanager
     inputmanager windowmanager

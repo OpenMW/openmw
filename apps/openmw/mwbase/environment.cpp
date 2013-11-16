@@ -11,13 +11,15 @@
 #include "mechanicsmanager.hpp"
 #include "inputmanager.hpp"
 #include "windowmanager.hpp"
+#include "statemanager.hpp"
 
 MWBase::Environment *MWBase::Environment::sThis = 0;
 bool MWBase::Environment::sExit = false;
 
 MWBase::Environment::Environment()
 : mWorld (0), mSoundManager (0), mScriptManager (0), mWindowManager (0),
-  mMechanicsManager (0),  mDialogueManager (0), mJournal (0), mInputManager (0), mFrameDuration (0)
+  mMechanicsManager (0),  mDialogueManager (0), mJournal (0), mInputManager (0), mFrameDuration (0),
+  mStateManager (0)
 {
     assert (!sThis);
     sThis = this;
@@ -67,6 +69,11 @@ void MWBase::Environment::setJournal (Journal *journal)
 void MWBase::Environment::setInputManager (InputManager *inputManager)
 {
     mInputManager = inputManager;
+}
+
+void MWBase::Environment::setStateManager (StateManager *stateManager)
+{
+    mStateManager = stateManager;
 }
 
 void MWBase::Environment::setFrameDuration (float duration)
@@ -122,6 +129,12 @@ MWBase::InputManager *MWBase::Environment::getInputManager() const
     return mInputManager;
 }
 
+MWBase::StateManager *MWBase::Environment::getStateManager() const
+{
+    assert (mStateManager);
+    return mStateManager;
+}
+
 float MWBase::Environment::getFrameDuration() const
 {
     return mFrameDuration;
@@ -152,6 +165,9 @@ void MWBase::Environment::cleanup()
 
     delete mInputManager;
     mInputManager = 0;
+
+    delete mStateManager;
+    mStateManager = 0;
 }
 
 const MWBase::Environment& MWBase::Environment::get()

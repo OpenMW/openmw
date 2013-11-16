@@ -7,6 +7,8 @@
 
 #include <MyGUI_WidgetManager.h>
 
+#include <SDL.h>
+
 #include <components/compiler/extensions0.hpp>
 
 #include <components/bsa/bsa_archive.hpp>
@@ -39,8 +41,7 @@
 
 #include "mwmechanics/mechanicsmanagerimp.hpp"
 
-
-#include <SDL.h>
+#include "mwstate/statemanagerimp.hpp"
 
 void OMW::Engine::executeLocalScripts()
 {
@@ -320,6 +321,8 @@ std::string OMW::Engine::loadSettings (Settings::Manager & settings)
 
 void OMW::Engine::prepareEngine (Settings::Manager & settings)
 {
+    mEnvironment.setStateManager (new MWState::StateManager);
+
     Nif::NIFFile::CacheLock cachelock;
 
     std::string renderSystem = settings.getString("render system", "Video");
@@ -397,7 +400,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     for (size_t i = 0; i < mContentFiles.size(); i++)
       mTranslationDataStorage.loadTranslationData(mFileCollections, mContentFiles[i]);
 
-    Compiler::registerExtensions (mExtensions); 
+    Compiler::registerExtensions (mExtensions);
 
     // Create sound system
     mEnvironment.setSoundManager (new MWSound::SoundManager(mUseSound));

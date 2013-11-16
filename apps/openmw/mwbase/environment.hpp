@@ -11,6 +11,7 @@ namespace MWBase
     class MechanicsManager;
     class InputManager;
     class WindowManager;
+    class StateManager;
 
     /// \brief Central hub for mw-subsystems
     ///
@@ -30,6 +31,7 @@ namespace MWBase
             DialogueManager *mDialogueManager;
             Journal *mJournal;
             InputManager *mInputManager;
+            StateManager *mStateManager;
             float mFrameDuration;
 
             static bool sExit;
@@ -65,6 +67,8 @@ namespace MWBase
 
             void setInputManager (InputManager *inputManager);
 
+            void setStateManager (StateManager *stateManager);
+
             void setFrameDuration (float duration);
             ///< Set length of current frame in seconds.
 
@@ -83,6 +87,8 @@ namespace MWBase
             Journal *getJournal() const;
 
             InputManager *getInputManager() const;
+
+            StateManager *getStateManager() const;
 
             float getFrameDuration() const;
 
