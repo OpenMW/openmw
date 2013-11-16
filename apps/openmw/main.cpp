@@ -248,7 +248,7 @@ int main(int argc, char**argv)
 {
 #if OGRE_PLATFORM == OGRE_PLATFORM_LINUX || OGRE_PLATFORM == OGRE_PLATFORM_APPLE
     // Unix crash catcher
-    if (!is_debugger_attached())
+    if ((argc == 2 && strcmp(argv[1], "--cc-handle-crash") == 0) || !is_debugger_attached())
     {
         int s[5] = { SIGSEGV, SIGILL, SIGFPE, SIGBUS, SIGABRT };
         cc_install_handlers(argc, argv, 5, s, "crash.log", NULL);
