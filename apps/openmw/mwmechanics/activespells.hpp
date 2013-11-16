@@ -57,7 +57,7 @@ namespace MWMechanics
 
         private:
 
-            mutable TContainer mSpells; // spellId, (time of casting, relative magnitude)
+            mutable TContainer mSpells;
             mutable MagicEffects mEffects;
             mutable bool mSpellsChanged;
             mutable MWWorld::TimeStamp mLastUpdate;

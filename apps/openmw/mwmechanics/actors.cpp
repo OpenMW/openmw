@@ -167,8 +167,9 @@ namespace MWMechanics
             stat.setModifier(effects.get(EffectKey(ESM::MagicEffect::FortifyHealth+i)).mMagnitude -
                              effects.get(EffectKey(ESM::MagicEffect::DrainHealth+i)).mMagnitude);
 
-            float damage = creatureStats.getMagicEffects().get(EffectKey(ESM::MagicEffect::DamageHealth)).mMagnitude;
-            stat.setCurrent(stat.getCurrent() - damage * duration);
+            float currentDiff = creatureStats.getMagicEffects().get(EffectKey(ESM::MagicEffect::RestoreHealth+i)).mMagnitude
+                    - creatureStats.getMagicEffects().get(EffectKey(ESM::MagicEffect::DamageHealth+i)).mMagnitude;
+            stat.setCurrent(stat.getCurrent() + currentDiff * duration);
 
             creatureStats.setDynamic(i, stat);
         }
