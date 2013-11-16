@@ -503,7 +503,7 @@ namespace MWInput
 
         mInputBinder->keyPressed (arg);
 
-        if(arg.keysym.sym == SDLK_RETURN
+        if(arg.keysym.sym == SDLK_RETURN || arg.keysym.sym == SDLK_KP_ENTER
             && MWBase::Environment::get().getWindowManager()->isGuiMode())
         {
             // Pressing enter when a messagebox is prompting for "ok" will activate the ok button
