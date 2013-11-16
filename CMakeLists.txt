@@ -50,7 +50,12 @@ option(USE_MPG123 "use mpg123 + libsndfile for sound" ON)
 # OS X deployment
 option(OPENMW_OSX_DEPLOYMENT OFF)
 
-find_program(DPKG_PROGRAM dpkg DOC "dpkg program of Debian-based systems")
+if(UNIX AND NOT APPLE)
+    option(BUILD_WITH_DPKG "enable dpkg-based install for debian and debian derivatives" OFF)
+    if(BUILD_WITH_DPKG)
+        find_program(DPKG_PROGRAM dpkg DOC "dpkg program of Debian-based systems")
+    endif(BUILD_WITH_DPKG)
+endif(UNIX AND NOT APPLE)
 
 # Location of morrowind data files
 if (APPLE)
