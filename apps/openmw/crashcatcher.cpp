@@ -432,31 +432,18 @@ int cc_install_handlers(int argc, char **argv, int num_signals, int *signals, co
 }
 
 
-
-
-static void*
-test_trace(void* ignored)
-{
-    return (void*)ptrace(PTRACE_TRACEME, 0, NULL, NULL);
-}
-
+// gdb apparently opens FD(s) 3,4,5 (whereas a typical prog uses only stdin=0, stdout=1,stderr=2)
 bool
 is_debugger_attached(void)
 {
-    pthread_attr_t attr;
-    void* result;
-    pthread_t thread;
+    bool rc = false;
+    FILE *fd = fopen("/tmp", "r");
 
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-    if (pthread_create(&thread, &attr, test_trace, NULL) != 0) {
-        pthread_attr_destroy(&attr);
-        return false;
-    }
-    pthread_attr_destroy(&attr);
-    if (pthread_join(thread, &result) != 0) {
-        return false;
+    if (fileno(fd) > 5)
+    {
+        rc = true;
     }
 
-    return result != NULL;
+    fclose(fd);
+    return rc;
 }
