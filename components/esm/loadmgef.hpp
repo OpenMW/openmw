@@ -58,6 +58,12 @@ struct MagicEffect
 
     static const std::string &effectIdToString(short effectID);
     static short effectStringToId(const std::string &effect);
+
+    /// Returns the effect that provides resistance against \a effect (or -1 if there's none)
+    static short getResistanceEffect(short effect);
+    /// Returns the effect that induces weakness against \a effect (or -1 if there's none)
+    static short getWeaknessEffect(short effect);
+
     MagnitudeDisplayType getMagnitudeDisplayType() const;
 
 

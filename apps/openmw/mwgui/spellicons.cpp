@@ -21,6 +21,20 @@
 namespace MWGui
 {
 
+    void EffectSourceVisitor::visit (const ESM::ENAMstruct& enam,
+                                           const std::string& sourceName, float magnitude, float remainingTime)
+    {
+        MagicEffectInfo newEffectSource;
+        newEffectSource.mKey = MWMechanics::EffectKey(enam);
+        newEffectSource.mMagnitude = magnitude;
+        newEffectSource.mPermanent = mIsPermanent;
+        newEffectSource.mRemainingTime = remainingTime;
+        newEffectSource.mSource = sourceName;
+
+        mEffectSources[enam.mEffectID].push_back(newEffectSource);
+    }
+
+
     void SpellIcons::updateWidgets(MyGUI::Widget *parent, bool adjustSize)
     {
         // TODO: Tracking add/remove/expire would be better than force updating every frame
@@ -28,125 +42,20 @@ namespace MWGui
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
         const MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
 
-        std::map <int, std::vector<MagicEffectInfo> > effects;
 
-        // add permanent item enchantments
+        EffectSourceVisitor visitor;
+
+        // permanent item enchantments & permanent spells
+        visitor.mIsPermanent = true;
         MWWorld::InventoryStore& store = MWWorld::Class::get(player).getInventoryStore(player);
-        for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
-        {
-            MWWorld::ContainerStoreIterator it = store.getSlot(slot);
-            if (it == store.end())
-                continue;
-            std::string enchantment = MWWorld::Class::get(*it).getEnchantment(*it);
-            if (enchantment.empty())
-                continue;
-            const ESM::Enchantment* enchant = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(enchantment);
-            if (enchant->mData.mType != ESM::Enchantment::ConstantEffect)
-                continue;
+        store.visitEffectSources(visitor);
+        stats.getSpells().visitEffectSources(visitor);
 
-            const ESM::EffectList& list = enchant->mEffects;
-            for (std::vector<ESM::ENAMstruct>::const_iterator effectIt = list.mList.begin();
-                 effectIt != list.mList.end(); ++effectIt)
-            {
-                const ESM::MagicEffect* magicEffect =
-                    MWBase::Environment::get().getWorld ()->getStore ().get<ESM::MagicEffect>().find(effectIt->mEffectID);
+        // now add lasting effects
+        visitor.mIsPermanent = false;
+        stats.getActiveSpells().visitEffectSources(visitor);
 
-                MagicEffectInfo effectInfo;
-                effectInfo.mSource = MWWorld::Class::get(*it).getName(*it);
-                effectInfo.mKey = MWMechanics::EffectKey (effectIt->mEffectID);
-                if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetSkill)
-                    effectInfo.mKey.mArg = effectIt->mSkill;
-                else if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetAttribute)
-                    effectInfo.mKey.mArg = effectIt->mAttribute;
-                // just using the min magnitude here, permanent enchantments with a random magnitude just wouldn't make any sense
-                effectInfo.mMagnitude = effectIt->mMagnMin;
-                effectInfo.mPermanent = true;
-                effects[effectIt->mEffectID].push_back (effectInfo);
-            }
-        }
-
-        // add permanent spells
-        const MWMechanics::Spells& spells = stats.getSpells();
-        for (MWMechanics::Spells::TIterator it = spells.begin(); it != spells.end(); ++it)
-        {
-            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(it->first);
-
-            // these are the spell types that are permanently in effect
-            if (!(spell->mData.mType == ESM::Spell::ST_Ability)
-                    && !(spell->mData.mType == ESM::Spell::ST_Disease)
-                    && !(spell->mData.mType == ESM::Spell::ST_Curse)
-                    && !(spell->mData.mType == ESM::Spell::ST_Blight))
-                continue;
-            const ESM::EffectList& list = spell->mEffects;
-            for (std::vector<ESM::ENAMstruct>::const_iterator effectIt = list.mList.begin();
-                 effectIt != list.mList.end(); ++effectIt)
-            {
-                const ESM::MagicEffect* magicEffect =
-                    MWBase::Environment::get().getWorld ()->getStore ().get<ESM::MagicEffect>().find(effectIt->mEffectID);
-                MagicEffectInfo effectInfo;
-                effectInfo.mSource = getSpellDisplayName (it->first);
-                effectInfo.mKey = MWMechanics::EffectKey (effectIt->mEffectID);
-                if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetSkill)
-                    effectInfo.mKey.mArg = effectIt->mSkill;
-                else if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetAttribute)
-                    effectInfo.mKey.mArg = effectIt->mAttribute;
-                // just using the min magnitude here, permanent spells with a random magnitude just wouldn't make any sense
-                effectInfo.mMagnitude = effectIt->mMagnMin;
-                effectInfo.mPermanent = true;
-
-                effects[effectIt->mEffectID].push_back (effectInfo);
-            }
-        }
-
-        // add lasting effect spells/potions etc
-
-        // TODO: Move this to ActiveSpells
-        const MWMechanics::ActiveSpells::TContainer& activeSpells = stats.getActiveSpells().getActiveSpells();
-        for (MWMechanics::ActiveSpells::TContainer::const_iterator it = activeSpells.begin();
-             it != activeSpells.end(); ++it)
-        {
-            const ESM::EffectList& list = getSpellEffectList(it->first);
-
-            float timeScale = MWBase::Environment::get().getWorld()->getTimeScaleFactor();
-
-            int i=0;
-            for (std::vector<ESM::ENAMstruct>::const_iterator effectIt = list.mList.begin();
-                 effectIt != list.mList.end(); ++effectIt, ++i)
-            {
-                if (effectIt->mRange != it->second.mRange)
-                    continue;
-
-                float randomFactor = it->second.mRandom[i];
-
-                const ESM::MagicEffect* magicEffect =
-                    MWBase::Environment::get().getWorld ()->getStore ().get<ESM::MagicEffect>().find(effectIt->mEffectID);
-
-                MagicEffectInfo effectInfo;
-                if (!it->second.mName.empty())
-                    effectInfo.mSource = it->second.mName;
-                else
-                    effectInfo.mSource = getSpellDisplayName(it->first);
-                effectInfo.mKey = MWMechanics::EffectKey (effectIt->mEffectID);
-                if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetSkill)
-                    effectInfo.mKey.mArg = effectIt->mSkill;
-                else if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetAttribute)
-                    effectInfo.mKey.mArg = effectIt->mAttribute;
-                effectInfo.mMagnitude = effectIt->mMagnMin + (effectIt->mMagnMax-effectIt->mMagnMin) * randomFactor;
-                effectInfo.mRemainingTime = effectIt->mDuration +
-                        (it->second.mTimeStamp - MWBase::Environment::get().getWorld()->getTimeStamp())*3600/timeScale;
-
-                // ingredients need special casing for their magnitude / duration
-                if (MWBase::Environment::get().getWorld()->getStore().get<ESM::Ingredient>().search (it->first))
-                {
-                    effectInfo.mRemainingTime = effectIt->mDuration * randomFactor +
-                            (it->second.mTimeStamp - MWBase::Environment::get().getWorld()->getTimeStamp())*3600/timeScale;
-
-                    effectInfo.mMagnitude = static_cast<int> (0.05*randomFactor / (0.1 * magicEffect->mData.mBaseCost));
-                }
-
-                effects[effectIt->mEffectID].push_back (effectInfo);
-            }
-        }
+        std::map <int, std::vector<MagicEffectInfo> >& effects = visitor.mEffectSources;
 
         int w=2;
 
@@ -278,61 +187,6 @@ namespace MWGui
             if (effects.find(it->first) == effects.end())
                 it->second->setVisible(false);
         }
-    }
-
-
-    std::string SpellIcons::getSpellDisplayName (const std::string& id)
-    {
-        if (const ESM::Spell *spell =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search (id))
-            return spell->mName;
-
-        if (const ESM::Potion *potion =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Potion>().search (id))
-            return potion->mName;
-
-        if (const ESM::Ingredient *ingredient =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Ingredient>().search (id))
-            return ingredient->mName;
-
-        throw std::runtime_error ("ID " + id + " has no display name");
-    }
-
-    ESM::EffectList SpellIcons::getSpellEffectList (const std::string& id)
-    {
-        if (const ESM::Enchantment* enchantment =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search (id))
-            return enchantment->mEffects;
-
-        if (const ESM::Spell *spell =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search (id))
-            return spell->mEffects;
-
-        if (const ESM::Potion *potion =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Potion>().search (id))
-            return potion->mEffects;
-
-        if (const ESM::Ingredient *ingredient =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Ingredient>().search (id))
-        {
-            const ESM::MagicEffect *magicEffect =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
-                ingredient->mData.mEffectID[0]);
-
-            ESM::ENAMstruct effect;
-            effect.mEffectID = ingredient->mData.mEffectID[0];
-            effect.mSkill = ingredient->mData.mSkills[0];
-            effect.mAttribute = ingredient->mData.mAttributes[0];
-            effect.mRange = 0;
-            effect.mArea = 0;
-            effect.mDuration = magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration ? 0 : 1;
-            effect.mMagnMin = 1;
-            effect.mMagnMax = 1;
-            ESM::EffectList result;
-            result.mList.push_back (effect);
-            return result;
-        }
-        throw std::runtime_error("ID " + id + " does not have effects");
     }
 
 }

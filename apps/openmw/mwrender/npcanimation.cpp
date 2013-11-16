@@ -60,7 +60,7 @@ const NpcAnimation::PartBoneMap NpcAnimation::sPartList = createPartListMap();
 NpcAnimation::~NpcAnimation()
 {
     if (!mListenerDisabled)
-        mPtr.getClass().getInventoryStore(mPtr).setListener(NULL);
+        mPtr.getClass().getInventoryStore(mPtr).setListener(NULL, mPtr);
 
     Ogre::SceneManager *sceneMgr = mInsert->getCreator();
     for(size_t i = 0;i < ESM::PRT_Count;i++)
@@ -85,7 +85,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int v
     }
 
     if (!disableListener)
-        mPtr.getClass().getInventoryStore(mPtr).setListener(this);
+        mPtr.getClass().getInventoryStore(mPtr).setListener(this, mPtr);
 
     updateNpcBase();
 }

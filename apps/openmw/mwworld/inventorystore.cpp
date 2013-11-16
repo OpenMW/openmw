@@ -11,6 +11,8 @@
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/spellcasting.hpp"
+
 
 #include "esmstore.hpp"
 #include "class.hpp"
@@ -123,7 +125,7 @@ void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& ite
     flagAsModified();
 
     fireEquipmentChangedEvent();
-    updateMagicEffects();
+    updateMagicEffects(actor);
 }
 
 void MWWorld::InventoryStore::unequipAll(const MWWorld::Ptr& actor)
@@ -150,10 +152,10 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::getSlot (int slot)
     return mSlots[slot];
 }
 
-void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& npc)
+void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
 {
-    const MWMechanics::NpcStats& stats = MWWorld::Class::get(npc).getNpcStats(npc);
-    MWWorld::InventoryStore& invStore = MWWorld::Class::get(npc).getInventoryStore(npc);
+    const MWMechanics::NpcStats& stats = MWWorld::Class::get(actor).getNpcStats(actor);
+    MWWorld::InventoryStore& invStore = MWWorld::Class::get(actor).getInventoryStore(actor);
 
     TSlots slots_;
     initSlots (slots_);
@@ -211,15 +213,15 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& npc)
                 }
             }
 
-            switch(MWWorld::Class::get (test).canBeEquipped (test, npc).first)
+            switch(MWWorld::Class::get (test).canBeEquipped (test, actor).first)
             {
                 case 0:
                     continue;
                 case 2:
-                    invStore.unequipSlot(MWWorld::InventoryStore::Slot_CarriedLeft, npc);
+                    invStore.unequipSlot(MWWorld::InventoryStore::Slot_CarriedLeft, actor);
                     break;
                 case 3:
-                    invStore.unequipSlot(MWWorld::InventoryStore::Slot_CarriedRight, npc);
+                    invStore.unequipSlot(MWWorld::InventoryStore::Slot_CarriedRight, actor);
                     break;
             }
 
@@ -255,7 +257,7 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& npc)
     {
         mSlots.swap (slots_);
         fireEquipmentChangedEvent();
-        updateMagicEffects();
+        updateMagicEffects(actor);
         flagAsModified();
     }
 }
@@ -265,7 +267,7 @@ const MWMechanics::MagicEffects& MWWorld::InventoryStore::getMagicEffects() cons
     return mMagicEffects;
 }
 
-void MWWorld::InventoryStore::updateMagicEffects()
+void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
 {
     // To avoid excessive updates during auto-equip
     if (!mUpdatesEnabled)
@@ -292,29 +294,45 @@ void MWWorld::InventoryStore::updateMagicEffects()
             if (enchantment.mData.mType != ESM::Enchantment::ConstantEffect)
                 continue;
 
-            // Roll some dice, one for each effect
-            std::vector<float> random;
-            random.resize(enchantment.mEffects.mList.size());
-            for (unsigned int i=0; i<random.size();++i)
-                random[i] = static_cast<float> (std::rand()) / RAND_MAX;
+            std::vector<EffectParams> params;
 
             bool existed = (mPermanentMagicEffectMagnitudes.find((**iter).getCellRef().mRefID) != mPermanentMagicEffectMagnitudes.end());
             if (!existed)
             {
+                // Roll some dice, one for each effect
+                params.resize(enchantment.mEffects.mList.size());
+                for (unsigned int i=0; i<params.size();++i)
+                    params[i].mRandom = static_cast<float> (std::rand()) / RAND_MAX;
+
+                // Try resisting each effect
+                int i=0;
+                for (std::vector<ESM::ENAMstruct>::const_iterator effectIt (enchantment.mEffects.mList.begin());
+                    effectIt!=enchantment.mEffects.mList.end(); ++effectIt)
+                {
+                    params[i].mMultiplier = MWMechanics::getEffectMultiplier(effectIt->mEffectID, actor, actor);
+                    ++i;
+                }
+
                 // Note that using the RefID as a key here is not entirely correct.
                 // Consider equipping the same item twice (e.g. a ring)
                 // However, permanent enchantments with a random magnitude are kind of an exploit anyway,
                 // so it doesn't really matter if both items will get the same magnitude. *Extreme* edge case.
-                mPermanentMagicEffectMagnitudes[(**iter).getCellRef().mRefID] = random;
+                mPermanentMagicEffectMagnitudes[(**iter).getCellRef().mRefID] = params;
             }
+            else
+                params = mPermanentMagicEffectMagnitudes[(**iter).getCellRef().mRefID];
 
             int i=0;
             for (std::vector<ESM::ENAMstruct>::const_iterator effectIt (enchantment.mEffects.mList.begin());
-                effectIt!=enchantment.mEffects.mList.end(); ++effectIt)
+                effectIt!=enchantment.mEffects.mList.end(); ++effectIt, ++i)
             {
                 const ESM::MagicEffect *magicEffect =
                     MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
                     effectIt->mEffectID);
+
+                // Fully resisted?
+                if (params[i].mMultiplier == 0)
+                    continue;
 
                 if (!existed)
                 {
@@ -325,8 +343,10 @@ void MWWorld::InventoryStore::updateMagicEffects()
                                                         !mFirstAutoEquip && effectIt == enchantment.mEffects.mList.begin());
                 }
 
-                mMagicEffects.add (*effectIt, random[i]);
-                ++i;
+                float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * params[i].mRandom;
+                magnitude *= params[i].mMultiplier;
+                if (magnitude)
+                    mMagicEffects.add (*effectIt, magnitude);
             }
         }
     }
@@ -467,7 +487,7 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipSlot(int slot, c
         }
 
         fireEquipmentChangedEvent();
-        updateMagicEffects();
+        updateMagicEffects(actor);
 
         return retval;
     }
@@ -487,10 +507,10 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipItem(const MWWor
     throw std::runtime_error ("attempt to unequip an item that is not currently equipped");
 }
 
-void MWWorld::InventoryStore::setListener(InventoryStoreListener *listener)
+void MWWorld::InventoryStore::setListener(InventoryStoreListener *listener, const Ptr& actor)
 {
     mListener = listener;
-    updateMagicEffects();
+    updateMagicEffects(actor);
 }
 
 void MWWorld::InventoryStore::fireEquipmentChangedEvent()
@@ -499,4 +519,38 @@ void MWWorld::InventoryStore::fireEquipmentChangedEvent()
         return;
     if (mListener)
         mListener->equipmentChanged();
+}
+
+void MWWorld::InventoryStore::visitEffectSources(MWMechanics::EffectSourceVisitor &visitor)
+{
+    for (TSlots::const_iterator iter (mSlots.begin()); iter!=mSlots.end(); ++iter)
+    {
+        if (*iter==end())
+            continue;
+
+        std::string enchantmentId = MWWorld::Class::get (**iter).getEnchantment (**iter);
+        if (enchantmentId.empty())
+            continue;
+
+        const ESM::Enchantment& enchantment =
+            *MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find (enchantmentId);
+
+        if (enchantment.mData.mType != ESM::Enchantment::ConstantEffect)
+            continue;
+
+        if (mPermanentMagicEffectMagnitudes.find((**iter).getCellRef().mRefID) == mPermanentMagicEffectMagnitudes.end())
+            continue;
+
+        int i=0;
+        for (std::vector<ESM::ENAMstruct>::const_iterator effectIt (enchantment.mEffects.mList.begin());
+            effectIt!=enchantment.mEffects.mList.end(); ++effectIt)
+        {
+            const EffectParams& params = mPermanentMagicEffectMagnitudes[(**iter).getCellRef().mRefID][i];
+            float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * params.mRandom;
+            magnitude *= params.mMultiplier;
+            visitor.visit(*effectIt, (**iter).getClass().getName(**iter), magnitude);
+
+            ++i;
+        }
+    }
 }

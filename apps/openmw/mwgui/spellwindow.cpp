@@ -9,7 +9,7 @@
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/actionequip.hpp"
 
-#include "../mwmechanics/spellsuccess.hpp"
+#include "../mwmechanics/spellcasting.hpp"
 
 #include "spellicons.hpp"
 #include "inventorywindow.hpp"

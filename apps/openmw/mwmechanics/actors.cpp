@@ -29,7 +29,7 @@ namespace MWMechanics
         // magic effects
         adjustMagicEffects (ptr);
         calculateDynamicStats (ptr);
-        calculateCreatureStatModifiers (ptr);
+        calculateCreatureStatModifiers (ptr, duration);
 
         if(!MWBase::Environment::get().getWindowManager()->isGuiMode())
         {
@@ -145,7 +145,7 @@ namespace MWMechanics
         stats.setFatigue (fatigue);
     }
 
-    void Actors::calculateCreatureStatModifiers (const MWWorld::Ptr& ptr)
+    void Actors::calculateCreatureStatModifiers (const MWWorld::Ptr& ptr, float duration)
     {
         CreatureStats &creatureStats = MWWorld::Class::get(ptr).getCreatureStats(ptr);
         const MagicEffects &effects = creatureStats.getMagicEffects();
@@ -167,10 +167,25 @@ namespace MWMechanics
             stat.setModifier(effects.get(EffectKey(ESM::MagicEffect::FortifyHealth+i)).mMagnitude -
                              effects.get(EffectKey(ESM::MagicEffect::DrainHealth+i)).mMagnitude);
 
+            float currentDiff = creatureStats.getMagicEffects().get(EffectKey(ESM::MagicEffect::RestoreHealth+i)).mMagnitude
+                    - creatureStats.getMagicEffects().get(EffectKey(ESM::MagicEffect::DamageHealth+i)).mMagnitude;
+            stat.setCurrent(stat.getCurrent() + currentDiff * duration);
+
             creatureStats.setDynamic(i, stat);
         }
 
+        // Apply damage ticks
+        int damageEffects[] = {
+            ESM::MagicEffect::FireDamage, ESM::MagicEffect::ShockDamage, ESM::MagicEffect::FrostDamage, ESM::MagicEffect::Poison
+        };
 
+        for (unsigned int i=0; i<sizeof(damageEffects)/sizeof(int); ++i)
+        {
+            float magnitude = creatureStats.getMagicEffects().get(EffectKey(damageEffects[i])).mMagnitude;
+            DynamicStat<float> health = creatureStats.getHealth();
+            health.setCurrent(health.getCurrent() - magnitude * duration);
+            creatureStats.setHealth(health);
+        }
     }
 
     void Actors::calculateNpcStatModifiers (const MWWorld::Ptr& ptr)

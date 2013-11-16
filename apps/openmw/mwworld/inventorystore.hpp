@@ -74,7 +74,15 @@ namespace MWWorld
 
             // Vanilla allows permanent effects with a random magnitude, so it needs to be stored here.
             // We also need this to only play sounds and particle effects when the item is equipped, rather than on every update.
-            typedef std::map<std::string, std::vector<float> > TEffectMagnitudes;
+            struct EffectParams
+            {
+                // Modifier to scale between min and max magnitude
+                float mRandom;
+                // Multiplier for when an effect was fully or partially resisted
+                float mMultiplier;
+            };
+
+            typedef std::map<std::string, std::vector<EffectParams> > TEffectMagnitudes;
             TEffectMagnitudes mPermanentMagicEffectMagnitudes;
 
             typedef std::vector<ContainerStoreIterator> TSlots;
@@ -88,7 +96,7 @@ namespace MWWorld
 
             void initSlots (TSlots& slots_);
 
-            void updateMagicEffects();
+            void updateMagicEffects(const Ptr& actor);
 
             void fireEquipmentChangedEvent();
 
@@ -127,7 +135,7 @@ namespace MWWorld
             void unequipAll(const MWWorld::Ptr& actor);
             ///< Unequip all currently equipped items.
 
-            void autoEquip (const MWWorld::Ptr& npc);
+            void autoEquip (const MWWorld::Ptr& actor);
             ///< Auto equip items according to stats and item value.
 
             const MWMechanics::MagicEffects& getMagicEffects() const;
@@ -160,8 +168,10 @@ namespace MWWorld
             /// (it can be re-stacked so its count may be different than when it
             /// was equipped).
 
-            void setListener (InventoryStoreListener* listener);
+            void setListener (InventoryStoreListener* listener, const Ptr& actor);
             ///< Set a listener for various events, see \a InventoryStoreListener
+
+            void visitEffectSources (MWMechanics::EffectSourceVisitor& visitor);
     };
 }
 

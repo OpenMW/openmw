@@ -782,7 +782,7 @@ void CharacterController::update(float duration)
 
         if(!onground && !flying && !inwater)
         {
-            // The player is in the air (either getting up —ascending part of jump— or falling).
+            // In the air (either getting up —ascending part of jump— or falling).
 
             if (world->isSlowFalling(mPtr))
             {
@@ -817,8 +817,7 @@ void CharacterController::update(float duration)
         }
         else if(vec.z > 0.0f && mJumpState == JumpState_None)
         {
-            // The player has started a jump.
-
+            // Started a jump.
             float z = cls.getJump(mPtr);
             if(vec.x == 0 && vec.y == 0)
                 vec = Ogre::Vector3(0.0f, 0.0f, z);
@@ -829,7 +828,8 @@ void CharacterController::update(float duration)
             }
 
             // advance acrobatics
-            cls.skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, 0);
+            if (mPtr.getRefData().getHandle() == "player")
+                cls.skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, 0);
 
             // decrease fatigue
             const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
@@ -843,8 +843,6 @@ void CharacterController::update(float duration)
         }
         else if(mJumpState == JumpState_Falling)
         {
-            // The player is landing.
-
             forcestateupdate = true;
             mJumpState = JumpState_Landing;
             vec.z = 0.0f;
@@ -861,7 +859,8 @@ void CharacterController::update(float duration)
                 cls.getCreatureStats(mPtr).setHealth(health);
 
                 // report acrobatics progression
-                cls.skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, 1);
+                if (mPtr.getRefData().getHandle() == "player")
+                    cls.skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, 1);
 
                 const float acrobaticsSkill = cls.getNpcStats(mPtr).getSkill(ESM::Skill::Acrobatics).getModified();
                 if (healthLost > (acrobaticsSkill * fatigueTerm))

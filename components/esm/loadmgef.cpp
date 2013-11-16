@@ -81,6 +81,100 @@ void MagicEffect::save(ESMWriter &esm) const
     esm.writeHNOString("DESC", mDescription);
 }
 
+short MagicEffect::getResistanceEffect(short effect)
+{
+    // Source https://wiki.openmw.org/index.php?title=Research:Magic#Effect_attribute
+
+    // <Effect, Effect providing resistance against first effect>
+    std::map<short, short> effects;
+    effects[DisintegrateArmor] = Sanctuary;
+    effects[DisintegrateWeapon] = Sanctuary;
+
+    for (int i=0; i<5; ++i)
+        effects[DrainAttribute+i] = ResistMagicka;
+    for (int i=0; i<5; ++i)
+        effects[DamageAttribute+i] = ResistMagicka;
+    for (int i=0; i<5; ++i)
+        effects[AbsorbAttribute+i] = ResistMagicka;
+    for (int i=0; i<10; ++i)
+        effects[WeaknessToFire+i] = ResistMagicka;
+
+    effects[Burden] = ResistMagicka;
+    effects[Charm] = ResistMagicka;
+    effects[Silence] = ResistMagicka;
+    effects[Blind] = ResistMagicka;
+    effects[Sound] = ResistMagicka;
+
+    for (int i=0; i<2; ++i)
+    {
+        effects[CalmHumanoid] = ResistMagicka;
+        effects[FrenzyHumanoid] = ResistMagicka;
+        effects[DemoralizeHumanoid] = ResistMagicka;
+        effects[RallyHumanoid] = ResistMagicka;
+    }
+
+    effects[TurnUndead] = ResistMagicka;
+
+    effects[FireDamage] = ResistFire;
+    effects[FrostDamage] = ResistFrost;
+    effects[ShockDamage] = ResistShock;
+    effects[Vampirism] = ResistCommonDisease;
+    effects[Corprus] = ResistCorprusDisease;
+    effects[Poison] = ResistPoison;
+    effects[Paralyze] = ResistParalysis;
+
+    if (effects.find(effect) != effects.end())
+        return effects[effect];
+    else
+        return -1;
+}
+
+short MagicEffect::getWeaknessEffect(short effect)
+{
+    std::map<short, short> effects;
+    effects[DisintegrateArmor] = Sanctuary;
+    effects[DisintegrateWeapon] = Sanctuary;
+
+    for (int i=0; i<5; ++i)
+        effects[DrainAttribute+i] = WeaknessToMagicka;
+    for (int i=0; i<5; ++i)
+        effects[DamageAttribute+i] = WeaknessToMagicka;
+    for (int i=0; i<5; ++i)
+        effects[AbsorbAttribute+i] = WeaknessToMagicka;
+    for (int i=0; i<10; ++i)
+        effects[WeaknessToFire+i] = WeaknessToMagicka;
+
+    effects[Burden] = WeaknessToMagicka;
+    effects[Charm] = WeaknessToMagicka;
+    effects[Silence] = WeaknessToMagicka;
+    effects[Blind] = WeaknessToMagicka;
+    effects[Sound] = WeaknessToMagicka;
+
+    for (int i=0; i<2; ++i)
+    {
+        effects[CalmHumanoid] = WeaknessToMagicka;
+        effects[FrenzyHumanoid] = WeaknessToMagicka;
+        effects[DemoralizeHumanoid] = WeaknessToMagicka;
+        effects[RallyHumanoid] = WeaknessToMagicka;
+    }
+
+    effects[TurnUndead] = WeaknessToMagicka;
+
+    effects[FireDamage] = WeaknessToFire;
+    effects[FrostDamage] = WeaknessToFrost;
+    effects[ShockDamage] = WeaknessToShock;
+    effects[Vampirism] = WeaknessToCommonDisease;
+    effects[Corprus] = WeaknessToCorprusDisease;
+    effects[Poison] = WeaknessToPoison;
+
+    // Weakness to magicka or -1 ?
+    effects[Paralyze] = WeaknessToMagicka;
+
+    if (effects.find(effect) != effects.end())
+        return effects[effect];
+    else
+        return -1;
+}
 
 static std::map<short,std::string> genNameMap()
 {

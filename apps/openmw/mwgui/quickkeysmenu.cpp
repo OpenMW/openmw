@@ -5,7 +5,7 @@
 #include "../mwworld/player.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/actionequip.hpp"
-#include "../mwmechanics/spellsuccess.hpp"
+#include "../mwmechanics/spellcasting.hpp"
 #include "../mwgui/inventorywindow.hpp"
 #include "../mwgui/bookwindow.hpp"
 #include "../mwgui/scrollwindow.hpp"

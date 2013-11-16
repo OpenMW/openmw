@@ -9,7 +9,7 @@
 
 #include "../mwworld/player.hpp"
 
-#include "../mwmechanics/spellsuccess.hpp"
+#include "../mwmechanics/spellcasting.hpp"
 
 #include "tooltips.hpp"
 #include "class.hpp"
@@ -89,6 +89,8 @@ namespace MWGui
         mEffect.mMagnMax = 1;
         mEffect.mDuration = 1;
         mEffect.mArea = 0;
+        mEffect.mSkill = -1;
+        mEffect.mAttribute = -1;
         eventEffectAdded(mEffect);
 
         onRangeButtonClicked(mRangeButton);

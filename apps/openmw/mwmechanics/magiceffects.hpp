@@ -2,6 +2,7 @@
 #define GAME_MWMECHANICS_MAGICEFFECTS_H
 
 #include <map>
+#include <string>
 
 namespace ESM
 {
@@ -11,6 +12,13 @@ namespace ESM
 
 namespace MWMechanics
 {
+    // Used by effect management classes (ActiveSpells, InventoryStore, Spells) to list active effect sources for GUI display
+    struct EffectSourceVisitor
+    {
+        virtual void visit (const ESM::ENAMstruct& enam,
+                                 const std::string& sourceName, float magnitude, float remainingTime = -1) = 0;
+    };
+
     struct EffectKey
     {
         int mId;
@@ -29,11 +37,12 @@ namespace MWMechanics
 
     struct EffectParam
     {
-        int mMagnitude;
+        // Note usually this would be int, but applying partial resistance might introduce decimal point.
+        float mMagnitude;
 
         EffectParam();
 
-        EffectParam(int magnitude) : mMagnitude(magnitude) {}
+        EffectParam(float magnitude) : mMagnitude(magnitude) {}
 
         EffectParam& operator+= (const EffectParam& param);
 

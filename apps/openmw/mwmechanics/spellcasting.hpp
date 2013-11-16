@@ -63,7 +63,7 @@ namespace MWMechanics
             x *= 0.1 * magicEffect->mData.mBaseCost;
             x *= 0.5 * (it->mMagnMin + it->mMagnMax);
             x *= it->mArea * 0.05 * magicEffect->mData.mBaseCost;
-            if (it->mRange == ESM::RT_Target)
+            if (magicEffect->mData.mFlags & ESM::MagicEffect::CastTarget)
                 x *= 1.5;
             static const float fEffectCostMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
                         "fEffectCostMult")->getFloat();
@@ -112,6 +112,72 @@ namespace MWMechanics
         int school = 0;
         getSpellSuccessChance(spell, actor, &school);
         return school;
+    }
+
+    /// @return >=100 for fully resisted. can also return negative value for damage amplification.
+    inline float getEffectResistance (short effectId, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster, const ESM::Spell* spell = NULL)
+    {
+        const ESM::MagicEffect *magicEffect =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
+            effectId);
+
+        const MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
+
+        float resisted = 0;
+        if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful)
+        {
+
+            short resistanceEffect = ESM::MagicEffect::getResistanceEffect(effectId);
+            short weaknessEffect = ESM::MagicEffect::getWeaknessEffect(effectId);
+
+            float resistance = 0;
+            if (resistanceEffect != -1)
+                resistance += stats.getMagicEffects().get(resistanceEffect).mMagnitude;
+            if (weaknessEffect != -1)
+                resistance -= stats.getMagicEffects().get(weaknessEffect).mMagnitude;
+
+
+            float willpower = stats.getAttribute(ESM::Attribute::Willpower).getModified();
+            float luck = stats.getAttribute(ESM::Attribute::Luck).getModified();
+            float x = (willpower + 0.1 * luck) * stats.getFatigueTerm();
+
+            // This makes spells that are easy to cast harder to resist and vice versa
+            if (spell != NULL)
+            {
+                float castChance = getSpellSuccessChance(spell, caster);
+                if (castChance > 0)
+                    x *= 50 / castChance;
+            }
+
+            float roll = static_cast<float>(std::rand()) / RAND_MAX * 100;
+            if (magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude)
+                roll -= resistance;
+
+            if (x <= roll)
+                x = 0;
+            else
+            {
+                if (magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude)
+                    x = 100;
+                else
+                    x = roll / std::min(x, 100.f);
+            }
+
+            x = std::min(x + resistance, 100.f);
+
+            resisted = x;
+        }
+
+        return resisted;
+    }
+
+    inline float getEffectMultiplier(short effectId, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster, const ESM::Spell* spell = NULL)
+    {
+        float resistance = getEffectResistance(effectId, actor, caster, spell);
+        if (resistance >= 0)
+            return 1 - resistance / 100.f;
+        else
+            return -(resistance-100) / 100.f;
     }
 
 }
