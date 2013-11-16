@@ -86,12 +86,13 @@ void CompanionWindow::onBackgroundSelected()
 void CompanionWindow::open(const MWWorld::Ptr& npc)
 {
     mPtr = npc;
-    setTitle(MWWorld::Class::get(npc).getName(npc));
     updateEncumbranceBar();
 
     mModel = new CompanionItemModel(npc);
     mSortModel = new SortFilterItemModel(mModel);
     mItemView->setModel(mSortModel);
+
+    setTitle(MWWorld::Class::get(npc).getName(npc));
 }
 
 void CompanionWindow::onFrame()
