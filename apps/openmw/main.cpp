@@ -107,7 +107,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("resources", bpo::value<std::string>()->default_value("resources"),
             "set resources directory")
 
-        ("start", bpo::value<std::string>()->default_value("Beshara"),
+        ("start", bpo::value<std::string>()->default_value(""),
             "set initial cell")
 
         ("content", bpo::value<StringsVector>()->default_value(StringsVector(), "")

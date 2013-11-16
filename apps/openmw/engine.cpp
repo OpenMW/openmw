@@ -424,12 +424,21 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     ESM::Position pos;
     MWBase::World *world = MWBase::Environment::get().getWorld();
 
-    if (world->findExteriorPosition(mCellName, pos)) {
-        world->changeToExteriorCell (pos);
+    if (!mCellName.empty())
+    {
+        if (world->findExteriorPosition(mCellName, pos)) {
+            world->changeToExteriorCell (pos);
+        }
+        else {
+            world->findInteriorPosition(mCellName, pos);
+            world->changeToInteriorCell (mCellName, pos);
+        }
     }
-    else {
-        world->findInteriorPosition(mCellName, pos);
-        world->changeToInteriorCell (mCellName, pos);
+    else
+    {
+        pos.pos[0] = pos.pos[1] = pos.pos[2] = 0;
+        pos.rot[0] = pos.rot[1] = pos.pos[2] = 0;
+        world->changeToExteriorCell (pos);
     }
 
     Ogre::FrameEvent event;
@@ -456,7 +465,6 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
 void OMW::Engine::go()
 {
-    assert (!mCellName.empty());
     assert (!mContentFiles.empty());
     assert (!mOgre);
 
