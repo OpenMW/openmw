@@ -82,7 +82,6 @@ namespace MWGui
     void TradeWindow::startTrade(const MWWorld::Ptr& actor)
     {
         mPtr = actor;
-        setTitle(MWWorld::Class::get(actor).getName(actor));
 
         mCurrentBalance = 0;
         mCurrentMerchantOffer = 0;
@@ -99,6 +98,10 @@ namespace MWGui
         mItemView->setModel (mSortModel);
 
         updateLabels();
+
+        // Careful here. setTitle may cause size updates, causing itemview redraw, so make sure to do it last
+        // or we end up using a possibly invalid model.
+        setTitle(MWWorld::Class::get(actor).getName(actor));
     }
 
     void TradeWindow::onFilterChanged(MyGUI::Widget* _sender)
