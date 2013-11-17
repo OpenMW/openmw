@@ -602,7 +602,7 @@ class NIFObjectLoader
         partsys->setParticleQuota(particledata->numParticles);
         // TODO: There is probably a field or flag to specify this, as some
         // particle effects have it and some don't.
-        partsys->setKeepParticlesInLocalSpace(true);
+        partsys->setKeepParticlesInLocalSpace(false);
 
         Nif::ControllerPtr ctrl = partnode->controller;
         while(!ctrl.empty())
