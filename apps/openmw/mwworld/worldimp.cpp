@@ -2166,7 +2166,10 @@ namespace MWWorld
         if (!contact.first.isEmpty())
         {
             if (contact.first.getClass().isActor())
-                contact.first.getClass().getCreatureStats(contact.first).getActiveSpells().addSpell(selectedSpell, contact.first, actor, ESM::RT_Touch, sourceName);
+            {
+                if (!contact.first.getClass().getCreatureStats(contact.first).isDead())
+                    contact.first.getClass().getCreatureStats(contact.first).getActiveSpells().addSpell(selectedSpell, contact.first, actor, ESM::RT_Touch, sourceName);
+            }
             else
             {
                 // We hit a non-actor, e.g. a door. Only instant effects are relevant.
