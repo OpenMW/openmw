@@ -1045,7 +1045,9 @@ void Animation::updateEffects(float duration)
         NifOgre::ObjectList& objects = it->mObjects;
         for(size_t i = 0; i < objects.mControllers.size() ;i++)
         {
-            static_cast<EffectAnimationValue*> (objects.mControllers[i].getSource().get())->addTime(duration);
+            EffectAnimationValue* value = dynamic_cast<EffectAnimationValue*>(objects.mControllers[i].getSource().get());
+            if (value)
+                value->addTime(duration);
 
             objects.mControllers[i].update();
         }
@@ -1058,7 +1060,9 @@ void Animation::updateEffects(float duration)
                 float remainder = objects.mControllers[0].getSource()->getValue() - objects.mMaxControllerLength;
                 for(size_t i = 0; i < objects.mControllers.size() ;i++)
                 {
-                    static_cast<EffectAnimationValue*> (objects.mControllers[i].getSource().get())->resetTime(remainder);
+                    EffectAnimationValue* value = dynamic_cast<EffectAnimationValue*>(objects.mControllers[i].getSource().get());
+                    if (value)
+                        value->resetTime(remainder);
                 }
             }
             else

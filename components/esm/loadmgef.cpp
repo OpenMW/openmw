@@ -132,8 +132,6 @@ short MagicEffect::getResistanceEffect(short effect)
 short MagicEffect::getWeaknessEffect(short effect)
 {
     std::map<short, short> effects;
-    effects[DisintegrateArmor] = Sanctuary;
-    effects[DisintegrateWeapon] = Sanctuary;
 
     for (int i=0; i<5; ++i)
         effects[DrainAttribute+i] = WeaknessToMagicka;
