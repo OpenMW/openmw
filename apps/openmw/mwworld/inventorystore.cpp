@@ -92,6 +92,9 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::add(const Ptr& itemPtr,
 
 void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& iterator, const Ptr& actor)
 {
+    if (iterator == end())
+        throw std::runtime_error ("can't equip end() iterator, use unequip function instead");
+
     if (slot<0 || slot>=static_cast<int> (mSlots.size()))
         throw std::runtime_error ("slot number out of range");
 
@@ -99,13 +102,11 @@ void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& ite
         throw std::runtime_error ("attempt to equip an item that is not in the inventory");
 
     std::pair<std::vector<int>, bool> slots_;
-    if (iterator!=end())
-    {
-        slots_ = Class::get (*iterator).getEquipmentSlots (*iterator);
 
-        if (std::find (slots_.first.begin(), slots_.first.end(), slot)==slots_.first.end())
-            throw std::runtime_error ("invalid slot");
-    }
+    slots_ = Class::get (*iterator).getEquipmentSlots (*iterator);
+
+    if (std::find (slots_.first.begin(), slots_.first.end(), slot)==slots_.first.end())
+        throw std::runtime_error ("invalid slot");
 
     if (mSlots[slot] != end())
         unequipSlot(slot, actor);
@@ -126,6 +127,10 @@ void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& ite
 
     fireEquipmentChangedEvent();
     updateMagicEffects(actor);
+
+    // Update HUD icon for player weapon
+    if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
+        MWBase::Environment::get().getWindowManager()->setSelectedWeapon(*getSlot(slot));
 }
 
 void MWWorld::InventoryStore::unequipAll(const MWWorld::Ptr& actor)
@@ -482,6 +487,7 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipSlot(int slot, c
             if ((mSelectedEnchantItem != end()) && (mSelectedEnchantItem == it))
             {
                 // enchanted item
+                mSelectedEnchantItem = end();
                 MWBase::Environment::get().getWindowManager()->unsetSelectedSpell();
             }
         }

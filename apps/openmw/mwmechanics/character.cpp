@@ -563,10 +563,8 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
                 if(!resultSound.empty())
                     MWBase::Environment::get().getSoundManager()->playSound(resultSound, 1.0f, 1.0f);
 
-                // tool used up?
-                if(!item.getRefData().getCount())
-                    MWBase::Environment::get().getWindowManager()->unsetSelectedWeapon();
-                else
+                // Set again, just to update the charge bar
+                if(item.getRefData().getCount())
                     MWBase::Environment::get().getWindowManager()->setSelectedWeapon(item);
             }
             else

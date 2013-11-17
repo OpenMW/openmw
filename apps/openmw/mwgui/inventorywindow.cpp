@@ -455,14 +455,6 @@ namespace MWGui
         if (MWBase::Environment::get().getWindowManager()->getSpellWindow())
             MWBase::Environment::get().getWindowManager()->getSpellWindow()->updateSpells();
 
-        // update selected weapon icon
-        MWWorld::InventoryStore& invStore = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
-        MWWorld::ContainerStoreIterator weaponSlot = invStore.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-        if (weaponSlot == invStore.end())
-            MWBase::Environment::get().getWindowManager()->unsetSelectedWeapon();
-        else
-            MWBase::Environment::get().getWindowManager()->setSelectedWeapon(*weaponSlot);
-
         mPreviewDirty = true;
 
         mArmorRating->setCaptionWithReplacing ("#{sArmor}: "
