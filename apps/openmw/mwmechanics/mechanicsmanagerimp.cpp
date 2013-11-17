@@ -679,4 +679,9 @@ namespace MWMechanics
             return false;
     }
 
+    void MechanicsManager::updateMagicEffects(const MWWorld::Ptr &ptr)
+    {
+        mActors.updateMagicEffects(ptr);
+    }
+
 }

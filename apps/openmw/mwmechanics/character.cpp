@@ -516,6 +516,12 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
                     const ESM::Static* castStatic = store.get<ESM::Static>().find (effect->mCasting);
                     mAnimation->addEffect("meshes\\" + castStatic->mModel, effect->mIndex);
 
+                    castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_Hands");
+                    //mAnimation->addEffect("meshes\\" + castStatic->mModel, -1, false, "Bip01 L Hand", effect->mParticle);
+                    //mAnimation->addEffect("meshes\\" + castStatic->mModel, -1, false, "Bip01 R Hand", effect->mParticle);
+                    mAnimation->addEffect("meshes\\" + castStatic->mModel, -1, false, "Left Hand", effect->mParticle);
+                    mAnimation->addEffect("meshes\\" + castStatic->mModel, -1, false, "Right Hand", effect->mParticle);
+
                     switch(effectentry.mRange)
                     {
                         case 0: mAttackType = "self"; break;

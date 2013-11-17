@@ -114,6 +114,11 @@ namespace MWBase
         /// references that are currently not in the scene should be ignored.
 
         virtual bool checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string& groupName) = 0;
+
+        /// Update magic effects for an actor. Usually done automatically once per frame, but if we're currently
+        /// paused we may want to do it manually (after equipping permanent enchantment)
+        virtual void updateMagicEffects (const MWWorld::Ptr& ptr) = 0;
+
     };
 }
 

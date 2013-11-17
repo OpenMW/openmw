@@ -281,3 +281,11 @@ void Objects::updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
     node->addChild(cur.getRefData().getBaseNode());
 }
 
+ObjectAnimation* Objects::getAnimation(const MWWorld::Ptr &ptr)
+{
+    PtrAnimationMap::const_iterator iter = mObjects.find(ptr);
+    if(iter != mObjects.end())
+        return iter->second;
+    return NULL;
+}
+

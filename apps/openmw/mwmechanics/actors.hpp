@@ -53,6 +53,10 @@ namespace MWMechanics
 
             Actors();
 
+            /// Update magic effects for an actor. Usually done automatically once per frame, but if we're currently
+            /// paused we may want to do it manually (after equipping permanent enchantment)
+            void updateMagicEffects (const MWWorld::Ptr& ptr) { adjustMagicEffects(ptr); }
+
             void addActor (const MWWorld::Ptr& ptr);
             ///< Register an actor for stats management
             ///

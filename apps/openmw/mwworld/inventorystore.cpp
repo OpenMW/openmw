@@ -9,6 +9,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/spellcasting.hpp"
@@ -339,6 +340,9 @@ void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
                 if (params[i].mMultiplier == 0)
                     continue;
 
+                float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * params[i].mRandom;
+                magnitude *= params[i].mMultiplier;
+
                 if (!existed)
                 {
                     // During first auto equip, we don't play any sounds.
@@ -346,10 +350,13 @@ void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
                     // the items should appear as if they'd always been equipped.
                     mListener->permanentEffectAdded(magicEffect, !mFirstAutoEquip,
                                                         !mFirstAutoEquip && effectIt == enchantment.mEffects.mList.begin());
+
+                    // Apply instant effects
+                    MWMechanics::CastSpell cast(actor, actor);
+                    if (magnitude)
+                        cast.applyInstantEffect(actor, effectIt->mEffectID, magnitude);
                 }
 
-                float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * params[i].mRandom;
-                magnitude *= params[i].mMultiplier;
                 if (magnitude)
                     mMagicEffects.add (*effectIt, magnitude);
             }
@@ -375,6 +382,9 @@ void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
         else
             ++it;
     }
+
+    // Magic effects are normally not updated when paused, but we need this to make resistances work immediately after equipping
+    MWBase::Environment::get().getMechanicsManager()->updateMagicEffects(actor);
 
     mFirstAutoEquip = false;
 }
@@ -440,6 +450,13 @@ int MWWorld::InventoryStore::remove(const Ptr& item, int count, const Ptr& actor
         std::string type = item.getTypeName();
         if ((type == typeid(ESM::Armor).name()) || (type == typeid(ESM::Clothing).name()))
             autoEquip(actor);
+    }
+
+    if (item.getRefData().getCount() == 0 && mSelectedEnchantItem != end()
+            && *mSelectedEnchantItem == item && actor.getRefData().getHandle() == "player")
+    {
+        mSelectedEnchantItem = end();
+        MWBase::Environment::get().getWindowManager()->unsetSelectedSpell();
     }
 
     return retCount;
@@ -554,7 +571,7 @@ void MWWorld::InventoryStore::visitEffectSources(MWMechanics::EffectSourceVisito
             const EffectParams& params = mPermanentMagicEffectMagnitudes[(**iter).getCellRef().mRefID][i];
             float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * params.mRandom;
             magnitude *= params.mMultiplier;
-            visitor.visit(*effectIt, (**iter).getClass().getName(**iter), magnitude);
+            visitor.visit(MWMechanics::EffectKey(*effectIt), (**iter).getClass().getName(**iter), magnitude);
 
             ++i;
         }

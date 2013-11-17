@@ -206,9 +206,10 @@ public:
      * @param loop Loop the effect. If false, it is removed automatically after it finishes playing. If true,
      *              you need to remove it manually using removeEffect when the effect should end.
      * @param bonename Bone to attach to, or empty string to use the scene node instead
+     * @param texture override the texture specified in the model's materials
      * @note Will not add an effect twice.
      */
-    void addEffect (const std::string& model, int effectId, bool loop = false, const std::string& bonename = "");
+    void addEffect (const std::string& model, int effectId, bool loop = false, const std::string& bonename = "", std::string texture = "");
     void removeEffect (int effectId);
     void getLoopingEffects (std::vector<int>& out);
 private:

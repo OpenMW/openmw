@@ -994,16 +994,27 @@ void Animation::detachObjectFromBone(Ogre::MovableObject *obj)
     mSkelBase->detachObjectFromBone(obj);
 }
 
-void Animation::addEffect(const std::string &model, int effectId, bool loop, const std::string &bonename)
+void Animation::addEffect(const std::string &model, int effectId, bool loop, const std::string &bonename, std::string texture)
 {
     // Early out if we already have this effect
     for (std::vector<EffectParams>::iterator it = mEffects.begin(); it != mEffects.end(); ++it)
         if (it->mLoop && loop && it->mEffectId == effectId && it->mBoneName == bonename)
             return;
 
+    // fix texture extension to .dds
+    if (texture.size() > 4)
+    {
+        texture[texture.size()-3] = 'd';
+        texture[texture.size()-2] = 'd';
+        texture[texture.size()-1] = 's';
+    }
+
     EffectParams params;
     params.mModelName = model;
-    params.mObjects = NifOgre::Loader::createObjects(mInsert, model);
+    if (bonename.empty())
+        params.mObjects = NifOgre::Loader::createObjects(mInsert, model);
+    else
+        params.mObjects = NifOgre::Loader::createObjects(mSkelBase, bonename, mInsert, model);
     params.mLoop = loop;
     params.mEffectId = effectId;
     params.mBoneName = bonename;
@@ -1013,6 +1024,35 @@ void Animation::addEffect(const std::string &model, int effectId, bool loop, con
         if(params.mObjects.mControllers[i].getSource().isNull())
             params.mObjects.mControllers[i].setSource(Ogre::SharedPtr<EffectAnimationValue> (new EffectAnimationValue()));
     }
+
+    if (!texture.empty())
+    {
+        for(size_t i = 0;i < params.mObjects.mParticles.size(); ++i)
+        {
+            Ogre::ParticleSystem* partSys = params.mObjects.mParticles[i];
+            Ogre::MaterialPtr mat = Ogre::MaterialManager::getSingleton().getByName(partSys->getMaterialName());
+            static int count = 0;
+            Ogre::String materialName = "openmw/" + Ogre::StringConverter::toString(count++);
+            // TODO: destroy when effect is removed
+            Ogre::MaterialPtr newMat = mat->clone(materialName);
+            partSys->setMaterialName(materialName);
+
+            for (int t=0; t<newMat->getNumTechniques(); ++t)
+            {
+                Ogre::Technique* tech = newMat->getTechnique(t);
+                for (int p=0; p<tech->getNumPasses(); ++p)
+                {
+                    Ogre::Pass* pass = tech->getPass(p);
+                    for (int tex=0; tex<pass->getNumTextureUnitStates(); ++tex)
+                    {
+                        Ogre::TextureUnitState* tus = pass->getTextureUnitState(tex);
+                        tus->setTextureName("textures\\" + texture);
+                    }
+                }
+            }
+        }
+    }
+
     mEffects.push_back(params);
 }
 

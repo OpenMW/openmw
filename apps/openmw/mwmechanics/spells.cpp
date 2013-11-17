@@ -118,6 +118,62 @@ namespace MWMechanics
         return false;
     }
 
+    void Spells::purgeCommonDisease()
+    {
+        for (TContainer::iterator iter = mSpells.begin(); iter!=mSpells.end();)
+        {
+            const ESM::Spell *spell =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (iter->first);
+
+            if (spell->mData.mType & ESM::Spell::ST_Disease)
+                mSpells.erase(iter++);
+            else
+                iter++;
+        }
+    }
+
+    void Spells::purgeBlightDisease()
+    {
+        for (TContainer::iterator iter = mSpells.begin(); iter!=mSpells.end();)
+        {
+            const ESM::Spell *spell =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (iter->first);
+
+            if (spell->mData.mType & ESM::Spell::ST_Blight)
+                mSpells.erase(iter++);
+            else
+                iter++;
+        }
+    }
+
+    void Spells::purgeCorprusDisease()
+    {
+        for (TContainer::iterator iter = mSpells.begin(); iter!=mSpells.end();)
+        {
+            const ESM::Spell *spell =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (iter->first);
+
+            if (Misc::StringUtils::ciEqual(spell->mId, "corprus"))
+                mSpells.erase(iter++);
+            else
+                iter++;
+        }
+    }
+
+    void Spells::purgeCurses()
+    {
+        for (TContainer::iterator iter = mSpells.begin(); iter!=mSpells.end();)
+        {
+            const ESM::Spell *spell =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (iter->first);
+
+            if (spell->mData.mType == ESM::Spell::ST_Curse)
+                mSpells.erase(iter++);
+            else
+                iter++;
+        }
+    }
+
     void Spells::visitEffectSources(EffectSourceVisitor &visitor) const
     {
         for (TIterator it = begin(); it != end(); ++it)
@@ -136,7 +192,7 @@ namespace MWMechanics
                  effectIt != list.mList.end(); ++effectIt, ++i)
             {
                 float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * it->second[i];
-                visitor.visit(*effectIt, spell->mName, magnitude);
+                visitor.visit(MWMechanics::EffectKey(*effectIt), spell->mName, magnitude);
             }
         }
     }

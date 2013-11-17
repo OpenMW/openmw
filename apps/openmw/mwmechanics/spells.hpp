@@ -35,6 +35,11 @@ namespace MWMechanics
 
         public:
 
+            void purgeCommonDisease();
+            void purgeBlightDisease();
+            void purgeCorprusDisease();
+            void purgeCurses();
+
             TIterator begin() const;
 
             TIterator end() const;

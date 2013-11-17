@@ -44,12 +44,6 @@ namespace MWMechanics
         if (creatureStats.getMagicEffects().get(ESM::MagicEffect::Silence).mMagnitude)
             return 0;
 
-        if (spell->mData.mType != ESM::Spell::ST_Spell)
-            return 100;
-
-        if (spell->mData.mFlags & ESM::Spell::F_Always)
-            return 100;
-
         float y = FLT_MAX;
         float lowestSkill = 0;
 
@@ -79,8 +73,14 @@ namespace MWMechanics
             }
         }
 
+        if (spell->mData.mType != ESM::Spell::ST_Spell)
+            return 100;
+
+        if (spell->mData.mFlags & ESM::Spell::F_Always)
+            return 100;
 
         int castBonus = -stats.getMagicEffects().get(ESM::MagicEffect::Sound).mMagnitude;
+
         int actorWillpower = stats.getAttribute(ESM::Attribute::Willpower).getModified();
         int actorLuck = stats.getAttribute(ESM::Attribute::Luck).getModified();
 
@@ -98,7 +98,6 @@ namespace MWMechanics
         return getSpellSuccessChance(spell, actor, effectiveSchool);
     }
 
-    /// @note this only works for ST_Spell
     inline int getSpellSchool(const std::string& spellId, const MWWorld::Ptr& actor)
     {
         int school = 0;
@@ -106,7 +105,6 @@ namespace MWMechanics
         return school;
     }
 
-    /// @note this only works for ST_Spell
     inline int getSpellSchool(const ESM::Spell* spell, const MWWorld::Ptr& actor)
     {
         int school = 0;
@@ -179,6 +177,34 @@ namespace MWMechanics
         else
             return -(resistance-100) / 100.f;
     }
+
+
+    class CastSpell
+    {
+    private:
+        MWWorld::Ptr mCaster;
+        MWWorld::Ptr mTarget;
+
+        bool mStack;
+        std::string mId; // ID of spell, potion, item etc
+        std::string mSourceName; // Display name for spell, potion, etc
+
+    public:
+        CastSpell(const MWWorld::Ptr& caster, const MWWorld::Ptr& target);
+
+        bool cast (const ESM::Spell* spell);
+        bool cast (const MWWorld::Ptr& item);
+        bool cast (const ESM::Ingredient* ingredient);
+        bool cast (const ESM::Potion* potion);
+
+        /// @note Auto detects if spell, ingredient or potion
+        bool cast (const std::string& id);
+
+        void inflict (const MWWorld::Ptr& target, const MWWorld::Ptr& caster,
+                      const ESM::EffectList& effects, ESM::RangeType range, bool reflected=false);
+
+        void applyInstantEffect (const MWWorld::Ptr& target, short effectId, float magnitude);
+    };
 
 }
 

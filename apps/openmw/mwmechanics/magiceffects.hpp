@@ -12,13 +12,6 @@ namespace ESM
 
 namespace MWMechanics
 {
-    // Used by effect management classes (ActiveSpells, InventoryStore, Spells) to list active effect sources for GUI display
-    struct EffectSourceVisitor
-    {
-        virtual void visit (const ESM::ENAMstruct& enam,
-                                 const std::string& sourceName, float magnitude, float remainingTime = -1) = 0;
-    };
-
     struct EffectKey
     {
         int mId;
@@ -58,6 +51,13 @@ namespace MWMechanics
         EffectParam param (left);
         return param -= right;
     }
+
+    // Used by effect management classes (ActiveSpells, InventoryStore, Spells) to list active effect sources for GUI display
+    struct EffectSourceVisitor
+    {
+        virtual void visit (MWMechanics::EffectKey key,
+                                 const std::string& sourceName, float magnitude, float remainingTime = -1) = 0;
+    };
 
     /// \brief Effects currently affecting a NPC or creature
     class MagicEffects

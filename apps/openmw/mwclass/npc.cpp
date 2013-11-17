@@ -20,6 +20,7 @@
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/movement.hpp"
+#include "../mwmechanics/spellcasting.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
@@ -467,12 +468,9 @@ namespace MWClass
                 else
                 {
                     weapon.getCellRef().mEnchantmentCharge -= castCost;
-                    // Touch
-                    othercls.getCreatureStats(victim).getActiveSpells().addSpell(enchantmentName, victim, ptr, ESM::RT_Touch, weapon.getClass().getName(weapon));
-                    // Self
-                    getCreatureStats(ptr).getActiveSpells().addSpell(enchantmentName, ptr, ptr, ESM::RT_Self, weapon.getClass().getName(weapon));
-                    // Target
-                    MWBase::Environment::get().getWorld()->launchProjectile(enchantmentName, enchantment->mEffects, ptr, weapon.getClass().getName(weapon));
+
+                    MWMechanics::CastSpell cast(ptr, victim);
+                    cast.cast(weapon);
                 }
             }
         }
@@ -932,11 +930,8 @@ namespace MWClass
     bool Npc::apply (const MWWorld::Ptr& ptr, const std::string& id,
         const MWWorld::Ptr& actor) const
     {
-        MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
-
-        /// \todo consider instant effects
-
-        return stats.getActiveSpells().addSpell (id, actor, actor);
+        MWMechanics::CastSpell cast(ptr, ptr);
+        return cast.cast(id);
     }
 
     void Npc::skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType) const

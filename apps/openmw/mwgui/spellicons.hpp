@@ -42,7 +42,7 @@ namespace MWGui
 
         std::map <int, std::vector<MagicEffectInfo> > mEffectSources;
 
-        virtual void visit (const ESM::ENAMstruct& enam,
+        virtual void visit (MWMechanics::EffectKey key,
                                  const std::string& sourceName, float magnitude, float remainingTime = -1);
     };
 

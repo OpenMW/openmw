@@ -21,17 +21,17 @@
 namespace MWGui
 {
 
-    void EffectSourceVisitor::visit (const ESM::ENAMstruct& enam,
+    void EffectSourceVisitor::visit (MWMechanics::EffectKey key,
                                            const std::string& sourceName, float magnitude, float remainingTime)
     {
         MagicEffectInfo newEffectSource;
-        newEffectSource.mKey = MWMechanics::EffectKey(enam);
+        newEffectSource.mKey = key;
         newEffectSource.mMagnitude = magnitude;
         newEffectSource.mPermanent = mIsPermanent;
         newEffectSource.mRemainingTime = remainingTime;
         newEffectSource.mSource = sourceName;
 
-        mEffectSources[enam.mEffectID].push_back(newEffectSource);
+        mEffectSources[key.mId].push_back(newEffectSource);
     }
 
 

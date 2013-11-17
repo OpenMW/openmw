@@ -2029,156 +2029,28 @@ namespace MWWorld
     void World::castSpell(const Ptr &actor)
     {
         MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
+        InventoryStore& inv = actor.getClass().getInventoryStore(actor);
+
+        // Unset casting flag, otherwise pressing the mouse button down would continue casting every frame if using an enchantment
+        // (which casts instantly without an animation)
         stats.setAttackingOrSpell(false);
 
-        ESM::EffectList effects;
+        MWWorld::Ptr target = getFacedObject();
 
         std::string selectedSpell = stats.getSpells().getSelectedSpell();
-        std::string sourceName;
+
+        MWMechanics::CastSpell cast(actor, target);
+
         if (!selectedSpell.empty())
         {
             const ESM::Spell* spell = getStore().get<ESM::Spell>().search(selectedSpell);
 
-            // Reduce fatigue (note that in the vanilla game, both GMSTs are 0, and there's no fatigue loss)
-            static const float fFatigueSpellBase = getStore().get<ESM::GameSetting>().find("fFatigueSpellBase")->getFloat();
-            static const float fFatigueSpellMult = getStore().get<ESM::GameSetting>().find("fFatigueSpellMult")->getFloat();
-            MWMechanics::DynamicStat<float> fatigue = stats.getFatigue();
-            const float normalizedEncumbrance = actor.getClass().getEncumbrance(actor) / actor.getClass().getCapacity(actor);
-            float fatigueLoss = spell->mData.mCost * (fFatigueSpellBase + normalizedEncumbrance * fFatigueSpellMult);
-            fatigue.setCurrent(std::max(0.f, fatigue.getCurrent() - fatigueLoss));
-            stats.setFatigue(fatigue);
-
-            // Check mana
-            bool fail = false;
-            MWMechanics::DynamicStat<float> magicka = stats.getMagicka();
-            if (magicka.getCurrent() < spell->mData.mCost)
-            {
-                MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicInsufficientSP}");
-                fail = true;
-            }
-
-            // Reduce mana
-            if (!fail)
-            {
-                magicka.setCurrent(magicka.getCurrent() - spell->mData.mCost);
-                stats.setMagicka(magicka);
-            }
-
-            // If this is a power, check if it was already used in last 24h
-            if (!fail && spell->mData.mType & ESM::Spell::ST_Power)
-            {
-                if (stats.canUsePower(selectedSpell))
-                    stats.usePower(selectedSpell);
-                else
-                {
-                    MWBase::Environment::get().getWindowManager()->messageBox("#{sPowerAlreadyUsed}");
-                    fail = true;
-                }
-            }
-
-            // Check success
-            int successChance = MWMechanics::getSpellSuccessChance(selectedSpell, actor);
-            int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
-            if (!fail && roll >= successChance)
-            {
-                MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicSkillFail}");
-                fail = true;
-            }
-
-            if (fail)
-            {
-                // Failure sound
-                for (std::vector<ESM::ENAMstruct>::const_iterator iter (spell->mEffects.mList.begin());
-                    iter!=spell->mEffects.mList.end(); ++iter)
-                {
-                    const ESM::MagicEffect *magicEffect = getStore().get<ESM::MagicEffect>().find (
-                        iter->mEffectID);
-
-                    static const std::string schools[] = {
-                        "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
-                    };
-
-                    MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-                    sndMgr->playSound3D(actor, "Spell Failure " + schools[magicEffect->mData.mSchool], 1.0f, 1.0f);
-                    break;
-                }
-                return;
-            }
-
-            if (actor == getPlayer().getPlayer() && spell->mData.mType == ESM::Spell::ST_Spell)
-                actor.getClass().skillUsageSucceeded(actor,
-                    MWMechanics::spellSchoolToSkill(MWMechanics::getSpellSchool(selectedSpell, actor)), 0);
-
-            effects = spell->mEffects;
+            cast.cast(spell);
         }
-        InventoryStore& inv = actor.getClass().getInventoryStore(actor);
-        if (selectedSpell.empty() && inv.getSelectedEnchantItem() != inv.end())
+        else if (inv.getSelectedEnchantItem() != inv.end())
         {
-            MWWorld::Ptr item = *inv.getSelectedEnchantItem();
-            selectedSpell = item.getClass().getEnchantment(item);
-            const ESM::Enchantment* enchantment = getStore().get<ESM::Enchantment>().search (selectedSpell);
-
-            if (enchantment->mData.mType == ESM::Enchantment::WhenUsed)
-            {
-                // Check if there's enough charge left
-                const float enchantCost = enchantment->mData.mCost;
-                MWMechanics::NpcStats &stats = MWWorld::Class::get(actor).getNpcStats(actor);
-                int eSkill = stats.getSkill(ESM::Skill::Enchant).getModified();
-                const float castCost = enchantCost - (enchantCost / 100) * (eSkill - 10);
-
-                if (item.getCellRef().mEnchantmentCharge == -1)
-                    item.getCellRef().mEnchantmentCharge = enchantment->mData.mCharge;
-
-                if (item.getCellRef().mEnchantmentCharge < castCost)
-                {
-                    MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicInsufficientCharge}");
-                    return;
-                }
-
-                // Reduce charge
-                item.getCellRef().mEnchantmentCharge -= castCost;
-            }
-            if (enchantment->mData.mType == ESM::Enchantment::CastOnce)
-            {
-                if (!item.getContainerStore()->remove(item, 1, actor))
-                {
-                    // Item was used up
-                    MWBase::Environment::get().getWindowManager()->unsetSelectedSpell();
-                    inv.setSelectedEnchantItem(inv.end());
-                }
-            }
-            else
-                MWBase::Environment::get().getWindowManager()->setSelectedEnchantItem(item); // Set again to show the modified charge
-
-            sourceName = item.getClass().getName(item);
-
-            effects = enchantment->mEffects;
+            cast.cast(*inv.getSelectedEnchantItem());
         }
-
-        // Now apply the spell!
-
-        // Apply Self portion
-        actor.getClass().getCreatureStats(actor).getActiveSpells().addSpell(selectedSpell, actor, actor, ESM::RT_Self, sourceName);
-
-        // Apply Touch portion
-        // TODO: Distance is probably incorrect, and should it be hardcoded?
-        std::pair<MWWorld::Ptr, Ogre::Vector3> contact = getHitContact(actor, 100);
-        if (!contact.first.isEmpty())
-        {
-            if (contact.first.getClass().isActor())
-            {
-                if (!contact.first.getClass().getCreatureStats(contact.first).isDead())
-                    contact.first.getClass().getCreatureStats(contact.first).getActiveSpells().addSpell(selectedSpell, contact.first, actor, ESM::RT_Touch, sourceName);
-            }
-            else
-            {
-                // We hit a non-actor, e.g. a door. Only instant effects are relevant.
-                //  inflictSpellOnNonActor(contact.first, selectedSpell, ESM::RT_Touch);
-            }
-        }
-
-        launchProjectile(selectedSpell, effects, actor, sourceName);
-
     }
 
     void World::launchProjectile (const std::string& id, const ESM::EffectList& effects,
