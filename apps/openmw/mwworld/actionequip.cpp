@@ -60,6 +60,9 @@ namespace MWWorld
         for (std::vector<int>::const_iterator slot=slots_.first.begin();
             slot!=slots_.first.end(); ++slot)
         {
+            // if the item is equipped already, nothing to do
+            if (invStore.getSlot(*slot) == it)
+                return;
 
             // if all slots are occupied, replace the last slot
             if (slot == --slots_.first.end())
