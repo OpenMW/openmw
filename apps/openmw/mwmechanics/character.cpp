@@ -350,6 +350,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     , mSkipAnim(false)
     , mSecondsOfRunning(0)
     , mSecondsOfSwimming(0)
+    , mFallHeight(0)
 {
     if(!mAnimation)
         return;
