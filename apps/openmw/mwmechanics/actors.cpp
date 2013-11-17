@@ -336,6 +336,7 @@ namespace MWMechanics
         mDuration += duration;
 
         //if (mDuration>=0.25)
+        if (!paused)
         {
             float totalDuration = mDuration;
             mDuration = 0;
