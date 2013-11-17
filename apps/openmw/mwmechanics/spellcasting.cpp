@@ -59,7 +59,8 @@ namespace MWMechanics
                 // Try absorbing if it's a spell
                 // NOTE: Vanilla does this once per effect source instead of adding the % from all sources together, not sure
                 // if that is worth replicating.
-                if (const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search (mId))
+                const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search (mId);
+                if (spell && caster != target)
                 {
                     int absorb = target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::SpellAbsorption).mMagnitude;
                     int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
@@ -78,7 +79,7 @@ namespace MWMechanics
                 }
 
                 // Try reflecting
-                if (!reflected && magnitudeMult > 0)
+                if (!reflected && magnitudeMult > 0 && caster != target)
                 {
                     int reflect = target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::Reflect).mMagnitude;
                     int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
@@ -434,9 +435,8 @@ namespace MWMechanics
         if (roll > x)
         {
             // "X has no effect on you"
-            std::string message = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("#{sNotifyMessage50}")->getString();
+            std::string message = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sNotifyMessage50")->getString();
             message = boost::str(boost::format(message) % ingredient->mName);
-
             MWBase::Environment::get().getWindowManager()->messageBox(message);
             return false;
         }
