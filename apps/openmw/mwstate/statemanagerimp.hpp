@@ -24,6 +24,8 @@ namespace MWState
             ///< Start a new game.
             ///
             /// \param bypass Skip new game mechanics.
+
+            virtual void endGame();
     };
 }
 

@@ -17,6 +17,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
+ #include "../mwbase/statemanager.hpp"
 
 #include "npcstats.hpp"
 #include "creaturestats.hpp"
@@ -344,20 +345,24 @@ namespace MWMechanics
                         continue;
                 }
 
-                // If it's the player and God Mode is turned on, keep it alive
-                if(iter->first.getRefData().getHandle()=="player" && 
-                    MWBase::Environment::get().getWorld()->getGodModeState())
+                if (iter->first.getRefData().getHandle()=="player")
                 {
-                    MWMechanics::DynamicStat<float> stat(stats.getHealth());
-
-                    if(stat.getModified()<1)
+                    // If it's the player and God Mode is turned on, keep it alive
+                    if (MWBase::Environment::get().getWorld()->getGodModeState())
                     {
-                        stat.setModified(1, 0);
-                        stats.setHealth(stat);
+                        MWMechanics::DynamicStat<float> stat (stats.getHealth());
+
+                        if (stat.getModified()<1)
+                        {
+                            stat.setModified(1, 0);
+                            stats.setHealth(stat);
+                        }
+
+                        stats.resurrect();
+                        continue;
                     }
 
-                    stats.resurrect();
-                    continue;
+                    MWBase::Environment::get().getStateManager()->endGame();
                 }
 
                 if(iter->second->isDead())

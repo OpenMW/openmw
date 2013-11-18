@@ -46,3 +46,8 @@ void MWState::StateManager::newGame (bool bypass)
 
     mState = State_Running;
 }
+
+void MWState::StateManager::endGame()
+{
+    mState = State_Ended;
+}
