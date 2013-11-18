@@ -7,17 +7,26 @@ namespace MWGui
 
     class MainMenu : public OEngine::GUI::Layout
     {
-    public:
-        MainMenu(int w, int h);
+            int mWidth;
+            int mHeight;
 
-        void onResChange(int w, int h);
+        public:
 
-    private:
-        MyGUI::Widget* mButtonBox;
+            MainMenu(int w, int h);
 
-        std::map<std::string, MWGui::ImageButton*> mButtons;
+            void onResChange(int w, int h);
 
-        void onButtonClicked (MyGUI::Widget* sender);
+            virtual void setVisible (bool visible);
+
+        private:
+
+            MyGUI::Widget* mButtonBox;
+
+            std::map<std::string, MWGui::ImageButton*> mButtons;
+
+            void onButtonClicked (MyGUI::Widget* sender);
+
+            void updateMenu();
     };
 
 }
