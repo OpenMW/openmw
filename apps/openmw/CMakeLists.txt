@@ -6,8 +6,10 @@ configure_file ("${CMAKE_CURRENT_SOURCE_DIR}/config.hpp.cmake" "${CMAKE_CURRENT_
 set(GAME
     main.cpp
     engine.cpp
-    crashcatcher.cpp
 )
+if(NOT WIN32)
+    set(GAME ${GAME} crashcatcher.cpp)
+endif()
 set(GAME_HEADER
     engine.hpp
     config.hpp
