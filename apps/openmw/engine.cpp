@@ -92,7 +92,8 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
             MWBase::Environment::get().getSoundManager()->update(frametime);
 
         // global scripts
-        if (MWBase::Environment::get().getStateManager()->isGameRunning())
+        if (MWBase::Environment::get().getStateManager()->getState()==
+            MWBase::StateManager::State_Running)
         {
             MWBase::Environment::get().getScriptManager()->getGlobalScripts().run();
 

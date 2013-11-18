@@ -8,7 +8,7 @@
 #include "../mwbase/windowmanager.hpp"
 
 MWState::StateManager::StateManager()
-: mQuitRequest (false), mRunning (false)
+: mQuitRequest (false), mState (State_NoGame)
 {
 
 }
@@ -23,18 +23,18 @@ bool MWState::StateManager::hasQuitRequest() const
     return mQuitRequest;
 }
 
-bool MWState::StateManager::isGameRunning() const
+MWState::StateManager::State MWState::StateManager::getState() const
 {
-    return mRunning;
+    return mState;
 }
 
 void MWState::StateManager::newGame (bool bypass)
 {
-    if (mRunning)
+    if (mState!=State_NoGame)
     {
         MWBase::Environment::get().getDialogueManager()->clear();
         MWBase::Environment::get().getJournal()->clear();
-        mRunning = false;
+        mState = State_NoGame;
     }
 
     if (!bypass)
@@ -44,5 +44,5 @@ void MWState::StateManager::newGame (bool bypass)
         MWBase::Environment::get().getWindowManager()->setNewGame (true);
     }
 
-    mRunning = true;
+    mState = State_Running;
 }

@@ -8,7 +8,7 @@ namespace MWState
     class StateManager : public MWBase::StateManager
     {
             bool mQuitRequest;
-            bool mRunning;
+            State mState;
 
         public:
 
@@ -18,7 +18,7 @@ namespace MWState
 
             virtual bool hasQuitRequest() const;
 
-            virtual bool isGameRunning() const;
+            virtual State getState() const;
 
             virtual void newGame (bool bypass = false);
             ///< Start a new game.

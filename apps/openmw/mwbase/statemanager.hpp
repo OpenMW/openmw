@@ -6,6 +6,15 @@ namespace MWBase
     /// \brief Interface for game state manager (implemented in MWState)
     class StateManager
     {
+        public:
+
+            enum State
+            {
+                State_NoGame,
+                State_Ended,
+                State_Running
+            };
+
         private:
 
             StateManager (const StateManager&);
@@ -24,7 +33,7 @@ namespace MWBase
 
             virtual bool hasQuitRequest() const = 0;
 
-            virtual bool isGameRunning() const = 0;
+            virtual State getState() const = 0;
 
             virtual void newGame (bool bypass = false) = 0;
             ///< Start a new game.
