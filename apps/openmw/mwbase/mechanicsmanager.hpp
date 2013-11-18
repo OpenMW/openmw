@@ -114,6 +114,9 @@ namespace MWBase
         /// references that are currently not in the scene should be ignored.
 
         virtual bool checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string& groupName) = 0;
+
+        virtual void toggleAI() = 0;
+        virtual bool isAIActive() = 0;
     };
 }
 

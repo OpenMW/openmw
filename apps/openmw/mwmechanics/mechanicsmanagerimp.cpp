@@ -165,7 +165,7 @@ namespace MWMechanics
 
     MechanicsManager::MechanicsManager()
     : mUpdatePlayer (true), mClassSelected (false),
-      mRaceSelected (false)
+      mRaceSelected (false), mAI(true)
     {
         buildPlayer();
     }
@@ -677,6 +677,16 @@ namespace MWMechanics
             return mActors.checkAnimationPlaying(ptr, groupName);
         else
             return false;
+    }
+
+    void MechanicsManager::toggleAI()
+    {
+        mAI = !mAI;
+    }
+
+    bool MechanicsManager::isAIActive()
+    {
+        return mAI;
     }
 
 }

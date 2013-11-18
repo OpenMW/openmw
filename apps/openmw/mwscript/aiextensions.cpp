@@ -25,6 +25,8 @@
 
 #include <iostream>
 
+#include "../mwbase/mechanicsmanager.hpp"
+
 namespace MWScript
 {
     namespace Ai
@@ -390,6 +392,17 @@ namespace MWScript
                 }
         };
 
+        template<class R>
+        class OpToggleAI : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWBase::Environment::get().getMechanicsManager()->toggleAI();   
+                }
+        };
+
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
             interpreter.installSegment3 (Compiler::Ai::opcodeAIActivate, new OpAiActivate<ImplicitRef>);
@@ -416,6 +429,8 @@ namespace MWScript
             interpreter.installSegment3 (Compiler::Ai::opcodeGetDetectedExplicit, new OpGetDetected<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Ai::opcodeGetLineOfSight, new OpGetLineOfSight<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Ai::opcodeGetLineOfSightExplicit, new OpGetLineOfSight<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Ai::opcodeToggleAI, new OpToggleAI<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Ai::opcodeToggleAIExplicit, new OpToggleAI<ExplicitRef>);
 
             interpreter.installSegment5 (Compiler::Ai::opcodeSetHello, new OpSetAiSetting<ImplicitRef>(0));
             interpreter.installSegment5 (Compiler::Ai::opcodeSetHelloExplicit, new OpSetAiSetting<ExplicitRef>(0));
