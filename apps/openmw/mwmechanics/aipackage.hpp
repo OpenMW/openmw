@@ -22,6 +22,9 @@ namespace MWMechanics
             
             virtual int getTypeId() const = 0;
             ///< 0: Wanter, 1 Travel, 2 Escort, 3 Follow, 4 Activate
+
+            virtual unsigned int getPriority() const {return 0;}
+            ///< higher number is higher priority (0 beeing the lowest)
     };
 }
 

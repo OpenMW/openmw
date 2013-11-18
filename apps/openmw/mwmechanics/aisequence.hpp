@@ -18,8 +18,6 @@ namespace MWMechanics
     class AiSequence
     {
             std::list<AiPackage *> mPackages;
-            AiPackage* mCombatPackage;
-            bool mCombat;
 
             bool mDone;
 
@@ -36,7 +34,7 @@ namespace MWMechanics
             virtual ~AiSequence();
 
             int getTypeId() const;
-            ///< -1: None, 0: Wanter, 1 Travel, 2 Escort, 3 Follow, 4 Activate    
+            ///< -1: None, 0: Wanter, 1 Travel, 2 Escort, 3 Follow, 4 Activate, 5 Combat    
             
             bool isPackageDone() const;
             ///< Has a package been completed during the last update?
@@ -46,7 +44,7 @@ namespace MWMechanics
             
             void clear();
             ///< Remove all packages.
-            
+
             void stack (const AiPackage& package);
             ///< Add \a package to the front of the sequence (suspends current package)
             
