@@ -72,7 +72,7 @@ namespace MWMechanics
             if(getEnchantChance()<std::rand()/static_cast<double> (RAND_MAX)*100)
                 return false;
 
-            MWWorld::Class::get (mEnchanter).skillUsageSucceeded (mEnchanter, ESM::Skill::Enchant, 1);
+            MWWorld::Class::get (mEnchanter).skillUsageSucceeded (mEnchanter, ESM::Skill::Enchant, 2);
         }
 
         if(mCastStyle==ESM::Enchantment::ConstantEffect)

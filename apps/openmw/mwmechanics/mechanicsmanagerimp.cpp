@@ -213,6 +213,14 @@ namespace MWMechanics
         mWatched = ptr;
     }
 
+    void MechanicsManager::advanceTime (float duration)
+    {
+        // Uses ingame time, but scaled to real time
+        duration /= MWBase::Environment::get().getWorld()->getTimeScaleFactor();
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+        player.getClass().getInventoryStore(player).rechargeItems(duration);
+    }
+
     void MechanicsManager::update(float duration, bool paused)
     {
         if(!mWatched.isEmpty())

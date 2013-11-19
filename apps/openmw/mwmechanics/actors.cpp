@@ -199,7 +199,8 @@ namespace MWMechanics
         {
             Stat<int> stat = creatureStats.getAttribute(i);
             stat.setModifier(effects.get(EffectKey(ESM::MagicEffect::FortifyAttribute, i)).mMagnitude -
-                             effects.get(EffectKey(ESM::MagicEffect::DrainAttribute, i)).mMagnitude);
+                             effects.get(EffectKey(ESM::MagicEffect::DrainAttribute, i)).mMagnitude -
+                             effects.get(EffectKey(ESM::MagicEffect::AbsorbAttribute, i)).mMagnitude);
 
             creatureStats.setAttribute(i, stat);
         }
@@ -212,7 +213,8 @@ namespace MWMechanics
                              effects.get(EffectKey(ESM::MagicEffect::DrainHealth+i)).mMagnitude);
 
             float currentDiff = creatureStats.getMagicEffects().get(EffectKey(ESM::MagicEffect::RestoreHealth+i)).mMagnitude
-                    - creatureStats.getMagicEffects().get(EffectKey(ESM::MagicEffect::DamageHealth+i)).mMagnitude;
+                    - creatureStats.getMagicEffects().get(EffectKey(ESM::MagicEffect::DamageHealth+i)).mMagnitude
+                    - creatureStats.getMagicEffects().get(EffectKey(ESM::MagicEffect::AbsorbHealth)).mMagnitude;
             stat.setCurrent(stat.getCurrent() + currentDiff * duration);
 
             creatureStats.setDynamic(i, stat);
@@ -242,7 +244,8 @@ namespace MWMechanics
         {
             Stat<float>& skill = npcStats.getSkill(i);
             skill.setModifier(effects.get(EffectKey(ESM::MagicEffect::FortifySkill, i)).mMagnitude -
-                             effects.get(EffectKey(ESM::MagicEffect::DrainSkill, i)).mMagnitude);
+                             effects.get(EffectKey(ESM::MagicEffect::DrainSkill, i)).mMagnitude -
+                             effects.get(EffectKey(ESM::MagicEffect::AbsorbSkill, i)).mMagnitude);
         }
     }
 

@@ -77,6 +77,7 @@ namespace MWGui
   class MerchantRepair;
   class Repair;
   class SoulgemDialog;
+  class Recharge;
   class CompanionWindow;
 
   class WindowManager : public MWBase::WindowManager
@@ -263,6 +264,7 @@ namespace MWGui
     virtual void startTraining(MWWorld::Ptr actor);
     virtual void startRepair(MWWorld::Ptr actor);
     virtual void startRepairItem(MWWorld::Ptr item);
+    virtual void startRecharge(MWWorld::Ptr soulgem);
 
     virtual void frameStarted(float dt);
 
@@ -313,6 +315,7 @@ namespace MWGui
     MerchantRepair* mMerchantRepair;
     SoulgemDialog* mSoulgemDialog;
     Repair* mRepair;
+    Recharge* mRecharge;
     CompanionWindow* mCompanionWindow;
 
     Translation::Storage& mTranslationDataStorage;

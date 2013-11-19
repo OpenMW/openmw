@@ -81,6 +81,7 @@ set(MYGUI_FILES
     openmw_repair.layout
     openmw_companion_window.layout
     openmw_savegame_dialog.layout
+    openmw_recharge_dialog.layout
     smallbars.png
     DejaVuLGCSansMono.ttf
     markers.png

@@ -607,6 +607,8 @@ namespace MWWorld
 
     void World::advanceTime (double hours)
     {
+        MWBase::Environment::get().getMechanicsManager()->advanceTime(hours*3600);
+
         mWeatherManager->advanceTime (hours);
 
         hours += mGlobalVariables->getFloat ("gamehour");
