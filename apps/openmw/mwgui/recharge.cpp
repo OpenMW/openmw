@@ -169,6 +169,8 @@ void Recharge::onItemClicked(MyGUI::Widget *sender)
                     item.getClass().getEnchantment(item));
         item.getCellRef().mEnchantmentCharge =
             std::min(item.getCellRef().mEnchantmentCharge + restored, static_cast<float>(enchantment->mData.mCharge));
+
+        player.getClass().skillUsageSucceeded (player, ESM::Skill::Enchant, 0);
     }
 
     gem.getContainerStore()->remove(gem, 1, player);

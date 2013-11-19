@@ -303,6 +303,9 @@ namespace MWMechanics
                 MWBase::Environment::get().getWindowManager()->setSelectedEnchantItem(item); // Set again to show the modified charge
         }
 
+        if (mCaster.getRefData().getHandle() == "player")
+            mCaster.getClass().skillUsageSucceeded (mCaster, ESM::Skill::Enchant, 1);
+
         inflict(mCaster, mCaster, enchantment->mEffects, ESM::RT_Self);
 
         if (!mTarget.isEmpty())

@@ -471,6 +471,9 @@ namespace MWClass
 
                     MWMechanics::CastSpell cast(ptr, victim);
                     cast.cast(weapon);
+
+                    if (ptr.getRefData().getHandle() == "player")
+                        skillUsageSucceeded (ptr, ESM::Skill::Enchant, 3);
                 }
             }
         }
