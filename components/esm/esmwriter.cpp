@@ -51,12 +51,6 @@ namespace ESM
         mHeader.mMaster.push_back(d);
     }
 
-    void ESMWriter::save(const std::string& file)
-    {
-        std::ofstream fs(file.c_str(), std::ios_base::out | std::ios_base::trunc);
-        save(fs);
-    }
-
     void ESMWriter::save(std::ostream& file)
     {
         mRecordCount = 0;

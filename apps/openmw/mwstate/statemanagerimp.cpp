@@ -67,10 +67,13 @@ void MWState::StateManager::saveGame (const Slot *slot)
     else
         slot = mCharacterManager.getCurrentCharacter()->updateSlot (slot, profile);
 
+    std::ofstream stream (slot->mPath.string().c_str());
     ESM::ESMWriter writer;
 //    writer.setFormat ();
-    writer.save (slot->mPath.string());
+    writer.save (stream);
+    writer.startRecord ("SAVE");
     slot->mProfile.save (writer);
+    writer.endRecord ("SAVE");
     writer.close();
 }
 

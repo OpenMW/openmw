@@ -36,9 +36,6 @@ class ESMWriter
 
         void addMaster(const std::string& name, uint64_t size);
 
-        void save(const std::string& file);
-        ///< Start saving a file by writing the TES3 header.
-
         void save(std::ostream& file);
         ///< Start saving a file by writing the TES3 header.
 
