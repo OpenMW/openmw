@@ -95,7 +95,7 @@ namespace MWMechanics
                 }
 
                 // Try reflecting
-                if (!reflected && magnitudeMult > 0 && caster != target)
+                if (!reflected && magnitudeMult > 0 && caster != target && !(magicEffect->mData.mFlags & ESM::MagicEffect::Unreflectable))
                 {
                     int reflect = target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::Reflect).mMagnitude;
                     int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
