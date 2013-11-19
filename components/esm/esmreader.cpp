@@ -303,7 +303,10 @@ std::string ESMReader::getString(int size)
     getExact(ptr, size);
 
     // Convert to UTF8 and return
-    return mEncoder->getUtf8(ptr, size);
+    if (mEncoder)
+        return mEncoder->getUtf8(ptr, size);
+
+    return std::string (ptr, size);
 }
 
 void ESMReader::fail(const std::string &msg)

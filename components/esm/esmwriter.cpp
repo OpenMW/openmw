@@ -6,7 +6,7 @@
 
 namespace ESM
 {
-    ESMWriter::ESMWriter() : mRecordCount (0), mCounting (true) {}
+    ESMWriter::ESMWriter() : mEncoder (0), mRecordCount (0), mCounting (true) {}
 
     unsigned int ESMWriter::getVersion() const
     {
@@ -152,9 +152,9 @@ namespace ESM
         else
         {
             // Convert to UTF8 and return
-            std::string ascii = mEncoder->getLegacyEnc(data);
+            std::string string = mEncoder ? mEncoder->getLegacyEnc(data) : data;
 
-            write(ascii.c_str(), ascii.size());
+            write(string.c_str(), string.size());
         }
     }
 
