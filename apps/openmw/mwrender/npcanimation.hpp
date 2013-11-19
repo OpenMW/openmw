@@ -51,14 +51,17 @@ private:
 
     void updateNpcBase();
 
-    NifOgre::ObjectList insertBoundedPart(const std::string &model, int group, const std::string &bonename);
+    NifOgre::ObjectList insertBoundedPart(const std::string &model, int group, const std::string &bonename,
+                                          bool enchantedGlow, Ogre::Vector3* glowColor=NULL);
 
     void removeIndividualPart(ESM::PartReferenceType type);
     void reserveIndividualPart(ESM::PartReferenceType type, int group, int priority);
 
-    bool addOrReplaceIndividualPart(ESM::PartReferenceType type, int group, int priority, const std::string &mesh);
+    bool addOrReplaceIndividualPart(ESM::PartReferenceType type, int group, int priority, const std::string &mesh,
+                                    bool enchantedGlow=false, Ogre::Vector3* glowColor=NULL);
     void removePartGroup(int group);
-    void addPartGroup(int group, int priority, const std::vector<ESM::PartReference> &parts);
+    void addPartGroup(int group, int priority, const std::vector<ESM::PartReference> &parts,
+                                    bool enchantedGlow=false, Ogre::Vector3* glowColor=NULL);
 
 public:
     /**

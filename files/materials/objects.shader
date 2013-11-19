@@ -30,6 +30,8 @@
 
 #define VIEWPROJ_FIX @shGlobalSettingBool(viewproj_fix)
 
+#define ENV_MAP @shPropertyBool(env_map)
+
 #ifdef SH_VERTEX_SHADER
 
     // ------------------------------------- VERTEX ---------------------------------------
@@ -61,7 +63,7 @@
         shOutput(float3, tangentPassthrough)
 #endif
 
-#if !VERTEX_LIGHTING
+#if !VERTEX_LIGHTING || ENV_MAP
         shOutput(float3, normalPassthrough)
 #endif
 
@@ -79,12 +81,15 @@
         shOutput(float4, colourPassthrough)
 #endif
 
+#if ENV_MAP || VERTEX_LIGHTING
+    shUniform(float4x4, worldView) @shAutoConstant(worldView, worldview_matrix)
+#endif
+
 #if VERTEX_LIGHTING
     shUniform(float4, lightPosition[@shGlobalSettingString(num_lights)]) @shAutoConstant(lightPosition, light_position_view_space_array, @shGlobalSettingString(num_lights))
     shUniform(float4, lightDiffuse[@shGlobalSettingString(num_lights)]) @shAutoConstant(lightDiffuse, light_diffuse_colour_array, @shGlobalSettingString(num_lights))
     shUniform(float4, lightAttenuation[@shGlobalSettingString(num_lights)]) @shAutoConstant(lightAttenuation, light_attenuation_array, @shGlobalSettingString(num_lights))
     shUniform(float4, lightAmbient)                    @shAutoConstant(lightAmbient, ambient_light_colour)
-    shUniform(float4x4, worldView) @shAutoConstant(worldView, worldview_matrix)
 #if VERTEXCOLOR_MODE != 2
     shUniform(float4, materialAmbient)                    @shAutoConstant(materialAmbient, surface_ambient_colour)
 #endif
@@ -125,10 +130,23 @@
         UV.zw = uv1;
 #endif
 
+#if ENV_MAP || VERTEX_LIGHTING
+        float3 viewNormal = normalize(shMatrixMult(worldView, float4(normal.xyz, 0)).xyz);
+#endif
+
+#if ENV_MAP
+        float3 viewVec = normalize( shMatrixMult(worldView, shInputPosition).xyz);
+
+        float3 r = reflect( viewVec, viewNormal );
+        float m = 2.0 * sqrt( r.x*r.x + r.y*r.y + (r.z+1.0)*(r.z+1.0) );
+        UV.z = r.x/m + 0.5;
+        UV.w = r.y/m + 0.5;
+#endif
+
 #if NORMAL_MAP
         tangentPassthrough = tangent.xyz;
 #endif
-#if !VERTEX_LIGHTING
+#if !VERTEX_LIGHTING || ENV_MAP
         normalPassthrough = normal.xyz;
 #endif
 #if VERTEXCOLOR_MODE != 0 && !VERTEX_LIGHTING
@@ -173,7 +191,6 @@
 
 #if VERTEX_LIGHTING
         float3 viewPos = shMatrixMult(worldView, shInputPosition).xyz;
-        float3 viewNormal = normalize(shMatrixMult(worldView, float4(normal.xyz, 0)).xyz);
 
         float3 lightDir;
         float d;
@@ -242,12 +259,18 @@
         shSampler2D(detailMap)
 #endif
 
+#if ENV_MAP
+        shSampler2D(envMap)
+        shUniform(float3, env_map_color) @shUniformProperty3f(env_map_color, env_map_color)
+        shUniform(float3, cameraPosObjSpace) @shAutoConstant(cameraPosObjSpace, camera_position_object_space)
+#endif
+
         shInput(float4, UV)
 
 #if NORMAL_MAP
         shInput(float3, tangentPassthrough)
 #endif
-#if !VERTEX_LIGHTING
+#if !VERTEX_LIGHTING || ENV_MAP
         shInput(float3, normalPassthrough)
 #endif
 
@@ -327,8 +350,11 @@
 #endif
 #endif
 
-#if NORMAL_MAP
+#if !VERTEX_LIGHTING || ENV_MAP
         float3 normal = normalPassthrough;
+#endif
+
+#if NORMAL_MAP
         float3 binormal = cross(tangentPassthrough.xyz, normal.xyz);
         float3x3 tbn = float3x3(tangentPassthrough.xyz, binormal, normal.xyz);
 
@@ -420,6 +446,23 @@
         shOutputColour(0) *= lightResult;
 #endif
 
+#if EMISSIVE_MAP
+        #if @shPropertyString(emissiveMapUVSet)
+        shOutputColour(0).xyz += shSample(emissiveMap, UV.zw).xyz;
+        #else
+        shOutputColour(0).xyz += shSample(emissiveMap, UV.xy).xyz;
+        #endif
+#endif
+
+#if ENV_MAP
+        // Everything looks better with fresnel
+        float3 eyeDir = normalize(cameraPosObjSpace.xyz - objSpacePositionPassthrough.xyz);
+        float facing = 1.0 - max(abs(dot(-eyeDir, normal)), 0);
+        float envFactor = shSaturate(0.25 + 0.75 * pow(facing, 1));
+
+        shOutputColour(0).xyz += shSample(envMap, UV.zw).xyz * envFactor * env_map_color;
+#endif
+
 #if FOG
         float fogValue = shSaturate((depthPassthrough - fogParams.y) * fogParams.w);
 
@@ -430,14 +473,6 @@
         shOutputColour(0).xyz = shLerp (shOutputColour(0).xyz, fogColour, fogValue);
 #endif
 
-#endif
-
-#if EMISSIVE_MAP
-        #if @shPropertyString(emissiveMapUVSet)
-        shOutputColour(0).xyz += shSample(emissiveMap, UV.zw).xyz;
-        #else
-        shOutputColour(0).xyz += shSample(emissiveMap, UV.xy).xyz;
-        #endif
 #endif
 
         // prevent negative colour output (for example with negative lights)

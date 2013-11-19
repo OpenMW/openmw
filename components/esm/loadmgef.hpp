@@ -49,8 +49,9 @@ struct MagicEffect
         int mSchool; // SpellSchool, see defs.hpp
         float mBaseCost;
         int mFlags;
-        // Properties of the fired magic 'ball' I think
-        int mRed, mBlue, mGreen;
+        // Glow color for enchanted items with this effect
+        int mRed, mGreen, mBlue;
+        // Properties of the fired magic 'ball'
         float mSpeed, mSize, mSizeCap;
     }; // 36 bytes
 

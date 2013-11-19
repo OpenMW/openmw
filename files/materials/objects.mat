@@ -19,6 +19,8 @@ material openmw_objects_base
     alpha_rejection default
     transparent_sorting default
     polygon_mode default
+    env_map false
+    env_map_color 1 1 1
 
     pass
     {
@@ -33,6 +35,8 @@ material openmw_objects_base
             detailMapUVSet $detailMapUVSet
             emissiveMap $emissiveMap
             detailMap $detailMap
+            env_map $env_map
+            env_map_color $env_map_color
         }
 
         diffuse $diffuse
@@ -74,6 +78,14 @@ material openmw_objects_base
             colour_op_ex modulate_x2 src_current src_texture
             direct_texture $detailMap
             tex_coord_set $detailMapUVSet
+        }
+
+        texture_unit envMap
+        {
+            create_in_ffp $env_map
+            env_map spherical
+            anim_texture2 textures\magicitem\caust.dds 32 2
+            colour_op add
         }
       
         texture_unit shadowMap0

@@ -33,6 +33,8 @@ class Objects{
 
     void insertBegin(const MWWorld::Ptr& ptr);
 
+
+
 public:
     Objects(OEngine::Render::OgreRenderer &renderer)
         : mRenderer(renderer)

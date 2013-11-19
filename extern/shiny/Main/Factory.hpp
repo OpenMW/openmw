@@ -259,8 +259,9 @@ namespace sh
 		Platform* mPlatform;
 
 		MaterialInstance* findInstance (const std::string& name);
+    public:
 		MaterialInstance* searchInstance (const std::string& name);
-
+    private:
 		/// @return was anything removed?
 		bool removeCache (const std::string& pattern);
 

@@ -191,9 +191,14 @@ protected:
 
     static void destroyObjectList(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList &objects);
 
-    static void setRenderProperties(const NifOgre::ObjectList &objlist, Ogre::uint32 visflags, Ogre::uint8 solidqueue, Ogre::uint8 transqueue, Ogre::Real dist=0.0f);
+    static void setRenderProperties(const NifOgre::ObjectList &objlist, Ogre::uint32 visflags, Ogre::uint8 solidqueue,
+                                    Ogre::uint8 transqueue, Ogre::Real dist=0.0f,
+                                    bool enchantedGlow=false, Ogre::Vector3* glowColor=NULL);
 
     void clearAnimSources();
+
+    // TODO: Should not be here
+    Ogre::Vector3 getEnchantmentColor(MWWorld::Ptr item);
 
 public:
     Animation(const MWWorld::Ptr &ptr, Ogre::SceneNode *node);
