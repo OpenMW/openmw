@@ -119,6 +119,8 @@ namespace MWBase
         /// paused we may want to do it manually (after equipping permanent enchantment)
         virtual void updateMagicEffects (const MWWorld::Ptr& ptr) = 0;
 
+        virtual void toggleAI() = 0;
+        virtual bool isAIActive() = 0;
     };
 }
 

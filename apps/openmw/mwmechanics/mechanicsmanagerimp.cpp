@@ -165,7 +165,7 @@ namespace MWMechanics
 
     MechanicsManager::MechanicsManager()
     : mUpdatePlayer (true), mClassSelected (false),
-      mRaceSelected (false)
+      mRaceSelected (false), mAI(true)
     {
         //buildPlayer no longer here, needs to be done explicitely after all subsystems are up and running
     }
@@ -684,4 +684,13 @@ namespace MWMechanics
         mActors.updateMagicEffects(ptr);
     }
 
+    void MechanicsManager::toggleAI()
+    {
+        mAI = !mAI;
+    }
+
+    bool MechanicsManager::isAIActive()
+    {
+        return mAI;
+    }
 }

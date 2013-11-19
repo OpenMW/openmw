@@ -12,7 +12,7 @@ namespace MWMechanics
         public:
             AiActivate(const std::string &objectId);
             virtual AiActivate *clone() const;
-            virtual bool execute (const MWWorld::Ptr& actor);
+            virtual bool execute (const MWWorld::Ptr& actor,float duration);
                     ///< \return Package completed?
             virtual int getTypeId() const;
 

@@ -31,7 +31,7 @@ namespace MWMechanics
         return new AiTravel(*this);
     }
 
-    bool AiTravel::execute (const MWWorld::Ptr& actor)
+    bool AiTravel::execute (const MWWorld::Ptr& actor,float duration)
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();
         ESM::Position pos = actor.getRefData().getPosition();

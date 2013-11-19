@@ -15,7 +15,7 @@ MWMechanics::AiFollow *MWMechanics::AiFollow::clone() const
     return new AiFollow(*this);
 }
 
- bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor)
+ bool MWMechanics::AiFollow::execute (const MWWorld::Ptr& actor,float duration)
 {
     std::cout << "AiFollow completed.\n";
     return true;

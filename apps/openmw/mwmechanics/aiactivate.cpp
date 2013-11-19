@@ -9,7 +9,7 @@ MWMechanics::AiActivate *MWMechanics::AiActivate::clone() const
 {
     return new AiActivate(*this);
 }
-bool MWMechanics::AiActivate::execute (const MWWorld::Ptr& actor)
+bool MWMechanics::AiActivate::execute (const MWWorld::Ptr& actor,float duration)
 {
     std::cout << "AiActivate completed.\n";
     return true;

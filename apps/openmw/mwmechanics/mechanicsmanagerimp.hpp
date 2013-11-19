@@ -29,6 +29,7 @@ namespace MWMechanics
             bool mUpdatePlayer;
             bool mClassSelected;
             bool mRaceSelected;
+            bool mAI;///< is AI active?
 
             Objects mObjects;
             Actors mActors;
@@ -89,7 +90,7 @@ namespace MWMechanics
 
             virtual int countDeaths (const std::string& id) const;
             ///< Return the number of deaths for actors with the given ID.
-            
+
             virtual void getPersuasionDispositionChange (const MWWorld::Ptr& npc, PersuasionType type,
                 float currentTemporaryDispositionDelta, bool& success, float& tempChange, float& permChange);
             void toLower(std::string npcFaction);
@@ -105,6 +106,8 @@ namespace MWMechanics
             /// paused we may want to do it manually (after equipping permanent enchantment)
             virtual void updateMagicEffects (const MWWorld::Ptr& ptr);
 
+        virtual void toggleAI();
+        virtual bool isAIActive();
     };
 }
 

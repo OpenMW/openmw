@@ -354,5 +354,9 @@ op 0x200021e: ShowVarsExplicit
 op 0x200021f: ToggleGodMode
 op 0x2000220: DisableLevitation
 op 0x2000221: EnableLevitation
+op 0x2000222: GetLineOfSight
+op 0x2000223: GetLineOfSightExplicit
+op 0x2000224: ToggleAI
+op 0x2000225: ToggleAIExplicit
 
-opcodes 0x2000222-0x3ffffff unused
+opcodes 0x2000226-0x3ffffff unused
