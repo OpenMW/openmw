@@ -95,18 +95,37 @@ namespace MWMechanics
                 }
 
                 // Try resisting
-                if (magnitudeMult > 0 && caster.getClass().isActor())
+                if (magnitudeMult > 0 && target.getClass().isActor())
                 {
                     const ESM::Spell *spell =
                             MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search (mId);
-                    magnitudeMult = MWMechanics::getEffectMultiplier(effectIt->mEffectID, target, caster, spell);
-                    if (magnitudeMult == 0)
+
+                    if (spell->mData.mType == ESM::Spell::ST_Disease || spell->mData.mType == ESM::Spell::ST_Blight)
                     {
-                        // Fully resisted, show message
-                        if (target.getRefData().getHandle() == "player")
-                            MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicPCResisted}");
-                        else
-                            MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicTargetResisted}");
+                        float x = (spell->mData.mType == ESM::Spell::ST_Disease) ?
+                                    target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::ResistCommonDisease).mMagnitude
+                                  : target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::ResistBlightDisease).mMagnitude;
+
+                        int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+                        if (roll <= x)
+                        {
+                            // Fully resisted, show message
+                            if (target.getRefData().getHandle() == "player")
+                                MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicPCResisted}");
+                            magnitudeMult = 0;
+                        }
+                    }
+                    else
+                    {
+                        magnitudeMult = MWMechanics::getEffectMultiplier(effectIt->mEffectID, target, caster, spell);
+                        if (magnitudeMult == 0)
+                        {
+                            // Fully resisted, show message
+                            if (target.getRefData().getHandle() == "player")
+                                MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicPCResisted}");
+                            else
+                                MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicTargetResisted}");
+                        }
                     }
                 }
             }
