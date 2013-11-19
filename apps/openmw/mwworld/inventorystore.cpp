@@ -81,7 +81,8 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::add(const Ptr& itemPtr,
 
     // Auto-equip items if an armor/clothing item is added, but not for the player nor werewolves
     if ((actorPtr.getRefData().getHandle() != "player")
-            && !(MWWorld::Class::get(actorPtr).getNpcStats(actorPtr).isWerewolf()))
+            && !(MWWorld::Class::get(actorPtr).getNpcStats(actorPtr).isWerewolf())
+            && !actorPtr.getClass().getCreatureStats(actorPtr).isDead())
     {
         std::string type = itemPtr.getTypeName();
         if ((type == typeid(ESM::Armor).name()) || (type == typeid(ESM::Clothing).name()))
@@ -450,7 +451,8 @@ int MWWorld::InventoryStore::remove(const Ptr& item, int count, const Ptr& actor
             && !(MWWorld::Class::get(actor).getNpcStats(actor).isWerewolf()))
     {
         std::string type = item.getTypeName();
-        if ((type == typeid(ESM::Armor).name()) || (type == typeid(ESM::Clothing).name()))
+        if (((type == typeid(ESM::Armor).name()) || (type == typeid(ESM::Clothing).name()))
+                && !actor.getClass().getCreatureStats(actor).isDead())
             autoEquip(actor);
     }
 
