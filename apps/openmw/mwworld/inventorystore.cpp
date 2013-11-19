@@ -88,6 +88,8 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::add(const Ptr& itemPtr,
             autoEquip(actorPtr);
     }
 
+    updateRechargingItems();
+
     return retVal;
 }
 
@@ -459,6 +461,8 @@ int MWWorld::InventoryStore::remove(const Ptr& item, int count, const Ptr& actor
         MWBase::Environment::get().getWindowManager()->unsetSelectedSpell();
     }
 
+    updateRechargingItems();
+
     return retCount;
 }
 
@@ -575,5 +579,37 @@ void MWWorld::InventoryStore::visitEffectSources(MWMechanics::EffectSourceVisito
 
             ++i;
         }
+    }
+}
+
+void MWWorld::InventoryStore::updateRechargingItems()
+{
+    mRechargingItems.clear();
+    for (ContainerStoreIterator it = begin(); it != end(); ++it)
+    {
+        if (it->getClass().getEnchantment(*it) != "")
+        {
+            const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(
+                        it->getClass().getEnchantment(*it));
+            if (enchantment->mData.mType == ESM::Enchantment::WhenUsed
+                    || enchantment->mData.mType == ESM::Enchantment::WhenStrikes)
+                mRechargingItems.push_back(std::make_pair(it, enchantment->mData.mCharge));
+        }
+    }
+}
+
+void MWWorld::InventoryStore::rechargeItems(float duration)
+{
+    for (TRechargingItems::iterator it = mRechargingItems.begin(); it != mRechargingItems.end(); ++it)
+    {
+        if (it->first->getCellRef().mEnchantmentCharge == -1
+                || it->first->getCellRef().mEnchantmentCharge == it->second)
+            continue;
+
+        static float fMagicItemRechargePerSecond = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
+                    "fMagicItemRechargePerSecond")->getFloat();
+
+        it->first->getCellRef().mEnchantmentCharge = std::min (it->first->getCellRef().mEnchantmentCharge + fMagicItemRechargePerSecond * duration,
+                                                              it->second);
     }
 }

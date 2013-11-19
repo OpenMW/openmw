@@ -92,11 +92,16 @@ namespace MWWorld
             // selected magic item (for using enchantments of type "Cast once" or "Cast when used")
             ContainerStoreIterator mSelectedEnchantItem;
 
+            // (item, max charge)
+            typedef std::vector<std::pair<ContainerStoreIterator, float> > TRechargingItems;
+            TRechargingItems mRechargingItems;
+
             void copySlots (const InventoryStore& store);
 
             void initSlots (TSlots& slots_);
 
             void updateMagicEffects(const Ptr& actor);
+            void updateRechargingItems();
 
             void fireEquipmentChangedEvent();
 
@@ -172,6 +177,9 @@ namespace MWWorld
             ///< Set a listener for various events, see \a InventoryStoreListener
 
             void visitEffectSources (MWMechanics::EffectSourceVisitor& visitor);
+
+            void rechargeItems (float duration);
+            /// Restore charge on enchanted items. Note this should only be done for the player.
     };
 }
 

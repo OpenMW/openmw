@@ -59,6 +59,8 @@ namespace MWBase
             /// \param paused In game type does not currently advance (this usually means some GUI
             /// component is up).
 
+            virtual void advanceTime (float duration) = 0;
+
             virtual void setPlayerName (const std::string& name) = 0;
             ///< Set player name.
 
