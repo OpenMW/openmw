@@ -140,7 +140,7 @@ namespace MWMechanics
             float x = (willpower + 0.1 * luck) * stats.getFatigueTerm();
 
             // This makes spells that are easy to cast harder to resist and vice versa
-            if (spell != NULL)
+            if (spell != NULL && caster.getClass().isActor())
             {
                 float castChance = getSpellSuccessChance(spell, caster);
                 if (castChance > 0)
