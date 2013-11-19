@@ -21,6 +21,11 @@ Game and Addon files are concept descended from old esm/esp system, but much mor
 The actual creating of new files is described in the next chapter. Here We are gonna focus only on details that you need to know in order to create your first Open{CS} file while full understanding your needs.
 
 \paragraph{Dependencies}
-Since addon is supposed to change the game it is logical that it also depends on the said game. It simply can't work otherwise. Just think about it: your modification is changing prize of the iron sword. But what if there is no iron sword in game? That's right: we get nonsense. What you want to do is to tie your addon to the files you are changing. Those can be either game files (expansion island for a game) or other addon files (house on the said island). It is a a good idea to be dependent only on files that are really changed in your addon obviously, but sadly there is no other way to achieve this than knowing what you want to do.
+Since addon is supposed to change the game it is logical that it also depends on the said game. It simply can't work otherwise. Just think about it: your modification is changing prize of the iron sword. But what if there is no iron sword in game? That's right: we get nonsense. What you want to do is to tie your addon to the files you are changing. Those can be either game files (expansion island for a game) or other addon files (house on the said island). It is a a good idea to be dependent only on files that are really changed in your addon obviously, but sadly there is no other way to achieve this than knowing what you want to do.\\
+
+Game files are not intend to have any dependencies for a very simple reasons: player is using only one game file at the time and therefore no game file can depend on other game file, and since game file makes the base for addon files -- it can't depend on addon files.
+
+\paragraph{Loading order}
 
 \paragraph{Resources files}
+%textures, sounds, whatever
