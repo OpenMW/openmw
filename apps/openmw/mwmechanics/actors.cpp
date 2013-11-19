@@ -39,46 +39,42 @@ namespace MWMechanics
         if(!MWBase::Environment::get().getWindowManager()->isGuiMode())
         {
             // AI
-            if(MWBase::Environment::get().getMechanicsManager())//check MechanismsManager is already created
+            if(MWBase::Environment::get().getMechanicsManager()->isAIActive())
             {
-                if(MWBase::Environment::get().getMechanicsManager()->isAIActive())//MWBase::Environment::get().getMechanicsManager()->isAIActive())
+                CreatureStats& creatureStats =  MWWorld::Class::get (ptr).getCreatureStats (ptr);
+                //engage combat or not?
+                if(ptr != MWBase::Environment::get().getWorld()->getPlayer().getPlayer() && !creatureStats.isHostile())
                 {
-                    CreatureStats& creatureStats =  MWWorld::Class::get (ptr).getCreatureStats (ptr);
-                    if(ptr != MWBase::Environment::get().getWorld()->getPlayer().getPlayer())  MWBase::Environment::get().getMechanicsManager()->restoreDynamicStats();
-                    //engage combat or not?
-                    if(ptr != MWBase::Environment::get().getWorld()->getPlayer().getPlayer() && !creatureStats.isHostile())
+                    ESM::Position playerpos = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getRefData().getPosition();
+                    ESM::Position actorpos = ptr.getRefData().getPosition();
+                    float d = sqrt((actorpos.pos[0] - playerpos.pos[0])*(actorpos.pos[0] - playerpos.pos[0])
+                        +(actorpos.pos[1] - playerpos.pos[1])*(actorpos.pos[1] - playerpos.pos[1])
+                        +(actorpos.pos[2] - playerpos.pos[2])*(actorpos.pos[2] - playerpos.pos[2]));
+                    float fight = ptr.getClass().getCreatureStats(ptr).getAiSetting(1);
+                    float disp = 100; //creatures don't have disposition, so set it to 100 by default
+                    if(ptr.getTypeName() == typeid(ESM::NPC).name())
                     {
-                        ESM::Position playerpos = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getRefData().getPosition();
-                        ESM::Position actorpos = ptr.getRefData().getPosition();
-                        float d = sqrt((actorpos.pos[0] - playerpos.pos[0])*(actorpos.pos[0] - playerpos.pos[0])
-                            +(actorpos.pos[1] - playerpos.pos[1])*(actorpos.pos[1] - playerpos.pos[1])
-                            +(actorpos.pos[2] - playerpos.pos[2])*(actorpos.pos[2] - playerpos.pos[2]));
-                        float fight = ptr.getClass().getCreatureStats(ptr).getAiSetting(1);
-                        float disp = 100; //creatures don't have disposition, so set it to 100 by default
-                        if(ptr.getTypeName() == typeid(ESM::NPC).name())
-                        {
-                            disp = MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(ptr);
-                        }
-                        bool LOS = MWBase::Environment::get().getWorld()->getLOS(ptr,MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
-                        if(  ( (fight == 100 ) 
-                            || (fight >= 95 && d <= 3000)
-                            || (fight >= 90 && d <= 2000)
-                            || (fight >= 80 && d <= 1000)
-                            || (fight >= 80 && disp <= 40) 
-                            || (fight >= 70 && disp <= 35 && d <= 1000) 
-                            || (fight >= 60 && disp <= 30 && d <= 1000) 
-                            || (fight >= 50 && disp == 0) 
-                            || (fight >= 40 && disp <= 10 && d <= 500) )
-                            && LOS
-                            )
-                        {
-                            creatureStats.getAiSequence().stack(AiCombat("player"));
-                            creatureStats.setHostile(true);
-                        }
+                        disp = MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(ptr);
                     }
-
-                    creatureStats.getAiSequence().execute (ptr,duration);
+                    bool LOS = MWBase::Environment::get().getWorld()->getLOS(ptr,MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+                    if(  ( (fight == 100 )
+                        || (fight >= 95 && d <= 3000)
+                        || (fight >= 90 && d <= 2000)
+                        || (fight >= 80 && d <= 1000)
+                        || (fight >= 80 && disp <= 40)
+                        || (fight >= 70 && disp <= 35 && d <= 1000)
+                        || (fight >= 60 && disp <= 30 && d <= 1000)
+                        || (fight >= 50 && disp == 0)
+                        || (fight >= 40 && disp <= 10 && d <= 500) )
+                        && LOS
+                        )
+                    {
+                        creatureStats.getAiSequence().stack(AiCombat("player"));
+                        creatureStats.setHostile(true);
+                    }
                 }
+
+                creatureStats.getAiSequence().execute (ptr,duration);
             }
 
             // fatigue restoration
@@ -211,6 +207,7 @@ namespace MWMechanics
             DynamicStat<float> stat = creatureStats.getDynamic(i);
             stat.setModifier(effects.get(EffectKey(ESM::MagicEffect::FortifyHealth+i)).mMagnitude -
                              effects.get(EffectKey(ESM::MagicEffect::DrainHealth+i)).mMagnitude);
+
 
             float currentDiff = creatureStats.getMagicEffects().get(EffectKey(ESM::MagicEffect::RestoreHealth+i)).mMagnitude
                     - creatureStats.getMagicEffects().get(EffectKey(ESM::MagicEffect::DamageHealth+i)).mMagnitude
