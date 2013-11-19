@@ -83,6 +83,9 @@ enum RecNameInts
     REC_STAT = 0x54415453,
     REC_WEAP = 0x50414557,
 
+    // format 0 - saved games
+    REC_SAVE = 0x45564153,
+
     // format 1
     REC_FILT = 0x544C4946
 };
