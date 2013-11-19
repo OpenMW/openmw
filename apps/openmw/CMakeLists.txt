@@ -73,12 +73,12 @@ add_openmw_dir (mwmechanics
     )
 
 add_openmw_dir (mwstate
-    statemanagerimp
+    statemanagerimp charactermanager character
     )
 
 add_openmw_dir (mwbase
     environment world scriptmanager dialoguemanager journal soundmanager mechanicsmanager
-    inputmanager windowmanager
+    inputmanager windowmanager statemanager
     )
 
 # Main executable

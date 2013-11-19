@@ -61,9 +61,10 @@ namespace MWGui
         }
         else if (sender == mButtons["savegame"])
         {
-            MWGui::SaveGameDialog* dialog = new MWGui::SaveGameDialog();
-            dialog->setLoadOrSave(false);
-            dialog->setVisible(true);
+            MWBase::Environment::get().getStateManager()->saveGame (0);
+//            MWGui::SaveGameDialog* dialog = new MWGui::SaveGameDialog();
+//            dialog->setLoadOrSave(false);
+//            dialog->setVisible(true);
         }
     }
 

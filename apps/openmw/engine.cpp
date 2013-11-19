@@ -323,7 +323,7 @@ std::string OMW::Engine::loadSettings (Settings::Manager & settings)
 
 void OMW::Engine::prepareEngine (Settings::Manager & settings)
 {
-    mEnvironment.setStateManager (new MWState::StateManager);
+    mEnvironment.setStateManager (new MWState::StateManager (mCfgMgr.getUserPath() / "saves"));
 
     Nif::NIFFile::CacheLock cachelock;
 
