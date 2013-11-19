@@ -36,6 +36,9 @@ namespace MWMechanics
                 std::vector<Effect> mEffects;
                 MWWorld::TimeStamp mTimeStamp;
                 std::string mDisplayName;
+
+                // TODO: To handle CASTER_LINKED flag (spell is purged when caster dies),
+                // we should probably store a handle to the caster here.
             };
 
             typedef std::multimap<std::string, ActiveSpellParams > TContainer;
