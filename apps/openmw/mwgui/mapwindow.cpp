@@ -261,6 +261,7 @@ namespace MWGui
         : MWGui::WindowPinnableBase("openmw_map_window.layout")
         , mGlobal(false)
         , mGlobalMap(0)
+        , mGlobalMapRender(0)
     {
         setCoord(500,0,320,300);
 
