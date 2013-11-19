@@ -22,10 +22,10 @@ void ESM::SavedGame::load (ESMReader &esm)
 
 void ESM::SavedGame::save (ESMWriter &esm) const
 {
-    esm.writeHNCString (mPlayerName, "PNAM");
+    esm.writeHNCString ("PNAM", mPlayerName);
     esm.writeHNT ("PLEV", mPlayerLevel);
-    esm.writeHNCString (mPlayerClass, "PCLA");
-    esm.writeHNCString (mPlayerCell, "PCEL");
+    esm.writeHNCString ("PCLA", mPlayerClass);
+    esm.writeHNCString ("PCEL", mPlayerCell);
     esm.writeHNT ("TSTM", mInGameTime, 16);
     esm.writeHNT ("TIME", mTimePlayed);
 
