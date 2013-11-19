@@ -43,6 +43,7 @@
 #include "waitdialog.hpp"
 #include "enchantingdialog.hpp"
 #include "trainingwindow.hpp"
+#include "recharge.hpp"
 #include "exposedwindow.hpp"
 #include "cursor.hpp"
 #include "merchantrepair.hpp"
@@ -95,6 +96,7 @@ namespace MWGui
       , mTrainingWindow(NULL)
       , mMerchantRepair(NULL)
       , mSoulgemDialog(NULL)
+      , mRecharge(NULL)
       , mRepair(NULL)
       , mCompanionWindow(NULL)
       , mTranslationDataStorage (translationDataStorage)
@@ -197,6 +199,7 @@ namespace MWGui
         mDragAndDrop->mDraggedWidget = 0;
         mDragAndDrop->mDragAndDropWidget = dragAndDropWidget;
 
+        mRecharge = new Recharge();
         mMenu = new MainMenu(w,h);
         mMap = new MapWindow("");
         mStatsWindow = new StatsWindow();
@@ -312,6 +315,7 @@ namespace MWGui
         delete mSoulgemDialog;
         delete mSoftwareCursor;
         delete mCursorManager;
+        delete mRecharge;
 
         cleanupGarbage();
 
@@ -375,6 +379,7 @@ namespace MWGui
         mRepair->setVisible(false);
         mCompanionWindow->setVisible(false);
         mInventoryWindow->setTrading(false);
+        mRecharge->setVisible(false);
 
         mHud->setVisible(mHudEnabled);
 
@@ -491,6 +496,9 @@ namespace MWGui
                 break;
             case GM_SpellCreation:
                 mSpellCreationDialog->setVisible(true);
+                break;
+            case GM_Recharge:
+                mRecharge->setVisible(true);
                 break;
             case GM_Enchanting:
                 mEnchantingDialog->setVisible(true);
@@ -1361,6 +1369,11 @@ namespace MWGui
     Loading::Listener* WindowManager::getLoadingScreen()
     {
         return mLoadingScreen;
+    }
+
+    void WindowManager::startRecharge(MWWorld::Ptr soulgem)
+    {
+        mRecharge->start(soulgem);
     }
 
 }

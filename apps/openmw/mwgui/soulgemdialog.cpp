@@ -21,7 +21,8 @@ namespace MWGui
     {
         if (button == 0)
         {
-            /// \todo show recharge enchanted item dialog here
+            MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Recharge);
+            MWBase::Environment::get().getWindowManager()->startRecharge(mSoulgem);
         }
         else
         {
