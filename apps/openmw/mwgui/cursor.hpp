@@ -39,23 +39,6 @@ namespace MWGui
         int mRotation; // rotation in degrees
     };
 
-    class Cursor
-    {
-    public:
-        Cursor();
-        ~Cursor();
-        void update ();
-
-        void setVisible (bool visible);
-
-        void onCursorChange (const std::string& name);
-
-    private:
-        MyGUI::ImageBox* mWidget;
-
-        MyGUI::IntSize mSize;
-        MyGUI::IntPoint mHotSpot;
-    };
 }
 
 #endif

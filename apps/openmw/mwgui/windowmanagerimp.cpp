@@ -100,7 +100,6 @@ namespace MWGui
       , mRepair(NULL)
       , mCompanionWindow(NULL)
       , mTranslationDataStorage (translationDataStorage)
-      , mSoftwareCursor(NULL)
       , mCharGen(NULL)
       , mInputBlocker(NULL)
       , mCrosshairEnabled(Settings::Manager::getBool ("crosshair", "HUD"))
@@ -128,7 +127,6 @@ namespace MWGui
       , mFPS(0.0f)
       , mTriangleCount(0)
       , mBatchCount(0)
-      , mUseHardwareCursors(Settings::Manager::getBool("hardware cursors", "GUI"))
     {
         // Set up the GUI system
         mGuiManager = new OEngine::GUI::MyGUIManager(mRendering->getWindow(), mRendering->getScene(), false, logpath);
@@ -173,16 +171,19 @@ namespace MWGui
         mLoadingScreen->onResChange (w,h);
 
         //set up the hardware cursor manager
-        mSoftwareCursor = new Cursor();
         mCursorManager = new SFO::SDLCursorManager();
 
         MyGUI::PointerManager::getInstance().eventChangeMousePointer += MyGUI::newDelegate(this, &WindowManager::onCursorChange);
 
         MyGUI::InputManager::getInstance().eventChangeKeyFocus += MyGUI::newDelegate(this, &WindowManager::onKeyFocusChanged);
 
-        setUseHardwareCursors(mUseHardwareCursors);
+        mCursorManager->setEnabled(true);
+
         onCursorChange(MyGUI::PointerManager::getInstance().getDefaultPointer());
         mCursorManager->cursorVisibilityChange(false);
+
+        // hide mygui's pointer
+        MyGUI::PointerManager::getInstance().setVisible(false);
     }
 
     void WindowManager::initUI()
@@ -313,7 +314,6 @@ namespace MWGui
         delete mMerchantRepair;
         delete mRepair;
         delete mSoulgemDialog;
-        delete mSoftwareCursor;
         delete mCursorManager;
         delete mRecharge;
 
@@ -344,8 +344,6 @@ namespace MWGui
         mHud->setBatchCount(mBatchCount);
 
         mHud->update();
-
-        mSoftwareCursor->update();
     }
 
     void WindowManager::updateVisible()
@@ -879,12 +877,6 @@ namespace MWGui
         MWBase::Environment::get().getInputManager()->setDragDrop(dragDrop);
     }
 
-    void WindowManager::setUseHardwareCursors(bool use)
-    {
-        mCursorManager->setEnabled(use);
-        mSoftwareCursor->setVisible(!use && mCursorVisible);
-    }
-
     void WindowManager::setCursorVisible(bool visible)
     {
         if(mCursorVisible == visible)
@@ -892,8 +884,6 @@ namespace MWGui
 
         mCursorVisible = visible;
         mCursorManager->cursorVisibilityChange(visible);
-
-        mSoftwareCursor->setVisible(!mUseHardwareCursors && visible);
     }
 
     void WindowManager::onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result)
@@ -923,8 +913,6 @@ namespace MWGui
     {
         mHud->setFpsLevel(Settings::Manager::getInt("fps", "HUD"));
         mToolTips->setDelay(Settings::Manager::getFloat("tooltip delay", "GUI"));
-
-        setUseHardwareCursors(Settings::Manager::getBool("hardware cursors", "GUI"));
 
         for (Settings::CategorySettingVector::const_iterator it = changed.begin();
             it != changed.end(); ++it)
@@ -977,8 +965,6 @@ namespace MWGui
 
     void WindowManager::onCursorChange(const std::string &name)
     {
-        mSoftwareCursor->onCursorChange(name);
-
         if(!mCursorManager->cursorChanged(name))
             return; //the cursor manager doesn't want any more info about this cursor
         //See if we can get the information we need out of the cursor resource

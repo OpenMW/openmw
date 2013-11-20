@@ -369,9 +369,6 @@ namespace MWGui
     unsigned int mTriangleCount;
     unsigned int mBatchCount;
 
-    bool mUseHardwareCursors;
-    void setUseHardwareCursors(bool use);
-
     /**
      * Called when MyGUI tries to retrieve a tag. This usually corresponds to a GMST string,
      * so this method will retrieve the GMST with the name \a _tag and place the result in \a _result
