@@ -72,7 +72,6 @@ namespace MWRender
 
         mAnimation = new NpcAnimation(mCharacter, mNode,
                                       0, true, (renderHeadOnly() ? NpcAnimation::VM_HeadOnly : NpcAnimation::VM_Normal));
-        mAnimation->updateParts();
 
         Ogre::Vector3 scale = mNode->getScale();
         mCamera->setPosition(mPosition * scale);
@@ -114,7 +113,6 @@ namespace MWRender
         delete mAnimation;
         mAnimation = new NpcAnimation(mCharacter, mNode,
                                       0, true, (renderHeadOnly() ? NpcAnimation::VM_HeadOnly : NpcAnimation::VM_Normal));
-        mAnimation->updateParts();
 
         float scale=1.f;
         MWWorld::Class::get(mCharacter).adjustScale(mCharacter, scale);
@@ -142,6 +140,9 @@ namespace MWRender
 
     void InventoryPreview::update(int sizeX, int sizeY)
     {
+        // TODO: can we avoid this. Vampire state needs to be updated.
+        mAnimation->rebuild();
+
         MWWorld::InventoryStore &inv = MWWorld::Class::get(mCharacter).getInventoryStore(mCharacter);
         MWWorld::ContainerStoreIterator iter = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
         std::string groupname;
@@ -176,11 +177,12 @@ namespace MWRender
                 groupname = "inventoryhandtohand";
         }
 
-        if(groupname != mCurrentAnimGroup)
-        {
+        // TODO see above
+        //if(groupname != mCurrentAnimGroup)
+        //{
             mCurrentAnimGroup = groupname;
             mAnimation->play(mCurrentAnimGroup, 1, Animation::Group_All, false, 1.0f, "start", "stop", 0.0f, 0);
-        }
+        //}
 
         MWWorld::ContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
         if(torch != inv.end() && torch->getTypeName() == typeid(ESM::Light).name())

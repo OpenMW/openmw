@@ -66,7 +66,7 @@ namespace MWMechanics
                 int i=0;
                 for (std::vector<ESM::ENAMstruct>::const_iterator it = spell->mEffects.mList.begin(); it != spell->mEffects.mList.end(); ++it)
                 {
-                    effects.add (*it, iter->second[i]);
+                    effects.add (*it, it->mMagnMin + (it->mMagnMax - it->mMagnMin) * iter->second[i]);
                     ++i;
                 }
             }
