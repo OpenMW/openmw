@@ -552,3 +552,9 @@ clear_if_changed(OGRE_PREFIX_WATCH OGRE_MEDIA_DIR)
 find_path(OGRE_MEDIA_DIR NAMES packs/cubemapsJS.zip HINTS ${OGRE_MEDIA_SEARCH_PATH}
   PATHS ${OGRE_PREFIX_PATH} PATH_SUFFIXES ${OGRE_MEDIA_SEARCH_SUFFIX})
 
+if (OGRE_RenderSystem_GL_FOUND)
+MESSAGE("-- OpenGL -- Found!")
+else()
+MESSAGE("-- OpenGL -- Not Found!")
+endif()
+MESSAGE("-- ${OGRE_RenderSystem_GL_LIBRARIES} ${OPENGL_LIBRARIES}")
