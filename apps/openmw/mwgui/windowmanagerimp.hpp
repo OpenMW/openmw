@@ -278,6 +278,8 @@ namespace MWGui
 
     void onSoulgemDialogButtonPressed (int button);
 
+    virtual bool getCursorVisible();
+
   private:
     bool mConsoleOnlyScripts;
 

@@ -180,7 +180,7 @@ namespace MWGui
         mCursorManager->setEnabled(true);
 
         onCursorChange(MyGUI::PointerManager::getInstance().getDefaultPointer());
-        mCursorManager->cursorVisibilityChange(false);
+        SDL_ShowCursor(false);
 
         // hide mygui's pointer
         MyGUI::PointerManager::getInstance().setVisible(false);
@@ -879,11 +879,7 @@ namespace MWGui
 
     void WindowManager::setCursorVisible(bool visible)
     {
-        if(mCursorVisible == visible)
-            return;
-
         mCursorVisible = visible;
-        mCursorManager->cursorVisibilityChange(visible);
     }
 
     void WindowManager::onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result)
@@ -1360,6 +1356,11 @@ namespace MWGui
     void WindowManager::startRecharge(MWWorld::Ptr soulgem)
     {
         mRecharge->start(soulgem);
+    }
+
+    bool WindowManager::getCursorVisible()
+    {
+        return mCursorVisible;
     }
 
 }
