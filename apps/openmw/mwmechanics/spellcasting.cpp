@@ -157,7 +157,7 @@ namespace MWMechanics
                     }
                 }
                 else
-                    applyInstantEffect(mTarget, effectIt->mEffectID, magnitude);
+                    applyInstantEffect(target, effectIt->mEffectID, magnitude);
 
                 if (target.getClass().isActor() || magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration)
                 {
