@@ -26,7 +26,7 @@ before_script:
  - cd -
  - mkdir build
  - cd build
- - cmake .. -DBUILD_WITH_CODE_COVERAGE=1 -DBUILD_UNITTESTS=1 DBUILD_WITH_DPKG=1
+ - cmake .. -DBUILD_WITH_CODE_COVERAGE=1 -DBUILD_UNITTESTS=1 -DBUILD_WITH_DPKG=1
 script:
  - make -j4
 after_script:
