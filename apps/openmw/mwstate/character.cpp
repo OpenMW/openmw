@@ -109,3 +109,22 @@ MWState::Character::SlotIterator MWState::Character::end() const
 {
     return mSlots.rend();
 }
+
+ESM::SavedGame MWState::Character::getSignature() const
+{
+    if (mSlots.empty())
+        throw std::logic_error ("character signature not available");
+
+    std::vector<Slot>::const_iterator iter (mSlots.begin());
+
+    Slot slot = *iter;
+
+    for (++iter; iter!=mSlots.end(); ++iter)
+        if (iter->mProfile.mPlayerLevel>slot.mProfile.mPlayerLevel)
+            slot = *iter;
+        else if (iter->mProfile.mPlayerLevel==slot.mProfile.mPlayerLevel &&
+            iter->mTimeStamp>slot.mTimeStamp)
+            slot = *iter;
+
+    return slot.mProfile;
+}

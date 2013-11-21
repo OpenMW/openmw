@@ -50,6 +50,11 @@ namespace MWState
             ///< First slot is the most recent. Other slots follow in descending order of save date.
 
             SlotIterator end() const;
+
+            ESM::SavedGame getSignature() const;
+            ///< Return signature information for this character.
+            ///
+            /// \todo attention This function must not be called if there are no slots.
     };
 }
 
