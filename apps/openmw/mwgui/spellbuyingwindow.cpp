@@ -10,11 +10,11 @@
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/containerstore.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 
 #include "inventorywindow.hpp"
-#include "tradewindow.hpp"
 
 namespace MWGui
 {
@@ -123,7 +123,7 @@ namespace MWGui
             MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
             MWMechanics::Spells& spells = stats.getSpells();
             spells.add (mSpellsWidgetMap.find(_sender)->second);
-            MWBase::Environment::get().getWindowManager()->getTradeWindow()->addOrRemoveGold(-price);
+            player.getClass().getContainerStore(player).remove("gold_001", price, player);
             startSpellBuying(mPtr);
 
             MWBase::Environment::get().getSoundManager()->playSound ("Item Gold Up", 1.0, 1.0);
