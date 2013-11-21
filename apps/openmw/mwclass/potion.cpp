@@ -137,13 +137,14 @@ namespace MWClass
         MWMechanics::NpcStats& npcStats = MWWorld::Class::get(player).getNpcStats (player);
         int alchemySkill = npcStats.getSkill (ESM::Skill::Alchemy).getBase();
         int i=0;
+        static const float fWortChanceValue =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fWortChanceValue")->getFloat();
         for (MWGui::Widgets::SpellEffectList::iterator it = info.effects.begin(); it != info.effects.end(); ++it)
         {
-            /// \todo this code is duplicated from mwclass/ingredient, put it in a helper function
-            it->mKnown = ( (i == 0 && alchemySkill >= 15)
-                 || (i == 1 && alchemySkill >= 30)
-                 || (i == 2 && alchemySkill >= 45)
-                 || (i == 3 && alchemySkill >= 60));
+            it->mKnown = ( (i == 0 && alchemySkill >= fWortChanceValue)
+                 || (i == 1 && alchemySkill >= fWortChanceValue*2)
+                 || (i == 2 && alchemySkill >= fWortChanceValue*3)
+                 || (i == 3 && alchemySkill >= fWortChanceValue*4));
 
             ++i;
         }
