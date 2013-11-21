@@ -39,7 +39,7 @@ MWState::CharacterManager::CharacterManager (const boost::filesystem::path& save
 MWState::Character *MWState::CharacterManager::getCurrentCharacter()
 {
     if (!mCurrent)
-        throw std::logic_error ("no character selected");
+        createCharacter();
 
     return mCurrent;
 }
@@ -54,4 +54,9 @@ void MWState::CharacterManager::createCharacter()
     mCharacters.push_back (Character (path));
 
     mCurrent = &mCharacters.back();
+}
+
+void MWState::CharacterManager::clearCurrentCharacter()
+{
+    mCurrent = 0;
 }

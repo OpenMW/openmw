@@ -54,7 +54,6 @@ namespace MWBase
             /// \note Slot must belong to the current character.
 
             virtual MWState::Character *getCurrentCharacter() = 0;
-            ///< Must not be called, if there is no current character.
     };
 }
 

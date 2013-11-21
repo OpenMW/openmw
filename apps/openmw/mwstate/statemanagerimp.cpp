@@ -37,6 +37,7 @@ void MWState::StateManager::newGame (bool bypass)
         MWBase::Environment::get().getDialogueManager()->clear();
         MWBase::Environment::get().getJournal()->clear();
         mState = State_NoGame;
+        mCharacterManager.clearCurrentCharacter();
     }
 
     if (!bypass)
@@ -45,8 +46,6 @@ void MWState::StateManager::newGame (bool bypass)
         MWBase::Environment::get().getWorld()->startNewGame();
         MWBase::Environment::get().getWindowManager()->setNewGame (true);
     }
-
-    mCharacterManager.createCharacter();
 
     mState = State_Running;
 }

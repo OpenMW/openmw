@@ -27,10 +27,12 @@ namespace MWState
             CharacterManager (const boost::filesystem::path& saves);
 
             Character *getCurrentCharacter();
-            ///< Must not be called, if there is no current character.
+            ///< A character is implicitly created, if there is none.
 
             void createCharacter();
             ///< Create new character within saved game management
+
+            void clearCurrentCharacter();
     };
 }
 

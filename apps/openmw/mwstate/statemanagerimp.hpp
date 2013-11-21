@@ -38,7 +38,6 @@ namespace MWState
             /// \note Slot must belong to the current character.
 
             virtual Character *getCurrentCharacter();
-            ///< Must not be called, if there is no current character.
     };
 }
 
