@@ -1967,23 +1967,13 @@ namespace MWWorld
 
         if(werewolf)
         {
-            ManualRef ref(getStore(), "WerewolfRobe");
+            InventoryStore &inv = actor.getClass().getInventoryStore(actor);
 
-            // Configure item's script variables
-            std::string script = Class::get(ref.getPtr()).getScript(ref.getPtr());
-            if(script != "")
-            {
-                const ESM::Script *esmscript = getStore().get<ESM::Script>().find(script);
-                ref.getPtr().getRefData().setLocals(*esmscript);
-            }
-
-            // Not sure this is right
-            InventoryStore &inv = Class::get(actor).getInventoryStore(actor);
-            inv.equip(InventoryStore::Slot_Robe, inv.add(ref.getPtr(), actor), actor);
+            inv.equip(InventoryStore::Slot_Robe, inv.ContainerStore::add("WerewolfRobe", 1, actor), actor);
         }
         else
         {
-            Class::get(actor).getContainerStore(actor).remove("WerewolfRobe", 1, actor);
+            actor.getClass().getContainerStore(actor).remove("WerewolfRobe", 1, actor);
         }
 
         if(actor.getRefData().getHandle() == "player")

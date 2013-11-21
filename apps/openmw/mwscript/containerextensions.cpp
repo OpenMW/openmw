@@ -54,15 +54,6 @@ namespace MWScript
 
                     MWWorld::Ptr itemPtr = *ptr.getClass().getContainerStore (ptr).add (item, count, ptr);
 
-                    // Configure item's script variables
-                    std::string script = MWWorld::Class::get(itemPtr).getScript(itemPtr);
-                    if (script != "")
-                    {
-                        const ESM::Script *esmscript = MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find (script);
-                        itemPtr.getRefData().setLocals(*esmscript);
-                    }
-
-
                     // Spawn a messagebox (only for items added to player's inventory and if player is talking to someone)
                     if (ptr == MWBase::Environment::get().getWorld ()->getPlayer ().getPlayer() )
                     {
