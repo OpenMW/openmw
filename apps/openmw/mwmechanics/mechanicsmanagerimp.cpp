@@ -419,7 +419,7 @@ namespace MWMechanics
         MWWorld::LiveCellRef<ESM::NPC>* player = playerPtr.get<ESM::NPC>();
         const MWMechanics::NpcStats &playerStats = MWWorld::Class::get(playerPtr).getNpcStats(playerPtr);
 
-        if (Misc::StringUtils::lowerCase(npc->mBase->mRace) == Misc::StringUtils::lowerCase(player->mBase->mRace))
+        if (Misc::StringUtils::ciEqual(npc->mBase->mRace, player->mBase->mRace))
             x += MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispRaceMod")->getFloat();
 
         x += MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fDispPersonalityMult")->getFloat()
@@ -435,7 +435,9 @@ namespace MWMechanics
             for(std::vector<ESM::Faction::Reaction>::const_iterator it = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(Misc::StringUtils::lowerCase(npcFaction))->mReactions.begin();
                 it != MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(Misc::StringUtils::lowerCase(npcFaction))->mReactions.end(); ++it)
             {
-                if(Misc::StringUtils::lowerCase(it->mFaction) == Misc::StringUtils::lowerCase(npcFaction)) reaction = it->mReaction;
+                if(Misc::StringUtils::lowerCase(it->mFaction) == Misc::StringUtils::lowerCase(npcFaction)
+                        && playerStats.getExpelled().find(Misc::StringUtils::lowerCase(it->mFaction)) == playerStats.getExpelled().end())
+                    reaction = it->mReaction;
             }
             rank = playerStats.getFactionRanks().find(Misc::StringUtils::lowerCase(npcFaction))->second;
         }
@@ -446,7 +448,8 @@ namespace MWMechanics
             {
                 if(playerStats.getFactionRanks().find(Misc::StringUtils::lowerCase(it->mFaction)) != playerStats.getFactionRanks().end() )
                 {
-                    if(it->mReaction<reaction) reaction = it->mReaction;
+                    if(it->mReaction < reaction)
+                        reaction = it->mReaction;
                 }
             }
             rank = 0;
