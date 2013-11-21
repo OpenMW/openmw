@@ -1084,9 +1084,9 @@ namespace MWWorld
                         adjust);
     }
 
-    void World::safePlaceObject(const MWWorld::Ptr& ptr,MWWorld::CellStore &Cell,ESM::Position pos)
+    MWWorld::Ptr World::safePlaceObject(const MWWorld::Ptr& ptr,MWWorld::CellStore &Cell,ESM::Position pos)
     {
-        copyObjectToCell(ptr,Cell,pos);
+        return copyObjectToCell(ptr,Cell,pos);
     }
 
     void World::indexToPosition (int cellX, int cellY, float &x, float &y, bool centre) const

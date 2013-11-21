@@ -241,7 +241,7 @@ namespace MWBase
 
             virtual void localRotateObject (const MWWorld::Ptr& ptr, float x, float y, float z) = 0;
 
-            virtual void safePlaceObject(const MWWorld::Ptr& ptr,MWWorld::CellStore &Cell,ESM::Position pos) = 0;
+            virtual MWWorld::Ptr safePlaceObject(const MWWorld::Ptr& ptr,MWWorld::CellStore &Cell,ESM::Position pos) = 0;
             ///< place an object in a "safe" location (ie not in the void, etc).
 
             virtual void indexToPosition (int cellX, int cellY, float &x, float &y, bool centre = false)

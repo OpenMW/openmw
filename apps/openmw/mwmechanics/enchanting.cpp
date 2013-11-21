@@ -92,8 +92,8 @@ namespace MWMechanics
         MWWorld::Class::get(newItemPtr).applyEnchantment(newItemPtr, enchantmentPtr->mId, getGemCharge(), mNewItemName);
 
         // Add the new item to player inventory and remove the old one
-        store.add(newItemPtr, player);
         store.remove(mOldItemPtr, 1, player);
+        store.add(newItemPtr, player);
 
         if(!mSelfEnchanting)
             payForEnchantment();
