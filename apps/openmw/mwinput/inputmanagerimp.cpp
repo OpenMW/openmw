@@ -264,6 +264,8 @@ namespace MWInput
 
     void InputManager::update(float dt, bool loading)
     {
+        mInputManager->setMouseVisible(MWBase::Environment::get().getWindowManager()->getCursorVisible());
+
         mInputManager->capture(loading);
         // inject some fake mouse movement to force updating MyGUI's widget states
         // this shouldn't do any harm since we're moving back to the original position afterwards

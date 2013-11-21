@@ -19,6 +19,42 @@
 #include "renderconst.hpp"
 #include "camera.hpp"
 
+namespace
+{
+
+std::string getVampireHead(const std::string& race, bool female)
+{
+    static std::map <std::pair<std::string,int>, const ESM::BodyPart* > sVampireMapping;
+
+    std::pair<std::string, int> thisCombination = std::make_pair(race, int(female));
+
+    if (sVampireMapping.find(thisCombination) == sVampireMapping.end())
+    {
+        const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::Store<ESM::BodyPart> &partStore = store.get<ESM::BodyPart>();
+        for(MWWorld::Store<ESM::BodyPart>::iterator it = partStore.begin(); it != partStore.end(); ++it)
+        {
+            const ESM::BodyPart& bodypart = *it;
+            if (!bodypart.mData.mVampire)
+                continue;
+            if (bodypart.mData.mType != ESM::BodyPart::MT_Skin)
+                continue;
+            if (bodypart.mData.mPart != ESM::BodyPart::MP_Head)
+                continue;
+            if (female != (bodypart.mData.mFlags & ESM::BodyPart::BPF_Female))
+                continue;
+            if (!Misc::StringUtils::ciEqual(bodypart.mRace, race))
+                continue;
+            sVampireMapping[thisCombination] = &*it;
+        }
+    }
+
+    assert(sVampireMapping[thisCombination]);
+    return "meshes\\" + sVampireMapping[thisCombination]->mModel;
+}
+
+}
+
 
 namespace MWRender
 {
@@ -110,17 +146,22 @@ void NpcAnimation::updateNpcBase()
 
     const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
     const ESM::Race *race = store.get<ESM::Race>().find(mNpc->mRace);
-    bool isWerewolf = MWWorld::Class::get(mPtr).getNpcStats(mPtr).isWerewolf();
+    bool isWerewolf = mPtr.getClass().getNpcStats(mPtr).isWerewolf();
+    bool vampire = mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Vampirism).mMagnitude;
 
-    if(!isWerewolf)
-    {
-        mHeadModel = "meshes\\" + store.get<ESM::BodyPart>().find(mNpc->mHead)->mModel;
-        mHairModel = "meshes\\" + store.get<ESM::BodyPart>().find(mNpc->mHair)->mModel;
-    }
-    else
+    if (isWerewolf)
     {
         mHeadModel = "meshes\\" + store.get<ESM::BodyPart>().find("WerewolfHead")->mModel;
         mHairModel = "meshes\\" + store.get<ESM::BodyPart>().find("WerewolfHair")->mModel;
+    }
+    else
+    {
+        if (vampire)
+            mHeadModel = getVampireHead(mNpc->mRace, mNpc->mFlags & ESM::NPC::Female);
+        else
+            mHeadModel = "meshes\\" + store.get<ESM::BodyPart>().find(mNpc->mHead)->mModel;
+
+        mHairModel = "meshes\\" + store.get<ESM::BodyPart>().find(mNpc->mHair)->mModel;
     }
 
     bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
@@ -269,6 +310,8 @@ void NpcAnimation::updateParts()
 
     // Remember body parts so we only have to search through the store once for each race/gender/viewmode combination
     static std::map< std::pair<std::string,int>,std::vector<const ESM::BodyPart*> > sRaceMapping;
+
+    static std::map <std::pair<std::string,int>, std::vector<const ESM::BodyPart*> > sVampireMapping;
 
     static const int Flag_Female      = 1<<0;
     static const int Flag_FirstPerson = 1<<1;

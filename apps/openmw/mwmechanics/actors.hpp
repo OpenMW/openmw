@@ -30,8 +30,6 @@ namespace MWMechanics
 
         std::map<std::string, int> mDeathCount;
 
-        float mDuration;
-
         void updateNpc(const MWWorld::Ptr &ptr, float duration, bool paused);
 
 

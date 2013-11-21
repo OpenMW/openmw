@@ -10,7 +10,6 @@ namespace MWGui
 
     MessageBoxManager::MessageBoxManager ()
     {
-        // defines
         mMessageBoxSpeed = 0.1;
         mInterMessageBoxe = NULL;
         mStaticMessageBox = NULL;
@@ -19,47 +18,26 @@ namespace MWGui
 
     void MessageBoxManager::onFrame (float frameDuration)
     {
-        std::vector<MessageBoxManagerTimer>::iterator it;
-        for(it = mTimers.begin(); it != mTimers.end();)
+        std::vector<MessageBox*>::iterator it;
+        for(it = mMessageBoxes.begin(); it != mMessageBoxes.end();)
         {
-            // if this messagebox is already deleted, remove the timer and move on
-            if (std::find(mMessageBoxes.begin(), mMessageBoxes.end(), it->messageBox) == mMessageBoxes.end())
+            (*it)->mCurrentTime += frameDuration;
+            if((*it)->mCurrentTime >= (*it)->mMaxTime && *it != mStaticMessageBox)
             {
-                it = mTimers.erase(it);
-                continue;
-            }
-
-            it->current += frameDuration;
-            if(it->current >= it->max)
-            {
-                it->messageBox->mMarkedToDelete = true;
-
-                if(*mMessageBoxes.begin() == it->messageBox) // if this box is the last one
-                {
-                    // collect all with mMarkedToDelete and delete them.
-                    // and place the other messageboxes on the right position
-                    int height = 0;
-                    std::vector<MessageBox*>::iterator it2 = mMessageBoxes.begin();
-                    while(it2 != mMessageBoxes.end())
-                    {
-                        if((*it2)->mMarkedToDelete)
-                        {
-                            delete (*it2);
-                            it2 = mMessageBoxes.erase(it2);
-                        }
-                        else {
-                            (*it2)->update(height);
-                            height += (*it2)->getHeight();
-                            ++it2;
-                        }
-                    }
-                }
-                it = mTimers.erase(it);
+                delete *it;
+                it = mMessageBoxes.erase(it);
             }
             else
-            {
                 ++it;
-            }
+        }
+
+        float height = 0;
+        it = mMessageBoxes.begin();
+        while(it != mMessageBoxes.end())
+        {
+                (*it)->update(height);
+                height += (*it)->getHeight();
+                ++it;
         }
 
         if(mInterMessageBoxe != NULL && mInterMessageBoxe->mMarkedToDelete) {
@@ -74,14 +52,13 @@ namespace MWGui
     void MessageBoxManager::createMessageBox (const std::string& message, bool stat)
     {
         MessageBox *box = new MessageBox(*this, message);
+        box->mCurrentTime = 0;
+        box->mMaxTime = message.length()*mMessageBoxSpeed;
 
         if(stat)
             mStaticMessageBox = box;
-        else
-            removeMessageBox(message.length()*mMessageBoxSpeed, box);
 
         mMessageBoxes.push_back(box);
-        std::vector<MessageBox*>::iterator it;
 
         if(mMessageBoxes.size() > 3) {
             delete *mMessageBoxes.begin();
@@ -89,7 +66,7 @@ namespace MWGui
         }
 
         int height = 0;
-        for(it = mMessageBoxes.begin(); it != mMessageBoxes.end(); ++it)
+        for(std::vector<MessageBox*>::iterator it = mMessageBoxes.begin(); it != mMessageBoxes.end(); ++it)
         {
             (*it)->update(height);
             height += (*it)->getHeight();
@@ -119,15 +96,6 @@ namespace MWGui
         return mInterMessageBoxe != NULL;
     }
 
-    void MessageBoxManager::removeMessageBox (float time, MessageBox *msgbox)
-    {
-        MessageBoxManagerTimer timer;
-        timer.current = 0;
-        timer.max = time;
-        timer.messageBox = msgbox;
-
-        mTimers.insert(mTimers.end(), timer);
-    }
 
     bool MessageBoxManager::removeMessageBox (MessageBox *msgbox)
     {
@@ -169,12 +137,13 @@ namespace MWGui
       : Layout("openmw_messagebox.layout")
       , mMessageBoxManager(parMessageBoxManager)
       , mMessage(message)
+      , mCurrentTime(0)
+      , mMaxTime(0)
     {
         // defines
         mFixedWidth = 300;
         mBottomPadding = 20;
         mNextBoxPadding = 20;
-        mMarkedToDelete = false;
 
         getWidget(mMessageWidget, "message");
 

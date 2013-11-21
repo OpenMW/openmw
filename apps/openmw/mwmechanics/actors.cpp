@@ -211,7 +211,7 @@ namespace MWMechanics
 
             float currentDiff = creatureStats.getMagicEffects().get(EffectKey(ESM::MagicEffect::RestoreHealth+i)).mMagnitude
                     - creatureStats.getMagicEffects().get(EffectKey(ESM::MagicEffect::DamageHealth+i)).mMagnitude
-                    - creatureStats.getMagicEffects().get(EffectKey(ESM::MagicEffect::AbsorbHealth)).mMagnitude;
+                    - creatureStats.getMagicEffects().get(EffectKey(ESM::MagicEffect::AbsorbHealth+i)).mMagnitude;
             stat.setCurrent(stat.getCurrent() + currentDiff * duration);
 
             creatureStats.setDynamic(i, stat);
@@ -219,16 +219,34 @@ namespace MWMechanics
 
         // Apply damage ticks
         int damageEffects[] = {
-            ESM::MagicEffect::FireDamage, ESM::MagicEffect::ShockDamage, ESM::MagicEffect::FrostDamage, ESM::MagicEffect::Poison
+            ESM::MagicEffect::FireDamage, ESM::MagicEffect::ShockDamage, ESM::MagicEffect::FrostDamage, ESM::MagicEffect::Poison,
+            ESM::MagicEffect::SunDamage
         };
 
+        DynamicStat<float> health = creatureStats.getHealth();
         for (unsigned int i=0; i<sizeof(damageEffects)/sizeof(int); ++i)
         {
             float magnitude = creatureStats.getMagicEffects().get(EffectKey(damageEffects[i])).mMagnitude;
-            DynamicStat<float> health = creatureStats.getHealth();
-            health.setCurrent(health.getCurrent() - magnitude * duration);
-            creatureStats.setHealth(health);
+
+            if (damageEffects[i] == ESM::MagicEffect::SunDamage)
+            {
+                // isInCell shouldn't be needed, but updateActor called during game start
+                if (!ptr.isInCell() || !ptr.getCell()->isExterior())
+                    continue;
+                float time = MWBase::Environment::get().getWorld()->getTimeStamp().getHour();
+                float timeDiff = std::min(7.f, std::max(0.f, std::abs(time - 13)));
+                float damageScale = 1.f - timeDiff / 7.f;
+                // When cloudy, the sun damage effect is halved
+                int weather = MWBase::Environment::get().getWorld()->getCurrentWeather();
+                if (weather > 1)
+                    damageScale *= 0.5;
+                health.setCurrent(health.getCurrent() - magnitude * duration * damageScale);
+            }
+            else
+                health.setCurrent(health.getCurrent() - magnitude * duration);
+
         }
+        creatureStats.setHealth(health);
     }
 
     void Actors::calculateNpcStatModifiers (const MWWorld::Ptr& ptr)
@@ -324,7 +342,7 @@ namespace MWMechanics
         }
     }
 
-    Actors::Actors() : mDuration (0) {}
+    Actors::Actors() {}
 
     void Actors::addActor (const MWWorld::Ptr& ptr)
     {
@@ -377,14 +395,8 @@ namespace MWMechanics
 
     void Actors::update (float duration, bool paused)
     {
-        mDuration += duration;
-
-        //if (mDuration>=0.25)
         if (!paused)
         {
-            float totalDuration = mDuration;
-            mDuration = 0;
-
             for(PtrControllerMap::iterator iter(mActors.begin());iter != mActors.end();iter++)
             {
                 const MWWorld::Class &cls = MWWorld::Class::get(iter->first);
@@ -396,9 +408,9 @@ namespace MWMechanics
                     if(iter->second->isDead())
                         iter->second->resurrect();
 
-                    updateActor(iter->first, totalDuration);
+                    updateActor(iter->first, duration);
                     if(iter->first.getTypeName() == typeid(ESM::NPC).name())
-                        updateNpc(iter->first, totalDuration, paused);
+                        updateNpc(iter->first, duration, paused);
 
                     if(!stats.isDead())
                         continue;

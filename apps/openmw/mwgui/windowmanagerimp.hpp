@@ -278,6 +278,8 @@ namespace MWGui
 
     void onSoulgemDialogButtonPressed (int button);
 
+    virtual bool getCursorVisible();
+
   private:
     bool mConsoleOnlyScripts;
 
@@ -368,9 +370,6 @@ namespace MWGui
     float mFPS;
     unsigned int mTriangleCount;
     unsigned int mBatchCount;
-
-    bool mUseHardwareCursors;
-    void setUseHardwareCursors(bool use);
 
     /**
      * Called when MyGUI tries to retrieve a tag. This usually corresponds to a GMST string,

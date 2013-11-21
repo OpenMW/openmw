@@ -284,6 +284,9 @@ namespace MWBase
             virtual void setKeyFocusWidget (MyGUI::Widget* widget) = 0;
 
             virtual Loading::Listener* getLoadingScreen() = 0;
+
+            /// Should the cursor be visible?
+            virtual bool getCursorVisible() = 0;
     };
 }
 
