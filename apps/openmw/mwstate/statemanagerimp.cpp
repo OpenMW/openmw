@@ -98,3 +98,13 @@ MWState::Character *MWState::StateManager::getCurrentCharacter()
 {
     return mCharacterManager.getCurrentCharacter();
 }
+
+MWState::StateManager::CharacterIterator MWState::StateManager::characterBegin()
+{
+    return mCharacterManager.begin();
+}
+
+MWState::StateManager::CharacterIterator MWState::StateManager::characterEnd()
+{
+    return mCharacterManager.end();
+}

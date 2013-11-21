@@ -1,6 +1,8 @@
 #ifndef GAME_MWSTATE_STATEMANAGER_H
 #define GAME_MWSTATE_STATEMANAGER_H
 
+#include <vector>
+
 namespace MWState
 {
     struct Slot;
@@ -20,6 +22,8 @@ namespace MWBase
                 State_Ended,
                 State_Running
             };
+
+            typedef std::vector<MWState::Character>::const_iterator CharacterIterator;
 
         private:
 
@@ -54,6 +58,10 @@ namespace MWBase
             /// \note Slot must belong to the current character.
 
             virtual MWState::Character *getCurrentCharacter() = 0;
+
+            virtual CharacterIterator characterBegin() = 0;
+
+            virtual CharacterIterator characterEnd() = 0;
     };
 }
 

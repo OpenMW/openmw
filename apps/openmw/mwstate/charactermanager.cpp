@@ -60,3 +60,13 @@ void MWState::CharacterManager::clearCurrentCharacter()
 {
     mCurrent = 0;
 }
+
+std::vector<MWState::Character>::const_iterator MWState::CharacterManager::begin() const
+{
+    return mCharacters.begin();
+}
+
+std::vector<MWState::Character>::const_iterator MWState::CharacterManager::end() const
+{
+    return mCharacters.end();
+}

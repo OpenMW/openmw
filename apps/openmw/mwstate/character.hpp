@@ -18,6 +18,12 @@ namespace MWState
 
     class Character
     {
+        public:
+
+            typedef std::vector<Slot>::const_reverse_iterator SlotIterator;
+
+        private:
+
             boost::filesystem::path mPath;
             std::vector<Slot> mSlots;
             int mNext;
@@ -39,6 +45,11 @@ namespace MWState
             /// \note Slot must belong to this character.
             ///
             /// \attention The \æ slot pointer will be invalidated by this call.
+
+            SlotIterator begin() const;
+            ///< First slot is the most recent. Other slots follow in descending order of save date.
+
+            SlotIterator end() const;
     };
 }
 

@@ -99,3 +99,13 @@ const MWState::Slot *MWState::Character::updateSlot (const Slot *slot, const ESM
 
     return &mSlots.back();
 }
+
+MWState::Character::SlotIterator MWState::Character::begin() const
+{
+    return mSlots.rbegin();
+}
+
+MWState::Character::SlotIterator MWState::Character::end() const
+{
+    return mSlots.rend();
+}

@@ -38,6 +38,10 @@ namespace MWState
             /// \note Slot must belong to the current character.
 
             virtual Character *getCurrentCharacter();
+
+            virtual CharacterIterator characterBegin();
+
+            virtual CharacterIterator characterEnd();
     };
 }
 

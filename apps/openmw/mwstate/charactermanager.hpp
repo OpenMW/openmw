@@ -33,6 +33,10 @@ namespace MWState
             ///< Create new character within saved game management
 
             void clearCurrentCharacter();
+
+            std::vector<Character>::const_iterator begin() const;
+
+            std::vector<Character>::const_iterator end() const;
     };
 }
 
