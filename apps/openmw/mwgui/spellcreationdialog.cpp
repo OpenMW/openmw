@@ -8,13 +8,13 @@
 #include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/player.hpp"
+#include "../mwworld/containerstore.hpp"
 
 #include "../mwmechanics/spellcasting.hpp"
 
 #include "tooltips.hpp"
 #include "class.hpp"
 #include "inventorywindow.hpp"
-#include "tradewindow.hpp"
 
 namespace
 {
@@ -342,13 +342,14 @@ namespace MWGui
 
         mSpell.mName = mNameEdit->getCaption();
 
-        MWBase::Environment::get().getWindowManager()->getTradeWindow()->addOrRemoveGold(-boost::lexical_cast<int>(mPriceLabel->getCaption()));
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
+
+        player.getClass().getContainerStore(player).remove("gold_001", boost::lexical_cast<int>(mPriceLabel->getCaption()), player);
 
         MWBase::Environment::get().getSoundManager()->playSound ("Item Gold Up", 1.0, 1.0);
 
         const ESM::Spell* spell = MWBase::Environment::get().getWorld()->createRecord(mSpell);
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
         MWMechanics::CreatureStats& stats = MWWorld::Class::get(player).getCreatureStats(player);
         MWMechanics::Spells& spells = stats.getSpells();
         spells.add (spell->mId);

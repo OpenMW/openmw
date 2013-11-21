@@ -184,8 +184,11 @@ namespace MWClass
             }
 
             // creature stats
+            int gold=0;
             if(ref->mBase->mNpdt52.mGold != -10)
             {
+                gold = ref->mBase->mNpdt52.mGold;
+
                 for (int i=0; i<27; ++i)
                     data->mNpcStats.getSkill (i).setBase (ref->mBase->mNpdt52.mSkills[i]);
 
@@ -207,6 +210,8 @@ namespace MWClass
             }
             else
             {
+                gold = ref->mBase->mNpdt12.mGold;
+
                 for (int i=0; i<3; ++i)
                     data->mNpcStats.setDynamic (i, 10);
 
@@ -235,6 +240,8 @@ namespace MWClass
 
             // store
             ptr.getRefData().setCustomData (data.release());
+
+            getContainerStore(ptr).add("gold_001", gold, ptr);
 
             getInventoryStore(ptr).autoEquip(ptr);
         }

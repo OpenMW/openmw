@@ -62,10 +62,7 @@ namespace MWMechanics
 
         //Exception for Azura Star, new one will be added after enchanting
         if(boost::iequals(mSoulGemPtr.get<ESM::Miscellaneous>()->mBase->mId, "Misc_SoulGem_Azura"))
-        {
-            MWWorld::ManualRef azura (MWBase::Environment::get().getWorld()->getStore(), "Misc_SoulGem_Azura");
-            store.add(azura.getPtr(), player);
-        }
+            store.add("Misc_SoulGem_Azura", 1, player);
 
         if(mSelfEnchanting)
         {
@@ -92,8 +89,8 @@ namespace MWMechanics
         MWWorld::Class::get(newItemPtr).applyEnchantment(newItemPtr, enchantmentPtr->mId, getGemCharge(), mNewItemName);
 
         // Add the new item to player inventory and remove the old one
-        store.add(newItemPtr, player);
         store.remove(mOldItemPtr, 1, player);
+        store.add(newItemPtr, player);
 
         if(!mSelfEnchanting)
             payForEnchantment();

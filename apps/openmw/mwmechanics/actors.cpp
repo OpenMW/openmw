@@ -12,6 +12,8 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/player.hpp"
+#include "../mwworld/manualref.hpp"
+#include "../mwworld/actionequip.hpp"
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -26,6 +28,25 @@
 #include "../mwbase/mechanicsmanager.hpp"
 
 #include "aicombat.hpp"
+
+namespace
+{
+
+void adjustBoundItem (const std::string& item, bool bound, const MWWorld::Ptr& actor)
+{
+    if (bound)
+    {
+        MWWorld::Ptr newPtr = *actor.getClass().getContainerStore(actor).add(item, 1, actor);
+        MWWorld::ActionEquip action(newPtr);
+        action.execute(actor);
+    }
+    else
+    {
+        actor.getClass().getContainerStore(actor).remove(item, 1, actor);
+    }
+}
+
+}
 
 namespace MWMechanics
 {
@@ -247,6 +268,118 @@ namespace MWMechanics
 
         }
         creatureStats.setHealth(health);
+
+        // TODO: dirty flag for magic effects to avoid some unnecessary work below?
+
+        // Update bound effects
+        static std::map<int, std::string> boundItemsMap;
+        if (boundItemsMap.empty())
+        {
+            boundItemsMap[ESM::MagicEffect::BoundBattleAxe] = "battle_axe";
+            boundItemsMap[ESM::MagicEffect::BoundBoots] = "boots";
+            boundItemsMap[ESM::MagicEffect::BoundCuirass] = "cuirass";
+            boundItemsMap[ESM::MagicEffect::BoundDagger] = "dagger";
+            boundItemsMap[ESM::MagicEffect::BoundGloves] = "gauntlet"; // Note: needs both _left and _right variants, see below
+            boundItemsMap[ESM::MagicEffect::BoundHelm] = "helm";
+            boundItemsMap[ESM::MagicEffect::BoundLongbow] = "longbow";
+            boundItemsMap[ESM::MagicEffect::BoundLongsword] = "longsword";
+            boundItemsMap[ESM::MagicEffect::BoundMace] = "mace";
+            boundItemsMap[ESM::MagicEffect::BoundShield] = "shield";
+            boundItemsMap[ESM::MagicEffect::BoundSpear] = "spear";
+        }
+
+        for (std::map<int, std::string>::iterator it = boundItemsMap.begin(); it != boundItemsMap.end(); ++it)
+        {
+            bool found = creatureStats.mBoundItems.find(it->first) != creatureStats.mBoundItems.end();
+            int magnitude = creatureStats.getMagicEffects().get(EffectKey(it->first)).mMagnitude;
+            if (found != (magnitude > 0))
+            {
+                std::string item = "bound_" + it->second;
+                if (it->first == ESM::MagicEffect::BoundGloves)
+                {
+                    adjustBoundItem(item + "_left", magnitude > 0, ptr);
+                    adjustBoundItem(item + "_right", magnitude > 0, ptr);
+                }
+                else
+                    adjustBoundItem(item, magnitude > 0, ptr);
+
+                if (magnitude > 0)
+                    creatureStats.mBoundItems.insert(it->first);
+                else
+                    creatureStats.mBoundItems.erase(it->first);
+            }
+        }
+
+        // Update summon effects
+        static std::map<int, std::string> summonMap;
+        if (summonMap.empty())
+        {
+            summonMap[ESM::MagicEffect::SummonAncestralGhost] = "ancestor_ghost_summon";
+            summonMap[ESM::MagicEffect::SummonBear] = "BM_bear_black_summon";
+            summonMap[ESM::MagicEffect::SummonBonelord] = "bonelord_summon";
+            summonMap[ESM::MagicEffect::SummonBonewalker] = "bonewalker_summon";
+            summonMap[ESM::MagicEffect::SummonBonewolf] = "BM_wolf_bone_summon";
+            summonMap[ESM::MagicEffect::SummonCenturionSphere] = "centurion_sphere_summon";
+            summonMap[ESM::MagicEffect::SummonClannfear] = "clannfear_summon";
+            summonMap[ESM::MagicEffect::SummonDaedroth] = "daedroth_summon";
+            summonMap[ESM::MagicEffect::SummonDremora] = "dremora_summon";
+            summonMap[ESM::MagicEffect::SummonFabricant] = "fabricant_summon";
+            summonMap[ESM::MagicEffect::SummonFlameAtronach] = "atronach_flame_summon";
+            summonMap[ESM::MagicEffect::SummonFrostAtronach] = "atronach_frost_summon";
+            summonMap[ESM::MagicEffect::SummonGoldenSaint] = "golden saint_summon";
+            summonMap[ESM::MagicEffect::SummonGreaterBonewalker] = "bonewalker_greater_summ";
+            summonMap[ESM::MagicEffect::SummonHunger] = "hunger_summon";
+            summonMap[ESM::MagicEffect::SummonScamp] = "scamp_summon";
+            summonMap[ESM::MagicEffect::SummonSkeletalMinion] = "skeleton_summon";
+            summonMap[ESM::MagicEffect::SummonStormAtronach] = "atronach_storm_summon";
+            summonMap[ESM::MagicEffect::SummonWingedTwilight] = "winged twilight_summon";
+            summonMap[ESM::MagicEffect::SummonWolf] = "BM_wolf_grey_summon";
+        }
+
+        for (std::map<int, std::string>::iterator it = summonMap.begin(); it != summonMap.end(); ++it)
+        {
+            bool found = creatureStats.mSummonedCreatures.find(it->first) != creatureStats.mSummonedCreatures.end();
+            int magnitude = creatureStats.getMagicEffects().get(EffectKey(it->first)).mMagnitude;
+            if (found != (magnitude > 0))
+            {
+                if (magnitude > 0)
+                {
+                    ESM::Position ipos = ptr.getRefData().getPosition();
+                    Ogre::Vector3 pos(ipos.pos[0],ipos.pos[1],ipos.pos[2]);
+                    Ogre::Quaternion rot(Ogre::Radian(-ipos.rot[2]), Ogre::Vector3::UNIT_Z);
+                    const float distance = 50;
+                    pos = pos + distance*rot.yAxis();
+                    ipos.pos[0] = pos.x;
+                    ipos.pos[1] = pos.y;
+                    ipos.pos[2] = pos.z;
+                    ipos.rot[0] = 0;
+                    ipos.rot[1] = 0;
+                    ipos.rot[2] = 0;
+
+                    MWWorld::CellStore* store = ptr.getCell();
+                    MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), it->second, 1);
+                    ref.getPtr().getCellRef().mPos = ipos;
+
+                    // TODO: Add AI to follow player and fight for him
+
+                    creatureStats.mSummonedCreatures.insert(std::make_pair(it->first,
+                        MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),*store,ipos).getRefData().getHandle()));
+
+                }
+                else
+                {
+                    std::string handle = creatureStats.mSummonedCreatures[it->first];
+                    // TODO: Show death animation before deleting? We shouldn't allow looting the corpse while the animation
+                    // plays though, which is a rather lame exploit in vanilla.
+                    MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaHandle(handle);
+                    if (!ptr.isEmpty())
+                    {
+                        MWBase::Environment::get().getWorld()->deleteObject(ptr);
+                        creatureStats.mSummonedCreatures.erase(it->first);
+                    }
+                }
+            }
+        }
     }
 
     void Actors::calculateNpcStatModifiers (const MWWorld::Ptr& ptr)

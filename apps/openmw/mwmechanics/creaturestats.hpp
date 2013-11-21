@@ -171,6 +171,11 @@ namespace MWMechanics
 
         void setLastHitObject(const std::string &objectid);
         const std::string &getLastHitObject() const;
+
+        // Note, this is just a cache to avoid checking the whole container store every frame TODO: Put it somewhere else?
+        std::set<int> mBoundItems;
+        // Same as above
+        std::map<int, std::string> mSummonedCreatures;
     };
 }
 

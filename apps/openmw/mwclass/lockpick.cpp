@@ -86,7 +86,10 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Lockpick> *ref =
             ptr.get<ESM::Lockpick>();
 
-        return ref->mBase->mData.mValue;
+        if (ptr.getCellRef().mCharge == -1)
+            return ref->mBase->mData.mValue;
+        else
+            return ref->mBase->mData.mValue * (ptr.getCellRef().mCharge / getItemMaxHealth(ptr));
     }
 
     void Lockpick::registerSelf()
