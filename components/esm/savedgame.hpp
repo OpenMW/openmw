@@ -26,7 +26,7 @@ namespace ESM
         std::vector<std::string> mContentFiles;
         std::string mPlayerName;
         int mPlayerLevel;
-        std::string mPlayerClass;
+        std::string mPlayerClass; // this is the ID and not the name of the class
         std::string mPlayerCell;
         TimeStamp mInGameTime;
         double mTimePlayed;

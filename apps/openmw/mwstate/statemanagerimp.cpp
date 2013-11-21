@@ -9,6 +9,11 @@
 #include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
+#include "../mwworld/player.hpp"
+#include "../mwworld/class.hpp"
+
+#include "../mwmechanics/npcstats.hpp"
+
 MWState::StateManager::StateManager (const boost::filesystem::path& saves)
 : mQuitRequest (false), mState (State_NoGame), mCharacterManager (saves)
 {
@@ -59,7 +64,20 @@ void MWState::StateManager::saveGame (const Slot *slot)
 {
     ESM::SavedGame profile;
 
-    /// \todo configure profile
+    MWBase::World& world = *MWBase::Environment::get().getWorld();
+
+    MWWorld::Ptr player = world.getPlayer().getPlayer();
+
+    /// \todo store content file list
+    profile.mPlayerName = player.getClass().getName (player);
+    profile.mPlayerLevel = player.getClass().getNpcStats (player).getLevel();
+    profile.mPlayerClass = player.get<ESM::NPC>()->mBase->mId;
+    /// \todo player cell
+    /// \todo gamehour
+    profile.mInGameTime.mDay = world.getDay();
+    profile.mInGameTime.mMonth = world.getMonth();
+    /// \todo year
+    /// \todo time played
 
     if (!slot)
         slot = mCharacterManager.getCurrentCharacter()->createSlot (profile);
