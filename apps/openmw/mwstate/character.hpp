@@ -44,17 +44,19 @@ namespace MWState
             const Slot *updateSlot (const Slot *slot, const ESM::SavedGame& profile);
             /// \note Slot must belong to this character.
             ///
-            /// \attention The \æ slot pointer will be invalidated by this call.
+            /// \attention The \a slot pointer will be invalidated by this call.
 
             SlotIterator begin() const;
             ///< First slot is the most recent. Other slots follow in descending order of save date.
+            ///
+            /// Any call to createSlot and updateSlot can invalidate the returned iterator.
 
             SlotIterator end() const;
 
             ESM::SavedGame getSignature() const;
             ///< Return signature information for this character.
             ///
-            /// \todo attention This function must not be called if there are no slots.
+            /// \attention This function must not be called if there are no slots.
     };
 }
 
