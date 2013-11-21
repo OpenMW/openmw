@@ -40,22 +40,23 @@ namespace MWGui
 
     void MainMenu::onButtonClicked(MyGUI::Widget *sender)
     {
+        std::string name = *sender->getUserData<std::string>();
         MWBase::Environment::get().getSoundManager()->playSound("Menu Click", 1.f, 1.f);
-        if (sender == mButtons["return"])
+        if (name == "return")
         {
             MWBase::Environment::get().getSoundManager ()->resumeSounds (MWBase::SoundManager::Play_TypeSfx);
             MWBase::Environment::get().getWindowManager ()->removeGuiMode (GM_MainMenu);
         }
-        else if (sender == mButtons["options"])
+        else if (name == "options")
             MWBase::Environment::get().getWindowManager ()->pushGuiMode (GM_Settings);
-        else if (sender == mButtons["exitgame"])
+        else if (name == "exitgame")
             MWBase::Environment::get().getStateManager()->requestQuit();
-        else if (sender == mButtons["newgame"])
+        else if (name == "newgame")
         {
             MWBase::Environment::get().getStateManager()->newGame();
         }
 
-        else if (sender == mButtons["loadgame"])
+        else if (name == "loadgame")
         {
             // for testing purpose, pick the first slot of the first character:
             const MWState::Character& character =
@@ -68,7 +69,7 @@ namespace MWGui
 //            dialog->setLoadOrSave(true);
 //            dialog->setVisible(true);
         }
-        else if (sender == mButtons["savegame"])
+        else if (name == "savegame")
         {
             // for testing purpose, save into a new slot:
             MWBase::Environment::get().getStateManager()->saveGame (0);
@@ -84,10 +85,9 @@ namespace MWGui
         setCoord(0,0, mWidth, mHeight);
 
 
-        if (mButtonBox)
-            MyGUI::Gui::getInstance ().destroyWidget(mButtonBox);
+        if (!mButtonBox)
+            mButtonBox = mMainWidget->createWidget<MyGUI::Widget>("", MyGUI::IntCoord(0, 0, 0, 0), MyGUI::Align::Default);
 
-        mButtonBox = mMainWidget->createWidget<MyGUI::Widget>("", MyGUI::IntCoord(0, 0, 0, 0), MyGUI::Align::Default);
         int curH = 0;
 
         MWBase::StateManager::State state = MWBase::Environment::get().getStateManager()->getState();
@@ -110,28 +110,41 @@ namespace MWGui
         //buttons.push_back("credits");
         buttons.push_back("exitgame");
 
-        int maxwidth = 0;
-
-        mButtons.clear();
+        // Create new buttons if needed
         for (std::vector<std::string>::iterator it = buttons.begin(); it != buttons.end(); ++it)
         {
-            MWGui::ImageButton* button = mButtonBox->createWidget<MWGui::ImageButton>
-                    ("ImageBox", MyGUI::IntCoord(0, curH, 0, 0), MyGUI::Align::Default);
-            button->setProperty("ImageHighlighted", "textures\\menu_" + *it + "_over.dds");
-            button->setProperty("ImageNormal", "textures\\menu_" + *it + ".dds");
-            button->setProperty("ImagePushed", "textures\\menu_" + *it + "_pressed.dds");
-            MyGUI::IntSize requested = button->getRequestedSize();
-            button->eventMouseButtonClick += MyGUI::newDelegate(this, &MainMenu::onButtonClicked);
-            mButtons[*it] = button;
-            curH += requested.height;
+            if (mButtons.find(*it) == mButtons.end())
+            {
+                MWGui::ImageButton* button = mButtonBox->createWidget<MWGui::ImageButton>
+                        ("ImageBox", MyGUI::IntCoord(0, curH, 0, 0), MyGUI::Align::Default);
+                button->setProperty("ImageHighlighted", "textures\\menu_" + *it + "_over.dds");
+                button->setProperty("ImageNormal", "textures\\menu_" + *it + ".dds");
+                button->setProperty("ImagePushed", "textures\\menu_" + *it + "_pressed.dds");
+                button->eventMouseButtonClick += MyGUI::newDelegate(this, &MainMenu::onButtonClicked);
+                button->setUserData(std::string(*it));
+                mButtons[*it] = button;
+            }
+        }
 
+        // Start by hiding all buttons
+        int maxwidth = 0;
+        for (std::map<std::string, MWGui::ImageButton*>::iterator it = mButtons.begin(); it != mButtons.end(); ++it)
+        {
+            it->second->setVisible(false);
+            MyGUI::IntSize requested = it->second->getRequestedSize();
             if (requested.width > maxwidth)
                 maxwidth = requested.width;
         }
-        for (std::map<std::string, MWGui::ImageButton*>::iterator it = mButtons.begin(); it != mButtons.end(); ++it)
+
+        // Now show and position the ones we want
+        for (std::vector<std::string>::iterator it = buttons.begin(); it != buttons.end(); ++it)
         {
-            MyGUI::IntSize requested = it->second->getRequestedSize();
-            it->second->setCoord((maxwidth-requested.width) / 2, it->second->getTop(), requested.width, requested.height);
+            assert(mButtons.find(*it) != mButtons.end());
+            MWGui::ImageButton* button = mButtons[*it];
+            button->setVisible(true);
+            MyGUI::IntSize requested = button->getRequestedSize();
+            button->setCoord((maxwidth-requested.width) / 2, curH, requested.width, requested.height);
+            curH += requested.height;
         }
 
         mButtonBox->setCoord (mWidth/2 - maxwidth/2, mHeight/2 - curH/2, maxwidth, curH);
