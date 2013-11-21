@@ -29,7 +29,7 @@ namespace ESM
         std::string mPlayerClass;
         std::string mPlayerCell;
         TimeStamp mInGameTime;
-        float mTimePlayed;
+        double mTimePlayed;
 
         /// \todo add field for screenshot
 
