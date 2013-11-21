@@ -32,17 +32,17 @@
 namespace
 {
 
-void adjustBoundItem (const std::string& item, bool bound, const MWWorld::Ptr& ptr)
+void adjustBoundItem (const std::string& item, bool bound, const MWWorld::Ptr& actor)
 {
     if (bound)
     {
-        MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), item, 1);
-        MWWorld::ActionEquip action(*ptr.getClass().getContainerStore(ptr).add(ref.getPtr(), ptr));
-        action.execute(ptr);
+        MWWorld::Ptr newPtr = *actor.getClass().getContainerStore(actor).add(item, 1, actor);
+        MWWorld::ActionEquip action(newPtr);
+        action.execute(actor);
     }
     else
     {
-        ptr.getClass().getContainerStore(ptr).remove(item, 1, ptr);
+        actor.getClass().getContainerStore(actor).remove(item, 1, actor);
     }
 }
 

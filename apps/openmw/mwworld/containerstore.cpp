@@ -118,6 +118,12 @@ bool MWWorld::ContainerStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
             || cls2.getItemMaxHealth(ptr2) == ptr2.getCellRef().mCharge);
 }
 
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(const std::string &id, int count, const Ptr &actorPtr)
+{
+    MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), id, count);
+    return add(ref.getPtr(), actorPtr);
+}
+
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr, const Ptr& actorPtr)
 {
     MWWorld::ContainerStoreIterator it = addImp(itemPtr);

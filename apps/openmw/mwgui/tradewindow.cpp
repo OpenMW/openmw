@@ -210,8 +210,7 @@ namespace MWGui
 
         if (amount > 0)
         {
-            MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), "Gold_001", amount);
-            playerStore.add(ref.getPtr(), player);
+            playerStore.add("gold_001", amount, player);
         }
         else
         {
