@@ -37,6 +37,11 @@ namespace MWState
             ///
             /// \note Slot must belong to the current character.
 
+            virtual void loadGame (const Character *character, const Slot *slot);
+            ///< Load a saved game file from \a slot.
+            ///
+            /// \note \a slot must belong to \a character.
+
             virtual Character *getCurrentCharacter();
 
             virtual CharacterIterator characterBegin();

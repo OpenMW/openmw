@@ -56,6 +56,16 @@ void MWState::CharacterManager::createCharacter()
     mCurrent = &mCharacters.back();
 }
 
+void MWState::CharacterManager::setCurrentCharacter (const Character *character)
+{
+    int index = character - &mCharacters[0];
+
+    if (index<0 || index>=static_cast<int> (mCharacters.size()))
+        throw std::logic_error ("invalid character");
+
+    mCurrent = &mCharacters[index];
+}
+
 void MWState::CharacterManager::clearCurrentCharacter()
 {
     mCurrent = 0;

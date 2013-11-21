@@ -2,6 +2,7 @@
 #include "statemanagerimp.hpp"
 
 #include <components/esm/esmwriter.hpp>
+#include <components/esm/esmreader.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -92,6 +93,27 @@ void MWState::StateManager::saveGame (const Slot *slot)
     slot->mProfile.save (writer);
     writer.endRecord ("SAVE");
     writer.close();
+}
+
+void MWState::StateManager::loadGame (const Character *character, const Slot *slot)
+{
+    if (mState!=State_NoGame)
+    {
+        MWBase::Environment::get().getDialogueManager()->clear();
+        MWBase::Environment::get().getJournal()->clear();
+        mState = State_NoGame;
+        mCharacterManager.clearCurrentCharacter();
+    }
+
+    ESM::ESMReader reader;
+    reader.open (slot->mPath.string());
+
+    reader.getRecName(); // don't need to read that here
+    reader.getRecHeader();
+
+    /// \todo read saved game data
+
+    mState = State_Running;
 }
 
 MWState::Character *MWState::StateManager::getCurrentCharacter()

@@ -57,6 +57,11 @@ namespace MWBase
             ///
             /// \note Slot must belong to the current character.
 
+            virtual void loadGame (const MWState::Character *character, const MWState::Slot *slot) = 0;
+            ///< Load a saved game file from \a slot.
+            ///
+            /// \note \a slot must belong to \a character.
+
             virtual MWState::Character *getCurrentCharacter() = 0;
 
             virtual CharacterIterator characterBegin() = 0;

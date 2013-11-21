@@ -8,6 +8,8 @@
 #include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/statemanager.hpp"
 
+#include "../mwstate/character.hpp"
+
 #include "savegamedialog.hpp"
 
 namespace MWGui
@@ -55,13 +57,22 @@ namespace MWGui
 
         else if (sender == mButtons["loadgame"])
         {
-            MWGui::SaveGameDialog* dialog = new MWGui::SaveGameDialog();
-            dialog->setLoadOrSave(true);
-            dialog->setVisible(true);
+            // for testing purpose, pick the first slot of the first character:
+            const MWState::Character& character =
+                *MWBase::Environment::get().getStateManager()->characterBegin();
+            const MWState::Slot& slot = *character.begin();
+
+            MWBase::Environment::get().getStateManager()->loadGame (&character, &slot);
+
+//            MWGui::SaveGameDialog* dialog = new MWGui::SaveGameDialog();
+//            dialog->setLoadOrSave(true);
+//            dialog->setVisible(true);
         }
         else if (sender == mButtons["savegame"])
         {
+            // for testing purpose, save into a new slot:
             MWBase::Environment::get().getStateManager()->saveGame (0);
+
 //            MWGui::SaveGameDialog* dialog = new MWGui::SaveGameDialog();
 //            dialog->setLoadOrSave(false);
 //            dialog->setVisible(true);
@@ -88,8 +99,9 @@ namespace MWGui
 
         buttons.push_back("newgame");
 
-        /// \todo hide, if no saved game is available
-        buttons.push_back("loadgame");
+        if (MWBase::Environment::get().getStateManager()->characterBegin()!=
+            MWBase::Environment::get().getStateManager()->characterEnd())
+            buttons.push_back("loadgame");
 
         if (state==MWBase::StateManager::State_Running)
             buttons.push_back("savegame");

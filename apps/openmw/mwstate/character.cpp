@@ -9,6 +9,9 @@
 
 #include <boost/filesystem.hpp>
 
+#include <components/esm/esmreader.hpp>
+#include <components/esm/defs.hpp>
+
 bool MWState::operator< (const Slot& left, const Slot& right)
 {
     return left.mTimeStamp<right.mTimeStamp;
@@ -21,7 +24,15 @@ void MWState::Character::addSlot (const boost::filesystem::path& path)
     slot.mPath = path;
     slot.mTimeStamp = boost::filesystem::last_write_time (path);
 
-    /// \todo load profile
+    ESM::ESMReader reader;
+    reader.open (slot.mPath.string());
+
+    if (reader.getRecName()!=ESM::REC_SAVE)
+        return; // invalid save file -> ignore
+
+    reader.getRecHeader();
+
+    slot.mProfile.load (reader);
 
     mSlots.push_back (slot);
 }
