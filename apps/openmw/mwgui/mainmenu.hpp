@@ -5,6 +5,8 @@
 namespace MWGui
 {
 
+    class SaveGameDialog;
+
     class MainMenu : public OEngine::GUI::Layout
     {
             int mWidth;
@@ -13,6 +15,7 @@ namespace MWGui
         public:
 
             MainMenu(int w, int h);
+            ~MainMenu();
 
             void onResChange(int w, int h);
 
@@ -27,6 +30,8 @@ namespace MWGui
             void onButtonClicked (MyGUI::Widget* sender);
 
             void updateMenu();
+
+            SaveGameDialog* mSaveGameDialog;
     };
 
 }

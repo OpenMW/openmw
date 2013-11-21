@@ -72,9 +72,28 @@ void MWState::StateManager::saveGame (const Slot *slot)
     /// \todo store content file list
     profile.mPlayerName = player.getClass().getName (player);
     profile.mPlayerLevel = player.getClass().getNpcStats (player).getLevel();
-    profile.mPlayerClass = player.get<ESM::NPC>()->mBase->mId;
-    /// \todo player cell
-    /// \todo gamehour
+    profile.mPlayerClass = player.get<ESM::NPC>()->mBase->mClass;
+
+    std::string cellName;
+    if (player.getCell()->mCell->isExterior())
+    {
+        if (player.getCell()->mCell->mName != "")
+            cellName = player.getCell()->mCell->mName;
+        else
+        {
+            const ESM::Region* region =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::Region>().search(player.getCell()->mCell->mRegion);
+            if (region)
+                cellName = region->mName;
+            else
+                cellName = MWBase::Environment::get().getWindowManager()->getGameSettingString("sDefaultCellname", "Wilderness");
+        }
+    }
+    else
+        cellName = player.getCell()->mCell->mName;
+    profile.mPlayerCell = cellName;
+
+    profile.mInGameTime.mGameHour = world.getTimeStamp().getHour();
     profile.mInGameTime.mDay = world.getDay();
     profile.mInGameTime.mMonth = world.getMonth();
     /// \todo year
@@ -112,6 +131,8 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
     reader.getRecHeader();
 
     /// \todo read saved game data
+
+    mCharacterManager.setCurrentCharacter(character);
 
     mState = State_Running;
 }

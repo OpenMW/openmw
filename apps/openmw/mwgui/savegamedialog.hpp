@@ -3,6 +3,11 @@
 
 #include "windowbase.hpp"
 
+namespace MWState
+{
+    class Character;
+}
+
 namespace MWGui
 {
 
@@ -17,10 +22,15 @@ namespace MWGui
 
         void onCancelButtonClicked (MyGUI::Widget* sender);
         void onOkButtonClicked (MyGUI::Widget* sender);
+        void onCharacterSelected (MyGUI::ComboBox* sender, size_t pos);
+        void onSlotSelected (MyGUI::ListBox* sender, size_t pos);
+
+        void fillSaveList();
 
 
     private:
         MyGUI::ImageBox* mScreenshot;
+        bool mSaving;
 
         MyGUI::ComboBox* mCharacterSelection;
         MyGUI::EditBox* mInfoText;
@@ -29,6 +39,8 @@ namespace MWGui
         MyGUI::ListBox* mSaveList;
         MyGUI::EditBox* mSaveNameEdit;
         MyGUI::Widget* mSpacer;
+
+        const MWState::Character* mCurrentCharacter;
 
     };
 

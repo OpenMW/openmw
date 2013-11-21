@@ -63,8 +63,8 @@ namespace MWBase
             /// \note \a slot must belong to \a character.
 
             virtual MWState::Character *getCurrentCharacter() = 0;
-            ///< \attention Do not call this function to check if there is a current character. Use
-            /// characterBegin()!=characterEnd() instead.
+            ///< \attention Do not call this function to check if there is a current character.
+            /// Instead, assume there is a character if getState() == Running.
 
             virtual CharacterIterator characterBegin() = 0;
             ///< Any call to SaveGame and getCurrentCharacter can invalidate the returned

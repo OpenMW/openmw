@@ -18,8 +18,14 @@ namespace MWGui
     MainMenu::MainMenu(int w, int h)
         : OEngine::GUI::Layout("openmw_mainmenu.layout")
         , mButtonBox(0), mWidth (w), mHeight (h)
+        , mSaveGameDialog(NULL)
     {
         updateMenu();
+    }
+
+    MainMenu::~MainMenu()
+    {
+        delete mSaveGameDialog;
     }
 
     void MainMenu::onResChange(int w, int h)
@@ -56,27 +62,15 @@ namespace MWGui
             MWBase::Environment::get().getStateManager()->newGame();
         }
 
-        else if (name == "loadgame")
+        else
         {
-            // for testing purpose, pick the first slot of the first character:
-            const MWState::Character& character =
-                *MWBase::Environment::get().getStateManager()->characterBegin();
-            const MWState::Slot& slot = *character.begin();
-
-            MWBase::Environment::get().getStateManager()->loadGame (&character, &slot);
-
-//            MWGui::SaveGameDialog* dialog = new MWGui::SaveGameDialog();
-//            dialog->setLoadOrSave(true);
-//            dialog->setVisible(true);
-        }
-        else if (name == "savegame")
-        {
-            // for testing purpose, save into a new slot:
-            MWBase::Environment::get().getStateManager()->saveGame (0);
-
-//            MWGui::SaveGameDialog* dialog = new MWGui::SaveGameDialog();
-//            dialog->setLoadOrSave(false);
-//            dialog->setVisible(true);
+            if (!mSaveGameDialog)
+                mSaveGameDialog = new SaveGameDialog();
+            if (name == "loadgame")
+                mSaveGameDialog->setLoadOrSave(true);
+            else if (name == "savegame")
+                mSaveGameDialog->setLoadOrSave(false);
+            mSaveGameDialog->setVisible(true);
         }
     }
 
