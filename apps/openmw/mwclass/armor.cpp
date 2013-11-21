@@ -281,6 +281,7 @@ namespace MWClass
         newItem.mEnchant=enchId;
         const ESM::Armor *record = MWBase::Environment::get().getWorld()->createRecord (newItem);
         ref->mBase = record;
+        ref->mRef.mRefID = record->mId;
     }
 
     std::pair<int, std::string> Armor::canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const

@@ -171,6 +171,7 @@ namespace MWClass
         newItem.mEnchant=enchId;
         const ESM::Book *record = MWBase::Environment::get().getWorld()->createRecord (newItem);
         ref->mBase = record;
+        ref->mRef.mRefID = record->mId;
     }
 
     boost::shared_ptr<MWWorld::Action> Book::use (const MWWorld::Ptr& ptr) const
