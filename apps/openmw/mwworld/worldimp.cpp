@@ -749,12 +749,16 @@ namespace MWWorld
 
     void World::changeToInteriorCell (const std::string& cellName, const ESM::Position& position)
     {
-        return mWorldScene->changeToInteriorCell(cellName, position);
+        removeContainerScripts(getPlayer().getPlayer());
+        mWorldScene->changeToInteriorCell(cellName, position);
+        addContainerScripts(getPlayer().getPlayer(), getPlayer().getPlayer().getCell());
     }
 
     void World::changeToExteriorCell (const ESM::Position& position)
     {
-        return mWorldScene->changeToExteriorCell(position);
+        removeContainerScripts(getPlayer().getPlayer());
+        mWorldScene->changeToExteriorCell(position);
+        addContainerScripts(getPlayer().getPlayer(), getPlayer().getPlayer().getCell());
     }
 
     void World::markCellAsUnchanged()
