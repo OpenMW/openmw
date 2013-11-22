@@ -882,6 +882,7 @@ namespace MWWorld
                     int cellY = newCell.mCell->getGridY();
                     mWorldScene->changeCell(cellX, cellY, pos, false);
                 }
+                addContainerScripts (ptr, &newCell);
             }
             else
             {
