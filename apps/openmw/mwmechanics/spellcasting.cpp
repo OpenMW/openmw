@@ -312,7 +312,7 @@ namespace MWMechanics
         }
         if (enchantment->mData.mType == ESM::Enchantment::CastOnce)
             item.getContainerStore()->remove(item, 1, mCaster);
-        else
+        else if (enchantment->mData.mType != ESM::Enchantment::WhenStrikes)
         {
             if (mCaster.getRefData().getHandle() == "player")
                 MWBase::Environment::get().getWindowManager()->setSelectedEnchantItem(item); // Set again to show the modified charge
