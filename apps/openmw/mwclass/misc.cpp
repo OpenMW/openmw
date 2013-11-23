@@ -241,7 +241,8 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
             item.get<ESM::Miscellaneous>();
 
-        return !ref->mBase->mData.mIsKey && (npcServices & ESM::NPC::Misc);
+        return !ref->mBase->mData.mIsKey && (npcServices & ESM::NPC::Misc)
+                && !Misc::StringUtils::ciEqual(item.getCellRef().mRefID, "gold_001");
     }
 
     float Miscellaneous::getWeight(const MWWorld::Ptr &ptr) const
