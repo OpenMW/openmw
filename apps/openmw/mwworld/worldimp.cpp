@@ -267,6 +267,7 @@ namespace MWWorld
 
         // Rebuild player
         setupPlayer();
+        mPlayer->setCell(NULL);
         MWWorld::Ptr player = mPlayer->getPlayer();
 
         // removes NpcStats, ContainerStore etc
