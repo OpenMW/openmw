@@ -426,6 +426,11 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
     {
         forcestateupdate = true;
 
+        // Shields shouldn't be visible during spellcasting
+        // There seems to be no text keys for this purpose, except maybe for "[un]equip start/stop",
+        // but they are also present in weapon drawing animation.
+        mAnimation->showShield(weaptype != WeapType_Spell);
+
         std::string weapgroup;
         if(weaptype == WeapType_None)
         {
@@ -443,6 +448,7 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
                              MWRender::Animation::Group_UpperBody, true,
                              1.0f, "equip start", "equip stop", 0.0f, 0);
             mUpperBodyState = UpperCharState_EquipingWeap;
+
             if(isWerewolf)
             {
                 const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
