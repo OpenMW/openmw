@@ -35,7 +35,7 @@ namespace MWRender
         , mCamera(NULL)
         , mNode(NULL)
     {
-
+        mCharacter.mCell = NULL;
     }
 
     void CharacterPreview::onSetup()
@@ -230,7 +230,7 @@ namespace MWRender
         , mRef(&mBase)
     {
         mBase = *mCharacter.get<ESM::NPC>()->mBase;
-        mCharacter = MWWorld::Ptr(&mRef, mCharacter.getCell());
+        mCharacter = MWWorld::Ptr(&mRef, NULL);
     }
 
     void RaceSelectionPreview::update(float angle)
