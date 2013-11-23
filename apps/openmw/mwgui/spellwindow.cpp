@@ -282,8 +282,16 @@ namespace MWGui
             MyGUI::Button* costCharge = mSpellView->createWidget<MyGUI::Button>(equipped ? "SpellText" : "SpellTextUnequipped",
                 MyGUI::IntCoord(4, mHeight, mWidth-8, spellHeight), MyGUI::Align::Left | MyGUI::Align::Top);
 
-            std::string cost = boost::lexical_cast<std::string>(enchant->mData.mCost);
-            std::string charge = boost::lexical_cast<std::string>(enchant->mData.mCharge); /// \todo track current charge
+            float enchantCost = enchant->mData.mCost;
+            MWMechanics::NpcStats &stats = player.getClass().getNpcStats(player);
+            int eSkill = stats.getSkill(ESM::Skill::Enchant).getModified();
+            int castCost = std::max(1.f, enchantCost - (enchantCost / 100) * (eSkill - 10));
+
+            std::string cost = boost::lexical_cast<std::string>(castCost);
+            int currentCharge = int(item.getCellRef().mEnchantmentCharge);
+            if (currentCharge ==  -1)
+                currentCharge = enchant->mData.mCharge;
+            std::string charge = boost::lexical_cast<std::string>(currentCharge);
             if (enchant->mData.mType == ESM::Enchantment::CastOnce)
             {
                 // this is Morrowind behaviour

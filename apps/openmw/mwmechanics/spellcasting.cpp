@@ -295,7 +295,7 @@ namespace MWMechanics
             const float enchantCost = enchantment->mData.mCost;
             MWMechanics::NpcStats &stats = MWWorld::Class::get(mCaster).getNpcStats(mCaster);
             int eSkill = stats.getSkill(ESM::Skill::Enchant).getModified();
-            const float castCost = enchantCost - (enchantCost / 100) * (eSkill - 10);
+            const int castCost = std::max(1.f, enchantCost - (enchantCost / 100) * (eSkill - 10));
 
             if (item.getCellRef().mEnchantmentCharge == -1)
                 item.getCellRef().mEnchantmentCharge = enchantment->mData.mCharge;
