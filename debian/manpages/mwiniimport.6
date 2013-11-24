@@ -1,0 +1,42 @@
+.TH MWINIIMPORT "6" "October 2013" "OpenMW" "OpenMW Commands"
+.SH NAME
+mwiniimport \- Import the ini variables from Morrowind to OpenMW
+.SH DESCRIPTION
+Syntax: mwiniimporter <options> inifile configfile
+Allowed options:
+.TP
+\fB\-h\fR [ \fB\-\-help\fR ]
+produce help message
+.TP
+\fB\-v\fR [ \fB\-\-verbose\fR ]
+verbose output
+.TP
+\fB\-i\fR [ \fB\-\-ini\fR ] arg
+morrowind.ini file
+.TP
+\fB\-c\fR [ \fB\-\-cfg\fR ] arg
+openmw.cfg file
+.TP
+\fB\-o\fR [ \fB\-\-output\fR ] arg
+openmw.cfg file
+.TP
+\fB\-g\fR [ \fB\-\-game\-files\fR ]
+import esm and esp files
+.TP
+\fB\-A\fR [ \fB\-\-no\-archives\fR ]
+disable bsa archives import
+.TP
+\fB\-e\fR [ \fB\-\-encoding\fR ] arg (=win1252) Character encoding used in OpenMW game
+messages:
+.IP
+win1250 \- Central and Eastern European such
+as Polish, Czech, Slovak, Hungarian,
+Slovene, Bosnian, Croatian, Serbian (Latin
+script), Romanian and Albanian languages
+.IP
+win1251 \- Cyrillic alphabet such as Russian,
+Bulgarian, Serbian Cyrillic and other
+languages
+.IP
+win1252 \- Western European (Latin) alphabet,
+used by default
