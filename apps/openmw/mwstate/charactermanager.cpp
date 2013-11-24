@@ -23,7 +23,9 @@ MWState::CharacterManager::CharacterManager (const boost::filesystem::path& save
             if (boost::filesystem::is_directory (characterDir))
             {
                 Character character (characterDir);
-                mCharacters.push_back (character);
+
+                if (character.begin()!=character.end())
+                    mCharacters.push_back (character);
             }
 
             std::istringstream stream (characterDir.filename().string());
