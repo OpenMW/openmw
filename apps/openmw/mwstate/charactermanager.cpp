@@ -38,9 +38,9 @@ MWState::CharacterManager::CharacterManager (const boost::filesystem::path& save
     }
 }
 
-MWState::Character *MWState::CharacterManager::getCurrentCharacter()
+MWState::Character *MWState::CharacterManager::getCurrentCharacter (bool create)
 {
-    if (!mCurrent)
+    if (!mCurrent && create)
         createCharacter();
 
     return mCurrent;

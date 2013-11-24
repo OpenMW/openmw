@@ -63,7 +63,8 @@ namespace MWBase
             ///
             /// \note \a slot must belong to \a character.
 
-            virtual MWState::Character *getCurrentCharacter() = 0;
+            virtual MWState::Character *getCurrentCharacter (bool create = true) = 0;
+            ///< \param create Create a new character, if there is no current character.
 
             virtual CharacterIterator characterBegin() = 0;
             ///< Any call to SaveGame and getCurrentCharacter can invalidate the returned

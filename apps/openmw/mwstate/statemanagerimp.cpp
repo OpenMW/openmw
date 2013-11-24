@@ -138,9 +138,9 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
     mState = State_Running;
 }
 
-MWState::Character *MWState::StateManager::getCurrentCharacter()
+MWState::Character *MWState::StateManager::getCurrentCharacter (bool create)
 {
-    return mCharacterManager.getCurrentCharacter();
+    return mCharacterManager.getCurrentCharacter (create);
 }
 
 MWState::StateManager::CharacterIterator MWState::StateManager::characterBegin()

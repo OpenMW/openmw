@@ -91,9 +91,10 @@ namespace MWGui
         if (mgr->characterBegin() == mgr->characterEnd())
             return;
 
-        mCurrentCharacter = mgr->getCurrentCharacter();
+        mCurrentCharacter = mgr->getCurrentCharacter (false);
 
         mCharacterSelection->removeAllItems();
+
         for (MWBase::StateManager::CharacterIterator it = mgr->characterBegin(); it != mgr->characterEnd(); ++it)
         {
             if (it->begin()!=it->end())
@@ -104,7 +105,7 @@ namespace MWGui
 
                 mCharacterSelection->addItem (title.str());
 
-                if (mgr->getCurrentCharacter() == &*it)
+                if (mCurrentCharacter == &*it)
                     mCharacterSelection->setIndexSelected(mCharacterSelection->getItemCount()-1);
             }
         }
@@ -123,7 +124,7 @@ namespace MWGui
 
         if (!load)
         {
-            mCurrentCharacter = MWBase::Environment::get().getStateManager()->getCurrentCharacter();
+            mCurrentCharacter = MWBase::Environment::get().getStateManager()->getCurrentCharacter (false);
         }
 
         center();
@@ -139,10 +140,14 @@ namespace MWGui
         // Get the selected slot, if any
         unsigned int i=0;
         const MWState::Slot* slot = NULL;
-        for (MWState::Character::SlotIterator it = mCurrentCharacter->begin(); it != mCurrentCharacter->end(); ++it,++i)
+
+        if (mCurrentCharacter)
         {
-            if (i == mSaveList->getIndexSelected())
-                slot = &*it;
+            for (MWState::Character::SlotIterator it = mCurrentCharacter->begin(); it != mCurrentCharacter->end(); ++it,++i)
+            {
+                if (i == mSaveList->getIndexSelected())
+                    slot = &*it;
+            }
         }
 
         if (mSaving)
@@ -151,7 +156,8 @@ namespace MWGui
         }
         else
         {
-            MWBase::Environment::get().getStateManager()->loadGame (mCurrentCharacter, slot);
+            if (mCurrentCharacter && slot)
+                MWBase::Environment::get().getStateManager()->loadGame (mCurrentCharacter, slot);
         }
 
         setVisible(false);
