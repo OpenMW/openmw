@@ -83,6 +83,8 @@ namespace MWGui
     {
         WindowModal::open();
 
+        mSaveNameEdit->setCaption ("");
+
         center();
 
         MWBase::StateManager* mgr = MWBase::Environment::get().getStateManager();
@@ -145,7 +147,7 @@ namespace MWGui
 
         if (mSaving)
         {
-            MWBase::Environment::get().getStateManager()->saveGame (slot);
+            MWBase::Environment::get().getStateManager()->saveGame (mSaveNameEdit->getCaption(), slot);
         }
         else
         {
@@ -179,7 +181,7 @@ namespace MWGui
             return;
         for (MWState::Character::SlotIterator it = mCurrentCharacter->begin(); it != mCurrentCharacter->end(); ++it)
         {
-            mSaveList->addItem(it->mPath.string());
+            mSaveList->addItem(it->mProfile.mDescription);
         }
         onSlotSelected(mSaveList, MyGUI::ITEM_NONE);
     }

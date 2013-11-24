@@ -15,6 +15,7 @@ void ESM::SavedGame::load (ESMReader &esm)
     mPlayerCell = esm.getHNString("PCEL");
     esm.getHNT (mInGameTime, "TSTM", 16);
     esm.getHNT (mTimePlayed, "TIME");
+    mDescription = esm.getHNString ("DESC");
 
     while (esm.isNextSub ("DEPE"))
         mContentFiles.push_back (esm.getHString());
@@ -28,6 +29,7 @@ void ESM::SavedGame::save (ESMWriter &esm) const
     esm.writeHNCString ("PCEL", mPlayerCell);
     esm.writeHNT ("TSTM", mInGameTime, 16);
     esm.writeHNT ("TIME", mTimePlayed);
+    esm.writeHNCString ("DESC", mDescription);
 
     for (std::vector<std::string>::const_iterator iter (mContentFiles.begin());
          iter!=mContentFiles.end(); ++iter)

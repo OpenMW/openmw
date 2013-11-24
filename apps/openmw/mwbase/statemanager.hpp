@@ -2,6 +2,7 @@
 #define GAME_MWSTATE_STATEMANAGER_H
 
 #include <vector>
+#include <string>
 
 namespace MWState
 {
@@ -52,7 +53,7 @@ namespace MWBase
 
             virtual void endGame() = 0;
 
-            virtual void saveGame (const MWState::Slot *slot = 0) = 0;
+            virtual void saveGame (const std::string& description, const MWState::Slot *slot = 0) = 0;
             ///< Write a saved game to \a slot or create a new slot if \a slot == 0.
             ///
             /// \note Slot must belong to the current character.

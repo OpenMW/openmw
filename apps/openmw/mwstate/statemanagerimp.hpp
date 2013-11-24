@@ -32,7 +32,7 @@ namespace MWState
 
             virtual void endGame();
 
-            virtual void saveGame (const Slot *slot = 0);
+            virtual void saveGame (const std::string& description, const Slot *slot = 0);
             ///< Write a saved game to \a slot or create a new slot if \a slot == 0.
             ///
             /// \note Slot must belong to the current character.

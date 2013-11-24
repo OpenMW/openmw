@@ -61,7 +61,7 @@ void MWState::StateManager::endGame()
     mState = State_Ended;
 }
 
-void MWState::StateManager::saveGame (const Slot *slot)
+void MWState::StateManager::saveGame (const std::string& description, const Slot *slot)
 {
     ESM::SavedGame profile;
 
@@ -98,6 +98,7 @@ void MWState::StateManager::saveGame (const Slot *slot)
     profile.mInGameTime.mMonth = world.getMonth();
     /// \todo year
     /// \todo time played
+    profile.mDescription = description;
 
     if (!slot)
         slot = mCharacterManager.getCurrentCharacter()->createSlot (profile);
