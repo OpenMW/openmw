@@ -89,23 +89,22 @@ namespace MWGui
         if (mgr->characterBegin() == mgr->characterEnd())
             return;
 
-        // If we are running, there must be a current character
-        if (mgr->getState() == MWBase::StateManager::State_Running)
-        {
-            mCurrentCharacter = mgr->getCurrentCharacter();
-        }
+        mCurrentCharacter = mgr->getCurrentCharacter();
 
         mCharacterSelection->removeAllItems();
         for (MWBase::StateManager::CharacterIterator it = mgr->characterBegin(); it != mgr->characterEnd(); ++it)
         {
-            std::stringstream title;
-            title << it->getSignature().mPlayerName;
-            title << " (Level " << it->getSignature().mPlayerLevel << " " << it->getSignature().mPlayerClass << ")";
+            if (it->begin()!=it->end())
+            {
+                std::stringstream title;
+                title << it->getSignature().mPlayerName;
+                title << " (Level " << it->getSignature().mPlayerLevel << " " << it->getSignature().mPlayerClass << ")";
 
-            mCharacterSelection->addItem (title.str());
+                mCharacterSelection->addItem (title.str());
 
-            if (mCurrentCharacter == &*it)
-                mCharacterSelection->setIndexSelected(mCharacterSelection->getItemCount()-1);
+                if (mgr->getCurrentCharacter() == &*it)
+                    mCharacterSelection->setIndexSelected(mCharacterSelection->getItemCount()-1);
+            }
         }
 
         fillSaveList();
