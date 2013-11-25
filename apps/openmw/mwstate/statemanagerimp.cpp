@@ -107,7 +107,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
 
     std::ofstream stream (slot->mPath.string().c_str());
     ESM::ESMWriter writer;
-//    writer.setFormat ();
+    writer.setFormat (ESM::Header::CurrentFormat);
     writer.save (stream);
     writer.startRecord ("SAVE");
     slot->mProfile.save (writer);
