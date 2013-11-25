@@ -144,11 +144,11 @@ namespace MWMechanics
                     mCurrentNode = mAllowedNodes[index];
                     mAllowedNodes.erase(mAllowedNodes.begin() + index);
                 }
-
-                if(mAllowedNodes.empty())
-                    mDistance = 0;
             }
         }
+
+        if(mAllowedNodes.empty())
+            mDistance = 0;
 
         // Don't try to move if you are in a new cell (ie: positioncell command called) but still play idles.
         if(mDistance && (mCellX != actor.getCell()->mCell->mData.mX || mCellY != actor.getCell()->mCell->mData.mY))
@@ -200,6 +200,7 @@ namespace MWMechanics
         {
             if(!mPathFinder.isPathConstructed())
             {
+                assert(mAllowedNodes.size());
                 unsigned int randNode = (int)(rand() / ((double)RAND_MAX + 1) * mAllowedNodes.size());
                 Ogre::Vector3 destNodePos(mAllowedNodes[randNode].mX, mAllowedNodes[randNode].mY, mAllowedNodes[randNode].mZ);
 
