@@ -497,7 +497,9 @@ class NIFObjectLoader
     }
 
 
-    static void createParticleEmitterAffectors(Ogre::ParticleSystem *partsys, const Nif::NiParticleSystemController *partctrl)
+    static void createParticleEmitterAffectors(Ogre::ParticleSystem *partsys,
+                                               const Nif::NiParticleSystemController *partctrl, Ogre::Bone* bone,
+                                               const std::string& skelBaseName)
     {
         Ogre::ParticleEmitter *emitter = partsys->addEmitter("Nif");
         emitter->setParticleVelocity(partctrl->velocity - partctrl->velocityRandom*0.5f,
@@ -512,6 +514,8 @@ class NIFObjectLoader
         emitter->setParameter("vertical_angle", Ogre::StringConverter::toString(Ogre::Radian(partctrl->verticalAngle).valueDegrees()));
         emitter->setParameter("horizontal_direction", Ogre::StringConverter::toString(Ogre::Radian(partctrl->horizontalDir).valueDegrees()));
         emitter->setParameter("horizontal_angle", Ogre::StringConverter::toString(Ogre::Radian(partctrl->horizontalAngle).valueDegrees()));
+        emitter->setParameter("skelbase", skelBaseName);
+        emitter->setParameter("bone", bone->getName());
 
         Nif::ExtraPtr e = partctrl->extra;
         while(!e.empty())
@@ -533,6 +537,8 @@ class NIFObjectLoader
                 affector->setParameter("force_type", (gr->mType==0) ? "wind" : "point");
                 affector->setParameter("direction", Ogre::StringConverter::toString(gr->mDirection));
                 affector->setParameter("position", Ogre::StringConverter::toString(gr->mPosition));
+                affector->setParameter("skelbase", skelBaseName);
+                affector->setParameter("bone", bone->getName());
             }
             else if(e->recType == Nif::RC_NiParticleColorModifier)
             {
@@ -565,7 +571,7 @@ class NIFObjectLoader
     }
 
     static void createParticleSystem(const std::string &name, const std::string &group,
-                                     Ogre::SceneManager *sceneMgr, ObjectList &objectlist,
+                                     Ogre::SceneNode *sceneNode, ObjectList &objectlist,
                                      const Nif::Node *partnode, int flags, int partflags)
     {
         const Nif::NiAutoNormalParticlesData *particledata = NULL;
@@ -579,7 +585,7 @@ class NIFObjectLoader
             fullname += "@type="+partnode->name;
         Misc::StringUtils::toLower(fullname);
 
-        Ogre::ParticleSystem *partsys = sceneMgr->createParticleSystem();
+        Ogre::ParticleSystem *partsys = sceneNode->getCreator()->createParticleSystem();
 
         const Nif::NiTexturingProperty *texprop = NULL;
         const Nif::NiMaterialProperty *matprop = NULL;
@@ -600,9 +606,9 @@ class NIFObjectLoader
                                         particledata->particleRadius*2.0f);
         partsys->setCullIndividually(false);
         partsys->setParticleQuota(particledata->numParticles);
-        // TODO: There is probably a field or flag to specify this, as some
-        // particle effects have it and some don't.
-        partsys->setKeepParticlesInLocalSpace(false);
+        partsys->setKeepParticlesInLocalSpace(partflags & (Nif::NiNode::ParticleFlag_LocalSpace));
+
+        sceneNode->attachObject(partsys);
 
         Nif::ControllerPtr ctrl = partnode->controller;
         while(!ctrl.empty())
@@ -611,12 +617,11 @@ class NIFObjectLoader
             {
                 const Nif::NiParticleSystemController *partctrl = static_cast<const Nif::NiParticleSystemController*>(ctrl.getPtr());
 
-                createParticleEmitterAffectors(partsys, partctrl);
-                if(!partctrl->emitter.empty() && !partsys->isAttached())
+                if(!partctrl->emitter.empty())
                 {
                     int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, partctrl->emitter->recIndex);
                     Ogre::Bone *trgtbone = objectlist.mSkelBase->getSkeleton()->getBone(trgtid);
-                    objectlist.mSkelBase->attachObjectToBone(trgtbone->getName(), partsys);
+                    createParticleEmitterAffectors(partsys, partctrl, trgtbone, objectlist.mSkelBase->getName());
                 }
 
                 Ogre::ControllerValueRealPtr srcval((partflags&Nif::NiNode::ParticleFlag_AutoPlay) ?
@@ -632,13 +637,6 @@ class NIFObjectLoader
                 objectlist.mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
             }
             ctrl = ctrl->next;
-        }
-
-        if(!partsys->isAttached())
-        {
-            int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, partnode->recIndex);
-            Ogre::Bone *trgtbone = objectlist.mSkelBase->getSkeleton()->getBone(trgtid);
-            objectlist.mSkelBase->attachObjectToBone(trgtbone->getName(), partsys);
         }
 
         partsys->setVisible(!(flags&Nif::NiNode::Flag_Hidden));
@@ -729,7 +727,7 @@ class NIFObjectLoader
 
 
     static void createObjects(const std::string &name, const std::string &group,
-                              Ogre::SceneManager *sceneMgr, const Nif::Node *node,
+                              Ogre::SceneNode *sceneNode, const Nif::Node *node,
                               ObjectList &objectlist, int flags, int animflags, int partflags)
     {
         // Do not create objects for the collision shape (includes all children)
@@ -784,13 +782,13 @@ class NIFObjectLoader
 
         if(node->recType == Nif::RC_NiTriShape && !(flags&0x80000000))
         {
-            createEntity(name, group, sceneMgr, objectlist, node, flags, animflags);
+            createEntity(name, group, sceneNode->getCreator(), objectlist, node, flags, animflags);
         }
 
         if((node->recType == Nif::RC_NiAutoNormalParticles ||
             node->recType == Nif::RC_NiRotatingParticles) && !(flags&0x40000000))
         {
-            createParticleSystem(name, group, sceneMgr, objectlist, node, flags, partflags);
+            createParticleSystem(name, group, sceneNode, objectlist, node, flags, partflags);
         }
 
         const Nif::NiNode *ninode = dynamic_cast<const Nif::NiNode*>(node);
@@ -800,7 +798,7 @@ class NIFObjectLoader
             for(size_t i = 0;i < children.length();i++)
             {
                 if(!children[i].empty())
-                    createObjects(name, group, sceneMgr, children[i].getPtr(), objectlist, flags, animflags, partflags);
+                    createObjects(name, group, sceneNode, children[i].getPtr(), objectlist, flags, animflags, partflags);
             }
         }
     }
@@ -821,7 +819,7 @@ class NIFObjectLoader
     }
 
 public:
-    static void load(Ogre::SceneManager *sceneMgr, ObjectList &objectlist, const std::string &name, const std::string &group, int flags=0)
+    static void load(Ogre::SceneNode *sceneNode, ObjectList &objectlist, const std::string &name, const std::string &group, int flags=0)
     {
         Nif::NIFFile::ptr nif = Nif::NIFFile::create(name);
         if(nif->numRoots() < 1)
@@ -845,9 +843,9 @@ public:
            !NIFSkeletonLoader::createSkeleton(name, group, node).isNull())
         {
             // Create a base skeleton entity if this NIF needs one
-            createSkelBase(name, group, sceneMgr, node, objectlist);
+            createSkelBase(name, group, sceneNode->getCreator(), node, objectlist);
         }
-        createObjects(name, group, sceneMgr, node, objectlist, flags, 0, 0);
+        createObjects(name, group, sceneNode, node, objectlist, flags, 0, 0);
     }
 
     static void loadKf(Ogre::Skeleton *skel, const std::string &name,
@@ -915,7 +913,7 @@ ObjectList Loader::createObjects(Ogre::SceneNode *parentNode, std::string name, 
     ObjectList objectlist;
 
     Misc::StringUtils::toLower(name);
-    NIFObjectLoader::load(parentNode->getCreator(), objectlist, name, group);
+    NIFObjectLoader::load(parentNode, objectlist, name, group);
 
     for(size_t i = 0;i < objectlist.mEntities.size();i++)
     {
@@ -934,7 +932,7 @@ ObjectList Loader::createObjects(Ogre::Entity *parent, const std::string &bonena
     ObjectList objectlist;
 
     Misc::StringUtils::toLower(name);
-    NIFObjectLoader::load(parentNode->getCreator(), objectlist, name, group);
+    NIFObjectLoader::load(parentNode, objectlist, name, group);
 
     bool isskinned = false;
     for(size_t i = 0;i < objectlist.mEntities.size();i++)
@@ -984,6 +982,17 @@ ObjectList Loader::createObjects(Ogre::Entity *parent, const std::string &bonena
         }
     }
 
+    for(size_t i = 0;i < objectlist.mParticles.size();i++)
+    {
+        Ogre::ParticleSystem *partsys = objectlist.mParticles[i];
+        if(partsys->isAttached())
+            partsys->detachFromParent();
+
+        Ogre::TagPoint *tag = objectlist.mSkelBase->attachObjectToBone(
+                    objectlist.mSkelBase->getSkeleton()->getRootBone()->getName(), partsys);
+        tag->setScale(scale);
+    }
+
     return objectlist;
 }
 
@@ -993,7 +1002,7 @@ ObjectList Loader::createObjectBase(Ogre::SceneNode *parentNode, std::string nam
     ObjectList objectlist;
 
     Misc::StringUtils::toLower(name);
-    NIFObjectLoader::load(parentNode->getCreator(), objectlist, name, group, 0xC0000000);
+    NIFObjectLoader::load(parentNode, objectlist, name, group, 0xC0000000);
 
     if(objectlist.mSkelBase)
         parentNode->attachObject(objectlist.mSkelBase);
