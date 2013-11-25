@@ -215,7 +215,7 @@ namespace MWWorld
       mSky (true), mCells (mStore, mEsm),
       mActivationDistanceOverride (mActivationDistanceOverride),
       mFallback(fallbackMap), mPlayIntro(0), mTeleportEnabled(true),
-      mFacedDistance(FLT_MAX), mGodMode(false)
+      mFacedDistance(FLT_MAX), mGodMode(false), mContentFiles (contentFiles)
     {
         mPhysics = new PhysicsSystem(renderer);
         mPhysEngine = mPhysics->getEngine();
@@ -2245,5 +2245,10 @@ namespace MWWorld
             //moveObject(it->first, newPos.x, newPos.y, newPos.z);
             ++it;
         }
+    }
+
+    const std::vector<std::string>& World::getContentFiles() const
+    {
+        return mContentFiles;
     }
 }

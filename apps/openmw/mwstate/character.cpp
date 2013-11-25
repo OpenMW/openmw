@@ -12,13 +12,18 @@
 #include <components/esm/esmreader.hpp>
 #include <components/esm/defs.hpp>
 
+#include <components/misc/stringops.hpp>
+
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+
 bool MWState::operator< (const Slot& left, const Slot& right)
 {
     return left.mTimeStamp<right.mTimeStamp;
 }
 
 
-void MWState::Character::addSlot (const boost::filesystem::path& path)
+void MWState::Character::addSlot (const boost::filesystem::path& path, const std::string& game)
 {
     Slot slot;
     slot.mPath = path;
@@ -37,6 +42,9 @@ void MWState::Character::addSlot (const boost::filesystem::path& path)
 
     slot.mProfile.load (reader);
 
+    if (Misc::StringUtils::lowerCase (slot.mProfile.mContentFiles.at (0))!=game)
+        return; // this file is for a different game -> ignore
+
     mSlots.push_back (slot);
 }
 
@@ -54,7 +62,7 @@ void MWState::Character::addSlot (const ESM::SavedGame& profile)
     mSlots.push_back (slot);
 }
 
-MWState::Character::Character (const boost::filesystem::path& saves)
+MWState::Character::Character (const boost::filesystem::path& saves, const std::string& game)
 : mPath (saves), mNext (0)
 {
     if (!boost::filesystem::is_directory (mPath))
@@ -70,7 +78,7 @@ MWState::Character::Character (const boost::filesystem::path& saves)
 
             try
             {
-                addSlot (slotPath);
+                addSlot (slotPath, game);
             }
             catch (...) {} // ignoring bad saved game files for now
 

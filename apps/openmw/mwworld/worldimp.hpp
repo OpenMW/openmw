@@ -73,6 +73,7 @@ namespace MWWorld
             OEngine::Physic::PhysicEngine* mPhysEngine;
 
             bool mGodMode;
+            std::vector<std::string> mContentFiles;
 
             // not implemented
             World (const World&);
@@ -492,6 +493,8 @@ namespace MWWorld
 
             virtual void launchProjectile (const std::string& id, const ESM::EffectList& effects,
                                            const MWWorld::Ptr& actor, const std::string& sourceName);
+
+            virtual const std::vector<std::string>& getContentFiles() const;
     };
 }
 

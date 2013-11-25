@@ -6,8 +6,9 @@
 
 #include <boost/filesystem.hpp>
 
-MWState::CharacterManager::CharacterManager (const boost::filesystem::path& saves)
-: mPath (saves), mNext (0), mCurrent (0)
+MWState::CharacterManager::CharacterManager (const boost::filesystem::path& saves,
+    const std::string& game)
+: mPath (saves), mNext (0), mCurrent (0), mGame (game)
 {
     if (!boost::filesystem::is_directory (mPath))
     {
@@ -22,7 +23,7 @@ MWState::CharacterManager::CharacterManager (const boost::filesystem::path& save
 
             if (boost::filesystem::is_directory (characterDir))
             {
-                Character character (characterDir);
+                Character character (characterDir, mGame);
 
                 if (character.begin()!=character.end())
                     mCharacters.push_back (character);
@@ -53,7 +54,7 @@ void MWState::CharacterManager::createCharacter()
 
     boost::filesystem::path path = mPath / stream.str();
 
-    mCharacters.push_back (Character (path));
+    mCharacters.push_back (Character (path, mGame));
 
     mCurrent = &mCharacters.back();
 }

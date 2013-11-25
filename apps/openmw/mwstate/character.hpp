@@ -28,13 +28,13 @@ namespace MWState
             std::vector<Slot> mSlots;
             int mNext;
 
-            void addSlot (const boost::filesystem::path& path);
+            void addSlot (const boost::filesystem::path& path, const std::string& game);
 
             void addSlot (const ESM::SavedGame& profile);
 
         public:
 
-            Character (const boost::filesystem::path& saves);
+            Character (const boost::filesystem::path& saves, const std::string& game);
 
             const Slot *createSlot (const ESM::SavedGame& profile);
             ///< Create new slot.

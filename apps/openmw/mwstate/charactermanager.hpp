@@ -13,6 +13,7 @@ namespace MWState
             int mNext;
             std::vector<Character> mCharacters;
             Character *mCurrent;
+            std::string mGame;
 
         private:
 
@@ -24,7 +25,7 @@ namespace MWState
 
         public:
 
-            CharacterManager (const boost::filesystem::path& saves);
+            CharacterManager (const boost::filesystem::path& saves, const std::string& game);
 
             Character *getCurrentCharacter (bool create = true);
             ///< \param create Create a new character, if there is no current character.

@@ -416,6 +416,8 @@ namespace MWBase
 
             virtual void launchProjectile (const std::string& id, const ESM::EffectList& effects,
                                            const MWWorld::Ptr& actor, const std::string& sourceName) = 0;
+
+            virtual const std::vector<std::string>& getContentFiles() const = 0;
     };
 }
 

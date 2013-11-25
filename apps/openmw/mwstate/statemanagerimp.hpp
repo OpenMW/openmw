@@ -17,7 +17,7 @@ namespace MWState
 
         public:
 
-            StateManager (const boost::filesystem::path& saves);
+            StateManager (const boost::filesystem::path& saves, const std::string& game);
 
             virtual void requestQuit();
 

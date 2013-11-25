@@ -15,8 +15,8 @@
 
 #include "../mwmechanics/npcstats.hpp"
 
-MWState::StateManager::StateManager (const boost::filesystem::path& saves)
-: mQuitRequest (false), mState (State_NoGame), mCharacterManager (saves)
+MWState::StateManager::StateManager (const boost::filesystem::path& saves, const std::string& game)
+: mQuitRequest (false), mState (State_NoGame), mCharacterManager (saves, game)
 {
 
 }
@@ -69,7 +69,8 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
 
     MWWorld::Ptr player = world.getPlayer().getPlayer();
 
-    /// \todo store content file list
+    profile.mContentFiles = world.getContentFiles();
+
     profile.mPlayerName = player.getClass().getName (player);
     profile.mPlayerLevel = player.getClass().getNpcStats (player).getLevel();
     profile.mPlayerClass = player.get<ESM::NPC>()->mBase->mClass;
