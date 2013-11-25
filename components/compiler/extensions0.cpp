@@ -60,6 +60,7 @@ namespace Compiler
             extensions.registerInstruction ("modflee", "l", opcodeModFlee, opcodeModFleeExplicit);
             extensions.registerInstruction ("modalarm", "l", opcodeModAlarm, opcodeModAlarmExplicit);
             extensions.registerInstruction ("toggleai", "", opcodeToggleAI, opcodeToggleAI);
+            extensions.registerInstruction ("tai", "", opcodeToggleAI, opcodeToggleAI);
             extensions.registerFunction ("gethello", 'l', "", opcodeGetHello, opcodeGetHelloExplicit);
             extensions.registerFunction ("getfight", 'l', "", opcodeGetFight, opcodeGetFightExplicit);
             extensions.registerFunction ("getflee", 'l', "", opcodeGetFlee, opcodeGetFleeExplicit);
