@@ -33,6 +33,6 @@ void ESM::SavedGame::save (ESMWriter &esm) const
 
     for (std::vector<std::string>::const_iterator iter (mContentFiles.begin());
          iter!=mContentFiles.end(); ++iter)
-         esm.writeHNCString (*iter, "DEPE");
+         esm.writeHNCString ("DEPE", *iter);
 
 }
