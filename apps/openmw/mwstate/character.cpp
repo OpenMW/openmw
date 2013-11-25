@@ -42,7 +42,8 @@ void MWState::Character::addSlot (const boost::filesystem::path& path, const std
 
     slot.mProfile.load (reader);
 
-    if (Misc::StringUtils::lowerCase (slot.mProfile.mContentFiles.at (0))!=game)
+    if (Misc::StringUtils::lowerCase (slot.mProfile.mContentFiles.at (0))!=
+        Misc::StringUtils::lowerCase (game))
         return; // this file is for a different game -> ignore
 
     mSlots.push_back (slot);
