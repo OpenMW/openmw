@@ -1,9 +1,12 @@
 #include "savegamedialog.hpp"
 #include "widgets.hpp"
 
+#include <components/misc/stringops.hpp>
+
+#include <components/settings/settings.hpp>
+
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/environment.hpp"
-
 
 #include "../mwstate/character.hpp"
 
@@ -93,6 +96,9 @@ namespace MWGui
 
         mCurrentCharacter = mgr->getCurrentCharacter (false);
 
+        std::string directory =
+            Misc::StringUtils::lowerCase (Settings::Manager::getString ("character", "Saves"));
+
         mCharacterSelection->removeAllItems();
 
         for (MWBase::StateManager::CharacterIterator it = mgr->characterBegin(); it != mgr->characterEnd(); ++it)
@@ -105,7 +111,9 @@ namespace MWGui
 
                 mCharacterSelection->addItem (title.str());
 
-                if (mCurrentCharacter == &*it)
+                if (mCurrentCharacter == &*it ||
+                    (!mCurrentCharacter && directory==Misc::StringUtils::lowerCase (
+                    it->begin()->mPath.parent_path().filename().string())))
                     mCharacterSelection->setIndexSelected(mCharacterSelection->getItemCount()-1);
             }
         }

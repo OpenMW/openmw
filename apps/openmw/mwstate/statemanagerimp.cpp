@@ -4,6 +4,8 @@
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/esmreader.hpp>
 
+#include <components/settings/settings.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/journal.hpp"
@@ -114,6 +116,9 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
     slot->mProfile.save (writer);
     writer.endRecord ("SAVE");
     writer.close();
+
+    Settings::Manager::setString ("character", "Saves",
+        slot->mPath.parent_path().filename().string());
 }
 
 void MWState::StateManager::loadGame (const Character *character, const Slot *slot)
@@ -137,6 +142,9 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
     mCharacterManager.setCurrentCharacter(character);
 
     mState = State_Running;
+
+    Settings::Manager::setString ("character", "Saves",
+        slot->mPath.parent_path().filename().string());
 }
 
 MWState::Character *MWState::StateManager::getCurrentCharacter (bool create)
