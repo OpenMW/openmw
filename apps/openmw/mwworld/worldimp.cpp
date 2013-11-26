@@ -442,40 +442,20 @@ namespace MWWorld
         return mGlobalVariables->getGlobals();
     }
 
-    std::string World::getCurrentCellName () const
+    std::string World::getCellName (const MWWorld::CellStore *cell) const
     {
-        std::string name;
+        if (!cell)
+            cell = mWorldScene->getCurrentCell();
 
-        Ptr::CellStore *cell = mWorldScene->getCurrentCell();
-        if (cell->mCell->isExterior())
-        {
-            if (cell->mCell->mName != "")
-            {
-                name = cell->mCell->mName;
-            }
-            else
-            {
-                const ESM::Region* region =
-                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Region>().search(cell->mCell->mRegion);
-                if (region)
-                    name = region->mName;
-                else
-                {
-                    const ESM::GameSetting *setting =
-                        MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().search("sDefaultCellname");
+        if (!cell->mCell->isExterior() || !cell->mCell->mName.empty())
+            return cell->mCell->mName;
 
-                    if (setting && setting->mValue.getType()==ESM::VT_String)
-                        name = setting->mValue.getString();
-                }
+        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
 
-            }
-        }
-        else
-        {
-            name = cell->mCell->mName;
-        }
+        if (const ESM::Region* region = store.get<ESM::Region>().search (cell->mCell->mRegion))
+            return region->mName;
 
-        return name;
+        return store.get<ESM::GameSetting>().find ("sDefaultCellname")->mValue.getString();
     }
 
     void World::removeRefScript (MWWorld::RefData *ref)

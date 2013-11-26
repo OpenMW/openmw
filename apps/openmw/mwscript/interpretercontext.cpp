@@ -322,8 +322,7 @@ namespace MWScript
 
     std::string InterpreterContext::getCurrentCellName() const
     {
-        MWBase::World *world = MWBase::Environment::get().getWorld();
-        return world->getCurrentCellName();
+        return  MWBase::Environment::get().getWorld()->getCellName();
     }
 
     bool InterpreterContext::isScriptRunning (const std::string& name) const

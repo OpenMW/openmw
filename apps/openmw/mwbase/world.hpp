@@ -149,7 +149,11 @@ namespace MWBase
 
             virtual std::vector<std::string> getGlobals () const = 0;
 
-            virtual std::string getCurrentCellName() const = 0;
+            virtual std::string getCellName (const MWWorld::CellStore *cell = 0) const = 0;
+            ///< Return name of the cell.
+            ///
+            /// \note If cell==0, the cell the player is currently in will be used instead to
+            /// generate a name.
 
             virtual void removeRefScript (MWWorld::RefData *ref) = 0;
             //< Remove the script attached to ref from mLocalScripts
