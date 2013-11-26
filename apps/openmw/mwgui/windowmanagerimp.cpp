@@ -752,28 +752,17 @@ namespace MWGui
 
     void WindowManager::changeCell(MWWorld::Ptr::CellStore* cell)
     {
+        std::string name = MWBase::Environment::get().getWorld()->getCellName (cell);
+
+        mMap->setCellName( name );
+        mHud->setCellName( name );
+
         if (cell->mCell->isExterior())
         {
-            std::string name;
-            if (cell->mCell->mName != "")
-            {
-                name = cell->mCell->mName;
+            if (!cell->mCell->mName.empty())
                 mMap->addVisitedLocation ("#{sCell=" + name + "}", cell->mCell->getGridX (), cell->mCell->getGridY ());
-            }
-            else
-            {
-                const ESM::Region* region =
-                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Region>().search(cell->mCell->mRegion);
-                if (region)
-                    name = region->mName;
-                else
-                    name = getGameSettingString("sDefaultCellname", "Wilderness");
-            }
 
             mMap->cellExplored(cell->mCell->getGridX(), cell->mCell->getGridY());
-
-            mMap->setCellName( name );
-            mHud->setCellName( name );
 
             mMap->setCellPrefix("Cell");
             mHud->setCellPrefix("Cell");
@@ -782,12 +771,9 @@ namespace MWGui
         }
         else
         {
-            mMap->setCellName( cell->mCell->mName );
-            mHud->setCellName( cell->mCell->mName );
             mMap->setCellPrefix( cell->mCell->mName );
             mHud->setCellPrefix( cell->mCell->mName );
         }
-
     }
 
     void WindowManager::setInteriorMapTexture(const int x, const int y)
