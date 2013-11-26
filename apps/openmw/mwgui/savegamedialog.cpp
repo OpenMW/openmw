@@ -7,61 +7,12 @@
 
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwstate/character.hpp"
 
-namespace
-{
-std::string getMonth(int m)
-{
-    std::string month;
-    switch (m) {
-        case 0:
-            month = "#{sMonthMorningstar}";
-            break;
-        case 1:
-            month = "#{sMonthSunsdawn}";
-            break;
-        case 2:
-            month = "#{sMonthFirstseed}";
-            break;
-        case 3:
-            month = "#{sMonthRainshand}";
-            break;
-        case 4:
-            month = "#{sMonthSecondseed}";
-            break;
-        case 5:
-            month = "#{sMonthMidyear}";
-            break;
-        case 6:
-            month = "#{sMonthSunsheight}";
-            break;
-        case 7:
-            month = "#{sMonthLastseed}";
-            break;
-        case 8:
-            month = "#{sMonthHeartfire}";
-            break;
-        case 9:
-            month = "#{sMonthFrostfall}";
-            break;
-        case 10:
-            month = "#{sMonthSunsdusk}";
-            break;
-        case 11:
-            month = "#{sMonthEveningstar}";
-            break;
-        default:
-            break;
-    }
-    return month;
-}
-}
-
 namespace MWGui
 {
-
     SaveGameDialog::SaveGameDialog()
         : WindowModal("openmw_savegame_dialog.layout")
         , mSaving(true)
@@ -225,19 +176,18 @@ namespace MWGui
         text << asctime(timeinfo) << "\n";
         text << "Level " << slot->mProfile.mPlayerLevel << "\n";
         text << slot->mProfile.mPlayerCell << "\n";
-        //text << "Time played: " << slot->mProfile.mTimePlayed << "\n";
+        // text << "Time played: " << slot->mProfile.mTimePlayed << "\n";
 
         int hour = int(slot->mProfile.mInGameTime.mGameHour);
         bool pm = hour >= 12;
         if (hour >= 13) hour -= 12;
         if (hour == 0) hour = 12;
 
-        text <<
-                slot->mProfile.mInGameTime.mDay << " "
-               << getMonth(slot->mProfile.mInGameTime.mMonth)
-               <<  " " << hour << " " << (pm ? "#{sSaveMenuHelp05}" : "#{sSaveMenuHelp04}");
+        text
+            << slot->mProfile.mInGameTime.mDay << " "
+            << MWBase::Environment::get().getWorld()->getMonthName(slot->mProfile.mInGameTime.mMonth)
+            <<  " " << hour << " " << (pm ? "#{sSaveMenuHelp05}" : "#{sSaveMenuHelp04}");
 
         mInfoText->setCaptionWithReplacing(text.str());
-
     }
 }

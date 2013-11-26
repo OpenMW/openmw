@@ -186,8 +186,11 @@ namespace MWBase
             virtual void setDay (int day) = 0;
             ///< Set in-game time day.
 
-            virtual int getDay() = 0;
-            virtual int getMonth() = 0;
+            virtual int getDay() const = 0;
+            virtual int getMonth() const = 0;
+
+            virtual std::string getMonthName (int month = -1) const = 0;
+            ///< Return name of month (-1: current month)
 
             virtual MWWorld::TimeStamp getTimeStamp() const = 0;
             ///< Return current in-game time stamp.

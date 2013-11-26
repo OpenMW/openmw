@@ -450,12 +450,10 @@ namespace MWWorld
         if (!cell->mCell->isExterior() || !cell->mCell->mName.empty())
             return cell->mCell->mName;
 
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-
-        if (const ESM::Region* region = store.get<ESM::Region>().search (cell->mCell->mRegion))
+        if (const ESM::Region* region = getStore().get<ESM::Region>().search (cell->mCell->mRegion))
             return region->mName;
 
-        return store.get<ESM::GameSetting>().find ("sDefaultCellname")->mValue.getString();
+        return getStore().get<ESM::GameSetting>().find ("sDefaultCellname")->mValue.getString();
     }
 
     void World::removeRefScript (MWWorld::RefData *ref)
@@ -673,14 +671,34 @@ namespace MWWorld
         mRendering->skySetDate (mGlobalVariables->getInt ("day"), month);
     }
 
-    int World::getDay()
+    int World::getDay() const
     {
         return mGlobalVariables->getInt("day");
     }
 
-    int World::getMonth()
+    int World::getMonth() const
     {
         return mGlobalVariables->getInt("month");
+    }
+
+    std::string World::getMonthName (int month) const
+    {
+        if (month==-1)
+            month = getMonth();
+
+        const int months = 12;
+
+        if (month<0 || month>=months)
+            return "";
+
+        static const char *monthNames[months] =
+        {
+            "sMonthMorningstar", "sMonthSunsdawn", "sMonthFirstseed", "sMonthRainshand",
+            "sMonthSecondseed", "sMonthMidyear", "sMonthSunsheight", "sMonthLastseed",
+            "sMonthHeartfire", "sMonthFrostfall", "sMonthSunsdusk", "sMonthEveningstar"
+        };
+
+        return getStore().get<ESM::GameSetting>().find (monthNames[month])->mValue.getString();
     }
 
     TimeStamp World::getTimeStamp() const

@@ -20,8 +20,6 @@ namespace MWGui {
 
 struct JournalViewModelImpl;
 
-static void injectMonthName (std::ostream & os, int month);
-
 struct JournalViewModelImpl : JournalViewModel
 {
     typedef KeywordSearch <std::string, intptr_t> KeywordSearchT;
@@ -242,14 +240,14 @@ struct JournalViewModelImpl : JournalViewModel
         {
             if (timestamp_buffer.empty ())
             {
+                std::string dayStr = MyGUI::LanguageManager::getInstance().replaceTags("#{sDay}");
+
                 std::ostringstream os;
 
-                os << itr->mDayOfMonth << ' ';
-
-                injectMonthName (os, itr->mMonth);
-
-                const std::string& dayStr = MyGUI::LanguageManager::getInstance().replaceTags("#{sDay}");
-                os << " (" << dayStr << " " << (itr->mDay + 1) << ')';
+                os
+                    << itr->mDayOfMonth << ' '
+                    << MWBase::Environment::get().getWorld()->getMonthName (itr->mMonth)
+                    << " (" << dayStr << " " << (itr->mDay + 1) << ')';
 
                 timestamp_buffer = os.str ();
             }
@@ -348,38 +346,6 @@ struct JournalViewModelImpl : JournalViewModel
             visitor (TopicEntryImpl (this, topic, i));
     }
 };
-
-static void injectMonthName (std::ostream & os, int month)
-{
-    MyGUI::LanguageManager& lm = MyGUI::LanguageManager::getInstance();
-
-    if (month  == 0)
-        os << lm.replaceTags ("#{sMonthMorningstar}");
-    else if (month == 1)
-        os << lm.replaceTags ("#{sMonthSunsdawn}");
-    else if (month == 2)
-        os << lm.replaceTags ("#{sMonthFirstseed}");
-    else if (month == 3)
-        os << lm.replaceTags ("#{sMonthRainshand}");
-    else if (month == 4)
-        os << lm.replaceTags ("#{sMonthSecondseed}");
-    else if (month == 5)
-        os << lm.replaceTags ("#{sMonthMidyear}");
-    else if (month == 6)
-        os << lm.replaceTags ("#{sMonthSunsheight}");
-    else if (month == 7)
-        os << lm.replaceTags ("#{sMonthLastseed}");
-    else if (month == 8)
-        os << lm.replaceTags ("#{sMonthHeartfire}");
-    else if (month == 9)
-        os << lm.replaceTags ("#{sMonthFrostfall}");
-    else if (month == 10)
-        os << lm.replaceTags ("#{sMonthSunsdusk}");
-    else if (month == 11)
-        os << lm.replaceTags ("#{sMonthEveningstar}");
-    else
-        os << month;
-}
 
 JournalViewModel::Ptr JournalViewModel::create ()
 {
