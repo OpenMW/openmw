@@ -23,13 +23,13 @@ void ESM::SavedGame::load (ESMReader &esm)
 
 void ESM::SavedGame::save (ESMWriter &esm) const
 {
-    esm.writeHNCString ("PNAM", mPlayerName);
+    esm.writeHNString ("PNAM", mPlayerName);
     esm.writeHNT ("PLEV", mPlayerLevel);
-    esm.writeHNCString ("PCLA", mPlayerClass);
-    esm.writeHNCString ("PCEL", mPlayerCell);
+    esm.writeHNString ("PCLA", mPlayerClass);
+    esm.writeHNString ("PCEL", mPlayerCell);
     esm.writeHNT ("TSTM", mInGameTime, 16);
     esm.writeHNT ("TIME", mTimePlayed);
-    esm.writeHNCString ("DESC", mDescription);
+    esm.writeHNString ("DESC", mDescription);
 
     for (std::vector<std::string>::const_iterator iter (mContentFiles.begin());
          iter!=mContentFiles.end(); ++iter)
