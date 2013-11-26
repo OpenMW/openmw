@@ -35,11 +35,12 @@ Since addon is supposed to change the game it is logical that it also depends on
 Game files are not intend to have any dependencies for a very simple reasons: player is using only one game file (excluding original and dirty esp/esm system) at the time and therefore no game file can depend on other game file, and since game file makes the base for addon files -- it can't depend on addon files.\\
 
 \subparagraph{Loading order}
+%TODO
 
 \paragraph{Project files}
 Project files act as containers for data not used by the Openm{MW} game engine itself, but still useful for OpenCS. The shining example of this data category are without doubt record filters (described in the later section of the manual you are reading currently). As a mod author you probably don't need and/or want to distribute project files at all, they are meant to be used only by you.\\ 
 As you would imagine, project file makes sense only in combination with actual content files. In fact, each time you start to work on new content file and project file was not found, it will be created.\\ 
-Project files extension is, to not surprise ``.project''. The whole name of the project file is the whole name of the content file with appended extensions. For instance awesomeswords.omwaddon file is associated with awesomeswords.omwaddon.project file.\\
+Project files extension is, to not surprise ``.project''. The whole name of the project file is the whole name of the content file with appended extensions. For instance swords.omwaddon file is associated with swords.omwaddon.project file.\\
 
 %TODO where are they stored.
 Project files are stored inside the user directory, in the \textbf{projects} subfolder. This is the path location for both freshly created project files, and a place where Open{CS} looks for already existing files.\\
@@ -47,3 +48,27 @@ Project files are stored inside the user directory, in the \textbf{projects} sub
 \paragraph{Resources files}
 %textures, sounds, whatever
 Unless we are talking about the fully text based game, like Zork or Rogue, you are expecting that a video game is using some media files: models with textures, pictures acting as icons, sounds and everything else. Since content files, no matter if it is esp, esm or new Open{MW} file type do not contain any of those, it's clear that they have to be deliver with a different file. It is also clear that this, let's call it ``resources file``, have to be supported by the engine. Without code handling those files, it is nothing more than a mathematical abstraction -- something, that lacks meaning for human beings\footnote{Unless we call programmers a human beings.}. Therefore this section must cover ways to add resources files to your content file, and point out what is supported. We are going to do just that. Later, you will learn how to make use of those files in your content.
+
+\subparagraph{Audio}
+Open{MW} is using {FF}mpeg for audio playback, and so we support every audio type that is supported by this library. This makes a huge list. Below is only small portion of supported file types.
+
+\begin{description}
+ \item mp3 popular format and \textit{de facto} standard for storing audio. Used by the Morrowind game.
+ \item mp4 format with a better compression rate than mp3, but also requiring more {CPU} intensive decoding -- this makes it probably less suited for video games. 
+ \item ogg open source, audio container file using high quality vorbis codec. Recommended.
+\end{description}
+
+
+\subparagraph{Video}
+As in the case of audio files, we are using {FFmepg} to decode video files. The list of supported files is long, we will cover only the most significant.
+
+\begin{description}
+ \item bik videos used by original Morrowind game.
+ \item webm is a new, shiny and open source video format with excellent compression. It needs quite a lot of processing power to be decoded, but since game logic is not running during cut scenes we can recommended it for use with Open{MW}.
+ \item ogv alternative, open source container using theora codec for video and vorbis for audio.
+\end{description}
+
+\subparagraph{Textures and images}
+Original Morrowind game uses dds and tga file for all kind of two dimensional images and textures alike. In addition, engine supported bmp files for some reason (bmp is a terrible format for a video game). We also support extended set of image files -- including jpeg and png. Jpeg and png files can be useful in some cases, for instance jpeg file is a valid option for skybox texture and png can useful for masks. However please, keep in mind that jpeg can grow into large sizes quickly and are not the best option with directx rendering backend.
+
+\subparagraph{Meshes} %TODO once we will support something more than just nifs
