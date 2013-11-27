@@ -1304,6 +1304,7 @@ namespace MWGui
 
     void WindowManager::changePointer(const std::string &name)
     {
+        MyGUI::PointerManager::getInstance().setPointer(name);
         onCursorChange(name);
     }
 
