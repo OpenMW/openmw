@@ -184,7 +184,7 @@ namespace MWMechanics
     private:
         MWWorld::Ptr mCaster;
         MWWorld::Ptr mTarget;
-
+    public:
         bool mStack;
         std::string mId; // ID of spell, potion, item etc
         std::string mSourceName; // Display name for spell, potion, etc

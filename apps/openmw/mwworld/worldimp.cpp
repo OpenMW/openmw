@@ -804,6 +804,8 @@ namespace MWWorld
             return MWWorld::Ptr ();
 
         MWWorld::Ptr object = searchPtrViaHandle (result.second);
+        if (object.isEmpty())
+            return object;
         float ActivationDistance;
 
         if (MWBase::Environment::get().getWindowManager()->isConsoleMode())
@@ -895,15 +897,16 @@ namespace MWWorld
                     copyObjectToCell(ptr, newCell, pos);
                 else if (!mWorldScene->isCellActive(newCell))
                 {
-                    MWWorld::Class::get(ptr)
-                        .copyToCell(ptr, newCell)
-                        .getRefData()
-                        .setBaseNode(0);
-
                     mWorldScene->removeObjectFromScene(ptr);
                     mLocalScripts.remove(ptr);
                     removeContainerScripts (ptr);
                     haveToMove = false;
+
+                    MWWorld::Ptr newPtr = MWWorld::Class::get(ptr)
+                            .copyToCell(ptr, newCell);
+                    newPtr.getRefData().setBaseNode(0);
+
+                    objectLeftActiveCell(ptr, newPtr);
                 }
                 else
                 {
@@ -1292,7 +1295,8 @@ namespace MWWorld
 
         mWorldScene->update (duration, paused);
 
-        doPhysics (duration);
+        if (!paused)
+            doPhysics (duration);
 
         performUpdateSceneQueries ();
 
@@ -2066,11 +2070,12 @@ namespace MWWorld
         }
     }
 
-    void World::launchProjectile (const std::string& id, const ESM::EffectList& effects,
+    void World::launchProjectile (const std::string& id, bool stack, const ESM::EffectList& effects,
                                    const MWWorld::Ptr& actor, const std::string& sourceName)
     {
         std::string projectileModel;
         std::string sound;
+        float speed = 0;
         for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.mList.begin());
             iter!=effects.mList.end(); ++iter)
         {
@@ -2091,18 +2096,20 @@ namespace MWWorld
             else
                 sound = schools[magicEffect->mData.mSchool] + " bolt";
 
+            speed = magicEffect->mData.mSpeed;
             break;
         }
         if (projectileModel.empty())
             return;
 
-        return;
+        // Spawn at 0.75 * ActorHeight
+        float height = mPhysEngine->getCharacter(actor.getRefData().getHandle())->getHalfExtents().z * 2 * 0.75;
 
         MWWorld::ManualRef ref(getStore(), projectileModel);
         ESM::Position pos;
         pos.pos[0] = actor.getRefData().getPosition().pos[0];
         pos.pos[1] = actor.getRefData().getPosition().pos[1];
-        pos.pos[2] = actor.getRefData().getPosition().pos[2];
+        pos.pos[2] = actor.getRefData().getPosition().pos[2] + height;
         pos.rot[0] = actor.getRefData().getPosition().rot[0];
         pos.rot[1] = actor.getRefData().getPosition().rot[1];
         pos.rot[2] = actor.getRefData().getPosition().rot[2];
@@ -2113,6 +2120,9 @@ namespace MWWorld
         state.mSourceName = sourceName;
         state.mId = id;
         state.mActorHandle = actor.getRefData().getHandle();
+        state.mSpeed = speed;
+        state.mEffects = effects;
+        state.mStack = stack;
 
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
         sndMgr->playSound3D(ptr, sound, 1.0f, 1.0f);
@@ -2122,6 +2132,7 @@ namespace MWWorld
 
     void World::moveProjectiles(float duration)
     {
+        std::map<std::string, ProjectileState> moved;
         for (std::map<MWWorld::Ptr, ProjectileState>::iterator it = mProjectiles.begin(); it != mProjectiles.end();)
         {
             if (!mWorldScene->isCellActive(*it->first.getCell()))
@@ -2129,9 +2140,83 @@ namespace MWWorld
                 mProjectiles.erase(it++);
                 continue;
             }
-            // TODO: Move
-            //moveObject(it->first, newPos.x, newPos.y, newPos.z);
-            ++it;
+
+            MWWorld::Ptr ptr = it->first;
+
+            Ogre::Vector3 rot(ptr.getRefData().getPosition().rot);
+
+            // TODO: Why -rot.z, but not -rot.x?
+            Ogre::Quaternion orient = Ogre::Quaternion(Ogre::Radian(-rot.z), Ogre::Vector3::UNIT_Z);
+            orient = orient * Ogre::Quaternion(Ogre::Radian(rot.x), Ogre::Vector3::UNIT_X);
+
+            // This is just a guess, probably wrong
+            static float fProjectileMinSpeed = getStore().get<ESM::GameSetting>().find("fProjectileMinSpeed")->getFloat();
+            static float fProjectileMaxSpeed = getStore().get<ESM::GameSetting>().find("fProjectileMaxSpeed")->getFloat();
+            float speed = fProjectileMinSpeed + (fProjectileMaxSpeed - fProjectileMinSpeed) * it->second.mSpeed;
+
+            Ogre::Vector3 direction = orient.yAxis();
+            direction.normalise();
+            Ogre::Vector3 pos(ptr.getRefData().getPosition().pos);
+            Ogre::Vector3 newPos = pos + direction * duration * speed;
+
+            // Check for impact
+            btVector3 from(pos.x, pos.y, pos.z);
+            btVector3 to(newPos.x, newPos.y, newPos.z);
+            std::vector<std::pair<float, std::string> > collisions = mPhysEngine->rayTest2(from, to);
+            for (std::vector<std::pair<float, std::string> >::iterator cIt = collisions.begin(); cIt != collisions.end(); ++cIt)
+            {
+                MWWorld::Ptr obstacle = searchPtrViaHandle(cIt->second);
+                if (obstacle.isEmpty())
+                {
+                    // Terrain. TODO: Explode
+                    continue;
+                }
+                if (obstacle == ptr)
+                    continue;
+                MWWorld::Ptr caster = searchPtrViaHandle(it->second.mActorHandle);
+                if (caster.isEmpty())
+                    caster = obstacle;
+                MWMechanics::CastSpell cast(caster, obstacle);
+                cast.mStack = it->second.mStack;
+                cast.mId = it->second.mId;
+                cast.mSourceName = it->second.mSourceName;
+                cast.inflict(obstacle, caster, it->second.mEffects, ESM::RT_Target, false);
+
+                deleteObject(ptr);
+                mProjectiles.erase(it++);
+                continue;
+            }
+
+            std::string handle = ptr.getRefData().getHandle();
+
+            moveObject(ptr, newPos.x, newPos.y, newPos.z);
+
+            // HACK: Re-fetch Ptrs if necessary, since the cell might have changed
+            if (!ptr.getRefData().getCount())
+            {
+                moved[handle] = it->second;
+                mProjectiles.erase(it++);
+            }
+            else
+                ++it;
+        }
+
+        // HACK: Re-fetch Ptrs if necessary, since the cell might have changed
+        for (std::map<std::string, ProjectileState>::iterator it = moved.begin(); it != moved.end(); ++it)
+        {
+            MWWorld::Ptr newPtr = searchPtrViaHandle(it->first);
+            if (newPtr.isEmpty()) // The projectile went into an inactive cell and was deleted
+                continue;
+            mProjectiles[getPtrViaHandle(it->first)] = it->second;
+        }
+    }
+
+    void World::objectLeftActiveCell(Ptr object, Ptr movedPtr)
+    {
+        // For now, projectiles moved to an inactive cell are just deleted, because there's no reliable way to hold on to the meta information
+        if (mProjectiles.find(object) != mProjectiles.end())
+        {
+            deleteObject(movedPtr);
         }
     }
 }

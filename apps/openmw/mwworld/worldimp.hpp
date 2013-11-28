@@ -97,6 +97,12 @@ namespace MWWorld
 
                 // Name of item to display as effect source in magic menu (in case we casted an enchantment)
                 std::string mSourceName;
+
+                ESM::EffectList mEffects;
+
+                float mSpeed;
+
+                bool mStack;
             };
 
             std::map<MWWorld::Ptr, ProjectileState> mProjectiles;
@@ -146,6 +152,9 @@ namespace MWWorld
 
             bool mTeleportEnabled;
             bool mLevitationEnabled;
+
+            /// Called when \a object is moved to an inactive cell
+            void objectLeftActiveCell (MWWorld::Ptr object, MWWorld::Ptr movedPtr);
 
         public:
 
@@ -493,7 +502,7 @@ namespace MWWorld
 
             virtual void castSpell (const MWWorld::Ptr& actor);
 
-            virtual void launchProjectile (const std::string& id, const ESM::EffectList& effects,
+            virtual void launchProjectile (const std::string& id, bool stack, const ESM::EffectList& effects,
                                            const MWWorld::Ptr& actor, const std::string& sourceName);
     };
 }

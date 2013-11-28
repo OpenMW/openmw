@@ -329,7 +329,7 @@ namespace MWMechanics
                 inflict(mTarget, mCaster, enchantment->mEffects, ESM::RT_Touch);
         }
 
-        MWBase::Environment::get().getWorld()->launchProjectile(mId, enchantment->mEffects, mCaster, mSourceName);
+        MWBase::Environment::get().getWorld()->launchProjectile(mId, false, enchantment->mEffects, mCaster, mSourceName);
 
         return true;
     }
@@ -434,7 +434,7 @@ namespace MWMechanics
             }
         }
 
-        MWBase::Environment::get().getWorld()->launchProjectile(mId, spell->mEffects, mCaster, mSourceName);
+        MWBase::Environment::get().getWorld()->launchProjectile(mId, false, spell->mEffects, mCaster, mSourceName);
         return true;
     }
 
