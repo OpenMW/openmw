@@ -60,9 +60,9 @@ namespace MWDialogue
 
     StampedJournalEntry StampedJournalEntry::makeFromQuest (const std::string& topic, int index)
     {
-        int day = MWBase::Environment::get().getWorld()->getGlobalVariable ("dayspassed").mLong;
-        int month = MWBase::Environment::get().getWorld()->getGlobalVariable ("month").mLong;
-        int dayOfMonth = MWBase::Environment::get().getWorld()->getGlobalVariable ("day").mLong;
+        int day = MWBase::Environment::get().getWorld()->getGlobalInt ("dayspassed");
+        int month = MWBase::Environment::get().getWorld()->getGlobalInt ("month");
+        int dayOfMonth = MWBase::Environment::get().getWorld()->getGlobalInt ("day");
 
         return StampedJournalEntry (topic, idFromIndex (topic, index), day, month, dayOfMonth);
     }

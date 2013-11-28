@@ -204,9 +204,17 @@ namespace MWWorld
             virtual bool isPositionExplored (float nX, float nY, int x, int y, bool interior);
             ///< see MWRender::LocalMap::isPositionExplored
 
-            virtual Globals::Data& getGlobalVariable (const std::string& name);
+            virtual void setGlobalInt (const std::string& name, int value);
+            ///< Set value independently from real type.
 
-            virtual Globals::Data getGlobalVariable (const std::string& name) const;
+            virtual void setGlobalFloat (const std::string& name, float value);
+            ///< Set value independently from real type.
+
+            virtual int getGlobalInt (const std::string& name) const;
+            ///< Get value independently from real type.
+
+            virtual float getGlobalFloat (const std::string& name) const;
+            ///< Get value independently from real type.
 
             virtual char getGlobalVariableType (const std::string& name) const;
             ///< Return ' ', if there is no global variable with this name.

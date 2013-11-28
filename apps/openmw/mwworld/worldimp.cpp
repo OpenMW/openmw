@@ -422,14 +422,24 @@ namespace MWWorld
         return mWorldScene->hasCellChanged();
     }
 
-    Globals::Data& World::getGlobalVariable (const std::string& name)
+    void World::setGlobalInt (const std::string& name, int value)
     {
-        return (*mGlobalVariables)[name];
+        mGlobalVariables->setInt (name, value);
     }
 
-    Globals::Data World::getGlobalVariable (const std::string& name) const
+    void World::setGlobalFloat (const std::string& name, float value)
     {
-        return (*mGlobalVariables)[name];
+        mGlobalVariables->setFloat (name, value);
+    }
+
+    int World::getGlobalInt (const std::string& name) const
+    {
+        return mGlobalVariables->getInt (name);
+    }
+
+    float World::getGlobalFloat (const std::string& name) const
+    {
+        return mGlobalVariables->getFloat (name);
     }
 
     char World::getGlobalVariableType (const std::string& name) const

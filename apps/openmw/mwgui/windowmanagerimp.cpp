@@ -1238,7 +1238,7 @@ namespace MWGui
     bool WindowManager::getRestEnabled()
     {
         //Enable rest dialogue if character creation finished
-        if(mRestAllowed==false && MWBase::Environment::get().getWorld()->getGlobalVariable ("chargenstate").mFloat==-1)
+        if(mRestAllowed==false && MWBase::Environment::get().getWorld()->getGlobalFloat ("chargenstate")==-1)
             mRestAllowed=true;
         return mRestAllowed;
     }

@@ -127,18 +127,18 @@ namespace MWScript
 
     int InterpreterContext::getGlobalShort (const std::string& name) const
     {
-        return MWBase::Environment::get().getWorld()->getGlobalVariable (name).mShort;
+        return MWBase::Environment::get().getWorld()->getGlobalInt (name);
     }
 
     int InterpreterContext::getGlobalLong (const std::string& name) const
     {
         // a global long is internally a float.
-        return MWBase::Environment::get().getWorld()->getGlobalVariable (name).mLong;
+        return MWBase::Environment::get().getWorld()->getGlobalInt (name);
     }
 
     float InterpreterContext::getGlobalFloat (const std::string& name) const
     {
-        return MWBase::Environment::get().getWorld()->getGlobalVariable (name).mFloat;
+        return MWBase::Environment::get().getWorld()->getGlobalFloat (name);
     }
 
     void InterpreterContext::setGlobalShort (const std::string& name, int value)
@@ -150,7 +150,7 @@ namespace MWScript
         else if (name=="month")
             MWBase::Environment::get().getWorld()->setMonth (value);
         else
-            MWBase::Environment::get().getWorld()->getGlobalVariable (name).mShort = value;
+            MWBase::Environment::get().getWorld()->setGlobalInt (name, value);
     }
 
     void InterpreterContext::setGlobalLong (const std::string& name, int value)
@@ -162,7 +162,7 @@ namespace MWScript
         else if (name=="month")
             MWBase::Environment::get().getWorld()->setMonth (value);
         else
-            MWBase::Environment::get().getWorld()->getGlobalVariable (name).mLong = value;
+            MWBase::Environment::get().getWorld()->setGlobalInt (name, value);
     }
 
     void InterpreterContext::setGlobalFloat (const std::string& name, float value)
@@ -174,7 +174,7 @@ namespace MWScript
         else if (name=="month")
             MWBase::Environment::get().getWorld()->setMonth (value);
         else
-            MWBase::Environment::get().getWorld()->getGlobalVariable (name).mFloat = value;
+            MWBase::Environment::get().getWorld()->setGlobalFloat (name, value);
     }
 
     std::vector<std::string> InterpreterContext::getGlobals () const
