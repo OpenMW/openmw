@@ -143,45 +143,23 @@ namespace MWScript
 
     void InterpreterContext::setGlobalShort (const std::string& name, int value)
     {
-        if (name=="gamehour")
-            MWBase::Environment::get().getWorld()->setHour (value);
-        else if (name=="day")
-            MWBase::Environment::get().getWorld()->setDay (value);
-        else if (name=="month")
-            MWBase::Environment::get().getWorld()->setMonth (value);
-        else
-            MWBase::Environment::get().getWorld()->setGlobalInt (name, value);
+        MWBase::Environment::get().getWorld()->setGlobalInt (name, value);
     }
 
     void InterpreterContext::setGlobalLong (const std::string& name, int value)
     {
-        if (name=="gamehour")
-            MWBase::Environment::get().getWorld()->setHour (value);
-        else if (name=="day")
-            MWBase::Environment::get().getWorld()->setDay (value);
-        else if (name=="month")
-            MWBase::Environment::get().getWorld()->setMonth (value);
-        else
-            MWBase::Environment::get().getWorld()->setGlobalInt (name, value);
+        MWBase::Environment::get().getWorld()->setGlobalInt (name, value);
     }
 
     void InterpreterContext::setGlobalFloat (const std::string& name, float value)
     {
-        if (name=="gamehour")
-            MWBase::Environment::get().getWorld()->setHour (value);
-        else if (name=="day")
-            MWBase::Environment::get().getWorld()->setDay (value);
-        else if (name=="month")
-            MWBase::Environment::get().getWorld()->setMonth (value);
-        else
-            MWBase::Environment::get().getWorld()->setGlobalFloat (name, value);
+        MWBase::Environment::get().getWorld()->setGlobalFloat (name, value);
     }
 
     std::vector<std::string> InterpreterContext::getGlobals () const
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();
         return world->getGlobals();
-
     }
 
     char InterpreterContext::getGlobalType (const std::string& name) const

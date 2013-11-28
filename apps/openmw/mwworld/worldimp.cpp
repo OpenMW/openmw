@@ -424,12 +424,26 @@ namespace MWWorld
 
     void World::setGlobalInt (const std::string& name, int value)
     {
-        mGlobalVariables->setInt (name, value);
+        if (name=="gamehour")
+            setHour (value);
+        else if (name=="day")
+            setDay (value);
+        else if (name=="month")
+            setMonth (value);
+        else
+            mGlobalVariables->setInt (name, value);
     }
 
     void World::setGlobalFloat (const std::string& name, float value)
     {
-        mGlobalVariables->setFloat (name, value);
+        if (name=="gamehour")
+            setHour (value);
+        else if (name=="day")
+            setDay (value);
+        else if (name=="month")
+            setMonth (value);
+        else
+            mGlobalVariables->setFloat (name, value);
     }
 
     int World::getGlobalInt (const std::string& name) const
