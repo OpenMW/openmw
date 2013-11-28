@@ -196,6 +196,7 @@ namespace MWBase
 
             virtual int getDay() const = 0;
             virtual int getMonth() const = 0;
+            virtual int getYear() const = 0;
 
             virtual std::string getMonthName (int month = -1) const = 0;
             ///< Return name of month (-1: current month)

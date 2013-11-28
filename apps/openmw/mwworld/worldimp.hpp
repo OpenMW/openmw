@@ -261,6 +261,7 @@ namespace MWWorld
 
             virtual int getDay() const;
             virtual int getMonth() const;
+            virtual int getYear() const;
 
             virtual std::string getMonthName (int month = -1) const;
             ///< Return name of month (-1: current month)

@@ -705,6 +705,11 @@ namespace MWWorld
         return mGlobalVariables->getInt("month");
     }
 
+    int World::getYear() const
+    {
+        return mGlobalVariables->getInt("year");
+    }
+
     std::string World::getMonthName (int month) const
     {
         if (month==-1)

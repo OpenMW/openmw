@@ -82,7 +82,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
     profile.mInGameTime.mGameHour = world.getTimeStamp().getHour();
     profile.mInGameTime.mDay = world.getDay();
     profile.mInGameTime.mMonth = world.getMonth();
-    /// \todo year
+    profile.mInGameTime.mYear = world.getYear();
     /// \todo time played
     profile.mDescription = description;
 
