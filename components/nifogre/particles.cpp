@@ -5,11 +5,55 @@
 #include <OgreParticleEmitter.h>
 #include <OgreParticleAffector.h>
 #include <OgreParticle.h>
+#include <OgreBone.h>
+#include <OgreTagPoint.h>
+#include <OgreEntity.h>
+#include <OgreSkeletonInstance.h>
+#include <OgreSceneNode.h>
+#include <OgreSceneManager.h>
 
 /* FIXME: "Nif" isn't really an appropriate emitter name. */
 class NifEmitter : public Ogre::ParticleEmitter
 {
 public:
+    std::string mSkelBaseName;
+    Ogre::Bone* mBone;
+
+    Ogre::ParticleSystem* getPartSys() { return mParent; }
+
+    class CmdSkelBase : public Ogre::ParamCommand
+    {
+    public:
+        Ogre::String doGet(const void *target) const
+        {
+            assert(false && "Unimplemented");
+        }
+        void doSet(void *target, const Ogre::String &val)
+        {
+            NifEmitter* emitter = static_cast<NifEmitter*>(target);
+            emitter->mSkelBaseName = val;
+        }
+    };
+
+    class CmdBone : public Ogre::ParamCommand
+    {
+    public:
+        Ogre::String doGet(const void *target) const
+        {
+			assert(false && "Unimplemented");
+        }
+        void doSet(void *target, const Ogre::String &val)
+        {
+            NifEmitter* emitter = static_cast<NifEmitter*>(target);
+            assert(!emitter->mSkelBaseName.empty() && "Base entity needs to be set first");
+			Ogre::ParticleSystem* partsys = emitter->getPartSys();
+            Ogre::Entity* ent = partsys->getParentSceneNode()->getCreator()->getEntity(emitter->mSkelBaseName);
+            Ogre::Bone* bone = ent->getSkeleton()->getBone(val);
+            assert(bone);
+            emitter->mBone = bone;
+        }
+    };
+
     /** Command object for the emitter width (see Ogre::ParamCommand).*/
     class CmdWidth : public Ogre::ParamCommand
     {
@@ -119,6 +163,7 @@ public:
 
     NifEmitter(Ogre::ParticleSystem *psys)
       : Ogre::ParticleEmitter(psys)
+      , mBone(NULL)
     {
         initDefaults("Nif");
     }
@@ -133,6 +178,7 @@ public:
     /** See Ogre::ParticleEmitter. */
     void _initParticle(Ogre::Particle *particle)
     {
+		assert (mBone && "No node set");
         Ogre::Vector3 xOff, yOff, zOff;
 
         // Call superclass
@@ -141,8 +187,8 @@ public:
         xOff = Ogre::Math::SymmetricRandom() * mXRange;
         yOff = Ogre::Math::SymmetricRandom() * mYRange;
         zOff = Ogre::Math::SymmetricRandom() * mZRange;
-
-        particle->position = mPosition + xOff + yOff + zOff;
+ 
+        particle->position = mBone->_getDerivedPosition() + xOff + yOff + zOff;
 
         // Generate complex data by reference
         genEmissionColour(particle->colour);
@@ -150,7 +196,7 @@ public:
         // NOTE: We do not use mDirection/mAngle for the initial direction.
         Ogre::Radian hdir = mHorizontalDir + mHorizontalAngle*Ogre::Math::SymmetricRandom();
         Ogre::Radian vdir = mVerticalDir + mVerticalAngle*Ogre::Math::SymmetricRandom();
-        particle->direction = (Ogre::Quaternion(hdir, Ogre::Vector3::UNIT_Z) *
+        particle->direction = (mBone->_getDerivedOrientation() * Ogre::Quaternion(hdir, Ogre::Vector3::UNIT_Z) *
                                Ogre::Quaternion(vdir, Ogre::Vector3::UNIT_X)) *
                               Ogre::Vector3::UNIT_Z;
 
@@ -313,6 +359,16 @@ protected:
                                                   Ogre::PT_REAL),
                                &msHorizontalAngleCmd);
 
+            dict->addParameter(Ogre::ParameterDef("bone",
+                                                  "The bone where the particles should be spawned",
+                                                  Ogre::PT_STRING),
+                               &msBoneCmd);
+
+            dict->addParameter(Ogre::ParameterDef("skelbase",
+                                                  "The name of the entity containing the bone (see 'bone' parameter)",
+                                                  Ogre::PT_STRING),
+                               &msSkelBaseCmd);
+
             return true;
         }
         return false;
@@ -326,6 +382,8 @@ protected:
     static CmdVerticalAngle msVerticalAngleCmd;
     static CmdHorizontalDir msHorizontalDirCmd;
     static CmdHorizontalAngle msHorizontalAngleCmd;
+    static CmdBone msBoneCmd;
+    static CmdSkelBase msSkelBaseCmd;
 };
 NifEmitter::CmdWidth NifEmitter::msWidthCmd;
 NifEmitter::CmdHeight NifEmitter::msHeightCmd;
@@ -334,12 +392,14 @@ NifEmitter::CmdVerticalDir NifEmitter::msVerticalDirCmd;
 NifEmitter::CmdVerticalAngle NifEmitter::msVerticalAngleCmd;
 NifEmitter::CmdHorizontalDir NifEmitter::msHorizontalDirCmd;
 NifEmitter::CmdHorizontalAngle NifEmitter::msHorizontalAngleCmd;
+NifEmitter::CmdBone NifEmitter::msBoneCmd;
+NifEmitter::CmdSkelBase NifEmitter::msSkelBaseCmd;
 
 Ogre::ParticleEmitter* NifEmitterFactory::createEmitter(Ogre::ParticleSystem *psys)
 {
-    Ogre::ParticleEmitter *emit = OGRE_NEW NifEmitter(psys);
-    mEmitters.push_back(emit);
-    return emit;
+    Ogre::ParticleEmitter *emitter = OGRE_NEW NifEmitter(psys);
+    mEmitters.push_back(emitter);
+    return emitter;
 }
 
 
@@ -492,6 +552,45 @@ class GravityAffector : public Ogre::ParticleAffector
     };
 
 public:
+    std::string mSkelBaseName;
+    Ogre::Bone* mBone;
+
+    Ogre::ParticleSystem* getPartSys() { return mParent; }
+
+    class CmdSkelBase : public Ogre::ParamCommand
+    {
+    public:
+        Ogre::String doGet(const void *target) const
+        {
+            assert(false && "Unimplemented");
+        }
+        void doSet(void *target, const Ogre::String &val)
+        {
+            GravityAffector* affector = static_cast<GravityAffector*>(target);
+            affector->mSkelBaseName = val;
+        }
+    };
+
+    class CmdBone : public Ogre::ParamCommand
+    {
+    public:
+        Ogre::String doGet(const void *target) const
+        {
+            assert(false && "Unimplemented");
+        }
+        void doSet(void *target, const Ogre::String &val)
+        {
+            GravityAffector* affector = static_cast<GravityAffector*>(target);
+            assert(!affector->mSkelBaseName.empty() && "Base entity needs to be set first");
+            Ogre::ParticleSystem* partsys = affector->getPartSys();
+            Ogre::Entity* ent = partsys->getParentSceneNode()->getCreator()->getEntity(affector->mSkelBaseName);
+            Ogre::Bone* bone = ent->getSkeleton()->getBone(val);
+            assert(bone);
+            affector->mBone = bone;
+        }
+    };
+
+
     /** Command object for force (see Ogre::ParamCommand).*/
     class CmdForce : public Ogre::ParamCommand
     {
@@ -585,6 +684,7 @@ public:
       , mForceType(Type_Wind)
       , mPosition(0.0f)
       , mDirection(0.0f)
+      , mBone(NULL)
     {
         mType = "Gravity";
 
@@ -606,6 +706,16 @@ public:
             dict->addParameter(Ogre::ParameterDef(force_type_title, force_type_descr, Ogre::PT_STRING), &msForceTypeCmd);
             dict->addParameter(Ogre::ParameterDef(direction_title, direction_descr, Ogre::PT_VECTOR3), &msDirectionCmd);
             dict->addParameter(Ogre::ParameterDef(position_title, position_descr, Ogre::PT_VECTOR3), &msPositionCmd);
+
+            dict->addParameter(Ogre::ParameterDef("bone",
+                                                  "The bone where the particles should be spawned",
+                                                  Ogre::PT_STRING),
+                               &msBoneCmd);
+
+            dict->addParameter(Ogre::ParameterDef("skelbase",
+                                                  "The name of the entity containing the bone (see 'bone' parameter)",
+                                                  Ogre::PT_STRING),
+                               &msSkelBaseCmd);
         }
     }
 
@@ -647,6 +757,8 @@ public:
     static CmdForceType msForceTypeCmd;
     static CmdDirection msDirectionCmd;
     static CmdPosition msPositionCmd;
+    static CmdBone msBoneCmd;
+    static CmdSkelBase msSkelBaseCmd;
 
 protected:
     void applyWindForce(Ogre::ParticleSystem *psys, Ogre::Real timeElapsed)
@@ -667,7 +779,8 @@ protected:
         while (!pi.end())
         {
             Ogre::Particle *p = pi.getNext();
-            const Ogre::Vector3 vec = (p->position - mPosition).normalisedCopy() * force;
+            const Ogre::Vector3 vec = (
+                (mBone->_getDerivedOrientation() * mPosition + mBone->_getDerivedPosition()) - p->position).normalisedCopy() * force;
             p->direction += vec;
         }
     }
@@ -684,6 +797,8 @@ GravityAffector::CmdForce GravityAffector::msForceCmd;
 GravityAffector::CmdForceType GravityAffector::msForceTypeCmd;
 GravityAffector::CmdDirection GravityAffector::msDirectionCmd;
 GravityAffector::CmdPosition GravityAffector::msPositionCmd;
+GravityAffector::CmdBone GravityAffector::msBoneCmd;
+GravityAffector::CmdSkelBase GravityAffector::msSkelBaseCmd;
 
 Ogre::ParticleAffector *GravityAffectorFactory::createAffector(Ogre::ParticleSystem *psys)
 {
