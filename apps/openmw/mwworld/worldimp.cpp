@@ -2163,27 +2163,38 @@ namespace MWWorld
             btVector3 from(pos.x, pos.y, pos.z);
             btVector3 to(newPos.x, newPos.y, newPos.z);
             std::vector<std::pair<float, std::string> > collisions = mPhysEngine->rayTest2(from, to);
-            for (std::vector<std::pair<float, std::string> >::iterator cIt = collisions.begin(); cIt != collisions.end(); ++cIt)
+            bool explode = false;
+            for (std::vector<std::pair<float, std::string> >::iterator cIt = collisions.begin(); cIt != collisions.end() && !explode; ++cIt)
             {
                 MWWorld::Ptr obstacle = searchPtrViaHandle(cIt->second);
-                if (obstacle.isEmpty())
-                {
-                    // Terrain. TODO: Explode
-                    continue;
-                }
                 if (obstacle == ptr)
                     continue;
+
+                explode = true;
+
                 MWWorld::Ptr caster = searchPtrViaHandle(it->second.mActorHandle);
                 if (caster.isEmpty())
                     caster = obstacle;
-                MWMechanics::CastSpell cast(caster, obstacle);
-                cast.mStack = it->second.mStack;
-                cast.mId = it->second.mId;
-                cast.mSourceName = it->second.mSourceName;
-                cast.inflict(obstacle, caster, it->second.mEffects, ESM::RT_Target, false);
+                if (obstacle.isEmpty())
+                {
+                    // Terrain
+                }
+                else
+                {
+                    MWMechanics::CastSpell cast(caster, obstacle);
+                    cast.mStack = it->second.mStack;
+                    cast.mId = it->second.mId;
+                    cast.mSourceName = it->second.mSourceName;
+                    cast.inflict(obstacle, caster, it->second.mEffects, ESM::RT_Target, false);
+                }
 
                 deleteObject(ptr);
                 mProjectiles.erase(it++);
+            }
+
+            if (explode)
+            {
+                // TODO: Explode
                 continue;
             }
 
