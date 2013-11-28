@@ -16,6 +16,10 @@ namespace MWState
             CharacterManager mCharacterManager;
             double mTimePlayed;
 
+        private:
+
+            void cleanup();
+
         public:
 
             StateManager (const boost::filesystem::path& saves, const std::string& game);

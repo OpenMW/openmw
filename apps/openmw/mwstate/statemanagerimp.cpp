@@ -17,6 +17,18 @@
 
 #include "../mwmechanics/npcstats.hpp"
 
+void MWState::StateManager::cleanup()
+{
+    if (mState!=State_NoGame)
+    {
+        MWBase::Environment::get().getDialogueManager()->clear();
+        MWBase::Environment::get().getJournal()->clear();
+        mState = State_NoGame;
+        mCharacterManager.clearCurrentCharacter();
+        mTimePlayed = 0;
+    }
+}
+
 MWState::StateManager::StateManager (const boost::filesystem::path& saves, const std::string& game)
 : mQuitRequest (false), mState (State_NoGame), mCharacterManager (saves, game), mTimePlayed (0)
 {
@@ -40,18 +52,10 @@ MWState::StateManager::State MWState::StateManager::getState() const
 
 void MWState::StateManager::newGame (bool bypass)
 {
-    if (mState!=State_NoGame)
-    {
-        MWBase::Environment::get().getDialogueManager()->clear();
-        MWBase::Environment::get().getJournal()->clear();
-        mState = State_NoGame;
-        mCharacterManager.clearCurrentCharacter();
-        mTimePlayed = 0;
-    }
+    cleanup();
 
     if (!bypass)
     {
-        /// \todo extract cleanup code
         MWBase::Environment::get().getWorld()->startNewGame();
         MWBase::Environment::get().getWindowManager()->setNewGame (true);
     }
@@ -99,6 +103,9 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
     writer.startRecord ("SAVE");
     slot->mProfile.save (writer);
     writer.endRecord ("SAVE");
+
+    /// \todo write saved game data
+
     writer.close();
 
     Settings::Manager::setString ("character", "Saves",
@@ -107,13 +114,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
 
 void MWState::StateManager::loadGame (const Character *character, const Slot *slot)
 {
-    if (mState!=State_NoGame)
-    {
-        MWBase::Environment::get().getDialogueManager()->clear();
-        MWBase::Environment::get().getJournal()->clear();
-        mState = State_NoGame;
-        mCharacterManager.clearCurrentCharacter();
-    }
+    cleanup();
 
     mTimePlayed = slot->mProfile.mTimePlayed;
 

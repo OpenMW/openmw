@@ -290,7 +290,6 @@ namespace MWWorld
         pos.rot[2] = 0;
         mWorldScene->changeToExteriorCell(pos);
 
-
         // enable collision
         if(!mPhysics->toggleCollisionMode())
             mPhysics->toggleCollisionMode();
@@ -300,6 +299,7 @@ namespace MWWorld
 
         // global variables
         delete mGlobalVariables;
+        mGlobalVariables = 0;
         mGlobalVariables = new Globals (mStore);
 
         // set new game mark
@@ -308,6 +308,7 @@ namespace MWWorld
 
         // we don't want old weather to persist on a new game
         delete mWeatherManager;
+        mWeatherManager = 0;
         mWeatherManager = new MWWorld::WeatherManager(mRendering,&mFallback);
 
         MWBase::Environment::get().getScriptManager()->resetGlobalScripts();
