@@ -14,7 +14,7 @@ void Land::LandData::save(ESMWriter &esm)
         esm.writeHNT("VNML", mNormals, sizeof(VNML));
     }
     if (mDataTypes & Land::DATA_VHGT) {
-        static VHGT offsets;
+        VHGT offsets;
         offsets.mHeightOffset = mHeights[0] / HEIGHT_SCALE;
         offsets.mUnk1 = mUnk1;
         offsets.mUnk2 = mUnk2;
