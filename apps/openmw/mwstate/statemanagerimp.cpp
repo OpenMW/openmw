@@ -18,7 +18,7 @@
 #include "../mwmechanics/npcstats.hpp"
 
 MWState::StateManager::StateManager (const boost::filesystem::path& saves, const std::string& game)
-: mQuitRequest (false), mState (State_NoGame), mCharacterManager (saves, game)
+: mQuitRequest (false), mState (State_NoGame), mCharacterManager (saves, game), mTimePlayed (0)
 {
 
 }
@@ -46,6 +46,7 @@ void MWState::StateManager::newGame (bool bypass)
         MWBase::Environment::get().getJournal()->clear();
         mState = State_NoGame;
         mCharacterManager.clearCurrentCharacter();
+        mTimePlayed = 0;
     }
 
     if (!bypass)
@@ -83,7 +84,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
     profile.mInGameTime.mDay = world.getDay();
     profile.mInGameTime.mMonth = world.getMonth();
     profile.mInGameTime.mYear = world.getYear();
-    /// \todo time played
+    profile.mTimePlayed = mTimePlayed;
     profile.mDescription = description;
 
     if (!slot)
@@ -114,6 +115,8 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
         mCharacterManager.clearCurrentCharacter();
     }
 
+    mTimePlayed = slot->mProfile.mTimePlayed;
+
     ESM::ESMReader reader;
     reader.open (slot->mPath.string());
 
@@ -143,4 +146,9 @@ MWState::StateManager::CharacterIterator MWState::StateManager::characterBegin()
 MWState::StateManager::CharacterIterator MWState::StateManager::characterEnd()
 {
     return mCharacterManager.end();
+}
+
+void MWState::StateManager::update (float duration)
+{
+    mTimePlayed += duration;
 }

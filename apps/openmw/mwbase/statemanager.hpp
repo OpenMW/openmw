@@ -71,6 +71,8 @@ namespace MWBase
             /// iterator.
 
             virtual CharacterIterator characterEnd() = 0;
+
+            virtual void update (float duration) = 0;
     };
 }
 

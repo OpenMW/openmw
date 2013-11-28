@@ -117,6 +117,9 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
 
             // update world
             MWBase::Environment::get().getWorld()->update(frametime, MWBase::Environment::get().getWindowManager()->isGuiMode());
+
+            // update game state
+            MWBase::Environment::get().getStateManager()->update (frametime);
         }
 
         // update GUI

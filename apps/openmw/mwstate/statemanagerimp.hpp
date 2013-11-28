@@ -14,6 +14,7 @@ namespace MWState
             bool mQuitRequest;
             State mState;
             CharacterManager mCharacterManager;
+            double mTimePlayed;
 
         public:
 
@@ -50,6 +51,8 @@ namespace MWState
             /// iterator.
 
             virtual CharacterIterator characterEnd();
+
+            virtual void update (float duration);
     };
 }
 
