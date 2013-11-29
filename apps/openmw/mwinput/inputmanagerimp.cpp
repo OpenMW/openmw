@@ -87,7 +87,7 @@ namespace MWInput
 {
     InputManager::InputManager(OEngine::Render::OgreRenderer &ogre,
             OMW::Engine& engine,
-            const std::string& userFile, bool userFileExists)
+            const std::string& userFile, bool userFileExists, bool grab)
         : mOgre(ogre)
         , mPlayer(NULL)
         , mEngine(engine)
@@ -111,7 +111,7 @@ namespace MWInput
 
         Ogre::RenderWindow* window = ogre.getWindow ();
 
-        mInputManager = new SFO::InputWrapper(mOgre.getSDLWindow(), mOgre.getWindow());
+        mInputManager = new SFO::InputWrapper(mOgre.getSDLWindow(), mOgre.getWindow(), grab);
         mInputManager->setMouseEventCallback (this);
         mInputManager->setKeyboardEventCallback (this);
         mInputManager->setWindowEventCallback(this);

@@ -79,6 +79,8 @@ namespace OMW
             bool mScriptConsoleMode;
             std::string mStartupScript;
             int mActivationDistanceOverride;
+            // Grab mouse?
+            bool mGrab;
 
             Compiler::Extensions mExtensions;
             Compiler::Context *mScriptContext;
@@ -151,6 +153,8 @@ namespace OMW
 
             /// Start as a new game.
             void setNewGame(bool newGame);
+
+            void setGrabMouse(bool grab) { mGrab = grab; }
 
             /// Initialise and enter main loop.
             void go();

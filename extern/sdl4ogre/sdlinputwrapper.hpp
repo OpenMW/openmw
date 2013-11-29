@@ -16,7 +16,7 @@ namespace SFO
     class InputWrapper
     {
     public:
-        InputWrapper(SDL_Window *window, Ogre::RenderWindow* ogreWindow);
+        InputWrapper(SDL_Window *window, Ogre::RenderWindow* ogreWindow, bool grab);
         ~InputWrapper();
 
         void setMouseEventCallback(MouseListener* listen) { mMouseListener = listen; }
@@ -62,6 +62,7 @@ namespace SFO
         bool mWarpCompensate;
         bool mWrapPointer;
 
+        bool mAllowGrab;
         bool mWantMouseVisible;
         bool mWantGrab;
         bool mWantRelative;
