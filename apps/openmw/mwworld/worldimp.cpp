@@ -2086,6 +2086,8 @@ namespace MWWorld
                 iter->mEffectID);
 
             projectileModel = magicEffect->mBolt;
+            if (projectileModel.empty())
+                projectileModel = "VFX_DefaultBolt";
 
             static const std::string schools[] = {
                 "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
