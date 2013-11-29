@@ -1127,10 +1127,6 @@ namespace MWWorld
 
     void World::doPhysics(float duration)
     {
-        /* No duration? Shouldn't be any movement, then. */
-        if(duration <= 0.0f)
-            return;
-
         processDoors(duration);
 
         moveProjectiles(duration);
