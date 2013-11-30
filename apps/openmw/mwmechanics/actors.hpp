@@ -68,8 +68,8 @@ namespace MWMechanics
             void updateActor(const MWWorld::Ptr &old, const MWWorld::Ptr& ptr);
             ///< Updates an actor with a new Ptr
 
-            void dropActors (const MWWorld::CellStore *cellStore);
-            ///< Deregister all actors in the given cell.
+            void dropActors (const MWWorld::CellStore *cellStore, const MWWorld::Ptr& ignore);
+            ///< Deregister all actors (except for \a ignore) in the given cell.
 
             void update (float duration, bool paused);
             ///< Update actor stats and store desired velocity vectors in \a movement

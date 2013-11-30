@@ -200,10 +200,7 @@ namespace MWMechanics
 
     void MechanicsManager::drop(const MWWorld::CellStore *cellStore)
     {
-        if(!mWatched.isEmpty() && mWatched.getCell() == cellStore)
-            mWatched = MWWorld::Ptr();
-
-        mActors.dropActors(cellStore);
+        mActors.dropActors(cellStore, mWatched);
         mObjects.dropObjects(cellStore);
     }
 

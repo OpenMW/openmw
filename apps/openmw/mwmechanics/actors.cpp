@@ -516,12 +516,12 @@ namespace MWMechanics
         }
     }
 
-    void Actors::dropActors (const MWWorld::Ptr::CellStore *cellStore)
+    void Actors::dropActors (const MWWorld::Ptr::CellStore *cellStore, const MWWorld::Ptr& ignore)
     {
         PtrControllerMap::iterator iter = mActors.begin();
         while(iter != mActors.end())
         {
-            if(iter->first.getCell()==cellStore)
+            if(iter->first.getCell()==cellStore && iter->first != ignore)
             {
                 delete iter->second;
                 mActors.erase(iter++);
