@@ -65,7 +65,10 @@ namespace MWGui
                 if (mCurrentCharacter == &*it ||
                     (!mCurrentCharacter && directory==Misc::StringUtils::lowerCase (
                     it->begin()->mPath.parent_path().filename().string())))
+                {
+                    mCurrentCharacter = &*it;
                     mCharacterSelection->setIndexSelected(mCharacterSelection->getItemCount()-1);
+                }
             }
         }
 
