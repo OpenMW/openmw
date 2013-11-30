@@ -5,7 +5,7 @@
 
 namespace MWDialogue
 {
-    /// \brief A quest in progress or a compelted quest
+    /// \brief A quest in progress or a completed quest
     class Quest : public Topic
     {
             int mIndex;
@@ -23,7 +23,7 @@ namespace MWDialogue
             int getIndex() const;
 
             void setIndex (int index);
-            ///< Calling this function with a non-existant index while throw an exception.
+            ///< Calling this function with a non-existent index will throw an exception.
 
             bool isFinished() const;
 
