@@ -1543,12 +1543,15 @@ namespace MWWorld
         MWWorld::Ptr dropped =
             MWWorld::Class::get(object).copyToCell(object, cell, pos);
 
-        Ogre::Vector3 min, max;
-        if (mPhysics->getObjectAABB(object, min, max)) {
-            float *pos = dropped.getRefData().getPosition().pos;
-            pos[0] -= (min.x + max.x) / 2;
-            pos[1] -= (min.y + max.y) / 2;
-            pos[2] -= min.z;
+        if (object.getClass().isActor())
+        {
+            Ogre::Vector3 min, max;
+            if (mPhysics->getObjectAABB(object, min, max)) {
+                float *pos = dropped.getRefData().getPosition().pos;
+                pos[0] -= (min.x + max.x) / 2;
+                pos[1] -= (min.y + max.y) / 2;
+                pos[2] -= min.z;
+            }
         }
 
         if (mWorldScene->isCellActive(cell)) {

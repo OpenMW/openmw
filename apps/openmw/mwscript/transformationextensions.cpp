@@ -490,10 +490,20 @@ namespace MWScript
                     ipos.pos[0] = pos.x;
                     ipos.pos[1] = pos.y;
                     ipos.pos[2] = pos.z;
-                    ipos.rot[0] = 0;
-                    ipos.rot[1] = 0;
-                    ipos.rot[2] = 0;
 
+                    if (actor.getClass().isActor())
+                    {
+                        // TODO: should this depend on the 'direction' parameter?
+                        ipos.rot[0] = 0;
+                        ipos.rot[1] = 0;
+                        ipos.rot[2] = 0;
+                    }
+                    else
+                    {
+                        ipos.rot[0] = actor.getRefData().getPosition().rot[0];
+                        ipos.rot[1] = actor.getRefData().getPosition().rot[1];
+                        ipos.rot[2] = actor.getRefData().getPosition().rot[2];
+                    }
                     // create item
                     MWWorld::CellStore* store = actor.getCell();
                     MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), itemID, count);
