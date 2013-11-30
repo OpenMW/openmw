@@ -110,11 +110,6 @@ namespace MWGui
 
             else
             {
-    	    const MyGUI::IntPoint& lastPressed = MyGUI::InputManager::getInstance().getLastPressedPosition(MyGUI::MouseButton::Left);
-
-                if (mousePos == lastPressed) // mouseclick makes tooltip disappear
-                    return;
-
                 if (mousePos.left == mLastMouseX && mousePos.top == mLastMouseY)
                 {
                     mRemainingDelay -= frameDuration;
