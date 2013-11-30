@@ -317,7 +317,6 @@ struct JournalViewModelImpl : JournalViewModel
 
         std::string getText () const
         {
-            /// \todo defines are not replaced (%PCName etc). should probably be done elsewhere though since we need the actor
             return  mTopic.getEntry (*itr).getText(MWBase::Environment::get().getWorld()->getStore());
 
         }
