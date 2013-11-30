@@ -15,6 +15,7 @@ namespace MWDialogue
     {
         std::string mTopic;
         std::string mInfoId;
+        std::string mText;
 
         JournalEntry();
 

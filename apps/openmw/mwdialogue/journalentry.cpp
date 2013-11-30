@@ -14,19 +14,25 @@ namespace MWDialogue
 
     JournalEntry::JournalEntry (const std::string& topic, const std::string& infoId)
     : mTopic (topic), mInfoId (infoId)
-    {}
-
-    std::string JournalEntry::getText (const MWWorld::ESMStore& store) const
     {
         const ESM::Dialogue *dialogue =
-            store.get<ESM::Dialogue>().find (mTopic);
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().find (mTopic);
 
         for (std::vector<ESM::DialInfo>::const_iterator iter (dialogue->mInfo.begin());
             iter!=dialogue->mInfo.end(); ++iter)
             if (iter->mId == mInfoId)
-                return iter->mResponse;
+            {
+                /// \todo text replacement
+                mText = iter->mResponse;
+                return;
+            }
 
         throw std::runtime_error ("unknown info ID " + mInfoId + " for topic " + mTopic);
+    }
+
+    std::string JournalEntry::getText (const MWWorld::ESMStore& store) const
+    {
+        return mText;
     }
 
     JournalEntry JournalEntry::makeFromQuest (const std::string& topic, int index)
