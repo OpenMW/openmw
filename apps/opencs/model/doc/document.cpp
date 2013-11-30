@@ -2245,28 +2245,38 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration, co
         mData.setDescription ("");
         mData.setAuthor ("");
     }
-/// \todo un-outcomment the else, once loading an existing content file works properly again.
+
+    bool filtersFound = false;
+
+    if (boost::filesystem::exists (mProjectPath))
+    {
+        filtersFound = true;
+    }
     else
     {
-        if (boost::filesystem::exists (mProjectPath))
+        boost::filesystem::path locCustomFiltersPath (configuration.getUserPath());
+        locCustomFiltersPath /= "defaultfilters";
+
+        if (boost::filesystem::exists(locCustomFiltersPath))
         {
-            getData().loadFile (mProjectPath, false, true);
+            boost::filesystem::copy_file (locCustomFiltersPath, mProjectPath);
+            filtersFound = true;
         }
         else
         {
-            boost::filesystem::path locCustomFiltersPath (configuration.getUserPath());
-            locCustomFiltersPath /= "defaultfilters";
-            if (boost::filesystem::exists(locCustomFiltersPath))
+            boost::filesystem::path filters(mResDir);
+            filters /= "defaultfilters";
+
+            if (boost::filesystem::exists(filters))
             {
-                boost::filesystem::copy_file (locCustomFiltersPath, mProjectPath);
-            } else {
-                boost::filesystem::path filters(mResDir);
-                filters /= "defaultfilters";
                 boost::filesystem::copy_file(filters, mProjectPath);
+                filtersFound = true;
             }
-            getData().loadFile (mProjectPath, false, true);
         }
     }
+
+    if (filtersFound)
+        getData().loadFile (mProjectPath, false, true);
 
     addOptionalGmsts();
     addOptionalGlobals();
