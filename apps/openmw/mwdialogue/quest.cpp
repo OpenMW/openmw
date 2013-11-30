@@ -16,7 +16,7 @@ namespace MWDialogue
     : Topic (topic), mIndex (0), mFinished (false)
     {}
 
-    const std::string Quest::getName() const
+    std::string Quest::getName() const
     {
         const ESM::Dialogue *dialogue =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().find (mTopic);

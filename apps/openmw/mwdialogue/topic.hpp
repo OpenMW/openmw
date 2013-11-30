@@ -19,6 +19,7 @@ namespace MWDialogue
         protected:
 
             std::string mTopic;
+            std::string mName;
             TEntryContainer mEntries; // info-IDs
 
         public:
@@ -34,7 +35,7 @@ namespace MWDialogue
             ///
             /// \note Redundant entries are ignored.
 
-            std::string const & getName () const { return mTopic; }
+            virtual std::string getName () const;
 
             TEntryIter begin() const;
             ///< Iterator pointing to the begin of the journal for this topic.

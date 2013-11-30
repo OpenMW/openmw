@@ -288,9 +288,7 @@ struct JournalViewModelImpl : JournalViewModel
     void visitTopicName (TopicId topicId, boost::function <void (Utf8Span)> visitor) const
     {
         MWDialogue::Topic const & topic = * reinterpret_cast <MWDialogue::Topic const *> (topicId);
-        // This is to get the correct case for the topic
-        const std::string& name = MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().find(topic.getName())->mId;
-        visitor (toUtf8Span (name));
+        visitor (toUtf8Span (topic.getName()));
     }
 
     void visitTopicNamesStartingWith (char character, boost::function < void (TopicId , Utf8Span) > visitor) const
@@ -302,10 +300,7 @@ struct JournalViewModelImpl : JournalViewModel
             if (i->first [0] != std::tolower (character, mLocale))
                 continue;
 
-            // This is to get the correct case for the topic
-            const std::string& name = MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().find(i->first)->mId;
-
-            visitor (TopicId (&i->second), toUtf8Span (name));
+            visitor (TopicId (&i->second), toUtf8Span (i->second.getName()));
         }
 
     }

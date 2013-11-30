@@ -1,6 +1,9 @@
 
 #include "topic.hpp"
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+
 #include "../mwworld/esmstore.hpp"
 
 namespace MWDialogue
@@ -9,7 +12,8 @@ namespace MWDialogue
     {}
 
     Topic::Topic (const std::string& topic)
-    : mTopic (topic)
+    : mTopic (topic), mName (
+      MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().find (topic)->mId)
     {}
 
     Topic::~Topic()
@@ -25,6 +29,11 @@ namespace MWDialogue
                 return;
 
         mEntries.push_back (entry.mInfoId);
+    }
+
+    std::string Topic::getName() const
+    {
+        return mName;
     }
 
     Topic::TEntryIter Topic::begin() const

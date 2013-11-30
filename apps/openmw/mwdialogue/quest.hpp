@@ -17,7 +17,7 @@ namespace MWDialogue
 
             Quest (const std::string& topic);
 
-            const std::string getName() const;
+            virtual std::string getName() const;
             ///< May be an empty string
 
             int getIndex() const;
