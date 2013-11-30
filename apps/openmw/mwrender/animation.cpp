@@ -1066,6 +1066,7 @@ void Animation::addEffect(const std::string &model, int effectId, bool loop, con
         for(size_t i = 0;i < params.mObjects.mParticles.size(); ++i)
         {
             Ogre::ParticleSystem* partSys = params.mObjects.mParticles[i];
+            sh::Factory::getInstance()._ensureMaterial(partSys->getMaterialName(), "Default");
             Ogre::MaterialPtr mat = Ogre::MaterialManager::getSingleton().getByName(partSys->getMaterialName());
             static int count = 0;
             Ogre::String materialName = "openmw/" + Ogre::StringConverter::toString(count++);

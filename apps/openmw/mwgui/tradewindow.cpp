@@ -80,7 +80,7 @@ namespace MWGui
     }
 
     void TradeWindow::startTrade(const MWWorld::Ptr& actor)
-    {
+    {        
         mPtr = actor;
 
         mCurrentBalance = 0;
@@ -102,6 +102,8 @@ namespace MWGui
         // Careful here. setTitle may cause size updates, causing itemview redraw, so make sure to do it last
         // or we end up using a possibly invalid model.
         setTitle(MWWorld::Class::get(actor).getName(actor));
+
+        onFilterChanged(mFilterAll);
     }
 
     void TradeWindow::onFilterChanged(MyGUI::Widget* _sender)

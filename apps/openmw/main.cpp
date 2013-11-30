@@ -154,6 +154,8 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("fallback", bpo::value<FallbackMap>()->default_value(FallbackMap(), "")
             ->multitoken()->composing(), "fallback values")
 
+        ("no-grab", "Don't grab mouse cursor")
+
         ("activate-dist", bpo::value <int> ()->default_value (-1), "activation distance override");
 
     bpo::parsed_options valid_opts = bpo::command_line_parser(argc, argv)
@@ -183,6 +185,8 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
     if (!run)
         return false;
+
+    engine.setGrabMouse(!variables.count("no-grab"));
 
     // Font encoding settings
     std::string encoding(variables["encoding"].as<std::string>());

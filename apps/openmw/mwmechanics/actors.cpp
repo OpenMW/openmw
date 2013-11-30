@@ -160,6 +160,8 @@ namespace MWMechanics
 
     void Actors::calculateRestoration (const MWWorld::Ptr& ptr, float duration)
     {
+        if (ptr.getClass().getCreatureStats(ptr).isDead())
+            return;
         CreatureStats& stats = MWWorld::Class::get (ptr).getCreatureStats (ptr);
         const MWWorld::Store<ESM::GameSetting>& settings = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 

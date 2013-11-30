@@ -1127,10 +1127,6 @@ namespace MWWorld
 
     void World::doPhysics(float duration)
     {
-        /* No duration? Shouldn't be any movement, then. */
-        if(duration <= 0.0f)
-            return;
-
         processDoors(duration);
 
         moveProjectiles(duration);
@@ -1547,12 +1543,15 @@ namespace MWWorld
         MWWorld::Ptr dropped =
             MWWorld::Class::get(object).copyToCell(object, cell, pos);
 
-        Ogre::Vector3 min, max;
-        if (mPhysics->getObjectAABB(object, min, max)) {
-            float *pos = dropped.getRefData().getPosition().pos;
-            pos[0] -= (min.x + max.x) / 2;
-            pos[1] -= (min.y + max.y) / 2;
-            pos[2] -= min.z;
+        if (object.getClass().isActor())
+        {
+            Ogre::Vector3 min, max;
+            if (mPhysics->getObjectAABB(object, min, max)) {
+                float *pos = dropped.getRefData().getPosition().pos;
+                pos[0] -= (min.x + max.x) / 2;
+                pos[1] -= (min.y + max.y) / 2;
+                pos[2] -= min.z;
+            }
         }
 
         if (mWorldScene->isCellActive(cell)) {
@@ -2086,6 +2085,8 @@ namespace MWWorld
                 iter->mEffectID);
 
             projectileModel = magicEffect->mBolt;
+            if (projectileModel.empty())
+                projectileModel = "VFX_DefaultBolt";
 
             static const std::string schools[] = {
                 "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
