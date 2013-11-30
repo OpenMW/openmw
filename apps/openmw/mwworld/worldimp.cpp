@@ -107,7 +107,7 @@ namespace MWWorld
 
         void load(const boost::filesystem::path& filepath, int& index)
         {
-            LoadersContainer::iterator it(mLoaders.find(filepath.extension().string()));
+            LoadersContainer::iterator it(mLoaders.find(Misc::StringUtils::lowerCase(filepath.extension().string())));
             if (it != mLoaders.end())
             {
                 it->second->load(filepath, index);
