@@ -116,8 +116,7 @@ void Launcher::DataFilesPage::buildView()
 
 void Launcher::DataFilesPage::removeProfile(const QString &profile)
 {
-    mLauncherSettings.remove(QString("Profiles/") + profile + QString("/game"));
-    mLauncherSettings.remove(QString("Profiles/") + profile + QString("/addon"));
+    mLauncherSettings.remove(QString("Profiles/") + profile);
 }
 
 QAbstractItemModel *Launcher::DataFilesPage::profilesModel() const
