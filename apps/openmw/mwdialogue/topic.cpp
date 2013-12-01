@@ -24,11 +24,7 @@ namespace MWDialogue
         if (entry.mTopic!=mTopic)
             throw std::runtime_error ("topic does not match: " + mTopic);
 
-        for (TEntryIter iter = begin(); iter!=end(); ++iter)
-            if (*iter==entry.mInfoId)
-                return;
-
-        mEntries.push_back (entry.mInfoId);
+        mEntries.push_back (entry); // we want slicing here
     }
 
     std::string Topic::getName() const

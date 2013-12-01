@@ -13,14 +13,14 @@ namespace MWDialogue
     {
         public:
 
-            typedef std::vector<std::string> TEntryContainer;
+            typedef std::vector<Entry> TEntryContainer;
             typedef TEntryContainer::const_iterator TEntryIter;
 
         protected:
 
             std::string mTopic;
             std::string mName;
-            TEntryContainer mEntries; // info-IDs
+            TEntryContainer mEntries;
 
         public:
 

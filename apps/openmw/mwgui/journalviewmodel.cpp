@@ -268,7 +268,7 @@ struct JournalViewModelImpl : JournalViewModel
             {
                 for (MWDialogue::Topic::TEntryIter j = quest->begin (); j != quest->end (); ++j)
                 {
-                    if (i->mInfoId == *j)
+                    if (i->mInfoId == j->mInfoId)
                         visitor (JournalEntryImpl <MWBase::Journal::TEntryIter> (this, i));
                 }
             }
@@ -317,7 +317,7 @@ struct JournalViewModelImpl : JournalViewModel
 
         std::string getText () const
         {
-            return  mTopic.getEntry (*itr).getText();
+            return  itr->getText();
         }
 
         Utf8Span source () const

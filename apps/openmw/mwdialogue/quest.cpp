@@ -82,9 +82,9 @@ namespace MWDialogue
         setIndex (index);
 
         for (TEntryIter iter (mEntries.begin()); iter!=mEntries.end(); ++iter)
-            if (*iter==entry.mInfoId)
+            if (iter->mInfoId==entry.mInfoId)
                 return;
 
-        mEntries.push_back (entry.mInfoId);
+        mEntries.push_back (entry); // we want slicing here
     }
 }
