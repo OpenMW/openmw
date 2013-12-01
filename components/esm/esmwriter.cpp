@@ -88,6 +88,16 @@ namespace ESM
         assert(mRecords.back().size == 0);
     }
 
+    void ESMWriter::startRecord (uint32_t name, uint32_t flags)
+    {
+        std::string type;
+        for (int i=0; i<4; ++i)
+            /// \todo make endianess agnostic
+            type += reinterpret_cast<const char *> (&name)[i];
+
+        startRecord (type, flags);
+    }
+
     void ESMWriter::startSubRecord(const std::string& name)
     {
         writeName(name);
@@ -115,6 +125,16 @@ namespace ESM
 
         mStream->seekp(0, std::ios::end);
 
+    }
+
+    void ESMWriter::endRecord (uint32_t name)
+    {
+        std::string type;
+        for (int i=0; i<4; ++i)
+            /// \todo make endianess agnostic
+            type += reinterpret_cast<const char *> (&name)[i];
+
+        endRecord (type);
     }
 
     void ESMWriter::writeHNString(const std::string& name, const std::string& data)

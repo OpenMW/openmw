@@ -90,8 +90,10 @@ class ESMWriter
         }
 
         void startRecord(const std::string& name, uint32_t flags = 0);
+        void startRecord(uint32_t name, uint32_t flags = 0);
         void startSubRecord(const std::string& name);
         void endRecord(const std::string& name);
+        void endRecord(uint32_t name);
         void writeHString(const std::string& data);
         void writeHCString(const std::string& data);
         void writeName(const std::string& data);

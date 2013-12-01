@@ -136,15 +136,10 @@ namespace CSMWorld
         if (state==CSMWorld::RecordBase::State_Modified ||
             state==CSMWorld::RecordBase::State_ModifiedOnly)
         {
-            std::string type;
-            for (int i=0; i<4; ++i)
-                /// \todo make endianess agnostic (change ESMWriter interface?)
-                type += reinterpret_cast<const char *> (&mContainer.at (index).mModified.sRecordId)[i];
-
-            writer.startRecord (type);
+            writer.startRecord (mContainer.at (index).mModified.sRecordId);
             writer.writeHNCString ("NAME", getId (index));
             mContainer.at (index).mModified.save (writer);
-            writer.endRecord (type);
+            writer.endRecord (mContainer.at (index).mModified.sRecordId);
         }
         else if (state==CSMWorld::RecordBase::State_Deleted)
         {
