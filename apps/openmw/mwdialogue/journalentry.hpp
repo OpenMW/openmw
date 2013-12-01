@@ -3,25 +3,31 @@
 
 #include <string>
 
-namespace MWWorld
-{
-    struct ESMStore;
-}
-
 namespace MWDialogue
 {
-    /// \brief A quest or dialogue entry
-    struct JournalEntry
+    /// \brief Basic quest/dialogue/topic entry
+    struct Entry
     {
-        std::string mTopic;
         std::string mInfoId;
         std::string mText;
+
+        Entry();
+
+        Entry (const std::string& topic, const std::string& infoId);
+
+        std::string getText() const;
+    };
+
+    /// \brief A dialogue entry
+    ///
+    /// Same as entry, but store TopicID
+    struct JournalEntry : public Entry
+    {
+        std::string mTopic;
 
         JournalEntry();
 
         JournalEntry (const std::string& topic, const std::string& infoId);
-
-        std::string getText (const MWWorld::ESMStore& store) const;
 
         static JournalEntry makeFromQuest (const std::string& topic, int index);
 

@@ -233,7 +233,7 @@ struct JournalViewModelImpl : JournalViewModel
 
         std::string getText () const
         {
-            return itr->getText(MWBase::Environment::get().getWorld()->getStore());
+            return itr->getText();
         }
 
         Utf8Span timestamp () const
@@ -317,8 +317,7 @@ struct JournalViewModelImpl : JournalViewModel
 
         std::string getText () const
         {
-            return  mTopic.getEntry (*itr).getText(MWBase::Environment::get().getWorld()->getStore());
-
+            return  mTopic.getEntry (*itr).getText();
         }
 
         Utf8Span source () const
