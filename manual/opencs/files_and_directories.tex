@@ -24,7 +24,7 @@ is not clear, and often confusing. You would expect the ESM (master) file is use
 and indeed: this is the basic idea. However, original expansions also were made as ESM files, even though they essentially could be
 described as a really large plugins, and therefore rather use ESP files. There were technical reasons behind this decision -- somewhat valid
 in the case of original engine, but clearly it's better to create a system that can be used is more sensible way. \OMW{} achieves
-his with our own content file types.
+this with our own content file types.
 
 We support both ESM and ESP files, but in order to make use of new features of OpenMW one should consider using new file types designed
 with our engine in mind: game files and addon files together called ``content files``.
@@ -40,7 +40,7 @@ Other simple thing about content files are extensions. We are using .omwaddon fo
 %TODO describe what content files contains. and what not.
 \subparagraph{\MW{} content files}
 Using our content files is recommended solution for projects that are intended to used with \OMW{} engine. However some players
-wish to use original Morrowind engine, even with it large flaws and lacking features\footnote{If this is actually wrong, we are very
+wish to use original \MW{} engine, even with it large flaws and lacking features\footnote{If this is actually wrong, we are very
 successful project. Yay!}. Also, since 2002 thousands of ESP/ESM files were created, some with really outstanding content.
 Because of this \OCS{} simply has no other choice but support ESP/ESM files. However, if you decided to choose ESP/ESM file instead
 using our own content file types you are most likely aim at the original engine compatibility. This subject is covered in the very
@@ -60,7 +60,7 @@ this section of the manual does not cover creating the content files -- it is on
 keep in mind that dependencies exist, and is up to you what to decide if your content file should depend on other content file.
 
 Game files are not intend to have any dependencies for a very simple reasons: player is using only one game file (excluding original
-and dirty ESP/ESM system) at the time and therefore no game file can depend on other game file, and since game file makes the base
+and dirty {ESP/ESM} system) at the time and therefore no game file can depend on other game file, and since game file makes the base
 for addon files -- it can not depend on addon files.
 
 %\subparagraph{Loading order} %TODO
@@ -93,7 +93,7 @@ OpenMW is using {FFmpeg} for audio playback, and so we support every audio type 
 Below is only small portion of supported file types.
 
 \begin{description}
- \item mp3 (MPEG-1 Part 3 Layer 3) popular audio file format and \textit{de facto} standard for storing audio. Used by the Morrowind game.
+ \item mp3 ({MPEG}-1 {Part 3 Layer 3}) popular audio file format and \textit{de facto} standard for storing audio. Used by the \MW{} game.
  \item ogg open source, multimedia container file using high quality vorbis audio codec. Recommended.
 \end{description}
 
@@ -103,17 +103,18 @@ only the most significant.
 
 \begin{description}
  \item bik videos used by original \MW{} game.
- \item mp4 multimedia container which use more advanced codecs (MPEG-4 Parts 2,3,10) with a better audio and video compression rate,
- but also requiring more {CPU} intensive decoding -- this makes it probably less suited for video games.
+ \item mp4 multimedia container which use more advanced codecs ({MPEG-4 Parts 2,3,10}) with a better audio and video compression rate,
+ but also requiring more {CPU} intensive decoding -- this makes it probably less suited for storing sounds in computer games, but good for videos.
  \item webm is a new, shiny and open source video format with excellent compression. It needs quite a lot of processing power to be decoded,
  but since game logic is not running during cut scenes we can recommended it for use with \OMW.
  \item ogv alternative, open source container using theora codec for video and vorbis for audio.
 \end{description}
 
 \subparagraph{Textures and images}
-Original \MW{} game uses DDS and TGA files for all kind of two dimensional images and textures alike. In addition, engine supported BMP
-files for some reason (BMP is a terrible format for a video game). We also support extended set of image files -- including JPEG and PNG.
+Original \MW{} game uses {DDS} and {TGA} files for all kind of two dimensional images and textures alike. In addition, engine supported BMP
+files for some reason ({BMP} is a terrible format for a video game). We also support extended set of image files -- including {JPEG} and {PNG}.
 JPEG and PNG files can be useful in some cases, for instance JPEG file is a valid option for skybox texture and PNG can useful for masks.
-However please, keep in mind that JPEG can grow into large sizes quickly and are not the best option with DirectX rendering backend.
+However please, keep in mind that JPEG can grow into large sizes quickly and are not the best option with {DirectX} rendering backend. You probabbly still want 
+to use {DDS} files for textures.
 
 %\subparagraph{Meshes} %TODO once we will support something more than just nifs
