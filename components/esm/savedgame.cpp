@@ -9,10 +9,10 @@ unsigned int ESM::SavedGame::sRecordId = ESM::REC_SAVE;
 
 void ESM::SavedGame::load (ESMReader &esm)
 {
-    mPlayerName = esm.getHNString("PNAM");
-    esm.getHNOT (mPlayerLevel, "PLEV");
-    mPlayerClass = esm.getHNString("PCLA");
-    mPlayerCell = esm.getHNString("PCEL");
+    mPlayerName = esm.getHNString("PLNA");
+    esm.getHNOT (mPlayerLevel, "PLLE");
+    mPlayerClass = esm.getHNString("PLCL");
+    mPlayerCell = esm.getHNString("PLCE");
     esm.getHNT (mInGameTime, "TSTM", 16);
     esm.getHNT (mTimePlayed, "TIME");
     mDescription = esm.getHNString ("DESC");
@@ -23,10 +23,10 @@ void ESM::SavedGame::load (ESMReader &esm)
 
 void ESM::SavedGame::save (ESMWriter &esm) const
 {
-    esm.writeHNString ("PNAM", mPlayerName);
-    esm.writeHNT ("PLEV", mPlayerLevel);
-    esm.writeHNString ("PCLA", mPlayerClass);
-    esm.writeHNString ("PCEL", mPlayerCell);
+    esm.writeHNString ("PLNA", mPlayerName);
+    esm.writeHNT ("PLLE", mPlayerLevel);
+    esm.writeHNString ("PLCL", mPlayerClass);
+    esm.writeHNString ("PLCE", mPlayerCell);
     esm.writeHNT ("TSTM", mInGameTime, 16);
     esm.writeHNT ("TIME", mTimePlayed);
     esm.writeHNString ("DESC", mDescription);
