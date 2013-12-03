@@ -878,6 +878,8 @@ void RenderingManager::setMenuTransparency(float val)
 
 void RenderingManager::windowResized(int x, int y)
 {
+    Settings::Manager::setInt("resolution x", "Video", x);
+    Settings::Manager::setInt("resolution y", "Video", y);
     mRendering.adjustViewport();
     mCompositors->recreate();
 
