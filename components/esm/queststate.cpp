@@ -7,13 +7,13 @@
 void ESM::QuestState::load (ESMReader &esm)
 {
     mTopic = esm.getHNString ("YETO");
-    esm.getHNOT (mState, "QSTAT");
+    esm.getHNOT (mState, "QSTA");
     esm.getHNOT (mFinished, "QFIN");
 }
 
 void ESM::QuestState::save (ESMWriter &esm) const
 {
     esm.writeHNString ("YETO", mTopic);
-    esm.writeHNT ("QSTAT", mState);
+    esm.writeHNT ("QSTA", mState);
     esm.writeHNT ("QFIN", mFinished);
 }
