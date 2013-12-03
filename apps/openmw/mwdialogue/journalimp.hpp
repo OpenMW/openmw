@@ -15,7 +15,11 @@ namespace MWDialogue
             TQuestContainer mQuests;
             TTopicContainer mTopics;
 
+        private:
+
             Quest& getQuest (const std::string& id);
+
+            Topic& getTopic (const std::string& id);
 
         public:
 
@@ -55,6 +59,12 @@ namespace MWDialogue
 
             virtual TTopicIter topicEnd() const;
             ///< Iterator pointing past the last topic.
+
+            virtual int countSavedGameRecords() const;
+
+            virtual void write (ESM::ESMWriter& writer) const;
+
+            virtual void readRecord (ESM::ESMReader& reader, int32_t type);
     };
 }
 

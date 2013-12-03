@@ -27,6 +27,16 @@ namespace MWDialogue
         mEntries.push_back (entry); // we want slicing here
     }
 
+    void Topic::insertEntry (const ESM::JournalEntry& entry)
+    {
+        mEntries.push_back (entry);
+    }
+
+    std::string Topic::getTopic() const
+    {
+        return mTopic;
+    }
+
     std::string Topic::getName() const
     {
         return mName;

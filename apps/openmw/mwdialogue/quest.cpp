@@ -1,6 +1,8 @@
 
 #include "quest.hpp"
 
+#include <components/esm/queststate.hpp>
+
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"
@@ -14,6 +16,10 @@ namespace MWDialogue
 
     Quest::Quest (const std::string& topic)
     : Topic (topic), mIndex (0), mFinished (false)
+    {}
+
+    Quest::Quest (const ESM::QuestState& state)
+    : Topic (state.mTopic), mIndex (state.mState), mFinished (state.mFinished!=0)
     {}
 
     std::string Quest::getName() const
@@ -86,5 +92,12 @@ namespace MWDialogue
                 return;
 
         mEntries.push_back (entry); // we want slicing here
+    }
+
+    void Quest::write (ESM::QuestState& state) const
+    {
+        state.mTopic = getTopic();
+        state.mState = mIndex;
+        state.mFinished = mFinished;
     }
 }

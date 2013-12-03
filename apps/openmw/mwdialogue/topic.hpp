@@ -6,6 +6,11 @@
 
 #include "journalentry.hpp"
 
+namespace ESM
+{
+    struct JournalEntry;
+}
+
 namespace MWDialogue
 {
     /// \brief Collection of seen responses for a topic
@@ -35,7 +40,13 @@ namespace MWDialogue
             ///
             /// \note Redundant entries are ignored.
 
-            virtual std::string getName () const;
+            void insertEntry (const ESM::JournalEntry& entry);
+            ///< Add entry without checking for redundant entries or modifying the state of the
+            /// topic otherwise
+
+            std::string getTopic() const;
+
+            virtual std::string getName() const;
 
             TEntryIter begin() const;
             ///< Iterator pointing to the begin of the journal for this topic.

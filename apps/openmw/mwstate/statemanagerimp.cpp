@@ -99,11 +99,17 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
     std::ofstream stream (slot->mPath.string().c_str());
     ESM::ESMWriter writer;
     writer.setFormat (ESM::Header::CurrentFormat);
-    writer.save (stream);
-    writer.startRecord ("SAVE");
-    slot->mProfile.save (writer);
-    writer.endRecord ("SAVE");
+    writer.setRecordCount (
+        1+ // saved game header
+        MWBase::Environment::get().getJournal()->countSavedGameRecords());
 
+    writer.save (stream);
+
+    writer.startRecord (ESM::REC_SAVE);
+    slot->mProfile.save (writer);
+    writer.endRecord (ESM::REC_SAVE);
+
+    MWBase::Environment::get().getJournal()->write (writer);
     /// \todo write saved game data
 
     writer.close();
@@ -121,10 +127,32 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
     ESM::ESMReader reader;
     reader.open (slot->mPath.string());
 
-    reader.getRecName(); // don't need to read that here
-    reader.getRecHeader();
+    while (reader.hasMoreRecs())
+    {
+        ESM::NAME n = reader.getRecName();
+        reader.getRecHeader();
 
-    /// \todo read saved game data
+        switch (n.val)
+        {
+            case ESM::REC_SAVE:
+
+                // don't need to read that here
+                reader.skipRecord();
+                break;
+
+            case ESM::REC_JOUR:
+            case ESM::REC_QUES:
+
+                MWBase::Environment::get().getJournal()->readRecord (reader, n.val);
+                break;
+
+            default:
+
+                // ignore invalid records
+                /// \todo log error
+                reader.skipRecord();
+        }
+    }
 
     mCharacterManager.setCurrentCharacter(character);
 

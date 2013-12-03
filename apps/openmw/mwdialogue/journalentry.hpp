@@ -3,6 +3,11 @@
 
 #include <string>
 
+namespace ESM
+{
+    struct JournalEntry;
+}
+
 namespace MWDialogue
 {
     /// \brief Basic quest/dialogue/topic entry
@@ -15,7 +20,11 @@ namespace MWDialogue
 
         Entry (const std::string& topic, const std::string& infoId);
 
+        Entry (const ESM::JournalEntry& record);
+
         std::string getText() const;
+
+        void write (ESM::JournalEntry& entry) const;
     };
 
     /// \brief A dialogue entry
@@ -28,6 +37,10 @@ namespace MWDialogue
         JournalEntry();
 
         JournalEntry (const std::string& topic, const std::string& infoId);
+
+        JournalEntry (const ESM::JournalEntry& record);
+
+        void write (ESM::JournalEntry& entry) const;
 
         static JournalEntry makeFromQuest (const std::string& topic, int index);
 
@@ -45,6 +58,10 @@ namespace MWDialogue
 
         StampedJournalEntry (const std::string& topic, const std::string& infoId,
             int day, int month, int dayOfMonth);
+
+        StampedJournalEntry (const ESM::JournalEntry& record);
+
+        void write (ESM::JournalEntry& entry) const;
 
         static StampedJournalEntry makeFromQuest (const std::string& topic, int index);
     };

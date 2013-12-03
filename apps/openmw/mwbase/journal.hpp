@@ -5,9 +5,17 @@
 #include <deque>
 #include <map>
 
+#include <libs/platform/stdint.h>
+
 #include "../mwdialogue/journalentry.hpp"
 #include "../mwdialogue/topic.hpp"
 #include "../mwdialogue/quest.hpp"
+
+namespace ESM
+{
+    class ESMReader;
+    class ESMWriter;
+}
 
 namespace MWBase
 {
@@ -69,6 +77,12 @@ namespace MWBase
 
             virtual TTopicIter topicEnd() const = 0;
             ///< Iterator pointing past the last topic.
+
+            virtual int countSavedGameRecords() const = 0;
+
+            virtual void write (ESM::ESMWriter& writer) const = 0;
+
+            virtual void readRecord (ESM::ESMReader& reader, int32_t type) = 0;
     };
 }
 

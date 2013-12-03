@@ -3,6 +3,11 @@
 
 #include "topic.hpp"
 
+namespace ESM
+{
+    struct QuestState;
+}
+
 namespace MWDialogue
 {
     /// \brief A quest in progress or a completed quest
@@ -16,6 +21,8 @@ namespace MWDialogue
             Quest();
 
             Quest (const std::string& topic);
+
+            Quest (const ESM::QuestState& state);
 
             virtual std::string getName() const;
             ///< May be an empty string
@@ -31,6 +38,8 @@ namespace MWDialogue
             ///< Add entry and adjust index accordingly.
             ///
             /// \note Redundant entries are ignored, but the index is still adjusted.
+
+            void write (ESM::QuestState& state) const;
     };
 }
 
