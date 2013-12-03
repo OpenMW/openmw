@@ -102,7 +102,7 @@ you want to see, while the second one sets desired value inside of the cell. To 
 String in programmers language is often\footnote{Often, not always. There are different programming languages using slightly different terms.}
 just a word for anything composed of characters. In case of \OCS{} this is in fact true for every value inside the column that is not composed
 of the pure numbers. Even columns containing only ``true`` and ``false`` values can be targeted by the string expression\footnote{There is no
-Boolean (''true'' or ``false'') value in the \OCS. You should use string for those.}. String evaluates to true, 
+Boolean (``true'' or ``false'') value in the \OCS. You should use string for those.}. String evaluates to true, 
 when record contains in the specified column exactly the same value as specified.
 
 Since majority of the columns contain string values, string is among the most often used expressions. Examples:
@@ -157,7 +157,7 @@ As you would imagine the range can be specified as including a border value, or 
  The same expression will evaluate to false for value equal 10.
 \end{itemize}
 
-\paragraph{''true`` and ''false``}
+\paragraph{``true'' and ``false''}
 Nullary \textit{true} and \textit{false} do not accept any arguments, and always evaluates to true (in case of \textit{true})
 and false (in case of \textit{false})  no matter what. The main usage of this expressions is the give users ability to quickly
 disable some part of the filter that makes heavy use of the logical expressions. 
@@ -184,10 +184,10 @@ This is probably not the most useful filter on earth, but this is not a surprise
 \mono{or(string(``record type'', npc), string(``record type'', creature))} and will show both npcs and creatures.
 
 \paragraph{and -- and(expression1(), expression2())}
-\textit{And} is a expression that will return true if all arguments evaluates to true. As in the case of ''or`` you can use two or more arguments,
+\textit{And} is a expression that will return true if all arguments evaluates to true. As in the case of ``or'' you can use two or more arguments,
 separated by a comma.
 As we mentioned earlier in the \textit{not} filter, combining \textit{not} with \textit{and} can be very useful. For instance to show all armor types,
-excluding gauntlets you can write the following: \mono{and (not string("armor type", ".* gauntlet"), string(''Record Type``, ''Armor``))}.
+excluding gauntlets you can write the following: \mono{and (not string(``armor type'', ``.* gauntlet''), string(``Record Type'', ``Armor''))}.
 
 \subsubsection{Creating and saving filter}
 In order to create and save new filter, you should go to the filters table, right click and select option ``add record'' from the context menu.
