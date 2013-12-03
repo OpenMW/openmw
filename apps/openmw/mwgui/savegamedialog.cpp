@@ -63,7 +63,7 @@ namespace MWGui
                 mCharacterSelection->addItem (title.str());
 
                 if (mCurrentCharacter == &*it ||
-                    (!mCurrentCharacter && directory==Misc::StringUtils::lowerCase (
+                    (!mCurrentCharacter && !mSaving && directory==Misc::StringUtils::lowerCase (
                     it->begin()->mPath.parent_path().filename().string())))
                 {
                     mCurrentCharacter = &*it;
