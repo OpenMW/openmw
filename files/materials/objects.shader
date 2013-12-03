@@ -350,7 +350,8 @@
         float depthPassthrough = objSpacePositionPassthrough.w;
 #endif
 
-        shOutputColour(0) = shSample(diffuseMap, UV.xy);
+        float4 diffuse = shSample(diffuseMap, UV.xy);
+        shOutputColour(0) = diffuse;
 
 #if DETAIL_MAP
 #if @shPropertyString(detailMapUVSet)
@@ -483,7 +484,7 @@
         float3 halfVec = normalize (light0Dir + eyeDir);
 
         float3 specular = pow(max(dot(normal, halfVec), 0), matShininess) * lightSpec0 * matSpec;
-        shOutputColour(0).xyz += specular * shadow;
+        shOutputColour(0).xyz += specular * shadow * diffuse.a;
 #endif
 
 #if FOG
