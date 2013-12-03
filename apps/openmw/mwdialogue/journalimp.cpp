@@ -48,6 +48,22 @@ namespace MWDialogue
         return iter->second;
     }
 
+    bool Journal::isThere (const std::string& topicId, const std::string& infoId) const
+    {
+        if (const ESM::Dialogue *dialogue =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().search (topicId))
+        {
+            if (infoId.empty())
+                return true;
+
+            for (std::vector<ESM::DialInfo>::const_iterator iter (dialogue->mInfo.begin());
+                iter!=dialogue->mInfo.end(); ++iter)
+                if (iter->mId == infoId)
+                    return true;
+        }
+
+        return false;
+    }
 
     Journal::Journal()
     {}
@@ -207,30 +223,32 @@ namespace MWDialogue
             ESM::JournalEntry record;
             record.load (reader);
 
-            switch (record.mType)
-            {
-                case ESM::JournalEntry::Type_Quest:
+            if (isThere (record.mTopic, record.mInfo))
+                switch (record.mType)
+                {
+                    case ESM::JournalEntry::Type_Quest:
 
-                    getQuest (record.mTopic).insertEntry (record);
-                    break;
+                        getQuest (record.mTopic).insertEntry (record);
+                        break;
 
-                case ESM::JournalEntry::Type_Journal:
+                    case ESM::JournalEntry::Type_Journal:
 
-                    mJournal.push_back (record);
-                    break;
+                        mJournal.push_back (record);
+                        break;
 
-                case ESM::JournalEntry::Type_Topic:
+                    case ESM::JournalEntry::Type_Topic:
 
-                    getTopic (record.mTopic).insertEntry (record);
-                    break;
-            }
+                        getTopic (record.mTopic).insertEntry (record);
+                        break;
+                }
         }
         else if (type==ESM::REC_QUES)
         {
             ESM::QuestState record;
             record.load (reader);
 
-            mQuests.insert (std::make_pair (record.mTopic, record));
+            if (isThere (record.mTopic))
+                mQuests.insert (std::make_pair (record.mTopic, record));
         }
     }
 }

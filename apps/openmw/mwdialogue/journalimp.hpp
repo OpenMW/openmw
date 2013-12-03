@@ -21,6 +21,8 @@ namespace MWDialogue
 
             Topic& getTopic (const std::string& id);
 
+            bool isThere (const std::string& topicId, const std::string& infoId = "") const;
+
         public:
 
             Journal();
