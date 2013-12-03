@@ -1,7 +1,7 @@
 material openmw_objects_base
 {
     diffuse 1.0 1.0 1.0 1.0
-    specular 0 0 0 0
+    specular 0 0 0 0 1
     ambient 1.0 1.0 1.0
     emissive 0.0 0.0 0.0
     vertmode 0

@@ -32,6 +32,10 @@
 
 #define ENV_MAP @shPropertyBool(env_map)
 
+#define SPECULAR 1
+
+#define NEED_NORMAL (!VERTEX_LIGHTING || ENV_MAP) || SPECULAR
+
 #ifdef SH_VERTEX_SHADER
 
     // ------------------------------------- VERTEX ---------------------------------------
@@ -63,15 +67,12 @@
         shOutput(float3, tangentPassthrough)
 #endif
 
-#if !VERTEX_LIGHTING || ENV_MAP
+#if NEED_NORMAL
         shOutput(float3, normalPassthrough)
 #endif
 
-#ifdef NEED_DEPTH
-        shOutput(float, depthPassthrough)
-#endif
-
-        shOutput(float3, objSpacePositionPassthrough)
+    // Depth in w
+        shOutput(float4, objSpacePositionPassthrough)
 
 #if VERTEXCOLOR_MODE != 0
         shColourInput(float4)
@@ -146,7 +147,7 @@
 #if NORMAL_MAP
         tangentPassthrough = tangent.xyz;
 #endif
-#if !VERTEX_LIGHTING || ENV_MAP
+#if NEED_NORMAL
         normalPassthrough = normal.xyz;
 #endif
 #if VERTEXCOLOR_MODE != 0 && !VERTEX_LIGHTING
@@ -169,14 +170,14 @@
 
         float4x4 fixedWVP = shMatrixMult(vpFixed, worldMatrix);
 
-        depthPassthrough = shMatrixMult(fixedWVP, shInputPosition).z;
+        objSpacePositionPassthrough.w = shMatrixMult(fixedWVP, shInputPosition).z;
 #else
-        depthPassthrough = shOutputPosition.z;
+        objSpacePositionPassthrough.w = shOutputPosition.z;
 #endif
 
 #endif
 
-        objSpacePositionPassthrough = shInputPosition.xyz;
+        objSpacePositionPassthrough.xyz = shInputPosition.xyz;
 
 #if SHADOWS
         lightSpacePos0 = shMatrixMult(texViewProjMatrix0, shMatrixMult(worldMatrix, shInputPosition));
@@ -262,7 +263,16 @@
 #if ENV_MAP
         shSampler2D(envMap)
         shUniform(float3, env_map_color) @shUniformProperty3f(env_map_color, env_map_color)
-        shUniform(float3, cameraPosObjSpace) @shAutoConstant(cameraPosObjSpace, camera_position_object_space)
+#endif
+
+#if ENV_MAP || SPECULAR
+    shUniform(float3, cameraPosObjSpace) @shAutoConstant(cameraPosObjSpace, camera_position_object_space)
+#endif
+#if SPECULAR
+    shUniform(float3, lightSpec0) @shAutoConstant(lightSpec0, light_specular_colour, 0)
+    shUniform(float3, lightPosObjSpace0) @shAutoConstant(lightPosObjSpace0, light_position_object_space, 0)
+    shUniform(float, matShininess) @shAutoConstant(matShininess, surface_shininess)
+    shUniform(float3, matSpec) @shAutoConstant(matSpec, surface_specular_colour)
 #endif
 
         shInput(float4, UV)
@@ -270,15 +280,11 @@
 #if NORMAL_MAP
         shInput(float3, tangentPassthrough)
 #endif
-#if !VERTEX_LIGHTING || ENV_MAP
+#if NEED_NORMAL
         shInput(float3, normalPassthrough)
 #endif
 
-#ifdef NEED_DEPTH
-        shInput(float, depthPassthrough)
-#endif
-
-        shInput(float3, objSpacePositionPassthrough)
+        shInput(float4, objSpacePositionPassthrough)
 
 #if VERTEXCOLOR_MODE != 0 && !VERTEX_LIGHTING
         shInput(float4, colourPassthrough)
@@ -340,6 +346,10 @@
 
     SH_START_PROGRAM
     {
+#ifdef NEED_DEPTH
+        float depthPassthrough = objSpacePositionPassthrough.w;
+#endif
+
         shOutputColour(0) = shSample(diffuseMap, UV.xy);
 
 #if DETAIL_MAP
@@ -350,7 +360,7 @@
 #endif
 #endif
 
-#if !VERTEX_LIGHTING || ENV_MAP
+#if NEED_NORMAL
         float3 normal = normalPassthrough;
 #endif
 
@@ -368,7 +378,7 @@
 #endif
 
 #if !VERTEX_LIGHTING
-        float3 viewPos = shMatrixMult(worldView, float4(objSpacePositionPassthrough,1)).xyz;
+        float3 viewPos = shMatrixMult(worldView, float4(objSpacePositionPassthrough.xyz,1)).xyz;
         float3 viewNormal = normalize(shMatrixMult(worldView, float4(normal.xyz, 0)).xyz);
 
         float3 lightDir;
@@ -433,7 +443,7 @@
 
 
 #if (UNDERWATER) || (FOG)
-    float3 worldPos = shMatrixMult(worldMatrix, float4(objSpacePositionPassthrough,1)).xyz;
+    float3 worldPos = shMatrixMult(worldMatrix, float4(objSpacePositionPassthrough.xyz,1)).xyz;
 #endif
 
 #if UNDERWATER
@@ -454,13 +464,26 @@
         #endif
 #endif
 
+#if ENV_MAP || SPECULAR
+        float3 eyeDir = normalize(cameraPosObjSpace.xyz - objSpacePositionPassthrough.xyz);
+#endif
+
 #if ENV_MAP
         // Everything looks better with fresnel
-        float3 eyeDir = normalize(cameraPosObjSpace.xyz - objSpacePositionPassthrough.xyz);
         float facing = 1.0 - max(abs(dot(-eyeDir, normal)), 0);
         float envFactor = shSaturate(0.25 + 0.75 * pow(facing, 1));
 
         shOutputColour(0).xyz += shSample(envMap, UV.zw).xyz * envFactor * env_map_color;
+#endif
+
+#if SPECULAR
+        float3 light0Dir = normalize(lightPosObjSpace0.xyz);
+
+        float NdotL = max(dot(normal, light0Dir), 0);
+        float3 halfVec = normalize (light0Dir + eyeDir);
+
+        float3 specular = pow(max(dot(normal, halfVec), 0), matShininess) * lightSpec0 * matSpec;
+        shOutputColour(0).xyz += specular * shadow;
 #endif
 
 #if FOG
