@@ -37,10 +37,6 @@ namespace MWGui
         , mPreviewDirty(true)
         , mDragAndDrop(dragAndDrop)
         , mSelectedItem(-1)
-        , mPositionInventory(0, 342, 498, 258)
-        , mPositionContainer(0, 342, 498, 258)
-        , mPositionCompanion(0, 342, 498, 258)
-        , mPositionBarter(0, 342, 498, 258)
         , mGuiMode(GM_Inventory)
     {
         static_cast<MyGUI::Window*>(mMainWidget)->eventWindowChangeCoord += MyGUI::newDelegate(this, &InventoryWindow::onWindowResize);
@@ -71,8 +67,19 @@ namespace MWGui
 
         mFilterAll->setStateSelected(true);
 
-        setCoord(mPositionInventory.left, mPositionInventory.top, mPositionInventory.width, mPositionInventory.height);
-        onWindowResize(static_cast<MyGUI::Window*>(mMainWidget));
+        setGuiMode(mGuiMode);
+
+        adjustPanes();
+    }
+
+    void InventoryWindow::adjustPanes()
+    {
+        const float aspect = 0.5; // fixed aspect ratio for the left pane
+        mLeftPane->setSize( (mMainWidget->getSize().height-44) * aspect, mMainWidget->getSize().height-44 );
+        mRightPane->setCoord( mLeftPane->getPosition().left + (mMainWidget->getSize().height-44) * aspect + 4,
+                              mRightPane->getPosition().top,
+                              mMainWidget->getSize().width - 12 - (mMainWidget->getSize().height-44) * aspect - 15,
+                              mMainWidget->getSize().height-44 );
     }
 
     void InventoryWindow::updatePlayer()
@@ -87,27 +94,36 @@ namespace MWGui
 
     void InventoryWindow::setGuiMode(GuiMode mode)
     {
+        std::string setting = "inventory";
         mGuiMode = mode;
         switch(mode) {
             case GM_Container:
                 setPinButtonVisible(false);
-                mMainWidget->setCoord(mPositionContainer);
+                setting += " container";
                 break;
             case GM_Companion:
                 setPinButtonVisible(false);
-                mMainWidget->setCoord(mPositionCompanion);
+                setting += " companion";
                 break;
             case GM_Barter:
                 setPinButtonVisible(false);
-                mMainWidget->setCoord(mPositionBarter);
+                setting += " barter";
                 break;
             case GM_Inventory:
             default:
                 setPinButtonVisible(true);
-                mMainWidget->setCoord(mPositionInventory);
                 break;
         }
-        onWindowResize(static_cast<MyGUI::Window*>(mMainWidget));
+
+        MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+        MyGUI::IntPoint pos (Settings::Manager::getFloat(setting + " x", "Windows") * viewSize.width,
+                             Settings::Manager::getFloat(setting + " y", "Windows") * viewSize.height);
+        MyGUI::IntSize size (Settings::Manager::getFloat(setting + " w", "Windows") * viewSize.width,
+                             Settings::Manager::getFloat(setting + " h", "Windows") * viewSize.height);
+        mMainWidget->setPosition(pos);
+        mMainWidget->setSize(size);
+        adjustPanes();
+        mPreviewDirty = true;
     }
 
     TradeItemModel* InventoryWindow::getTradeModel()
@@ -256,31 +272,36 @@ namespace MWGui
         mItemView->update();
 
         notifyContentChanged();
+        adjustPanes();
     }
 
     void InventoryWindow::onWindowResize(MyGUI::Window* _sender)
     {
-        const float aspect = 0.5; // fixed aspect ratio for the left pane
-        mLeftPane->setSize( (_sender->getSize().height-44) * aspect, _sender->getSize().height-44 );
-        mRightPane->setCoord( mLeftPane->getPosition().left + (_sender->getSize().height-44) * aspect + 4,
-                              mRightPane->getPosition().top,
-                              _sender->getSize().width - 12 - (_sender->getSize().height-44) * aspect - 15,
-                              _sender->getSize().height-44 );
-
+        adjustPanes();
+        std::string setting = "inventory";
         switch(mGuiMode) {
             case GM_Container:
-                mPositionContainer = _sender->getCoord();
+                setting += " container";
                 break;
             case GM_Companion:
-                mPositionCompanion = _sender->getCoord();
+                setting += " companion";
                 break;
             case GM_Barter:
-                mPositionBarter = _sender->getCoord();
+                setting += " barter";
                 break;
-            case GM_Inventory:
             default:
-                mPositionInventory = _sender->getCoord();
+                break;
         }
+
+        MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+        float x = _sender->getPosition().left / float(viewSize.width);
+        float y = _sender->getPosition().top / float(viewSize.height);
+        float w = _sender->getSize().width / float(viewSize.width);
+        float h = _sender->getSize().height / float(viewSize.height);
+        Settings::Manager::setFloat(setting + " x", "Windows", x);
+        Settings::Manager::setFloat(setting + " y", "Windows", y);
+        Settings::Manager::setFloat(setting + " w", "Windows", w);
+        Settings::Manager::setFloat(setting + " h", "Windows", h);
 
         if (mMainWidget->getSize().width != mLastXSize || mMainWidget->getSize().height != mLastYSize)
         {

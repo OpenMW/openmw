@@ -203,16 +203,22 @@ namespace MWGui
         mRecharge = new Recharge();
         mMenu = new MainMenu(w,h);
         mMap = new MapWindow("");
+        trackWindow(mMap, "map");
         mStatsWindow = new StatsWindow();
+        trackWindow(mStatsWindow, "stats");
         mConsole = new Console(w,h, mConsoleOnlyScripts);
+        trackWindow(mConsole, "console");
         mJournal = JournalWindow::create(JournalViewModel::create ());
         mMessageBoxManager = new MessageBoxManager();
         mInventoryWindow = new InventoryWindow(mDragAndDrop);
         mTradeWindow = new TradeWindow();
+        trackWindow(mTradeWindow, "barter");
         mSpellBuyingWindow = new SpellBuyingWindow();
         mTravelWindow = new TravelWindow();
         mDialogueWindow = new DialogueWindow();
+        trackWindow(mDialogueWindow, "dialogue");
         mContainerWindow = new ContainerWindow(mDragAndDrop);
+        trackWindow(mContainerWindow, "container");
         mHud = new HUD(w,h, mShowFPSLevel, mDragAndDrop);
         mToolTips = new ToolTips();
         mScrollWindow = new ScrollWindow();
@@ -221,7 +227,9 @@ namespace MWGui
         mSettingsWindow = new SettingsWindow();
         mConfirmationDialog = new ConfirmationDialog();
         mAlchemyWindow = new AlchemyWindow();
+        trackWindow(mAlchemyWindow, "alchemy");
         mSpellWindow = new SpellWindow();
+        trackWindow(mSpellWindow, "spells");
         mQuickKeysMenu = new QuickKeysMenu();
         mLevelupDialog = new LevelupDialog();
         mWaitDialog = new WaitDialog();
@@ -232,6 +240,7 @@ namespace MWGui
         mRepair = new Repair();
         mSoulgemDialog = new SoulgemDialog(mMessageBoxManager);
         mCompanionWindow = new CompanionWindow(mDragAndDrop, mMessageBoxManager);
+        trackWindow(mCompanionWindow, "companion");
 
         mInputBlocker = mGui->createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Default,"Windows","");
 
@@ -926,6 +935,17 @@ namespace MWGui
         mLoadingScreen->onResChange (x,y);
         if (!mHud)
             return; // UI not initialized yet
+
+        for (std::map<MyGUI::Window*, std::string>::iterator it = mTrackedWindows.begin(); it != mTrackedWindows.end(); ++it)
+        {
+            MyGUI::IntPoint pos (Settings::Manager::getFloat(it->second + " x", "Windows") * x,
+                                 Settings::Manager::getFloat(it->second+ " y", "Windows") * y);
+            MyGUI::IntSize size (Settings::Manager::getFloat(it->second + " w", "Windows") * x,
+                                 Settings::Manager::getFloat(it->second + " h", "Windows") * y);
+            it->first->setPosition(pos);
+            it->first->setSize(size);
+        }
+
         mHud->onResChange(x, y);
         mConsole->onResChange(x, y);
         mMenu->onResChange(x, y);
@@ -1362,6 +1382,37 @@ namespace MWGui
     bool WindowManager::getCursorVisible()
     {
         return mCursorVisible;
+    }
+
+    void WindowManager::trackWindow(OEngine::GUI::Layout *layout, const std::string &name)
+    {
+        MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+        MyGUI::IntPoint pos (Settings::Manager::getFloat(name + " x", "Windows") * viewSize.width,
+                             Settings::Manager::getFloat(name + " y", "Windows") * viewSize.height);
+        MyGUI::IntSize size (Settings::Manager::getFloat(name + " w", "Windows") * viewSize.width,
+                             Settings::Manager::getFloat(name + " h", "Windows") * viewSize.height);
+        layout->mMainWidget->setPosition(pos);
+        layout->mMainWidget->setSize(size);
+
+        MyGUI::Window* window = dynamic_cast<MyGUI::Window*>(layout->mMainWidget);
+        if (!window)
+            throw std::runtime_error("Attempting to track size of a non-resizable window");
+        window->eventWindowChangeCoord += MyGUI::newDelegate(this, &WindowManager::onWindowChangeCoord);
+        mTrackedWindows[window] = name;
+    }
+
+    void WindowManager::onWindowChangeCoord(MyGUI::Window *_sender)
+    {
+        std::string setting = mTrackedWindows[_sender];
+        MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+        float x = _sender->getPosition().left / float(viewSize.width);
+        float y = _sender->getPosition().top / float(viewSize.height);
+        float w = _sender->getSize().width / float(viewSize.width);
+        float h = _sender->getSize().height / float(viewSize.height);
+        Settings::Manager::setFloat(setting + " x", "Windows", x);
+        Settings::Manager::setFloat(setting + " y", "Windows", y);
+        Settings::Manager::setFloat(setting + " w", "Windows", w);
+        Settings::Manager::setFloat(setting + " h", "Windows", h);
     }
 
 }

@@ -154,10 +154,6 @@ namespace MWGui
         size.width = mFixedWidth;
         size.height = 100; // dummy
 
-        MyGUI::IntCoord coord;
-        coord.left = 10; // dummy
-        coord.top = 10; // dummy
-
         mMessageWidget->setSize(size);
 
         MyGUI::IntSize textSize = mMessageWidget->getTextSize();
