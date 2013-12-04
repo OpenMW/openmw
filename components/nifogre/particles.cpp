@@ -27,6 +27,7 @@ public:
         Ogre::String doGet(const void *target) const
         {
             assert(false && "Unimplemented");
+            return "";
         }
         void doSet(void *target, const Ogre::String &val)
         {
@@ -41,6 +42,7 @@ public:
         Ogre::String doGet(const void *target) const
         {
 			assert(false && "Unimplemented");
+            return "";
         }
         void doSet(void *target, const Ogre::String &val)
         {
@@ -563,6 +565,7 @@ public:
         Ogre::String doGet(const void *target) const
         {
             assert(false && "Unimplemented");
+            return "";
         }
         void doSet(void *target, const Ogre::String &val)
         {
@@ -577,6 +580,7 @@ public:
         Ogre::String doGet(const void *target) const
         {
             assert(false && "Unimplemented");
+            return "";
         }
         void doSet(void *target, const Ogre::String &val)
         {
