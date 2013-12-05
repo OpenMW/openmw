@@ -302,7 +302,7 @@ namespace MWMechanics
         }
     }
 
-    void Actors::dropActors (const MWWorld::Ptr::CellStore *cellStore)
+    void Actors::dropActors (const MWWorld::CellStore *cellStore)
     {
         PtrControllerMap::iterator iter = mActors.begin();
         while(iter != mActors.end())

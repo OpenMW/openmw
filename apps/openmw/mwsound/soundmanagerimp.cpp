@@ -399,7 +399,7 @@ namespace MWSound
         }
     }
 
-    void SoundManager::stopSound(const MWWorld::Ptr::CellStore *cell)
+    void SoundManager::stopSound(const MWWorld::CellStore *cell)
     {
         SoundMap::iterator snditer = mActiveSounds.begin();
         while(snditer != mActiveSounds.end())
@@ -595,7 +595,7 @@ namespace MWSound
                         soundDuration=snditer->first->mFadeOutTime;
                     snditer->first->setVolume(snditer->first->mVolume
                                     - soundDuration / snditer->first->mFadeOutTime * snditer->first->mVolume);
-                    snditer->first->mFadeOutTime -= soundDuration;               
+                    snditer->first->mFadeOutTime -= soundDuration;
                 }
                 snditer->first->update();
                 ++snditer;

@@ -48,30 +48,6 @@ using namespace Ogre;
 
 namespace
 {
-/*  // NOTE this code is never instantiated (proper copy in localscripts.cpp),
-    //      so this commented out to not produce syntactic errors
-
-    template<typename T>
-    void listCellScripts (const MWWorld::ESMStore& store,
-        MWWorld::CellRefList<T>& cellRefList, MWWorld::LocalScripts& localScripts,
-        MWWorld::Ptr::CellStore *cell)
-    {
-        for (typename MWWorld::CellRefList<T>::List::iterator iter (
-            cellRefList.mList.begin());
-            iter!=cellRefList.mList.end(); ++iter)
-        {
-            if (!iter->mBase->mScript.empty() && iter->mData.getCount())
-            {
-                if (const ESM::Script *script = store.get<ESM::Script>().find (iter->mBase->mScript))
-                {
-                    iter->mData.setLocals (*script);
-
-                    localScripts.add (iter->mBase->mScript, MWWorld::Ptr (&*iter, cell));
-                }
-            }
-        }
-    }
-*/
     template<typename T>
     MWWorld::LiveCellRef<T> *searchViaHandle (const std::string& handle,
         MWWorld::CellRefList<T>& refList)
@@ -125,7 +101,7 @@ namespace MWWorld
           LoadersContainer mLoaders;
     };
 
-    Ptr World::getPtrViaHandle (const std::string& handle, Ptr::CellStore& cell)
+    Ptr World::getPtrViaHandle (const std::string& handle, CellStore& cell)
     {
         if (MWWorld::LiveCellRef<ESM::Activator> *ref =
             searchViaHandle (handle, cell.mActivators))
@@ -388,12 +364,12 @@ namespace MWWorld
         return &mFallback;
     }
 
-    Ptr::CellStore *World::getExterior (int x, int y)
+    CellStore *World::getExterior (int x, int y)
     {
         return mCells.getExterior (x, y);
     }
 
-    Ptr::CellStore *World::getInterior (const std::string& name)
+    CellStore *World::getInterior (const std::string& name)
     {
         return mCells.getInterior (name);
     }
@@ -504,7 +480,7 @@ namespace MWWorld
         for (Scene::CellStoreCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
             iter!=mWorldScene->getActiveCells().end(); ++iter)
         {
-            Ptr::CellStore* cellstore = *iter;
+            CellStore* cellstore = *iter;
             Ptr ptr = mCells.getPtr (name, *cellstore, true);
 
             if (!ptr.isEmpty())
@@ -537,7 +513,7 @@ namespace MWWorld
         for (Scene::CellStoreCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
             iter!=mWorldScene->getActiveCells().end(); ++iter)
         {
-            Ptr::CellStore* cellstore = *iter;
+            CellStore* cellstore = *iter;
             Ptr ptr = getPtrViaHandle (handle, *cellstore);
 
             if (!ptr.isEmpty())
@@ -547,7 +523,7 @@ namespace MWWorld
         return MWWorld::Ptr();
     }
 
-    void World::addContainerScripts(const Ptr& reference, Ptr::CellStore * cell)
+    void World::addContainerScripts(const Ptr& reference, CellStore * cell)
     {
         if( reference.getTypeName()==typeid (ESM::Container).name() ||
             reference.getTypeName()==typeid (ESM::NPC).name() ||
@@ -1400,7 +1376,7 @@ namespace MWWorld
 
     bool World::isCellExterior() const
     {
-        Ptr::CellStore *currentCell = mWorldScene->getCurrentCell();
+        CellStore *currentCell = mWorldScene->getCurrentCell();
         if (currentCell)
         {
             return currentCell->mCell->isExterior();
@@ -1410,7 +1386,7 @@ namespace MWWorld
 
     bool World::isCellQuasiExterior() const
     {
-        Ptr::CellStore *currentCell = mWorldScene->getCurrentCell();
+        CellStore *currentCell = mWorldScene->getCurrentCell();
         if (currentCell)
         {
             if (!(currentCell->mCell->mData.mFlags & ESM::Cell::QuasiEx))
@@ -1587,7 +1563,7 @@ namespace MWWorld
 
     void World::dropObjectOnGround (const Ptr& actor, const Ptr& object, int amount)
     {
-        MWWorld::Ptr::CellStore* cell = actor.getCell();
+        MWWorld::CellStore* cell = actor.getCell();
 
         ESM::Position pos =
             actor.getRefData().getPosition();
@@ -1684,7 +1660,7 @@ namespace MWWorld
     }
 
     bool
-    World::isUnderwater(const MWWorld::Ptr::CellStore* cell, const Ogre::Vector3 &pos) const
+    World::isUnderwater(const MWWorld::CellStore* cell, const Ogre::Vector3 &pos) const
     {
         if (!(cell->mCell->mData.mFlags & ESM::Cell::HasWater)) {
             return false;
@@ -1704,9 +1680,9 @@ namespace MWWorld
         return mRendering->vanityRotateCamera(rot);
     }
 
-    void World::setCameraDistance(float dist, bool adjust, bool override)
+    void World::setCameraDistance(float dist, bool adjust, bool override_)
     {
-        return mRendering->setCameraDistance(dist, adjust, override);;
+        return mRendering->setCameraDistance(dist, adjust, override_);
     }
 
     void World::setupPlayer()
@@ -1734,7 +1710,7 @@ namespace MWWorld
 
     int World::canRest ()
     {
-        Ptr::CellStore *currentCell = mWorldScene->getCurrentCell();
+        CellStore *currentCell = mWorldScene->getCurrentCell();
 
         Ptr player = mPlayer->getPlayer();
         RefData &refdata = player.getRefData();

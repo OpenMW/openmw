@@ -79,7 +79,7 @@ std::string LocalMap::coordStr(const int x, const int y)
     return StringConverter::toString(x) + "_" + StringConverter::toString(y);
 }
 
-void LocalMap::saveFogOfWar(MWWorld::Ptr::CellStore* cell)
+void LocalMap::saveFogOfWar(MWWorld::CellStore* cell)
 {
     if (!mInterior)
     {
@@ -108,7 +108,7 @@ void LocalMap::saveFogOfWar(MWWorld::Ptr::CellStore* cell)
     }
 }
 
-void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell, float zMin, float zMax)
+void LocalMap::requestMap(MWWorld::CellStore* cell, float zMin, float zMax)
 {
     mInterior = false;
 
@@ -125,7 +125,7 @@ void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell, float zMin, float zMax)
     render((x+0.5)*sSize, (y+0.5)*sSize, zMin, zMax, sSize, sSize, name);
 }
 
-void LocalMap::requestMap(MWWorld::Ptr::CellStore* cell,
+void LocalMap::requestMap(MWWorld::CellStore* cell,
                             AxisAlignedBox bounds)
 {
     // if we're in an empty cell, don't bother rendering anything

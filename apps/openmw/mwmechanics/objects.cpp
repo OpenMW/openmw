@@ -45,7 +45,7 @@ void Objects::updateObject(const MWWorld::Ptr &old, const MWWorld::Ptr &ptr)
     }
 }
 
-void Objects::dropObjects (const MWWorld::Ptr::CellStore *cellStore)
+void Objects::dropObjects (const MWWorld::CellStore *cellStore)
 {
     PtrControllerMap::iterator iter = mObjects.begin();
     while(iter != mObjects.end())

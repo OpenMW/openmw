@@ -172,7 +172,7 @@ bool Objects::deleteObject (const MWWorld::Ptr& ptr)
 }
 
 
-void Objects::removeCell(MWWorld::Ptr::CellStore* store)
+void Objects::removeCell(MWWorld::CellStore* store)
 {
     for(PtrAnimationMap::iterator iter = mObjects.begin();iter != mObjects.end();)
     {
@@ -212,7 +212,7 @@ void Objects::removeCell(MWWorld::Ptr::CellStore* store)
     }
 }
 
-void Objects::buildStaticGeometry(MWWorld::Ptr::CellStore& cell)
+void Objects::buildStaticGeometry(MWWorld::CellStore& cell)
 {
     if(mStaticGeometry.find(&cell) != mStaticGeometry.end())
     {
@@ -226,7 +226,7 @@ void Objects::buildStaticGeometry(MWWorld::Ptr::CellStore& cell)
     }
 }
 
-Ogre::AxisAlignedBox Objects::getDimensions(MWWorld::Ptr::CellStore* cell)
+Ogre::AxisAlignedBox Objects::getDimensions(MWWorld::CellStore* cell)
 {
     return mBounds[cell];
 }

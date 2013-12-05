@@ -7,28 +7,28 @@
 #include "esmstore.hpp"
 #include "containerstore.hpp"
 
-MWWorld::Ptr::CellStore *MWWorld::Cells::getCellStore (const ESM::Cell *cell)
+MWWorld::CellStore *MWWorld::Cells::getCellStore (const ESM::Cell *cell)
 {
     if (cell->mData.mFlags & ESM::Cell::Interior)
     {
-        std::map<std::string, Ptr::CellStore>::iterator result = mInteriors.find (Misc::StringUtils::lowerCase(cell->mName));
+        std::map<std::string, CellStore>::iterator result = mInteriors.find (Misc::StringUtils::lowerCase(cell->mName));
 
         if (result==mInteriors.end())
         {
-            result = mInteriors.insert (std::make_pair (Misc::StringUtils::lowerCase(cell->mName), Ptr::CellStore (cell))).first;
+            result = mInteriors.insert (std::make_pair (Misc::StringUtils::lowerCase(cell->mName), CellStore (cell))).first;
         }
 
         return &result->second;
     }
     else
     {
-        std::map<std::pair<int, int>, Ptr::CellStore>::iterator result =
+        std::map<std::pair<int, int>, CellStore>::iterator result =
             mExteriors.find (std::make_pair (cell->getGridX(), cell->getGridY()));
 
         if (result==mExteriors.end())
         {
             result = mExteriors.insert (std::make_pair (
-                std::make_pair (cell->getGridX(), cell->getGridY()), Ptr::CellStore (cell))).first;
+                std::make_pair (cell->getGridX(), cell->getGridY()), CellStore (cell))).first;
 
         }
 
@@ -40,11 +40,11 @@ void MWWorld::Cells::clear()
 {
     mInteriors.clear();
     mExteriors.clear();
-    std::fill(mIdCache.begin(), mIdCache.end(), std::make_pair("", (MWWorld::Ptr::CellStore*)0));
+    std::fill(mIdCache.begin(), mIdCache.end(), std::make_pair("", (MWWorld::CellStore*)0));
     mIdCacheIndex = 0;
 }
 
-MWWorld::Ptr MWWorld::Cells::getPtrAndCache (const std::string& name, Ptr::CellStore& cellStore)
+MWWorld::Ptr MWWorld::Cells::getPtrAndCache (const std::string& name, CellStore& cellStore)
 {
     Ptr ptr = getPtr (name, cellStore);
 
@@ -61,13 +61,13 @@ MWWorld::Ptr MWWorld::Cells::getPtrAndCache (const std::string& name, Ptr::CellS
 
 MWWorld::Cells::Cells (const MWWorld::ESMStore& store, std::vector<ESM::ESMReader>& reader)
 : mStore (store), mReader (reader),
-  mIdCache (40, std::pair<std::string, Ptr::CellStore *> ("", (Ptr::CellStore*)0)), /// \todo make cache size configurable
+  mIdCache (40, std::pair<std::string, CellStore *> ("", (CellStore*)0)), /// \todo make cache size configurable
   mIdCacheIndex (0)
 {}
 
-MWWorld::Ptr::CellStore *MWWorld::Cells::getExterior (int x, int y)
+MWWorld::CellStore *MWWorld::Cells::getExterior (int x, int y)
 {
-    std::map<std::pair<int, int>, Ptr::CellStore>::iterator result =
+    std::map<std::pair<int, int>, CellStore>::iterator result =
         mExteriors.find (std::make_pair (x, y));
 
     if (result==mExteriors.end())
@@ -92,7 +92,7 @@ MWWorld::Ptr::CellStore *MWWorld::Cells::getExterior (int x, int y)
             std::make_pair (x, y), CellStore (cell))).first;
     }
 
-    if (result->second.mState!=Ptr::CellStore::State_Loaded)
+    if (result->second.mState!=CellStore::State_Loaded)
     {
         // Multiple plugin support for landscape data is much easier than for references. The last plugin wins.
         result->second.load (mStore, mReader);
@@ -101,19 +101,19 @@ MWWorld::Ptr::CellStore *MWWorld::Cells::getExterior (int x, int y)
     return &result->second;
 }
 
-MWWorld::Ptr::CellStore *MWWorld::Cells::getInterior (const std::string& name)
+MWWorld::CellStore *MWWorld::Cells::getInterior (const std::string& name)
 {
     std::string lowerName = Misc::StringUtils::lowerCase(name);
-    std::map<std::string, Ptr::CellStore>::iterator result = mInteriors.find (lowerName);
+    std::map<std::string, CellStore>::iterator result = mInteriors.find (lowerName);
 
     if (result==mInteriors.end())
     {
         const ESM::Cell *cell = mStore.get<ESM::Cell>().find(lowerName);
 
-        result = mInteriors.insert (std::make_pair (lowerName, Ptr::CellStore (cell))).first;
+        result = mInteriors.insert (std::make_pair (lowerName, CellStore (cell))).first;
     }
 
-    if (result->second.mState!=Ptr::CellStore::State_Loaded)
+    if (result->second.mState!=CellStore::State_Loaded)
     {
         result->second.load (mStore, mReader);
     }
@@ -121,13 +121,13 @@ MWWorld::Ptr::CellStore *MWWorld::Cells::getInterior (const std::string& name)
     return &result->second;
 }
 
-MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name, Ptr::CellStore& cell,
+MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name, CellStore& cell,
     bool searchInContainers)
 {
-    if (cell.mState==Ptr::CellStore::State_Unloaded)
+    if (cell.mState==CellStore::State_Unloaded)
         cell.preload (mStore, mReader);
 
-    if (cell.mState==Ptr::CellStore::State_Preloaded)
+    if (cell.mState==CellStore::State_Preloaded)
     {
         std::string lowerCase = Misc::StringUtils::lowerCase(name);
 
@@ -208,7 +208,7 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name, Ptr::CellStore& ce
 MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name)
 {
     // First check the cache
-    for (std::vector<std::pair<std::string, Ptr::CellStore *> >::iterator iter (mIdCache.begin());
+    for (std::vector<std::pair<std::string, CellStore *> >::iterator iter (mIdCache.begin());
         iter!=mIdCache.end(); ++iter)
         if (iter->first==name && iter->second)
         {
@@ -218,7 +218,7 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name)
         }
 
     // Then check cells that are already listed
-    for (std::map<std::pair<int, int>, Ptr::CellStore>::iterator iter = mExteriors.begin();
+    for (std::map<std::pair<int, int>, CellStore>::iterator iter = mExteriors.begin();
         iter!=mExteriors.end(); ++iter)
     {
         Ptr ptr = getPtrAndCache (name, iter->second);
@@ -226,7 +226,7 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name)
             return ptr;
     }
 
-    for (std::map<std::string, Ptr::CellStore>::iterator iter = mInteriors.begin();
+    for (std::map<std::string, CellStore>::iterator iter = mInteriors.begin();
         iter!=mInteriors.end(); ++iter)
     {
         Ptr ptr = getPtrAndCache (name, iter->second);
@@ -240,7 +240,7 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name)
 
     for (iter = cells.extBegin(); iter != cells.extEnd(); ++iter)
     {
-        Ptr::CellStore *cellStore = getCellStore (&(*iter));
+        CellStore *cellStore = getCellStore (&(*iter));
 
         Ptr ptr = getPtrAndCache (name, *cellStore);
 
@@ -250,7 +250,7 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name)
 
     for (iter = cells.intBegin(); iter != cells.intEnd(); ++iter)
     {
-        Ptr::CellStore *cellStore = getCellStore (&(*iter));
+        CellStore *cellStore = getCellStore (&(*iter));
 
         Ptr ptr = getPtrAndCache (name, *cellStore);
 

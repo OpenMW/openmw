@@ -185,14 +185,14 @@ bool Debugging::toggleRenderMode (int mode){
     return false;
 }
 
-void Debugging::cellAdded(MWWorld::Ptr::CellStore *store)
+void Debugging::cellAdded(MWWorld::CellStore *store)
 {
     mActiveCells.push_back(store);
     if (mPathgridEnabled)
         enableCellPathgrid(store);
 }
 
-void Debugging::cellRemoved(MWWorld::Ptr::CellStore *store)
+void Debugging::cellRemoved(MWWorld::CellStore *store)
 {
     mActiveCells.erase(std::remove(mActiveCells.begin(), mActiveCells.end(), store), mActiveCells.end());
     if (mPathgridEnabled)
@@ -227,7 +227,7 @@ void Debugging::togglePathgrid()
     }
 }
 
-void Debugging::enableCellPathgrid(MWWorld::Ptr::CellStore *store)
+void Debugging::enableCellPathgrid(MWWorld::CellStore *store)
 {
     const ESM::Pathgrid *pathgrid =
         MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*store->mCell);
@@ -254,7 +254,7 @@ void Debugging::enableCellPathgrid(MWWorld::Ptr::CellStore *store)
     }
 }
 
-void Debugging::disableCellPathgrid(MWWorld::Ptr::CellStore *store)
+void Debugging::disableCellPathgrid(MWWorld::CellStore *store)
 {
     if (store->mCell->isExterior())
     {

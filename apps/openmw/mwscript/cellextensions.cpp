@@ -125,7 +125,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWWorld::Ptr::CellStore *cell = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell();
+                    MWWorld::CellStore *cell = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell();
                     runtime.push (cell->mWaterLevel);
                 }
         };
@@ -138,7 +138,7 @@ namespace MWScript
                 {
                     Interpreter::Type_Float level = runtime[0].mFloat;
 
-                    MWWorld::Ptr::CellStore *cell = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell();
+                    MWWorld::CellStore *cell = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell();
 
                     if (cell->mCell->isExterior())
                         throw std::runtime_error("Can't set water level in exterior cell");
@@ -156,7 +156,7 @@ namespace MWScript
                 {
                     Interpreter::Type_Float level = runtime[0].mFloat;
 
-                    MWWorld::Ptr::CellStore *cell = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell();
+                    MWWorld::CellStore *cell = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell();
 
                     if (cell->mCell->isExterior())
                         throw std::runtime_error("Can't set water level in exterior cell");

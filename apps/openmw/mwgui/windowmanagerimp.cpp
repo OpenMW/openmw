@@ -750,7 +750,7 @@ namespace MWGui
         mCompanionWindow->onFrame();
     }
 
-    void WindowManager::changeCell(MWWorld::Ptr::CellStore* cell)
+    void WindowManager::changeCell(MWWorld::CellStore* cell)
     {
         std::string name = MWBase::Environment::get().getWorld()->getCellName (cell);
 

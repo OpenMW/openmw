@@ -18,7 +18,7 @@ namespace MWGui
 
     void ReferenceInterface::checkReferenceAvailable()
     {
-        MWWorld::Ptr::CellStore* playerCell = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell();
+        MWWorld::CellStore* playerCell = MWBase::Environment::get().getWorld()->getPlayer().getPlayer().getCell();
 
         // check if player has changed cell, or count of the reference has become 0
         if ((playerCell != mCurrentPlayerCell && mCurrentPlayerCell != NULL)

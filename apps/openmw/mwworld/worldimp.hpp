@@ -79,7 +79,7 @@ namespace MWWorld
             World (const World&);
             World& operator= (const World&);
 
-            Ptr getPtrViaHandle (const std::string& handle, Ptr::CellStore& cellStore);
+            Ptr getPtrViaHandle (const std::string& handle, CellStore& cellStore);
 
             int mActivationDistanceOverride;
             std::string mFacedHandle;
@@ -121,7 +121,7 @@ namespace MWWorld
             float getObjectActivationDistance ();
 
             void removeContainerScripts(const Ptr& reference);
-            void addContainerScripts(const Ptr& reference, Ptr::CellStore* cell);
+            void addContainerScripts(const Ptr& reference, CellStore* cell);
             void PCDropped (const Ptr& item);
 
             void processDoors(float duration);
@@ -413,7 +413,7 @@ namespace MWWorld
             ///Is the head of the creature underwater?
             virtual bool isSubmerged(const MWWorld::Ptr &object) const;
             virtual bool isSwimming(const MWWorld::Ptr &object) const;
-            virtual bool isUnderwater(const MWWorld::Ptr::CellStore* cell, const Ogre::Vector3 &pos) const;
+            virtual bool isUnderwater(const MWWorld::CellStore* cell, const Ogre::Vector3 &pos) const;
             virtual bool isOnGround(const MWWorld::Ptr &ptr) const;
 
             virtual void togglePOV() {

@@ -126,7 +126,7 @@ bool Actors::deleteObject (const MWWorld::Ptr& ptr)
     return true;
 }
 
-void Actors::removeCell(MWWorld::Ptr::CellStore* store)
+void Actors::removeCell(MWWorld::CellStore* store)
 {
     for(PtrAnimationMap::iterator iter = mAllActors.begin();iter != mAllActors.end();)
     {

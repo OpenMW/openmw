@@ -221,7 +221,7 @@ OEngine::Render::Fader* RenderingManager::getFader()
     return mRendering.getFader();
 }
 
-void RenderingManager::removeCell (MWWorld::Ptr::CellStore *store)
+void RenderingManager::removeCell (MWWorld::CellStore *store)
 {
     mObjects.removeCell(store);
     mActors.removeCell(store);
@@ -238,7 +238,7 @@ void RenderingManager::toggleWater()
     mWater->toggle();
 }
 
-void RenderingManager::cellAdded (MWWorld::Ptr::CellStore *store)
+void RenderingManager::cellAdded (MWWorld::CellStore *store)
 {
     mObjects.buildStaticGeometry (*store);
     sh::Factory::getInstance().unloadUnreferencedMaterials();
@@ -410,7 +410,7 @@ void RenderingManager::postRenderTargetUpdate(const RenderTargetEvent &evt)
     mOcclusionQuery->setActive(false);
 }
 
-void RenderingManager::waterAdded (MWWorld::Ptr::CellStore *store)
+void RenderingManager::waterAdded (MWWorld::CellStore *store)
 {
     const MWWorld::Store<ESM::Land> &lands =
         MWBase::Environment::get().getWorld()->getStore().get<ESM::Land>();
@@ -501,7 +501,7 @@ bool RenderingManager::toggleRenderMode(int mode)
     }
 }
 
-void RenderingManager::configureFog(MWWorld::Ptr::CellStore &mCell)
+void RenderingManager::configureFog(MWWorld::CellStore &mCell)
 {
     Ogre::ColourValue color;
     color.setAsABGR (mCell.mCell->mAmbi.mFog);
@@ -554,7 +554,7 @@ void RenderingManager::setAmbientMode()
     }
 }
 
-void RenderingManager::configureAmbient(MWWorld::Ptr::CellStore &mCell)
+void RenderingManager::configureAmbient(MWWorld::CellStore &mCell)
 {
     if (mCell.mCell->mData.mFlags & ESM::Cell::Interior)
         mAmbientColor.setAsABGR (mCell.mCell->mAmbi.mAmbient);
@@ -651,7 +651,7 @@ void RenderingManager::setGlare(bool glare)
     mSkyManager->setGlare(glare);
 }
 
-void RenderingManager::requestMap(MWWorld::Ptr::CellStore* cell)
+void RenderingManager::requestMap(MWWorld::CellStore* cell)
 {
     if (cell->mCell->isExterior())
     {
@@ -670,7 +670,7 @@ void RenderingManager::requestMap(MWWorld::Ptr::CellStore* cell)
         mLocalMap->requestMap(cell, mObjects.getDimensions(cell));
 }
 
-void RenderingManager::preCellChange(MWWorld::Ptr::CellStore* cell)
+void RenderingManager::preCellChange(MWWorld::CellStore* cell)
 {
     mLocalMap->saveFogOfWar(cell);
 }
