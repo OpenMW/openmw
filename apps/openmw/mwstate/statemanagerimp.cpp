@@ -161,6 +161,10 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
 
     Settings::Manager::setString ("character", "Saves",
         slot->mPath.parent_path().filename().string());
+
+    MWBase::Environment::get().getWorld()->setupPlayer();
+    MWBase::Environment::get().getWorld()->renderPlayer();
+    MWBase::Environment::get().getWindowManager()->updatePlayer();
 }
 
 MWState::Character *MWState::StateManager::getCurrentCharacter (bool create)
