@@ -16,6 +16,7 @@ namespace MyGUI
 {
     class Gui;
     class Widget;
+    class Window;
     class UString;
 }
 
@@ -282,6 +283,10 @@ namespace MWGui
 
   private:
     bool mConsoleOnlyScripts;
+
+    std::map<MyGUI::Window*, std::string> mTrackedWindows;
+    void trackWindow(OEngine::GUI::Layout* layout, const std::string& name);
+    void onWindowChangeCoord(MyGUI::Window* _sender);
 
     OEngine::GUI::MyGUIManager *mGuiManager;
     OEngine::Render::OgreRenderer *mRendering;

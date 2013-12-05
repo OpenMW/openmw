@@ -334,6 +334,10 @@ Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
         instance->setProperty("detailMapUVSet", sh::makeProperty(new sh::IntValue(texprop->textures[Nif::NiTexturingProperty::DetailTexture].uvSet)));
     }
 
+    bool useParallax = !texName[Nif::NiTexturingProperty::BumpTexture].empty()
+            && texName[Nif::NiTexturingProperty::BumpTexture].find("_nh.") != std::string::npos;
+    instance->setProperty("use_parallax", sh::makeProperty(new sh::BooleanValue(useParallax)));
+
     for(int i = 0;i < 7;i++)
     {
         if(i == Nif::NiTexturingProperty::BaseTexture ||

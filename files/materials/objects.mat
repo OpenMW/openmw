@@ -1,7 +1,7 @@
 material openmw_objects_base
 {
     diffuse 1.0 1.0 1.0 1.0
-    specular 0 0 0 0
+    specular 0 0 0 0 1
     ambient 1.0 1.0 1.0
     emissive 0.0 0.0 0.0
     vertmode 0
@@ -12,6 +12,7 @@ material openmw_objects_base
     use_detail_map false
     emissiveMapUVSet 0
     detailMapUVSet 0
+    use_parallax false
 
     scene_blend default
     depth_write default
@@ -37,6 +38,7 @@ material openmw_objects_base
             detailMap $detailMap
             env_map $env_map
             env_map_color $env_map_color
+            use_parallax $use_parallax
         }
 
         diffuse $diffuse

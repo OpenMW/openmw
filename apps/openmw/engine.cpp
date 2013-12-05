@@ -1,6 +1,6 @@
 #include "engine.hpp"
 
-#include "components/esm/loadcell.hpp"
+#include <stdexcept>
 
 #include <OgreRoot.h>
 #include <OgreRenderWindow.h>
@@ -17,6 +17,8 @@
 
 #include <components/nifbullet/bulletnifloader.hpp>
 #include <components/nifogre/ogrenifloader.hpp>
+
+#include <components/esm/loadcell.hpp>
 
 #include "mwinput/inputmanagerimp.hpp"
 
@@ -211,7 +213,9 @@ void OMW::Engine::loadBSA()
         }
         else
         {
-            std::cout << "Archive " << *archive << " not found" << std::endl;
+            std::stringstream message;
+            message << "Archive '" << *archive << "' not found";
+            throw std::runtime_error(message.str());
         }
     }
 }
