@@ -1,7 +1,9 @@
 #include <iostream>
+#include <cstdio>
 
 #include <components/files/configurationmanager.hpp>
 
+#include <SDL_messagebox.h>
 #include <SDL_main.h>
 #include "engine.hpp"
 
@@ -280,7 +282,11 @@ int main(int argc, char**argv)
     }
     catch (std::exception &e)
     {
-        std::cout << "\nERROR: " << e.what() << std::endl;
+        if (isatty(fileno(stdin)))
+            std::cerr << "\nERROR: " << e.what() << std::endl;
+        else
+            SDL_ShowSimpleMessageBox(0, "OpenMW: Fatal error", e.what(), NULL);
+
         return 1;
     }
 
