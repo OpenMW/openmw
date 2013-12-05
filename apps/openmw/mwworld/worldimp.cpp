@@ -238,7 +238,6 @@ namespace MWWorld
         setupPlayer();
 
         renderPlayer();
-        mRendering->resetCamera();
 
         MWBase::Environment::get().getWindowManager()->updatePlayer();
 
@@ -289,6 +288,15 @@ namespace MWWorld
         mStore.setUp();
 
         mCells.clear();
+
+        mProjectiles.clear();
+        mDoorStates.clear();
+
+        mGodMode = false;
+        mSky = true;
+        mTeleportEnabled = true;
+        mPlayIntro = 0;
+        mFacedDistance = FLT_MAX;
     }
 
     void World::ensureNeededRecords()
@@ -1701,6 +1709,7 @@ namespace MWWorld
     {
         mRendering->renderPlayer(mPlayer->getPlayer());
         mPhysics->addActor(mPlayer->getPlayer());
+        mRendering->resetCamera();
     }
 
     void World::setupExternalRendering (MWRender::ExternalRendering& rendering)
