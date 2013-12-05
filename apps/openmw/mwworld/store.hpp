@@ -293,6 +293,20 @@ namespace MWWorld
     };
 
     template <>
+    inline void Store<ESM::NPC>::clearDynamic()
+    {
+        std::map<std::string, ESM::NPC>::iterator iter = mDynamic.begin();
+
+        while (iter!=mDynamic.end())
+            if (iter->first=="player")
+                ++iter;
+            else
+                mDynamic.erase (iter++);
+
+        mShared.clear();
+    }
+
+    template <>
     inline void Store<ESM::Dialogue>::load(ESM::ESMReader &esm, const std::string &id) {
         std::string idLower = Misc::StringUtils::lowerCase(id);
 
