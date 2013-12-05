@@ -32,6 +32,17 @@ namespace MWWorld
         mCustomData = 0;
     }
 
+    RefData::RefData()
+    : mBaseNode(0), mHasLocals (false), mEnabled (true), mCount (1), mCustomData (0)
+    {
+        for (int i=0; i<3; ++i)
+        {
+            mLocalRotation.rot[i] = 0;
+            mPosition.pos[i] = 0;
+            mPosition.rot[i] = 0;
+        }
+    }
+
     RefData::RefData (const ESM::CellRef& cellRef)
     : mBaseNode(0), mHasLocals (false), mEnabled (true), mCount (1), mPosition (cellRef.mPos),
       mCustomData (0)
@@ -88,7 +99,7 @@ namespace MWWorld
             static const std::string empty;
             return empty;
         }
-            
+
         return mBaseNode->getName();
     }
 
@@ -120,7 +131,7 @@ namespace MWWorld
     {
         if(count == 0)
             MWBase::Environment::get().getWorld()->removeRefScript(this);
-        
+
         mCount = count;
     }
 

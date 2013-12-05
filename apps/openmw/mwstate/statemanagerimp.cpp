@@ -23,6 +23,7 @@ void MWState::StateManager::cleanup()
     {
         MWBase::Environment::get().getDialogueManager()->clear();
         MWBase::Environment::get().getJournal()->clear();
+        MWBase::Environment::get().getWorld()->clear();
         mState = State_NoGame;
         mCharacterManager.clearCurrentCharacter();
         mTimePlayed = 0;

@@ -96,6 +96,8 @@ namespace MWBase
 
             virtual void startNewGame() = 0;
 
+            virtual void clear() = 0;
+
             virtual OEngine::Render::Fader* getFader() = 0;
             ///< \ŧodo remove this function. Rendering details should not be exposed.
 

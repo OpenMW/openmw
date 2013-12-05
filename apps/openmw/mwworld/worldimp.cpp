@@ -258,25 +258,11 @@ namespace MWWorld
 
     void World::startNewGame()
     {
-        mWorldScene->changeToVoid();
-
-        mStore.clearDynamic();
-        mStore.setUp();
-
-        mCells.clear();
-
         // Rebuild player
         setupPlayer();
-        MWWorld::Ptr player = mPlayer->getPlayer();
-
-        // removes NpcStats, ContainerStore etc
-        player.getRefData().setCustomData(NULL);
 
         renderPlayer();
         mRendering->resetCamera();
-
-        // make sure to do this so that local scripts from items that were in the players inventory are removed
-        mLocalScripts.clear();
 
         MWBase::Environment::get().getWindowManager()->updatePlayer();
 
@@ -289,10 +275,6 @@ namespace MWWorld
         pos.rot[1] = 0;
         pos.rot[2] = 0;
         mWorldScene->changeToExteriorCell(pos);
-
-        // enable collision
-        if(!mPhysics->toggleCollisionMode())
-            mPhysics->toggleCollisionMode();
 
         // FIXME: should be set to 1, but the sound manager won't pause newly started sounds
         mPlayIntro = 2;
@@ -314,6 +296,24 @@ namespace MWWorld
         MWBase::Environment::get().getScriptManager()->resetGlobalScripts();
     }
 
+    void World::clear()
+    {
+        mLocalScripts.clear();
+
+        // enable collision
+        if (!mPhysics->toggleCollisionMode())
+            mPhysics->toggleCollisionMode();
+
+        mWorldScene->changeToVoid();
+
+        if (mPlayer)
+            mPlayer->getPlayer().getRefData() = RefData();
+
+        mStore.clearDynamic();
+        mStore.setUp();
+
+        mCells.clear();
+    }
 
     void World::ensureNeededRecords()
     {

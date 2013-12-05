@@ -160,6 +160,8 @@ namespace MWWorld
 
             virtual void startNewGame();
 
+            virtual void clear();
+
             virtual OEngine::Render::Fader* getFader();
             ///< \ŧodo remove this function. Rendering details should not be exposed.
 
