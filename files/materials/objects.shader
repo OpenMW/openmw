@@ -18,6 +18,10 @@
 #define EMISSIVE_MAP @shPropertyHasValue(emissiveMap)
 #define DETAIL_MAP @shPropertyHasValue(detailMap)
 
+#define PARALLAX @shPropertyBool(use_parallax)
+#define PARALLAX_SCALE 0.04
+#define PARALLAX_BIAS -0.02
+
 // right now we support 2 UV sets max. implementing them is tedious, and we're probably not going to need more
 #define SECOND_UV_SET (@shPropertyString(emissiveMapUVSet) || @shPropertyString(detailMapUVSet))
 
@@ -265,7 +269,7 @@
         shUniform(float3, env_map_color) @shUniformProperty3f(env_map_color, env_map_color)
 #endif
 
-#if ENV_MAP || SPECULAR
+#if ENV_MAP || SPECULAR || PARALLAX
     shUniform(float3, cameraPosObjSpace) @shAutoConstant(cameraPosObjSpace, camera_position_object_space)
 #endif
 #if SPECULAR
@@ -345,19 +349,10 @@
 
     SH_START_PROGRAM
     {
+        float4 newUV = UV;
+
 #ifdef NEED_DEPTH
         float depthPassthrough = objSpacePositionPassthrough.w;
-#endif
-
-        float4 diffuse = shSample(diffuseMap, UV.xy);
-        shOutputColour(0) = diffuse;
-
-#if DETAIL_MAP
-#if @shPropertyString(detailMapUVSet)
-        shOutputColour(0) *= shSample(detailMap, UV.zw)*2;
-#else
-        shOutputColour(0) *= shSample(detailMap, UV.xy)*2;
-#endif
 #endif
 
 #if NEED_NORMAL
@@ -372,10 +367,32 @@
             tbn = transpose(tbn);
         #endif
 
-        float3 TSnormal = shSample(normalMap, UV.xy).xyz * 2 - 1;
+        float4 normalTex = shSample(normalMap, UV.xy);
 
-        normal = normalize (shMatrixMult( transpose(tbn), TSnormal ));
+        normal = normalize (shMatrixMult( transpose(tbn), normalTex.xyz * 2 - 1 ));
 #endif
+
+#if ENV_MAP || SPECULAR || PARALLAX
+        float3 eyeDir = normalize(cameraPosObjSpace.xyz - objSpacePositionPassthrough.xyz);
+#endif
+
+#if PARALLAX
+        float3 TSeyeDir = normalize(shMatrixMult(tbn, eyeDir));
+
+        newUV += (TSeyeDir.xyxy * ( normalTex.a * PARALLAX_SCALE + PARALLAX_BIAS )).xyxy;
+#endif
+
+        float4 diffuse = shSample(diffuseMap, newUV.xy);
+        shOutputColour(0) = diffuse;
+
+#if DETAIL_MAP
+#if @shPropertyString(detailMapUVSet)
+        shOutputColour(0) *= shSample(detailMap, newUV.zw)*2;
+#else
+        shOutputColour(0) *= shSample(detailMap, newUV.xy)*2;
+#endif
+#endif
+
 
 #if !VERTEX_LIGHTING
         float3 viewPos = shMatrixMult(worldView, float4(objSpacePositionPassthrough.xyz,1)).xyz;
@@ -458,14 +475,10 @@
 
 #if EMISSIVE_MAP
         #if @shPropertyString(emissiveMapUVSet)
-        shOutputColour(0).xyz += shSample(emissiveMap, UV.zw).xyz;
+        shOutputColour(0).xyz += shSample(emissiveMap, newUV.zw).xyz;
         #else
-        shOutputColour(0).xyz += shSample(emissiveMap, UV.xy).xyz;
+        shOutputColour(0).xyz += shSample(emissiveMap, newUV.xy).xyz;
         #endif
-#endif
-
-#if ENV_MAP || SPECULAR
-        float3 eyeDir = normalize(cameraPosObjSpace.xyz - objSpacePositionPassthrough.xyz);
 #endif
 
 #if ENV_MAP
