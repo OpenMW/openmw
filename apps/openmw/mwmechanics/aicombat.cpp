@@ -77,13 +77,14 @@ namespace MWMechanics
             mPathFinder.buildPath(start, dest, pathgrid, xCell, yCell, true);
         else
         {
-            mPathFinder2.buildPath(start, dest, pathgrid, xCell, yCell, true);
-            ESM::Pathgrid::Point lastPt = mPathFinder.getPath().back();
-            if((mTimer2 > 0.25)&&(mPathFinder2.getPathSize() < mPathFinder.getPathSize() ||
-                (dest.mX - lastPt.mX)*(dest.mX - lastPt.mX)+(dest.mY - lastPt.mY)*(dest.mY - lastPt.mY)+(dest.mZ - lastPt.mZ)*(dest.mZ - lastPt.mZ) > 200*200))
+            if(mTimer2 > 0.25)
             {
                 mTimer2 = 0;
-                mPathFinder = mPathFinder2;
+                mPathFinder2.buildPath(start, dest, pathgrid, xCell, yCell, true);
+                ESM::Pathgrid::Point lastPt = mPathFinder.getPath().back();
+                if(mPathFinder2.getPathSize() < mPathFinder.getPathSize() ||
+                    (dest.mX - lastPt.mX)*(dest.mX - lastPt.mX)+(dest.mY - lastPt.mY)*(dest.mY - lastPt.mY)+(dest.mZ - lastPt.mZ)*(dest.mZ - lastPt.mZ) > 200*200)
+                    mPathFinder = mPathFinder2;
             }
         }
 
