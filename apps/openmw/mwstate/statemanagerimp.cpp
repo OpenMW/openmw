@@ -60,6 +60,8 @@ void MWState::StateManager::newGame (bool bypass)
         MWBase::Environment::get().getWorld()->startNewGame();
         MWBase::Environment::get().getWindowManager()->setNewGame (true);
     }
+    else
+        MWBase::Environment::get().getWorld()->setGlobalInt ("chargenstate", -1);
 
     mState = State_Running;
 }

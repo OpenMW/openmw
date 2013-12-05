@@ -97,7 +97,8 @@ namespace MWGui
             MWBase::Environment::get().getStateManager()->characterEnd())
             buttons.push_back("loadgame");
 
-        if (state==MWBase::StateManager::State_Running)
+        if (state==MWBase::StateManager::State_Running &&
+            MWBase::Environment::get().getWorld()->getGlobalInt ("chargenstate")==-1)
             buttons.push_back("savegame");
 
         buttons.push_back("options");
