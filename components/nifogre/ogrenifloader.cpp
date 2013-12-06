@@ -385,12 +385,35 @@ public:
     private:
         Ogre::SubEntity *mSubEntity;
         std::vector<Nif::NiMorphData::MorphData> mMorphs;
+        std::vector<float> mValues;
+
+        std::vector<Ogre::Vector3> mVertices;
+
+        static float interpKey(const Nif::FloatKeyList::VecType &keys, float time)
+        {
+            if(time <= keys.front().mTime)
+                return keys.front().mValue;
+
+            Nif::FloatKeyList::VecType::const_iterator iter(keys.begin()+1);
+            for(;iter != keys.end();iter++)
+            {
+                if(iter->mTime < time)
+                    continue;
+
+                Nif::FloatKeyList::VecType::const_iterator last(iter-1);
+                float a = (time-last->mTime) / (iter->mTime-last->mTime);
+                return last->mValue + ((iter->mValue - last->mValue)*a);
+            }
+            return keys.back().mValue;
+        }
 
     public:
         Value(Ogre::SubEntity *subent, const Nif::NiMorphData *data)
           : mSubEntity(subent)
           , mMorphs(data->mMorphs)
-        { }
+        {
+            mValues.resize(mMorphs.size()-1, 0.f);
+        }
 
         virtual Ogre::Real getValue() const
         {
@@ -398,9 +421,63 @@ public:
             return 0.0f;
         }
 
-        virtual void setValue(Ogre::Real value)
+        virtual void setValue(Ogre::Real time)
         {
-            // TODO: Implement
+            if (mMorphs.size() <= 1)
+                return;
+
+#if OGRE_DOUBLE_PRECISION
+#error "This code needs to be rewritten for double precision mode"
+#endif
+
+            Ogre::VertexData* data = mSubEntity->_getSoftwareVertexAnimVertexData();
+
+            const Ogre::VertexElement* posElem =
+                            data->vertexDeclaration->findElementBySemantic(Ogre::VES_POSITION);
+
+            Ogre::HardwareVertexBufferSharedPtr vbuf =
+                data->vertexBufferBinding->getBuffer(posElem->getSource());
+
+            bool needToUpdate = false;
+            int i=0;
+            for (std::vector<Nif::NiMorphData::MorphData>::iterator it = mMorphs.begin()+1; it != mMorphs.end(); ++it,++i)
+            {
+                float val = 0;
+                if (!it->mData.mKeys.empty())
+                    val = interpKey(it->mData.mKeys, time);
+                val = std::max(0.f, std::min(1.f, val));
+
+                if (val != mValues[i])
+                    needToUpdate = true;
+                mValues[i] = val;
+            }
+            if (!needToUpdate)
+                return;
+
+            // The first morph key always contains the original positions
+            mVertices = mMorphs[0].mVertices;
+
+            i = 0;
+            for (std::vector<Nif::NiMorphData::MorphData>::iterator it = mMorphs.begin()+1; it != mMorphs.end(); ++it,++i)
+            {
+                float val = mValues[i];
+
+                if (it->mVertices.size() != mMorphs[0].mVertices.size())
+                    continue;
+
+                if (val != 0)
+                {
+                    for (unsigned int v=0; v<mVertices.size(); ++v)
+                        mVertices[v] += it->mVertices[v] * val;
+                }
+            }
+
+            if (mVertices.size() * sizeof(float)*3 != vbuf->getSizeInBytes())
+                return;
+
+            vbuf->writeData(0, vbuf->getSizeInBytes(), &mVertices[0]);
+
+            mSubEntity->_markBuffersUsedForAnimation();
         }
     };
 
@@ -480,11 +557,10 @@ class NIFObjectLoader
             {
                 const Nif::NiGeomMorpherController *geom = static_cast<const Nif::NiGeomMorpherController*>(ctrl.getPtr());
 
-                Ogre::SubEntity *subent = entity->getSubEntity(0);
                 Ogre::ControllerValueRealPtr srcval((animflags&Nif::NiNode::AnimFlag_AutoPlay) ?
                                                     Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
                                                     Ogre::ControllerValueRealPtr());
-                Ogre::ControllerValueRealPtr dstval(OGRE_NEW GeomMorpherController::Value(subent, geom->data.getPtr()));
+                Ogre::ControllerValueRealPtr dstval(OGRE_NEW GeomMorpherController::Value(entity->getSubEntity(0), geom->data.getPtr()));
 
                 GeomMorpherController::Function* function = OGRE_NEW GeomMorpherController::Function(geom, (animflags&Nif::NiNode::AnimFlag_AutoPlay));
                 objectlist.mMaxControllerLength = std::max(function->mStopTime, objectlist.mMaxControllerLength);

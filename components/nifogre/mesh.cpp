@@ -116,6 +116,7 @@ void NIFMeshLoader::createSubMesh(Ogre::Mesh *mesh, const Nif::NiTriShape *shape
     Ogre::HardwareBuffer::Usage vertUsage = Ogre::HardwareBuffer::HBU_STATIC;
     bool vertShadowBuffer = false;
 
+    bool geomMorpherController = false;
     if(!shape->controller.empty())
     {
         Nif::ControllerPtr ctrl = shape->controller;
@@ -124,6 +125,7 @@ void NIFMeshLoader::createSubMesh(Ogre::Mesh *mesh, const Nif::NiTriShape *shape
             {
                 vertUsage = Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY;
                 vertShadowBuffer = true;
+                geomMorpherController = true;
                 break;
             }
         } while(!(ctrl=ctrl->next).empty());
@@ -347,6 +349,11 @@ void NIFMeshLoader::createSubMesh(Ogre::Mesh *mesh, const Nif::NiTriShape *shape
         if (!mesh->suggestTangentVectorBuildParams(Ogre::VES_TANGENT, src,dest))
             mesh->buildTangentVectors(Ogre::VES_TANGENT, src,dest);
     }
+
+    // Create a dummy vertex animation track if there's a geom morpher controller
+    // This is required to make Ogre create the buffers we will use for software vertex animation
+    if (srcVerts.size() && geomMorpherController)
+        mesh->createAnimation("dummy", 0)->createVertexTrack(1, sub->vertexData, Ogre::VAT_MORPH);
 }
 
 
