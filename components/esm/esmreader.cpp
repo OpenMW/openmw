@@ -302,6 +302,9 @@ std::string ESMReader::getString(int size)
     char *ptr = &mBuffer[0];
     getExact(ptr, size);
 
+    if (size>0 && ptr[size-1]==0)
+        --size;
+
     // Convert to UTF8 and return
     if (mEncoder)
         return mEncoder->getUtf8(ptr, size);
