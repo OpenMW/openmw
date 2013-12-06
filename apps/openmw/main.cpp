@@ -282,9 +282,11 @@ int main(int argc, char**argv)
     }
     catch (std::exception &e)
     {
+#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX || OGRE_PLATFORM == OGRE_PLATFORM_APPLE
         if (isatty(fileno(stdin)))
             std::cerr << "\nERROR: " << e.what() << std::endl;
         else
+#endif
             SDL_ShowSimpleMessageBox(0, "OpenMW: Fatal error", e.what(), NULL);
 
         return 1;
