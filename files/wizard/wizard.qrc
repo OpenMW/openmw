@@ -1,0 +1,7 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource prefix="icons/tango">
+    <file alias="index.theme">icons/tango/index.theme</file>
+    <file alias="48x48/folder.png">icons/tango/48x48/folder.png</file>
+    <file alias="48x48/system-installer.png">icons/tango/48x48/system-installer.png</file>
+</qresource>
+</RCC>
