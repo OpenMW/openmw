@@ -11,6 +11,7 @@
 #include "../mwbase/journal.hpp"
 #include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
@@ -103,8 +104,10 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
     ESM::ESMWriter writer;
     writer.setFormat (ESM::Header::CurrentFormat);
     writer.setRecordCount (
-        1+ // saved game header
-        MWBase::Environment::get().getJournal()->countSavedGameRecords());
+        1 // saved game header
+        +MWBase::Environment::get().getJournal()->countSavedGameRecords()
+        +MWBase::Environment::get().getWorld()->countSavedGameRecords()
+        );
 
     writer.save (stream);
 
@@ -113,7 +116,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
     writer.endRecord (ESM::REC_SAVE);
 
     MWBase::Environment::get().getJournal()->write (writer);
-    /// \todo write saved game data
+    MWBase::Environment::get().getWorld()->write (writer);
 
     writer.close();
 
@@ -149,6 +152,19 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
                 MWBase::Environment::get().getJournal()->readRecord (reader, n.val);
                 break;
 
+            case ESM::REC_ALCH:
+            case ESM::REC_ARMO:
+            case ESM::REC_BOOK:
+            case ESM::REC_CLAS:
+            case ESM::REC_CLOT:
+            case ESM::REC_ENCH:
+            case ESM::REC_NPC_:
+            case ESM::REC_SPEL:
+            case ESM::REC_WEAP:
+
+                MWBase::Environment::get().getWorld()->readRecord (reader, n.val);
+                break;
+
             default:
 
                 // ignore invalid records
@@ -167,6 +183,13 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
     MWBase::Environment::get().getWorld()->setupPlayer();
     MWBase::Environment::get().getWorld()->renderPlayer();
     MWBase::Environment::get().getWindowManager()->updatePlayer();
+    MWBase::Environment::get().getMechanicsManager()->playerLoaded();
+
+    // for testing purpose only
+    ESM::Position pos;
+    pos.pos[0] = pos.pos[1] = pos.pos[2] = 0;
+    pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
+    MWBase::Environment::get().getWorld()->changeToExteriorCell (pos);
 }
 
 MWState::Character *MWState::StateManager::getCurrentCharacter (bool create)

@@ -139,4 +139,54 @@ void ESMStore::setUp()
     mAttributes.setUp();
 }
 
+    int ESMStore::countSavedGameRecords() const
+    {
+        return
+            mPotions.getDynamicSize()
+            +mArmors.getDynamicSize()
+            +mBooks.getDynamicSize()
+            +mClasses.getDynamicSize()
+            +mClothes.getDynamicSize()
+            +mEnchants.getDynamicSize()
+            +mNpcs.getDynamicSize()
+            +mSpells.getDynamicSize()
+            +mWeapons.getDynamicSize();
+    }
+
+    void ESMStore::write (ESM::ESMWriter& writer) const
+    {
+        mPotions.write (writer);
+        mArmors.write (writer);
+        mBooks.write (writer);
+        mClasses.write (writer);
+        mClothes.write (writer);
+        mEnchants.write (writer);
+        mNpcs.write (writer);
+        mSpells.write (writer);
+        mWeapons.write (writer);
+    }
+
+    bool ESMStore::readRecord (ESM::ESMReader& reader, int32_t type)
+    {
+        switch (type)
+        {
+            case ESM::REC_ALCH:
+            case ESM::REC_ARMO:
+            case ESM::REC_BOOK:
+            case ESM::REC_CLAS:
+            case ESM::REC_CLOT:
+            case ESM::REC_ENCH:
+            case ESM::REC_NPC_:
+            case ESM::REC_SPEL:
+            case ESM::REC_WEAP:
+
+                mStores[type]->read (reader);
+                return true;
+
+            default:
+
+                return false;
+        }
+    }
+
 } // end namespace

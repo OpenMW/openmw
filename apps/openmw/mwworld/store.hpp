@@ -6,6 +6,8 @@
 #include <map>
 #include <stdexcept>
 
+#include <components/esm/esmwriter.hpp>
+
 #include "recordcmp.hpp"
 
 namespace MWWorld
@@ -18,10 +20,16 @@ namespace MWWorld
         virtual void listIdentifier(std::vector<std::string> &list) const {}
 
         virtual size_t getSize() const = 0;
+        virtual int getDynamicSize() const { return 0; }
         virtual void load(ESM::ESMReader &esm, const std::string &id) = 0;
 
         virtual bool eraseStatic(const std::string &id) {return false;}
         virtual void clearDynamic() {}
+
+        virtual void write (ESM::ESMWriter& writer) const {}
+
+        virtual void read (ESM::ESMReader& reader) {}
+        ///< Read into dynamic storage
     };
 
     template <class T>
@@ -212,6 +220,11 @@ namespace MWWorld
             return mShared.size();
         }
 
+        int getDynamicSize() const
+        {
+            return mDynamic.size();
+        }
+
         void listIdentifier(std::vector<std::string> &list) const {
             list.reserve(list.size() + getSize());
             typename std::vector<T *>::const_iterator it = mShared.begin();
@@ -289,6 +302,26 @@ namespace MWWorld
 
         bool erase(const T &item) {
             return erase(item.mId);
+        }
+
+        void write (ESM::ESMWriter& writer) const
+        {
+            for (typename Dynamic::const_iterator iter (mDynamic.begin()); iter!=mDynamic.end();
+                 ++iter)
+            {
+                writer.startRecord (T::sRecordId);
+                writer.writeHNString ("NAME", iter->second.mId);
+                iter->second.save (writer);
+                writer.endRecord (T::sRecordId);
+            }
+        }
+
+        void read (ESM::ESMReader& reader)
+        {
+            T record;
+            record.mId = reader.getHNString ("NAME");
+            record.load (reader);
+            insert (record);
         }
     };
 

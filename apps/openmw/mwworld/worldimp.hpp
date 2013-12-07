@@ -171,6 +171,12 @@ namespace MWWorld
 
             virtual void clear();
 
+            virtual int countSavedGameRecords() const;
+
+            virtual void write (ESM::ESMWriter& writer) const;
+
+            virtual void readRecord (ESM::ESMReader& reader, int32_t type);
+
             virtual OEngine::Render::Fader* getFader();
             ///< \ŧodo remove this function. Rendering details should not be exposed.
 

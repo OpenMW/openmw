@@ -282,7 +282,10 @@ namespace MWWorld
         mWorldScene->changeToVoid();
 
         if (mPlayer)
+        {
+            mPlayer->setCell (0);
             mPlayer->getPlayer().getRefData() = RefData();
+        }
 
         mStore.clearDynamic();
         mStore.setUp();
@@ -297,6 +300,25 @@ namespace MWWorld
         mTeleportEnabled = true;
         mPlayIntro = 0;
         mFacedDistance = FLT_MAX;
+    }
+
+    int World::countSavedGameRecords() const
+    {
+        return mStore.countSavedGameRecords();
+    }
+
+    void World::write (ESM::ESMWriter& writer) const
+    {
+        mStore.write (writer);
+    }
+
+    void World::readRecord (ESM::ESMReader& reader, int32_t type)
+    {
+        if (!mStore.readRecord (reader, type))
+        {
+            /// \todo handle other world state records
+
+        }
     }
 
     void World::ensureNeededRecords()

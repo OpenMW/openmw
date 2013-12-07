@@ -701,4 +701,12 @@ namespace MWMechanics
     {
         return mAI;
     }
+
+    void MechanicsManager::playerLoaded()
+    {
+        mUpdatePlayer = true;
+        mClassSelected = true;
+        mRaceSelected = true;
+        mAI = true;
+    }
 }
