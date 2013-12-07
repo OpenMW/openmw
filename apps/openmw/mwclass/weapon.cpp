@@ -154,7 +154,10 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Weapon> *ref =
             ptr.get<ESM::Weapon>();
 
-        return ref->mBase->mData.mValue;
+        if (ptr.getCellRef().mCharge == -1)
+            return ref->mBase->mData.mValue;
+        else
+            return ref->mBase->mData.mValue * (ptr.getCellRef().mCharge / getItemMaxHealth(ptr));
     }
 
     void Weapon::registerSelf()
@@ -370,16 +373,17 @@ namespace MWClass
 
     void Weapon::applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
     {
-            MWWorld::LiveCellRef<ESM::Weapon> *ref =
-            ptr.get<ESM::Weapon>();
+        MWWorld::LiveCellRef<ESM::Weapon> *ref =
+        ptr.get<ESM::Weapon>();
 
-            ESM::Weapon newItem = *ref->mBase;
-            newItem.mId="";
-            newItem.mName=newName;
-            newItem.mData.mEnchant=enchCharge;
-            newItem.mEnchant=enchId;
-            const ESM::Weapon *record = MWBase::Environment::get().getWorld()->createRecord (newItem);
-            ref->mBase = record;
+        ESM::Weapon newItem = *ref->mBase;
+        newItem.mId="";
+        newItem.mName=newName;
+        newItem.mData.mEnchant=enchCharge;
+        newItem.mEnchant=enchId;
+        const ESM::Weapon *record = MWBase::Environment::get().getWorld()->createRecord (newItem);
+        ref->mBase = record;
+        ref->mRef.mRefID = record->mId;
     }
 
     std::pair<int, std::string> Weapon::canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const

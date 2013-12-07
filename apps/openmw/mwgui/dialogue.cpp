@@ -12,6 +12,8 @@
 #include "../mwmechanics/npcstats.hpp"
 
 #include "../mwworld/class.hpp"
+#include "../mwworld/player.hpp"
+#include "../mwworld/containerstore.hpp"
 
 #include "../mwdialogue/dialoguemanagerimp.hpp"
 
@@ -67,23 +69,24 @@ namespace MWGui
 
     void PersuasionDialog::onPersuade(MyGUI::Widget *sender)
     {
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayer().getPlayer();
         MWBase::MechanicsManager::PersuasionType type;
         if (sender == mAdmireButton) type = MWBase::MechanicsManager::PT_Admire;
         else if (sender == mIntimidateButton) type = MWBase::MechanicsManager::PT_Intimidate;
         else if (sender == mTauntButton) type = MWBase::MechanicsManager::PT_Taunt;
         else if (sender == mBribe10Button)
         {
-            MWBase::Environment::get().getWindowManager()->getTradeWindow()->addOrRemoveGold(-10);
+            player.getClass().getContainerStore(player).remove("gold_001", 10, player);
             type = MWBase::MechanicsManager::PT_Bribe10;
         }
         else if (sender == mBribe100Button)
         {
-            MWBase::Environment::get().getWindowManager()->getTradeWindow()->addOrRemoveGold(-100);
+            player.getClass().getContainerStore(player).remove("gold_001", 100, player);
             type = MWBase::MechanicsManager::PT_Bribe100;
         }
         else /*if (sender == mBribe1000Button)*/
         {
-            MWBase::Environment::get().getWindowManager()->getTradeWindow()->addOrRemoveGold(-1000);
+            player.getClass().getContainerStore(player).remove("gold_001", 1000, player);
             type = MWBase::MechanicsManager::PT_Bribe1000;
         }
 

@@ -49,8 +49,9 @@ struct MagicEffect
         int mSchool; // SpellSchool, see defs.hpp
         float mBaseCost;
         int mFlags;
-        // Properties of the fired magic 'ball' I think
-        int mRed, mBlue, mGreen;
+        // Glow color for enchanted items with this effect
+        int mRed, mGreen, mBlue;
+        // Properties of the fired magic 'ball'
         float mSpeed, mSize, mSizeCap;
     }; // 36 bytes
 
@@ -58,6 +59,12 @@ struct MagicEffect
 
     static const std::string &effectIdToString(short effectID);
     static short effectStringToId(const std::string &effect);
+
+    /// Returns the effect that provides resistance against \a effect (or -1 if there's none)
+    static short getResistanceEffect(short effect);
+    /// Returns the effect that induces weakness against \a effect (or -1 if there's none)
+    static short getWeaknessEffect(short effect);
+
     MagnitudeDisplayType getMagnitudeDisplayType() const;
 
 

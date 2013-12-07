@@ -1,6 +1,6 @@
 #include "engine.hpp"
 
-#include "components/esm/loadcell.hpp"
+#include <stdexcept>
 
 #include <OgreRoot.h>
 #include <OgreRenderWindow.h>
@@ -19,6 +19,8 @@
 
 #include <components/nifbullet/bulletnifloader.hpp>
 #include <components/nifogre/ogrenifloader.hpp>
+
+#include <components/esm/loadcell.hpp>
 
 #include "mwinput/inputmanagerimp.hpp"
 
@@ -153,6 +155,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mEncoding(ToUTF8::WINDOWS_1252)
   , mEncoder(NULL)
   , mActivationDistanceOverride(-1)
+  , mGrab(true)
 
 {
     std::srand ( std::time(NULL) );
@@ -216,7 +219,9 @@ void OMW::Engine::loadBSA()
         }
         else
         {
-            std::cout << "Archive " << *archive << " not found" << std::endl;
+            std::stringstream message;
+            message << "Archive '" << *archive << "' not found";
+            throw std::runtime_error(message.str());
         }
     }
 }
@@ -379,7 +384,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     std::string keybinderUser = (mCfgMgr.getUserPath() / "input.xml").string();
     bool keybinderUserExists = boost::filesystem::exists(keybinderUser);
-    MWInput::InputManager* input = new MWInput::InputManager (*mOgre, *this, keybinderUser, keybinderUserExists);
+    MWInput::InputManager* input = new MWInput::InputManager (*mOgre, *this, keybinderUser, keybinderUserExists, mGrab);
     mEnvironment.setInputManager (input);
 
     MWGui::WindowManager* window = new MWGui::WindowManager(

@@ -259,7 +259,7 @@ namespace MWBase
 
             virtual void localRotateObject (const MWWorld::Ptr& ptr, float x, float y, float z) = 0;
 
-            virtual void safePlaceObject(const MWWorld::Ptr& ptr,MWWorld::CellStore &Cell,ESM::Position pos) = 0;
+            virtual MWWorld::Ptr safePlaceObject(const MWWorld::Ptr& ptr,MWWorld::CellStore &Cell,ESM::Position pos) = 0;
             ///< place an object in a "safe" location (ie not in the void, etc).
 
             virtual void indexToPosition (int cellX, int cellY, float &x, float &y, bool centre = false)
@@ -380,6 +380,9 @@ namespace MWBase
             virtual void getItemsOwnedBy (const MWWorld::Ptr& npc, std::vector<MWWorld::Ptr>& out) = 0;
             ///< get all items in active cells owned by this Npc
 
+            virtual bool getLOS(const MWWorld::Ptr& npc,const MWWorld::Ptr& targetNpc) = 0;
+            ///< get Line of Sight (morrowind stupid implementation)
+
             virtual void enableActorCollision(const MWWorld::Ptr& actor, bool enable) = 0;
 
             virtual void setupExternalRendering (MWRender::ExternalRendering& rendering) = 0;
@@ -432,7 +435,7 @@ namespace MWBase
 
             virtual void castSpell (const MWWorld::Ptr& actor) = 0;
 
-            virtual void launchProjectile (const std::string& id, const ESM::EffectList& effects,
+            virtual void launchProjectile (const std::string& id, bool stack, const ESM::EffectList& effects,
                                            const MWWorld::Ptr& actor, const std::string& sourceName) = 0;
 
             virtual const std::vector<std::string>& getContentFiles() const = 0;

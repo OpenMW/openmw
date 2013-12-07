@@ -50,7 +50,12 @@ option(USE_MPG123 "use mpg123 + libsndfile for sound" ON)
 # OS X deployment
 option(OPENMW_OSX_DEPLOYMENT OFF)
 
-find_program(DPKG_PROGRAM dpkg DOC "dpkg program of Debian-based systems")
+if(UNIX AND NOT APPLE)
+    option(BUILD_WITH_DPKG "enable dpkg-based install for debian and debian derivatives" OFF)
+    if(BUILD_WITH_DPKG)
+        find_program(DPKG_PROGRAM dpkg DOC "dpkg program of Debian-based systems")
+    endif(BUILD_WITH_DPKG)
+endif(UNIX AND NOT APPLE)
 
 # Location of morrowind data files
 if (APPLE)
@@ -684,7 +689,10 @@ if (APPLE)
     set(CPACK_PACKAGE_VERSION_MINOR ${OPENMW_VERSION_MINO})
     set(CPACK_PACKAGE_VERSION_PATCH ${OPENMW_VERSION_RELEASE})
 
-    set(APPS "\${CMAKE_INSTALL_PREFIX}/${INSTALL_SUBDIR}/${APP_BUNDLE_NAME}")
+    set(OPENMW_APP "\${CMAKE_INSTALL_PREFIX}/${INSTALL_SUBDIR}/${APP_BUNDLE_NAME}")
+
+    set(OPENCS_APP "\${CMAKE_INSTALL_PREFIX}/${INSTALL_SUBDIR}/OpenCS.app")
+
     set(PLUGINS "")
     set(ABSOLUTE_PLUGINS "")
 
@@ -745,7 +753,8 @@ if (APPLE)
         cmake_policy(SET CMP0009 OLD)
         set(BU_CHMOD_BUNDLE_ITEMS ON)
         include(BundleUtilities)
-        fixup_bundle(\"${APPS}\" \"${PLUGINS}\" \"${DIRS}\")
+        fixup_bundle(\"${OPENMW_APP}\" \"${PLUGINS}\" \"${DIRS}\")
+        fixup_bundle(\"${OPENCS_APP}\" \"\" \"${DIRS}\")
         " COMPONENT Runtime)
         include(CPack)
 endif (APPLE)

@@ -189,7 +189,7 @@ namespace MWMechanics
         // This should never happen (programmers should have an if statement checking mIsPathConstructed that prevents this call
         // if otherwise).
         if(mPath.empty())
-            return 0;
+            return 0.;
 
         const ESM::Pathgrid::Point &nextPoint = *mPath.begin();
         float directionX = nextPoint.mX - x;
@@ -197,6 +197,21 @@ namespace MWMechanics
         float directionResult = sqrt(directionX * directionX + directionY * directionY);
 
         return Ogre::Radian(acos(directionY / directionResult) * sgn(asin(directionX / directionResult))).valueDegrees();
+    }
+
+    bool PathFinder::checkWaypoint(float x, float y, float z)
+    {
+        if(mPath.empty())
+            return true;
+
+        ESM::Pathgrid::Point nextPoint = *mPath.begin();
+        if(distanceZCorrected(nextPoint, x, y, z) < 64)
+        {
+            mPath.pop_front();
+            if(mPath.empty()) mIsPathConstructed = false;
+            return true;
+        }
+        return false;
     }
 
     bool PathFinder::checkPathCompleted(float x, float y, float z)

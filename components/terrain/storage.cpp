@@ -4,9 +4,10 @@
 #include <OgreTextureManager.h>
 #include <OgreStringConverter.h>
 #include <OgreRenderSystem.h>
+#include <OgreResourceGroupManager.h>
 #include <OgreRoot.h>
 
-#include <boost/multi_array.hpp>
+#include <boost/algorithm/string.hpp>
 
 namespace Terrain
 {
@@ -302,7 +303,7 @@ namespace Terrain
     }
 
     void Storage::getBlendmaps(float chunkSize, const Ogre::Vector2 &chunkCenter,
-        bool pack, std::vector<Ogre::TexturePtr> &blendmaps, std::vector<std::string> &layerList)
+        bool pack, std::vector<Ogre::TexturePtr> &blendmaps, std::vector<LayerInfo> &layerList)
     {
         // TODO - blending isn't completely right yet; the blending radius appears to be
         // different at a cell transition (2 vertices, not 4), so we may need to create a larger blendmap
@@ -336,7 +337,7 @@ namespace Terrain
         {
             int size = textureIndicesMap.size();
             textureIndicesMap[*it] = size;
-            layerList.push_back(getTextureName(*it));
+            layerList.push_back(getLayerInfo(getTextureName(*it)));
         }
 
         int numTextures = textureIndices.size();
@@ -464,6 +465,35 @@ namespace Terrain
         assert(x < ESM::Land::LAND_SIZE);
         assert(y < ESM::Land::LAND_SIZE);
         return land->mLandData->mHeights[y * ESM::Land::LAND_SIZE + x];
+    }
+
+    LayerInfo Storage::getLayerInfo(const std::string& texture)
+    {
+        // Already have this cached?
+        if (mLayerInfoMap.find(texture) != mLayerInfoMap.end())
+            return mLayerInfoMap[texture];
+
+        LayerInfo info;
+        info.mParallax = false;
+        info.mDiffuseMap = "textures\\" + texture;
+        std::string texture_ = texture;
+        boost::replace_last(texture_, ".", "_nh.");
+        if (Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup("textures\\" + texture_))
+        {
+            info.mNormalMap = "textures\\" + texture_;
+            info.mParallax = true;
+        }
+        else
+        {
+            texture_ = texture;
+            boost::replace_last(texture_, ".", "_n.");
+            if (Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup("textures\\" + texture_))
+                info.mNormalMap = "textures\\" + texture_;
+        }
+
+        mLayerInfoMap[texture] = info;
+
+        return info;
     }
 
 

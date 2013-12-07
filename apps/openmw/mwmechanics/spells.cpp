@@ -66,7 +66,7 @@ namespace MWMechanics
                 int i=0;
                 for (std::vector<ESM::ENAMstruct>::const_iterator it = spell->mEffects.mList.begin(); it != spell->mEffects.mList.end(); ++it)
                 {
-                    effects.add (*it, iter->second[i]);
+                    effects.add (*it, it->mMagnMin + (it->mMagnMax - it->mMagnMin) * iter->second[i]);
                     ++i;
                 }
             }
@@ -116,5 +116,84 @@ namespace MWMechanics
         }
 
         return false;
+    }
+
+    void Spells::purgeCommonDisease()
+    {
+        for (TContainer::iterator iter = mSpells.begin(); iter!=mSpells.end();)
+        {
+            const ESM::Spell *spell =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (iter->first);
+
+            if (spell->mData.mType & ESM::Spell::ST_Disease)
+                mSpells.erase(iter++);
+            else
+                iter++;
+        }
+    }
+
+    void Spells::purgeBlightDisease()
+    {
+        for (TContainer::iterator iter = mSpells.begin(); iter!=mSpells.end();)
+        {
+            const ESM::Spell *spell =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (iter->first);
+
+            if (spell->mData.mType & ESM::Spell::ST_Blight)
+                mSpells.erase(iter++);
+            else
+                iter++;
+        }
+    }
+
+    void Spells::purgeCorprusDisease()
+    {
+        for (TContainer::iterator iter = mSpells.begin(); iter!=mSpells.end();)
+        {
+            const ESM::Spell *spell =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (iter->first);
+
+            if (Misc::StringUtils::ciEqual(spell->mId, "corprus"))
+                mSpells.erase(iter++);
+            else
+                iter++;
+        }
+    }
+
+    void Spells::purgeCurses()
+    {
+        for (TContainer::iterator iter = mSpells.begin(); iter!=mSpells.end();)
+        {
+            const ESM::Spell *spell =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (iter->first);
+
+            if (spell->mData.mType == ESM::Spell::ST_Curse)
+                mSpells.erase(iter++);
+            else
+                iter++;
+        }
+    }
+
+    void Spells::visitEffectSources(EffectSourceVisitor &visitor) const
+    {
+        for (TIterator it = begin(); it != end(); ++it)
+        {
+            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(it->first);
+
+            // these are the spell types that are permanently in effect
+            if (!(spell->mData.mType == ESM::Spell::ST_Ability)
+                    && !(spell->mData.mType == ESM::Spell::ST_Disease)
+                    && !(spell->mData.mType == ESM::Spell::ST_Curse)
+                    && !(spell->mData.mType == ESM::Spell::ST_Blight))
+                continue;
+            const ESM::EffectList& list = spell->mEffects;
+            int i=0;
+            for (std::vector<ESM::ENAMstruct>::const_iterator effectIt = list.mList.begin();
+                 effectIt != list.mList.end(); ++effectIt, ++i)
+            {
+                float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * it->second[i];
+                visitor.visit(MWMechanics::EffectKey(*effectIt), spell->mName, magnitude);
+            }
+        }
     }
 }

@@ -75,14 +75,8 @@ void Launcher::DataFilesPage::saveSettings(const QString &profile)
     mLauncherSettings.setValue(QString("Profiles/currentprofile"), ui.profilesComboBox->currentText());
 
     foreach(const ContentSelectorModel::EsmFile *item, items) {
-
-        if (item->gameFiles().size() == 0) {
-            mLauncherSettings.setMultiValue(QString("Profiles/") + profileName, item->fileName());
-            mGameSettings.setMultiValue(QString("content"), item->fileName());
-        } else {
-            mLauncherSettings.setMultiValue(QString("Profiles/") + profileName, item->fileName());
-            mGameSettings.setMultiValue(QString("content"), item->fileName());
-        }
+        mLauncherSettings.setMultiValue(QString("Profiles/") + profileName, item->fileName());
+        mGameSettings.setMultiValue(QString("content"), item->fileName());
     }
 
 }
@@ -116,8 +110,7 @@ void Launcher::DataFilesPage::buildView()
 
 void Launcher::DataFilesPage::removeProfile(const QString &profile)
 {
-    mLauncherSettings.remove(QString("Profiles/") + profile + QString("/game"));
-    mLauncherSettings.remove(QString("Profiles/") + profile + QString("/addon"));
+    mLauncherSettings.remove(QString("Profiles/") + profile);
 }
 
 QAbstractItemModel *Launcher::DataFilesPage::profilesModel() const

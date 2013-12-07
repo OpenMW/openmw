@@ -9,13 +9,13 @@ before_install:
  - pwd
  - git submodule update --init --recursive
  - echo "yes" | sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu `lsb_release -sc` main universe restricted multiverse"
- - echo "yes" | sudo apt-add-repository ppa:openmw/deps
+ - echo "yes" | sudo apt-add-repository ppa:openmw/openmw
  - sudo apt-get update -qq
- - sudo apt-get install -qq libboost-all-dev libgtest-dev google-mock libzzip-dev
+ - sudo apt-get install -qq libboost-all-dev libgtest-dev google-mock libzzip-dev uuid-dev
  - sudo apt-get install -qq libqt4-dev libxaw7-dev libxrandr-dev libfreeimage-dev libpng-dev
  - sudo apt-get install -qq libopenal-dev libmpg123-dev libsndfile1-dev
  - sudo apt-get install -qq libavcodec-dev libavformat-dev libavdevice-dev libavutil-dev libswscale-dev libpostproc-dev
- - sudo apt-get install -qq libbullet-dev libogre-static-dev libmygui-static-dev libsdl2-static-dev libunshield-dev
+ - sudo apt-get install -qq libbullet-dev libogre-1.8-dev libmygui-dev libsdl2-dev libunshield-dev
  - sudo mkdir /usr/src/gtest/build
  - cd /usr/src/gtest/build
  - sudo cmake .. -DBUILD_SHARED_LIBS=1
@@ -26,7 +26,7 @@ before_script:
  - cd -
  - mkdir build
  - cd build
- - cmake .. -DOGRE_STATIC=1 -DMYGUI_STATIC=1 -DBOOST_STATIC=1 -DSDL2_STATIC=1 -DBUILD_WITH_CODE_COVERAGE=1 -DBUILD_UNITTESTS=1
+ - cmake .. -DBUILD_WITH_CODE_COVERAGE=1 -DBUILD_UNITTESTS=1 -DBUILD_WITH_DPKG=1
 script:
  - make -j4
 after_script:

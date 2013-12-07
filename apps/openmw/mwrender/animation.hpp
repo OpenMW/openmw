@@ -191,9 +191,14 @@ protected:
 
     static void destroyObjectList(Ogre::SceneManager *sceneMgr, NifOgre::ObjectList &objects);
 
-    static void setRenderProperties(const NifOgre::ObjectList &objlist, Ogre::uint32 visflags, Ogre::uint8 solidqueue, Ogre::uint8 transqueue, Ogre::Real dist=0.0f);
+    static void setRenderProperties(const NifOgre::ObjectList &objlist, Ogre::uint32 visflags, Ogre::uint8 solidqueue,
+                                    Ogre::uint8 transqueue, Ogre::Real dist=0.0f,
+                                    bool enchantedGlow=false, Ogre::Vector3* glowColor=NULL);
 
     void clearAnimSources();
+
+    // TODO: Should not be here
+    Ogre::Vector3 getEnchantmentColor(MWWorld::Ptr item);
 
 public:
     Animation(const MWWorld::Ptr &ptr, Ogre::SceneNode *node);
@@ -206,9 +211,10 @@ public:
      * @param loop Loop the effect. If false, it is removed automatically after it finishes playing. If true,
      *              you need to remove it manually using removeEffect when the effect should end.
      * @param bonename Bone to attach to, or empty string to use the scene node instead
+     * @param texture override the texture specified in the model's materials
      * @note Will not add an effect twice.
      */
-    void addEffect (const std::string& model, int effectId, bool loop = false, const std::string& bonename = "");
+    void addEffect (const std::string& model, int effectId, bool loop = false, const std::string& bonename = "", std::string texture = "");
     void removeEffect (int effectId);
     void getLoopingEffects (std::vector<int>& out);
 private:
@@ -268,6 +274,7 @@ public:
     virtual Ogre::Vector3 runAnimation(float duration);
 
     virtual void showWeapons(bool showWeapon);
+    virtual void showShield(bool show) {}
 
     void enableLights(bool enable);
 

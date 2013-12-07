@@ -61,11 +61,11 @@ namespace CSMFilter
         bool isString() const;
     };
 
-    Token::Token (Type type) : mType (type) {}
+    Token::Token (Type type) : mType (type), mNumber(0.0) {}
 
-    Token::Token (Type type, const std::string& string) : mType (type), mString (string) {}
+    Token::Token (Type type, const std::string& string) : mType (type), mString (string), mNumber(0.0) {}
 
-    Token::Token (const std::string& string) : mType (Type_String), mString (string) {}
+    Token::Token (const std::string& string) : mType (Type_String), mString (string), mNumber(0.0) {}
 
     Token::Token (double number) : mType (Type_Number), mNumber (number) {}
 

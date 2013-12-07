@@ -350,6 +350,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     , mSkipAnim(false)
     , mSecondsOfRunning(0)
     , mSecondsOfSwimming(0)
+    , mFallHeight(0)
 {
     if(!mAnimation)
         return;
@@ -425,6 +426,11 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
     {
         forcestateupdate = true;
 
+        // Shields shouldn't be visible during spellcasting
+        // There seems to be no text keys for this purpose, except maybe for "[un]equip start/stop",
+        // but they are also present in weapon drawing animation.
+        mAnimation->showShield(weaptype != WeapType_Spell);
+
         std::string weapgroup;
         if(weaptype == WeapType_None)
         {
@@ -442,6 +448,7 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
                              MWRender::Animation::Group_UpperBody, true,
                              1.0f, "equip start", "equip stop", 0.0f, 0);
             mUpperBodyState = UpperCharState_EquipingWeap;
+
             if(isWerewolf)
             {
                 const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
@@ -515,6 +522,12 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
                     const ESM::Static* castStatic = store.get<ESM::Static>().find (effect->mCasting);
                     mAnimation->addEffect("meshes\\" + castStatic->mModel, effect->mIndex);
 
+                    castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_Hands");
+                    //mAnimation->addEffect("meshes\\" + castStatic->mModel, -1, false, "Bip01 L Hand", effect->mParticle);
+                    //mAnimation->addEffect("meshes\\" + castStatic->mModel, -1, false, "Bip01 R Hand", effect->mParticle);
+                    mAnimation->addEffect("meshes\\" + castStatic->mModel, -1, false, "Left Hand", effect->mParticle);
+                    mAnimation->addEffect("meshes\\" + castStatic->mModel, -1, false, "Right Hand", effect->mParticle);
+
                     switch(effectentry.mRange)
                     {
                         case 0: mAttackType = "self"; break;
@@ -563,10 +576,8 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
                 if(!resultSound.empty())
                     MWBase::Environment::get().getSoundManager()->playSound(resultSound, 1.0f, 1.0f);
 
-                // tool used up?
-                if(!item.getRefData().getCount())
-                    MWBase::Environment::get().getWindowManager()->unsetSelectedWeapon();
-                else
+                // Set again, just to update the charge bar
+                if(item.getRefData().getCount())
                     MWBase::Environment::get().getWindowManager()->setSelectedWeapon(item);
             }
             else
@@ -782,7 +793,7 @@ void CharacterController::update(float duration)
 
         if(!onground && !flying && !inwater)
         {
-            // The player is in the air (either getting up —ascending part of jump— or falling).
+            // In the air (either getting up —ascending part of jump— or falling).
 
             if (world->isSlowFalling(mPtr))
             {
@@ -817,8 +828,7 @@ void CharacterController::update(float duration)
         }
         else if(vec.z > 0.0f && mJumpState == JumpState_None)
         {
-            // The player has started a jump.
-
+            // Started a jump.
             float z = cls.getJump(mPtr);
             if(vec.x == 0 && vec.y == 0)
                 vec = Ogre::Vector3(0.0f, 0.0f, z);
@@ -829,7 +839,8 @@ void CharacterController::update(float duration)
             }
 
             // advance acrobatics
-            cls.skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, 0);
+            if (mPtr.getRefData().getHandle() == "player")
+                cls.skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, 0);
 
             // decrease fatigue
             const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
@@ -843,8 +854,6 @@ void CharacterController::update(float duration)
         }
         else if(mJumpState == JumpState_Falling)
         {
-            // The player is landing.
-
             forcestateupdate = true;
             mJumpState = JumpState_Landing;
             vec.z = 0.0f;
@@ -861,7 +870,8 @@ void CharacterController::update(float duration)
                 cls.getCreatureStats(mPtr).setHealth(health);
 
                 // report acrobatics progression
-                cls.skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, 1);
+                if (mPtr.getRefData().getHandle() == "player")
+                    cls.skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, 1);
 
                 const float acrobaticsSkill = cls.getNpcStats(mPtr).getSkill(ESM::Skill::Acrobatics).getModified();
                 if (healthLost > (acrobaticsSkill * fatigueTerm))
@@ -1099,7 +1109,7 @@ void CharacterController::resurrect()
 
     if(mAnimation)
         mAnimation->disable(mCurrentDeath);
-    mCurrentDeath.empty();
+    mCurrentDeath.clear();
     mDeathState = CharState_None;
 }
 

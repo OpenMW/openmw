@@ -1,7 +1,9 @@
 #include <iostream>
+#include <cstdio>
 
 #include <components/files/configurationmanager.hpp>
 
+#include <SDL_messagebox.h>
 #include <SDL_main.h>
 #include "engine.hpp"
 
@@ -14,6 +16,13 @@
 // makes __argc and __argv available on windows
 #include <cstdlib>
 
+#endif
+
+
+#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX || OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+#include <csignal>
+extern int cc_install_handlers(int argc, char **argv, int num_signals, int *sigs, const char *logfile, int (*user_info)(char*, char*));
+extern int is_debugger_attached(void);
 #endif
 
 // for Ogre::macBundlePath
@@ -147,6 +156,8 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("fallback", bpo::value<FallbackMap>()->default_value(FallbackMap(), "")
             ->multitoken()->composing(), "fallback values")
 
+        ("no-grab", "Don't grab mouse cursor")
+
         ("activate-dist", bpo::value <int> ()->default_value (-1), "activation distance override");
 
     bpo::parsed_options valid_opts = bpo::command_line_parser(argc, argv)
@@ -176,6 +187,8 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
     if (!run)
         return false;
+
+    engine.setGrabMouse(!variables.count("no-grab"));
 
     // Font encoding settings
     std::string encoding(variables["encoding"].as<std::string>());
@@ -239,6 +252,18 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
 int main(int argc, char**argv)
 {
+#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX || OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+    // Unix crash catcher
+    if ((argc == 2 && strcmp(argv[1], "--cc-handle-crash") == 0) || !is_debugger_attached())
+    {
+        int s[5] = { SIGSEGV, SIGILL, SIGFPE, SIGBUS, SIGABRT };
+        cc_install_handlers(argc, argv, 5, s, "crash.log", NULL);
+        std::cout << "Installing crash catcher" << std::endl;
+    }
+    else
+        std::cout << "Running in a debugger, not installing crash catcher" << std::endl;
+#endif
+
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
     // set current dir to bundle path
     boost::filesystem::path bundlePath = boost::filesystem::path(Ogre::macBundlePath()).parent_path();
@@ -257,7 +282,13 @@ int main(int argc, char**argv)
     }
     catch (std::exception &e)
     {
-        std::cout << "\nERROR: " << e.what() << std::endl;
+#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX || OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+        if (isatty(fileno(stdin)))
+            std::cerr << "\nERROR: " << e.what() << std::endl;
+        else
+#endif
+            SDL_ShowSimpleMessageBox(0, "OpenMW: Fatal error", e.what(), NULL);
+
         return 1;
     }
 

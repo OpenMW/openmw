@@ -246,7 +246,7 @@ namespace MWGui
         {
             if(mCurrent != mCommandHistory.end())
             {
-                --mCurrent;
+                ++mCurrent;
 
                 if(mCurrent != mCommandHistory.end())
                     mCommandLine->setCaption(*mCurrent);

@@ -878,6 +878,8 @@ void RenderingManager::setMenuTransparency(float val)
 
 void RenderingManager::windowResized(int x, int y)
 {
+    Settings::Manager::setInt("resolution x", "Video", x);
+    Settings::Manager::setInt("resolution y", "Video", y);
     mRendering.adjustViewport();
     mCompositors->recreate();
 
@@ -975,8 +977,13 @@ void RenderingManager::setupExternalRendering (MWRender::ExternalRendering& rend
 Animation* RenderingManager::getAnimation(const MWWorld::Ptr &ptr)
 {
     Animation *anim = mActors.getAnimation(ptr);
+
     if(!anim && ptr.getRefData().getHandle() == "player")
         anim = mPlayerAnimation;
+
+    if (!anim)
+        anim = mObjects.getAnimation(ptr);
+
     return anim;
 }
 

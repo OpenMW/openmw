@@ -98,6 +98,12 @@ namespace MWWorld
 
                 // Name of item to display as effect source in magic menu (in case we casted an enchantment)
                 std::string mSourceName;
+
+                ESM::EffectList mEffects;
+
+                float mSpeed;
+
+                bool mStack;
             };
 
             std::map<MWWorld::Ptr, ProjectileState> mProjectiles;
@@ -147,6 +153,9 @@ namespace MWWorld
 
             bool mTeleportEnabled;
             bool mLevitationEnabled;
+
+            /// Called when \a object is moved to an inactive cell
+            void objectLeftActiveCell (MWWorld::Ptr object, MWWorld::Ptr movedPtr);
 
         public:
 
@@ -321,7 +330,7 @@ namespace MWWorld
 
             virtual void localRotateObject (const Ptr& ptr, float x, float y, float z);
 
-            virtual void safePlaceObject(const MWWorld::Ptr& ptr,MWWorld::CellStore &Cell,ESM::Position pos);
+            virtual MWWorld::Ptr safePlaceObject(const MWWorld::Ptr& ptr,MWWorld::CellStore &Cell,ESM::Position pos);
             ///< place an object in a "safe" location (ie not in the void, etc). Makes a copy of the Ptr.
 
             virtual void indexToPosition (int cellX, int cellY, float &x, float &y, bool centre = false)
@@ -460,6 +469,9 @@ namespace MWWorld
             virtual void getItemsOwnedBy (const MWWorld::Ptr& npc, std::vector<MWWorld::Ptr>& out);
             ///< get all items in active cells owned by this Npc
 
+            virtual bool getLOS(const MWWorld::Ptr& npc,const MWWorld::Ptr& targetNpc);
+            ///< get Line of Sight (morrowind stupid implementation)
+
             virtual void enableActorCollision(const MWWorld::Ptr& actor, bool enable);
 
             virtual void setupExternalRendering (MWRender::ExternalRendering& rendering);
@@ -509,7 +521,7 @@ namespace MWWorld
 
             virtual void castSpell (const MWWorld::Ptr& actor);
 
-            virtual void launchProjectile (const std::string& id, const ESM::EffectList& effects,
+            virtual void launchProjectile (const std::string& id, bool stack, const ESM::EffectList& effects,
                                            const MWWorld::Ptr& actor, const std::string& sourceName);
 
             virtual const std::vector<std::string>& getContentFiles() const;

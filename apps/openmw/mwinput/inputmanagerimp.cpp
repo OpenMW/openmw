@@ -88,7 +88,7 @@ namespace MWInput
 {
     InputManager::InputManager(OEngine::Render::OgreRenderer &ogre,
             OMW::Engine& engine,
-            const std::string& userFile, bool userFileExists)
+            const std::string& userFile, bool userFileExists, bool grab)
         : mOgre(ogre)
         , mPlayer(NULL)
         , mEngine(engine)
@@ -112,7 +112,7 @@ namespace MWInput
 
         Ogre::RenderWindow* window = ogre.getWindow ();
 
-        mInputManager = new SFO::InputWrapper(mOgre.getSDLWindow(), mOgre.getWindow());
+        mInputManager = new SFO::InputWrapper(mOgre.getSDLWindow(), mOgre.getWindow(), grab);
         mInputManager->setMouseEventCallback (this);
         mInputManager->setKeyboardEventCallback (this);
         mInputManager->setWindowEventCallback(this);
@@ -265,6 +265,8 @@ namespace MWInput
 
     void InputManager::update(float dt, bool loading)
     {
+        mInputManager->setMouseVisible(MWBase::Environment::get().getWindowManager()->getCursorVisible());
+
         mInputManager->capture(loading);
         // inject some fake mouse movement to force updating MyGUI's widget states
         // this shouldn't do any harm since we're moving back to the original position afterwards
@@ -504,7 +506,7 @@ namespace MWInput
 
         mInputBinder->keyPressed (arg);
 
-        if(arg.keysym.sym == SDLK_RETURN
+        if((arg.keysym.sym == SDLK_RETURN || arg.keysym.sym == SDLK_KP_ENTER)
             && MWBase::Environment::get().getWindowManager()->isGuiMode())
         {
             // Pressing enter when a messagebox is prompting for "ok" will activate the ok button

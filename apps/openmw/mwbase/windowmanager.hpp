@@ -265,6 +265,7 @@ namespace MWBase
             virtual void showCompanionWindow(MWWorld::Ptr actor) = 0;
             virtual void startSpellMaking(MWWorld::Ptr actor) = 0;
             virtual void startEnchanting(MWWorld::Ptr actor) = 0;
+            virtual void startRecharge(MWWorld::Ptr soulgem) = 0;
             virtual void startSelfEnchanting(MWWorld::Ptr soulgem) = 0;
             virtual void startTraining(MWWorld::Ptr actor) = 0;
             virtual void startRepair(MWWorld::Ptr actor) = 0;
@@ -283,6 +284,9 @@ namespace MWBase
             virtual void setKeyFocusWidget (MyGUI::Widget* widget) = 0;
 
             virtual Loading::Listener* getLoadingScreen() = 0;
+
+            /// Should the cursor be visible?
+            virtual bool getCursorVisible() = 0;
     };
 }
 

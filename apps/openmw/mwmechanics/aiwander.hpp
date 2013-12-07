@@ -16,7 +16,7 @@ namespace MWMechanics
 
             AiWander(int distance, int duration, int timeOfDay, const std::vector<int>& idle, bool repeat);
             virtual AiPackage *clone() const;
-            virtual bool execute (const MWWorld::Ptr& actor);
+            virtual bool execute (const MWWorld::Ptr& actor,float duration);
             ///< \return Package completed?
             virtual int getTypeId() const;
             ///< 0: Wander

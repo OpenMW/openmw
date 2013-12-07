@@ -17,12 +17,15 @@
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/world.hpp"
 
+#include <extern/shiny/Main/Factory.hpp>
+
 #include "../mwmechanics/character.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/fallback.hpp"
 
 #include "renderconst.hpp"
+
 
 namespace MWRender
 {
@@ -166,8 +169,37 @@ void Animation::setObjectRoot(const std::string &model, bool baseonly)
     }
 }
 
+struct AddGlow
+{
+    Ogre::Vector3* mColor;
+    AddGlow(Ogre::Vector3* col) : mColor(col) {}
 
-class VisQueueSet {
+    // TODO: integrate this with material controllers?
+    void operator()(Ogre::Entity* entity) const
+    {
+        unsigned int numsubs = entity->getNumSubEntities();
+        for(unsigned int i = 0;i < numsubs;++i)
+        {
+            unsigned int numsubs = entity->getNumSubEntities();
+            for(unsigned int i = 0;i < numsubs;++i)
+            {
+                Ogre::SubEntity* subEnt = entity->getSubEntity(i);
+                std::string newName = subEnt->getMaterialName() + "@fx";
+                if (sh::Factory::getInstance().searchInstance(newName) == NULL)
+                {
+                    sh::MaterialInstance* instance =
+                        sh::Factory::getInstance().createMaterialInstance(newName, subEnt->getMaterialName());
+                    instance->setProperty("env_map", sh::makeProperty(new sh::BooleanValue(true)));
+                    instance->setProperty("env_map_color", sh::makeProperty(new sh::Vector3(mColor->x, mColor->y, mColor->z)));
+                }
+                subEnt->setMaterialName(newName);
+            }
+        }
+    }
+};
+
+class VisQueueSet
+{
     Ogre::uint32 mVisFlags;
     Ogre::uint8 mSolidQueue, mTransQueue;
     Ogre::Real mDist;
@@ -201,12 +233,16 @@ public:
     }
 };
 
-void Animation::setRenderProperties(const NifOgre::ObjectList &objlist, Ogre::uint32 visflags, Ogre::uint8 solidqueue, Ogre::uint8 transqueue, Ogre::Real dist)
+void Animation::setRenderProperties(const NifOgre::ObjectList &objlist, Ogre::uint32 visflags, Ogre::uint8 solidqueue, Ogre::uint8 transqueue, Ogre::Real dist, bool enchantedGlow, Ogre::Vector3* glowColor)
 {
     std::for_each(objlist.mEntities.begin(), objlist.mEntities.end(),
                   VisQueueSet(visflags, solidqueue, transqueue, dist));
     std::for_each(objlist.mParticles.begin(), objlist.mParticles.end(),
                   VisQueueSet(visflags, solidqueue, transqueue, dist));
+
+    if (enchantedGlow)
+        std::for_each(objlist.mEntities.begin(), objlist.mEntities.end(),
+                  AddGlow(glowColor));
 }
 
 
@@ -994,16 +1030,27 @@ void Animation::detachObjectFromBone(Ogre::MovableObject *obj)
     mSkelBase->detachObjectFromBone(obj);
 }
 
-void Animation::addEffect(const std::string &model, int effectId, bool loop, const std::string &bonename)
+void Animation::addEffect(const std::string &model, int effectId, bool loop, const std::string &bonename, std::string texture)
 {
     // Early out if we already have this effect
     for (std::vector<EffectParams>::iterator it = mEffects.begin(); it != mEffects.end(); ++it)
         if (it->mLoop && loop && it->mEffectId == effectId && it->mBoneName == bonename)
             return;
 
+    // fix texture extension to .dds
+    if (texture.size() > 4)
+    {
+        texture[texture.size()-3] = 'd';
+        texture[texture.size()-2] = 'd';
+        texture[texture.size()-1] = 's';
+    }
+
     EffectParams params;
     params.mModelName = model;
-    params.mObjects = NifOgre::Loader::createObjects(mInsert, model);
+    if (bonename.empty())
+        params.mObjects = NifOgre::Loader::createObjects(mInsert, model);
+    else
+        params.mObjects = NifOgre::Loader::createObjects(mSkelBase, bonename, mInsert, model);
     params.mLoop = loop;
     params.mEffectId = effectId;
     params.mBoneName = bonename;
@@ -1013,6 +1060,36 @@ void Animation::addEffect(const std::string &model, int effectId, bool loop, con
         if(params.mObjects.mControllers[i].getSource().isNull())
             params.mObjects.mControllers[i].setSource(Ogre::SharedPtr<EffectAnimationValue> (new EffectAnimationValue()));
     }
+
+    if (!texture.empty())
+    {
+        for(size_t i = 0;i < params.mObjects.mParticles.size(); ++i)
+        {
+            Ogre::ParticleSystem* partSys = params.mObjects.mParticles[i];
+            sh::Factory::getInstance()._ensureMaterial(partSys->getMaterialName(), "Default");
+            Ogre::MaterialPtr mat = Ogre::MaterialManager::getSingleton().getByName(partSys->getMaterialName());
+            static int count = 0;
+            Ogre::String materialName = "openmw/" + Ogre::StringConverter::toString(count++);
+            // TODO: destroy when effect is removed
+            Ogre::MaterialPtr newMat = mat->clone(materialName);
+            partSys->setMaterialName(materialName);
+
+            for (int t=0; t<newMat->getNumTechniques(); ++t)
+            {
+                Ogre::Technique* tech = newMat->getTechnique(t);
+                for (int p=0; p<tech->getNumPasses(); ++p)
+                {
+                    Ogre::Pass* pass = tech->getPass(p);
+                    for (int tex=0; tex<pass->getNumTextureUnitStates(); ++tex)
+                    {
+                        Ogre::TextureUnitState* tus = pass->getTextureUnitState(tex);
+                        tus->setTextureName("textures\\" + texture);
+                    }
+                }
+            }
+        }
+    }
+
     mEffects.push_back(params);
 }
 
@@ -1045,7 +1122,9 @@ void Animation::updateEffects(float duration)
         NifOgre::ObjectList& objects = it->mObjects;
         for(size_t i = 0; i < objects.mControllers.size() ;i++)
         {
-            static_cast<EffectAnimationValue*> (objects.mControllers[i].getSource().get())->addTime(duration);
+            EffectAnimationValue* value = dynamic_cast<EffectAnimationValue*>(objects.mControllers[i].getSource().get());
+            if (value)
+                value->addTime(duration);
 
             objects.mControllers[i].update();
         }
@@ -1058,7 +1137,9 @@ void Animation::updateEffects(float duration)
                 float remainder = objects.mControllers[0].getSource()->getValue() - objects.mMaxControllerLength;
                 for(size_t i = 0; i < objects.mControllers.size() ;i++)
                 {
-                    static_cast<EffectAnimationValue*> (objects.mControllers[i].getSource().get())->resetTime(remainder);
+                    EffectAnimationValue* value = dynamic_cast<EffectAnimationValue*>(objects.mControllers[i].getSource().get());
+                    if (value)
+                        value->resetTime(remainder);
                 }
             }
             else
@@ -1070,6 +1151,23 @@ void Animation::updateEffects(float duration)
         }
          ++it;
     }
+}
+
+// TODO: Should not be here
+Ogre::Vector3 Animation::getEnchantmentColor(MWWorld::Ptr item)
+{
+    Ogre::Vector3 result(1,1,1);
+    std::string enchantmentName = item.getClass().getEnchantment(item);
+    if (enchantmentName.empty())
+        return result;
+    const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(enchantmentName);
+    assert (enchantment->mEffects.mList.size());
+    const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(
+            enchantment->mEffects.mList.front().mEffectID);
+    result.x = magicEffect->mData.mRed / 255.f;
+    result.y = magicEffect->mData.mGreen / 255.f;
+    result.z = magicEffect->mData.mBlue / 255.f;
+    return result;
 }
 
 
@@ -1088,9 +1186,10 @@ ObjectAnimation::ObjectAnimation(const MWWorld::Ptr& ptr, const std::string &mod
         small = false;
 
     float dist = small ? Settings::Manager::getInt("small object distance", "Viewing distance") : 0.0f;
+    Ogre::Vector3 col = getEnchantmentColor(ptr);
     setRenderProperties(mObjectRoot, (mPtr.getTypeName() == typeid(ESM::Static).name()) ?
                                      (small ? RV_StaticsSmall : RV_Statics) : RV_Misc,
-                        RQG_Main, RQG_Alpha, dist);
+                        RQG_Main, RQG_Alpha, dist, !ptr.getClass().getEnchantment(ptr).empty(), &col);
 }
 
 void ObjectAnimation::addLight(const ESM::Light *light)

@@ -420,8 +420,6 @@ namespace MWGui
         }
         mSkillWidgets.clear();
 
-        mSkillView->setViewOffset (MyGUI::IntPoint(0,0));
-
         const int valueSize = 40;
         MyGUI::IntCoord coord1(10, 0, mSkillView->getWidth() - (10 + valueSize) - 24, 18);
         MyGUI::IntCoord coord2(coord1.left + coord1.width, coord1.top, valueSize, coord1.height);

@@ -49,10 +49,10 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
             {
                 int row =selectedRows.begin()->row();
 
-                int column = mModel->findColumnIndex (CSMWorld::Columns::ColumnId_Topic);
+                int column = mModel->searchColumnIndex (CSMWorld::Columns::ColumnId_Topic);
 
                 if (column==-1)
-                    column = mModel->findColumnIndex (CSMWorld::Columns::ColumnId_Journal);
+                    column = mModel->searchColumnIndex (CSMWorld::Columns::ColumnId_Journal);
 
                 if (column!=-1)
                 {

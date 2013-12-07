@@ -11,11 +11,11 @@
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/containerstore.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 
 #include "inventorywindow.hpp"
-#include "tradewindow.hpp"
 #include "tooltips.hpp"
 
 namespace MWGui
@@ -142,7 +142,7 @@ namespace MWGui
         pcStats.increaseSkill (skillId, *class_, true);
 
         // remove gold
-        MWBase::Environment::get().getWindowManager()->getTradeWindow()->addOrRemoveGold(-price);
+        player.getClass().getContainerStore(player).remove("gold_001", price, player);
 
         // go back to game mode
         MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Training);

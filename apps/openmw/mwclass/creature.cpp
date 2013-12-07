@@ -98,6 +98,8 @@ namespace MWClass
             data->mContainerStore.fill(ref->mBase->mInventory, getId(ptr),
                                        MWBase::Environment::get().getWorld()->getStore());
 
+            data->mContainerStore.add("gold_001", ref->mBase->mData.mGold, ptr);
+
             // store
             ptr.getRefData().setCustomData (data.release());
         }

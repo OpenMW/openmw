@@ -19,7 +19,6 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
-#include "../mwworld/manualref.hpp"
 #include "../mwworld/containerstore.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
@@ -348,12 +347,8 @@ namespace MWScript
                     const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
                     store.get<ESM::Creature>().find(creature); // This line throws an exception if it can't find the creature
 
-                    MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), gem, 1);
-
-                    ref.getPtr().getCellRef().mSoul = creature;
-
-                    MWWorld::Class::get (ptr).getContainerStore (ptr).add (ref.getPtr(), ptr);
-
+                    MWWorld::Ptr item = *ptr.getClass().getContainerStore(ptr).add(gem, 1, ptr);
+                    item.getCellRef().mSoul = creature;
                 }
         };
 

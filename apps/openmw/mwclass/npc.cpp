@@ -20,6 +20,7 @@
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/movement.hpp"
+#include "../mwmechanics/spellcasting.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
@@ -183,8 +184,11 @@ namespace MWClass
             }
 
             // creature stats
+            int gold=0;
             if(ref->mBase->mNpdt52.mGold != -10)
             {
+                gold = ref->mBase->mNpdt52.mGold;
+
                 for (int i=0; i<27; ++i)
                     data->mNpcStats.getSkill (i).setBase (ref->mBase->mNpdt52.mSkills[i]);
 
@@ -206,6 +210,8 @@ namespace MWClass
             }
             else
             {
+                gold = ref->mBase->mNpdt12.mGold;
+
                 for (int i=0; i<3; ++i)
                     data->mNpcStats.setDynamic (i, 10);
 
@@ -234,6 +240,8 @@ namespace MWClass
 
             // store
             ptr.getRefData().setCustomData (data.release());
+
+            getContainerStore(ptr).add("gold_001", gold, ptr);
 
             getInventoryStore(ptr).autoEquip(ptr);
         }
@@ -455,7 +463,7 @@ namespace MWClass
                 // Check if we have enough charges
                 const float enchantCost = enchantment->mData.mCost;
                 int eSkill = stats.getSkill(ESM::Skill::Enchant).getModified();
-                const float castCost = enchantCost - (enchantCost / 100) * (eSkill - 10);
+                const int castCost = std::max(1.f, enchantCost - (enchantCost / 100) * (eSkill - 10));
 
                 if (weapon.getCellRef().mEnchantmentCharge == -1)
                     weapon.getCellRef().mEnchantmentCharge = enchantment->mData.mCharge;
@@ -467,12 +475,12 @@ namespace MWClass
                 else
                 {
                     weapon.getCellRef().mEnchantmentCharge -= castCost;
-                    // Touch
-                    othercls.getCreatureStats(victim).getActiveSpells().addSpell(enchantmentName, victim, ESM::RT_Touch, weapon.getClass().getName(weapon));
-                    // Self
-                    getCreatureStats(ptr).getActiveSpells().addSpell(enchantmentName, ptr, ESM::RT_Self, weapon.getClass().getName(weapon));
-                    // Target
-                    MWBase::Environment::get().getWorld()->launchProjectile(enchantmentName, enchantment->mEffects, ptr, weapon.getClass().getName(weapon));
+
+                    MWMechanics::CastSpell cast(ptr, victim);
+                    cast.cast(weapon);
+
+                    if (ptr.getRefData().getHandle() == "player")
+                        skillUsageSucceeded (ptr, ESM::Skill::Enchant, 3);
                 }
             }
         }
@@ -932,11 +940,8 @@ namespace MWClass
     bool Npc::apply (const MWWorld::Ptr& ptr, const std::string& id,
         const MWWorld::Ptr& actor) const
     {
-        MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
-
-        /// \todo consider instant effects
-
-        return stats.getActiveSpells().addSpell (id, actor);
+        MWMechanics::CastSpell cast(ptr, ptr);
+        return cast.cast(id);
     }
 
     void Npc::skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType) const

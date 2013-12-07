@@ -18,7 +18,7 @@ namespace MWMechanics
 
             virtual AiEscort *clone() const;
 
-            virtual bool execute (const MWWorld::Ptr& actor);
+            virtual bool execute (const MWWorld::Ptr& actor,float duration);
             ///< \return Package completed?
 
             virtual int getTypeId() const;

@@ -58,7 +58,7 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
     manager.add (CSMWorld::UniversalId::Type_Topics,
         new CSVDoc::SubViewFactoryWithCreator<TableSubView, TopicCreatorFactory>);
 
-    manager.add (CSMWorld::UniversalId::Type_Journal,
+    manager.add (CSMWorld::UniversalId::Type_Journals,
         new CSVDoc::SubViewFactoryWithCreator<TableSubView, JournalCreatorFactory>);
 
     manager.add (CSMWorld::UniversalId::Type_TopicInfos,

@@ -36,7 +36,7 @@ namespace OgreInit
     {
         // Set up logging first
         new Ogre::LogManager;
-        Ogre::Log *log = Ogre::LogManager::getSingleton().createLog(logPath + std::string("Ogre.log"));
+        Ogre::Log *log = Ogre::LogManager::getSingleton().createLog(logPath);
 
         // Disable logging to cout/cerr
         log->setDebugOutputEnabled(false);

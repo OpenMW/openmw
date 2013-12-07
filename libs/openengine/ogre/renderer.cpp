@@ -50,7 +50,7 @@ void OgreRenderer::configure(const std::string &logPath,
                              const std::string& rttMode
                             )
 {
-    mRoot = mOgreInit.init(logPath);
+    mRoot = mOgreInit.init(logPath + "/ogre.log");
 
     RenderSystem* rs = mRoot->getRenderSystemByName(renderSystem);
     if (rs == 0)
