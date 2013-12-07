@@ -39,6 +39,7 @@ option(BUILD_ESMTOOL "build ESM inspector" ON)
 option(BUILD_LAUNCHER "build Launcher" ON)
 option(BUILD_MWINIIMPORTER "build MWiniImporter" ON)
 option(BUILD_OPENCS "build OpenMW Construction Set" ON)
+option(BUILD_WIZARD "build Installation Wizard" ON)
 option(BUILD_WITH_CODE_COVERAGE "Enable code coverage with gconv" OFF)
 option(BUILD_UNITTESTS "Enable Unittests with Google C++ Unittest ang GMock frameworks" OFF)
 
@@ -384,6 +385,10 @@ IF(NOT WIN32 AND NOT APPLE)
         IF(BUILD_OPENCS)
             INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/opencs" DESTINATION "${BINDIR}" )
         ENDIF(BUILD_OPENCS)
+          IF(BUILD_WIZARD)
+            INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/wizard" DESTINATION "${BINDIR}" )
+        ENDIF(BUILD_WIZARD)
+       
 
         # Install licenses
         INSTALL(FILES "DejaVu Font License.txt" DESTINATION "${LICDIR}" )
@@ -434,7 +439,7 @@ IF(NOT WIN32 AND NOT APPLE)
  Data files from the original game is required to run it.")
         SET(CPACK_DEBIAN_PACKAGE_NAME "openmw")
         SET(CPACK_DEBIAN_PACKAGE_VERSION "${VERSION_STRING}")
-        SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW opencs;OpenCS bsatool;Bsatool esmtool;Esmtool omwlauncher;OMWLauncher mwiniimporter;MWiniImporter")
+        SET(CPACK_PACKAGE_EXECUTABLES "openmw;OpenMW opencs;OpenCS bsatool;Bsatool esmtool;Esmtool omwlauncher;OMWLauncher mwiniimporter;MWiniImporter openmw-wizard;OpenMW Wizard")
         SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.11.2), libfreetype6 (>= 2.2.1), libgcc1 (>= 1:4.1.1), libmpg123-0 (>= 1.12.1), libopenal1 (>= 1:1.12.854), libsndfile1 (>= 1.0.23), libstdc++6 (>= 4.4.5), libuuid1 (>= 2.17.2), libqtgui4 (>= 4.7.0)")
 
         SET(CPACK_DEBIAN_PACKAGE_SECTION "Games")
@@ -476,6 +481,10 @@ if(WIN32)
         INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/Release/opencs.exe" DESTINATION ".")
         INSTALL(FILES "${OpenMW_BINARY_DIR}/opencs.cfg" DESTINATION ".")
     ENDIF(BUILD_OPENCS)
+    IF(BUILD_WIZARD)
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/Release/openmw-wizard.exe" DESTINATION ".")
+    ENDIF(BUILD_WIZARD)
+    
 
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION ".")
 
@@ -493,6 +502,9 @@ if(WIN32)
     IF(BUILD_OPENCS)
         SET(CPACK_PACKAGE_EXECUTABLES "${CPACK_PACKAGE_EXECUTABLES};opencs;OpenMW Construction Set")
     ENDIF(BUILD_OPENCS)
+    IF(BUILD_WIZARD)
+        SET(CPACK_PACKAGE_EXECUTABLES "${CPACK_PACKAGE_EXECUTABLES};openmw-wizard;OpenMW Wizard")
+    ENDIF(BUILD_WIZARD)
     SET(CPACK_NSIS_CREATE_ICONS_EXTRA "CreateShortCut '\$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\Readme.lnk' '\$INSTDIR\\\\readme.txt'")
     SET(CPACK_NSIS_DELETE_ICONS_EXTRA "
         !insertmacro MUI_STARTMENU_GETFOLDER Application $MUI_TEMP
@@ -573,6 +585,10 @@ if (BUILD_OPENCS)
    add_subdirectory (apps/opencs)
 endif()
 
+if (BUILD_WIZARD)
+   add_subdirectory(apps/wizard)
+endif()
+
 # UnitTests
 if (BUILD_UNITTESTS)
   add_subdirectory( apps/openmw_test_suite )
@@ -649,6 +665,9 @@ if (WIN32)
     if (BUILD_ESMTOOL)
         set_target_properties(esmtool PROPERTIES COMPILE_FLAGS ${WARNINGS})
     endif (BUILD_ESMTOOL)
+    if (BUILD_WIZARD)
+        set_target_properties(openmw-wizard PROPERTIES COMPILE_FLAGS ${WARNINGS})
+    endif (BUILD_WIZARD)
   endif(MSVC)
 
   # Same for MinGW
