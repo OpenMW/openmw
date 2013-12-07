@@ -106,10 +106,6 @@ NpcAnimation::~NpcAnimation()
 {
     if (!mListenerDisabled)
         mPtr.getClass().getInventoryStore(mPtr).setListener(NULL, mPtr);
-
-    Ogre::SceneManager *sceneMgr = mInsert->getCreator();
-    for(size_t i = 0;i < ESM::PRT_Count;i++)
-        destroyObjectList(sceneMgr, mObjectParts[i]);
 }
 
 
@@ -447,18 +443,18 @@ public:
     }
 };
 
-NifOgre::ObjectList NpcAnimation::insertBoundedPart(const std::string &model, int group, const std::string &bonename, bool enchantedGlow, Ogre::Vector3* glowColor)
+NifOgre::ObjectScenePtr NpcAnimation::insertBoundedPart(const std::string &model, int group, const std::string &bonename, bool enchantedGlow, Ogre::Vector3* glowColor)
 {
-    NifOgre::ObjectList objects = NifOgre::Loader::createObjects(mSkelBase, bonename, mInsert, model);
+    NifOgre::ObjectScenePtr objects = NifOgre::Loader::createObjects(mSkelBase, bonename, mInsert, model);
     setRenderProperties(objects, (mViewMode == VM_FirstPerson) ? RV_FirstPerson : mVisibilityFlags, RQG_Main, RQG_Alpha, 0,
                         enchantedGlow, glowColor);
 
-    std::for_each(objects.mEntities.begin(), objects.mEntities.end(), SetObjectGroup(group));
-    std::for_each(objects.mParticles.begin(), objects.mParticles.end(), SetObjectGroup(group));
+    std::for_each(objects->mEntities.begin(), objects->mEntities.end(), SetObjectGroup(group));
+    std::for_each(objects->mParticles.begin(), objects->mParticles.end(), SetObjectGroup(group));
 
-    if(objects.mSkelBase)
+    if(objects->mSkelBase)
     {
-        Ogre::AnimationStateSet *aset = objects.mSkelBase->getAllAnimationStates();
+        Ogre::AnimationStateSet *aset = objects->mSkelBase->getAllAnimationStates();
         Ogre::AnimationStateIterator asiter = aset->getAnimationStateIterator();
         while(asiter.hasMoreElements())
         {
@@ -466,7 +462,7 @@ NifOgre::ObjectList NpcAnimation::insertBoundedPart(const std::string &model, in
             state->setEnabled(false);
             state->setLoop(false);
         }
-        Ogre::SkeletonInstance *skelinst = objects.mSkelBase->getSkeleton();
+        Ogre::SkeletonInstance *skelinst = objects->mSkelBase->getSkeleton();
         Ogre::Skeleton::BoneIterator boneiter = skelinst->getBoneIterator();
         while(boneiter.hasMoreElements())
             boneiter.getNext()->setManuallyControlled(true);
@@ -494,11 +490,13 @@ Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
 
     for(size_t i = 0;i < ESM::PRT_Count;i++)
     {
-        std::vector<Ogre::Controller<Ogre::Real> >::iterator ctrl(mObjectParts[i].mControllers.begin());
-        for(;ctrl != mObjectParts[i].mControllers.end();ctrl++)
+        if (mObjectParts[i].isNull())
+            continue;
+        std::vector<Ogre::Controller<Ogre::Real> >::iterator ctrl(mObjectParts[i]->mControllers.begin());
+        for(;ctrl != mObjectParts[i]->mControllers.end();ctrl++)
             ctrl->update();
 
-        Ogre::Entity *ent = mObjectParts[i].mSkelBase;
+        Ogre::Entity *ent = mObjectParts[i]->mSkelBase;
         if(!ent) continue;
         updateSkeletonInstance(baseinst, ent->getSkeleton());
         ent->getAllAnimationStates()->_notifyDirty();
@@ -512,7 +510,7 @@ void NpcAnimation::removeIndividualPart(ESM::PartReferenceType type)
     mPartPriorities[type] = 0;
     mPartslots[type] = -1;
 
-    destroyObjectList(mInsert->getCreator(), mObjectParts[type]);
+    mObjectParts[type].setNull();
 }
 
 void NpcAnimation::reserveIndividualPart(ESM::PartReferenceType type, int group, int priority)
@@ -544,12 +542,12 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
     mPartPriorities[type] = priority;
 
     mObjectParts[type] = insertBoundedPart(mesh, group, sPartList.at(type), enchantedGlow, glowColor);
-    if(mObjectParts[type].mSkelBase)
+    if(mObjectParts[type]->mSkelBase)
     {
-        Ogre::SkeletonInstance *skel = mObjectParts[type].mSkelBase->getSkeleton();
-        if(mObjectParts[type].mSkelBase->isParentTagPoint())
+        Ogre::SkeletonInstance *skel = mObjectParts[type]->mSkelBase->getSkeleton();
+        if(mObjectParts[type]->mSkelBase->isParentTagPoint())
         {
-            Ogre::Node *root = mObjectParts[type].mSkelBase->getParentNode();
+            Ogre::Node *root = mObjectParts[type]->mSkelBase->getParentNode();
             if(skel->hasBone("BoneOffset"))
             {
                 Ogre::Bone *offset = skel->getBone("BoneOffset");
@@ -571,8 +569,8 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
     // TODO:
     // type == ESM::PRT_Weapon should get an animation source based on the current offset
     // of the weapon attack animation (from its beginning, or start marker?)
-    std::vector<Ogre::Controller<Ogre::Real> >::iterator ctrl(mObjectParts[type].mControllers.begin());
-    for(;ctrl != mObjectParts[type].mControllers.end();ctrl++)
+    std::vector<Ogre::Controller<Ogre::Real> >::iterator ctrl(mObjectParts[type]->mControllers.begin());
+    for(;ctrl != mObjectParts[type]->mControllers.end();ctrl++)
     {
         if(ctrl->getSource().isNull())
         {

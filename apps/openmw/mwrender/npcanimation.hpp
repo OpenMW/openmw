@@ -46,7 +46,7 @@ private:
     bool mListenerDisabled;
 
     // Bounded Parts
-    NifOgre::ObjectList mObjectParts[ESM::PRT_Count];
+    NifOgre::ObjectScenePtr mObjectParts[ESM::PRT_Count];
 
     const ESM::NPC *mNpc;
     std::string    mHeadModel;
@@ -66,7 +66,7 @@ private:
 
     void updateNpcBase();
 
-    NifOgre::ObjectList insertBoundedPart(const std::string &model, int group, const std::string &bonename,
+    NifOgre::ObjectScenePtr insertBoundedPart(const std::string &model, int group, const std::string &bonename,
                                           bool enchantedGlow, Ogre::Vector3* glowColor=NULL);
 
     void removeIndividualPart(ESM::PartReferenceType type);
