@@ -59,6 +59,15 @@ std::string getVampireHead(const std::string& race, bool female)
 namespace MWRender
 {
 
+float SayAnimationValue::getValue() const
+{
+    if (MWBase::Environment::get().getSoundManager()->sayDone(mReference))
+        return 0;
+    else
+        // TODO: Use the loudness of the currently playing sound
+        return 1;
+}
+
 static NpcAnimation::PartBoneMap createPartListMap()
 {
     NpcAnimation::PartBoneMap result;
@@ -114,6 +123,8 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int v
     mFirstPersonOffset(0.f, 0.f, 0.f)
 {
     mNpc = mPtr.get<ESM::NPC>()->mBase;
+
+    mSayAnimationValue = Ogre::SharedPtr<SayAnimationValue>(new SayAnimationValue(mPtr));
 
     for(size_t i = 0;i < ESM::PRT_Count;i++)
     {
@@ -558,15 +569,18 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
     }
 
     // TODO:
-    // type == ESM::PRT_Head should get an animation source based on the current output of
-    // the actor's 'say' sound (0 = silent, 1 = loud?).
     // type == ESM::PRT_Weapon should get an animation source based on the current offset
     // of the weapon attack animation (from its beginning, or start marker?)
     std::vector<Ogre::Controller<Ogre::Real> >::iterator ctrl(mObjectParts[type].mControllers.begin());
     for(;ctrl != mObjectParts[type].mControllers.end();ctrl++)
     {
         if(ctrl->getSource().isNull())
+        {
             ctrl->setSource(mNullAnimationValuePtr);
+
+            if (type == ESM::PRT_Head)
+                ctrl->setSource(mSayAnimationValue);
+        }
     }
 
     return true;

@@ -13,6 +13,18 @@ namespace ESM
 namespace MWRender
 {
 
+class SayAnimationValue : public Ogre::ControllerValue<Ogre::Real>
+{
+private:
+    MWWorld::Ptr mReference;
+public:
+    SayAnimationValue(MWWorld::Ptr reference) : mReference(reference) {}
+
+    virtual Ogre::Real getValue() const;
+    virtual void setValue(Ogre::Real value)
+    { }
+};
+
 class NpcAnimation : public Animation, public MWWorld::InventoryStoreListener
 {
 public:
@@ -49,6 +61,8 @@ private:
     int mPartPriorities[ESM::PRT_Count];
 
     Ogre::Vector3 mFirstPersonOffset;
+
+    Ogre::SharedPtr<SayAnimationValue> mSayAnimationValue;
 
     void updateNpcBase();
 
