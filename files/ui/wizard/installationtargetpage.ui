@@ -54,16 +54,6 @@
     </layout>
    </item>
    <item>
-    <widget class="QLabel" name="explanationLabel">
-     <property name="text">
-      <string>Click Next to continue. If you would like to select a different location, click Browse. </string>
-     </property>
-     <property name="wordWrap">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
       <widget class="QLineEdit" name="targetLineEdit"/>

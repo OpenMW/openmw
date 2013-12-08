@@ -1,14 +1,29 @@
 set(WIZARD
+    componentselectionpage.cpp
+    conclusionpage.cpp
+    existinginstallationpage.cpp
+    importpage.cpp
+    installationpage.cpp
+    installationtargetpage.cpp
+    intropage.cpp
     main.cpp
-    wizard.cpp
-
+    mainwizard.cpp
+    methodselectionpage.cpp
 )
 # if(NOT WIN32)
 #     LIST(APPEND WIZARD unshieldthread.cpp)
 # endif(NOT WIN32)
 
 set(WIZARD_HEADER
-    wizard.hpp
+    componentselectionpage.hpp
+    conclusionpage.hpp
+    existinginstallationpage.hpp
+    importpage.hpp
+    installationpage.hpp
+    installationtargetpage.hpp
+    intropage.hpp
+    mainwizard.hpp
+    methodselectionpage.hpp
 )
 # if(NOT WIN32)
 #     LIST(APPEND WIZARD_HEADER unshieldthread.hpp)
@@ -17,7 +32,15 @@ set(WIZARD_HEADER
 
 # Headers that must be pre-processed
 set(WIZARD_HEADER_MOC
-    wizard.hpp
+    componentselectionpage.hpp
+    conclusionpage.hpp
+    existinginstallationpage.hpp
+    importpage.hpp
+    installationpage.hpp
+    installationtargetpage.hpp
+    intropage.hpp
+    mainwizard.hpp
+    methodselectionpage.hpp
 )
 
 # if(NOT WIN32)
@@ -28,7 +51,6 @@ set(WIZARD_HEADER_MOC
 set(WIZARD_UI
     ${CMAKE_SOURCE_DIR}/files/ui/wizard/componentselectionpage.ui
     ${CMAKE_SOURCE_DIR}/files/ui/wizard/conclusionpage.ui
-    ${CMAKE_SOURCE_DIR}/files/ui/wizard/configurationpage.ui
     ${CMAKE_SOURCE_DIR}/files/ui/wizard/existinginstallationpage.ui
     ${CMAKE_SOURCE_DIR}/files/ui/wizard/importpage.ui
     ${CMAKE_SOURCE_DIR}/files/ui/wizard/installationpage.ui

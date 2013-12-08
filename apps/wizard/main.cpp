@@ -3,6 +3,8 @@
 #include <QDir>
 #include <QDebug>
 
+#include "mainwizard.hpp"
+
 #ifdef MAC_OS_X_VERSION_MIN_REQUIRED
 #undef MAC_OS_X_VERSION_MIN_REQUIRED
 // We need to do this because of Qt: https://bugreports.qt-project.org/browse/QTBUG-22154
@@ -39,13 +41,8 @@ int main(int argc, char *argv[])
     // Support non-latin characters
     QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
 
-//    Launcher::MainDialog mainWin;
+    Wizard::MainWizard wizard;
 
-//    if (mainWin.setup()) {
-//        mainWin.show();
-//    } else {
-//        return 0;
-//    }
-
+    wizard.show();
     return app.exec();
 }
