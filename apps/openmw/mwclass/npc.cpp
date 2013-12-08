@@ -63,7 +63,6 @@ namespace
         bool male = (npc->mFlags & ESM::NPC::Female) == 0;
 
         int level = creatureStats.getLevel();
-
         for (int i=0; i<ESM::Attribute::Length; ++i)
         {
             const ESM::Race::MaleFemale& attribute = race->mData.mAttributeValues[i];
@@ -85,7 +84,7 @@ namespace
         }
 
         // skill bonus
-        for (int attribute=0; attribute<ESM::Attribute::Length; ++attribute)
+        for (int attribute=0; attribute < ESM::Attribute::Length; ++attribute)
         {
             float modifierSum = 0;
 
@@ -131,6 +130,89 @@ namespace
 
         creatureStats.setHealth(static_cast<int> (0.5 * (strength + endurance)) + multiplier * (creatureStats.getLevel() - 1));
     }
+
+    /**
+     * @brief autoCalculateSkills
+     *
+     * Skills are calculated with following formulae ( http://www.uesp.net/wiki/Morrowind:NPCs#Skills ):
+     *
+     * Skills: (Level - 1) × (Majority Multiplier + Specialization Multiplier)
+     *
+     *         The Majority Multiplier is 1.0 for a Major or Minor Skill, or 0.1 for a Miscellaneous Skill.
+     *
+     *         The Specialization Multiplier is 0.5 for a Skill in the same Specialization as the class,
+     *         zero for other Skills.
+     *
+     * and by adding class, race, specialization bonus.
+     */
+    void autoCalculateSkills(const ESM::NPC* npc, MWMechanics::NpcStats& npcStats)
+    {
+        const ESM::Class *class_ =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(npc->mClass);
+
+        unsigned int level = npcStats.getLevel();
+
+        const ESM::Race *race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npc->mRace);
+
+
+        for (int i = 0; i < 2; ++i)
+        {
+            int bonus = (i==0) ? 10 : 25;
+
+            for (int i2 = 0; i2 < 5; ++i2)
+            {
+                int index = class_->mData.mSkills[i2][i];
+                if (index >= 0 && index < ESM::Skill::Length)
+                {
+                    npcStats.getSkill(index).setBase (npcStats.getSkill(index).getBase() + bonus);
+                }
+            }
+        }
+
+        for (int skillIndex = 0; skillIndex < ESM::Skill::Length; ++skillIndex)
+        {
+            float majorMultiplier = 0.1f;
+            float specMultiplier = 0.0f;
+
+            int raceBonus = 0;
+            int specBonus = 0;
+
+            for (int raceSkillIndex = 0; raceSkillIndex < 7; ++raceSkillIndex)
+            {
+              if (race->mData.mBonus[raceSkillIndex].mSkill == skillIndex)
+              {
+                  raceBonus = race->mData.mBonus[raceSkillIndex].mBonus;
+                  break;
+              }
+            }
+
+            for (int k = 0; k < 5; ++k)
+            {
+              // is this a minor or major skill?
+              if ((class_->mData.mSkills[k][0] == skillIndex) || (class_->mData.mSkills[k][1] == skillIndex))
+              {
+                majorMultiplier = 1.0f;
+                break;
+              }
+            }
+
+            // is this skill in the same Specialization as the class?
+            const ESM::Skill* skill = MWBase::Environment::get().getWorld()->getStore().get<ESM::Skill>().find(skillIndex);
+            if (skill->mData.mSpecialization == class_->mData.mSpecialization)
+            {
+              specMultiplier = 0.5f;
+              specBonus = 5;
+            }
+
+            npcStats.getSkill(skillIndex).setBase(
+                  std::min(
+                    npcStats.getSkill(skillIndex).getBase()
+                    + 5
+                    + raceBonus
+                    + specBonus
+                    + static_cast<int>((level-1) * (majorMultiplier + specMultiplier)), 100.0f));
+        }
+    }
 }
 
 namespace MWClass
@@ -173,7 +255,7 @@ namespace MWClass
             {
                 std::string faction = ref->mBase->mFaction;
                 Misc::StringUtils::toLower(faction);
-                if(ref->mBase->mNpdt52.mGold != -10)
+                if(ref->mBase->mNpdtType != ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
                 {
                     data->mNpcStats.getFactionRanks()[faction] = (int)ref->mBase->mNpdt52.mRank;
                 }
@@ -185,11 +267,11 @@ namespace MWClass
 
             // creature stats
             int gold=0;
-            if(ref->mBase->mNpdt52.mGold != -10)
+            if(ref->mBase->mNpdtType != ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
             {
                 gold = ref->mBase->mNpdt52.mGold;
 
-                for (int i=0; i<27; ++i)
+                for (unsigned int i=0; i< ESM::Skill::Length; ++i)
                     data->mNpcStats.getSkill (i).setBase (ref->mBase->mNpdt52.mSkills[i]);
 
                 data->mNpcStats.getAttribute(0).set (ref->mBase->mNpdt52.mStrength);
@@ -220,6 +302,7 @@ namespace MWClass
                 data->mNpcStats.setReputation(ref->mBase->mNpdt12.mReputation);
 
                 autoCalculateAttributes(ref->mBase, data->mNpcStats);
+                autoCalculateSkills(ref->mBase, data->mNpcStats);
             }
 
             data->mNpcStats.getAiSequence().fill(ref->mBase->mAiPackage);
