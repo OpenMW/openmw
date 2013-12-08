@@ -306,7 +306,7 @@ public:
 class NiFlipController : public Controller
 {
 public:
-    int mTexSlot;
+    int mTexSlot; // NiTexturingProperty::TextureType
     float mDelta; // Time between two flips. delta = (start_time - stop_time) / num_sources
     NiSourceTextureList mSources;
 

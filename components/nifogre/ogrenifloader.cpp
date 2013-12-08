@@ -109,6 +109,74 @@ ObjectScene::~ObjectScene()
     mSkelBase = NULL;
 }
 
+// Animates a texture
+class FlipController
+{
+public:
+    class Value : public Ogre::ControllerValue<Ogre::Real>
+    {
+    private:
+        Ogre::MovableObject* mMovable;
+        int mTexSlot;
+        float mDelta;
+        std::vector<std::string> mTextures;
+        MaterialControllerManager* mMaterialControllerMgr;
+
+    public:
+        Value(Ogre::MovableObject *movable, const Nif::NiFlipController *ctrl, MaterialControllerManager* materialControllerMgr)
+          : mMovable(movable)
+          , mMaterialControllerMgr(materialControllerMgr)
+        {
+            mTexSlot = ctrl->mTexSlot;
+            mDelta = ctrl->mDelta;
+            for (unsigned int i=0; i<ctrl->mSources.length(); ++i)
+            {
+                const Nif::NiSourceTexture* tex = ctrl->mSources[i].getPtr();
+                if (!tex->external)
+                    std::cerr << "Warning: Found internal texture, ignoring." << std::endl;
+                mTextures.push_back(NIFMaterialLoader::findTextureName(tex->filename));
+            }
+        }
+
+        virtual Ogre::Real getValue() const
+        {
+            // Should not be called
+            return 0.0f;
+        }
+
+        virtual void setValue(Ogre::Real time)
+        {
+            if (mDelta == 0)
+                return;
+            int curTexture = int(time / mDelta) % mTextures.size();
+
+            Ogre::MaterialPtr mat = mMaterialControllerMgr->getWritableMaterial(mMovable);
+            Ogre::Material::TechniqueIterator techs = mat->getTechniqueIterator();
+            while(techs.hasMoreElements())
+            {
+                Ogre::Technique *tech = techs.getNext();
+                Ogre::Technique::PassIterator passes = tech->getPassIterator();
+                while(passes.hasMoreElements())
+                {
+                    Ogre::Pass *pass = passes.getNext();
+                    Ogre::Pass::TextureUnitStateIterator textures = pass->getTextureUnitStateIterator();
+                    while (textures.hasMoreElements())
+                    {
+                        Ogre::TextureUnitState *texture = textures.getNext();
+                        if ((texture->getName() == "diffuseMap" && mTexSlot == Nif::NiTexturingProperty::BaseTexture)
+                                || (texture->getName() == "normalMap" && mTexSlot == Nif::NiTexturingProperty::BumpTexture)
+                                || (texture->getName() == "detailMap" && mTexSlot == Nif::NiTexturingProperty::DetailTexture)
+                                || (texture->getName() == "emissiveMap" && mTexSlot == Nif::NiTexturingProperty::GlowTexture))
+                            texture->setTextureName(mTextures[curTexture]);
+                    }
+                }
+            }
+        }
+    };
+
+    typedef DefaultFunction Function;
+};
+
 class AlphaController
 {
 public:
@@ -633,15 +701,15 @@ class NIFObjectLoader
         const Nif::NiWireframeProperty *wireprop = NULL;
         node->getProperties(texprop, matprop, alphaprop, vertprop, zprop, specprop, wireprop);
 
+        Ogre::ControllerValueRealPtr srcval((animflags&Nif::NiNode::AnimFlag_AutoPlay) ?
+                                            Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
+                                            Ogre::ControllerValueRealPtr());
+
         if(matprop)
         {
             Nif::ControllerPtr ctrls = matprop->controller;
             while(!ctrls.empty())
             {
-                Ogre::ControllerValueRealPtr srcval((animflags&Nif::NiNode::AnimFlag_AutoPlay) ?
-                                                    Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
-                                                    Ogre::ControllerValueRealPtr());
-
                 if (ctrls->recType == Nif::RC_NiAlphaController)
                 {
                     const Nif::NiAlphaController *alphaCtrl = dynamic_cast<const Nif::NiAlphaController*>(ctrls.getPtr());
@@ -656,6 +724,27 @@ class NIFObjectLoader
                     const Nif::NiMaterialColorController *matCtrl = dynamic_cast<const Nif::NiMaterialColorController*>(ctrls.getPtr());
                     Ogre::ControllerValueRealPtr dstval(OGRE_NEW MaterialColorController::Value(movable, matCtrl->data.getPtr(), &scene->mMaterialControllerMgr));
                     AlphaController::Function* function = OGRE_NEW AlphaController::Function(matCtrl, (animflags&Nif::NiNode::AnimFlag_AutoPlay));
+                    scene->mMaxControllerLength = std::max(function->mStopTime, scene->mMaxControllerLength);
+                    Ogre::ControllerFunctionRealPtr func(function);
+                    scene->mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
+                }
+
+                ctrls = ctrls->next;
+            }
+        }
+        if (texprop)
+        {
+            Nif::ControllerPtr ctrls = texprop->controller;
+            while(!ctrls.empty())
+            {
+                if (ctrls->recType == Nif::RC_NiFlipController)
+                {
+                    const Nif::NiFlipController *flipCtrl = dynamic_cast<const Nif::NiFlipController*>(ctrls.getPtr());
+
+
+                    Ogre::ControllerValueRealPtr dstval(OGRE_NEW FlipController::Value(
+                        movable, flipCtrl, &scene->mMaterialControllerMgr));
+                    FlipController::Function* function = OGRE_NEW FlipController::Function(flipCtrl, (animflags&Nif::NiNode::AnimFlag_AutoPlay));
                     scene->mMaxControllerLength = std::max(function->mStopTime, scene->mMaxControllerLength);
                     Ogre::ControllerFunctionRealPtr func(function);
                     scene->mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
