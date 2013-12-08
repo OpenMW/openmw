@@ -149,7 +149,7 @@ namespace MWGui
 
                 // health, magicka, fatigue tooltip
                 MyGUI::Widget* w;
-                std::string valStr =  boost::lexical_cast<std::string>(value.getCurrent()) + "/" + boost::lexical_cast<std::string>(value.getModified());
+                std::string valStr =  boost::lexical_cast<std::string>(int(value.getCurrent())) + "/" + boost::lexical_cast<std::string>(int(value.getModified()));
                 if (i==0)
                 {
                     getWidget(w, "Health");

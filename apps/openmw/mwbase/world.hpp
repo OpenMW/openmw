@@ -419,6 +419,8 @@ namespace MWBase
 
             virtual void launchProjectile (const std::string& id, bool stack, const ESM::EffectList& effects,
                                            const MWWorld::Ptr& actor, const std::string& sourceName) = 0;
+
+            virtual void breakInvisibility (const MWWorld::Ptr& actor) = 0;
     };
 }
 

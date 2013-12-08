@@ -501,6 +501,7 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
     {
         if(mUpperBodyState == UpperCharState_WeapEquiped)
         {
+            MWBase::Environment::get().getWorld()->breakInvisibility(mPtr);
             mAttackType.clear();
             if(mWeaponType == WeapType_Spell)
             {

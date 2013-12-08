@@ -517,6 +517,8 @@ void OMW::Engine::activate()
 
     std::string script = MWWorld::Class::get (ptr).getScript (ptr);
 
+    MWBase::Environment::get().getWorld()->breakInvisibility(MWBase::Environment::get().getWorld()->getPlayer().getPlayer());
+
     if (!script.empty())
     {
         MWBase::Environment::get().getWorld()->getLocalScripts().setIgnore (ptr);

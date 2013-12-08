@@ -2238,4 +2238,10 @@ namespace MWWorld
             deleteObject(movedPtr);
         }
     }
+
+    void World::breakInvisibility(const Ptr &actor)
+    {
+        actor.getClass().getCreatureStats(actor).getActiveSpells().purgeEffect(ESM::MagicEffect::Invisibility);
+        actor.getClass().getInventoryStore(actor).purgeEffect(ESM::MagicEffect::Invisibility);
+    }
 }

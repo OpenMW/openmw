@@ -615,3 +615,8 @@ void MWWorld::InventoryStore::rechargeItems(float duration)
                                                               it->second);
     }
 }
+
+void MWWorld::InventoryStore::purgeEffect(short effectId)
+{
+    mMagicEffects.add(MWMechanics::EffectKey(effectId), -mMagicEffects.get(MWMechanics::EffectKey(effectId)).mMagnitude);
+}
