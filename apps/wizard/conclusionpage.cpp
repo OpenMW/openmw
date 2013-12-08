@@ -5,3 +5,8 @@ Wizard::ConclusionPage::ConclusionPage(QWidget *parent) :
 {
     setupUi(this);
 }
+
+int Wizard::ConclusionPage::nextId() const
+{
+    return -1;
+}

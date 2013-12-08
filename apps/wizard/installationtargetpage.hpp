@@ -14,6 +14,8 @@ namespace Wizard
     public:
         InstallationTargetPage(QWidget *parent = 0);
 
+        int nextId() const;
+
     };
 
 }
