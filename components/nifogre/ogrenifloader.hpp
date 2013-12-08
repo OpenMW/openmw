@@ -37,6 +37,19 @@
 namespace NifOgre
 {
 
+/**
+ * @brief Clones materials as necessary to not make controllers affect other objects (that share the original material).
+ */
+class MaterialControllerManager
+{
+public:
+    ~MaterialControllerManager();
+    Ogre::MaterialPtr getWritableMaterial (Ogre::MovableObject* movable);
+
+private:
+    std::map<Ogre::MovableObject*, Ogre::MaterialPtr> mClonedMaterials;
+};
+
 typedef std::multimap<float,std::string> TextKeyMap;
 static const char sTextKeyExtraDataID[] = "TextKeyExtraData";
 struct ObjectScene {
@@ -51,6 +64,8 @@ struct ObjectScene {
     float mMaxControllerLength;
 
     std::map<int,TextKeyMap> mTextKeys;
+
+    MaterialControllerManager mMaterialControllerMgr;
 
     std::vector<Ogre::Controller<Ogre::Real> > mControllers;
 

@@ -37,16 +37,56 @@
 #include <OgreSkeletonManager.h>
 #include <OgreControllerManager.h>
 
+#include <extern/shiny/Main/Factory.hpp>
+
 #include <components/nif/node.hpp>
 #include <components/misc/stringops.hpp>
 
 #include "skeleton.hpp"
 #include "material.hpp"
 #include "mesh.hpp"
+#include "controller.hpp"
 
 namespace NifOgre
 {
 
+Ogre::MaterialPtr MaterialControllerManager::getWritableMaterial(Ogre::MovableObject *movable)
+{
+    if (mClonedMaterials.find(movable) != mClonedMaterials.end())
+        return mClonedMaterials[movable];
+
+    else
+    {
+        Ogre::MaterialPtr mat;
+        if (Ogre::Entity* ent = dynamic_cast<Ogre::Entity*>(movable))
+            mat = ent->getSubEntity(0)->getMaterial();
+        else if (Ogre::ParticleSystem* partSys = dynamic_cast<Ogre::ParticleSystem*>(movable))
+            mat = Ogre::MaterialManager::getSingleton().getByName(partSys->getMaterialName());
+
+        // Make sure techniques are created
+        sh::Factory::getInstance()._ensureMaterial(mat->getName(), "Default");
+
+        static int count=0;
+        mat = mat->clone(mat->getName() + Ogre::StringConverter::toString(count++));
+
+        mClonedMaterials[movable] = mat;
+
+        if (Ogre::Entity* ent = dynamic_cast<Ogre::Entity*>(movable))
+            ent->getSubEntity(0)->setMaterial(mat);
+        else if (Ogre::ParticleSystem* partSys = dynamic_cast<Ogre::ParticleSystem*>(movable))
+            partSys->setMaterialName(mat->getName());
+
+        return mat;
+    }
+}
+
+MaterialControllerManager::~MaterialControllerManager()
+{
+    for (std::map<Ogre::MovableObject*, Ogre::MaterialPtr>::iterator it = mClonedMaterials.begin(); it != mClonedMaterials.end(); ++it)
+    {
+        Ogre::MaterialManager::getSingleton().remove(it->second->getName());
+    }
+}
 
 ObjectScene::~ObjectScene()
 {
@@ -69,44 +109,100 @@ ObjectScene::~ObjectScene()
     mSkelBase = NULL;
 }
 
-// FIXME: Should not be here.
-class DefaultFunction : public Ogre::ControllerFunction<Ogre::Real>
+class AlphaController
 {
-private:
-    float mFrequency;
-    float mPhase;
-    float mStartTime;
 public:
-    float mStopTime;
-
-public:
-    DefaultFunction(const Nif::Controller *ctrl, bool deltaInput)
-        : Ogre::ControllerFunction<Ogre::Real>(deltaInput)
-        , mFrequency(ctrl->frequency)
-        , mPhase(ctrl->phase)
-        , mStartTime(ctrl->timeStart)
-        , mStopTime(ctrl->timeStop)
+    class Value : public Ogre::ControllerValue<Ogre::Real>, public ValueInterpolator
     {
-        if(mDeltaInput)
-            mDeltaCount = mPhase;
-    }
+    private:
+        Ogre::MovableObject* mMovable;
+        Nif::FloatKeyList mData;
+        MaterialControllerManager* mMaterialControllerMgr;
 
-    virtual Ogre::Real calculate(Ogre::Real value)
-    {
-        if(mDeltaInput)
+    public:
+        Value(Ogre::MovableObject *movable, const Nif::NiFloatData *data, MaterialControllerManager* materialControllerMgr)
+          : mMovable(movable)
+          , mData(data->mKeyList)
+          , mMaterialControllerMgr(materialControllerMgr)
         {
-            mDeltaCount += value*mFrequency;
-            if(mDeltaCount < mStartTime)
-                mDeltaCount = mStopTime - std::fmod(mStartTime - mDeltaCount,
-                                                    mStopTime - mStartTime);
-            mDeltaCount = std::fmod(mDeltaCount - mStartTime,
-                                    mStopTime - mStartTime) + mStartTime;
-            return mDeltaCount;
         }
 
-        value = std::min(mStopTime, std::max(mStartTime, value+mPhase));
-        return value;
-    }
+        virtual Ogre::Real getValue() const
+        {
+            // Should not be called
+            return 0.0f;
+        }
+
+        virtual void setValue(Ogre::Real time)
+        {
+            float value = interpKey(mData.mKeys, time);
+            Ogre::MaterialPtr mat = mMaterialControllerMgr->getWritableMaterial(mMovable);
+            Ogre::Material::TechniqueIterator techs = mat->getTechniqueIterator();
+            while(techs.hasMoreElements())
+            {
+                Ogre::Technique *tech = techs.getNext();
+                Ogre::Technique::PassIterator passes = tech->getPassIterator();
+                while(passes.hasMoreElements())
+                {
+                    Ogre::Pass *pass = passes.getNext();
+                    Ogre::ColourValue diffuse = pass->getDiffuse();
+                    diffuse.a = value;
+                    pass->setDiffuse(diffuse);
+                }
+            }
+        }
+    };
+
+    typedef DefaultFunction Function;
+};
+
+class MaterialColorController
+{
+public:
+    class Value : public Ogre::ControllerValue<Ogre::Real>, public ValueInterpolator
+    {
+    private:
+        Ogre::MovableObject* mMovable;
+        Nif::Vector3KeyList mData;
+        MaterialControllerManager* mMaterialControllerMgr;
+
+    public:
+        Value(Ogre::MovableObject *movable, const Nif::NiPosData *data, MaterialControllerManager* materialControllerMgr)
+          : mMovable(movable)
+          , mData(data->mKeyList)
+          , mMaterialControllerMgr(materialControllerMgr)
+        {
+        }
+
+        virtual Ogre::Real getValue() const
+        {
+            // Should not be called
+            return 0.0f;
+        }
+
+        virtual void setValue(Ogre::Real time)
+        {
+            Ogre::Vector3 value = interpKey(mData.mKeys, time);
+            Ogre::MaterialPtr mat = mMaterialControllerMgr->getWritableMaterial(mMovable);
+            Ogre::Material::TechniqueIterator techs = mat->getTechniqueIterator();
+            while(techs.hasMoreElements())
+            {
+                Ogre::Technique *tech = techs.getNext();
+                Ogre::Technique::PassIterator passes = tech->getPassIterator();
+                while(passes.hasMoreElements())
+                {
+                    Ogre::Pass *pass = passes.getNext();
+                    Ogre::ColourValue diffuse = pass->getDiffuse();
+                    diffuse.r = value.x;
+                    diffuse.g = value.y;
+                    diffuse.b = value.z;
+                    pass->setDiffuse(diffuse);
+                }
+            }
+        }
+    };
+
+    typedef DefaultFunction Function;
 };
 
 class VisController
@@ -185,48 +281,14 @@ public:
 class KeyframeController
 {
 public:
-    class Value : public NodeTargetValue<Ogre::Real>
+    class Value : public NodeTargetValue<Ogre::Real>, public ValueInterpolator
     {
     private:
         Nif::QuaternionKeyList mRotations;
         Nif::Vector3KeyList mTranslations;
         Nif::FloatKeyList mScales;
 
-        static float interpKey(const Nif::FloatKeyList::VecType &keys, float time)
-        {
-            if(time <= keys.front().mTime)
-                return keys.front().mValue;
-
-            Nif::FloatKeyList::VecType::const_iterator iter(keys.begin()+1);
-            for(;iter != keys.end();iter++)
-            {
-                if(iter->mTime < time)
-                    continue;
-
-                Nif::FloatKeyList::VecType::const_iterator last(iter-1);
-                float a = (time-last->mTime) / (iter->mTime-last->mTime);
-                return last->mValue + ((iter->mValue - last->mValue)*a);
-            }
-            return keys.back().mValue;
-        }
-
-        static Ogre::Vector3 interpKey(const Nif::Vector3KeyList::VecType &keys, float time)
-        {
-            if(time <= keys.front().mTime)
-                return keys.front().mValue;
-
-            Nif::Vector3KeyList::VecType::const_iterator iter(keys.begin()+1);
-            for(;iter != keys.end();iter++)
-            {
-                if(iter->mTime < time)
-                    continue;
-
-                Nif::Vector3KeyList::VecType::const_iterator last(iter-1);
-                float a = (time-last->mTime) / (iter->mTime-last->mTime);
-                return last->mValue + ((iter->mValue - last->mValue)*a);
-            }
-            return keys.back().mValue;
-        }
+        using ValueInterpolator::interpKey;
 
         static Ogre::Quaternion interpKey(const Nif::QuaternionKeyList::VecType &keys, float time)
         {
@@ -298,43 +360,24 @@ public:
 class UVController
 {
 public:
-    class Value : public Ogre::ControllerValue<Ogre::Real>
+    class Value : public Ogre::ControllerValue<Ogre::Real>, public ValueInterpolator
     {
     private:
-        Ogre::MaterialPtr mMaterial;
+        Ogre::MovableObject* mMovable;
         Nif::FloatKeyList mUTrans;
         Nif::FloatKeyList mVTrans;
         Nif::FloatKeyList mUScale;
         Nif::FloatKeyList mVScale;
-
-        static float lookupValue(const Nif::FloatKeyList &keys, float time, float def)
-        {
-            if(keys.mKeys.size() == 0)
-                return def;
-
-            if(time <= keys.mKeys.front().mTime)
-                return keys.mKeys.front().mValue;
-
-            Nif::FloatKeyList::VecType::const_iterator iter(keys.mKeys.begin()+1);
-            for(;iter != keys.mKeys.end();iter++)
-            {
-                if(iter->mTime < time)
-                    continue;
-
-                Nif::FloatKeyList::VecType::const_iterator last(iter-1);
-                float a = (time-last->mTime) / (iter->mTime-last->mTime);
-                return last->mValue + ((iter->mValue - last->mValue)*a);
-            }
-            return keys.mKeys.back().mValue;
-        }
+        MaterialControllerManager* mMaterialControllerMgr;
 
     public:
-        Value(const Ogre::MaterialPtr &material, const Nif::NiUVData *data)
-          : mMaterial(material)
+        Value(Ogre::MovableObject* movable, const Nif::NiUVData *data, MaterialControllerManager* materialControllerMgr)
+          : mMovable(movable)
           , mUTrans(data->mKeyList[0])
           , mVTrans(data->mKeyList[1])
           , mUScale(data->mKeyList[2])
           , mVScale(data->mKeyList[3])
+          , mMaterialControllerMgr(materialControllerMgr)
         { }
 
         virtual Ogre::Real getValue() const
@@ -345,12 +388,14 @@ public:
 
         virtual void setValue(Ogre::Real value)
         {
-            float uTrans = lookupValue(mUTrans, value, 0.0f);
-            float vTrans = lookupValue(mVTrans, value, 0.0f);
-            float uScale = lookupValue(mUScale, value, 1.0f);
-            float vScale = lookupValue(mVScale, value, 1.0f);
+            float uTrans = interpKey(mUTrans.mKeys, value, 0.0f);
+            float vTrans = interpKey(mVTrans.mKeys, value, 0.0f);
+            float uScale = interpKey(mUScale.mKeys, value, 1.0f);
+            float vScale = interpKey(mVScale.mKeys, value, 1.0f);
 
-            Ogre::Material::TechniqueIterator techs = mMaterial->getTechniqueIterator();
+            Ogre::MaterialPtr material = mMaterialControllerMgr->getWritableMaterial(mMovable);
+
+            Ogre::Material::TechniqueIterator techs = material->getTechniqueIterator();
             while(techs.hasMoreElements())
             {
                 Ogre::Technique *tech = techs.getNext();
@@ -402,7 +447,7 @@ public:
 class GeomMorpherController
 {
 public:
-    class Value : public Ogre::ControllerValue<Ogre::Real>
+    class Value : public Ogre::ControllerValue<Ogre::Real>, public ValueInterpolator
     {
     private:
         Ogre::SubEntity *mSubEntity;
@@ -410,24 +455,6 @@ public:
         std::vector<float> mValues;
 
         std::vector<Ogre::Vector3> mVertices;
-
-        static float interpKey(const Nif::FloatKeyList::VecType &keys, float time)
-        {
-            if(time <= keys.front().mTime)
-                return keys.front().mValue;
-
-            Nif::FloatKeyList::VecType::const_iterator iter(keys.begin()+1);
-            for(;iter != keys.end();iter++)
-            {
-                if(iter->mTime < time)
-                    continue;
-
-                Nif::FloatKeyList::VecType::const_iterator last(iter-1);
-                float a = (time-last->mTime) / (iter->mTime-last->mTime);
-                return last->mValue + ((iter->mValue - last->mValue)*a);
-            }
-            return keys.back().mValue;
-        }
 
     public:
         Value(Ogre::SubEntity *subent, const Nif::NiMorphData *data)
@@ -563,11 +590,10 @@ class NIFObjectLoader
             {
                 const Nif::NiUVController *uv = static_cast<const Nif::NiUVController*>(ctrl.getPtr());
 
-                const Ogre::MaterialPtr &material = entity->getSubEntity(0)->getMaterial();
                 Ogre::ControllerValueRealPtr srcval((animflags&Nif::NiNode::AnimFlag_AutoPlay) ?
                                                     Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
                                                     Ogre::ControllerValueRealPtr());
-                Ogre::ControllerValueRealPtr dstval(OGRE_NEW UVController::Value(material, uv->data.getPtr()));
+                Ogre::ControllerValueRealPtr dstval(OGRE_NEW UVController::Value(entity, uv->data.getPtr(), &scene->mMaterialControllerMgr));
 
                 UVController::Function* function = OGRE_NEW UVController::Function(uv, (animflags&Nif::NiNode::AnimFlag_AutoPlay));
                 scene->mMaxControllerLength = std::max(function->mStopTime, scene->mMaxControllerLength);
@@ -592,8 +618,53 @@ class NIFObjectLoader
             }
             ctrl = ctrl->next;
         }
+
+        createMaterialControllers(shape, entity, animflags, scene);
     }
 
+    static void createMaterialControllers (const Nif::Node* node, Ogre::MovableObject* movable, int animflags, ObjectScenePtr scene)
+    {
+        const Nif::NiTexturingProperty *texprop = NULL;
+        const Nif::NiMaterialProperty *matprop = NULL;
+        const Nif::NiAlphaProperty *alphaprop = NULL;
+        const Nif::NiVertexColorProperty *vertprop = NULL;
+        const Nif::NiZBufferProperty *zprop = NULL;
+        const Nif::NiSpecularProperty *specprop = NULL;
+        const Nif::NiWireframeProperty *wireprop = NULL;
+        node->getProperties(texprop, matprop, alphaprop, vertprop, zprop, specprop, wireprop);
+
+        if(matprop)
+        {
+            Nif::ControllerPtr ctrls = matprop->controller;
+            while(!ctrls.empty())
+            {
+                Ogre::ControllerValueRealPtr srcval((animflags&Nif::NiNode::AnimFlag_AutoPlay) ?
+                                                    Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
+                                                    Ogre::ControllerValueRealPtr());
+
+                if (ctrls->recType == Nif::RC_NiAlphaController)
+                {
+                    const Nif::NiAlphaController *alphaCtrl = dynamic_cast<const Nif::NiAlphaController*>(ctrls.getPtr());
+                    Ogre::ControllerValueRealPtr dstval(OGRE_NEW AlphaController::Value(movable, alphaCtrl->data.getPtr(), &scene->mMaterialControllerMgr));
+                    AlphaController::Function* function = OGRE_NEW AlphaController::Function(alphaCtrl, (animflags&Nif::NiNode::AnimFlag_AutoPlay));
+                    scene->mMaxControllerLength = std::max(function->mStopTime, scene->mMaxControllerLength);
+                    Ogre::ControllerFunctionRealPtr func(function);
+                    scene->mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
+                }
+                else if (ctrls->recType == Nif::RC_NiMaterialColorController)
+                {
+                    const Nif::NiMaterialColorController *matCtrl = dynamic_cast<const Nif::NiMaterialColorController*>(ctrls.getPtr());
+                    Ogre::ControllerValueRealPtr dstval(OGRE_NEW MaterialColorController::Value(movable, matCtrl->data.getPtr(), &scene->mMaterialControllerMgr));
+                    AlphaController::Function* function = OGRE_NEW AlphaController::Function(matCtrl, (animflags&Nif::NiNode::AnimFlag_AutoPlay));
+                    scene->mMaxControllerLength = std::max(function->mStopTime, scene->mMaxControllerLength);
+                    Ogre::ControllerFunctionRealPtr func(function);
+                    scene->mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
+                }
+
+                ctrls = ctrls->next;
+            }
+        }
+    }
 
     static void createParticleEmitterAffectors(Ogre::ParticleSystem *partsys,
                                                const Nif::NiParticleSystemController *partctrl, Ogre::Bone* bone,
@@ -670,7 +741,7 @@ class NIFObjectLoader
 
     static void createParticleSystem(const std::string &name, const std::string &group,
                                      Ogre::SceneNode *sceneNode, ObjectScenePtr scene,
-                                     const Nif::Node *partnode, int flags, int partflags)
+                                     const Nif::Node *partnode, int flags, int partflags, int animflags)
     {
         const Nif::NiAutoNormalParticlesData *particledata = NULL;
         if(partnode->recType == Nif::RC_NiAutoNormalParticles)
@@ -739,6 +810,8 @@ class NIFObjectLoader
 
         partsys->setVisible(!(flags&Nif::NiNode::Flag_Hidden));
         scene->mParticles.push_back(partsys);
+
+        createMaterialControllers(partnode, partsys, animflags, scene);
     }
 
 
@@ -886,7 +959,7 @@ class NIFObjectLoader
         if((node->recType == Nif::RC_NiAutoNormalParticles ||
             node->recType == Nif::RC_NiRotatingParticles) && !(flags&0x40000000))
         {
-            createParticleSystem(name, group, sceneNode, scene, node, flags, partflags);
+            createParticleSystem(name, group, sceneNode, scene, node, flags, partflags, animflags);
         }
 
         const Nif::NiNode *ninode = dynamic_cast<const Nif::NiNode*>(node);
