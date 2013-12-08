@@ -98,9 +98,7 @@
 #if VERTEXCOLOR_MODE != 2
     shUniform(float4, materialAmbient)                    @shAutoConstant(materialAmbient, surface_ambient_colour)
 #endif
-#if VERTEXCOLOR_MODE != 2
     shUniform(float4, materialDiffuse)                    @shAutoConstant(materialDiffuse, surface_diffuse_colour)
-#endif
 #if VERTEXCOLOR_MODE != 1
     shUniform(float4, materialEmissive)                   @shAutoConstant(materialEmissive, surface_emissive_colour)
 #endif
@@ -234,9 +232,7 @@
         lightResult.xyz += lightAmbient.xyz * materialAmbient.xyz + materialEmissive.xyz;
 #endif
 
-#if VERTEXCOLOR_MODE != 2
         lightResult.a *= materialDiffuse.a;
-#endif
 
 #endif
     }
@@ -339,9 +335,7 @@
     #if VERTEXCOLOR_MODE != 2
     shUniform(float4, materialAmbient)                    @shAutoConstant(materialAmbient, surface_ambient_colour)
     #endif
-    #if VERTEXCOLOR_MODE != 2
     shUniform(float4, materialDiffuse)                    @shAutoConstant(materialDiffuse, surface_diffuse_colour)
-    #endif
     #if VERTEXCOLOR_MODE != 1
     shUniform(float4, materialEmissive)                   @shAutoConstant(materialEmissive, surface_emissive_colour)
     #endif
@@ -434,9 +428,7 @@
         lightResult.xyz += lightAmbient.xyz * materialAmbient.xyz + materialEmissive.xyz;
 #endif
 
-#if VERTEXCOLOR_MODE != 2
         lightResult.a *= materialDiffuse.a;
-#endif
 #endif
 
             // shadows only for the first (directional) light

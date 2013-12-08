@@ -727,6 +727,8 @@ void CharacterController::update(float duration)
     const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
     Ogre::Vector3 movement(0.0f);
 
+    updateVisibility();
+
     if(!cls.isActor())
     {
         if(mAnimQueue.size() > 1)
@@ -1128,6 +1130,27 @@ void CharacterController::updateContinuousVfx()
             || mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(MWMechanics::EffectKey(*it)).mMagnitude <= 0)
             mAnimation->removeEffect(*it);
     }
+}
+
+void CharacterController::updateVisibility()
+{
+    if (!mPtr.getClass().isActor())
+        return;
+    float alpha = 1.f;
+    if (mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Invisibility).mMagnitude)
+    {
+        if (mPtr.getRefData().getHandle() == "player")
+            alpha = 0.4f;
+        else
+            alpha = 0.f;
+    }
+    float chameleon = mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Chameleon).mMagnitude;
+    if (chameleon)
+    {
+        alpha *= std::max(0.2f, (100.f - chameleon)/100.f);
+    }
+
+    mAnimation->setAlpha(alpha);
 }
 
 }

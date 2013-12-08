@@ -215,6 +215,8 @@ public:
     void addEffect (const std::string& model, int effectId, bool loop = false, const std::string& bonename = "", std::string texture = "");
     void removeEffect (int effectId);
     void getLoopingEffects (std::vector<int>& out);
+
+    virtual void setAlpha(float alpha) {}
 private:
     void updateEffects(float duration);
 

@@ -63,11 +63,12 @@ Ogre::MaterialPtr MaterialControllerManager::getWritableMaterial(Ogre::MovableOb
         else if (Ogre::ParticleSystem* partSys = dynamic_cast<Ogre::ParticleSystem*>(movable))
             mat = Ogre::MaterialManager::getSingleton().getByName(partSys->getMaterialName());
 
-        // Make sure techniques are created
-        sh::Factory::getInstance()._ensureMaterial(mat->getName(), "Default");
-
         static int count=0;
-        mat = mat->clone(mat->getName() + Ogre::StringConverter::toString(count++));
+        Ogre::String newName = mat->getName() + Ogre::StringConverter::toString(count++);
+        sh::Factory::getInstance().createMaterialInstance(newName, mat->getName());
+        // Make sure techniques are created
+        sh::Factory::getInstance()._ensureMaterial(newName, "Default");
+        mat = Ogre::MaterialManager::getSingleton().getByName(newName);
 
         mClonedMaterials[movable] = mat;
 
@@ -84,7 +85,7 @@ MaterialControllerManager::~MaterialControllerManager()
 {
     for (std::map<Ogre::MovableObject*, Ogre::MaterialPtr>::iterator it = mClonedMaterials.begin(); it != mClonedMaterials.end(); ++it)
     {
-        Ogre::MaterialManager::getSingleton().remove(it->second->getName());
+        sh::Factory::getInstance().destroyMaterialInstance(it->second->getName());
     }
 }
 
