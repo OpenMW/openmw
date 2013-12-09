@@ -134,38 +134,28 @@ namespace MWGui
 
     void StatsWindow::setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value)
     {
-        static const char *ids[] =
-        {
-            "HBar", "MBar", "FBar",
-            0
-        };
+        int current = std::max(0, static_cast<int>(value.getCurrent()));
+        int modified = static_cast<int>(value.getModified());
 
-        for (int i=0; ids[i]; ++i)
-        {
-            if (ids[i]==id)
-            {
-                std::string id (ids[i]);
-                setBar (id, id + "T", static_cast<int>(value.getCurrent()), static_cast<int>(value.getModified()));
+        setBar (id, id + "T", current, modified);
 
-                // health, magicka, fatigue tooltip
-                MyGUI::Widget* w;
-                std::string valStr =  boost::lexical_cast<std::string>(int(value.getCurrent())) + "/" + boost::lexical_cast<std::string>(int(value.getModified()));
-                if (i==0)
-                {
-                    getWidget(w, "Health");
-                    w->setUserString("Caption_HealthDescription", "#{sHealthDesc}\n" + valStr);
-                }
-                else if (i==1)
-                {
-                    getWidget(w, "Magicka");
-                    w->setUserString("Caption_HealthDescription", "#{sIntDesc}\n" + valStr);
-                }
-                else if (i==2)
-                {
-                    getWidget(w, "Fatigue");
-                    w->setUserString("Caption_HealthDescription", "#{sFatDesc}\n" + valStr);
-                }
-            }
+        // health, magicka, fatigue tooltip
+        MyGUI::Widget* w;
+        std::string valStr =  boost::lexical_cast<std::string>(current) + "/" + boost::lexical_cast<std::string>(modified);
+        if (id == "HBar")
+        {
+            getWidget(w, "Health");
+            w->setUserString("Caption_HealthDescription", "#{sHealthDesc}\n" + valStr);
+        }
+        else if (id == "MBar")
+        {
+            getWidget(w, "Magicka");
+            w->setUserString("Caption_HealthDescription", "#{sIntDesc}\n" + valStr);
+        }
+        else if (id == "FBar")
+        {
+            getWidget(w, "Fatigue");
+            w->setUserString("Caption_HealthDescription", "#{sFatDesc}\n" + valStr);
         }
     }
 

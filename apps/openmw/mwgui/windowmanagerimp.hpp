@@ -346,8 +346,6 @@ namespace MWGui
     std::map<int, MWMechanics::Stat<int> > mPlayerAttributes;
     SkillList mPlayerMajorSkills, mPlayerMinorSkills;
     std::map<int, MWMechanics::Stat<float> > mPlayerSkillValues;
-    MWMechanics::DynamicStat<float> mPlayerHealth, mPlayerMagicka, mPlayerFatigue;
-
 
     MyGUI::Gui *mGui; // Gui
     std::vector<GuiMode> mGuiModes;
