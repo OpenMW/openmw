@@ -179,7 +179,10 @@ namespace MWWorld
             void visitEffectSources (MWMechanics::EffectSourceVisitor& visitor);
 
             void rechargeItems (float duration);
-            /// Restore charge on enchanted items. Note this should only be done for the player.
+            ///< Restore charge on enchanted items. Note this should only be done for the player.
+
+            void purgeEffect (short effectId);
+            ///< Remove a magic effect
     };
 }
 

@@ -19,7 +19,7 @@ add_component_dir (nif
     )
 
 add_component_dir (nifogre
-    ogrenifloader skeleton material mesh particles
+    ogrenifloader skeleton material mesh particles controller
     )
 
 add_component_dir (nifbullet

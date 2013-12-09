@@ -46,7 +46,7 @@ private:
     bool mListenerDisabled;
 
     // Bounded Parts
-    NifOgre::ObjectList mObjectParts[ESM::PRT_Count];
+    NifOgre::ObjectScenePtr mObjectParts[ESM::PRT_Count];
 
     const ESM::NPC *mNpc;
     std::string    mHeadModel;
@@ -64,9 +64,11 @@ private:
 
     Ogre::SharedPtr<SayAnimationValue> mSayAnimationValue;
 
+    float mAlpha;
+
     void updateNpcBase();
 
-    NifOgre::ObjectList insertBoundedPart(const std::string &model, int group, const std::string &bonename,
+    NifOgre::ObjectScenePtr insertBoundedPart(const std::string &model, int group, const std::string &bonename,
                                           bool enchantedGlow, Ogre::Vector3* glowColor=NULL);
 
     void removeIndividualPart(ESM::PartReferenceType type);
@@ -77,6 +79,8 @@ private:
     void removePartGroup(int group);
     void addPartGroup(int group, int priority, const std::vector<ESM::PartReference> &parts,
                                     bool enchantedGlow=false, Ogre::Vector3* glowColor=NULL);
+
+    void applyAlpha(float alpha, Ogre::Entity* ent, NifOgre::ObjectScenePtr scene);
 
 public:
     /**
@@ -109,6 +113,9 @@ public:
 
     /// Rebuilds the NPC, updating their root model, animation sources, and equipment.
     void rebuild();
+
+    /// Make the NPC only partially visible
+    virtual void setAlpha(float alpha);
 };
 
 }

@@ -25,6 +25,7 @@
 #define OPENMW_COMPONENTS_NIFOGRE_OGRENIFLOADER_HPP
 
 #include <OgreResource.h>
+#include <OgreMaterial.h>
 #include <OgreController.h>
 
 #include <vector>
@@ -37,39 +38,60 @@
 namespace NifOgre
 {
 
+/**
+ * @brief Clones materials as necessary to not make controllers affect other objects (that share the original material).
+ */
+class MaterialControllerManager
+{
+public:
+    ~MaterialControllerManager();
+    Ogre::MaterialPtr getWritableMaterial (Ogre::MovableObject* movable);
+
+private:
+    std::map<Ogre::MovableObject*, Ogre::MaterialPtr> mClonedMaterials;
+};
+
 typedef std::multimap<float,std::string> TextKeyMap;
 static const char sTextKeyExtraDataID[] = "TextKeyExtraData";
-struct ObjectList {
+struct ObjectScene {
     Ogre::Entity *mSkelBase;
     std::vector<Ogre::Entity*> mEntities;
     std::vector<Ogre::ParticleSystem*> mParticles;
     std::vector<Ogre::Light*> mLights;
+
+    Ogre::SceneManager* mSceneMgr;
 
     // The maximum length on any of the controllers. For animations with controllers, but no text keys, consider this the animation length.
     float mMaxControllerLength;
 
     std::map<int,TextKeyMap> mTextKeys;
 
+    MaterialControllerManager mMaterialControllerMgr;
+
     std::vector<Ogre::Controller<Ogre::Real> > mControllers;
 
-    ObjectList() : mSkelBase(0), mMaxControllerLength(0)
+    ObjectScene(Ogre::SceneManager* sceneMgr) : mSkelBase(0), mMaxControllerLength(0), mSceneMgr(sceneMgr)
     { }
+
+    ~ObjectScene();
 };
+
+typedef Ogre::SharedPtr<ObjectScene> ObjectScenePtr;
 
 
 class Loader
 {
 public:
-    static ObjectList createObjects(Ogre::Entity *parent, const std::string &bonename,
+    static ObjectScenePtr createObjects(Ogre::Entity *parent, const std::string &bonename,
                                     Ogre::SceneNode *parentNode,
                                     std::string name,
                                     const std::string &group="General");
 
-    static ObjectList createObjects(Ogre::SceneNode *parentNode,
+    static ObjectScenePtr createObjects(Ogre::SceneNode *parentNode,
                                     std::string name,
                                     const std::string &group="General");
 
-    static ObjectList createObjectBase(Ogre::SceneNode *parentNode,
+    static ObjectScenePtr createObjectBase(Ogre::SceneNode *parentNode,
                                        std::string name,
                                        const std::string &group="General");
 

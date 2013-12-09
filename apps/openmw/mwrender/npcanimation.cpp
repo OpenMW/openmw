@@ -5,6 +5,8 @@
 #include <OgreParticleSystem.h>
 #include <OgreSubEntity.h>
 
+#include <extern/shiny/Main/Factory.hpp>
+
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/class.hpp"
@@ -106,10 +108,6 @@ NpcAnimation::~NpcAnimation()
 {
     if (!mListenerDisabled)
         mPtr.getClass().getInventoryStore(mPtr).setListener(NULL, mPtr);
-
-    Ogre::SceneManager *sceneMgr = mInsert->getCreator();
-    for(size_t i = 0;i < ESM::PRT_Count;i++)
-        destroyObjectList(sceneMgr, mObjectParts[i]);
 }
 
 
@@ -120,7 +118,8 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int v
     mViewMode(viewMode),
     mShowWeapons(false),
     mShowShield(true),
-    mFirstPersonOffset(0.f, 0.f, 0.f)
+    mFirstPersonOffset(0.f, 0.f, 0.f),
+    mAlpha(1.f)
 {
     mNpc = mPtr.get<ESM::NPC>()->mBase;
 
@@ -223,6 +222,7 @@ void NpcAnimation::updateNpcBase()
 
 void NpcAnimation::updateParts()
 {
+    mAlpha = 1.f;
     const MWWorld::Class &cls = MWWorld::Class::get(mPtr);
     MWWorld::InventoryStore &inv = cls.getInventoryStore(mPtr);
 
@@ -447,18 +447,18 @@ public:
     }
 };
 
-NifOgre::ObjectList NpcAnimation::insertBoundedPart(const std::string &model, int group, const std::string &bonename, bool enchantedGlow, Ogre::Vector3* glowColor)
+NifOgre::ObjectScenePtr NpcAnimation::insertBoundedPart(const std::string &model, int group, const std::string &bonename, bool enchantedGlow, Ogre::Vector3* glowColor)
 {
-    NifOgre::ObjectList objects = NifOgre::Loader::createObjects(mSkelBase, bonename, mInsert, model);
+    NifOgre::ObjectScenePtr objects = NifOgre::Loader::createObjects(mSkelBase, bonename, mInsert, model);
     setRenderProperties(objects, (mViewMode == VM_FirstPerson) ? RV_FirstPerson : mVisibilityFlags, RQG_Main, RQG_Alpha, 0,
                         enchantedGlow, glowColor);
 
-    std::for_each(objects.mEntities.begin(), objects.mEntities.end(), SetObjectGroup(group));
-    std::for_each(objects.mParticles.begin(), objects.mParticles.end(), SetObjectGroup(group));
+    std::for_each(objects->mEntities.begin(), objects->mEntities.end(), SetObjectGroup(group));
+    std::for_each(objects->mParticles.begin(), objects->mParticles.end(), SetObjectGroup(group));
 
-    if(objects.mSkelBase)
+    if(objects->mSkelBase)
     {
-        Ogre::AnimationStateSet *aset = objects.mSkelBase->getAllAnimationStates();
+        Ogre::AnimationStateSet *aset = objects->mSkelBase->getAllAnimationStates();
         Ogre::AnimationStateIterator asiter = aset->getAnimationStateIterator();
         while(asiter.hasMoreElements())
         {
@@ -466,7 +466,7 @@ NifOgre::ObjectList NpcAnimation::insertBoundedPart(const std::string &model, in
             state->setEnabled(false);
             state->setLoop(false);
         }
-        Ogre::SkeletonInstance *skelinst = objects.mSkelBase->getSkeleton();
+        Ogre::SkeletonInstance *skelinst = objects->mSkelBase->getSkeleton();
         Ogre::Skeleton::BoneIterator boneiter = skelinst->getBoneIterator();
         while(boneiter.hasMoreElements())
             boneiter.getNext()->setManuallyControlled(true);
@@ -494,11 +494,13 @@ Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
 
     for(size_t i = 0;i < ESM::PRT_Count;i++)
     {
-        std::vector<Ogre::Controller<Ogre::Real> >::iterator ctrl(mObjectParts[i].mControllers.begin());
-        for(;ctrl != mObjectParts[i].mControllers.end();ctrl++)
+        if (mObjectParts[i].isNull())
+            continue;
+        std::vector<Ogre::Controller<Ogre::Real> >::iterator ctrl(mObjectParts[i]->mControllers.begin());
+        for(;ctrl != mObjectParts[i]->mControllers.end();ctrl++)
             ctrl->update();
 
-        Ogre::Entity *ent = mObjectParts[i].mSkelBase;
+        Ogre::Entity *ent = mObjectParts[i]->mSkelBase;
         if(!ent) continue;
         updateSkeletonInstance(baseinst, ent->getSkeleton());
         ent->getAllAnimationStates()->_notifyDirty();
@@ -512,7 +514,7 @@ void NpcAnimation::removeIndividualPart(ESM::PartReferenceType type)
     mPartPriorities[type] = 0;
     mPartslots[type] = -1;
 
-    destroyObjectList(mInsert->getCreator(), mObjectParts[type]);
+    mObjectParts[type].setNull();
 }
 
 void NpcAnimation::reserveIndividualPart(ESM::PartReferenceType type, int group, int priority)
@@ -544,12 +546,12 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
     mPartPriorities[type] = priority;
 
     mObjectParts[type] = insertBoundedPart(mesh, group, sPartList.at(type), enchantedGlow, glowColor);
-    if(mObjectParts[type].mSkelBase)
+    if(mObjectParts[type]->mSkelBase)
     {
-        Ogre::SkeletonInstance *skel = mObjectParts[type].mSkelBase->getSkeleton();
-        if(mObjectParts[type].mSkelBase->isParentTagPoint())
+        Ogre::SkeletonInstance *skel = mObjectParts[type]->mSkelBase->getSkeleton();
+        if(mObjectParts[type]->mSkelBase->isParentTagPoint())
         {
-            Ogre::Node *root = mObjectParts[type].mSkelBase->getParentNode();
+            Ogre::Node *root = mObjectParts[type]->mSkelBase->getParentNode();
             if(skel->hasBone("BoneOffset"))
             {
                 Ogre::Bone *offset = skel->getBone("BoneOffset");
@@ -571,8 +573,8 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
     // TODO:
     // type == ESM::PRT_Weapon should get an animation source based on the current offset
     // of the weapon attack animation (from its beginning, or start marker?)
-    std::vector<Ogre::Controller<Ogre::Real> >::iterator ctrl(mObjectParts[type].mControllers.begin());
-    for(;ctrl != mObjectParts[type].mControllers.end();ctrl++)
+    std::vector<Ogre::Controller<Ogre::Real> >::iterator ctrl(mObjectParts[type]->mControllers.begin());
+    for(;ctrl != mObjectParts[type]->mControllers.end();ctrl++)
     {
         if(ctrl->getSource().isNull())
         {
@@ -649,6 +651,7 @@ void NpcAnimation::showWeapons(bool showWeapon)
     {
         removeIndividualPart(ESM::PRT_Weapon);
     }
+    mAlpha = 1.f;
 }
 
 void NpcAnimation::showShield(bool show)
@@ -704,6 +707,58 @@ void NpcAnimation::permanentEffectAdded(const ESM::MagicEffect *magicEffect, boo
         // Don't play particle VFX unless the effect is new or it should be looping.
         if (isNew || loop)
             addEffect("meshes\\" + castStatic->mModel, magicEffect->mIndex, loop, "");
+    }
+}
+
+void NpcAnimation::setAlpha(float alpha)
+{
+    if (alpha == mAlpha)
+        return;
+    mAlpha = alpha;
+
+    for (int i=0; i<ESM::PRT_Count; ++i)
+    {
+        if (mObjectParts[i].isNull())
+            continue;
+
+        for (unsigned int j=0; j<mObjectParts[i]->mEntities.size(); ++j)
+        {
+            Ogre::Entity* ent = mObjectParts[i]->mEntities[j];
+            if (ent != mObjectParts[i]->mSkelBase)
+                applyAlpha(alpha, ent, mObjectParts[i]);
+        }
+    }
+}
+
+void NpcAnimation::applyAlpha(float alpha, Ogre::Entity *ent, NifOgre::ObjectScenePtr scene)
+{
+    ent->getSubEntity(0)->setRenderQueueGroup(alpha != 1.f || ent->getSubEntity(0)->getMaterial()->isTransparent()
+            ? RQG_Alpha : RQG_Main);
+
+
+    Ogre::MaterialPtr mat = scene->mMaterialControllerMgr.getWritableMaterial(ent);
+    if (mAlpha == 1.f)
+    {
+        // Don't bother remembering what the original values were. Just remove the techniques and let the factory restore them.
+        mat->removeAllTechniques();
+        sh::Factory::getInstance()._ensureMaterial(mat->getName(), "Default");
+        return;
+    }
+
+    Ogre::Material::TechniqueIterator techs = mat->getTechniqueIterator();
+    while(techs.hasMoreElements())
+    {
+        Ogre::Technique *tech = techs.getNext();
+        Ogre::Technique::PassIterator passes = tech->getPassIterator();
+        while(passes.hasMoreElements())
+        {
+            Ogre::Pass *pass = passes.getNext();
+            pass->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
+            Ogre::ColourValue diffuse = pass->getDiffuse();
+            diffuse.a = alpha;
+            pass->setDiffuse(diffuse);
+            pass->setVertexColourTracking(pass->getVertexColourTracking() &~Ogre::TVC_DIFFUSE);
+        }
     }
 }
 

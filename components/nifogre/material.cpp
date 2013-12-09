@@ -237,7 +237,8 @@ Ogre::String NIFMaterialLoader::getMaterial(const Nif::ShapeData *shapedata,
         Nif::ControllerPtr ctrls = matprop->controller;
         while(!ctrls.empty())
         {
-            warn("Unhandled material controller "+ctrls->recName+" in "+name);
+            if (ctrls->recType != Nif::RC_NiAlphaController && ctrls->recType != Nif::RC_NiMaterialColorController)
+                warn("Unhandled material controller "+ctrls->recName+" in "+name);
             ctrls = ctrls->next;
         }
     }
