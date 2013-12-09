@@ -25,6 +25,7 @@
 #define OPENMW_COMPONENTS_NIFOGRE_OGRENIFLOADER_HPP
 
 #include <OgreResource.h>
+#include <OgreMaterial.h>
 #include <OgreController.h>
 
 #include <vector>
