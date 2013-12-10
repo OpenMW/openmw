@@ -118,6 +118,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int v
     mViewMode(viewMode),
     mShowWeapons(false),
     mShowShield(true),
+    mShowLights(false),
     mFirstPersonOffset(0.f, 0.f, 0.f),
     mAlpha(1.f)
 {
@@ -320,6 +321,7 @@ void NpcAnimation::updateParts()
 
     showWeapons(mShowWeapons);
     showShield(mShowShield);
+    showLights(mShowLights);
 
     // Remember body parts so we only have to search through the store once for each race/gender/viewmode combination
     static std::map< std::pair<std::string,int>,std::vector<const ESM::BodyPart*> > sRaceMapping;
@@ -660,27 +662,39 @@ void NpcAnimation::showShield(bool show)
     MWWorld::InventoryStore &inv = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
     MWWorld::ContainerStoreIterator shield = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
 
-    if (shield != inv.end() && shield->getTypeName() == typeid(ESM::Light).name())
-    {
-        // ... Except for lights, which are still shown during spellcasting since they
-        // have their own (one-handed) casting animations
-        show = true;
-    }
-    if(show && shield != inv.end())
+    if(show && shield != inv.end() && shield->getTypeName() != typeid(ESM::Light).name())
     {
         Ogre::Vector3 glowColor = getEnchantmentColor(*shield);
         std::string mesh = MWWorld::Class::get(*shield).getModel(*shield);
         addOrReplaceIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft, 1,
                                    mesh, !shield->getClass().getEnchantment(*shield).empty(), &glowColor);
-
-        if (shield->getTypeName() == typeid(ESM::Light).name())
-            addExtraLight(mInsert->getCreator(), mObjectParts[ESM::PRT_Shield], shield->get<ESM::Light>()->mBase);
     }
     else
     {
         removeIndividualPart(ESM::PRT_Shield);
     }
 }
+
+void NpcAnimation::showLights(bool show)
+{
+    mShowLights = show;
+    MWWorld::InventoryStore &inv = MWWorld::Class::get(mPtr).getInventoryStore(mPtr);
+    MWWorld::ContainerStoreIterator shield = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
+
+    if(show && shield != inv.end() && shield->getTypeName() == typeid(ESM::Light).name())
+    {
+        Ogre::Vector3 glowColor = getEnchantmentColor(*shield);
+        std::string mesh = MWWorld::Class::get(*shield).getModel(*shield);
+        addOrReplaceIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft, 1,
+                                   mesh, !shield->getClass().getEnchantment(*shield).empty(), &glowColor);
+        addExtraLight(mInsert->getCreator(), mObjectParts[ESM::PRT_Shield], shield->get<ESM::Light>()->mBase);
+    }
+    else
+    {
+        removeIndividualPart(ESM::PRT_Shield);
+    }
+}
+
 
 void NpcAnimation::permanentEffectAdded(const ESM::MagicEffect *magicEffect, bool isNew, bool playSound)
 {

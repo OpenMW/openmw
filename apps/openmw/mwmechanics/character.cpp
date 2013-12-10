@@ -707,17 +707,30 @@ bool CharacterController::updateNpcState(bool onground, bool inwater, bool isrun
         }
     }
 
-
-    MWWorld::ContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
-    if(torch != inv.end() && torch->getTypeName() == typeid(ESM::Light).name())
+    if (MWBase::Environment::get().getWorld()->isNight())
     {
+      MWWorld::ContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
+      if(torch != inv.end() && torch->getTypeName() == typeid(ESM::Light).name())
+      {
+        mAnimation->showLights(true);
         if(!mAnimation->isPlaying("torch"))
-            mAnimation->play("torch", Priority_Torch,
-                             MWRender::Animation::Group_LeftArm, false,
-                             1.0f, "start", "stop", 0.0f, (~(size_t)0));
+              mAnimation->play("torch", Priority_Torch,
+                               MWRender::Animation::Group_LeftArm, false,
+                               1.0f, "start", "stop", 0.0f, (~(size_t)0));
+      }
+      else if (mAnimation->isPlaying("torch"))
+      {
+          mAnimation->disable("torch");
+          mAnimation->showLights(false);
+          mAnimation->showShield(true);
+      }
     }
-    else if(mAnimation->isPlaying("torch"))
+    else
+    {
         mAnimation->disable("torch");
+        mAnimation->showLights(false);
+        mAnimation->showShield(true);
+    }
 
     return forcestateupdate;
 }

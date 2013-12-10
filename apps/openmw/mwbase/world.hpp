@@ -421,6 +421,8 @@ namespace MWBase
                                            const MWWorld::Ptr& actor, const std::string& sourceName) = 0;
 
             virtual void breakInvisibility (const MWWorld::Ptr& actor) = 0;
+
+            virtual bool isNight() const = 0;
     };
 }
 

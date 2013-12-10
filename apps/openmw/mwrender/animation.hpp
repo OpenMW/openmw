@@ -275,6 +275,7 @@ public:
 
     virtual void showWeapons(bool showWeapon);
     virtual void showShield(bool show) {}
+    virtual void showLights(bool show) {}
 
     void enableLights(bool enable);
 

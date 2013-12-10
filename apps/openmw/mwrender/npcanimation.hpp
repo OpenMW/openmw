@@ -54,6 +54,7 @@ private:
     ViewMode       mViewMode;
     bool mShowWeapons;
     bool mShowShield;
+    bool mShowLights;
 
     int mVisibilityFlags;
 
@@ -101,6 +102,7 @@ public:
 
     virtual void showWeapons(bool showWeapon);
     virtual void showShield(bool showShield);
+    virtual void showLights(bool showLights);
 
     void setViewMode(ViewMode viewMode);
 
