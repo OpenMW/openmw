@@ -255,9 +255,7 @@ namespace MWWorld
         mPlayIntro = 2;
 
         // global variables
-        delete mGlobalVariables;
-        mGlobalVariables = 0;
-        mGlobalVariables = new Globals (mStore);
+        *mGlobalVariables = Globals (mStore);
 
         // set new game mark
         mGlobalVariables->setInt ("chargenstate", 1);
