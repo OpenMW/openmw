@@ -33,8 +33,6 @@ namespace MWWorld
             char getType (const std::string& name) const;
             ///< If there is no global variable with this name, ' ' is returned.
 
-            std::vector<std::string> getGlobals() const;
-
             void fill (const MWWorld::ESMStore& store);
             ///< Replace variables with variables from \a store with default values.
     };

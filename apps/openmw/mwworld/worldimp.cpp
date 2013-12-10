@@ -464,11 +464,6 @@ namespace MWWorld
         return mGlobalVariables.getType (name);
     }
 
-    std::vector<std::string> World::getGlobals() const
-    {
-        return mGlobalVariables.getGlobals();
-    }
-
     std::string World::getCellName (const MWWorld::CellStore *cell) const
     {
         if (!cell)

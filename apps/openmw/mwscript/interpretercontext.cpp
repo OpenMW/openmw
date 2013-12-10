@@ -156,10 +156,20 @@ namespace MWScript
         MWBase::Environment::get().getWorld()->setGlobalFloat (name, value);
     }
 
-    std::vector<std::string> InterpreterContext::getGlobals () const
+    std::vector<std::string> InterpreterContext::getGlobals() const
     {
-        MWBase::World *world = MWBase::Environment::get().getWorld();
-        return world->getGlobals();
+        std::vector<std::string> ids;
+
+        const MWWorld::Store<ESM::Global>& globals =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::Global>();
+
+        for (MWWorld::Store<ESM::Global>::iterator iter = globals.begin(); iter!=globals.end();
+            ++iter)
+        {
+            ids.push_back (iter->mId);
+        }
+
+        return ids;
     }
 
     char InterpreterContext::getGlobalType (const std::string& name) const

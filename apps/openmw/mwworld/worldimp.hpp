@@ -237,8 +237,6 @@ namespace MWWorld
             virtual char getGlobalVariableType (const std::string& name) const;
             ///< Return ' ', if there is no global variable with this name.
 
-            virtual std::vector<std::string> getGlobals () const;
-
             virtual std::string getCellName (const MWWorld::CellStore *cell = 0) const;
             ///< Return name of the cell.
             ///

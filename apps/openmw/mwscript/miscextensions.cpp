@@ -652,13 +652,14 @@ namespace MWScript
 
             void printGlobalVars(Interpreter::Runtime &runtime)
             {
-                Interpreter::Context& context = runtime.getContext();
+                InterpreterContext& context =
+                    static_cast<InterpreterContext&> (runtime.getContext());
 
                 std::stringstream str;
                 str<< "Global variables:";
 
                 MWBase::World *world = MWBase::Environment::get().getWorld();
-                std::vector<std::string> names = world->getGlobals();
+                std::vector<std::string> names = context.getGlobals();
                 for(size_t i = 0;i < names.size();++i)
                 {
                     char type = world->getGlobalVariableType (names[i]);

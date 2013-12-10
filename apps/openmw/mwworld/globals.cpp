@@ -7,16 +7,6 @@
 
 namespace MWWorld
 {
-    std::vector<std::string> Globals::getGlobals() const
-    {
-        std::vector<std::string> ids;
-
-        for (Collection::const_iterator iter = mVariables.begin(); iter!=mVariables.end(); ++iter)
-            ids.push_back (iter->first);
-
-        return ids;
-    }
-
     Globals::Collection::const_iterator Globals::find (const std::string& name) const
     {
         Collection::const_iterator iter = mVariables.find (name);
