@@ -11,6 +11,7 @@
 #include "localscripts.hpp"
 #include "timestamp.hpp"
 #include "fallback.hpp"
+#include "globals.hpp"
 
 #include "../mwbase/world.hpp"
 
@@ -64,7 +65,7 @@ namespace MWWorld
             std::vector<ESM::ESMReader> mEsm;
             MWWorld::ESMStore mStore;
             LocalScripts mLocalScripts;
-            MWWorld::Globals *mGlobalVariables;
+            MWWorld::Globals mGlobalVariables;
             MWWorld::PhysicsSystem *mPhysics;
             bool mSky;
 

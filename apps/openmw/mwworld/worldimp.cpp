@@ -172,9 +172,9 @@ namespace MWWorld
     {
         if (mSky && (isCellExterior() || isCellQuasiExterior()))
         {
-            mRendering->skySetHour (mGlobalVariables->getFloat ("gamehour"));
-            mRendering->skySetDate (mGlobalVariables->getInt ("day"),
-                mGlobalVariables->getInt ("month"));
+            mRendering->skySetHour (mGlobalVariables["gamehour"].getFloat());
+            mRendering->skySetDate (mGlobalVariables["day"].getInteger(),
+                mGlobalVariables["month"].getInteger());
 
             mRendering->skyEnable();
         }
@@ -187,7 +187,7 @@ namespace MWWorld
         const std::vector<std::string>& contentFiles,
         const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir,
         ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap, int mActivationDistanceOverride)
-    : mPlayer (0), mLocalScripts (mStore), mGlobalVariables (0),
+    : mPlayer (0), mLocalScripts (mStore),
       mSky (true), mCells (mStore, mEsm),
       mActivationDistanceOverride (mActivationDistanceOverride),
       mFallback(fallbackMap), mPlayIntro(0), mTeleportEnabled(true), mLevitationEnabled(false),
@@ -227,7 +227,7 @@ namespace MWWorld
         mStore.setUp();
         mStore.movePlayerRecord();
 
-        mGlobalVariables = new Globals (mStore);
+        mGlobalVariables.fill (mStore);
 
         mWorldScene = new Scene(*mRendering, mPhysics);
     }
@@ -254,12 +254,9 @@ namespace MWWorld
         // FIXME: should be set to 1, but the sound manager won't pause newly started sounds
         mPlayIntro = 2;
 
-        // global variables
-        *mGlobalVariables = Globals (mStore);
-
         // set new game mark
-        mGlobalVariables->setInt ("chargenstate", 1);
-        mGlobalVariables->setInt ("pcrace", 3);
+        mGlobalVariables["chargenstate"].setInteger (1);
+        mGlobalVariables["pcrace"].setInteger (3);
 
         // we don't want old weather to persist on a new game
         delete mWeatherManager;
@@ -298,6 +295,8 @@ namespace MWWorld
         mTeleportEnabled = true;
         mPlayIntro = 0;
         mFacedDistance = FLT_MAX;
+
+        mGlobalVariables.fill (mStore);
     }
 
     int World::countSavedGameRecords() const
@@ -358,7 +357,6 @@ namespace MWWorld
     {
         delete mWeatherManager;
         delete mWorldScene;
-        delete mGlobalVariables;
         delete mRendering;
         delete mPhysics;
 
@@ -436,7 +434,7 @@ namespace MWWorld
         else if (name=="month")
             setMonth (value);
         else
-            mGlobalVariables->setInt (name, value);
+            mGlobalVariables[name].setInteger (value);
     }
 
     void World::setGlobalFloat (const std::string& name, float value)
@@ -448,27 +446,27 @@ namespace MWWorld
         else if (name=="month")
             setMonth (value);
         else
-            mGlobalVariables->setFloat (name, value);
+            mGlobalVariables[name].setFloat (value);
     }
 
     int World::getGlobalInt (const std::string& name) const
     {
-        return mGlobalVariables->getInt (name);
+        return mGlobalVariables[name].getInteger();
     }
 
     float World::getGlobalFloat (const std::string& name) const
     {
-        return mGlobalVariables->getFloat (name);
+        return mGlobalVariables[name].getFloat();
     }
 
     char World::getGlobalVariableType (const std::string& name) const
     {
-        return mGlobalVariables->getType (name);
+        return mGlobalVariables.getType (name);
     }
 
-    std::vector<std::string> World::getGlobals () const
+    std::vector<std::string> World::getGlobals() const
     {
-        return mGlobalVariables->getGlobals();
+        return mGlobalVariables.getGlobals();
     }
 
     std::string World::getCellName (const MWWorld::CellStore *cell) const
@@ -618,14 +616,15 @@ namespace MWWorld
 
         mWeatherManager->advanceTime (hours);
 
-        hours += mGlobalVariables->getFloat ("gamehour");
+        hours += mGlobalVariables["gamehour"].getFloat();
 
         setHour (hours);
 
         int days = hours / 24;
 
         if (days>0)
-            mGlobalVariables->setInt ("dayspassed", days + mGlobalVariables->getInt ("dayspassed"));
+            mGlobalVariables["dayspassed"].setInteger (
+                days + mGlobalVariables["dayspassed"].getInteger());
     }
 
     void World::setHour (double hour)
@@ -637,14 +636,14 @@ namespace MWWorld
 
         hour = std::fmod (hour, 24);
 
-        mGlobalVariables->setFloat ("gamehour", hour);
+        mGlobalVariables["gamehour"].setFloat (hour);
 
         mRendering->skySetHour (hour);
 
         mWeatherManager->setHour (hour);
 
         if (days>0)
-            setDay (days + mGlobalVariables->getInt ("day"));
+            setDay (days + mGlobalVariables["day"].getInteger());
     }
 
     void World::setDay (int day)
@@ -652,7 +651,7 @@ namespace MWWorld
         if (day<1)
             day = 1;
 
-        int month = mGlobalVariables->getInt ("month");
+        int month = mGlobalVariables["month"].getInteger();
 
         while (true)
         {
@@ -667,14 +666,14 @@ namespace MWWorld
             else
             {
                 month = 0;
-                mGlobalVariables->setInt ("year", mGlobalVariables->getInt ("year")+1);
+                mGlobalVariables["year"].setInteger (mGlobalVariables["year"].getInteger()+1);
             }
 
             day -= days;
         }
 
-        mGlobalVariables->setInt ("day", day);
-        mGlobalVariables->setInt ("month", month);
+        mGlobalVariables["day"].setInteger (day);
+        mGlobalVariables["month"].setInteger (month);
 
         mRendering->skySetDate (day, month);
 
@@ -691,30 +690,30 @@ namespace MWWorld
 
         int days = getDaysPerMonth (month);
 
-        if (mGlobalVariables->getInt ("day")>days)
-            mGlobalVariables->setInt ("day", days);
+        if (mGlobalVariables["day"].getInteger()>days)
+            mGlobalVariables["day"].setInteger (days);
 
-        mGlobalVariables->setInt ("month", month);
+        mGlobalVariables["month"].setInteger (month);
 
         if (years>0)
-            mGlobalVariables->setInt ("year", years+mGlobalVariables->getInt ("year"));
+            mGlobalVariables["year"].setInteger (years+mGlobalVariables["year"].getInteger());
 
-        mRendering->skySetDate (mGlobalVariables->getInt ("day"), month);
+        mRendering->skySetDate (mGlobalVariables["day"].getInteger(), month);
     }
 
     int World::getDay() const
     {
-        return mGlobalVariables->getInt("day");
+        return mGlobalVariables["day"].getInteger();
     }
 
     int World::getMonth() const
     {
-        return mGlobalVariables->getInt("month");
+        return mGlobalVariables["month"].getInteger();
     }
 
     int World::getYear() const
     {
-        return mGlobalVariables->getInt("year");
+        return mGlobalVariables["year"].getInteger();
     }
 
     std::string World::getMonthName (int month) const
@@ -739,8 +738,8 @@ namespace MWWorld
 
     TimeStamp World::getTimeStamp() const
     {
-        return TimeStamp (mGlobalVariables->getFloat ("gamehour"),
-            mGlobalVariables->getInt ("dayspassed"));
+        return TimeStamp (mGlobalVariables["gamehour"].getFloat(),
+            mGlobalVariables["dayspassed"].getInteger());
     }
 
     bool World::toggleSky()
@@ -776,7 +775,7 @@ namespace MWWorld
 
     float World::getTimeScaleFactor() const
     {
-        return mGlobalVariables->getFloat ("timescale");
+        return mGlobalVariables["timescale"].getFloat();
     }
 
     void World::changeToInteriorCell (const std::string& cellName, const ESM::Position& position)
@@ -1267,7 +1266,7 @@ namespace MWWorld
                 if (Misc::StringUtils::ciEqual (ids[i], record.mRace))
                     break;
 
-            mGlobalVariables->setInt ("pcrace", (i == ids.size()) ? 0 : i+1);
+            mGlobalVariables["pcrace"].setInteger (i == ids.size() ? 0 : i+1);
 
             const ESM::NPC *player =
                 mPlayer->getPlayer().get<ESM::NPC>()->mBase;
