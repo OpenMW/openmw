@@ -1,8 +1,12 @@
 
 #include "actiontalk.hpp"
 
+#include "class.hpp"
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/dialoguemanager.hpp"
+
+#include "../mwmechanics/creaturestats.hpp"
 
 namespace MWWorld
 {
@@ -10,6 +14,10 @@ namespace MWWorld
 
     void ActionTalk::executeImp (const Ptr& actor)
     {
-        MWBase::Environment::get().getDialogueManager()->startDialogue (getTarget());
+        MWWorld::Ptr talkTo = getTarget();	//because 'actor' is always the player!
+        if ( MWWorld::Class::get(talkTo).getCreatureStats(talkTo).isHostile() )
+            return;
+
+        MWBase::Environment::get().getDialogueManager()->startDialogue (talkTo);
     }
 }
