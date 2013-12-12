@@ -190,10 +190,6 @@ if (MSVC10)
     set(PLATFORM_INCLUDE_DIR "")
 endif()
 
-if (APPLE)
-    set(Boost_USE_STATIC_LIBS   ON)
-endif (APPLE)
-
 # Dependencies
 
 # Fix for not visible pthreads functions for linker with glibc 2.15
