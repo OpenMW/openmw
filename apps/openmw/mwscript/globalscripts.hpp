@@ -6,7 +6,7 @@
 
 #include "locals.hpp"
 
-namespace MWWorld 
+namespace MWWorld
 {
     struct ESMStore;
 }
@@ -22,8 +22,6 @@ namespace MWScript
 
             GlobalScripts (const MWWorld::ESMStore& store);
 
-            void reset();
-
             void addScript (const std::string& name);
 
             void removeScript (const std::string& name);
@@ -32,6 +30,11 @@ namespace MWScript
 
             void run();
             ///< run all active global scripts
+
+            void clear();
+
+            void addStartup();
+            ///< Add startup script
     };
 }
 

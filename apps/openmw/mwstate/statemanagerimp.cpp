@@ -12,11 +12,14 @@
 #include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/scriptmanager.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
+
+#include "../mwscript/globalscripts.hpp"
 
 void MWState::StateManager::cleanup()
 {
@@ -24,7 +27,9 @@ void MWState::StateManager::cleanup()
     {
         MWBase::Environment::get().getDialogueManager()->clear();
         MWBase::Environment::get().getJournal()->clear();
+        MWBase::Environment::get().getScriptManager()->getGlobalScripts().clear();
         MWBase::Environment::get().getWorld()->clear();
+
         mState = State_NoGame;
         mCharacterManager.clearCurrentCharacter();
         mTimePlayed = 0;
@@ -63,6 +68,8 @@ void MWState::StateManager::newGame (bool bypass)
     }
     else
         MWBase::Environment::get().getWorld()->setGlobalInt ("chargenstate", -1);
+
+    MWBase::Environment::get().getScriptManager()->getGlobalScripts().addStartup();
 
     mState = State_Running;
 }

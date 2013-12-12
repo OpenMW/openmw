@@ -3,6 +3,8 @@
 
 #include <cassert>
 
+#include <components/misc/stringops.hpp>
+
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"
@@ -15,25 +17,12 @@ namespace MWScript
     GlobalScripts::GlobalScripts (const MWWorld::ESMStore& store)
     : mStore (store)
     {
-        reset();
-    }
-
-    void GlobalScripts::reset()
-    {
-        mScripts.clear();
-        addScript ("Main");
-
-        MWWorld::Store<ESM::StartScript>::iterator iter =
-            mStore.get<ESM::StartScript>().begin();
-
-        for (; iter != mStore.get<ESM::StartScript>().end(); ++iter) {
-            addScript (iter->mScript);
-        }
+        addStartup();
     }
 
     void GlobalScripts::addScript (const std::string& name)
     {
-        if (mScripts.find (name)==mScripts.end())
+        if (mScripts.find (Misc::StringUtils::lowerCase (name))==mScripts.end())
             if (const ESM::Script *script = mStore.get<ESM::Script>().find (name))
             {
                 Locals locals;
@@ -46,7 +35,8 @@ namespace MWScript
 
     void GlobalScripts::removeScript (const std::string& name)
     {
-        std::map<std::string, std::pair<bool, Locals> >::iterator iter = mScripts.find (name);
+        std::map<std::string, std::pair<bool, Locals> >::iterator iter =
+            mScripts.find (Misc::StringUtils::lowerCase (name));
 
         if (iter!=mScripts.end())
             iter->second.first = false;
@@ -55,7 +45,7 @@ namespace MWScript
     bool GlobalScripts::isRunning (const std::string& name) const
     {
         std::map<std::string, std::pair<bool, Locals> >::const_iterator iter =
-            mScripts.find (name);
+            mScripts.find (Misc::StringUtils::lowerCase (name));
 
         if (iter==mScripts.end())
             return false;
@@ -74,6 +64,23 @@ namespace MWScript
                     &iter->second.second, MWWorld::Ptr());
                 MWBase::Environment::get().getScriptManager()->run (iter->first, interpreterContext);
             }
+        }
+    }
+
+    void GlobalScripts::clear()
+    {
+        mScripts.clear();
+    }
+
+    void GlobalScripts::addStartup()
+    {
+        addScript ("main");
+
+        for (MWWorld::Store<ESM::StartScript>::iterator iter =
+            mStore.get<ESM::StartScript>().begin();
+            iter != mStore.get<ESM::StartScript>().end(); ++iter)
+        {
+            addScript (iter->mScript);
         }
     }
 }

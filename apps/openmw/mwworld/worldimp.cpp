@@ -21,7 +21,6 @@
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
-#include "../mwbase/scriptmanager.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/movement.hpp"
@@ -262,8 +261,6 @@ namespace MWWorld
         delete mWeatherManager;
         mWeatherManager = 0;
         mWeatherManager = new MWWorld::WeatherManager(mRendering,&mFallback);
-
-        MWBase::Environment::get().getScriptManager()->resetGlobalScripts();
     }
 
     void World::clear()
