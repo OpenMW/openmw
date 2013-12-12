@@ -5,8 +5,16 @@
 #include <string>
 #include <map>
 
+#include <libs/platform/stdint.h>
+
 #include <components/interpreter/types.hpp>
 #include <components/esm/variant.hpp>
+
+namespace ESM
+{
+    class ESMWriter;
+    class ESMReader;
+}
 
 namespace MWWorld
 {
@@ -35,6 +43,16 @@ namespace MWWorld
 
             void fill (const MWWorld::ESMStore& store);
             ///< Replace variables with variables from \a store with default values.
+
+            int countSavedGameRecords() const;
+
+            void write (ESM::ESMWriter& writer) const;
+
+            bool readRecord (ESM::ESMReader& reader, int32_t type);
+            ///< Records for variables that do not exist are dropped silently.
+            ///
+            /// \return Known type?
+
     };
 }
 

@@ -161,6 +161,7 @@ void MWState::StateManager::loadGame (const Character *character, const Slot *sl
             case ESM::REC_NPC_:
             case ESM::REC_SPEL:
             case ESM::REC_WEAP:
+            case ESM::REC_GLOB:
 
                 MWBase::Environment::get().getWorld()->readRecord (reader, n.val);
                 break;

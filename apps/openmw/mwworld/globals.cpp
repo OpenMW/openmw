@@ -3,6 +3,11 @@
 
 #include <stdexcept>
 
+#include <components/misc/stringops.hpp>
+
+#include <components/esm/esmwriter.hpp>
+#include <components/esm/esmreader.hpp>
+
 #include "esmstore.hpp"
 
 namespace MWWorld
@@ -65,5 +70,40 @@ namespace MWWorld
 
             default: return ' ';
         }
+    }
+
+    int Globals::countSavedGameRecords() const
+    {
+        return mVariables.size();
+    }
+
+    void Globals::write (ESM::ESMWriter& writer) const
+    {
+        for (Collection::const_iterator iter (mVariables.begin()); iter!=mVariables.end(); ++iter)
+        {
+            writer.startRecord (ESM::REC_GLOB);
+            writer.writeHNString ("NAME", iter->first);
+            iter->second.write (writer, ESM::Variant::Format_Global);
+            writer.endRecord (ESM::REC_GLOB);
+        }
+    }
+
+    bool Globals::readRecord (ESM::ESMReader& reader,  int32_t type)
+    {
+        if (type==ESM::REC_GLOB)
+        {
+            std::string id = reader.getHNString ("NAME");
+
+            Collection::iterator iter = mVariables.find (Misc::StringUtils::lowerCase (id));
+
+            if (iter!=mVariables.end())
+                iter->second.read (reader, ESM::Variant::Format_Global);
+            else
+                reader.skipHRecord();
+
+            return true;
+        }
+
+        return false;
     }
 }

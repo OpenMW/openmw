@@ -301,20 +301,23 @@ namespace MWWorld
 
     int World::countSavedGameRecords() const
     {
-        return mStore.countSavedGameRecords();
+        return
+            mStore.countSavedGameRecords()
+            +mGlobalVariables.countSavedGameRecords();
     }
 
     void World::write (ESM::ESMWriter& writer) const
     {
         mStore.write (writer);
+        mGlobalVariables.write (writer);
     }
 
     void World::readRecord (ESM::ESMReader& reader, int32_t type)
     {
-        if (!mStore.readRecord (reader, type))
+        if (!mStore.readRecord (reader, type) &&
+            !mGlobalVariables.readRecord (reader, type))
         {
-            /// \todo handle other world state records
-
+            throw std::runtime_error ("unknown record in saved game");
         }
     }
 
