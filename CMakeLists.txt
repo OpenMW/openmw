@@ -248,7 +248,9 @@ if (APPLE)
                           ${OGRE_Plugin_OctreeSceneManager_LIBRARY_REL}
                           ${OGRE_Plugin_ParticleFX_LIBRARY_REL})
     
-    if (OGRE_Plugin_CgProgramManager_FOUND)
+    # Actually we must use OGRE_Plugin_CgProgramManager_FOUND but it's
+    # not reliable and equals TRUE even if there's no Ogre Cg plugin
+    if (Cg_FOUND)
         set(USED_OGRE_PLUGINS ${USED_OGRE_PLUGINS}
                               ${OGRE_Plugin_CgProgramManager_LIBRARY_REL})
     endif ()
