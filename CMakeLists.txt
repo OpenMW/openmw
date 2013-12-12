@@ -689,9 +689,9 @@ if (APPLE)
 
     set(OPENMW_APP "\${CMAKE_INSTALL_PREFIX}/${INSTALL_SUBDIR}/${APP_BUNDLE_NAME}")
 
-    set(OPENCS_APP "\${CMAKE_INSTALL_PREFIX}/${INSTALL_SUBDIR}/OpenCS.app")
+    set(OPENCS_BUNDLE_NAME "OpenCS.app")
+    set(OPENCS_APP "\${CMAKE_INSTALL_PREFIX}/${INSTALL_SUBDIR}/${OPENCS_BUNDLE_NAME}")
 
-    set(PLUGINS "")
     set(ABSOLUTE_PLUGINS "")
 
     foreach (PLUGIN ${USED_OGRE_PLUGINS})
@@ -699,12 +699,25 @@ if (APPLE)
         set(ABSOLUTE_PLUGINS ${PLUGIN_ABS} ${ABSOLUTE_PLUGINS})
     endforeach ()
 
-    set(PLUGIN_INSTALL_BASE "\${CMAKE_INSTALL_PREFIX}/${INSTALL_SUBDIR}/${APP_BUNDLE_NAME}/Contents/Plugins")
-    install(FILES ${ABSOLUTE_PLUGINS} DESTINATION "${INSTALL_SUBDIR}/${APP_BUNDLE_NAME}/Contents/Plugins" COMPONENT Runtime)
-    foreach (PLUGIN ${ABSOLUTE_PLUGINS})
-        get_filename_component(PLUGIN_RELATIVE ${PLUGIN} NAME)
-        set(PLUGINS ${PLUGINS} "${PLUGIN_INSTALL_BASE}/${PLUGIN_RELATIVE}")
-    endforeach ()
+    # installs used plugins in bundle at given path (bundle_path must be relative to ${CMAKE_INSTALL_PREFIX})
+    # and returns list of install paths for all installed plugins
+    function (install_plugins_for_bundle bundle_path plugins_var)
+        set(RELATIVE_PLUGIN_INSTALL_BASE "${bundle_path}/Contents/Plugins")
+        install(FILES ${ABSOLUTE_PLUGINS} DESTINATION ${RELATIVE_PLUGIN_INSTALL_BASE} COMPONENT Runtime)
+
+        set(PLUGINS "")
+        set(PLUGIN_INSTALL_BASE "\${CMAKE_INSTALL_PREFIX}/${RELATIVE_PLUGIN_INSTALL_BASE}")
+
+        foreach (PLUGIN ${ABSOLUTE_PLUGINS})
+            get_filename_component(PLUGIN_RELATIVE ${PLUGIN} NAME)
+            set(PLUGINS ${PLUGINS} "${PLUGIN_INSTALL_BASE}/${PLUGIN_RELATIVE}")
+        endforeach ()
+
+        set(${plugins_var} ${PLUGINS} PARENT_SCOPE)
+    endfunction (install_plugins_for_bundle)
+
+    install_plugins_for_bundle("${INSTALL_SUBDIR}/${APP_BUNDLE_NAME}" PLUGINS)
+    install_plugins_for_bundle("${INSTALL_SUBDIR}/${OPENCS_BUNDLE_NAME}" OPENCS_PLUGINS)
 
     #For now, search unresolved dependencies only in default system paths, so if you put unresolveable (i.e. with @executable_path in id name) lib or framework somewhere else, it would fail
     set(DIRS "")
@@ -752,7 +765,7 @@ if (APPLE)
         set(BU_CHMOD_BUNDLE_ITEMS ON)
         include(BundleUtilities)
         fixup_bundle(\"${OPENMW_APP}\" \"${PLUGINS}\" \"${DIRS}\")
-        fixup_bundle(\"${OPENCS_APP}\" \"\" \"${DIRS}\")
+        fixup_bundle(\"${OPENCS_APP}\" \"${OPENCS_PLUGINS}\" \"${DIRS}\")
         " COMPONENT Runtime)
         include(CPack)
 endif (APPLE)
