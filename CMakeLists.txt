@@ -246,8 +246,12 @@ if (APPLE)
     # List used Ogre plugins
     SET(USED_OGRE_PLUGINS ${OGRE_RenderSystem_GL_LIBRARY_REL}
                           ${OGRE_Plugin_OctreeSceneManager_LIBRARY_REL}
-                          ${OGRE_Plugin_CgProgramManager_LIBRARY_REL}
                           ${OGRE_Plugin_ParticleFX_LIBRARY_REL})
+    
+    if (OGRE_Plugin_CgProgramManager_FOUND)
+        set(USED_OGRE_PLUGINS ${USED_OGRE_PLUGINS}
+                              ${OGRE_Plugin_CgProgramManager_LIBRARY_REL})
+    endif ()
 
     if (${OGRE_PLUGIN_DIR_REL}})
         set(OGRE_PLUGINS_REL_FOUND TRUE)
