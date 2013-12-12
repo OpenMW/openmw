@@ -22,7 +22,11 @@ namespace MWScript
 
     void GlobalScripts::addScript (const std::string& name)
     {
-        if (mScripts.find (Misc::StringUtils::lowerCase (name))==mScripts.end())
+        std::map<std::string, std::pair<bool, Locals> >::iterator iter =
+            mScripts.find (Misc::StringUtils::lowerCase (name));
+
+        if (iter==mScripts.end())
+        {
             if (const ESM::Script *script = mStore.get<ESM::Script>().find (name))
             {
                 Locals locals;
@@ -31,6 +35,9 @@ namespace MWScript
 
                 mScripts.insert (std::make_pair (name, std::make_pair (true, locals)));
             }
+        }
+        else
+            iter->second.first = true;
     }
 
     void GlobalScripts::removeScript (const std::string& name)
