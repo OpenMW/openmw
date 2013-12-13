@@ -7,6 +7,8 @@ Wizard::LanguageSelectionPage::LanguageSelectionPage(MainWizard *wizard) :
     mWizard(wizard)
 {
     setupUi(this);
+
+    registerField(QLatin1String("installation.language"), languagesComboBox);
 }
 
 int Wizard::LanguageSelectionPage::nextId() const

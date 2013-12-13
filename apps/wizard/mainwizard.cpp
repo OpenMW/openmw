@@ -26,11 +26,6 @@ Wizard::MainWizard::MainWizard(QWidget *parent) :
     setWindowTitle(tr("OpenMW Wizard"));
     setupInstallations();
     setupPages();
-
-    QDir dir("/home/pvdk/data");
-    QFileInfo info(dir.absoluteFilePath("../Morrowind.ini"));
-
-    qDebug() << "exists? " << info.exists();
 }
 
 void Wizard::MainWizard::setupInstallations()

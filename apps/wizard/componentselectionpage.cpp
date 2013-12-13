@@ -52,9 +52,9 @@ void Wizard::ComponentSelectionPage::initializePage()
 
     QString path = field("installation.path").toString();
 
-    QListWidgetItem *morrowindItem = new QListWidgetItem(QString("Morrowind"));
-    QListWidgetItem *tribunalItem = new QListWidgetItem(QString("Tribunal"));
-    QListWidgetItem *bloodmoonItem = new QListWidgetItem(QString("Bloodmoon"));
+    QListWidgetItem *morrowindItem = new QListWidgetItem(QLatin1String("Morrowind"));
+    QListWidgetItem *tribunalItem = new QListWidgetItem(QLatin1String("Tribunal"));
+    QListWidgetItem *bloodmoonItem = new QListWidgetItem(QLatin1String("Bloodmoon"));
 
     if (field("installation.new").toBool() == true)
     {
