@@ -21,6 +21,7 @@ namespace Wizard
         enum {
             Page_Intro,
             Page_MethodSelection,
+            Page_LanguageSelection,
             Page_ExistingInstallation,
             Page_InstallationTarget,
             Page_ComponentSelection,

@@ -13,11 +13,5 @@ Wizard::MethodSelectionPage::MethodSelectionPage(MainWizard *wizard) :
 
 int Wizard::MethodSelectionPage::nextId() const
 {
-    if (newLocationRadioButton->isChecked()) {
-        //wizard()->setField("installation.new", true);
-        return MainWizard::Page_InstallationTarget;
-    } else {
-        //wizard()->setField("installation.new", false);
-        return MainWizard::Page_ExistingInstallation;
-    }
+    return MainWizard::Page_LanguageSelection;
 }

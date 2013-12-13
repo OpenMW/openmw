@@ -5,6 +5,7 @@
 
 #include "intropage.hpp"
 #include "methodselectionpage.hpp"
+#include "languageselectionpage.hpp"
 #include "existinginstallationpage.hpp"
 #include "installationtargetpage.hpp"
 #include "componentselectionpage.hpp"
@@ -57,6 +58,7 @@ void Wizard::MainWizard::setupPages()
 {
     setPage(Page_Intro, new IntroPage(this));
     setPage(Page_MethodSelection, new MethodSelectionPage(this));
+    setPage(Page_LanguageSelection, new LanguageSelectionPage(this));
     setPage(Page_ExistingInstallation, new ExistingInstallationPage(this));
     setPage(Page_InstallationTarget, new InstallationTargetPage(this));
     setPage(Page_ComponentSelection, new ComponentSelectionPage(this));

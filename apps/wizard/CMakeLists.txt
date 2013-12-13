@@ -6,6 +6,7 @@ set(WIZARD
     installationpage.cpp
     installationtargetpage.cpp
     intropage.cpp
+    languageselectionpage.cpp
     main.cpp
     mainwizard.cpp
     methodselectionpage.cpp
@@ -22,6 +23,7 @@ set(WIZARD_HEADER
     installationpage.hpp
     installationtargetpage.hpp
     intropage.hpp
+    languageselectionpage.hpp
     mainwizard.hpp
     methodselectionpage.hpp
 )
@@ -39,6 +41,7 @@ set(WIZARD_HEADER_MOC
     installationpage.hpp
     installationtargetpage.hpp
     intropage.hpp
+    languageselectionpage.hpp
     mainwizard.hpp
     methodselectionpage.hpp
 )
@@ -56,6 +59,7 @@ set(WIZARD_UI
     ${CMAKE_SOURCE_DIR}/files/ui/wizard/installationpage.ui
     ${CMAKE_SOURCE_DIR}/files/ui/wizard/installationtargetpage.ui
     ${CMAKE_SOURCE_DIR}/files/ui/wizard/intropage.ui
+    ${CMAKE_SOURCE_DIR}/files/ui/wizard/languageselectionpage.ui
     ${CMAKE_SOURCE_DIR}/files/ui/wizard/methodselectionpage.ui
 )
 
